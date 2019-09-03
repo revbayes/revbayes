@@ -6,7 +6,6 @@ echo $HERE
 #################
 # command line options
 # set default values
-boost="true"
 debug="false"
 mac="false"
 travis="false"
@@ -28,7 +27,6 @@ make
 
 Command line options are:
 -h                              : print this help and exit.
--boost          <true|false>    : true (re)compiles boost libs, false dont. Defaults to true.
 -mac            <true|false>    : set to true if you are building for a OS X - compatible with 10.6 and higher. Defaults to false.
 -win            <true|false>    : set to true if you are building on a Windows system. Defaults to false.
 -mpi            <true|false>    : set to true if you want to build the MPI version. Defaults to false.
@@ -45,39 +43,6 @@ Command line options are:
     shift
 done
 
-
-
-#################
-# build boost libraries separately
-
-if [ "$boost" = "true" ]
-then
-    echo 'Building boost libraries'
-    echo 'you can turn this off with argument "-boost false"'
-
-    cd ../../boost_1_60_0
-    rm ./project-config.jam*  # clean up from previous runs
-
-    if [ "$mac" = "true" ]
-    then
-        ./bootstrap.sh --with-libraries=atomic,chrono,filesystem,system,regex,thread,date_time,program_options,math,serialization
-        ./b2 link=static
-    elif [ "$win" = "true" ]
-    then
-        ./bootstrap.sh --with-libraries=atomic,chrono,filesystem,system,regex,thread,date_time,program_options,math,serialization --with-toolset=mingw
-        ./b2 link=static
-    elif [ "$gentoo" = "true" ]
-    then
-        ./bootstrap.sh --with-libraries=atomic,chrono,filesystem,system,regex,thread,date_time,program_options,math,serialization
-        ./b2 link=static --ignore-site-config
-    else
-        ./bootstrap.sh --with-libraries=atomic,chrono,filesystem,system,regex,thread,date_time,program_options,math,serialization
-        ./b2 link=static
-    fi
-
-else
-    echo 'not building boost libraries'
-fi
 
 
 #################
@@ -180,16 +145,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake ${CMAKE_MODULE_PATH})
 
 # Set source root relate to project file
 set(PROJECT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/../../../src)
-
-option(INTERNAL_BOOST "Use the version of boost shipped with revbayes" ON)
-
-if (INTERNAL_BOOST)
-   SET(BOOST_ROOT "../../../boost_1_60_0")
-   SET(BOOST_LIBRARY "../../../boost_1_60_0/stage/lib")
-   SET(Boost_NO_SYSTEM_PATHS ON)
-   SET(Boost_USE_STATIC_RUNTIME ON)
-   SET(Boost_USE_STATIC_LIBS ON)
-endif()
 
 find_package(Boost
 1.60.0

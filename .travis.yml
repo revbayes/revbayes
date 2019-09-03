@@ -93,9 +93,9 @@ script:
 # Build
   - cd projects/cmake
   - mkdir build
-  - ./regenerate.sh -boost false -travis true ${MAYBE_MPI}
+  - ./regenerate.sh -travis true ${MAYBE_MPI}
   - cd build
-  - cmake . -DINTERNAL_BOOST=OFF
+  - cmake .
   - make -j4
   - cd ..
 # Run tests
