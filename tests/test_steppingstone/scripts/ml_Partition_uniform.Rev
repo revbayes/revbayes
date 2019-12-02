@@ -107,8 +107,8 @@ mymodel = model(psi)
 
 # add monitors
 monitors[++mni] = mnScreen(alpha, pinvar, TL, printgen=1000)
-monitors[++mni] = mnFile(psi, filename="output/PS_uniform.trees", printgen=10)
-monitors[++mni] = mnModel(filename="output/PS_uniform.log",printgen=10)
+monitors[++mni] = mnFile(psi, filename="output/PS_uniform.trees", printgen=1)
+monitors[++mni] = mnModel(filename="output/PS_uniform.log",printgen=1)
 
 # run the analysis
 pow_p = powerPosterior(mymodel, moves, monitors, "output/model_uniform.out", cats=10, sampleFreq=1)
