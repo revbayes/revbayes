@@ -47,6 +47,8 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                               mu;                                                                                     //!< The extinction rate(s)
         RevPtr<const RevVariable>                               psi;                                                                                    //!< The fossilization rate(s)
         RevPtr<const RevVariable>                               rho;                                                                                    //!< The extant sampling proportion
+        RevPtr<const RevVariable>                               lambda_a;                                                                               //!< The anagenetic speciation rate(s)
+        RevPtr<const RevVariable>                               beta;                                                                                   //!< The symmetric speciation probability
         RevPtr<const RevVariable>                               timeline;                                                                               //!< The interval times
         RevPtr<const RevVariable>                               fossil_counts;                                                                          //!< The fossil counts
         RevPtr<const RevVariable>                               presence_absence;

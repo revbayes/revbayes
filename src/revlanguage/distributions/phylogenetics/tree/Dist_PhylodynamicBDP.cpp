@@ -6,7 +6,7 @@
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 // #include "ConstantRateSerialSampledBirthDeathProcess.h"
-#include "Dist_BDSTP.h"
+#include "Dist_PhylodynamicBDP.h"
 #include "ModelVector.h"
 #include "OptionRule.h"
 #include "EpisodicBirthDeathSamplingTreatmentProcess.h"
@@ -44,7 +44,7 @@ using namespace RevLanguage;
  *
  * The default constructor does nothing except allocating the object.
  */
-Dist_BDSTP::Dist_BDSTP() : BirthDeathProcess()
+Dist_PhylodynamicBDP::Dist_PhylodynamicBDP() : BirthDeathProcess()
 {
 
 }
@@ -56,9 +56,9 @@ Dist_BDSTP::Dist_BDSTP() : BirthDeathProcess()
  *
  * \return A new copy of the process.
  */
-Dist_BDSTP* Dist_BDSTP::clone( void ) const
+Dist_PhylodynamicBDP* Dist_PhylodynamicBDP::clone( void ) const
 {
-    return new Dist_BDSTP(*this);
+    return new Dist_PhylodynamicBDP(*this);
 }
 
 
@@ -72,7 +72,7 @@ Dist_BDSTP* Dist_BDSTP::clone( void ) const
  *
  * \return A new internal distribution object.
  */
-RevBayesCore::AbstractBirthDeathProcess* Dist_BDSTP::createDistribution( void ) const
+RevBayesCore::AbstractBirthDeathProcess* Dist_PhylodynamicBDP::createDistribution( void ) const
 {
     // get the parameters
 
@@ -101,18 +101,11 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_BDSTP::createDistribution( void ) 
     // treatment probability
     RevBayesCore::DagNode* t_s = r->getRevObject().getDagNode();
 
+    // There are no bursts or mass extinctions in the standard phylodynamic application
     // birth burst
     RevBayesCore::DagNode* b_e = NULL;
-    if (Lambda->getRevObject().isType( ModelVector<Probability>::getClassTypeSpec() ))
-    {
-      b_e = Lambda->getRevObject().getDagNode();
-    }
     // death burst (mass extinction)
     RevBayesCore::DagNode* d_e = NULL;
-    if (Mu->getRevObject().isType( ModelVector<Probability>::getClassTypeSpec() ))
-    {
-      d_e = Mu->getRevObject().getDagNode();
-    }
     // event sampling
     RevBayesCore::DagNode* s_e = NULL;
     if ( Phi->getRevObject() != RevNullObject::getInstance() )
@@ -158,17 +151,9 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_BDSTP::createDistribution( void ) 
         rt = static_cast<const ModelVector<RealPos> &>( r_timeline->getRevObject() ).getDagNode();
     }
 
+    // There are no bursts or mass extinctions in the standard phylodynamic application
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* Lt = NULL;
-    if ( Lambda_timeline->getRevObject() != RevNullObject::getInstance() )
-    {
-        Lt = static_cast<const ModelVector<RealPos> &>( Lambda_timeline->getRevObject() ).getDagNode();
-    }
-
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* Mt = NULL;
-    if ( Mu_timeline->getRevObject() != RevNullObject::getInstance() )
-    {
-        Mt = static_cast<const ModelVector<RealPos> &>( Mu_timeline->getRevObject() ).getDagNode();
-    }
 
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* Pt = NULL;
     if ( Phi_timeline->getRevObject() != RevNullObject::getInstance() )
@@ -206,10 +191,10 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_BDSTP::createDistribution( void ) 
  *
  * \return The class' name.
  */
-const std::string& Dist_BDSTP::getClassType( void )
+const std::string& Dist_PhylodynamicBDP::getClassType( void )
 {
 
-    static std::string rev_type = "Dist_BDSTP";
+    static std::string rev_type = "Dist_PhylodynamicBDP";
 
     return rev_type;
 }
@@ -220,7 +205,7 @@ const std::string& Dist_BDSTP::getClassType( void )
  *
  * \return TypeSpec of this class.
  */
-const TypeSpec& Dist_BDSTP::getClassTypeSpec( void )
+const TypeSpec& Dist_PhylodynamicBDP::getClassTypeSpec( void )
 {
 
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( BirthDeathProcess::getClassTypeSpec() ) );
@@ -234,11 +219,11 @@ const TypeSpec& Dist_BDSTP::getClassTypeSpec( void )
  *
  * \return Rev aliases of constructor function.
  */
-std::vector<std::string> Dist_BDSTP::getDistributionFunctionAliases( void ) const
+std::vector<std::string> Dist_PhylodynamicBDP::getDistributionFunctionAliases( void ) const
 {
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
-    a_names.push_back( "BDSTP" );
+    a_names.push_back( "PhylodynamicBDP" );
 
     return a_names;
 }
@@ -251,10 +236,10 @@ std::vector<std::string> Dist_BDSTP::getDistributionFunctionAliases( void ) cons
  *
  * \return Rev name of constructor function.
  */
-std::string Dist_BDSTP::getDistributionFunctionName( void ) const
+std::string Dist_PhylodynamicBDP::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
-    std::string d_name = "BirthDeathSamplingTreatment";
+    std::string d_name = "PhylodynamicBirthDeathProcess";
 
     return d_name;
 }
@@ -270,7 +255,7 @@ std::string Dist_BDSTP::getDistributionFunctionName( void ) const
  *
  * \return The member rules.
  */
-const MemberRules& Dist_BDSTP::getParameterRules(void) const
+const MemberRules& Dist_PhylodynamicBDP::getParameterRules(void) const
 {
 
     static MemberRules dist_member_rules;
@@ -289,18 +274,15 @@ const MemberRules& Dist_BDSTP::getParameterRules(void) const
         dist_member_rules.push_back( new ArgumentRule( "lambda",  paramTypes, "The birth rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "mu",      paramTypes, "The death rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "phi",     paramTypes, "The serial sampling rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        dist_member_rules.push_back( new ArgumentRule( "r",       paramTypes, "The probabilit(y|ies) of death upon sampling (treatment).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-
-        std::vector<TypeSpec> other_event_paramTypes;
-        other_event_paramTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
-        dist_member_rules.push_back( new ArgumentRule( "Lambda",  other_event_paramTypes, "The episodic birth burst probabilities.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        dist_member_rules.push_back( new ArgumentRule( "Mu",      other_event_paramTypes, "The episodic death burst (mass extinction) survival probabilities.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "r",       paramTypes, "The probabilit(y|ies) of death upon sampling (treatment).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(1.0) ) );
 
         std::vector<TypeSpec> event_sampling_paramTypes;
         event_sampling_paramTypes.push_back( Probability::getClassTypeSpec() );
         event_sampling_paramTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
-        dist_member_rules.push_back( new ArgumentRule( "Phi",     event_sampling_paramTypes, "The probability of sampling taxa at sampling events (at present only if input is scalar).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "Phi",     event_sampling_paramTypes, "The probability of sampling taxa at sampling events (at present only if input is scalar).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(0.0) ) );
 
+        std::vector<TypeSpec> other_event_paramTypes;
+        other_event_paramTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
         dist_member_rules.push_back( new ArgumentRule( "R",       other_event_paramTypes, "The treatment probabilities for the sampling events (excluding sampling at present).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         dist_member_rules.push_back( new ArgumentRule( "timeline",    ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
@@ -308,8 +290,6 @@ const MemberRules& Dist_BDSTP::getParameterRules(void) const
         dist_member_rules.push_back( new ArgumentRule( "muTimeline",        ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the extinction rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         dist_member_rules.push_back( new ArgumentRule( "phiTimeline",       ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the sampling rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         dist_member_rules.push_back( new ArgumentRule( "rTimeline",         ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the (serial) treatment probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        dist_member_rules.push_back( new ArgumentRule( "LambdaTimeline",    ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the speciation rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        dist_member_rules.push_back( new ArgumentRule( "MuTimeline",        ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the extinction rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         dist_member_rules.push_back( new ArgumentRule( "PhiTimeline",       ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the sampling rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         std::vector<std::string> optionsCondition;
@@ -331,7 +311,7 @@ const MemberRules& Dist_BDSTP::getParameterRules(void) const
  *
  * \return The type spec of this object.
  */
-const TypeSpec& Dist_BDSTP::getTypeSpec( void ) const
+const TypeSpec& Dist_PhylodynamicBDP::getTypeSpec( void ) const
 {
 
     static TypeSpec ts = getClassTypeSpec();
@@ -350,7 +330,7 @@ const TypeSpec& Dist_BDSTP::getTypeSpec( void ) const
  * \param[in]    name     Name of the member variable.
  * \param[in]    var      Pointer to the variable.
  */
-void Dist_BDSTP::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+void Dist_PhylodynamicBDP::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     if ( name == "lambda" )
     {
@@ -367,14 +347,6 @@ void Dist_BDSTP::setConstParameter(const std::string& name, const RevPtr<const R
     else if ( name == "r" )
     {
         r = var;
-    }
-    else if ( name == "Lambda" )
-    {
-        Lambda = var;
-    }
-    else if ( name == "Mu" )
-    {
-        Mu = var;
     }
     else if ( name == "Phi" )
     {
@@ -408,14 +380,6 @@ void Dist_BDSTP::setConstParameter(const std::string& name, const RevPtr<const R
     else if ( name == "rTimeline" )
     {
         r_timeline = var;
-    }
-    else if ( name == "LambdaTimeline" )
-    {
-        Lambda_timeline = var;
-    }
-    else if ( name == "MuTimeline" )
-    {
-        Mu_timeline = var;
     }
     else if ( name == "PhiTimeline" )
     {

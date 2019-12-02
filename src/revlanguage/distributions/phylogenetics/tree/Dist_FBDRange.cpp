@@ -90,6 +90,10 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_FBDRange::createDistribution( void
     RevBayesCore::DagNode* m = mu->getRevObject().getDagNode();
     // fossilization rate
     RevBayesCore::DagNode* p = psi->getRevObject().getDagNode();
+    // anagnetic speciation rate
+    RevBayesCore::DagNode* la = lambda_a->getRevObject().getDagNode();
+    // symmetric speciation probability
+    RevBayesCore::DagNode* b = beta->getRevObject().getDagNode();
 
     // fossil counts
     RevBayesCore::DagNode* c = NULL;
@@ -111,7 +115,7 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_FBDRange::createDistribution( void
     bool pa = static_cast<const RlBoolean &>( presence_absence->getRevObject() ).getValue();
     bool ex = static_cast<const RlBoolean &>( extended->getRevObject() ).getValue();
 
-    RevBayesCore::PiecewiseConstantFossilizedBirthDeathProcess* d = new RevBayesCore::PiecewiseConstantFossilizedBirthDeathProcess(sa, l, m, p, c, r, rt, cond, t, uo, pa, ex);
+    RevBayesCore::PiecewiseConstantFossilizedBirthDeathProcess* d = new RevBayesCore::PiecewiseConstantFossilizedBirthDeathProcess(sa, l, m, p, c, r, la, b, rt, cond, t, uo, pa, ex);
 
     return d;
 }
@@ -202,10 +206,17 @@ const MemberRules& Dist_FBDRange::getParameterRules(void) const
         std::vector<TypeSpec> paramTypes;
         paramTypes.push_back( RealPos::getClassTypeSpec() );
         paramTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
-        dist_member_rules.push_back( new ArgumentRule( "lambda",  paramTypes, "The speciation rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "lambda",  paramTypes, "The (asymmetric) speciation rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "mu",      paramTypes, "The extinction rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
         dist_member_rules.push_back( new ArgumentRule( "psi",     paramTypes, "The fossil sampling rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
         dist_member_rules.push_back( new ArgumentRule( "rho",     Probability::getClassTypeSpec(), "The extant sampling fraction.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
+
+        dist_member_rules.push_back( new ArgumentRule( "lambda_a",  paramTypes, "The anagenetic speciation rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
+
+        std::vector<TypeSpec> betaParamTypes;
+        betaParamTypes.push_back( Probability::getClassTypeSpec() );
+        betaParamTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
+        dist_member_rules.push_back( new ArgumentRule( "beta",  betaParamTypes, "The probability of symmetric speciation.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
 
         dist_member_rules.push_back( new ArgumentRule( "timeline",    ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
@@ -268,6 +279,14 @@ void Dist_FBDRange::setConstParameter(const std::string& name, const RevPtr<cons
     else if ( name == "rho" )
     {
         rho = var;
+    }
+    else if ( name == "lambda_a" )
+    {
+        lambda_a = var;
+    }
+    else if ( name == "beta" )
+    {
+        beta = var;
     }
     else if ( name == "rootAge" || name == "originAge" )
     {

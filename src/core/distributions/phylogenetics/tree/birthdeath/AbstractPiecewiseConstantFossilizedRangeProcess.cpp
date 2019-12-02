@@ -638,16 +638,16 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::p( size_t i, double t ) 
     double ti = times[i];
     
     double diff = b - d - f;
-    double bp   = b*f;
     double dt   = t - ti;
-    
-    double A = sqrt( diff*diff + 4.0*bp);
+
+    double A = sqrt( diff*diff + 4.0*b*f);
     double B = ( (1.0 - 2.0*(1.0-r)*p_i[i] )*b + d + f ) / A;
+
+    double ln_e = -A*dt;
+
+    double tmp = (1.0 + B) + exp(ln_e)*(1.0 - B);
     
-    double e = exp(-A*dt);
-    double tmp = b + d + f - A * ((1.0+B)-e*(1.0-B))/((1.0+B)+e*(1.0-B));
-    
-    return tmp / (2.0*b);
+    return (b + d + f - A * ((1.0+B)-exp(ln_e)*(1.0-B))/tmp)/(2.0*b);
 }
 
 
@@ -667,14 +667,14 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::q( size_t i, double t, b
     double ti = times[i];
     
     double diff = b - d - f;
-    double bp   = b*f;
     double dt   = t - ti;
 
-    double A = sqrt( diff*diff + 4.0*bp);
+    double A = sqrt( diff*diff + 4.0*b*f);
     double B = ( (1.0 - 2.0*(1.0-r)*p_i[i] )*b + d + f ) / A;
 
     double ln_e = -A*dt;
-    double tmp = (1.0+B) + exp(ln_e)*(1.0-B);
+
+    double tmp = (1.0 + B) + exp(ln_e)*(1.0 - B);
 
     double q = log(4.0) + ln_e - 2.0*log(tmp);
 
