@@ -45,7 +45,7 @@ TreeScaleFunction* TreeScaleFunction::clone( void ) const
 }
 
 
-void TreeScaleFunction::keep(DagNode *affecter)
+void TreeScaleFunction::keep( const DagNode *affecter)
 {
     //delegate to base class
     TypedFunction< Tree >::keep( affecter );
@@ -59,14 +59,14 @@ void TreeScaleFunction::reInitialized( void )
 }
 
 
-void TreeScaleFunction::restore(DagNode *restorer)
+void TreeScaleFunction::restore( const DagNode *restorer)
 {
     //delegate to base class
     TypedFunction< Tree >::restore( restorer );
 }
 
 
-void TreeScaleFunction::touch(DagNode *toucher)
+void TreeScaleFunction::touch(const DagNode *toucher)
 {
     
     //delegate to base class

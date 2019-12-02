@@ -228,19 +228,19 @@ void PiecewiseConstantFossilizedBirthDeathRangeProcess::redrawValue(void)
 }
 
 
-void PiecewiseConstantFossilizedBirthDeathRangeProcess::keepSpecialization(DagNode *toucher)
+void PiecewiseConstantFossilizedBirthDeathRangeProcess::keepSpecialization(const DagNode *toucher)
 {
     dirty_gamma = std::vector<bool>(fbd_taxa.size(), false);
 }
 
 
-void PiecewiseConstantFossilizedBirthDeathRangeProcess::restoreSpecialization(DagNode *toucher)
+void PiecewiseConstantFossilizedBirthDeathRangeProcess::restoreSpecialization(const DagNode *toucher)
 {
 
 }
 
 
-void PiecewiseConstantFossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, bool touchAll)
+void PiecewiseConstantFossilizedBirthDeathRangeProcess::touchSpecialization(const DagNode *toucher, bool touchAll)
 {
     if ( toucher == dag_node )
     {

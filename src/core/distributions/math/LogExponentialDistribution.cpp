@@ -20,7 +20,7 @@ LogExponentialDistribution::LogExponentialDistribution(const TypedDagNode<double
     addParameter( lambda );
     
     double u = RbStatistics::Exponential::rv(lambda->getValue(), *GLOBAL_RNG);
-    double ln_u = log(u );
+    double ln_u = log( u );
     *value = ln_u;
 }
 

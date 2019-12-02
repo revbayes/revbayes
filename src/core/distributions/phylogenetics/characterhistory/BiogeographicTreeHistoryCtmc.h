@@ -84,9 +84,9 @@
 //        virtual double                                      computeInternalNodeLikelihood(const TopologyNode &n);
 //        virtual double                                      computeTipLikelihood(const TopologyNode &node);
 //        virtual const std::vector<double>&                  getRootFrequencies(void);
-//        // (not needed)        void                         keepSpecialization(DagNode* affecter);
-//        // (not needed)        void                         restoreSpecialization(DagNode *restorer);
-//        virtual void                                        touchSpecialization(DagNode *toucher, bool touchAll);
+//        // (not needed)        void                         keepSpecialization(const DagNode* affecter);
+//        // (not needed)        void                         restoreSpecialization(const DagNode *restorer);
+//        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
 //        
 //        
 //    private:
@@ -1684,7 +1684,7 @@
 ////}
 ////
 ////template<class charType>
-////void RevBayesCore::BiogeographicTreeHistoryCtmc<charType>::touchSpecialization( DagNode* affecter, bool touchAll )
+////void RevBayesCore::BiogeographicTreeHistoryCtmc<charType>::touchSpecialization( const DagNode* affecter, bool touchAll )
 ////{
 ////    
 ////    // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
@@ -2609,7 +2609,7 @@
 //}
 //
 //template<class charType>
-//void RevBayesCore::BiogeographicTreeHistoryCtmc<charType>::touchSpecialization( DagNode* affecter, bool touchAll )
+//void RevBayesCore::BiogeographicTreeHistoryCtmc<charType>::touchSpecialization( const DagNode* affecter, bool touchAll )
 //{
 //    
 //    // if the topology wasn't the culprit for the touch, then we just flag everything as dirty

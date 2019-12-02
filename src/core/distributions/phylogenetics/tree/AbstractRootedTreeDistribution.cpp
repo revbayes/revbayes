@@ -373,7 +373,7 @@ const std::vector<Taxon>& AbstractRootedTreeDistribution::getTaxa( void ) const
 }
 
 
-void AbstractRootedTreeDistribution::keepSpecialization(DagNode *affecter)
+void AbstractRootedTreeDistribution::keepSpecialization(const DagNode *affecter)
 {
     
     if ( affecter == process_age && dag_node != NULL)
@@ -429,7 +429,7 @@ void AbstractRootedTreeDistribution::redrawValue( void )
 }
 
 
-void AbstractRootedTreeDistribution::restoreSpecialization(DagNode *affecter)
+void AbstractRootedTreeDistribution::restoreSpecialization(const DagNode *affecter)
 {
     if ( affecter == process_age )
     {
@@ -728,7 +728,7 @@ void AbstractRootedTreeDistribution::swapParameterInternal( const DagNode *oldP,
 }
 
 
-void AbstractRootedTreeDistribution::touchSpecialization(DagNode *affecter, bool touchAll)
+void AbstractRootedTreeDistribution::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     if ( affecter == process_age )

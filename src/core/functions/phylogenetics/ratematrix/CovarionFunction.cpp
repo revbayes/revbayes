@@ -14,12 +14,12 @@ namespace RevBayesCore { class DagNode; }
 using namespace RevBayesCore;
 
 CovarionFunction::CovarionFunction(bool r) : TypedFunction<RateGenerator>( NULL ),
-rescale( r ),
-//num_observed_states( 0 ),
-//num_hidden_states( 0 ),
-rate_matrices( NULL ),
-rate_scalars( NULL ),
-switch_rates( NULL )
+    rescale( r ),
+    //num_observed_states( 0 ),
+    //num_hidden_states( 0 ),
+    rate_matrices( NULL ),
+    rate_scalars( NULL ),
+    switch_rates( NULL )
 {
     
 }

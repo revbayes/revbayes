@@ -961,7 +961,7 @@ void TopologyConstrainedTreeDistribution::swapParameterInternal( const DagNode *
  * Touch the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void TopologyConstrainedTreeDistribution::touchSpecialization(DagNode *affecter, bool touchAll)
+void TopologyConstrainedTreeDistribution::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
     stored_clades = active_clades;
     stored_backbone_clades = active_backbone_clades;
@@ -970,7 +970,7 @@ void TopologyConstrainedTreeDistribution::touchSpecialization(DagNode *affecter,
     base_distribution->touch(affecter, touchAll);
 }
 
-void TopologyConstrainedTreeDistribution::keepSpecialization(DagNode *affecter)
+void TopologyConstrainedTreeDistribution::keepSpecialization(const DagNode *affecter)
 {
     stored_clades = active_clades;
     stored_backbone_clades = active_backbone_clades;
@@ -978,7 +978,7 @@ void TopologyConstrainedTreeDistribution::keepSpecialization(DagNode *affecter)
     base_distribution->keep(affecter);
 }
 
-void TopologyConstrainedTreeDistribution::restoreSpecialization(DagNode *restorer)
+void TopologyConstrainedTreeDistribution::restoreSpecialization(const DagNode *restorer)
 {
     active_clades = stored_clades;
     active_backbone_clades = stored_backbone_clades;

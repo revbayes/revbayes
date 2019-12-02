@@ -71,14 +71,14 @@ PhyloDistanceGamma* PhyloDistanceGamma::clone( void ) const
 }
 
 
-void PhyloDistanceGamma::keepSpecialization(DagNode* affecter)
+void PhyloDistanceGamma::keepSpecialization(const DagNode* affecter)
 {
     
     
 }
 
 
-void PhyloDistanceGamma::touchSpecialization(DagNode *toucher, bool touchAll)
+void PhyloDistanceGamma::touchSpecialization(const DagNode *toucher, bool touchAll)
 {
     
     

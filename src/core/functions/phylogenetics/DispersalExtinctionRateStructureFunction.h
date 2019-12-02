@@ -1,13 +1,5 @@
-//
-//  DispersalExtinctionRateStructureFunction.h
-//  revbayes-proj
-//
-//  Created by Michael Landis on 3/3/15.
-//  Copyright (c) 2015 Michael Landis. All rights reserved.
-//
-
-#ifndef __revbayes_proj__DispersalExtinctionRateStructureFunction__
-#define __revbayes_proj__DispersalExtinctionRateStructureFunction__
+#ifndef DispersalExtinctionRateStructureFunction_H
+#define DispersalExtinctionRateStructureFunction_H
 
 #include <stddef.h>
 #include <vector>
@@ -28,10 +20,10 @@ template <class valueType> class TypedDagNode;
         
         // public member functions
         DispersalExtinctionRateStructureFunction*           clone(void) const;                                                                  //!< Create an independent clone
-        void                                                keep(DagNode* affecter);
-        void                                                restore(DagNode *restorer);
+        void                                                keep(const DagNode* affecter);
+        void                                                restore(const DagNode *restorer);
         void                                                reInitialized(void);                                                                //!< The arguments have been re-initialized
-        void                                                touch(DagNode *toucher );
+        void                                                touch(const DagNode *toucher );
         void                                                update(void);
         
     protected:

@@ -31,7 +31,7 @@ namespace RevBayesCore {
      * Will Freyman 6/22/16
      *
      */
-    class StateDependentSpeciationExtinctionProcess : public TypedDistribution<Tree>, public TreeChangeEventListener, public MemberObject< RbVector<double> > {
+    class StateDependentSpeciationExtinctionProcess : public TypedDistribution<Tree>, public TreeChangeEventListener, public MemberObject< RbVector<long> >, public MemberObject< RbVector<double> > {
         
     public:
         StateDependentSpeciationExtinctionProcess(const TypedDagNode<double> *root,
@@ -88,15 +88,16 @@ namespace RevBayesCore {
 
         // virtual methods that may be overwritten, but then the derived class should call this methods
         virtual void                                                    getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter);                                  //!< get affected nodes
-        virtual void                                                    keepSpecialization(DagNode* affecter);
-        virtual void                                                    restoreSpecialization(DagNode *restorer);
-        virtual void                                                    touchSpecialization(DagNode *toucher, bool touchAll);
+        virtual void                                                    keepSpecialization(const DagNode* affecter);
+        virtual void                                                    restoreSpecialization(const DagNode *restorer);
+        virtual void                                                    touchSpecialization(const DagNode *toucher, bool touchAll);
         
         double                                                          lnProbTreeShape(void) const;
 
         // Parameter management functions. You need to override both if you have additional parameters
         virtual void                                                    swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                    //!< Swap a parameter
         void                                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;  
+        void                                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<long> &rv) const;     //!< Map the member methods to internal function calls
         RevLanguage::RevPtr<RevLanguage::RevVariable>                   executeProcedure(const std::string &name, const std::vector<DagNode *> args, bool &found);
         
         // helper functions
@@ -136,7 +137,7 @@ namespace RevBayesCore {
         const TypedDagNode<double>*                                     process_age;                                                                                           //!< Time since the origin.
         const TypedDagNode<RbVector<double> >*                          mu;
         const TypedDagNode<RbVector<double> >*                          lambda;
-        const TypedDagNode<RbVector<double> >*                          psi;
+        const TypedDagNode<RbVector<double> >*                          phi;
         const TypedDagNode<Simplex >*                                   pi;                                                                                                 //!< The root frequencies (probabilities of the root states).
         const TypedDagNode<RateGenerator>*                              Q;
         const TypedDagNode<double>*                                     rate;                                                                                               //!< Sampling probability of each species.

@@ -495,7 +495,7 @@ RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::NaturalNumbersState>
     HomologousDiscreteCharacterData<NaturalNumbersState>    *combined_data  = new HomologousDiscreteCharacterData<NaturalNumbersState>();
     
     std::string type = "union";
-    size_t sequence_length = getNumberOfCharacters();
+//    size_t sequence_length = getNumberOfCharacters();
     
     // check if both have the same number of taxa
 //    if ( taxa.size() != obsd.getNumberOfTaxa() )

@@ -67,13 +67,24 @@ double AbstractBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) co
     }
     else if ( condition == "nTaxa" )
     {
-        lnProbTimes = -lnProbNumTaxa( value->getNumberOfTips(), 0, present_time, true );
+        size_t n_taxa_present = getNumberOfTaxaAtPresent();
+        
+        lnProbTimes = -lnProbNumTaxa( n_taxa_present, 0, present_time, true );
     }
     
     // multiply the probability of a descendant of the initial species
     lnProbTimes += computeLnProbabilityTimes();
     
     return lnProbTimes;
+}
+
+
+size_t AbstractBirthDeathProcess::getNumberOfTaxaAtPresent( void ) const
+{
+    
+    size_t num_taxa_present = value->getNumberOfTips();
+    
+    return num_taxa_present;
 }
 
 

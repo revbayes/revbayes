@@ -384,7 +384,7 @@ double PhyloOrnsteinUhlenbeckProcessEVE::computeRootState( void ) const
 }
 
 
-void PhyloOrnsteinUhlenbeckProcessEVE::keepSpecialization( DagNode* affecter )
+void PhyloOrnsteinUhlenbeckProcessEVE::keepSpecialization( const DagNode* affecter )
 {
     
     // reset the flags
@@ -543,7 +543,7 @@ std::set<size_t> PhyloOrnsteinUhlenbeckProcessEVE::recursiveComputeDistanceMatri
 
 
 
-void PhyloOrnsteinUhlenbeckProcessEVE::restoreSpecialization( DagNode* affecter )
+void PhyloOrnsteinUhlenbeckProcessEVE::restoreSpecialization( const DagNode* affecter )
 {
     
     // reset the flags
@@ -872,7 +872,7 @@ void PhyloOrnsteinUhlenbeckProcessEVE::swapParameterInternal(const DagNode *oldP
 }
 
 
-void PhyloOrnsteinUhlenbeckProcessEVE::touchSpecialization( DagNode* affecter, bool touchAll )
+void PhyloOrnsteinUhlenbeckProcessEVE::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
     
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty

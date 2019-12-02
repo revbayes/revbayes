@@ -138,7 +138,7 @@ void PhyloBrownianProcessREML::fireTreeChangeEvent( const TopologyNode &n, const
 }
 
 
-void PhyloBrownianProcessREML::keepSpecialization( DagNode* affecter )
+void PhyloBrownianProcessREML::keepSpecialization( const DagNode* affecter )
 {
     
     // reset all flags
@@ -332,7 +332,7 @@ void PhyloBrownianProcessREML::resetValue( void )
 }
 
 
-void PhyloBrownianProcessREML::restoreSpecialization( DagNode* affecter )
+void PhyloBrownianProcessREML::restoreSpecialization( const DagNode* affecter )
 {
     
     // reset the flags
@@ -393,7 +393,7 @@ double PhyloBrownianProcessREML::sumRootLikelihood( void )
 }
 
 
-void PhyloBrownianProcessREML::touchSpecialization( DagNode* affecter, bool touchAll )
+void PhyloBrownianProcessREML::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
     
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty

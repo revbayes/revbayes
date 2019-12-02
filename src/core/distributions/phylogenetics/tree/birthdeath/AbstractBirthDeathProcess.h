@@ -19,6 +19,7 @@ namespace RevBayesCore {
     protected:
         // pure virtual helper functions
         virtual double                                      computeLnProbabilityTimes(void) const = 0;  //!< Compute the log-transformed probability of the current value.
+        virtual size_t                                      getNumberOfTaxaAtPresent(void) const;
         virtual double                                      lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const = 0;     //!< Compute the log-transformed probability of the number of taxa.
         virtual double                                      lnProbTreeShape(void) const;    //!< Compute the log-transformed probability of the tree shape.
         virtual double                                      pSurvival(double start, double end) const = 0;  //!< Compute the probability of survival of the process.

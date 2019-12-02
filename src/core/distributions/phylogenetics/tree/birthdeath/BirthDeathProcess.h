@@ -1,15 +1,15 @@
 #ifndef BirthDeathProcess_H
 #define BirthDeathProcess_H
 
-#include "Taxon.h" 
+#include "Taxon.h"
 #include "Tree.h"
 #include "TypedDagNode.h"
 #include "AbstractBirthDeathProcess.h"
 
 namespace RevBayesCore {
-    
+
     class Clade;
-    
+
     /**
      * @file
      * This file contains the declaration of the random variable class for constant rate birth-death process.
@@ -22,21 +22,21 @@ namespace RevBayesCore {
      *
      */
     class BirthDeathProcess : public AbstractBirthDeathProcess {
-        
+
     public:
         BirthDeathProcess(const TypedDagNode<double> *ro,
-                                    const TypedDagNode<double> *rh, const std::string& ss, const std::vector<Clade> &ic, const std::string &cdt,
+                                    const TypedDagNode<double> *rh, const TypedDagNode<double> *mp, const std::string& ss, const std::vector<Clade> &ic, const std::string &cdt,
                                     const std::vector<Taxon> &tn);
-        
+
         // pure virtual member functions
-        virtual BirthDeathProcess*                          clone(void) const = 0;                                                          //!< Create an independent clone
-        
-        
+        virtual BirthDeathProcess*                          clone(void) const = 0;                                                      //!< Create an independent clone
+
+
     protected:
         // Parameter management functions
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
-        virtual void                                        restoreSpecialization(DagNode *restorer);
-        virtual void                                        touchSpecialization(DagNode *toucher, bool touchAll);
+        virtual void                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
 
         // pure virtual helper functions
         virtual double                                      lnSpeciationRate(double t) const = 0;                                       //!< Get the log-transformed speciation rate at time t.
@@ -49,6 +49,7 @@ namespace RevBayesCore {
         
         // helper functions
         virtual double                                      computeLnProbabilityTimes(void) const;                                      //!< Compute the log-transformed probability of the current value.
+        size_t                                              getNumberOfTaxaAtPresent(void) const;
         double                                              lnP1(double T, double r) const;
         double                                              lnP1(double t, double T, double r) const;
         double                                              lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const;         //!< Compute the log-transformed probability of the number of taxa.
@@ -59,6 +60,7 @@ namespace RevBayesCore {
 
         // members
         const TypedDagNode<double>*                         rho;                                                                        //!< Sampling probability of each species.
+        const TypedDagNode<double>*                         sampling_mixture_proportion;                                                //!< The proportion of sampling that is diversified in sampling mixture model.
         std::string                                         sampling_strategy;                                                          //!< The incomplete taxon sampling strategy (uniform/diversified).
         std::vector<int>                                    missing_species;
         std::vector<Clade>                                  incomplete_clades;                                                          //!< Topological constrains.
@@ -69,7 +71,7 @@ namespace RevBayesCore {
         
         
     };
-    
+
 }
 
 #endif

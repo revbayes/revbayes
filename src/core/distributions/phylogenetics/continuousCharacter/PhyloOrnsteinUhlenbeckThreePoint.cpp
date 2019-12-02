@@ -230,7 +230,7 @@ void PhyloOrnsteinUhlenbeckThreePoint::fireTreeChangeEvent( const TopologyNode &
 }
 
 
-void PhyloOrnsteinUhlenbeckThreePoint::keepSpecialization( DagNode* affecter )
+void PhyloOrnsteinUhlenbeckThreePoint::keepSpecialization( const DagNode* affecter )
 {
     
     // reset all flags
@@ -339,7 +339,7 @@ void PhyloOrnsteinUhlenbeckThreePoint::resetValue( void )
 }
 
 
-void PhyloOrnsteinUhlenbeckThreePoint::restoreSpecialization( DagNode* affecter )
+void PhyloOrnsteinUhlenbeckThreePoint::restoreSpecialization( const DagNode* affecter )
 {
     
     // reset the flags
@@ -647,7 +647,7 @@ double PhyloOrnsteinUhlenbeckThreePoint::sumRootLikelihood( void )
 }
 
 
-void PhyloOrnsteinUhlenbeckThreePoint::touchSpecialization( DagNode* affecter, bool touchAll )
+void PhyloOrnsteinUhlenbeckThreePoint::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
     
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty

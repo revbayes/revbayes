@@ -34,15 +34,15 @@ namespace RevBayesCore {
         
         // virtual methods that may be overwritten, but then the derived class should call this methods
         void                                                                computeNodeLnProbability( const TopologyNode &node, size_t node_index );
-        virtual void                                                        keepSpecialization(DagNode* affecter);
+        virtual void                                                        keepSpecialization(const DagNode* affecter);
         void                                                                flagNodeDirty(const TopologyNode& n);
 //        void                                                                recursiveComputeLnProbability( const TopologyNode &node, size_t node_index );
         void                                                                resetValue( void );
-        virtual void                                                        restoreSpecialization(DagNode *restorer);
+        virtual void                                                        restoreSpecialization(const DagNode *restorer);
         void                                                                simulateInternalNodeStates( void );
         virtual void                                                        simulateRecursively(const TopologyNode& node, std::vector< ContinuousTaxonData > &t);
         virtual void                                                        simulateRecursivelyInternal(const TopologyNode& node, std::vector< ContinuousTaxonData > &t);
-        virtual void                                                        touchSpecialization(DagNode *toucher, bool touchAll);
+        virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
 
         // Parameter management functions.
         virtual void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                         //!< Swap a parameter

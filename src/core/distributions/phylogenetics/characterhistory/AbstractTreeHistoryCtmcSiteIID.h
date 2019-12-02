@@ -68,9 +68,9 @@
 //        double                                                              computeBranchRate(size_t index);
 //        
 //        // virtual methods that may be overwritten, but then the derived class should call this methods
-//        virtual void                                                        keepSpecialization(DagNode* affecter);
-//        virtual void                                                        restoreSpecialization(DagNode *restorer);
-//        virtual void                                                        touchSpecialization(DagNode *toucher, bool touchAll);
+//        virtual void                                                        keepSpecialization(const DagNode* affecter);
+//        virtual void                                                        restoreSpecialization(const DagNode *restorer);
+//        virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
 //        
 //        // pure virtual methods
 //        virtual double                                                      computeRootLikelihood(const TopologyNode &nd) = 0;
@@ -376,7 +376,7 @@
 //
 //
 //template<class charType>
-//void RevBayesCore::AbstractTreeHistoryCtmcSiteIID<charType>::keepSpecialization( DagNode* affecter )
+//void RevBayesCore::AbstractTreeHistoryCtmcSiteIID<charType>::keepSpecialization( const DagNode* affecter )
 //{
 //    
 //    // reset all flags
@@ -419,7 +419,7 @@
 //}
 //
 //template<class charType>
-//void RevBayesCore::AbstractTreeHistoryCtmcSiteIID<charType>::restoreSpecialization( DagNode* affecter )
+//void RevBayesCore::AbstractTreeHistoryCtmcSiteIID<charType>::restoreSpecialization( const DagNode* affecter )
 //{
 //    
 //    // reset the flags
@@ -543,7 +543,7 @@
 //
 //
 //template<class charType>
-//void RevBayesCore::AbstractTreeHistoryCtmcSiteIID<charType>::touchSpecialization( DagNode* affecter, bool touchAll )
+//void RevBayesCore::AbstractTreeHistoryCtmcSiteIID<charType>::touchSpecialization( const DagNode* affecter, bool touchAll )
 //{
 //    
 //    // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
