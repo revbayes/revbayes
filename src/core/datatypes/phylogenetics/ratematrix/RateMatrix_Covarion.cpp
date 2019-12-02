@@ -130,13 +130,6 @@ RateMatrix_Covarion& RateMatrix_Covarion::assign(const Assignable &m)
     
 }
 
-std::vector<int> RateMatrix_Covarion::get_emitted_letters() const
-{
-    std::vector<int> emit(num_states);
-    for(int i=0;i<num_states;i++)
-        emit[i] = i % num_states_per_class;
-    return emit;
-}
 
 /** Do precalculations on eigenvectors */
 void RateMatrix_Covarion::calculateCijk(void)

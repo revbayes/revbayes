@@ -2,6 +2,7 @@
 #define TreeSummary_H
 
 #include "Clade.h"
+#include "SBNParameters.h"
 #include "Trace.h"
 #include "Tree.h"
 
@@ -59,7 +60,7 @@ namespace RevBayesCore {
             bool sampled_ancestor_probs;
             bool force_positive_branch_lengths;
             bool use_outgroup;
-            
+
             AnnotationReport();
         };
 
@@ -84,6 +85,7 @@ namespace RevBayesCore {
         bool                                       isCoveredInInterval(const std::string &v, double size, bool verbose);
         bool                                       isCoveredInInterval(const Tree &t, double size, bool verbose);
         bool                                       isDirty(void) const;
+        SBNParameters                              learnUnconstrainedSBN(const std::string &branch_length_approximation);
         double                                     maxdiff(bool verbose);
         Tree*                                      mapTree(AnnotationReport report, bool verbose);
         Tree*                                      mccTree(AnnotationReport report, bool verbose);

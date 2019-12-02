@@ -38,6 +38,7 @@
 
 #include "Clade.h"
 #include "RbBitSet.h"
+#include "Subsplit.h"
 
 #include "TreeChangeEventMessage.h"
 #include "Taxon.h"
@@ -48,11 +49,11 @@
 #include <string>
 
 namespace RevBayesCore {
-    
+
     class Tree;
-    
+
     class TopologyNode  {
-        
+
     public:
         TopologyNode(size_t indx=0);                                                                                                    //!< Default constructor with optional index
         TopologyNode(const std::string& n, size_t indx=0);                                                                              //!< Constructor with name and optional index
@@ -60,12 +61,12 @@ namespace RevBayesCore {
         TopologyNode(const TopologyNode &n);                                                                                            //!< Copy constructor
         virtual                                    ~TopologyNode(void);                                                                 //!< Destructor
         TopologyNode&                               operator=(const TopologyNode& n);
-        
-        
+
+
         // Basic utility functions
         TopologyNode*                               clone(void) const;                                                                  //!< Clone object
         bool                                        equals(const TopologyNode& node) const;                                             //!< Test whether this is the same node
-        
+
         // public methods
         void                                        addBranchParameter(const std::string &n, double p);
         void                                        addBranchParameter(const std::string &n, const std::string &p);
@@ -118,6 +119,8 @@ namespace RevBayesCore {
         TopologyNode&                               getParent(void);                                                                    //!< Returns the node's parent
         const TopologyNode&                         getParent(void) const;                                                              //!< Returns the node's parent
         std::string                                 getSpeciesName() const;                                                             //!< Get the species name for the node
+        Subsplit                                    getSubsplit(const std::vector<Taxon>& ordered_taxa) const;                          //!< Get the subsplit this node represents
+        void                                        getSubsplitParentChildPairsRecursively(std::vector<std::pair<Subsplit,Subsplit> > &all_pairs, Subsplit& node_subsplit, const std::vector<Taxon>& ordered_taxa) const; //!< Recursively get all subsplit parent-child pairs below this node
         void                                        getTaxa(std::vector<Taxon> &taxa) const;                                            //!< Fill the vector of taxa
         void                                        getTaxa(RbBitSet &taxa) const;                                                      //!< Fill the taxon bitset
         void                                        getTaxa(std::vector<Taxon> &taxa, RbBitSet &bitset) const;                          //!< Fill the vector of taxa and the taxon bitset
@@ -133,6 +136,8 @@ namespace RevBayesCore {
         bool                                        isSampledAncestor(bool propagate=false) const;                                                      //!< Is node (or a child node) a sampled ancestor?
         bool                                        isTip(void) const;                                                                  //!< Is node tip?
         void                                        makeBifurcating(void);                                                              //!< Make this and all its descendants bifurcating.
+        void                                        recursivelySortNodesByPostorder(std::vector<int> &visited, std::vector<size_t> &nodes) const;  // Recursively fill vector nodes with indices of nodes for a postorder (tip to root) traversal
+        void                                        recursivelySortNodesByPreorder(std::vector<int> &visited, std::vector<size_t> &nodes) const;  // Recursively fill vector nodes with indices of nodes for a preorder (root to tip) traversal
         void                                        renameNodeParameter(const std::string &old_name, const std::string &new_name);
         void                                        removeAllChildren(void);                                                            //!< Removes all of the children of the node
         size_t                                      removeChild(TopologyNode* c);                                                       //!< Removes a specific child
@@ -151,15 +156,15 @@ namespace RevBayesCore {
         void                                        setTimeInStates(std::vector<double> t);
         void                                        setTree(Tree *t);                                                                   //!< Sets the tree pointer
         void                                        setUseAges(bool tf, bool recursive);
-        
+
         // internal helper functions
         void                                        recomputeBranchLength(void);                                                        //!< Recompute the length of this branch based on the ages.
-        
+
     protected:
-        
+
         // helper methods
         virtual std::string                         buildNewickString(bool simmap);                                                     //!< compute the newick string for a tree rooting at this node
-        
+
         // protected members
         bool                                        use_ages;
         double                                      age;
@@ -174,16 +179,16 @@ namespace RevBayesCore {
         bool                                        root_node;
         bool                                        tip_node;
         bool                                        sampled_ancestor;
-        
+
         // information for newick representation
         std::vector<std::string>                    node_comments;
         std::vector<std::string>                    branch_comments;
-       
+
         // for stochastic maps
         std::vector<double>                         time_in_states;
-        
+
 //        RevLanguage::RevPtr<TaxonMap>               taxon_map;
-        
+
      // std::map<std::string,std::string>           nodeFields;
      // std::map<std::string,std::string>           branchFields;
     };

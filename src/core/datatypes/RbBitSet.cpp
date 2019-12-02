@@ -46,11 +46,32 @@ bool RbBitSet::operator!=(const RbBitSet& x) const
 }
 
 
-/** Smaller than comparison */
+/** Less than comparison */
 bool RbBitSet::operator<(const RbBitSet& x) const
 {
 
     return x.value < value;
+}
+
+/** Less than or equals to comparison */
+bool RbBitSet::operator<=(const RbBitSet& x) const
+{
+
+    return x.value <= value;
+}
+
+/** Greater than comparison */
+bool RbBitSet::operator>(const RbBitSet& x) const
+{
+
+    return x.value > value;
+}
+
+/** Greater than or equals to comparison */
+bool RbBitSet::operator>=(const RbBitSet& x) const
+{
+
+    return !(x.value < value);
 }
 
 /** Bitwise and */

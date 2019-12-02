@@ -6,7 +6,7 @@
 #include <vector>
 
 namespace RevBayesCore {
-    
+
     /**
      * RevBayes class for bit sets.
      *
@@ -17,18 +17,21 @@ namespace RevBayesCore {
      * @since 2016-09-06, version 1.0
      */
     class RbBitSet {
-        
+
     public:
         RbBitSet(void);                                                                                         //!< Constructor requires character type
         RbBitSet(size_t n, bool def = false);                                                                   //!< Constructor requires character type
         virtual                        ~RbBitSet(void) {}
-        
+
         bool                            operator[](size_t i) const;
 
         bool                            operator==(const RbBitSet &bs) const;
         bool                            operator!=(const RbBitSet &bs) const;
         bool                            operator<(const RbBitSet &bs) const;
-        
+        bool                            operator<=(const RbBitSet &bs) const;
+        bool                            operator>(const RbBitSet &bs) const;
+        bool                            operator>=(const RbBitSet &bs) const;
+
         RbBitSet                        operator&(const RbBitSet &bs) const;
         RbBitSet                        operator|(const RbBitSet &bs) const;
         RbBitSet                        operator^(const RbBitSet &bs) const;
@@ -49,18 +52,18 @@ namespace RevBayesCore {
         size_t                          size(void) const;
         void                            unset(size_t i);
 
-        
+
     private:
 
         std::vector<bool>               value;
         size_t                          num_set_bits;
 
-        
+
     };
-    
+
     // Global functions using the class
     std::ostream&                               operator<<(std::ostream& o, const RbBitSet& x);                    //!< Overloaded output operator
-    
+
 }
 
 #endif

@@ -32,6 +32,6 @@ TraceTree::TraceTree(const TraceTree& t ) : TreeSummary(this, t.isClock())
 
 TraceTree* TraceTree::clone(void) const
 {
-    
+
     return new TraceTree(*this);
 }

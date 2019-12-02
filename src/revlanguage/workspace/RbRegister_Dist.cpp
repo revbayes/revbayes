@@ -187,12 +187,14 @@
 #include "Dist_sampledSpeciationBirthDeathProcess.h"
 #include "Dist_BDSTP.h"
 #include "Dist_SSBDP.h"
+#include "Dist_timeCalibratedSBN.h"
 #include "Dist_TimeVaryingStateDependentSpeciationExtinctionProcess.h"
 #include "Dist_UltrametricTree.h"
 #include "Dist_uniformTimeTree.h"
 #include "Dist_uniformSerialSampledTimeTree.h"
 #include "Dist_uniformTopology.h"
 #include "Dist_uniformTopologyBranchLength.h"
+#include "Dist_unconstrainedSBN.h"
 
 /* Distributions on simple variables (in folder "distributions/math") */
 #include "Dist_bernoulli.h"
@@ -212,6 +214,7 @@
 #include "Dist_exponentialOffset.h"
 #include "Dist_exponentialOffsetPositive.h"
 #include "Dist_gamma.h"
+#include "Dist_generalizedGamma.h"
 #include "Dist_geom.h"
 #include "Dist_GilbertGraph.h"
 #include "Dist_halfCauchy.h"
@@ -220,6 +223,7 @@
 #include "Dist_halfNormalPositive.h"
 #include "Dist_inverseGamma.h"
 #include "Dist_inverseWishart.h"
+#include "Dist_Kumaraswamy.h"
 #include "Dist_Laplace.h"
 #include "Dist_LKJ.h"
 #include "Dist_LKJPartial.h"
@@ -386,6 +390,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         // constrained topology distribution
         AddDistribution< TimeTree                   >( new Dist_ConstrainedTopology() );
 
+        // uniform topology distribution
+        AddDistribution< BranchLengthTree           >( new Dist_TimeCalibratedSBN() );
+
         // uniform time tree distribution
         AddDistribution< TimeTree                   >( new Dist_uniformTimeTree() );
 
@@ -394,6 +401,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // uniform topology distribution
         AddDistribution< BranchLengthTree           >( new Dist_uniformTopology() );
+
+        // uniform topology distribution
+        AddDistribution< BranchLengthTree           >( new Dist_UnconstrainedSBN() );
 
         // uniform topology with branch lengths distribution
         AddDistribution< BranchLengthTree           >( new Dist_uniformTopologyBranchLength() );
@@ -456,6 +466,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         // gamma distribution
         AddContinuousDistribution< RealPos          >( new Dist_gamma() );
 
+        // generalized gamma distribution
+        AddContinuousDistribution< RealPos          >( new Dist_generalizedGamma() );
+
         // geometric distribution
         AddDistribution< Natural                    >( new Dist_geom() );
 
@@ -481,6 +494,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddContinuousDistribution< RealPos          >( new Dist_exponential() );
         AddContinuousDistribution< Real             >( new Dist_exponentialOffset() );
         AddContinuousDistribution< RealPos          >( new Dist_exponentialOffsetPositive() );
+
+        // Kumaraswamy distribution
+        AddDistribution< Probability                >( new Dist_Kumaraswamy() );
 
         // Laplace distribution
         AddContinuousDistribution< Real             >( new Dist_Laplace() );

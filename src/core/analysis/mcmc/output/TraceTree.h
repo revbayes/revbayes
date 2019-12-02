@@ -2,6 +2,7 @@
 #define TraceTree_H
 
 #include "Clade.h"
+#include "SBNParameters.h"
 #include "Trace.h"
 #include "Tree.h"
 #include "TreeSummary.h"

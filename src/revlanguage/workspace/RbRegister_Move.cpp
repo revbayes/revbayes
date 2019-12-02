@@ -76,6 +76,7 @@
 #include "Move_HSRFUnevenGridHyperpriorsGibbs.h"
 #include "Move_SliceSampling.h"
 #include "Move_Scale.h"
+#include "Move_ScaleKernelMixture.h"
 #include "Move_GammaScale.h"
 #include "Move_RandomDive.h"
 #include "Move_ScaleBactrian.h"
@@ -223,6 +224,8 @@
 #include "Move_SubtreeScale.h"
 #include "Move_SPRNonclock.h"
 #include "Move_TreeScale.h"
+#include "Move_UnrootedUnconstrainedSBN.h"
+#include "Move_UnconstrainedSBNSelfStart.h"
 //#include "Move_WeightedNodeTimeSlide.h"
 
 
@@ -244,6 +247,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_Mirror() );
         addType( new Move_MirrorMultiplier() );
         addType( new Move_Scale() );
+        addType( new Move_ScaleKernelMixture() );
         addType( new Move_GammaScale() );
         addType( new Move_RandomDive() );
         addType( new Move_ScaleBactrian() );
@@ -420,6 +424,8 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_TipTimeSlideUniform()              );
         addType( new Move_SpeciesTreeScale()                 );
         addType( new Move_TreeScale()                        );
+        addType( new Move_UnconstrainedSBNSelfStart()        );
+        addType( new Move_UnrootedUnconstrainedSBN()         );
         addType( new Move_NarrowExchangeRateMatrix()         );
 
         /* Moves on character histories / data augmentation */
