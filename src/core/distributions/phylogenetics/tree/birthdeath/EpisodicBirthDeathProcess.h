@@ -15,7 +15,7 @@ namespace RevBayesCore {
         EpisodicBirthDeathProcess(const TypedDagNode<double> *ra,
                                   const TypedDagNode<RbVector<double> > *s, const TypedDagNode<RbVector<double> > *st,
                                   const TypedDagNode<RbVector<double> > *e, const TypedDagNode<RbVector<double> > *et,
-                                  const TypedDagNode<double> *r, const std::string& ss, const std::vector<Clade> &ic,
+                                  const TypedDagNode<double> *r, const TypedDagNode<double> *mp, const std::string& ss, const std::vector<Clade> &ic,
                                   const std::string &cdt, const std::vector<Taxon> &tn);
         
         // public member functions

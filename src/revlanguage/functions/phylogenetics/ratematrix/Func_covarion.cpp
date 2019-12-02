@@ -74,9 +74,9 @@ const ArgumentRules& Func_covarion::getArgumentRules( void ) const
     if ( !rules_set )
     {
         argumentRules.push_back( new ArgumentRule( "RateMatrices", ModelVector<RateGenerator>::getClassTypeSpec(), "Rate matrices for the characters per state.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "RateScalars", ModelVector<RealPos>::getClassTypeSpec(),         "Rate multipliers per state.",   ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "SwitchRates", ModelVector<ModelVector<RealPos> >::getClassTypeSpec(),         "Rates between state.",   ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "rescaled",                    RlBoolean::getClassTypeSpec(), "Should the matrix be normalized?",          ArgumentRule::BY_VALUE,              ArgumentRule::ANY, new RlBoolean(true) ) );
+        argumentRules.push_back( new ArgumentRule( "RateScalars",  ModelVector<RealPos>::getClassTypeSpec(),         "Rate multipliers per state.",   ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "SwitchRates",  ModelVector<ModelVector<RealPos> >::getClassTypeSpec(),         "Rates between state.",   ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "rescaled",     RlBoolean::getClassTypeSpec(), "Should the matrix be normalized?",          ArgumentRule::BY_VALUE,              ArgumentRule::ANY, new RlBoolean(true) ) );
         rules_set = true;
     }
     

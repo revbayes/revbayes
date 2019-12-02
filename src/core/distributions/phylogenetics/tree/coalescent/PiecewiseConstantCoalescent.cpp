@@ -159,7 +159,7 @@ void PiecewiseConstantCoalescent::executeMethod(const std::string &n, const std:
 /**
  * Keep the current value and reset some internal flags. Nothing to do here.
  */
-void PiecewiseConstantCoalescent::keepSpecialization(DagNode *affecter)
+void PiecewiseConstantCoalescent::keepSpecialization(const DagNode *affecter)
 {
     
     // nothing to do here
@@ -170,7 +170,7 @@ void PiecewiseConstantCoalescent::keepSpecialization(DagNode *affecter)
  * Restore the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void PiecewiseConstantCoalescent::restoreSpecialization(DagNode *affecter)
+void PiecewiseConstantCoalescent::restoreSpecialization(const DagNode *affecter)
 {
     
     // just re-update the start times of the intervals
@@ -290,7 +290,7 @@ void PiecewiseConstantCoalescent::swapParameterInternal(const DagNode *oldP, con
  * Touch the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void PiecewiseConstantCoalescent::touchSpecialization(DagNode *affecter, bool touchAll)
+void PiecewiseConstantCoalescent::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     // just update the start times of the intervals

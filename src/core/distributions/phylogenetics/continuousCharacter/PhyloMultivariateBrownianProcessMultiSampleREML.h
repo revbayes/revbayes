@@ -35,14 +35,14 @@ namespace RevBayesCore {
         double                                                              computeMeanForSpecies(const std::string &n, size_t i);
         double                                                              getNumberOfSamplesForSpecies(const std::string &n);
         double                                                              getWithinSpeciesVariance(const std::string &n, size_t site);
-        virtual void                                                        keepSpecialization(DagNode* affecter);
+        virtual void                                                        keepSpecialization(const DagNode* affecter);
         void                                                                recursiveComputeLnProbability( const TopologyNode &node, size_t node_index );
         void                                                                recursivelyFlagNodeDirty(const TopologyNode& n);
         void                                                                resetValue( void );
-        virtual void                                                        restoreSpecialization(DagNode *restorer);
+        virtual void                                                        restoreSpecialization(const DagNode *restorer);
         std::vector<double>                                                 simulateRootCharacters(size_t n);
         void                                                                simulateRecursively( const TopologyNode &node, std::vector< ContinuousTaxonData > &taxa);
-        virtual void                                                        touchSpecialization(DagNode *toucher, bool touchAll);
+        virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
         
         // Parameter management functions.
         virtual void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                                //!< Swap a parameter

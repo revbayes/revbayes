@@ -34,18 +34,19 @@ namespace RevBayesCore {
         MixtureDistribution*                                clone(void) const;                                                                      //!< Create an independent clone
         double                                              computeLnProbability(void);
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, long &rv) const;     //!< Map the member methods to internal function calls
-        const std::vector<mixtureType>&                     getParameterValues(void) const;
+        const RevBayesCore::RbVector<mixtureType>&          getParameterValues(void) const;
         size_t                                              getCurrentIndex(void) const;
-        size_t                                              getNumberOfCategories(void) const;
+        std::vector<double>                                 getMixtureProbabilities(void) const;
+        size_t                                              getNumberOfMixtureElements(void) const;                                                        //!< Get the number of elements for this value
         void                                                redrawValue(void);
         void                                                setCurrentIndex(size_t i);
         void                                                setValue(mixtureType *v, bool f=false);
         
         // special handling of state changes
         void                                                getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter);                          //!< get affected nodes
-        void                                                keepSpecialization(DagNode* affecter);
-        void                                                restoreSpecialization(DagNode *restorer);
-        void                                                touchSpecialization(DagNode *toucher, bool touchAll);
+        void                                                keepSpecialization(const DagNode* affecter);
+        void                                                restoreSpecialization(const DagNode *restorer);
+        void                                                touchSpecialization(const DagNode *toucher, bool touchAll);
         
     protected:
         // Parameter management functions
@@ -143,7 +144,15 @@ size_t RevBayesCore::MixtureDistribution<mixtureType>::getCurrentIndex( void ) c
 
 
 template <class mixtureType>
-size_t RevBayesCore::MixtureDistribution<mixtureType>::getNumberOfCategories( void ) const
+std::vector<double> RevBayesCore::MixtureDistribution<mixtureType>::getMixtureProbabilities( void ) const
+{
+
+    return probabilities->getValue();
+}
+
+
+template <class mixtureType>
+size_t RevBayesCore::MixtureDistribution<mixtureType>::getNumberOfMixtureElements( void ) const
 {
 
     return probabilities->getValue().size();
@@ -151,13 +160,13 @@ size_t RevBayesCore::MixtureDistribution<mixtureType>::getNumberOfCategories( vo
 
 
 template <class mixtureType>
-const std::vector<mixtureType>& RevBayesCore::MixtureDistribution<mixtureType>::getParameterValues( void ) const
+const RevBayesCore::RbVector<mixtureType>& RevBayesCore::MixtureDistribution<mixtureType>::getParameterValues( void ) const
 {
     return parameterValues->getValue();
 }
 
 template <class mixtureType>
-void RevBayesCore::MixtureDistribution<mixtureType>::keepSpecialization( DagNode* affecter )
+void RevBayesCore::MixtureDistribution<mixtureType>::keepSpecialization( const DagNode* affecter )
 {
     // only do this when the toucher was our parameters
     if ( affecter == parameterValues && this->dag_node != NULL )
@@ -223,7 +232,7 @@ void RevBayesCore::MixtureDistribution<mixtureType>::swapParameterInternal( cons
 
 
 template <class mixtureType>
-void RevBayesCore::MixtureDistribution<mixtureType>::restoreSpecialization( DagNode *restorer )
+void RevBayesCore::MixtureDistribution<mixtureType>::restoreSpecialization( const DagNode *restorer )
 {
     
     // only do this when the toucher was our parameters
@@ -262,7 +271,7 @@ void RevBayesCore::MixtureDistribution<mixtureType>::setValue(mixtureType *v, bo
 
 
 template <class mixtureType>
-void RevBayesCore::MixtureDistribution<mixtureType>::touchSpecialization( DagNode *toucher, bool touchAll )
+void RevBayesCore::MixtureDistribution<mixtureType>::touchSpecialization( const DagNode *toucher, bool touchAll )
 {
     // only do this when the toucher was our parameters
     if ( toucher == parameterValues )

@@ -224,21 +224,21 @@ void NodeAgeConstrainedTreeDistribution::swapParameterInternal( const DagNode *o
  * Touch the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void NodeAgeConstrainedTreeDistribution::touchSpecialization(DagNode *affecter, bool touchAll)
+void NodeAgeConstrainedTreeDistribution::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
     base_distribution->touch(affecter, touchAll);
     double a = base_distribution->getValue().getRoot().getAge();
     value->getRoot().setAge( a );
 }
 
-void NodeAgeConstrainedTreeDistribution::keepSpecialization(DagNode *affecter)
+void NodeAgeConstrainedTreeDistribution::keepSpecialization(const DagNode *affecter)
 {
     base_distribution->keep(affecter);
     double a = base_distribution->getValue().getRoot().getAge();
     value->getRoot().setAge( a );
 }
 
-void NodeAgeConstrainedTreeDistribution::restoreSpecialization(DagNode *restorer)
+void NodeAgeConstrainedTreeDistribution::restoreSpecialization(const DagNode *restorer)
 {
     base_distribution->restore(restorer);
     double a = base_distribution->getValue().getRoot().getAge();

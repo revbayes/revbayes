@@ -1226,7 +1226,7 @@ bool NclReader::isPhylipFile(std::string& fn, std::string& dType, bool& is_inter
         }
         else if (lineNum == 0 && wordNum == 1 && StringUtilities::isNumber(word) == true)
             foundNumChar = true;
-        else if (lineNum > 0 && wordNum == 0 && word != "" && word.size() < 25)
+        else if (lineNum > 0 && wordNum == 0 && word != "")
             taxonNames.push_back( word );
         else if (lineNum > 0 && wordNum > 0)
             seqStr += word;

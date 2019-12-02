@@ -42,16 +42,18 @@ namespace RevBayesCore {
         virtual                                                 ~Distribution(void);
         
         // public methods
-        virtual void                                            bootstrap(void);                                                              //!< Draw a new random value from the distribution
+        virtual void                                            bootstrap(void);                                                                    //!< Draw a new random value from the distribution
         virtual RevLanguage::RevPtr<RevLanguage::RevVariable>   executeProcedure(const std::string &n, const std::vector<DagNode*> args, bool &f);  //!< execute the procedure
-        virtual void                                            getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter);                  //!< get affected nodes
+        virtual void                                            getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);            //!< get affected nodes
+        virtual std::vector<double>                             getMixtureProbabilities(void) const;
+        virtual size_t                                          getNumberOfMixtureElements(void) const;                                             //!< Get the number of elements for this value
         const std::vector<const DagNode*>&                      getParameters(void) const;                                                          //!< get the parameters of the function
-        void                                                    keep(DagNode* affecter);
+        void                                                    keep(const DagNode* affecter);
         virtual void                                            reInitialized( void );                                                              //!< The model was re-initialized
-        void                                                    restore(DagNode *restorer);
+        void                                                    restore(const DagNode *restorer);
         virtual void                                            setMcmcMode(bool tf);                                                               //!< Change the likelihood computation to or from MCMC mode.
         void                                                    swapParameter(const DagNode *oldP, const DagNode *newP);                            //!< Exchange the parameter
-        void                                                    touch(DagNode *toucher, bool touchAll);
+        void                                                    touch(const DagNode *toucher, bool touchAll);
         
         // pure virtual public methods
         virtual Distribution*                                   clone(void) const = 0;                                                              //!< Clone the distribution
@@ -59,14 +61,14 @@ namespace RevBayesCore {
         virtual void                                            redrawValue(void) = 0;                                                              //!< Draw a new random value from the distribution
         
     protected:
-        Distribution(void);                                                                                                         //!< Default constructor
-        Distribution(const Distribution &f);                                                                                        //!< Copy constructor
+        Distribution(void);                                                                                                                         //!< Default constructor
+        Distribution(const Distribution &f);                                                                                                        //!< Copy constructor
         Distribution&                                           operator=(const Distribution &f);                                                   //!< Assignment operator
         
         // keep specialization for derived classes
-        virtual void                                            keepSpecialization(DagNode* affecter);
-        virtual void                                            restoreSpecialization(DagNode *restorer);
-        virtual void                                            touchSpecialization(DagNode *toucher, bool touchAll);
+        virtual void                                            keepSpecialization(const DagNode* affecter);
+        virtual void                                            restoreSpecialization(const DagNode *restorer);
+        virtual void                                            touchSpecialization(const DagNode *toucher, bool touchAll);
         
         // swap parameter methods for internal use of derived classes
         void                                                    addParameter(const DagNode* p);                                                     //!< add a parameter to the function

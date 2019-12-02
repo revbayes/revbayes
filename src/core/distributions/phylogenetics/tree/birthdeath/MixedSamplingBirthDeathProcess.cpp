@@ -594,7 +594,7 @@
 // * Touch the current value and reset some internal flags.
 // * If the root age variable has been restored, then we need to change the root age of the tree too.
 // */
-//void MixedSamplingBirthDeathProcess::touchSpecialization(DagNode *affecter, bool touchAll)
+//void MixedSamplingBirthDeathProcess::touchSpecialization(const DagNode *affecter, bool touchAll)
 //{
 //    stored_clades = active_clades;
 //    stored_backbone_clades = active_backbone_clades;
@@ -603,7 +603,7 @@
 //    base_distribution->touch(affecter, touchAll);
 //}
 //
-//void MixedSamplingBirthDeathProcess::keepSpecialization(DagNode *affecter)
+//void MixedSamplingBirthDeathProcess::keepSpecialization(const DagNode *affecter)
 //{
 //    stored_clades = active_clades;
 //    stored_backbone_clades = active_backbone_clades;
@@ -611,7 +611,7 @@
 //    base_distribution->keep(affecter);
 //}
 //
-//void MixedSamplingBirthDeathProcess::restoreSpecialization(DagNode *restorer)
+//void MixedSamplingBirthDeathProcess::restoreSpecialization(const DagNode *restorer)
 //{
 //    active_clades = stored_clades;
 //    active_backbone_clades = stored_backbone_clades;

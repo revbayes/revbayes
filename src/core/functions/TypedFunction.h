@@ -53,7 +53,7 @@ namespace RevBayesCore {
 
         // pure virtual public methors
         virtual TypedFunction*              clone(void) const = 0;                                                      //!< Clone the function
-        virtual void                        touch(RevBayesCore::DagNode *toucher );                                     //!< Touch the function (set dirty flag)
+        virtual void                        touch(const RevBayesCore::DagNode *toucher );                               //!< Touch the function (set dirty flag)
         virtual void                        update(void) = 0;                                                           //!< Update the value of the function
     
     protected:
@@ -154,7 +154,7 @@ void RevBayesCore::TypedFunction<valueType>::setDeterministicNode(DeterministicN
 
 
 template <class valueType>
-void RevBayesCore::TypedFunction<valueType>::touch( RevBayesCore::DagNode* /*toucher*/ )
+void RevBayesCore::TypedFunction<valueType>::touch( const RevBayesCore::DagNode* /*toucher*/ )
 {
     // nothing to do here in the base class
 

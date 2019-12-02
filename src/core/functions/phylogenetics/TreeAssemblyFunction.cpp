@@ -62,7 +62,7 @@ TreeAssemblyFunction* TreeAssemblyFunction::clone( void ) const
 }
 
 
-void TreeAssemblyFunction::keep(DagNode *affecter)
+void TreeAssemblyFunction::keep( const DagNode *affecter )
 {
     //delegate to base class
     TypedFunction< Tree >::keep( affecter );
@@ -78,7 +78,7 @@ void TreeAssemblyFunction::reInitialized( void )
 }
 
 
-void TreeAssemblyFunction::restore(DagNode *restorer)
+void TreeAssemblyFunction::restore( const DagNode *restorer )
 {
     //delegate to base class
     TypedFunction< Tree >::restore( restorer );
@@ -87,7 +87,7 @@ void TreeAssemblyFunction::restore(DagNode *restorer)
 }
 
 
-void TreeAssemblyFunction::touch(DagNode *toucher)
+void TreeAssemblyFunction::touch(const DagNode *toucher)
 {
     
     //delegate to base class

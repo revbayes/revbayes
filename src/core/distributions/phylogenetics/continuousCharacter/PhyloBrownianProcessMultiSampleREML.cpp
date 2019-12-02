@@ -179,7 +179,7 @@ double PhyloBrownianProcessMultiSampleREML::getWithinSpeciesVariance(const std::
 
 
 
-void PhyloBrownianProcessMultiSampleREML::keepSpecialization( DagNode* affecter )
+void PhyloBrownianProcessMultiSampleREML::keepSpecialization( const DagNode* affecter )
 {
     
     // reset all flags
@@ -500,7 +500,7 @@ void PhyloBrownianProcessMultiSampleREML::resetValue( void )
 }
 
 
-void PhyloBrownianProcessMultiSampleREML::restoreSpecialization( DagNode* affecter )
+void PhyloBrownianProcessMultiSampleREML::restoreSpecialization( const DagNode* affecter )
 {
     
     // reset the flags
@@ -561,7 +561,7 @@ double PhyloBrownianProcessMultiSampleREML::sumRootLikelihood( void )
 }
 
 
-void PhyloBrownianProcessMultiSampleREML::touchSpecialization( DagNode* affecter, bool touchAll )
+void PhyloBrownianProcessMultiSampleREML::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
     
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty

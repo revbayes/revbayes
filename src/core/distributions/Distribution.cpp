@@ -124,23 +124,37 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Distribution::executeProcedure(con
 
 
 /* Method stub: override for specialized treatment. */
-void Distribution::getAffected(RbOrderedSet<DagNode *> &affected, DagNode* affecter)
+void Distribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
 {
     // do nothing
+}
+
+
+
+std::vector<double> Distribution::getMixtureProbabilities(void) const
+{
+    return std::vector<double>(1, 1.0);
+}
+
+
+size_t Distribution::getNumberOfMixtureElements(void) const
+{
+    return 0;
 }
 
 
 /**
  * Get a const reference to the set of parameters for this distribution.
  */
-const std::vector<const DagNode*>& Distribution::getParameters( void ) const {
+const std::vector<const DagNode*>& Distribution::getParameters( void ) const
+{
     
     return parameters;
 }
 
 
 /* Method stub: override for specialized treatment. */
-void Distribution::keep( DagNode* affecter )
+void Distribution::keep( const DagNode* affecter )
 {
     // delegate to specialization
     keepSpecialization(affecter);
@@ -149,7 +163,7 @@ void Distribution::keep( DagNode* affecter )
 
 
 /* Method stub: override for specialized treatment. */
-void Distribution::keepSpecialization( DagNode* affecter )
+void Distribution::keepSpecialization( const DagNode* affecter )
 {
     // do nothing
 }
@@ -189,7 +203,7 @@ void Distribution::removeParameter(const RevBayesCore::DagNode *p)
 
 
 /* Method stub: override for specialized treatment. */
-void Distribution::restore( DagNode *restorer )
+void Distribution::restore( const DagNode *restorer )
 {
     // delegate to specialization
     restoreSpecialization( restorer );
@@ -197,7 +211,7 @@ void Distribution::restore( DagNode *restorer )
 
 
 /* Method stub: override for specialized treatment. */
-void Distribution::restoreSpecialization( DagNode *restorer )
+void Distribution::restoreSpecialization( const DagNode *restorer )
 {
     // do nothing
 }
@@ -250,7 +264,7 @@ void Distribution::swapParameter(const DagNode *old_p, const DagNode *new_p)
 
 
 /* Method stub: override for specialized treatment. */
-void Distribution::touch( DagNode *toucher, bool touchAll )
+void Distribution::touch( const DagNode *toucher, bool touchAll )
 {
     // do some general stuff for all distributions ...
     
@@ -260,7 +274,7 @@ void Distribution::touch( DagNode *toucher, bool touchAll )
 
 
 /* Method stub: override for specialized treatment. */
-void Distribution::touchSpecialization( DagNode *toucher, bool touchAll )
+void Distribution::touchSpecialization( const DagNode *toucher, bool touchAll )
 {
     // do nothing
 }

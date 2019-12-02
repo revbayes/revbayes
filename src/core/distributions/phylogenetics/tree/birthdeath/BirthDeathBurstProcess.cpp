@@ -264,7 +264,7 @@ bool BirthDeathBurstProcess::isBurstSpeciation( size_t index ) const
 /**
  * Keep the current value and reset some internal flags. Nothing to do here.
  */
-void BirthDeathBurstProcess::keepSpecialization(DagNode *affecter)
+void BirthDeathBurstProcess::keepSpecialization(const DagNode *affecter)
 {
     
     if ( affecter == time_burst && dag_node != NULL)
@@ -309,7 +309,7 @@ double BirthDeathBurstProcess::pSurvival(double start, double end) const
  * Restore the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void BirthDeathBurstProcess::restoreSpecialization(DagNode *affecter)
+void BirthDeathBurstProcess::restoreSpecialization(const DagNode *affecter)
 {
     if ( affecter == time_burst )
     {
@@ -512,7 +512,7 @@ void BirthDeathBurstProcess::swapParameterInternal(const DagNode *oldP, const Da
  * Touch the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void BirthDeathBurstProcess::touchSpecialization(DagNode *affecter, bool touchAll)
+void BirthDeathBurstProcess::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     if ( affecter == time_burst )

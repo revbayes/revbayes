@@ -35,7 +35,7 @@ ExtantTreeFunction* ExtantTreeFunction::clone( void ) const
 }
 
 
-void ExtantTreeFunction::keep(DagNode *affecter)
+void ExtantTreeFunction::keep( const DagNode *affecter )
 {
     //delegate to base class
     TypedFunction< Tree >::keep( affecter );
@@ -50,14 +50,14 @@ void ExtantTreeFunction::reInitialized( void )
 }
 
 
-void ExtantTreeFunction::restore(DagNode *restorer)
+void ExtantTreeFunction::restore( const DagNode *restorer )
 {
     //delegate to base class
     TypedFunction< Tree >::restore( restorer );
 }
 
 
-void ExtantTreeFunction::touch(DagNode *toucher)
+void ExtantTreeFunction::touch(const DagNode *toucher)
 {
     
     //delegate to base class

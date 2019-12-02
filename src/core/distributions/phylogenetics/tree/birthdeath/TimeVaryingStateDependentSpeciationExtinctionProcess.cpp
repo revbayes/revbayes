@@ -1695,7 +1695,7 @@ std::vector<double> TimeVaryingStateDependentSpeciationExtinctionProcess::getRoo
 /**
  * Keep the current value and reset some internal flags. Nothing to do here.
  */
-void TimeVaryingStateDependentSpeciationExtinctionProcess::keepSpecialization(DagNode *affecter)
+void TimeVaryingStateDependentSpeciationExtinctionProcess::keepSpecialization(const DagNode *affecter)
 {
     
     if ( affecter == process_age )
@@ -1791,7 +1791,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::redrawValue( void )
  * Restore the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void TimeVaryingStateDependentSpeciationExtinctionProcess::restoreSpecialization(DagNode *affecter)
+void TimeVaryingStateDependentSpeciationExtinctionProcess::restoreSpecialization(const DagNode *affecter)
 {
     
     if ( affecter == process_age )
@@ -2533,7 +2533,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::swapParameterInternal
  * Touch the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void TimeVaryingStateDependentSpeciationExtinctionProcess::touchSpecialization(DagNode *affecter, bool touchAll)
+void TimeVaryingStateDependentSpeciationExtinctionProcess::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     if ( affecter == process_age )

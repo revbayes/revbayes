@@ -255,6 +255,7 @@ std::vector<std::string> Dist_CharacterDependentBirthDeathProcess::getDistributi
     a_names.push_back( "CDSSBDP" );
     a_names.push_back( "CDFBDP" );
     a_names.push_back( "BirthDeathMultiRate" );
+    a_names.push_back( "BirthDeathShift" );
     a_names.push_back( "CDCladoBDP" );
 
     return a_names;
@@ -280,6 +281,10 @@ MethodTable Dist_CharacterDependentBirthDeathProcess::getDistributionMethods( vo
 
     ArgumentRules* avgExtinctionArgRules = new ArgumentRules();
     methods.addFunction( new DistributionMemberFunction<Dist_CharacterDependentBirthDeathProcess, ModelVector<RealPos> >( "averageExtinctionRate", variable, avgExtinctionArgRules   ) );
+    
+    ArgumentRules* num_events_arg_rules = new ArgumentRules();
+    //    parentArgRules->push_back( new ArgumentRule( "node", Natural::getClassTypeSpec(), "The index of the node.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    methods.addFunction( new DistributionMemberFunction<Dist_CharacterDependentBirthDeathProcess, ModelVector<Natural> >( "numberEvents", variable, num_events_arg_rules   ) );
     
     ArgumentRules* timeInStateArgRules = new ArgumentRules();
     methods.addFunction( new DistributionMemberFunction<Dist_CharacterDependentBirthDeathProcess, ModelVector<RealPos> >( "getTimeInState", variable, timeInStateArgRules   ) );

@@ -53,9 +53,9 @@ namespace RevBayesCore {
     protected:
         
         void                                                initializeBitSets();
-        virtual void                                        keepSpecialization(DagNode* affecter);
-        virtual void                                        restoreSpecialization(DagNode *restorer);
-        virtual void                                        touchSpecialization(DagNode *toucher, bool touchAll);
+        virtual void                                        keepSpecialization(const DagNode* affecter);
+        virtual void                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
         
         // Parameter management functions. You need to override both if you have additional parameters
         virtual void                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                    //!< Swap a parameter

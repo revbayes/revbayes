@@ -507,7 +507,7 @@ double PhyloMultiSampleOrnsteinUhlenbeckProcess::getWithinSpeciesVariance(const 
 
 
 
-void PhyloMultiSampleOrnsteinUhlenbeckProcess::keepSpecialization( DagNode* affecter )
+void PhyloMultiSampleOrnsteinUhlenbeckProcess::keepSpecialization( const DagNode* affecter )
 {
     
     // reset the flags
@@ -723,7 +723,7 @@ std::set<size_t> PhyloMultiSampleOrnsteinUhlenbeckProcess::recursiveComputeDista
 
 
 
-void PhyloMultiSampleOrnsteinUhlenbeckProcess::restoreSpecialization( DagNode* affecter )
+void PhyloMultiSampleOrnsteinUhlenbeckProcess::restoreSpecialization( const DagNode* affecter )
 {
     
     // reset the flags
@@ -1066,7 +1066,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcess::swapParameterInternal(const DagNo
 }
 
 
-void PhyloMultiSampleOrnsteinUhlenbeckProcess::touchSpecialization( DagNode* affecter, bool touchAll )
+void PhyloMultiSampleOrnsteinUhlenbeckProcess::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
     
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty

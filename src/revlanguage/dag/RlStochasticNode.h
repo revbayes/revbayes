@@ -36,8 +36,9 @@ namespace RevLanguage {
     
 }
 
-
+#include "RlBoolean.h"
 #include "RealPos.h"
+#include "ModelVector.h"
 #include "RlDagMemberFunction.h"
 
 template<class valueType>
@@ -49,6 +50,10 @@ RevLanguage::StochasticNode<valueType>::StochasticNode( const std::string& n, Re
     ArgumentRules* clampArgRules = new ArgumentRules();
     clampArgRules->push_back( new ArgumentRule("x", rlDistribution->getVariableTypeSpec(), "The observed value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     this->methods.addFunction( new MemberProcedure( "clamp",  RlUtils::Void, clampArgRules) );
+
+    ArgumentRules* integrate_out_arg_ules = new ArgumentRules();
+    integrate_out_arg_ules->push_back( new ArgumentRule("x", RlBoolean::getClassTypeSpec(), "Should we integrate over this variable?", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    this->methods.addFunction( new MemberProcedure( "integrateOut", RlUtils::Void, integrate_out_arg_ules) );
     
     ArgumentRules* redrawArgRules = new ArgumentRules();
     this->methods.addFunction( new MemberProcedure( "redraw", RlUtils::Void, redrawArgRules) );
@@ -58,6 +63,12 @@ RevLanguage::StochasticNode<valueType>::StochasticNode( const std::string& n, Re
     
     ArgumentRules* lnprob_arg_rules = new ArgumentRules();
     this->methods.addFunction( new DagMemberFunction<Real>( "lnProbability", this, lnprob_arg_rules) );
+    
+    ArgumentRules* ln_mixture_prob_arg_rules = new ArgumentRules();
+    this->methods.addFunction( new DagMemberFunction< ModelVector<Real> >( "lnMixtureLikelihoods", this, ln_mixture_prob_arg_rules) );
+    
+    ArgumentRules* mixture_prob_arg_rules = new ArgumentRules();
+    this->methods.addFunction( new DagMemberFunction< ModelVector<Real> >( "MixtureLikelihoods", this, mixture_prob_arg_rules) );
 
     ArgumentRules* setValueArgRules = new ArgumentRules();
     setValueArgRules->push_back( new ArgumentRule("x", rlDistribution->getVariableTypeSpec(), "The value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
@@ -176,13 +187,19 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::StochasticNode<valueT
         
         return NULL;
     }
-    else if (name == "lnProbability")
+    else if (name == "integrateOut")
     {
         
         // we found the corresponding member method
         found = true;
         
-        return RevPtr<RevVariable>( new RevVariable( new Real( this->getLnProbability() ), "" ) );
+        // get the observation
+        bool tf = static_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+                
+        // mark this node to ignore redraws
+        this->setIntegratedOut( tf );
+        
+        return NULL;
     }
     else if (name == "probability")
     {

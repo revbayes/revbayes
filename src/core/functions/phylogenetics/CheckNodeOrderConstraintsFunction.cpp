@@ -50,7 +50,7 @@ CheckNodeOrderConstraintsFunction* CheckNodeOrderConstraintsFunction::clone( voi
 }
 
 
-void CheckNodeOrderConstraintsFunction::keep(DagNode *affecter)
+void CheckNodeOrderConstraintsFunction::keep( const DagNode *affecter)
 {
     //delegate to base class
     TypedFunction< Boolean >::keep( affecter );
@@ -64,14 +64,14 @@ void CheckNodeOrderConstraintsFunction::reInitialized( void )
 }
 
 
-void CheckNodeOrderConstraintsFunction::restore(DagNode *restorer)
+void CheckNodeOrderConstraintsFunction::restore( const DagNode *restorer)
 {
     //delegate to base class
     TypedFunction< Boolean >::restore( restorer );
 }
 
 
-void CheckNodeOrderConstraintsFunction::touch(DagNode *toucher)
+void CheckNodeOrderConstraintsFunction::touch(const DagNode *toucher)
 {
     
     //delegate to base class

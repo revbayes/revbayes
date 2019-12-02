@@ -208,7 +208,7 @@ void PhyloMultivariateBrownianProcess::flagNodes()
     }
 }
 
-void PhyloMultivariateBrownianProcess::touchSpecialization( DagNode *toucher, bool touchAll )
+void PhyloMultivariateBrownianProcess::touchSpecialization( const DagNode *toucher, bool touchAll )
 {
     
     if ( toucher == sigma ) {
@@ -229,11 +229,11 @@ void PhyloMultivariateBrownianProcess::touchSpecialization( DagNode *toucher, bo
 }
 
 
-void PhyloMultivariateBrownianProcess::keepSpecialization( DagNode* affecter ) {
+void PhyloMultivariateBrownianProcess::keepSpecialization( const DagNode* affecter ) {
 }
 
 
-void PhyloMultivariateBrownianProcess::restoreSpecialization( DagNode *restorer ) {
+void PhyloMultivariateBrownianProcess::restoreSpecialization( const DagNode *restorer ) {
     if ( restorer == sigma ) {
         corruptAll();
     }

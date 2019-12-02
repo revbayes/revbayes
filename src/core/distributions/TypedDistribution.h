@@ -46,44 +46,45 @@ namespace RevBayesCore {
         
     public:
         // constructors and destructor
-        virtual                        ~TypedDistribution(void);
+        virtual                                        ~TypedDistribution(void);
         
 //        typedef variableType            rbValueType;
 
         
         // public methods
-        variableType&                   getValue(void);                                                             //!< Get the current value (non-const)
-        const variableType&             getValue(void) const;                                                       //!< Get the current value
-        StochasticNode<variableType>*   getStochasticNode(void);                                                    //!< Get the stochastic node holding this distribution
-        virtual void                    setStochasticNode(StochasticNode<variableType> *n);                         //!< Set the stochastic node holding this distribution
+        virtual const RevBayesCore::RbVector<variableType>&         getParameterValues(void) const;
+        variableType&                                               getValue(void);                                                             //!< Get the current value (non-const)
+        const variableType&                                         getValue(void) const;                                                       //!< Get the current value
+        StochasticNode<variableType>*                               getStochasticNode(void);                                                    //!< Get the stochastic node holding this distribution
+        virtual void                                                setStochasticNode(StochasticNode<variableType> *n);                         //!< Set the stochastic node holding this distribution
         
         // virtual methods
-        virtual void                    setValue(variableType *v, bool f=false);                                    //!< Set the current value, e.g. attach an observation (clamp)
+        virtual void                                                setValue(variableType *v, bool f=false);                                    //!< Set the current value, e.g. attach an observation (clamp)
         
         // pure virtual public methods
-        virtual TypedDistribution*      clone(void) const = 0;                                                      //!< Clone the distribution
-        virtual double                  computeLnProbability(void) = 0;                                             //!< Clone the ln probability density
-        virtual void                    redrawValue(void) = 0;                                                      //!< Draw a new random value from the distribution
+        virtual TypedDistribution*                                  clone(void) const = 0;                                                      //!< Clone the distribution
+        virtual double                                              computeLnProbability(void) = 0;                                             //!< Clone the ln probability density
+        virtual void                                                redrawValue(void) = 0;                                                      //!< Draw a new random value from the distribution
         
     protected:
         TypedDistribution(variableType *v);
         TypedDistribution(const TypedDistribution &d);
         
         // overloaded operators
-        TypedDistribution&              operator=(const TypedDistribution &d); 
+        TypedDistribution&                                          operator=(const TypedDistribution &d);
 
-        virtual void                    swapParameterInternal(const DagNode *oldP, const DagNode *newP) = 0;        //!< Exchange the parameter
+        virtual void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP) = 0;        //!< Exchange the parameter
 
         
         // inheritable attributes
-        StochasticNode<variableType>*   dag_node;                                                                   //!< The stochastic node holding this distribution. This is needed for delegated calls to the DAG, such as getAffected(), ...
-        variableType*                   value;
+        StochasticNode<variableType>*                               dag_node;                                                                   //!< The stochastic node holding this distribution. This is needed for delegated calls to the DAG, such as getAffected(), ...
+        variableType*                                               value;
         
     };
     
     // Global functions using the class
     template <class variableType>
-    std::ostream&               operator<<(std::ostream& o, const TypedDistribution<variableType>& x);                                //!< Overloaded output operator
+    std::ostream&                                                   operator<<(std::ostream& o, const TypedDistribution<variableType>& x);                                //!< Overloaded output operator
     
 }
 
@@ -91,6 +92,7 @@ namespace RevBayesCore {
 #include "Cloner.h"
 #include "Cloneable.h"
 #include "IsDerivedFrom.h"
+#include "RbException.h"
 
 
 template <class variableType>
@@ -136,6 +138,12 @@ RevBayesCore::TypedDistribution<variableType>& RevBayesCore::TypedDistribution<v
     return *this;
 }
 
+
+template <class variableType>
+const RevBayesCore::RbVector<variableType>& RevBayesCore::TypedDistribution<variableType>::getParameterValues(void) const
+{
+    throw RbException("Cannot access mixture values of non-mixture distribution.");
+}
 
 template <class variableType>
 variableType& RevBayesCore::TypedDistribution<variableType>::getValue(void)

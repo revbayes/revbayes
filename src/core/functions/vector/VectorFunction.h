@@ -39,9 +39,9 @@ namespace RevBayesCore {
         // public member functions
         VectorFunction*                                     clone(void) const;                                                          //!< Create an independent clone
         const std::vector<const TypedDagNode<valueType>* >& getVectorParameters(void) const;
-        void                                                keep(DagNode* affecter);
-        void                                                restore(DagNode *restorer);   
-        void                                                touch(DagNode *toucher );
+        void                                                keep(const DagNode* affecter);
+        void                                                restore(const DagNode *restorer);
+        void                                                touch(const DagNode *toucher );
         void                                                update(void);
         
     protected:
@@ -99,7 +99,7 @@ const std::vector<const RevBayesCore::TypedDagNode<valueType>* >& RevBayesCore::
 }
 
 template <class valueType>
-void RevBayesCore::VectorFunction<valueType>::keep( DagNode *toucher )
+void RevBayesCore::VectorFunction<valueType>::keep( const DagNode *toucher )
 {
     TypedFunction< RbVector<valueType> >::keep( toucher );
     this->dag_node->clearTouchedElementIndices();
@@ -107,7 +107,7 @@ void RevBayesCore::VectorFunction<valueType>::keep( DagNode *toucher )
 
 
 template <class valueType>
-void RevBayesCore::VectorFunction<valueType>::restore( DagNode *toucher )
+void RevBayesCore::VectorFunction<valueType>::restore( const DagNode *toucher )
 {
     TypedFunction< RbVector<valueType> >::restore( toucher );
     
@@ -171,7 +171,7 @@ void RevBayesCore::VectorFunction<valueType>::swapParameterInternal(const DagNod
 
 
 template <class valueType>
-void RevBayesCore::VectorFunction<valueType>::touch( DagNode *toucher )
+void RevBayesCore::VectorFunction<valueType>::touch( const DagNode *toucher )
 {
     
     //delegate to base class

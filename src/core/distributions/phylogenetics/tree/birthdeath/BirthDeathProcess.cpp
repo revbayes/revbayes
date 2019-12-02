@@ -37,10 +37,11 @@ using namespace RevBayesCore;
  * \param[in]    tn        Taxon names used during initialization.
  * \param[in]    c         Clade constraints.
  */
-BirthDeathProcess::BirthDeathProcess(const TypedDagNode<double> *ra, const TypedDagNode<double> *rh,
+BirthDeathProcess::BirthDeathProcess(const TypedDagNode<double> *ra, const TypedDagNode<double> *rh, const TypedDagNode<double> *mp,
                                      const std::string& ss, const std::vector<Clade> &ic, const std::string &cdt,
                                      const std::vector<Taxon> &tn) : AbstractBirthDeathProcess( ra, cdt, tn ),
     rho( rh ),
+    sampling_mixture_proportion( mp ),
     sampling_strategy( ss ),
     incomplete_clades( ic )
 {
@@ -156,6 +157,22 @@ double BirthDeathProcess::computeLnProbabilityTimes( void ) const
 //    }
     
     return ln_prob_times;
+}
+
+
+size_t BirthDeathProcess::getNumberOfTaxaAtPresent( void ) const
+{
+    
+    size_t num_taxa_present = value->getNumberOfTips();
+    
+    // now iterate over the vector of missing species per clade
+    for (size_t i=0; i<incomplete_clades.size(); ++i)
+    {
+        int m = incomplete_clades[i].getNumberMissingTaxa();
+        num_taxa_present += m;
+    }
+    
+    return num_taxa_present;
 }
 
 
@@ -366,7 +383,7 @@ double BirthDeathProcess::pSurvival(double start, double end) const
  * Restore the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void BirthDeathProcess::restoreSpecialization(DagNode *affecter)
+void BirthDeathProcess::restoreSpecialization(const DagNode *affecter)
 {
     
     AbstractRootedTreeDistribution::restoreSpecialization(affecter);
@@ -413,7 +430,7 @@ void BirthDeathProcess::swapParameterInternal(const DagNode *oldP, const DagNode
  * Touch the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void BirthDeathProcess::touchSpecialization(DagNode *affecter, bool touchAll)
+void BirthDeathProcess::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     AbstractRootedTreeDistribution::touchSpecialization(affecter, touchAll);
