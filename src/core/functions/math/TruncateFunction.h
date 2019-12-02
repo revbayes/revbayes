@@ -1,17 +1,10 @@
 /**
  * @file
- * This file contains the declaration of the Truncate functions, f(x) = exp( a(x) ).
+ * This file contains the declaration of the Truncate functions.
  *
  * @brief Declaration of the Truncate functions.
+ * The Truncate Functions removes all the digits after the decimal to make the number and integer.
  *
- * (c) Copyright 2009-
- * @date Last modified: $Date: 2012-06-20 22:57:09 +0200 (Wed, 20 Jun 2012) $
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- * @version 1.0
- * @since 2012-08-13, version 1.0
- *
- * $Id: RandomNumberFactory.h 1643 2012-06-20 20:57:09Z hoehna $
  */
 
 #ifndef TruncateFunction_H

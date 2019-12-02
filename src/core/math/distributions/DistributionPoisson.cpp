@@ -1,18 +1,4 @@
-/**
- * @file DistributionPoisson
- * This file contains the functions of the poisson distribution.
- *
- * @brief Implementation of the poisson distribution.
- *
- * (c) Copyright 2009- under GPL version 3
- * @date Last modified: $Date$
- * @author The RevBayes core development team
- * @license GPL version 3
- * @version 1.0
- * @since 2011-03-17, version 1.0
- *
- * $Id$
- */
+
 
 #include <cmath>
 #include <sstream> // IWYU pragma: keep
@@ -28,7 +14,18 @@ namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 
-
+/*!
+ *
+ *
+ * \brief Poisson probability.
+ * This function calculates the probability for a
+ * Poisson distribution.
+ *
+ * \param lambda is the rate parameter of the Poisson.
+ * \param x is the value of the random variable.
+ * \return Returns the probability.
+ * \throws Does not throw an error.
+ */
 double RbStatistics::Poisson::pdf(double lambda, int x) {
     
     if (x <= 20) {

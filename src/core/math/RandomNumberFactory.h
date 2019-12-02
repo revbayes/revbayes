@@ -6,16 +6,6 @@
  * class has two seeds it manages: one is a global seed and the other is
  * is a so called local seed.
  *
- * @brief Declaration of RandomNumberFactory
- *
- * (c) Copyright 2009-
- * @date Last modified: $Date$
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- * @version 1.0
- * @since 2009-11-20, version 1.0
- *
- * $Id$
  */
 
 #ifndef RandomNumberFactory_H

@@ -1,20 +1,13 @@
 /**
- * @file
- * This file contains the declaration of the deterministic variable class for Vectors.
- * This class is derived from the deterministic node and each instance will represent a deterministic variable
- * computing the Vector of its parameters.
+ * @brief Declaration of the LogicalAndFunction.
  *
- * @brief Declaration of the deterministic variable for Vectors.
+ * This function takes the logical AND of two booleans
+ * T && T -> T
+ * T && F -> F
+ * F && T -> F
+ * F && F -> F
  *
- * (c) Copyright 2009- under GPL version 3
- * @date Last modified: $Date$
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- * @version 1.0
- * @since 2012-07-06, version 1.0
- * @interface TypedDagNode
  *
- * $Id$
  */
 
 

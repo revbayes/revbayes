@@ -15,11 +15,6 @@ namespace RevLanguage {
      * the variables/parameters of the function and creates the internal MaxFunction object.
      * Please read the MaxFunction.h for more info.
      *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2014-07-27, version 1.0
-     *
      */
     class Func_max :  public TypedFunction<Real> {
         
