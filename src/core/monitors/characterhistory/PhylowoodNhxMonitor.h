@@ -1,0 +1,81 @@
+#ifndef PhylowoodNhxMonitor_H
+#define PhylowoodNhxMonitor_H
+
+#include "Monitor.h"
+#include "BranchHistory.h"
+#include "StochasticNode.h"
+#include "TypedDagNode.h"
+#include "Tree.h"
+
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
+
+namespace RevBayesCore {
+    
+    class PhylowoodNhxMonitor : public Monitor {
+        
+    public:
+        // Constructors and Destructors
+        PhylowoodNhxMonitor(TypedDagNode<Tree> *t, std::vector< StochasticNode< BranchHistory >* > bh, std::vector<std::vector<double> > gc, unsigned long g, unsigned long mg, int burn, const std::string &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sr=true);
+        
+        // new PhylowoodNhxMonitor( tau, bh_vector_stochastic, 10, filepath + "rb.tree_chars.txt", "\t"));
+        
+        PhylowoodNhxMonitor(const PhylowoodNhxMonitor& f);
+        
+        // basic methods
+        PhylowoodNhxMonitor*          clone(void) const;                                                  //!< Clone the object
+        
+        // Monitor functions
+        void                                monitor(unsigned long gen);                                                  //!< Monitor at generation gen
+        void                                swapNode(DagNode *oldN, DagNode *newN);
+        
+        // FileMonitor functions
+        void                                closeStream(void);                                                  //!< Close stream after finish writing
+        void                                openStream(bool reopen);                                            //!< Open the stream for writing
+        void                                printHeader(void);                                                  //!< Print header
+        std::vector<unsigned int>           getChildCharacterCounts(size_t idx);
+        std::vector<unsigned int>           getParentCharacterCounts(size_t idx);
+        long                                getNumSamples(void);
+        
+    private:
+        std::string                         buildExtendedNewick();
+        std::string                         buildExtendedNewick(TopologyNode* n);
+        std::string                         buildCharacterHistoryString(TopologyNode* n, std::string brEnd="child");
+        void updateCharacterCounts(TopologyNode* n, std::string brEnd="child");
+        std::string                         buildNhxString(void);
+        
+        // the stream to print
+        std::fstream                        outStream;
+        
+        // parameters
+        TypedDagNode<Tree>*                 tree;
+        std::vector<StochasticNode<BranchHistory>* > branchHistories;
+        std::set<DagNode *>                 nodeVariables;
+        std::vector<std::vector<double> > geographicCoordinates;
+        
+        std::vector<std::vector<unsigned int> > parentCharacterCounts;
+        std::vector<std::vector<unsigned int> > childCharacterCounts;
+        
+        size_t numHistories;
+        size_t numCharacters;
+        
+        std::string                         filename;
+        std::string                         separator;
+        bool                                posterior;
+        bool                                prior;
+        bool                                likelihood;
+        bool                                append;
+        bool                                showMetadata;
+        bool                                showRates;
+        long                                numSamples;
+        unsigned long                       maxGen;
+        long                                burn;
+        
+    };
+    
+}
+
+
+#endif

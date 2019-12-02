@@ -1,0 +1,25 @@
+################################################################################
+#
+# RevBayes Validation Test: Declaring a clade with taxon objects, or with their names
+# 
+#            
+#
+# authors: Bastien Boussau
+#
+################################################################################
+
+#######################
+# Reading in the Data #
+#######################
+
+### Read in sequence data for both genes
+
+data <- readDiscreteCharacterData("data/primates_cytb.nex")
+
+### Test creation and printing of clades
+clade_1 = clade(data.names()[1], data.names()[2], missing= 0)
+print(clade_1)
+# We should get   {Callicebus_donacophilus,Saimiri_sciureus}
+clade_1 = clade(data.names()[1].getSpeciesName(), data.names()[2].getSpeciesName(), missing= 0)
+print(clade_1)
+# We should get   {Callicebus_donacophilus,Saimiri_sciureus}

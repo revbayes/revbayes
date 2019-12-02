@@ -1,0 +1,156 @@
+################################################################################
+#
+# RevBayes Example: Bayesian inference of phylogeny using a GTR+Gamma+Inv
+#                   substitution model for a codon specific substitution models
+#
+# authors: Michael Landis, Sebastian Hoehna, Tracy A. Heath and Brian R. Moore
+#
+################################################################################
+
+
+seed(12345)
+
+#######################
+# Reading in the Data #
+#######################
+
+# read in the character data
+data_cox2 <- readDiscreteCharacterData("data/primates_and_galeopterus_cox2.nex")
+data_cytb <- readDiscreteCharacterData("data/primates_and_galeopterus_cytb.nex")
+
+
+# partition for 1st and 2nd codon position
+data[1] <- data_cox2
+data[1].setCodonPartition( v(1,2) )
+
+# partition for 3rd codon position
+data[2] <- data_cox2
+data[2].setCodonPartition( 3 )
+
+
+# partition for 1st and 2nd codon position
+data[3] <- data_cytb
+data[3].setCodonPartition( v(1,2) )
+
+# partition for 3rd codon position
+data[4] <- data_cytb
+data[4].setCodonPartition( 3 )
+
+n_data_subsets <- data.size()
+
+
+# Get some useful variables from the data. We need these later on.
+n_species <- data[1].ntaxa()
+n_branches <- 2 * n_species - 3
+taxa <- data[1].taxa()
+
+mvi = 0
+mni = 0
+
+##################################
+#      Substitution Model        #
+#   Loop over each data subset   #
+##################################
+  
+for (i in 1:n_data_subsets) {
+
+    # exchangeability rates for partition i
+    er_prior[i] <- v(1,1,1,1,1,1)
+    er[i] ~ dnDirichlet(er_prior[i])
+    moves[++mvi] = mvSimplexElementScale(er[i], alpha=10, tune=true, weight=3) 
+
+    # stationary frequencies for partition i
+    pi_prior[i] <- v(1,1,1,1)
+    pi[i] ~ dnDirichlet(pi_prior[i])
+    moves[++mvi] = mvSimplexElementScale(pi[i], alpha=10, tune=true, weight=2) 
+
+    # rate matrix for partition i
+    Q[i] := fnGTR(er[i],pi[i]) 
+  
+    # +Gamma for partition i
+    alpha_prior_mean[i] <- 5.0
+    alpha_prior_sd[i] <- 0.587405
+    alpha[i] ~ dnLognormal( alpha_prior_mean[i], alpha_prior_sd[i] )
+    gamma_rates[i] := fnDiscretizeGamma( alpha[i], alpha[i], 4, false )
+
+    # add moves for the alpha parameter
+    moves[++mvi] = mvScale(alpha[i],weight=2)
+
+    # the probability of a site being invariable
+    pinvar[i] ~ dnBeta(1,1)
+    moves[++mvi] = mvScale(pinvar[i], lambda=0.1, tune=true, weight=2.0)
+    moves[++mvi] = mvSlide(pinvar[i], delta=0.1, tune=true, weight=2.0)
+
+}
+
+
+##############
+# Tree model #
+##############
+
+out_group = clade("Galeopterus_variegatus")
+# Prior distribution on the tree topology
+topology ~ dnUniformTopology(taxa, outgroup=out_group)
+moves[++mvi] = mvNNI(topology, weight=5.0)
+moves[++mvi] = mvSPR(topology, weight=1.0)
+
+# Branch length prior
+for (i in 1:n_branches) {
+    bl[i] ~ dnExponential(10.0)
+    moves[++mvi] = mvScale(bl[i])
+}
+
+TL := sum(bl)
+
+psi := treeAssembly(topology, bl)
+
+
+##############################
+# Partition rate multipliers #
+##############################
+
+# specify a rate multiplier for each partition
+part_rate_mult ~ dnDirichlet( rep(1.0, n_data_subsets) )
+moves[++mvi] = mvBetaSimplex(part_rate_mult, alpha=1.0, tune=true, weight=n_data_subsets)
+moves[++mvi] = mvDirichletSimplex(part_rate_mult, alpha=1.0, tune=true, weight=2.0)
+
+# note that we use here a vector multiplication, 
+# i.e., multiplying each element of part_rate_mult by n_data_subsets
+part_rate := part_rate_mult * n_data_subsets
+
+
+###################
+# PhyloCTMC Model #
+###################
+
+for (i in 1:n_data_subsets) {
+    phyloSeq[i] ~ dnPhyloCTMC(tree=psi, Q=Q[i], branchRates=part_rate[i], siteRates=gamma_rates[i], pInv=pinvar[i], type="DNA")
+    phyloSeq[i].clamp(data[i])
+
+}
+
+
+############
+# Analysis #
+############
+
+mymodel = model(psi)
+
+# add monitors
+monitors[++mni] = mnModel(filename="output/PS_codon.log",printgen=10)
+monitors[++mni] = mnFile(psi, filename="output/PS_codon.trees", printgen=100)
+monitors[++mni] = mnScreen(TL, printgen=1000)
+
+# run the analysis
+mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single", nruns=2)
+mymcmc.run(generations=500)
+
+# summarize output
+treetrace = readTreeTrace("output/PS_codon.trees", treetype="non-clock")
+#treetrace.summarize()
+
+map_tree = mapTree(treetrace,"output/PS_codon_map.tre")
+
+
+# you may want to quit RevBayes now
+q()

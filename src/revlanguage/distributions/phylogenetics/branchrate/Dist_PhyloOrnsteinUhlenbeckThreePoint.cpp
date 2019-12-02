@@ -1,0 +1,253 @@
+#include "Dist_PhyloOrnsteinUhlenbeckThreePoint.h"
+#include "PhyloOrnsteinUhlenbeckThreePoint.h"
+#include "OptionRule.h"
+#include "RevNullObject.h"
+#include "RlBoolean.h"
+#include "RlString.h"
+#include "RlTree.h"
+
+using namespace RevLanguage;
+
+
+Dist_PhyloOrnsteinUhlenbeckThreePoint::Dist_PhyloOrnsteinUhlenbeckThreePoint() : TypedDistribution< ContinuousCharacterData >()
+{
+    
+}
+
+
+Dist_PhyloOrnsteinUhlenbeckThreePoint::~Dist_PhyloOrnsteinUhlenbeckThreePoint()
+{
+    
+}
+
+
+
+Dist_PhyloOrnsteinUhlenbeckThreePoint* Dist_PhyloOrnsteinUhlenbeckThreePoint::clone( void ) const
+{
+    
+    return new Dist_PhyloOrnsteinUhlenbeckThreePoint(*this);
+}
+
+
+RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_PhyloOrnsteinUhlenbeckThreePoint::createDistribution( void ) const
+{
+    
+    // get the parameters
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
+    size_t n = size_t( static_cast<const Natural &>( n_sites->getRevObject() ).getValue() );
+    size_t n_nodes = tau->getValue().getNumberOfNodes();
+    
+    RevBayesCore::PhyloOrnsteinUhlenbeckThreePoint *dist = new RevBayesCore::PhyloOrnsteinUhlenbeckThreePoint(tau, n);
+    
+    // set alpha
+    if ( alpha->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
+    {
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* a = static_cast<const ModelVector<RealPos> &>( alpha->getRevObject() ).getDagNode();
+        dist->setAlpha( a );
+    }
+    else
+    {
+        RevBayesCore::TypedDagNode< double >* a = static_cast<const RealPos &>( alpha->getRevObject() ).getDagNode();
+        dist->setAlpha( a );
+    }
+    
+    // set theta
+    if ( theta->getRevObject().isType( ModelVector<Real>::getClassTypeSpec() ) )
+    {
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* t = static_cast<const ModelVector<Real> &>( theta->getRevObject() ).getDagNode();
+        dist->setTheta( t );
+    }
+    else
+    {
+        RevBayesCore::TypedDagNode< double >* t = static_cast<const Real &>( theta->getRevObject() ).getDagNode();
+        dist->setTheta( t );
+    }
+    
+    // set sigma
+    if ( sigma->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
+    {
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* s = static_cast<const ModelVector<RealPos> &>( sigma->getRevObject() ).getDagNode();
+        dist->setSigma( s );
+    }
+    else
+    {
+        RevBayesCore::TypedDagNode< double >* s = static_cast<const RealPos &>( sigma->getRevObject() ).getDagNode();
+        dist->setSigma( s );
+    }
+    
+    
+    // set the root states
+    //    if ( rootStates->getRevObject().isType( ModelVector<Real>::getClassTypeSpec() ) )
+    //    {
+    //        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* rs = static_cast<const ModelVector<Real> &>( rootStates->getRevObject() ).getDagNode();
+    //        dist->setRootState( rs );
+    //    }
+    //    else
+    //    {
+    RevBayesCore::TypedDagNode< double >* rs = static_cast<const Real &>( root_states->getRevObject() ).getDagNode();
+    dist->setRootState( rs );
+    //    }
+    
+    return dist;
+}
+
+
+
+/* Get Rev type of object */
+const std::string& Dist_PhyloOrnsteinUhlenbeckThreePoint::getClassType(void)
+{
+    
+    static std::string rev_type = "Dist_PhyloOrnsteinUhlenbeckThreePoint";
+    
+    return rev_type;
+}
+
+/* Get class type spec describing type of object */
+const TypeSpec& Dist_PhyloOrnsteinUhlenbeckThreePoint::getClassTypeSpec(void)
+{
+    
+    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Distribution::getClassTypeSpec() ) );
+    
+    return rev_type_spec;
+}
+
+
+/**
+ * Get the Rev name for the distribution.
+ * This name is used for the constructor and the distribution functions,
+ * such as the density and random value function
+ *
+ * \return Rev name of constructor function.
+ */
+std::string Dist_PhyloOrnsteinUhlenbeckThreePoint::getDistributionFunctionName( void ) const
+{
+    // create a distribution name variable that is the same for all instance of this class
+    std::string d_name = "PhyloOrnsteinUhlenbeckThreePoint";
+    
+    return d_name;
+}
+
+
+/** Return member rules (no members) */
+const MemberRules& Dist_PhyloOrnsteinUhlenbeckThreePoint::getParameterRules(void) const
+{
+    
+    static MemberRules dist_member_rules;
+    static bool rules_set = false;
+    
+    if ( !rules_set )
+    {
+        dist_member_rules.push_back( new ArgumentRule( "tree" , Tree::getClassTypeSpec(), "The tree along which the character evolves.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        
+        std::vector<TypeSpec> alphaTypes;
+        alphaTypes.push_back( RealPos::getClassTypeSpec() );
+        alphaTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
+        dist_member_rules.push_back( new ArgumentRule( "alpha" , alphaTypes, "The rate of attraction/selection (per branch).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
+        
+        std::vector<TypeSpec> thetaTypes;
+        thetaTypes.push_back( Real::getClassTypeSpec() );
+        thetaTypes.push_back( ModelVector<Real>::getClassTypeSpec() );
+        dist_member_rules.push_back( new ArgumentRule( "theta" , thetaTypes, "The optimum value (per branch).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
+        
+        std::vector<TypeSpec> sigmaTypes;
+        sigmaTypes.push_back( RealPos::getClassTypeSpec() );
+        sigmaTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
+        dist_member_rules.push_back( new ArgumentRule( "sigma" , sigmaTypes, "The rate of random drift (per branch).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
+        
+        std::vector<TypeSpec> rootStateTypes;
+        rootStateTypes.push_back( Real::getClassTypeSpec() );
+        rootStateTypes.push_back( ModelVector<Real>::getClassTypeSpec() );
+        Real *defaultRootStates = new Real(0.0);
+        dist_member_rules.push_back( new ArgumentRule( "rootStates" , rootStateTypes, "The vector of root states.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, defaultRootStates ) );
+        
+        dist_member_rules.push_back( new ArgumentRule( "nSites"         ,  Natural::getClassTypeSpec(), "The number of sites which is used for the initialized (random draw) from this distribution.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(10) ) );
+        
+        rules_set = true;
+    }
+    
+    return dist_member_rules;
+}
+
+
+const TypeSpec& Dist_PhyloOrnsteinUhlenbeckThreePoint::getTypeSpec( void ) const
+{
+    
+    static TypeSpec ts = getClassTypeSpec();
+    
+    return ts;
+}
+
+
+/** Print value for user */
+void Dist_PhyloOrnsteinUhlenbeckThreePoint::printValue(std::ostream& o) const
+{
+    
+    o << "PhyloOrnsteinUhlenbeckProcess(tree=";
+    if ( tree != NULL )
+    {
+        o << tree->getName();
+    }
+    else
+    {
+        o << "?";
+    }
+    o << ", sigma=";
+    if ( sigma != NULL )
+    {
+        o << sigma->getName();
+    }
+    else
+    {
+        o << "?";
+    }
+    
+    o << ", nSites=";
+    if ( n_sites != NULL )
+    {
+        o << n_sites->getName();
+    }
+    else
+    {
+        o << "?";
+    }
+    o << ")";
+    
+}
+
+
+/** Set a member variable */
+void Dist_PhyloOrnsteinUhlenbeckThreePoint::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+{
+    
+    if ( name == "tree" )
+    {
+        tree = var;
+    }
+    else if ( name == "alpha" )
+    {
+        alpha = var;
+    }
+    else if ( name == "theta" )
+    {
+        theta = var;
+    }
+    else if ( name == "sigma" )
+    {
+        sigma = var;
+    }
+    else if ( name == "rootStates" )
+    {
+        root_states = var;
+    }
+    else if ( name == "nSites" )
+    {
+        n_sites = var;
+    }
+    else
+    {
+        Distribution::setConstParameter(name, var);
+    }
+    
+}
+
+

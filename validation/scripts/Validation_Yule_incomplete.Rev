@@ -1,0 +1,86 @@
+################################################################################
+#
+# RevBayes Validation Test: Constant-rate pure-birth (Yule) process
+# 
+# Model: A constant-rate pure-birth process with uniform taxon sampling. 
+#            
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+#######################
+# Reading in the Data #
+#######################
+
+###### This just defines a single model for all sites #######
+
+### Read in sequence data for both genes
+
+
+tree <- readTrees( "data/primates.tree" )[1]
+
+# Get some useful variables from the data. We need these later on.
+taxa <- tree.taxa()
+
+# set my move index
+mi = 0
+
+
+
+
+##############
+# Tree model #
+##############
+
+# Specify a prior on the diversification and turnover rate
+diversification ~ dnExp(1)
+turnover <- 0
+
+# now transform the diversification and turnover rates into speciation and extinction rates
+speciation := diversification + turnover
+extinction := turnover
+
+# specify a prior on the root age (our informed guess is about 75-80 mya)
+root <- tree.rootAge()
+
+sampling_fraction <- 23 / 450 # 23 out of the ~ 450 primate species
+
+# create some moves that change the stochastic variables
+# all moves are sliding proposals but you could use scaling proposals for the rates too
+moves[++mi] = mvScale(diversification,lambda=1,tune=true,weight=1)
+
+# construct a variable for the tree drawn from a birth death process
+psi ~ dnBDP(lambda=speciation, mu=extinction, rootAge=abs(root), rho=sampling_fraction, taxa=taxa, condition="nTaxa" )
+psi.clamp( tree )
+
+
+
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model( root )
+
+
+
+
+
+
+monitors[1] = mnModel(filename="output/primates_BDP.log",printgen=10, separator = TAB)
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+
+validation = validationAnalysis( mymcmc, 1000 )
+validation.burnin(generations=5000,tuningInterval=250)
+validation.run(generations=10000)
+validation.summarize()
+
+
+# you may want to quit RevBayes now
+q()
+

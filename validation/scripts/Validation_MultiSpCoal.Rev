@@ -1,0 +1,73 @@
+################################################################################
+#
+# RevBayes Validation Test: Multispecies coalescent process
+#
+# Model: Multispecies coalescent with constant effective population size.
+#        We test whether we can estimate the population size, given fixed species tree and gene trees.
+#
+#
+# authors: Bastien Boussau
+#
+################################################################################
+
+#######################
+# Reading in the Data #
+#######################
+
+### Read in an ultrametric tree
+
+primate_tree <- readTrees( "data/primates.tree" )[1]
+
+
+####################
+# Useful variables #
+####################
+
+num_loci = 20
+
+# Get some useful variables from the data. We need these later on.
+n_species <- primate_tree.ntips()
+taxa <- primate_tree.taxa()
+n_branches <- 2 * n_species - 1 # number of branches in a rooted tree
+
+
+moves = VectorMoves()
+monitors = VectorMonitors()
+
+
+###################
+# Gene-Tree model #
+###################
+
+# We assume a single effective population size for the entire species tree.
+Ne ~ dnGamma(shape=1.0,rate=1.0)
+moves.append(mvScale(Ne,1,true,1.0) )
+
+for (i in 1:num_loci) {
+   # The gene trees from the multispecies coalescent process
+   # The taxon names in the gene trees are the same as in the species tree
+   geneTree[i] ~ dnMultiSpeciesCoalescent(speciesTree=primate_tree, Ne=Ne, taxa=taxa)
+   geneTree[i].clamp(geneTree[i])
+}
+
+
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model( primate_tree )
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+
+validation = validationAnalysis( mymcmc, 100 )
+validation.burnin(generations=500,tuningInterval=25)
+validation.run(generations=1000)
+validation.summarize()
+
+
+# you may want to quit RevBayes now
+q()

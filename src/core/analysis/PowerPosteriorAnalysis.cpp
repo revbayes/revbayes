@@ -1,0 +1,382 @@
+#include "DagNode.h"
+#include "VariableMonitor.h"
+#include "MonteCarloSampler.h"
+#include "MoveSchedule.h"
+#include "PowerPosteriorAnalysis.h"
+#include "ProgressBar.h"
+#include "RandomMoveSchedule.h"
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
+#include "RbConstants.h"
+#include "RbException.h"
+#include "RbFileManager.h"
+#include "RbOptions.h"
+#include <cmath>
+#include <typeinfo>
+#include "SequentialMoveSchedule.h"
+
+
+#ifdef RB_MPI
+#include <mpi.h>
+#endif
+
+using namespace RevBayesCore;
+
+PowerPosteriorAnalysis::PowerPosteriorAnalysis(MonteCarloSampler *m, const std::string &fn, size_t k) : Cloneable( ), Parallelizable(),
+    filename( fn ),
+    powers(),
+    sampler( m ),
+    sampleFreq( 100 ),
+    processors_per_likelihood( k )
+{
+    
+    initMPI();
+}
+
+
+PowerPosteriorAnalysis::PowerPosteriorAnalysis(const PowerPosteriorAnalysis &a) : Cloneable( a ), Parallelizable( a ),
+    filename( a.filename ),
+    powers( a.powers ),
+    sampler( a.sampler->clone() ),
+    sampleFreq( a.sampleFreq ),
+    processors_per_likelihood( a.processors_per_likelihood )
+{
+    
+}
+
+
+PowerPosteriorAnalysis::~PowerPosteriorAnalysis(void)
+{
+    delete sampler;
+}
+
+
+/**
+ * Overloaded assignment operator.
+ * We need to keep track of the MonteCarloSamplers
+ */
+PowerPosteriorAnalysis& PowerPosteriorAnalysis::operator=(const PowerPosteriorAnalysis &a)
+{
+    Parallelizable::operator=( a );
+    
+    if ( this != &a )
+    {
+        
+        // free the sampler
+        delete sampler;
+        
+        filename                        = a.filename;
+        powers                          = a.powers;
+        sampler                         = a.sampler->clone();
+        sampleFreq                      = a.sampleFreq;
+        processors_per_likelihood       = a.processors_per_likelihood;
+        
+    }
+    
+    return *this;
+}
+
+
+/** Run burnin and autotune */
+void PowerPosteriorAnalysis::burnin(size_t generations, size_t tuningInterval)
+{
+    
+//    initMPI();
+    
+    // Initialize objects needed by chain
+    sampler->initializeSampler();
+    
+    
+    // reset the counters for the move schedules
+    sampler->reset();
+    
+    // start the progress bar
+    ProgressBar progress = ProgressBar(generations, 0);
+    
+    if ( process_active == true )
+    {
+        // Let user know what we are doing
+        std::stringstream ss;
+        ss << "\n";
+        ss << "Running burn-in phase of Power Posterior sampler for " << generations << " iterations.\n";
+        ss << sampler->getStrategyDescription();
+        std::cout << ss.str() << std::endl;
+    
+        // Print progress bar (68 characters wide)
+        progress.start();
+    }
+    
+    
+    // Run the chain
+    for (size_t k=1; k<=generations; k++)
+    {
+        if ( process_active == true )
+        {
+            progress.update( k );
+        }
+        
+        sampler->nextCycle(false);
+            
+        // check for autotuning
+        if ( k % tuningInterval == 0 && k != generations )
+        {
+                
+            sampler->tune();
+            
+        }
+        
+    }
+    
+    
+    if ( process_active == true )
+    {
+        progress.finish();
+    }
+    
+}
+
+
+
+PowerPosteriorAnalysis* PowerPosteriorAnalysis::clone( void ) const
+{
+    
+    return new PowerPosteriorAnalysis( *this );
+}
+
+
+void PowerPosteriorAnalysis::initMPI( void )
+{
+    
+    
+    size_t active_proc = size_t( floor( pid   / double(processors_per_likelihood)) ) * processors_per_likelihood;
+    sampler->setActivePID( active_proc, processors_per_likelihood );
+    
+    
+#ifdef RB_MPI
+    // wait until all processes are complete
+    MPI_Barrier(MPI_COMM_WORLD);
+#endif
+    
+}
+
+
+void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t pre_burnin_generations, size_t tuning_interval)
+{
+
+//    initMPI();
+    
+    if( gen < sampleFreq )
+    {
+        throw(RbException("Trying to run power posterior analysis for fewer generations than sampleFreq, no samples will be stored"));
+    }
+
+    // disable the screen monitor(s) if any
+    sampler->disableScreenMonitor(true, 0);
+    
+    
+    // print some information to the screen but only if we are the active process
+    if ( process_active == true )
+    {
+        std::cout << std::endl;
+        std::cout << "Running power posterior analysis ..." << std::endl;
+    }
+    
+    // compute which block of the data this process needs to compute
+//    size_t stone_block_start = size_t(floor( (double(pid)   / num_processes ) * powers.size()) );
+//    size_t stone_block_end   = size_t(floor( (double(pid+1) / num_processes ) * powers.size()) );
+    
+    size_t stone_block_start =  floor( ( floor( pid   /double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() );
+    size_t stone_block_end   =  floor( ( ceil( (pid+1)/double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() );
+    
+    // Run the chain
+    for (size_t i = stone_block_start; i < stone_block_end; ++i)
+    {
+    
+        // run the i-th stone
+        runStone(i, gen, burnin_fraction, pre_burnin_generations, tuning_interval);
+        
+    }
+    
+#ifdef RB_MPI
+    // wait until all chains complete
+    MPI_Barrier(MPI_COMM_WORLD);
+#endif
+    if ( process_active == true )
+    {
+        summarizeStones();
+    }
+    
+}
+
+
+
+void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_fraction, size_t pre_burnin_generations, size_t tuning_interval)
+{
+    
+    // create the directory if necessary
+    RbFileManager fm = RbFileManager(filename);
+    if (fm.getFileName() == "")
+    {
+        throw(RbException("Please provide a filename with an extension"));
+    }
+    std::string stoneFileName = fm.getFileNameWithoutExtension() + "_stone_" + idx + "." + fm.getFileExtension();
+
+    RbFileManager f = RbFileManager(fm.getFilePath(), stoneFileName);
+    f.createDirectoryForFile();
+    
+    std::fstream outStream;
+    outStream.open( f.getFullFileName().c_str(), std::fstream::out);
+    outStream << "state\t" << "power\t" << "likelihood" << std::endl;
+    
+    // reset the sampler
+    sampler->reset();
+
+    
+    size_t burnin = size_t( ceil( burnin_fraction*gen ) );
+    
+    size_t printInterval = size_t( round( fmax(1,gen/40.0) ) );
+    size_t digits = size_t( ceil( log10( powers.size() ) ) );
+    
+    // print output for users
+    if ( process_active ==true )
+    {
+        std::cout << "Step ";
+        for (size_t d = size_t( ceil( log10( idx+1.1 ) ) ); d < digits; d++ )
+        {
+            std::cout << " ";
+        }
+        std::cout << (idx+1) << " / " << powers.size();
+        std::cout << "\t\t";
+    }
+    
+    // set the power of this sampler
+    sampler->setLikelihoodHeat( powers[idx] );
+    
+    std::stringstream ss;
+    ss << "_stone_" << idx;
+    sampler->addFileMonitorExtension( ss.str(), false);
+    
+    // let's do a pre-burnin
+    for (size_t k=1; k<=pre_burnin_generations; k++)
+    {
+        
+        sampler->nextCycle(false);
+        
+        // check for autotuning
+        if ( k % tuning_interval == 0 && k != pre_burnin_generations )
+        {
+            sampler->tune();
+        }
+        
+    }
+    
+    // Monitor
+    sampler->startMonitors(gen, false);
+    sampler->writeMonitorHeaders( false );
+    sampler->monitor(0);
+    
+    double p = powers[idx];
+    for (size_t k=1; k<=gen; ++k)
+    {
+        
+        if ( process_active == true )
+        {
+            if ( k % printInterval == 0 )
+            {
+                std::cout << "*";
+                std::cout.flush();
+            }
+        }
+        
+        sampler->nextCycle( true );
+
+        // Monitor
+        sampler->monitor(k);
+        
+        // sample the likelihood
+        if ( k > burnin && k % sampleFreq == 0 )
+        {
+            // compute the joint likelihood
+            double likelihood = sampler->getModelLnProbability(true);
+            outStream << k << "\t" << p << "\t" << likelihood << std::endl;
+        }
+            
+    }
+    
+    if ( process_active == true )
+    {
+        std::cout << std::endl;
+    }
+    
+    outStream.close();
+    
+    // Monitor
+    sampler->finishMonitors( 1, MonteCarloAnalysisOptions::NONE );
+    
+}
+
+
+void PowerPosteriorAnalysis::summarizeStones( void )
+{
+    // create the directory if necessary
+    RbFileManager f = RbFileManager(filename);
+    f.createDirectoryForFile();
+    
+    std::ofstream outStream;
+    outStream.open( f.getFullFileName().c_str(), std::fstream::out);
+    outStream << "state\t" << "power\t" << "likelihood" << std::endl;
+
+    // Append each stone
+    for (size_t idx = 0; idx < powers.size(); ++idx)
+    {
+        RbFileManager fm = RbFileManager(filename);
+        std::string stoneFileName = fm.getFileNameWithoutExtension() + "_stone_" + idx + "." + fm.getFileExtension();
+        
+        RbFileManager f = RbFileManager(fm.getFilePath(), stoneFileName);
+
+        // read the i-th stone
+        std::ifstream inStream;
+        inStream.open( f.getFullFileName().c_str(), std::fstream::in);
+        if (inStream.is_open())
+        {
+            bool header = true;
+            std::string line = "";
+            while ( std::getline(inStream,line) )
+            {
+                // we need to skip the header line
+                if ( header == true )
+                {
+                    header  = false;
+                }
+                else
+                {
+                    outStream << line << std::endl;
+                }
+                
+            }
+            inStream.close();
+        }
+        else
+        {
+            std::cerr << "Problem reading stone " << idx+1 << " from file " << stoneFileName << "." << std::endl;
+        }
+
+    }
+    
+    // closing the file stream
+    outStream.close();
+
+}
+
+
+void PowerPosteriorAnalysis::setPowers(const std::vector<double> &p)
+{
+    powers = p;
+}
+
+
+void PowerPosteriorAnalysis::setSampleFreq(size_t sf)
+{
+    sampleFreq = sf;
+}
+

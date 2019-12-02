@@ -1,0 +1,49 @@
+################################################################################
+#
+# RevBayes Validation Test: Dirichlet Distribution
+# 
+# Model: Just a single random variable from an dirichlet distribution. 
+#            
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+
+# set my move index
+mi = 0
+
+
+prior <- rep(10,4) 
+pi ~ dnDirichlet(prior)
+moves[++mi] = mvBetaSimplex(pi,weight=2)
+moves[++mi] = mvDirichletSimplex(pi,weight=2,numCats=4)
+
+
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(pi)
+
+
+
+
+
+
+monitors[1] = mnModel(filename="output/dirichlet.log",printgen=10, separator = TAB)
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+validation = validationAnalysis( mymcmc, 1000 )
+validation.burnin(generations=10000,tuningInterval=250)
+validation.run(generations=30000)
+validation.summarize()
+
+
+# you may want to quit RevBayes now
+q()
+

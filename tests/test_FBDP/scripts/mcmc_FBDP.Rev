@@ -1,0 +1,96 @@
+################################################################################
+#
+# RevBayes Validation Test: Fossilized birth-death process
+# 
+# Model: Tree is drawn from a constant-rate fossilized birth-death process.
+#            
+#
+# authors: Walker Pett
+#
+################################################################################
+
+seed(12345)
+
+#######################
+# Reading in the Data #
+#######################
+
+### Read in taxon data
+
+taxa <- readTaxonData("data/bears_taxa.tsv")
+
+# set my move index
+mvi = 0
+
+
+##############
+# Tree model #
+##############
+
+# Specify speciation, extinction and serial sampling rates
+speciation_rate ~ dnExp(10)
+extinction_rate ~ dnExp(10)
+psi ~ dnExp(10)
+
+# specify a prior on the origin age
+origin_time ~ dnUnif(37.0, 55.0)
+
+# create some moves that change the stochastic variables
+# all moves are sliding proposals but you could use scaling proposals for the rates too
+moves[mvi++] = mvScale(speciation_rate,lambda=1,weight=1)
+moves[mvi++] = mvScale(speciation_rate,lambda=0.1,weight=1)
+moves[mvi++] = mvScale(speciation_rate,lambda=0.01,weight=1)
+
+moves[mvi++] = mvScale(extinction_rate,lambda=1,weight=1)
+moves[mvi++] = mvScale(extinction_rate,lambda=0.1,weight=1)
+moves[mvi++] = mvScale(extinction_rate,lambda=0.01,weight=1)
+
+moves[mvi++] = mvScale(psi,lambda=1,weight=1)
+moves[mvi++] = mvScale(psi,lambda=0.1,weight=1)
+moves[mvi++] = mvScale(psi,lambda=0.01,weight=1)
+
+### Define the tree-prior distribution as the fossilized birth-death process ###
+fbd_dist = dnFBDRP(origin=origin_time, lambda=speciation_rate, mu=extinction_rate, psi=psi, rho=1.0, taxa=taxa)
+
+# The will be a random variable of a constrained topology distribution that is governed by the FBD #
+# this distribution will generate FBD trees that match the monophyly constraints defined above #
+clade_ursinae = clade("Melursus_ursinus", "Ursus_arctos", "Ursus_maritimus", 
+                      "Helarctos_malayanus", "Ursus_americanus", "Ursus_thibetanus", 
+                      "Ursus_abstrusus", "Ursus_spelaeus")
+constraints = v(clade_ursinae)
+
+fbd_tree ~ dnConstrainedTopology(fbd_dist, constraints=constraints)
+
+moves[mvi++] = mvFNPR(fbd_tree, weight=1.0)
+moves[mvi++] = mvTipTimeSlideUniform(fbd_tree, weight=1.0)
+moves[mvi++] = mvNodeTimeSlideUniform(fbd_tree, weight=1.0)
+moves[mvi++] = mvRootTimeSlideUniform(fbd_tree, origin_time, weight=1.0)
+
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(fbd_tree)
+
+
+monitors[1] = mnStochasticVariable(filename="output/mcmc_FBDP.out",printgen=100)
+monitors[2] = mnFile(filename="output/mcmc_FBDP.trees",printgen=100,fbd_tree)
+
+mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
+
+
+mymcmc.run(generations=100000)
+
+
+# Read in the tree trace and construct the maximum clade credibility (MCC) tree #
+trace = readTreeTrace("output/mcmc_FBDP.trees")
+
+# Summarize tree trace and save MCC tree to file
+mccTree(trace, file="output/mcmc_FBDP_mcc.tre" )
+
+
+# you may want to quit RevBayes now
+q()

@@ -1,0 +1,100 @@
+################################################################################
+#
+# RevBayes Validation Test: Felsenstein (81) with uniform time tree
+# 
+# Model: Sequences evolve under the Felsenstein (81) model and the tree is drawn
+#        from a uniform time tree distribution. 
+#            
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+#######################
+# Reading in the Data #
+#######################
+
+#######################
+# Reading in the Data #
+#######################
+# Import the morphological character matrix #
+# this file contains only the taxa for which morphological characters are available #
+morpho <- readDiscreteCharacterData("data/bears.nex")
+
+## helpers
+mvi = 1
+mni = 1
+taxa <- morpho.names()
+n_taxa <- taxa.size()
+n_branches <- 2 * n_taxa - 2
+
+
+
+##############
+# Tree model #
+##############
+
+# Obtain a list of names from the Nexus file. We will use this to add tips to the tree
+names <- morpho.names()
+
+# Set up branch length hyperprior with a move
+br_len_lambda ~ dnExp(0.2)
+moves[mvi++] = mvScale(br_len_lambda, weight=2)
+
+# Define the tree parameter.
+# First, we generate the topology.
+# We assume a uniform prior on topology.
+phylogeny ~ dnUniformTopologyBranchLength(names, branchLengthDistribution=dnExponential(br_len_lambda))
+
+# compute the tree length from the phylogeny
+tree_length := phylogeny.treeLength()
+
+moves[mvi++] = mvNNI(phylogeny, weight=n_branches/2.0)
+moves[mvi++] = mvSPR(phylogeny, weight=n_branches/10.0)
+moves[mvi++] = mvBranchLengthScale(phylogeny, weight=n_branches)
+
+
+
+###########################################
+# Binary morphological substitution model #
+###########################################
+
+# Create the Q matrix. These data are binary, so we initialize the Jukes-Cantor matrix with
+# two states
+Q_morpho <- fnJC(2)
+
+# Set up Gamma-distributed rate variation.
+#alpha_morpho ~ dnExponential( 1.0 )
+#rates_morpho := fnDiscretizeGamma( alpha_morpho, alpha_morpho, 4 )
+
+# Moves on the parameters to the Gamma distribution.
+#moves[mvi++] = mvScale(alpha_morpho,lambda=1, weight=2.0)
+
+#Combine all of our elements into a CTMC. Because we have not observed any invariant sites, 
+# we specify the coding is 'variable'.
+
+phyMorpho ~ dnPhyloCTMC(tree=phylogeny, Q=Q_morpho, type="Standard")
+#phyMorpho ~ dnPhyloCTMC(tree=phylogeny, siteRates=rates_morpho, Q=Q_morpho, type="Standard")
+phyMorpho.clamp(morpho)
+
+
+
+
+# initialize the model object #
+mymodel = model(phylogeny)
+
+
+monitors[1] = mnModel(filename="output/bears_mk.log",printgen=10, separator = TAB)
+monitors[2] = mnFile(filename="output/bears_mk.trees",printgen=10, separator = TAB, phylogeny)
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+validation = validationAnalysis( mymcmc, 100 )
+validation.burnin(generations=3000,tuningInterval=250)
+validation.run(generations=10000)
+validation.summarize()
+
+
+# you may want to quit RevBayes now
+q()
+

@@ -1,0 +1,29 @@
+#NEXUS
+
+	Begin taxa;
+	Dimensions ntax=18;
+	Taxlabels
+		Agriarctos_spp
+		Ailurarctos_lufengensis
+		Ailuropoda_melanoleuca
+		Ballusia_elmensis
+		Helarctos_malayanus
+		Indarctos_arctoides
+		Indarctos_punjabiensis
+		Indarctos_vireti
+		Kretzoiarctos_beatrix
+		Melursus_ursinus
+		Tremarctos_ornatus
+		Ursavus_brevirhinus
+		Ursavus_primaevus
+		Ursus_americanus
+		Ursus_arctos
+		Ursus_maritimus
+		Ursus_thibetanus
+		Zaragocyon_daamsi
+		;
+End;
+
+Begin trees;
+tree TREE1 = [&U](((((((((((((Ursus_arctos[&index=5]:0.031409[&brlen_95%_HPD={3.5e-05,0.078207}],Ursus_maritimus[&index=3]:0.076430[&brlen_95%_HPD={0.015133,0.15612}])[&index=19,posterior=0.834887]:0.053194[&brlen_95%_HPD={0.00525,0.115828}],Ursus_americanus[&index=4]:0.020532[&brlen_95%_HPD={5.2e-05,0.060686}])[&index=20,posterior=0.812916]:0.067828[&brlen_95%_HPD={0.000807,0.156597}],Ursus_thibetanus[&index=13]:0.098912[&brlen_95%_HPD={0.000482,0.206943}])[&index=21,posterior=0.466711]:0.057488[&brlen_95%_HPD={4.3e-05,0.146535}],Helarctos_malayanus[&index=15]:0.084554[&brlen_95%_HPD={0.00054,0.17646}])[&index=22,posterior=0.953395]:0.187746[&brlen_95%_HPD={0.035129,0.377131}],Melursus_ursinus[&index=8]:0.135229[&brlen_95%_HPD={0.000284,0.310079}])[&index=23,posterior=0.896804]:0.162325[&brlen_95%_HPD={0.000534,0.352698}],Tremarctos_ornatus[&index=10]:0.076540[&brlen_95%_HPD={4e-06,0.220693}])[&index=24,posterior=0.994674]:0.355023[&brlen_95%_HPD={0.107218,0.702166}],(((Ballusia_elmensis[&index=17]:0.066001[&brlen_95%_HPD={0.000176,0.202758}],Zaragocyon_daamsi[&index=11]:0.309036[&brlen_95%_HPD={0.06163,0.601816}])[&index=25,posterior=0.932756]:0.169244[&brlen_95%_HPD={0.018241,0.377097}],Ursavus_primaevus[&index=18]:0.026825[&brlen_95%_HPD={3.9e-05,0.077929}])[&index=26,posterior=0.334221]:0.033135[&brlen_95%_HPD={4.6e-05,0.090532}],Ursavus_brevirhinus[&index=14]:0.030327[&brlen_95%_HPD={1e-06,0.092658}])[&index=27,posterior=0.781625]:0.142986[&brlen_95%_HPD={0.001308,0.317989}])[&index=28,posterior=0.768309]:0.144534[&brlen_95%_HPD={0.00055,0.367493}],Indarctos_vireti[&index=2]:0.025972[&brlen_95%_HPD={2e-06,0.07697}])[&index=29,posterior=0.633156]:0.040904[&brlen_95%_HPD={0.002182,0.094501}],Indarctos_arctoides[&index=12]:0.021606[&brlen_95%_HPD={9.6e-05,0.054741}])[&index=30,posterior=0.320905]:0.019740[&brlen_95%_HPD={0.000181,0.052959}],Indarctos_punjabiensis[&index=7]:0.013618[&brlen_95%_HPD={3.6e-05,0.038353}])[&index=31,posterior=0.576565]:0.043345[&brlen_95%_HPD={7.6e-05,0.099702}],Ailuropoda_melanoleuca[&index=6]:0.060491[&brlen_95%_HPD={0.001405,0.132721}])[&index=32,posterior=0.425433]:0.042548[&brlen_95%_HPD={4.9e-05,0.109225}],Ailurarctos_lufengensis[&index=9]:0.051560[&brlen_95%_HPD={0.000435,0.14334}])[&index=33,posterior=0.577230]:0.045773[&brlen_95%_HPD={4.8e-05,0.108363}],Agriarctos_spp[&index=1]:0.033886[&brlen_95%_HPD={1.2e-05,0.106226}],Kretzoiarctos_beatrix[&index=16]:0.034404[&brlen_95%_HPD={5.1e-05,0.091243}])[&index=34,posterior=1.000000]:0.095956;
+End;

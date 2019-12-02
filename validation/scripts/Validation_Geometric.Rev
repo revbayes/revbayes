@@ -1,0 +1,44 @@
+################################################################################
+#
+# RevBayes Validation Test: Geometric Distribution
+#
+# Model: random variable from a Geometric distribution.
+#
+#
+# authors: Michael R. May
+#
+################################################################################
+
+
+# set my move index
+mi = 0
+
+p <- 0.5
+x ~ dnGeometric(p)
+moves[++mi] = mvRandomIntegerWalk(x,weight=2)
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(x)
+
+
+
+
+
+
+monitors[1] = mnModel(filename="output/geometric.log",printgen=10, separator = TAB)
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+validation = validationAnalysis( mymcmc, 1000 )
+validation.burnin(generations=10000,tuningInterval=250)
+validation.run(generations=30000)
+validation.summarize()
+
+
+# you may want to quit RevBayes now
+q()

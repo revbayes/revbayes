@@ -1,0 +1,98 @@
+################################################################################
+#
+# RevBayes Validation Test: GTR with fixed time tree
+# 
+# Model: Sequences evolve under the GTR model and the tree is fixed
+#            
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+#######################
+# Reading in the Data #
+#######################
+
+###### This just defines a single model for all sites #######
+
+### Read in sequence data for both genes
+
+data <- readDiscreteCharacterData("data/primates_cytb.nex")
+
+# set my move index
+mi = 0
+
+
+
+######################
+# Substitution Model #
+######################
+
+#### specify the GTR+G substitution model applied uniformly to all sites ###
+er_prior <- v(1,1,1,1,1,1)
+er ~ dnDirichlet(er_prior)
+moves[++mi] = mvSimplexElementScale(er,weight=3)
+
+
+pi_prior <- v(1,1,1,1) 
+pi ~ dnDirichlet(pi_prior)
+moves[++mi] = mvSimplexElementScale(pi,weight=2)
+
+
+#### create a deterministic variable for the rate matrix ####
+Q := fnGTR(er,pi) 
+
+
+
+##############
+# Tree model #
+##############
+
+psi <- readTrees( "data/primates.tree" )[1]
+
+
+
+
+
+###################
+# PhyloCTMC Model #
+###################
+
+# We use an empirical estimate of the clock rate which is 0.01 (=1%) per million years per site
+clockRate <- 0.01
+
+# the sequence evolution model
+seq ~ dnPhyloCTMC(tree=psi, Q=Q, branchRates=clockRate, type="DNA")
+
+# attach the data
+seq.clamp(data)
+
+
+
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(Q)
+
+
+
+
+
+
+monitors[1] = mnModel(filename="output/primates_cytb_GTR_Gamma.log",printgen=10, separator = TAB)
+monitors[2] = mnFile(filename="output/primates_cytb_GTR_Gamma.trees",printgen=10, separator = TAB, psi)
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+validation = validationAnalysis( mymcmc, 1000 )
+validation.burnin(generations=3000,tuningInterval=250)
+validation.run(generations=10000)
+validation.summarize()
+
+# you may want to quit RevBayes now
+q()
+

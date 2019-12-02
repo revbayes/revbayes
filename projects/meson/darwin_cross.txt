@@ -1,0 +1,16 @@
+[binaries]
+c = '/home/bredelings/Applications/osxcross/target/bin/x86_64-apple-darwin14-clang'
+cpp = '/home/bredelings/Applications/osxcross/target/bin/x86_64-apple-darwin14-clang++'
+ar = '/home/bredelings/Applications/osxcross/target/bin/x86_64-apple-darwin14-ar'
+ld = '/home/bredelings/Applications/osxcross/target/bin/x86_64-apple-darwin14-ld'
+strip = '/home/bredelings/Applications/osxcross/target/bin/x86_64-apple-darwin14-strip'
+pkgconfig = '/home/bredelings/Applications/osxcross/target/bin/x86_64-apple-darwin14-pkg-config'
+
+[host_machine]
+system = 'darwin'
+cpu_family = 'x86_64'
+cpu = 'x86_64'
+endian = 'little'
+
+[properties]
+root = '/path/to/osxcross/target/SDK/MacOSX10.10.sdk'

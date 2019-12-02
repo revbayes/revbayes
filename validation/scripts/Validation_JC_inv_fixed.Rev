@@ -1,0 +1,104 @@
+################################################################################
+#
+# RevBayes Validation Test: Jukes-Cantor with birth-death process
+# 
+# Model: Sequences evolve under the Jukes-Cantor model and the tree is drawn
+#        from a constant-rate birth-death process with uniform sampling.
+#            
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+#######################
+# Reading in the Data #
+#######################
+
+###### This just defines a single model for all sites #######
+
+### Read in sequence data for both genes
+data <- readDiscreteCharacterData("data/primates_cytb_small.nex")
+
+# Get some useful variables from the data. We need these later on.
+taxa <- data.taxa()
+
+# set my move index
+mvi = 0
+
+
+
+######################
+# Substitution Model #
+######################
+
+#### specify the Jukes-Cantor substitution model applied uniformly to all sites ###
+Q <- fnJC(4) 
+
+
+
+
+#############################
+# Among Site Rate Variation #
+#############################
+
+# the probability of a site being invariable, +I
+p_inv ~ dnBeta(1,1)
+#moves[++mvi] = mvBetaProbability(p_inv, weight=2.0)
+moves[++mvi] = mvSlide(p_inv, weight=2.0)
+
+
+
+##############
+# Tree model #
+##############
+
+
+psi <- readTrees( "data/primates_small.tre" )[1]
+
+
+
+
+###################
+# PhyloCTMC Model #
+###################
+
+# We use an empirical estimate of the clock rate which is 0.01 (=1%) per mvillion years per site
+clockRate <- 0.05
+
+# the sequence evolution model
+seq ~ dnPhyloCTMC(tree=psi, Q=Q, branchRates=clockRate, pInv=p_inv, type="DNA")
+
+# attach the data
+seq.clamp(data)
+
+
+
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(Q)
+
+
+
+
+
+
+monitors[1] = mnModel(filename="output/primates_cytb_JC.log",printgen=10, separator = TAB)
+monitors[2] = mnFile(filename="output/primates_cytb_JC.trees",printgen=10, separator = TAB, psi)
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+
+validation = validationAnalysis( mymcmc, 1000 )
+validation.burnin(generations=500,tuningInterval=250)
+validation.run(generations=1000)
+validation.summarize()
+
+
+# you may want to quit RevBayes now
+q()
+

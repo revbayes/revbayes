@@ -1,0 +1,46 @@
+################################################################################
+#
+# RevBayes Validation Test: Beta Distribution
+#
+# Model: Just a single random variable from a Beta distribution.
+#
+#
+# authors: Michael R. May
+#
+################################################################################
+
+
+# set my move index
+mi = 0
+
+alpha <- 1.0
+beta  <- 1.0
+p ~ dnBeta(alpha, beta)
+
+moves[++mi] = mvBetaProbability(p,weight=2)
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(p)
+
+
+
+
+
+
+monitors[1] = mnModel(filename="output/beta.log",printgen=10, separator = TAB)
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+validation = validationAnalysis( mymcmc, 1000 )
+validation.burnin(generations=10000,tuningInterval=250)
+validation.run(generations=30000)
+validation.summarize()
+
+
+# you may want to quit RevBayes now
+q()
