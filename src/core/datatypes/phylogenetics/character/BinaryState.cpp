@@ -15,6 +15,8 @@
 
 #include "BinaryState.h"
 
+#include "Cloneable.h"
+
 using namespace RevBayesCore;
 
 /** Default constructor */

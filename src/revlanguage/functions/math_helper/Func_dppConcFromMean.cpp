@@ -1,7 +1,16 @@
 #include "Func_dppConcFromMean.h"
+
+#include <vector>
+
 #include "RbStatisticsHelper.h"
 #include "Natural.h"
 #include "RealPos.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

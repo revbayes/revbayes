@@ -1,11 +1,21 @@
+#include <stddef.h>
+#include <cmath>
+#include <iosfwd>
+#include <vector>
+
 #include "DistributionExponential.h"
 #include "DiversityDependentPureBirthProcess.h"
 #include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbMathLogic.h"
+#include "AbstractBirthDeathProcess.h"
+#include "TopologyNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
 
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class RandomNumberGenerator; }
+namespace RevBayesCore { class Taxon; }
 
 using namespace RevBayesCore;
 

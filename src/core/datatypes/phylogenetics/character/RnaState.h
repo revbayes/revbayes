@@ -16,9 +16,11 @@
 #ifndef RnaState_H
 #define RnaState_H
 
-#include "DiscreteCharacterState.h"
+#include <stddef.h>
 #include <ostream>
-#include <set>
+
+#include "DiscreteCharacterState.h"
+#include "RbBitSet.h"
 
 namespace RevBayesCore {
 

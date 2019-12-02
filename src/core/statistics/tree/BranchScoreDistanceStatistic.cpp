@@ -1,9 +1,16 @@
 #include "BranchScoreDistanceStatistic.h"
-#include "TreeBipartitions.h"
-#include <algorithm>
 
-#include <boost/dynamic_bitset.hpp>
 #include <math.h>
+#include <stddef.h>
+#include <vector>
+
+#include "TreeBipartitions.h"
+#include "RbVector.h"
+#include "TypedDagNode.h"
+#include "boost/dynamic_bitset.hpp" // IWYU pragma: keep
+
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class Tree; }
 
 using namespace RevBayesCore;
 

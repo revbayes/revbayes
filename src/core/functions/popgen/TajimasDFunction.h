@@ -1,13 +1,12 @@
 #ifndef TajimasDFunction_H
 #define TajimasDFunction_H
 
-#include "AbstractHomologousDiscreteCharacterData.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <vector>
-
 namespace RevBayesCore {
+class AbstractHomologousDiscreteCharacterData;
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Computing Tajima's D function.

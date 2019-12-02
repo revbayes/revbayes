@@ -1,7 +1,11 @@
 #include "RevNullObject.h"
-#include "TypeSpec.h"
 
-#include <sstream>
+#include <stddef.h>
+
+#include "TypeSpec.h"
+#include "RevVariable.h"
+
+namespace RevLanguage { class Argument; }
 
 using namespace RevLanguage;
 

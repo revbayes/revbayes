@@ -1,13 +1,13 @@
 #ifndef ScaleProposalContinuous_H
 #define ScaleProposalContinuous_H
 
-#include <set>
-#include <string>
+#include <iosfwd>
 
 #include "Proposal.h"
-#include "ContinuousStochasticNode.h"
 
 namespace RevBayesCore {
+class ContinuousStochasticNode;
+class DagNode;
     
     /**
      * The scaling operator. 

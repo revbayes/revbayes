@@ -1,14 +1,22 @@
+#include <stddef.h>
+#include <cmath>
+#include <vector>
+
 #include "MatrixReal.h"
 #include "RateMatrix_HKY.h"
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
-
-#include <cmath>
-#include <string>
+#include "Assignable.h"
+#include "Cloneable.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "TimeReversibleRateMatrix.h"
 
 using namespace RevBayesCore;
 
-/** Construct rate matrix with n states */
+/** Default Constructor for a HKY rate matrix
+ * Kappa is initialized to 1
+ *  */
 RateMatrix_HKY::RateMatrix_HKY(void) : TimeReversibleRateMatrix( 4 )
 {
     
@@ -47,7 +55,15 @@ RateMatrix_HKY& RateMatrix_HKY::assign(const Assignable &m)
 
 
 
-/** Calculate the transition probabilities */
+/** Calculate the transition probabilities along a branch
+ * @param startAge a double that denotes the start of the branch
+ * @param endAge a double that denotes the end of the branch
+ * @param rate a double that denotes the overall substitution rate
+ * @param p A transition probability matrix
+ *
+ * Stationary frequencies of nucleotides are also used in this calculation
+ *
+ *  */
 void RateMatrix_HKY::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
 {
     

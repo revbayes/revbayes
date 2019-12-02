@@ -2,7 +2,7 @@
 #define CharacterEventDiscrete_H
 
 #include <stdlib.h>
-#include <vector>
+#include <iosfwd>
 
 #include "CharacterEvent.h"
 #include "CharacterEventType.h"

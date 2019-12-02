@@ -1,16 +1,24 @@
 #include "OrderedRateMatrixFunction.h"
+
 #include "RateMatrix_Ordered.h"
-#include "RbException.h"
+#include "Cloneable.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-OrderedRateMatrixFunction::OrderedRateMatrixFunction(const TypedDagNode<long> *n, const TypedDagNode<double> *l, const TypedDagNode<double> *m) : TypedFunction<RateGenerator>( new RateMatrix_Ordered(n->getValue()) ),
+OrderedRateMatrixFunction::OrderedRateMatrixFunction(const TypedDagNode<long> *n, const TypedDagNode<double> *l, const TypedDagNode<double> *m, bool allow_zero_state) : TypedFunction<RateGenerator>( new RateMatrix_Ordered(n->getValue()) ),
     lambda( l ),
     mu( m )
 {
     
+    
+    
     addParameter( lambda );
     addParameter( mu );
+    
+    static_cast< RateMatrix_Ordered* >(value)->setAllowZeroState( allow_zero_state );
     
     update();
 }

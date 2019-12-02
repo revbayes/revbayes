@@ -1,23 +1,29 @@
 
 
-#include <cmath>
+#include <stddef.h>
+#include <map>
+#include <utility>
+#include <vector>
+
 #include "CDCladoSE.h"
+#include "RateGenerator.h"
+#include "TimeInterval.h"
 
 using namespace RevBayesCore;
 
 
 CDCladoSE::CDCladoSE( const std::vector<double> &m, const RateGenerator* q, std::map<std::vector<unsigned>, double> e, double r ) :
-mu( m ),
-num_states( q->getNumberOfStates() ),
-Q( q ),
-eventMap( e ),
-rate( r )
+    mu( m ),
+    num_states( q->getNumberOfStates() ),
+    Q( q ),
+    eventMap( e ),
+    rate( r )
 {
     
 }
 
 
-void CDCladoSE::operator()(const state_type &x, state_type &dxdt, const double t)
+void CDCladoSE::operator()(const std::vector< double > &x, std::vector< double > &dxdt, const double t)
 {
     // ClaSSE equations A1 and A2 from Goldberg and Igic, 2012
     

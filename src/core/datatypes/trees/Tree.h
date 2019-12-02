@@ -62,7 +62,7 @@ namespace RevBayesCore {
         // public Tree methods
         void                                                addBranchParameter(const std::string &n, const std::vector<double> &p, bool io);
         void                                                addNodeParameter(const std::string &n, const std::vector<double> &p, bool io);
-		void                                                addNodeParameter(const std::string &n, const std::vector<std::string*> &p, bool io);
+		void                                                addNodeParameter(const std::string &n, const std::vector<std::string> &p, bool io);
         void                                                clearParameters(void);                                                                              //!< Clear both the current node and branch parameters
         void                                                clearBranchParameters(void);
 		void                                                clearNodeParameters(void);

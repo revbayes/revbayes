@@ -1,14 +1,13 @@
 #ifndef TimRateMatrixFunction_H
 #define TimRateMatrixFunction_H
 
-#include "RateMatrix_TIM.h"
-#include "Simplex.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
-
-#include <vector>
+#include "RateGenerator.h"
 
 namespace RevBayesCore {
+class DagNode;
+class Simplex;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Tim rate matrix function.

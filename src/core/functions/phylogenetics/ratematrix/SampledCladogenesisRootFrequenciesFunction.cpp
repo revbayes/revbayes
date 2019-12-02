@@ -6,13 +6,34 @@
 //  Copyright © 2016 Michael Landis. All rights reserved.
 //
 
-#include "AbstractCladogenicStateFunction.h"
+#include <stddef.h>
+#include <cmath>
+#include <iterator>
+#include <map>
+#include <set>
+#include <utility>
+#include <vector>
+
 #include "AbstractCharacterHistoryBirthDeathProcess.h"
-#include "DeterministicNode.h"
 #include "SampledCladogenesisRootFrequenciesFunction.h"
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
-#include <cmath>
+#include "BranchHistory.h"
+#include "BranchHistoryDiscrete.h"
+#include "CharacterEvent.h"
+#include "CharacterEventCompare.h"
+#include "CharacterHistoryDiscrete.h"
+#include "Distribution.h"
+#include "RateGenerator.h"
+#include "RbVectorImpl.h"
+#include "Simplex.h"
+#include "TopologyNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class MatrixReal; }
 
 using namespace RevBayesCore;
 

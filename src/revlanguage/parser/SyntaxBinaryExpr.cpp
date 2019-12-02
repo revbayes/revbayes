@@ -1,14 +1,17 @@
+#include <stddef.h>
 #include <iostream>
-#include <list>
-#include <sstream>
 #include <vector>
+#include <set>
 
 #include "Argument.h"
-#include "RbException.h"
 #include "RlFunction.h"
-#include "RbUtil.h"
 #include "SyntaxBinaryExpr.h"
 #include "Workspace.h"
+#include "Environment.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "SyntaxElement.h"
 
 using namespace RevLanguage;
 

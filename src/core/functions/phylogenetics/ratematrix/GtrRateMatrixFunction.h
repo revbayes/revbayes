@@ -1,14 +1,13 @@
 #ifndef GtrRateMatrixFunction_H
 #define GtrRateMatrixFunction_H
 
-#include "RateMatrix_GTR.h"
-#include "Simplex.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
-
-#include <vector>
+#include "RateGenerator.h"
 
 namespace RevBayesCore {
+class DagNode;
+class Simplex;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief GTR rate matrix function.

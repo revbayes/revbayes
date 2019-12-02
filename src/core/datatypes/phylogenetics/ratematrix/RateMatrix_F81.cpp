@@ -1,15 +1,18 @@
-#include "EigenSystem.h"
-#include "MatrixReal.h"
-#include "RateMatrix_F81.h"
-#include "RbException.h"
-#include "TransitionProbabilityMatrix.h"
+#include <math.h>
+#include <stddef.h>
+#include <vector>
 
-#include <cmath>
-#include <iomanip>
+#include "RateMatrix_F81.h"
+#include "TransitionProbabilityMatrix.h"
+#include "Assignable.h"
+#include "RbException.h"
+#include "TimeReversibleRateMatrix.h"
 
 using namespace RevBayesCore;
 
-/** Construct rate matrix with n states */
+/** Default Constructor for Felsenstein81 rate matrix
+ * @param n the size of the matrix
+ *  */
 RateMatrix_F81::RateMatrix_F81(size_t n) : TimeReversibleRateMatrix( n )
 {
     

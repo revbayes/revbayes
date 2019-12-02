@@ -43,7 +43,6 @@
 
 #include "DualityDiagram.h"
 #include "MatrixReal.h"
-#include "RbException.h"
 
 namespace RevBayesCore
 /**

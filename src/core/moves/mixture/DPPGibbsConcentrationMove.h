@@ -1,35 +1,35 @@
-/**
- * @file
- * This file contains the declaration of DPPGibbsConcentrationMove, which performs a fully conditional Gibbs move on the concentration parameter of the DPP
- *   this move is conditional on the # of categories in the current state of the DPP
- *
- * @brief Declaration of DPPGibbsConcentrationMove
- *
- * (c) Copyright 2009- under GPL version 3
- * @date Last modified: $Date: 2012-05-11 14:54:35 +0200 (Fri, 11 May 2012) $
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- * @version 1.0
- * @since 2012-07-20, version 1.0
- *
- * $Id: DPPGibbsConcentrationMove.h $
- */
-
 #ifndef DPPGibbsConcentrationMove_H
 #define DPPGibbsConcentrationMove_H
 
-#include <ostream>
+#include <iosfwd>
 
 #include "AbstractGibbsMove.h"
-#include "DirichletProcessPriorDistribution.h"
-#include "StochasticNode.h"
-#include "DeterministicNode.h"
-#include "TypedDagNode.h"
-#include "ConstantNode.h"
 
 
 namespace RevBayesCore {
-	
+class DagNode;
+template <class valueType> class DeterministicNode;
+template <class valueType> class TypedDagNode;
+template <class variableType> class StochasticNode;
+
+    /**
+     * @brief The Move for updating the concentration parameter of the DPP
+     *
+     * This is a Gibbs move on the concentration parameter (alpha) where the prior on
+     * alpha must be a Gamma distribution with fixed hyperparameters.
+     * This move is described by Escobar & West (Bayesian density estimation and inference using mixtures, 1995),
+     * (also see Dozario, On selecting a prior for the precision parameter of Dirichlet process mixture models, 2009).
+     * This move is conditional on the # of categories in the current state of the DPP
+     *
+     * The move has the following member variables:
+     *  @param variable the concentration parameter (double)
+     *  @param numCats the number of mixture categories in the current state of the DPP (long)
+     *  @param gammaShape the shape parameter of the gamma prior (double)
+     *  @param gammaRate the rate parameter of the gamma prior (double)
+     *  @param numElem the number of elements in the DPP (int)
+     *
+     */
+
     class DPPGibbsConcentrationMove : public AbstractGibbsMove {
 		
     public:
@@ -46,7 +46,7 @@ namespace RevBayesCore {
     private:
 		
         StochasticNode<double>*									variable;
-		DeterministicNode<long>*									numCats;
+		DeterministicNode<long>*								numCats;
 		TypedDagNode< double >*									gammaShape;
 		TypedDagNode< double >*									gammaRate;
 		int														numElem;

@@ -23,12 +23,11 @@
  * $Id$
  */
 
+#include <cmath>
+
 #include "RbConstants.h"
-#include "RbException.h"
 #include "RbMathLogic.h"
 #include "RbSettings.h"
-#include <cassert>
-#include <cmath>
 
 
 using namespace RevBayesCore;
@@ -128,15 +127,24 @@ bool RbMath::isNan(double x) {
 
 
 /** Returns the maximum of two real numbers */
-double RbMath::max(double x, double y){
+double RbMath::max(double x, double y)
+{
 
 	return (x < y) ? y : x;
 }
 
 
 /** Returns the minimum of two real numbers */
-double RbMath::min(double x, double y) {
+double RbMath::min(double x, double y)
+{
 
+    return (x < y) ? x : y;
+}
+
+/** Returns the minimum of two integer numbers */
+int RbMath::min(int x, int y)
+{
+    
     return (x < y) ? x : y;
 }
 

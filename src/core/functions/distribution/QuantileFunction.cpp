@@ -1,7 +1,15 @@
 #include "QuantileFunction.h"
 
+#include <vector>
 
-RevBayesCore::QuantileFunction::QuantileFunction(const TypedDagNode<double> *q, ContinuousDistribution* d) : ContinuousFunction( new double(0.0) ),
+#include "ContinuousDistribution.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
+
+
+RevBayesCore::QuantileFunction::QuantileFunction(const TypedDagNode<double> *q, ContinuousDistribution* d) :
+    ContinuousFunction( new double(0.0) ),
     p( q ),
     dist( d )
 {
@@ -12,29 +20,24 @@ RevBayesCore::QuantileFunction::QuantileFunction(const TypedDagNode<double> *q, 
     for (std::vector<const DagNode* >::const_iterator it = params.begin(); it != params.end(); ++it)
     {
         addParameter( *it );
-    }
-    
+    }    
 }
 
 
 RevBayesCore::QuantileFunction::QuantileFunction(const QuantileFunction &qf) : ContinuousFunction( qf ),
     p( qf.p ),
     dist( qf.dist->clone() )
-{
-    
-}
+{}
+
 
 RevBayesCore::QuantileFunction::~QuantileFunction(void)
-{
-    
+{   
     delete dist;
-
 }
 
 
 RevBayesCore::QuantileFunction* RevBayesCore::QuantileFunction::clone( void ) const
-{
-    
+{    
     return new QuantileFunction(*this);
 }
 
@@ -53,8 +56,8 @@ void RevBayesCore::QuantileFunction::swapParameterInternal(const DagNode *oldP, 
     
 }
 
+
 void RevBayesCore::QuantileFunction::update( void )
-{
-    
+{    
     *value = dist->quantile( p->getValue() );
 }

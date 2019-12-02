@@ -1,5 +1,13 @@
 #include "Kimura81RateMatrixFunction.h"
-#include "RbException.h"
+
+#include <vector>
+
+#include "Cloneable.h"
+#include "RateMatrix_Kimura81.h"
+#include "Simplex.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

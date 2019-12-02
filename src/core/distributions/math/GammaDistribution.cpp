@@ -1,9 +1,20 @@
 #include "GammaDistribution.h"
+
 #include "DistributionGamma.h"
 #include "RandomNumberFactory.h"
 #include "RbConstants.h"
+#include "Cloneable.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
+
+/* Gamma Distribution Constructor
+ * @param sh The shape parameter of the distribution
+ * @param r The rate parameter of the distribution
+ *
+ */
 
 GammaDistribution::GammaDistribution(const TypedDagNode<double> *sh, const TypedDagNode<double> *r) : ContinuousDistribution( new double( 1.0 ) ),
     shape( sh ),

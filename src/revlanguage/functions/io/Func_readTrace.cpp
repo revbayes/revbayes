@@ -1,20 +1,34 @@
+#include <math.h>
+#include <stdlib.h>
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
-#include "ConstantNode.h"
-#include "Ellipsis.h"
 #include "Func_readTrace.h"
 #include "Probability.h"
 #include "RbException.h"
 #include "RbFileManager.h"
 #include "RlString.h"
-#include "RlUtils.h"
 #include "StringUtilities.h"
 #include "RlTrace.h"
 #include "RlUserInterface.h"
 #include "WorkspaceVector.h"
-
-#include <map>
-#include <set>
-#include <sstream>
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "Integer.h"
+#include "Natural.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "Trace.h"
+#include "TraceNumeric.h"
+#include "TypeSpec.h"
+#include "WorkspaceToCoreWrapperObject.h"
 
 
 using namespace RevLanguage;
@@ -168,7 +182,7 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
         else
         {
             double burninFrac = static_cast<const Probability &>(b).getValue();
-            burnin = int( floor( rv->getValue().size()*burninFrac ) );
+            burnin = int( floor( it->size()*burninFrac ) );
         }
 
         it->computeStatistics();

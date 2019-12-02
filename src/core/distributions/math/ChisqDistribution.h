@@ -1,24 +1,21 @@
 #ifndef ChisqDistribution_H
 #define ChisqDistribution_H
 
-#include "TypedDagNode.h"
 #include "ContinuousDistribution.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Chi-square distribution class.
      *
      * The Chi-square distribution represents a family of distributions defined
-     * on the positiv real number. The Chisq distribution has 1 parameters:
-     *   df .. the degrees of freedom
+     * on the positive real number. The Chi-squared distribution has 1 parameters:
+     * @param df the degrees of freedom
      * Instances of this class can be associated to stochastic variables.
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2015-04-19, version 1.0
-     *
      */
+
     class ChisqDistribution : public ContinuousDistribution {
         
     public:

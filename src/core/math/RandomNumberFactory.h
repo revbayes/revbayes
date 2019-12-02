@@ -22,7 +22,6 @@
 #define RandomNumberFactory_H
 
 #include <set>
-#include <vector>
 
 namespace RevBayesCore {
 
@@ -30,6 +29,7 @@ namespace RevBayesCore {
 //    #define NEW_RNG    RandomNumberFactory::randomNumberFactoryInstance().getRandomNumberGenerator()
 
     class RandomNumberGenerator;
+
     class RandomNumberFactory {
 
 	public:

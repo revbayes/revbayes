@@ -1,10 +1,13 @@
 #ifndef NormalDistribution_H
 #define NormalDistribution_H
 
+#include <stddef.h>
+
 #include "ContinuousDistribution.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     /**
      *@brief Normal distribution class.

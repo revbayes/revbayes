@@ -1,9 +1,11 @@
 #ifndef AminoAcidState_H
 #define AminoAcidState_H
 
-#include "DiscreteCharacterState.h"
+#include <stddef.h>
 #include <ostream>
-#include <set>
+
+#include "DiscreteCharacterState.h"
+#include "RbBitSet.h"
 
 namespace RevBayesCore {
 

@@ -1,5 +1,32 @@
 #include "PhyloCTMCSiteHomogeneousDollo.h"
+
+#include <limits.h>
+#include <math.h>
+#include <algorithm>
+#include <bitset>
+#include <string>
+#include <iosfwd>
+
 #include "RbMathFunctions.h"
+#include "AbstractHomologousDiscreteCharacterData.h"
+#include "DiscreteCharacterState.h"
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
+#include "RateGenerator.h"
+#include "RateMatrix.h"
+#include "RbBitSet.h"
+#include "RbConstants.h"
+#include "RbMathLogic.h"
+#include "RbSettings.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "StochasticNode.h"
+#include "Taxon.h"
+#include "TransitionProbabilityMatrix.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 RevBayesCore::PhyloCTMCSiteHomogeneousDollo::PhyloCTMCSiteHomogeneousDollo(const TypedDagNode<Tree> *t, size_t nc, bool c, size_t nSites, bool amb, DolloAscertainmentBias::Coding ty, bool norm) :
     PhyloCTMCSiteHomogeneousConditional<StandardState>(  t, nc + 1, c, nSites, amb, AscertainmentBias::Coding(ty)), dim(nc), integrationFactors(0), normalize(norm)

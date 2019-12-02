@@ -1,8 +1,15 @@
 #include "BiogeographyRateGeneratorSequenceFunction.h"
+
+#include <string>
+
 #include "ConstantNode.h"
 #include "RateGenerator.h"
 #include "RateMatrix_JC.h"
-#include "RbException.h"
+#include "RateGeneratorSequence_Biogeography.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class CharacterHistoryRateModifier; }
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

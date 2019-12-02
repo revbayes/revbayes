@@ -1,9 +1,15 @@
 #include "Func_hyperbolicSine.h"
+
 #include "HyperbolicSineFunction.h"
-#include "Probability.h"
 #include "Real.h"
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

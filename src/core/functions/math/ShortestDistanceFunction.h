@@ -10,11 +10,16 @@
 #define ShortestDistanceFunction_h
 
 #include <stdio.h>
+#include <set>
+#include <vector>
+
 #include "RbVector.h"
 #include "TypedFunction.h"
-#include "TypedDagNode.h"
+#include "RbVectorImpl.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     
     /**

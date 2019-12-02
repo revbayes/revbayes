@@ -1,11 +1,13 @@
 #ifndef AbstractFileMonitor_H
 #define AbstractFileMonitor_H
 
+#include <fstream>
+#include <vector>
+
 #include "Monitor.h"
 
-#include <fstream>
-
 namespace RevBayesCore {
+class DagNode;
 
     /** @brief Base abstract class for all file monitors
     *

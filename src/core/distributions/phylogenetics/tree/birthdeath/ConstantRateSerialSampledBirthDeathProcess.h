@@ -1,12 +1,19 @@
 #ifndef ConstantRateSerialSampledBirthDeathProcess_H
 #define ConstantRateSerialSampledBirthDeathProcess_H
 
+#include <stddef.h>
+#include <iosfwd>
+#include <vector>
+
 #include "AbstractBirthDeathProcess.h"
+#include "RbException.h"
 
 namespace RevBayesCore {
 
-    class Clade;
     class Taxon;
+class DagNode;
+class Tree;
+template <class valueType> class TypedDagNode;
 
     class ConstantRateSerialSampledBirthDeathProcess : public AbstractBirthDeathProcess {
 

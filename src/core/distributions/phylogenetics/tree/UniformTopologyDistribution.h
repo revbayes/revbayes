@@ -1,12 +1,17 @@
 #ifndef UniformTopologyDistribution_H
 #define UniformTopologyDistribution_H
 
+#include <stddef.h>
+#include <vector>
+
 #include "Taxon.h"
 #include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypedDistribution.h"
+#include "Clade.h"
 
 namespace RevBayesCore {
+class DagNode;
+class TopologyNode;
     
     class UniformTopologyDistribution : public TypedDistribution<Tree> {
         

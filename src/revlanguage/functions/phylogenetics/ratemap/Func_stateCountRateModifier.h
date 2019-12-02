@@ -9,13 +9,23 @@
 #ifndef Func_stateCountRateModifier_hpp
 #define Func_stateCountRateModifier_hpp
 
+#include <string>
+#include <iosfwd>
+#include <vector>
+
 #include "RlCharacterHistoryRateModifier.h"
 #include "RlTypedFunction.h"
-
-#include <map>
-#include <string>
+#include "CharacterHistoryRateModifier.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RevPtr.h"
+#include "RlDeterministicNode.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 namespace RevLanguage {
+class ArgumentRules;
+class TypeSpec;
     
     class Func_stateCountRateModifier : public TypedFunction<CharacterHistoryRateModifier> {
         

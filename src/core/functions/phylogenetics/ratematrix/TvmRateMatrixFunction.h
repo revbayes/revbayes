@@ -1,15 +1,13 @@
 #ifndef TvmRateMatrixFunction_H
 #define TvmRateMatrixFunction_H
 
-#include "RateMatrix_TVM.h"
-#include "RbVector.h"
-#include "Simplex.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
-
-#include <vector>
+#include "RateGenerator.h"
 
 namespace RevBayesCore {
+class DagNode;
+class Simplex;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Tvm rate matrix function.

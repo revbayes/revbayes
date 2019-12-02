@@ -16,10 +16,13 @@
 #ifndef CodonState_H
 #define CodonState_H
 
+#include <stddef.h>
+#include <ostream>
+#include <vector>
+
 #include "AminoAcidState.h"
 #include "DiscreteCharacterState.h"
-#include <ostream>
-#include <set>
+#include "RbBitSet.h"
 
 namespace RevBayesCore {
     

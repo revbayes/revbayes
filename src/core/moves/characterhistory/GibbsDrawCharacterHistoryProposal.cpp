@@ -1,11 +1,16 @@
 #include "GibbsDrawCharacterHistoryProposal.h"
+
+#include <stddef.h>
+#include <vector>
+
 #include "RbException.h"
-#include "TypedDagNode.h"
 #include "StateDependentSpeciationExtinctionProcess.h"
 #include "Tree.h"
+#include "Cloneable.h"
+#include "StochasticNode.h"
+#include "TypedDistribution.h"
 
-#include <cmath>
-#include <iostream>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
@@ -55,7 +60,7 @@ double GibbsDrawCharacterHistoryProposal::doProposal( void )
 {
 
     size_t num_nodes = distribution->getValue().getNumberOfNodes();
-    std::vector<std::string*> character_histories(num_nodes);
+    std::vector<std::string> character_histories(num_nodes);
     distribution->drawStochasticCharacterMap(character_histories);
     
     return 0.0;

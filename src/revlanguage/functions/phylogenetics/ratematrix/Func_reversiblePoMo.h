@@ -18,13 +18,23 @@
 #ifndef Func_reversiblePoMo_H
 #define Func_reversiblePoMo_H
 
+#include <string>
+#include <iosfwd>
+#include <vector>
+
 #include "RlRateMatrix.h"
 #include "RlTypedFunction.h"
-
-#include <map>
-#include <string>
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RateGenerator.h"
+#include "RevPtr.h"
+#include "RlDeterministicNode.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 namespace RevLanguage {
+class ArgumentRules;
+class TypeSpec;
 
     class Func_reversiblePoMo : public TypedFunction<RateMatrix> {
 

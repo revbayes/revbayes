@@ -1,12 +1,14 @@
 #include "NewickConverter.h"
-#include "RbException.h"
-#include "TopologyNode.h"
-#include "Tree.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <sstream>
 #include <vector>
+#include <string>
+
+#include "RbException.h"
+#include "TopologyNode.h"
+#include "Tree.h"
 
 using namespace RevBayesCore;
 

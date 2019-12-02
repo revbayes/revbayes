@@ -15,6 +15,7 @@
  */
 
 #include <cmath>
+#include <sstream> // IWYU pragma: keep
 
 #include "DistributionBeta.h"
 #include "DistributionBinomial.h"
@@ -23,8 +24,8 @@
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbException.h"
-#include "RbMathFunctions.h"
 #include "RbMathLogic.h"
+#include "RbMathFunctions.h" // IWYU pragma: keep
 
 using namespace RevBayesCore;
 

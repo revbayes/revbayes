@@ -1,19 +1,20 @@
-#include "DagNode.h"
-#include "VariableMonitor.h"
+#include <stddef.h>
+#include <cmath>
+#include <iostream>
+#include <string>
+#include <vector>
+
 #include "MonteCarloSampler.h"
 #include "MoveSchedule.h"
+#include "MpiUtilities.h"
 #include "PowerPosteriorAnalysis.h"
 #include "ProgressBar.h"
-#include "RandomMoveSchedule.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbConstants.h"
 #include "RbException.h"
 #include "RbFileManager.h"
-#include "RbOptions.h"
-#include <cmath>
-#include <typeinfo>
-#include "SequentialMoveSchedule.h"
+#include "Cloneable.h"
+#include "MonteCarloAnalysisOptions.h"
+#include "Parallelizable.h"
+#include "StringUtilities.h"
 
 
 #ifdef RB_MPI
@@ -200,7 +201,13 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
 #ifdef RB_MPI
     // wait until all chains complete
     MPI_Barrier(MPI_COMM_WORLD);
+    
+    // to be safe, we should synchronize the random number generators
+    MpiUtilities::synchronizeRNG( MPI_COMM_WORLD);
+#else
+    MpiUtilities::synchronizeRNG(  );
 #endif
+    
     if ( process_active == true )
     {
         summarizeStones();

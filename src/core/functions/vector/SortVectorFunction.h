@@ -2,13 +2,11 @@
 #define SortVectorFunction_H
 
 #include "RbVector.h"
-#include "Simplex.h"
 #include "TypedFunction.h"
-#include "TypedDagNode.h"
-
-#include <vector>
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Simplex constructor from vector

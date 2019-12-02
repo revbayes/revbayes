@@ -6,20 +6,25 @@
 //  Copyright © 2016 Michael Landis. All rights reserved.
 //
 
+#include <map>
+#include <vector>
+
 #include "CladogeneticProbabilityMatrix_Epoch.h"
 #include "EpochCladogeneticStateFunction.h"
-#include "RbException.h"
+#include "Assignable.h"
+#include "CladogeneticProbabilityMatrix.h"
+#include "RbVector.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
-#include <math.h>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-EpochCladogeneticStateFunction::EpochCladogeneticStateFunction(const TypedDagNode< RbVector<double> > *et, const TypedDagNode< RbVector<CladogeneticProbabilityMatrix> > *cp, unsigned nc, unsigned ns) :
-TypedFunction<CladogeneticProbabilityMatrix>( new CladogeneticProbabilityMatrix_Epoch(0) ),
+EpochCladogeneticStateFunction::EpochCladogeneticStateFunction(const TypedDagNode< RbVector<double> > *et, const TypedDagNode< RbVector<CladogeneticProbabilityMatrix> > *cp, unsigned ns) :
+TypedFunction<CladogeneticProbabilityMatrix>( new CladogeneticProbabilityMatrix_Epoch(ns) ),
 epochTimes( et ),
 cladoProbs( cp ),
-numCharacters(nc),
-numStates(ns),
 numEpochs( (unsigned)et->getValue().size() )
 {
     // add the lambda parameter as a parent

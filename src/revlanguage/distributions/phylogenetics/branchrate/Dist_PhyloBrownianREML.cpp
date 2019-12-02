@@ -1,9 +1,22 @@
 #include "Dist_PhyloBrownianREML.h"
-#include "OptionRule.h"
+
+#include <stddef.h>
+#include <ostream>
+
 #include "PhyloBrownianProcessREML.h"
-#include "RevNullObject.h"
-#include "RlString.h"
 #include "RlTree.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "ModelObject.h"
+#include "ModelVector.h"
+#include "Natural.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RealPos.h"
+#include "RlDistribution.h"
+#include "StringUtilities.h"
+#include "Tree.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

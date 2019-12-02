@@ -1,3 +1,8 @@
+#include <stddef.h>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "Argument.h"
 #include "ArgumentRule.h"
 #include "Func_simTree.h"
@@ -6,12 +11,15 @@
 #include "RbException.h"
 #include "RlString.h"
 #include "RlTimeTree.h"
-#include "RlUtils.h"
 #include "StringUtilities.h"
 #include "Tree.h"
 #include "TypeSpec.h"
-
-#include <math.h>       /* log2 */
+#include "ArgumentRules.h"
+#include "Procedure.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TopologyNode.h"
 
 using namespace RevLanguage;
 

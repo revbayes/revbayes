@@ -17,12 +17,11 @@
 
 #include <cmath>
 
-
 #include "DistributionLognormal.h"
 #include "DistributionNormal.h"
 #include "RbConstants.h"
-#include "RandomNumberGenerator.h"
-#include "RbStatisticsHelper.h"
+
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 

@@ -1,12 +1,19 @@
 #include "AbstractPhyloContinuousCharacterProcess.h"
+
+#include <string>
+
 #include "ConstantNode.h"
-#include "DistributionNormal.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
 #include "StochasticNode.h"
 #include "TopologyNode.h"
+#include "Cloneable.h"
+#include "ContinuousTaxonData.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "Taxon.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
 
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
 
 
 using namespace RevBayesCore;

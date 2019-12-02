@@ -2,9 +2,10 @@
 #define FloorFunction_H
 
 #include "TypedFunction.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Round down to the next integer.

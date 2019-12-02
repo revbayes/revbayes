@@ -1,8 +1,14 @@
 
 #include "NormalDistribution.h"
+
 #include "DistributionNormal.h"
 #include "RandomNumberFactory.h"
 #include "RbConstants.h"
+#include "Cloneable.h"
+#include "RbException.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

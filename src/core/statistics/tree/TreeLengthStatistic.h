@@ -9,14 +9,12 @@
 #ifndef __revbayes_mlandis__TreeLengthStatistic__
 #define __revbayes_mlandis__TreeLengthStatistic__
 
-#include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <vector>
-#include <string>
-
 namespace RevBayesCore {
+class DagNode;
+class Tree;
+template <class valueType> class TypedDagNode;
     
     class TreeLengthStatistic : public TypedFunction<double> {
         

@@ -1,12 +1,17 @@
 #include "SpeciesTreeScaleProposal.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbException.h"
-#include "TreeUtilities.h"
-#include "TypedDagNode.h"
 
+#include <stddef.h>
 #include <cmath>
 #include <iostream>
+
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
+#include "TreeUtilities.h"
+#include "Cloneable.h"
+#include "DagNode.h"
+#include "StochasticNode.h"
+#include "TopologyNode.h"
+#include "Tree.h"
 
 using namespace RevBayesCore;
 

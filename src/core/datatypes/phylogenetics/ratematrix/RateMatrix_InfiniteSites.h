@@ -1,12 +1,15 @@
 #ifndef RateMatrix_InfiniteSites_H
 #define RateMatrix_InfiniteSites_H
 
+#include <stddef.h>
+
 #include "TimeReversibleRateMatrix.h"
 
 
 namespace RevBayesCore {
     
     class TransitionProbabilityMatrix;
+class Assignable;
     
     /**
      * @brief Infinite Sites rate matrix class.

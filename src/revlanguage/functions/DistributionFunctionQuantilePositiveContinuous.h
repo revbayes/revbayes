@@ -16,14 +16,23 @@
 #ifndef DistributionFunctionQuantilePositiveContinuous_H
 #define DistributionFunctionQuantilePositiveContinuous_H
 
-#include "RlContinuousDistribution.h"
-#include "RlTypedFunction.h"
-#include "RlPositiveContinuousDistribution.h"
-
 #include <string>
 #include <vector>
+#include <iosfwd>
+
+#include "RlTypedFunction.h"
+#include "ArgumentRules.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RealPos.h"
+#include "RevPtr.h"
+#include "RlDeterministicNode.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 namespace RevLanguage {
+class PositiveContinuousDistribution;
+class TypeSpec;
     
     class DistributionFunctionQuantilePositiveContinuous : public TypedFunction<RealPos> {
         

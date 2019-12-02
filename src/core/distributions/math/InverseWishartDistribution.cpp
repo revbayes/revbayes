@@ -7,12 +7,16 @@
 
 #include "InverseWishartDistribution.h"
 
+#include <stddef.h>
+
 #include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbConstants.h"
-#include "RbStatisticsHelper.h"
-#include "DistributionNormal.h"
 #include "DistributionInverseWishart.h"
+#include "Cloneable.h"
+#include "RbException.h"
+#include "RbVector.h"
+
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 

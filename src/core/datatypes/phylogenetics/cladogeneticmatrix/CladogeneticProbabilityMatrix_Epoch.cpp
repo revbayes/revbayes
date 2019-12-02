@@ -11,12 +11,7 @@
 using namespace RevBayesCore;
 
 #include "RbException.h"
-#include "RbMathMatrix.h"
-
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <iomanip>
+#include "Assignable.h"
 
 using namespace RevBayesCore;
 
@@ -87,6 +82,23 @@ const CladogeneticProbabilityMatrix& CladogeneticProbabilityMatrix_Epoch::getCla
     return epochCladogeneticProbabilityMatrices[k];
 }
 
+void CladogeneticProbabilityMatrix_Epoch::printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const {
+    
+    std::stringstream prev_time( "Inf" );
+    for (size_t i = 0; i < epochTimes.size(); i++) {
+        
+        std::stringstream curr_time;
+        curr_time << epochTimes[i];
+        o << "\n";
+        o << "Epoch with index " << i << "\n";
+        o << "Epoch time from " << prev_time.str() << " to " << curr_time.str() << "\n";
+        o << "Epoch cladogenetic probability matrix:\n";
+        // append each clado matrix's print statement
+        epochCladogeneticProbabilityMatrices[i].printForUser(o, sep, l, left);
+        prev_time.str( curr_time.str() );
+    }
+}
+
 void CladogeneticProbabilityMatrix_Epoch::setEpochCladogeneticProbabilityMatrix(const RbVector<CladogeneticProbabilityMatrix>& cp)
 {
     epochCladogeneticProbabilityMatrices = cp;
@@ -119,6 +131,11 @@ void CladogeneticProbabilityMatrix_Epoch::setEventMap(const std::map<std::vector
 {
     size_t k = findEpochIndex(t);
     epochCladogeneticProbabilityMatrices[k].setEventMap(m);
+}
+
+void CladogeneticProbabilityMatrix_Epoch::update(void)
+{
+    ; // do nothing?
 }
 
 void CladogeneticProbabilityMatrix_Epoch::initFromString( const std::string &s )

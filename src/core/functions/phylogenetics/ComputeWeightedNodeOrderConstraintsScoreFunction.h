@@ -9,20 +9,19 @@
 #ifndef computeWeightedNodeOrderConstraintsScoreFunction_H
 #define computeWeightedNodeOrderConstraintsScoreFunction_H
 
-#include "RelativeNodeAgeWeightedConstraints.h"
-#include "RbVector.h"
-#include "Tree.h"
-#include "TypedDagNode.h"
+#include <set>
+#include <iosfwd>
+#include <map>
+#include <string>
+#include <utility>
+
 #include "TypedFunction.h"
 
-#include <set>
-
-#include <vector>
-
-#include <boost/functional/hash.hpp>
-#include <boost/unordered_set.hpp>
-
 namespace RevBayesCore {
+class DagNode;
+class RelativeNodeAgeWeightedConstraints;
+class Tree;
+template <class valueType> class TypedDagNode;
     
     class computeWeightedNodeOrderConstraintsScoreFunction : public TypedFunction<double> {
         

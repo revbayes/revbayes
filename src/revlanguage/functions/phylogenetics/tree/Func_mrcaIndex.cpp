@@ -6,16 +6,31 @@
 //  Copyright 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "Clade.h"
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "Func_mrcaIndex.h"
-#include "ModelVector.h"
 #include "Natural.h"
 #include "RlClade.h"
 #include "RlTimeTree.h"
-#include "RealPos.h"
 #include "RlDeterministicNode.h"
 #include "MrcaIndexStatistic.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "RlTypedFunction.h"
+#include "TypeSpec.h"
+#include "TypedFunction.h"
+
+namespace RevBayesCore { class Clade; }
+namespace RevBayesCore { class Tree; }
 
 using namespace RevLanguage;
 

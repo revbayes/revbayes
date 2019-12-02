@@ -1,16 +1,31 @@
+#include <cmath>
+#include <algorithm>
+#include <cstddef>
+#include <iostream>
+#include <map>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "NewickConverter.h"
-#include "RlBoolean.h"
-#include "RbConstants.h"
 #include "RbException.h"
-#include "RbMathLogic.h"
-#include "RbOptions.h"
 #include "Tree.h"
 #include "Taxon.h"
 #include "TopologyNode.h"
 #include "TypedDagNode.h"
 #include "TreeUtilities.h"
+#include "Clade.h"
+#include "DagNode.h"
+#include "RbBitSet.h"
+#include "RbBoolean.h"
+#include "RbFileManager.h"
+#include "StringUtilities.h"
+#include "TaxonMap.h"
+#include "TreeChangeEventHandler.h"
 
-#include <cmath>
+namespace RevBayesCore { class AbstractHomologousDiscreteCharacterData; }
+namespace RevBayesCore { class TreeChangeEventListener; }
 
 using namespace RevBayesCore;
 
@@ -144,7 +159,7 @@ void Tree::addNodeParameter(std::string const &name, const std::vector<double> &
 
 }
 
-void Tree::addNodeParameter(std::string const &name, const std::vector<std::string*> &parameters, bool internalOnly)
+void Tree::addNodeParameter(std::string const &name, const std::vector<std::string> &parameters, bool internalOnly)
 {
 
     getRoot().addNodeParameters(name,parameters,internalOnly);

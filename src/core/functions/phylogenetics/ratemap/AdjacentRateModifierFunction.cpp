@@ -7,9 +7,17 @@
 //
 
 #include "AdjacentRateModifierFunction.h"
+
+#include <string>
+
 #include "AdjacentRateModifier.h"
 #include "TypedDagNode.h"
-#include <cmath>
+#include "Assignable.h"
+#include "MatrixReal.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

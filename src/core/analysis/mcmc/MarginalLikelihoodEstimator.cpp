@@ -1,5 +1,9 @@
 #include "MarginalLikelihoodEstimator.h"
-#include "RbConstants.h"
+
+#include <stdlib.h>
+#include <ostream>
+#include <string>
+
 #include "RbException.h"
 #include "RbFileManager.h"
 #include "StringUtilities.h"

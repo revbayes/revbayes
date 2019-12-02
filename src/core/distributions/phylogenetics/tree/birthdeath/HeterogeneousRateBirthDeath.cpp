@@ -1,37 +1,57 @@
-#include "Clade.h"
+#include <boost/numeric/odeint.hpp> // IWYU pragma: keep
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <iosfwd>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
-#include "RbMathCombinatorialFunctions.h"
 #include "StochasticNode.h"
 #include "TopologyNode.h"
 #include "HeterogeneousRateBirthDeath.h"
 #include "OdeHeterogeneousRateBirthDeath.h"
+#include "AbstractCharacterHistoryBirthDeathProcess.h"
+#include "BranchHistory.h"
+#include "BranchHistoryDiscrete.h"
+#include "CharacterEvent.h"
+#include "CharacterEventCompare.h"
+#include "CharacterEventDiscrete.h"
+#include "CharacterHistoryDiscrete.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "Taxon.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
 
-#include <algorithm>
-#include <cmath>
-#include <boost/numeric/odeint.hpp>
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
 
 using namespace RevBayesCore;
 
 HeterogeneousRateBirthDeath::HeterogeneousRateBirthDeath( const TypedDagNode<double> *a, const TypedDagNode<long> *rs, const TypedDagNode<RbVector<double> > *s, const TypedDagNode<RbVector<double> > *e, const TypedDagNode<double > *ev, const TypedDagNode< double > *r, const std::string &cdt, bool allow_same, const std::vector<Taxon> &n) : AbstractCharacterHistoryBirthDeathProcess(),
-root_age( a ),
-root_state( rs ),
-speciation( s ),
-extinction( e ),
-event_rate( ev ),
-rho( r ),
-branch_histories( NULL, 1, speciation->getValue().size() ),
-condition( cdt ),
-taxa( n ),
-activeLikelihood( std::vector<size_t>(2*n.size()-1, 0) ),
-changed_nodes( std::vector<bool>(2*n.size()-1, false) ),
-dirty_nodes( std::vector<bool>(2*n.size()-1, true) ),
-nodeStates( std::vector<std::vector<state_type> >(2*n.size()-1, std::vector<state_type>(2,std::vector<double>(1+speciation->getValue().size(),0))) ),
-scalingFactors( std::vector<std::vector<double> >(2*n.size()-1, std::vector<double>(2,0.0) ) ),
-totalScaling( 0.0 ),
-NUM_TIME_SLICES( 200.0 ),
-allow_same_category( allow_same )
+    root_age( a ),
+    root_state( rs ),
+    speciation( s ),
+    extinction( e ),
+    event_rate( ev ),
+    rho( r ),
+    branch_histories( NULL, 1, speciation->getValue().size() ),
+    condition( cdt ),
+    taxa( n ),
+    activeLikelihood( std::vector<size_t>(2*n.size()-1, 0) ),
+    changed_nodes( std::vector<bool>(2*n.size()-1, false) ),
+    dirty_nodes( std::vector<bool>(2*n.size()-1, true) ),
+    nodeStates( std::vector<std::vector<std::vector< double > > >(2*n.size()-1, std::vector<std::vector< double > >(2,std::vector<double>(1+speciation->getValue().size(),0))) ),
+    scalingFactors( std::vector<std::vector<double> >(2*n.size()-1, std::vector<double>(2,0.0) ) ),
+    totalScaling( 0.0 ),
+    NUM_TIME_SLICES( 200.0 ),
+    allow_same_category( allow_same )
 {
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
@@ -774,11 +794,11 @@ void HeterogeneousRateBirthDeath::updateBranchProbabilitiesNumerically(std::vect
     OdeHeterogeneousRateBirthDeath ode = OdeHeterogeneousRateBirthDeath(lambda,mu,delta,allow_same_category);
     ode.setCurrentRateCategory( current_rate_category );
     
-    typedef boost::numeric::odeint::runge_kutta_dopri5< state_type > stepper_type;
+    typedef boost::numeric::odeint::runge_kutta_dopri5< std::vector< double > > stepper_type;
     boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-6 , 1E-6 , stepper_type() ) , ode , state , begin_age , end_age , dt );
     
     
-    //    boost::numeric::odeint::bulirsch_stoer< state_type > stepper(1E-7, 0.0, 0.0, 0.0);
+    //    boost::numeric::odeint::bulirsch_stoer< std::vector< double > > stepper(1E-7, 0.0, 0.0, 0.0);
     //    boost::numeric::odeint::integrate_adaptive( stepper, ode, state, begin_age, end_age, dt );
     
 }

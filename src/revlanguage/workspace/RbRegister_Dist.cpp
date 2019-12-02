@@ -25,29 +25,76 @@
 
 #include <sstream>
 #include <vector>
-#include <set>
 #include <cstdlib>
+#include <math.h>
+#include <stdio.h>
+#include <string>
 
 /* Files including helper classes */
 #include "AddContinuousDistribution.h"
 #include "AddDistribution.h"
-#include "AddWorkspaceVectorType.h"
-#include "AddVectorizedWorkspaceType.h"
 #include "RbException.h"
 #include "RlUserInterface.h"
 #include "Workspace.h"
 
 /// Miscellaneous types ///
 
+#include "AbstractHomologousDiscreteCharacterData.h"
+#include "AverageDistanceMatrix.h"
+#include "ConstantNode.h"
+#include "ContinuousCharacterData.h"
+#include "DagMemberFunction.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DirichletProcessPriorDistribution.h"
+#include "DistanceMatrix.h"
+#include "DistributionMemberFunction.h"
+#include "DynamicNode.h"
+#include "EmpiricalSampleDistribution.h"
+#include "EventDistribution.h"
+#include "IndirectReferenceFunction.h"
+#include "MatrixBoolean.h"
+#include "MatrixReal.h"
+#include "MixtureDistribution.h"
+#include "ModelObject.h"
+#include "MultiValueEvent.h"
+#include "ProbabilityDensityFunction.h"
+#include "RateGenerator.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RevPtr.h"
+#include "ReversibleJumpMixtureConstantDistribution.h"
+#include "RlAbstractHomologousDiscreteCharacterData.h"
+#include "RlAverageDistanceMatrix.h"
+#include "RlConstantNode.h"
+#include "RlContinuousCharacterData.h"
+#include "RlDagMemberFunction.h"
+#include "RlDeterministicNode.h"
+#include "RlDistanceMatrix.h"
+#include "RlDistributionMemberFunction.h"
+#include "RlMultiValueEvent.h"
+#include "RlStochasticNode.h"
+#include "RlTimeTree.h"
+#include "RlTree.h"
+#include "RlTypedDistribution.h"
+#include "RlTypedFunction.h"
+#include "Simplex.h"
+#include "StochasticNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
+#include "TypedFunction.h"
+#include "UniformPartitioningDistribution.h"
+#include "UserFunctionNode.h"
+#include "WeightedSampleDistribution.h"
+#include "WorkspaceToCoreWrapperObject.h"
+
 /* Base types (in folder "datatypes") */
-#include "RevObject.h"
 
 /* Primitive types (in folder "datatypes/basic") */
 #include "Integer.h"
 #include "Natural.h"
 #include "Probability.h"
-#include "RlBoolean.h"
-#include "RlString.h"
 #include "Real.h"
 #include "RealPos.h"
 
@@ -58,18 +105,10 @@
 /* Evolution types (in folder "datatypes/phylogenetics") */
 
 /* Character state types (in folder "datatypes/phylogenetics/character") */
-#include "RlAminoAcidState.h"
-#include "RlDnaState.h"
-#include "RlRnaState.h"
-#include "RlStandardState.h"
 
 /* Character data types (in folder "datatypes/phylogenetics/characterdata") */
-#include "RlAbstractCharacterData.h"
 
 /* Tree types (in folder "datatypes/phylogenetics/trees") */
-#include "RlClade.h"
-#include "RlRootedTripletDistribution.h"
-
 
 
 /// Types ///
@@ -78,14 +117,10 @@
 #include "RlBranchLengthTree.h"
 #include "RlRateGenerator.h"
 
-
-
-
 /* Math types (in folder "datatypes/math") */
+#include "RlMatrixBoolean.h"
 #include "RlMatrixReal.h"
 #include "RlMatrixRealSymmetric.h"
-#include "RlRateGeneratorSequence.h"
-#include "RlRateMatrix.h"
 #include "RlSimplex.h"
 
 /// Distributions ///
@@ -105,6 +140,7 @@
 /* Branch rate priors (in folder "distributions/phylogenetics/tree") */
 
 /* Trait evolution models (in folder "distributions/phylogenetics/branchrates") */
+#include "Dist_PhyloBranchRateBM.h"
 #include "Dist_PhyloBrownian.h"
 #include "Dist_PhyloBrownianMVN.h"
 #include "Dist_PhyloBrownianREML.h"
@@ -154,6 +190,7 @@
 #include "Dist_TimeVaryingStateDependentSpeciationExtinctionProcess.h"
 #include "Dist_UltrametricTree.h"
 #include "Dist_uniformTimeTree.h"
+#include "Dist_uniformSerialSampledTimeTree.h"
 #include "Dist_uniformTopology.h"
 #include "Dist_uniformTopologyBranchLength.h"
 
@@ -171,6 +208,7 @@
 #include "Dist_decomposedInverseWishart.h"
 #include "Dist_dirichlet.h"
 #include "Dist_exponential.h"
+#include "Dist_exponentialError.h"
 #include "Dist_exponentialOffset.h"
 #include "Dist_exponentialOffsetPositive.h"
 #include "Dist_gamma.h"
@@ -197,6 +235,7 @@
 #include "Dist_normTruncated.h"
 #include "Dist_normTruncatedPositive.h"
 #include "Dist_pointMass.h"
+#include "Dist_pointMassPositive.h"
 #include "Dist_poisson.h"
 #include "Dist_scaledDirichlet.h"
 #include "Dist_softBoundUniformNormal.h"
@@ -214,7 +253,10 @@
 /* Mixture distributions (in folder "distributions/mixture") */
 #include "Dist_dpp.h"
 #include "Dist_event.h"
+#include "Dist_IID.h"
 #include "Dist_mixture.h"
+#include "Dist_mixtureAnalytical.h"
+#include "Dist_mixtureVector.h"
 #include "Dist_MultiValueEvent.h"
 #include "Dist_reversibleJumpMixtureConstant.h"
 #include "Dist_upp.h"
@@ -222,16 +264,10 @@
 /// Functions ///
 
 /* Helper functions for creating functions (in folder "functions") */
-#include "DistributionFunctionCdf.h"
 #include "DistributionFunctionPdf.h"
-#include "DistributionFunctionQuantileContinuous.h"
-#include "DistributionFunctionQuantilePositiveContinuous.h"
 #include "DistributionFunctionRv.h"
 
-
 /* Argument rules (in folder "functions/argumentrules") */
-#include "ArgumentRule.h"
-
 
 
 /** Initialize global workspace */
@@ -250,10 +286,12 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         /* Branch rate processes (in folder "distributions/phylogenetics/branchrate") */
 
         // white noise process
-        AddDistribution< ModelVector<RealPos>       >(  new Dist_PhyloWhiteNoise()          );
+        AddDistribution< ModelVector<RealPos>       >( new Dist_PhyloWhiteNoise()          );
 
         /* trait evolution (in folder "distributions/phylogenetics/branchrate") */
-
+        
+        AddDistribution< ModelVector<RealPos>       >( new Dist_PhyloBranchRateBM()                             );
+        
         // brownian motion
         AddDistribution< ModelVector<Real>          >( new Dist_PhyloBrownian()                                 );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloBrownianREML()                             );
@@ -351,6 +389,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         // uniform time tree distribution
         AddDistribution< TimeTree                   >( new Dist_uniformTimeTree() );
 
+        // uniform serial-sampled time tree distribution
+        AddDistribution< TimeTree                   >( new Dist_uniformSerialSampledTimeTree() );
+
         // uniform topology distribution
         AddDistribution< BranchLengthTree           >( new Dist_uniformTopology() );
 
@@ -431,6 +472,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // point mass distribution
         AddDistribution< Real                       >( new Dist_pointMass() );
+        AddDistribution< RealPos                    >( new Dist_pointMassPositive() );
 
         // poisson distribution
         AddDistribution< Natural                    >( new Dist_poisson() );
@@ -496,7 +538,13 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         // and the so-called "decomposed" Inverse Wishart
         AddDistribution< MatrixReal                 >( new Dist_decomposedInverseWishart() );
 
-        /* Mixture distributions (in folder "distributions/mixture") */
+        // Exponential error distribution for matrix distance from average distance matrix
+        AddDistribution< AverageDistanceMatrix      >( new Dist_exponentialError());
+        
+        /* Empirical sample distributions (in folder "distributions/mixture") */
+        AddDistribution< ModelVector<Natural>       >( new Dist_EmpiricalSample<Natural>());
+        AddDistribution< ModelVector<Real>          >( new Dist_EmpiricalSample<Real>());
+        AddDistribution< ModelVector<RealPos>       >( new Dist_EmpiricalSample<RealPos>());
         AddDistribution< ModelVector<TimeTree>      >( new Dist_EmpiricalSample<TimeTree>());
         AddDistribution< ModelVector<TimeTree>      >( new Dist_WeightedSample<TimeTree>());
         AddDistribution< ModelVector<AbstractHomologousDiscreteCharacterData>      >( new Dist_WeightedSample<AbstractHomologousDiscreteCharacterData>());
@@ -518,6 +566,13 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ModelVector<Integer>       >( new Dist_event<Integer>()      );
         AddDistribution< ModelVector<Probability>   >( new Dist_event<Probability>()  );
         AddDistribution< MultiValueEvent            >( new Dist_MultiValueEvent()     );
+        
+        // IID distribution
+        AddDistribution< ModelVector<Real>          >( new Dist_IID<Real>()         );
+        AddDistribution< ModelVector<RealPos>       >( new Dist_IID<RealPos>()      );
+        AddDistribution< ModelVector<Natural>       >( new Dist_IID<Natural>()      );
+        AddDistribution< ModelVector<Integer>       >( new Dist_IID<Integer>()      );
+        AddDistribution< ModelVector<Probability>   >( new Dist_IID<Probability>()  );
 
         // uniform partitions prior
         AddDistribution< ModelVector<RealPos>       >( new Dist_upp<RealPos>() );
@@ -529,9 +584,26 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 		AddDistribution< Integer                    >( new Dist_mixture<Integer>() );
         AddDistribution< Probability                >( new Dist_mixture<Probability>() );
         AddDistribution< Simplex                    >( new Dist_mixture<Simplex>() );
+        AddDistribution< ModelVector<Real>          >( new Dist_mixture< ModelVector<Real> >() );
+        AddDistribution< ModelVector<RealPos>       >( new Dist_mixture< ModelVector<RealPos> >() );
 //        AddDistribution< RateGenerator              >( new Dist_mixture<RateGenerator>() );
         addDistribution( new Dist_mixture<RateGenerator>() );
         AddDistribution< TimeTree                   >( new Dist_mixture<TimeTree>() );
+        
+        
+        // analytical mixture distribution
+        AddDistribution< Real                       >( new Dist_mixtureAnalytical<Real>() );
+        AddDistribution< RealPos                    >( new Dist_mixtureAnalytical<RealPos>() );
+        AddDistribution< Natural                    >( new Dist_mixtureAnalytical<Natural>() );
+        AddDistribution< Integer                    >( new Dist_mixtureAnalytical<Integer>() );
+        AddDistribution< Probability                >( new Dist_mixtureAnalytical<Probability>() );
+        AddDistribution< Simplex                    >( new Dist_mixtureAnalytical<Simplex>() );
+        AddDistribution< ModelVector<Real>          >( new Dist_mixtureAnalytical< ModelVector<Real> >() );
+        AddDistribution< ModelVector<RealPos>       >( new Dist_mixtureAnalytical< ModelVector<RealPos> >() );
+        AddDistribution< TimeTree                   >( new Dist_mixtureAnalytical<TimeTree>() );
+        
+        AddDistribution< ModelVector<Real>          >( new Dist_mixtureVector<Real>() );
+        AddDistribution< ModelVector<RealPos>       >( new Dist_mixtureVector<RealPos>() );
 
         // Ornstein-Uhlenbeck process
         AddDistribution< Real                       >( new OrnsteinUhlenbeckProcess() );

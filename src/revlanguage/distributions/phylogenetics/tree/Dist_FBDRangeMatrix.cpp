@@ -1,17 +1,46 @@
+#include <math.h>
+#include <stddef.h>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "Clade.h"
 #include "Dist_FBDRangeMatrix.h"
 #include "ModelVector.h"
 #include "Natural.h"
 #include "OptionRule.h"
 #include "PiecewiseConstantFossilizedBirthDeathRangeProcess.h"
 #include "Probability.h"
-#include "Real.h"
 #include "RealPos.h"
-#include "RlClade.h"
 #include "RlString.h"
 #include "RlTaxon.h"
+#include "DagMemberFunction.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "MatrixReal.h"
+#include "ModelObject.h"
+#include "RbBoolean.h"
+#include "RbVector.h"
+#include "RevNullObject.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlDagMemberFunction.h"
+#include "RlDeterministicNode.h"
+#include "RlMatrixReal.h"
+#include "RlStochasticNode.h"
+#include "RlTypedDistribution.h"
+#include "RlTypedFunction.h"
+#include "StochasticNode.h"
+#include "Taxon.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
+#include "TypedFunction.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevLanguage;
 

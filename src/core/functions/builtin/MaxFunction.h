@@ -1,13 +1,13 @@
 #ifndef MaxFunction_H
 #define MaxFunction_H
 
-#include "MatrixReal.h"
 #include "TypedFunction.h"
-#include "TypedDagNode.h"
-
-#include <vector>
 
 namespace RevBayesCore {
+class DagNode;
+class MatrixReal;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Declaration of the deterministic variable for maximum.

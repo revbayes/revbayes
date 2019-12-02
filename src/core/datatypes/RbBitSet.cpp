@@ -1,4 +1,8 @@
 #include "RbBitSet.h"
+
+#include <string>
+#include <sstream> // IWYU pragma: keep
+
 #include "RbException.h"
 
 using namespace RevBayesCore;

@@ -1,13 +1,15 @@
 #ifndef FreeSymmetricRateMatrixFunction_H
 #define FreeSymmetricRateMatrixFunction_H
 
-#include "RateMatrix_FreeBinary.h"
-#include "TypedDagNode.h"
-#include "TypedFunction.h"
+#include <iosfwd>
 
-#include <vector>
+#include "TypedFunction.h"
+#include "RateGenerator.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Free symmetric rate matrix function.

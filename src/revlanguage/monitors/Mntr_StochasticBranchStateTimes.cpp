@@ -8,22 +8,28 @@
 
 #include "Mntr_StochasticBranchStateTimes.h"
 
-#include "AbstractCharacterData.h"
+#include <stddef.h>
+#include <string>
+
 #include "ArgumentRule.h"
-#include "Model.h"
 #include "Natural.h"
-#include "NaturalNumbersState.h"
 #include "RlMonitor.h"
-#include "RbException.h"
 #include "RevObject.h"
-#include "RlAbstractHomologousDiscreteCharacterData.h"
-#include "RlModel.h"
 #include "RlTimeTree.h"
-#include "RlBranchLengthTree.h"
 #include "RlString.h"
-#include "StandardState.h"
 #include "StateDependentSpeciationExtinctionProcess.h"
 #include "TypeSpec.h"
+#include "ArgumentRules.h"
+#include "Monitor.h"
+#include "RbBoolean.h"
+#include "RlBoolean.h"
+#include "RlTree.h"
+#include "StochasticBranchStateTimesMonitor.h"
+#include "StochasticNode.h"
+#include "TypedDistribution.h"
+
+namespace RevBayesCore { class Tree; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 
 using namespace RevLanguage;

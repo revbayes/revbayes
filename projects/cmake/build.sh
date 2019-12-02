@@ -1,10 +1,38 @@
 #!/bin/sh
+
+all_args=$@
+mpi="false"
+travis="false"
+# parse command line arguments
+while echo $1 | grep ^- > /dev/null; do
+    # intercept help while parsing "-key value" pairs
+    if [ "$1" = "--help" ] || [ "$1" = "-h" ]
+    then
+        echo '
+Command line options are:
+-h                              : print this help and exit.
+'
+        exit
+    fi
+
+    # parse pairs
+    eval $( echo $1 | sed 's/-//g' | tr -d '\012')=$2
+    shift
+    shift
+done
+
+if [ "$mpi" = "true" ] && [ "$travis" = "false" ]; then
+    BUILD_DIR="build-mpi"
+else
+    BUILD_DIR="build"
+fi
+
 if [ "$1" = "clean" ]
 then
-	rm -rf build
+	rm -rf ${BUILD_DIR}
 else
-if [ ! -d build ]; then
-	mkdir build
+if [ ! -d ${BUILD_DIR} ]; then
+	mkdir ${BUILD_DIR}
 fi
 
     #################
@@ -13,8 +41,8 @@ fi
     cp ../../src/revlanguage/utils/GitVersion.cpp GitVersion_backup.cpp
     mv GitVersion.cpp ../../src/revlanguage/utils/
 
-	./regenerate.sh $@
-	cd build 
+	./regenerate.sh ${all_args}
+	cd ${BUILD_DIR} 
 	CC=gcc CXX=g++ cmake .
 	make -j 4
 	cd ..

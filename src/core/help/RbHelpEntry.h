@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <iosfwd>
 
 #include "RbHelpReference.h"
 
@@ -40,28 +41,14 @@ namespace RevBayesCore {
         
         // setters
         void                                        setAliases(const std::vector<std::string> &a);
-        void                                        setAuthor(const std::vector<std::string> &a);
-        void                                        setDetails(const std::string &d);
-        void                                        setDescription(const std::string &d);
-        void                                        setExample(const std::string &e);
         void                                        setName(const std::string &n);
-        void                                        setReferences(const std::vector<RbHelpReference> &r);
-        void                                        setSeeAlso(const std::vector<std::string> &s);
-        void                                        setTitle(const std::string &t);
         void                                        setTypeSpec(const std::vector<std::string> &t);
         
         
     private:
         
         std::vector<std::string>                    aliases;
-        std::vector<std::string>                    author;
-        std::string                                 description;
-        std::string                                 details;
-        std::string                                 example;
         std::string                                 name;
-        std::vector<RbHelpReference>                references;
-        std::vector<std::string>                    seeAlso;
-        std::string                                 title;
         std::vector<std::string>                    typeSpec;
         
     };

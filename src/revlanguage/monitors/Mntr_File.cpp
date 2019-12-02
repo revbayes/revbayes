@@ -1,18 +1,26 @@
 
+#include <algorithm>
+#include <string>
+#include <ostream>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Ellipsis.h"
 #include "VariableMonitor.h"
-#include "ModelVector.h"
 #include "Mntr_File.h"
 #include "Natural.h"
-#include "RbException.h"
 #include "RevObject.h"
 #include "RlString.h"
 #include "TypeSpec.h"
+#include "Monitor.h"
+#include "RbBoolean.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlMonitor.h"
 
-#include <algorithm>
-#include <string>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevLanguage;
 

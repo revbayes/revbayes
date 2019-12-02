@@ -1,9 +1,21 @@
-#include "AbstractTaxonData.h"
+#include <stddef.h>
+#include <algorithm>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "CharacterState.h"
 #include "NexusWriter.h"
 #include "RbFileManager.h"
-
-#include <iomanip>
+#include "AbstractDiscreteTaxonData.h"
+#include "AbstractHomologousDiscreteCharacterData.h"
+#include "Clade.h"
+#include "Cloneable.h"
+#include "ContinuousCharacterData.h"
+#include "ContinuousTaxonData.h"
+#include "DiscreteCharacterState.h"
+#include "Taxon.h"
+#include "Tree.h"
 
 using namespace RevBayesCore;
 

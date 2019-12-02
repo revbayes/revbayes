@@ -1,13 +1,14 @@
 #ifndef AssembleOrder2ContinuousMRFFunction_H
 #define AssembleOrder2ContinuousMRFFunction_H
 
+#include <stddef.h>
+
 #include "RbVector.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <vector>
-
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
 
     /**
      * @brief Make a MRF of order 2 on a continuous vector using increments.

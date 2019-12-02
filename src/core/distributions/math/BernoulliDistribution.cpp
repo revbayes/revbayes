@@ -1,9 +1,13 @@
 #include "BernoulliDistribution.h"
+
+#include <cmath>
+
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
+#include "TypedDagNode.h"
 
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

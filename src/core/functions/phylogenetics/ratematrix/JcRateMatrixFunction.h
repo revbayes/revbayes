@@ -1,13 +1,13 @@
 #ifndef JcRateMatrixFunction_H
 #define JcRateMatrixFunction_H
 
-#include "RateMatrix_JC.h"
-#include "TypedDagNode.h"
-#include "TypedFunction.h"
+#include <stddef.h>
 
-#include <vector>
+#include "TypedFunction.h"
+#include "RateGenerator.h"
 
 namespace RevBayesCore {
+class DagNode;
     
     
     /**

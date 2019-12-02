@@ -7,11 +7,16 @@
 //
 
 #include "HostSwitchRateModifierFunction.h"
-#include "DistanceMatrix.h"
+
+#include <vector>
+
 #include "HostSwitchRateModifier.h"
 #include "RbVector.h"
 #include "TypedDagNode.h"
-#include <cmath>
+#include "Assignable.h"
+#include "Tree.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

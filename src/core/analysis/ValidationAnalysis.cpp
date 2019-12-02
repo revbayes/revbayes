@@ -1,21 +1,32 @@
+#include <stddef.h>
+#include <cmath>
+#include <algorithm>
+#include <iostream>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "DagNode.h"
 #include "DistributionBinomial.h"
-#include "DistributionUniform.h"
 #include "MaxIterationStoppingRule.h"
 #include "MonteCarloAnalysis.h"
-#include "MonteCarloSampler.h"
 #include "ProgressBar.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-#include "RbException.h"
 #include "RlUserInterface.h"
 #include "StochasticVariableMonitor.h"
 #include "Trace.h"
 #include "TraceReader.h"
 #include "ValidationAnalysis.h"
-
-#include <cmath>
-#include <typeinfo>
+#include "Cloneable.h"
+#include "Model.h"
+#include "Parallelizable.h"
+#include "RbFileManager.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "StoppingRule.h"
+#include "StringUtilities.h"
 
 
 using namespace RevBayesCore;
@@ -45,6 +56,13 @@ ValidationAnalysis::ValidationAnalysis( const MonteCarloAnalysis &m, size_t n ) 
     {
         GLOBAL_RNG->setSeed( int(floor( GLOBAL_RNG->uniform01()*1E5 )) );
     }
+    
+#ifdef RB_MPI
+//    size_t active_proc = floor( pid / double(processors_per_likelihood) ) * processors_per_likelihood;
+    size_t active_proc = 0;
+    MPI_Comm analysis_comm;
+    MPI_Comm_split(MPI_COMM_WORLD, active_proc, pid, &analysis_comm);
+#endif
     
     runs = std::vector<MonteCarloAnalysis*>(num_runs,NULL);
     simulation_values = std::vector<Model*>(num_runs,NULL);
@@ -84,7 +102,11 @@ ValidationAnalysis::ValidationAnalysis( const MonteCarloAnalysis &m, size_t n ) 
             }
         
             // now set the model of the current analysis
+#ifdef RB_MPI
+            current_analysis->setModel( current_model, false, analysis_comm );
+#else
             current_analysis->setModel( current_model, false );
+#endif
             
             std::stringstream ss;
             ss << "Validation_Sim_" << i;

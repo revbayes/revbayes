@@ -1,10 +1,9 @@
 #ifndef Taxon_H
 #define Taxon_H
 
-#include "TimeInterval.h"
-
-#include <string>
 #include <ostream>
+
+#include "TimeInterval.h"
 
 namespace RevBayesCore {
     
@@ -25,7 +24,7 @@ namespace RevBayesCore {
         
                                             Taxon(void);                                //!< Default constructor
                                             Taxon(const std::string &n);                //!< Regular constructor
-        virtual                             ~Taxon() {}
+        virtual                             ~Taxon(void) {}
         
         bool                                operator==(const Taxon &t) const;           //!< Equals operators
         bool                                operator!=(const Taxon &t) const;           //!< Not-quals operators
@@ -37,6 +36,7 @@ namespace RevBayesCore {
         // public methods
         double                              getAge(void) const;                         //!< Get the age for this taxon.
         const TimeInterval&                 getAgeRange(void) const;                    //!< Get the date info for this taxon.
+        const std::string                   getJsonRespresentation(void) const;         //!< Get JSON-formatted string
         const std::string&                  getName(void) const;                        //!< Get the name for this taxon.
         const std::string&                  getSpeciesName(void) const;                 //!< Get the name of the species.
         void                                setAge(double a);                           //!< Set the age.
@@ -54,7 +54,7 @@ namespace RevBayesCore {
     };
 	
     // Global functions using the class
-    std::ostream&                       operator<<(std::ostream& o, const Taxon& x);                                         //!< Overloaded output operator
+    std::ostream&                           operator<<(std::ostream& o, const Taxon& x);//!< Overloaded output operator
 }
 
 #endif

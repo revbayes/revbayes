@@ -18,14 +18,18 @@
 #ifndef RlModelTrace_H
 #define RlModelTrace_H
 
-#include "Trace.h"
-#include "TypedDagNode.h"
-#include "WorkspaceToCoreWrapperObject.h"
-
 #include <ostream>
-#include <string>
+#include <vector>
+
+#include "Trace.h"
+#include "WorkspaceToCoreWrapperObject.h"
+#include "RevObject.h"
+#include "RevPtr.h"
 
 namespace RevLanguage {
+class Argument;
+class RevVariable;
+class TypeSpec;
     
     class ModelTrace : public WorkspaceToCoreWrapperObject<RevBayesCore::ModelTrace> {
         
@@ -41,13 +45,14 @@ namespace RevLanguage {
         static const TypeSpec&                      getClassTypeSpec(void);                                                                 //!< Get class type spec
         const MemberRules&                          getParameterRules(void) const;                                                          //!< Get member rules (const)
         virtual const TypeSpec&                     getTypeSpec(void) const;                                                                //!< Get language type of the object
-        
+        virtual void                                printValue(std::ostream& o) const;                                                      //!< Print value (for user)
+
         // Member method inits
         virtual RevPtr<RevVariable>                 executeMethod(const std::string& name, const std::vector<Argument>& args, bool &f);     //!< Override to map member methods to internal functions
         
     protected:
         
-        virtual void                                printValue(std::ostream& o) const;                                                      //!< Print value (for user)
+        void                                        initMethods(void);
         void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);          //!< Set member variable
         
     };

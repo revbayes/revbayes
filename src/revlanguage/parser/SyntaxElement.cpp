@@ -1,5 +1,11 @@
-#include "RbUtil.h"
+#include <iosfwd>
+#include <set>
+
 #include "SyntaxElement.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+
+namespace RevLanguage { class Environment; }
 
 using namespace RevLanguage;
 

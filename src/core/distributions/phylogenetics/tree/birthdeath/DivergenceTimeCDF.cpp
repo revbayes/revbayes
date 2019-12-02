@@ -1,9 +1,9 @@
 #include "DivergenceTimeCDF.h"
-#include "RbMathLogic.h"
 
-#include <cmath>
 #include <stdio.h>
-#include <set>
+#include <cmath>
+
+#include "RbMathLogic.h"
 
 
 using namespace RevBayesCore;

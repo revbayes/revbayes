@@ -1,13 +1,13 @@
 #ifndef BetaProbabilityProposal_H
 #define BetaProbabilityProposal_H
 
-#include <set>
-#include <string>
+#include <iosfwd>
 
 #include "SimpleProposal.h"
-#include "StochasticNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class variableType> class StochasticNode;
     
     /**
      * The beta-Probability operator.

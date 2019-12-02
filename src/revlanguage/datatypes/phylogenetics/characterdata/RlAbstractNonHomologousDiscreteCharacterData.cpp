@@ -1,12 +1,17 @@
 #include "RlAbstractNonHomologousDiscreteCharacterData.h"
-#include "ArgumentRule.h"
+
+#include <stddef.h>
+
 #include "MemberProcedure.h"
-#include "ModelVector.h"
-#include "Natural.h"
 #include "RlBoolean.h"
 #include "RlString.h"
-#include "RlDiscreteTaxonData.h"
-#include "RlSimplex.h"
+#include "ArgumentRules.h"
+#include "MethodTable.h"
+#include "RevMemberObject.h"
+#include "RevVariable.h"
+#include "TypeSpec.h"
+
+namespace RevLanguage { class Argument; }
 
 
 using namespace RevLanguage;

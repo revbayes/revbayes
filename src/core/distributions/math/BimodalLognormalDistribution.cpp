@@ -1,11 +1,16 @@
 #include "BimodalLognormalDistribution.h"
+
+#include <cmath>
+
 #include "DistributionLognormal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbException.h"
+#include "Cloneable.h"
+#include "TypedDagNode.h"
 
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

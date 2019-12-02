@@ -1,7 +1,17 @@
 #include "Simplex.h"
-#include "TypedDagNode.h"
 
 #include <iomanip>
+#include <string>
+
+#include "TypedDagNode.h"
+#include "IsDerivedFrom.h"
+#include "RbException.h"
+#include "RbVectorImpl.h"
+#include "Serializer.h"
+#include "StringUtilities.h"
+
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class Serializable; }
 
 using namespace RevBayesCore;
 

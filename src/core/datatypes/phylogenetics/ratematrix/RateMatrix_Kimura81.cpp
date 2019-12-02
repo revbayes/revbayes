@@ -1,18 +1,26 @@
+#include <math.h>
+#include <stddef.h>
+#include <complex>
+#include <vector>
+
 #include "EigenSystem.h"
+#include "RateMatrix_Kimura81.h"
+#include "TransitionProbabilityMatrix.h"
+#include "Assignable.h"
 #include "MatrixComplex.h"
 #include "MatrixReal.h"
-#include "RateMatrix_Kimura81.h"
 #include "RbException.h"
-#include "RbMathMatrix.h"
-#include "TransitionProbabilityMatrix.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "TimeReversibleRateMatrix.h"
 
-#include <cmath>
-#include <string>
-#include <iomanip>
 
 using namespace RevBayesCore;
 
-/** Construct rate matrix with n states */
+/** Default Constructor for a Kimura81 rate matrix
+ * @param n The size of the matrix
+ *
+ *  */
 RateMatrix_Kimura81::RateMatrix_Kimura81(size_t n) : TimeReversibleRateMatrix( n )
 {
     
@@ -125,7 +133,15 @@ void RateMatrix_Kimura81::calculateCijk(void)
 }
 
 
-/** Calculate the transition probabilities */
+/** Calculate the transition probabilities along a branch
+ * @param startAge a double that denotes the start of the branch
+ * @param endAge a double that denotes the end of the branch
+ * @param rate a double that denotes the overall substitution rate
+ * @param p A transition probability matrix
+ *
+ * Stationary frequencies of nucleotides are also used in this calculation
+ *
+ *  */
 void RateMatrix_Kimura81::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
 {
     double t = rate * (startAge - endAge);

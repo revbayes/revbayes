@@ -1,10 +1,10 @@
 #ifndef StoppingRule_H
 #define StoppingRule_H
 
-#include "Cloneable.h"
-
-#include <vector>
+#include <stddef.h>
 #include <iostream>
+
+#include "Cloneable.h"
 
 namespace RevBayesCore {
     

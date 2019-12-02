@@ -1,11 +1,10 @@
 #ifndef DemographicFunction_H
 #define DemographicFunction_H
 
-#include "Cloneable.h"
-
 #include <iostream>
-#include <set>
 #include <vector>
+
+#include "Cloneable.h"
 
 namespace RevBayesCore {
     

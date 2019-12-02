@@ -1,9 +1,21 @@
 #include "VarianceGammaDistribution.h"
+
 #include "DistributionVarianceGamma.h"
 #include "RandomNumberFactory.h"
 #include "RbConstants.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
+
+/* Variance gamma distribution constructor
+ * The constructor takes 4 parameters:
+ * @param m Mu
+ * @param k Kappa, the mean of the normal distribution
+ * @param t Tau, the rate of the poisson process
+ * @param ti time
+ */
 
 VarianceGammaDistribution::VarianceGammaDistribution(const TypedDagNode<double> *m, const TypedDagNode<double> *k, const TypedDagNode<double> *t, const TypedDagNode<double> *ti) : ContinuousDistribution( new double( 0.0 ) ),
 mu( m ),

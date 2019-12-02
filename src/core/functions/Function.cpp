@@ -1,6 +1,14 @@
+#include <stddef.h>
+#include <algorithm>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "DagNode.h"
 #include "Function.h"
 #include "RbException.h"
+
+namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
 
 using namespace RevBayesCore;
 

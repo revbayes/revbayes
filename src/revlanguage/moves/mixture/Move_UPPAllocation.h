@@ -50,7 +50,6 @@ namespace RevLanguage {
 #include "ModelVector.h"
 #include "UPPAllocationProposal.h"
 #include "RbException.h"
-#include "TypedDagNode.h"
 #include "TypeSpec.h"
 
 

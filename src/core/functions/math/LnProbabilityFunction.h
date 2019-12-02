@@ -11,19 +11,17 @@
 
 
 #include "ContinuousFunction.h"
-#include "StochasticNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class variableType> class StochasticNode;
     
     /**
-     * \brief Logarithm of a to base b.
+     * @brief Natural logaritm of a of a. To be used with a
+     * StochasticNode as opposed to a TypedDagNode
      *
-     * The logarithm of value 'a' taken to base 'b'.
-     * Useful application are for base 2, e and 10.
-     *
-     * \copyright (c) Copyright 2009-2015 (GPL version 3)
-     * \author The RevBayes Development Core Team (Sebastian Hoehna)
-     * \since Version 1.0, 2012-08-13
+     * The natural logarithm of x.
+     * This is the same as log(x,base=e).
      *
      */
     class LnProbabilityFunction : public ContinuousFunction {

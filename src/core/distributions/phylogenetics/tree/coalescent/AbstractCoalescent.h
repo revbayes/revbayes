@@ -1,14 +1,16 @@
 #ifndef AbstractCoalescent_H
 #define AbstractCoalescent_H
 
+#include <stddef.h>
+#include <vector>
+
 #include "Taxon.h"
 #include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypedDistribution.h"
+#include "Clade.h"
 
 namespace RevBayesCore {
     
-    class Clade;
     class TopologyNode;
     
     /**

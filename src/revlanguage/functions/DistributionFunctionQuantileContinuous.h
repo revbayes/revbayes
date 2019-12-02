@@ -16,13 +16,23 @@
 #ifndef DistributionFunctionQuantileContinuous_H
 #define DistributionFunctionQuantileContinuous_H
 
-#include "RlContinuousDistribution.h"
-#include "RlTypedFunction.h"
-
 #include <string>
 #include <vector>
+#include <iosfwd>
+
+#include "RlTypedFunction.h"
+#include "ArgumentRules.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "Real.h"
+#include "RevPtr.h"
+#include "RlDeterministicNode.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 namespace RevLanguage {
+class ContinuousDistribution;
+class TypeSpec;
     
     class DistributionFunctionQuantileContinuous : public TypedFunction<Real> {
         

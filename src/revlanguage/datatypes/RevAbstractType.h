@@ -1,15 +1,15 @@
 #ifndef RevAbstractType_H
 #define RevAbstractType_H
 
-#include "WorkspaceObject.h"
-
 #include <ostream>
-#include <string>
+
+#include "WorkspaceObject.h"
 
 
 namespace RevLanguage {
     
     class TypeSpec;
+class RevObject;
     
     /**
      * @brief RevAbstractType: Object representing abstract Rev types

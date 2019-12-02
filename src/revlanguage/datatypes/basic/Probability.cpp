@@ -1,12 +1,15 @@
 #include "Probability.h"
+
+#include <string>
+
 #include "RealPos.h"
 #include "RbException.h"
-#include "RlString.h"
-#include "RbUtil.h"
+#include "ReferenceFunction.h"
 #include "StringUtilities.h"
 #include "TypeSpec.h"
+#include "TypedDagNode.h"
 
-#include <sstream>
+namespace RevLanguage { class RevObject; }
 
 using namespace RevLanguage;
 
@@ -48,6 +51,28 @@ Probability* Probability::clone( void ) const
 	return new Probability( *this );
 }
 
+
+void Probability::constructInternalObject( void )
+{
+  // we free the memory first
+    if ( dag_node != NULL )
+    {
+        if ( dag_node->decrementReferenceCount() == 0 )
+        {
+            delete dag_node;
+        }
+    }
+
+    RevBayesCore::TypedDagNode<double>* x = static_cast<const Real&>( real->getRevObject() ).getDagNode();
+    RevBayesCore::ReferenceFunction<double>* f = new RevBayesCore::ReferenceFunction<double>( x );
+
+
+    dag_node = new RevBayesCore::DeterministicNode<double>("", f);
+    dag_node->incrementReferenceCount();
+
+}
+
+
 RevObject* Probability::convertTo( const TypeSpec& type ) const
 {
     
@@ -79,6 +104,38 @@ const TypeSpec& Probability::getClassTypeSpec(void)
 }
 
 
+/**
+ * Get the Rev name for the constructor function.
+ *
+ * \return Rev name of constructor function.
+ */
+std::string Probability::getConstructorFunctionName( void ) const
+{
+    // create a name variable that is the same for all instance of this class
+    std::string f_name = "Probability";
+
+    return f_name;
+}
+
+
+/** Return member rules (no members) */
+const MemberRules& Probability::getParameterRules(void) const
+{
+    static ArgumentRules argumentRules = ArgumentRules();
+    static bool          rules_set = false;
+
+    if ( !rules_set )
+    {
+
+        argumentRules.push_back( new ArgumentRule( "x", Real::getClassTypeSpec(), "The value.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+
+        rules_set = true;
+    }
+
+    return argumentRules;
+}
+
+
 /** Get type spec */
 const TypeSpec& Probability::getTypeSpec( void ) const
 {
@@ -104,3 +161,17 @@ double Probability::isConvertibleTo( const TypeSpec& type, bool once ) const
     }
 }
 
+
+/** Set a member variable */
+void Probability::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+{
+
+    if ( name == "x" )
+    {
+        real = var;
+    }
+    else
+    {
+        RevObject::setConstParameter(name, var);
+    }
+}

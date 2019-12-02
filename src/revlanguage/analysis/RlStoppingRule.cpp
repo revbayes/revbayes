@@ -1,6 +1,10 @@
+#include <iosfwd>
+
 #include "StoppingRule.h"
 #include "RlStoppingRule.h"
 #include "TypeSpec.h"
+#include "StringUtilities.h"
+#include "WorkspaceToCoreWrapperObject.h"
 
 
 using namespace RevLanguage;

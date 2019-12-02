@@ -1,29 +1,24 @@
-/**
- * @file
- * This file contains the declaration of DPPAllocateAuxGibbsMove, which performs the DPP move based on Neal (2000) Algorithm 8
- *
- * @brief Declaration of DPPAllocateAuxGibbsMove
- *
- * (c) Copyright 2009- under GPL version 3
- * @date Last modified: $Date: 2012-05-11 14:54:35 +0200 (Fri, 11 May 2012) $
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- * @version 1.0
- * @since 2012-07-20, version 1.0
- *
- * $Id: DPPAllocateAuxGibbsMove.h $
- */
-
 #ifndef DPPAllocateAuxGibbsMove_H
 #define DPPAllocateAuxGibbsMove_H
 
-#include <ostream>
-
 #include "DirichletProcessPriorDistribution.h"
 #include "AbstractGibbsMove.h"
-#include "RbVector.h"
+#include "RbMathLogic.h"
 
 namespace RevBayesCore {
+
+    /**
+     * @brief The DDP Move for updating the allocation structure of DPP-distributed elements *templated class
+     *
+     * This move follows the algorithm 8 in Neal (2000, Markov Chain Sampling Methods for Dirichlet Process Mixture Models)
+     * It is a Gibbs sampling proposal with auxiliary parameters.
+     * The move operates on:
+     *  @param v a vector of elements
+     *
+     * The tuning parameter of the move is essentially determined by
+     *  @param na the number of auxiliary parameters (i.e., auxiliary tables)
+     *
+     */
 
     template <class valueType>
     class DPPAllocateAuxGibbsMove : public AbstractGibbsMove {
@@ -54,14 +49,6 @@ namespace RevBayesCore {
 }
 
 
-#include "NormalizeVectorFunction.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbConstants.h"
-#include "RbException.h"
-#include "RbMathVector.h"
-
-#include <cmath>
 
 
 template <class valueType>

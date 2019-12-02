@@ -1,8 +1,17 @@
+#include <stddef.h>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "GewekeTest.h"
 #include "GewekeStoppingRule.h"
 #include "RbFileManager.h"
 #include "StringUtilities.h"
 #include "TraceContinuousReader.h"
+#include "AbstractConvergenceStoppingRule.h"
+#include "BurninEstimatorContinuous.h"
+#include "Cloner.h"
+#include "TraceNumeric.h"
 
 
 using namespace RevBayesCore;

@@ -1,9 +1,13 @@
 #include "DispersalExtinctionRootStructureFunction.h"
-#include "RbException.h"
 
-#include <cmath>
 #include <vector>
 #include <map>
+
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

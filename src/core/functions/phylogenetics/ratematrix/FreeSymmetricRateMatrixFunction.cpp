@@ -1,8 +1,15 @@
 #include "FreeSymmetricRateMatrixFunction.h"
-#include "RateMatrix_FreeSymmetric.h"
-#include "RbException.h"
 
+#include <stddef.h>
 #include <cmath>
+#include <vector>
+
+#include "RateMatrix_FreeSymmetric.h"
+#include "Cloneable.h"
+#include "RbVector.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

@@ -1,3 +1,9 @@
+#include <stddef.h>
+#include <set>
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ConstantNode.h"
 #include "ContinuousCharacterData.h"
@@ -6,17 +12,30 @@
 #include "NclReader.h"
 #include "RbException.h"
 #include "RbFileManager.h"
-#include "RevNullObject.h"
 #include "RlBoolean.h"
 #include "RlContinuousCharacterData.h"
 #include "RlString.h"
-#include "RlUtils.h"
-#include "StringUtilities.h"
 #include "RlUserInterface.h"
-
-#include <map>
-#include <set>
-#include <sstream>
+#include "AbstractCharacterData.h"
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "RbBoolean.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
 
 using namespace RevLanguage;

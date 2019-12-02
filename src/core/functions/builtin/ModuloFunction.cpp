@@ -1,5 +1,10 @@
 #include "ModuloFunction.h"
 
+#include "Cloneable.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
+
 using namespace RevBayesCore;
 /* ModuloFunction of TypedDagNodes of types long
  *

@@ -5,14 +5,37 @@
  * Created on 05/10/14.
  */
 
+#include <stddef.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "Dist_PhyloOrnsteinUhlenbeck.h"
 #include "ModelVector.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RlTimeTree.h"
-#include "StochasticNode.h"
 #include "Tree.h"
+#include "ArgumentRules.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "PhyloOrnsteinUhlenbeckProcess.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlDistribution.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
 using namespace RevLanguage;
 

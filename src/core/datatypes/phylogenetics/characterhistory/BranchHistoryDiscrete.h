@@ -1,13 +1,12 @@
 #ifndef BranchHistoryDiscrete_H
 #define BranchHistoryDiscrete_H
 
-#include "BranchHistory.h"
-#include "CharacterEventDiscrete.h"
-#include "TopologyNode.h"
-
+#include <stddef.h>
 #include <ostream>
 #include <set>
-#include <vector>
+
+#include "BranchHistory.h"
+#include "CharacterEventDiscrete.h"
 
 namespace RevBayesCore {
     

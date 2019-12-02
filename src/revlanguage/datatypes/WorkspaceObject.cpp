@@ -1,7 +1,6 @@
 #include "WorkspaceObject.h"
 
 #include "TypeSpec.h"
-#include "RlFunction.h"
 
 using namespace RevLanguage;
 

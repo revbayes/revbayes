@@ -1,5 +1,9 @@
 #include "ConstantDemographicFunction.h"
+
 #include "TypedDagNode.h"
+#include "Cloneable.h"
+
+namespace RevBayesCore { class DagNode; }
 
 
 using namespace RevBayesCore;

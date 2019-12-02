@@ -1,21 +1,30 @@
+#include <math.h>       /* log2 */
+#include <stddef.h>
+#include <algorithm>
+#include <iosfwd>
+#include <vector>
+
 #include "Argument.h"
 #include "ArgumentRule.h"
 #include "Func_simCompleteTree.h"
-#include "Natural.h"
-#include "OptionRule.h"
-#include "RbException.h"
 #include "RealPos.h"
-#include "RlString.h"
 #include "RlTimeTree.h"
 #include "RlTaxon.h"
-#include "RlUtils.h"
-#include "StringUtilities.h"
 #include "Tree.h"
 #include "TypeSpec.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-
-#include <math.h>       /* log2 */
+#include "ArgumentRules.h"
+#include "ModelObject.h"
+#include "ModelVector.h"
+#include "Procedure.h"
+#include "RbVector.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "Taxon.h"
+#include "TopologyNode.h"
+#include "TypedDagNode.h"
 
 using namespace RevLanguage;
 

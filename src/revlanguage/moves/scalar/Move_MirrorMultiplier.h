@@ -44,7 +44,6 @@ namespace RevLanguage {
 
     protected:
 
-        std::string                                 getHelpDescription(void) const;                                                         //!< Get the description for this function
         void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
 
         RevPtr<const RevVariable>                   x;

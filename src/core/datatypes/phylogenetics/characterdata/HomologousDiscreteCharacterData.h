@@ -44,6 +44,7 @@ namespace RevBayesCore {
 
         // CharacterData functions
         double                                              computeMultinomialProfileLikelihood( void ) const;
+        std::vector<long>                                   computeSiteFrequencySpectrum(bool folded, SFS_AMBIGUITY_TREATMENT ambig_treat) const;
         MatrixReal                                          computeStateFrequencies(void) const;
         void                                                concatenate(const HomologousDiscreteCharacterData &d, std::string type = "");                       //!< Concatenate data matrices
         void                                                concatenate(const AbstractCharacterData &d, std::string type = "");                                 //!< Concatenate data matrices
@@ -109,18 +110,15 @@ namespace RevBayesCore {
 
 #include "CharacterTranslator.h"
 #include "DnaState.h"
-#include "DiscreteCharacterState.h"
-#include "DiscreteTaxonData.h"
 #include "NaturalNumbersState.h"
 #include "NclReader.h"
 #include "RbConstants.h"
 #include "RbException.h"
+#include "RbMathLogic.h"
 
 #include <cmath>
 #include <fstream>
 #include <sstream>
-#include <string>
-
 
 /**
  * Default constructor,
@@ -359,6 +357,112 @@ RevBayesCore::MatrixReal RevBayesCore::HomologousDiscreteCharacterData<charType>
 
 
 /**
+ * Compute the site frequency spectrum.
+ *
+ * \return       A vector of occurrences for the site frequency spectrum.
+ */
+template<class charType>
+std::vector<long> RevBayesCore::HomologousDiscreteCharacterData<charType>::computeSiteFrequencySpectrum( bool folded, SFS_AMBIGUITY_TREATMENT ambig_treat ) const
+{
+    
+    charType tmp = this->getTaxonData(0)[0];
+    size_t num_states = tmp.getNumberOfStates();
+    size_t num_sequences = this->taxa.size();
+    std::vector<long> sfs;
+    
+    if ( folded == true )
+    {
+        sfs = std::vector<long>( int(num_sequences/2)+1,0);
+    }
+    else
+    {
+        sfs = std::vector<long>(num_sequences+1,0);
+    }
+    
+    const DiscreteTaxonData<charType>& tmp_seq = this->getTaxonData(0);
+    size_t seq_len = tmp_seq.getNumberOfCharacters();
+    for (size_t i = 0; i < seq_len; ++i)
+    {
+        
+        size_t derived_count = 0;
+        size_t this_SNP_count = num_sequences;
+        bool skip_this_SNP = false;
+        for (size_t j = 0; j < num_sequences; ++j)
+        {
+            const charType& c = this->getTaxonData(j)[i];
+            
+            if ( c.isAmbiguous() == true )
+            {
+                if ( ambig_treat == DERIVED )
+                {
+                    ++derived_count;
+                }
+                else if ( ambig_treat == RESCALE )
+                {
+                    // decrease the counter of the SNP;
+                    --this_SNP_count;
+                }
+                else if ( ambig_treat == SKIP_COLUMN )
+                {
+                    skip_this_SNP = true;
+                    break;
+                }
+                
+            }
+            else if ( c.isGapState() == false )
+            {
+                
+                for (size_t k=1; k<num_states; ++k)
+                {
+                    
+                    if ( c.isStateSet(k) == true )
+                    {
+                        ++derived_count;
+                        break;
+                    }
+                    
+                }
+                
+            }
+            else
+            {
+                throw RbException("Unexpected character in SFS calculation.");
+            }
+            
+            
+        }  // finished loop over taxa
+        
+        if ( skip_this_SNP == false )
+        {
+        
+//            if ( folded == true )
+//            {
+//                derived_count = RbMath::min(int(derived_count), int(this_SNP_count-derived_count));
+//            }
+            
+            if ( ambig_treat == RESCALE )
+            {
+                double rescaled_derived_count = double(derived_count) / double(num_sequences) * double(this_SNP_count);
+                derived_count = int( round(rescaled_derived_count) );
+            }
+            
+            
+            if ( folded == true )
+            {
+                derived_count = RbMath::min(int(derived_count), int(num_sequences-derived_count));
+            }
+        
+            sfs[derived_count]++;
+            
+        }
+        
+    }  // finished loop over sequence
+    
+    return sfs;
+}
+
+
+/**
  * Add another character data object to this character data object.
  *
  * \param[in]    obsd    The CharacterData object that should be added.
@@ -380,7 +484,7 @@ RevBayesCore::AbstractHomologousDiscreteCharacterData* RevBayesCore::HomologousD
 /**
  * Add another character data object to this character data object.
  *
- * \param[in]    obsd    The CharacterData object that should be added.
+ * \param[in]    second    The CharacterData object that should be added.
  */
 template<class charType>
 RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::NaturalNumbersState>* RevBayesCore::HomologousDiscreteCharacterData<charType>::combineCharacters(const HomologousDiscreteCharacterData<charType> &second ) const
@@ -691,6 +795,10 @@ RevBayesCore::AbstractHomologousDiscreteCharacterData* RevBayesCore::HomologousD
             {
                 number_state.setMissingState( true );
             }
+            else if ( org_char.isGapState() == true )
+            {
+                number_state.setGapState( true );
+            }
             else
             {
 
@@ -938,7 +1046,10 @@ size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getMaxObservedSt
         for (size_t i = 0; i < getNumberOfTaxa(); i++)
         {
             const DiscreteTaxonData<charType>& sequence = getTaxonData( i );
-            observed |= sequence[j].getState();
+            if ( sequence[j].isMissingState() == false )
+            {
+                observed |= sequence[j].getState();
+            }
         }
     }
 

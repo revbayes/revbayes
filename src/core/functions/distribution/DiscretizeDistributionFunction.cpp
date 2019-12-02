@@ -1,5 +1,14 @@
 #include "DiscretizeDistributionFunction.h"
 
+#include <vector>
+
+#include "Cloneable.h"
+#include "ContinuousDistribution.h"
+#include "RbVectorImpl.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
+
 
 using namespace RevBayesCore;
 

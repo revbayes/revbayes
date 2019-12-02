@@ -8,11 +8,11 @@
 #include <vector>
 
 namespace RevBayesCore {
-    
+
     class Proposal;
-    
+
     /**
-     * Base class for all Metropolis-Hastings within an MCMC. 
+     * Base class for all Metropolis-Hastings within an MCMC.
      *
      * The base class of all moves only provides the interface for the call to propose a new move.
      * Here the perform methods actually does the accept/reject step.
@@ -26,7 +26,7 @@ namespace RevBayesCore {
     class EllipticalSliceSamplingSimpleMove : public AbstractMove {
 
     public:
-        EllipticalSliceSamplingSimpleMove(std::vector< StochasticNode<double> *> n, double window_, double weight_, bool autoTune = false);        //!< Constructor
+        EllipticalSliceSamplingSimpleMove(std::vector< StochasticNode<double> *> n, double window_, double weight_, bool autoTune = false, bool forceAccept = false);        //!< Constructor
         virtual                                                 ~EllipticalSliceSamplingSimpleMove(void);                           //!< Destructor
 
         // public methods
@@ -42,7 +42,7 @@ namespace RevBayesCore {
         void                                                    performMcmcMove(double prHeat, double lHeat, double pHeat);            //!< Perform the move.
         void                                                    resetMoveCounters(void);                            //!< Reset the counters such as numAccepted.
         virtual void                                            swapNodeInternal(DagNode *oldN, DagNode *newN);             //!< Swap the pointers to the variable on which the move works on.
-        
+
     private:
 
         // parameters
@@ -50,6 +50,7 @@ namespace RevBayesCore {
         double                                                  window;                                             //!< Window width for slice sampling
         double                                                  total_movement;                                     //!< total distance moved under auto-tuning
         int                                                     numPr;                                              //!< Number of probability evaluations
+        bool                                                    force_accept;                                       //!< Should we force an acceptance of a step of size 0 after we max out on slice iterations?
     };
 }
 

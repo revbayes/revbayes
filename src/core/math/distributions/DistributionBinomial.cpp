@@ -15,6 +15,7 @@
  */
 
 #include <cmath>
+#include <sstream> // IWYU pragma: keep
 
 #include "DistributionBeta.h"
 #include "DistributionBinomial.h"
@@ -189,7 +190,7 @@ double RbStatistics::Binomial::do_search(double y, double *z, double p, double n
 }
 
 /*!
- * This function calculates the probability density 
+ * This function calculates the probability density
  * for a binomially-distributed random variable.
  *
  * From R:
@@ -203,9 +204,9 @@ double RbStatistics::Binomial::do_search(double y, double *z, double p, double n
  *         Do this in the calling function.
  *
  * \brief Binomial probability density.
- * \param n is the number of trials. 
- * \param p is the success probability. 
- * \param x is the number of successes. 
+ * \param n is the number of trials.
+ * \param p is the success probability.
+ * \param x is the number of successes.
  * \return Returns the probability density.
  * \throws Does not throw an error.
  */
@@ -317,6 +318,8 @@ double RbStatistics::Binomial::quantile(double quantile_prob, double n, double p
 
 #include <stdlib.h>
 #include <limits.h>
+#include <float.h>
+
 #include "RandomNumberGenerator.h"
 
 #define repeat for (;;)

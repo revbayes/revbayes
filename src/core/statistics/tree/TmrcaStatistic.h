@@ -18,18 +18,18 @@
 #ifndef TmrcaStatistic_H
 #define TmrcaStatistic_H
 
+#include <stddef.h>
+
 //#include "Statistic.h"
 #include "Clade.h"
-#include "Tree.h"
 #include "TreeChangeEventListener.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
-
-
-#include <vector>
-#include <string>
+#include "TopologyNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+class Tree;
+template <class valueType> class TypedDagNode;
     
     class TmrcaStatistic : public TypedFunction<double>, TreeChangeEventListener {
         

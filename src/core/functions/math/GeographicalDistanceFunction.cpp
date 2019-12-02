@@ -7,8 +7,14 @@
 //
 
 #include "GeographicalDistanceFunction.h"
-#include "RbConstants.h"
+
 #include <cmath>
+
+#include "RbConstants.h"
+#include "Cloneable.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 /**

@@ -1,10 +1,11 @@
 #ifndef BinomialDistribution_H
 #define BinomialDistribution_H
 
-#include "TypedDagNode.h"
 #include "TypedDistribution.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Binomial distribution class.

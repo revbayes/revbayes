@@ -1,3 +1,10 @@
+#include <stddef.h>
+#include <cmath>
+#include <string>
+#include <complex>
+#include <iosfwd>
+#include <vector>
+
 #include "DistributionPoisson.h"
 #include "EigenSystem.h"
 #include "MatrixComplex.h"
@@ -8,72 +15,57 @@
 #include "RbMathMatrix.h"
 #include "RbSettings.h"
 #include "TransitionProbabilityMatrix.h"
-
-#include <cmath>
-#include <string>
-#include <iomanip>
+#include "Assignable.h"
+#include "GeneralRateMatrix.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 
 using namespace RevBayesCore;
 
-/** Construct rate matrix with n states */
-RateMatrix_FreeK::RateMatrix_FreeK(size_t n) : GeneralRateMatrix( n ),
-    rescale(true),
-    my_method( EIGEN )
+RateMatrix_FreeK::METHOD method_from_string(const std::string& method)
 {
-    
-    theEigenSystem       = new EigenSystem(the_rate_matrix);
-    c_ijk.resize(num_states * num_states * num_states);
-    cc_ijk.resize(num_states * num_states * num_states);
-    
-    matrixProducts = new std::vector<MatrixReal>();
-    
-    update();
-}
-
-
-RateMatrix_FreeK::RateMatrix_FreeK(size_t n, bool r) : GeneralRateMatrix( n ),
-    rescale(r),
-    my_method( EIGEN )
-{
-    
-    theEigenSystem       = new EigenSystem(the_rate_matrix);
-    c_ijk.resize(num_states * num_states * num_states);
-    cc_ijk.resize(num_states * num_states * num_states);
-    
-    matrixProducts = new std::vector<MatrixReal>();
-    
-    update();
-}
-
-
-RateMatrix_FreeK::RateMatrix_FreeK(size_t n, bool r, std::string method) : GeneralRateMatrix( n ),
-    rescale(r),
-    my_method( EIGEN )
-{
-    
     // determine the type of matrix exponentiation
     if (method == "scalingAndSquaring")
     {
-        my_method = SCALING_AND_SQUARING;
+        return RateMatrix_FreeK::SCALING_AND_SQUARING;
     }
     else if (method == "scalingAndSquaringPade")
     {
-        my_method = SCALING_AND_SQUARING_PADE;
+        return RateMatrix_FreeK::SCALING_AND_SQUARING_PADE;
     }
     else if (method == "scalingAndSquaringTaylor")
     {
-        my_method = SCALING_AND_SQUARING_TAYLOR;
+        return RateMatrix_FreeK::SCALING_AND_SQUARING_TAYLOR;
     }
     else if (method == "uniformization")
     {
-        my_method = UNIFORMIZATION;
+        return RateMatrix_FreeK::UNIFORMIZATION;
     }
     else if (method == "eigen")
     {
-        my_method = EIGEN;
+        return RateMatrix_FreeK::EIGEN;
     }
-    
+    else
+        return RateMatrix_FreeK::EIGEN; /// We haven't been complaining here, but maybe we should.
+}
+
+/** Construct rate matrix with n states */
+RateMatrix_FreeK::RateMatrix_FreeK(size_t n) : RateMatrix_FreeK(n, true, EIGEN)
+{ }
+
+
+RateMatrix_FreeK::RateMatrix_FreeK(size_t n, bool r) : RateMatrix_FreeK(n, r, EIGEN)
+{ }
+
+
+RateMatrix_FreeK::RateMatrix_FreeK(size_t n, bool r, std::string method) : RateMatrix_FreeK( n, r, method_from_string(method))
+{ }
+
+RateMatrix_FreeK::RateMatrix_FreeK(size_t n, bool r, METHOD method) : GeneralRateMatrix( n ),
+    rescale(r),
+    my_method( method )
+{
     // create the eigen system so the destructor has something to delete
     theEigenSystem       = new EigenSystem(the_rate_matrix);
     c_ijk.resize(num_states * num_states * num_states);
@@ -81,6 +73,11 @@ RateMatrix_FreeK::RateMatrix_FreeK(size_t n, bool r, std::string method) : Gener
     
     matrixProducts = new std::vector<MatrixReal>();
     
+    // Initialize emit_letters to [0...N-1]
+    emit_letters.resize(num_states);
+    for(int i=0;i<num_states;i++)
+        emit_letters[i] = i;
+
     update();
 }
 
@@ -785,3 +782,14 @@ void RateMatrix_FreeK::update( void )
     
 }
 
+void RateMatrix_FreeK::set_emitted_letters(const std::vector<int>& emit)
+{
+    assert(emit.size() == num_states);
+
+    emit_letters = emit;
+}
+
+std::vector<int> RateMatrix_FreeK::get_emitted_letters() const
+{
+    return emit_letters;
+}

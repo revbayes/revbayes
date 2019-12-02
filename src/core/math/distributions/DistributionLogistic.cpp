@@ -15,11 +15,12 @@
  */
 
 #include <cmath>
+#include <sstream> // IWYU pragma: keep
+
 #include "DistributionLogistic.h"
 #include "RbException.h"
-#include "RbMathFunctions.h"
-#include "RbStatisticsHelper.h"
 #include "RbMathLogic.h"
+#include "RandomNumberGenerator.h"
 
 using namespace RevBayesCore;
 

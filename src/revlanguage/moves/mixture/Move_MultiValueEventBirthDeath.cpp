@@ -1,13 +1,25 @@
+#include <stddef.h>
+#include <ostream>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_MultiValueEventBirthDeath.h"
 #include "MultiValueEventBirthDeathProposal.h"
-#include "RbException.h"
 #include "RealPos.h"
 #include "RevObject.h"
-#include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "Move.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlMove.h"
+#include "RlMultiValueEvent.h"
+#include "StochasticNode.h"
+
+namespace RevBayesCore { class MultiValueEvent; }
+namespace RevBayesCore { class Proposal; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 
 using namespace RevLanguage;

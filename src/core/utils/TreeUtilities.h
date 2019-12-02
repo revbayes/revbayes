@@ -16,9 +16,10 @@
 #define TreeUtilities_H
 
 #include "AbstractHomologousDiscreteCharacterData.h"
+#include "AverageDistanceMatrix.h"
 #include "DistanceMatrix.h"
 #include "MatrixReal.h"
-#include "Tree.h"
+#include "RbVector.h"
 #include "Tree.h"
 #include "TopologyNode.h"
 #include <string>
@@ -36,6 +37,7 @@ namespace RevBayesCore {
         Tree*                   convertTree(const Tree &t, bool resetIndex=true);
 //        AdmixtureTree*  convertToAdmixtureTree(const Tree &t, std::vector<std::string> names); // , const std::vector<std::string> names);
         void                    getAges(Tree *t, TopologyNode *n, std::vector<double>& ages, bool internalsOnly=true);
+        AverageDistanceMatrix   getAverageDistanceMatrix(const RbVector<DistanceMatrix>& matvect);
         DistanceMatrix*         getDistanceMatrix(const Tree& tree);
         size_t                  getMrcaIndex(const TopologyNode *l, const TopologyNode *r);
         int                     getNodalDistance(const TopologyNode *l, const TopologyNode *r);
@@ -48,6 +50,7 @@ namespace RevBayesCore {
         void                    rescaleTree(Tree *t, TopologyNode *n, double factor);
         void                    setAges(Tree *t, TopologyNode *n, std::vector<double>& ages);
         void                    setAgesRecursively(Tree *t, TopologyNode *n, double age);
+        void                    setBranchLength(Tree *t, size_t index, double value);
 
         // internal helper functions
         void                    constructTimeTreeRecursively(TopologyNode *tn, const TopologyNode &n, std::vector<TopologyNode*> &nodes, std::vector<double> &ages, double depth);

@@ -18,6 +18,7 @@
 #ifndef MatrixComplex_H
 #define MatrixComplex_H
 
+#include <stddef.h>
 #include <vector>
 #include <complex>
 

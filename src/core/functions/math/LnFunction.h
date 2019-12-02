@@ -2,21 +2,20 @@
 #define LnFunction_H
 
 #include "ContinuousFunction.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     
     /**
-     * \brief Natural logarith function.
+     * @brief Natural logarithm function.
      *
      * The natural logarithm of x.
      * This is the same as log(x,base=e).
+     * Reimplemented here to allow for use with TypedDagNode
      *
-     * \copyright (c) Copyright 2009-2015 (GPL version 3)
-     * \author The RevBayes Development Core Team (Sebastian Hoehna)
-     * \since Version 1.0, 2012-08-13
-     *
+     * @see LnFunction
      */
     class LnFunction : public ContinuousFunction {
         

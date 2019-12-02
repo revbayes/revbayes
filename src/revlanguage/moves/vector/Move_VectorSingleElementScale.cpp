@@ -1,3 +1,7 @@
+#include <stddef.h>
+#include <ostream>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
@@ -5,6 +9,20 @@
 #include "Move_VectorSingleElementScale.h"
 #include "RealPos.h"
 #include "VectorSingleElementScaleProposal.h"
+#include "ModelObject.h"
+#include "Move.h"
+#include "RbBoolean.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlMove.h"
+#include "StochasticNode.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class Proposal; }
+namespace RevBayesCore { template <class valueType> class RbVector; }
 
 using namespace RevLanguage;
 

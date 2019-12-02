@@ -1,5 +1,9 @@
 #include "JcRateMatrixFunction.h"
-#include "RbException.h"
+
+#include "Cloneable.h"
+#include "RateMatrix_JC.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

@@ -1,17 +1,26 @@
+#include <stddef.h>
+#include <iostream>
+#include <string>
+#include <vector>
+
 #include "Argument.h"
 #include "ArgumentRule.h"
 #include "Func_source.h"
 #include "Parser.h"
 #include "RbException.h"
-#include "RbUtil.h"
-#include "RevNullObject.h"
 #include "RlString.h"
 #include "RlUtils.h"
 #include "TypeSpec.h"
 #include "RlUserInterface.h"
 #include "Workspace.h"
-
-#include <fstream>
+#include "ArgumentRules.h"
+#include "Procedure.h"
+#include "RbBoolean.h"
+#include "RbFileManager.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlFunction.h"
 
 using namespace RevLanguage;
 

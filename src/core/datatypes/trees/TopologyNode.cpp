@@ -1,17 +1,26 @@
+#include <stdio.h>
+#include <algorithm>
+#include <cstddef>
+#include <iostream>
+#include <iterator>
+#include <map>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "Clade.h"
-#include "RbConstants.h"
 #include "RbException.h"
 #include "RbMathLogic.h"
-#include "RbOptions.h"
 #include "RbSettings.h"
-#include "RbUtil.h"
 #include "Taxon.h"
 #include "TopologyNode.h"
 #include "Tree.h"
 #include "TreeChangeEventMessage.h"
-
-#include <algorithm>
-#include <stdio.h>
+#include "RbBitSet.h"
+#include "TaxonMap.h"
+#include "TreeChangeEventHandler.h"
+#include "RbConstants.h" // IWYU pragma: keep
 
 using namespace RevBayesCore;
 
@@ -309,19 +318,19 @@ void TopologyNode::addNodeParameters(std::string const &n, const std::vector<dou
     
 }
 
-void TopologyNode::addNodeParameters(std::string const &n, const std::vector<std::string*> &p, bool internalOnly)
+void TopologyNode::addNodeParameters(std::string const &n, const std::vector<std::string> &p, bool internal_only)
 {
     
-    if ( !internalOnly || !isTip()  )
+    if ( !internal_only || !isTip()  )
     {
         std::stringstream o;
-        o << n << "=" << *p[index];
+        o << n << "=" << p[index];
         std::string comment = o.str();
         node_comments.push_back( comment );
         
         for (std::vector<TopologyNode*>::iterator it = children.begin(); it != children.end(); ++it)
         {
-            (*it)->addNodeParameters(n, p, internalOnly);
+            (*it)->addNodeParameters(n, p, internal_only);
         }
     }
 }
@@ -1789,7 +1798,7 @@ void TopologyNode::setParent(TopologyNode* p)
         
     }
     
-    root_node = parent == NULL;
+    root_node = (parent == NULL);
 }
 
 void TopologyNode::setUseAges(bool tf, bool recursive)

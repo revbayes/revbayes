@@ -1,19 +1,20 @@
 #ifndef ContinuousTaxonData_H
 #define ContinuousTaxonData_H
 
-#include "AbstractTaxonData.h"
-#include "RbOptions.h"
-
-
-#include <string>
+#include <stddef.h>
 #include <vector>
+#include <iosfwd>
+#include <set>
+
+#include "AbstractTaxonData.h"
+#include "Taxon.h"
 
 namespace RevBayesCore {
     
     class ContinuousTaxonData : public AbstractTaxonData {
         
     public:
-//                                                ContinuousTaxonData(void);                                          //!< Set type spec of container from type of elements
+//                                              ContinuousTaxonData(void);                                          //!< Set type spec of container from type of elements
                                                 ContinuousTaxonData(const Taxon &t);                                //!< Set type spec of container from type of elements
         
         double&                                 operator[](size_t i);                                               //!< Index op allowing change
@@ -25,12 +26,13 @@ namespace RevBayesCore {
         // TaxonData functions
         void                                    addCharacter(const double &newChar);                                //!< Push back a new character
         void                                    addCharacter(const double &newChar, const bool tf);                 //!< Push back a new character
-//        void                                    combineCharacters(const AbstractTaxonData &d);                      //!< Concatenate sequences
-//        void                                    combineCharacters(const ContinuousTaxonData &d);                    //!< Concatenate sequences
+//      void                                    combineCharacters(const AbstractTaxonData &d);                      //!< Concatenate sequences
+//      void                                    combineCharacters(const ContinuousTaxonData &d);                    //!< Concatenate sequences
         void                                    concatenate(const AbstractTaxonData &d);                            //!< Concatenate sequences
         void                                    concatenate(const ContinuousTaxonData &d);                          //!< Concatenate sequences
         const double&                           getCharacter(size_t index) const;                                   //!< Get the character at position index
         double&                                 getCharacter(size_t index);                                         //!< Get the character at position index (non-const to return non-const character)
+        std::string                             getJsonRepresentation(void) const;
         size_t                                  getNumberOfCharacters(void) const;                                  //!< How many characters
         double                                  getPercentageMissing(void) const;                                   //!< Returns the percentage of missing data for this sequence
         std::string                             getStringRepresentation(size_t idx) const;

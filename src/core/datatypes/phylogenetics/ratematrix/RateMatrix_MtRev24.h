@@ -21,8 +21,6 @@
 
 namespace RevBayesCore {
     
-    class TransitionProbabilityMatrix;
-    
     class RateMatrix_MtRev24 : public RateMatrix_Empirical {
         
     public:

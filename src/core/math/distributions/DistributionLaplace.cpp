@@ -16,7 +16,6 @@
 #include <cmath>
 
 #include "DistributionLaplace.h"
-#include "RbConstants.h"
 #include "RandomNumberGenerator.h"
 
 using namespace RevBayesCore;

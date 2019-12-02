@@ -1,7 +1,14 @@
 #include "MixtureCladogeneticStateFunction.h"
-#include "RbException.h"
 
-#include <math.h>
+#include <utility>
+
+#include "Cloneable.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "Simplex.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

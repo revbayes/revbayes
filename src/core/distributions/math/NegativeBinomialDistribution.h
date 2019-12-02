@@ -1,10 +1,11 @@
 #ifndef NegativeBinomialDistribution_H
 #define NegativeBinomialDistribution_H
 
-#include "TypedDagNode.h"
 #include "TypedDistribution.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief NegativeBinomial distribution class.

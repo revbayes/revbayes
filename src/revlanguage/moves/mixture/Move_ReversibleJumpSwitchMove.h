@@ -52,7 +52,6 @@ namespace RevLanguage {
 #include "MetropolisHastingsMove.h"
 #include "ReversibleJumpMixtureProposal.h"
 #include "RbException.h"
-#include "TypedDagNode.h"
 #include "TypeSpec.h"
 
 

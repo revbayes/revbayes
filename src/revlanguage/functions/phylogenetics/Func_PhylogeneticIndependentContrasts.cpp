@@ -1,16 +1,38 @@
+#include <iosfwd>
+#include <vector>
+
 #include "Argument.h"
 #include "ArgumentRule.h"
-#include "Ellipsis.h"
 #include "Func_PhylogeneticIndependentContrasts.h"
-#include "OptionRule.h"
 #include "PhylogeneticIndependentContrastsFunction.h"
-#include "RbException.h"
 #include "RlContinuousCharacterData.h"
 #include "RlTimeTree.h"
-#include "RlString.h"
-#include "RlUtils.h"
 #include "TypeSpec.h"
-#include "Workspace.h"
+#include "ArgumentRules.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "ModelVector.h"
+#include "Natural.h"
+#include "RbBoolean.h"
+#include "RbVector.h"
+#include "Real.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlConstantNode.h"
+#include "RlDeterministicNode.h"
+#include "RlFunction.h"
+#include "RlTypedFunction.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
+
+namespace RevBayesCore { class ContinuousCharacterData; }
+namespace RevBayesCore { class Tree; }
 
 using namespace RevLanguage;
 

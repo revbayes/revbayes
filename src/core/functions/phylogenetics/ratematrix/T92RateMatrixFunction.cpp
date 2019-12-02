@@ -1,6 +1,10 @@
 #include "T92RateMatrixFunction.h"
+
 #include "RateMatrix_Tamura92.h"
-#include "RbException.h"
+#include "Cloneable.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

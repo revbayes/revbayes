@@ -9,14 +9,21 @@
 #ifndef StitchTreeFunction_h
 #define StitchTreeFunction_h
 
-#include "Tree.h"
-#include "TypedDagNode.h"
-#include "TypedFunction.h"
-
 #include <map>
 #include <set>
+#include <cstddef>
+#include <vector>
+
+#include "Tree.h"
+#include "TypedFunction.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "Taxon.h"
 
 namespace RevBayesCore {
+class DagNode;
+class TopologyNode;
+template <class valueType> class TypedDagNode;
     
     class StitchTreeFunction : public TypedFunction<Tree> {
         

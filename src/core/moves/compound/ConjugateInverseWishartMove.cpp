@@ -1,12 +1,25 @@
+#include <stddef.h>
+#include <iosfwd>
+#include <vector>
+
 #include "DistributionInverseWishart.h"
 #include "InverseWishartDistribution.h"
 #include "MultivariateNormalDistribution.h"
 #include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
 #include "ConjugateInverseWishartMove.h"
+#include "AbstractGibbsMove.h"
+#include "Cloneable.h"
+#include "DagNode.h"
+#include "Distribution.h"
+#include "MatrixReal.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "StochasticNode.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
 
-#include <cmath>
-#include <iomanip>
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 

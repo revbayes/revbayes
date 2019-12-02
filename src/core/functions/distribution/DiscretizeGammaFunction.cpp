@@ -2,6 +2,10 @@
 
 #include "DistributionChisq.h"
 #include "RbMathFunctions.h"
+#include "RbVectorImpl.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 
 

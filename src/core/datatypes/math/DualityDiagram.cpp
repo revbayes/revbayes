@@ -37,11 +37,15 @@
  */
 
 #include "DualityDiagram.h"
+
+#include <cmath>
+
 #include "EigenSystem.h"
 #include "MatrixReal.h"
 #include "RbMathMatrix.h"
-
-#include <cmath>
+#include "RbException.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 using namespace RevBayesCore;
 

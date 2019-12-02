@@ -1,5 +1,9 @@
 #include "LogicalOrFunction.h"
 
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
+
 using namespace RevBayesCore;
 
 LogicalOrFunction::LogicalOrFunction(const TypedDagNode<Boolean> *l, const TypedDagNode<Boolean> *r) : TypedFunction<Boolean>( new Boolean(false) ),

@@ -1,16 +1,30 @@
-#include "Clade.h"
-#include "ConstantNode.h"
+#include <stdlib.h>
+#include <cmath>
+#include <cstddef>
+#include <iostream>
+#include <map>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "MultispeciesCoalescentMigration.h"
-#include "MultispeciesCoalescentMigrationODE.h"
 #include "DistributionExponential.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "TopologyNode.h"
+#include "RateGenerator.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "Taxon.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
 
-#include <algorithm>
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

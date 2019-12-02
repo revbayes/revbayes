@@ -1,19 +1,36 @@
+#include <iosfwd>
+#include <vector>
+
 #include "Argument.h"
 #include "ArgumentRule.h"
 #include "Func_simStartingTree.h"
 #include "ModelVector.h"
-#include "OptionRule.h"
-#include "RbException.h"
 #include "RlClade.h"
 #include "RlTaxon.h"
 #include "RlTimeTree.h"
-#include "RlUtils.h"
 #include "StartingTreeSimulator.h"
-#include "StringUtilities.h"
-#include "Tree.h"
 #include "TypeSpec.h"
+#include "ArgumentRules.h"
+#include "Clade.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "Procedure.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlFunction.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
-#include <math.h>       /* log2 */
+namespace RevBayesCore { class Taxon; }
+namespace RevBayesCore { class Tree; }
 
 using namespace RevLanguage;
 

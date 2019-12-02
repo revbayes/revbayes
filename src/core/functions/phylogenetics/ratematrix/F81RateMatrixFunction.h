@@ -1,15 +1,13 @@
 #ifndef F81RateMatrixFunction_H
 #define F81RateMatrixFunction_H
 
-#include "RateMatrix_F81.h"
-#include "RbVector.h"
-#include "Simplex.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
-
-#include <vector>
+#include "RateGenerator.h"
 
 namespace RevBayesCore {
+class DagNode;
+class Simplex;
+template <class valueType> class TypedDagNode;
     
     
     /**

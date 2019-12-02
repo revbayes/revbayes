@@ -6,15 +6,39 @@
 //  Copyright (c) 2015 Michael Landis. All rights reserved.
 //
 
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ModelVector.h"
-#include "Natural.h"
-#include "Real.h"
 #include "RealPos.h"
-#include "RlBoolean.h"
 #include "RlMemberFunction.h"
 #include "RlRateGenerator.h"
-#include "RlRateMatrix.h"
+#include "ArgumentRules.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "MemberFunction.h"
+#include "MethodTable.h"
+#include "ModelObject.h"
+#include "RateGenerator.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlDeterministicNode.h"
+#include "RlTypedFunction.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
+
+namespace RevLanguage { class Argument; }
 
 using namespace RevLanguage;
 

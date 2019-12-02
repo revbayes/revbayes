@@ -9,12 +9,16 @@
 #ifndef __rb_mlandis__TimeAtlas__
 #define __rb_mlandis__TimeAtlas__
 
+#include <stddef.h>
+#include <iosfwd>
+#include <vector>
+
 #include "Cloneable.h"
-#include "GeographicArea.h"
-#include "TimeAtlasDataReader.h"
-#include <string>
 
 namespace RevBayesCore {
+class GeographicArea;
+class TimeAtlasDataReader;
+
     class TimeAtlas : public Cloneable
     {
         

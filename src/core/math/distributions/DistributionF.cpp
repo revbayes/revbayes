@@ -15,16 +15,18 @@
  */
 
 #include <cmath>
+#include <sstream> // IWYU pragma: keep
 
 #include "DistributionBeta.h"
 #include "DistributionBinomial.h"
 #include "DistributionChisq.h"
 #include "DistributionF.h"
 #include "DistributionGamma.h"
-#include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbException.h"
 #include "RbMathLogic.h"
+
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 
 using namespace RevBayesCore;

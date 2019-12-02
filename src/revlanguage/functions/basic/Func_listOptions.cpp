@@ -1,13 +1,17 @@
-#include "Argument.h"
-#include "ArgumentRule.h"
+#include <stddef.h>
+#include <fstream>
+#include <vector>
+
 #include "Func_listOptions.h"
-#include "RbException.h"
 #include "RbSettings.h"
-#include "RlString.h"
 #include "RlUtils.h"
 #include "TypeSpec.h"
-
-#include <fstream>
+#include "ArgumentRules.h"
+#include "Procedure.h"
+#include "RbHelpReference.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
 
 using namespace RevLanguage;
 
@@ -82,95 +86,6 @@ std::string Func_listOptions::getFunctionName( void ) const
     std::string f_name = "listOptions";
     
     return f_name;
-}
-
-
-/**
- * Get the author(s) of this function so they can receive credit (and blame) for it.
- */
-std::vector<std::string> Func_listOptions::getHelpAuthor(void) const
-{
-    // create a vector of authors for this function
-    std::vector<std::string> authors;
-    authors.push_back( "Will Freyman" );
-    
-    return authors;
-}
-
-
-/**
- * Get the (brief) description for this function
- */
-std::string Func_listOptions::getHelpDescription(void) const
-{
-    // create a variable for the description of the function
-    std::string description = "List all global options for RevBayes.";
-    
-    return description;
-}
-
-
-/**
- * Get the more detailed description of the function
- */
-std::string Func_listOptions::getHelpDetails(void) const
-{
-    // create a variable for the description of the function
-    std::string details =  "Options are used to personalize RevBayes and are stored on the local machine. Currently this is rather experimental." ;
-    
-    return details;
-}
-
-
-/**
- * Get an executable and instructive example.
- * These example should help the users to show how this function works but
- * are also used to test if this function still works.
- */
-std::string Func_listOptions::getHelpExample(void) const
-{
-    return "";
-}
-
-
-/**
- * Get some references/citations for this function
- *
- */
-std::vector<RevBayesCore::RbHelpReference> Func_listOptions::getHelpReferences(void) const
-{
-    // create an entry for each reference
-    std::vector<RevBayesCore::RbHelpReference> references;
-    
-    
-    return references;
-}
-
-
-/**
- * Get the names of similar and suggested other functions
- */
-std::vector<std::string> Func_listOptions::getHelpSeeAlso(void) const
-{
-    // create an entry for each suggested function
-    std::vector<std::string> see_also;
-    see_also.push_back( "setOption" );
-    see_also.push_back( "getOption" );
-    
-    
-    return see_also;
-}
-
-
-/**
- * Get the title of this help entry
- */
-std::string Func_listOptions::getHelpTitle(void) const
-{
-    // create a title variable
-    std::string title = "List global RevBayes options";
-    
-    return title;
 }
 
 

@@ -1,7 +1,12 @@
 #include "LognormalDistribution.h"
+
 #include "DistributionLognormal.h"
 #include "RandomNumberFactory.h"
 #include "RbConstants.h"
+#include "Cloneable.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
@@ -74,15 +79,16 @@ void LognormalDistribution::redrawValue( void )
 
 
 /** Swap a parameter of the distribution */
-void LognormalDistribution::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void LognormalDistribution::swapParameterInternal(const DagNode *old_p, const DagNode *new_p)
 {
     
-    if (oldP == mean) 
+    if (old_p == mean)
     {
-        mean = static_cast<const TypedDagNode<double>* >( newP );
+        mean = static_cast<const TypedDagNode<double>* >( new_p );
     }
-    if (oldP == sd) 
+    if (old_p == sd)
     {
-        sd = static_cast<const TypedDagNode<double>* >( newP );
+        sd = static_cast<const TypedDagNode<double>* >( new_p );
     }
+    
 }

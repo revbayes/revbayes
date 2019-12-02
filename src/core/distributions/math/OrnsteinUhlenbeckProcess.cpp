@@ -1,11 +1,15 @@
 #include "OrnsteinUhlenbeckProcess.h"
-#include "DistributionNormal.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbConstants.h"
-#include "RbException.h"
 
 #include <cmath>
+
+#include "DistributionNormal.h"
+#include "RandomNumberFactory.h"
+#include "RbConstants.h"
+#include "RbException.h"
+#include "Cloneable.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

@@ -22,11 +22,11 @@
 #define SimplexScaleFunction_H
 
 #include "TypedFunction.h"
-#include "TypedDagNode.h"
-
-#include <vector>
+#include "RbVector.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     class SimplexScaleFunction : public TypedFunction< RbVector<double> > {
         

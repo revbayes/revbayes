@@ -1,6 +1,8 @@
-#include "Clade.h"
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "Func_tmrca.h"
-#include "ModelVector.h"
 #include "RlBoolean.h"
 #include "RlClade.h"
 #include "RlTimeTree.h"
@@ -8,6 +10,21 @@
 #include "RlDeterministicNode.h"
 #include "TmrcaStatistic.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RbBoolean.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "RlTypedFunction.h"
+#include "TypeSpec.h"
+#include "TypedFunction.h"
+
+namespace RevBayesCore { class Clade; }
+namespace RevBayesCore { class Tree; }
 
 using namespace RevLanguage;
 

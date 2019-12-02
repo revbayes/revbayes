@@ -1,10 +1,12 @@
 #ifndef RelativeNodeAgeWeightedConstraintsReader_H
 #define RelativeNodeAgeWeightedConstraintsReader_H
 
-#include "DelimitedDataReader.h"
-#include "MatrixReal.h"
-#include <string>
+#include <stddef.h>
 #include <vector>
+#include <iosfwd>
+#include <utility>
+
+#include "DelimitedDataReader.h"
 
 namespace RevBayesCore {
     

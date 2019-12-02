@@ -6,6 +6,10 @@
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
 
 using namespace RevLanguage;
 

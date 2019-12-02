@@ -1,13 +1,15 @@
 #ifndef Move_IndependentTopology_H
 #define Move_IndependentTopology_H
 
-#include "RlMove.h"
-#include "TypedDagNode.h"
-
 #include <ostream>
-#include <string>
+
+#include "RlMove.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
 
 namespace RevLanguage {
+class TypeSpec;
     
     /**
      * @brief Rev Wrapper of a constrained tree distribution move.

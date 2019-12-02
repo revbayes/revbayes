@@ -32,7 +32,8 @@ namespace RevBayesCore {
         virtual double                                      getRootAge(void) const;
         const std::vector<Taxon>&                           getTaxa(void) const;
         virtual void                                        simulateClade(std::vector<TopologyNode *> &n, double age, double present);
-        
+        virtual double                                      simulateCladeAge(size_t n, double origin, double present, double min) const;
+
     protected:
         // pure virtual helper functions
         virtual double                                      computeLnProbabilityDivergenceTimes(void) const = 0;                                                //!< Compute the log-transformed probability of the current value.

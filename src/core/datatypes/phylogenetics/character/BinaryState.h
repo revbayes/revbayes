@@ -16,6 +16,9 @@
 #ifndef BinaryState_H
 #define BinaryState_H
 
+#include <stddef.h>
+#include <iosfwd>
+
 #include "StandardState.h"
 
 namespace RevBayesCore {

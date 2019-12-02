@@ -1,18 +1,34 @@
+#include <stddef.h>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "Clade.h"
 #include "Dist_FBDRange.h"
 #include "ModelVector.h"
 #include "Natural.h"
 #include "OptionRule.h"
 #include "PiecewiseConstantFossilizedBirthDeathProcess.h"
 #include "Probability.h"
-#include "Real.h"
 #include "RealPos.h"
-#include "RlClade.h"
 #include "RlString.h"
 #include "RlTaxon.h"
-#include "RlTimeTree.h"
+#include "AbstractBirthDeathProcess.h"
+#include "ModelObject.h"
+#include "RbBoolean.h"
+#include "RbVector.h"
+#include "RevNullObject.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBirthDeathProcess.h"
+#include "RlBoolean.h"
+#include "Taxon.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevLanguage;
 

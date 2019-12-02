@@ -1,14 +1,20 @@
-#include "DistributionExponential.h"
-#include "AbstractPiecewiseConstantFossilizedRangeProcess.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbConstants.h"
-#include "RbMathLogic.h"
-#include "StochasticNode.h"
-#include "TypedDistribution.h"
-
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
+#include <ostream>
+#include <vector>
+
+#include "DistributionExponential.h"
+#include "AbstractPiecewiseConstantFossilizedRangeProcess.h"
+#include "RbConstants.h"
+#include "RbMathLogic.h"
+#include "DagNode.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "Taxon.h"
+#include "TimeInterval.h"
+#include "TypedDagNode.h"
 
 using namespace RevBayesCore;
 
@@ -622,7 +628,7 @@ size_t AbstractPiecewiseConstantFossilizedRangeProcess::l(double t) const
  */
 double AbstractPiecewiseConstantFossilizedRangeProcess::p( size_t i, double t ) const
 {
-    if ( t == 0) return 1.0;
+    if (t == 0.0) return 1.0;
 
     // get the parameters
     double b = birth[i];

@@ -9,13 +9,16 @@
 #ifndef __revbayes_proj__DispersalExtinctionRateStructureFunction__
 #define __revbayes_proj__DispersalExtinctionRateStructureFunction__
 
+#include <stddef.h>
+#include <vector>
+#include <map>
+
 #include "RbVector.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <vector>
-
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     class DispersalExtinctionRateStructureFunction : public TypedFunction<RbVector<double> > {
         

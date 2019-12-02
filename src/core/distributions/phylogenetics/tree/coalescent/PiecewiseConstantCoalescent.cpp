@@ -1,15 +1,27 @@
-#include "Clade.h"
+#include <stddef.h>
+#include <algorithm>
+#include <cmath>
+#include <iosfwd>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "PiecewiseConstantCoalescent.h"
 #include "DistributionExponential.h"
 #include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
 #include "RbConstants.h"
-#include "RbMathCombinatorialFunctions.h"
-#include "StochasticNode.h"
 #include "TopologyNode.h"
+#include "AbstractCoalescent.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
 
-#include <algorithm>
-#include <cmath>
+namespace RevBayesCore { class Clade; }
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class RandomNumberGenerator; }
+namespace RevBayesCore { class Taxon; }
 
 using namespace RevBayesCore;
 

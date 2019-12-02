@@ -1,12 +1,32 @@
 #include "Func_phyloDiversity.h"
-#include "Clade.h"
-#include "Func_phyloDiversity.h"
+
+#include <stddef.h>
+
 #include "ModelVector.h"
 #include "PhyloDiversityFunction.h"
 #include "RealPos.h"
 #include "RlBoolean.h"
 #include "RlClade.h"
 #include "RlTypedFunction.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "RbBoolean.h"
+#include "RbVector.h"
+#include "RevNullObject.h"
+#include "RevObject.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlTree.h"
+#include "TypeSpec.h"
+#include "UserFunctionNode.h"
+
+namespace RevBayesCore { class Clade; }
+namespace RevBayesCore { class Tree; }
 
 
 using namespace RevLanguage;

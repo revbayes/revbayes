@@ -1,26 +1,38 @@
+#include <stddef.h>
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ConstantNode.h"
-#include "Ellipsis.h"
 #include "Func_readTrees.h"
 #include "ModelVector.h"
 #include "NclReader.h"
 #include "NewickConverter.h"
 #include "OptionRule.h"
-#include "RbException.h"
 #include "RbFileManager.h"
-#include "RevNullObject.h"
-#include "RlBoolean.h"
 #include "RlBranchLengthTree.h"
 #include "RlString.h"
 #include "RlTimeTree.h"
-#include "RlUtils.h"
-#include "StringUtilities.h"
 #include "Tree.h"
-#include "RlUserInterface.h"
-
-#include <map>
-#include <set>
-#include <sstream>
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "RbHelpReference.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
 
 using namespace RevLanguage;
@@ -199,103 +211,4 @@ const TypeSpec& Func_readTrees::getReturnType( void ) const
 
     static TypeSpec return_typeSpec = ModelVector<TimeTree>::getClassTypeSpec();
     return return_typeSpec;
-}
-
-
-
-/**
- * Get the author(s) of this function so they can receive credit (and blame) for it.
- */
-std::vector<std::string> Func_readTrees::getHelpAuthor(void) const
-{
-    // create a vector of authors for this function
-    std::vector<std::string> authors;
-    authors.push_back( "Bastien Boussau" );
-
-    return authors;
-}
-
-
-/**
- * Get the (brief) description for this function
- */
-std::string Func_readTrees::getHelpDescription(void) const
-{
-    // create a variable for the description of the function
-    std::string description = "Reads trees from a file containing trees (Nexus, Phylip or Newick accepted), or from a string containing Newick representations of trees.";
-
-    return description;
-}
-
-
-/**
- * Get the more detailed description of the function
- */
-std::string Func_readTrees::getHelpDetails(void) const
-{
-    // create a variable for the description of the function
-    std::string details = "Either a file name (with the file argument) or a string (with the text argument) must be provided as argument. If both are provided, trees will be read from both sources.";
-
-    return details;
-}
-
-
-/**
- * Get an executable and instructive example.
- * These example should help the users to show how this function works but
- * are also used to test if this function still works.
- */
-std::string Func_readTrees::getHelpExample(void) const
-{
-    // create an example as a single string variable.
-    std::string example = "";
-    example += "trees=readTrees(text=\"(a,(b,c));\\n(d:0.1,(e:0.1,f:0.1):0.1);\")\n";
-    example += "print(trees)\n";
-    return example;
-}
-
-
-/**
- * Get some references/citations for this function
- *
- */
-std::vector<RevBayesCore::RbHelpReference> Func_readTrees::getHelpReferences(void) const
-{
-    // create an entry for each reference
-    std::vector<RevBayesCore::RbHelpReference> references;
-
-    return references;
-}
-
-
-/**
- * Get the names of similar and suggested other functions
- */
-std::vector<std::string> Func_readTrees::getHelpSeeAlso(void) const
-{
-    // create an entry for each suggested function
-    std::vector<std::string> see_also;
-
-    see_also.push_back("write");
-    see_also.push_back("readBranchLengthTrees");
-    see_also.push_back("readCharacterData");
-    see_also.push_back("readCharacterDataDelimited");
-    see_also.push_back("readContinuousCharacterData");
-    see_also.push_back("readDiscreteCharacterData");
-    see_also.push_back("readDataDelimitedFile");
-    see_also.push_back("readCharacterData");
-
-    return see_also;
-}
-
-
-/**
- * Get the title of this help entry
- */
-std::string Func_readTrees::getHelpTitle(void) const
-{
-    // create a title variable
-    std::string title = "Function to read in trees.";
-
-    return title;
 }

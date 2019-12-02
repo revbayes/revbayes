@@ -1,14 +1,26 @@
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <iosfwd>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "DistributionExponential.h"
 #include "PiecewiseConstantFossilizedBirthDeathRangeProcess.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-#include "RbConstants.h"
-#include "RbMathLogic.h"
 #include "StochasticNode.h"
 #include "TypedDistribution.h"
+#include "AbstractPiecewiseConstantFossilizedRangeProcess.h"
+#include "MatrixReal.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "Taxon.h"
+#include "TimeInterval.h"
 
-#include <algorithm>
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevBayesCore;
 

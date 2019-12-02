@@ -1,4 +1,8 @@
 #include "Serializable.h"
+
+#include <ostream>
+#include <string>
+
 #include "RbFileManager.h"
 
 using namespace RevBayesCore;

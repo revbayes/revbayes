@@ -1,8 +1,19 @@
 #include "PowerFunction.h"
+
 #include <cmath>
 
-using namespace RevBayesCore;
+#include "Cloneable.h"
+#include "TypedDagNode.h"
 
+namespace RevBayesCore { class DagNode; }
+
+using namespace RevBayesCore;
+/**
+ * PowerFunction of a TypedDagNode of type double with power of type double
+ *
+ * @param b value of type double
+ * @param e value of type double
+ */
 PowerFunction::PowerFunction(const TypedDagNode<double> *b, const TypedDagNode<double> *e) : ContinuousFunction( new double(0.0) ),
     base( b ),
     exponent( e )

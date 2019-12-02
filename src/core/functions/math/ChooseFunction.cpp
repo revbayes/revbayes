@@ -1,7 +1,10 @@
 #include "ChooseFunction.h"
-#include "RbMathFunctions.h"
+
 #include "RbMathCombinatorialFunctions.h"
-#include <cmath>
+#include "Cloneable.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

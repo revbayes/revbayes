@@ -1,17 +1,21 @@
 #ifndef Environment_H
 #define Environment_H
 
-#include "FunctionTable.h"
-#include "RevObject.h"
-#include "RevPtr.h"
-#include "RevVariable.h"
-
+#include <stddef.h>
 #include <map>
 #include <string>
 #include <vector>
+#include <iosfwd>
+
+#include "FunctionTable.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
 
 
 namespace RevLanguage {
+class Argument;
+class Function;
+class RevObject;
 
     typedef std::map<std::string, RevPtr<RevVariable> > VariableTable;                                                             //!< Typedef for convenience
 

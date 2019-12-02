@@ -6,13 +6,18 @@
 //
 
 #include "Func_partialToCorrelationMatrix.h"
+
 #include "MatrixReal.h"
-#include "ModelVector.h"
-#include "Real.h"
-#include "RealPos.h"
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
 #include "PartialToCorrelationFunction.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "RlMatrixReal.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

@@ -1,15 +1,19 @@
-#include "Clade.h"
-#include "AbstractBirthDeathProcess.h"
-#include "RbConstants.h"
-#include "RbException.h"
-#include "RbMathCombinatorialFunctions.h"
-#include "StochasticNode.h"
-#include "Taxon.h"
-#include "TopologyNode.h"
-#include "TreeUtilities.h"
-
+#include <stddef.h>
 #include <algorithm>
 #include <cmath>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
+#include "AbstractBirthDeathProcess.h"
+#include "RbConstants.h"
+#include "RbMathCombinatorialFunctions.h"
+#include "TopologyNode.h"
+#include "AbstractRootedTreeDistribution.h"
+#include "Tree.h"
+
+namespace RevBayesCore { class Taxon; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevBayesCore;
 

@@ -1,16 +1,15 @@
 #include "NodeAgeConstrainedTreeDistribution.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbConstants.h"
-#include "RbException.h"
-#include "RbMathCombinatorialFunctions.h"
-#include "StochasticNode.h"
-#include "Taxon.h"
-#include "TopologyNode.h"
-#include "TreeUtilities.h"
 
-#include <algorithm>
+#include <stddef.h>
 #include <cmath>
+
+#include "RbConstants.h"
+#include "TopologyNode.h"
+#include "RbBoolean.h"
+
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
+namespace RevBayesCore { template <class variableType> class StochasticNode; }
 
 using namespace RevBayesCore;
 

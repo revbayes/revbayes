@@ -14,7 +14,10 @@
  * $Id$
  */
 
+#include <stddef.h>
 #include <cmath>
+#include <iostream>
+#include <sstream> // IWYU pragma: keep
 
 #include "RbConstants.h"
 #include "RbMathCombinatorialFunctions.h"

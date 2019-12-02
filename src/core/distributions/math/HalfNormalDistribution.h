@@ -2,9 +2,24 @@
 #define HalfNormalDistribution_H
 
 #include "ContinuousDistribution.h"
-#include "TypedDagNode.h"
+
+ /**
+     * @brief Half-Normal Distribution class.
+     *
+     * The Half-Normal distribution represents a family of distributions
+     * defined on the postive numbers. The Half-Normal Distribution is a special case of the Folded Normal Distribution with a location parameter of 0.
+     *  Instances of this class can be associated to stochastic variables.
+     * The Half-Normal distribution has 2 parameters:
+     * @param Offest This parameter represents the location parameter of the Folded Normal Distribution.
+     * @param Sigma This paramer repesents the variance. In the distribution constructor, the parameter is the standard deviation, the square root of variance.
+     *
+     */
+
+
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     class HalfNormalDistribution : public ContinuousDistribution {
         

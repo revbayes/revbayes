@@ -1,23 +1,21 @@
 #include "DiscreteCharacterState.h"
-#include "RbException.h"
+
 #include <string>
 #include <vector>
+
+#include "RbException.h"
+#include "Cloneable.h"
 
 using namespace RevBayesCore;
 
 
 
-/** Constructor */
 DiscreteCharacterState::DiscreteCharacterState(size_t n) : CharacterState(),
-//    num_states( n ),
     weighted(false),
     weights(std::vector<double>(n,1.0/n))
-{
+{}
 
 
-}
-
-/** Equals comparison */
 bool DiscreteCharacterState::operator==(const CharacterState& x) const
 {
 
@@ -32,10 +30,8 @@ bool DiscreteCharacterState::operator==(const CharacterState& x) const
 }
 
 
-/** Not equals comparison */
 bool DiscreteCharacterState::operator!=(const CharacterState& x) const
 {
-
     return !operator==(x);
 }
 
@@ -56,6 +52,7 @@ bool DiscreteCharacterState::operator<(const CharacterState &x) const
 }
 
 
+/** Prefix increment current state (if non ambiguous) by 1 */
 void DiscreteCharacterState::operator++( void )
 {
 
@@ -74,16 +71,10 @@ void DiscreteCharacterState::operator++( void )
 
     // unset the current state
     setStateByIndex( index );
-//
-//    // incremement our state index;
-//    ++index_single_state;
-//
-//    // now set the bit of the state
-//    state.set(index_single_state);
-
 }
 
 
+/** Postfix increment current state (if non ambiguous) by 1 */
 void DiscreteCharacterState::operator++( int i )
 {
 
@@ -106,6 +97,10 @@ void DiscreteCharacterState::operator++( int i )
 
 }
 
+
+/** Increment current state (if non ambiguous)
+ * @param i increment
+ */
 void DiscreteCharacterState::operator+=( int i )
 {
 
@@ -126,17 +121,10 @@ void DiscreteCharacterState::operator+=( int i )
     // unset the current state
     setStateByIndex( index );
 
-//    // unset the current state
-//    state.unset( index_single_state );
-//
-//    // incremement our state index;
-//    index_single_state += i;
-//
-//    // now set the bit of the state
-//    state.set(index_single_state);
-
 }
 
+
+/** Prefix decrement current state (if non ambiguous) by 1 */
 void DiscreteCharacterState::operator--( void )
 {
 
@@ -161,6 +149,7 @@ void DiscreteCharacterState::operator--( void )
 }
 
 
+/** Postfix decrement current state (if non ambiguous) by 1 */
 void DiscreteCharacterState::operator--( int i )
 {
 
@@ -184,6 +173,10 @@ void DiscreteCharacterState::operator--( int i )
 
 }
 
+
+/** Decrement current state (if non ambiguous)
+ * @param i decrement
+ */
 void DiscreteCharacterState::operator-=( int i )
 {
 
@@ -207,12 +200,18 @@ void DiscreteCharacterState::operator-=( int i )
 }
 
 
+/** Get description of the current state
+ * @return string representation of the state
+ **/
 std::string DiscreteCharacterState::getStateDescription(void) const
 {
     return getStringValue();
 }
 
 
+/** Get state labels as vector
+ * @return labels
+ **/
 std::vector<std::string> DiscreteCharacterState::getStateDescriptions(void) const
 {
     std::string state_labels = getStateLabels();
@@ -271,12 +270,17 @@ std::string DiscreteCharacterState::getStringValue(void) const
 }
 
 
+/** Is the character ambiguous (i.e missing, a gap, or a set of states)?
+ **/
 bool DiscreteCharacterState::isAmbiguous( void ) const
 {
-
     return isMissingState() || isGapState() || ( getNumberObservedStates() > 1 );
 }
 
+
+/** Is this state part of the current set of states?
+ * @param index index of a possible state
+ **/
 bool DiscreteCharacterState::isStateSet(size_t index) const
 {
     RbBitSet bs = getState();
@@ -294,11 +298,13 @@ bool DiscreteCharacterState::isWeighted( void ) const
 void DiscreteCharacterState::setWeighted( bool tf )
 {
     weighted = tf;
-
-    return;
 }
 
 
+/** Get index of current state
+ * @return index if state is unambiguous
+ * @throws RbException if state is ambiguous
+ **/
 size_t DiscreteCharacterState::getStateIndex(void) const
 {
     if ( isAmbiguous() == true )
@@ -312,8 +318,7 @@ size_t DiscreteCharacterState::getStateIndex(void) const
 }
 
 
-
-
+/** Get number of states in the current set */
 size_t DiscreteCharacterState::getNumberObservedStates(void) const
 {
     RbBitSet bs = getState();
@@ -327,7 +332,6 @@ size_t DiscreteCharacterState::getNumberOfStates(void) const
     RbBitSet bs = getState();
     return bs.size();
 }
-
 
 
 const std::vector<double>& DiscreteCharacterState::getWeights() const

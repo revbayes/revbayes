@@ -1,18 +1,23 @@
 #ifndef DECCladogeneticStateFunction_H
 #define DECCladogeneticStateFunction_H
 
-#include "AbstractCladogenicStateFunction.h"
-#include "CladogeneticProbabilityMatrix.h"
-#include "RbVector.h"
-#include "Simplex.h"
-#include "TypedDagNode.h"
-#include "TypedFunction.h"
-
+#include <stddef.h>
 #include <sstream>
 #include <vector>
 #include <map>
+#include <set>
+#include <string>
+
+#include "AbstractCladogenicStateFunction.h"
+#include "CladogeneticProbabilityMatrix.h"
+#include "TypedFunction.h"
 
 namespace RevBayesCore {
+class BranchHistory;
+class DagNode;
+class Simplex;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     class DECCladogeneticStateFunction : public AbstractCladogenicStateFunction, public TypedFunction<CladogeneticProbabilityMatrix> {
         
@@ -44,6 +49,8 @@ namespace RevBayesCore {
         const std::map< std::vector<unsigned>, double >&        getEventMap(double t=0.0) const;
         const std::vector<std::string>&                         getEventTypes(void) const;
         void                                                    update(void);
+        
+        const static unsigned MAX_NUM_AREAS = 20;
         
     protected:
         

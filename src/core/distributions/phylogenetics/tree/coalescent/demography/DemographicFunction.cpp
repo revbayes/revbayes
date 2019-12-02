@@ -1,4 +1,8 @@
 #include "DemographicFunction.h"
+
+#include <algorithm>
+#include <string>
+
 #include "DagNode.h"
 #include "RbException.h"
 

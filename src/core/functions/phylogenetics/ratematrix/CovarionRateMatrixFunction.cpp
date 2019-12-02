@@ -7,10 +7,20 @@
 //
 
 #include "CovarionRateMatrixFunction.h"
-#include "RbException.h"
+
+#include <stddef.h>
+
 #include "RateMatrix_Covarion.h"
 #include "RateGenerator.h"
 #include "TypedFunction.h"
+#include "AbstractRateMatrix.h"
+#include "Cloneable.h"
+#include "MatrixReal.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

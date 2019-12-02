@@ -16,15 +16,14 @@
  */
 
 #include "StringUtilities.h"
-#include "RbFileManager.h"
-#include "RbVector.h"
 
-#include <sstream>
-#include <fstream>
-#include <iostream>
+#include <stdio.h>
 #include <iomanip>
 #include <string>
 #include <cstdlib>
+
+#include "RbFileManager.h"
+#include "RbVector.h"
 
 
 
@@ -540,6 +539,20 @@ void StringUtilities::replaceSubstring(std::string& str, const std::string& oldS
     {
         str.replace(pos, oldStr.length(), newStr);
         pos += newStr.length();
+    }
+    
+}
+
+
+void StringUtilities::replaceAllOccurrences(std::string& str, char old_ch, char new_ch)
+{
+    
+    for (size_t i=0; i<str.size(); ++i)
+    {
+        if ( str[i] == old_ch )
+        {
+            str[i] = new_ch;
+        }
     }
     
 }

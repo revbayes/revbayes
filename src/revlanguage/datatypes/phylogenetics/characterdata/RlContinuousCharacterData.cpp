@@ -1,18 +1,30 @@
 #include "RlContinuousCharacterData.h"
 
+#include <stddef.h>
+
 #include "ConstantNode.h"
 #include "RlMemberFunction.h"
-#include "ModelVector.h"
 #include "Natural.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RlContinuousTaxonData.h"
 #include "RlDistanceMatrix.h"
 #include "RlString.h"
-#include "RbUtil.h"
 #include "TypeSpec.h"
-
-#include <sstream>
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "ContinuousTaxonData.h"
+#include "DistanceMatrix.h"
+#include "MemberFunction.h"
+#include "MemberProcedure.h"
+#include "MethodTable.h"
+#include "RbException.h"
+#include "RevMemberObject.h"
+#include "RevVariable.h"
+#include "RlDeterministicNode.h"
+#include "RlTypedFunction.h"
+#include "StringUtilities.h"
 
 using namespace RevLanguage;
 

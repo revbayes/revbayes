@@ -7,13 +7,19 @@
 //
 
 #include "Func_geographicalDistance.h"
+
 //#include "HyperbolicSineFunction.h"
 #include "ArgumentRule.h"
 #include "GeographicalDistanceFunction.h"
-#include "Probability.h"
 #include "RealPos.h"
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "Real.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

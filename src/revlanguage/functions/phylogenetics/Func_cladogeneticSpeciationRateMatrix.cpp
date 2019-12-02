@@ -4,11 +4,33 @@
 //  Created by Will Freyman on 8/1/17.
 //
 
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "CladogeneticSpeciationRateMatrix.h"
 #include "CladogeneticSpeciationRateMatrixFunction.h"
 #include "Func_cladogeneticSpeciationRateMatrix.h"
 #include "RealPos.h"
 #include "ModelVector.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "ModelObject.h"
+#include "Natural.h"
+#include "RbVector.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlCladogeneticSpeciationRateMatrix.h"
+#include "RlDeterministicNode.h"
+#include "RlFunction.h"
+#include "RlTypedFunction.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 using namespace RevLanguage;
 

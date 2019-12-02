@@ -1,14 +1,24 @@
+#include <stddef.h>
+#include <iosfwd>
+#include <vector>
+
 #include "Argument.h"
 #include "ArgumentRule.h"
-#include "Ellipsis.h"
 #include "Func_concatenateFromVector.h"
 #include "OptionRule.h"
-#include "RbException.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlString.h"
-#include "RlUtils.h"
 #include "TypeSpec.h"
-#include "Workspace.h"
+#include "ArgumentRules.h"
+#include "ModelObject.h"
+#include "ModelVector.h"
+#include "Procedure.h"
+#include "RbVector.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlFunction.h"
+#include "TypedDagNode.h"
 
 using namespace RevLanguage;
 

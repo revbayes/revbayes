@@ -6,11 +6,16 @@
 //
 
 #include "RateMatrix_ReversiblePoMo.h"
-#include "RbException.h"
-#include "TransitionProbabilityMatrix.h"
 
-#include <cmath>
-#include <iomanip>
+#include <assert.h>
+#include <cstddef>
+
+#include "RbException.h"
+#include "Assignable.h"
+#include "Cloneable.h"
+#include "MatrixReal.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 using namespace RevBayesCore;
 
@@ -122,7 +127,8 @@ double RateMatrix_ReversiblePoMo::averageRate(void) const
 
 
 // Code modified from IQ-tree:
-void RateMatrix_ReversiblePoMo::decomposeState(int state, int &i, int &nt1, int &nt2) {
+void RateMatrix_ReversiblePoMo::decomposeState(int state, int &i, int &nt1, int &nt2)
+{
     if (state < 4) {
         // Fixed a, C, G or t
         i = N;
@@ -262,7 +268,8 @@ double RateMatrix_ReversiblePoMo::mutCoeff(int nt1, int nt2) {
 
 
 // Code modified from IQ-tree:
-double RateMatrix_ReversiblePoMo::computeProbBoundaryMutation(int state1, int state2) {
+double RateMatrix_ReversiblePoMo::computeProbBoundaryMutation(int state1, int state2)
+{
     // the transition rate to the same state will be calculated by
     // (row_sum = 0).
     assert(state1 != state2);
@@ -278,7 +285,8 @@ double RateMatrix_ReversiblePoMo::computeProbBoundaryMutation(int state1, int st
     // the second of state 2 or the first of state 2 with the second
     // of state 1.  additionally, we have to consider fixed states as
     // special cases.
-    if (nt1 == nt3 && (nt2==nt4 || nt2==-1 || nt4 == -1)) {
+    if (nt1 == nt3 && (nt2==nt4 || nt2==-1 || nt4 == -1))
+    {
         assert(i1 != i2); // because state1 != state2
         if (i1+1==i2)
             // e.g.: 2a8C -> 3a7C or 9a1C -> 10a
@@ -298,18 +306,25 @@ double RateMatrix_ReversiblePoMo::computeProbBoundaryMutation(int state1, int st
                 return double(i1*(N-i1)) / double(N);
         else
             return 0.0;
-    } else if (nt1 == nt4 && nt2 == -1 && i2 == 1)  {
+    }
+    else if (nt1 == nt4 && nt2 == -1 && i2 == 1)
+    {
         // e.g.: 10G -> 1a9G
         //return mutCoeff(nt1,nt3) * state_freq[nt3];
         return mutCoeff(nt1,nt3) ;//* freq_fixed_states[nt3];
-    } else if (nt2 == nt3  && i1 == 1 && nt4 == -1) {
+    }
+    else if (nt2 == nt3  && i1 == 1 && nt4 == -1)
+    {
         // E.g.: 1a9G -> 10G
         // Changed Dom tue sep 29 13:30:25 CEst 2015
         // return double(i1*(N-i1)) / double(N*N);
         return double(i1*(N-i1)) / double(N);
-    } else
+    }
+    else
+    {
         // 0 for all other transitions
         return 0.0;
+    }
 }
 
 
@@ -319,41 +334,49 @@ double RateMatrix_ReversiblePoMo::computeProbBoundaryMutation(int state1, int st
 void RateMatrix_ReversiblePoMo::buildRateMatrix(void)
 {
     // the destination state is in column, the starting state in rows.
-        int state1, state2;
+//    int state1, state2;
 
-        // activate this if frequencies of fixed states sum up to 1.0.
-        // updateFreqFixedstate();
+    // activate this if frequencies of fixed states sum up to 1.0.
+    // updateFreqFixedstate();
 
-      //  computestateFreq();
+    //  computestateFreq();
 
-      std::vector< double > stationaryFrequencies = getStationaryFrequencies();
+    std::vector< double > stationaryFrequencies = getStationaryFrequencies();
 
-        // Code modified from IQ-tree
-        double tot_sum = 0.0;
-        // Loop over rows (transition starting from state1).
-        for (state1 = 0; state1 < num_states; state1++) {
-            double row_sum = 0.0;
-            // Loop over columns in row state1 (transition to state2).
-            for (state2 = 0; state2 < num_states; state2++)
-                if (state2 != state1) {
-                    row_sum +=
-                        ((*the_rate_matrix)[state1][state2] =
-                         computeProbBoundaryMutation(state1, state2));
-                }
-            tot_sum += stationaryFrequencies[state1]*row_sum;
-            (*the_rate_matrix)[state1][state1] = -(row_sum);
+    // Code modified from IQ-tree
+    double tot_sum = 0.0;
+    // Loop over rows (transition starting from state1).
+    for (size_t state1 = 0; state1 < num_states; state1++)
+    {
+        double row_sum = 0.0;
+        // Loop over columns in row state1 (transition to state2).
+        for (size_t state2 = 0; state2 < num_states; state2++)
+        {
+            if (state2 != state1)
+            {
+                (*the_rate_matrix)[state1][state2] = computeProbBoundaryMutation(state1, state2);
+                row_sum += (*the_rate_matrix)[state1][state2];
+            }
         }
-        // Normalize rate matrix such that one event happens per unit time.
-           for (state1 = 0; state1 < num_states; state1++) {
-               for (state2 = 0; state2 < num_states; state2++) {
-                   (*the_rate_matrix)[state1][state2] /= tot_sum;
-               }
-           }
+        tot_sum += stationaryFrequencies[state1]*row_sum;
+        (*the_rate_matrix)[state1][state1] = -(row_sum);
+    }
+        
+    // Normalize rate matrix such that one event happens per unit time.
+    for (size_t state1 = 0; state1 < num_states; state1++)
+    {
+        for (size_t state2 = 0; state2 < num_states; state2++)
+        {
+            (*the_rate_matrix)[state1][state2] /= tot_sum;
+        }
+    }
+    
 }
 
 
 /** Calculate the transition probabilities */
-void RateMatrix_ReversiblePoMo::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const {
+void RateMatrix_ReversiblePoMo::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
+{
 
 
   // We use repeated squaring to quickly obtain exponentials, as in Poujol and Lartillot, Bioinformatics 2014.
@@ -418,6 +441,19 @@ std::vector<double> RateMatrix_ReversiblePoMo::getStationaryFrequencies( void ) 
 
   return stationaryVector;
 }
+
+void RateMatrix_ReversiblePoMo::setExchangeabilityRates(const std::vector<double>& r)
+{
+    rho = r;
+}
+
+
+
+void RateMatrix_ReversiblePoMo::setStationaryFrequencies(const Simplex& s)
+{
+    pi = s;
+}
+
 
 
 void RateMatrix_ReversiblePoMo::update( void )

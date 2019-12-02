@@ -1,14 +1,13 @@
 #ifndef SimplexFromVectorFunction_H
 #define SimplexFromVectorFunction_H
 
-#include "RbVector.h"
 #include "Simplex.h"
 #include "TypedFunction.h"
-#include "TypedDagNode.h"
-
-#include <vector>
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Simplex constructor from vector

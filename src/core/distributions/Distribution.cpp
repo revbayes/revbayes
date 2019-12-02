@@ -1,10 +1,17 @@
+#include <stddef.h>
+#include <algorithm>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "DagNode.h"
 #include "Distribution.h"
 #include "RbException.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
+#include "Parallelizable.h"
 
-#include <algorithm>
+namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
 
 using namespace RevBayesCore;
 
@@ -213,20 +220,20 @@ void Distribution::setMcmcMode(bool tf)
  * when we replace a variable with the same name (re-assignment).
  * Here we update our set and delegate to the derived class.
  */
-void Distribution::swapParameter(const DagNode *oldP, const DagNode *newP)
+void Distribution::swapParameter(const DagNode *old_p, const DagNode *new_p)
 {
     
-    std::vector<const DagNode *>::iterator position = std::find(parameters.begin(), parameters.end(), oldP);
+    std::vector<const DagNode *>::iterator position = std::find(parameters.begin(), parameters.end(), old_p);
     if ( position != parameters.end() )
     {
 //        parameters.erase( position );
 //        parameters.push_back( newP );
-        (*position) = newP;
-        swapParameterInternal( oldP, newP );
+        (*position) = new_p;
+        swapParameterInternal( old_p, new_p );
         
         // increment and decrement the reference counts
-        newP->incrementReferenceCount();
-        if ( oldP->decrementReferenceCount() == 0 )
+        new_p->incrementReferenceCount();
+        if ( old_p->decrementReferenceCount() == 0 )
         {
             throw RbException("Memory leak in distribution. Please report this bug to Sebastian.");
         }
@@ -235,13 +242,7 @@ void Distribution::swapParameter(const DagNode *oldP, const DagNode *newP)
     else
     {
         
-//        std::cerr << "Could not find the distribution parameter to be swapped: " << oldP->getName() << "("<< oldP << ") to " << newP->getName() << "("<< newP <<")" << std::endl;
-//        for (size_t i=0; i<parameters.size(); ++i)
-//        {
-//            std::cerr << "Parameter["<< i <<"]:\t\t" << parameters[i]->getName() << "(" << parameters[i] << ")" << std::endl;
-//        }
-        
-        throw RbException("Could not find the distribution parameter to be swapped: " + oldP->getName() + " to " + newP->getName()) ;
+        throw RbException("Could not find the distribution parameter to be swapped: " + old_p->getName() + " to " + new_p->getName()) ;
     
     }
     

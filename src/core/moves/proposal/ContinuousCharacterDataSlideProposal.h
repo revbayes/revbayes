@@ -1,14 +1,15 @@
 #ifndef ContinuousCharacterDataSlideProposal_H
 #define ContinuousCharacterDataSlideProposal_H
 
-#include <set>
-#include <string>
+#include <stddef.h>
+#include <iosfwd>
 
 #include "Proposal.h"
-#include "MatrixReal.h"
-#include "StochasticNode.h"
 
 namespace RevBayesCore {
+class ContinuousCharacterData;
+class DagNode;
+template <class variableType> class StochasticNode;
     
     /**
      * The sliding operator.

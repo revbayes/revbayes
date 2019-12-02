@@ -1,9 +1,10 @@
 #define MAXK 20
 
+#include <float.h>
 #include <cmath>
+#include <sstream> // IWYU pragma: keep
 
 #include "DistributionBeta.h"
-#include "DistributionGamma.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbException.h"

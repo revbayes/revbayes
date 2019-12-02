@@ -1,11 +1,13 @@
 #ifndef DistanceMatrixReader_H
 #define DistanceMatrixReader_H
 
+#include <stddef.h>
+#include <vector>
+#include <iosfwd>
+
 #include "DelimitedDataReader.h"
 #include "MatrixReal.h"
 #include "Taxon.h"
-#include <string>
-#include <vector>
 
 namespace RevBayesCore {
 	

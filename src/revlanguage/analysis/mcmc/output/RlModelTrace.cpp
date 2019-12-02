@@ -1,30 +1,30 @@
-//
-//  RlModelTrace.cpp
-//  RevBayesCore
-//
-//  Created by Sebastian Hoehna on 3/27/13.
-//  Copyright 2013 __MyCompanyName__. All rights reserved.
-//
-
 #include "RlModelTrace.h"
 
+#include <string>
+
 #include "ArgumentRules.h"
-#include "MemberProcedure.h"
-#include "MethodTable.h"
+#include "Integer.h"
 #include "Natural.h"
-#include "RlUtils.h"
+#include "Probability.h"
+#include "RbException.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
+
+namespace RevLanguage { class Argument; }
 
 using namespace RevLanguage;
 
 ModelTrace::ModelTrace() : WorkspaceToCoreWrapperObject<RevBayesCore::ModelTrace>()
 {
-    
+    initMethods();
 }
 
 
 ModelTrace::ModelTrace(const RevBayesCore::ModelTrace &t) : WorkspaceToCoreWrapperObject<RevBayesCore::ModelTrace>( new RevBayesCore::ModelTrace( t ) )
 {
-    
+    initMethods();
 }
 
 
@@ -50,6 +50,45 @@ void ModelTrace::constructInternalObject( void )
 /* Map calls to member methods */
 RevPtr<RevVariable> ModelTrace::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
 {
+    if ( name == "setBurnin" )
+    {
+        found = true;
+
+        int burnin = 0;
+
+        RevObject& b = args[0].getVariable()->getRevObject();
+        if ( b.isType( Integer::getClassTypeSpec() ) )
+        {
+            burnin = (int)static_cast<const Integer &>(b).getValue();
+        }
+        else
+        {
+            double burninFrac = static_cast<const Probability &>(b).getValue();
+            burnin = int( floor( value->size()*burninFrac ) );
+        }
+
+        this->value->setBurnin( burnin );
+
+        return NULL;
+    }
+    else if ( name == "size" || name == "getNumberSamples" )
+    {
+        found = true;
+
+        bool post = static_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+
+        int n = (int)this->value->size(post);
+
+        return new RevVariable( new Natural( n ) );
+    }
+    else if ( name == "getBurnin" )
+    {
+        found = true;
+
+        int n = this->value->getBurnin();
+
+        return new RevVariable( new Natural( n ) );
+    }
     
     return RevObject::executeMethod( name, args, found );
 }
@@ -95,6 +134,28 @@ const TypeSpec& ModelTrace::getTypeSpec( void ) const {
     static TypeSpec type_spec = getClassTypeSpec();
     
     return type_spec;
+}
+
+
+void ModelTrace::initMethods( void )
+{
+    ArgumentRules* burninArgRules = new ArgumentRules();
+    std::vector<TypeSpec> burninTypes;
+    burninTypes.push_back( Probability::getClassTypeSpec() );
+    burninTypes.push_back( Integer::getClassTypeSpec() );
+    burninArgRules->push_back( new ArgumentRule("burnin",      burninTypes, "The fraction/number of samples to disregard as burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
+    this->methods.addFunction( new MemberProcedure( "setBurnin", RlUtils::Void, burninArgRules) );
+
+    ArgumentRules* getBurninArgRules = new ArgumentRules();
+    this->methods.addFunction( new MemberProcedure( "getBurnin", Natural::getClassTypeSpec(), getBurninArgRules) );
+
+    ArgumentRules* getNumberSamplesArgRules = new ArgumentRules();
+    getNumberSamplesArgRules->push_back( new ArgumentRule("post", RlBoolean::getClassTypeSpec(), "Get the post-burnin number of samples?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
+    this->methods.addFunction( new MemberProcedure( "getNumberSamples", Natural::getClassTypeSpec(), getNumberSamplesArgRules) );
+
+    ArgumentRules* getSizeArgRules = new ArgumentRules();
+    getSizeArgRules->push_back( new ArgumentRule("post", RlBoolean::getClassTypeSpec(), "Get the post-burnin number of samples?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
+    this->methods.addFunction( new MemberProcedure( "size", Natural::getClassTypeSpec(), getSizeArgRules) );
 }
 
 

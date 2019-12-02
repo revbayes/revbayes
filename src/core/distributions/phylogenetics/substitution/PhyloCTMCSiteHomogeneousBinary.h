@@ -1,10 +1,24 @@
 #ifndef PhyloCTMCSiteHomogeneousBinary_H
 #define PhyloCTMCSiteHomogeneousBinary_H
 
+#include <stddef.h>
+#include <map>
+#include <vector>
+
 #include "BinaryState.h"
 #include "PhyloCTMCSiteHomogeneousConditional.h"
+#include "AbstractPhyloCTMCSiteHomogeneous.h"
+#include "DiscreteTaxonData.h"
+#include "HomologousDiscreteCharacterData.h"
+#include "NaturalNumbersState.h"
+#include "PhyloCTMCSiteHomogeneous.h"
+#include "RbException.h"
+#include "TypedDistribution.h"
 
 namespace RevBayesCore {
+class RbBitSet;
+class Tree;
+template <class valueType> class TypedDagNode;
 
     struct BinaryAscertainmentBias {
         

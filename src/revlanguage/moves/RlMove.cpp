@@ -1,16 +1,22 @@
 
+#include <stddef.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "ConstantNode.h"
-#include "ModelVector.h"
 #include "Move.h"
-#include "OptionRule.h"
 #include "Probability.h"
 #include "RevObject.h"
-#include "RbException.h"
 #include "RealPos.h"
 #include "RlMove.h"
 #include "TypeSpec.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "StringUtilities.h"
+#include "WorkspaceObject.h"
+#include "WorkspaceToCoreWrapperObject.h"
 
 
 using namespace RevLanguage;

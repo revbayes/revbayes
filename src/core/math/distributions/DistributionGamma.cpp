@@ -18,11 +18,10 @@
 
 #include "DistributionChisq.h"
 #include "DistributionGamma.h"
-#include "DistributionNormal.h"
 #include "RbStatisticsHelper.h"
-#include "RbConstants.h"
 #include "RbMathFunctions.h"
-#include "RbMathLogic.h"
+
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 

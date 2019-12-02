@@ -1,5 +1,10 @@
 #include "TajimasPiFunction.h"
-#include "RbException.h"
+
+#include "AbstractHomologousDiscreteCharacterData.h"
+#include "Cloneable.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

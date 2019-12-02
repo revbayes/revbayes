@@ -1,9 +1,7 @@
 
 #include "StandardState.h"
-#include "RbException.h"
-#include <sstream>
-#include <cstdlib>
-#include <cassert>
+
+#include "Cloneable.h"
 
 using namespace RevBayesCore;
 

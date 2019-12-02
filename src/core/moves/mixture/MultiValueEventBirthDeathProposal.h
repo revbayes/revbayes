@@ -1,13 +1,16 @@
 #ifndef MultiValueEventBirthDeathProposal_H
 #define MultiValueEventBirthDeathProposal_H
 
-#include <string>
+#include <stddef.h>
+#include <iosfwd>
+#include <vector>
 
 #include "Proposal.h"
-#include "StochasticNode.h"
-#include "MultiValueEvent.h"
 
 namespace RevBayesCore {
+class DagNode;
+class MultiValueEvent;
+template <class variableType> class StochasticNode;
     
     /**
      * The node-age slide proposal operator using a Uniform distribution.

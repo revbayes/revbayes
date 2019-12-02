@@ -1,13 +1,18 @@
 
+#include <ostream>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "MaxIterationStoppingRule.h"
 #include "RlMaxIterationStoppingRule.h"
-#include "RealPos.h"
-#include "RbException.h"
-#include "OptionRule.h"
-#include "RlString.h"
 #include "TypeSpec.h"
+#include "Natural.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlStoppingRule.h"
+#include "StoppingRule.h"
 
 
 using namespace RevLanguage;

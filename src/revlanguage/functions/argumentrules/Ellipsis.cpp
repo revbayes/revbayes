@@ -1,5 +1,7 @@
 #include "Ellipsis.h"
-#include "RbUtil.h"
+
+#include <vector>
+
 #include "TypeSpec.h"
 
 

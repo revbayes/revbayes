@@ -1,10 +1,9 @@
 #ifndef PathSampler_H
 #define PathSampler_H
 
-#include "MarginalLikelihoodEstimator.h"
+#include <iosfwd>
 
-#include <string>
-#include <vector>
+#include "MarginalLikelihoodEstimator.h"
 
 namespace RevBayesCore {
     

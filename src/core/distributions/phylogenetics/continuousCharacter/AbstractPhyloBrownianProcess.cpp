@@ -1,10 +1,16 @@
 #include "AbstractPhyloBrownianProcess.h"
-#include "DistributionNormal.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "TopologyNode.h"
 
 #include <cmath>
+
+#include "DistributionNormal.h"
+#include "RandomNumberFactory.h"
+#include "TopologyNode.h"
+#include "Cloneable.h"
+#include "ContinuousTaxonData.h"
+
+namespace RevBayesCore { class RandomNumberGenerator; }
+namespace RevBayesCore { class Tree; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 
 using namespace RevBayesCore;

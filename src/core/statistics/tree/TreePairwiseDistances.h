@@ -10,17 +10,13 @@
 #ifndef __revbayes_bboussau__TreePairwiseDistances__
 #define __revbayes_bboussau__TreePairwiseDistances__
 
-#include "Tree.h"
-#include "TreeUtilities.h"
 #include "TypedDagNode.h"
 #include "TypedFunction.h"
-#include "MatrixReal.h"
 #include "DistanceMatrix.h"
 
-#include <vector>
-#include <string>
-
 namespace RevBayesCore {
+class DagNode;
+class Tree;
     
 	class TreePairwiseDistances : public TypedFunction<RevBayesCore::DistanceMatrix> {
         

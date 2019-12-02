@@ -22,13 +22,12 @@
 #ifndef T92RateMatrixFunction_H
 #define T92RateMatrixFunction_H
 
-#include "RateMatrix_GTR.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
-
-#include <vector>
+#include "RateGenerator.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     class T92RateMatrixFunction : public TypedFunction<RateGenerator> {
         

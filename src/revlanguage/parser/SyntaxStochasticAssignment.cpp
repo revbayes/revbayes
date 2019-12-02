@@ -1,15 +1,13 @@
-#include "ArgumentRule.h"
 #include "RbException.h"
-#include "RbUtil.h"
-#include "RbOptions.h"
 #include "RlDistribution.h"
-#include "SyntaxFunctionCall.h"
 #include "SyntaxStochasticAssignment.h"
-#include "Workspace.h"
+#include "DagNode.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "SyntaxAssignment.h"
 
-#include <iostream>
-#include <list>
-#include <sstream>
+namespace RevLanguage { class SyntaxElement; }
 
 using namespace RevLanguage;
 

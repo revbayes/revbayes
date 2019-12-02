@@ -1,13 +1,20 @@
 #ifndef ConstrainedEmpiricalTreeProposal_H
 #define ConstrainedEmpiricalTreeProposal_H
 
-#include <string>
+#include <stddef.h>
+#include <iosfwd>
+#include <vector>
 
 #include "Proposal.h"
-#include "StochasticNode.h"
 #include "Tree.h"
+#include "Clade.h"
+#include "TopologyNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
+template <class variableType> class StochasticNode;
+template <class variableType> class TypedDistribution;
     
     /**
      *

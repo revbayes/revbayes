@@ -1,5 +1,7 @@
 #include "ContinuousStochasticNode.h"
 
+#include "ContinuousDistribution.h"
+
 using namespace RevBayesCore;
 
 ContinuousStochasticNode::ContinuousStochasticNode(const std::string &n, ContinuousDistribution *d) : StochasticNode<double>( n, d )

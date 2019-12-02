@@ -1,3 +1,11 @@
+#include <float.h>
+#include <stddef.h>
+#include <algorithm>
+#include <cmath>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "DistributionExponential.h"
 #include "EpisodicBirthDeathSamplingTreatmentProcess.h"
 #include "RandomNumberFactory.h"
@@ -5,10 +13,15 @@
 #include "RbConstants.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "RbMathLogic.h"
-#include "StochasticNode.h"
+#include "AbstractBirthDeathProcess.h"
+#include "DagNode.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "TopologyNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
 
-#include <algorithm>
-#include <cmath>
+namespace RevBayesCore { class Taxon; }
 
 using namespace RevBayesCore;
 
@@ -158,7 +171,7 @@ EpisodicBirthDeathSamplingTreatmentProcess::EpisodicBirthDeathSamplingTreatmentP
     if (t != NULL)
     {
       delete value;
-      value = &(t->getValue());
+      value = t->getValue().clone();
     }
     else
     {
@@ -391,82 +404,82 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
     // Compute probabilities of branch segments on all branches
     for (size_t i=0; i<num_nodes; ++i)
     {
-        const TopologyNode& n = value->getNode( i );
+      const TopologyNode& n = value->getNode( i );
 
-        if ( !n.isRoot() && !n.isSampledAncestor() )
-        {
-//        double t_start = n.getParent().getAge();
-//        double t_end = n.getAge();
-            double t_start = n.getAge();
-            double t_end = n.getParent().getAge();
+      double t = n.getAge();
+      size_t index = findIndex(t);
+      double this_ln_D = lnD(index,t);
+      if ( n.isTip() )
+      {
+        lnProbTimes -= this_ln_D;
+      }
+      else
+      {
+        lnProbTimes += this_ln_D;
+      }
 
-            size_t interval_t_start = findIndex(t_start);
-            size_t interval_t_end = findIndex(t_end);
+//         if ( !n.isRoot() && !n.isSampledAncestor() )
+//         {
+// //        double t_start = n.getParent().getAge();
+// //        double t_end = n.getAge();
+//             double t_start = n.getAge();
+//             double t_end = n.getParent().getAge();
+//
+//             size_t interval_t_start = findIndex(t_start);
+//             size_t interval_t_end = findIndex(t_end);
+//
+//             double t_o = t_start;
+//             size_t interval_t_o = interval_t_start;
+//
+//             while ( interval_t_o < interval_t_end )
+//             {
+//                 double t_y = timeline[interval_t_o+1];
+//                 size_t interval_t_y = interval_t_o + 1;
+//
+//                 lnProbTimes -= lnD(interval_t_o,t_o);
+//                 lnProbTimes += lnD(interval_t_y,t_y);
+//
+//                 t_o = t_y;
+//                 interval_t_o = interval_t_y;
+//             }
+//
+//             lnProbTimes -= lnD(interval_t_o,t_o);
+//             lnProbTimes += lnD(interval_t_end,t_end);
+//             // std::cout << "    computing (vii); t_o = " << t_o << "; t_end = " << t_end << "; lnD(interval_t_o,t_o) = " << lnD(interval_t_o,t_o) << "; lnD(interval_t_end,t_end) = " << lnD(interval_t_end,t_end) << std::endl;
+//             // std::cout << "lnProbTimes is now " << lnProbTimes << std::endl;
+//         }
 
-            double t_o = t_start;
-            size_t interval_t_o = interval_t_start;
+      }
+      lnProbTimes += lnD(findIndex(value->getRoot().getAge()),value->getRoot().getAge());
 
-            while ( interval_t_o < interval_t_end )
-            {
-                double t_y = timeline[interval_t_o+1];
-                size_t interval_t_y = interval_t_o + 1;
-
-                lnProbTimes -= lnD(interval_t_o,t_o);
-                lnProbTimes += lnD(interval_t_y,t_y);
-
-                t_o = t_y;
-                interval_t_o = interval_t_y;
-            }
-
-            lnProbTimes -= lnD(interval_t_o,t_o);
-            lnProbTimes += lnD(interval_t_end,t_end);
-            // std::cout << "    computing (vii); t_o = " << t_o << "; t_end = " << t_end << "; lnD(interval_t_o,t_o) = " << lnD(interval_t_o,t_o) << "; lnD(interval_t_end,t_end) = " << lnD(interval_t_end,t_end) << std::endl;
-            // std::cout << "lnProbTimes is now " << lnProbTimes << std::endl;
-        }
-    }
-
-    // // Handle all branch segments by creating master list of all intervals and tracking number alive in each
-    // // Assemble sorted master timeline defining all branch-interval beginnings and endings
-    // std::vector<double> all_events = timeline;
-    // all_events.reserve(1 + timeline.size() + serial_bifurcation_times.size() + serial_sampled_ancestor_ages.size() + serial_tip_ages.size());
-    // all_events.insert(all_events.end(),(&value->getRoot())->getAge() - offset);
-    // all_events.insert(all_events.end(),serial_bifurcation_times.begin(),serial_bifurcation_times.end());
-    // all_events.insert(all_events.end(),serial_sampled_ancestor_ages.begin(),serial_sampled_ancestor_ages.end());
-    // all_events.insert(all_events.end(),serial_tip_ages.begin(),serial_tip_ages.end());
-    // std::sort(all_events.begin(),all_events.end());
-    //
-    // // Ensure list of times is unique
-    // std::vector<double>::iterator it = std::unique(all_events.begin(),all_events.end());
-    // all_events.resize(std::distance(all_events.begin(),it));
-    //
-    // // Compute probabilities of branch segments
-    // for (size_t i=0; i<all_events.size()-1; ++i)
-    // {
-    //   if ( RbMath::isAComputableNumber(lnProbTimes) == false )
-    //   {
-    //       return RbConstants::Double::nan;
-    //   }
-    //   double t_y = all_events[i]; // The times are sorted in ascending order
-    //   double t_o = all_events[i+1];
-    //   int active_lineages_in_interval = survivors((t_o + t_y)/2.0);
-    //   double lnD_t_o = lnD(findIndex(t_o),t_o);
-    //   double lnD_t_y = lnD(findIndex(t_y),t_y);
-    //   lnProbTimes += active_lineages_in_interval * lnD_t_o - active_lineages_in_interval * lnD_t_y;
-    //
-    // }
 // std::cout << "computed (vii); lnProbability = " << lnProbTimes << std::endl;
 
     // condition on survival
     if ( condition == "survival" )
     {
-        double root_age = (&value->getRoot())->getAge() - offset;
+        double root_age = (&value->getRoot())->getAge();
         lnProbTimes -= num_initial_lineages * log( 1 - E(findIndex(root_age),root_age) );
     }
-    // condition on nTaxa
-    else if ( condition == "nTaxa" )
+    else if ( condition == "sampleAtLeastOneLineage" )
     {
-        // lnProbTimes -= lnProbNumTaxa( value->getNumberOfTips(), 0, process_time, true );
+        // The conditioning suggested by Stadler 2011 and used by Gavryuskina (2014)
+        double root_age = (&value->getRoot())->getAge();
+        lnProbTimes -= log( 1 - E(findIndex(root_age),root_age) );
     }
+    // else if ( condition == "persistence" )
+    // {
+    //   // Condition on extand descendant(s) at time 0 and sample being left
+    //   double root_age = (&value->getRoot())->getAge();
+    //   double pr_no_samples = modifiedE(findIndex(root_age),root_age,1);
+    //   double pr_extinction_and_no_samples = modifiedE(findIndex(root_age),root_age,2);
+    //   double pr_no_extant_descendants = modifiedE(findIndex(root_age),root_age,4);
+    //   lnProbTimes -= log( (1.0 - pr_no_samples) - pr_no_extant_descendants + pr_extinction_and_no_samples );
+    //   // Condition on the other root (if there is one) child leaving sample
+    //   if (num_initial_lineages > 1)
+    //   {
+    //     lnProbTimes -= log( 1.0 - pr_no_samples );
+    //   }
+    // }
 
     if ( RbMath::isFinite(lnProbTimes) == false )
     {
@@ -509,19 +522,20 @@ void EpisodicBirthDeathSamplingTreatmentProcess::countAllNodes(void) const
   event_tip_ages = std::vector<std::vector<double> >(timeline.size(),std::vector<double>(0,1.0));
   event_bifurcation_times = std::vector<std::vector<double> >(timeline.size(),std::vector<double>(0,1.0));
 
-  // Assign all node times (bifurcations, sampled ancestors, and tips) to their sets, accounting for offset
+  // Assign all node times (bifurcations, sampled ancestors, and tips) to their sets
   for (size_t i = 0; i < num_nodes; i++)
   {
       const TopologyNode& n = value->getNode( i );
 
-      double t = n.getAge() - offset;
+      double t = n.getAge();
 
       if ( n.isTip() && n.isFossil() && n.isSampledAncestor() )
       {
         // node is sampled ancestor
           int at_event = whichIntervalTime(t);
 
-          if (at_event == -1)
+          // If this tip is not at an event time (and specifically at an event time with Phi[i] > 0), it's a serial tip
+          if (at_event == -1 || phi_event[at_event] < DBL_EPSILON)
           {
             serial_sampled_ancestor_ages.push_back(t);
           }
@@ -535,7 +549,7 @@ void EpisodicBirthDeathSamplingTreatmentProcess::countAllNodes(void) const
           // node is serial leaf
           int at_event = whichIntervalTime(t);
 
-          // If this tip is not at an event time (and at an event time with Phi[i] > 0), it's a serial tip
+          // If this tip is not at an event time (and specifically at an event time with Phi[i] > 0), it's a serial tip
           if (at_event == -1 || phi_event[at_event] < DBL_EPSILON)
           {
             serial_tip_ages.push_back(t);
@@ -566,7 +580,8 @@ void EpisodicBirthDeathSamplingTreatmentProcess::countAllNodes(void) const
               // node is bifurcation event (a "true" node)
               int at_event = whichIntervalTime(t);
 
-              if (at_event == -1)
+              // If this bifurcation is not at an event time (and specifically at an event time with Lambda[i] > 0), it's a serial bifurcation
+              if (at_event == -1 || lambda_event[at_event] < DBL_EPSILON)
               {
                 serial_bifurcation_times.push_back(t);
               }
@@ -661,6 +676,93 @@ double EpisodicBirthDeathSamplingTreatmentProcess::E(size_t i, double t) const
 }
 
 /**
+ * Recursively compute one of the four extinction probabilities that may be desired.
+ * Argument type is one of:
+ *                         1: no sampled descendants at any point in time (this is the same as E(i,t))
+ *                         2: no sampled descendants at any point in time AND lineage goes extinct before present day
+ *                         3: no sampled descendants at time 0 (this only works if 1 > Phi[0] > 0)
+ *                         4: no extant descendants at time 0
+ */
+double EpisodicBirthDeathSamplingTreatmentProcess::modifiedE(int i, double t, size_t condition_type) const
+{
+  if (i < 0) {
+    if ( t < DBL_EPSILON )
+    {
+      if (condition_type == 1 || condition_type == 3)
+      {
+        if ( phi_event[0] > DBL_EPSILON )
+        {
+          return 1.0;
+        }
+        else
+        {
+          return 1.0 - phi_event[0];
+        }
+      }
+      else
+      {
+        return 0.0;
+      }
+    }
+    else
+    {
+      throw(RbException("Cannot compute E for index -1 at t > 0."));
+    }
+  }
+  else
+  {
+
+    // E <- (b + d + s - A *(1+B-exp(-A*(next_t-current_t))*(1-B))/(1+B+exp(-A*(next_t-current_t))*(1-B)) ) / (2*b)
+    double s = timeline[i];
+    double E_i;
+
+    if ( condition_type == 1 || condition_type == 2 ) {
+      // E_i = lambda[i] + mu[i] + phi[i];
+      // E_i -= A_i[i] * (1 + B_i[i] - exp(-A_i[i] * (t - s)) * (1 - B_i[i])) / (1 + B_i[i] + exp(-A_i[i] * (t - s)) * (1 - B_i[i]));
+      // E_i /= (2 * lambda[i]);
+
+      double E_i_minus_1 = modifiedE(i-1,s,condition_type);
+
+      double A = sqrt( pow(lambda[i] - mu[i] - phi[i],2.0) + 4 * lambda[i] * phi[i]);
+
+      double C = (1.0 - lambda_event[i]) * (1 - mu_event[i]) * E_i_minus_1;
+      C += (1.0 - mu_event[i]) * lambda_event[i] * E_i_minus_1 * E_i_minus_1;
+      C += (1.0 - lambda_event[i]) * mu_event[i];
+      C *= (1.0 - phi_event[i]);
+
+      double B = (1.0 - 2.0 * C) * lambda[i] + mu[i] + phi[i];
+      B /= A;
+
+      E_i = lambda[i] + mu[i] + phi[i];
+      E_i -= A * (1.0 + B - exp(-A * (t - s)) * (1.0 - B)) / (1.0 + B + exp(-A * (t - s)) * (1.0 - B));
+      E_i /= (2.0 * lambda[i]);
+
+    }
+    else
+    {
+      // TODO: double check this is giving us appropriate r(t_s)
+      double E_i_minus_1 = modifiedE(i-1,s,condition_type);
+
+      double delta = mu[i] + phi[i] * r[i];
+
+      double G = mu_event[i] + (1.0 - mu_event[i])*phi_event[i]*r[i] + ((1.0 - mu_event[i])*(1.0 - phi_event[i]*r[i]))*E_i_minus_1;
+
+      double F = (1 - lambda_event[i])*G + lambda_event[i]*G*G;
+
+      double neg_rate = delta - lambda[i];
+
+      double tmp1 = (F - 1.0) * exp(neg_rate * s);
+      double tmp2 = (delta - lambda[i] * F) * exp(neg_rate * t);
+
+      E_i = (delta * tmp1 + tmp2) / (lambda[i] * tmp1 + tmp2);
+    }
+
+    return E_i;
+  }
+}
+
+
+/**
  * return the index i so that t_{i-1} <= t < t_i
  * where t_i is the instantaneous sampling time (i = 0,...,l)
  * t_0 = 0.0
@@ -668,18 +770,25 @@ double EpisodicBirthDeathSamplingTreatmentProcess::E(size_t i, double t) const
  */
 size_t EpisodicBirthDeathSamplingTreatmentProcess::findIndex(double t) const
 {
-    // Linear search for interval because upper_bound isn't cooperating
-    for (size_t i=0; i < timeline.size()-1; ++i)
+    // Linear search for interval because std::lower_bound is not cooperating
+    if (timeline.size() == 2) // If timeline.size() were 1, we would have 0 break points and would be in constant-rate version
     {
-        if (t >= timeline[i] && t < timeline[i+1])
-        {
-            return i;
-        }
+      return(t < timeline[1] ? 0 : 1);
+    }
+    else
+    {
+      for (size_t i=0; i < timeline.size()-1; ++i)
+      {
+          if (t >= timeline[i] && t < timeline[i+1])
+          {
+              return(i);
+          }
+      }
+
+      return(timeline.size() - 1);
     }
 
-    return timeline.size() - 1;
-
-    // // Binary search for interval because std::upper_bound isn't cooperating
+    // // Binary search for interval because std::lower_bound isn't cooperating
     // // The run-time cost differential of binary versus linear seems negligible in limited testing
     // // First check if t > s_l, since we don't have an l+1 this interval is unbounded and we can't include it in the search
     // if (t >= timeline[timeline.size()-1])
@@ -745,8 +854,9 @@ double EpisodicBirthDeathSamplingTreatmentProcess::lnProbTreeShape(void) const
     int num_extinct = (int)value->getNumberOfExtinctTips();
     int num_sa = (int)value->getNumberOfSampledAncestors();
 
-    //TODO: Check against Gavryushkina (2014)
-    return (num_taxa - num_sa - 1) * RbConstants::LN2 - RbMath::lnFactorial(num_taxa - num_extinct);
+    // return (num_taxa - num_sa - 1) * RbConstants::LN2 - RbMath::lnFactorial(num_taxa - num_extinct);
+    //Gavryushkina (2014) uses the following
+    return (num_taxa - num_sa - 1) * RbConstants::LN2 - RbMath::lnFactorial(num_taxa);
 }
 
 /**
@@ -761,14 +871,9 @@ void EpisodicBirthDeathSamplingTreatmentProcess::updateVectorParameters( void ) 
     timeline.clear();
     timeline = interval_times->getValue();
 
-    // Offset the timeline
-    for (size_t i=0; i<timeline.size(); ++i)
-    {
-      timeline[i] += offset;
-    }
-
     // Add t_0
-    timeline.insert(timeline.begin(),0.0);
+    getOffset();
+    timeline.insert(timeline.begin(),offset);
 
     // clean all the sets
     lambda.clear();
@@ -941,7 +1046,7 @@ double EpisodicBirthDeathSamplingTreatmentProcess::pSurvival(double start, doubl
 {
   //TODO: we do not really need this function here, and survival does not have quite the same meaning here
   //      we should make sure this is this is the closest translation of survival to SSBDPs
-  return (1.0 - E(findIndex(end),end)) / (1.0 - E(findIndex(end),end));
+  return (1.0 - E(findIndex(start),start)) / (1.0 - E(findIndex(end),end));
 }
 
 /**

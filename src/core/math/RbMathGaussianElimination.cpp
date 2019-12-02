@@ -16,9 +16,14 @@
 
 
 #include "RbMathGaussianElimination.h"
-#include "RbException.h"
+
+#include <stddef.h>
+
 #include "RbMathMatrix.h"
-#include "RbSettings.h"
+#include "MatrixComplex.h"
+#include "MatrixReal.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 using namespace RevBayesCore;
 

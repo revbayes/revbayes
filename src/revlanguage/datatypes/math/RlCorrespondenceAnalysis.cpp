@@ -1,4 +1,9 @@
 
+#include <stddef.h>
+#include <vector>
+#include <string>
+#include <ostream>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "CorrespondenceAnalysis.h"
@@ -6,13 +11,28 @@
 #include "Natural.h"
 #include "RealPos.h"
 #include "RevObject.h"
-#include "RbException.h"
 #include "RlCorrespondenceAnalysis.h"
 #include "RlMatrixReal.h"
 #include "TypeSpec.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "MatrixReal.h"
+#include "MemberProcedure.h"
+#include "MethodTable.h"
+#include "ModelObject.h"
+#include "RbVector.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
+#include "WorkspaceToCoreWrapperObject.h"
 
-#include <vector>
-#include <string>
+namespace RevLanguage { class Argument; }
 
 using namespace RevLanguage;
 

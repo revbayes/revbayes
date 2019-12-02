@@ -9,13 +9,22 @@
 #ifndef ConstantRateOutgroupBirthDeathProcess_h
 #define ConstantRateOutgroupBirthDeathProcess_h
 
+#include <stddef.h>
+#include <iosfwd>
+#include <vector>
+
 #include "AbstractBirthDeathProcess.h"
 #include "TreeChangeEventListener.h"
+#include "Clade.h"
+#include "RbBitSet.h"
+#include "RbException.h"
+#include "Taxon.h"
+#include "TopologyNode.h"
 
 namespace RevBayesCore {
-    
-    class Clade;
-    class Taxon;
+class DagNode;
+class Tree;
+template <class valueType> class TypedDagNode;
     
     class ConstantRateOutgroupBirthDeathProcess : public AbstractBirthDeathProcess, TreeChangeEventListener {
 

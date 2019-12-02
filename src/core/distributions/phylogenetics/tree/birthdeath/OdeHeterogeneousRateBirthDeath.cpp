@@ -1,5 +1,7 @@
 #include "OdeHeterogeneousRateBirthDeath.h"
 
+#include "RbVectorImpl.h"
+
 using namespace RevBayesCore;
 
 
@@ -15,7 +17,7 @@ OdeHeterogeneousRateBirthDeath::OdeHeterogeneousRateBirthDeath( const RbVector<d
 }
 
 
-void OdeHeterogeneousRateBirthDeath::operator()(const state_type &x, state_type &dxdt, const double t)
+void OdeHeterogeneousRateBirthDeath::operator()(const std::vector< double > &x, std::vector< double > &dxdt, const double t)
 {
     
     double rate_cat_prob = ( allow_same_category == true ? (1.0/ num_categories) : 1.0 / (num_categories-1.0) );

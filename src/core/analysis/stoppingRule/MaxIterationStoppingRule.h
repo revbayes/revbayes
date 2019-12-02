@@ -1,9 +1,10 @@
 #ifndef MaxIterationStoppingRule_H
 #define MaxIterationStoppingRule_H
 
-#include "StoppingRule.h"
+#include <stddef.h>
+#include <iosfwd>
 
-#include <vector>
+#include "StoppingRule.h"
 
 namespace RevBayesCore {
     

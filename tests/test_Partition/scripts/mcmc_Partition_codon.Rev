@@ -146,7 +146,7 @@ mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single", nruns=2)
 mymcmc.run(generations=500)
 
 # summarize output
-treetrace = readTreeTrace("output/PS_codon.trees", treetype="non-clock")
+treetrace = readTreeTrace("output/PS_codon.trees", treetype="non-clock", nruns=2)
 #treetrace.summarize()
 
 map_tree = mapTree(treetrace,"output/PS_codon_map.tre")

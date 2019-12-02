@@ -2,9 +2,10 @@
 #define AbsoluteValueFunction_H
 
 #include "ContinuousFunction.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     
     /**

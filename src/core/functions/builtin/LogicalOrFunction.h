@@ -24,11 +24,10 @@
 
 #include "RbBoolean.h"
 #include "TypedFunction.h"
-#include "TypedDagNode.h"
-
-#include <vector>
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     class LogicalOrFunction : public TypedFunction<Boolean> {
         

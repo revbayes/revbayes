@@ -1,5 +1,11 @@
 #include "TreeScaleFunction.h"
-#include "RbException.h"
+
+#include <stddef.h>
+
+#include "TopologyNode.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

@@ -2,15 +2,14 @@
 #define AbstractCharacterHistoryBirthDeathProcess_h
 
 
-#include "CharacterHistoryDiscrete.h"
-#include "MemberObject.h"
 #include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypedDistribution.h"
 
 namespace RevBayesCore {
     
-    class Clade;
+    class CharacterHistory;
+    class DagNode;
+    template <class valueType> class RbOrderedSet;
     
     class AbstractCharacterHistoryBirthDeathProcess : public TypedDistribution<Tree> {
         

@@ -1,12 +1,14 @@
+#include <stddef.h>
+#include <cmath>
+#include <iostream>
+#include <vector>
+
 #include "DagNode.h"
 #include "MaximumLikelihoodAnalysis.h"
-#include "MaximumLikelihoodEstimation.h"
-#include "RbException.h"
-#include "RlUserInterface.h"
 #include "BootstrapAnalysis.h"
-
-#include <cmath>
-#include <typeinfo>
+#include "Cloneable.h"
+#include "Model.h"
+#include "Parallelizable.h"
 
 
 using namespace RevBayesCore;

@@ -1,18 +1,9 @@
-#include "MatrixReal.h"
+#include <stddef.h>
+#include <fstream>
+
 #include "RateGeneratorSequence.h"
 #include "RateGenerator.h"
-#include "RateMatrix.h"
-#include "RateMatrix_JC.h"
-#include "RbVector.h"
-#include "RbException.h"
-#include "RbMathMatrix.h"
-#include "TransitionProbabilityMatrix.h"
-
-#include <cmath>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <iomanip>
+#include "Cloneable.h"
 
 using namespace RevBayesCore;
 

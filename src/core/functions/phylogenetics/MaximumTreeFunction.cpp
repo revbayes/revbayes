@@ -1,10 +1,18 @@
 #include "MaximumTreeFunction.h"
+
+#include <limits>
+#include <set>
+
 #include "RbException.h"
 #include "TopologyNode.h"
 #include "Tree.h"
 #include "TreeUtilities.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "TypedDagNode.h"
+#include "boost/dynamic_bitset.hpp" // IWYU pragma: keep
 
-#include <boost/dynamic_bitset.hpp>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

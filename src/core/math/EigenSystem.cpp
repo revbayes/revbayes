@@ -27,10 +27,14 @@
  */
 
 #include "EigenSystem.h"
-#include "MatrixReal.h"
 
 #include <assert.h>
+#include <math.h>
 #include <vector>
+
+#include "MatrixReal.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 using namespace RevBayesCore;
 

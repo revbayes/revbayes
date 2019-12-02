@@ -1,10 +1,30 @@
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "PosteriorPredictiveProbabilityFunction.h"
 #include "Func_posteriorPredictiveProbability.h"
 #include "ModelVector.h"
 #include "Real.h"
-#include "RealPos.h"
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "ModelObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "RlSimplex.h"
+#include "RlTypedFunction.h"
+#include "Simplex.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
+#include "TypedFunction.h"
+
+namespace RevBayesCore { template <class valueType> class RbVector; }
 
 using namespace RevLanguage;
 

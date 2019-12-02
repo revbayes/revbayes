@@ -18,14 +18,20 @@
 #ifndef RlRateMatrix_H
 #define RlRateMatrix_H
 
+#include <ostream>
+#include <vector>
+
 #include "RlRateGenerator.h"
 #include "RateMatrix.h"
-#include "TypedDagNode.h"
+#include "RevPtr.h"
 
-#include <ostream>
-#include <string>
+namespace RevBayesCore { class RateGenerator; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 namespace RevLanguage {
+class Argument;
+class RevVariable;
+class TypeSpec;
     
     class RateMatrix : public RateGenerator {
         

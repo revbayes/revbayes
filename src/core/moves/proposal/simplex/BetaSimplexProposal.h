@@ -1,14 +1,14 @@
 #ifndef BetaSimplexProposal_H
 #define BetaSimplexProposal_H
 
-#include <set>
-#include <string>
+#include <iosfwd>
 
 #include "SimpleProposal.h"
 #include "Simplex.h"
-#include "StochasticNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class variableType> class StochasticNode;
     
     /**
      * The beta-simplex operator.

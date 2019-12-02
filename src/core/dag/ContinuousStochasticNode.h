@@ -1,10 +1,17 @@
 #ifndef ContinuousStochasticNode_H
 #define ContinuousStochasticNode_H
 
-#include "ContinuousDistribution.h"
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "StochasticNode.h"
+#include "DynamicNode.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
 
 namespace RevBayesCore {
+class ContinuousDistribution;
     
     class ContinuousStochasticNode : public StochasticNode<double> {
         

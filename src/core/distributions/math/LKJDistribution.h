@@ -9,13 +9,14 @@
 #ifndef __revbayes__LKJDistribution__
 #define __revbayes__LKJDistribution__
 
-#include <iostream>
+#include <stddef.h>
 
 #include "TypedDistribution.h"
 #include "MatrixReal.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     class LKJDistribution : public TypedDistribution<MatrixReal>   {
         

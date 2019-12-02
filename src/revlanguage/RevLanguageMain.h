@@ -27,7 +27,7 @@ class RevLanguageMain {
     
         RevLanguageMain(bool batch = false);
     
-        void startRevLanguageEnvironment(std::vector<std::string> sourceFiles);
+        void startRevLanguageEnvironment(const std::vector<std::string> &args, const std::vector<std::string> &source_files);
 
     private:
     

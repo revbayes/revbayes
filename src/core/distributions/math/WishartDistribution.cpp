@@ -1,19 +1,14 @@
-//
-//  WishartDistribution.cpp
-//  revbayes
-//
-//  Created by Nicolas Lartillot on 2014-03-26.
-//  Copyright (c) 2014 revbayes team. All rights reserved.
-//
-
 #include "WishartDistribution.h"
 
+#include <stdlib.h>
+#include <iostream>
+
 #include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbConstants.h"
-#include "RbStatisticsHelper.h"
-#include "DistributionNormal.h"
 #include "DistributionWishart.h"
+#include "Cloneable.h"
+
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 

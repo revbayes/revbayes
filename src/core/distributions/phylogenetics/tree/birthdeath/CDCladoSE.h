@@ -5,9 +5,6 @@
 #include "RateMatrix.h"
 
 #include <vector>
-#include <boost/array.hpp>
-
-typedef std::vector< double > state_type;
 
 namespace RevBayesCore {
     
@@ -26,7 +23,7 @@ namespace RevBayesCore {
         
         CDCladoSE( const std::vector<double> &m, const RateGenerator* q, std::map<std::vector<unsigned>, double> e, double r);
         
-        void operator() ( const state_type &x , state_type &dxdt , const double t );
+        void operator() ( const std::vector< double > &x , std::vector< double > &dxdt , const double t );
         
     private:
         

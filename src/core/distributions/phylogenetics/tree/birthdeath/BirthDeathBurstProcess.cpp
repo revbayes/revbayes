@@ -1,12 +1,21 @@
 #include "BirthDeathBurstProcess.h"
-#include "DistributionExponential.h"
+
+#include <cmath>
+#include <string>
+
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "StochasticNode.h"
+#include "AbstractRootedTreeDistribution.h"
+#include "TimeInterval.h"
+#include "TopologyNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
 
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
 
 
 using namespace RevBayesCore;

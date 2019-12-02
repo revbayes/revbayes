@@ -1,13 +1,22 @@
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "ConstantNode.h"
 #include "RevObject.h"
-#include "RbException.h"
 #include "Real.h"
-#include "RevNullObject.h"
 #include "RlPathSampler.h"
 #include "RlString.h"
 #include "TypeSpec.h"
+#include "MemberProcedure.h"
+#include "MethodTable.h"
+#include "PathSampler.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "WorkspaceToCoreWrapperObject.h"
+
+namespace RevLanguage { class Argument; }
 
 
 using namespace RevLanguage;

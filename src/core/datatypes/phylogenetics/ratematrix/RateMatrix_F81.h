@@ -4,14 +4,10 @@
  * class that holds a rate matrix for a continuous-time Markov model
  * with parameters for equilibrium frequencies but fixed exchangeabilities.
  *
- * @brief Declaration of RateMatrix_F81
+ * @brief F81 (Felsenstein 1981) rate matrix class
  *
- * (c) Copyright 2009-
- * @date Last modified: $Date: 2012-12-05 12:20:37 -0800 (Wed, 05 Dec 2012) $
- * @author The RevBayes Development Core Team
- * @license GPL version 3
+ * This rate matrix class assumes equal exchangability rates for each state but allows for different stationary frequencies.
  *
- * $Id: RateMatrix.h 1901 2012-12-05 20:20:37Z boussau $
  */
 
 #ifndef RateMatrix_F81_H

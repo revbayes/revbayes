@@ -1,10 +1,21 @@
 
 #include "LaplaceDistribution.h"
+
 #include "DistributionLaplace.h"
 #include "RandomNumberFactory.h"
+#include "Cloneable.h"
 #include "RbConstants.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
+
 
 using namespace RevBayesCore;
+
+/* Laplace Distribution Constructor
+ * @param m A real number for location parameter
+ * @param s A positive real for the scale parameter
+ */
 
 LaplaceDistribution::LaplaceDistribution(const TypedDagNode<double> *m, const TypedDagNode<double> *s) : ContinuousDistribution( new double( 0.0 ) ),
     mean( m ),

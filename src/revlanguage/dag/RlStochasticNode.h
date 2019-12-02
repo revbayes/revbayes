@@ -3,6 +3,7 @@
 
 #include "StochasticNode.h"
 #include "RevMemberObject.h"
+#include "RlDistribution.h"
 
 namespace RevLanguage {
     

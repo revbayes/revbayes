@@ -21,17 +21,21 @@
  */
 
 
-#ifndef __RateMatrix_PoMo4__
-#define __RateMatrix_PoMo4__
+#ifndef RateMatrix_PoMo4_H
+#define RateMatrix_PoMo4_H
+
+#include <stddef.h>
+#include <vector>
 
 #include "AbstractRateMatrix.h"
-#include <complex>
-#include <vector>
+#include "RateGenerator.h"
+#include "RateMatrix.h"
 
 
 namespace RevBayesCore {
     
     class TransitionProbabilityMatrix;
+class Assignable;
     
     class RateMatrix_PoMo4 : public AbstractRateMatrix {
         
@@ -40,37 +44,38 @@ namespace RevBayesCore {
         using RateMatrix::getRate;
         
         RateMatrix_PoMo4(size_t n);                                                  //!< Construct rate matrix with n states
-        RateMatrix_PoMo4(size_t n,  const size_t vps, const std::vector<double> &mr, const std::vector<double> &sc);  //!< Construct rate matrix with n states, a vector of mutation rates, and a vector of selection coefficients
-        RateMatrix_PoMo4(size_t n,  const size_t vps, const RateGenerator &mm, const std::vector<double> sc);  //!< Construct rate matrix with n states, a matrix of mutation rates, and a vector of selection coefficients
+        RateMatrix_PoMo4(size_t n, const size_t vps, const std::vector<double> &mr, const std::vector<double> &sc);  //!< Construct rate matrix with n states, a vector of mutation rates, and a vector of selection coefficients
+        RateMatrix_PoMo4(size_t n, const size_t vps, const RateGenerator &mm, const std::vector<double> sc);  //!< Construct rate matrix with n states, a matrix of mutation rates, and a vector of selection coefficients
         
         virtual                         ~RateMatrix_PoMo4(void);                     //!< Destructor
         
         // RateMatrix functions
-        virtual RateMatrix_PoMo4&                    assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
+        virtual RateMatrix_PoMo4&                   assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
         double                                      averageRate(void) const;
         void                                        calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;   //!< Calculate the transition matrix
-        RateMatrix_PoMo4*                            clone(void) const;
+        RateMatrix_PoMo4*                           clone(void) const;
         std::vector<double>                         getStationaryFrequencies(void) const ;  //!< Return the stationary frequencies, although in the PoMo4 model I don't know them
         
         void                                        update(void);
         void                                        setMutationRates(const std::vector<double>& mr);
         void                                        setMutationRates(const RateGenerator& mm);
+        void                                        setMutationRates(const std::vector<double>& r, const Simplex& s);
         void                                        setSelectionCoefficients(const std::vector<double>& sc);
         
         
     private:
         void                                        buildRateMatrix(void);
         double                                      computeEntryFromMoranProcessWithSelection(size_t state1, size_t state2, double& count1);
-        void                                        computeExponentialMatrixByRepeatedSquaring(double t,  TransitionProbabilityMatrix& P ) const;
-        inline void                                 squareMatrix( TransitionProbabilityMatrix& P,  TransitionProbabilityMatrix& P2) const;
+        void                                        computeExponentialMatrixByRepeatedSquaring(double t, TransitionProbabilityMatrix& P ) const;
+        inline void                                 squareMatrix( TransitionProbabilityMatrix& P, TransitionProbabilityMatrix& P2) const;
         
         
-        size_t                                      N;                        //!< Number of individuals in idealized population
-        size_t                                      matrixSize;             //!< Number of elements in a row or column of the rate matrix
-        std::vector < std::vector < double > >      mu;                        //!< Matrix of 12 mutation rates and 0s elsewhere
-        std::vector < double >                      s;                        //!< Vector of 4 selection coefficients
-        double                                      precision;              //!< Precision for exponentiation through repeated squaring
-        std::vector<double>                         stationary_freqs;       //!< Holds the stationary frequencies
+        size_t                                      N;                          //!< Number of individuals in idealized population
+        size_t                                      matrixSize;                 //!< Number of elements in a row or column of the rate matrix
+        std::vector < std::vector < double > >      mu;                         //!< Matrix of 12 mutation rates and 0s elsewhere
+        std::vector < double >                      s;                          //!< Vector of 4 selection coefficients
+        double                                      precision;                  //!< Precision for exponentiation through repeated squaring
+        std::vector<double>                         stationary_freqs;           //!< Holds the stationary frequencies
         
     };
     

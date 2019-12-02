@@ -1,3 +1,12 @@
+#include <stddef.h>
+#include <algorithm>
+#include <iosfwd>
+#include <map>
+#include <string>
+#include <type_traits>
+#include <utility>
+#include <vector>
+
 #include "AbstractRootedTreeDistribution.h"
 #include "Clade.h"
 #include "TopologyConstrainedTreeDistribution.h"
@@ -8,10 +17,19 @@
 #include "StochasticNode.h"
 #include "Taxon.h"
 #include "TopologyNode.h"
-#include "TreeUtilities.h"
+#include "RbBitSet.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "StringUtilities.h"
+#include "TimeInterval.h"
+#include "Tree.h"
+#include "TreeChangeEventHandler.h"
+#include "TreeChangeEventMessage.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
 
-#include <algorithm>
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
 
 using namespace RevBayesCore;
 
@@ -427,13 +445,12 @@ bool TopologyConstrainedTreeDistribution::matchesConstraints( void )
 void TopologyConstrainedTreeDistribution::recursivelyFlagNodesDirty(const TopologyNode& n)
 {
     
-    
     dirty_nodes[ n.getIndex() ] = true;
     
-    if ( n.isRoot() )
-        return;
-    
-    recursivelyFlagNodesDirty(n.getParent());
+    if ( n.isRoot() == false )
+    {
+        recursivelyFlagNodesDirty(n.getParent());
+    }
     
 }
 
@@ -843,9 +860,10 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
         if ( clade_age <= max_node_age )
         {
             // Get the rng
-            RandomNumberGenerator* rng = GLOBAL_RNG;
+//            RandomNumberGenerator* rng = GLOBAL_RNG;
             
-            clade_age = rng->uniform01() * ( max_age - max_node_age ) + max_node_age;
+//            clade_age = rng->uniform01() * ( max_age - max_node_age ) + max_node_age;
+            clade_age = tree_base_distribution->simulateCladeAge(nodes_in_clade.size(), max_age, 0, max_node_age);
         }
         
         tree_base_distribution->simulateClade(nodes_in_clade, clade_age, 0.0);

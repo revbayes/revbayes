@@ -7,12 +7,18 @@
 //
 
 #include "ShortestDistanceFunction.h"
+
+#include <set>
+#include <vector>
+#include <cstddef>
+
 #include "RbConstants.h"
 #include "RbVector.h"
 #include "TypedFunction.h"
-#include <cmath>
-#include <set>
-#include <vector>
+#include "Cloner.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

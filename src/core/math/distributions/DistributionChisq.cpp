@@ -20,9 +20,9 @@
 #include "DistributionChisq.h"
 #include "DistributionGamma.h"
 #include "DistributionNormal.h"
-#include "RandomNumberGenerator.h"
-#include "RbException.h"
 #include "RbMathFunctions.h"
+
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 

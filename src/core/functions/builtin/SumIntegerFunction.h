@@ -1,11 +1,12 @@
 #ifndef SumIntegerFunction_H
 #define SumIntegerFunction_H
 
-#include "RbVector.h"
 #include "TypedFunction.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Function for computation of the sum of some integers.

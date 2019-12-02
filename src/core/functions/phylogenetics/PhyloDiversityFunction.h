@@ -16,14 +16,18 @@
 #define PhyloDiversityFunction_H
 
 
+#include <stddef.h>
+#include <vector>
+
 #include "Clade.h"
-#include "RbException.h"
-#include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
 
 namespace RevBayesCore {
+class DagNode;
+class Tree;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     class PhyloDiversityFunction : public TypedFunction<double> {
         

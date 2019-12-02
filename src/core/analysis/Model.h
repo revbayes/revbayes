@@ -1,9 +1,10 @@
 #ifndef Model_H
 #define Model_H
 
-#include <map>
+#include <stddef.h>
 #include <set>
 #include <vector>
+#include <iosfwd>
 
 #include "Cloneable.h"
 #include "DagNodeMap.h"

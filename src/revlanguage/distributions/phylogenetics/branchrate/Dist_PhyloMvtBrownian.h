@@ -8,6 +8,7 @@
 #include "RlTypedDistribution.h"
 #include "MatrixReal.h"
 #include "Real.h"
+#include "ModelVector.h" // IWYU pragma: keep
 
 namespace RevLanguage {
 

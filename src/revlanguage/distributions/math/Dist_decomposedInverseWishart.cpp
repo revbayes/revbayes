@@ -1,3 +1,9 @@
+#include <math.h>
+#include <stddef.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "Dist_decomposedInverseWishart.h"
 #include "Natural.h"
@@ -5,7 +11,35 @@
 #include "ModelVector.h"
 #include "RlMatrixRealSymmetric.h"
 #include "StochasticNode.h"
-#include "InverseWishartDistribution.h"
+#include "ArgumentRules.h"
+#include "ConstantNode.h"
+#include "DagMemberFunction.h"
+#include "DagNode.h"
+#include "DecomposedInverseWishartDistribution.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "MatrixReal.h"
+#include "ModelObject.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "Real.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlDagMemberFunction.h"
+#include "RlDeterministicNode.h"
+#include "RlDistribution.h"
+#include "RlMatrixReal.h"
+#include "RlStochasticNode.h"
+#include "RlTypedDistribution.h"
+#include "RlTypedFunction.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
 using namespace RevLanguage;
 

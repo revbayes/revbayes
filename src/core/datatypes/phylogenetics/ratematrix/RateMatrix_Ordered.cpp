@@ -1,29 +1,19 @@
-/**
- * @file
- * This file contains the implementation of RateMatrix_Ordered, which is a
- * class that holds a rate matrix for the chromosome number evolution model.
- *
- * @brief Implementation of RateMatrix_Ordered
- *
- * (c) copyright 2014-
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- *
- */
-
 #include "RateMatrix_Ordered.h"
-#include "MatrixReal.h"
-#include "RbException.h"
-#include "TransitionProbabilityMatrix.h"
 
 #include <cmath>
-#include <iomanip>
+
+#include "MatrixReal.h"
+#include "TransitionProbabilityMatrix.h"
+#include "Cloneable.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 using namespace RevBayesCore;
 
 /** Construct rate matrix with n states */
 RateMatrix_Ordered::RateMatrix_Ordered(size_t n) : AbstractRateMatrix( n ),
-    matrix_size( n )
+    matrix_size( n ),
+    allow_zero_state( true )
 {
     setLambda(1.0);
     setMu(1.0);
@@ -52,11 +42,13 @@ void RateMatrix_Ordered::buildRateMatrix(void)
         for (size_t j=0; j< matrix_size; j++)
         {
             (*the_rate_matrix)[i][j] = 0.0;
-            if (j != 0 && i != 0) {
+            if ( allow_zero_state == true || (j != 0 && i != 0) )
+            {
                 if (j == i+1)
                 {
                     (*the_rate_matrix)[i][j] = lambda;
-                } else if (j == i-1)
+                }
+                else if (j == i-1)
                 {
                     (*the_rate_matrix)[i][j] = mu;
                 }
@@ -171,6 +163,16 @@ std::vector<double> RateMatrix_Ordered::getStationaryFrequencies( void ) const
 {
     
     return stationary_freqs;
+}
+
+void RateMatrix_Ordered::setAllowZeroState(bool tf)
+{
+    
+    allow_zero_state = tf;
+    
+    // set flags
+    needs_update = true;
+    
 }
 
 void RateMatrix_Ordered::setLambda( double l )

@@ -23,9 +23,10 @@
 #define LognormalWithOffsetDistribution_H
 
 #include "ContinuousDistribution.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     class LognormalWithOffsetDistribution : public ContinuousDistribution {
         

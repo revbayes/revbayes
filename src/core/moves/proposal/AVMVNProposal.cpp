@@ -1,20 +1,20 @@
 #include "AVMVNProposal.h"
-#include "CholeskyDecomposition.h"
-#include "DistributionMultivariateNormal.h"
-#include "DistributionNormal.h"
-#include "EigenSystem.h"
-#include "MultivariateNormalDistribution.h"
-#include "NormalDistribution.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbConstants.h"
-#include "RbException.h"
-#include "RbMathLogic.h"
-#include "TreeUtilities.h"
-#include "TypedDagNode.h"
 
 #include <cmath>
-#include <iostream>
+#include <algorithm>
+
+#include "CholeskyDecomposition.h"
+#include "DistributionNormal.h"
+#include "RandomNumberFactory.h"
+#include "RbException.h"
+#include "ContinuousStochasticNode.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "Simplex.h"
+#include "StochasticNode.h"
+
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 
@@ -42,6 +42,7 @@ AVMVNProposal::AVMVNProposal( double s, double e, double n0, double c0, double m
     AVMVN_cholesky_L(  ),
     x_bar(  ),
     storedValues(  ),
+    storedValuesUntransformed(  ),
     proposedValues(  )
 {
     if (waitBeforeUsing < waitBeforeLearning)
@@ -58,7 +59,7 @@ void AVMVNProposal::addUntransformedScalar( StochasticNode<double> *v )
 {
     // add it to the nodes vector
     addNode( v );
-    
+
     noTransformScalarVariables.push_back( v );
 }
 
@@ -66,7 +67,7 @@ void AVMVNProposal::addLogScalar( StochasticNode<double> *v )
 {
     // add it to the nodes vector
     addNode( v );
-    
+
     logTransformScalarVariables.push_back( v );
 }
 
@@ -74,7 +75,7 @@ void AVMVNProposal::addLogitScalar( ContinuousStochasticNode *v )
 {
     // add it to the nodes vector
     addNode( v );
-    
+
     logitTransformScalarVariables.push_back( v );
 }
 
@@ -86,7 +87,7 @@ void AVMVNProposal::addUntransformedVector( StochasticNode<RbVector<double> > *v
 {
     // add it to the nodes vector
     addNode( v );
-    
+
     noTransformVectorVariables.push_back( v );
 }
 
@@ -94,11 +95,78 @@ void AVMVNProposal::addLogConstrainedSumVector( StochasticNode<Simplex> *v)
 {
     // add it to the nodes vector
     addNode( v );
-    
+
     logConstrainedSumTransformVectorVariables.push_back( v );
 
 }
 
+/**
+ * Calculates hastings ratio of the move, also sets all variables to their new values.
+ */
+void AVMVNProposal::calculateHastingsRatio( std::vector<double> x_prime, std::vector<double> x )
+{
+    // Calculate hastings ratio and give variables their new values
+    size_t index = 0;
+    for (size_t i = 0; i < noTransformScalarVariables.size(); ++i)
+    {
+        noTransformScalarVariables[i]->getValue() = x_prime[index];
+        ++index;
+    }
+
+    for (size_t i = 0; i < logTransformScalarVariables.size(); ++i)
+    {
+        logTransformScalarVariables[i]->getValue() = exp(x_prime[index]);
+        lnHastingsratio += -x[index] + x_prime[index];
+        ++index;
+    }
+
+    for (size_t i = 0; i < logitTransformScalarVariables.size(); ++i)
+    {
+        double p_old = 1 / (1 + exp(-x[index]));
+        double p_proposed = 1 / (1 + exp(-x_prime[index]));
+
+        double lb = logitTransformScalarVariables[i]->getMin();
+        double ub = logitTransformScalarVariables[i]->getMax();
+
+        logitTransformScalarVariables[i]->getValue() = p_proposed * (ub - lb) + lb;
+        lnHastingsratio += ( -log(1.0 - p_old) - log(p_old) ) - ( -log(1.0 - p_proposed) - log(p_proposed) );
+        ++index;
+    }
+
+    for (size_t i = 0; i < noTransformVectorVariables.size(); ++i)
+    {
+        std::vector<double> tmp;
+
+        for (size_t j=0; j < noTransformVectorVariables[i]->getValue().size(); ++j)
+        {
+            tmp.push_back( x_prime[index] );
+            ++index;
+        }
+        noTransformVectorVariables[i]->getValue() = tmp;
+    }
+
+    for (size_t i = 0; i < logConstrainedSumTransformVectorVariables.size(); ++i)
+    {
+        std::vector<double> old_sum_constrained = logConstrainedSumTransformVectorVariables[i]->getValue();
+        std::vector<double> tmp;
+        double sum = 0.0;
+
+        for (size_t j=0; j < old_sum_constrained.size(); ++j)
+        {
+            tmp.push_back( exp(x_prime[index]) );
+            sum += tmp[j];
+            ++index;
+        }
+        for (size_t j=0; j < old_sum_constrained.size(); ++j)
+        {
+            tmp[j] /= sum;
+            lnHastingsratio += -log(old_sum_constrained[j]) + log(tmp[j]);
+        }
+
+        logConstrainedSumTransformVectorVariables[i]->getValue() = tmp;
+
+    }
+}
 
 
 /**
@@ -108,7 +176,7 @@ void AVMVNProposal::addLogConstrainedSumVector( StochasticNode<Simplex> *v)
  */
 void AVMVNProposal::cleanProposal( void )
 {
-    
+
 }
 
 /**
@@ -119,7 +187,7 @@ void AVMVNProposal::cleanProposal( void )
  */
 AVMVNProposal* AVMVNProposal::clone( void ) const
 {
-    
+
     return new AVMVNProposal( *this );
 }
 
@@ -132,7 +200,7 @@ AVMVNProposal* AVMVNProposal::clone( void ) const
 const std::string& AVMVNProposal::getProposalName( void ) const
 {
     static std::string name = "AVMVN";
-    
+
     return name;
 }
 
@@ -144,7 +212,7 @@ double AVMVNProposal::getProposalTuningParameter( void ) const
 
 
 /**
- * Obtains the values of all variables in the AVMVN proposal.
+ * Obtains the values of all variables in the AVMVN proposal on the transformed scale.
  */
 void AVMVNProposal::getAVMVNMemberVariableValues( std::vector<double> *x )
 {
@@ -152,12 +220,12 @@ void AVMVNProposal::getAVMVNMemberVariableValues( std::vector<double> *x )
     {
         x->push_back( noTransformScalarVariables[i]->getValue() );
     }
-    
+
     for (size_t i = 0; i < logTransformScalarVariables.size(); ++i)
     {
         x->push_back( log(logTransformScalarVariables[i]->getValue()) );
     }
-    
+
     for (size_t i = 0; i < logitTransformScalarVariables.size(); ++i)
     {
         double y = logitTransformScalarVariables[i]->getValue();
@@ -165,24 +233,24 @@ void AVMVNProposal::getAVMVNMemberVariableValues( std::vector<double> *x )
         double ub = logitTransformScalarVariables[i]->getMax();
         double p = (y - lb) / (ub - lb);
         x->push_back( log(p / (1 - p)) );
-        
+
     }
-    
+
     for (size_t i = 0; i < noTransformVectorVariables.size(); ++i)
     {
-        
+
         std::vector<double> tmp = noTransformVectorVariables[i]->getValue();
-        
+
         for (size_t j=0; j < tmp.size(); ++j)
         {
             x->push_back( tmp[j] );
         }
     }
-    
+
     for (size_t i = 0; i < logConstrainedSumTransformVectorVariables.size(); ++i)
     {
         std::vector<double> tmp = logConstrainedSumTransformVectorVariables[i]->getValue();
-        
+
         for (size_t j=0; j < tmp.size(); ++j)
         {
             x->push_back( log(tmp[j]) );
@@ -191,71 +259,96 @@ void AVMVNProposal::getAVMVNMemberVariableValues( std::vector<double> *x )
 }
 
 /**
- * Sets the values of all variables in the AVMVN proposal.
- * Calculates hastings ratio at the same time
+ * Obtains the values of all variables in the AVMVN proposal on their original scale.
  */
-void AVMVNProposal::setAVMVNMemberVariableValues( std::vector<double> x_prime, std::vector<double> x )
+void AVMVNProposal::getAVMVNMemberVariableValuesUntransformed( std::vector<double> *x )
+{
+    for (size_t i = 0; i < noTransformScalarVariables.size(); ++i)
+    {
+        x->push_back( noTransformScalarVariables[i]->getValue() );
+    }
+
+    for (size_t i = 0; i < logTransformScalarVariables.size(); ++i)
+    {
+        x->push_back( logTransformScalarVariables[i]->getValue() );
+    }
+
+    for (size_t i = 0; i < logitTransformScalarVariables.size(); ++i)
+    {
+        x->push_back( logitTransformScalarVariables[i]->getValue() );
+
+    }
+
+    for (size_t i = 0; i < noTransformVectorVariables.size(); ++i)
+    {
+
+        std::vector<double> tmp = noTransformVectorVariables[i]->getValue();
+
+        for (size_t j=0; j < tmp.size(); ++j)
+        {
+            x->push_back( tmp[j] );
+        }
+    }
+
+    for (size_t i = 0; i < logConstrainedSumTransformVectorVariables.size(); ++i)
+    {
+        std::vector<double> tmp = logConstrainedSumTransformVectorVariables[i]->getValue();
+
+        for (size_t j=0; j < tmp.size(); ++j)
+        {
+            x->push_back( tmp[j] );
+        }
+    }
+}
+
+/**
+ * Resets the values of all variables in the AVMVN proposal.
+ */
+void AVMVNProposal::resetAVMVNMemberVariableValues( std::vector<double> x )
 {
     // Calculate hastings ratio and give variables their new values
     size_t index = 0;
     for (size_t i = 0; i < noTransformScalarVariables.size(); ++i)
     {
-        noTransformScalarVariables[i]->getValue() = x_prime[index];
+        noTransformScalarVariables[i]->getValue() = x[index];
         ++index;
     }
-    
+
     for (size_t i = 0; i < logTransformScalarVariables.size(); ++i)
     {
-        logTransformScalarVariables[i]->getValue() = exp(x_prime[index]);
-        lnHastingsratio += -x[index] + x_prime[index];
+        logTransformScalarVariables[i]->getValue() = x[index];
         ++index;
     }
-    
+
     for (size_t i = 0; i < logitTransformScalarVariables.size(); ++i)
     {
-        double p_old = 1 / (1 + exp(-x[index]));
-        double p_proposed = 1 / (1 + exp(-x_prime[index]));
-        
-        double lb = logitTransformScalarVariables[i]->getMin();
-        double ub = logitTransformScalarVariables[i]->getMax();
-        
-        logitTransformScalarVariables[i]->getValue() = p_proposed * (ub - lb) + lb;
-        lnHastingsratio += ( -log(1.0 - p_old) - log(p_old) ) - ( -log(1.0 - p_proposed) - log(p_proposed) );
+        logitTransformScalarVariables[i]->getValue() = x[index];
         ++index;
     }
-    
+
     for (size_t i = 0; i < noTransformVectorVariables.size(); ++i)
     {
         std::vector<double> tmp;
-        
+
         for (size_t j=0; j < noTransformVectorVariables[i]->getValue().size(); ++j)
         {
-            tmp.push_back( x_prime[index] );
+            tmp.push_back( x[index] );
             ++index;
         }
         noTransformVectorVariables[i]->getValue() = tmp;
     }
-    
+
     for (size_t i = 0; i < logConstrainedSumTransformVectorVariables.size(); ++i)
     {
-        std::vector<double> old_sum_constrained = logConstrainedSumTransformVectorVariables[i]->getValue();
         std::vector<double> tmp;
-        double sum = 0.0;
-        
-        for (size_t j=0; j < old_sum_constrained.size(); ++j)
+
+        for (size_t j=0; j < logConstrainedSumTransformVectorVariables[i]->getValue().size(); ++j)
         {
-            tmp.push_back( exp(x_prime[index]) );
-            sum += tmp[j];
+            tmp.push_back( x[index] );
             ++index;
         }
-        for (size_t j=0; j < old_sum_constrained.size(); ++j)
-        {
-            tmp[j] /= sum;
-            lnHastingsratio += -log(old_sum_constrained[j]) + log(tmp[j]);
-        }
-        
         logConstrainedSumTransformVectorVariables[i]->getValue() = tmp;
-        
+
     }
 }
 
@@ -268,7 +361,7 @@ std::vector<double> AVMVNProposal::rMVNCholesky( std::vector<double> mu, MatrixR
 {
     double sqrtScale = sqrt(scale);
     size_t dimension = L.getDim();
-    
+
     MatrixReal W(dimension, 1, 0.0);
     for (size_t i = 0; i < dimension; ++i)
     {
@@ -281,7 +374,7 @@ std::vector<double> AVMVNProposal::rMVNCholesky( std::vector<double> mu, MatrixR
     {
         v[i] = mu[i] + V[i][0];
     }
-    
+
     return v;
 
 }
@@ -300,18 +393,20 @@ std::vector<double> AVMVNProposal::rMVNCholesky( std::vector<double> mu, MatrixR
 double AVMVNProposal::doProposal( void )
 {
     ++nTried;
-    
+
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
-    
+
     lnHastingsratio = 0.0;
-    
+
     // Get current values in transformed space
     // All variables are accessed in the order they appear in the relevant vector of transformed variables
     // These in turn are accessed in the order: scalar (no transform, log, logit), vector (no transform, sum-constrained-log)
     std::vector<double> x;
-    
     getAVMVNMemberVariableValues(&x);
+
+    std::vector<double> x_untransformed;
+    getAVMVNMemberVariableValuesUntransformed(&x_untransformed);
 
     if ( nTried == 1 )
     // First time using move, setting up components
@@ -321,17 +416,18 @@ double AVMVNProposal::doProposal( void )
         for ( size_t i=0; i<dim; ++i )
         {
             storedValues.push_back(x[i]);
+            storedValuesUntransformed.push_back(x_untransformed[i]);
             x_bar.push_back(0.0);
-            
+
             for (size_t j=0; j < dim; ++j)
             {
                 vcv[i][j] = 0.0;
             }
             vcv[i][i] = sigma;
         }
-        
+
         C_emp = vcv;
-        
+
         vcv.setCholesky(true);
         CholeskyDecomposition& cd = vcv.getCholeskyDecomposition();
         AVMVN_cholesky_L = cd.getLowerCholeskyFactor();
@@ -344,14 +440,15 @@ double AVMVNProposal::doProposal( void )
         for ( size_t i=0; i<dim; ++i )
         {
             storedValues[i] = x[i];
+            storedValuesUntransformed[i] = x_untransformed[i];
         }
-        
+
         if ( nTried > waitBeforeLearning && updates <= maxUpdates)
         {
             ++updates;
-            
+
             double n = double(updates);
-            
+
             for ( size_t i=0; i<dim; ++i )
             {
                 // Update covariances first (to save us tracking current and previous averages)
@@ -360,19 +457,20 @@ double AVMVNProposal::doProposal( void )
                     C_emp[i][j] = 1/n * ( C_emp[i][j] * (n - 1.0) + ((n - 1.0)/n) * ((x[i] - x_bar[i]) * (x[j] - x_bar[j])) );
                     C_emp[j][i] = C_emp[i][j];
                 }
-                
+
                 // Update averages
                 x_bar[i] = 1/n * x[i] + (n - 1)/n * x_bar[i];
             }
 
         }
-        
+
     }
-    
+
     // Move
     std::vector<double> x_prime = rMVNCholesky(x, AVMVN_cholesky_L, *rng, sigma);
 
-    setAVMVNMemberVariableValues(x_prime, x);
+    // This also sets all x to x_prime
+    calculateHastingsRatio(x_prime, x);
 
     return lnHastingsratio;
 
@@ -385,7 +483,7 @@ double AVMVNProposal::doProposal( void )
  */
 void AVMVNProposal::prepareProposal( void )
 {
-    
+
 }
 
 
@@ -399,13 +497,13 @@ void AVMVNProposal::prepareProposal( void )
  */
 void AVMVNProposal::printParameterSummary(std::ostream &o, bool name_only) const
 {
-    
+
     o << "sigma = ";
     if (name_only == false)
     {
         o << sigma;
     }
-    
+
 }
 
 
@@ -414,28 +512,28 @@ void AVMVNProposal::printParameterSummary(std::ostream &o, bool name_only) const
  */
 void AVMVNProposal::removeUntransformedScalar( StochasticNode<double> *v )
 {
-    
+
     // add it to the nodes vector
     removeNode( v );
-    
+
     noTransformScalarVariables.erase(std::remove(noTransformScalarVariables.begin(), noTransformScalarVariables.end(), v), noTransformScalarVariables.end());
 }
 
 void AVMVNProposal::removeLogScalar( StochasticNode<double> *v )
 {
-    
+
     // add it to the nodes vector
     removeNode( v );
-    
+
     logTransformScalarVariables.erase(std::remove(logTransformScalarVariables.begin(), logTransformScalarVariables.end(), v), logTransformScalarVariables.end());
 }
 
 void AVMVNProposal::removeLogitScalar( ContinuousStochasticNode *v )
 {
-    
+
     // add it to the nodes vector
     removeNode( v );
-    
+
     logitTransformScalarVariables.erase(std::remove(logitTransformScalarVariables.begin(), logitTransformScalarVariables.end(), v), logitTransformScalarVariables.end());
 }
 
@@ -445,10 +543,10 @@ void AVMVNProposal::removeLogitScalar( ContinuousStochasticNode *v )
  */
 void AVMVNProposal::removeUntransformedVector( StochasticNode<RbVector<double> > *v)
 {
-    
+
     // add it to the nodes vector
     removeNode( v );
-    
+
     noTransformVectorVariables.erase(std::remove(noTransformVectorVariables.begin(), noTransformVectorVariables.end(), v), noTransformVectorVariables.end());
 }
 
@@ -456,9 +554,9 @@ void AVMVNProposal::removeLogConstrainedSumVector( StochasticNode<Simplex> *v)
 {
     // add it to the nodes vector
     removeNode( v );
-    
+
     logConstrainedSumTransformVectorVariables.erase(std::remove(logConstrainedSumTransformVectorVariables.begin(), logConstrainedSumTransformVectorVariables.end(), v), logConstrainedSumTransformVectorVariables.end());
-    
+
 }
 
 
@@ -471,8 +569,8 @@ void AVMVNProposal::removeLogConstrainedSumVector( StochasticNode<Simplex> *v)
  */
 void AVMVNProposal::undoProposal( void )
 {
-    setAVMVNMemberVariableValues(storedValues, storedValues);
-    
+    resetAVMVNMemberVariableValues(storedValuesUntransformed);
+
 }
 
 
@@ -484,7 +582,7 @@ void AVMVNProposal::undoProposal( void )
  */
 void AVMVNProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
-    
+
     for (size_t i = 0; i < noTransformScalarVariables.size(); ++i)
     {
         if ( noTransformScalarVariables[i] == oldN )
@@ -492,7 +590,7 @@ void AVMVNProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
             noTransformScalarVariables[i] = static_cast<StochasticNode<double> *>(newN);
         }
     }
-    
+
     for (size_t i = 0; i < logTransformScalarVariables.size(); ++i)
     {
         if ( logTransformScalarVariables[i] == oldN )
@@ -500,7 +598,7 @@ void AVMVNProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
             logTransformScalarVariables[i] = static_cast<StochasticNode<double> *>(newN);
         }
     }
-    
+
     for (size_t i = 0; i < logitTransformScalarVariables.size(); ++i)
     {
         if ( logitTransformScalarVariables[i] == oldN )
@@ -508,7 +606,7 @@ void AVMVNProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
             logitTransformScalarVariables[i] = static_cast<ContinuousStochasticNode *>(newN);
         }
     }
-    
+
     for (size_t i = 0; i < noTransformVectorVariables.size(); ++i)
     {
         if ( noTransformVectorVariables[i] == oldN )
@@ -543,7 +641,7 @@ void AVMVNProposal::setProposalTuningParameter(double tp)
  */
 void AVMVNProposal::tune( double rate )
 {
-    
+
     // Update proposal variance
     if ( rate > 0.234 )
     {
@@ -553,21 +651,21 @@ void AVMVNProposal::tune( double rate )
     {
         sigma /= (2.0 - rate/0.234 );
     }
-    
+
     if ( sigma > 1 ) {
         sigma = fmin(10000, sigma);
     } else {
         sigma = fmax(1/10000, sigma);
     }
-    
+
     // Update our move's variance-covariance matrix too, then store the Cholesky decomposition
     MatrixReal vcv( dim );
-    
+
     for (size_t i=0; i<dim; ++i)
     {
         vcv[i][i] = 1.0;
     }
-    
+
     if ( nTried > waitBeforeUsing )
     {
         for (size_t i=0; i<dim; ++i)
@@ -586,10 +684,9 @@ void AVMVNProposal::tune( double rate )
             vcv[i][i] = 1.0/dim * sigma;
         }
     }
-    
+
     vcv.setCholesky(true);
     CholeskyDecomposition& cd = vcv.getCholeskyDecomposition();
     AVMVN_cholesky_L = cd.getLowerCholeskyFactor();
-    
-}
 
+}

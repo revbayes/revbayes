@@ -17,6 +17,11 @@
  * $Id: Func_module.cpp 1485 2012-05-04 16:03:37Z hoehna $
  */
 
+#include <stddef.h>
+#include <iostream>
+#include <string>
+#include <vector>
+
 #include "Argument.h"
 #include "ArgumentRule.h"
 #include "Ellipsis.h"
@@ -25,16 +30,18 @@
 #include "ModuleSystem.h"
 #include "Parser.h"
 #include "RbException.h"
-#include "RbUtil.h"
 #include "RevNullObject.h"
 #include "RlString.h"
 #include "RlUtils.h"
 #include "TypeSpec.h"
 #include "RlUserInterface.h"
-#include "Workspace.h"
-#include "WorkspaceVector.h"
-
-#include <fstream>
+#include "ArgumentRules.h"
+#include "Environment.h"
+#include "Procedure.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
 
 using namespace RevLanguage;
 

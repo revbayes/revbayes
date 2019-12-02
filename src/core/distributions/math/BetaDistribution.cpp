@@ -1,7 +1,12 @@
 #include "BetaDistribution.h"
+
 #include "DistributionBeta.h"
 #include "RandomNumberFactory.h"
 #include "RbConstants.h"
+#include "Cloneable.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

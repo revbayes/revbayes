@@ -1,3 +1,10 @@
+#include <stddef.h>
+#include <cmath>
+#include <string>
+#include <complex>
+#include <iosfwd>
+#include <vector>
+
 #include "DistributionPoisson.h"
 #include "EigenSystem.h"
 #include "MatrixComplex.h"
@@ -8,10 +15,10 @@
 #include "RbMathMatrix.h"
 #include "RbSettings.h"
 #include "TransitionProbabilityMatrix.h"
-
-#include <cmath>
-#include <string>
-#include <iomanip>
+#include "Assignable.h"
+#include "GeneralRateMatrix.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 
 using namespace RevBayesCore;

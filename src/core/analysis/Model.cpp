@@ -1,7 +1,12 @@
 #include "Model.h"
 
+#include <map>
+#include <ostream>
+#include <string>
+
 #include "DagNode.h"
 #include "RbException.h"
+#include "StringUtilities.h"
 
 using namespace RevBayesCore;
 

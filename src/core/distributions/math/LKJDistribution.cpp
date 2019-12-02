@@ -7,12 +7,14 @@
 //
 
 #include "LKJDistribution.h"
+
 #include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbConstants.h"
-#include "RbStatisticsHelper.h"
-#include "DistributionNormal.h"
 #include "DistributionLKJ.h"
+#include "Cloneable.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 

@@ -1,13 +1,23 @@
 #ifndef Func_stitchTree_h
 #define Func_stitchTree_h
 
+#include <string>
+#include <iosfwd>
+#include <vector>
+
 #include "RlTree.h"
 #include "RlTypedFunction.h"
-
-#include <map>
-#include <string>
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RevPtr.h"
+#include "RlDeterministicNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 namespace RevLanguage {
+class ArgumentRules;
+class TypeSpec;
     
     class Func_stitchTree :  public TypedFunction<Tree> {
         

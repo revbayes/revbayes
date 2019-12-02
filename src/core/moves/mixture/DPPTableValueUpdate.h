@@ -22,6 +22,7 @@
 #include "DirichletProcessPriorDistribution.h"
 #include "AbstractGibbsMove.h"
 #include "RbVector.h"
+#include "SimpleProposal.h"
 
 namespace RevBayesCore {
     

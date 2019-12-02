@@ -6,9 +6,11 @@
 //  Copyright 2012 __MyCompanyName__. All rights reserved.
 //
 
+#include <stddef.h>
+#include <vector>
+
 #include "RbException.h"
 #include "RbUtil.h"
-#include "Clade.h"
 
 
 //std::ostream& RevBayesCore::operator<<(std::ostream& o, const bool& x)

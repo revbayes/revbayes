@@ -1,13 +1,14 @@
 #ifndef __revbayes__GilbertGraphDistribution__
 #define __revbayes__GilbertGraphDistribution__
 
-#include <iostream>
+#include <stddef.h>
 
 #include "TypedDistribution.h"
 #include "MatrixReal.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     class GilbertGraphDistribution : public TypedDistribution<MatrixReal>   {
         

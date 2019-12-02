@@ -1,12 +1,11 @@
 #ifndef MoveSchedule_H
 #define MoveSchedule_H
 
-#include "Move.h"
-#include "RbVector.h"
 
-#include <vector>
 
 namespace RevBayesCore {
+class Move;
+template <class valueType> class RbVector;
     
     class MoveSchedule {
         

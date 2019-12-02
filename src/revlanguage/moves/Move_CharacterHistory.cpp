@@ -1,40 +1,46 @@
-#include "AminoAcidState.h"
+#include <stddef.h>
+#include <map>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 //#include "BiogeographicTreeHistoryCtmc.h"
 #include "BiogeographyNodeRejectionSampleProposal.h"
-#include "BiogeographyNodeRejectionShiftProposal.h"
 #include "BiogeographyCladogeneticRejectionShiftProposal.h"
 #include "BiogeographyCladogeneticRejectionSampleProposal.h"
 //#include "BiogeographyPathRejectionSampleProposal.h"
 #include "NodeRejectionSampleProposal.h"
-#include "PathUniformizationSampleProposal.h"
-#include "NodeUniformizationSampleProposal.h"
-#include "ContinuousStochasticNode.h"
-#include "Dist_phyloCTMCDASequence.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_CharacterHistory.h"
-#include "NodeRejectionSampleProposal.h"
 #include "OptionRule.h"
 #include "Probability.h"
-#include "RateGeneratorSequence_Biogeography.h"
 #include "RbException.h"
-#include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
-#include "RlBoolean.h"
 #include "RlRateGenerator.h"
 #include "RlRateGeneratorSequence.h"
 #include "RlString.h"
-#include "RlTimeTree.h"
-#include "RnaState.h"
-#include "ScaleProposal.h"
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "AbstractHomologousDiscreteCharacterData.h"
+#include "Move.h"
+#include "PathRejectionSampleProposal.h"
+#include "RevNullObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlMove.h"
+#include "StochasticNode.h"
+#include "RnaState.h" // IWYU pragma: keep
+#include "AminoAcidState.h" // IWYU pragma: keep
+#include "StandardState.h" // IWYU pragma: keep
 
-#include "StandardState.h"
-
+namespace RevBayesCore { class DnaState; }
+namespace RevBayesCore { class Proposal; }
+namespace RevBayesCore { class RateGenerator; }
+namespace RevBayesCore { class RateGeneratorSequence; }
 
 using namespace RevLanguage;
 
@@ -193,7 +199,7 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         if (gt == "node" && pt == "rejection")
         {
             RevBayesCore::NodeRejectionSampleProposal<RevBayesCore::StandardState> *tmp_p = new RevBayesCore::NodeRejectionSampleProposal<RevBayesCore::StandardState>(ctmc_sn, l, r);
-            //            tmp_p->setRateGenerator( qmap_tdn );
+            
             if (use_site) {
                 tmp_p->setRateGenerator( qmap_site_tdn );
             } else if (use_seq) {
@@ -204,7 +210,7 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         else if (gt == "cladogenetic" && pt == "rejection")
         {
             RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<RevBayesCore::StandardState> *tmp_p = new RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<RevBayesCore::StandardState>(ctmc_sn, l, r);
-            //            tmp_p->setRateGenerator( qmap_tdn );
+            
             if (use_site) {
                 tmp_p->setRateGenerator( qmap_site_tdn );
             } else if (use_seq) {
@@ -237,7 +243,7 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         else if (gt == "branch" && pt == "rejection")
         {
             RevBayesCore::PathRejectionSampleProposal<RevBayesCore::StandardState> *tmp_p = new RevBayesCore::PathRejectionSampleProposal<RevBayesCore::StandardState>(ctmc_sn, l, r);
-            //            tmp_p->setRateGenerator( qmap_tdn );
+            
             if (use_site) {
                 tmp_p->setRateGenerator( qmap_site_tdn );
             } else if (use_seq) {

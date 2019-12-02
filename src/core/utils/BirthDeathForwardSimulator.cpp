@@ -1,26 +1,32 @@
 #include "BirthDeathForwardSimulator.h"
 
+#include <math.h>
+#include <iterator>
+#include <set>
+#include <string>
+
 #include "DistributionExponential.h"
 #include "RandomNumberGenerator.h"
 #include "RandomNumberFactory.h"
-
-
 #include "TopologyNode.h"
+#include "RbException.h"
+#include "StringUtilities.h"
+#include "Tree.h"
 
 using namespace RevBayesCore;
 
 
 BirthDeathForwardSimulator::BirthDeathForwardSimulator( void )
 {
-    
+
 }
 
 
 bool BirthDeathForwardSimulator::checkParameters( void ) const
 {
-    
+
     size_t NUM_TIME_INTERVALS = timeline.size();
-    
+
     if ( lambda.size() != NUM_TIME_INTERVALS )
     {
         throw RbException("You need to provide the same number of time intervals as speciation rates.");
@@ -42,24 +48,23 @@ bool BirthDeathForwardSimulator::checkParameters( void ) const
 //    }
 
     size_t NUM_CATEGORIES = getNumberOfCategories();
-    
+
 //    if ( root_cat_probability.size() != NUM_CATEGORIES )
 //    {
 //        throw RbException("You need to provide the same number of categories for the root state probability as all other categories.");
 //    }
-    
+
     for ( size_t i=0; i<NUM_TIME_INTERVALS; ++i )
     {
-        
+
     }
-    
+
     return true;
 }
 
-
 size_t BirthDeathForwardSimulator::getNumberOfCategories( void ) const
 {
-    
+
     if ( lambda.size() > 0 )
     {
         return lambda[0].size();
@@ -68,7 +73,7 @@ size_t BirthDeathForwardSimulator::getNumberOfCategories( void ) const
     {
         return 0;
     }
-    
+
 }
 
 
@@ -147,13 +152,13 @@ std::vector<double> BirthDeathForwardSimulator::getLambdaRate( size_t index, siz
     {
         throw RbException("Problem in the birth-death simulation: We could not get the speciation rates.");
     }
-    
+
 }
 
 
 double BirthDeathForwardSimulator::getMuProbability( size_t index, size_t n ) const
 {
-    
+
     if ( Mu.size() > index )
     {
         if ( Mu[index].size() > n )
@@ -188,13 +193,13 @@ double BirthDeathForwardSimulator::getMuProbability( size_t index, size_t n ) co
     {
         throw RbException("Problem in the birth-death simulation: We could not get the extinction event probabilities.");
     }
-    
+
 }
 
 
 std::vector<double> BirthDeathForwardSimulator::getMuRate( size_t index, size_t n ) const
 {
-    
+
     if ( mu.size() > index )
     {
         if ( mu[index].size() > 1 || mu[index].size() == n )
@@ -229,13 +234,12 @@ std::vector<double> BirthDeathForwardSimulator::getMuRate( size_t index, size_t 
     {
         throw RbException("Problem in the birth-death simulation: We could not get the extinction rates.");
     }
-    
+
 }
 
 
 double BirthDeathForwardSimulator::getPhiProbability( size_t index, size_t n ) const
 {
-    
     if ( Phi.size() > index )
     {
         if ( Phi[index].size() > n )
@@ -270,13 +274,13 @@ double BirthDeathForwardSimulator::getPhiProbability( size_t index, size_t n ) c
     {
         throw RbException("Problem in the birth-death simulation: We could not get the sampling event probabilities.");
     }
-    
+
 }
 
 
 std::vector<double> BirthDeathForwardSimulator::getPhiRate( size_t index, size_t n ) const
 {
-    
+
     if ( phi.size() > index )
     {
         if ( phi[index].size() > 1 || phi[index].size() == n )
@@ -311,13 +315,13 @@ std::vector<double> BirthDeathForwardSimulator::getPhiRate( size_t index, size_t
     {
         throw RbException("Problem in the birth-death simulation: We could not get the sampling rate.");
     }
-    
+
 }
 
 
 double BirthDeathForwardSimulator::getRProbability( size_t index, size_t n ) const
 {
-    
+
     if ( R.size() > index )
     {
         if ( R[index].size() > n )
@@ -352,13 +356,13 @@ double BirthDeathForwardSimulator::getRProbability( size_t index, size_t n ) con
     {
         throw RbException("Problem in the birth-death simulation: We could not get the treament event probabilities.");
     }
-    
+
 }
 
 
 std::vector<double> BirthDeathForwardSimulator::getRRate( size_t index, size_t n ) const
 {
-    
+
     if ( r.size() > index )
     {
         if ( r[index].size() > 1 || r[index].size() == n )
@@ -393,7 +397,7 @@ std::vector<double> BirthDeathForwardSimulator::getRRate( size_t index, size_t n
     {
         throw RbException("Problem in the birth-death simulation: We could not get the treatment rate.");
     }
-    
+
 }
 
 
@@ -411,39 +415,39 @@ std::vector<double> BirthDeathForwardSimulator::getRootCategoryProbabilities( si
     {
         throw RbException("Problem in the birth-death simulation: We could not get the root category probabilities.");
     }
-    
+
 }
 
 
 Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SIM_CONDITION condition) const
 {
-    
+
     if ( checkParameters() == false )
     {
-        
+
     }
-    
+
     size_t NUM_TIME_INTERVALS = timeline.size();
     size_t NUM_CATEGORIES = getNumberOfCategories();
-    
+
     RandomNumberGenerator *rng = GLOBAL_RNG;
-    
+
     TopologyNode *root = NULL;
     do {
-        
+
         // we define here a set of all sampled nodes
         // this set will be necessary for sampled fossils
         std::set<TopologyNode*> sampled_nodes;
         std::set<TopologyNode*> extinct_not_sampled_nodes;
 
         std::vector< std::set<TopologyNode*> > active_nodes_in_actegories = std::vector< std::set<TopologyNode*> >( NUM_CATEGORIES, std::set<TopologyNode*>() );
-    
-        size_t current_time_index = 0;
-        while ( current_time_index < NUM_TIME_INTERVALS && timeline[current_time_index] > start_age )
+
+        size_t current_time_index = NUM_TIME_INTERVALS - 1;
+        while ( current_time_index > 0 && timeline[current_time_index] > start_age )
         {
-            ++current_time_index;
+            --current_time_index;
         }
-    
+
         // draw the index of the root category
         size_t root_cat_index = 0;
         std::vector<double> root_cat_probs = getRootCategoryProbabilities( NUM_CATEGORIES );
@@ -453,7 +457,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
             u -= root_cat_probs[root_cat_index];
             ++root_cat_index;
         }
-    
+
         // for now we assume that we always start with the root
         // we should make the an argument
         size_t current_num_active_nodes = 2;
@@ -467,16 +471,16 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
         TopologyNode *right = new TopologyNode();
         root->addChild( right );
         right->setParent( root );
-    
+
         // now add the two children to the active nodes
         active_nodes_in_actegories[root_cat_index].insert( left  );
         active_nodes_in_actegories[root_cat_index].insert( right );
-    
+
         std::vector<double> current_lambda   = getLambdaRate(current_time_index, NUM_CATEGORIES);
         std::vector<double> current_mu       = getMuRate(current_time_index, NUM_CATEGORIES);
         std::vector<double> current_phi      = getPhiRate(current_time_index, NUM_CATEGORIES);
         std::vector<double> current_r        = getRRate(current_time_index, NUM_CATEGORIES);
-    
+
         double current_lambda_total     = 0;
         double current_mu_total         = 0;
         double current_phi_total        = 0;
@@ -488,19 +492,19 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
             current_phi_total       += num_lineages_in_category * current_phi[i];
         }
         double current_rate_total = current_lambda_total + current_mu_total + current_phi_total;
-    
+
         double current_age = start_age;
         while ( current_age > 0.0 && current_num_active_nodes > 0 )
         {
             // draw the next event
             double next_age = current_age - RbStatistics::Exponential::rv(current_rate_total, *rng);
-        
+
             // check if the next event is passed the current epoch
             if ( next_age < timeline[current_time_index] )
             {
                 double event_age = timeline[current_time_index];
                 // now we perform the different events
-            
+
                 for ( size_t i=0; i<NUM_CATEGORIES; ++i )
                 {
                     // (1) a burst event
@@ -523,19 +527,19 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                                 TopologyNode *right = new TopologyNode();
                                 this_node->addChild( right );
                                 right->setParent( this_node );
-                            
+
                                 // update the active node set
                                 active_nodes_in_actegories[i].erase( this_node );
                                 active_nodes_in_actegories[i].insert( left );
                                 active_nodes_in_actegories[i].insert( right );
-                                
+
                             } // end-if there was a burst speciation event for this node
 
                         } // end-for all nodes in this rate category
-                    
+
                     } // end-if this category has a non-zero burst probability
-                
-                
+
+
                     // (2) a mass-extinction event
                     double this_mass_extinction_prob = getMuProbability(current_time_index, i);
                     if ( this_mass_extinction_prob < 1.0 )
@@ -548,20 +552,20 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                             {
                                 TopologyNode *this_node = *it;
                                 this_node->setAge( event_age );
-                            
+
                                 // update the active node set
                                 active_nodes_in_actegories[i].erase( this_node );
-                            
+
                                 // remember this node to prune later
                                 extinct_not_sampled_nodes.insert( this_node );
-                            
+
                             } // end-if there was a mass-extinction event for this node
-                        
+
                         } // end-for all nodes in this rate category
-                    
+
                     } // end-if this category has a non-zero mass-extinction probability
-                
-                
+
+
                     // (3) a sampling event
                     double this_sampling_prob = getPhiProbability(current_time_index, i);
                     if ( this_sampling_prob > 0.0 )
@@ -575,10 +579,10 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                             {
                                 TopologyNode *this_node = *it;
                                 this_node->setAge( event_age );
-                            
+
                                 // store this node
                                 sampled_nodes.insert( this_node );
-                            
+
                                 // simulate also if this sampling lead to a death event (i.e., treatment)
                                 u = rng->uniform01();
                                 if ( u < this_sampling_extinction_prob )
@@ -586,21 +590,40 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                                     // update the active node set
                                     active_nodes_in_actegories[i].erase( this_node );
                                 }
-                            
+                                else
+                                {
+                                  // left child (sampled ancestor)
+                                  TopologyNode *left = new TopologyNode();
+                                  this_node->addChild( left );
+                                  left->setParent( this_node );
+                                  left->setAge( event_age );
+                                  left->setSampledAncestor( true );
+                                  sampled_nodes.insert( left );
+
+                                  // right child
+                                  TopologyNode *right = new TopologyNode();
+                                  this_node->addChild( right );
+                                  right->setParent( this_node );
+
+                                  // update the active node set
+                                  active_nodes_in_actegories[i].erase( this_node );
+                                  active_nodes_in_actegories[i].insert( right );
+                                }
+
                             } // end-if there was a sampling event for this node
-                        
+
                         } // end-for all nodes in this rate category
-                    
+
                     } // end-if this category has a non-zero sampling probability
-                
+
                 } // end-for over all categories
-            
+
                 // update the age
                 current_age = event_age;
-            
+
                 // update the interval index
-                ++current_time_index;
-            
+                --current_time_index;
+
                 if ( current_time_index < NUM_TIME_INTERVALS )
                 {
                     // update all the rate summaries
@@ -608,16 +631,16 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                     current_mu       = getMuRate(current_time_index, NUM_CATEGORIES);
                     current_phi      = getPhiRate(current_time_index, NUM_CATEGORIES);
                     current_r        = getRRate(current_time_index, NUM_CATEGORIES);
-            
+
                     current_num_active_nodes = 0;
-            
+
                     current_lambda_total     = 0;
                     current_mu_total         = 0;
                     current_phi_total        = 0;
                     for ( size_t i=0; i<NUM_CATEGORIES; ++i)
                     {
                         current_num_active_nodes += active_nodes_in_actegories[i].size();
-                
+
                         double num_lineages_in_category = double( active_nodes_in_actegories[i].size() );
                         current_lambda_total    += num_lineages_in_category * current_lambda[i];
                         current_mu_total        += num_lineages_in_category * current_mu[i];
@@ -625,17 +648,17 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                     }
                     current_rate_total = current_lambda_total + current_mu_total + current_phi_total;
                 }
-            
+
             } // end-if the time passed the epoch boundary
             else
             {
-            
+
                 // check which type of event we had
                 u = rng->uniform01();
                 if ( u < (current_lambda_total)/current_rate_total )
                 {
                     // it was a speciation event
-                
+
                     u = rng->uniform01();
                     for ( size_t i=0; i<NUM_CATEGORIES; ++i)
                     {
@@ -646,7 +669,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                             size_t this_node_index = size_t( floor(u*num_lineages_in_category) );
                             std::set<TopologyNode*>::const_iterator it = active_nodes_in_actegories[i].begin();
                             std::advance(it, this_node_index);
-                        
+
                             TopologyNode *this_node = *it;
                             this_node->setAge( next_age );
                             // left child
@@ -657,19 +680,19 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                             TopologyNode *right = new TopologyNode();
                             this_node->addChild( right );
                             right->setParent( this_node );
-                        
+
                             // update the active node set
                             active_nodes_in_actegories[i].erase( this_node );
                             active_nodes_in_actegories[i].insert( left );
                             active_nodes_in_actegories[i].insert( right );
-                        
+
                             // update counters
                             ++current_num_active_nodes;
                             current_lambda_total    += this_cat_lambda;
                             current_mu_total        += current_mu[i];
                             current_phi_total       += current_phi[i];
                             current_rate_total      += this_cat_lambda + current_mu[i] + current_phi[i];
-                        
+
                             // now stop the loop
                             break;
                         }
@@ -677,14 +700,14 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                         {
                             u -= (num_lineages_in_category*this_cat_lambda)/current_lambda_total;
                         } // end-if-else the speciation event was in this category
-                    
+
                     } // end-for loop over all categories
-                
+
                 } // end-if it was a speciation event
                 else if ( u < (current_lambda_total+current_mu_total)/current_rate_total )
                 {
                     // it was an extinction event
-                
+
                     u = rng->uniform01();
                     for ( size_t i=0; i<NUM_CATEGORIES; ++i)
                     {
@@ -695,23 +718,23 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                             size_t this_node_index = size_t( floor(u*num_lineages_in_category) );
                             std::set<TopologyNode*>::const_iterator it = active_nodes_in_actegories[i].begin();
                             std::advance(it, this_node_index);
-                        
+
                             TopologyNode *this_node = *it;
                             this_node->setAge( next_age );
-                        
+
                             // update the active node set
                             active_nodes_in_actegories[i].erase( this_node );
-                        
+
                             // remember this node to prune later
                             extinct_not_sampled_nodes.insert( this_node );
-                        
+
                             // update counters
                             --current_num_active_nodes;
                             current_lambda_total    -= current_lambda[i];
                             current_mu_total        -= this_cat_mu;
                             current_phi_total       -= current_phi[i];
                             current_rate_total      -= (current_lambda[i] + this_cat_mu + current_phi[i]);
-                        
+
                             // now stop the loop
                             break;
                         }
@@ -719,14 +742,13 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                         {
                             u -= (num_lineages_in_category*this_cat_mu)/current_mu_total;
                         } // end-if-else the speciation event was in this category
-                    
+
                     } // end-for loop over all categories
-                
+
                 } // end-if it was an extinction event
                 else if ( u < (current_lambda_total+current_mu_total+current_phi_total)/current_rate_total )
                 {
                     // it was a sampling event
-                
                     u = rng->uniform01();
                     for ( size_t i=0; i<NUM_CATEGORIES; ++i)
                     {
@@ -738,20 +760,20 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                             size_t this_node_index = size_t( floor(u*num_lineages_in_category) );
                             std::set<TopologyNode*>::const_iterator it = active_nodes_in_actegories[i].begin();
                             std::advance(it, this_node_index);
-                        
+
                             TopologyNode *this_node = *it;
                             this_node->setAge( next_age );
-                        
-                            // the current node to our set of sampled nodes
-                            sampled_nodes.insert( this_node );
-                        
+
+                            // // the current node to our set of sampled nodes
+                            // sampled_nodes.insert( this_node );
+
                             // now draw if this node died during sampling (i.e., treatment)
                             u = rng->uniform01();
                             if ( u < this_cat_r )
                             {
                                 // update the active node set
                                 active_nodes_in_actegories[i].erase( this_node );
-                        
+
                                 // update counters
                                 --current_num_active_nodes;
                                 current_lambda_total    -= current_lambda[i];
@@ -759,7 +781,25 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                                 current_phi_total       -= this_cat_phi;
                                 current_rate_total      -= (current_lambda[i] + current_mu[i] + this_cat_phi);
                             } // end-of this node died during sampling
-                        
+                            else
+                            {
+                              // left child (sampled ancestor)
+                              TopologyNode *left = new TopologyNode();
+                              this_node->addChild( left );
+                              left->setParent( this_node );
+                              left->setAge( next_age );
+                              left->setSampledAncestor( true );
+                              sampled_nodes.insert( left );
+
+                              // right child
+                              TopologyNode *right = new TopologyNode();
+                              this_node->addChild( right );
+                              right->setParent( this_node );
+
+                              // update the active node set
+                              active_nodes_in_actegories[i].erase( this_node );
+                              active_nodes_in_actegories[i].insert( right );
+                            }
                             // now stop the loop
                             break;
                         }
@@ -767,23 +807,24 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                         {
                             u -= (num_lineages_in_category*this_cat_phi)/current_phi_total;
                         } // end-if-else the speciation event was in this category
-                    
+
                     } // end-for loop over all categories
-                
+
                 } // end-if it was a sampling event
                 else
                 {
                     // this should not happen
                     throw RbException("Problem in birth-death forward simulator: could not determine which type of event happened");
                 }
-            
+
                 current_age = next_age;
             }
-                
+
         } // end-while we still have time and nodes to simulate forward
-    
-    
+
+
         // set the ages of all remaining active nodes to 0.0
+        // add nodes that were not sampled at the present to the extinct pile
         for ( size_t i=0; i<NUM_CATEGORIES; ++i)
         {
             const std::set<TopologyNode*> &active_nodes_in_category = active_nodes_in_actegories[i];
@@ -791,9 +832,23 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
             {
                 TopologyNode *this_node = *it;
                 this_node->setAge( 0.0 );
+
+                bool found = false;
+                for ( std::set<TopologyNode*>::const_iterator jt=sampled_nodes.begin(); jt!=sampled_nodes.end(); ++jt)
+                {
+                  if (*it == *jt)
+                  {
+                    found = true;
+                    break;
+                  }
+                }
+                if ( found == false )
+                {
+                  extinct_not_sampled_nodes.insert(this_node);
+                }
             }
         }
-    
+
         bool complete_tree = !true;
         bool prune = complete_tree == false && current_num_active_nodes > 0 && ( condition == ROOT && current_num_active_nodes >= 2 );
         // now prune away all the extinct nodes
@@ -802,26 +857,28 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
             for ( std::set<TopologyNode*>::const_iterator it=extinct_not_sampled_nodes.begin(); it!=extinct_not_sampled_nodes.end(); ++it)
             {
                 TopologyNode *this_node = *it;
-        
+
                 if ( this_node->isRoot() == false ) // this should truly never happen, only if there was no survivor
                 {
                     TopologyNode &parent = this_node->getParent();
                     TopologyNode *sibling = &parent.getChild( 0 );
                     if ( sibling == this_node ) sibling = &parent.getChild( 1 );
-            
+
                     if ( parent.isRoot() == false )
                     {
                         TopologyNode &grandparent = parent.getParent();
                         TopologyNode *uncle = &grandparent.getChild( 0 );
                         if ( uncle == &parent ) uncle = &grandparent.getChild( 1 );
-                    
+
                         parent.removeChild( sibling );
                         grandparent.removeChild( &parent );
                         parent.setParent( NULL );
-                    
+
                         sibling->setParent( &grandparent );
                         grandparent.addChild( sibling );
-                    
+
+                        sibling->setSampledAncestor(false);
+
                         delete &parent; // this will also delete this child node
                     }
                     else
@@ -829,16 +886,16 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                         parent.removeChild( sibling );
                         sibling->setParent( NULL );
                         root = sibling;
-                    
+
                         delete &parent;
                     }
-                
+
                 }
-            
+
             }
-        
+
         }
-        
+
         if ( condition == SURVIVAL and current_num_active_nodes <= 1 )
         {
             delete root;
@@ -849,13 +906,13 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
             delete root;
             root = NULL;
         }
-        
+
     } while ( root == NULL );
-    
+
     // build and return the tree
     Tree *my_tree = new Tree();
     my_tree->setRoot(root, true);
-    
+
     size_t num_nodes = my_tree->getNumberOfNodes();
     for (size_t i=0; i<num_nodes; ++i)
     {
@@ -863,9 +920,12 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
         if ( n.isTip() == true )
         {
             n.setName("Tip_"+ StringUtilities::toString(i+1) );
+        } else if ( n.isSampledAncestor() == true )
+        {
+          n.setName("Tip_"+ StringUtilities::toString(i+1) );
         }
     }
-    
+
     return my_tree;
 }
 

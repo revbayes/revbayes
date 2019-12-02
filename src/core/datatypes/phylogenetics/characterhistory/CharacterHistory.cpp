@@ -1,8 +1,14 @@
 #include "CharacterHistory.h"
+
+#include <assert.h>
+#include <math.h>
+
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbException.h"
-#include "Tree.h"
+#include "BranchHistory.h"
+
+namespace RevBayesCore { class CharacterEvent; }
 
 using namespace RevBayesCore;
 

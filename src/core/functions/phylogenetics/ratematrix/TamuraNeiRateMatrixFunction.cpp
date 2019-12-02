@@ -1,7 +1,14 @@
+#include <vector>
+
 #include "RateGenerator.h"
 #include "TamuraNeiRateMatrixFunction.h"
 #include "TypedFunction.h"
-#include "RbException.h"
+#include "Assignable.h"
+#include "RateMatrix_TamuraNei.h"
+#include "Simplex.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

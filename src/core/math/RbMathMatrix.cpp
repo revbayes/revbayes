@@ -14,17 +14,19 @@
  * $Id$
  */
 
+#include <stddef.h>
+#include <cmath>
+#include <complex>
+#include <vector>
+
 #include "RbException.h"
 #include "RbMathMatrix.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "RbMathGaussianElimination.h"
-#include "RbSettings.h"
-
-#include <cassert>
-#include <cmath>
-#include <complex>
-#include <iostream>
-#include <vector>
+#include "MatrixComplex.h"
+#include "MatrixReal.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 using namespace RevBayesCore;
 

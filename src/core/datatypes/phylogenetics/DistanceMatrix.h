@@ -1,12 +1,17 @@
 #ifndef DistanceMatrix_H
 #define DistanceMatrix_H
 
+#include <stddef.h>
+#include <iosfwd>
+#include <vector>
+
 #include "Cloneable.h"
-#include "DistanceMatrixReader.h"
 #include "Taxon.h"
-#include <string>
+#include "MatrixReal.h"
 
 namespace RevBayesCore {
+class DistanceMatrixReader;
+template <class valueType> class RbVector;
     
     class DistanceMatrix : public Cloneable {
         

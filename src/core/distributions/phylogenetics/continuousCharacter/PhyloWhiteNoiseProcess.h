@@ -2,11 +2,13 @@
 #define PhyloWhiteNoiseProcess_H
 
 #include "RbVector.h"
-#include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypedDistribution.h"
+#include "TopologyNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+class Tree;
+template <class valueType> class TypedDagNode;
     
     class PhyloWhiteNoiseProcess : public TypedDistribution< RbVector<double> > {
         

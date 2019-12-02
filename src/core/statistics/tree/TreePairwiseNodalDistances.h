@@ -6,17 +6,13 @@
 #ifndef TreePairwiseNodalDistances_h
 #define TreePairwiseNodalDistances_h
 
-#include "Tree.h"
-#include "TreeUtilities.h"
 #include "TypedDagNode.h"
 #include "TypedFunction.h"
-#include "MatrixReal.h"
 #include "DistanceMatrix.h"
 
-#include <vector>
-#include <string>
-
 namespace RevBayesCore {
+class DagNode;
+class Tree;
     
 	class TreePairwiseNodalDistances : public TypedFunction<RevBayesCore::DistanceMatrix> {
         

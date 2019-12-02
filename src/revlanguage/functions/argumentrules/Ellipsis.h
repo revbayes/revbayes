@@ -21,12 +21,12 @@
 #ifndef Ellipsis_H
 #define Ellipsis_H
 
+#include <ostream>
+
 #include "ArgumentRule.h"
 
-#include <ostream>
-#include <string>
-
 namespace RevLanguage {
+class TypeSpec;
 
 class Ellipsis : public ArgumentRule {
 

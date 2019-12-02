@@ -8,8 +8,25 @@
 #include "RbException.h"
 #include "Real.h"
 #include "RealPos.h"
-#include "RlUtils.h"
 #include "WorkspaceVector.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "Ellipsis.h"
+#include "MemberFunction.h"
+#include "MethodTable.h"
+#include "RbConstIterator.h"
+#include "RbConstIteratorImpl.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RevVariable.h"
+#include "RlDeterministicNode.h"
+#include "RlTypedFunction.h"
+#include "SimplexFunction.h"
+#include "SimplexFromVectorFunction.h"
+#include "TypeSpec.h"
+#include "WorkspaceToCoreWrapperObject.h"
+
+namespace RevLanguage { class Argument; }
 
 using namespace RevLanguage;
 
@@ -68,6 +85,66 @@ Simplex::~Simplex()
 Simplex* Simplex::clone( void ) const
 {
     return new Simplex( *this );
+}
+
+
+void Simplex::constructInternalObject( void )
+{
+  // we free the memory first
+    if ( dag_node != NULL )
+    {
+        if ( dag_node->decrementReferenceCount() == 0 )
+        {
+            delete dag_node;
+        }
+    }
+
+    RevBayesCore::TypedFunction<RevBayesCore::Simplex> * f = NULL;
+
+    if ( args.size() == 1 )
+    {
+        RevObject& b = args[0]->getRevObject();
+
+        if ( b.isType( ModelVector<RealPos>::getClassTypeSpec() ) )
+        {
+            const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* vec;
+            vec = static_cast< const ModelVector<RealPos>& >( args[0]->getRevObject() ).getDagNode();
+
+            f = new RevBayesCore::SimplexFromVectorFunction( vec );
+        }
+        else
+        {
+            throw( RbException("Must provide at least 2 RealPos values to Simplex constructor") );
+        }
+    }
+    else if ( args.size() > 1 )
+    {
+        std::vector<const RevBayesCore::TypedDagNode<double>* > params;
+
+        for ( size_t i = 0; i < args.size(); i++ )
+        {
+            RevObject& b = args[i]->getRevObject();
+            if ( b.isType( RealPos::getClassTypeSpec() ) )
+            {
+                const RealPos &val = static_cast<const RealPos &>( args[i]->getRevObject() );
+                params.push_back( val.getDagNode() );
+            }
+            else
+            {
+                throw( RbException("Can only provide one RealPos[] vector to Simplex constructor") );
+            }
+        }
+
+        f = new RevBayesCore::SimplexFunction( params );
+    }
+    else
+    {
+        throw( RbException("Must provide at least 2 RealPos values or exactly one RealPos[] vector to Simplex constructor") );
+    }
+
+    dag_node = new RevBayesCore::DeterministicNode<RevBayesCore::Simplex>("", f);
+    dag_node->incrementReferenceCount();
+
 }
 
 
@@ -133,6 +210,56 @@ const TypeSpec& Simplex::getClassTypeSpec(void)
     
 	return rev_type_spec; 
 }
+
+
+/**
+ * Get the Rev name for the constructor function.
+ *
+ * \return Rev name of constructor function.
+ */
+std::string Simplex::getConstructorFunctionName( void ) const
+{
+    // create a name variable that is the same for all instance of this class
+    std::string f_name = "Simplex";
+
+    return f_name;
+}
+
+
+/**
+ * Get the aliases of the Rev name for the constructor function.
+ *
+ * \return Rev aliases of constructor function.
+ */
+std::vector<std::string> Simplex::getConstructorFunctionAliases( void ) const
+{
+    // create a constructor function name alias variable that is the same for all instance of this class
+    std::vector<std::string> aliases;
+
+    aliases.push_back("simplex");
+
+    return aliases;
+}
+
+
+/** Return member rules (no members) */
+const MemberRules& Simplex::getParameterRules(void) const
+{
+    static ArgumentRules argumentRules = ArgumentRules();
+    static bool          rules_set = false;
+
+    if ( !rules_set )
+    {
+        argumentRules.push_back( new ArgumentRule( "x", ModelVector<RealPos>::getClassTypeSpec(), "A vector of values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        argumentRules.push_back( new ArgumentRule( "x1", RealPos::getClassTypeSpec(), "first value", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        argumentRules.push_back( new ArgumentRule( "x2", RealPos::getClassTypeSpec(), "second value", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        argumentRules.push_back( new Ellipsis ( "additional values", RealPos::getClassTypeSpec() ) );
+        rules_set = true;
+    }
+
+    return argumentRules;
+}
+
 
 
 /** Get the type spec of this class */
@@ -284,5 +411,22 @@ void Simplex::sort( void )
 void Simplex::unique( void )
 {
     throw RbException( "Illegal attempt to apply unique to a Simplex variable" );
+}
+
+/** Set a member variable */
+void Simplex::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+{
+
+    if ( name == "x" || name == "x1" || name == "x2" || name == "additional values" || name == "" )
+    {
+        if ( var->getRevObject() != RevNullObject::getInstance() )
+        {
+            args.push_back(var);
+        }
+    }
+    else
+    {
+        RevObject::setConstParameter(name, var);
+    }
 }
 

@@ -1,14 +1,21 @@
-sudo: required
+# paste config here
+
 cache: apt
 language: cpp
 
-matrix:
+stages:
+  - cache
+  - test
+
+jobs:
   include:
     - os: linux
       dist: xenial
+      cache: ccache
       env:
         - CXX_COMPILER=/usr/bin/g++-7
         - C_COMPILER=/usr/bin/gcc-7
+        - USE_MPI="false"
       addons:
         apt:
           sources:
@@ -20,9 +27,11 @@ matrix:
           - boost1.67
     - os: linux
       dist: xenial
+      cache: ccache
       env:
         - CXX_COMPILER=/usr/bin/g++-8
         - C_COMPILER=/usr/bin/gcc-8
+        - USE_MPI="false"
       addons:
         apt:
           sources:
@@ -34,9 +43,11 @@ matrix:
           - boost1.67
     - os: linux
       dist: xenial
+      cache: ccache
       env:
         - CXX_COMPILER=/usr/bin/g++-9
         - C_COMPILER=/usr/bin/gcc-9
+        - USE_MPI="false"
       addons:
         apt:
           sources:
@@ -48,10 +59,12 @@ matrix:
           - boost1.67
     - os: linux
       dist: xenial
+      cache: ccache
       env:
         - CXX_COMPILER=/usr/bin/g++-7
         - C_COMPILER=/usr/bin/gcc-7
-        - MAYBE_MPI="-mpi true"
+        - USE_MPI="true"
+        - MPI_IMPL=openmpi
       addons:
         apt:
           sources:
@@ -65,9 +78,11 @@ matrix:
     - os: linux
       dist: xenial
       compiler: clang++
+      cache: ccache
       env:
         - CXX_COMPILER=/usr/local/clang-7.0.0/bin/clang++
         - C_COMPILER=/usr/local/clang-7.0.0/bin/clang
+        - USE_MPI="false"
       addons:
         apt:
           sources:
@@ -80,35 +95,59 @@ matrix:
     - os: osx
       osx_image: xcode9.4
       env: PYTHON=3.5.1
+        USE_MPI="false"
+      addons:
+       homebrew:
+         update: true
+         packages:
+           - ccache
+      install:
+       - export PATH="/usr/local/opt/ccache/libexec:$PATH"
+      cache: ccache
     - os: osx
       osx_image: xcode10.2
       env: PYTHON=3.5.1
+        USE_MPI="false"
+      addons:
+       homebrew:
+         packages:
+           - ccache
+      install:
+       - export PATH="/usr/local/opt/ccache/libexec:$PATH"
+      cache: ccache
+
+    # # stage for building the cache, without tests
+    # - stage: cache
+    #   os: osx
+    #   osx_image: xcode10.2
+    #   env: PYTHON=3.5.1
+    #     USE_MPI="false"
+    #   addons:
+    #    homebrew:
+    #      packages:
+    #        - ccache
+    #   install:
+    #    - export PATH="/usr/local/opt/ccache/libexec:$PATH"
+    #   cache: ccache 
+    # - os: osx
+    #   osx_image: xcode9.4
+    #   env: PYTHON=3.5.1
+    #     USE_MPI="false"
+    #   addons:
+    #    homebrew:
+    #      update: true
+    #      packages:
+    #        - ccache
+    #   install:
+    #    - export PATH="/usr/local/opt/ccache/libexec:$PATH"
+    #   cache: ccache
 
 before_install:
   # We need to re-export CC and CXX here, because travis exports CXX=g++ or clang++ AFTER we set CXX.
   - if [ -n "${C_COMPILER}" ]; then sudo update-alternatives --install /usr/bin/gcc  gcc "${C_COMPILER}"  90; fi
   - if [ -n "${CXX_COMPILER}" ]; then sudo update-alternatives --install /usr/bin/g++  g++ "${CXX_COMPILER}"  90; fi
 
-script:
-# Build
-  - cd projects/cmake
-  - mkdir build
-  - ./regenerate.sh -boost false -travis true ${MAYBE_MPI}
-  - cd build
-  - cmake . -DINTERNAL_BOOST=OFF
-  - make -j4
-  - cd ..
-# Run tests
-  - cd ../..
-  - echo "\"Hello World\"" | projects/cmake/rb
-  - cd tests
-  - ./run_integration_tests.sh ${TRAVIS_BUILD_DIR}/projects/cmake/rb
-# Run testiphy
-  - export PATH=${TRAVIS_BUILD_DIR}/projects/cmake:$PATH
-  - cd
-  - git clone https://gitlab.com/testiphy/testiphy.git
-  - cd testiphy
-  - ./testiphy rb
+script: ./travis-build.sh
 
 # notifications
 notifications:

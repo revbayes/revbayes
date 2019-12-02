@@ -1,13 +1,16 @@
 #ifndef Move_EmpiricalTree_H
 #define Move_EmpiricalTree_H
 
-#include "RlMove.h"
-#include "TypedDagNode.h"
-
 #include <ostream>
-#include <string>
+#include <vector>
+
+#include "RlMove.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
 
 namespace RevLanguage {
+class TypeSpec;
     
     /**
      * @brief Rev Wrapper of an empirical tree distribution move.
@@ -28,10 +31,6 @@ namespace RevLanguage {
         void                                        constructInternalObject(void);                                                                  //!< We construct the a new internal move.
         static const std::string&                   getClassType(void);                                                                             //!< Get Rev type
         static const TypeSpec&                      getClassTypeSpec(void);                                                                         //!< Get class type spec
-        std::vector<std::string>                    getHelpAuthor(void) const;                                  //!< Get the author(s) of this function
-        std::string                                 getHelpDescription(void) const;                             //!< Get the description for this function
-        std::string                                 getHelpExample(void) const;                                 //!< Get an executable and instructive example
-        std::vector<std::string>                    getHelpSeeAlso(void) const;                                 //!< Get suggested other functions
         std::string                                 getMoveName(void) const;                                                                        //!< Get the name used for the constructor function in Rev.
         const MemberRules&                          getParameterRules(void) const;                                                                  //!< Get member rules (const)
         virtual const TypeSpec&                     getTypeSpec(void) const;                                                                        //!< Get language type of the object

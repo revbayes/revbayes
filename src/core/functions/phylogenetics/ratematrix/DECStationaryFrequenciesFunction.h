@@ -9,13 +9,13 @@
 #ifndef DECStationaryFrequenciesFunction_h
 #define DECStationaryFrequenciesFunction_h
 
-#include "RateMatrix_DECRateMatrix.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
-
-#include <vector>
+#include "RbVector.h"
 
 namespace RevBayesCore {
+class DagNode;
+class RateGenerator;
+template <class valueType> class TypedDagNode;
     
     class DECStationaryFrequenciesFunction : public TypedFunction<RbVector<double> > {
         

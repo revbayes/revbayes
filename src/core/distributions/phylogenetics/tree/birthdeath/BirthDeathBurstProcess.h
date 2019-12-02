@@ -1,12 +1,20 @@
 #ifndef BirthDeathBurstProcess_H
 #define BirthDeathBurstProcess_H
 
+#include <stddef.h>
+#include <iosfwd>
+#include <vector>
+
 #include "AbstractBirthDeathProcess.h"
+#include "MemberObject.h"
+#include "RbException.h"
 
 namespace RevBayesCore {
     
-    class Clade;
     class Taxon;
+class DagNode;
+template <class valueType> class RbOrderedSet;
+template <class valueType> class TypedDagNode;
     
     class BirthDeathBurstProcess : public AbstractBirthDeathProcess, public MemberObject< long > {
         

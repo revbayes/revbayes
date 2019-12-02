@@ -1,13 +1,16 @@
-#include "ConstantNode.h"
+#include <stddef.h>
+#include <cassert>
+#include <sstream>
+#include <set>
+
 #include "RlContainer.h"
 #include "Environment.h"
 #include "RbException.h"
-#include "RbUtil.h"
-#include "RlString.h"
 #include "SyntaxForLoop.h"
-
-#include <cassert>
-#include <sstream>
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "SyntaxElement.h"
 
 using namespace RevLanguage;
 

@@ -1,10 +1,23 @@
 #include "Dist_PhyloOrnsteinUhlenbeckREML.h"
+
+#include <stddef.h>
+#include <ostream>
+
 #include "PhyloOrnsteinUhlenbeckREML.h"
-#include "OptionRule.h"
-#include "RevNullObject.h"
-#include "RlBoolean.h"
-#include "RlString.h"
 #include "RlTree.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "ModelObject.h"
+#include "ModelVector.h"
+#include "Natural.h"
+#include "Real.h"
+#include "RealPos.h"
+#include "RlDistribution.h"
+#include "StringUtilities.h"
+#include "Tree.h"
+#include "TypeSpec.h"
+
+namespace RevBayesCore { template <class valueType> class RbVector; }
 
 using namespace RevLanguage;
 

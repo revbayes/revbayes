@@ -3,9 +3,6 @@
 
 #include "RbHelpType.h"
 
-#include <string>
-#include <vector>
-
 namespace RevBayesCore {
     
     

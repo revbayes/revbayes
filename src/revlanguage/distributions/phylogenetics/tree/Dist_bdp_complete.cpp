@@ -1,16 +1,25 @@
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "Clade.h"
 #include "Dist_bdp_complete.h"
 #include "ModelVector.h"
-#include "Natural.h"
 #include "OptionRule.h"
-#include "Probability.h"
-#include "Real.h"
 #include "RealPos.h"
-#include "RlClade.h"
 #include "RlString.h"
 #include "RlTaxon.h"
+#include "ConstantRateCompleteBirthDeathProcess.h"
+#include "ModelObject.h"
+#include "RbVector.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBirthDeathProcess.h"
+#include "Taxon.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
 
 using namespace RevLanguage;
 

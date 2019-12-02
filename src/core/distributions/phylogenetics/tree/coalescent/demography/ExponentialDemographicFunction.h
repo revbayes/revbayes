@@ -1,13 +1,13 @@
 #ifndef ExponentialDemographicFunction_H
 #define ExponentialDemographicFunction_H
 
-#include "DemographicFunction.h"
-#include "TypedDagNode.h"
-
 #include <iostream>
-#include <vector>
+
+#include "DemographicFunction.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief ExponentialDemographicFunction

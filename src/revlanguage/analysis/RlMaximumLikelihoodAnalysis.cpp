@@ -1,22 +1,32 @@
+#include <stddef.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "ConstantNode.h"
-#include "MaxIterationStoppingRule.h"
 #include "MaximumLikelihoodAnalysis.h"
 #include "Model.h"
-#include "Natural.h"
 #include "OptionRule.h"
-#include "RbException.h"
 #include "RealPos.h"
 #include "RlMaximumLikelihoodAnalysis.h"
 #include "RlModel.h"
 #include "RlMonitor.h"
 #include "RlMove.h"
-#include "RlStoppingRule.h"
 #include "RlString.h"
-#include "StoppingRule.h"
 #include "TypeSpec.h"
 #include "WorkspaceVector.h"
+#include "AbstractModelObject.h"
+#include "Argument.h"
+#include "DagNode.h"
+#include "MemberProcedure.h"
+#include "MethodTable.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlUtils.h"
+#include "Workspace.h"
+#include "WorkspaceToCoreWrapperObject.h"
 
 
 using namespace RevLanguage;

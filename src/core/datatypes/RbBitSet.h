@@ -1,6 +1,7 @@
 #ifndef RbRbBitSet_H
 #define RbRbBitSet_H
 
+#include <stddef.h>
 #include <ostream>
 #include <vector>
 

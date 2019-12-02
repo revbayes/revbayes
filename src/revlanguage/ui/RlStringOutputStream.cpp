@@ -1,7 +1,5 @@
 #include "RlStringOutputStream.h"
 
-#include <iostream>
-
 
 void StringOutputStream::emptyOutputString(void)
 {

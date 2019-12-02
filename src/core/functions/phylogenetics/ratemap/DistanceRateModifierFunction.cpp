@@ -7,10 +7,12 @@
 //
 
 #include "DistanceRateModifierFunction.h"
+
 #include "DistanceRateModifier.h"
-#include "TimeAtlas.h"
 #include "TypedDagNode.h"
-#include <cmath>
+
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class TimeAtlas; }
 
 using namespace RevBayesCore;
 

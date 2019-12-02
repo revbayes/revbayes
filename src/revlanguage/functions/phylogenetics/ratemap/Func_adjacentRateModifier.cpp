@@ -7,6 +7,10 @@
 //
 
 #include "Func_adjacentRateModifier.h"
+
+#include <stddef.h>
+#include <ostream>
+
 #include "AdjacentRateModifierFunction.h"
 #include "CharacterHistoryRateModifier.h"
 #include "MatrixReal.h"
@@ -14,12 +18,21 @@
 #include "RbVector.h"
 #include "Real.h"
 #include "RealPos.h"
-#include "RlBoolean.h"
 #include "RlDeterministicNode.h"
 #include "RlMatrixReal.h"
 #include "RlMatrixRealSymmetric.h"
-#include "RlRateGeneratorSequence.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "ModelObject.h"
+#include "Natural.h"
+#include "RbException.h"
+#include "RevObject.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "StochasticNode.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

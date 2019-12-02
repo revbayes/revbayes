@@ -1,13 +1,15 @@
 #ifndef HiddenStateRateMatrixFunction_H
 #define HiddenStateRateMatrixFunction_H
 
-#include "RateMatrix_FreeBinary.h"
-#include "TypedDagNode.h"
-#include "TypedFunction.h"
+#include <stddef.h>
 
-#include <vector>
+#include "TypedFunction.h"
+#include "RateGenerator.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Hidden state rate matrix function.

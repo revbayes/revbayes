@@ -10,13 +10,12 @@
 #define SiteRateModifierFunction_h
 
 #include "CharacterHistoryRateModifier.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <iostream>
-#include <vector>
-
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     class SiteRateModifierFunction : public TypedFunction<CharacterHistoryRateModifier> {
         

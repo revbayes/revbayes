@@ -1,20 +1,13 @@
 /**
- * @file
- * This file contains the declaration of the MultivariateNormally distributed random variable class.
+ * @brief
+ * This file contains the declaration of the Multivariate Normally distributed random variable class.
  * This class is derived from the stochastic node and each instance will represent a random variable
  * from a normal distribution in the model graph.
+ * The Multivariate Normal distribution represents a family of distributions
+ * defined on the real numbers. The Multivariate Normal distribution has a varying number of parameters depending on the dimensionality of the distribution:
  *
- * @brief Declaration of the stochastic DAG node base class.
- *
- * (c) Copyright 2009- under GPL version 3
- * @date Last modified: $Date:$
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- * @version 1.0
- * @since 2012-06-17, version 1.0
- * @interface TypedDagNode
- *
- * $Id:$
+ *@param Mu A location parameter for each dimension
+ *@param Sigma a variance-covariance matrix
  */
 
 
@@ -22,14 +15,20 @@
 #ifndef MultivariateNormalDistribution_H
 #define MultivariateNormalDistribution_H
 
+#include <stddef.h>
+#include <vector>
+#include <iosfwd>
+
 #include "RbVector.h"
-#include "TypedDagNode.h"
 #include "TypedDistribution.h"
 #include "MatrixReal.h"
+#include "RevPtr.h"
 
-#include <vector>
+namespace RevLanguage { class RevVariable; }
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     class MultivariateNormalDistribution : public TypedDistribution< RbVector<double> > {
         

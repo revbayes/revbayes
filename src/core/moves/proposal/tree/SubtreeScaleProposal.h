@@ -1,13 +1,16 @@
 #ifndef SubtreeScaleProposal_H
 #define SubtreeScaleProposal_H
 
-#include <string>
+#include <iosfwd>
+#include <vector>
 
 #include "Proposal.h"
-#include "StochasticNode.h"
-#include "Tree.h"
 
 namespace RevBayesCore {
+class DagNode;
+class TopologyNode;
+class Tree;
+template <class variableType> class StochasticNode;
     
     /**
      * The subtree-scale operator.

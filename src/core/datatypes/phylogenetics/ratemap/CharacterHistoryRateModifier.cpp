@@ -6,10 +6,17 @@
 //  Copyright (c) 2013 Michael Landis. All rights reserved.
 //
 
-#include "CharacterEventDiscrete.h"
+#include <iostream>
+#include <cstddef>
+#include <set>
+#include <vector>
+
 #include "CharacterHistoryRateModifier.h"
 #include "RbException.h"
-#include <iostream>
+#include "Assignable.h"
+
+namespace RevBayesCore { class CharacterEvent; }
+namespace RevBayesCore { class CharacterEventDiscrete; }
 
 using namespace RevBayesCore;
 

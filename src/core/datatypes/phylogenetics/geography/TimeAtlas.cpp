@@ -7,9 +7,12 @@
 //
 
 #include "TimeAtlas.h"
-#include "TimeAtlasDataReader.h"
+
 #include <sstream>
 #include <string>
+
+#include "TimeAtlasDataReader.h"
+#include "GeographicArea.h"
 
 using namespace RevBayesCore;
 

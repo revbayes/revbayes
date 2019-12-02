@@ -1,15 +1,13 @@
 #ifndef Kimura81RateMatrixFunction_H
 #define Kimura81RateMatrixFunction_H
 
-#include "RateMatrix_Kimura81.h"
-#include "RbVector.h"
-#include "Simplex.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
-
-#include <vector>
+#include "RateGenerator.h"
 
 namespace RevBayesCore {
+class DagNode;
+class Simplex;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Kimura81 rate matrix function.

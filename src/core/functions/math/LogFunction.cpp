@@ -1,7 +1,22 @@
 #include "LogFunction.h"
+
 #include <cmath>
 
+#include "Cloneable.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
+
 using namespace RevBayesCore;
+/**
+ * LogFunction of a TypedDagNode containing a value of type double using
+ * a base of type y.
+ *
+ * @param x value of type double
+ * @param y value of type double, the value used as the base
+ *
+ */
+
 
 LogFunction::LogFunction(const TypedDagNode<double> *x, const TypedDagNode<double> *y) : ContinuousFunction( new double(0.0) ),
     a( x ),

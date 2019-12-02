@@ -7,17 +7,17 @@
 #ifndef CladogeneticSpeciationRateMatrixFunction__
 #define CladogeneticSpeciationRateMatrixFunction__
 
-#include "AbstractCladogenicStateFunction.h"
-#include "CladogeneticSpeciationRateMatrix.h"
-#include "RbVector.h"
-#include "TypedDagNode.h"
-#include "TypedFunction.h"
-
-#include <sstream>
 #include <vector>
 #include <map>
 
+#include "AbstractCladogenicStateFunction.h"
+#include "CladogeneticSpeciationRateMatrix.h"
+#include "TypedFunction.h"
+
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     class CladogeneticSpeciationRateMatrixFunction : public AbstractCladogenicStateFunction, public TypedFunction<CladogeneticSpeciationRateMatrix> {
         

@@ -1,22 +1,37 @@
+#include <stddef.h>
+#include <ostream>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "BiogeographicTreeHistoryCtmc.h"
 #include "TreeCharacterHistoryNhxMonitor.h"
 #include "Mntr_CharacterHistoryNhxFile.h"
 #include "Natural.h"
 #include "OptionRule.h"
 #include "Probability.h"
-#include "RbException.h"
 #include "RevObject.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlAtlas.h"
 #include "RlString.h"
 #include "RlTimeTree.h"
-#include "StandardState.h"
-#include "TimeAtlas.h"
-#include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "Integer.h"
+#include "Monitor.h"
+#include "RbBoolean.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlMonitor.h"
+#include "StochasticNode.h"
+#include "StandardState.h" // IWYU pragma: keep
+#include "GeographicArea.h" // IWYU pragma: keep
+
+namespace RevBayesCore { class AbstractHomologousDiscreteCharacterData; }
+namespace RevBayesCore { class TimeAtlas; }
+namespace RevBayesCore { class Tree; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 
 using namespace RevLanguage;

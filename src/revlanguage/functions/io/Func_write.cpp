@@ -1,13 +1,23 @@
+#include <stddef.h>
+#include <string>
+#include <iostream>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "Ellipsis.h"
 #include "Func_write.h"
-#include "RbException.h"
 #include "RbFileManager.h"
 #include "RevNullObject.h"
 #include "RlBoolean.h"
 #include "RlString.h"
-
-#include <string>
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "RbBoolean.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
 
 #if defined (RB_MPI)
 #include <mpi.h>

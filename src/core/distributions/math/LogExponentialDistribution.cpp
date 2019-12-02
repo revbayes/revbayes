@@ -1,10 +1,13 @@
+#include <cmath>
+
 #include "DistributionExponential.h"
 #include "LogExponentialDistribution.h"
 #include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
 #include "RbConstants.h"
+#include "ContinuousDistribution.h"
+#include "TypedDagNode.h"
 
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

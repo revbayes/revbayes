@@ -1,9 +1,10 @@
 #ifndef MaxTimeStoppingRule_H
 #define MaxTimeStoppingRule_H
 
-#include "StoppingRule.h"
+#include <ctime>
+#include <iosfwd>
 
-#include <vector>
+#include "StoppingRule.h"
 
 namespace RevBayesCore {
     

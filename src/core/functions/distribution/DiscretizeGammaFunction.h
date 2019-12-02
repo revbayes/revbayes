@@ -20,11 +20,11 @@
 #define DiscretizeGammaFunction_H
 
 #include "TypedFunction.h"
-#include "ContinuousDistribution.h"
 #include "RbVector.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     class DiscretizeGammaFunction : public TypedFunction< RbVector<double> >{
         

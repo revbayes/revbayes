@@ -1,10 +1,10 @@
 #ifndef CharacterEventCompare_H
 #define CharacterEventCompare_H
 
+#include "CharacterEvent.h"
 
 namespace RevBayesCore {
 
-    class CharacterEvent;
     class CharacterEventCompare
     {
     public:

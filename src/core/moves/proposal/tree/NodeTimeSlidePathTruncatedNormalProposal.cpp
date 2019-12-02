@@ -1,13 +1,19 @@
+#include <stddef.h>
+#include <cmath>
+#include <iostream>
+#include <vector>
+
 #include "DistributionNormal.h"
 #include "NodeTimeSlidePathTruncatedNormalProposal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-#include "RbException.h"
-#include "TreeUtilities.h"
-#include "TypedDagNode.h"
+#include "Proposal.h"
+#include "RbConstants.h"
+#include "StochasticNode.h"
+#include "TopologyNode.h"
+#include "Tree.h"
 
-#include <cmath>
-#include <iostream>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

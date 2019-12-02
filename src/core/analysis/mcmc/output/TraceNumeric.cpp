@@ -1,15 +1,13 @@
 #include "TraceNumeric.h"
-#include "DistributionNormal.h"
-#include "RbConstants.h"
-#include "RbMathLogic.h"
+
+#include <math.h>
+#include <stddef.h>
+#include <vector>
 
 #include "GewekeTest.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
 #include "StationarityTest.h"
-
-#include <cmath>
-#include <math.h>
+#include "Cloner.h"
+#include "RbConstants.h" // IWYU pragma: keep
 
 using namespace RevBayesCore;
 using namespace std;

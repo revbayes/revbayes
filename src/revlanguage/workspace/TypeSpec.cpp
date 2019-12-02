@@ -1,4 +1,7 @@
-#include "RbException.h"
+#include <stddef.h>
+#include <ostream>
+#include <string>
+
 #include "TypeSpec.h"
 
 using namespace RevLanguage;

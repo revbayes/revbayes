@@ -1,16 +1,16 @@
 #include "AbstractCoalescent.h"
+
+#include <cmath>
+#include <iosfwd>
+
 #include "Clade.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbException.h"
-#include "RbMathCombinatorialFunctions.h"
-#include "StochasticNode.h"
 #include "Taxon.h"
 #include "TopologyNode.h"
-
-#include <algorithm>
-#include <cmath>
+#include "TimeInterval.h"
 
 using namespace RevBayesCore;
 

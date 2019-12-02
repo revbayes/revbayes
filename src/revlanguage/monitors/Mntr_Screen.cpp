@@ -1,34 +1,35 @@
 
+#include <algorithm>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Ellipsis.h"
-#include "ModelVector.h"
 #include "Mntr_Screen.h"
 #include "Natural.h"
-#include "RbException.h"
-#include "RevObject.h"
-#include "RlString.h"
 #include "ScreenMonitor.h"
 #include "TypeSpec.h"
+#include "Monitor.h"
+#include "RbBoolean.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlMonitor.h"
+
+namespace RevBayesCore { class DagNode; }
 
 
 using namespace RevLanguage;
 
 Mntr_Screen::Mntr_Screen(void) : Monitor()
-{
-    
-}
+{}
 
 
-/**
- * The clone function is a convenience function to create proper copies of inherited objected.
- * E.g. a.clone() will create a clone of the correct type even if 'a' is of derived type 'b'.
- *
- * \return A new copy of the process.
- */
 Mntr_Screen* Mntr_Screen::clone(void) const
-{
-    
+{    
 	return new Mntr_Screen(*this);
 }
 
@@ -56,40 +57,28 @@ void Mntr_Screen::constructInternalObject( void )
 }
 
 
-/** Get Rev type of object */
 const std::string& Mntr_Screen::getClassType(void)
-{
-    
-    static std::string rev_type = "Mntr_Screen";
-    
+{   
+    static std::string rev_type = "Mntr_Screen";    
 	return rev_type; 
 }
 
-/** Get class type spec describing type of object */
+
 const TypeSpec& Mntr_Screen::getClassTypeSpec(void)
-{
-    
-    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Monitor::getClassTypeSpec() ) );
-    
+{    
+    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Monitor::getClassTypeSpec() ) );   
 	return rev_type_spec; 
 }
 
 
-/**
- * Get the Rev name for the constructor function.
- *
- * \return Rev name of constructor function.
- */
 std::string Mntr_Screen::getMonitorName( void ) const
 {
     // create a constructor function name variable that is the same for all instance of this class
-    std::string c_name = "Screen";
-    
+    std::string c_name = "Screen";    
     return c_name;
 }
 
 
-/** Return member rules (no members) */
 const MemberRules& Mntr_Screen::getParameterRules(void) const
 {
     
@@ -111,25 +100,20 @@ const MemberRules& Mntr_Screen::getParameterRules(void) const
     return memberRules;
 }
 
-/** Get type spec */
+
 const TypeSpec& Mntr_Screen::getTypeSpec( void ) const
-{
-    
-    static TypeSpec type_spec = getClassTypeSpec();
-    
+{    
+    static TypeSpec type_spec = getClassTypeSpec();    
     return type_spec;
 }
 
 
-/** Get type spec */
 void Mntr_Screen::printValue(std::ostream &o) const
-{
-    
+{  
     o << "Mntr_Screen";
 }
 
 
-/** Set a member variable */
 void Mntr_Screen::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     

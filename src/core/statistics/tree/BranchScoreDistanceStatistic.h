@@ -18,19 +18,12 @@
 #ifndef BranchScoreDistanceStatistic_H
 #define BranchScoreDistanceStatistic_H
 
-//#include "Statistic.h"
-#include "Tree.h"
-#include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <boost/dynamic_bitset.hpp>
-
-
-#include <vector>
-#include <string>
-
 namespace RevBayesCore {
+class DagNode;
+class Tree;
+template <class valueType> class TypedDagNode;
     
     class BranchScoreDistanceStatistic : public TypedFunction< double > {
         

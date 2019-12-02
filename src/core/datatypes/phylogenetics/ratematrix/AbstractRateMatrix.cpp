@@ -1,4 +1,10 @@
 #include "AbstractRateMatrix.h"
+
+#include <cmath>
+#include <fstream>
+#include <algorithm>
+#include <cstddef>
+
 #include "MatrixReal.h"
 #include "RandomNumberGenerator.h"
 #include "RandomNumberFactory.h"
@@ -7,12 +13,9 @@
 #include "RbMathMatrix.h"
 #include "DistributionPoisson.h"
 #include "TransitionProbabilityMatrix.h"
-
-#include <cmath>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <iomanip>
+#include "Cloneable.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 using namespace RevBayesCore;
 
@@ -617,4 +620,13 @@ void AbstractRateMatrix::setDiagonal(void)
 
     // set flags
     needs_update = true;
+}
+
+std::vector<int> AbstractRateMatrix::get_emitted_letters() const
+{
+    std::vector<int> emit(num_states);
+    for(int i=0;i<num_states;i++)
+        emit[i] = i;
+
+    return emit;
 }

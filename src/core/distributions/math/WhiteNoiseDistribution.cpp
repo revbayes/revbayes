@@ -1,11 +1,24 @@
 #include "WhiteNoiseDistribution.h"
-#include "DistributionGamma.h"
-#include "RandomNumberFactory.h"
-#include "RbConstants.h"
 
 #include <cmath>
 
+#include "DistributionGamma.h"
+#include "RandomNumberFactory.h"
+#include "RbConstants.h"
+#include "Cloneable.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class RandomNumberGenerator; }
+
 using namespace RevBayesCore;
+
+/* White Noise Distribution Constructor
+ * The constructor takes 3 parameters:
+ * @param m the mean
+ * @param sd the standard deviation
+ * @param t time
+ */
 
 WhiteNoiseDistribution::WhiteNoiseDistribution(const TypedDagNode<double> *m, const TypedDagNode<double> *sd, const TypedDagNode<double> *t) : ContinuousDistribution( new double( 1.0 ) ),
     mu( m ),

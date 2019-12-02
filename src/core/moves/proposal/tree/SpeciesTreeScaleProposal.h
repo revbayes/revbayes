@@ -1,13 +1,15 @@
 #ifndef SpeciesTreeScaleProposal_H
 #define SpeciesTreeScaleProposal_H
 
-#include <string>
+#include <iosfwd>
+#include <vector>
 
 #include "Proposal.h"
-#include "StochasticNode.h"
-#include "Tree.h"
 
 namespace RevBayesCore {
+class DagNode;
+class Tree;
+template <class variableType> class StochasticNode;
     
     /**
      * The species-subtree-scale operator.

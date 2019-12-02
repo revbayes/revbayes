@@ -1,15 +1,28 @@
 #include "RlPosteriorPredictiveSimulation.h"
+
+#include <stddef.h>
+#include <string>
+
 #include "ArgumentRules.h"
 #include "MemberProcedure.h"
 #include "MethodTable.h"
 #include "Natural.h"
-#include "Probability.h"
 #include "RlModel.h"
 #include "RlString.h"
 #include "RlAncestralStateTrace.h"
 #include "RlModelTrace.h"
 #include "RlUtils.h"
 #include "WorkspaceVector.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RevNullObject.h"
+#include "StringUtilities.h"
+#include "Trace.h"
+#include "TypeSpec.h"
+
+namespace RevBayesCore { class Model; }
 
 using namespace RevLanguage;
 

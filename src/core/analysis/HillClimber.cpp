@@ -1,25 +1,28 @@
+#include <stddef.h>
+#include <cmath>
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include "DagNode.h"
 #include "HillClimber.h"
 #include "MoveSchedule.h"
 #include "RandomMoveSchedule.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbConstants.h"
 #include "RbException.h"
 #include "RbMathLogic.h"
-#include "RbOptions.h"
 #include "RlUserInterface.h"
 #include "SingleRandomMoveSchedule.h"
-#include "RandomMoveSchedule.h"
-#include "ExtendedNewickTreeMonitor.h"
-
-#include <unistd.h>
-
-#include <cmath>
-#include <iomanip>
-#include <sstream>
-#include <typeinfo>
 #include "SequentialMoveSchedule.h"
+#include "MaximumLikelihoodEstimation.h"
+#include "Model.h"
+#include "Monitor.h"
+#include "Move.h"
+#include "RbConstIterator.h"
+#include "RbConstIteratorImpl.h"
+#include "RbIterator.h"
+#include "RbIteratorImpl.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 
 using namespace RevBayesCore;
@@ -43,10 +46,10 @@ HillClimber::HillClimber(const Model& m, const RbVector<Move> &mvs, const RbVect
 {
     // create an independent copy of the model, monitors and moves
     replaceDag(mvs,mons);
-    
+
     initializeSampler();
     initializeMonitors();
-    
+
 }
 
 
@@ -62,15 +65,15 @@ HillClimber::HillClimber(const HillClimber &m) : MaximumLikelihoodEstimation(m),
     schedule( NULL ),
     scheduleType( m.scheduleType )
 {
-    
+
     // temporary references
     const RbVector<Monitor>& mons = m.monitors;
     const RbVector<Move>& mvs = m.moves;
-    
-    
+
+
     // create an independent copy of the model, monitors and moves
     replaceDag(mvs,mons);
-    
+
     initializeSampler();
     initializeMonitors();
 }
@@ -81,14 +84,14 @@ HillClimber::HillClimber(const HillClimber &m) : MaximumLikelihoodEstimation(m),
  */
 HillClimber::~HillClimber(void)
 {
-    
-    
+
+
     // delete the move schedule
     delete schedule;
-    
+
     // delete the model
     delete model;
-    
+
 }
 
 
@@ -100,24 +103,24 @@ HillClimber::~HillClimber(void)
 HillClimber& HillClimber::operator=(const HillClimber &m)
 {
     MaximumLikelihoodEstimation::operator=( m );
-    
+
     if ( this != &m )
     {
         delete model;
         model = m.model->clone();
-        
+
         // temporary references
         const RbVector<Monitor>& mons = m.monitors;
         const RbVector<Move>& mvs = m.moves;
-        
-        
+
+
         // create an independent copy of the model, monitors and moves
         replaceDag(mvs,mons);
-        
+
         initializeSampler();
         initializeMonitors();
     }
-    
+
     return *this;
 }
 
@@ -128,21 +131,21 @@ HillClimber& HillClimber::operator=(const HillClimber &m)
 // */
 //void HillClimber::addFileMonitorExtension(const std::string &s, bool dir)
 //{
-//    
+//
 //    // tell each monitor
 //    for (RbIterator<Monitor> it=monitors.begin(); it!=monitors.end(); ++it)
 //    {
 //        it->addFileExtension( s, dir );
 //    }
-//    
+//
 //}
 //
 //
 //void HillClimber::addMonitor(const Monitor &m)
 //{
-//    
+//
 //    monitors.push_back( m );
-//    
+//
 //}
 
 
@@ -151,26 +154,26 @@ HillClimber& HillClimber::operator=(const HillClimber &m)
  */
 void HillClimber::disableScreenMonitor( void )
 {
-    
+
     // tell each monitor
     for (size_t i=0; i < monitors.size(); ++i)
     {
-        
+
         bool is = monitors[i].isScreenMonitor();
         if ( is == true )
         {
             monitors.erase( i );
             --i;
         }
-        
+
     }
-    
+
 }
 
 
 HillClimber* HillClimber::clone( void ) const
 {
-    
+
     return new HillClimber( *this );
 }
 
@@ -180,20 +183,20 @@ HillClimber* HillClimber::clone( void ) const
  */
 void HillClimber::finishMonitors( void )
 {
-    
+
     // iterate over all monitors
     for (size_t i=0; i<monitors.size(); i++)
     {
-        
+
         // if this chain is active, then close the stream
         if ( process_active == true )
         {
             monitors[i].closeStream();
-            
+
         }
-        
+
     }
-    
+
 }
 
 
@@ -202,7 +205,7 @@ void HillClimber::finishMonitors( void )
  */
 Model& HillClimber::getModel( void )
 {
-    
+
     return *model;
 }
 
@@ -212,7 +215,7 @@ Model& HillClimber::getModel( void )
  */
 const Model& HillClimber::getModel( void ) const
 {
-    
+
     return *model;
 }
 
@@ -232,7 +235,11 @@ double HillClimber::getModelLnProbability(bool likelihood_only)
         {
             pp += the_node->getLnProbability();
         }
-        
+        else
+        {
+          pp += the_node->getLnProbability();
+        }
+
     }
     return pp;
 }
@@ -284,7 +291,7 @@ const std::string& HillClimber::getScheduleType( void ) const
 
 std::string HillClimber::getStrategyDescription( void ) const
 {
-    
+
     std::string description = "";
     std::stringstream stream;
     if ( scheduleType == "single" )
@@ -300,7 +307,7 @@ std::string HillClimber::getStrategyDescription( void ) const
         stream << "The simulator uses " << moves.size() << " different moves in a sequential move schedule with " << schedule->getNumberMovesPerIteration() << " moves per iteration" << std::endl;
     }
     description = stream.str();
-    
+
     return description;
 }
 
@@ -308,51 +315,51 @@ std::string HillClimber::getStrategyDescription( void ) const
 bool HillClimber::hasConverged(double min_acceptance_ratio)
 {
     bool converged = true;
-    
+
     for (size_t i=0; i<moves.size() && converged == true; ++i)
     {
         size_t num_tried    = moves[i].getNumberTriedCurrentPeriod();
         size_t num_accepted = moves[i].getNumberAcceptedCurrentPeriod();
-        
+
         if ( num_tried > 0)
         {
             bool tmp = ( min_acceptance_ratio > (double(num_accepted)/double(num_tried)) );
             converged &= tmp;
         }
-        
+
     }
-    
+
     return converged;
 }
 
 
 void HillClimber::initializeSampler( void )
 {
-    
+
     std::vector<DagNode *>& dagNodes = model->getDagNodes();
     std::vector<DagNode *> orderedStochNodes = model->getOrderedStochasticNodes(  );
-    
+
     // Get rid of previous move schedule, if any
     if ( schedule )
     {
         delete schedule;
     }
     schedule = NULL;
-    
+
     // Get initial lnProbability of model
-    
+
     // first we touch all nodes so that the likelihood is dirty
     for (std::vector<DagNode *>::iterator i=dagNodes.begin(); i!=dagNodes.end(); i++)
     {
-        
+
         DagNode *the_node = *i;
         the_node->setMcmcMode( true );
         the_node->setPriorOnly( false );
         the_node->touch();
-        
+
     }
-    
-    
+
+
     int numTries    = 0;
     int maxNumTries = 100;
     double lnProbability = 0.0;
@@ -360,15 +367,15 @@ void HillClimber::initializeSampler( void )
     {
         // a flag if we failed to find a valid starting value
         bool failed = false;
-        
+
         lnProbability = 0.0;
         for (std::vector<DagNode *>::iterator i=dagNodes.begin(); i!=dagNodes.end(); i++)
         {
             DagNode* node = (*i);
             node->touch();
-            
+
             double lnProb = node->getLnProbability();
-            
+
             if ( !RbMath::isAComputableNumber(lnProb) )
             {
                 std::stringstream ss;
@@ -376,33 +383,33 @@ void HillClimber::initializeSampler( void )
                 node->printValue( ss, "," );
                 ss << std::endl;
                 RBOUT( ss.str() );
-                
+
                 // set the flag
                 failed = true;
-                
+
                 break;
             }
             lnProbability += lnProb;
-            
+
         }
-        
+
         // now we keep all nodes so that the likelihood is stored
         for (std::vector<DagNode *>::iterator i=dagNodes.begin(); i!=dagNodes.end(); i++)
         {
             (*i)->keep();
         }
-        
+
         if ( failed == true )
         {
             RBOUT( "Drawing new initial states ... " );
             for (std::vector<DagNode *>::iterator i=orderedStochNodes.begin(); i!=orderedStochNodes.end(); i++)
             {
-                
+
                 if ( !(*i)->isClamped() && (*i)->isStochastic() )
                 {
                     (*i)->redraw();
                     (*i)->reInitialized();
-                    
+
                 }
                 else if ( (*i)->isClamped() )
                 {
@@ -410,16 +417,16 @@ void HillClimber::initializeSampler( void )
                     (*i)->reInitialized();
                     (*i)->touch();
                 }
-                
+
             }
         }
         else
         {
             break;
         }
-        
+
     }
-    
+
     if ( numTries == maxNumTries )
     {
         std::stringstream msg;
@@ -429,9 +436,9 @@ void HillClimber::initializeSampler( void )
             msg << " after " << numTries << " tries";
         }
         throw RbException( msg.str() );
-        
+
     }
-    
+
     // Create the move scheduler
     if ( scheduleType == "sequential" )
     {
@@ -445,7 +452,7 @@ void HillClimber::initializeSampler( void )
     {
         schedule = new RandomMoveSchedule( &moves );
     }
-    
+
     generation = 0;
 }
 
@@ -462,7 +469,7 @@ void HillClimber::initializeMonitors(void)
 
 void HillClimber::monitor(unsigned long g)
 {
-    
+
     if ( process_active == true )
     {
         // Monitor
@@ -471,57 +478,57 @@ void HillClimber::monitor(unsigned long g)
             monitors[i].monitor( g );
         }
     }
-    
+
 }
 
 
 void HillClimber::nextCycle( void )
 {
-    
+
     size_t proposals = size_t( round( schedule->getNumberMovesPerIteration() ) );
     for (size_t i=0; i<proposals; i++)
     {
-        
+
         // Get the move
         Move& the_move = schedule->nextMove( generation );
-        
+
         // Perform the move
         the_move.performHillClimbingStep( 1.0, 1.0);
-        
+
     }
-    
-    
+
+
     // advance gen cycle
     generation++;
-    
+
 }
 
 
 
 void HillClimber::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> &mons)
 {
-    
+
     moves.clear();
     monitors.clear();
-    
+
     // we need to replace the DAG nodes of the monitors and moves
     const std::vector<DagNode*>& modelNodes = model->getDagNodes();
     for (RbConstIterator<Move> it = mvs.begin(); it != mvs.end(); ++it)
     {
-        
+
         Move *the_move = it->clone();
         std::vector<DagNode*> nodes = the_move->getDagNodes();
         for (std::vector<DagNode*>::const_iterator j = nodes.begin(); j != nodes.end(); ++j)
         {
-            
+
             RevBayesCore::DagNode *the_node = *j;
-            
+
             // error checking
             if ( the_node->getName() == "" )
             {
                 throw RbException( "Unable to connect move '" + the_move->getMoveName() + "' to DAG copy because variable name was lost");
             }
-            
+
             DagNode* theNewNode = NULL;
             for (std::vector<DagNode*>::const_iterator k = modelNodes.begin(); k != modelNodes.end(); ++k)
             {
@@ -536,29 +543,29 @@ void HillClimber::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> 
             {
                 throw RbException("Cannot find node with name '" + the_node->getName() + "' in the model but received a move working on it.");
             }
-            
+
             // now swap the node
             the_move->swapNode( *j, theNewNode );
         }
         moves.push_back( *the_move );
         delete the_move;
     }
-    
+
     for (RbConstIterator<Monitor> it = mons.begin(); it != mons.end(); ++it)
     {
         Monitor *theMonitor = it->clone();
         std::vector<DagNode*> nodes = theMonitor->getDagNodes();
         for (std::vector<DagNode*>::const_iterator j = nodes.begin(); j != nodes.end(); ++j)
         {
-            
+
             RevBayesCore::DagNode *the_node = (*j);
-            
+
             // error checking
             if ( the_node->getName() == "" )
             {
                 throw RbException( "Unable to connect monitor to DAG copy because variable name was lost");
             }
-            
+
             DagNode* theNewNode = NULL;
             for (std::vector<DagNode*>::const_iterator k = modelNodes.begin(); k != modelNodes.end(); ++k)
             {
@@ -573,24 +580,24 @@ void HillClimber::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> 
             {
                 throw RbException("Cannot find node with name '" + the_node->getName() + "' in the model but received a monitor working on it.");
             }
-            
+
             // now swap the node
             theMonitor->swapNode( *j, theNewNode );
         }
         monitors.push_back( *theMonitor );
         delete theMonitor;
-        
+
     }
-    
+
 }
 
 
 void HillClimber::removeMonitors( void )
 {
-    
+
     // just clear the vector
     monitors.clear();
-    
+
 }
 
 
@@ -600,16 +607,16 @@ void HillClimber::removeMonitors( void )
  */
 void HillClimber::reset( void )
 {
-    
+
     double movesPerIteration = 0.0;
     for (RbIterator<Move> it = moves.begin(); it != moves.end(); ++it)
     {
-        
+
         it->resetCounters();
         movesPerIteration += it->getUpdateWeight();
-        
+
     }
-    
+
 }
 
 
@@ -618,7 +625,7 @@ void HillClimber::reset( void )
  */
 void HillClimber::setActivePIDSpecialized(size_t a, size_t n)
 {
-    
+
     // delegate the call to the model
     model->setActivePID(a,n);
 }
@@ -629,19 +636,19 @@ void HillClimber::setActivePIDSpecialized(size_t a, size_t n)
  */
 void HillClimber::setModel( Model *m )
 {
-    
+
     model = m;
-    
+
     // we need to set the new model in the monitors as well
     // which is done in initializeMonitors
     initializeMonitors();
-    
+
 }
 
 
 void HillClimber::setScheduleType(const std::string &s)
 {
-    
+
     scheduleType = s;
 }
 
@@ -651,22 +658,22 @@ void HillClimber::setScheduleType(const std::string &s)
  */
 void HillClimber::startMonitors( size_t num_cycles, bool reopen )
 {
-    
+
     // Open the output file and print headers
     for (size_t i=0; i<monitors.size(); ++i)
     {
-        
+
         // reset the monitor
         monitors[i].reset( num_cycles );
-        
+
         // if this chain is active, print the header
         if ( process_active == true )
         {
             monitors[i].openStream( reopen );
         }
-        
+
     }
-    
+
 }
 
 
@@ -676,14 +683,14 @@ void HillClimber::startMonitors( size_t num_cycles, bool reopen )
  */
 void HillClimber::tune( void )
 {
-    
+
     // iterate over the moves
     for (RbIterator<Move> it=moves.begin(); it!=moves.end(); ++it)
     {
         // tune the move
         it->autoTune();
     }
-    
+
 }
 
 
@@ -692,19 +699,19 @@ void HillClimber::tune( void )
  */
 void HillClimber::writeMonitorHeaders( void )
 {
-    
+
     // Open the output file and print headers
     for (size_t i=0; i<monitors.size(); ++i)
     {
-        
+
         // if this chain is active, print the header
         if ( process_active == true )
         {
-            
+
             monitors[i].printHeader();
-            
+
         }
-        
+
     }
-    
+
 }

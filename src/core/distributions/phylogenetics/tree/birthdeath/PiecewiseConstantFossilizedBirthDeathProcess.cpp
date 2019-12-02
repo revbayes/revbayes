@@ -1,15 +1,30 @@
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <iterator>
+#include <ostream>
+#include <string>
+#include <type_traits>
+#include <vector>
+
 #include "DistributionExponential.h"
 #include "PiecewiseConstantFossilizedBirthDeathProcess.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbMathCombinatorialFunctions.h"
-#include "RbMathLogic.h"
-#include "StochasticNode.h"
-#include "TypedDistribution.h"
+#include "AbstractBirthDeathProcess.h"
+#include "AbstractPiecewiseConstantFossilizedRangeProcess.h"
+#include "RbException.h"
+#include "StringUtilities.h"
+#include "Taxon.h"
+#include "TimeInterval.h"
+#include "TopologyNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
 
-#include <algorithm>
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { template <class valueType> class RbVector; }
 
 using namespace RevBayesCore;
 
@@ -166,7 +181,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( 
             if ( d_i[i] > 0.0 )
             {
                 lnProb -= death[di];
-                lnProb += log( fossil[di] ) + log( p(d_i[i], di) );
+                lnProb += log( fossil[di] ) + log( p(di, d_i[i]) );
             }
         }
     }

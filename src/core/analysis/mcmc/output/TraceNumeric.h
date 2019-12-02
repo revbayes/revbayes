@@ -3,8 +3,6 @@
 
 #include "Trace.h"
 
-#include <vector>
-
 namespace RevBayesCore {
 
     class TraceNumeric : public Trace<double> {

@@ -1,13 +1,28 @@
 #include "MultivariateNormalDistribution.h"
+
+#include <cmath>
+#include <string>
+
 #include "DistributionMultivariateNormal.h"
 #include "RandomNumberFactory.h"
 #include "RbConstants.h"
 #include "RbException.h"
 #include "StochasticNode.h"
+#include "Cloner.h"
+#include "RbVectorImpl.h"
+#include "RevVariable.h"
+#include "TypedDagNode.h"
 
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
+
+/* Multivariate Normal Distribution Constructor
+ *
+ * @param m A vector of doubles for the location parameters
+ * @param cov a matrix of reals for that represents the covariance matrix
+ */
 
 MultivariateNormalDistribution::MultivariateNormalDistribution(const TypedDagNode< RbVector<double> > *m, const TypedDagNode<MatrixReal>* cov, const TypedDagNode<MatrixReal>* prec, const TypedDagNode<double>* sc) :
     TypedDistribution< RbVector<double> >( new RbVector<double>() ),
