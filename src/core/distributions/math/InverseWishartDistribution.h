@@ -1,9 +1,4 @@
-/* 
- * File:   InverseInverseWishartDistribution.h
- * Author: nl
- *
- * Created on 15 juillet 2014, 10:08
- */
+
 
 #ifndef INVERSEWISHARTDISTRIBUTION_H
 #define	INVERSEWISHARTDISTRIBUTION_H

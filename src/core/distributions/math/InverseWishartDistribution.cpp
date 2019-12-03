@@ -1,9 +1,4 @@
-/* 
- * File:   InverseWishartDistribution.cpp
- * Author: nl
- * 
- * Created on 15 juillet 2014, 10:08
- */
+
 
 #include "InverseWishartDistribution.h"
 
