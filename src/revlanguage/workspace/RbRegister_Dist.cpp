@@ -131,6 +131,7 @@
 #include "Dist_WeightedSample.h"
 
 /* Character evolution models (in folder "distributions/phylogenetics/character") */
+#include "Dist_CTMC.h"
 #include "Dist_phyloCTMC.h"
 #include "Dist_phyloCTMCDASequence.h"
 #include "Dist_phyloCTMCDASiteIID.h"
@@ -315,6 +316,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 //        AddDistribution< AbstractHomologousDiscreteCharacterData >( new Dist_phyloCTMC() );
 //        AddDistribution< AbstractHomologousDiscreteCharacterData >( new Dist_phyloDACTMC() );
 //        AddDistribution< AbstractHomologousDiscreteCharacterData >( new Dist_phyloCTMCClado() );
+        addDistribution( new Dist_CTMC() );
         addDistribution( new Dist_phyloCTMC() );
         addDistribution( new Dist_phyloCTMCDASequence() );
         addDistribution( new Dist_phyloCTMCDASiteIID() );
