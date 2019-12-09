@@ -43,7 +43,7 @@ fi
 
 	./regenerate.sh ${all_args}
 	cd ${BUILD_DIR} 
-	CC=gcc CXX=g++ cmake .
+	CC=gcc CXX=g++ cmake -D Boost_NO_BOOST_CMAKE:BOOL=ON .
 	make -j 4
 	cd ..
 	
