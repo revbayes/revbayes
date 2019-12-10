@@ -106,12 +106,12 @@ script:
   - cd tests
   - ./run_integration_tests.sh ${TRAVIS_BUILD_DIR}/projects/cmake/rb
 # Run testiphy
- - export PATH=${TRAVIS_BUILD_DIR}/projects/cmake:$PATH
- - cd
- - git clone https://gitlab.com/testiphy/testiphy.git
- - cd testiphy
- - rm -rf tests/likelihood/covarion/
- - ./testiphy rb
+  - export PATH=${TRAVIS_BUILD_DIR}/projects/cmake:$PATH
+  - cd
+  - git clone https://gitlab.com/testiphy/testiphy.git
+  - cd testiphy
+  - rm -rf tests/likelihood/covarion/
+  - ./testiphy rb
 
 # notifications
 notifications:
