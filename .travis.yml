@@ -92,6 +92,8 @@ before_install:
 script:
 # Build
   - cd projects/cmake
+  - ./generate_version_number.sh
+  - mv GitVersion.cpp ../../src/revlanguage/utils/
   - mkdir build
   - ./regenerate.sh -travis true ${MAYBE_MPI}
   - cd build
