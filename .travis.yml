@@ -92,6 +92,8 @@ before_install:
 script:
 # Build
   - cd projects/cmake
+  - ./generate_version_number.sh
+  - mv GitVersion.cpp ../../src/revlanguage/utils/
   - mkdir build
   - ./regenerate.sh -travis true ${MAYBE_MPI}
   - cd build
@@ -108,6 +110,7 @@ script:
   - cd
   - git clone https://gitlab.com/testiphy/testiphy.git
   - cd testiphy
+  - rm -rf tests/likelihood/covarion/
   - ./testiphy rb
 
 # notifications
