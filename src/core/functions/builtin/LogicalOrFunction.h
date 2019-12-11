@@ -1,16 +1,3 @@
-/**
-/**
- * @brief Declaration of the LogicalAndFunction.
- *
- * This function takes the logical OR of two booleans
- * T || T -> T
- * T || F -> T
- * F || T -> T
- * F || F -> F
- *
- */
-
-
 #ifndef LogicalOrFunction_H
 #define LogicalOrFunction_H
 
@@ -20,6 +7,17 @@
 namespace RevBayesCore {
 class DagNode;
 template <class valueType> class TypedDagNode;
+
+    /**
+     * @brief Declaration of the logical OR function.
+     *
+     * This function takes the logical OR of two booleans
+     * T || T -> T
+     * T || F -> T
+     * F || T -> T
+     * F || F -> F
+     *
+     **/
     
     class LogicalOrFunction : public TypedFunction<Boolean> {
         
