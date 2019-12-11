@@ -59,7 +59,7 @@ using namespace RevLanguage;
  *
  * The default constructor does nothing except allocating the object.
  */
-Dist_BranchRateTree::Dist_BranchRateTree() : TypedDistribution<Tree>()
+Dist_BranchRateTree::Dist_BranchRateTree() : TypedDistribution<BranchLengthTree>()
 {
 
 }
@@ -167,7 +167,7 @@ MethodTable Dist_BranchRateTree::getDistributionMethods( void ) const
 
 //    const Distribution& rlDistribution = static_cast<const Distribution &>( baseDistribution->getRevObject() );
 
-    MethodTable methods = TypedDistribution<Tree>::getDistributionMethods();
+    MethodTable methods = TypedDistribution<BranchLengthTree>::getDistributionMethods();
 
     // member functions
     ArgumentRules* sample_prob_arg_rules = new ArgumentRules();
@@ -245,6 +245,6 @@ void Dist_BranchRateTree::setConstParameter(const std::string& name, const RevPt
     }
     else
     {
-        TypedDistribution<Tree>::setConstParameter(name, var);
+        TypedDistribution<BranchLengthTree>::setConstParameter(name, var);
     }
 }

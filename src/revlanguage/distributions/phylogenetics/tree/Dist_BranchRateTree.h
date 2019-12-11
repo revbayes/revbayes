@@ -2,7 +2,7 @@
 #define Dist_BranchRateTree_H
 
 #include "RlTypedDistribution.h"
-#include "RlTimeTree.h"
+#include "RlBranchLengthTree.h"
 #include "BranchRateTreeDistribution.h"
 
 namespace RevLanguage {
@@ -20,7 +20,7 @@ namespace RevLanguage {
      * @since 2014-01-26, version 1.0
      *
      */
-    class Dist_BranchRateTree : public TypedDistribution<Tree> {
+    class Dist_BranchRateTree : public TypedDistribution<BranchLengthTree> {
 
     public:
         Dist_BranchRateTree(void);

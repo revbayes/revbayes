@@ -408,7 +408,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< TimeTree                   >( new Dist_UltrametricTree() );
 
         // branch rate tree distributions
-        AddDistribution< Tree                       >( new Dist_BranchRateTree() );
+        AddDistribution< BranchLengthTree           >( new Dist_BranchRateTree() );
 
 		// Distance Matrix Gamma distribution
 		AddDistribution< DistanceMatrix             >( new Dist_phyloDistanceGamma() );
