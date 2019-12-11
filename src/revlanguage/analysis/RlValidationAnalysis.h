@@ -12,26 +12,20 @@ namespace RevLanguage {
     
     
     /**
-     * RevLanguage wrapper class for the posterior predictive analysis object.
+     * @brief RevLanguage wrapper class for the validation analysis object.
      *
-     *
-     * The wraper class provides the Rev interface to the core class ValidationAnalysis.
-     * See ValidationAnalysis.h for more details.
-     *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     *
+     * @copydetails RevBayesCore::ValidationAnalysis
+     * @see RevBayesCore::ValidationAnalysis for the internal object
      */
     class ValidationAnalysis : public WorkspaceToCoreWrapperObject<RevBayesCore::ValidationAnalysis> {
         
     public:
         
-        ValidationAnalysis(void);                                                                                                               //!< Default constructor
+        ValidationAnalysis(void);
         
         // Basic utility functions
-        virtual ValidationAnalysis*                 clone(void) const;                                                                      //!< Clone object
-        void                                        constructInternalObject(void);                                                          //!< We construct the a new internal PowerPosterior object.
+        virtual ValidationAnalysis*                 clone(void) const;                                                                      //!< Deep copy of the object
+        void                                        constructInternalObject(void);                                                          //!< Construct a new internal ValidationAnalysis object.
         std::string                                 getConstructorFunctionName(void) const;                                                 //!< Get the name used for the constructor function in Rev.
         static const std::string&                   getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                      getClassTypeSpec(void);                                                                 //!< Get class type spec
@@ -39,16 +33,16 @@ namespace RevLanguage {
         virtual const TypeSpec&                     getTypeSpec(void) const;                                                                //!< Get language type of the object
         
         // Member method inits
-        virtual RevPtr<RevVariable>                 executeMethod(const std::string& name, const std::vector<Argument>& args, bool &f);     //!< Override to map member methods to internal functions
+        virtual RevPtr<RevVariable>                 executeMethod(const std::string& name, const std::vector<Argument>& args, bool &f);     //!< Map member methods to internal functions
         
     protected:
         
-        void                                        initializeMethods(void);                                                                    //!< Initialize the member methods
+        void                                        initializeMethods(void);                                                                //!< Initialize the member methods
         virtual void                                printValue(std::ostream& o) const;                                                      //!< Print value (for user)
-        void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);          //!< Set member variable
+        void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
         
-        RevPtr<const RevVariable>                   simulations;
-        RevPtr<const RevVariable>                   sampler;
+        RevPtr<const RevVariable>                   simulations; //!< number of analyses to run
+        RevPtr<const RevVariable>                   sampler;  //!< sampler object to run
         
     };
     
