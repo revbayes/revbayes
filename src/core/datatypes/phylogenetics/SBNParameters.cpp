@@ -446,12 +446,6 @@ std::vector<std::pair<Subsplit,double> > SBNParameters::computeLnProbabilityTopo
     // tree->orderNodesForTraversal(preorder);
     // const std::vector<TopologyNode*> &preorder_nodes = tree->getNodes();
     //
-    // std::cout << "tree nodes are currently in this (pre?)order:" << std::endl;
-    // for (std::vector<TopologyNode*>::const_iterator it = preorder_nodes.begin(); it != preorder_nodes.end(); ++it)
-    // {
-    //   std::cout << (*it)->getIndex() << ", ";
-    // }
-    // std::cout << std::endl;
 
     std::vector<double> rtt = std::vector<double>(tree->getNumberOfNodes(),0.0);
 
@@ -460,15 +454,9 @@ std::vector<std::pair<Subsplit,double> > SBNParameters::computeLnProbabilityTopo
 
     // Loop over edges of tree (exploit equivalency between an edge and the node that edge subtends)
     // The root has no edge so there is nothing to do for the root, so we skip it
-    // for (std::vector<TopologyNode*>::const_iterator it = preorder_nodes.begin()+1; it != preorder_nodes.end(); ++it)
-    // for (std::vector<TopologyNode*>::const_iterator it = postorder_nodes.end()-2; it != postorder_nodes.begin(); --it)
+    // A reversed postorder is a preorder
     for (std::vector<TopologyNode*>::const_reverse_iterator it = postorder_nodes.rbegin()+1; it != postorder_nodes.rend(); ++it)
     {
-      // std::cout << ">>>working on a root/internal/tip node " << ((*it)->isRoot()) << "/" << ((*it)->isInternal()) << "/" << ((*it)->isTip()) << std::endl;
-      // std::cout << ">The node's index is " << (*it)->getIndex() << std::endl;
-      // std::cout << ">The node's subsplit is " << per_node_subsplit[(*it)->getIndex()] << std::endl;
-      // std::cout << ">The node's parent's subsplit is " << per_node_subsplit[(*it)->getParent().getIndex()] << std::endl;
-
       size_t index = (*it)->getIndex();
 
       // Edges descending from root need to be handled differently
@@ -504,26 +492,12 @@ std::vector<std::pair<Subsplit,double> > SBNParameters::computeLnProbabilityTopo
         root_split_and_tree_prob.second = pr_subtree_s + pr_subtree_not_s + computeRootSplitProbability(cases[2].first);
         lnProbability.push_back(root_split_and_tree_prob);
 
-        // std::cout << "me             = " << per_node_subsplit[index].asCladeBitset() << std::endl;
-        // std::cout << "rtt[index] = " << rtt[index] << std::endl;
-        //
       }
       else
       {
-        // std::cout << "(*it)->getParent().isRoot() == " << (*it)->getParent().isRoot() << std::endl;
-        // Define parent-child pair for current rooting (parent first, child second)
-        // std::pair<Subsplit,Subsplit> this_parent_child;
-        // this_parent_child.first = per_node_subsplit[(*it)->getParent().getIndex()];
-        // this_parent_child.second = per_node_subsplit[(*it)->getParent().getIndex()];
-
         // Get all cases for virtual rooting of this edge (including current rooting)
         // std::vector<std::pair<Subsplit,Subsplit> > cases = per_node_subsplit[index].doVirtualRootingNonRootParent(this_parent_child.first,this_parent_child.second);
         std::vector<std::pair<Subsplit,Subsplit> > cases = per_node_subsplit[index].doVirtualRootingNonRootParent(per_node_subsplit[(*it)->getParent().getIndex()],per_node_subsplit[(*it)->getIndex()]);
-
-        // for (size_t i=0; i<6; ++i) {
-        //   std::cout << "cases[" << i << "].first = " << cases[i].first << std::endl;
-        //   std::cout << "cases[" << i << "].second = " << cases[i].second << std::endl;
-        // }
 
         // We will need to get the first subsplit both in our parent's sister node and in the rest of the tree
         // Thus we need our sibling's index and our parent's sibling's index
@@ -556,23 +530,6 @@ std::vector<std::pair<Subsplit,double> > SBNParameters::computeLnProbabilityTopo
 
         rtt[index] = ttr[my_siblings_index] + computeSubsplitTransitionProbability(cases[5].second,everyone_else_from_parents_sister) + rtt[parent_index] + computeSubsplitTransitionProbability(cases[5].second,per_node_subsplit[my_siblings_index]);
 
-        // if ( (*it)->getParent().getParent().isRoot() ) {
-        // std::cout << "me             = " << per_node_subsplit[index].asCladeBitset() << std::endl;
-        // std::cout << "sibling        = " << per_node_subsplit[my_siblings_index].asCladeBitset() << std::endl;
-        // std::cout << "parent         = " << parents_clade << std::endl;
-        // std::cout << "parents_sister = " << parents_sisters_clade << std::endl;
-        // std::cout << "everyone_else  = " << everyone_else << std::endl;
-        // std::cout << "ee || ps       = " << everyone_else_from_parents_sister << std::endl;
-        //
-        // std::cout << "rtt[parent_index] = " << rtt[parent_index] << std::endl;
-        // std::cout << "looking for subsplit transition probability for parent->child split " << cases[5].second << " -> " << everyone_else_from_parents_sister << std::endl;
-        // std::cout << "computeSubsplitTransitionProbability(cases[5].second,everyone_else_from_parents_sister) = " << computeSubsplitTransitionProbability(cases[5].second,everyone_else_from_parents_sister) << std::endl;
-        // std::cout << "ttr[my_siblings_index] = " << ttr[my_siblings_index] << std::endl;
-        // std::cout << "looking for subsplit transition probability for parent->child split " << cases[5].second << " -> " << per_node_subsplit[my_siblings_index] << std::endl;
-        // std::cout << "computeSubsplitTransitionProbability(cases[5].second,per_node_subsplit[my_siblings_index]) = " << computeSubsplitTransitionProbability(cases[5].second,per_node_subsplit[my_siblings_index]) << std::endl;
-        // std::cout << "rtt[index] = " << rtt[index] << std::endl;
-        // }
-
         // 2) Compute Pr(tree,root here)
         double pr_subtree_s = computeSubsplitTransitionProbability(cases[2].first,cases[2].second) + ttr[index];
         double pr_subtree_not_s = computeSubsplitTransitionProbability(cases[5].first,cases[5].second) + rtt[index];
@@ -580,21 +537,7 @@ std::vector<std::pair<Subsplit,double> > SBNParameters::computeLnProbabilityTopo
         root_split_and_tree_prob.first = cases[2].first;
         root_split_and_tree_prob.second = pr_subtree_s + pr_subtree_not_s + computeRootSplitProbability(cases[2].first);
         lnProbability.push_back(root_split_and_tree_prob);
-        // std::cout << ">>>>>>> clade: " << per_node_subsplit[index].asClade(taxa) << " <<<<<<<" << std::endl;
-        // std::cout << "rtt = " << rtt[index] << std::endl;
-        // std::cout << "ttr = " << ttr[index] << std::endl;
-        // std::cout << "p(pr_subtree_s)     = " << pr_subtree_s << std::endl;
-        // std::cout << "p(pr_subtree_not_s) = " << pr_subtree_not_s << std::endl;
-        // std::cout << "p(s1)               = " << computeRootSplitProbability(cases[2].first) << std::endl;
-        // std::cout << "p(tree and root)    = " << root_split_and_tree_prob.second << std::endl;
-        //
-        // std::cout << "rtt[parent]  = " << rtt[parent_index] << std::endl;
-        // std::cout << "ttr[sibling] = " << ttr[my_siblings_index] << std::endl;
-        //
-
       }
-      // std::cout << "ttr[" << per_node_subsplit[index].asCladeBitset() << "] = " << ttr[index] << std::endl;
-      // std::cout << "rtt[" << per_node_subsplit[index].asCladeBitset() << "] = " << rtt[index] << std::endl;
     }
     delete tree;
 
@@ -610,11 +553,10 @@ double SBNParameters::computeLnProbabilityUnrootedTopology( const Tree &tree ) c
 
   std::vector<double> per_edge_log_probs;
   std::pair<Subsplit,double> this_rooting;
+
   // Loop over parent subsplits
-// std::cout << "per_edge_log_probs:" << std::endl;
   BOOST_FOREACH(this_rooting, lnPr_tree_and_rooting) {
     per_edge_log_probs.push_back(this_rooting.second);
-// std::cout << "rooting = " << this_rooting.first << "; lnPr = " << this_rooting.second << std::endl;
   }
 
   lnProbability = RbMath::log_sum_exp(per_edge_log_probs);
