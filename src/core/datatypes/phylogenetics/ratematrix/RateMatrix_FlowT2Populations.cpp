@@ -167,7 +167,7 @@ mutation, allele flow and selection between population 1 and 2:
 effective population size:  nu     = ( N_1         , N_2 )
 mutation:                   mu     = ( mu_{Aa}     , mu_{aA} )
 allele flow:                lambda = ( lambda_{12} , lambda_{21} )
-allelic selection:          sigma  = ( sigma_A     , sigma_a )
+allelic selection:          sigma  = ( sigma_a     , sigma_A )
 */
 
 void RateMatrix_FlowT2Populations::computeOffDiagonal( void )
@@ -187,9 +187,9 @@ void RateMatrix_FlowT2Populations::computeOffDiagonal( void )
 
     int index = 0;
 
-    for (int i=0; i<nu[0]+1; ++i){
+    for (int i=0; i<nu[0]+1; i++){
 
-        for (int j=0; j<nu[1]+1; ++j){
+        for (int j=0; j<nu[1]+1; j++){
 
             frequency_1[index] = i;
 
@@ -229,49 +229,49 @@ void RateMatrix_FlowT2Populations::computeOffDiagonal( void )
                     // a emerges in population 1
                     // mutation A to a OR allele flow from population 2
                     // note that the second term is null if a is absent in population 2 (initial_frequency_2 = nu[1])
-                    m[i][j] = mu[0]/nu[0] + (nu[1]-initial_frequency_2)*lambda[1]/nu[1];
+                    m[i][j] = mu[0] + (nu[1]-initial_frequency_2)*lambda[1]/nu[1];
 
                 } else if ( initial_frequency_2 == nu[1] && change_frequency_2 == -1 ) {
 
                     // a emerges in population 2
                     // mutation A to a OR allele flow from population 1
                     // note that the second term is null if a is absent in population 1 (initial_frequency_1 = nu[0])
-                    m[i][j] = mu[0]/nu[1] + (nu[0]-initial_frequency_1)*lambda[0]/nu[0];
+                    m[i][j] = mu[0] + (nu[0]-initial_frequency_1)*lambda[0]/nu[0];
 
                 } else if ( initial_frequency_1 == 0 && change_frequency_1 == 1 ) {
 
                     // A emerges in population 1
                     // mutation a to A OR allele flow from population 2
                     // note that the second term is null if A is absent in population 2 (initial_frequency_2 = 0)
-                    m[i][j] = mu[1]/nu[0] + initial_frequency_2*lambda[1]/nu[1];
+                    m[i][j] = mu[1] + initial_frequency_2*lambda[1]/nu[1];
 
                 } else if ( initial_frequency_2 == 0 && change_frequency_2 == 1  ) {
 
                     // A emerges in population 2
                     // mutation a to A OR allele flow from population 1
                     // note that the second term is null if A is absent in population 1 (initial_frequency_1 = 0)
-                    m[i][j] = mu[1]/nu[1] + initial_frequency_1*lambda[0]/nu[0];
+                    m[i][j] = mu[1] + initial_frequency_1*lambda[0]/nu[0];
 
                 } else if ( initial_frequency_1 > 0 && initial_frequency_1 < nu[0] && change_frequency_1 == 1 ) {
 
                     // A increases in frequency in population 1
                     // drift and selection OR allele flow from population 2
                     // note that the second term is null if A is absent in population 2 (initial_frequency_2 = 0)
-                    m[i][j] = initial_frequency_1*(nu[0]-initial_frequency_1)*sigma[1]/(nu[0]*nu[0]) + (nu[0]-initial_frequency_1)*initial_frequency_2*lambda[1]/(nu[0]*nu[1]);
+                    m[i][j] = initial_frequency_1*(nu[0]-initial_frequency_1)*(1.0+sigma[1])/(nu[0]*nu[0]) + (nu[0]-initial_frequency_1)*initial_frequency_2*lambda[1]/(nu[0]*nu[1]);
 
                 } else if ( initial_frequency_1 > 0 && initial_frequency_1 < nu[0] && change_frequency_1 == -1 ) {
 
                     // a increases in frequency in population 1
                     // drift and selection OR allele flow from population 2
                     // note that the second term is null if a is absent in population 2 (initial_frequency_2 = nu[1])
-                    m[i][j] = initial_frequency_1*(nu[0]-initial_frequency_1)*sigma[0]/(nu[0]*nu[0]) + initial_frequency_1*(nu[1]-initial_frequency_2)*lambda[1]/(nu[0]*nu[1]);
+                    m[i][j] = initial_frequency_1*(nu[0]-initial_frequency_1)*(1.0+sigma[0])/(nu[0]*nu[0]) + initial_frequency_1*(nu[1]-initial_frequency_2)*lambda[1]/(nu[0]*nu[1]);
 
                 } else if ( initial_frequency_2 > 0 && initial_frequency_2 < nu[1] && change_frequency_2 == 1 ) {
 
                     // A increases in frequency in population 2
                     // drift and selection OR allele flow from population 1
                     // note that the second term is null if A is absent in population 1 (initial_frequency_1 = 0)
-                    m[i][j] = initial_frequency_2*(nu[1]-initial_frequency_2)*sigma[1]/(nu[1]*nu[1]) + (nu[1]-initial_frequency_2)*initial_frequency_1*lambda[0]/(nu[1]*nu[0]);
+                    m[i][j] = initial_frequency_2*(nu[1]-initial_frequency_2)*(1.0+sigma[1])/(nu[1]*nu[1]) + (nu[1]-initial_frequency_2)*initial_frequency_1*lambda[0]/(nu[1]*nu[0]);
 
 
                 } else if ( initial_frequency_2 > 0 && initial_frequency_2 < nu[1] && change_frequency_2 == -1 ) {
@@ -279,7 +279,7 @@ void RateMatrix_FlowT2Populations::computeOffDiagonal( void )
                     // a increases in frequency in population 2
                     // drift and selection OR allele flow from population 1
                     // note that the second term is null if a is absent in population 1 (initial_frequency_1 = nu[0])
-                    m[i][j] = initial_frequency_2*(nu[1]-initial_frequency_2)*sigma[0]/(nu[1]*nu[1]) + initial_frequency_2*(nu[0]-initial_frequency_1)*lambda[0]/(nu[1]*nu[0]);
+                    m[i][j] = initial_frequency_2*(nu[1]-initial_frequency_2)*(1.0+sigma[0])/(nu[1]*nu[1]) + initial_frequency_2*(nu[0]-initial_frequency_1)*lambda[0]/(nu[1]*nu[0]);
 
                 } else {
 
