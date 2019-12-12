@@ -55,7 +55,8 @@ double UnconstrainedSBN::computeLnProbability( void )
 
     // Here we compute the probability of the tree topology according to the SBN
 
-    lnProbability += computeLnProbabilityUnrootedTopologyMarginalize();
+    // lnProbability += computeLnProbabilityUnrootedTopologyMarginalize();
+    lnProbability += parameters.computeLnProbabilityUnrootedTopology(*value);
 
     // Add branch lengths
     lnProbability += computeLnProbabilityBranchLengths();
@@ -138,6 +139,7 @@ double UnconstrainedSBN::computeLnProbabilityUnrootedTopologyMarginalize( void )
 
     std::vector<double> lnl_given_root;
     double offset = RbConstants::Double::neginf;
+// std::cout << "lnl_given_root:" << std::endl;
     // sum over rooting locations
     // std::cout << "marginalizing over " << value->getNumberOfNodes() << " possible rooting locations" << std::endl;
     for (size_t ri=0; ri < value->getNumberOfNodes(); ++ri)
@@ -149,13 +151,22 @@ double UnconstrainedSBN::computeLnProbabilityUnrootedTopologyMarginalize( void )
         double lnl = parameters.computeLnProbabilityRootedTopology( *(tree_rooted) );
         // std::cout << "at" << ri << ", lnL_tot = " << lnl << std::endl;
         lnl_given_root.push_back(lnl);
+// std::cout << "root split = " << tree_rooted->getRootSubsplit(taxa) << "; lnPr = " << lnl << std::endl;
         delete tree_rooted;
       }
     }
+
     // std::cout << "marginalization complete" << std::endl;
     lnProbability = logSumExp(lnl_given_root);
 
     // std::cout << "computed lnProb" << std::endl;
+
+    double lnPr2pass = parameters.computeLnProbabilityUnrootedTopology(*value);
+
+    if ( fabs(lnPr2pass - lnProbability) > 0.000001 ) {
+      std::cout << "uh oh! lnPr2pass = " << lnPr2pass << " but lnPrMarginalize = " << lnProbability << std::endl;
+      throw(RbException("fuck"));
+    }
 
     return lnProbability;
 }
