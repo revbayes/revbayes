@@ -962,6 +962,20 @@ void RevBayesCore::CTMCProcess<charType>::setActivePIDSpecialized(size_t a, size
     // we need to recompress the data
     this->compress();
 }
+                                                              ;
+
+template<class charType>
+void RevBayesCore::CTMCProcess<charType>::setProcessTime(const TypedDagNode< double > *t)
+{
+    this->removeParameter( process_time );
+    
+
+    // set the value
+    process_time = t;
+    
+    // add the new parameter
+    this->addParameter( process_time );
+}
 
 
 template<class charType>

@@ -60,6 +60,7 @@ class TypeSpec;
         RevPtr<const RevVariable>                       site_rates_probs;
         RevPtr<const RevVariable>                       site_matrices;
         RevPtr<const RevVariable>                       site_matrices_probs;
+        RevPtr<const RevVariable>                       process_time;
         RevPtr<const RevVariable>                       root_frequencies;
         RevPtr<const RevVariable>                       nSites;
         RevPtr<const RevVariable>                       type;

@@ -62,8 +62,11 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     // get the parameters
     size_t this_num_sites = size_t( static_cast<const Natural &>( nSites->getRevObject() ).getValue() );
     const std::string& dt = static_cast<const RlString &>( type->getRevObject() ).getValue();
-    const std::string& code = static_cast<const RlString &>( coding->getRevObject() ).getValue();
+//    const std::string& code = static_cast<const RlString &>( coding->getRevObject() ).getValue();
 
+    RevBayesCore::TypedDagNode<double>* time = static_cast<const RealPos &>( process_time->getRevObject() ).getDagNode();
+
+    
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* site_rates_node = NULL;
     if ( site_rates != NULL && site_rates->getRevObject() != RevNullObject::getInstance() )
     {
@@ -116,10 +119,10 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         }
     }
 
-    if ( !(dt == "Binary" || dt == "Restriction" || dt == "Standard") && code != "all")
-    {
-        throw RbException( "Ascertainment bias correction only supported with Standard and Binary/Restriction datatypes" );
-    }
+//    if ( !(dt == "Binary" || dt == "Restriction" || dt == "Standard") && code != "all")
+//    {
+//        throw RbException( "Ascertainment bias correction only supported with Standard and Binary/Restriction datatypes" );
+//    }
 
     if ( dt == "DNA" )
     {
@@ -127,6 +130,8 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
         // set the root frequencies (by default these are NULL so this is OK)
         dist->setRootFrequencies( rf );
+
+        dist->setProcessTime( time );
 
         dist->setSiteMatricesProbs(sp);
 
@@ -163,6 +168,8 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         // set the root frequencies (by default these are NULL so this is OK)
         dist->setRootFrequencies( rf );
 
+        dist->setProcessTime( time );
+
         dist->setSiteMatricesProbs(sp);
 
         // set the rate matrix
@@ -197,6 +204,8 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
         // set the root frequencies (by default these are NULL so this is OK)
         dist->setRootFrequencies( rf );
+
+        dist->setProcessTime( time );
 
         dist->setSiteMatricesProbs(sp);
 
@@ -233,6 +242,8 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
         // set the root frequencies (by default these are NULL so this is OK)
         dist->setRootFrequencies( rf );
+
+        dist->setProcessTime( time );
 
         dist->setSiteMatricesProbs(sp);
 
@@ -284,6 +295,8 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         // set the root frequencies (by default these are NULL so this is OK)
         dist->setRootFrequencies( rf );
 
+        dist->setProcessTime( time );
+
         dist->setSiteMatricesProbs(sp);
 
         // set the rate matrix
@@ -334,6 +347,8 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         // set the root frequencies (by default these are NULL so this is OK)
         dist->setRootFrequencies( rf );
 
+        dist->setProcessTime( time );
+
         dist->setSiteMatricesProbs(sp);
 
         // set the rate matrix
@@ -382,6 +397,8 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
         // set the root frequencies (by default these are NULL so this is OK)
         dist->setRootFrequencies( rf );
+
+        dist->setProcessTime( time );
 
         dist->setSiteMatricesProbs(sp);
 
@@ -439,6 +456,8 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
         // set the root frequencies (by default these are NULL so this is OK)
         dist->setRootFrequencies( rf );
+
+        dist->setProcessTime( time );
 
         dist->setSiteMatricesProbs(sp);
 
@@ -554,6 +573,8 @@ const MemberRules& Dist_CTMC::getParameterRules(void) const
         rateMatrixTypes.push_back( RateGenerator::getClassTypeSpec() );
         rateMatrixTypes.push_back( ModelVector<RateGenerator>::getClassTypeSpec() );
         dist_member_rules.push_back( new ArgumentRule( "Q", rateMatrixTypes, "The global, branch-specific or site-mixture rate matrices.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+
+        dist_member_rules.push_back( new ArgumentRule( "processTime", RealPos::getClassTypeSpec(), "The time of the process, i.e., how long it ran.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         // optional argument for the root frequencies
         dist_member_rules.push_back( new ArgumentRule( "rootFrequencies", Simplex::getClassTypeSpec(), "The root specific frequencies of the characters, if applicable.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
@@ -682,6 +703,10 @@ void Dist_CTMC::setConstParameter(const std::string& name, const RevPtr<const Re
     else if ( name == "nSites" )
     {
         nSites = var;
+    }
+    else if ( name == "processTime" )
+    {
+        process_time = var;
     }
     else if ( name == "type" )
     {
