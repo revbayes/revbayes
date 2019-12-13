@@ -8,7 +8,7 @@
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbException.h"
-#include "RbMath.h"
+#include "RbMathFunctions.h"
 #include "TopologyNode.h"
 #include "UnconstrainedSBN.h"
 
@@ -158,70 +158,6 @@ double UnconstrainedSBN::computeLnProbabilityUnrootedTopologyMarginalize( void )
 
     return lnProbability;
 }
-
-double UnconstrainedSBN::logSumExp( std::vector<double> &x )
-{
-    double offset = RbConstants::Double::neginf;
-    double sum = 0.0;
-    for (size_t i=0; i < x.size(); ++i)
-    {
-      if (x[i] > offset)
-      {
-        offset = x[i];
-      }
-    }
-
-    for (size_t i=0; i < x.size(); ++i)
-    {
-      sum += exp(x[i] - offset);
-    }
-
-    return log(sum) + offset;
-}
-
-double UnconstrainedSBN::logSumExp( double &x1, double &x2 )
-{
-    double offset = std::max(x1,x2);
-
-    x1 -= offset;
-    x2 -= offset;
-
-    double exp_x1 = exp(x1);
-    double exp_x2 = exp(x2);
-
-    return log(exp_x1 + exp_x2) + offset;
-}
-
-double UnconstrainedSBN::logSumExpWeights( std::vector<double> &x, std::vector<double> &p )
-{
-    double offset = RbConstants::Double::neginf;
-    double sum = 0.0;
-    for (size_t i=0; i < x.size(); ++i)
-    {
-      if (x[i] > offset)
-      {
-        offset = x[i];
-      }
-    }
-
-    for (size_t i=0; i < x.size(); ++i)
-    {
-      sum += p[i] * exp(x[i] - offset);
-    }
-
-    return log(sum) + offset;
-}
-
-double UnconstrainedSBN::logSumExpWeights( double &x1, double &x2, double &p1, double &p2 )
-{
-    double offset = std::max(x1,x2);
-
-    double exp_x1 = p1 * exp(x1 - offset);
-    double exp_x2 = p2 * exp(x2 - offset);
-
-    return log(exp_x1 + exp_x2) + offset;
-}
-
 
 void UnconstrainedSBN::redrawValue( void )
 {
