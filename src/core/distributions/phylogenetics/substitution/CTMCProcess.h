@@ -1244,6 +1244,10 @@ void RevBayesCore::CTMCProcess<charType>::swapParameterInternal(const DagNode *o
     {
         site_rates_probs = static_cast<const TypedDagNode< Simplex >* >( newP );
     }
+    else if (oldP == process_time)
+    {
+        process_time = static_cast<const TypedDagNode< double >* >( newP );
+    }
 
 }
 

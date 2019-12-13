@@ -175,8 +175,6 @@ void RateMatrix_FlowT2Populations::computeOffDiagonal( void )
     
     
     MatrixReal& m = *the_rate_matrix;
-    std::cout << "matrix was created";
-
     // frequency of allele A in population 1 (n1) and 2 (n2)
     // create the combine state-space between the two populations
     // {n1A,(N1-n1)a}{n2A,(N2-n2)a}
