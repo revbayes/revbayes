@@ -61,6 +61,7 @@ namespace RevBayesCore {
         Subsplit                            drawSubsplitForY( const Subsplit &s ) const;
         Subsplit                            drawSubsplitForZ( const Subsplit &s ) const;
         bool                                isValid(void) const;
+        double                              KL(SBNParameters &Q_x) const; // Takes the current object to be P(x) and the passed argument to be Q(x) and computes KL(P || Q)
 
         // Functions for learning SBNs
         void                                countAllSubsplits(Tree& tree, std::map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts, std::map<Subsplit,double>& root_split_counts, std::map<Subsplit,double>& q, bool doSA);
@@ -68,12 +69,13 @@ namespace RevBayesCore {
         void                                fitNodeTimeDistributions(std::vector<Tree> &trees);
         bool                                isValidCPD(std::vector<std::pair<Subsplit,double> >& cpd, Subsplit& parent) const;
         bool                                isValidRootDistribution(void) const;
-        void                                normalizeCPDForSubsplit(std::vector<std::pair<Subsplit,double> >& cpd, Subsplit& parent);
-        void                                makeCPDs(std::map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts);
-        void                                makeRootSplits(std::map<Subsplit,double>& root_split_counts);
         void                                learnTimeCalibratedSBN( std::vector<Tree>& trees );
         void                                learnUnconstrainedSBNSA( std::vector<Tree> &trees );
         void                                learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &alpha );
+        void                                makeCPDs(std::map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts);
+        void                                makeRootSplits(std::map<Subsplit,double>& root_split_counts);
+        void                                normalizeCPDForSubsplit(std::vector<std::pair<Subsplit,double> >& cpd, Subsplit& parent);
+        void                                regularizeCounts(std::map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts, std::map<Subsplit,double>& root_split_counts, std::map<std::pair<Subsplit,Subsplit>,double>& pseudo_parent_child_counts, std::map<Subsplit,double>& pseudo_root_split_counts, double alpha);
 
         // Helper functions for learning SBNs
         void                                addTreeToAllParentChildCounts(std::map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts, Tree& tree, double &weight);
@@ -82,6 +84,7 @@ namespace RevBayesCore {
         void                                incrementRootSplitCount(std::map<Subsplit,double>& root_split_counts, Subsplit &this_root_split, double &weight);
 
         // // Misc.
+        std::map<std::pair<Subsplit,Subsplit>,double> computeUnconditionalSubsplitProbabilities(void) const;
         // std::vector<std::pair<Split,double> > computeCladeProbabilities(void) const;
         // std::vector<std::pair<Split,double> > computeSplitProbabilities(void) const;
 

@@ -1372,8 +1372,13 @@ bool TreeSummary::isDirty(void) const
     return dirty;
 }
 
-SBNParameters TreeSummary::learnUnconstrainedSBN(const std::string &branch_length_approximation)
+SBNParameters TreeSummary::learnUnconstrainedSBN(const std::string &method, const std::string &branch_length_approximation, double alpha)
 {
+
+  if ( !(method == "SA" || method ==  "EM" || method ==  "EMA") )
+  {
+    throw(RbException("Invalid argument to \"method\" in learnUnconstrainedSBN."));
+  }
 
   std::vector<Taxon> ordered_taxa = traces[0]->objectAt(0).getTaxa();
   VectorUtilities::sort( ordered_taxa );

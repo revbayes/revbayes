@@ -85,7 +85,7 @@ namespace RevBayesCore {
         bool                                       isCoveredInInterval(const std::string &v, double size, bool verbose);
         bool                                       isCoveredInInterval(const Tree &t, double size, bool verbose);
         bool                                       isDirty(void) const;
-        SBNParameters                              learnUnconstrainedSBN(const std::string &branch_length_approximation);
+        SBNParameters                              learnUnconstrainedSBN(const std::string &method, const std::string &branch_length_approximation, double alpha);
         double                                     maxdiff(bool verbose);
         Tree*                                      mapTree(AnnotationReport report, bool verbose);
         Tree*                                      mccTree(AnnotationReport report, bool verbose);

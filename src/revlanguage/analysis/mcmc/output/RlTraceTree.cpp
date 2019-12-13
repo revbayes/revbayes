@@ -330,24 +330,26 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
         }
 
     }
-    else if ( name == "learnTimeCalibratedSBN" )
-    {
-        found = true;
-
-        const std::string &branch_length_approximation  = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
-
-        // RevBayesCore::SBNParameters sbn = this->value->learnTimeCalibratedSBN(branch_length_approximation);
-        RevBayesCore::SBNParameters sbn;
-        return new RevVariable( new SBNParameters( sbn ) );
-
-    }
+    // else if ( name == "learnTimeCalibratedSBN" )
+    // {
+    //     found = true;
+    //
+    //     const std::string &branch_length_approximation  = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+    //
+    //     // RevBayesCore::SBNParameters sbn = this->value->learnTimeCalibratedSBN(branch_length_approximation);
+    //     RevBayesCore::SBNParameters sbn;
+    //     return new RevVariable( new SBNParameters( sbn ) );
+    //
+    // }
     else if ( name == "learnUnconstrainedSBN" )
     {
         found = true;
 
-        const std::string &branch_length_approximation  = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+        const std::string &fitting_method  = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+        const std::string &branch_length_approximation  = static_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
+        double alpha = static_cast<const RealPos &>( args[2].getVariable()->getRevObject() ).getValue();
 
-        RevBayesCore::SBNParameters sbn = this->value->learnUnconstrainedSBN(branch_length_approximation);
+        RevBayesCore::SBNParameters sbn = this->value->learnUnconstrainedSBN(fitting_method, branch_length_approximation, alpha);
         return new RevVariable( new SBNParameters( sbn ) );
 
     }
@@ -436,12 +438,14 @@ void TraceTree::initMethods( void )
     cladeProbArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     this->methods.addFunction( new MemberProcedure( "cladeProbability", Probability::getClassTypeSpec(), cladeProbArgRules) );
 
-    ArgumentRules* learnTimeCalibratedSBNRules = new ArgumentRules();
-    learnTimeCalibratedSBNRules->push_back( new ArgumentRule("nodeAgeApproximationMethod", RlString::getClassTypeSpec(), "gammaRootNodePropBeta", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
-    this->methods.addFunction( new MemberProcedure( "learnTimeCalibratedSBN", SBNParameters::getClassTypeSpec(), learnTimeCalibratedSBNRules) );
+    // ArgumentRules* learnTimeCalibratedSBNRules = new ArgumentRules();
+    // learnTimeCalibratedSBNRules->push_back( new ArgumentRule("nodeAgeApproximationMethod", RlString::getClassTypeSpec(), "gammaRootNodePropBeta", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
+    // this->methods.addFunction( new MemberProcedure( "learnTimeCalibratedSBN", SBNParameters::getClassTypeSpec(), learnTimeCalibratedSBNRules) );
 
     ArgumentRules* learnUnconstrainedSBNRules = new ArgumentRules();
-    learnUnconstrainedSBNRules->push_back( new ArgumentRule("branchLengthApproximationMethod", RlString::getClassTypeSpec(), "gammaMOM|lognormalML|lognormalMOM.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
+    learnUnconstrainedSBNRules->push_back( new ArgumentRule("topologyFittingMethod", RlString::getClassTypeSpec(), "Fitting method for topology component. SA|EM|EMA.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
+    learnUnconstrainedSBNRules->push_back( new ArgumentRule("branchLengthApproximationMethod", RlString::getClassTypeSpec(), "How to fit branch lengths. gammaMOM|lognormalML|lognormalMOM.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
+    learnUnconstrainedSBNRules->push_back( new ArgumentRule("regularizationAlpha", RealPos::getClassTypeSpec(), "Regularization parameter for EMA approach. If NULL, will be 50/treetrace.size()", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL) );
     this->methods.addFunction( new MemberProcedure( "learnUnconstrainedSBN", SBNParameters::getClassTypeSpec(), learnUnconstrainedSBNRules) );
 
     ArgumentRules* getNumberSamplesArgRules = new ArgumentRules();

@@ -29,6 +29,7 @@ namespace RevBayesCore {
                                                     Subsplit(const std::vector<Taxon> &c1, const std::vector<Taxon> &n );                                                //!< Default constructor: fake Subsplit
                                                     Subsplit(const std::vector<Taxon> &c1, const std::vector<Taxon> &c2, const std::vector<Taxon> &n );                               //!< Default constructor: real Subsplit
                                                     Subsplit(RbBitSet &c1, RbBitSet &c2 );                               //!< Default constructor: real Subsplit from bitsets
+                                                    Subsplit(Subsplit &s1, Subsplit &s2 );                               //!< Default constructor: Subsplit from its child subsplits
 
         virtual                                    ~Subsplit(void) {}
 
