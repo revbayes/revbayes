@@ -40,44 +40,34 @@ using namespace RevLanguage;
 AbstractHomologousDiscreteCharacterData::AbstractHomologousDiscreteCharacterData(void) : ModelObject<RevBayesCore::AbstractHomologousDiscreteCharacterData>(),
 HomologousCharacterData( )
 {
-
     initMethods();
-
 }
 
 
 AbstractHomologousDiscreteCharacterData::AbstractHomologousDiscreteCharacterData( const RevBayesCore::AbstractHomologousDiscreteCharacterData &d) : ModelObject<RevBayesCore::AbstractHomologousDiscreteCharacterData>( d.clone() ),
 HomologousCharacterData( )
 {
-
     initMethods();
-
 }
 
 
 AbstractHomologousDiscreteCharacterData::AbstractHomologousDiscreteCharacterData( RevBayesCore::AbstractHomologousDiscreteCharacterData *d) : ModelObject<RevBayesCore::AbstractHomologousDiscreteCharacterData>( d ),
 HomologousCharacterData( )
 {
-
     initMethods();
-
 }
 
 
 AbstractHomologousDiscreteCharacterData::AbstractHomologousDiscreteCharacterData( RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData> *d) : ModelObject<RevBayesCore::AbstractHomologousDiscreteCharacterData>( d ),
 HomologousCharacterData( )
 {
-
     initMethods();
-
 }
 
 
 
 AbstractHomologousDiscreteCharacterData::~AbstractHomologousDiscreteCharacterData()
 {
-
-
 }
 
 
@@ -561,7 +551,8 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
                             {
                                 if (state.isSet(k) && k +1 > max)
                                 {
-                                max = static_cast<int>(k)+1;                                }
+                                max = static_cast<int>(k)+1;
+                                }
                             }
                         }
                         else
