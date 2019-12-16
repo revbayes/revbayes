@@ -84,6 +84,7 @@ namespace RevBayesCore {
         std::string                                         getNewickRepresentation() const;                                                                    //!< Get the newick representation of this Tree
         TopologyNode&                                       getNode(size_t idx);                                                                                //!< Get the node at index
         const TopologyNode&                                 getNode(size_t idx) const;                                                                          //!< Get the node at index
+        std::vector<size_t>                                 getNodeIndicesForTraversal(std::string &order) const;                                                                               //!< Get a pointer to the nodes in the Tree
         const std::vector<TopologyNode*>&                   getNodes(void) const;                                                                               //!< Get a pointer to the nodes in the Tree
         std::vector<RbBitSet>                               getNodesAsBitset(void) const;                                                                               //!< Get a pointer to the nodes in the Tree
         size_t                                              getNumberOfInteriorNodes(void) const;                                                               //!< Get the number of nodes in the Tree
@@ -125,7 +126,7 @@ namespace RevBayesCore {
         void                                                makeInternalNodesBifurcating(bool reindex);                                                         //!< Make all the internal nodes bifurcating.
         void                                                makeRooted(TopologyNode &n, bool reindex);                                                                           //!< Make an unrooted tree rooted by arbitrarily resolving basal polytomy
         void                                                orderNodesByIndex();
-        std::vector<TopologyNode*>&                         orderNodesForTraversal(std::string &order);
+        void                                                orderNodesForTraversal(std::string &order);
         void                                                pruneTaxa(const RbBitSet&);
         void                                                reroot(const Clade &outgroup, bool reindex);                                                        //!< Re-root the tree with the given outgroup
         void                                                reroot(const std::string &outgroup, bool reindex);                                                  //!< Re-root the tree with the given outgroup

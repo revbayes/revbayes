@@ -566,7 +566,6 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
  */
 void Tree::fillNodesByPhylogeneticTraversal(TopologyNode* node)
 {
-// std::cout << "filling node " << node->getIndex() << "; it has " << node->getNumberOfChildren() << " children and node->isTip() == " << node->isTip() << std::endl;
     // now call this function recursively for all your children
     for (size_t i=0; i<node->getNumberOfChildren(); i++)
     {
@@ -707,6 +706,30 @@ const TopologyNode& Tree::getNode(size_t idx) const
     }
 
     return *nodes[idx];
+}
+
+std::vector<size_t> Tree::getNodeIndicesForTraversal(std::string &order) const
+{
+  // Get vector of indices in appropriate traversal order
+  std::vector<int> visited = std::vector<int>(nodes.size(),0);
+  std::vector<size_t> node_indices;
+
+  if (order == "postorder")
+  {
+    root->recursivelySortNodesByPreorder(visited,node_indices);
+    std::reverse(node_indices.begin(),node_indices.end());
+  }
+  else if (order == "preorder")
+  {
+    root->recursivelySortNodesByPreorder(visited,node_indices);
+  }
+  else
+  {
+    throw RbException("Unknown order in getNodeIndicesForTraversal");
+  }
+
+  return node_indices;
+
 }
 
 const std::vector<TopologyNode*>& Tree::getNodes(void) const
@@ -1415,40 +1438,56 @@ void Tree::orderNodesByIndex( void )
 
 }
 
-std::vector<TopologyNode*>& Tree::orderNodesForTraversal(std::string &order)
+void Tree::orderNodesForTraversal(std::string &order)
 {
   // Get vector of indices in appropriate traversal order
-  std::vector<int> visited = std::vector<int>(nodes.size(),0);
-  std::vector<size_t> node_indices;
+  std::vector<size_t> node_indices = getNodeIndicesForTraversal(order);
 
-  if (order == "postorder")
-  {
-    const TopologyNode& n = getTipNode( 0 );
-    n.recursivelySortNodesByPostorder(visited,node_indices);
-  }
-  else if (order == "preorder")
-  {
-    root->recursivelySortNodesByPreorder(visited,node_indices);
-  }
-  else
-  {
-    throw RbException("Unknown order in getNodeIndicesInOrder");
-  }
-
-  // Put nodes in order given by node_indices
-  std::vector<TopologyNode*> nodes_copy = std::vector<TopologyNode*>(nodes.size());
+  // if (order == "postorder")
+  // {
+  //   root->recursivelySortNodesByPreorder(visited,node_indices);
+  //   std::reverse(node_indices.begin(),node_indices.end());
+  // }
+  // else if (order == "preorder")
+  // {
+  //   root->recursivelySortNodesByPreorder(visited,node_indices);
+  // }
+  // else
+  // {
+  //   throw RbException("Unknown order in orderNodesForTraversal");
+  // }
 
   // std::cout << "sorted nodes by " << order << std::endl;
-  for (int i = 0; i < nodes.size(); i++)
+  std::vector<TopologyNode*> nodes_copy = std::vector<TopologyNode*>(nodes.size());
+  std::vector<bool> used = std::vector<bool>(nodes.size(),false);
+  size_t found = 0;
+  for (size_t i = 0; i < nodes.size(); ++i)
   {
-      nodes_copy[i] = nodes[node_indices[i]];
+      if ( node_indices[i] > nodes.size() )
+      {
+        throw RbException("Problem while working with tree: Node had bad index. Index was '" + StringUtilities::to_string( node_indices[i] ) + "' while there are only '" + StringUtilities::to_string( nodes.size() ) + "' nodes in the tree.");
+      }
+      else if ( used[node_indices[i]] == true )
+      {
+          throw RbException("Problem while working with tree: Node had bad index. Two nodes had same index of '" + StringUtilities::to_string( node_indices[i] ) + "'.");
+      }
+      else
+      {
+        nodes_copy[i] = nodes[node_indices[i]];
+        used[node_indices[i]] = true;
+        ++found;
+      }
       // std::cout << node_indices[i] << ", ";
   }
   // std::cout << std::endl;
 
+  if ( found != nodes.size() )
+  {
+    throw RbException("Problem while working with tree: Found " + StringUtilities::to_string( found ) + " nodes but there should be "  + StringUtilities::to_string( nodes.size() ) + " nodes.");
+  }
+
   nodes = nodes_copy;
 
-  return nodes;
 }
 
 
