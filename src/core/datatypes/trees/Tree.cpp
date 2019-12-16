@@ -1443,20 +1443,6 @@ void Tree::orderNodesForTraversal(std::string &order)
   // Get vector of indices in appropriate traversal order
   std::vector<size_t> node_indices = getNodeIndicesForTraversal(order);
 
-  // if (order == "postorder")
-  // {
-  //   root->recursivelySortNodesByPreorder(visited,node_indices);
-  //   std::reverse(node_indices.begin(),node_indices.end());
-  // }
-  // else if (order == "preorder")
-  // {
-  //   root->recursivelySortNodesByPreorder(visited,node_indices);
-  // }
-  // else
-  // {
-  //   throw RbException("Unknown order in orderNodesForTraversal");
-  // }
-
   // std::cout << "sorted nodes by " << order << std::endl;
   std::vector<TopologyNode*> nodes_copy = std::vector<TopologyNode*>(nodes.size());
   std::vector<bool> used = std::vector<bool>(nodes.size(),false);

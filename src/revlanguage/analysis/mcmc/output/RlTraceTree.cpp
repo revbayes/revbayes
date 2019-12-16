@@ -347,7 +347,17 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
 
         const std::string &fitting_method  = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
         const std::string &branch_length_approximation  = static_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
-        double alpha = static_cast<const RealPos &>( args[2].getVariable()->getRevObject() ).getValue();
+        double alpha;
+
+        if ( args[2].getVariable()->getRevObject() != RevNullObject::getInstance() )
+        {
+           alpha = static_cast<const RealPos &>( args[2].getVariable()->getRevObject() ).getValue();
+        }
+        else
+        {
+          double n = this->value->size(true);
+          alpha = 50.0 / n;
+        }
 
         RevBayesCore::SBNParameters sbn = this->value->learnUnconstrainedSBN(fitting_method, branch_length_approximation, alpha);
         return new RevVariable( new SBNParameters( sbn ) );

@@ -725,8 +725,10 @@ double SBNParameters::KL( SBNParameters &Q_x ) const
 }
 
 // Counts all subsplits in an unrooted tree (handles all virtual rooting)
-void SBNParameters::countAllSubsplits(Tree& tree, std::map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts, std::map<Subsplit,double>& root_split_counts, std::map<Subsplit,double>& q, bool doSA)
+void SBNParameters::countAllSubsplits(Tree& t, std::map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts, std::map<Subsplit,double>& root_split_counts, std::map<Subsplit,double>& q, bool doSA)
 {
+  Tree tree = t;
+// std::cout << ">>>>counting all subsplits<<<<" << std::endl;
   // Prep for tip to root pass
   std::string order = "postorder";
   tree.orderNodesForTraversal(order);
@@ -739,6 +741,8 @@ void SBNParameters::countAllSubsplits(Tree& tree, std::map<std::pair<Subsplit,Su
   // For storing sum of rooting probabilities from tip through this branch.
   std::vector<double> ttr = std::vector<double>(tree.getNumberOfNodes(),0.0);
 
+// std::cout << "postorder traversal" << std::endl;
+
   // Tip to root pass, here we do two things
   // 1) Get all nodes' subsplits (we will need these repeatedly)
   //      We do not make a subsplit for the root as the root is a trifurcation in an unrooted tree
@@ -747,7 +751,11 @@ void SBNParameters::countAllSubsplits(Tree& tree, std::map<std::pair<Subsplit,Su
   //      We do not loop over the root for now because it is a special case: we already account for rooting on all edges, but ttr[root] is ill-defined
   for (std::vector<TopologyNode*>::const_iterator it = postorder_nodes.begin(); it != (postorder_nodes.end()-1); ++it)
   {
+// std::cout << (*it)->getIndex() << std::endl;
     size_t index = (*it)->getIndex();
+// std::cout << ">>>working on a root/internal/tip node " << ((*it)->isRoot()) << "/" << ((*it)->isInternal()) << "/" << ((*it)->isTip()) << std::endl;
+// std::cout << ">The node's index is " << (*it)->getIndex() << std::endl;
+// std::cout << ">The node's subsplit is " << (*it)->getSubsplit(taxa) << std::endl;
 
     if ( (*it)->isTip() )
     {
@@ -763,11 +771,16 @@ void SBNParameters::countAllSubsplits(Tree& tree, std::map<std::pair<Subsplit,Su
     else
     {
       std::vector<int> children = (*it)->getChildrenIndices();
-
+// std::cout << "my children have indices " << children[0] << " and " << children[1] << std::endl;
       // 1)
       RbBitSet clade_1 = per_node_subsplit[children[0]].asCladeBitset();
       RbBitSet clade_2 = per_node_subsplit[children[1]].asCladeBitset();
+// std::cout << "clade_1 = " << clade_1 << std::endl;
+// std::cout << "clade_2 = " << clade_2 << std::endl;
+// std::cout << "per_node_subsplit[children[0]] = " << per_node_subsplit[children[0]] << std::endl;
+// std::cout << "per_node_subsplit[children[1]] = " << per_node_subsplit[children[1]] << std::endl;
       per_node_subsplit[index] = Subsplit(clade_1,clade_2);
+// std::cout << "per_node_subsplit[index] = " << per_node_subsplit[index] << std::endl;
 
       // 2)
       Subsplit root_on_edge = per_node_subsplit[index].rootSplitFromClade();
@@ -777,6 +790,7 @@ void SBNParameters::countAllSubsplits(Tree& tree, std::map<std::pair<Subsplit,Su
     }
   }
 
+// std::cout << "preorder traversal" << std::endl;
   // Root to tip pass (this is where the fun starts)
   // order = "preorder";
   // tree.orderNodesForTraversal(order);
@@ -787,7 +801,9 @@ void SBNParameters::countAllSubsplits(Tree& tree, std::map<std::pair<Subsplit,Su
   // for (std::vector<TopologyNode*>::const_iterator it = preorder_nodes.begin()+1; it != preorder_nodes.end(); ++it)
   for (std::vector<TopologyNode*>::const_reverse_iterator it = postorder_nodes.rbegin()+1; it != postorder_nodes.rend(); ++it)
   {
+// std::cout << (*it)->getIndex() << std::endl;
     // std::cout << ">>>working on a root/internal/tip node " << ((*it)->isRoot()) << "/" << ((*it)->isInternal()) << "/" << ((*it)->isTip()) << std::endl;
+    // std::cout << ">The node's index is " << (*it)->getIndex() << std::endl;
     // std::cout << ">The node's subsplit is " << per_node_subsplit[(*it)->getIndex()] << std::endl;
     // std::cout << ">The node's parent's subsplit is " << per_node_subsplit[(*it)->getParent().getIndex()] << std::endl;
 
@@ -912,7 +928,6 @@ void SBNParameters::countAllSubsplits(Tree& tree, std::map<std::pair<Subsplit,Su
     }
 
   }
-
 }
 
 // Here we regularize our real counts using pseudocounts and a regularization parameter alpha
@@ -1242,6 +1257,8 @@ void SBNParameters::fitNodeTimeDistributions(std::vector<Tree> &trees )
 void SBNParameters::makeCPDs(std::map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts)
 {
 
+  subsplit_cpds.clear();
+
   // Put parent-child splits in correct format and place
   std::pair<std::pair<Subsplit,Subsplit>,double> this_parent_child;
 
@@ -1294,6 +1311,9 @@ void SBNParameters::makeCPDs(std::map<std::pair<Subsplit,Subsplit>,double>& pare
 */
 void SBNParameters::makeRootSplits(std::map<Subsplit,double>& root_split_counts)
 {
+
+  root_splits.clear();
+
   // Put root splits in correct format and place
   std::pair<Subsplit,double> this_root;
   BOOST_FOREACH(this_root, root_split_counts) {
@@ -1614,13 +1634,9 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
   {
     countAllSubsplits(trees[i], parent_child_counts_sa, root_split_counts_sa, q, true);
   }
-
   // Turn root split counts into a distribution on the root split and parent-child subsplit counts into CPDs
   makeRootSplits(root_split_counts_sa);
   makeCPDs(parent_child_counts_sa);
-
-  // Handle branch lengths (we only need to do this once!)
-  fitBranchLengthDistributions(trees);
 
   SBNParameters sbn_old = *this;
 
@@ -1632,41 +1648,45 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
     std::map<Subsplit,double> root_split_counts;
     std::map<std::pair<Subsplit,Subsplit>,double> parent_child_counts;
 
+std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
     // E-step, compute q (per tree) and m (counts, across all trees)
     for (size_t i=0; i<trees.size(); ++i)
     {
+// std::cout << "counting for tree " << i << std::endl;
       // Get ln(Pr(tree,root)) for all branches
       std::vector<std::pair<Subsplit,double> > pr_tree_and_root = computeLnProbabilityTopologyAndRooting(trees[i]);
+// std::cout << "got components for q()" << std::endl;
 
       // turn ln(Pr(tree,root)) into q(root)
       double max = RbConstants::Double::min;
       for (size_t j=0; j<pr_tree_and_root.size(); ++j)
       {
-        if ( max < pr_tree_and_root[i].second )
+        if ( max < pr_tree_and_root[j].second )
         {
-          max = pr_tree_and_root[i].second;
+          max = pr_tree_and_root[j].second;
         }
       }
 
       double sum = 0.0;
       for (size_t j=0; j<pr_tree_and_root.size(); ++j)
       {
-        pr_tree_and_root[i].second = exp(pr_tree_and_root[i].second - max);
-        sum += pr_tree_and_root[i].second;
+        pr_tree_and_root[j].second = exp(pr_tree_and_root[j].second - max);
+        sum += pr_tree_and_root[j].second;
       }
 
       for (size_t j=0; j<pr_tree_and_root.size(); ++j)
       {
-        pr_tree_and_root[i].second /= sum;
+        pr_tree_and_root[j].second /= sum;
       }
 
       // make vector-pair q into a map
       q.clear();
       for (size_t j=0; j<pr_tree_and_root.size(); ++j)
       {
-        q[pr_tree_and_root[i].first] = pr_tree_and_root[i].second;
+        q[pr_tree_and_root[j].first] = pr_tree_and_root[j].second;
       }
 
+// std::cout << "about to recount, NOT using q" << std::endl;
       // use q to re-count subsplits
       countAllSubsplits(trees[i], parent_child_counts, root_split_counts, q, false);
 
@@ -1675,6 +1695,7 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
     // regularize all counts
     regularizeCounts(parent_child_counts, root_split_counts, parent_child_counts_sa, root_split_counts_sa, alpha);
 
+    std::cout << ">>>>>>M step" << std::endl;
     // M-step, compute p
     makeRootSplits(root_split_counts);
     makeCPDs(parent_child_counts);
@@ -1686,6 +1707,9 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
     }
 
   }
+
+  // Handle branch lengths (we only need to do this once!)
+  fitBranchLengthDistributions(trees);
 
   if ( !isValid() )
   {

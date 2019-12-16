@@ -84,7 +84,8 @@ namespace RevBayesCore {
         void                                incrementRootSplitCount(std::map<Subsplit,double>& root_split_counts, Subsplit &this_root_split, double &weight);
 
         // // Misc.
-        std::map<std::pair<Subsplit,Subsplit>,double> computeUnconditionalSubsplitProbabilities(void) const;
+        std::map<Subsplit,double> computeUnconditionalSubsplitProbabilities(void) const;
+        void                                 recursivelyComputeUnconditionalSubsplitProbabilities(std::map<Subsplit,double> subsplit_probs) const;
         // std::vector<std::pair<Split,double> > computeCladeProbabilities(void) const;
         // std::vector<std::pair<Split,double> > computeSplitProbabilities(void) const;
 

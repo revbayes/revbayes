@@ -1647,28 +1647,32 @@ void TopologyNode::makeBifurcating( void )
 
 void TopologyNode::recursivelySortNodesByPostorder(std::vector<int> &visited, std::vector<size_t> &nodes) const
 {
-  if ( tip_node )
-  {
-    visited[index] = 1;
-    nodes.push_back(index);
-    parent->recursivelySortNodesByPostorder(visited,nodes);
-  }
-  else
-  {
-    for (std::vector<TopologyNode *>::const_iterator i = children.begin(); i != children.end(); ++i)
-    {
-        if (!visited[(*i)->getIndex()])
-        {
-          (*i)->recursivelySortNodesByPostorder(visited,nodes);
-        }
-    }
-    visited[index] = 1;
-    nodes.push_back(index);
-    if (!root_node)
-    {
-      parent->recursivelySortNodesByPostorder(visited,nodes);
-    }
-  }
+// // std::cout << "At node " << index << std::endl;
+//   if ( tip_node )
+//   {
+//     visited[index] = 1;
+//     nodes.push_back(index);
+//     parent->recursivelySortNodesByPostorder(visited,nodes);
+//   }
+//   else
+//   {
+//     for (std::vector<TopologyNode *>::const_iterator i = children.begin(); i != children.end(); ++i)
+//     {
+//         if (!visited[(*i)->getIndex()])
+//         {
+//           (*i)->recursivelySortNodesByPostorder(visited,nodes);
+//         }
+//     }
+//     if ( visited[index] == 0 )
+//     {
+//       nodes.push_back(index);
+//     }
+//     visited[index] = 1;
+//     if (!root_node)
+//     {
+//       parent->recursivelySortNodesByPostorder(visited,nodes);
+//     }
+//   }
 }
 
 void TopologyNode::recursivelySortNodesByPreorder(std::vector<int> &visited, std::vector<size_t> &nodes) const
