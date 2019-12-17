@@ -343,9 +343,10 @@ const std::string AbstractCharacterData::getJsonRepresentation(void) const {
 
     std::string jsonStr = "{\"CharacterDataMatrix\": {\n";
     
-    jsonStr += std::string("   \"filePath\": \"") + filePath + std::string("\",") + '\n';
-    jsonStr += std::string("   \"fileName\": \"") + fileName + std::string("\",") + '\n';
-    jsonStr += std::string("   \"dataType\": \"") + getDataType() + "\"\n";
+    jsonStr += std::string("   \"filePath\": \"")    + filePath + std::string("\",") + '\n';
+    jsonStr += std::string("   \"fileName\": \"")    + fileName + std::string("\",") + '\n';
+    jsonStr += std::string("   \"dataType\": \"")    + getDataType() + "\",\n";
+    jsonStr += std::string("   \"stateLabels\": \"") + getStateLabels() + "\",\n";
     
     jsonStr += "   \"taxa\": [";
     for (int i=0; i<taxa.size(); i++)
@@ -363,7 +364,7 @@ const std::string AbstractCharacterData::getJsonRepresentation(void) const {
         if (it != deletedTaxa.end())
             jsonStr += ",";
         }
-    jsonStr += "]\n";
+    jsonStr += "],\n";
     
     jsonStr += "   \"data\": [\n";
     for (std::map<std::string,AbstractTaxonData* >::const_iterator it = taxonMap.begin(); it != taxonMap.end(); it++)
@@ -373,6 +374,7 @@ const std::string AbstractCharacterData::getJsonRepresentation(void) const {
         jsonStr += "   " + it->second->getJsonRepresentation();
         }
     jsonStr += "   ]";
+    jsonStr += "}}";
 
     return jsonStr;
 }

@@ -3,6 +3,9 @@ set -ev
 
 # Build
 cd projects/cmake
+./generate_version_number.sh
+mv GitVersion.cpp ../../src/revlanguage/utils/
+
 mkdir build
 ./regenerate.sh -travis true -mpi ${USE_MPI} -help true -exec_name rb
 cd build
