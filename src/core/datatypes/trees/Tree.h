@@ -84,7 +84,7 @@ namespace RevBayesCore {
         std::string                                         getNewickRepresentation() const;                                                                    //!< Get the newick representation of this Tree
         TopologyNode&                                       getNode(size_t idx);                                                                                //!< Get the node at index
         const TopologyNode&                                 getNode(size_t idx) const;                                                                          //!< Get the node at index
-        std::vector<size_t>                                 getNodeIndicesForTraversal(std::string &order) const;                                                                               //!< Get a pointer to the nodes in the Tree
+        std::vector<size_t>                                 getNodeIndicesForTraversal(std::string &order) const;                                               //!< Get the indices of all nodes in the order of a pre- or postorder tree traversal
         const std::vector<TopologyNode*>&                   getNodes(void) const;                                                                               //!< Get a pointer to the nodes in the Tree
         std::vector<RbBitSet>                               getNodesAsBitset(void) const;                                                                               //!< Get a pointer to the nodes in the Tree
         size_t                                              getNumberOfInteriorNodes(void) const;                                                               //!< Get the number of nodes in the Tree

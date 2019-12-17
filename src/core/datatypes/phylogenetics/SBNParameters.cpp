@@ -598,13 +598,54 @@ double SBNParameters::computeSubsplitTransitionProbability( const Subsplit &pare
 
 }
 
+void SBNParameters::recursivelyComputeUnconditionalSubsplitProbabilities(std::map<Subsplit,double> &subsplit_probs, Subsplit &parent, double p) const
+{
+  // If we're a fake subsplit, we're done on this leg of the recursion, otherwise we continue
+  if ( !(parent.isFake()) )
+  {
+    std::vector<std::pair<Subsplit,double> > this_cpd = subsplit_cpds.at(parent);
+
+    // Loop over child subsplits
+    for (std::vector<std::pair<Subsplit,double> >::const_iterator this_child=this_cpd.begin(); this_child != this_cpd.end(); ++this_child)
+    {
+      // Accumulate probability for this path from SBN root to SBN tip for child
+      double p_child = p * this_child->second;
+      // Add the current probability to the marginal probability of this child
+      if ( subsplit_probs.count(this_child->first) == 0 )
+      {
+        subsplit_probs[this_child->first] = p_child;
+      }
+      else
+      {
+        subsplit_probs[this_child->first] += p_child;
+      }
+      // TODO: make function take a const Subsplit &parent
+      recursivelyComputeUnconditionalSubsplitProbabilities(subsplit_probs, *(this_child->first.clone()), p_child);
+    }
+  }
+}
+
+std::map<Subsplit,double> SBNParameters::computeUnconditionalSubsplitProbabilities(void) const
+{
+  std::map<Subsplit,double> unconditional_split_probs;
+
+  // Loop over child subsplits
+  for (std::vector<std::pair<Subsplit,double> >::const_iterator this_root=root_splits.begin(); this_root != root_splits.end(); ++this_root)
+  {
+    double p = this_root->second;
+    recursivelyComputeUnconditionalSubsplitProbabilities(unconditional_split_probs, *(this_root->first.clone()), p);
+  }
+
+  return unconditional_split_probs;
+}
+
 // /* Computes the probability of seeing a particular parent-child subsplit pair given an SBN */
 // std::vector<std::pair<Split,double> > SBNParameters::computeSplitProbabilities( void ) const
 // {
-//
-//   // Find all potential children of parent
+//   // First get all marginal subsplit probabilities
+//   std::map<Subsplit,double> unconditional_split_probs = computeUnconditionalSubsplitProbabilities();
+//   // Now sum over all subsplits consistent with a split (or we could do this in computeCladeProbabilities then we could simply polarize those here and do one more summation)
 //   std::vector<std::pair<Split,double> > split_probs;
-//
 //   return split_probs;
 //
 // }
@@ -721,7 +762,32 @@ bool SBNParameters::isValid(void) const
 
 double SBNParameters::KL( SBNParameters &Q_x ) const
 {
-  return 0.0;
+
+    double kl = 0.0;
+
+    // Compute unconditional/marginal probabilities of all subsplits
+    std::map<Subsplit,double> unconditional_subsplit_probs = computeUnconditionalSubsplitProbabilities();
+
+    // Loop over all parent subsplits
+    for (std::map<Subsplit,std::vector<std::pair<Subsplit,double> > >::const_iterator parent=subsplit_cpds.begin(); parent!=subsplit_cpds.end(); ++parent)
+    {
+      // Parent subsplit is parent->first, the vector of children (and their probabilities) is parent->second
+      for (std::vector<std::pair<Subsplit,double> >::const_iterator child=parent->second.begin(); child!=parent->second.end(); ++child)
+      {
+        // Child Subsplit is child->first, its cpd is child->second
+        double P_s_given_t = child->second;
+        double log_Q_s_given_t = Q_x.computeSubsplitTransitionProbability(parent->first,child->first);
+        // Pr(s,t) = Pr(s|t)Pr(t)
+        double P_parent_and_child =  P_s_given_t * unconditional_subsplit_probs[parent->first];
+        kl -= P_parent_and_child * (log_Q_s_given_t - log(P_s_given_t));
+      }
+    }
+  // for (std::map<Subsplit,double>::iterator p_s=unconditional_subsplit_probs.begin(); p_s!=unconditional_subsplit_probs.end(); ++p_s)
+  // {
+  //   std::cout << "Pr(" << p_s->first << ") = " << p_s->second << std::endl;
+  // }
+
+  return kl;
 }
 
 // Counts all subsplits in an unrooted tree (handles all virtual rooting)
@@ -1612,7 +1678,7 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
     throw(RbException("Invalid value for regularization parameter in learnUnconstrainedSBNEM"));
   }
 
-  double threshold = 0.000001;
+  double threshold = 0.001;
 
   // Initialize parameters to SA values
   time_calibrated = false;
@@ -1702,9 +1768,12 @@ std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
 
     double kl = KL(sbn_old);
 
+    std::cout << "KL(new || old) = " << kl << std::endl;
     if ( kl < threshold ) {
       terminate = true;
     }
+
+    sbn_old = *this;
 
   }
 
