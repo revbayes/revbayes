@@ -565,18 +565,17 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
                         }
                     }
                 }
-
-                if (max == x)
-                {
-                    v.includeCharacter(i);
-                }
-                else
-                {
-                    v.excludeCharacter(i);
-                }
+              if (max == x)
+              {
+                  v.includeCharacter(i);
               }
-                matVec.push_back(AbstractHomologousDiscreteCharacterData(v));
+              else
+              {
+                  v.excludeCharacter(i);
+              }
             }
+              matVec.push_back(AbstractHomologousDiscreteCharacterData(v));
+          }
             return new RevVariable (new ModelVector<AbstractHomologousDiscreteCharacterData>(matVec));
     }
     else if ( name == "translateCharacters" )
@@ -699,7 +698,6 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     setCodonPartitionArgRules->push_back(       new ArgumentRule("",        Natural::getClassTypeSpec()              , "The index of the codon position.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     setCodonPartitionArgRules2->push_back(      new ArgumentRule("",        ModelVector<Natural>::getClassTypeSpec() , "The indicies of the codon positions.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     setNumStatesPartitionArgRules->push_back(   new ArgumentRule("",        Natural::getClassTypeSpec()              , "The number of states in this partition.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    setNumStatesVectorArgRules->push_back(      new ArgumentRule(""  ,      RlBoolean::getClassTypeSpec()            , "Should we partition the matrix by number of states?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true )  ) );
     squareBracketArgRules->push_back(           new ArgumentRule( "index" , Natural::getClassTypeSpec()              , "The index of the taxon.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
 
     std::vector<std::string> sfs_ambig_options;
@@ -738,7 +736,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     methods.addFunction( new MemberProcedure( "setCodonPartition",                      RlUtils::Void,                      setCodonPartitionArgRules       ) );
     methods.addFunction( new MemberProcedure( "setCodonPartition",                      RlUtils::Void,                      setCodonPartitionArgRules2      ) );
     methods.addFunction( new MemberProcedure( "setNumStatesPartition",                  RlUtils::Void,                      setNumStatesPartitionArgRules   ) );
-    methods.addFunction( new MemberProcedure( "setNumStatesVector"  ,                   RlUtils::Void,                      setNumStatesVectorArgRules      ) );
+    methods.addFunction( new MemberProcedure( "setNumStatesVector"  ,                   ModelVector<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec(), setNumStatesVectorArgRules      ) );
     methods.addFunction( new MemberProcedure( "isHomologous",                           RlBoolean::getClassTypeSpec(),      ishomologousArgRules            ) );
     methods.addFunction( new MemberProcedure( "expandCharacters",                       AbstractHomologousDiscreteCharacterData::getClassTypeSpec(),        expandCharactersArgRules         ) );
     methods.addFunction( new MemberProcedure( "getEmpiricalBaseFrequencies",            Simplex::getClassTypeSpec(),        empiricalBaseArgRules           ) );
