@@ -9,6 +9,7 @@
 #include "Proposal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
+#include "RbConstants.h"
 #include "RbMathLogic.h"
 #include "AbstractMove.h"
 #include "RbOrderedSet.h"
@@ -262,8 +263,18 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     
     // Propose a new value
     proposal->prepareProposal();
-    double ln_hastings_ratio = proposal->doProposal();
-    
+    double ln_hastings_ratio = RbConstants::Double::neginf;
+    try {
+        ln_hastings_ratio = proposal->doProposal();
+    }
+    catch (RbException e)
+    {
+//        std::cerr << "Caught exception in move '" << getMoveName() << "' which works on '" << nodes[0]->getName() << "'." << std::endl;
+        if ( e.getExceptionType() != RbException::MATH_ERROR )
+        {
+            throw RbException(e);
+        }
+    }
     
     // Identify nodes that proposal touches
     std::vector<DagNode*> touched_nodes = nodes; //proposal->identifyNodesToTouch();
@@ -300,11 +311,34 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         {
             if ( the_node->isClamped() )
             {
-                ln_likelihood_ratio += the_node->getLnProbabilityRatio();
+                try {
+                    ln_likelihood_ratio += the_node->getLnProbabilityRatio();
+                }
+                catch (RbException e)
+                {
+                    ln_likelihood_ratio = RbConstants::Double::neginf;
+//                    std::cerr << "Caught exception in move '" << getMoveName() << "' which works on '" << nodes[0]->getName() << "'." << std::endl;
+                    if ( e.getExceptionType() != RbException::MATH_ERROR )
+                    {
+                        throw RbException(e);
+                    }
+                }
             }
             else
             {
-                ln_prior_ratio += the_node->getLnProbabilityRatio();
+                try
+                {
+                    ln_prior_ratio += the_node->getLnProbabilityRatio();
+                }
+                catch (RbException e)
+                {
+                    ln_prior_ratio = RbConstants::Double::neginf;
+//                    std::cerr << "Caught exception in move '" << getMoveName() << "' which works on '" << nodes[0]->getName() << "'." << std::endl;
+                    if ( e.getExceptionType() != RbException::MATH_ERROR )
+                    {
+                        throw RbException(e);
+                    }
+                }
             }
             
         }
@@ -320,11 +354,34 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         {
             if ( the_node->isClamped() )
             {
-                ln_likelihood_ratio += the_node->getLnProbabilityRatio();
+                try
+                {
+                    ln_likelihood_ratio += the_node->getLnProbabilityRatio();
+                }
+                catch (RbException e)
+                {
+                    ln_likelihood_ratio = RbConstants::Double::neginf;
+//                    std::cerr << "Caught exception in move '" << getMoveName() << "' which works on '" << nodes[0]->getName() << "'." << std::endl;
+                    if ( e.getExceptionType() != RbException::MATH_ERROR )
+                    {
+                        throw RbException(e);
+                    }
+                }
             }
             else
             {
-                ln_prior_ratio += the_node->getLnProbabilityRatio();
+                try {
+                    ln_prior_ratio += the_node->getLnProbabilityRatio();
+                }
+                catch (RbException e)
+                {
+                    ln_prior_ratio = RbConstants::Double::neginf;
+//                    std::cerr << "Caught exception in move '" << getMoveName() << "' which works on '" << nodes[0]->getName() << "'." << std::endl;
+                    if ( e.getExceptionType() != RbException::MATH_ERROR )
+                    {
+                        throw RbException(e);
+                    }
+                }
             }
         }
 
