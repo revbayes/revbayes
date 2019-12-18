@@ -9,24 +9,24 @@ class RbException {
 
     public:
         // Exception types
-        enum                        exceptionT { DEFAULT, QUIT, MISSING_VARIABLE };         //!< Exception types
-        static std::string          exceptionName[];                                        //!< Exception type names
+        enum                        ExceptionType { DEFAULT,
+                                                    MATH_ERROR,
+                                                    MISSING_VARIABLE,
+                                                    QUIT };         //!< Exception types
+        static std::string          ExceptionName[];                                        //!< Exception type names
 
                                     RbException(void);                                      //!< Default constructor
                                     RbException(const std::string& msg);                    //!< Default with message 
-                                    RbException(exceptionT type, const std::string& msg="");//!< General constructor
-
-        // Implemented abstract/virtual functions from base classes
-//        RbException*                clone(void) const;                                      //!< Clone this object
+                                    RbException(ExceptionType type, const std::string& msg="");//!< General constructor
 
         // Regular functions
-        exceptionT                  getExceptionType(void) { return exceptionType; }        //!< Get exception type 
+        ExceptionType               getExceptionType(void) const;                           //!< Get exception type
         void                        setMessage(std::string msg);
         std::string                 getMessage(void) const;
         void                        print(std::ostream &o) const;                           //!< Print the exception
      
     private:
-	    exceptionT                  exceptionType;                                          //!< Exception type
+	    ExceptionType               exception_type;                                         //!< Exception type
 	    std::string                 message;                                                //!< Error message
     
 };
