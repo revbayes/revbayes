@@ -189,6 +189,73 @@ Subsplit::Subsplit( RbBitSet &clade_1_bitset, RbBitSet &clade_2_bitset ) :
 
 }
 
+/**
+ * Constructor from 2 child subsplits.
+ */
+Subsplit::Subsplit( Subsplit &s1, Subsplit &s2 ) :
+    bitset(),
+    is_fake( false )
+{
+
+    RbBitSet clade_1_bitset = s1.getYBitset() | s1.getZBitset();
+    RbBitSet clade_2_bitset = s2.getYBitset() | s2.getZBitset();
+
+    if ( clade_1_bitset.size() != clade_2_bitset.size() )
+    {
+      throw(RbException("Cannot create subsplit from subsplits of unequal size"));
+    }
+
+    // Check if we are called to make a fake subsplit
+    if ( clade_1_bitset.getNumberSetBits() == 1 && clade_2_bitset.getNumberSetBits() == 1 && clade_1_bitset.getFirstSetBit() == clade_2_bitset.getFirstSetBit() )
+    {
+      is_fake = true;
+    }
+    
+    // bitset representations and check that X and Y are disjoint
+    bool disjoint = true;
+    for (size_t i=0; i<clade_1_bitset.size(); ++i)
+    {
+      if ( clade_1_bitset[i] && clade_2_bitset[i] )
+      {
+        disjoint = false;
+        break;
+      }
+    }
+
+    // Check if we are called to make a fake subsplit
+    if ( clade_1_bitset.getNumberSetBits() == 1 && clade_2_bitset.getNumberSetBits() == 1 && clade_1_bitset.getFirstSetBit() == clade_2_bitset.getFirstSetBit() )
+    {
+      is_fake = true;
+    }
+
+
+    if (!disjoint && !is_fake)
+    {
+      std::cout << "Parent of " << s1 << " and " << s2 << std::endl;
+      throw(RbException("Cannot create subsplit from non-disjoint clades."));
+    }
+
+    if (clade_1_bitset.getNumberSetBits() == 0 || clade_2_bitset.getNumberSetBits() == 0)
+    {
+      std::cout << "Invalid subsplit: " << clade_1_bitset << "|" << clade_2_bitset << std::endl;
+      throw(RbException("Cannot create subsplit when one clade is empty."));
+    }
+
+    // Order clades
+    if ( clade_1_bitset < clade_2_bitset )
+    {
+      bitset.first = clade_1_bitset;
+      bitset.second = clade_2_bitset;
+    }
+    else
+    {
+      bitset.first = clade_2_bitset;
+      bitset.second = clade_1_bitset;
+    }
+
+}
+
+
 Subsplit& Subsplit::operator=(const Subsplit &s)
 {
   if (this != &s)
