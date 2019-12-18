@@ -269,7 +269,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     }
     catch (RbException e)
     {
-//        std::cerr << "Caught exception in move '" << getMoveName() << "' which works on '" << nodes[0]->getName() << "'." << std::endl;
+
         if ( e.getExceptionType() != RbException::MATH_ERROR )
         {
             throw RbException(e);
@@ -317,7 +317,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
                 catch (RbException e)
                 {
                     ln_likelihood_ratio = RbConstants::Double::neginf;
-//                    std::cerr << "Caught exception in move '" << getMoveName() << "' which works on '" << nodes[0]->getName() << "'." << std::endl;
+
                     if ( e.getExceptionType() != RbException::MATH_ERROR )
                     {
                         throw RbException(e);
@@ -333,7 +333,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
                 catch (RbException e)
                 {
                     ln_prior_ratio = RbConstants::Double::neginf;
-//                    std::cerr << "Caught exception in move '" << getMoveName() << "' which works on '" << nodes[0]->getName() << "'." << std::endl;
+
                     if ( e.getExceptionType() != RbException::MATH_ERROR )
                     {
                         throw RbException(e);
@@ -361,7 +361,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
                 catch (RbException e)
                 {
                     ln_likelihood_ratio = RbConstants::Double::neginf;
-//                    std::cerr << "Caught exception in move '" << getMoveName() << "' which works on '" << nodes[0]->getName() << "'." << std::endl;
+
                     if ( e.getExceptionType() != RbException::MATH_ERROR )
                     {
                         throw RbException(e);
@@ -376,7 +376,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
                 catch (RbException e)
                 {
                     ln_prior_ratio = RbConstants::Double::neginf;
-//                    std::cerr << "Caught exception in move '" << getMoveName() << "' which works on '" << nodes[0]->getName() << "'." << std::endl;
+
                     if ( e.getExceptionType() != RbException::MATH_ERROR )
                     {
                         throw RbException(e);
