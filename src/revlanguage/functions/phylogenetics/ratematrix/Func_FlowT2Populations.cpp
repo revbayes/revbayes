@@ -61,10 +61,10 @@ const ArgumentRules& Func_FlowT2Populations::getArgumentRules( void ) const
     if ( !rules_set )
     {
         
-        argumentRules.push_back( new ArgumentRule( "nu"          , ModelVector<Real>::getClassTypeSpec(), "The population sizes: nu=(nu_1,nu_2).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "mu"          , ModelVector<Real>::getClassTypeSpec(), "The mutation rates: mu=(mu_A,mu_a).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "lambda"      , ModelVector<Real>::getClassTypeSpec(), "The allele flow rates: lambda=(lambda_12,lambda_21).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "sigma"       , ModelVector<Real>::getClassTypeSpec(), "The selection coefficients: sigma=(sigma_A,sigma_a).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "nu"          , ModelVector<Real>::getClassTypeSpec(), "The population sizes: nu=(nu_1,nu_2)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "mu"          , ModelVector<Real>::getClassTypeSpec(), "The mutation rates: mu=(mu_A,mu_a)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "lambda"      , ModelVector<Real>::getClassTypeSpec(), "The allele flow rates: lambda=(lambda_12,lambda_21)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "sigma"       , ModelVector<Real>::getClassTypeSpec(), "The selection coefficients: sigma=(sigma_a,sigma_A)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         rules_set = true;
     }
