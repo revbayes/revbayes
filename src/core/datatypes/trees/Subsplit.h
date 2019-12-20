@@ -52,11 +52,16 @@ namespace RevBayesCore {
         RbBitSet                                    asSplitBitset(void) const;                                        //!< Convert this value into a split (as bitset representation).
         std::vector<std::pair<Subsplit,Subsplit> >  doVirtualRootingNonRootParent(const Subsplit &parent, const Subsplit &child) const; //!< Gives us all parent-child subsplits that will replace this one on the equivalent edge in a tree rerooted to a specific edge
         std::vector<std::pair<Subsplit,Subsplit> >  doVirtualRootingRootParent(const Subsplit &sister1, const Subsplit &sister2, const Subsplit &child) const; //!< Gives us all parent-child subsplits that will replace this one on the equivalent edge in a tree rerooted to a specific edge
-        std::pair<RbBitSet,RbBitSet>                getBitset(void) const;                                      //!< Get the paired bitset representation of this subsplit as a clade
+        std::pair<RbBitSet,RbBitSet>                getBitset(void) const;                                      //!< Get the paired bitset representation of this subsplit as a bitset
+        const std::pair<RbBitSet,RbBitSet>&         getBitsetRef(void) const;                                      //!< Get the paired bitset representation of this subsplit as a bitset referemce
+        const std::pair<RbBitSet,RbBitSet>*         getBitsetPtr(void) const;                                      //!< Get the paired bitset representation of this subsplit as a bitset referemce
         Clade                                       getY(const std::vector<Taxon>& taxa) const;                                           //!< Get clade Y
         RbBitSet                                    getYBitset(void) const;                                     //!< Get clade Y as bitset
+        RbBitSet&                                   getYBitsetRef(void) const;                                     //!< Get clade Y as bitset  reference
         Clade                                       getZ(const std::vector<Taxon>& taxa) const;                                           //!< Get clade Z
-        RbBitSet                                    getZBitset(void) const;                                     //!< Get clade Y as bitset
+        RbBitSet                                    getZBitset(void) const;                                     //!< Get clade Z as bitset
+        RbBitSet&                                   getZBitsetRef(void) const;                                     //!< Get clade Z as bitset reference
+        size_t                                      getHash(void) const;                                         //!< A hash function (mainly for unordered_maps)
         bool                                        isChildOfY(const Subsplit &s) const;                      //!< Is argument subsplit compatible with this one?
         bool                                        isChildOfZ(const Subsplit &s) const;                      //!< Is argument subsplit compatible with this one?
         bool                                        isCompatible(const Subsplit &s) const;                      //!< Is argument subsplit compatible with this one?

@@ -316,7 +316,7 @@ bool Subsplit::operator!=(const Subsplit &s) const
  */
 bool Subsplit::operator<(const Subsplit &s) const
 {
-  return ( s.getBitset() < bitset );
+  return ( s.bitset < bitset );
 }
 
 /**
@@ -324,7 +324,7 @@ bool Subsplit::operator<(const Subsplit &s) const
  */
 bool Subsplit::operator<=(const Subsplit &s) const
 {
-  return ( s.getBitset() <= bitset );
+  return ( s.bitset <= bitset );
 }
 
 /**
@@ -332,7 +332,7 @@ bool Subsplit::operator<=(const Subsplit &s) const
  */
 bool Subsplit::operator>(const Subsplit &s) const
 {
-  return ( s.getBitset() > bitset );
+  return ( s.bitset > bitset );
 }
 
 /**
@@ -340,7 +340,7 @@ bool Subsplit::operator>(const Subsplit &s) const
  */
 bool Subsplit::operator>=(const Subsplit &s) const
 {
-  return ( s.getBitset() >= bitset );
+  return ( s.bitset >= bitset );
 }
 
 
@@ -591,6 +591,28 @@ std::pair<RbBitSet,RbBitSet> Subsplit::getBitset( void ) const
 }
 
 /**
+ * Utility function to access paired bitset
+ *
+ * \return    The bitset pair.
+ */
+const std::pair<RbBitSet,RbBitSet>* Subsplit::getBitsetPtr( void ) const
+{
+
+    return &bitset;
+}
+
+/**
+ * Utility function to access paired bitset
+ *
+ * \return    The bitset pair.
+ */
+const std::pair<RbBitSet,RbBitSet>& Subsplit::getBitsetRef( void ) const
+{
+    // TODO: investiate uses of getBitset, decide if we ever need to return a value, then ditch most of this because we never needed the get functions for comparison operators
+    return bitset;
+}
+
+/*&
  * The clone function is a convenience function to create proper copies of inherited objected.
  * E.g. a.clone() will create a clone of the correct type even if 'a' is of derived type 'B'.
  *
@@ -640,6 +662,16 @@ RbBitSet Subsplit::getZBitset( void ) const
 {
 
     return bitset.second;
+}
+
+/**
+ * Is subsplit s a child of this subsplit's clade Y?
+ * \return    true/false
+ */
+size_t Subsplit::getHash(void) const
+{
+    size_t h = 0;
+    return h;
 }
 
 /**

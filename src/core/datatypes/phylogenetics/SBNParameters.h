@@ -26,6 +26,7 @@
 #include "TypedDistribution.h"
 
 #include <vector>
+#include <unordered_map>
 
 namespace RevBayesCore {
 
@@ -65,6 +66,7 @@ namespace RevBayesCore {
 
         // Functions for learning SBNs
         void                                countAllSubsplits(Tree& tree, std::map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts, std::map<Subsplit,double>& root_split_counts, std::map<Subsplit,double>& q, bool doSA);
+        void                                countAllSubsplits(Tree& tree, std::unordered_map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts, std::map<Subsplit,double>& root_split_counts, std::map<Subsplit,double>& q, bool doSA);
         void                                fitBranchLengthDistributions(std::vector<Tree> &trees);
         void                                fitNodeTimeDistributions(std::vector<Tree> &trees);
         bool                                isValidCPD(std::vector<std::pair<Subsplit,double> >& cpd, Subsplit& parent) const;
@@ -73,6 +75,7 @@ namespace RevBayesCore {
         void                                learnUnconstrainedSBNSA( std::vector<Tree> &trees );
         void                                learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &alpha );
         void                                makeCPDs(std::map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts);
+        void                                makeCPDs(std::unordered_map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts);
         void                                makeRootSplits(std::map<Subsplit,double>& root_split_counts);
         void                                normalizeCPDForSubsplit(std::vector<std::pair<Subsplit,double> >& cpd, Subsplit& parent);
         void                                regularizeCounts(std::map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts, std::map<Subsplit,double>& root_split_counts, std::map<std::pair<Subsplit,Subsplit>,double>& pseudo_parent_child_counts, std::map<Subsplit,double>& pseudo_root_split_counts, double alpha);
@@ -81,6 +84,7 @@ namespace RevBayesCore {
         void                                addTreeToAllParentChildCounts(std::map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts, Tree& tree, double &weight);
         void                                addTreeToAllRootSplitCounts(std::map<Subsplit,double>& root_split_counts, Tree& tree, double &weight);
         void                                incrementParentChildCount(std::map<std::pair<Subsplit,Subsplit>,double> &parent_child_counts, std::pair<Subsplit,Subsplit> &this_parent_child, double &weight);
+        void                                incrementParentChildCount(std::unordered_map<std::pair<Subsplit,Subsplit>,double> &parent_child_counts, std::pair<Subsplit,Subsplit> &this_parent_child, double &weight);
         void                                incrementRootSplitCount(std::map<Subsplit,double>& root_split_counts, Subsplit &this_root_split, double &weight);
 
         // // Misc.
@@ -100,12 +104,33 @@ namespace RevBayesCore {
         std::map<Subsplit,std::vector<std::pair<Subsplit,double> > >        subsplit_cpds; // For each subsplit, its children and their probabilities
         std::vector<Taxon>                             taxa; // The taxa in the tree the SBN describes
         bool                                           time_calibrated; // Is this a time-calibrated SBN?
+
     };
 
     // Global functions using the class
     std::ostream&                       operator<<(std::ostream& o, const SBNParameters& x);                                           //!< Overloaded output operator
 
 
+}
+
+namespace std {
+  template<>
+  struct hash<std::pair<RevBayesCore::Subsplit,RevBayesCore::Subsplit> >
+  {
+    size_t operator()(const std::pair<RevBayesCore::Subsplit,RevBayesCore::Subsplit>& p) const
+    {
+      return p.first.getHash() ^ p.second.getHash();
+    }
+  };
+
+  template<>
+  struct equal_to<std::pair<RevBayesCore::Subsplit,RevBayesCore::Subsplit> >
+  {
+    size_t operator()(const std::pair<RevBayesCore::Subsplit,RevBayesCore::Subsplit>& lhs, const std::pair<RevBayesCore::Subsplit,RevBayesCore::Subsplit>& rhs) const
+    {
+      return lhs == rhs;
+    }
+  };
 }
 
 #endif

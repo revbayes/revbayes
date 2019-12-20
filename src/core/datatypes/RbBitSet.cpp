@@ -206,6 +206,11 @@ size_t RbBitSet::getFirstSetBit( void ) const
     return index;
 }
 
+size_t RbBitSet::getHash( void )
+{
+    return std::hash<std::vector<bool> >{}(value);
+}
+
 size_t RbBitSet::getNumberSetBits( void ) const
 {
     // get the internal value
