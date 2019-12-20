@@ -1897,7 +1897,7 @@ void SBNParameters::learnUnconstrainedSBNSA( std::vector<Tree> &trees )
 
   // To store counts
   std::map<Subsplit,double> root_split_counts;
-  std::map<std::pair<Subsplit,Subsplit>,double> parent_child_counts;
+  std::unordered_map<std::pair<Subsplit,Subsplit>,double> parent_child_counts;
 
   // This can stay empty, we don't need to specify q() if we override with doSA=TRUE
   std::map<Subsplit,double> q;

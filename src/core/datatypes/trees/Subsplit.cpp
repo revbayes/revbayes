@@ -15,7 +15,9 @@ using namespace RevBayesCore;
  */
 Subsplit::Subsplit( void ) :
     bitset(),
-    is_fake()
+    is_fake(),
+    fsb_y(),
+    fsb_z()
 {
 
 }
@@ -25,7 +27,9 @@ Subsplit::Subsplit( void ) :
  */
 Subsplit::Subsplit( const std::vector<Taxon> &c1, const std::vector<Taxon> &n ) :
     bitset(),
-    is_fake( true )
+    is_fake( true ),
+    fsb_y(),
+    fsb_z()
     {
         // TODO: having a single taxon instead of a vector of size 1 may be faster
 
@@ -64,7 +68,9 @@ Subsplit::Subsplit( const std::vector<Taxon> &c1, const std::vector<Taxon> &n ) 
  */
 Subsplit::Subsplit( const std::vector<Taxon> &c1, const std::vector<Taxon> &c2, const std::vector<Taxon> &n ) :
     bitset(),
-    is_fake( false )
+    is_fake( false ),
+    fsb_y(),
+    fsb_z()
 {
     // bitset representations and check that X and Y are disjoint
     bool disjoint = true;
@@ -145,7 +151,9 @@ Subsplit::Subsplit( const std::vector<Taxon> &c1, const std::vector<Taxon> &c2, 
  */
 Subsplit::Subsplit( RbBitSet &clade_1_bitset, RbBitSet &clade_2_bitset ) :
     bitset(),
-    is_fake( false )
+    is_fake( false ),
+    fsb_y(),
+    fsb_z()
 {
     // Check if we are called to make a fake subsplit
     if ( clade_1_bitset.getNumberSetBits() == 1 && clade_2_bitset.getNumberSetBits() == 1 && clade_1_bitset.getFirstSetBit() == clade_2_bitset.getFirstSetBit() )
@@ -194,7 +202,9 @@ Subsplit::Subsplit( RbBitSet &clade_1_bitset, RbBitSet &clade_2_bitset ) :
  */
 Subsplit::Subsplit( Subsplit &s1, Subsplit &s2 ) :
     bitset(),
-    is_fake( false )
+    is_fake( false ),
+    fsb_y(),
+    fsb_z()
 {
 
     RbBitSet clade_1_bitset = s1.getYBitset() | s1.getZBitset();
@@ -670,8 +680,9 @@ RbBitSet Subsplit::getZBitset( void ) const
  */
 size_t Subsplit::getHash(void) const
 {
-    size_t h = 0;
-    return h;
+    return bitset.first.getHash() ^ bitset.second.getHash();
+    // size_t h = 0;
+    // return h;
 }
 
 /**

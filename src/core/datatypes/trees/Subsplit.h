@@ -79,6 +79,8 @@ namespace RevBayesCore {
         // members
         std::pair<RbBitSet,RbBitSet>                bitset;
         bool                                        is_fake;
+        size_t                                      fsb_y;
+        size_t                                      fsb_z;
     };
 
     // Global functions using the class

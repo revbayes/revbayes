@@ -206,7 +206,7 @@ size_t RbBitSet::getFirstSetBit( void ) const
     return index;
 }
 
-size_t RbBitSet::getHash( void )
+size_t RbBitSet::getHash( void ) const
 {
     return std::hash<std::vector<bool> >{}(value);
 }
