@@ -43,12 +43,15 @@ Subsplit::Subsplit( const std::vector<Taxon> &c1, const std::vector<Taxon> &n ) 
 
         // bitset representation
         RbBitSet clade_1_bitset = RbBitSet(n.size(),false);
-        for (size_t i=0; i<n.size(); ++i)
+        // for (size_t i=0; i<n.size(); ++i)
+        for (size_t i = n.size(); i-- > 0; )
         {
           if (n[i] == c1[0])
           {
             clade_1_bitset.set(i);
             found = true;
+            fsb_y = i;
+            fsb_z = i;
             break;
           }
         }
@@ -80,12 +83,18 @@ Subsplit::Subsplit( const std::vector<Taxon> &c1, const std::vector<Taxon> &c2, 
     RbBitSet clade_1_bitset = RbBitSet(n.size(),false);
     RbBitSet clade_2_bitset = RbBitSet(n.size(),false);
 
-    for (size_t i=0; i<n.size(); ++i)
+    // For faster comparison operators
+    size_t fsb1;
+    size_t fsb2;
+
+    // for (size_t i=0; i<n.size(); ++i)
+    for (size_t i = n.size(); i-- > 0; )
     {
       for (std::vector<Taxon>::iterator jt=c1_unset.begin(); jt!=c1_unset.end(); jt++)
       {
         if (n[i] == (*jt))
         {
+          fsb1 = i;
           clade_1_bitset.set(i);
           c1_unset.erase(jt);
           break;
@@ -95,6 +104,7 @@ Subsplit::Subsplit( const std::vector<Taxon> &c1, const std::vector<Taxon> &c2, 
       {
         if (n[i] == (*jt))
         {
+          fsb2 = i;
           clade_2_bitset.set(i);
           c2_unset.erase(jt);
           break;
@@ -131,12 +141,16 @@ Subsplit::Subsplit( const std::vector<Taxon> &c1, const std::vector<Taxon> &c2, 
     if ( clade_1_bitset < clade_2_bitset )
     {
       bitset.first = clade_1_bitset;
+      fsb_y = fsb1;
       bitset.second = clade_2_bitset;
+      fsb_z = fsb2;
     }
     else
     {
       bitset.first = clade_2_bitset;
+      fsb_y = fsb2;
       bitset.second = clade_1_bitset;
+      fsb_z = fsb1;
     }
 
     // Check if we made a fake subsplit
@@ -161,14 +175,27 @@ Subsplit::Subsplit( RbBitSet &clade_1_bitset, RbBitSet &clade_2_bitset ) :
       is_fake = true;
     }
 
+    // For faster comparison operators
+    size_t fsb1;
+    size_t fsb2;
+
     // bitset representations and check that X and Y are disjoint
     bool disjoint = true;
-    for (size_t i=0; i<clade_1_bitset.size(); ++i)
+    // for (size_t i=0; i<clade_1_bitset.size(); ++i)
+    for (size_t i = clade_1_bitset.size(); i-- > 0; )
     {
-      if ( clade_1_bitset[i] && clade_2_bitset[i] )
+      if ( clade_1_bitset[i] )
       {
+        fsb1 = i;
+        if ( clade_2_bitset[i] )
+        {
         disjoint = false;
         break;
+        }
+      }
+      if ( clade_2_bitset[i] )
+      {
+        fsb2 = i;
       }
     }
 
@@ -187,12 +214,16 @@ Subsplit::Subsplit( RbBitSet &clade_1_bitset, RbBitSet &clade_2_bitset ) :
     if ( clade_1_bitset < clade_2_bitset )
     {
       bitset.first = clade_1_bitset;
+      fsb_y = fsb1;
       bitset.second = clade_2_bitset;
+      fsb_z = fsb2;
     }
     else
     {
       bitset.first = clade_2_bitset;
+      fsb_y = fsb2;
       bitset.second = clade_1_bitset;
+      fsb_z = fsb1;
     }
 
 }
@@ -210,6 +241,10 @@ Subsplit::Subsplit( Subsplit &s1, Subsplit &s2 ) :
     RbBitSet clade_1_bitset = s1.getYBitset() | s1.getZBitset();
     RbBitSet clade_2_bitset = s2.getYBitset() | s2.getZBitset();
 
+    // For faster comparison operators
+    size_t fsb1;
+    size_t fsb2;
+
     if ( clade_1_bitset.size() != clade_2_bitset.size() )
     {
       throw(RbException("Cannot create subsplit from subsplits of unequal size"));
@@ -223,12 +258,20 @@ Subsplit::Subsplit( Subsplit &s1, Subsplit &s2 ) :
     
     // bitset representations and check that X and Y are disjoint
     bool disjoint = true;
-    for (size_t i=0; i<clade_1_bitset.size(); ++i)
+    for (size_t i = clade_1_bitset.size(); i-- > 0; )
     {
-      if ( clade_1_bitset[i] && clade_2_bitset[i] )
+      if ( clade_1_bitset[i] )
       {
+        fsb1 = i;
+        if ( clade_2_bitset[i] )
+        {
         disjoint = false;
         break;
+        }
+      }
+      if ( clade_2_bitset[i] )
+      {
+        fsb2 = i;
       }
     }
 
@@ -255,12 +298,16 @@ Subsplit::Subsplit( Subsplit &s1, Subsplit &s2 ) :
     if ( clade_1_bitset < clade_2_bitset )
     {
       bitset.first = clade_1_bitset;
+      fsb_y = fsb1;
       bitset.second = clade_2_bitset;
+      fsb_y = fsb2;
     }
     else
     {
       bitset.first = clade_2_bitset;
+      fsb_y = fsb2;
       bitset.second = clade_1_bitset;
+      fsb_z = fsb1;
     }
 
 }
@@ -288,9 +335,10 @@ bool Subsplit::operator==(const Subsplit &s) const
   // If first set bits of both pairs are the same, the Subsplits may be equal (and we have to check)
   // If not, then we know that they must be different
   // Checking this first speeds the process if most comparisons are between non-equal Subsplits
-  if ( s.getYBitset().getFirstSetBit() == bitset.first.getFirstSetBit() && s.getZBitset().getFirstSetBit() == bitset.second.getFirstSetBit() )
+  // if ( s.bitset.first.getNumberSetBits() == bitset.first.getNumberSetBits() && s.bitset.second.getNumberSetBits() == bitset.second.getNumberSetBits() )
+  if ( s.fsb_y == fsb_y && s.fsb_z == fsb_z)
   {
-    tf = (s.getBitset() == bitset);
+    tf = (s.bitset == bitset);
   }
   else
   {
@@ -310,7 +358,7 @@ bool Subsplit::operator!=(const Subsplit &s) const
   // If first set bits of both pairs are the same, the Subsplits may be equal (and we have to check)
   // If not, then we know that they must be different
   // Checking this first speeds the process if most comparisons are between non-equal Subsplits
-  if ( s.getYBitset().getFirstSetBit() == bitset.first.getFirstSetBit() && s.getZBitset().getFirstSetBit() == bitset.second.getFirstSetBit() )
+  if ( s.fsb_y == fsb_y && s.fsb_z == fsb_z)
   {
     tf = (s.getBitset() != bitset);
   }
@@ -326,7 +374,16 @@ bool Subsplit::operator!=(const Subsplit &s) const
  */
 bool Subsplit::operator<(const Subsplit &s) const
 {
-  return ( s.bitset < bitset );
+  bool tf;
+  if (s.fsb_y < fsb_y)
+  {
+    tf = true;
+  }
+  else
+  {
+    tf = (s.bitset < bitset);
+  }
+  return tf;
 }
 
 /**
