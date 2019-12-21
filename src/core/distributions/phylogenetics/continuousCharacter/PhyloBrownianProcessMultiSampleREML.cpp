@@ -124,9 +124,14 @@ double PhyloBrownianProcessMultiSampleREML::computeMeanForSpecies(const std::str
         if ( name == t.getSpeciesName() )
         {
             ContinuousTaxonData& taxon = this->value->getTaxonData( t.getName() );
-            mean += taxon.getCharacter(index);
+            
+            if ( taxon.isCharacterResolved(index) == true )
+            {
+                mean += taxon.getCharacter(index);
 
-            ++num_samples;
+                ++num_samples;
+            }
+            
         }
         
     }
@@ -229,19 +234,23 @@ void PhyloBrownianProcessMultiSampleREML::recursiveComputeLnProbability( const T
                 {
                     
                     ContinuousTaxonData& taxon = this->value->getTaxonData( t.getName() );
-                    double x = taxon.getCharacter( site_indices[i] );
+                    if ( taxon.isCharacterResolved( site_indices[i] ) )
+                    {
+                        double x = taxon.getCharacter( site_indices[i] );
                     
-                    // get the site specific rate of evolution
-                    double standDev = this->computeSiteRate(i) * stdev;
+                        // get the site specific rate of evolution
+                        double standDev = this->computeSiteRate(i) * stdev;
                     
-                    // compute the contrasts for this site and node
-                    double contrast = mu_node[i] - x;
+                        // compute the contrasts for this site and node
+                        double contrast = mu_node[i] - x;
                     
-                    // compute the probability for the contrasts at this node
-                    double lnl_node = RbStatistics::Normal::lnPdf(0, standDev, contrast);
+                        // compute the probability for the contrasts at this node
+                        double lnl_node = RbStatistics::Normal::lnPdf(0, standDev, contrast);
                     
-                    // sum up the probabilities of the contrasts
-                    p_node[i] += lnl_node;
+                        // sum up the probabilities of the contrasts
+                        p_node[i] += lnl_node;
+                        
+                    } // end if is character resolved
                     
                 } // end for-loop over all sites
 
