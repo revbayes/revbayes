@@ -678,7 +678,7 @@ Subsplit SBNParameters::drawSubsplitForY( const Subsplit &s ) const
 
   // Find a distinguishing feature of clade Y in subsplit s
   // Since Y and Z are disjoint, we can use the first set bit in Y
-  size_t fsb = s.getYBitset().getFirstSetBit();
+  size_t fsb = s.getFsbY();
 
   double u = GLOBAL_RNG->uniform01();
   size_t index;
@@ -688,7 +688,7 @@ Subsplit SBNParameters::drawSubsplitForY( const Subsplit &s ) const
   {
     // This is a subsplit of Y if one of its splits has the same first set bit as Y
     // my_children[i].first is a Subsplit, with its bitset.first being the bitset representation of its clade Y
-    if ( my_children[i].first.getYBitset().getFirstSetBit() == fsb || my_children[i].first.getZBitset().getFirstSetBit() == fsb )
+    if ( my_children[i].first.getFsbY() == fsb || my_children[i].first.getFsbZ() == fsb )
     {
       if (u < my_children[i].second)
       {
@@ -710,7 +710,7 @@ Subsplit SBNParameters::drawSubsplitForZ( const Subsplit &s ) const
 
   // Find a distinguishing feature of clade Y in subsplit s
   // Since Y and Z are disjoint, we can use the first set bit in Z
-  size_t fsb = s.getZBitset().getFirstSetBit();
+  size_t fsb = s.getFsbZ();
 
   double u = GLOBAL_RNG->uniform01();
   size_t index;
@@ -720,7 +720,7 @@ Subsplit SBNParameters::drawSubsplitForZ( const Subsplit &s ) const
   {
     // This is a subsplit of Y if one of its splits has the same first set bit as Y
     // my_children[i].first is a Subsplit, with its bitset.first being the bitset representation of its clade Y
-    if ( my_children[i].first.getYBitset().getFirstSetBit() == fsb || my_children[i].first.getZBitset().getFirstSetBit() == fsb )
+    if ( my_children[i].first.getFsbY() == fsb || my_children[i].first.getFsbZ() == fsb )
     {
       if (u < my_children[i].second)
       {
@@ -1664,8 +1664,8 @@ void SBNParameters::normalizeCPDForSubsplit(std::vector<std::pair<Subsplit,doubl
 
   // Find a distinguishing feature of clade Y in subsplit s
   // Since Y and Z are disjoint, we can use the first set bits in Y and Z
-  size_t fsb_y = parent.getYBitset().getFirstSetBit();
-  size_t fsb_z = parent.getZBitset().getFirstSetBit();
+  size_t fsb_y = parent.getFsbY();
+  size_t fsb_z = parent.getFsbZ();
 
   // In unrooted counting, we lose dummy subsplits, we add them in here
   bool y_is_tip = parent.getYBitset().getNumberSetBits() == 1 ? true : false;
@@ -1686,12 +1686,12 @@ void SBNParameters::normalizeCPDForSubsplit(std::vector<std::pair<Subsplit,doubl
 
     // This is a subsplit of parent's clade Y if one of its splits has the same first set bit as Y
     // cpd[i].first is a Subsplit, with its bitset.first being the bitset representation of its clade Y
-    if ( cpd[i].first.getYBitset().getFirstSetBit() == fsb_y || cpd[i].first.getZBitset().getFirstSetBit() == fsb_y )
+    if ( cpd[i].first.getFsbY() == fsb_y || cpd[i].first.getFsbZ() == fsb_y )
     {
       sum_y +=  cpd[i].second;
       ++n_children_of_y;
     }
-    else if ( cpd[i].first.getYBitset().getFirstSetBit() == fsb_z || cpd[i].first.getZBitset().getFirstSetBit() == fsb_z )
+    else if ( cpd[i].first.getFsbY() == fsb_z || cpd[i].first.getFsbZ() == fsb_z )
     {
       sum_z +=  cpd[i].second;
       ++n_children_of_z;
@@ -1732,7 +1732,7 @@ void SBNParameters::normalizeCPDForSubsplit(std::vector<std::pair<Subsplit,doubl
   {
     // This is a subsplit of X's clade Y if one of its splits has the same first set bit as Y
     // cpd[i].first is a Subsplit, with its bitset.first being the bitset representation of its clade Y
-    if ( cpd[i].first.getYBitset().getFirstSetBit() == fsb_y || cpd[i].first.getZBitset().getFirstSetBit() == fsb_y )
+    if ( cpd[i].first.getFsbY() == fsb_y || cpd[i].first.getFsbZ() == fsb_y )
     {
       (subsplit_cpds[parent][i]).second /= sum_y;
     }
@@ -1749,8 +1749,8 @@ bool SBNParameters::isValidCPD(std::vector<std::pair<Subsplit,double> >& cpd, Su
   double sum_y = 0.0;
   double sum_z = 0.0;
 
-  size_t fsb_y = parent.getYBitset().getFirstSetBit();
-  // size_t fsb_z = parent.getZBitset().getFirstSetBit();
+  size_t fsb_y = parent.getFsbY();
+  // size_t fsb_z = parent.getFsbZ();
 
   // bool y_is_tip = parent.getYBitset().getNumberSetBits() == 1 ? true : false;
   // bool z_is_tip = parent.getZBitset().getNumberSetBits() == 1 ? true : false;

@@ -51,10 +51,14 @@ namespace RevBayesCore {
         RbBitSet                                    asCladeBitset(void) const;                                  //!< Convert this value into a bitset representation for a clade.
         RbBitSet                                    asSplitBitset(void) const;                                        //!< Convert this value into a split (as bitset representation).
         std::vector<std::pair<Subsplit,Subsplit> >  doVirtualRootingNonRootParent(const Subsplit &parent, const Subsplit &child) const; //!< Gives us all parent-child subsplits that will replace this one on the equivalent edge in a tree rerooted to a specific edge
+        void                                        doVirtualRootingNonRootParent(const Subsplit &parent, const Subsplit &child, std::vector<std::pair<Subsplit,Subsplit> > &cases) const; //!< Gives us all parent-child subsplits that will replace this one on the equivalent edge in a tree rerooted to a specific edge
         std::vector<std::pair<Subsplit,Subsplit> >  doVirtualRootingRootParent(const Subsplit &sister1, const Subsplit &sister2, const Subsplit &child) const; //!< Gives us all parent-child subsplits that will replace this one on the equivalent edge in a tree rerooted to a specific edge
+        void                                        doVirtualRootingRootParent(const Subsplit &sister1, const Subsplit &sister2, const Subsplit &child, std::vector<std::pair<Subsplit,Subsplit> > &cases) const; //!< Gives us all parent-child subsplits that will replace this one on the equivalent edge in a tree rerooted to a specific edge
         std::pair<RbBitSet,RbBitSet>                getBitset(void) const;                                      //!< Get the paired bitset representation of this subsplit as a bitset
         const std::pair<RbBitSet,RbBitSet>&         getBitsetRef(void) const;                                      //!< Get the paired bitset representation of this subsplit as a bitset referemce
         const std::pair<RbBitSet,RbBitSet>*         getBitsetPtr(void) const;                                      //!< Get the paired bitset representation of this subsplit as a bitset referemce
+        size_t                                      getFsbY(void) const;                                        //!< Get first set bit in Y
+        size_t                                      getFsbZ(void) const;                                        //!< Get first set bit in Z
         Clade                                       getY(const std::vector<Taxon>& taxa) const;                                           //!< Get clade Y
         RbBitSet                                    getYBitset(void) const;                                     //!< Get clade Y as bitset
         RbBitSet&                                   getYBitsetRef(void) const;                                     //!< Get clade Y as bitset  reference

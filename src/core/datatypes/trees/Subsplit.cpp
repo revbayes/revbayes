@@ -319,6 +319,8 @@ Subsplit& Subsplit::operator=(const Subsplit &s)
   {
     bitset  = s.bitset;
     is_fake = s.is_fake;
+    fsb_y   = s.fsb_y;
+    fsb_z   = s.fsb_z;
   }
 
   return *this;
@@ -677,6 +679,28 @@ const std::pair<RbBitSet,RbBitSet>& Subsplit::getBitsetRef( void ) const
 {
     // TODO: investiate uses of getBitset, decide if we ever need to return a value, then ditch most of this because we never needed the get functions for comparison operators
     return bitset;
+}
+
+/**
+ * Utility function to get first set bit in child Y
+ *
+ * \return    The bitset pair.
+ */
+size_t Subsplit::getFsbY( void ) const
+{
+
+    return fsb_y;
+}
+
+/**
+ * Utility function to get first set bit in child Z
+ *
+ * \return    The bitset pair.
+ */
+size_t Subsplit::getFsbZ( void ) const
+{
+
+    return fsb_z;
 }
 
 /*&

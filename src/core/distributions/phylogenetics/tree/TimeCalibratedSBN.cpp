@@ -241,7 +241,7 @@ void TimeCalibratedSBN::simulateTree( void )
       if ( Y_child.isFake() )
       {
         // This is a tip, we don't add it to the active pile, nor do we give it an age
-        Y_child_node = tip_nodes[Y_child.getYBitset().getFirstSetBit()];
+        Y_child_node = tip_nodes[Y_child.getFsbY()];
       }
       else
       {
@@ -286,7 +286,7 @@ void TimeCalibratedSBN::simulateTree( void )
       if ( Z_child.isFake() )
       {
         // This is a tip, we don't add it to the active pile, nor do we give it an age
-        Z_child_node = tip_nodes[Z_child.getYBitset().getFirstSetBit()];
+        Z_child_node = tip_nodes[Z_child.getFsbY()];
       }
       else
       {
