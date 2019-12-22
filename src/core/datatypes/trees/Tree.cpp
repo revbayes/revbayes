@@ -759,6 +759,22 @@ std::vector<RbBitSet> Tree::getNodesAsBitset(void) const
     return bs;
 }
 
+
+std::vector<long> Tree::getNodeIndices(void) const
+{
+    std::vector<long> indices;
+
+    for ( size_t i=0; i<nodes.size(); ++i )
+    {
+        indices.push_back(nodes[i]->getIndex() );
+    }
+
+    return indices;
+}
+
+
+
+
 /**
  * Calculate the number of interior nodes in the BranchLengthTree by deducing the number of
  * tips from number of nodes, and then subtract 1 more if the BranchLengthTree is rooted.
