@@ -479,7 +479,8 @@ std::vector<std::pair<Subsplit,double> > SBNParameters::computeLnProbabilityTopo
         RbBitSet sib_1_bitset = per_node_subsplit[sibling_indices[1]].asCladeBitset();
         Subsplit sib_split = Subsplit(sib_0_bitset,sib_1_bitset);
 
-        std::vector<std::pair<Subsplit,Subsplit> > cases = per_node_subsplit[index].doVirtualRootingRootParent(per_node_subsplit[sibling_indices[0]],per_node_subsplit[sibling_indices[1]],per_node_subsplit[(*it)->getIndex()]);
+        std::vector<std::pair<Subsplit,Subsplit> > cases;
+        per_node_subsplit[index].doVirtualRootingRootParent(per_node_subsplit[sibling_indices[0]],per_node_subsplit[sibling_indices[1]],per_node_subsplit[(*it)->getIndex()],cases);
 
         // 1) Propagate rtt
         rtt[index] = ttr[sibling_indices[0]] + computeSubsplitTransitionProbability(sib_split,per_node_subsplit[sibling_indices[0]]) + ttr[sibling_indices[1]] + computeSubsplitTransitionProbability(sib_split,per_node_subsplit[sibling_indices[1]]);
@@ -496,8 +497,8 @@ std::vector<std::pair<Subsplit,double> > SBNParameters::computeLnProbabilityTopo
       else
       {
         // Get all cases for virtual rooting of this edge (including current rooting)
-        // std::vector<std::pair<Subsplit,Subsplit> > cases = per_node_subsplit[index].doVirtualRootingNonRootParent(this_parent_child.first,this_parent_child.second);
-        std::vector<std::pair<Subsplit,Subsplit> > cases = per_node_subsplit[index].doVirtualRootingNonRootParent(per_node_subsplit[(*it)->getParent().getIndex()],per_node_subsplit[(*it)->getIndex()]);
+        std::vector<std::pair<Subsplit,Subsplit> > cases;
+        per_node_subsplit[index].doVirtualRootingNonRootParent(per_node_subsplit[(*it)->getParent().getIndex()],per_node_subsplit[(*it)->getIndex()],cases);
 
         // We will need to get the first subsplit both in our parent's sister node and in the rest of the tree
         // Thus we need our sibling's index and our parent's sibling's index
@@ -892,7 +893,8 @@ void SBNParameters::countAllSubsplits(Tree& t, std::map<std::pair<Subsplit,Subsp
       }
 
       // Get all cases for virtual rooting of this edge (including current rooting)
-      std::vector<std::pair<Subsplit,Subsplit> > cases = per_node_subsplit[index].doVirtualRootingRootParent(per_node_subsplit[sibling_indices[0]],per_node_subsplit[sibling_indices[1]],per_node_subsplit[index]);
+      std::vector<std::pair<Subsplit,Subsplit> > cases;
+      per_node_subsplit[index].doVirtualRootingRootParent(per_node_subsplit[sibling_indices[0]],per_node_subsplit[sibling_indices[1]],per_node_subsplit[index],cases);
 
       // Subsplit root_on_edge = per_node_subsplit[index].rootSplitFromClade();
 
@@ -942,7 +944,8 @@ void SBNParameters::countAllSubsplits(Tree& t, std::map<std::pair<Subsplit,Subsp
       this_parent_child.second = per_node_subsplit[index];
 
       // Get all cases for virtual rooting of this edge (including current rooting)
-      std::vector<std::pair<Subsplit,Subsplit> > cases = per_node_subsplit[index].doVirtualRootingNonRootParent(this_parent_child.first,this_parent_child.second);
+      std::vector<std::pair<Subsplit,Subsplit> > cases;
+      per_node_subsplit[index].doVirtualRootingNonRootParent(this_parent_child.first,this_parent_child.second,cases);
 
       // Subsplit root_on_edge = per_node_subsplit[index].rootSplitFromClade();
 
@@ -1098,7 +1101,8 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<Subs
       }
 
       // Get all cases for virtual rooting of this edge (including current rooting)
-      std::vector<std::pair<Subsplit,Subsplit> > cases = per_node_subsplit[index].doVirtualRootingRootParent(per_node_subsplit[sibling_indices[0]],per_node_subsplit[sibling_indices[1]],per_node_subsplit[index]);
+      std::vector<std::pair<Subsplit,Subsplit> > cases;
+      per_node_subsplit[index].doVirtualRootingRootParent(per_node_subsplit[sibling_indices[0]],per_node_subsplit[sibling_indices[1]],per_node_subsplit[index],cases);
 
       // Subsplit root_on_edge = per_node_subsplit[index].rootSplitFromClade();
 
@@ -1148,7 +1152,8 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<Subs
       this_parent_child.second = per_node_subsplit[index];
 
       // Get all cases for virtual rooting of this edge (including current rooting)
-      std::vector<std::pair<Subsplit,Subsplit> > cases = per_node_subsplit[index].doVirtualRootingNonRootParent(this_parent_child.first,this_parent_child.second);
+      std::vector<std::pair<Subsplit,Subsplit> > cases;
+      per_node_subsplit[index].doVirtualRootingNonRootParent(this_parent_child.first,this_parent_child.second,cases);
 
       // Subsplit root_on_edge = per_node_subsplit[index].rootSplitFromClade();
 

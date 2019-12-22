@@ -28,8 +28,8 @@ namespace RevBayesCore {
                                                     Subsplit(void);                                                            //! Default constructor: empty Subsplit
                                                     Subsplit(const std::vector<Taxon> &c1, const std::vector<Taxon> &n );                                                //!< Default constructor: fake Subsplit
                                                     Subsplit(const std::vector<Taxon> &c1, const std::vector<Taxon> &c2, const std::vector<Taxon> &n );                               //!< Default constructor: real Subsplit
-                                                    Subsplit(RbBitSet &c1, RbBitSet &c2 );                               //!< Default constructor: real Subsplit from bitsets
-                                                    Subsplit(Subsplit &s1, Subsplit &s2 );                               //!< Default constructor: Subsplit from its child subsplits
+                                                    Subsplit(const RbBitSet &c1, const RbBitSet &c2 );                               //!< Default constructor: real Subsplit from bitsets
+                                                    Subsplit(const Subsplit &s1, const Subsplit &s2 );                               //!< Default constructor: Subsplit from its child subsplits
 
         virtual                                    ~Subsplit(void) {}
 
@@ -74,7 +74,8 @@ namespace RevBayesCore {
         size_t                                      size(void) const;                                           //!< Get the number of taxa.
         bool                                        splitsAreDisjoint(void) const;
         std::string                                 toString(void) const;                                       //!< Convert this value into a string.
-        std::pair<Subsplit,Subsplit>                virtualRoot(const Subsplit &t, const Subsplit &s, int case_number) const;       //!< Gives us the parent-child subsplit that will replace this one on the equivalent edge in a tree rerooted to a specific edge
+        std::pair<Subsplit,Subsplit>                reverseParentChildNonRootParent(const Subsplit &t, const Subsplit &s) const;       //!< Gives us the parent-child subsplit that will replace this one on the equivalent edge in a tree rerooted in the child
+        std::pair<Subsplit,Subsplit>                reverseParentChildRootParent(const Subsplit &sister1, const Subsplit &sister2, const Subsplit &s) const;       //!< Gives us the parent-child subsplit that will replace this one on the equivalent edge in a tree rerooted in the child
 
         // public TopologyNode functions
 

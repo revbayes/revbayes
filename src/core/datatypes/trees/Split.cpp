@@ -107,7 +107,7 @@ Split& Split::operator=(const Split &s)
  */
 bool Split::operator==(const Split &s) const
 {
-  return ( s.getBitset() == bitset );
+  return ( s.bitset == bitset );
 }
 
 
@@ -116,7 +116,7 @@ bool Split::operator==(const Split &s) const
  */
 bool Split::operator!=(const Split &s) const
 {
-  return ( s.getBitset() != bitset );
+  return ( s.bitset != bitset );
 }
 
 /**
@@ -124,7 +124,7 @@ bool Split::operator!=(const Split &s) const
  */
 bool Split::operator<(const Split &s) const
 {
-  return ( s.getBitset() < bitset );
+  return ( s.bitset < bitset );
 }
 
 /**
@@ -132,7 +132,7 @@ bool Split::operator<(const Split &s) const
  */
 bool Split::operator<=(const Split &s) const
 {
-  return ( s.getBitset() <= bitset );
+  return ( s.bitset <= bitset );
 }
 
 /**
@@ -140,7 +140,7 @@ bool Split::operator<=(const Split &s) const
  */
 bool Split::operator>(const Split &s) const
 {
-  return ( s.getBitset() > bitset );
+  return ( s.bitset > bitset );
 }
 
 /**
@@ -148,7 +148,7 @@ bool Split::operator>(const Split &s) const
  */
 bool Split::operator>=(const Split &s) const
 {
-  return ( s.getBitset() >= bitset );
+  return ( s.bitset >= bitset );
 }
 
 /**

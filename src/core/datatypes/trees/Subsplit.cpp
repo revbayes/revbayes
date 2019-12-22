@@ -163,7 +163,7 @@ Subsplit::Subsplit( const std::vector<Taxon> &c1, const std::vector<Taxon> &c2, 
 /**
  * Constructor from bitsets.
  */
-Subsplit::Subsplit( RbBitSet &clade_1_bitset, RbBitSet &clade_2_bitset ) :
+Subsplit::Subsplit( const RbBitSet &clade_1_bitset, const RbBitSet &clade_2_bitset ) :
     bitset(),
     is_fake( false ),
     fsb_y(),
@@ -231,15 +231,15 @@ Subsplit::Subsplit( RbBitSet &clade_1_bitset, RbBitSet &clade_2_bitset ) :
 /**
  * Constructor from 2 child subsplits.
  */
-Subsplit::Subsplit( Subsplit &s1, Subsplit &s2 ) :
+Subsplit::Subsplit( const Subsplit &s1, const Subsplit &s2 ) :
     bitset(),
     is_fake( false ),
     fsb_y(),
     fsb_z()
 {
 
-    RbBitSet clade_1_bitset = s1.getYBitset() | s1.getZBitset();
-    RbBitSet clade_2_bitset = s2.getYBitset() | s2.getZBitset();
+    RbBitSet clade_1_bitset = s1.bitset.first | s1.bitset.second;
+    RbBitSet clade_2_bitset = s2.bitset.first | s2.bitset.second;
 
     // For faster comparison operators
     size_t fsb1;
@@ -472,23 +472,20 @@ RbBitSet Subsplit::asSplitBitset( void ) const
 /*
  * Gives us all the parent-child subsplit pairs that we can get from the edge leading from parent to child subsplit for all rootings of this tree.
  * The edge must be internal.
- *
- * return: vector of parent-child pairs
  */
-std::vector<std::pair<Subsplit,Subsplit> > Subsplit::doVirtualRootingNonRootParent(const Subsplit &parent, const Subsplit &child) const
+void Subsplit::doVirtualRootingNonRootParent(const Subsplit &parent, const Subsplit &child, std::vector<std::pair<Subsplit,Subsplit> > &all_orientations) const
 {
-    std::vector<std::pair<Subsplit,Subsplit> > all_orientations; // Each subsplit in this vector will be in the order parent-child
-
+    
     std::pair<Subsplit,Subsplit> orientation; // Use this for each new s,t pair; will be in the order parent-child
 
     // Define the sets of taxa we need
 
     // Children clades of child subsplit
-    RbBitSet s_y = child.getYBitset();
-    RbBitSet s_z = child.getZBitset();
+    // RbBitSet s_y = child.bitset.first;
+    // RbBitSet s_z = child.bitset.second;
 
     // Child subsplit
-    RbBitSet s = s_y | s_z;
+    RbBitSet s = child.bitset.first | child.bitset.second;
 
     // Everyone but child subsplit
     RbBitSet not_s = s; ~not_s;
@@ -536,12 +533,12 @@ std::vector<std::pair<Subsplit,Subsplit> > Subsplit::doVirtualRootingNonRootPare
     if ( s.getNumberSetBits() > 1 )
     {
       // Case 4: virtual root in s_y
-      orientation.first = Subsplit(s_z,not_s);
+      orientation.first = Subsplit(child.bitset.second,not_s);
       orientation.second = reversed_child;
       all_orientations.push_back(orientation);
 
       // Case 5: virtual root in s_z
-      orientation.first = Subsplit(s_y,not_s);
+      orientation.first = Subsplit(child.bitset.first,not_s);
       all_orientations.push_back(orientation);
     }
     else
@@ -559,6 +556,20 @@ std::vector<std::pair<Subsplit,Subsplit> > Subsplit::doVirtualRootingNonRootPare
     orientation.second = reversed_child;
     all_orientations.push_back(orientation);
 
+}
+
+/*
+ * Gives us all the parent-child subsplit pairs that we can get from the edge leading from parent to child subsplit for all rootings of this tree.
+ * The edge must be internal.
+ *
+ * return: vector of parent-child pairs
+ */
+std::vector<std::pair<Subsplit,Subsplit> > Subsplit::doVirtualRootingNonRootParent(const Subsplit &parent, const Subsplit &child) const
+{
+    std::vector<std::pair<Subsplit,Subsplit> > all_orientations; // Each subsplit in this vector will be in the order parent-child
+
+    doVirtualRootingNonRootParent(parent, child, all_orientations);
+
     return all_orientations;
 }
 
@@ -568,20 +579,18 @@ std::vector<std::pair<Subsplit,Subsplit> > Subsplit::doVirtualRootingNonRootPare
  *
  * return: vector of parent-child pairs
  */
-std::vector<std::pair<Subsplit,Subsplit> >  Subsplit::doVirtualRootingRootParent(const Subsplit &sister1, const Subsplit &sister2, const Subsplit &child) const
+void  Subsplit::doVirtualRootingRootParent(const Subsplit &sister1, const Subsplit &sister2, const Subsplit &child, std::vector<std::pair<Subsplit,Subsplit> > &all_orientations) const
 {
-  std::vector<std::pair<Subsplit,Subsplit> > all_orientations; // Each subsplit in this vector will be in the order parent-child
-
   std::pair<Subsplit,Subsplit> orientation; // Use this for each new s,t pair; will be in the order parent-child
 
   // Define the sets of taxa we need
 
-  // Children clades of child subsplit
-  RbBitSet s_y = child.getYBitset();
-  RbBitSet s_z = child.getZBitset();
+  // // Children clades of child subsplit
+  // RbBitSet s_y = child.bitset.first;
+  // RbBitSet s_z = child.bitset.second;
 
   // Child subsplit
-  RbBitSet s = s_y | s_z;
+  RbBitSet s = child.bitset.first | child.bitset.second;
 
   // Everyone but child subsplit
   RbBitSet not_s = s; ~not_s;
@@ -622,12 +631,12 @@ std::vector<std::pair<Subsplit,Subsplit> >  Subsplit::doVirtualRootingRootParent
   if ( s.getNumberSetBits() > 1 )
   {
     // Case 4: virtual root in s_y
-    orientation.first = Subsplit(s_z,not_s);
+    orientation.first = Subsplit(child.bitset.second,not_s);
     orientation.second = reversed_child;
     all_orientations.push_back(orientation);
 
     // Case 5: virtual root in s_z
-    orientation.first = Subsplit(s_y,not_s);
+    orientation.first = Subsplit(child.bitset.first,not_s);
     all_orientations.push_back(orientation);
   }
   else
@@ -644,6 +653,19 @@ std::vector<std::pair<Subsplit,Subsplit> >  Subsplit::doVirtualRootingRootParent
   orientation.first = root_to_this_edge;
   orientation.second = reversed_child;
   all_orientations.push_back(orientation);
+}
+
+/*
+ * Gives us all the parent-child subsplit pairs that we can get from the edge leading from parent to child subsplit for all rootings of this tree.
+ * The edge must have the root as a parent.
+ *
+ * return: vector of parent-child pairs
+ */
+std::vector<std::pair<Subsplit,Subsplit> >  Subsplit::doVirtualRootingRootParent(const Subsplit &sister1, const Subsplit &sister2, const Subsplit &child) const
+{
+  std::vector<std::pair<Subsplit,Subsplit> > all_orientations; // Each subsplit in this vector will be in the order parent-child
+
+  doVirtualRootingRootParent(sister1, sister2, child, all_orientations);
 
   return all_orientations;
 }
@@ -930,7 +952,7 @@ std::string Subsplit::toString( void ) const
  *
  * return: parent-child pair
  */
-std::pair<Subsplit,Subsplit> Subsplit::virtualRoot(const Subsplit &parent, const Subsplit &child, int case_number) const
+std::pair<Subsplit,Subsplit> Subsplit::reverseParentChildNonRootParent(const Subsplit &parent, const Subsplit &child) const
 {
 
     std::pair<Subsplit,Subsplit> flipped; // This will be in the order parent-child
