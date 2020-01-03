@@ -29,6 +29,10 @@ namespace RevBayesCore {
         
             double                      dppConcParamFromNumTables(double tables, double num);
             double                      dppExpectNumTableFromConcParam(double conp, double num);
+            std::vector<double>         calculateMoments(std::vector<double>& samples, bool sample=true);
+            std::vector<double>         fitGammaMOM(std::vector<double>& x);
+            std::vector<double>         fitKumaraswamyAGD(std::vector<double> &samples);
+            double                      KumaraswamyScore(double a, std::vector<double> &samples);
             double                      pointChi2(double prob, double v);
             int                         poissonInver(double lambda, RandomNumberGenerator& rng);
             int                         poissonLow(double lambda, RandomNumberGenerator& rng);

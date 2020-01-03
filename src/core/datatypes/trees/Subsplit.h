@@ -93,4 +93,24 @@ namespace RevBayesCore {
 
 }
 
+namespace std {
+  template<>
+  struct hash<RevBayesCore::Subsplit>
+  {
+    size_t operator()(const RevBayesCore::Subsplit& p) const
+    {
+      return p.getHash();
+    }
+  };
+
+  template<>
+  struct equal_to<RevBayesCore::Subsplit>
+  {
+    size_t operator()(const RevBayesCore::Subsplit& lhs, const RevBayesCore::Subsplit& rhs) const
+    {
+      return lhs == rhs;
+    }
+  };
+}
+
 #endif

@@ -105,7 +105,127 @@ double RbStatistics::Helper::dppExpectNumTableFromConcParam(double conp, double 
 	return expectedNum;
 }
 
+/*!
+ * This function is used to calculate the mean and variance of
+ * the input vector. Divides by n, not n-1.
+ *
+ * \brief Mean/Variance
+ * \param x is vector for which moments are to be calculated
+ * \param sample determines whether the sample moments are calculated
+ * \return Returns the moments 
+ * \throws 
+ */
+std::vector<double> RbStatistics::Helper::calculateMoments(std::vector<double>& x, bool sample)
+{
+  // Get mean/var of observations
+  double mean;
+  for (size_t i=0; i<x.size(); ++i)
+  {
+    mean += x[i];
+  }
+  mean /= sample ? x.size() - 1.0 : x.size();
 
+  double var;
+  for (size_t i=0; i<x.size(); ++i)
+  {
+    var += pow(x[i] - mean,2.0);
+  }
+  var /= sample ? x.size() - 1.0 : x.size();
+
+  std::vector<double> moments;
+  moments.push_back(mean);
+  moments.push_back(var);
+
+  return moments;
+}
+
+//Fit gamma distribution by method of moments
+std::vector<double> RbStatistics::Helper::fitGammaMOM(std::vector<double>& x)
+{
+  std::vector<double> moments = calculateMoments(x);
+  std::vector<double> par = std::vector<double>(2,-1.0);
+  par[1] = moments[0]/moments[1];
+  par[0] = moments[0]*moments[0]/moments[1];
+
+  return par;
+}
+
+// Need for fitting time-SBNs
+// Jones (2009) eqn 5.2, Score function for Kumaraswamy distribution
+double RbStatistics::Helper::KumaraswamyScore(double a, std::vector<double> &samples)
+{
+  double n = (double)samples.size();
+
+  double T1 = 0.0;
+  double T2 = 0.0;
+  double T3 = 0.0;
+
+  for (size_t i=0; i<samples.size(); ++i)
+  {
+    double y = pow(samples[i],a);
+    double log_y = log(y);
+    double one_minus_y = 1.0 - y;
+    T1 += log_y/one_minus_y;
+    T2 += (y * log_y)/one_minus_y;
+    T3 += log(one_minus_y);
+  }
+
+  T1 *= 1.0/n;
+  T2 *= 1.0/n;
+  T3 *= 1.0/n;
+
+  return n/a * (1 + T1 + T2/T3);
+
+}
+
+// Fits a Kumaraswamy distribution via Nesterov's accelerated gradient descent
+std::vector<double> RbStatistics::Helper::fitKumaraswamyAGD(std::vector<double> &samples)
+{
+
+  double x_s = 1.0;
+  double x_s_1;
+
+  double y_s = 1.0;
+  double y_s_1;
+
+  double lambda_s = 1.0;
+  double lambda_s_1 = (1.0 + sqrt(1.0 + 4.0 * lambda_s*lambda_s)) / 2.0;
+
+  double d = 10000000.0;
+  double beta_inv = 1.0/1000.0;
+  double eps = 0.001;
+  // Run accelerated gradient descent
+  while (d > eps)
+  {
+    double gamma_s = (1.0 - lambda_s) / lambda_s_1;
+
+    y_s_1 = x_s + beta_inv * KumaraswamyScore(x_s,samples);
+    x_s_1 = (1.0 - gamma_s) * y_s_1 + gamma_s * y_s;
+
+    d = fabs(x_s_1 - x_s);
+
+    x_s = x_s_1;
+    y_s = y_s_1;
+
+    lambda_s = lambda_s_1;
+    lambda_s_1 = (1.0 + sqrt(1.0 + 4.0 * lambda_s*lambda_s)) / 2.0;
+
+  }
+
+  std::vector<double> alphabeta;
+  alphabeta.push_back(x_s_1);
+
+  // Get beta parameter of Kumaraswamy distribution (x_s_1 is alpha)
+  double s = 0.0;
+  for (size_t i=0; i<samples.size(); ++i)
+  {
+    s += log(1.0 - pow(samples[i],x_s_1));
+  }
+
+  alphabeta.push_back(-(double)samples.size()/s);
+
+  return alphabeta;
+}
 
 double RbStatistics::Helper::pointChi2(double prob, double v) {
     // Returns z so that Prob{x<z}=prob where x is Chi2 distributed with df

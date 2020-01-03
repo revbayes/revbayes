@@ -1,9 +1,7 @@
 #include <boost/foreach.hpp>
 #include "Clade.h"
 #include "DistributionGamma.h"
-#include "DistributionGeneralizedGamma.h"
 #include "DistributionLognormal.h"
-#include "DistributionScaledDirichlet.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
@@ -14,8 +12,11 @@
 
 #include <algorithm>
 #include <cmath>
+#include <unordered_map>
 
 using namespace RevBayesCore;
+
+//TODO: drawing trees, computing branch lengths, and most other complex things done here should really be done in SBNParameters
 
 // Empty constructor (needed by smart moves)
 UnconstrainedSBN::UnconstrainedSBN(void) : TypedDistribution<Tree>( new Tree() ),
@@ -69,13 +70,7 @@ double UnconstrainedSBN::computeLnProbabilityBranchLengths( void )
 {
     double lnProbability = 0.0;
 
-    std::map<RbBitSet,std::vector<double> > edge_length_params = parameters.getEdgeLengthDistributionParameters();
-
-    // Only needed if we're using a compound parameterization on branch lengths and tree length
-    std::vector<double> branch_length_alpha;
-    std::vector<double> branch_length_beta;
-    std::vector<double> branch_length_simplex_coords;
-    double tree_length = value->getTreeLength();
+    std::unordered_map<RbBitSet,std::vector<double> > edge_length_params = parameters.getEdgeLengthDistributionParameters();
 
     // Get branch lengths
     const std::vector<TopologyNode*> tree_nodes = value->getNodes();
@@ -89,23 +84,11 @@ double UnconstrainedSBN::computeLnProbabilityBranchLengths( void )
         // std::cout << "About to get branch length parameters for split " << this_split << std::endl;
 
         std::vector<double> these_params = edge_length_params[this_split];
-        if ( parameters.getBranchLengthApproximationMethod() == "compound" )
-        {
-          branch_length_alpha.push_back(these_params[0]);
-          branch_length_beta.push_back(these_params[1]);
-          branch_length_simplex_coords.push_back((tree_nodes[i]->getBranchLength())/tree_length);
-        }
-        else if ( parameters.getBranchLengthApproximationMethod() == "gammaMOM" )
+        if ( parameters.getBranchLengthApproximationMethod() == "gammaMOM" )
         {
           // std::cout << "Computing branch length probability for branch " << i << ", lnProb = " << RbStatistics::Gamma::pdf(these_params[0], these_params[1], tree_nodes[i]->getBranchLength()) << std::endl;
           // std::cout << "gamma shape: " << these_params[0] << "; gamma rate: " << these_params[1] << "; evaluating density at x=" << tree_nodes[i]->getBranchLength() << std::endl;
           lnProbability += RbStatistics::Gamma::lnPdf(these_params[0], these_params[1], tree_nodes[i]->getBranchLength());
-        }
-        else if ( parameters.getBranchLengthApproximationMethod() == "generalizedGamma" )
-        {
-          // std::cout << "generalized gamma a: " << these_params[0] << "; generalized gamma c: " << these_params[1] << "; generalized gamma l: " << these_params[2] << "; evaluating density at x=" << tree_nodes[i]->getBranchLength() << std::endl;
-          // std::cout << "Computing branch length probability for branch " << i << ", lnProb = " << RbStatistics::GeneralizedGamma::lnPdf(these_params[0], these_params[1], these_params[2], tree_nodes[i]->getBranchLength()) << std::endl;
-          lnProbability += RbStatistics::GeneralizedGamma::lnPdf(these_params[0], these_params[1], these_params[2], tree_nodes[i]->getBranchLength());
         }
         else
         {
@@ -115,18 +98,6 @@ double UnconstrainedSBN::computeLnProbabilityBranchLengths( void )
         }
 
       }
-    }
-
-    if ( parameters.getBranchLengthApproximationMethod() == "compound" )
-    {
-      // Tree length probability
-      RbBitSet whole_tree = RbBitSet(taxa.size(),true);
-      std::vector<double> these_params = edge_length_params[whole_tree];
-      lnProbability += RbStatistics::Gamma::lnPdf(these_params[0], these_params[1], tree_length);
-
-      // Branch length proportion probability
-      lnProbability += RbStatistics::ScaledDirichlet::lnPdf(branch_length_alpha,branch_length_beta,branch_length_simplex_coords);
-
     }
 
     return lnProbability;
@@ -187,7 +158,7 @@ void UnconstrainedSBN::simulateTree( void )
     psi->setRooted(true);
 
     // For drawing branch lengths
-    std::map<RbBitSet,std::vector<double> > edge_length_params = parameters.getEdgeLengthDistributionParameters();
+    std::unordered_map<RbBitSet,std::vector<double> > edge_length_params = parameters.getEdgeLengthDistributionParameters();
 
     // create the tip nodes
     std::vector<TopologyNode*> tip_nodes;
@@ -286,13 +257,9 @@ void UnconstrainedSBN::simulateTree( void )
         RbBitSet this_split = tree_nodes[i]->getSubsplit(taxa).asSplitBitset();
 
         std::vector<double> these_params = edge_length_params[this_split];
-        if ( parameters.getBranchLengthApproximationMethod() == "gammaMOM" || parameters.getBranchLengthApproximationMethod() == "compound" )
+        if ( parameters.getBranchLengthApproximationMethod() == "gammaMOM" )
         {
           brlen = RbStatistics::Gamma::rv(these_params[0], these_params[1], *rng);
-        }
-        else if ( parameters.getBranchLengthApproximationMethod() == "generalizedGamma" )
-        {
-          brlen = RbStatistics::GeneralizedGamma::rv(these_params[0], these_params[1], these_params[2], *rng);
         }
         else
         {
@@ -300,22 +267,6 @@ void UnconstrainedSBN::simulateTree( void )
         }
         tree_nodes[i]->setBranchLength(brlen,false);
         brlen_sum += brlen;
-      }
-    }
-
-    // If doing compound parameterization, readjust tree length
-    if ( parameters.getBranchLengthApproximationMethod() == "compound" )
-    {
-      RbBitSet whole_tree = RbBitSet(taxa.size(),true);
-      std::vector<double> these_params = edge_length_params[whole_tree];
-      double tree_length = RbStatistics::Gamma::rv(these_params[0], these_params[1], *rng);
-      double scaling_factor = tree_length/brlen_sum;
-      for (size_t i=0; i<tree_nodes.size(); ++i)
-      {
-        if (!tree_nodes[i]->isRoot())
-        {
-          tree_nodes[i]->setBranchLength(tree_nodes[i]->getBranchLength()*scaling_factor,false);
-        }
       }
     }
 

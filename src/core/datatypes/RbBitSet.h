@@ -67,4 +67,23 @@ namespace RevBayesCore {
 
 }
 
+namespace std {
+  template<>
+  struct hash<RevBayesCore::RbBitSet>
+  {
+    size_t operator()(const RevBayesCore::RbBitSet& p) const
+    {
+      return p.getHash();
+    }
+  };
+
+  template<>
+  struct equal_to<RevBayesCore::RbBitSet>
+  {
+    size_t operator()(const RevBayesCore::RbBitSet& lhs, const RevBayesCore::RbBitSet& rhs) const
+    {
+      return lhs == rhs;
+    }
+  };
+}
 #endif
