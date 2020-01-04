@@ -138,6 +138,54 @@ const std::vector<Taxon>& SBNParameters::getTaxa(void) const
   return taxa;
 }
 
+/* Computes probability of edge length for split */
+double SBNParameters::computeEdgeLengthProbability( const RbBitSet &split, double length) const
+{
+  // Get parameters
+  std::vector<double> these_params = edge_length_distribution_parameters.at(split);
+  
+  // Compute probability
+  if ( branch_length_approximation_method == "gammaMOM" )
+  {
+    return RbStatistics::Gamma::lnPdf(these_params[0], these_params[1], length);
+  }
+  else if ( branch_length_approximation_method == "lognormalMOM" || branch_length_approximation_method == "lognormalML" )
+  {
+    return RbStatistics::Lognormal::lnPdf(these_params[0], these_params[1], length);
+  }
+  else if ( branch_length_approximation_method == "pureTopology" )
+  {
+    // For a "pure topology" SBN, we define the branch lengths as point-masses at 1. Thus the probability is 1 if the branch is 1, 0 otherwise
+    if ( fabs(length - 1.0) >= DBL_EPSILON )
+    {
+      return RbConstants::Double::neginf;
+    }
+    else
+    {
+      return 0.0;
+    }
+  }
+  else
+  {
+    throw(RbException("Invalid branch length approximation distribution."));
+    return RbConstants::Double::nan;
+  }
+}
+
+// /* Computes probability of node time (or node time proportion) for clade */
+// double SBNParameters::computeNodeTimeProbability( const RbBitSet &clade, double time) const
+// {
+//   // Get parameters
+//   std::vector<double> these_params = edge_length_distribution_parameters.at(clade);
+  
+//   // Compute probability
+//   double lnProbability = RbConstants::Double::neginf;
+
+//   // TODO: compute a real probability
+
+//   return lnProbability;
+// }
+
 /* Computes the probability of the given ROOTED tree under this SBN. */
 double SBNParameters::computeLnProbabilityRootedTopology( const Tree &tree ) const
 {
@@ -550,6 +598,33 @@ bool SBNParameters::isValid(void) const
   return true;
 }
 
+/* Draws a new branch length for a given split */
+double SBNParameters::drawEdgeLength( const RbBitSet &split) const
+{
+  // Get parameters
+  std::vector<double> these_params = edge_length_distribution_parameters.at(split);
+  
+  // Draw branch length
+  if ( branch_length_approximation_method == "gammaMOM" )
+  {
+    return RbStatistics::Gamma::rv(these_params[0], these_params[1], *GLOBAL_RNG);
+  }
+  else if ( branch_length_approximation_method == "lognormalMOM" || branch_length_approximation_method == "lognormalML" )
+  {
+    return RbStatistics::Lognormal::rv(these_params[0], these_params[1], *GLOBAL_RNG);
+  }
+  else if ( branch_length_approximation_method == "pureTopology" )
+  {
+    // For a "pure topology" SBN, we define the branch lengths as point-masses at 1
+    return 1.0;
+  }
+  else
+  {
+    throw(RbException("Invalid branch length approximation distribution."));
+    return RbConstants::Double::nan;
+  }
+}
+
 double SBNParameters::KL( SBNParameters &Q_x ) const
 {
 
@@ -913,7 +988,7 @@ void SBNParameters::fitBranchLengthDistributions(std::vector<Tree> &trees )
       edge_length_distribution_parameters[clade_edge_observations.first] = these_params;
     }
   }
-  else if ( branch_length_approximation_method == "gammaMOM" || branch_length_approximation_method == "compound" )
+  else if ( branch_length_approximation_method == "gammaMOM" )
   {
     // Turn branch length observations into some distributions
     std::pair<RbBitSet,std::vector<double> > clade_edge_observations;
@@ -935,7 +1010,20 @@ void SBNParameters::fitBranchLengthDistributions(std::vector<Tree> &trees )
       edge_length_distribution_parameters[clade_edge_observations.first] = these_params;
     }
   }
-
+  else if ( branch_length_approximation_method == "pureTopology" )
+  {
+    // In a pureTopology context, we don't care about branch lengths so we just make all branch lengths point masses at 1
+    std::pair<RbBitSet,std::vector<double> > clade_edge_observations;
+    BOOST_FOREACH(clade_edge_observations, branch_length_observations)
+    {
+      std::vector<double> these_params = std::vector<double>(1,1.0);
+      edge_length_distribution_parameters[clade_edge_observations.first] = these_params;
+    }
+  }
+  else
+  {
+    throw(RbException("Invalid branch length approximation."));
+  }
 }
 
 void SBNParameters::fitNodeTimeDistributions(std::vector<Tree> &trees )
@@ -1373,7 +1461,7 @@ void SBNParameters::learnUnconstrainedSBNSA( std::vector<Tree> &trees )
 {
   time_calibrated = false;
 
-  if ( !(branch_length_approximation_method == "gammaMOM" || branch_length_approximation_method == "lognormalML" || branch_length_approximation_method == "lognormalMOM") )
+  if ( !(branch_length_approximation_method == "gammaMOM" || branch_length_approximation_method == "lognormalML" || branch_length_approximation_method == "lognormalMOM" || branch_length_approximation_method == "pureTopology") )
   {
     throw(RbException("Invalid branch length/node height approximation method when initializing SBN object."));
   }
@@ -1424,7 +1512,7 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
   // Initialize parameters to SA values
   time_calibrated = false;
 
-  if ( !(branch_length_approximation_method == "gammaMOM" || branch_length_approximation_method == "lognormalML" || branch_length_approximation_method == "lognormalMOM") )
+  if ( !(branch_length_approximation_method == "gammaMOM" || branch_length_approximation_method == "lognormalML" || branch_length_approximation_method == "lognormalMOM" || branch_length_approximation_method == "pureTopology") )
   {
     throw(RbException("Invalid branch length/node height approximation method when initializing SBN object."));
   }

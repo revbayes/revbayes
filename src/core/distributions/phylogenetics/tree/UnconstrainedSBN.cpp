@@ -1,7 +1,5 @@
 #include <boost/foreach.hpp>
 #include "Clade.h"
-#include "DistributionGamma.h"
-#include "DistributionLognormal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
@@ -12,11 +10,8 @@
 
 #include <algorithm>
 #include <cmath>
-#include <unordered_map>
 
 using namespace RevBayesCore;
-
-//TODO: drawing trees, computing branch lengths, and most other complex things done here should really be done in SBNParameters
 
 // Empty constructor (needed by smart moves)
 UnconstrainedSBN::UnconstrainedSBN(void) : TypedDistribution<Tree>( new Tree() ),
@@ -70,33 +65,14 @@ double UnconstrainedSBN::computeLnProbabilityBranchLengths( void )
 {
     double lnProbability = 0.0;
 
-    std::unordered_map<RbBitSet,std::vector<double> > edge_length_params = parameters.getEdgeLengthDistributionParameters();
-
     // Get branch lengths
     const std::vector<TopologyNode*> tree_nodes = value->getNodes();
     for (size_t i=0; i<tree_nodes.size(); ++i)
     {
       if (!tree_nodes[i]->isRoot())
       {
-        // Subsplit this_subsplit = tree_nodes[i]->getSubsplit(taxa);
-        // RbBitSet this_split = this_subsplit.asSplitBitset();
         RbBitSet this_split = tree_nodes[i]->getSubsplit(taxa).asSplitBitset();
-        // std::cout << "About to get branch length parameters for split " << this_split << std::endl;
-
-        std::vector<double> these_params = edge_length_params[this_split];
-        if ( parameters.getBranchLengthApproximationMethod() == "gammaMOM" )
-        {
-          // std::cout << "Computing branch length probability for branch " << i << ", lnProb = " << RbStatistics::Gamma::pdf(these_params[0], these_params[1], tree_nodes[i]->getBranchLength()) << std::endl;
-          // std::cout << "gamma shape: " << these_params[0] << "; gamma rate: " << these_params[1] << "; evaluating density at x=" << tree_nodes[i]->getBranchLength() << std::endl;
-          lnProbability += RbStatistics::Gamma::lnPdf(these_params[0], these_params[1], tree_nodes[i]->getBranchLength());
-        }
-        else
-        {
-          // // std::cout << "Computing branch length probability for branch " << i << ", lnProb = " << RbStatistics::Lognormal::pdf(these_params[0], these_params[1], tree_nodes[i]->getBranchLength()) << std::endl;
-          // // std::cout << "lognormal mu: " << these_params[0] << "; lognormal sigma: " << these_params[1] << "; evaluating density at x=" << tree_nodes[i]->getBranchLength() << std::endl;
-          lnProbability += RbStatistics::Lognormal::lnPdf(these_params[0], these_params[1], tree_nodes[i]->getBranchLength());
-        }
-
+        lnProbability += parameters.computeEdgeLengthProbability(this_split,tree_nodes[i]->getBranchLength());
       }
     }
 
@@ -156,9 +132,6 @@ void UnconstrainedSBN::simulateTree( void )
 
     // We always draw a rooted tree, if we want to unroot we need it to first be rooted
     psi->setRooted(true);
-
-    // For drawing branch lengths
-    std::unordered_map<RbBitSet,std::vector<double> > edge_length_params = parameters.getEdgeLengthDistributionParameters();
 
     // create the tip nodes
     std::vector<TopologyNode*> tip_nodes;
@@ -245,28 +218,16 @@ void UnconstrainedSBN::simulateTree( void )
     psi->orderNodesByIndex();
 
     // Add branch lengths
-    double brlen_sum = 0.0;
     const std::vector<TopologyNode*> tree_nodes = psi->getNodes();
     for (size_t i=0; i<tree_nodes.size(); ++i)
     {
       if (!tree_nodes[i]->isRoot())
       {
-        double brlen;
         // Subsplit this_subsplit = tree_nodes[i]->getSubsplit(taxa);
         // RbBitSet this_split = this_subsplit.asSplitBitset();
         RbBitSet this_split = tree_nodes[i]->getSubsplit(taxa).asSplitBitset();
-
-        std::vector<double> these_params = edge_length_params[this_split];
-        if ( parameters.getBranchLengthApproximationMethod() == "gammaMOM" )
-        {
-          brlen = RbStatistics::Gamma::rv(these_params[0], these_params[1], *rng);
-        }
-        else
-        {
-          brlen  = RbStatistics::Lognormal::rv(these_params[0], these_params[1], *rng);
-        }
+        double brlen = parameters.drawEdgeLength(this_split);
         tree_nodes[i]->setBranchLength(brlen,false);
-        brlen_sum += brlen;
       }
     }
 
