@@ -79,7 +79,7 @@ namespace RevBayesCore {
 
         // Helper functions for learning SBNs
         void                                countAllSubsplits(Tree& tree, std::unordered_map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts, std::unordered_map<Subsplit,double>& root_split_counts, std::unordered_map<Subsplit,double>& q, bool doSA);
-        void                                countAllSubsplits(std::vector<std::pair<Subsplit,std::vector<Subsplit> > > &orientations,std::unordered_map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts, std::unordered_map<Subsplit,double>& root_split_counts, std::unordered_map<Subsplit,double>& q, bool doSA);
+        void                                countAllSubsplits(std::pair<std::vector<Subsplit>,std::vector<std::pair<std::pair<Subsplit,Subsplit>,RbBitSet> > > &observations,std::unordered_map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts, std::unordered_map<Subsplit,double>& root_split_counts, std::vector<double>& q, bool doSA);
         void                                addTreeToAllParentChildCounts(std::unordered_map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts, Tree& tree, double &weight);
         void                                addTreeToAllRootSplitCounts(std::unordered_map<Subsplit,double>& root_split_counts, Tree& tree, double &weight);
         void                                incrementParentChildCount(std::unordered_map<std::pair<Subsplit,Subsplit>,double> &parent_child_counts, std::pair<Subsplit,Subsplit> &this_parent_child, double &weight);
@@ -88,7 +88,7 @@ namespace RevBayesCore {
         bool                                isValidCPD(std::vector<std::pair<Subsplit,double> >& cpd, Subsplit& parent) const;
         bool                                isValidRootDistribution(void) const;
         void                                regularizeCounts(std::unordered_map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts, std::unordered_map<Subsplit,double>& root_split_counts, std::unordered_map<std::pair<Subsplit,Subsplit>,double>& pseudo_parent_child_counts, std::unordered_map<Subsplit,double>& pseudo_root_split_counts, double alpha);
-        void                                treeToOrientations(Tree& tree, std::vector<std::pair<Subsplit,std::vector<Subsplit> > > &orientations);
+        void                                extractSubsplits(Tree& tree, std::pair<std::vector<Subsplit>,std::vector<std::pair<std::pair<Subsplit,Subsplit>,RbBitSet> > > &observations);
 
         // // Misc.
         std::unordered_map<Subsplit,double>  computeUnconditionalSubsplitProbabilities(void) const;

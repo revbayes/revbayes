@@ -22,6 +22,7 @@
 #include "RandomNumberGenerator.h"
 #include "RbException.h"
 #include "RbMathFunctions.h"
+#include "RbMathLogic.h"
 #include "RbStatisticsHelper.h"
 #include "Split.h"
 #include "SBNParameters.h"
@@ -413,6 +414,10 @@ double SBNParameters::computeRootSplitProbability( const Subsplit &root_split ) 
       log_prob = log(root_splits[i].second);
     }
   }
+    if ( !RbMath::isFinite(log_prob) )
+  {
+    std::cout << "0 probability for root split " << root_split << std::endl;
+  }
   return log_prob;
 }
 
@@ -430,7 +435,23 @@ double SBNParameters::computeSubsplitTransitionProbability( const Subsplit &pare
     if ( child == all_children[i].first)
     {
       log_prob = log(all_children[i].second);
+      break;
     }
+  }
+  if ( !RbMath::isFinite(log_prob) )
+  {
+    std::cout << "0 probability for parent-child subsplit " << parent << " - " << child << std::endl;
+    bool found = false;
+    for (size_t i=0; i<all_children.size(); ++i)
+    {
+      if ( child == all_children[i].first)
+      {
+        std::cout << "      ^found it" << std::endl;
+        found = true;
+      }
+    }
+    std::cout << "    ^trying to find this subsplit in cpd, found == " << found << std::endl;
+    
   }
   return log_prob;
 
@@ -570,32 +591,6 @@ Subsplit SBNParameters::drawSubsplitForZ( const Subsplit &s ) const
   }
 
   return my_children[index].first;
-}
-
-/* Checks the validity of an SBNParameters object.
-   This requires checking that, for each candidate subsplit,
-     1) The CPDs sum to 1 for both splitting Y and Z
-     2) All candidate subsplits are compatible with their parents
-     3) All subsplits are pairs of disjoint splits
-   There are equivalent conditions on the root split
-*/
-bool SBNParameters::isValid(void) const
-{
-  if ( !isValidRootDistribution() )
-  {
-    return false;
-  }
-
-  std::pair<Subsplit,std::vector<std::pair<Subsplit,double> > > this_cpd;
-  // Loop over parent subsplits
-  BOOST_FOREACH(this_cpd, subsplit_cpds) {
-    if ( !(isValidCPD(this_cpd.second, this_cpd.first)) )
-    {
-      return false;
-    }
-  }
-
-  return true;
 }
 
 /* Draws a new branch length for a given split */
@@ -763,12 +758,14 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<Subs
       // Subsplit root_on_edge = per_node_subsplit[index].rootSplitFromClade();
 
       // Case 1
-      double weight = ttr[root_children_indices[0]];
+      // double weight = ttr[root_children_indices[0]];
+      double weight = ttr[sibling_indices[0]];  
       incrementParentChildCount(parent_child_counts,cases[0],weight);
 // std::cout << "did case 1" << std::endl;
 
       // Case 2
-      weight = ttr[root_children_indices[0]];
+      // weight = ttr[root_children_indices[1]];
+      weight = ttr[sibling_indices[1]];
       incrementParentChildCount(parent_child_counts,cases[1],weight);
 // std::cout << "did case 2" << std::endl;
 
@@ -814,7 +811,8 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<Subs
       // Subsplit root_on_edge = per_node_subsplit[index].rootSplitFromClade();
 
       // Case 1
-      double weight = 1 - ttr[(*it)->getParent().getIndex()];
+      // double weight = 1.0 - ttr[(*it)->getParent().getIndex()];
+      double weight = 1.0 - ttr[(*it)->getParent().getChild(0).getIndex()]  - ttr[(*it)->getParent().getChild(1).getIndex()] ;
       incrementParentChildCount(parent_child_counts,cases[0],weight);
 // std::cout << "did case 1" << std::endl;
 
@@ -1317,8 +1315,35 @@ void SBNParameters::normalizeCPDForSubsplit(std::vector<std::pair<Subsplit,doubl
 
 }
 
+/* Checks the validity of an SBNParameters object.
+   This requires checking that, for each candidate subsplit,
+     1) The CPDs sum to 1 for both splitting Y and Z
+     2) All candidate subsplits are compatible with their parents
+     3) All subsplits are pairs of disjoint splits
+   There are equivalent conditions on the root split
+*/
+bool SBNParameters::isValid(void) const
+{
+  if ( !isValidRootDistribution() )
+  {
+    return false;
+  }
+  
+  std::pair<Subsplit,std::vector<std::pair<Subsplit,double> > > this_cpd;
+  // Loop over parent subsplits
+  BOOST_FOREACH(this_cpd, subsplit_cpds) {
+    if ( !(isValidCPD(this_cpd.second, this_cpd.first)) )
+    {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 bool SBNParameters::isValidCPD(std::vector<std::pair<Subsplit,double> >& cpd, Subsplit& parent) const
 {
+
   double sum_y = 0.0;
   double sum_z = 0.0;
 
@@ -1466,7 +1491,7 @@ void SBNParameters::learnUnconstrainedSBNSA( std::vector<Tree> &trees )
     throw(RbException("Invalid branch length/node height approximation method when initializing SBN object."));
   }
 
-  // std::cout << "hello from learnUnconstrainedSBNSA, there are this many trees" << trees.size() << std::endl;
+  // std::cout << "hello from learnUnconstrainedSBNSA, there are this many trees " << trees.size() << std::endl;
 
   // To store counts
   std::unordered_map<Subsplit,double> root_split_counts;
@@ -1478,10 +1503,10 @@ void SBNParameters::learnUnconstrainedSBNSA( std::vector<Tree> &trees )
   // Run counting
   for (size_t i=0; i<trees.size(); ++i)
   {
-// std::cout << trees[i] << std::endl;
+    // std::cout << i << std::endl;
     countAllSubsplits(trees[i], parent_child_counts, root_split_counts, q, true);
   }
-// std::cout << "counted all subsplits in all trees" << std::endl;
+  // std::cout << "counted all subsplits in all trees" << std::endl;
 
   // Turn root split counts into a distribution on the root split
   makeRootSplits(root_split_counts);
@@ -1533,17 +1558,21 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
   makeRootSplits(root_split_counts_sa);
   makeCPDs(parent_child_counts_sa);
 
-  SBNParameters sbn_old = *this;
+  // SBNParameters sbn_old = *this;
+
+  double old_lnL = RbConstants::Double::neginf;
 
   // run EM, start on E-step because we have parameters from running SA
   bool terminate = false;
-  while ( !terminate )
+  size_t iter=0;
+  for ( ; iter<500; ++iter )
   {
     // To store counts
     std::unordered_map<Subsplit,double> root_split_counts;
     std::unordered_map<std::pair<Subsplit,Subsplit>,double> parent_child_counts;
 
 std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
+    double lnL = 0.0;
     // E-step, compute q (per tree) and m (counts, across all trees)
     for (size_t i=0; i<trees.size(); ++i)
     {
@@ -1552,14 +1581,25 @@ std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
       std::vector<std::pair<Subsplit,double> > pr_tree_and_root = computeLnProbabilityTopologyAndRooting(trees[i]);
 // std::cout << "got components for q()" << std::endl;
 
+      // So we can compute the probability of this tree
+      std::vector<double> per_edge_log_probs;
+
       // turn ln(Pr(tree,root)) into q(root)
       double max = RbConstants::Double::min;
       for (size_t j=0; j<pr_tree_and_root.size(); ++j)
       {
+        per_edge_log_probs.push_back(pr_tree_and_root[j].second);
         if ( max < pr_tree_and_root[j].second )
         {
           max = pr_tree_and_root[j].second;
         }
+      }
+
+      // compute log-probability of this tree, add it to total probability of all trees
+      lnL += RbMath::log_sum_exp(per_edge_log_probs,max);
+      if (!RbMath::isAComputableNumber(lnL))
+      {
+        throw(RbException("Error in EM algorithm, NaN tree probabilities."));
       }
 
       double sum = 0.0;
@@ -1594,16 +1634,32 @@ std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
     // M-step, compute p
     makeRootSplits(root_split_counts);
     makeCPDs(parent_child_counts);
+    
+    // double kl = KL(sbn_old);
 
-    double kl = KL(sbn_old);
+    // std::cout << "KL(new || old) = " << kl << std::endl;
+    // if ( kl < threshold ) {
+    //   terminate = true;
+    // }
 
-    std::cout << "KL(new || old) = " << kl << std::endl;
-    if ( kl < threshold ) {
-      terminate = true;
+    // sbn_old = *this;
+
+    // Contemplate loop termination
+    std::cout << "lnL - old_lnL = " << lnL - old_lnL << std::endl;
+    std::cout << "lnL = " << lnL << std::endl;
+    if ( fabs(lnL - old_lnL) < 0.000001 )
+    {
+      break;
     }
 
-    sbn_old = *this;
+    old_lnL = lnL;
 
+// break;
+  }
+
+  if ( iter == 500 )
+  {
+    throw(RbException("EM algorithm hit maximum step limit and was aborted."));
   }
 
   // Handle branch lengths (we only need to do this once!)
