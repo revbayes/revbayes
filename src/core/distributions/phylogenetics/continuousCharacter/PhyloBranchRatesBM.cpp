@@ -81,7 +81,7 @@ double PhyloBranchRatesBM::recursiveLnProb( const TopologyNode& node, std::vecto
         double stand_dev = sigma->getValue() * sqrt(node.getBranchLength());
 //        double mean = parent_value + drift->getValue() * node.getBranchLength();
         double mean = parent_value;
-        ln_prob += RbStatistics::Normal::lnPdf(node_value, stand_dev, mean);
+        ln_prob += RbStatistics::Normal::lnPdf(node_value, stand_dev, mean) - std::log(ln_node_value);
         
         parent_values[index] = node_value;
     }
