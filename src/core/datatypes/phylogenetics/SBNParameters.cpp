@@ -399,7 +399,7 @@ double SBNParameters::computeLnProbabilityUnrootedTopology( const Tree &tree ) c
   }
 
   lnProbability = RbMath::log_sum_exp(per_edge_log_probs);
-
+  
   return lnProbability;
 }
 
@@ -660,7 +660,7 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<Subs
   tree.orderNodesForTraversal(order);
   const std::vector<TopologyNode*> &postorder_nodes = tree.getNodes();
 
-  double one_over_n_branches = 1.0 / (2.0 * tree.getNumberOfNodes() - 3.0); // 1 over the number of branches in an unrooted tree
+  double one_over_n_branches = 1.0 / (2.0 * tree.getNumberOfTips() - 3.0); // 1 over the number of branches in an unrooted tree
 
   // For storing subsplits
   std::vector<Subsplit> per_node_subsplit = std::vector<Subsplit>(tree.getNumberOfNodes(),Subsplit());
@@ -727,7 +727,7 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<Subs
   // for (std::vector<TopologyNode*>::const_iterator it = preorder_nodes.begin()+1; it != preorder_nodes.end(); ++it)
   for (std::vector<TopologyNode*>::const_reverse_iterator it = postorder_nodes.rbegin()+1; it != postorder_nodes.rend(); ++it)
   {
-// std::cout << (*it)->getIndex() << std::endl;
+    // std::cout << (*it)->getIndex() << std::endl;
     // std::cout << ">>>working on a root/internal/tip node " << ((*it)->isRoot()) << "/" << ((*it)->isInternal()) << "/" << ((*it)->isTip()) << std::endl;
     // std::cout << ">The node's index is " << (*it)->getIndex() << std::endl;
     // std::cout << ">The node's subsplit is " << per_node_subsplit[(*it)->getIndex()] << std::endl;
@@ -743,14 +743,23 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<Subs
 
       std::vector<int> sibling_indices;
 
+      double root_sum = 0.0;
       for (size_t i=0; i<3; ++i)
       {
+        root_sum += ttr[root_children_indices[i]];
         if (index != root_children_indices[i])
         {
           sibling_indices.push_back(root_children_indices[i]);
         }
       }
-
+      if ( fabs(root_sum - 1.0) > 0.00000001) {
+        std::cout << "uh-oh, sum of q at root is " << root_sum << std::endl;
+        for (size_t i=0; i<3; ++i)
+        {
+          std::cout << "sum for clade " << per_node_subsplit[root_children_indices[i]].asCladeBitset() << " is " << ttr[root_children_indices[i]] << std::endl;
+        }
+        throw(RbException("Error in counting"));
+      }
       // Get all cases for virtual rooting of this edge (including current rooting)
       std::vector<std::pair<Subsplit,Subsplit> > cases;
       per_node_subsplit[index].doVirtualRootingRootParent(per_node_subsplit[sibling_indices[0]],per_node_subsplit[sibling_indices[1]],per_node_subsplit[index],cases);
@@ -771,7 +780,7 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<Subs
 
       // Case 3
       // weight = doSA ? one_over_n_branches : q[root_on_edge];
-      weight = doSA ? one_over_n_branches : q[cases[5].first];
+      weight = doSA ? one_over_n_branches : q[cases[2].first];
       incrementParentChildCount(parent_child_counts,cases[2],weight);
 // std::cout << "did case 3" << std::endl;
 
@@ -812,9 +821,10 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<Subs
 
       // Case 1
       // double weight = 1.0 - ttr[(*it)->getParent().getIndex()];
-      double weight = 1.0 - ttr[(*it)->getParent().getChild(0).getIndex()]  - ttr[(*it)->getParent().getChild(1).getIndex()] ;
+      double weight = 1.0 - ttr[(*it)->getParent().getChild(0).getIndex()]  - ttr[(*it)->getParent().getChild(1).getIndex()];
+
       incrementParentChildCount(parent_child_counts,cases[0],weight);
-// std::cout << "did case 1" << std::endl;
+      // std::cout << "did case 1" << std::endl;
 
       // Case 2
       std::vector<int> my_parents_children = (*it)->getParent().getChildrenIndices();
@@ -824,9 +834,9 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<Subs
         sibling = 1;
       }
 
-      weight = ttr[sibling];
+      weight = ttr[my_parents_children[sibling]];
       incrementParentChildCount(parent_child_counts,cases[1],weight);
-// std::cout << "did case 2" << std::endl;
+      // std::cout << "did case 2" << std::endl;
 
       // Case 3
       // weight = doSA ? one_over_n_branches : q[root_on_edge];
@@ -867,7 +877,6 @@ void SBNParameters::regularizeCounts(std::unordered_map<std::pair<Subsplit,Subsp
 {
   // Regularize CPDs
   std::pair<std::pair<Subsplit,Subsplit>,double> this_parent_child;
-
   BOOST_FOREACH(this_parent_child, parent_child_counts) {
     double pseudocount = pseudo_parent_child_counts.at(this_parent_child.first);
     double count = parent_child_counts.at(this_parent_child.first);
@@ -1563,7 +1572,6 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
   double old_lnL = RbConstants::Double::neginf;
 
   // run EM, start on E-step because we have parameters from running SA
-  bool terminate = false;
   size_t iter=0;
   for ( ; iter<500; ++iter )
   {
@@ -1599,7 +1607,7 @@ std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
       lnL += RbMath::log_sum_exp(per_edge_log_probs,max);
       if (!RbMath::isAComputableNumber(lnL))
       {
-        throw(RbException("Error in EM algorithm, NaN tree probabilities."));
+        // throw(RbException("Error in EM algorithm, NaN tree probabilities."));
       }
 
       double sum = 0.0;
@@ -1612,6 +1620,10 @@ std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
       for (size_t j=0; j<pr_tree_and_root.size(); ++j)
       {
         pr_tree_and_root[j].second /= sum;
+        if (pr_tree_and_root[j].second < 0.00000001)
+        {
+          std::cout << "q[" << pr_tree_and_root[j].first << "] = " << pr_tree_and_root[j].second << std::endl;
+        }
       }
 
       // make vector-pair q into a map
@@ -1627,8 +1639,11 @@ std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
 
     }
 
+    if ( alpha >= DBL_EPSILON )
+    {
     // regularize all counts
     regularizeCounts(parent_child_counts, root_split_counts, parent_child_counts_sa, root_split_counts_sa, alpha);
+    }
 
     std::cout << ">>>>>>M step" << std::endl;
     // M-step, compute p
@@ -1639,7 +1654,7 @@ std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
 
     // std::cout << "KL(new || old) = " << kl << std::endl;
     // if ( kl < threshold ) {
-    //   terminate = true;
+    //   break;
     // }
 
     // sbn_old = *this;
@@ -1653,8 +1668,7 @@ std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
     }
 
     old_lnL = lnL;
-
-// break;
+    break;
   }
 
   if ( iter == 500 )
@@ -1669,6 +1683,22 @@ std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
   {
     throw(RbException("learnUnconstrainedSBNEM produced an invalid SBNParameters object."));
   }
+
+    // Loop over all parent subsplits
+  for (std::unordered_map<Subsplit,std::vector<std::pair<Subsplit,double> > >::const_iterator parent=subsplit_cpds.begin(); parent!=subsplit_cpds.end(); ++parent)
+  {
+    // Parent subsplit is parent->first, the vector of children (and their probabilities) is parent->second
+    for (std::vector<std::pair<Subsplit,double> >::const_iterator child=parent->second.begin(); child!=parent->second.end(); ++child)
+    {
+      std::cout << child->first << " | " << parent->first << " = " << exp(computeSubsplitTransitionProbability(parent->first,child->first)) << std::endl;
+    }
+  }
+
+  for (size_t i=0; i<root_splits.size(); ++i)
+  {
+    std::cout << root_splits[i].first << " = " << root_splits[i].second << std::endl;
+  }
+
 
 }
 
