@@ -300,7 +300,7 @@ Subsplit::Subsplit( const Subsplit &s1, const Subsplit &s2 ) :
       bitset.first = clade_1_bitset;
       fsb_y = fsb1;
       bitset.second = clade_2_bitset;
-      fsb_y = fsb2;
+      fsb_z = fsb2;
     }
     else
     {
