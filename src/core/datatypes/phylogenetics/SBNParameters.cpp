@@ -399,28 +399,31 @@ double SBNParameters::computeLnProbabilityUnrootedTopology( const Tree &tree ) c
   }
 
   lnProbability = RbMath::log_sum_exp(per_edge_log_probs);
-  
+  // std::cout << std::setprecision(20) << exp(lnProbability) << std::endl;
   return lnProbability;
 }
 
 /* Computes the probability of seeing a particular root split given an SBN */
 double SBNParameters::computeRootSplitProbability( const Subsplit &root_split ) const
 {
-  double log_prob = RbConstants::Double::neginf;
+  double log_prob = RbConstants::Double::nan;
   for (size_t i=0; i<root_splits.size(); ++i)
   {
     if ( root_split == root_splits[i].first)
     {
       log_prob = log(root_splits[i].second);
+      break;
     }
   }
-    if ( !RbMath::isFinite(log_prob) )
-  {
-    std::cout << "0 probability for root split " << root_split << std::endl;
-  }
+  // if ( !RbMath::isAComputableNumber(log_prob) )
+  // {
+  //   std::cout << exp(log_prob) << " probability for root split " << root_split << std::endl;
+  // }
   return log_prob;
 }
 
+// TODO: Why ever leave the log-scale? Just store log-probabilities and in the simulate/draw function, draw a log-uniform
+// TODO: CPDs should be a map of maps, root splits a map. This will make computing probabilities faster and should not slow down drawing appreciably
 /* Computes the probability of seeing a particular parent-child subsplit pair given an SBN */
 double SBNParameters::computeSubsplitTransitionProbability( const Subsplit &parent, const Subsplit &child ) const
 {
@@ -428,31 +431,29 @@ double SBNParameters::computeSubsplitTransitionProbability( const Subsplit &pare
   // Find all potential children of parent
   const std::vector<std::pair<Subsplit,double> > &all_children = subsplit_cpds.at(parent);
 
-  double log_prob = RbConstants::Double::neginf;
+  double log_prob = RbConstants::Double::nan;
 
   for (size_t i=0; i<all_children.size(); ++i)
   {
-    if ( child == all_children[i].first)
+    if ( child == all_children[i].first )
     {
-      log_prob = log(all_children[i].second);
+      log_prob = log(std::max(0.0,all_children[i].second));
       break;
     }
   }
-  if ( !RbMath::isFinite(log_prob) )
-  {
-    std::cout << "0 probability for parent-child subsplit " << parent << " - " << child << std::endl;
-    bool found = false;
-    for (size_t i=0; i<all_children.size(); ++i)
-    {
-      if ( child == all_children[i].first)
-      {
-        std::cout << "      ^found it" << std::endl;
-        found = true;
-      }
-    }
-    std::cout << "    ^trying to find this subsplit in cpd, found == " << found << std::endl;
-    
-  }
+  // if ( !RbMath::isAComputableNumber(log_prob) )
+  // {
+  //   std::cout << exp(log_prob) << " probability for parent-child subsplit " << parent << " - " << child << std::endl;
+  //   bool found = false;
+  //   for (size_t i=0; i<all_children.size(); ++i)
+  //   {
+  //     if ( child == all_children[i].first)
+  //     {
+  //       found = true;
+  //     }
+  //   }
+  //   std::cout << "    ^trying to find this subsplit in cpd, found == " << found << std::endl;
+  // }
   return log_prob;
 
 }
@@ -1322,6 +1323,9 @@ void SBNParameters::normalizeCPDForSubsplit(std::vector<std::pair<Subsplit,doubl
     }
   }
 
+  if ( RbMath::isNan(sum_y) || RbMath::isNan(sum_z) ) {
+    std::cout << "sum_y = " << sum_y << "; sum_z = " << sum_z << " for parent " << parent << std::endl;
+  }
 }
 
 /* Checks the validity of an SBNParameters object.
@@ -1533,6 +1537,14 @@ void SBNParameters::learnUnconstrainedSBNSA( std::vector<Tree> &trees )
 
 }
 
+double log_sum_exp_neginf (std::vector<double> x, double max ) {
+    double lse = 0.0;
+    for (std::vector<double>::const_iterator it = x.begin(); it != x.end(); it++)
+        lse += *it == RbConstants::Double::neginf ? 0 : exp(*it - max);
+
+    return max + log(lse);
+}
+
 void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &alpha )
 {
 
@@ -1569,7 +1581,7 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
 
   // SBNParameters sbn_old = *this;
 
-  double old_lnL = RbConstants::Double::neginf;
+  double old_score = RbConstants::Double::neginf;
 
   // run EM, start on E-step because we have parameters from running SA
   size_t iter=0;
@@ -1580,7 +1592,7 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
     std::unordered_map<std::pair<Subsplit,Subsplit>,double> parent_child_counts;
 
 std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
-    double lnL = 0.0;
+    double score = 0.0;
     // E-step, compute q (per tree) and m (counts, across all trees)
     for (size_t i=0; i<trees.size(); ++i)
     {
@@ -1593,23 +1605,24 @@ std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
       std::vector<double> per_edge_log_probs;
 
       // turn ln(Pr(tree,root)) into q(root)
-      double max = RbConstants::Double::min;
+      double max = RbConstants::Double::neginf;
       for (size_t j=0; j<pr_tree_and_root.size(); ++j)
       {
+        // if ( RbMath::isNan(pr_tree_and_root[j].second) )
+        // {
+        //   for (size_t xx=0; xx<pr_tree_and_root.size(); ++xx)
+        //   {
+        //     std::cout << "lnPr(root = " << pr_tree_and_root[xx].first << ") = " << pr_tree_and_root[j].second << std::endl;
+        //   }
+        //   throw(RbException("NaN tree probabilities!"));
+        // }
         per_edge_log_probs.push_back(pr_tree_and_root[j].second);
         if ( max < pr_tree_and_root[j].second )
         {
           max = pr_tree_and_root[j].second;
         }
       }
-
-      // compute log-probability of this tree, add it to total probability of all trees
-      lnL += RbMath::log_sum_exp(per_edge_log_probs,max);
-      if (!RbMath::isAComputableNumber(lnL))
-      {
-        // throw(RbException("Error in EM algorithm, NaN tree probabilities."));
-      }
-
+      
       double sum = 0.0;
       for (size_t j=0; j<pr_tree_and_root.size(); ++j)
       {
@@ -1620,10 +1633,18 @@ std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
       for (size_t j=0; j<pr_tree_and_root.size(); ++j)
       {
         pr_tree_and_root[j].second /= sum;
-        if (pr_tree_and_root[j].second < 0.00000001)
+        // if (pr_tree_and_root[j].second < 0.0000000001)
+        // {
+        //   std::cout << "in tree " << i << ", q[" << pr_tree_and_root[j].first << "] = " << pr_tree_and_root[j].second << std::endl;
+        // }
+        
+        // If q is 0, then the contribution of this orientation to the lower bound is 0
+        if ( pr_tree_and_root[j].second >= DBL_EPSILON & RbMath::isFinite(per_edge_log_probs[j]) )
         {
-          std::cout << "q[" << pr_tree_and_root[j].first << "] = " << pr_tree_and_root[j].second << std::endl;
-        }
+          score += pr_tree_and_root[j].second * per_edge_log_probs[j];
+          // asymptotically speaking, the q * log(q) portion of the score function is 0 when q = 0
+          score -= pr_tree_and_root[j].second * log(pr_tree_and_root[j].second);
+        } 
       }
 
       // make vector-pair q into a map
@@ -1631,6 +1652,16 @@ std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
       for (size_t j=0; j<pr_tree_and_root.size(); ++j)
       {
         q[pr_tree_and_root[j].first] = pr_tree_and_root[j].second;
+      }
+
+      if (RbMath::isNan(score))
+      {
+        std::cout << "NaN tree prob, ln(Pr(tree and root)) vector contains:" << std::endl;
+        for (size_t j=0; j<per_edge_log_probs.size(); ++j)
+        {
+          std::cout << "  " << per_edge_log_probs[j] << std::endl;
+        }
+        throw(RbException("Error in EM algorithm, NaN tree probabilities."));
       }
 
 // std::cout << "about to recount, NOT using q" << std::endl;
@@ -1660,15 +1691,16 @@ std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
     // sbn_old = *this;
 
     // Contemplate loop termination
-    std::cout << "lnL - old_lnL = " << lnL - old_lnL << std::endl;
-    std::cout << "lnL = " << lnL << std::endl;
-    if ( fabs(lnL - old_lnL) < 0.000001 )
+    std::cout << "score - old_score = " << score - old_score << std::endl;
+    std::cout << "score = " << score << std::endl;
+    if ( fabs(score - old_score) < 0.000001 )
     {
       break;
     }
 
-    old_lnL = lnL;
-    break;
+    old_score = score;
+    // break;
+    // if (iter == 100){break;}
   }
 
   if ( iter == 500 )
@@ -1684,20 +1716,54 @@ std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
     throw(RbException("learnUnconstrainedSBNEM produced an invalid SBNParameters object."));
   }
 
-    // Loop over all parent subsplits
-  for (std::unordered_map<Subsplit,std::vector<std::pair<Subsplit,double> > >::const_iterator parent=subsplit_cpds.begin(); parent!=subsplit_cpds.end(); ++parent)
-  {
-    // Parent subsplit is parent->first, the vector of children (and their probabilities) is parent->second
-    for (std::vector<std::pair<Subsplit,double> >::const_iterator child=parent->second.begin(); child!=parent->second.end(); ++child)
-    {
-      std::cout << child->first << " | " << parent->first << " = " << exp(computeSubsplitTransitionProbability(parent->first,child->first)) << std::endl;
-    }
-  }
+  //   // Loop over all parent subsplits
+  // for (std::unordered_map<Subsplit,std::vector<std::pair<Subsplit,double> > >::const_iterator parent=subsplit_cpds.begin(); parent!=subsplit_cpds.end(); ++parent)
+  // {
+  //   // Parent subsplit is parent->first, the vector of children (and their probabilities) is parent->second
+  //   for (std::vector<std::pair<Subsplit,double> >::const_iterator child=parent->second.begin(); child!=parent->second.end(); ++child)
+  //   {
+  //     std::cout << child->first << " | " << parent->first << " = " << exp(computeSubsplitTransitionProbability(parent->first,child->first)) << std::endl;
+  //   }
+  // }
 
-  for (size_t i=0; i<root_splits.size(); ++i)
-  {
-    std::cout << root_splits[i].first << " = " << root_splits[i].second << std::endl;
-  }
+  // for (size_t i=0; i<root_splits.size(); ++i)
+  // {
+  //   std::cout << root_splits[i].first << " = " << root_splits[i].second << std::endl;
+  // }
+    // for (size_t i=0; i<trees.size(); ++i)
+    // {
+    //   std::vector<std::pair<Subsplit,double> > pr_tree_and_root = computeLnProbabilityTopologyAndRooting(trees[i]);
+    //   std::vector<double> per_edge_log_probs;
+
+    //   // std::cout << "ln(Pr(tree and root)) = [";
+    //   double max = RbConstants::Double::neginf;
+    //   for (size_t j=0; j<pr_tree_and_root.size(); ++j)
+    //   {
+    //     per_edge_log_probs.push_back(pr_tree_and_root[j].second);
+    //     if ( max < pr_tree_and_root[j].second )
+    //     {
+    //       max = pr_tree_and_root[j].second;
+    //     }
+    //     // std::cout << per_edge_log_probs[j] << ",";
+    //   }
+    //   // std::cout << "]" << std::endl;
+      
+    //   double sum = 0.0;
+    //   for (size_t j=0; j<pr_tree_and_root.size(); ++j)
+    //   {
+    //     pr_tree_and_root[j].second = exp(pr_tree_and_root[j].second - max);
+    //     sum += pr_tree_and_root[j].second;
+    //   }
+
+    //   std::cout << "q_k = [";
+    //   for (size_t j=0; j<pr_tree_and_root.size(); ++j)
+    //   {
+    //     pr_tree_and_root[j].second /= sum;
+    //     std::cout << pr_tree_and_root[j].second << ",";
+    //   }
+    //   std::cout << "]" << std::endl;
+
+    // }
 
 
 }

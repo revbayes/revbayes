@@ -226,7 +226,6 @@ Subsplit::Subsplit( const RbBitSet &clade_1_bitset, const RbBitSet &clade_2_bits
       fsb_z = fsb1;
     }
 
-// std::cout << "made subsplit " << *this << " from clade bitsets " << clade_1_bitset << " and " << clade_2_bitset << std::endl;
 }
 
 /**
@@ -310,7 +309,6 @@ Subsplit::Subsplit( const Subsplit &s1, const Subsplit &s2 ) :
       bitset.second = clade_1_bitset;
       fsb_z = fsb1;
     }
-// std::cout << "made subsplit " << *this << " from clades " << clade_1_bitset << " and " << clade_2_bitset << std::endl;
 }
 
 
