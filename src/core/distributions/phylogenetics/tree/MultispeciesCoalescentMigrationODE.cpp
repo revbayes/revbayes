@@ -38,13 +38,13 @@ void MultispeciesCoalescentMigrationODE::operator()(const std::vector< double > 
         // we compute the probability that this individual is in population j
         // to do so, we need to add the probability that the individual migrated to population j,
         // and remove the probability that it left population j
-        for ( size_t j=0; j<num_populations; ++j )
+        for ( size_t j=0; j<num_populations-1; ++j )
         {
             double migration_prob = 0.0;
             double leaving_rate = 0.0;
 
             // now iterate over all target/receiver populations
-            for ( size_t k=0; k<num_populations; ++k )
+            for ( size_t k=0; k<num_populations-1; ++k )
             {
                 if ( j != k )
                 {
@@ -85,5 +85,3 @@ void MultispeciesCoalescentMigrationODE::operator()(const std::vector< double > 
     dxdt[num_individuals*num_populations] = rate_no_coalencent * x[num_individuals*num_populations];
     
 }
-
-

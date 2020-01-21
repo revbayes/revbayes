@@ -15,7 +15,9 @@ namespace RevBayesCore { class Tree; }
 
 using namespace RevBayesCore;
 
-MultispeciesCoalescent::MultispeciesCoalescent(const TypedDagNode<Tree> *sp, const std::vector<Taxon> &t) : AbstractMultispeciesCoalescent(sp, t)
+MultispeciesCoalescent::MultispeciesCoalescent(const TypedDagNode<Tree> *sp, const std::vector<Taxon> &t) : AbstractMultispeciesCoalescent(sp, t),
+    Ne( NULL ),
+    Nes( NULL )
 {
     
 }
