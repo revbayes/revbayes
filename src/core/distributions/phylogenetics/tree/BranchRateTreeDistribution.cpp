@@ -250,6 +250,12 @@ double BranchRateTreeDistribution::computeLnProbability( void )
         // check if the node is a descendant of the root
         if ( the_time_node->getParent().isRoot() == true )
         {
+            
+            // there is a Jacobian term because we use the root branch (i.e., the sum of the two branches subtending the root) as a single variable
+            // however, the probability density is defined on the two branches subtending the root.
+            // the Jacobian is J = root_branch = (left_branch + right_branch)
+            ln_prob += log( branch_exp_num_events ) / 2.0; // we need to divide by 2 because we will go twice into this if statement
+            
             // do something with the root branch, i.e., use a root branch fraction
             double frac = 1.0;
             if ( root_branch_fraction != NULL )
