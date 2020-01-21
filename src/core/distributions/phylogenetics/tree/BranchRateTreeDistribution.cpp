@@ -240,7 +240,7 @@ double BranchRateTreeDistribution::computeLnProbability( void )
         std::map<RbBitSet, double>::const_iterator it_branch_length = split_to_branch_lengths.find( this_split );
         if ( it_branch_length == split_to_branch_lengths.end() )
         {
-            throw RbException("Problem in ultrametric tree distribution. Couldn't find branch length ...");
+            throw RbException("Problem in branch rate tree distribution. Couldn't find branch length ...");
         }
         // get branch length
         double branch_exp_num_events = it_branch_length->second;
@@ -250,12 +250,12 @@ double BranchRateTreeDistribution::computeLnProbability( void )
         // check if the node is a descendant of the root
         if ( the_time_node->getParent().isRoot() == true )
         {
-            
+
             // there is a Jacobian term because we use the root branch (i.e., the sum of the two branches subtending the root) as a single variable
             // however, the probability density is defined on the two branches subtending the root.
             // the Jacobian is J = root_branch = (left_branch + right_branch)
             ln_prob += log( branch_exp_num_events ) / 2.0; // we need to divide by 2 because we will go twice into this if statement
-            
+
             // do something with the root branch, i.e., use a root branch fraction
             double frac = 1.0;
             if ( root_branch_fraction != NULL )
@@ -325,25 +325,37 @@ void BranchRateTreeDistribution::simulateTree( void )
 {
     delete value;
 
-    // make our own copy of this time tree as an unrooted tree
+    // make our own copy of this time tree
+    // our strategy is to loop through all nodes of the time tree, update
+    // the branch times with new branch lengths, and then finally unroot
+    // the tree to create our new branch length tree
     const Tree &time_tree_copy = time_tree->getValue();
     Tree *value = time_tree_copy.clone();
-    value->unroot();
 
-    // draw new branch rates
-    const std::vector<TopologyNode*> &tree_nodes = value->getNodes();
+    // get time tree nodes
+    const std::vector<TopologyNode*> &time_tree_nodes = value->getNodes();
 
-    for (size_t i=0; i<tree_nodes.size(); ++i)
+    // loop through time tree nodes and draw new rates to get new branch lengths
+    for (size_t i=0; i<time_tree_nodes.size(); ++i)
     {
-        TopologyNode* the_node = tree_nodes[i];
+        TopologyNode* the_node = time_tree_nodes[i];
+
+        // get the branch time
         double branch_time = the_node->getBranchLength();
 
+        // draw new branch rate
         branch_rate_prior->redrawValue();
         double new_branch_rate = branch_rate_prior->getValue();
+
+        // get new branch length
         double new_branch_length = new_branch_rate * branch_time;
 
+        // set new branch length
         the_node->setBranchLength( new_branch_length );
     }
+
+    // now unroot to get the final branch length tree
+    value->unroot();
 
 }
 
