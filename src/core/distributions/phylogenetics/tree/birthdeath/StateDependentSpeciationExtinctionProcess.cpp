@@ -2514,8 +2514,8 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
         for (size_t i = 0; i < num_states; i++)
         {
             std::vector<unsigned> states = boost::assign::list_of(i)(i)(i);
-            sample_probs[ states ] = speciation_rates[i] * freqs[i];
-            sample_probs_sum += speciation_rates[i] * freqs[i];
+            sample_probs[ states ] = freqs[i];
+            sample_probs_sum += freqs[i];
         }
     }
     
@@ -2595,7 +2595,7 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
             t = t - dt;
         }
 
-        if (t < 0 and condition_on_num_tips == false)
+        if (t < 0 && condition_on_num_tips == false)
         {
             dt = dt - (0 - t);
             t = 0;

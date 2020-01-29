@@ -14,7 +14,7 @@ namespace RevBayesCore {
     class MultispeciesCoalescentMigration : public TypedDistribution<Tree> {
         
         public:
-        MultispeciesCoalescentMigration(const TypedDagNode<Tree> *st, const std::vector<Taxon> &t);
+        MultispeciesCoalescentMigration(const TypedDagNode<Tree> *st, const std::vector<Taxon> &t, const TypedDagNode<RateGenerator>* q, const TypedDagNode<double >* d);
         virtual                                            ~MultispeciesCoalescentMigration(void);                                                                       //!< Virtual destructor
         
         // public member functions

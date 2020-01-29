@@ -44,6 +44,7 @@ namespace RevLanguage {
     private:
         RevPtr<const RevVariable>                           branch_rate_prior;
         RevPtr<const RevVariable>                           time_tree;
+        RevPtr<const RevVariable>                           root_branch_fraction;
     };
 }
 

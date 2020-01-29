@@ -19,7 +19,8 @@ RateMatrix_FreeBinary::RateMatrix_FreeBinary(bool rescale) : GeneralRateMatrix( 
 
 
 /** Destructor */
-RateMatrix_FreeBinary::~RateMatrix_FreeBinary(void) {
+RateMatrix_FreeBinary::~RateMatrix_FreeBinary(void)
+{
 
 }
 

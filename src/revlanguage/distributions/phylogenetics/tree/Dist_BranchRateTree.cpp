@@ -97,8 +97,14 @@ RevBayesCore::BranchRateTreeDistribution* Dist_BranchRateTree::createDistributio
 
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tt          = static_cast<const Tree &>( time_tree->getRevObject() ).getDagNode();
 
+    RevBayesCore::TypedDagNode<double>* rbf = NULL;
+    if( root_branch_fraction->getRevObject() != RevNullObject::getInstance() )
+    {
+        rbf = static_cast<const Probability &>( root_branch_fraction->getRevObject() ).getDagNode();
+    }
+
     // create the internal distribution object
-    RevBayesCore::BranchRateTreeDistribution* dist              = new RevBayesCore::BranchRateTreeDistribution(tt, brp);
+    RevBayesCore::BranchRateTreeDistribution* dist              = new RevBayesCore::BranchRateTreeDistribution(tt, brp, rbf);
 
 
     return dist;
@@ -170,14 +176,14 @@ MethodTable Dist_BranchRateTree::getDistributionMethods( void ) const
     MethodTable methods = TypedDistribution<BranchLengthTree>::getDistributionMethods();
 
     // member functions
-    ArgumentRules* sample_prob_arg_rules = new ArgumentRules();
-    sample_prob_arg_rules->push_back( new ArgumentRule( "log", RlBoolean::getClassTypeSpec(), "If we should return the log-transformed probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( false ) ) );
-    methods.addFunction( new DistributionMemberFunction<Dist_BranchRateTree, ModelVector<Real> >( "getSampleProbabilities", this->variable, sample_prob_arg_rules   ) );
-
-    // member functions
-    ArgumentRules* branch_rates_arg_rules = new ArgumentRules();
-    branch_rates_arg_rules->push_back( new ArgumentRule( "index", Natural::getClassTypeSpec(), "The index of the tree in the trace for which we want to get the branch rates.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-    methods.addFunction( new DistributionMemberFunction<Dist_BranchRateTree, ModelVector<RealPos> >( "getBranchRates", this->variable, branch_rates_arg_rules   ) );
+    // ArgumentRules* sample_prob_arg_rules = new ArgumentRules();
+    // sample_prob_arg_rules->push_back( new ArgumentRule( "log", RlBoolean::getClassTypeSpec(), "If we should return the log-transformed probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( false ) ) );
+    // methods.addFunction( new DistributionMemberFunction<Dist_BranchRateTree, ModelVector<Real> >( "getSampleProbabilities", this->variable, sample_prob_arg_rules   ) );
+    //
+    // // member functions
+    // ArgumentRules* branch_rates_arg_rules = new ArgumentRules();
+    // branch_rates_arg_rules->push_back( new ArgumentRule( "index", Natural::getClassTypeSpec(), "The index of the tree in the trace for which we want to get the branch rates.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    // methods.addFunction( new DistributionMemberFunction<Dist_BranchRateTree, ModelVector<RealPos> >( "getBranchRates", this->variable, branch_rates_arg_rules   ) );
 
     return methods;
 }
@@ -202,6 +208,7 @@ const MemberRules& Dist_BranchRateTree::getParameterRules(void) const
     {
         member_rules.push_back( new ArgumentRule( "branchRatePrior", TypedDistribution<RealPos>::getClassTypeSpec(), "The prior distribution for the branch rates.",   ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         member_rules.push_back( new ArgumentRule( "timeTree", Tree::getClassTypeSpec(), "The time tree",   ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        member_rules.push_back( new ArgumentRule( "rootBranchFraction", Probability::getClassTypeSpec(), "The fraction of how much of the root branch is assigned to the left subtree.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         rules_set = true;
     }
@@ -242,6 +249,10 @@ void Dist_BranchRateTree::setConstParameter(const std::string& name, const RevPt
     else if ( name == "timeTree" )
     {
         time_tree = var;
+    }
+    else if ( name == "rootBranchFraction" )
+    {
+        root_branch_fraction = var;
     }
     else
     {

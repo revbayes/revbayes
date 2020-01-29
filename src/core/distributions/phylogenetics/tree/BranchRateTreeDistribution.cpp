@@ -12,13 +12,16 @@
 #include "RbConstants.h"
 #include "RbException.h"
 #include "TopologyNode.h"
+#include "TypedDagNode.h"
 #include "TreeChangeEventMessage.h"
 
+namespace RevBayesCore { class DagNode; }
 using namespace RevBayesCore;
 
-BranchRateTreeDistribution::BranchRateTreeDistribution(const TypedDagNode<Tree>* tt, TypedDistribution<double>* brp) : TypedDistribution<Tree>( new Tree() ),
+BranchRateTreeDistribution::BranchRateTreeDistribution(const TypedDagNode<Tree>* tt, TypedDistribution<double>* brp, TypedDagNode<double> *rbf) : TypedDistribution<Tree>( new Tree() ),
     branch_rate_prior( brp ),
     time_tree( tt ),
+    root_branch_fraction( rbf ),
     num_taxa( tt->getValue().getNumberOfTips() )
 {
 
@@ -29,6 +32,11 @@ BranchRateTreeDistribution::BranchRateTreeDistribution(const TypedDagNode<Tree>*
         this->addParameter( *it );
     }
 
+    // add the parameters to our set (in the base class)
+    // in that way other class can easily access the set of our parameters
+    // this will also ensure that the parameters are not getting deleted before we do
+    this->addParameter( root_branch_fraction );
+
 
     simulateTree();
 
@@ -38,6 +46,7 @@ BranchRateTreeDistribution::BranchRateTreeDistribution(const TypedDagNode<Tree>*
 BranchRateTreeDistribution::BranchRateTreeDistribution(const BranchRateTreeDistribution &d) : TypedDistribution<Tree>( d ),
     branch_rate_prior( d.branch_rate_prior->clone() ),
     time_tree( d.time_tree ),
+    root_branch_fraction( d.root_branch_fraction ),
     num_taxa( d.num_taxa )
 {
 
@@ -79,6 +88,7 @@ BranchRateTreeDistribution& BranchRateTreeDistribution::operator=(const BranchRa
 
         branch_rate_prior           = d.branch_rate_prior->clone();
         time_tree                   = d.time_tree;
+        root_branch_fraction        = d.root_branch_fraction;
         num_taxa                    = d.num_taxa;
 
         // add the parameters of the distribution
@@ -181,6 +191,7 @@ double BranchRateTreeDistribution::computeLnProbability( void )
 
     // get our branch length tree
     const Tree &branch_length_tree = *value;
+    Tree *branch_length_tree_copy = branch_length_tree.clone();
 
     // compare if the time tree and branch length tree topologies match
     const std::map<std::string, size_t> &time_tree_taxon_bitmap = time_tree_unrooted->getTaxonBitSetMap();
@@ -190,17 +201,23 @@ double BranchRateTreeDistribution::computeLnProbability( void )
     {
         std::cerr << "Ooohhh" << std::endl;
     }
-    
-    // @Allison: Check that the topologies are identical.
-    // If they are not identical, then you need to return -Inf for the probability
-    // the cheap way of checking topologies uses the newick strings (without branches)
+
+    // Check that the topologies are identical
+    //std::cout << time_tree_unrooted->getPlainNewickRepresentation() << std::endl;
+    //std::cout << branch_length_tree_copy->getPlainNewickRepresentation() << std::endl;
+    std::string time_tree_newick = time_tree_unrooted->getPlainNewickRepresentation();
+    std::string branch_length_tree_newick = branch_length_tree_copy->getPlainNewickRepresentation();
+
+    if ( time_tree_newick != branch_length_tree_newick )
+    {
+        return RbConstants::Double::neginf;
+    }
 
     // compute the branch rates as r = bl / t
     const std::vector<TopologyNode*> &time_tree_nodes = time_tree_copy.getNodes();
 //    const std::vector<TopologyNode*> &branch_length_tree_nodes = branch_length_tree.getNodes();
-    
+
 //    std::vector<double> rates(time_tree_nodes.size()-1,0.0);
-    
 
     // get the clades for this tree
     RbBitSet b( branch_length_tree.getNumberOfTips(), false );
@@ -209,7 +226,7 @@ double BranchRateTreeDistribution::computeLnProbability( void )
 
     for (size_t i=0; i<time_tree_nodes.size(); ++i)
     {
-            
+
         TopologyNode* the_time_node = time_tree_nodes[i];
         // check if the node is the root node
         if ( the_time_node->isRoot() == true )
@@ -223,20 +240,43 @@ double BranchRateTreeDistribution::computeLnProbability( void )
         std::map<RbBitSet, double>::const_iterator it_branch_length = split_to_branch_lengths.find( this_split );
         if ( it_branch_length == split_to_branch_lengths.end() )
         {
-            throw RbException("Problem in ultrametric tree distribution. Couldn't find branch length ...");
+            throw RbException("Problem in branch rate tree distribution. Couldn't find branch length ...");
         }
+        // get branch length
         double branch_exp_num_events = it_branch_length->second;
-        
+        // get branch time
+        double branch_time = the_time_node->getBranchLength();
+
         // check if the node is a descendant of the root
         if ( the_time_node->getParent().isRoot() == true )
         {
+
+            // there is a Jacobian term because we use the root branch (i.e., the sum of the two branches subtending the root) as a single variable
+            // however, the probability density is defined on the two branches subtending the root.
+            // the Jacobian is J = root_branch = (left_branch + right_branch)
+            ln_prob += log( branch_exp_num_events ) / 2.0; // we need to divide by 2 because we will go twice into this if statement
+
             // do something with the root branch, i.e., use a root branch fraction
-            // @Allison: Add the root branch fraction variable in here
-            branch_exp_num_events *= 0.5;
-            
+            double frac = 1.0;
+            if ( root_branch_fraction != NULL )
+            {
+                if ( the_time_node == &(the_time_node->getParent().getChild(0)) )
+                {
+                    frac = root_branch_fraction->getValue();
+                }
+                else
+                {
+                    frac = 1.0 - root_branch_fraction->getValue();
+                }
+            }
+            else
+            {
+                double sum = the_time_node->getParent().getChild(0).getBranchLength() + the_time_node->getParent().getChild(1).getBranchLength();
+                frac = branch_time / sum;
+            }
+            branch_exp_num_events *= frac;
         }
 
-        double branch_time = the_time_node->getBranchLength();
 
         double branch_rate = branch_exp_num_events / branch_time;
 
@@ -285,25 +325,37 @@ void BranchRateTreeDistribution::simulateTree( void )
 {
     delete value;
 
-    // make our own copy of this time tree as an unrooted tree
+    // make our own copy of this time tree
+    // our strategy is to loop through all nodes of the time tree, update
+    // the branch times with new branch lengths, and then finally unroot
+    // the tree to create our new branch length tree
     const Tree &time_tree_copy = time_tree->getValue();
     Tree *value = time_tree_copy.clone();
-    value->unroot();
 
-    // draw new branch rates
-    const std::vector<TopologyNode*> &tree_nodes = value->getNodes();
+    // get time tree nodes
+    const std::vector<TopologyNode*> &time_tree_nodes = value->getNodes();
 
-    for (size_t i=0; i<tree_nodes.size(); ++i)
+    // loop through time tree nodes and draw new rates to get new branch lengths
+    for (size_t i=0; i<time_tree_nodes.size(); ++i)
     {
-        TopologyNode* the_node = tree_nodes[i];
+        TopologyNode* the_node = time_tree_nodes[i];
+
+        // get the branch time
         double branch_time = the_node->getBranchLength();
 
+        // draw new branch rate
         branch_rate_prior->redrawValue();
         double new_branch_rate = branch_rate_prior->getValue();
+
+        // get new branch length
         double new_branch_length = new_branch_rate * branch_time;
 
+        // set new branch length
         the_node->setBranchLength( new_branch_length );
     }
+
+    // now unroot to get the final branch length tree
+    value->unroot();
 
 }
 
@@ -312,8 +364,18 @@ void BranchRateTreeDistribution::simulateTree( void )
 void BranchRateTreeDistribution::swapParameterInternal( const DagNode *oldP, const DagNode *newP )
 {
 
-    if ( branch_rate_prior != NULL )
+    if (oldP == root_branch_fraction )
+    {
+        root_branch_fraction = static_cast<const TypedDagNode<double>* >( newP );
+    }
+
+    //if ( branch_rate_prior != NULL )
+    try
     {
         branch_rate_prior->swapParameter(oldP,newP);
+    }
+    catch (RbException &e)
+    {
+
     }
 }
