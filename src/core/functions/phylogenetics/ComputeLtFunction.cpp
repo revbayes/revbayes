@@ -76,8 +76,8 @@ void ComputeLtFunction::update( void ) {
 	const std::vector<double> &b = listB->getValue(); // sampled ancestors
 	const std::vector<double> &c = listC->getValue(); // terminal non-removed
 	const std::vector<double> &d = listD->getValue(); // terminal removed
-	const std::vector<double> &e = listE->getValue(); //
-	const std::vector<double> &f = listF->getValue();
+	const std::vector<double> &e = listE->getValue(); // occurrences non-removed
+	const std::vector<double> &f = listF->getValue(); // occurrences removed
 
 	double out = 0.0;
 	for ( std::vector<double>::const_iterator it = a.begin(); it != a.end(); ++it) {
