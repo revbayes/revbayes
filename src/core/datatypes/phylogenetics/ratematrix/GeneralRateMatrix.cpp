@@ -40,11 +40,17 @@ GeneralRateMatrix& GeneralRateMatrix::assign(const Assignable &m)
 double GeneralRateMatrix::averageRate(void) const
 {
     std::vector<double> stationary_freqs = getStationaryFrequencies();
+
+    std::vector<int> emit = get_emitted_letters();
     
     double ave = 0.0;
     for (size_t i=0; i<num_states; i++)
     {
-        ave += -stationary_freqs[i] * (*the_rate_matrix)[i][i];
+        for (size_t j=0; j<num_states; j++)
+        {
+            if (emit[i] != emit[j])
+                ave += stationary_freqs[i] * (*the_rate_matrix)[i][j];
+        }
     }
     
     return ave;

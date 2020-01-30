@@ -621,3 +621,12 @@ void AbstractRateMatrix::setDiagonal(void)
     // set flags
     needs_update = true;
 }
+
+std::vector<int> AbstractRateMatrix::get_emitted_letters() const
+{
+    std::vector<int> emit(num_states);
+    for(int i=0;i<num_states;i++)
+        emit[i] = i;
+
+    return emit;
+}
