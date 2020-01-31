@@ -40,7 +40,9 @@ RevBayesCore::TypedFunction<double>* Func_computeLt::createFunction( void ) cons
   RevBayesCore::TypedDagNode< double >* rho = static_cast<const RealPos &>( this->args[11].getVariable()->getRevObject() ).getDagNode();
   RevBayesCore::TypedDagNode< double >* r = static_cast<const RealPos &>( this->args[12].getVariable()->getRevObject() ).getDagNode();
 
-  RevBayesCore::ComputeLtFunction* fxn = new RevBayesCore::ComputeLtFunction( a, b, c, d, e, f, t, l, m, p, o, rho, r );
+  RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* g = static_cast<const ModelVector<Real> &>( this->args[13].getVariable()->getRevObject() ).getDagNode();
+
+  RevBayesCore::ComputeLtFunction* fxn = new RevBayesCore::ComputeLtFunction( a, b, c, d, e, f, t, l, m, p, o, rho, r, g );
 
   return fxn;
 
@@ -73,6 +75,8 @@ const ArgumentRules& Func_computeLt::getArgumentRules( void ) const
         argumentRules.push_back( new ArgumentRule( "o", RealPos::getClassTypeSpec(), "omega.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "rho", RealPos::getClassTypeSpec(), "rho.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "r", RealPos::getClassTypeSpec(), "removel Pr.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+
+        argumentRules.push_back( new ArgumentRule( "listF", ModelVector<Real>::getClassTypeSpec(), "A vector of values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         rules_set = true;
     }

@@ -10,6 +10,24 @@ class DagNode;
 template <class valueType> class RbVector;
 template <class valueType> class TypedDagNode;
 
+  class Event {
+
+  //public: Event(double time, std::<string> type, bool extant) : time(time), type(type), extant(extant) {}
+
+  public: Event(double time, std::string type, bool extant) : time(time), type(type), extant(extant) {}
+
+  double getEventTime(void){ return time; }
+  std::string getEventType(void){ return type; }
+  bool getIsExtant(void){ return extant; }
+  void setIsExtant(bool b){ extant = b; }
+
+  private:
+    double time;
+    std::string type;
+    bool extant;
+
+  };
+
   class ComputeLtFunction : public TypedFunction<double> {
 
   public:
@@ -26,13 +44,15 @@ template <class valueType> class TypedDagNode;
       const TypedDagNode< double > *p,
       const TypedDagNode< double > *o,
       const TypedDagNode< double > *rho,
-      const TypedDagNode< double > *r
+      const TypedDagNode< double > *r,
+      const TypedDagNode< RbVector<double> > *g
     );
     virtual                                            ~ComputeLtFunction(void);
 
     // public member functions
     ComputeLtFunction*                                  clone(void) const;                                                          //!< Create an independent clone
     void                                                update(void);
+    void                                                poolTimes(void);
 
   protected:
     void                     swapParameterInternal(const DagNode *oldP, const DagNode *newP);
@@ -46,6 +66,7 @@ template <class valueType> class TypedDagNode;
     const TypedDagNode< RbVector< double > >*           listD;
     const TypedDagNode< RbVector< double > >*           listE;
     const TypedDagNode< RbVector< double > >*           listF;
+    const TypedDagNode< RbVector< double > >*           listG;
 
     const TypedDagNode< double > *                      tor;
     const TypedDagNode< double > *                      lambda;
@@ -55,7 +76,11 @@ template <class valueType> class TypedDagNode;
     const TypedDagNode< double > *                      rho;
     const TypedDagNode< double > *                      removalPr;
 
+    // vector of Events
+    std::vector<Event *>         events;
+
   };
+
 
 }
 
