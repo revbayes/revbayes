@@ -4,29 +4,33 @@
 #include "TypedFunction.h"
 // anything other includes?
 
+#include <string>
+#include <vector>
+
 namespace RevBayesCore {
 // anything else here?
 class DagNode;
 template <class valueType> class RbVector;
 template <class valueType> class TypedDagNode;
 
-  class Event {
-
-  //public: Event(double time, std::<string> type, bool extant) : time(time), type(type), extant(extant) {}
-
-  public: Event(double time, std::string type, bool extant) : time(time), type(type), extant(extant) {}
-
-  double getEventTime(void){ return time; }
-  std::string getEventType(void){ return type; }
-  bool getIsExtant(void){ return extant; }
-  void setIsExtant(bool b){ extant = b; }
-
-  private:
-    double time;
-    std::string type;
-    bool extant;
-
-  };
+  // class Event {
+  //
+  // //public: Event(double time, std::<string> type, bool extant) : time(time), type(type), extant(extant) {}
+  //
+  // public: Event(double time, std::string type, bool extant) : time(time), type(type), extant(extant) {}
+  //
+  // double getEventTime(void){ return time; }
+  // std::string getEventType(void){ return type; }
+  // bool getIsExtant(void){ return extant; }
+  // void setIsExtant(bool b){ extant = b; }
+  //
+  // double time;
+  //
+  // private:
+  //   std::string type;
+  //   bool extant;
+  //
+  // };
 
   class ComputeLtFunction : public TypedFunction<double> {
 
@@ -57,6 +61,29 @@ template <class valueType> class TypedDagNode;
   protected:
     void                     swapParameterInternal(const DagNode *oldP, const DagNode *newP);
 
+
+    struct Event {
+      Event(double d, std::string s, bool b) : time(d), type(s), extant(b) {};
+
+      double time;
+      std::string type;
+      bool extant;
+
+      double getEventTime(void){ return time; }
+      std::string getEventType(void){ return type; }
+      bool getIsExtant(void){ return extant; }
+
+    };
+
+    // vector of Events
+    std::vector<Event>         events;
+
+    struct AgeCompare {
+      bool operator()(const Event first, const Event second) {
+                return first.time < second.time;
+      }
+    };
+
   private:
 
     // members
@@ -75,9 +102,6 @@ template <class valueType> class TypedDagNode;
     const TypedDagNode< double > *                      omega;
     const TypedDagNode< double > *                      rho;
     const TypedDagNode< double > *                      removalPr;
-
-    // vector of Events
-    std::vector<Event *>         events;
 
   };
 

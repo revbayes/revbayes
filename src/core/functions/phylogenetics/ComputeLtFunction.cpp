@@ -6,6 +6,7 @@
 #include "ComputeLtFunction.h"
 
 #include <vector>
+#include <iostream>
 
 #include "RbMathMatrix.h"
 #include "RbVector.h"
@@ -44,12 +45,12 @@ ComputeLtFunction::ComputeLtFunction(
 	//poolTimes(a, b, b, c, d, e, f, g);
 
 	//add the parameter as parents
-	this->addParameter( listA );
-	this->addParameter( listB );
-	this->addParameter( listC );
-	this->addParameter( listD );
-	this->addParameter( listE );
-	this->addParameter( listF );
+	//this->addParameter( listA );
+	//this->addParameter( listB );
+	//this->addParameter( listC );
+	//this->addParameter( listD );
+	//this->addParameter( listE );
+	//this->addParameter( listF );
 
 	this->addParameter( tor );
 	this->addParameter( lambda );
@@ -59,8 +60,7 @@ ComputeLtFunction::ComputeLtFunction(
 	this->addParameter( rho );
 	this->addParameter( removalPr ); // I'm not sure if we need to do this
 
-
-	poolTimes();
+	poolTimes(); // step 1.
 	update();
 
 }
@@ -112,38 +112,47 @@ void ComputeLtFunction::poolTimes(void) {
 	const std::vector<double> &f = listF->getValue(); // occurrences removed
 	const std::vector<double> &g = listF->getValue(); // timeslices
 
-	for ( int i = 0; a.size(); i++){
-			events.push_back( new Event(a[i], "branching time", 0) );
+	for ( int i = 0; i < a.size(); i++){
+	    events.push_back( Event(a[i], "branching time", 0) );
 	}
 
-	for ( int i = 0; b.size(); i++){
-			events.push_back( new Event(b[i], "sampled ancestor", 0) );
+	for ( int i = 0; i < b.size(); i++){
+	    events.push_back( Event(b[i], "sampled ancestor", 0) );
 	}
 
-	for ( int i = 0; c.size(); i++){
-			if(c[i] == 0)
-				events.push_back( new Event(c[i], "terminal non-removed", 1) );
-			else
-				events.push_back( new Event(c[i], "terminal non-removed", 0) );
+	for ( int i = 0; i < c.size(); i++){
+	    if(c[i] == 0)
+	      events.push_back( Event(c[i], "terminal non-removed", 1) );
+	    else
+	      events.push_back( Event(c[i], "terminal non-removed", 0) );
 	}
 
-	for ( int i = 0; d.size(); i++){
-			if(c[i] == 0)
-				events.push_back( new Event(d[i], "terminal removed", 1) );
-			else
-				events.push_back( new Event(d[i], "terminal removed", 0) );
+	for ( int i = 0; i < d.size(); i++){
+	    if(c[i] == 0)
+	      events.push_back( Event(d[i], "terminal removed", 1) );
+	    else
+	      events.push_back( Event(d[i], "terminal removed", 0) );
 	}
 
-	for ( int i = 0; e.size(); i++) {
-			events.push_back( new Event(e[i], "terminal non-removed", 0) );
+	for ( int i = 0; i < e.size(); i++){
+	    events.push_back( Event(e[i], "terminal non-removed", 0) );
 	}
 
-	for ( int i = 0; f.size(); i++) {
-			events.push_back( new Event(f[i], "occurrence removed", 0) );
+	for ( int i = 0; i < f.size(); i++){
+	    events.push_back( Event(f[i], "occurrence removed", 0) );
 	}
 
-	for ( int i = 0; g.size(); i++) {
-			events.push_back( new Event(g[i], "time slice", 0) );
+	for ( int i = 0; i < g.size(); i++){
+	    events.push_back( Event(g[i], "time slice", 0) );
+	}
+
+	// order times youngest to oldest
+	std::sort( events.begin(), events.end(), AgeCompare() );
+
+	// debugging code
+	for( int i = 0; i < events.size(); i++){
+	 	Event e = events[i];
+	 	std::cout << i << " " << e.time << std::endl;
 	}
 
 }
