@@ -103,6 +103,8 @@ template <class valueType> class TypedDagNode;
     const TypedDagNode< double > *                      rho;
     const TypedDagNode< double > *                      removalPr;
 
+    size_t                      extant;
+
   };
 
 
