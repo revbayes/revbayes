@@ -8,7 +8,6 @@
 #include <vector>
 
 namespace RevBayesCore {
-// anything else here?
 class DagNode;
 template <class valueType> class RbVector;
 template <class valueType> class TypedDagNode;
@@ -67,7 +66,7 @@ template <class valueType> class TypedDagNode;
 
       double time;
       std::string type;
-      bool extant;
+      bool extant; // todo: get rid of this
 
       double getEventTime(void){ return time; }
       std::string getEventType(void){ return type; }
