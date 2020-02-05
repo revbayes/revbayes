@@ -106,18 +106,15 @@ void ComputeLtFunction::update( void ) {
 	//std::cout << "k " << k << std::endl;
 
 	// step 3. // I think this is supposed to be the first entry of B
-	std::vector<double> Lt;
+	//std::vector<double> Lt;
+	RbVector<double> Lt;
 	for ( int i = 0; i < (N + 1); i++){
 		if (i == 0) Lt.push_back( pow(rh, k) );
 		else Lt.push_back( pow(rh, k) * pow((1-rh), i) );
 	}
 
 	// debugging
-	//std::cout << "Lt 1" << Lt[0] << std::endl;
-
-	for(int i = 0; i < Lt.size(); i++){
-		std::cout << "Lt " << Lt[i] << std::endl;
-	}
+	std::cout << "Lt 1" << Lt << std::endl;
 
 	// step 4.
 	//-> calculate the state of the process just before the next time point
@@ -128,7 +125,8 @@ void ComputeLtFunction::update( void ) {
 
 	size_t indxJ = 0;
 
-	for(int h = 0; h < S; h++){
+	//for(int h = 0; h < S; h++){
+	for(int h = 0; h < events.size(); h++){
 
 		double th = events[h].time;
 
@@ -144,31 +142,37 @@ void ComputeLtFunction::update( void ) {
 				}
 			}
 
-			std::cout << "A 1" << A << std::endl;
+			//std::cout << "A 1" << A << std::endl;
 
-			A = A * (th - thMinusOne);
+			//A = A * (th - thMinusOne);
+			for(int i = 0; i < (N + 1); i++){
+				for(int j = 0; j < (N + 1); j++){
+					A[i][j] = A[i][j] * (th - thMinusOne);
+				}
+			}
 
-			std::cout << "A 2" << A << std::endl;
+			//std::cout << std::setw(6) << "A 2" << A << std::endl;
 
 			RbMath::expMatrixPade(A, A, 4);
 
-			std::cout << "A 3" << A << std::endl;
+			//std::cout << "A 3" << A << std::endl;
 
-			//Lt = A * Lt;
-			std::vector<double> LtPrime;
-			for( int i =0; i < Lt.size(); i++){
-				double sum = 0.0;
-				for(int j = 0; j <Lt.size(); j++){
-					sum += A[i][j] * Lt[j];
-				}
-				LtPrime[i] = sum;
-			}
-			Lt = LtPrime;
+		 // A * Lt
+		 RbVector<double> LtPrime;
+		 // for each row in matrix A
+		 for(int i = 0; i < Lt.size(); i++){
+			 double sum = 0.0;
+			 // for each entry in the vector Lt
+			 for(int j = 0; j < Lt.size(); j++){
+				 sum += A[i][j] * Lt[j];
+			 }
+			 LtPrime.push_back( sum );
+		 }
 
-			//debug
-			for(int i = 0; i < Lt.size(); i++){
-				std::cout << "step 5-6 " << Lt[i] << std::endl;
-			}
+		 //Lt = LtPrime;
+		 for(int i = 0; i < Lt.size(); i++){
+				Lt[i] = LtPrime[i];
+		 }
 
 		}
 
@@ -226,15 +230,15 @@ void ComputeLtFunction::update( void ) {
 
 		// step 19-20.
 		if(type == "occurrence removed"){
-			for(int i = Lt.size(); i > 0; i--){
-				Lt[i] = Lt[i-1] * i * om * rp;
-			}
-			Lt[0] = 0;
-			//debug
-			for(int i = 0; i < Lt.size(); i++){
-				std::cout << "step 19 " << Lt[i] << std::endl;
-			}
-		}
+		 	for(int i = Lt.size()-1; i > 0; i--){
+		 		Lt[i] = Lt[i-1] * i * om * rp;
+		 	}
+		 	Lt[0] = 0;
+		 	//debug
+		 	for(int i = 0; i < Lt.size(); i++){
+		 		std::cout << "step 19 " << Lt[i] << std::endl;
+		 	}
+		 }
 
 		// step 21-22.
 		if(type == "occurrence non-removed"){
@@ -263,10 +267,11 @@ void ComputeLtFunction::update( void ) {
 
 	}
 
-	// debugging
-	//std::cout << A << std::endl;
+	//double out = log(Lt[0]);
 
-	*this->value = Lt[0]; // this will eventually be the lk of the tree + occurrences
+	double out = Lt[0];
+
+	*this->value = out; // this will eventually be the lk of the tree + occurrences
 
 }
 
