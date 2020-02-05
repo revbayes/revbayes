@@ -406,7 +406,7 @@ double SBNParameters::computeLnProbabilityUnrootedTopology( const Tree &tree ) c
 /* Computes the probability of seeing a particular root split given an SBN */
 double SBNParameters::computeRootSplitProbability( const Subsplit &root_split ) const
 {
-  double log_prob = RbConstants::Double::nan;
+  double log_prob = RbConstants::Double::neginf;
   for (size_t i=0; i<root_splits.size(); ++i)
   {
     if ( root_split == root_splits[i].first)
@@ -431,7 +431,7 @@ double SBNParameters::computeSubsplitTransitionProbability( const Subsplit &pare
   // Find all potential children of parent
   const std::vector<std::pair<Subsplit,double> > &all_children = subsplit_cpds.at(parent);
 
-  double log_prob = RbConstants::Double::nan;
+  double log_prob = RbConstants::Double::neginf;
 
   for (size_t i=0; i<all_children.size(); ++i)
   {
@@ -515,7 +515,7 @@ Subsplit SBNParameters::drawRootSplit( void ) const
 {
 
   double u = GLOBAL_RNG->uniform01();
-  size_t index;
+  size_t index = root_splits.size();
   for (size_t i=0; i<root_splits.size(); ++i)
   {
     if (u < root_splits[i].second)
@@ -541,7 +541,7 @@ Subsplit SBNParameters::drawSubsplitForY( const Subsplit &s ) const
   size_t fsb = s.getFsbY();
 
   double u = GLOBAL_RNG->uniform01();
-  size_t index;
+  size_t index = my_children.size();
 
   // This is like drawing a root split, but we must ensure we only draw from subsplits of Y
   for (size_t i=0; i<my_children.size(); ++i)
@@ -573,7 +573,7 @@ Subsplit SBNParameters::drawSubsplitForZ( const Subsplit &s ) const
   size_t fsb = s.getFsbZ();
 
   double u = GLOBAL_RNG->uniform01();
-  size_t index;
+  size_t index = my_children.size();
 
   // This is like drawing a root split, but we must ensure we only draw from subsplits of Z
   for (size_t i=0; i<my_children.size(); ++i)
@@ -1545,7 +1545,7 @@ double log_sum_exp_neginf (std::vector<double> x, double max ) {
     return max + log(lse);
 }
 
-void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &alpha )
+void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &alpha, size_t min_loop_iter, size_t max_loop_iter )
 {
 
   if ( alpha < 0.0 )
@@ -1591,7 +1591,7 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
     std::unordered_map<Subsplit,double> root_split_counts;
     std::unordered_map<std::pair<Subsplit,Subsplit>,double> parent_child_counts;
 
-std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
+// std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
     double score = 0.0;
     // E-step, compute q (per tree) and m (counts, across all trees)
     for (size_t i=0; i<trees.size(); ++i)
@@ -1676,7 +1676,7 @@ std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
     regularizeCounts(parent_child_counts, root_split_counts, parent_child_counts_sa, root_split_counts_sa, alpha);
     }
 
-    std::cout << ">>>>>>M step" << std::endl;
+    // std::cout << ">>>>>>M step" << std::endl;
     // M-step, compute p
     makeRootSplits(root_split_counts);
     makeCPDs(parent_child_counts);
@@ -1690,22 +1690,28 @@ std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
 
     // sbn_old = *this;
 
-    // Contemplate loop termination
-    std::cout << "score - old_score = " << score - old_score << std::endl;
-    std::cout << "score = " << score << std::endl;
-    if ( fabs(score - old_score) < 0.000001 )
-    {
-      break;
-    }
-
     old_score = score;
     // break;
-    // if (iter == 100){break;}
-  }
 
-  if ( iter == 500 )
-  {
-    throw(RbException("EM algorithm hit maximum step limit and was aborted."));
+    // if (iter == 100){break;}
+
+    if ( iter >= min_loop_iter )
+    {
+      if ( iter < max_loop_iter )
+      {
+        // Contemplate loop termination
+        std::cout << "score - old_score = " << score - old_score << std::endl;
+        std::cout << "score = " << score << std::endl;
+        if ( fabs(score - old_score) < 0.000001 )
+        {
+          break;
+        }
+      }
+      else
+      {
+        break;
+      }
+    }
   }
 
   // Handle branch lengths (we only need to do this once!)

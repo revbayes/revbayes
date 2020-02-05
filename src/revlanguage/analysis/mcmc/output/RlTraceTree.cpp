@@ -359,7 +359,24 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
           alpha = 50.0 / n;
         }
 
-        RevBayesCore::SBNParameters sbn = this->value->learnUnconstrainedSBN(fitting_method, branch_length_approximation, alpha);
+        size_t min_loop_iter = 1;
+        if ( args[3].getVariable()->getRevObject() != RevNullObject::getInstance() )
+        {
+            min_loop_iter = static_cast<const Natural &>( args[3].getVariable()->getRevObject() ).getValue();
+            assert(min_loop_iter > 0);
+        }
+
+        size_t max_loop_iter = 500;
+        if ( args[4].getVariable()->getRevObject() != RevNullObject::getInstance() )
+        {
+            max_loop_iter = static_cast<const Natural &>( args[4].getVariable()->getRevObject() ).getValue();
+            if (max_loop_iter < min_loop_iter)
+            {
+                throw(RbException("maximumIterations must be greater than or equal to minimumIterations"));
+            }
+        }
+
+        RevBayesCore::SBNParameters sbn = this->value->learnUnconstrainedSBN(fitting_method, branch_length_approximation, alpha, min_loop_iter, max_loop_iter);
         return new RevVariable( new SBNParameters( sbn ) );
 
     }
@@ -455,7 +472,9 @@ void TraceTree::initMethods( void )
     ArgumentRules* learnUnconstrainedSBNRules = new ArgumentRules();
     learnUnconstrainedSBNRules->push_back( new ArgumentRule("topologyFittingMethod", RlString::getClassTypeSpec(), "Fitting method for topology component. SA|EM|EMA.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
     learnUnconstrainedSBNRules->push_back( new ArgumentRule("branchLengthApproximationMethod", RlString::getClassTypeSpec(), "How to fit branch lengths. gammaMOM|lognormalML|lognormalMOM.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
-    learnUnconstrainedSBNRules->push_back( new ArgumentRule("regularizationAlpha", RealPos::getClassTypeSpec(), "Regularization parameter for EMA approach. If NULL, will be 50/treetrace.size()", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL) );
+    learnUnconstrainedSBNRules->push_back( new ArgumentRule("regularizationAlpha", RealPos::getClassTypeSpec(), "Regularization parameter for EMA approach. If NULL, will be 50/treetrace.size().", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL) );
+    learnUnconstrainedSBNRules->push_back( new ArgumentRule("minimumIterations", Natural::getClassTypeSpec(), "For EMA and EM, minimum number of EM algorithm steps.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL) );
+    learnUnconstrainedSBNRules->push_back( new ArgumentRule("maximumIterations", Natural::getClassTypeSpec(), "For EMA and EM, maximum number of EM algorithm steps.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL) );
     this->methods.addFunction( new MemberProcedure( "learnUnconstrainedSBN", SBNParameters::getClassTypeSpec(), learnUnconstrainedSBNRules) );
 
     ArgumentRules* getNumberSamplesArgRules = new ArgumentRules();

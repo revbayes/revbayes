@@ -72,7 +72,7 @@ namespace RevBayesCore {
         void                                fitNodeTimeDistributions(std::vector<Tree> &trees);
         void                                learnTimeCalibratedSBN( std::vector<Tree>& trees );
         void                                learnUnconstrainedSBNSA( std::vector<Tree> &trees );
-        void                                learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &alpha );
+        void                                learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &alpha, size_t min_loop_iter, size_t max_loop_iter );
         void                                makeCPDs(std::unordered_map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts);
         void                                makeRootSplits(std::unordered_map<Subsplit,double>& root_split_counts);
         void                                normalizeCPDForSubsplit(std::vector<std::pair<Subsplit,double> >& cpd, Subsplit& parent);

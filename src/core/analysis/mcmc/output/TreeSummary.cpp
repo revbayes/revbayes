@@ -1372,7 +1372,7 @@ bool TreeSummary::isDirty(void) const
     return dirty;
 }
 
-SBNParameters TreeSummary::learnUnconstrainedSBN(const std::string &method, const std::string &branch_length_approximation, double alpha)
+SBNParameters TreeSummary::learnUnconstrainedSBN(const std::string &method, const std::string &branch_length_approximation, double alpha, size_t min_loop_iter, size_t max_loop_iter)
 {
 
   std::vector<Taxon> ordered_taxa = traces[0]->objectAt(0).getTaxa();
@@ -1409,11 +1409,11 @@ SBNParameters TreeSummary::learnUnconstrainedSBN(const std::string &method, cons
     else if ( method == "EM" )
     {
       double a = 0.0;
-      sbn.learnUnconstrainedSBNEM(trees,a);
+      sbn.learnUnconstrainedSBNEM(trees,a,min_loop_iter,max_loop_iter);
     }
     else if ( method == "EMA" )
     {
-      sbn.learnUnconstrainedSBNEM(trees,alpha);
+      sbn.learnUnconstrainedSBNEM(trees,alpha,min_loop_iter,max_loop_iter);
     }
     else
     {
