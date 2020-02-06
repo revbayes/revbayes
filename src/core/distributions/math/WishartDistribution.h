@@ -7,6 +7,21 @@
 
 namespace RevBayesCore {
 class DagNode;
+
+
+/**
+ * @brief Wishart distribution class.
+ *
+ * The Gamma distribution represents a family of distributions
+ * defined on the positive real numbers. The Wishart distribution is a multivariate generalization of the Gamma distribution.
+ * The Wishart distribution has 2 parameters:
+ *
+ * @param V A square scaling matrix.
+ * @param Df The degrees of freedom
+ * Instances of this class can be associated to stochastic variables.
+ */
+
+
     
     class WishartDistribution : public TypedDistribution<MatrixReal>   {
         

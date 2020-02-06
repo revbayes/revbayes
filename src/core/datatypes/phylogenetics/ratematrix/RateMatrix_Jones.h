@@ -1,16 +1,12 @@
 /**
  * @file
- * This file contains the declaration of RateMatrix_JC, which is
+ * This file contains the declaration of RateMatrix_Jones, which is
  * class that holds a rate matrix for a continuous-time Markov model.
  *
- * @brief Declaration of RateMatrix_JC
+ * @brief Declaration of RateMatrix_Jones
  *
- * (c) Copyright 2009-
- * @date Last modified: $Date: 2012-12-05 12:20:37 -0800 (Wed, 05 Dec 2012) $
- * @author The RevBayes Development Core Team
- * @license GPL version 3
+ * This class implements the Jones rate matrix. The Blosum62 matrix has empirically derived exchangeability rates and stationary frequencies for the 20 amino acids.
  *
- * $Id: RateMatrix.h 1901 2012-12-05 20:20:37Z boussau $
  */
 
 #ifndef RateMatrix_Jones_H

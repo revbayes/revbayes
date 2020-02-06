@@ -23,7 +23,10 @@
 
 using namespace RevBayesCore;
 
-/** Construct rate matrix with n states */
+/** Free Symmetric Rate Matrix Constructor
+ *
+ * @param n the size of the matrix
+ */
 RateMatrix_FreeSymmetric::RateMatrix_FreeSymmetric(size_t n) : GeneralRateMatrix( n ),
     rescale(true),
     my_method( EIGEN )

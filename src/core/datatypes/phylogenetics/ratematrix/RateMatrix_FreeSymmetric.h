@@ -14,7 +14,7 @@ namespace RevBayesCore {
     /**
      * @brief Free symmetric rate matrix class.
      *
-     * This class implements the free symmetric rate matrix .
+     * This class implements the free symmetric rate matrix. Each state has an equal probability of transitioning to any other state.
      * The resulting rate matrix is computed by:
      *
      *      |   -        r[1]    r[2]      ...         r[k-1]    |
@@ -26,9 +26,6 @@ namespace RevBayesCore {
      *      | r[k-1]        ...        r[(k-1)k/2]        -      |
      *
      *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2015-09-29, version 1.0
      */
     class RateMatrix_FreeSymmetric : public GeneralRateMatrix {
         
