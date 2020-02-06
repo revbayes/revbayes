@@ -14,9 +14,13 @@ template <class valueType> class TypedDagNode;
      *
      * This function computes the StandardDeviation of a vector of real number:
      *   y = sum_{i=1}^{n}(x[i]-\bar{x})*(x[i]-\bar{x})/(n-1)
+ ion for computation of the sum of a vector of  real numbers.
      *
-     * 
+     * This class is the function that computes the standard deviation of a vector of numbers.
+     * The numbers are passed in as a DAG node whose value type is a std::vector<double>.
+     *
      */
+
     class StandardDeviationFunction : public TypedFunction<double> {
         
     public:
