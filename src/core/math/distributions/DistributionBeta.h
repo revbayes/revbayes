@@ -1,6 +1,5 @@
 /**
- * @file DistributionBeta
- * This file contains the functions of the beta distribution.
+ * @file DistributionBeta.h
  *
  * @brief Implementation of the beta distribution.
  *

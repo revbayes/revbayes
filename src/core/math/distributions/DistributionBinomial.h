@@ -1,6 +1,6 @@
 /**
- * @file DistributionBinomial
- * This file contains the functions of the binomial distribution.
+ * @file DistributionBinomial.h
+ * @brief Implementation of the binomial distribution.
  *
  */
 
