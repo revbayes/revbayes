@@ -133,7 +133,7 @@ const std::string& Dist_BranchRateTree::getClassType( void )
 const TypeSpec& Dist_BranchRateTree::getClassTypeSpec( void )
 {
 
-    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution<Tree>::getClassTypeSpec() ) );
+    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution<BranchLengthTree>::getClassTypeSpec() ) );
     return rev_type_spec;
 }
 
