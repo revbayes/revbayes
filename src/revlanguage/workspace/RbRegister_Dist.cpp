@@ -184,6 +184,7 @@
 #include "Dist_heterogeneousRateBirthDeath.h"
 #include "Dist_multispeciesCoalescentInverseGammaPrior.h"
 #include "Dist_multispeciesCoalescentUniformPrior.h"
+#include "Dist_MultispeciesCoalescentMigration.h"
 #include "Dist_outgroupBirthDeath.h"
 #include "Dist_phyloDistanceGamma.h"
 #include "Dist_sampledSpeciationBirthDeathProcess.h"
@@ -376,6 +377,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< TimeTree                   >( new Dist_constPopMultispCoal() );
         AddDistribution< TimeTree                   >( new Dist_multispeciesCoalescentInverseGammaPrior() );
         AddDistribution< TimeTree                   >( new Dist_multispeciesCoalescentUniformPrior() );
+        AddDistribution< TimeTree                   >( new Dist_MultispeciesCoalescentMigration() );
 
         // constrained node age distribution
         AddDistribution< TimeTree                   >( new Dist_ConstrainedNodeAge() );
