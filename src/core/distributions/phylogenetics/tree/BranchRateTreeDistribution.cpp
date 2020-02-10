@@ -287,6 +287,9 @@ double BranchRateTreeDistribution::computeLnProbability( void )
         ln_prob += branch_rate_prior->computeLnProbability();
 
     }
+    
+    delete time_tree_unrooted;
+    delete branch_length_tree_copy;
 
     return ln_prob;
 }
