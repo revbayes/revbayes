@@ -124,7 +124,7 @@ double ComputeLtFunction::ComputeMt( void ) {
 
 	double thPlusOne = tor->getValue();
 
-	size_t indxJ = 0;
+	size_t indxJ = S-1;
 
 	for(int h = 0; h < events.size(); h++){
 		// deal with t > tor
@@ -137,34 +137,34 @@ double ComputeLtFunction::ComputeMt( void ) {
 
 			for(int i = 0; i < (N + 1); i++){
 				for(int j = 0; j < (N + 1); j++){
-					if(j == i) A[i][i] = -gamma * (k + i);
-					else if (j == i+1) A[i][i+1] = birth * ( (2 * k) + i );
-					else if (j == i-1) A[i][i-1] = death * i;
+					if(j == i) A[i][i] = gamma * (k + i);
+					else if (j == i+1) A[i][i+1] = death * (i + 1);
+					else if (j == i-1) A[i][i-1] = birth * (2*k + i - 1);
 				}
 			}
 
 			//A = A * (th - thMinusOne);
 			for(int i = 0; i < (N + 1); i++){
 				for(int j = 0; j < (N + 1); j++){
-					A[i][j] = A[i][j] * (thPlusOne -th);
+					A[i][j] = A[i][j] * (th - thPlusOne);
 				}
 			}
 
 		 RbMath::expMatrixPade(A, A, 4);
 
-		 // A * Lt
+		 // A * Mt
 		 RbVector<double> MtPrime;
 		 // for each row in matrix A
 		 for(int i = 0; i < Mt.size(); i++){
 			 double sum = 0.0;
-			 // for each entry in the vector Lt
+			 // for each entry in the vector Mt
 			 for(int j = 0; j < Mt.size(); j++){
 				 sum += A[i][j] * Mt[j];
 			 }
 			 MtPrime.push_back( sum );
 		 }
 
-		 //Lt = LtPrime;
+		 //Lt = MtPrime;
 		 for(int i = 0; i < Mt.size(); i++){
 				Mt[i] = MtPrime[i];
 		 }
@@ -173,22 +173,15 @@ double ComputeLtFunction::ComputeMt( void ) {
 
 		std::string type = events[h].type;
 
-		// step 7-10. sample Lt
+		// step 7-10. sample Mt
 		if(type == "time slice"){
 			for(int i = 0; i < Mt.size(); i++){
 				B[indxJ][i] = Mt[i];
 			}
-			indxJ += 1;
+			indxJ -= 1;
 		}
 
-		// step 11-12. end algorithm 1
-		if(th == 0.0){
-			for(int i = 0; i < Mt.size(); i++){
-				Mt[i] = Mt[i] * pow(rh,k) * pow(1-rh,i);
-			}
-		}
-
-		// step 13-14.
+    // step 13-14.
 		if(type == "terminal removed"){
 			for(int i = 0; i < Mt.size(); i++){
 				Mt[i] = Mt[i] * ps * rp;
@@ -238,7 +231,12 @@ double ComputeLtFunction::ComputeMt( void ) {
 
 	}
 
-	return Mt[0];
+  double likelihood = 0.0;
+  for(int i = 0; i < Mt.size(); i++){
+    likelihood += Mt[i] * pow(rh,k) * pow(1-rh,i);
+  }
+
+	return likelihood;
 
 }
 
