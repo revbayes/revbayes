@@ -62,7 +62,7 @@ ComputeLtFunction::ComputeLtFunction(
 	this->addParameter( removalPr ); // I'm not sure if we need to do this
 
 	poolTimes(); // step 1.
-	update();
+	//update();
 
 }
 
@@ -79,6 +79,20 @@ ComputeLtFunction* ComputeLtFunction::clone( void ) const
 // required -> update function, where you do the work
 void ComputeLtFunction::update( void ) {
 
+	double a1 = ComputeLt();
+	double a2 = ComputeMt();
+
+	double out = a2;
+
+	*this->value = out; // this will eventually be the lk of the tree + occurrences
+
+}
+
+double ComputeLtFunction::ComputeMt( void ) {
+
+	// order times oldest to youngest -> revisit this
+	std::sort( events.begin(), events.end(), AgeCompareReverse() );
+
 	const double birth = lambda->getValue();
 	const double death = mu->getValue();
 	const double ps = psi->getValue();
@@ -88,8 +102,159 @@ void ComputeLtFunction::update( void ) {
 
 	const double gamma = birth + death + ps + om;
 
-	// debugging
-	//std::cout << "gamma " << gamma << std::endl;
+	size_t N = 4; // accuracy of the algorithm
+	size_t S = listG->getValue().size();
+
+	// step 2. initialize an empty matrix
+	MatrixReal B(S, (N + 1), 0.0);
+
+	size_t k = 1;
+
+	// step 3. // this is the first entry of B
+	RbVector<double> Mt;
+	for ( int i = 0; i < (N + 1); i++){
+		if (i == 0) Mt.push_back( 1.0 );
+		else Mt.push_back( 0.0 );
+	}
+
+	// step 4.
+	//-> calculate the state of the process just before the next time point
+
+	MatrixReal A( (N+1), (N+1), 0.0 );
+
+	double thPlusOne = tor->getValue();
+
+	size_t indxJ = 0;
+
+	for(int h = 0; h < events.size(); h++){
+		// deal with t > tor
+
+		double th = events[h].time;
+
+		if(th > tor->getValue()) continue;
+
+		if( th != thPlusOne ){
+
+			for(int i = 0; i < (N + 1); i++){
+				for(int j = 0; j < (N + 1); j++){
+					if(j == i) A[i][i] = -gamma * (k + i);
+					else if (j == i+1) A[i][i+1] = birth * ( (2 * k) + i );
+					else if (j == i-1) A[i][i-1] = death * i;
+				}
+			}
+
+			//A = A * (th - thMinusOne);
+			for(int i = 0; i < (N + 1); i++){
+				for(int j = 0; j < (N + 1); j++){
+					A[i][j] = A[i][j] * (thPlusOne -th);
+				}
+			}
+
+		 RbMath::expMatrixPade(A, A, 4);
+
+		 // A * Lt
+		 RbVector<double> MtPrime;
+		 // for each row in matrix A
+		 for(int i = 0; i < Mt.size(); i++){
+			 double sum = 0.0;
+			 // for each entry in the vector Lt
+			 for(int j = 0; j < Mt.size(); j++){
+				 sum += A[i][j] * Mt[j];
+			 }
+			 MtPrime.push_back( sum );
+		 }
+
+		 //Lt = LtPrime;
+		 for(int i = 0; i < Mt.size(); i++){
+				Mt[i] = MtPrime[i];
+		 }
+
+		}
+
+		std::string type = events[h].type;
+
+		// step 7-10. sample Lt
+		if(type == "time slice"){
+			for(int i = 0; i < Mt.size(); i++){
+				B[indxJ][i] = Mt[i];
+			}
+			indxJ += 1;
+		}
+
+		// step 11-12. end algorithm 1
+		if(th == 0.0){
+			for(int i = 0; i < Mt.size(); i++){
+				Mt[i] = Mt[i] * pow(rh,k) * pow(1-rh,i);
+			}
+		}
+
+		// step 13-14.
+		if(type == "terminal removed"){
+			for(int i = 0; i < Mt.size(); i++){
+				Mt[i] = Mt[i] * ps * rp;
+			}
+			k -= 1;
+		}
+
+		// step 15-16.
+		if(type == "terminal non-removed"){
+			for(int i = Mt.size()-1; i > 0; i--){
+				Mt[i] = Mt[i-1] * ps * (1-rp);
+			}
+			Mt[0] = 0;
+			k -= 1;
+		}
+
+		// step 17-18.
+		if(type == "sampled ancestor"){
+			for(int i = 0; i < Mt.size(); i++){
+				Mt[i] = Mt[i] * ps * (1-rp);
+			}
+		}
+
+		// step 19-20.
+		if(type == "occurrence removed"){
+			for(int i = 0; i < Mt.size()-1; i++){
+				Mt[i] = Mt[i+1] * (i+1) * om * rp;
+			}
+		 }
+
+		// step 21-22.
+		if(type == "occurrence non-removed"){
+			for(int i = 0; i < Mt.size(); i++){
+				Mt[i] = Mt[i] * (k+i) * om * (1-rp);
+			}
+		}
+
+		// step 23-24.
+		if(type == "branching time"){
+			for(int i = 0; i < Mt.size(); i++){
+				Mt[i] = Mt[i] * birth;
+			}
+			k += 1;
+		}
+
+		thPlusOne = th;
+
+	}
+
+	return Mt[0];
+
+}
+
+double ComputeLtFunction::ComputeLt( void ) {
+
+	// order times youngest to oldest
+	std::sort( events.begin(), events.end(), AgeCompare() );
+
+	const double birth = lambda->getValue();
+	const double death = mu->getValue();
+	const double ps = psi->getValue();
+	const double om = omega->getValue();
+	const double rh = rho->getValue();
+	const double rp = removalPr->getValue();
+
+	const double gamma = birth + death + ps + om;
 
 	size_t N = 4; // accuracy of the algorithm
 	size_t S = listG->getValue().size();
@@ -97,24 +262,14 @@ void ComputeLtFunction::update( void ) {
 	// step 2. initialize an empty matrix
 	MatrixReal B(S, (N + 1), 0.0);
 
-	// debugging
-	std::cout << "B 1" << B << std::endl;
-
 	size_t k = extant;
 
-	// debugging
-	//std::cout << "k " << k << std::endl;
-
-	// step 3. // I think this is supposed to be the first entry of B
-	//std::vector<double> Lt;
+	// step 3. // this is the first entry of B
 	RbVector<double> Lt;
 	for ( int i = 0; i < (N + 1); i++){
 		if (i == 0) Lt.push_back( pow(rh, k) );
 		else Lt.push_back( pow(rh, k) * pow((1-rh), i) );
 	}
-
-	// debugging
-	std::cout << "Lt 1" << Lt << std::endl;
 
 	// step 4.
 	//-> calculate the state of the process just before the next time point
@@ -125,7 +280,6 @@ void ComputeLtFunction::update( void ) {
 
 	size_t indxJ = 0;
 
-	//for(int h = 0; h < S; h++){
 	for(int h = 0; h < events.size(); h++){
 
 		double th = events[h].time;
@@ -142,8 +296,6 @@ void ComputeLtFunction::update( void ) {
 				}
 			}
 
-			//std::cout << "A 1" << A << std::endl;
-
 			//A = A * (th - thMinusOne);
 			for(int i = 0; i < (N + 1); i++){
 				for(int j = 0; j < (N + 1); j++){
@@ -151,11 +303,7 @@ void ComputeLtFunction::update( void ) {
 				}
 			}
 
-			//std::cout << std::setw(6) << "A 2" << A << std::endl;
-
-			RbMath::expMatrixPade(A, A, 4);
-
-			//std::cout << "A 3" << A << std::endl;
+		 RbMath::expMatrixPade(A, A, 4);
 
 		 // A * Lt
 		 RbVector<double> LtPrime;
@@ -184,7 +332,6 @@ void ComputeLtFunction::update( void ) {
 				B[indxJ][i] = Lt[i];
 			}
 			indxJ += 1;
-			//std::cout << "B 2" << B << std::endl;
 		}
 
 		// step 11-12. end algorithm 1
@@ -198,10 +345,6 @@ void ComputeLtFunction::update( void ) {
 				Lt[i] = Lt[i] * ps * rp;
 			}
 			k += 1;
-			//debug
-			for(int i = 0; i < Lt.size(); i++){
-				std::cout << "step 13 " << Lt[i] << std::endl;
-			}
 		}
 
 		// step 15-16.
@@ -211,20 +354,12 @@ void ComputeLtFunction::update( void ) {
 			}
 			//Lt[N] = 0;
 			k += 1;
-			//debug
-			for(int i = 0; i < Lt.size(); i++){
-				std::cout << "step 15 " << Lt[i] << std::endl;
-			}
 		}
 
 		// step 17-18.
 		if(type == "sampled ancestor"){
 			for(int i = 0; i < Lt.size(); i++){
 				Lt[i] = Lt[i] * ps * (1-rp);
-			}
-			//debug
-			for(int i = 0; i < Lt.size(); i++){
-				std::cout << "step 17 " << Lt[i] << std::endl;
 			}
 		}
 
@@ -234,20 +369,12 @@ void ComputeLtFunction::update( void ) {
 		 		Lt[i] = Lt[i-1] * i * om * rp;
 		 	}
 		 	Lt[0] = 0;
-		 	//debug
-		 	for(int i = 0; i < Lt.size(); i++){
-		 		std::cout << "step 19 " << Lt[i] << std::endl;
-		 	}
 		 }
 
 		// step 21-22.
 		if(type == "occurrence non-removed"){
 			for(int i = 0; i < Lt.size(); i++){
 				Lt[i] = Lt[i] * (k+i) * om * (1-rp);
-			}
-			//debug
-			for(int i = 0; i < Lt.size(); i++){
-				std::cout << "step 21 " << Lt[i] << std::endl;
 			}
 		}
 
@@ -257,21 +384,13 @@ void ComputeLtFunction::update( void ) {
 				Lt[i] = Lt[i] * birth;
 			}
 			k -= 1;
-			//debug
-			for(int i = 0; i < Lt.size(); i++){
-				std::cout << "step 23 " << Lt[i] << std::endl;
-			}
 		}
 
 		thMinusOne = th;
 
 	}
 
-	//double out = log(Lt[0]);
-
-	double out = Lt[0];
-
-	*this->value = out; // this will eventually be the lk of the tree + occurrences
+	return Lt[0];
 
 }
 
@@ -314,7 +433,7 @@ void ComputeLtFunction::poolTimes(void) {
 	}
 
 	for(int i = 0; i < e.size(); i++){
-	    events.push_back( Event(e[i], "terminal non-removed", 0) );
+	    events.push_back( Event(e[i], "occurrence non-removed", 0) );
 	}
 
 	for(int i = 0; i < f.size(); i++){
@@ -326,14 +445,5 @@ void ComputeLtFunction::poolTimes(void) {
 	}
 
 	events.push_back( Event(tor->getValue(), "origin", 0) );
-
-	// order times youngest to oldest
-	std::sort( events.begin(), events.end(), AgeCompare() );
-
-	// debugging code
-	for(int i = 0; i < events.size(); i++){
-	 	Event e = events[i];
-	 	//std::cout << i << " " << e.time << std::endl;
-	}
 
 }

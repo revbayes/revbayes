@@ -56,6 +56,8 @@ template <class valueType> class TypedDagNode;
     ComputeLtFunction*                                  clone(void) const;                                                          //!< Create an independent clone
     void                                                update(void);
     void                                                poolTimes(void);
+    double                                              ComputeLt(void);
+    double                                              ComputeMt(void);
 
   protected:
     void                     swapParameterInternal(const DagNode *oldP, const DagNode *newP);
@@ -80,6 +82,12 @@ template <class valueType> class TypedDagNode;
     struct AgeCompare {
       bool operator()(const Event first, const Event second) {
                 return first.time < second.time;
+      }
+    };
+
+    struct AgeCompareReverse {
+      bool operator()(const Event first, const Event second) {
+                return first.time > second.time;
       }
     };
 
