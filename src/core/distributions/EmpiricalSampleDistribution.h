@@ -27,7 +27,7 @@ namespace RevBayesCore {
         
     public:
         // constructor(s)
-        EmpiricalSampleDistribution(TypedDistribution<valueType> *g);
+        EmpiricalSampleDistribution(TypedDistribution<valueType> *g, Trace<double>* d = NULL);
         EmpiricalSampleDistribution(const EmpiricalSampleDistribution &d);
         virtual                                            ~EmpiricalSampleDistribution(void);
 
@@ -53,6 +53,7 @@ namespace RevBayesCore {
         // private members
         TypedDistribution<valueType>*                       base_distribution;
         std::vector< TypedDistribution<valueType>* >        base_distribution_instances;
+        Trace<double>*                                      sample_prior_density;
 
         size_t                                              num_samples;
         size_t                                              sample_block_start;
@@ -81,9 +82,10 @@ namespace RevBayesCore {
 #endif
 
 template <class valueType>
-RevBayesCore::EmpiricalSampleDistribution<valueType>::EmpiricalSampleDistribution(TypedDistribution<valueType> *g) : TypedDistribution< RbVector<valueType> >( new RbVector<valueType>() ),
+RevBayesCore::EmpiricalSampleDistribution<valueType>::EmpiricalSampleDistribution(TypedDistribution<valueType> *g, Trace<double>* d) : TypedDistribution< RbVector<valueType> >( new RbVector<valueType>() ),
     base_distribution( g ),
     base_distribution_instances(),
+    sample_prior_density( d ),
     num_samples( 0 ),
     sample_block_start( 0 ),
     sample_block_end( num_samples ),
@@ -110,6 +112,7 @@ template <class valueType>
 RevBayesCore::EmpiricalSampleDistribution<valueType>::EmpiricalSampleDistribution( const EmpiricalSampleDistribution &d ) : TypedDistribution< RbVector<valueType> >( new RbVector<valueType>( d.getValue() ) ),
     base_distribution( d.base_distribution->clone() ),
     base_distribution_instances(),
+    sample_prior_density( d.sample_prior_density ),
     num_samples( d.num_samples ),
     sample_block_start( d.sample_block_start ),
     sample_block_end( d.sample_block_end ),
@@ -216,7 +219,7 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
     double ln_prob = 0;
     double prob    = 0;
     
-    std::vector<double> probs    = std::vector<double>(num_samples, 0.0);
+    std::vector<double> probs = std::vector<double>(num_samples, 0.0);
     
     // add the ln-probs for each sample
     for (size_t i = 0; i < num_samples; ++i)
@@ -232,13 +235,14 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
 #ifdef RB_MPI
     for (size_t i = 0; i < num_samples; ++i)
     {
-
+        
         if ( this->pid == pid_per_sample[i] )
         {
             
             // send the likelihood from the helpers to the master
             if ( this->process_active == false )
             {
+
                 // send from the workers the log-likelihood to the master
                 MPI_Send(&ln_probs[i], 1, MPI_DOUBLE, this->active_PID, 0, MPI_COMM_WORLD);
             }
@@ -249,6 +253,7 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
         {
             MPI_Status status;
             MPI_Recv(&ln_probs[i], 1, MPI_DOUBLE, pid_per_sample[i], 0, MPI_COMM_WORLD, &status);
+
         }
         
     }
@@ -275,7 +280,6 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
         
     }
 
-    
 #ifdef RB_MPI
     if ( this->process_active == true )
     {
@@ -306,7 +310,7 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
         
     }
 #endif
-    
+
     return ln_prob;
 }
 
@@ -415,8 +419,8 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::setValue(RbVector<val
     sample_block_start = 0;
     sample_block_end   = num_samples;
 #ifdef RB_MPI
-    sample_block_start = size_t(floor( (double(this->pid-this->active_PID)   / this->num_processes ) * num_samples) );
-    sample_block_end   = size_t(floor( (double(this->pid+1-this->active_PID) / this->num_processes ) * num_samples) );
+    sample_block_start = size_t(ceil( (double(this->pid-this->active_PID)   / this->num_processes ) * num_samples) );
+    sample_block_end   = size_t(ceil( (double(this->pid+1-this->active_PID) / this->num_processes ) * num_samples) );
 #endif
     sample_block_size  = sample_block_end - sample_block_start;
     
@@ -429,7 +433,7 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::setValue(RbVector<val
     }
     
 #ifdef RB_MPI
-    // now we need to populate how is
+    // now we need to populate which process is responsible for the given sample
     pid_per_sample = std::vector<size_t>( num_samples, 0 );
     for (size_t i = 0; i < num_samples; ++i)
     {
