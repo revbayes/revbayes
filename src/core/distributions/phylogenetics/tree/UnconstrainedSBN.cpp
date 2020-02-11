@@ -144,34 +144,34 @@ void UnconstrainedSBN::simulateTree( void )
 
     // List of active tree nodes/subsplits
     // We pair them such that each tree node corresponds to the subsplit it defines
-    std::vector<std::pair<Subsplit,TopologyNode*> > active;
+    std::vector<std::pair<size_t,TopologyNode*> > active;
 
     // Root split
     double u = rng->uniform01();
     TopologyNode* root = new TopologyNode();
     root->setNodeType(false, true, false);
-    Subsplit root_split = parameters.drawRootSplit();
+    size_t root_split = parameters.drawRootSplit();
     active.push_back(std::make_pair(root_split,root));
 
     // All other subplits
     while (active.size() > 0)
     {
       // Get a node/subsplit to work on, remove that from list
-      std::pair<Subsplit,TopologyNode*> this_parent = active.back();
+      std::pair<size_t,TopologyNode*> this_parent = active.back();
       active.pop_back();
 
-      Subsplit this_parent_subsplit = this_parent.first;
+      size_t this_parent_subsplit = this_parent.first;
       TopologyNode* this_parent_node = this_parent.second;
 
       TopologyNode* Y_child_node;
       TopologyNode* Z_child_node;
 
       // Choose subsplit of Y
-      Subsplit Y_child = parameters.drawSubsplitForY(this_parent_subsplit);
-      if ( Y_child.isFake() )
+      size_t Y_child = parameters.drawSubsplitForY(this_parent_subsplit);
+      if ( parameters.findSubsplitReference(Y_child).isFake() )
       {
         // This is a tip, we don't add it to the active pile
-        Y_child_node = tip_nodes[Y_child.getFsbY()];
+        Y_child_node = tip_nodes[parameters.findSubsplitReference(Y_child).getFsbY()];
       }
       else
       {
@@ -181,11 +181,11 @@ void UnconstrainedSBN::simulateTree( void )
       }
 
       // Choose subsplit of Z
-      Subsplit Z_child = parameters.drawSubsplitForZ(this_parent_subsplit);
-      if ( Z_child.isFake() )
+      size_t Z_child = parameters.drawSubsplitForZ(this_parent_subsplit);
+      if ( parameters.findSubsplitReference(Z_child).isFake() )
       {
         // This is a tip, we don't add it to the active pile
-        Z_child_node = tip_nodes[Z_child.getFsbY()];
+        Z_child_node = tip_nodes[parameters.findSubsplitReference(Z_child).getFsbY()];
       }
       else
       {

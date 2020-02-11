@@ -135,6 +135,7 @@ const std::vector<Taxon>& SBNParameters::getTaxa(void) const
 
 size_t SBNParameters::findIndex( const Subsplit &s ) const
 {
+  // TODO: there are likely places that indices are found more times than needed, and storing size_t indices may increase speed
   return all_subsplits.at(s);
 }
 
@@ -240,9 +241,9 @@ double SBNParameters::computeLnProbabilityRootedTopology( const Tree &tree ) con
 }
 
 /* Helper function for UNROOTED trees. Computes for each branch the joint probability Pr(tree and root here) */
-std::vector<std::pair<Subsplit,double> > SBNParameters::computeLnProbabilityTopologyAndRooting( const Tree &t ) const
+std::vector<std::pair<size_t,double> > SBNParameters::computeLnProbabilityTopologyAndRooting( const Tree &t ) const
 {
-    std::vector<std::pair<Subsplit,double> > lnProbability;
+    std::vector<std::pair<size_t,double> > lnProbability;
 
     Tree* tree = t.clone();
 
@@ -330,8 +331,18 @@ std::vector<std::pair<Subsplit,double> > SBNParameters::computeLnProbabilityTopo
         RbBitSet sib_1_bitset = per_node_subsplit[sibling_indices[1]].asCladeBitset();
         Subsplit sib_split = Subsplit(sib_0_bitset,sib_1_bitset);
 
-        std::vector<std::pair<Subsplit,Subsplit> > cases;
-        per_node_subsplit[index].doVirtualRootingRootParent(per_node_subsplit[sibling_indices[0]],per_node_subsplit[sibling_indices[1]],per_node_subsplit[(*it)->getIndex()],cases);
+        std::vector<std::pair<Subsplit,Subsplit> > cases_subsplits;
+        per_node_subsplit[index].doVirtualRootingRootParent(per_node_subsplit[sibling_indices[0]],per_node_subsplit[sibling_indices[1]],per_node_subsplit[(*it)->getIndex()],cases_subsplits);
+
+        // Cases as indices
+        std::vector<std::pair<size_t,size_t> > cases;
+        for (size_t i=0; i<6; ++i)
+        {
+          std::pair<size_t,size_t> pcss;
+          pcss.first = findIndex(cases_subsplits[i].first);
+          pcss.second = findIndex(cases_subsplits[i].first);
+          cases.push_back(pcss);
+        }
 
         // 1) Propagate rtt
         rtt[index] = ttr[sibling_indices[0]] + computeSubsplitTransitionProbability(sib_split,per_node_subsplit[sibling_indices[0]]) + ttr[sibling_indices[1]] + computeSubsplitTransitionProbability(sib_split,per_node_subsplit[sibling_indices[1]]);
@@ -339,7 +350,7 @@ std::vector<std::pair<Subsplit,double> > SBNParameters::computeLnProbabilityTopo
         // 2) Compute Pr(tree,root here)
         double pr_subtree_s = computeSubsplitTransitionProbability(cases[2].first,cases[2].second) + ttr[index];
         double pr_subtree_not_s = computeSubsplitTransitionProbability(cases[5].first,cases[5].second) + rtt[index];
-        std::pair<Subsplit,double> root_split_and_tree_prob;
+        std::pair<size_t,double> root_split_and_tree_prob;
         root_split_and_tree_prob.first = cases[2].first;
         root_split_and_tree_prob.second = pr_subtree_s + pr_subtree_not_s + computeRootSplitProbability(cases[2].first);
         lnProbability.push_back(root_split_and_tree_prob);
@@ -348,8 +359,18 @@ std::vector<std::pair<Subsplit,double> > SBNParameters::computeLnProbabilityTopo
       else
       {
         // Get all cases for virtual rooting of this edge (including current rooting)
-        std::vector<std::pair<Subsplit,Subsplit> > cases;
-        per_node_subsplit[index].doVirtualRootingNonRootParent(per_node_subsplit[(*it)->getParent().getIndex()],per_node_subsplit[(*it)->getIndex()],cases);
+        std::vector<std::pair<Subsplit,Subsplit> > cases_subsplits;
+        per_node_subsplit[index].doVirtualRootingNonRootParent(per_node_subsplit[(*it)->getParent().getIndex()],per_node_subsplit[(*it)->getIndex()],cases_subsplits);
+        
+        // Cases as indices
+        std::vector<std::pair<size_t,size_t> > cases;
+        for (size_t i=0; i<6; ++i)
+        {
+          std::pair<size_t,size_t> pcss;
+          pcss.first = findIndex(cases_subsplits[i].first);
+          pcss.second = findIndex(cases_subsplits[i].first);
+          cases.push_back(pcss);
+        }
 
         // We will need to get the first subsplit both in our parent's sister node and in the rest of the tree
         // Thus we need our sibling's index and our parent's sibling's index
@@ -378,14 +399,16 @@ std::vector<std::pair<Subsplit,double> > SBNParameters::computeLnProbabilityTopo
         RbBitSet not_parents_sisters_clade = parents_sisters_clade;
         ~not_parents_sisters_clade;
         RbBitSet everyone_else = not_parents_clade & not_parents_sisters_clade;
-        Subsplit everyone_else_from_parents_sister = Subsplit(everyone_else,parents_sisters_clade);
-
-        rtt[index] = ttr[my_siblings_index] + computeSubsplitTransitionProbability(cases[5].second,everyone_else_from_parents_sister) + rtt[parent_index] + computeSubsplitTransitionProbability(cases[5].second,per_node_subsplit[my_siblings_index]);
+        Subsplit everyone_else_from_parents_sister_subsplit = Subsplit(everyone_else,parents_sisters_clade);
+        
+        size_t everyone_else_from_parents_sister = findIndex(everyone_else_from_parents_sister_subsplit);
+        
+        rtt[index] = ttr[my_siblings_index] + computeSubsplitTransitionProbability(cases[5].second,everyone_else_from_parents_sister) + rtt[parent_index] + computeSubsplitTransitionProbability(cases[5].second,findIndex(per_node_subsplit[my_siblings_index]));
 
         // 2) Compute Pr(tree,root here)
         double pr_subtree_s = computeSubsplitTransitionProbability(cases[2].first,cases[2].second) + ttr[index];
         double pr_subtree_not_s = computeSubsplitTransitionProbability(cases[5].first,cases[5].second) + rtt[index];
-        std::pair<Subsplit,double> root_split_and_tree_prob;
+        std::pair<size_t,double> root_split_and_tree_prob;
         root_split_and_tree_prob.first = cases[2].first;
         root_split_and_tree_prob.second = pr_subtree_s + pr_subtree_not_s + computeRootSplitProbability(cases[2].first);
         lnProbability.push_back(root_split_and_tree_prob);
@@ -399,12 +422,12 @@ std::vector<std::pair<Subsplit,double> > SBNParameters::computeLnProbabilityTopo
 /* Computes the probability of the given UNROOTED tree under this SBN. */
 double SBNParameters::computeLnProbabilityUnrootedTopology( const Tree &tree ) const
 {
-  std::vector<std::pair<Subsplit,double> > lnPr_tree_and_rooting = computeLnProbabilityTopologyAndRooting(tree);
+  std::vector<std::pair<size_t,double> > lnPr_tree_and_rooting = computeLnProbabilityTopologyAndRooting(tree);
 
   double lnProbability = 0.0;
 
   std::vector<double> per_edge_log_probs;
-  std::pair<Subsplit,double> this_rooting;
+  std::pair<size_t,double> this_rooting;
 
   // Loop over parent subsplits
   BOOST_FOREACH(this_rooting, lnPr_tree_and_rooting) {
@@ -663,7 +686,7 @@ double SBNParameters::KL( SBNParameters &Q_x ) const
 }
 
 // Counts all subsplits in an unrooted tree (handles all virtual rooting)
-void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts, std::unordered_map<Subsplit,double>& root_split_counts, std::unordered_map<Subsplit,double>& q, bool doSA)
+void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<size_t,size_t>,double>& parent_child_counts, std::unordered_map<size_t,double>& root_split_counts, std::unordered_map<size_t,double>& q, bool doSA)
 {
   Tree tree = t;
 // std::cout << ">>>>counting all subsplits<<<<" << std::endl;
@@ -701,7 +724,7 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<Subs
       per_node_subsplit[index] = (*it)->getSubsplit(taxa);
 
       // 2)
-      Subsplit root_on_edge = per_node_subsplit[index].rootSplitFromClade();
+      size_t root_on_edge = findIndex(per_node_subsplit[index].rootSplitFromClade());
       double this_root_q = doSA ? one_over_n_branches : q[root_on_edge];
       ttr[index] = this_root_q;
       incrementRootSplitCount(root_split_counts,root_on_edge,this_root_q);
@@ -721,7 +744,7 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<Subs
 // std::cout << "per_node_subsplit[index] = " << per_node_subsplit[index] << std::endl;
 
       // 2)
-      Subsplit root_on_edge = per_node_subsplit[index].rootSplitFromClade();
+      size_t root_on_edge = findIndex(per_node_subsplit[index].rootSplitFromClade());
       double this_root_q = doSA ? one_over_n_branches : q[root_on_edge];
       ttr[index] = this_root_q + ttr[children[0]] + ttr[children[1]];
       incrementRootSplitCount(root_split_counts,root_on_edge,this_root_q);
@@ -773,10 +796,18 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<Subs
         throw(RbException("Error in counting"));
       }
       // Get all cases for virtual rooting of this edge (including current rooting)
-      std::vector<std::pair<Subsplit,Subsplit> > cases;
-      per_node_subsplit[index].doVirtualRootingRootParent(per_node_subsplit[sibling_indices[0]],per_node_subsplit[sibling_indices[1]],per_node_subsplit[index],cases);
+      std::vector<std::pair<Subsplit,Subsplit> > cases_subsplits;
+      per_node_subsplit[index].doVirtualRootingRootParent(per_node_subsplit[sibling_indices[0]],per_node_subsplit[sibling_indices[1]],per_node_subsplit[index],cases_subsplits);
 
-      // Subsplit root_on_edge = per_node_subsplit[index].rootSplitFromClade();
+      // Cases as indices
+      std::vector<std::pair<size_t,size_t> > cases;
+      for (size_t i=0; i<6; ++i)
+      {
+        std::pair<size_t,size_t> pcss;
+        pcss.first = findIndex(cases_subsplits[i].first);
+        pcss.second = findIndex(cases_subsplits[i].first);
+        cases.push_back(pcss);
+      }
 
       // Case 1
       // double weight = ttr[root_children_indices[0]];
@@ -826,8 +857,18 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<Subs
       this_parent_child.second = per_node_subsplit[index];
 
       // Get all cases for virtual rooting of this edge (including current rooting)
-      std::vector<std::pair<Subsplit,Subsplit> > cases;
-      per_node_subsplit[index].doVirtualRootingNonRootParent(this_parent_child.first,this_parent_child.second,cases);
+      std::vector<std::pair<Subsplit,Subsplit> > cases_subsplits;
+      per_node_subsplit[index].doVirtualRootingNonRootParent(this_parent_child.first,this_parent_child.second,cases_subsplits);
+
+      // Cases as indices
+      std::vector<std::pair<size_t,size_t> > cases;
+      for (size_t i=0; i<6; ++i)
+      {
+        std::pair<size_t,size_t> pcss;
+        pcss.first = findIndex(cases_subsplits[i].first);
+        pcss.second = findIndex(cases_subsplits[i].first);
+        cases.push_back(pcss);
+      }
 
       // Subsplit root_on_edge = per_node_subsplit[index].rootSplitFromClade();
 
@@ -1524,7 +1565,7 @@ void SBNParameters::learnUnconstrainedSBNSA( std::vector<Tree> &trees )
   std::unordered_map<std::pair<size_t,size_t>,double> parent_child_counts;
 
   // This can stay empty, we don't need to specify q() if we override with doSA=TRUE
-  std::unordered_map<Subsplit,double> q;
+  std::unordered_map<size_t,double> q;
 
   // Run counting
   for (size_t i=0; i<trees.size(); ++i)
@@ -1581,7 +1622,7 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
   std::unordered_map<std::pair<size_t,size_t>,double> parent_child_counts_sa;
 
   // This can stay empty, we don't need to specify q() if we override with doSA=TRUE
-  std::unordered_map<Subsplit,double> q;
+  std::unordered_map<size_t,double> q;
 
   // Run counting
   for (size_t i=0; i<trees.size(); ++i)
@@ -1611,7 +1652,7 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
     {
 // std::cout << "counting for tree " << i << std::endl;
       // Get ln(Pr(tree,root)) for all branches
-      std::vector<std::pair<Subsplit,double> > pr_tree_and_root = computeLnProbabilityTopologyAndRooting(trees[i]);
+      std::vector<std::pair<size_t,double> > pr_tree_and_root = computeLnProbabilityTopologyAndRooting(trees[i]);
 // std::cout << "got components for q()" << std::endl;
 
       // So we can compute the probability of this tree
@@ -1788,39 +1829,42 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
 }
 
 // Takes a tree in with weight (can be for multiple trees or for q(root)), keeps rooting intact, adds all parent-child subsplits found in this tree to master list of counts
-void SBNParameters::addTreeToAllParentChildCounts(std::unordered_map<std::pair<Subsplit,Subsplit>,double> &parent_child_counts, Tree& tree, double &weight)
+void SBNParameters::addTreeToAllParentChildCounts(std::unordered_map<std::pair<size_t,size_t>,double> &parent_child_counts, Tree& tree, double &weight)
 {
   std::vector<std::pair<Subsplit,Subsplit> > these_parent_child_subsplits = tree.getAllSubsplitParentChildPairs(taxa);
   for (size_t j=0; j<these_parent_child_subsplits.size(); ++j)
   {
-    if ( parent_child_counts.count(these_parent_child_subsplits[j]) == 0 )
+    std::pair<size_t,size_t> pcss;
+    pcss.first = findIndex(these_parent_child_subsplits[j].first);
+    pcss.second = findIndex(these_parent_child_subsplits[j].second);
+    if ( parent_child_counts.count(pcss) == 0 )
     {
-      parent_child_counts[these_parent_child_subsplits[j]] = weight;
+      parent_child_counts[pcss] = weight;
     }
     else
     {
-      parent_child_counts[these_parent_child_subsplits[j]] += weight;
+      parent_child_counts[pcss] += weight;
     }
   }
 }
 
 // Takes a tree in with weight (can be for multiple trees or for q(root)), keeps rooting intact, adds the root split to master list of counts
-void SBNParameters::addTreeToAllRootSplitCounts(std::unordered_map<Subsplit,double>& root_split_counts, Tree& tree, double &weight)
+void SBNParameters::addTreeToAllRootSplitCounts(std::unordered_map<size_t,double>& root_split_counts, Tree& tree, double &weight)
 {
-  Subsplit this_root_split;
-  this_root_split = tree.getRootSubsplit(taxa);
-  if ( root_split_counts.count(this_root_split) == 0 )
+  Subsplit this_root_split = tree.getRootSubsplit(taxa);
+  size_t index = findIndex(this_root_split);
+  if ( root_split_counts.count(index) == 0 )
   {
-    root_split_counts[this_root_split] = weight;
+    root_split_counts[index] = weight;
   }
   else
   {
-    root_split_counts[this_root_split] += weight;
+    root_split_counts[index] += weight;
   }
 }
 
 
-void SBNParameters::incrementParentChildCount(std::unordered_map<std::pair<Subsplit,Subsplit>,double> &parent_child_counts, std::pair<Subsplit,Subsplit> &this_parent_child, double &weight)
+void SBNParameters::incrementParentChildCount(std::unordered_map<std::pair<size_t,size_t>,double> &parent_child_counts, std::pair<size_t,size_t> &this_parent_child, double &weight)
 {
 // std::cout << "incrementing ParentChildCount by " << weight << " for parent-child" << this_parent_child.first << " - " << this_parent_child.second << std::endl;
   if ( parent_child_counts.count(this_parent_child) == 0 )
@@ -1833,7 +1877,7 @@ void SBNParameters::incrementParentChildCount(std::unordered_map<std::pair<Subsp
   }
 }
 
-void SBNParameters::incrementRootSplitCount(std::unordered_map<Subsplit,double>& root_split_counts, Subsplit &this_root_split, double &weight)
+void SBNParameters::incrementRootSplitCount(std::unordered_map<size_t,double>& root_split_counts, size_t this_root_split, double &weight)
 {
 // std::cout << "incrementing RootSplitCount by " << weight << " for root split" << this_root_split << std::endl;
   if ( root_split_counts.count(this_root_split) == 0 )
