@@ -47,8 +47,6 @@ namespace RevBayesCore {
         std::unordered_map<RbBitSet,std::vector<double> >&                            getEdgeLengthDistributionParameters(void); // For each split in an unrooted tree, the parameters of the edge length distribution
         std::unordered_map<RbBitSet,std::vector<double> >&                            getNodeTimeDistributionParameters(void); // For each clade in a rooted tree, the parameters of the edge length distribution
         const size_t                                                                  getNumTaxa(void) const; // The number of taxa in the tree the SBN describes
-        std::vector<std::pair<Subsplit,double> >&                                     getRootSplits(void); // The root splits in the tree and their probabilities
-        std::unordered_map<Subsplit,std::vector<std::pair<Subsplit,double> > >&       getSubsplitCPDs(void); // For each subsplit, its children and their probabilities
         std::vector<Taxon>&                                                           getTaxa(void); // The taxa in the tree the SBN describes
         const std::vector<Taxon>&                                                     getTaxa(void) const; // The taxa in the tree the SBN describes
 
@@ -58,13 +56,18 @@ namespace RevBayesCore {
         double                              computeLnProbabilityRootedTopology( const Tree &tree ) const;
         std::vector<std::pair<Subsplit,double> >  computeLnProbabilityTopologyAndRooting( const Tree &tree ) const;
         double                              computeLnProbabilityUnrootedTopology( const Tree &tree ) const;
-        double                              computeRootSplitProbability( const Subsplit &root_split ) const;
+        double                              computeRootSplitProbability( const size_t index ) const;
+        double                              computeRootSplitProbability( const Subsplit &s ) const;
+        double                              computeSubsplitTransitionProbability( const size_t parent_index, const size_t child_index ) const;
         double                              computeSubsplitTransitionProbability( const Subsplit &parent, const Subsplit &child ) const;
         double                              drawEdgeLength( const RbBitSet &split) const; // Draw a new edge length for a split
         double                              drawNodeTime( const RbBitSet &split) const; // Draw a new node time (or node time proportion) for a clade
-        Subsplit                            drawRootSplit( void ) const;
-        Subsplit                            drawSubsplitForY( const Subsplit &s ) const;
-        Subsplit                            drawSubsplitForZ( const Subsplit &s ) const;
+        size_t                              drawRootSplit( void ) const;
+        size_t                              drawSubsplitForY( size_t s ) const;
+        size_t                              drawSubsplitForZ( size_t s ) const;
+        size_t                              findIndex( const Subsplit &s ) const; // Find index of subsplit s in the master subsplit list
+        Subsplit                            findSubsplit( size_t i ) const; // Find subsplit for index i in the master subsplit list
+        const Subsplit&                     findSubsplitReference( size_t i ) const; // Find subsplit for index i in the master subsplit list
         double                              KL(SBNParameters &Q_x) const; // Takes the current object to be P(x) and the passed argument to be Q(x) and computes KL(P || Q)
 
         // Functions for learning SBNs
@@ -73,9 +76,9 @@ namespace RevBayesCore {
         void                                learnTimeCalibratedSBN( std::vector<Tree>& trees );
         void                                learnUnconstrainedSBNSA( std::vector<Tree> &trees );
         void                                learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &alpha, size_t min_loop_iter, size_t max_loop_iter );
-        void                                makeCPDs(std::unordered_map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts);
-        void                                makeRootSplits(std::unordered_map<Subsplit,double>& root_split_counts);
-        void                                normalizeCPDForSubsplit(std::vector<std::pair<Subsplit,double> >& cpd, Subsplit& parent);
+        void                                makeCPDs(std::unordered_map<std::pair<size_t,size_t>,double>& parent_child_counts);
+        void                                makeRootSplits(std::unordered_map<size_t,double>& root_split_counts);
+        void                                normalizeCPDForSubsplit(size_t parent_index);
 
         // Helper functions for learning SBNs
         void                                countAllSubsplits(Tree& tree, std::unordered_map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts, std::unordered_map<Subsplit,double>& root_split_counts, std::unordered_map<Subsplit,double>& q, bool doSA);
@@ -85,24 +88,25 @@ namespace RevBayesCore {
         void                                incrementParentChildCount(std::unordered_map<std::pair<Subsplit,Subsplit>,double> &parent_child_counts, std::pair<Subsplit,Subsplit> &this_parent_child, double &weight);
         void                                incrementRootSplitCount(std::unordered_map<Subsplit,double>& root_split_counts, Subsplit &this_root_split, double &weight);
         bool                                isValid(void) const;
-        bool                                isValidCPD(std::vector<std::pair<Subsplit,double> >& cpd, Subsplit& parent) const;
+        bool                                isValidCPD(size_t parent_index) const;
         bool                                isValidRootDistribution(void) const;
-        void                                regularizeCounts(std::unordered_map<std::pair<Subsplit,Subsplit>,double>& parent_child_counts, std::unordered_map<Subsplit,double>& root_split_counts, std::unordered_map<std::pair<Subsplit,Subsplit>,double>& pseudo_parent_child_counts, std::unordered_map<Subsplit,double>& pseudo_root_split_counts, double alpha);
+        void                                regularizeCounts(std::unordered_map<std::pair<size_t,size_t>,double>& parent_child_counts, std::unordered_map<size_t,double>& root_split_counts, std::unordered_map<std::pair<size_t,size_t>,double>& pseudo_parent_child_counts, std::unordered_map<size_t,double>& pseudo_root_split_counts, double alpha);
         void                                extractSubsplits(Tree& tree, std::pair<std::vector<Subsplit>,std::vector<std::pair<std::pair<Subsplit,Subsplit>,RbBitSet> > > &observations);
 
         // // Misc.
-        std::unordered_map<Subsplit,double>  computeUnconditionalSubsplitProbabilities(void) const;
-        void                                 recursivelyComputeUnconditionalSubsplitProbabilities(std::unordered_map<Subsplit,double> &subsplit_probs, Subsplit &parent, double p) const;
+        std::vector<double>                  computeUnconditionalSubsplitProbabilities(void) const;
+        void                                 recursivelyComputeUnconditionalSubsplitProbabilities(std::vector<double> &subsplit_probs, size_t parent_index, double p) const;
         // std::vector<std::pair<Split,double> > computeCladeProbabilities(void) const;
         // std::vector<std::pair<Split,double> > computeSplitProbabilities(void) const;
 
       private:
         // members
+        std::unordered_map<Subsplit,size_t>            all_subsplits; // Internally we work with subsplits as indices, this takes a subsplit and gives us its index
         std::string                                    branch_length_approximation_method;
         std::unordered_map<RbBitSet,std::vector<double> >        edge_length_distribution_parameters; // In an unconstrained SBN, we learn branch lengths as functions of the splits they represent
         size_t                                         num_taxa; // The number of taxa in the tree the SBN describes
-        std::vector<std::pair<Subsplit,double> >       root_splits; // The root splits in the tree and their probabilities
-        std::unordered_map<Subsplit,std::vector<std::pair<Subsplit,double> > >        subsplit_cpds; // For each subsplit, its children and their probabilities
+        std::vector<std::pair<size_t,double> >         root_splits; // The root splits (indices) in the tree and their probabilities
+        std::vector<std::vector<std::pair<size_t,double> > >     subsplit_cpds; // For each subsplit (index), its children (indices) and their (conditional) probabilities
         std::vector<Taxon>                             taxa; // The taxa in the tree the SBN describes
         bool                                           time_calibrated; // Is this a time-calibrated SBN?
 
@@ -132,6 +136,25 @@ namespace std {
       return lhs == rhs;
     }
   };
+
+  template<>
+  struct hash<std::pair<size_t,size_t> >
+  {
+    size_t operator()(const std::pair<size_t,size_t>& p) const
+    {
+      return std::hash<size_t>{}(p.first) ^ std::hash<size_t>{}(p.second);
+    }
+  };
+
+  template<>
+  struct equal_to<std::pair<size_t,size_t> >
+  {
+    size_t operator()(const std::pair<size_t,size_t>& lhs, const std::pair<size_t,size_t>& rhs) const
+    {
+      return lhs == rhs;
+    }
+  };
+
 }
 
 #endif
