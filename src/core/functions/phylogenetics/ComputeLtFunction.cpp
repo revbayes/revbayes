@@ -138,8 +138,8 @@ double ComputeLtFunction::ComputeMt( void ) {
 			for(int i = 0; i < (N + 1); i++){
 				for(int j = 0; j < (N + 1); j++){
 					if(j == i) A[i][i] = gamma * (k + i);
-					else if (j == i+1) A[i][i+1] = death * (i + 1);
-					else if (j == i-1) A[i][i-1] = birth * (2*k + i - 1);
+					else if (j == i+1) A[i][i+1] = -death * (i + 1);
+					else if (j == i-1) A[i][i-1] = -birth * (2*k + i - 1);
 				}
 			}
 
@@ -164,7 +164,7 @@ double ComputeLtFunction::ComputeMt( void ) {
 			 MtPrime.push_back( sum );
 		 }
 
-		 //Lt = MtPrime;
+		 //Mt = MtPrime;
 		 for(int i = 0; i < Mt.size(); i++){
 				Mt[i] = MtPrime[i];
 		 }
