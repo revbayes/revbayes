@@ -144,6 +144,7 @@ double BirthDeathProcess::computeLnProbabilityTimes( void ) const
         
         // multiply the probability for the missing species
         ln_prob_times += m * log_F_t;
+        ln_prob_times -= RbMath::lnFactorial(m);
 //        ln_prob_times += m * log_F_t + RbMath::lnFactorial(m+num_taxa-2.0) - RbMath::lnFactorial(m) - ln_fact_n_taxa;
 //        ln_prob_times += m * log_F_t + log(RbMath::choose(m-initial_taxa,num_taxa-initial_taxa));
 
@@ -151,10 +152,11 @@ double BirthDeathProcess::computeLnProbabilityTimes( void ) const
         total_species += m;
     }
     
-//    if ( incomplete_clades.size() > 0 )
-//    {
-//        ln_prob_times += RbMath::lnFactorial(total_species-2) - RbMath::lnFactorial( int(num_taxa-2) ) - RbMath::lnFactorial( int(total_species-num_taxa) );
-//    }
+    if ( incomplete_clades.size() > 0 )
+    {
+        int initial_taxa = 2;
+        ln_prob_times += RbMath::lnFactorial(total_species-initial_taxa) - RbMath::lnFactorial( int(num_taxa-initial_taxa) );
+    }
     
     return ln_prob_times;
 }
