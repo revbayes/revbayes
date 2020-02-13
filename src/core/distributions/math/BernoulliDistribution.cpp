@@ -11,6 +11,14 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
+
+/*
+ * Bernoulli Distribution Constructor
+ *
+ * @param p a value of type double for the probability of succcess
+ *
+ */
+
 BernoulliDistribution::BernoulliDistribution(const TypedDagNode<double> *q) : TypedDistribution<long>( new long( 0 ) ),
     p( q )
 {

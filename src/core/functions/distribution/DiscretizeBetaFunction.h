@@ -8,6 +8,12 @@
  *
  * @brief Declaration of the discretized Beta function.
  *
+ * This is a function to turn the Beta function into discrete groups.
+ * @param a the alpha value of the beta distribution
+ * @param b the beta value of the beta distribution
+ * @param nc the number of categories for the distribution
+ * @param med a boolean for whether the median value should be used for each category. The mean value is used if set to false
+ *
  */
 
 namespace RevBayesCore {

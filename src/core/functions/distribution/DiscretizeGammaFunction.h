@@ -4,17 +4,16 @@
  * The distribution is given as a parameter so this file is the wrapper to call the pdf of the distribution.
  * Hence, this function can be used inside deterministic nodes.
  *
- * @brief Declaration of the probability density function.
+ * @brief Declaration of the discretized Gamma function.
+ * This function divides the continuous Gamma distribution into discrete groups.The groups are divided such that each group has equal probability density.
  *
- * (c) Copyright 2009-
- * @date Last modified: $Date: 2012-06-20 22:57:09 +0200 (Wed, 20 Jun 2012) $
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- * @version 1.0
- * @since 2012-08-13, version 1.0
+ * @param r the rate parameter of the continuous gamma distribution
+ * @param s the shape parameter of the continuous gamma distribution
+ * @param nc the number of categories for the distribution
+ * @param med a boolean for whether the median value should be used for each category. The mean value is used if set to false
  *
- * $Id: RandomNumberFactory.h 1643 2012-06-20 20:57:09Z hoehna $
  */
+
 
 #ifndef DiscretizeGammaFunction_H
 #define DiscretizeGammaFunction_H
