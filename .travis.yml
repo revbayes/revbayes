@@ -61,11 +61,12 @@ jobs:
         provider: releases
         skip_cleanup: true
         api_key:
-          secure: "vZtNOa/BC9/5VchESiX/Vh+zXjPR7TtSTYzwhks9y+Y2KJ7+F7v95wGaFmiRjuTgiy/+ChkRDbAVrgUY+n7mKTKQ2BNE71RKQFnF1kDTMblQhQcnif8pxnOPD85q76LPoCLj+C83jnDEHJokm0CXMLIQUWDPv+7nnW2OFDX/ao9oMi/JENcOAjauMt/idAUgE9rJ97CDDnHZsJxoVXSUJggllxIYGSRB6UltRvBITMWZRiuxuofvwIUDg4L9UT6T1H4IRIA5F2+fh8ENq9j4rK27rZ3wu/1iLdNJoTvayOOhTnkIPIa/vcwx1j1kcAB1SCYmRKdlrXbf7mPXvnxQ39M7fNiH+UgQVnDexSilJO8N4wUZpYdMrpRN3ve+EHhQkuTVq+AesRO6P8Y+K2h9oACTy2Ab/b8GyBS+rZsqDRvW7GQjAX2ad+0SsoV9MN8VkietMpwdDTeLNkMN75kYm4Mkyvp/cWGCGP9ca3ul+O4hrj6WF69Z/dsQ8kgVHGCwp1Sgac5mluDfvrgU6EZQyKcCOhuIRQ6mVaud9k7VX93fCXw/guGXtHGCcm1grfuoDDDh2cP6JRmb75AJ76FzW1iVgI6mh3ouem5sKkbqeeW313w8thgJsv2TpE28O74Z0JMMEfP5LXfTgd8i9RN9m5ZSMlBG8sp5VtUg2UeqVyQ="
+          secure: "Oag208LCu+WOhufBEYBngpIvBaVAO8cSQAbhOlfb17JFcSYP9aBryPkiEuSX7p6gHXmWGWy0C2Y5Pl/avaoFZpG9/9h0dhh4fuh9PgZ8LI26Fz7hPuQhFd3ewKjTcZCIhbHIBgTv/hPbFaltlEQfhR7hAjbFXZpCeXwBVWFt45X2R8xO/x7Wryw+eWIkXtj3L1Rsyjos3QHPSRQOcB9+mUfzn52g+MuVaNAm3RAnc3lgA27Vn3xyhdVk22Y2yV0hld/bUMmpm5T+ebcvJrkngRc56nFMUbK9dPsAkX8G7qvfoHmCVMTg7o+waymPjbLzR+4v1QTOegZO1YcDdz+SFyblPQah9bBOwpEw7RWgoTTz+T+/AT8hJpkuNSGyyEB4BlK3QOEz1eQBW/1FGK/TKRGnr6DHauKQu2ObQbaOXerFNis2Uv5uZWF92kbyw05yfSAAoMKUdr56bz6fMEFWYTDrYroN6imembxxzquCXuABhyTQZBjzEGMatUfe64wH/AH2Ong82iMPT6+ldu4IHN/p/ECwMcvfHrwD7t2TonQNC8zNNSH5mWtwIHLM/k7q/FlVZ8y5It89f+snPuZre+LE55LAFvfDomuicqb2FWAtAitNBMPzAJ5QtY3GyUXgjN9ajJiYqWjTeOPUEABlMpHIJ3y4a2jeQxeNzfwCneY="
         file: "${TRAVIS_BUILD_DIR}/projects/cmake/rb"
         on:
           repo: revbayes/revbayes
           branch: travisreleases
+          tags: true
         draft: true
     - os: linux
       dist: xenial
@@ -114,6 +115,17 @@ jobs:
       install:
        - export PATH="/usr/local/opt/ccache/libexec:$PATH"
       cache: ccache
+      deploy:
+        provider: releases
+        skip_cleanup: true
+        api_key:
+          secure: "Oag208LCu+WOhufBEYBngpIvBaVAO8cSQAbhOlfb17JFcSYP9aBryPkiEuSX7p6gHXmWGWy0C2Y5Pl/avaoFZpG9/9h0dhh4fuh9PgZ8LI26Fz7hPuQhFd3ewKjTcZCIhbHIBgTv/hPbFaltlEQfhR7hAjbFXZpCeXwBVWFt45X2R8xO/x7Wryw+eWIkXtj3L1Rsyjos3QHPSRQOcB9+mUfzn52g+MuVaNAm3RAnc3lgA27Vn3xyhdVk22Y2yV0hld/bUMmpm5T+ebcvJrkngRc56nFMUbK9dPsAkX8G7qvfoHmCVMTg7o+waymPjbLzR+4v1QTOegZO1YcDdz+SFyblPQah9bBOwpEw7RWgoTTz+T+/AT8hJpkuNSGyyEB4BlK3QOEz1eQBW/1FGK/TKRGnr6DHauKQu2ObQbaOXerFNis2Uv5uZWF92kbyw05yfSAAoMKUdr56bz6fMEFWYTDrYroN6imembxxzquCXuABhyTQZBjzEGMatUfe64wH/AH2Ong82iMPT6+ldu4IHN/p/ECwMcvfHrwD7t2TonQNC8zNNSH5mWtwIHLM/k7q/FlVZ8y5It89f+snPuZre+LE55LAFvfDomuicqb2FWAtAitNBMPzAJ5QtY3GyUXgjN9ajJiYqWjTeOPUEABlMpHIJ3y4a2jeQxeNzfwCneY="
+        file: "${TRAVIS_BUILD_DIR}/projects/cmake/rb"
+        on:
+          repo: revbayes/revbayes
+          branch: travisreleases
+          tags: true
+        draft: true
     - os: osx
       osx_image: xcode10.2
       env: PYTHON=3.5.1
