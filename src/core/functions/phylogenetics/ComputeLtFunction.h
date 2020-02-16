@@ -9,6 +9,11 @@
 
 namespace RevBayesCore {
 class DagNode;
+class Tree;
+
+class Clade;
+class Taxon;
+
 template <class valueType> class RbVector;
 template <class valueType> class TypedDagNode;
 
@@ -36,6 +41,22 @@ template <class valueType> class TypedDagNode;
   public:
     ComputeLtFunction(
       const TypedDagNode< RbVector<double> > *a,
+      const TypedDagNode< RbVector<double> > *b,
+      const TypedDagNode< RbVector<double> > *c,
+      const TypedDagNode< RbVector<double> > *d,
+      const TypedDagNode< RbVector<double> > *e,
+      const TypedDagNode< RbVector<double> > *f,
+      const TypedDagNode< double > *t,
+      const TypedDagNode< double > *l,
+      const TypedDagNode< double > *m,
+      const TypedDagNode< double > *p,
+      const TypedDagNode< double > *o,
+      const TypedDagNode< double > *rho,
+      const TypedDagNode< double > *r,
+      const TypedDagNode< RbVector<double> > *g
+    );
+    ComputeLtFunction(
+      const TypedDagNode<Tree> *tr,
       const TypedDagNode< RbVector<double> > *b,
       const TypedDagNode< RbVector<double> > *c,
       const TypedDagNode< RbVector<double> > *d,
@@ -101,6 +122,10 @@ template <class valueType> class TypedDagNode;
     const TypedDagNode< RbVector< double > >*           listE;
     const TypedDagNode< RbVector< double > >*           listF;
     const TypedDagNode< RbVector< double > >*           listG;
+
+    const TypedDagNode<Tree>*                           tree;
+    mutable TypedDagNode< RbVector< double > >*         listAlt;
+    bool useTree;
 
     const TypedDagNode< double > *                      tor;
     const TypedDagNode< double > *                      lambda;

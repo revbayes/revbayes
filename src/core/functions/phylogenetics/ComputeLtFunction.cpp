@@ -12,6 +12,8 @@
 #include "RbMathMatrix.h"
 #include "RbVector.h"
 #include "TypedDagNode.h"
+#include "Tree.h"
+#include "TopologyNode.h"
 // other includes
 
 namespace RevBayesCore { class DagNode; } //tt
@@ -60,6 +62,70 @@ ComputeLtFunction::ComputeLtFunction(
 	this->addParameter( omega );
 	this->addParameter( rho );
 	this->addParameter( removalPr ); // I'm not sure if we need to do this
+
+	useTree = false;
+
+	poolTimes(); // step 1.
+	//update();
+
+}
+
+ComputeLtFunction::ComputeLtFunction(
+	const TypedDagNode<Tree> *tr,
+	const TypedDagNode< RbVector<double> > *b,
+	const TypedDagNode< RbVector<double> > *c,
+	const TypedDagNode< RbVector<double> > *d,
+	const TypedDagNode< RbVector<double> > *e,
+	const TypedDagNode< RbVector<double> > *f,
+	const TypedDagNode< double > *t,
+	const TypedDagNode< double > *l,
+	const TypedDagNode< double > *m,
+	const TypedDagNode< double > *p,
+	const TypedDagNode< double > *o,
+	const TypedDagNode< double > *rho,
+	const TypedDagNode< double > *r,
+	const TypedDagNode< RbVector<double> > *g
+ 	) : TypedFunction<double>( new double(0.0) ),
+	tree ( tr ), listB ( b ), listC ( c ), listD ( d ), listE ( e ), listF ( f ),
+	tor ( t ), lambda ( l ), mu ( m ), psi ( p ), omega ( o ), rho ( rho ), removalPr ( r ),
+	listG ( g )
+{
+
+	this->addParameter( tor );
+	this->addParameter( lambda );
+	this->addParameter( mu );
+	this->addParameter( psi );
+	this->addParameter( omega );
+	this->addParameter( rho );
+	this->addParameter( removalPr ); // I'm not sure if we need to do this
+
+	// see also Tree class -> addNodeParameter // is there an equivalent for tips?
+	// getTipNodeWithName
+	// renameNodeParameter
+	// getNumberOfExtantTips
+	// getNumberOfSampledAncestors
+
+	// see /core/distributions/phylogenetics/tree/birthdeath EpisodicBirthDeathSamplingTreatmentProcess.cpp
+
+	//RbVector<double> tmp;
+
+	useTree = true;
+
+	size_t num_nodes = tree->getValue().getNumberOfNodes();
+
+	for (size_t i = 0; i < num_nodes; i++)
+	{
+
+      const TopologyNode& n = tree->getValue().getNode( i );
+
+			double t = n.getAge();
+
+			if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
+			{
+				//tmp.push_back(t);
+				listAlt->getValue().push_back(t);
+			}
+	}
 
 	poolTimes(); // step 1.
 	//update();
@@ -395,19 +461,28 @@ double ComputeLtFunction::ComputeLt( void ) {
 // required -> swap function. See Variance Function for inspiration
 void ComputeLtFunction::swapParameterInternal( const DagNode *oldP, const DagNode *newP ) {
 
-	if ( oldP == listA	)
+	if ( oldP == listB	)
 	{
-			listA = static_cast<const TypedDagNode< RbVector<double> >* >( newP ); //tt
+			listB = static_cast<const TypedDagNode< RbVector<double> >* >( newP ); //tt
 	}
 
 }
 
 void ComputeLtFunction::poolTimes(void) {
 
-	const std::vector<double> &a = listA->getValue(); // branching times
+	const std::vector<double> a;
+
+	if(useTree){
+		 const std::vector<double> &a = listAlt->getValue(); // branching times
+	} else {
+		const std::vector<double> &a = listA->getValue(); // branching times
+	}
+
+	// we should be able to extra the following ages from the tree too
 	const std::vector<double> &b = listB->getValue(); // sampled ancestors
 	const std::vector<double> &c = listC->getValue(); // terminal non-removed
 	const std::vector<double> &d = listD->getValue(); // terminal removed
+
 	const std::vector<double> &e = listE->getValue(); // occurrences non-removed
 	const std::vector<double> &f = listF->getValue(); // occurrences removed
 	const std::vector<double> &g = listG->getValue(); // timeslices
