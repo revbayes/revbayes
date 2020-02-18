@@ -122,7 +122,6 @@ ComputeLtFunction::ComputeLtFunction(
 
 			if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
 			{
-				//tmp.push_back(t);
 				listAlt->getValue().push_back(t);
 			}
 	}
@@ -470,15 +469,11 @@ void ComputeLtFunction::swapParameterInternal( const DagNode *oldP, const DagNod
 
 void ComputeLtFunction::poolTimes(void) {
 
-	const std::vector<double> a;
 
-	if(useTree){
-		 const std::vector<double> &a = listAlt->getValue(); // branching times
-	} else {
-		const std::vector<double> &a = listA->getValue(); // branching times
-	}
+	//const std::vector<double> &aT = listAlt->getValue(); // branching times from the tree
+	//const std::vector<double> &a = listA->getValue(); // branching times from a vector
 
-	// we should be able to extra the following ages from the tree too
+	// we should be able to extract the following ages from the tree too
 	const std::vector<double> &b = listB->getValue(); // sampled ancestors
 	const std::vector<double> &c = listC->getValue(); // terminal non-removed
 	const std::vector<double> &d = listD->getValue(); // terminal removed
@@ -487,10 +482,21 @@ void ComputeLtFunction::poolTimes(void) {
 	const std::vector<double> &f = listF->getValue(); // occurrences removed
 	const std::vector<double> &g = listG->getValue(); // timeslices
 
-	extant = a.size() + 1 - c.size() - d.size();
+	// this seems outrageously overly complex
+	if(useTree){
 
-	for(int i = 0; i < a.size(); i++){
-	    events.push_back( Event(a[i], "branching time", 0) );
+		extant = listAlt->getValue().size() + 1 - c.size() - d.size();
+
+		for(int i = 0; i < listAlt->getValue().size(); i++){
+		    events.push_back( Event(listAlt->getValue()[i], "branching time", 0) );
+		}
+	} else {
+
+		extant = listA->getValue().size() + 1 - c.size() - d.size();
+
+		for(int i = 0; i < listA->getValue().size(); i++){
+	    events.push_back( Event(listA->getValue()[i], "branching time", 0) );
+		}
 	}
 
 	for(int i = 0; i < b.size(); i++){

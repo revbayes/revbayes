@@ -2,8 +2,11 @@
 #include "ComputeLtFunction.h"
 
 #include "ModelVector.h"
+#include "RlTree.h"
+#include "TypeSpec.h"
 
 namespace RevBayesCore { template <class valueType> class RbVector; }
+namespace RevBayesCore { class Tree; }
 
 using namespace RevLanguage;
 
@@ -24,7 +27,13 @@ Func_computeLt* Func_computeLt::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_computeLt::createFunction( void ) const
 {
 
-  RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* a = static_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+  RevBayesCore::DagNode* node = this->args[0].getVariable()->getRevObject().getDagNode();
+
+  // vector of branching times or tree
+  //RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* a = static_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+  RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* a = dynamic_cast<RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*>(node);
+  RevBayesCore::TypedDagNode< RevBayesCore::Tree>* alt = dynamic_cast< RevBayesCore::TypedDagNode< RevBayesCore::Tree >*>(node);
+
   RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* b = static_cast<const ModelVector<Real> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
   RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* c = static_cast<const ModelVector<Real> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
   RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* d = static_cast<const ModelVector<Real> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
@@ -42,7 +51,8 @@ RevBayesCore::TypedFunction<double>* Func_computeLt::createFunction( void ) cons
 
   RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* g = static_cast<const ModelVector<Real> &>( this->args[13].getVariable()->getRevObject() ).getDagNode();
 
-  RevBayesCore::ComputeLtFunction* fxn = new RevBayesCore::ComputeLtFunction( a, b, c, d, e, f, t, l, m, p, o, rho, r, g );
+  //RevBayesCore::ComputeLtFunction* fxn = new RevBayesCore::ComputeLtFunction( a, b, c, d, e, f, t, l, m, p, o, rho, r, g );
+  RevBayesCore::ComputeLtFunction* fxn = a != NULL ? new RevBayesCore::ComputeLtFunction( a, b, c, d, e, f, t, l, m, p, o, rho, r, g ) : new RevBayesCore::ComputeLtFunction( alt, b, c, d, e, f, t, l, m, p, o, rho, r, g );
 
   return fxn;
 
@@ -61,7 +71,12 @@ const ArgumentRules& Func_computeLt::getArgumentRules( void ) const
     if ( !rules_set )
     {
 
-        argumentRules.push_back( new ArgumentRule( "listA", ModelVector<Real>::getClassTypeSpec(), "A vector of values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        std::vector<TypeSpec> paramTypes;
+        paramTypes.push_back( ModelVector<Real>::getClassTypeSpec() );
+        paramTypes.push_back( Tree::getClassTypeSpec() );
+
+        argumentRules.push_back( new ArgumentRule( "listA", paramTypes, "A vector of values/tree.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+
         argumentRules.push_back( new ArgumentRule( "listB", ModelVector<Real>::getClassTypeSpec(), "A vector of values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "listC", ModelVector<Real>::getClassTypeSpec(), "A vector of values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "listD", ModelVector<Real>::getClassTypeSpec(), "A vector of values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );

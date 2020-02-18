@@ -123,9 +123,9 @@ template <class valueType> class TypedDagNode;
     const TypedDagNode< RbVector< double > >*           listF;
     const TypedDagNode< RbVector< double > >*           listG;
 
+    mutable TypedDagNode< RbVector< double > >*           listAlt;
     const TypedDagNode<Tree>*                           tree;
-    mutable TypedDagNode< RbVector< double > >*         listAlt;
-    bool useTree;
+    bool                                                useTree;
 
     const TypedDagNode< double > *                      tor;
     const TypedDagNode< double > *                      lambda;
