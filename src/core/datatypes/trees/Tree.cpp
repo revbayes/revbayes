@@ -667,8 +667,14 @@ const TopologyNode& Tree::getMrca(const TopologyNode &n) const
 
 std::string Tree::getNewickRepresentation() const
 {
-
-    return root->computeNewick();
+    if ( root == NULL )
+    {
+        return "";
+    }
+    else
+    {
+        return root->computeNewick();
+    }
 }
 
 
@@ -1591,9 +1597,7 @@ void Tree::setRoot( TopologyNode* r, bool reindex )
     {
         if ( nodes[i] == NULL )
         {
-            std::cerr << "#nodes after filling:\t\t" << nodes.size() << std::endl;
-            std::cerr << i << " - " << nodes[i] << std::endl;
-            throw RbException("Problem while reading in tree.");
+            throw RbException("Problem while setting the root of the tree.");
         }
         if ( nodes[i] == old_root)
         {
