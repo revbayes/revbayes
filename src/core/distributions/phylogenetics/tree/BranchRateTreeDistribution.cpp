@@ -334,6 +334,10 @@ void BranchRateTreeDistribution::simulateTree( void )
     // the tree to create our new branch length tree
     const Tree &time_tree_copy = time_tree->getValue();
     Tree *value = time_tree_copy.clone();
+    
+    // we need to change the tree setting so that the branch lengths are used and not the ages.
+    // internally, our tree nodes store both an age and branch length variable, but only one should be used.
+    value->getRoot().setUseAges( false, true );
 
     // get time tree nodes
     const std::vector<TopologyNode*> &time_tree_nodes = value->getNodes();
