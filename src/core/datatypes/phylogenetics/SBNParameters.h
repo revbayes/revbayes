@@ -65,9 +65,9 @@ namespace RevBayesCore {
         size_t                              drawRootSplit( void ) const;
         size_t                              drawSubsplitForY( size_t s ) const;
         size_t                              drawSubsplitForZ( size_t s ) const;
-        size_t                              findIndex( const Subsplit &s ) const; // Find index of subsplit s in the master subsplit list
-        Subsplit                            findSubsplit( size_t i ) const; // Find subsplit for index i in the master subsplit list
-        const Subsplit&                     findSubsplitReference( size_t i ) const; // Find subsplit for index i in the master subsplit list
+        size_t                              getIndex( const Subsplit &s ) const; // Find index of subsplit s in the master subsplit list
+        Subsplit                            getSubsplit( size_t i ) const; // Find subsplit for index i in the master subsplit list
+        const Subsplit&                     getSubsplitReference( size_t i ) const; // Find subsplit for index i in the master subsplit list
         double                              KL(SBNParameters &Q_x) const; // Takes the current object to be P(x) and the passed argument to be Q(x) and computes KL(P || Q)
 
         // Functions for learning SBNs
@@ -81,16 +81,17 @@ namespace RevBayesCore {
         void                                normalizeCPDForSubsplit(size_t parent_index);
 
         // Helper functions for learning SBNs
-        void                                countAllSubsplits(Tree& tree, std::unordered_map<std::pair<size_t,size_t>,double>& parent_child_counts, std::unordered_map<size_t,double>& root_split_counts, std::unordered_map<size_t,double>& q, bool doSA);
         void                                addTreeToAllParentChildCounts(std::unordered_map<std::pair<size_t,size_t>,double>& parent_child_counts, Tree& tree, double &weight);
         void                                addTreeToAllRootSplitCounts(std::unordered_map<size_t,double>& root_split_counts, Tree& tree, double &weight);
+        void                                countAllSubsplits(Tree& tree, std::unordered_map<std::pair<size_t,size_t>,double>& parent_child_counts, std::unordered_map<size_t,double>& root_split_counts, std::unordered_map<size_t,double>& q, bool doSA);
+        void                                enumerateAllSubsplits(std::vector<Tree> &trees);
         void                                incrementParentChildCount(std::unordered_map<std::pair<size_t,size_t>,double> &parent_child_counts, std::pair<size_t,size_t> &this_parent_child, double &weight);
         void                                incrementRootSplitCount(std::unordered_map<size_t,double>& root_split_counts, size_t this_root_split, double &weight);
         bool                                isValid(void) const;
         bool                                isValidCPD(size_t parent_index) const;
         bool                                isValidRootDistribution(void) const;
         void                                regularizeCounts(std::unordered_map<std::pair<size_t,size_t>,double>& parent_child_counts, std::unordered_map<size_t,double>& root_split_counts, std::unordered_map<std::pair<size_t,size_t>,double>& pseudo_parent_child_counts, std::unordered_map<size_t,double>& pseudo_root_split_counts, double alpha);
-        std::vector<std::pair<size_t,size_t> > subsplitCasesToIndexCases(std::vector<std::pair<Subsplit,Subsplit> > &subsplit_cases);
+        std::vector<std::pair<size_t,size_t> > subsplitCasesToIndexCases(std::vector<std::pair<Subsplit,Subsplit> > &subsplit_cases) const;
 
         // // Misc.
         std::vector<double>                  computeUnconditionalSubsplitProbabilities(void) const;

@@ -168,10 +168,10 @@ void UnconstrainedSBN::simulateTree( void )
 
       // Choose subsplit of Y
       size_t Y_child = parameters.drawSubsplitForY(this_parent_subsplit);
-      if ( parameters.findSubsplitReference(Y_child).isFake() )
+      if ( parameters.getSubsplitReference(Y_child).isFake() )
       {
         // This is a tip, we don't add it to the active pile
-        Y_child_node = tip_nodes[parameters.findSubsplitReference(Y_child).getFsbY()];
+        Y_child_node = tip_nodes[parameters.getSubsplitReference(Y_child).getFsbY()];
       }
       else
       {
@@ -182,10 +182,10 @@ void UnconstrainedSBN::simulateTree( void )
 
       // Choose subsplit of Z
       size_t Z_child = parameters.drawSubsplitForZ(this_parent_subsplit);
-      if ( parameters.findSubsplitReference(Z_child).isFake() )
+      if ( parameters.getSubsplitReference(Z_child).isFake() )
       {
         // This is a tip, we don't add it to the active pile
-        Z_child_node = tip_nodes[parameters.findSubsplitReference(Z_child).getFsbY()];
+        Z_child_node = tip_nodes[parameters.getSubsplitReference(Z_child).getFsbY()];
       }
       else
       {

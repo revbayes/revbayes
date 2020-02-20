@@ -133,23 +133,22 @@ const std::vector<Taxon>& SBNParameters::getTaxa(void) const
   return taxa;
 }
 
-size_t SBNParameters::findIndex( const Subsplit &s ) const
+size_t SBNParameters::getIndex( const Subsplit &s ) const
 {
-  // TODO: there are likely places that indices are found more times than needed, and storing size_t indices may increase speed
   return all_subsplits.at(s);
 }
 
-Subsplit SBNParameters::findSubsplit( const size_t i ) const
+Subsplit SBNParameters::getSubsplit( const size_t i ) const
 {
   std::unordered_map<Subsplit,size_t>::const_iterator it = all_subsplits.begin();
-  std::advance(it,i-1);
+  std::advance(it,i);
   return (*it).first;
 }
 
-const Subsplit& SBNParameters::findSubsplitReference( const size_t i ) const
+const Subsplit& SBNParameters::getSubsplitReference( const size_t i ) const
 {
   std::unordered_map<Subsplit,size_t>::const_iterator it = all_subsplits.begin();
-  std::advance(it,i-1);
+  std::advance(it,i);
   return (*it).first;
 }
 
@@ -158,7 +157,7 @@ double SBNParameters::computeEdgeLengthProbability( const RbBitSet &split, doubl
 {
   // Get parameters
   std::vector<double> these_params = edge_length_distribution_parameters.at(split);
-  
+
   // Compute probability
   if ( branch_length_approximation_method == "gammaMOM" )
   {
@@ -192,7 +191,7 @@ double SBNParameters::computeEdgeLengthProbability( const RbBitSet &split, doubl
 // {
 //   // Get parameters
 //   std::vector<double> these_params = edge_length_distribution_parameters.at(clade);
-  
+
 //   // Compute probability
 //   double lnProbability = RbConstants::Double::neginf;
 
@@ -335,14 +334,7 @@ std::vector<std::pair<size_t,double> > SBNParameters::computeLnProbabilityTopolo
         per_node_subsplit[index].doVirtualRootingRootParent(per_node_subsplit[sibling_indices[0]],per_node_subsplit[sibling_indices[1]],per_node_subsplit[(*it)->getIndex()],cases_subsplits);
 
         // Cases as indices
-        std::vector<std::pair<size_t,size_t> > cases;
-        for (size_t i=0; i<6; ++i)
-        {
-          std::pair<size_t,size_t> pcss;
-          pcss.first = findIndex(cases_subsplits[i].first);
-          pcss.second = findIndex(cases_subsplits[i].first);
-          cases.push_back(pcss);
-        }
+        std::vector<std::pair<size_t,size_t> > cases = subsplitCasesToIndexCases(cases_subsplits);
 
         // 1) Propagate rtt
         rtt[index] = ttr[sibling_indices[0]] + computeSubsplitTransitionProbability(sib_split,per_node_subsplit[sibling_indices[0]]) + ttr[sibling_indices[1]] + computeSubsplitTransitionProbability(sib_split,per_node_subsplit[sibling_indices[1]]);
@@ -361,16 +353,9 @@ std::vector<std::pair<size_t,double> > SBNParameters::computeLnProbabilityTopolo
         // Get all cases for virtual rooting of this edge (including current rooting)
         std::vector<std::pair<Subsplit,Subsplit> > cases_subsplits;
         per_node_subsplit[index].doVirtualRootingNonRootParent(per_node_subsplit[(*it)->getParent().getIndex()],per_node_subsplit[(*it)->getIndex()],cases_subsplits);
-        
+
         // Cases as indices
-        std::vector<std::pair<size_t,size_t> > cases;
-        for (size_t i=0; i<6; ++i)
-        {
-          std::pair<size_t,size_t> pcss;
-          pcss.first = findIndex(cases_subsplits[i].first);
-          pcss.second = findIndex(cases_subsplits[i].first);
-          cases.push_back(pcss);
-        }
+        std::vector<std::pair<size_t,size_t> > cases = subsplitCasesToIndexCases(cases_subsplits);
 
         // We will need to get the first subsplit both in our parent's sister node and in the rest of the tree
         // Thus we need our sibling's index and our parent's sibling's index
@@ -400,10 +385,10 @@ std::vector<std::pair<size_t,double> > SBNParameters::computeLnProbabilityTopolo
         ~not_parents_sisters_clade;
         RbBitSet everyone_else = not_parents_clade & not_parents_sisters_clade;
         Subsplit everyone_else_from_parents_sister_subsplit = Subsplit(everyone_else,parents_sisters_clade);
-        
-        size_t everyone_else_from_parents_sister = findIndex(everyone_else_from_parents_sister_subsplit);
-        
-        rtt[index] = ttr[my_siblings_index] + computeSubsplitTransitionProbability(cases[5].second,everyone_else_from_parents_sister) + rtt[parent_index] + computeSubsplitTransitionProbability(cases[5].second,findIndex(per_node_subsplit[my_siblings_index]));
+
+        size_t everyone_else_from_parents_sister = getIndex(everyone_else_from_parents_sister_subsplit);
+
+        rtt[index] = ttr[my_siblings_index] + computeSubsplitTransitionProbability(cases[5].second,everyone_else_from_parents_sister) + rtt[parent_index] + computeSubsplitTransitionProbability(cases[5].second,getIndex(per_node_subsplit[my_siblings_index]));
 
         // 2) Compute Pr(tree,root here)
         double pr_subtree_s = computeSubsplitTransitionProbability(cases[2].first,cases[2].second) + ttr[index];
@@ -461,7 +446,7 @@ double SBNParameters::computeRootSplitProbability( const size_t index ) const
 /* Computes the probability of seeing a particular root split given an SBN */
 double SBNParameters::computeRootSplitProbability( const Subsplit &s ) const
 {
-  size_t index = findIndex(s);
+  size_t index = getIndex(s);
   return computeRootSplitProbability(index);
 }
 
@@ -504,15 +489,15 @@ double SBNParameters::computeSubsplitTransitionProbability( const size_t parent_
 /* Computes the probability of seeing a particular root split given an SBN */
 double SBNParameters::computeSubsplitTransitionProbability( const Subsplit &parent, const Subsplit &child ) const
 {
-  size_t parent_index = findIndex(parent);
-  size_t child_index = findIndex(child);
+  size_t parent_index = getIndex(parent);
+  size_t child_index = getIndex(child);
   return computeSubsplitTransitionProbability(parent,child);
 }
 
 void SBNParameters::recursivelyComputeUnconditionalSubsplitProbabilities(std::vector<double> &subsplit_probs, size_t parent_index, double p) const
 {
   // If we're a fake subsplit, we're done on this leg of the recursion, otherwise we continue
-  if ( !(findSubsplitReference(parent_index).isFake()) )
+  if ( !(getSubsplitReference(parent_index).isFake()) )
   {
     // Loop over child subsplits
     for (std::vector<std::pair<size_t,double> >::const_iterator this_child=subsplit_cpds[parent_index].begin(); this_child != subsplit_cpds[parent_index].end(); ++this_child)
@@ -575,7 +560,7 @@ size_t SBNParameters::drawSubsplitForY( size_t s ) const
 {
   // Find a distinguishing feature of clade Y in subsplit s
   // Since Y and Z are disjoint, we can use the first set bit in Y
-  size_t fsb = findSubsplitReference(s).getFsbY();
+  size_t fsb = getSubsplitReference(s).getFsbY();
 
   double u = GLOBAL_RNG->uniform01();
   size_t index = subsplit_cpds[s].size();
@@ -585,7 +570,7 @@ size_t SBNParameters::drawSubsplitForY( size_t s ) const
   {
     // This is a subsplit of Y if one of its splits has the same first set bit as Y
     // my_children[i].first is a Subsplit, with its bitset.first being the bitset representation of its clade Y
-    if ( findSubsplitReference((*it).first).getFsbY() == fsb || findSubsplitReference((*it).first).getFsbZ() == fsb )
+    if ( getSubsplitReference((*it).first).getFsbY() == fsb || getSubsplitReference((*it).first).getFsbZ() == fsb )
     {
       if (u < (*it).second)
       {
@@ -604,7 +589,7 @@ size_t SBNParameters::drawSubsplitForZ( size_t s ) const
 {
   // Find a distinguishing feature of clade Y in subsplit s
   // Since Y and Z are disjoint, we can use the first set bit in Y
-  size_t fsb = findSubsplitReference(s).getFsbZ();
+  size_t fsb = getSubsplitReference(s).getFsbZ();
 
   double u = GLOBAL_RNG->uniform01();
   size_t index = subsplit_cpds[s].size();
@@ -614,7 +599,7 @@ size_t SBNParameters::drawSubsplitForZ( size_t s ) const
   {
     // This is a subsplit of Y if one of its splits has the same first set bit as Y
     // my_children[i].first is a Subsplit, with its bitset.first being the bitset representation of its clade Y
-    if ( findSubsplitReference((*it).first).getFsbY() == fsb || findSubsplitReference((*it).first).getFsbZ() == fsb )
+    if ( getSubsplitReference((*it).first).getFsbY() == fsb || getSubsplitReference((*it).first).getFsbZ() == fsb )
     {
       if (u < (*it).second)
       {
@@ -633,7 +618,7 @@ double SBNParameters::drawEdgeLength( const RbBitSet &split) const
 {
   // Get parameters
   std::vector<double> these_params = edge_length_distribution_parameters.at(split);
-  
+
   // Draw branch length
   if ( branch_length_approximation_method == "gammaMOM" )
   {
@@ -685,11 +670,140 @@ double SBNParameters::KL( SBNParameters &Q_x ) const
   return kl;
 }
 
+// Makes the master list (map) of subsplits
+void SBNParameters::enumerateAllSubsplits(std::vector<Tree> &trees)
+{
+
+  for (size_t i=0; i<trees.size(); ++i)
+  {
+    // std::cout << "working on tree " << i << "; about to tag nodes" << std::endl;
+    Tree tree = trees[i];
+
+    std::string order = "postorder";
+    tree.orderNodesForTraversal(order);
+    const std::vector<TopologyNode*> &postorder_nodes = tree.getNodes();
+
+    // For storing subsplits
+    std::vector<Subsplit> per_node_subsplit = std::vector<Subsplit>(tree.getNumberOfNodes(),Subsplit());
+
+    // Tag all nodes with their subsplits
+    for (std::vector<TopologyNode*>::const_iterator it = postorder_nodes.begin(); it != (postorder_nodes.end()-1); ++it)
+    {
+      size_t index = (*it)->getIndex();
+
+      if ( (*it)->isTip() )
+      {
+        per_node_subsplit[index] = (*it)->getSubsplit(taxa);
+      }
+      else
+      {
+        std::vector<int> children = (*it)->getChildrenIndices();
+        RbBitSet clade_1 = per_node_subsplit[children[0]].asCladeBitset();
+        RbBitSet clade_2 = per_node_subsplit[children[1]].asCladeBitset();
+        per_node_subsplit[index] = Subsplit(clade_1,clade_2);
+      }
+
+    }
+
+    // std::cout << "tagged all nodes" << std::endl;
+
+    // Get all subsplits at all nodes in the tree, add to list if they're new
+    for (std::vector<TopologyNode*>::const_iterator it = postorder_nodes.begin(); it != (postorder_nodes.end()-1); ++it)
+    {
+      size_t index = (*it)->getIndex();
+
+      // std::cout << ">>>working on a root/internal/tip node " << ((*it)->isRoot()) << "/" << ((*it)->isInternal()) << "/" << ((*it)->isTip()) << std::endl;
+      // std::cout << ">The node's index is " << (*it)->getIndex() << std::endl;
+      // std::cout << ">The node's subsplit is " << (*it)->getSubsplit(taxa) << std::endl;
+
+      // For recording all parent-child pairs
+      std::vector<std::pair<Subsplit,Subsplit> > cases_subsplits;
+
+      // Edges descending from root need to be handled differently
+      if ( (*it)->getParent().isRoot() )
+      {
+        // Get subsplits for other two descendants of root
+        std::vector<int> root_children_indices = tree.getRoot().getChildrenIndices();
+
+        std::vector<int> sibling_indices;
+
+        double root_sum = 0.0;
+        for (size_t i=0; i<3; ++i)
+        {
+          if (index != root_children_indices[i])
+          {
+            sibling_indices.push_back(root_children_indices[i]);
+          }
+        }
+
+        // Get all cases for virtual rooting of this edge (including current rooting)
+        per_node_subsplit[index].doVirtualRootingRootParent(per_node_subsplit[sibling_indices[0]],per_node_subsplit[sibling_indices[1]],per_node_subsplit[index],cases_subsplits);
+
+      }
+      else
+      {
+        // Define parent-child pair for current rooting (parent first, child second)
+        std::pair<Subsplit,Subsplit> this_parent_child;
+        this_parent_child.first = per_node_subsplit[(*it)->getParent().getIndex()];
+        this_parent_child.second = per_node_subsplit[index];
+
+        // Get all cases for virtual rooting of this edge (including current rooting)
+        per_node_subsplit[index].doVirtualRootingNonRootParent(this_parent_child.first,this_parent_child.second,cases_subsplits);
+      }
+
+      // // TODO: there is no need to try all 12 SS in cases, but the code below is broken; fixing it should speed up inference
+      // // std::cout << "got cases" << std::endl;
+      // for (size_t j=0; j<6; ++j)
+      // {
+      //   // We initialize the indices of all subsplits to 0 since we do not yet know where they will end up
+      //   all_subsplits[cases_subsplits[j].first] = 0;
+      //   all_subsplits[cases_subsplits[j].second] = 0;
+      // }
+
+      // The 6 orientations contain 2 distinct children and either 3 or 5 distinct parents (5 if child is not a tip, 3 else)
+      // Now we add those to our master list
+      // First the new children
+      all_subsplits[cases_subsplits[0].second] = 0;
+      // std::cout << "did 0.first" << std::endl;
+
+      all_subsplits[cases_subsplits[5].second] = 0;
+      // std::cout << "did 5.first" << std::endl;
+
+      // Now the new parents
+      all_subsplits[cases_subsplits[0].first] = 0;
+      // std::cout << "did 0.second" << std::endl;
+
+      all_subsplits[cases_subsplits[1].first] = 0;
+      // std::cout << "did 1.second" << std::endl;
+
+      all_subsplits[cases_subsplits[2].first] = 0;
+      // std::cout << "did 2.second" << std::endl;
+
+      // these are only non-empty if child is not tip, but we need an index for the empty subsplit anyways
+      all_subsplits[cases_subsplits[3].first] = 0;
+      // std::cout << "did 3.second" << std::endl;
+
+      all_subsplits[cases_subsplits[4].first] = 0;
+      // std::cout << "did 4.second" << std::endl;
+    }
+  }
+
+  // Now that all_subsplits is complete, it will be unchanged and we can ensure that the value in the iterator's ith position is i
+  size_t i = 0;
+  for (std::unordered_map<Subsplit,size_t>::const_iterator it = all_subsplits.begin(); it != all_subsplits.end(); ++it)
+  {
+    all_subsplits[(*it).first] = i;
+    ++i;
+  }
+
+  std::cout << "Enumerated all subsplits, there are " << all_subsplits.size() << " of them" << std::endl;
+}
+
 // Counts all subsplits in an unrooted tree (handles all virtual rooting)
 void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<size_t,size_t>,double>& parent_child_counts, std::unordered_map<size_t,double>& root_split_counts, std::unordered_map<size_t,double>& q, bool doSA)
 {
   Tree tree = t;
-// std::cout << ">>>>counting all subsplits<<<<" << std::endl;
+  // std::cout << ">>>>counting all subsplits<<<<" << std::endl;
   // Prep for tip to root pass
   std::string order = "postorder";
   tree.orderNodesForTraversal(order);
@@ -702,7 +816,7 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<size
   // For storing sum of rooting probabilities from tip through this branch.
   std::vector<double> ttr = std::vector<double>(tree.getNumberOfNodes(),0.0);
 
-// std::cout << "postorder traversal" << std::endl;
+  // std::cout << "postorder traversal" << std::endl;
 
   // Tip to root pass, here we do two things
   // 1) Get all nodes' subsplits (we will need these repeatedly)
@@ -712,11 +826,12 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<size
   //      We do not loop over the root for now because it is a special case: we already account for rooting on all edges, but ttr[root] is ill-defined
   for (std::vector<TopologyNode*>::const_iterator it = postorder_nodes.begin(); it != (postorder_nodes.end()-1); ++it)
   {
-// std::cout << (*it)->getIndex() << std::endl;
+    // std::cout << (*it)->getIndex() << std::endl;
     size_t index = (*it)->getIndex();
-// std::cout << ">>>working on a root/internal/tip node " << ((*it)->isRoot()) << "/" << ((*it)->isInternal()) << "/" << ((*it)->isTip()) << std::endl;
-// std::cout << ">The node's index is " << (*it)->getIndex() << std::endl;
-// std::cout << ">The node's subsplit is " << (*it)->getSubsplit(taxa) << std::endl;
+    // std::cout << ">>>working on a root/internal/tip node " << ((*it)->isRoot()) << "/" << ((*it)->isInternal()) << "/" << ((*it)->isTip()) << std::endl;
+    // std::cout << ">The node's index is " << (*it)->getIndex() << std::endl;
+    // std::cout << ">The node's subsplit is " << (*it)->getSubsplit(taxa) << std::endl;
+    // std::cout << ">The node's subsplit has index " << getIndex((*it)->getSubsplit(taxa)) << std::endl;
 
     if ( (*it)->isTip() )
     {
@@ -724,7 +839,7 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<size
       per_node_subsplit[index] = (*it)->getSubsplit(taxa);
 
       // 2)
-      size_t root_on_edge = findIndex(per_node_subsplit[index].rootSplitFromClade());
+      size_t root_on_edge = getIndex(per_node_subsplit[index].rootSplitFromClade());
       double this_root_q = doSA ? one_over_n_branches : q[root_on_edge];
       ttr[index] = this_root_q;
       incrementRootSplitCount(root_split_counts,root_on_edge,this_root_q);
@@ -732,26 +847,26 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<size
     else
     {
       std::vector<int> children = (*it)->getChildrenIndices();
-// std::cout << "my children have indices " << children[0] << " and " << children[1] << std::endl;
+      // std::cout << "my children have indices " << children[0] << " and " << children[1] << std::endl;
       // 1)
       RbBitSet clade_1 = per_node_subsplit[children[0]].asCladeBitset();
       RbBitSet clade_2 = per_node_subsplit[children[1]].asCladeBitset();
-// std::cout << "clade_1 = " << clade_1 << std::endl;
-// std::cout << "clade_2 = " << clade_2 << std::endl;
-// std::cout << "per_node_subsplit[children[0]] = " << per_node_subsplit[children[0]] << std::endl;
-// std::cout << "per_node_subsplit[children[1]] = " << per_node_subsplit[children[1]] << std::endl;
+      // std::cout << "clade_1 = " << clade_1 << std::endl;
+      // std::cout << "clade_2 = " << clade_2 << std::endl;
+      // std::cout << "per_node_subsplit[children[0]] = " << per_node_subsplit[children[0]] << std::endl;
+      // std::cout << "per_node_subsplit[children[1]] = " << per_node_subsplit[children[1]] << std::endl;
       per_node_subsplit[index] = Subsplit(clade_1,clade_2);
-// std::cout << "per_node_subsplit[index] = " << per_node_subsplit[index] << std::endl;
+      // std::cout << "per_node_subsplit[index] = " << per_node_subsplit[index] << std::endl;
 
       // 2)
-      size_t root_on_edge = findIndex(per_node_subsplit[index].rootSplitFromClade());
+      size_t root_on_edge = getIndex(per_node_subsplit[index].rootSplitFromClade());
       double this_root_q = doSA ? one_over_n_branches : q[root_on_edge];
       ttr[index] = this_root_q + ttr[children[0]] + ttr[children[1]];
       incrementRootSplitCount(root_split_counts,root_on_edge,this_root_q);
     }
   }
 
-// std::cout << "preorder traversal" << std::endl;
+  // std::cout << "preorder traversal" << std::endl;
   // Root to tip pass (this is where the fun starts)
   // order = "preorder";
   // tree.orderNodesForTraversal(order);
@@ -766,6 +881,7 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<size
     // std::cout << ">>>working on a root/internal/tip node " << ((*it)->isRoot()) << "/" << ((*it)->isInternal()) << "/" << ((*it)->isTip()) << std::endl;
     // std::cout << ">The node's index is " << (*it)->getIndex() << std::endl;
     // std::cout << ">The node's subsplit is " << per_node_subsplit[(*it)->getIndex()] << std::endl;
+    // std::cout << ">The node's subsplit's index is " << getIndex(per_node_subsplit[(*it)->getIndex()]) << std::endl;
     // std::cout << ">The node's parent's subsplit is " << per_node_subsplit[(*it)->getParent().getIndex()] << std::endl;
 
     size_t index = (*it)->getIndex();
@@ -800,32 +916,25 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<size
       per_node_subsplit[index].doVirtualRootingRootParent(per_node_subsplit[sibling_indices[0]],per_node_subsplit[sibling_indices[1]],per_node_subsplit[index],cases_subsplits);
 
       // Cases as indices
-      std::vector<std::pair<size_t,size_t> > cases;
-      for (size_t i=0; i<6; ++i)
-      {
-        std::pair<size_t,size_t> pcss;
-        pcss.first = findIndex(cases_subsplits[i].first);
-        pcss.second = findIndex(cases_subsplits[i].first);
-        cases.push_back(pcss);
-      }
+      std::vector<std::pair<size_t,size_t> > cases = subsplitCasesToIndexCases(cases_subsplits);
 
       // Case 1
       // double weight = ttr[root_children_indices[0]];
-      double weight = ttr[sibling_indices[0]];  
+      double weight = ttr[sibling_indices[0]];
       incrementParentChildCount(parent_child_counts,cases[0],weight);
-// std::cout << "did case 1" << std::endl;
+      // std::cout << "did case 1" << std::endl;
 
       // Case 2
       // weight = ttr[root_children_indices[1]];
       weight = ttr[sibling_indices[1]];
       incrementParentChildCount(parent_child_counts,cases[1],weight);
-// std::cout << "did case 2" << std::endl;
+      // std::cout << "did case 2" << std::endl;
 
       // Case 3
       // weight = doSA ? one_over_n_branches : q[root_on_edge];
       weight = doSA ? one_over_n_branches : q[cases[2].first];
       incrementParentChildCount(parent_child_counts,cases[2],weight);
-// std::cout << "did case 3" << std::endl;
+      // std::cout << "did case 3" << std::endl;
 
       if ( !((*it)->isTip()) )
       {
@@ -835,19 +944,19 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<size
         // Case 4
         weight = ttr[children_indices[child_0_is_y ? 0 : 1]];
         incrementParentChildCount(parent_child_counts,cases[3],weight);
-// std::cout << "did case 4" << std::endl;
+        // std::cout << "did case 4" << std::endl;
 
         // Case 5
         weight = ttr[children_indices[child_0_is_y ? 1 : 0]];
         incrementParentChildCount(parent_child_counts,cases[4],weight);
-// std::cout << "did case 5" << std::endl;
+        // std::cout << "did case 5" << std::endl;
       }
 
       // Case 6
       // weight = doSA ? one_over_n_branches : q[root_on_edge];
       weight = doSA ? one_over_n_branches : q[cases[5].first];
       incrementParentChildCount(parent_child_counts,cases[5],weight);
-// std::cout << "did case 6" << std::endl;
+      // std::cout << "did case 6" << std::endl;
     }
     else
     {
@@ -861,15 +970,8 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<size
       per_node_subsplit[index].doVirtualRootingNonRootParent(this_parent_child.first,this_parent_child.second,cases_subsplits);
 
       // Cases as indices
-      std::vector<std::pair<size_t,size_t> > cases;
-      for (size_t i=0; i<6; ++i)
-      {
-        std::pair<size_t,size_t> pcss;
-        pcss.first = findIndex(cases_subsplits[i].first);
-        pcss.second = findIndex(cases_subsplits[i].first);
-        cases.push_back(pcss);
-      }
-
+      std::vector<std::pair<size_t,size_t> > cases = subsplitCasesToIndexCases(cases_subsplits);
+      
       // Subsplit root_on_edge = per_node_subsplit[index].rootSplitFromClade();
 
       // Case 1
@@ -895,7 +997,7 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<size
       // weight = doSA ? one_over_n_branches : q[root_on_edge];
       weight = doSA ? one_over_n_branches : q[cases[5].first];
       incrementParentChildCount(parent_child_counts,cases[2],weight);
-// std::cout << "did case 3" << std::endl;
+      // std::cout << "did case 3" << std::endl;
 
       if ( !((*it)->isTip()) )
       {
@@ -905,22 +1007,21 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<size
         // Case 4
         weight = ttr[children_indices[child_0_is_y ? 0 : 1]];
         incrementParentChildCount(parent_child_counts,cases[3],weight);
-// std::cout << "did case 4" << std::endl;
+        // std::cout << "did case 4" << std::endl;
 
         // Case 5
         weight = ttr[children_indices[child_0_is_y ? 1 : 0]];
         incrementParentChildCount(parent_child_counts,cases[4],weight);
-// std::cout << "did case 5" << std::endl;
+        // std::cout << "did case 5" << std::endl;
       }
 
       // Case 6
       // weight = doSA ? one_over_n_branches : q[root_on_edge];
       weight = doSA ? one_over_n_branches : q[cases[5].first];
       incrementParentChildCount(parent_child_counts,cases[5],weight);
-// std::cout << "did case 6" << std::endl;
+      // std::cout << "did case 6" << std::endl;
 
     }
-
   }
 }
 
@@ -946,6 +1047,20 @@ void SBNParameters::regularizeCounts(std::unordered_map<std::pair<size_t,size_t>
     root_split_counts[this_root.first] = regularized_count;
   }
 
+}
+
+std::vector<std::pair<size_t,size_t> > SBNParameters::subsplitCasesToIndexCases(std::vector<std::pair<Subsplit,Subsplit> > &subsplit_cases) const
+{
+  
+  std::vector<std::pair<size_t,size_t> > cases;
+  for (size_t i=0; i<6; ++i)
+  {
+    std::pair<size_t,size_t> pcss;
+    pcss.first = getIndex(subsplit_cases[i].first);
+    pcss.second = getIndex(subsplit_cases[i].second);
+    cases.push_back(pcss);
+  }
+  return cases;
 }
 
 void SBNParameters::fitBranchLengthDistributions(std::vector<Tree> &trees )
@@ -1121,7 +1236,7 @@ void SBNParameters::fitNodeTimeDistributions(std::vector<Tree> &trees )
     }
 
     double root_age = trees[i].getRoot().getAge();
-// std::cout << "got root age" << std::endl;
+    // std::cout << "got root age" << std::endl;
 
     (node_time_observations[root_clade]).push_back(root_age - max_leaf_age);
 
@@ -1130,7 +1245,7 @@ void SBNParameters::fitNodeTimeDistributions(std::vector<Tree> &trees )
       // Root already handled and nothing to do for tips
       if ( !(tree_nodes[n]->isTip()) && !(tree_nodes[n]->isRoot()) )
       {
-// std::cout << "on node " << n << std::endl;
+        // std::cout << "on node " << n << std::endl;
         Subsplit this_subsplit = tree_nodes[n]->getSubsplit(taxa);
         RbBitSet this_clade = this_subsplit.asCladeBitset();
 
@@ -1143,16 +1258,16 @@ void SBNParameters::fitNodeTimeDistributions(std::vector<Tree> &trees )
             max_descendant_leaf_age = tip_ages[j];
           }
         }
-// std::cout << "max_descendant_leaf_age = " << max_descendant_leaf_age << std::endl;
+        // std::cout << "max_descendant_leaf_age = " << max_descendant_leaf_age << std::endl;
         double my_age_above_tips = tree_nodes[n]->getAge() - max_descendant_leaf_age;
-// std::cout << "my_age_above_tips = " << my_age_above_tips << std::endl;
+        // std::cout << "my_age_above_tips = " << my_age_above_tips << std::endl;
         double my_parents_age_above_tips = tree_nodes[n]->getParent().getAge() - max_descendant_leaf_age;
-// std::cout << "my_parents_age_above_tips = " << my_parents_age_above_tips << std::endl;
+        // std::cout << "my_parents_age_above_tips = " << my_parents_age_above_tips << std::endl;
         (node_time_observations[this_clade]).push_back(my_age_above_tips/my_parents_age_above_tips);
       }
     }
   }
-// std::cout << "got all node ages" << std::endl;
+  // std::cout << "got all node ages" << std::endl;
   // Then we fit distributions to our observations
   if ( branch_length_approximation_method == "rootGammaNodePropKumaraswamy" )
   {
@@ -1211,8 +1326,10 @@ void SBNParameters::fitNodeTimeDistributions(std::vector<Tree> &trees )
 }
 void SBNParameters::makeCPDs(std::unordered_map<std::pair<size_t,size_t>,double>& parent_child_counts)
 {
-
+  
+  // (re-)initialize subsplit_cpds
   subsplit_cpds.clear();
+  subsplit_cpds = std::vector<std::vector<std::pair<size_t,double> > >(all_subsplits.size(),std::vector<std::pair<size_t,double> >());
 
   // Put parent-child splits in correct format and place
   std::pair<std::pair<size_t,size_t>,double> this_parent_child;
@@ -1222,11 +1339,11 @@ void SBNParameters::makeCPDs(std::unordered_map<std::pair<size_t,size_t>,double>
     size_t this_child_index = this_parent_child.first.second;
     double this_prob = this_parent_child.second;
 
-    if ( !(findSubsplitReference(this_parent_index).isCompatible(findSubsplitReference(this_child_index))) )
+    if ( !(getSubsplitReference(this_parent_index).isCompatible(getSubsplitReference(this_child_index))) )
     {
       std::cout << "Invalid s|t" << std::endl;
-      std::cout << "  s = " << findSubsplit(this_child_index) << std::endl;
-      std::cout << "  t = " << findSubsplit(this_parent_index) << std::endl;
+      std::cout << "  s = " << getSubsplit(this_child_index) << std::endl;
+      std::cout << "  t = " << getSubsplit(this_parent_index) << std::endl;
       throw(RbException("Found impossible parent-child subsplit pair in makeCPDs."));
     }
 
@@ -1243,17 +1360,23 @@ void SBNParameters::makeCPDs(std::unordered_map<std::pair<size_t,size_t>,double>
   // Loop over parent subsplits
   for (size_t i=0; i<subsplit_cpds.size(); ++i)
   {
-    const Subsplit &parent = findSubsplitReference(i);
+    const Subsplit &parent = getSubsplitReference(i);
     for (size_t j=0; j<subsplit_cpds[i].size(); ++j)
     {
-      if ( !(parent.isCompatible(findSubsplitReference(subsplit_cpds[i][j].first))) )
+      if ( !(parent.isCompatible(getSubsplitReference(subsplit_cpds[i][j].first))) )
       {
-        std::cout << "Found incompatible parent-child subsplit pair:" << parent << "->" << findSubsplit(subsplit_cpds[i][j].first) << std::endl;
+        std::cout << "Found incompatible parent-child subsplit pair:" << parent << "->" << getSubsplit(subsplit_cpds[i][j].first) << std::endl;
         throw(RbException("Found incompatible subsplit in makeCPDs."));
       }
     }
 
-    normalizeCPDForSubsplit(i);
+    // We add tips as parents in order to make CPDs a vector, but we do not need their CPDs becuase we will never use them
+    // We also have the empty subsplit recorded, but it has no children to normalize
+    // TODO: we may be able to remove the empty subsplit if we are careful in subsplitCasesToIndexCases
+    if ( subsplit_cpds[i].size() > 0 && parent.getYBitset().size() > 0 )
+    {
+      normalizeCPDForSubsplit(i);
+    }
 
   }
 
@@ -1295,7 +1418,7 @@ void SBNParameters::normalizeCPDForSubsplit(size_t parent_index)
 
   // Find a distinguishing feature of clade Y in subsplit s
   // Since Y and Z are disjoint, we can use the first set bits in Y and Z
-  const Subsplit &parent = findSubsplitReference(parent_index);
+  const Subsplit &parent = getSubsplitReference(parent_index);
   size_t fsb_y = parent.getFsbY();
   size_t fsb_z = parent.getFsbZ();
 
@@ -1308,7 +1431,7 @@ void SBNParameters::normalizeCPDForSubsplit(size_t parent_index)
 
   for (size_t i=0; i<subsplit_cpds[parent_index].size(); ++i) // Loop over the children of this parent, get sum for normalizing
   {
-    const Subsplit &child = findSubsplitReference(subsplit_cpds[parent_index][i].first);
+    const Subsplit &child = getSubsplitReference(subsplit_cpds[parent_index][i].first);
     if ( !(parent.isCompatible(child)) )
     {
       std::cout << "Found incompatible parent-child subsplit pair." << std::endl;
@@ -1362,7 +1485,7 @@ void SBNParameters::normalizeCPDForSubsplit(size_t parent_index)
 
   for (size_t i=0; i<subsplit_cpds[parent_index].size(); ++i) // Loop over the children of this parent, normalize
   {
-    const Subsplit &child = findSubsplitReference(subsplit_cpds[parent_index][i].first);
+    const Subsplit &child = getSubsplitReference(subsplit_cpds[parent_index][i].first);
     // This is a subsplit of X's clade Y if one of its splits has the same first set bit as Y
     // cpd[i].first is a Subsplit, with its bitset.first being the bitset representation of its clade Y
     if ( child.getFsbY() == fsb_y || child.getFsbZ() == fsb_y )
@@ -1393,7 +1516,7 @@ bool SBNParameters::isValid(void) const
   {
     return false;
   }
-  
+
   // Loop over parent subsplits
   for (size_t i=0; i<subsplit_cpds.size(); ++i)
   {
@@ -1411,59 +1534,63 @@ bool SBNParameters::isValidCPD(size_t parent_index) const
 
   double sum_y = 0.0;
   double sum_z = 0.0;
-  
-  const Subsplit &parent = findSubsplitReference(parent_index);
 
-  size_t fsb_y = parent.getFsbY();
-  // size_t fsb_z = parent.getFsbZ();
+  const Subsplit &parent = getSubsplitReference(parent_index);
 
-  // bool y_is_tip = parent.getYBitset().getNumberSetBits() == 1 ? true : false;
-  // bool z_is_tip = parent.getZBitset().getNumberSetBits() == 1 ? true : false;
-
-  for (size_t i=0; i<subsplit_cpds[parent_index].size(); ++i)
+  // We have tips as parents in our master CPD list (so we can make it a vector) but we never use them
+  // We also have the empty subsplit, but we never use it either
+  if ( !parent.isFake() && parent.getYBitset().size() > 0 )
   {
-    const Subsplit &child = findSubsplitReference(subsplit_cpds[parent_index][i].first);
-    size_t child_fsb = child.asCladeBitset().getFirstSetBit();
-    RbBitSet child_y = child.getYBitset();
-    RbBitSet child_z = child.getZBitset();
+    size_t fsb_y = parent.getFsbY();
+    // size_t fsb_z = parent.getFsbZ();
 
-    // Make sure child is compatible with parent
-    if ( !(parent.isCompatible(child)) )
+    // bool y_is_tip = parent.getYBitset().getNumberSetBits() == 1 ? true : false;
+    // bool z_is_tip = parent.getZBitset().getNumberSetBits() == 1 ? true : false;
+
+    for (size_t i=0; i<subsplit_cpds[parent_index].size(); ++i)
     {
-      std::cout << "Found incompatible parent-child subsplit pair." << std::endl;
-      std::cout << "  parent: " << parent << std::endl;
-      std::cout << "  child:  " << child << std::endl;
+      const Subsplit &child = getSubsplitReference(subsplit_cpds[parent_index][i].first);
+      size_t child_fsb = child.asCladeBitset().getFirstSetBit();
+      RbBitSet child_y = child.getYBitset();
+      RbBitSet child_z = child.getZBitset();
+
+      // Make sure child is compatible with parent
+      if ( !(parent.isCompatible(child)) )
+      {
+        std::cout << "Found incompatible parent-child subsplit pair." << std::endl;
+        std::cout << "  parent: " << parent << std::endl;
+        std::cout << "  child:  " << child << std::endl;
+        return false;
+      }
+
+      // Make sure children's splits are disjoint
+      if ( !child.splitsAreDisjoint() )
+      {
+        std::cout << "Found impossible subsplit: " << child << std::endl;
+        return false;
+      }
+
+      // Determine if the child is of parent's split Y or Z, add probability to appropriate sum
+      if ( child_fsb == fsb_y )
+      {
+        sum_y += subsplit_cpds[parent_index][i].second;
+      }
+      else
+      {
+        sum_z += subsplit_cpds[parent_index][i].second;
+      }
+    }
+
+    // Make sure that for all non-trivial subsplits, the sum of probabilities of children is 1 (trivial subsplits are tips and don't need CPDs)
+    double tol = 0.0001;
+    // if ( (fabs(sum_y - 1.0) > tol && !y_is_tip) || (fabs(sum_z - 1.0) > tol && !z_is_tip) )
+    if ( (fabs(sum_y - 1.0) > tol) || (fabs(sum_z - 1.0) > tol) )
+    {
+      std::cout << "Unnormalized or improperly normalized CPD for parent subsplit " << parent << std::endl;
+      std::cout << "Sum of CPDs for descendants of Y is " << std::fixed << std::setprecision(10) << sum_y << ". Sum of CPDs for descendants of Z is " << sum_z << std::endl;
       return false;
     }
-
-    // Make sure children's splits are disjoint
-    if ( !child.splitsAreDisjoint() )
-    {
-      std::cout << "Found impossible subsplit: " << child << std::endl;
-      return false;
-    }
-
-    // Determine if the child is of parent's split Y or Z, add probability to appropriate sum
-    if ( child_fsb == fsb_y )
-    {
-      sum_y += subsplit_cpds[parent_index][i].second;
-    }
-    else
-    {
-      sum_z += subsplit_cpds[parent_index][i].second;
-    }
   }
-
-  // Make sure that for all non-trivial subsplits, the sum of probabilities of children is 1 (trivial subsplits are tips and don't need CPDs)
-  double tol = 0.0001;
-  // if ( (fabs(sum_y - 1.0) > tol && !y_is_tip) || (fabs(sum_z - 1.0) > tol && !z_is_tip) )
-  if ( (fabs(sum_y - 1.0) > tol) || (fabs(sum_z - 1.0) > tol) )
-  {
-    std::cout << "Unnormalized or improperly normalized CPD for parent subsplit " << parent << std::endl;
-    std::cout << "Sum of CPDs for descendants of Y is " << std::fixed << std::setprecision(10) << sum_y << ". Sum of CPDs for descendants of Z is " << sum_z << std::endl;
-    return false;
-  }
-
   return true;
 }
 
@@ -1473,8 +1600,8 @@ bool SBNParameters::isValidRootDistribution(void) const
   for (size_t i=0; i<root_splits.size(); ++i)
   {
     sum_root += root_splits[i].second;
-    RbBitSet root_y = findSubsplitReference(root_splits[i].first).getYBitset();
-    RbBitSet root_z = findSubsplitReference(root_splits[i].first).getZBitset();
+    RbBitSet root_y = getSubsplitReference(root_splits[i].first).getYBitset();
+    RbBitSet root_z = getSubsplitReference(root_splits[i].first).getZBitset();
 
     // Check that in sum_root they have all tips
     if ( !(root_y.getNumberSetBits() + root_z.getNumberSetBits() == root_y.size()) )
@@ -1482,7 +1609,7 @@ bool SBNParameters::isValidRootDistribution(void) const
       return false;
     }
     // Check they're disjoint
-    if ( !findSubsplitReference(root_splits[i].first).splitsAreDisjoint() )
+    if ( !getSubsplitReference(root_splits[i].first).splitsAreDisjoint() )
     {
       std::cout << "Found impossible root split: " << root_splits[i].first << std::endl;
         return false;
@@ -1513,6 +1640,9 @@ void SBNParameters::learnTimeCalibratedSBN( std::vector<Tree>& trees )
   {
     throw(RbException("Invalid branch length/node height approximation method when initializing SBN object."));
   }
+
+  // get master list of subsplits and their indices
+  enumerateAllSubsplits(trees);
 
   // For counting subsplits, we could use integers but unrooted trees get fractional counts, so we'll be consistent
   std::unordered_map<size_t,double> root_split_counts;
@@ -1560,6 +1690,9 @@ void SBNParameters::learnUnconstrainedSBNSA( std::vector<Tree> &trees )
 
   // std::cout << "hello from learnUnconstrainedSBNSA, there are this many trees " << trees.size() << std::endl;
 
+  // get master list of subsplits and their indices
+  enumerateAllSubsplits(trees);
+
   // To store counts
   std::unordered_map<size_t,double> root_split_counts;
   std::unordered_map<std::pair<size_t,size_t>,double> parent_child_counts;
@@ -1568,21 +1701,25 @@ void SBNParameters::learnUnconstrainedSBNSA( std::vector<Tree> &trees )
   std::unordered_map<size_t,double> q;
 
   // Run counting
+  std::cout << "counting all trees" << std::endl;
   for (size_t i=0; i<trees.size(); ++i)
   {
     // std::cout << i << std::endl;
     countAllSubsplits(trees[i], parent_child_counts, root_split_counts, q, true);
   }
-  // std::cout << "counted all subsplits in all trees" << std::endl;
+  std::cout << "counted all subsplits in all trees" << std::endl;
 
   // Turn root split counts into a distribution on the root split
   makeRootSplits(root_split_counts);
+  std::cout << "made root splits" << std::endl;
 
   // Turn parent-child subsplit counts into CPDs
   makeCPDs(parent_child_counts);
+  std::cout << "made CPDs" << std::endl;
 
   // Handle branch lengths
   fitBranchLengthDistributions(trees);
+  std::cout << "fit branch lengths" << std::endl;
 
   if ( !isValid() )
   {
@@ -1616,6 +1753,9 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
   {
     throw(RbException("Invalid branch length/node height approximation method when initializing SBN object."));
   }
+
+  // get master list of subsplits and their indices
+  enumerateAllSubsplits(trees);
 
   // To store counts
   std::unordered_map<size_t,double> root_split_counts_sa;
@@ -1676,7 +1816,7 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
           max = pr_tree_and_root[j].second;
         }
       }
-      
+
       double sum = 0.0;
       for (size_t j=0; j<pr_tree_and_root.size(); ++j)
       {
@@ -1691,14 +1831,14 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
         // {
         //   std::cout << "in tree " << i << ", q[" << pr_tree_and_root[j].first << "] = " << pr_tree_and_root[j].second << std::endl;
         // }
-        
+
         // If q is 0, then the contribution of this orientation to the lower bound is 0
         if ( pr_tree_and_root[j].second >= DBL_EPSILON & RbMath::isFinite(per_edge_log_probs[j]) )
         {
           score += pr_tree_and_root[j].second * per_edge_log_probs[j];
           // asymptotically speaking, the q * log(q) portion of the score function is 0 when q = 0
           score -= pr_tree_and_root[j].second * log(pr_tree_and_root[j].second);
-        } 
+        }
       }
 
       // make vector-pair q into a map
@@ -1734,7 +1874,7 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
     // M-step, compute p
     makeRootSplits(root_split_counts);
     makeCPDs(parent_child_counts);
-    
+
     // double kl = KL(sbn_old);
 
     // std::cout << "KL(new || old) = " << kl << std::endl;
@@ -1807,7 +1947,7 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
     //     // std::cout << per_edge_log_probs[j] << ",";
     //   }
     //   // std::cout << "]" << std::endl;
-      
+
     //   double sum = 0.0;
     //   for (size_t j=0; j<pr_tree_and_root.size(); ++j)
     //   {
@@ -1835,8 +1975,8 @@ void SBNParameters::addTreeToAllParentChildCounts(std::unordered_map<std::pair<s
   for (size_t j=0; j<these_parent_child_subsplits.size(); ++j)
   {
     std::pair<size_t,size_t> pcss;
-    pcss.first = findIndex(these_parent_child_subsplits[j].first);
-    pcss.second = findIndex(these_parent_child_subsplits[j].second);
+    pcss.first = getIndex(these_parent_child_subsplits[j].first);
+    pcss.second = getIndex(these_parent_child_subsplits[j].second);
     if ( parent_child_counts.count(pcss) == 0 )
     {
       parent_child_counts[pcss] = weight;
@@ -1852,7 +1992,7 @@ void SBNParameters::addTreeToAllParentChildCounts(std::unordered_map<std::pair<s
 void SBNParameters::addTreeToAllRootSplitCounts(std::unordered_map<size_t,double>& root_split_counts, Tree& tree, double &weight)
 {
   Subsplit this_root_split = tree.getRootSubsplit(taxa);
-  size_t index = findIndex(this_root_split);
+  size_t index = getIndex(this_root_split);
   if ( root_split_counts.count(index) == 0 )
   {
     root_split_counts[index] = weight;
@@ -1866,7 +2006,7 @@ void SBNParameters::addTreeToAllRootSplitCounts(std::unordered_map<size_t,double
 
 void SBNParameters::incrementParentChildCount(std::unordered_map<std::pair<size_t,size_t>,double> &parent_child_counts, std::pair<size_t,size_t> &this_parent_child, double &weight)
 {
-// std::cout << "incrementing ParentChildCount by " << weight << " for parent-child" << this_parent_child.first << " - " << this_parent_child.second << std::endl;
+  // std::cout << "incrementing ParentChildCount by " << weight << " for parent-child" << getSubsplit(this_parent_child.first) << " - " << getSubsplit(this_parent_child.second) << std::endl;
   if ( parent_child_counts.count(this_parent_child) == 0 )
   {
     parent_child_counts[this_parent_child] = weight;
@@ -1879,7 +2019,7 @@ void SBNParameters::incrementParentChildCount(std::unordered_map<std::pair<size_
 
 void SBNParameters::incrementRootSplitCount(std::unordered_map<size_t,double>& root_split_counts, size_t this_root_split, double &weight)
 {
-// std::cout << "incrementing RootSplitCount by " << weight << " for root split" << this_root_split << std::endl;
+  // std::cout << "incrementing RootSplitCount by " << weight << " for root split" << this_root_split << std::endl;
   if ( root_split_counts.count(this_root_split) == 0 )
   {
     root_split_counts[this_root_split] = weight;
