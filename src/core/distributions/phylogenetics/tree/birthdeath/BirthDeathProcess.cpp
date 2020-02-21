@@ -36,10 +36,11 @@ using namespace RevBayesCore;
  * \param[in]    nTaxa     Number of taxa (used for initialization during simulation).
  * \param[in]    tn        Taxon names used during initialization.
  * \param[in]    c         Clade constraints.
+ * \param[in]    t         The starting tree if we want to avoid simulating trees.
  */
 BirthDeathProcess::BirthDeathProcess(const TypedDagNode<double> *ra, const TypedDagNode<double> *rh, const TypedDagNode<double> *mp,
                                      const std::string& ss, const std::vector<Clade> &ic, const std::string &cdt,
-                                     const std::vector<Taxon> &tn) : AbstractBirthDeathProcess( ra, cdt, tn ),
+                                     const std::vector<Taxon> &tn, Tree* t) : AbstractBirthDeathProcess( ra, cdt, tn, false, t ),
     rho( rh ),
     sampling_mixture_proportion( mp ),
     sampling_strategy( ss ),

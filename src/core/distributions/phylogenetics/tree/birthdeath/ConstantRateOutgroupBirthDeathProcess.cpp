@@ -51,7 +51,7 @@ ConstantRateOutgroupBirthDeathProcess::ConstantRateOutgroupBirthDeathProcess(   
                                                                                  const std::string& sso,
                                                                                  const std::string& cdt,
                                                                                  const std::vector<Taxon> &tn,
-                                                                                 const std::vector<Taxon> &tno) : AbstractBirthDeathProcess( ra, cdt, tn ),
+                                                                                 const std::vector<Taxon> &tno) : AbstractBirthDeathProcess( ra, cdt, tn, false, NULL ),
 lambda( s ),
 mu( e ),
 rho_ingroup( ri ),

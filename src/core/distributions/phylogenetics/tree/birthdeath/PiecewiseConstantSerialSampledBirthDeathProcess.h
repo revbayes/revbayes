@@ -46,7 +46,7 @@ namespace RevBayesCore {
                                                       const std::string &cdt,
                                                       const std::vector<Taxon> &tn,
                                                       bool uo,
-                                                      TypedDagNode<Tree> *t);  //!< Constructor
+                                                      Tree *t);  //!< Constructor
 
         // public member functions
         PiecewiseConstantSerialSampledBirthDeathProcess*   clone(void) const;                                         //!< Create an independent clone

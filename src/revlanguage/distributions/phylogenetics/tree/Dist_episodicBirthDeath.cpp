@@ -164,8 +164,15 @@ RevBayesCore::EpisodicBirthDeathProcess* Dist_episodicBirthDeath::createDistribu
     // get the taxa to simulate either from a vector of rev taxon objects or a vector of names
     std::vector<RevBayesCore::Taxon> t                                      = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
     
+    // tree for initialization
+    RevBayesCore::Tree* init = NULL;
+    if ( initial_tree->getRevObject() != RevNullObject::getInstance() )
+    {
+        init = static_cast<const TimeTree &>( initial_tree->getRevObject() ).getDagNode()->getValue().clone();
+    }
+    
     // create the internal distribution object
-    RevBayesCore::EpisodicBirthDeathProcess* d = new RevBayesCore::EpisodicBirthDeathProcess(ra, sr, st, er, et, r, mp, strategy, inc_clades, cond, t);
+    RevBayesCore::EpisodicBirthDeathProcess* d = new RevBayesCore::EpisodicBirthDeathProcess(ra, sr, st, er, et, r, mp, strategy, inc_clades, cond, t, init);
     
     return d;
 }
@@ -262,7 +269,9 @@ const MemberRules& Dist_episodicBirthDeath::getParameterRules(void) const
         // add the rules from the base class
         const MemberRules &parentRules = BirthDeathProcess::getParameterRules();
         dist_member_rules.insert(dist_member_rules.end(), parentRules.begin(), parentRules.end());
-        
+
+        dist_member_rules.push_back( new ArgumentRule( "initialTree" , TimeTree::getClassTypeSpec() , "Instead of drawing a tree from the distribution, initialize distribution with this tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+
         rules_set = true;
     }
     
@@ -316,6 +325,10 @@ void Dist_episodicBirthDeath::setConstParameter(const std::string& name, const R
     else if ( name == "muTimes" )
     {
         mu_times = var;
+    }
+    else if ( name == "initialTree" )
+    {
+        initial_tree = var;
     }
     else
     {

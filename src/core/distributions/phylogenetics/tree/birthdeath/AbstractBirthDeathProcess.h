@@ -10,7 +10,7 @@ namespace RevBayesCore {
     class AbstractBirthDeathProcess : public AbstractRootedTreeDistribution {
         
     public:
-        AbstractBirthDeathProcess(const TypedDagNode<double> *ra, const std::string &cdt, const std::vector<Taxon> &tn, bool uo = false );      
+        AbstractBirthDeathProcess(const TypedDagNode<double> *ra, const std::string &cdt, const std::vector<Taxon> &tn, bool uo, Tree *t );
         
         virtual ~AbstractBirthDeathProcess(void);
         // pure virtual member functions

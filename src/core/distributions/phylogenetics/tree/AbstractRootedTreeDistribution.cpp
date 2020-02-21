@@ -36,11 +36,13 @@ using namespace RevBayesCore;
  * \param    ra       The start time of the process.
  * \param    tn       Taxon names used during initialization.
  * \param    uo       True = condition on the origin time, False = condition on the root age.
+ * \param    t        The starting tree if we want to avoid simulating trees.
  */
-AbstractRootedTreeDistribution::AbstractRootedTreeDistribution(const TypedDagNode<double> *ra, const std::vector<Taxon> &tn, bool uo ) : TypedDistribution<Tree>( new Tree() ),
+AbstractRootedTreeDistribution::AbstractRootedTreeDistribution(const TypedDagNode<double> *ra, const std::vector<Taxon> &tn, bool uo, Tree *t ) : TypedDistribution<Tree>( new Tree() ),
     process_age( ra ),
     taxa( tn ),
-    use_origin( uo )
+    use_origin( uo ),
+    starting_tree( t )
 {
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
@@ -61,12 +63,73 @@ AbstractRootedTreeDistribution::AbstractRootedTreeDistribution(const TypedDagNod
             throw(RbException(ss.str()));
         }
     }
+    
+    // if we got a starting tree, then we should also use it.
+    if ( starting_tree != NULL)
+    {
+        delete value;
+        value = starting_tree->clone();
+    }
 }
 
 
-AbstractRootedTreeDistribution::~AbstractRootedTreeDistribution(void)
+
+/**
+ * Copy constructor.
+ *
+ * The constructor connects the parameters of the birth-death process (DAG structure)
+ * and initializes the probability density by computing the combinatorial constant of the tree structure.
+ *
+ * \param    d       The object to copy
+ */
+AbstractRootedTreeDistribution::AbstractRootedTreeDistribution( const AbstractRootedTreeDistribution& d ) : TypedDistribution<Tree>( d ),
+    divergence_times( d.divergence_times ),
+    process_age( d.process_age ),
+    taxa( d.taxa ),
+    use_origin( d.use_origin ),
+    starting_tree( NULL )
 {
     
+    if ( d.starting_tree != NULL )
+    {
+        starting_tree = d.starting_tree->clone();
+    }
+    
+}
+
+AbstractRootedTreeDistribution::~AbstractRootedTreeDistribution(void)
+{
+    delete starting_tree;
+}
+
+
+AbstractRootedTreeDistribution& AbstractRootedTreeDistribution::operator=(const AbstractRootedTreeDistribution &d)
+{
+    
+    // check for self-assignment
+    if ( this != &d )
+    {
+        // delegate to super class
+        TypedDistribution<Tree>::operator=(d);
+        
+        // free our memory
+        delete starting_tree;
+        starting_tree = NULL;
+        
+        divergence_times    = d.divergence_times;
+        process_age         = d.process_age;
+        taxa                = d.taxa;
+        use_origin          = d.use_origin;
+        
+
+        if ( d.starting_tree != NULL )
+        {
+            starting_tree = d.starting_tree->clone();
+        }
+        
+    }
+    
+    return *this;
 }
 
 
@@ -424,8 +487,10 @@ void AbstractRootedTreeDistribution::recomputeDivergenceTimesSinceOrigin( void )
 void AbstractRootedTreeDistribution::redrawValue( void )
 {
     
-    simulateTree();
-    
+    if ( starting_tree == NULL )
+    {
+        simulateTree();
+    }
 }
 
 

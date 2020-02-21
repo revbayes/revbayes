@@ -90,10 +90,10 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_BDSTP::createDistribution( void ) 
     std::vector<RevBayesCore::Taxon> tree = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
 
     // tree for initialization
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* init = NULL;
+    RevBayesCore::Tree* init = NULL;
     if ( initial_tree->getRevObject() != RevNullObject::getInstance() )
     {
-        init = static_cast<const TimeTree &>( initial_tree->getRevObject() ).getDagNode();
+        init = static_cast<const TimeTree &>( initial_tree->getRevObject() ).getDagNode()->getValue().clone();
     }
 
     bool piecewise = false;

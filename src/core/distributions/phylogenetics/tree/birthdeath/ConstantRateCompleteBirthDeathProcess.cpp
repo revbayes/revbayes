@@ -18,7 +18,7 @@ namespace RevBayesCore { class Taxon; }
 
 using namespace RevBayesCore;
 
-ConstantRateCompleteBirthDeathProcess::ConstantRateCompleteBirthDeathProcess(const TypedDagNode<double> *ra, const TypedDagNode<double> *s, const TypedDagNode<double> *e, const std::string &cdt, const std::vector<Taxon> &tn, bool uo, bool mr) : AbstractBirthDeathProcess( ra, cdt, tn, uo ),
+ConstantRateCompleteBirthDeathProcess::ConstantRateCompleteBirthDeathProcess(const TypedDagNode<double> *ra, const TypedDagNode<double> *s, const TypedDagNode<double> *e, const std::string &cdt, const std::vector<Taxon> &tn, bool uo, bool mr) : AbstractBirthDeathProcess( ra, cdt, tn, uo, NULL ),
     speciation( s ),
     extinction( e ),
     use_mrca( mr )
