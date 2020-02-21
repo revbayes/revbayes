@@ -67,8 +67,14 @@ void TreeAssemblyFunction::keep(DagNode *affecter)
     //delegate to base class
     TypedFunction< Tree >::keep( affecter );
     
-    // Make sure keep is only called after update!
-    update();
+    // SH (20200221): This needs to stay, otherwise the MCMC does not update properly.
+    touchedNodeIndices.clear();
+    
+    // SH (20200221): We must not call update because it breaks the MCMC!
+    // SH (20190913): There seems to be an issue if we use two replicates
+    // So we need to make sure keep is only called after update!
+//    update();
+    
 }
 
 
