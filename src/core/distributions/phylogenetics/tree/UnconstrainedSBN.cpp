@@ -122,7 +122,6 @@ void UnconstrainedSBN::setValue(RevBayesCore::Tree *v, bool force)
 
 void UnconstrainedSBN::simulateTree( void )
 {
-
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
 
@@ -154,6 +153,7 @@ void UnconstrainedSBN::simulateTree( void )
     active.push_back(std::make_pair(root_split,root));
 
     // All other subplits
+    // TODO: we should exploit the fact that tips are in the master list and have 0 children to avoid "getting" subsplits just to check if they're tips
     while (active.size() > 0)
     {
       // Get a node/subsplit to work on, remove that from list
@@ -168,7 +168,7 @@ void UnconstrainedSBN::simulateTree( void )
 
       // Choose subsplit of Y
       size_t Y_child = parameters.drawSubsplitForY(this_parent_subsplit);
-      if ( parameters.getSubsplitReference(Y_child).isFake() )
+      if ( parameters.getSubsplit(Y_child).isFake() )
       {
         // This is a tip, we don't add it to the active pile
         Y_child_node = tip_nodes[parameters.getSubsplitReference(Y_child).getFsbY()];
@@ -182,7 +182,7 @@ void UnconstrainedSBN::simulateTree( void )
 
       // Choose subsplit of Z
       size_t Z_child = parameters.drawSubsplitForZ(this_parent_subsplit);
-      if ( parameters.getSubsplitReference(Z_child).isFake() )
+      if ( parameters.getSubsplit(Z_child).isFake() )
       {
         // This is a tip, we don't add it to the active pile
         Z_child_node = tip_nodes[parameters.getSubsplitReference(Z_child).getFsbY()];
@@ -199,7 +199,6 @@ void UnconstrainedSBN::simulateTree( void )
       this_parent_node->addChild(Z_child_node);
       Y_child_node->setParent(this_parent_node);
       Z_child_node->setParent(this_parent_node);
-
     }
 
     // initialize the topology by setting the root

@@ -263,7 +263,7 @@ std::vector<std::pair<size_t,double> > SBNParameters::computeLnProbabilityTopolo
     for (std::vector<TopologyNode*>::const_iterator it = postorder_nodes.begin(); it != (postorder_nodes.end()-1); ++it)
     {
       size_t index = (*it)->getIndex();
-
+      
       if ( (*it)->isTip() )
       {
         // 1)
@@ -281,11 +281,12 @@ std::vector<std::pair<size_t,double> > SBNParameters::computeLnProbabilityTopolo
         RbBitSet clade_2 = per_node_subsplit[children[1]].asCladeBitset();
         per_node_subsplit[index] = Subsplit(clade_1,clade_2);
 
+        double tmp = computeSubsplitTransitionProbability(per_node_subsplit[index],per_node_subsplit[children[0]]);
+
         // 2)
         ttr[index] = computeSubsplitTransitionProbability(per_node_subsplit[index],per_node_subsplit[children[0]]) + ttr[children[0]] + computeSubsplitTransitionProbability(per_node_subsplit[index],per_node_subsplit[children[1]]) + ttr[children[1]];
       }
     }
-
     // Root to tip pass (this is where the fun starts)
     // Here we do several things
     // 1) We collect a vector at every node, rtt[node], which handles cumulative tree probabilities like ttr[node], but for the complement of the tree tipward of node.
@@ -455,20 +456,18 @@ double SBNParameters::computeRootSplitProbability( const Subsplit &s ) const
 /* Computes the probability of seeing a particular parent-child subsplit pair given an SBN */
 double SBNParameters::computeSubsplitTransitionProbability( const size_t parent_index, const size_t child_index ) const
 {
-
-  // Find all potential children of parent
-  const std::vector<std::pair<size_t,double> > &all_children = subsplit_cpds.at(parent_index);
-
   double log_prob = RbConstants::Double::neginf;
 
-  for (size_t i=0; i<all_children.size(); ++i)
+  for (size_t i=0; i<subsplit_cpds[parent_index].size(); ++i)
   {
-    if ( child_index == all_children[i].first )
+    if ( child_index == subsplit_cpds[parent_index][i].first )
     {
-      log_prob = log(std::max(0.0,all_children[i].second));
+      // TODO: Floating point arithmetic means some small probs can turn up < 0, can we simply fix this when normalizing?
+      log_prob = log(std::max(0.0,subsplit_cpds[parent_index][i].second));
       break;
     }
   }
+
   // if ( !RbMath::isAComputableNumber(log_prob) )
   // {
   //   std::cout << exp(log_prob) << " probability for parent-child subsplit " << parent << " - " << child << std::endl;
@@ -491,7 +490,7 @@ double SBNParameters::computeSubsplitTransitionProbability( const Subsplit &pare
 {
   size_t parent_index = getIndex(parent);
   size_t child_index = getIndex(child);
-  return computeSubsplitTransitionProbability(parent,child);
+  return computeSubsplitTransitionProbability(parent_index,child_index);
 }
 
 void SBNParameters::recursivelyComputeUnconditionalSubsplitProbabilities(std::vector<double> &subsplit_probs, size_t parent_index, double p) const
@@ -563,8 +562,8 @@ size_t SBNParameters::drawSubsplitForY( size_t s ) const
   size_t fsb = getSubsplitReference(s).getFsbY();
 
   double u = GLOBAL_RNG->uniform01();
-  size_t index = subsplit_cpds[s].size();
-
+  size_t index = subsplit_cpds.size();
+  
   // This is like drawing a root split, but we must ensure we only draw from subsplits of Y
   for (std::vector<std::pair<size_t,double> >::const_iterator it = subsplit_cpds[s].begin(); it != subsplit_cpds[s].end(); ++it)
   {
@@ -580,8 +579,7 @@ size_t SBNParameters::drawSubsplitForY( size_t s ) const
       u -= (*it).second;
     }
   }
-
-  return subsplit_cpds[s][index].first;
+  return index;
 }
 
 /* Draws a subsplit for subsplit S's clade Z*/
@@ -592,13 +590,13 @@ size_t SBNParameters::drawSubsplitForZ( size_t s ) const
   size_t fsb = getSubsplitReference(s).getFsbZ();
 
   double u = GLOBAL_RNG->uniform01();
-  size_t index = subsplit_cpds[s].size();
+  size_t index = subsplit_cpds.size();
 
-  // This is like drawing a root split, but we must ensure we only draw from subsplits of Y
+  // This is like drawing a root split, but we must ensure we only draw from subsplits of Z
   for (std::vector<std::pair<size_t,double> >::const_iterator it = subsplit_cpds[s].begin(); it != subsplit_cpds[s].end(); ++it)
   {
-    // This is a subsplit of Y if one of its splits has the same first set bit as Y
-    // my_children[i].first is a Subsplit, with its bitset.first being the bitset representation of its clade Y
+    // This is a subsplit of Y if one of its splits has the same first set bit as Z
+    // my_children[i].first is a Subsplit, with its bitset.first being the bitset representation of its clade Z
     if ( getSubsplitReference((*it).first).getFsbY() == fsb || getSubsplitReference((*it).first).getFsbZ() == fsb )
     {
       if (u < (*it).second)
@@ -610,7 +608,7 @@ size_t SBNParameters::drawSubsplitForZ( size_t s ) const
     }
   }
 
-  return subsplit_cpds[s][index].first;
+  return index;
 }
 
 /* Draws a new branch length for a given split */
@@ -796,7 +794,6 @@ void SBNParameters::enumerateAllSubsplits(std::vector<Tree> &trees)
     ++i;
   }
 
-  std::cout << "Enumerated all subsplits, there are " << all_subsplits.size() << " of them" << std::endl;
 }
 
 // Counts all subsplits in an unrooted tree (handles all virtual rooting)
@@ -1701,25 +1698,20 @@ void SBNParameters::learnUnconstrainedSBNSA( std::vector<Tree> &trees )
   std::unordered_map<size_t,double> q;
 
   // Run counting
-  std::cout << "counting all trees" << std::endl;
   for (size_t i=0; i<trees.size(); ++i)
   {
     // std::cout << i << std::endl;
     countAllSubsplits(trees[i], parent_child_counts, root_split_counts, q, true);
   }
-  std::cout << "counted all subsplits in all trees" << std::endl;
 
   // Turn root split counts into a distribution on the root split
   makeRootSplits(root_split_counts);
-  std::cout << "made root splits" << std::endl;
 
   // Turn parent-child subsplit counts into CPDs
   makeCPDs(parent_child_counts);
-  std::cout << "made CPDs" << std::endl;
 
   // Handle branch lengths
   fitBranchLengthDistributions(trees);
-  std::cout << "fit branch lengths" << std::endl;
 
   if ( !isValid() )
   {
