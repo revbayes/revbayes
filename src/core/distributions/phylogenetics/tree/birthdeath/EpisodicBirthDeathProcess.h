@@ -26,14 +26,13 @@ namespace RevBayesCore {
                                   Tree *t);
         
         // public member functions
-        EpisodicBirthDeathProcess*                          clone(void) const;                                                                      //!< Create an independent clone
+        EpisodicBirthDeathProcess*                          clone(void) const;                                                              //!< Create an independent clone
         
         
     protected:
         // Parameter management functions
-        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                        //!< Swap a parameter
-//        double                                              computeLnProbabilityTimes(void) const;                                                              //!< Compute the log-transformed probability of the current value.
-        double                                              lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const { throw RbException("Cannot compute P(nTaxa)."); }
+        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
+//        double                                              computeLnProbabilityTimes(void) const;                                         //!< Compute the log-transformed probability of the current value.
         void                                                prepareProbComputation(void) const;
         
         void                                                prepareRateIntegral(double end) const;                                          //!< Compute the rate integral.
@@ -47,22 +46,16 @@ namespace RevBayesCore {
 
     private:
         
-//        size_t                                              l(double t) const;                                                                                  //!< Find the max index so that rateChangeTimes[index] < t < rateChangeTimes[index+1]
-//        size_t                                              l(double t, size_t min, size_t max) const;                                                                                  //!< Find the max index so that rateChangeTimes[index] < t < rateChangeTimes[index+1]
-//        double                                              p(size_t i, double t) const;
-//        double                                              q(size_t i, double t) const;
-//        int                                                 survivors(double t) const;                                                                          //!< Number of species alive at time t.
-
-        size_t                                              lower_index(double t) const;                                                                                  //!< Find the max index so that rateChangeTimes[index] < t < rateChangeTimes[index+1]
-        size_t                                              lower_index(double t, size_t min, size_t max) const;                                                                                  //!< Find the max index so that rateChangeTimes[index] < t < rateChangeTimes[index+1]
+        size_t                                              lower_index(double t) const;                                                    //!< Find the max index so that rateChangeTimes[index] < t < rateChangeTimes[index+1]
+        size_t                                              lower_index(double t, size_t min, size_t max) const;                            //!< Find the max index so that rateChangeTimes[index] < t < rateChangeTimes[index+1]
         
         
         
         // members
-        const TypedDagNode<RbVector<double> >*              lambda_rates;                                                                                             //!< The speciation rates.
-        const TypedDagNode<RbVector<double> >*              lambda_times;                                                                                        //!< The time of the speciation rate changes.
-        const TypedDagNode<RbVector<double> >*              mu_rates;                                                                                                 //!< The extinction rates.
-        const TypedDagNode<RbVector<double> >*              mu_times;                                                                                            //!< The times of the extinction rate changes.
+        const TypedDagNode<RbVector<double> >*              lambda_rates;                                                                   //!< The speciation rates.
+        const TypedDagNode<RbVector<double> >*              lambda_times;                                                                   //!< The time of the speciation rate changes.
+        const TypedDagNode<RbVector<double> >*              mu_rates;                                                                       //!< The extinction rates.
+        const TypedDagNode<RbVector<double> >*              mu_times;                                                                       //!< The times of the extinction rate changes.
 
         mutable std::vector<double>                         rate_change_times;
         mutable std::vector<double>                         birth;
