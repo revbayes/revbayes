@@ -15,13 +15,11 @@ using namespace RevBayesCore;
  */
 Subsplit::Subsplit( void ) :
     bitset(),
-    is_fake(),
+    is_fake( true ),
     fsb_y(),
     fsb_z()
 {
-  // We can check if we have an empty Subsplit object by asking if it's bitset has size 0
-  bitset.first = RbBitSet(0,false);
-  bitset.second = RbBitSet(0,false);
+  // An empty subsplit is a type of fake subsplit
 }
 
 /**

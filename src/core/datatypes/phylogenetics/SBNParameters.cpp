@@ -135,6 +135,12 @@ const std::vector<Taxon>& SBNParameters::getTaxa(void) const
 
 size_t SBNParameters::getIndex( const Subsplit &s ) const
 {
+  // size_t idx = all_subsplits.size()+1;
+  // if ( all_subsplits.count(s) > 0 )
+  // {
+  //   idx = all_subsplits.at(s);
+  // }
+  // return idx;
   return all_subsplits.at(s);
 }
 
@@ -1370,7 +1376,7 @@ void SBNParameters::makeCPDs(std::unordered_map<std::pair<size_t,size_t>,double>
     // We add tips as parents in order to make CPDs a vector, but we do not need their CPDs becuase we will never use them
     // We also have the empty subsplit recorded, but it has no children to normalize
     // TODO: we may be able to remove the empty subsplit if we are careful in subsplitCasesToIndexCases
-    if ( subsplit_cpds[i].size() > 0 && parent.getYBitset().size() > 0 )
+    if ( subsplit_cpds[i].size() > 0 )
     {
       normalizeCPDForSubsplit(i);
     }
@@ -1535,8 +1541,7 @@ bool SBNParameters::isValidCPD(size_t parent_index) const
   const Subsplit &parent = getSubsplitReference(parent_index);
 
   // We have tips as parents in our master CPD list (so we can make it a vector) but we never use them
-  // We also have the empty subsplit, but we never use it either
-  if ( !parent.isFake() && parent.getYBitset().size() > 0 )
+  if ( !parent.isFake() )
   {
     size_t fsb_y = parent.getFsbY();
     // size_t fsb_z = parent.getFsbZ();
@@ -1777,15 +1782,15 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
     std::unordered_map<size_t,double> root_split_counts;
     std::unordered_map<std::pair<size_t,size_t>,double> parent_child_counts;
 
-// std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
+    std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
     double score = 0.0;
     // E-step, compute q (per tree) and m (counts, across all trees)
     for (size_t i=0; i<trees.size(); ++i)
     {
-// std::cout << "counting for tree " << i << std::endl;
+      // std::cout << "counting for tree " << i << std::endl;
       // Get ln(Pr(tree,root)) for all branches
       std::vector<std::pair<size_t,double> > pr_tree_and_root = computeLnProbabilityTopologyAndRooting(trees[i]);
-// std::cout << "got components for q()" << std::endl;
+      // std::cout << "got components for q()" << std::endl;
 
       // So we can compute the probability of this tree
       std::vector<double> per_edge_log_probs;
@@ -1850,7 +1855,7 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
         throw(RbException("Error in EM algorithm, NaN tree probabilities."));
       }
 
-// std::cout << "about to recount, NOT using q" << std::endl;
+      // std::cout << "about to recount, NOT using q" << std::endl;
       // use q to re-count subsplits
       countAllSubsplits(trees[i], parent_child_counts, root_split_counts, q, false);
 
@@ -1862,7 +1867,7 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
     regularizeCounts(parent_child_counts, root_split_counts, parent_child_counts_sa, root_split_counts_sa, alpha);
     }
 
-    // std::cout << ">>>>>>M step" << std::endl;
+    std::cout << ">>>>>>M step" << std::endl;
     // M-step, compute p
     makeRootSplits(root_split_counts);
     makeCPDs(parent_child_counts);
