@@ -22,7 +22,7 @@ template <class valueType> class TypedDagNode;
                                                 const TypedDagNode<double> *s, const TypedDagNode<double> *e,
                                                 const TypedDagNode<double> *p, const TypedDagNode<double> *r,
                                                 const std::string &cdt, const std::vector<Taxon> &tn, bool uo,
-                                                TypedDagNode<Tree> *t);
+                                                Tree *t);
 
         // public member functions
         ConstantRateSerialSampledBirthDeathProcess*         clone(void) const;

@@ -53,7 +53,7 @@ PiecewiseConstantSerialSampledBirthDeathProcess::PiecewiseConstantSerialSampledB
                                                                                            const std::string &cdt,
                                                                                            const std::vector<Taxon> &tn,
                                                                                            bool uo,
-                                                                                           TypedDagNode<Tree> *t) : AbstractBirthDeathProcess( ra, cdt, tn, uo ),
+                                                                                           Tree *t) : AbstractBirthDeathProcess( ra, cdt, tn, uo, t ),
     homogeneous_timeline(ht),
     lambda_timeline(lt),
     mu_timeline(mt),
@@ -295,12 +295,12 @@ PiecewiseConstantSerialSampledBirthDeathProcess::PiecewiseConstantSerialSampledB
 
     if (t != NULL)
     {
-      delete value;
-      value = &(t->getValue());
+        delete value;
+        value = t->clone();
     }
     else
     {
-      simulateTree();
+        simulateTree();
     }
 }
 

@@ -36,10 +36,11 @@ using namespace RevBayesCore;
  * \param[in]    nTaxa     Number of taxa (used for initialization during simulation).
  * \param[in]    tn        Taxon names used during initialization.
  * \param[in]    c         Clade constraints.
+ * \param[in]    t         The starting tree if we want to avoid simulating trees.
  */
 BirthDeathProcess::BirthDeathProcess(const TypedDagNode<double> *ra, const TypedDagNode<double> *rh, const TypedDagNode<double> *mp,
                                      const std::string& ss, const std::vector<Clade> &ic, const std::string &cdt,
-                                     const std::vector<Taxon> &tn) : AbstractBirthDeathProcess( ra, cdt, tn ),
+                                     const std::vector<Taxon> &tn, Tree* t) : AbstractBirthDeathProcess( ra, cdt, tn, false, t ),
     rho( rh ),
     sampling_mixture_proportion( mp ),
     sampling_strategy( ss ),
@@ -144,18 +145,23 @@ double BirthDeathProcess::computeLnProbabilityTimes( void ) const
         
         // multiply the probability for the missing species
         ln_prob_times += m * log_F_t;
-        ln_prob_times -= RbMath::lnFactorial(m);
-//        ln_prob_times += m * log_F_t + RbMath::lnFactorial(m+num_taxa-2.0) - RbMath::lnFactorial(m) - ln_fact_n_taxa;
-//        ln_prob_times += m * log_F_t + log(RbMath::choose(m-initial_taxa,num_taxa-initial_taxa));
-
+//        ln_prob_times -= RbMath::lnFactorial(m);
 
         total_species += m;
     }
     
     if ( incomplete_clades.size() > 0 )
     {
-        int initial_taxa = 2;
-        ln_prob_times += RbMath::lnFactorial(total_species-initial_taxa) - RbMath::lnFactorial( int(num_taxa-initial_taxa) );
+//        int initial_taxa = 2;
+//        ln_prob_times += RbMath::lnFactorial(total_species-initial_taxa) - RbMath::lnFactorial( int(num_taxa-initial_taxa) );
+
+        // present time
+        double present_time = value->getRoot().getAge();
+        
+        ln_prob_times += lnProbNumTaxa( total_species, 0, present_time, true );
+        ln_prob_times -= lnProbNumTaxa( num_taxa, 0, present_time, true );
+
+
     }
     
     return ln_prob_times;

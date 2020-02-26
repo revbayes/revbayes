@@ -53,7 +53,7 @@ PiecewiseConstantFossilizedBirthDeathProcess::PiecewiseConstantFossilizedBirthDe
                                                                                            bool uo,
                                                                                            bool pa,
                                                                                            bool ex) :
-    AbstractBirthDeathProcess(ra, incondition, intaxa, uo),
+    AbstractBirthDeathProcess(ra, incondition, intaxa, uo, NULL),
     AbstractPiecewiseConstantFossilizedRangeProcess(inspeciation, inextinction, inpsi, incounts, inrho, intimes, intaxa, pa),
     extended(ex)
 {

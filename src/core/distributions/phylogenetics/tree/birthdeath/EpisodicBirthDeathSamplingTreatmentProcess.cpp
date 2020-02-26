@@ -50,7 +50,7 @@ EpisodicBirthDeathSamplingTreatmentProcess::EpisodicBirthDeathSamplingTreatmentP
                                                                                            const std::string &cdt,
                                                                                            const std::vector<Taxon> &tn,
                                                                                            bool uo,
-                                                                                           TypedDagNode<Tree> *t) : AbstractBirthDeathProcess( ra, cdt, tn, uo ),
+                                                                                           Tree *t) : AbstractBirthDeathProcess( ra, cdt, tn, uo, t ),
     interval_times(ht),
     offset( 0.0 )
 {
@@ -171,7 +171,7 @@ EpisodicBirthDeathSamplingTreatmentProcess::EpisodicBirthDeathSamplingTreatmentP
     if (t != NULL)
     {
       delete value;
-      value = t->getValue().clone();
+      value = t->clone();
     }
     else
     {

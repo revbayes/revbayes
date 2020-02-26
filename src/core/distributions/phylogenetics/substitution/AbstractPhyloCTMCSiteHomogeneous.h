@@ -3987,8 +3987,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
 
     if (this->branch_heterogeneous_substitution_matrices == false )
     {
+        // loop now over all per-site rate matrices (could also be only a single one, as by default)
         for (size_t matrix = 0; matrix < this->num_matrices; ++matrix)
         {
+            // get the i-th rate matrix
             if ( this->heterogeneous_rate_matrices != NULL )
             {
                 rm = &this->heterogeneous_rate_matrices->getValue()[matrix];
@@ -3998,6 +4000,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
                 rm = &this->homogeneous_rate_matrix->getValue();
             }
 
+            // now also get the site specific rates
             for (size_t j = 0; j < this->num_site_rates; ++j)
             {
                 double r = 1.0;

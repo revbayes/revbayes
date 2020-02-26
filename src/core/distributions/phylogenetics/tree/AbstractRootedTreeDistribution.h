@@ -15,10 +15,15 @@ namespace RevBayesCore {
     class AbstractRootedTreeDistribution : public TypedDistribution<Tree> {
         
     public:
-        AbstractRootedTreeDistribution(const TypedDagNode<double> *ra, const std::vector<Taxon> &tn, bool uo = false );
-        
+        AbstractRootedTreeDistribution(const TypedDagNode<double> *ra, const std::vector<Taxon> &tn, bool uo, Tree *t );
+        AbstractRootedTreeDistribution(const AbstractRootedTreeDistribution& d );
+
         
         virtual ~AbstractRootedTreeDistribution(void);
+        
+        // overloaded operators
+        AbstractRootedTreeDistribution&                     operator=(const AbstractRootedTreeDistribution& d);                                                            //!< Assignment
+
         // pure virtual member functions
         virtual AbstractRootedTreeDistribution*             clone(void) const = 0;                                                                              //!< Create an independent clone
         
@@ -69,6 +74,7 @@ namespace RevBayesCore {
         const TypedDagNode<double>*                         process_age;                                                                                        //!< Time since the start of the process.
         std::vector<Taxon>                                  taxa;                                                                                               //!< Taxon names that will be attached to new simulated trees.
         bool                                                use_origin;
+        Tree*                                               starting_tree;
     };
     
 }

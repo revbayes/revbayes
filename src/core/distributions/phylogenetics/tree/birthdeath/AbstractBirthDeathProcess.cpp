@@ -28,9 +28,10 @@ using namespace RevBayesCore;
  * \param    cdt       The condition of the process (time/survival/nTaxa)
  * \param    tn        Taxon names used during initialization.
  * \param    uo        If true ra is the origin time otherwise the root age of the process.
+ * \param    t         The starting tree if we want to avoid simulating trees. 
  */
-AbstractBirthDeathProcess::AbstractBirthDeathProcess(const TypedDagNode<double> *ra, const std::string &cdt, const std::vector<Taxon> &tn, bool uo )
-    : AbstractRootedTreeDistribution( ra, tn, uo ),
+AbstractBirthDeathProcess::AbstractBirthDeathProcess(const TypedDagNode<double> *ra, const std::string &cdt, const std::vector<Taxon> &tn, bool uo, Tree* t )
+    : AbstractRootedTreeDistribution( ra, tn, uo, t ),
     condition( cdt )
 {}
 

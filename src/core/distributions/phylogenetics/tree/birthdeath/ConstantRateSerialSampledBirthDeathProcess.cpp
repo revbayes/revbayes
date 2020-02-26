@@ -40,7 +40,7 @@ ConstantRateSerialSampledBirthDeathProcess::ConstantRateSerialSampledBirthDeathP
                                                                                   const std::string& cdt,
                                                                                   const std::vector<Taxon> &tn,
                                                                                   bool uo,
-                                                                                  TypedDagNode<Tree> *t) : AbstractBirthDeathProcess( o, cdt, tn, uo ),
+                                                                                  Tree *t) : AbstractBirthDeathProcess( o, cdt, tn, uo, t ),
     lambda( s ),
     mu( e ),
     psi( p ),
@@ -54,7 +54,7 @@ ConstantRateSerialSampledBirthDeathProcess::ConstantRateSerialSampledBirthDeathP
     if (t != NULL)
     {
       delete value;
-      value = &(t->getValue());
+      value = t->clone();
     }
     else
     {
