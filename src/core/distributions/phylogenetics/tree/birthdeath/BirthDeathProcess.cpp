@@ -128,12 +128,14 @@ double BirthDeathProcess::computeLnProbabilityTimes( void ) const
     {
         // We use equation (5) of Hoehna et al.
         // "Inferring Speciation and Extinction Rates under Different Sampling Schemes"
-        double last_event = presentTime - incomplete_clade_ages[i];
+//        double last_event = presentTime - incomplete_clade_ages[i];
+        double last_event = incomplete_clade_ages[i];
         
         double p_0_T = 1.0 - pSurvival(0,presentTime,1.0) * exp( rateIntegral(0,presentTime) );
         double p_0_t = (1.0 - pSurvival(last_event,presentTime,1.0) * exp( rateIntegral(last_event,presentTime) ));
         double log_F_t = log(p_0_t) - log(p_0_T);
-        
+//        double log_F_t = log(p_0_t);
+
 //        if ( log_F_t > 0.0 )
 //        {
 //            throw RbException("Problem in computing the probability of missing species in BDP.");
@@ -158,8 +160,12 @@ double BirthDeathProcess::computeLnProbabilityTimes( void ) const
         // present time
         double present_time = value->getRoot().getAge();
         
-        ln_prob_times += lnProbNumTaxa( total_species, 0, present_time, true );
-        ln_prob_times -= lnProbNumTaxa( num_taxa, 0, present_time, true );
+        double p_0_T = 1.0 - pSurvival(0,present_time,1.0) * exp( rateIntegral(0,present_time) );
+        ln_prob_times += log( p_0_T )*total_species;
+        ln_prob_times -= log( p_0_T )*num_taxa;
+
+//        ln_prob_times += lnProbNumTaxa( total_species, 0, present_time, true );
+//        ln_prob_times -= lnProbNumTaxa( num_taxa, 0, present_time, true );
 
 
     }

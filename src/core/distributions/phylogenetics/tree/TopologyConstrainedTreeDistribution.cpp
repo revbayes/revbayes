@@ -841,7 +841,7 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
         for ( int index_missing_species = 0; index_missing_species < c.getNumberMissingTaxa(); ++index_missing_species)
         {
             ++n_added_missing_taxa;
-            TopologyNode* missing_node = new TopologyNode("Missing_Taxon_" + StringUtilities::to_string(n_added_missing_taxa) );
+            TopologyNode* missing_node = new TopologyNode("Missing_Taxon_" + ( c.getCladeName() != "" ? c.getCladeName() + "_" : "") + StringUtilities::to_string(n_added_missing_taxa) );
             missing_node->setAge( 0.0 );
             nodes_in_clade.push_back( missing_node );
         }

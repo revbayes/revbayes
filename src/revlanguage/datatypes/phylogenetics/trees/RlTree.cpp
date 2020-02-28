@@ -121,8 +121,18 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     {
         found = true;
         
-        const std::vector<RevBayesCore::Taxon> &taxa = static_cast<const ModelVector<Taxon>&>( args[0].getVariable()->getRevObject() ).getValue();
-        RevBayesCore::Clade tmp = RevBayesCore::Clade( taxa );
+        RevBayesCore::Clade tmp;
+        
+        if ( args[0].getVariable()->getRevObject().isType( ModelVector<Taxon>::getClassTypeSpec() ) )
+        {
+            const std::vector<RevBayesCore::Taxon> &taxa = static_cast<const ModelVector<Taxon>&>( args[0].getVariable()->getRevObject() ).getValue();
+            tmp = RevBayesCore::Clade( taxa );
+        }
+        else if ( args[0].getVariable()->getRevObject().isType( Clade::getClassTypeSpec() ) )
+        {
+            tmp = static_cast<const Clade&>( args[0].getVariable()->getRevObject() ).getValue();
+        }
+        
         tmp.resetTaxonBitset( this->dag_node->getValue().getTaxonBitSetMap() );
         RevBayesCore::Clade c = this->dag_node->getValue().getMrca( tmp ).getClade();
         return new RevVariable( new Clade( c ) );
@@ -448,7 +458,10 @@ void Tree::initMethods( void )
     methods.addFunction( new MemberProcedure( "makeUltrametric", RlUtils::Void, makeUltraArgRules ) );
 
     ArgumentRules* get_clade_arg_rules = new ArgumentRules();
-    get_clade_arg_rules->push_back( new ArgumentRule( "clade", ModelVector<Taxon>::getClassTypeSpec(), "Vector of some of the taxa included in the clade.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    std::vector<TypeSpec> clade_types;
+    clade_types.push_back( ModelVector<Taxon>::getClassTypeSpec() );
+    clade_types.push_back( Clade::getClassTypeSpec() );
+    get_clade_arg_rules->push_back( new ArgumentRule( "clade", clade_types, "Vector of some of the taxa included in the clade.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "getClade", Clade::getClassTypeSpec(), get_clade_arg_rules ) );
 
 

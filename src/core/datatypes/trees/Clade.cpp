@@ -19,6 +19,7 @@ using namespace RevBayesCore;
  */
 Clade::Clade( void ) :
     age( 0.0 ),
+    clade_name(""),
     num_missing( 0 ),
     taxa(),
     is_negative_constraint(false),
@@ -34,6 +35,7 @@ Clade::Clade( void ) :
 Clade::Clade( const Taxon &t, const RbBitSet &b ) :
     age( 0.0 ),
     bitset( b ),
+    clade_name( "" ),
     num_missing( b.size() > 1 ? b.size() - 1 : 0 ),
     taxa(),
     is_negative_constraint(false),
@@ -53,6 +55,7 @@ Clade::Clade( const Taxon &t, const RbBitSet &b ) :
 Clade::Clade(const std::vector<Taxon> &n, const RbBitSet &b) :
     age( 0.0 ),
     bitset( b ),
+    clade_name( "" ),
     num_missing( b.size() > n.size() ? int(b.size()) - int(n.size()) : 0 ),
     taxa( n ),
     is_negative_constraint(false),
@@ -72,6 +75,7 @@ Clade::Clade(const std::vector<Taxon> &n, const RbBitSet &b) :
 Clade::Clade(const std::set<Taxon> &n, const RbBitSet &b) :
     age( 0.0 ),
     bitset( b ),
+    clade_name( "" ),
     num_missing( b.size() > n.size() ? int(b.size()) - int(n.size()) : 0 ),
     taxa(),
     is_negative_constraint(false),
@@ -96,6 +100,7 @@ Clade::Clade(const std::set<Taxon> &n, const RbBitSet &b) :
 Clade::Clade(const RbBitSet &b, const std::vector<Taxon> &n) :
     age( 0.0 ),
     bitset( b ),
+    clade_name( "" ),
     num_missing( b.size() - b.getNumberSetBits() ),
     is_negative_constraint(false),
     is_optional_match(false)
@@ -119,6 +124,11 @@ bool Clade::operator==(const Clade &c) const
 {
     
     if ( c.size() != taxa.size() )
+    {
+        return false;
+    }
+    
+    if ( c.clade_name != clade_name )
     {
         return false;
     }
@@ -164,6 +174,11 @@ bool Clade::operator<(const Clade &c) const
     else if ( taxa.size() > c.size() )
     {
         return false;
+    }
+    
+    if ( c.clade_name != clade_name )
+    {
+        return c.clade_name < clade_name;
     }
     
     for (size_t i = 0; i < taxa.size(); ++i)
@@ -291,6 +306,18 @@ double Clade::getAge( void ) const
 const RbBitSet& Clade::getBitRepresentation( void ) const
 {
     return bitset;
+}
+
+
+/**
+ * Get the clade name.
+ *
+ * \return       The name of the clade
+ *
+ */
+const std::string& Clade::getCladeName(void) const
+{
+    return clade_name;
 }
 
 
@@ -457,6 +484,18 @@ void Clade::setAge(double a)
 void Clade::setBitRepresentation( const RbBitSet &b )
 {
     bitset = b;
+}
+
+
+/**
+ * Set the clade name.
+ *
+ * \param[in]    n      The new name
+ *
+ */
+void Clade::setCladeName(const std::string& n)
+{
+    clade_name = n;
 }
 
 
