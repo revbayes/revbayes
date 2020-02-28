@@ -1,8 +1,12 @@
-#include "ConstantRateSerialSampledBirthDeathProcess.h"
+#include "OccurrenceBirthDeathProcess.h"
 
+#include <iostream>
+#include <vector>
 #include <cmath>
 #include <string>
 
+#include "RbMathMatrix.h"
+#include "RbVector.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
@@ -32,7 +36,7 @@ using namespace RevBayesCore;
  * \param[in]    tn             Taxa.
  * \param[in]    c              Clades conditioned to be present.
  */
-ConstantRateSerialSampledBirthDeathProcess::ConstantRateSerialSampledBirthDeathProcess( const TypedDagNode<double> *o,
+OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess( const TypedDagNode<double> *o,
                                                                                   const TypedDagNode<double> *s,
                                                                                   const TypedDagNode<double> *e,
                                                                                   const TypedDagNode<double> *p,
@@ -69,10 +73,10 @@ ConstantRateSerialSampledBirthDeathProcess::ConstantRateSerialSampledBirthDeathP
  *
  * \return A new copy of myself
  */
-ConstantRateSerialSampledBirthDeathProcess* ConstantRateSerialSampledBirthDeathProcess::clone( void ) const
+OccurrenceBirthDeathProcess* OccurrenceBirthDeathProcess::clone( void ) const
 {
 
-    return new ConstantRateSerialSampledBirthDeathProcess( *this );
+    return new OccurrenceBirthDeathProcess( *this );
 }
 
 
@@ -80,7 +84,7 @@ ConstantRateSerialSampledBirthDeathProcess* ConstantRateSerialSampledBirthDeathP
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double ConstantRateSerialSampledBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) const
+double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) const
 {
     // prepare the probability computation
     prepareProbComputation();
@@ -97,7 +101,7 @@ double ConstantRateSerialSampledBirthDeathProcess::computeLnProbabilityDivergenc
  *
  * \return    The log-probability density.
  */
-double ConstantRateSerialSampledBirthDeathProcess::computeLnProbabilityTimes( void ) const
+double OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void ) const
 {
 
     double lnProbTimes = 0.0;
@@ -122,104 +126,113 @@ double ConstantRateSerialSampledBirthDeathProcess::computeLnProbabilityTimes( vo
     double death_rate = mu->getValue();
     double serial_rate = psi->getValue();
     double sampling_prob = rho->getValue();
+    double gamma = birth_rate + death_rate + serial_rate + sampling_prob;
 
     // get helper variables
     double a = birth_rate - death_rate - serial_rate;
     double c1 = std::fabs(sqrt(a * a + 4 * birth_rate * serial_rate));
     double c2 = -(a - 2 * birth_rate * sampling_prob) / c1;
+    // roots of the polynmial ODE
+    double Delta = pow(gamma,2) - 4*birth_rate*death_rate;
+    double x1 = (gamma - sqrt(Delta))/(2*birth_rate);
+    double x2 = (gamma + sqrt(Delta))/(2*birth_rate);
+
+
 
     // get node/time variables
     size_t num_nodes = value->getNumberOfNodes();
 
     // classify nodes
-    int num_sampled_ancestors = 0;
     int num_extant_taxa = 0;
 
     std::vector<double> serial_tip_ages = std::vector<double>();
     std::vector<double> internal_node_ages = std::vector<double>();
+    std::vector<double> sampled_ancestors_ages = std::vector<double>();
+
     for (size_t i = 0; i < num_nodes; i++)
     {
         const TopologyNode& n = value->getNode( i );
 
-        if ( n.isFossil() && n.isSampledAncestor() )
+        if ( !n.isTip() && n.isFossil() )
         {
             // node is sampled ancestor
-            num_sampled_ancestors++;
+            events.push_back( Event(n.getAge(), "sampled ancestor", 0) );
+
         }
-        else if ( n.isFossil() && !n.isSampledAncestor() )
+        else if ( n.isFossil() && n.isTip() )
         {
             // node is serial leaf
-            serial_tip_ages.push_back( n.getAge() );
+            events.push_back( Event(n.getAge(), "terminal non-removed", 0) ); //fossil leaf
         }
         else if ( n.isTip() && !n.isFossil() )
         {
             // node is extant leaf
-            num_extant_taxa++;
+            events.push_back( Event(n.getAge(), "terminal non-removed", 0) ); //extant leaf
         }
         else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
         {
             if (!n.isRoot() || use_origin)
             {
                 // node is bifurcation event (a "true" node)
-                internal_node_ages.push_back( n.getAge() );
+                events.push_back( Event(n.getAge(), "branching time", 0) );
             }
         }
     }
 
-    // add the log probability for the serial sampling events
-    if (serial_rate == 0.0)
-    {
-        if ( serial_tip_ages.size() + num_sampled_ancestors > 0 )
-        {
-            return RbConstants::Double::neginf;
-            //throw RbException("The serial sampling rate is zero, but the tree has serial sampled tips.");
-        }
-    }
-    else
-    {
-        lnProbTimes += (serial_tip_ages.size() + num_sampled_ancestors) * log( serial_rate );
-    }
-
-    // add the log probability for sampling the extant taxa
-    if (num_extant_taxa > 0)
-    {
-        lnProbTimes += num_extant_taxa * log( 4.0 * sampling_prob );
-    }
-
-    // add the log probability of the initial sequences
-    lnProbTimes += -lnQ(process_time, c1, c2) * num_initial_lineages;
-
-    // add the log probability for the internal node ages
-    lnProbTimes += internal_node_ages.size() * log( birth_rate );
-    for (size_t i=0; i<internal_node_ages.size(); i++)
-    {
-        lnProbTimes -= lnQ(internal_node_ages[i], c1, c2);
-    }
-
-    // add the log probability for the serial tip ages
-    for (size_t i=0; i < serial_tip_ages.size(); i++)
-    {
-        double t = serial_tip_ages[i];
-        lnProbTimes += log(pZero(t, c1, c2)) + lnQ(t, c1, c2);
-    }
-
-    // condition on survival
-    if ( condition == "survival")
-    {
-        lnProbTimes -= num_initial_lineages * log(1.0 - pHatZero(process_time));
-    }
-    // condition on nTaxa
-    else if ( condition == "nTaxa" )
-    {
-        lnProbTimes -= lnProbNumTaxa( value->getNumberOfTips(), 0, process_time, true );
-    }
+    // // add the log probability for the serial sampling events
+    // if (serial_rate == 0.0)
+    // {
+    //     if ( serial_tip_ages.size() + sampled_ancestors_ages.size() > 0 )
+    //     {
+    //         return RbConstants::Double::neginf;
+    //         //throw RbException("The serial sampling rate is zero, but the tree has serial sampled tips.");
+    //     }
+    // }
+    // else
+    // {
+    //     lnProbTimes += (serial_tip_ages.size() + sampled_ancestors_ages.size() ) * log( serial_rate );
+    // }
+    //
+    // // add the log probability for sampling the extant taxa
+    // if (num_extant_taxa > 0)
+    // {
+    //     lnProbTimes += num_extant_taxa * log( 4.0 * sampling_prob );
+    // }
+    //
+    // // add the log probability of the initial sequences
+    // lnProbTimes += -lnQ(process_time, c1, c2) * num_initial_lineages;
+    //
+    // // add the log probability for the internal node ages
+    // lnProbTimes += internal_node_ages.size() * log( birth_rate );
+    // for (size_t i=0; i<internal_node_ages.size(); i++)
+    // {
+    //     lnProbTimes -= lnQ(internal_node_ages[i], c1, c2);
+    // }
+    //
+    // // add the log probability for the serial tip ages
+    // for (size_t i=0; i < serial_tip_ages.size(); i++)
+    // {
+    //     double t = serial_tip_ages[i];
+    //     lnProbTimes += log(pZero(t, c1, c2)) + lnQ(t, c1, c2);
+    // }
+    //
+    // // condition on survival
+    // if ( condition == "survival")
+    // {
+    //     lnProbTimes -= num_initial_lineages * log(1.0 - pHatZero(process_time));
+    // }
+    // // condition on nTaxa
+    // else if ( condition == "nTaxa" )
+    // {
+    //     lnProbTimes -= lnProbNumTaxa( value->getNumberOfTips(), 0, process_time, true );
+    // }
 
     return lnProbTimes;
 
 }
 
 
-double ConstantRateSerialSampledBirthDeathProcess::lnProbTreeShape(void) const
+double OccurrenceBirthDeathProcess::lnProbTreeShape(void) const
 {
     // the birth death divergence times density is derived for a (ranked) unlabeled oriented tree
     // so we convert to a (ranked) labeled non-oriented tree probability by multiplying by 2^{n+m-1} / n!
@@ -242,7 +255,7 @@ double ConstantRateSerialSampledBirthDeathProcess::lnProbTreeShape(void) const
  *
  * \return Speciation rate at time t.
  */
-double ConstantRateSerialSampledBirthDeathProcess::pSurvival(double start, double end) const
+double OccurrenceBirthDeathProcess::pSurvival(double start, double end) const
 {
     return 1.0 - pHatZero(end);
 }
@@ -252,7 +265,7 @@ double ConstantRateSerialSampledBirthDeathProcess::pSurvival(double start, doubl
 /**
  * Simulate new speciation times.
  */
-double ConstantRateSerialSampledBirthDeathProcess::simulateDivergenceTime(double origin, double present) const
+double OccurrenceBirthDeathProcess::simulateDivergenceTime(double origin, double present) const
 {
 
     // incorrect placeholder for constant FBDP
@@ -286,7 +299,7 @@ double ConstantRateSerialSampledBirthDeathProcess::simulateDivergenceTime(double
 }
 
 
-double ConstantRateSerialSampledBirthDeathProcess::pZero(double t, double c1, double c2) const
+double OccurrenceBirthDeathProcess::pZero(double t, double c1, double c2) const
 {
     double b = lambda->getValue();
     double d = mu->getValue();
@@ -298,7 +311,8 @@ double ConstantRateSerialSampledBirthDeathProcess::pZero(double t, double c1, do
 }
 
 
-double ConstantRateSerialSampledBirthDeathProcess::lnQ(double t, double c1, double c2) const
+
+double OccurrenceBirthDeathProcess::lnQ(double t, double c1, double c2) const
 {
     //return log( 2*(1-c2*c2) + exp(-c1*t)*(1-c2)*(1-c2) + exp(c1*t)*(1+c2)*(1+c2) );
 
@@ -307,7 +321,7 @@ double ConstantRateSerialSampledBirthDeathProcess::lnQ(double t, double c1, doub
 }
 
 
-double ConstantRateSerialSampledBirthDeathProcess::pHatZero(double t) const
+double OccurrenceBirthDeathProcess::pHatZero(double t) const
 {
     double b = lambda->getValue();
     double d = mu->getValue();
@@ -317,6 +331,8 @@ double ConstantRateSerialSampledBirthDeathProcess::pHatZero(double t) const
 }
 
 
+
+
 /**
  * Swap the parameters held by this distribution.
  *
@@ -324,7 +340,7 @@ double ConstantRateSerialSampledBirthDeathProcess::pHatZero(double t) const
  * \param[in]    oldP      Pointer to the old parameter.
  * \param[in]    newP      Pointer to the new parameter.
  */
-void ConstantRateSerialSampledBirthDeathProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void OccurrenceBirthDeathProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     if (oldP == lambda)
     {
@@ -347,5 +363,69 @@ void ConstantRateSerialSampledBirthDeathProcess::swapParameterInternal(const Dag
         // delegate the super-class
         AbstractBirthDeathProcess::swapParameterInternal(oldP, newP);
     }
+
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void OccurrenceBirthDeathProcess::poolTimes(void) {
+
+
+	//const std::vector<double> &aT = listAlt->getValue(); // branching times from the tree
+	//const std::vector<double> &a = listA->getValue(); // branching times from a vector
+
+	// we should be able to extract the following ages from the tree too
+	const std::vector<double> &b = listB->getValue(); // sampled ancestors
+	const std::vector<double> &c = listC->getValue(); // terminal non-removed
+	const std::vector<double> &d = listD->getValue(); // terminal removed
+
+	const std::vector<double> &e = listE->getValue(); // occurrences non-removed
+	const std::vector<double> &f = listF->getValue(); // occurrences removed
+	const std::vector<double> &g = listG->getValue(); // timeslices
+
+	// this seems outrageously overly complex
+	if(useTree){
+
+		extant = listAlt->getValue().size() + 1 - c.size() - d.size();
+
+		for(int i = 0; i < listAlt->getValue().size(); i++){
+		    events.push_back( Event(listAlt->getValue()[i], "branching time", 0) );
+		}
+	} else {
+
+		extant = listA->getValue().size() + 1 - c.size() - d.size();
+
+		for(int i = 0; i < listA->getValue().size(); i++){
+	    events.push_back( Event(listA->getValue()[i], "branching time", 0) );
+		}
+	}
+
+	for(int i = 0; i < b.size(); i++){
+	    events.push_back( Event(b[i], "sampled ancestor", 0) );
+	}
+
+	for(int i = 0; i < c.size(); i++){
+	    events.push_back( Event(c[i], "terminal non-removed", 0) );
+	}
+
+	for(int i = 0; i < d.size(); i++){
+	    events.push_back( Event(d[i], "terminal removed", 0) );
+	}
+
+	for(int i = 0; i < e.size(); i++){
+	    events.push_back( Event(e[i], "occurrence non-removed", 0) );
+	}
+
+	for(int i = 0; i < f.size(); i++){
+	    events.push_back( Event(f[i], "occurrence removed", 0) );
+	}
+
+	for(int i = 0; i < g.size(); i++){
+	    events.push_back( Event(g[i], "time slice", 0) );
+	}
+
+	events.push_back( Event(tor->getValue(), "origin", 0) );
 
 }
