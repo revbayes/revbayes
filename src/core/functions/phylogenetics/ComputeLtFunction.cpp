@@ -115,16 +115,22 @@ ComputeLtFunction::ComputeLtFunction(
 
 	for (size_t i = 0; i < num_nodes; i++)
 	{
-
       const TopologyNode& n = tree->getValue().getNode( i );
 
-			double t = n.getAge();
+			double t;
 
-			if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
+			//if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
+			if ( n.isInternal() )
 			{
+				t = n.getAge();
 				listAlt->getValue().push_back(t);
 			}
 	}
+
+	//for(size_t i = 0; i < num_nodes; i++)
+	//{
+	//	std::cout << i << ": " << listAlt->getValue()[i] ;
+	//}
 
 	poolTimes(); // step 1.
 	//update();
