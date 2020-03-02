@@ -1,9 +1,15 @@
 #include "Func_computeLt.h"
 #include "ComputeLtFunction.h"
 
+// you can probably get rid of some of these
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
 #include "ModelVector.h"
+#include "OptionRule.h"
+#include "RevObject.h"
 #include "RlTree.h"
 #include "TypeSpec.h"
+#include "TypedDagNode.h"
 
 namespace RevBayesCore { template <class valueType> class RbVector; }
 namespace RevBayesCore { class Tree; }
@@ -19,7 +25,6 @@ Func_computeLt::Func_computeLt (void) : TypedFunction<RealPos>( )
 /** clone function */
 Func_computeLt* Func_computeLt::clone( void ) const
 {
-
     return new Func_computeLt( *this );
 }
 
@@ -27,10 +32,10 @@ Func_computeLt* Func_computeLt::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_computeLt::createFunction( void ) const
 {
 
-  RevBayesCore::DagNode* node = this->args[0].getVariable()->getRevObject().getDagNode();
-
-  // vector of branching times or tree
   //RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* a = static_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+
+  RevBayesCore::DagNode* node = this->args[0].getVariable()->getRevObject().getDagNode();
+  // vector of branching times or tree
   RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* a = dynamic_cast<RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*>(node);
   RevBayesCore::TypedDagNode< RevBayesCore::Tree>* alt = dynamic_cast< RevBayesCore::TypedDagNode< RevBayesCore::Tree >*>(node);
 
@@ -40,19 +45,24 @@ RevBayesCore::TypedFunction<double>* Func_computeLt::createFunction( void ) cons
   RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* e = static_cast<const ModelVector<Real> &>( this->args[4].getVariable()->getRevObject() ).getDagNode();
   RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* f = static_cast<const ModelVector<Real> &>( this->args[5].getVariable()->getRevObject() ).getDagNode();
 
-  //RevBayesCore::TypedDagNode< double >* mu = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
   RevBayesCore::TypedDagNode< double >* t = static_cast<const RealPos &>( this->args[6].getVariable()->getRevObject() ).getDagNode();
   RevBayesCore::TypedDagNode< double >* l = static_cast<const RealPos &>( this->args[7].getVariable()->getRevObject() ).getDagNode();
   RevBayesCore::TypedDagNode< double >* m = static_cast<const RealPos &>( this->args[8].getVariable()->getRevObject() ).getDagNode();
   RevBayesCore::TypedDagNode< double >* p = static_cast<const RealPos &>( this->args[9].getVariable()->getRevObject() ).getDagNode();
   RevBayesCore::TypedDagNode< double >* o = static_cast<const RealPos &>( this->args[10].getVariable()->getRevObject() ).getDagNode();
-  RevBayesCore::TypedDagNode< double >* rho = static_cast<const RealPos &>( this->args[11].getVariable()->getRevObject() ).getDagNode();
-  RevBayesCore::TypedDagNode< double >* r = static_cast<const RealPos &>( this->args[12].getVariable()->getRevObject() ).getDagNode();
+  RevBayesCore::TypedDagNode< double >* rh = static_cast<const RealPos &>( this->args[11].getVariable()->getRevObject() ).getDagNode();
+  RevBayesCore::TypedDagNode< double >* rm = static_cast<const RealPos &>( this->args[12].getVariable()->getRevObject() ).getDagNode();
 
-  RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* g = static_cast<const ModelVector<Real> &>( this->args[13].getVariable()->getRevObject() ).getDagNode();
+  //RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* g = static_cast<const ModelVector<Real> &>( this->args[13].getVariable()->getRevObject() ).getDagNode();
+  // times of interest
+  RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* g = NULL;
+  if ( listG->getRevObject() != RevNullObject::getInstance() )
+  {
+      g = static_cast<const ModelVector<Real> &>( listG->getRevObject() ).getDagNode();
+  }
 
   //RevBayesCore::ComputeLtFunction* fxn = new RevBayesCore::ComputeLtFunction( a, b, c, d, e, f, t, l, m, p, o, rho, r, g );
-  RevBayesCore::ComputeLtFunction* fxn = a != NULL ? new RevBayesCore::ComputeLtFunction( a, b, c, d, e, f, t, l, m, p, o, rho, r, g ) : new RevBayesCore::ComputeLtFunction( alt, b, c, d, e, f, t, l, m, p, o, rho, r, g );
+  RevBayesCore::ComputeLtFunction* fxn = a != NULL ? new RevBayesCore::ComputeLtFunction( a, b, c, d, e, f, t, l, m, p, o, rh, rm, g ) : new RevBayesCore::ComputeLtFunction( alt, b, c, d, e, f, t, l, m, p, o, rh, rm, g );
 
   return fxn;
 
@@ -83,15 +93,15 @@ const ArgumentRules& Func_computeLt::getArgumentRules( void ) const
         argumentRules.push_back( new ArgumentRule( "listE", ModelVector<Real>::getClassTypeSpec(), "A vector of values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "listF", ModelVector<Real>::getClassTypeSpec(), "A vector of values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
-        argumentRules.push_back( new ArgumentRule( "tor", RealPos::getClassTypeSpec(), "Origin time.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "l", RealPos::getClassTypeSpec(), "lambda.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "m", RealPos::getClassTypeSpec(), "mu.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "p", RealPos::getClassTypeSpec(), "psi.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "o", RealPos::getClassTypeSpec(), "omega.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "origin", RealPos::getClassTypeSpec(), "Origin time.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "lambda", RealPos::getClassTypeSpec(), "lambda.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "mu", RealPos::getClassTypeSpec(), "mu.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "psi", RealPos::getClassTypeSpec(), "psi.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "omega", RealPos::getClassTypeSpec(), "omega.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "rho", RealPos::getClassTypeSpec(), "rho.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "r", RealPos::getClassTypeSpec(), "removel Pr.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "removal", RealPos::getClassTypeSpec(), "removel Pr.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
-        argumentRules.push_back( new ArgumentRule( "listF", ModelVector<Real>::getClassTypeSpec(), "A vector of values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "listG", ModelVector<Real>::getClassTypeSpec(), "A vector of values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         rules_set = true;
     }
@@ -134,4 +144,25 @@ const TypeSpec& Func_computeLt::getTypeSpec( void ) const
     static TypeSpec type_spec = getClassTypeSpec();
 
     return type_spec;
+}
+
+/**
+ * Set a member variable.
+ *
+ * Sets a member variable with the given name and store the pointer to the variable.
+ * The value of the variable might still change but this function needs to be called again if the pointer to
+ * the variable changes. The current values will be used to create the distribution object.
+ *
+ * \param[in]    name     Name of the member variable.
+ * \param[in]    var      Pointer to the variable.
+ */
+void Func_computeLt::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+{
+    if ( name == "listG" )
+    {
+        listG = var;
+    }
+    else {
+      Function::setConstParameter(name, var);
+    }
 }

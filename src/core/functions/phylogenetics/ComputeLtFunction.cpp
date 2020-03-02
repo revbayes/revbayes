@@ -25,12 +25,12 @@ using namespace RevBayesCore;
  * @param v the vector of branching times
  */
 ComputeLtFunction::ComputeLtFunction(
-	const TypedDagNode< RbVector<double> > *a,
-	const TypedDagNode< RbVector<double> > *b,
-	const TypedDagNode< RbVector<double> > *c,
-	const TypedDagNode< RbVector<double> > *d,
-	const TypedDagNode< RbVector<double> > *e,
-	const TypedDagNode< RbVector<double> > *f,
+	const TypedDagNode< RbVector<double> > *a, // branching times
+	const TypedDagNode< RbVector<double> > *b, // SAs
+	const TypedDagNode< RbVector<double> > *c, // terminal non-removed
+	const TypedDagNode< RbVector<double> > *d, // terminal removed
+	const TypedDagNode< RbVector<double> > *e, // occ non-removed
+	const TypedDagNode< RbVector<double> > *f, // occ removed
 	const TypedDagNode< double > *t,
 	const TypedDagNode< double > *l,
 	const TypedDagNode< double > *m,
@@ -38,22 +38,12 @@ ComputeLtFunction::ComputeLtFunction(
 	const TypedDagNode< double > *o,
 	const TypedDagNode< double > *rho,
 	const TypedDagNode< double > *r,
-	const TypedDagNode< RbVector<double> > *g
+	const TypedDagNode< RbVector<double> > *g // times
  	) : TypedFunction<double>( new double(0.0) ),
 	listA ( a ), listB ( b ), listC ( c ), listD ( d ), listE ( e ), listF ( f ),
 	tor ( t ), lambda ( l ), mu ( m ), psi ( p ), omega ( o ), rho ( rho ), removalPr ( r ),
 	listG ( g )
 {
-
-	//poolTimes(a, b, b, c, d, e, f, g);
-
-	//add the parameter as parents
-	//this->addParameter( listA );
-	//this->addParameter( listB );
-	//this->addParameter( listC );
-	//this->addParameter( listD );
-	//this->addParameter( listE );
-	//this->addParameter( listF );
 
 	this->addParameter( tor );
 	this->addParameter( lambda );
@@ -74,9 +64,9 @@ ComputeLtFunction::ComputeLtFunction(
 	const TypedDagNode<Tree> *tr,
 	const TypedDagNode< RbVector<double> > *b,
 	const TypedDagNode< RbVector<double> > *c,
-	const TypedDagNode< RbVector<double> > *d,
-	const TypedDagNode< RbVector<double> > *e,
-	const TypedDagNode< RbVector<double> > *f,
+	const TypedDagNode< RbVector<double> > *d, // terminal removed
+	const TypedDagNode< RbVector<double> > *e, // occ non-removed
+	const TypedDagNode< RbVector<double> > *f, // occ removed
 	const TypedDagNode< double > *t,
 	const TypedDagNode< double > *l,
 	const TypedDagNode< double > *m,
@@ -84,7 +74,7 @@ ComputeLtFunction::ComputeLtFunction(
 	const TypedDagNode< double > *o,
 	const TypedDagNode< double > *rho,
 	const TypedDagNode< double > *r,
-	const TypedDagNode< RbVector<double> > *g
+	const TypedDagNode< RbVector<double> > *g // times
  	) : TypedFunction<double>( new double(0.0) ),
 	tree ( tr ), listB ( b ), listC ( c ), listD ( d ), listE ( e ), listF ( f ),
 	tor ( t ), lambda ( l ), mu ( m ), psi ( p ), omega ( o ), rho ( rho ), removalPr ( r ),
@@ -97,40 +87,49 @@ ComputeLtFunction::ComputeLtFunction(
 	this->addParameter( psi );
 	this->addParameter( omega );
 	this->addParameter( rho );
-	this->addParameter( removalPr ); // I'm not sure if we need to do this
+	this->addParameter( removalPr );
 
-	// see also Tree class -> addNodeParameter // is there an equivalent for tips?
+	// see also Tree class -> addNodeParameter
 	// getTipNodeWithName
 	// renameNodeParameter
 	// getNumberOfExtantTips
 	// getNumberOfSampledAncestors
 
-	// see /core/distributions/phylogenetics/tree/birthdeath EpisodicBirthDeathSamplingTreatmentProcess.cpp
-
-	//RbVector<double> tmp;
-
 	useTree = true;
 
 	size_t num_nodes = tree->getValue().getNumberOfNodes();
 
-	for (size_t i = 0; i < num_nodes; i++)
-	{
+	for (size_t i = 0; i < num_nodes; i++){
+
       const TopologyNode& n = tree->getValue().getNode( i );
 
-			double t;
+			double t = n.getAge();
 
-			//if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
-			if ( n.isInternal() )
-			{
-				t = n.getAge();
-				listAlt->getValue().push_back(t);
+			if ( n.isFossil() && n.isSampledAncestor() ){
+				// 1. sampled ancestor
+				SA_ages.push_back(t);
+			} else if ( n.isFossil() && !n.isSampledAncestor() ){
+				// 2. node is serial leaf
+				tip_ages.push_back(t);
+			} // else if ( n.isTip() && !n.isFossil() ){
+				// 3. node is at present
+				// tip_ages.push_back(t);
+			// }
+			else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() ){
+				// 4. true branching event
+				branching_times.push_back(t);
 			}
 	}
 
-	//for(size_t i = 0; i < num_nodes; i++)
-	//{
-	//	std::cout << i << ": " << listAlt->getValue()[i] ;
-	//}
+	for(int i = 0; i < branching_times.size(); i++){
+		std::cout << "bt " << i << " : " << branching_times[i] << std::endl;
+	}
+	for(int i = 0; i < SA_ages.size(); i++){
+		std::cout << "SA " << i << " : " << SA_ages[i] << std::endl;
+	}
+	for(int i = 0; i < tip_ages.size(); i++){
+		std::cout << "tr " << i << " : " << tip_ages[i] << std::endl;
+	}
 
 	poolTimes(); // step 1.
 	//update();
@@ -475,42 +474,50 @@ void ComputeLtFunction::swapParameterInternal( const DagNode *oldP, const DagNod
 
 void ComputeLtFunction::poolTimes(void) {
 
-
-	//const std::vector<double> &aT = listAlt->getValue(); // branching times from the tree
 	//const std::vector<double> &a = listA->getValue(); // branching times from a vector
+	//const std::vector<double> &b = listB->getValue(); // sampled ancestors
+	//const std::vector<double> &c = listC->getValue(); // terminal non-removed
 
-	// we should be able to extract the following ages from the tree too
-	const std::vector<double> &b = listB->getValue(); // sampled ancestors
-	const std::vector<double> &c = listC->getValue(); // terminal non-removed
+	// we should be able to extract listD ages from the tree too
 	const std::vector<double> &d = listD->getValue(); // terminal removed
 
 	const std::vector<double> &e = listE->getValue(); // occurrences non-removed
 	const std::vector<double> &f = listF->getValue(); // occurrences removed
 	const std::vector<double> &g = listG->getValue(); // timeslices
 
-	// this seems outrageously overly complex
+	// this seems overly complex
 	if(useTree){
 
-		extant = listAlt->getValue().size() + 1 - c.size() - d.size();
+		extant = branching_times.size() + 1 - tip_ages.size() - d.size();
 
-		for(int i = 0; i < listAlt->getValue().size(); i++){
-		    events.push_back( Event(listAlt->getValue()[i], "branching time", 0) );
+		for(int i = 0; i < branching_times.size(); i++){
+		    events.push_back( Event(branching_times[i], "branching time", 0) );
 		}
+
+		for(int i = 0; i < SA_ages.size(); i++){
+		    events.push_back( Event(SA_ages[i], "branching time", 0) );
+		}
+
+		for(int i = 0; i < tip_ages.size(); i++){
+		    events.push_back( Event(tip_ages[i], "terminal non-removed", 0) );
+		}
+
 	} else {
 
-		extant = listA->getValue().size() + 1 - c.size() - d.size();
+		extant = listA->getValue().size() + 1 - listC->getValue().size() - d.size();
 
 		for(int i = 0; i < listA->getValue().size(); i++){
 	    events.push_back( Event(listA->getValue()[i], "branching time", 0) );
 		}
-	}
 
-	for(int i = 0; i < b.size(); i++){
-	    events.push_back( Event(b[i], "sampled ancestor", 0) );
-	}
+		for(int i = 0; i < listB->getValue().size(); i++){
+				events.push_back( Event(listB->getValue()[i], "sampled ancestor", 0) );
+		}
 
-	for(int i = 0; i < c.size(); i++){
-	    events.push_back( Event(c[i], "terminal non-removed", 0) );
+		for(int i = 0; i < listC->getValue().size(); i++){
+		    events.push_back( Event(listC->getValue()[i], "terminal non-removed", 0) );
+		}
+
 	}
 
 	for(int i = 0; i < d.size(); i++){

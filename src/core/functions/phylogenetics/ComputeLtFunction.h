@@ -115,17 +115,19 @@ template <class valueType> class TypedDagNode;
   private:
 
     // members
-    const TypedDagNode< RbVector< double > >*           listA;
-    const TypedDagNode< RbVector< double > >*           listB;
-    const TypedDagNode< RbVector< double > >*           listC;
-    const TypedDagNode< RbVector< double > >*           listD;
-    const TypedDagNode< RbVector< double > >*           listE;
-    const TypedDagNode< RbVector< double > >*           listF;
-    const TypedDagNode< RbVector< double > >*           listG;
+    const TypedDagNode< RbVector< double > >*           listA; // branching times
+    const TypedDagNode< RbVector< double > >*           listB; // SAs
+    const TypedDagNode< RbVector< double > >*           listC; // terminal non-removed
+    const TypedDagNode< RbVector< double > >*           listD; // terminal removed
+    const TypedDagNode< RbVector< double > >*           listE; // occ non-removed
+    const TypedDagNode< RbVector< double > >*           listF; // occ removed
+    const TypedDagNode< RbVector< double > >*           listG; // times
 
-    mutable TypedDagNode< RbVector< double > >*           listAlt;
     const TypedDagNode<Tree>*                           tree;
     bool                                                useTree;
+    mutable std::vector<double>                         tip_ages;
+    mutable std::vector<double>                         SA_ages;
+    mutable std::vector<double>                         branching_times;
 
     const TypedDagNode< double > *                      tor;
     const TypedDagNode< double > *                      lambda;

@@ -26,8 +26,31 @@ namespace RevLanguage {
     const TypeSpec&                 getTypeSpec(void) const; // Get the type spec
 
     // Function functions you have to override
-    RevBayesCore::TypedFunction<double>*        createFunction(void) const; // Create internal function object
-    const ArgumentRules&                        getArgumentRules(void) const; // Get argument rules
+    RevBayesCore::TypedFunction<double>*      createFunction(void) const; // Create internal function object
+    const ArgumentRules&                      getArgumentRules(void) const; // Get argument rules
+    //const MemberRules&                          getParameterRules(void) const; //Get member rules
+
+  protected:
+
+      void                                     setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);
+
+  private:
+
+      RevPtr<const RevVariable>                               origin;
+      RevPtr<const RevVariable>                               lambda;
+      RevPtr<const RevVariable>                               mu;
+      RevPtr<const RevVariable>                               psi;
+      RevPtr<const RevVariable>                               omega;
+      RevPtr<const RevVariable>                               removal;
+      RevPtr<const RevVariable>                               rho;
+      RevPtr<const RevVariable>                               listA;
+      RevPtr<const RevVariable>                               listB;
+      RevPtr<const RevVariable>                               listC;
+      RevPtr<const RevVariable>                               listD;
+      RevPtr<const RevVariable>                               listE;
+      RevPtr<const RevVariable>                               listF;
+      RevPtr<const RevVariable>                               listG;
+
 
   };
 
