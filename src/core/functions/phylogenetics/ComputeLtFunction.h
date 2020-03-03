@@ -40,36 +40,36 @@ template <class valueType> class TypedDagNode;
 
   public:
     ComputeLtFunction(
+      const TypedDagNode< double > *l,
+      const TypedDagNode< double > *m,
+      const TypedDagNode< double > *p,
+      const TypedDagNode< double > *o,
+      const TypedDagNode< double > *rho,
+      const TypedDagNode< double > *r,
+      const TypedDagNode< double > *t,
+      const TypedDagNode< RbVector<double> > *g,
       const TypedDagNode< RbVector<double> > *a,
       const TypedDagNode< RbVector<double> > *b,
       const TypedDagNode< RbVector<double> > *c,
       const TypedDagNode< RbVector<double> > *d,
       const TypedDagNode< RbVector<double> > *e,
-      const TypedDagNode< RbVector<double> > *f,
-      const TypedDagNode< double > *t,
+      const TypedDagNode< RbVector<double> > *f
+    );
+    ComputeLtFunction(
       const TypedDagNode< double > *l,
       const TypedDagNode< double > *m,
       const TypedDagNode< double > *p,
       const TypedDagNode< double > *o,
       const TypedDagNode< double > *rho,
       const TypedDagNode< double > *r,
-      const TypedDagNode< RbVector<double> > *g
-    );
-    ComputeLtFunction(
+      const TypedDagNode< double > *t,
+      const TypedDagNode< RbVector<double> > *g,
       const TypedDagNode<Tree> *tr,
       const TypedDagNode< RbVector<double> > *b,
       const TypedDagNode< RbVector<double> > *c,
       const TypedDagNode< RbVector<double> > *d,
       const TypedDagNode< RbVector<double> > *e,
-      const TypedDagNode< RbVector<double> > *f,
-      const TypedDagNode< double > *t,
-      const TypedDagNode< double > *l,
-      const TypedDagNode< double > *m,
-      const TypedDagNode< double > *p,
-      const TypedDagNode< double > *o,
-      const TypedDagNode< double > *rho,
-      const TypedDagNode< double > *r,
-      const TypedDagNode< RbVector<double> > *g
+      const TypedDagNode< RbVector<double> > *f
     );
     virtual                                            ~ComputeLtFunction(void);
 

@@ -32,37 +32,40 @@ Func_computeLt* Func_computeLt::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_computeLt::createFunction( void ) const
 {
 
+  RevBayesCore::TypedDagNode< double >* l = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+  RevBayesCore::TypedDagNode< double >* m = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+  RevBayesCore::TypedDagNode< double >* p = static_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+  RevBayesCore::TypedDagNode< double >* o = static_cast<const RealPos &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+  RevBayesCore::TypedDagNode< double >* rh = static_cast<const RealPos &>( this->args[4].getVariable()->getRevObject() ).getDagNode();
+  RevBayesCore::TypedDagNode< double >* rm = static_cast<const RealPos &>( this->args[5].getVariable()->getRevObject() ).getDagNode();
+  RevBayesCore::TypedDagNode< double >* t = static_cast<const RealPos &>( this->args[6].getVariable()->getRevObject() ).getDagNode();
+
+  RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* g = static_cast<const ModelVector<Real> &>( this->args[7].getVariable()->getRevObject() ).getDagNode();
+  // times of interest
+  //RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* g = NULL;
+  //if ( listG->getRevObject() != RevNullObject::getInstance() )
+  //{
+  //    g = static_cast<const ModelVector<Real> &>( listG->getRevObject() ).getDagNode();
+  //}
+
+
   //RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* a = static_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
 
-  RevBayesCore::DagNode* node = this->args[0].getVariable()->getRevObject().getDagNode();
+  RevBayesCore::DagNode* node = this->args[8].getVariable()->getRevObject().getDagNode();
   // vector of branching times or tree
   RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* a = dynamic_cast<RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*>(node);
   RevBayesCore::TypedDagNode< RevBayesCore::Tree>* alt = dynamic_cast< RevBayesCore::TypedDagNode< RevBayesCore::Tree >*>(node);
 
-  RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* b = static_cast<const ModelVector<Real> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-  RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* c = static_cast<const ModelVector<Real> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-  RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* d = static_cast<const ModelVector<Real> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
-  RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* e = static_cast<const ModelVector<Real> &>( this->args[4].getVariable()->getRevObject() ).getDagNode();
-  RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* f = static_cast<const ModelVector<Real> &>( this->args[5].getVariable()->getRevObject() ).getDagNode();
+  RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* b = static_cast<const ModelVector<Real> &>( this->args[9].getVariable()->getRevObject() ).getDagNode();
+  RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* c = static_cast<const ModelVector<Real> &>( this->args[10].getVariable()->getRevObject() ).getDagNode();
+  RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* d = static_cast<const ModelVector<Real> &>( this->args[11].getVariable()->getRevObject() ).getDagNode();
+  RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* e = static_cast<const ModelVector<Real> &>( this->args[12].getVariable()->getRevObject() ).getDagNode();
+  RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* f = static_cast<const ModelVector<Real> &>( this->args[13].getVariable()->getRevObject() ).getDagNode();
 
-  RevBayesCore::TypedDagNode< double >* t = static_cast<const RealPos &>( this->args[6].getVariable()->getRevObject() ).getDagNode();
-  RevBayesCore::TypedDagNode< double >* l = static_cast<const RealPos &>( this->args[7].getVariable()->getRevObject() ).getDagNode();
-  RevBayesCore::TypedDagNode< double >* m = static_cast<const RealPos &>( this->args[8].getVariable()->getRevObject() ).getDagNode();
-  RevBayesCore::TypedDagNode< double >* p = static_cast<const RealPos &>( this->args[9].getVariable()->getRevObject() ).getDagNode();
-  RevBayesCore::TypedDagNode< double >* o = static_cast<const RealPos &>( this->args[10].getVariable()->getRevObject() ).getDagNode();
-  RevBayesCore::TypedDagNode< double >* rh = static_cast<const RealPos &>( this->args[11].getVariable()->getRevObject() ).getDagNode();
-  RevBayesCore::TypedDagNode< double >* rm = static_cast<const RealPos &>( this->args[12].getVariable()->getRevObject() ).getDagNode();
 
-  //RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* g = static_cast<const ModelVector<Real> &>( this->args[13].getVariable()->getRevObject() ).getDagNode();
-  // times of interest
-  RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* g = NULL;
-  if ( listG->getRevObject() != RevNullObject::getInstance() )
-  {
-      g = static_cast<const ModelVector<Real> &>( listG->getRevObject() ).getDagNode();
-  }
 
   //RevBayesCore::ComputeLtFunction* fxn = new RevBayesCore::ComputeLtFunction( a, b, c, d, e, f, t, l, m, p, o, rho, r, g );
-  RevBayesCore::ComputeLtFunction* fxn = a != NULL ? new RevBayesCore::ComputeLtFunction( a, b, c, d, e, f, t, l, m, p, o, rh, rm, g ) : new RevBayesCore::ComputeLtFunction( alt, b, c, d, e, f, t, l, m, p, o, rh, rm, g );
+  RevBayesCore::ComputeLtFunction* fxn = a != NULL ? new RevBayesCore::ComputeLtFunction( l, m, p, o, rh, rm, t, g , a, b, c, d, e, f ) : new RevBayesCore::ComputeLtFunction( l, m, p, o, rh, rm, t, g, alt, b, c, d, e, f );
 
   return fxn;
 
@@ -85,6 +88,16 @@ const ArgumentRules& Func_computeLt::getArgumentRules( void ) const
         paramTypes.push_back( ModelVector<Real>::getClassTypeSpec() );
         paramTypes.push_back( Tree::getClassTypeSpec() );
 
+        argumentRules.push_back( new ArgumentRule( "lambda", RealPos::getClassTypeSpec(), "lambda.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "mu", RealPos::getClassTypeSpec(), "mu.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "psi", RealPos::getClassTypeSpec(), "psi.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "omega", RealPos::getClassTypeSpec(), "omega.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "rho", RealPos::getClassTypeSpec(), "rho.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "removal", RealPos::getClassTypeSpec(), "removel Pr.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "origin", RealPos::getClassTypeSpec(), "Origin time.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+
+        argumentRules.push_back( new ArgumentRule( "listG", ModelVector<Real>::getClassTypeSpec(), "A vector of values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+
         argumentRules.push_back( new ArgumentRule( "listA", paramTypes, "A vector of values/tree.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         argumentRules.push_back( new ArgumentRule( "listB", ModelVector<Real>::getClassTypeSpec(), "A vector of values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
@@ -92,16 +105,6 @@ const ArgumentRules& Func_computeLt::getArgumentRules( void ) const
         argumentRules.push_back( new ArgumentRule( "listD", ModelVector<Real>::getClassTypeSpec(), "A vector of values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "listE", ModelVector<Real>::getClassTypeSpec(), "A vector of values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "listF", ModelVector<Real>::getClassTypeSpec(), "A vector of values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-
-        argumentRules.push_back( new ArgumentRule( "origin", RealPos::getClassTypeSpec(), "Origin time.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "lambda", RealPos::getClassTypeSpec(), "lambda.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "mu", RealPos::getClassTypeSpec(), "mu.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "psi", RealPos::getClassTypeSpec(), "psi.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "omega", RealPos::getClassTypeSpec(), "omega.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "rho", RealPos::getClassTypeSpec(), "rho.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "removal", RealPos::getClassTypeSpec(), "removel Pr.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-
-        argumentRules.push_back( new ArgumentRule( "listG", ModelVector<Real>::getClassTypeSpec(), "A vector of values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         rules_set = true;
     }

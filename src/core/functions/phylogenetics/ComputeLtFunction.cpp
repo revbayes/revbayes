@@ -25,24 +25,23 @@ using namespace RevBayesCore;
  * @param v the vector of branching times
  */
 ComputeLtFunction::ComputeLtFunction(
-	const TypedDagNode< RbVector<double> > *a, // branching times
-	const TypedDagNode< RbVector<double> > *b, // SAs
-	const TypedDagNode< RbVector<double> > *c, // terminal non-removed
-	const TypedDagNode< RbVector<double> > *d, // terminal removed
-	const TypedDagNode< RbVector<double> > *e, // occ non-removed
-	const TypedDagNode< RbVector<double> > *f, // occ removed
-	const TypedDagNode< double > *t,
 	const TypedDagNode< double > *l,
 	const TypedDagNode< double > *m,
 	const TypedDagNode< double > *p,
 	const TypedDagNode< double > *o,
 	const TypedDagNode< double > *rho,
 	const TypedDagNode< double > *r,
-	const TypedDagNode< RbVector<double> > *g // times
+	const TypedDagNode< double > *t,
+	const TypedDagNode< RbVector<double> > *g, // times
+	const TypedDagNode< RbVector<double> > *a, // branching times
+	const TypedDagNode< RbVector<double> > *b, // SAs
+	const TypedDagNode< RbVector<double> > *c, // terminal non-removed
+	const TypedDagNode< RbVector<double> > *d, // terminal removed
+	const TypedDagNode< RbVector<double> > *e, // occ non-removed
+	const TypedDagNode< RbVector<double> > *f // occ removed
  	) : TypedFunction<double>( new double(0.0) ),
-	listA ( a ), listB ( b ), listC ( c ), listD ( d ), listE ( e ), listF ( f ),
-	tor ( t ), lambda ( l ), mu ( m ), psi ( p ), omega ( o ), rho ( rho ), removalPr ( r ),
-	listG ( g )
+	lambda ( l ), mu ( m ), psi ( p ), omega ( o ), rho ( rho ), removalPr ( r ), tor ( t ),
+	listG ( g ), listA ( a ), listB ( b ), listC ( c ), listD ( d ), listE ( e ), listF ( f )
 {
 
 	this->addParameter( tor );
@@ -61,24 +60,23 @@ ComputeLtFunction::ComputeLtFunction(
 }
 
 ComputeLtFunction::ComputeLtFunction(
-	const TypedDagNode<Tree> *tr,
-	const TypedDagNode< RbVector<double> > *b,
-	const TypedDagNode< RbVector<double> > *c,
-	const TypedDagNode< RbVector<double> > *d, // terminal removed
-	const TypedDagNode< RbVector<double> > *e, // occ non-removed
-	const TypedDagNode< RbVector<double> > *f, // occ removed
-	const TypedDagNode< double > *t,
 	const TypedDagNode< double > *l,
 	const TypedDagNode< double > *m,
 	const TypedDagNode< double > *p,
 	const TypedDagNode< double > *o,
 	const TypedDagNode< double > *rho,
 	const TypedDagNode< double > *r,
-	const TypedDagNode< RbVector<double> > *g // times
+	const TypedDagNode< double > *t,
+	const TypedDagNode< RbVector<double> > *g, // times
+	const TypedDagNode<Tree> *tr,
+	const TypedDagNode< RbVector<double> > *b,
+	const TypedDagNode< RbVector<double> > *c,
+	const TypedDagNode< RbVector<double> > *d, // terminal removed
+	const TypedDagNode< RbVector<double> > *e, // occ non-removed
+	const TypedDagNode< RbVector<double> > *f // occ removed
  	) : TypedFunction<double>( new double(0.0) ),
-	tree ( tr ), listB ( b ), listC ( c ), listD ( d ), listE ( e ), listF ( f ),
-	tor ( t ), lambda ( l ), mu ( m ), psi ( p ), omega ( o ), rho ( rho ), removalPr ( r ),
-	listG ( g )
+	lambda ( l ), mu ( m ), psi ( p ), omega ( o ), rho ( rho ), removalPr ( r ), tor ( t ),
+	listG ( g ), tree ( tr ), listB ( b ), listC ( c ), listD ( d ), listE ( e ), listF ( f )
 {
 
 	this->addParameter( tor );
