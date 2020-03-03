@@ -6,6 +6,7 @@
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
+#include "RbMathMatrix.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "TimeInterval.h"
 #include "TopologyNode.h"
@@ -42,17 +43,25 @@ OccurrenceBirthDeathProcessR::OccurrenceBirthDeathProcessR( const TypedDagNode<d
                                                             const std::vector<Taxon> &tn,
                                                             bool uo,
                                                             TypedDagNode<Tree> *t) : AbstractBirthDeathProcess( o, cdt, tn, uo ),
+    tor ( o ),
     lambda( s ),
     mu( e ),
     psi( p ),
     omega( om ),
     rho( r )
 {
+    addParameter( tor );
     addParameter( lambda );
     addParameter( mu );
     addParameter( psi );
     addParameter( omega );
     addParameter( rho );
+
+    //
+    removalPr = 0.0;
+    time_slices.push_back(0.1);
+    time_slices.push_back(1.1);
+    time_slices.push_back(2.1);
 
     if (t != NULL)
     {
@@ -87,6 +96,8 @@ double OccurrenceBirthDeathProcessR::computeLnProbabilityDivergenceTimes( void )
 {
     // prepare the probability computation
     prepareProbComputation();
+
+    poolTimes();
 
     // variable declarations and initialization
     double lnProbTimes = computeLnProbabilityTimes();
@@ -221,6 +232,382 @@ double OccurrenceBirthDeathProcessR::computeLnProbabilityTimes( void ) const
 
 }
 
+void OccurrenceBirthDeathProcessR::poolTimes( void ) const
+{
+    // get node/time variables
+    size_t num_nodes = value->getNumberOfNodes();
+
+    int extant = 0;
+
+    // classify nodes
+    std::vector<Event> events;
+    events.push_back(Event(tor->getValue(), "origin", 0));
+    for (size_t i = 0; i < num_nodes; i++)
+    {
+        const TopologyNode& n = value->getNode( i );
+
+//isFossil is an optional condition to obtain sampled ancestor node ages
+/* p is a sampled ancestor
+o sampled ancestor
+r extant leaf
+careful with internal nodes !!
+q = "false" bifurcation
+s = "true" bifurcation
+
+ __|s__
+|      |
+o      |
+       |
+      q|___ p
+       |
+      r|
+
+ 1. Pick a fossil among those with brl > 0 (prob = 1/m)
+ 2. Set brl = 0
+ */
+
+        if ( n.isFossil() && n.isSampledAncestor() )
+        {
+            // node is sampled ancestor
+            events.push_back(Event(n.getAge(),"sampled ancestor",0)) ;
+
+        }
+        else if ( n.isFossil() && !n.isSampledAncestor() )
+        {
+            // node is fossil leaf
+            // named terminal non-removed in Lt
+            // events.push_back(Event(n.getAge(),"fossil leaf", 0) ;
+            events.push_back(Event(n.getAge(),"terminal non-removed",0)) ;
+        }
+        else if ( n.isTip() && !n.isFossil() )
+        {
+            // node is extant leaf
+            // events.push_back(Event(n.getAge(),"extant leaf", 0) ;
+            events.push_back(Event(n.getAge(), "terminal non-removed", 0)) ;
+            extant++;
+        }
+        else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
+        {
+            if (!n.isRoot())
+            {
+                // node is a "true" bifurcation event
+                events.push_back(Event(n.getAge(),"branching time",0)) ;
+            }
+        }
+
+    }
+
+}
+
+double OccurrenceBirthDeathProcessR::ComputeMt( void ) const
+{
+
+	// order times oldest to youngest -> revisit this
+	//std::sort( events.begin(), events.end(), AgeCompareReverse() );
+
+	const double birth = lambda->getValue();
+	const double death = mu->getValue();
+	const double ps = psi->getValue();
+	const double om = omega->getValue();
+	const double rh = rho->getValue();
+	//const double rp = removalPr->getValue();
+  const double rp = removalPr;
+
+	const double gamma = birth + death + ps + om;
+
+	size_t N = 4; // accuracy of the algorithm
+	//size_t S = time_slices->getValue().size();
+  size_t S = time_slices.size();
+
+	// step 2. initialize an empty matrix
+	MatrixReal B(S, (N + 1), 0.0);
+
+	size_t k = 1;
+
+	// step 3. // this is the first entry of B
+	RbVector<double> Mt;
+	for ( int i = 0; i < (N + 1); i++){
+		if (i == 0) Mt.push_back( 1.0 );
+		else Mt.push_back( 0.0 );
+	}
+
+	// step 4.
+	//-> calculate the state of the process just before the next time point
+
+	MatrixReal A( (N+1), (N+1), 0.0 );
+
+	double thPlusOne = tor->getValue();
+
+	size_t indxJ = S-1;
+
+	for(int h = 0; h < events.size(); h++){
+		// deal with t > tor
+
+		double th = events[h].time;
+
+		if(th > tor->getValue()) continue;
+
+		if( th != thPlusOne ){
+
+			for(int i = 0; i < (N + 1); i++){
+				for(int j = 0; j < (N + 1); j++){
+					if(j == i) A[i][i] = gamma * (k + i);
+					else if (j == i+1) A[i][i+1] = -death * (i + 1);
+					else if (j == i-1) A[i][i-1] = -birth * (2*k + i - 1);
+				}
+			}
+
+			//A = A * (th - thMinusOne);
+			for(int i = 0; i < (N + 1); i++){
+				for(int j = 0; j < (N + 1); j++){
+					A[i][j] = A[i][j] * (th - thPlusOne);
+				}
+			}
+
+		 RbMath::expMatrixPade(A, A, 4);
+
+		 // A * Mt
+		 RbVector<double> MtPrime;
+		 // for each row in matrix A
+		 for(int i = 0; i < Mt.size(); i++){
+			 double sum = 0.0;
+			 // for each entry in the vector Mt
+			 for(int j = 0; j < Mt.size(); j++){
+				 sum += A[i][j] * Mt[j];
+			 }
+			 MtPrime.push_back( sum );
+		 }
+
+		 //Mt = MtPrime;
+		 for(int i = 0; i < Mt.size(); i++){
+				Mt[i] = MtPrime[i];
+		 }
+
+		}
+
+		std::string type = events[h].type;
+
+		// step 7-10. sample Mt
+		if(type == "time slice"){
+			for(int i = 0; i < Mt.size(); i++){
+				B[indxJ][i] = Mt[i];
+			}
+			indxJ -= 1;
+		}
+
+    // step 13-14.
+		if(type == "terminal removed"){
+			for(int i = 0; i < Mt.size(); i++){
+				Mt[i] = Mt[i] * ps * rp;
+			}
+			k -= 1;
+		}
+
+		// step 15-16.
+		if(type == "terminal non-removed"){
+			for(int i = Mt.size()-1; i > 0; i--){
+				Mt[i] = Mt[i-1] * ps * (1-rp);
+			}
+			Mt[0] = 0;
+			k -= 1;
+		}
+
+		// step 17-18.
+		if(type == "sampled ancestor"){
+			for(int i = 0; i < Mt.size(); i++){
+				Mt[i] = Mt[i] * ps * (1-rp);
+			}
+		}
+
+		// step 19-20.
+		if(type == "occurrence removed"){
+			for(int i = 0; i < Mt.size()-1; i++){
+				Mt[i] = Mt[i+1] * (i+1) * om * rp;
+			}
+		 }
+
+		// step 21-22.
+		if(type == "occurrence non-removed"){
+			for(int i = 0; i < Mt.size(); i++){
+				Mt[i] = Mt[i] * (k+i) * om * (1-rp);
+			}
+		}
+
+		// step 23-24.
+		if(type == "branching time"){
+			for(int i = 0; i < Mt.size(); i++){
+				Mt[i] = Mt[i] * birth;
+			}
+			k += 1;
+		}
+
+		thPlusOne = th;
+
+	}
+
+  double likelihood = 0.0;
+  for(int i = 0; i < Mt.size(); i++){
+    likelihood += Mt[i] * pow(rh,k) * pow(1-rh,i);
+  }
+
+	return likelihood;
+
+}
+
+double OccurrenceBirthDeathProcessR::ComputeLt( void ) const
+{
+
+	// order times youngest to oldest
+	//std::sort( events.begin(), events.end(), AgeCompare() );
+
+	const double birth = lambda->getValue();
+	const double death = mu->getValue();
+	const double ps = psi->getValue();
+	const double om = omega->getValue();
+	const double rh = rho->getValue();
+	//const double rp = removalPr->getValue();
+  const double rp = removalPr;
+
+	const double gamma = birth + death + ps + om;
+
+	size_t N = 4; // accuracy of the algorithm
+	//size_t S = time_slices->getValue().size();
+  size_t S = time_slices.size();
+
+	// step 2. initialize an empty matrix
+	MatrixReal B(S, (N + 1), 0.0);
+
+	size_t k = extant;
+
+	// step 3. // this is the first entry of B
+	RbVector<double> Lt;
+	for ( int i = 0; i < (N + 1); i++){
+		if (i == 0) Lt.push_back( pow(rh, k) );
+		else Lt.push_back( pow(rh, k) * pow((1-rh), i) );
+	}
+
+	// step 4.
+	//-> calculate the state of the process just before the next time point
+
+	MatrixReal A( (N+1), (N+1), 0.0 );
+
+	double thMinusOne = 0.0;
+
+	size_t indxJ = 0;
+
+	for(int h = 0; h < events.size(); h++){
+
+		double th = events[h].time;
+
+		// if time is not the same recalculate A.
+		// step 5-6.
+		if( th != thMinusOne ){
+
+			for(int i = 0; i < (N + 1); i++){
+				for(int j = 0; j < (N + 1); j++){
+					if(j == i) A[i][i] = -gamma * (k + i);
+					else if (j == i+1) A[i][i+1] = birth * ( (2 * k) + i );
+					else if (j == i-1) A[i][i-1] = death * i;
+				}
+			}
+
+			//A = A * (th - thMinusOne);
+			for(int i = 0; i < (N + 1); i++){
+				for(int j = 0; j < (N + 1); j++){
+					A[i][j] = A[i][j] * (th - thMinusOne);
+				}
+			}
+
+		 RbMath::expMatrixPade(A, A, 4);
+
+		 // A * Lt
+		 RbVector<double> LtPrime;
+		 // for each row in matrix A
+		 for(int i = 0; i < Lt.size(); i++){
+			 double sum = 0.0;
+			 // for each entry in the vector Lt
+			 for(int j = 0; j < Lt.size(); j++){
+				 sum += A[i][j] * Lt[j];
+			 }
+			 LtPrime.push_back( sum );
+		 }
+
+		 //Lt = LtPrime;
+		 for(int i = 0; i < Lt.size(); i++){
+				Lt[i] = LtPrime[i];
+		 }
+
+		}
+
+		std::string type = events[h].type;
+
+		// step 7-10. sample Lt
+		if(type == "time slice"){
+			for(int i = 0; i < Lt.size(); i++){
+				B[indxJ][i] = Lt[i];
+			}
+			indxJ += 1;
+		}
+
+		// step 11-12. end algorithm 1
+		if(type == "origin"){
+			continue;
+		}
+
+		// step 13-14.
+		if(type == "terminal removed"){
+			for(int i = 0; i < Lt.size(); i++){
+				Lt[i] = Lt[i] * ps * rp;
+			}
+			k += 1;
+		}
+
+		// step 15-16.
+		if(type == "terminal non-removed"){
+			for(int i = 0; i < Lt.size()-1; i++){
+				Lt[i] = Lt[i+1] * ps * (1-rp);
+			}
+			//Lt[N] = 0;
+			k += 1;
+		}
+
+		// step 17-18.
+		if(type == "sampled ancestor"){
+			for(int i = 0; i < Lt.size(); i++){
+				Lt[i] = Lt[i] * ps * (1-rp);
+			}
+		}
+
+		// step 19-20.
+		if(type == "occurrence removed"){
+		 	for(int i = Lt.size()-1; i > 0; i--){
+		 		Lt[i] = Lt[i-1] * i * om * rp;
+		 	}
+		 	Lt[0] = 0;
+		 }
+
+		// step 21-22.
+		if(type == "occurrence non-removed"){
+			for(int i = 0; i < Lt.size(); i++){
+				Lt[i] = Lt[i] * (k+i) * om * (1-rp);
+			}
+		}
+
+		// step 23-24.
+		if(type == "branching time"){
+			for(int i = 0; i < Lt.size(); i++){
+				Lt[i] = Lt[i] * birth;
+			}
+			k -= 1;
+		}
+
+		thMinusOne = th;
+
+	}
+
+	return Lt[0];
+
+}
 
 double OccurrenceBirthDeathProcessR::lnProbTreeShape(void) const
 {

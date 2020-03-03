@@ -20,7 +20,7 @@ template <class valueType> class TypedDagNode;
     public:
         OccurrenceBirthDeathProcessR(const TypedDagNode<double> *o,
                                      const TypedDagNode<double> *s, const TypedDagNode<double> *e,
-                                     const TypedDagNode<double> *p, const TypedDagNode<double> *om, 
+                                     const TypedDagNode<double> *p, const TypedDagNode<double> *om,
                                      const TypedDagNode<double> *r,
                                      const std::string &cdt, const std::vector<Taxon> &tn, bool uo,
                                      TypedDagNode<Tree> *t);
@@ -43,12 +43,51 @@ template <class valueType> class TypedDagNode;
         double                                              lnQ(double t, double c1, double c2) const;
         double                                              pHatZero(double t) const;
 
+        void                                                poolTimes(void) const;
+        double                                              ComputeLt(void) const;
+        double                                              ComputeMt(void) const;
+
+        struct Event {
+          Event(double d, std::string s, bool b) : time(d), type(s), extant(b) {};
+
+          double time;
+          std::string type;
+          bool extant; // todo: get rid of this
+
+          double getEventTime(void){ return time; }
+          std::string getEventType(void){ return type; }
+          bool getIsExtant(void){ return extant; }
+
+        };
+
+        // vector of Events
+        std::vector<Event>         events;
+
+        //struct AgeCompare {
+        //  bool operator()(const Event first, const Event second) {
+        //            return first.time < second.time;
+        //  }
+        //};
+
+        //struct AgeCompareReverse {
+        //  bool operator()(const Event first, const Event second) {
+        //            return first.time > second.time;
+        //  }
+        //};
+
         // members
+        const TypedDagNode<double>*                         tor;
         const TypedDagNode<double>*                         lambda;                                                                         //!< The speciation rate.
         const TypedDagNode<double>*                         mu;                                                                             //!< The extinction rate.
         const TypedDagNode<double>*                         psi;
         const TypedDagNode<double>*                         omega;                                                                            //!< The sampling probability of a just extinct species.
-        const TypedDagNode<double>*                         rho;                                                                            //!< The sampling probability of extant taxa.
+        const TypedDagNode<double>*                         rho;
+
+        // tmp
+        double                      removalPr;
+        std::vector<double>         time_slices;
+
+        size_t                      extant;                                                                            //!< The sampling probability of extant taxa.
 
     };
 
