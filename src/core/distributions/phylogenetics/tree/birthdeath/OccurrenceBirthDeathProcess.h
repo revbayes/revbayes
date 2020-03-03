@@ -41,11 +41,10 @@ virtual                                                     ~OccurrenceBirthDeat
         // public member functions
         OccurrenceBirthDeathProcess*                        clone(void) const;
         void                                                poolTimes(void);
-        double                                              ComputeLt(void);
-        double                                              ComputeMt(void);
+
 
     protected:
-        double                                              computeLnProbabilityDivergenceTimes(void) ;                                //!< Compute the log-transformed probability of the current value.
+        double                                              computeLnProbabilityDivergenceTimes(void)  ;                                //!< Compute the log-transformed probability of the current value.
         // Parameter management functions
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
 
@@ -63,7 +62,7 @@ virtual                                                     ~OccurrenceBirthDeat
         };
 
         // vector of Events
-        std::vector<Event>         events;
+        mutable std::vector<Event>         events;
 
         struct AgeCompare {
           bool operator()(const Event first, const Event second) {
@@ -79,6 +78,8 @@ virtual                                                     ~OccurrenceBirthDeat
 
 
         // helper functions
+        double                                              ComputeLt(void) ;
+        double                                              ComputeMt(void) const ;
         double                                              computeLnProbabilityTimes(void) const;                                          //!< Compute the log-transformed probability of the current value.
         double                                              lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const { throw RbException("Cannot compute P(nTaxa)."); }
         double                                              lnProbTreeShape(void) const;

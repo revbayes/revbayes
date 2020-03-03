@@ -98,6 +98,7 @@ OccurrenceBirthDeathProcess* OccurrenceBirthDeathProcess::clone( void ) const
 }
 
 
+
 /**
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
@@ -107,12 +108,16 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
     // prepare the probability computation
     prepareProbComputation();
 
+    // step 1: Create the list of all event times
+    poolTimes();
+
     // variable declarations and initialization
-    double a1 = ComputeLt();
-  	double a2 = ComputeMt();
+    //double a1 = ComputeLt();
+  	double lnProbTimes = ComputeMt();
 
+  //  double lnProbTimes = computeLnProbabilityTimes();
 
-    return a2;
+    return lnProbTimes;
 }
 
 
@@ -130,7 +135,7 @@ void OccurrenceBirthDeathProcess::poolTimes( void )
 
     int extant = 0;
     // classify nodes
-    std::vector<Event> events;
+    //std::vector<Event> events;
     events.push_back(Event(tor->getValue(), "origin", 0));
     for (size_t i = 0; i < num_nodes; i++)
     {
@@ -384,9 +389,16 @@ void OccurrenceBirthDeathProcess::swapParameterInternal(const DagNode *oldP, con
 
 }
 
-//from Warnock & Manceau computeLt function
 
-double OccurrenceBirthDeathProcess::ComputeMt( void ) {
+double OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void ) const
+ {
+ double lnProbTimes = ComputeMt();
+ return lnProbTimes;
+ }
+
+//from Warnock & Manceau computeLt function
+double OccurrenceBirthDeathProcess::ComputeMt( void ) const
+{
 
 	// order times oldest to youngest -> revisit this
 	std::sort( events.begin(), events.end(), AgeCompareReverse() );
@@ -534,13 +546,16 @@ double OccurrenceBirthDeathProcess::ComputeMt( void ) {
     likelihood += Mt[i] * pow(rh,k) * pow(1-rh,i);
   }
 
-	return likelihood;
+	return log(likelihood);
 
 }
 
 
 
-double OccurrenceBirthDeathProcess::ComputeLt( void ) {
+
+
+double OccurrenceBirthDeathProcess::ComputeLt( void )
+{
 
 	// order times youngest to oldest
 	std::sort( events.begin(), events.end(), AgeCompare() );
@@ -688,6 +703,6 @@ double OccurrenceBirthDeathProcess::ComputeLt( void ) {
 
 	}
 
-	return Lt[0];
+	return log(Lt[0]);
 
 }
