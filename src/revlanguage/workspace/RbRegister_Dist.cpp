@@ -188,6 +188,7 @@
 #include "Dist_sampledSpeciationBirthDeathProcess.h"
 #include "Dist_BDSTP.h"
 #include "Dist_SSBDP.h"
+#include "Dist_occurrenceBirthDeathProcessR.h"
 #include "Dist_TimeVaryingStateDependentSpeciationExtinctionProcess.h"
 #include "Dist_UltrametricTree.h"
 #include "Dist_uniformTimeTree.h"
@@ -345,6 +346,8 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         // serial-sampled-birth-death process
         AddDistribution< TimeTree                   >( new Dist_BDSTP());
         AddDistribution< TimeTree                   >( new Dist_SSBDP());
+
+        AddDistribution< TimeTree                   >( new Dist_OccurrenceBirthDeathProcessR());
 
         // diversity-dependent pure-birth process
         AddDistribution< TimeTree                   >( new Dist_divDepYuleProcess() );
