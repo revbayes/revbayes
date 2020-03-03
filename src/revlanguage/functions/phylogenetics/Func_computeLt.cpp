@@ -41,15 +41,6 @@ RevBayesCore::TypedFunction<double>* Func_computeLt::createFunction( void ) cons
   RevBayesCore::TypedDagNode< double >* t = static_cast<const RealPos &>( this->args[6].getVariable()->getRevObject() ).getDagNode();
 
   RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* g = static_cast<const ModelVector<Real> &>( this->args[7].getVariable()->getRevObject() ).getDagNode();
-  // times of interest
-  //RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* g = NULL;
-  //if ( listG->getRevObject() != RevNullObject::getInstance() )
-  //{
-  //    g = static_cast<const ModelVector<Real> &>( listG->getRevObject() ).getDagNode();
-  //}
-
-
-  //RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* a = static_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
 
   RevBayesCore::DagNode* node = this->args[8].getVariable()->getRevObject().getDagNode();
   // vector of branching times or tree
@@ -60,9 +51,8 @@ RevBayesCore::TypedFunction<double>* Func_computeLt::createFunction( void ) cons
   RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* c = static_cast<const ModelVector<Real> &>( this->args[10].getVariable()->getRevObject() ).getDagNode();
   RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* d = static_cast<const ModelVector<Real> &>( this->args[11].getVariable()->getRevObject() ).getDagNode();
   RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* e = static_cast<const ModelVector<Real> &>( this->args[12].getVariable()->getRevObject() ).getDagNode();
+
   RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* f = static_cast<const ModelVector<Real> &>( this->args[13].getVariable()->getRevObject() ).getDagNode();
-
-
 
   //RevBayesCore::ComputeLtFunction* fxn = new RevBayesCore::ComputeLtFunction( a, b, c, d, e, f, t, l, m, p, o, rho, r, g );
   RevBayesCore::ComputeLtFunction* fxn = a != NULL ? new RevBayesCore::ComputeLtFunction( l, m, p, o, rh, rm, t, g , a, b, c, d, e, f ) : new RevBayesCore::ComputeLtFunction( l, m, p, o, rh, rm, t, g, alt, b, c, d, e, f );
@@ -104,7 +94,7 @@ const ArgumentRules& Func_computeLt::getArgumentRules( void ) const
         argumentRules.push_back( new ArgumentRule( "listC", ModelVector<Real>::getClassTypeSpec(), "A vector of values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "listD", ModelVector<Real>::getClassTypeSpec(), "A vector of values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "listE", ModelVector<Real>::getClassTypeSpec(), "A vector of values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "listF", ModelVector<Real>::getClassTypeSpec(), "A vector of values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "listF", ModelVector<Real>::getClassTypeSpec(), "A vector of values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
 
         rules_set = true;
     }
