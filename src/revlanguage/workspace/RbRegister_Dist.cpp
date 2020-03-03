@@ -187,6 +187,7 @@
 #include "Dist_sampledSpeciationBirthDeathProcess.h"
 #include "Dist_BDSTP.h"
 #include "Dist_SSBDP.h"
+#include "Dist_occurrenceBirthDeathProcessR.h"
 #include "Dist_TimeVaryingStateDependentSpeciationExtinctionProcess.h"
 #include "Dist_UltrametricTree.h"
 #include "Dist_uniformTimeTree.h"
@@ -289,9 +290,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ModelVector<RealPos>       >( new Dist_PhyloWhiteNoise()          );
 
         /* trait evolution (in folder "distributions/phylogenetics/branchrate") */
-        
+
         AddDistribution< ModelVector<RealPos>       >( new Dist_PhyloBranchRateBM()                             );
-        
+
         // brownian motion
         AddDistribution< ModelVector<Real>          >( new Dist_PhyloBrownian()                                 );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloBrownianREML()                             );
@@ -344,6 +345,8 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         // serial-sampled-birth-death process
         AddDistribution< TimeTree                   >( new Dist_BDSTP());
         AddDistribution< TimeTree                   >( new Dist_SSBDP());
+
+        AddDistribution< TimeTree                   >( new Dist_OccurrenceBirthDeathProcessR());
 
         // diversity-dependent pure-birth process
         AddDistribution< TimeTree                   >( new Dist_divDepYuleProcess() );
@@ -540,7 +543,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // Exponential error distribution for matrix distance from average distance matrix
         AddDistribution< AverageDistanceMatrix      >( new Dist_exponentialError());
-        
+
         /* Empirical sample distributions (in folder "distributions/mixture") */
         AddDistribution< ModelVector<Natural>       >( new Dist_EmpiricalSample<Natural>());
         AddDistribution< ModelVector<Real>          >( new Dist_EmpiricalSample<Real>());
@@ -566,7 +569,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ModelVector<Integer>       >( new Dist_event<Integer>()      );
         AddDistribution< ModelVector<Probability>   >( new Dist_event<Probability>()  );
         AddDistribution< MultiValueEvent            >( new Dist_MultiValueEvent()     );
-        
+
         // IID distribution
         AddDistribution< ModelVector<Real>          >( new Dist_IID<Real>()         );
         AddDistribution< ModelVector<RealPos>       >( new Dist_IID<RealPos>()      );
@@ -589,8 +592,8 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 //        AddDistribution< RateGenerator              >( new Dist_mixture<RateGenerator>() );
         addDistribution( new Dist_mixture<RateGenerator>() );
         AddDistribution< TimeTree                   >( new Dist_mixture<TimeTree>() );
-        
-        
+
+
         // analytical mixture distribution
         AddDistribution< Real                       >( new Dist_mixtureAnalytical<Real>() );
         AddDistribution< RealPos                    >( new Dist_mixtureAnalytical<RealPos>() );
@@ -601,7 +604,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ModelVector<Real>          >( new Dist_mixtureAnalytical< ModelVector<Real> >() );
         AddDistribution< ModelVector<RealPos>       >( new Dist_mixtureAnalytical< ModelVector<RealPos> >() );
         AddDistribution< TimeTree                   >( new Dist_mixtureAnalytical<TimeTree>() );
-        
+
         AddDistribution< ModelVector<Real>          >( new Dist_mixtureVector<Real>() );
         AddDistribution< ModelVector<RealPos>       >( new Dist_mixtureVector<RealPos>() );
 
