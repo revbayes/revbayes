@@ -64,9 +64,9 @@ namespace RevLanguage {
         // RevPtr<const RevVariable>                               psi_timeline;                                                                           //!< The serial sampling rate change times
         // RevPtr<const RevVariable>                               rho_timeline;                                                                           //!< The episodic taxon sampling fraction change times
         std::string                                             start_condition;                                                                           //!< The start condition of the process (rootAge/originAge)
-        RevPtr<const RevVariable>                               tree;                                                                                      //!< Tree
+        RevPtr<const RevVariable>                               initialTree;                                                                                      //!< Tree
         //RevPtr<const RevVariable>                               extant;                                                                                    //!< Number of extant taxa
-        RevPtr<const RevVariable>                               time_slices;                                                                               //!< Times at which density is computed
+        RevPtr<const RevVariable>                               dn_time_points;                                                                               //!< Times at which density is computed
 
 
 

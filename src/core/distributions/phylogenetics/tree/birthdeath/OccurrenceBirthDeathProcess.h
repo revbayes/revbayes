@@ -40,11 +40,11 @@ template <class valueType> class RbVector;
 virtual                                                     ~OccurrenceBirthDeathProcess(void);
         // public member functions
         OccurrenceBirthDeathProcess*                        clone(void) const;
-        void                                                poolTimes(void);
+        void                                                poolTimes(void) const;
 
 
     protected:
-        double                                              computeLnProbabilityDivergenceTimes(void)  ;                                //!< Compute the log-transformed probability of the current value.
+        double                                              computeLnProbabilityDivergenceTimes(void) const;                                //!< Compute the log-transformed probability of the current value.
         // Parameter management functions
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
 
@@ -78,8 +78,8 @@ virtual                                                     ~OccurrenceBirthDeat
 
 
         // helper functions
-        double                                              ComputeLt(void) ;
-        double                                              ComputeMt(void) const ;
+        double                                              ComputeLt(void) const;
+        double                                              ComputeMt(void) const;
         double                                              computeLnProbabilityTimes(void) const;                                          //!< Compute the log-transformed probability of the current value.
         double                                              lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const { throw RbException("Cannot compute P(nTaxa)."); }
         double                                              lnProbTreeShape(void) const;
@@ -97,8 +97,8 @@ virtual                                                     ~OccurrenceBirthDeat
         const TypedDagNode<double>*                         omega;                                                                          //!< The probability of an observation being an occurrence.
         const TypedDagNode<double>*                         rho;                                                                            //!< The sampling probability of extant taxa.
         const TypedDagNode<double>*                         removalPr;                                                                      //!< The removal probability after sampling.
-        const TypedDagNode<Tree>*                           tree;                                                                           //!< Tree
-        const TypedDagNode< RbVector< double > >*           time_slices;                                                                    //!< Times at which density is computed
+        const TypedDagNode<Tree>*                           initialTree;                                                                           //!< Tree
+        const TypedDagNode< RbVector< double > >*           dn_time_points;                                                                    //!< Times at which density is computed
         int                                                 extant;                                                                         //!< Number of extant taxa
     };
 

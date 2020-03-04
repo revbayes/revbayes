@@ -88,9 +88,9 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
 
     // tree for initialization
      RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tr = NULL;
-     if ( tree->getRevObject() != RevNullObject::getInstance() )
+     if ( initialTree->getRevObject() != RevNullObject::getInstance() )
      {
-        tr = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+        tr = static_cast<const TimeTree &>( initialTree->getRevObject() ).getDagNode();
      }
     //
     // bool piecewise = false;
@@ -178,8 +178,8 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
         RevBayesCore::TypedDagNode<double>* r       = static_cast<const RealPos &>( removalPr->getRevObject() ).getDagNode();
         // occurrence probability
         RevBayesCore::TypedDagNode<double>* o       = static_cast<const RealPos &>( omega->getRevObject() ).getDagNode();
-        // time slices
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tau       = static_cast<const ModelVector<RealPos> &>( time_slices->getRevObject() ).getDagNode();
+        // density calculation time points
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tau       = static_cast<const ModelVector<RealPos> &>( dn_time_points->getRevObject() ).getDagNode();
 
         d = new RevBayesCore::OccurrenceBirthDeathProcess(t, l, m, p, o, rh, r, cond, tn, tau, uo, tr);
 
@@ -277,7 +277,7 @@ const MemberRules& Dist_occurrenceBirthDeathProcess::getParameterRules(void) con
         dist_member_rules.push_back( new ArgumentRule( "mu",      paramTypes, "The extinction rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
         dist_member_rules.push_back( new ArgumentRule( "psi",     paramTypes, "The serial sampling rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
         dist_member_rules.push_back( new ArgumentRule( "omega",  paramTypes, "The occurrence rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
-        dist_member_rules.push_back( new ArgumentRule( "time slices",     paramTypes, "The serial sampling rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "dn_time_points",    ModelVector<RealPos>::getClassTypeSpec(), "Time points for which we compute density.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
 
         std::vector<TypeSpec> rho_paramTypes;
@@ -354,9 +354,9 @@ void Dist_occurrenceBirthDeathProcess::setConstParameter(const std::string& name
     {
         psi = var;
     }
-    else if ( name == "time slices" )
+    else if ( name == "dn_time_points" )
     {
-        time_slices = var;
+        dn_time_points = var;
     }
     else if ( name == "omega" )
     {
@@ -385,7 +385,7 @@ void Dist_occurrenceBirthDeathProcess::setConstParameter(const std::string& name
     // }
     else if ( name == "initialTree" )
     {
-        tree = var;
+        initialTree = var;
     }
     else
     {

@@ -26,15 +26,16 @@ using namespace RevBayesCore;
  * Constructor.
  * We delegate most parameters to the base class and initialize the members.
  *
- * \param[in]    o              Time of the origin/present/length of the process.
- * \param[in]    ra             Age or the root (=time of the process).
- * \param[in]    s              Speciation rate.
- * \param[in]    e              Extinction rate.
+ * \param[in]    t              Time of the origin/present/length of the process.
+ * \param[in]    l              Speciation rate.
+ * \param[in]    m              Extinction rate.
  * \param[in]    p              Extinction sampling rate.
- * \param[in]    r              Sampling probability at present time.
+ * \param[in]    o              Rate of occurrence observations.
+ * \param[in]    rho            Sampling probability at present time.
+ * \param[in]    r              Removal probability after sampling.
  * \param[in]    cdt            Condition of the process (none/survival/#Taxa).
  * \param[in]    tn             Taxa.
- * \param[in]    c              Clades conditioned to be present.
+ * \param[in]    uo             If true ra is the origin time otherwise the root age of the process.
  */
 OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                         const TypedDagNode<double> *t,
                                                                                   const TypedDagNode<double> *l,
@@ -50,7 +51,7 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                       
                                                                                   const TypedDagNode< RbVector<double> > *tau,
                                                                                   bool uo,
 
-                                                                                  TypedDagNode<Tree> *tr) : AbstractBirthDeathProcess( o, cdt, tn, uo ),
+                                                                                  TypedDagNode<Tree> *tr) : AbstractBirthDeathProcess( t, cdt, tn, uo ),
     tor( t ),
     lambda( l ),
     mu( m ),
@@ -58,7 +59,7 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                       
     omega( o ),
     rho( rho ),
     removalPr( r ),
-    time_slices( tau )
+    dn_time_points ( tau )
 
 {
     addParameter( tor );
@@ -103,8 +104,9 @@ OccurrenceBirthDeathProcess* OccurrenceBirthDeathProcess::clone( void ) const
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
+double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) const
 {
+
     // prepare the probability computation
     prepareProbComputation();
 
@@ -128,7 +130,7 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
  */
 
 
-void OccurrenceBirthDeathProcess::poolTimes( void )
+void OccurrenceBirthDeathProcess::poolTimes( void ) const
 {
     // get node/time variables
     size_t num_nodes = value->getNumberOfNodes();
@@ -399,7 +401,6 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void ) const
 //from Warnock & Manceau computeLt function
 double OccurrenceBirthDeathProcess::ComputeMt( void ) const
 {
-
 	// order times oldest to youngest -> revisit this
 	std::sort( events.begin(), events.end(), AgeCompareReverse() );
 
@@ -413,7 +414,7 @@ double OccurrenceBirthDeathProcess::ComputeMt( void ) const
 	const double gamma = birth + death + ps + om;
 
 	size_t N = 4; // accuracy of the algorithm
-	size_t S = time_slices->getValue().size();
+	size_t S = dn_time_points->getValue().size();
 
 	// step 2. initialize an empty matrix
 	MatrixReal B(S, (N + 1), 0.0);
@@ -554,10 +555,9 @@ double OccurrenceBirthDeathProcess::ComputeMt( void ) const
 
 
 
-double OccurrenceBirthDeathProcess::ComputeLt( void )
+double OccurrenceBirthDeathProcess::ComputeLt( void ) const
 {
-
-	// order times youngest to oldest
+// order times youngest to oldest
 	std::sort( events.begin(), events.end(), AgeCompare() );
 
 	const double birth = lambda->getValue();
@@ -569,8 +569,8 @@ double OccurrenceBirthDeathProcess::ComputeLt( void )
 
 	const double gamma = birth + death + ps + om;
 
-	size_t N = 4; // accuracy of the algorithm
-	size_t S = time_slices->getValue().size();
+	size_t N = 100; // accuracy of the algorithm
+	size_t S = dn_time_points->getValue().size();
 
 	// step 2. initialize an empty matrix
 	MatrixReal B(S, (N + 1), 0.0);
