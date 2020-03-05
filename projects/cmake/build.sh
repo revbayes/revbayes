@@ -27,6 +27,15 @@ else
     BUILD_DIR="build"
 fi
 
+CC=gcc CXX=g++
+
+if [ "$travis" = "true" ]; then
+    CC=${C_COMPILER} CXX=${CXX_COMPILER}
+    all_args="-travis true -mpi ${USE_MPI} -help true -exec_name rb"
+else
+    all_args=""
+fi
+
 if [ "$1" = "clean" ]
 then
 	rm -rf ${BUILD_DIR}
@@ -43,10 +52,25 @@ fi
 
 	./regenerate.sh ${all_args}
 	cd ${BUILD_DIR} 
-	CC=gcc CXX=g++ cmake .
+	cmake .
 	make -j 4
 	cd ..
 	
     cp GitVersion_backup.cpp ../../src/revlanguage/utils/GitVersion.cpp
     rm GitVersion_backup.cpp
+fi
+
+# Run tests
+if [ "$travis" = "true" ] && [ ${TRAVIS_BUILD_STAGE_NAME} = "Test" ]
+then
+  cd ../..
+  echo "\"Hello World\"" | projects/cmake/rb
+  cd tests
+  ./run_integration_tests.sh -mpi ${USE_MPI} ${TRAVIS_BUILD_DIR}/projects/cmake/rb
+  # Run testiphy
+  export PATH=${TRAVIS_BUILD_DIR}/projects/cmake:$PATH
+  cd
+  git clone https://gitlab.com/testiphy/testiphy.git
+  cd testiphy
+  ./testiphy rb
 fi
