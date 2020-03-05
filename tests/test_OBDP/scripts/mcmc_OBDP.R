@@ -26,6 +26,7 @@ mu ~ dnExp(10)
 psi ~ dnExp(10)
 rho <- 1.0
 rm <- 0.0
+cond <- "time"
 omega <- 0.0
 origin_time ~ dnUnif(37.0, 55.0)
 
@@ -48,18 +49,18 @@ moves[mvi++] = mvScale(psi,lambda=0.01,weight=1)
 
 
 ### Define the tree-prior distribution as the fossilized birth-death process ###
-obd_tree = dnOBDP(originAge=origin_time, lambda=lambda, mu=mu, psi=psi,omega=omega, dn_time_points=v(0.0), rho=rho, removalPr=rm, taxa=taxa)
+obd_dist = dnOBDP(originAge=origin_time, lambda=lambda, mu=mu, psi=psi,omega=omega, dn_time_points=v(0.0), rho=rho, removalPr=rm, cond=cond, taxa=taxa)
 print("OK dn")
 
 # The will be a random variable of a constrained topology distribution that is governed by the obd #
 # this distribution will generate obd trees that match the monophyly constraints defined above #
-# clade_ursinae = clade("Melursus_ursinus", "Ursus_arctos", "Ursus_maritimus",
-#                       "Helarctos_malayanus", "Ursus_americanus", "Ursus_thibetanus",
-#                       "Ursus_abstrusus", "Ursus_spelaeus")
-# constraints = v(clade_ursinae)
-#
-#
-# obd_tree ~ dnConstrainedTopology(obd_dist, constraints=constraints)
+clade_ursinae = clade("Melursus_ursinus", "Ursus_arctos", "Ursus_maritimus",
+                      "Helarctos_malayanus", "Ursus_americanus", "Ursus_thibetanus",
+                      "Ursus_abstrusus", "Ursus_spelaeus")
+constraints = v(clade_ursinae)
+
+
+obd_tree ~ dnConstrainedTopology(obd_dist, constraints=constraints)
 print("OK tree")
 
 moves[mvi++] = mvFNPR(obd_tree, weight=1.0)
