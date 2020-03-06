@@ -202,6 +202,7 @@ o      |
 
     }
 
+    events.push_back(Event(0.0,"present time",0)) ;
 }
 
   //Pool all observations together into
@@ -509,10 +510,10 @@ double OccurrenceBirthDeathProcess::ComputeMt( void ) const
 
 		 //Mt = MtPrime;
 		 for(int i = 0; i < Mt.size(); i++){
-       std::cout << " MtPrime" <<std::endl ;
-       std::cout << MtPrime <<std::endl ; 
 				Mt[i] = MtPrime[i];
 		 }
+       std::cout << " Mt after multiplying with eA" <<std::endl ;
+       std::cout << Mt <<std::endl ; 
 
 		}
 
@@ -528,43 +529,43 @@ double OccurrenceBirthDeathProcess::ComputeMt( void ) const
 
     // step 13-14.
 		if(type == "terminal removed"){
-      std::cout << "terminal removed" << std::endl;
+      std::cout << "Mt after terminal removed step" << std::endl;
 			for(int i = 0; i < Mt.size(); i++){
 				Mt[i] = Mt[i] * ps * rp;
-        std::cout << Mt[i] << std::endl;
 			}
 			k -= 1;
+       std::cout << Mt <<std::endl ; 
 		}
 
 		// step 15-16.
 		if(type == "terminal non-removed"){
-      std::cout << "terminal non-removed" << std::endl;
+      std::cout << "Mt after terminal non-removed step" << std::endl;
 
 			for(int i = Mt.size()-1; i > 0; i--){
 				Mt[i] = Mt[i-1] * ps * (1-rp);
-      std::cout << Mt[i] << std::endl;
 			}
 			Mt[0] = 0;
 			k -= 1;
+       std::cout << Mt <<std::endl ; 
 		}
 
 		// step 17-18.
 		if(type == "sampled ancestor"){
-      std::cout << "sampled ancestor" << std::endl;
+      std::cout << "Mt after sampled ancestor step" << std::endl;
 
 			for(int i = 0; i < Mt.size(); i++){
 				Mt[i] = Mt[i] * ps * (1-rp);
-        std::cout << Mt[i] << std::endl;
 			}
+       std::cout << Mt <<std::endl ; 
 		}
 
 		// step 19-20.
 		if(type == "occurrence removed"){
-      std::cout << "occurence removed" << std::endl;
+      std::cout << "Mt after occurence removed step" << std::endl;
 			for(int i = 0; i < Mt.size()-1; i++){
 				Mt[i] = Mt[i+1] * (i+1) * om * rp;
-
 			}
+       std::cout << Mt <<std::endl ; 
 		 }
 
 		// step 21-22.
@@ -574,40 +575,32 @@ double OccurrenceBirthDeathProcess::ComputeMt( void ) const
 			for(int i = 0; i < Mt.size(); i++){
 				Mt[i] = Mt[i] * (k+i) * om * (1-rp);
 			}
+       std::cout << Mt <<std::endl ; 
 		}
 
 		// step 23-24.
 		if(type == "branching time"){
-      std::cout << "branching time" << std::endl;
+      std::cout << "Mt after branching time step" << std::endl;
 			for(int i = 0; i < Mt.size(); i++){
 				Mt[i] = Mt[i] * birth;
         std::cout << Mt[i] << std::endl;
 			}
 			k += 1;
+       std::cout << Mt <<std::endl ; 
 		}
 
 		thPlusOne = th;
 
 	}
 
-  std::cout<< "Mt[0]" << std::endl;
-  std::cout<< Mt[0] << std::endl;
-  std::cout<< "likelihoods" << std::endl;
-  double test = 10e-50 ;
-  std::cout << test << std::endl;
+  std::cout<< "Mt right after the loop on events" << std::endl;
+       std::cout << Mt <<std::endl ; 
   double likelihood = Mt[0];
   for(int i = 1; i < Mt.size(); i++){
-    std::cout << likelihood << std::endl;
-    std::cout<< "Mt[i]s" << std::endl;
-    std::cout << Mt[i] * pow(rh,k) * pow(1-rh,i) << std::endl;
     likelihood += Mt[i] * pow(rh,k) * pow(1-rh,i);
-
-
-
-
   }
 
-  std::cout << "Compute mt output" << std::endl;
+  std::cout << "Log likelihood" << std::endl;
   std::cout << log(likelihood) << std::endl;
 	return log(likelihood);
 

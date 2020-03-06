@@ -20,7 +20,7 @@ seed(12345)
 
 # set my move index
 mvi = 0
-taxa <- readTaxonData("data/bears_taxa.tsv")
+taxa <- readTaxonData("../data/bears_taxa.tsv")
 lambda ~ dnExp(10)
 mu ~ dnExp(10)
 psi ~ dnExp(10)
