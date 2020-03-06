@@ -119,8 +119,11 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) 
     // variable declarations and initialization
     //double a1 = ComputeLt();
   	double lnProbTimes = ComputeMt();
-    std::cout << "ComputeMt" << std::endl;
+    std::cout << "ComputeMt and Lt" << std::endl;
 
+  	double lnProbTimes2 = ComputeLt();
+    std::cout << lnProbTimes << std::endl;
+    std::cout << lnProbTimes2 << std::endl;
   //  double lnProbTimes = computeLnProbabilityTimes();
 
     return lnProbTimes;
@@ -446,7 +449,7 @@ double OccurrenceBirthDeathProcess::ComputeMt( void ) const
 
 	const double gamma = birth + death + ps + om;
 
-	size_t N = 20; // accuracy of the algorithm
+	size_t N = 10; // accuracy of the algorithm
 	size_t S = dn_time_points->getValue().size();
 
 	// step 2. initialize an empty matrix
@@ -593,8 +596,9 @@ double OccurrenceBirthDeathProcess::ComputeMt( void ) const
 
 	}
 
+  std::cout << k <<std::endl ; 
   std::cout<< "Mt right after the loop on events" << std::endl;
-       std::cout << Mt <<std::endl ; 
+  std::cout << Mt <<std::endl ; 
   double likelihood = Mt[0];
   for(int i = 1; i < Mt.size(); i++){
     likelihood += Mt[i] * pow(rh,k) * pow(1-rh,i);
@@ -627,14 +631,13 @@ double OccurrenceBirthDeathProcess::ComputeLt( void ) const
 
 	size_t N = 10; // accuracy of the algorithm
 	size_t S = dn_time_points->getValue().size();
-  std::cout << "S setting time points for comput" << std::endl;
-  std::cout << S << std::endl;
-
 
 	// step 2. initialize an empty matrix
 	MatrixReal B(S, (N + 1), 0.0);
 
-	size_t k = extant;
+	size_t k = 7;
+  std::cout << "nb of extant individuals" << std::endl;
+  std::cout << extant << std::endl;
 
 	// step 3. // this is the first entry of B
 	RbVector<double> Lt;
@@ -642,7 +645,8 @@ double OccurrenceBirthDeathProcess::ComputeLt( void ) const
 		if (i == 0) Lt.push_back( pow(rh, k) );
 		else Lt.push_back( pow(rh, k) * pow((1-rh), i) );
 	}
-  //std::cout << Lt << std::endl;
+  std::cout << "Lt at initialization" << std::endl;
+  std::cout << Lt << std::endl;
 
 	// step 4.
 	//-> calculate the state of the process just before the next time point
@@ -694,6 +698,8 @@ double OccurrenceBirthDeathProcess::ComputeLt( void ) const
 		 for(int i = 0; i < Lt.size(); i++){
 				Lt[i] = LtPrime[i];
 		 }
+       std::cout << " Lt after multiplying with eA" <<std::endl ;
+       std::cout << Lt <<std::endl ; 
 
 		}
 
@@ -708,71 +714,74 @@ double OccurrenceBirthDeathProcess::ComputeLt( void ) const
 		}
 
 		// step 11-12. end algorithm 1
-		if(type == "origin"){
-			continue;
-		}
+	//	if(type == "origin"){
+	//		continue;
+	//	}
 
 		// step 13-14.
 		if(type == "terminal removed"){
 			for(int i = 0; i < Lt.size(); i++){
 				Lt[i] = Lt[i] * ps * rp;
-        std::cout << Lt[i] << std::endl;
 			}
 			k += 1;
+       std::cout << "Lt after terminal removed"  <<std::endl ; 
+       std::cout << Lt <<std::endl ; 
 		}
 
 		// step 15-16.
 		if(type == "terminal non-removed"){
 			for(int i = 0; i < Lt.size()-1; i++){
 				Lt[i] = Lt[i+1] * ps * (1-rp);
-        std::cout << Lt[i] << std::endl;
-
 			}
 			//Lt[N] = 0;
 			k += 1;
+       std::cout << "Lt after terminal non-removed"  <<std::endl ; 
+       std::cout << Lt <<std::endl ; 
 		}
 
 		// step 17-18.
 		if(type == "sampled ancestor"){
 			for(int i = 0; i < Lt.size(); i++){
 				Lt[i] = Lt[i] * ps * (1-rp);
-        std::cout << Lt[i] << std::endl;
-
 			}
+       std::cout << "Lt after sampled ancestor"  <<std::endl ; 
+       std::cout << Lt <<std::endl ; 
 		}
 
 		// step 19-20.
 		if(type == "occurrence removed"){
 		 	for(int i = Lt.size()-1; i > 0; i--){
 		 		Lt[i] = Lt[i-1] * i * om * rp;
-        std::cout << Lt[i] << std::endl;
-
 		 	}
 		 	Lt[0] = 0;
+       std::cout << "Lt after occurrence removed"  <<std::endl ; 
+       std::cout << Lt <<std::endl ; 
 		 }
 
 		// step 21-22.
 		if(type == "occurrence non-removed"){
 			for(int i = 0; i < Lt.size(); i++){
 				Lt[i] = Lt[i] * (k+i) * om * (1-rp);
-        std::cout << Lt[i] << std::endl;
-
 			}
+       std::cout << "Lt after occurrence non-removed"  <<std::endl ; 
+       std::cout << Lt <<std::endl ; 
 		}
 
 		// step 23-24.
 		if(type == "branching time"){
 			for(int i = 0; i < Lt.size(); i++){
 				Lt[i] = Lt[i] * birth;
-        std::cout << Lt[i] << std::endl;
-
 			}
 			k -= 1;
+       std::cout << "Lt after branching time"  <<std::endl ; 
+       std::cout << Lt <<std::endl ; 
 		}
 
 		thMinusOne = th;
 
 	}
+
+  std::cout << k << std::endl;
   std::cout << "Compute Lt output" << std::endl;
   std::cout << Lt[0] << std::endl;
 	return log(Lt[0]);
