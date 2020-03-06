@@ -80,11 +80,11 @@ mymodel = model(obd_tree)
 
 monitors[1] = mnStochasticVariable(filename="output/mcmc_OBDP.out",printgen=100)
 monitors[2] = mnFile(filename="output/mcmc_OBDP.trees",printgen=100,obd_tree)
-
+print("my model ok")
 mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
 
 
-mymcmc.run(generations=100000)
+mymcmc.run(generations=1)
 
 
 # Read in the tree trace and construct the maximum clade credibility (MCC) tree #
