@@ -446,7 +446,7 @@ double OccurrenceBirthDeathProcess::ComputeMt( void ) const
 
 	const double gamma = birth + death + ps + om;
 
-	size_t N = 20; // accuracy of the algorithm
+	size_t N = 30; // accuracy of the algorithm
 	size_t S = dn_time_points->getValue().size();
 
 	// step 2. initialize an empty matrix
@@ -464,7 +464,6 @@ double OccurrenceBirthDeathProcess::ComputeMt( void ) const
 	// step 4.
 	//-> calculate the state of the process just before the next time point
 
-	MatrixReal A( (N+1), (N+1), 0.0 );
 
 	double thPlusOne = tor->getValue();
 
@@ -479,38 +478,14 @@ double OccurrenceBirthDeathProcess::ComputeMt( void ) const
 
 		if( th != thPlusOne ){
 
+	    MatrixReal A( (N+1), (N+1), 0.0 );
 			for(int i = 0; i < (N + 1); i++){
         A[i][i] = gamma * (k + i) * (th-thPlusOne);
         if (i < N) A[i][i+1] = -death * (i + 1) * (th-thPlusOne);
         if (i > 0) A[i][i-1] = -birth * (2*k + i - 1) * (th-thPlusOne);
 			}
-
-			//A = A * (th - thMinusOne);
-	//		for(int i = 0; i < (N + 1); i++){
-	//			for(int j = 0; j < (N + 1); j++){
-	//				A[i][j] = A[i][j] * (th - thPlusOne);
-	//			}
-	//		}
-
 		 RbMath::expMatrixPade(A, A, 4);
-
-		 // A * Mt
-		 RbVector<double> MtPrime;
-		 // for each row in matrix A
-		 for(int i = 0; i < N+1; i++){
-			 double sum = 0.0;
-			 // for each entry in the vector Mt
-			 for(int j = 0; j < N+1; j++){
-				 sum += A[i][j] * Mt[j];
-			 }
-			 MtPrime.push_back( sum );
-		 }
-
-		 //Mt = MtPrime;
-		 for(int i = 0; i < N+1; i++){
-				Mt[i] = MtPrime[i];
-		 }
-    std::cout << " Mt after multiplying with eA : " << Mt << std::endl ;
+     Mt = A * Mt;
 		}
 
 		std::string type = events[h].type;
@@ -607,7 +582,7 @@ double OccurrenceBirthDeathProcess::ComputeLt( void ) const
 
 	const double gamma = birth + death + ps + om;
 
-	size_t N = 20; // accuracy of the algorithm
+	size_t N = 30; // accuracy of the algorithm
 	size_t S = dn_time_points->getValue().size();
 
 	// step 2. initialize an empty matrix
@@ -627,7 +602,6 @@ double OccurrenceBirthDeathProcess::ComputeLt( void ) const
 	// step 4.
 	//-> calculate the state of the process just before the next time point
 
-	MatrixReal A( (N+1), (N+1), 0.0 );
 
 	double thMinusOne = 0.0;
 
@@ -641,31 +615,14 @@ double OccurrenceBirthDeathProcess::ComputeLt( void ) const
 		// step 5-6.
 		if( th != thMinusOne ){
 
+      MatrixReal A( (N+1), (N+1), 0.0 );
 			for(int i = 0; i < (N + 1); i++){
         A[i][i] = -gamma * (k + i) * (th - thMinusOne);
         if (i < N) A[i][i+1] = birth * ( (2 * k) + i ) * (th - thMinusOne);
         if (i > 0) A[i][i-1] = death * i * (th - thMinusOne);
 			}
-
-		 RbMath::expMatrixPade(A, A, 4);
-
-		 // A * Lt
-		 RbVector<double> LtPrime;
-		 // for each row in matrix A
-		 for(int i = 0; i < N+1; i++){
-			 double sum = 0.0;
-			 // for each entry in the vector Lt
-			 for(int j = 0; j < N+1; j++){
-				 sum += A[i][j] * Lt[j];
-			 }
-			 LtPrime.push_back( sum );
-		 }
-
-		 //Lt = LtPrime;
-		 for(int i = 0; i < N+1; i++){
-				Lt[i] = LtPrime[i];
-		 }
-    std::cout << "Lt after multiplying with eA : " << Lt << std::endl ;
+      RbMath::expMatrixPade(A, A, 4);
+      Lt = A * Lt;
 		}
 
 		std::string type = events[h].type;
