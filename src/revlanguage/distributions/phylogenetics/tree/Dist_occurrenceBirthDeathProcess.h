@@ -39,8 +39,7 @@ namespace RevLanguage {
         // Distribution functions you have to override
         RevBayesCore::AbstractBirthDeathProcess*                createDistribution(void) const;
 
-        //What is that ?
-        const ArgumentRules&                        getArgumentRules(void) const; // Get argument rules
+        const ArgumentRules&                                    getArgumentRules(void) const;                                                           // Get argument rules
 
 
     protected:
@@ -50,23 +49,23 @@ namespace RevLanguage {
 
     private:
 
-        RevPtr<const RevVariable>                               tor;                                                                                       //!< Time of origin
-        RevPtr<const RevVariable>                               lambda;                                                                                    //!< The speciation rate(s)
-        RevPtr<const RevVariable>                               mu;                                                                                        //!< The extinction rate(s)
-        RevPtr<const RevVariable>                               psi;                                                                                       //!< The serial sampling rate(s)
-        RevPtr<const RevVariable>                               omega;                                                                                     //!<The probability of an observation being an occurrence
-        RevPtr<const RevVariable>                               rho;                                                                                       //!< The taxon sampling fraction(s)
-        RevPtr<const RevVariable>                               removalPr;                                                                                 //!< The removal probability after sampling
+        RevPtr<const RevVariable>                               tor;                                                                                    //!< Time of origin
+        RevPtr<const RevVariable>                               lambda;                                                                                 //!< The speciation rate(s)
+        RevPtr<const RevVariable>                               mu;                                                                                     //!< The extinction rate(s)
+        RevPtr<const RevVariable>                               psi;                                                                                    //!< The serial sampling rate(s)
+        RevPtr<const RevVariable>                               omega;                                                                                  //!<The probability of an observation being an occurrence
+        RevPtr<const RevVariable>                               rho;                                                                                    //!< The taxon sampling fraction(s)
+        RevPtr<const RevVariable>                               removalPr;                                                                              //!< The removal probability after sampling
 
-        // RevPtr<const RevVariable>                               timeline;                                                                               //!< The interval change times
-        // RevPtr<const RevVariable>                               lambda_timeline;                                                                        //!< The speciation rate change times
-        // RevPtr<const RevVariable>                               mu_timeline;                                                                            //!< The extinction rate change times
-        // RevPtr<const RevVariable>                               psi_timeline;                                                                           //!< The serial sampling rate change times
-        // RevPtr<const RevVariable>                               rho_timeline;                                                                           //!< The episodic taxon sampling fraction change times
-        std::string                                             start_condition;                                                                           //!< The start condition of the process (rootAge/originAge)
-        RevPtr<const RevVariable>                               initialTree;                                                                                      //!< Tree
-        //RevPtr<const RevVariable>                               extant;                                                                                    //!< Number of extant taxa
-        RevPtr<const RevVariable>                               dn_time_points;                                                                               //!< Times at which density is computed
+        // RevPtr<const RevVariable>                               timeline;                                                                            //!< The interval change times
+        // RevPtr<const RevVariable>                               lambda_timeline;                                                                     //!< The speciation rate change times
+        // RevPtr<const RevVariable>                               mu_timeline;                                                                         //!< The extinction rate change times
+        // RevPtr<const RevVariable>                               psi_timeline;                                                                        //!< The serial sampling rate change times
+        // RevPtr<const RevVariable>                               rho_timeline;                                                                        //!< The episodic taxon sampling fraction change times
+        std::string                                             start_condition;                                                                        //!< The start condition of the process (rootAge/originAge)
+        RevPtr<const RevVariable>                               initialTree;                                                                            //!< Facultative initial tree
+        RevPtr<const RevVariable>                               extant;                                                                                 //!< Number of extant taxa
+        RevPtr<const RevVariable>                               dn_time_points;                                                                         //!< Times at which density is computed
 
 
 

@@ -94,5 +94,5 @@ trace = readTreeTrace("output/mcmc_OBDP.trees")
 mccTree(trace, file="output/mcmc_OBDP_mcc.tre" )
 
 
-you may want to quit RevBayes now
+# you may want to quit RevBayes now
 q()
