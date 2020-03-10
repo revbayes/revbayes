@@ -1,8 +1,17 @@
 /**
  * @file DistributionLaplace
- * This file contains the functions of the normal distribution.
+ * This file contains the functions for the Laplace (or double exponential) distribution.
  *
- * @brief Implementation of the normal distribution.
+ * @brief Implementation of the Laplace distribution.
+ *
+ * The Laplace probability distribution, also referred to as the "Double Exponential"
+ * distribution, has probability density
+ * @f[ f(x|\mu, b) = {1 \over 2b} \exp \left( - { |x-\mu| \over b} \right) @f]
+ * where @f$ \mu @f$ is the location parameter and @f$ b @f$ is a scale parameter.
+ * The Laplace distribution is essentially two exponential distributions glued together back-to-back
+ * (hence the name, double exponential). The standard Laplace distribution has
+ * @f$ \mu=0 @f$ and @f$ b=1 @f$ (i.e., two exponentials with parameter one glued
+ * back-to-back and starting at zero).
  *
  * (c) Copyright 2009- under GPL version 3
  * @date Last modified: $Date$
