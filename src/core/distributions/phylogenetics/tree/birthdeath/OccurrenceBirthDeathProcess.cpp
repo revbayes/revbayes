@@ -116,10 +116,12 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) 
 
     // step 1: Create the list of all event times
     poolTimes();
-    std::cout << "Printing the list of events below" << std::endl;
-    for (int i =0; i < events.size(); i++){
-        std::cout << events[i].time << " : " << events[i].type << std::endl;
-    }
+   // std::cout << "Printing the list of events below" << std::endl;
+   // for (int i =0; i < events.size(); i++){
+   //     std::cout << events[i].time << " : " << events[i].type << std::endl;
+   // }
+
+    //std::cout << "Parameter values are the following : lambda, mu, psi, rho = " << lambda -> getValue() << " , " << mu -> getValue() << " , " << psi -> getValue() << " , " << rho -> getValue() << std::endl;
 
     // compute the log-likelihood : use ComputeLt (backward traversal of the tree) or ComputeMt (forward traversal of the tree)
     double lnProbTimes_Mt = ComputeMt();
@@ -127,16 +129,6 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) 
 
     double lnProbTimes = computeLnProbabilityTimes();
     double lnProbTimes2 = computeLnProbabilityTimes2();
-
-    int num_taxa = (int)value->getNumberOfTips();
-    int num_extinct = (int)value->getNumberOfExtinctTips();
-    int num_sa = (int)value->getNumberOfSampledAncestors();
-
-    std::cout << "The diff between Lt and lnProbTimes = " << lnProbTimes - lnProbTimes_Lt << std::endl;
-    std::cout << "log(n!) = " << RbMath::lnFactorial(num_taxa) << std::endl;
-    std::cout << "n*log(2) = " << num_taxa*log(2) << std::endl;
-    std::cout << "log( 1 - u) = " << log( 1.0 - functionU(tor -> getValue(), 1.0 - rho -> getValue() ) ) << std::endl;
-    std::cout << "log(p) = " << log( functionP(tor -> getValue(), 1.0 - rho -> getValue() ) ) << std::endl;
 
     return lnProbTimes_Lt;
 }
@@ -394,7 +386,7 @@ void OccurrenceBirthDeathProcess::poolTimes( void ) const
             // node is extant leaf : only their number is necessary to compute Lt and Mt
             // events.push_back(Event(n.getAge(),"extant leaf") ;
             // events.push_back(Event(n.getAge(), "terminal non-removed")) ;
-            std::cout << n.getSpeciesName() << std::endl;
+            //std::cout << n.getSpeciesName() << std::endl;
             extant++;
         }
         else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
@@ -660,27 +652,23 @@ double OccurrenceBirthDeathProcess::ComputeMt( void ) const
     const double rp = removalPr->getValue();
     const double gamma = birth + death + ps + om;
 
-    size_t N = 10; // accuracy of the algorithm
+    size_t N = 20; // accuracy of the algorithm
     size_t S = dn_time_points->getValue().size();
 
-    // step 2. initialize an empty matrix
+    // Initialize an empty matrix and a cursor to write lines in this matrix
     MatrixReal B(S, (N + 1), 0.0);
-
-    size_t k = 1;
-
-    // step 3. // this is the first entry of B
-    RbVector<double> Mt;
-    for ( int i = 0; i < (N + 1); i++){
-        if (i == 0) Mt.push_back( 1.0 );
-        else Mt.push_back( 0.0 );
-    }
-
-    double thPlusOne = tor->getValue();
-
     size_t indxJ = S-1;
 
-    for(int h = 0; h < events.size(); h++){
+    // We start at the time of origin, supposedly the first time in the vector of events
+    size_t k = 1;
+    RbVector<double> Mt(N+1, 0.0);
+    Mt[0] = 1;
+    double thPlusOne = events[0].time;
 
+    // Then we iterate over the next events
+    for(int h = 1; h < events.size(); h++){
+
+        // First, deal with the update on time period (th, thPlusOne)
         double th = events[h].time;
 
         if(th > tor->getValue()) {
@@ -689,7 +677,6 @@ double OccurrenceBirthDeathProcess::ComputeMt( void ) const
         };
 
         if( th != thPlusOne ){
-
             MatrixReal A( (N+1), (N+1), 0.0 );
             
             for(int i = 0; i < (N + 1); i++){
@@ -699,78 +686,59 @@ double OccurrenceBirthDeathProcess::ComputeMt( void ) const
             }
             
             RbMath::expMatrixPade(A, A, 4);
-
             Mt = A * Mt;
-
         }
 
+        // Second, deal with the update at punctual event th
         std::string type = events[h].type;
 
-        // step 7-10. sample Mt
         if(type == "time slice"){
-            
             for(int i = 0; i < N+1; i++){
                 B[indxJ][i] = Mt[i];
             }
-
             indxJ -= 1;
         }
 
-        // step 13-14.
         if(type == "terminal removed"){
-            
             for(int i = 0; i < N+1; i++){
                 Mt[i] *= ps * rp;
             }
-            
             k -= 1;
         }
 
-        // step 15-16.
         if(type == "terminal non-removed"){
-
             for(int i = N; i > 0; i--){
                 Mt[i] = Mt[i-1] * ps * (1-rp);
             }
-            
             Mt[0] = 0;
             k -= 1;
         }
 
-        // step 17-18.
         if(type == "sampled ancestor"){
-
             for(int i = 0; i < N+1; i++){
                 Mt[i] *= ps * (1-rp);
             }
         }
 
-        // step 19-20.
         if(type == "occurrence removed"){
-            
             for(int i = 0; i < N; i++){
                 Mt[i] = Mt[i+1] * (i+1) * om * rp;
             }
          }
 
-        // step 21-22.
         if(type == "occurrence non-removed"){
-
             for(int i = 0; i < N+1; i++){
                 Mt[i] *= (k+i) * om * (1-rp);
             }
         }
 
-        // step 23-24.
         if(type == "branching time"){
             for(int i = 0; i < N+1; i++){
                 Mt[i] *= birth;
             }
-
             k += 1;
         }
 
-        //std::cout << type << " : " << th << " - k : " << k << " - " << Mt << std::endl;
         thPlusOne = th;
     }
 
@@ -779,7 +747,6 @@ double OccurrenceBirthDeathProcess::ComputeMt( void ) const
         likelihood += Mt[i] * pow(rh,k) * pow(1.0 - rh,i);
     }
 
-    //std::cout << "Mt : " << Mt << std::endl;
     std::cout << "Compute Mt output : " << log(likelihood) << std::endl;
     return log(likelihood);
 }
@@ -793,7 +760,7 @@ double OccurrenceBirthDeathProcess::ComputeMt( void ) const
  */
 double OccurrenceBirthDeathProcess::ComputeLt( void ) const
 {
-// order times youngest to oldest
+    // order times youngest to oldest
     std::sort( events.begin(), events.end(), AgeCompare() );
 
     const double birth = lambda->getValue();
@@ -804,31 +771,27 @@ double OccurrenceBirthDeathProcess::ComputeLt( void ) const
     const double rp = removalPr->getValue();
     const double gamma = birth + death + ps + om;
 
-    size_t N = 10; // accuracy of the algorithm
+    size_t N = 20; // accuracy of the algorithm
+
+    // Initialize an empty matrix and a cursor indxJ to write lines in this matrix
     size_t S = dn_time_points->getValue().size();
-
-    // step 2. initialize an empty matrix
     MatrixReal B(S, (N + 1), 0.0);
-
-    size_t k = extant;
-
-    // step 3. // this is the first entry of B
-    RbVector<double> Lt;
-    for ( int i = 0; i < (N + 1); i++){
-        if (i == 0) Lt.push_back( pow(rh, k) );
-        else Lt.push_back( pow(rh, k) * pow((1.0 - rh), i) );
-    }
-
-    double thMinusOne = 0.0;
-
     size_t indxJ = 0;
 
-    for(int h = 0; h < events.size(); h++){
+    // We start at time 0 with type "present" in the vector of events
+    size_t k = extant;
+    double thMinusOne = events[0].time;
+    RbVector<double> Lt(N+1, pow(rh, k));
+    for ( int i = 0; i < (N + 1); i++){
+        Lt[i] *= pow( 1.0-rh, i );
+    }
 
+    // We then iterate over the following events until finding the time of origin
+    for(int h = 1; h < events.size(); h++){
+
+        // First deal with the update along (thMinusOne, th)
         double th = events[h].time;
 
-        // if time is not the same recalculate A.
-        // step 5-6.
         if( th != thMinusOne ){
 
             MatrixReal A( (N+1), (N+1), 0.0 );
@@ -841,9 +804,9 @@ double OccurrenceBirthDeathProcess::ComputeLt( void ) const
             Lt = A * Lt;
         }
 
+        // Second, deal with the update at time th
         std::string type = events[h].type;
 
-        // step 7-10. sample Lt
         if(type == "time slice"){
             for(int i = 0; i < N+1; i++){
                 B[indxJ][i] = Lt[i];
@@ -851,12 +814,6 @@ double OccurrenceBirthDeathProcess::ComputeLt( void ) const
             indxJ += 1;
         }
 
-        // step 11-12. end algorithm 1
-    //  if(type == "origin"){
-    //      continue;
-    //  }
-
-        // step 13-14.
         if(type == "terminal removed"){
             for(int i = 0; i < N+1; i++){
                 Lt[i] = Lt[i] * ps * rp;
@@ -864,23 +821,19 @@ double OccurrenceBirthDeathProcess::ComputeLt( void ) const
             k += 1;
         }
 
-        // step 15-16.
         if(type == "terminal non-removed"){
             for(int i = 0; i < N; i++){
                 Lt[i] = Lt[i+1] * ps * (1.0-rp);
             }
-            //Lt[N] = 0;
             k += 1;
         }
 
-        // step 17-18.
         if(type == "sampled ancestor"){
             for(int i = 0; i < N+1; i++){
                 Lt[i] = Lt[i] * ps * (1.0-rp);
             }
         }
 
-        // step 19-20.
         if(type == "occurrence removed"){
             for(int i = N; i > 0; i--){
                 Lt[i] = Lt[i-1] * i * om * rp;
@@ -888,26 +841,22 @@ double OccurrenceBirthDeathProcess::ComputeLt( void ) const
             Lt[0] = 0;
          }
 
-        // step 21-22.
         if(type == "occurrence non-removed"){
             for(int i = 0; i < N+1; i++){
                 Lt[i] = Lt[i] * (k+i) * om * (1-rp);
             }
         }
 
-        // step 23-24.
         if(type == "branching time"){
             for(int i = 0; i < N+1; i++){
                 Lt[i] = Lt[i] * birth;
             }
             k -= 1;
         }
-
+        
         thMinusOne = th;
-
     }
 
-    //std::cout << "Lt : " << Lt << std::endl;
     std::cout << "Compute Lt output : " << log(Lt[0]) << std::endl;
     return log(Lt[0]);
 }

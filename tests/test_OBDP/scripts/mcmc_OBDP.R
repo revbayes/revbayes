@@ -35,15 +35,15 @@ origin_time ~ dnUnif(37.0, 55.0)
 
  # create some moves that change the stochastic variables
  # all moves are sliding proposals but you could use scaling proposals for the rates too
- moves[mvi++] = mvScale(lambda,lambda=1,weight=1)
- moves[mvi++] = mvScale(lambda,lambda=0.1,weight=1)
- moves[mvi++] = mvScale(lambda,lambda=0.01,weight=1)
+moves[mvi++] = mvScale(lambda,lambda=1,weight=1)
+moves[mvi++] = mvScale(lambda,lambda=0.1,weight=1)
+moves[mvi++] = mvScale(lambda,lambda=0.01,weight=1)
 
- moves[mvi++] = mvScale(mu,lambda=1,weight=1)
- moves[mvi++] = mvScale(mu,lambda=0.1,weight=1)
- moves[mvi++] = mvScale(mu,lambda=0.01,weight=1)
+moves[mvi++] = mvScale(mu,lambda=1,weight=1)
+moves[mvi++] = mvScale(mu,lambda=0.1,weight=1)
+moves[mvi++] = mvScale(mu,lambda=0.01,weight=1)
 
- moves[mvi++] = mvScale(psi,lambda=1,weight=1)
+moves[mvi++] = mvScale(psi,lambda=1,weight=1)
 moves[mvi++] = mvScale(psi,lambda=0.1,weight=1)
 moves[mvi++] = mvScale(psi,lambda=0.01,weight=1)
 
