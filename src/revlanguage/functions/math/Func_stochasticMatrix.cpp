@@ -58,7 +58,7 @@ const ArgumentRules& Func_stochasticMatrix::getArgumentRules( void ) const
     
     if ( !rules_set )
     {
-        argumentRules.push_back( new ArgumentRule( "x", ModelVector< Simplex >::getClassTypeSpec(), "x", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "x", ModelVector< Simplex >::getClassTypeSpec(), "A vector of simplices. Each simplex corresponds to a row in the stochastic matrix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         rules_set = true;
     }
     
