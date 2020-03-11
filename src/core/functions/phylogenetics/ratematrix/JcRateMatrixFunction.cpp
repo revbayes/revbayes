@@ -7,6 +7,15 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
+/**
+ * Default constructor.
+ *
+ * This function takes a single input:
+ * @param ns The number of states
+ *
+ * @return A JC rate matrix object.
+ */
+
 JcRateMatrixFunction::JcRateMatrixFunction(size_t ns) : TypedFunction<RateGenerator>( new RateMatrix_JC(ns) ) {
     
     update();
