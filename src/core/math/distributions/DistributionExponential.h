@@ -1,5 +1,5 @@
 /**
- * @file DistributionExponential
+ * @file DistributionExponential.h
  * This file contains the functions of the exponential distribution.
  *
  * $Id$
