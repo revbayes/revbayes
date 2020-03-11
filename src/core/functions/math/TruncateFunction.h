@@ -3,7 +3,8 @@
  * This file contains the declaration of the Truncate functions.
  *
  * @brief Declaration of the Truncate functions.
- * The Truncate Functions removes all the digits after the decimal to make the number and integer.
+ * The Truncate function removes all the digits after the decimal to make the number an integer.
+ * In other words, truncate is a ceiling function for negative numbers and a floor function for positive numbers.
  *
  */
 
