@@ -13,7 +13,7 @@ template <class valueType> class TypedDagNode;
      * The Bernoulli distribution represents a family of distributions
      * on the values 0 and 1. The probability of a random variable is computed by
      * P(X=x) = x*p
-     * @parm p represents the probability of a success.
+     * @param p represents the probability of a success.
      *
      * Instances of this class can be associated to stochastic variables.
      *
