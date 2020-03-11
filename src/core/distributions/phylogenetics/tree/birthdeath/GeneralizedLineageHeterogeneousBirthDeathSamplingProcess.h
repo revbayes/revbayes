@@ -23,7 +23,7 @@ namespace RevBayesCore {
 
     /**
      * @file
-     * This is the generalized lineage-heterogenous (state-dependent?) birth-death-sampling process.
+     * This is the generalized lineage-heterogenous (/state-dependent) birth-death-sampling process.
      * An interface for tensorphylo.
      *
      * Michael R. May and Xavier Meyer 2020/3/08
@@ -33,32 +33,31 @@ namespace RevBayesCore {
         
     public:
         GeneralizedLineageHeterogeneousBirthDeathSamplingProcess(
-        		const TypedDagNode<double>*                                     age_,
-        		const std::string&                                              condition_type_,
-				const TypedDagNode<Simplex >*                                   root_frequency_,
-				const TypedDagNode<RbVector< RbVector<double> > >*              lambda_,
-				const TypedDagNode<RbVector< double > >*                        lambda_times_,
-				const TypedDagNode<RbVector< RbVector<double> > >*              mu_,
-				const TypedDagNode<RbVector< double > >*                        mu_times_,
-				const TypedDagNode<RbVector< RbVector<double> > >*              phi_,
-				const TypedDagNode<RbVector< double > >*                        phi_times_,
-				const TypedDagNode<RbVector< RbVector<double> > >*              delta_,
-				const TypedDagNode<RbVector< double > >*                        delta_times_,
-				const TypedDagNode<RbVector< RbVector<double> > >*              upsilon_,
-				const TypedDagNode<RbVector< double > >*                        upsilon_times_,
-				const TypedDagNode<RbVector< RbVector<double> > >*              gamma_,
-				const TypedDagNode<RbVector< double > >*                        gamma_times_,
-				const TypedDagNode<RbVector< RbVector<double> > >*              rho_,
-				const TypedDagNode<RbVector< double > >*                        rho_times_,
-				const TypedDagNode<RbVector< RbVector<double> > >*              xi_,
-				const TypedDagNode<RbVector< double > >*                        xi_times_,
-				const TypedDagNode<RbVector< RateGenerator > >*                 eta_,
-				const TypedDagNode<RbVector< double > >*                        eta_times_,
-				const TypedDagNode<RbVector< CladogeneticProbabilityMatrix > >* omega_,
-				const TypedDagNode<RbVector< double > >*                        omega_times_,
-				const TypedDagNode<RbVector< MatrixReal > >*                    zeta_,
-				bool                                                            use_origin_
-        		);
+			const TypedDagNode<double>*                                     age_,
+			const std::string&                                              condition_type_,
+			const TypedDagNode<Simplex >*                                   root_frequency_,
+			const TypedDagNode<RbVector< RbVector< double > > >*            lambda_,
+			const TypedDagNode<RbVector< double > >*                        lambda_times_,
+			const TypedDagNode<RbVector< RbVector< double > > >*            mu_,
+			const TypedDagNode<RbVector< double > >*                        mu_times_,
+			const TypedDagNode<RbVector< RbVector< double > > >*            phi_,
+			const TypedDagNode<RbVector< double > >*                        phi_times_,
+			const TypedDagNode<RbVector< RbVector< double > > >*            delta_,
+			const TypedDagNode<RbVector< double > >*                        delta_times_,
+			const TypedDagNode<RbVector< RbVector< double > > >*            upsilon_,
+			const TypedDagNode<RbVector< double > >*                        upsilon_times_,
+			const TypedDagNode<RbVector< RbVector< double > > >*            gamma_,
+			const TypedDagNode<RbVector< double > >*                        gamma_times_,
+			const TypedDagNode<RbVector< RbVector< double > > >*            rho_,
+			const TypedDagNode<RbVector< double > >*                        rho_times_,
+			const TypedDagNode<RbVector< RbVector< double > > >*            xi_,
+			const TypedDagNode<RbVector< double > >*                        xi_times_,
+			const TypedDagNode<RbVector< RateGenerator > >*                 eta_,
+			const TypedDagNode<RbVector< double > >*                        eta_times_,
+			const TypedDagNode<RbVector< CladogeneticProbabilityMatrix > >* omega_,
+			const TypedDagNode<RbVector< double > >*                        omega_times_,
+			const TypedDagNode<RbVector< MatrixReal > >*                    zeta_,
+			bool                                                            use_origin_);
         
         // pure virtual member functions
         virtual GeneralizedLineageHeterogeneousBirthDeathSamplingProcess* clone(void) const;
@@ -82,32 +81,70 @@ namespace RevBayesCore {
         void                                                              executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;
         RevLanguage::RevPtr<RevLanguage::RevVariable>                     executeProcedure(const std::string &name, const std::vector<DagNode *> args, bool &found);
         
-        // parameters
-		const TypedDagNode<double>*                                     age;
-		const std::string&                                              condition_type;
-		const TypedDagNode<Simplex >*                                   root_frequency;
-		const TypedDagNode<RbVector< RbVector<double> > >*              lambda;
-		const TypedDagNode<RbVector< double > >*                        lambda_times;
-		const TypedDagNode<RbVector< RbVector<double> > >*              mu;
-		const TypedDagNode<RbVector< double > >*                        mu_times;
-		const TypedDagNode<RbVector< RbVector<double> > >*              phi;
-		const TypedDagNode<RbVector< double > >*                        phi_times;
-		const TypedDagNode<RbVector< RbVector<double> > >*              delta;
-		const TypedDagNode<RbVector< double > >*                        delta_times;
-		const TypedDagNode<RbVector< RbVector<double> > >*              upsilon;
-		const TypedDagNode<RbVector< double > >*                        upsilon_times;
-		const TypedDagNode<RbVector< RbVector<double> > >*              gamma;
-		const TypedDagNode<RbVector< double > >*                        gamma_times;
-		const TypedDagNode<RbVector< RbVector<double> > >*              rho;
-		const TypedDagNode<RbVector< double > >*                        rho_times;
-		const TypedDagNode<RbVector< RbVector<double> > >*              xi;
-		const TypedDagNode<RbVector< double > >*                        xi_times;
-		const TypedDagNode<RbVector< RateGenerator > >*                 eta;
-		const TypedDagNode<RbVector< double > >*                        eta_times;
-		const TypedDagNode<RbVector< CladogeneticProbabilityMatrix > >* omega;
-		const TypedDagNode<RbVector< double > >*                        omega_times;
-		const TypedDagNode<RbVector< MatrixReal > >*                    zeta;
-		bool                                                            use_origin;
+        // updating function
+        void                                                              prepareParameters(bool force = false);
+        void                                                              updateTree(bool force = false);
+        void                                                              updateRootFrequency(bool force = false);
+        void                                                              updateLambda(bool force = false);
+        void                                                              updateMu(bool force = false);
+        void                                                              updatePhi(bool force = false);
+        void                                                              updateDelta(bool force = false);
+        void                                                              updateUpsilon(bool force = false);
+        void                                                              updateGamma(bool force = false);
+        void                                                              updateRho(bool force = false);
+        void                                                              updateXi(bool force = false);
+        void                                                              updateEta(bool force = false);
+        void                                                              updateOmega(bool force = false);
+        void                                                              updateZeta(bool force = false);
+
+        std::vector<double>                                               toStd(const Simplex &obj);
+        std::vector<double>                                               toStd(const RbVector<double> &obj);
+        std::vector< std::vector<double> >                                toStd(const RbVector< RbVector<double>> &obj);
+        std::vector< std::vector< std::vector<double> > >                 toStd(const RbVector< RateGenerator > &obj);
+        std::vector< std::vector< std::vector<double> > >                 toStd(const RbVector< MatrixReal > &obj);
+        std::vector< std::map< std::vector<unsigned>, double > >          toStd(const RbVector< CladogeneticProbabilityMatrix > &obj);
+
+        // revbayes parameters
+		const TypedDagNode< double>*                                     age;
+		const std::string&                                               condition_type;
+		const TypedDagNode< Simplex >*                                   root_frequency;
+		const TypedDagNode< RbVector< RbVector<double> > >*              lambda;
+		const TypedDagNode< RbVector< double > >*                        lambda_times;
+		const TypedDagNode< RbVector< RbVector<double> > >*              mu;
+		const TypedDagNode< RbVector< double > >*                        mu_times;
+		const TypedDagNode< RbVector< RbVector<double> > >*              phi;
+		const TypedDagNode< RbVector< double > >*                        phi_times;
+		const TypedDagNode< RbVector< RbVector<double> > >*              delta;
+		const TypedDagNode< RbVector< double > >*                        delta_times;
+		const TypedDagNode< RbVector< RbVector<double> > >*              upsilon;
+		const TypedDagNode< RbVector< double > >*                        upsilon_times;
+		const TypedDagNode< RbVector< RbVector<double> > >*              gamma;
+		const TypedDagNode< RbVector< double > >*                        gamma_times;
+		const TypedDagNode< RbVector< RbVector<double> > >*              rho;
+		const TypedDagNode< RbVector< double > >*                        rho_times;
+		const TypedDagNode< RbVector< RbVector<double> > >*              xi;
+		const TypedDagNode< RbVector< double > >*                        xi_times;
+		const TypedDagNode< RbVector< RateGenerator > >*                 eta;
+		const TypedDagNode< RbVector< double > >*                        eta_times;
+		const TypedDagNode< RbVector< CladogeneticProbabilityMatrix > >* omega;
+		const TypedDagNode< RbVector< double > >*                        omega_times;
+		const TypedDagNode< RbVector< MatrixReal > >*                    zeta;
+		bool                                                             use_origin;
+
+		// book-keeping
+		bool tree_dirty;
+		bool root_freq_dirty;
+		bool lambda_dirty;
+		bool mu_dirty;
+		bool phi_dirty;
+		bool delta_dirty;
+		bool upsilon_dirty;
+		bool gamma_dirty;
+		bool rho_dirty;
+		bool xi_dirty;
+		bool eta_dirty;
+		bool omega_dirty;
+		bool zeta_dirty;
 
     };
     
