@@ -177,6 +177,7 @@
 #include "Dist_DuplicationLoss.h"
 #include "Dist_FBDRP.h"
 #include "Dist_FBDSP.h"
+#include "Dist_GLHBDSP.h"
 #include "Dist_constPopMultispCoal.h"
 #include "Dist_divDepYuleProcess.h"
 #include "Dist_empiricalTree.h"
@@ -342,7 +343,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< TimeTree                   >( new Dist_outgroupBirthDeath() );
         AddDistribution< TimeTree                   >( new Dist_sampledSpeciationBirthDeathProcess() );
         AddDistribution< TimeTree                   >( new Dist_TimeVaryingStateDependentSpeciationExtinctionProcess() );
-
+        AddDistribution< TimeTree                   >( new Dist_GLHBDSP() );
 
         // fossilized-birth-death range processes
         AddDistribution< MatrixReal                 >( new Dist_FBDRP());
