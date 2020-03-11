@@ -49,7 +49,7 @@ namespace RevLanguage {
 
         // age
         RevPtr<const RevVariable>  start_age;       //!< The age at the start of the process
-        std::string                start_condition; //!< The start condition of the process (rootAge/originAge)
+        std::string                start_type; //!< The start condition of the process (rootAge/originAge)
 
         // regular events (and times)
         RevPtr<const RevVariable>  lambda;          //!< The speciation rates for each state for each epoch
