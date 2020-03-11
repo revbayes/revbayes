@@ -65,12 +65,12 @@ jobs:
         sudo rm -rf /usr/local/share/boost
         if [ "${{ matrix.compiler }}" = "gcc" ]; then
           sudo apt-get install -y g++-${{ matrix.version }}
-          echo "::set-env name=CC::ccache gcc-${{ matrix.version }}"
-          echo "::set-env name=CXX::ccache g++-${{ matrix.version }}"
+          echo "::set-env name=C_COMPILER::ccache gcc-${{ matrix.version }}"
+          echo "::set-env name=CXX_COMPILER::ccache g++-${{ matrix.version }}"
         else
           sudo apt-get install -y clang-${{ matrix.version }}
-          echo "::set-env name=CC::ccache clang-${{ matrix.version }}"
-          echo "::set-env name=CXX::ccache clang++-${{ matrix.version }}"
+          echo "::set-env name=C_COMPILER::ccache clang-${{ matrix.version }}"
+          echo "::set-env name=CXX_COMPILER::ccache clang++-${{ matrix.version }}"
         fi
         if [ "${{ matrix.mpi }}" = true ] ; then
           sudo apt-get install libopenmpi-dev

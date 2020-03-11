@@ -29,14 +29,20 @@ else
     BUILD_DIR="build"
 fi
 
+# This is bad because it overrides any choices the user may have chosen.
 CC=gcc CXX=g++
 
 if [ "$travis" = "true" ]; then
-    CC=${C_COMPILER} CXX=${CXX_COMPILER}
+    CC=${C_COMPILER}
+    CXX=${CXX_COMPILER}
     all_args="-travis true -mpi ${USE_MPI} -help true -exec_name rb"
 else
     all_args=""
 fi
+
+export CC
+export CXX
+echo "CC=${CC}  CXX=${CXX}"
 
 if [ "$1" = "clean" ]
 then
