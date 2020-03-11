@@ -9,9 +9,9 @@
 #include "RlTypedFunction.h"
 #include "DeterministicNode.h"
 #include "DynamicNode.h"
-#include "MatrixReal.h"
 #include "RevPtr.h"
 #include "RlDeterministicNode.h"
+#include "RlStochasticMatrix.h"
 #include "TypedDagNode.h"
 #include "TypedFunction.h"
 
@@ -28,7 +28,7 @@ class TypeSpec;
      * @since 2020-03-10, version 1.0
      *
      */
-    class Func_stochasticMatrix : public TypedFunction<MatrixReal> {
+    class Func_stochasticMatrix : public TypedFunction<StochasticMatrix> {
         
     public:
         Func_stochasticMatrix();
