@@ -13,7 +13,7 @@ namespace RevBayesCore { class RandomNumberGenerator; }
 using namespace RevBayesCore;
 
 /*Default Constructor for the Wishart Distribution
- * @param inomega0 A scale matrix of postitive real numbers
+ * @param inomega0 A scale matrix of positive real numbers
  * @param indf a positive long number for the degrees of freedom
  *
  */
