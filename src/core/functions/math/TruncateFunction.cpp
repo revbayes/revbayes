@@ -8,7 +8,7 @@ using namespace RevBayesCore;
 /*
  * TruncateFunction for a TypedDagNode of type double
  *
- * @param x a a double with the value to be truncated
+ * @param x a double with the value to be truncated
  */
 
 TruncateFunction::TruncateFunction(const TypedDagNode<double> *x) : TypedFunction<long>( new long(0) ),
