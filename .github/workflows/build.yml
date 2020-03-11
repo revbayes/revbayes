@@ -72,6 +72,9 @@ jobs:
           echo "::set-env name=CC::ccache clang-${{ matrix.version }}"
           echo "::set-env name=CXX::ccache clang++-${{ matrix.version }}"
         fi
+        if [ "${{ matrix.mpi }}" = true ] ; then
+          sudo apt-get install libopenmpi-dev
+        fi
 
     - name: Install (macOS)
       if: runner.os == 'macOS'
