@@ -105,7 +105,7 @@ RateMatrix_Kimura80* RateMatrix_Kimura80::clone( void ) const
 }
 
 /*
- * Sets Kapps of the rate matrix
+ * Sets kappa for the rate matrix
  * @param k Kappa, the transition:transversion ratio
  */
 void RateMatrix_Kimura80::setKappa( double k )
