@@ -1,5 +1,5 @@
 /**
- * @file DistributionGeometric
+ * @file DistributionGeometric.h
  * This file contains the functions of the geometric distribution.
  */
 
