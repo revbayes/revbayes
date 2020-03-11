@@ -60,8 +60,8 @@ jobs:
     - name: Install (Linux)
       if: runner.os == 'Linux'
       run: |
-        sudo apt install -y pandoc libcairo2-dev ccache
-        sudo apt install -y libboost-dev libboost-program-options-dev libboost-date-time-dev libboost-filesystem-dev libboost-regex-dev libboost-serialization-dev libboost-system-dev libboost-thread-dev 
+        sudo apt-get install -y pandoc libcairo2-dev ccache
+        sudo apt-get install -y libboost-dev libboost-program-options-dev libboost-date-time-dev libboost-filesystem-dev libboost-regex-dev libboost-serialization-dev libboost-system-dev libboost-thread-dev 
         sudo rm -rf /usr/local/share/boost
         if [ "${{ matrix.compiler }}" = "gcc" ]; then
           sudo apt-get install -y g++-${{ matrix.version }}
