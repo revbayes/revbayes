@@ -67,7 +67,7 @@ fi
 fi
 
 # Run tests
-if [ "$travis" = "true" ] && [ ${TRAVIS_BUILD_STAGE_NAME} = "Test" ]
+if [ "$travis" = "true" ] && [ "${TRAVIS_BUILD_STAGE_NAME}" = "Test" ]
 then
   cd ../..
   echo "\"Hello World\"" | projects/cmake/rb

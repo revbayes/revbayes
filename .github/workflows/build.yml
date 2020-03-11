@@ -106,9 +106,26 @@ jobs:
          restore-keys: |
            ${{ matrix.name }}-ccache-
 
-    - name: Configure, build and test
+    - name: Configure and build
       env:
         USE_MPI: ${{ matrix.mpi }}
       run: |
         cd projects/cmake
         ./build.sh -travis true
+
+    - name: Test
+      env:
+        USE_MPI: ${{ matrix.mpi }}
+      run: |
+        export PATH=${GITHUB_WORKSPACE}/projects/cmake:$PATH
+        echo "\"Hello World\"" | rb
+        echo ::group::Test suite
+        cd tests
+        ./run_integration_tests.sh -mpi ${USE_MPI} rb
+        cd
+        echo ::endgroup::
+        echo ::group::testiphy
+        git clone https://gitlab.com/testiphy/testiphy.git
+        cd testiphy
+        ./testiphy rb
+        echo ::endgroup::
