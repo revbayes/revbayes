@@ -87,9 +87,9 @@ type(y))");
 number <- -3.0
 absoluteValueOfTheNumber <- abs(number)
 if (number + absoluteValueOfTheNumber != 0.0) {
-    print("Problem when computing an absolute value.")
+print("Problem when computing an absolute value.")
 } else {
-    print("Correct computation of an absolute value.")
+print("Correct computation of an absolute value.")
 })");
 	help_strings[string("abs")][string("name")] = string(R"(abs)");
 	help_arrays[string("abs")][string("see_also")].push_back(string(R"(ceil)"));
@@ -115,9 +115,9 @@ c := append(a,b))");
 number <- 3.4
 ceiled_number <- ceil(number)
 if (ceiled_number != 4.0) {
-    print("Problem when computing a ceiled value.")
+print("Problem when computing a ceiled value.")
 } else {
-    print("Correct computation of a ceiled value.")
+print("Correct computation of a ceiled value.")
 })");
 	help_strings[string("ceil")][string("name")] = string(R"(ceil)");
 	help_arrays[string("ceil")][string("see_also")].push_back(string(R"(abs)"));
@@ -224,7 +224,7 @@ map_tree = consensusTree(trace=tree_trace, cutoff=0.5, file="consensus.tree"))")
 x ~ dnBernoulli(p)
 x.clamp(1)
 moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", x)
+monitors[1] = screenmonitor(printgen=1000, separator = "	", x)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -239,7 +239,7 @@ mymcmc.run(generations=200000))");
 x ~ dnBernoulli(p)
 x.clamp(1)
 moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", x)
+monitors[1] = screenmonitor(printgen=1000, separator = "	", x)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -253,7 +253,7 @@ mymcmc.run(generations=200000))");
 x ~ dnBimodalLognormal(mean1=-1,mean2=1,sd1=0.1,sd2=0.1,p=p)
 x.clamp( exp(1) )
 moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", x)
+monitors[1] = screenmonitor(printgen=1000, separator = "	", x)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -268,7 +268,7 @@ mymcmc.run(generations=200000))");
 x ~ dnBimodalNormal(mean1=-1,mean2=1,sd1=0.1,sd2=0.1,p=p)
 x.clamp( 1 )
 moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", x)
+monitors[1] = screenmonitor(printgen=1000, separator = "	", x)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -284,7 +284,7 @@ mymcmc.run(generations=200000))");
 x ~ dnBinomial(n=10,p)
 x.clamp(8)
 moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", x)
+monitors[1] = screenmonitor(printgen=1000, separator = "	", x)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -301,7 +301,7 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnBivariatePoisson")][string("example")] = string(R"(th1 ~ dnUniform(0.0,10.0)
 th2 ~ dnUniform(0.0,10.0)
 th0 ~ dnUniform(0.0,10.0)
- ~ dnBivariatePoisson(th1, th2, th0)
+~ dnBivariatePoisson(th1, th2, th0)
 x.clamp([3, 3, 3])
 oves[1] = mvSlide(th1, delta=0.01, weight=1.0)
 moves[2] = mvSlide(th2, delta=0.01, weight=1.0)
@@ -332,8 +332,8 @@ x
 # Draw 10 values from the distribution and place them
 # in a vector a, then examine a.
 for ( i in 1:10 ) {
-    a[i] <- x
-    x.redraw()
+a[i] <- x
+x.redraw()
 }
 a
 
@@ -399,7 +399,7 @@ sum(b))");
 	help_strings[string("dnDuplicationLoss")][string("details")] = string(R"(The species tree must be ultrametric.
 The effective population size is constant across the species tree.)");
 	help_strings[string("dnDuplicationLoss")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees/"
+dataFolder = "simulatedTrees/" 
 # Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
@@ -407,7 +407,7 @@ n_alleles <- 3
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -416,19 +416,19 @@ popSize <- 50
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 }
-# We can save the species tree and the gene trees:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+print(geneTrees[g])
+}
+# We can save the species tree and the gene trees: 
 write(spTree, filename=dataFolder+"speciesTree")
 # Saving the gene trees
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 })");
 	help_strings[string("dnDuplicationLoss")][string("name")] = string(R"(dnDuplicationLoss)");
 	help_references[string("dnDuplicationLoss")].push_back(RbHelpReference(R"(Bayes Estimation of Species Divergence Times and Ancestral Population Sizes Using DNA Sequences From Multiple Loci. Bruce Rannala and Ziheng Yang. GENETICS August 1, 2003 vol. 164 no. 4 1645-1656.)",R"()",R"(http://www.genetics.org/content/164/4/1645.short )"));
@@ -490,7 +490,7 @@ x)");
 x ~ dnGeom(p)
 x.clamp(10)
 moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", p)
+monitors[1] = screenmonitor(printgen=1000, separator = "	", p)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -652,7 +652,7 @@ X ~ dnBrownian(trueTree,sigma)
 	help_strings[string("dnMultiSpeciesCoalescent")][string("details")] = string(R"(The species tree must be ultrametric.
 The effective population size is constant across the species tree.)");
 	help_strings[string("dnMultiSpeciesCoalescent")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees/"
+dataFolder = "simulatedTrees/" 
 # Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
@@ -660,7 +660,7 @@ n_alleles <- 3
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -669,19 +669,19 @@ popSize <- 50
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 }
-# We can save the species tree and the gene trees:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+print(geneTrees[g])
+}
+# We can save the species tree and the gene trees: 
 write(spTree, filename=dataFolder+"speciesTree")
 # Saving the gene trees
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 })");
 	help_strings[string("dnMultiSpeciesCoalescent")][string("name")] = string(R"(dnMultiSpeciesCoalescent)");
 	help_references[string("dnMultiSpeciesCoalescent")].push_back(RbHelpReference(R"(Bayes Estimation of Species Divergence Times and Ancestral Population Sizes Using DNA Sequences From Multiple Loci. Bruce Rannala and Ziheng Yang. GENETICS August 1, 2003 vol. 164 no. 4 1645-1656.)",R"()",R"(http://www.genetics.org/content/164/4/1645.short )"));
@@ -696,7 +696,7 @@ This distribution uses a conjugate prior on effective population sizes. As a con
 
 If you are interested in reconstructing ancestral effective population sizes, use dnMultiSpeciesCoalescent.)");
 	help_strings[string("dnMultiSpeciesCoalescentInverseGamma")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees/"
+dataFolder = "simulatedTrees/" 
 # Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
@@ -704,7 +704,7 @@ n_alleles <- 3
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -714,19 +714,19 @@ beta <- 0.003
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescentInverseGamma(speciesTree=spTree, shape=alpha, rate=beta, taxa=taxons[g])
-  print(geneTrees[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 }
-# We can save the species tree and the gene trees:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescentInverseGamma(speciesTree=spTree, shape=alpha, rate=beta, taxa=taxons[g])
+print(geneTrees[g])
+}
+# We can save the species tree and the gene trees: 
 write(spTree, filename=dataFolder+"speciesTree")
 # Saving the gene trees
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 })");
 	help_strings[string("dnMultiSpeciesCoalescentInverseGamma")][string("name")] = string(R"(dnMultiSpeciesCoalescentInverseGamma)");
 	help_references[string("dnMultiSpeciesCoalescentInverseGamma")].push_back(RbHelpReference(R"(' Algorithmic improvements to species delimitation and phylogeny estimation under the multispecies coalescent. Jones G.  Journal of Mathematical Biology. 2016.')",R"('DOI: 10.1007/s00285-016-1034-0')",R"(http://www.indriid.com/2016/2016-06-01-STACEY.pdf )"));
@@ -738,7 +738,7 @@ for (i in 1:(n_genes)) {
 	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("details")] = string(R"(The species tree must be ultrametric.
 Effective population sizes can be constant across the species tree, if a single real positive is provided, or branchwise, if a vector is provided.)");
 	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees/"
+dataFolder = "simulatedTrees/" 
 # Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
@@ -746,7 +746,7 @@ n_alleles <- 3
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -755,19 +755,19 @@ popSize <- 50
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescentUniformPrior(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 }
-# We can save the species tree and the gene trees:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescentUniformPrior(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+print(geneTrees[g])
+}
+# We can save the species tree and the gene trees: 
 write(spTree, filename=dataFolder+"speciesTree")
 # Saving the gene trees
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 })");
 	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("name")] = string(R"(dnMultiSpeciesCoalescentUniformPrior)");
 	help_references[string("dnMultiSpeciesCoalescentUniformPrior")].push_back(RbHelpReference(R"(Bayes Estimation of Species Divergence Times and Ancestral Population Sizes Using DNA Sequences From Multiple Loci. Bruce Rannala and Ziheng Yang. GENETICS August 1, 2003 vol. 164 no. 4 1645-1656.)",R"()",R"(http://www.genetics.org/content/164/4/1645.short )"));
@@ -787,7 +787,7 @@ x ~ dnMultinomial(10, p)
 y ~ dnDirichlet(x)
 y.clamp( simplex(1,2,3,4) )
 moves[1] = mvSlide(x, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", x)
+monitors[1] = screenmonitor(printgen=1000, separator = "	", x)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -826,7 +826,7 @@ mv[6] = mvVectorSlide(x))");
 x ~ dnNegativeBinomial(r=10,p)
 x.clamp(8)
 moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", x)
+monitors[1] = screenmonitor(printgen=1000, separator = "	", x)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -858,7 +858,7 @@ sd(x))");
 x ~ dnBernoulli(p)
 x.clamp(1)
 moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", speciation)
+monitors[1] = screenmonitor(printgen=1000, separator = "	", speciation)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -916,7 +916,7 @@ x)");
 x ~ dnPoisson(l)
 x.clamp(10)
 moves[1] = mvSlide(l, delta=0.1, weight=1.0)
-monitors[1] = mnScreen(printgen=1000, separator = "        ", l)
+monitors[1] = mnScreen(printgen=1000, separator = "	", l)
 mymodel = model(l)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -947,7 +947,7 @@ sum(x))");
 x ~ dnBernoulli(p)
 x.clamp(1)
 moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", speciation)
+monitors[1] = screenmonitor(printgen=1000, separator = "	", speciation)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -1166,7 +1166,6 @@ help()
 help("dnNormal"))");
 	help_strings[string("help")][string("name")] = string(R"(help)");
 	help_strings[string("help")][string("title")] = string(R"(Get help with RevBayes)");
-	help_strings[string("history.txt")][string("")] = string(R"(q())");
 	help_arrays[string("ifelse")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("ifelse")][string("description")] = string(R"(If the expression is true, then the function returns the first value, otherwise the second value.)");
 	help_strings[string("ifelse")][string("details")] = string(R"(The ifelse function is important when the value of a variable should deterministically change during an analysis depending on other variables. Standard if-else statements are not dynamically re-evaluated.)");
@@ -1255,7 +1254,7 @@ n_alleles <- 2
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -1264,14 +1263,14 @@ popSize <- 50
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
-# Let's compute the maximum tree:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+}
+# Let's compute the maximum tree: 
 recTree <- maximumTree(geneTrees)
 print(recTree))");
 	help_strings[string("maximumTree")][string("name")] = string(R"(maximumTree)");
@@ -1496,7 +1495,7 @@ mymcmc.run(30000,underPrior=TRUE);)");
 
 An age is randomly drawn between the root age and the age of the oldest tip. Then all subtrees below this age are scaled up or down depending on a scaler drawn from an exponential distribution.)");
 	help_strings[string("mvLayeredScaleProposal")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees/"
+dataFolder = "simulatedTrees/" 
 # Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
@@ -1504,7 +1503,7 @@ n_alleles <- 3
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -1513,25 +1512,25 @@ popSize <- 50
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 }
-# We can save the species tree and the gene trees:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+print(geneTrees[g])
+}
+# We can save the species tree and the gene trees: 
 write(spTree, filename=dataFolder+"speciesTree")
 # Saving the gene trees
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 }
 # set my move index
 mi = 0
 move_species_subtree_scale = mvLayeredScaleProposal( speciesTree=spTree, weight=5 )
 for (i in 1:n_genes) {
-   move_species_subtree_scale.addGeneTreeVariable( geneTrees[i] )
+move_species_subtree_scale.addGeneTreeVariable( geneTrees[i] )
 }
 moves[++mi] = move_species_subtree_scale
 # We get a handle on our model.
@@ -1598,7 +1597,7 @@ All the gene trees that evolved along the species tree according to some form of
 
 This move jointly performs narrow exchange moves (Nearest-Neighbor Interchanges without branch length alterations) on the species tree and on gene trees, all of which must be ultrametric.)");
 	help_strings[string("mvSpeciesNarrow")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees/"
+dataFolder = "simulatedTrees/" 
 # Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
@@ -1606,7 +1605,7 @@ n_alleles <- 3
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -1615,25 +1614,25 @@ popSize <- 50
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 }
-# We can save the species tree and the gene trees:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+print(geneTrees[g])
+}
+# We can save the species tree and the gene trees: 
 write(spTree, filename=dataFolder+"speciesTree")
 # Saving the gene trees
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 }
 # set my move index
 mi = 0
 move_species_narrow_exchange = mvSpeciesNarrow( speciesTree=spTree, weight=5 )
 for (i in 1:n_genes) {
-   move_species_narrow_exchange.addGeneTreeVariable( geneTrees[i] )
+move_species_narrow_exchange.addGeneTreeVariable( geneTrees[i] )
 }
 moves[++mi] = move_species_narrow_exchange
 # We get a handle on our model.
@@ -1662,7 +1661,7 @@ All the gene trees that evolved along the species tree according to some form of
 
 This move jointly performs node time slides (branch length alterations, keeping the topologies fixed) on the species tree and on gene trees, all of which must be ultrametric.)");
 	help_strings[string("mvSpeciesNodeTimeSlideUniform")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees"
+dataFolder = "simulatedTrees" 
 # Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
@@ -1670,7 +1669,7 @@ n_alleles <- 3
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -1679,25 +1678,25 @@ popSize <- 50
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 }
-# We can save the species tree and the gene trees:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+print(geneTrees[g])
+}
+# We can save the species tree and the gene trees: 
 write(spTree, filename=dataFolder+"speciesTree")
 # Saving the gene trees
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 }
 # set my move index
 mi = 0
 move_species_node_time_slide = mvSpeciesNodeTimeSlideUniform( speciesTree=spTree, weight=5 )
 for (i in 1:n_genes) {
-   move_species_node_time_slide.addGeneTreeVariable( geneTrees[i] )
+move_species_node_time_slide.addGeneTreeVariable( geneTrees[i] )
 }
 moves[++mi] = move_species_node_time_slide
 # We get a handle on our model.
@@ -1731,7 +1730,7 @@ Then, we uniformly pick an age between the parent and the oldest sampled descend
 The picked subtree is then scaled to this new age.
 All gene-trees that are present in the population will be scaled accordingly.)");
 	help_strings[string("mvSpeciesSubtreeScale")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees/"
+dataFolder = "simulatedTrees/" 
 # Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
@@ -1739,7 +1738,7 @@ n_alleles <- 3
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -1748,25 +1747,25 @@ popSize <- 50
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 }
-# We can save the species tree and the gene trees:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+print(geneTrees[g])
+}
+# We can save the species tree and the gene trees: 
 write(spTree, filename=dataFolder+"speciesTree")
 # Saving the gene trees
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 }
 # set my move index
 mi = 0
 move_species_subtree_scale = mvSpeciesSubtreeScale( speciesTree=spTree, weight=5 )
 for (i in 1:n_genes) {
-   move_species_subtree_scale.addGeneTreeVariable( geneTrees[i] )
+move_species_subtree_scale.addGeneTreeVariable( geneTrees[i] )
 }
 moves[++mi] = move_species_subtree_scale
 # We get a handle on our model.
@@ -1800,7 +1799,7 @@ Then, we pick a new age between the parent and the oldest sampled descendant acc
 The picked subtree is then scaled to this new age.
 All gene-trees that are present in the population will be scaled accordingly.)");
 	help_strings[string("mvSpeciesSubtreeScaleBeta")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees/"
+dataFolder = "simulatedTrees/" 
 # Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
@@ -1808,7 +1807,7 @@ n_alleles <- 3
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -1817,25 +1816,25 @@ popSize <- 50
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 }
-# We can save the species tree and the gene trees:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+print(geneTrees[g])
+}
+# We can save the species tree and the gene trees: 
 write(spTree, filename=dataFolder+"speciesTree")
 # Saving the gene trees
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 }
 # set my move index
 mi = 0
 move_species_subtree_scale_beta = mvSpeciesSubtreeScaleBeta( speciesTree=spTree, weight=5 )
 for (i in 1:n_genes) {
-   move_species_subtree_scale_beta.addGeneTreeVariable( geneTrees[i] )
+move_species_subtree_scale_beta.addGeneTreeVariable( geneTrees[i] )
 }
 moves[++mi] = move_species_subtree_scale_beta
 # We get a handle on our model.
@@ -1864,7 +1863,7 @@ All the gene trees that evolved along the species tree according to some form of
 
 This move jointly performs a tree scale move (the entire tree is scaled up or down, keeping the topology fixed) on the species tree and on gene trees, all of which must be ultrametric.)");
 	help_strings[string("mvSpeciesTreeScale")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees/"
+dataFolder = "simulatedTrees/" 
 # Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
@@ -1872,7 +1871,7 @@ n_alleles <- 3
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 root ~  dnNormal(mean=75,sd=2.5,min=0.0, max=Inf)
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=root, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
@@ -1882,25 +1881,25 @@ popSize <- 50
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 }
-# We can save the species tree and the gene trees:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+print(geneTrees[g])
+}
+# We can save the species tree and the gene trees: 
 write(spTree, filename=dataFolder+"speciesTree")
 # Saving the gene trees
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 }
 # set my move index
 mi = 0
 move_species_tree_scale = mvSpeciesTreeScale( speciesTree=spTree, root=root, weight=5 )
 for (i in 1:n_genes) {
-   move_species_tree_scale.addGeneTreeVariable( geneTrees[i] )
+move_species_tree_scale.addGeneTreeVariable( geneTrees[i] )
 }
 moves[++mi] = move_species_tree_scale
 # We get a handle on our model.

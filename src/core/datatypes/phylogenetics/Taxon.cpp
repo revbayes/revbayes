@@ -163,7 +163,7 @@ const std::string Taxon::getJsonRespresentation(void) const {
     jsonStr += "{\"Taxon\": {";
     jsonStr += "\"name\": \"" + name + "\", ";
     jsonStr += "\"speciesName\": \"" + species_name + "\", ";
-    jsonStr += "\"TimeInterval\": {\"minAge\": " + std::to_string(age_range.getMin()) + ", ";
+    jsonStr += "{\"TimeInterval\": {\"minAge\": " + std::to_string(age_range.getMin()) + ", ";
     jsonStr += "\"maxAge\": " + std::to_string(age_range.getMax()) + "}}";
     return jsonStr;
 }

@@ -284,15 +284,6 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         ModelVector<RealPos> *n = new ModelVector<RealPos>( es );
         return new RevVariable( n );
     }
-    else if ( name == "getIndices" )
-    {
-        found = true;        
-        RevBayesCore::Tree &tree = dag_node->getValue();        
-        std::vector<long> indices = tree.getNodeIndices();        
-        ModelVector<Natural> *n = new ModelVector<Natural>( indices );       
-        return new RevVariable( n );
-        
-    }
 
     return ModelObject<RevBayesCore::Tree>::executeMethod( name, args, found );
 }
@@ -365,9 +356,6 @@ void Tree::initMethods( void )
     
     ArgumentRules* esArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "getInverseES", ModelVector<RealPos>::getClassTypeSpec(), esArgRules ) );
-
-    ArgumentRules* indicesArgRules = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "getIndices", ModelVector<Natural>::getClassTypeSpec(), indicesArgRules ) );
     
     ArgumentRules* meanInverseESArgRules = new ArgumentRules();
     meanInverseESArgRules->push_back( new ArgumentRule( "characters", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The character alignment from which to compute the mean inverse ES metric.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );

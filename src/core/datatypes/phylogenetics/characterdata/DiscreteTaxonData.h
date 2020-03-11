@@ -429,12 +429,12 @@ std::string RevBayesCore::DiscreteTaxonData<charType>::getJsonRepresentation(voi
 
     std::string jsonStr = "";
     
-    jsonStr += "{\"DiscreteTaxonData\": ";
+    jsonStr += "{\"DiscreteTaxonData\": {";
     jsonStr += taxon.getJsonRespresentation();
     jsonStr += ", \"charData\": [";
     for (int i=0; i<sequence.size(); i++)
         {
-        jsonStr += "\"" + sequence[i].getStringValue() + "\"";
+        jsonStr += sequence[i].getStringValue();
         if (i + 1 < sequence.size())
             jsonStr += ",";
         }
