@@ -59,9 +59,11 @@ fi
 	cmake .
 	make -j 4
 	cd ..
-	
-    cp GitVersion_backup.cpp ../../src/revlanguage/utils/GitVersion.cpp
-    rm GitVersion_backup.cpp
+
+    if [ -e  GitVersion_backup.cpp ] ; then
+        cp GitVersion_backup.cpp ../../src/revlanguage/utils/GitVersion.cpp
+        rm GitVersion_backup.cpp
+    fi
 fi
 
 # Run tests
