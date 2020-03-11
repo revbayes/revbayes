@@ -13,7 +13,7 @@ template <class valueType> class TypedDagNode;
      *@brief Normal distribution class.
      *
      *The Normal distribution represents a family of distributions
-     * on the set of rational numbers. The Normal distribution has 2 parameters:
+     * on the set of real numbers. The Normal distribution has 2 parameters:
      * @param m  the mean
      * @param s the standard deviation
      *
