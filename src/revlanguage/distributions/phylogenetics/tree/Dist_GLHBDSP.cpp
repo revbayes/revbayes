@@ -28,9 +28,6 @@
 #include "TypeSpec.h"
 #include "TypedDagNode.h"
 
-namespace RevBayesCore { class DagNode; }
-namespace RevBayesCore { class Tree; }
-
 using namespace RevLanguage;
 
 /**
@@ -74,8 +71,11 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     // the start age
     RevBayesCore::TypedDagNode<double>* sa = static_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
 
-    // the start condition
-    bool uo = ( start_condition == "originAge" ? true : false );
+    // the start type
+    bool uo = ( start_type == "originAge" ? true : false );
+
+    // root frequency
+    RevBayesCore::TypedDagNode<RevBayesCore::Simplex >* root_freq = static_cast<const Simplex &>( root_frequencies->getRevObject() ).getDagNode();;
 
     // sampling condition
     const std::string& cond = static_cast<const RlString &>( condition->getRevObject() ).getValue();
@@ -106,9 +106,6 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::CladogeneticProbabilityMatrix > >* w_mats  = static_cast<const ModelVector< CladogeneticProbabilityMatrix > &>( omega->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                                        w_times = static_cast<const ModelVector< RealPos> &>( omega_times->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::MatrixReal > >*                    z_mats  = static_cast<const ModelVector< StochasticMatrix > &>( zeta->getRevObject() ).getDagNode();
-
-    // root frequency
-    RevBayesCore::TypedDagNode<RevBayesCore::Simplex >* rf = static_cast<const Simplex &>( root_frequencies->getRevObject() ).getDagNode();;
 
     // checks for safety
     std::cout << "Checking argument sizes." << std::endl;
@@ -160,7 +157,7 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     // make the distribution
     std::cout << "Creating the distribution object." << std::endl;
     RevBayesCore::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess* d = new RevBayesCore::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess(
-    	sa, cond, rf,
+    	sa, cond, root_freq,
 		l_rates, l_times,
 		m_rates, m_times,
 		p_rates, p_times,
@@ -266,6 +263,9 @@ const MemberRules& Dist_GLHBDSP::getParameterRules(void) const
         aliases.push_back("originAge");
         dist_member_rules.push_back( new ArgumentRule( aliases, RealPos::getClassTypeSpec(), "The start time of the process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
+        // the root frequency
+        dist_member_rules.push_back( new ArgumentRule( "rootFreq",     Simplex::getClassTypeSpec(),                                     "Frequencies of each state at the beginning of the process.",                                 ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+
         // regular events (and times)
         dist_member_rules.push_back( new ArgumentRule( "lambda",       ModelVector< ModelVector<RealPos> >::getClassTypeSpec(),         "The vector of speciation rates for each time interval.",                                     ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "lambdaTimes",  ModelVector< RealPos >::getClassTypeSpec(),                      "The times at which speciation rates change.",                                                ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new ModelVector<RealPos>() ) );
@@ -292,9 +292,6 @@ const MemberRules& Dist_GLHBDSP::getParameterRules(void) const
         dist_member_rules.push_back( new ArgumentRule( "omega",        ModelVector< CladogeneticProbabilityMatrix>::getClassTypeSpec(), "The cladogenetic event probabilities for each time interval.",                               ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "omegaTimes",   ModelVector< RealPos >::getClassTypeSpec(),                      "The times at which the cladogenetic rates change.",                                          ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new ModelVector<RealPos>() ) );
         dist_member_rules.push_back( new ArgumentRule( "zeta",         ModelVector<StochasticMatrix>::getClassTypeSpec(),               "The probabilities of change for each mass-extinction event.",                                ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-
-        // the root frequency
-        dist_member_rules.push_back( new ArgumentRule( "rootFreq",     Simplex::getClassTypeSpec(),                                     "Frequencies of each state at the beginning of the process.",                                 ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         // conditioning
 		std::vector<std::string> options_condition;
@@ -338,7 +335,7 @@ void Dist_GLHBDSP::setConstParameter(const std::string& name, const RevPtr<const
 
 	if ( name == "rootAge" || name == "originAge" )
 	{
-		start_condition = name;
+		start_type = name;
 		start_age = var;
 	}
 	else if ( name == "lambda" )
