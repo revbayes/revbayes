@@ -19,8 +19,8 @@ using namespace RevBayesCore;
  *
  */
 
-BernoulliDistribution::BernoulliDistribution(const TypedDagNode<double> *q) : TypedDistribution<long>( new long( 0 ) ),
-    p( q )
+BernoulliDistribution::BernoulliDistribution(const TypedDagNode<double> *p) : TypedDistribution<long>( new long( 0 ) ),
+    p( p )
 {
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
