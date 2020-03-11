@@ -4,6 +4,7 @@ BootstrapAnalysis
 ## description
 ## details
 ## authors
+Sebastian Hoehna
 ## see_also
 ## example
 ## references
