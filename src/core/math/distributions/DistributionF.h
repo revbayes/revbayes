@@ -1,5 +1,5 @@
 /**
- * @file DistributionF
+ * @file DistributionF.h
  * This file contains the functions of the F distribution.
  */
 
