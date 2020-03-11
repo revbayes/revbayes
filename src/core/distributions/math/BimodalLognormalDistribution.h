@@ -11,7 +11,7 @@ template <class valueType> class TypedDagNode;
      * @brief
      * ### Bimodal Lognormal Distribution.
      *
-     * The *bimodal lognormal distribution* is the mixture of 2 lognormal distributions,
+     * The bimodal lognormal distribution is the mixture of 2 lognormal distributions,
      * @f$ \textit{Lognormal}(\mu_1,\sigma_1) @f$ and @f$ \textit{Lognormal}(\mu_2,\sigma_2) @f$,
      * parameterized by a mixing factor of @f$ p @f$.
      *
@@ -31,7 +31,7 @@ template <class valueType> class TypedDagNode;
                                      const TypedDagNode<double> *p);
 
         // public member functions
-        double                                              cdf(void) const;                                                                //!< Cummulative density function
+        double                                              cdf(void) const;                                                                //!< Cumulative density function
         BimodalLognormalDistribution*                       clone(void) const;                                                              //!< Create an independent clone
         double                                              computeLnProbability(void);
         double                                              getMax(void) const;
