@@ -1,5 +1,5 @@
 /**
- * @file DistributionPoisson
+ * @file DistributionPoisson.h
  * This file contains the functions of the poisson distribution.
  *
  */
