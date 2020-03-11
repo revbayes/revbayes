@@ -13,13 +13,6 @@
  * @f$ \mu=0 @f$ and @f$ b=1 @f$ (i.e., two exponentials with parameter one glued
  * back-to-back and starting at zero).
  *
- * (c) Copyright 2009- under GPL version 3
- * @date Last modified: $Date$
- * @author The RevBayes core development team
- * @license GPL version 3
- * @since 2017-10-19
- *
- * $Id$
  */
 
 
