@@ -6,6 +6,18 @@
 namespace RevBayesCore {
 class DagNode;
 template <class valueType> class TypedDagNode;
+
+/**
+ * @brief Lognormal distribution class.
+ *
+ * The lognormal distribution represents a family of distributions
+ * defined on positive real numbers. The lognormal distribution has 2 parameters:
+ * @param m The mean of the natural logarithm of the variable
+ * @param s The standard deviation of the natural logarithm of the variable
+ *
+ * Instances of this class can be associated to stochastic variables.
+ *
+ */
     
     class LognormalDistribution : public ContinuousDistribution {
         
