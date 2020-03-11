@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 SRC=../../src
 
 ./generate_includes.sh

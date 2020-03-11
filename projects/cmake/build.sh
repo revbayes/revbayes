@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 all_args=$@
 mpi="false"
 travis="false"
