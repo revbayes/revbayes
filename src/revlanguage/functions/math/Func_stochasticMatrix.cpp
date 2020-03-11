@@ -13,6 +13,7 @@
 #include "RevVariable.h"
 #include "RlFunction.h"
 #include "RlSimplex.h"
+#include "RlStochasticMatrix.h"
 #include "Simplex.h"
 #include "StringUtilities.h"
 
@@ -21,7 +22,7 @@ using namespace RevLanguage;
 
 
 /** Default constructor */
-Func_stochasticMatrix::Func_stochasticMatrix( void ) : TypedFunction< MatrixReal >()
+Func_stochasticMatrix::Func_stochasticMatrix( void ) : TypedFunction< StochasticMatrix >()
 {
 }
 
