@@ -23,6 +23,8 @@ subdir('cmd')
 
 ./generate_version_number.sh 
 echo "Saving old GitVersion.cpp in projects/meson/GitVersion_backup.cpp"
-cp ../../src/revlanguage/utils/GitVersion.cpp GitVersion_backup.cpp
+if [ -e ../../src/revlanguage/utils/GitVersion.cpp ] ; then
+    cp ../../src/revlanguage/utils/GitVersion.cpp GitVersion_backup.cpp
+fi
 echo "Copying current GitVersion.cpp to src/revlanguage/utils"
 mv GitVersion.cpp ../../src/revlanguage/utils/

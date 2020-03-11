@@ -49,7 +49,9 @@ fi
     #################
     # generate git version number
     ./generate_version_number.sh
-    cp ../../src/revlanguage/utils/GitVersion.cpp GitVersion_backup.cpp
+    if [ -e ../../src/revlanguage/utils/GitVersion.cpp ] ; then
+        cp ../../src/revlanguage/utils/GitVersion.cpp GitVersion_backup.cpp
+    fi
     mv GitVersion.cpp ../../src/revlanguage/utils/
 
 	./regenerate.sh ${all_args}
