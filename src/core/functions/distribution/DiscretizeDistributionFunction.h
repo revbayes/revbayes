@@ -17,7 +17,7 @@ template <class valueType> class TypedDagNode;
      *   x[i] = quantile(dist, (i+0.5)/k)
      * Note that I assume: 0 <= i < k
      *
-     *@param c the distribution to be discritized
+     *@param c the distribution to be discretized
      *@param nc the number of categories
      *
      */
