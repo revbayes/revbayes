@@ -84,7 +84,18 @@ c = a + b
 	help_strings[string("RealPos")][string("name")] = string(R"(RealPos)");
 	help_strings[string("RevObject")][string("name")] = string(R"(RevObject)");
 	help_strings[string("Simplex")][string("name")] = string(R"(Simplex)");
+	help_strings[string("String")][string("description")] = string(R"(Datatype for `String` variables.)");
+	help_strings[string("String")][string("example")] = string(R"(myString <- "yarn"
+myString.find("y")
+# returns index of the substring "y" so 1
+myString.charAt(1)
+# returns "y"
+myString.size()
+# returns 4
+myString.substr(1,3)
+# returns "yar")");
 	help_strings[string("String")][string("name")] = string(R"(String)");
+	help_strings[string("String")][string("title")] = string(R"(String datatype)");
 	help_strings[string("TimeTree")][string("description")] = string(R"(The Tree datatype stores information to describe the shared ancestryof a taxon set. Information includes taxon labels, topology, nodecount, and branch lengths. Tree objects also possess several usefulmethods to traverse and manipulate the Tree's value.)");
 	help_strings[string("TimeTree")][string("name")] = string(R"(TimeTree)");
 	help_arrays[string("TimeTree")][string("see_also")].push_back(string(R"(TimeTree)"));
@@ -1047,8 +1058,33 @@ exists(x))");
 	help_strings[string("exists")][string("name")] = string(R"(exists)");
 	help_arrays[string("exists")][string("see_also")].push_back(string(R"(clear)"));
 	help_strings[string("exists")][string("title")] = string(R"(Check whether a variable exists)");
+	help_strings[string("exp")][string("description")] = string(R"(Calculates the exponential function on a variable of type `Real`)");
+	help_strings[string("exp")][string("example")] = string(R"(a <- 2
+exp(2)
+# returns 7.389056
+exp(ln(1))
+# returns 0)");
 	help_strings[string("exp")][string("name")] = string(R"(exp)");
+	help_arrays[string("exp")][string("see_also")].push_back(string(R"(`power`)"));
+	help_arrays[string("exp")][string("see_also")].push_back(string(R"(`ln`)"));
+	help_arrays[string("exp")][string("see_also")].push_back(string(R"(`log`)"));
+	help_strings[string("exp")][string("title")] = string(R"(Exponential function)");
+	help_arrays[string("floor")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("floor")][string("description")] = string(R"(Converts a variable of type `Real` to the lowest `Integer` 
+less than or equal to that number.)");
+	help_strings[string("floor")][string("example")] = string(R"(# compute the ceiling of a real number
+number <- 3.4
+floored_number <- floor(number)
+if (ceiled_number != 3.0) {
+print("Problem when computing a floored value.")
+} else {
+print("Correct computation of a floored value.")
+})");
 	help_strings[string("floor")][string("name")] = string(R"(floor)");
+	help_arrays[string("floor")][string("see_also")].push_back(string(R"(`abs`)"));
+	help_arrays[string("floor")][string("see_also")].push_back(string(R"(`ceil`)"));
+	help_arrays[string("floor")][string("see_also")].push_back(string(R"(`round`)"));
+	help_strings[string("floor")][string("title")] = string(R"(Floor function)");
 	help_strings[string("fnAdjacentRateModifier")][string("name")] = string(R"(fnAdjacentRateModifier)");
 	help_strings[string("fnBetaBrokenStick")][string("name")] = string(R"(fnBetaBrokenStick)");
 	help_strings[string("fnBinaryMutationCoalescentRateMatrix")][string("name")] = string(R"(fnBinaryMutationCoalescentRateMatrix)");
@@ -1221,7 +1257,17 @@ y # y has the determined value of 1.07846)");
 	help_strings[string("ln")][string("name")] = string(R"(ln)");
 	help_arrays[string("ln")][string("see_also")].push_back(string(R"(log)"));
 	help_strings[string("ln")][string("title")] = string(R"(Natural log function)");
+	help_strings[string("log")][string("description")] = string(R"(Calculates the logarithm of a variable of typ `Real`
+given a base.)");
+	help_strings[string("log")][string("details")] = string(R"(For base e use the `ln` function.)");
+	help_strings[string("log")][string("example")] = string(R"(b <- 2.0
+log(b, base=2)
+# returns 1)");
 	help_strings[string("log")][string("name")] = string(R"(log)");
+	help_arrays[string("log")][string("see_also")].push_back(string(R"(`ln`)"));
+	help_arrays[string("log")][string("see_also")].push_back(string(R"(`power`)"));
+	help_arrays[string("log")][string("see_also")].push_back(string(R"(`exp`)"));
+	help_strings[string("log")][string("title")] = string(R"(Logarithm function)");
 	help_strings[string("logistic")][string("name")] = string(R"(logistic)");
 	help_arrays[string("ls")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("ls")][string("description")] = string(R"(Show the content of the workspace.)");
@@ -1993,7 +2039,16 @@ mymcmc.operatorSummary())");
 	help_strings[string("posteriorPredictiveAnalysis")][string("name")] = string(R"(posteriorPredictiveAnalysis)");
 	help_strings[string("posteriorPredictiveProbability")][string("name")] = string(R"(posteriorPredictiveProbability)");
 	help_strings[string("posteriorPredictiveSimulation")][string("name")] = string(R"(posteriorPredictiveSimulation)");
+	help_strings[string("power")][string("description")] = string(R"(Given a variable of type `Real` and a given exponent,
+calculates that number to the given exponent.)");
+	help_strings[string("power")][string("example")] = string(R"(c <- 3.0
+power(3.0, exponent = 2)
+# returns 9.0)");
 	help_strings[string("power")][string("name")] = string(R"(power)");
+	help_arrays[string("power")][string("see_also")].push_back(string(R"(`log`)"));
+	help_arrays[string("power")][string("see_also")].push_back(string(R"(`ln`)"));
+	help_arrays[string("power")][string("see_also")].push_back(string(R"(`exp`)"));
+	help_strings[string("power")][string("title")] = string(R"(Power function)");
 	help_strings[string("powerPosterior")][string("name")] = string(R"(powerPosterior)");
 	help_arrays[string("printSeed")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("printSeed")][string("description")] = string(R"(Print the seed of the random number generator.)");
@@ -2006,7 +2061,20 @@ printSeed())");
 	help_strings[string("printSeed")][string("name")] = string(R"(printSeed)");
 	help_arrays[string("printSeed")][string("see_also")].push_back(string(R"(seed)"));
 	help_strings[string("printSeed")][string("title")] = string(R"(Print the random number generator seed)");
+	help_strings[string("quantile")][string("description")] = string(R"(Calculates the sample quantiles corresponding to the given probability.
+The smallest observation corresponds to a probability of 0.0 and the 
+largest to a probability of 1.0. The median corresponds to a probability of
+0.5.)");
+	help_strings[string("quantile")][string("example")] = string(R"(b <- v(2,4,6,7,9)
+quantile(b, k = 0.0)
+# returns 2
+quantile(b, k = 0.5)
+# returns 6
+quantile(b, k = 1.0)
+# returns 9)");
 	help_strings[string("quantile")][string("name")] = string(R"(quantile)");
+	help_arrays[string("quantile")][string("see_also")].push_back(string(R"(`median`)"));
+	help_strings[string("quantile")][string("title")] = string(R"(Quantile function)");
 	help_arrays[string("quit")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("quit")][string("description")] = string(R"(Terminates the currently running instance of RevBayes.)");
 	help_strings[string("quit")][string("example")] = string(R"(# if you really want to quit
@@ -2119,7 +2187,12 @@ getwd())");
 	help_strings[string("simCompleteTree")][string("name")] = string(R"(simCompleteTree)");
 	help_strings[string("simStartingTree")][string("name")] = string(R"(simStartingTree)");
 	help_strings[string("simTree")][string("name")] = string(R"(simTree)");
+	help_strings[string("sinh")][string("description")] = string(R"(Calculates the hyperbolic sine of number of type `Real`)");
+	help_strings[string("sinh")][string("example")] = string(R"(sinh(1)
+# results in 1.175201)");
 	help_strings[string("sinh")][string("name")] = string(R"(sinh)");
+	help_arrays[string("sinh")][string("see_also")].push_back(string(R"(`tanh`)"));
+	help_strings[string("sinh")][string("title")] = string(R"(Hyperbolic sine function)");
 	help_strings[string("sort")][string("description")] = string(R"(Function for sorting the members of a vector in either ascending or descending order.)");
 	help_strings[string("sort")][string("details")] = string(R"(The vector to be sorted can be of any numeric type. Ascending or descending is specified via the `ascending` argument)");
 	help_strings[string("sort")][string("example")] = string(R"(nums = v(1,3,5,7,2,4,6,8)
@@ -2151,7 +2224,12 @@ sqrt(sqrt(4))
 	help_strings[string("srMaxTime")][string("name")] = string(R"(srMaxTime)");
 	help_strings[string("srMinESS")][string("name")] = string(R"(srMinESS)");
 	help_strings[string("srStationarity")][string("name")] = string(R"(srStationarity)");
+	help_strings[string("stdev")][string("description")] = string(R"(Calculates the standard deviation of a vector of numbers of type `Real`)");
+	help_strings[string("stdev")][string("example")] = string(R"(nums <- v(1,1,2,3,5,8)
+stdev(nums)
+# this will output 2.73252)");
 	help_strings[string("stdev")][string("name")] = string(R"(stdev)");
+	help_strings[string("stdev")][string("title")] = string(R"(Standard deviation function)");
 	help_strings[string("steppingStoneSampler")][string("name")] = string(R"(steppingStoneSampler)");
 	help_arrays[string("structure")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("structure")][string("description")] = string(R"(Shows all the information about a given variable.)");
@@ -2184,7 +2262,11 @@ system("ls")
 system("pwd"))");
 	help_strings[string("system")][string("name")] = string(R"(system)");
 	help_strings[string("system")][string("title")] = string(R"(Execute a system command.)");
+	help_strings[string("tanh")][string("description")] = string(R"(Calculates the hyperbolic tanger of a number of type `Real`)");
+	help_strings[string("tanh")][string("example")] = string(R"(tanh(1)
+# will result in 0.7615942)");
 	help_strings[string("tanh")][string("name")] = string(R"(tanh)");
+	help_strings[string("tanh")][string("title")] = string(R"(Hyperbolic tangent function)");
 	help_arrays[string("taxon")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("taxon")][string("description")] = string(R"(The taxon function creates a Taxon object.)");
 	help_strings[string("taxon")][string("details")] = string(R"(Each Taxon object records that taxon's name in addition to other information, such as age (which is non-zero for fossils). Character matrices and trees contain Taxon vectors (Taxon[]) that are used to match leaf nodes to data entries for phylogenetic analyses. For multispecies coalescent analyses, Taxon objects are also used to assign species memberships to individuals.)");
