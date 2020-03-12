@@ -107,6 +107,9 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	// add this object to the tree change event handler
     value->getTreeChangeEventHandler().addListener( this );
 
+    // update the parameters
+    prepareParameters(true);
+
 }
 
 /**
@@ -202,8 +205,12 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecializatio
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::prepareParameters(bool force)
 {
-	// make sure all the parametes are up-to-date
-	updateTree(force);
+
+	std::cout << "Preparing parameters" << std::endl;
+
+	// make sure all the parameters are up-to-date
+//	updateTree(force);
+//	updateData(force);
 	updateRootFrequency(force);
 	updateLambda(force);
 	updateMu(force);
@@ -216,6 +223,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::prepareParameters
 	updateEta(force);
 	updateOmega(force);
 	updateZeta(force);
+
+	std::cout << "Done preparing parameters" << std::endl;
+
 }
 
 
@@ -262,7 +272,7 @@ std::vector<double> GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::Rb
 std::vector<double> GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::RbToStd(const RbVector<double> &obj)
 {
 	std::vector<double> std_object;
-	for(size_t i = 0; i < std_object.size(); ++i) {
+	for(size_t i = 0; i < obj.size(); ++i) {
 		std_object.push_back(obj[i]);
 	}
 	return std_object;
@@ -271,9 +281,9 @@ std::vector<double> GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::Rb
 std::vector< std::vector<double> > GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::RbToStd(const RbVector< RbVector<double>> &obj)
 {
 	std::vector< std::vector<double> > std_object;
-	for(size_t i = 0; i < std_object.size(); ++i) {
+	for(size_t i = 0; i < obj.size(); ++i) {
 		std::vector<double> sub;
-		for(size_t j = 0; j < std_object[i].size(); ++j) {
+		for(size_t j = 0; j < obj[i].size(); ++j) {
 			sub.push_back(obj[i][j]);
 		}
 		std_object.push_back(sub);
@@ -284,12 +294,13 @@ std::vector< std::vector<double> > GeneralizedLineageHeterogeneousBirthDeathSamp
 std::vector< std::vector< std::vector<double> > > GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::RbToStd(const RbVector< RateGenerator > &obj)
 {
 	std::vector< std::vector< std::vector<double> > > std_object;
-	for(size_t i = 0; i < std_object.size(); ++i) {
+	for(size_t i = 0; i < obj.size(); ++i) {
 		std::vector< std::vector<double> > sub;
 		const RateGenerator &this_rate_generator = obj[i];
-		for(size_t j = 0; j < std_object[i].size(); ++j) {
+		size_t num_states = this_rate_generator.getNumberOfStates();
+		for(size_t j = 0; j < num_states; ++j) {
 			std::vector<double> sub_sub;
-			for(size_t k = 0; k < std_object[i][j].size(); ++k)
+			for(size_t k = 0; k < num_states; ++k)
 			{
 				sub_sub.push_back( this_rate_generator.getRate(j, k, 0.0, 1.0) );
 			}
@@ -303,12 +314,14 @@ std::vector< std::vector< std::vector<double> > > GeneralizedLineageHeterogeneou
 std::vector< std::vector< std::vector<double> > > GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::RbToStd(const RbVector< MatrixReal > &obj)
 {
 	std::vector< std::vector< std::vector<double> > > std_object;
-	for(size_t i = 0; i < std_object.size(); ++i) {
+	for(size_t i = 0; i < obj.size(); ++i) {
 		std::vector< std::vector<double> > sub;
 		const MatrixReal &this_matrix = obj[i];
-		for(size_t j = 0; j < std_object[i].size(); ++j) {
+		size_t nrow = this_matrix.getNumberOfRows();
+		size_t ncol = this_matrix.getNumberOfColumns();
+		for(size_t j = 0; j < nrow; ++j) {
 			std::vector<double> sub_sub;
-			for(size_t k = 0; k < std_object[i][j].size(); ++k)
+			for(size_t k = 0; k < ncol; ++k)
 			{
 				sub_sub.push_back( this_matrix[j][k] );
 			}
@@ -322,7 +335,7 @@ std::vector< std::vector< std::vector<double> > > GeneralizedLineageHeterogeneou
 std::vector< std::map< std::vector<unsigned>, double > > GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::RbToStd(const RbVector< CladogeneticProbabilityMatrix > &obj)
 {
 	std::vector< std::map< std::vector<unsigned >, double >> std_object;
-	for(size_t i = 0; i < std_object.size(); ++i)
+	for(size_t i = 0; i < obj.size(); ++i)
 	{
 		std_object.push_back( obj[i].getEventMap() );
 	}
@@ -351,8 +364,16 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateLambda(bool
 {
 	if ( force | lambda_dirty )
 	{
+		// convert to std
 		std::vector< std::vector<double> > params = RbToStd( lambda->getValue() );
 		std::vector<double>                times  = RbToStd( lambda_times->getValue() );
+
+		// handle some errors
+		if ( params.size() != times.size() + 1 )
+		{
+			throw RbException( "Number of lambda vectors does not match the number of intervals." );
+		}
+
 		// TODO: send var to tensorphylo
 	}
 }
@@ -361,8 +382,16 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateMu(bool for
 {
 	if ( force | mu_dirty )
 	{
+		// convert to std
 		std::vector< std::vector<double> > params = RbToStd( mu->getValue() );
 		std::vector<double>                times  = RbToStd( mu_times->getValue() );
+
+		// handle some errors
+		if ( params.size() != times.size() + 1 )
+		{
+			throw RbException( "Number of mu vectors does not match the number of intervals." );
+		}
+
 		// TODO: send var to tensorphylo
 	}
 }
@@ -371,8 +400,16 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updatePhi(bool fo
 {
 	if ( force | phi_dirty )
 	{
+		// convert to std
 		std::vector< std::vector<double> > params = RbToStd( phi->getValue() );
 		std::vector<double>                times  = RbToStd( phi_times->getValue() );
+
+		// handle some errors
+		if ( params.size() != times.size() + 1 )
+		{
+			throw RbException( "Number of phi vectors does not match the number of intervals." );
+		}
+
 		// TODO: send var to tensorphylo
 	}
 }
@@ -381,8 +418,16 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateDelta(bool 
 {
 	if ( force | delta_dirty )
 	{
+		// convert to std
 		std::vector< std::vector<double> > params = RbToStd( delta->getValue() );
 		std::vector<double>                times  = RbToStd( delta_times->getValue() );
+
+		// handle some errors
+		if ( params.size() != times.size() + 1 )
+		{
+			throw RbException( "Number of delta vectors does not match the number of intervals." );
+		}
+
 		// TODO: send var to tensorphylo
 	}
 }
@@ -391,8 +436,16 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateUpsilon(boo
 {
 	if ( force | upsilon_dirty )
 	{
+		// convert to std
 		std::vector< std::vector<double> > params = RbToStd( upsilon->getValue() );
 		std::vector<double>                times  = RbToStd( upsilon_times->getValue() );
+
+		// handle some errors
+		if ( params.size() != times.size() )
+		{
+			throw RbException( "Number of upsilon vectors does not match the number of intervals." );
+		}
+
 		// TODO: send var to tensorphylo
 	}
 }
@@ -401,8 +454,16 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateGamma(bool 
 {
 	if ( force | gamma_dirty )
 	{
+		// convert to std
 		std::vector< std::vector<double> > params = RbToStd( gamma->getValue() );
 		std::vector<double>                times  = RbToStd( gamma_times->getValue() );
+
+		// handle some errors
+		if ( params.size() != times.size() )
+		{
+			throw RbException( "Number of gamma vectors does not match the number of intervals." );
+		}
+
 		// TODO: send var to tensorphylo
 	}
 }
@@ -411,8 +472,16 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateRho(bool fo
 {
 	if ( force | rho_dirty )
 	{
+		// convert to std
 		std::vector< std::vector<double> > params = RbToStd( rho->getValue() );
 		std::vector<double>                times  = RbToStd( rho_times->getValue() );
+
+		// handle some errors
+		if ( params.size() != times.size() )
+		{
+			throw RbException( "Number of rho vectors does not match the number of intervals." );
+		}
+
 		// TODO: send var to tensorphylo
 	}
 }
@@ -421,37 +490,70 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateXi(bool for
 {
 	if ( force | xi_dirty )
 	{
+		// convert to std
 		std::vector< std::vector<double> > params = RbToStd( xi->getValue() );
 		std::vector<double>                times  = RbToStd( xi_times->getValue() );
+
+		// handle some errors
+		if ( params.size() != times.size() )
+		{
+			throw RbException( "Number of xi vectors does not match the number of intervals." );
+		}
+
 		// TODO: send var to tensorphylo
 	}
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateEta(bool force)
 {
-	if ( force | mu_dirty )
+	if ( force | eta_dirty )
 	{
+		// convert to std
 		std::vector< std::vector< std::vector<double> > > params = RbToStd( eta->getValue() );
 		std::vector<double>                               times  = RbToStd( eta_times->getValue() );
+
+		// handle some errors
+		if ( params.size() != times.size() + 1 )
+		{
+			throw RbException( "Number of eta vectors does not match the number of intervals." );
+		}
+
 		// TODO: send var to tensorphylo
 	}
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateOmega(bool force)
 {
-	if ( force | mu_dirty )
+	if ( force | omega_dirty )
 	{
+		// convert to std
 		std::vector< std::map< std::vector<unsigned>, double > > params = RbToStd( omega->getValue() );
 		std::vector<double>                                      times  = RbToStd( omega_times->getValue() );
+
+		// handle some errors
+		if ( params.size() != times.size() + 1 )
+		{
+			throw RbException( "Number of omega vectors does not match the number of intervals." );
+		}
+
 		// TODO: send var to tensorphylo
 	}
+
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateZeta(bool force)
 {
-	if ( force | mu_dirty )
+	if ( force | zeta_dirty )
 	{
+		// convert to std
 		std::vector< std::vector< std::vector<double> > > params = RbToStd( zeta->getValue() );
+
+		// handle some errors
+		if ( params.size() != gamma_times->getValue().size() )
+		{
+			throw RbException( "Number of zeta vectors does not match the number of intervals." );
+		}
+
 		// TODO: send var to tensorphylo
 	}
 }
