@@ -11,6 +11,14 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
+/**
+ * Default constructor.
+ *
+ * This function takes two inputs:
+ * @param er The simplex of exchangeabilities
+ * @param bf The simplex of base frequencies
+ */
+
 TvmRateMatrixFunction::TvmRateMatrixFunction(const TypedDagNode< Simplex > *er, const TypedDagNode< Simplex > *bf) : TypedFunction<RateGenerator>( new RateMatrix_TVM(bf->getValue().size()) ),
     exchangeability_rates( er ),
     base_frequencies( bf )
