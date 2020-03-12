@@ -231,7 +231,7 @@ then
 #################
 # generate help database
 echo "Generating help database"
-perl ../help/md2help.pl ../help/md/* > core/help/RbHelpDatabase.cpp
+perl ../help/md2help.pl ../help/md/*.md > core/help/RbHelpDatabase.cpp
 
 echo '
 add_subdirectory(help2yml)
