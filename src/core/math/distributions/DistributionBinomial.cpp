@@ -1,18 +1,4 @@
-/**
- * @file DistributionBinomial
- * This file contains the functions of the binomial distribution.
- *
- * @brief Implementation of the binomial distribution.
- *
- * (c) Copyright 2009- under GPL version 3
- * @date Last modified: $Date$
- * @author The RevBayes core development team
- * @license GPL version 3
- * @version 1.0
- * @since 2011-03-17, version 1.0
- *
- * $Id$
- */
+
 
 #include <cmath>
 #include <sstream> // IWYU pragma: keep
@@ -28,14 +14,14 @@
 using namespace RevBayesCore;
 
 /*!
- * This function calculates the probability density 
+ * This function calculates the cumulative probability density
  * for a binomially-distributed random variable.
  *
- * \brief Binomial probability density.
+ * \brief Binomial cumulative probability density.
  * \param n is the number of trials. 
  * \param p is the success probability. 
  * \param x is the number of successes. 
- * \return Returns the probability density.
+ * \return Returns a double with the cumulative probability density.
  * \throws Does not throw an error.
  */
 double RbStatistics::Binomial::cdf(double n, double p, double x)
@@ -71,14 +57,14 @@ double RbStatistics::Binomial::cdf(double n, double p, double x)
 }
 
 /*!
- * This function calculates the probability density 
+ * This function calculates the log probability density
  * for a binomially-distributed random variable.
  *
  * \brief Binomial probability density.
  * \param n is the number of trials. 
  * \param p is the success probability. 
  * \param x is the number of successes. 
- * \return Returns the probability density.
+ * \return Returns a double with the log probability density.
  * \throws Does not throw an error.
  */
 double RbStatistics::Binomial::lnPdf(double n, double p, double x) {
@@ -95,7 +81,7 @@ double RbStatistics::Binomial::lnPdf(double n, double p, double x) {
  * \param n is the number of trials. 
  * \param p is the success probability. 
  * \param x is the number of successes. 
- * \return Returns the probability density.
+ * \return Returns a double with the probability density.
  * \throws Does not throw an error.
  */
 double RbStatistics::Binomial::pdf(double n, double p, double x)
@@ -189,27 +175,6 @@ double RbStatistics::Binomial::do_search(double y, double *z, double p, double n
     }
 }
 
-/*!
- * This function calculates the probability density
- * for a binomially-distributed random variable.
- *
- * From R:
- *
- *     (1) pdf() has both p and q arguments, when one may be represented
- *         more accurately than the other (in particular, in df()).
- *     (2) pdf() does NOT check that inputs x and n are integers. This
- *         should be done in the calling function, where necessary.
- *         -- but is not the case at all when called e.g., from df() or dbeta() !
- *     (3) Also does not check for 0 <= p <= 1 and 0 <= q <= 1 or NaN's.
- *         Do this in the calling function.
- *
- * \brief Binomial probability density.
- * \param n is the number of trials.
- * \param p is the success probability.
- * \param x is the number of successes.
- * \return Returns the probability density.
- * \throws Does not throw an error.
- */
 #include "DistributionNormal.h"
 
 double RbStatistics::Binomial::quantile(double quantile_prob, double n, double p)

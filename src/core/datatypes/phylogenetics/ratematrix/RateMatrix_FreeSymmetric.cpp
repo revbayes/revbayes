@@ -23,7 +23,13 @@
 
 using namespace RevBayesCore;
 
-/** Construct rate matrix with n states */
+/** Free Symmetric Rate Matrix Constructor
+ *
+ * @param n the size of the matrix
+ *
+ * the rate matrix is automatically rescaled such that the average rate is 1
+ * The matrix exponentiation method is defaulted to EIGEN
+ */
 RateMatrix_FreeSymmetric::RateMatrix_FreeSymmetric(size_t n) : GeneralRateMatrix( n ),
     rescale(true),
     my_method( EIGEN )
@@ -39,6 +45,14 @@ RateMatrix_FreeSymmetric::RateMatrix_FreeSymmetric(size_t n) : GeneralRateMatrix
 }
 
 
+/** Free Symmetric Rate Matrix Constructor
+ *
+ * @param n the size matrix
+ * @param r a boolean on whether to rescale the rate matrix
+ *
+ * The matrix exponentiation method is defaulted to EIGEN
+ */
+
 RateMatrix_FreeSymmetric::RateMatrix_FreeSymmetric(size_t n, bool r) : GeneralRateMatrix( n ),
     rescale(r),
     my_method( EIGEN )
@@ -53,6 +67,16 @@ RateMatrix_FreeSymmetric::RateMatrix_FreeSymmetric(size_t n, bool r) : GeneralRa
     update();
 }
 
+
+/** Free Symmetric Rate Matrix Constructor
+ *
+ * @param n the size matrix
+ * @param r a boolean on whether to rescale the rate matrix
+ * @param method a string for the method of matrix exponentiation
+ *
+ * @note options for the matrix exponentiation method are "scalingAndSquaring", "scalingAndSquaringTaylor", "uniformization", and "eigen"
+ *
+ */
 
 RateMatrix_FreeSymmetric::RateMatrix_FreeSymmetric(size_t n, bool r, std::string method) : GeneralRateMatrix( n ),
     rescale(r),
@@ -121,6 +145,15 @@ RateMatrix_FreeSymmetric::~RateMatrix_FreeSymmetric(void)
 }
 
 
+/**
+ * Operator=
+ *
+ * @param r a RateMatrix_FreeSymmetric object
+ *
+ * gives the current RateMatrix_FreeSymmetric object the values of r
+ *
+ */
+
 RateMatrix_FreeSymmetric& RateMatrix_FreeSymmetric::operator=(const RateMatrix_FreeSymmetric &r)
 {
     
@@ -149,6 +182,17 @@ RateMatrix_FreeSymmetric& RateMatrix_FreeSymmetric::operator=(const RateMatrix_F
     return *this;
 }
 
+
+/** assign constructor
+ *
+ * @param m
+ *
+ *
+ * assigns a rate matrix
+ *
+ * @throw RbException if m is NULL
+ *
+ */
 
 RateMatrix_FreeSymmetric& RateMatrix_FreeSymmetric::assign(const Assignable &m)
 {
@@ -248,14 +292,17 @@ void RateMatrix_FreeSymmetric::calculateTransitionProbabilities(double startAge,
     
 }
 
+/**
+* check if the Q matrix is irreducible by checking if there is any element in the P matrix
+* that is smaller than some specified tolerance
+* and if that's the case, fill in the P matrix with all zeros
+* so that the current proposal will certainly get rejected
+* here we assume that all the states in the Q matrix exist in the observed data
+*/
 
 void RateMatrix_FreeSymmetric::checkMatrixIrreducible(double tolerance, TransitionProbabilityMatrix &P) const
 {
-    // check if the Q matrix is irreducible by checking if there is any element in the P matrix
-    // that is smaller than some specified tolerance
-    // and if that's the case, fill in the P matrix with all zeros
-    // so that the current proposal will certainly get rejected
-    // here we assume that all the states in the Q matrix exist in the observed data
+
     bool irreducible = true;
     
     for (size_t i = 0; i < num_states - 1; ++i)
@@ -344,27 +391,35 @@ void RateMatrix_FreeSymmetric::expandUniformization(int truncation, double toler
 }
 
 
-void RateMatrix_FreeSymmetric::expMatrixTaylor(MatrixReal &A, MatrixReal &F, double tolerance) const
+/**
+ *  Scaling and squaring a matrix via a Taylor series
+ *
+ * @param Q the Q matrix
+ * @param F an n state matrix
+ * @param tolerence A tolerence to determine the truncation order of the Taylor series
+ *
+ */
+void RateMatrix_FreeSymmetric::expMatrixTaylor(MatrixReal &Q, MatrixReal &F, double tolerance) const
 {
     // here use the global tolerance to determine the truncation order for Taylor series
     // alternatively, it can be determined according to Table 1 in Moler and Van Loan, 2003
     
     // here we dynamically determine the scaling parameter according to the norm of Q*t
     // first compute the norm of Q*t
-    double normA = 0.0;
+    double normQ = 0.0;
     for (size_t i = 0; i < num_states; ++i)
     {
-        double x = std::abs(A[i][i]);
-        if (x > normA)
-            normA = x;
+        double x = std::abs(Q[i][i]);
+        if (x > normQ)
+            normQ = x;
     }
-    normA *= 2.0;
+    normQ *= 2.0;
     
     // check if the Q matrix is irreducible
     // if that is not the case, directly exit the current function
     // as otherwise the following taylor series or repeated squaring loops may not be finite
     // here we assume that all the states in the Q matrix exist in the observed data
-    if (RbMath::isNan(normA) || normA == 0.0)
+    if (RbMath::isNan(normQ) || normQ == 0.0)
     {
         return;
     }
@@ -378,12 +433,12 @@ void RateMatrix_FreeSymmetric::expMatrixTaylor(MatrixReal &A, MatrixReal &F, dou
     // whose sum differ from the ones computed under the eigen method by about 1e-9 under 0.1 branch length
     // if that turns out to be still insufficient, a larger number should be considered
     // Jiansi Gao 09/07/2017
-    int e = ceil(log2(normA)) + 12;
+    int e = ceil(log2(normQ)) + 12;
     int s = (e < 0) ? 0 : e;
     
     // scale the matrix by 2^s
     double scale = pow(2, s);
-    A *= 1.0/scale;
+    Q *= 1.0/scale;
     
     // the first term of the taylor series is the identity matrix
     for (size_t i = 0; i < num_states; ++i)
@@ -396,7 +451,7 @@ void RateMatrix_FreeSymmetric::expMatrixTaylor(MatrixReal &A, MatrixReal &F, dou
     int fact = 1;
     while (true)
     {
-        MatrixReal m = A * (1.0/fact);
+        MatrixReal m = Q * (1.0/fact);
         F += m;
         
         bool diff = true;
@@ -408,7 +463,7 @@ void RateMatrix_FreeSymmetric::expMatrixTaylor(MatrixReal &A, MatrixReal &F, dou
         
         ++it;
         fact *= it;
-        A *= A;
+        Q *= Q;
     }
     
     //now repeated squaring result s times
@@ -420,17 +475,26 @@ void RateMatrix_FreeSymmetric::expMatrixTaylor(MatrixReal &A, MatrixReal &F, dou
 }
 
 
+
+/**Exponentiate the matrix by scaling and squaring
+ *
+ * @param t the scaling factor
+ * @param p the transition probability matrix
+ *
+ * Here we use the scaling and squaring method with a 4th order Taylor approximant as described in:
+ * Moler, C., & Van Loan, C. 2003. Nineteen dubious ways to compute the exponential of a
+ * matrix, twenty-five years later. SIAM review, 45(1), 3-49.
+ *
+ * @note I tested this implementation against the Eigen C++ package and a scaling parameter s = 6 had similar time
+ * efficiency and returned the same results with about 10^-9 accuracy. The scaling parameter could be
+ * increased for better accuracy.
+ * -- Will Freyman 11/27/16
+ *
+ *
+ */
 void RateMatrix_FreeSymmetric::exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const {
     
-    // Here we use the scaling and squaring method with a 4th order Taylor approximant as described in:
-    //
-    // Moler, C., & Van Loan, C. 2003. Nineteen dubious ways to compute the exponential of a
-    // matrix, twenty-five years later. SIAM review, 45(1), 3-49.
-    //
-    // I tested this implementation against the Eigen C++ package and a scaling parameter s = 6 had similar time
-    // efficiency and returned the same results with about 10^-9 accuracy. The scaling parameter could be
-    // increased for better accuracy.
-    // -- Will Freyman 11/27/16
+
     size_t s = 6;
     
     // first scale the matrix
@@ -507,7 +571,15 @@ void RateMatrix_FreeSymmetric::fillRateMatrix( void )
     needs_update = true;
 }
 
-
+/** Multiply two matrices
+ *
+ * Perform matrix multiplication on matrices p and q. The resulting matrix is given in r
+ *
+ * @param p a transition probability matrix
+ * @param q a transition probability matrix
+ * @param r a transition probability matrix. This will store the output of the product of p and q
+ *
+ */
 inline void RateMatrix_FreeSymmetric::multiplyMatrices(TransitionProbabilityMatrix& p,  TransitionProbabilityMatrix& q,  TransitionProbabilityMatrix& r) const {
     
     // could probably use boost::ublas here, for the moment we do it ourselves.

@@ -1,18 +1,3 @@
-/**
- * @file DistributionExponential
- * This file contains the functions of the exponential distribution.
- *
- * @brief Implementation of the exponential distribution.
- *
- * (c) Copyright 2009- under GPL version 3
- * @date Last modified: $Date$
- * @author The RevBayes core development team
- * @license GPL version 3
- * @version 1.0
- * @since 2011-03-17, version 1.0
- *
- * $Id$
- */
 
 #include <cmath>
 
@@ -28,7 +13,7 @@ using namespace RevBayesCore;
  * \brief Exponential cumulative probability.
  * \param lambda is the rate parameter of the exponential. 
  * \param x is the exponential random variable. 
- * \return Returns the cumulative probability.
+ * \return Returns a double with the cumulative probability.
  * \throws Does not throw an error.
  */
 double RbStatistics::Exponential::cdf(double lambda, double x)
@@ -45,7 +30,7 @@ double RbStatistics::Exponential::cdf(double lambda, double x)
  * \brief Exponential probability density.
  * \param lambda is the rate parameter of the exponential. 
  * \param x is the exponential random variable. 
- * \return Returns the probability density.
+ * \return Returns a double with the probability density.
  * \throws Does not throw an error.
  */
 double RbStatistics::Exponential::pdf(double lambda, double x)

@@ -11,11 +11,10 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 /**
- * LnFunction of a TypedDagNode of RbVector constructor with values of
- * type double.
+ * PowerVectorFunction Constructor
  *
- * @param b RbVector constructor with values of type double
- * @param e value of type double
+ * @param b A RbVector vector of doubles that are the bases
+ * @param e A double that is the exponent for each base
  */
 PowerVectorFunction::PowerVectorFunction(const TypedDagNode<RbVector<double> > *b, const TypedDagNode<double> *e) : TypedFunction<RbVector<double> >( new RbVector<double>(b->getValue().size(),0) ),
     base( b ),

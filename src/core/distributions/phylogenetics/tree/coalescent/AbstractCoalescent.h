@@ -14,14 +14,9 @@ namespace RevBayesCore {
     class TopologyNode;
     
     /**
-     * @file
      * This file contains the declaration of the random variable class for any coalescent process.
      *
      * @brief Declaration of the abstract coalescent process class.
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2015-04-14, version 1.0
      *
      */
     class AbstractCoalescent : public TypedDistribution<Tree> {

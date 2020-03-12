@@ -1,21 +1,4 @@
-/**
- * @file
- * This file contains the implementation of RateMatrix_LG, which is
- * class that holds a rate matrix in RevBayes.
- *
- * @brief Implementation of RateMatrix_LG
- *
- * (c) Copyright 2009- under GPL version 3
- * @date Last modified: $Date: 2012-12-11 14:46:24 +0100 (Tue, 11 Dec 2012) $
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- * @version 1.0
- * @since 2009-08-27, version 1.0
- * @interface Mcmc
- * @package distributions
- *
- * $Id: RateMatrix_LG.cpp 1921 2012-12-11 13:46:24Z wrightam $
- */
+
 
 #include "RateMatrix_LG.h"
 
@@ -31,7 +14,9 @@
 
 using namespace RevBayesCore;
 
-/** Construct rate matrix with n states */
+/** Default constructor for RateMatrix_LG
+ *Constructs a rate matrix with 20 states
+  */
 RateMatrix_LG::RateMatrix_LG( void ) : RateMatrix_Empirical( 20 ){
     
     MatrixReal &m = *the_rate_matrix;

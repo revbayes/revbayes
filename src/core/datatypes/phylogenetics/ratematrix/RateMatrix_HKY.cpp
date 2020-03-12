@@ -59,7 +59,7 @@ RateMatrix_HKY& RateMatrix_HKY::assign(const Assignable &m)
  * @param startAge a double that denotes the start of the branch
  * @param endAge a double that denotes the end of the branch
  * @param rate a double that denotes the overall substitution rate
- * @param p A transition probability matrix
+ * @param P A transition probability matrix
  *
  * Stationary frequencies of nucleotides are also used in this calculation
  *

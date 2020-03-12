@@ -1,17 +1,7 @@
-//
-//  ShortestDistanceFunction.cpp
-//  revbayes-branch-proj
-//
-//  Created by Michael Landis on 2/15/17.
-//  Copyright © 2017 Michael Landis. All rights reserved.
-//
-
 #include "ShortestDistanceFunction.h"
-
 #include <set>
 #include <vector>
 #include <cstddef>
-
 #include "RbConstants.h"
 #include "RbVector.h"
 #include "TypedFunction.h"
@@ -21,6 +11,14 @@
 namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
+
+
+/**
+ * Default Constructor for the ShortestDistanceFunction
+ *
+ * @param adj a vector of vectors of longs that represent a matrix denoting the connectivity of nodes. adj[i][j] > 0 for connected nodes and 0 for disconnected nodes.
+ * @param dist a vector of vectors of doubles that represent a matrix denoting the distance between connected nodes. dist[i][j] denotes the distance between nodes i and j.
+ */
 
 ShortestDistanceFunction::ShortestDistanceFunction(const TypedDagNode<RbVector<RbVector<long> > >* adj, const TypedDagNode<RbVector<RbVector<double> > >* dist) : TypedFunction<RbVector<RbVector<double> > >( new RbVector<RbVector<double> >() ),
 num_nodes( adj->getValue().size() ),
@@ -43,7 +41,16 @@ ShortestDistanceFunction* ShortestDistanceFunction::clone( void ) const
     return new ShortestDistanceFunction(*this);
 }
 
-
+/**
+ * ShortestDistanceFunction::CreateAdjacencySets
+ *
+ * Creates a set for each node that denotes which nodes it is connected to
+ *
+ * @param adj a vector of vectors of type long
+ *
+ * @return s a vector of sets where each set denotes the adjacent nodes for that index in the vector
+ *
+ */
 std::vector<std::set<size_t> > ShortestDistanceFunction::createAdjacencySets(const RbVector<RbVector<long> >& adj)
 {
 
@@ -63,6 +70,16 @@ std::vector<std::set<size_t> > ShortestDistanceFunction::createAdjacencySets(con
     
     return s;
 }
+
+/**
+ * ShortestDistanceFunction::findShortestPaths
+ *
+ * Runs Dijkstra's shortest path algorithm
+ *
+ * @param adj
+ * @param dist
+ *
+ */
 
 RbVector<RbVector<double> > ShortestDistanceFunction::findShortestPaths(const RbVector<RbVector<long> >& adj, const RbVector<RbVector<double> >& dist)
 {

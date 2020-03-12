@@ -20,7 +20,7 @@ template <class valueType> class TypedDagNode;
     public:
         PowerFunction(const TypedDagNode<double> *b, const TypedDagNode<double> *e);
         
-        PowerFunction*                      clone(void) const;                                                  //!< Create a clon.
+        PowerFunction*                      clone(void) const;                                                  //!< Create a clone.
         void                                update(void);                                                       //!< Recompute the value
         
     protected:
