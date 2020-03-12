@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 all_args="$@"
 mpi="false"
@@ -27,12 +28,18 @@ else
     BUILD_DIR="build"
 fi
 
+# This is bad because it overrides any choices the user may have chosen.
 CC=gcc CXX=g++
 
 if [ "$travis" = "true" ]; then
-    CC=${C_COMPILER} CXX=${CXX_COMPILER}
+    CC=${C_COMPILER}
+    CXX=${CXX_COMPILER}
     all_args="-travis true -mpi ${USE_MPI} -help true -exec_name rb"
 fi
+
+export CC
+export CXX
+echo "CC=${CC}  CXX=${CXX}"
 
 if [ "$1" = "clean" ]
 then
@@ -45,7 +52,9 @@ fi
     #################
     # generate git version number
     ./generate_version_number.sh
-    cp ../../src/revlanguage/utils/GitVersion.cpp GitVersion_backup.cpp
+    if [ -e ../../src/revlanguage/utils/GitVersion.cpp ] ; then
+        cp ../../src/revlanguage/utils/GitVersion.cpp GitVersion_backup.cpp
+    fi
     mv GitVersion.cpp ../../src/revlanguage/utils/
 
 	./regenerate.sh ${all_args}
@@ -53,13 +62,15 @@ fi
 	cmake .
 	make -j 4
 	cd ..
-	
-    cp GitVersion_backup.cpp ../../src/revlanguage/utils/GitVersion.cpp
-    rm GitVersion_backup.cpp
+
+    if [ -e  GitVersion_backup.cpp ] ; then
+        cp GitVersion_backup.cpp ../../src/revlanguage/utils/GitVersion.cpp
+        rm GitVersion_backup.cpp
+    fi
 fi
 
 # Run tests
-if [ "$travis" = "true" ] && [ ${TRAVIS_BUILD_STAGE_NAME} = "Test" ]
+if [ "$travis" = "true" ] && [ "${TRAVIS_BUILD_STAGE_NAME}" = "Test" ]
 then
   cd ../..
   echo "\"Hello World\"" | projects/cmake/rb
