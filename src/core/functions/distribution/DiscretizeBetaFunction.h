@@ -4,6 +4,11 @@
 #include "TypedFunction.h"
 #include "RbVector.h"
 
+
+namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
+
 /**
  *
  * @brief Declaration of the discretized Beta function.
@@ -15,11 +20,6 @@
  * @param med a boolean for whether the median value should be used for each category. The mean value is used if set to false
  *
  */
-
-namespace RevBayesCore {
-class DagNode;
-template <class valueType> class TypedDagNode;
-    
     class DiscretizeBetaFunction : public TypedFunction< RbVector<double> >{
         
     public:

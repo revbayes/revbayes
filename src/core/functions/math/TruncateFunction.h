@@ -1,13 +1,3 @@
-/**
- * @file
- * This file contains the declaration of the Truncate functions.
- *
- * @brief Declaration of the Truncate functions.
- * The Truncate function removes all the digits after the decimal to make the number an integer.
- * In other words, truncate is a ceiling function for negative numbers and a floor function for positive numbers.
- *
- */
-
 #ifndef TruncateFunction_H
 #define TruncateFunction_H
 
@@ -17,6 +7,11 @@ namespace RevBayesCore {
 class DagNode;
 template <class valueType> class TypedDagNode;
     
+/**
+ * @brief Declaration of the Truncate functions.
+ * The Truncate function removes all the digits after the decimal to make the number an integer.
+ * In other words, truncate is a ceiling function for negative numbers and a floor function for positive numbers.
+ */
     class TruncateFunction : public TypedFunction<long> {
         
     public:

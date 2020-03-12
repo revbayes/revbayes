@@ -51,10 +51,10 @@ class DagNode;
 
         // members
         
-        const TypedDagNode<MatrixReal>*                     omega0;
-        const TypedDagNode<double>*                         kappa;
-        const TypedDagNode<long>*                           df;
-        const TypedDagNode<long>*                           dim;
+        const TypedDagNode<MatrixReal>*                     omega0;     //!<The scaling matrix
+        const TypedDagNode<double>*                         kappa;      //!<A value for the diagonal elements of the scaling matrix
+        const TypedDagNode<long>*                           df;         //!<The degrees of freedom
+        const TypedDagNode<long>*                           dim;        //!<The number of dimensions of the scaling matrix
         
     };
     

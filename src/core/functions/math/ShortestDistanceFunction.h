@@ -38,10 +38,10 @@ template <class valueType> class TypedDagNode;
         std::vector<std::set<size_t> >                          createAdjacencySets(const RbVector<RbVector<long> >& adj);
         RbVector<RbVector<double> >                             findShortestPaths(const RbVector<RbVector<long> >& adj, const RbVector<RbVector<double> >& dist);
         
-        size_t                                                  num_nodes;
+        size_t                                                  num_nodes; //!< The number of nodes in the graph
         
-        const TypedDagNode<RbVector<RbVector<long> > >*          adjacencies;
-        const TypedDagNode<RbVector<RbVector<double> > >*       distances;
+        const TypedDagNode<RbVector<RbVector<long> > >*          adjacencies; //!< The connectivity of nodes in the graph
+        const TypedDagNode<RbVector<RbVector<double> > >*       distances; //!< The distances between connected nodes
     };
 }
 

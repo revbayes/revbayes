@@ -13,7 +13,7 @@ namespace RevBayesCore { class DagNode; }
 using namespace RevBayesCore;
 
 
-/*
+/**
  * Default Constructor for the ShortestDistanceFunction
  *
  * @param adj a vector of vectors of longs that represent a matrix denoting the connectivity of nodes. adj[i][j] > 0 for connected nodes and 0 for disconnected nodes.
@@ -41,7 +41,7 @@ ShortestDistanceFunction* ShortestDistanceFunction::clone( void ) const
     return new ShortestDistanceFunction(*this);
 }
 
-/*
+/**
  * ShortestDistanceFunction::CreateAdjacencySets
  *
  * Creates a set for each node that denotes which nodes it is connected to
@@ -71,7 +71,8 @@ std::vector<std::set<size_t> > ShortestDistanceFunction::createAdjacencySets(con
     return s;
 }
 
-/* ShortestDistanceFunction::findShortestPaths
+/**
+ * ShortestDistanceFunction::findShortestPaths
  *
  * Runs Dijkstra's shortest path algorithm
  *

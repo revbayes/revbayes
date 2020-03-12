@@ -1,9 +1,4 @@
-/**
- * @file
- * This file contains the implementation of RateMatrix_Jones, which is
- * class that holds a rate matrix in RevBayes.
- *
- */
+
 
 #include "RateMatrix_Jones.h"
 

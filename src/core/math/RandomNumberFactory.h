@@ -1,12 +1,4 @@
-/**
- * @file
- * This file contains the declaration of RandomNumberFactory, which is
- * used to manage random number generating objects. The class has a pool
- * of random number objects that it can hand off as needed. This singleton
- * class has two seeds it manages: one is a global seed and the other is
- * is a so called local seed.
- *
- */
+
 
 #ifndef RandomNumberFactory_H
 #define RandomNumberFactory_H
@@ -20,6 +12,15 @@ namespace RevBayesCore {
 
     class RandomNumberGenerator;
 
+    /**
+     * @brief RandomNumberFactory class declaration
+     * The class RandomNumberFactory is
+     * used to manage random number generating objects. The class has a pool
+     * of random number objects that it can hand off as needed. This singleton
+     * class has two seeds it manages: one is a global seed and the other is
+     * is a so called local seed.
+     *
+     */
     class RandomNumberFactory {
 
 	public:

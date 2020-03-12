@@ -13,8 +13,9 @@ namespace RevLanguage {
      *
      * The RevLanguage wrapper of the sum function connects
      * the variables/parameters of the function and creates the internal MaxFunction object.
-     * Please read the MaxFunction.h for more info.
      *
+     * @copybrief RevBayesCore::MaxFunction
+     * @see RevBayesCore::MaxFunction for the internal object
      */
     class Func_max :  public TypedFunction<Real> {
         
