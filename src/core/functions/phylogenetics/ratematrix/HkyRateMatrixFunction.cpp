@@ -17,8 +17,6 @@ using namespace RevBayesCore;
  * This function takes two inputs:
  * @param k The transition-transversion ratio (kappa)
  * @param bf The simplex of base frequencies
- *
- * @return A HKY rate matrix object.
  */
 
 HkyRateMatrixFunction::HkyRateMatrixFunction(const TypedDagNode<double> *k, const TypedDagNode< Simplex > *bf) : TypedFunction<RateGenerator>( new RateMatrix_HKY() ),

@@ -18,8 +18,6 @@ using namespace RevBayesCore;
  * @param k1 The ratio of transitions (A<->G, C<->T) to A<->C, G<->T transversions
  * @param k2 The ratio of A<->T, C<->G transversions to A<->C, G<->T transversions
  * @param bf The simplex of base frequencies
- *
- * @return A Kimura81 rate matrix object.
  */
 
 Kimura81RateMatrixFunction::Kimura81RateMatrixFunction(const TypedDagNode<double> *k1, const TypedDagNode<double> *k2, const TypedDagNode< Simplex > *bf) : TypedFunction<RateGenerator>( new RateMatrix_Kimura81(bf->getValue().size()) ),

@@ -35,7 +35,7 @@ template <class valueType> class TypedDagNode;
         double                                              computeLnProbability(void);
         double                                              getMax(void) const;
         double                                              getMin(void) const;
-        double                                              quantile(double p) const;                                                       //!< Qu
+        double                                              quantile(double p) const;                                                   
         void                                                redrawValue(void);
         const TypedDagNode<double>*                         getMean() const {return mean;}
         const TypedDagNode<double>*                         getStDev() const {return stDev;}

@@ -29,7 +29,7 @@ class DagNode;
 template <class valueType> class TypedDagNode;
 
 /**
- * @brief LognormalWithOffset distribution class.
+ * @brief Lognormal distribution with offset.
  *
  * The LognormalWithOffset distribution represents a family of distributions defined on those positive real numbers
  * that are greater than the value of the offset parameter. The LognormalWithOffset distribution has 3 parameters:
@@ -53,7 +53,7 @@ template <class valueType> class TypedDagNode;
         double                                              computeLnProbability(void);
         double                                              getMax(void) const;
         double                                              getMin(void) const;
-        double                                              quantile(double p) const;                                                       //!< Qu
+        double                                              quantile(double p) const;                                                   
         void                                                redrawValue(void);
         
     protected:
