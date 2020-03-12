@@ -9,13 +9,13 @@
 #include "Simplex.h"
 #include "Taxon.h"
 #include "Tree.h"
+#include "TreeDiscreteCharacterData.h"
 #include "TreeChangeEventListener.h"
 #include "TypedDagNode.h"
 #include "RbVector.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "RlString.h"
-
 
 #include <vector>
 
@@ -65,6 +65,7 @@ namespace RevBayesCore {
         
         double                                                            computeLnProbability(void);
         void                                                              fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                                                 //!< The tree has changed and we want to know which part.
+        const AbstractHomologousDiscreteCharacterData&                    getCharacterData() const;
         virtual void                                                      redrawValue(void);
         virtual void                                                      setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
         
@@ -84,6 +85,7 @@ namespace RevBayesCore {
         // updating function
         void                                                              prepareParameters(bool force = false);
         void                                                              updateTree(bool force = false);
+        void                                                              updateTreeData(bool force = false);
         void                                                              updateRootFrequency(bool force = false);
         void                                                              updateLambda(bool force = false);
         void                                                              updateMu(bool force = false);
@@ -97,12 +99,12 @@ namespace RevBayesCore {
         void                                                              updateOmega(bool force = false);
         void                                                              updateZeta(bool force = false);
 
-        std::vector<double>                                               toStd(const Simplex &obj);
-        std::vector<double>                                               toStd(const RbVector<double> &obj);
-        std::vector< std::vector<double> >                                toStd(const RbVector< RbVector<double>> &obj);
-        std::vector< std::vector< std::vector<double> > >                 toStd(const RbVector< RateGenerator > &obj);
-        std::vector< std::vector< std::vector<double> > >                 toStd(const RbVector< MatrixReal > &obj);
-        std::vector< std::map< std::vector<unsigned>, double > >          toStd(const RbVector< CladogeneticProbabilityMatrix > &obj);
+        std::vector<double>                                               RbToStd(const Simplex &obj);
+        std::vector<double>                                               RbToStd(const RbVector<double> &obj);
+        std::vector< std::vector<double> >                                RbToStd(const RbVector< RbVector<double>> &obj);
+        std::vector< std::vector< std::vector<double> > >                 RbToStd(const RbVector< RateGenerator > &obj);
+        std::vector< std::vector< std::vector<double> > >                 RbToStd(const RbVector< MatrixReal > &obj);
+        std::vector< std::map< std::vector<unsigned>, double > >          RbToStd(const RbVector< CladogeneticProbabilityMatrix > &obj);
 
         // revbayes parameters
 		const TypedDagNode< double>*                                     age;
