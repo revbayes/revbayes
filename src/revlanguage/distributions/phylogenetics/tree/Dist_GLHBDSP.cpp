@@ -108,53 +108,6 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                                        w_times = static_cast<const ModelVector< RealPos> &>( omega_times->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::MatrixReal > >*                    z_mats  = static_cast<const ModelVector< StochasticMatrix > &>( zeta->getRevObject() ).getDagNode();
 
-    // checks for safety
-    std::cout << "Checking argument sizes." << std::endl;
-    if ( l_rates->getValue().size() != l_times->getValue().size() + 1 )
-    {
-    	throw RbException( "Number of lambda vectors does not match the number of intervals." );
-    }
-    if ( m_rates->getValue().size() != m_times->getValue().size() + 1 )
-    {
-    	throw RbException( "Number of mu vectors does not match the number of intervals." );
-    }
-    if ( p_rates->getValue().size() != p_times->getValue().size() + 1 )
-    {
-    	throw RbException( "Number of phi vectors does not match the number of intervals." );
-    }
-    if ( d_rates->getValue().size() != d_times->getValue().size() + 1 )
-    {
-    	throw RbException( "Number of delta vectors does not match the number of intervals." );
-    }
-    if ( u_probs->getValue().size() != u_times->getValue().size() )
-    {
-    	throw RbException( "Number of mass-speciation events does not match the number of times." );
-    }
-    if ( g_probs->getValue().size() != g_times->getValue().size() )
-    {
-    	throw RbException( "Number of mass-extinction events does not match the number of times." );
-    }
-    if ( z_mats->getValue().size() != g_times->getValue().size() )
-    {
-    	throw RbException( "Number of mass-extinction associated state-change matrices does not match the number of times." );
-    }
-    if ( r_probs->getValue().size() != r_times->getValue().size() )
-    {
-    	throw RbException( "Number of mass-sampling events does not match the number of times." );
-    }
-    if ( x_probs->getValue().size() != x_times->getValue().size() )
-    {
-    	throw RbException( "Number of mass-destructive-sampling events does not match the number of times." );
-    }
-    if ( h_mats->getValue().size() != h_times->getValue().size() + 1 )
-    {
-    	throw RbException( "Number of eta matrices does not match the number of intervals." );
-    }
-    if ( w_mats->getValue().size() != w_times->getValue().size() + 1 )
-    {
-    	throw RbException( "Number of omega matrices does not match the number of intervals." );
-    }
-
     // make the distribution
     std::cout << "Creating the distribution object." << std::endl;
     RevBayesCore::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess* d = new RevBayesCore::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess(
