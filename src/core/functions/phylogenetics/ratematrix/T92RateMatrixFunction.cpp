@@ -8,6 +8,14 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
+/**
+ * Default constructor.
+ *
+ * This function takes two inputs:
+ * @param eqGc The compound equilibrium frequency of bases G and C
+ * @param tstv The transition-transversion ratio (kappa)
+ */
+
 T92RateMatrixFunction::T92RateMatrixFunction(const TypedDagNode< double > *eqGc, const TypedDagNode< double > *tstv) : TypedFunction<RateGenerator>( new RateMatrix_Tamura92( ) ),
     equilibriumGc( eqGc ),
     transitionTransversionRate( tstv )

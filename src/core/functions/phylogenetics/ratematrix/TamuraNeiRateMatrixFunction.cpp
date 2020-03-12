@@ -12,6 +12,14 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
+/**
+ * Default constructor.
+ *
+ * This function takes three inputs:
+ * @param k1 The ratio of A<->G transitions to transversions
+ * @param k2 The ratio of C<->T transitions to transversions
+ * @param bf The simplex of base frequencies
+ */
 
 TamuraNeiRateMatrixFunction::TamuraNeiRateMatrixFunction(const TypedDagNode<double> *k1, const TypedDagNode<double> *k2, const TypedDagNode< Simplex > *bf) : TypedFunction<RateGenerator>( new RateMatrix_TamuraNei(bf->getValue().size()) ),
     kappa_1( k1 ),
