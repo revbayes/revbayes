@@ -10,16 +10,13 @@ class Simplex;
 template <class valueType> class TypedDagNode;
     
     /**
-     * @brief GTR rate matrix function.
+     * @brief General Time-Reversible rate matrix function.
      *
-     * This function creates the GTR rates matrix object by setting the exchangeability rates
+     * This function creates the GTR rate matrix object by setting the exchangeability rates
      * and the base frequencies. The rate matrix takes care of the setting of the actual rates and transition probabilities.
      *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since Version 1.0, 2014-07-04
-     *
+     * @param er The simplex of exchangeabilities
+     * @param bf The simplex of stationary base frequencies
      */
     class GtrRateMatrixFunction : public TypedFunction<RateGenerator> {
         
