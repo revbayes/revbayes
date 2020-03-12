@@ -180,6 +180,8 @@ MESSAGE("My Boost information:")
 MESSAGE("  Boost_INCLUDE_DIRS: ${LOCAL_BOOST_ROOT}")
 MESSAGE("  Boost_LIBRARIES: ${LOCAL_BOOST_LIBRARY}")
 
+set(Boost_USE_MULTITHREADED ON)
+
 if ( NOT ${LOCAL_BOOST_ROOT} STREQUAL "" AND NOT ${LOCAL_BOOST_LIBRARY} STREQUAL "" )
    SET(BOOST_ROOT ${LOCAL_BOOST_ROOT})
    SET(BOOST_LIBRARY ${LOCAL_BOOST_LIBRARY})
@@ -229,7 +231,7 @@ then
 #################
 # generate help database
 echo "Generating help database"
-perl ../help/md2help.pl ../help/md/* > core/help/RbHelpDatabase.cpp
+perl ../help/md2help.pl ../help/md/*.md > core/help/RbHelpDatabase.cpp
 
 echo '
 add_subdirectory(help2yml)
