@@ -9,7 +9,17 @@
 namespace RevBayesCore {
 class DagNode;
 template <class valueType> class TypedDagNode;
-    
+
+/**
+     * @brief The Tree Scale Function
+     *
+     * A core function for scaling the length of the tree. This function scales internal edges of the tree and adjusts the tip ages to the age specified in the parameter TipAges
+     * The class also has the following member variables:
+     *  @param tau the phylogenetic tree to be scaled
+     *  @param scale the value to multiply internal node ages by
+     *  @param tipAges the new ages of the tips after scaling
+     *  @param scaleLimit The scale parameter should always be less than the max of the tipAges, denoted here
+     */
     class TreeScaleFunction : public TypedFunction<Tree> {
         
     public:

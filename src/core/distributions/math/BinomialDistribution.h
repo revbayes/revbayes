@@ -12,8 +12,8 @@ template <class valueType> class TypedDagNode;
      *
      * The Binomial distribution represents a family of distributions defined
      * on the natural number. The Binomial distribution has 2 parameters:
-     *   n .. the number of trials
-     *   p .. the probability of success
+     *@param  n The number of trials
+     *@param  p The probability of success
      * Instances of this class can be associated to stochastic variables.
      */
     class BinomialDistribution : public TypedDistribution<long> {

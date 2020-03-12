@@ -8,6 +8,15 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
+/*
+ * Tajimas Pi Function Constructor
+ *
+ * @param a A character data set with the alignment
+ * @param ps A boolean for whether we calculate Tajimas Pi per site
+ * @param excl A boolean for whether we exclude the ambiguous sites from the alignment
+ */
+
+
 TajimasPiFunction::TajimasPiFunction(const TypedDagNode<AbstractHomologousDiscreteCharacterData> *a, bool ps, bool excl) : TypedFunction<double>( new double(0.0) ),
     alignment( a ),
     per_site( ps ),

@@ -1,7 +1,5 @@
 #include "LogisticFunction.h"
-
 #include <cmath>
-
 #include "Cloneable.h"
 #include "TypedDagNode.h"
 
