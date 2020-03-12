@@ -92,29 +92,29 @@ jobs:
           - g++-8
           - pandoc
           - boost1.67
-    - os: osx
-      osx_image: xcode9.4
-      env: PYTHON=3.5.1
-        USE_MPI="false"
-      addons:
-       homebrew:
-         update: true
-         packages:
-           - ccache
-      install:
-       - export PATH="/usr/local/opt/ccache/libexec:$PATH"
-      cache: ccache
-    - os: osx
-      osx_image: xcode10.2
-      env: PYTHON=3.5.1
-        USE_MPI="false"
-      addons:
-       homebrew:
-         packages:
-           - ccache
-      install:
-       - export PATH="/usr/local/opt/ccache/libexec:$PATH"
-      cache: ccache
+    #- os: osx
+    #  osx_image: xcode9.4
+    #  env: PYTHON=3.5.1
+    #    USE_MPI="false"
+    #  addons:
+    #   homebrew:
+    #     update: true
+    #     packages:
+    #       - ccache
+    #  install:
+    #   - export PATH="/usr/local/opt/ccache/libexec:$PATH"
+    #  cache: ccache
+    #- os: osx
+    #  osx_image: xcode10.2
+    #  env: PYTHON=3.5.1
+    #    USE_MPI="false"
+    #  addons:
+    #   homebrew:
+    #     packages:
+    #       - ccache
+    #  install:
+    #   - export PATH="/usr/local/opt/ccache/libexec:$PATH"
+    #  cache: ccache
 
     # # stage for building the cache, without tests
     # - stage: cache
