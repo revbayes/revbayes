@@ -2,6 +2,8 @@
 
 SRC=../../src
 
+./generate_help.sh
+
 ./generate_includes.sh
 
 echo "
