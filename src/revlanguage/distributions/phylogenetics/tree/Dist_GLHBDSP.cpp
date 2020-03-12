@@ -41,6 +41,10 @@ Dist_GLHBDSP::Dist_GLHBDSP() : TypedDistribution<TimeTree>()
 
 }
 
+Dist_GLHBDSP::~Dist_GLHBDSP()
+{
+
+}
 
 /**
  * The clone function is a convenience function to create proper copies of inherited objected.
@@ -66,14 +70,11 @@ Dist_GLHBDSP* Dist_GLHBDSP::clone( void ) const
  */
 RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistribution( void ) const
 {
-
-	std::cout << "Calling constructor for the GLHBDSP." << std::endl;
-
     // the start age
     RevBayesCore::TypedDagNode<double>* sa = static_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
 
     // the start type
-    bool uo = ( start_type == "originAge" ? true : false );
+    bool uo = start_type == "originAge" ? true : false;
 
     // root frequency
     RevBayesCore::TypedDagNode<RevBayesCore::Simplex >* root_freq = static_cast<const Simplex &>( root_frequencies->getRevObject() ).getDagNode();;
@@ -108,10 +109,12 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                                        w_times = static_cast<const ModelVector< RealPos> &>( omega_times->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::MatrixReal > >*                    z_mats  = static_cast<const ModelVector< StochasticMatrix > &>( zeta->getRevObject() ).getDagNode();
 
+    // taxa
+    std::vector<RevBayesCore::Taxon> tax = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+
     // make the distribution
-    std::cout << "Creating the distribution object." << std::endl;
     RevBayesCore::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess* d = new RevBayesCore::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess(
-    	sa, cond, root_freq,
+    	tax, sa, cond, root_freq,
 		l_rates, l_times,
 		m_rates, m_times,
 		p_rates, p_times,
@@ -126,7 +129,6 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
 		uo);
 
     // return the distribution
-    std::cout << "Done." << std::endl;
     return d;
 
 }
@@ -258,7 +260,14 @@ const MemberRules& Dist_GLHBDSP::getParameterRules(void) const
 		std::vector<std::string> options_condition;
 		options_condition.push_back( "time" );
 		options_condition.push_back( "survival" );
+		options_condition.push_back( "sampled" );
+		options_condition.push_back( "sampledExtant" );
+		options_condition.push_back( "tree" );
+		options_condition.push_back( "treeExtant" );
 		dist_member_rules.push_back( new OptionRule( "condition", new RlString("time"), options_condition, "The condition of the process." ) );
+
+		// taxa
+        dist_member_rules.push_back( new ArgumentRule( "taxa", ModelVector<Taxon>::getClassTypeSpec(), "The taxa used for simulation.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
 
         rules_set = true;
     }
@@ -390,6 +399,10 @@ void Dist_GLHBDSP::setConstParameter(const std::string& name, const RevPtr<const
 	else if ( name == "condition" )
 	{
 		condition = var;
+	}
+	else if ( name == "taxa" )
+	{
+		taxa = var;
 	}
 	else
 	{
