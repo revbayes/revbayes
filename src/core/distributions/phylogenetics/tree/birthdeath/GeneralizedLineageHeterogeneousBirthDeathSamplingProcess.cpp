@@ -1,9 +1,15 @@
 #include <string>
 
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "GeneralizedLineageHeterogeneousBirthDeathSamplingProcess.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlString.h"
+#include "HomologousDiscreteCharacterData.h"
+#include "DiscreteCharacterState.h"
+#include "DiscreteTaxonData.h"
+#include "NaturalNumbersState.h"
 #include "TopologyNode.h"
 #include "Taxon.h"
 #include "Tree.h"
@@ -14,6 +20,7 @@ using namespace RevBayesCore;
  * Constructor.
 */
 GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess(
+	const std::vector<Taxon>&                                       taxa_,
 	const TypedDagNode<double>*                                     age_,
 	const std::string&                                              condition_type_,
 	const TypedDagNode<Simplex >*                                   root_frequency_,
@@ -40,6 +47,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	const TypedDagNode<RbVector< MatrixReal > >*                    zeta_,
 	bool                                                            use_origin_
 ) : TypedDistribution<Tree>( new TreeDiscreteCharacterData() ),
+	taxa(taxa_),
 	age(age_),
 	condition_type(condition_type_),
 	root_frequency(root_frequency_),
@@ -79,6 +87,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	omega_dirty(true),
 	zeta_dirty(true)
 {
+
 	// add the parameters
 	addParameter(age);
 	addParameter(root_frequency);
@@ -110,6 +119,9 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
     // update the parameters
     prepareParameters(true);
 
+    // simulate the tree
+    simulateTree();
+
 }
 
 /**
@@ -138,6 +150,80 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::~GeneralizedLineageHet
     value->getTreeChangeEventHandler().removeListener( this );
 }
 
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::buildSerialSampledRandomBinaryTree(Tree *psi, std::vector<TopologyNode*> &nodes, const std::vector<double> &ages)
+{
+
+	// Get the rng
+	RandomNumberGenerator* rng = GLOBAL_RNG;
+
+	// make a vector of active nodes, and a vector of serial nodes
+	std::vector<TopologyNode*> active_nodes;
+	std::vector<TopologyNode*> extinct_nodes;
+
+	for(int i = 0; i < nodes.size(); ++i)
+	{
+		if ( nodes.at(i)->getAge() == 0.0 )
+		{
+			active_nodes.push_back( nodes.at(i) );
+		}
+		else
+		{
+			extinct_nodes.push_back( nodes.at(i) );
+		}
+	}
+
+	// loop backward through ages
+	size_t num_ages = ages.size();
+	double current_time = 0.0;
+
+	for(int i = num_ages - 1; i >= 0; i--)
+	{
+		// get the current time
+		double current_time = ages[i];
+
+		// check if any extinct nods become active
+		size_t num_extinct = extinct_nodes.size();
+		for(int j = num_extinct - 1; j >= 0; --j)
+		{
+			if ( extinct_nodes.at(j)->getAge() < current_time )
+			{
+				// add the extinct node to the active nodes list, remove it from the extinct nodes list
+				active_nodes.push_back( extinct_nodes.at(j) );
+				extinct_nodes.erase( extinct_nodes.begin() + long(j) );
+			}
+		}
+
+		// randomly draw one child (arbitrarily called left) node from the list of active nodes
+		size_t left = static_cast<size_t>( floor( rng->uniform01() * active_nodes.size() ) );
+		TopologyNode* leftChild = active_nodes.at(left);
+
+		// remove the randomly drawn node from the list
+		active_nodes.erase( active_nodes.begin() + long(left) );
+
+		// randomly draw one child (arbitrarily called left) node from the list of active nodes
+		size_t right = static_cast<size_t>( floor( rng->uniform01() * active_nodes.size() ) );
+		TopologyNode* rightChild = active_nodes.at(right);
+
+		// remove the randomly drawn node from the list
+		active_nodes.erase( active_nodes.begin() + long(right) );
+
+		// make sure ages are consistent
+
+		// add the parent
+		size_t num_taxa = taxa.size();
+		TopologyNode* parent = new TopologyNode(i + num_taxa);
+		parent->addChild(leftChild);
+		parent->addChild(rightChild);
+		leftChild->setParent(parent);
+		rightChild->setParent(parent);
+		parent->setAge( current_time );
+		parent->setNodeType( false, false, true );
+		active_nodes.push_back(parent);
+		nodes.push_back(parent);
+
+	}
+
+}
 
 double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbability(void)
 {
@@ -158,16 +244,51 @@ const RevBayesCore::AbstractHomologousDiscreteCharacterData& GeneralizedLineageH
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::redrawValue(void)
 {
-
+	// just simulate with a uniform tree and all missing data
+    simulateTree();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v, bool f)
 {
-
+	// check that tree is binary
     if (v->isBinary() == false)
     {
         throw RbException("The process is only implemented for binary trees.");
     }
+
+    // check the taxon labels in the current tree and new tree
+    std::vector<std::string> param_taxa;
+    size_t num_taxa = taxa.size();
+    for(size_t i = 0; i < num_taxa; ++i)
+    {
+    	param_taxa.push_back( taxa[i].getName() );
+    }
+    std::vector<std::string> input_taxa   = v->getSpeciesNames();
+    std::vector<std::string> current_taxa = value->getSpeciesNames();
+
+    // check that the number of taxa match
+    if ( input_taxa.size() != num_taxa )
+    {
+    	throw RbException("Number of taxa in the new tree does not match number of taxa in the old tree.");
+    }
+
+    // sort the labels
+    std::sort(param_taxa.begin(),   param_taxa.end());
+    std::sort(input_taxa.begin(),   input_taxa.end());
+    std::sort(current_taxa.begin(), current_taxa.end());
+    for(size_t i = 0; i < num_taxa; ++i)
+    {
+    	if ( current_taxa[i] != param_taxa[i] )
+    	{
+    		throw RbException("Something went wrong. The taxon labels in the current tree do not match the taxon labels in the distribution object.");
+    	}
+    	if ( input_taxa[i] != current_taxa[i] )
+    	{
+    		throw RbException("Taxon labels in the new tree do not match with taxon labels in the original tree.");
+    	}
+    }
+
+    // swap the listener
     value->getTreeChangeEventHandler().removeListener( this );
 
     // set the tree
@@ -179,10 +300,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
     // add this object to the tree change event handler
     value->getTreeChangeEventHandler().addListener( this );
 
-    // TODO: update the tensorphylo object with the new tree
-    // we should probability initialize the tip data to ?
-
-
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter)
@@ -191,6 +308,29 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::getAffected(RbOrd
     {
         dag_node->initiateGetAffectedNodes( affected );
     }
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::initializeEmptyCharData(void)
+{
+	// get the tip labels from the tree
+    std::vector<std::string> tips = value->getTipNames();
+
+    // get the number of states in the model
+    size_t num_states = lambda->getValue()[0].size();
+
+    // create a new data object
+    HomologousDiscreteCharacterData<NaturalNumbersState> *tip_data = new HomologousDiscreteCharacterData<NaturalNumbersState>();
+    for (size_t i = 0; i < tips.size(); i++)
+    {
+        DiscreteTaxonData<NaturalNumbersState> this_tip_data = DiscreteTaxonData<NaturalNumbersState>(tips[i]);
+        NaturalNumbersState state = NaturalNumbersState(0, num_states);
+        state.setState("?");
+        this_tip_data.addCharacter(state);
+        tip_data->addTaxonData(this_tip_data);
+    }
+
+    // store the new value for the discrete data
+    static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData(tip_data);
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecialization(DagNode* affecter)
@@ -228,11 +368,109 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::prepareParameters
 
 }
 
-
-
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecialization(DagNode *restorer)
 {
 
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::simulateTree(void)
+{
+	// throw a warning that this is not a correct simulation
+	// throw RbException(RbException::DEFAULT, "Warning: simulating tree under uniform model.");
+
+	// simulating a tree
+    delete value;
+
+    // Get the rng
+    RandomNumberGenerator* rng = GLOBAL_RNG;
+
+    // Create the time tree object (topology + times)
+    Tree *psi = new Tree();
+
+    // Root the topology by setting the appropriate flag
+    psi->setRooted( true );
+
+    // make a vector of tip nodes
+    std::vector<TopologyNode* > nodes;
+
+    // set tip names
+    size_t num_taxa = taxa.size();
+    for (size_t i=0; i<num_taxa; ++i)
+    {
+        // get the node from the list
+        TopologyNode* node = new TopologyNode(i);
+
+        // set name and age
+        const std::string& name = taxa[i].getName();
+        node->setName(name);
+        node->setSpeciesName(taxa[i].getSpeciesName());
+        node->setAge(taxa[i].getAge());
+        node->setNodeType( true, false, false );
+        node->setTaxon(taxa[i]);
+
+        // add to tips
+        nodes.push_back(node);
+    }
+
+    // get times for simulation
+    std::vector<double> ages = simulateCoalescentAges();
+
+    // recursively build the tree
+    buildSerialSampledRandomBinaryTree(psi, nodes, ages);
+
+    // initialize the topology by setting the root
+    TopologyNode* root = nodes[nodes.size() - 1];
+    psi->setRoot(root, true);
+
+    // store the new value for the tree
+    value = psi;
+
+    // set tip states to missing
+    initializeEmptyCharData();
+
+}
+
+std::vector<double> GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::simulateCoalescentAges() const
+{
+    // Get the rng
+    RandomNumberGenerator* rng = GLOBAL_RNG;
+
+    // create the container for the ages
+    std::vector<double> ages;
+
+    // for each tip, simulate an age between max age and tip age
+    double max_age = age->getValue();
+    size_t num_taxa = taxa.size();
+    size_t num_ages;
+    if ( use_origin == false )
+    {
+    	// root age provided
+    	ages.push_back(max_age);
+    	num_ages = num_taxa - 2;
+    }
+    else
+    {
+    	// stem age provided
+    	num_ages = num_taxa - 1;
+    }
+
+    for(size_t i = 0; i < num_ages; ++i)
+    {
+    	// get the age of the tip
+    	double a = taxa[i + 1].getAge();
+
+    	// simulate the age of a node
+    	double new_age = a + rng->uniform01() * (max_age - a);
+
+    	//add the age to the vector of ages
+    	ages.push_back(new_age);
+    }
+
+    // sort the ages (from youngest to oldest)
+    std::sort(ages.begin(), ages.end(), std::greater<double>());
+
+    // return the ages
+    return ages;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecialization(DagNode *affecter, bool touchAll)
@@ -658,33 +896,38 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> GeneralizedLineageHeterogeneousBir
     {
         found = true;
 
+    	// get the incoming data
         const AbstractHomologousDiscreteCharacterData& v = static_cast<const TypedDagNode<AbstractHomologousDiscreteCharacterData > *>( args[0] )->getValue();
 
-        // check if the tip names match
-        bool match = true;
-        std::vector<std::string> tips = value->getTipNames();
-        for (size_t i = 0; i < tips.size(); i++)
+        // check the taxon labels in the current tree and new tree
+        std::vector<std::string> param_taxa;
+        size_t num_taxa = taxa.size();
+
+        std::vector<Taxon> input_tax = v.getTaxa();
+        std::vector<std::string> input_taxa(input_tax.size());
+        for(size_t i = 0; i < input_tax.size(); ++i)
         {
-            found = false;
-            for (size_t j = 0; j < v.getNumberOfTaxa(); j++)
-            {
-                if (tips[i] == v[j].getTaxonName())
-                {
-                    found = true;
-                    break;
-                }
-            }
-            if (found == false)
-            {
-                match = false;
-                break;
-            }
-        }
-        if (match == false)
-        {
-            throw RbException("To clamp a character data object all taxa present in the tree must be present in the character data.");
+        	input_taxa[i] = input_tax[i].getName();
         }
 
+        // check that the number of taxa match
+        if ( input_taxa.size() != num_taxa )
+        {
+        	throw RbException("Number of taxa in the character data does not match number of taxa in the tree.");
+        }
+
+        // sort the labels
+        std::sort(param_taxa.begin(), param_taxa.end());
+        std::sort(input_taxa.begin(), input_taxa.end());
+        for(size_t i = 0; i < num_taxa; ++i)
+        {
+        	if ( input_taxa[i] != input_taxa[i] )
+        	{
+        		throw RbException("Taxon labels in the new character data do not match with taxon labels in the tree.");
+        	}
+        }
+
+        // copy the input data
         static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData( v.clone() );
 
         return NULL;
