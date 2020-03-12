@@ -11,6 +11,13 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
+/**
+ * Default constructor.
+ *
+ * This function takes two inputs:
+ * @param k The transition-transversion ratio (kappa)
+ * @param bf The simplex of base frequencies
+ */
 
 HkyRateMatrixFunction::HkyRateMatrixFunction(const TypedDagNode<double> *k, const TypedDagNode< Simplex > *bf) : TypedFunction<RateGenerator>( new RateMatrix_HKY() ),
     base_frequencies( bf ),

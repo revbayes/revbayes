@@ -11,15 +11,13 @@ template <class valueType> class TypedDagNode;
     /**
      * @brief K80 rate matrix function.
      *
-     * This function creates the K80 rates matrix object by setting the transition-transversion parameter kappa.
+     * This function creates the Kimura80 rate matrix object by setting the transition-transversion parameter kappa.
      * The rate matrix takes care of the setting of the actual rates and transition probabilities.
      *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since Version 1.0, 2014-11-18
+     * @param k The transition-transversion ratio (kappa)
      *
      */
+
     class K80RateMatrixFunction : public TypedFunction<RateGenerator> {
         
     public:
