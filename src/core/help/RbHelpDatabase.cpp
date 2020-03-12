@@ -11,7 +11,15 @@ using namespace std;
 RevBayesCore::RbHelpDatabase::RbHelpDatabase()
 {
 	help_strings[string("AbstractHomologousDiscreteCharacterData")][string("name")] = string(R"(AbstractHomologousDiscreteCharacterData)");
+	help_arrays[string("Bool")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("Bool")][string("description")] = string(R"(Bool variables can be either `true` or `false` (`TRUE` or `FALSE` also work).)");
+	help_strings[string("Bool")][string("example")] = string(R"(a <- FALSE
+if(!a)
+print("a is not true")
+# this will print the statement in parentheses)");
 	help_strings[string("Bool")][string("name")] = string(R"(Bool)");
+	help_strings[string("Bool")][string("title")] = string(R"(Datatype for logical variables.)");
+	help_arrays[string("BootstrapAnalysis")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("BootstrapAnalysis")][string("name")] = string(R"(BootstrapAnalysis)");
 	help_strings[string("BranchLengthTree")][string("description")] = string(R"(The Tree datatype stores information to describe the shared ancestry of a taxon set. Information includes taxon labels, topology, nodecount, and branch lengths. Tree objects also possess several useful methods to traverse and manipulate the Tree's value.)");
 	help_strings[string("BranchLengthTree")][string("name")] = string(R"(BranchLengthTree)");
@@ -63,7 +71,16 @@ y := Probability(x)
 type(y))");
 	help_strings[string("Probability")][string("name")] = string(R"(Probability)");
 	help_strings[string("RateGenerator")][string("name")] = string(R"(RateGenerator)");
+	help_strings[string("Real")][string("description")] = string(R"(The real number data type can hold any real number value.
+Not to be confused with integers which are whole numbers, or
+`Natural` which are the counting numbers (e.g. 1,2,3,...).)");
+	help_strings[string("Real")][string("example")] = string(R"(a = 1.1
+b = 1.3
+c = a + b
+# c will be 2.4)");
 	help_strings[string("Real")][string("name")] = string(R"(Real)");
+	help_arrays[string("Real")][string("see_also")].push_back(string(R"(`RealPos`, `Integer`, `Natural`, `Probability`)"));
+	help_strings[string("Real")][string("title")] = string(R"(Real number data type)");
 	help_strings[string("RealPos")][string("name")] = string(R"(RealPos)");
 	help_strings[string("RevObject")][string("name")] = string(R"(RevObject)");
 	help_strings[string("Simplex")][string("name")] = string(R"(Simplex)");
@@ -1233,7 +1250,13 @@ map_tree = mapTree(trace=tree_trace, file="map.tree"))");
 	help_arrays[string("mapTree")][string("see_also")].push_back(string(R"(treeTrace)"));
 	help_arrays[string("mapTree")][string("see_also")].push_back(string(R"(readTreeTrace)"));
 	help_strings[string("matrix")][string("name")] = string(R"(matrix)");
+	help_strings[string("max")][string("description")] = string(R"(Finds the maximum of a vector of numbers.)");
+	help_strings[string("max")][string("example")] = string(R"(a = v(1,2,3,4,5)
+max(a) 
+# this will print 5)");
 	help_strings[string("max")][string("name")] = string(R"(max)");
+	help_arrays[string("max")][string("see_also")].push_back(string(R"(`min`)"));
+	help_strings[string("max")][string("title")] = string(R"(Maximum of a set of numbers)");
 	help_arrays[string("maxdiff")][string("authors")].push_back(string(R"(Will Pett)"));
 	help_strings[string("maxdiff")][string("description")] = string(R"(Finds the maximum difference in clade probabilities between two posterior samples.)");
 	help_strings[string("maxdiff")][string("example")] = string(R"(# Read in tree trace
@@ -1342,9 +1365,35 @@ myMcmcmcObject.operatorSummary())");
 	help_references[string("mcmcmc")].push_back(RbHelpReference(R"(Altekar, G.; Dwarkadas, S.; Huelsenbeck, J. P. & Ronquist, F. Parallel metropolis coupled Markov chain Monte Carlo for Bayesian phylogenetic inference Bioinformatics, Oxford Univ Press, 2004, 20, 407-415.)",R"()",R"()"));
 	help_arrays[string("mcmcmc")][string("see_also")].push_back(string(R"(mcmc)"));
 	help_strings[string("mcmcmc")][string("title")] = string(R"(Metropolis-Coupled MCMC analysis object)");
+	help_strings[string("mean")][string("description")] = string(R"(Finds the arithmetic mean of a vector of numbers.)");
+	help_strings[string("mean")][string("details")] = string(R"(The numbers of the vector are summed and divided by the vector length.)");
+	help_strings[string("mean")][string("example")] = string(R"(g = v(2,3,5,6,7)
+mean(g)
+# 4.6)");
 	help_strings[string("mean")][string("name")] = string(R"(mean)");
+	help_strings[string("mean")][string("title")] = string(R"(Mean of a vector of numbers)");
+	help_strings[string("median")][string("description")] = string(R"(Finds the median of a sorted vector of numbers.)");
+	help_strings[string("median")][string("details")] = string(R"(The vector is sorted when `median` is used finding the
+number of the sorted values with an equal amount of numbers that
+are greater than or less than that value. If the length of the 
+vector is even there will be no two such values, in that case
+the two are averaged arithmetically.)");
+	help_strings[string("median")][string("example")] = string(R"(a = v(5,3,2,6,8)
+median(a)
+# 5 is the result
+b = v(1,1,2,3,5,8)
+median(b)
+# 2.5 is the result)");
 	help_strings[string("median")][string("name")] = string(R"(median)");
+	help_arrays[string("median")][string("see_also")].push_back(string(R"(`mean`)"));
+	help_strings[string("median")][string("title")] = string(R"(Median of a set of numbers)");
+	help_strings[string("min")][string("description")] = string(R"(Finds the minimum of a vector of numbers.)");
+	help_strings[string("min")][string("example")] = string(R"(a = v(0,1,1,2,3,5,8,13)
+min(a)
+# will print 0)");
 	help_strings[string("min")][string("name")] = string(R"(min)");
+	help_arrays[string("min")][string("see_also")].push_back(string(R"(`max`)"));
+	help_strings[string("min")][string("title")] = string(R"(Minimum of a set of numbers)");
 	help_strings[string("mnAncestralState")][string("name")] = string(R"(mnAncestralState)");
 	help_strings[string("mnCharHistoryNewick")][string("name")] = string(R"(mnCharHistoryNewick)");
 	help_strings[string("mnCharHistoryNhx")][string("name")] = string(R"(mnCharHistoryNhx)");
@@ -2021,7 +2070,16 @@ print(trees))");
 	help_strings[string("rep")][string("title")] = string(R"(Replicate a value)");
 	help_strings[string("rootedTripletDist")][string("name")] = string(R"(rootedTripletDist)");
 	help_strings[string("round")][string("name")] = string(R"(round)");
+	help_strings[string("seed")][string("description")] = string(R"(Sets the random number generator seed given a natural number.)");
+	help_strings[string("seed")][string("example")] = string(R"(# pick some definitely random number
+seed(80797980)
+a <- rUniform(1,0.6,1.2)
+a
+seed(80797980)
+a <- rUniform(1,0.6,1.2)
+a # this will b the same as above!)");
 	help_strings[string("seed")][string("name")] = string(R"(seed)");
+	help_strings[string("seed")][string("title")] = string(R"(Seed set function)");
 	help_arrays[string("seq")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("seq")][string("description")] = string(R"(Create a sequence of values separate by a given step-size.)");
 	help_strings[string("seq")][string("details")] = string(R"(The 'seq' function create a sequence of values, starting with the initial value and then adding the step-size to it until the value reaches the 'to'-value.)");
@@ -2062,9 +2120,31 @@ getwd())");
 	help_strings[string("simStartingTree")][string("name")] = string(R"(simStartingTree)");
 	help_strings[string("simTree")][string("name")] = string(R"(simTree)");
 	help_strings[string("sinh")][string("name")] = string(R"(sinh)");
+	help_strings[string("sort")][string("description")] = string(R"(Function for sorting the members of a vector in either ascending or descending order.)");
+	help_strings[string("sort")][string("details")] = string(R"(The vector to be sorted can be of any numeric type. Ascending or descending is specified via the `ascending` argument)");
+	help_strings[string("sort")][string("example")] = string(R"(nums = v(1,3,5,7,2,4,6,8)
+sort(nums)
+# this will result in 1,2,3,4,5,6,7,8
+sort(nums, ascending = FALSE) 
+# this will result in 8,7,6,5,4,3,2,1)");
 	help_strings[string("sort")][string("name")] = string(R"(sort)");
+	help_strings[string("sort")][string("title")] = string(R"(Sort function)");
+	help_strings[string("source")][string("description")] = string(R"(This function takes a Rev filename as an argument and runs that Rev script.)");
+	help_strings[string("source")][string("example")] = string(R"(# what the file name
+fn = "rb_tutorial.Rev"
+# the source function will run the Rev code in the file fn
+source(fn))");
 	help_strings[string("source")][string("name")] = string(R"(source)");
+	help_strings[string("source")][string("title")] = string(R"(Function for sourcing a Rev file)");
+	help_strings[string("sqrt")][string("description")] = string(R"(Takes the square root of some positive number `x`.)");
+	help_strings[string("sqrt")][string("example")] = string(R"(sqrt(4)
+# returns 2
+sqrt(sqrt(4))
+# returns an approximation of the irrational root 2. 
+# keep an eye out for Pythagoras, he wasn't a fan!)");
 	help_strings[string("sqrt")][string("name")] = string(R"(sqrt)");
+	help_arrays[string("sqrt")][string("see_also")].push_back(string(R"(`power`)"));
+	help_strings[string("sqrt")][string("title")] = string(R"(Square root function)");
 	help_strings[string("srGelmanRubin")][string("name")] = string(R"(srGelmanRubin)");
 	help_strings[string("srGeweke")][string("name")] = string(R"(srGeweke)");
 	help_strings[string("srMaxIteration")][string("name")] = string(R"(srMaxIteration)");
@@ -2087,7 +2167,13 @@ str(b))");
 	help_strings[string("structure")][string("name")] = string(R"(structure)");
 	help_arrays[string("structure")][string("see_also")].push_back(string(R"(type)"));
 	help_strings[string("structure")][string("title")] = string(R"(The structure of a variable)");
+	help_strings[string("sum")][string("description")] = string(R"(Sums all members of a vector of type `Real`, `RealPos`, `Integer`,
+or `Natural`)");
+	help_strings[string("sum")][string("example")] = string(R"(a = v(1,2,3,4,5,6,7,8)
+sum(a)
+# returns 36)");
 	help_strings[string("sum")][string("name")] = string(R"(sum)");
+	help_strings[string("sum")][string("title")] = string(R"(Sum function)");
 	help_strings[string("summarizeCharacterMaps")][string("name")] = string(R"(summarizeCharacterMaps)");
 	help_strings[string("symmetricDifference")][string("name")] = string(R"(symmetricDifference)");
 	help_arrays[string("system")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
@@ -2123,7 +2209,23 @@ for (i in 1:10000) sum += i
 time())");
 	help_strings[string("time")][string("name")] = string(R"(time)");
 	help_strings[string("time")][string("title")] = string(R"(Get the time information)");
+	help_strings[string("tmrca")][string("description")] = string(R"(Finds the most recent common ancestor (TMRCA) of a clade of taxa on a tree.)");
+	help_strings[string("tmrca")][string("example")] = string(R"(# let's make up some taxa 
+taxa = v("horse", "whale", "unicorn", "narwhal")
+# convert these to the taxon datatype
+for(i in 1:4) { taxa[i] = taxon(taxa[i]) }
+# simulate a tree
+tau ~ dnUniformTimeTree(rootAge=1, taxa=taxa)
+# we also need a molecular substitution model
+molecular_model := fnJC(4)
+# together these form a continuous time Markov chain over the tree
+full_model ~ dnPhyloCTMC(tree=tau, Q=molecular_model, nSites = 100, type="DNA")
+# need to make a clade
+horned_animals <- clade(taxa[3], taxa[4])
+tmrca(tau, horned_animals))");
 	help_strings[string("tmrca")][string("name")] = string(R"(tmrca)");
+	help_arrays[string("tmrca")][string("see_also")].push_back(string(R"(`clade`)"));
+	help_strings[string("tmrca")][string("title")] = string(R"(Find the time to the most recent common ancestor)");
 	help_arrays[string("treeTrace")][string("authors")].push_back(string(R"(Will Freyman)"));
 	help_strings[string("treeTrace")][string("description")] = string(R"(Creates a tree trace object from a vector of trees.)");
 	help_strings[string("treeTrace")][string("example")] = string(R"(# Read in a vector of trees
@@ -2175,6 +2277,45 @@ z[0])");
 	help_strings[string("vectorFlatten")][string("name")] = string(R"(vectorFlatten)");
 	help_strings[string("write")][string("name")] = string(R"(write)");
 	help_strings[string("writeCharacterDataDelimited")][string("name")] = string(R"(writeCharacterDataDelimited)");
+	help_strings[string("writeFasta")][string("description")] = string(R"(This function writes out a FASTA formatted file given 
+data of class `AbstractHomologousDiscreteCharacterData`.
+Filename is specified using the`fn` argument.)");
+	help_strings[string("writeFasta")][string("example")] = string(R"(# let's make up some taxa 
+taxa = v("horse", "whale", "unicorn", "narwhal")
+# convert these to the taxon datatype
+for(i in 1:4) { taxa[i] = taxon(taxa[i]) }
+# simulate a tree
+tau ~ dnUniformTimeTree(rootAge=1, taxa=taxa)
+# we also need a molecular substitution model
+molecular_model := fnJC(4)
+# together these form a continuous time Markov chain over the tree
+full_model ~ dnPhyloCTMC(tree=tau, Q=molecular_model, nSites = 100, type="DNA")
+# this will print a FASTA file with a simulated molecular matrix
+# to the working directory
+writeFasta(filename="test.fasta", full_model))");
 	help_strings[string("writeFasta")][string("name")] = string(R"(writeFasta)");
+	help_references[string("writeFasta")].push_back(RbHelpReference(R"(Pearson, William R., and David J. Lipman. "Improved tools for biological sequence comparison." Proceedings of the National Academy of Sciences 85.8 (1988): 2444-2448. )",R"()",R"()"));
+	help_references[string("writeFasta")].push_back(RbHelpReference(R"()",R"()",R"(https://www.pnas.org/content/85/8/2444.short )"));
+	help_references[string("writeFasta")].push_back(RbHelpReference(R"()",R"(https://doi.org/10.1073/pnas.85.8.2444)",R"()"));
+	help_arrays[string("writeFasta")][string("see_also")].push_back(string(R"(`writeNexus`, `writeCharacterDataDelimited`)"));
+	help_strings[string("writeFasta")][string("title")] = string(R"(FASTA file writing function)");
+	help_strings[string("writeNexus")][string("description")] = string(R"(Function for writing a nexus file.)");
+	help_strings[string("writeNexus")][string("details")] = string(R"(The first argument is the filename  to write to and this must be a string.
+The second argument is a data object that must be some character matrix. 
+This data matrix could be a morphological matrix, a molecular matrix, or a tree.)");
+	help_strings[string("writeNexus")][string("example")] = string(R"(# let's make up some taxa
+taxa = v("horse", "whale", "unicorn", "narwhal")
+# simulate a tree
+tau ~ dnUniformTimeTree(rootAge=1, taxa=taxa)
+# we also need a molecular substitution model
+molecular_model := fnJC(4)
+# together these form a continuous time Markov chain over the tree
+full_model ~ dnPhyloCTMC(tree=tau, Q=molecular_model, nSites = 100, type="DNA")
+# this will print a Nexus file with a simulated molecular matrix
+# to the working directory
+writeNexus(filename="test.nex", full_model))");
 	help_strings[string("writeNexus")][string("name")] = string(R"(writeNexus)");
+	help_references[string("writeNexus")].push_back(RbHelpReference(R"(David R. Maddison, David L. Swofford, Wayne P. Maddison, Nexus: An Extensible File Format for Systematic Information, Systematic Biology, Volume 46, Issue 4, December 1997, Pages 590–621,)",R"(https://doi.org/10.1093/sysbio/46.4.590)",R"(https://academic.oup.com/sysbio/article/46/4/590/1629695)"));
+	help_arrays[string("writeNexus")][string("see_also")].push_back(string(R"(`writeFasta`, `writeCharacterDataDelimited`, `write`)"));
+	help_strings[string("writeNexus")][string("title")] = string(R"(Nexus file writer)");
 }
