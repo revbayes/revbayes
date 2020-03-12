@@ -10,9 +10,10 @@
 #include "ModelVector.h"
 #include "OptionRule.h"
 #include "Probability.h"
+#include "RealPos.h"
 #include "RlCladogeneticProbabilityMatrix.h"
 #include "RlRateGenerator.h"
-#include "RealPos.h"
+#include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlSimplex.h"
 #include "RlStochasticMatrix.h"
 #include "RlString.h"
@@ -239,6 +240,13 @@ std::string Dist_GLHBDSP::getDistributionFunctionName( void ) const
 MethodTable Dist_GLHBDSP::getDistributionMethods( void ) const
 {
     MethodTable methods = TypedDistribution<TimeTree>::getDistributionMethods();
+
+    ArgumentRules* clampCharDataArgRules = new ArgumentRules();
+    clampCharDataArgRules->push_back( new ArgumentRule( "value", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The observed value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure( "clampCharData", RlUtils::Void, clampCharDataArgRules ) );
+
+    ArgumentRules* getCharDataArgRules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "getCharData", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), getCharDataArgRules ) );
 
     return methods;
 }

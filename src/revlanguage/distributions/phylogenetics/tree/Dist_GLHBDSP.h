@@ -2,6 +2,7 @@
 #define Dist_GLHBDSP_H
 
 #include "RlTimeTree.h"
+#include "TreeDiscreteCharacterData.h"
 #include "RlTypedDistribution.h"
 
 namespace RevLanguage {
@@ -38,7 +39,7 @@ namespace RevLanguage {
 
 
         // Distribution functions you have to override
-        RevBayesCore::TypedDistribution<RevBayesCore::Tree>*    createDistribution(void) const;
+        RevBayesCore::TypedDistribution<RevBayesCore::Tree>* createDistribution(void) const;
 
     protected:
 
@@ -49,7 +50,7 @@ namespace RevLanguage {
 
         // age
         RevPtr<const RevVariable>  start_age;       //!< The age at the start of the process
-        std::string                start_type; //!< The start condition of the process (rootAge/originAge)
+        std::string                start_type;      //!< The start condition of the process (rootAge/originAge)
 
         // regular events (and times)
         RevPtr<const RevVariable>  lambda;          //!< The speciation rates for each state for each epoch
@@ -79,8 +80,8 @@ namespace RevLanguage {
         RevPtr<const RevVariable>  zeta;            //!< The probabilities of state change at each mass-extinction event
 
         // other parameters
-        RevPtr<const RevVariable> root_frequencies; //!< The frequencies of the states at the root
-        RevPtr<const RevVariable> condition;        //!< The condition of the process
+        RevPtr<const RevVariable>  root_frequencies; //!< The frequencies of the states at the root
+        RevPtr<const RevVariable>  condition;        //!< The condition of the process
 
     };
 

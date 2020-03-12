@@ -1,4 +1,12 @@
+#include <string>
+
+#include "AbstractHomologousDiscreteCharacterData.h"
 #include "GeneralizedLineageHeterogeneousBirthDeathSamplingProcess.h"
+#include "RlAbstractHomologousDiscreteCharacterData.h"
+#include "RlString.h"
+#include "TopologyNode.h"
+#include "Taxon.h"
+#include "Tree.h"
 
 using namespace RevBayesCore;
 
@@ -71,7 +79,6 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	omega_dirty(true),
 	zeta_dirty(true)
 {
-
 	// add the parameters
 	addParameter(age);
 	addParameter(root_frequency);
@@ -141,6 +148,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::fireTreeChangeEve
 	// TODO: update the tensorphylo object with the new tree
 }
 
+const RevBayesCore::AbstractHomologousDiscreteCharacterData& GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::getCharacterData() const
+{
+    return static_cast<TreeDiscreteCharacterData*>(this->value)->getCharacterData();
+}
+
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::redrawValue(void)
 {
 
@@ -190,7 +202,20 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecializatio
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::prepareParameters(bool force)
 {
-
+	// make sure all the parametes are up-to-date
+	updateTree(force);
+	updateRootFrequency(force);
+	updateLambda(force);
+	updateMu(force);
+	updatePhi(force);
+	updateDelta(force);
+	updateUpsilon(force);
+	updateGamma(force);
+	updateRho(force);
+	updateXi(force);
+	updateEta(force);
+	updateOmega(force);
+	updateZeta(force);
 }
 
 
@@ -225,7 +250,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecializati
 
 }
 
-std::vector<double> GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::toStd(const Simplex &obj)
+std::vector<double> GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::RbToStd(const Simplex &obj)
 {
 	std::vector<double> std_object;
 	for(size_t i = 0; i < std_object.size(); ++i) {
@@ -234,7 +259,7 @@ std::vector<double> GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::to
 	return std_object;
 }
 
-std::vector<double> GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::toStd(const RbVector<double> &obj)
+std::vector<double> GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::RbToStd(const RbVector<double> &obj)
 {
 	std::vector<double> std_object;
 	for(size_t i = 0; i < std_object.size(); ++i) {
@@ -243,7 +268,7 @@ std::vector<double> GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::to
 	return std_object;
 }
 
-std::vector< std::vector<double> > GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::toStd(const RbVector< RbVector<double>> &obj)
+std::vector< std::vector<double> > GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::RbToStd(const RbVector< RbVector<double>> &obj)
 {
 	std::vector< std::vector<double> > std_object;
 	for(size_t i = 0; i < std_object.size(); ++i) {
@@ -256,7 +281,7 @@ std::vector< std::vector<double> > GeneralizedLineageHeterogeneousBirthDeathSamp
 	return std_object;
 }
 
-std::vector< std::vector< std::vector<double> > > GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::toStd(const RbVector< RateGenerator > &obj)
+std::vector< std::vector< std::vector<double> > > GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::RbToStd(const RbVector< RateGenerator > &obj)
 {
 	std::vector< std::vector< std::vector<double> > > std_object;
 	for(size_t i = 0; i < std_object.size(); ++i) {
@@ -275,7 +300,7 @@ std::vector< std::vector< std::vector<double> > > GeneralizedLineageHeterogeneou
 	return std_object;
 }
 
-std::vector< std::vector< std::vector<double> > > GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::toStd(const RbVector< MatrixReal > &obj)
+std::vector< std::vector< std::vector<double> > > GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::RbToStd(const RbVector< MatrixReal > &obj)
 {
 	std::vector< std::vector< std::vector<double> > > std_object;
 	for(size_t i = 0; i < std_object.size(); ++i) {
@@ -294,10 +319,11 @@ std::vector< std::vector< std::vector<double> > > GeneralizedLineageHeterogeneou
 	return std_object;
 }
 
-std::vector< std::map< std::vector<unsigned>, double > > GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::toStd(const RbVector< CladogeneticProbabilityMatrix > &obj)
+std::vector< std::map< std::vector<unsigned>, double > > GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::RbToStd(const RbVector< CladogeneticProbabilityMatrix > &obj)
 {
 	std::vector< std::map< std::vector<unsigned >, double >> std_object;
-	for(size_t i = 0; i < std_object.size(); ++i) {
+	for(size_t i = 0; i < std_object.size(); ++i)
+	{
 		std_object.push_back( obj[i].getEventMap() );
 	}
 	return std_object;
@@ -305,14 +331,18 @@ std::vector< std::map< std::vector<unsigned>, double > > GeneralizedLineageHeter
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool force)
 {
-
+	if ( force | tree_dirty )
+	{
+		std::string var = this->getValue().getNewickRepresentation();
+		// TODO: send var to tensorphylo
+	}
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateRootFrequency(bool force)
 {
 	if ( force | root_freq_dirty )
 	{
-		std::vector<double> var = toStd( root_frequency->getValue() );
+		std::vector<double> var = RbToStd( root_frequency->getValue() );
 		// TODO: send var to tensorphylo
 	}
 }
@@ -321,8 +351,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateLambda(bool
 {
 	if ( force | lambda_dirty )
 	{
-		std::vector< std::vector<double> > params = toStd( lambda->getValue() );
-		std::vector<double>                times  = toStd( lambda_times->getValue() );
+		std::vector< std::vector<double> > params = RbToStd( lambda->getValue() );
+		std::vector<double>                times  = RbToStd( lambda_times->getValue() );
 		// TODO: send var to tensorphylo
 	}
 }
@@ -331,8 +361,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateMu(bool for
 {
 	if ( force | mu_dirty )
 	{
-		std::vector< std::vector<double> > params = toStd( mu->getValue() );
-		std::vector<double>                times  = toStd( mu_times->getValue() );
+		std::vector< std::vector<double> > params = RbToStd( mu->getValue() );
+		std::vector<double>                times  = RbToStd( mu_times->getValue() );
 		// TODO: send var to tensorphylo
 	}
 }
@@ -341,8 +371,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updatePhi(bool fo
 {
 	if ( force | phi_dirty )
 	{
-		std::vector< std::vector<double> > params = toStd( phi->getValue() );
-		std::vector<double>                times  = toStd( phi_times->getValue() );
+		std::vector< std::vector<double> > params = RbToStd( phi->getValue() );
+		std::vector<double>                times  = RbToStd( phi_times->getValue() );
 		// TODO: send var to tensorphylo
 	}
 }
@@ -351,8 +381,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateDelta(bool 
 {
 	if ( force | delta_dirty )
 	{
-		std::vector< std::vector<double> > params = toStd( delta->getValue() );
-		std::vector<double>                times  = toStd( delta_times->getValue() );
+		std::vector< std::vector<double> > params = RbToStd( delta->getValue() );
+		std::vector<double>                times  = RbToStd( delta_times->getValue() );
 		// TODO: send var to tensorphylo
 	}
 }
@@ -361,8 +391,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateUpsilon(boo
 {
 	if ( force | upsilon_dirty )
 	{
-		std::vector< std::vector<double> > params = toStd( upsilon->getValue() );
-		std::vector<double>                times  = toStd( upsilon_times->getValue() );
+		std::vector< std::vector<double> > params = RbToStd( upsilon->getValue() );
+		std::vector<double>                times  = RbToStd( upsilon_times->getValue() );
 		// TODO: send var to tensorphylo
 	}
 }
@@ -371,8 +401,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateGamma(bool 
 {
 	if ( force | gamma_dirty )
 	{
-		std::vector< std::vector<double> > params = toStd( gamma->getValue() );
-		std::vector<double>                times  = toStd( gamma_times->getValue() );
+		std::vector< std::vector<double> > params = RbToStd( gamma->getValue() );
+		std::vector<double>                times  = RbToStd( gamma_times->getValue() );
 		// TODO: send var to tensorphylo
 	}
 }
@@ -381,8 +411,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateRho(bool fo
 {
 	if ( force | rho_dirty )
 	{
-		std::vector< std::vector<double> > params = toStd( rho->getValue() );
-		std::vector<double>                times  = toStd( rho_times->getValue() );
+		std::vector< std::vector<double> > params = RbToStd( rho->getValue() );
+		std::vector<double>                times  = RbToStd( rho_times->getValue() );
 		// TODO: send var to tensorphylo
 	}
 }
@@ -391,8 +421,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateXi(bool for
 {
 	if ( force | xi_dirty )
 	{
-		std::vector< std::vector<double> > params = toStd( xi->getValue() );
-		std::vector<double>                times  = toStd( xi_times->getValue() );
+		std::vector< std::vector<double> > params = RbToStd( xi->getValue() );
+		std::vector<double>                times  = RbToStd( xi_times->getValue() );
 		// TODO: send var to tensorphylo
 	}
 }
@@ -401,8 +431,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateEta(bool fo
 {
 	if ( force | mu_dirty )
 	{
-		std::vector< std::vector< std::vector<double> > > params = toStd( eta->getValue() );
-		std::vector<double>                               times  = toStd( eta_times->getValue() );
+		std::vector< std::vector< std::vector<double> > > params = RbToStd( eta->getValue() );
+		std::vector<double>                               times  = RbToStd( eta_times->getValue() );
 		// TODO: send var to tensorphylo
 	}
 }
@@ -411,8 +441,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateOmega(bool 
 {
 	if ( force | mu_dirty )
 	{
-		std::vector< std::map< std::vector<unsigned>, double > > params = toStd( omega->getValue() );
-		std::vector<double>                                      times  = toStd( omega_times->getValue() );
+		std::vector< std::map< std::vector<unsigned>, double > > params = RbToStd( omega->getValue() );
+		std::vector<double>                                      times  = RbToStd( omega_times->getValue() );
 		// TODO: send var to tensorphylo
 	}
 }
@@ -421,15 +451,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateZeta(bool f
 {
 	if ( force | mu_dirty )
 	{
-		std::vector< std::vector< std::vector<double> > > params = toStd( zeta->getValue() );
+		std::vector< std::vector< std::vector<double> > > params = RbToStd( zeta->getValue() );
 		// TODO: send var to tensorphylo
 	}
 }
-
-
-
-
-
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
@@ -520,17 +545,56 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::swapParameterInte
 }
 
 
-
-
-
-
-
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const
 {
+
 }
 
 RevLanguage::RevPtr<RevLanguage::RevVariable> GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::executeProcedure(const std::string &name, const std::vector<DagNode *> args, bool &found)
 {
+    if (name == "clampCharData")
+    {
+        found = true;
+
+        const AbstractHomologousDiscreteCharacterData& v = static_cast<const TypedDagNode<AbstractHomologousDiscreteCharacterData > *>( args[0] )->getValue();
+
+        // check if the tip names match
+        bool match = true;
+        std::vector<std::string> tips = value->getTipNames();
+        for (size_t i = 0; i < tips.size(); i++)
+        {
+            found = false;
+            for (size_t j = 0; j < v.getNumberOfTaxa(); j++)
+            {
+                if (tips[i] == v[j].getTaxonName())
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (found == false)
+            {
+                match = false;
+                break;
+            }
+        }
+        if (match == false)
+        {
+            throw RbException("To clamp a character data object all taxa present in the tree must be present in the character data.");
+        }
+
+        static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData( v.clone() );
+
+        return NULL;
+    }
+
+    if (name == "getCharData")
+    {
+        found = true;
+        RevLanguage::AbstractHomologousDiscreteCharacterData *tip_states = new RevLanguage::AbstractHomologousDiscreteCharacterData( getCharacterData() );
+        return new RevLanguage::RevVariable( tip_states );
+    }
+
 	return TypedDistribution<Tree>::executeProcedure( name, args, found );
 }
 
