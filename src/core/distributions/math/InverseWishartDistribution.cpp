@@ -16,7 +16,8 @@ namespace RevBayesCore { class RandomNumberGenerator; }
 using namespace RevBayesCore;
 
 
-/*Default Constructor for the Inverse Wishart Distribution
+/**
+ * Default Constructor for the Inverse Wishart Distribution
  * @param insigma0 A scale matrix of positive real numbers
  * @param indf a positive long number for the degrees of freedom
  *

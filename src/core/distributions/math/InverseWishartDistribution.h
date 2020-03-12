@@ -29,9 +29,9 @@ template <class valueType> class RbVector;
         
     public:
         
-        InverseWishartDistribution(const TypedDagNode<MatrixReal> *insigma0, const TypedDagNode<long>* indf); //!< inverse InverseWishart distribution of parameter sigma0 and df degrees of freedom
-        InverseWishartDistribution(const TypedDagNode<RbVector<double> > *inkappaVector, const TypedDagNode<long>* indf); //!< inverse InverseWishart distribution of parameter sigma0 = Diagonal(kappaVector) and df degrees of freedom
-        InverseWishartDistribution(const TypedDagNode<long>* indim, const TypedDagNode<double> *inkappa, const TypedDagNode<long>* indf);  //<! inverse InverseWishart distribution of parameter sigma0 kappa * Identitymatrix and df degrees of freedom
+        InverseWishartDistribution(const TypedDagNode<MatrixReal> *insigma0, const TypedDagNode<long>* indf);
+        InverseWishartDistribution(const TypedDagNode<RbVector<double> > *inkappaVector, const TypedDagNode<long>* indf);
+        InverseWishartDistribution(const TypedDagNode<long>* indim, const TypedDagNode<double> *inkappa, const TypedDagNode<long>* indf);
 
         virtual                                            ~InverseWishartDistribution(void) {}
         
