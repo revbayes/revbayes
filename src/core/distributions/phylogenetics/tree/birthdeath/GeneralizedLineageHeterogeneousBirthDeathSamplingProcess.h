@@ -33,6 +33,7 @@ namespace RevBayesCore {
         
     public:
         GeneralizedLineageHeterogeneousBirthDeathSamplingProcess(
+        	const std::vector<Taxon>&                                       taxa_,
 			const TypedDagNode<double>*                                     age_,
 			const std::string&                                              condition_type_,
 			const TypedDagNode<Simplex >*                                   root_frequency_,
@@ -71,6 +72,12 @@ namespace RevBayesCore {
         
     protected:
         
+        // simulation functions
+        void                                                              simulateTree(void);
+        void                                                              buildSerialSampledRandomBinaryTree(Tree *psi, std::vector<TopologyNode*> &nodes, const std::vector<double> &ages);
+        std::vector<double>                                               simulateCoalescentAges() const;
+        void                                                              initializeEmptyCharData();
+
         // virtual methods that may be overwritten, but then the derived class should call this methods
         virtual void                                                      getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter);                                  //!< get affected nodes
         virtual void                                                      keepSpecialization(DagNode* affecter);
@@ -105,6 +112,9 @@ namespace RevBayesCore {
         std::vector< std::vector< std::vector<double> > >                 RbToStd(const RbVector< RateGenerator > &obj);
         std::vector< std::vector< std::vector<double> > >                 RbToStd(const RbVector< MatrixReal > &obj);
         std::vector< std::map< std::vector<unsigned>, double > >          RbToStd(const RbVector< CladogeneticProbabilityMatrix > &obj);
+
+        // taxa
+        std::vector<Taxon> taxa;
 
         // revbayes parameters
 		const TypedDagNode< double>*                                     age;

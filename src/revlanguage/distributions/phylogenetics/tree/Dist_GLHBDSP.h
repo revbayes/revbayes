@@ -26,6 +26,7 @@ namespace RevLanguage {
     public:
 
     	Dist_GLHBDSP( void );
+        virtual ~Dist_GLHBDSP(); //!< Virtual destructor
 
         // Basic utility functions
         Dist_GLHBDSP*                                           clone(void) const;                                                                      //!< Clone the object
@@ -39,7 +40,7 @@ namespace RevLanguage {
 
 
         // Distribution functions you have to override
-        RevBayesCore::TypedDistribution<RevBayesCore::Tree>* createDistribution(void) const;
+        RevBayesCore::TypedDistribution<RevBayesCore::Tree>*    createDistribution(void) const;
 
     protected:
 
@@ -47,6 +48,9 @@ namespace RevLanguage {
 
 
     private:
+
+        // taxa
+        RevPtr<const RevVariable>  taxa;            //!< The taxa in the tree
 
         // age
         RevPtr<const RevVariable>  start_age;       //!< The age at the start of the process
