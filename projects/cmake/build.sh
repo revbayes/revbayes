@@ -1,8 +1,7 @@
 #!/bin/sh
-
 set -e
 
-all_args=$@
+all_args="$@"
 mpi="false"
 travis="false"
 # parse command line arguments
@@ -36,8 +35,6 @@ if [ "$travis" = "true" ]; then
     CC=${C_COMPILER}
     CXX=${CXX_COMPILER}
     all_args="-travis true -mpi ${USE_MPI} -help true -exec_name rb"
-else
-    all_args=""
 fi
 
 export CC
