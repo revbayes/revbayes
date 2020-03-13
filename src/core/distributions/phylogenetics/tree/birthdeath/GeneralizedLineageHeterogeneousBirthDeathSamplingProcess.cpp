@@ -137,6 +137,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
     prepareParameters(true);
 
     // set the condition type
+    tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::TIME);
     if ( condition_type != "time" )
     {
         if ( use_origin )
@@ -170,6 +171,8 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
         	}
         }
     }
+
+    // include
 
 }
 
@@ -290,6 +293,12 @@ double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbab
 
     // flag the likelihood as up-to-date
     probability_dirty = false;
+
+    // NOTE: this likelihood differs from the one computed in other revbayes
+    // distributions because we include the probability density of the root node.
+    // that probability density drops out if we condition on anything but time, in which
+    // case this likelihood will be equivalent to a likelihood from other revbayes
+    // birth-death models
 
     return current_ln_prob;
 }
@@ -881,7 +890,15 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateData(bool f
 		for(size_t i = 0; i < num_taxa; ++i)
 		{
 			const AbstractDiscreteTaxonData& this_taxon_data = dat.getTaxonData(taxa[i].getName());
-			taxon_map[taxa[i].getName()] = this_taxon_data[0].getWeights();
+			RbBitSet this_bit_set = this_taxon_data[0].getState();
+			size_t num_states = this_bit_set.size();
+			std::vector<double> this_taxon_states(num_states);
+			for(size_t j = 0; j < num_states; ++j)
+			{
+				this_taxon_states[j] = this_bit_set[j] == true ? 1.0 : 0.0;
+			}
+			taxon_map[taxa[i].getName()] = this_taxon_states;
+
 			taxon_names[i] = taxa[i].getName();
 		}
 
