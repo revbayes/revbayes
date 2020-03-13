@@ -19,7 +19,7 @@ using namespace RevBayesCore;
  * @param bf The simplex of base frequencies
  */
 
-TimRateMatrixFunction::TimRateMatrixFunction(const TypedDagNode< Simplex > *er, const TypedDagNode< Simplex > *bf) : TypedFunction<RateGenerator>( new RateMatrix_TIM(bf->getValue().size()) ),
+TimRateMatrixFunction::TimRateMatrixFunction(const TypedDagNode< Simplex > *er, const TypedDagNode< Simplex > *bf) : TypedFunction<RateGenerator>( new RateMatrix_TIM() ),
     exchangeability_rates( er ),
     base_frequencies( bf )
 {
