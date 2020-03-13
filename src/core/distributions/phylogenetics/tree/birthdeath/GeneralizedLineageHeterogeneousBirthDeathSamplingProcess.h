@@ -16,6 +16,7 @@
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "RlString.h"
+#include "Loader.h"
 
 #include <vector>
 
@@ -71,7 +72,12 @@ namespace RevBayesCore {
         virtual void                                                      setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
         
     protected:
-        
+
+        // likelihoods
+        double                                    current_ln_likelihood;
+        double                                    old_ln_likelihood;
+        TensorPhylo::DistributionHandlerSharedPtr tp_ptr;
+
         // simulation functions
         void                                                              simulateTree(void);
         void                                                              buildSerialSampledRandomBinaryTree(Tree *psi, std::vector<TopologyNode*> &nodes, const std::vector<double> &ages);
@@ -92,6 +98,7 @@ namespace RevBayesCore {
         // updating function
         void                                                              prepareParameters(bool force = false);
         void                                                              updateTree(bool force = false);
+        void                                                              updateData(bool force = false);
         void                                                              updateTreeData(bool force = false);
         void                                                              updateRootFrequency(bool force = false);
         void                                                              updateLambda(bool force = false);
