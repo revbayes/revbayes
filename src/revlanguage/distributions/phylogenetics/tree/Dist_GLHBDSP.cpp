@@ -328,7 +328,7 @@ void Dist_GLHBDSP::setConstParameter(const std::string& name, const RevPtr<const
 	if ( name == "rootAge" || name == "originAge" )
 	{
 		start_type = name;
-		start_age = var;
+		start_age  = var;
 	}
 	else if ( name == "lambda" )
 	{
