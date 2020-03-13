@@ -202,6 +202,7 @@
 #include "Func_convertToPhylowood.h"
 #include "Func_fileExists.h"
 #include "Func_listFiles.h"
+#include "Func_loadPlugin.h"
 #include "Func_maxdiff.h"
 #include "Func_mapTree.h"
 #include "Func_mccTree.h"
@@ -527,6 +528,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_maxdiff()                                 );
         addFunction( new Func_mapTree()                                 );
         addFunction( new Func_mccTree()                                 );
+        addFunction( new Func_loadPlugin()                                 );
         addFunction( new Func_module()                                  );
         addFunction( new Func_readAncestralStateTreeTrace()             );
 		addFunction( new Func_readAncestralStateTrace()                 );
