@@ -47,6 +47,8 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	const TypedDagNode<RbVector< MatrixReal > >*                    zeta_,
 	bool                                                            use_origin_
 ) : TypedDistribution<Tree>( new TreeDiscreteCharacterData() ),
+	current_ln_likelihood(0.0),
+	old_ln_likelihood(0.0),
 	taxa(taxa_),
 	age(age_),
 	condition_type(condition_type_),
@@ -88,6 +90,15 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	zeta_dirty(true)
 {
 
+	std::string tp_dir = "/home/mike/repos/tensorphyloprototype/build_local";
+	if(Plugin::loader().loadTensorPhylo(tp_dir)) {
+		assert(Plugin::loader().isTensorPhyloLoaded());
+		tp_ptr = Plugin::loader().createTensorPhyloLik();
+	} else {
+		throw RbException("TensorPhylo not loaded.");
+	}
+	std::cout << "tensorphylo version: " << tp_ptr->getVersion() << std::endl;
+
 	// add the parameters
 	addParameter(age);
 	addParameter(root_frequency);
@@ -116,11 +127,55 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	// add this object to the tree change event handler
     value->getTreeChangeEventHandler().addListener( this );
 
+    // simulate the tree
+    simulateTree();
+
     // update the parameters
     prepareParameters(true);
 
-    // simulate the tree
-    simulateTree();
+    // set the condition type
+    if ( condition_type != "time" )
+    {
+        if ( use_origin )
+        {
+        	if ( condition_type == "survival" | condition_type == "sampledExtant" )
+        	{
+        		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_SURVIVAL);
+        	}
+        	else if ( condition_type == "sampled" )
+        	{
+        		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_ONE_SAMPLE);
+        	}
+        	else if ( condition_type == "tree" )
+        	{
+        		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_TWO_SAMPLES);
+        	}
+        	else if ( condition_type == "treeExtant" )
+        	{
+        		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_TWO_EXT_SAMPLES);
+        	}
+        	else
+        	{
+        		throw RbException( "Cannot use condition " + condition_type + " when beginning from the origin." );
+        	}
+        }
+        else
+        {
+        	if ( condition_type == "survival" | condition_type == "sampledExtant" )
+        	{
+        		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::ROOT_MRCA);
+        	}
+        	else if ( condition_type == "sampled" )
+        	{
+        		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::ROOT_SAMPLING);
+        	}
+        	else
+        	{
+        		std::cout << "OOPS" << std::endl;
+        		throw RbException( "Cannot use condition " + condition_type + " when beginning from the root." );
+        	}
+        }
+    }
 
 }
 
@@ -228,6 +283,13 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::buildSerialSample
 double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbability(void)
 {
 
+//	std::cout << "preparing to calculate likelihood" << std::endl;
+//
+//	// TODO: calculate a likelihood!
+//	double ln_prob = tp_ptr->computeLogLikelihood();
+//	std::cout << "computing log likelihood " << ln_prob << std::endl;
+//
+//	return ln_prob;
 
 	return 0.0;
 }
@@ -297,9 +359,19 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
     // clear memory
     delete v;
 
+    // set the taxon data
+    for(size_t i = 0; i < num_taxa; ++i)
+    {
+    	// get the taxon data and node in the new tree
+    	Taxon &taxon = taxa[i];
+    	TopologyNode& node = this->value->getTipNodeWithName( taxon.getSpeciesName() );
+
+    	// set the taxon data for the node
+    	node.setTaxon( taxon );
+    }
+
     // add this object to the tree change event handler
     value->getTreeChangeEventHandler().addListener( this );
-
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter)
@@ -349,8 +421,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::prepareParameters
 	std::cout << "Preparing parameters" << std::endl;
 
 	// make sure all the parameters are up-to-date
-//	updateTree(force);
-//	updateData(force);
+	updateTree(force);
+	updateData(force);
 	updateRootFrequency(force);
 	updateLambda(force);
 	updateMu(force);
@@ -584,8 +656,42 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 {
 	if ( force | tree_dirty )
 	{
+		// get the newick string
 		std::string var = this->getValue().getNewickRepresentation();
-		// TODO: send var to tensorphylo
+
+		if ( use_origin )
+		{
+			double origin_age  = age->getValue();
+			double root_age    = this->getValue().getRoot().getAge();
+			double tail_length = origin_age - root_age;
+			// TODO: append the tail to the rooted tree
+		}
+
+		var += ";";
+		tp_ptr->setTree(var);
+	}
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateData(bool force)
+{
+	if ( force )
+	{
+		// get the data
+		const RevBayesCore::AbstractHomologousDiscreteCharacterData &dat = getCharacterData();
+		size_t num_taxa = taxa.size();
+		std::map< std::string, std::vector<double> > taxon_map;
+		std::vector<std::string> taxon_names(num_taxa);
+		for(size_t i = 0; i < num_taxa; ++i)
+		{
+			const AbstractDiscreteTaxonData& this_taxon_data = dat.getTaxonData(taxa[i].getName());
+			taxon_map[taxa[i].getName()] = this_taxon_data[0].getWeights();
+			taxon_names[i] = taxa[i].getName();
+		}
+		// ...(taxon_names, taxon_map);
+
+		// set the parameters
+		tp_ptr->setData(taxon_names, taxon_map);
+
 	}
 }
 
@@ -594,7 +700,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateRootFrequen
 	if ( force | root_freq_dirty )
 	{
 		std::vector<double> var = RbToStd( root_frequency->getValue() );
-		// TODO: send var to tensorphylo
+
+		// set the parameters
+		tp_ptr->setRootPrior(var);
 	}
 }
 
@@ -612,7 +720,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateLambda(bool
 			throw RbException( "Number of lambda vectors does not match the number of intervals." );
 		}
 
-		// TODO: send var to tensorphylo
+		// set the parameters
+		tp_ptr->setLambda(times, params);
 	}
 }
 
@@ -630,7 +739,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateMu(bool for
 			throw RbException( "Number of mu vectors does not match the number of intervals." );
 		}
 
-		// TODO: send var to tensorphylo
+		// set the parameters
+		tp_ptr->setMu(times, params);
+
 	}
 }
 
@@ -648,7 +759,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updatePhi(bool fo
 			throw RbException( "Number of phi vectors does not match the number of intervals." );
 		}
 
-		// TODO: send var to tensorphylo
+		// set the parameters
+		tp_ptr->setPhi(times, params);
 	}
 }
 
@@ -666,7 +778,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateDelta(bool 
 			throw RbException( "Number of delta vectors does not match the number of intervals." );
 		}
 
-		// TODO: send var to tensorphylo
+		// set the parameters
+		tp_ptr->setDelta(times, params);
 	}
 }
 
@@ -684,7 +797,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateUpsilon(boo
 			throw RbException( "Number of upsilon vectors does not match the number of intervals." );
 		}
 
-		// TODO: send var to tensorphylo
+		// set the parameters
+		tp_ptr->setMassSpeciationEvents(times, params);
 	}
 }
 
@@ -702,7 +816,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateGamma(bool 
 			throw RbException( "Number of gamma vectors does not match the number of intervals." );
 		}
 
-		// TODO: send var to tensorphylo
+		// set the parameters
+		tp_ptr->setMassExtinctionEvents(times, params);
 	}
 }
 
@@ -720,7 +835,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateRho(bool fo
 			throw RbException( "Number of rho vectors does not match the number of intervals." );
 		}
 
-		// TODO: send var to tensorphylo
+		// set the parameters
+		tp_ptr->setMassSamplingEvents(times, params);
 	}
 }
 
@@ -738,7 +854,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateXi(bool for
 			throw RbException( "Number of xi vectors does not match the number of intervals." );
 		}
 
-		// TODO: send var to tensorphylo
+		// set the parameters
+		tp_ptr->setMassDestrSamplingEvents(times, params);
 	}
 }
 
@@ -756,7 +873,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateEta(bool fo
 			throw RbException( "Number of eta vectors does not match the number of intervals." );
 		}
 
-		// TODO: send var to tensorphylo
+		// set the parameters
+		tp_ptr->setEta(times, params);
 	}
 }
 
@@ -768,13 +886,17 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateOmega(bool 
 		std::vector< std::map< std::vector<unsigned>, double > > params = RbToStd( omega->getValue() );
 		std::vector<double>                                      times  = RbToStd( omega_times->getValue() );
 
+		const AbstractHomologousDiscreteCharacterData& char_data = getCharacterData();
+		size_t num_states = char_data.getNumberOfStates();
+
 		// handle some errors
 		if ( params.size() != times.size() + 1 )
 		{
 			throw RbException( "Number of omega vectors does not match the number of intervals." );
 		}
 
-		// TODO: send var to tensorphylo
+		// set the parameters
+		tp_ptr->setOmega(num_states, times, params);
 	}
 
 }
@@ -792,7 +914,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateZeta(bool f
 			throw RbException( "Number of zeta vectors does not match the number of intervals." );
 		}
 
-		// TODO: send var to tensorphylo
+		// set the parameters
+		tp_ptr->setMassExtinctionStateChangeProb(params);
 	}
 }
 
@@ -899,7 +1022,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> GeneralizedLineageHeterogeneousBir
     	// get the incoming data
         const AbstractHomologousDiscreteCharacterData& v = static_cast<const TypedDagNode<AbstractHomologousDiscreteCharacterData > *>( args[0] )->getValue();
 
-        // check the taxon labels in the current tree and new tree
+        // check the taxon labels in the new data are consistent
         std::vector<std::string> param_taxa;
         size_t num_taxa = taxa.size();
 
