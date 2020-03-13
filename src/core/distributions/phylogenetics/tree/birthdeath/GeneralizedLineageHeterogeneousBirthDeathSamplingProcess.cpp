@@ -376,6 +376,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
 
     // update the kernel
     updateTree(true);
+
+    // mark the likelihood dirty
+    probability_dirty = true;
+
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter)
@@ -410,6 +414,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::initializeEmptyCh
 
     // update the kernel
     updateData(true);
+
+    // mark the likelihood dirty
+    probability_dirty = true;
+
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecialization(DagNode* affecter)
@@ -1243,6 +1251,9 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> GeneralizedLineageHeterogeneousBir
 
         // update the kernel
         updateData(true);
+
+        // mark the likelihood dirty
+        probability_dirty = true;
 
         return NULL;
     }
