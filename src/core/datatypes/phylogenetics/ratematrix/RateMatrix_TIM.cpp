@@ -16,7 +16,7 @@
 
 using namespace RevBayesCore;
 
-/** Construct rate matrix with n states */
+/** Construct rate matrix with 4 states and all four exchangeabilities set to 1 */
 RateMatrix_TIM::RateMatrix_TIM(void) : TimeReversibleRateMatrix( 4 ), rates(4,1)
 {
     
