@@ -28,6 +28,7 @@ else
     BUILD_DIR="build"
 fi
 
+<<<<<<< HEAD
 # This is bad because it overrides any choices the user may have chosen.
 CC=gcc CXX=g++
 
@@ -41,6 +42,8 @@ export CC
 export CXX
 echo "CC=${CC}  CXX=${CXX}"
 
+=======
+>>>>>>> cc0ef7a193417d5cda78d231e214dc88c76ef2af
 if [ "$1" = "clean" ]
 then
 	rm -rf ${BUILD_DIR}
@@ -59,7 +62,7 @@ fi
 
 	./regenerate.sh ${all_args}
 	cd ${BUILD_DIR} 
-	cmake .
+	CC=gcc CXX=g++ cmake .
 	make -j 4
 	cd ..
 
@@ -68,6 +71,7 @@ fi
         rm GitVersion_backup.cpp
     fi
 fi
+<<<<<<< HEAD
 
 # Run tests
 if [ "$travis" = "true" ] && [ "${TRAVIS_BUILD_STAGE_NAME}" = "Test" ]
@@ -83,3 +87,5 @@ then
   cd testiphy
   ./testiphy rb
 fi
+=======
+>>>>>>> cc0ef7a193417d5cda78d231e214dc88c76ef2af

@@ -11,7 +11,15 @@ using namespace std;
 RevBayesCore::RbHelpDatabase::RbHelpDatabase()
 {
 	help_strings[string("AbstractHomologousDiscreteCharacterData")][string("name")] = string(R"(AbstractHomologousDiscreteCharacterData)");
+	help_arrays[string("Bool")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("Bool")][string("description")] = string(R"(Bool variables can be either `true` or `false` (`TRUE` or `FALSE` also work).)");
+	help_strings[string("Bool")][string("example")] = string(R"(a <- FALSE
+if(!a)
+print("a is not true")
+# this will print the statement in parentheses)");
 	help_strings[string("Bool")][string("name")] = string(R"(Bool)");
+	help_strings[string("Bool")][string("title")] = string(R"(Datatype for logical variables.)");
+	help_arrays[string("BootstrapAnalysis")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("BootstrapAnalysis")][string("name")] = string(R"(BootstrapAnalysis)");
 	help_strings[string("BranchLengthTree")][string("description")] = string(R"(The Tree datatype stores information to describe the shared ancestry of a taxon set. Information includes taxon labels, topology, nodecount, and branch lengths. Tree objects also possess several useful methods to traverse and manipulate the Tree's value.)");
 	help_strings[string("BranchLengthTree")][string("name")] = string(R"(BranchLengthTree)");
@@ -63,11 +71,31 @@ y := Probability(x)
 type(y))");
 	help_strings[string("Probability")][string("name")] = string(R"(Probability)");
 	help_strings[string("RateGenerator")][string("name")] = string(R"(RateGenerator)");
+	help_strings[string("Real")][string("description")] = string(R"(The real number data type can hold any real number value.
+Not to be confused with integers which are whole numbers, or
+`Natural` which are the counting numbers (e.g. 1,2,3,...).)");
+	help_strings[string("Real")][string("example")] = string(R"(a = 1.1
+b = 1.3
+c = a + b
+# c will be 2.4)");
 	help_strings[string("Real")][string("name")] = string(R"(Real)");
+	help_arrays[string("Real")][string("see_also")].push_back(string(R"(`RealPos`, `Integer`, `Natural`, `Probability`)"));
+	help_strings[string("Real")][string("title")] = string(R"(Real number data type)");
 	help_strings[string("RealPos")][string("name")] = string(R"(RealPos)");
 	help_strings[string("RevObject")][string("name")] = string(R"(RevObject)");
 	help_strings[string("Simplex")][string("name")] = string(R"(Simplex)");
+	help_strings[string("String")][string("description")] = string(R"(Datatype for `String` variables.)");
+	help_strings[string("String")][string("example")] = string(R"(myString <- "yarn"
+myString.find("y")
+# returns index of the substring "y" so 1
+myString.charAt(1)
+# returns "y"
+myString.size()
+# returns 4
+myString.substr(1,3)
+# returns "yar")");
 	help_strings[string("String")][string("name")] = string(R"(String)");
+	help_strings[string("String")][string("title")] = string(R"(String datatype)");
 	help_strings[string("TimeTree")][string("description")] = string(R"(The Tree datatype stores information to describe the shared ancestryof a taxon set. Information includes taxon labels, topology, nodecount, and branch lengths. Tree objects also possess several usefulmethods to traverse and manipulate the Tree's value.)");
 	help_strings[string("TimeTree")][string("name")] = string(R"(TimeTree)");
 	help_arrays[string("TimeTree")][string("see_also")].push_back(string(R"(TimeTree)"));
@@ -87,9 +115,9 @@ type(y))");
 number <- -3.0
 absoluteValueOfTheNumber <- abs(number)
 if (number + absoluteValueOfTheNumber != 0.0) {
-    print("Problem when computing an absolute value.")
+print("Problem when computing an absolute value.")
 } else {
-    print("Correct computation of an absolute value.")
+print("Correct computation of an absolute value.")
 })");
 	help_strings[string("abs")][string("name")] = string(R"(abs)");
 	help_arrays[string("abs")][string("see_also")].push_back(string(R"(ceil)"));
@@ -115,9 +143,9 @@ c := append(a,b))");
 number <- 3.4
 ceiled_number <- ceil(number)
 if (ceiled_number != 4.0) {
-    print("Problem when computing a ceiled value.")
+print("Problem when computing a ceiled value.")
 } else {
-    print("Correct computation of a ceiled value.")
+print("Correct computation of a ceiled value.")
 })");
 	help_strings[string("ceil")][string("name")] = string(R"(ceil)");
 	help_arrays[string("ceil")][string("see_also")].push_back(string(R"(abs)"));
@@ -224,7 +252,7 @@ map_tree = consensusTree(trace=tree_trace, cutoff=0.5, file="consensus.tree"))")
 x ~ dnBernoulli(p)
 x.clamp(1)
 moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", x)
+monitors[1] = screenmonitor(printgen=1000, separator = "	", x)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -239,7 +267,7 @@ mymcmc.run(generations=200000))");
 x ~ dnBernoulli(p)
 x.clamp(1)
 moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", x)
+monitors[1] = screenmonitor(printgen=1000, separator = "	", x)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -253,7 +281,7 @@ mymcmc.run(generations=200000))");
 x ~ dnBimodalLognormal(mean1=-1,mean2=1,sd1=0.1,sd2=0.1,p=p)
 x.clamp( exp(1) )
 moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", x)
+monitors[1] = screenmonitor(printgen=1000, separator = "	", x)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -268,7 +296,7 @@ mymcmc.run(generations=200000))");
 x ~ dnBimodalNormal(mean1=-1,mean2=1,sd1=0.1,sd2=0.1,p=p)
 x.clamp( 1 )
 moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", x)
+monitors[1] = screenmonitor(printgen=1000, separator = "	", x)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -284,7 +312,7 @@ mymcmc.run(generations=200000))");
 x ~ dnBinomial(n=10,p)
 x.clamp(8)
 moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", x)
+monitors[1] = screenmonitor(printgen=1000, separator = "	", x)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -301,7 +329,7 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnBivariatePoisson")][string("example")] = string(R"(th1 ~ dnUniform(0.0,10.0)
 th2 ~ dnUniform(0.0,10.0)
 th0 ~ dnUniform(0.0,10.0)
- ~ dnBivariatePoisson(th1, th2, th0)
+~ dnBivariatePoisson(th1, th2, th0)
 x.clamp([3, 3, 3])
 oves[1] = mvSlide(th1, delta=0.01, weight=1.0)
 moves[2] = mvSlide(th2, delta=0.01, weight=1.0)
@@ -332,8 +360,8 @@ x
 # Draw 10 values from the distribution and place them
 # in a vector a, then examine a.
 for ( i in 1:10 ) {
-    a[i] <- x
-    x.redraw()
+a[i] <- x
+x.redraw()
 }
 a
 
@@ -399,7 +427,7 @@ sum(b))");
 	help_strings[string("dnDuplicationLoss")][string("details")] = string(R"(The species tree must be ultrametric.
 The effective population size is constant across the species tree.)");
 	help_strings[string("dnDuplicationLoss")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees/"
+dataFolder = "simulatedTrees/" 
 # Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
@@ -407,7 +435,7 @@ n_alleles <- 3
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -416,19 +444,19 @@ popSize <- 50
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 }
-# We can save the species tree and the gene trees:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+print(geneTrees[g])
+}
+# We can save the species tree and the gene trees: 
 write(spTree, filename=dataFolder+"speciesTree")
 # Saving the gene trees
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 })");
 	help_strings[string("dnDuplicationLoss")][string("name")] = string(R"(dnDuplicationLoss)");
 	help_references[string("dnDuplicationLoss")].push_back(RbHelpReference(R"(Bayes Estimation of Species Divergence Times and Ancestral Population Sizes Using DNA Sequences From Multiple Loci. Bruce Rannala and Ziheng Yang. GENETICS August 1, 2003 vol. 164 no. 4 1645-1656.)",R"()",R"(http://www.genetics.org/content/164/4/1645.short )"));
@@ -490,7 +518,7 @@ x)");
 x ~ dnGeom(p)
 x.clamp(10)
 moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", p)
+monitors[1] = screenmonitor(printgen=1000, separator = "	", p)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -652,7 +680,7 @@ X ~ dnBrownian(trueTree,sigma)
 	help_strings[string("dnMultiSpeciesCoalescent")][string("details")] = string(R"(The species tree must be ultrametric.
 The effective population size is constant across the species tree.)");
 	help_strings[string("dnMultiSpeciesCoalescent")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees/"
+dataFolder = "simulatedTrees/" 
 # Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
@@ -660,7 +688,7 @@ n_alleles <- 3
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -669,19 +697,19 @@ popSize <- 50
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 }
-# We can save the species tree and the gene trees:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+print(geneTrees[g])
+}
+# We can save the species tree and the gene trees: 
 write(spTree, filename=dataFolder+"speciesTree")
 # Saving the gene trees
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 })");
 	help_strings[string("dnMultiSpeciesCoalescent")][string("name")] = string(R"(dnMultiSpeciesCoalescent)");
 	help_references[string("dnMultiSpeciesCoalescent")].push_back(RbHelpReference(R"(Bayes Estimation of Species Divergence Times and Ancestral Population Sizes Using DNA Sequences From Multiple Loci. Bruce Rannala and Ziheng Yang. GENETICS August 1, 2003 vol. 164 no. 4 1645-1656.)",R"()",R"(http://www.genetics.org/content/164/4/1645.short )"));
@@ -696,7 +724,7 @@ This distribution uses a conjugate prior on effective population sizes. As a con
 
 If you are interested in reconstructing ancestral effective population sizes, use dnMultiSpeciesCoalescent.)");
 	help_strings[string("dnMultiSpeciesCoalescentInverseGamma")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees/"
+dataFolder = "simulatedTrees/" 
 # Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
@@ -704,7 +732,7 @@ n_alleles <- 3
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -714,19 +742,19 @@ beta <- 0.003
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescentInverseGamma(speciesTree=spTree, shape=alpha, rate=beta, taxa=taxons[g])
-  print(geneTrees[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 }
-# We can save the species tree and the gene trees:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescentInverseGamma(speciesTree=spTree, shape=alpha, rate=beta, taxa=taxons[g])
+print(geneTrees[g])
+}
+# We can save the species tree and the gene trees: 
 write(spTree, filename=dataFolder+"speciesTree")
 # Saving the gene trees
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 })");
 	help_strings[string("dnMultiSpeciesCoalescentInverseGamma")][string("name")] = string(R"(dnMultiSpeciesCoalescentInverseGamma)");
 	help_references[string("dnMultiSpeciesCoalescentInverseGamma")].push_back(RbHelpReference(R"(' Algorithmic improvements to species delimitation and phylogeny estimation under the multispecies coalescent. Jones G.  Journal of Mathematical Biology. 2016.')",R"('DOI: 10.1007/s00285-016-1034-0')",R"(http://www.indriid.com/2016/2016-06-01-STACEY.pdf )"));
@@ -738,7 +766,7 @@ for (i in 1:(n_genes)) {
 	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("details")] = string(R"(The species tree must be ultrametric.
 Effective population sizes can be constant across the species tree, if a single real positive is provided, or branchwise, if a vector is provided.)");
 	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees/"
+dataFolder = "simulatedTrees/" 
 # Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
@@ -746,7 +774,7 @@ n_alleles <- 3
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -755,19 +783,19 @@ popSize <- 50
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescentUniformPrior(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 }
-# We can save the species tree and the gene trees:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescentUniformPrior(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+print(geneTrees[g])
+}
+# We can save the species tree and the gene trees: 
 write(spTree, filename=dataFolder+"speciesTree")
 # Saving the gene trees
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 })");
 	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("name")] = string(R"(dnMultiSpeciesCoalescentUniformPrior)");
 	help_references[string("dnMultiSpeciesCoalescentUniformPrior")].push_back(RbHelpReference(R"(Bayes Estimation of Species Divergence Times and Ancestral Population Sizes Using DNA Sequences From Multiple Loci. Bruce Rannala and Ziheng Yang. GENETICS August 1, 2003 vol. 164 no. 4 1645-1656.)",R"()",R"(http://www.genetics.org/content/164/4/1645.short )"));
@@ -787,7 +815,7 @@ x ~ dnMultinomial(10, p)
 y ~ dnDirichlet(x)
 y.clamp( simplex(1,2,3,4) )
 moves[1] = mvSlide(x, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", x)
+monitors[1] = screenmonitor(printgen=1000, separator = "	", x)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -826,7 +854,7 @@ mv[6] = mvVectorSlide(x))");
 x ~ dnNegativeBinomial(r=10,p)
 x.clamp(8)
 moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", x)
+monitors[1] = screenmonitor(printgen=1000, separator = "	", x)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -858,7 +886,7 @@ sd(x))");
 x ~ dnBernoulli(p)
 x.clamp(1)
 moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", speciation)
+monitors[1] = screenmonitor(printgen=1000, separator = "	", speciation)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -916,7 +944,7 @@ x)");
 x ~ dnPoisson(l)
 x.clamp(10)
 moves[1] = mvSlide(l, delta=0.1, weight=1.0)
-monitors[1] = mnScreen(printgen=1000, separator = "        ", l)
+monitors[1] = mnScreen(printgen=1000, separator = "	", l)
 mymodel = model(l)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -947,7 +975,7 @@ sum(x))");
 x ~ dnBernoulli(p)
 x.clamp(1)
 moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", speciation)
+monitors[1] = screenmonitor(printgen=1000, separator = "	", speciation)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
@@ -1030,8 +1058,33 @@ exists(x))");
 	help_strings[string("exists")][string("name")] = string(R"(exists)");
 	help_arrays[string("exists")][string("see_also")].push_back(string(R"(clear)"));
 	help_strings[string("exists")][string("title")] = string(R"(Check whether a variable exists)");
+	help_strings[string("exp")][string("description")] = string(R"(Calculates the exponential function on a variable of type `Real`)");
+	help_strings[string("exp")][string("example")] = string(R"(a <- 2
+exp(2)
+# returns 7.389056
+exp(ln(1))
+# returns 0)");
 	help_strings[string("exp")][string("name")] = string(R"(exp)");
+	help_arrays[string("exp")][string("see_also")].push_back(string(R"(`power`)"));
+	help_arrays[string("exp")][string("see_also")].push_back(string(R"(`ln`)"));
+	help_arrays[string("exp")][string("see_also")].push_back(string(R"(`log`)"));
+	help_strings[string("exp")][string("title")] = string(R"(Exponential function)");
+	help_arrays[string("floor")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("floor")][string("description")] = string(R"(Converts a variable of type `Real` to the lowest `Integer` 
+less than or equal to that number.)");
+	help_strings[string("floor")][string("example")] = string(R"(# compute the ceiling of a real number
+number <- 3.4
+floored_number <- floor(number)
+if (ceiled_number != 3.0) {
+print("Problem when computing a floored value.")
+} else {
+print("Correct computation of a floored value.")
+})");
 	help_strings[string("floor")][string("name")] = string(R"(floor)");
+	help_arrays[string("floor")][string("see_also")].push_back(string(R"(`abs`)"));
+	help_arrays[string("floor")][string("see_also")].push_back(string(R"(`ceil`)"));
+	help_arrays[string("floor")][string("see_also")].push_back(string(R"(`round`)"));
+	help_strings[string("floor")][string("title")] = string(R"(Floor function)");
 	help_strings[string("fnAdjacentRateModifier")][string("name")] = string(R"(fnAdjacentRateModifier)");
 	help_strings[string("fnBetaBrokenStick")][string("name")] = string(R"(fnBetaBrokenStick)");
 	help_strings[string("fnBinaryMutationCoalescentRateMatrix")][string("name")] = string(R"(fnBinaryMutationCoalescentRateMatrix)");
@@ -1166,7 +1219,6 @@ help()
 help("dnNormal"))");
 	help_strings[string("help")][string("name")] = string(R"(help)");
 	help_strings[string("help")][string("title")] = string(R"(Get help with RevBayes)");
-	help_strings[string("history.txt")][string("")] = string(R"(q())");
 	help_arrays[string("ifelse")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("ifelse")][string("description")] = string(R"(If the expression is true, then the function returns the first value, otherwise the second value.)");
 	help_strings[string("ifelse")][string("details")] = string(R"(The ifelse function is important when the value of a variable should deterministically change during an analysis depending on other variables. Standard if-else statements are not dynamically re-evaluated.)");
@@ -1205,7 +1257,17 @@ y # y has the determined value of 1.07846)");
 	help_strings[string("ln")][string("name")] = string(R"(ln)");
 	help_arrays[string("ln")][string("see_also")].push_back(string(R"(log)"));
 	help_strings[string("ln")][string("title")] = string(R"(Natural log function)");
+	help_strings[string("log")][string("description")] = string(R"(Calculates the logarithm of a variable of typ `Real`
+given a base.)");
+	help_strings[string("log")][string("details")] = string(R"(For base e use the `ln` function.)");
+	help_strings[string("log")][string("example")] = string(R"(b <- 2.0
+log(b, base=2)
+# returns 1)");
 	help_strings[string("log")][string("name")] = string(R"(log)");
+	help_arrays[string("log")][string("see_also")].push_back(string(R"(`ln`)"));
+	help_arrays[string("log")][string("see_also")].push_back(string(R"(`power`)"));
+	help_arrays[string("log")][string("see_also")].push_back(string(R"(`exp`)"));
+	help_strings[string("log")][string("title")] = string(R"(Logarithm function)");
 	help_strings[string("logistic")][string("name")] = string(R"(logistic)");
 	help_arrays[string("ls")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("ls")][string("description")] = string(R"(Show the content of the workspace.)");
@@ -1234,7 +1296,13 @@ map_tree = mapTree(trace=tree_trace, file="map.tree"))");
 	help_arrays[string("mapTree")][string("see_also")].push_back(string(R"(treeTrace)"));
 	help_arrays[string("mapTree")][string("see_also")].push_back(string(R"(readTreeTrace)"));
 	help_strings[string("matrix")][string("name")] = string(R"(matrix)");
+	help_strings[string("max")][string("description")] = string(R"(Finds the maximum of a vector of numbers.)");
+	help_strings[string("max")][string("example")] = string(R"(a = v(1,2,3,4,5)
+max(a) 
+# this will print 5)");
 	help_strings[string("max")][string("name")] = string(R"(max)");
+	help_arrays[string("max")][string("see_also")].push_back(string(R"(`min`)"));
+	help_strings[string("max")][string("title")] = string(R"(Maximum of a set of numbers)");
 	help_arrays[string("maxdiff")][string("authors")].push_back(string(R"(Will Pett)"));
 	help_strings[string("maxdiff")][string("description")] = string(R"(Finds the maximum difference in clade probabilities between two posterior samples.)");
 	help_strings[string("maxdiff")][string("example")] = string(R"(# Read in tree trace
@@ -1255,7 +1323,7 @@ n_alleles <- 2
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -1264,14 +1332,14 @@ popSize <- 50
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
-# Let's compute the maximum tree:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+}
+# Let's compute the maximum tree: 
 recTree <- maximumTree(geneTrees)
 print(recTree))");
 	help_strings[string("maximumTree")][string("name")] = string(R"(maximumTree)");
@@ -1343,9 +1411,35 @@ myMcmcmcObject.operatorSummary())");
 	help_references[string("mcmcmc")].push_back(RbHelpReference(R"(Altekar, G.; Dwarkadas, S.; Huelsenbeck, J. P. & Ronquist, F. Parallel metropolis coupled Markov chain Monte Carlo for Bayesian phylogenetic inference Bioinformatics, Oxford Univ Press, 2004, 20, 407-415.)",R"()",R"()"));
 	help_arrays[string("mcmcmc")][string("see_also")].push_back(string(R"(mcmc)"));
 	help_strings[string("mcmcmc")][string("title")] = string(R"(Metropolis-Coupled MCMC analysis object)");
+	help_strings[string("mean")][string("description")] = string(R"(Finds the arithmetic mean of a vector of numbers.)");
+	help_strings[string("mean")][string("details")] = string(R"(The numbers of the vector are summed and divided by the vector length.)");
+	help_strings[string("mean")][string("example")] = string(R"(g = v(2,3,5,6,7)
+mean(g)
+# 4.6)");
 	help_strings[string("mean")][string("name")] = string(R"(mean)");
+	help_strings[string("mean")][string("title")] = string(R"(Mean of a vector of numbers)");
+	help_strings[string("median")][string("description")] = string(R"(Finds the median of a sorted vector of numbers.)");
+	help_strings[string("median")][string("details")] = string(R"(The vector is sorted when `median` is used finding the
+number of the sorted values with an equal amount of numbers that
+are greater than or less than that value. If the length of the 
+vector is even there will be no two such values, in that case
+the two are averaged arithmetically.)");
+	help_strings[string("median")][string("example")] = string(R"(a = v(5,3,2,6,8)
+median(a)
+# 5 is the result
+b = v(1,1,2,3,5,8)
+median(b)
+# 2.5 is the result)");
 	help_strings[string("median")][string("name")] = string(R"(median)");
+	help_arrays[string("median")][string("see_also")].push_back(string(R"(`mean`)"));
+	help_strings[string("median")][string("title")] = string(R"(Median of a set of numbers)");
+	help_strings[string("min")][string("description")] = string(R"(Finds the minimum of a vector of numbers.)");
+	help_strings[string("min")][string("example")] = string(R"(a = v(0,1,1,2,3,5,8,13)
+min(a)
+# will print 0)");
 	help_strings[string("min")][string("name")] = string(R"(min)");
+	help_arrays[string("min")][string("see_also")].push_back(string(R"(`max`)"));
+	help_strings[string("min")][string("title")] = string(R"(Minimum of a set of numbers)");
 	help_strings[string("mnAncestralState")][string("name")] = string(R"(mnAncestralState)");
 	help_strings[string("mnCharHistoryNewick")][string("name")] = string(R"(mnCharHistoryNewick)");
 	help_strings[string("mnCharHistoryNhx")][string("name")] = string(R"(mnCharHistoryNhx)");
@@ -1496,7 +1590,7 @@ mymcmc.run(30000,underPrior=TRUE);)");
 
 An age is randomly drawn between the root age and the age of the oldest tip. Then all subtrees below this age are scaled up or down depending on a scaler drawn from an exponential distribution.)");
 	help_strings[string("mvLayeredScaleProposal")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees/"
+dataFolder = "simulatedTrees/" 
 # Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
@@ -1504,7 +1598,7 @@ n_alleles <- 3
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -1513,25 +1607,25 @@ popSize <- 50
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 }
-# We can save the species tree and the gene trees:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+print(geneTrees[g])
+}
+# We can save the species tree and the gene trees: 
 write(spTree, filename=dataFolder+"speciesTree")
 # Saving the gene trees
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 }
 # set my move index
 mi = 0
 move_species_subtree_scale = mvLayeredScaleProposal( speciesTree=spTree, weight=5 )
 for (i in 1:n_genes) {
-   move_species_subtree_scale.addGeneTreeVariable( geneTrees[i] )
+move_species_subtree_scale.addGeneTreeVariable( geneTrees[i] )
 }
 moves[++mi] = move_species_subtree_scale
 # We get a handle on our model.
@@ -1598,7 +1692,7 @@ All the gene trees that evolved along the species tree according to some form of
 
 This move jointly performs narrow exchange moves (Nearest-Neighbor Interchanges without branch length alterations) on the species tree and on gene trees, all of which must be ultrametric.)");
 	help_strings[string("mvSpeciesNarrow")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees/"
+dataFolder = "simulatedTrees/" 
 # Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
@@ -1606,7 +1700,7 @@ n_alleles <- 3
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -1615,25 +1709,25 @@ popSize <- 50
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 }
-# We can save the species tree and the gene trees:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+print(geneTrees[g])
+}
+# We can save the species tree and the gene trees: 
 write(spTree, filename=dataFolder+"speciesTree")
 # Saving the gene trees
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 }
 # set my move index
 mi = 0
 move_species_narrow_exchange = mvSpeciesNarrow( speciesTree=spTree, weight=5 )
 for (i in 1:n_genes) {
-   move_species_narrow_exchange.addGeneTreeVariable( geneTrees[i] )
+move_species_narrow_exchange.addGeneTreeVariable( geneTrees[i] )
 }
 moves[++mi] = move_species_narrow_exchange
 # We get a handle on our model.
@@ -1662,7 +1756,7 @@ All the gene trees that evolved along the species tree according to some form of
 
 This move jointly performs node time slides (branch length alterations, keeping the topologies fixed) on the species tree and on gene trees, all of which must be ultrametric.)");
 	help_strings[string("mvSpeciesNodeTimeSlideUniform")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees"
+dataFolder = "simulatedTrees" 
 # Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
@@ -1670,7 +1764,7 @@ n_alleles <- 3
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -1679,25 +1773,25 @@ popSize <- 50
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 }
-# We can save the species tree and the gene trees:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+print(geneTrees[g])
+}
+# We can save the species tree and the gene trees: 
 write(spTree, filename=dataFolder+"speciesTree")
 # Saving the gene trees
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 }
 # set my move index
 mi = 0
 move_species_node_time_slide = mvSpeciesNodeTimeSlideUniform( speciesTree=spTree, weight=5 )
 for (i in 1:n_genes) {
-   move_species_node_time_slide.addGeneTreeVariable( geneTrees[i] )
+move_species_node_time_slide.addGeneTreeVariable( geneTrees[i] )
 }
 moves[++mi] = move_species_node_time_slide
 # We get a handle on our model.
@@ -1731,7 +1825,7 @@ Then, we uniformly pick an age between the parent and the oldest sampled descend
 The picked subtree is then scaled to this new age.
 All gene-trees that are present in the population will be scaled accordingly.)");
 	help_strings[string("mvSpeciesSubtreeScale")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees/"
+dataFolder = "simulatedTrees/" 
 # Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
@@ -1739,7 +1833,7 @@ n_alleles <- 3
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -1748,25 +1842,25 @@ popSize <- 50
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 }
-# We can save the species tree and the gene trees:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+print(geneTrees[g])
+}
+# We can save the species tree and the gene trees: 
 write(spTree, filename=dataFolder+"speciesTree")
 # Saving the gene trees
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 }
 # set my move index
 mi = 0
 move_species_subtree_scale = mvSpeciesSubtreeScale( speciesTree=spTree, weight=5 )
 for (i in 1:n_genes) {
-   move_species_subtree_scale.addGeneTreeVariable( geneTrees[i] )
+move_species_subtree_scale.addGeneTreeVariable( geneTrees[i] )
 }
 moves[++mi] = move_species_subtree_scale
 # We get a handle on our model.
@@ -1800,7 +1894,7 @@ Then, we pick a new age between the parent and the oldest sampled descendant acc
 The picked subtree is then scaled to this new age.
 All gene-trees that are present in the population will be scaled accordingly.)");
 	help_strings[string("mvSpeciesSubtreeScaleBeta")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees/"
+dataFolder = "simulatedTrees/" 
 # Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
@@ -1808,7 +1902,7 @@ n_alleles <- 3
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -1817,25 +1911,25 @@ popSize <- 50
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 }
-# We can save the species tree and the gene trees:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+print(geneTrees[g])
+}
+# We can save the species tree and the gene trees: 
 write(spTree, filename=dataFolder+"speciesTree")
 # Saving the gene trees
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 }
 # set my move index
 mi = 0
 move_species_subtree_scale_beta = mvSpeciesSubtreeScaleBeta( speciesTree=spTree, weight=5 )
 for (i in 1:n_genes) {
-   move_species_subtree_scale_beta.addGeneTreeVariable( geneTrees[i] )
+move_species_subtree_scale_beta.addGeneTreeVariable( geneTrees[i] )
 }
 moves[++mi] = move_species_subtree_scale_beta
 # We get a handle on our model.
@@ -1864,7 +1958,7 @@ All the gene trees that evolved along the species tree according to some form of
 
 This move jointly performs a tree scale move (the entire tree is scaled up or down, keeping the topology fixed) on the species tree and on gene trees, all of which must be ultrametric.)");
 	help_strings[string("mvSpeciesTreeScale")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees/"
+dataFolder = "simulatedTrees/" 
 # Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
@@ -1872,7 +1966,7 @@ n_alleles <- 3
 # we simulate an ultrametric species tree:
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 root ~  dnNormal(mean=75,sd=2.5,min=0.0, max=Inf)
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=root, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
@@ -1882,25 +1976,25 @@ popSize <- 50
 # let's simulate gene trees now:
 # taxa names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
-    }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+for (i in 1:n_species) {
+for (j in 1:n_alleles) {
+taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 }
-# We can save the species tree and the gene trees:
+}
+geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+print(geneTrees[g])
+}
+# We can save the species tree and the gene trees: 
 write(spTree, filename=dataFolder+"speciesTree")
 # Saving the gene trees
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 }
 # set my move index
 mi = 0
 move_species_tree_scale = mvSpeciesTreeScale( speciesTree=spTree, root=root, weight=5 )
 for (i in 1:n_genes) {
-   move_species_tree_scale.addGeneTreeVariable( geneTrees[i] )
+move_species_tree_scale.addGeneTreeVariable( geneTrees[i] )
 }
 moves[++mi] = move_species_tree_scale
 # We get a handle on our model.
@@ -1945,7 +2039,16 @@ mymcmc.operatorSummary())");
 	help_strings[string("posteriorPredictiveAnalysis")][string("name")] = string(R"(posteriorPredictiveAnalysis)");
 	help_strings[string("posteriorPredictiveProbability")][string("name")] = string(R"(posteriorPredictiveProbability)");
 	help_strings[string("posteriorPredictiveSimulation")][string("name")] = string(R"(posteriorPredictiveSimulation)");
+	help_strings[string("power")][string("description")] = string(R"(Given a variable of type `Real` and a given exponent,
+calculates that number to the given exponent.)");
+	help_strings[string("power")][string("example")] = string(R"(c <- 3.0
+power(3.0, exponent = 2)
+# returns 9.0)");
 	help_strings[string("power")][string("name")] = string(R"(power)");
+	help_arrays[string("power")][string("see_also")].push_back(string(R"(`log`)"));
+	help_arrays[string("power")][string("see_also")].push_back(string(R"(`ln`)"));
+	help_arrays[string("power")][string("see_also")].push_back(string(R"(`exp`)"));
+	help_strings[string("power")][string("title")] = string(R"(Power function)");
 	help_strings[string("powerPosterior")][string("name")] = string(R"(powerPosterior)");
 	help_arrays[string("printSeed")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("printSeed")][string("description")] = string(R"(Print the seed of the random number generator.)");
@@ -1958,7 +2061,20 @@ printSeed())");
 	help_strings[string("printSeed")][string("name")] = string(R"(printSeed)");
 	help_arrays[string("printSeed")][string("see_also")].push_back(string(R"(seed)"));
 	help_strings[string("printSeed")][string("title")] = string(R"(Print the random number generator seed)");
+	help_strings[string("quantile")][string("description")] = string(R"(Calculates the sample quantiles corresponding to the given probability.
+The smallest observation corresponds to a probability of 0.0 and the 
+largest to a probability of 1.0. The median corresponds to a probability of
+0.5.)");
+	help_strings[string("quantile")][string("example")] = string(R"(b <- v(2,4,6,7,9)
+quantile(b, k = 0.0)
+# returns 2
+quantile(b, k = 0.5)
+# returns 6
+quantile(b, k = 1.0)
+# returns 9)");
 	help_strings[string("quantile")][string("name")] = string(R"(quantile)");
+	help_arrays[string("quantile")][string("see_also")].push_back(string(R"(`median`)"));
+	help_strings[string("quantile")][string("title")] = string(R"(Quantile function)");
 	help_arrays[string("quit")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("quit")][string("description")] = string(R"(Terminates the currently running instance of RevBayes.)");
 	help_strings[string("quit")][string("example")] = string(R"(# if you really want to quit
@@ -2022,7 +2138,16 @@ print(trees))");
 	help_strings[string("rep")][string("title")] = string(R"(Replicate a value)");
 	help_strings[string("rootedTripletDist")][string("name")] = string(R"(rootedTripletDist)");
 	help_strings[string("round")][string("name")] = string(R"(round)");
+	help_strings[string("seed")][string("description")] = string(R"(Sets the random number generator seed given a natural number.)");
+	help_strings[string("seed")][string("example")] = string(R"(# pick some definitely random number
+seed(80797980)
+a <- rUniform(1,0.6,1.2)
+a
+seed(80797980)
+a <- rUniform(1,0.6,1.2)
+a # this will b the same as above!)");
 	help_strings[string("seed")][string("name")] = string(R"(seed)");
+	help_strings[string("seed")][string("title")] = string(R"(Seed set function)");
 	help_arrays[string("seq")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("seq")][string("description")] = string(R"(Create a sequence of values separate by a given step-size.)");
 	help_strings[string("seq")][string("details")] = string(R"(The 'seq' function create a sequence of values, starting with the initial value and then adding the step-size to it until the value reaches the 'to'-value.)");
@@ -2062,17 +2187,49 @@ getwd())");
 	help_strings[string("simCompleteTree")][string("name")] = string(R"(simCompleteTree)");
 	help_strings[string("simStartingTree")][string("name")] = string(R"(simStartingTree)");
 	help_strings[string("simTree")][string("name")] = string(R"(simTree)");
+	help_strings[string("sinh")][string("description")] = string(R"(Calculates the hyperbolic sine of number of type `Real`)");
+	help_strings[string("sinh")][string("example")] = string(R"(sinh(1)
+# results in 1.175201)");
 	help_strings[string("sinh")][string("name")] = string(R"(sinh)");
+	help_arrays[string("sinh")][string("see_also")].push_back(string(R"(`tanh`)"));
+	help_strings[string("sinh")][string("title")] = string(R"(Hyperbolic sine function)");
+	help_strings[string("sort")][string("description")] = string(R"(Function for sorting the members of a vector in either ascending or descending order.)");
+	help_strings[string("sort")][string("details")] = string(R"(The vector to be sorted can be of any numeric type. Ascending or descending is specified via the `ascending` argument)");
+	help_strings[string("sort")][string("example")] = string(R"(nums = v(1,3,5,7,2,4,6,8)
+sort(nums)
+# this will result in 1,2,3,4,5,6,7,8
+sort(nums, ascending = FALSE) 
+# this will result in 8,7,6,5,4,3,2,1)");
 	help_strings[string("sort")][string("name")] = string(R"(sort)");
+	help_strings[string("sort")][string("title")] = string(R"(Sort function)");
+	help_strings[string("source")][string("description")] = string(R"(This function takes a Rev filename as an argument and runs that Rev script.)");
+	help_strings[string("source")][string("example")] = string(R"(# what the file name
+fn = "rb_tutorial.Rev"
+# the source function will run the Rev code in the file fn
+source(fn))");
 	help_strings[string("source")][string("name")] = string(R"(source)");
+	help_strings[string("source")][string("title")] = string(R"(Function for sourcing a Rev file)");
+	help_strings[string("sqrt")][string("description")] = string(R"(Takes the square root of some positive number `x`.)");
+	help_strings[string("sqrt")][string("example")] = string(R"(sqrt(4)
+# returns 2
+sqrt(sqrt(4))
+# returns an approximation of the irrational root 2. 
+# keep an eye out for Pythagoras, he wasn't a fan!)");
 	help_strings[string("sqrt")][string("name")] = string(R"(sqrt)");
+	help_arrays[string("sqrt")][string("see_also")].push_back(string(R"(`power`)"));
+	help_strings[string("sqrt")][string("title")] = string(R"(Square root function)");
 	help_strings[string("srGelmanRubin")][string("name")] = string(R"(srGelmanRubin)");
 	help_strings[string("srGeweke")][string("name")] = string(R"(srGeweke)");
 	help_strings[string("srMaxIteration")][string("name")] = string(R"(srMaxIteration)");
 	help_strings[string("srMaxTime")][string("name")] = string(R"(srMaxTime)");
 	help_strings[string("srMinESS")][string("name")] = string(R"(srMinESS)");
 	help_strings[string("srStationarity")][string("name")] = string(R"(srStationarity)");
+	help_strings[string("stdev")][string("description")] = string(R"(Calculates the standard deviation of a vector of numbers of type `Real`)");
+	help_strings[string("stdev")][string("example")] = string(R"(nums <- v(1,1,2,3,5,8)
+stdev(nums)
+# this will output 2.73252)");
 	help_strings[string("stdev")][string("name")] = string(R"(stdev)");
+	help_strings[string("stdev")][string("title")] = string(R"(Standard deviation function)");
 	help_strings[string("steppingStoneSampler")][string("name")] = string(R"(steppingStoneSampler)");
 	help_arrays[string("structure")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("structure")][string("description")] = string(R"(Shows all the information about a given variable.)");
@@ -2088,7 +2245,13 @@ str(b))");
 	help_strings[string("structure")][string("name")] = string(R"(structure)");
 	help_arrays[string("structure")][string("see_also")].push_back(string(R"(type)"));
 	help_strings[string("structure")][string("title")] = string(R"(The structure of a variable)");
+	help_strings[string("sum")][string("description")] = string(R"(Sums all members of a vector of type `Real`, `RealPos`, `Integer`,
+or `Natural`)");
+	help_strings[string("sum")][string("example")] = string(R"(a = v(1,2,3,4,5,6,7,8)
+sum(a)
+# returns 36)");
 	help_strings[string("sum")][string("name")] = string(R"(sum)");
+	help_strings[string("sum")][string("title")] = string(R"(Sum function)");
 	help_strings[string("summarizeCharacterMaps")][string("name")] = string(R"(summarizeCharacterMaps)");
 	help_strings[string("symmetricDifference")][string("name")] = string(R"(symmetricDifference)");
 	help_arrays[string("system")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
@@ -2099,7 +2262,11 @@ system("ls")
 system("pwd"))");
 	help_strings[string("system")][string("name")] = string(R"(system)");
 	help_strings[string("system")][string("title")] = string(R"(Execute a system command.)");
+	help_strings[string("tanh")][string("description")] = string(R"(Calculates the hyperbolic tanger of a number of type `Real`)");
+	help_strings[string("tanh")][string("example")] = string(R"(tanh(1)
+# will result in 0.7615942)");
 	help_strings[string("tanh")][string("name")] = string(R"(tanh)");
+	help_strings[string("tanh")][string("title")] = string(R"(Hyperbolic tangent function)");
 	help_arrays[string("taxon")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("taxon")][string("description")] = string(R"(The taxon function creates a Taxon object.)");
 	help_strings[string("taxon")][string("details")] = string(R"(Each Taxon object records that taxon's name in addition to other information, such as age (which is non-zero for fossils). Character matrices and trees contain Taxon vectors (Taxon[]) that are used to match leaf nodes to data entries for phylogenetic analyses. For multispecies coalescent analyses, Taxon objects are also used to assign species memberships to individuals.)");
@@ -2124,7 +2291,23 @@ for (i in 1:10000) sum += i
 time())");
 	help_strings[string("time")][string("name")] = string(R"(time)");
 	help_strings[string("time")][string("title")] = string(R"(Get the time information)");
+	help_strings[string("tmrca")][string("description")] = string(R"(Finds the most recent common ancestor (TMRCA) of a clade of taxa on a tree.)");
+	help_strings[string("tmrca")][string("example")] = string(R"(# let's make up some taxa 
+taxa = v("horse", "whale", "unicorn", "narwhal")
+# convert these to the taxon datatype
+for(i in 1:4) { taxa[i] = taxon(taxa[i]) }
+# simulate a tree
+tau ~ dnUniformTimeTree(rootAge=1, taxa=taxa)
+# we also need a molecular substitution model
+molecular_model := fnJC(4)
+# together these form a continuous time Markov chain over the tree
+full_model ~ dnPhyloCTMC(tree=tau, Q=molecular_model, nSites = 100, type="DNA")
+# need to make a clade
+horned_animals <- clade(taxa[3], taxa[4])
+tmrca(tau, horned_animals))");
 	help_strings[string("tmrca")][string("name")] = string(R"(tmrca)");
+	help_arrays[string("tmrca")][string("see_also")].push_back(string(R"(`clade`)"));
+	help_strings[string("tmrca")][string("title")] = string(R"(Find the time to the most recent common ancestor)");
 	help_arrays[string("treeTrace")][string("authors")].push_back(string(R"(Will Freyman)"));
 	help_strings[string("treeTrace")][string("description")] = string(R"(Creates a tree trace object from a vector of trees.)");
 	help_strings[string("treeTrace")][string("example")] = string(R"(# Read in a vector of trees
@@ -2176,6 +2359,45 @@ z[0])");
 	help_strings[string("vectorFlatten")][string("name")] = string(R"(vectorFlatten)");
 	help_strings[string("write")][string("name")] = string(R"(write)");
 	help_strings[string("writeCharacterDataDelimited")][string("name")] = string(R"(writeCharacterDataDelimited)");
+	help_strings[string("writeFasta")][string("description")] = string(R"(This function writes out a FASTA formatted file given 
+data of class `AbstractHomologousDiscreteCharacterData`.
+Filename is specified using the`fn` argument.)");
+	help_strings[string("writeFasta")][string("example")] = string(R"(# let's make up some taxa 
+taxa = v("horse", "whale", "unicorn", "narwhal")
+# convert these to the taxon datatype
+for(i in 1:4) { taxa[i] = taxon(taxa[i]) }
+# simulate a tree
+tau ~ dnUniformTimeTree(rootAge=1, taxa=taxa)
+# we also need a molecular substitution model
+molecular_model := fnJC(4)
+# together these form a continuous time Markov chain over the tree
+full_model ~ dnPhyloCTMC(tree=tau, Q=molecular_model, nSites = 100, type="DNA")
+# this will print a FASTA file with a simulated molecular matrix
+# to the working directory
+writeFasta(filename="test.fasta", full_model))");
 	help_strings[string("writeFasta")][string("name")] = string(R"(writeFasta)");
+	help_references[string("writeFasta")].push_back(RbHelpReference(R"(Pearson, William R., and David J. Lipman. "Improved tools for biological sequence comparison." Proceedings of the National Academy of Sciences 85.8 (1988): 2444-2448. )",R"()",R"()"));
+	help_references[string("writeFasta")].push_back(RbHelpReference(R"()",R"()",R"(https://www.pnas.org/content/85/8/2444.short )"));
+	help_references[string("writeFasta")].push_back(RbHelpReference(R"()",R"(https://doi.org/10.1073/pnas.85.8.2444)",R"()"));
+	help_arrays[string("writeFasta")][string("see_also")].push_back(string(R"(`writeNexus`, `writeCharacterDataDelimited`)"));
+	help_strings[string("writeFasta")][string("title")] = string(R"(FASTA file writing function)");
+	help_strings[string("writeNexus")][string("description")] = string(R"(Function for writing a nexus file.)");
+	help_strings[string("writeNexus")][string("details")] = string(R"(The first argument is the filename  to write to and this must be a string.
+The second argument is a data object that must be some character matrix. 
+This data matrix could be a morphological matrix, a molecular matrix, or a tree.)");
+	help_strings[string("writeNexus")][string("example")] = string(R"(# let's make up some taxa
+taxa = v("horse", "whale", "unicorn", "narwhal")
+# simulate a tree
+tau ~ dnUniformTimeTree(rootAge=1, taxa=taxa)
+# we also need a molecular substitution model
+molecular_model := fnJC(4)
+# together these form a continuous time Markov chain over the tree
+full_model ~ dnPhyloCTMC(tree=tau, Q=molecular_model, nSites = 100, type="DNA")
+# this will print a Nexus file with a simulated molecular matrix
+# to the working directory
+writeNexus(filename="test.nex", full_model))");
 	help_strings[string("writeNexus")][string("name")] = string(R"(writeNexus)");
+	help_references[string("writeNexus")].push_back(RbHelpReference(R"(David R. Maddison, David L. Swofford, Wayne P. Maddison, Nexus: An Extensible File Format for Systematic Information, Systematic Biology, Volume 46, Issue 4, December 1997, Pages 590–621,)",R"(https://doi.org/10.1093/sysbio/46.4.590)",R"(https://academic.oup.com/sysbio/article/46/4/590/1629695)"));
+	help_arrays[string("writeNexus")][string("see_also")].push_back(string(R"(`writeFasta`, `writeCharacterDataDelimited`, `write`)"));
+	help_strings[string("writeNexus")][string("title")] = string(R"(Nexus file writer)");
 }

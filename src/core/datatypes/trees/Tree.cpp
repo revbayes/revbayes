@@ -725,19 +725,6 @@ std::vector<RbBitSet> Tree::getNodesAsBitset(void) const
 }
 
 
-std::vector<long> Tree::getNodeIndices(void) const
-{
-    std::vector<long> indices;
-
-    for ( size_t i=0; i<nodes.size(); ++i )
-    {
-        indices.push_back(nodes[i]->getIndex() );
-    }
-
-    return indices;
-}
-
-
 
 
 /**
