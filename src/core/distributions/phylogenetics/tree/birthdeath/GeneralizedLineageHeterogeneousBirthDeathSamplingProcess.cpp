@@ -100,7 +100,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 		std::cout << "Not loaded!" << std::endl;
 		throw RbException("TensorPhylo not loaded.");
 	}
-	std::cout << "tensorphylo version: " << tp_ptr->getVersion() << std::endl;
+//	std::cout << "tensorphylo version: " << tp_ptr->getVersion() << std::endl;
 
 	// add the parameters
 	addParameter(age);
@@ -285,12 +285,8 @@ double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbab
 	// store the old likelihood
     old_ln_prob = current_ln_prob;
 
-//	std::cout << "preparing to calculate likelihood" << std::endl;
-//
-//	// TODO: calculate a likelihood!
-double ln_prob = tp_ptr->computeLogLikelihood();
-std::cout << "computing log likelihood " << ln_prob << std::endl;
-//
+    // calculate a likelihood!
+    current_ln_prob = tp_ptr->computeLogLikelihood();
 
     // flag the likelihood as up-to-date
     probability_dirty = false;
@@ -358,7 +354,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
     value->getTreeChangeEventHandler().removeListener( this );
 
     // set the tree
-		// FIXME the memory bug seems to be coming from this line or the next one (double delete) and most probably happen in setTree (i.e., delete root;)
+	// FIXME the memory bug seems to be coming from this line or the next one (double delete) and most probably happen in setTree (i.e., delete root;)
     static_cast<TreeDiscreteCharacterData *>(this->value)->setTree( *v );
 
     // clear memory
@@ -377,6 +373,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
 
     // add this object to the tree change event handler
     value->getTreeChangeEventHandler().addListener( this );
+
+    // update the kernel
+    updateTree(true);
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter)
@@ -408,6 +407,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::initializeEmptyCh
 
     // store the new value for the discrete data
     static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData(tip_data);
+
+    // update the kernel
+    updateData(true);
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecialization(DagNode* affecter)
@@ -440,7 +442,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecializatio
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::prepareParameters(bool force)
 {
 
-	std::cout << "Preparing parameters" << std::endl;
+//	std::cout << "Preparing parameters" << std::endl;
 
 	// make sure all the parameters are up-to-date
 	updateTree(force);
@@ -458,7 +460,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::prepareParameters
 	updateOmega(force);
 	updateZeta(force);
 
-	std::cout << "Done preparing parameters" << std::endl;
+//	std::cout << "Done preparing parameters" << std::endl;
 
 }
 
@@ -595,6 +597,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::simulateTree(void
 
     // store the new value for the tree
     value = psi;
+
+    // update the kernel
+    updateTree(true);
 
     // set tip states to missing
     initializeEmptyCharData();
@@ -1235,6 +1240,9 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> GeneralizedLineageHeterogeneousBir
 
         // copy the input data
         static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData( v.clone() );
+
+        // update the kernel
+        updateData(true);
 
         return NULL;
     }
