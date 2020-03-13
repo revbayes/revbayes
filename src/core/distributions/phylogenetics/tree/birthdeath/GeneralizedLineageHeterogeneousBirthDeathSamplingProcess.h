@@ -74,8 +74,11 @@ namespace RevBayesCore {
     protected:
 
         // likelihoods
-        double                                    current_ln_likelihood;
-        double                                    old_ln_likelihood;
+        double                                    current_ln_prob;
+        double                                    old_ln_prob;
+        bool                                      probability_dirty;
+
+        // tensorphylo interface
         TensorPhylo::DistributionHandlerSharedPtr tp_ptr;
 
         // simulation functions
