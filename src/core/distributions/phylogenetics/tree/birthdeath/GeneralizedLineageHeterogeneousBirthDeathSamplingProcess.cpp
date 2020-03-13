@@ -91,10 +91,12 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 {
 
 	std::string tp_dir = "/home/mike/repos/tensorphyloprototype/build_local";
+	//"/home/meyerx/Projets/TensorPhyloProto/glhbdsp/plugins";
 	if(Plugin::loader().loadTensorPhylo(tp_dir)) {
 		assert(Plugin::loader().isTensorPhyloLoaded());
 		tp_ptr = Plugin::loader().createTensorPhyloLik();
 	} else {
+		std::cout << "Not loaded!" << std::endl;
 		throw RbException("TensorPhylo not loaded.");
 	}
 	std::cout << "tensorphylo version: " << tp_ptr->getVersion() << std::endl;
@@ -286,8 +288,8 @@ double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbab
 //	std::cout << "preparing to calculate likelihood" << std::endl;
 //
 //	// TODO: calculate a likelihood!
-//	double ln_prob = tp_ptr->computeLogLikelihood();
-//	std::cout << "computing log likelihood " << ln_prob << std::endl;
+double ln_prob = tp_ptr->computeLogLikelihood();
+std::cout << "computing log likelihood " << ln_prob << std::endl;
 //
 //	return ln_prob;
 
@@ -354,6 +356,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
     value->getTreeChangeEventHandler().removeListener( this );
 
     // set the tree
+		// FIXME the memory bug seems to be coming from this line or the next one (double delete) and most probably happen in setTree (i.e., delete root;)
     static_cast<TreeDiscreteCharacterData *>(this->value)->setTree( *v );
 
     // clear memory
@@ -573,7 +576,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecializati
 std::vector<double> GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::RbToStd(const Simplex &obj)
 {
 	std::vector<double> std_object;
-	for(size_t i = 0; i < std_object.size(); ++i) {
+	for(size_t i = 0; i < obj.size(); ++i) {
 		std_object.push_back(obj[i]);
 	}
 	return std_object;
@@ -644,10 +647,25 @@ std::vector< std::vector< std::vector<double> > > GeneralizedLineageHeterogeneou
 
 std::vector< std::map< std::vector<unsigned>, double > > GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::RbToStd(const RbVector< CladogeneticProbabilityMatrix > &obj)
 {
+	/* Original
 	std::vector< std::map< std::vector<unsigned >, double >> std_object;
 	for(size_t i = 0; i < obj.size(); ++i)
 	{
 		std_object.push_back( obj[i].getEventMap() );
+	}*/
+	// Copy and convert from 1-indexing to 0-indexing
+	std::vector< std::map< std::vector<unsigned >, double >> std_object(obj.size());
+	for(size_t i = 0; i < obj.size(); ++i)
+	{
+		for(std::map< std::vector<unsigned >, double >::const_iterator it=obj[i].getEventMap().begin(); it != obj[i].getEventMap().end(); ++it)
+		{
+			// Recover the map entries
+			std::vector<unsigned> key = it->first;
+			double val = it->second;
+			// 1-indexing to 0-indexing
+			for(size_t iK=0; iK<key.size(); ++iK) key[iK] -= 1;
+			std_object[i][key] = val;
+		}
 	}
 	return std_object;
 }
@@ -1065,22 +1083,3 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> GeneralizedLineageHeterogeneousBir
 
 	return TypedDistribution<Tree>::executeProcedure( name, args, found );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
