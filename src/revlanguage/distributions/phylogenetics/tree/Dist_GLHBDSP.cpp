@@ -76,11 +76,33 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     // the start type
     bool uo = start_type == "originAge" ? true : false;
 
-    // root frequency
-    RevBayesCore::TypedDagNode<RevBayesCore::Simplex >* root_freq = static_cast<const Simplex &>( root_frequencies->getRevObject() ).getDagNode();;
-
     // sampling condition
     const std::string& cond = static_cast<const RlString &>( condition->getRevObject() ).getValue();
+
+    if ( cond != "time" )
+    {
+        if ( start_type == "originAge" )
+        {
+        	if ( cond != "survival" && cond != "sampled" && cond != "sampledExtant" && cond != "tree" && cond != "treeExtant" )
+        	{
+        		throw RbException( "Cannot condition on " + cond + " when starting from the origin." );
+        	}
+        }
+        else if ( start_type == "rootAge" )
+        {
+        	if ( cond != "survival" && cond != "sampled" && cond != "sampledExtant" )
+        	{
+        		throw RbException( "Cannot condition on " + cond + " when starting from the root." );
+        	}
+        }
+        else
+        {
+        	throw RbException("How did you get here???");
+        }
+    }
+
+    // root frequency
+    RevBayesCore::TypedDagNode<RevBayesCore::Simplex >* root_freq = static_cast<const Simplex &>( root_frequencies->getRevObject() ).getDagNode();;
 
     // regular parameters
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* l_rates = static_cast<const ModelVector< ModelVector<RealPos> > &>( lambda->getRevObject() ).getDagNode();
