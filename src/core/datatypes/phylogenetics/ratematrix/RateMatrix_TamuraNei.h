@@ -33,9 +33,9 @@ namespace RevBayesCore {
     class RateMatrix_TamuraNei : public TimeReversibleRateMatrix {
         
     public:
-        RateMatrix_TamuraNei(size_t n);                                                                                               //!< Construct rate matrix with n states
-        RateMatrix_TamuraNei(const RateMatrix_TamuraNei& m);                                                                                //!< Copy constructor
-        virtual                             ~RateMatrix_TamuraNei(void);                                                              //!< Destructor
+        RateMatrix_TamuraNei(void);                                                                                             //!< Construct rate matrix with n states
+        RateMatrix_TamuraNei(const RateMatrix_TamuraNei& m);                                                                    //!< Copy constructor
+        virtual                             ~RateMatrix_TamuraNei(void);                                                        //!< Destructor
         
         // overloaded operators
         RateMatrix_TamuraNei&                operator=(const RateMatrix_TamuraNei& r);

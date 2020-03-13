@@ -21,7 +21,7 @@ using namespace RevBayesCore;
  * @param bf The simplex of base frequencies
  */
 
-TamuraNeiRateMatrixFunction::TamuraNeiRateMatrixFunction(const TypedDagNode<double> *k1, const TypedDagNode<double> *k2, const TypedDagNode< Simplex > *bf) : TypedFunction<RateGenerator>( new RateMatrix_TamuraNei(bf->getValue().size()) ),
+TamuraNeiRateMatrixFunction::TamuraNeiRateMatrixFunction(const TypedDagNode<double> *k1, const TypedDagNode<double> *k2, const TypedDagNode< Simplex > *bf) : TypedFunction<RateGenerator>( new RateMatrix_TamuraNei() ),
     kappa_1( k1 ),
     kappa_2( k2 ),
     base_frequencies( bf )
