@@ -91,14 +91,11 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	zeta_dirty(false)
 {
 
-	std::string tp_dir = "/home/mike/repos/tensorphyloprototype/build_local";
-	//"/home/meyerx/Projets/TensorPhyloProto/glhbdsp/plugins";
-	if(Plugin::loader().loadTensorPhylo(tp_dir)) {
-		assert(Plugin::loader().isTensorPhyloLoaded());
+	//assert(Plugin::loader().isTensorPhyloLoaded());
+	try {
 		tp_ptr = Plugin::loader().createTensorPhyloLik();
-	} else {
-		std::cout << "Not loaded!" << std::endl;
-		throw RbException("TensorPhylo not loaded.");
+	} catch (...) {
+		throw RbException("TensorPhylo is not loaded (use loadPlugin(...)).");
 	}
 //	std::cout << "tensorphylo version: " << tp_ptr->getVersion() << std::endl;
 
