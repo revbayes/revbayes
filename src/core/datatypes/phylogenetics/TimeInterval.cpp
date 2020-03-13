@@ -64,7 +64,7 @@ void TimeInterval::setMin(double s)
 {
     if( max < s )
     {
-        throw(RbException("Time interval max < min"));
+    	throw(RbException("Time interval max < min"));
     }
 
     min = s;

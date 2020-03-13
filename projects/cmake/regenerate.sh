@@ -313,7 +313,7 @@ else
 echo '
 add_executable(${RB_EXEC_NAME} ${PROJECT_SOURCE_DIR}/revlanguage/main.cpp)
 
-target_link_libraries(${RB_EXEC_NAME} rb-parser rb-core rb-libs ${Boost_LIBRARIES})
+target_link_libraries(${RB_EXEC_NAME} rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${CMAKE_DL_LIBS})
 
 set_target_properties(${RB_EXEC_NAME} PROPERTIES PREFIX "../")
 ' >> $BUILD_DIR/CMakeLists.txt
