@@ -34,7 +34,8 @@ typedef enum {
 typedef enum {
 	SEQUENTIAL_VECTOR=0,
 	SEQUENTIAL_MATRIX=1,
-	SEQUENTIAL_OPTIMIZED=2
+	SEQUENTIAL_OPTIMIZED=2,
+	PARALLEL_OPENMP=3
 } approximatorVersion_t;
 
 typedef enum {
@@ -44,6 +45,11 @@ typedef enum {
 	RUNGE_KUTTA_DOPRI5=3
 } integrationScheme_t;
 
+typedef enum {
+	DBG_NONE=0,
+	DBG_PRINT=1,
+	DBG_FILE=2
+} debugMode_t;
 
 typedef size_t version_t;
 
@@ -81,6 +87,9 @@ public:
 	virtual void setSyncMonitors(const std::vector< double > &synchMonitoring) = 0;
 
 	virtual double computeLogLikelihood() = 0;
+
+	virtual void setDebugMode(debugMode_t aDebugMode) = 0;
+	virtual void setDebugMode(debugMode_t aDebugMode, const std::string &aFilePath) = 0;
 
 	virtual size_t getVersion() const = 0;
 
