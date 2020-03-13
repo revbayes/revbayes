@@ -1,50 +1,55 @@
 #ifndef RandomNumberGenerator_H
 #define RandomNumberGenerator_H
 
-#include <boost/random/uniform_01.hpp>
-#include <boost/random/mersenne_twister.hpp>
+#include <cstdint>
 
 namespace RevBayesCore {
 
+    /**
+    * @brief
+    * ### Pseudo Random Number Generator
+    *
+    * This class provides a pseudo random number generator using the xoshiro256** algorithm.
+    *
+    * The code for this class was adapted from the pure C implementation by David Blackman
+    * and Sebastiano Vigna in the paper: *Scrambled Linear Pseudorandom Number Generators*.
+    *
+    * The original C implementation provided by Blackman and Vigna is licenced as public
+    * domain. See <http://creativecommons.org/publicdomain/zero/1.0/>.
+    *
+    * More information can be found at http://prng.di.unimi.it.
+    *
+    * Note that in the original generator we are able to use uint64_t seeds.
+    * To be compliant with the revbayes api, we instead use unsigned int seeds in this
+    * implementation. Everything internal still uses uint64_t types.
+    *
+    */
+
     class RandomNumberGenerator {
 
-    public:
+        public:
 
-                                                    RandomNumberGenerator(void);                            //!< Default constructor using time seed
-                                            
-        // Regular functions
-        unsigned int                                getNewSeed(void) const;                                 //!< Get the new seed values
-        unsigned int                                getSeed(void) const;                                    //!< Get the seed values
-        void                                        setSeed(unsigned int s);                                //!< Set the seeds of the RNG
-        double                                      uniform01(void);                                        //!< Get a random [0,1) var
+            RandomNumberGenerator     ( void );            //!< Default constructor using time seed
 
-    private:
-        
-        double                                      last_u;
-        boost::uniform_01<boost::mt19937>           zeroone;
-        unsigned int seed;
+            unsigned int  getSeed     ( void ) const;      //!< Get the seed values
+            void          setSeed     ( unsigned int x );  //!< Set the seeds of the RNG
+            double        uniform01   ( void );            //!< Get a random [0,1) var
+
+
+        private:
+
+            unsigned int  seed;                            //!< Seed for PRNG
+            uint64_t      state[4];                        //!< Internal state vector of PRNG
+
+            void          updateState ( void );            //!< Update the internal state based on seed
+            uint64_t      next        ( void );            //!< Return next pseudo random number
 
     };
-}
 
-namespace deprecated
-{
-    template< class RandomIt >
-    void random_shuffle( RandomIt first, RandomIt last )
-    {
-        typename std::iterator_traits<RandomIt>::difference_type i, n;
-        n = last - first;
-        for (i = n-1; i > 0; --i) {
-            using std::swap;
-            swap(first[i], first[std::rand() % (i+1)]);
-            // rand() % (i+1) isn't actually correct, because the generated number
-            // is not uniformly distributed for most values of i. A correct implementation
-            // will need to essentially reimplement C++11 std::uniform_int_distribution,
-            // which is beyond the scope of this example.
-        }
-    }
-}
+} //-- End RandomNumberGenerator namespace
 
 
-#endif
+#endif //-- RandomNumberGenerator.h
+
+
 
