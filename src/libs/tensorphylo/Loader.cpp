@@ -44,7 +44,7 @@ bool Loader::loadTensorPhylo(const std::string &aPluginFolder) {
 	// Checking for the plugin folder
 	boost::filesystem::path pluginPath(aPluginFolder);
 	if(!boost::filesystem::is_directory(pluginPath)) {
-		std::cerr << "Path not found : " << pluginPath << std::endl;
+		std::cerr << "Path not found : " << aPluginFolder << std::endl;
 		return false;
 	}
 
@@ -57,7 +57,10 @@ bool Loader::loadTensorPhylo(const std::string &aPluginFolder) {
 	boost::filesystem::path tensorPhyloPath;
 	for(std::vector<boost::filesystem::directory_entry>::const_iterator it = vecPlugins.begin(); it != vecPlugins.end();  ++ it ) {
 		std::string filePath(it->path().string());
-		if(filePath.find(PLUGIN_TENSORPHYLO_NAME) != std::string::npos) {
+		if(filePath.find(PLUGIN_TENSORPHYLO_NAME) != std::string::npos &&
+			 (filePath.find(".so") != std::string::npos ||
+		 	 filePath.find(".dylib") != std::string::npos ||
+		 	 filePath.find(".dll") != std::string::npos)) {
 			found =  true;
 			tensorPhyloPath = filePath;
 		}
