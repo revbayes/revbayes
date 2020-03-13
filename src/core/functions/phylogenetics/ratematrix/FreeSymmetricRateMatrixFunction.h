@@ -37,7 +37,7 @@ template <class valueType> class TypedDagNode;
     private:
         
         // members
-        const TypedDagNode< RbVector<double> >*             transition_rates;
+        const TypedDagNode< RbVector<double> >*             transition_rates; //!< Vector of transition rates: of length (k-1)k/2 for a k-state model
         
     };
     

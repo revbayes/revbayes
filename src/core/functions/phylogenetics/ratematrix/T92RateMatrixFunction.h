@@ -34,7 +34,7 @@ template <class valueType> class TypedDagNode;
     private:
         
         // members
-        const TypedDagNode< double >*                       equilibriumGc;
+        const TypedDagNode< double >*                       equilibriumGc; //!< The compound equilibrium frequency of bases G and C
         const TypedDagNode< double >*                       transitionTransversionRate;
         
     };

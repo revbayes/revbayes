@@ -35,7 +35,7 @@ template <class valueType> class TypedDagNode;
         
         // members
         
-        const TypedDagNode< Simplex >*                      exchangeability_rates;
+        const TypedDagNode< Simplex >*                      exchangeability_rates; //!< A<->C = G<->T, A<->G, A<->T = C<->G, C<->T exchangeabilities
         const TypedDagNode< Simplex >*                      base_frequencies;
         
     };

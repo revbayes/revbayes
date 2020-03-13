@@ -40,8 +40,8 @@ namespace RevBayesCore {
         
         // members
         
-        const TypedDagNode<double>*                         kappa_1;
-        const TypedDagNode<double>*                         kappa_2;
+        const TypedDagNode<double>*                         kappa_1; //!< The ratio of A<->G transitions to transversions
+        const TypedDagNode<double>*                         kappa_2; //!< The ratio of C<->T transitions to transversions
         const TypedDagNode<Simplex>*                        base_frequencies;
         
     };

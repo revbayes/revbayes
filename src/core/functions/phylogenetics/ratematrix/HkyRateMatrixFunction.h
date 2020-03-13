@@ -36,7 +36,7 @@ template <class valueType> class TypedDagNode;
         
         // members
         const TypedDagNode< Simplex >*                      base_frequencies;
-        const TypedDagNode<double>*                         kappa;
+        const TypedDagNode<double>*                         kappa;                                                                          //!< Transition-transversion ratio
         
     };
     

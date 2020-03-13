@@ -34,7 +34,7 @@ template <class valueType> class TypedDagNode;
     private:
         
         // members
-        const TypedDagNode<double>*                         kappa;
+        const TypedDagNode<double>*                         kappa; //!< Transition-transversion ratio
         
     };
     
