@@ -14,21 +14,17 @@ namespace RevBayesCore {
     /**
      * @brief TIM (transition model) rate matrix class.
      *
-     * This class implements the TIM rate matrix.
-     * The resulting rate matrix is computed by:
+     * This class implements the TIM rate matrix. The TIM matrix has four base frequency parameters
+     * and four exchangeability parameters. The resulting rate matrix is computed by:
      *
      *      |     -     pi_C*r_1  pi_G*r_2   pi_T*r_3 |
-     *      |                                         |
+     *      |                                                           |
      *      | pi_A*r_1      -     pi_G*r_3   pi_T*r_4 |
-     * Q =  |                                         |
+     * Q =     |                                                           |
      *      | pi_A*r_2  pi_C*r_3      -      pi_T*r_1 |
-     *      |                                         |
+     *      |                                                           |
      *      | pi_A*r_3  pi_C*r_4  pi_G*r_1       -    |
      *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2016-03-31, version 1.0
      */
     class RateMatrix_TIM : public TimeReversibleRateMatrix {
         

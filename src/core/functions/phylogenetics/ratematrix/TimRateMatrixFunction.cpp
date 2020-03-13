@@ -15,7 +15,7 @@ using namespace RevBayesCore;
  * Default constructor.
  *
  * This function takes two inputs:
- * @param er The simplex of exchangeabilities
+ * @param er The simplex of exchangeabilities (abccea): A<->C = G<->T, A<->G, A<->T = C<->G, C<->T
  * @param bf The simplex of base frequencies
  */
 

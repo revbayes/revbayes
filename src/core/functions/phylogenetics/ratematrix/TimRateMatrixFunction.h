@@ -15,7 +15,7 @@ template <class valueType> class TypedDagNode;
      * This function creates the Tim (transition model) rate matrix object by setting the exchangeability rates
      * and the base frequencies. The rate matrix takes care of the setting of the actual rates and transition probabilities.
      *
-     * @param er The simplex of exchangeabilities
+     * @param er The simplex of exchangeabilities (abccea): A<->C = G<->T, A<->G, A<->T = C<->G, C<->T
      * @param bf The simplex of base frequencies
      */
     class TimRateMatrixFunction : public TypedFunction<RateGenerator> {

@@ -15,7 +15,7 @@ template <class valueType> class TypedDagNode;
      * This function creates the Tvm (transversion model) rate matrix object by setting the exchangeability rates
      * and the base frequencies. The rate matrix takes care of the setting of the actual rates and transition probabilities.
      *
-     * @param er The simplex of exchangeabilities
+     * @param er The simplex of exchangeabilities (abcdbe): A<->C, A<->G = C<->T, A<->T, C<->G, G<->T
      * @param bf The simplex of base frequencies
      */
     class TvmRateMatrixFunction : public TypedFunction<RateGenerator> {
