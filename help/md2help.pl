@@ -1,5 +1,28 @@
 use strict;
 use warnings;
+use List::Util qw[min max];
+
+
+sub find_block_indent {
+	my ($arg) = @_;
+        my @lines = split(/\n/,$arg);
+
+        my $indent;
+        foreach my $line1 (@lines)
+        {
+                my $line2 = $line1;
+                $line2 =~ s/^ +//;
+                my $whitewidth = length($line1) - length($line2);
+                next if ($line2 eq "");
+
+                if (defined($indent)) {
+                        $indent = min($indent,$whitewidth);
+                } else {
+                        $indent = $whitewidth;
+                }
+        }
+        return $indent;
+}
 
 sub parse_entry {
 	my ($key, $value) = @_;
@@ -42,9 +65,24 @@ sub parse_entry {
 	} else {
 		$ret = $value;
 
-		# remove leading whitespace from examples
-		if ( $key eq "example") {
-			$ret =~ s/^[^\S\n]+//mg;
+                # Replace tabs with 8 spaces
+                $ret =~ s/\t/        /g;
+
+		# remove block indentation from examples
+		if ( $key eq "example")
+                {
+                        my $indent = find_block_indent($ret);
+
+                        if (defined($indent))
+                        {
+                            my @lines = split(/\n/,$ret);
+                            foreach my $line (@lines)
+                            {
+                                $line = substr($line,$indent);
+                                $line =~ s/\s*$//s;
+                            }
+                            $ret = join("\n",@lines);
+                        }
 		}
 
 		# remove trailing spaces

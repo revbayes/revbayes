@@ -1,5 +1,5 @@
 /**
- * @file DistributionGamma
+ * @file DistributionGamma.h
  * This file contains the functions of the gamma distribution.
  *
  */

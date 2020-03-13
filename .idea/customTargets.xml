@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CLionExternalBuildManager">
+    <target id="2044a698-5362-443f-a887-5f6d96fad36b" name="rb-help" projectName="revbayes">
+      <configuration id="914c2ba2-e84d-40af-ba3b-43d45b6827a7" name="rb-help" toolchainName="Default">
+        <build type="TOOL">
+          <tool actionId="Tool_External Tools_rb-build-help" />
+        </build>
+      </configuration>
+    </target>
+  </component>
+</project>

@@ -16,16 +16,13 @@ using namespace RevBayesCore;
 
 
 /**
- * Constructor.
+ * Default Constructor.
  *
- * The constructor connects the parameters of the birth-death process (DAG structure)
+ * The constructor connects the parameters of the coalescent process (DAG structure)
  * and initializes the probability density by computing the combinatorial constant of the tree structure.
  *
- * \param[in]    o         Origin or time of the process.
- * \param[in]    cdt       The condition of the process (time/survival/nTaxa)
- * \param[in]    nTaxa     Number of taxa (used for initialization during simulation).
- * \param[in]    tn        Taxon names used during initialization.
- * \param[in]    c         Clade constraints.
+ * \param[in] tn        A vector of taxon names used during initialization.
+ * \param[in] c         a vector of type Clade for clade constraints.
  */
 AbstractCoalescent::AbstractCoalescent(const std::vector<Taxon> &tn, const std::vector<Clade> &c) : TypedDistribution<Tree>( new Tree() ),
     constraints( c ),
@@ -52,10 +49,9 @@ AbstractCoalescent::AbstractCoalescent(const std::vector<Taxon> &tn, const std::
  * and recursively calling this function again.
  *
  * \param[in]     psi        The tree topology (needed to call setAge).
- * \param[in]     tips       The vector of tips
- * \param[in]     index
- * \param[in]     times
- * \param[in]     T
+ * \param[in]     tips       The vector of TopologyNode for the tips
+ * \param[in]     index      The index of the node to be aged. Used for recursion
+ * \param[in]     ages       A vector of node ages
  */
 void AbstractCoalescent::attachAges(Tree *psi, std::vector<TopologyNode *> &tips, size_t index, const std::vector<double> &ages)
 {
@@ -96,7 +92,12 @@ void AbstractCoalescent::attachAges(Tree *psi, std::vector<TopologyNode *> &tips
     // no return value
 }
 
-
+/*
+ * Builds a Random Binary Tree by starting with tips and coalescening them together randomly
+ *
+ * @param tips a vector of TopologyNode for the tips
+ *
+ */
 void AbstractCoalescent::buildRandomBinaryTree(std::vector<TopologyNode*> &tips)
 {
     
@@ -232,6 +233,8 @@ void AbstractCoalescent::buildHeterochronousRandomBinaryTree(Tree *psi, std::vec
 
 /**
  * Compute the log-transformed probability of the current value under the current parameter values.
+ *
+ * @return double for the log-transformed probability
  *
  */
 double AbstractCoalescent::computeLnProbability( void )

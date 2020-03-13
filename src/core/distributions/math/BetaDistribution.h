@@ -23,12 +23,12 @@ template <class valueType> class TypedDagNode;
         virtual                                            ~BetaDistribution(void);                                                  //!< Virtual destructor
         
         // public member functions
-        double                                              cdf(void) const;                                                                  //!< Cummulative density function
+        double                                              cdf(void) const;                                                                  //!< Cumulative density function
         BetaDistribution*                                   clone(void) const;                                                          //!< Create an independent clone
         double                                              computeLnProbability(void);
         double                                              getMax(void) const;
         double                                              getMin(void) const;
-        double                                              quantile(double p) const;                                                       //!< Qu
+        double                                              quantile(double p) const;
         void                                                redrawValue(void);
 
     protected:

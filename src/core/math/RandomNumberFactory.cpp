@@ -1,12 +1,4 @@
-/**
- * @file
- * This file contains the implementation of RandomNumberFactory, which is
- * used to manage random number generating objects. The class has a pool
- * of random number objects that it can hand off as needed. This singleton
- * class has two seeds it manages: one is a global seed and the other is
- * a so called local seed.
- *
- */
+
 
 #include "RandomNumberFactory.h"
 

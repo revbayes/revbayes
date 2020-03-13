@@ -1,17 +1,3 @@
-/**
- * @brief Declaration of the LogicalAndFunction.
- *
- * This function takes the logical AND of two booleans
- * T && T -> T
- * T && F -> F
- * F && T -> F
- * F && F -> F
- *
- *
- */
-
-
-
 #ifndef LogicalAndFunction_H
 #define LogicalAndFunction_H
 
@@ -22,6 +8,15 @@ namespace RevBayesCore {
 class DagNode;
 template <class valueType> class TypedDagNode;
     
+/**
+ * @brief Declaration of the LogicalAndFunction.
+ *
+ * This function takes the logical AND of two booleans
+ * T && T -> T
+ * T && F -> F
+ * F && T -> F
+ * F && F -> F
+ */
     class LogicalAndFunction : public TypedFunction<Boolean> {
         
     public:

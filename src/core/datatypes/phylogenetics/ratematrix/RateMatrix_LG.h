@@ -1,3 +1,11 @@
+#ifndef RateMatrix_LG_H
+#define RateMatrix_LG_H
+
+#include "RateMatrix_Empirical.h"
+
+
+namespace RevBayesCore {
+
 /**
  * @brief
  * This file contains the declaration of RateMatrix_LG, which is
@@ -6,15 +14,6 @@
  * This is an empirically derived rate matrix for the 20 amino acids obtained from 3,912 Pfam alignments (Le and Gascuel 2008)
  *
  */
-
-#ifndef RateMatrix_LG_H
-#define RateMatrix_LG_H
-
-#include "RateMatrix_Empirical.h"
-
-
-namespace RevBayesCore {
-    
     class RateMatrix_LG : public RateMatrix_Empirical {
         
     public:

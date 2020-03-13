@@ -24,8 +24,8 @@ using namespace RevBayesCore;
  * \param[in]   s2    The standard deviation of the second lognormal distribution.
  * \param[in]   p     The probability that the realization came from the first lognormal distribution.
  */
-BimodalLognormalDistribution::BimodalLognormalDistribution(const TypedDagNode<double> *m1, const TypedDagNode<double> *m2, const TypedDagNode<double> *s1, const TypedDagNode<double> *s2, const TypedDagNode<double> *p) : ContinuousDistribution( new double( 0.0 ) ), 
-    mean1( m1 ), 
+BimodalLognormalDistribution::BimodalLognormalDistribution(const TypedDagNode<double> *m1, const TypedDagNode<double> *m2, const TypedDagNode<double> *s1, const TypedDagNode<double> *s2, const TypedDagNode<double> *p) : ContinuousDistribution( new double( 0.0 ) ),
+    mean1( m1 ),
     mean2( m2 ),
     stDev1( s1 ),
     stDev2( s2 ),
@@ -39,9 +39,9 @@ BimodalLognormalDistribution::BimodalLognormalDistribution(const TypedDagNode<do
     addParameter( s1 );
     addParameter( s2 );
     addParameter( p );
-    
+
     double u = GLOBAL_RNG->uniform01();
-    if ( u < p->getValue() ) 
+    if ( u < p->getValue() )
     {
         *value = RbStatistics::Lognormal::rv(mean1->getValue(), stDev1->getValue(), *GLOBAL_RNG);
     }
@@ -57,7 +57,7 @@ BimodalLognormalDistribution::BimodalLognormalDistribution(const TypedDagNode<do
  *
  * \return    The cumulative density.
  */
-double BimodalLognormalDistribution::cdf( void ) const 
+double BimodalLognormalDistribution::cdf( void ) const
 {
     return p->getValue() * RbStatistics::Lognormal::cdf( mean1->getValue(), stDev1->getValue(), *value) + (1.0 - p->getValue()) * RbStatistics::Lognormal::cdf( mean2->getValue(), stDev2->getValue(), *value);
 }
@@ -67,11 +67,11 @@ double BimodalLognormalDistribution::cdf( void ) const
  * The clone function is a convenience function to create proper copies of inherited objected.
  * E.g. a.clone() will create a clone of the correct type even if 'a' is of derived type 'b'.
  *
- * \return A new copy of the process. 
+ * \return A new copy of the process.
  */
-BimodalLognormalDistribution* BimodalLognormalDistribution::clone( void ) const 
+BimodalLognormalDistribution* BimodalLognormalDistribution::clone( void ) const
 {
-    
+
     return new BimodalLognormalDistribution( *this );
 }
 
@@ -81,7 +81,7 @@ BimodalLognormalDistribution* BimodalLognormalDistribution::clone( void ) const
  *
  * \return   The log-transformed probability density.
  */
-double BimodalLognormalDistribution::computeLnProbability( void ) 
+double BimodalLognormalDistribution::computeLnProbability( void )
 {
     return log(p->getValue() * RbStatistics::Lognormal::pdf( mean1->getValue(), stDev1->getValue(), *value) + (1.0 - p->getValue()) * RbStatistics::Lognormal::pdf( mean2->getValue(), stDev2->getValue(), *value) );
 }
@@ -92,7 +92,7 @@ double BimodalLognormalDistribution::computeLnProbability( void )
  *
  * \return    Positive infinity as the maximum value.
  */
-double BimodalLognormalDistribution::getMax( void ) const 
+double BimodalLognormalDistribution::getMax( void ) const
 {
     return RbConstants::Double::inf;
 }
@@ -103,7 +103,7 @@ double BimodalLognormalDistribution::getMax( void ) const
  *
  * \return    Negative infinity as the minimum value.
  */
-double BimodalLognormalDistribution::getMin( void ) const 
+double BimodalLognormalDistribution::getMin( void ) const
 {
     return RbConstants::Double::neginf;
 }
@@ -116,7 +116,7 @@ double BimodalLognormalDistribution::getMin( void ) const
  *
  * \return    The quantile.
  */
-double BimodalLognormalDistribution::quantile(double p) const 
+double BimodalLognormalDistribution::quantile(double p) const
 {
     throw RbException("Quantile function of bimodal lognormal distribution not implemented.");
 }
@@ -125,10 +125,10 @@ double BimodalLognormalDistribution::quantile(double p) const
 /**
  * Redrawing a new value from the process and storing it as a member.
  */
-void BimodalLognormalDistribution::redrawValue( void ) 
+void BimodalLognormalDistribution::redrawValue( void )
 {
     double u = GLOBAL_RNG->uniform01();
-    if ( u < p->getValue() ) 
+    if ( u < p->getValue() )
     {
         *value = RbStatistics::Lognormal::rv(mean1->getValue(), stDev1->getValue(), *GLOBAL_RNG);
     }
@@ -142,32 +142,32 @@ void BimodalLognormalDistribution::redrawValue( void )
 /**
  * Swap the parameters held by this distribution.
  *
- * 
+ *
  * \param[in]    oldP      Pointer to the old parameter.
  * \param[in]    newP      Pointer to the new parameter.
  */
 void BimodalLognormalDistribution::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
-    
-    if (oldP == mean1) 
+
+    if (oldP == mean1)
     {
         mean1 = static_cast<const TypedDagNode<double>* >( newP );
     }
-    if (oldP == mean2) 
+    if (oldP == mean2)
     {
         mean2 = static_cast<const TypedDagNode<double>* >( newP );
     }
-    if (oldP == stDev1) 
+    if (oldP == stDev1)
     {
         stDev1 = static_cast<const TypedDagNode<double>* >( newP );
     }
-    if (oldP == stDev2) 
+    if (oldP == stDev2)
     {
         stDev2 = static_cast<const TypedDagNode<double>* >( newP );
     }
-    if (oldP == p) 
+    if (oldP == p)
     {
         p = static_cast<const TypedDagNode<double>* >( newP );
     }
-    
+
 }

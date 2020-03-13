@@ -27,22 +27,7 @@ using namespace RevLanguage;
 
 ValidationAnalysis::ValidationAnalysis() : WorkspaceToCoreWrapperObject<RevBayesCore::ValidationAnalysis>()
 {
-
     initializeMethods();
-    
-//    ArgumentRules* runArgRules = new ArgumentRules();
-//    runArgRules->push_back( new ArgumentRule("generations", Natural::getClassTypeSpec(), "The number of generation to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-//    methods.addFunction( new MemberProcedure( "run", RlUtils::Void, runArgRules) );
-//    
-//    ArgumentRules* burninArgRules = new ArgumentRules();
-//    burninArgRules->push_back( new ArgumentRule("generations"   , Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-//    burninArgRules->push_back( new ArgumentRule("tuningInterval", Natural::getClassTypeSpec(), "The number of iterations after which we tune the parameters of the moves.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-//    methods.addFunction( new MemberProcedure( "burnin", RlUtils::Void, burninArgRules) );
-//    
-//    ArgumentRules* summarizeArgRules = new ArgumentRules();
-////    summarizeArgRules->push_back( new ArgumentRule("generations", Natural::getClassTypeSpec(), "The number of generation to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-//    methods.addFunction( new MemberProcedure( "summarize", RlUtils::Void, summarizeArgRules) );
-    
 }
 
 
@@ -50,7 +35,7 @@ ValidationAnalysis::ValidationAnalysis() : WorkspaceToCoreWrapperObject<RevBayes
  * The clone function is a convenience function to create proper copies of inherited objected.
  * E.g. a.clone() will create a clone of the correct type even if 'a' is of derived type 'b'.
  *
- * \return A new copy of the process.
+ * \return A new copy of the analysis.
  */
 ValidationAnalysis* ValidationAnalysis::clone(void) const
 {
@@ -58,13 +43,13 @@ ValidationAnalysis* ValidationAnalysis::clone(void) const
     return new ValidationAnalysis(*this);
 }
 
-
+/** Construct a new internal object and sets value to it **/
 void ValidationAnalysis::constructInternalObject( void )
 {
     // we free the memory first
     delete value;
     
-    // now allocate a new sliding move
+    // now allocate a new validation analysis
     const RevBayesCore::MonteCarloAnalysis&         s   = static_cast<const MonteCarloAnalysis &>( sampler->getRevObject() ).getValue();
     int                                             n   = (int)static_cast<const Natural &>( simulations->getRevObject() ).getValue();
     
@@ -87,7 +72,9 @@ std::string ValidationAnalysis::getConstructorFunctionName( void ) const
 }
 
 
-/* Map calls to member methods */
+/** Map calls to member methods
+* @return result of the call
+**/
 RevPtr<RevVariable> ValidationAnalysis::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
 {
     
@@ -149,7 +136,7 @@ const TypeSpec& ValidationAnalysis::getClassTypeSpec(void)
 
 
 
-/** Return member rules (no members) */
+/** Return member rules */
 const MemberRules& ValidationAnalysis::getParameterRules(void) const
 {
     
@@ -179,6 +166,7 @@ const TypeSpec& ValidationAnalysis::getTypeSpec( void ) const
 }
 
 
+/** Initialize the member methods */
 void ValidationAnalysis::initializeMethods()
 {
     
@@ -198,7 +186,6 @@ void ValidationAnalysis::initializeMethods()
 }
 
 
-/** Get type spec */
 void ValidationAnalysis::printValue(std::ostream &o) const
 {
     
@@ -206,7 +193,7 @@ void ValidationAnalysis::printValue(std::ostream &o) const
 }
 
 
-/** Set a member variable */
+/** Set member variable */
 void ValidationAnalysis::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     
