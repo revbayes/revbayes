@@ -136,6 +136,9 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
     // update the parameters
     prepareParameters(true);
 
+    // turn on/off debug
+//    tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_PRINT);
+
     // set the condition type
     tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::TIME);
     if ( condition_type != "time" )
