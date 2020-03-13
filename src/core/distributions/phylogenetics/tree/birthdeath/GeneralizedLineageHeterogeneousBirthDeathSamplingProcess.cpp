@@ -283,7 +283,6 @@ double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbab
 	// store the old likelihood
     old_ln_prob = current_ln_prob;
 
-
 //	std::cout << "preparing to calculate likelihood" << std::endl;
 //
 //	// TODO: calculate a likelihood!
@@ -475,10 +474,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
             dag_node->touchAffected();
         }
 
-        // update the tree to tensorphylo
+        // update the tree
         updateTree();
         tree_dirty = false;
-
     }
 
     if ( restorer != this->dag_node )
@@ -535,11 +533,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
     		updateOmega();
     		omega_dirty = false;
     	}
-
     }
 
     // clean the likelihood
-    probability_dirty = true;
+    probability_dirty = false;
     current_ln_prob   = old_ln_prob;
 
 }
