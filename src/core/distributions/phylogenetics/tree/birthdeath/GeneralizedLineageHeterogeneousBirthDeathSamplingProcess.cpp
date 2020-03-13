@@ -175,8 +175,6 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
         }
     }
 
-    // include
-
 }
 
 /**
