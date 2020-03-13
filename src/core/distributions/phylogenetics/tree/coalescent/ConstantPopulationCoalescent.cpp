@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <cmath>
 #include <vector>
-
 #include "ConstantPopulationCoalescent.h"
 #include "DistributionExponential.h"
 #include "RandomNumberFactory.h"
@@ -18,6 +17,15 @@ namespace RevBayesCore { class Taxon; }
 
 using namespace RevBayesCore;
 
+
+/**
+ * Default Constructor
+ *
+ * @param N a double for the effective population size
+ * @param tn a vector of Taxon for the taxon names
+ * @param c a vector of clade constraints
+ *
+ */
 ConstantPopulationCoalescent::ConstantPopulationCoalescent(const TypedDagNode<double> *N, const std::vector<Taxon> &tn, const std::vector<Clade> &c) : AbstractCoalescent( tn, c ),
     Ne( N )
 {
@@ -30,7 +38,9 @@ ConstantPopulationCoalescent::ConstantPopulationCoalescent(const TypedDagNode<do
 }
 
 
-
+/*
+ * Destructor
+ */
 ConstantPopulationCoalescent::~ConstantPopulationCoalescent()
 {
     

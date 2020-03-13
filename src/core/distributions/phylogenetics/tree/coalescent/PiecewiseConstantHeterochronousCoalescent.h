@@ -12,21 +12,14 @@ namespace RevBayesCore {
     class Clade;
     
     /**
-     * @brief Piecewise-constant population size coalescent process.
+     * @brief Piecewise-Constant Heterochronous Coalescent Process.
      *
+     * This process is an extension to the piecewise constant coalescent to include serially sampled lineages.
+     * This process has intervals where population sizes are constant within each interval.
      *
-     * The piecewise-constant population size coalescent process is an extension to the constant
-     * population size coalescent process. The process can have one or two parameters:
-     * NEs               := the population sizes
-     * internvalStarts   := the start of a new interval (0 is implicitely assumed)
-     * If the second parameter is omitted, then we assume that the interval are
-     * 1) equally distributed over the present time and the time of the root
-     * 2) equally distributed over coalescent events
-     *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2015-04-14, version 1.0
+     * The process can have one or two parameters:
+     * @param NE    The population sizes for each interval
+     * @param internvalStarts tTe start of a new interval (0 is implicitely assumed). The start of a new interval denotes the end of the previous interval.
      *
      */
     class PiecewiseConstantHeterochronousCoalescent : public AbstractCoalescent {
@@ -51,8 +44,8 @@ namespace RevBayesCore {
         
         
         // members
-        const TypedDagNode<RbVector<double> >*              Nes;
-        const TypedDagNode<RbVector<double> >*              intervalStarts;
+        const TypedDagNode<RbVector<double> >*              Nes;                            //!< The population size for each interval
+        const TypedDagNode<RbVector<double> >*              intervalStarts;                 //!< The time of a new interval start time.
         
     };
     

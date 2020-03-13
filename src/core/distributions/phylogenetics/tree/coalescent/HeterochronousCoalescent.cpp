@@ -25,6 +25,15 @@ namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 
+
+/**
+ * Default Constructor for Heterochronus Coalescent
+ *
+ * @param[in] iv The start times of intervals where demographic dynamics can differ
+ * @param[in] df A vector specifying the demographic dynamics for a given interval.
+ * @param[in] tn        A vector of taxon names used during initialization.
+ * @param[in] c         A vector of clade constraints.
+ */
 HeterochronousCoalescent::HeterochronousCoalescent(const TypedDagNode< RbVector<double> > *iv, const RbVector< DemographicFunction > &df, const std::vector<Taxon> &tn, const std::vector<Clade> &c) : AbstractCoalescent( tn, c ),
     intervals( iv ),
     demographies( df )
@@ -46,61 +55,10 @@ HeterochronousCoalescent::HeterochronousCoalescent(const TypedDagNode< RbVector<
     simulateHeterochronousTree();
 }
 
-
-//HeterochronousCoalescent::HeterochronousCoalescent(const HeterochronousCoalescent &c) : AbstractCoalescent( c ),
-//    intervals( c.intervals ),
-//    demographies( c.demographies )
-//{
-//    
-//    // add the parameters to our set (in the base class)
-//    // in that way other class can easily access the set of our parameters
-//    // this will also ensure that the parameters are not getting deleted before we do
-//    addParameter( intervals );
-//    
-//    for (size_t i=0; i<demographies.size(); ++i)
-//    {
-//        const std::vector<const DagNode*> &pars = demographies[i].getDagNodes();
-//        for (size_t j=0; j<pars.size(); ++j)
-//        {
-//            addParameter( pars[j] );
-//        }
-//    }
-//    
-//}
-
-
 HeterochronousCoalescent::~HeterochronousCoalescent()
 {
     
 }
-
-
-//HeterochronousCoalescent& HeterochronousCoalescent::operator=(const HeterochronousCoalescent &c)
-//{
-//    AbstractCoalescent::operator=(c);
-//
-//    if ( &c != this )
-//    {
-//        intervals       = c.intervals;
-//        demographies    = c.demographies;
-//
-////        // add the parameters to our set (in the base class)
-////        // in that way other class can easily access the set of our parameters
-////        // this will also ensure that the parameters are not getting deleted before we do
-////        addParameter( intervals );
-////
-////        for (size_t i=0; i<demographies.size(); ++i)
-////        {
-////            const std::vector<const DagNode*> &pars = demographies[i].getDagNodes();
-////            for (size_t j=0; j<pars.size(); ++j)
-////            {
-////                addParameter( pars[j] );
-////            }
-////        }
-//    }
-//
-//    return *this;
-//}
 
 /**
  * The clone function is a convenience function to create proper copies of inherited objected.
