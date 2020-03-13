@@ -47,8 +47,9 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	const TypedDagNode<RbVector< MatrixReal > >*                    zeta_,
 	bool                                                            use_origin_
 ) : TypedDistribution<Tree>( new TreeDiscreteCharacterData() ),
-	current_ln_likelihood(0.0),
-	old_ln_likelihood(0.0),
+	current_ln_prob(0.0),
+	old_ln_prob(0.0),
+	probability_dirty(true),
 	taxa(taxa_),
 	age(age_),
 	condition_type(condition_type_),
@@ -75,19 +76,19 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	omega_times(omega_times_),
 	zeta(zeta_),
 	use_origin(use_origin_),
-	tree_dirty(true),
-	root_freq_dirty(true),
-	lambda_dirty(true),
-	mu_dirty(true),
-	phi_dirty(true),
-	delta_dirty(true),
-	upsilon_dirty(true),
-	gamma_dirty(true),
-	rho_dirty(true),
-	xi_dirty(true),
-	eta_dirty(true),
-	omega_dirty(true),
-	zeta_dirty(true)
+	tree_dirty(false),
+	root_freq_dirty(false),
+	lambda_dirty(false),
+	mu_dirty(false),
+	phi_dirty(false),
+	delta_dirty(false),
+	upsilon_dirty(false),
+	gamma_dirty(false),
+	rho_dirty(false),
+	xi_dirty(false),
+	eta_dirty(false),
+	omega_dirty(false),
+	zeta_dirty(false)
 {
 
 	std::string tp_dir = "/home/mike/repos/tensorphyloprototype/build_local";
@@ -154,10 +155,6 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
         	{
         		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_TWO_EXT_SAMPLES);
         	}
-        	else
-        	{
-        		throw RbException( "Cannot use condition " + condition_type + " when beginning from the origin." );
-        	}
         }
         else
         {
@@ -168,11 +165,6 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
         	else if ( condition_type == "sampled" )
         	{
         		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::ROOT_SAMPLING);
-        	}
-        	else
-        	{
-        		std::cout << "OOPS" << std::endl;
-        		throw RbException( "Cannot use condition " + condition_type + " when beginning from the root." );
         	}
         }
     }
@@ -282,21 +274,32 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::buildSerialSample
 
 double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbability(void)
 {
+	// make sure we need to recompute
+	if ( probability_dirty == false )
+	{
+		return current_ln_prob;
+	}
+
+	// store the old likelihood
+    old_ln_prob = current_ln_prob;
+
 
 //	std::cout << "preparing to calculate likelihood" << std::endl;
 //
 //	// TODO: calculate a likelihood!
-//	double ln_prob = tp_ptr->computeLogLikelihood();
+//	current_ln_likelihood = tp_ptr->computeLogLikelihood();
 //	std::cout << "computing log likelihood " << ln_prob << std::endl;
 //
-//	return ln_prob;
 
-	return 0.0;
+    // flag the likelihood as up-to-date
+    probability_dirty = false;
+
+    return current_ln_prob;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::fireTreeChangeEvent(const TopologyNode &n, const unsigned& m)
 {
-	// TODO: update the tensorphylo object with the new tree
+	// nothing smart to do yet
 }
 
 const RevBayesCore::AbstractHomologousDiscreteCharacterData& GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::getCharacterData() const
@@ -413,6 +416,23 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecializatio
         dag_node->keepAffected();
     }
 
+    // clear all flags
+    probability_dirty = false;
+    tree_dirty        = false;
+    root_freq_dirty   = false;
+    lambda_dirty      = false;
+    mu_dirty          = false;
+    phi_dirty         = false;
+    delta_dirty       = false;
+    upsilon_dirty     = false;
+    gamma_dirty       = false;
+    rho_dirty         = false;
+    xi_dirty          = false;
+    eta_dirty         = false;
+    omega_dirty       = false;
+    zeta_dirty        = false;
+    old_ln_prob       = current_ln_prob; // make sure we don't accidently restore the outdated likelihood
+
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::prepareParameters(bool force)
@@ -442,6 +462,85 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::prepareParameters
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecialization(DagNode *restorer)
 {
+
+    if ( restorer == age )
+    {
+        if ( use_origin == false)
+        {
+            value->getRoot().setAge( age->getValue() );
+        }
+
+        if ( dag_node != NULL )
+        {
+            dag_node->touchAffected();
+        }
+
+        // update the tree to tensorphylo
+        updateTree();
+        tree_dirty = false;
+
+    }
+
+    if ( restorer != this->dag_node )
+    {
+    	if ( restorer == lambda || restorer == lambda_times  )
+    	{
+    		updateLambda();
+    		lambda_dirty = false;
+    	}
+    	else if ( restorer == mu || restorer == mu_times  )
+    	{
+    		updateMu();
+    		mu_dirty = false;
+    	}
+    	else if ( restorer == phi || restorer == phi_times  )
+    	{
+    		updatePhi();
+    		phi_dirty = false;
+    	}
+    	else if ( restorer == delta || restorer == delta_times )
+    	{
+    		updateDelta();
+    		delta_dirty = false;
+    	}
+    	else if ( restorer == upsilon || restorer == upsilon_times  )
+    	{
+    		updateUpsilon();
+    		upsilon_dirty = false;
+    	}
+    	else if ( restorer == gamma || restorer == gamma_times || restorer == zeta )
+    	{
+    		updateGamma();
+    		updateZeta();
+    		gamma_dirty = false;
+    		zeta_dirty = false;
+    	}
+    	else if ( restorer == rho || restorer == rho_times  )
+    	{
+    		updateRho();
+    		rho_dirty = false;
+    	}
+    	else if ( restorer == xi || restorer == xi_times  )
+    	{
+    		updateXi();
+    		xi_dirty = false;
+    	}
+    	else if ( restorer == eta || restorer == eta_times  )
+    	{
+    		updateEta();
+    		eta_dirty = false;
+    	}
+    	else if ( restorer == omega || restorer == omega_times  )
+    	{
+    		updateOmega();
+    		omega_dirty = false;
+    	}
+
+    }
+
+    // clean the likelihood
+    probability_dirty = true;
+    current_ln_prob   = old_ln_prob;
 
 }
 
@@ -559,13 +658,80 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecializati
         {
             dag_node->touchAffected();
         }
+
+        // update the tree
+        tree_dirty = true;
+        updateTree();
+
+        // make sure we update the likelihood
+        probability_dirty = true;
+
     }
 
     if ( affecter != this->dag_node )
     {
-
-    	// TODO: update tensorphlyo object
-
+    	if ( affecter == lambda || affecter == lambda_times  )
+    	{
+    		lambda_dirty = true;
+    		updateLambda();
+    		probability_dirty = true;
+    	}
+    	else if ( affecter == mu || affecter == mu_times  )
+    	{
+    		mu_dirty = true;
+    		updateMu();
+    		probability_dirty = true;
+    	}
+    	else if ( affecter == phi || affecter == phi_times  )
+    	{
+    		phi_dirty = true;
+    		updatePhi();
+    		probability_dirty = true;
+    	}
+    	else if ( affecter == delta || affecter == delta_times )
+    	{
+    		delta_dirty = true;
+    		updateDelta();
+    		probability_dirty = true;
+    	}
+    	else if ( affecter == upsilon || affecter == upsilon_times  )
+    	{
+    		upsilon_dirty = true;
+    		updateUpsilon();
+    		probability_dirty = true;
+    	}
+    	else if ( affecter == gamma || affecter == gamma_times || affecter == zeta )
+    	{
+    		gamma_dirty = true;
+    		zeta_dirty = true;
+    		updateGamma();
+    		updateZeta();
+    		probability_dirty = true;
+    	}
+    	else if ( affecter == rho || affecter == rho_times  )
+    	{
+    		rho_dirty = true;
+    		updateRho();
+    		probability_dirty = true;
+    	}
+    	else if ( affecter == xi || affecter == xi_times  )
+    	{
+    		xi_dirty = true;
+    		updateXi();
+    		probability_dirty = true;
+    	}
+    	else if ( affecter == eta || affecter == eta_times  )
+    	{
+    		eta_dirty = true;
+    		updateEta();
+    		probability_dirty = true;
+    	}
+    	else if ( affecter == omega || affecter == omega_times  )
+    	{
+    		omega_dirty = true;
+    		updateOmega();
+    		probability_dirty = true;
+    	}
     }
 
 }
@@ -667,7 +833,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 			// TODO: append the tail to the rooted tree
 		}
 
+		// make sure there's a closing semicolon
 		var += ";";
+
+		// set the tree
 		tp_ptr->setTree(var);
 	}
 }
@@ -687,9 +856,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateData(bool f
 			taxon_map[taxa[i].getName()] = this_taxon_data[0].getWeights();
 			taxon_names[i] = taxa[i].getName();
 		}
-		// ...(taxon_names, taxon_map);
 
-		// set the parameters
+		// set the data
 		tp_ptr->setData(taxon_names, taxon_map);
 
 	}
