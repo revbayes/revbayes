@@ -29,7 +29,7 @@ namespace RevBayesCore {
     class RateMatrix_TIM : public TimeReversibleRateMatrix {
         
     public:
-        RateMatrix_TIM(size_t n);                                                                                               //!< Construct rate matrix with n states
+        RateMatrix_TIM(void);                                                                                                   //!< Default constructor
         RateMatrix_TIM(const RateMatrix_TIM& m);                                                                                //!< Copy constructor
         virtual                             ~RateMatrix_TIM(void);                                                              //!< Destructor
         

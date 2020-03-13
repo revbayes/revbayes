@@ -17,7 +17,7 @@
 using namespace RevBayesCore;
 
 /** Construct rate matrix with n states */
-RateMatrix_TIM::RateMatrix_TIM(size_t n) : TimeReversibleRateMatrix( n ), rates(4,1)
+RateMatrix_TIM::RateMatrix_TIM(void) : TimeReversibleRateMatrix( 4 ), rates(4,1)
 {
     
     theEigenSystem       = new EigenSystem(the_rate_matrix);
