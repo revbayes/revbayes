@@ -5,7 +5,7 @@ FASTA file writing function
 ## description
 This function writes out a FASTA formatted file given 
 data of class `AbstractHomologousDiscreteCharacterData`.
-Filename is specified using the`fn` argument.
+Filename is specified using the `fn` argument.
 ## details
 ## authors
 ## see_also
