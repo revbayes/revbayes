@@ -15,6 +15,6 @@ Sets the random number generator seed given a natural number.
     a
     seed(80797980)
     a <- rUniform(1,0.6,1.2)
-    a # this will b the same as above!
+    a # this will be the same as above!
     
 ## references
