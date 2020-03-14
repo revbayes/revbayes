@@ -567,13 +567,13 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::simulateTree(void
 	// throw RbException(RbException::DEFAULT, "Warning: simulating tree under uniform model.");
 
 	// simulating a tree
-    delete value;
+//    delete value;
 
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
 
     // Create the time tree object (topology + times)
-    Tree *psi = new Tree();
+    Tree *psi = new TreeDiscreteCharacterData();
 
     // Root the topology by setting the appropriate flag
     psi->setRooted( true );
@@ -610,8 +610,17 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::simulateTree(void
     TopologyNode* root = nodes[nodes.size() - 1];
     psi->setRoot(root, true);
 
+//    std::cout << "Here 3." << std::endl;
+
     // store the new value for the tree
     value = psi;
+
+    value->getTreeChangeEventHandler().removeListener( this );
+//    static_cast<TreeDiscreteCharacterData *>(this->value)->setTree( *psi );
+//    delete psi;
+    value->getTreeChangeEventHandler().addListener( this );
+
+//    std::cout << "Here 4." << std::endl;
 
     // update the kernel
     updateTree(true);
