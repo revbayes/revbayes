@@ -99,6 +99,8 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	}
 //	std::cout << "tensorphylo version: " << tp_ptr->getVersion() << std::endl;
 
+//	tp_ptr->setInitialDeltaT(0.00001);
+
 	// add the parameters
 	addParameter(age);
 	addParameter(root_frequency);
@@ -610,17 +612,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::simulateTree(void
     TopologyNode* root = nodes[nodes.size() - 1];
     psi->setRoot(root, true);
 
-//    std::cout << "Here 3." << std::endl;
-
     // store the new value for the tree
-    value = psi;
-
     value->getTreeChangeEventHandler().removeListener( this );
-//    static_cast<TreeDiscreteCharacterData *>(this->value)->setTree( *psi );
-//    delete psi;
+    value = psi;
     value->getTreeChangeEventHandler().addListener( this );
-
-//    std::cout << "Here 4." << std::endl;
 
     // update the kernel
     updateTree(true);
