@@ -74,7 +74,7 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     RevBayesCore::TypedDagNode<double>* sa = static_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
 
     // the start type
-    bool uo = start_type == "originAge" ? true : false;
+    bool use_origin = start_type == "originAge" ? true : false;
 
     // sampling condition
     const std::string& cond = static_cast<const RlString &>( condition->getRevObject() ).getValue();
@@ -104,32 +104,92 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     // root frequency
     RevBayesCore::TypedDagNode<RevBayesCore::Simplex >* root_freq = static_cast<const Simplex &>( root_frequencies->getRevObject() ).getDagNode();;
 
-    // regular parameters
+    // speciation events
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* l_rates = static_cast<const ModelVector< ModelVector<RealPos> > &>( lambda->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           l_times = static_cast<const ModelVector< RealPos> &>( lambda_times->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* m_rates = static_cast<const ModelVector< ModelVector<RealPos> > &>( mu->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           m_times = static_cast<const ModelVector< RealPos> &>( mu_times->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* p_rates = static_cast<const ModelVector< ModelVector<RealPos> > &>( phi->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           p_times = static_cast<const ModelVector< RealPos> &>( phi_times->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* d_rates = static_cast<const ModelVector< ModelVector<RealPos> > &>( delta->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           d_times = static_cast<const ModelVector< RealPos> &>( delta_times->getRevObject() ).getDagNode();
 
-    // mass-event parameters
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* u_probs = static_cast<const ModelVector< ModelVector<Probability> > &>( upsilon->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           u_times = static_cast<const ModelVector< RealPos> &>( upsilon_times->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* g_probs = static_cast<const ModelVector< ModelVector<Probability> > &>( gamma->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           g_times = static_cast<const ModelVector< RealPos> &>( gamma_times->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* r_probs = static_cast<const ModelVector< ModelVector<Probability> > &>( rho->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           r_times = static_cast<const ModelVector< RealPos> &>( rho_times->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* x_probs = static_cast<const ModelVector< ModelVector<Probability> > &>( xi->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           x_times = static_cast<const ModelVector< RealPos> &>( xi_times->getRevObject() ).getDagNode();
+    // extinction events
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* m_rates = NULL;;
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           m_times = NULL;;
+    if ( mu->getRevObject() != RevNullObject::getInstance() )
+    {
+        m_rates = static_cast<const ModelVector< ModelVector<RealPos> > &>( mu->getRevObject() ).getDagNode();
+        m_times = static_cast<const ModelVector< RealPos> &>( mu_times->getRevObject() ).getDagNode();
+    }
 
-    // state-change events
+    // sampling events
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* p_rates = NULL;
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           p_times = NULL;
+    if ( phi->getRevObject() != RevNullObject::getInstance() )
+    {
+    	p_rates = static_cast<const ModelVector< ModelVector<RealPos> > &>( phi->getRevObject() ).getDagNode();
+    	p_times = static_cast<const ModelVector< RealPos> &>( phi_times->getRevObject() ).getDagNode();
+    }
+
+    // destructive sampling events
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* d_rates = NULL;
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           d_times = NULL;
+    if ( delta->getRevObject() != RevNullObject::getInstance() )
+    {
+    	d_rates = static_cast<const ModelVector< ModelVector<RealPos> > &>( delta->getRevObject() ).getDagNode();
+    	d_times = static_cast<const ModelVector< RealPos> &>( delta_times->getRevObject() ).getDagNode();
+    }
+
+    // mass-speciation events
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* u_probs = NULL;
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           u_times = NULL;
+    if ( upsilon->getRevObject() != RevNullObject::getInstance() )
+    {
+    	u_probs = static_cast<const ModelVector< ModelVector<Probability> > &>( upsilon->getRevObject() ).getDagNode();;
+    	u_times = static_cast<const ModelVector< RealPos> &>( upsilon_times->getRevObject() ).getDagNode();;
+    }
+
+    // mass-extinction events
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* g_probs = NULL;
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           g_times = NULL;
+    if ( gamma->getRevObject() != RevNullObject::getInstance() )
+    {
+    	g_probs = static_cast<const ModelVector< ModelVector<Probability> > &>( gamma->getRevObject() ).getDagNode();;
+    	g_times = static_cast<const ModelVector< RealPos> &>( gamma_times->getRevObject() ).getDagNode();;
+    }
+
+    // mass-sampling events
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* r_probs = NULL;
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           r_times = NULL;
+    if ( rho->getRevObject() != RevNullObject::getInstance() )
+    {
+    	r_probs = static_cast<const ModelVector< ModelVector<Probability> > &>( rho->getRevObject() ).getDagNode();;
+    	r_times = static_cast<const ModelVector< RealPos> &>( rho_times->getRevObject() ).getDagNode();;
+    }
+
+    // mass-destructive-sampling events
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* x_probs = NULL;
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           x_times = NULL;
+    if ( xi->getRevObject() != RevNullObject::getInstance() )
+    {
+    	x_probs = static_cast<const ModelVector< ModelVector<Probability> > &>( xi->getRevObject() ).getDagNode();;
+    	x_times = static_cast<const ModelVector< RealPos> &>( xi_times->getRevObject() ).getDagNode();;
+    }
+
+    // anagenetic events
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RateGenerator > >*                 h_mats  = static_cast<const ModelVector< RateGenerator > &>( eta->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                                        h_times = static_cast<const ModelVector< RealPos> &>( eta_times->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::CladogeneticProbabilityMatrix > >* w_mats  = static_cast<const ModelVector< CladogeneticProbabilityMatrix > &>( omega->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                                        w_times = static_cast<const ModelVector< RealPos> &>( omega_times->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::MatrixReal > >*                    z_mats  = static_cast<const ModelVector< StochasticMatrix > &>( zeta->getRevObject() ).getDagNode();
+
+    // cladogenetic events
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::CladogeneticProbabilityMatrix > >* w_mats  = NULL;
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                                        w_times = NULL;
+    if ( omega->getRevObject() != RevNullObject::getInstance() )
+    {
+    	w_mats  = static_cast<const ModelVector< CladogeneticProbabilityMatrix > &>( omega->getRevObject() ).getDagNode();
+    	w_times = static_cast<const ModelVector< RealPos> &>( omega_times->getRevObject() ).getDagNode();
+    }
+
+    // mass-extinction associated state changes
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::MatrixReal > >*                    z_mats = NULL;
+    if ( zeta->getRevObject() != RevNullObject::getInstance() )
+    {
+		z_mats  = static_cast<const ModelVector< StochasticMatrix > &>( zeta->getRevObject() ).getDagNode();
+    }
 
     // taxa
     std::vector<RevBayesCore::Taxon> tax = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
@@ -148,7 +208,7 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
 		h_mats,  h_times,
 		w_mats,  w_times,
 		z_mats,
-		uo);
+		use_origin);
 
     // return the distribution
     return d;
@@ -254,29 +314,29 @@ const MemberRules& Dist_GLHBDSP::getParameterRules(void) const
         // regular events (and times)
         dist_member_rules.push_back( new ArgumentRule( "lambda",       ModelVector< ModelVector<RealPos> >::getClassTypeSpec(),         "The vector of speciation rates for each time interval.",                                     ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "lambdaTimes",  ModelVector< RealPos >::getClassTypeSpec(),                      "The times at which speciation rates change.",                                                ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new ModelVector<RealPos>() ) );
-        dist_member_rules.push_back( new ArgumentRule( "mu",           ModelVector< ModelVector<RealPos> >::getClassTypeSpec(),         "The vector of extinction rates for each time interval.",                                     ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "mu",           ModelVector< ModelVector<RealPos> >::getClassTypeSpec(),         "The vector of extinction rates for each time interval.",                                     ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         dist_member_rules.push_back( new ArgumentRule( "muTimes",      ModelVector< RealPos >::getClassTypeSpec(),                      "The times at which extinction rates change.",                                                ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new ModelVector<RealPos>() ) );
-        dist_member_rules.push_back( new ArgumentRule( "phi",          ModelVector< ModelVector<RealPos> >::getClassTypeSpec(),         "The vector of sampling rates for each time interval.",                                       ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "phi",          ModelVector< ModelVector<RealPos> >::getClassTypeSpec(),         "The vector of sampling rates for each time interval.",                                       ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         dist_member_rules.push_back( new ArgumentRule( "phiTimes",     ModelVector< RealPos >::getClassTypeSpec(),                      "The times at which sampling rates change.",                                                  ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new ModelVector<RealPos>() ) );
-        dist_member_rules.push_back( new ArgumentRule( "delta",        ModelVector< ModelVector<RealPos> >::getClassTypeSpec(),         "The vector of destructive-sampling rates for each time interval.",                           ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "delta",        ModelVector< ModelVector<RealPos> >::getClassTypeSpec(),         "The vector of destructive-sampling rates for each time interval.",                           ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         dist_member_rules.push_back( new ArgumentRule( "deltaTimes",   ModelVector< RealPos >::getClassTypeSpec(),                      "The times at which destructive-sampling rates change.",                                      ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new ModelVector<RealPos>() ) );
 
         // mass events
-        dist_member_rules.push_back( new ArgumentRule( "upsilon",      ModelVector< ModelVector<Probability> >::getClassTypeSpec(),     "The vector of speciation probabilities for each mass-speciation event.",                     ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        dist_member_rules.push_back( new ArgumentRule( "upsilonTimes", ModelVector< RealPos >::getClassTypeSpec(),                      "The times at which mass-speciation events occur.",                                           ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        dist_member_rules.push_back( new ArgumentRule( "gamma",        ModelVector< ModelVector<Probability> >::getClassTypeSpec(),     "The vector of extinction probabilities for each mass-extinction event.",                     ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        dist_member_rules.push_back( new ArgumentRule( "gammaTimes",   ModelVector< RealPos >::getClassTypeSpec(),                      "The times at which mass-extinction events occur.",                                           ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        dist_member_rules.push_back( new ArgumentRule( "rho",          ModelVector< ModelVector<Probability> >::getClassTypeSpec(),     "The vector of sampling probabilities for each mass-sampling event.",                         ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        dist_member_rules.push_back( new ArgumentRule( "rhoTimes",     ModelVector< RealPos >::getClassTypeSpec(),                      "The times at which mass-sampling events occur.",                                             ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        dist_member_rules.push_back( new ArgumentRule( "xi",           ModelVector< ModelVector<Probability> >::getClassTypeSpec(),     "The vector of destructive-sampling probabilities for each mass-destructive-sampling event.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        dist_member_rules.push_back( new ArgumentRule( "xiTimes",      ModelVector< RealPos >::getClassTypeSpec(),                      "The times at which mass-destructive-sampling events occur.",                                 ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "upsilon",      ModelVector< ModelVector<Probability> >::getClassTypeSpec(),     "The vector of speciation probabilities for each mass-speciation event.",                     ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "upsilonTimes", ModelVector< RealPos >::getClassTypeSpec(),                      "The times at which mass-speciation events occur.",                                           ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "gamma",        ModelVector< ModelVector<Probability> >::getClassTypeSpec(),     "The vector of extinction probabilities for each mass-extinction event.",                     ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "gammaTimes",   ModelVector< RealPos >::getClassTypeSpec(),                      "The times at which mass-extinction events occur.",                                           ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "rho",          ModelVector< ModelVector<Probability> >::getClassTypeSpec(),     "The vector of sampling probabilities for each mass-sampling event.",                         ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "rhoTimes",     ModelVector< RealPos >::getClassTypeSpec(),                      "The times at which mass-sampling events occur.",                                             ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "xi",           ModelVector< ModelVector<Probability> >::getClassTypeSpec(),     "The vector of destructive-sampling probabilities for each mass-destructive-sampling event.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "xiTimes",      ModelVector< RealPos >::getClassTypeSpec(),                      "The times at which mass-destructive-sampling events occur.",                                 ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         // state changes
         dist_member_rules.push_back( new ArgumentRule( "eta",          ModelVector< RateGenerator >::getClassTypeSpec(),                "The anagenetic rates of change for each time interval.",                                     ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "etaTimes",     ModelVector< RealPos >::getClassTypeSpec(),                      "The times at which the anagenetic rates change.",                                            ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new ModelVector<RealPos>() ) );
-        dist_member_rules.push_back( new ArgumentRule( "omega",        ModelVector< CladogeneticProbabilityMatrix>::getClassTypeSpec(), "The cladogenetic event probabilities for each time interval.",                               ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "omega",        ModelVector< CladogeneticProbabilityMatrix>::getClassTypeSpec(), "The cladogenetic event probabilities for each time interval.",                               ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         dist_member_rules.push_back( new ArgumentRule( "omegaTimes",   ModelVector< RealPos >::getClassTypeSpec(),                      "The times at which the cladogenetic rates change.",                                          ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new ModelVector<RealPos>() ) );
-        dist_member_rules.push_back( new ArgumentRule( "zeta",         ModelVector<StochasticMatrix>::getClassTypeSpec(),               "The probabilities of change for each mass-extinction event.",                                ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "zeta",         ModelVector<StochasticMatrix>::getClassTypeSpec(),               "The probabilities of change for each mass-extinction event.",                                ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         // conditioning
 		std::vector<std::string> options_condition;
