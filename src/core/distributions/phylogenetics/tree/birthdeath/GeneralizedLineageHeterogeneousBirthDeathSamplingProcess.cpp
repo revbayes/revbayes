@@ -91,6 +91,8 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	zeta_dirty(false)
 {
 
+	std::cout << "Making GLHBDSP object" << std::endl;
+
 	//assert(Plugin::loader().isTensorPhyloLoaded());
 	try {
 		tp_ptr = Plugin::loader().createTensorPhyloLik();
@@ -98,8 +100,6 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 		throw RbException("TensorPhylo is not loaded (use loadPlugin(...)).");
 	}
 //	std::cout << "tensorphylo version: " << tp_ptr->getVersion() << std::endl;
-
-//	tp_ptr->setInitialDeltaT(0.00001);
 
 	// add the parameters
 	addParameter(age);
@@ -298,7 +298,7 @@ double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbab
     // distributions because we include the probability density of the root node.
     // that probability density drops out if we condition on anything but time, in which
     // case this likelihood will be equivalent to a likelihood from other revbayes
-    // birth-death models
+    // birth-death models (but only in the case where rates are independent of state)
 
     return current_ln_prob;
 }
@@ -565,11 +565,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::simulateTree(void)
 {
-	// throw a warning that this is not a correct simulation
-	// throw RbException(RbException::DEFAULT, "Warning: simulating tree under uniform model.");
+	// Warning: simulating tree under uniform model.
 
 	// simulating a tree
-//    delete value;
 
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -914,7 +912,16 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateRootFrequen
 {
 	if ( force | root_freq_dirty )
 	{
-		std::vector<double> var = RbToStd( root_frequency->getValue() );
+		// create empty vector
+		std::vector<double> var;
+		if ( root_frequency != NULL )
+		{
+			var = RbToStd( root_frequency->getValue() );
+		}
+		else
+		{
+			throw RbException("Root frequencies cannot be NULL.");
+		}
 
 		// set the parameters
 		tp_ptr->setRootPrior(var);
@@ -925,14 +932,21 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateLambda(bool
 {
 	if ( force | lambda_dirty )
 	{
-		// convert to std
-		std::vector< std::vector<double> > params = RbToStd( lambda->getValue() );
-		std::vector<double>                times  = RbToStd( lambda_times->getValue() );
+		// create empty vectors
+		std::vector< std::vector<double> > params;
+		std::vector<double>                times;
 
-		// handle some errors
-		if ( params.size() != times.size() + 1 )
+		if ( lambda != NULL && lambda_times != NULL )
 		{
-			throw RbException( "Number of lambda vectors does not match the number of intervals." );
+			// convert to std
+			params = RbToStd( lambda->getValue() );
+			times  = RbToStd( lambda_times->getValue() );
+
+			// handle some errors
+			if ( params.size() != times.size() + 1 )
+			{
+				throw RbException( "Number of lambda vectors does not match the number of intervals." );
+			}
 		}
 
 		// set the parameters
@@ -944,19 +958,32 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateMu(bool for
 {
 	if ( force | mu_dirty )
 	{
-		// convert to std
-		std::vector< std::vector<double> > params = RbToStd( mu->getValue() );
-		std::vector<double>                times  = RbToStd( mu_times->getValue() );
+		// create empty vectors
+		std::vector< std::vector<double> > params;
+		std::vector<double>                times;
 
-		// handle some errors
-		if ( params.size() != times.size() + 1 )
+		if ( mu != NULL )
 		{
-			throw RbException( "Number of mu vectors does not match the number of intervals." );
+			// convert to std
+			params = RbToStd( mu->getValue() );
+			times  = RbToStd( mu_times->getValue() );
+
+			// handle some errors
+			if ( params.size() != times.size() + 1 )
+			{
+				throw RbException( "Number of mu vectors does not match the number of intervals." );
+			}
+		}
+		else
+		{
+			// make dummy initial values
+			const AbstractHomologousDiscreteCharacterData& char_data = getCharacterData();
+			size_t num_states = char_data.getNumberOfStates();
+			params.push_back( std::vector<double>(num_states, 0.0) );
 		}
 
 		// set the parameters
 		tp_ptr->setMu(times, params);
-
 	}
 }
 
@@ -964,14 +991,28 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updatePhi(bool fo
 {
 	if ( force | phi_dirty )
 	{
-		// convert to std
-		std::vector< std::vector<double> > params = RbToStd( phi->getValue() );
-		std::vector<double>                times  = RbToStd( phi_times->getValue() );
+		// create empty vectors
+		std::vector< std::vector<double> > params;
+		std::vector<double>                times;
 
-		// handle some errors
-		if ( params.size() != times.size() + 1 )
+		if ( phi != NULL )
 		{
-			throw RbException( "Number of phi vectors does not match the number of intervals." );
+			// convert to std
+			params = RbToStd( phi->getValue() );
+			times  = RbToStd( phi_times->getValue() );
+
+			// handle some errors
+			if ( params.size() != times.size() + 1 )
+			{
+				throw RbException( "Number of phi vectors does not match the number of intervals." );
+			}
+		}
+		else
+		{
+			// make dummy initial values
+			const AbstractHomologousDiscreteCharacterData& char_data = getCharacterData();
+			size_t num_states = char_data.getNumberOfStates();
+			params.push_back( std::vector<double>(num_states, 0.0) );
 		}
 
 		// set the parameters
@@ -983,14 +1024,28 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateDelta(bool 
 {
 	if ( force | delta_dirty )
 	{
-		// convert to std
-		std::vector< std::vector<double> > params = RbToStd( delta->getValue() );
-		std::vector<double>                times  = RbToStd( delta_times->getValue() );
+		// create empty vectors
+		std::vector< std::vector<double> > params;
+		std::vector<double>                times;
 
-		// handle some errors
-		if ( params.size() != times.size() + 1 )
+		if ( delta != NULL )
 		{
-			throw RbException( "Number of delta vectors does not match the number of intervals." );
+			// convert to std
+			params = RbToStd( delta->getValue() );
+			times  = RbToStd( delta_times->getValue() );
+
+			// handle some errors
+			if ( params.size() != times.size() + 1 )
+			{
+				throw RbException( "Number of delta vectors does not match the number of intervals." );
+			}
+		}
+		else
+		{
+			// make dummy initial values
+			const AbstractHomologousDiscreteCharacterData& char_data = getCharacterData();
+			size_t num_states = char_data.getNumberOfStates();
+			params.push_back( std::vector<double>(num_states, 0.0) );
 		}
 
 		// set the parameters
@@ -1002,16 +1057,22 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateUpsilon(boo
 {
 	if ( force | upsilon_dirty )
 	{
-		// convert to std
-		std::vector< std::vector<double> > params = RbToStd( upsilon->getValue() );
-		std::vector<double>                times  = RbToStd( upsilon_times->getValue() );
+		// create empty vectors
+		std::vector< std::vector<double> > params;
+		std::vector<double>                times;
 
-		// handle some errors
-		if ( params.size() != times.size() )
+		if ( upsilon != NULL && upsilon_times != NULL )
 		{
-			throw RbException( "Number of upsilon vectors does not match the number of intervals." );
-		}
+			// convert to std
+			params = RbToStd( upsilon->getValue() );
+			times  = RbToStd( upsilon_times->getValue() );
 
+			// handle some errors
+			if ( params.size() != times.size() )
+			{
+				throw RbException( "Number of upsilon events does not match the number of times." );
+			}
+		}
 		// set the parameters
 		tp_ptr->setMassSpeciationEvents(times, params);
 	}
@@ -1021,14 +1082,21 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateGamma(bool 
 {
 	if ( force | gamma_dirty )
 	{
-		// convert to std
-		std::vector< std::vector<double> > params = RbToStd( gamma->getValue() );
-		std::vector<double>                times  = RbToStd( gamma_times->getValue() );
+		// create empty vectors
+		std::vector< std::vector<double> > params;
+		std::vector<double>                times;
 
-		// handle some errors
-		if ( params.size() != times.size() )
+		if ( gamma != NULL && gamma_times != NULL )
 		{
-			throw RbException( "Number of gamma vectors does not match the number of intervals." );
+			// convert to std
+			params = RbToStd( gamma->getValue() );
+			times  = RbToStd( gamma_times->getValue() );
+
+			// handle some errors
+			if ( params.size() != times.size() )
+			{
+				throw RbException( "Number of gamma events does not match the number of times." );
+			}
 		}
 
 		// set the parameters
@@ -1040,14 +1108,21 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateRho(bool fo
 {
 	if ( force | rho_dirty )
 	{
-		// convert to std
-		std::vector< std::vector<double> > params = RbToStd( rho->getValue() );
-		std::vector<double>                times  = RbToStd( rho_times->getValue() );
+		// create empty vectors
+		std::vector< std::vector<double> > params;
+		std::vector<double>                times;
 
-		// handle some errors
-		if ( params.size() != times.size() )
+		if ( rho != NULL && rho_times != NULL )
 		{
-			throw RbException( "Number of rho vectors does not match the number of intervals." );
+			// convert to std
+			params = RbToStd( rho->getValue() );
+			times  = RbToStd( rho_times->getValue() );
+
+			// handle some errors
+			if ( params.size() != times.size() )
+			{
+				throw RbException( "Number of rho events does not match the number of times." );
+			}
 		}
 
 		// set the parameters
@@ -1059,14 +1134,21 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateXi(bool for
 {
 	if ( force | xi_dirty )
 	{
-		// convert to std
-		std::vector< std::vector<double> > params = RbToStd( xi->getValue() );
-		std::vector<double>                times  = RbToStd( xi_times->getValue() );
+		// create empty vectors
+		std::vector< std::vector<double> > params;
+		std::vector<double>                times;
 
-		// handle some errors
-		if ( params.size() != times.size() )
+		if ( xi != NULL && xi_times != NULL )
 		{
-			throw RbException( "Number of xi vectors does not match the number of intervals." );
+			// convert to std
+			params = RbToStd( xi->getValue() );
+			times  = RbToStd( xi_times->getValue() );
+
+			// handle some errors
+			if ( params.size() != times.size() )
+			{
+				throw RbException( "Number of xi events does not match the number of times." );
+			}
 		}
 
 		// set the parameters
@@ -1078,14 +1160,21 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateEta(bool fo
 {
 	if ( force | eta_dirty )
 	{
-		// convert to std
-		std::vector< std::vector< std::vector<double> > > params = RbToStd( eta->getValue() );
-		std::vector<double>                               times  = RbToStd( eta_times->getValue() );
+		// create empty vectors
+		std::vector< std::vector< std::vector<double> > > params;
+		std::vector<double>                               times;
 
-		// handle some errors
-		if ( params.size() != times.size() + 1 )
+		if ( eta != NULL && eta_times != NULL )
 		{
-			throw RbException( "Number of eta vectors does not match the number of intervals." );
+			// convert to std
+			params = RbToStd( eta->getValue() );
+			times  = RbToStd( eta_times->getValue() );
+
+			// handle some errors
+			if ( params.size() != times.size() + 1 )
+			{
+				throw RbException( "Number of eta matrices does not match the number of intervals." );
+			}
 		}
 
 		// set the parameters
@@ -1097,17 +1186,24 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateOmega(bool 
 {
 	if ( force | omega_dirty )
 	{
-		// convert to std
-		std::vector< std::map< std::vector<unsigned>, double > > params = RbToStd( omega->getValue() );
-		std::vector<double>                                      times  = RbToStd( omega_times->getValue() );
+		// create empty vectors
+		std::vector< std::map< std::vector<unsigned>, double > > params;
+		std::vector<double>                                      times;
 
 		const AbstractHomologousDiscreteCharacterData& char_data = getCharacterData();
 		size_t num_states = char_data.getNumberOfStates();
 
-		// handle some errors
-		if ( params.size() != times.size() + 1 )
+		if ( omega != NULL && omega_times != NULL )
 		{
-			throw RbException( "Number of omega vectors does not match the number of intervals." );
+			// convert to std
+			params = RbToStd( omega->getValue() );
+			times  = RbToStd( omega_times->getValue() );
+
+			// handle some errors
+			if ( params.size() != times.size() + 1 )
+			{
+				throw RbException( "Number of omega matrices does not match the number of intervals." );
+			}
 		}
 
 		// set the parameters
@@ -1121,12 +1217,38 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateZeta(bool f
 	if ( force | zeta_dirty )
 	{
 		// convert to std
-		std::vector< std::vector< std::vector<double> > > params = RbToStd( zeta->getValue() );
+		std::vector< std::vector< std::vector<double> > > params;
 
-		// handle some errors
-		if ( params.size() != gamma_times->getValue().size() )
+		if ( zeta != NULL && gamma_times != NULL )
 		{
-			throw RbException( "Number of zeta vectors does not match the number of intervals." );
+			// convert to std
+			params = RbToStd( zeta->getValue() );
+
+			// handle some errors
+			if ( params.size() != gamma_times->getValue().size() )
+			{
+				throw RbException( "Number of zeta matrices does not match the number of times." );
+			}
+		}
+		else if ( gamma_times != NULL )
+		{
+			// create some dummy identity matrices
+			const AbstractHomologousDiscreteCharacterData& char_data = getCharacterData();
+			size_t num_states = char_data.getNumberOfStates();
+
+			std::vector< std::vector<double> > default_zeta;
+			for(size_t i = 0; i < num_states; ++i)
+			{
+				std::vector<double> this_zeta_row(num_states, 0.0);
+				this_zeta_row[i] = 1.0;
+				default_zeta.push_back(this_zeta_row);
+			}
+
+			for(size_t i = 0; i < gamma_times->getValue().size(); ++i)
+			{
+				params.push_back( default_zeta );
+			}
+
 		}
 
 		// set the parameters
