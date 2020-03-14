@@ -8,7 +8,7 @@ This function takes a Rev filename as an argument and runs that Rev script.
 ## authors
 ## see_also
 ## example
-    # what the file name
+    # set the file name
     fn = "rb_tutorial.Rev"
     # the source function will run the Rev code in the file fn
     source(fn)
