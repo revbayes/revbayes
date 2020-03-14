@@ -7,9 +7,7 @@ Finds the median of a sorted vector of numbers.
 ## details
 The vector is sorted when `median` is used finding the
 number of the sorted values with an equal amount of numbers that
-are greater than or less than that value. If the length of the 
-vector is even there will be no two such values, in that case
-the two are averaged arithmetically.
+are greater than or less than that value. If the length of the vector is even, there will be no such value. In that case, the two are averaged automatically.
 ## authors
 ## see_also
 `mean`
