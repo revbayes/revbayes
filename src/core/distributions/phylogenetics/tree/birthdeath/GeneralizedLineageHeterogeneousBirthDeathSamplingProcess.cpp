@@ -134,7 +134,9 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
     prepareParameters(true);
 
     // turn on/off debug
-//    tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_PRINT);
+    tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_PRINT);
+
+//    tp_ptr->setApplyTreeLikCorrection(false);
 
     // set the condition type
     tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::TIME);
@@ -361,7 +363,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
     value->getTreeChangeEventHandler().removeListener( this );
 
     // set the tree
-	// FIXME the memory bug seems to be coming from this line or the next one (double delete) and most probably happen in setTree (i.e., delete root;)
     static_cast<TreeDiscreteCharacterData *>(this->value)->setTree( *v );
 
     // clear memory
@@ -862,14 +863,30 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 
 		if ( use_origin )
 		{
+			// strip out trailing zeros
+			std::string pattern = ":";
+			while ( true )
+			{
+				// if we found a colon stop
+				if ( &var.back() == pattern )
+				{
+					break;
+				}
+				// otherwise, pop off the last character
+				var.pop_back();
+			}
+
+			// now add the tail
 			double origin_age  = age->getValue();
 			double root_age    = this->getValue().getRoot().getAge();
 			double tail_length = origin_age - root_age;
-			// TODO: append the tail to the rooted tree
+			var += std::to_string(tail_length);
 		}
 
 		// make sure there's a closing semicolon
 		var += ";";
+
+		std::cout << var << std::endl;
 
 		// set the tree
 		tp_ptr->setTree(var);
