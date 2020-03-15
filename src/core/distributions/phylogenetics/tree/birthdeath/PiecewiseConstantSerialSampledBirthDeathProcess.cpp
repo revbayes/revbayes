@@ -295,8 +295,8 @@ PiecewiseConstantSerialSampledBirthDeathProcess::PiecewiseConstantSerialSampledB
 
     if (t != NULL)
     {
-      delete value;
-      value = &(t->getValue());
+        delete value;
+        value = t->getValue().clone();
     }
     else
     {
