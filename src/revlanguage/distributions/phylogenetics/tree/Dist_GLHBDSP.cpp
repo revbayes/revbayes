@@ -254,6 +254,7 @@ std::vector<std::string> Dist_GLHBDSP::getDistributionFunctionAliases( void ) co
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
     a_names.push_back( "GLHBDSP" );
+    a_names.push_back( "TimeHeterogeneousLineageHeterogeneousBirthDeathSamplingProcess" );
 
     return a_names;
 }
