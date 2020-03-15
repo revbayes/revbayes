@@ -91,8 +91,6 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	zeta_dirty(false)
 {
 
-	std::cout << "Making GLHBDSP object" << std::endl;
-
 	//assert(Plugin::loader().isTensorPhyloLoaded());
 	try {
 		tp_ptr = Plugin::loader().createTensorPhyloLik();
@@ -1229,26 +1227,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateZeta(bool f
 			{
 				throw RbException( "Number of zeta matrices does not match the number of times." );
 			}
-		}
-		else if ( gamma_times != NULL )
-		{
-			// create some dummy identity matrices
-			const AbstractHomologousDiscreteCharacterData& char_data = getCharacterData();
-			size_t num_states = char_data.getNumberOfStates();
-
-			std::vector< std::vector<double> > default_zeta;
-			for(size_t i = 0; i < num_states; ++i)
-			{
-				std::vector<double> this_zeta_row(num_states, 0.0);
-				this_zeta_row[i] = 1.0;
-				default_zeta.push_back(this_zeta_row);
-			}
-
-			for(size_t i = 0; i < gamma_times->getValue().size(); ++i)
-			{
-				params.push_back( default_zeta );
-			}
-
 		}
 
 		// set the parameters

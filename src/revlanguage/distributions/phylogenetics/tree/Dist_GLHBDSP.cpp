@@ -102,15 +102,15 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     }
 
     // root frequency
-    RevBayesCore::TypedDagNode<RevBayesCore::Simplex >* root_freq = static_cast<const Simplex &>( root_frequencies->getRevObject() ).getDagNode();;
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* root_freq = static_cast<const Simplex &>( root_frequencies->getRevObject() ).getDagNode();;
 
     // speciation events
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* l_rates = static_cast<const ModelVector< ModelVector<RealPos> > &>( lambda->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           l_times = static_cast<const ModelVector< RealPos> &>( lambda_times->getRevObject() ).getDagNode();
 
     // extinction events
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* m_rates = NULL;;
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           m_times = NULL;;
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* m_rates = NULL;
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           m_times = NULL;
     if ( mu->getRevObject() != RevNullObject::getInstance() )
     {
         m_rates = static_cast<const ModelVector< ModelVector<RealPos> > &>( mu->getRevObject() ).getDagNode();
@@ -172,8 +172,8 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     }
 
     // anagenetic events
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RateGenerator > >*                 h_mats  = static_cast<const ModelVector< RateGenerator > &>( eta->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                                        h_times = static_cast<const ModelVector< RealPos> &>( eta_times->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RateGenerator > >* h_mats  = static_cast<const ModelVector< RateGenerator > &>( eta->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                        h_times = static_cast<const ModelVector< RealPos> &>( eta_times->getRevObject() ).getDagNode();
 
     // cladogenetic events
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::CladogeneticProbabilityMatrix > >* w_mats  = NULL;
@@ -185,7 +185,7 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     }
 
     // mass-extinction associated state changes
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::MatrixReal > >*                    z_mats = NULL;
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::MatrixReal > >* z_mats = NULL;
     if ( zeta->getRevObject() != RevNullObject::getInstance() )
     {
 		z_mats  = static_cast<const ModelVector< StochasticMatrix > &>( zeta->getRevObject() ).getDagNode();
@@ -349,7 +349,7 @@ const MemberRules& Dist_GLHBDSP::getParameterRules(void) const
 		dist_member_rules.push_back( new OptionRule( "condition", new RlString("time"), options_condition, "The condition of the process." ) );
 
 		// taxa
-        dist_member_rules.push_back( new ArgumentRule( "taxa", ModelVector<Taxon>::getClassTypeSpec(), "The taxa used for simulation.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "taxa", ModelVector<Taxon>::getClassTypeSpec(), "The taxa in the tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
 
         rules_set = true;
     }
