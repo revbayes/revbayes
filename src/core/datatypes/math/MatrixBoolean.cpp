@@ -23,7 +23,7 @@
 
 using namespace RevBayesCore;
 
-
+/** Default constructor for a null matrix (0 rows and 0 columns) */
 MatrixBoolean::MatrixBoolean( void ) :
     elements( RbVector<boost::dynamic_bitset<> >() ),
     nRows( 0 ),
@@ -32,7 +32,7 @@ MatrixBoolean::MatrixBoolean( void ) :
 
 }
 
-
+/** Constructor for an n x n Boolean matrix (filled with 'false' by default) */
 MatrixBoolean::MatrixBoolean( size_t n ) :
     elements( RbVector<boost::dynamic_bitset<> >(n, boost::dynamic_bitset<>(n) ) ),
     nRows( n ),
@@ -41,7 +41,10 @@ MatrixBoolean::MatrixBoolean( size_t n ) :
     
 }
 
-
+/** Constructor for a general Boolean matrix (filled with 'false' by default)
+ * @param n The number of rows
+ * @param k The number of columns
+ */
 MatrixBoolean::MatrixBoolean( size_t n, size_t k) :
     elements( RbVector<boost::dynamic_bitset<> >(n, boost::dynamic_bitset<>(k) ) ),
     nRows( n ),
@@ -50,7 +53,11 @@ MatrixBoolean::MatrixBoolean( size_t n, size_t k) :
     
 }
 
-
+/** Constructor for a general Boolean matrix
+ * @param n The number of rows
+ * @param k The number of columns
+ * @param b Either 0 (for an all-false n x k matrix) or 1 (for an all-true n x k matrix)
+ */
 MatrixBoolean::MatrixBoolean( size_t n, size_t k, int b) :
     elements( RbVector<boost::dynamic_bitset<> >(n, boost::dynamic_bitset<>(k, b) ) ),
     nRows( n ),
@@ -106,7 +113,7 @@ void MatrixBoolean::clear( void )
     elements.clear();
 }
 
-
+/** Element-wise bit flipping (turns every 'true' into 'false' and every 'false' into 'true') */
 MatrixBoolean MatrixBoolean::negate( void ) const
 {
     
@@ -167,7 +174,12 @@ void MatrixBoolean::executeMethod(const std::string &n, const std::vector<const 
     
 }
 
-
+/** Get a column
+ * @param columnIndex Index denoting the column to be extracted
+ *
+ * @throw RbException if columnIndex is out of bounds
+ * @return Vector of Booleans corresponding to the given column of the matrix
+ */
 boost::dynamic_bitset<> MatrixBoolean::getColumn( size_t columnIndex ) const
 {
     
@@ -188,26 +200,30 @@ boost::dynamic_bitset<> MatrixBoolean::getColumn( size_t columnIndex ) const
     return col;
 }
 
-
+/** Get matrix dimensions on the assumption that it is a square matrix */
 size_t MatrixBoolean::getDim( void ) const
 {
     // we assume that this is a square matrix
     return nRows;
 }
 
-
+/** Get the number of columns for the general case */
 size_t MatrixBoolean::getNumberOfColumns( void ) const
 {
     return nCols;
 }
 
-
+/** Get the number of rows for the general case */
 size_t MatrixBoolean::getNumberOfRows( void ) const
 {
     return nRows;
 }
 
-
+/**Get elements above the diagonal
+ *
+ * @throw RbException if the matrix is not a square matrix
+ * @return Vector of elements above the diagonal
+ */
 boost::dynamic_bitset<> MatrixBoolean::getUpperTriangle( void ) const
 {
     
@@ -230,13 +246,16 @@ boost::dynamic_bitset<> MatrixBoolean::getUpperTriangle( void ) const
     
 }
 
-
+/** Check whether the matrix is a square matrix */
 bool MatrixBoolean::isSquareMatrix( void ) const
 {
     return nRows == nCols;
 }
 
-
+/** Resize to a given number of rows and columns and fill with 'false'
+ * @param r The new number of rows
+ * @param c The new number of columns
+ */
 void MatrixBoolean::resize(size_t r, size_t c)
 {
     
@@ -247,7 +266,7 @@ void MatrixBoolean::resize(size_t r, size_t c)
     
 }
 
-
+/** Get the number of elements in a row or column of the matrix on the assumption that it is a square matrix */
 size_t MatrixBoolean::size( void ) const
 {
     return nRows;

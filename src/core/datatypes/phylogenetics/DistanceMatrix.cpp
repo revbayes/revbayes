@@ -125,7 +125,7 @@ double& DistanceMatrix::getElement( size_t i, size_t j )
  * @param t Taxon that will be set if index i is not out of bound
  * @param i Index denoting the element of the 'taxa' vector that is to be set
  *
- * @throws RbException if i is out of bounds
+ * @throw RbException if i is out of bounds
  */
 void DistanceMatrix::setTaxon(const RevBayesCore::Taxon &t, size_t i)
 {
