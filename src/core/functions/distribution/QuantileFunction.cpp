@@ -7,6 +7,12 @@
 
 namespace RevBayesCore { class DagNode; }
 
+/*
+ * Default Constructor for QuantileFunction
+ * @param q a type double for the quantile of interest
+ * @param d a continuous distribution for quantile computation
+ *
+ */
 
 RevBayesCore::QuantileFunction::QuantileFunction(const TypedDagNode<double> *q, ContinuousDistribution* d) :
     ContinuousFunction( new double(0.0) ),

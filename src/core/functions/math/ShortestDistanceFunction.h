@@ -1,18 +1,9 @@
-//
-//  ShortestDistanceFunction.h
-//  revbayes-branch-proj
-//
-//  Created by Michael Landis on 2/15/17.
-//  Copyright © 2017 Michael Landis. All rights reserved.
-//
-
 #ifndef ShortestDistanceFunction_h
 #define ShortestDistanceFunction_h
 
 #include <stdio.h>
 #include <set>
 #include <vector>
-
 #include "RbVector.h"
 #include "TypedFunction.h"
 #include "RbVectorImpl.h"
@@ -23,13 +14,13 @@ template <class valueType> class TypedDagNode;
     
     
     /**
-     * \brief Hyperbolic Sine of a real number.
+     * \brief Shortest Distance Along A Graph.
      *
-     * Compute the hyperbolic Sine of a real number x. (sinh(x) = (exp(x) - exp(-x))/2).
+     * Computes the shortest distance from each node in the graph to every other node in the graph
+     * The function computes a vector of vectors where the x[i][j] position returns the shortest distance between nodes i and j.
      *
-     * \copyright (c) Copyright 2009-2015 (GPL version 3)
-     * \author The RevBayes Development Core Team (Wade Dismukes)
-     * \since Version 1.0, 2015-01-31
+     *@param adj a matrix denoting the connectivity of nodes. adj[i][j]>0 denotes connectivity
+     *@param dist a matrix denoting the distance between connected nodes.
      *
      */
     class ShortestDistanceFunction : public TypedFunction<RbVector<RbVector<double> > > {
@@ -47,10 +38,10 @@ template <class valueType> class TypedDagNode;
         std::vector<std::set<size_t> >                          createAdjacencySets(const RbVector<RbVector<long> >& adj);
         RbVector<RbVector<double> >                             findShortestPaths(const RbVector<RbVector<long> >& adj, const RbVector<RbVector<double> >& dist);
         
-        size_t                                                  num_nodes;
+        size_t                                                  num_nodes; //!< The number of nodes in the graph
         
-        const TypedDagNode<RbVector<RbVector<long> > >*          adjacencies;
-        const TypedDagNode<RbVector<RbVector<double> > >*       distances;
+        const TypedDagNode<RbVector<RbVector<long> > >*          adjacencies; //!< The connectivity of nodes in the graph
+        const TypedDagNode<RbVector<RbVector<double> > >*       distances; //!< The distances between connected nodes
     };
 }
 

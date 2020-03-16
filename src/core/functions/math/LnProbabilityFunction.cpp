@@ -1,5 +1,4 @@
 #include "LnProbabilityFunction.h"
-
 #include "Cloneable.h"
 #include "StochasticNode.h"
 

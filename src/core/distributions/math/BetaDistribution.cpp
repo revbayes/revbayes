@@ -10,6 +10,12 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
+/*
+ * Default Constructor for the Beta Distribution.
+ * This distribution has two parameters:
+ * @param a a double for the alpha shape parameter
+ * @param b a double for the beta shape parameter
+ */
 BetaDistribution::BetaDistribution(const TypedDagNode<double> *a, const TypedDagNode<double> *b) : ContinuousDistribution( new double( 0.5 ) ),
     alpha( a ),
     beta( b )
