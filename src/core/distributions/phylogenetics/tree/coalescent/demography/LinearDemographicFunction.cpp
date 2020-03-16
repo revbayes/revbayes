@@ -12,10 +12,10 @@ using namespace RevBayesCore;
 
 
 /**
- * @param[in]    N0   the population size at the beginning of the linear period (towards the present)
- * @param[in]    N1   the population size at the end of the linear period (towards the past)
- * @param[in]    t0   the time at which the linear process started
- * @param[in]    t1   the time of the beginning of the linear period (towards the present)
+ * @param[in]    N0   Pointer to the population size at the beginning of the linear period (towards the present)
+ * @param[in]    N1   Pointer to the population size at the end of the linear period (towards the past)
+ * @param[in]    t0   Pointer to the time at which the linear process started
+ * @param[in]    t1   Pointer to the time of the beginning of the linear period (towards the present)
  */
 LinearDemographicFunction::LinearDemographicFunction(const TypedDagNode<double>* N0, const TypedDagNode<double>* N1, const TypedDagNode<double>* t0, const TypedDagNode<double>* t1) : DemographicFunction(),
     theta_ancient( N1 ),
@@ -80,7 +80,7 @@ LinearDemographicFunction* LinearDemographicFunction::clone( void ) const
 }
 
 /**
- * @param[in]   t    time
+ * @param[in]   t    Time
  *
  * @return  N(t)
  */
@@ -110,8 +110,8 @@ double LinearDemographicFunction::getDemographic(double t) const
 }
 
 /**
- * @param[in]   start   time at which the interval starts
- * @param[in]   finish  time at which the interval ends
+ * @param[in]   start   Time at which the interval starts
+ * @param[in]   finish  Time at which the interval ends
  *
  * @return  Integral 1/N(x) dx between start and finish.
  */
@@ -142,8 +142,8 @@ double LinearDemographicFunction::getIntegral(double start, double finish) const
 }
 
 /**
- * @param[in]   old_node    pointer to DAG node to be replaced
- * @param[in]   new_node    pointer to DAG node replacing the other
+ * @param[in]   old_node    Pointer to the DAG node to be replaced
+ * @param[in]   new_node    Pointer to the DAG node replacing the other
  */
 void LinearDemographicFunction::swapNodeInternal(const DagNode *old_node, const DagNode *new_node)
 {

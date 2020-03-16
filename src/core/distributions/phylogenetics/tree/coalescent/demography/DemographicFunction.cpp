@@ -84,7 +84,7 @@ DemographicFunction& DemographicFunction::operator=(const DemographicFunction &f
 }
 
 /**
- * @param[in]   n    The DAG node to be added to the nodes vector.
+ * @param[in]   n    Pointer to the DAG node to be added to the nodes vector.
  */
 void DemographicFunction::addVariable(const DagNode *n)
 {
@@ -107,8 +107,8 @@ const std::vector<const DagNode *>& DemographicFunction::getDagNodes(void) const
 
 
 /**
- * @param[in]   old_node    Pointer to DAG node to be replaced
- * @param[in]   new_node    Pointer to DAG node replacing the other
+ * @param[in]   old_node    Pointer to the DAG node to be replaced
+ * @param[in]   new_node    Pointer to the DAG node replacing the other
  *
  */
 void DemographicFunction::swapNode(const DagNode *old_node, const DagNode *new_node)

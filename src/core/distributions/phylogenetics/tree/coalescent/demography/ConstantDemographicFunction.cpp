@@ -65,7 +65,7 @@ ConstantDemographicFunction* ConstantDemographicFunction::clone( void ) const
 }
 
 /**
- * @param[in]   t    time
+ * @param[in]   t    Time
  *
  * @return  N(t)
  */
@@ -76,8 +76,8 @@ double ConstantDemographicFunction::getDemographic(double t) const
 }
 
 /**
- * @param[in]   start   time at which the interval starts
- * @param[in]   finish  time at which the interval ends
+ * @param[in]   start   Time at which the interval starts
+ * @param[in]   finish  Time at which the interval ends
  *
  * @return  Integral 1/N(x) dx between start and finish.
  */
@@ -88,8 +88,8 @@ double ConstantDemographicFunction::getIntegral(double start, double finish) con
 }
 
 /**
- * @param[in]   old_node    pointer to DAG node to be replaced
- * @param[in]   new_node    pointer to DAG node replacing the other
+ * @param[in]   old_node    Pointer to the DAG node to be replaced
+ * @param[in]   new_node    Pointer to the DAG node replacing the other
  */
 void ConstantDemographicFunction::swapNodeInternal(const DagNode *old_node, const DagNode *new_node)
 {
