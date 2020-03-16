@@ -287,7 +287,6 @@ const MemberRules& Dist_occurrenceBirthDeathProcess::getParameterRules(void) con
         dist_member_rules.push_back( new ArgumentRule( "mu",                RealPos::getClassTypeSpec(), "The extinction rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
         dist_member_rules.push_back( new ArgumentRule( "psi",               RealPos::getClassTypeSpec(), "The fossil sampling rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
         dist_member_rules.push_back( new ArgumentRule( "omega",             RealPos::getClassTypeSpec(), "The occurrence rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
-        dist_member_rules.push_back( new ArgumentRule( "dn_time_points",    ModelVector<RealPos>::getClassTypeSpec(), "Time points for which we compute density.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
 
         // std::vector<TypeSpec> rho_paramTypes;
@@ -307,6 +306,8 @@ const MemberRules& Dist_occurrenceBirthDeathProcess::getParameterRules(void) con
         optionsCondition.push_back( "survival" );
         dist_member_rules.push_back( new OptionRule( "condition",           new RlString("time"), optionsCondition, "The condition of the process." ) );
         dist_member_rules.push_back( new ArgumentRule( "taxa"  ,            ModelVector<Taxon>::getClassTypeSpec(), "The taxa used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+
+        dist_member_rules.push_back( new ArgumentRule( "dn_time_points",    ModelVector<RealPos>::getClassTypeSpec(), "Time points for which we compute density.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         dist_member_rules.push_back( new ArgumentRule( "initialTree" ,      TimeTree::getClassTypeSpec() , "Instead of drawing a tree from the distribution, initialize distribution with this tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
 
@@ -342,7 +343,12 @@ const TypeSpec& Dist_occurrenceBirthDeathProcess::getTypeSpec( void ) const
  */
 void Dist_occurrenceBirthDeathProcess::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
-    if ( name == "lambda" )
+    if ( name == "rootAge" || name == "originAge" )
+    {
+        start_age = var;
+        start_condition = name;
+    }
+    else if ( name == "lambda" )
     {
         lambda = var;
     }
@@ -350,30 +356,29 @@ void Dist_occurrenceBirthDeathProcess::setConstParameter(const std::string& name
     {
         mu = var;
     }
-    else if ( name == "rho" )
-    {
-        rho = var;
-    }
-    else if ( name == "rootAge" || name == "originAge" )
-    {
-        start_age = var;
-        start_condition = name;
-    }
     else if ( name == "psi" )
     {
         psi = var;
-    }
-    else if ( name == "dn_time_points" )
-    {
-        dn_time_points = var;
     }
     else if ( name == "omega" )
     {
        omega = var;
     }
+    else if ( name == "rho" )
+    {
+        rho = var;
+    }
     else if ( name == "removalPr" )
     {
         removalPr = var;
+    }
+    else if ( name == "condition" )
+    {
+        condition = var;
+    }
+    else if ( name == "dn_time_points" )
+    {
+        dn_time_points = var;
     }
     // else if ( name == "lambdaTimes" )
     // {

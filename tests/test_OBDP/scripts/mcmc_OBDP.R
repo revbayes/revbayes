@@ -84,7 +84,7 @@ print("my model ok")
 mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
 
 
-mymcmc.run(generations=1)
+mymcmc.run(generations=100000)
 
 
 # Read in the tree trace and construct the maximum clade credibility (MCC) tree #

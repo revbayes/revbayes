@@ -95,12 +95,12 @@ template <class valueType> class RbVector;
       const TypedDagNode<double>*                         lambda;                                                                         //!< The speciation rate.
       const TypedDagNode<double>*                         mu;                                                                             //!< The extinction rate.
       const TypedDagNode<double>*                         psi;                                                                            //!< The sampling probability of a just extinct species.
-      const TypedDagNode<double>*                         omega;                                                                          //!< The probability of an observation being an occurrence.
+      const TypedDagNode<double>*                         omega;                                                                          //!< The occurrence sampling rate.
       const TypedDagNode<double>*                         rho;                                                                            //!< The sampling probability of extant taxa.
       const TypedDagNode<double>*                         removalPr;                                                                      //!< The removal probability after sampling.
       const TypedDagNode<Tree>*                           initialTree;                                                                    //!< Facultative initial tree
       const TypedDagNode< RbVector< double > >*           dn_time_points;                                                                 //!< Times at which density is computed
-      mutable int                                         extant;                                                                         //!< Number of extant taxa
+      mutable size_t                                      extant;                                                                         //!< Number of extant taxa
     };
 
 

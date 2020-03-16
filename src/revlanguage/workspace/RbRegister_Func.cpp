@@ -84,7 +84,6 @@
 #include "Func_branchScoreDistance.h"
 #include "Func_checkNodeOrderConstraints.h"
 #include "Func_chronoToPhylo.h"
-#include "Func_computeLt.h"
 #include "Func_computeWeightedNodeOrderConstraintsScore.h"
 #include "Func_combineCharacter.h"
 #include "Func_concatenate.h"
@@ -95,6 +94,7 @@
 #include "Func_earlyBurstRates.h"
 #include "Func_extantTree.h"
 #include "Func_formatDiscreteCharacterData.h"
+#include "Func_inferAncestralPopSize.h"
 #include "Func_maximumTree.h"
 #include "Func_mrcaIndex.h"
 #include "Func_nodeAgeByID.h"
@@ -341,7 +341,6 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_branchScoreDistance()                             );
         addFunction( new Func_checkNodeOrderConstraints()                       );
         addFunction( new Func_chronoToPhylo()                                   );
-        addFunction( new Func_computeLt()                                       );
         addFunction( new Func_computeWeightedNodeOrderConstraintsScore()        );
         addFunction( new Func_combineCharacter()                                );
         addFunction( new Func_concatenate()                                     );
@@ -351,6 +350,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_formatDiscreteCharacterData()                     );
         addFunction( new Func_EarlyBurstRates()                                 );
         addFunction( new Func_extantTree()                                      );
+        addFunction( new Func_inferAncestralPopSize()                           );
         addFunction( new Func_maximumTree()                                     );
         addFunction( new Func_mrcaIndex()                                       );
         addFunction( new Func_nodeAgeByID()                                     );

@@ -50,11 +50,11 @@ namespace RevLanguage {
     private:
 
         RevPtr<const RevVariable>                               tor;                                                                                    //!< Time of origin
-        RevPtr<const RevVariable>                               lambda;                                                                                 //!< The speciation rate(s)
-        RevPtr<const RevVariable>                               mu;                                                                                     //!< The extinction rate(s)
-        RevPtr<const RevVariable>                               psi;                                                                                    //!< The serial sampling rate(s)
-        RevPtr<const RevVariable>                               omega;                                                                                  //!<The probability of an observation being an occurrence
-        RevPtr<const RevVariable>                               rho;                                                                                    //!< The taxon sampling fraction(s)
+        RevPtr<const RevVariable>                               lambda;                                                                                 //!< The speciation rate
+        RevPtr<const RevVariable>                               mu;                                                                                     //!< The extinction rate
+        RevPtr<const RevVariable>                               psi;                                                                                    //!< The serial sampling rate
+        RevPtr<const RevVariable>                               omega;                                                                                  //!< The occurrence sampling rate
+        RevPtr<const RevVariable>                               rho;                                                                                    //!< The taxon sampling fraction
         RevPtr<const RevVariable>                               removalPr;                                                                              //!< The removal probability after sampling
 
         // RevPtr<const RevVariable>                               timeline;                                                                            //!< The interval change times

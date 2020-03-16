@@ -30,11 +30,10 @@ using namespace RevBayesCore;
  * \param[in]    l              Speciation rate.
  * \param[in]    m              Extinction rate.
  * \param[in]    p              Extinction sampling rate.
- * \param[in]    o              Rate of occurrence observations.
+ * \param[in]    o              Occurrence sampling rate.
  * \param[in]    rho            Sampling probability at present time.
  * \param[in]    r              Removal probability after sampling.
  * \param[in]    cdt            Condition of the process (none/survival/#Taxa).
- * \param[in]    tn             Taxa.
  * \param[in]    tau            Times for which we want to compute the density.
  * \param[in]    uo             If true t is the origin time otherwise the root age of the process.
  * \param[in]    tr             Initial tree (facultative).
@@ -124,13 +123,15 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) 
     //std::cout << "Parameter values are the following : lambda, mu, psi, rho = " << lambda -> getValue() << " , " << mu -> getValue() << " , " << psi -> getValue() << " , " << rho -> getValue() << std::endl;
 
     // compute the log-likelihood : use ComputeLt (backward traversal of the tree) or ComputeMt (forward traversal of the tree)
-    double lnProbTimes_Mt = ComputeMt();
-    double lnProbTimes_Lt = ComputeLt();
+    // double lnProbTimes_Mt = ComputeMt();
+    // double lnProbTimes_Lt = ComputeLt();
 
     double lnProbTimes = computeLnProbabilityTimes();
-    double lnProbTimes2 = computeLnProbabilityTimes2();
+    // std::cout << "Difference : "<< lnProbTimes-lnProbTimes_Mt << std::endl;
 
-    return lnProbTimes_Lt;
+    // double lnProbTimes2 = computeLnProbabilityTimes2();
+
+    return lnProbTimes;
 }
 
 double OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void ) const
@@ -329,6 +330,7 @@ double OccurrenceBirthDeathProcess::functionU(double t, double z) const
     double denominator = (x2-z) - (x1-z)*exp(-sqrtDelta*t);
     return numerator/denominator;
 }
+
 /**
  * Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
  */
@@ -753,11 +755,11 @@ double OccurrenceBirthDeathProcess::ComputeMt( void ) const
 
 
 //from Warnock & Manceau computeLt function
- /**
- * Compute the log-transformed probability of the current value under the current parameter values : breadth-first backward traversal algorithm.
- *
- * \return    The log-probability density.
- */
+/**
+* Compute the log-transformed probability of the current value under the current parameter values : breadth-first backward traversal algorithm.
+*
+* \return    The log-probability density.
+*/
 double OccurrenceBirthDeathProcess::ComputeLt( void ) const
 {
     // order times youngest to oldest
