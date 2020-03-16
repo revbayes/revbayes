@@ -4,9 +4,12 @@ sqrt
 Square root of a number
 ## description
 The 'sqrt' function return the square root of a number.
+## description
+Takes the square root of some positive number `x`.
 ## details
 ## authors
 ## see_also
+`power`
 ## example
         # compute the square root of a real number
         x <- 3.0

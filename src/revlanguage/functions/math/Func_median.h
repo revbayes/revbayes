@@ -13,12 +13,9 @@ namespace RevLanguage {
      *
      * The RevLanguage wrapper of the median function connects
      * the variables/parameters of the function and creates the internal medianFunction object.
-     * Please read the medianFunction.h for more info.
      *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2014-07-27, version 1.0
+     * @copybrief RevBayesCore::MedianFunction
+     * @see RevBayesCore::MedianFunction for the internal object
      *
      */
     class Func_median : public TypedFunction<Real> {

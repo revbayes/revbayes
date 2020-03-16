@@ -1,13 +1,24 @@
 #include "TreeScaleFunction.h"
-
 #include <stddef.h>
-
 #include "TopologyNode.h"
 #include "TypedDagNode.h"
 
 namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
+
+
+/*Default Constructor for TreeScaleFunction
+ *
+ * This function has three inputs:
+ * @param t the phylogenetic tree of type Tree
+ * @param s a double representing a scalar to to multiply the internal node ages
+ * @param m a vector of doubles representing the desired tip ages
+ *
+ * @return This function modifies the input tree directly
+ *
+ * @todo write a function that automatically rescales the tip ages
+ */
 
 TreeScaleFunction::TreeScaleFunction(const TypedDagNode<Tree> *t, const TypedDagNode<double> *s, std::vector<double> m) : TypedFunction<Tree>( new Tree() ),
     tau( t ),

@@ -6,6 +6,16 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
+
+/*
+ * LogicalOrFunction Constructor for two TypedDagNodes of type Boolean
+ *
+ * These parameters are the two booleans to be compared by a logical OR
+ * @param l A TypedDagNode of type Boolean
+ * @param r A TypedDagNode of type Boolean
+ */
+
+
 LogicalOrFunction::LogicalOrFunction(const TypedDagNode<Boolean> *l, const TypedDagNode<Boolean> *r) : TypedFunction<Boolean>( new Boolean(false) ),
     left( l ),
     right( r )
