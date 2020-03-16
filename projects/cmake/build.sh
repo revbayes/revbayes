@@ -58,7 +58,7 @@ fi
     mv GitVersion.cpp ../../src/revlanguage/utils/
 
 	./regenerate.sh ${all_args}
-	cd ${BUILD_DIR} 
+	cd ${BUILD_DIR}
 	cmake .
 	make -j 4
 	cd ..
