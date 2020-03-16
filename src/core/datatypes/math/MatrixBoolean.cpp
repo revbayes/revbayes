@@ -18,6 +18,7 @@
 #include "RbConstants.h"
 #include "TypedDagNode.h"
 #include "RbVectorImpl.h"
+#include "RbMathMatrix.h"
 
 #include <boost/dynamic_bitset.hpp>
 
@@ -272,20 +273,17 @@ size_t MatrixBoolean::size( void ) const
     return nRows;
 }
 
-#include "RbMathMatrix.h"
+
 
 namespace RevBayesCore { class DagNode; }
 
 /**
- * This function applies the logical AND operation (only returns TRUE
- * if both operands are TRUE) elementwise to the two matrices and
- * returns the resulting matrix. If the matrices are not conformable,
- * a null matrix is returned.
+ * @todo Implement overloading of the && operator such that the
+ * logical AND operation (only returns TRUE if both operands are
+ * are TRUE) will be applied elementwise to two input matrices and
+ * return the resulting matrix. If the matrices are not conformable,
+ * a null matrix should be returned.
  *
- * @brief operator &&
- * @param A Matrix
- * @param B Matrix
- * @return A  && B, null matrix on failure
  */
 /* MatrixBoolean operator&&(const MatrixBoolean& A, const MatrixBoolean& B)
 {
@@ -309,15 +307,12 @@ namespace RevBayesCore { class DagNode; }
 
 
 /**
- * This function applies the logical OR operation (returns TRUE if
- * at least one of the two operands is TRUE) elementwise to the
- * two matrices and returns the resulting matrix. If the matrices are
- * not conformable, a null matrix is returned.
+ * @todo Implement overloading of the || operator such that the
+ * logical OR operation (returns TRUE if at least one of the two
+ * operands is TRUE) will be applied elementwise to two input
+ * matrices and return the resulting matrix. If the matrices are
+ * not conformable, a null matrix should be returned.
  *
- * @brief operator ||
- * @param A Matrix
- * @param B Matrix
- * @return A  || B, null matrix on failure
  */
 /* MatrixBoolean operator||(const MatrixBoolean& A, const MatrixBoolean& B)
 {
@@ -341,15 +336,12 @@ namespace RevBayesCore { class DagNode; }
 
 
 /**
- * This function applies the logical XOR operation (returns TRUE if
- * only one of the two operands is TRUE) elementwise to the two
- * matrices and returns the resulting matrix. If the matrices are not
- * conformable, a null matrix is returned.
+ * @todo Implement overloading of the != operator such that the
+ * logical XOR operation (returns TRUE if only one of the two
+ * operands is TRUE) will be applied elementwise to two input
+ * matrices and return the resulting matrix. If the matrices are
+ * not conformable, a null matrix should be returned.
  *
- * @brief operator !=
- * @param A Matrix
- * @param B Matrix
- * @return A  != B, null matrix on failure
  */
 /* MatrixBoolean operator!=(const MatrixBoolean& A, const MatrixBoolean& B)
 {
