@@ -134,8 +134,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
     prepareParameters(true);
 
     // turn on/off debug
-    tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_PRINT);
-
+//    tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_PRINT);
 //    tp_ptr->setApplyTreeLikCorrection(false);
 
     // set the condition type
@@ -886,7 +885,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 		// make sure there's a closing semicolon
 		var += ";";
 
-		std::cout << var << std::endl;
+//		std::cout << var << std::endl;
 
 		// set the tree
 		tp_ptr->setTree(var);
