@@ -91,6 +91,9 @@ public:
 	virtual void setDebugMode(debugMode_t aDebugMode) = 0;
 	virtual void setDebugMode(debugMode_t aDebugMode, const std::string &aFilePath) = 0;
 
+	virtual void writeStateToFile(const std::string &aFilePath) = 0;
+	virtual void loadStateFromFile(const std::string &aFilePath) = 0;
+
 	virtual size_t getVersion() const = 0;
 
 };
