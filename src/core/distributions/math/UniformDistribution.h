@@ -7,45 +7,35 @@ namespace RevBayesCore {
 class DagNode;
 template <class valueType> class TypedDagNode;
     
-    /**
-     * @brief Uniform distribution class.
-     *
-     * The uniform distribution defined on a real numbered random variable gives equal probability
-     * to values between the min and the max.
-     * Instances of this class can be associated to stochastic variables.
-     *
-     *The distribution has 2 parameters:
-     *@param min the lower bound of the distribution
-     *@param max the upper bound of the distribution
-     *
-     */
+/**
+ * @brief Uniform distribution class.
+ *
+ * The Uniform probability distribution has probability density
+ * @f[ f(x | \min, \max) = {1 \over \max - \min} @f]
+ * for @f$\min \leq x \leq \max@f$ and 0 otherwise.
+ * Instances of this class can be associated to stochastic variables.
+ *
+ */
     class UniformDistribution : public ContinuousDistribution {
         
-    public:
-        UniformDistribution(const TypedDagNode<double> *min, const TypedDagNode<double> *max);
-        virtual                                            ~UniformDistribution(void);                                                  //!< Virtual destructor
-        
-        // public member functions
-        double                                              cdf(void) const;                                                            //!< Cummulative density function
-        UniformDistribution*                                clone(void) const;                                                          //!< Create an independent clone
-        double                                              computeLnProbability(void);
-        double                                              getMax(void) const;
-        double                                              getMin(void) const;
-        double                                              quantile(double p) const;                                                   //!< Qu
-        void                                                redrawValue(void);
+        public:
+                                            UniformDistribution(const TypedDagNode<double> *min, const TypedDagNode<double> *max);
+            virtual                        ~UniformDistribution(void);                                                  //!< Virtual destructor
+            double                          cdf(void) const;                                                            //!< Cumulative density function
+            UniformDistribution*            clone(void) const;                                                          //!< Create an independent clone
+            double                          computeLnProbability(void);                                                 //!< Natural log of the probability density
+            double                          getMax(void) const;                                                         //!< Maximum possible value
+            double                          getMin(void) const;                                                         //!< Minimum possible value
+            double                          quantile(double p) const;                                                   //!< Quantile function
+            void                            redrawValue(void);
 
-    protected:
-        // Parameter management functions
-        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Swap a parameter
-        
-    private:
-        
-        // members
-        const TypedDagNode<double>*                          min;
-        const TypedDagNode<double>*                          max;
-        
+        protected:
+            void                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Swap a parameter
+            
+        private:
+            const TypedDagNode<double>*     min;
+            const TypedDagNode<double>*     max;
     };
-    
 }
 
 #endif
