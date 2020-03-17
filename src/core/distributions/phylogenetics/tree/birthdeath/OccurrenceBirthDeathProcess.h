@@ -18,6 +18,13 @@ class Clade;
 
 template <class valueType> class TypedDagNode;
 template <class valueType> class RbVector;
+  
+  /**
+     * @file This file contains the declaration of the random variable class for occurrence birth-death process, see Manceau & al. 2020 algorithm (http://dx.doi.org/10.1101/755561).
+     *
+     * @brief Declaration of the occurrence Birth-Death process class.
+     * @return The joint density of trees + population sizes
+     */
 
     class OccurrenceBirthDeathProcess : public AbstractBirthDeathProcess {
 
@@ -91,16 +98,17 @@ template <class valueType> class RbVector;
       double                                              functionU(double t, double z) const;
 
       // Members
-      const TypedDagNode<double>*                         tor;                                                                            //!< Time of origin.
-      const TypedDagNode<double>*                         lambda;                                                                         //!< The speciation rate.
-      const TypedDagNode<double>*                         mu;                                                                             //!< The extinction rate.
-      const TypedDagNode<double>*                         psi;                                                                            //!< The sampling probability of a just extinct species.
-      const TypedDagNode<double>*                         omega;                                                                          //!< The occurrence sampling rate.
-      const TypedDagNode<double>*                         rho;                                                                            //!< The sampling probability of extant taxa.
-      const TypedDagNode<double>*                         removalPr;                                                                      //!< The removal probability after sampling.
-      const TypedDagNode<Tree>*                           initialTree;                                                                    //!< Facultative initial tree
-      const TypedDagNode< RbVector< double > >*           dn_time_points;                                                                 //!< Times at which density is computed
-      mutable size_t                                      extant;                                                                         //!< Number of extant taxa
+      const TypedDagNode< double > *                        tor;                                   //!< Time of origin.
+      const TypedDagNode< double > *                        lambda;                                //!< The speciation rate.
+      const TypedDagNode< double > *                        mu;                                    //!< The extinction rate.
+      const TypedDagNode< double > *                        psi;                                   //!< The sampling probability of a just extinct species.
+      const TypedDagNode< double > *                        omega;                                 //!< The occurrence sampling rate.
+      const TypedDagNode< double > *                        rho;                                   //!< The sampling probability of extant taxa.
+      const TypedDagNode< double > *                        removalPr;                             //!< The removal probability after sampling.
+      const TypedDagNode<Tree>*                             initialTree;                           //!< Facultative initial tree
+      const TypedDagNode< RbVector< double > > *            dn_time_points;                        //!< Times at which density is computed
+      mutable size_t                                        extant;                                //!< Number of extant taxa
+
     };
 
 

@@ -24,12 +24,15 @@ using namespace RevBayesCore;
 
 /**
  * Constructor.
+ *
+ * The constructor connects the parameters of the birth-death process (DAG structure)
+ * 
  * We delegate most parameters to the base class and initialize the members.
  *
  * \param[in]    t              Time of the origin/present/length of the process.
  * \param[in]    l              Speciation rate.
  * \param[in]    m              Extinction rate.
- * \param[in]    p              Extinction sampling rate.
+ * \param[in]    p              Fossil sampling rate.
  * \param[in]    o              Occurrence sampling rate.
  * \param[in]    rho            Sampling probability at present time.
  * \param[in]    r              Removal probability after sampling.
