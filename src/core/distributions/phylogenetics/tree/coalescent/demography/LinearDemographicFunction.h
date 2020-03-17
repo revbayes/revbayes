@@ -10,9 +10,14 @@ class DagNode;
 template <class valueType> class TypedDagNode;
     
     /**
-     * @brief LinearDemographicFunction
+     * @brief Linear Demographic Function
      *
-     *
+     * The demographic function related to a linear population growth.
+     * It contains four variables:
+     *    - theta_recent, the population size at the beginning of the linear period (towards the present)
+     *    - theta_ancient, the population size at the end of the linear period (towards the past)
+     *    - time_recent, the time of the beginning of the linear period (towards the present)
+     *    - time_ancient, the time of the end of the linear period (towards the past)
      */
     class LinearDemographicFunction : public DemographicFunction {
         
@@ -21,18 +26,18 @@ template <class valueType> class TypedDagNode;
         LinearDemographicFunction(const LinearDemographicFunction &f);                                                                  //!< Copy constructor
         
         // destructor
-        virtual                                        ~LinearDemographicFunction(void);
+        virtual                                        ~LinearDemographicFunction(void);                                  //!< Destructor
         LinearDemographicFunction&                      operator=(const LinearDemographicFunction &f);                    //!< Assignment operator
         
         // public methods
         
         // pure virtual public methods
         LinearDemographicFunction*                      clone(void) const;                                      //!< Clone the LinearDemographicFunction
-        double                                          getDemographic(double t) const;                         //!< demographic function N(t) at time t
+        double                                          getDemographic(double t) const;                         //!< Returns the demographic function N(t) at time t.
         double                                          getIntegral(double start, double finish) const;         //!< Calculates the integral 1/N(x) dx between start and finish.
         
     protected:
-        virtual void                                    swapNodeInternal(const DagNode *oldN, const DagNode *newN);
+        virtual void                                    swapNodeInternal(const DagNode *oldN, const DagNode *newN); //!< Internally replacing a DAG node containing a variable with a different one
         
         
     private:
