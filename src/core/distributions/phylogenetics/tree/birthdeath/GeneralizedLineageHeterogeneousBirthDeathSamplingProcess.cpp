@@ -86,6 +86,9 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 		throw RbException("TensorPhylo is not loaded (use loadPlugin(...)).");
 	}
 //	std::cout << "tensorphylo version: " << tp_ptr->getVersion() << std::endl;
+	// turn on/off debug
+	//tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_FILE, "debug.txt");
+	//tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_PRINT);
 
 	// add the parameters
 	addParameter(age);
@@ -101,7 +104,6 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
     updateRootFrequency(true);
 
     // turn on/off debug
-//    tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_PRINT);
 //    tp_ptr->setApplyTreeLikCorrection(false);
 
     // set the condition type
@@ -253,6 +255,8 @@ double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbab
     old_ln_prob = current_ln_prob;
 
     // calculate a likelihood!
+		//tp_ptr->writeStateToFile("state.dat");
+		//tp_ptr->loadStateFromFile("state.dat");
     current_ln_prob = tp_ptr->computeLogLikelihood();
 
     // flag the likelihood as up-to-date
@@ -1243,8 +1247,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 
 		// make sure there's a closing semicolon
 		var += ";";
-
-//		std::cout << var << std::endl;
 
 		// set the tree
 		tp_ptr->setTree(var);
