@@ -90,8 +90,7 @@ double ExponentialDemographicFunction::getDemographic(double t) const
     double t0 = time_recent->getValue();
     double t1 = time_ancient->getValue();
     
-    ///@todo The first if-clause has the condition "N1 < 0" twice - please correct
-    if ( t1 < t0 || t0 < 0 || N1 < 0 || N1 < 0 || t < t0 || t > t1 )
+    if ( t1 < t0 || t0 < 0 || N1 < 0 || t < t0 || t > t1 )
     {
         throw RbException("Impossible parameter values in exponential growth/decline demographic functions.");
     }
@@ -121,8 +120,7 @@ double ExponentialDemographicFunction::getIntegral(double start, double finish) 
     double t0 = time_recent->getValue();
     double t1 = time_ancient->getValue();
     
-    ///@todo The first if-clause has the condition "N1 < 0" twice - please correct
-    if ( t1 < t0 || t0 < 0 || N1 < 0 || N1 < 0 || start < t0 || start > t1 || finish < t0 || finish > t1 )
+    if ( t1 < t0 || t0 < 0 || N1 < 0 || start < t0 || start > t1 || finish < t0 || finish > t1 )
     {
         throw RbException("Impossible parameter values in exponential growth/decline demographic functions.");
     }
