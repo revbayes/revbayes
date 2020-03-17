@@ -1078,9 +1078,24 @@ exists(x))");
 	help_strings[string("fnFreeBinary")][string("name")] = string(R"(fnFreeBinary)");
 	help_strings[string("fnFreeK")][string("name")] = string(R"(fnFreeK)");
 	help_strings[string("fnFreeSymmetricRateMatrix")][string("name")] = string(R"(fnFreeSymmetricRateMatrix)");
+	help_strings[string("fnGTR")][string("description")] = string(R"(The GTR rate matrix.)");
+	help_strings[string("fnGTR")][string("details")] = string(R"(The general time-reversible rate matrix:
+  Q(i,j) = exchangeRates(i,j) * baseFrequencies[j]
+The exchangeRates are symmetric.)");
+	help_strings[string("fnGTR")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
+pi ~ dnDirichlet( v(1,1,1,1) )
+Q := fnGTR(er,pi))");
 	help_strings[string("fnGTR")][string("name")] = string(R"(fnGTR)");
+	help_references[string("fnGTR")].push_back(RbHelpReference(R"(Tavare, S. Some Probabilistic and Statistical Problems in the Analysis of DNA Sequences.  Lectures on Mathematics in the Life Sciences (1986). 17: 57-86)",R"()",R"(http://www.damtp.cam.ac.uk/user/st321/CV_&_Publications_files/STpapers-pdf/T86.pdf)"));
+	help_strings[string("fnGTR")][string("title")] = string(R"(The General Time-Reversible rate matrix)");
 	help_strings[string("fnGeographicalDistance")][string("name")] = string(R"(fnGeographicalDistance)");
+	help_strings[string("fnHKY")][string("description")] = string(R"(The HKY85 model.)");
+	help_strings[string("fnHKY")][string("example")] = string(R"(kappa ~ dnLognormal(0,1)
+pi ~ dnDirichlet( v(1,1,1,1) )
+Q := fnHKY(kappa,pi))");
 	help_strings[string("fnHKY")][string("name")] = string(R"(fnHKY)");
+	help_references[string("fnHKY")].push_back(RbHelpReference(R"(Hasegawa, M. et al. Dating of the human-ape splitting by a molecular clock of mitochondrial DNA. Journal of molecular evolution (1985) 22 (2): 160-174.)",R"(https://doi.org/10.1007/BF02101694)",R"(https://link.springer.com/article/10.1007%2FBF02101694 )"));
+	help_strings[string("fnHKY")][string("title")] = string(R"(The Hasegawa-Kishino-Yano (1985) nucleotide rate matrix)");
 	help_strings[string("fnHiddenStateRateMatrix")][string("name")] = string(R"(fnHiddenStateRateMatrix)");
 	help_strings[string("fnHostSwitchRateModifier")][string("name")] = string(R"(fnHostSwitchRateModifier)");
 	help_strings[string("fnInfiniteSites")][string("name")] = string(R"(fnInfiniteSites)");
@@ -1119,7 +1134,15 @@ exists(x))");
 	help_strings[string("fnTVM")][string("name")] = string(R"(fnTVM)");
 	help_strings[string("fnTajimasD")][string("name")] = string(R"(fnTajimasD)");
 	help_strings[string("fnTajimasPi")][string("name")] = string(R"(fnTajimasPi)");
+	help_strings[string("fnTrN")][string("description")] = string(R"(The Tamura-Nei nucleotide rate matrix.)");
+	help_strings[string("fnTrN")][string("example")] = string(R"(kappaAG ~ dnLognormal(0,1)    # The purine transition rate
+kappaCT ~ dnLognormal(0,1)    # The pyrimindine transition rate
+pi ~ dnDirichlet( v(1,1,1,1) )
+Q := fnTrN(kappaAT, kappaCT, ,pi))");
 	help_strings[string("fnTrN")][string("name")] = string(R"(fnTrN)");
+	help_references[string("fnTrN")].push_back(RbHelpReference(R"(Tamura, K. and M. Nei. Estimation of the number of nucleotide substitutions in the control region of mitochondrial DNA in humans and chimpanzees. Molecular biology and evolution (1993) 10(3):512-526.)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040023)",R"(https://academic.oup.com/mbe/article/10/3/512/1016366 )"));
+	help_arrays[string("fnTrN")][string("see_also")].push_back(string(R"(fnHKY)"));
+	help_strings[string("fnTrN")][string("title")] = string(R"(The Tamura-Nei (1993) nucleotide rate matrix)");
 	help_strings[string("fnTreeAssembly")][string("name")] = string(R"(fnTreeAssembly)");
 	help_strings[string("fnTreePairwiseDistances")][string("name")] = string(R"(fnTreePairwiseDistances)");
 	help_strings[string("fnTreePairwiseNodalDistances")][string("name")] = string(R"(fnTreePairwiseNodalDistances)");
@@ -2065,7 +2088,17 @@ getwd())");
 	help_strings[string("sinh")][string("name")] = string(R"(sinh)");
 	help_strings[string("sort")][string("name")] = string(R"(sort)");
 	help_strings[string("source")][string("name")] = string(R"(source)");
+	help_strings[string("sqrt")][string("description")] = string(R"(The 'sqrt' function return the square root of a number.)");
+	help_strings[string("sqrt")][string("example")] = string(R"(# compute the square root of a real number
+x <- 3.0
+root <- sqrt(x)
+if ( abs(root*root - x) > 1.0e-15) {
+print("Problem computing the square root.")
+} else {
+print("Correct computation of the square root.")
+})");
 	help_strings[string("sqrt")][string("name")] = string(R"(sqrt)");
+	help_strings[string("sqrt")][string("title")] = string(R"(Square root of a number)");
 	help_strings[string("srGelmanRubin")][string("name")] = string(R"(srGelmanRubin)");
 	help_strings[string("srGeweke")][string("name")] = string(R"(srGeweke)");
 	help_strings[string("srMaxIteration")][string("name")] = string(R"(srMaxIteration)");
