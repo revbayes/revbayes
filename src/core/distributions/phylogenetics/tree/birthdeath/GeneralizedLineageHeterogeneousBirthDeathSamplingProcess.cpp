@@ -24,27 +24,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	const TypedDagNode<double>*                                     age_,
 	const std::string&                                              condition_type_,
 	const TypedDagNode<Simplex >*                                   root_frequency_,
-	const TypedDagNode<RbVector< RbVector< double > > >*            lambda_,
-	const TypedDagNode<RbVector< double > >*                        lambda_times_,
-	const TypedDagNode<RbVector< RbVector< double > > >*            mu_,
-	const TypedDagNode<RbVector< double > >*                        mu_times_,
-	const TypedDagNode<RbVector< RbVector< double > > >*            phi_,
-	const TypedDagNode<RbVector< double > >*                        phi_times_,
-	const TypedDagNode<RbVector< RbVector< double > > >*            delta_,
-	const TypedDagNode<RbVector< double > >*                        delta_times_,
-	const TypedDagNode<RbVector< RbVector< double > > >*            upsilon_,
-	const TypedDagNode<RbVector< double > >*                        upsilon_times_,
-	const TypedDagNode<RbVector< RbVector< double > > >*            gamma_,
-	const TypedDagNode<RbVector< double > >*                        gamma_times_,
-	const TypedDagNode<RbVector< RbVector< double > > >*            rho_,
-	const TypedDagNode<RbVector< double > >*                        rho_times_,
-	const TypedDagNode<RbVector< RbVector< double > > >*            xi_,
-	const TypedDagNode<RbVector< double > >*                        xi_times_,
-	const TypedDagNode<RbVector< RateGenerator > >*                 eta_,
-	const TypedDagNode<RbVector< double > >*                        eta_times_,
-	const TypedDagNode<RbVector< CladogeneticProbabilityMatrix > >* omega_,
-	const TypedDagNode<RbVector< double > >*                        omega_times_,
-	const TypedDagNode<RbVector< MatrixReal > >*                    zeta_,
+	const size_t                                                    num_states_,
 	bool                                                            use_origin_
 ) : TypedDistribution<Tree>( new TreeDiscreteCharacterData() ),
 	current_ln_prob(0.0),
@@ -53,42 +33,50 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	taxa(taxa_),
 	age(age_),
 	condition_type(condition_type_),
+	num_states(num_states_),
 	root_frequency(root_frequency_),
-	lambda(lambda_),
-	lambda_times(lambda_times_),
-	mu(mu_),
-	mu_times(mu_times_),
-	phi(phi_),
-	phi_times(phi_times_),
-	delta(delta_),
-	delta_times(delta_times_),
-	upsilon(upsilon_),
-	upsilon_times(upsilon_times_),
-	gamma(gamma_),
-	gamma_times(gamma_times_),
-	rho(rho_),
-	rho_times(rho_times_),
-	xi(xi_),
-	xi_times(xi_times_),
-	eta(eta_),
-	eta_times(eta_times_),
-	omega(omega_),
-	omega_times(omega_times_),
-	zeta(zeta_),
+	lambda_const(NULL),
+	lambda_var(NULL),
+	lambda_times(NULL),
+	mu_const(NULL),
+	mu_var(NULL),
+	mu_times(NULL),
+	phi_const(NULL),
+	phi_var(NULL),
+	phi_times(NULL),
+	delta_const(NULL),
+	delta_var(NULL),
+	delta_times(NULL),
+	upsilon(NULL),
+	upsilon_times(NULL),
+	gamma(NULL),
+	gamma_times(NULL),
+	rho_simple(NULL),
+	rho(NULL),
+	rho_times(NULL),
+	xi(NULL),
+	xi_times(NULL),
+	eta_const(NULL),
+	eta_var(NULL),
+	eta_times(NULL),
+	omega_const(NULL),
+	omega_var(NULL),
+	omega_times(NULL),
+	zeta(NULL),
 	use_origin(use_origin_),
-	tree_dirty(false),
-	root_freq_dirty(false),
-	lambda_dirty(false),
-	mu_dirty(false),
-	phi_dirty(false),
-	delta_dirty(false),
-	upsilon_dirty(false),
-	gamma_dirty(false),
-	rho_dirty(false),
-	xi_dirty(false),
-	eta_dirty(false),
-	omega_dirty(false),
-	zeta_dirty(false)
+	tree_dirty(true),
+	root_freq_dirty(true),
+	lambda_dirty(true),
+	mu_dirty(true),
+	phi_dirty(true),
+	delta_dirty(true),
+	upsilon_dirty(true),
+	gamma_dirty(true),
+	rho_dirty(true),
+	xi_dirty(true),
+	eta_dirty(true),
+	omega_dirty(true),
+	zeta_dirty(true)
 {
 
 	//assert(Plugin::loader().isTensorPhyloLoaded());
@@ -102,27 +90,6 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	// add the parameters
 	addParameter(age);
 	addParameter(root_frequency);
-	addParameter(lambda);
-	addParameter(lambda_times);
-	addParameter(mu);
-	addParameter(mu_times);
-	addParameter(phi);
-	addParameter(phi_times);
-	addParameter(delta);
-	addParameter(delta_times);
-	addParameter(upsilon);
-	addParameter(upsilon_times);
-	addParameter(gamma);
-	addParameter(gamma_times);
-	addParameter(rho);
-	addParameter(rho_times);
-	addParameter(xi);
-	addParameter(xi_times);
-	addParameter(eta);
-	addParameter(eta_times);
-	addParameter(omega);
-	addParameter(omega_times);
-	addParameter(zeta);
 
 	// add this object to the tree change event handler
     value->getTreeChangeEventHandler().addListener( this );
@@ -130,8 +97,8 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
     // simulate the tree
     simulateTree();
 
-    // update the parameters
-    prepareParameters(true);
+    // update the kernel
+    updateRootFrequency(true);
 
     // turn on/off debug
 //    tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_PRINT);
@@ -258,8 +225,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::buildSerialSample
 		// remove the randomly drawn node from the list
 		active_nodes.erase( active_nodes.begin() + long(right) );
 
-		// make sure ages are consistent
-
 		// add the parent
 		size_t num_taxa = taxa.size();
 		TopologyNode* parent = new TopologyNode(i + num_taxa);
@@ -316,6 +281,393 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::redrawValue(void)
 {
 	// just simulate with a uniform tree and all missing data
     simulateTree();
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setLambda(const TypedDagNode< RbVector<double> >* param)
+{
+	if ( lambda_const != NULL || lambda_var != NULL )
+	{
+		throw RbException("Tried to set lambda twice.");
+	}
+
+	// set the value
+	lambda_const = param;
+	lambda_times = NULL;
+
+	// include the parameter
+	addParameter(lambda_const);
+
+	// dispatch an update
+	updateLambda(true);
+
+	// mark clean
+	lambda_dirty = false;
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setLambda(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
+{
+	if ( lambda_const != NULL || lambda_var != NULL )
+	{
+		throw RbException("Tried to set lambda twice.");
+	}
+
+	// set the value
+	lambda_var   = param;
+	lambda_times = times;
+
+	// include the parameter
+	addParameter(lambda_var);
+	addParameter(lambda_times);
+
+	// dispatch an update
+	updateLambda(true);
+
+	// mark clean
+	lambda_dirty = false;
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setMu(const TypedDagNode< RbVector<double> >* param)
+{
+	if ( mu_const != NULL || mu_var != NULL )
+	{
+		throw RbException("Tried to set mu twice.");
+	}
+
+	// set the value
+	mu_const = param;
+	mu_times = NULL;
+
+	// include the parameter
+	addParameter(mu_const);
+
+	// dispatch an update
+	updateMu(true);
+
+	// mark clean
+	mu_dirty = false;
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setMu(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
+{
+	if ( mu_const != NULL || mu_var != NULL )
+	{
+		throw RbException("Tried to set mu twice.");
+	}
+
+	// set the value
+	mu_var   = param;
+	mu_times = times;
+
+	// include the parameter
+	addParameter(mu_var);
+	addParameter(mu_times);
+
+	// dispatch an update
+	updateMu(true);
+
+	// mark clean
+	mu_dirty = false;
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setPhi(const TypedDagNode< RbVector<double> >* param)
+{
+	if ( phi_const != NULL || phi_var != NULL )
+	{
+		throw RbException("Tried to set phi twice.");
+	}
+
+	// set the value
+	phi_const = param;
+	phi_times = NULL;
+
+	// include the parameter
+	addParameter(phi_const);
+
+	// dispatch an update
+	updatePhi(true);
+
+	// mark clean
+	phi_dirty = false;
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setPhi(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
+{
+	if ( phi_const != NULL || phi_var != NULL )
+	{
+		throw RbException("Tried to set phi twice.");
+	}
+
+	// set the value
+	phi_var   = param;
+	phi_times = times;
+
+	// include the parameter
+	addParameter(phi_var);
+	addParameter(phi_times);
+
+	// dispatch an update
+	updatePhi(true);
+
+	// mark clean
+	phi_dirty = false;
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setDelta(const TypedDagNode< RbVector<double> >* param)
+{
+	if ( delta_const != NULL || delta_var != NULL )
+	{
+		throw RbException("Tried to set delta twice.");
+	}
+
+	// set the value
+	delta_const = param;
+	delta_times = NULL;
+
+	// include the parameter
+	addParameter(delta_const);
+
+	// dispatch an update
+	updateDelta(true);
+
+	// mark clean
+	delta_dirty = false;
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setDelta(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
+{
+	if ( delta_const != NULL || delta_var != NULL )
+	{
+		throw RbException("Tried to set delta twice.");
+	}
+
+	// set the value
+	delta_var   = param;
+	delta_times = times;
+
+	// include the parameter
+	addParameter(delta_var);
+	addParameter(delta_times);
+
+	// dispatch an update
+	updateDelta(true);
+
+	// mark clean
+	delta_dirty = false;
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setUpsilon(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
+{
+	if ( upsilon != NULL )
+	{
+		throw RbException("Tried to set upsilon twice.");
+	}
+
+	// set the value
+	upsilon       = param;
+	upsilon_times = times;
+
+	// include the parameter
+	addParameter(upsilon);
+	addParameter(upsilon_times);
+
+	// dispatch an update
+	updateUpsilon(true);
+
+	// mark clean
+	upsilon_dirty = false;
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setGamma(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
+{
+	if ( gamma != NULL )
+	{
+		throw RbException("Tried to set gamma twice.");
+	}
+
+	// set the value
+	gamma       = param;
+	gamma_times = times;
+
+	// include the parameter
+	addParameter(gamma);
+	addParameter(gamma_times);
+
+	// dispatch an update
+	updateGamma(true);
+
+	// mark clean
+	gamma_dirty = false;
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setRho(const TypedDagNode< double >* param)
+{
+	if ( rho_simple != NULL || rho != NULL )
+	{
+		throw RbException("Tried to set rho twice.");
+	}
+
+	// set the value
+	rho_simple = param;
+	rho_times  = NULL;
+
+	// include the parameter
+	addParameter(rho_simple);
+
+	// dispatch an update
+	updateRho(true);
+
+	// mark clean
+	rho_dirty = false;
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setRho(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
+{
+	if ( rho_simple != NULL || rho != NULL )
+	{
+		throw RbException("Tried to set rho twice.");
+	}
+
+	// set the value
+	rho       = param;
+	rho_times = times;
+
+	// include the parameter
+	addParameter(rho);
+	addParameter(rho_times);
+
+	// dispatch an update
+	updateRho(true);
+
+	// mark clean
+	rho_dirty = false;
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setXi(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
+{
+	if ( xi != NULL )
+	{
+		throw RbException("Tried to set xi twice.");
+	}
+
+	// set the value
+	xi       = param;
+	xi_times = times;
+
+	// include the parameter
+	addParameter(xi);
+	addParameter(xi_times);
+
+	// dispatch an update
+	updateXi(true);
+
+	// mark clean
+	xi_dirty = false;
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const TypedDagNode< RateGenerator >* param)
+{
+	if ( eta_const != NULL || eta_var != NULL )
+	{
+		throw RbException("Tried to set eta twice.");
+	}
+
+	// set the value
+	eta_const = param;
+	eta_times = NULL;
+
+	// include the parameter
+	addParameter(eta_const);
+
+	// dispatch an update
+	updateEta(true);
+
+	// mark clean
+	eta_dirty = false;
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const TypedDagNode< RbVector< RateGenerator > >* param, const TypedDagNode< RbVector<double> >* times)
+{
+	if ( eta_const != NULL || eta_var != NULL )
+	{
+		throw RbException("Tried to set eta twice.");
+	}
+
+	// set the value
+	eta_var   = param;
+	eta_times = times;
+
+	// include the parameter
+	addParameter(eta_var);
+	addParameter(eta_times);
+
+	// dispatch an update
+	updateEta(true);
+
+	// mark clean
+	eta_dirty = false;
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setOmega(const TypedDagNode< CladogeneticProbabilityMatrix >* param)
+{
+	if ( omega_const != NULL || omega_var != NULL )
+	{
+		throw RbException("Tried to set omega twice.");
+	}
+
+	// set the value
+	omega_const = param;
+	omega_times = NULL;
+
+	// include the parameter
+	addParameter(omega_const);
+
+	// dispatch an update
+	updateOmega(true);
+
+	// mark clean
+	omega_dirty = false;
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setOmega(const TypedDagNode< RbVector< CladogeneticProbabilityMatrix > >* param, const TypedDagNode< RbVector<double> >* times)
+{
+	if ( omega_const != NULL || omega_var != NULL )
+	{
+		throw RbException("Tried to set omega twice.");
+	}
+
+	// set the value
+	omega_var   = param;
+	omega_times = times;
+
+	// include the parameter
+	addParameter(omega_var);
+	addParameter(omega_times);
+
+	// dispatch an update
+	updateOmega(true);
+
+	// mark clean
+	omega_dirty = false;
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setZeta(const TypedDagNode< RbVector< MatrixReal > >* param)
+{
+	if ( zeta != NULL )
+	{
+		throw RbException("Tried to set zeta twice.");
+	}
+
+	// set the value
+	zeta = param;
+
+	// include the parameter
+	addParameter(zeta);
+
+	// dispatch an update
+	updateZeta(true);
+
+	// mark clean
+	zeta_dirty = false;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v, bool f)
@@ -401,9 +753,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::initializeEmptyCh
 {
 	// get the tip labels from the tree
     std::vector<std::string> tips = value->getTipNames();
-
-    // get the number of states in the model
-    size_t num_states = lambda->getValue()[0].size();
 
     // create a new data object
     HomologousDiscreteCharacterData<NaturalNumbersState> *tip_data = new HomologousDiscreteCharacterData<NaturalNumbersState>();
@@ -501,22 +850,22 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
 
     if ( restorer != this->dag_node )
     {
-    	if ( restorer == lambda || restorer == lambda_times  )
+    	if ( restorer == lambda_const || restorer == lambda_var || restorer == lambda_times  )
     	{
     		updateLambda();
     		lambda_dirty = false;
     	}
-    	else if ( restorer == mu || restorer == mu_times  )
+    	else if ( restorer == mu_const || restorer == mu_var || restorer == mu_times  )
     	{
     		updateMu();
     		mu_dirty = false;
     	}
-    	else if ( restorer == phi || restorer == phi_times  )
+    	else if ( restorer == phi_const || restorer == phi_var || restorer == phi_times  )
     	{
     		updatePhi();
     		phi_dirty = false;
     	}
-    	else if ( restorer == delta || restorer == delta_times )
+    	else if ( restorer == delta_const || restorer == delta_var || restorer == delta_times )
     	{
     		updateDelta();
     		delta_dirty = false;
@@ -543,14 +892,19 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
     		updateXi();
     		xi_dirty = false;
     	}
-    	else if ( restorer == eta || restorer == eta_times  )
+    	else if ( restorer == eta_const || restorer == eta_var || restorer == eta_times  )
     	{
     		updateEta();
     		eta_dirty = false;
     	}
-    	else if ( restorer == omega || restorer == omega_times  )
+    	else if ( restorer == omega_const || restorer == omega_var || restorer == omega_times  )
     	{
     		updateOmega();
+    		omega_dirty = false;
+    	}
+    	else if ( restorer == zeta  )
+    	{
+    		updateZeta();
     		omega_dirty = false;
     	}
     }
@@ -690,25 +1044,25 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecializati
 
     if ( affecter != this->dag_node )
     {
-    	if ( affecter == lambda || affecter == lambda_times  )
+    	if ( affecter == lambda_const || affecter == lambda_var || affecter == lambda_times  )
     	{
     		lambda_dirty = true;
     		updateLambda();
     		probability_dirty = true;
     	}
-    	else if ( affecter == mu || affecter == mu_times  )
+    	else if ( affecter == mu_const || affecter == mu_var || affecter == mu_times  )
     	{
     		mu_dirty = true;
     		updateMu();
     		probability_dirty = true;
     	}
-    	else if ( affecter == phi || affecter == phi_times  )
+    	else if ( affecter == phi_const || affecter == phi_var || affecter == phi_times  )
     	{
     		phi_dirty = true;
     		updatePhi();
     		probability_dirty = true;
     	}
-    	else if ( affecter == delta || affecter == delta_times )
+    	else if ( affecter == delta_const || affecter == delta_var || affecter == delta_times )
     	{
     		delta_dirty = true;
     		updateDelta();
@@ -740,16 +1094,22 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecializati
     		updateXi();
     		probability_dirty = true;
     	}
-    	else if ( affecter == eta || affecter == eta_times  )
+    	else if ( affecter == eta_const || affecter == eta_var || affecter == eta_times  )
     	{
     		eta_dirty = true;
     		updateEta();
     		probability_dirty = true;
     	}
-    	else if ( affecter == omega || affecter == omega_times  )
+    	else if ( affecter == omega_const || affecter == eta_var || affecter == omega_times  )
     	{
     		omega_dirty = true;
     		updateOmega();
+    		probability_dirty = true;
+    	}
+    	else if ( affecter == zeta  )
+    	{
+    		zeta_dirty = true;
+    		updateZeta();
     		probability_dirty = true;
     	}
     }
@@ -793,7 +1153,6 @@ std::vector< std::vector< std::vector<double> > > GeneralizedLineageHeterogeneou
 	for(size_t i = 0; i < obj.size(); ++i) {
 		std::vector< std::vector<double> > sub;
 		const RateGenerator &this_rate_generator = obj[i];
-		size_t num_states = this_rate_generator.getNumberOfStates();
 		for(size_t j = 0; j < num_states; ++j) {
 			std::vector<double> sub_sub;
 			for(size_t k = 0; k < num_states; ++k)
@@ -905,7 +1264,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateData(bool f
 		{
 			const AbstractDiscreteTaxonData& this_taxon_data = dat.getTaxonData(taxa[i].getName());
 			RbBitSet this_bit_set = this_taxon_data[0].getState();
-			size_t num_states = this_bit_set.size();
+//			size_t num_states = this_bit_set.size();
 			std::vector<double> this_taxon_states(num_states);
 			for(size_t j = 0; j < num_states; ++j)
 			{
@@ -946,25 +1305,34 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateLambda(bool
 {
 	if ( force | lambda_dirty )
 	{
-		// create empty vectors
-		std::vector< std::vector<double> > params;
-		std::vector<double>                times;
-
-		if ( lambda != NULL && lambda_times != NULL )
+		if ( lambda_const != NULL )
 		{
-			// convert to std
-			params = RbToStd( lambda->getValue() );
-			times  = RbToStd( lambda_times->getValue() );
+			// create intermediate parameters
+			RbVector< RbVector<double> > intermediate_parameters;
+			intermediate_parameters.push_back( RbVector<double>( lambda_const->getValue() ) );
+
+			// create empty vectors
+			std::vector< std::vector<double> > params = RbToStd( intermediate_parameters );
+			std::vector<double>                times;
+
+			// set the parameters
+			tp_ptr->setLambda(times, params);
+		}
+		else if ( lambda_var != NULL )
+		{
+			// create empty vectors
+			std::vector< std::vector<double> > params = RbToStd( lambda_var->getValue() );
+			std::vector<double>                times  = RbToStd( lambda_times->getValue() );
 
 			// handle some errors
 			if ( params.size() != times.size() + 1 )
 			{
 				throw RbException( "Number of lambda vectors does not match the number of intervals." );
 			}
-		}
 
-		// set the parameters
-		tp_ptr->setLambda(times, params);
+			// set the parameters
+			tp_ptr->setLambda(times, params);
+		}
 	}
 }
 
@@ -972,32 +1340,34 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateMu(bool for
 {
 	if ( force | mu_dirty )
 	{
-		// create empty vectors
-		std::vector< std::vector<double> > params;
-		std::vector<double>                times;
-
-		if ( mu != NULL )
+		if ( mu_const != NULL )
 		{
-			// convert to std
-			params = RbToStd( mu->getValue() );
-			times  = RbToStd( mu_times->getValue() );
+			// create intermediate parameters
+			RbVector< RbVector<double> > intermediate_parameters;
+			intermediate_parameters.push_back( RbVector<double>( mu_const->getValue() ) );
+
+			// create empty vectors
+			std::vector< std::vector<double> > params = RbToStd( intermediate_parameters );
+			std::vector<double>                times;
+
+			// set the parameters
+			tp_ptr->setMu(times, params);
+		}
+		else if ( mu_var != NULL )
+		{
+			// create empty vectors
+			std::vector< std::vector<double> > params = RbToStd( mu_var->getValue() );
+			std::vector<double>                times  = RbToStd( mu_times->getValue() );
 
 			// handle some errors
 			if ( params.size() != times.size() + 1 )
 			{
 				throw RbException( "Number of mu vectors does not match the number of intervals." );
 			}
-		}
-		else
-		{
-			// make dummy initial values
-			const AbstractHomologousDiscreteCharacterData& char_data = getCharacterData();
-			size_t num_states = char_data.getNumberOfStates();
-			params.push_back( std::vector<double>(num_states, 0.0) );
-		}
 
-		// set the parameters
-		tp_ptr->setMu(times, params);
+			// set the parameters
+			tp_ptr->setMu(times, params);
+		}
 	}
 }
 
@@ -1005,32 +1375,34 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updatePhi(bool fo
 {
 	if ( force | phi_dirty )
 	{
-		// create empty vectors
-		std::vector< std::vector<double> > params;
-		std::vector<double>                times;
-
-		if ( phi != NULL )
+		if ( phi_const != NULL )
 		{
-			// convert to std
-			params = RbToStd( phi->getValue() );
-			times  = RbToStd( phi_times->getValue() );
+			// create intermediate parameters
+			RbVector< RbVector<double> > intermediate_parameters;
+			intermediate_parameters.push_back( RbVector<double>( phi_const->getValue() ) );
+
+			// create empty vectors
+			std::vector< std::vector<double> > params = RbToStd( intermediate_parameters );
+			std::vector<double>                times;
+
+			// set the parameters
+			tp_ptr->setPhi(times, params);
+		}
+		else if ( phi_var != NULL )
+		{
+			// create empty vectors
+			std::vector< std::vector<double> > params = RbToStd( phi_var->getValue() );
+			std::vector<double>                times  = RbToStd( phi_times->getValue() );
 
 			// handle some errors
 			if ( params.size() != times.size() + 1 )
 			{
 				throw RbException( "Number of phi vectors does not match the number of intervals." );
 			}
-		}
-		else
-		{
-			// make dummy initial values
-			const AbstractHomologousDiscreteCharacterData& char_data = getCharacterData();
-			size_t num_states = char_data.getNumberOfStates();
-			params.push_back( std::vector<double>(num_states, 0.0) );
-		}
 
-		// set the parameters
-		tp_ptr->setPhi(times, params);
+			// set the parameters
+			tp_ptr->setPhi(times, params);
+		}
 	}
 }
 
@@ -1038,33 +1410,36 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateDelta(bool 
 {
 	if ( force | delta_dirty )
 	{
-		// create empty vectors
-		std::vector< std::vector<double> > params;
-		std::vector<double>                times;
-
-		if ( delta != NULL )
+		if ( delta_const != NULL )
 		{
-			// convert to std
-			params = RbToStd( delta->getValue() );
-			times  = RbToStd( delta_times->getValue() );
+			// create intermediate parameters
+			RbVector< RbVector<double> > intermediate_parameters;
+			intermediate_parameters.push_back( RbVector<double>( delta_const->getValue() ) );
+
+			// create empty vectors
+			std::vector< std::vector<double> > params = RbToStd( intermediate_parameters );
+			std::vector<double>                times;
+
+			// set the parameters
+			tp_ptr->setDelta(times, params);
+		}
+		else if ( delta_var != NULL )
+		{
+			// create empty vectors
+			std::vector< std::vector<double> > params = RbToStd( delta_var->getValue() );
+			std::vector<double>                times  = RbToStd( delta_times->getValue() );
 
 			// handle some errors
 			if ( params.size() != times.size() + 1 )
 			{
 				throw RbException( "Number of delta vectors does not match the number of intervals." );
 			}
-		}
-		else
-		{
-			// make dummy initial values
-			const AbstractHomologousDiscreteCharacterData& char_data = getCharacterData();
-			size_t num_states = char_data.getNumberOfStates();
-			params.push_back( std::vector<double>(num_states, 0.0) );
-		}
 
-		// set the parameters
-		tp_ptr->setDelta(times, params);
+			// set the parameters
+			tp_ptr->setDelta(times, params);
+		}
 	}
+
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateUpsilon(bool force)
@@ -1122,25 +1497,40 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateRho(bool fo
 {
 	if ( force | rho_dirty )
 	{
-		// create empty vectors
-		std::vector< std::vector<double> > params;
-		std::vector<double>                times;
-
-		if ( rho != NULL && rho_times != NULL )
+		if ( rho_simple != NULL )
 		{
-			// convert to std
-			params = RbToStd( rho->getValue() );
-			times  = RbToStd( rho_times->getValue() );
+			// create empty vectors
+			std::vector< std::vector<double> > params;
+			std::vector<double>                times(1, 0.0);
 
-			// handle some errors
-			if ( params.size() != times.size() )
-			{
-				throw RbException( "Number of rho events does not match the number of times." );
-			}
+			// replicate the value of rho for each state
+			params.push_back( std::vector<double>( num_states, rho_simple->getValue() ) );
+
+			// set the parameters
+			tp_ptr->setMassSamplingEvents(times, params);
 		}
+		else if ( rho != NULL )
+		{
+			// create empty vectors
+			std::vector< std::vector<double> > params;
+			std::vector<double>                times;
 
-		// set the parameters
-		tp_ptr->setMassSamplingEvents(times, params);
+			if ( rho != NULL && rho_times != NULL )
+			{
+				// convert to std
+				params = RbToStd( rho->getValue() );
+				times  = RbToStd( rho_times->getValue() );
+
+				// handle some errors
+				if ( params.size() != times.size() )
+				{
+					throw RbException( "Number of rho events does not match the number of times." );
+				}
+			}
+
+			// set the parameters
+			tp_ptr->setMassSamplingEvents(times, params);
+		}
 	}
 }
 
@@ -1174,25 +1564,34 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateEta(bool fo
 {
 	if ( force | eta_dirty )
 	{
-		// create empty vectors
-		std::vector< std::vector< std::vector<double> > > params;
-		std::vector<double>                               times;
-
-		if ( eta != NULL && eta_times != NULL )
+		if ( eta_const != NULL )
 		{
-			// convert to std
-			params = RbToStd( eta->getValue() );
-			times  = RbToStd( eta_times->getValue() );
+			// create intermediate parameters
+			RbVector< RateGenerator > intermediate_parameters;
+			intermediate_parameters.push_back( eta_const->getValue() );
+
+			// create empty vectors
+			std::vector< std::vector< std::vector<double> > > params = RbToStd( intermediate_parameters );
+			std::vector<double>                               times;
+
+			// set the parameters
+			tp_ptr->setEta(times, params);
+		}
+		else if ( eta_var != NULL )
+		{
+			// create empty vectors
+			std::vector< std::vector< std::vector<double> > > params = RbToStd( eta_var->getValue() );
+			std::vector<double>                               times  = RbToStd( eta_times->getValue() );
 
 			// handle some errors
 			if ( params.size() != times.size() + 1 )
 			{
 				throw RbException( "Number of eta matrices does not match the number of intervals." );
 			}
-		}
 
-		// set the parameters
-		tp_ptr->setEta(times, params);
+			// set the parameters
+			tp_ptr->setEta(times, params);
+		}
 	}
 }
 
@@ -1200,30 +1599,35 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateOmega(bool 
 {
 	if ( force | omega_dirty )
 	{
-		// create empty vectors
-		std::vector< std::map< std::vector<unsigned>, double > > params;
-		std::vector<double>                                      times;
-
-		const AbstractHomologousDiscreteCharacterData& char_data = getCharacterData();
-		size_t num_states = char_data.getNumberOfStates();
-
-		if ( omega != NULL && omega_times != NULL )
+		if ( omega_const != NULL )
 		{
-			// convert to std
-			params = RbToStd( omega->getValue() );
-			times  = RbToStd( omega_times->getValue() );
+			// create intermediate parameters
+			RbVector< CladogeneticProbabilityMatrix > intermediate_parameters;
+			intermediate_parameters.push_back( omega_const->getValue() );
+
+			// create empty vectors
+			std::vector< std::map< std::vector<unsigned>, double > > params = RbToStd( intermediate_parameters );
+			std::vector<double>                                      times;
+
+			// set the parameters
+			tp_ptr->setOmega(num_states, times, params);
+		}
+		else if ( omega_var != NULL )
+		{
+			// create empty vectors
+			std::vector< std::map< std::vector<unsigned>, double > > params = RbToStd( omega_var->getValue() );
+			std::vector<double>                                      times  = RbToStd( omega_times->getValue() );
 
 			// handle some errors
 			if ( params.size() != times.size() + 1 )
 			{
 				throw RbException( "Number of omega matrices does not match the number of intervals." );
 			}
+
+			// set the parameters
+			tp_ptr->setOmega(num_states, times, params);
 		}
-
-		// set the parameters
-		tp_ptr->setOmega(num_states, times, params);
 	}
-
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateZeta(bool force)
@@ -1233,7 +1637,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateZeta(bool f
 		// convert to std
 		std::vector< std::vector< std::vector<double> > > params;
 
-		if ( zeta != NULL && gamma_times != NULL )
+		if ( zeta != NULL )
 		{
 			// convert to std
 			params = RbToStd( zeta->getValue() );
@@ -1260,29 +1664,53 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::swapParameterInte
 	{
 		root_frequency = static_cast<const TypedDagNode<Simplex>* >( newP );
 	}
-	if ( oldP == lambda )
+	if ( oldP == lambda_const )
 	{
-		lambda = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+		lambda_const = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+	}
+	if ( oldP == lambda_var )
+	{
+		lambda_var = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
 	}
 	if ( oldP == lambda_times )
 	{
 		lambda_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
 	}
-	if ( oldP == mu )
+	if ( oldP == mu_const )
 	{
-		mu = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+		mu_const = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+	}
+	if ( oldP == mu_var )
+	{
+		mu_var = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
 	}
 	if ( oldP == mu_times )
 	{
 		mu_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
 	}
-	if ( oldP == phi )
+	if ( oldP == phi_const )
 	{
-		phi = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+		phi_const = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+	}
+	if ( oldP == phi_var )
+	{
+		phi_var = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
 	}
 	if ( oldP == phi_times )
 	{
 		phi_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+	}
+	if ( oldP == delta_const )
+	{
+		delta_const = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+	}
+	if ( oldP == delta_var )
+	{
+		delta_var = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+	}
+	if ( oldP == delta_times )
+	{
+		delta_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
 	}
 	if ( oldP == upsilon )
 	{
@@ -1316,17 +1744,25 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::swapParameterInte
 	{
 		xi_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
 	}
-	if ( oldP == eta )
+	if ( oldP == eta_const )
 	{
-		eta = static_cast<const TypedDagNode<RbVector<RateGenerator > >* >( newP );
+		eta_const = static_cast<const TypedDagNode<RateGenerator >* >( newP );
+	}
+	if ( oldP == eta_var )
+	{
+		eta_var = static_cast<const TypedDagNode<RbVector<RateGenerator > >* >( newP );
 	}
 	if ( oldP == eta_times )
 	{
 		eta_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
 	}
-	if ( oldP == omega )
+	if ( oldP == omega_const )
 	{
-		omega = static_cast<const TypedDagNode<RbVector<CladogeneticProbabilityMatrix > >* >( newP );
+		omega_const = static_cast<const TypedDagNode<CladogeneticProbabilityMatrix >* >( newP );
+	}
+	if ( oldP == omega_var )
+	{
+		omega_var = static_cast<const TypedDagNode<RbVector<CladogeneticProbabilityMatrix > >* >( newP );
 	}
 	if ( oldP == omega_times )
 	{
@@ -1352,6 +1788,16 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> GeneralizedLineageHeterogeneousBir
 
     	// get the incoming data
         const AbstractHomologousDiscreteCharacterData& v = static_cast<const TypedDagNode<AbstractHomologousDiscreteCharacterData > *>( args[0] )->getValue();
+
+//		// need to know the number of states
+//		const AbstractHomologousDiscreteCharacterData& char_data = getCharacterData();
+//		size_t num_states = char_data.getNumberOfStates();
+
+        // check the number of states
+        if(v.getNumberOfStates() != num_states)
+        {
+        	throw RbException("Number of discrete states in the clamped data does not match the number of discrete states for the distribution.");
+        }
 
         // check the taxon labels in the new data are consistent
         std::vector<std::string> param_taxa;
