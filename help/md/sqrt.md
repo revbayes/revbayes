@@ -1,7 +1,9 @@
 ## name
 sqrt
 ## title
-Square root function
+Square root of a number
+## description
+The 'sqrt' function return the square root of a number.
 ## description
 Takes the square root of some positive number `x`.
 ## details
@@ -9,9 +11,12 @@ Takes the square root of some positive number `x`.
 ## see_also
 `power`
 ## example
-    sqrt(4)
-    # returns 2
-    sqrt(sqrt(4))
-    # returns an approximation of the irrational root 2. 
-    # keep an eye out for Pythagoras, he wasn't a fan!
+        # compute the square root of a real number
+        x <- 3.0
+        root <- sqrt(x)
+        if ( abs(root*root - x) > 1.0e-15) {
+            print("Problem computing the square root.")
+        } else {
+            print("Correct computation of the square root.")
+        }
 ## references
