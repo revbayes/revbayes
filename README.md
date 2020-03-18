@@ -12,3 +12,4 @@ For more information, see our [website](http://www.RevBayes.com) and [tutorials.
 
 New or returning contributors should check out the [developer section](https://https://revbayes.github.io/developer/) of the website, in particular the [git workflow](https://revbayes.github.io/developer/git-flow.html) and the recommended [best practices](https://revbayes.github.io/developer/best_practices/).
 
+Old releases are available at https://github.com/revbayes/revbayes.archive
