@@ -4,6 +4,7 @@ set -e
 all_args="$@"
 mpi="false"
 travis="false"
+cmake_args=""
 # parse command line arguments
 while echo $1 | grep ^- > /dev/null; do
     # intercept help while parsing "-key value" pairs
@@ -15,6 +16,13 @@ Command line options are:
 '
         exit
     fi
+
+    case "$1" in -D*)
+                     cmake_args="$cmake_args $1"
+                     shift
+                     continue
+                     ;;
+    esac
 
     # parse pairs
     eval $( echo $1 | sed 's/-//g' | tr -d '\012')=$2
@@ -59,7 +67,10 @@ fi
 
 	./regenerate.sh ${all_args}
 	cd ${BUILD_DIR}
-	cmake .
+        echo "Running 'cmake . $cmake_args' in $(pwd)"
+	cmake . $cmake_args
+        echo
+        echo "Running 'make -j4' in $(pwd)"
 	make -j 4
 	cd ..
 
