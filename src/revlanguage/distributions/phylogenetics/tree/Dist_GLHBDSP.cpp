@@ -105,7 +105,7 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     std::vector<RevBayesCore::Taxon> tax = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
 
     // root frequency
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* root_freq = static_cast<const Simplex &>( root_frequencies->getRevObject() ).getDagNode();;
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* root_freq = static_cast<const Simplex &>( pi->getRevObject() ).getDagNode();;
 
     // number of states
     size_t num_states = size_t(static_cast<const Natural &>( n_states->getRevObject() ).getValue());
@@ -389,7 +389,7 @@ const MemberRules& Dist_GLHBDSP::getParameterRules(void) const
         dist_member_rules.push_back( new ArgumentRule( age_types, RealPos::getClassTypeSpec(), "The start time of the process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         // the root frequency
-        dist_member_rules.push_back( new ArgumentRule( "rootFreq",     Simplex::getClassTypeSpec(),                                     "Frequencies of each state at the beginning of the process.",                                 ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "pi",     Simplex::getClassTypeSpec(),                                     "Frequencies of each state at the beginning of the process.",                                 ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         // regular events (and times)
         std::vector<TypeSpec> rate_types;
@@ -579,9 +579,9 @@ void Dist_GLHBDSP::setConstParameter(const std::string& name, const RevPtr<const
 	{
 		zeta = var;
 	}
-	else if ( name == "rootFreq" )
+	else if ( name == "pi" )
 	{
-		root_frequencies = var;
+		pi = var;
 	}
 	else if ( name == "condition" )
 	{

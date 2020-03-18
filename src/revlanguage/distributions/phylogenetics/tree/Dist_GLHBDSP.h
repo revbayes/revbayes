@@ -87,7 +87,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>  zeta;            //!< The probabilities of state change at each mass-extinction event
 
         // other parameters
-        RevPtr<const RevVariable>  root_frequencies; //!< The frequencies of the states at the root
+        RevPtr<const RevVariable>  pi;               //!< The frequencies of the states at the root
         RevPtr<const RevVariable>  condition;        //!< The condition of the process
 
     };
