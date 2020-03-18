@@ -274,7 +274,8 @@ double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbab
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::fireTreeChangeEvent(const TopologyNode &n, const unsigned& m)
 {
-	// nothing smart to do yet
+	tree_dirty = true;
+	updateTree();
 }
 
 const RevBayesCore::AbstractHomologousDiscreteCharacterData& GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::getCharacterData() const
