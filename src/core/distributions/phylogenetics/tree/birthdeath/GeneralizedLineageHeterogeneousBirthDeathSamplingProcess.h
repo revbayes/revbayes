@@ -64,6 +64,7 @@ namespace RevBayesCore {
         void                                                              setRho(const TypedDagNode< double >* param);
         void                                                              setRho(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times);
         void                                                              setXi(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times);
+        void                                                              setEta(const TypedDagNode< double >* param);
         void                                                              setEta(const TypedDagNode< RateGenerator >* param);
         void                                                              setEta(const TypedDagNode< RbVector< RateGenerator > >* param, const TypedDagNode< RbVector<double> >* times);
         void                                                              setOmega(const TypedDagNode< CladogeneticProbabilityMatrix >* param);
@@ -160,6 +161,7 @@ namespace RevBayesCore {
 		const TypedDagNode< RbVector< RbVector<double> > >*              xi;
 		const TypedDagNode< RbVector< double > >*                        xi_times;
 
+		const TypedDagNode< double >*                                    eta_simple;
 		const TypedDagNode< RateGenerator >*                             eta_const;
 		const TypedDagNode< RbVector< RateGenerator > >*                 eta_var;
 		const TypedDagNode< RbVector< double > >*                        eta_times;
