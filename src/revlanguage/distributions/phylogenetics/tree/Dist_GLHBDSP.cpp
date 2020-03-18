@@ -217,12 +217,12 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     if ( rho->getRevObject() != RevNullObject::getInstance() )
     {
     	if ( rho->getRevObject().isType( Probability::getClassTypeSpec() ) )
-    	{
+    	{ // simple case
     		RevBayesCore::TypedDagNode< double >* r_probs = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
     		d->setRho(r_probs);
     	}
     	else
-    	{
+    	{ // state-depenent case
             RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* r_probs = static_cast<const ModelVector< ModelVector<Probability> > &>( rho->getRevObject() ).getDagNode();
             RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           r_times = static_cast<const ModelVector< RealPos> &>( rho_times->getRevObject() ).getDagNode();
             d->setRho(r_probs, r_times);
@@ -240,13 +240,18 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     // anagenetic changes
     if ( eta->getRevObject() != RevNullObject::getInstance() )
     {
-    	if ( eta->getRevObject().isType( RateGenerator::getClassTypeSpec() ) )
-    	{ // case 1: time homogeneous
+    	if ( eta->getRevObject().isType( RealPos::getClassTypeSpec() ) )
+    	{
+    		RevBayesCore::TypedDagNode< double >* h_rate = static_cast<const RealPos &>( eta->getRevObject() ).getDagNode();
+    	    d->setEta(h_rate);
+    	}
+    	else if ( eta->getRevObject().isType( RateGenerator::getClassTypeSpec() ) )
+    	{ // case 2: time homogeneous
     		RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* h_mats = static_cast<const RateGenerator &>( eta->getRevObject() ).getDagNode();
     	    d->setEta(h_mats);
     	}
     	else if ( eta->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
-		{ // case 2: time heterogeneous
+		{ // case 3: time heterogeneous
     	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RateGenerator > >* h_mats  = static_cast<const ModelVector<RateGenerator> &>( eta->getRevObject() ).getDagNode();
     	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                        h_times = static_cast<const ModelVector< RealPos > &>( eta_times->getRevObject() ).getDagNode();
     	    d->setEta(h_mats, h_times);
@@ -378,10 +383,10 @@ const MemberRules& Dist_GLHBDSP::getParameterRules(void) const
     if ( !rules_set )
     {
     	// the start of the process
-    	std::vector<std::string> aliases;
-        aliases.push_back("rootAge");
-        aliases.push_back("originAge");
-        dist_member_rules.push_back( new ArgumentRule( aliases, RealPos::getClassTypeSpec(), "The start time of the process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    	std::vector<std::string> age_types;
+        age_types.push_back("rootAge");
+        age_types.push_back("originAge");
+        dist_member_rules.push_back( new ArgumentRule( age_types, RealPos::getClassTypeSpec(), "The start time of the process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         // the root frequency
         dist_member_rules.push_back( new ArgumentRule( "rootFreq",     Simplex::getClassTypeSpec(),                                     "Frequencies of each state at the beginning of the process.",                                 ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
@@ -421,6 +426,7 @@ const MemberRules& Dist_GLHBDSP::getParameterRules(void) const
 
         // state changes
         std::vector<TypeSpec> eta_types;
+        eta_types.push_back( RealPos::getClassTypeSpec() );
         eta_types.push_back( RateGenerator::getClassTypeSpec() );
         eta_types.push_back( ModelVector<RateGenerator>::getClassTypeSpec() );
         dist_member_rules.push_back( new ArgumentRule( "eta",          eta_types,                                                       "The anagenetic rates of change for each time interval.",                                     ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );

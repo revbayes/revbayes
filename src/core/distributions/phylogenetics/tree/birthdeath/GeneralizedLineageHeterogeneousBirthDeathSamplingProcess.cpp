@@ -56,6 +56,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	rho_times(NULL),
 	xi(NULL),
 	xi_times(NULL),
+	eta_simple(NULL),
 	eta_const(NULL),
 	eta_var(NULL),
 	eta_times(NULL),
@@ -567,9 +568,30 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setXi(const Typed
 	xi_dirty = false;
 }
 
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const TypedDagNode< double >* param)
+{
+	if ( eta_simple != NULL || eta_const != NULL || eta_var != NULL )
+	{
+		throw RbException("Tried to set eta twice.");
+	}
+
+	// set the value
+	eta_simple = param;
+	eta_times  = NULL;
+
+	// include the parameter
+	addParameter(eta_simple);
+
+	// dispatch an update
+	updateEta(true);
+
+	// mark clean
+	eta_dirty = false;
+}
+
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const TypedDagNode< RateGenerator >* param)
 {
-	if ( eta_const != NULL || eta_var != NULL )
+	if ( eta_simple != NULL || eta_const != NULL || eta_var != NULL )
 	{
 		throw RbException("Tried to set eta twice.");
 	}
@@ -590,7 +612,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const Type
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const TypedDagNode< RbVector< RateGenerator > >* param, const TypedDagNode< RbVector<double> >* times)
 {
-	if ( eta_const != NULL || eta_var != NULL )
+	if ( eta_simple != NULL ||  eta_const != NULL || eta_var != NULL )
 	{
 		throw RbException("Tried to set eta twice.");
 	}
@@ -885,7 +907,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
     		gamma_dirty = false;
     		zeta_dirty = false;
     	}
-    	else if ( restorer == rho || restorer == rho_times  )
+    	else if ( restorer == rho_simple || restorer == rho || restorer == rho_times  )
     	{
     		updateRho();
     		rho_dirty = false;
@@ -895,7 +917,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
     		updateXi();
     		xi_dirty = false;
     	}
-    	else if ( restorer == eta_const || restorer == eta_var || restorer == eta_times  )
+    	else if ( restorer == eta_simple || restorer == eta_const || restorer == eta_var || restorer == eta_times  )
     	{
     		updateEta();
     		eta_dirty = false;
@@ -1085,7 +1107,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecializati
     		updateZeta();
     		probability_dirty = true;
     	}
-    	else if ( affecter == rho || affecter == rho_times  )
+    	else if ( affecter == rho_simple || affecter == rho || affecter == rho_times  )
     	{
     		rho_dirty = true;
     		updateRho();
@@ -1097,7 +1119,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecializati
     		updateXi();
     		probability_dirty = true;
     	}
-    	else if ( affecter == eta_const || affecter == eta_var || affecter == eta_times  )
+    	else if ( affecter == eta_simple || affecter == eta_const || affecter == eta_var || affecter == eta_times  )
     	{
     		eta_dirty = true;
     		updateEta();
@@ -1567,7 +1589,29 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateEta(bool fo
 {
 	if ( force | eta_dirty )
 	{
-		if ( eta_const != NULL )
+		if ( eta_simple != NULL )
+		{
+			// create empty vectors
+			std::vector< std::vector< std::vector<double> > > params;
+			std::vector<double>                               times;
+
+			// create the matrix
+			std::vector< std::vector<double> > matrix;
+			std::vector<double> row(num_states, eta_simple->getValue());
+			double diagonal = -1.0 * eta_simple->getValue() * ((double)num_states - 1.0);
+			for(size_t i = 0; i < num_states; ++i)
+			{
+				matrix.push_back( row );
+				matrix[i][i] = diagonal;
+			}
+
+			// add the matrix to the vector
+			params.push_back(matrix);
+
+			// set the parameters
+			tp_ptr->setEta(times, params);
+		}
+		else if ( eta_const != NULL )
 		{
 			// create intermediate parameters
 			RbVector< RateGenerator > intermediate_parameters;
@@ -1731,6 +1775,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::swapParameterInte
 	{
 		gamma_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
 	}
+	if ( oldP == rho_simple )
+	{
+		rho_simple = static_cast<const TypedDagNode<double>* >( newP );
+	}
 	if ( oldP == rho )
 	{
 		rho = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
@@ -1750,6 +1798,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::swapParameterInte
 	if ( oldP == eta_const )
 	{
 		eta_const = static_cast<const TypedDagNode<RateGenerator >* >( newP );
+	}
+	if ( oldP == eta_simple )
+	{
+		eta_simple = static_cast<const TypedDagNode<double>* >( newP );
 	}
 	if ( oldP == eta_var )
 	{
