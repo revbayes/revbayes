@@ -7,8 +7,15 @@ SCRIPT_DIR=$(pwd)
 if [ "$#" = 1 ] ; then
     BUILD_DIR="$1"
 else
-    BUILD_DIR=$(pwd)/build
+    BUILD_DIR=build
 fi
+
+if [ ! -e "$BUILD_DIR" ] ; then
+   mkdir "$BUILD_DIR"
+fi
+
+BUILD_DIR=$(cd "$BUILD_DIR"; pwd)
+
 
 cd "$BUILD_DIR"/../../../src
 
