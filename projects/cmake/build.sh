@@ -2,8 +2,20 @@
 set -e
 
 all_args="$@"
-mpi="false"
+
+#################
+# command line options
+# set default values
+debug="false"
 travis="false"
+win="false"
+mpi="false"
+gentoo="false"
+help="false"
+jupyter="false"
+boost_root=""
+boost_lib=""
+
 cmake_args=""
 # parse command line arguments
 while echo $1 | grep ^- > /dev/null; do
@@ -11,8 +23,17 @@ while echo $1 | grep ^- > /dev/null; do
     if [ "$1" = "--help" ] || [ "$1" = "-h" ]
     then
         echo '
+The minimum steps to build RevBayes after running this script is:
+cmake .
+make
+
 Command line options are:
 -h                              : print this help and exit.
+-win            <true|false>    : set to true if you are building on a Windows system. Defaults to false.
+-mpi            <true|false>    : set to true if you want to build the MPI version. Defaults to false.
+-cmd            <true|false>    : set to true if you want to build RevStudio with GTK2+. Defaults to false.
+-jupyter        <true|false>    : set to true if you want to build the jupyter version. Defaults to false.
+-help           <true|false>    : Update the help database and build the YAML help generator. Defaults to false.
 '
         exit
     fi

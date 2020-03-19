@@ -5,39 +5,12 @@ set -e
 #################
 # command line options
 # set default values
-debug="false"
-mac="false"
 travis="false"
-win="false"
 mpi="false"
-gentoo="false"
 help="false"
-jupyter="false"
-boost_root=""
-boost_lib=""
 
 # parse command line arguments
 while echo $1 | grep ^- > /dev/null; do
-    # intercept help while parsing "-key value" pairs
-    if [ "$1" = "--help" ] || [ "$1" = "-h" ]
-    then
-        echo '
-The minimum steps to build RevBayes after running this script is:
-cmake .
-make
-
-Command line options are:
--h                              : print this help and exit.
--mac            <true|false>    : set to true if you are building for a OS X - compatible with 10.6 and higher. Defaults to false.
--win            <true|false>    : set to true if you are building on a Windows system. Defaults to false.
--mpi            <true|false>    : set to true if you want to build the MPI version. Defaults to false.
--help           <true|false>    : Update the help database and build the YAML help generator. Defaults to false.
-'
-# secret test option
-# -jupyter        <true|false>    : set to true if you want ot buikd the jupyter version. Defaults to false.
-        exit
-    fi
-
     # skip cmake args
     case "$1" in -D*)
                      shift
