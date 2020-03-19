@@ -89,7 +89,7 @@ echo "set (LOCAL_BOOST_LIBRARY \"${boost_lib}\")" >> "$BUILD_DIR/CMakeLists.txt"
 
 if [ "$debug" = "true" ]
 then
-echo '
+    echo '
 # -Woverloaded-virtual has some false-positives with GCC
 # We should ultimiately remove -Wno-reorder -Wno-unused-variable -Wno-unused-but-set-variable
 # But there are so many of them we cant see the really bad warnings.
@@ -99,19 +99,19 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -Wall")
 '  >> "$BUILD_DIR/CMakeLists.txt"
 elif [ "$mac" = "true" ]
 then
-echo '
+    echo '
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.6")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -msse -msse2 -msse3")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 '  >> "$BUILD_DIR/CMakeLists.txt"
 elif [ "$win" = "true" ]
 then
-echo '
+    echo '
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -msse -msse2 -msse3")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 '  >> "$BUILD_DIR/CMakeLists.txt"
 else
-echo '
+    echo '
 if (CMAKE_SYSTEM_PROCESSOR MATCHES "^arm*|aarch64")
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
    add_definitions(-DRB_ARM)
@@ -124,7 +124,7 @@ fi
 
 if [ "$mpi" = "true" ]
 then
-echo '
+    echo '
 add_definitions(-DRB_MPI)
 #add_definitions(-DDEBUG_MPI_MCA)
 # Require MPI for this project:
@@ -137,7 +137,7 @@ fi
 
 if [ "$win" = "true" ]
 then
-echo '
+    echo '
 add_definitions(-DRB_WIN)
 '  >> "$BUILD_DIR/CMakeLists.txt"
 fi
@@ -183,40 +183,40 @@ add_subdirectory(revlanguage)
 if [ "$help" = "true" ]
 then
 
-#################
-# generate help database
-echo "Generating help database"
-perl ../help/md2help.pl ../help/md/*.md > core/help/RbHelpDatabase.cpp
+    #################
+    # generate help database
+    echo "Generating help database"
+    perl ../help/md2help.pl ../help/md/*.md > core/help/RbHelpDatabase.cpp
 
-echo '
+    echo '
 add_subdirectory(help2yml)
 ' >> $BUILD_DIR/CMakeLists.txt
 
-echo '
+    echo '
 add_executable(${RB_EXEC_NAME}-help2yml ${PROJECT_SOURCE_DIR}/help2yml/main.cpp)
 
 target_link_libraries(${RB_EXEC_NAME}-help2yml rb-help rb-parser rb-core rb-libs rb-parser ${Boost_LIBRARIES})
 set_target_properties(${RB_EXEC_NAME}-help2yml PROPERTIES PREFIX "../")
 ' >> $BUILD_DIR/CMakeLists.txt
 
-if [ ! -d "$BUILD_DIR/help2yml" ]; then
-mkdir "$BUILD_DIR/help2yml"
-fi
-echo 'set(HELP_FILES' > "$BUILD_DIR/help2yml/CMakeLists.txt"
-find help2yml | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/help2yml/CMakeLists.txt"
-echo ')
+    if [ ! -d "$BUILD_DIR/help2yml" ]; then
+        mkdir "$BUILD_DIR/help2yml"
+    fi
+    echo 'set(HELP_FILES' > "$BUILD_DIR/help2yml/CMakeLists.txt"
+    find help2yml | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/help2yml/CMakeLists.txt"
+    echo ')
 add_library(rb-help ${HELP_FILES})'  >> "$BUILD_DIR/help2yml/CMakeLists.txt"
 
-if [ "$mpi" = "true" ] ; then
-    echo 'target_link_libraries(${RB_EXEC_NAME}-help2yml ${MPI_LIBRARIES})
+    if [ "$mpi" = "true" ] ; then
+        echo 'target_link_libraries(${RB_EXEC_NAME}-help2yml ${MPI_LIBRARIES})
 ' >> $BUILD_DIR/CMakeLists.txt
-fi
+    fi
 fi
 
 if [ "$jupyter" = "true" ]
 then
-echo "more jupyter!"
-echo '
+    echo "more jupyter!"
+    echo '
 add_executable(rb-jupyter ${PROJECT_SOURCE_DIR}/revlanguage/main.cpp)
 
 target_link_libraries(rb-jupyter rb-parser rb-core rb-libs ${Boost_LIBRARIES})
@@ -224,32 +224,32 @@ set_target_properties(rb-jupyter PROPERTIES PREFIX "../")
 ' >> $BUILD_DIR/CMakeLists.txt
 elif [ "$cmd" = "true" ]
 then
-cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-RevStudio.txt" >> "$BUILD_DIR/CMakeLists.txt"
+    cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-RevStudio.txt" >> "$BUILD_DIR/CMakeLists.txt"
 
-if [ ! -d "$BUILD_DIR/cmd" ]; then
-mkdir "$BUILD_DIR/cmd"
-fi
-echo 'SET(CMD_FILES' > "$BUILD_DIR/cmd/CMakeLists.txt"
-find cmd | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/cmd/CMakeLists.txt"
-echo ')
+    if [ ! -d "$BUILD_DIR/cmd" ]; then
+        mkdir "$BUILD_DIR/cmd"
+    fi
+    echo 'SET(CMD_FILES' > "$BUILD_DIR/cmd/CMakeLists.txt"
+    find cmd | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/cmd/CMakeLists.txt"
+    echo ')
 ADD_LIBRARY(rb-cmd-lib ${CMD_FILES})'  >> "$BUILD_DIR/cmd/CMakeLists.txt"
 
 else
-echo '
+    echo '
 add_executable(${RB_EXEC_NAME} ${PROJECT_SOURCE_DIR}/revlanguage/main.cpp)
 
 target_link_libraries(${RB_EXEC_NAME} rb-parser rb-core rb-libs ${Boost_LIBRARIES})
 
 set_target_properties(${RB_EXEC_NAME} PROPERTIES PREFIX "../")
 ' >> $BUILD_DIR/CMakeLists.txt
-if [ "$mpi" = "true" ] ; then
-    echo 'target_link_libraries(${RB_EXEC_NAME} ${MPI_LIBRARIES})
+    if [ "$mpi" = "true" ] ; then
+        echo 'target_link_libraries(${RB_EXEC_NAME} ${MPI_LIBRARIES})
 ' >> $BUILD_DIR/CMakeLists.txt
-fi
+    fi
 fi
 
 if [ ! -d "$BUILD_DIR/libs" ]; then
-mkdir "$BUILD_DIR/libs"
+    mkdir "$BUILD_DIR/libs"
 fi
 echo 'set(LIBS_FILES' > "$BUILD_DIR/libs/CMakeLists.txt"
 find libs | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/libs/CMakeLists.txt"
@@ -257,7 +257,7 @@ echo ')
 add_library(rb-libs ${LIBS_FILES})'  >> "$BUILD_DIR/libs/CMakeLists.txt"
 
 if [ ! -d "$BUILD_DIR/core" ]; then
-mkdir "$BUILD_DIR/core"
+    mkdir "$BUILD_DIR/core"
 fi
 echo 'set(CORE_FILES' > "$BUILD_DIR/core/CMakeLists.txt"
 find core | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/core/CMakeLists.txt"
@@ -265,7 +265,7 @@ echo ')
 add_library(rb-core ${CORE_FILES})'  >> "$BUILD_DIR/core/CMakeLists.txt"
 
 if [ ! -d "$BUILD_DIR/revlanguage" ]; then
-mkdir "$BUILD_DIR/revlanguage"
+    mkdir "$BUILD_DIR/revlanguage"
 fi
 echo 'set(PARSER_FILES' > "$BUILD_DIR/revlanguage/CMakeLists.txt"
 find revlanguage | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/revlanguage/CMakeLists.txt"
