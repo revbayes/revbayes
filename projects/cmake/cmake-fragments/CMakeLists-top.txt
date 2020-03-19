@@ -33,4 +33,3 @@ else()
 endif()
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.6")
