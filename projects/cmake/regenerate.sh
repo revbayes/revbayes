@@ -129,14 +129,6 @@ elif [ "$cmd" = "true" ]
 then
     cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-RevStudio.txt" >> "$BUILD_DIR/CMakeLists.txt"
 
-    if [ ! -d "$BUILD_DIR/cmd" ]; then
-        mkdir "$BUILD_DIR/cmd"
-    fi
-    echo 'SET(CMD_FILES' > "$BUILD_DIR/cmd/CMakeLists.txt"
-    find cmd | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/cmd/CMakeLists.txt"
-    echo ')
-ADD_LIBRARY(rb-cmd-lib ${CMD_FILES})'  >> "$BUILD_DIR/cmd/CMakeLists.txt"
-
 else
     echo '
 add_executable(${RB_EXEC_NAME} ${PROJECT_SOURCE_DIR}/revlanguage/main.cpp)
@@ -175,7 +167,7 @@ find revlanguage | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD
 echo ')
 add_library(rb-parser ${PARSER_FILES})'  >> "$BUILD_DIR/revlanguage/CMakeLists.txt"
 
-# We will only use this if we add help2yml as a subdir()
+# We will only USE this if we do subdir(help2yml)
 if [ ! -d "$BUILD_DIR/help2yml" ]; then
     mkdir "$BUILD_DIR/help2yml"
 fi
@@ -183,5 +175,14 @@ echo 'set(HELP_FILES' > "$BUILD_DIR/help2yml/CMakeLists.txt"
 find help2yml | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/help2yml/CMakeLists.txt"
 echo ')
 add_library(rb-help ${HELP_FILES})'  >> "$BUILD_DIR/help2yml/CMakeLists.txt"
+
+# We will only USE this if we do subdir(cmd)
+if [ ! -d "$BUILD_DIR/cmd" ]; then
+    mkdir "$BUILD_DIR/cmd"
+fi
+echo 'SET(CMD_FILES' > "$BUILD_DIR/cmd/CMakeLists.txt"
+find cmd | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/cmd/CMakeLists.txt"
+echo ')
+ADD_LIBRARY(rb-cmd-lib ${CMD_FILES})'  >> "$BUILD_DIR/cmd/CMakeLists.txt"
 
 cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-bottom.txt" >> "$BUILD_DIR/CMakeLists.txt"
