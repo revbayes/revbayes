@@ -81,9 +81,6 @@ if [ "${exec_name}" = "" ]; then
     fi
 fi
 
-echo "Building ${exec_name}"
-
-echo "set (RB_EXEC_NAME \"${exec_name}\")" >> "$BUILD_DIR/CMakeLists.txt"
 echo "set (LOCAL_BOOST_ROOT \"${boost_root}\")" >> "$BUILD_DIR/CMakeLists.txt"
 echo "set (LOCAL_BOOST_LIBRARY \"${boost_lib}\")" >> "$BUILD_DIR/CMakeLists.txt"
 

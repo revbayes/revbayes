@@ -85,6 +85,7 @@ if [ "$help" = "true" ] ; then
     cmake_args="-DHELP=ON $cmake_args"
 fi
 
+echo "Building ${exec_name}"
 cmake_args="-DRB_EXEC_NAME=${exec_name} $cmake_args"
 
 # This is bad because it overrides any choices the user may have chosen.

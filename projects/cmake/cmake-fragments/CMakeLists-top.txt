@@ -41,3 +41,6 @@ else()
    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPTIMIZATION_FLAGS}")
 endif()
 
+if ("${RB_EXEC_NAME}" STREQUAL "")
+   SET(RB_EXEC_NAME "rb")
+endif()
