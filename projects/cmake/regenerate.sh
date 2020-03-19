@@ -15,7 +15,6 @@ help="false"
 jupyter="false"
 boost_root=""
 boost_lib=""
-exec_name=""
 
 # parse command line arguments
 while echo $1 | grep ^- > /dev/null; do
@@ -72,14 +71,6 @@ SCRIPT_DIR=$(pwd)
 cd "$BUILD_DIR"/../../../src
 
 cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-top.txt" > "$BUILD_DIR/CMakeLists.txt"
-
-if [ "${exec_name}" = "" ]; then
-    if [ "${mpi}" = "true" ]; then
-        exec_name="rb-mpi"
-    else
-        exec_name="rb"
-    fi
-fi
 
 if [ "$mpi" = "true" ]
 then
