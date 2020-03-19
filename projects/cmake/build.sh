@@ -136,6 +136,7 @@ fi
     fi
     mv GitVersion.cpp ../../src/revlanguage/utils/
 
+        echo "Running './regenerate.sh ${all_args}'"
 	./regenerate.sh ${all_args}
 	cd ${BUILD_DIR}
         echo "Running 'cmake . $cmake_args' in $(pwd)"

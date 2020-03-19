@@ -64,52 +64,29 @@ then
     perl ../help/md2help.pl ../help/md/*.md > core/help/RbHelpDatabase.cpp
 fi
 
-######### Generate libs/CMakeLists.txt #########################
-if [ ! -d "$BUILD_DIR/libs" ]; then
-    mkdir "$BUILD_DIR/libs"
-fi
-echo 'set(LIBS_FILES' > "$BUILD_DIR/libs/CMakeLists.txt"
-find libs | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/libs/CMakeLists.txt"
-echo ')
-add_library(rb-libs ${LIBS_FILES})'  >> "$BUILD_DIR/libs/CMakeLists.txt"
+######## Generate CMakeLists.txt for subdirs
+generate_subdir_cmake()
+{
+    local subdir="$1"
+    local libname=$2
+    if [ ! -d "$BUILD_DIR/$subdir" ]; then
+        mkdir "$BUILD_DIR/$subdir"
+    fi
+    echo "set(${subdir}_FILES" > "$BUILD_DIR/$subdir/CMakeLists.txt"
+    ### Treat all files in each subdir as source files
+    find "$subdir" | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/$subdir/CMakeLists.txt"
+    echo ")
+add_library($libname \${${subdir}_FILES})"  >> "$BUILD_DIR/$subdir/CMakeLists.txt"
+}
 
-######### Generate core/CMakeLists.txt #########################
-if [ ! -d "$BUILD_DIR/core" ]; then
-    mkdir "$BUILD_DIR/core"
-fi
-echo 'set(CORE_FILES' > "$BUILD_DIR/core/CMakeLists.txt"
-find core | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/core/CMakeLists.txt"
-echo ')
-add_library(rb-core ${CORE_FILES})'  >> "$BUILD_DIR/core/CMakeLists.txt"
+generate_subdir_cmake "libs" "rb-libs"
 
-######### Generate revlanguage/CMakeLists.txt ##################
-if [ ! -d "$BUILD_DIR/revlanguage" ]; then
-    mkdir "$BUILD_DIR/revlanguage"
-fi
-echo 'set(PARSER_FILES' > "$BUILD_DIR/revlanguage/CMakeLists.txt"
-find revlanguage | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/revlanguage/CMakeLists.txt"
-echo ')
-add_library(rb-parser ${PARSER_FILES})'  >> "$BUILD_DIR/revlanguage/CMakeLists.txt"
+generate_subdir_cmake "core" "rb-core"
 
-######### Generate help2yml/CMakeLists.txt #####################
+generate_subdir_cmake "revlanguage" "rb-parser"
+
 # We will only USE this if we do subdir(help2yml)
-if [ ! -d "$BUILD_DIR/help2yml" ]; then
-    mkdir "$BUILD_DIR/help2yml"
-fi
-echo 'set(HELP_FILES' > "$BUILD_DIR/help2yml/CMakeLists.txt"
-find help2yml | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/help2yml/CMakeLists.txt"
-echo ')
-add_library(rb-help ${HELP_FILES})'  >> "$BUILD_DIR/help2yml/CMakeLists.txt"
+generate_subdir_cmake "help2yml" "rb-help"
 
-######### Generate cmd/CMakeLists.txt ##########################
 # We will only USE this if we do subdir(cmd)
-if [ ! -d "$BUILD_DIR/cmd" ]; then
-    mkdir "$BUILD_DIR/cmd"
-fi
-echo 'SET(CMD_FILES' > "$BUILD_DIR/cmd/CMakeLists.txt"
-find cmd | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/cmd/CMakeLists.txt"
-echo ')
-ADD_LIBRARY(rb-cmd-lib ${CMD_FILES})'  >> "$BUILD_DIR/cmd/CMakeLists.txt"
-
-
-
+generate_subdir_cmake "cmd" "rb-cmd-lib"
