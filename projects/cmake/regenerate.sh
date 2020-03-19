@@ -70,78 +70,28 @@ SCRIPT_DIR=$(pwd)
 
 cd "$BUILD_DIR"/../../../src
 
+######### Generate CMakeLists.txt: top #########################
 cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-top.txt" > "$BUILD_DIR/CMakeLists.txt"
 
+######### Generate CMakeLists.txt: list of include directories #
 echo '
 # TODO Split these up based on sub-package dependency
 INCLUDE_DIRECTORIES(' >> "$BUILD_DIR/CMakeLists.txt"
 find libs core revlanguage -type d | grep -v "svn" | sed 's|^|    ${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/CMakeLists.txt"
 echo ' ${Boost_INCLUDE_DIR} )
+'>> "$BUILD_DIR/CMakeLists.txt"
 
+######### Generate CMakeLists.txt: bottom ######################
+cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-bottom.txt" >> "$BUILD_DIR/CMakeLists.txt"
 
-####
-
-# Split into much smaller libraries
-add_subdirectory(libs)
-add_subdirectory(core)
-add_subdirectory(revlanguage)
-
-
-############# executables #################
-# basic rev-bayes binary
-
-if ("${HELP}" STREQUAL "ON")
-  add_subdirectory(help2yml)
-
-  add_executable(${RB_EXEC_NAME}-help2yml ${PROJECT_SOURCE_DIR}/help2yml/main.cpp)
-
-  target_link_libraries(${RB_EXEC_NAME}-help2yml rb-help rb-parser rb-core rb-libs rb-parser ${Boost_LIBRARIES})
-  set_target_properties(${RB_EXEC_NAME}-help2yml PROPERTIES PREFIX "../")
-  if ("${MPI}" STREQUAL "ON")
-    target_link_libraries(${RB_EXEC_NAME}-help2yml ${MPI_LIBRARIES})
-  endif()
-endif()
-
-if ("${JUPYTER}" STREQUAL "ON")
-  add_executable(rb-jupyter ${PROJECT_SOURCE_DIR}/revlanguage/main.cpp)
-
-  target_link_libraries(rb-jupyter rb-parser rb-core rb-libs ${Boost_LIBRARIES})
-  set_target_properties(rb-jupyter PROPERTIES PREFIX "../")
-endif()
-
-' >> $BUILD_DIR/CMakeLists.txt
-
+######### Generate help database
 if [ "$help" = "true" ]
 then
-    #################
-    # generate help database
     echo "Generating help database"
     perl ../help/md2help.pl ../help/md/*.md > core/help/RbHelpDatabase.cpp
 fi
 
-if [ "$jupyter" = "true" ]
-then
-    echo "more jupyter!"
-elif [ "$cmd" = "true" ]
-then
-    cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-RevStudio.txt" >> "$BUILD_DIR/CMakeLists.txt"
-
-else
-    echo '
-add_executable(${RB_EXEC_NAME} ${PROJECT_SOURCE_DIR}/revlanguage/main.cpp)
-
-target_link_libraries(${RB_EXEC_NAME} rb-parser rb-core rb-libs ${Boost_LIBRARIES})
-
-set_target_properties(${RB_EXEC_NAME} PROPERTIES PREFIX "../")
-' >> $BUILD_DIR/CMakeLists.txt
-    if [ "$mpi" = "true" ] ; then
-        echo 'target_link_libraries(${RB_EXEC_NAME} ${MPI_LIBRARIES})
-' >> $BUILD_DIR/CMakeLists.txt
-    fi
-fi
-cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-bottom.txt" >> "$BUILD_DIR/CMakeLists.txt"
-
-######### Generate libs/CMakeLists.txt ####################
+######### Generate libs/CMakeLists.txt #########################
 if [ ! -d "$BUILD_DIR/libs" ]; then
     mkdir "$BUILD_DIR/libs"
 fi
@@ -150,7 +100,7 @@ find libs | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/li
 echo ')
 add_library(rb-libs ${LIBS_FILES})'  >> "$BUILD_DIR/libs/CMakeLists.txt"
 
-######### Generate core/CMakeLists.txt ###################
+######### Generate core/CMakeLists.txt #########################
 if [ ! -d "$BUILD_DIR/core" ]; then
     mkdir "$BUILD_DIR/core"
 fi
@@ -159,7 +109,7 @@ find core | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/co
 echo ')
 add_library(rb-core ${CORE_FILES})'  >> "$BUILD_DIR/core/CMakeLists.txt"
 
-######### Generate revlanguage/CMakeLists.txt ############
+######### Generate revlanguage/CMakeLists.txt ##################
 if [ ! -d "$BUILD_DIR/revlanguage" ]; then
     mkdir "$BUILD_DIR/revlanguage"
 fi
@@ -168,7 +118,7 @@ find revlanguage | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD
 echo ')
 add_library(rb-parser ${PARSER_FILES})'  >> "$BUILD_DIR/revlanguage/CMakeLists.txt"
 
-######### Generate help2yml/CMakeLists.txt ###############
+######### Generate help2yml/CMakeLists.txt #####################
 # We will only USE this if we do subdir(help2yml)
 if [ ! -d "$BUILD_DIR/help2yml" ]; then
     mkdir "$BUILD_DIR/help2yml"
@@ -178,7 +128,7 @@ find help2yml | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DI
 echo ')
 add_library(rb-help ${HELP_FILES})'  >> "$BUILD_DIR/help2yml/CMakeLists.txt"
 
-######### Generate cmd/CMakeLists.txt ####################
+######### Generate cmd/CMakeLists.txt ##########################
 # We will only USE this if we do subdir(cmd)
 if [ ! -d "$BUILD_DIR/cmd" ]; then
     mkdir "$BUILD_DIR/cmd"
