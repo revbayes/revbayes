@@ -72,14 +72,6 @@ cd "$BUILD_DIR"/../../../src
 
 cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-top.txt" > "$BUILD_DIR/CMakeLists.txt"
 
-if [ "$win" = "true" ]
-then
-    echo '
-add_definitions(-DRB_WIN)
-'  >> "$BUILD_DIR/CMakeLists.txt"
-fi
-
-
 if [ "$jupyter" = "true" ]
 then
 echo "JUPYTER!"
