@@ -89,7 +89,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 //	std::cout << "tensorphylo version: " << tp_ptr->getVersion() << std::endl;
 	// turn on/off debug
 	//tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_FILE, "debug.txt");
-	tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_PRINT);
+//	tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_PRINT);
 
 	// add the parameters
 	addParameter(age);
@@ -1864,10 +1864,6 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> GeneralizedLineageHeterogeneousBir
 
     	// get the incoming data
         const AbstractHomologousDiscreteCharacterData& v = static_cast<const TypedDagNode<AbstractHomologousDiscreteCharacterData > *>( args[0] )->getValue();
-
-//		// need to know the number of states
-//		const AbstractHomologousDiscreteCharacterData& char_data = getCharacterData();
-//		size_t num_states = char_data.getNumberOfStates();
 
         // check the number of states
         if(v.getNumberOfStates() != num_states)
