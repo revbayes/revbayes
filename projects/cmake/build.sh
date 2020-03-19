@@ -30,24 +30,65 @@ Command line options are:
     shift
 done
 
-if [ "$debug" = "true" ] ; then
-    cmake_args="-DCMAKE_BUILD_TYPE=DEBUG $cmake_args"
-fi
-
-if [ "$mpi" = "true" ] && [ "$travis" = "false" ]; then
+if [ "$mpi" = "true" ] ; then
     BUILD_DIR="build-mpi"
 else
     BUILD_DIR="build"
 fi
 
-# This is bad because it overrides any choices the user may have chosen.
-CC=gcc CXX=g++
+if [ -z "${exec_name}" ] ; then
+    if [ "$mpi" = "true" ] ; then
+        exec_name="rb-mpi"
+    else
+        exec_name=rb
+    fi
+fi
 
 if [ "$travis" = "true" ]; then
+    BUILD_DIR="build"
     CC=${C_COMPILER}
     CXX=${CXX_COMPILER}
     all_args="-travis true -mpi ${USE_MPI} -help true -exec_name rb"
+    exec_name=rb
+    help=true
 fi
+
+if [ "$debug" = "true" ] ; then
+    cmake_args="-DCMAKE_BUILD_TYPE=DEBUG $cmake_args"
+fi
+
+if [ "$mpi" = "true" ] ; then
+    cmake_args="-DMPI=ON $cmake_args"
+fi
+
+if [ "$jupyter" = "true" ] ; then
+    cmake_args="-DJUPYTER=ON $cmake_args"
+fi
+
+if [ "$win" = "true" ] ; then
+    cmake_args="-DWINDOWS=TRUE $cmake_args"
+fi
+
+if [ "$travis" = "true" ] ; then
+    cmake_args="-DCONTINUOUS_INTEGRATION=TRUE $cmake_args"
+fi
+
+if [ -n "$boost_root" ] ; then
+    cmake_args="-DLOCAL_BOOST_ROOT=\"${boost_root}\""
+fi
+
+if [ -n "$boost_lib" ] ; then
+    cmake_args="-DLOCAL_BOOST_LIBRARY=\"${boost_lib}\""
+fi
+
+if [ "$help" = "true" ] ; then
+    cmake_args="-DHELP=ON $cmake_args"
+fi
+
+cmake_args="-DRB_EXEC_NAME=${exec_name} $cmake_args"
+
+# This is bad because it overrides any choices the user may have chosen.
+CC=gcc CXX=g++
 
 export CC
 export CXX
