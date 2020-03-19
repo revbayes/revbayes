@@ -72,19 +72,6 @@ cd "$BUILD_DIR"/../../../src
 
 cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-top.txt" > "$BUILD_DIR/CMakeLists.txt"
 
-if [ "$mpi" = "true" ]
-then
-    echo '
-add_definitions(-DRB_MPI)
-#add_definitions(-DDEBUG_MPI_MCA)
-# Require MPI for this project:
-find_package(MPI REQUIRED)
-include_directories(${MPI_INCLUDE_PATH})
-set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS}")
-set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS}")
-'  >> "$BUILD_DIR/CMakeLists.txt"
-fi
-
 if [ "$win" = "true" ]
 then
     echo '
