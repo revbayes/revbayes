@@ -30,6 +30,10 @@ Command line options are:
     shift
 done
 
+if [ "$debug" = "true" ] ; then
+    cmake_args="-DCMAKE_BUILD_TYPE=DEBUG $cmake_args"
+fi
+
 if [ "$mpi" = "true" ] && [ "$travis" = "false" ]; then
     BUILD_DIR="build-mpi"
 else
