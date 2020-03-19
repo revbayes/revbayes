@@ -81,9 +81,6 @@ if [ "${exec_name}" = "" ]; then
     fi
 fi
 
-echo "set (LOCAL_BOOST_ROOT \"${boost_root}\")" >> "$BUILD_DIR/CMakeLists.txt"
-echo "set (LOCAL_BOOST_LIBRARY \"${boost_lib}\")" >> "$BUILD_DIR/CMakeLists.txt"
-
 if [ "$mpi" = "true" ]
 then
     echo '
