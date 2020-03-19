@@ -136,15 +136,25 @@ fi
     fi
     mv GitVersion.cpp ../../src/revlanguage/utils/
 
-        echo "Running './regenerate.sh ${all_args}'"
-	./regenerate.sh ${all_args}
-	cd ${BUILD_DIR}
-        echo "Running 'cmake . $cmake_args' in $(pwd)"
-	cmake . $cmake_args
-        echo
-        echo "Running 'make -j4' in $(pwd)"
-	make -j 4
-	cd ..
+    ######### Generate help database
+    if [ "$help" = "true" ]
+    then
+        (
+            cd ../../src
+            echo "Generating help database"
+            perl ../help/md2help.pl ../help/md/*.md > core/help/RbHelpDatabase.cpp
+        )
+    fi
+
+    echo "Running './regenerate.sh $(pwd)/$BUILD_DIR"
+    ./regenerate.sh $(pwd)/$BUILD_DIR
+    cd ${BUILD_DIR}
+    echo "Running 'cmake . $cmake_args' in $(pwd)"
+    cmake . $cmake_args
+    echo
+    echo "Running 'make -j4' in $(pwd)"
+    make -j 4
+    cd ..
 
     if [ -e  GitVersion_backup.cpp ] ; then
         cp GitVersion_backup.cpp ../../src/revlanguage/utils/GitVersion.cpp

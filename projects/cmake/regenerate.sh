@@ -2,44 +2,13 @@
 
 set -e
 
-#################
-# command line options
-# set default values
-travis="false"
-mpi="false"
-help="false"
-
-# parse command line arguments
-while echo $1 | grep ^- > /dev/null; do
-    # skip cmake args
-    case "$1" in -D*)
-                     shift
-                     continue
-                     ;;
-    esac
-
-    # parse pairs
-    eval $( echo $1 | sed 's/-//g' | tr -d '\012')=$2
-    shift
-    shift
-done
-
-
-
-#################
-# generate cmake configuration
-
-if [ "${mpi}" = "true" ] && [ "${travis}" = "false" ]; then
-    BUILD_DIR="$(pwd)/build-mpi"
-    mkdir -p "${BUILD_DIR}"
-    echo $BUILD_DIR
-else
-    BUILD_DIR="$(pwd)/build"
-    mkdir -p "${BUILD_DIR}"
-    echo $BUILD_DIR
-fi
-
 SCRIPT_DIR=$(pwd)
+
+if [ "$#" = 1 ] ; then
+    BUILD_DIR="$1"
+else
+    BUILD_DIR=$(pwd)/build
+fi
 
 cd "$BUILD_DIR"/../../../src
 
@@ -56,13 +25,6 @@ echo ' ${Boost_INCLUDE_DIR} )
 
 ######### Generate CMakeLists.txt: bottom ######################
 cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-bottom.txt" >> "$BUILD_DIR/CMakeLists.txt"
-
-######### Generate help database
-if [ "$help" = "true" ]
-then
-    echo "Generating help database"
-    perl ../help/md2help.pl ../help/md/*.md > core/help/RbHelpDatabase.cpp
-fi
 
 ######## Generate CMakeLists.txt for subdirs
 generate_subdir_cmake()
