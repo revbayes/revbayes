@@ -60,3 +60,6 @@ if (WINDOWS MATCHES TRUE)
    add_definitions(-DRB_WIN)
 endif()
 
+if (JUPYTER MATCHES ON)
+   add_definitions(-DRB_XCODE)
+endif()

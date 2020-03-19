@@ -72,14 +72,6 @@ cd "$BUILD_DIR"/../../../src
 
 cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-top.txt" > "$BUILD_DIR/CMakeLists.txt"
 
-if [ "$jupyter" = "true" ]
-then
-echo "JUPYTER!"
-echo '
-add_definitions(-DRB_XCODE)
-'  >> "$BUILD_DIR/CMakeLists.txt"
-fi
-
 if [ "$travis" = "true" ]
 then
     echo 'set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g0 -O2")
