@@ -19,4 +19,8 @@ if(NOT (${CMAKE_VERSION} VERSION_LESS "2.8.0"))
   endif()
 endif()
 
+# Add extra CMake libraries into ./CMake
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake ${CMAKE_MODULE_PATH})
 
+# Set source root relate to project file
+set(PROJECT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/../../../src)

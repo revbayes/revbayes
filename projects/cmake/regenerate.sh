@@ -158,14 +158,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g0 -O2")
 ' >> "$BUILD_DIR/CMakeLists.txt"
 fi
 
-echo '
-# Add extra CMake libraries into ./CMake
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake ${CMAKE_MODULE_PATH})
-
-# Set source root relate to project file
-set(PROJECT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/../../../src)
-' >> "$BUILD_DIR/CMakeLists.txt"
-
 ## Emit CMakeLists-boost.txt
 cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-boost.txt" >> "$BUILD_DIR/CMakeLists.txt"
 
