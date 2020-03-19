@@ -23,10 +23,8 @@ class TypeSpec;
      * The RevLanguage constructor for (row) stochastic matrices. A (row)
      * stochastic matrix has rows that sum to 1.
      *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Michael R. May)
-     * @since 2020-03-10, version 1.0
-     *
+     * @see RlStochasticMatrix for the revlanguage object that is returned,
+     * and StochasticMatrixFunction for the core implementation of this function.
      */
     class Func_stochasticMatrix : public TypedFunction<StochasticMatrix> {
         
