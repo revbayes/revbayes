@@ -37,6 +37,13 @@ Command line options are:
         exit
     fi
 
+    # skip cmake args
+    case "$1" in -D*)
+                     shift
+                     continue
+                     ;;
+    esac
+
     # parse pairs
     eval $( echo $1 | sed 's/-//g' | tr -d '\012')=$2
     shift
