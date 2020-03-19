@@ -72,13 +72,6 @@ cd "$BUILD_DIR"/../../../src
 
 cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-top.txt" > "$BUILD_DIR/CMakeLists.txt"
 
-if [ "$travis" = "true" ]
-then
-    echo 'set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g0 -O2")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g0 -O2")
-' >> "$BUILD_DIR/CMakeLists.txt"
-fi
-
 ## Emit CMakeLists-boost.txt
 cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-boost.txt" >> "$BUILD_DIR/CMakeLists.txt"
 
