@@ -230,29 +230,25 @@ echo '
 FIND_PACKAGE(PkgConfig REQUIRED)
 PKG_CHECK_MODULES(GTK REQUIRED gtk+-2.0)
 #PKG_CHECK_MODULES(GTK REQUIRED gtk+-3.0)
-' >> $BUILD_DIR/CMakeLists.txt
+
 
 # Setup CMake to use GTK+, tell the compiler where to look for headers
 # and to the linker where to look for libraries
-echo '
 INCLUDE_DIRECTORIES(${GTK_INCLUDE_DIRS})
 LINK_DIRECTORIES(${GTK_LIBRARY_DIRS})
-' >> $BUILD_DIR/CMakeLists.txt
 
-echo '
+
 # Add other flags to the compiler
 ADD_DEFINITIONS(${GTK_CFLAGS_OTHER})
 
 # Add an executable compiled from hello.c
 ADD_EXECUTABLE(RevStudio ${PROJECT_SOURCE_DIR}/cmd/main.cpp)
-' >> $BUILD_DIR/CMakeLists.txt
+
 
 # Link the target to the GTK+ libraries
-echo '
 TARGET_LINK_LIBRARIES(RevStudio rb-cmd-lib rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${GTK_LIBRARIES})
-' >> $BUILD_DIR/CMakeLists.txt
 
-echo '
+
 SET_TARGET_PROPERTIES(RevStudio PROPERTIES PREFIX "../")
 
 add_subdirectory(cmd)
