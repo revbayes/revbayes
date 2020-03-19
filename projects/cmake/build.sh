@@ -65,6 +65,10 @@ if [ "$jupyter" = "true" ] ; then
     cmake_args="-DJUPYTER=ON $cmake_args"
 fi
 
+if [ "$cmd" = "true" ] ; then
+    cmake_args="-DCMD_GTK=ON $cmake_args"
+fi
+
 if [ "$win" = "true" ] ; then
     cmake_args="-DWINDOWS=TRUE $cmake_args"
 fi
