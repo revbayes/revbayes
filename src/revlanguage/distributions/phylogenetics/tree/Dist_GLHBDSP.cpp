@@ -109,7 +109,6 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
 
     // number of states
     size_t num_states = size_t(static_cast<const Natural &>( n_states->getRevObject() ).getValue());
-
     if ( num_states < 2 )
     {
     	throw RbException("nStates must be 2 or greater.");
