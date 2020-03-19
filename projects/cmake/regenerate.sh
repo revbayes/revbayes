@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 #################
 # command line options
 # set default values
@@ -65,31 +67,11 @@ else
     echo $BUILD_DIR
 fi
 
+SCRIPT_DIR=$(pwd)
+
 cd "$BUILD_DIR"/../../../src
 
-echo 'cmake_minimum_required(VERSION 2.6)
-project(RevBayes)
-
-# Consider:
-# -Wno-sign-compare
-# -D_GLIBCXX_DEBUG
-
-# This is the RIGHT way, but requires cmake version >=3:
-#   set(CMAKE_CXX_STANDARD 11)
-# RHEL 7 compute clusters may have cmake 2.8.12
-#
-# So, we add the flag directly instead.
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
-if(NOT (${CMAKE_VERSION} VERSION_LESS "2.8.0"))
-  find_program(CCACHE_PROGRAM ccache)
-  if(CCACHE_PROGRAM)
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
-  endif()
-endif()
-
-' > "$BUILD_DIR/CMakeLists.txt"
-
+cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-top.txt" > "$BUILD_DIR/CMakeLists.txt"
 
 if [ "${exec_name}" = "" ]; then
     if [ "${mpi}" = "true" ]; then
