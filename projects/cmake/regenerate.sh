@@ -113,13 +113,10 @@ endif()
 
 if [ "$help" = "true" ]
 then
-
     #################
     # generate help database
     echo "Generating help database"
     perl ../help/md2help.pl ../help/md/*.md > core/help/RbHelpDatabase.cpp
-
-
 fi
 
 if [ "$jupyter" = "true" ]
@@ -142,7 +139,9 @@ set_target_properties(${RB_EXEC_NAME} PROPERTIES PREFIX "../")
 ' >> $BUILD_DIR/CMakeLists.txt
     fi
 fi
+cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-bottom.txt" >> "$BUILD_DIR/CMakeLists.txt"
 
+######### Generate libs/CMakeLists.txt ####################
 if [ ! -d "$BUILD_DIR/libs" ]; then
     mkdir "$BUILD_DIR/libs"
 fi
@@ -151,6 +150,7 @@ find libs | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/li
 echo ')
 add_library(rb-libs ${LIBS_FILES})'  >> "$BUILD_DIR/libs/CMakeLists.txt"
 
+######### Generate core/CMakeLists.txt ###################
 if [ ! -d "$BUILD_DIR/core" ]; then
     mkdir "$BUILD_DIR/core"
 fi
@@ -159,6 +159,7 @@ find core | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/co
 echo ')
 add_library(rb-core ${CORE_FILES})'  >> "$BUILD_DIR/core/CMakeLists.txt"
 
+######### Generate revlanguage/CMakeLists.txt ############
 if [ ! -d "$BUILD_DIR/revlanguage" ]; then
     mkdir "$BUILD_DIR/revlanguage"
 fi
@@ -167,6 +168,7 @@ find revlanguage | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD
 echo ')
 add_library(rb-parser ${PARSER_FILES})'  >> "$BUILD_DIR/revlanguage/CMakeLists.txt"
 
+######### Generate help2yml/CMakeLists.txt ###############
 # We will only USE this if we do subdir(help2yml)
 if [ ! -d "$BUILD_DIR/help2yml" ]; then
     mkdir "$BUILD_DIR/help2yml"
@@ -176,6 +178,7 @@ find help2yml | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DI
 echo ')
 add_library(rb-help ${HELP_FILES})'  >> "$BUILD_DIR/help2yml/CMakeLists.txt"
 
+######### Generate cmd/CMakeLists.txt ####################
 # We will only USE this if we do subdir(cmd)
 if [ ! -d "$BUILD_DIR/cmd" ]; then
     mkdir "$BUILD_DIR/cmd"
@@ -185,4 +188,5 @@ find cmd | grep -v "svn" | sed 's|^|${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/cmd
 echo ')
 ADD_LIBRARY(rb-cmd-lib ${CMD_FILES})'  >> "$BUILD_DIR/cmd/CMakeLists.txt"
 
-cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-bottom.txt" >> "$BUILD_DIR/CMakeLists.txt"
+
+
