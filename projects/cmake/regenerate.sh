@@ -97,29 +97,6 @@ then
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -Wall -msse -msse2 -msse3")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -Wall")
 '  >> "$BUILD_DIR/CMakeLists.txt"
-elif [ "$mac" = "true" ]
-then
-    echo '
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.6")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -msse -msse2 -msse3")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
-'  >> "$BUILD_DIR/CMakeLists.txt"
-elif [ "$win" = "true" ]
-then
-    echo '
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -msse -msse2 -msse3")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
-'  >> "$BUILD_DIR/CMakeLists.txt"
-else
-    echo '
-if (CMAKE_SYSTEM_PROCESSOR MATCHES "^arm*|aarch64")
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
-   add_definitions(-DRB_ARM)
-else()
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -msse -msse2 -msse3")
-endif()
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
-'  >> "$BUILD_DIR/CMakeLists.txt"
 fi
 
 if [ "$mpi" = "true" ]
