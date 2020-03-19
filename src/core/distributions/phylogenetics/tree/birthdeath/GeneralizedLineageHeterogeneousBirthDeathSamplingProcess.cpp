@@ -89,6 +89,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 //	std::cout << "tensorphylo version: " << tp_ptr->getVersion() << std::endl;
 	// turn on/off debug
 	//tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_FILE, "debug.txt");
+	tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_PRINT);
 
 	// add the parameters
 	addParameter(age);
@@ -1265,6 +1266,25 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 			double root_age    = this->getValue().getRoot().getAge();
 			double tail_length = origin_age - root_age;
 			var += std::to_string(tail_length);
+		}
+		else
+		{
+			// strip off the tail
+			// strip out trailing zeros
+			std::string pattern = ":";
+			while ( true )
+			{
+				// if we found a colon stop
+				if ( &var.back() == pattern )
+				{
+					break;
+				}
+				// otherwise, pop off the last character
+				var.pop_back();
+			}
+
+			// now add the trailing zeros
+			var += "0.00000";
 		}
 
 		// make sure there's a closing semicolon
