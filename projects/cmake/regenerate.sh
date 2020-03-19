@@ -164,38 +164,12 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake ${CMAKE_MODULE_PATH})
 
 # Set source root relate to project file
 set(PROJECT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/../../../src)
+' >> "$BUILD_DIR/CMakeLists.txt"
 
-MESSAGE("My Boost information:")
-MESSAGE("  Boost_INCLUDE_DIRS: ${LOCAL_BOOST_ROOT}")
-MESSAGE("  Boost_LIBRARIES: ${LOCAL_BOOST_LIBRARY}")
+## Emit CMakeLists-boost.txt
+cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-boost.txt" >> "$BUILD_DIR/CMakeLists.txt"
 
-set(Boost_USE_MULTITHREADED ON)
-
-if ( NOT ${LOCAL_BOOST_ROOT} STREQUAL "" AND NOT ${LOCAL_BOOST_LIBRARY} STREQUAL "" )
-   SET(BOOST_ROOT ${LOCAL_BOOST_ROOT})
-   SET(BOOST_LIBRARY ${LOCAL_BOOST_LIBRARY})
-   SET(Boost_REALPATH ON)
-#   SET(Boost_NO_SYSTEM_PATHS ON)
-#   SET(Boost_USE_STATIC_RUNTIME ON)
-#   SET(Boost_USE_STATIC_LIBS ON)
-endif()
-
-find_package(Boost
-1.60.0
-COMPONENTS regex
-program_options
-thread
-system
-filesystem
-date_time
-serialization REQUIRED)
-MESSAGE("Boost information:")
-MESSAGE("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIR}")
-MESSAGE("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
-MESSAGE("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
-LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
-
-
+echo '
 # TODO Split these up based on sub-package dependency
 INCLUDE_DIRECTORIES(' >> "$BUILD_DIR/CMakeLists.txt"
 find libs core revlanguage -type d | grep -v "svn" | sed 's|^|    ${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/CMakeLists.txt"
