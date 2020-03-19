@@ -224,35 +224,7 @@ set_target_properties(rb-jupyter PROPERTIES PREFIX "../")
 ' >> $BUILD_DIR/CMakeLists.txt
 elif [ "$cmd" = "true" ]
 then
-echo '
-
-# Use the package PkgConfig to detect GTK+ headers/library files
-FIND_PACKAGE(PkgConfig REQUIRED)
-PKG_CHECK_MODULES(GTK REQUIRED gtk+-2.0)
-#PKG_CHECK_MODULES(GTK REQUIRED gtk+-3.0)
-
-
-# Setup CMake to use GTK+, tell the compiler where to look for headers
-# and to the linker where to look for libraries
-INCLUDE_DIRECTORIES(${GTK_INCLUDE_DIRS})
-LINK_DIRECTORIES(${GTK_LIBRARY_DIRS})
-
-
-# Add other flags to the compiler
-ADD_DEFINITIONS(${GTK_CFLAGS_OTHER})
-
-# Add an executable compiled from hello.c
-ADD_EXECUTABLE(RevStudio ${PROJECT_SOURCE_DIR}/cmd/main.cpp)
-
-
-# Link the target to the GTK+ libraries
-TARGET_LINK_LIBRARIES(RevStudio rb-cmd-lib rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${GTK_LIBRARIES})
-
-
-SET_TARGET_PROPERTIES(RevStudio PROPERTIES PREFIX "../")
-
-add_subdirectory(cmd)
-' >> $BUILD_DIR/CMakeLists.txt
+cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-RevStudio.txt" >> "$BUILD_DIR/CMakeLists.txt"
 
 if [ ! -d "$BUILD_DIR/cmd" ]; then
 mkdir "$BUILD_DIR/cmd"
