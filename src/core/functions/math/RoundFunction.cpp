@@ -9,10 +9,9 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 /**
- * RoundFunction of a TypedDagNode of constructor with values of
- * type double.
+ * Constructor RoundFunction of a TypedDagNode
  *
- * @param x value of type double
+ * @param x a double of the value to be rounded
  */
 RoundFunction::RoundFunction(const TypedDagNode<double> *x) : TypedFunction<long>( new long(0) ),
     a( x )

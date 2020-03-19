@@ -1,21 +1,4 @@
-/**
- * @file
- * This file contains the implementation of RateMatrix_Jones, which is
- * class that holds a rate matrix in RevBayes.
- *
- * @brief Implementation of RateMatrix_Jones
- *
- * (c) Copyright 2009- under GPL version 3
- * @date Last modified: $Date: 2012-12-11 14:46:24 +0100 (Tue, 11 Dec 2012) $
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- * @version 1.0
- * @since 2009-08-27, version 1.0
- * @interface Mcmc
- * @package distributions
- *
- * $Id: RateMatrix_Jones.cpp 1921 2012-12-11 13:46:24Z hoehna $
- */
+
 
 #include "RateMatrix_Jones.h"
 
@@ -31,7 +14,7 @@
 
 using namespace RevBayesCore;
 
-/** Construct rate matrix with n states */
+/** Default Constructor for the Jones rate matrix with 20 states */
 RateMatrix_Jones::RateMatrix_Jones( void ) : RateMatrix_Empirical( 20 ){
     
     MatrixReal &m = *the_rate_matrix;

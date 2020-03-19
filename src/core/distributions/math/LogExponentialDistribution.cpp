@@ -11,6 +11,13 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
+/*
+ * LogExponential Distribution Constructor
+ * @param l a value of type double for the rate parameter
+ *
+ */
+
+
 LogExponentialDistribution::LogExponentialDistribution(const TypedDagNode<double> *l) : ContinuousDistribution( new double( 1.0 ) ),
     lambda( l )
 {

@@ -7,6 +7,19 @@ namespace RevBayesCore {
 class DagNode;
 template <class valueType> class TypedDagNode;
     
+    /*
+     * @brief Log Uniform Distribution Class
+     *
+     * The geometric distribution represents a family of distributions defined on the real numbers.
+     * Instances of this class can be associated to stochastic variables. The Log Uniform Distribution has 2 parameters:
+     * @param min The lower bound of the support
+     * @param max The upper bound of the support
+     */
+
+
+
+
+
     class LogUniformDistribution : public ContinuousDistribution {
         
     public:

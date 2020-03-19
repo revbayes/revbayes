@@ -39,9 +39,9 @@ double RbStatistics::Laplace::pdf(double x)
  * for a Laplace-distributed random variable.
  *
  * \brief Laplace probability density.
- * \param mu is the mean parameter. 
- * \param scale is the variance parameter. 
- * \param x is the normal random variable. 
+ * \param mu is the location parameter of the Laplace.
+ * \param scale is the scale parameter of the Laplace.
+ * \param x is the normal random variable.
  * \return Returns the probability density.
  */
 double RbStatistics::Laplace::pdf(double mu, double scale, double x) 
@@ -72,9 +72,9 @@ double RbStatistics::Laplace::lnPdf(double x)
  * for a Laplace-distributed random variable.
  *
  * \brief Natural log of Laplace probability density.
- * \param mu is the mean parameter. 
- * \param scale is the scale parameters. 
- * \param x is the Laplce random variable. 
+ * \param mu is the location parameter of the Laplace.
+ * \param scale is the scale parameter of the Laplace.
+ * \param x is the Laplce random variable.
  * \return Returns the natural log of the probability density.
  * \throws Does not throw an error.
  */
@@ -101,12 +101,12 @@ double RbStatistics::Laplace::cdf(double x)
 
 /*!
  * This function calculates the cumulative probability 
- * for a normally-distributed random variable.
+ * for a Laplace-distributed random variable.
  *
  * \brief Laplace cumulative probability.
- * \param mu is the mean parameter of the normal. 
- * \param scale is the variance parameter of the normal. 
- * \param x is the normal random variable. 
+ * \param mu is the location parameter of the Laplace.
+ * \param scale is the scale parameter of the Laplace.
+ * \param x is the normal random variable.
  * \return Returns the cumulative probability.
  * \throws Does not throw an error.
  */
@@ -133,13 +133,33 @@ double RbStatistics::Laplace::cdf(double mu, double scale, double x)
 }
 
 
-double RbStatistics::Laplace::quantile(double p) 
+/*!
+* This function calculates the quantile for a
+* standard Laplace-distributed random variable.
+*
+* \brief Standard Laplace quantile.
+* \param p is the Laplace cululative probability.
+* \return Returns the quantile.
+* \throws Does not throw an error.
+*/
+double RbStatistics::Laplace::quantile(double p)
 {
     return Laplace::quantile(0, 1, p);
 }
 
 
-double RbStatistics::Laplace::quantile(double mu, double scale, double p) 
+/*!
+* This function calculates the quantile for a
+* Laplace-distributed random variable.
+*
+* \brief Laplace quantile.
+* \param mu is the location parameter of the Laplace.
+* \param scale is the scale parameter of the Laplace.
+* \param p is the Laplace cululative probability.
+* \return Returns the quantile.
+* \throws Does not throw an error.
+*/
+double RbStatistics::Laplace::quantile(double mu, double scale, double p)
 {
     if (p < 0.5)
     {
@@ -153,14 +173,34 @@ double RbStatistics::Laplace::quantile(double mu, double scale, double p)
 
 
 
-double RbStatistics::Laplace::rv(RandomNumberGenerator& rng) 
+/*!
+* This function returns a random variable drawn from a
+* Standard Laplace distribution.
+*
+* \brief Standard Laplace random variable.
+* \param rng is random number generator.
+* \return Returns a random variable from the Standard Laplace distribution.
+* \throws Does not throw an error.
+*/
+double RbStatistics::Laplace::rv(RandomNumberGenerator& rng)
 {
 	return Laplace::rv(0 ,1, rng);
 }
 
 
 
-double RbStatistics::Laplace::rv(double mu, double scale, RandomNumberGenerator& rng) 
+/*!
+* This function returns a random variable drawn from a
+* Laplace distribution.
+*
+* \brief Laplace random variable.
+* \param mu is the location parameter of the Laplace.
+* \param scale is the scale parameter of the Laplace.
+* \param rng is random number generator.
+* \return Returns a random variable from the Standard Laplace distribution.
+* \throws Does not throw an error.
+*/
+double RbStatistics::Laplace::rv(double mu, double scale, RandomNumberGenerator& rng)
 {
     double u = rng.uniform01() - 0.5;
     double z = u;
