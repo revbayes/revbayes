@@ -72,9 +72,6 @@ cd "$BUILD_DIR"/../../../src
 
 cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-top.txt" > "$BUILD_DIR/CMakeLists.txt"
 
-## Emit CMakeLists-boost.txt
-cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-boost.txt" >> "$BUILD_DIR/CMakeLists.txt"
-
 echo '
 # TODO Split these up based on sub-package dependency
 INCLUDE_DIRECTORIES(' >> "$BUILD_DIR/CMakeLists.txt"
