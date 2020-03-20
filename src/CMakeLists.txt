@@ -41,7 +41,7 @@ if ("${RB_EXEC_NAME}" STREQUAL "")
    SET(RB_EXEC_NAME "rb")
 endif()
 
-if (MPI MATCHES ON)
+if ("${MPI}" STREQUAL "ON")
    add_definitions(-DRB_MPI)
    #add_definitions(-DDEBUG_MPI_MCA)
    # Require MPI for this project:
@@ -52,15 +52,15 @@ if (MPI MATCHES ON)
 endif()
 
 ## Instead of checking this condition, we should check if we are compiling for windows!
-if (WINDOWS MATCHES TRUE)
+if ("${WINDOWS}" STREQUAL "TRUE")
    add_definitions(-DRB_WIN)
 endif()
 
-if (JUPYTER MATCHES ON)
+if ("${JUPYTER}" STREQUAL "ON")
    add_definitions(-DRB_XCODE)
 endif()
 
-if (CONTINUOUS_INTEGRATION MATCHES TRUE)
+if ("${CONTINUOUS_INTEGRATION}" STREQUAL "TRUE")
    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g0 -O2")
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g0 -O2")
 endif()
