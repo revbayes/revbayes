@@ -29,10 +29,12 @@ while echo $1 | grep ^- > /dev/null; do
 -mpi            <true|false>    : set to true if you want to build the MPI version. Defaults to false.
 -cmd            <true|false>    : set to true if you want to build RevStudio with GTK2+. Defaults to false.
 -jupyter        <true|false>    : set to true if you want to build the jupyter version. Defaults to false.
--help           <true|false>    : Update the help database and build the YAML help generator. Defaults to false.
+-help           <true|false>    : update the help database and build the YAML help generator. Defaults to false.
 -boost_root     string          : specify directory containing Boost headers (e.g. `/usr/include`). Defaults to unset.
 -boost_lib      string          : specify directory containing Boost libraries. (e.g. `/usr/lib`). Defaults to unset.
-'
+
+Example:
+  ./build.sh -mpi true -help true'
         exit
     fi
 
