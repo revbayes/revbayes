@@ -129,6 +129,10 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
         	{
         		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_TWO_EXT_SAMPLES);
         	}
+        	else
+        	{
+        		throw RbException("Invalid condition selected.");
+        	}
         }
         else
         {
@@ -139,6 +143,14 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
         	else if ( condition_type == "sampled" )
         	{
         		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::ROOT_SAMPLING);
+        	}
+        	else if ( condition_type == "sampledMRCA" )
+        	{
+        		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::ROOT_SAMPLING_AND_MRCA);
+        	}
+        	else
+        	{
+        		throw RbException("Invalid condition selected.");
         	}
         }
     }
