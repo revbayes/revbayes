@@ -20,7 +20,7 @@ if(NOT (${CMAKE_VERSION} VERSION_LESS "2.8.0"))
 endif()
 
 # Add extra CMake libraries into ./CMake
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_MODULE_PATH})
 
 # Set source root relate to project file
 set(PROJECT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/../../../src)
@@ -99,4 +99,80 @@ MESSAGE("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIR}")
 MESSAGE("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
 MESSAGE("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
+
+# This will look for "generated_include_dirs.cmake" in the module path.
+message("CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}")
+include("generated_include_dirs")
+
+# Split into much smaller libraries
+add_subdirectory(libs)
+add_subdirectory(core)
+add_subdirectory(revlanguage)
+
+
+message("Compile information:")
+message("  CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
+message("  CMAKE_CXX_FLAGS = ${CMAKE_CXX_FLAGS}")
+message("  CMAKE_C_FLAGS = ${CMAKE_C_FLAGS}")
+
+############# executables #################
+# basic rev-bayes binary
+
+if ("${HELP}" STREQUAL "ON")
+  add_subdirectory(help2yml)
+
+  message("Building ${RB_EXEC_NAME}-help2yml")
+  add_executable(${RB_EXEC_NAME}-help2yml ${PROJECT_SOURCE_DIR}/help2yml/main.cpp)
+
+  target_link_libraries(${RB_EXEC_NAME}-help2yml rb-help rb-parser rb-core rb-libs rb-parser ${Boost_LIBRARIES})
+  set_target_properties(${RB_EXEC_NAME}-help2yml PROPERTIES PREFIX "../")
+  if ("${MPI}" STREQUAL "ON")
+    target_link_libraries(${RB_EXEC_NAME}-help2yml ${MPI_LIBRARIES})
+  endif()
+endif()
+
+if ("${JUPYTER}" STREQUAL "ON")
+  message("Building rb-jupyter")
+  add_executable(rb-jupyter ${PROJECT_SOURCE_DIR}/revlanguage/main.cpp)
+
+  target_link_libraries(rb-jupyter rb-parser rb-core rb-libs ${Boost_LIBRARIES})
+  set_target_properties(rb-jupyter PROPERTIES PREFIX "../")
+elseif ("${CMD_GTK}" STREQUAL "ON")
+  message("Building RevStudio")
+  # Use the package PkgConfig to detect GTK+ headers/library files
+  FIND_PACKAGE(PkgConfig REQUIRED)
+  PKG_CHECK_MODULES(GTK REQUIRED gtk+-2.0)
+  #PKG_CHECK_MODULES(GTK REQUIRED gtk+-3.0)
+
+  # Setup CMake to use GTK+, tell the compiler where to look for headers
+  # and to the linker where to look for libraries
+  INCLUDE_DIRECTORIES(${GTK_INCLUDE_DIRS})
+  LINK_DIRECTORIES(${GTK_LIBRARY_DIRS})
+
+  # Add other flags to the compiler
+  ADD_DEFINITIONS(${GTK_CFLAGS_OTHER})
+
+  # Add an executable compiled from hello.c
+  ADD_EXECUTABLE(RevStudio ${PROJECT_SOURCE_DIR}/cmd/main.cpp)
+
+  # Link the target to the GTK+ libraries
+  TARGET_LINK_LIBRARIES(RevStudio rb-cmd-lib rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${GTK_LIBRARIES})
+
+  SET_TARGET_PROPERTIES(RevStudio PROPERTIES PREFIX "../")
+
+  add_subdirectory(cmd)
+
+else()
+  message("Building ${RB_EXEC_NAME}")
+  add_executable(${RB_EXEC_NAME} ${PROJECT_SOURCE_DIR}/revlanguage/main.cpp)
+
+  target_link_libraries(${RB_EXEC_NAME} rb-parser rb-core rb-libs ${Boost_LIBRARIES})
+
+  set_target_properties(${RB_EXEC_NAME} PROPERTIES PREFIX "../")
+
+  if ("${MPI}" STREQUAL "ON")
+    target_link_libraries(${RB_EXEC_NAME} ${MPI_LIBRARIES})
+  endif()
+
+endif()
 

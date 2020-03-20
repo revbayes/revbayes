@@ -16,22 +16,21 @@ fi
 
 BUILD_DIR=$(cd "$BUILD_DIR"; pwd)
 
-
+SRC_DIR="$BUILD_DIR"/../../../src
 cd "$BUILD_DIR"/../../../src
 
-######### Generate CMakeLists.txt: top #########################
-cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-top.txt" > "$BUILD_DIR/CMakeLists.txt"
+######### Generate generated_include_dirs.cmake ############
+cat "$SCRIPT_DIR/cmake-fragments/CMakeLists.txt" > "$BUILD_DIR/CMakeLists.txt"
 
-######### Generate CMakeLists.txt: list of include directories #
-echo '
-# TODO Split these up based on sub-package dependency
-INCLUDE_DIRECTORIES(' >> "$BUILD_DIR/CMakeLists.txt"
-find libs core revlanguage -type d | grep -v "svn" | sed 's|^|    ${PROJECT_SOURCE_DIR}/|g' >> "$BUILD_DIR/CMakeLists.txt"
-echo ' ${Boost_INCLUDE_DIR} )
-'>> "$BUILD_DIR/CMakeLists.txt"
-
-######### Generate CMakeLists.txt: bottom ######################
-cat "$SCRIPT_DIR/cmake-fragments/CMakeLists-bottom.txt" >> "$BUILD_DIR/CMakeLists.txt"
+######### Generate generated_include_dirs.cmake ############
+(
+    echo '
+    # TODO Split these up based on sub-package dependency
+INCLUDE_DIRECTORIES('
+    find libs core revlanguage -type d | grep -v "svn" | sed 's|^|    ${PROJECT_SOURCE_DIR}/|g' 
+    echo ' ${Boost_INCLUDE_DIR} )
+'
+) > "$BUILD_DIR/generated_include_dirs.cmake"
 
 ######## Generate CMakeLists.txt for subdirs
 generate_subdir_cmake()
