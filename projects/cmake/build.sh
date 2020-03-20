@@ -24,7 +24,7 @@ while echo $1 | grep ^- > /dev/null; do
     then
         echo '
 The minimum steps to build RevBayes after running this script is:
-cmake .
+cmake ../../src
 make
 
 Command line options are:
@@ -149,8 +149,8 @@ fi
     echo "Running './regenerate.sh $(pwd)/$BUILD_DIR"
     ./regenerate.sh $(pwd)/$BUILD_DIR
     cd ${BUILD_DIR}
-    echo "Running 'cmake . $cmake_args' in $(pwd)"
-    cmake . $cmake_args
+    echo "Running 'cmake ../../../src $cmake_args' in $(pwd)"
+    cmake ../../../src $cmake_args
     echo
     echo "Running 'make -j4' in $(pwd)"
     make -j 4

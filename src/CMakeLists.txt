@@ -22,10 +22,6 @@ endif()
 # Add extra CMake libraries into ./CMake
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_MODULE_PATH})
 
-# Set source root relate to project file
-set(PROJECT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/../../../src)
-
-
 set(OPTIMIZATION_FLAGS "-O3 -DNDEBUG")
 if (CMAKE_SYSTEM_PROCESSOR MATCHES "^arm*|aarch64")
    add_definitions(-DRB_ARM)
