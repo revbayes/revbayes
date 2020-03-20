@@ -97,7 +97,6 @@ MESSAGE("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
 # This will look for "generated_include_dirs.cmake" in the module path.
-message("CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}")
 include("generated_include_dirs")
 
 # Split into much smaller libraries
