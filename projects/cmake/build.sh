@@ -113,9 +113,8 @@ fi
 echo "Building ${exec_name}"
 cmake_args="-DRB_EXEC_NAME=${exec_name} $cmake_args"
 
-# This is bad because it overrides any choices the user may have chosen.
-CC=gcc CXX=g++
-
+# Just print the values of CC and CXX in case the user has some weird
+# values set.
 export CC
 export CXX
 echo "CC=${CC}  CXX=${CXX}"
