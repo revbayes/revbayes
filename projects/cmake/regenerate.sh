@@ -10,6 +10,7 @@ else
     BUILD_DIR=build
 fi
 
+echo "Making build directory '$BUILD_DIR'"
 if [ ! -e "$BUILD_DIR" ] ; then
    mkdir "$BUILD_DIR"
 fi
@@ -19,6 +20,7 @@ BUILD_DIR=$(cd "$BUILD_DIR"; pwd)
 SRC_DIR="$BUILD_DIR"/../../../src
 cd "$BUILD_DIR"/../../../src
 
+echo "Generating src/generated_include_dirs.cmake"
 ######### Generate generated_include_dirs.cmake ############
 (
     echo '
@@ -34,6 +36,7 @@ generate_subdir_cmake()
 {
     local subdir="$1"
     local libname=$2
+    echo "Generating src/$subdir/CMakeLists.txt"
     (
         echo "set(${subdir}_FILES"
         ### Treat all files in each subdir as source files
