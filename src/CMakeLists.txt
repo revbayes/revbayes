@@ -51,8 +51,7 @@ if ("${MPI}" STREQUAL "ON")
    set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS}")
 endif()
 
-## Instead of checking this condition, we should check if we are compiling for windows!
-if ("${WINDOWS}" STREQUAL "TRUE")
+if (WIN32)
    add_definitions(-DRB_WIN)
 endif()
 

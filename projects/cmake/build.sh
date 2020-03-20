@@ -8,7 +8,6 @@ all_args="$@"
 # set default values
 debug="false"
 travis="false"
-win="false"
 mpi="false"
 gentoo="false"
 help="false"
@@ -25,7 +24,6 @@ while echo $1 | grep ^- > /dev/null; do
         echo 'Command line options are:
 -h                              : print this help and exit.
 -debug          <true|false>    : set to true to build in debug mode. Defaults to false.
--win            <true|false>    : set to true if you are building on a Windows system. Defaults to false.
 -mpi            <true|false>    : set to true if you want to build the MPI version. Defaults to false.
 -cmd            <true|false>    : set to true if you want to build RevStudio with GTK2+. Defaults to false.
 -jupyter        <true|false>    : set to true if you want to build the jupyter version. Defaults to false.
@@ -88,10 +86,6 @@ fi
 
 if [ "$cmd" = "true" ] ; then
     cmake_args="-DCMD_GTK=ON $cmake_args"
-fi
-
-if [ "$win" = "true" ] ; then
-    cmake_args="-DWINDOWS=TRUE $cmake_args"
 fi
 
 if [ "$travis" = "true" ] ; then
