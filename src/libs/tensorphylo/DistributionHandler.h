@@ -28,7 +28,8 @@ typedef enum {
 	STEM_SURVIVAL=4,
 	STEM_ONE_SAMPLE=5,
 	STEM_TWO_EXT_SAMPLES=6,
-	STEM_TWO_SAMPLES=7
+	STEM_TWO_SAMPLES=7,
+	ROOT_SAMPLING_AND_MRCA=8
 } conditionalProbability_t;
 
 typedef enum {
