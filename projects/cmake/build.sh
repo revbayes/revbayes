@@ -22,18 +22,16 @@ while echo $1 | grep ^- > /dev/null; do
     # intercept help while parsing "-key value" pairs
     if [ "$1" = "--help" ] || [ "$1" = "-h" ]
     then
-        echo '
-The minimum steps to build RevBayes after running this script is:
-cmake ../../src
-make
-
-Command line options are:
+        echo 'Command line options are:
 -h                              : print this help and exit.
+-debug          <true|false>    : set to true to build in debug mode. Defaults to false.
 -win            <true|false>    : set to true if you are building on a Windows system. Defaults to false.
 -mpi            <true|false>    : set to true if you want to build the MPI version. Defaults to false.
 -cmd            <true|false>    : set to true if you want to build RevStudio with GTK2+. Defaults to false.
 -jupyter        <true|false>    : set to true if you want to build the jupyter version. Defaults to false.
 -help           <true|false>    : Update the help database and build the YAML help generator. Defaults to false.
+-boost_root     string          : specify directory containing Boost headers (e.g. `/usr/include`). Defaults to unset.
+-boost_lib      string          : specify directory containing Boost libraries. (e.g. `/usr/lib`). Defaults to unset.
 '
         exit
     fi
