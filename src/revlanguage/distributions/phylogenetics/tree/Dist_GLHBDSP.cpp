@@ -90,7 +90,7 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
         }
         else if ( start_type == "rootAge" )
         {
-        	if ( cond != "survival" && cond != "sampled" && cond != "sampledExtant" )
+        	if ( cond != "survival" && cond != "sampled" && cond != "sampledExtant" && cond != "sampledMRCA" )
         	{
         		throw RbException( "Cannot condition on " + cond + " when starting from the root." );
         	}
@@ -450,6 +450,7 @@ const MemberRules& Dist_GLHBDSP::getParameterRules(void) const
 		options_condition.push_back( "survival" );
 		options_condition.push_back( "sampled" );
 		options_condition.push_back( "sampledExtant" );
+		options_condition.push_back( "sampledMRCA" );
 		options_condition.push_back( "tree" );
 		options_condition.push_back( "treeExtant" );
 		dist_member_rules.push_back( new OptionRule( "condition", new RlString("time"), options_condition, "The condition of the process." ) );
