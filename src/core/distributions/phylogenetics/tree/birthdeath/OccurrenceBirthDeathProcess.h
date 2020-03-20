@@ -29,18 +29,20 @@ template <class valueType> class RbVector;
     class OccurrenceBirthDeathProcess : public AbstractBirthDeathProcess {
 
     public:
-      OccurrenceBirthDeathProcess(                        const TypedDagNode<double> *t,
+      OccurrenceBirthDeathProcess(                        const TypedDagNode<double> *sa,
                                                           const TypedDagNode<double> *l,
                                                           const TypedDagNode<double> *m,
                                                           const TypedDagNode<double> *p,
                                                           const TypedDagNode<double> *o,
                                                           const TypedDagNode<double> *rho,
                                                           const TypedDagNode<double> *r,
+                                                          const TypedDagNode<long> *n,
 
                                                           const std::string& cdt,
                                                           const std::vector<Taxon> &tn,
-                                                          const TypedDagNode< RbVector<double> > *tau,
+                                                          const std::vector<double> &tau,
                                                           bool uo,
+                                                          bool mt,
                                                           TypedDagNode<Tree> *tr);
 
 
@@ -98,15 +100,19 @@ template <class valueType> class RbVector;
       double                                              functionU(double t, double z) const;
 
       // Members
-      const TypedDagNode< double > *                        tor;                                   //!< Time of origin.
+      const TypedDagNode< double > *                        start_age;                             //!< Start age of the process.
       const TypedDagNode< double > *                        lambda;                                //!< The speciation rate.
       const TypedDagNode< double > *                        mu;                                    //!< The extinction rate.
       const TypedDagNode< double > *                        psi;                                   //!< The sampling probability of a just extinct species.
       const TypedDagNode< double > *                        omega;                                 //!< The occurrence sampling rate.
       const TypedDagNode< double > *                        rho;                                   //!< The sampling probability of extant taxa.
       const TypedDagNode< double > *                        removalPr;                             //!< The removal probability after sampling.
-      const TypedDagNode<Tree>*                             initialTree;                           //!< Facultative initial tree
-      const TypedDagNode< RbVector< double > > *            dn_time_points;                        //!< Times at which density is computed
+      const TypedDagNode< long > *                          maxHiddenLin;                          //!< The maximal number of hidden lineages.
+      const std::string &                                   cond;                                  //!< Condition of the process ("time" or "survival")
+      const std::vector< double > &                         dn_time_points;                        //!< Times at which density is computed
+      const bool                                            useOrigin;                             //!< Start the process at the origin (otherwise root)
+      const bool                                            useMt;                                 //!< Forward traversal Mt algorithm (otherwise backward Lt)
+      const TypedDagNode< Tree > *                          initialTree;                           //!< Facultative initial tree
       mutable size_t                                        extant;                                //!< Number of extant taxa
 
     };

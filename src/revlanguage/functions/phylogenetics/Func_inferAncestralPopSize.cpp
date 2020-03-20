@@ -60,7 +60,7 @@ RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_inferAncestralPopS
   // sampling condition
   const std::string&                                            cdt             = static_cast<const RlString &>( this->args[8].getVariable()->getRevObject() ).getValue();
     
-  RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tau             = static_cast<const ModelVector<RealPos> &>( this->args[9].getVariable()->getRevObject() ).getDagNode();
+  std::vector<double>                                           tau             = static_cast<const ModelVector<RealPos> &>( this->args[9].getVariable()->getRevObject() ).getValue();
 
   bool                                                          uo              = ( start_condition == "originAge" ? true : false );
   
@@ -95,7 +95,7 @@ const ArgumentRules& Func_inferAncestralPopSize::getArgumentRules( void ) const
         argumentRules.push_back( new ArgumentRule( "omega",             RealPos::getClassTypeSpec(), "The occurrence rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
         argumentRules.push_back( new ArgumentRule( "rho",               Probability::getClassTypeSpec(), "The sampling fraction at present.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(1.0) ) );
         argumentRules.push_back( new ArgumentRule( "removalPr",         Probability::getClassTypeSpec(), "The removal probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(0.0) ) );
-        argumentRules.push_back( new ArgumentRule( "maxHiddenLin",      Natural::getClassTypeSpec(), "The number of hidden lineages (algorithm accuracy).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Integer(30) ) );
+        argumentRules.push_back( new ArgumentRule( "maxHiddenLin",      Natural::getClassTypeSpec(), "The number of hidden lineages (algorithm accuracy).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Natural(30) ) );
 
         std::vector<std::string> optionsCondition;
         optionsCondition.push_back( "time" );

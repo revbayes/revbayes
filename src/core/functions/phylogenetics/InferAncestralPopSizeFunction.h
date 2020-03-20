@@ -37,7 +37,7 @@ template <class valueType> class TypedDagNode;
                                                             const TypedDagNode<long> *n,
 
                                                             const std::string& cdt,
-                                                            const TypedDagNode< RbVector<double> > *tau,
+                                                            const std::vector<double> &tau,
                                                             bool uo,
                                                             TypedDagNode<Tree> *tr);
       
@@ -63,7 +63,7 @@ template <class valueType> class TypedDagNode;
       const TypedDagNode< double > *                        removalPr;                             //!< The removal probability after sampling.
       const TypedDagNode< long > *                          maxHiddenLin;                          //!< The maximal number of hidden lineages.
       const std::string&                                    cond;                                  //!< Condition of the process ("time" or "survival")
-      const TypedDagNode< RbVector< double > > *            dn_time_points;                        //!< Times at which density is computed
+      const std::vector<double>                             dn_time_points;                        //!< Times at which density is computed
       const bool                                            useOrigin;                             //!< Start the process at the origin (otherwise root)
       const TypedDagNode< Tree > *                          timeTree;                              //!< Facultative initial tree
 

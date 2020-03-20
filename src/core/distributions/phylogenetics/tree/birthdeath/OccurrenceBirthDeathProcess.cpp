@@ -6,6 +6,7 @@
 #include <string>
 
 #include "RbMathMatrix.h"
+#include "MatrixReal.h"
 #include "RbVector.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
@@ -15,6 +16,8 @@
 #include "TopologyNode.h"
 #include "Tree.h"
 #include "TypedDagNode.h"
+
+#include "ComputeLikelihoodsLtMt.h"
 
 namespace RevBayesCore { class DagNode; }
 
@@ -29,7 +32,7 @@ using namespace RevBayesCore;
  * 
  * We delegate most parameters to the base class and initialize the members.
  *
- * \param[in]    t              Time of the origin/present/length of the process.
+ * \param[in]    sa             Start age of the process.
  * \param[in]    l              Speciation rate.
  * \param[in]    m              Extinction rate.
  * \param[in]    p              Fossil sampling rate.
@@ -39,39 +42,47 @@ using namespace RevBayesCore;
  * \param[in]    cdt            Condition of the process (none/survival/#Taxa).
  * \param[in]    tau            Times for which we want to compute the density.
  * \param[in]    uo             If true t is the origin time otherwise the root age of the process.
+ * \param[in]    mt             If true computes densities with the Mt forward traversal algorithm otherwise uses Lt backward one.
  * \param[in]    tr             Initial tree (facultative).
  */
-OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess( const TypedDagNode<double> *t,
-                                                          const TypedDagNode<double> *l,
-                                                          const TypedDagNode<double> *m,
-                                                          const TypedDagNode<double> *p,
-                                                          const TypedDagNode<double> *o,
-                                                          const TypedDagNode<double> *rho,
-                                                          const TypedDagNode<double> *r,
+OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(   const TypedDagNode<double> *sa,
+                                                            const TypedDagNode<double> *l,
+                                                            const TypedDagNode<double> *m,
+                                                            const TypedDagNode<double> *p,
+                                                            const TypedDagNode<double> *o,
+                                                            const TypedDagNode<double> *rho,
+                                                            const TypedDagNode<double> *r,
+                                                            const TypedDagNode<long> *n,
 
-                                                          const std::string& cdt,
-                                                          const std::vector<Taxon> &tn,
-                                                          const TypedDagNode< RbVector<double> > *tau,
-                                                          bool uo,
+                                                            const std::string& cdt,
+                                                            const std::vector<Taxon> &tn,
+                                                            const std::vector<double> &tau,
+                                                            bool uo,
+                                                            bool mt,
 
-                                                          TypedDagNode<Tree> *tr) : AbstractBirthDeathProcess( t, cdt, tn, uo ),
-    tor( t ),
+                                                            TypedDagNode<Tree> *tr) : AbstractBirthDeathProcess( sa, cdt, tn, uo ),
+    start_age( sa ),
     lambda( l ),
     mu( m ),
     psi( p ),
     omega( o ),
     rho( rho ),
     removalPr( r ),
-    dn_time_points ( tau )
+    maxHiddenLin( n ),
+    cond (cdt),
+    dn_time_points( tau ),
+    useOrigin (uo),
+    useMt ( mt )
 
 {
-    addParameter( tor );
+    addParameter( start_age );
     addParameter( lambda );
     addParameter( mu );
     addParameter( psi );
     addParameter( omega );
     addParameter( rho );
     addParameter( removalPr );
+    addParameter( maxHiddenLin );
 
 
     if (tr != NULL)
@@ -117,25 +128,43 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) 
     prepareProbComputation();
 
     // step 1: Create the list of all event times
-    poolTimes();
-   // std::cout << "Printing the list of events below" << std::endl;
-   // for (int i =0; i < events.size(); i++){
-   //     std::cout << events[i].time << " : " << events[i].type << std::endl;
-   // }
+    // poolTimes();
+    // std::cout << "Printing the list of events below" << std::endl;
+    // for (int i =0; i < events.size(); i++){
+    //     std::cout << events[i].time << " : " << events[i].type << std::endl;
+    // }
 
     //std::cout << "Parameter values are the following : lambda, mu, psi, rho = " << lambda -> getValue() << " , " << mu -> getValue() << " , " << psi -> getValue() << " , " << rho -> getValue() << std::endl;
 
     // compute the log-likelihood : use ComputeLt (backward traversal of the tree) or ComputeMt (forward traversal of the tree)
-    // double lnProbTimes_Mt = ComputeMt();
-    // double lnProbTimes_Lt = ComputeLt();
+    const RevBayesCore::Tree tree(*value);
+    // const RevBayesCore::Tree tree( const_cast<Tree&>(value) );
 
-    double lnProbTimes = computeLnProbabilityTimes();
+    if (useMt) {
+        const std::vector<double> dn_time_points_Mt( 1, start_age->getValue() );
+        MatrixReal B_Mt = RevBayesCore::ComputeLikelihoodsForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, dn_time_points_Mt, useOrigin, tree);
+        
+        const double rh = rho->getValue();
+        const long N = maxHiddenLin->getValue();
+        const size_t k = 8; // NB OF EXTANT TAXA : TODO !!!!
+        
+        double likelihood = B_Mt[0][0];
+        for(int i = 1; i < N+1; i++){
+            likelihood += B_Mt[i][0] * pow(rh,k) * pow(1.0 - rh,i);
+        return likelihood;
+        }
+    }
+    const std::vector<double> dn_time_points_Lt(1, 0.0);
+    MatrixReal B_Lt = RevBayesCore::ComputeLikelihoodsBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, dn_time_points_Lt, useOrigin, tree);
+    
+    double likelihood = B_Lt[0][0];
+    return likelihood;
+}
+
+    // double lnProbTimes = computeLnProbabilityTimes();
     // std::cout << "Difference : "<< lnProbTimes-lnProbTimes_Mt << std::endl;
 
-    // double lnProbTimes2 = computeLnProbabilityTimes2();
-
-    return lnProbTimes;
-}
+    // double lnProbTimes2 = computeLnProbabilityTimes2();}
 
 double OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void ) const
 {
@@ -274,7 +303,7 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityTimes2( void ) const
     
     double lnProbTimes = 0;
     for(int h = 0; h < events.size(); h++){
-        // deal with t > tor
+        // deal with t > start_age
 
         double th = events[h].time;
         std::string type = events[h].type;
@@ -334,82 +363,82 @@ double OccurrenceBirthDeathProcess::functionU(double t, double z) const
     return numerator/denominator;
 }
 
-/**
- * Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
- */
-void OccurrenceBirthDeathProcess::poolTimes( void ) const
-{
-    // get node/time variables
-    size_t num_nodes = value->getNumberOfNodes();
+// /**
+//  * Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
+//  */
+// void OccurrenceBirthDeathProcess::poolTimes( void ) const
+// {
+//     // get node/time variables
+//     size_t num_nodes = value->getNumberOfNodes();
 
-    extant = 0;
+//     extant = 0;
 
-    // classify nodes
-    events.clear();
-    events.push_back(Event(tor->getValue(), "origin"));
+//     // classify nodes
+//     events.clear();
+//     events.push_back(Event(start_age->getValue(), "origin"));
 
-    for (size_t i = 0; i < num_nodes; i++)
-    {
-        const TopologyNode& n = value->getNode( i );
+//     for (size_t i = 0; i < num_nodes; i++)
+//     {
+//         const TopologyNode& n = value->getNode( i );
         
-        //isFossil is an optional condition to obtain sampled ancestor node ages
-        /*
-        Node labels :
-        fl = fossil leaf
-        b  = "true" bifurcation
-        b' = "false" bifurcation (artefact of the sampled ancestors representation)
-        sa = sampled ancestor
-        el = extant leaf
+//         //isFossil is an optional condition to obtain sampled ancestor node ages
+//         /*
+//         Node labels :
+//         fl = fossil leaf
+//         b  = "true" bifurcation
+//         b' = "false" bifurcation (artefact of the sampled ancestors representation)
+//         sa = sampled ancestor
+//         el = extant leaf
 
-         __|___
-        |  b   |
-        |      |
-        fl     |
-             b'|___ sa
-               |
-               |
-               el
+//          __|___
+//         |  b   |
+//         |      |
+//         fl     |
+//              b'|___ sa
+//                |
+//                |
+//                el
 
-         1. Pick a fossil among those with brl > 0 (prob = 1/m)
-         2. Set brl = 0
-         */
+//          1. Pick a fossil among those with brl > 0 (prob = 1/m)
+//          2. Set brl = 0
+//          */
 
-        if ( n.isFossil() && n.isSampledAncestor() )  //isFossil is optional (all sampled ancestors are fossils)
-        {
-            // node is sampled ancestor
-            events.push_back(Event(n.getAge(), "sampled ancestor")) ;
+//         if ( n.isFossil() && n.isSampledAncestor() )  //isFossil is optional (all sampled ancestors are fossils)
+//         {
+//             // node is sampled ancestor
+//             events.push_back(Event(n.getAge(), "sampled ancestor")) ;
 
-        }
-        else if ( n.isFossil() && !n.isSampledAncestor() )
-        {
-            // node is fossil leaf (named terminal non-removed in Lt)
-            // events.push_back(Event(n.getAge(),"fossil leaf") ;
-            events.push_back(Event(n.getAge(),"terminal non-removed")) ;
-        }
-        else if ( !n.isFossil() && n.isTip() )
-        {
-            // node is extant leaf : only their number is necessary to compute Lt and Mt
-            // events.push_back(Event(n.getAge(),"extant leaf") ;
-            // events.push_back(Event(n.getAge(), "terminal non-removed")) ;
-            //std::cout << n.getSpeciesName() << std::endl;
-            extant++;
-        }
-        else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
-        {
-            // std::cout << "Is branching node root ? " << n.isRoot() << std::endl;
+//         }
+//         else if ( n.isFossil() && !n.isSampledAncestor() )
+//         {
+//             // node is fossil leaf (named terminal non-removed in Lt)
+//             // events.push_back(Event(n.getAge(),"fossil leaf") ;
+//             events.push_back(Event(n.getAge(),"terminal non-removed")) ;
+//         }
+//         else if ( !n.isFossil() && n.isTip() )
+//         {
+//             // node is extant leaf : only their number is necessary to compute Lt and Mt
+//             // events.push_back(Event(n.getAge(),"extant leaf") ;
+//             // events.push_back(Event(n.getAge(), "terminal non-removed")) ;
+//             //std::cout << n.getSpeciesName() << std::endl;
+//             extant++;
+//         }
+//         else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
+//         {
+//             // std::cout << "Is branching node root ? " << n.isRoot() << std::endl;
             
-            // node is a "true" bifurcation event
-            events.push_back(Event(n.getAge(),"branching time")) ;
-        }
-        else
-        {
-            std::cout << "Warning : non-categorized node" << std::endl;
-        }   
+//             // node is a "true" bifurcation event
+//             events.push_back(Event(n.getAge(),"branching time")) ;
+//         }
+//         else
+//         {
+//             std::cout << "Warning : non-categorized node" << std::endl;
+//         }   
 
-    }
+//     }
 
-    events.push_back(Event(0.0,"present time")) ;
-}
+//     events.push_back(Event(0.0,"present time")) ;
+// }
 
   //Pool all observations together into
 
@@ -638,230 +667,230 @@ void OccurrenceBirthDeathProcess::swapParameterInternal(const DagNode *oldP, con
 //  return lnProbTimes;
 //  }
 
-//from Warnock & Manceau computeLt function
- /**
- * Compute the log-transformed probability of the current value under the current parameter values : breadth-first forward traversal algorithm.
- *
- * \return    The log-probability density.
- */
-double OccurrenceBirthDeathProcess::ComputeMt( void ) const
-{
-    // order times oldest to youngest
-    std::sort( events.begin(), events.end(), AgeCompareReverse() );
+// //from Warnock & Manceau computeLt function
+//  /**
+//  * Compute the log-transformed probability of the current value under the current parameter values : breadth-first forward traversal algorithm.
+//  *
+//  * \return    The log-probability density.
+//  */
+// double OccurrenceBirthDeathProcess::ComputeMt( void ) const
+// {
+//     // order times oldest to youngest
+//     std::sort( events.begin(), events.end(), AgeCompareReverse() );
 
-    const double birth = lambda->getValue();
-    const double death = mu->getValue();
-    const double ps = psi->getValue();
-    const double om = omega->getValue();
-    const double rh = rho->getValue();
-    const double rp = removalPr->getValue();
-    const double gamma = birth + death + ps + om;
+//     const double birth = lambda->getValue();
+//     const double death = mu->getValue();
+//     const double ps = psi->getValue();
+//     const double om = omega->getValue();
+//     const double rh = rho->getValue();
+//     const double rp = removalPr->getValue();
+//     const double gamma = birth + death + ps + om;
 
-    size_t N = 20; // accuracy of the algorithm
-    size_t S = dn_time_points->getValue().size();
+//     size_t N = 20; // accuracy of the algorithm
+//     size_t S = dn_time_points->getValue().size();
 
-    // Initialize an empty matrix and a cursor to write lines in this matrix
-    MatrixReal B(S, (N + 1), 0.0);
-    size_t indxJ = S-1;
+//     // Initialize an empty matrix and a cursor to write lines in this matrix
+//     MatrixReal B(S, (N + 1), 0.0);
+//     size_t indxJ = S-1;
 
-    // We start at the time of origin, supposedly the first time in the vector of events
-    size_t k = 1;
-    RbVector<double> Mt(N+1, 0.0);
-    Mt[0] = 1;
-    double thPlusOne = events[0].time;
+//     // We start at the time of origin, supposedly the first time in the vector of events
+//     size_t k = 1;
+//     RbVector<double> Mt(N+1, 0.0);
+//     Mt[0] = 1;
+//     double thPlusOne = events[0].time;
 
-    // Then we iterate over the next events
-    for(int h = 1; h < events.size(); h++){
+//     // Then we iterate over the next events
+//     for(int h = 1; h < events.size(); h++){
 
-        // First, deal with the update on time period (th, thPlusOne)
-        double th = events[h].time;
+//         // First, deal with the update on time period (th, thPlusOne)
+//         double th = events[h].time;
 
-        if(th > tor->getValue()) {
-            std::cout << "ERROR : th > tor : " << th << " > " << tor->getValue() << std::endl;
-            continue;
-        };
+//         if(th > start_age->getValue()) {
+//             std::cout << "ERROR : th > start_age : " << th << " > " << start_age->getValue() << std::endl;
+//             continue;
+//         };
 
-        if( th != thPlusOne ){
-            MatrixReal A( (N+1), (N+1), 0.0 );
+//         if( th != thPlusOne ){
+//             MatrixReal A( (N+1), (N+1), 0.0 );
             
-            for(int i = 0; i < (N + 1); i++){
-                A[i][i] = gamma * (k + i) * (th-thPlusOne);
-                if (i < N) A[i][i+1] = -death * (i + 1) * (th-thPlusOne);
-                if (i > 0) A[i][i-1] = -birth * (2*k + i - 1) * (th-thPlusOne);
-            }
+//             for(int i = 0; i < (N + 1); i++){
+//                 A[i][i] = gamma * (k + i) * (th-thPlusOne);
+//                 if (i < N) A[i][i+1] = -death * (i + 1) * (th-thPlusOne);
+//                 if (i > 0) A[i][i-1] = -birth * (2*k + i - 1) * (th-thPlusOne);
+//             }
             
-            RbMath::expMatrixPade(A, A, 4);
-            Mt = A * Mt;
-        }
+//             RbMath::expMatrixPade(A, A, 4);
+//             Mt = A * Mt;
+//         }
 
-        // Second, deal with the update at punctual event th
-        std::string type = events[h].type;
+//         // Second, deal with the update at punctual event th
+//         std::string type = events[h].type;
 
-        if(type == "time slice"){
-            for(int i = 0; i < N+1; i++){
-                B[indxJ][i] = Mt[i];
-            }
-            indxJ -= 1;
-        }
+//         if(type == "time slice"){
+//             for(int i = 0; i < N+1; i++){
+//                 B[indxJ][i] = Mt[i];
+//             }
+//             indxJ -= 1;
+//         }
 
-        if(type == "terminal removed"){
-            for(int i = 0; i < N+1; i++){
-                Mt[i] *= ps * rp;
-            }
-            k -= 1;
-        }
+//         if(type == "terminal removed"){
+//             for(int i = 0; i < N+1; i++){
+//                 Mt[i] *= ps * rp;
+//             }
+//             k -= 1;
+//         }
 
-        if(type == "terminal non-removed"){
-            for(int i = N; i > 0; i--){
-                Mt[i] = Mt[i-1] * ps * (1-rp);
-            }
-            Mt[0] = 0;
-            k -= 1;
-        }
+//         if(type == "terminal non-removed"){
+//             for(int i = N; i > 0; i--){
+//                 Mt[i] = Mt[i-1] * ps * (1-rp);
+//             }
+//             Mt[0] = 0;
+//             k -= 1;
+//         }
 
-        if(type == "sampled ancestor"){
-            for(int i = 0; i < N+1; i++){
-                Mt[i] *= ps * (1-rp);
-            }
-        }
+//         if(type == "sampled ancestor"){
+//             for(int i = 0; i < N+1; i++){
+//                 Mt[i] *= ps * (1-rp);
+//             }
+//         }
 
-        if(type == "occurrence removed"){
-            for(int i = 0; i < N; i++){
-                Mt[i] = Mt[i+1] * (i+1) * om * rp;
-            }
-         }
+//         if(type == "occurrence removed"){
+//             for(int i = 0; i < N; i++){
+//                 Mt[i] = Mt[i+1] * (i+1) * om * rp;
+//             }
+//          }
 
-        if(type == "occurrence non-removed"){
-            for(int i = 0; i < N+1; i++){
-                Mt[i] *= (k+i) * om * (1-rp);
-            }
-        }
+//         if(type == "occurrence non-removed"){
+//             for(int i = 0; i < N+1; i++){
+//                 Mt[i] *= (k+i) * om * (1-rp);
+//             }
+//         }
 
-        if(type == "branching time"){
-            for(int i = 0; i < N+1; i++){
-                Mt[i] *= birth;
-            }
-            k += 1;
-        }
+//         if(type == "branching time"){
+//             for(int i = 0; i < N+1; i++){
+//                 Mt[i] *= birth;
+//             }
+//             k += 1;
+//         }
 
-        thPlusOne = th;
-    }
+//         thPlusOne = th;
+//     }
 
-    double likelihood = Mt[0];
-    for(int i = 1; i < N+1; i++){
-        likelihood += Mt[i] * pow(rh,k) * pow(1.0 - rh,i);
-    }
+//     double likelihood = Mt[0];
+//     for(int i = 1; i < N+1; i++){
+//         likelihood += Mt[i] * pow(rh,k) * pow(1.0 - rh,i);
+//     }
 
-    std::cout << "Compute Mt output : " << log(likelihood) << std::endl;
-    return log(likelihood);
-}
+//     std::cout << "Compute Mt output : " << log(likelihood) << std::endl;
+//     return log(likelihood);
+// }
 
 
-//from Warnock & Manceau computeLt function
-/**
-* Compute the log-transformed probability of the current value under the current parameter values : breadth-first backward traversal algorithm.
-*
-* \return    The log-probability density.
-*/
-double OccurrenceBirthDeathProcess::ComputeLt( void ) const
-{
-    // order times youngest to oldest
-    std::sort( events.begin(), events.end(), AgeCompare() );
+// //from Warnock & Manceau computeLt function
+// /**
+// * Compute the log-transformed probability of the current value under the current parameter values : breadth-first backward traversal algorithm.
+// *
+// * \return    The log-probability density.
+// */
+// double OccurrenceBirthDeathProcess::ComputeLt( void ) const
+// {
+//     // order times youngest to oldest
+//     std::sort( events.begin(), events.end(), AgeCompare() );
 
-    const double birth = lambda->getValue();
-    const double death = mu->getValue();
-    const double ps = psi->getValue();
-    const double om = omega->getValue();
-    const double rh = rho->getValue();
-    const double rp = removalPr->getValue();
-    const double gamma = birth + death + ps + om;
+//     const double birth = lambda->getValue();
+//     const double death = mu->getValue();
+//     const double ps = psi->getValue();
+//     const double om = omega->getValue();
+//     const double rh = rho->getValue();
+//     const double rp = removalPr->getValue();
+//     const double gamma = birth + death + ps + om;
 
-    size_t N = 20; // accuracy of the algorithm
+//     size_t N = 20; // accuracy of the algorithm
 
-    // Initialize an empty matrix and a cursor indxJ to write lines in this matrix
-    size_t S = dn_time_points->getValue().size();
-    MatrixReal B(S, (N + 1), 0.0);
-    size_t indxJ = 0;
+//     // Initialize an empty matrix and a cursor indxJ to write lines in this matrix
+//     size_t S = dn_time_points->getValue().size();
+//     MatrixReal B(S, (N + 1), 0.0);
+//     size_t indxJ = 0;
 
-    // We start at time 0 with type "present" in the vector of events
-    size_t k = extant;
-    double thMinusOne = events[0].time;
-    RbVector<double> Lt(N+1, pow(rh, k));
-    for ( int i = 0; i < (N + 1); i++){
-        Lt[i] *= pow( 1.0-rh, i );
-    }
+//     // We start at time 0 with type "present" in the vector of events
+//     size_t k = extant;
+//     double thMinusOne = events[0].time;
+//     RbVector<double> Lt(N+1, pow(rh, k));
+//     for ( int i = 0; i < (N + 1); i++){
+//         Lt[i] *= pow( 1.0-rh, i );
+//     }
 
-    // We then iterate over the following events until finding the time of origin
-    for(int h = 1; h < events.size(); h++){
+//     // We then iterate over the following events until finding the time of origin
+//     for(int h = 1; h < events.size(); h++){
 
-        // First deal with the update along (thMinusOne, th)
-        double th = events[h].time;
+//         // First deal with the update along (thMinusOne, th)
+//         double th = events[h].time;
 
-        if( th != thMinusOne ){
+//         if( th != thMinusOne ){
 
-            MatrixReal A( (N+1), (N+1), 0.0 );
-            for(int i = 0; i < (N + 1); i++){
-              A[i][i] = -gamma * (k + i) * (th - thMinusOne);
-              if (i < N) A[i][i+1] = birth * ( (2 * k) + i ) * (th - thMinusOne);
-              if (i > 0) A[i][i-1] = death * i * (th - thMinusOne);
-            }
-            RbMath::expMatrixPade(A, A, 4);
-            Lt = A * Lt;
-        }
+//             MatrixReal A( (N+1), (N+1), 0.0 );
+//             for(int i = 0; i < (N + 1); i++){
+//               A[i][i] = -gamma * (k + i) * (th - thMinusOne);
+//               if (i < N) A[i][i+1] = birth * ( (2 * k) + i ) * (th - thMinusOne);
+//               if (i > 0) A[i][i-1] = death * i * (th - thMinusOne);
+//             }
+//             RbMath::expMatrixPade(A, A, 4);
+//             Lt = A * Lt;
+//         }
 
-        // Second, deal with the update at time th
-        std::string type = events[h].type;
+//         // Second, deal with the update at time th
+//         std::string type = events[h].type;
 
-        if(type == "time slice"){
-            for(int i = 0; i < N+1; i++){
-                B[indxJ][i] = Lt[i];
-            }
-            indxJ += 1;
-        }
+//         if(type == "time slice"){
+//             for(int i = 0; i < N+1; i++){
+//                 B[indxJ][i] = Lt[i];
+//             }
+//             indxJ += 1;
+//         }
 
-        if(type == "terminal removed"){
-            for(int i = 0; i < N+1; i++){
-                Lt[i] = Lt[i] * ps * rp;
-            }
-            k += 1;
-        }
+//         if(type == "terminal removed"){
+//             for(int i = 0; i < N+1; i++){
+//                 Lt[i] = Lt[i] * ps * rp;
+//             }
+//             k += 1;
+//         }
 
-        if(type == "terminal non-removed"){
-            for(int i = 0; i < N; i++){
-                Lt[i] = Lt[i+1] * ps * (1.0-rp);
-            }
-            k += 1;
-        }
+//         if(type == "terminal non-removed"){
+//             for(int i = 0; i < N; i++){
+//                 Lt[i] = Lt[i+1] * ps * (1.0-rp);
+//             }
+//             k += 1;
+//         }
 
-        if(type == "sampled ancestor"){
-            for(int i = 0; i < N+1; i++){
-                Lt[i] = Lt[i] * ps * (1.0-rp);
-            }
-        }
+//         if(type == "sampled ancestor"){
+//             for(int i = 0; i < N+1; i++){
+//                 Lt[i] = Lt[i] * ps * (1.0-rp);
+//             }
+//         }
 
-        if(type == "occurrence removed"){
-            for(int i = N; i > 0; i--){
-                Lt[i] = Lt[i-1] * i * om * rp;
-            }
-            Lt[0] = 0;
-         }
+//         if(type == "occurrence removed"){
+//             for(int i = N; i > 0; i--){
+//                 Lt[i] = Lt[i-1] * i * om * rp;
+//             }
+//             Lt[0] = 0;
+//          }
 
-        if(type == "occurrence non-removed"){
-            for(int i = 0; i < N+1; i++){
-                Lt[i] = Lt[i] * (k+i) * om * (1-rp);
-            }
-        }
+//         if(type == "occurrence non-removed"){
+//             for(int i = 0; i < N+1; i++){
+//                 Lt[i] = Lt[i] * (k+i) * om * (1-rp);
+//             }
+//         }
 
-        if(type == "branching time"){
-            for(int i = 0; i < N+1; i++){
-                Lt[i] = Lt[i] * birth;
-            }
-            k -= 1;
-        }
+//         if(type == "branching time"){
+//             for(int i = 0; i < N+1; i++){
+//                 Lt[i] = Lt[i] * birth;
+//             }
+//             k -= 1;
+//         }
         
-        thMinusOne = th;
-    }
+//         thMinusOne = th;
+//     }
 
-    std::cout << "Compute Lt output : " << log(Lt[0]) << std::endl;
-    return log(Lt[0]);
-}
+//     std::cout << "Compute Lt output : " << log(Lt[0]) << std::endl;
+//     return log(Lt[0]);
+// }

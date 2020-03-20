@@ -27,19 +27,19 @@ namespace RevLanguage {
         Dist_occurrenceBirthDeathProcess( void );
 
         // Basic utility functions
-        Dist_occurrenceBirthDeathProcess*                       clone(void) const;                                                                      //!< Clone the object
-        static const std::string&                               getClassType(void);                                                                     //!< Get Rev type
-        static const TypeSpec&                                  getClassTypeSpec(void);                                                                 //!< Get class type spec
-        std::vector<std::string>                                getDistributionFunctionAliases(void) const;                                             //!< Get the alternative names used for the constructor function in Rev.
-        std::string                                             getDistributionFunctionName(void) const;                                                //!< Get the Rev-name for this distribution.
-        const TypeSpec&                                         getTypeSpec(void) const;                                                                //!< Get the type spec of the instance
-        const MemberRules&                                      getParameterRules(void) const;                                                          //!< Get member rules (const)
+        Dist_occurrenceBirthDeathProcess*                       clone(void) const;                                //!< Clone the object
+        static const std::string&                               getClassType(void);                               //!< Get Rev type
+        static const TypeSpec&                                  getClassTypeSpec(void);                           //!< Get class type spec
+        std::vector<std::string>                                getDistributionFunctionAliases(void) const;       //!< Get the alternative names used for the constructor function in Rev.
+        std::string                                             getDistributionFunctionName(void) const;          //!< Get the Rev-name for this distribution.
+        const TypeSpec&                                         getTypeSpec(void) const;                          //!< Get the type spec of the instance
+        const MemberRules&                                      getParameterRules(void) const;                    //!< Get member rules (const)
 
 
         // Distribution functions you have to override
         RevBayesCore::AbstractBirthDeathProcess*                createDistribution(void) const;
 
-        const ArgumentRules&                                    getArgumentRules(void) const;                                                           // Get argument rules
+        const ArgumentRules&                                    getArgumentRules(void) const;                      //!< Get argument rules
 
 
     protected:
@@ -49,25 +49,26 @@ namespace RevLanguage {
 
     private:
 
-        RevPtr<const RevVariable>                               tor;                                                                                    //!< Time of origin
-        RevPtr<const RevVariable>                               lambda;                                                                                 //!< The speciation rate
-        RevPtr<const RevVariable>                               mu;                                                                                     //!< The extinction rate
-        RevPtr<const RevVariable>                               psi;                                                                                    //!< The serial sampling rate
-        RevPtr<const RevVariable>                               omega;                                                                                  //!< The occurrence sampling rate
-        RevPtr<const RevVariable>                               rho;                                                                                    //!< The taxon sampling fraction
-        RevPtr<const RevVariable>                               removalPr;                                                                              //!< The removal probability after sampling
+        RevPtr<const RevVariable>                               start_age;                                        //!< Time of origin
+        RevPtr<const RevVariable>                               lambda;                                           //!< The speciation rate
+        RevPtr<const RevVariable>                               mu;                                               //!< The extinction rate
+        RevPtr<const RevVariable>                               psi;                                              //!< The serial sampling rate
+        RevPtr<const RevVariable>                               omega;                                            //!< The occurrence sampling rate
+        RevPtr<const RevVariable>                               rho;                                              //!< The taxon sampling fraction
+        RevPtr<const RevVariable>                               removalPr;                                        //!< The removal probability after sampling
+        RevPtr<const RevVariable>                               maxHiddenLin;                                     //!< The number of hidden lineages (algorithm accuracy)
 
-        // RevPtr<const RevVariable>                               timeline;                                                                            //!< The interval change times
-        // RevPtr<const RevVariable>                               lambda_timeline;                                                                     //!< The speciation rate change times
-        // RevPtr<const RevVariable>                               mu_timeline;                                                                         //!< The extinction rate change times
-        // RevPtr<const RevVariable>                               psi_timeline;                                                                        //!< The serial sampling rate change times
-        // RevPtr<const RevVariable>                               rho_timeline;                                                                        //!< The episodic taxon sampling fraction change times
-        std::string                                             start_condition;                                                                        //!< The start condition of the process (rootAge/originAge)
-        RevPtr<const RevVariable>                               initialTree;                                                                            //!< Facultative initial tree
-        RevPtr<const RevVariable>                               extant;                                                                                 //!< Number of extant taxa
-        RevPtr<const RevVariable>                               dn_time_points;                                                                         //!< Times at which density is computed
-
-
+        // RevPtr<const RevVariable>                               timeline;                                         //!< The interval change times
+        // RevPtr<const RevVariable>                               lambda_timeline;                                  //!< The speciation rate change times
+        // RevPtr<const RevVariable>                               mu_timeline;                                      //!< The extinction rate change times
+        // RevPtr<const RevVariable>                               psi_timeline;                                     //!< The serial sampling rate change times
+        // RevPtr<const RevVariable>                               rho_timeline;                                     //!< The episodic taxon sampling fraction change times
+        std::string                                             start_condition;                                  //!< The start condition of the process (rootAge/originAge)
+        RevPtr<const RevVariable>                               condition;                                        //!< The conditioning of the process ("time" or "survaval")
+        RevPtr<const RevVariable>                               extant;                                           //!< Number of extant taxa
+        RevPtr<const RevVariable>                               dn_time_points;                                   //!< Times at which density is computed
+        RevPtr<const RevVariable>                               useMt;                                            //!< Forward traversal Mt algorithm (otherwise backward Lt)
+        RevPtr<const RevVariable>                               initialTree;                                      //!< Facultative initial tree
 
     };
 

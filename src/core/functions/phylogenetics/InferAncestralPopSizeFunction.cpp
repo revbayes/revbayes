@@ -57,10 +57,10 @@ InferAncestralPopSizeFunction::InferAncestralPopSizeFunction( 	const TypedDagNod
 	                                                          	const TypedDagNode<long> *n,
 
 	                                                          	const std::string& cdt,
-	                                                          	const TypedDagNode< RbVector<double> > *tau,
+	                                                          	const std::vector<double> &tau,
 	                                                          	bool uo,
 
-	                                                          	TypedDagNode<Tree> *tr) : TypedFunction<MatrixReal>( new MatrixReal(tau->getValue().size(), (n->getValue() + 1), 0.0) ),
+	                                                          	TypedDagNode<Tree> *tr) : TypedFunction<MatrixReal>( new MatrixReal(tau.size(), (n->getValue() + 1), 0.0) ),
     start_age( sa ),
     lambda( l ),
     mu( m ),
@@ -83,7 +83,6 @@ InferAncestralPopSizeFunction::InferAncestralPopSizeFunction( 	const TypedDagNod
     this->addParameter( rho );
     this->addParameter( removalPr );
     this->addParameter( maxHiddenLin );
-    this->addParameter( dn_time_points );
     this->addParameter( timeTree );
 
 	// poolTimes();
@@ -112,14 +111,15 @@ InferAncestralPopSizeFunction* InferAncestralPopSizeFunction::clone( void ) cons
  */
 void InferAncestralPopSizeFunction::update( void )
 {
-    size_t S = dn_time_points->getValue().size();
+    size_t S = dn_time_points.size();
     long N = maxHiddenLin->getValue();
+    const Tree tree = timeTree->getValue();
 
     //bool useMt = false;
-	MatrixReal B_Lt = RevBayesCore::ComputeLikelihoodsBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, dn_time_points, useOrigin, timeTree);
+	MatrixReal B_Lt = RevBayesCore::ComputeLikelihoodsBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, dn_time_points, useOrigin, tree);
 	
 	//useMt = true;
-	MatrixReal B_Mt = RevBayesCore::ComputeLikelihoodsForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, dn_time_points, useOrigin, timeTree);
+	MatrixReal B_Mt = RevBayesCore::ComputeLikelihoodsForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, dn_time_points, useOrigin, tree);
 
 	// Realize the Hadamar Product of B_Lt and B_Mt
 	MatrixReal D_Kt(S, (N + 1), 0.0);
