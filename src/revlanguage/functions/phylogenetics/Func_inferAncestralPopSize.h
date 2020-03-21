@@ -48,7 +48,7 @@ namespace RevLanguage {
       std::string                                             start_condition;                                                                        //!< The start condition of the process (rootAge/originAge)
       RevPtr<const RevVariable>                               condition;                                                                              //!< The conditioning of the process ("time" or "survaval")
       RevPtr<const RevVariable>                               extant;                                                                                 //!< The number of extant taxa
-      RevPtr<const RevVariable>                               dn_time_points;                                                                         //!< The times at which density is computed
+      RevPtr<const RevVariable>                               time_points;                                                                         //!< The times at which density is computed
       RevPtr<const RevVariable>                               timeTree;                                                                               //!< The tree for ancestral pop. size inference
 
   };

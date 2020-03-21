@@ -21,7 +21,7 @@ using namespace RevBayesCore;
  * Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
  */
 // std::vector<Event> RevBayesCore::poolTimes(     const TypedDagNode<double> *start_age,
-//                                                 const TypedDagNode< RbVector<double> > *dn_time_points,
+//                                                 const TypedDagNode< RbVector<double> > *time_points,
 //                                                 const Tree &timeTree )
 // {   
 //     // Structure of the phylodynamic events in a tree with occurrences : type + time
@@ -109,7 +109,7 @@ using namespace RevBayesCore;
 //         }
 //     }
 
-//     const RbVector<double> tau = dn_time_points->getValue();
+//     const RbVector<double> tau = time_points->getValue();
 
 //     for (size_t i = 0; i < tau.size(); i++)
 //     {
@@ -134,7 +134,7 @@ using namespace RevBayesCore;
  * \param[in]    removalPr              Removal probability after sampling.
  * \param[in]    maxHiddenLin           Algorithm accuracy (maximal number of hidden lineages).
  * \param[in]    cond                   Condition of the process (none/survival/#Taxa).
- * \param[in]    dn_time_points         Times for which we want to compute the density.
+ * \param[in]    time_points         Times for which we want to compute the density.
  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
  * \param[in]    timeTree               Tree for ancestral populations size inference.
  * 
@@ -150,7 +150,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
                                                           const TypedDagNode<long> *maxHiddenLin,
 
                                                           const std::string &cond,
-                                                          const std::vector<double> &dn_time_points,
+                                                          const std::vector<double> &time_points,
                                                           bool useOrigin,
                                                           const Tree &timeTree)
 {   
@@ -239,7 +239,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
         }
     }
 
-    const RbVector<double> tau = dn_time_points;
+    const RbVector<double> tau = time_points;
 
     for (size_t i = 0; i < tau.size(); i++)
     {
@@ -248,7 +248,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
 
     events.push_back(Event(0.0,"present time")) ;
 
-    // mutable std::vector<Event> events = RevBayesCore::poolTimes(*start_age, *dn_time_points, timeTree);
+    // mutable std::vector<Event> events = RevBayesCore::poolTimes(*start_age, *time_points, timeTree);
 
     // order times oldest to youngest
     struct AgeCompareReverse {
@@ -268,7 +268,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
     const double rh = rho->getValue();
     const double rp = removalPr->getValue();
     const long N = maxHiddenLin->getValue();
-    // const RbVector<double> tau = dn_time_points->getValue();
+    // const RbVector<double> tau = time_points->getValue();
 
     const size_t S = tau.size();
     const double gamma = birth + death + ps + om;
@@ -391,7 +391,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
  * \param[in]    removalPr              Removal probability after sampling.
  * \param[in]    maxHiddenLin           Algorithm accuracy (maximal number of hidden lineages).
  * \param[in]    cond                   Condition of the process (none/survival/#Taxa).
- * \param[in]    dn_time_points         Times for which we want to compute the density.
+ * \param[in]    time_points         Times for which we want to compute the density.
  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
  * \param[in]    timeTree               Tree for ancestral populations size inference.
  *
@@ -407,7 +407,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
                                                           const TypedDagNode<long> *maxHiddenLin,
 
                                                           const std::string& cond,
-                                                          const std::vector<double> &dn_time_points,
+                                                          const std::vector<double> &time_points,
                                                           bool useOrigin,
                                                           const Tree &timeTree)
 {   
@@ -496,7 +496,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
         }
     }
 
-    const RbVector<double> tau = dn_time_points;
+    const RbVector<double> tau = time_points;
 
     for (size_t i = 0; i < tau.size(); i++)
     {
@@ -505,7 +505,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
 
     events.push_back(Event(0.0,"present time")) ;
 
-    // mutable std::vector<Event> events = RevBayesCore::poolTimes(*start_age, *dn_time_points, timeTree);
+    // mutable std::vector<Event> events = RevBayesCore::poolTimes(*start_age, *time_points, timeTree);
 
     // order times youngest to oldest
     struct AgeCompare {
@@ -526,7 +526,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
     const double rh = rho->getValue();
     const double rp = removalPr->getValue();
     const long N = maxHiddenLin->getValue();
-    // const RbVector<double> tau = dn_time_points->getValue();
+    // const RbVector<double> tau = time_points->getValue();
 
     const size_t S = tau.size();
     const double gamma = birth + death + ps + om;

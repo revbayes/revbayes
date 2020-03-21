@@ -61,7 +61,7 @@ ComputeLikelihoodsLtMtFunction::ComputeLikelihoodsLtMtFunction( const TypedDagNo
     removalPr( r ),
     maxHiddenLin( n ),
     cond (cdt),
-    dn_time_points ( tau ),
+    time_points ( tau ),
     useOrigin (uo),
     useMt ( mt ),
     timeTree (tr)
@@ -208,7 +208,7 @@ MatrixReal ComputeLikelihoodsLtMtFunction::ComputeMt( void ) const
     const double rp = removalPr->getValue();
     const double gamma = birth + death + ps + om;
 
-    size_t S = dn_time_points.size();
+    size_t S = time_points.size();
     long N = maxHiddenLin->getValue();
 
     // Initialize an empty matrix and a cursor to write lines in this matrix
@@ -326,7 +326,7 @@ MatrixReal ComputeLikelihoodsLtMtFunction::ComputeLt( void ) const
     const double gamma = birth + death + ps + om;
 
     // Initialize an empty matrix and a cursor indxJ to write lines in this matrix
-    size_t S = dn_time_points.size();
+    size_t S = time_points.size();
     long N = maxHiddenLin->getValue();
     MatrixReal B(S, (N + 1), 0.0);
     size_t indxJ = 0;

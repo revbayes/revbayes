@@ -102,7 +102,7 @@ const ArgumentRules& Func_inferAncestralPopSize::getArgumentRules( void ) const
         optionsCondition.push_back( "survival" );
         argumentRules.push_back( new OptionRule( "condition",           new RlString("time"), optionsCondition, "The condition of the process." ) );
 
-        argumentRules.push_back( new ArgumentRule( "dn_time_points",    ModelVector<RealPos>::getClassTypeSpec(), "Time points for which we compute density.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "time_points",       ModelVector<RealPos>::getClassTypeSpec(), "Time points for which we compute density.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         argumentRules.push_back( new ArgumentRule( "timeTree" ,         TimeTree::getClassTypeSpec(), "Tree for which ancestral pop. size has to be computed.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
 
@@ -198,9 +198,9 @@ void Func_inferAncestralPopSize::setConstParameter(const std::string& name, cons
     {
         condition = var;
     }
-    else if ( name == "dn_time_points" )
+    else if ( name == "time_points" )
     {
-        dn_time_points = var;
+        time_points = var;
     }
     else if ( name == "timeTree" )
     {

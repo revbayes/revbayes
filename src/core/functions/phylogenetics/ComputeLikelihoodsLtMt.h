@@ -9,11 +9,7 @@
 #include <vector>
 
 namespace RevBayesCore {
-        
-        // std::vector<Event>      poolTimes(  const TypedDagNode<double> *start_age,
-        //                                     const TypedDagNode< RbVector<double> > *dn_time_points,
-        //                                     const TypedDagNode<Tree> *timeTree );
-        
+                
         MatrixReal              ComputeLikelihoodsBackwardsLt(  const TypedDagNode<double> *start_age,
                                                                 const TypedDagNode<double> *lambda,
                                                                 const TypedDagNode<double> *mu,
@@ -24,7 +20,7 @@ namespace RevBayesCore {
                                                                 const TypedDagNode<long> *maxHiddenLin,
 
                                                                 const std::string& cond,
-                                                                const std::vector<double> &dn_time_points,
+                                                                const std::vector<double> &time_points,
                                                                 bool useOrigin,
                                                                 const Tree &timeTree);
 
@@ -38,7 +34,7 @@ namespace RevBayesCore {
                                                                 const TypedDagNode<long> *maxHiddenLin,
 
                                                                 const std::string& cond,
-                                                                const std::vector<double> &dn_time_points,
+                                                                const std::vector<double> &time_points,
                                                                 bool useOrigin,
                                                                 const Tree &timeTree);
     };

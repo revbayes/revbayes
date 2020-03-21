@@ -66,7 +66,7 @@ namespace RevLanguage {
         std::string                                             start_condition;                                  //!< The start condition of the process (rootAge/originAge)
         RevPtr<const RevVariable>                               condition;                                        //!< The conditioning of the process ("time" or "survaval")
         RevPtr<const RevVariable>                               extant;                                           //!< Number of extant taxa
-        RevPtr<const RevVariable>                               dn_time_points;                                   //!< Times at which density is computed
+        RevPtr<const RevVariable>                               time_points;                                      //!< Times at which density is computed
         RevPtr<const RevVariable>                               useMt;                                            //!< Forward traversal Mt algorithm (otherwise backward Lt)
         RevPtr<const RevVariable>                               initialTree;                                      //!< Facultative initial tree
 

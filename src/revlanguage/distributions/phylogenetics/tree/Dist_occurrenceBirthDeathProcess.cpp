@@ -175,7 +175,7 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
     std::vector<RevBayesCore::Taxon>    tn      = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
 
     // density computation time points
-    std::vector<double>                 tau     = static_cast<const ModelVector<RealPos> &>( dn_time_points->getRevObject() ).getValue();
+    std::vector<double>                 tau     = static_cast<const ModelVector<RealPos> &>( time_points->getRevObject() ).getValue();
 
     // the start condition
     bool                                uo      = ( start_condition == "originAge" ? true : false );
@@ -265,7 +265,7 @@ std::string Dist_occurrenceBirthDeathProcess::getDistributionFunctionName( void 
  * (3) the extinction rate mu must be a positive real.
  * (4) the fossil sampling rate psi must be a positive real.
  * (5) the occurrence rate omega must be a positive real.
- * (6) the vector of density computation times dn_time_points must contain positive reals.
+ * (6) the vector of density computation times time_points must contain positive reals.
  *
  * (7) the sampling fraction at present rho must be a real between 0 and 1.
  * (8) the removal probability removalPr must be a real between 0 and 1.
@@ -317,7 +317,7 @@ const MemberRules& Dist_occurrenceBirthDeathProcess::getParameterRules(void) con
         dist_member_rules.push_back( new OptionRule( "condition",           new RlString("time"), optionsCondition, "The condition of the process." ) );
         dist_member_rules.push_back( new ArgumentRule( "taxa"  ,            ModelVector<Taxon>::getClassTypeSpec(), "The taxa used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
-        dist_member_rules.push_back( new ArgumentRule( "dn_time_points",    ModelVector<RealPos>::getClassTypeSpec(), "Time points for which we compute density.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "time_points",    ModelVector<RealPos>::getClassTypeSpec(), "Time points for which we compute density.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         dist_member_rules.push_back( new ArgumentRule( "useMt",             RlBoolean::getClassTypeSpec(), "If true computes densities with the Mt forward traversal algorithm otherwise uses Lt backward one.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( true ) ) );
 
@@ -392,9 +392,9 @@ void Dist_occurrenceBirthDeathProcess::setConstParameter(const std::string& name
     {
         condition = var;
     }
-    else if ( name == "dn_time_points" )
+    else if ( name == "time_points" )
     {
-        dn_time_points = var;
+        time_points = var;
     }
     else if ( name == "useMt" )
     {

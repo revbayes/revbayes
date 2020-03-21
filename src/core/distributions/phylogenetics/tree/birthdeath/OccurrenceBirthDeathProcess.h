@@ -57,38 +57,8 @@ template <class valueType> class RbVector;
       // Parameter management functions
       void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
 
-      struct Event {
-        Event(double d, std::string s) : time(d), type(s) {};
-
-        double time;
-        std::string type;
-
-        double getEventTime(void){ return time; }
-        std::string getEventType(void){ return type; }
-
-      };
-
-      // Vector of Events
-      mutable std::vector<Event>         events;
-
-      // Sorting functions
-      struct AgeCompare {
-        bool operator()(const Event first, const Event second) {
-                  return first.time < second.time;
-        }
-      };
-
-      struct AgeCompareReverse {
-        bool operator()(const Event first, const Event second) {
-                  return first.time > second.time;
-        }
-      };
-
       // Helper functions
-      double                                              ComputeLt(void) const;
-      double                                              ComputeMt(void) const;
       double                                              computeLnProbabilityTimes(void) const;                                          //!< Compute the log-transformed probability of the current value.
-      double                                              computeLnProbabilityTimes2(void) const;                                          //!< Compute the log-transformed probability of the current value.
       double                                              lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const { throw RbException("Cannot compute P(nTaxa)."); }
       double                                              lnProbTreeShape(void) const;
       double                                              simulateDivergenceTime(double origin, double present) const;                    //!< Simulate a speciation event.
@@ -109,7 +79,8 @@ template <class valueType> class RbVector;
       const TypedDagNode< double > *                        removalPr;                             //!< The removal probability after sampling.
       const TypedDagNode< long > *                          maxHiddenLin;                          //!< The maximal number of hidden lineages.
       const std::string &                                   cond;                                  //!< Condition of the process ("time" or "survival")
-      const std::vector< double > &                         dn_time_points;                        //!< Times at which density is computed
+      const std::vector<Taxon> &                            taxa;                                  //!< Extinct and extant taxa
+      const std::vector< double > &                         time_points;                           //!< Times at which density is computed
       const bool                                            useOrigin;                             //!< Start the process at the origin (otherwise root)
       const bool                                            useMt;                                 //!< Forward traversal Mt algorithm (otherwise backward Lt)
       const TypedDagNode< Tree > *                          initialTree;                           //!< Facultative initial tree

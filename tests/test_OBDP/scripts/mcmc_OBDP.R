@@ -20,15 +20,20 @@ seed(12345)
 
 # set my move index
 mvi = 0
-taxa <- readTaxonData("../data/bears_taxa.tsv")
+
+# set the parameters
+origin_time ~ dnUnif(37.0, 55.0)
 lambda ~ dnExp(10)
 mu ~ dnExp(10)
 psi ~ dnExp(10)
+omega <- 0.0
 rho <- 1.0
 rm <- 0.0
+n <- 30
 cond <- "time"
-omega <- 0.0
-origin_time ~ dnUnif(37.0, 55.0)
+taxa <- readTaxonData("../data/bears_taxa.tsv")
+tau <- v(0.0)
+mt <- TRUE
 
 
 
@@ -49,7 +54,18 @@ moves[mvi++] = mvScale(psi,lambda=0.01,weight=1)
 
 
 ### Define the tree-prior distribution as the fossilized birth-death process ###
-obd_dist = dnOBDP(originAge=origin_time, lambda=lambda, mu=mu, psi=psi,omega=omega, dn_time_points=v(0.0), rho=rho, removalPr=rm, cond=cond, taxa=taxa)
+obd_dist = dnOBDP(  originAge=origin_time,
+                    lambda=lambda,
+                    mu=mu,
+                    psi=psi,
+                    omega=omega,
+                    rho=rho,
+                    removalPr=rm,
+                    maxHiddenLin=n,
+                    condition=cond,
+                    taxa=taxa,
+                    dn_time_points=tau,
+                    useMt=mt)
 print("OK dn")
 
 # The will be a random variable of a constrained topology distribution that is governed by the obd #
