@@ -12,6 +12,7 @@
 #include "Probability.h"
 #include "Natural.h"
 #include "RlBoolean.h"
+#include "Real.h"
 #include "RealPos.h"
 #include "RlString.h"
 #include "RlTaxon.h"
@@ -175,11 +176,23 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
     std::vector<RevBayesCore::Taxon>    tn      = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
 
     // occurrence ages
-    std::vector<double> occ_ages;
-    if ( occurrence_ages->getRevObject() != RevNullObject::getInstance() )
-    {
-      occ_ages = static_cast<const ModelVector<Real> &>( occurrence_ages->getRevObject() ).getValue();
-    }
+
+    // RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*  occAges = NULL;
+    // if ( initialTree->getRevObject() != RevNullObject::getInstance() )
+    // {
+    //     std::cout << "loop test" << std::endl;
+    //     occAges                                 = static_cast<const ModelVector<Real> &>( occurrence_ages->getRevObject() ).getDagNode();
+    // }
+
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*  occAges = static_cast<const ModelVector<Real> &>( occurrence_ages->getRevObject() ).getDagNode();
+    // std::vector<double> occAges;
+    // if ( occurrence_ages->getRevObject() != RevNullObject::getInstance() )
+    // {
+    //     std::cout << "occAges size : " << occAges.size() << std::endl;
+    //     occAges = static_cast<const ModelVector<Real> &>( occurrence_ages->getRevObject() ).getValue();
+    //     std::cout << "occAges size : " << occAges.size() << std::endl;
+    //     std::cout << "occAges 0 : " << occAges[0] << std::endl;
+    // }
 
     // the start condition
     bool                                uo      = ( start_condition == "originAge" ? true : false );
@@ -195,7 +208,7 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
     }
 
 
-    d = new RevBayesCore::OccurrenceBirthDeathProcess(sa, l, m, p, o, rh, r, n, cond, tn, occ_ages, uo, mt, tr);
+    d = new RevBayesCore::OccurrenceBirthDeathProcess(sa, l, m, p, o, rh, r, n, cond, tn, occAges, uo, mt, tr);
 
     return d;
 }
@@ -270,7 +283,7 @@ std::string Dist_occurrenceBirthDeathProcess::getDistributionFunctionName( void 
  * (3) the extinction rate mu must be a positive real.
  * (4) the fossil sampling rate psi must be a positive real.
  * (5) the occurrence rate omega must be a positive real.
- * (6) the vector of density computation times time_points must contain positive reals.
+ * (6) the vector of occurrence ages must contain reals.
  *
  * (7) the sampling fraction at present rho must be a real between 0 and 1.
  * (8) the removal probability removalPr must be a real between 0 and 1.

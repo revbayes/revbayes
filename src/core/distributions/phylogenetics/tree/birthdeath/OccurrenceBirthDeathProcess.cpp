@@ -57,7 +57,8 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(   const TypedDagNode<d
                                                             const TypedDagNode<long> *n,
                                                             const std::string& cdt,
                                                             const std::vector<Taxon> &tn,
-                                                            const std::vector<double> &O,
+                                                            const TypedDagNode< RevBayesCore::RbVector<double> > *O,
+                                                            //const std::vector<double> &O,
                                                             bool uo,
                                                             bool mt,
                                                             TypedDagNode<Tree> *tr) :
@@ -85,7 +86,8 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(   const TypedDagNode<d
     addParameter( rho );
     addParameter( removalPr );
     addParameter( maxHiddenLin );
-
+    addParameter( occurrence_ages );
+    
 
     if (tr != NULL)
     {
@@ -132,9 +134,15 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) 
     // compute the log-likelihood : use ComputeLikelihoodsBackwardsLt (backward traversal of the tree) or ComputeLikelihoodsForwardsMt (forward traversal of the tree)
     const RevBayesCore::Tree tree(*value);
 
+    std::vector<double> occAges = occurrence_ages->getValue();
+
+    std::cout << "cond : " << cond << std::endl;
+    std::cout << "occurrence_ages size : " << occAges.size() << std::endl;
+    std::cout << "occurrence_ages 0 : " << occAges[0] << std::endl;
+
     if (useMt) {
         const std::vector<double> time_points_Mt( 1, start_age->getValue() );
-        MatrixReal B_Mt = RevBayesCore::ComputeLikelihoodsForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, occurrence_ages, tree);
+        MatrixReal B_Mt = RevBayesCore::ComputeLikelihoodsForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, occAges, tree);
 
         const double rh = rho->getValue();
         const long N = maxHiddenLin->getValue();
@@ -143,13 +151,15 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) 
         double likelihood = B_Mt[0][0];
         for(int i = 1; i < N+1; i++){
             likelihood += B_Mt[0][i] * pow(rh,k) * pow(1.0 - rh,i);
+        
         return likelihood;
         }
     }
     const std::vector<double> time_points_Lt(1, 0.0);
-    MatrixReal B_Lt = RevBayesCore::ComputeLikelihoodsBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, occurrence_ages, tree);
+    MatrixReal B_Lt = RevBayesCore::ComputeLikelihoodsBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, occAges, tree);
 
     double likelihood = B_Lt[0][0];
+    
     return likelihood;
 }
 

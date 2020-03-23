@@ -16,111 +16,6 @@ namespace RevBayesCore {
 
 using namespace RevBayesCore;
 
-
-/**
- * Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
- */
-// std::vector<Event> RevBayesCore::poolTimes(     const TypedDagNode<double> *start_age,
-//                                                 const TypedDagNode< RbVector<double> > *time_points,
-//                                                 const Tree &timeTree )
-// {
-//     // Structure of the phylodynamic events in a tree with occurrences : type + time
-//     struct Event {
-//             Event(double d, std::string s) : time(d), type(s) {};
-
-//             std::string type;
-//             double time;
-
-//             std::string getEventType(void){ return type; }
-//             double getEventTime(void){ return time; }
-
-//         };
-
-//     // get node/time variables
-//     const size_t num_nodes = timeTree.getNumberOfNodes();
-
-//     // number of extant lineages
-//     size_t extant = 0;
-
-//     // vector of events
-//     mutable std::vector<Event>         events;
-
-//     // classify nodes
-//     events.clear();
-//     events.push_back(Event(start_age->getValue(), "origin"));
-
-//     for (size_t i = 0; i < num_nodes; i++)
-//     {
-//         const TopologyNode& n = timeTree.getNode( i );
-
-//         //isFossil is an optional condition to obtain sampled ancestor node ages
-
-//         Node labels :
-//         fl = fossil leaf
-//         b  = "true" bifurcation
-//         b' = "false" bifurcation (artefact of the sampled ancestors representation)
-//         sa = sampled ancestor
-//         el = extant leaf
-//         . = time points at which density is computed
-
-//          __|___             .
-//         |  b   |
-//         |      |            .
-//         fl     |
-//              b'|___ sa      .
-//                |
-//                |            .
-//                el
-
-//          1. Pick a fossil among those with brl > 0 (prob = 1/m)
-//          2. Set brl = 0
-
-
-//         if ( n.isFossil() && n.isSampledAncestor() )  //isFossil is optional (all sampled ancestors are fossils)
-//         {
-//             // node is sampled ancestor
-//             events.push_back(Event(n.getAge(), "sampled ancestor")) ;
-
-//         }
-//         else if ( n.isFossil() && !n.isSampledAncestor() )
-//         {
-//             // node is fossil leaf (named terminal non-removed in Lt)
-//             events.push_back(Event(n.getAge(),"fossil leaf") ;
-//             // events.push_back(Event(n.getAge(),"terminal non-removed")) ;
-//         }
-//         else if ( !n.isFossil() && n.isTip() )
-//         {
-//             // node is extant leaf : only their number is necessary to compute Lt and Mt
-//             // events.push_back(Event(n.getAge(),"extant leaf") ;
-//             // events.push_back(Event(n.getAge(), "terminal non-removed")) ;
-//             // std::cout << n.getSpeciesName() << std::endl;
-//             extant++;
-//         }
-//         else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
-//         {
-//             // std::cout << "Is branching node root ? " << n.isRoot() << std::endl;
-
-//             // node is a "true" bifurcation event
-//             events.push_back(Event(n.getAge(),"branching time")) ;
-//         }
-//         else
-//         {
-//             std::cout << "Warning : non-categorized node" << std::endl;
-//         }
-//     }
-
-//     const RbVector<double> tau = time_points->getValue();
-
-//     for (size_t i = 0; i < tau.size(); i++)
-//     {
-//         events.push_back(Event(tau[i],"time point")) ;
-//     }
-
-//     events.push_back(Event(0.0,"present time")) ;
-
-//     return events;
-// }
-
 /**
  * Compute the joint probability density of the observations made up to any time t and the population
  * size at that time, as time decreases towards present : breadth-first forward traversal algorithm.
@@ -155,6 +50,8 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
                                                           const std::vector<double> &occurrence_ages,
                                                           const Tree &timeTree)
 {
+    std::cout << "ComputeLikelihoodsForwardsMt in" << std::endl;
+
     // Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
     struct Event {
             Event(double d, std::string s) : time(d), type(s) {};
@@ -249,7 +146,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
 
     for ( int i=0; i < occurrence_ages.size(); ++i)
     {
-    events.push_back(Event(occurrence_ages[i],"occurrence non-removed")) ;
+        events.push_back(Event(occurrence_ages[i],"occurrence non-removed")) ;
     }
 
     events.push_back(Event(0.0,"present time")) ;
@@ -263,7 +160,6 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
         }
     };
     std::sort( events.begin(), events.end(), AgeCompareReverse() );
-
 
 
 
@@ -381,6 +277,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
     //     likelihood += Mt[i] * pow(rh,k) * pow(1.0 - rh,i);
     // }
 
+    std::cout << "ComputeLikelihoodsForwardsMt out" << std::endl;
     return B;
 }
 

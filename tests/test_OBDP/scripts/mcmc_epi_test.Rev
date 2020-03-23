@@ -55,17 +55,17 @@ moves[mvi++] = mvScale(psi,lambda=0.01,weight=1)
 
 ### Define the tree-prior distribution as the fossilized birth-death process ###
 obd_tree ~ dnOBDP(  originAge=start_time,
-				    lambda=lambda,
-				    mu=mu, 
-				    psi=psi, 
-				    omega=omega, 
-				    rho=rho, 
-				    removalPr=rm, 
-				    maxHiddenLin=N, 
-				    condition=cond, 
-				    taxa=taxa, 
-				    occurrence_ages=occurrence_ages, 
-				    useMt=useMt)
+                    lambda=lambda,
+                    mu=mu, 
+                    psi=psi, 
+                    omega=omega, 
+                    rho=rho, 
+                    removalPr=rm, 
+                    maxHiddenLin=N, 
+                    condition=cond, 
+                    taxa=taxa, 
+                    occurrence_ages=occurrence_ages, 
+                    useMt=useMt)
 
 moves[mvi++] = mvFNPR(obd_tree, weight=1.0)
 moves[mvi++] = mvTipTimeSlideUniform(obd_tree, weight=1.0)
