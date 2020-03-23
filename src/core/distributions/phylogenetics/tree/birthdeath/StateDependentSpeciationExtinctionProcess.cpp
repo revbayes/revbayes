@@ -585,7 +585,7 @@ double StateDependentSpeciationExtinctionProcess::computeRootLikelihood( void ) 
     {
         node_likelihood[i] = left_likelihoods[i];
 
-        if ( use_cladogenetic_events == true && speciation_node == true )
+        if ( use_cladogenetic_events == true || speciation_node == true )
         {
 
             double like_sum = 0.0;
