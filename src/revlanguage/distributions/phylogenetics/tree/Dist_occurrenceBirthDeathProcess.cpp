@@ -332,7 +332,7 @@ const MemberRules& Dist_occurrenceBirthDeathProcess::getParameterRules(void) con
 
         dist_member_rules.push_back( new ArgumentRule( "initialTree" ,      TimeTree::getClassTypeSpec() , "Instead of drawing a tree from the distribution, initialize distribution with this tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
 
-        dist_member_rules.push_back( new ArgumentRule( "occurrence_ages" ,      TimeTree::getClassTypeSpec() , "The fixed occurrences used", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "occurrence_ages" ,      ModelVector<RealPos>::getClassTypeSpec() , "The fixed occurrences used", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
 
         rules_set = true;
     }
