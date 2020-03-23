@@ -49,6 +49,9 @@ namespace RevLanguage {
 
     private:
 
+        // number of processors
+        RevPtr<const RevVariable>  n_proc;          //!< The number of processors for parallel calculations
+
         // taxa
         RevPtr<const RevVariable>  taxa;            //!< The taxa in the tree
 
