@@ -42,7 +42,7 @@ using namespace RevBayesCore;
  * \param[in]    n              Algorithm accuracy (maximal number of hidden lineages).
  * \param[in]    cdt            Condition of the process (none/survival/#Taxa).
  * \param[in]    tn             Extinct and extant taxa and their range ages.
- * \param[in]    tau            Times for which we want to compute the density.
+ * \param[in]    O              Occurrence ages.
  * \param[in]    uo             If true t is the origin time otherwise the root age of the process.
  * \param[in]    mt             If true computes densities with the Mt forward traversal algorithm otherwise uses Lt backward one.
  * \param[in]    tr             Initial tree (facultative).
@@ -57,10 +57,9 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(   const TypedDagNode<d
                                                             const TypedDagNode<long> *n,
                                                             const std::string& cdt,
                                                             const std::vector<Taxon> &tn,
-                                                            const std::vector<double> &tau,
+                                                            const std::vector<double> &O,
                                                             bool uo,
                                                             bool mt,
-                                                            const std::vector<double> &O,
                                                             TypedDagNode<Tree> *tr) :
     AbstractBirthDeathProcess( sa, cdt, tn, uo ),
     start_age( sa ),
@@ -73,10 +72,9 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(   const TypedDagNode<d
     maxHiddenLin( n ),
     cond (cdt),
     taxa (tn),
-    time_points( tau ),
+    occurrence_ages( O ),
     useOrigin (uo),
-    useMt ( mt ),
-    occurrence_ages( O )
+    useMt ( mt )
 
 {
     addParameter( start_age );

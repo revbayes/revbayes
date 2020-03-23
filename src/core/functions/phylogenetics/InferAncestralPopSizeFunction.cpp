@@ -85,7 +85,6 @@ InferAncestralPopSizeFunction::InferAncestralPopSizeFunction( 	const TypedDagNod
     this->addParameter( maxHiddenLin );
     this->addParameter( timeTree );
 
-	// poolTimes();
 	update();
 }
 
