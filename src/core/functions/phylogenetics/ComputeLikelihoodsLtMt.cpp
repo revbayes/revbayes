@@ -23,7 +23,7 @@ using namespace RevBayesCore;
 // std::vector<Event> RevBayesCore::poolTimes(     const TypedDagNode<double> *start_age,
 //                                                 const TypedDagNode< RbVector<double> > *time_points,
 //                                                 const Tree &timeTree )
-// {   
+// {
 //     // Structure of the phylodynamic events in a tree with occurrences : type + time
 //     struct Event {
 //             Event(double d, std::string s) : time(d), type(s) {};
@@ -52,9 +52,9 @@ using namespace RevBayesCore;
 //     for (size_t i = 0; i < num_nodes; i++)
 //     {
 //         const TopologyNode& n = timeTree.getNode( i );
-        
+
 //         //isFossil is an optional condition to obtain sampled ancestor node ages
-        
+
 //         Node labels :
 //         fl = fossil leaf
 //         b  = "true" bifurcation
@@ -66,15 +66,15 @@ using namespace RevBayesCore;
 //          __|___             .
 //         |  b   |
 //         |      |            .
-//         fl     |            
+//         fl     |
 //              b'|___ sa      .
-//                |            
+//                |
 //                |            .
 //                el
 
 //          1. Pick a fossil among those with brl > 0 (prob = 1/m)
 //          2. Set brl = 0
-         
+
 
 //         if ( n.isFossil() && n.isSampledAncestor() )  //isFossil is optional (all sampled ancestors are fossils)
 //         {
@@ -99,7 +99,7 @@ using namespace RevBayesCore;
 //         else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
 //         {
 //             // std::cout << "Is branching node root ? " << n.isRoot() << std::endl;
-            
+
 //             // node is a "true" bifurcation event
 //             events.push_back(Event(n.getAge(),"branching time")) ;
 //         }
@@ -121,10 +121,10 @@ using namespace RevBayesCore;
 //     return events;
 // }
 
-/** 
- * Compute the joint probability density of the observations made up to any time t and the population 
+/**
+ * Compute the joint probability density of the observations made up to any time t and the population
  * size at that time, as time decreases towards present : breadth-first forward traversal algorithm.
- * 
+ *
  * \param[in]    start_age              Start age of the process.
  * \param[in]    lambda                 Speciation rate.
  * \param[in]    mu                     Extinction rate.
@@ -137,7 +137,7 @@ using namespace RevBayesCore;
  * \param[in]    time_points         Times for which we want to compute the density.
  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
  * \param[in]    timeTree               Tree for ancestral populations size inference.
- * 
+ *
  * \return    The matrix of Mt values through time.
 */
 MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<double> *start_age,
@@ -152,8 +152,9 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
                                                           const std::string &cond,
                                                           const std::vector<double> &time_points,
                                                           bool useOrigin,
+                                                          const std::vector<double> &occurrence_ages,
                                                           const Tree &timeTree)
-{   
+{
     // Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
     struct Event {
             Event(double d, std::string s) : time(d), type(s) {};
@@ -182,7 +183,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
     for (size_t i = 0; i < num_nodes; i++)
     {
         const TopologyNode& n = timeTree.getNode( i );
-        
+
         //isFossil is an optional condition to obtain sampled ancestor node ages
         /*
         Node labels :
@@ -196,9 +197,9 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
          __|___             .
         |  b   |
         |      |            .
-        fl     |            
+        fl     |
              b'|___ sa      .
-               |            
+               |
                |            .
                el
 
@@ -229,7 +230,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
         else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
         {
             // std::cout << "Is branching node root ? " << n.isRoot() << std::endl;
-            
+
             // node is a "true" bifurcation event
             events.push_back(Event(n.getAge(),"branching time")) ;
         }
@@ -246,6 +247,11 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
         events.push_back(Event(tau[i],"time point")) ;
     }
 
+    for ( int i=0; i < occurrence_ages.size(); ++i)
+    {
+    events.push_back(Event(occurrence_ages[i],"occurrence non-removed")) ;
+    }
+
     events.push_back(Event(0.0,"present time")) ;
 
     // mutable std::vector<Event> events = RevBayesCore::poolTimes(*start_age, *time_points, timeTree);
@@ -256,7 +262,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
             return first.time > second.time;
         }
     };
-    std::sort( events.begin(), events.end(), AgeCompareReverse() );    
+    std::sort( events.begin(), events.end(), AgeCompareReverse() );
 
 
 
@@ -306,13 +312,13 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
 
         if( th != thPlusOne ){
             MatrixReal A( (N+1), (N+1), 0.0 );
-            
+
             for(int i = 0; i < (N + 1); i++){
                 A[i][i] = gamma * (k + i) * (th-thPlusOne);
                 if (i < N) A[i][i+1] = -death * (i + 1) * (th-thPlusOne);
                 if (i > 0) A[i][i-1] = -birth * (2*k + i - 1) * (th-thPlusOne);
             }
-            
+
             RbMath::expMatrixPade(A, A, 4);
             Mt = A * Mt;
         }
@@ -381,7 +387,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
 /**
  * Compute the probability density of observations made down any time t, conditioned on the population
  * size at that time, as time increases towards the past : breadth-first backward traversal algorithm.
- * 
+ *
  * \param[in]    start_age              Start age of the process.
  * \param[in]    lambda                 Speciation rate.
  * \param[in]    mu                     Extinction rate.
@@ -409,8 +415,9 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
                                                           const std::string& cond,
                                                           const std::vector<double> &time_points,
                                                           bool useOrigin,
+                                                          const std::vector<double> &occurrence_ages,
                                                           const Tree &timeTree)
-{   
+{
     // Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
     struct Event {
             Event(double d, std::string s) : time(d), type(s) {};
@@ -439,7 +446,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
     for (size_t i = 0; i < num_nodes; i++)
     {
         const TopologyNode& n = timeTree.getNode( i );
-        
+
         //isFossil is an optional condition to obtain sampled ancestor node ages
         /*
         Node labels :
@@ -453,9 +460,9 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
          __|___             .
         |  b   |
         |      |            .
-        fl     |            
+        fl     |
              b'|___ sa      .
-               |            
+               |
                |            .
                el
 
@@ -486,7 +493,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
         else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
         {
             // std::cout << "Is branching node root ? " << n.isRoot() << std::endl;
-            
+
             // node is a "true" bifurcation event
             events.push_back(Event(n.getAge(),"branching time")) ;
         }
@@ -503,6 +510,11 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
         events.push_back(Event(tau[i],"time point")) ;
     }
 
+    for ( int i=0; i < occurrence_ages.size(); ++i)
+    {
+    events.push_back(Event(occurrence_ages[i],"occurrence non-removed")) ;
+    }
+    
     events.push_back(Event(0.0,"present time")) ;
 
     // mutable std::vector<Event> events = RevBayesCore::poolTimes(*start_age, *time_points, timeTree);
@@ -513,7 +525,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
             return first.time < second.time;
         }
     };
-    std::sort( events.begin(), events.end(), AgeCompare() );    
+    std::sort( events.begin(), events.end(), AgeCompare() );
 
 
 
@@ -610,10 +622,9 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
             }
             k -= 1;
         }
-        
+
         thMinusOne = th;
     }
 
     return B;
 }
-

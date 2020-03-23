@@ -9,7 +9,7 @@
 #include <vector>
 
 namespace RevBayesCore {
-                
+
         MatrixReal              ComputeLikelihoodsBackwardsLt(  const TypedDagNode<double> *start_age,
                                                                 const TypedDagNode<double> *lambda,
                                                                 const TypedDagNode<double> *mu,
@@ -22,6 +22,7 @@ namespace RevBayesCore {
                                                                 const std::string& cond,
                                                                 const std::vector<double> &time_points,
                                                                 bool useOrigin,
+                                                                const std::vector<double> &occurrence_ages,
                                                                 const Tree &timeTree);
 
         MatrixReal              ComputeLikelihoodsForwardsMt(   const TypedDagNode<double> *start_age,
@@ -36,7 +37,8 @@ namespace RevBayesCore {
                                                                 const std::string& cond,
                                                                 const std::vector<double> &time_points,
                                                                 bool useOrigin,
+                                                                const std::vector<double> &occurrence_ages,
                                                                 const Tree &timeTree);
     };
-    
+
 #endif

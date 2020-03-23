@@ -141,7 +141,7 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
     // }
 
     RevBayesCore::AbstractBirthDeathProcess* d;
-    
+
     // Get the parameters :
 
     // the start age
@@ -183,6 +183,13 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
     // boolean : use Mt, otherwise use Lt
     bool                                mt      = static_cast<const RlBoolean &>( useMt->getRevObject() ).getValue();
 
+
+    std::vector<double> occ_ages;
+   if ( occurrence_ages->getRevObject() != RevNullObject::getInstance() )
+   {
+      occ_ages = static_cast<const ModelVector<RealPos> &>( occurrence_ages->getRevObject() ).getValue();
+   }
+
     // tree for initialization
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tr = NULL;
     if ( initialTree->getRevObject() != RevNullObject::getInstance() )
@@ -190,7 +197,9 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
        tr                                        = static_cast<const TimeTree &>( initialTree->getRevObject() ).getDagNode();
     }
 
-    d = new RevBayesCore::OccurrenceBirthDeathProcess(sa, l, m, p, o, rh, r, n, cond, tn, tau, uo, mt, tr);
+
+
+    d = new RevBayesCore::OccurrenceBirthDeathProcess(sa, l, m, p, o, rh, r, n, cond, tn, tau, uo, mt, occ_ages, tr);
 
     return d;
 }
@@ -269,7 +278,7 @@ std::string Dist_occurrenceBirthDeathProcess::getDistributionFunctionName( void 
  *
  * (7) the sampling fraction at present rho must be a real between 0 and 1.
  * (8) the removal probability removalPr must be a real between 0 and 1.
- 
+
  * (9) the process can be conditioned either on the time or on the survival.
  *
  * (10) the initial tree must be a time tree.
@@ -322,6 +331,8 @@ const MemberRules& Dist_occurrenceBirthDeathProcess::getParameterRules(void) con
         dist_member_rules.push_back( new ArgumentRule( "useMt",             RlBoolean::getClassTypeSpec(), "If true computes densities with the Mt forward traversal algorithm otherwise uses Lt backward one.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( true ) ) );
 
         dist_member_rules.push_back( new ArgumentRule( "initialTree" ,      TimeTree::getClassTypeSpec() , "Instead of drawing a tree from the distribution, initialize distribution with this tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+
+        dist_member_rules.push_back( new ArgumentRule( "occurrence_ages" ,      TimeTree::getClassTypeSpec() , "The fixed occurrences used", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
 
         rules_set = true;
     }
@@ -416,10 +427,16 @@ void Dist_occurrenceBirthDeathProcess::setConstParameter(const std::string& name
     // {
     //     rho_timeline = var;
     // }
+
     else if ( name == "initialTree" )
     {
         initialTree = var;
     }
+    else if ( name == "occurrence_ages" )
+    {
+        occurrence_ages = var;
+    }
+
     else
     {
         BirthDeathProcess::setConstParameter(name, var);

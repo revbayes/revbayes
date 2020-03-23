@@ -2,7 +2,7 @@
 //  InferAncestralPopSizeFunction.cpp
 //
 //  Initiated by Rachel Warnock, Marc Manceau 30.01.2020.
-//  Completed by Jérémy Andréoletti, Antoine Swaans 03.2020.
+//  Completed by Jérémy Andréoletti, Antoine Zwaans 03.2020.
 //
 #include "InferAncestralPopSizeFunction.h"
 
@@ -116,10 +116,11 @@ void InferAncestralPopSizeFunction::update( void )
     const Tree tree = timeTree->getValue();
 
     //bool useMt = false;
-	MatrixReal B_Lt = RevBayesCore::ComputeLikelihoodsBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, tree);
-	
+	std::vector<double> essai;
+	MatrixReal B_Lt = RevBayesCore::ComputeLikelihoodsBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, essai, tree);
+
 	//useMt = true;
-	MatrixReal B_Mt = RevBayesCore::ComputeLikelihoodsForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, tree);
+	MatrixReal B_Mt = RevBayesCore::ComputeLikelihoodsForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, essai, tree);
 
 	// Realize the Hadamar Product of B_Lt and B_Mt
 	MatrixReal D_Kt(S, (N + 1), 0.0);
@@ -189,4 +190,3 @@ void InferAncestralPopSizeFunction::swapParameterInternal( const DagNode *oldP, 
         timeTree = static_cast<const TypedDagNode< Tree >* >( newP );
     }
 }
-

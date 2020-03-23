@@ -29,7 +29,7 @@ using namespace RevBayesCore;
  * Constructor.
  *
  * The constructor connects the parameters of the birth-death process (DAG structure)
- * 
+ *
  * We delegate most parameters to the base class and initialize the members.
  *
  * \param[in]    sa             Start age of the process.
@@ -55,14 +55,14 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(   const TypedDagNode<d
                                                             const TypedDagNode<double> *rho,
                                                             const TypedDagNode<double> *r,
                                                             const TypedDagNode<long> *n,
-
                                                             const std::string& cdt,
                                                             const std::vector<Taxon> &tn,
                                                             const std::vector<double> &tau,
                                                             bool uo,
                                                             bool mt,
-
-                                                            TypedDagNode<Tree> *tr) : AbstractBirthDeathProcess( sa, cdt, tn, uo ),
+                                                            const std::vector<double> &O,
+                                                            TypedDagNode<Tree> *tr) :
+    AbstractBirthDeathProcess( sa, cdt, tn, uo ),
     start_age( sa ),
     lambda( l ),
     mu( m ),
@@ -75,7 +75,8 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(   const TypedDagNode<d
     taxa (tn),
     time_points( tau ),
     useOrigin (uo),
-    useMt ( mt )
+    useMt ( mt ),
+    occurrence_ages( O )
 
 {
     addParameter( start_age );
@@ -135,12 +136,12 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) 
 
     if (useMt) {
         const std::vector<double> time_points_Mt( 1, start_age->getValue() );
-        MatrixReal B_Mt = RevBayesCore::ComputeLikelihoodsForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, tree);
-        
+        MatrixReal B_Mt = RevBayesCore::ComputeLikelihoodsForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, occurrence_ages, tree);
+
         const double rh = rho->getValue();
         const long N = maxHiddenLin->getValue();
         const size_t k = value->getNumberOfExtantTips();
-        
+
         double likelihood = B_Mt[0][0];
         for(int i = 1; i < N+1; i++){
             likelihood += B_Mt[0][i] * pow(rh,k) * pow(1.0 - rh,i);
@@ -148,8 +149,8 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) 
         }
     }
     const std::vector<double> time_points_Lt(1, 0.0);
-    MatrixReal B_Lt = RevBayesCore::ComputeLikelihoodsBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, tree);
-    
+    MatrixReal B_Lt = RevBayesCore::ComputeLikelihoodsBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, occurrence_ages, tree);
+
     double likelihood = B_Lt[0][0];
     return likelihood;
 }
@@ -291,7 +292,7 @@ double OccurrenceBirthDeathProcess::functionP(double t, double z) const
     double sqrtDelta = sqrt( pow(gamma, 2) - 4.0 * birth * death );
     double x1 = (gamma - sqrtDelta)/(2*birth);
     double x2 = (gamma + sqrtDelta)/(2*birth);
-    
+
     return pow((sqrtDelta/birth),2) * pow((1/((x2-z) - (x1-z)*exp(-sqrtDelta*t))),2) * exp(-sqrtDelta*t) * (1-z);
 }
 
@@ -308,7 +309,7 @@ double OccurrenceBirthDeathProcess::functionU(double t, double z) const
     double sqrtDelta = sqrt( pow(gamma, 2) - 4.0 * birth * death );
     double x1 = (gamma - sqrtDelta)/(2*birth);
     double x2 = (gamma + sqrtDelta)/(2*birth);
-    
+
     double numerator = x1*(x2-z) - x2*(x1-z)*exp(-sqrtDelta*t);
     double denominator = (x2-z) - (x1-z)*exp(-sqrtDelta*t);
     return numerator/denominator;
@@ -471,6 +472,10 @@ void OccurrenceBirthDeathProcess::swapParameterInternal(const DagNode *oldP, con
     {
         removalPr = static_cast<const TypedDagNode<double>* >( newP );
     }
+    // else if (oldP == occurrence_ages)
+    // {
+    //     occurrence_ages = static_cast<const std::vector<double>& >( newP );
+    // }
     else
     {
         // delegate the super-class

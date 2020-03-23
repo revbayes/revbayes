@@ -50,7 +50,7 @@ ComputeLikelihoodsLtMtFunction::ComputeLikelihoodsLtMtFunction( const TypedDagNo
                                                                 const std::vector<double> &tau,
                                                                 bool uo,
                                                                 bool mt,
-
+                                                                const std::vector<double> &O,
                                                                 const TypedDagNode<Tree> *tr) : TypedFunction<MatrixReal>( new MatrixReal(tau.size(), (n->getValue() + 1), 0.0) ),
     start_age( sa ),
     lambda( l ),
@@ -64,6 +64,7 @@ ComputeLikelihoodsLtMtFunction::ComputeLikelihoodsLtMtFunction( const TypedDagNo
     time_points ( tau ),
     useOrigin (uo),
     useMt ( mt ),
+    occurrence_ages( O ),
     timeTree (tr)
 {
     this->addParameter( start_age );
@@ -75,7 +76,7 @@ ComputeLikelihoodsLtMtFunction::ComputeLikelihoodsLtMtFunction( const TypedDagNo
     this->addParameter( removalPr );
     this->addParameter( maxHiddenLin );
     this->addParameter( timeTree );
-    
+
     poolTimes();
     update();
 }
@@ -129,7 +130,7 @@ void ComputeLikelihoodsLtMtFunction::poolTimes( void ) const
     for (size_t i = 0; i < num_nodes; i++)
     {
         const TopologyNode& n = timeTree->getValue().getNode( i );
-        
+
         //isFossil is an optional condition to obtain sampled ancestor node ages
         /*
         Node labels :
@@ -175,22 +176,27 @@ void ComputeLikelihoodsLtMtFunction::poolTimes( void ) const
         else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
         {
             // std::cout << "Is branching node root ? " << n.isRoot() << std::endl;
-            
+
             // node is a "true" bifurcation event
             events.push_back(Event(n.getAge(),"branching time")) ;
         }
         else
         {
             std::cout << "Warning : non-categorized node" << std::endl;
-        }   
+        }
 
     }
+    for ( int i=0; i < occurrence_ages.size(); ++i)
+    {
+    events.push_back(Event(occurrence_ages[i],"occurrence non-removed")) ;
+    }
+
 
     events.push_back(Event(0.0,"present time")) ;
 }
 
 /**
- * Compute the joint probability density of the observations made up to any time t and the population 
+ * Compute the joint probability density of the observations made up to any time t and the population
  * size at that time, as time decreases towards present : breadth-first forward traversal algorithm.
  *
  * \return    The matrix of Mt values through time.
@@ -234,13 +240,13 @@ MatrixReal ComputeLikelihoodsLtMtFunction::ComputeMt( void ) const
 
         if( th != thPlusOne ){
             MatrixReal A( (N+1), (N+1), 0.0 );
-            
+
             for(int i = 0; i < (N + 1); i++){
                 A[i][i] = gamma * (k + i) * (th-thPlusOne);
                 if (i < N) A[i][i+1] = -death * (i + 1) * (th-thPlusOne);
                 if (i > 0) A[i][i-1] = -birth * (2*k + i - 1) * (th-thPlusOne);
             }
-            
+
             RbMath::expMatrixPade(A, A, 4);
             Mt = A * Mt;
         }
@@ -406,7 +412,7 @@ MatrixReal ComputeLikelihoodsLtMtFunction::ComputeLt( void ) const
             }
             k -= 1;
         }
-        
+
         thMinusOne = th;
     }
 

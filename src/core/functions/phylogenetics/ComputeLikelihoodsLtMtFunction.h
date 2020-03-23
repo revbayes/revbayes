@@ -17,13 +17,13 @@ namespace RevBayesCore {
 
     template <class valueType> class RbVector;
     template <class valueType> class TypedDagNode;
-    
+
     /**
      * @brief Declaration of the deterministic variable for Lt/Mt likelihoods.
      */
-    
+
     class ComputeLikelihoodsLtMtFunction : public TypedFunction<MatrixReal> {
-        
+
     public:
         ComputeLikelihoodsLtMtFunction(                     const TypedDagNode<double> *sa,
                                                             const TypedDagNode<double> *l,
@@ -38,10 +38,11 @@ namespace RevBayesCore {
                                                             const std::vector<double> &tau,
                                                             bool uo,
                                                             bool mt,
+                                                            const std::vector<double> &O,
                                                             const TypedDagNode<Tree> *tr);                                      //!< Default constructor
-        
+
         virtual                                             ~ComputeLikelihoodsLtMtFunction(void);                              //!< Destructor
-                
+
         // Basic utility functions
         ComputeLikelihoodsLtMtFunction*                     clone(void) const;                                                  //!< Clone object
         void                                                update(void);                                                       //!< Clone the function
@@ -50,10 +51,10 @@ namespace RevBayesCore {
         void                                                poolTimes(void) const;
         MatrixReal                                          ComputeLt(void) const;
         MatrixReal                                          ComputeMt(void) const;
-        
+
     protected:
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);    //!< Implementation of swaping parameters
-        
+
         // Structure of the phylodynamic events in a tree with occurrences : type + time
         struct Event {
             Event(double d, std::string s) : time(d), type(s) {};
@@ -84,7 +85,7 @@ namespace RevBayesCore {
 
     private:
         RevBayesCore::DistanceMatrix* getDistanceMatrix(const TypedDagNode<Tree>& tree);
-        
+
 
         // members
         const TypedDagNode< double > *                        start_age;                             //!< Time of origin.
@@ -100,11 +101,12 @@ namespace RevBayesCore {
         const bool                                            useOrigin;                             //!< Start the process at the origin (otherwise root)
         const bool                                            useMt;                                 //!< Forward traversal Mt algorithm (otherwise backward Lt)
         const TypedDagNode< Tree > *                          timeTree;                              //!< Facultative initial tree
+        const std::vector<double> &                           occurrence_ages;                       //!< Vector of occurrence ages
         mutable size_t                                        extant;                                //!< Number of extant taxa
         MatrixReal                                            B;                                     //!< Output, likelihoods through time matrix
-        
+
     };
-    
+
 }
 
 #endif

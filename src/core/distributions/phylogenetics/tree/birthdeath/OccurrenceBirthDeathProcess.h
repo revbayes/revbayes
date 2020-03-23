@@ -18,7 +18,7 @@ class Clade;
 
 template <class valueType> class TypedDagNode;
 template <class valueType> class RbVector;
-  
+
   /**
      * @file This file contains the declaration of the random variable class for occurrence birth-death process, see Manceau & al. 2020 algorithm (http://dx.doi.org/10.1101/755561).
      *
@@ -43,6 +43,7 @@ template <class valueType> class RbVector;
                                                           const std::vector<double> &tau,
                                                           bool uo,
                                                           bool mt,
+                                                          const std::vector<double> &O,
                                                           TypedDagNode<Tree> *tr);
 
 
@@ -85,6 +86,7 @@ template <class valueType> class RbVector;
       const bool                                            useMt;                                 //!< Forward traversal Mt algorithm (otherwise backward Lt)
       const TypedDagNode< Tree > *                          initialTree;                           //!< Facultative initial tree
       mutable size_t                                        extant;                                //!< Number of extant taxa
+      const std::vector<double> &                           occurrence_ages;                                     //!< Vector of occurrence times
 
     };
 
