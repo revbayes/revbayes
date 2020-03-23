@@ -27,11 +27,13 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	const std::string&                                              condition_type_,
 	const TypedDagNode<Simplex >*                                   root_frequency_,
 	const size_t                                                    num_states_,
-	bool                                                            use_origin_
+	bool                                                            use_origin_,
+	size_t                                                          n_proc_
 ) : TypedDistribution<Tree>( new TreeDiscreteCharacterData() ),
 	current_ln_prob(0.0),
 	old_ln_prob(0.0),
 	probability_dirty(true),
+	n_proc(n_proc_),
 	taxa(taxa_),
 	age(age_),
 	condition_type(condition_type_),

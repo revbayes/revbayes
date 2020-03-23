@@ -38,7 +38,8 @@ namespace RevBayesCore {
 																 const std::string&            condition_type_,
 																 const TypedDagNode<Simplex >* root_frequency_,
 																 const size_t                  num_states_,
-																 bool                          use_origin_);
+																 bool                          use_origin_,
+																 size_t                        n_proc_);
 
         // pure virtual member functions
         virtual GeneralizedLineageHeterogeneousBirthDeathSamplingProcess* clone(void) const;
@@ -79,6 +80,7 @@ namespace RevBayesCore {
         bool   probability_dirty;
 
         // tensorphylo interface
+        size_t                                    n_proc;
         TensorPhylo::DistributionHandlerSharedPtr tp_ptr;
 
         // simulation functions

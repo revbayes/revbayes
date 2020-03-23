@@ -114,8 +114,11 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     	throw RbException("nStates must be 2 or greater.");
     }
 
+    // number of states
+    size_t num_procs = size_t(static_cast<const Natural &>( n_proc->getRevObject() ).getValue());
+
     // make the distribution
-    RevBayesCore::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess* d = new RevBayesCore::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess(tax, sa, cond, root_freq, num_states, use_origin);
+    RevBayesCore::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess* d = new RevBayesCore::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess(tax, sa, cond, root_freq, num_states, use_origin, num_procs);
 
     // speciation rates
     if ( lambda->getRevObject() != RevNullObject::getInstance() )
@@ -461,6 +464,9 @@ const MemberRules& Dist_GLHBDSP::getParameterRules(void) const
 		// number of states
         dist_member_rules.push_back( new ArgumentRule( "nStates", Natural::getClassTypeSpec(), "The number of discrete states.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(2) ) );
 
+		// number of processors
+        dist_member_rules.push_back( new ArgumentRule( "nProc", Natural::getClassTypeSpec(), "The number of processors for parallel calculations.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
+
         rules_set = true;
     }
 
@@ -599,6 +605,10 @@ void Dist_GLHBDSP::setConstParameter(const std::string& name, const RevPtr<const
 	else if ( name == "nStates" )
 	{
 		n_states = var;
+	}
+	else if ( name == "nProc" )
+	{
+		n_proc = var;
 	}
 	else
 	{
