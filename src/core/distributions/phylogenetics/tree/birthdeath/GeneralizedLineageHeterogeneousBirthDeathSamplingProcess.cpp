@@ -13,6 +13,8 @@
 #include "TopologyNode.h"
 #include "Taxon.h"
 #include "Tree.h"
+#include "RlUserInterface.h"
+
 
 using namespace RevBayesCore;
 
@@ -88,7 +90,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	}
 //	std::cout << "tensorphylo version: " << tp_ptr->getVersion() << std::endl;
 	// turn on/off debug
-	//tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_FILE, "debug.txt");
+//	tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_FILE, "debug.txt");
 //	tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_PRINT);
 
 	// add the parameters
@@ -277,9 +279,9 @@ double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbab
 
     // NOTE: this likelihood differs from the one computed in other revbayes
     // distributions because we include the probability density of the root node.
-    // that probability density drops out if we condition on anything but time, in which
-    // case this likelihood will be equivalent to a likelihood from other revbayes
-    // birth-death models (but only in the case where rates are independent of state)
+    // for lineage-homogeneous (state-independent) models, that probability density
+    // drops out if we condition on survival, in which case this likelihood
+    // will be equivalent to a likelihood from other revbayes birth-death models
 
     return current_ln_prob;
 }
@@ -957,6 +959,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::simulateTree(void)
 {
 	// Warning: simulating tree under uniform model.
+	RBOUT("Warning: simulating tree under uniform model.");
 
 	// simulating a tree
 
