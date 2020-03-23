@@ -13,7 +13,9 @@ DemographicFunction::DemographicFunction(void) : Cloneable()
     
 }
 
-
+/**
+ * @param[in]   f    The demographic function to copy.
+ */
 DemographicFunction::DemographicFunction(const DemographicFunction &f) :
     variables( f.variables )
 {
@@ -21,9 +23,6 @@ DemographicFunction::DemographicFunction(const DemographicFunction &f) :
     for (std::vector<const DagNode*>::iterator it = variables.begin(); it != variables.end(); it++)
     {
         const DagNode *the_node = *it;
-        
-        // add myself to the set of monitors
-//        the_node->addMonitor( this );
         
         // tell the node that we have a reference to it (avoids deletion)
         the_node->incrementReferenceCount();
@@ -37,13 +36,9 @@ DemographicFunction::~DemographicFunction(void)
     
     for (std::vector<const DagNode*>::iterator it = variables.begin(); it != variables.end(); it++)
     {
-        const DagNode *the_node = *it;
+        const DagNode *the_node = *it; 
         
-        // remove myself to the set of monitors
-//        the_node->removeMonitor( this );
-        
-        
-        // tell the node that we have a reference to it (avoids deletion)
+        // delete the node if there are no references to it
         if ( the_node->decrementReferenceCount() == 0 )
         {
             delete *it;
@@ -52,7 +47,9 @@ DemographicFunction::~DemographicFunction(void)
     
 }
 
-
+/**
+ * @param[in]   f    The demographic function to copy.
+ */
 DemographicFunction& DemographicFunction::operator=(const DemographicFunction &f)
 {
     
@@ -63,10 +60,7 @@ DemographicFunction& DemographicFunction::operator=(const DemographicFunction &f
         {
             const DagNode *the_node = *it;
             
-            // remove myself to the set of monitors
-//            the_node->removeMonitor( this );
-            
-            // tell the node that we have a reference to it (avoids deletion)
+            // delete the node if there are no references to it
             if ( the_node->decrementReferenceCount() == 0 )
             {
                 delete *it;
@@ -81,9 +75,6 @@ DemographicFunction& DemographicFunction::operator=(const DemographicFunction &f
             
             const DagNode *the_node = *it;
             
-            // add myself to the set of monitors
-//            the_node->addMonitor( this );
-            
             // tell the node that we have a reference to it (avoids deletion)
             the_node->incrementReferenceCount();
         }
@@ -92,24 +83,22 @@ DemographicFunction& DemographicFunction::operator=(const DemographicFunction &f
     return *this;
 }
 
-
+/**
+ * @param[in]   n    Pointer to the DAG node to be added to the nodes vector.
+ */
 void DemographicFunction::addVariable(const DagNode *n)
 {
     
     variables.push_back( n );
-    
-    // add myself to the set of monitors
-//    n->addMonitor( this );
-    
+      
     // tell the node that we have a reference to it (avoids deletion)
-    n->incrementReferenceCount();
-    
-    // now we need to sort again
-//    sortNodesByName();
-    
+    n->incrementReferenceCount();   
 }
 
 
+/**
+ * @return   The nodes vector containing the variables.
+ */
 const std::vector<const DagNode *>& DemographicFunction::getDagNodes(void) const
 {
     
@@ -117,73 +106,11 @@ const std::vector<const DagNode *>& DemographicFunction::getDagNodes(void) const
 }
 
 
-
-//void DemographicFunction::removeVariable(DagNode *n)
-//{
-//
-//    for (std::vector<DagNode*>::iterator it = variables.begin(); it != variables.end(); ++it)
-//    {
-//        if ( *it == n )
-//        {
-//            // move myself to the set of monitors
-////            n->removeMonitor( this );
-//
-//            // tell the node that we have a reference to it (avoids deletion)
-//            if ( n->decrementReferenceCount() == 0 )
-//            {
-//                delete *it;
-//            }
-//
-//            variables.erase( it );
-//
-//            // we assume that nodes are unique
-//            break;
-//        }
-//    }
-//
-//    // now we need to sort again
-////    sortNodesByName();
-//
-//}
-
-
-//void DemographicFunction::setDagNodes( const std::vector<DagNode *> &args)
-//{
-//
-//    for (std::vector<DagNode*>::iterator it = variables.begin(); it != variables.end(); it++)
-//    {
-//        DagNode *the_node = *it;
-//
-//        // remove myself to the set of monitors
-////        the_node->removeMonitor( this );
-//
-//        // tell the node that we have a reference to it (avoids deletion)
-//        if ( the_node->decrementReferenceCount() == 0 )
-//        {
-//            delete *it;
-//        }
-//    }
-//
-//    // set the nodes (we don't own them)
-//    variables = args;
-//
-//    for (std::vector<DagNode*>::iterator it = variables.begin(); it != variables.end(); it++)
-//    {
-//
-//        DagNode *the_node = *it;
-//
-//        // add myself to the set of monitors
-////        the_node->addMonitor( this );
-//
-//        // tell the node that we have a reference to it (avoids deletion)
-//        the_node->incrementReferenceCount();
-//    }
-//
-////    sortNodesByName();
-//
-//}
-
-
+/**
+ * @param[in]   old_node    Pointer to the DAG node to be replaced
+ * @param[in]   new_node    Pointer to the DAG node replacing the other
+ *
+ */
 void DemographicFunction::swapNode(const DagNode *old_node, const DagNode *new_node)
 {
 
@@ -194,11 +121,7 @@ void DemographicFunction::swapNode(const DagNode *old_node, const DagNode *new_n
     {
         throw RbException("Cannot replace DAG node with name\"" + old_node->getName() + "\" in this demographic function because the demographic function doesn't hold this DAG node.");
     }
-    
-    // remove myself from the old node and add myself to the new node
-//    oldN->removeMonitor( this );
-//    newN->addMonitor( this );
-    
+        
     // increment and decrement the reference counts
     new_node->incrementReferenceCount();
     if ( old_node->decrementReferenceCount() == 0 )
