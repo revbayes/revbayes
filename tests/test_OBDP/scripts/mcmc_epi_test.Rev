@@ -27,7 +27,7 @@ occurrence_ages <- readMatrix(file="data-epi-test/data_occurrences.csv", delimit
 lambda ~ dnExp(10)
 mu ~ dnExp(10)
 psi ~ dnExp(10)
-omega <- 0.0
+omega <- 2.0
 rho <- 1.0
 rm <- 0.0
 N <- 30

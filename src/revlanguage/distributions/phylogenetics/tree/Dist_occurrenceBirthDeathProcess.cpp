@@ -178,7 +178,7 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
     std::vector<double> occ_ages;
     if ( occurrence_ages->getRevObject() != RevNullObject::getInstance() )
     {
-      occ_ages = static_cast<const ModelVector<RealPos> &>( occurrence_ages->getRevObject() ).getValue();
+      occ_ages = static_cast<const ModelVector<Real> &>( occurrence_ages->getRevObject() ).getValue();
     }
 
     // the start condition
@@ -191,7 +191,7 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tr = NULL;
     if ( initialTree->getRevObject() != RevNullObject::getInstance() )
     {
-       tr                                        = static_cast<const TimeTree &>( initialTree->getRevObject() ).getDagNode();
+       tr                                       = static_cast<const TimeTree &>( initialTree->getRevObject() ).getDagNode();
     }
 
 
@@ -322,7 +322,7 @@ const MemberRules& Dist_occurrenceBirthDeathProcess::getParameterRules(void) con
         dist_member_rules.push_back( new OptionRule( "condition",           new RlString("time"), optionsCondition, "The condition of the process." ) );
         dist_member_rules.push_back( new ArgumentRule( "taxa"  ,            ModelVector<Taxon>::getClassTypeSpec(), "The taxa used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
-        dist_member_rules.push_back( new ArgumentRule( "occurrence_ages" ,  ModelVector<RealPos>::getClassTypeSpec() , "The fixed occurrence ages", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "occurrence_ages" ,  ModelVector<Real>::getClassTypeSpec() , "The fixed occurrence ages", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
 
         dist_member_rules.push_back( new ArgumentRule( "useMt",             RlBoolean::getClassTypeSpec(), "If true computes densities with the Mt forward traversal algorithm otherwise uses Lt backward one.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( true ) ) );
 
