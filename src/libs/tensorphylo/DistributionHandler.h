@@ -63,6 +63,7 @@ public:
 	virtual void setData(const std::vector<std::string> &taxa, const std::map<std::string, std::vector<double> > &aProbabilityMap) = 0;
 
 	virtual void setApplyTreeLikCorrection(bool doApply) = 0;
+	virtual void setConditionalProbCompatibilityMode(bool setActive) = 0;
 	virtual void setLikelihoodApproximator(approximatorVersion_t approxVersion) = 0;
 	virtual void setConditionalProbabilityType(conditionalProbability_t condProb) = 0;
 	virtual void setNumberOfThreads(size_t nThreads) = 0;
