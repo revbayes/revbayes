@@ -1,0 +1,145 @@
+############################################################################################
+#
+# RevBayes Validation Test: Occurrence birth-death process
+#
+# Model: Tree is drawn from a constant-rate fossilized birth-death process with occurrences.
+#
+#
+# authors: Jérémy Andréoletti (from Walker Pett's FBDP test function 
+#                                   + "Total-evidence dating under the FBD model" tutorial)
+#
+############################################################################################
+
+seed(12345)
+
+#######################
+# Reading in the Data #
+#######################
+
+### Read in taxon data
+
+
+# set my move index
+mvi = 0
+taxa <- readTaxonData("data-epi-test/data_taxa.csv")
+sequences <- readDiscreteCharacterData("data-macro-test/data_seq_extant.nex")
+morpho <- readDiscreteCharacterData("data-macro-test/data_morpho.nex")
+occurrence_ages <- readMatrix(file="data-epi-test/data_occurrences.csv", delimiter="; ")[1]
+
+#Add Missing Taxa
+sequences.addMissingTaxa( taxa )
+morpho.addMissingTaxa( taxa )
+
+lambda ~ dnExp(10)
+mu ~ dnExp(10)
+psi ~ dnExp(10)
+omega ~ dnExp(5)
+rho <- 1.0
+rm <- 0.0
+N <- 20
+cond <- "time"
+start_time ~ dnUnif(7.0, 12.0)
+useMt <- TRUE
+
+
+
+
+ # create some moves that change the stochastic variables
+ # all moves are sliding proposals but you could use scaling proposals for the rates too
+moves[mvi++] = mvScale(lambda,lambda=0.1, weight=1, tune=TRUE)
+moves[mvi++] = mvScale(mu,lambda=0.1, weight=1, tune=TRUE)
+moves[mvi++] = mvScale(psi,lambda=0.1, weight=1, tune=TRUE)
+moves[mvi++] = mvScale(omega,lambda=0.1, weight=1, tune=TRUE)
+
+moves[mvi++] = mvSlide(start_time, delta=0.1,  weight=5.0, tune=TRUE)
+
+
+### Define the tree-prior distribution as the fossilized birth-death process ###
+obd_tree ~ dnOBDP(  originAge=start_time,
+                    lambda=lambda,
+                    mu=mu, 
+                    psi=psi, 
+                    omega=omega, 
+                    rho=rho, 
+                    removalPr=rm, 
+                    maxHiddenLin=N, 
+                    condition=cond, 
+                    taxa=taxa, 
+                    occurrence_ages=occurrence_ages, 
+                    useMt=useMt)
+
+moves[mvi++] = mvFNPR(obd_tree, weight=15.0)
+moves[mvi++] = mvCollapseExpandFossilBranch(obd_tree, start_time, weight=6.0)
+moves[mvi++] = mvNodeTimeSlideUniform(obd_tree, weight=40.0)
+moves[mvi++] = mvRootTimeSlideUniform(obd_tree, start_time, weight=5.0)
+
+num_samp_anc := obd_tree.numSampledAncestors();
+
+## Strict clock model
+branch_rates ~ dnExponential(10.0)
+moves[mvi++] = mvScale(branch_rates, lambda=0.1, tune=TRUE)
+
+## Nucleotide sequence evolution
+sf_hp <- v(1,1,1,1)
+sf ~ dnDirichlet(sf_hp)
+moves[mvi++] = mvSimplexElementScale(sf, alpha=10.0, weight=5.0)
+
+er_hp <- v(1,1,1,1,1,1)
+er ~ dnDirichlet(er_hp)
+moves[mvi++] = mvSimplexElementScale(er, alpha=10.0, weight=5.0)
+
+Q_seq := fnGTR(er,sf)
+
+alpha_seq ~ dnExponential( 1.0 )
+moves[mvi++] = mvScale(alpha_seq, lambda=0.1,  weight=1.0, tune=TRUE)
+
+rates_seq := fnDiscretizeGamma( alpha_seq, alpha_seq, 4 )
+
+extant_tree := fnExtantTree(obd_tree)
+phySeq ~ dnPhyloCTMC(tree=extant_tree, Q=Q_seq, siteRates=rates_seq, branchRates=branch_rates, type="DNA")
+phySeq.clamp(sequences)
+
+## Modeling the Evolution of Binary Morphological Characters
+
+Q_morpho := fnJC(2)
+
+alpha_morpho ~ dnExponential( 1.0 )
+rates_morpho := fnDiscretizeGamma( alpha_morpho, alpha_morpho, 4 )
+moves[mvi++] = mvScale(alpha_morpho, lambda=0.1,  weight=3.0, tune=TRUE)
+
+clock_morpho ~ dnExponential(1.0)
+moves[mvi++] = mvScale(clock_morpho, lambda=0.1, weight=4.0, tune=TRUE) 
+
+phyMorpho ~ dnPhyloCTMC(tree=obd_tree, siteRates=rates_morpho, branchRates=clock_morpho, Q=Q_morpho, type="Standard")
+phyMorpho.clamp(morpho)
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(obd_tree)
+
+
+monitors[1] = mnStochasticVariable(filename="output_macro_test/mcmc_OBDP_macro_test.out", printgen=100)
+monitors[2] = mnFile(filename="output_macro_test/mcmc_OBDP_macro_test.trees", printgen=100,obd_tree)
+monitors[3] = mnScreen(printgen=100)
+print("my model ok")
+# mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
+mymcmc = mcmc(mymodel, monitors, moves)
+
+mymcmc.run(generations=1000, tuningInterval=200)
+
+# check the performance of the MCMC/moves
+mymcmc.operatorSummary()
+
+# Read in the tree trace and construct the maximum clade credibility (MCC) tree #
+trace = readTreeTrace("output_macro_test/mcmc_OBDP_macro_test.trees")
+
+# Summarize tree trace and save MCC tree to file
+mccTree(trace, file="output_macro_test/mcmc_OBDP_macro_test.tre" )
+
+
+# you may want to quit RevBayes now
+q()

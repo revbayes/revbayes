@@ -87,7 +87,7 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(   const TypedDagNode<d
     addParameter( removalPr );
     addParameter( maxHiddenLin );
     addParameter( occurrence_ages );
-    
+
 
     if (tr != NULL)
     {
@@ -135,10 +135,6 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) 
     const RevBayesCore::Tree tree(*value);
 
     std::vector<double> occAges = occurrence_ages->getValue();
-
-    std::cout << "cond : " << cond << std::endl;
-    std::cout << "occurrence_ages size : " << occAges.size() << std::endl;
-    std::cout << "occurrence_ages 0 : " << occAges[0] << std::endl;
 
     if (useMt) {
         const std::vector<double> time_points_Mt( 1, start_age->getValue() );

@@ -50,7 +50,6 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
                                                           const std::vector<double> &occurrence_ages,
                                                           const Tree &timeTree)
 {
-    std::cout << "ComputeLikelihoodsForwardsMt in" << std::endl;
 
     // Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
     struct Event {
@@ -126,14 +125,8 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
         }
         else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
         {
-            // std::cout << "Is branching node root ? " << n.isRoot() << std::endl;
-
             // node is a "true" bifurcation event
             events.push_back(Event(n.getAge(),"branching time")) ;
-        }
-        else
-        {
-            std::cout << "Warning : non-categorized node" << std::endl;
         }
     }
 
@@ -277,7 +270,6 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
     //     likelihood += Mt[i] * pow(rh,k) * pow(1.0 - rh,i);
     // }
 
-    std::cout << "ComputeLikelihoodsForwardsMt out" << std::endl;
     return B;
 }
 
@@ -389,8 +381,6 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
         }
         else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
         {
-            // std::cout << "Is branching node root ? " << n.isRoot() << std::endl;
-
             // node is a "true" bifurcation event
             events.push_back(Event(n.getAge(),"branching time")) ;
         }

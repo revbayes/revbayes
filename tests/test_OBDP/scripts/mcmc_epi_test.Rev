@@ -1,11 +1,11 @@
 ################################################################################
 #
-# RevBayes Validation Test: Fossilized birth-death process
+# RevBayes Validation Test: Occurrence birth-death process
 #
-# Model: Tree is drawn from a constant-rate fossilized birth-death process.
+# Model: Tree is drawn from a constant-rate fossilized birth-death process with occurrences.
 #
 #
-# authors: Walker Pett
+# authors: Antoine Zwaans (from Walker Pett's FBDP test function)
 #
 ################################################################################
 
@@ -30,7 +30,7 @@ psi ~ dnExp(10)
 omega <- 2.0
 rho <- 1.0
 rm <- 0.0
-N <- 30
+N <- 20
 cond <- "time"
 start_time ~ dnUnif(7.7, 12.0)
 useMt <- TRUE
@@ -112,8 +112,9 @@ phySeq.clamp(sequences)
 mymodel = model(obd_tree)
 
 
-monitors[1] = mnStochasticVariable(filename="output/mcmc_OBDP_wo_oc_epi.out", printgen=100)
-monitors[2] = mnFile(filename="output/mcmc_OBDP_epi.trees", printgen=100,obd_tree)
+monitors[1] = mnStochasticVariable(filename="output_wo_oc_epi/mcmc_OBDP_wo_oc_epi.out", printgen=100)
+monitors[2] = mnFile(filename="output_wo_oc_epi/mcmc_OBDP_wo_oc_epi.trees", printgen=100,obd_tree)
+monitors[3] = mnScreen(printgen=100)
 print("my model ok")
 mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
 
@@ -122,10 +123,10 @@ mymcmc.run(generations=1000)
 
 
 # Read in the tree trace and construct the maximum clade credibility (MCC) tree #
-trace = readTreeTrace("output/mcmc_OBDP_wo_oc_epi.trees")
+trace = readTreeTrace("output_wo_oc_epi/mcmc_OBDP_wo_oc_epi.trees")
 
 # Summarize tree trace and save MCC tree to file
-mccTree(trace, file="output/mcmc_OBDP_wo_oc_epi.tre" )
+mccTree(trace, file="output_wo_oc_epi/mcmc_OBDP_wo_oc_epi.tre" )
 
 
 # you may want to quit RevBayes now

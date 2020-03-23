@@ -2,7 +2,7 @@
 
 Begin data;
 	Dimensions ntax=55 nchar=60;
-	Format datatype=dna gap=- missing=?;
+	Format datatype=standard gap=- missing=? symbols="01";
 	Matrix
 f53			001110100101000000001001000010111011110001010110101100110110
 f54			011110100101001000001001000010111011110001000110101100110110

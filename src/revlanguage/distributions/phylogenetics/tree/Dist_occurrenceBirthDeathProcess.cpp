@@ -154,13 +154,13 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
     // extinction rate
     RevBayesCore::TypedDagNode<double>* m       = static_cast<const RealPos &>( mu->getRevObject() ).getDagNode();
 
-    // serial sampling rate
+    // sampling rate
     RevBayesCore::TypedDagNode<double>* p       = static_cast<const RealPos &>( psi->getRevObject() ).getDagNode();
 
-    // occurrence probability
+    // occurrence rate
     RevBayesCore::TypedDagNode<double>* o       = static_cast<const RealPos &>( omega->getRevObject() ).getDagNode();
 
-    // sampling probability
+    // sampling probability at present
     RevBayesCore::TypedDagNode<double>* rh      = static_cast<const RealPos &>( rho->getRevObject() ).getDagNode();
 
     // removal probability
@@ -176,23 +176,8 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
     std::vector<RevBayesCore::Taxon>    tn      = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
 
     // occurrence ages
-
-    // RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*  occAges = NULL;
-    // if ( initialTree->getRevObject() != RevNullObject::getInstance() )
-    // {
-    //     std::cout << "loop test" << std::endl;
-    //     occAges                                 = static_cast<const ModelVector<Real> &>( occurrence_ages->getRevObject() ).getDagNode();
-    // }
-
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*  occAges = static_cast<const ModelVector<Real> &>( occurrence_ages->getRevObject() ).getDagNode();
-    // std::vector<double> occAges;
-    // if ( occurrence_ages->getRevObject() != RevNullObject::getInstance() )
-    // {
-    //     std::cout << "occAges size : " << occAges.size() << std::endl;
-    //     occAges = static_cast<const ModelVector<Real> &>( occurrence_ages->getRevObject() ).getValue();
-    //     std::cout << "occAges size : " << occAges.size() << std::endl;
-    //     std::cout << "occAges 0 : " << occAges[0] << std::endl;
-    // }
+
 
     // the start condition
     bool                                uo      = ( start_condition == "originAge" ? true : false );
