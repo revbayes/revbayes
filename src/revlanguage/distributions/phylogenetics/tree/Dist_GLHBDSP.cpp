@@ -114,7 +114,7 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     	throw RbException("nStates must be 2 or greater.");
     }
 
-    // number of states
+    // number of processors
     size_t num_procs = size_t(static_cast<const Natural &>( n_proc->getRevObject() ).getValue());
 
     // make the distribution
