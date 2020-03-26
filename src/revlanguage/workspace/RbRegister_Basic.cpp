@@ -138,6 +138,7 @@
 #include "Func_listOptions.h"
 #include "Func_ls.h"
 #include "Func_printSeed.h"
+#include "Func_profile.h"
 #include "Func_quit.h"
 #include "Func_range.h"
 #include "Func_replicate.h"
@@ -313,6 +314,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_listOptions()                 );
         addFunction( new Func_ls()                          );
         addFunction( new Func_printSeed()                   );
+        addFunction( new Func_profile()                     );
         addFunction( new Func_quit()                        );
         addFunction( new Func_replicate<Integer>()          );
         addFunction( new Func_replicate<Real>()             );
@@ -453,7 +455,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func__scalarMatrixMult<Integer    , MatrixRealSymmetric  , MatrixRealSymmetric  >(  )   );
         addFunction( new Func__scalarMatrixMult<Real       , MatrixRealSymmetric  , MatrixRealSymmetric  >(  )   );
         addFunction( new Func__scalarMatrixMult<RealPos    , MatrixRealSymmetric  , MatrixRealSymmetric  >(  )   );
-        
+
         // subtraction
         addFunction( new Func__sub< Integer                            , Integer               , Integer               >(  )  );
         addFunction( new Func__sub< Real                               , Real                  , Real                  >(  )  );
@@ -498,8 +500,8 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func__conversion<ModelVector<ModelVector<RealPos> >, ModelVector<ModelVector<Real> > >()            );
         addFunction( new Func__conversion<ModelVector<ModelVector<Probability> >, ModelVector<ModelVector<RealPos> > >()     );
         addFunction( new Func__conversion<ModelVector<ModelVector<Probability> >, ModelVector<ModelVector<Real> > >()        );
-        
-        
+
+
 
 
 
@@ -541,7 +543,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_writeCharacterDataDelimited()             );
         addFunction( new Func_writeFasta()                              );
         addFunction( new Func_writeNexus()                              );
-        
+
     }
     catch(RbException& rbException)
     {
