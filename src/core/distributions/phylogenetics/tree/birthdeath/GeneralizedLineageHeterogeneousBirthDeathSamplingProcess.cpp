@@ -273,7 +273,7 @@ double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbab
     old_ln_prob = current_ln_prob;
 
     // calculate a likelihood!
-		//tp_ptr->writeStateToFile("state.dat");
+	tp_ptr->writeStateToFile("params.dat");
 		//tp_ptr->loadStateFromFile("state.dat");
     current_ln_prob = tp_ptr->computeLogLikelihood();
 
@@ -1145,7 +1145,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecializati
     		updateEta();
     		probability_dirty = true;
     	}
-    	else if ( affecter == omega_const || affecter == eta_var || affecter == omega_times  )
+    	else if ( affecter == omega_const || affecter == omega_var || affecter == omega_times  )
     	{
     		omega_dirty = true;
     		updateOmega();
