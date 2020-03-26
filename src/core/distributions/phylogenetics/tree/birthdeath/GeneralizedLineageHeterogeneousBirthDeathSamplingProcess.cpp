@@ -273,7 +273,7 @@ double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbab
     old_ln_prob = current_ln_prob;
 
     // calculate a likelihood!
-	tp_ptr->writeStateToFile("params.dat");
+//	tp_ptr->writeStateToFile("params.dat");
 		//tp_ptr->loadStateFromFile("state.dat");
     current_ln_prob = tp_ptr->computeLogLikelihood();
 
@@ -288,6 +288,12 @@ double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbab
 
     return current_ln_prob;
 }
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::dumpModel(std::string file_name)
+{
+	tp_ptr->writeStateToFile(file_name);
+}
+
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::fireTreeChangeEvent(const TopologyNode &n, const unsigned& m)
 {
@@ -1934,6 +1940,19 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> GeneralizedLineageHeterogeneousBir
         found = true;
         RevLanguage::AbstractHomologousDiscreteCharacterData *tip_states = new RevLanguage::AbstractHomologousDiscreteCharacterData( getCharacterData() );
         return new RevLanguage::RevVariable( tip_states );
+    }
+
+    if (name == "dumpModel")
+    {
+    	found = true;
+
+    	// get the filename
+    	std::string file_name = args[0]->getValueAsString();
+
+    	// write the file
+    	tp_ptr->writeStateToFile(file_name);
+
+    	return NULL;
     }
 
 	return TypedDistribution<Tree>::executeProcedure( name, args, found );
