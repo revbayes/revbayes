@@ -35,7 +35,7 @@ RevPtr<RevVariable> Func_profile::execute( void )
 {
 
     const std::string &command = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
-    const std::string &event = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+    const std::string &event = static_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
 
     double duration = 0.;
     if ( command == "start" )
