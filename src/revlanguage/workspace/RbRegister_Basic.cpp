@@ -140,6 +140,7 @@
 #include "Func_listOptions.h"
 #include "Func_ls.h"
 #include "Func_printSeed.h"
+#include "Func_profile.h"
 #include "Func_quit.h"
 #include "Func_range.h"
 #include "Func_replicate.h"
@@ -465,7 +466,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func__scalarMatrixMult<Integer    , MatrixRealSymmetric  , MatrixRealSymmetric  >(  )   );
         addFunction( new Func__scalarMatrixMult<Real       , MatrixRealSymmetric  , MatrixRealSymmetric  >(  )   );
         addFunction( new Func__scalarMatrixMult<RealPos    , MatrixRealSymmetric  , MatrixRealSymmetric  >(  )   );
-        
+
         // subtraction
         addFunction( new Func__sub< Integer                            , Integer               , Integer               >(  )  );
         addFunction( new Func__sub< Real                               , Real                  , Real                  >(  )  );
@@ -510,8 +511,8 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func__conversion<ModelVector<ModelVector<RealPos> >, ModelVector<ModelVector<Real> > >()            );
         addFunction( new Func__conversion<ModelVector<ModelVector<Probability> >, ModelVector<ModelVector<RealPos> > >()     );
         addFunction( new Func__conversion<ModelVector<ModelVector<Probability> >, ModelVector<ModelVector<Real> > >()        );
-        
-        
+
+
         // index operation
         addFunction( new Func__simplexIndexOperator() );
 
@@ -556,7 +557,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_writeDelimitedCharacterData()             );
         addFunction( new Func_writeFasta()                              );
         addFunction( new Func_writeNexus()                              );
-        
+
     }
     catch(RbException& rbException)
     {
