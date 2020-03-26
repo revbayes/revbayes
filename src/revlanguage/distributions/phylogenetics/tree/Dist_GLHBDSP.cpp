@@ -372,6 +372,10 @@ MethodTable Dist_GLHBDSP::getDistributionMethods( void ) const
     ArgumentRules* getCharDataArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "getCharData", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), getCharDataArgRules ) );
 
+    ArgumentRules* dumpModelArgRules = new ArgumentRules();
+    dumpModelArgRules->push_back( new ArgumentRule( "filename", RlString::getClassTypeSpec(), "The file to write the model in.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure( "dumpModel", RlUtils::Void, dumpModelArgRules ) );
+
     return methods;
 }
 

@@ -51,6 +51,8 @@ namespace RevBayesCore {
         virtual void                                                      redrawValue(void);
         virtual void                                                      setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
         
+        void                                                              dumpModel(std::string file_name);
+
         // parameter setters
         void                                                              setLambda(const TypedDagNode< RbVector<double> >* param);
         void                                                              setLambda(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times);
