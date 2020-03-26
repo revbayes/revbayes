@@ -326,6 +326,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_listOptions()                 );
         addFunction( new Func_ls()                          );
         addFunction( new Func_printSeed()                   );
+        addFunction( new Func_profile()                     );
         addFunction( new Func_quit()                        );
         addFunction( new Func_replicate<Integer>()          );
         addFunction( new Func_replicate<Real>()             );
