@@ -176,7 +176,12 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
     std::vector<RevBayesCore::Taxon>    tn      = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
 
     // occurrence ages
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*  occAges = static_cast<const ModelVector<Real> &>( occurrence_ages->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*  occAges = NULL;
+    if ( occurrence_ages->getRevObject() != RevNullObject::getInstance() )
+    {
+        occAges                                  = static_cast<const ModelVector<Real> &>( occurrence_ages->getRevObject() ).getDagNode();
+    }
+    // RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*  occAges = static_cast<const ModelVector<Real> &>( occurrence_ages->getRevObject() ).getDagNode();
 
 
     // the start condition

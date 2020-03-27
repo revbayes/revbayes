@@ -82,10 +82,9 @@ template <class valueType> class RbVector;
       const std::string &                                   cond;                                  //!< Condition of the process ("time" or "survival")
       const std::vector<Taxon> &                            taxa;                                  //!< Extinct and extant taxa
       // const std::vector<double> &                           occurrence_ages;                       //!< Vector of occurrence times
-      const TypedDagNode< RevBayesCore::RbVector<double> > *occurrence_ages;                       //!< Vector of occurrence times
+      const TypedDagNode< RevBayesCore::RbVector<double> > *occurrence_ages;                    //!< Vector of occurrence times
       const bool                                            useOrigin;                             //!< Start the process at the origin (otherwise root)
       const bool                                            useMt;                                 //!< Forward traversal Mt algorithm (otherwise backward Lt)
-      const TypedDagNode< Tree > *                          initialTree;                           //!< Facultative initial tree
 
     };
 

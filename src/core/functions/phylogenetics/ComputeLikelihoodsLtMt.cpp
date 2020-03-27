@@ -187,6 +187,11 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
     RbVector<double> Mt(N+1, 0.0);
     Mt[0] = 1;
     double thPlusOne = events[0].time;
+    std::cout << "Event time : " << events[0].time << " - Event type : " << events[0].type << std::endl;
+    
+    if(thPlusOne != start_age->getValue()) {
+        std::cout << "WARNING : thPlusOne != start_age : " << thPlusOne << " != " << start_age->getValue() << std::endl;
+    };
 
     // Then we iterate over the next events
     for(int h = 1; h < events.size(); h++){
@@ -195,7 +200,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
         double th = events[h].time;
 
         if(th > start_age->getValue()) {
-            std::cout << "ERROR : th > start_age : " << th << " > " << start_age->getValue() << std::endl;
+            std::cout << "WARNING : th > start_age : " << th << " > " << start_age->getValue() << std::endl;
             continue;
         };
 
@@ -261,6 +266,8 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
             }
             k += 1;
         }
+
+        std::cout << "Event time : " << th << " - Event type : " << type << " -> Mt[0] : " << Mt[0] << " / Mt[1] : " << Mt[1] << std::endl;
 
         thPlusOne = th;
     }
@@ -442,6 +449,8 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
         Lt[i] *= pow( 1.0-rh, i );
     }
 
+    std::cout << "Event time : " << events[0].time << " - Event type : " << events[0].type << std::endl;
+
     // We then iterate over the following events until finding the time of origin
     for(int h = 1; h < events.size(); h++){
 
@@ -509,6 +518,8 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
             }
             k -= 1;
         }
+
+        std::cout << "Event time : " << th << " - Event type : " << type << " -> Lt[0] : " << Lt[0] << " / Lt[1] : " << Lt[1] << std::endl;
 
         thMinusOne = th;
     }

@@ -19,7 +19,7 @@
 
 #include "ComputeLikelihoodsLtMt.h"
 
-namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class DagNode;}
 
 
 using namespace RevBayesCore;
@@ -88,15 +88,14 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(   const TypedDagNode<d
     addParameter( maxHiddenLin );
     addParameter( occurrence_ages );
 
-
     if (tr != NULL)
     {
-      delete value;
-      value = &(tr->getValue());
+        delete value;
+        value = &(tr->getValue());
     }
     else
     {
-      simulateTree();
+        simulateTree();
     }
 
 }
@@ -127,17 +126,25 @@ OccurrenceBirthDeathProcess* OccurrenceBirthDeathProcess::clone( void ) const
  */
 double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) const
 {
-
     // prepare the probability computation
     prepareProbComputation();
 
     // compute the log-likelihood : use ComputeLikelihoodsBackwardsLt (backward traversal of the tree) or ComputeLikelihoodsForwardsMt (forward traversal of the tree)
     const RevBayesCore::Tree tree(*value);
 
-    std::vector<double> occAges = occurrence_ages->getValue();
+    std::vector<double> occAges;
+    if (occurrence_ages != NULL)
+    {
+        occAges = occurrence_ages->getValue();
+    }
+    else
+    {
+        occAges = std::vector<double>();
+    }
 
+    std::cout << "lambda=" << lambda->getValue() << " - mu=" << mu->getValue() << " - psi=" << psi->getValue() << " - omega=" << omega->getValue() << " - rho=" << rho->getValue() << " - removalPr=" << removalPr->getValue() << std::endl;
     if (useMt) {
-        const std::vector<double> time_points_Mt( 1, start_age->getValue() );
+        const std::vector<double> time_points_Mt( 1, 0.0 );
         MatrixReal B_Mt = RevBayesCore::ComputeLikelihoodsForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, occAges, tree);
 
         const double rh = rho->getValue();
@@ -145,18 +152,30 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) 
         const size_t k = value->getNumberOfExtantTips();
 
         double likelihood = B_Mt[0][0];
+        // std::cout << "B_Mt[0][0] : " << B_Mt[0][0] << std::endl;
         for(int i = 1; i < N+1; i++){
+            // std::cout << "B_Mt[0][" << i << "] : " << B_Mt[0][i] << std::endl;
+            // std::cout << "B_Mt[0][" << i << "] * pow(rh,k) * pow(1.0 - rh,i) : " << B_Mt[0][i] * pow(rh,k) * pow(1.0 - rh,i) << std::endl;
             likelihood += B_Mt[0][i] * pow(rh,k) * pow(1.0 - rh,i);
-        
-        return likelihood;
         }
+
+        std::cout << "\n ==> Log-Likelihood Mt : " << log(likelihood) << "\n" << std::endl;
+        
+        // return log(likelihood);
     }
-    const std::vector<double> time_points_Lt(1, 0.0);
+    const std::vector<double> time_points_Lt(1, start_age->getValue());
     MatrixReal B_Lt = RevBayesCore::ComputeLikelihoodsBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, occAges, tree);
+    
+    // const long N = maxHiddenLin->getValue();
+    // for(int i = 0; i < N+1; i++){
+    //     std::cout << "B_Lt[0][" << i << "] : " << B_Lt[0][i] << std::endl;
+    // }
 
     double likelihood = B_Lt[0][0];
+    std::cout << "\n ==> Log-Likelihood Lt : " << log(likelihood) << std::endl;
+    std::cout << "\ncomputeLnProbabilityTimes : " << computeLnProbabilityTimes() << "\n\n" << std::endl;
     
-    return likelihood;
+    return log(likelihood);
 }
 
 
@@ -168,7 +187,7 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void ) const
     size_t num_initial_lineages = 2;
     const TopologyNode& root = value->getRoot();
 
-    if (use_origin) {
+    if (useOrigin) {
         // If we are conditioning on survival from the origin,
         // then we must divide by 2 the log survival probability computed by AbstractBirthDeathProcess
         num_initial_lineages = 1;
@@ -221,7 +240,7 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void ) const
         }
         else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
         {
-            if (!n.isRoot() || use_origin)
+            if (!n.isRoot() || useOrigin)
             {
                 // node is bifurcation event (a "true" node)
                 internal_node_ages.push_back( n.getAge() );
@@ -277,7 +296,6 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void ) const
         lnProbTimes -= lnProbNumTaxa( value->getNumberOfTips(), 0, process_time, true );
     }
 
-    std::cout << "Compute lnProbTimes output : " << lnProbTimes << std::endl;
     return lnProbTimes;
 
 }
