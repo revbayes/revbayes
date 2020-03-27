@@ -13,9 +13,6 @@ template <class valueType> class TypedDagNode;
      *
      * Compute the square root of a real number x (sqrt(x) or x^1/2).
      *
-     * \copyright (c) Copyright 2009-2015 (GPL version 3)
-     * \author The RevBayes Development Core Team (Sebastian Hoehna)
-     * \since Version 1.0, 2012-08-13
      *
      */
     class SqrtFunction : public ContinuousFunction {

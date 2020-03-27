@@ -8,10 +8,9 @@ class DagNode;
 template <class valueType> class TypedDagNode;
 
     /**
-     * @brief
-     * ### Bimodal Lognormal Distribution.
+     * @brief **Bimodal Lognormal Distribution** class.
      *
-     * The bimodal lognormal distribution is the mixture of 2 lognormal distributions,
+     * The *bimodal lognormal distribution* is the mixture of 2 lognormal distributions,
      * @f$ \textit{Lognormal}(\mu_1,\sigma_1) @f$ and @f$ \textit{Lognormal}(\mu_2,\sigma_2) @f$,
      * parameterized by a mixing factor of @f$ p @f$.
      *

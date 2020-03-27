@@ -235,7 +235,27 @@ void RateMatrix_FreeK::calculateTransitionProbabilities(double startAge, double 
             tiProbsComplexEigens(t, P);
         }
     }
-    
+
+    for(int i=0; i < num_states; i++)
+    {
+        double total = 0;
+        for(int j=0; j < num_states; j++)
+        {
+#ifdef DEBUG_MATRIX_EXPONENTIAL
+            if (P[i][j] < -1.0e-6)
+                std::cerr<<my_method<<" exp(M)["<<i<<","<<j<<"] = "<<P[i][j]<<"\n";
+#endif
+            P[i][j] = std::max(0.0, P[i][j]);
+            total += P[i][j];
+        }
+#ifdef DEBUG_MATRIX_EXPONENTIAL
+        if (std::abs(total - 1.0) > num_states * 1.0e-6)
+            std::cerr<<my_method<<" exp(M)["<<i<<"]: row sum = "<<total<<"\n";
+#endif
+        double scale = 1.0/total;
+        for(int j=0; j < num_states; j++)
+            P[i][j] *= scale;
+    }
 }
 
 
@@ -528,25 +548,25 @@ void RateMatrix_FreeK::tiProbsEigens(double t, TransitionProbabilityMatrix& P) c
     
     // precalculate the product of the eigenvalue and the branch length
     std::vector<double> eigValExp(num_states);
-	for (size_t s=0; s<num_states; s++)
+    for (size_t s=0; s<num_states; s++)
     {
-		eigValExp[s] = exp(eigenValue[s] * t);
+        eigValExp[s] = exp(eigenValue[s] * t);
     }
     
     // calculate the transition probabilities
-	const double* ptr = &c_ijk[0];
+    const double* ptr = &c_ijk[0];
     double*         p = P.theMatrix;
-	for (size_t i=0; i<num_states; i++)
+    for (size_t i=0; i<num_states; i++)
     {
-		for (size_t j=0; j<num_states; j++, ++p)
+        for (size_t j=0; j<num_states; j++, ++p)
         {
-			double sum = 0.0;
-			for (size_t s=0; s<num_states; s++)
+            double sum = 0.0;
+            for (size_t s=0; s<num_states; s++)
             {
-				sum += (*ptr++) * eigValExp[s];
+                sum += (*ptr++) * eigValExp[s];
             }
             
-            //			P[i][j] = (sum < 0.0) ? 0.0 : sum;
+            //                  P[i][j] = (sum < 0.0) ? 0.0 : sum;
             (*p) = (sum < 0.0) ? 0.0 : sum;
         }
         
@@ -568,22 +588,22 @@ void RateMatrix_FreeK::tiProbsComplexEigens(double t, TransitionProbabilityMatri
     
     // precalculate the product of the eigenvalue and the branch length
     std::vector<std::complex<double> > ceigValExp(num_states);
-	for (size_t s=0; s<num_states; s++)
+    for (size_t s=0; s<num_states; s++)
     {
         std::complex<double> ev = std::complex<double>(eigenValueReal[s], eigenValueComp[s]);
-		ceigValExp[s] = exp(ev * t);
+        ceigValExp[s] = exp(ev * t);
     }
     
     // calculate the transition probabilities
-	const std::complex<double>* ptr = &cc_ijk[0];
-	for (size_t i=0; i<num_states; i++)
+    const std::complex<double>* ptr = &cc_ijk[0];
+    for (size_t i=0; i<num_states; i++)
     {
-		for (size_t j=0; j<num_states; j++)
+        for (size_t j=0; j<num_states; j++)
         {
-			std::complex<double> sum = std::complex<double>(0.0, 0.0);
-			for (size_t s=0; s<num_states; s++)
+            std::complex<double> sum = std::complex<double>(0.0, 0.0);
+            for (size_t s=0; s<num_states; s++)
             {
-				sum += (*ptr++) * ceigValExp[s];
+                sum += (*ptr++) * ceigValExp[s];
             }
 
             P[i][j] = (sum.real() < 0.0) ? 0.0 : sum.real();

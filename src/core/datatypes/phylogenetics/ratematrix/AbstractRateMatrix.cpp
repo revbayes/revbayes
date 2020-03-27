@@ -364,8 +364,8 @@ bool AbstractRateMatrix::simulateStochasticMapping(double startAge, double endAg
 
     // transition probabilities
     TransitionProbabilityMatrix P(num_states);
-//    calculateTransitionProbabilities(startAge, endAge, rate, P);
-    exponentiateMatrixByScalingAndSquaring(branch_length * rate, P);
+    calculateTransitionProbabilities(startAge, endAge, rate, P);
+//    exponentiateMatrixByScalingAndSquaring(branch_length * rate, P);
     stochastic_matrix = std::vector<MatrixReal>();
 
     // dominating rate

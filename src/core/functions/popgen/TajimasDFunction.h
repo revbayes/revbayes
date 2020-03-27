@@ -13,11 +13,6 @@ template <class valueType> class TypedDagNode;
      *
      * This function computes Tajima's D = (pi - theta) / C.
      *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since Version 1.0, 2015-04-30
-     *
      */
     class TajimasDFunction : public TypedFunction<double> {
         

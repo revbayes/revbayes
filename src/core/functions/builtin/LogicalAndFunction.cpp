@@ -1,10 +1,16 @@
 #include "LogicalAndFunction.h"
-
 #include "TypedDagNode.h"
 
 namespace RevBayesCore { class DagNode; }
-
 using namespace RevBayesCore;
+
+/*
+ * LogicalAndFunction Constructor for two TypedDagNodes of type Boolean
+ *
+ * These parameters are the two booleans to be compared by a logical AND
+ * @param l A TypedDagNode of type Boolean
+ * @param r A TypedDagNode of type Boolean
+ */
 
 LogicalAndFunction::LogicalAndFunction(const TypedDagNode<Boolean> *l, const TypedDagNode<Boolean> *r) : TypedFunction<Boolean>( new Boolean(false) ),
     left( l ),
