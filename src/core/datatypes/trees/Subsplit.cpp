@@ -947,7 +947,7 @@ std::string Subsplit::toString( void ) const
 }
 
 /*
- * Gives us the parent-child subsplit that will replace this one on the equivalent edge in a tree rerooted to a specific edge
+ * Returns only case 6 from doVirtualRootingNonRootParent
  *
  * return: parent-child pair
  */
@@ -956,61 +956,63 @@ std::pair<Subsplit,Subsplit> Subsplit::reverseParentChildNonRootParent(const Sub
 
     std::pair<Subsplit,Subsplit> flipped; // This will be in the order parent-child
 
-    // // Define the sets of taxa we need
-    //
-    // // Children clades of child subsplit
-    // RbBitSet s_y = child.bitset.first;
-    // RbBitSet s_z = child.bitset.second;
-    //
-    // // Child subsplit
-    // RbBitSet s = s_y | s_z;
-    //
-    // // Everyone but child subsplit
-    // RbBitSet not_s = ~s;
-    //
-    // // Whole clade of parent
-    // RbBitSet t = parent.asCladeBitset();
-    //
-    // // Sister group of s in t
-    // RbBitSet t_not_s = t & not_s;
-    //
-    // // All taxa not in the clade defined by parent
-    // RbBitSet not_t = ~t;
-    //
-    // // Re-root to a branch in clade y of subsplit s
-    // if (root_to == "s_y")
-    // {
-    //   flipped.first = Subsplit(s_z,not_s);
-    //   flipped.second = Subsplit(t_not_s,not_t);
-    // }
-    // // Re-root to a branch in clade z of subsplit s
-    // else if (root_to == "s_z")
-    // {
-    //   flipped.first = Subsplit(s_y,not_s);
-    //   flipped.second = Subsplit(t_not_s,not_t);
-    // }
-    // // Re-root to a branch in clade not-s of subsplit t (sister of s in t)
-    // else if (root_to == "t_{-s}")
-    // {
-    //   flipped.first = Subsplit(not_t,s);
-    //   flipped.second = child;
-    // }
-    // // Re-root to this edge, track clade s as child
-    // else if (root_to == "e1")
-    // {
-    //   flipped.first = Subsplit(s,not_s);
-    //   flipped.second = child;
-    // }
-    // // Re-root to this edge, track clade of everyone but s as child
-    // else if (root_to == "e2")
-    // {
-    //   flipped.first = Subsplit(s,not_s);
-    //   flipped.second = Subsplit(t_not_s,not_t);
-    // }
-    // else
-    // {
-    //   throw(RbException("Invalid re-rooting in reorientParentChild"));
-    // }
+    // Child subsplit
+    RbBitSet s = child.bitset.first | child.bitset.second;
+
+    // Everyone but child subsplit
+    RbBitSet not_s = s; ~not_s;
+
+    // Whole clade of parent
+    RbBitSet t = parent.asCladeBitset();
+
+    // Sister group of s in t
+    RbBitSet t_not_s = t & not_s;
+
+    // All taxa not in the clade defined by parent
+    RbBitSet not_t = t; ~not_t;
+
+    // The root split induced by rooting to this edge
+    Subsplit root_to_this_edge = Subsplit(s,not_s);
+
+    // The child subsplit induced by rooting to a descendant of s
+    Subsplit reversed_child = Subsplit(t_not_s,not_t);
+
+    flipped.first = root_to_this_edge;
+    flipped.second = reversed_child;
+
+    return flipped;
+}
+
+/*
+ * Returns only case 6 from doVirtualRootingRootParent
+ *
+ * return: parent-child pair
+ */
+std::pair<Subsplit,Subsplit> Subsplit::reverseParentChildRootParent(const Subsplit &sister1, const Subsplit &sister2, const Subsplit &child) const
+{
+
+    std::pair<Subsplit,Subsplit> flipped; // This will be in the order parent-child
+
+    // Child subsplit
+    RbBitSet s = child.bitset.first | child.bitset.second;
+
+    // Everyone but child subsplit
+    RbBitSet not_s = s; ~not_s;
+
+    // Sister (sibling) 1's clade
+    RbBitSet sib1 = sister1.asCladeBitset();
+
+    // Sister (sibling) 2's clade
+    RbBitSet sib2 = sister2.asCladeBitset();
+
+    // The root split induced by rooting to this edge
+    Subsplit root_to_this_edge = Subsplit(s,not_s);
+
+    // The child subsplit induced by rooting to a descendant of s
+    Subsplit reversed_child = Subsplit(sib1,sib2);
+
+    flipped.first = root_to_this_edge;
+    flipped.second = reversed_child;
 
     return flipped;
 }

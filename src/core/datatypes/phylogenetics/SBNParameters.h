@@ -55,7 +55,9 @@ namespace RevBayesCore {
         double                              computeNodeTimeProbability( const RbBitSet &clade, double time) const; // Compute probability of node time (or node time proportion) for clade
         double                              computeLnProbabilityRootedTopology( const Tree &tree ) const;
         std::vector<std::pair<size_t,double> >  computeLnProbabilityTopologyAndRooting( const Tree &tree ) const;
+        std::vector<std::pair<size_t,double> >  computeLnProbabilityTopologyAndRooting( const std::vector<std::vector<size_t> >& compact_tree ) const;
         double                              computeLnProbabilityUnrootedTopology( const Tree &tree ) const;
+        double                              computeLnProbabilityUnrootedTopology( const std::vector<std::vector<size_t> >& compact_tree ) const;
         double                              computeRootSplitProbability( const size_t index ) const;
         double                              computeRootSplitProbability( const Subsplit &s ) const;
         double                              computeSubsplitTransitionProbability( const size_t parent_index, const size_t child_index ) const;
@@ -68,7 +70,6 @@ namespace RevBayesCore {
         size_t                              getIndex( const Subsplit &s ) const; // Find index of subsplit s in the master subsplit list
         Subsplit                            getSubsplit( size_t i ) const; // Find subsplit for index i in the master subsplit list
         const Subsplit&                     getSubsplitReference( size_t i ) const; // Find subsplit for index i in the master subsplit list
-        double                              KL(SBNParameters &Q_x) const; // Takes the current object to be P(x) and the passed argument to be Q(x) and computes KL(P || Q)
 
         // Functions for learning SBNs
         void                                fitBranchLengthDistributions(std::vector<Tree> &trees);
@@ -84,7 +85,9 @@ namespace RevBayesCore {
         void                                addTreeToAllParentChildCounts(std::unordered_map<std::pair<size_t,size_t>,double>& parent_child_counts, Tree& tree, double &weight);
         void                                addTreeToAllRootSplitCounts(std::unordered_map<size_t,double>& root_split_counts, Tree& tree, double &weight);
         void                                countAllSubsplits(Tree& tree, std::unordered_map<std::pair<size_t,size_t>,double>& parent_child_counts, std::unordered_map<size_t,double>& root_split_counts, std::unordered_map<size_t,double>& q, bool doSA);
+        void                                countAllSubsplits(const std::vector<std::vector<size_t> >& compact_tree, std::unordered_map<std::pair<size_t,size_t>,double>& parent_child_counts, std::unordered_map<size_t,double>& root_split_counts, std::unordered_map<size_t,double>& q, bool doSA);
         void                                enumerateAllSubsplits(std::vector<Tree> &trees);
+        std::vector<std::pair<size_t,size_t> > getCasesFromCompactTree(const std::vector<std::vector<size_t> >& compact_tree, size_t row);
         void                                incrementParentChildCount(std::unordered_map<std::pair<size_t,size_t>,double> &parent_child_counts, std::pair<size_t,size_t> &this_parent_child, double &weight);
         void                                incrementRootSplitCount(std::unordered_map<size_t,double>& root_split_counts, size_t this_root_split, double &weight);
         bool                                isValid(void) const;
@@ -92,10 +95,17 @@ namespace RevBayesCore {
         bool                                isValidRootDistribution(void) const;
         void                                regularizeCounts(std::unordered_map<std::pair<size_t,size_t>,double>& parent_child_counts, std::unordered_map<size_t,double>& root_split_counts, std::unordered_map<std::pair<size_t,size_t>,double>& pseudo_parent_child_counts, std::unordered_map<size_t,double>& pseudo_root_split_counts, double alpha);
         std::vector<std::pair<size_t,size_t> > subsplitCasesToIndexCases(std::vector<std::pair<Subsplit,Subsplit> > &subsplit_cases) const;
-
+        void                                treesToCompactTrees(std::vector<Tree> &trees, std::vector<std::vector<std::vector<size_t> > >& compact_trees);
         // // Misc.
         std::vector<double>                  computeUnconditionalSubsplitProbabilities(void) const;
+        std::vector<std::pair<size_t,double> >               getCPDForParent(void) const;
+        std::vector<std::vector<std::pair<size_t,double> > > getCPDs(void) const;
+        size_t                               getNumChildrenForParent(size_t parent) const;
+        size_t                               getNumRootSplits(void) const;
+        std::vector<std::pair<size_t,double> >               getRootSplits(void) const;
+        double                               KL(SBNParameters &Q_x) const; // Takes the current object to be P(x) and the passed argument to be Q(x) and computes KL(P || Q)
         void                                 recursivelyComputeUnconditionalSubsplitProbabilities(std::vector<double> &subsplit_probs, size_t parent_index, double p) const;
+        size_t                               size(void) const;
         // std::vector<std::pair<Split,double> > computeCladeProbabilities(void) const;
         // std::vector<std::pair<Split,double> > computeSplitProbabilities(void) const;
 

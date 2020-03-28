@@ -530,6 +530,37 @@ std::vector<double> SBNParameters::computeUnconditionalSubsplitProbabilities(voi
   return unconditional_split_probs;
 }
 
+// std::vector<std::pair<size_t,double> > SBNParameters::getCPDForParent(void) const 
+// {
+//   return subsplit_cpds.at();
+// }
+
+std::vector<std::vector<std::pair<size_t,double> > > SBNParameters::getCPDs(void) const
+{
+  return subsplit_cpds;
+}
+
+size_t SBNParameters::getNumChildrenForParent(size_t parent) const
+{
+  return subsplit_cpds.at(parent).size();
+}
+
+size_t SBNParameters::getNumRootSplits(void) const
+{
+  return root_splits.size();
+}
+
+std::vector<std::pair<size_t,double> > SBNParameters::getRootSplits(void) const
+{
+  return root_splits;
+}
+
+size_t SBNParameters::size(void) const
+{
+  return all_subsplits.size();
+}
+
+
 // /* Computes the probability of seeing a particular parent-child subsplit pair given an SBN */
 // std::vector<std::pair<Split,double> > SBNParameters::computeSplitProbabilities( void ) const
 // {
@@ -802,6 +833,84 @@ void SBNParameters::enumerateAllSubsplits(std::vector<Tree> &trees)
 
 }
 
+std::vector<std::pair<size_t,size_t> > SBNParameters::getCasesFromCompactTree(const std::vector<std::vector<size_t> >& compact_tree, size_t row)
+{
+  
+  std::vector<std::pair<size_t,size_t> > cases;
+
+  std::pair<size_t,size_t> this_case;
+
+  // root parent
+  if ( compact_tree[row][4] == compact_tree[compact_tree.size()][0] ) {
+    this_case.first = compact_tree[row][9];
+    this_case.second = compact_tree[row][5];
+    cases.push_back(this_case);
+
+    this_case.first = compact_tree[row][12];
+    cases.push_back(this_case);
+
+    this_case.first = compact_tree[row][11];
+    cases.push_back(this_case);
+
+    if (compact_tree[row][0] == compact_tree[row][1])
+    {
+      this_case.first = compact_tree[row][13];
+      this_case.second = compact_tree[row][10];
+      cases.push_back(this_case);
+
+      this_case.first = compact_tree[row][14];
+      cases.push_back(this_case);
+    }
+    else
+    {
+      // TODO: this may not be the best way to handle this case, if we make variable for the index of the NULL subsplit we could use that instead
+      this_case.first = all_subsplits.size();
+      this_case.second = all_subsplits.size();
+      cases.push_back(this_case);
+      cases.push_back(this_case);
+    }
+
+    this_case.first = compact_tree[row][11];
+    this_case.second = compact_tree[row][10];
+    cases.push_back(this_case);
+  }
+  // non-root parent
+  else
+  {
+    this_case.first = compact_tree[row][9];
+    this_case.second = compact_tree[row][5];
+    cases.push_back(this_case);
+
+    this_case.first = compact_tree[row][12];
+    cases.push_back(this_case);
+
+    this_case.first = compact_tree[row][11];
+    cases.push_back(this_case);
+
+    if (compact_tree[row][0] == compact_tree[row][1])
+    {
+      this_case.first = compact_tree[row][13];
+      this_case.second = compact_tree[row][10];
+      cases.push_back(this_case);
+
+      this_case.first = compact_tree[row][14];
+      cases.push_back(this_case);
+    }
+    else
+    {
+      // TODO: this may not be the best way to handle this case, if we make variable for the index of the NULL subsplit we could use that instead
+      this_case.first = all_subsplits.size();
+      this_case.second = all_subsplits.size();
+      cases.push_back(this_case);
+      cases.push_back(this_case);
+    }
+
+    this_case.first = compact_tree[row][11];
+    this_case.second = compact_tree[row][10];
+    cases.push_back(this_case);
+  }
+}
+
 // Counts all subsplits in an unrooted tree (handles all virtual rooting)
 void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<size_t,size_t>,double>& parent_child_counts, std::unordered_map<size_t,double>& root_split_counts, std::unordered_map<size_t,double>& q, bool doSA)
 {
@@ -1028,6 +1137,295 @@ void SBNParameters::countAllSubsplits(Tree& t, std::unordered_map<std::pair<size
   }
 }
 
+void SBNParameters::countAllSubsplits(const std::vector<std::vector<size_t> >& compact_tree, std::unordered_map<std::pair<size_t,size_t>,double>& parent_child_counts, std::unordered_map<size_t,double>& root_split_counts, std::unordered_map<size_t,double>& q, bool doSA)
+{
+  // std::cout << "counting all subsplits" << std::endl;
+  std::vector<double> TTR = std::vector<double>(compact_tree.size(),0.0);
+  std::vector<double> RTT = std::vector<double>(compact_tree.size(),0.0);
+
+  double one_over_n_branches = 1.0 / (2.0 * taxa.size() - 3.0); // 1 over the number of branches in an unrooted tree
+
+  // First pass: up to (but not including) root
+  for (size_t i=0; i<compact_tree.size()-1; ++i)
+  {
+    double this_q = doSA ? one_over_n_branches : q[compact_tree[i][13]];
+    // tip node
+    if ( compact_tree[i][0] == compact_tree[i][1] )
+    {
+      TTR[compact_tree[i][0]] = doSA ? one_over_n_branches : q[compact_tree[i][13]];
+    }
+    else
+    {
+      TTR[compact_tree[i][0]] = this_q + TTR[compact_tree[i][1]] + TTR[compact_tree[i][2]];
+    }
+    incrementRootSplitCount(root_split_counts,compact_tree[i][13],this_q);
+  }
+
+  // std::cout << "TTR done" << std::endl;
+  size_t root = compact_tree[compact_tree.size()-1][0];
+
+  std::vector<size_t> root_children;
+  for (size_t i=1; i<4; ++i)
+  {
+    root_children.push_back(compact_tree[compact_tree.size()-1][i]);
+  }
+
+  // Second pass: count
+  for (size_t i=0; i<compact_tree.size()-1; ++i)
+  {
+    // root parent
+    if ( compact_tree[i][4] == root )
+    {
+      std::vector<size_t> sibling_indices;
+      for (size_t i=0; i<3; ++i)
+      {
+        if (compact_tree[i][0] != root_children[i])
+        {
+          sibling_indices.push_back(root_children[i]);
+        }
+      }
+
+      std::pair<size_t,size_t> this_case;
+
+      // Case 1
+      this_case.first = compact_tree[i][8];
+      this_case.second = compact_tree[i][5];
+      double weight = TTR[sibling_indices[0]];
+      incrementParentChildCount(parent_child_counts,this_case,weight);
+      // std::cout << "did case 1" << std::endl;
+
+      // Case 2
+      this_case.first = compact_tree[i][9];
+      weight = TTR[sibling_indices[1]];
+      incrementParentChildCount(parent_child_counts,this_case,weight);
+      // std::cout << "did case 2" << std::endl;
+
+      // Case 3
+      this_case.first = compact_tree[i][13];
+      weight = doSA ? one_over_n_branches : q[this_case.first];
+      incrementParentChildCount(parent_child_counts,this_case,weight);
+      // std::cout << "did case 3" << std::endl;
+
+      this_case.second = compact_tree[i][12];
+      
+      // This node is not a tip
+      if ( compact_tree[i][0] != compact_tree[i][1] )
+      {
+        bool child_0_is_y = getSubsplit(compact_tree[i][0]).isChildOfY(getSubsplit(compact_tree[i][1]));
+
+        // Case 4
+        this_case.first = compact_tree[i][15];
+        weight = TTR[compact_tree[i][child_0_is_y ? 1 : 2]];
+        incrementParentChildCount(parent_child_counts,this_case,weight);
+        // std::cout << "did case 4" << std::endl;
+
+        // Case 5
+        this_case.first = compact_tree[i][14];
+        weight = TTR[compact_tree[i][child_0_is_y ? 2 : 1]];
+        incrementParentChildCount(parent_child_counts,this_case,weight);
+        // std::cout << "did case 5" << std::endl;
+      }
+
+      // Case 6
+      this_case.first = compact_tree[i][13];
+      weight = doSA ? one_over_n_branches : q[this_case.first];
+      incrementParentChildCount(parent_child_counts,this_case,weight);
+      // std::cout << "did case 6" << std::endl;
+    }
+    else
+    {
+
+      std::pair<size_t,size_t> this_case;
+
+      // Case 1
+      this_case.first = compact_tree[i][8];
+      this_case.second = compact_tree[i][5];
+
+      double weight = 1.0 - TTR[compact_tree[i][0]]  - TTR[compact_tree[i][4]];
+
+      incrementParentChildCount(parent_child_counts,this_case,weight);
+      // std::cout << "did case 1" << std::endl;
+
+      // Case 2
+      this_case.first = compact_tree[i][9];
+      weight = TTR[compact_tree[i][4]];
+      incrementParentChildCount(parent_child_counts,this_case,weight);
+      // std::cout << "did case 2" << std::endl;
+
+      // Case 3
+      this_case.first = compact_tree[i][13];
+      weight = doSA ? one_over_n_branches : q[this_case.first];
+      incrementParentChildCount(parent_child_counts,this_case,weight);
+      // std::cout << "did case 3" << std::endl;
+
+      this_case.second = compact_tree[i][12];
+
+      // This node is not a tip
+      if ( compact_tree[i][0] != compact_tree[i][1] )
+      {
+        bool child_0_is_y = getSubsplit(compact_tree[i][0]).isChildOfY(getSubsplit(compact_tree[i][1]));
+
+        // Case 4
+        this_case.first = compact_tree[i][15];
+        weight = TTR[compact_tree[i][child_0_is_y ? 1 : 2]];
+        incrementParentChildCount(parent_child_counts,this_case,weight);
+        // std::cout << "did case 4" << std::endl;
+
+        // Case 5
+        this_case.first = compact_tree[i][14];
+        weight = TTR[compact_tree[i][child_0_is_y ? 2 : 1]];
+        incrementParentChildCount(parent_child_counts,this_case,weight);
+        // std::cout << "did case 5" << std::endl;
+      }
+
+      // Case 6
+      this_case.first = compact_tree[i][13];
+      weight = doSA ? one_over_n_branches : q[this_case.first];
+      incrementParentChildCount(parent_child_counts,this_case,weight);
+      // std::cout << "did case 6" << std::endl;
+    }
+
+  }
+  
+}
+
+// Counts all subsplits in an unrooted tree (handles all virtual rooting)
+void SBNParameters::treesToCompactTrees(std::vector<Tree> &trees, std::vector<std::vector<std::vector<size_t> > >& compact_trees)
+{
+  for (size_t t=0; t<trees.size(); ++t)
+  {
+    Tree tree = trees[t];
+
+    // Create an empty matrix of the correct size for this tree
+    std::vector<std::vector<size_t> > ctree = std::vector<std::vector<size_t> >(2*tree.getNumberOfTips()-2,std::vector<size_t>(16,all_subsplits.size()));
+
+    // First pass: get subsplits for each node
+    std::string order = "postorder";
+    tree.orderNodesForTraversal(order);
+    const std::vector<TopologyNode*> &postorder_nodes = tree.getNodes();
+
+    // For storing subsplits
+    std::vector<Subsplit> per_node_subsplit = std::vector<Subsplit>(tree.getNumberOfNodes(),Subsplit());
+
+    for (std::vector<TopologyNode*>::const_iterator it = postorder_nodes.begin(); it != (postorder_nodes.end()-1); ++it)
+    {
+      size_t index = (*it)->getIndex();
+
+      // Add my children's indices and to this row in compact representation
+      if ( (*it)->isTip() )
+      {
+        per_node_subsplit[index] = (*it)->getSubsplit(taxa);
+      }
+      else
+      {
+        std::vector<int> children = (*it)->getChildrenIndices();
+        RbBitSet clade_1 = per_node_subsplit[children[0]].asCladeBitset();
+        RbBitSet clade_2 = per_node_subsplit[children[1]].asCladeBitset();
+        per_node_subsplit[index] = Subsplit(clade_1,clade_2);
+      }
+    }
+
+    // Now that every node has a known subsplit, we store the relevant indices (tree node and subsplit) in this compact tree
+    size_t row = 0;
+    for (std::vector<TopologyNode*>::const_iterator it = postorder_nodes.begin(); it != (postorder_nodes.end()-1); ++it)
+    {
+      size_t index = (*it)->getIndex();
+      // std::cout << ">>>working on a root/internal/tip node " << ((*it)->isRoot()) << "/" << ((*it)->isInternal()) << "/" << ((*it)->isTip()) << std::endl;
+      // std::cout << ">The node's index is " << (*it)->getIndex() << std::endl;
+      // std::cout << ">The node's subsplit is " << (*it)->getSubsplit(taxa) << std::endl;
+      // std::cout << ">The node's subsplit has index " << getIndex((*it)->getSubsplit(taxa)) << std::endl;
+
+      // Add all tree node indices to this row
+      // if my parent is not the root, then the first 5 entries are:
+      //     0: me; 1-2: my children; 3: my sibling; 4: my parent
+      // if my real parent is the root, they are
+      //     0: me; 1-2: my children; 3-4: my siblings
+      ctree[row][0] = index;
+
+      std::vector<int> parents_children = (*it)->getParent().getChildrenIndices();
+      if ( parents_children[0] == index )
+      {
+        ctree[row][3] = parents_children[1];
+      }
+      else
+      {
+        ctree[row][3] = parents_children[0];
+      }
+
+      ctree[row][4] = (*it)->getParent().getIndex();
+
+      // Add my children's indices and to this row in compact representation
+      if ( (*it)->isTip() )
+      {
+        // Fake subsplits have only themselves as children
+        ctree[row][1] = index;
+        ctree[row][2] = index;
+      }
+      else
+      {
+        std::vector<int> children = (*it)->getChildrenIndices();
+        ctree[row][1] = children[0];
+        ctree[row][2] = children[1];
+      }
+
+      size_t eleven;
+
+      // Need orientations to get many of the split indices
+      std::vector<std::pair<Subsplit,Subsplit> > cases_subsplits;
+
+      if ( (*it)->getParent().isRoot() )
+      {
+        // Get subsplits for other two descendants of root
+        std::vector<int> root_children_indices =  (*it)->getParent().getChildrenIndices();
+
+        std::vector<int> sibling_indices;
+
+        for (size_t i=0; i<3; ++i)
+        {
+          if (index != root_children_indices[i])
+          {
+            sibling_indices.push_back(root_children_indices[i]);
+          }
+        }
+
+        per_node_subsplit[index].doVirtualRootingRootParent(per_node_subsplit[sibling_indices[0]],per_node_subsplit[sibling_indices[1]],per_node_subsplit[(*it)->getIndex()],cases_subsplits);
+        eleven = getIndex(per_node_subsplit[ctree[row][3]]);
+      }
+      else
+      {
+        per_node_subsplit[index].doVirtualRootingNonRootParent(per_node_subsplit[(*it)->getParent().getIndex()],per_node_subsplit[(*it)->getIndex()],cases_subsplits);
+        eleven = getIndex(per_node_subsplit[ctree[row][3]].reverseParentChildNonRootParent(per_node_subsplit[ctree[row][3]],per_node_subsplit[ctree[row][0]]).second);
+      }
+  
+      std::vector<std::pair<size_t,size_t> > cases = subsplitCasesToIndexCases(cases_subsplits);
+            
+      // Add all subsplit indices to this row
+      ctree[row][5]  = getIndex(per_node_subsplit[index]); // my subsplit
+      ctree[row][6]  = getIndex(per_node_subsplit[ctree[row][1]]); // my child subsplit
+      ctree[row][7]  = getIndex(per_node_subsplit[ctree[row][2]]); // my other child subsplit
+      ctree[row][8]  = cases[0].first; // me from sister (if root child, then me from sister)
+      ctree[row][9]  = cases[1].first; // me from not-sister-not-me (if root child, then me from other sister)
+      ctree[row][10] = getIndex(per_node_subsplit[ctree[row][4]]); // sister's subsplit
+      ctree[row][11] = eleven; // (if root child, then other sister's subsplit)      
+      ctree[row][12] = cases[5].second; // sister from everything else (if root child, then sister from other sister)
+      ctree[row][13] = cases[5].first; // root here
+      ctree[row][14] = cases[4].first; // root to one child
+      ctree[row][15] = cases[3].first; // root to other child
+      
+      ++row;
+    }
+
+    // root (solely exists to tell us which nodes are its children so we can initialize those)
+    ctree[row][0] = tree.getRoot().getIndex();
+    std::vector<int> root_children = tree.getRoot().getChildrenIndices();
+    for (size_t i=1; i<4; ++i) {
+      ctree[row][i] = root_children[i-1];
+    }
+    compact_trees.push_back(ctree);
+  }
+}
+
+
 // Here we regularize our real counts using pseudocounts and a regularization parameter alpha
 // Note that at alpha=0, there is no regularization
 void SBNParameters::regularizeCounts(std::unordered_map<std::pair<size_t,size_t>,double>& parent_child_counts, std::unordered_map<size_t,double>& root_split_counts, std::unordered_map<std::pair<size_t,size_t>,double>& pseudo_parent_child_counts, std::unordered_map<size_t,double>& pseudo_root_split_counts, double alpha)
@@ -1054,8 +1452,10 @@ void SBNParameters::regularizeCounts(std::unordered_map<std::pair<size_t,size_t>
 
 std::vector<std::pair<size_t,size_t> > SBNParameters::subsplitCasesToIndexCases(std::vector<std::pair<Subsplit,Subsplit> > &subsplit_cases) const
 {
-  
+
+  // TODO: there is structure here that should allow us to cut out several lookups
   std::vector<std::pair<size_t,size_t> > cases;
+
   for (size_t i=0; i<6; ++i)
   {
     std::pair<size_t,size_t> pcss;
@@ -1761,149 +2161,157 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
   // This can stay empty, we don't need to specify q() if we override with doSA=TRUE
   std::unordered_map<size_t,double> q;
 
+  std::vector<std::vector<std::vector<size_t> > > compact_trees;
+  treesToCompactTrees(trees, compact_trees);
+
+  // std::cout << "compact_trees is this big " << compact_trees.size() << std::endl;
+  // std::cout << "compact_trees[0] is this big " << compact_trees[0].size() << std::endl;
+  // std::cout << "compact_trees[0][0] is this big " << compact_trees[0][0].size() << std::endl;
+
   // Run counting
   for (size_t i=0; i<trees.size(); ++i)
   {
-    countAllSubsplits(trees[i], parent_child_counts_sa, root_split_counts_sa, q, true);
+    countAllSubsplits(compact_trees[i], parent_child_counts_sa, root_split_counts_sa, q, true);
+    // countAllSubsplits(trees[i], parent_child_counts_sa, root_split_counts_sa, q, true);
   }
   // Turn root split counts into a distribution on the root split and parent-child subsplit counts into CPDs
   makeRootSplits(root_split_counts_sa);
   makeCPDs(parent_child_counts_sa);
 
-  // SBNParameters sbn_old = *this;
+  // // SBNParameters sbn_old = *this;
 
-  double old_score = RbConstants::Double::neginf;
+  // double old_score = RbConstants::Double::neginf;
 
-  // run EM, start on E-step because we have parameters from running SA
-  size_t iter=0;
-  for ( ; iter<500; ++iter )
-  {
-    // To store counts
-    std::unordered_map<size_t,double> root_split_counts;
-    std::unordered_map<std::pair<size_t,size_t>,double> parent_child_counts;
+  // // run EM, start on E-step because we have parameters from running SA
+  // size_t iter=0;
+  // for ( ; iter<500; ++iter )
+  // {
+  //   // To store counts
+  //   std::unordered_map<size_t,double> root_split_counts;
+  //   std::unordered_map<std::pair<size_t,size_t>,double> parent_child_counts;
 
-    std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
-    double score = 0.0;
-    // E-step, compute q (per tree) and m (counts, across all trees)
-    for (size_t i=0; i<trees.size(); ++i)
-    {
-      // std::cout << "counting for tree " << i << std::endl;
-      // Get ln(Pr(tree,root)) for all branches
-      std::vector<std::pair<size_t,double> > pr_tree_and_root = computeLnProbabilityTopologyAndRooting(trees[i]);
-      // std::cout << "got components for q()" << std::endl;
+  //   std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
+  //   double score = 0.0;
+  //   // E-step, compute q (per tree) and m (counts, across all trees)
+  //   for (size_t i=0; i<trees.size(); ++i)
+  //   {
+  //     // std::cout << "counting for tree " << i << std::endl;
+  //     // Get ln(Pr(tree,root)) for all branches
+  //     std::vector<std::pair<size_t,double> > pr_tree_and_root = computeLnProbabilityTopologyAndRooting(trees[i]);
+  //     // std::cout << "got components for q()" << std::endl;
 
-      // So we can compute the probability of this tree
-      std::vector<double> per_edge_log_probs;
+  //     // So we can compute the probability of this tree
+  //     std::vector<double> per_edge_log_probs;
 
-      // turn ln(Pr(tree,root)) into q(root)
-      double max = RbConstants::Double::neginf;
-      for (size_t j=0; j<pr_tree_and_root.size(); ++j)
-      {
-        // if ( RbMath::isNan(pr_tree_and_root[j].second) )
-        // {
-        //   for (size_t xx=0; xx<pr_tree_and_root.size(); ++xx)
-        //   {
-        //     std::cout << "lnPr(root = " << pr_tree_and_root[xx].first << ") = " << pr_tree_and_root[j].second << std::endl;
-        //   }
-        //   throw(RbException("NaN tree probabilities!"));
-        // }
-        per_edge_log_probs.push_back(pr_tree_and_root[j].second);
-        if ( max < pr_tree_and_root[j].second )
-        {
-          max = pr_tree_and_root[j].second;
-        }
-      }
+  //     // turn ln(Pr(tree,root)) into q(root)
+  //     double max = RbConstants::Double::neginf;
+  //     for (size_t j=0; j<pr_tree_and_root.size(); ++j)
+  //     {
+  //       // if ( RbMath::isNan(pr_tree_and_root[j].second) )
+  //       // {
+  //       //   for (size_t xx=0; xx<pr_tree_and_root.size(); ++xx)
+  //       //   {
+  //       //     std::cout << "lnPr(root = " << pr_tree_and_root[xx].first << ") = " << pr_tree_and_root[j].second << std::endl;
+  //       //   }
+  //       //   throw(RbException("NaN tree probabilities!"));
+  //       // }
+  //       per_edge_log_probs.push_back(pr_tree_and_root[j].second);
+  //       if ( max < pr_tree_and_root[j].second )
+  //       {
+  //         max = pr_tree_and_root[j].second;
+  //       }
+  //     }
 
-      double sum = 0.0;
-      for (size_t j=0; j<pr_tree_and_root.size(); ++j)
-      {
-        pr_tree_and_root[j].second = exp(pr_tree_and_root[j].second - max);
-        sum += pr_tree_and_root[j].second;
-      }
+  //     double sum = 0.0;
+  //     for (size_t j=0; j<pr_tree_and_root.size(); ++j)
+  //     {
+  //       pr_tree_and_root[j].second = exp(pr_tree_and_root[j].second - max);
+  //       sum += pr_tree_and_root[j].second;
+  //     }
 
-      for (size_t j=0; j<pr_tree_and_root.size(); ++j)
-      {
-        pr_tree_and_root[j].second /= sum;
-        // if (pr_tree_and_root[j].second < 0.0000000001)
-        // {
-        //   std::cout << "in tree " << i << ", q[" << pr_tree_and_root[j].first << "] = " << pr_tree_and_root[j].second << std::endl;
-        // }
+  //     for (size_t j=0; j<pr_tree_and_root.size(); ++j)
+  //     {
+  //       pr_tree_and_root[j].second /= sum;
+  //       // if (pr_tree_and_root[j].second < 0.0000000001)
+  //       // {
+  //       //   std::cout << "in tree " << i << ", q[" << pr_tree_and_root[j].first << "] = " << pr_tree_and_root[j].second << std::endl;
+  //       // }
 
-        // If q is 0, then the contribution of this orientation to the lower bound is 0
-        if ( pr_tree_and_root[j].second >= DBL_EPSILON & RbMath::isFinite(per_edge_log_probs[j]) )
-        {
-          score += pr_tree_and_root[j].second * per_edge_log_probs[j];
-          // asymptotically speaking, the q * log(q) portion of the score function is 0 when q = 0
-          score -= pr_tree_and_root[j].second * log(pr_tree_and_root[j].second);
-        }
-      }
+  //       // If q is 0, then the contribution of this orientation to the lower bound is 0
+  //       if ( pr_tree_and_root[j].second >= DBL_EPSILON & RbMath::isFinite(per_edge_log_probs[j]) )
+  //       {
+  //         score += pr_tree_and_root[j].second * per_edge_log_probs[j];
+  //         // asymptotically speaking, the q * log(q) portion of the score function is 0 when q = 0
+  //         score -= pr_tree_and_root[j].second * log(pr_tree_and_root[j].second);
+  //       }
+  //     }
 
-      // make vector-pair q into a map
-      q.clear();
-      for (size_t j=0; j<pr_tree_and_root.size(); ++j)
-      {
-        q[pr_tree_and_root[j].first] = pr_tree_and_root[j].second;
-      }
+  //     // make vector-pair q into a map
+  //     q.clear();
+  //     for (size_t j=0; j<pr_tree_and_root.size(); ++j)
+  //     {
+  //       q[pr_tree_and_root[j].first] = pr_tree_and_root[j].second;
+  //     }
 
-      if (RbMath::isNan(score))
-      {
-        std::cout << "NaN tree prob, ln(Pr(tree and root)) vector contains:" << std::endl;
-        for (size_t j=0; j<per_edge_log_probs.size(); ++j)
-        {
-          std::cout << "  " << per_edge_log_probs[j] << std::endl;
-        }
-        throw(RbException("Error in EM algorithm, NaN tree probabilities."));
-      }
+  //     if (RbMath::isNan(score))
+  //     {
+  //       std::cout << "NaN tree prob, ln(Pr(tree and root)) vector contains:" << std::endl;
+  //       for (size_t j=0; j<per_edge_log_probs.size(); ++j)
+  //       {
+  //         std::cout << "  " << per_edge_log_probs[j] << std::endl;
+  //       }
+  //       throw(RbException("Error in EM algorithm, NaN tree probabilities."));
+  //     }
 
-      // std::cout << "about to recount, NOT using q" << std::endl;
-      // use q to re-count subsplits
-      countAllSubsplits(trees[i], parent_child_counts, root_split_counts, q, false);
+  //     // std::cout << "about to recount, NOT using q" << std::endl;
+  //     // use q to re-count subsplits
+  //     countAllSubsplits(trees[i], parent_child_counts, root_split_counts, q, false);
 
-    }
+  //   }
 
-    if ( alpha >= DBL_EPSILON )
-    {
-    // regularize all counts
-    regularizeCounts(parent_child_counts, root_split_counts, parent_child_counts_sa, root_split_counts_sa, alpha);
-    }
+  //   if ( alpha >= DBL_EPSILON )
+  //   {
+  //   // regularize all counts
+  //   regularizeCounts(parent_child_counts, root_split_counts, parent_child_counts_sa, root_split_counts_sa, alpha);
+  //   }
 
-    std::cout << ">>>>>>M step" << std::endl;
-    // M-step, compute p
-    makeRootSplits(root_split_counts);
-    makeCPDs(parent_child_counts);
+  //   std::cout << ">>>>>>M step" << std::endl;
+  //   // M-step, compute p
+  //   makeRootSplits(root_split_counts);
+  //   makeCPDs(parent_child_counts);
 
-    // double kl = KL(sbn_old);
+  //   // double kl = KL(sbn_old);
 
-    // std::cout << "KL(new || old) = " << kl << std::endl;
-    // if ( kl < threshold ) {
-    //   break;
-    // }
+  //   // std::cout << "KL(new || old) = " << kl << std::endl;
+  //   // if ( kl < threshold ) {
+  //   //   break;
+  //   // }
 
-    // sbn_old = *this;
+  //   // sbn_old = *this;
 
-    old_score = score;
-    // break;
+  //   old_score = score;
+  //   // break;
 
-    // if (iter == 100){break;}
+  //   // if (iter == 100){break;}
 
-    if ( iter >= min_loop_iter )
-    {
-      if ( iter < max_loop_iter )
-      {
-        // Contemplate loop termination
-        std::cout << "score - old_score = " << score - old_score << std::endl;
-        std::cout << "score = " << score << std::endl;
-        if ( fabs(score - old_score) < 0.000001 )
-        {
-          break;
-        }
-      }
-      else
-      {
-        break;
-      }
-    }
-  }
+  //   if ( iter >= min_loop_iter )
+  //   {
+  //     if ( iter < max_loop_iter )
+  //     {
+  //       // Contemplate loop termination
+  //       std::cout << "score - old_score = " << score - old_score << std::endl;
+  //       std::cout << "score = " << score << std::endl;
+  //       if ( fabs(score - old_score) < 0.000001 )
+  //       {
+  //         break;
+  //       }
+  //     }
+  //     else
+  //     {
+  //       break;
+  //     }
+  //   }
+  // }
 
   // Handle branch lengths (we only need to do this once!)
   fitBranchLengthDistributions(trees);
@@ -2034,7 +2442,9 @@ std::ostream& RevBayesCore::operator<<(std::ostream& o, const SBNParameters& x) 
     // std::ios_base::fmtflags previousFlags = o.flags();
 
     std::vector<Taxon> taxa = x.getTaxa();
-    o << "SBN on taxon vector [ ";
+    o << "SBN with ";
+    o << x.size();
+    o << " subsplits on taxon vector [ ";
     // o << std::fixed;
     // o << std::setprecision(4);
 
