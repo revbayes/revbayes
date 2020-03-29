@@ -181,13 +181,14 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
     // }
 
     // Number of extant lineages
-    // size_t k = extant;
+    k = 1;
 
     // We start at the time of origin, supposedly the first time in the vector of events
     RbVector<double> Mt(N+1, 0.0);
     Mt[0] = 1;
     double thPlusOne = events[0].time;
     std::cout << "Event time : " << events[0].time << " - Event type : " << events[0].type << std::endl;
+    std::cout << k << std::endl;
     
     if(thPlusOne != start_age->getValue()) {
         std::cout << "WARNING : thPlusOne != start_age : " << thPlusOne << " != " << start_age->getValue() << std::endl;
