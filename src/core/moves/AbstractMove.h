@@ -47,7 +47,7 @@ namespace RevBayesCore {
         size_t                                                  getNumberTriedTotal(void) const;                                    //!< Get the number of tries for this move since the last reset
         double                                                  getUpdateWeight(void) const;                                        //!< Get update weight of move
         bool                                                    isActive(unsigned long gen) const;                                  //!< Is the move active at the generation 'gen'?
-        void                                                    performMcmcStep(double prHeat, double lHeat, double pHeat);                        //!< Perform the move.
+        void                                                    performMcmcStep(double prHeat, double lHeat, double pHeat);         //!< Perform the move.
         void                                                    performHillClimbingStep(double lHeat, double pHeat);                //!< Perform the move.
         void                                                    removeNode(DagNode* p);                                             //!< remove a node from the proposal
         void                                                    resetCounters(void);                                                //!< Reset the counters such as numTried.
@@ -75,11 +75,11 @@ namespace RevBayesCore {
         
         // parameters
         std::vector<DagNode*>                                   nodes;
-        RbOrderedSet<DagNode*>                                  affected_nodes;                                                      //!< The affected nodes by this move.
+        RbOrderedSet<DagNode*>                                  affected_nodes;                                                     //!< The affected nodes by this move.
         double                                                  weight;
         bool                                                    auto_tuning;
-        size_t                                                  num_tried_current_period;                                            //!< Number of times tried
-        size_t                                                  num_tried_total;                                                     //!< Number of times tried
+        size_t                                                  num_tried_current_period;                                           //!< Number of times tried
+        size_t                                                  num_tried_total;                                                    //!< Number of times tried
 
     };
     
