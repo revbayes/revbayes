@@ -40,8 +40,8 @@ template <class valueType> class TypedDagNode;
         
     private:
 
-        ContinuousDistribution *            dist;
-        const TypedDagNode<long>*            numCats;
+        ContinuousDistribution*             dist;
+        const TypedDagNode<long>*           num_cats;
     
     };
 }
