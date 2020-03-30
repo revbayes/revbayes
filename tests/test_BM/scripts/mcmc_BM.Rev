@@ -1,9 +1,9 @@
 ################################################################################
 #
 # RevBayes Validation Test: Brownian-Motion on a fixed tree
-# 
+#
 # Model: Continuous character(s) evolve under Brownian motion.
-#            
+#
 #
 # authors: Sebastian Hoehna
 #
@@ -15,21 +15,17 @@ seed(12345)
 # Reading in the Data #
 #######################
 
-###### This just defines a single model for all sites #######
-
-### Read in sequence data for both genes
-
 data <- readContinuousCharacterData("data/primates_lht.nex")
 
 data.excludeAll()
-data.includeCharacter(1) 
+data.includeCharacter(1)
 
 # Get some useful variables from the data. We need these later on.
 taxa <- data.taxa()
 
-# set my move index
-mvi = 0
-
+# set the move vector
+moves = VectorMoves()
+monitors = VectorMonitors()
 
 
 #######################
@@ -40,7 +36,7 @@ mvi = 0
 # sigma: variance per unit of time of the Brownian motion
 sigma ~ dnExponential(1.0)
 
-moves[++mvi] = mvScale(sigma, lambda=1.0, tune=true, weight=2.0) 
+moves.append( mvScale(sigma, lambda=1.0, tune=true, weight=2.0) )
 
 
 
@@ -75,9 +71,8 @@ traits.clamp(data)
 mymodel = model(psi)
 
 
-mni = 0
-monitors[++mni] = mnModel(filename="output/primates_BM.log",printgen=10, separator = TAB)
-monitors[++mni] = mnScreen(printgen=1000, sigma)
+monitors.append( mnModel(filename="output/primates_BM.log",printgen=10, separator = TAB) )
+monitors.append( mnScreen(printgen=1000, sigma) )
 
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=5000,tuningInterval=250)
@@ -86,4 +81,3 @@ mymcmc.run(generations=5000)
 
 # you may want to quit RevBayes now
 q()
-
