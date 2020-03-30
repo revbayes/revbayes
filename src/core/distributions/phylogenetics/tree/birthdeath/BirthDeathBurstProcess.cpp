@@ -233,7 +233,7 @@ void BirthDeathBurstProcess::executeMethod(const std::string &name, const std::v
  * Get the affected nodes by a change of this node.
  * If the burst age has changed than we need to call get affected again.
  */
-void BirthDeathBurstProcess::getAffected(RbOrderedSet<DagNode *> &affected, RevBayesCore::DagNode *affecter)
+void BirthDeathBurstProcess::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
 {
     
     if ( affecter == time_burst )

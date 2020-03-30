@@ -689,7 +689,7 @@ void HeterogeneousRateBirthDeath::simulateTree( void )
     
 }
 
-void HeterogeneousRateBirthDeath::getAffected(RbOrderedSet<DagNode *> &affected, RevBayesCore::DagNode *affecter)
+void HeterogeneousRateBirthDeath::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
 {
     
     if ( affecter == root_age && this->dag_node != NULL )

@@ -284,7 +284,7 @@ int AbstractRootedTreeDistribution::diversity(double t) const
 }
 
 
-void AbstractRootedTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, RevBayesCore::DagNode *affecter)
+void AbstractRootedTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
 {
     
     if ( affecter == process_age && dag_node != NULL )

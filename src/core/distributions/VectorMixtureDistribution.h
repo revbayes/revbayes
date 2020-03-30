@@ -39,7 +39,7 @@ namespace RevBayesCore {
 //        void                                                    setValue(RbVector<mixtureType> *v, bool f=false);
         
         // special handling of state changes
-        void                                                    getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter);                          //!< get affected nodes
+        void                                                    getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                          //!< get affected nodes
         void                                                    keepSpecialization(const DagNode* affecter);
         void                                                    restoreSpecialization(const DagNode *restorer);
         void                                                    touchSpecialization(const DagNode *toucher, bool touchAll);
@@ -225,7 +225,7 @@ void RevBayesCore::VectorMixtureDistribution<mixtureType>::executeMethod(const s
 
 
 template <class mixtureType>
-void RevBayesCore::VectorMixtureDistribution<mixtureType>::getAffected(RbOrderedSet<DagNode *> &affected, DagNode* affecter)
+void RevBayesCore::VectorMixtureDistribution<mixtureType>::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
 {
 
     

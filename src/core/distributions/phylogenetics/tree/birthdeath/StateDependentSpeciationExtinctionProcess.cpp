@@ -1498,10 +1498,10 @@ void StateDependentSpeciationExtinctionProcess::executeMethod(const std::string 
  * Get the affected nodes by a change of this node.
  * If the root age has changed than we need to call get affected again.
  */
-void StateDependentSpeciationExtinctionProcess::getAffected(RbOrderedSet<DagNode *> &affected, RevBayesCore::DagNode *affecter)
+void StateDependentSpeciationExtinctionProcess::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
 {
     
-    if ( affecter == process_age)
+    if ( affecter == process_age )
     {
         dag_node->initiateGetAffectedNodes( affected );
     }

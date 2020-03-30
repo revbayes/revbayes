@@ -273,7 +273,7 @@ void UniformTimeTreeDistribution::simulateTree( void )
     
 }
 
-void UniformTimeTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, RevBayesCore::DagNode *affecter)
+void UniformTimeTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
 {
     
     if ( affecter == root_age)
