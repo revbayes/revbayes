@@ -41,13 +41,13 @@ namespace RevBayesCore {
         // member variables
         StochasticNode<Tree>*                   tree;
         std::vector<StochasticNode<double>* >   rates_vec;
-        StochasticNode<RbVector<double> >*     rates;
+        StochasticNode<RbVector<double> >*      rates;
         double                                  delta;
         
         // stored objects to undo proposal
-        TopologyNode*                           storedNode;
-        double                                  storedAge;
-        std::vector<double>                     storedRates;
+        TopologyNode*                           stored_node;
+        double                                  stored_age;
+        std::vector<double>                     stored_rates;
 
         size_t                                  num_accepted_current_period;
         size_t                                  num_accepted_total;
