@@ -111,7 +111,9 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
         }
         else if ( n.isFossil() && !n.isSampledAncestor() )
         {
-            // node is fossil leaf (named terminal non-removed in Lt)
+            // node is fossil leaf
+            // For now, we assume there is no information/labels on removal
+            // @todo add fossil-removed/non-removed
             events.push_back(Event(n.getAge(),"fossil leaf")) ;
             // events.push_back(Event(n.getAge(),"terminal non-removed")) ;
         }
@@ -139,7 +141,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
 
     for ( int i=0; i < occurrence_ages.size(); ++i)
     {
-        events.push_back(Event(occurrence_ages[i],"occurrence non-removed")) ;
+        events.push_back(Event(occurrence_ages[i],"occurrence")) ;
     }
 
     events.push_back(Event(0.0,"present time")) ;
@@ -189,7 +191,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
     double thPlusOne = events[0].time;
     std::cout << "Event time : " << events[0].time << " - Event type : " << events[0].type << std::endl;
     std::cout << k << std::endl;
-    
+
     if(thPlusOne != start_age->getValue()) {
         std::cout << "WARNING : thPlusOne != start_age : " << thPlusOne << " != " << start_age->getValue() << std::endl;
     };
@@ -243,6 +245,17 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
             k -= 1;
         }
 
+        // For now, we assume there is no information/labels on removal
+        // @todo add fossil-removed/non-removed
+        // if(type == "fossil leaf"){
+        //     for(int i = N; i > 0 ; i--){
+        //         Mt[i] = Mt[i-1] * ps * (1-rp) + ps * rp * Mt[i];
+        //     }
+        //     Mt[0] *= ps * rp;
+        //     k -= 1;
+        // }
+
+
         if(type == "sampled ancestor"){
             for(int i = 0; i < N+1; i++){
                 Mt[i] *= ps * (1-rp);
@@ -255,11 +268,21 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
             }
          }
 
-        if(type == "occurrence non-removed"){
+        if(type == "occurrence"){
             for(int i = 0; i < N+1; i++){
                 Mt[i] *= (k+i) * om * (1-rp);
             }
         }
+
+        // For now, we assume there is no information/labels on removal
+        // @todo add occurrence-removed/non-removed
+        // if(type == "occurrence"){
+        //     for(int i = 0; i < N; i++){
+        //         Mt[i] = Mt[i+1] * (i+1) * om * rp + (k+i) * om * (1-rp) * Mt[i];
+        //     }
+        //     Mt[N] *= (k+N) * om * (1-rp);
+        //  }
+
 
         if(type == "branching time"){
             for(int i = 0; i < N+1; i++){
@@ -375,7 +398,9 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
         }
         else if ( n.isFossil() && !n.isSampledAncestor() )
         {
-            // node is fossil leaf (named terminal non-removed in Lt)
+          // node is a fossil leaf
+          // For now, we assume there is no information/labels on removal
+          // @todo add fossil-removed/non-removed
             events.push_back(Event(n.getAge(),"fossil leaf")) ;
             // events.push_back(Event(n.getAge(),"terminal non-removed")) ;
         }
@@ -407,9 +432,11 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
 
     for ( int i=0; i < occurrence_ages.size(); ++i)
     {
-    events.push_back(Event(occurrence_ages[i],"occurrence non-removed")) ;
+    // For now, we assume there is no information/labels on removal
+    // @todo add occurrence-removed/non-removed
+    events.push_back(Event(occurrence_ages[i],"occurrence")) ;
     }
-    
+
     events.push_back(Event(0.0,"present time")) ;
 
     // mutable std::vector<Event> events = RevBayesCore::poolTimes(*start_age, *time_points, timeTree);
@@ -494,6 +521,16 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
             k += 1;
         }
 
+       // For now, we assume there is no information/labels on removal
+       // @todo add fossil-removed/non-removed
+       // if(type == "fossil leaf"){
+       //     for(int i = 0; i < N; i++){
+       //         Lt[i] = Lt[i] * ps * rp + Lt[i+1] * ps * (1.0-rp) ;
+       //     }
+       //     Lt[N] = Lt[N] * ps * rp;
+       //     k += 1;
+       // }
+
         if(type == "sampled ancestor"){
             for(int i = 0; i < N+1; i++){
                 Lt[i] = Lt[i] * ps * (1.0-rp);
@@ -507,11 +544,20 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
             Lt[0] = 0;
          }
 
-        if(type == "occurrence non-removed"){
+        if(type == "occurrence"){
             for(int i = 0; i < N+1; i++){
                 Lt[i] = Lt[i] * (k+i) * om * (1-rp);
             }
         }
+
+        // For now, we assume there is no information/labels on removal
+       // @todo add occurrence-removed/non-removed
+       // if(type == "occurrence"){
+       //     for(int i = N; i > 0; i--){
+       //         Lt[i] = Lt[i-1] * i * om * rp + Lt[i] * (k+i) * om * (1-rp);
+       //     }
+       //     Lt[0] = Lt[0] * k * om * (1-rp);
+       //  }
 
         if(type == "branching time"){
             for(int i = 0; i < N+1; i++){
