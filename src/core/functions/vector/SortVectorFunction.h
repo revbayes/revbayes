@@ -9,10 +9,14 @@ class DagNode;
 template <class valueType> class TypedDagNode;
     
     /**
-     * @brief Simplex constructor from vector
+     * @brief Sort Vector Function
      *
-     * This class implements a function that constructs a simplex from a vector of
-     * real positive values.
+     * This class implements a function that sorts a vector of double type values
+     * This class has these member parameters:
+     * @param vector The vector to be sorted
+     * @param ascending a boolean denoting whether the vector should be sorted in ascending order
+     *
+     *
      */
     class SortVectorFunction : public TypedFunction< RbVector<double> > {
         

@@ -6,6 +6,16 @@
 
 namespace RevBayesCore {
     
+/**
+ * @brief LogExponential distribution class.
+ *
+ * The LogExponential distribution represents a family of distributions defined
+ * on the natural number. The LogExpoential distribution has 1 parameter:
+ *
+ *@param l the rate parameter, lambda
+ *
+ * Instances of this class can be associated to stochastic variables.
+ */
     class LogExponentialDistribution : public ContinuousDistribution {
         
     public:

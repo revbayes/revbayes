@@ -1,3 +1,7 @@
+# ---------- Generated files -------------------
+src/generated_include_dirs.cmake
+src/*/CMakeLists.txt
+
 # ----------------------------------------------
 projects/cmake/*
 !projects/cmake/README.txt

@@ -1,7 +1,6 @@
 #include <iosfwd>
 #include <string>
 #include <vector>
-
 #include "MedianFunction.h"
 #include "Func_median.h"
 #include "ModelVector.h"
@@ -87,7 +86,6 @@ const std::string& Func_median::getClassType(void)
 /* Get class type spec describing type of object */
 const TypeSpec& Func_median::getClassTypeSpec(void)
 {
-    
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
     
     return rev_type_spec;

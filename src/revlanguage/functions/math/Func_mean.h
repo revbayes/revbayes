@@ -13,12 +13,11 @@ namespace RevLanguage {
      *
      * The RevLanguage wrapper of the mean function connects
      * the variables/parameters of the function and creates the internal MeanFunction object.
-     * Please read the MeanFunction.h for more info.
+     *
+     * @copybrief RevBayesCore::MeanFunction
+     * @see RevBayesCore::MeanFunction for the internal object
      *
      *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2014-07-27, version 1.0
      *
      */
     class Func_mean : public TypedFunction<Real> {

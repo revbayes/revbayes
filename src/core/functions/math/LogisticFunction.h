@@ -11,7 +11,11 @@ template <class valueType> class TypedDagNode;
     /**
      * @brief Logistic function value of a real number.
      *
-     * Compute the logistic function of a real number x (tanh(x) = exp(x) / (1 + exp(x))).
+     * Compute the logistic function of a real number x (y = exp(x) / (1 + exp(x))).
+     *
+     * This function has one parameter:
+     *
+     * @param x a double for the value of the logistic function
      *
      * 
      */

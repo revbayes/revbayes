@@ -10,29 +10,31 @@ class DagNode;
 template <class valueType> class TypedDagNode;
     
     /**
-     * @brief ConstantDemographicFunction
+     * @brief Constant demographic function.
      *
-     *
+     * The constant demographic function is the simplest available demographic function.
+     * It contains only a single variable, theta, the population size.
      */
     class ConstantDemographicFunction : public DemographicFunction {
         
     public:
-        ConstantDemographicFunction(const TypedDagNode<double>* t);                                                                                          //!< Default constructor
-        ConstantDemographicFunction(const ConstantDemographicFunction &f);                                                                  //!< Copy constructor
+        ConstantDemographicFunction(const TypedDagNode<double>* t);                                             //!< Default constructor
+        ConstantDemographicFunction(const ConstantDemographicFunction &f);                                      //!< Copy constructor
         
         // destructor
-        virtual                                        ~ConstantDemographicFunction(void);
-        ConstantDemographicFunction&                    operator=(const ConstantDemographicFunction &f);                    //!< Assignment operator
+        virtual                                        ~ConstantDemographicFunction(void);                      //!< Destructor
+
+        ConstantDemographicFunction&                    operator=(const ConstantDemographicFunction &f);        //!< Assignment operator
 
         // public methods
         
         // pure virtual public methods
         ConstantDemographicFunction*                    clone(void) const;                                      //!< Clone the ConstantDemographicFunction
-        double                                          getDemographic(double t) const;                         //!< demographic function N(t) at time t
+        double                                          getDemographic(double t) const;                         //!< Returns the demographic function N(t) at time t.
         double                                          getIntegral(double start, double finish) const;         //!< Calculates the integral 1/N(x) dx between start and finish.
         
     protected:
-        virtual void                                    swapNodeInternal(const DagNode *oldN, const DagNode *newN);
+        virtual void                                    swapNodeInternal(const DagNode *oldN, const DagNode *newN); //!< Internally replacing a DAG node containing a variable with a different one
 
         
     private:

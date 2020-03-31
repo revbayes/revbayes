@@ -18,7 +18,7 @@ template <class valueType> class TypedDagNode;
     public:
         FloorFunction(const TypedDagNode<double> *a);
         
-        FloorFunction*                      clone(void) const;                                                  //!< Create a clon.
+        FloorFunction*                      clone(void) const;                                                  //!< Create a clone.
         void                                update(void);                                                       //!< Recompute the value
         
     protected:
