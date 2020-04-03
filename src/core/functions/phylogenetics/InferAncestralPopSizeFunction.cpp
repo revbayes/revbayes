@@ -57,6 +57,7 @@ InferAncestralPopSizeFunction::InferAncestralPopSizeFunction( 	const TypedDagNod
 	                                                          	const TypedDagNode<long> *n,
 
 	                                                          	const std::string& cdt,
+                                                                const TypedDagNode< RevBayesCore::RbVector<double> > *O,
 	                                                          	const std::vector<double> &tau,
 	                                                          	bool uo,
 
@@ -70,6 +71,7 @@ InferAncestralPopSizeFunction::InferAncestralPopSizeFunction( 	const TypedDagNod
     removalPr( r ),
     maxHiddenLin( n ),
     cond (cdt),
+    occurrences( O ),
     time_points ( tau ),
     useOrigin (uo),
     timeTree (tr)
@@ -83,6 +85,7 @@ InferAncestralPopSizeFunction::InferAncestralPopSizeFunction( 	const TypedDagNod
     this->addParameter( rho );
     this->addParameter( removalPr );
     this->addParameter( maxHiddenLin );
+    this->addParameter( occurrences );
     this->addParameter( timeTree );
 
 	update();
@@ -112,33 +115,31 @@ void InferAncestralPopSizeFunction::update( void )
 {
     size_t S = time_points.size();
     long N = maxHiddenLin->getValue();
+
     const Tree tree = timeTree->getValue();
+    const std::vector<double> occurrence_ages = occurrences->getValue();
 
-    //bool useMt = false;
-	std::vector<double> essai;
-	MatrixReal B_Lt = RevBayesCore::ComputeLikelihoodsBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, essai, tree);
-
-	//useMt = true;
-	MatrixReal B_Mt = RevBayesCore::ComputeLikelihoodsForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, essai, tree);
+	MatrixReal B_Lt = RevBayesCore::ComputeLikelihoodsBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, occurrence_ages, tree);
+	MatrixReal B_Mt = RevBayesCore::ComputeLikelihoodsForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, occurrence_ages, tree);
 
 	// Realize the Hadamar Product of B_Lt and B_Mt
 	MatrixReal D_Kt(S, (N + 1), 0.0);
-	for (size_t i = 0; i < S; i++)
+	for (size_t j = 0; j < S; j++)
         {
-            for (size_t j = 0; j < (N+1); j++)
+            // Compute the normalization factor
+            double norm = 0;
+            for (size_t i = 0; i < (N+1); i++)
             {
-                D_Kt[i][j] = B_Lt[i][j] * B_Mt[i][j];
+                norm += B_Lt[j][i]*B_Mt[j][i];
+            }
+    
+            for (size_t i = 0; i < (N+1); i++)
+            {
+                D_Kt[j][i] = (B_Lt[j][i] * B_Mt[j][i])/norm;
             }
         }
 
-    // Transpose Lt
-    MatrixReal B_Lt_T((N + 1), S, 0.0);
-    RbMath::transposeMatrix(B_Lt, B_Lt_T);
-
-    // Normalize
-	D_Kt *= 1/(B_Lt_T*B_Mt)[0][0];
-
-	*this->value = D_Kt; // this will eventually be the lk of the tree + occurrences
+	*this->value = D_Kt;
 
 }
 

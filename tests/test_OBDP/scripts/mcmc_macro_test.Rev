@@ -18,10 +18,10 @@ seed(12345)
 
 ### Read in data
 
-taxa <- readTaxonData("data-macro-test-small/data_taxa.csv")
-sequences <- readDiscreteCharacterData("data-macro-test-small/data_seq_extant.nex")
-morpho <- readDiscreteCharacterData("data-macro-test-small/data_morpho.nex")
-occurrence_ages <- readMatrix(file="data-macro-test-small/data_occurrences.csv", delimiter=";")[1]
+taxa <- readTaxonData("data-macro-test/data_taxa.csv")
+sequences <- readDiscreteCharacterData("data-macro-test/data_seq_extant.nex")
+morpho <- readDiscreteCharacterData("data-macro-test/data_morpho.nex")
+occurrence_ages <- readMatrix(file="data-macro-test/data_occurrences.csv", delimiter=";")[1]
 
 # Add Missing Taxa
 sequences.addMissingTaxa( taxa )
@@ -65,26 +65,26 @@ obd_tree ~ dnOBDP(  originAge=start_time,
                     maxHiddenLin=N, 
                     condition=cond, 
                     taxa=taxa, 
+                    occurrence_ages=occurrence_ages, 
                     useMt=useMt)
 
-                    # occurrence_ages=occurrence_ages, 
 
-moves[mvi++] = mvFNPR(obd_tree, weight=10.0)
+moves[mvi++] = mvFNPR(obd_tree, weight=20.0)
 moves[mvi++] = mvCollapseExpandFossilBranch(obd_tree, start_time, weight=10.0)
-moves[mvi++] = mvNodeTimeSlideUniform(obd_tree, weight=2.0)
+moves[mvi++] = mvNodeTimeSlideUniform(obd_tree, weight=5.0)
 moves[mvi++] = mvRootTimeSlideUniform(obd_tree, start_time, weight=1.0)
 
-# fossils = obd_tree.getFossils()
-# for(i in 1:fossils.size())
-# {
-#     t[i] := tmrca(obd_tree, clade(fossils[i]))
+fossils = obd_tree.getFossils()
+for(i in 1:fossils.size())
+{
+    t[i] := tmrca(obd_tree, clade(fossils[i]))
 
-#     a_i = fossils[i].getMinAge()
-#     b_i = fossils[i].getMaxAge()
+    a_i = fossils[i].getMinAge()
+    b_i = fossils[i].getMaxAge()
 
-#     F[i] ~ dnUniform(t[i] - b_i - 0.001, t[i] - a_i + 0.001)
-#     F[i].clamp( 0 )
-# }
+    F[i] ~ dnUniform(t[i] - b_i - 0.001, t[i] - a_i + 0.001)
+    F[i].clamp( 0 )
+}
 
 num_samp_anc := obd_tree.numSampledAncestors();
 
@@ -134,23 +134,23 @@ phyMorpho.clamp(morpho)
 mymodel = model(obd_tree)
 
 
-monitors[1] = mnStochasticVariable(filename="output_macro_test_small/mcmc_OBDP_macro_test.out", printgen=1)
-monitors[2] = mnFile(filename="output_macro_test_small/mcmc_OBDP_macro_test.trees", printgen=1,obd_tree)
-monitors[3] = mnScreen(printgen=1, num_samp_anc, start_time)
+monitors[1] = mnStochasticVariable(filename="output_macro_test_Mt/mcmc_OBDP_macro_test.out", printgen=10)
+monitors[2] = mnFile(filename="output_macro_test_Mt/mcmc_OBDP_macro_test.trees", printgen=10,obd_tree)
+monitors[3] = mnScreen(printgen=10, num_samp_anc, start_time)
 print("my model ok")
-mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
-# mymcmc = mcmc(mymodel, monitors, moves)
+# mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
+mymcmc = mcmc(mymodel, monitors, moves)
 
-mymcmc.run(generations=0, tuningInterval=10)
+mymcmc.run(generations=1000, tuningInterval=200)
 
 # check the performance of the MCMC/moves
 mymcmc.operatorSummary()
 
 # Read in the tree trace and construct the maximum clade credibility (MCC) tree #
-trace = readTreeTrace("output_macro_test_small/mcmc_OBDP_macro_test.trees")
+trace = readTreeTrace("output_macro_test_Mt/mcmc_OBDP_macro_test.trees")
 
 # Summarize tree trace and save MCC tree to file
-mccTree(trace, file="output_macro_test_small/mcmc_OBDP_macro_test.tre" )
+mccTree(trace, file="output_macro_test_Mt/mcmc_OBDP_macro_test.tre" )
 
 
 # you may want to quit RevBayes now

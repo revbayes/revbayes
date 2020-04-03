@@ -37,6 +37,7 @@ template <class valueType> class TypedDagNode;
                                                             const TypedDagNode<long> *n,
 
                                                             const std::string& cdt,
+                                                            const TypedDagNode< RevBayesCore::RbVector<double> > *O,  
                                                             const std::vector<double> &tau,
                                                             bool uo,
                                                             TypedDagNode<Tree> *tr);
@@ -64,6 +65,7 @@ template <class valueType> class TypedDagNode;
       const TypedDagNode< long > *                          maxHiddenLin;                          //!< The maximal number of hidden lineages.
       const std::string&                                    cond;                                  //!< Condition of the process ("time" or "survival")
       const std::vector<double>                             time_points;                           //!< Times at which density is computed
+      const TypedDagNode< RbVector<double> > *              occurrences;                           //!< Occurrence ages of incomplete fossils
       const bool                                            useOrigin;                             //!< Start the process at the origin (otherwise root)
       const TypedDagNode< Tree > *                          timeTree;                              //!< Facultative initial tree
 

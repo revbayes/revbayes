@@ -142,7 +142,7 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) 
         occAges = std::vector<double>();
     }
 
-    std::cout << "lambda=" << lambda->getValue() << " - mu=" << mu->getValue() << " - psi=" << psi->getValue() << " - omega=" << omega->getValue() << " - rho=" << rho->getValue() << " - removalPr=" << removalPr->getValue() << std::endl;
+    // std::cout << "lambda=" << lambda->getValue() << " - mu=" << mu->getValue() << " - psi=" << psi->getValue() << " - omega=" << omega->getValue() << " - rho=" << rho->getValue() << " - removalPr=" << removalPr->getValue() << std::endl;
     if (useMt) {
         const std::vector<double> time_points_Mt( 1, 0.0 );
         MatrixReal B_Mt = RevBayesCore::ComputeLikelihoodsForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, occAges, tree);
@@ -159,9 +159,9 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) 
             likelihood += B_Mt[0][i] * pow(rh,k) * pow(1.0 - rh,i);
         }
 
-        std::cout << "\n ==> Log-Likelihood Mt : " << log(likelihood) << "\n" << std::endl;
+        // std::cout << "\n ==> Log-Likelihood Mt : " << log(likelihood) << "\n" << std::endl;
         
-        // return log(likelihood);
+        return log(likelihood);
     }
     const std::vector<double> time_points_Lt(1, start_age->getValue());
     MatrixReal B_Lt = RevBayesCore::ComputeLikelihoodsBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, occAges, tree);
@@ -172,8 +172,8 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) 
     // }
 
     double likelihood = B_Lt[0][0];
-    std::cout << "\n ==> Log-Likelihood Lt : " << log(likelihood) << std::endl;
-    std::cout << "\ncomputeLnProbabilityTimes : " << computeLnProbabilityTimes() << "\n\n" << std::endl;
+    // std::cout << "\n ==> Log-Likelihood Lt : " << log(likelihood) << std::endl;
+    // std::cout << "\ncomputeLnProbabilityTimes : " << computeLnProbabilityTimes() << "\n\n" << std::endl;
     
     return log(likelihood);
 }

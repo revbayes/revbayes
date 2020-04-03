@@ -8,6 +8,7 @@
 #include "OptionRule.h"
 #include "RevObject.h"
 #include "Probability.h"
+#include "Real.h"
 #include "RealPos.h"
 #include "Natural.h"
 #include "RlMatrixReal.h"
@@ -41,32 +42,35 @@ Func_inferAncestralPopSize* Func_inferAncestralPopSize::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_inferAncestralPopSize::createFunction( void ) const
 {
 
-  RevBayesCore::TypedDagNode< double >*                         sa              = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+  RevBayesCore::TypedDagNode< double >*                           sa              = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
   
-  RevBayesCore::TypedDagNode< double >*                         l               = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-  
-  RevBayesCore::TypedDagNode< double >*                         m               = static_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-  
-  RevBayesCore::TypedDagNode< double >*                         p               = static_cast<const RealPos &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
-  
-  RevBayesCore::TypedDagNode< double >*                         o               = static_cast<const RealPos &>( this->args[4].getVariable()->getRevObject() ).getDagNode();
-  
-  RevBayesCore::TypedDagNode< double >*                         rh              = static_cast<const RealPos &>( this->args[5].getVariable()->getRevObject() ).getDagNode();
-  
-  RevBayesCore::TypedDagNode< double >*                         r               = static_cast<const RealPos &>( this->args[6].getVariable()->getRevObject() ).getDagNode();
+  RevBayesCore::TypedDagNode< double >*                           l               = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
 
-  RevBayesCore::TypedDagNode< long >*                           n               = static_cast<const Natural &>( this->args[7].getVariable()->getRevObject() ).getDagNode();
+  RevBayesCore::TypedDagNode< double >*                           m               = static_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+  
+  RevBayesCore::TypedDagNode< double >*                           p               = static_cast<const RealPos &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+  
+  RevBayesCore::TypedDagNode< double >*                           o               = static_cast<const RealPos &>( this->args[4].getVariable()->getRevObject() ).getDagNode();
+  
+  RevBayesCore::TypedDagNode< double >*                           rh              = static_cast<const RealPos &>( this->args[5].getVariable()->getRevObject() ).getDagNode();
+  
+  RevBayesCore::TypedDagNode< double >*                           r               = static_cast<const RealPos &>( this->args[6].getVariable()->getRevObject() ).getDagNode();
+
+  RevBayesCore::TypedDagNode< long >*                             n               = static_cast<const Natural &>( this->args[7].getVariable()->getRevObject() ).getDagNode();
   
   // sampling condition
-  const std::string&                                            cdt             = static_cast<const RlString &>( this->args[8].getVariable()->getRevObject() ).getValue();
-    
-  std::vector<double>                                           tau             = static_cast<const ModelVector<RealPos> &>( this->args[9].getVariable()->getRevObject() ).getValue();
+  const std::string&                                              cdt             = static_cast<const RlString &>( this->args[8].getVariable()->getRevObject() ).getValue();
 
-  bool                                                          uo              = ( start_condition == "originAge" ? true : false );
+  // occurrence ages
+  RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> > *  O               = static_cast<const ModelVector<Real> &>( this->args[9].getVariable()->getRevObject() ).getDagNode();
+    
+  std::vector<double>                                             tau             = static_cast<const ModelVector<Real> &>( this->args[10].getVariable()->getRevObject() ).getValue();
+
+  bool                                                            uo              = ( start_condition == "originAge" ? true : false );
   
-  RevBayesCore::TypedDagNode< RevBayesCore::Tree >*             tr              = static_cast<const TimeTree &>( this->args[10].getVariable()->getRevObject() ).getDagNode();
+  RevBayesCore::TypedDagNode< RevBayesCore::Tree >*               tr              = static_cast<const TimeTree &>( this->args[11].getVariable()->getRevObject() ).getDagNode();
   
-  RevBayesCore::InferAncestralPopSizeFunction* fxn = new RevBayesCore::InferAncestralPopSizeFunction( sa, l, m, p, o, rh, r, n, cdt, tau, uo, tr );
+  RevBayesCore::InferAncestralPopSizeFunction* fxn = new RevBayesCore::InferAncestralPopSizeFunction( sa, l, m, p, o, rh, r, n, cdt, O, tau, uo, tr );
 
   return fxn;
 
@@ -102,7 +106,9 @@ const ArgumentRules& Func_inferAncestralPopSize::getArgumentRules( void ) const
         optionsCondition.push_back( "survival" );
         argumentRules.push_back( new OptionRule( "condition",           new RlString("time"), optionsCondition, "The condition of the process." ) );
 
-        argumentRules.push_back( new ArgumentRule( "time_points",       ModelVector<RealPos>::getClassTypeSpec(), "Time points for which we compute density.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "occurrence_ages",   ModelVector<Real>::getClassTypeSpec(), "Occurrence ages for incomplete fossils.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+
+        argumentRules.push_back( new ArgumentRule( "time_points",       ModelVector<Real>::getClassTypeSpec(), "Time points for which we compute density.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         argumentRules.push_back( new ArgumentRule( "timeTree" ,         TimeTree::getClassTypeSpec(), "Tree for which ancestral pop. size has to be computed.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
 
@@ -197,6 +203,10 @@ void Func_inferAncestralPopSize::setConstParameter(const std::string& name, cons
     else if ( name == "condition" )
     {
         condition = var;
+    }
+    else if ( name == "occurrence_ages" )
+    {
+        occurrence_ages = var;
     }
     else if ( name == "time_points" )
     {
