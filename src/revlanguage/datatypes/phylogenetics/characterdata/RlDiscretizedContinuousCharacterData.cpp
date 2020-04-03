@@ -2,7 +2,7 @@
 
 #include <stddef.h>
 
-#include "../../container/ModelVector.h"
+#include "ModelVector.h"
 #include "RlDiscretizedContinuousState.h"
 #include "DiscretizedContinuousCharacterData.h"
 #include "ConstantNode.h"

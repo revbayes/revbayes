@@ -6,6 +6,8 @@
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Dist_GLHBDSP.h"
+
+#include "RlDiscretizedContinuousCharacterData.h"
 #include "GeneralizedLineageHeterogeneousBirthDeathSamplingProcess.h"
 #include "ModelVector.h"
 #include "OptionRule.h"
@@ -366,7 +368,10 @@ MethodTable Dist_GLHBDSP::getDistributionMethods( void ) const
     MethodTable methods = TypedDistribution<TimeTree>::getDistributionMethods();
 
     ArgumentRules* clampCharDataArgRules = new ArgumentRules();
-    clampCharDataArgRules->push_back( new ArgumentRule( "value", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The observed value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    std::vector<TypeSpec> data_types;
+    data_types.push_back( AbstractHomologousDiscreteCharacterData::getClassTypeSpec() );
+    data_types.push_back( DiscretizedContinuousCharacterData::getClassTypeSpec() );
+    clampCharDataArgRules->push_back( new ArgumentRule( "value", data_types, "The observed value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "clampCharData", RlUtils::Void, clampCharDataArgRules ) );
 
     ArgumentRules* getCharDataArgRules = new ArgumentRules();
