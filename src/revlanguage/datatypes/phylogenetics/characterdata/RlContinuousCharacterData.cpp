@@ -7,6 +7,7 @@
 #include "Natural.h"
 #include "Real.h"
 #include "RealPos.h"
+#include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlContinuousTaxonData.h"
 #include "RlDistanceMatrix.h"
 #include "RlString.h"
@@ -23,6 +24,7 @@
 #include "RevMemberObject.h"
 #include "RevVariable.h"
 #include "RlDeterministicNode.h"
+#include "RlDiscretizedContinuousCharacterData.h"
 #include "RlTypedFunction.h"
 #include "StringUtilities.h"
 
@@ -276,6 +278,20 @@ RevPtr<RevVariable> ContinuousCharacterData::executeMethod(std::string const &na
         
         return new RevVariable( new RealPos(var) );
     }
+    else if ( name == "discretizeCharacter" )
+    {
+    	found = true;
+
+    	// get the arguments
+        double error    = static_cast<const RealPos &>( args[0].getVariable()->getRevObject() ).getValue();
+        long num_bins   = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
+        double cushion  = static_cast<const RealPos &>( args[2].getVariable()->getRevObject() ).getValue();
+
+        // make the discretized data
+        RevBayesCore::DiscretizedContinuousCharacterData *disc_data = this->dag_node->getValue().discretizeCharacter(error, num_bins, cushion);
+
+    	return new RevVariable( new DiscretizedContinuousCharacterData(disc_data) );
+    }
     
     
     return ModelObject<RevBayesCore::ContinuousCharacterData>::executeMethod( name, args, found );
@@ -385,6 +401,12 @@ void ContinuousCharacterData::initMethods( void )
     within_species_var_arg_rules->push_back( new ArgumentRule( "species" , Natural::getClassTypeSpec(), "The index of the species.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     within_species_var_arg_rules->push_back( new ArgumentRule( "site" , Natural::getClassTypeSpec(), "The index of the character.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     this->methods.addFunction( new MemberProcedure( "withinSpeciesVar", RealPos::getClassTypeSpec(), within_species_var_arg_rules ) );
+
+    ArgumentRules* discretize_arg_rules = new ArgumentRules();
+    discretize_arg_rules->push_back(new ArgumentRule( "error", RealPos::getClassTypeSpec(), "The amount of error in the measured tip states (currently a global value). NULL means all the probability will be placed in the bin closes to the observed value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(0.0) ) );
+    discretize_arg_rules->push_back(new ArgumentRule( "nBins", Natural::getClassTypeSpec(), "The number of discrete bins.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    discretize_arg_rules->push_back(new ArgumentRule( "cushionWidth", RealPos::getClassTypeSpec(), "The amount of padding around the range of observed values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(5.0) ) );
+    methods.addFunction( new MemberProcedure( "discretizeCharacter", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), discretize_arg_rules) );
 
     
     // member functions
