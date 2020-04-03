@@ -196,7 +196,6 @@ DiscretizedContinuousCharacterData* ContinuousCharacterData::discretizeCharacter
 	// create the new matrix
 	size_t num_chars     = this->getNumberOfCharacters();
     size_t num_sequences = this->taxa.size();
-//    HomologousDiscreteCharacterData<DiscretizedContinuousState> *disc_char_data = new HomologousDiscreteCharacterData<DiscretizedContinuousState>();
     DiscretizedContinuousCharacterData *disc_char_data = new DiscretizedContinuousCharacterData();
 
     // or each character, compute the bins and dx
@@ -305,8 +304,12 @@ DiscretizedContinuousCharacterData* ContinuousCharacterData::discretizeCharacter
 					bin_index = lower_bound - these_bins.begin();
 				}
 
-				// set the state
-				discretized_state.setStateByIndex(bin_index);
+				// compute the density at each point
+				std::vector<double> density(num_bins, 0.0);
+				density[bin_index] = 1.0 / dx[iC];
+
+				// set the weights
+				discretized_state.setWeights(density);
 			}
 			else
 			{ // otherwise, compute the density at each point
@@ -320,7 +323,10 @@ DiscretizedContinuousCharacterData* ContinuousCharacterData::discretizeCharacter
 				std::vector<double> density(num_bins);
 				for(size_t iX = 0; iX < num_bins; ++iX)
 				{
-					density[iX] = RbStatistics::Normal::pdf(mean, sd, these_bins[iX]);
+					double left  = these_bins[iX] - dx[iC] * 0.5;
+					double right = these_bins[iX] + dx[iC] * 0.5;
+					density[iX]  = (RbStatistics::Normal::cdf(mean, sd, right) - RbStatistics::Normal::cdf(mean, sd, left)) / dx[iC];
+//					density[iX] = RbStatistics::Normal::pdf(mean, sd, these_bins[iX]); // the old way of compute the value for each point
 				}
 
 				// set the weights
