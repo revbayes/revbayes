@@ -1334,7 +1334,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateData(bool f
 		{
 			const AbstractDiscreteTaxonData& this_taxon_data = dat.getTaxonData(taxa[i].getName());
 			RbBitSet this_bit_set = this_taxon_data[0].getState();
-//			size_t num_states = this_bit_set.size();
 			std::vector<double> this_taxon_states(num_states);
 			for(size_t j = 0; j < num_states; ++j)
 			{
