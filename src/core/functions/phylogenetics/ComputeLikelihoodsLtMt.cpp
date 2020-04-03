@@ -190,8 +190,8 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
     Mt[0] = 1;
     double thPlusOne = events[0].time;
 
-    std::cout << "Event time : " << events[0].time << " - Event type : " << events[0].type << std::endl;
-    std::cout << k << std::endl;
+    // std::cout << "Event time : " << events[0].time << " - Event type : " << events[0].type << std::endl;
+    // std::cout << k << std::endl;
 
     if(thPlusOne != start_age->getValue()) {
         std::cout << "WARNING : thPlusOne != start_age : " << thPlusOne << " != " << start_age->getValue() << std::endl;
