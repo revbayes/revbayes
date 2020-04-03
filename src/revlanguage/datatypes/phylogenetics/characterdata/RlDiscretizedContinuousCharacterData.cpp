@@ -175,7 +175,7 @@ RevPtr<RevVariable> DiscretizedContinuousCharacterData::executeMethod(std::strin
 		// get the member with given index
         size_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         std::vector<double> pts = dag_node->getValue().getPointsForCharacter(index);
-        return new RevVariable( new ModelVector<RealPos>(pts) );
+        return new RevVariable( new ModelVector<Real>(pts) );
     }
 
 
@@ -239,7 +239,7 @@ void DiscretizedContinuousCharacterData::initMethods( void )
 
     ArgumentRules* getPointsArgRules = new ArgumentRules();
     getPointsArgRules->push_back( new ArgumentRule( "index" , Natural::getClassTypeSpec(), "The index of the character.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    methods.addFunction( new MemberProcedure( "getPoints", ModelVector<RealPos>::getClassTypeSpec(), getPointsArgRules) );
+    methods.addFunction( new MemberProcedure( "getPoints", ModelVector<Real>::getClassTypeSpec(), getPointsArgRules) );
 
 }
 
