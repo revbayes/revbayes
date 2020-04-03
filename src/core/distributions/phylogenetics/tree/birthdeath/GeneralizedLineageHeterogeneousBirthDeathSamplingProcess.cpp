@@ -1327,19 +1327,29 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateData(bool f
 	{
 		// get the data
 		const RevBayesCore::AbstractHomologousDiscreteCharacterData &dat = getCharacterData();
+
 		size_t num_taxa = taxa.size();
 		std::map< std::string, std::vector<double> > taxon_map;
 		std::vector<std::string> taxon_names(num_taxa);
 		for(size_t i = 0; i < num_taxa; ++i)
 		{
 			const AbstractDiscreteTaxonData& this_taxon_data = dat.getTaxonData(taxa[i].getName());
-			RbBitSet this_bit_set = this_taxon_data[0].getState();
-			std::vector<double> this_taxon_states(num_states);
-			for(size_t j = 0; j < num_states; ++j)
+
+			// if the data are weighted, use the weights
+			if ( this_taxon_data[0].isWeighted() )
 			{
-				this_taxon_states[j] = this_bit_set[j] == true ? 1.0 : 0.0;
+				taxon_map[taxa[i].getName()] = this_taxon_data[0].getWeights();
 			}
-			taxon_map[taxa[i].getName()] = this_taxon_states;
+			else
+			{
+				RbBitSet this_bit_set = this_taxon_data[0].getState();
+				std::vector<double> this_taxon_states(num_states);
+				for(size_t j = 0; j < num_states; ++j)
+				{
+					this_taxon_states[j] = this_bit_set[j] == true ? 1.0 : 0.0;
+				}
+				taxon_map[taxa[i].getName()] = this_taxon_states;
+			}
 
 			taxon_names[i] = taxa[i].getName();
 		}
