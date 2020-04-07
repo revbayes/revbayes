@@ -234,6 +234,7 @@
 #include "Func_diagonalMatrix.h"
 #include "Func_empiricalQuantile.h"
 #include "Func_exp.h"
+#include "Func_expVector.h"
 #include "Func_floor.h"
 #include "Func_gamma.h"
 #include "Func_lnProbability.h"
@@ -256,6 +257,8 @@
 //#include "Func_powerVector.h"
 #include "Func_round.h"
 #include "Func_shortestDistance.h"
+#include "Func_sigmoid.h"
+#include "Func_sigmoidVector.h"
 #include "Func_sort.h"
 #include "Func_sum.h"
 #include "Func_sumPositive.h"
@@ -471,6 +474,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
         // exponential function
         addFunction( new Func_exp() );
+        addFunction( new Func_expVector() );
 
 		// floor function
         addFunction( new Func_floor<Real,Integer>()  );
@@ -514,6 +518,10 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
         // sort vector function
         addFunction( new Func_sort() );
+
+        // sigmoid function
+        addFunction( new Func_sigmoid() );
+        addFunction( new Func_sigmoidVector() );
 
 		// square root function
         addFunction( new Func_sqrt()  );
