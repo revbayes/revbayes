@@ -58,11 +58,12 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                               removalPr;                                        //!< The removal probability after sampling
         RevPtr<const RevVariable>                               maxHiddenLin;                                     //!< The number of hidden lineages (algorithm accuracy)
 
-        // RevPtr<const RevVariable>                               timeline;                                         //!< The interval change times
-        // RevPtr<const RevVariable>                               lambda_timeline;                                  //!< The speciation rate change times
-        // RevPtr<const RevVariable>                               mu_timeline;                                      //!< The extinction rate change times
-        // RevPtr<const RevVariable>                               psi_timeline;                                     //!< The serial sampling rate change times
-        // RevPtr<const RevVariable>                               rho_timeline;                                     //!< The episodic taxon sampling fraction change times
+        RevPtr<const RevVariable>                               timeline;                                         //!< The interval change times
+        RevPtr<const RevVariable>                               lambda_timeline;                                  //!< The speciation rate change times
+        RevPtr<const RevVariable>                               mu_timeline;                                      //!< The extinction rate change times
+        RevPtr<const RevVariable>                               psi_timeline;                                     //!< The serial sampling rate change times
+        RevPtr<const RevVariable>                               omega_timeline;                                   //!< The occurrence sampling change times
+        RevPtr<const RevVariable>                               removalPr_timeline;                               //!< The removal probabilty change times
         std::string                                             start_condition;                                  //!< The start condition of the process (rootAge/originAge)
         RevPtr<const RevVariable>                               condition;                                        //!< The conditioning of the process ("time" or "survaval")
         RevPtr<const RevVariable>                               occurrence_ages;                                  //!< Occurrence ages

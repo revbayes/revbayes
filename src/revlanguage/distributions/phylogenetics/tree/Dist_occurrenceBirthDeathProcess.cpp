@@ -6,6 +6,7 @@
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "OccurrenceBirthDeathProcess.h"
+#include "PiecewiseConstantOccurrenceBirthDeathProcess.h"
 #include "Dist_occurrenceBirthDeathProcess.h"
 #include "ModelVector.h"
 #include "OptionRule.h"
@@ -71,82 +72,122 @@ Dist_occurrenceBirthDeathProcess* Dist_occurrenceBirthDeathProcess::clone( void 
  */
 RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::createDistribution( void ) const
 {
-    //
-    // bool piecewise = false;
-    //
-    // if ( lambda->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
-    // {
-    //     piecewise = true;
-    // }
-    //
-    // if ( mu->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
-    // {
-    //     piecewise = true;
-    // }
-    //
-    // if ( psi->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
-    // {
-    //     piecewise = true;
-    // }
-    //
-    // if ( rho->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
-    // {
-    //     piecewise = true;
-    // }
-    //
-    // if ( piecewise )
-    // {
-    //     //throw(RbException("Piecewise Constant FBDP currently unsupported. Please use constant-rate process by specifying only constant-rate parameters."));
-    //     // speciation rate
-    //     RevBayesCore::DagNode* l = lambda->getRevObject().getDagNode();
-    //     // extinction rate
-    //     RevBayesCore::DagNode* m = mu->getRevObject().getDagNode();
-    //     // serial sampling rate
-    //     RevBayesCore::DagNode* p = psi->getRevObject().getDagNode();
-    //     // taxon sampling fraction
-    //     RevBayesCore::DagNode* r = rho->getRevObject().getDagNode();
-    //
-    //     // rate change times
-    //     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ht = NULL;
-    //     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* lt = NULL;
-    //     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* mt = NULL;
-    //     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* pt = NULL;
-    //     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* rt = NULL;
-    //
-    //     if ( lambda_timeline->getRevObject() != RevNullObject::getInstance() )
-    //     {
-    //         lt = static_cast<const ModelVector<RealPos> &>( lambda_timeline->getRevObject() ).getDagNode();
-    //     }
-    //
-    //     if ( mu_timeline->getRevObject() != RevNullObject::getInstance() )
-    //     {
-    //         mt = static_cast<const ModelVector<RealPos> &>( mu_timeline->getRevObject() ).getDagNode();
-    //     }
-    //
-    //     if ( psi_timeline->getRevObject() != RevNullObject::getInstance() )
-    //     {
-    //         pt = static_cast<const ModelVector<RealPos> &>( psi_timeline->getRevObject() ).getDagNode();
-    //     }
-    //
-    //     if ( rho_timeline->getRevObject() != RevNullObject::getInstance() )
-    //     {
-    //         rt = static_cast<const ModelVector<RealPos> &>( rho_timeline->getRevObject() ).getDagNode();
-    //     }
-    //
-    //     if ( timeline->getRevObject() != RevNullObject::getInstance() )
-    //     {
-    //         ht = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
-    //     }
-    //
-    //     d = new RevBayesCore::PiecewiseConstantSerialSampledBirthDeathProcess(sa, l, m, p, r, ht, lt, mt, pt, rt, cond, t, uo, init);
-    // }
 
-    RevBayesCore::AbstractBirthDeathProcess* d;
-
-    // Get the parameters :
+    //get the parameters shared by both models:
 
     // the start age
     RevBayesCore::TypedDagNode<double>* sa       = static_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
+
+    // the start condition
+    bool                                uo      = ( start_condition == "originAge" ? true : false );
+
+    // sampling condition
+    const std::string&                  cond    = static_cast<const RlString &>( condition->getRevObject() ).getValue();
+
+    // get the taxa to simulate either from a vector of rev taxon objects or a vector of names
+    std::vector<RevBayesCore::Taxon>    tn      = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+
+    // tree for initialization
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tr = NULL;
+    if ( initialTree->getRevObject() != RevNullObject::getInstance() )
+    {
+       tr                                       = static_cast<const TimeTree &>( initialTree->getRevObject() ).getDagNode();
+    }
+
+    // maximum number of hidden lineages
+    RevBayesCore::TypedDagNode< long >* n       = static_cast<const Natural &>( maxHiddenLin->getRevObject() ).getDagNode();
+
+    // boolean : use Mt, otherwise use Lt
+    bool                                Mt      = static_cast<const RlBoolean &>( useMt->getRevObject() ).getValue();
+
+
+    bool piecewise = false;
+
+    if ( lambda->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
+    {
+        piecewise = true;
+    }
+
+    if ( mu->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
+    {
+        piecewise = true;
+    }
+
+    if ( psi->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
+    {
+        piecewise = true;
+    }
+
+    if ( omega->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
+    {
+        piecewise = true;
+    }
+
+    if ( removalPr->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
+    {
+        piecewise = true;
+    }
+
+    RevBayesCore::AbstractBirthDeathProcess* d;
+
+    if ( piecewise )
+    {
+        //throw(RbException("Piecewise Constant FBDP currently unsupported. Please use constant-rate process by specifying only constant-rate parameters."));
+        // sampling probability at present
+        RevBayesCore::TypedDagNode<double>* rh      = static_cast<const RealPos &>( rho->getRevObject() ).getDagNode();
+        // speciation rate
+        RevBayesCore::DagNode* l = lambda->getRevObject().getDagNode();
+        // extinction rate
+        RevBayesCore::DagNode* m = mu->getRevObject().getDagNode();
+        // serial sampling rate
+        RevBayesCore::DagNode* p = psi->getRevObject().getDagNode();
+        // occurrence sampling rate
+        RevBayesCore::DagNode* o = omega->getRevObject().getDagNode();
+        // removal probability
+        RevBayesCore::DagNode* r = removalPr->getRevObject().getDagNode();
+
+        // rate change times
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ht = NULL;
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* lt = NULL;
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* mt = NULL;
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* pt = NULL;
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ot = NULL;
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* rt = NULL;
+
+        if ( lambda_timeline->getRevObject() != RevNullObject::getInstance() )
+        {
+            lt = static_cast<const ModelVector<RealPos> &>( lambda_timeline->getRevObject() ).getDagNode();
+        }
+
+        if ( mu_timeline->getRevObject() != RevNullObject::getInstance() )
+        {
+            mt = static_cast<const ModelVector<RealPos> &>( mu_timeline->getRevObject() ).getDagNode();
+        }
+
+        if ( psi_timeline->getRevObject() != RevNullObject::getInstance() )
+        {
+            pt = static_cast<const ModelVector<RealPos> &>( psi_timeline->getRevObject() ).getDagNode();
+        }
+
+        if ( omega_timeline->getRevObject() != RevNullObject::getInstance() )
+        {
+            ot = static_cast<const ModelVector<RealPos> &>( omega_timeline->getRevObject() ).getDagNode();
+        }
+
+        if ( removalPr_timeline->getRevObject() != RevNullObject::getInstance() )
+        {
+            rt = static_cast<const ModelVector<RealPos> &>( removalPr_timeline->getRevObject() ).getDagNode();
+        }
+
+        if ( timeline->getRevObject() != RevNullObject::getInstance() )
+        {
+            ht = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
+        }
+        std::cout << tn << std::endl;
+        d = new RevBayesCore::PiecewiseConstantOccurrenceBirthDeathProcess(sa, rh, l, m, p, o, r, ht, lt, mt, pt, ot, rt, n, cond, tn, uo, Mt, tr);
+    }
+else {
+    // Get the parameters :
 
     // speciation rate
     RevBayesCore::TypedDagNode<double>* l       = static_cast<const RealPos &>( lambda->getRevObject() ).getDagNode();
@@ -166,14 +207,8 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
     // removal probability
     RevBayesCore::TypedDagNode<double>* r       = static_cast<const RealPos &>( removalPr->getRevObject() ).getDagNode();
 
-    // maximum number of hidden lineages
-    RevBayesCore::TypedDagNode< long >* n       = static_cast<const Natural &>( maxHiddenLin->getRevObject() ).getDagNode();
 
-    // sampling condition
-    const std::string&                  cond    = static_cast<const RlString &>( condition->getRevObject() ).getValue();
 
-    // get the taxa to simulate either from a vector of rev taxon objects or a vector of names
-    std::vector<RevBayesCore::Taxon>    tn      = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
 
     // occurrence ages
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*  occAges = NULL;
@@ -183,24 +218,12 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
     }
     // RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*  occAges = static_cast<const ModelVector<Real> &>( occurrence_ages->getRevObject() ).getDagNode();
 
+    std::cout << tn << std::endl;
 
-    // the start condition
-    bool                                uo      = ( start_condition == "originAge" ? true : false );
-
-    // boolean : use Mt, otherwise use Lt
-    bool                                mt      = static_cast<const RlBoolean &>( useMt->getRevObject() ).getValue();
-
-    // tree for initialization
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tr = NULL;
-    if ( initialTree->getRevObject() != RevNullObject::getInstance() )
-    {
-       tr                                       = static_cast<const TimeTree &>( initialTree->getRevObject() ).getDagNode();
-    }
-
-
-    d = new RevBayesCore::OccurrenceBirthDeathProcess(sa, l, m, p, o, rh, r, n, cond, tn, occAges, uo, mt, tr);
-
+    d = new RevBayesCore::OccurrenceBirthDeathProcess(sa, l, m, p, o, rh, r, n, cond, tn, occAges, uo, Mt, tr);
+}
     return d;
+
 }
 
 /**
@@ -296,40 +319,34 @@ const MemberRules& Dist_occurrenceBirthDeathProcess::getParameterRules(void) con
         aliases.push_back("originAge");
         dist_member_rules.push_back( new ArgumentRule( aliases,             RealPos::getClassTypeSpec()    , "The start time of the process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
-        // std::vector<TypeSpec> paramTypes;
-        // paramTypes.push_back( RealPos::getClassTypeSpec() );
-        // paramTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
-        dist_member_rules.push_back( new ArgumentRule( "lambda",            RealPos::getClassTypeSpec(), "The speciation rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        dist_member_rules.push_back( new ArgumentRule( "mu",                RealPos::getClassTypeSpec(), "The extinction rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
-        dist_member_rules.push_back( new ArgumentRule( "psi",               RealPos::getClassTypeSpec(), "The fossil sampling rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
-        dist_member_rules.push_back( new ArgumentRule( "omega",             RealPos::getClassTypeSpec(), "The occurrence rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
-
-
-        // std::vector<TypeSpec> rho_paramTypes;
-        // rho_paramTypes.push_back( Probability::getClassTypeSpec() );
-        // rho_paramTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
+        std::vector<TypeSpec> paramTypes;
+        paramTypes.push_back( RealPos::getClassTypeSpec() );
+        paramTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
+        dist_member_rules.push_back( new ArgumentRule( "lambda",            paramTypes, "The speciation rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "mu",                paramTypes, "The extinction rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
+        dist_member_rules.push_back( new ArgumentRule( "psi",               paramTypes, "The fossil sampling rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
+        dist_member_rules.push_back( new ArgumentRule( "omega",             paramTypes, "The occurrence rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
         dist_member_rules.push_back( new ArgumentRule( "rho",               Probability::getClassTypeSpec(), "The sampling fraction at present.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(1.0) ) );
-        dist_member_rules.push_back( new ArgumentRule( "removalPr",         Probability::getClassTypeSpec(), "The removal probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(0.0) ) );
+        dist_member_rules.push_back( new ArgumentRule( "removalPr",         paramTypes, "The removal probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(0.0) ) );
 
         dist_member_rules.push_back( new ArgumentRule( "maxHiddenLin",      Natural::getClassTypeSpec(), "The maximum number of hidden lineages.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Natural(30) ) );
-
-        // dist_member_rules.push_back( new ArgumentRule( "timeline",          ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        // dist_member_rules.push_back( new ArgumentRule( "lambdaTimes",       ModelVector<RealPos>::getClassTypeSpec(), "The speciation rate change times.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        // dist_member_rules.push_back( new ArgumentRule( "muTimes",           ModelVector<RealPos>::getClassTypeSpec(), "The extinction rate change times.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        // dist_member_rules.push_back( new ArgumentRule( "psiTimes",          ModelVector<RealPos>::getClassTypeSpec(), "The serial sampling rate change times.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        // dist_member_rules.push_back( new ArgumentRule( "rhoTimes",          ModelVector<RealPos>::getClassTypeSpec(), "The episodic taxon sampling fraction change times.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         std::vector<std::string> optionsCondition;
         optionsCondition.push_back( "time" );
         optionsCondition.push_back( "survival" );
         dist_member_rules.push_back( new OptionRule( "condition",           new RlString("time"), optionsCondition, "The condition of the process." ) );
         dist_member_rules.push_back( new ArgumentRule( "taxa"  ,            ModelVector<Taxon>::getClassTypeSpec(), "The taxa used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-
         dist_member_rules.push_back( new ArgumentRule( "occurrence_ages" ,  ModelVector<Real>::getClassTypeSpec() , "The fixed occurrence ages", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
-
         dist_member_rules.push_back( new ArgumentRule( "useMt",             RlBoolean::getClassTypeSpec(), "If true computes densities with the Mt forward traversal algorithm otherwise uses Lt backward one.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( true ) ) );
-
         dist_member_rules.push_back( new ArgumentRule( "initialTree" ,      TimeTree::getClassTypeSpec() , "Instead of drawing a tree from the distribution, initialize distribution with this tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "lambdaTimes",       ModelVector<RealPos>::getClassTypeSpec(), "The speciation rate change times.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+
+////NEEDS TO BE CHECKED WHY DOES timeline need to be BY VALUE ????????
+        dist_member_rules.push_back( new ArgumentRule( "timeline",          ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "muTimes",           ModelVector<RealPos>::getClassTypeSpec(), "The extinction rate change times.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "psiTimes",          ModelVector<RealPos>::getClassTypeSpec(), "The serial sampling rate change times.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "omegaTimes",        ModelVector<RealPos>::getClassTypeSpec(), "The occurrence sampling rate change times.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "removalPrTimes",    ModelVector<RealPos>::getClassTypeSpec(), "The removal probabilty change times.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         rules_set = true;
     }
@@ -408,22 +425,30 @@ void Dist_occurrenceBirthDeathProcess::setConstParameter(const std::string& name
     {
         useMt = var;
     }
-    // else if ( name == "lambdaTimes" )
-    // {
-    //     lambda_timeline = var;
-    // }
-    // else if ( name == "muTimes" )
-    // {
-    //     mu_timeline = var;
-    // }
-    // else if ( name == "psiTimes" )
-    // {
-    //     psi_timeline = var;
-    // }
-    // else if ( name == "rhoTimes" )
-    // {
-    //     rho_timeline = var;
-    // }
+    else if ( name == "timeline" )
+     {
+         timeline = var;
+     }
+    else if ( name == "lambdaTimes" )
+    {
+        lambda_timeline = var;
+    }
+    else if ( name == "muTimes" )
+    {
+        mu_timeline = var;
+    }
+    else if ( name == "psiTimes" )
+    {
+        psi_timeline = var;
+    }
+    else if ( name == "omegaTimes" )
+    {
+        omega_timeline = var;
+    }
+    else if ( name == "removalPrTimes" )
+    {
+        removalPr_timeline = var;
+    }
 
     else if ( name == "initialTree" )
     {
