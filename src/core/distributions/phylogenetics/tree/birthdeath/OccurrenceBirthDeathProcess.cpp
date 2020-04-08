@@ -459,8 +459,6 @@ double OccurrenceBirthDeathProcess::pHatZero(double t) const
 }
 
 
-
-
 /**
  * Swap the parameters held by this distribution.
  *
@@ -470,7 +468,11 @@ double OccurrenceBirthDeathProcess::pHatZero(double t) const
  */
 void OccurrenceBirthDeathProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
-    if (oldP == lambda)
+    if (oldP == start_age)
+    {
+        start_age = static_cast<const TypedDagNode<double>* >( newP );
+    }
+    else if (oldP == lambda)
     {
         lambda = static_cast<const TypedDagNode<double>* >( newP );
     }
@@ -494,10 +496,14 @@ void OccurrenceBirthDeathProcess::swapParameterInternal(const DagNode *oldP, con
     {
         removalPr = static_cast<const TypedDagNode<double>* >( newP );
     }
-    // else if (oldP == occurrence_ages)
-    // {
-    //     occurrence_ages = static_cast<const std::vector<double>& >( newP );
-    // }
+    else if (oldP == maxHiddenLin)
+    {
+        maxHiddenLin = static_cast<const TypedDagNode<long>* >( newP );
+    }
+    else if (oldP == occurrence_ages)
+    {
+        occurrence_ages = static_cast<const TypedDagNode< RevBayesCore::RbVector<double> >* >( newP );
+    }
     else
     {
         // delegate the super-class

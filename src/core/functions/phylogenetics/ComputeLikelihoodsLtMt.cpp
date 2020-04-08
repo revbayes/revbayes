@@ -29,7 +29,7 @@ using namespace RevBayesCore;
  * \param[in]    removalPr              Removal probability after sampling.
  * \param[in]    maxHiddenLin           Algorithm accuracy (maximal number of hidden lineages).
  * \param[in]    cond                   Condition of the process (none/survival/#Taxa).
- * \param[in]    time_points         Times for which we want to compute the density.
+ * \param[in]    time_points            Times for which we want to compute the density.
  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
  * \param[in]    timeTree               Tree for ancestral populations size inference.
  *
@@ -188,8 +188,8 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
     RbVector<double> Mt(N+1, 0.0);
     Mt[0] = 1;
     double thPlusOne = events[0].time;
-    std::cout << "Event time : " << events[0].time << " - Event type : " << events[0].type << std::endl;
-    std::cout << k << std::endl;
+    // std::cout << "Event time : " << events[0].time << " - Event type : " << events[0].type << std::endl;
+    // std::cout << k << std::endl;
 
     if(thPlusOne != start_age->getValue()) {
         std::cout << "WARNING : thPlusOne != start_age : " << thPlusOne << " != " << start_age->getValue() << std::endl;
@@ -290,7 +290,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
             k += 1;
         }
 
-        std::cout << "Event time : " << th << " - Event type : " << type << " -> Mt[0] : " << Mt[0] << " / Mt[1] : " << Mt[1] << std::endl;
+        // std::cout << "Event time : " << th << " - Event type : " << type << " -> Mt[0] : " << Mt[0] << " / Mt[1] : " << Mt[1] << std::endl;
 
         thPlusOne = th;
     }

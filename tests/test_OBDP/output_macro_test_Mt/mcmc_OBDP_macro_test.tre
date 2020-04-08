@@ -1,66 +1,21 @@
 #NEXUS
 
 	Begin taxa;
-	Dimensions ntax=55;
+	Dimensions ntax=10;
 	Taxlabels
 		f0
 		f1
-		f10
-		f11
-		f12
-		f13
-		f14
-		f15
-		f16
-		f17
-		f18
-		f19
 		f2
-		f20
-		f21
-		f22
-		f23
-		f24
-		f25
-		f26
-		f27
-		f28
-		f29
 		f3
-		f30
-		f31
-		f32
-		f33
-		f34
-		f35
-		f36
-		f37
-		f38
-		f39
 		f4
-		f40
-		f41
-		f42
-		f43
-		f44
-		f45
-		f46
-		f47
-		f48
-		f49
-		f5
 		f50
 		f51
 		f52
 		f53
 		f54
-		f6
-		f7
-		f8
-		f9
 		;
 End;
 
 Begin trees;
-tree TREE1 = [&R]((((((((((((((f14[&index=16]:0.183008,f32[&index=8]:0.183008)[&index=56,posterior=1.000000,age_95%_HPD={0.147735,0.210694}]:0.947965,(f23[&index=25]:0.237802,f5[&index=29]:0.237802)[&index=57,posterior=1.000000,age_95%_HPD={0.205952,0.278065}]:0.893172)[&index=58,posterior=1.000000,age_95%_HPD={1.07396,1.19419}]:0.490301,f19[&index=10]:1.621274)[&index=59,posterior=1.000000,age_95%_HPD={1.50041,1.72997}]:1.491161,f46[&index=38,sampled_ancestor=0.654255,age_95%_HPD={2.261,2.2611}]:0.851376)[&index=60,posterior=0.114362,age_95%_HPD={2.38197,4.1293}]:1.275713,((f22[&index=22]:0.811001)f37[&index=61,posterior=0.377660,age_95%_HPD={0.811,0.811002},sampled_ancestor=0.377660]:1.548304,f41[&index=42,sampled_ancestor=0.063830,age_95%_HPD={1.28,1.28}]:1.079304)[&index=62,posterior=0.750000,age_95%_HPD={1.36721,3.47729}]:2.028843)[&index=63,posterior=0.367021,age_95%_HPD={4.31799,4.45492}]:0.070354,(((((f28[&index=55]:0.325401)f34[&index=64,posterior=0.478723,age_95%_HPD={0.325,0.325859},sampled_ancestor=0.909574]:1.224020,f25[&index=33]:1.549421)[&index=65,posterior=1.000000,age_95%_HPD={1.46658,1.64824}]:0.649064,f7[&index=3]:2.198485)[&index=66,posterior=1.000000,age_95%_HPD={2.1279,2.30159}]:0.410375,f13[&index=28]:2.608860)[&index=67,posterior=1.000000,age_95%_HPD={2.52992,2.72968}]:1.651174,(f3[&index=23]:0.490521,f6[&index=15]:0.490521)[&index=68,posterior=1.000000,age_95%_HPD={0.464685,0.543808}]:3.769512)[&index=69,posterior=0.420213,age_95%_HPD={4.17533,4.34747}]:0.198469)[&index=70,posterior=1.000000,age_95%_HPD={4.36843,4.52256}]:0.968790,((((f17[&index=48]:1.253917,f27[&index=37]:1.253917)[&index=71,posterior=0.928191,age_95%_HPD={1.12853,1.33154}]:1.500667,f12[&index=30]:2.754585)[&index=72,posterior=0.212766,age_95%_HPD={2.64174,2.90963}]:0.134359,((f39[&index=17,sampled_ancestor=0.372340,age_95%_HPD={1.20744,1.20778}]:0.175382)f43[&index=73,posterior=0.273936,age_95%_HPD={1.383,1.383},sampled_ancestor=0.734043]:0.921032,f44[&index=5,sampled_ancestor=0.039894,age_95%_HPD={1.636,1.636}]:0.668032)[&index=74,posterior=0.085106,age_95%_HPD={1.78898,3.03945}]:0.584911)[&index=75,posterior=0.420213,age_95%_HPD={2.65343,3.39909}]:0.715348,f4[&index=53]:3.604292)[&index=76,posterior=0.960106,age_95%_HPD={3.3444,4.14783}]:1.823002)[&index=77,posterior=0.973404,age_95%_HPD={5.30757,5.50501}]:0.144761,f16[&index=39]:5.572054)[&index=78,posterior=0.994681,age_95%_HPD={5.477,5.65433}]:0.617068,(f29[&index=26]:1.076670,f30[&index=46]:1.076670)[&index=79,posterior=1.000000,age_95%_HPD={1.02895,1.12161}]:5.112451)[&index=80,posterior=0.683511,age_95%_HPD={6.10072,6.36296}]:1.298954,f52[&index=11,sampled_ancestor=0.199468,age_95%_HPD={3.948,3.948}]:3.540074)[&index=81,posterior=0.619681,age_95%_HPD={6.13663,9.20896}]:2.295993,((((f10[&index=35]:1.253991)f40[&index=82,posterior=0.529255,age_95%_HPD={1.25398,1.254},sampled_ancestor=1.000000]:0.007299,f15[&index=27]:1.261290)[&index=83,posterior=1.000000,age_95%_HPD={1.26018,1.26625}]:3.143101,(f31[&index=19]:2.417791,f8[&index=51]:2.417791)[&index=84,posterior=1.000000,age_95%_HPD={2.2859,2.51725}]:1.986600)[&index=85,posterior=1.000000,age_95%_HPD={4.30276,4.53792}]:4.714983,f50[&index=4,age_95%_HPD={3.114,3.114}]:6.005372)[&index=86,posterior=0.148936,age_95%_HPD={8.68395,9.70911}]:0.664695)[&index=87,posterior=0.297872,age_95%_HPD={9.52306,10.2346}]:0.063497,f51[&index=2,age_95%_HPD={3.80392,3.80393}]:6.043640)[&index=88,posterior=0.215426,age_95%_HPD={9.5524,10.3163}]:0.695198,((((f11[&index=31]:1.748001)f45[&index=89,posterior=0.500000,age_95%_HPD={1.748,1.748},sampled_ancestor=0.662234]:2.426478,f21[&index=36]:4.174479)[&index=90,posterior=0.997340,age_95%_HPD={3.98008,4.241}]:4.309495,f49[&index=44,sampled_ancestor=0.042553,age_95%_HPD={3.097,3.097}]:5.386973)[&index=91,posterior=0.263298,age_95%_HPD={5.00416,9.67491}]:0.894470,f47[&index=6,age_95%_HPD={2.396,2.396}]:6.982443)[&index=92,posterior=0.396277,age_95%_HPD={8.57023,10.3048}]:1.164319)[&index=93,posterior=0.970745,age_95%_HPD={10.2444,11.1505}]:1.412596,(((((((((f0[&index=49]:0.245584,f20[&index=41]:0.245584)[&index=94,posterior=1.000000,age_95%_HPD={0.206672,0.284631}]:0.067777,f18[&index=34]:0.313361)[&index=95,posterior=1.000000,age_95%_HPD={0.271162,0.349561}]:0.228308,f2[&index=21]:0.541669)[&index=96,posterior=1.000000,age_95%_HPD={0.483863,0.590261}]:0.521686,((f1[&index=13]:0.068106,f26[&index=47]:0.068106)[&index=97,posterior=1.000000,age_95%_HPD={0.045263,0.092836}]:0.300895)f35[&index=98,posterior=0.832447,age_95%_HPD={0.369,0.369003},sampled_ancestor=0.832447]:0.694354)[&index=99,posterior=1.000000,age_95%_HPD={0.970273,1.15612}]:1.337760,f38[&index=32,sampled_ancestor=0.053191,age_95%_HPD={1.095,1.095}]:1.306114)[&index=100,posterior=0.566489,age_95%_HPD={1.42646,3.73242}]:0.517675,f42[&index=50,age_95%_HPD={1.285,1.285}]:1.633788)[&index=101,posterior=0.273936,age_95%_HPD={1.98273,3.81881}]:2.185328,((f24[&index=40]:0.587101,f33[&index=18]:0.587101)[&index=102,posterior=1.000000,age_95%_HPD={0.54799,0.651782}]:1.764831,(f9[&index=20]:0.492001)f36[&index=103,posterior=0.824468,age_95%_HPD={0.492,0.492002},sampled_ancestor=0.824468]:1.859931)[&index=104,posterior=0.949468,age_95%_HPD={2.20648,2.42727}]:2.752185)[&index=105,posterior=0.805851,age_95%_HPD={3.63045,9.20417}]:3.672933,f53[&index=43,sampled_ancestor=0.026596,age_95%_HPD={4.2,4.2}]:4.577049)[&index=106,posterior=0.925532,age_95%_HPD={4.9073,10.4024}]:1.910000,(f48[&index=12,age_95%_HPD={2.92,2.92}]:6.635395,f54[&index=1,age_95%_HPD={5.161,5.161}]:4.394395)[&index=107,posterior=0.614362,age_95%_HPD={8.49624,11.2317}]:1.131654)[&index=108,posterior=0.795213,age_95%_HPD={9.08722,11.9005}]:1.268308)[&index=109,posterior=1.000000,age_95%_HPD={11.8972,11.9969}]:0.000000;
+tree TREE1 = [&R](((((f0[&index=7]:0.160724,f2[&index=8]:0.160724)[&index=11,posterior=1.000000,age_95%_HPD={0.148345,0.155873}]:0.142919,f1[&index=2]:0.303643)[&index=12,posterior=1.000000,age_95%_HPD={0.303643,0.303643}]:3.896536)f53[&index=13,posterior=1.000000,age_95%_HPD={4.2,4.20054},sampled_ancestor=1.000000]:0.256736,(((f3[&index=6]:1.617151,f4[&index=4]:1.617151)[&index=14,posterior=1.000000,age_95%_HPD={1.64742,1.71199}]:2.330850)f52[&index=15,posterior=0.555556,age_95%_HPD={3.948,3.948},sampled_ancestor=1.000000]:0.257983,(f50[&index=5,sampled_ancestor=0.111111,age_95%_HPD={3.114,3.114}]:0.895585,f51[&index=1,sampled_ancestor=0.333333,age_95%_HPD={3.803,3.803}]:0.206585)[&index=16,posterior=0.222222,age_95%_HPD={4.02263,4.02263}]:0.196399)[&index=17,posterior=1.000000,age_95%_HPD={4.0014,4.47713}]:0.250931)[&index=18,posterior=1.000000,age_95%_HPD={4.24758,4.71394}]:0.704085)f54[&index=19,posterior=1.000000,age_95%_HPD={5.161,5.161},sampled_ancestor=1.000000]:0.000000;
 End;

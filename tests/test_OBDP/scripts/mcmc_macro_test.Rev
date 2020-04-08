@@ -18,10 +18,10 @@ seed(12345)
 
 ### Read in data
 
-taxa <- readTaxonData("data-macro-test/data_taxa.csv")
-sequences <- readDiscreteCharacterData("data-macro-test/data_seq_extant.nex")
-morpho <- readDiscreteCharacterData("data-macro-test/data_morpho.nex")
-occurrence_ages <- readMatrix(file="data-macro-test/data_occurrences.csv", delimiter=";")[1]
+taxa <- readTaxonData("data-macro-test-small/data_taxa.csv")
+sequences <- readDiscreteCharacterData("data-macro-test-small/data_seq_extant.nex")
+morpho <- readDiscreteCharacterData("data-macro-test-small/data_morpho.nex")
+occurrence_ages <- readMatrix(file="data-macro-test-small/data_occurrences.csv", delimiter=";")[1]
 
 # Add Missing Taxa
 sequences.addMissingTaxa( taxa )
@@ -36,11 +36,12 @@ lambda ~ dnExp(10)
 mu ~ dnExp(10)
 psi ~ dnExp(10)
 omega ~ dnExp(5)
-rho <- 1.0
+rho ~ dnUnif(0.0, 1.0)
 rm <- 0.0
 N <- 20
 cond <- "time"
-start_time ~ dnUnif(7.7, 12.0)
+# start_time ~ dnUnif(7.7, 12.0)
+start_time ~ dnUnif(5.3, 5.4)
 useMt <- TRUE
 
 # Initialise my move index
@@ -48,11 +49,12 @@ mvi = 1
 
 # Create some moves that change the stochastic variables
 # all moves are sliding proposals but you could use scaling proposals for the rates too
-moves[mvi++] = mvScale(lambda,lambda=1.0, weight=1.0, tune=TRUE)
-moves[mvi++] = mvScale(mu,lambda=1.0, weight=1.0, tune=TRUE)
-moves[mvi++] = mvScale(psi,lambda=1.0, weight=1.0, tune=TRUE)
-moves[mvi++] = mvScale(omega,lambda=1.0, weight=1.0, tune=TRUE)
+moves[mvi++] = mvScale(lambda, lambda=1.0, weight=1.0, tune=TRUE)
+moves[mvi++] = mvScale(mu, lambda=1.0, weight=1.0, tune=TRUE)
+moves[mvi++] = mvScale(psi, lambda=1.0, weight=1.0, tune=TRUE)
+moves[mvi++] = mvScale(omega, lambda=1.0, weight=1.0, tune=TRUE)
 
+moves[mvi++] = mvSlide(rho, delta=0.01,  weight=1.0, tune=TRUE)
 moves[mvi++] = mvSlide(start_time, delta=0.1,  weight=2.0, tune=TRUE)
 
 obd_tree ~ dnOBDP(  originAge=start_time,
@@ -70,7 +72,7 @@ obd_tree ~ dnOBDP(  originAge=start_time,
 
 
 moves[mvi++] = mvFNPR(obd_tree, weight=20.0)
-moves[mvi++] = mvCollapseExpandFossilBranch(obd_tree, start_time, weight=10.0)
+moves[mvi++] = mvCollapseExpandFossilBranch(obd_tree, start_time, weight=3.0)
 moves[mvi++] = mvNodeTimeSlideUniform(obd_tree, weight=5.0)
 moves[mvi++] = mvRootTimeSlideUniform(obd_tree, start_time, weight=1.0)
 
@@ -90,16 +92,16 @@ num_samp_anc := obd_tree.numSampledAncestors();
 
 ## Strict clock model
 branch_rates ~ dnExponential(10.0)
-moves[mvi++] = mvScale(branch_rates, lambda=0.1, tune=TRUE)
+moves[mvi++] = mvScale(branch_rates, lambda=0.1, weight=2.0, tune=TRUE)
 
 ## Nucleotide sequence evolution
 sf_hp <- v(1,1,1,1)
 sf ~ dnDirichlet(sf_hp)
-moves[mvi++] = mvSimplexElementScale(sf, alpha=10.0, weight=2.0, tune=TRUE)
+moves[mvi++] = mvSimplexElementScale(sf, alpha=100.0, weight=4.0, tune=TRUE)
 
 er_hp <- v(1,1,1,1,1,1)
 er ~ dnDirichlet(er_hp)
-moves[mvi++] = mvSimplexElementScale(er, alpha=10.0, weight=2.0, tune=TRUE)
+moves[mvi++] = mvSimplexElementScale(er, alpha=100.0, weight=2.0, tune=TRUE)
 
 Q_seq := fnGTR(er,sf)
 
@@ -136,12 +138,12 @@ mymodel = model(obd_tree)
 
 monitors[1] = mnStochasticVariable(filename="output_macro_test_Mt/mcmc_OBDP_macro_test.out", printgen=10)
 monitors[2] = mnFile(filename="output_macro_test_Mt/mcmc_OBDP_macro_test.trees", printgen=10,obd_tree)
-monitors[3] = mnScreen(printgen=10, num_samp_anc, start_time)
+monitors[3] = mnScreen(printgen=1, num_samp_anc, start_time)
 print("my model ok")
 # mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
 mymcmc = mcmc(mymodel, monitors, moves)
 
-mymcmc.run(generations=1000, tuningInterval=200)
+mymcmc.run(generations=100, tuningInterval=200)
 
 # check the performance of the MCMC/moves
 mymcmc.operatorSummary()
