@@ -3,7 +3,7 @@ setwd("Documents/Scolaire/ENS/Stage_M1/revbayes/tests/test_OBDP/output_inferKT_m
 devtools::load_all("../../../../RevGadgets")
 
 Kt_mean <- rev.process.nbLineages( popSize_distribution_matrices_file="Kt_trace.txt", 
-                                   trees_trace_file="../output_macro_test_Mt_cluster/mcmc_OBDP_macro_test.trees", 
+                                   trees_trace_file="../output_macro_test_Mt/mcmc_OBDP_macro_test.trees", 
                                    weight_trees_posterior=TRUE )
 
 p <- rev.plot.nbLineages( Kt_mean,
