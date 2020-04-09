@@ -92,7 +92,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	}
 //	std::cout << "tensorphylo version: " << tp_ptr->getVersion() << std::endl;
 	// turn on/off debug
-//	tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_FILE, "debug.txt");
+	tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_FILE, "debug.txt");
 	tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_PRINT);
 	tp_ptr->setConditionalProbCompatibilityMode(false); // FIXME Here you go Mike!
 
@@ -925,12 +925,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
     		updateUpsilon();
     		upsilon_dirty = false;
     	}
-    	else if ( restorer == gamma || restorer == gamma_times || restorer == zeta )
+    	else if ( restorer == gamma || restorer == gamma_times )
     	{
     		updateGamma();
-    		updateZeta();
     		gamma_dirty = false;
-    		zeta_dirty = false;
     	}
     	else if ( restorer == rho_simple || restorer == rho || restorer == rho_times  )
     	{
@@ -1125,12 +1123,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecializati
     		updateUpsilon();
     		probability_dirty = true;
     	}
-    	else if ( affecter == gamma || affecter == gamma_times || affecter == zeta )
+    	else if ( affecter == gamma || affecter == gamma_times )
     	{
     		gamma_dirty = true;
-    		zeta_dirty = true;
     		updateGamma();
-    		updateZeta();
     		probability_dirty = true;
     	}
     	else if ( affecter == rho_simple || affecter == rho || affecter == rho_times  )
@@ -1540,9 +1536,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateUpsilon(boo
 			{
 				throw RbException( "Number of upsilon events does not match the number of times." );
 			}
+
+			// set the parameters
+			tp_ptr->setMassSpeciationEvents(times, params);
 		}
-		// set the parameters
-		tp_ptr->setMassSpeciationEvents(times, params);
 	}
 }
 
@@ -1565,10 +1562,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateGamma(bool 
 			{
 				throw RbException( "Number of gamma events does not match the number of times." );
 			}
-		}
 
-		// set the parameters
-		tp_ptr->setMassExtinctionEvents(times, params);
+			// set the parameters
+			tp_ptr->setMassExtinctionEvents(times, params);
+		}
 	}
 }
 
@@ -1632,10 +1629,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateXi(bool for
 			{
 				throw RbException( "Number of xi events does not match the number of times." );
 			}
+
+			// set the parameters
+			tp_ptr->setMassDestrSamplingEvents(times, params);
 		}
 
-		// set the parameters
-		tp_ptr->setMassDestrSamplingEvents(times, params);
 	}
 }
 
@@ -1735,11 +1733,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateZeta(bool f
 {
 	if ( force | zeta_dirty )
 	{
-		// convert to std
-		std::vector< std::vector< std::vector<double> > > params;
-
 		if ( zeta != NULL )
 		{
+			// convert to std
+			std::vector< std::vector< std::vector<double> > > params;
+
 			// convert to std
 			params = RbToStd( zeta->getValue() );
 
@@ -1748,10 +1746,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateZeta(bool f
 			{
 				throw RbException( "Number of zeta matrices does not match the number of times." );
 			}
+
+			// set the parameters
+			tp_ptr->setMassExtinctionStateChangeProb(params);
 		}
 
-		// set the parameters
-		tp_ptr->setMassExtinctionStateChangeProb(params);
 	}
 }
 
