@@ -1148,22 +1148,22 @@ void SBNParameters::countAllSubsplits(const std::vector<std::vector<size_t> >& c
   // First pass: up to (but not including) root
   for (size_t i=0; i<compact_tree.size()-1; ++i)
   {
-    double this_q = doSA ? one_over_n_branches : q[compact_tree[i][13]];
+    double this_root_q = doSA ? one_over_n_branches : q[compact_tree[i][13]];
     // tip node
     if ( compact_tree[i][0] == compact_tree[i][1] )
     {
-      TTR[compact_tree[i][0]] = doSA ? one_over_n_branches : q[compact_tree[i][13]];
+      TTR[compact_tree[i][0]] = this_root_q;
     }
     else
     {
-      TTR[compact_tree[i][0]] = this_q + TTR[compact_tree[i][1]] + TTR[compact_tree[i][2]];
+      TTR[compact_tree[i][0]] = this_root_q + TTR[compact_tree[i][1]] + TTR[compact_tree[i][2]];
     }
-    incrementRootSplitCount(root_split_counts,compact_tree[i][13],this_q);
+    incrementRootSplitCount(root_split_counts,compact_tree[i][13],this_root_q);
   }
 
   // std::cout << "TTR done" << std::endl;
   size_t root = compact_tree[compact_tree.size()-1][0];
-
+  
   std::vector<size_t> root_children;
   for (size_t i=1; i<4; ++i)
   {
@@ -1174,16 +1174,12 @@ void SBNParameters::countAllSubsplits(const std::vector<std::vector<size_t> >& c
   for (size_t i=0; i<compact_tree.size()-1; ++i)
   {
     // root parent
-    if ( compact_tree[i][4] == root )
+    // if ( std::count(root_children.begin(),root_children.end(),compact_tree[i][0]) )
+    if ( root_children[0] == compact_tree[i][0] || root_children[1] == compact_tree[i][0] || root_children[2] == compact_tree[i][0] )
     {
       std::vector<size_t> sibling_indices;
-      for (size_t i=0; i<3; ++i)
-      {
-        if (compact_tree[i][0] != root_children[i])
-        {
-          sibling_indices.push_back(root_children[i]);
-        }
-      }
+      sibling_indices.push_back(compact_tree[i][3]);
+      sibling_indices.push_back(compact_tree[i][4]);
 
       std::pair<size_t,size_t> this_case;
 
@@ -1214,13 +1210,13 @@ void SBNParameters::countAllSubsplits(const std::vector<std::vector<size_t> >& c
         bool child_0_is_y = getSubsplit(compact_tree[i][0]).isChildOfY(getSubsplit(compact_tree[i][1]));
 
         // Case 4
-        this_case.first = compact_tree[i][15];
+        this_case.first = compact_tree[i][14];
         weight = TTR[compact_tree[i][child_0_is_y ? 1 : 2]];
         incrementParentChildCount(parent_child_counts,this_case,weight);
         // std::cout << "did case 4" << std::endl;
 
         // Case 5
-        this_case.first = compact_tree[i][14];
+        this_case.first = compact_tree[i][15];
         weight = TTR[compact_tree[i][child_0_is_y ? 2 : 1]];
         incrementParentChildCount(parent_child_counts,this_case,weight);
         // std::cout << "did case 5" << std::endl;
@@ -1266,19 +1262,19 @@ void SBNParameters::countAllSubsplits(const std::vector<std::vector<size_t> >& c
         bool child_0_is_y = getSubsplit(compact_tree[i][0]).isChildOfY(getSubsplit(compact_tree[i][1]));
 
         // Case 4
-        this_case.first = compact_tree[i][15];
+        this_case.first = compact_tree[i][14];
         weight = TTR[compact_tree[i][child_0_is_y ? 1 : 2]];
         incrementParentChildCount(parent_child_counts,this_case,weight);
         // std::cout << "did case 4" << std::endl;
 
         // Case 5
-        this_case.first = compact_tree[i][14];
+        this_case.first = compact_tree[i][15];
         weight = TTR[compact_tree[i][child_0_is_y ? 2 : 1]];
         incrementParentChildCount(parent_child_counts,this_case,weight);
         // std::cout << "did case 5" << std::endl;
       }
 
-      // Case 6
+      // Case 6 (root to s_y)
       this_case.first = compact_tree[i][13];
       weight = doSA ? one_over_n_branches : q[this_case.first];
       incrementParentChildCount(parent_child_counts,this_case,weight);
@@ -1337,22 +1333,10 @@ void SBNParameters::treesToCompactTrees(std::vector<Tree> &trees, std::vector<st
 
       // Add all tree node indices to this row
       // if my parent is not the root, then the first 5 entries are:
-      //     0: me; 1-2: my children; 3: my sibling; 4: my parent
-      // if my real parent is the root, they are
+      //     0: me; 1-2: my children; 3: my parent; 4: my sibling
+      // if my parent is the root, they are
       //     0: me; 1-2: my children; 3-4: my siblings
       ctree[row][0] = index;
-
-      std::vector<int> parents_children = (*it)->getParent().getChildrenIndices();
-      if ( parents_children[0] == index )
-      {
-        ctree[row][3] = parents_children[1];
-      }
-      else
-      {
-        ctree[row][3] = parents_children[0];
-      }
-
-      ctree[row][4] = (*it)->getParent().getIndex();
 
       // Add my children's indices and to this row in compact representation
       if ( (*it)->isTip() )
@@ -1367,6 +1351,37 @@ void SBNParameters::treesToCompactTrees(std::vector<Tree> &trees, std::vector<st
         ctree[row][1] = children[0];
         ctree[row][2] = children[1];
       }
+
+      if ( (*it)->getParent().isRoot() )
+      {
+        std::vector<int> root_children_indices =  (*it)->getParent().getChildrenIndices();
+
+        std::vector<int> sibling_indices;
+
+        for (size_t i=0; i<3; ++i)
+        {
+          if (index != root_children_indices[i])
+          {
+            sibling_indices.push_back(root_children_indices[i]);
+          }
+        }
+        ctree[row][3] = sibling_indices[0];
+        ctree[row][4] = sibling_indices[1];
+      }
+      else
+      {
+        ctree[row][3] = (*it)->getParent().getIndex();
+        std::vector<int> parents_children = (*it)->getParent().getChildrenIndices();
+        if ( parents_children[0] == index )
+        {
+          ctree[row][4] = parents_children[1];
+        }
+        else
+        {
+          ctree[row][4] = parents_children[0];
+        }
+      }
+
 
       size_t eleven;
 
@@ -1939,6 +1954,7 @@ bool SBNParameters::isValidCPD(size_t parent_index) const
   double sum_z = 0.0;
 
   const Subsplit &parent = getSubsplitReference(parent_index);
+  // std::cout << parent << std::endl;
 
   // We have tips as parents in our master CPD list (so we can make it a vector) but we never use them
   if ( !parent.isFake() )
@@ -1951,6 +1967,7 @@ bool SBNParameters::isValidCPD(size_t parent_index) const
 
     for (size_t i=0; i<subsplit_cpds[parent_index].size(); ++i)
     {
+      // std::cout << parent_index << "-" << subsplit_cpds[parent_index][i].first << " = " << subsplit_cpds[parent_index][i].second << std::endl;
       const Subsplit &child = getSubsplitReference(subsplit_cpds[parent_index][i].first);
       size_t child_fsb = child.asCladeBitset().getFirstSetBit();
       RbBitSet child_y = child.getYBitset();
@@ -2001,6 +2018,7 @@ bool SBNParameters::isValidRootDistribution(void) const
   double sum_root = 0.0;
   for (size_t i=0; i<root_splits.size(); ++i)
   {
+    // std::cout << root_splits[i].first << " = " << root_splits[i].second << std::endl;
     sum_root += root_splits[i].second;
     RbBitSet root_y = getSubsplitReference(root_splits[i].first).getYBitset();
     RbBitSet root_z = getSubsplitReference(root_splits[i].first).getZBitset();
@@ -2411,7 +2429,8 @@ void SBNParameters::addTreeToAllRootSplitCounts(std::unordered_map<size_t,double
 
 void SBNParameters::incrementParentChildCount(std::unordered_map<std::pair<size_t,size_t>,double> &parent_child_counts, std::pair<size_t,size_t> &this_parent_child, double &weight)
 {
-  // std::cout << "incrementing ParentChildCount by " << weight << " for parent-child" << getSubsplit(this_parent_child.first) << " - " << getSubsplit(this_parent_child.second) << std::endl;
+  // std::cout << "incrementing ParentChildCount by " << weight << " for parent-child " << getSubsplit(this_parent_child.first) << " - " << getSubsplit(this_parent_child.second) << std::endl;
+  // std::cout << "incrementing ParentChildCount by " << weight << " for parent-child " << this_parent_child.first << " - " << this_parent_child.second << std::endl;
   if ( parent_child_counts.count(this_parent_child) == 0 )
   {
     parent_child_counts[this_parent_child] = weight;
