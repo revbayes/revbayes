@@ -18,10 +18,10 @@ seed(12345)
 
 ### Read in data
 
-taxa <- readTaxonData("data-macro-test-small/data_taxa.csv")
-sequences <- readDiscreteCharacterData("data-macro-test-small/data_seq_extant.nex")
-morpho <- readDiscreteCharacterData("data-macro-test-small/data_morpho.nex")
-occurrence_ages <- readMatrix(file="data-macro-test-small/data_occurrences.csv", delimiter=";")[1]
+taxa <- readTaxonData("data-macro-test/data_taxa.csv")
+sequences <- readDiscreteCharacterData("data-macro-test/data_seq_extant.nex")
+morpho <- readDiscreteCharacterData("data-macro-test/data_morpho.nex")
+occurrence_ages <- readMatrix(file="data-macro-test/data_occurrences.csv", delimiter=";")[1]
 
 # Add Missing Taxa
 sequences.addMissingTaxa( taxa )
@@ -41,7 +41,7 @@ rm <- 0.0
 N <- 20
 cond <- "time"
 # start_time ~ dnUnif(7.7, 12.0)
-start_time ~ dnUnif(5.3, 5.4)
+start_time ~ dnUnif(5.3, 10.0)
 useMt <- TRUE
 
 # Initialise my move index
@@ -54,8 +54,8 @@ moves[mvi++] = mvScale(mu, lambda=1.0, weight=1.0, tune=TRUE)
 moves[mvi++] = mvScale(psi, lambda=1.0, weight=1.0, tune=TRUE)
 moves[mvi++] = mvScale(omega, lambda=1.0, weight=1.0, tune=TRUE)
 
-moves[mvi++] = mvSlide(rho, delta=0.01,  weight=1.0, tune=TRUE)
-moves[mvi++] = mvSlide(start_time, delta=0.1,  weight=2.0, tune=TRUE)
+moves[mvi++] = mvSlide(rho, delta=0.1,  weight=1.0, tune=TRUE)
+moves[mvi++] = mvSlide(start_time, delta=0.1,  weight=1.0, tune=TRUE)
 
 obd_tree ~ dnOBDP(  originAge=start_time,
                     lambda=lambda,
@@ -74,7 +74,7 @@ obd_tree ~ dnOBDP(  originAge=start_time,
 moves[mvi++] = mvFNPR(obd_tree, weight=20.0)
 moves[mvi++] = mvCollapseExpandFossilBranch(obd_tree, start_time, weight=3.0)
 moves[mvi++] = mvNodeTimeSlideUniform(obd_tree, weight=5.0)
-moves[mvi++] = mvRootTimeSlideUniform(obd_tree, start_time, weight=1.0)
+moves[mvi++] = mvRootTimeSlideUniform(obd_tree, start_time, weight=2.0)
 
 fossils = obd_tree.getFossils()
 for(i in 1:fossils.size())
@@ -136,14 +136,14 @@ phyMorpho.clamp(morpho)
 mymodel = model(obd_tree)
 
 
-monitors[1] = mnStochasticVariable(filename="output_macro_test_Mt/mcmc_OBDP_macro_test.out", printgen=10)
-monitors[2] = mnFile(filename="output_macro_test_Mt/mcmc_OBDP_macro_test.trees", printgen=10,obd_tree)
+monitors[1] = mnStochasticVariable(filename="output_macro_test_Mt/mcmc_OBDP_macro_test.out", printgen=1)
+monitors[2] = mnFile(filename="output_macro_test_Mt/mcmc_OBDP_macro_test.trees", printgen=1,obd_tree)
 monitors[3] = mnScreen(printgen=1, num_samp_anc, start_time)
 print("my model ok")
 # mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
 mymcmc = mcmc(mymodel, monitors, moves)
 
-mymcmc.run(generations=100, tuningInterval=200)
+mymcmc.run(generations=1000, tuningInterval=50)
 
 # check the performance of the MCMC/moves
 mymcmc.operatorSummary()

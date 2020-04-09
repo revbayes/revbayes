@@ -1,21 +1,66 @@
 #NEXUS
 
 	Begin taxa;
-	Dimensions ntax=10;
+	Dimensions ntax=55;
 	Taxlabels
 		f0
 		f1
+		f10
+		f11
+		f12
+		f13
+		f14
+		f15
+		f16
+		f17
+		f18
+		f19
 		f2
+		f20
+		f21
+		f22
+		f23
+		f24
+		f25
+		f26
+		f27
+		f28
+		f29
 		f3
+		f30
+		f31
+		f32
+		f33
+		f34
+		f35
+		f36
+		f37
+		f38
+		f39
 		f4
+		f40
+		f41
+		f42
+		f43
+		f44
+		f45
+		f46
+		f47
+		f48
+		f49
+		f5
 		f50
 		f51
 		f52
 		f53
 		f54
+		f6
+		f7
+		f8
+		f9
 		;
 End;
 
 Begin trees;
-tree TREE1 = [&R](((((f0[&index=7]:0.160724,f2[&index=8]:0.160724)[&index=11,posterior=1.000000,age_95%_HPD={0.148345,0.155873}]:0.142919,f1[&index=2]:0.303643)[&index=12,posterior=1.000000,age_95%_HPD={0.303643,0.303643}]:3.896536)f53[&index=13,posterior=1.000000,age_95%_HPD={4.2,4.20054},sampled_ancestor=1.000000]:0.256736,(((f3[&index=6]:1.617151,f4[&index=4]:1.617151)[&index=14,posterior=1.000000,age_95%_HPD={1.64742,1.71199}]:2.330850)f52[&index=15,posterior=0.555556,age_95%_HPD={3.948,3.948},sampled_ancestor=1.000000]:0.257983,(f50[&index=5,sampled_ancestor=0.111111,age_95%_HPD={3.114,3.114}]:0.895585,f51[&index=1,sampled_ancestor=0.333333,age_95%_HPD={3.803,3.803}]:0.206585)[&index=16,posterior=0.222222,age_95%_HPD={4.02263,4.02263}]:0.196399)[&index=17,posterior=1.000000,age_95%_HPD={4.0014,4.47713}]:0.250931)[&index=18,posterior=1.000000,age_95%_HPD={4.24758,4.71394}]:0.704085)f54[&index=19,posterior=1.000000,age_95%_HPD={5.161,5.161},sampled_ancestor=1.000000]:0.000000;
+tree TREE1 = [&R](((((((((((((((f28[&index=30]:0.325001)f34[&index=56,posterior=0.523302,age_95%_HPD={0.325,0.325003},sampled_ancestor=0.916112]:0.656127,f25[&index=33]:0.981128)[&index=57,posterior=1.000000,age_95%_HPD={0.864358,1.19953}]:0.442855,f7[&index=35]:1.423983)[&index=58,posterior=1.000000,age_95%_HPD={1.26099,1.69303}]:0.283303,f13[&index=55]:1.707286)[&index=59,posterior=1.000000,age_95%_HPD={1.54364,1.97188}]:0.554506)f46[&index=60,posterior=0.239680,age_95%_HPD={2.26179,2.26179},sampled_ancestor=0.890812]:0.507359,(f3[&index=5]:0.278841,f6[&index=6]:0.278841)[&index=61,posterior=1.000000,age_95%_HPD={0.229483,0.289741}]:2.490310)[&index=62,posterior=0.532623,age_95%_HPD={2.61351,2.85894}]:0.149461,((((f14[&index=49]:0.101186,f32[&index=29]:0.101186)[&index=63,posterior=1.000000,age_95%_HPD={0.079738,0.104342}]:0.544621,(f23[&index=15]:0.135782,f5[&index=3]:0.135782)[&index=64,posterior=1.000000,age_95%_HPD={0.125803,0.174602}]:0.510025)[&index=65,posterior=1.000000,age_95%_HPD={0.598259,0.729539}]:0.312826,f19[&index=8]:0.958633)[&index=66,posterior=1.000000,age_95%_HPD={0.925102,1.09563}]:1.898411,((f22[&index=39]:0.811001)f37[&index=67,posterior=0.930759,age_95%_HPD={0.811,0.811002},sampled_ancestor=0.930759]:1.034722,f41[&index=42,sampled_ancestor=0.331558,age_95%_HPD={1.28,1.28}]:0.565722)[&index=68,posterior=0.607190,age_95%_HPD={1.43978,2.65973}]:1.011320)[&index=69,posterior=0.476698,age_95%_HPD={2.60767,2.94438}]:0.061568)[&index=70,posterior=1.000000,age_95%_HPD={2.74236,3.04697}]:0.446177,((((f12[&index=54]:1.207295)f39[&index=71,posterior=0.367510,age_95%_HPD={1.20729,1.2073},sampled_ancestor=0.940080]:0.175737)f43[&index=72,posterior=0.267643,age_95%_HPD={1.383,1.3831},sampled_ancestor=0.962716]:0.202075,(f17[&index=17]:0.729158,f27[&index=16]:0.729158)[&index=73,posterior=1.000000,age_95%_HPD={0.677352,0.819456}]:0.855949)[&index=74,posterior=0.647137,age_95%_HPD={1.54337,1.69555}]:0.474719,(f4[&index=53]:1.905864,f44[&index=44,sampled_ancestor=0.348868,age_95%_HPD={1.636,1.636}]:0.269863)[&index=75,posterior=0.222370,age_95%_HPD={1.68926,2.11238}]:0.153962)[&index=76,posterior=1.000000,age_95%_HPD={1.81021,2.16093}]:1.304963)[&index=77,posterior=1.000000,age_95%_HPD={3.17202,3.56752}]:0.065415,f16[&index=19]:3.430204)[&index=78,posterior=0.990679,age_95%_HPD={3.22691,3.58308}]:0.228169,(f29[&index=34]:0.625775,f30[&index=52]:0.625775)[&index=79,posterior=1.000000,age_95%_HPD={0.606392,0.635111}]:3.032598)[&index=80,posterior=1.000000,age_95%_HPD={3.46385,3.75817}]:0.290146)f52[&index=81,posterior=0.790945,age_95%_HPD={3.94852,3.94852},sampled_ancestor=0.904128]:0.550342,f50[&index=24,age_95%_HPD={3.114,3.114}]:1.384859)[&index=82,posterior=0.615180,age_95%_HPD={4.06775,4.90593}]:0.530770,((((f10[&index=25]:0.090489,f15[&index=37]:0.090489)[&index=83,posterior=1.000000,age_95%_HPD={0.048032,0.102428}]:1.162512)f40[&index=84,posterior=0.994674,age_95%_HPD={1.253,1.253},sampled_ancestor=0.994674]:0.884463,(f31[&index=7]:1.276318,f8[&index=13]:1.276318)[&index=85,posterior=1.000000,age_95%_HPD={1.17151,1.33088}]:0.861146)[&index=86,posterior=1.000000,age_95%_HPD={2.11324,2.26481}]:1.665924)f51[&index=87,posterior=0.754993,age_95%_HPD={3.803,3.80374},sampled_ancestor=0.754993]:1.226241)[&index=88,posterior=0.721704,age_95%_HPD={4.94383,5.09541}]:0.265319,((((f11[&index=12]:1.711467,f21[&index=32]:1.711467)[&index=89,posterior=1.000000,age_95%_HPD={1.6959,1.73301}]:0.036534)f45[&index=90,posterior=0.960053,age_95%_HPD={1.748,1.748},sampled_ancestor=0.960053]:1.349000)f49[&index=91,posterior=0.588549,age_95%_HPD={3.097,3.097},sampled_ancestor=0.740346]:0.700701,f47[&index=41,age_95%_HPD={2.396,2.396}]:1.401701)[&index=92,posterior=0.816245,age_95%_HPD={3.15088,4.37056}]:1.497247)[&index=93,posterior=1.000000,age_95%_HPD={5.25435,5.36626}]:0.188234,(((((((((f0[&index=14]:0.154463,f20[&index=48]:0.154463)[&index=94,posterior=1.000000,age_95%_HPD={0.116974,0.250853}]:0.041955,f18[&index=23]:0.196418)[&index=95,posterior=0.820240,age_95%_HPD={0.143527,0.350579}]:0.157584,f2[&index=31]:0.354002)[&index=96,posterior=1.000000,age_95%_HPD={0.268323,0.509959}]:0.264392,((f1[&index=21]:0.034081,f26[&index=51]:0.034081)[&index=97,posterior=1.000000,age_95%_HPD={0.032495,0.035613}]:0.334920)f35[&index=98,posterior=1.000000,age_95%_HPD={0.369,0.369003},sampled_ancestor=1.000000]:0.249393)[&index=99,posterior=1.000000,age_95%_HPD={0.533692,0.791449}]:0.476607)f38[&index=100,posterior=0.866844,age_95%_HPD={1.095,1.095},sampled_ancestor=0.866844]:0.831827,((f24[&index=20]:0.313095,f33[&index=11]:0.313095)[&index=101,posterior=1.000000,age_95%_HPD={0.295839,0.3775}]:0.919229,(f9[&index=18]:0.492001)f36[&index=102,posterior=0.904128,age_95%_HPD={0.492,0.492003},sampled_ancestor=0.965379]:0.740323)[&index=103,posterior=1.000000,age_95%_HPD={1.10564,1.36942}]:0.694503)[&index=104,posterior=1.000000,age_95%_HPD={1.78473,2.25829}]:0.521872,f42[&index=50,age_95%_HPD={1.285,1.285}]:1.163698)[&index=105,posterior=1.000000,age_95%_HPD={1.89531,2.97439}]:1.751302)f53[&index=106,posterior=0.954727,age_95%_HPD={4.2,4.2},sampled_ancestor=0.954727]:1.084479,(f48[&index=22,age_95%_HPD={2.92,2.92}]:2.241482)f54[&index=107,posterior=0.552597,age_95%_HPD={5.16148,5.16148},sampled_ancestor=0.876165]:0.122997)[&index=108,posterior=0.968043,age_95%_HPD={5.16951,5.42562}]:0.198703)[&index=109,posterior=1.000000,age_95%_HPD={5.47458,5.48669}]:0.000000;
 End;

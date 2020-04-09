@@ -193,6 +193,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
 
     if(thPlusOne != start_age->getValue()) {
         std::cout << "WARNING : thPlusOne != start_age : " << thPlusOne << " != " << start_age->getValue() << std::endl;
+        return B;
     };
 
     // Then we iterate over the next events
