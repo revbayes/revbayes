@@ -69,8 +69,6 @@ void SigmoidVectorFunction::update( void )
 	double m  = middle->getValue();
 	double r  = slope->getValue();
 
-//	std::cout << y0 << " -- " << y1 << " -- " << m << " -- " << r << std::endl;
-
     size_t n = x->getValue().size();
     for (size_t i = 0; i < n; ++i)
     {
