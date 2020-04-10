@@ -193,7 +193,7 @@ jobs:
         BOOST_INCLUDEDIR: /root/win_root/mingw64/include/boost
         BOOST_LIBRARYDIR: /root/win_root/mingw64/lib
       run: |
-        /usr/local/bin/meson build revbayes --prefix=${GITHUB_WORKSPACE}/wincrossbuild --cross-file=win64-cross.txt
+        /usr/local/bin/meson build ${GITHUB_WORKSPACE} --prefix=${GITHUB_WORKSPACE}/wincrossbuild --cross-file=win64-cross.txt
         /usr/local/bin/ninja -C build install
         cp /usr/lib/gcc/x86_64-w64-mingw32/*-win32/libgcc_s_seh-1.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
         cp /usr/lib/gcc/x86_64-w64-mingw32/*-win32/libstdc++-6.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
