@@ -73,6 +73,8 @@
 #include "RlDistanceMatrix.h"
 #include "RlDistributionMemberFunction.h"
 #include "RlMultiValueEvent.h"
+#include "RlOrderedEventTimes.h"
+#include "RlOrderedEvents.h"
 #include "RlStochasticNode.h"
 #include "RlTimeTree.h"
 #include "RlTree.h"
@@ -261,6 +263,8 @@
 #include "Dist_dpp.h"
 #include "Dist_event.h"
 #include "Dist_IID.h"
+#include "Dist_markovTimes.h"
+#include "Dist_markovEvents.h"
 #include "Dist_mixture.h"
 #include "Dist_mixtureAnalytical.h"
 #include "Dist_mixtureVector.h"
@@ -638,6 +642,16 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ModelVector<Natural>       >( new Dist_reversibleJumpMixtureConstant<ModelVector<Natural> >() );
         AddDistribution< TimeTree                   >( new Dist_reversibleJumpMixtureConstant<TimeTree>() );
         AddDistribution< BranchLengthTree           >( new Dist_reversibleJumpMixtureConstant<BranchLengthTree>() );
+
+        // markov events
+        AddDistribution< RlOrderedEventTimes          >( new Dist_markovTimes() );
+        AddDistribution< RlOrderedEvents<Real>        >( new Dist_markovEvents<Real>() );
+        AddDistribution< RlOrderedEvents<RealPos>     >( new Dist_markovEvents<RealPos>() );
+        AddDistribution< RlOrderedEvents<Probability> >( new Dist_markovEvents<Probability>() );
+
+        AddDistribution< RlOrderedEvents<ModelVector<Real> >        >( new Dist_markovEvents<ModelVector<Real>        >() );
+        AddDistribution< RlOrderedEvents<ModelVector<RealPos> >     >( new Dist_markovEvents<ModelVector<RealPos>     >() );
+        AddDistribution< RlOrderedEvents<ModelVector<Probability> > >( new Dist_markovEvents<ModelVector<Probability> >() );
 
 
         /* Now we have added all primitive and complex data types and can start type checking */
