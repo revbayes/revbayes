@@ -1202,15 +1202,14 @@ void SBNParameters::countAllSubsplits(const std::vector<std::vector<size_t> >& c
       // This node is not a tip
       if ( compact_tree[i][0] != compact_tree[i][1] )
       {
-        bool child_0_is_y = getSubsplit(compact_tree[i][0]).isChildOfY(getSubsplit(compact_tree[i][1]));
-
+        
         // Case 4
-        weight = TTR[compact_tree[i][child_0_is_y ? 1 : 2]];
+        weight = TTR[compact_tree[i][1]];
         incrementParentChildCount(parent_child_counts,cases[3],weight);
         // std::cout << "did case 4" << std::endl;
 
         // Case 5
-        weight = TTR[compact_tree[i][child_0_is_y ? 2 : 1]];
+        weight = TTR[compact_tree[i][2]];
         incrementParentChildCount(parent_child_counts,cases[4],weight);
         // std::cout << "did case 5" << std::endl;
       }
@@ -1227,17 +1226,17 @@ void SBNParameters::countAllSubsplits(const std::vector<std::vector<size_t> >& c
       double weight = 1.0 - TTR[compact_tree[i][0]]  - TTR[compact_tree[i][4]];
 
       incrementParentChildCount(parent_child_counts,cases[0],weight);
-      std::cout << "did case 1" << std::endl;
+      // std::cout << "did case 1" << std::endl;
 
       // Case 2
       weight = TTR[compact_tree[i][4]];
       incrementParentChildCount(parent_child_counts,cases[1],weight);
-      std::cout << "did case 2" << std::endl;
+      // std::cout << "did case 2" << std::endl;
 
       // Case 3
       weight = doSA ? one_over_n_branches : q[cases[2].first];
       incrementParentChildCount(parent_child_counts,cases[2],weight);
-      std::cout << "did case 3" << std::endl;
+      // std::cout << "did case 3" << std::endl;
 
       // This node is not a tip
       if ( compact_tree[i][0] != compact_tree[i][1] )
@@ -1245,18 +1244,18 @@ void SBNParameters::countAllSubsplits(const std::vector<std::vector<size_t> >& c
         // Case 4
         weight = TTR[compact_tree[i][1]];
         incrementParentChildCount(parent_child_counts,cases[3],weight);
-        std::cout << "did case 4" << std::endl;
+        // std::cout << "did case 4" << std::endl;
 
         // Case 5
         weight = TTR[compact_tree[i][2]];
         incrementParentChildCount(parent_child_counts,cases[4],weight);
-        std::cout << "did case 5" << std::endl;
+        // std::cout << "did case 5" << std::endl;
       }
 
       // Case 6 (root to s_y)
       weight = doSA ? one_over_n_branches : q[cases[5].first];
       incrementParentChildCount(parent_child_counts,cases[5],weight);
-      std::cout << "did case 6" << std::endl;
+      // std::cout << "did case 6" << std::endl;
     }
 
   }
@@ -2416,8 +2415,8 @@ void SBNParameters::addTreeToAllRootSplitCounts(std::unordered_map<size_t,double
 
 void SBNParameters::incrementParentChildCount(std::unordered_map<std::pair<size_t,size_t>,double> &parent_child_counts, std::pair<size_t,size_t> &this_parent_child, double &weight)
 {
-  std::cout << "incrementing ParentChildCount by " << weight << " for parent-child " << getSubsplit(this_parent_child.first) << " - " << getSubsplit(this_parent_child.second) << std::endl;
-  std::cout << "incrementing ParentChildCount by " << weight << " for parent-child " << this_parent_child.first << " - " << this_parent_child.second << std::endl;
+  // std::cout << "incrementing ParentChildCount by " << weight << " for parent-child " << getSubsplit(this_parent_child.first) << " - " << getSubsplit(this_parent_child.second) << std::endl;
+  // std::cout << "incrementing ParentChildCount by " << weight << " for parent-child " << this_parent_child.first << " - " << this_parent_child.second << std::endl;
   if ( parent_child_counts.count(this_parent_child) == 0 )
   {
     parent_child_counts[this_parent_child] = weight;
