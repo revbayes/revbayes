@@ -101,8 +101,6 @@ RevBayesCore::EmpiricalSampleDistribution<valueType>::EmpiricalSampleDistributio
         this->addParameter( the_node );
     }
     
-    delete this->value;
-    
     RbVector<valueType>* new_value = simulate();
     this->setValue( new_value );
 
