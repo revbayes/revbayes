@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# RevBayes Validation Test: Occurrence birth-death process
+# RevBayes Validation Test: Occurrence birth-death process, corrected for drifting fossils
 #
 # Model: Tree is drawn from a constant-rate fossilized birth-death process with occurrences.
 #
@@ -25,12 +25,9 @@ sequences <- readDiscreteCharacterData("data-epi-test/data_seq.nex")
 occurrence_ages <- readMatrix(file="data-epi-test/data_occurrences.csv", delimiter="; ")[1]
 
 
-
-rho <- 1.0
 rm <- 0.0
 cond <- "time"
-origin_time ~ dnUnif(7.7, 12.0)
-N <- 15
+N <- 50
 Mt <- TRUE
 
 #Add Missing Taxa
@@ -38,6 +35,8 @@ sequences.addMissingTaxa( taxa )
 
 # Create some moves that change the stochastic variables
 # All moves are sliding proposals but you could use scaling proposals for the rates too
+rho ~ dnBeta(1.0,1.0)
+moves[mvi++] = mvScale(rho,lambda=0.1,tune=TRUE,weight=1.0)
 lambda ~ dnExp(10)
 moves[mvi++] = mvScale(lambda,lambda=0.1,tune=TRUE,weight=1.0)
 mu ~ dnExp(10)
@@ -46,15 +45,31 @@ psi ~ dnExp(10)
 moves[mvi++] = mvScale(psi,lambda=0.1, tune=TRUE,weight=1.0)
 omega ~ dnExp(10)
 moves[mvi++] = mvScale(omega,lambda=0.1, tune=TRUE,weight=1.0)
+origin_time ~ dnUnif(7.7, 12.0)
+moves[mvi++] = mvSlide(origin_time, delta=0.01,tune=TRUE,weight=5.0)
+
 
 ### Define the tree-prior distribution as the fossilized birth-death process ###
 obd_tree ~ dnOBDP(originAge=origin_time, lambda=lambda, mu=mu, psi=psi,omega=omega, maxHiddenLin=N, rho=rho, removalPr=rm, cond=cond,occurrence_ages=occurrence_ages,useMt=Mt, taxa=taxa)
 
-moves[mvi++] = mvFNPR(obd_tree, weight=10.0)
-moves[mvi++] = mvCollapseExpandFossilBranch(obd_tree, origin_time, weight=6.0)
+moves[mvi++] = mvFNPR(obd_tree, weight=20.0)
+moves[mvi++] = mvCollapseExpandFossilBranch(obd_tree, origin_time, weight=10.0)
 moves[mvi++] = mvNodeTimeSlideUniform(obd_tree, weight=2.0)
 moves[mvi++] = mvRootTimeSlideUniform(obd_tree, origin_time, weight=1.0)
 
+#attempt to have fixed fossils
+fossils = obd_tree.getFossils()
+for(i in 1:fossils.size())
+{
+    t[i] := tmrca(obd_tree, clade(fossils[i]))
+
+    a_i = fossils[i].getMinAge()
+    b_i = fossils[i].getMaxAge()
+
+    F[i] ~ dnUniform(t[i] - b_i - 0.001, t[i] - a_i + 0.001)
+    F[i].clamp( 0 )
+}
+num_samp_anc := obd_tree.numSampledAncestors()
 
 #strict clock model with lambda = 0.005
 branch_rates ~ dnExponential(250.0)
@@ -89,8 +104,8 @@ mymodel = model(obd_tree)
 
 # We define our model.
 # We can use any node of our model as a handle, here we chose to use the rate matrix.
-monitors[1] = mnStochasticVariable(filename="out-mini-epi/mcmc_OBDP_epi_new.out", printgen=10)
-monitors[2] = mnFile(filename="out-mini-epi/mcmc_OBDP_epi_new.trees", printgen=100,obd_tree)
+monitors[1] = mnStochasticVariable(filename="out-epi-more-fossils/mcmc_OBDP_epi_new.out", printgen=100)
+monitors[2] = mnFile(filename="out-epi-more-fossils/mcmc_OBDP_epi_new.trees", printgen=100,obd_tree)
 monitors[3] = mnScreen(printgen=100)
 print("my model ok")
 #mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
@@ -102,10 +117,10 @@ mymcmc.run(generations=5000, tuningInterval=100)
 mymcmc.operatorSummary()
 
 # Read in the tree trace and construct the maximum clade credibility (MCC) tree #
-trace = readTreeTrace("out-mini-epi/mcmc_OBDP_epi_new.trees")
+trace = readTreeTrace("out-epi-more-fossils/mcmc_OBDP_epi_new.trees")
 
 # Summarize tree trace and save MCC tree to file
-mccTree(trace, file="out-mini-epi/mcmc_OBDP_epi_new.tre" )
+mccTree(trace, file="out-epi-more-fossils/mcmc_OBDP_epi_new.tre" )
 
 
 # you may want to quit RevBayes now
