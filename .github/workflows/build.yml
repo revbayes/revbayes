@@ -198,25 +198,25 @@ jobs:
         cp /usr/lib/gcc/x86_64-w64-mingw32/*-win32/libgcc_s_seh-1.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
         cp /usr/lib/gcc/x86_64-w64-mingw32/*-win32/libstdc++-6.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
         cp /home/runner/win_root/mingw64/bin/libboost_*.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
-  
+        echo "wine64 ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb"' $@' > ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
+        chmod +x ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
     - name: Test
       env:
         USE_MPI: ${{ matrix.mpi }}
       run: |
         if [ "${{ matrix.name }}" = "windows" ] ; then
-          RB_EXE="wine64 ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb"
+          export PATH=${GITHUB_WORKSPACE}/wincrossbuild/bin:$PATH
         else
-          RB_EXE="rb"
           export PATH=${GITHUB_WORKSPACE}/projects/cmake:$PATH
         fi
         echo "\"Hello World\"" | ${RB_EXE}
         echo ::group::Test suite
         cd tests
-        ./run_integration_tests.sh -mpi ${USE_MPI} "${RB_EXE}"
+        ./run_integration_tests.sh -mpi ${USE_MPI} rb
         cd
         echo ::endgroup::
         echo ::group::testiphy
         git clone https://gitlab.com/testiphy/testiphy.git
         cd testiphy
-        ./testiphy "${RB_EXE}"
+        ./testiphy rb
         echo ::endgroup::
