@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include "AbstractEventsDistribution.h"
 #include "OrderedEvents.h"
 #include "RbVector.h"
 #include "OrderedEventTimes.h"
@@ -12,7 +13,7 @@
 namespace RevBayesCore {
 
     template <class valueType>
-    class MarkovEventsDistribution : public TypedDistribution< OrderedEvents<valueType> > {
+    class MarkovEventsDistribution : public AbstractEventsDistribution, public TypedDistribution< OrderedEvents<valueType> > {
         
     public:
         // constructor(s)
@@ -23,6 +24,13 @@ namespace RevBayesCore {
         MarkovEventsDistribution*                           clone(void) const;                                                                      //!< Create an independent clone
         double                                              computeLnProbability(void);
         void                                                redrawValue(void);
+
+        // virtual functions from AbstractEventsDistribution
+        void                                                resimulate(void);
+        double                                              addEvent(double time);
+        double                                              removeEvent(double time);
+        void                                                changeEventTime(double old_time, double new_time);
+        void                                                resetEvents(void);
 
     protected:
         // Parameter management functions
@@ -36,6 +44,10 @@ namespace RevBayesCore {
         // private members
         const TypedDagNode< OrderedEventTimes > *           event_times;
         TypedDistribution<valueType>*                       base_distribution;
+
+        // storing values
+        double    stored_event_time;
+        valueType stored_event;
 
     };
     
@@ -55,7 +67,8 @@ template <class valueType>
 RevBayesCore::MarkovEventsDistribution<valueType>::MarkovEventsDistribution(const TypedDagNode< OrderedEventTimes > *oet, TypedDistribution<valueType> *g) :
                                                                             TypedDistribution< OrderedEvents<valueType> >( new OrderedEvents<valueType>() ),
     event_times( oet ),
-    base_distribution( g )
+    base_distribution( g ),
+	stored_event()
 {
     this->addParameter( event_times );
     
@@ -68,12 +81,12 @@ RevBayesCore::MarkovEventsDistribution<valueType>::MarkovEventsDistribution(cons
 
     this->value = simulate();
 }
-
 
 template <class valueType>
 RevBayesCore::MarkovEventsDistribution<valueType>::MarkovEventsDistribution(const MarkovEventsDistribution &d) : TypedDistribution< OrderedEvents<valueType> >( d ),
 	event_times( d.event_times ),
-	base_distribution( d.base_distribution )
+	base_distribution( d.base_distribution ),
+	stored_event( d.stored_event )
 {
     this->addParameter( event_times );
     
@@ -86,8 +99,6 @@ RevBayesCore::MarkovEventsDistribution<valueType>::MarkovEventsDistribution(cons
     
     this->value = simulate();
 }
-
-
 
 template <class valueType>
 RevBayesCore::MarkovEventsDistribution<valueType>* RevBayesCore::MarkovEventsDistribution<valueType>::clone( void ) const
@@ -98,9 +109,31 @@ RevBayesCore::MarkovEventsDistribution<valueType>* RevBayesCore::MarkovEventsDis
 template <class valueType>
 double RevBayesCore::MarkovEventsDistribution<valueType>::computeLnProbability( void )
 {
+	// make sure the times and events are one-to-one
+	const std::set<double>& the_event_times = event_times->getValue().getEventTimes();
+	const std::map<double, valueType>& the_values = this->value->getEvents();
+
+	// make sure the number of events are the same
+	if ( the_event_times.size() != the_values.size() )
+	{
+		throw RbException("The number of event times and the number of events do not match up!");
+	}
+
+	// make sure the times match
+	for( std::set<double>::const_iterator it = the_event_times.begin(); it != the_event_times.end(); ++it)
+	{
+		// try to find the event with that time
+		typename std::map<double, valueType>::const_iterator ev = the_values.find( *it );
+
+		// if not found, throw error
+		if ( it == the_event_times.end() ) {
+			throw RbException("The times do not match up with event times");
+		}
+	}
+
+	// compute the probability
 	double ln_prob = 0.0;
 
-	const typename std::map<double, valueType> &the_values = this->value->getEvents();
 	for( typename std::map<double, valueType>::const_iterator it = the_values.begin(); it != the_values.end(); ++it)
 	{
 		// set the value for the base distribution
@@ -112,8 +145,6 @@ double RevBayesCore::MarkovEventsDistribution<valueType>::computeLnProbability( 
 
     return ln_prob;
 }
-
-
 
 template <class valueType>
 RevBayesCore::OrderedEvents<valueType>* RevBayesCore::MarkovEventsDistribution<valueType>::simulate()
@@ -150,6 +181,95 @@ void RevBayesCore::MarkovEventsDistribution<valueType>::redrawValue( void )
     this->value = simulate();
 }
 
+template <class valueType>
+void RevBayesCore::MarkovEventsDistribution<valueType>::resimulate(void)
+{
+	this->redrawValue();
+}
+
+template <class valueType>
+double RevBayesCore::MarkovEventsDistribution<valueType>::addEvent(double time)
+{
+	// NOTE: to undo this event, call removeEvent on the same time
+
+	// make sure there's not an event at this time
+	const std::map<double, valueType>& events = this->value->getEvents();
+	if ( events.find(time) != events.end() )
+	{
+		throw RbException("Trying to add an event that already has a value at the given time.");
+	}
+
+	// have the base distribution simulate a new value
+	base_distribution->redrawValue();
+
+	// copy the simulated value
+	valueType new_event = base_distribution->getValue();
+
+	// add the new event to the events
+	this->value->addEvent(time, new_event);
+
+	// return the probability
+	return base_distribution->computeLnProbability();
+}
+
+template <class valueType>
+double RevBayesCore::MarkovEventsDistribution<valueType>::removeEvent(double time)
+{
+	// NOTE: to undo this event, we have to store the value of the event
+	// and then call resetEvents to add the value back
+
+	// make sure there's an event at this time
+	const std::map<double, valueType>& events = this->value->getEvents();
+	typename std::map<double, valueType>::const_iterator it = events.find(time);
+	if ( it == events.end() )
+	{
+		throw RbException("Did not find an event at the provided time.");
+	}
+
+	// store the value
+	stored_event_time = time;
+	stored_event = it->second;
+
+	// give the value to the base distribution
+	base_distribution->setValue( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( stored_event ) );
+
+	// remove the event
+	this->value->removeEvent(time);
+
+	// return the probability
+	return base_distribution->computeLnProbability();;
+}
+
+template <class valueType>
+void RevBayesCore::MarkovEventsDistribution<valueType>::changeEventTime(double old_time, double new_time)
+{
+	// NOTE: to undo this event, simply call it again, reversing the order of the arguments
+
+	// make sure there's an event at this time
+	const std::map<double, valueType>& events = this->value->getEvents();
+	typename std::map<double, valueType>::const_iterator it = events.find(old_time);
+	if ( it == events.end() )
+	{
+		throw RbException("Did not find an event at the provided time.");
+	}
+
+	// change the time of the event
+	this->value->changeEventTime(old_time, new_time);
+}
+
+template <class valueType>
+void RevBayesCore::MarkovEventsDistribution<valueType>::resetEvents(void)
+{
+	// check if there is already an event at the stored time
+	const std::map<double, valueType>& events = this->value->getEvents();
+	if ( events.find(stored_event_time) != events.end() )
+	{
+		throw RbException("Tried to restore an event that already exists.");
+	}
+
+	// add the stored value back to the map
+	this->value->addEvent(stored_event_time, stored_event);
+}
 
 /** Swap a parameter of the distribution */
 template <class valueType>
