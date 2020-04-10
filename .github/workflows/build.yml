@@ -190,8 +190,8 @@ jobs:
     - name: Configure and build (Windows meson cross compile)
       if: matrix.name == 'windows'
       env:
-        BOOST_INCLUDEDIR: /root/win_root/mingw64/include/boost
-        BOOST_LIBRARYDIR: /root/win_root/mingw64/lib
+        BOOST_INCLUDEDIR: ${GITHUB_WORKSPACE}/win_root/mingw64/include/boost
+        BOOST_LIBRARYDIR: ${GITHUB_WORKSPACE}/win_root/mingw64/lib
       run: |
         /usr/local/bin/meson build ${GITHUB_WORKSPACE} --prefix=${GITHUB_WORKSPACE}/wincrossbuild --cross-file=win64-cross.txt
         /usr/local/bin/ninja -C build install
