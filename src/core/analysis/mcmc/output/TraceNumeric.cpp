@@ -46,14 +46,14 @@ TraceNumeric* TraceNumeric::clone() const
 void TraceNumeric::computeStatistics( void )
 {
 
-    // test stationarity within chain
-    size_t nBlocks = 10;
-    StationarityTest testS = StationarityTest(nBlocks, 0.01);
-    passedStationarityTest = testS.assessConvergence(*this);
-
-    // Geweke's test for convergence within a chain
-    GewekeTest testG = GewekeTest(0.01);
-    passedGewekeTest = testG.assessConvergence(*this);
+//    // test stationarity within chain
+//    size_t nBlocks = 10;
+//    StationarityTest testS = StationarityTest(nBlocks, 0.01);
+//    passedStationarityTest = testS.assessConvergence(*this);
+//
+//    // Geweke's test for convergence within a chain
+//    GewekeTest testG = GewekeTest(0.01);
+//    passedGewekeTest = testG.assessConvergence(*this);
 
 }
 
