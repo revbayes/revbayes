@@ -835,27 +835,27 @@ void SBNParameters::enumerateAllSubsplits(std::vector<Tree> &trees)
 
 std::vector<std::pair<size_t,size_t> > SBNParameters::getCasesFromCompactTree(const std::vector<std::vector<size_t> >& compact_tree, size_t row)
 {
-  
+  // to-do: add a "parent is root" option to this to avoid having to check for root parents here and in count-all-subsplits (saves 2 if statement evals per non-root-parent)
   std::vector<std::pair<size_t,size_t> > cases;
 
   std::pair<size_t,size_t> this_case;
 
   // root parent
-  if ( compact_tree[row][4] == compact_tree[compact_tree.size()][0] ) {
-    this_case.first = compact_tree[row][9];
+  if ( compact_tree[compact_tree.size()-1][1] == compact_tree[row][0] || compact_tree[compact_tree.size()-1][2] == compact_tree[row][0] || compact_tree[compact_tree.size()-1][3] == compact_tree[row][0] ) {
+    this_case.first = compact_tree[row][8];
     this_case.second = compact_tree[row][5];
     cases.push_back(this_case);
 
-    this_case.first = compact_tree[row][12];
+    this_case.first = compact_tree[row][9];
     cases.push_back(this_case);
 
-    this_case.first = compact_tree[row][11];
+    this_case.first = compact_tree[row][13];
     cases.push_back(this_case);
 
-    if (compact_tree[row][0] == compact_tree[row][1])
+    if (compact_tree[row][0] != compact_tree[row][1])
     {
-      this_case.first = compact_tree[row][13];
-      this_case.second = compact_tree[row][10];
+      this_case.first = compact_tree[row][15];
+      this_case.second = compact_tree[row][12];
       cases.push_back(this_case);
 
       this_case.first = compact_tree[row][14];
@@ -870,27 +870,27 @@ std::vector<std::pair<size_t,size_t> > SBNParameters::getCasesFromCompactTree(co
       cases.push_back(this_case);
     }
 
-    this_case.first = compact_tree[row][11];
-    this_case.second = compact_tree[row][10];
+    this_case.first = compact_tree[row][13];
+    this_case.second = compact_tree[row][12];
     cases.push_back(this_case);
   }
   // non-root parent
   else
   {
-    this_case.first = compact_tree[row][9];
+    this_case.first = compact_tree[row][8];
     this_case.second = compact_tree[row][5];
     cases.push_back(this_case);
 
-    this_case.first = compact_tree[row][12];
+    this_case.first = compact_tree[row][9];
     cases.push_back(this_case);
 
-    this_case.first = compact_tree[row][11];
+    this_case.first = compact_tree[row][13];
     cases.push_back(this_case);
 
-    if (compact_tree[row][0] == compact_tree[row][1])
+    if (compact_tree[row][0] != compact_tree[row][1])
     {
-      this_case.first = compact_tree[row][13];
-      this_case.second = compact_tree[row][10];
+      this_case.first = compact_tree[row][15];
+      this_case.second = compact_tree[row][12];
       cases.push_back(this_case);
 
       this_case.first = compact_tree[row][14];
@@ -905,10 +905,12 @@ std::vector<std::pair<size_t,size_t> > SBNParameters::getCasesFromCompactTree(co
       cases.push_back(this_case);
     }
 
-    this_case.first = compact_tree[row][11];
-    this_case.second = compact_tree[row][10];
+    this_case.first = compact_tree[row][13];
+    this_case.second = compact_tree[row][12];
     cases.push_back(this_case);
   }
+  
+  return cases;
 }
 
 // Counts all subsplits in an unrooted tree (handles all virtual rooting)
@@ -1173,6 +1175,7 @@ void SBNParameters::countAllSubsplits(const std::vector<std::vector<size_t> >& c
   // Second pass: count
   for (size_t i=0; i<compact_tree.size()-1; ++i)
   {
+    std::vector<std::pair<size_t,size_t> > cases = getCasesFromCompactTree(compact_tree,i);
     // root parent
     // if ( std::count(root_children.begin(),root_children.end(),compact_tree[i][0]) )
     if ( root_children[0] == compact_tree[i][0] || root_children[1] == compact_tree[i][0] || root_children[2] == compact_tree[i][0] )
@@ -1181,104 +1184,79 @@ void SBNParameters::countAllSubsplits(const std::vector<std::vector<size_t> >& c
       sibling_indices.push_back(compact_tree[i][3]);
       sibling_indices.push_back(compact_tree[i][4]);
 
-      std::pair<size_t,size_t> this_case;
-
       // Case 1
-      this_case.first = compact_tree[i][8];
-      this_case.second = compact_tree[i][5];
       double weight = TTR[sibling_indices[0]];
-      incrementParentChildCount(parent_child_counts,this_case,weight);
+      incrementParentChildCount(parent_child_counts,cases[0],weight);
       // std::cout << "did case 1" << std::endl;
 
       // Case 2
-      this_case.first = compact_tree[i][9];
       weight = TTR[sibling_indices[1]];
-      incrementParentChildCount(parent_child_counts,this_case,weight);
+      incrementParentChildCount(parent_child_counts,cases[1],weight);
       // std::cout << "did case 2" << std::endl;
 
       // Case 3
-      this_case.first = compact_tree[i][13];
-      weight = doSA ? one_over_n_branches : q[this_case.first];
-      incrementParentChildCount(parent_child_counts,this_case,weight);
+      weight = doSA ? one_over_n_branches : q[cases[2].first];
+      incrementParentChildCount(parent_child_counts,cases[2],weight);
       // std::cout << "did case 3" << std::endl;
 
-      this_case.second = compact_tree[i][12];
-      
       // This node is not a tip
       if ( compact_tree[i][0] != compact_tree[i][1] )
       {
         bool child_0_is_y = getSubsplit(compact_tree[i][0]).isChildOfY(getSubsplit(compact_tree[i][1]));
 
         // Case 4
-        this_case.first = compact_tree[i][14];
         weight = TTR[compact_tree[i][child_0_is_y ? 1 : 2]];
-        incrementParentChildCount(parent_child_counts,this_case,weight);
+        incrementParentChildCount(parent_child_counts,cases[3],weight);
         // std::cout << "did case 4" << std::endl;
 
         // Case 5
-        this_case.first = compact_tree[i][15];
         weight = TTR[compact_tree[i][child_0_is_y ? 2 : 1]];
-        incrementParentChildCount(parent_child_counts,this_case,weight);
+        incrementParentChildCount(parent_child_counts,cases[4],weight);
         // std::cout << "did case 5" << std::endl;
       }
 
       // Case 6
-      this_case.first = compact_tree[i][13];
-      weight = doSA ? one_over_n_branches : q[this_case.first];
-      incrementParentChildCount(parent_child_counts,this_case,weight);
+      weight = doSA ? one_over_n_branches : q[cases[5].first];
+      incrementParentChildCount(parent_child_counts,cases[5],weight);
       // std::cout << "did case 6" << std::endl;
     }
     else
     {
 
-      std::pair<size_t,size_t> this_case;
-
       // Case 1
-      this_case.first = compact_tree[i][8];
-      this_case.second = compact_tree[i][5];
-
       double weight = 1.0 - TTR[compact_tree[i][0]]  - TTR[compact_tree[i][4]];
 
-      incrementParentChildCount(parent_child_counts,this_case,weight);
-      // std::cout << "did case 1" << std::endl;
+      incrementParentChildCount(parent_child_counts,cases[0],weight);
+      std::cout << "did case 1" << std::endl;
 
       // Case 2
-      this_case.first = compact_tree[i][9];
       weight = TTR[compact_tree[i][4]];
-      incrementParentChildCount(parent_child_counts,this_case,weight);
-      // std::cout << "did case 2" << std::endl;
+      incrementParentChildCount(parent_child_counts,cases[1],weight);
+      std::cout << "did case 2" << std::endl;
 
       // Case 3
-      this_case.first = compact_tree[i][13];
-      weight = doSA ? one_over_n_branches : q[this_case.first];
-      incrementParentChildCount(parent_child_counts,this_case,weight);
-      // std::cout << "did case 3" << std::endl;
-
-      this_case.second = compact_tree[i][12];
+      weight = doSA ? one_over_n_branches : q[cases[2].first];
+      incrementParentChildCount(parent_child_counts,cases[2],weight);
+      std::cout << "did case 3" << std::endl;
 
       // This node is not a tip
       if ( compact_tree[i][0] != compact_tree[i][1] )
       {
-        bool child_0_is_y = getSubsplit(compact_tree[i][0]).isChildOfY(getSubsplit(compact_tree[i][1]));
-
         // Case 4
-        this_case.first = compact_tree[i][14];
-        weight = TTR[compact_tree[i][child_0_is_y ? 1 : 2]];
-        incrementParentChildCount(parent_child_counts,this_case,weight);
-        // std::cout << "did case 4" << std::endl;
+        weight = TTR[compact_tree[i][1]];
+        incrementParentChildCount(parent_child_counts,cases[3],weight);
+        std::cout << "did case 4" << std::endl;
 
         // Case 5
-        this_case.first = compact_tree[i][15];
-        weight = TTR[compact_tree[i][child_0_is_y ? 2 : 1]];
-        incrementParentChildCount(parent_child_counts,this_case,weight);
-        // std::cout << "did case 5" << std::endl;
+        weight = TTR[compact_tree[i][2]];
+        incrementParentChildCount(parent_child_counts,cases[4],weight);
+        std::cout << "did case 5" << std::endl;
       }
 
       // Case 6 (root to s_y)
-      this_case.first = compact_tree[i][13];
-      weight = doSA ? one_over_n_branches : q[this_case.first];
-      incrementParentChildCount(parent_child_counts,this_case,weight);
-      // std::cout << "did case 6" << std::endl;
+      weight = doSA ? one_over_n_branches : q[cases[5].first];
+      incrementParentChildCount(parent_child_counts,cases[5],weight);
+      std::cout << "did case 6" << std::endl;
     }
 
   }
@@ -1348,8 +1326,17 @@ void SBNParameters::treesToCompactTrees(std::vector<Tree> &trees, std::vector<st
       else
       {
         std::vector<int> children = (*it)->getChildrenIndices();
-        ctree[row][1] = children[0];
-        ctree[row][2] = children[1];
+        bool child_0_is_y = per_node_subsplit[index].isChildOfY(per_node_subsplit[children[0]]);
+        if ( child_0_is_y )
+        {
+          ctree[row][1] = children[0];
+          ctree[row][2] = children[1];
+        }
+        else
+        {
+          ctree[row][1] = children[1];
+          ctree[row][2] = children[0];
+        }
       }
 
       if ( (*it)->getParent().isRoot() )
@@ -1421,11 +1408,11 @@ void SBNParameters::treesToCompactTrees(std::vector<Tree> &trees, std::vector<st
       ctree[row][8]  = cases[0].first; // me from sister (if root child, then me from sister)
       ctree[row][9]  = cases[1].first; // me from not-sister-not-me (if root child, then me from other sister)
       ctree[row][10] = getIndex(per_node_subsplit[ctree[row][4]]); // sister's subsplit
-      ctree[row][11] = eleven; // (if root child, then other sister's subsplit)      
-      ctree[row][12] = cases[5].second; // sister from everything else (if root child, then sister from other sister)
+      ctree[row][11] = eleven; // my parent's reversed parent (if root child, then other sister's subsplit)      
+      ctree[row][12] = cases[5].second; // my parent reversed, aka my sister from everything else (if root child, then sister from other sister)
       ctree[row][13] = cases[5].first; // root here
-      ctree[row][14] = cases[4].first; // root to one child
-      ctree[row][15] = cases[3].first; // root to other child
+      ctree[row][14] = cases[4].first; // root to one child (parent is s_y from s_complement)
+      ctree[row][15] = cases[3].first; // root to other child (parent is s_z from s_complement)
       
       ++row;
     }
@@ -2429,8 +2416,8 @@ void SBNParameters::addTreeToAllRootSplitCounts(std::unordered_map<size_t,double
 
 void SBNParameters::incrementParentChildCount(std::unordered_map<std::pair<size_t,size_t>,double> &parent_child_counts, std::pair<size_t,size_t> &this_parent_child, double &weight)
 {
-  // std::cout << "incrementing ParentChildCount by " << weight << " for parent-child " << getSubsplit(this_parent_child.first) << " - " << getSubsplit(this_parent_child.second) << std::endl;
-  // std::cout << "incrementing ParentChildCount by " << weight << " for parent-child " << this_parent_child.first << " - " << this_parent_child.second << std::endl;
+  std::cout << "incrementing ParentChildCount by " << weight << " for parent-child " << getSubsplit(this_parent_child.first) << " - " << getSubsplit(this_parent_child.second) << std::endl;
+  std::cout << "incrementing ParentChildCount by " << weight << " for parent-child " << this_parent_child.first << " - " << this_parent_child.second << std::endl;
   if ( parent_child_counts.count(this_parent_child) == 0 )
   {
     parent_child_counts[this_parent_child] = weight;
