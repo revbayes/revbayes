@@ -6,6 +6,7 @@
  */
 
 #include "MarkovTimesDistribution.h"
+#include "AbstractEventsDistribution.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "DistributionExponential.h"
@@ -66,9 +67,12 @@ void MarkovTimesDistribution::redrawValue(void)
 	const std::vector<DagNode*>& children = this->dag_node->getChildren();
 	for(std::vector<DagNode*>::const_iterator it = children.begin(); it != children.end(); ++it)
 	{
-		(*it)->redraw();
+		AbstractEventsDistribution* dist = dynamic_cast<AbstractEventsDistribution *>( &(*it)->getDistribution() );
+        if ( dist != NULL )
+        {
+    		dist->resimulate();
+        }
 	}
-
 
 }
 
