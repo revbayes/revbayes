@@ -120,8 +120,8 @@ jobs:
       if: matrix.name == 'windows'
       run: |
           sudo apt-get install git python3-pip g++-mingw-w64 wine64
-          sudo pip3 install meson
-          sudo pip3 install ninja
+          sudo -H pip3 install meson
+          sudo -H pip3 install ninja
 
     # Caches for different branches are isolated, so we don't need to put the branch name into the key.
     # The total size for all caches in a repository is 5Gb.
