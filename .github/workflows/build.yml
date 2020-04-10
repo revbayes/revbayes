@@ -119,7 +119,7 @@ jobs:
     - name: Install (Windows meson cross compile)
       if: matrix.name == 'windows'
       run: |
-          sudo apt-get install git python3-pip g++-mingw-w64 wine64
+          sudo apt-get install git python3-setuptools python3-pip g++-mingw-w64 wine64
           sudo -H pip3 install meson
           sudo -H pip3 install ninja
 
