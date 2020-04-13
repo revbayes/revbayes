@@ -95,7 +95,7 @@ RevBayesCore::BranchRateTreeDistribution* Dist_BranchRateTree::createDistributio
     const Distribution& rl_rate_prior                           = static_cast<const Distribution &>( branch_rate_prior->getRevObject() );
     RevBayesCore::TypedDistribution<double>* brp                = dynamic_cast<RevBayesCore::TypedDistribution<double>* >( rl_rate_prior.createDistribution() );
 
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tt          = static_cast<const Tree &>( time_tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tt          = static_cast<const TimeTree &>( time_tree->getRevObject() ).getDagNode();
 
     RevBayesCore::TypedDagNode<double>* rbf = NULL;
     if( root_branch_fraction->getRevObject() != RevNullObject::getInstance() )
@@ -207,7 +207,7 @@ const MemberRules& Dist_BranchRateTree::getParameterRules(void) const
     if ( rules_set == false )
     {
         member_rules.push_back( new ArgumentRule( "branchRatePrior", TypedDistribution<RealPos>::getClassTypeSpec(), "The prior distribution for the branch rates.",   ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        member_rules.push_back( new ArgumentRule( "timeTree", Tree::getClassTypeSpec(), "The time tree",   ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        member_rules.push_back( new ArgumentRule( "timeTree", TimeTree::getClassTypeSpec(), "The time tree", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         member_rules.push_back( new ArgumentRule( "rootBranchFraction", Probability::getClassTypeSpec(), "The fraction of how much of the root branch is assigned to the left subtree.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         rules_set = true;
