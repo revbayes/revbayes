@@ -16,11 +16,14 @@ seed(12345)
 # Reading in the Data #
 #######################
 
+# Choose your burnin percentage
+burninPercentage <- 0.2
+
 ### Read in data
 occurrence_ages <- readMatrix(file="data-macro-test/data_occurrences.csv", delimiter=";")[1]
-trees = readTreeTrace("output_macro_test_Mt/mcmc_OBDP_macro_test.trees", burnin=0.25)
-trace = readTrace("output_macro_test_Mt/mcmc_OBDP_macro_test.out", burnin=0.25)
-# Trace[] vector with 13 values :
+trees = readTreeTrace("output_macro_test_Mt_cluster/mcmc_OBDP_macro_test.trees", burnin=burninPercentage)
+trace = readTrace("output_macro_test_Mt_cluster/mcmc_OBDP_macro_test.out", burnin=burninPercentage)
+# Trace[] vector with 14 values :
      # [1] Trace (Iteration)
      # [2] Trace (alpha_morpho)
      # [3] Trace (alpha_seq)
@@ -32,44 +35,36 @@ trace = readTrace("output_macro_test_Mt/mcmc_OBDP_macro_test.out", burnin=0.25)
      # [9] Trace (obd_tree)
      # [10] Trace (omega)
      # [11] Trace (psi)
-     # [11] Trace (rho)
+     # [12] Trace (rho)
      # [13] Trace (sf)
      # [14] Trace (start_time)
 
-output_file_name = "output_inferKt_macro_test/Kt_trace.txt"
+file_path = "output_inferKt_macro_test_cluster/"
 
 nb_trees <- trees.getNumberSamples()
-burninPercentage <- 0.20                             # Choose your burnin percentage
-burnin <- round(nb_trees*burninPercentage)
-# burnin <- trees.getBurnin()
-trees.setBurnin(burnin)
-trees.getBurnin()
+burnin <- trees.getBurnin()
 
 # Fixed OBDP parameters
 rm <- 0.0
 N <- 30
 cond <- "time"
-nb_time_points <- 100                                # Choose the number of time points you want to evaluate
+nb_time_points <- 200                                # Choose the number of time points you want to evaluate
 
-# variable OBDP parameters
-trace_start_time = trace[13]
-trace_start_time.setBurnin(burnin)
+# variable OBDP parameters -> check in trace that the values correspond well !
+trace_start_time = trace[14]
 trace_lambda = trace[7]
-trace_lambda.setBurnin(burnin)
 trace_mu = trace[8]
-trace_mu.setBurnin(burnin)
 trace_psi = trace[11]
-trace_psi.setBurnin(burnin)
 trace_omega = trace[10]
-trace_omega.setBurnin(burnin)
-trace_rho = trace[13]
-trace_rho.setBurnin(burnin)
+trace_rho = trace[12]
 
 # Define the times points at which density is computed according the the oldest start_time
-max_age <- max(trace[13].getValues())
+max_age <- max(trace_start_time.getValues())
 time_points <- seq(0,max_age*(1+0.5/(nb_time_points-1)), max_age/(nb_time_points-1))
 
-write("Kt\n", filename=output_file_name, append=FALSE)
+write("Start ages\n", trace_start_time.getValues(), "\n", filename=file_path + "start_time_trace.txt", append=FALSE)
+
+write("Kt\n", filename=file_path + "Kt_trace.txt", append=FALSE)
 
 for (i in 1:(nb_trees-burnin)){
      
@@ -97,9 +92,10 @@ for (i in 1:(nb_trees-burnin)){
                                    time_points=time_points, 
                                    timeTree=obd_tree)
 
+     i
      Kt
 
-     write(";", Kt, "\n", filename=output_file_name, append=TRUE)
+     write(";", Kt, "\n", filename=file_path + "Kt_trace.txt", append=TRUE)
 }
 
 

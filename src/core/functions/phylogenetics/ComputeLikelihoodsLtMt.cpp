@@ -188,22 +188,33 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
     RbVector<double> Mt(N+1, 0.0);
     Mt[0] = 1;
     double thPlusOne = events[0].time;
-    // std::cout << "Event time : " << events[0].time << " - Event type : " << events[0].type << std::endl;
     // std::cout << k << std::endl;
 
     if(thPlusOne != start_age->getValue()) {
-        std::cout << "WARNING : thPlusOne != start_age : " << thPlusOne << " != " << start_age->getValue() << std::endl;
-        return B;
+        std::cout << "WARNING : thPlusOne != start_age : " << thPlusOne << " != " << start_age->getValue() << " - type : " << events[0].type << std::endl;
     };
 
     // Then we iterate over the next events
-    for(int h = 1; h < events.size(); h++){
+    for(int h = 0; h < events.size(); h++){
 
         // First, deal with the update on time period (th, thPlusOne)
         double th = events[h].time;
+        std::string type = events[h].type;
 
         if(th > start_age->getValue()) {
-            std::cout << "WARNING : th > start_age : " << th << " > " << start_age->getValue() << std::endl;
+            std::cout << "WARNING : th > start_age : " << th << " > " << start_age->getValue() << " -> type : " << type << std::endl;
+
+            // Time points before the start age
+            if(type == "time point"){
+                for(int i = 0; i < N+1; i++){
+                    B[indxJ][i] = Mt[i];
+                }
+                indxJ -= 1;
+            }
+            else{
+                return B;
+            }
+
             continue;
         };
 
@@ -221,7 +232,6 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
         }
 
         // Second, deal with the update at punctual event th
-        std::string type = events[h].type;
 
         if(type == "time point"){
             for(int i = 0; i < N+1; i++){
@@ -417,10 +427,6 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
             // node is a "true" bifurcation event
             events.push_back(Event(n.getAge(),"branching time")) ;
         }
-        else
-        {
-            std::cout << "Warning : non-categorized node" << std::endl;
-        }
     }
 
     const RbVector<double> tau = time_points;
@@ -477,10 +483,8 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
         Lt[i] *= pow( 1.0-rh, i );
     }
 
-    std::cout << "Event time : " << events[0].time << " - Event type : " << events[0].type << std::endl;
-
     // We then iterate over the following events until finding the time of origin
-    for(int h = 1; h < events.size(); h++){
+    for(int h = 0; h < events.size(); h++){
 
         // First deal with the update along (thMinusOne, th)
         double th = events[h].time;
@@ -566,7 +570,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
             k -= 1;
         }
 
-        std::cout << "Event time : " << th << " - Event type : " << type << " -> Lt[0] : " << Lt[0] << " / Lt[1] : " << Lt[1] << std::endl;
+        // std::cout << "Event time : " << th << " - Event type : " << type << " -> Lt[0] : " << Lt[0] << " / Lt[1] : " << Lt[1] << std::endl;
 
         thMinusOne = th;
     }
@@ -760,11 +764,12 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDag
     RbVector<double> Mt(N+1, 0.0);
     Mt[0] = 1;
     double thPlusOne = events[0].time;
-    std::cout << "Event time : " << events[0].time << " - Event type : " << events[0].type << std::endl;
-    std::cout << k << std::endl;
+    // std::cout << "Event time : " << events[0].time << " - Event type : " << events[0].type << std::endl;
+    // std::cout << k << std::endl;
 
     if(thPlusOne != start_age->getValue()) {
         std::cout << "WARNING : thPlusOne != start_age : " << thPlusOne << " != " << start_age->getValue() << std::endl;
+        return B;
     };
 
     // Then we iterate over the next events
@@ -873,7 +878,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDag
             k += 1;
         }
 
-        std::cout << "Event time : " << th << " - Event type : " << type << " -> Mt[0] : " << Mt[0] << " / Mt[1] : " << Mt[1] << std::endl;
+        // std::cout << "Event time : " << th << " - Event type : " << type << " -> Mt[0] : " << Mt[0] << " / Mt[1] : " << Mt[1] << std::endl;
 
         thPlusOne = th;
     }
@@ -999,10 +1004,6 @@ MatrixReal ComputeLikelihoodsBackwardsLtPiecewise(  const TypedDagNode<double> *
             // node is a "true" bifurcation event
             events.push_back(Event(n.getAge(),"branching time")) ;
         }
-        else
-        {
-            std::cout << "Warning : non-categorized node" << std::endl;
-        }
     }
 
     const RbVector<double> tau = time_points;
@@ -1073,7 +1074,7 @@ MatrixReal ComputeLikelihoodsBackwardsLtPiecewise(  const TypedDagNode<double> *
         Lt[i] *= pow( 1.0-rh, i );
     }
 
-    std::cout << "Event time : " << events[0].time << " - Event type : " << events[0].type << std::endl;
+    // std::cout << "Event time : " << events[0].time << " - Event type : " << events[0].type << std::endl;
 
     // We then iterate over the following events until finding the time of origin
     for(int h = 1; h < events.size(); h++){
@@ -1172,7 +1173,7 @@ MatrixReal ComputeLikelihoodsBackwardsLtPiecewise(  const TypedDagNode<double> *
             k -= 1;
         }
 
-        std::cout << "Event time : " << th << " - Event type : " << type << " -> Lt[0] : " << Lt[0] << " / Lt[1] : " << Lt[1] << std::endl;
+        // std::cout << "Event time : " << th << " - Event type : " << type << " -> Lt[0] : " << Lt[0] << " / Lt[1] : " << Lt[1] << std::endl;
 
         thMinusOne = th;
     }

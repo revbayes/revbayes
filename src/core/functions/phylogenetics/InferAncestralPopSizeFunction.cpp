@@ -127,12 +127,12 @@ void InferAncestralPopSizeFunction::update( void )
 	for (size_t j = 0; j < S; j++)
         {
             // Compute the normalization factor
-            double norm = 0;
+            double norm = 0.0;
             for (size_t i = 0; i < (N+1); i++)
             {
                 norm += B_Lt[j][i]*B_Mt[j][i];
             }
-    
+
             for (size_t i = 0; i < (N+1); i++)
             {
                 D_Kt[j][i] = (B_Lt[j][i] * B_Mt[j][i])/norm;
