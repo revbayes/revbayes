@@ -29,13 +29,15 @@ BranchRateTreeDistribution::BranchRateTreeDistribution(const TypedDagNode<Tree>*
     const std::vector<const DagNode*>& pars = branch_rate_prior->getParameters();
     for (std::vector<const DagNode*>::const_iterator it = pars.begin(); it != pars.end(); ++it)
     {
-        this->addParameter( *it );
+        const DagNode* the_node = *it;
+        this->addParameter( the_node );
     }
 
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
     // this will also ensure that the parameters are not getting deleted before we do
     this->addParameter( root_branch_fraction );
+    this->addParameter( time_tree );
 
 
     simulateTree();
@@ -54,7 +56,8 @@ BranchRateTreeDistribution::BranchRateTreeDistribution(const BranchRateTreeDistr
     const std::vector<const DagNode*>& pars = branch_rate_prior->getParameters();
     for (std::vector<const DagNode*>::const_iterator it = pars.begin(); it != pars.end(); ++it)
     {
-        this->addParameter( *it );
+        const DagNode* the_node = *it;
+        this->addParameter( the_node );
     }
 
 
@@ -66,6 +69,7 @@ BranchRateTreeDistribution::~BranchRateTreeDistribution()
 {
 
     delete branch_rate_prior;
+    
     // the tree will be deleted automatically by the base class
 
 }
@@ -95,7 +99,8 @@ BranchRateTreeDistribution& BranchRateTreeDistribution::operator=(const BranchRa
         const std::vector<const DagNode*>& pars = branch_rate_prior->getParameters();
         for (std::vector<const DagNode*>::const_iterator it = pars.begin(); it != pars.end(); ++it)
         {
-            this->addParameter( *it );
+            const DagNode* the_node = *it;
+            this->addParameter( the_node );
         }
 
     }
@@ -333,7 +338,7 @@ void BranchRateTreeDistribution::simulateTree( void )
     // the branch times with new branch lengths, and then finally unroot
     // the tree to create our new branch length tree
     const Tree &time_tree_copy = time_tree->getValue();
-    Tree *value = time_tree_copy.clone();
+    value = time_tree_copy.clone();
     
     // we need to change the tree setting so that the branch lengths are used and not the ages.
     // internally, our tree nodes store both an age and branch length variable, but only one should be used.
@@ -374,6 +379,10 @@ void BranchRateTreeDistribution::swapParameterInternal( const DagNode *oldP, con
     if (oldP == root_branch_fraction )
     {
         root_branch_fraction = static_cast<const TypedDagNode<double>* >( newP );
+    }
+    else if ( oldP == time_tree )
+    {
+        time_tree = static_cast<const TypedDagNode<Tree>* >( newP );        
     }
 
     //if ( branch_rate_prior != NULL )
