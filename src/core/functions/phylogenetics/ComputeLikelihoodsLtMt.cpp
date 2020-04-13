@@ -736,13 +736,12 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDag
 
     // Initialize an empty matrix and a cursor to write lines in this matrix
     MatrixReal B(S, (N + 1), 0.0);
-    const size_t m = d.size();
-    double birth_current = birth[m];
-    double death_current = death[m];
-    double ps_current = ps[m];
-    double om_current = om[m];
-    double rp_current = rp[m];
-    double gamma_current = gamma[m];
+    double birth_current = birth[0];
+    double death_current = death[0];
+    double ps_current = ps[0];
+    double om_current = om[0];
+    double rp_current = rp[0];
+    double gamma_current = gamma[0];
     size_t indxJ = S-1;
 
     // Count the number of extant lineages
@@ -795,13 +794,20 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDag
         std::string type = events[h].type;
         if(type == "rate shift"){
         //change rates appropriately, rate changes provided in timeline are in an ascending order
-        size_t where = LocateTimeSliceIndex(th,timeline);
-        double birth_current = birth[where];
-        double death_current = death[where];
-        double ps_current = ps[where];
-        double om_current = om[where];
-        double rp_current = rp[where];
-        double gamma_current = gamma[where];
+        //rates are ordered in the reverse order : 1st element is last timeslice.
+        //the rates indices are forward in time
+        size_t where = timeline.size() - LocateTimeSliceIndex(th,timeline);
+
+        std::cout << "We are at time: " << th << std::endl;
+        std::cout << "We are entering rate-time-slice index #:" << where << std::endl;
+        std::cout <<"birth rate was " << birth_current << std::endl;
+        std::cout <<"birth rate shifts to "<< birth[where] <<std::endl;
+        birth_current = birth[where];
+        death_current = death[where];
+        ps_current = ps[where];
+        om_current = om[where];
+        rp_current = rp[where];
+        gamma_current = gamma[where];
 
         }
 
@@ -905,7 +911,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDag
 //  *
 //  * \return    The matrix of Lt values through time.
 //  */
-MatrixReal ComputeLikelihoodsBackwardsLtPiecewise(  const TypedDagNode<double> *start_age,
+MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLtPiecewise(  const TypedDagNode<double> *start_age,
                                                     const std::vector< double > &timeline,
                                                     const std::vector< double > &lambda,
                                                     const std::vector< double > &mu,
@@ -1055,12 +1061,13 @@ MatrixReal ComputeLikelihoodsBackwardsLtPiecewise(  const TypedDagNode<double> *
 
     // Initialize an empty matrix and a cursor indxJ to write lines in this matrix as well as the parameter sets.
     MatrixReal B(S, (N + 1), 0.0);
-    double birth_current = birth[0];
-    double death_current = death[0];
-    double ps_current = ps[0];
-    double om_current = om[0];
-    double rp_current = rp[0];
-    double gamma_current = gamma[0];
+    const size_t m = d.size();
+    double birth_current = birth[m];
+    double death_current = death[m];
+    double ps_current = ps[m];
+    double om_current = om[m];
+    double rp_current = rp[m];
+    double gamma_current = gamma[m];
 
     size_t indxJ = 0;
 
@@ -1098,12 +1105,17 @@ MatrixReal ComputeLikelihoodsBackwardsLtPiecewise(  const TypedDagNode<double> *
         if(type == "rate shift"){
         //change rates appropriately
         size_t where = LocateTimeSliceIndex(th,timeline);
-        double birth_current = birth[where];
-        double death_current = death[where];
-        double ps_current = ps[where];
-        double om_current = om[where];
-        double rp_current = rp[where];
-        double gamma_current = gamma[where];
+        std::cout << "We are at time: " << th << std::endl;
+        std::cout << "We are entering rate-time-slice index #:" << where << std::endl;
+        std::cout <<"birth rate was " << birth_current << std::endl;
+        std::cout <<"birth rate shifts to "<< birth[where] <<std::endl;
+        std::cout <<"birth rate ="<< birth[where] <<std::endl;
+        birth_current = birth[where];
+        death_current = death[where];
+        ps_current = ps[where];
+        om_current = om[where];
+        rp_current = rp[where];
+        gamma_current = gamma[where];
         }
 
         if(type == "time point"){
@@ -1183,5 +1195,5 @@ MatrixReal ComputeLikelihoodsBackwardsLtPiecewise(  const TypedDagNode<double> *
 
 size_t RevBayesCore::LocateTimeSliceIndex(const double &t, const std::vector<double> &timeline)
 {
-    return timeline.rend() - std::upper_bound( timeline.rbegin(), timeline.rend(), t) + 1;
+    return std::distance(timeline.begin(),std::find(timeline.begin(),timeline.end(),t));
 }
