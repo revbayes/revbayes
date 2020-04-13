@@ -186,7 +186,8 @@ RevBayesCore::EmpiricalSampleDistribution<valueType>& RevBayesCore::EmpiricalSam
         const std::vector<const DagNode*>& pars = base_distribution->getParameters();
         for (std::vector<const DagNode*>::const_iterator it = pars.begin(); it != pars.end(); ++it)
         {
-            this->addParameter( *it );
+            const DagNode* the_node = *it;
+            this->addParameter( the_node );
         }
         
         base_distribution_instances = std::vector< TypedDistribution<valueType>* >( num_samples, NULL );

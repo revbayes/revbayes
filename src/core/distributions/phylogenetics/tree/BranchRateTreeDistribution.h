@@ -16,19 +16,6 @@ namespace RevBayesCore {
 class DagNode;
 
 
-///*
-// * This struct represents a tree bipartition (split) that can be rooted or unrooted
-// */
-//struct Split : public RbBitSet
-//{
-//    Split( RbBitSet b ) : RbBitSet( b ) {}
-//
-//    inline bool operator()(const Sample<Split>& s)
-//    {
-//        return (*this) == s.first;
-//    }
-//};
-
     class BranchRateTreeDistribution : public TypedDistribution<Tree>, public TreeChangeEventListener {
 
     public:
@@ -62,12 +49,6 @@ class DagNode;
         const TypedDagNode<Tree>*                           time_tree;
         const TypedDagNode<double>*                         root_branch_fraction;
         size_t                                              num_taxa;
-//        std::vector<Taxon>                                  taxa;
-//        double                                              log_tree_topology_prob;                                                 //!< the log-topology probability.
-//        Clade                                               outgroup;
-//        bool                                                outgroup_provided;
-//        bool                                                rooted;
-//        bool                                                dirty_topology;
 
     };
 
