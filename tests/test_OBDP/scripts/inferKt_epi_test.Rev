@@ -1,0 +1,104 @@
+############################################################################################
+#
+# RevBayes Validation Test: Occurrence birth-death process
+#
+# Model: Tree is drawn from a constant-rate fossilized birth-death process with occurrences.
+#
+#
+# authors: Jérémy Andréoletti, Antoine Zwaans (from Walker Pett's FBDP test function
+#                                   + "Total-evidence dating under the FBD model" tutorial)
+#
+############################################################################################
+
+seed(12345)
+
+#######################
+# Reading in the Data #
+#######################
+
+### Read in data
+occurrence_ages <- readMatrix(file="data-epi-test/data_occurrences.csv", delimiter=";")[1]
+trees = readTreeTrace("out-epi-with-cor/epi.trees", burnin=0.25)
+trace = readTrace("out-epi-with-cor/epi.out", burnin=0.25)
+#Trace with vector with 12 elements
+#  [1]   Trace (Iteration)
+#  [2]   Trace (alpha_epi)
+#  [3]   Trace (branch_rates)
+#  [4]   Trace (kappa)
+#  [5]   Trace (lambda)
+#  [6]   Trace (mu)
+#  [7]   Trace (obd_tree)
+#  [8]   Trace (omega)
+#  [9]   Trace (origin_time)
+#  [10]  Trace (pi)
+#  [11]  Trace (psi)
+#  [12]   Trace (rho)
+
+nb_trees <- trees.getNumberSamples()
+burninPercentage <- 0.10                             # Choose your burnin percentage
+burnin <- round(nb_trees*burninPercentage)
+# burnin <- trees.getBurnin()
+trees.setBurnin(burnin)
+trees.getBurnin()
+
+# Fixed OBDP parameters
+rm <- 0.0
+N <- 15
+cond <- "time"
+nb_time_points <- 200
+
+# variable OBDP parameters
+trace_start_time = trace[13]
+trace_start_time.setBurnin(burnin*10)
+trace_lambda = trace[5]
+trace_lambda.setBurnin(burnin*10)
+trace_mu = trace[6]
+trace_mu.setBurnin(burnin*10)
+trace_psi = trace[11]
+trace_psi.setBurnin(burnin*10)
+trace_omega = trace[8]
+trace_omega.setBurnin(burnin*10)
+trace_rho = trace[12]
+trace_rho.setBurnin(burnin*10)
+
+# Define the times points at which density is computed according the the oldest start_time
+max_age <- max(trace[13].getValues())
+time_points <- seq(0,max_age*(1+0.5/(nb_time_points-1)), max_age/(nb_time_points-1))
+
+write("Kt\n", filename="output_inferKT_macro_test/Kt_trace.txt", append=FALSE)
+write
+
+for (i in 1:(nb_trees-burnin)){
+
+     # Tree
+     obd_tree <- trees.getTree(burnin+i)
+
+     # Variable OBDP parameters
+     start_time <- trace[13].getValues()[i*10]
+     lambda <- trace[5].getValues()[i*10]
+     mu <- trace[6].getValues()[i*10]
+     psi <- trace[11].getValues()[i*10]
+     omega <- trace[8].getValues()[i*10]
+     rho <- trace[12].getValues()[i*10]
+
+     Kt = fnInferAncestralPopSize( originAge=start_time,
+                                   lambda=lambda,
+                                   mu=mu,
+                                   psi=psi,
+                                   omega=omega,
+                                   rho=rho,
+                                   removalPr=rm,
+                                   maxHiddenLin=N,
+                                   condition=cond,
+                                   occurrence_ages=occurrence_ages,
+                                   time_points=time_points,
+                                   timeTree=obd_tree)
+
+     Kt
+
+     write(";", Kt, "\n", filename="output_inferKT_macro_test/Kt_trace.txt", append=TRUE)
+}
+
+
+# you may want to quit RevBayes now
+# q()
