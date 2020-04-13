@@ -198,7 +198,7 @@ jobs:
         cp /usr/lib/gcc/x86_64-w64-mingw32/*-win32/libgcc_s_seh-1.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
         cp /usr/lib/gcc/x86_64-w64-mingw32/*-win32/libstdc++-6.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
         cp /home/runner/win_root/mingw64/bin/libboost_*.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
-        echo "wine64 ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb.exe"' ${@:1:$#-1} $(winepath -w ${@: -1})' > ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
+        echo "wine64 ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb.exe"' ${@:1:$#-1} $(winepath -w ${@: -1} | sed "s,\\,\\\\,g")' > ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
         chmod +x ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
     - name: Test
       env:
