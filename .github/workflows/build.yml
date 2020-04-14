@@ -119,6 +119,7 @@ jobs:
     - name: Install (Windows meson cross compile)
       if: matrix.name == 'windows'
       run: |
+          sudo apt-get install -y pandoc libcairo2-dev ccache
           sudo apt-get install git python3-setuptools python3-pip g++-mingw-w64 wine64
           sudo -H pip3 install meson
           sudo -H pip3 install ninja
@@ -128,7 +129,6 @@ jobs:
 
     - name: Prepare ccache timestamp
       id: ccache_cache_timestamp
-      if: matrix.name != 'windows'
       run: |
         if [ "$RUNNER_OS" = "Linux" ] ; then
           stamp=$(date '+%s')
@@ -140,7 +140,6 @@ jobs:
 
     - name: ccache cache files
       uses: actions/cache@v1.1.0
-      if: matrix.name != 'windows'
       with:
          path: ~/.ccache
          key: ${{ matrix.name }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
@@ -176,7 +175,7 @@ jobs:
       env:
         USE_MPI: ${{ matrix.mpi }}
       run: |
-        ${GITHUB_WORKSPACE}/projects/meson/make_winroot.sh
+        ${GITHUB_WORKSPACE}/projects/meson/make_winroot.sh -ccache true
         ( cd ${GITHUB_WORKSPACE}/projects/meson/ ; ./generate.sh )
 
     - name: Configure and build
