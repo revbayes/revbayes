@@ -60,8 +60,7 @@ echo
 echo "3. Writing cross file to '${CROSSNAME}'"
 cat > "${CROSSNAME}" <<EOF
 [binaries]
-c = '/usr/bin/x86_64-w64-mingw32-gcc'
-cpp = '/usr/bin/x86_64-w64-mingw32-g++'
+${COMPILER_LINES}
 ar = '/usr/bin/x86_64-w64-mingw32-ar'
 strip = '/usr/bin/x86_64-w64-mingw32-strip'
 pkgconfig = '${SYSROOT}/bin/pkg-config'
