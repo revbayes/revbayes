@@ -225,4 +225,4 @@ jobs:
       if: failure()
       with:
         name: test-results
-        path: ${GITHUB_WORKSPACE}/tests
+        path: tests
