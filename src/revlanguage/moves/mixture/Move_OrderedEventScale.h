@@ -1,7 +1,8 @@
-#ifndef Move_MixtureAllocation_H
-#define Move_MixtureAllocation_H
+#ifndef Move_OrderedEventScale_H
+#define Move_OrderedEventScale_H
 
 #include "RlMove.h"
+#include "RlOrderedEvents.h"
 #include "TypedDagNode.h"
 
 #include <ostream>
@@ -19,14 +20,14 @@ namespace RevLanguage {
      * @since 2014-08-18, version 1.0
      */
     template <class rlValueType>
-    class Move_MixtureAllocation : public Move {
+    class Move_OrderedEventScale : public Move {
         
     public:
         
-        Move_MixtureAllocation(void);                                                                                                               //!< Default constructor
+        Move_OrderedEventScale(void);                                                                                                               //!< Default constructor
         
         // Basic utility functions
-        virtual Move_MixtureAllocation*             clone(void) const;                                                                              //!< Clone the object
+        virtual Move_OrderedEventScale*             clone(void) const;                                                                              //!< Clone the object
         void                                        constructInternalObject(void);                                                                  //!< We construct the a new internal move.
         static const std::string&                   getClassType(void);                                                                             //!< Get Rev type
         static const TypeSpec&                      getClassTypeSpec(void);                                                                         //!< Get class type spec
@@ -40,7 +41,7 @@ namespace RevLanguage {
         void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);               //!< Set member variable
         
         RevPtr<const RevVariable>                   x;                                                                                              //!< The variable holding the real valued vector.
-        RevPtr<const RevVariable>                   delta;                                                                                          //!< The width for proposing new allocations (default 0, uniform random sampling)
+        RevPtr<const RevVariable>                   lambda;                                                                                          //!< The width for proposing new allocations (default 0, uniform random sampling)
         
     };
     
@@ -51,8 +52,9 @@ namespace RevLanguage {
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "ModelVector.h"
-#include "../../../core/moves/mixture/OrderedEventSlideProposal.h"
+#include "OrderedEventScaleProposal.h"
 #include "RbException.h"
+#include "RealPos.h"
 #include "TypeSpec.h"
 
 
@@ -60,9 +62,9 @@ using namespace RevLanguage;
 
 
 template <class rlValueType>
-RevLanguage::Move_MixtureAllocation<rlValueType>::Move_MixtureAllocation() : Move()
+RevLanguage::Move_OrderedEventScale<rlValueType>::Move_OrderedEventScale() : Move()
 {
-    
+
 }
 
 
@@ -73,26 +75,27 @@ RevLanguage::Move_MixtureAllocation<rlValueType>::Move_MixtureAllocation() : Mov
  * \return A new copy of the process.
  */
 template <class rlValueType>
-RevLanguage::Move_MixtureAllocation<rlValueType>* Move_MixtureAllocation<rlValueType>::clone(void) const
+RevLanguage::Move_OrderedEventScale<rlValueType>* Move_OrderedEventScale<rlValueType>::clone(void) const
 {
-    
-	return new Move_MixtureAllocation<rlValueType>(*this);
+
+	return new Move_OrderedEventScale<rlValueType>(*this);
 }
 
 
 template <class rlValueType>
-void RevLanguage::Move_MixtureAllocation<rlValueType>::constructInternalObject( void )
+void RevLanguage::Move_OrderedEventScale<rlValueType>::constructInternalObject( void )
 {
     // we free the memory first
     delete value;
-    
+
     // now allocate a new vector-scale move
-    size_t d = size_t( static_cast<const Natural &>( delta->getRevObject() ).getValue() );
+    double d = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<typename rlValueType::valueType>* tmp = static_cast<const rlValueType &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode< typename rlValueType::valueType > *sn = static_cast<RevBayesCore::StochasticNode< typename rlValueType::valueType > *>( tmp );
-    
-    RevBayesCore::Proposal *p = new RevBayesCore::MixtureAllocationProposal<typename rlValueType::valueType>( sn, d );
+
+    RevBayesCore::TypedDagNode<RevBayesCore::OrderedEvents<typename rlValueType::valueType> >* tmp = static_cast<const RlOrderedEvents<rlValueType> &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::StochasticNode<RevBayesCore::OrderedEvents<typename rlValueType::valueType> > *sn = static_cast<RevBayesCore::StochasticNode<RevBayesCore::OrderedEvents<typename rlValueType::valueType >> *>( tmp );
+
+    RevBayesCore::Proposal *p = new RevBayesCore::OrderedEventScaleProposal<typename rlValueType::valueType>( sn, d );
     value = new RevBayesCore::MetropolisHastingsMove(p, w, false);
 
 }
@@ -100,22 +103,22 @@ void RevLanguage::Move_MixtureAllocation<rlValueType>::constructInternalObject( 
 
 /** Get Rev type of object */
 template <class rlValueType>
-const std::string& RevLanguage::Move_MixtureAllocation<rlValueType>::getClassType(void)
+const std::string& RevLanguage::Move_OrderedEventScale<rlValueType>::getClassType(void)
 {
-    
-//    static std::string rev_type = "Move_MixtureAllocation<" + rlValueType::getClassType() + ">";
-    static std::string rev_type = "Move_MixtureAllocation__" + rlValueType::getClassType();
-    
+
+//    static std::string rev_type = "Move_OrderedEventScale<" + rlValueType::getClassType() + ">";
+    static std::string rev_type = "Move_OrderedEventScale__" + rlValueType::getClassType();
+
 	return rev_type;
 }
 
 /** Get class type spec describing type of object */
 template <class rlValueType>
-const RevLanguage::TypeSpec& RevLanguage::Move_MixtureAllocation<rlValueType>::getClassTypeSpec(void)
+const RevLanguage::TypeSpec& RevLanguage::Move_OrderedEventScale<rlValueType>::getClassTypeSpec(void)
 {
-    
+
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Move::getClassTypeSpec() ) );
-    
+
 	return rev_type_spec;
 }
 
@@ -126,55 +129,55 @@ const RevLanguage::TypeSpec& RevLanguage::Move_MixtureAllocation<rlValueType>::g
  * \return Rev name of constructor function.
  */
 template <class rlValueType>
-std::string RevLanguage::Move_MixtureAllocation<rlValueType>::getMoveName( void ) const
+std::string RevLanguage::Move_OrderedEventScale<rlValueType>::getMoveName( void ) const
 {
     // create a constructor function name variable that is the same for all instance of this class
-    std::string c_name = "MixtureAllocation";
-    
+    std::string c_name = "OrderedEventScale" + rlValueType::getClassType();
+
     return c_name;
 }
 
 
 /** Return member rules (no members) */
 template <class rlValueType>
-const RevLanguage::MemberRules& RevLanguage::Move_MixtureAllocation<rlValueType>::getParameterRules(void) const
+const RevLanguage::MemberRules& RevLanguage::Move_OrderedEventScale<rlValueType>::getParameterRules(void) const
 {
-    
+
     static MemberRules move_member_rules;
     static bool rules_set = false;
-    
+
     if ( !rules_set )
     {
-        move_member_rules.push_back( new ArgumentRule( "x", rlValueType::getClassTypeSpec(), "The variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        move_member_rules.push_back( new ArgumentRule( "delta", Natural::getClassTypeSpec(), "The window of how many categories to propose left and right.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( long(0) )));
-        
+        move_member_rules.push_back( new ArgumentRule( "x",     RlOrderedEvents<rlValueType>::getClassTypeSpec(), "The variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
+        move_member_rules.push_back( new ArgumentRule( "lambda", RealPos::getClassTypeSpec(), "The size of the window to scale values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos( 1.0 )));
+
         /* Inherit weight from Move, put it after variable */
         const MemberRules& inheritedRules = Move::getParameterRules();
         move_member_rules.insert( move_member_rules.end(), inheritedRules.begin(), inheritedRules.end() );
-        
+
         rules_set = true;
     }
-    
+
     return move_member_rules;
 }
 
 /** Get type spec */
 template <class rlValueType>
-const RevLanguage::TypeSpec& RevLanguage::Move_MixtureAllocation<rlValueType>::getTypeSpec( void ) const
+const RevLanguage::TypeSpec& RevLanguage::Move_OrderedEventScale<rlValueType>::getTypeSpec( void ) const
 {
-    
+
     static TypeSpec type_spec = getClassTypeSpec();
-    
+
     return type_spec;
 }
 
 
 /** Get type spec */
 template <class rlValueType>
-void RevLanguage::Move_MixtureAllocation<rlValueType>::printValue(std::ostream &o) const
+void RevLanguage::Move_OrderedEventScale<rlValueType>::printValue(std::ostream &o) const
 {
-    
-    o << "Move_MixtureAllocation(";
+
+    o << "Move_OrderedEventScale(";
     if (x != NULL)
     {
         o << x->getName();
@@ -189,15 +192,15 @@ void RevLanguage::Move_MixtureAllocation<rlValueType>::printValue(std::ostream &
 
 /** Set a member variable */
 template <class rlValueType>
-void RevLanguage::Move_MixtureAllocation<rlValueType>::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) {
-    
+void RevLanguage::Move_OrderedEventScale<rlValueType>::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) {
+
     if ( name == "x" )
     {
         x = var;
     }
-    else if ( name == "delta" )
+    else if ( name == "lambda" )
     {
-        delta = var;
+    	lambda = var;
     }
     else
     {

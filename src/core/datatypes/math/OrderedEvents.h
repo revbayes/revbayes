@@ -185,7 +185,7 @@ std::ostream& RevBayesCore::operator<<(std::ostream& o, const RevBayesCore::Orde
 	typename std::map<double, valueType>::const_iterator it = events.begin();
 	for(size_t i = 1; i < num_events ; ++i, ++it)
 	{
-		o << it->second << "\n  ";
+		o << it->second << ", ";
 	}
 	if ( it != events.end() )
 	{
