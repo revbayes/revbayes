@@ -109,7 +109,7 @@ while [  $i -lt ${#tests[@]} ]; do
     if [ "$windows" = "true" ]; then
         find output -type f -exec dos2unix {} \;
         find output -type f -exec sed -i 's/e-00/e-0/g' {} \;
-        find output -type f -exec sed -i 's/e\+00/e\+0/g' {} \;
+        find output -type f -exec sed -i 's/e+00/e+0/g' {} \;
     fi
     for f in $(ls ${exp_out_dir}); do
         if [ ! -e output/$f ]; then
