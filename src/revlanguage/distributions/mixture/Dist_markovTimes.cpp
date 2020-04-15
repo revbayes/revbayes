@@ -7,6 +7,8 @@
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Dist_markovTimes.h"
+
+#include "OrderedEventTimes.h"
 #include "ModelVector.h"
 #include "Natural.h"
 #include "RlDistributionMemberFunction.h"
@@ -34,7 +36,7 @@
 #include "RlDagMemberFunction.h"
 #include "RlDeterministicNode.h"
 #include "RlDistribution.h"
-#include "RlMultiValueEvent.h"
+#include "RlOrderedEventTimes.h"
 #include "RlStochasticNode.h"
 #include "RlTypedDistribution.h"
 #include "RlTypedFunction.h"
@@ -153,9 +155,15 @@ std::string Dist_markovTimes::getDistributionFunctionName( void ) const
     return d_name;
 }
 
+MethodTable Dist_markovTimes::getDistributionMethods( void ) const
+{
+    MethodTable methods = TypedDistribution<RlOrderedEventTimes>::getDistributionMethods();
 
+    ArgumentRules* get_num_events_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_markovTimes, Natural >("getNumberOfEvents", this->variable, get_num_events_arg_rules, true ) );
 
-
+    return methods;
+}
 
 /**
  * Get the member rules used to create the constructor of this object.
