@@ -5,12 +5,14 @@
  *      Author: mrmay
  */
 
-#include "RlOrderedEventTimes.h"
-
+#include "FunctionTable.h"
+#include "Natural.h"
 #include "TypeSpec.h"
 #include "RbHelpReference.h"
 #include "RevObject.h"
 #include "RevVariable.h"
+#include "RlOrderedEventTimes.h"
+#include "RlMemberFunction.h"
 
 namespace RevLanguage {
 
@@ -84,6 +86,10 @@ const TypeSpec& RlOrderedEventTimes::getTypeSpec( void ) const
  */
 void RlOrderedEventTimes::initMethods( void )
 {
+
+//    ArgumentRules* num_events_arg_rules = new ArgumentRules();
+//    this->methods.addFunction( new MemberFunction<RlOrderedEventTimes, Natural >("numEvents", this, num_events_arg_rules ) );
+
 }
 
 

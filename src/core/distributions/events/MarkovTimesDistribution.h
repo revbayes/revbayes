@@ -10,6 +10,7 @@
 
 #include <set>
 
+#include "AbstractEventTimesDistribution.h"
 #include "RbVector.h"
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
@@ -17,7 +18,7 @@
 
 namespace RevBayesCore {
 
-	class MarkovTimesDistribution : public TypedDistribution< OrderedEventTimes > {
+	class MarkovTimesDistribution : public TypedDistribution< OrderedEventTimes >, public AbstractEventTimesDistribution, public MemberObject< long > {
 
 	public:
 
@@ -29,6 +30,15 @@ namespace RevBayesCore {
         double                                              computeLnProbability(void);
         void                                                redrawValue(void);
 
+        // exposed methods
+        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, long &rv) const;     //!< Map the member methods to internal function calls
+
+        // abstract methods
+		void                                                simulateEventTime(double &time, double &ln_prob);
+		void                                                getRandomTime(double &time, double &ln_prob);
+		void                                                removeTime(double time);
+		void                                                addTime(double time);
+
 	protected:
 
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                        //!< Swap a parameter
@@ -37,6 +47,7 @@ namespace RevBayesCore {
 
         // methods
         OrderedEventTimes*                                  simulate();
+        void                                                simulateChildren();
 
         // members
         const TypedDagNode< double >* rate;

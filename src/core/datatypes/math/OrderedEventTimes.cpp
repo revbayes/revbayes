@@ -9,6 +9,7 @@
 
 #include "OrderedEventTimes.h"
 
+#include "../../dag/TypedDagNode.h"
 namespace RevBayesCore {
 
 OrderedEventTimes::OrderedEventTimes()
@@ -90,6 +91,19 @@ bool OrderedEventTimes::changeEventTime(double old_time, double new_time)
 
 	return true;
 }
+
+void OrderedEventTimes::executeMethod(const std::string &n, const std::vector<const DagNode*> &args, long &rv) const
+{
+    if ( n == "numEvents" )
+    {
+        rv = this->size();
+    }
+    else
+    {
+        throw RbException("An OrderedEventTimes object does not have a member method called '" + n + "'.");
+    }
+}
+
 
 
 const std::set<double>& OrderedEventTimes::getEventTimes() const
