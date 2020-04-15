@@ -193,6 +193,10 @@
 
 #include "Move_OrderedEventTimeSlide.h"
 #include "Move_OrderedEventBirthDeath.h"
+#include "Move_OrderedEventSlide.h"
+#include "Move_OrderedEventScale.h"
+#include "Move_OrderedEventVectorSlide.h"
+#include "Move_OrderedEventVectorScale.h"
 
 
 /* Moves on continuous phyloprocesses (Brownian, multivariate Brownian, etc) */
@@ -385,8 +389,18 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_MultiValueEventScale()                         );
         addType( new Move_MultiValueEventSlide()                         );
 
+
         addType( new Move_OrderedEventTimeSlide()                        );
         addType( new Move_OrderedEventBirthDeath()                       );
+        addType( new Move_OrderedEventSlide<Real>()                      );
+        addType( new Move_OrderedEventSlide<RealPos>()                   );
+        addType( new Move_OrderedEventSlide<Probability>()               );
+        addType( new Move_OrderedEventScale<RealPos>()                   );
+        addType( new Move_OrderedEventVectorSlide<ModelVector<Real>>()        );
+        addType( new Move_OrderedEventVectorSlide<ModelVector<RealPos>>()     );
+        addType( new Move_OrderedEventVectorSlide<ModelVector<Probability>>() );
+        addType( new Move_OrderedEventVectorScale<ModelVector<RealPos>>()     );
+
 
         addType( new Move_BirthDeathEventContinuous()                    );
         addType( new Move_BirthDeathEventDiscrete()                      );
