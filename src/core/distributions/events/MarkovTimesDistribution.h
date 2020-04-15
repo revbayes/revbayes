@@ -18,7 +18,7 @@
 
 namespace RevBayesCore {
 
-	class MarkovTimesDistribution : public TypedDistribution< OrderedEventTimes >, public AbstractEventTimesDistribution, public MemberObject< long > {
+	class MarkovTimesDistribution : public TypedDistribution< OrderedEventTimes >, public AbstractEventTimesDistribution, public MemberObject< long >, public MemberObject< RbVector<double> > {
 
 	public:
 
@@ -31,7 +31,8 @@ namespace RevBayesCore {
         void                                                redrawValue(void);
 
         // exposed methods
-        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, long &rv) const;     //!< Map the member methods to internal function calls
+        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, long &rv) const;             //!< Map the member methods to internal function calls
+        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const; //!< Map the member methods to internal function calls
 
         // abstract methods
 		void                                                simulateEventTime(double &time, double &ln_prob);

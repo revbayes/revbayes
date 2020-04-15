@@ -24,6 +24,7 @@ namespace RevLanguage {
         static const std::string&                       getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                          getClassTypeSpec(void);                                                                 //!< Get class type spec
         std::string                                     getDistributionFunctionName(void) const;                                                //!< Get the Rev-name for this distribution.
+        MethodTable                                     getDistributionMethods( void ) const;
         const TypeSpec&                                 getTypeSpec(void) const;                                                                //!< Get the type spec of the instance
         const MemberRules&                              getParameterRules(void) const;                                                          //!< Get member rules (const)
 
@@ -48,6 +49,7 @@ namespace RevLanguage {
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
+#include "MethodTable.h"
 #include "RlSimplex.h"
 #include "StochasticNode.h"
 #include "TypedDistribution.h"
@@ -129,6 +131,18 @@ std::string RevLanguage::Dist_markovEvents<valType>::getDistributionFunctionName
     
     return d_name;
 }
+
+template <typename valType>
+MethodTable RevLanguage::Dist_markovEvents<valType>::getDistributionMethods( void ) const
+{
+	MethodTable methods = TypedDistribution< RlOrderedEvents<valType> >::getDistributionMethods();
+
+    ArgumentRules* get_events_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_markovEvents, ModelVector<valType> >("getEvents", this->variable, get_events_arg_rules, true ) );
+
+    return methods;
+}
+
 
 /** Return member rules (no members) */
 template <typename valType>

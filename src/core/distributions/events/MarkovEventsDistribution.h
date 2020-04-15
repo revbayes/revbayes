@@ -13,7 +13,7 @@
 namespace RevBayesCore {
 
     template <class valueType>
-    class MarkovEventsDistribution : public AbstractEventsDistribution, public TypedDistribution< OrderedEvents<valueType> > {
+    class MarkovEventsDistribution : public AbstractEventsDistribution, public TypedDistribution< OrderedEvents<valueType> >, public MemberObject< RbVector<valueType> > {
         
     public:
         // constructor(s)
@@ -31,6 +31,9 @@ namespace RevBayesCore {
         double                                              removeEvent(double time);
         void                                                changeEventTime(double old_time, double new_time);
         void                                                resetEvents(void);
+
+        // exposed methods
+        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<valueType> &rv) const; //!< Map the member methods to internal function calls
 
     protected:
         // Parameter management functions
@@ -270,6 +273,31 @@ void RevBayesCore::MarkovEventsDistribution<valueType>::resetEvents(void)
 	// add the stored value back to the map
 	this->value->addEvent(stored_event_time, stored_event);
 }
+
+template <class valueType>
+void RevBayesCore::MarkovEventsDistribution<valueType>::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<valueType> &rv) const
+{
+    if ( n == "getEvents" )
+    {
+    	// get the events
+    	const std::map<double, valueType>& events = this->value->getEvents();
+
+    	// convert the times to a vector
+    	std::vector<valueType> res;
+    	for(typename std::map<double, valueType>::const_iterator it = events.begin(); it != events.end(); ++it)
+    	{
+    		res.push_back( it->second );
+    	}
+
+    	// add the times to the rv
+    	rv = res;
+    }
+    else
+    {
+        throw RbException("The markov event model does not have a member method called '" + n + "'.");
+    }
+}
+
 
 /** Swap a parameter of the distribution */
 template <class valueType>
