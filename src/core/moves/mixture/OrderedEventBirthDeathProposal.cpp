@@ -129,7 +129,7 @@ double OrderedEventBirthDeathProposal::doProposal( void )
 		event_time = new_event_time;
 
 		// penalize the drawn time
-//		ln_hastings_ratio -= ln_prob_time;
+		ln_hastings_ratio -= ln_prob_time;
 
 		// for each child, draw a new event
 		const std::vector<DagNode*>& children = event_var->getChildren();
@@ -170,7 +170,7 @@ double OrderedEventBirthDeathProposal::doProposal( void )
 		event_time = new_event_time;
 
 		// penalize the drawn time
-//		ln_hastings_ratio += ln_prob_time;
+		ln_hastings_ratio += ln_prob_time;
 
 		// for each child, remove the event at the chosen time
 		const std::vector<DagNode*>& children = event_var->getChildren();
