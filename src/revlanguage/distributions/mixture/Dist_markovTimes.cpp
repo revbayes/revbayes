@@ -162,6 +162,9 @@ MethodTable Dist_markovTimes::getDistributionMethods( void ) const
     ArgumentRules* get_num_events_arg_rules = new ArgumentRules();
     methods.addFunction( new DistributionMemberFunction<Dist_markovTimes, Natural >("getNumberOfEvents", this->variable, get_num_events_arg_rules, true ) );
 
+    ArgumentRules* get_times_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_markovTimes, ModelVector<RealPos> >("getTimes", this->variable, get_times_arg_rules, true ) );
+
     return methods;
 }
 
