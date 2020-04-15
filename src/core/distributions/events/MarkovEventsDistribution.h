@@ -278,6 +278,7 @@ void RevBayesCore::MarkovEventsDistribution<valueType>::swapParameterInternal(co
     if (oldP == event_times)
     {
         event_times = static_cast<const TypedDagNode< OrderedEventTimes > *>( newP );
+        this->redrawValue(); // I need to resimulate if the event times changed
     }
     else
     {

@@ -191,6 +191,10 @@
 #include "Move_MultiValueEventScale.h"
 #include "Move_MultiValueEventSlide.h"
 
+#include "Move_OrderedEventTimeSlide.h"
+#include "Move_OrderedEventBirthDeath.h"
+
+
 /* Moves on continuous phyloprocesses (Brownian, multivariate Brownian, etc) */
 
 /* Tree proposals (in folder "datatypes/inference/moves/tree") */
@@ -381,7 +385,8 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_MultiValueEventScale()                         );
         addType( new Move_MultiValueEventSlide()                         );
 
-
+        addType( new Move_OrderedEventTimeSlide()                        );
+        addType( new Move_OrderedEventBirthDeath()                       );
 
         addType( new Move_BirthDeathEventContinuous()                    );
         addType( new Move_BirthDeathEventDiscrete()                      );
