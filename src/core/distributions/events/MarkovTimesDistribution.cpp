@@ -74,6 +74,9 @@ double MarkovTimesDistribution::computeLnProbability(void)
 	// the number of events is Poisson-distributed
 	double ln_prob = RbStatistics::Poisson::lnPdf(rate->getValue() * age->getValue(), num_events);
 
+	// the time of events is uniformly distributed
+	ln_prob -= double(num_events) * std::log(max);
+
 	return ln_prob;
 }
 
