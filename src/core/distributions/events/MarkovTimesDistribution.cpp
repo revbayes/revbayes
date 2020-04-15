@@ -94,7 +94,29 @@ void MarkovTimesDistribution::executeMethod(const std::string &n, const std::vec
     if ( n == "getNumberOfEvents" )
     {
         rv = value->size();
+    }
+    else
+    {
+        throw RbException("The markov event model does not have a member method called '" + n + "'.");
+    }
+}
 
+void MarkovTimesDistribution::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<double> &rv) const
+{
+    if ( n == "getTimes" )
+    {
+    	// get the times as a set
+    	const std::set<double>& times = value->getEventTimes();
+
+    	// convert the times to a vector
+    	std::vector<double> res;
+    	for( std::set<double>::const_iterator it = times.begin(); it != times.end(); ++it)
+    	{
+    		res.push_back( *it );
+    	}
+
+    	// add the times to the rv
+    	rv = res;
     }
     else
     {
