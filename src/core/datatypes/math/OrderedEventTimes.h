@@ -11,10 +11,11 @@
 #include <set>
 
 #include "Cloneable.h"
+#include "MemberObject.h"
 
 namespace RevBayesCore {
 
-	class OrderedEventTimes : public Cloneable {
+	class OrderedEventTimes : public Cloneable, public MemberObject<long> {
 
 	public:
 
@@ -34,6 +35,10 @@ namespace RevBayesCore {
 		bool                      changeEventTime(double old_time, double new_time);
 		const std::set<double>&   getEventTimes() const;
 		size_t                    size() const;
+
+		// expose methods
+        void                      executeMethod(const std::string &n, const std::vector<const DagNode*> &args, long &rv) const; //!< Map the member methods to internal function calls
+
 
 	private:
 
