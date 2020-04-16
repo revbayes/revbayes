@@ -199,7 +199,7 @@ jobs:
         cp /home/runner/win_root/mingw64/bin/libboost_*.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
         echo '#!/bin/bash' > ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
         echo 'cp ${GITHUB_WORKSPACE}/wincrossbuild/bin/* .' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
-        echo 'if [ "$@" -gt "1" ]; then' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
+        echo 'if [ "$#" -gt "1" ]; then' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
         echo 'wine64 rb.exe ${@:1:$#-1} $(winepath -w ${@: -1} | sed "s,\\\\,\\\\\\\\,g")' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
         echo 'else' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
         echo 'wine64 rb.exe $(winepath -w ${1} | sed "s,\\\\,\\\\\\\\,g")' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
