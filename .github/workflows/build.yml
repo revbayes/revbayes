@@ -230,8 +230,8 @@ jobs:
         path: tests
 
     - name: Upload testiphy files if they failed
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2-preview
       if: failure()
       with:
         name: testiphy-results
-        path: testiphy
+        path: '~/testiphy'
