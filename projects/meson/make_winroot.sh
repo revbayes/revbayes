@@ -44,8 +44,8 @@ chmod +x "${SYSROOT}/bin/pkg-config"
 CROSSNAME=win64-cross.txt
 if [ "$ccache" = "true" ]; then
     COMPILER_LINES=$(cat <<EOF
-c = '/usr/lib/ccache/x86_64-w64-mingw32-gcc'
-cpp = '/usr/lib/ccache/x86_64-w64-mingw32-g++'
+c = ['ccache', '/usr/bin/x86_64-w64-mingw32-gcc']
+cpp = ['ccache', '/usr/bin/x86_64-w64-mingw32-g++']
 EOF
 )
 else
