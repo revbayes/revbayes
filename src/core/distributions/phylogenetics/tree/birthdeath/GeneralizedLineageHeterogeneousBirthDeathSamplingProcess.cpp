@@ -92,7 +92,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	}
 //	std::cout << "tensorphylo version: " << tp_ptr->getVersion() << std::endl;
 	// turn on/off debug
-	tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_FILE, "debug.txt");
+//	tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_FILE, "debug.txt");
 	tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_PRINT);
 	tp_ptr->setConditionalProbCompatibilityMode(false); // FIXME Here you go Mike!
 

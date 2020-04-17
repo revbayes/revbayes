@@ -143,31 +143,20 @@ double RevBayesCore::OrderedEventVectorSlideProposal<valueType>::doProposal( voi
     RandomNumberGenerator* rng     = GLOBAL_RNG;
 
     // get the distribution
-    MarkovEventsDistribution<valueType>* dist = dynamic_cast<MarkovEventsDistribution<valueType> *>( &variable->getDistribution() );
+    TypedEventsDistribution<valueType>* dist = dynamic_cast<TypedEventsDistribution<valueType> *>( &variable->getDistribution() );
     if ( dist == NULL )
     {
-    	throw RbException("Tried to use OrderedEventVectorSlideProposal on an invalid type.");
+    	throw RbException("Tried to use OrderedEventScaleProposal on an invalid type.");
     }
 
-    // get the number of events
-    size_t num_events = variable->getValue().size();
-    if ( num_events == 0 )
-    {
-    	abort = true;
-    	return RbConstants::Double::neginf;
-    }
-
-    // choose the event index
-    size_t event_index = size_t(rng->uniform01() * num_events);
-
-    // get the events
-    const std::map<double, valueType>& events = variable->getValue().getEvents();
-    typename std::map<double, valueType>::const_iterator this_event = events.begin();
-    std::advance(this_event, event_index);
+    // get the random event
+    double this_event_time;
+    valueType this_event_value;
+    dist->getRandomEvent(this_event_time, this_event_value);
 
     // get the value
-    event_time = this_event->first;
-    old_value  = this_event->second;
+    event_time = this_event_time;
+    old_value  = this_event_value;
 
     // choose the value to change
     size_t element_index = size_t(rng->uniform01() * old_value.size());

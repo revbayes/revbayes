@@ -265,6 +265,7 @@
 #include "Dist_IID.h"
 #include "Dist_markovTimes.h"
 #include "Dist_markovEvents.h"
+#include "Dist_markovEventShifts.h"
 #include "Dist_mixture.h"
 #include "Dist_mixtureAnalytical.h"
 #include "Dist_mixtureVector.h"
@@ -652,6 +653,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< RlOrderedEvents<ModelVector<Real> >        >( new Dist_markovEvents<ModelVector<Real>        >() );
         AddDistribution< RlOrderedEvents<ModelVector<RealPos> >     >( new Dist_markovEvents<ModelVector<RealPos>     >() );
         AddDistribution< RlOrderedEvents<ModelVector<Probability> > >( new Dist_markovEvents<ModelVector<Probability> >() );
+
+        AddDistribution< RlOrderedEvents<RealPos >                  >( new Dist_markovEventShifts<RealPos>                  () );
+        AddDistribution< RlOrderedEvents<ModelVector<RealPos> >     >( new Dist_markovEventShifts<ModelVector<RealPos>     >() );
 
 
         /* Now we have added all primitive and complex data types and can start type checking */

@@ -194,11 +194,18 @@ void MarkovTimesDistribution::simulateChildren()
 	const std::vector<DagNode*>& children = this->dag_node->getChildren();
 	for(std::vector<DagNode*>::const_iterator it = children.begin(); it != children.end(); ++it)
 	{
-		AbstractEventsDistribution* dist = dynamic_cast<AbstractEventsDistribution *>( &(*it)->getDistribution() );
-        if ( dist != NULL )
-        {
-    		dist->resimulate();
-        }
+		if ( (*it)->isStochastic() == true )
+		{
+			AbstractEventsDistribution* dist = dynamic_cast<AbstractEventsDistribution *>( &(*it)->getDistribution() );
+	        if ( dist != NULL )
+	        {
+	    		dist->resimulate();
+	        }
+		}
+		else
+		{
+			(*it)->touch();
+		}
 	}
 }
 
