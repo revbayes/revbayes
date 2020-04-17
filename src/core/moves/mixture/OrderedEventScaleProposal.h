@@ -174,7 +174,7 @@ double RevBayesCore::OrderedEventScaleProposal<valueType>::doProposal( void )
 	}
 
 	// touch the variable
-	variable->touch();
+	variable->touch(true);
 
 	return std::log(scaling_factor);
 }
@@ -219,7 +219,7 @@ void RevBayesCore::OrderedEventScaleProposal<valueType>::undoProposal( void )
 	if ( abort == false )
 	{
 	    variable->getValue().changeEvent(event_time, old_value);
-	    variable->touch();
+	    variable->touch(true);
 	}
 }
 
