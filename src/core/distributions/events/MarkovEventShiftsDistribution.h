@@ -14,7 +14,7 @@ namespace RevBayesCore {
 
     template <class valueType>
     class MarkovEventShiftsDistribution : public TypedEventsDistribution<valueType>, public TypedDistribution< OrderedEvents<valueType> > {
-        
+
     public:
         // constructor(s)
         MarkovEventShiftsDistribution(const TypedDagNode< OrderedEventTimes > *oet, const TypedDagNode< valueType > *init, TypedDistribution< valueType > *g);
@@ -225,15 +225,16 @@ void RevBayesCore::MarkovEventShiftsDistribution<valueType>::updateInit()
 	// get the events
 	const std::map<double, valueType>& the_values = this->value->getEvents();
 
+	// get the factor
 	valueType old_init = the_values.begin()->second;
 	valueType new_init = initial_event->getValue();
 	valueType factor   = new_init / old_init;
 
+	// rescale the events
 	for(typename std::map<double, valueType>::const_iterator it = the_values.begin(); it != the_values.end(); ++it)
 	{
 		this->value->changeEvent(it->first, factor * it->second);
 	}
-
 }
 
 
@@ -385,6 +386,14 @@ void RevBayesCore::MarkovEventShiftsDistribution<valueType>::restoreSpecializati
 	if ( restorer == initial_event )
 	{
 		this->updateInit();
+
+	    // tell any rep children to update
+		const std::vector<DagNode*>& children = this->dag_node->getChildren();
+		for(std::vector<DagNode*>::const_iterator it = children.begin(); it != children.end(); ++it)
+		{
+			(*it)->touch();
+		}
+
 	}
 }
 
@@ -394,6 +403,14 @@ void RevBayesCore::MarkovEventShiftsDistribution<valueType>::touchSpecialization
 	if ( toucher == initial_event )
 	{
 		this->updateInit();
+
+	    // tell any rep children to update
+		const std::vector<DagNode*>& children = this->dag_node->getChildren();
+		for(std::vector<DagNode*>::const_iterator it = children.begin(); it != children.end(); ++it)
+		{
+			(*it)->touch();
+		}
+
 	}
 }
 
