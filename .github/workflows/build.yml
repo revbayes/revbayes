@@ -81,6 +81,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
+    - uses: textbook/git-checkout-submodule-action@master
     - uses: actions/setup-python@v1
       with:
         python-version: 3.8
