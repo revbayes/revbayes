@@ -37,7 +37,7 @@ namespace RevBayesCore {
 
         // parameters
         StochasticNode< OrderedEvents<valueType> >*        variable;                                                                           //!< The variable the Proposal is working on
-        size_t                                             lambda;
+        double                                             lambda;
         valueType                                          old_value;
         double                                             event_time;
         bool                                               abort;
@@ -143,34 +143,23 @@ double RevBayesCore::OrderedEventScaleProposal<valueType>::doProposal( void )
 	abort = false;
 
     // Get random number generator
-    RandomNumberGenerator* rng     = GLOBAL_RNG;
+    RandomNumberGenerator* rng = GLOBAL_RNG;
 
     // get the distribution
-    MarkovEventsDistribution<valueType>* dist = dynamic_cast<MarkovEventsDistribution<valueType> *>( &variable->getDistribution() );
+    TypedEventsDistribution<valueType>* dist = dynamic_cast<TypedEventsDistribution<valueType> *>( &variable->getDistribution() );
     if ( dist == NULL )
     {
     	throw RbException("Tried to use OrderedEventScaleProposal on an invalid type.");
     }
 
-    // get the number of events
-    size_t num_events = variable->getValue().size();
-    if ( num_events == 0 )
-    {
-    	abort = true;
-    	return RbConstants::Double::neginf;
-    }
-
-    // choose the index
-    size_t event_index = size_t(rng->uniform01() * num_events);
-
-    // get the events
-    const std::map<double, valueType>& events = variable->getValue().getEvents();
-    typename std::map<double, valueType>::const_iterator this_event = events.begin();
-    std::advance(this_event, event_index);
+    // get the random event
+    double this_event_time;
+    valueType this_event_value;
+    dist->getRandomEvent(this_event_time, this_event_value);
 
     // get the value
-    event_time = this_event->first;
-    old_value  = this_event->second;
+    event_time = this_event_time;
+    old_value  = this_event_value;
 
     // perform a Scale proposal
 	double u = rng->uniform01();
@@ -185,7 +174,7 @@ double RevBayesCore::OrderedEventScaleProposal<valueType>::doProposal( void )
 	}
 
 	// touch the variable
-	variable->touch(true);
+	variable->touch();
 
 	return std::log(scaling_factor);
 }
@@ -230,7 +219,7 @@ void RevBayesCore::OrderedEventScaleProposal<valueType>::undoProposal( void )
 	if ( abort == false )
 	{
 	    variable->getValue().changeEvent(event_time, old_value);
-	    variable->touch(true);
+	    variable->touch();
 	}
 }
 

@@ -12,10 +12,11 @@
 
 #include "Cloneable.h"
 #include "MemberObject.h"
+#include "RbVector.h"
 
 namespace RevBayesCore {
 
-	class OrderedEventTimes : public Cloneable, public MemberObject<long> {
+	class OrderedEventTimes : public Cloneable, public MemberObject<long>, public MemberObject< RbVector<double> > {
 
 	public:
 
@@ -38,6 +39,7 @@ namespace RevBayesCore {
 
 		// expose methods
         void                      executeMethod(const std::string &n, const std::vector<const DagNode*> &args, long &rv) const; //!< Map the member methods to internal function calls
+        void                      executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const; //!< Map the member methods to internal function calls
 
 
 	private:

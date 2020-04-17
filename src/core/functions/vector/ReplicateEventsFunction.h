@@ -98,15 +98,25 @@ RevBayesCore::ReplicateEventsFunction<valueType>* RevBayesCore::ReplicateEventsF
 template <class valueType>
 void RevBayesCore::ReplicateEventsFunction<valueType>::update( void )
 {
-    
-//    // empty current vector
-//    this->value->clear();
-//
-//    for (int i=0; i<num_rep; ++i)
-//    {
-//        this->value->push_back( value_param->getValue() );
-//    }
-    
+	// empty the current state
+	delete this->value;
+
+	// create the new object
+	OrderedEvents<RbVector<valueType>>* new_value = new OrderedEvents<RbVector<valueType>>();
+
+	// replicate each event
+	const std::map<double, valueType>& events = value_param->getValue().getEvents();
+	for(typename std::map<double, valueType>::const_iterator it = events.begin(); it != events.end(); ++it)
+	{
+		// create the new vector
+		RbVector<valueType> event_rep(num_rep, it->second);
+
+		// add the replicated events
+		new_value->addEvent(it->first, event_rep);
+	}
+
+	// set the current state
+	this->value = new_value;
 }
 
 
@@ -117,7 +127,8 @@ void RevBayesCore::ReplicateEventsFunction<valueType>::swapParameterInternal(con
     
     if ( oldP == value_param )
     {
-        value_param = static_cast<const TypedDagNode<valueType>* >( newP );
+        value_param = static_cast<const TypedDagNode<OrderedEvents<valueType>>* >( newP );
+        this->update();
     }
     
 }

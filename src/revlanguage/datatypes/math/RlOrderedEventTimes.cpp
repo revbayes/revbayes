@@ -7,8 +7,10 @@
 
 #include "FunctionTable.h"
 #include "Natural.h"
+#include "ModelVector.h"
 #include "TypeSpec.h"
 #include "RbHelpReference.h"
+#include "RealPos.h"
 #include "RevObject.h"
 #include "RevVariable.h"
 #include "RlOrderedEventTimes.h"
@@ -54,6 +56,19 @@ RlOrderedEventTimes* RlOrderedEventTimes::clone(void) const
 /* Map calls to member methods */
 RevLanguage::RevPtr<RevLanguage::RevVariable> RlOrderedEventTimes::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
 {
+	// we want to make sure that the times don't make it into the model monitor
+	if (name == "getTimes")
+	{
+		// first get the times
+		RevLanguage::RevPtr<RevLanguage::RevVariable> obj = ModelObject<RevBayesCore::OrderedEventTimes>::executeMethod( name, args, found );
+
+		// now make sure its hidden from monitors
+		obj->setHiddenVariableState(true);
+
+		// return the object
+		return obj;
+	}
+
     return ModelObject<RevBayesCore::OrderedEventTimes>::executeMethod( name, args, found );
 }
 
@@ -87,8 +102,11 @@ const TypeSpec& RlOrderedEventTimes::getTypeSpec( void ) const
 void RlOrderedEventTimes::initMethods( void )
 {
 
-//    ArgumentRules* num_events_arg_rules = new ArgumentRules();
-//    this->methods.addFunction( new MemberFunction<RlOrderedEventTimes, Natural >("numEvents", this, num_events_arg_rules ) );
+    ArgumentRules* num_events_arg_rules = new ArgumentRules();
+    methods.addFunction( new MemberFunction<RlOrderedEventTimes, Natural>( "getNumberOfEvents", this, num_events_arg_rules   ) );
+
+    ArgumentRules* event_time_arg_rules = new ArgumentRules();
+    methods.addFunction( new MemberFunction<RlOrderedEventTimes, ModelVector<RealPos> >( "getTimes", this, event_time_arg_rules   ) );
 
 }
 
