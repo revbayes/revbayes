@@ -20,7 +20,8 @@ jobs:
                ubuntu-gcc-9,
                ubuntu-gcc-9-mpi,
                ubuntu-clang-8,
-               macos-xcode-11.3.1
+               macos-xcode-11.3.1,
+               windows
                ]
 
         include:
