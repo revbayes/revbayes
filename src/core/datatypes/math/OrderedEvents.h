@@ -15,7 +15,7 @@
 namespace RevBayesCore {
 
 	template<class valueType>
-	class OrderedEvents : public Cloneable {
+	class OrderedEvents : public Cloneable, public MemberObject< RbVector<valueType> > {
 
 	public:
 
@@ -36,6 +36,9 @@ namespace RevBayesCore {
 		bool                               changeEvent(double time, valueType new_value);
 		const std::map<double, valueType>& getEvents() const;
 		size_t                             size() const;
+
+		// exposed methods
+        void                               executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<valueType> &rv) const; //!< Map the member methods to internal function calls
 
 	private:
 
@@ -173,6 +176,29 @@ size_t RevBayesCore::OrderedEvents<valueType>::size() const
 	return events.size();
 }
 
+template <class valueType>
+void RevBayesCore::OrderedEvents<valueType>::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<valueType> &rv) const
+{
+    if ( n == "getEvents" )
+    {
+    	// get the events
+    	const std::map<double, valueType>& events = this->getEvents();
+
+    	// convert the times to a vector
+    	std::vector<valueType> res;
+    	for(typename std::map<double, valueType>::const_iterator it = events.begin(); it != events.end(); ++it)
+    	{
+    		res.push_back( it->second );
+    	}
+
+    	// add the times to the rv
+    	rv = res;
+    }
+    else
+    {
+        throw RbException("The markov event model does not have a member method called '" + n + "'.");
+    }
+}
 
 
 template<class valueType>

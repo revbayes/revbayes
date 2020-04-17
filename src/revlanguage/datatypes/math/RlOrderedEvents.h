@@ -8,11 +8,14 @@
 #ifndef MATH_RlOrderedEvents_H_
 #define MATH_RlOrderedEvents_H_
 
-#include "RlOrderedEvents.h"
 
 #include <string>
 
+#include "RlOrderedEvents.h"
+#include "RlMemberFunction.h"
+#include "MemberFunction.h"
 #include "ModelObject.h"
+#include "ModelVector.h"
 #include "OrderedEvents.h"
 
 namespace RevBayesCore { class RbHelpReference; }
@@ -107,6 +110,19 @@ RevLanguage::RlOrderedEvents<rlType>* RevLanguage::RlOrderedEvents<rlType>::clon
 template <class rlType>
 RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::RlOrderedEvents<rlType>::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
 {
+	// we want to make sure that the events don't make it into the model monitor
+	if (name == "getEvents")
+	{
+		// first get the events
+		RevLanguage::RevPtr<RevLanguage::RevVariable> obj = ModelObject<RevBayesCore::OrderedEvents<typename rlType::valueType> >::executeMethod( name, args, found );
+
+		// now make sure its hidden from monitors
+		obj->setHiddenVariableState(true);
+
+		// return the object
+		return obj;
+	}
+
     return ModelObject<RevBayesCore::OrderedEvents<typename rlType::valueType> >::executeMethod( name, args, found );
 }
 
@@ -114,7 +130,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::RlOrderedEvents<rlTyp
 template <class rlType>
 const std::string& RevLanguage::RlOrderedEvents<rlType>::getClassType(void)
 {
-    static std::string rev_type = "OrderedEvents";
+    static std::string rev_type = "OrderedEvents<" + rlType::getClassType() + ">";
 
     return rev_type;
 }
@@ -143,6 +159,10 @@ const TypeSpec& RevLanguage::RlOrderedEvents<rlType>::getTypeSpec( void ) const
 template <class rlType>
 void RevLanguage::RlOrderedEvents<rlType>::initMethods( void )
 {
+
+	ArgumentRules* get_event_arg_rules = new ArgumentRules();
+    this->methods.addFunction( new MemberFunction<RlOrderedEvents<rlType>, ModelVector<rlType> >( "getEvents", this, get_event_arg_rules   ) );
+
 }
 
 

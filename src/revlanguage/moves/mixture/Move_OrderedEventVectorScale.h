@@ -152,8 +152,8 @@ const RevLanguage::MemberRules& RevLanguage::Move_OrderedEventVectorScale<rlValu
 
     if ( !rules_set )
     {
-        move_member_rules.push_back( new ArgumentRule( "x",     RlOrderedEvents<rlValueType>::getClassTypeSpec(), "The variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        move_member_rules.push_back( new ArgumentRule( "lambda",RealPos::getClassTypeSpec(), "The side of the window to scale values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos( 1.0 )));
+        move_member_rules.push_back( new ArgumentRule( "x",      RlOrderedEvents<rlValueType>::getClassTypeSpec(), "The variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
+        move_member_rules.push_back( new ArgumentRule( "lambda", RealPos::getClassTypeSpec(), "The side of the window to scale values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos( 1.0 )));
 
         /* Inherit weight from Move, put it after variable */
         const MemberRules& inheritedRules = Move::getParameterRules();

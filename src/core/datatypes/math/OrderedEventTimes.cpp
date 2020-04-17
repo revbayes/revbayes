@@ -8,8 +8,8 @@
 #include <ostream>
 
 #include "OrderedEventTimes.h"
+#include "TypedDagNode.h"
 
-#include "../../dag/TypedDagNode.h"
 namespace RevBayesCore {
 
 OrderedEventTimes::OrderedEventTimes()
@@ -94,7 +94,7 @@ bool OrderedEventTimes::changeEventTime(double old_time, double new_time)
 
 void OrderedEventTimes::executeMethod(const std::string &n, const std::vector<const DagNode*> &args, long &rv) const
 {
-    if ( n == "numEvents" )
+    if ( n == "getNumberOfEvents" )
     {
         rv = this->size();
     }
@@ -104,6 +104,28 @@ void OrderedEventTimes::executeMethod(const std::string &n, const std::vector<co
     }
 }
 
+void OrderedEventTimes::executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const
+{
+    if ( n == "getTimes" )
+    {
+    	// get the times as a set
+    	const std::set<double>& times = this->getEventTimes();
+
+    	// convert the times to a vector
+    	std::vector<double> res;
+    	for( std::set<double>::const_iterator it = times.begin(); it != times.end(); ++it)
+    	{
+    		res.push_back( *it );
+    	}
+
+    	// add the times to the rv
+    	rv = res;
+    }
+    else
+    {
+        throw RbException("An OrderedEventTimes object does not have a member method called '" + n + "'.");
+    }
+}
 
 
 const std::set<double>& OrderedEventTimes::getEventTimes() const

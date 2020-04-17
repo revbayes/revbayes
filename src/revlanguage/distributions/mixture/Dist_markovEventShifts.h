@@ -1,9 +1,9 @@
-#ifndef Dist_markovEvents_H
-#define Dist_markovEvents_H
+#ifndef Dist_markovEventShifts_H
+#define Dist_markovEventShifts_H
 
 #include "OrderedEventTimes.h"
 #include "RlOrderedEventTimes.h"
-#include "MarkovEventsDistribution.h"
+#include "MarkovEventShiftsDistribution.h"
 #include "RealPos.h"
 #include "RlTypedDistribution.h"
 #include "TypeSpec.h"
@@ -13,14 +13,14 @@
 namespace RevLanguage {
     
     template <typename valType>
-    class Dist_markovEvents : public TypedDistribution< RlOrderedEvents<valType> >{
+    class Dist_markovEventShifts : public TypedDistribution< RlOrderedEvents<valType> >{
         
     public:
-                                                        Dist_markovEvents( void );
-        virtual                                        ~Dist_markovEvents();
+                                                        Dist_markovEventShifts( void );
+        virtual                                        ~Dist_markovEventShifts();
         
         // Basic utility functions
-        Dist_markovEvents*                              clone(void) const;                                                                      //!< Clone the object
+        Dist_markovEventShifts*                         clone(void) const;                                                                      //!< Clone the object
         static const std::string&                       getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                          getClassTypeSpec(void);                                                                 //!< Get class type spec
         std::string                                     getDistributionFunctionName(void) const;                                                //!< Get the Rev-name for this distribution.
@@ -30,7 +30,7 @@ namespace RevLanguage {
 
         
         // Distribution functions you have to override
-        RevBayesCore::MarkovEventsDistribution<typename valType::valueType>* createDistribution(void) const;
+        RevBayesCore::MarkovEventShiftsDistribution<typename valType::valueType>* createDistribution(void) const;
         
     protected:
         
@@ -40,6 +40,7 @@ namespace RevLanguage {
     private:
         
         RevPtr<const RevVariable>                       event_times;
+        RevPtr<const RevVariable>                       initial_event;
         RevPtr<const RevVariable>                       base_distribution;
         
     };
@@ -56,7 +57,7 @@ namespace RevLanguage {
 
 
 template <typename valType>
-RevLanguage::Dist_markovEvents<valType>::Dist_markovEvents() : TypedDistribution< RlOrderedEvents<valType> >(),
+RevLanguage::Dist_markovEventShifts<valType>::Dist_markovEventShifts() : TypedDistribution< RlOrderedEvents<valType> >(),
 	event_times( NULL ),
 	base_distribution( NULL )
 {
@@ -65,7 +66,7 @@ RevLanguage::Dist_markovEvents<valType>::Dist_markovEvents() : TypedDistribution
 
 
 template <typename valType>
-RevLanguage::Dist_markovEvents<valType>::~Dist_markovEvents()
+RevLanguage::Dist_markovEventShifts<valType>::~Dist_markovEventShifts()
 {
     
 }
@@ -73,22 +74,23 @@ RevLanguage::Dist_markovEvents<valType>::~Dist_markovEvents()
 
 
 template <typename valType>
-RevLanguage::Dist_markovEvents<valType>* RevLanguage::Dist_markovEvents<valType>::clone( void ) const
+RevLanguage::Dist_markovEventShifts<valType>* RevLanguage::Dist_markovEventShifts<valType>::clone( void ) const
 {
-    return new Dist_markovEvents(*this);
+    return new Dist_markovEventShifts(*this);
 }
 
 
 template <typename valType>
-RevBayesCore::MarkovEventsDistribution<typename valType::valueType>* RevLanguage::Dist_markovEvents<valType>::createDistribution( void ) const
+RevBayesCore::MarkovEventShiftsDistribution<typename valType::valueType>* RevLanguage::Dist_markovEventShifts<valType>::createDistribution( void ) const
 {
 
     // get the parameters
     const Distribution& rlDistribution									= static_cast<const Distribution &>( base_distribution->getRevObject() );
     RevBayesCore::TypedDistribution<typename valType::valueType>* g0    = static_cast<RevBayesCore::TypedDistribution<typename valType::valueType>* >( rlDistribution.createDistribution() );
-    RevBayesCore::TypedDagNode<RevBayesCore::OrderedEventTimes>* oet    = static_cast<const RlOrderedEventTimes &>( event_times->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<typename valType::valueType>*      init  = static_cast<const valType &>( initial_event->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::OrderedEventTimes>*  oet   = static_cast<const RlOrderedEventTimes &>( event_times->getRevObject() ).getDagNode();
 
-    RevBayesCore::MarkovEventsDistribution<typename valType::valueType>* d = new RevBayesCore::MarkovEventsDistribution<typename valType::valueType>(oet, g0);
+    RevBayesCore::MarkovEventShiftsDistribution<typename valType::valueType>* d = new RevBayesCore::MarkovEventShiftsDistribution<typename valType::valueType>(oet, init, g0);
 
     return d;
 }
@@ -97,17 +99,17 @@ RevBayesCore::MarkovEventsDistribution<typename valType::valueType>* RevLanguage
 
 /* Get Rev type of object */
 template <typename valType>
-const std::string& RevLanguage::Dist_markovEvents<valType>::getClassType(void)
+const std::string& RevLanguage::Dist_markovEventShifts<valType>::getClassType(void)
 {
     
-    static std::string rev_type = "Dist_markovEvents";
+    static std::string rev_type = "Dist_markovEventShifts";
     
 	return rev_type;
 }
 
 /* Get class type spec describing type of object */
 template <typename valType>
-const RevLanguage::TypeSpec& RevLanguage::Dist_markovEvents<valType>::getClassTypeSpec(void)
+const RevLanguage::TypeSpec& RevLanguage::Dist_markovEventShifts<valType>::getClassTypeSpec(void)
 {
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution< valType >::getClassTypeSpec() ) );
@@ -124,16 +126,16 @@ const RevLanguage::TypeSpec& RevLanguage::Dist_markovEvents<valType>::getClassTy
  * \return Rev name of constructor function.
  */
 template <typename valType>
-std::string RevLanguage::Dist_markovEvents<valType>::getDistributionFunctionName( void ) const
+std::string RevLanguage::Dist_markovEventShifts<valType>::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
-    std::string d_name = "MarkovEvents";
+    std::string d_name = "MarkovEventShifts";
     
     return d_name;
 }
 
 template <typename valType>
-MethodTable RevLanguage::Dist_markovEvents<valType>::getDistributionMethods( void ) const
+MethodTable RevLanguage::Dist_markovEventShifts<valType>::getDistributionMethods( void ) const
 {
 	MethodTable methods = TypedDistribution< RlOrderedEvents<valType> >::getDistributionMethods();
     return methods;
@@ -142,7 +144,7 @@ MethodTable RevLanguage::Dist_markovEvents<valType>::getDistributionMethods( voi
 
 /** Return member rules (no members) */
 template <typename valType>
-const RevLanguage::MemberRules& RevLanguage::Dist_markovEvents<valType>::getParameterRules(void) const
+const RevLanguage::MemberRules& RevLanguage::Dist_markovEventShifts<valType>::getParameterRules(void) const
 {
     
     static MemberRules dist_member_rules;
@@ -152,7 +154,8 @@ const RevLanguage::MemberRules& RevLanguage::Dist_markovEvents<valType>::getPara
     {
 
 		dist_member_rules.push_back( new ArgumentRule( "eventTimes"      , RlOrderedEventTimes::getClassTypeSpec(),        "The times of the events.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-    	dist_member_rules.push_back( new ArgumentRule( "baseDistribution", TypedDistribution<valType>::getClassTypeSpec(), "The base distribution for the per event values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    	dist_member_rules.push_back( new ArgumentRule( "initialEvent",     valType::getClassTypeSpec(),                    "The intitial event.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    	dist_member_rules.push_back( new ArgumentRule( "baseDistribution", TypedDistribution<valType>::getClassTypeSpec(), "The base distribution from which rate multipliers are drawn for each event.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
 		rules_set = true;
     }
@@ -162,7 +165,7 @@ const RevLanguage::MemberRules& RevLanguage::Dist_markovEvents<valType>::getPara
 
 
 template <typename valType>
-const RevLanguage::TypeSpec& RevLanguage::Dist_markovEvents<valType>::getTypeSpec( void ) const
+const RevLanguage::TypeSpec& RevLanguage::Dist_markovEventShifts<valType>::getTypeSpec( void ) const
 {
     
     static TypeSpec ts = getClassTypeSpec();
@@ -174,11 +177,15 @@ const RevLanguage::TypeSpec& RevLanguage::Dist_markovEvents<valType>::getTypeSpe
 
 /** Set a member variable */
 template <typename valType>
-void RevLanguage::Dist_markovEvents<valType>::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+void RevLanguage::Dist_markovEventShifts<valType>::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     if ( name == "eventTimes" )
     {
     	event_times = var;
+    }
+    else if ( name == "initialEvent" )
+    {
+    	initial_event = var;
     }
     else if ( name == "baseDistribution" )
     {
