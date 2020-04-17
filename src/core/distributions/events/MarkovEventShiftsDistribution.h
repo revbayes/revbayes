@@ -1,5 +1,5 @@
-#ifndef MarkovEventsDistribution_H
-#define MarkovEventsDistribution_H
+#ifndef MarkovEventShiftsDistribution_H
+#define MarkovEventShiftsDistribution_H
 
 #include <vector>
 
@@ -13,16 +13,16 @@
 namespace RevBayesCore {
 
     template <class valueType>
-    class MarkovEventsDistribution : public TypedEventsDistribution< valueType >, public TypedDistribution< OrderedEvents<valueType> >, public MemberObject< RbVector<valueType> > {
+    class MarkovEventShiftsDistribution : public TypedEventsDistribution<valueType>, public TypedDistribution< OrderedEvents<valueType> > {
         
     public:
         // constructor(s)
-        MarkovEventsDistribution(const TypedDagNode< OrderedEventTimes > *oet, TypedDistribution<valueType> *g);
-        MarkovEventsDistribution(const MarkovEventsDistribution &d);
-        virtual ~MarkovEventsDistribution(void);                                                              //!< Virtual destructor
+        MarkovEventShiftsDistribution(const TypedDagNode< OrderedEventTimes > *oet, const TypedDagNode< valueType > *init, TypedDistribution< valueType > *g);
+        MarkovEventShiftsDistribution(const MarkovEventShiftsDistribution &d);
+        virtual ~MarkovEventShiftsDistribution(void);                                                              //!< Virtual destructor
 
         // public member functions
-        MarkovEventsDistribution*                           clone(void) const;                                                                      //!< Create an independent clone
+        MarkovEventShiftsDistribution*                      clone(void) const;                                                                      //!< Create an independent clone
         double                                              computeLnProbability(void);
         void                                                redrawValue(void);
 
@@ -36,10 +36,12 @@ namespace RevBayesCore {
         // virtual functions from TypedEventDistribution
 		void                                                getRandomEvent(double &time, valueType &event);
 
-        // exposed methods
-        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<valueType> &rv) const; //!< Map the member methods to internal function calls
-
     protected:
+
+        // keep specialization for derived classes
+        virtual void                                        restoreSpecialization(DagNode *restorer);
+        virtual void                                        touchSpecialization(DagNode *toucher, bool touchAll);
+
         // Parameter management functions
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Swap a parameter
         
@@ -47,10 +49,12 @@ namespace RevBayesCore {
 
         // helper methods
         OrderedEvents<valueType>*                           simulate(void);
-              
+        void                                                updateInit();
+
         // private members
         const TypedDagNode< OrderedEventTimes > *           event_times;
-        TypedDistribution<valueType>*                       base_distribution;
+        const TypedDagNode< valueType >*                    initial_event;
+        TypedDistribution< valueType >*                     base_distribution;
 
         // storing values
         double    stored_event_time;
@@ -66,20 +70,22 @@ namespace RevBayesCore {
 #include "RbMathCombinatorialFunctions.h"
 
 
-/** MarkovEventsDistribution Constructor
+/** MarkovEventShiftsDistribution Constructor
  * @param g the base distribution
  * @param cp concentration parameter
  * @param n number of elements
  */
 template <class valueType>
-RevBayesCore::MarkovEventsDistribution<valueType>::MarkovEventsDistribution(const TypedDagNode< OrderedEventTimes > *oet, TypedDistribution<valueType> *g) :
-                                                                            TypedDistribution< OrderedEvents<valueType> >( new OrderedEvents<valueType>() ),
+RevBayesCore::MarkovEventShiftsDistribution<valueType>::MarkovEventShiftsDistribution(const TypedDagNode< OrderedEventTimes > *oet, const TypedDagNode<valueType> *init, TypedDistribution<valueType> *g) :
+                                                                                      TypedDistribution< OrderedEvents<valueType> >( new OrderedEvents<valueType>() ),
     event_times( oet ),
+	initial_event( init ) ,
     base_distribution( g ),
 	stored_event()
 {
     this->addParameter( event_times );
-    
+    this->addParameter( initial_event );
+
     // add the parameters of the distribution
     const std::vector<const DagNode*>& pars = base_distribution->getParameters();
     for (std::vector<const DagNode*>::const_iterator it = pars.begin(); it != pars.end(); ++it)
@@ -91,13 +97,15 @@ RevBayesCore::MarkovEventsDistribution<valueType>::MarkovEventsDistribution(cons
 }
 
 template <class valueType>
-RevBayesCore::MarkovEventsDistribution<valueType>::MarkovEventsDistribution(const MarkovEventsDistribution &d) : TypedDistribution< OrderedEvents<valueType> >( d ),
+RevBayesCore::MarkovEventShiftsDistribution<valueType>::MarkovEventShiftsDistribution(const MarkovEventShiftsDistribution &d) : TypedDistribution< OrderedEvents<valueType> >( d ),
 	event_times( d.event_times ),
+	initial_event( d.initial_event ),
 	base_distribution( d.base_distribution ),
 	stored_event( d.stored_event )
 {
     this->addParameter( event_times );
-    
+    this->addParameter( initial_event );
+
     // add the parameters of the distribution
     const std::vector<const DagNode*>& pars = base_distribution->getParameters();
     for (std::vector<const DagNode*>::const_iterator it = pars.begin(); it != pars.end(); ++it)
@@ -109,25 +117,26 @@ RevBayesCore::MarkovEventsDistribution<valueType>::MarkovEventsDistribution(cons
 }
 
 template <class valueType>
-RevBayesCore::MarkovEventsDistribution<valueType>::~MarkovEventsDistribution<valueType>( void )
+RevBayesCore::MarkovEventShiftsDistribution<valueType>::~MarkovEventShiftsDistribution<valueType>( void )
 {
 }
 
+
 template <class valueType>
-RevBayesCore::MarkovEventsDistribution<valueType>* RevBayesCore::MarkovEventsDistribution<valueType>::clone( void ) const
+RevBayesCore::MarkovEventShiftsDistribution<valueType>* RevBayesCore::MarkovEventShiftsDistribution<valueType>::clone( void ) const
 {
-    return new MarkovEventsDistribution<valueType>( *this );
+    return new MarkovEventShiftsDistribution<valueType>( *this );
 }
 
 template <class valueType>
-double RevBayesCore::MarkovEventsDistribution<valueType>::computeLnProbability( void )
+double RevBayesCore::MarkovEventShiftsDistribution<valueType>::computeLnProbability( void )
 {
 	// make sure the times and events are one-to-one
 	const std::set<double>& the_event_times = event_times->getValue().getEventTimes();
 	const std::map<double, valueType>& the_values = this->value->getEvents();
 
 	// make sure the number of events are the same
-	if ( the_event_times.size() != the_values.size() )
+	if ( (the_event_times.size() + 1) != the_values.size() )
 	{
 		throw RbException("The number of event times and the number of events do not match up!");
 	}
@@ -144,23 +153,39 @@ double RevBayesCore::MarkovEventsDistribution<valueType>::computeLnProbability( 
 		}
 	}
 
-	// compute the probability
 	double ln_prob = 0.0;
 
-	for( typename std::map<double, valueType>::const_iterator it = the_values.begin(); it != the_values.end(); ++it)
+	// get the initial event
+	typename std::map<double, valueType>::const_iterator it = the_values.begin();
+	valueType current_event = it->second;
+
+	// increment to the second event
+	std::advance(it, 1);
+
+	// compute the probability of each rate shift
+	while ( it != the_values.end() )
 	{
+		// compute the rate multiplier
+		valueType rate_mult = it->second / current_event;
+
 		// set the value for the base distribution
-		base_distribution->setValue( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( it->second ) );
+		base_distribution->setValue( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( rate_mult ) );
 
 		// compute the probability
 		ln_prob += base_distribution->computeLnProbability();
+
+		// update the current event
+		current_event = it->second;
+
+		// increment the event
+		std::advance(it, 1);
 	}
 
     return ln_prob;
 }
 
 template <class valueType>
-RevBayesCore::OrderedEvents<valueType>* RevBayesCore::MarkovEventsDistribution<valueType>::simulate()
+RevBayesCore::OrderedEvents<valueType>* RevBayesCore::MarkovEventShiftsDistribution<valueType>::simulate()
 {
 	// get the number of events from the times
 	const std::set<double>& the_times  = event_times->getValue().getEventTimes();
@@ -169,26 +194,52 @@ RevBayesCore::OrderedEvents<valueType>* RevBayesCore::MarkovEventsDistribution<v
 	// create the new container
 	OrderedEvents<valueType>* sim = new OrderedEvents<valueType>();
 
+	// get the initial event and add it to the events
+	valueType current_event = initial_event->getValue();
+	sim->addEvent(0.0, current_event);
+
 	// for each event, simulate a value
 	for(std::set<double>::const_iterator it = the_times.begin(); it != the_times.end(); ++it)
 	{
-		// have the base distribution simulate a new value
+		// have the base distribution simulate a new multiplier
 		base_distribution->redrawValue();
 
-		// copy the simulated value
-		valueType new_event = base_distribution->getValue();
+		// apply the multiplier
+		valueType event_mult = base_distribution->getValue();
+		current_event = current_event * base_distribution->getValue();
 
 		// add the new event
-		sim->addEvent(*it, new_event);
+		sim->addEvent(*it, current_event);
 	}
 
 	// return the simulation
 	return sim;
 }
 
+template <class valueType>
+void RevBayesCore::MarkovEventShiftsDistribution<valueType>::updateInit()
+{
+	// check how much the initial value changed by,
+	// rescale the subsequent events by the same factor
+
+	// get the events
+	const std::map<double, valueType>& the_values = this->value->getEvents();
+
+	valueType old_init = the_values.begin()->second;
+	valueType new_init = initial_event->getValue();
+	valueType factor   = new_init / old_init;
+
+	for(typename std::map<double, valueType>::const_iterator it = the_values.begin(); it != the_values.end(); ++it)
+	{
+		this->value->changeEvent(it->first, factor * it->second);
+	}
+
+}
+
+
 
 template <class valueType>
-void RevBayesCore::MarkovEventsDistribution<valueType>::redrawValue( void )
+void RevBayesCore::MarkovEventShiftsDistribution<valueType>::redrawValue( void )
 {
     delete this->value;
     this->value = simulate();
@@ -203,13 +254,13 @@ void RevBayesCore::MarkovEventsDistribution<valueType>::redrawValue( void )
 }
 
 template <class valueType>
-void RevBayesCore::MarkovEventsDistribution<valueType>::resimulate(void)
+void RevBayesCore::MarkovEventShiftsDistribution<valueType>::resimulate(void)
 {
 	this->redrawValue();
 }
 
 template <class valueType>
-double RevBayesCore::MarkovEventsDistribution<valueType>::addEvent(double time)
+double RevBayesCore::MarkovEventShiftsDistribution<valueType>::addEvent(double time)
 {
 	// NOTE: to undo this event, call removeEvent on the same time
 
@@ -220,21 +271,28 @@ double RevBayesCore::MarkovEventsDistribution<valueType>::addEvent(double time)
 		throw RbException("Trying to add an event that already has a value at the given time.");
 	}
 
-	// have the base distribution simulate a new value
+	// have the base distribution simulate a new rate multiplier
 	base_distribution->redrawValue();
 
-	// copy the simulated value
-	valueType new_event = base_distribution->getValue();
+	// find the value right before this time
+	typename std::map<double, valueType>::const_iterator previous_event = events.lower_bound(time);
+	previous_event--;
+
+	// copy the previous event
+	valueType new_value = previous_event->second;
+
+	// apply the multiplier
+	new_value = new_value * base_distribution->getValue();
 
 	// add the new event to the events
-	this->value->addEvent(time, new_event);
+	this->value->addEvent(time, new_value);
 
 	// return the probability
 	return base_distribution->computeLnProbability();
 }
 
 template <class valueType>
-double RevBayesCore::MarkovEventsDistribution<valueType>::removeEvent(double time)
+double RevBayesCore::MarkovEventShiftsDistribution<valueType>::removeEvent(double time)
 {
 	// NOTE: to undo this event, we have to store the value of the event
 	// and then call resetEvents to add the value back
@@ -251,8 +309,15 @@ double RevBayesCore::MarkovEventsDistribution<valueType>::removeEvent(double tim
 	stored_event_time = time;
 	stored_event = it->second;
 
+	// find the value right before this time
+	typename std::map<double, valueType>::const_iterator previous_event = events.lower_bound(time);
+	previous_event--;
+
+	// compute the multiplier
+	valueType multiplier = stored_event / previous_event->second;
+
 	// give the value to the base distribution
-	base_distribution->setValue( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( stored_event ) );
+	base_distribution->setValue( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( multiplier ) );
 
 	// remove the event
 	this->value->removeEvent(time);
@@ -262,7 +327,7 @@ double RevBayesCore::MarkovEventsDistribution<valueType>::removeEvent(double tim
 }
 
 template <class valueType>
-void RevBayesCore::MarkovEventsDistribution<valueType>::changeEventTime(double old_time, double new_time)
+void RevBayesCore::MarkovEventShiftsDistribution<valueType>::changeEventTime(double old_time, double new_time)
 {
 	// NOTE: to undo this event, simply call it again, reversing the order of the arguments
 
@@ -279,7 +344,7 @@ void RevBayesCore::MarkovEventsDistribution<valueType>::changeEventTime(double o
 }
 
 template <class valueType>
-void RevBayesCore::MarkovEventsDistribution<valueType>::resetEvents(void)
+void RevBayesCore::MarkovEventShiftsDistribution<valueType>::resetEvents(void)
 {
 	// check if there is already an event at the stored time
 	const std::map<double, valueType>& events = this->value->getEvents();
@@ -293,7 +358,7 @@ void RevBayesCore::MarkovEventsDistribution<valueType>::resetEvents(void)
 }
 
 template <class valueType>
-void RevBayesCore::MarkovEventsDistribution<valueType>::getRandomEvent(double &time, valueType &event)
+void RevBayesCore::MarkovEventShiftsDistribution<valueType>::getRandomEvent(double &time, valueType &event)
 {
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
@@ -314,41 +379,37 @@ void RevBayesCore::MarkovEventsDistribution<valueType>::getRandomEvent(double &t
     event = this_event->second;
 }
 
-
-
 template <class valueType>
-void RevBayesCore::MarkovEventsDistribution<valueType>::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<valueType> &rv) const
+void RevBayesCore::MarkovEventShiftsDistribution<valueType>::restoreSpecialization(DagNode *restorer)
 {
-    if ( n == "getEvents" )
-    {
-    	// get the events
-    	const std::map<double, valueType>& events = this->value->getEvents();
-
-    	// convert the times to a vector
-    	std::vector<valueType> res;
-    	for(typename std::map<double, valueType>::const_iterator it = events.begin(); it != events.end(); ++it)
-    	{
-    		res.push_back( it->second );
-    	}
-
-    	// add the times to the rv
-    	rv = res;
-    }
-    else
-    {
-        throw RbException("The markov event model does not have a member method called '" + n + "'.");
-    }
+	if ( restorer == initial_event )
+	{
+		this->updateInit();
+	}
 }
 
+template <class valueType>
+void RevBayesCore::MarkovEventShiftsDistribution<valueType>::touchSpecialization(DagNode *toucher, bool touchAll)
+{
+	if ( toucher == initial_event )
+	{
+		this->updateInit();
+	}
+}
 
 /** Swap a parameter of the distribution */
 template <class valueType>
-void RevBayesCore::MarkovEventsDistribution<valueType>::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void RevBayesCore::MarkovEventShiftsDistribution<valueType>::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     if (oldP == event_times)
     {
         event_times = static_cast<const TypedDagNode< OrderedEventTimes > *>( newP );
         this->redrawValue(); // I need to resimulate if the event times changed
+    }
+    else if (oldP == initial_event)
+    {
+    	initial_event = static_cast<const TypedDagNode< valueType > *>( newP );
+        this->redrawValue(); // I need to resimulate if the initial rate changed
     }
     else
     {

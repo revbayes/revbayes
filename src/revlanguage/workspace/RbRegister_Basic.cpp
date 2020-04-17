@@ -60,6 +60,7 @@
 #include "RbVector.h"                                     // for RbVector
 #include "RbVectorImpl.h"                                 // for RbVectorImpl
 #include "ReplicateFunction.h"                            // for ReplicateFu...
+#include "ReplicateEventsFunction.h"                      // for ReplicateFu...
 #include "RevPtr.h"                                       // for RevPtr
 #include "RlBranchLengthTree.h"                           // for BranchLengt...
 #include "RlConstantNode.h"                               // for ConstantNode
@@ -145,6 +146,7 @@
 #include "Func_range.h"
 #include "Func_replicate.h"
 #include "Func_reverse.h"
+#include "Func_replicateEvents.h"
 #include "Func_seed.h"
 #include "Func_seq.h"
 #include "Func_setOption.h"
@@ -335,6 +337,9 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_replicate<RlString>()         );
         addFunction( new Func_replicate<RlBoolean>()        );
         addFunction( new Func_seed()                        );
+        addFunction( new Func_replicateEvents<Real>()       );
+        addFunction( new Func_replicateEvents<RealPos>()    );
+        addFunction( new Func_replicateEvents<Probability>());
         addFunction( new Func_seq<Integer>()                );
         addFunction( new Func_seq<Real>()                   );
         addFunction( new Func_setOption()                   );

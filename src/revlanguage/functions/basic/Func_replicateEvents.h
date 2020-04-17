@@ -16,7 +16,7 @@ namespace RevLanguage {
      * the elements are non-abstract model objects with non-abstract value types.
      */
     template <typename valType>
-    class Func_replicateEvents : public TypedFunction< RlOrderedEvents< valType> > {
+    class Func_replicateEvents : public TypedFunction< RlOrderedEvents< ModelVector<valType> > > {
         
     public:
         Func_replicateEvents(void);                                                                 //!< Default constructor
@@ -30,7 +30,7 @@ namespace RevLanguage {
         const TypeSpec&                                                                                 getTypeSpec(void) const;                                    //!< Get language type of the object
         
         // Regular functions
-        RevBayesCore::TypedFunction< RevBayesCore::RbVector<typename valType::valueType > >*            createFunction(void) const;                                 //!< Create a function object
+        RevBayesCore::TypedFunction< RevBayesCore::OrderedEvents<RevBayesCore::RbVector<typename valType::valueType > > >*       createFunction(void) const;                                 //!< Create a function object
         const ArgumentRules&                                                                            getArgumentRules(void) const;                               //!< Get argument rules
         
     protected:
@@ -52,7 +52,7 @@ namespace RevLanguage {
 
 /** Default constructor */
 template <typename valType>
-RevLanguage::Func_replicateEvents<valType>::Func_replicateEvents() : TypedFunction< ModelVector<valType> >()
+RevLanguage::Func_replicateEvents<valType>::Func_replicateEvents() : TypedFunction< RlOrderedEvents< ModelVector<valType> > >()
 {
 }
 
@@ -72,9 +72,9 @@ RevLanguage::Func_replicateEvents<valType>* RevLanguage::Func_replicateEvents<va
 
 /** Execute function: create deterministic replicate<valType> object */
 template <typename valType>
-RevBayesCore::TypedFunction< RevBayesCore::RbVector< typename valType::valueType> >* RevLanguage::Func_replicateEvents<valType>::createFunction( void ) const
+RevBayesCore::TypedFunction< RevBayesCore::OrderedEvents<RevBayesCore::RbVector<typename valType::valueType > > >* RevLanguage::Func_replicateEvents<valType>::createFunction( void ) const
 {
-	const RevBayesCore::TypedDagNode<typename RevBayesCore::OrderedEvents<valType::valueType>>* v   = static_cast<const RlOrderedEvents<valType> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+	const RevBayesCore::TypedDagNode<RevBayesCore::OrderedEvents<typename valType::valueType>>* v   = static_cast<const RlOrderedEvents<valType> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     int n   = (int)static_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getValue();
 
     RevBayesCore::ReplicateEventsFunction<typename valType::valueType>* func = new RevBayesCore::ReplicateEventsFunction<typename valType::valueType>( v, n );
