@@ -175,11 +175,22 @@ void AbstractCharacterData::addMissingTaxon(const std::string &n) {
  */
 void AbstractCharacterData::addTaxonData(const AbstractTaxonData &obs)
 {
+	// check if the taxon is already in the data
+	std::map<std::string, AbstractTaxonData* >::iterator it = taxonMap.find( obs.getTaxonName() );
+	if ( it == taxonMap.end() )
+	{
+	    // add the sequence name to the list
+	    taxa.push_back( obs.getTaxon() );
+	}
+	else
+	{
+		// remove the taxon data
+		delete it->second;
+		taxonMap.erase(it);
+	}
 
-    // add the sequence name to the list
-    taxa.push_back( obs.getTaxon() );
 
-    // add the sequence also as a member so that we can access it by name
+    // add the sequence as a member so that we can access it by name
     taxonMap.insert( std::pair<std::string, AbstractTaxonData* >( obs.getTaxonName(), obs.clone() ) );
 }
 
