@@ -21,7 +21,7 @@ namespace RevBayesCore {
 		virtual ~TypedEventsDistribution(void) {}
 
 		// virtual methods
-		virtual void getRandomEvent(double &time, valueType &event) = 0; //!< choose a random event
+		virtual bool getRandomEvent(double &time, valueType &event) = 0; //!< choose a random event
 
 	};
 
