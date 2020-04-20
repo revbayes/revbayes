@@ -34,7 +34,7 @@ namespace RevBayesCore {
         void                                                resetEvents(void);
 
         // virtual functions from TypedEventDistribution
-		void                                                getRandomEvent(double &time, valueType &event);
+        bool                                                getRandomEvent(double &time, valueType &event);
 
         // exposed methods
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<valueType> &rv) const; //!< Map the member methods to internal function calls
@@ -293,14 +293,18 @@ void RevBayesCore::MarkovEventsDistribution<valueType>::resetEvents(void)
 }
 
 template <class valueType>
-void RevBayesCore::MarkovEventsDistribution<valueType>::getRandomEvent(double &time, valueType &event)
+bool RevBayesCore::MarkovEventsDistribution<valueType>::getRandomEvent(double &time, valueType &event)
 {
     // Get random number generator
-    RandomNumberGenerator* rng     = GLOBAL_RNG;
+    RandomNumberGenerator* rng = GLOBAL_RNG;
 
     // get the events
 	const std::map<double, valueType>& events = this->value->getEvents();
 	size_t num_events = events.size();
+	if ( num_events == 0 )
+	{
+		return false;
+	}
 
     // choose the index
     size_t event_index = size_t(rng->uniform01() * num_events);
@@ -310,8 +314,13 @@ void RevBayesCore::MarkovEventsDistribution<valueType>::getRandomEvent(double &t
     std::advance(this_event, event_index);
 
     // store the values
-    time  = this_event->first;
-    event = this_event->second;
+	double    tmp_time  = this_event->first;
+	valueType tmp_event = this_event->second;
+
+    time  = tmp_time;
+    event = tmp_event;
+
+    return true;
 }
 
 

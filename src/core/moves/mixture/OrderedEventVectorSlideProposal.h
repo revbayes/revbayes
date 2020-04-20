@@ -140,19 +140,24 @@ double RevBayesCore::OrderedEventVectorSlideProposal<valueType>::doProposal( voi
 	abort = false;
 
     // Get random number generator
-    RandomNumberGenerator* rng     = GLOBAL_RNG;
+    RandomNumberGenerator* rng = GLOBAL_RNG;
 
     // get the distribution
     TypedEventsDistribution<valueType>* dist = dynamic_cast<TypedEventsDistribution<valueType> *>( &variable->getDistribution() );
     if ( dist == NULL )
     {
-    	throw RbException("Tried to use OrderedEventScaleProposal on an invalid type.");
+    	throw RbException("Tried to use OrderedEventVetorSlideProposal on an invalid type.");
     }
 
     // get the random event
+    // abort if there are no events
     double this_event_time;
     valueType this_event_value;
-    dist->getRandomEvent(this_event_time, this_event_value);
+    abort = !dist->getRandomEvent(this_event_time, this_event_value);
+    if ( abort == true )
+    {
+    	return RbConstants::Double::neginf;
+    }
 
     // get the value
     event_time = this_event_time;
