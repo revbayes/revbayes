@@ -117,6 +117,8 @@ void RevBayesCore::ReplicateEventsFunction<valueType>::update( void )
 
 	// set the current state
 	this->value = new_value;
+
+
 }
 
 

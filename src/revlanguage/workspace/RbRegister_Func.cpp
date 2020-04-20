@@ -288,6 +288,7 @@
 #include "Func_dppMeanFromConc.h"
 #include "Func_fnNormalizedQuantile.h"
 #include "Func_numUniqueInVector.h"
+#include "Func_rateShifts.h"
 #include "Func_stirling.h"
 #include "Func_varianceCovarianceMatrix.h"
 #include "Func_decomposedVarianceCovarianceMatrix.h"
@@ -522,6 +523,9 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         // sigmoid function
         addFunction( new Func_sigmoid() );
         addFunction( new Func_sigmoidVector() );
+
+        // rate shift function
+        addFunction( new Func_shiftEvents<RealPos>() );
 
 		// square root function
         addFunction( new Func_sqrt()  );
