@@ -77,16 +77,16 @@ void RevBayesCore::ShiftEventsFunction<valueType>::update( void )
 	// create the new object
 	OrderedEvents<valueType>* new_value = new OrderedEvents<valueType>();
 
-	// add the intial event
+	// add the initial value
 	valueType current_value = initial_values->getValue();
 	new_value->addEvent(0.0, current_value );
 
-	// add the rate shifts
+	// add the shifts
 	const std::map<double, valueType>& events = shift_events->getValue().getEvents();
 	for(typename std::map<double, valueType>::const_iterator it = events.begin(); it != events.end(); ++it)
 	{
 		// multiply the current event
-		current_value *= it->second;
+		current_value = current_value * it->second;
 
 		// add the event
 		new_value->addEvent(it->first, current_value);

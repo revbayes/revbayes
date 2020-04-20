@@ -459,7 +459,8 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_sigmoidVector() );
 
         // rate shift function
-        addFunction( new Func_shiftEvents<RealPos>() );
+        addFunction( new Func_shiftEvents<RealPos>()              );
+        addFunction( new Func_shiftEvents<ModelVector<RealPos>>() );
 
 		// square root function
         addFunction( new Func_sqrt()  );
