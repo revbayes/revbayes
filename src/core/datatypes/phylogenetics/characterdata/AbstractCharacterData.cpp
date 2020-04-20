@@ -175,10 +175,10 @@ void AbstractCharacterData::addMissingTaxon(const std::string &n) {
  */
 void AbstractCharacterData::addTaxonData(const AbstractTaxonData &obs)
 {
-    
+
     // add the sequence name to the list
     taxa.push_back( obs.getTaxon() );
-    
+
     // add the sequence also as a member so that we can access it by name
     taxonMap.insert( std::pair<std::string, AbstractTaxonData* >( obs.getTaxonName(), obs.clone() ) );
 }
