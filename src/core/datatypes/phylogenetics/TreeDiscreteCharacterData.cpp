@@ -45,7 +45,7 @@ AbstractHomologousDiscreteCharacterData& TreeDiscreteCharacterData::getCharacter
 
 const AbstractHomologousDiscreteCharacterData& TreeDiscreteCharacterData::getCharacterData( void ) const
 {
-    
+
     return *character_data;
 }
 
@@ -112,9 +112,12 @@ void TreeDiscreteCharacterData::initFromString(const std::string &s)
     throw RbException("Cannot initialize a tree with a discrete character data matrix from a string.");
 }
 
-
 void TreeDiscreteCharacterData::setCharacterData( AbstractHomologousDiscreteCharacterData *d )
 {
+	if ( character_data != NULL )
+	{
+		delete character_data;
+	}
     character_data = d;
 }
 
