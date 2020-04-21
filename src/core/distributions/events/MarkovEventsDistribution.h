@@ -22,7 +22,7 @@ namespace RevBayesCore {
         virtual ~MarkovEventsDistribution(void);                                                              //!< Virtual destructor
 
         // public member functions
-        MarkovEventsDistribution*                           clone(void) const;                                                                      //!< Create an independent clone
+        MarkovEventsDistribution<valueType>*                clone(void) const;                                                                      //!< Create an independent clone
         double                                              computeLnProbability(void);
         void                                                redrawValue(void);
 
@@ -93,7 +93,7 @@ RevBayesCore::MarkovEventsDistribution<valueType>::MarkovEventsDistribution(cons
 template <class valueType>
 RevBayesCore::MarkovEventsDistribution<valueType>::MarkovEventsDistribution(const MarkovEventsDistribution &d) : TypedDistribution< OrderedEvents<valueType> >( d ),
 	event_times( d.event_times ),
-	base_distribution( d.base_distribution ),
+	base_distribution( d.base_distribution->clone() ),
 	stored_event( d.stored_event )
 {
     this->addParameter( event_times );
@@ -112,6 +112,8 @@ template <class valueType>
 RevBayesCore::MarkovEventsDistribution<valueType>::~MarkovEventsDistribution<valueType>( void )
 {
 }
+
+
 
 template <class valueType>
 RevBayesCore::MarkovEventsDistribution<valueType>* RevBayesCore::MarkovEventsDistribution<valueType>::clone( void ) const
