@@ -131,6 +131,7 @@ namespace RevBayesCore {
         bool                                        isInternal(void) const;                                                             //!< Is node internal?
         bool                                        isRoot(void) const;                                                                 //!< Is node root?
         bool                                        isSampledAncestor(bool propagate=false) const;                                                      //!< Is node (or a child node) a sampled ancestor?
+        bool                                        hasSampledDescendant(void) const;                                                      //!< Is node (or a child node) a sampled ancestor?
         bool                                        isTip(void) const;                                                                  //!< Is node tip?
         void                                        makeBifurcating(void);                                                              //!< Make this and all its descendants bifurcating.
         void                                        renameNodeParameter(const std::string &old_name, const std::string &new_name);
@@ -145,6 +146,7 @@ namespace RevBayesCore {
   		void										setNodeType(bool tip, bool root, bool interior); //SK
         void                                        setParent(TopologyNode* p);                                                         //!< Sets the node's parent
         void                                        setSampledAncestor(bool tf);                                                        //!< Set if the node is a sampled ancestor
+        void                                        setSampledDescendant(bool tf);                                                      //!< Set if the node has sampled descendants
         void                                        setSpeciesName(std::string const &n);                                               //!< Set the species name of this node
         void                                        setTaxon(Taxon const &t);                                                           //!< Set the taxon of this node
         void                                        setTaxonIndices(const TaxonMap &tm);                                                //!< Set the indices of the taxa from the taxon map
@@ -174,6 +176,7 @@ namespace RevBayesCore {
         bool                                        root_node;
         bool                                        tip_node;
         bool                                        sampled_ancestor;
+        bool                                        sampled_descendant;                                                                 //!< Does node appear in reconstructed tree?
         
         // information for newick representation
         std::vector<std::string>                    node_comments;

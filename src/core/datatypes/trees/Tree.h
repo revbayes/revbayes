@@ -66,6 +66,7 @@ namespace RevBayesCore {
         void                                                clearParameters(void);                                                                              //!< Clear both the current node and branch parameters
         void                                                clearBranchParameters(void);
 		void                                                clearNodeParameters(void);
+        void                                                clearTaxonBitSetMap(void);                                                                      //!< Returns a
 
         void                                                collapseNegativeBranchLengths(double length);                                                       //!< Don't allow parents to be younger than their children (TimeTrees only)
         bool                                                containsClade(const TopologyNode &n, bool unrooted) const;
@@ -123,6 +124,7 @@ namespace RevBayesCore {
         void                                                makeInternalNodesBifurcating(bool reindex);                                                         //!< Make all the internal nodes bifurcating.
         void                                                orderNodesByIndex();
         void                                                pruneTaxa(const RbBitSet&);
+        void                                                pruneTaxaWithoutSampledDescendants(void);
         void                                                reroot(const Clade &outgroup, bool reindex);                                                        //!< Re-root the tree with the given outgroup
         void                                                reroot(const std::string &outgroup, bool reindex);                                                  //!< Re-root the tree with the given outgroup
         void                                                reroot(TopologyNode &n, bool reindex);

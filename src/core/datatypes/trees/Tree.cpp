@@ -190,6 +190,13 @@ void Tree::clearNodeParameters( void )
 
 }
 
+void Tree::clearTaxonBitSetMap(void)
+{
+    
+    taxon_bitset_map.clear();
+    
+}
+
 
 /* Clone function */
 Tree* Tree::clone(void) const
@@ -1275,17 +1282,41 @@ void Tree::pruneTaxa(const RbBitSet& prune_map )
     // bootstrap all nodes from the root and add the in a pre-order traversal
     recursivelyPruneTaxa(root, prune_map);
 
+    num_nodes = nodes.size();
+    num_tips = 0;
     for (unsigned int i = 0; i < nodes.size(); ++i)
     {
         nodes[i]->setIndex(i);
+        if (nodes[i]->isTip()) {
+            num_tips += 1;
+        }
     }
+    
+}
+
+void Tree::pruneTaxaWithoutSampledDescendants( void )
+{
+    RbBitSet prune_map(num_tips);
+
+    for (size_t i = 0; i < nodes.size(); i++)
+    {
+        TopologyNode* nd = nodes[i];
+        if (nd->isTip() && !nd->hasSampledDescendant())
+        {
+            size_t bitset_idx = taxon_bitset_map[ nd->getName() ];
+            prune_map.set(bitset_idx);
+        }
+    }
+    
+    pruneTaxa(prune_map);
 }
 
 bool Tree::recursivelyPruneTaxa( TopologyNode* n, const RbBitSet& prune_map )
 {
     if( n->isTip()  )
     {
-        bool prune = prune_map[n->getIndex()];
+//        bool prune = prune_map[n->getIndex()];
+        bool prune = prune_map[ taxon_bitset_map[ n->getName()] ];
 
         if( prune == false )
         {

@@ -37,6 +37,7 @@
 
 /* Monitor types (in folder "monitors) */
 #include "Mntr_AncestralState.h"
+#include "Mntr_BirthDeathStochasticCharacterMapping.h"
 #include "Mntr_File.h"
 #include "Mntr_HomeologPhase.h"
 #include "Mntr_JointConditionalAncestralState.h"
@@ -65,6 +66,7 @@ void RevLanguage::Workspace::initializeMonitorGlobalWorkspace(void)
         ////////////////////////////////////////////////////////////////////////////////
 
 		addType( new Mntr_AncestralState()                       );
+        addType( new Mntr_BirthDeathStochasticCharacterMapping() );
 		addType( new Mntr_HomeologPhase()                        );
         addType( new Mntr_JointConditionalAncestralState()       );
         addType( new Mntr_StochasticCharacterMapping()           );

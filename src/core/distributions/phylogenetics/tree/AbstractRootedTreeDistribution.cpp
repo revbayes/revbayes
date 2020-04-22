@@ -118,7 +118,7 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
     
     // check that the ages are in correct chronological order
     // i.e., no child is older than its parent
-    const std::vector<TopologyNode*>& nodes = value->getNodes();
+    std::vector<TopologyNode*> nodes = value->getNodes();
     for (std::vector<TopologyNode*>::const_iterator it = nodes.begin(); it != nodes.end(); it++)
     {
 
@@ -150,8 +150,11 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
             }
             
         }
-        else if ( the_node.getAge() > getOriginAge() )
+        else if ( (the_node.getAge() - 1E-5) > getOriginAge() )
         {
+            
+            getOriginAge();
+            
             return RbConstants::Double::neginf;
         }
         
@@ -165,7 +168,7 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
     // present time
     double ra = value->getRoot().getAge();
     
-    if ( ra > getOriginAge() || ra != getRootAge() )
+    if ( (ra-1E-5) > getOriginAge() || ra != getRootAge() )
     {
         return RbConstants::Double::neginf;
     }
@@ -588,7 +591,6 @@ double AbstractRootedTreeDistribution::simulateCladeAge(size_t n, double origin,
     return times.back();
 }
 
-
 double AbstractRootedTreeDistribution::simulateNextAge(size_t n, double origin, double present, double min) const
 {
 
@@ -669,7 +671,6 @@ void AbstractRootedTreeDistribution::simulateTree( void )
     value = psi;
 
 }
-
 
 void AbstractRootedTreeDistribution::setValue(Tree *v, bool f )
 {

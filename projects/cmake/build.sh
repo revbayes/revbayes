@@ -146,7 +146,7 @@ fi
     cmake ../../../src $cmake_args
     echo
     echo "Running 'make -j4' in $(pwd)"
-    make -j 4
+    make -j 60
     cd ..
 
     if [ -e  GitVersion_backup.cpp ] ; then

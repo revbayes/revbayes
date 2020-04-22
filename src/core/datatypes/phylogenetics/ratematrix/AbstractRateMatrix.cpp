@@ -448,6 +448,9 @@ bool AbstractRateMatrix::simulateStochasticMapping(double startAge, double endAg
         num_events += 1;
 
     }
+    
+    // add one more, just in case
+//    computeStochasticMatrix(num_events);
 
     // sample event types per interval
     transition_states = std::vector<size_t>(1, start_state);

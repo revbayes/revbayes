@@ -523,10 +523,14 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     num_patterns = 0;
 
     // resize the matrices
-    size_t tips = tau->getValue().getNumberOfTips();
-    ambiguous_char_matrix.resize(tips);
-    char_matrix.resize(tips);
-    gap_matrix.resize(tips);
+    size_t num_tips = tau->getValue().getNumberOfTips();
+    ambiguous_char_matrix.resize(num_tips);
+    char_matrix.resize(num_tips);
+    gap_matrix.resize(num_tips);
+    changed_nodes = std::vector<bool>(num_nodes, false);
+    dirty_nodes = std::vector<bool>(num_nodes, true);
+    activeLikelihood = std::vector<size_t>(num_nodes, 0) ;
+    perNodeSiteLogScalingFactors = std::vector<std::vector< std::vector<double> > >(2, std::vector<std::vector<double> >(num_nodes, std::vector<double>(num_sites, 0.0) ) );
 
     // create a vector with the correct site indices
     // some of the sites may have been excluded
@@ -2775,6 +2779,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setValue(Abstract
 
     // reset the number of sites
     this->num_sites = v->getNumberOfIncludedCharacters();
+    
+    // reset the number of taxa
+    this->num_nodes = tau->getValue().getNumberOfNodes();
 
     site_pattern.clear();
     site_pattern.resize(num_sites);

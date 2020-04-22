@@ -15,6 +15,8 @@ namespace RevBayesCore {
         virtual ~AbstractBirthDeathProcess(void);
         // pure virtual member functions
         virtual AbstractBirthDeathProcess*                  clone(void) const = 0;
+        virtual TopologyNode*                               simulateOneHiddenClade(double t);
+        virtual void                                        simulateHiddenClades(void);
         
     protected:
         // pure virtual helper functions

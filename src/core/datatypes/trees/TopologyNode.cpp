@@ -37,7 +37,8 @@ TopologyNode::TopologyNode(size_t indx) :
     interior_node( false ),
     root_node( true ),
     tip_node( true ),
-    sampled_ancestor( false )
+    sampled_ancestor( false ),
+    sampled_descendant( true )
 {
     
 }
@@ -56,7 +57,8 @@ TopologyNode::TopologyNode(const Taxon& t, size_t indx) :
     interior_node( false ),
     root_node( true ),
     tip_node( true ),
-    sampled_ancestor( false )
+    sampled_ancestor( false ),
+    sampled_descendant( true )
 {
     
 }
@@ -75,7 +77,8 @@ TopologyNode::TopologyNode(const std::string& n, size_t indx) :
     interior_node( false ),
     root_node( true ),
     tip_node( true ),
-    sampled_ancestor( false )
+    sampled_ancestor( false ),
+    sampled_descendant( true )
 {
     
 }
@@ -93,6 +96,7 @@ TopologyNode::TopologyNode(const TopologyNode &n) :
     root_node( n.root_node ),
     tip_node( n.tip_node ),
     sampled_ancestor( n.sampled_ancestor ),
+    sampled_descendant( n.sampled_descendant ),
     node_comments( n.node_comments ),
     branch_comments( n.branch_comments ),
     time_in_states( n.time_in_states )
@@ -145,6 +149,7 @@ TopologyNode& TopologyNode::operator=(const TopologyNode &n)
         interior_node           = n.interior_node;
         tip_node                = n.tip_node;
         sampled_ancestor        = n.sampled_ancestor;
+        sampled_descendant      = n.sampled_descendant;
         root_node               = n.root_node;
         node_comments           = n.node_comments;
         branch_comments         = n.branch_comments;
@@ -1537,6 +1542,13 @@ bool TopologyNode::isSampledAncestor(  bool propagate ) const
     return sa;
 }
 
+bool TopologyNode::hasSampledDescendant( void ) const
+{
+    
+    bool sd = sampled_descendant;
+    return sd;
+}
+
 
 bool TopologyNode::isTip( void ) const
 {
@@ -1840,6 +1852,12 @@ void TopologyNode::setSampledAncestor(bool tf)
     
 }
 
+void TopologyNode::setSampledDescendant(bool tf)
+{
+    
+    sampled_descendant = tf;
+    
+}
 
 void TopologyNode::setSpeciesName(std::string const &n)
 {

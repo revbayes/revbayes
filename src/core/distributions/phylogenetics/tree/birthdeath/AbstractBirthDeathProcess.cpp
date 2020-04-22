@@ -128,3 +128,17 @@ std::vector<double> AbstractBirthDeathProcess::simulateDivergenceTimes(size_t n,
     return times;
 }
 
+
+TopologyNode* AbstractBirthDeathProcess::simulateOneHiddenClade(double t) {
+     throw RbException("AbstractBirthDeathProcess::simulateOneHiddenClade() not implemented.");
+}
+
+/**
+ * Simulate hidden clades upon the reconstructed tree under a birth-death process.
+ **/
+
+void AbstractBirthDeathProcess::simulateHiddenClades(void) {
+    
+    throw RbException("AbstractBirthDeathProcess::simulateHiddenClades() not implemented.");
+
+}

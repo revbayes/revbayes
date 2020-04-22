@@ -27,6 +27,9 @@ namespace RevBayesCore {
         
         // public member functions
         ConstantRateBirthDeathProcess*                      clone(void) const;                                                                      //!< Create an independent clone
+        bool                                                simulateOneHiddenCladeRecursively(TopologyNode* n, std::vector<TopologyNode*>& stored_nodes);
+        TopologyNode*                                       simulateOneHiddenClade(double t);
+        void                                                simulateHiddenClades(void);
         
         
     protected:
@@ -36,6 +39,7 @@ namespace RevBayesCore {
         // helper functions
         double                                              lnSpeciationRate(double t) const;
         double                                              rateIntegral(double t_low, double t_high) const;
+        double                                              computeProbabilityNoSurvival(double start, double end) const;
         double                                              computeProbabilitySurvival(double start, double end) const;
         virtual double                                      simulateDivergenceTime(double origin, double present) const;                //!< Simulate a speciation event.
 
