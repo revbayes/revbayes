@@ -95,6 +95,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_PRINT);
 
 	tp_ptr->setConditionalProbCompatibilityMode(false); // FIXME Here you go Mike!
+	tp_ptr->setNumberOfThreads(n_proc);
 
 	// add the parameters
 	addParameter(age);
