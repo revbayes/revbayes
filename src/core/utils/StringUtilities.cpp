@@ -329,9 +329,14 @@ std::string StringUtilities::getFileContentsAsString(const std::string& s)
 /** Find the last component of a file path */
 std::string StringUtilities::getLastPathComponent(const std::string& s)
 {
+#	ifdef RB_WIN
+    std::string pathSeparator = "\\";
+#	else
+    std::string pathSeparator = "/";
+#   endif
 
     std::vector<std::string> sVec;
-    stringSplit(s, "/", sVec);
+    stringSplit(s, pathSeparator, sVec);
     std::string lastComponent = "";
     if (sVec.size() > 0)
     {
