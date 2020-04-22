@@ -33,10 +33,11 @@ typedef enum {
 } conditionalProbability_t;
 
 typedef enum {
-	SEQUENTIAL_VECTOR=0,
-	SEQUENTIAL_MATRIX=1,
-	SEQUENTIAL_OPTIMIZED=2,
-	PARALLEL_OPENMP=3
+	AUTO_TUNING=0,
+	SEQUENTIAL_OPTIMIZED=1,
+	SEQUENTIAL_BRANCHWISE=2,
+	PARALLEL_OPTIMIZED=3,
+	PARALLEL_BRANCHWISE=4
 } approximatorVersion_t;
 
 typedef enum {
