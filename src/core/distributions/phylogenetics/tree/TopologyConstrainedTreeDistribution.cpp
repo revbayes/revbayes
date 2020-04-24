@@ -42,7 +42,7 @@ using namespace RevBayesCore;
  *
  * \param[in]    c         Clade constraints.
  */
-TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDistribution<Tree>* base_dist, const std::vector<Clade> &c) : TypedDistribution<Tree>( NULL ),
+TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDistribution<Tree>* base_dist, const std::vector<Clade> &c, Tree *t) : TypedDistribution<Tree>( NULL ),
 //    active_backbone_clades( base_dist->getValue().getNumberOfInteriorNodes(), RbBitSet() ),
     active_clades( base_dist->getValue().getNumberOfInteriorNodes(), RbBitSet() ),
     backbone_topology(NULL),
@@ -51,8 +51,8 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDi
     dirty_nodes( base_dist->getValue().getNumberOfNodes(), true ),
     monophyly_constraints( c ),
     num_backbones( 0 ),
-    use_multiple_backbones( false )
-
+    use_multiple_backbones( false ),
+    starting_tree( t )
 {
     AbstractRootedTreeDistribution* tree_base_distribution = dynamic_cast<AbstractRootedTreeDistribution*>(base_distribution);
     if (tree_base_distribution == NULL)
@@ -99,7 +99,8 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(const T
     stored_backbone_clades( d.stored_backbone_clades ),
     stored_clades( d.stored_clades ),
     num_backbones( d.num_backbones ),
-    use_multiple_backbones( d.use_multiple_backbones )
+    use_multiple_backbones( d.use_multiple_backbones ),
+    starting_tree( (d.starting_tree==NULL ? NULL : d.starting_tree->clone()) )
 {
     // the copy constructor of the TypedDistribution creates a new copy of the value
     // however, here we want to hold exactly the same value as the base-distribution
@@ -137,6 +138,7 @@ TopologyConstrainedTreeDistribution::~TopologyConstrainedTreeDistribution()
     // our base class, the TypedDistribution thinks that it owns the value and thus deletes it
     value = NULL;
     
+    delete starting_tree;
 }
 
 
@@ -149,6 +151,7 @@ TopologyConstrainedTreeDistribution& TopologyConstrainedTreeDistribution::operat
         TypedDistribution<Tree>::operator=( d );
         
         delete base_distribution;
+        delete starting_tree;
         
         active_backbone_clades          = d.active_backbone_clades;
         active_clades                   = d.active_clades;
@@ -163,6 +166,7 @@ TopologyConstrainedTreeDistribution& TopologyConstrainedTreeDistribution::operat
         stored_clades                   = d.stored_clades;
         num_backbones                   = d.num_backbones;
         use_multiple_backbones          = d.use_multiple_backbones;
+        starting_tree                   = (d.starting_tree == NULL ? NULL : d.starting_tree->clone());
 
         // add the parameters of the base distribution
         const std::vector<const DagNode*>& pars = base_distribution->getParameters();
@@ -547,8 +551,18 @@ RbBitSet TopologyConstrainedTreeDistribution::recursivelyUpdateClades( const Top
 void TopologyConstrainedTreeDistribution::redrawValue( void )
 {
     
-    Tree* new_value = simulateTree();
-    // base_distribution->redrawValue();
+    
+    Tree* new_value = NULL;
+    
+    if ( starting_tree == NULL )
+    {
+        new_value = simulateTree();
+        // base_distribution->redrawValue();
+    }
+    else
+    {
+        new_value = starting_tree->clone();
+    }
     
     value->getTreeChangeEventHandler().removeListener( this );
     new_value->getTreeChangeEventHandler().addListener( this );
@@ -573,36 +587,48 @@ void TopologyConstrainedTreeDistribution::redrawValue( void )
 
 void TopologyConstrainedTreeDistribution::setBackbone(const TypedDagNode<Tree> *backbone_one, const TypedDagNode<RbVector<Tree> > *backbone_many)
 {
-    if (backbone_one == NULL && backbone_many == NULL) {
+    if (backbone_one == NULL && backbone_many == NULL)
+    {
         ; // do nothing
-    } else if (backbone_one != NULL && backbone_many != NULL) {
+    }
+    else if (backbone_one != NULL && backbone_many != NULL)
+    {
         ; // do nothing
-    } else {
+    }
+    else
+    {
         
         
         // clear old parameter
-        if (backbone_topology != NULL) {
+        if (backbone_topology != NULL)
+        {
             this->removeParameter( backbone_topology );
             backbone_topology = NULL;
-        } else {
+        }
+        else
+        {
             this->removeParameter( backbone_topologies );
             backbone_topologies = NULL;
         }
         
         // set new parameter
-        if (backbone_one != NULL) {
+        if (backbone_one != NULL)
+        {
             backbone_topology = backbone_one;
             num_backbones = 1;
             use_multiple_backbones = false;
             this->addParameter( backbone_one );
-        } else {
+        }
+        else
+        {
             backbone_topologies = backbone_many;
             num_backbones = backbone_topologies->getValue().size();
             use_multiple_backbones = true;
             this->addParameter( backbone_many );
         }
         
-        for (size_t i = 0; i < num_backbones; i++) {
+        for (size_t i = 0; i < num_backbones; i++)
+        {
             std::vector<RbBitSet>v( base_distribution->getValue().getNumberOfInteriorNodes(), RbBitSet() );
             active_backbone_clades.push_back(v);
         }

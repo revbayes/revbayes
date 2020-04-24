@@ -24,7 +24,7 @@ namespace RevBayesCore {
     class TopologyConstrainedTreeDistribution : public TypedDistribution<Tree>, TreeChangeEventListener {
         
     public:
-        TopologyConstrainedTreeDistribution(TypedDistribution<Tree>* base_dist, const std::vector<Clade> &c);
+        TopologyConstrainedTreeDistribution(TypedDistribution<Tree>* base_dist, const std::vector<Clade> &c, Tree *t);
         TopologyConstrainedTreeDistribution(const TopologyConstrainedTreeDistribution &d);
         
         virtual ~TopologyConstrainedTreeDistribution(void);
@@ -82,6 +82,7 @@ namespace RevBayesCore {
         std::vector<RbBitSet>                               stored_clades;
         size_t                                              num_backbones;
         bool                                                use_multiple_backbones;
+        Tree*                                               starting_tree;
 
     };
     
