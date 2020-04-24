@@ -45,7 +45,7 @@ TajimasPiFunction* TajimasPiFunction::clone( void ) const
 
 void TajimasPiFunction::update( void )
 {
-    double pd  = alignment->getValue().getAveragePaiwiseSequenceDifference( exclude_ambiguous_sites );
+    double pd  = alignment->getValue().getAveragePairwiseSequenceDifference( exclude_ambiguous_sites );
     *value = pd;
     
     if ( per_site == true )

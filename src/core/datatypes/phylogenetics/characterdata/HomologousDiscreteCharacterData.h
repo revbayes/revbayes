@@ -63,10 +63,10 @@ namespace RevBayesCore {
         size_t                                              getNumberOfInvariantSites(bool excl) const;                                 //!< Number of invariant sites
         size_t                                              getNumberOfSegregatingSites(bool excl) const;                               //!< Compute the number of segregating sites
         size_t                                              getNumberOfStates(void) const;                                              //!< Get the number of states for the characters in this matrix
-        double                                              getAveragePaiwiseSequenceDifference(bool excl) const;                       //!< Get the average pairwise sequence distance.
-        size_t                                              getMaxPaiwiseSequenceDifference(bool excl) const;                           //!< Get the average pairwise sequence distance.
-        size_t                                              getMinPaiwiseSequenceDifference(bool excl) const;                           //!< Get the average pairwise sequence distance.
-        DistanceMatrix                                      getPaiwiseSequenceDifference(bool excl) const;                              //!< Get the average pairwise sequence distance.
+        double                                              getAveragePairwiseSequenceDifference(bool excl) const;                       //!< Get the average pairwise sequence distance.
+        size_t                                              getMaxPairwiseSequenceDifference(bool excl) const;                           //!< Get the average pairwise sequence distance.
+        size_t                                              getMinPairwiseSequenceDifference(bool excl) const;                           //!< Get the average pairwise sequence distance.
+        DistanceMatrix                                      getPairwiseSequenceDifference(bool excl) const;                              //!< Get the average pairwise sequence distance.
         DiscreteTaxonData<charType>&                        getTaxonData(size_t tn);                                                    //!< Return a reference to a sequence in the character matrix
         const DiscreteTaxonData<charType>&                  getTaxonData(size_t tn) const;                                              //!< Return a reference to a sequence in the character matrix
         DiscreteTaxonData<charType>&                        getTaxonData(const std::string &tn);                                        //!< Return a reference to a sequence in the character matrix
@@ -1163,7 +1163,7 @@ size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getNumberOfSegre
  * \return    The average pairwise distance.
  */
 template<class charType>
-double RevBayesCore::HomologousDiscreteCharacterData<charType>::getAveragePaiwiseSequenceDifference(bool exclude_missing) const
+double RevBayesCore::HomologousDiscreteCharacterData<charType>::getAveragePairwiseSequenceDifference(bool exclude_missing) const
 {
     double pairwiseDistance = 0.0;
     size_t nt = this->getNumberOfIncludedTaxa();
@@ -1212,7 +1212,7 @@ double RevBayesCore::HomologousDiscreteCharacterData<charType>::getAveragePaiwis
  * \return    The max pairwise distance.
  */
 template<class charType>
-size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getMaxPaiwiseSequenceDifference( bool exclude_missing ) const
+size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getMaxPairwiseSequenceDifference( bool exclude_missing ) const
 {
     size_t max_pd = 0.0;
     size_t nt = this->getNumberOfIncludedTaxa();
@@ -1265,7 +1265,7 @@ size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getMaxPaiwiseSeq
  * \return    The min pairwise distance.
  */
 template<class charType>
-size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getMinPaiwiseSequenceDifference( bool include_missing ) const
+size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getMinPairwiseSequenceDifference( bool include_missing ) const
 {
     size_t min_pd = RbConstants::Size_t::max;
     size_t nt = this->getNumberOfIncludedTaxa();
@@ -1317,7 +1317,7 @@ size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getMinPaiwiseSeq
  * \return    The min pairwise distance.
  */
 template<class charType>
-RevBayesCore::DistanceMatrix RevBayesCore::HomologousDiscreteCharacterData<charType>::getPaiwiseSequenceDifference( bool include_missing ) const
+RevBayesCore::DistanceMatrix RevBayesCore::HomologousDiscreteCharacterData<charType>::getPairwiseSequenceDifference( bool include_missing ) const
 {
     size_t nt = this->getNumberOfIncludedTaxa();
     MatrixReal distances = MatrixReal(nt);

@@ -273,7 +273,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         const RevObject& argument = args[0].getVariable()->getRevObject();
         bool excl = static_cast<const RlBoolean&>( argument ).getValue();
 
-        size_t max_pd = this->dag_node->getValue().getMaxPaiwiseSequenceDifference( excl );
+        size_t max_pd = this->dag_node->getValue().getMaxPairwiseSequenceDifference( excl );
 
         return new RevVariable( new Natural(max_pd) );
     }
@@ -331,7 +331,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         const RevObject& argument = args[0].getVariable()->getRevObject();
         bool excl = static_cast<const RlBoolean&>( argument ).getValue();
 
-        size_t min_pd = this->dag_node->getValue().getMinPaiwiseSequenceDifference( excl );
+        size_t min_pd = this->dag_node->getValue().getMinPairwiseSequenceDifference( excl );
 
         return new RevVariable( new Natural(min_pd) );
     }
@@ -342,7 +342,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         const RevObject& argument = args[0].getVariable()->getRevObject();
         bool excl = static_cast<const RlBoolean&>( argument ).getValue();
 
-        RevBayesCore::DistanceMatrix pd = this->dag_node->getValue().getPaiwiseSequenceDifference( excl );
+        RevBayesCore::DistanceMatrix pd = this->dag_node->getValue().getPairwiseSequenceDifference( excl );
 
         return new RevVariable( new DistanceMatrix(pd) );
     }
