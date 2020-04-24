@@ -113,6 +113,7 @@
 #include "Func_treePairwiseDistances.h"
 #include "Func_treePairwiseNodalDistances.h"
 #include "Func_treeScale.h"
+#include "Func_UPGMA.h"
 
 #include "Func_FlowT2Populations.h"
 
@@ -376,6 +377,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_treePairwiseNodalDistances()                      );
         addFunction( new Func_treeAssembly()                                    );
         addFunction( new Func_treeScale()                                       );
+        addFunction( new Func_UPGMA()                                           );
 
         /* Population genetics functions (in folder "functions/popgen") */
         addFunction( new Func_PattersonsD()      );
