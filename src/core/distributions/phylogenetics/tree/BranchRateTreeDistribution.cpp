@@ -249,7 +249,8 @@ double BranchRateTreeDistribution::computeLnProbability( void )
     const Tree &time_tree_copy = time_tree->getValue();
     if ( touched_time_tree == true )
     {
-//        delete time_tree_unrooted;
+        delete time_tree_unrooted;
+        
         time_tree_unrooted = time_tree_copy.clone();
         time_tree_unrooted->unroot();
     }
@@ -478,6 +479,7 @@ void BranchRateTreeDistribution::restoreSpecialization(const DagNode *restorer)
     
     if ( was_touched_time_tree == true )
     {
+        delete time_tree_unrooted;
         was_touched_time_tree       = false;
         touched_time_tree           = false;
         newick_time_tree            = stored_newick_time_tree;
