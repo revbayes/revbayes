@@ -302,7 +302,7 @@ void TopologyConstrainedTreeDistribution::fireTreeChangeEvent(const TopologyNode
  * Touch the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void TopologyConstrainedTreeDistribution::getAffected(RbOrderedSet<RevBayesCore::DagNode *> &affected, RevBayesCore::DagNode *affecter)
+void TopologyConstrainedTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
 {
     
     // delegate to the base distribution

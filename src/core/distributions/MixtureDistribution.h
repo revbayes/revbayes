@@ -43,11 +43,11 @@ namespace RevBayesCore {
         void                                                setValue(mixtureType *v, bool f=false);
         
         // special handling of state changes
-        void                                                getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter);                          //!< get affected nodes
+        void                                                getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                          //!< get affected nodes
         void                                                keepSpecialization(const DagNode* affecter);
         void                                                restoreSpecialization(const DagNode *restorer);
         void                                                touchSpecialization(const DagNode *toucher, bool touchAll);
-        
+
     protected:
         // Parameter management functions
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                        //!< Swap a parameter
@@ -58,7 +58,7 @@ namespace RevBayesCore {
         const mixtureType&                                  simulate();
         
         // private members
-        const TypedDagNode< RbVector<mixtureType> >*        parameterValues;
+        const TypedDagNode< RbVector<mixtureType> >*        parameter_values;
         const TypedDagNode< Simplex >*                      probabilities;
         
         size_t                                              index;
@@ -75,14 +75,14 @@ namespace RevBayesCore {
 
 template <class mixtureType>
 RevBayesCore::MixtureDistribution<mixtureType>::MixtureDistribution(const TypedDagNode< RbVector<mixtureType> > *v, const TypedDagNode< Simplex > *p) : TypedDistribution<mixtureType>( Cloner<mixtureType, IsDerivedFrom<mixtureType, Cloneable>::Is >::createClone( v->getValue()[0] ) ),
-    parameterValues( v ),
+    parameter_values( v ),
     probabilities( p ),
     index( 0 )
 {
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
     // this will also ensure that the parameters are not getting deleted before we do
-    this->addParameter( parameterValues );
+    this->addParameter( parameter_values );
     this->addParameter( probabilities );
     
     *this->value = simulate();
@@ -124,10 +124,10 @@ void RevBayesCore::MixtureDistribution<mixtureType>::executeMethod(const std::st
 
 
 template <class mixtureType>
-void RevBayesCore::MixtureDistribution<mixtureType>::getAffected(RbOrderedSet<DagNode *> &affected, DagNode* affecter)
+void RevBayesCore::MixtureDistribution<mixtureType>::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
 {
     // only delegate when the toucher was our parameters
-    if ( affecter == parameterValues && this->dag_node != NULL )
+    if ( affecter == parameter_values && this->dag_node != NULL )
     {
         this->dag_node->initiateGetAffectedNodes( affected );
     }
@@ -162,14 +162,14 @@ size_t RevBayesCore::MixtureDistribution<mixtureType>::getNumberOfMixtureElement
 template <class mixtureType>
 const RevBayesCore::RbVector<mixtureType>& RevBayesCore::MixtureDistribution<mixtureType>::getParameterValues( void ) const
 {
-    return parameterValues->getValue();
+    return parameter_values->getValue();
 }
 
 template <class mixtureType>
 void RevBayesCore::MixtureDistribution<mixtureType>::keepSpecialization( const DagNode* affecter )
 {
     // only do this when the toucher was our parameters
-    if ( affecter == parameterValues && this->dag_node != NULL )
+    if ( affecter == parameter_values && this->dag_node != NULL )
     {
         this->dag_node->keepAffected();
     }
@@ -192,7 +192,7 @@ const mixtureType& RevBayesCore::MixtureDistribution<mixtureType>::simulate()
         ++index;
     }
     
-    return parameterValues->getValue()[index];
+    return parameter_values->getValue()[index];
 }
 
 
@@ -210,7 +210,7 @@ void RevBayesCore::MixtureDistribution<mixtureType>::setCurrentIndex(size_t i)
 {
 
     index = i;
-    const mixtureType &tmp = parameterValues->getValue()[i];
+    const mixtureType &tmp = parameter_values->getValue()[i];
     
     Assign<mixtureType, IsDerivedFrom<mixtureType, Assignable>::Is >::doAssign( (*this->value), tmp );
 }
@@ -220,9 +220,9 @@ void RevBayesCore::MixtureDistribution<mixtureType>::setCurrentIndex(size_t i)
 template <class mixtureType>
 void RevBayesCore::MixtureDistribution<mixtureType>::swapParameterInternal( const DagNode *oldP, const DagNode *newP )
 {
-    if (oldP == parameterValues)
+    if (oldP == parameter_values)
     {
-        parameterValues = static_cast<const TypedDagNode< RbVector<mixtureType> >* >( newP );
+        parameter_values = static_cast<const TypedDagNode< RbVector<mixtureType> >* >( newP );
     }
     else if (oldP == probabilities)
     {
@@ -236,9 +236,9 @@ void RevBayesCore::MixtureDistribution<mixtureType>::restoreSpecialization( cons
 {
     
     // only do this when the toucher was our parameters
-    if ( restorer == parameterValues )
+    if ( restorer == parameter_values )
     {
-        const mixtureType &tmp = parameterValues->getValue()[index];
+        const mixtureType &tmp = parameter_values->getValue()[index];
         Assign<mixtureType, IsDerivedFrom<mixtureType, Assignable>::Is >::doAssign( (*this->value), tmp );
 
         if ( this->dag_node != NULL )
@@ -255,7 +255,7 @@ template <class mixtureType>
 void RevBayesCore::MixtureDistribution<mixtureType>::setValue(mixtureType *v, bool force)
 {
     
-    const RbVector<mixtureType> &vals = parameterValues->getValue();
+    const RbVector<mixtureType> &vals = parameter_values->getValue();
     // we need to catch the value and increment the index
     for (index = 0; index < vals.size(); ++index)
     {
@@ -274,9 +274,9 @@ template <class mixtureType>
 void RevBayesCore::MixtureDistribution<mixtureType>::touchSpecialization( const DagNode *toucher, bool touchAll )
 {
     // only do this when the toucher was our parameters
-    if ( toucher == parameterValues )
+    if ( toucher == parameter_values )
     {
-        const mixtureType &tmp = parameterValues->getValue()[index];
+        const mixtureType &tmp = parameter_values->getValue()[index];
         Assign<mixtureType, IsDerivedFrom<mixtureType, Assignable>::Is >::doAssign( (*this->value), tmp );
         
         if ( this->dag_node != NULL )

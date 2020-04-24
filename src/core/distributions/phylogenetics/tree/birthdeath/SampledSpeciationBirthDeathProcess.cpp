@@ -442,7 +442,7 @@ void SampledSpeciationBirthDeathProcess::executeMethod(const std::string &n, con
     
 }
 
-void SampledSpeciationBirthDeathProcess::getAffected(RbOrderedSet<DagNode *> &affected, RevBayesCore::DagNode *affecter)
+void SampledSpeciationBirthDeathProcess::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
 {
     
     if ( affecter == root_age)

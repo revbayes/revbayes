@@ -20,7 +20,7 @@ template <class valueType> class TypedDagNode;
     public:
         AbsoluteValueFunction(const TypedDagNode<double> *a);
         
-        AbsoluteValueFunction*              clone(void) const;                                                  //!< Create a clon.
+        AbsoluteValueFunction*              clone(void) const;                                                  //!< Create a clone
         void                                update(void);                                                       //!< Recompute the value
         
     protected:

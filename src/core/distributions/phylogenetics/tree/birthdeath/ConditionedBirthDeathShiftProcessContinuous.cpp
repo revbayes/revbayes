@@ -896,7 +896,7 @@ void ConditionedBirthDeathShiftProcessContinuous::simulateTree( void )
 
 }
 
-void ConditionedBirthDeathShiftProcessContinuous::getAffected(RbOrderedSet<DagNode *> &affected, RevBayesCore::DagNode *affecter)
+void ConditionedBirthDeathShiftProcessContinuous::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
 {
     
     if ( affecter == root_age && this->dag_node != NULL )

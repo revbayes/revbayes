@@ -10,6 +10,10 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
+/** Log-normal Constructor
+* @param m mean value
+* @param s standard deviation
+*/
 LognormalDistribution::LognormalDistribution(const TypedDagNode<double> *m, const TypedDagNode<double> *s) : ContinuousDistribution( new double( 1.0 ) ),
     mean( m ), 
     sd( s )

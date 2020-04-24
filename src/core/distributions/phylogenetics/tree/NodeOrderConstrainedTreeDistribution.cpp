@@ -157,7 +157,7 @@ double NodeOrderConstrainedTreeDistribution::computeLnProbability( void )
  * Touch the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void NodeOrderConstrainedTreeDistribution::getAffected(RbOrderedSet<RevBayesCore::DagNode *> &affected, RevBayesCore::DagNode *affecter)
+void NodeOrderConstrainedTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
 {
 
     // delegate to the base distribution

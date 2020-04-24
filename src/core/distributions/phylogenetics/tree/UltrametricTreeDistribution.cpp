@@ -674,7 +674,7 @@ void UltrametricTreeDistribution::simulateTree( void )
 
 }
 
-void UltrametricTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, RevBayesCore::DagNode *affecter)
+void UltrametricTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
 {
 
     if ( affecter == root_age)

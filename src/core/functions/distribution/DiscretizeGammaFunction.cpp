@@ -7,6 +7,13 @@
 
 namespace RevBayesCore { class DagNode; }
 
+/**
+ * Wrapper for dealing with DiscretizeGammaFunction used the TypedDagNode classes of type doubles
+ * @param s double value for the shape parameter
+ * @param r double value for the rate parameter
+ * @param nc number of categories to use in the approximation
+ * @param med a bool of whether to use the median values to represent each category. If false then the mean values are used
+ */
 
 
 RevBayesCore::DiscretizeGammaFunction::DiscretizeGammaFunction(const TypedDagNode<double> *s, const TypedDagNode<double> *r, const TypedDagNode<long> *nc, bool med) : TypedFunction< RbVector<double> >( new RbVector<double>(nc->getValue(), 1.0) ),

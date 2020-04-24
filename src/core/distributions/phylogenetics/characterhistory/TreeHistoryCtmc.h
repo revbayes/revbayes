@@ -457,14 +457,14 @@ void RevBayesCore::TreeHistoryCtmc<charType>::flagNodeDirty( const RevBayesCore:
 }
 
 template<class charType>
-double RevBayesCore::TreeHistoryCtmc<charType>::getBranchRate(size_t nodeIdx) const
+double RevBayesCore::TreeHistoryCtmc<charType>::getBranchRate(size_t nide_idx) const
 {
     
     // get the clock rate for the branch
     double rate;
     if ( this->branchHeterogeneousClockRates == true )
     {
-        rate = this->heterogeneousClockRates->getValue()[nodeIdx];
+        rate = this->heterogeneousClockRates->getValue()[nide_idx];
     }
     else
     {

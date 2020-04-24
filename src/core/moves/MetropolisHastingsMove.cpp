@@ -261,6 +261,76 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     const RbOrderedSet<DagNode*> &affected_nodes = getAffectedNodes();
     const std::vector<DagNode*> nodes = getDagNodes();
     
+    
+    
+    // --------------------------
+    //
+    //     DEBUG (BEGIN)
+    //
+    // --------------------------
+#ifdef DEBUG_MCMC
+    double ln_posterior_before_move = 0.0;
+    for (size_t i = 0; i < nodes.size(); ++i)
+    {
+        // get the pointer to the current node
+        DagNode* the_node = nodes[i];
+        ln_posterior_before_move += the_node->getLnProbability();
+    }
+    for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
+    {
+        DagNode *the_node = *it;
+        ln_posterior_before_move += the_node->getLnProbability();
+    }
+    for (size_t i = 0; i < nodes.size(); ++i)
+    {
+        // get the pointer to the current node
+        DagNode* the_node = nodes[i];
+        the_node->touch();
+    }
+    for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
+    {
+        DagNode *the_node = *it;
+        the_node->touch();
+    }
+    double ln_posterior_before_move_after_touch = 0.0;
+    for (size_t i = 0; i < nodes.size(); ++i)
+    {
+        // get the pointer to the current node
+        DagNode* the_node = nodes[i];
+        ln_posterior_before_move_after_touch += the_node->getLnProbability();
+    }
+    for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
+    {
+        DagNode *the_node = *it;
+        ln_posterior_before_move_after_touch += the_node->getLnProbability();
+    }
+    for (size_t i = 0; i < nodes.size(); ++i)
+    {
+        // get the pointer to the current node
+        DagNode* the_node = nodes[i];
+        the_node->keep();
+    }
+    for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
+    {
+        DagNode *the_node = *it;
+        the_node->keep();
+    }
+    if ( fabs(ln_posterior_before_move - ln_posterior_before_move_after_touch) > 1E-6 )
+    {
+        throw RbException("Issue in '" + proposal->getProposalName() + "' on '" + nodes[0]->getName() + "' before move because posterior of " + ln_posterior_before_move + " and " + ln_posterior_before_move_after_touch + ".");
+    }
+#endif
+    // --------------------------
+    //
+    //     DEBUG (END)
+    //
+    // --------------------------
+    
+    
+    
+    
+    
+    
     // Propose a new value
     proposal->prepareProposal();
     double ln_hastings_ratio = RbConstants::Double::neginf;
@@ -416,7 +486,8 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         if (ln_acceptance_ratio >= 0.0)
         {
 
-            
+            if ( ln_posterior_ratio < -1000 ) throw RbException("Accepted move '" + proposal->getProposalName() + "' with with posterior ratio of " + ln_posterior_ratio + " and Hastings ratio of " + ln_hastings_ratio + ".");
+
             num_accepted_total++;
             num_accepted_current_period++;
         
@@ -452,6 +523,8 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
             if (u < r)
             {
                 
+                if ( ln_posterior_ratio < -1000 ) throw RbException("Accepted move '" + proposal->getProposalName() + "' with with posterior ratio of " + ln_posterior_ratio + " and Hastings ratio of " + ln_hastings_ratio + ".");
+
                 num_accepted_total++;
                 num_accepted_current_period++;
             
@@ -484,6 +557,72 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         }
 
     }
+    
+    
+    
+    // --------------------------
+    //
+    //     DEBUG (BEGIN)
+    //
+    // --------------------------
+#ifdef DEBUG_MCMC
+    double ln_posterior_after_move = 0.0;
+    for (size_t i = 0; i < nodes.size(); ++i)
+    {
+        // get the pointer to the current node
+        DagNode* the_node = nodes[i];
+        ln_posterior_after_move += the_node->getLnProbability();
+    }
+    for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
+    {
+        DagNode *the_node = *it;
+        ln_posterior_after_move += the_node->getLnProbability();
+    }
+    for (size_t i = 0; i < nodes.size(); ++i)
+    {
+        // get the pointer to the current node
+        DagNode* the_node = nodes[i];
+        the_node->touch();
+    }
+    for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
+    {
+        DagNode *the_node = *it;
+        the_node->touch();
+    }
+    double ln_posterior_after_move_after_touch = 0.0;
+    for (size_t i = 0; i < nodes.size(); ++i)
+    {
+        // get the pointer to the current node
+        DagNode* the_node = nodes[i];
+        ln_posterior_after_move_after_touch += the_node->getLnProbability();
+    }
+    for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
+    {
+        DagNode *the_node = *it;
+        ln_posterior_after_move_after_touch += the_node->getLnProbability();
+    }
+    for (size_t i = 0; i < nodes.size(); ++i)
+    {
+        // get the pointer to the current node
+        DagNode* the_node = nodes[i];
+        the_node->keep();
+    }
+    for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
+    {
+        DagNode *the_node = *it;
+        the_node->keep();
+    }
+    if ( fabs(ln_posterior_after_move - ln_posterior_after_move_after_touch) > 1E-6 )
+    {
+        throw RbException("Issue in '" + proposal->getProposalName() + "' on '" + nodes[0]->getName() + "' after move because posterior of " + ln_posterior_after_move + " and " + ln_posterior_after_move_after_touch + ". The move was " + (rejected ? "rejected." : "accepted.") );
+    }
+#endif
+    // --------------------------
+    //
+    //     DEBUG (END)
+    //
+    // --------------------------
+    
 
 }
 

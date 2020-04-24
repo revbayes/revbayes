@@ -16,19 +16,6 @@ namespace RevBayesCore {
 class DagNode;
 
 
-///*
-// * This struct represents a tree bipartition (split) that can be rooted or unrooted
-// */
-//struct Split : public RbBitSet
-//{
-//    Split( RbBitSet b ) : RbBitSet( b ) {}
-//
-//    inline bool operator()(const Sample<Split>& s)
-//    {
-//        return (*this) == s.first;
-//    }
-//};
-
     class BranchRateTreeDistribution : public TypedDistribution<Tree>, public TreeChangeEventListener {
 
     public:
@@ -56,18 +43,32 @@ class DagNode;
         RbBitSet                                            collectSplits(const TopologyNode& n, RbBitSet& in, std::vector<RbBitSet>& s) const;
         void                                                simulateTree(void);
         void                                                simulateClade(std::vector<TopologyNode*> &n);                           //!< Simulate n speciation events.
-
+        virtual void                                        keepSpecialization(const DagNode* affecter);
+        virtual void                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
+        
         // members
         TypedDistribution<double>*                          branch_rate_prior;
         const TypedDagNode<Tree>*                           time_tree;
         const TypedDagNode<double>*                         root_branch_fraction;
         size_t                                              num_taxa;
-//        std::vector<Taxon>                                  taxa;
-//        double                                              log_tree_topology_prob;                                                 //!< the log-topology probability.
-//        Clade                                               outgroup;
-//        bool                                                outgroup_provided;
-//        bool                                                rooted;
-//        bool                                                dirty_topology;
+        
+        // variables catching some of the probability computation
+        bool                                                touched_time_tree;
+        bool                                                touched_branch_length_tree;
+        bool                                                was_touched_time_tree;
+        bool                                                was_touched_branch_length_tree;
+        std::string                                         newick_time_tree;
+        std::string                                         newick_branch_length_tree;
+        Tree*                                               time_tree_unrooted;
+        std::vector<RbBitSet>                               splits;
+        std::map<RbBitSet, double>                          split_to_branch_lengths;
+        std::string                                         stored_newick_time_tree;
+        std::string                                         stored_newick_branch_length_tree;
+        Tree*                                               stored_time_tree_unrooted;
+        std::vector<RbBitSet>                               stored_splits;
+        std::map<RbBitSet, double>                          stored_split_to_branch_lengths;
+
 
     };
 

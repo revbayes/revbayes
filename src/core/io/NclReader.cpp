@@ -458,20 +458,18 @@ ContinuousCharacterData* NclReader::createContinuousMatrix(NxsCharactersBlock* c
         // add the real-valued observation
         for (NxsUnsignedSet::const_iterator cit = charset.begin(); cit != charset.end();cit++)
         {
-            double contObs ;
-            bool isResolved = true;
-            const std::vector<double>& x = charblock->GetContinuousValues( origTaxIndex, *cit, std::string("AVERAGE") );
-            if ( x.size() > 0 )
-            {
-                contObs = x[0];
-                isResolved = true;
-            }
-            else
-            {
-                contObs = RbConstants::Double::nan;
-                isResolved = false;
-            }
-            dataVec.addCharacter( contObs, isResolved );
+            double contObs = RbConstants::Double::nan;
+            bool is_resolved = false;
+//            if ( charblock->IsMissingState(origTaxIndex, *cit) == false )
+//            {
+                const std::vector<double>& x = charblock->GetContinuousValues( origTaxIndex, *cit, "AVERAGE" );
+                if ( x.size() > 0 )
+                {
+                    contObs = x[0];
+                    is_resolved = true;
+                }
+//            }
+            dataVec.addCharacter( contObs, is_resolved );
         }
         
         // add sequence to character matrix

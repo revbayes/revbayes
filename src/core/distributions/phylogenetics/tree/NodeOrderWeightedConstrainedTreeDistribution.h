@@ -40,10 +40,6 @@ namespace RevBayesCore {
     protected:
         
         //        // virtual methods that may be overwritten, but then the derived class should call this methods
-        //        virtual void                                        getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter);                                      //!< get affected nodes
-        //        virtual void                                        keepSpecialization(const DagNode* affecter);
-        //        virtual void                                        restoreSpecialization(const DagNode *restorer);
-        //        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
         
         // Parameter management functions. You need to override both if you have additional parameters
         virtual void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                    //!< Swap a parameter

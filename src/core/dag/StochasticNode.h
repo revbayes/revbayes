@@ -259,6 +259,7 @@ RevBayesCore::StochasticNode<valueType>* RevBayesCore::StochasticNode<valueType>
 template<class valueType>
 double RevBayesCore::StochasticNode<valueType>::computeRecursiveIntegratedLnProbability(RbOrderedSet<DagNode *>& integrated_parents, size_t index)
 {
+
     double ln_prob = 0;
     
     if ( integrated_parents.size() <= index )
@@ -362,7 +363,7 @@ template<class valueType>
 void RevBayesCore::StochasticNode<valueType>::getIntegratedParents(RbOrderedSet<DagNode *>& integrated_parents) const
 {
     
-    std::vector<const DagNode*> parents = this->getParents();                                                                     //!< Get the set of parents (empty set here)
+    std::vector<const DagNode*> parents = this->getParents();
 
     // delegate up the DAG
     for (size_t i=0; i<parents.size(); ++i)
@@ -382,15 +383,12 @@ void RevBayesCore::StochasticNode<valueType>::getIntegratedParents(RbOrderedSet<
 template<class valueType>
 std::vector<double> RevBayesCore::StochasticNode<valueType>::getMixtureLikelihoods( bool use_log ) const
 {
+      
     std::vector<double> ln_probs;
     
-    bool tmp = isIntegratedOut();
-    if ( tmp == false )
-    {
-        std::cerr << "This should not happen!!!" << std::endl;
-    }
     if ( isIntegratedOut() == false )
     {
+        // TODO: This is only for safety. We should actually never get in here!
         ln_probs.push_back( distribution->computeLnProbability() );
     }
     else
@@ -460,7 +458,6 @@ double RevBayesCore::StochasticNode<valueType>::getLnProbability( void )
             RbOrderedSet<DagNode *> integrated_parents;
             getIntegratedParents(integrated_parents);
             lnProb = computeRecursiveIntegratedLnProbability(integrated_parents,0);
-//            lnProb = distribution->computeLnProbability();
         }
         else
         {
@@ -567,7 +564,6 @@ void RevBayesCore::StochasticNode<valueType>::keepMe( const DagNode* affecter )
                 RbOrderedSet<DagNode *> integrated_parents;
                 getIntegratedParents(integrated_parents);
                 lnProb = computeRecursiveIntegratedLnProbability(integrated_parents,0);
-//            lnProb = distribution->computeLnProbability();
             }
             else
             {
@@ -737,7 +733,6 @@ void RevBayesCore::StochasticNode<valueType>::setIntegratedOut( bool tf )
 template <class valueType>
 void RevBayesCore::StochasticNode<valueType>::setIntegrationIndex( size_t i )
 {
-    
     valueType *new_val = Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( distribution->getParameterValues()[i] );
     this->setValue( new_val );
 

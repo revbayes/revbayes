@@ -355,7 +355,7 @@ void UniformSerialSampledTimeTreeDistribution::simulateTree( void )
 
 }
 
-void UniformSerialSampledTimeTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, RevBayesCore::DagNode *affecter)
+void UniformSerialSampledTimeTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
 {
     
     if ( affecter == start_age)

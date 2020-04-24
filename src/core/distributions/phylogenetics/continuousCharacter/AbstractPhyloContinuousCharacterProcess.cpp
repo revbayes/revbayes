@@ -60,14 +60,14 @@ AbstractPhyloContinuousCharacterProcess::~AbstractPhyloContinuousCharacterProces
 }
 
 
-double AbstractPhyloContinuousCharacterProcess::computeBranchTime( size_t nodeIdx, double brlen )
+double AbstractPhyloContinuousCharacterProcess::computeBranchTime( size_t nide_idx, double brlen )
 {
     
     // get the clock rate for the branch
     double branch_time;
     if ( this->heterogeneous_clock_rates != NULL )
     {
-        double sigma = this->heterogeneous_clock_rates->getValue()[nodeIdx];
+        double sigma = this->heterogeneous_clock_rates->getValue()[nide_idx];
         branch_time = sigma * sigma * brlen;
     }
     else

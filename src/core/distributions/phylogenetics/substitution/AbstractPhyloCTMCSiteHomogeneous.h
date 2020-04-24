@@ -3859,7 +3859,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
         const std::set<size_t> &indices = heterogeneous_clock_rates->getTouchedElementIndices();
 
         // maybe all of them have been touched or the flags haven't been set properly
-        if ( indices.size() == 0 )
+        if ( indices.size() == 0 || indices.size() == this->tau->getValue().getNodes().size() )
         {
             // just flag everyting for recomputation
             touch_all = true;

@@ -116,7 +116,12 @@ double BirthDeathProcess::computeLnProbabilityTimes( void ) const
         double m = round(num_taxa / rho->getValue());
         int initial_taxa = 2;
 //        if ( MRCA == TRUE ) k <- 2
+<<<<<<< HEAD
         ln_prob_times += (m-num_taxa) * log(F_t); // + log(RbMath::choose(m-initial_taxa,num_taxa-initial_taxa));
+=======
+//        ln_prob_times += (m-num_taxa) * log(F_t); // + log(RbMath::choose(m-initial_taxa,num_taxa-initial_taxa));
+        ln_prob_times += (m-num_taxa) * log(F_t) + RbMath::lnChoose(m-initial_taxa,num_taxa-initial_taxa);
+>>>>>>> 96029e59118e7a7232e3c5ee042c90864f8725bc
     }
     
     int total_species = int(num_taxa);
@@ -128,7 +133,11 @@ double BirthDeathProcess::computeLnProbabilityTimes( void ) const
     {
         // We use equation (5) of Hoehna et al.
         // "Inferring Speciation and Extinction Rates under Different Sampling Schemes"
+<<<<<<< HEAD
         double last_event_time = root_age - incomplete_clade_ages[i];
+=======
+        double last_event = presentTime - incomplete_clade_ages[i];
+>>>>>>> 96029e59118e7a7232e3c5ee042c90864f8725bc
 //        double last_event = incomplete_clade_ages[i];
         
         double p_0_T = 1.0 - pSurvival(0,present_time,1.0)               * exp( rateIntegral(0,present_time) );
@@ -159,10 +168,15 @@ double BirthDeathProcess::computeLnProbabilityTimes( void ) const
 //        ln_prob_times += RbMath::lnFactorial(total_species-initial_taxa) - RbMath::lnFactorial( int(num_taxa-initial_taxa) );
         
         double p_0_T = 1.0 - pSurvival(0,present_time,1.0) * exp( rateIntegral(0,present_time) );
+<<<<<<< HEAD
         ln_prob_times += log( p_0_T )*total_species;
         ln_prob_times -= log( p_0_T )*num_taxa;
 //        ln_prob_times -= log( p_0_T )*total_species;
 //        ln_prob_times += log( p_0_T )*num_taxa;
+=======
+//        ln_prob_times += log( p_0_T )*total_species;
+//        ln_prob_times -= log( p_0_T )*num_taxa;
+>>>>>>> 96029e59118e7a7232e3c5ee042c90864f8725bc
 
         
 //        double p_s = pSurvival(start, end, r);
@@ -414,6 +428,10 @@ void BirthDeathProcess::restoreSpecialization(const DagNode *affecter)
         for (size_t i=0; i<incomplete_clades.size(); ++i)
         {
             incomplete_clade_ages[i] = this->value->getTmrca( incomplete_clades[i] );
+            if ( incomplete_clade_ages[i] == -1 )
+            {
+                throw RbException("Could not find MRCA of clade " + incomplete_clades[i].toString() + " in tree.");
+            }
         }
         
     }
@@ -461,6 +479,10 @@ void BirthDeathProcess::touchSpecialization(const DagNode *affecter, bool touchA
         for (size_t i=0; i<incomplete_clades.size(); ++i)
         {
             incomplete_clade_ages[i] = this->value->getTmrca( incomplete_clades[i] );
+            if ( incomplete_clade_ages[i] == -1 )
+            {
+                throw RbException("Could not find MRCA of clade " + incomplete_clades[i].toString() + " in tree.");
+            }
         }
 
     }

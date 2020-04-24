@@ -1,7 +1,5 @@
 #include "LnFunction.h"
-
 #include <cmath>
-
 #include "Cloneable.h"
 #include "TypedDagNode.h"
 

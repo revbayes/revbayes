@@ -12,12 +12,21 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
+/*
+ * Default Constructor for the DiscretizeDistributionFunction
+ *
+ * @param d a type ContinuousDistribution for the distribution to be discretized
+ * @param nc A type long value for the number of categories
+ *
+ */
+
+
 DiscretizeDistributionFunction::DiscretizeDistributionFunction(ContinuousDistribution *d, const TypedDagNode<long> *nc) : TypedFunction< RbVector<double> >( new RbVector<double>(nc->getValue(), 1.0) ),
     dist( d ),
-    numCats(nc)
+    num_cats(nc)
 {
     
-    addParameter( numCats );
+    addParameter( num_cats );
 
     const std::vector<const DagNode*>& params = dist->getParameters();
     for (std::vector<const DagNode* >::const_iterator it = params.begin(); it != params.end(); ++it)
@@ -30,7 +39,7 @@ DiscretizeDistributionFunction::DiscretizeDistributionFunction(ContinuousDistrib
 
 DiscretizeDistributionFunction::DiscretizeDistributionFunction(const DiscretizeDistributionFunction &df) : TypedFunction< RbVector<double> >( df ),
     dist( df.dist->clone() ),
-    numCats(df.numCats)
+    num_cats(df.num_cats)
 {
     
 }
@@ -54,8 +63,8 @@ DiscretizeDistributionFunction& DiscretizeDistributionFunction::operator=(const 
         
         delete dist;
         
-        numCats = df.numCats;
-        dist = df.dist->clone();
+        num_cats    = df.num_cats;
+        dist        = df.dist->clone();
 
     }
     
@@ -75,9 +84,9 @@ DiscretizeDistributionFunction* DiscretizeDistributionFunction::clone( void ) co
 void DiscretizeDistributionFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     
-    if (oldP == numCats)
+    if (oldP == num_cats)
     {
-        numCats = static_cast<const TypedDagNode<long>* >( newP );
+        num_cats = static_cast<const TypedDagNode<long>* >( newP );
     }
     else
     {
@@ -89,11 +98,11 @@ void DiscretizeDistributionFunction::swapParameterInternal(const DagNode *oldP, 
 void RevBayesCore::DiscretizeDistributionFunction::update( void )
 {
     
-    int nCats = (int)numCats->getValue();
+    int n_cats = (int)num_cats->getValue();
     
-    for (int i=0; i<nCats; ++i)
+    for (int i=0; i<n_cats; ++i)
     {
-        double p = (i+0.5)/nCats;
+        double p = (i+0.5)/n_cats;
         (*value)[i] = dist->quantile( p );
     }
     

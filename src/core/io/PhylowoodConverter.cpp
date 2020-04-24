@@ -245,7 +245,7 @@ void PhylowoodConverter::makeMarginalAreaProbs(void) {
             else if (bgtype == "Range")
             {
                 // get node, state, and bits for i,j cell in tab-delimited file
-                size_t nodeIdx = idx[j][1];
+                size_t nide_idx = idx[j][1];
                 unsigned stateIdx = 0;
                 if (chartype == "NaturalNumbers")
                     stateIdx = std::atoi(stateChars[i][j].c_str());
@@ -258,14 +258,14 @@ void PhylowoodConverter::makeMarginalAreaProbs(void) {
                 if (idx[j][0] == 0) {
                     for (size_t k = 0; k < b.size(); k++)
                     {
-                        marginalStartProbs[nodeIdx][k] += b[k];
+                        marginalStartProbs[nide_idx][k] += b[k];
                     }
                 }
                 // end
                 else if (idx[j][0] == 1) {
                     for (size_t k = 0; k < b.size(); k++)
                     {
-                        marginalEndProbs[nodeIdx][k] += b[k];
+                        marginalEndProbs[nide_idx][k] += b[k];
                     }
                 }
             }
@@ -276,7 +276,7 @@ void PhylowoodConverter::makeMarginalAreaProbs(void) {
                 bool ambig = false;
                 
                 // get node, state, and bits for i,j cell in tab-delimited file
-                size_t nodeIdx = idx[j][1];
+                size_t nide_idx = idx[j][1];
                 unsigned stateIdx = 0;
                 if (chartype == "NaturalNumbers")
                     stateIdx = std::atoi(stateChars[i][j].c_str());
@@ -289,18 +289,18 @@ void PhylowoodConverter::makeMarginalAreaProbs(void) {
 
                 // start
                 if (idx[j][0] == 0) {
-                    marginalStartProbs[nodeIdx][stateIdx] += 1;
+                    marginalStartProbs[nide_idx][stateIdx] += 1;
                 }
                 // end
                 else if (idx[j][0] == 1) {
                     if (ambig) {
-                        for (size_t jdx = 0; jdx < marginalEndProbs[nodeIdx].size(); jdx++)
+                        for (size_t jdx = 0; jdx < marginalEndProbs[nide_idx].size(); jdx++)
                         {
-                            marginalEndProbs[nodeIdx][jdx] += 1;
+                            marginalEndProbs[nide_idx][jdx] += 1;
                         }
                     }
                     else {
-                        marginalEndProbs[nodeIdx][stateIdx] += 1;
+                        marginalEndProbs[nide_idx][stateIdx] += 1;
                     }
                 }
             }
@@ -338,8 +338,8 @@ std::string PhylowoodConverter::buildCharacterHistoryString(TopologyNode* n, uns
 {
     std::stringstream ss;
     
-    const size_t& nodeIdx = n->getIndex();
-    const std::vector<double>& characters = ( end == 0 ? marginalStartProbs[nodeIdx] : marginalEndProbs[nodeIdx] );
+    const size_t& nide_idx = n->getIndex();
+    const std::vector<double>& characters = ( end == 0 ? marginalStartProbs[nide_idx] : marginalEndProbs[nide_idx] );
     for (size_t i = 0; i < characters.size(); i++)
     {
         if (i != 0)
