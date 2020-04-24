@@ -63,6 +63,8 @@ namespace RevBayesCore {
         RbConstIterator<valueType>                          begin(void) const { return RbConstIterator<valueType>( this->std::vector<valueType>::begin() ); }
         RbIterator<valueType>                               end(void) { return RbIterator<valueType>( this->std::vector<valueType>::end() ); }
         RbConstIterator<valueType>                          end(void) const { return RbConstIterator<valueType>( this->std::vector<valueType>::end() ); }
+        RbIterator<valueType>                               erase(RbIterator<valueType> pos) { return this->std::vector<valueType>::erase( pos ); }
+        RbConstIterator<valueType>                          erase(RbConstIterator<valueType> pos) { return this->std::vector<valueType>::erase( pos ); }
 
 //        valueType&                                          operator[](size_t i) { return values[i]; }
 //        const valueType&                                    operator[](size_t i) const { return values[i]; }

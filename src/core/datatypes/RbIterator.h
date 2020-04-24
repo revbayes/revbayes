@@ -34,19 +34,10 @@ namespace RevBayesCore {
         RbIterator(void);
         RbIterator(const typename RbIteratorImpl<valueType, IsAbstract<valueType>::Is >::iteratorType &i);
         
-        // public (stl-like) vector functions
-//        RbIterator&                                         operator++(void);                                                               //!< Increment index (prefix)
-//        const RbIterator&                                   operator++(void) const;                                                               //!< Increment index (prefix)
-//        RbIterator&                                         operator--(void);                                                               //!< Decrement index (prefix)
-//        const RbIterator&                                   operator--(void) const;                                                               //!< Decrement index (prefix)
-//        bool                                                operator==(const RbIterator& x) const;                                   //!< Equals operator
-//        bool                                                operator!=(const RbIterator& x) const;                                   //!< Not-Equals operator
-//        bool                                                operator<(const RbIterator& x) const; 
-//        valueType&                                          operator*(void);
-//        const valueType&                                    operator*(void) const;
-//        valueType*                                          operator->(void);
-//        const valueType*                                    operator->(void) const;
         
+//        RbIterator<valueType>&                  operator+(size_t i) { return this->it+i; }          //!< Increment index (prefix)
+
+       
     private:
         
         // private members
@@ -71,89 +62,6 @@ RevBayesCore::RbIterator<valueType>::RbIterator(const typename RbIteratorImpl<va
 {
     
 }
-
-
-//template <typename valueType>
-//RevBayesCore::RbIterator<valueType>& RevBayesCore::RbIterator<valueType>::operator++(void) {
-//    
-//    ++it;
-//    
-//    return *this;
-//}
-//
-//
-//template <typename valueType>
-//const RevBayesCore::RbIterator<valueType>& RevBayesCore::RbIterator<valueType>::operator++(void) const {
-//    
-//    ++it;
-//    
-//    return *this;
-//}
-//
-//
-//template <typename valueType>
-//RevBayesCore::RbIterator<valueType>& RevBayesCore::RbIterator<valueType>::operator--(void) {
-//    
-//    --it;
-//    
-//    return *this;
-//}
-//
-//
-//template <typename valueType>
-//const RevBayesCore::RbIterator<valueType>& RevBayesCore::RbIterator<valueType>::operator--(void) const {
-//    
-//    --it;
-//    
-//    return *this;
-//}
-//
-//
-//template <typename valueType>
-//bool RevBayesCore::RbIterator<valueType>::operator==(const RbIterator<valueType> &x) const {
-//    
-//    return it == x.it;
-//}
-//
-//
-//template <typename valueType>
-//bool RevBayesCore::RbIterator<valueType>::operator!=(const RbIterator<valueType> &x) const {
-//    
-//    return it != x.it;
-//}
-//
-//
-//template <typename valueType>
-//bool RevBayesCore::RbIterator<valueType>::operator<(const RbIterator<valueType> &x) const {
-//    
-//    return it < x.it;
-//}
-//
-//
-//template <typename valueType>
-//valueType* RevBayesCore::RbIterator<valueType>::operator->(void) {
-//    
-//    return (*it);
-//}
-//
-//
-//template <typename valueType>
-//const valueType* RevBayesCore::RbIterator<valueType>::operator->(void) const {
-//    
-//    return (*it);
-//}
-//
-//template <typename valueType>
-//const valueType& RevBayesCore::RbIterator<valueType>::operator*(void) const {
-//    
-//    return *(*it);
-//}
-//
-//template <typename valueType>
-//valueType& RevBayesCore::RbIterator<valueType>::operator*(void) {
-//    
-//    return *(*it);
-//}
 
 
 #endif

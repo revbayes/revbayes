@@ -124,6 +124,24 @@ const RbVector<double>& MatrixReal::operator[]( size_t index ) const
 }
 
 
+void MatrixReal::addColumn( void )
+{
+
+    for (size_t i=0; i<n_rows; ++i)
+    {
+        elements[i].push_back( 0.0 );
+    }
+    ++n_cols;
+}
+
+
+void MatrixReal::addRow( void )
+{
+    elements.push_back( RbVector<double>(n_cols, 0.0) );
+    ++n_rows;
+}
+
+
 void MatrixReal::clear( void )
 {
     // to be safe
@@ -167,6 +185,24 @@ MatrixReal MatrixReal::computeInverse( void ) const
 MatrixReal* MatrixReal::clone(void) const
 {
      return new MatrixReal( *this );
+}
+
+
+void MatrixReal::deleteColumn(size_t index)
+{
+
+    for (size_t i=0; i<n_rows; ++i)
+    {
+        elements[i].erase( elements[i].begin()+index );
+    }
+    --n_cols;
+}
+
+
+void MatrixReal::deleteRow(size_t index)
+{
+    elements.erase( elements.begin()+index );
+    --n_rows;
 }
 
 
@@ -329,6 +365,25 @@ double MatrixReal::getDet() const
 }
 
 
+void MatrixReal::getIndexOfMin(size_t& row, size_t& col) const
+{
+    double min = RbConstants::Double::inf;
+    for (size_t i = 0; i < n_rows; ++i)
+    {
+        for (size_t j = 0; j < n_cols; ++j)
+        {
+            if ( min > elements[i][j] )
+            {
+                min = elements[i][j];
+                row = i;
+                col = j;
+            }
+        }
+    }
+    
+}
+
+
 double MatrixReal::getLogDet() const
 {
     
@@ -397,7 +452,6 @@ double MatrixReal::getMax( void ) const
     return max;
     
 }
-
 
 
 double MatrixReal::getMin( void ) const
