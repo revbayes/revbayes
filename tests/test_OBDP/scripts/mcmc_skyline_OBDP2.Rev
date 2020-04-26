@@ -1,0 +1,146 @@
+###############################################################################
+#
+# RevBayes Validation Test:Skyline occurrence birth-death process, corrected for drifting fossils
+#
+# Model: Tree is drawn from a piecewise constant birth-death process with occurrences.
+#
+#
+# authors: Antoine Zwaans (from Walker Pett's FBDP test function)
+#
+################################################################################
+
+seed(12345)
+
+#######################
+# Reading in the Data #
+#######################
+
+### Read in taxon data
+
+
+# set my move index
+
+mvi = 0
+taxa <- readTaxonData("data-episkyline-test/data_taxa.csv")
+sequences <- readDiscreteCharacterData("data-episkyline-test/data_seq.nex")
+occurrence_ages <- readMatrix(file="data-episkyline-test/data_occurrences.csv", delimiter="; ")[1]
+
+#there are no sequences sampled exactly at t=0
+rho <- 0.0
+
+#infected individuals remain infectious after being sampled
+rm <- 0.0
+
+#alpha is 1/lambda for the exponential distribution
+alpha <- 10
+
+#accuracy of our algorithm number of hidden lineages
+N <- 30
+
+#condition of the algorithm
+cond <- "time"
+
+#the first occurrence is found at t=41.98,we place the origin in a window before
+origin_time ~ dnUnif(41.98199999999932,71.0)
+moves[mvi++] = mvSlide(origin_time, delta=0.01,tune=TRUE,weight=5.0)
+
+#Which likelihood algorithm is used
+Mt <- TRUE
+
+#it is know that there was a major event that is meant to have affected the rates 30days before present
+timeline <- v(30.0)
+
+for(i in 1:(timeline.size() + 1))
+{
+    i
+
+    extinction[i] ~ dnExp(alpha)
+		speciation[i] ~ dnExp(alpha)
+		omega[i] ~ dnExp(alpha)
+		#patients are tested 8 times as often as they are sequenced
+		sampling[i] := omega[i]/8
+
+    moves[mvi++] = mvScale(extinction[i], lambda = 0.1,tune=TRUE)
+    moves[mvi++] = mvScale(speciation[i], lambda = 0.1, tune=TRUE)
+		moves[mvi++] = mvScale(omega[i], lambda = 0.1, tune=TRUE)
+
+
+}
+
+print(speciation)
+### Define the tree-prior distribution as the piecewise constant birth-death process ###
+obd_tree ~  dnOBDP2(originAge=origin_time,
+                    timeline=timeline,
+                    lambda=speciation,
+                    mu=extinction,
+                    omega=omega,
+                    phi=sampling,
+                    Phi=rho,
+                    r=rm,
+                    occurrence_ages=occurrence_ages,
+                    taxa=taxa,
+                    useMt=Mt)
+
+
+moves[mvi++] = mvFNPR(obd_tree, weight=20.0)
+moves[mvi++] = mvCollapseExpandFossilBranch(obd_tree, origin_time, weight=10.0)
+moves[mvi++] = mvNodeTimeSlideUniform(obd_tree, weight=2.0)
+moves[mvi++] = mvRootTimeSlideUniform(obd_tree, origin_time, weight=1.0)
+num_samp_anc := obd_tree.numSampledAncestors()
+
+######
+#Sequence evolution model
+####
+
+#strict clock model with lambda = 0.005
+branch_rates ~ dnExponential(250.0)
+moves[mvi++] = mvScale(branch_rates, lambda=0.01, tune=TRUE)
+
+
+#nucleotide evolution HKY model
+pi_prior <- v(1,1,1,1)
+pi ~ dnDirichlet(pi_prior)
+
+moves[mvi++] = mvBetaSimplex(pi, weight=2)
+moves[mvi++] = mvDirichletSimplex(pi, weight=1)
+
+kappa ~ dnLognormal(0.0, 1.0)
+moves[mvi++] =  mvScale(kappa)
+
+Q_epi := fnHKY(kappa,pi)
+
+alpha_epi ~ dnExponential( 1.0 )
+moves[mvi++] =  mvScale(alpha_epi, lambda=0.1, tune=TRUE)
+
+rates_epi := fnDiscretizeGamma( alpha_epi, alpha_epi, 4 )
+
+phySeq ~ dnPhyloCTMC(tree=obd_tree, Q=Q_epi, siteRates=rates_epi, branchRates=branch_rates, type="DNA")
+phySeq.clamp(sequences)
+
+#############
+# THE Model #
+#############
+mymodel = model(obd_tree)
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+monitors[1] = mnStochasticVariable(filename="output_sky/trace.out", printgen=1)
+monitors[2] = mnFile(filename="output_sky/trees.trees", printgen=1,obd_tree)
+monitors[3] = mnScreen(printgen=1,num_samp_anc)
+
+mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
+
+mymcmc.run(generations=100, tuningInterval=10, checkpointInterval=100, checkpointFile="output_sky/skyline.state")
+
+# check the performance of the MCMC/moves
+mymcmc.operatorSummary()
+
+# Read in the tree trace and construct the maximum clade credibility (MCC) tree #
+trace = readTreeTrace("output_sky/trees.trees")
+
+# Summarize tree trace and save MCC tree to file
+mccTree(trace, file="output_sky/tree.tre" )
+
+
+# you may want to quit RevBayes now
+q()
