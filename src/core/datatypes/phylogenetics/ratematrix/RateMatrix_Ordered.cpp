@@ -2,7 +2,10 @@
 
 #include <cmath>
 
+#include "AbstractRateMatrix.h"
+#include "RateMatrix.h"
 #include "MatrixReal.h"
+#include "RbMathMatrix.h"
 #include "TransitionProbabilityMatrix.h"
 #include "Cloneable.h"
 #include "RbVector.h"
@@ -13,11 +16,13 @@ using namespace RevBayesCore;
 /** Construct rate matrix with n states */
 RateMatrix_Ordered::RateMatrix_Ordered(size_t n) : AbstractRateMatrix( n ),
     matrix_size( n ),
-    allow_zero_state( true )
+    allow_zero_state( true ),
+    rescale( true )
+
 {
     setLambda(1.0);
     setMu(1.0);
-    
+
     update();
 }
 
@@ -25,7 +30,7 @@ RateMatrix_Ordered::RateMatrix_Ordered(size_t n) : AbstractRateMatrix( n ),
 /** Destructor */
 RateMatrix_Ordered::~RateMatrix_Ordered(void)
 {
-    
+
 }
 
 double RateMatrix_Ordered::averageRate(void) const
@@ -34,9 +39,9 @@ double RateMatrix_Ordered::averageRate(void) const
 }
 
 
-void RateMatrix_Ordered::buildRateMatrix(void)
+void RateMatrix_Ordered::fillRateMatrix(void)
 {
-    
+
     for (size_t i=0; i< matrix_size; i++)
     {
         for (size_t j=0; j< matrix_size; j++)
@@ -57,9 +62,13 @@ void RateMatrix_Ordered::buildRateMatrix(void)
     }
     // set the diagonal values
     setDiagonal();
-    
+
     // rescale rates
-    //rescaleToAverageRate( 1.0 );
+    if (rescale == true)
+    {
+    std::cout << "Rescaling";
+    rescaleToAverageRate( 1.0 );
+    }
 }
 
 
@@ -68,14 +77,14 @@ void RateMatrix_Ordered::buildRateMatrix(void)
 /** Calculate the transition probabilities */
 void RateMatrix_Ordered::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
 {
-    
+
     double t = rate * (startAge - endAge);
     exponentiateMatrixByScalingAndSquaring(t, P);
-    
+
 }
 
 void RateMatrix_Ordered::exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const {
-    
+
     // Here we use the scaling and squaring method with a 4th order Taylor approximant as described in:
     //
     // Moler, C., & Van Loan, C. 2003. Nineteen dubious ways to compute the exponential of a
@@ -86,7 +95,7 @@ void RateMatrix_Ordered::exponentiateMatrixByScalingAndSquaring(double t,  Trans
     // increased for better accuracy.
     // -- Will Freyman 11/27/16
     size_t s = 6;
-    
+
     // first scale the matrix
     double scale = t / pow(2, s);
     for ( size_t i = 0; i < num_states; i++ )
@@ -96,25 +105,25 @@ void RateMatrix_Ordered::exponentiateMatrixByScalingAndSquaring(double t,  Trans
             p[i][j] = (*the_rate_matrix)[i][j] * scale;
         }
     }
-    
+
     // compute the 4th order Taylor approximant
-    
+
     // calculate the scaled matrix raised to powers 2, 3 and 4
     TransitionProbabilityMatrix p_2(num_states);
     multiplyMatrices(p, p, p_2);
-    
+
     TransitionProbabilityMatrix p_3(num_states);
     multiplyMatrices(p, p_2, p_3);
-    
+
     TransitionProbabilityMatrix p_4(num_states);
     multiplyMatrices(p, p_3, p_4);
-    
+
     // add k=0 (the identity matrix) and k=1 terms
     for ( size_t i = 0; i < num_states; i++ )
     {
         p[i][i] += 1;
     }
-    
+
     // add the k=2, k=3, k=4 terms of the Taylor series
     for ( size_t i = 0; i < num_states; i++ )
     {
@@ -123,7 +132,7 @@ void RateMatrix_Ordered::exponentiateMatrixByScalingAndSquaring(double t,  Trans
             p[i][j] += ( ( p_2[i][j] / 2 ) + ( p_3[i][j] / 6 ) + ( p_4[i][j] / 24 ) );
         }
     }
-    
+
     // now perform the repeated squaring
     for (size_t i = 0; i < s; i++)
     {
@@ -136,7 +145,7 @@ void RateMatrix_Ordered::exponentiateMatrixByScalingAndSquaring(double t,  Trans
 
 
 inline void RateMatrix_Ordered::multiplyMatrices(TransitionProbabilityMatrix& p,  TransitionProbabilityMatrix& q,  TransitionProbabilityMatrix& r) const {
-    
+
     // could probably use boost::ublas here, for the moment we do it ourselves.
     for ( size_t i = 0; i < num_states; i++ )
     {
@@ -161,38 +170,38 @@ RateMatrix_Ordered* RateMatrix_Ordered::clone( void ) const
 
 std::vector<double> RateMatrix_Ordered::getStationaryFrequencies( void ) const
 {
-    
+
     return stationary_freqs;
 }
 
 void RateMatrix_Ordered::setAllowZeroState(bool tf)
 {
-    
+
     allow_zero_state = tf;
-    
+
     // set flags
     needs_update = true;
-    
+
 }
 
 void RateMatrix_Ordered::setLambda( double l )
 {
-    
+
     lambda = l;
-    
+
     // set flags
     needs_update = true;
-    
+
 }
 
 void RateMatrix_Ordered::setMu( double m )
 {
-    
+
     mu = m;
-    
+
     // set flags
     needs_update = true;
-    
+
 }
 
 
@@ -200,14 +209,18 @@ void RateMatrix_Ordered::setMu( double m )
 
 void RateMatrix_Ordered::update( void )
 {
-    
+
     if ( needs_update )
     {
         buildRateMatrix();
         // clean flags
         needs_update = false;
+        // rescale
+        if ( rescale == true )
+        {
+            rescaleToAverageRate( 1.0 );
+        }
+
     }
-    
+
 }
-
-

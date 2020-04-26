@@ -8,18 +8,15 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-OrderedRateMatrixFunction::OrderedRateMatrixFunction(const TypedDagNode<long> *n, const TypedDagNode<double> *l, const TypedDagNode<double> *m, bool allow_zero_state) : TypedFunction<RateGenerator>( new RateMatrix_Ordered(n->getValue()) ),
+OrderedRateMatrixFunction::OrderedRateMatrixFunction(const TypedDagNode<long> *n, const TypedDagNode<double> *l, const TypedDagNode<double> *m, bool allow_zero_state, bool rescale) : TypedFunction<RateGenerator>( new RateMatrix_Ordered(n->getValue()) ),
     lambda( l ),
     mu( m )
+
 {
-    
-    
-    
+
     addParameter( lambda );
     addParameter( mu );
-    
-    static_cast< RateMatrix_Ordered* >(value)->setAllowZeroState( allow_zero_state );
-    
+
     update();
 }
 
@@ -42,31 +39,28 @@ void OrderedRateMatrixFunction::update( void )
 {
     double la = lambda->getValue();
     double m = mu->getValue();
-    
+
     static_cast< RateMatrix_Ordered* >(value)->setLambda( la );
     static_cast< RateMatrix_Ordered* >(value)->setMu( m );
-    
+
     static_cast< RateMatrix_Ordered* >(value)->update();
-    
+
 }
 
 
 
 void OrderedRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
-    
+
     if (oldP == lambda)
     {
         lambda = static_cast<const TypedDagNode<double>* >( newP );
     }
-    
+
     if (oldP == mu)
     {
         mu = static_cast<const TypedDagNode<double>* >( newP );
     }
-    
-    
+
+
 }
-
-
-

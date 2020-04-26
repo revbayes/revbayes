@@ -25,12 +25,15 @@
 #include "TypeSpec.h"
 #include "TypedFunction.h"
 
+namespace RevLanguage { class Real; }
+
 using namespace RevLanguage;
+
 
 /** default constructor */
 Func_orderedRateMatrix::Func_orderedRateMatrix( void ) : TypedFunction<RateMatrix>( )
 {
-    
+
 }
 
 
@@ -42,22 +45,23 @@ Func_orderedRateMatrix::Func_orderedRateMatrix( void ) : TypedFunction<RateMatri
  */
 Func_orderedRateMatrix* Func_orderedRateMatrix::clone( void ) const
 {
-    
+
     return new Func_orderedRateMatrix( *this );
 }
 
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_orderedRateMatrix::createFunction( void ) const
 {
-    
-    
+
+
     RevBayesCore::TypedDagNode< long >* n                               = static_cast<const Natural &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< double >* lambda                        = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< double >* mu                            = static_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< RevBayesCore::Boolean >* zero_state     = static_cast<const RlBoolean &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::Boolean >* rescale        = static_cast<const RlBoolean &>( this->args[4].getVariable()->getRevObject() ).getDagNode();
 
-    RevBayesCore::OrderedRateMatrixFunction* f = new RevBayesCore::OrderedRateMatrixFunction( n, lambda, mu, zero_state->getValue() );
-    
+    RevBayesCore::OrderedRateMatrixFunction* f = new RevBayesCore::OrderedRateMatrixFunction( n, lambda, mu, zero_state, rescale );
+
     return f;
 }
 
@@ -65,39 +69,40 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_orderedRateMatr
 /* Get argument rules */
 const ArgumentRules& Func_orderedRateMatrix::getArgumentRules( void ) const
 {
-    
+
     static ArgumentRules argumentRules = ArgumentRules();
     static bool          rules_set = false;
-    
+
     if ( !rules_set )
     {
-        
+
         argumentRules.push_back( new ArgumentRule( "maxState"       , Natural::getClassTypeSpec(), "The maximum state for this rate matrix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "lambda"         , RealPos::getClassTypeSpec(), "The rate of gain.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
         argumentRules.push_back( new ArgumentRule( "mu"             , RealPos::getClassTypeSpec(), "The rate of loss.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
         argumentRules.push_back( new ArgumentRule( "allowZeroState" , RlBoolean::getClassTypeSpec(), "Can the character go into state 0.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+        argumentRules.push_back( new ArgumentRule( "rescale",         RlBoolean::getClassTypeSpec(), "Should the matrix be normalized?", ArgumentRule::BY_VALUE,  ArgumentRule::ANY, new RlBoolean(true) ) );
 
         rules_set = true;
     }
-    
+
     return argumentRules;
 }
 
 
 const std::string& Func_orderedRateMatrix::getClassType(void)
 {
-    
+
     static std::string rev_type = "Func_orderedRateMatrix";
-    
+
     return rev_type;
 }
 
 /* Get class type spec describing type of object */
 const TypeSpec& Func_orderedRateMatrix::getClassTypeSpec(void)
 {
-    
+
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
-    
+
     return rev_type_spec;
 }
 
@@ -109,15 +114,15 @@ std::string Func_orderedRateMatrix::getFunctionName( void ) const
 {
     // create a name variable that is the same for all instance of this class
     std::string f_name = "fnOrderedRateMatrix";
-    
+
     return f_name;
 }
 
 
 const TypeSpec& Func_orderedRateMatrix::getTypeSpec( void ) const
 {
-    
+
     static TypeSpec type_spec = getClassTypeSpec();
-    
+
     return type_spec;
 }

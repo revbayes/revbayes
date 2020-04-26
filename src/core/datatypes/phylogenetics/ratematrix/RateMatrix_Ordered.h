@@ -22,15 +22,15 @@
 
 
 namespace RevBayesCore {
-    
+
     class TransitionProbabilityMatrix;
-    
+
     class RateMatrix_Ordered : public AbstractRateMatrix {
-        
+
     public:
         RateMatrix_Ordered(size_t n);                                                  //!< Construct rate matrix with n states
         virtual                         ~RateMatrix_Ordered(void);                     //!< Destructor
-        
+
         // RateMatrix functions
         double                          averageRate(void) const;
         void                            calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;   //!< Calculate the transition matrix
@@ -40,21 +40,22 @@ namespace RevBayesCore {
         void                            setAllowZeroState(bool tf);
         void                            setLambda(double l);
         void                            setMu(double m);
-        
-        
+
+
     private:
         double                          lambda;
         double                          mu;
         size_t                          matrix_size;                                    //!< Number of elements in a row or column of the rate matrix
         std::vector<double>             stationary_freqs;                               //!< Holds the stationary frequencies
         bool                            allow_zero_state;
-        
+        bool                            rescale;
+
         void                            buildRateMatrix(void);
         void                            exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const;
         inline void                     multiplyMatrices(TransitionProbabilityMatrix& p,  TransitionProbabilityMatrix& q,  TransitionProbabilityMatrix& r) const;
 
     };
-    
+
 }
 
 #endif
