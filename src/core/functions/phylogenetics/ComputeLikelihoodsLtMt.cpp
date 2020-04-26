@@ -624,9 +624,8 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDag
             double getEventTime(void){ return time; }
 
         };
-    std::cout<<"WE ARE IN MT RIGHT NOW!" << std::endl;
 
-    std::cout<<"pooling times" << std::endl;
+
     // get node/time variables
     const size_t num_nodes = timeTree.getNumberOfNodes();
 
@@ -727,27 +726,14 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDag
     std::sort( events.begin(), events.end(), AgeCompareReverse() );
 
 
-    std::cout << "Getting the rate vectors" << std::endl;
-    std::cout << "Getting lambda" << std::endl;
-
     const std::vector<double> birth = lambda;
     std::cout << "birth vector" << birth << std::endl;
-    std::cout << "lambda vector" << lambda << std::endl;
-    std::cout << "lambda vector" << lambda[3] <<std::endl;
-    std::cout << "birth size" << birth.size() << std::endl;
-    std::cout << "lambda end" << birth[birth.size()-1] << std::endl;
 
-    std::cout << "Getting mu" << std::endl;
     const std::vector<double> death = mu;
-    std::cout << "Getting psi" << std::endl;
     const std::vector<double> ps = psi;
-    std::cout << "Getting omega" << std::endl;
     const std::vector<double> om = omega;
-    std::cout << "Getting rho" << std::endl;
     const double rh = rho->getValue();
-    std::cout << "Getting rp" << std::endl;
     const std::vector<double> rp = removalPr;
-    std::cout << "Getting N" << std::endl;
 
     const long N = maxHiddenLin->getValue();
     // const RbVector<double> tau = time_points->getValue();
@@ -755,7 +741,6 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDag
     const size_t S = tau.size();
     const std::vector<double> gamma = birth + death + ps + om;
 
-    std::cout << "Initilizing the current rates" << std::endl;
     // Initialize an empty matrix and a cursor to write lines in this matrix
     MatrixReal B(S, (N + 1), 0.0);
 
@@ -820,8 +805,6 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDag
         //change rates appropriately, rate changes provided in timeline are in an ascending order
         size_t where = LocateTimeSliceIndex(th,timeline) - 1;
 
-        std::cout << "We are at time: " << th << std::endl;
-        std::cout << "We are entering rate-time-slice index #:" << where << std::endl;
         std::cout <<"birth rate was " << birth_current << std::endl;
         std::cout <<"birth rate shifts to "<< birth[where] <<std::endl;
         birth_current = birth[where];
@@ -1122,11 +1105,9 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLtPiecewise(  const TypedDag
         if(type == "rate shift"){
         //change rates appropriately
         size_t where = LocateTimeSliceIndex(th,timeline) ;
-        std::cout << "We are at time: " << th << std::endl;
-        std::cout << "We are entering rate-time-slice index #:" << where << std::endl;
         std::cout <<"birth rate was " << birth_current << std::endl;
         std::cout <<"birth rate shifts to "<< birth[where] <<std::endl;
-        std::cout <<"birth rate ="<< birth[where] <<std::endl;
+
         birth_current = birth[where];
         death_current = death[where];
         ps_current = ps[where];
