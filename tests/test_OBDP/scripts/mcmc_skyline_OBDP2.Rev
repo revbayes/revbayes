@@ -128,9 +128,9 @@ monitors[1] = mnStochasticVariable(filename="output_sky/trace.out", printgen=1)
 monitors[2] = mnFile(filename="output_sky/trees.trees", printgen=1,obd_tree)
 monitors[3] = mnScreen(printgen=1,num_samp_anc)
 
-mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
+mymcmc = mcmc(mymodel, monitors, moves, moveschedule="mixed")
 
-mymcmc.run(generations=100, tuningInterval=10, checkpointInterval=100, checkpointFile="output_sky/skyline.state")
+mymcmc.run(generations=1000, tuningInterval=10, checkpointInterval=100, checkpointFile="output_sky/skyline.state")
 
 # check the performance of the MCMC/moves
 mymcmc.operatorSummary()
