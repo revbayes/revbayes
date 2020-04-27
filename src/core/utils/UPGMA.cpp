@@ -1,4 +1,5 @@
 #include "DistanceMatrix.h"
+#include "RbConstants.h"
 #include "Taxon.h"
 #include "TopologyNode.h"
 #include "Tree.h"
@@ -21,6 +22,12 @@ Tree* UPGMA::constructTree(const DistanceMatrix &d) const
     size_t                      num_tips    = d.getSize();
     MatrixReal                  distances   = d.getMatrix();
     
+    // make sure the diagonal is set to inf
+    for ( size_t i=0; i<num_tips; ++i )
+    {
+        distances[i][i] = RbConstants::Double::inf;
+    }
+    
     // first, we need to create a vector with all the nodes
     std::vector<TopologyNode*> active_nodes = std::vector<TopologyNode*>(num_tips, NULL);
     for (size_t i=0; i<num_tips; ++i)
@@ -35,8 +42,8 @@ Tree* UPGMA::constructTree(const DistanceMatrix &d) const
     
     // construct the tree
     Tree* upgma_tree = new Tree();
-    upgma_tree->setRoot(root, false);
-    
+    upgma_tree->setRoot(root, true);
+        
     // finally, return our constructed tree
     return upgma_tree;
 }
@@ -52,7 +59,7 @@ TopologyNode* UPGMA::constructTreeRecursively(std::vector<TopologyNode *> &activ
     distances.getIndexOfMin(index_A, index_B);
     
     // make sure that A < B
-    if ( index_B > index_A )
+    if ( index_B < index_A )
     {
         size_t tmp = index_A;
         index_A = index_B;
@@ -88,6 +95,8 @@ TopologyNode* UPGMA::constructTreeRecursively(std::vector<TopologyNode *> &activ
     
     distances.addColumn();
     distances.addRow();
+    // ensure that the diagonal stays infinite
+    distances[num_elements][num_elements] = RbConstants::Double::inf;
     for (size_t i=0; i<num_elements; ++i)
     {
         if ( i != index_A && i != index_B )
@@ -99,10 +108,10 @@ TopologyNode* UPGMA::constructTreeRecursively(std::vector<TopologyNode *> &activ
     }
     
     // delete the old rows and columns for A and B
-    distances.deleteRow(index_A);
     distances.deleteRow(index_B);
-    distances.deleteColumn(index_A);
+    distances.deleteRow(index_A);
     distances.deleteColumn(index_B);
+    distances.deleteColumn(index_A);
     
     
     // finally, continue the recursive call
