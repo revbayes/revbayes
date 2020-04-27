@@ -34,10 +34,13 @@ namespace RevBayesCore {
         RbIterator(void);
         RbIterator(const typename RbIteratorImpl<valueType, IsAbstract<valueType>::Is >::iteratorType &i);
         
-        
-//        RbIterator<valueType>&                  operator+(size_t i) { return this->it+i; }          //!< Increment index (prefix)
+        RbIterator<valueType>                   operator+(size_t i) const { return RbIterator<valueType>(this->it+i); }                                                                        //!< Increment index (prefix)
 
-       
+//        RbIterator<valueType>&                  operator+(size_t i) { return this->it+i; }          //!< Increment index (prefix)
+        
+        typename RbIteratorImpl<valueType, IsAbstract<valueType>::Is >::iteratorType        getStlIterator(void) { return this->it; }
+        typename RbIteratorImpl<valueType, IsAbstract<valueType>::Is >::iteratorType        getStlIterator(void) const { return this->it; }
+
     private:
         
         // private members

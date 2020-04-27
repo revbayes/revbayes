@@ -63,7 +63,7 @@ namespace RevBayesCore {
         RbConstIterator<valueType>                          begin(void) const { return RbConstIterator<valueType>( this->std::vector<valueType>::begin() ); }
         RbIterator<valueType>                               end(void) { return RbIterator<valueType>( this->std::vector<valueType>::end() ); }
         RbConstIterator<valueType>                          end(void) const { return RbConstIterator<valueType>( this->std::vector<valueType>::end() ); }
-        RbIterator<valueType>                               erase(RbIterator<valueType> pos) { return this->std::vector<valueType>::erase( pos ); }
+        RbIterator<valueType>                               erase(RbIterator<valueType> pos) { return this->std::vector<valueType>::erase( pos.getStlIterator() ); }
         RbConstIterator<valueType>                          erase(RbConstIterator<valueType> pos) { return this->std::vector<valueType>::erase( pos ); }
 
 //        valueType&                                          operator[](size_t i) { return values[i]; }
@@ -210,6 +210,8 @@ namespace RevBayesCore {
         RbIterator<valueType>                               end(void) { return RbIterator<valueType>( this->values.end() ); }
         RbConstIterator<valueType>                          end(void) const { return RbConstIterator<valueType>( this->values.end() ); }
         void                                                erase(size_t i) { valueType *tmp=values[i]; values.erase(values.begin()+i); delete tmp; }
+        RbIterator<valueType>                               erase(RbIterator<valueType> pos) { valueType *tmp=*pos; delete tmp; return this->std::vector<valueType>::erase( pos ); }
+        RbConstIterator<valueType>                          erase(RbConstIterator<valueType> pos) { valueType *tmp=*pos; delete tmp; return this->std::vector<valueType>::erase( pos ); }
         size_t                                              size(void) const { return this->values.size(); }
 
         void                                                swap( valueType& a, valueType& b)
