@@ -205,10 +205,8 @@ DiscretizedContinuousCharacterData* ContinuousCharacterData::discretizeCharacter
     for(size_t iC = 0; iC < num_chars; ++iC)
     { // loop over characters
 
-		// compute the extent (and midpoint)
-		double min_val = std::numeric_limits<double>::max();
-		double max_val = std::numeric_limits<double>::min();
-
+    	// get the characters
+    	std::vector<double> these_states;
 		for(size_t iS = 0; iS < num_sequences; ++iS)
 		{
 			// get the data for this taxon
@@ -218,20 +216,24 @@ DiscretizedContinuousCharacterData* ContinuousCharacterData::discretizeCharacter
 			// if the character is not missing
 			if ( RevBayesCore::RbMath::isNan(org_char) == false )
 			{
-				// check if this is an extremum
-				if ( org_char > max_val ) {
-					max_val = org_char;
-				} else if ( org_char < min_val ) {
-					min_val = org_char;
-				}
+				// add it to the states
+				these_states.push_back( org_char );
 			}
+
 		}
 
-		// compute the midpoint
-		double midpoint = (max_val + min_val) / 2.0;
+		// sort the characters
+		std::sort(these_states.begin(), these_states.end());
+
+		// compute the median, min and max
+		double min_val  = these_states[0];
+		double max_val  = these_states[these_states.size() - 1];
+		double midpoint = these_states[these_states.size() / 2];
 
 		// compute the range
-		double range = max_val - min_val;
+		double diff_up   = max_val - midpoint;
+		double diff_down = midpoint - min_val;
+		double range     = diff_up > diff_down ? 2.0 * diff_up : 2.0 * diff_down;
 
 		// compute the cushion range
 		double cushion_range = range * cushion_width;
@@ -239,6 +241,41 @@ DiscretizedContinuousCharacterData* ContinuousCharacterData::discretizeCharacter
 		// compute the extrema of the cushion
 		double cush_min = midpoint - cushion_range / 2.0;
 		double cush_max = midpoint + cushion_range / 2.0;
+
+//		// compute the extent (and midpoint)
+//		double min_val = std::numeric_limits<double>::max();
+//		double max_val = std::numeric_limits<double>::min();
+//
+//		for(size_t iS = 0; iS < num_sequences; ++iS)
+//		{
+//			// get the data for this taxon
+//			const ContinuousTaxonData& seq = this->getTaxonData(iS);
+//			const double& org_char = seq[iC];
+//
+//			// if the character is not missing
+//			if ( RevBayesCore::RbMath::isNan(org_char) == false )
+//			{
+//				// check if this is an extremum
+//				if ( org_char > max_val ) {
+//					max_val = org_char;
+//				} else if ( org_char < min_val ) {
+//					min_val = org_char;
+//				}
+//			}
+//		}
+//
+//		// compute the midpoint
+//		double midpoint = (max_val + min_val) / 2.0;
+//
+//		// compute the range
+//		double range = max_val - min_val;
+//
+//		// compute the cushion range
+//		double cushion_range = range * cushion_width;
+//
+//		// compute the extrema of the cushion
+//		double cush_min = midpoint - cushion_range / 2.0;
+//		double cush_max = midpoint + cushion_range / 2.0;
 
 		// compute the bin size
 		dx.push_back( cushion_range / double(num_bins - 1) );
