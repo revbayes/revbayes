@@ -207,6 +207,7 @@ DiscretizedContinuousCharacterData* ContinuousCharacterData::discretizeCharacter
 
     	// get the characters
     	std::vector<double> these_states;
+    	double sum = 0.0;
 		for(size_t iS = 0; iS < num_sequences; ++iS)
 		{
 			// get the data for this taxon
@@ -218,6 +219,7 @@ DiscretizedContinuousCharacterData* ContinuousCharacterData::discretizeCharacter
 			{
 				// add it to the states
 				these_states.push_back( org_char );
+				sum += org_char;
 			}
 
 		}
@@ -228,7 +230,7 @@ DiscretizedContinuousCharacterData* ContinuousCharacterData::discretizeCharacter
 		// compute the median, min and max
 		double min_val  = these_states[0];
 		double max_val  = these_states[these_states.size() - 1];
-		double midpoint = these_states[these_states.size() / 2];
+		double midpoint = sum / these_states.size();
 
 		// compute the range
 		double diff_up   = max_val - midpoint;
