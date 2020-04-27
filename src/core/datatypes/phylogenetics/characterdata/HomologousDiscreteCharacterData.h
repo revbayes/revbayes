@@ -1359,7 +1359,7 @@ RevBayesCore::DistanceMatrix RevBayesCore::HomologousDiscreteCharacterData<charT
     } // end loop over all first taxa
     
     
-    return DistanceMatrix(distances,getTaxa());
+    return DistanceMatrix(distances,getIncludedTaxa());
 }
 
 

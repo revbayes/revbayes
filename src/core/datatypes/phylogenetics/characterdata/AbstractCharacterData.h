@@ -56,6 +56,7 @@ namespace RevBayesCore {
         void                                        deleteTaxon(const std::string& s);                                          //!< Remove taxon
         const std::string&                          getFileName(void) const;                                                    //!< Returns the name of the file the data came from
         const std::string&                          getFilePath(void) const;                                                    //!< Returns the name of the file path
+        std::vector<Taxon>                          getIncludedTaxa(void) const;                                                //!< Get the names of the taxa
         size_t                                      getIndexOfTaxon(const std::string &n) const;                                //!< Get the index of the taxon with name 'n'.
         const std::map<std::string, std::string >   getHomeologMap();
         size_t                                      getNumberOfTaxa(void) const;                                                //!< Number of taxa
