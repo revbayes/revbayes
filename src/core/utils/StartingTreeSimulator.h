@@ -11,10 +11,10 @@ class TopologyNode;
 class Tree;
     
     /**
-     * This class represents the writer object of character data objects into files in Fasta format.
+     * This class provides a starting tree simulator that conforms to some clade constraints.
      *
      * This class currently has only one functionality,
-     * to write character data objects into a file in Fasta format.
+     * to simulate a tree with given clade and clade age constraints.
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
