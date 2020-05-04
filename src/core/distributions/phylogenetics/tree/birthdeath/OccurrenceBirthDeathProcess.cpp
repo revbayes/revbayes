@@ -145,37 +145,27 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) 
     // std::cout << "lambda=" << lambda->getValue() << " - mu=" << mu->getValue() << " - psi=" << psi->getValue() << " - omega=" << omega->getValue() << " - rho=" << rho->getValue() << " - removalPr=" << removalPr->getValue() << std::endl;
     if (useMt) {
         const std::vector<double> time_points_Mt( 1, 0.0 );
-        MatrixReal B_Mt = RevBayesCore::ComputeLikelihoodsForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, occAges, tree);
 
         const double rh = rho->getValue();
         const long N = maxHiddenLin->getValue();
         const size_t k = value->getNumberOfExtantTips();
 
-        double likelihood = B_Mt[0][0];
-        // std::cout << "B_Mt[0][0] : " << B_Mt[0][0] << std::endl;
-        for(int i = 1; i < N+1; i++){
-            // std::cout << "B_Mt[0][" << i << "] : " << B_Mt[0][i] << std::endl;
-            // std::cout << "B_Mt[0][" << i << "] * pow(rh,k) * pow(1.0 - rh,i) : " << B_Mt[0][i] * pow(rh,k) * pow(1.0 - rh,i) << std::endl;
-            likelihood += B_Mt[0][i] * pow(rh,k) * pow(1.0 - rh,i);
-        }
+        bool returnLogLikelihood = true;
+        MatrixReal LogLikelihood = RevBayesCore::ComputeLnProbabilitiesForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, returnLogLikelihood, occAges, tree);
+        double logLikelihood = LogLikelihood[0][0];
 
-        // std::cout << "\n ==> Log-Likelihood Mt : " << log(likelihood) << "\n" << std::endl;
-        
-        return log(likelihood);
+        // std::cout << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;
+
+        return logLikelihood;
     }
     const std::vector<double> time_points_Lt(1, start_age->getValue());
-    MatrixReal B_Lt = RevBayesCore::ComputeLikelihoodsBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, occAges, tree);
     
-    // const long N = maxHiddenLin->getValue();
-    // for(int i = 0; i < N+1; i++){
-    //     std::cout << "B_Lt[0][" << i << "] : " << B_Lt[0][i] << std::endl;
-    // }
-
-    double likelihood = B_Lt[0][0];
-    // std::cout << "\n ==> Log-Likelihood Lt : " << log(likelihood) << std::endl;
+    MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilitiesBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, occAges, tree);
+    double logLikelihood = B_Lt_log[0][0];
+    // std::cout << "\n ==> Log-Likelihood Lt : " << logLikelihood << "\n" << std::endl;
     // std::cout << "\ncomputeLnProbabilityTimes : " << computeLnProbabilityTimes() << "\n\n" << std::endl;
     
-    return log(likelihood);
+    return logLikelihood;
 }
 
 

@@ -16,8 +16,9 @@ namespace RevBayesCore {
 
 using namespace RevBayesCore;
 
+
 /**
- * Compute the joint probability density of the observations made up to any time t and the population
+ * Compute the joint log-probability density of the observations made up to any time t and the population
  * size at that time, as time decreases towards present : breadth-first forward traversal algorithm.
  *
  * \param[in]    start_age              Start age of the process.
@@ -31,23 +32,25 @@ using namespace RevBayesCore;
  * \param[in]    cond                   Condition of the process (none/survival/#Taxa).
  * \param[in]    time_points            Times for which we want to compute the density.
  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
+ * \param[in]    returnLogLikelihood    If true the function returns the log likelihood instead of the full B_Mt matrix.
  * \param[in]    timeTree               Tree for ancestral populations size inference.
  *
- * \return    The matrix of Mt values through time.
+ * \return    The matrix of log-Mt values through time.
 */
-MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<double> *start_age,
-                                                          const TypedDagNode<double> *lambda,
-                                                          const TypedDagNode<double> *mu,
-                                                          const TypedDagNode<double> *psi,
-                                                          const TypedDagNode<double> *omega,
-                                                          const TypedDagNode<double> *rho,
-                                                          const TypedDagNode<double> *removalPr,
-                                                          const TypedDagNode<long> *maxHiddenLin,
-                                                          const std::string &cond,
-                                                          const std::vector<double> &time_points,
-                                                          bool useOrigin,
-                                                          const std::vector<double> &occurrence_ages,
-                                                          const Tree &timeTree)
+MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<double> *start_age,
+                                                            const TypedDagNode<double> *lambda,
+                                                            const TypedDagNode<double> *mu,
+                                                            const TypedDagNode<double> *psi,
+                                                            const TypedDagNode<double> *omega,
+                                                            const TypedDagNode<double> *rho,
+                                                            const TypedDagNode<double> *removalPr,
+                                                            const TypedDagNode<long> *maxHiddenLin,
+                                                            const std::string &cond,
+                                                            const std::vector<double> &time_points,
+                                                            bool useOrigin,
+                                                            bool returnLogLikelihood,
+                                                            const std::vector<double> &occurrence_ages,
+                                                            const Tree &timeTree)
 {
 
     // Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
@@ -66,7 +69,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
     const size_t num_nodes = timeTree.getNumberOfNodes();
 
     // number of extant lineages
-    size_t k = 0;
+    size_t nb_extant = 0;
 
     // vector of events
     std::vector<Event>         events;
@@ -122,7 +125,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
             // events.push_back(Event(n.getAge(),"extant leaf") ;
             // events.push_back(Event(n.getAge(), "terminal non-removed")) ;
             // std::cout << n.getSpeciesName() << std::endl;
-            k++;
+            nb_extant++;
         }
         else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
         {
@@ -181,8 +184,20 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
     //     }
     // }
 
-    // Number of extant lineages
-    k = 1;
+    // Count event types :
+    size_t k = 1;                       // Number of lineages
+    size_t nb_fossil_leafs = 0;         // Number of fossil leafs
+    size_t nb_sampled_ancestors = 0;    // Number of sampled ancestors
+    size_t nb_occurrences = 0;          // Number of fossil occurrences
+    size_t nb_branching_times = 0;      // Number of branching times
+
+    // Recording the correction terms c to avoid divergence towards extreme values (outside of double precision)
+    double log_correction = 0;
+    double c;
+
+    // Estimating the smallest sufficient N value for getting most of the probability density
+    size_t N_optimal = 0;
+    size_t N_optimal_tmp;
 
     // We start at the time of origin, supposedly the first time in the vector of events
     RbVector<double> Mt(N+1, 0.0);
@@ -228,16 +243,36 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
             }
 
             RbMath::expMatrixPade(A, A, 4);
+            // std::cout << "\nA : " << A << std::endl;
+            // std::cout << "\nMt : " << Mt << std::endl;
+            // std::cout << "\nlog(Mt[0]) : " << log(Mt[0]) << " - log(Mt[1]) : " << log(Mt[1]) << " - log(Mt[2]) : " << log(Mt[2]) << " - log(Mt[3]) : " << log(Mt[3]) << std::endl;
             Mt = A * Mt;
         }
 
         // Second, deal with the update at punctual event th
 
         if(type == "time point"){
-            for(int i = 0; i < N+1; i++){
-                B[indxJ][i] = Mt[i];
+            // Combine the scaling factors for all the events until present
+            double events_factor_log = log_correction;
+            // std::cout << "log_correction : " << log_correction << std::endl;
+            if (ps != 0){
+                events_factor_log += log(ps) * (nb_fossil_leafs + nb_sampled_ancestors);
+                // std::cout << "log(ps) * (nb_fossil_leafs + nb_sampled_ancestors) : " << log(ps) * (nb_fossil_leafs + nb_sampled_ancestors) << std::endl;
             }
-            indxJ -= 1;
+            if (om != 0){
+                events_factor_log += log(om) * nb_occurrences;
+                // std::cout << "log(om) * nb_occurrences : " << log(om) * nb_occurrences << std::endl;
+            }
+            if (birth != 0){
+                events_factor_log += log(birth) * nb_branching_times;
+                // std::cout << "log(birth) * nb_branching_times : " << log(birth) * nb_branching_times << std::endl;
+            }
+            // std::cout << "events_factor_log : " << events_factor_log << std::endl;
+            for(int i = 0; i < N+1; i++){
+                B[indxJ][i] = log(Mt[i]) + events_factor_log;
+            }
+            // std::cout << "Time point scaled log : log(Mt[0]) + events_factor_log : " << log(Mt[0]) + events_factor_log << " / log(Mt[N]) + events_factor_log : " << log(Mt[N]) + events_factor_log << std::endl;
+            indxJ--;
         }
 
         // if(type == "terminal removed"){
@@ -259,17 +294,22 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
         // @todo add fossil-removed/non-removed
         if(type == "fossil leaf"){
             for(int i = N; i > 0 ; i--){
-                Mt[i] = Mt[i-1] * ps * (1-rp) + ps * rp * Mt[i];
+                // Mt[i] = Mt[i-1] * ps * (1-rp) + ps * rp * Mt[i];
+                Mt[i] = Mt[i-1] * (1-rp) + rp * Mt[i];
             }
-            Mt[0] *= ps * rp;
-            k -= 1;
+            // Mt[0] *= ps * rp;
+            Mt[0] *= rp;
+            k--;
+            nb_fossil_leafs++;
         }
 
 
         if(type == "sampled ancestor"){
             for(int i = 0; i < N+1; i++){
-                Mt[i] *= ps * (1-rp);
+                // Mt[i] *= ps * (1-rp);
+                Mt[i] *= (1-rp);
             }
+            nb_sampled_ancestors++;
         }
 
         // if(type == "occurrence removed"){
@@ -288,34 +328,97 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
         // @todo add occurrence-removed/non-removed
         if(type == "occurrence"){
             for(int i = 0; i < N; i++){
-                Mt[i] = Mt[i+1] * (i+1) * om * rp + (k+i) * om * (1-rp) * Mt[i];
+                // Mt[i] = Mt[i+1] * (i+1) * om * rp + (k+i) * om * (1-rp) * Mt[i];
+                Mt[i] = Mt[i+1] * (i+1) * rp + (k+i) * (1-rp) * Mt[i];
             }
-            Mt[N] *= (k+N) * om * (1-rp);
+            // Mt[N] *= (k+N) * om * (1-rp);
+            Mt[N] *= (k+N) * (1-rp);
+            nb_occurrences++;
          }
+        // if(type == "occurrence"){
+        //     // Correct probability vector to avoid divergence towards extreme values (outside of double precision) by scaling to a unit maximum value
+        //     double max_Mt = *std::max_element(Mt.begin(), Mt.end());
+        //     c = 1/max_Mt;
+        //     // c=exp(1);
+        //     for(int i = 0; i < N; i++){
+        //         // Mt[i] = Mt[i+1] * (i+1) * om * rp + (k+i) * om * (1-rp) * Mt[i];
+        //         Mt[i] = (Mt[i+1] * (i+1) * rp + (k+i) * (1-rp) * Mt[i]) * c;
+        //    }
+        //     // Mt[N] *= (k+N) * om * (1-rp);
+        //     Mt[N] *= (k+N) * (1-rp) * c;
+        //     nb_occurrences++;
+            
+        //     log_correction -= log(c);
+        //     std::cout << "log(c) : " << log(c) << std::endl;
+        //  }
 
 
         if(type == "branching time"){
-            for(int i = 0; i < N+1; i++){
-                Mt[i] *= birth;
-            }
-            k += 1;
+            // for(int i = 0; i < N+1; i++){
+            //     Mt[i] *= birth;
+            // }
+            k++;
+            nb_branching_times++;
         }
+        
+        // Correct probability vector to avoid divergence towards extreme values (outside of double precision) by scaling to a unit maximum value
+        double max_Mt = *std::max_element(Mt.begin(), Mt.end());
+        c = 1/max_Mt;
+        for(int i = 0; i < N+1; i++){
+            Mt[i] = Mt[i] * c;
+        }
+        log_correction -= log(c);
+        
+        // std::cout << "Event time : " << th << " - Event type : " << type << " -> log(c) : " << log(c) << " -> Mt[0] : " << Mt[0] << " / Mt[1] : " << Mt[1] << " / Mt[N] : " << Mt[N] << std::endl;
+        
+        // Check that N is big enough
+        if (Mt[N]>0.001){
+            std::cout << "\nWARNING : Mt[N] contains a non-negligeable probability ( Mt[N] > max(Mt)/1000 ) -> you should increase N\n" << std::endl;
 
-        // std::cout << "Event time : " << th << " - Event type : " << type << " -> Mt[0] : " << Mt[0] << " / Mt[1] : " << Mt[1] << std::endl;
+            // In that case the optimal N value cannot be estimated because it is greater than the chosen one
+            N_optimal = N+1;
+        }
+        else{
+            N_optimal_tmp = N;
+            while (Mt[N_optimal_tmp-1]<0.001){
+                N_optimal_tmp--;
+            }
+            N_optimal = std::max(N_optimal, N_optimal_tmp);
+        }
+        // std::cout << "\nThe smallest sufficient N value ( such as Mt[N_optimal] < max(Mt)/1000 for all t ) is " << N_optimal << "\n" << std::endl;
 
         thPlusOne = th;
     }
+    
+    // Give the estimated optimal N value
+    if (N_optimal != N+1){
+        std::cout << "\nThe smallest sufficient N value ( such as Mt[N_optimal] < max(Mt)/1000 for all t ) is " << N_optimal << "\n" << std::endl;
+    }
+    else{
+        std::cout << "\nWARNING : There is at least one time t such as Mt[N] contains a non-negligeable probability ( Mt[N] > max(Mt)/1000 ) -> you should increase N\n" << std::endl;
+    }
 
-    // double likelihood = Mt[0];
-    // for(int i = 1; i < N+1; i++){
-    //     likelihood += Mt[i] * pow(rh,k) * pow(1.0 - rh,i);
-    // }
+    if(returnLogLikelihood){
+        double events_factor_log = log_correction;
+        if (ps != 0){events_factor_log += log(ps) * (nb_fossil_leafs + nb_sampled_ancestors); }
+        if (om != 0){events_factor_log += log(om) * nb_occurrences; }
+        if (birth != 0) {events_factor_log += log(birth) * nb_branching_times; }
+        
+        double likelihood = 0;
+        for(int i = 0; i < N+1; i++){
+            likelihood += Mt[i] * pow(rh, k) * pow(1.0 - rh, i);
+        }
+        MatrixReal LogLikelihood(1, 1, log(likelihood) + events_factor_log);
+        return LogLikelihood;
+    }
 
     return B;
 }
 
+
+
 /**
- * Compute the probability density of observations made down any time t, conditioned on the population
+ * Compute the joint log probability density of observations made down any time t, conditioned on the population
  * size at that time, as time increases towards the past : breadth-first backward traversal algorithm.
  *
  * \param[in]    start_age              Start age of the process.
@@ -327,26 +430,26 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMt(    const TypedDagNode<dou
  * \param[in]    removalPr              Removal probability after sampling.
  * \param[in]    maxHiddenLin           Algorithm accuracy (maximal number of hidden lineages).
  * \param[in]    cond                   Condition of the process (none/survival/#Taxa).
- * \param[in]    time_points         Times for which we want to compute the density.
+ * \param[in]    time_points            Times for which we want to compute the density.
  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
  * \param[in]    timeTree               Tree for ancestral populations size inference.
  *
- * \return    The matrix of Lt values through time.
+ * \return    The matrix of log-Lt values through time.
  */
-MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<double> *start_age,
-                                                          const TypedDagNode<double> *lambda,
-                                                          const TypedDagNode<double> *mu,
-                                                          const TypedDagNode<double> *psi,
-                                                          const TypedDagNode<double> *omega,
-                                                          const TypedDagNode<double> *rho,
-                                                          const TypedDagNode<double> *removalPr,
-                                                          const TypedDagNode<long> *maxHiddenLin,
+MatrixReal RevBayesCore::ComputeLnProbabilitiesBackwardsLt( const TypedDagNode<double> *start_age,
+                                                            const TypedDagNode<double> *lambda,
+                                                            const TypedDagNode<double> *mu,
+                                                            const TypedDagNode<double> *psi,
+                                                            const TypedDagNode<double> *omega,
+                                                            const TypedDagNode<double> *rho,
+                                                            const TypedDagNode<double> *removalPr,
+                                                            const TypedDagNode<long> *maxHiddenLin,
 
-                                                          const std::string& cond,
-                                                          const std::vector<double> &time_points,
-                                                          bool useOrigin,
-                                                          const std::vector<double> &occurrence_ages,
-                                                          const Tree &timeTree)
+                                                            const std::string& cond,
+                                                            const std::vector<double> &time_points,
+                                                            bool useOrigin,
+                                                            const std::vector<double> &occurrence_ages,
+                                                            const Tree &timeTree)
 {
     // Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
     struct Event {
@@ -475,6 +578,20 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
     MatrixReal B(S, (N + 1), 0.0);
     size_t indxJ = 0;
 
+    // Count event types :
+    size_t nb_fossil_leafs = 0;         // Number of fossil leafs
+    size_t nb_sampled_ancestors = 0;    // Number of sampled ancestors
+    size_t nb_occurrences = 0;          // Number of fossil occurrences
+    size_t nb_branching_times = 0;      // Number of branching times
+
+    // Recording the correction terms c to avoid divergence towards extreme values (outside of double precision)
+    double log_correction = 0;
+    double c;
+
+    // Estimating the smallest sufficient N value for getting most of the probability density
+    size_t N_optimal = 0;
+    size_t N_optimal_tmp;
+
     // We start at time 0 with type "present" in the vector of events
     // size_t k = extant;
     double thMinusOne = events[0].time;
@@ -505,10 +622,30 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
         std::string type = events[h].type;
 
         if(type == "time point"){
-            for(int i = 0; i < N+1; i++){
-                B[indxJ][i] = Lt[i];
+            // Combine the scaling factors for all the events until present
+            double events_factor_log = log_correction;
+            // std::cout << "log_correction : " << log_correction << std::endl;
+            if (ps != 0){
+                events_factor_log += log(ps) * (nb_fossil_leafs + nb_sampled_ancestors);
+                // std::cout << "log(ps) * (nb_fossil_leafs + nb_sampled_ancestors) : " << log(ps) * (nb_fossil_leafs + nb_sampled_ancestors) << std::endl;
             }
-            indxJ += 1;
+            
+            if (om != 0){
+                events_factor_log += log(om) * nb_occurrences;
+                // std::cout << "log(om) * nb_occurrences : " << log(om) * nb_occurrences << std::endl;
+            }
+            
+            if (birth != 0){
+                events_factor_log += log(birth) * nb_branching_times;
+                // std::cout << "log(birth) * nb_branching_times : " << log(birth) * nb_branching_times << std::endl;
+            }
+
+            // std::cout << "events_factor_log : " << events_factor_log  << " / Lt : " << Lt << std::endl;
+            for(int i = 0; i < N+1; i++){
+                B[indxJ][i] = log(Lt[i]) + events_factor_log;
+            }
+            // std::cout << "Time point scaled log : log(Lt[0]) + events_factor_log : " << log(Lt[0]) + events_factor_log << " / log(Lt[N]) + events_factor_log : " << log(Lt[N]) + events_factor_log << std::endl;
+            indxJ++;
         }
 
         // if(type == "terminal removed"){
@@ -529,54 +666,99 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLt(   const TypedDagNode<dou
        // @todo add fossil-removed/non-removed
        if(type == "fossil leaf"){
            for(int i = 0; i < N; i++){
-               Lt[i] = Lt[i] * ps * rp + Lt[i+1] * ps * (1.0-rp) ;
+               // Lt[i] = Lt[i] * ps * rp + Lt[i+1] * ps * (1.0-rp) ;
+               Lt[i] = Lt[i] * rp + Lt[i+1] * (1.0-rp) ;
            }
-           Lt[N] = Lt[N] * ps * rp;
-           k += 1;
+           // Lt[N] = Lt[N] * ps * rp;
+           Lt[N] = Lt[N] * rp;
+           k++;
+           nb_fossil_leafs++;
        }
 
         if(type == "sampled ancestor"){
             for(int i = 0; i < N+1; i++){
-                Lt[i] = Lt[i] * ps * (1.0-rp);
+                // Lt[i] = Lt[i] * ps * (1.0-rp);
+                Lt[i] = Lt[i] * (1.0-rp);
             }
+            nb_sampled_ancestors++;
         }
 
-        if(type == "occurrence removed"){
-            for(int i = N; i > 0; i--){
-                Lt[i] = Lt[i-1] * i * om * rp;
-            }
-            Lt[0] = 0;
-         }
+        // if(type == "occurrence removed"){
+        //     for(int i = N; i > 0; i--){
+        //         Lt[i] = Lt[i-1] * i * om * rp;
+        //     }
+        //     Lt[0] = 0;
+        //  }
 
-        if(type == "occurrence"){
-            for(int i = 0; i < N+1; i++){
-                Lt[i] = Lt[i] * (k+i) * om * (1-rp);
-            }
-        }
+        // if(type == "occurrence"){
+        //     for(int i = 0; i < N+1; i++){
+        //         Lt[i] = Lt[i] * (k+i) * om * (1-rp);
+        //     }
+        // }
 
         // For now, we assume there is no information/labels on removal
        // @todo add occurrence-removed/non-removed
        if(type == "occurrence"){
            for(int i = N; i > 0; i--){
-               Lt[i] = Lt[i-1] * i * om * rp + Lt[i] * (k+i) * om * (1-rp);
+               // Lt[i] = Lt[i-1] * i * om * rp + Lt[i] * (k+i) * om * (1-rp);
+               Lt[i] = Lt[i-1] * i * rp + Lt[i] * (k+i) * (1-rp);
            }
-           Lt[0] = Lt[0] * k * om * (1-rp);
+           // Lt[0] = Lt[0] * k * om * (1-rp);
+           Lt[0] = Lt[0] * k * (1-rp);
+           nb_occurrences++;
         }
 
         if(type == "branching time"){
-            for(int i = 0; i < N+1; i++){
-                Lt[i] = Lt[i] * birth;
-            }
-            k -= 1;
+            // for(int i = 0; i < N+1; i++){
+            //     Lt[i] = Lt[i] * birth;
+            // }
+            k--;
+            nb_branching_times++;
         }
 
-        // std::cout << "Event time : " << th << " - Event type : " << type << " -> Lt[0] : " << Lt[0] << " / Lt[1] : " << Lt[1] << std::endl;
+        // Correct probability vector to avoid divergence towards extreme values (outside of double precision) by scaling to a unit maximum value
+        double max_Lt = *std::max_element(Lt.begin(), Lt.end());
+        c = 1/max_Lt;
+        for(int i = 0; i < N+1; i++){
+            Lt[i] = Lt[i] * c;
+        }
+        log_correction -= log(c);
+        
+        // std::cout << "Event time : " << th << " - Event type : " << type << " -> log(c) : " << log(c) << " -> Lt[0] : " << Lt[0] << " / Lt[1] : " << Lt[1] << " / Lt[N] : " << Lt[N] << std::endl;
+        
+        // Check that N is big enough
+        if (Lt[N]>0.001){
+            std::cout << "\nWARNING : Lt[N] contains a non-negligeable probability ( Lt[N] > max(Lt)/1000 ) -> you should increase N\n" << std::endl;
+
+            // In that case the optimal N value cannot be estimated because it is greater than the chosen one
+            N_optimal = N+1;
+        }
+        else{
+            N_optimal_tmp = N;
+            while (Lt[N_optimal_tmp-1]<0.001){
+                N_optimal_tmp--;
+            }
+            N_optimal = std::max(N_optimal, N_optimal_tmp);
+        }
+        // std::cout << "\nThe smallest sufficient N value ( such as Lt[N_optimal] < max(Lt)/1000 for all t ) is " << N_optimal << "\n" << std::endl;
+
+        // std::cout << "Event time : " << th << " - Event type : " << type << " -> k : " << k << " -> Lt[0] : " << Lt[0] << " / Lt[1] : " << Lt[1] << " / Lt[N] : " << Lt[N] << std::endl;
 
         thMinusOne = th;
     }
 
+    // Give the estimated optimal N value
+    if (N_optimal != N+1){
+        std::cout << "\nThe smallest sufficient N value ( such as Lt[N_optimal] < max(Lt)/1000 for all t ) is " << N_optimal << "\n" << std::endl;
+    }
+    else{
+        std::cout << "\nWARNING : There is at least one time t such as Lt[N] contains a non-negligeable probability ( Lt[N] > max(Lt)/1000 ) -> you should increase N\n" << std::endl;
+    }
+
     return B;
 }
+
+
 
 // /**
 //  * Compute the joint probability density of the observations made up to any time t and the population
@@ -910,7 +1092,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDag
 //  * \param[in]    removalPr              Removal probability after sampling.
 //  * \param[in]    maxHiddenLin           Algorithm accuracy (maximal number of hidden lineages).
 //  * \param[in]    cond                   Condition of the process (none/survival/#Taxa).
-//  * \param[in]    time_points         Times for which we want to compute the density.
+//  * \param[in]    time_points            Times for which we want to compute the density.
 //  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
 //  * \param[in]    timeTree               Tree for ancestral populations size inference.
 //  *

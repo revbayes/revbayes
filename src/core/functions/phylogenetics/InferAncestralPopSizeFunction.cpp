@@ -119,25 +119,33 @@ void InferAncestralPopSizeFunction::update( void )
     const Tree tree = timeTree->getValue();
     const std::vector<double> occurrence_ages = occurrences->getValue();
 
-	MatrixReal B_Lt = RevBayesCore::ComputeLikelihoodsBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, occurrence_ages, tree);
-	MatrixReal B_Mt = RevBayesCore::ComputeLikelihoodsForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, occurrence_ages, tree);
+	MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilitiesBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, occurrence_ages, tree);
+    bool returnLogLikelihood = false;
+	MatrixReal B_Mt_log = RevBayesCore::ComputeLnProbabilitiesForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, returnLogLikelihood, occurrence_ages, tree);
 
-	// Realize the Hadamar Product of B_Lt and B_Mt
+	// Realize the normalized Hadamar Product of B_Lt and B_Mt
 	MatrixReal D_Kt(S, (N + 1), 0.0);
-	for (size_t j = 0; j < S; j++)
+    for (size_t j = 0; j < S; j++){
+        // Compute the mean log-probability (later substracted in order to avoid extreme values, out of the double precision)
+        double B_Lt_Mt_log_mean = 0.0;
+        for (size_t i = 0; i < (N+1); i++)
         {
-            // Compute the normalization factor
-            double norm = 0.0;
-            for (size_t i = 0; i < (N+1); i++)
-            {
-                norm += B_Lt[j][i]*B_Mt[j][i];
-            }
-
-            for (size_t i = 0; i < (N+1); i++)
-            {
-                D_Kt[j][i] = (B_Lt[j][i] * B_Mt[j][i])/norm;
-            }
+            B_Lt_Mt_log_mean += B_Lt_log[j][i] + B_Mt_log[j][i];
         }
+        B_Lt_Mt_log_mean /= N;
+
+        // Compute the normalization factor
+        double norm = 0.0;
+        for (size_t i = 0; i < (N+1); i++)
+        {
+            norm += exp(B_Lt_log[j][i] + B_Mt_log[j][i] - B_Lt_Mt_log_mean);
+        }
+
+        for (size_t i = 0; i < (N+1); i++)
+        {
+            D_Kt[j][i] = exp(B_Lt_log[j][i] + B_Mt_log[j][i] - B_Lt_Mt_log_mean)/norm;
+        }
+    }
 
 	*this->value = D_Kt;
 

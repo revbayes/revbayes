@@ -17,12 +17,12 @@ seed(12345)
 #######################
 
 # Choose your burnin percentage
-burninPercentage <- 0.2
+burninPercentage <- 0
 
 ### Read in data
-occurrence_ages <- readMatrix(file="data-macro-test/data_occurrences.csv", delimiter=";")[1]
-trees = readTreeTrace("output_macro_test_Mt_cluster/mcmc_OBDP_macro_test.trees", burnin=burninPercentage)
-trace = readTrace("output_macro_test_Mt_cluster/mcmc_OBDP_macro_test.out", burnin=burninPercentage)
+occurrence_ages <- readMatrix(file="data-macro-test-small/data_occurrences.csv", delimiter=";")[1]
+trees = readTreeTrace("output_macro_test_Mt/mcmc_OBDP_macro_test-small.trees", burnin=burninPercentage)
+trace = readTrace("output_macro_test_Mt/mcmc_OBDP_macro_test-small.out", burnin=burninPercentage)
 # Trace[] vector with 14 values :
      # [1] Trace (Iteration)
      # [2] Trace (alpha_morpho)
@@ -39,16 +39,16 @@ trace = readTrace("output_macro_test_Mt_cluster/mcmc_OBDP_macro_test.out", burni
      # [13] Trace (sf)
      # [14] Trace (start_time)
 
-file_path = "output_inferKt_macro_test_cluster/"
+file_path = "output_inferKt_macro_test/"
 
 nb_trees <- trees.getNumberSamples()
 burnin <- trees.getBurnin()
 
 # Fixed OBDP parameters
 rm <- 0.0
-N <- 30
+N <- 35
 cond <- "time"
-nb_time_points <- 200                                # Choose the number of time points you want to evaluate
+nb_time_points <- 5                                # Choose the number of time points you want to evaluate
 
 # variable OBDP parameters -> check in trace that the values correspond well !
 trace_start_time = trace[14]

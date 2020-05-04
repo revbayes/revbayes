@@ -38,7 +38,7 @@ psi ~ dnExp(10)
 omega ~ dnExp(5)
 rho ~ dnUnif(0.0, 1.0)
 rm <- 0.0
-N <- 50
+N <- 15
 cond <- "time"
 # start_time ~ dnUnif(7.7, 12.0)
 start_time ~ dnUnif(5.3, 10.0)
@@ -66,14 +66,14 @@ obd_tree ~ dnOBDP(  originAge=start_time,
                     removalPr=rm, 
                     maxHiddenLin=N, 
                     condition=cond, 
-                    taxa=taxa, 
+                    taxa=taxa,
                     occurrence_ages=occurrence_ages, 
                     useMt=useMt)
 
 
-# moves[mvi++] = mvFNPR(obd_tree, weight=20.0)
-# moves[mvi++] = mvCollapseExpandFossilBranch(obd_tree, start_time, weight=3.0)
-# moves[mvi++] = mvNodeTimeSlideUniform(obd_tree, weight=5.0)
+moves[mvi++] = mvFNPR(obd_tree, weight=20.0)
+moves[mvi++] = mvCollapseExpandFossilBranch(obd_tree, start_time, weight=3.0)
+moves[mvi++] = mvNodeTimeSlideUniform(obd_tree, weight=5.0)
 moves[mvi++] = mvRootTimeSlideUniform(obd_tree, start_time, weight=2.0)
 
 fossils = obd_tree.getFossils()
@@ -136,14 +136,14 @@ phyMorpho.clamp(morpho)
 mymodel = model(obd_tree)
 
 
-monitors[1] = mnStochasticVariable(filename="output_macro_test_Mt/mcmc_OBDP_macro_test-small.out", printgen=1)
-monitors[2] = mnFile(filename="output_macro_test_Mt/mcmc_OBDP_macro_test-small.trees", printgen=1,obd_tree)
+monitors[1] = mnStochasticVariable(filename="output_macro_test_Mt/mcmc_OBDP_macro_test-small.out", printgen=5)
+monitors[2] = mnFile(filename="output_macro_test_Mt/mcmc_OBDP_macro_test-small.trees", printgen=5, obd_tree)
 monitors[3] = mnScreen(printgen=1, num_samp_anc, start_time)
 print("my model ok")
 mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
 # mymcmc = mcmc(mymodel, monitors, moves)
 
-mymcmc.run(generations=10, tuningInterval=100)
+mymcmc.run(generations=100, tuningInterval=100)
 
 # check the performance of the MCMC/moves
 mymcmc.operatorSummary()
