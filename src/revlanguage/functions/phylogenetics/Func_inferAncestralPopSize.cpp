@@ -1,5 +1,7 @@
 #include "Func_inferAncestralPopSize.h"
 #include "InferAncestralPopSizeFunction.h"
+#include "InferAncestralPopSizeFunctionPiecewise.h"
+
 
 // you can probably get rid of some of these
 #include "ArgumentRule.h"
@@ -42,37 +44,63 @@ Func_inferAncestralPopSize* Func_inferAncestralPopSize::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_inferAncestralPopSize::createFunction( void ) const
 {
 
+/**first we get parameters that are shared by the piecewise and constant rate models */
+
   RevBayesCore::TypedDagNode< double >*                           sa              = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-  
-  RevBayesCore::TypedDagNode< double >*                           l               = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
 
-  RevBayesCore::TypedDagNode< double >*                           m               = static_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-  
-  RevBayesCore::TypedDagNode< double >*                           p               = static_cast<const RealPos &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
-  
-  RevBayesCore::TypedDagNode< double >*                           o               = static_cast<const RealPos &>( this->args[4].getVariable()->getRevObject() ).getDagNode();
-  
-  RevBayesCore::TypedDagNode< double >*                           rh              = static_cast<const RealPos &>( this->args[5].getVariable()->getRevObject() ).getDagNode();
-  
-  RevBayesCore::TypedDagNode< double >*                           r               = static_cast<const RealPos &>( this->args[6].getVariable()->getRevObject() ).getDagNode();
-
-  RevBayesCore::TypedDagNode< long >*                             n               = static_cast<const Natural &>( this->args[7].getVariable()->getRevObject() ).getDagNode();
-  
   // sampling condition
   const std::string&                                              cdt             = static_cast<const RlString &>( this->args[8].getVariable()->getRevObject() ).getValue();
 
   // occurrence ages
   RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> > *  O               = static_cast<const ModelVector<Real> &>( this->args[9].getVariable()->getRevObject() ).getDagNode();
-    
+
   std::vector<double>                                             tau             = static_cast<const ModelVector<Real> &>( this->args[10].getVariable()->getRevObject() ).getValue();
 
   bool                                                            uo              = ( start_condition == "originAge" ? true : false );
-  
+
+  RevBayesCore::TypedDagNode< double >*                           rh              = static_cast<const RealPos &>( this->args[5].getVariable()->getRevObject() ).getDagNode();
+
+  RevBayesCore::TypedDagNode< long >*                             n               = static_cast<const Natural &>( this->args[7].getVariable()->getRevObject() ).getDagNode();
+
   RevBayesCore::TypedDagNode< RevBayesCore::Tree >*               tr              = static_cast<const TimeTree &>( this->args[11].getVariable()->getRevObject() ).getDagNode();
-  
+
+  /**If a timeline is provided, go to the piecwise version*/
+
+  if ( this->args[12].getVariable()->getRevObject() != RevNullObject::getInstance() )
+  {
+      RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >*time = static_cast<const ModelVector<RealPos> &>( this->args[12].getVariable()->getRevObject() ).getDagNode();
+
+      RevBayesCore::DagNode* l = ( this->args[1].getVariable()->getRevObject() ).getDagNode();
+
+      RevBayesCore::DagNode* m = ( this->args[2].getVariable()->getRevObject() ).getDagNode();
+
+      RevBayesCore::DagNode* p = ( this->args[3].getVariable()->getRevObject() ).getDagNode();
+
+      RevBayesCore::DagNode* o = ( this->args[4].getVariable()->getRevObject() ).getDagNode();
+
+      RevBayesCore::DagNode* r = ( this->args[6].getVariable()->getRevObject() ).getDagNode();
+
+      RevBayesCore::InferAncestralPopSizeFunctionPiecewise* fxn = new RevBayesCore::InferAncestralPopSizeFunctionPiecewise( sa, l, m, p, o, rh, r, n, cdt, O, tau, uo, tr, time );
+
+      return fxn;
+
+  }
+
+
+  RevBayesCore::TypedDagNode< double >*                           l               = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+
+  RevBayesCore::TypedDagNode< double >*                           m               = static_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+
+  RevBayesCore::TypedDagNode< double >*                           p               = static_cast<const RealPos &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+
+  RevBayesCore::TypedDagNode< double >*                           o               = static_cast<const RealPos &>( this->args[4].getVariable()->getRevObject() ).getDagNode();
+
+  RevBayesCore::TypedDagNode< double >*                           r               = static_cast<const RealPos &>( this->args[6].getVariable()->getRevObject() ).getDagNode();
+
   RevBayesCore::InferAncestralPopSizeFunction* fxn = new RevBayesCore::InferAncestralPopSizeFunction( sa, l, m, p, o, rh, r, n, cdt, O, tau, uo, tr );
 
   return fxn;
+
 
 }
 
@@ -111,6 +139,9 @@ const ArgumentRules& Func_inferAncestralPopSize::getArgumentRules( void ) const
         argumentRules.push_back( new ArgumentRule( "time_points",       ModelVector<Real>::getClassTypeSpec(), "Time points for which we compute density.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         argumentRules.push_back( new ArgumentRule( "timeTree" ,         TimeTree::getClassTypeSpec(), "Tree for which ancestral pop. size has to be computed.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+
+        argumentRules.push_back( new ArgumentRule( "timeline",    ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+
 
         rules_set = true;
     }
@@ -215,6 +246,10 @@ void Func_inferAncestralPopSize::setConstParameter(const std::string& name, cons
     else if ( name == "timeTree" )
     {
         timeTree = var;
+    }
+    else if ( name == "timeline" )
+    {
+        timeline = var;
     }
     else {
       Function::setConstParameter(name, var);

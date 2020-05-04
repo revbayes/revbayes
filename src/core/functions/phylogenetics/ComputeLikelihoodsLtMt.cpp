@@ -807,6 +807,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDag
 
         };
 
+
     // get node/time variables
     const size_t num_nodes = timeTree.getNumberOfNodes();
 
@@ -889,7 +890,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDag
     }
     //adding rate shift events to the events vector
     const std::vector<double> d = timeline;
-    for ( int i=0; i < d.size(); i++)
+    for ( int i=1; i < d.size(); i++)
     {
     events.push_back(Event(timeline[i],"rate shift")) ;
     }
@@ -907,13 +908,15 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDag
     std::sort( events.begin(), events.end(), AgeCompareReverse() );
 
 
-
     const std::vector<double> birth = lambda;
+    std::cout << "birth vector" << birth << std::endl;
+
     const std::vector<double> death = mu;
     const std::vector<double> ps = psi;
     const std::vector<double> om = omega;
     const double rh = rho->getValue();
     const std::vector<double> rp = removalPr;
+
     const long N = maxHiddenLin->getValue();
     // const RbVector<double> tau = time_points->getValue();
 
@@ -922,12 +925,13 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDag
 
     // Initialize an empty matrix and a cursor to write lines in this matrix
     MatrixReal B(S, (N + 1), 0.0);
-    double birth_current = birth[0];
-    double death_current = death[0];
-    double ps_current = ps[0];
-    double om_current = om[0];
-    double rp_current = rp[0];
-    double gamma_current = gamma[0];
+
+    double birth_current = birth.back();
+    double death_current = death.back();
+    double ps_current = ps.back();
+    double om_current = om.back();
+    double rp_current = rp.back();
+    double gamma_current = gamma.back();
     size_t indxJ = S-1;
 
     // Count the number of extant lineages
@@ -981,12 +985,8 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDag
         std::string type = events[h].type;
         if(type == "rate shift"){
         //change rates appropriately, rate changes provided in timeline are in an ascending order
-        //rates are ordered in the reverse order : 1st element is last timeslice.
-        //the rates indices are forward in time
-        size_t where = timeline.size() - LocateTimeSliceIndex(th,timeline);
+        size_t where = LocateTimeSliceIndex(th,timeline) - 1;
 
-        std::cout << "We are at time: " << th << std::endl;
-        std::cout << "We are entering rate-time-slice index #:" << where << std::endl;
         std::cout <<"birth rate was " << birth_current << std::endl;
         std::cout <<"birth rate shifts to "<< birth[where] <<std::endl;
         birth_current = birth[where];
@@ -1209,7 +1209,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLtPiecewise(  const TypedDag
     }
     //adding rate shift events to the events vector
     const std::vector<double> d = timeline;
-    for ( int i=0; i < d.size(); i++)
+    for ( int i=1; i < d.size(); i++)
     {
     events.push_back(Event(timeline[i],"rate shift")) ;
     }
@@ -1244,13 +1244,12 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLtPiecewise(  const TypedDag
 
     // Initialize an empty matrix and a cursor indxJ to write lines in this matrix as well as the parameter sets.
     MatrixReal B(S, (N + 1), 0.0);
-    const size_t m = d.size();
-    double birth_current = birth[m];
-    double death_current = death[m];
-    double ps_current = ps[m];
-    double om_current = om[m];
-    double rp_current = rp[m];
-    double gamma_current = gamma[m];
+    double birth_current = birth[0];
+    double death_current = death[0];
+    double ps_current = ps[0];
+    double om_current = om[0];
+    double rp_current = rp[0];
+    double gamma_current = gamma[0];
 
     size_t indxJ = 0;
 
@@ -1287,12 +1286,10 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLtPiecewise(  const TypedDag
         std::string type = events[h].type;
         if(type == "rate shift"){
         //change rates appropriately
-        size_t where = LocateTimeSliceIndex(th,timeline);
-        std::cout << "We are at time: " << th << std::endl;
-        std::cout << "We are entering rate-time-slice index #:" << where << std::endl;
+        size_t where = LocateTimeSliceIndex(th,timeline) ;
         std::cout <<"birth rate was " << birth_current << std::endl;
         std::cout <<"birth rate shifts to "<< birth[where] <<std::endl;
-        std::cout <<"birth rate ="<< birth[where] <<std::endl;
+
         birth_current = birth[where];
         death_current = death[where];
         ps_current = ps[where];

@@ -51,6 +51,8 @@ namespace RevLanguage {
       RevPtr<const RevVariable>                               extant;                                                                                 //!< The number of extant taxa
       RevPtr<const RevVariable>                               time_points;                                                                            //!< The times at which density is computed
       RevPtr<const RevVariable>                               timeTree;                                                                               //!< The tree for ancestral pop. size inference
+      RevPtr<const RevVariable>                               timeline;                                                                               //!< The rate shifts timeline
+
 
   };
 
