@@ -8,7 +8,12 @@ namespace RevBayesCore { class DagNode; }
 using namespace RevBayesCore;
 
 
-/** Standard constructor from appropriately typed DAG node */
+/** Standard constructor from appropriately typed DAG node
+ *
+ * @param vec a Rbvector of doubles
+ * @param a a boolean denoting whether to sort in ascending order
+ *
+ * */
 SortVectorFunction::SortVectorFunction( const TypedDagNode< RbVector<double> >* vec, bool a ) :
     TypedFunction< RbVector<double> >( new RbVector<double>() ),
     ascending( a ),

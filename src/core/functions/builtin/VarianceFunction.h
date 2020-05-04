@@ -12,8 +12,8 @@ template <class valueType> class TypedDagNode;
     /**
      * @brief Variance of a vector of real numbers.
      *
-     * This function computes the variance of a vector of real number:
-     *   y = sum_{i=1}^{n}(x[i]-\bar{x})*(x[i]-\bar{x})/(n-1)
+     * This function computes the variance of a vector of real numbers:
+     *   \f$y = \frac{1}{(n-1)}\sum_{i=1}^{n}(x[i]-\bar{x})*(x[i]-\bar{x})\f$
      *
      */
     class VarianceFunction : public TypedFunction<double> {

@@ -1,0 +1,245 @@
+name: Build and test
+
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+    - "*"
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        name: [ubuntu-gcc-4.9,
+               ubuntu-gcc-5,
+               ubuntu-gcc-6,
+               ubuntu-gcc-7,
+               ubuntu-gcc-8,
+               ubuntu-gcc-9,
+               ubuntu-gcc-9-mpi,
+               ubuntu-clang-8,
+               macos-xcode-11.3.1,
+               windows
+               ]
+
+        include:
+          - name: ubuntu-gcc-4.9
+            os: ubuntu-16.04
+            compiler: gcc
+            version: "4.9"
+            mpi: false
+
+          - name: ubuntu-gcc-5
+            os: ubuntu-18.04
+            compiler: gcc
+            version: "5"
+            mpi: false
+
+          - name: ubuntu-gcc-6
+            os: ubuntu-18.04
+            compiler: gcc
+            version: "6"
+            mpi: false
+
+          - name: ubuntu-gcc-7
+            os: ubuntu-latest
+            compiler: gcc
+            version: "8"
+            mpi: false
+
+          - name: ubuntu-gcc-8
+            os: ubuntu-latest
+            compiler: gcc
+            version: "8"
+            mpi: false
+
+          - name: ubuntu-gcc-9
+            os: ubuntu-latest
+            compiler: gcc
+            version: "9"
+            mpi: false
+
+          - name: ubuntu-gcc-9-mpi
+            os: ubuntu-latest
+            compiler: gcc
+            version: "9"
+            mpi: true
+
+          - name: ubuntu-clang-8
+            os: ubuntu-latest
+            compiler: clang
+            version: "8"
+            mpi: false
+
+          - name: macos-xcode-11.3.1
+            os: macos-latest
+            compiler: xcode
+            version: "11.3.1"
+            mpi: false
+  
+          - name: windows
+            os: ubuntu-latest
+            compiler: idk
+            version: "9000"
+            mpi: false
+
+
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+
+    - name: Install (Linux)
+      if: runner.os == 'Linux' && matrix.name != 'windows'
+      run: |
+        sudo apt-get install -y pandoc libcairo2-dev ccache
+        if [ "${{ matrix.compiler }}" = "gcc" ]; then
+          sudo apt-get install -y g++-${{ matrix.version }}
+          echo "::set-env name=C_COMPILER::gcc-${{ matrix.version }}"
+          echo "::set-env name=CXX_COMPILER::g++-${{ matrix.version }}"
+        else
+          sudo apt-get install -y clang-${{ matrix.version }}
+          echo "::set-env name=C_COMPILER::clang-${{ matrix.version }}"
+          echo "::set-env name=CXX_COMPILER::clang++-${{ matrix.version }}"
+        fi
+        if [ "${{ matrix.mpi }}" = true ] ; then
+          sudo apt-get install libopenmpi-dev
+        fi
+
+    - name: Install (macOS)
+      if: runner.os == 'macOS'
+      run: |
+          brew update
+          brew install pkg-config pandoc boost ccache coreutils
+          sudo xcode-select -switch /Applications/Xcode_${{ matrix.version }}.app
+
+    - name: Install (Windows meson cross compile)
+      if: matrix.name == 'windows'
+      run: |
+          sudo apt-get install -y pandoc libcairo2-dev ccache dos2unix
+          sudo apt-get install git python3-setuptools python3-pip g++-mingw-w64 wine64
+          sudo -H pip3 install meson
+          sudo -H pip3 install ninja
+
+    # Caches for different branches are isolated, so we don't need to put the branch name into the key.
+    # The total size for all caches in a repository is 5Gb.
+
+    - name: Prepare ccache timestamp
+      id: ccache_cache_timestamp
+      run: |
+        if [ "$RUNNER_OS" = "Linux" ] ; then
+          stamp=$(date '+%s')
+        else
+          stamp=$(gdate '+%s')
+        fi
+        echo "${stamp}"
+        echo "::set-output name=timestamp::${stamp}"
+
+    - name: ccache cache files
+      uses: actions/cache@v1.1.0
+      with:
+         path: ~/.ccache
+         key: ${{ matrix.name }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
+         restore-keys: |
+           ${{ matrix.name }}-ccache-
+
+    - name: Install BOOST (Linux)
+      if: runner.os == 'Linux' && matrix.name != 'windows'
+      run: |
+        # Don't use weird boost version installed by github actions.
+        sudo rm -rf /usr/local/share/boost
+        # We have to build boost for gcc-4.9 because the prebuilt packages have the ABI from gcc-5+
+        if [ "${{ matrix.os }}" = ubuntu-16.04 ] ; then
+          # These exports are supposed to affect b2, but they seem not to, so use update-alternatives
+          export CC=gcc-4.9
+          export CXX=g++-4.9
+          sudo update-alternatives --install /usr/bin/gcc  gcc /usr/bin/gcc-4.9  90
+          sudo update-alternatives --install /usr/bin/g++  g++ /usr/bin/g++-4.9  90
+          curl -O -L https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz
+          tar -xzf boost_1_71_0.tar.gz
+          cd boost_1_71_0
+          ./bootstrap.sh --with-libraries=atomic,chrono,filesystem,system,regex,thread,date_time,program_options,math,serialization
+          ./b2 link=static
+          echo "::set-env name=BOOST_ROOT::${GITHUB_WORKSPACE}/boost_1_71_0"
+          echo "::set-env name=BOOST_INCLUDE_DIR::${GITHUB_WORKSPACE}/boost_1_71_0"
+          echo "::set-env name=BOOST_LIBRARY_DIR::${GITHUB_WORKSPACE}/boost_1_71_0/stage/lib"
+        else
+          sudo apt-get install -y libboost-dev libboost-program-options-dev libboost-date-time-dev libboost-filesystem-dev libboost-regex-dev libboost-serialization-dev libboost-system-dev libboost-thread-dev
+        fi
+
+    - name: Install BOOST and set up build (Windows meson cross compile)
+      if: matrix.name == 'windows'
+      env:
+        USE_MPI: ${{ matrix.mpi }}
+      run: |
+        ${GITHUB_WORKSPACE}/projects/meson/make_winroot.sh -ccache true
+        ( cd ${GITHUB_WORKSPACE}/projects/meson/ ; ./generate.sh )
+
+    - name: Configure and build
+      if: matrix.name != 'windows'
+      env:
+        USE_MPI: ${{ matrix.mpi }}
+      run: |
+        cd projects/cmake
+        ./build.sh -travis true
+
+    - name: Configure and build (Windows meson cross compile)
+      if: matrix.name == 'windows'
+      env:
+        BOOST_INCLUDEDIR: /home/runner/win_root/mingw64/include/boost
+        BOOST_LIBRARYDIR: /home/runner/win_root/mingw64/lib
+      run: |
+        /usr/local/bin/meson build ${GITHUB_WORKSPACE} --prefix=${GITHUB_WORKSPACE}/wincrossbuild --cross-file=win64-cross.txt
+        /usr/local/bin/ninja -C build install
+        cp /usr/lib/gcc/x86_64-w64-mingw32/*-win32/libgcc_s_seh-1.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
+        cp /usr/lib/gcc/x86_64-w64-mingw32/*-win32/libstdc++-6.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
+        cp /home/runner/win_root/mingw64/bin/libboost_*.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
+        echo '#!/bin/bash' > ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
+        echo 'cp ${GITHUB_WORKSPACE}/wincrossbuild/bin/* .' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
+        echo 'if [ "$#" -gt "1" ]; then' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
+        echo 'wine64 rb.exe ${@:1:$#-1} $(winepath -w ${@: -1} | sed "s,\\\\,\\\\\\\\,g")' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
+        echo 'else' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
+        echo 'wine64 rb.exe $(winepath -w ${1} | sed "s,\\\\,\\\\\\\\,g")' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
+        echo 'fi' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
+        echo 'rm -f *.exe' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
+        echo 'rm -f *.dll' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
+        chmod +x ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
+    - name: Test
+      env:
+        USE_MPI: ${{ matrix.mpi }}
+        IS_WINDOWS: ${{ matrix.name == 'windows' }}
+      run: |
+        if [ "${{ matrix.name }}" = "windows" ] ; then
+          export PATH=${GITHUB_WORKSPACE}/wincrossbuild/bin:$PATH
+        else
+          export PATH=${GITHUB_WORKSPACE}/projects/cmake:$PATH
+        fi
+        echo "\"Hello World\"" | rb
+        echo ::group::Test suite
+        cd tests
+        ./run_integration_tests.sh -mpi ${USE_MPI} -windows ${IS_WINDOWS} rb
+        cd
+        echo ::endgroup::
+        echo ::group::testiphy
+        git clone https://gitlab.com/testiphy/testiphy.git
+        cd testiphy
+        ./testiphy rb
+        echo ::endgroup::
+
+    - name: Upload test files if they failed
+      uses: actions/upload-artifact@v1
+      if: failure()
+      with:
+        name: test-results
+        path: tests
+
+    - name: Upload testiphy files if they failed
+      uses: actions/upload-artifact@v2-preview
+      if: failure()
+      with:
+        name: testiphy-results
+        path: '~/testiphy'

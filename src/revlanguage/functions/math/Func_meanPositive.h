@@ -13,13 +13,9 @@ namespace RevLanguage {
      *
      * The RevLanguage wrapper of the meanPositive function connects
      * the variables/parameters of the function and creates the internal MeanFunction object.
-     * Please read the MeanFunction.h for more info.
      *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2014-07-27, version 1.0
-     *
+     * @copybrief RevBayesCore::MeanFunction
+     * @see RevBayesCore::MeanFunction for the internal object
      */
     class Func_meanPositive : public TypedFunction<RealPos> {
         

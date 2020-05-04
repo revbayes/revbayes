@@ -13,7 +13,9 @@ template <class valueType> class TypedDagNode;
     /**
      * @brief The power function for a vector, f(b,e) = b^e.
      *
-     *
+     *Where:
+     *@param b is a vector of doubles
+     *@param e is double
      *
      */
     class PowerVectorFunction : public TypedFunction<RbVector<double> > {

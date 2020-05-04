@@ -15,11 +15,6 @@ template <class valueType> class TypedDagNode;
      *   alpha
      *   beta
      * Instances of this class can be associated to stochastic variables.
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2013-04-12, version 1.0
-     *
      */
     class BetaDistribution : public ContinuousDistribution {
         
@@ -28,12 +23,12 @@ template <class valueType> class TypedDagNode;
         virtual                                            ~BetaDistribution(void);                                                  //!< Virtual destructor
         
         // public member functions
-        double                                              cdf(void) const;                                                                  //!< Cummulative density function
+        double                                              cdf(void) const;                                                                  //!< Cumulative density function
         BetaDistribution*                                   clone(void) const;                                                          //!< Create an independent clone
         double                                              computeLnProbability(void);
         double                                              getMax(void) const;
         double                                              getMin(void) const;
-        double                                              quantile(double p) const;                                                       //!< Qu
+        double                                              quantile(double p) const;
         void                                                redrawValue(void);
 
     protected:
