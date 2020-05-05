@@ -22,31 +22,31 @@
 namespace RevBayesCore {
 class DagNode;
 template <class valueType> class TypedDagNode;
-
+    
     class OrderedRateMatrixFunction : public TypedFunction<RateGenerator> {
-
+        
     public:
-        OrderedRateMatrixFunction(const TypedDagNode<long> *n, const TypedDagNode<double> *l, const TypedDagNode<double> *m, bool allow_zero_state, bool rescale);
-
+        OrderedRateMatrixFunction(const TypedDagNode<long> *n, const TypedDagNode<double> *l, const TypedDagNode<double> *m, bool allow_zero_state);
+        
         virtual                                     ~OrderedRateMatrixFunction(void);                                                    //!< Virtual destructor
-
+        
         // public member functions
         OrderedRateMatrixFunction*                  clone(void) const;                                                              //!< Create an independent clone
         void                                        update(void);
-
+        
     protected:
         void                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                        //!< Implementation of swaping parameters
-
+        
     private:
-
+        
         // members
-
+        
         const TypedDagNode<long>*                   n;
         const TypedDagNode<double>*                 lambda;
         const TypedDagNode<double>*                 mu;
 
     };
-
+    
 }
 
 #endif
