@@ -1,7 +1,7 @@
 ---
 name: Feature request
 about: Is there an analysis you'd like to do in RevBayes? Tell us about it.
-title: "[BUG]"
+title: "[Feature Request]"
 labels: ''
 assignees: ''
 
