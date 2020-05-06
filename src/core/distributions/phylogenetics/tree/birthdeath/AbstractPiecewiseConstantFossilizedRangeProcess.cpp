@@ -38,8 +38,9 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
                                                                                                  const TypedDagNode<double> *inrho,
                                                                                                  const TypedDagNode< RbVector<double> > *intimes,
                                                                                                  const std::vector<Taxon> &intaxa,
-                                                                                                 bool pa ) :
-    ascending(false), homogeneous_rho(inrho), timeline( intimes ), fbd_taxa(intaxa), presence_absence(pa)
+                                                                                                 bool bo,
+                                                                                                 bool presence_absence) :
+    ascending(false), homogeneous_rho(inrho), timeline( intimes ), fbd_taxa(intaxa), bounded(bo), model(KNOWNCOUNTS)
 {
     // initialize all the pointers to NULL
     homogeneous_lambda             = NULL;
@@ -130,14 +131,22 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
     range_parameters.push_back( interval_fossil_counts );
     range_parameters.push_back( fossil_counts );
 
-    marginalize_k = ( species_interval_fossil_counts == NULL && interval_fossil_counts == NULL && fossil_counts == NULL);
-
-    if( marginalize_k && presence_absence )
+    if ( species_interval_fossil_counts == NULL && interval_fossil_counts == NULL && fossil_counts == NULL)
     {
-        throw(RbException("Cannot marginalize fossil presence absence data"));
+        model = UNKNOWNCOUNTS;
     }
 
-    if( species_interval_fossil_counts == NULL && presence_absence )
+    if( presence_absence )
+    {
+        if ( model == UNKNOWNCOUNTS )
+        {
+            throw(RbException("Cannot marginalize fossil presence absence data"));
+        }
+
+        model = PRESENCEABSENCE;
+    }
+
+    if( species_interval_fossil_counts == NULL && model == PRESENCEABSENCE )
     {
         throw(RbException("Presence absence data must be provided by species and interval"));
     }
@@ -197,7 +206,7 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
     b_i = std::vector<double>(fbd_taxa.size(), 0.0);
     d_i = std::vector<double>(fbd_taxa.size(), 0.0);
 
-    if( presence_absence ) H = std::vector<double>(fbd_taxa.size(), 0.0);
+    if( bounded == false ) H = std::vector<double>(fbd_taxa.size(), 0.0);
 
     p_i         = std::vector<double>(num_intervals, 1.0);
     q_i         = std::vector<double>(num_intervals, 0.0);
@@ -246,12 +255,12 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
 
         size_t bi = l(b);
         size_t di = l(d);
-        size_t oi = presence_absence ? oldest_intervals[i] : l(o);
-        size_t yi = presence_absence ? youngest_intervals[i] : l(y);
+        size_t oi = bounded ? l(o) : oldest_intervals[i];
+        size_t yi = bounded ? l(y) : youngest_intervals[i];
 
 
         // check constraints
-        if( presence_absence )
+        if( bounded == false )
         {
             if( !( b > d && bi <= oi && ((y == 0.0 && d == 0.0) || (y > 0 && yi <= di)) && d >= 0.0 ) )
             {
@@ -289,9 +298,16 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
         }
 
         // include factor for the first appearance
-        if( presence_absence == false )
+        if( bounded == true )
         {
             lnProbTimes += q(oi, o, true) - q(oi, o);
+        }
+        else
+        {
+            double delta = std::max(d, times[oi]);
+            double delta_plus_Ls_alpha = oi > 0 ? std::min(b, times[oi-1]) : b;
+
+            H[i] = integrateQ(oi, delta_plus_Ls_alpha) - integrateQ(oi, delta);
         }
 
         // include intermediate q_tilde terms
@@ -306,43 +322,97 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
         // include extinction density
         if (d > 0.0) lnProbTimes += log( death[di] );
 
-
         // update the marginalized fossil count data
-        if( marginalize_k )
+        if( model == UNKNOWNCOUNTS )
         {
-            if( o > 0.0 )
+            if ( bounded == true )
             {
-                kappa_prime[oi]++;
+                // if bounds are known
+                // include sampling density
+                if( o > 0.0 )
+                {
+                    L[oi] += log(fossil[oi]);
+                }
+                if( o != y && y > 0.0)
+                {
+                    L[yi] += log(fossil[yi]);
+                }
+
+                // marginalize fossil counts >= 0 in oi
+                L[oi] += fossil[oi] * ( o - std::max(y, times[oi]) );
+
+                // marginalize fossil counts >= 0 in intervening intervals
+                for(size_t j = oi + 1; j <= yi; j++)
+                {
+                    double Ls = times[j-1] - std::max(y, times[j]);
+
+                    L[j] += fossil[j] * Ls;
+                }
             }
-            if( o != y && y > 0.0)
+            else
             {
-                kappa_prime[yi]++;
-            }
+                // include sampling density for first occurrence
+                L[oi] += log(fossil[oi]);
 
-            double y_star = std::max(y, times[oi]);
+                // marginalize fossil counts >= 0 and integrate over o in oi
+                L[oi] += log( H[i] ) - fossil[oi]*( std::max(d, times[oi]) - times[oi] );
 
-            L[oi] += o - y_star;
+                // marginalize fossil counts >= 0 in intervening intervals
+                for(size_t j = oi + 1; j < yi; j++)
+                {
+                    double Ls = times[j-1] - std::max(d, times[j]);
 
-            for(size_t j = oi + 1; j <= yi; j++)
-            {
-                L[j] += times[j-1] - std::max(y, times[j]);
+                    L[j] += fossil[j] * Ls;
+                }
+
+                // treat yi as a presence/absence interval
+                // i.e. marginalize fossil counts > 0
+                double Ls = times[yi-1] - std::max(d, times[yi]);
+
+                L[yi] += fossil[yi] * Ls + log( 1.0 - exp( - Ls * fossil[yi] ) );
             }
         }
-        else if( presence_absence )
+        else if( model == PRESENCEABSENCE )
         {
-            if( getFossilCount(oi, i) > 0 )
+            if ( bounded == true )
             {
-                double delta = std::max(d, times[oi]);
-                double delta_plus_Ls_alpha = oi > 0 ? std::min(b, times[oi-1]) : b;
+                // if bounds are known
+                // include sampling density
+                if( o > 0.0 )
+                {
+                    L[oi] += log(fossil[oi]);
+                }
+                if( o != y && y > 0.0)
+                {
+                    L[yi] += log(fossil[yi]);
+                }
 
-                double t_alpha = times[oi];
+                // marginalize fossil counts >= 0 in oi
+                L[oi] += fossil[oi] * ( o - std::max(y, times[oi]) );
 
-                H[i] = integrateQ(oi, delta_plus_Ls_alpha) - integrateQ(oi, delta);
+                // marginalize fossil counts > 0 in intervening intervals
+                for(size_t j = oi + 1; j < yi; j++)
+                {
+                    if( getFossilCount(j, i) > 0 )
+                    {
+                        double Ls = std::min(o, times[j-1]) - std::max(y, times[j]);
 
-                H[i] = log( H[i] ) + log( fossil[oi] ) - fossil[oi]*( delta - t_alpha );
+                        L[j] += fossil[j] * Ls + log( 1.0 - exp( - Ls * fossil[j] ) );
+                    }
+                }
 
-                L[oi] += H[i];
+                // marginalize fossil counts >= 0 in yi
+                L[yi] += fossil[yi] * ( times[yi-1] - std::max(d, times[yi]) );
+            }
+            else
+            {
+                // include sampling density for first occurrence
+                L[oi] += log(fossil[oi]);
 
+                // marginalize fossil counts >= 0 and integrate over o in oi
+                L[oi] += log( H[i] ) - fossil[oi]*( std::max(d, times[oi]) - times[oi] );
+
+                // marginalize fossil counts > 0 in remaining intervals
                 for(size_t j = oi + 1; j <= yi; j++)
                 {
                     if( getFossilCount(j, i) > 0 )
@@ -353,6 +423,10 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                     }
                 }
             }
+        }
+        else if ( bounded == false )
+        {
+            lnProbTimes += log( H[i] );
         }
 
         if ( RbMath::isFinite(lnProbTimes) == false )
@@ -367,26 +441,13 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
     // check if we marginalize over fossil counts
     for (size_t i = 0; i < num_intervals; ++i)
     {
-        if( presence_absence )
+        if( model == KNOWNCOUNTS )
         {
-            lnProbTimes += L[i];
+            lnProbTimes += getFossilCount(i) * log(fossil[i]);
         }
         else
         {
-            size_t k;
-
-            if( marginalize_k )
-            {
-                k = kappa_prime[i];
-
-                lnProbTimes += fossil[i]*L[i];
-            }
-            else
-            {
-                k = getFossilCount(i);
-            }
-
-            lnProbTimes += k*log(fossil[i]);
+            lnProbTimes += L[i];
         }
     }
 
@@ -596,7 +657,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::integrateQ( size_t i, do
 
     double e = exp(-A*dt);
 
-    double diff2 = b + d - f;
+    double diff2 = b + d + (model == KNOWNCOUNTS ? f : -f);
     double tmp = (1+B)/(A-diff2) - e*(1-B)/(A+diff2);
     double intQ = exp(-(diff2-A)*dt/2) * tmp;
 
@@ -725,7 +786,7 @@ void AbstractPiecewiseConstantFossilizedRangeProcess::updateIntervals() const
             p_i[i-1]       = (b + d + f - A * ((1.0+B)-exp(ln_e)*(1.0-B))/tmp)/(2.0*b);
         }
 
-        if( presence_absence )
+        if( bounded == false )
         {
             for(size_t j = 0; j < fbd_taxa.size(); j++)
             {

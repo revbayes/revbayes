@@ -112,10 +112,11 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_FBDRange::createDistribution( void
         rt = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
 
+    bool bo = static_cast<const RlBoolean &>( bounded->getRevObject() ).getValue();
     bool pa = static_cast<const RlBoolean &>( presence_absence->getRevObject() ).getValue();
     bool ex = static_cast<const RlBoolean &>( extended->getRevObject() ).getValue();
 
-    RevBayesCore::PiecewiseConstantFossilizedBirthDeathProcess* d = new RevBayesCore::PiecewiseConstantFossilizedBirthDeathProcess(sa, l, m, p, c, r, la, b, rt, cond, t, uo, pa, ex);
+    RevBayesCore::PiecewiseConstantFossilizedBirthDeathProcess* d = new RevBayesCore::PiecewiseConstantFossilizedBirthDeathProcess(sa, l, m, p, c, r, la, b, rt, cond, t, uo, bo, pa, ex);
 
     return d;
 }
@@ -232,6 +233,7 @@ const MemberRules& Dist_FBDRange::getParameterRules(void) const
         dist_member_rules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
         dist_member_rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         
+        dist_member_rules.push_back( new ArgumentRule( "bounded" , RlBoolean::getClassTypeSpec() , "Treat first and last occurrence ages as known range boundaries?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         dist_member_rules.push_back( new ArgumentRule( "binary" , RlBoolean::getClassTypeSpec() , "Treat fossil counts as binary presence/absence data?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
         dist_member_rules.push_back( new ArgumentRule( "extended" , RlBoolean::getClassTypeSpec() , "Treat tip nodes as extinction events?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
 
@@ -304,6 +306,10 @@ void Dist_FBDRange::setConstParameter(const std::string& name, const RevPtr<cons
     else if ( name == "k" )
     {
         fossil_counts = var;
+    }
+    else if ( name == "bounded" )
+    {
+        bounded = var;
     }
     else if ( name == "binary" )
     {

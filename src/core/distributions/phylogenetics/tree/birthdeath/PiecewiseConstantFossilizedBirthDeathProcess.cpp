@@ -53,10 +53,11 @@ PiecewiseConstantFossilizedBirthDeathProcess::PiecewiseConstantFossilizedBirthDe
                                                                                            const std::string &incondition,
                                                                                            const std::vector<Taxon> &intaxa,
                                                                                            bool uo,
+                                                                                           bool bounded,
                                                                                            bool pa,
                                                                                            bool ex) :
     AbstractBirthDeathProcess(ra, incondition, intaxa, uo),
-    AbstractPiecewiseConstantFossilizedRangeProcess(inspeciation, inextinction, inpsi, incounts, inrho, intimes, intaxa, pa),
+    AbstractPiecewiseConstantFossilizedRangeProcess(inspeciation, inextinction, inpsi, incounts, inrho, intimes, intaxa, bounded, pa),
     extended(ex)
 {
     for(std::vector<const DagNode*>::iterator it = range_parameters.begin(); it != range_parameters.end(); it++)
@@ -176,7 +177,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( 
             // if this is a sampled tree, then integrate out the speciation times for descendants of sampled ancestors
             if( extended == false )
             {
-                size_t oi = presence_absence ? oldest_intervals[i] : l(o);
+                size_t oi = bounded ? l(o) : oldest_intervals[i];
 
                 double x = 0.0;
 
@@ -189,14 +190,21 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( 
                     x += q_tilde_i[j] - q_i[j];
                 }
 
-                if( presence_absence )
+                if( bounded == false )
                 {
                     double a = std::max(d_i[i], times[oi]);
                     double Ls_plus_a = oi > 0 ? std::min(y_a, times[oi-1]) : y_a;
                     double Ls = Ls_plus_a - a;
 
                     // replace H_i
-                    x += log(expm1(Ls*fossil[oi])) - H[i];
+                    if ( model == KNOWNCOUNTS )
+                    {
+                        x += log( Ls ) - log( H[i] );
+                    }
+                    else
+                    {
+                        x += log(expm1(Ls*fossil[oi])) - log(H[i]) - log(fossil[oi]);
+                    }
                 }
                 else
                 {
@@ -206,15 +214,18 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( 
 
                 // compute definite integral
                 lnProb += log(-expm1(x));
+
+                // offset the extinction density for the ancestor (included later for all taxa)
+                lnProb -= log( p(y_ai, y_a) );
             }
-            // if this is an extended tree, use the anagenetic speciation density for descendants of sampled ancestors
+            // if this is an extended tree, include the anagenetic speciation density for descendants of sampled ancestors
             else
             {
                 lnProb += log( anagenetic[y_ai] );
-            }
 
-            // in either case, offset the extinction density for the sampled ancestor (included later for all taxa)
-            lnProb -= log( p(y_ai, y_a) );
+                // offset the extinction density for the ancestor
+                lnProb -= log( death[y_ai] );
+            }
         }
 
         // if this is a sampled tree
@@ -224,35 +235,34 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( 
             size_t di = l(d_i[i]);
 
             // check constraints
-            if( presence_absence )
+            if( bounded == false )
             {
-                if( d_i[i] > 0.0 )
+                if( youngest_intervals[i] != di)
                 {
                     // yi == di
-                    if( youngest_intervals[i] != di )
-                    {
-                        return RbConstants::Double::neginf;
-                    }
-
-                    // if the tip is a sampling event in the past
-                    // then replace one unobserved fossil sample with an observed fossil sample
-                    // i.e increment the observed fossil count
-                    double Ls = times[di-1] - std::max(d_i[i], times[di]);
-                    lnProb += fossil[di] - log( 1.0 - exp( - Ls * fossil[di] ) );
+                    return RbConstants::Double::neginf;
                 }
             }
             // y == d
-            else if ( fabs(d_i[i] - taxa[i].getAgeRange().getMin()) > 1E-5 )
+            else if ( d_i[i] != taxa[i].getAgeRange().getMin() )
             {
                 return RbConstants::Double::neginf;
             }
 
             // if the tip is a sampling event in the past
-            // replace observed extinction density with unobserved extinction density
             if( d_i[i] > 0.0 )
             {
+                // replace observed extinction density with unobserved extinction density
                 lnProb -= log( death[di] );
                 lnProb += log( p(di, d_i[i]) );
+
+                // replace one unobserved fossil sample with an observed fossil sample
+                // i.e increment the observed fossil count
+                if ( model == PRESENCEABSENCE )
+                {
+                    double Ls = times[di-1] - std::max(d_i[i], times[di]);
+                    lnProb += log( fossil[di] ) - log( 1.0 - exp( - Ls * fossil[di] ) );
+                }
             }
         }
     }
@@ -447,7 +457,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::integrateQ( size_t i, doubl
 
     double e = exp(-A*dt);
 
-    double diff2 = b + d - f + 2.0*a;
+    double diff2 = b + d + 2.0*a + (model == KNOWNCOUNTS ? f : -f);
     double tmp = (1+B)/(A-diff2) - e*(1-B)/(A+diff2);
     double intQ = exp(-(diff2-A)*dt/2) * tmp;
 

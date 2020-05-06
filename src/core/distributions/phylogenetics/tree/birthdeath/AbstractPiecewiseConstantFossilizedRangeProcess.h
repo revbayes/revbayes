@@ -14,6 +14,8 @@ namespace RevBayesCore {
     class Clade;
     class Taxon;
     
+    enum RangeModel { KNOWNCOUNTS, UNKNOWNCOUNTS, PRESENCEABSENCE };
+
     /**
      * @brief Piecewise-constant fossilized birth-death process with serially sampled fossils.
      *
@@ -42,7 +44,8 @@ namespace RevBayesCore {
                                                              const TypedDagNode<double>* rho,
                                                              const TypedDagNode<RbVector<double> > *times,
                                                              const std::vector<Taxon> &taxa,
-                                                             bool pa );  //!< Constructor
+                                                             bool bounded,
+                                                             bool presence_absence);  //!< Constructor
 
         virtual ~AbstractPiecewiseConstantFossilizedRangeProcess(){};
 
@@ -101,8 +104,8 @@ namespace RevBayesCore {
 
         std::vector<Taxon>                              fbd_taxa;                                                                                               //!< Taxon names that will be attached to new simulated trees.
 
-        bool                                            marginalize_k;
-        bool                                            presence_absence;
+        enum RangeModel                                 model;
+        bool                                            bounded;
 
         mutable std::vector<size_t>                     oldest_intervals;
         mutable std::vector<size_t>                     youngest_intervals;
