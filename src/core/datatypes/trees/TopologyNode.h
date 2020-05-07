@@ -85,6 +85,7 @@ namespace RevBayesCore {
         bool                                        containsClade(const TopologyNode* c, bool strict) const;
         bool                                        containsClade(const Clade &c, bool strict) const;
         bool                                        containsClade(const RbBitSet &c, bool strict) const;
+        bool                                        doesUseAges(void) const;                                                            //!< Does this node use ages or branch lengths?
         std::string                                 fillCladeIndices(std::map<std::string,size_t> &clade_index_map) const;              //!< Fill this map recursively with all clade indices.
         void                                        fireTreeChangeEvent(const unsigned& m = RevBayesCore::TreeChangeEventMessage::DEFAULT);
         double                                      getAge(void) const;                                                                 //!< Get the age (time ago from present) for this node
@@ -132,6 +133,7 @@ namespace RevBayesCore {
         bool                                        isRoot(void) const;                                                                 //!< Is node root?
         bool                                        isSampledAncestor(bool propagate=false) const;                                                      //!< Is node (or a child node) a sampled ancestor?
         bool                                        isTip(void) const;                                                                  //!< Is node tip?
+        bool                                        isUltrametric(double& depth) const;                                                 //!< Check if the subtree subtending from this node is ultramtric.
         void                                        makeBifurcating(void);                                                              //!< Make this and all its descendants bifurcating.
         void                                        renameNodeParameter(const std::string &old_name, const std::string &new_name);
         void                                        removeAllChildren(void);                                                            //!< Removes all of the children of the node

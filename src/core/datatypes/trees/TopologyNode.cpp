@@ -686,6 +686,13 @@ bool TopologyNode::containsClade(const RbBitSet &your_taxa, bool strict) const
 
 
 
+bool TopologyNode::doesUseAges( void ) const
+{
+    return use_ages;
+}
+
+
+
 bool TopologyNode::equals(const TopologyNode& node) const
 {
     
@@ -1545,6 +1552,33 @@ bool TopologyNode::isTip( void ) const
 }
 
 
+bool TopologyNode::isUltrametric(double &depth) const
+{
+    // if we are simply a tip node, then this subtree must be ultrametric
+    if ( isTip() == true )
+    {
+        depth = 0;
+        return true;
+    }
+    
+    double my_depth = 0.0;
+    bool am_ultrametric = children[0]->isUltrametric(my_depth);
+    my_depth += children[0]->getBranchLength();
+    
+    for ( size_t i=1; i<children.size(); ++i )
+    {
+        double child_depth = 0.0;
+        bool child_is_ultrametric = children[i]->isUltrametric(child_depth);
+        child_depth += children[i]->getBranchLength();
+        
+        am_ultrametric = (am_ultrametric && child_is_ultrametric);
+        am_ultrametric = (am_ultrametric && fabs(child_depth - my_depth) < 1E-4);
+    }
+    
+    return am_ultrametric;
+}
+
+
 /**
  * Make this node an all its children bifurcating.
  * The root will not be changed. We throw an error if this node
@@ -1740,6 +1774,10 @@ void TopologyNode::setBranchLength(double b, bool flag_dirty)
 {
     
     branch_length = b;
+    
+    // we need to mark that we are not using ages but branch lengths
+    // otherwise, this code would need to reformat the branch length into ages!!!
+//    setUseAges( false, false);
     
     
     // fire tree change event
