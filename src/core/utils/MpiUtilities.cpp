@@ -114,13 +114,14 @@ void RevBayesCore::MpiUtilities::synchronizeRNG( void )
     // sync the random number generators
     if ( process_id == 0 )
     {
-        seed = RevBayesCore::GLOBAL_RNG->getSeed();
+        seed = RevBayesCore::GLOBAL_RNG->getNewSeed();
     }
 
     #ifdef RB_MPI
     MPI_Bcast(&seed, 1, MPI_INT, 0, analysis_comm);
     #endif
 
+    
     RevBayesCore::GLOBAL_RNG->setSeed( seed );
 
 }
