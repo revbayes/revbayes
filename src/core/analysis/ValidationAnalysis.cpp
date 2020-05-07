@@ -222,7 +222,7 @@ void ValidationAnalysis::burnin(size_t generations, size_t tuningInterval)
 {
     
     // start the progress bar
-    ProgressBar progress = ProgressBar(generations, 0);
+    ProgressBar progress = ProgressBar(num_runs, 0);
     
     if ( process_active == true )
     {
@@ -461,6 +461,9 @@ void ValidationAnalysis::summarizeSim(double credible_interval_size, size_t idx)
                 // create a trace
                 AbstractTrace *t = the_node->createTraceObject();
                 trace_map[parameter_name] = t;
+                
+                // we can stop the loop now
+                break;
             }
             
         }
