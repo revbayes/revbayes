@@ -114,8 +114,6 @@ double BirthDeathProcess::computeLnProbabilityTimes( void ) const
         
         // get an estimate of the actual number of taxa
         double m = round(num_taxa / rho->getValue());
-        int initial_taxa = 2;
-//        if ( MRCA == TRUE ) k <- 2
         ln_prob_times += (m-num_taxa) * log(F_t); // + log(RbMath::choose(m-initial_taxa,num_taxa-initial_taxa));
 //        ln_prob_times += (m-num_taxa) * log(F_t) + RbMath::lnChoose(m-initial_taxa,num_taxa-initial_taxa);
     }
