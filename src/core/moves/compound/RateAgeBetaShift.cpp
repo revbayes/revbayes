@@ -105,8 +105,8 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     tree->initiateGetAffectedNodes( affected );
     
     double oldLnLike = 0.0;
-    bool checkLikelihoodShortcuts = rng->uniform01() < 0.001;
-    if ( checkLikelihoodShortcuts == true )
+    bool check_likelihood_shortcuts = rng->uniform01() < 0.001;
+    if ( check_likelihood_shortcuts == true )
     {
         for (RbOrderedSet<DagNode*>::iterator it = affected.begin(); it != affected.end(); ++it)
         {
@@ -220,7 +220,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         rates_prob_ratio = rates->getLnProbabilityRatio();
     }
     
-    if ( checkLikelihoodShortcuts == true && false )
+    if ( check_likelihood_shortcuts == true )
     {
         tree->touch();
         if ( rates == NULL )
