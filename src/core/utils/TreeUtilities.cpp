@@ -175,10 +175,10 @@ RevBayesCore::Tree* RevBayesCore::TreeUtilities::convertTree(const Tree &t, bool
     std::vector<double> ages;
     std::vector<TopologyNode*> nodes;
 
-    double maxDepth = bln.getMaxDepth() + bln.getBranchLength();
+    double max_depth = bln.getMaxDepth() + bln.getBranchLength();
 
     // recursive creation of the tree
-    constructTimeTreeRecursively(root, bln, nodes, ages, maxDepth);
+    constructTimeTreeRecursively(root, bln, nodes, ages, max_depth);
 
     // add the root which creates the topology
     tt->setRoot( root, resetIndex );
