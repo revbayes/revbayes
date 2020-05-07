@@ -1319,20 +1319,30 @@ size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getMinPairwiseSe
 template<class charType>
 RevBayesCore::DistanceMatrix RevBayesCore::HomologousDiscreteCharacterData<charType>::getPairwiseSequenceDifference( bool include_missing ) const
 {
-    size_t nt = this->getNumberOfIncludedTaxa();
-    MatrixReal distances = MatrixReal(nt);
+    size_t n_taxa_included = this->getNumberOfIncludedTaxa();
+    size_t n_taxa_total    = this->getNumberOfTaxa();
+    MatrixReal distances   = MatrixReal(n_taxa_included);
     
-    
-    for (size_t i=0; i<(nt-1); i++)
+    size_t index_included_i = 0;
+    size_t index_total_i    = 0;
+    for ( ; index_total_i<(n_taxa_total-1); ++index_total_i)
     {
+        // skip over excluded taxa
+        if ( isTaxonExcluded( index_total_i ) == true )
+            continue;
         
-        const AbstractDiscreteTaxonData& firstTaxonData = this->getTaxonData(i);
+        const AbstractDiscreteTaxonData& firstTaxonData = this->getTaxonData(index_total_i);
         size_t nc = firstTaxonData.getNumberOfCharacters();
         
-        for (size_t j=i+1; j<nt; j++)
+        size_t index_total_j    = index_total_i+1;
+        size_t index_included_j = index_included_i+1;
+        for ( ; index_total_j<n_taxa_total; ++index_total_j)
         {
             
-            const AbstractDiscreteTaxonData& secondTaxonData = this->getTaxonData(j);
+            if ( isTaxonExcluded(index_total_j) == true )
+                continue;
+            
+            const AbstractDiscreteTaxonData& secondTaxonData = this->getTaxonData(index_total_j);
             size_t pd = 0.0;
             
             for (size_t k=0; k<nc; k++)
@@ -1349,12 +1359,16 @@ RevBayesCore::DistanceMatrix RevBayesCore::HomologousDiscreteCharacterData<charT
                 
             }
             
-            distances[i][j] = pd;
-            distances[j][i] = pd;
+            distances[index_included_i][index_included_j] = pd;
+            distances[index_included_j][index_included_i] = pd;
+            
+            ++index_included_j;
             
         } // end loop over all second taxa
         
-        distances[i][i] = 0;
+        distances[index_included_i][index_included_i] = 0;
+        
+        ++index_included_i;
         
     } // end loop over all first taxa
     
