@@ -1133,11 +1133,21 @@ void Tree::initFromString(const std::string &s)
 {
     NewickConverter converter;
     Tree* bl_tree = converter.convertFromNewick( s );
-    Tree *tree = TreeUtilities::convertTree( *bl_tree );
+    if ( bl_tree->isUltrametric() == true )
+    {
+        Tree *tree = TreeUtilities::convertTree( *bl_tree );
+        
+        *this = *tree;
 
-    *this = *tree;
+        delete bl_tree;
+        delete tree;
+    }
+    else
+    {
+        *this = *bl_tree;
 
-    delete tree;
+        delete bl_tree;
+    }
 }
 
 
@@ -1219,14 +1229,25 @@ bool Tree::isRooted(void) const
 bool Tree::isUltrametric( void ) const
 {
 
-    double tip_age = getTipNode( 0 ).getAge();
-    for (size_t i = 1; i < getNumberOfTips(); ++i)
+    if ( root->doesUseAges() == true )
+    {
+        double tip_age = getTipNode( 0 ).getAge();
+        for (size_t i = 1; i < getNumberOfTips(); ++i)
+        {
+
+            if ( std::fabs(tip_age-getTipNode(i).getAge()) > 1E-4 )
+            {
+                return false;
+            }
+
+        }
+        
+    }
+    else
     {
 
-        if ( std::fabs(tip_age-getTipNode(i).getAge()) > 1E-4 )
-        {
-            return false;
-        }
+        double d = 0;
+        return root->isUltrametric(d);
 
     }
 
@@ -1285,6 +1306,10 @@ void Tree::pruneTaxa(const RbBitSet& prune_map )
     {
         nodes[i]->setIndex(i);
     }
+    
+    // we also need to reset our internal variables
+    num_nodes = nodes.size();
+    num_tips = (num_nodes+1) / 2;
 }
 
 bool Tree::recursivelyPruneTaxa( TopologyNode* n, const RbBitSet& prune_map )

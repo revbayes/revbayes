@@ -59,7 +59,7 @@ TreeSummary::AnnotationReport::AnnotationReport() :
  */
 TreeSummary::TreeSummary( TraceTree* t, bool c ) :
     clock( c ),
-    rooted( true ),
+    rooted( c ),
     use_outgroup(false)
 {
     traces.push_back(t);
@@ -72,7 +72,7 @@ TreeSummary::TreeSummary( TraceTree* t, bool c ) :
 TreeSummary::TreeSummary( std::vector<TraceTree* > t, bool c ) :
     traces(t),
     clock( c ),
-    rooted( true ),
+    rooted( c ),
     use_outgroup(false)
 {
     if( traces.empty() )
