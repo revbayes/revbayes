@@ -498,13 +498,14 @@ RevBayesCore::DistanceMatrix* RevBayesCore::TreeUtilities::getNodalDistanceMatri
 
 void RevBayesCore::TreeUtilities::rescaleTree(Tree *t, TopologyNode *n, double factor)
 {
-    // rescale the time of the node
-    double newAge = n->getAge() * factor;
-    t->getNode(n->getIndex()).setAge( newAge);
-
     // recursive call for internal nodes
     if ( n->isTip() == false )
     {
+        // we only rescale non-tip nodes
+        // rescale the time of the node
+        double newAge = n->getAge() * factor;
+        t->getNode(n->getIndex()).setAge( newAge);
+
 
         // assertion that we have binary trees
 #ifdef ASSERTIONS_TREE
