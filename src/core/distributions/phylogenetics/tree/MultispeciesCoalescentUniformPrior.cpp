@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <cmath>
 #include <vector>
+#include <boost/math/special_functions/expint.hpp>
 
 #include "MultispeciesCoalescentUniformPrior.h"
 #include "DistributionUniform.h"
@@ -42,7 +43,7 @@ MultispeciesCoalescentUniformPrior* MultispeciesCoalescentUniformPrior::clone( v
 double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t k, const std::vector<double> &times, double begin_age, double end_age, size_t index, bool add_final_interval)
 {
 
-    //if ( k == 1 ) return 0.0;
+    if ( k == 1 ) return 0.0;
 
     double theta_max = max_theta->getValue();
 
@@ -85,19 +86,44 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
 
 //    Gamma(n-2,2*fn/theta_max)
 
-    if (n <= 2)
+    // Now we need to deal with the incomplete gamma term
+
+    // If the number of gene copies is 1, then there can be no coalescence event
+    // and the probability is equal to 1.0 for the only possible event (no coalescence)
+    if (n <= 1)
     {
-        double lower_incomplete_gamma = 0.0;
-        double gamma = 0.0;
+        ln_prob_coal = 0.0;
     }
     else
     {
-        double lower_incomplete_gamma = RbMath::incompleteGamma( 2*fn/theta_max, nt-2, RbMath::lnGamma(nt-2) );
+        double integral_limit = 2 * fn / theta_max;
 
-        double gamma = RbMath::lnGamma(nt-2);
-        gamma = 0.0;
+        // When the shape term is 0 (as when n == 2), then we calculate
+        // the upper incomplete gamma using an exponential integral instead
+        // (see )
+        if (n == 2)
+        {
+            if (integral_limit > 0)
+            {
+                double ei = boost::math::expint( -integral_limit );
+                double e1 = -ei;
 
-        ln_prob_coal -= log( lower_incomplete_gamma ) - gamma;
+                ln_prob_coal += log(e1);
+            }
+            else
+            {
+                std::cerr << "The integral limit in dnMultiSpeciesCoalescentUniformPrior is negative." << std::endl;
+            }
+
+        }
+        // Otherwise we calculate the incomplete gamma directly
+        else
+        {
+            double lower_incomplete_gamma = RbMath::incompleteGamma( integral_limit, nt-2, RbMath::lnGamma(nt-2) ) * gamma(nt-2);
+            double upper_incomplete_gamma = gamma(nt-2) - lower_incomplete_gamma;
+
+            ln_prob_coal += log( upper_incomplete_gamma );
+        }
     }
 
     return ln_prob_coal;
