@@ -437,7 +437,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::integrateQ( size_t i, doubl
 
     if ( s > 0.0 )
     {
-        throw(RbException("Presence/absence sampling not implemented for beta > 0.0"));
+        throw(RbException("Cannot integrate first occurrence age for beta > 0.0"));
     }
 
     // get the parameters
