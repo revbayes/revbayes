@@ -8,6 +8,7 @@
 #include "TypedDagNode.h"
 #include "TimeAtlas.h"
 #include "Tree.h"
+#include "GeographicArea.h"
 
 #include <fstream>
 #include <iostream>

@@ -1,18 +1,19 @@
 #ifndef AbstractHomologousDiscreteCharacterData_H
 #define AbstractHomologousDiscreteCharacterData_H
 
-#include "AbstractDiscreteTaxonData.h"
-#include "AbstractTaxonData.h"
-#include "CharacterState.h"
-#include "DiscreteCharacterState.h"
+#include <stddef.h>
+#include <vector>
+#include <iosfwd>
+
 #include "DistanceMatrix.h"
 #include "HomologousCharacterData.h"
 #include "MatrixReal.h"
 
-#include <string>
-#include <vector>
-
 namespace RevBayesCore {
+class AbstractCharacterData;
+class AbstractDiscreteTaxonData;
+class AbstractTaxonData;
+class DiscreteCharacterState;
     
     /**
      * Abstract class for all DISCRETE character data objects.
@@ -31,7 +32,9 @@ namespace RevBayesCore {
      */
     class AbstractHomologousDiscreteCharacterData : public HomologousCharacterData {
         
-    public:    
+    public:
+        enum SFS_AMBIGUITY_TREATMENT { ANCESTRAL, DERIVED, RESCALE, SKIP_COLUMN };
+
         virtual                                                ~AbstractHomologousDiscreteCharacterData(void) {}
         
         // Overloaded operators
@@ -50,6 +53,7 @@ namespace RevBayesCore {
         virtual void                                            concatenate(const AbstractHomologousDiscreteCharacterData &d, std::string type = "") = 0;   //!< Concatenate data matrices
         virtual AbstractHomologousDiscreteCharacterData*        combineCharacters(const AbstractHomologousDiscreteCharacterData &d) const = 0;              //!< Combine/expand data matrices
         virtual double                                          computeMultinomialProfileLikelihood( void ) const = 0;
+        virtual std::vector<long>                               computeSiteFrequencySpectrum(bool folded, SFS_AMBIGUITY_TREATMENT ambig_treat) const = 0;
         virtual MatrixReal                                      computeStateFrequencies(void) const = 0;                                                    //!< Compute the state frequencies for this character data object
         virtual void                                            excludeCharacter(size_t i) = 0;                                                             //!< Exclude character
         virtual const DiscreteCharacterState&                   getCharacter(size_t tn, size_t cn) const = 0;                                               //!< Return a reference to a character element in the character matrix

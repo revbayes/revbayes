@@ -1,15 +1,30 @@
 //#define DEBUG_DEC
 
 #include "DECCladogeneticStateFunction.h"
+
+#include <algorithm>
+#include <cstddef>
+#include <math.h>
+#include <map>
+#include <sstream>
+#include <utility>
+#include <vector>
+
 #include "BiogeographicCladoEvent.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbException.h"
 #include "RbMathCombinatorialFunctions.h"
+#include "BranchHistory.h"
+#include "CharacterEventDiscrete.h"
+#include "Cloneable.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "Simplex.h"
+#include "TypedDagNode.h"
 
-#include <math.h>
-#include <map>
-#include <vector>
+namespace RevBayesCore { class CharacterEvent; }
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
@@ -42,7 +57,8 @@ DECCladogeneticStateFunction::DECCladogeneticStateFunction(const TypedDagNode< S
     addParameter( eventProbs );
     addParameter( connectivityGraph );
     addParameter( vicarianceGraph );
-    if (numCharacters <= 10)
+    
+    if (numCharacters <= MAX_NUM_AREAS)
     {
         buildBits();
         buildRanges(beforeRanges, connectivityGraph, false);
@@ -52,6 +68,10 @@ DECCladogeneticStateFunction::DECCladogeneticStateFunction(const TypedDagNode< S
         numRanges++; // add one for the null range
         
         buildEventMap();
+    } else {
+        std::stringstream ss;
+        ss << "DECCladogeneticStateFunction only supports up to " << MAX_NUM_AREAS << " areas\n";
+        throw RbException(ss.str());
     }
     
     update();
@@ -222,10 +242,6 @@ void DECCladogeneticStateFunction::buildEventMap( void ) {
         // narrow sympatry
         if (sumBits(ba) == 1)
         {
-      
-#ifdef DEBUG_DEC
-            
-#endif
             idx[1] = i;
             idx[2] = i;
             if (beforeRanges.find(i) == beforeRanges.end())
@@ -941,7 +957,7 @@ void DECCladogeneticStateFunction::update( void )
         probs[ eventStringToStateMap[eventTypes[i]] ] = ep[i];
     }
 
-    if (numCharacters > 10) return;
+    if (numCharacters > MAX_NUM_AREAS) return;
    
     if (eventProbsAsWeightedAverages)
     {

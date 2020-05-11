@@ -7,10 +7,17 @@
 //
 
 #include "Func_choose.h"
+
 #include "ChooseFunction.h"
 #include "Natural.h"
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 
@@ -80,50 +87,6 @@ const TypeSpec& Func_choose::getClassTypeSpec(void)
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
     
     return rev_type_spec;
-}
-
-
-/**
- * Get the author(s) of this function so they can receive credit (and blame) for it.
- */
-std::vector<std::string> Func_choose::getHelpAuthor(void) const
-{
-    // create a vector of authors for this function
-    std::vector<std::string> authors;
-    authors.push_back( "Michael Landis" );
-    
-    return authors;
-}
-
-
-/**
- * Get the (brief) description for this function
- */
-std::string Func_choose::getHelpDescription(void) const
-{
-    std::string description = "";
-    description += "Rev function to calculate the binomial coefficients.";
-    
-    return description;
-}
-
-
-/**
- * Get an executable and instructive example.
- * These example should help the users to show how this function works but
- * are also used to test if this function still works.
- */
-std::string Func_choose::getHelpExample(void) const
-{
-    // create an example as a single string variable.
-    std::string example = "";
-    
-    example += "n <- 5\n";
-    example += "k <- 2\n";
-    example += "x := choose(n, k)\n";
-    example += "\n";
-    
-    return example;
 }
 
 

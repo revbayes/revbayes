@@ -61,7 +61,6 @@ namespace RevLanguage {
 
 #include "ArgumentRule.h"
 #include "DeterministicNode.h"
-#include "DistributionFunctionRv.h"
 #include "ModelVector.h"
 #include "Natural.h"
 #include "ProbabilityDensityFunction.h"

@@ -75,7 +75,7 @@ namespace RevBayesCore {
         void                                        addNodeParameter(const std::string &n, double p);
         void                                        addNodeParameter(const std::string &n, const std::string &p);
         void                                        addNodeParameters(const std::string &n, const std::vector<double> &p, bool io);
-		void                                        addNodeParameters(const std::string &n, const std::vector<std::string*> &p, bool io);
+		void                                        addNodeParameters(const std::string &n, const std::vector<std::string> &p, bool io);
         void                                        clearParameters(void);                                                              //!< Clear the node and branch parameters
         void                                        clearBranchParameters(void);
 		void                                        clearNodeParameters(void);

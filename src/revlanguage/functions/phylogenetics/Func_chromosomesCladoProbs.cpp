@@ -1,15 +1,21 @@
 #include "Func_chromosomesCladoProbs.h"
+
 #include "CladogeneticProbabilityMatrix.h"
-#include "ConstantNode.h"
 #include "ChromosomesCladogenicStateFunction.h"
 #include "Natural.h"
-#include "Real.h"
-#include "RealPos.h"
 #include "RlCladogeneticProbabilityMatrix.h"
 #include "RlDeterministicNode.h"
-#include "MatrixReal.h"
 #include "RlSimplex.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
+
+namespace RevBayesCore { class Simplex; }
 
 using namespace RevLanguage;
 

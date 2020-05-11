@@ -1,16 +1,17 @@
 #ifndef CladeSpecificHierarchicalBranchRateFunction_H
 #define CladeSpecificHierarchicalBranchRateFunction_H
 
+#include <vector>
+#include <cstddef>
+
 #include "Clade.h"
 #include "RbVector.h"
-#include "TopologyNode.h"
-#include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <vector>
-
 namespace RevBayesCore {
+class DagNode;
+class Tree;
+template <class valueType> class TypedDagNode;
     
     class CladeSpecificHierarchicalBranchRateFunction : public TypedFunction< RbVector<double> > {
         

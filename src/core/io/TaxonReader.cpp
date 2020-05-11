@@ -1,11 +1,17 @@
-#include "RbConstants.h"
-#include "RbException.h"
-#include "StringUtilities.h"
-#include "TaxonReader.h"
+#include <stddef.h>
 #include <sstream>
 #include <set>
 #include <map>
 #include <algorithm>
+#include <string>
+#include <vector>
+
+#include "RbException.h"
+#include "StringUtilities.h"
+#include "TaxonReader.h"
+#include "DelimitedDataReader.h"
+#include "Taxon.h"
+#include "TimeInterval.h"
 
 using namespace RevBayesCore;
 

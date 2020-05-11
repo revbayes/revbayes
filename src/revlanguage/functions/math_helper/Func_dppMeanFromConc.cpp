@@ -6,16 +6,20 @@
 //  Copyright 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "Clade.h"
-#include "ConstantNode.h"
-#include "DeterministicNode.h"
+#include <iosfwd>
+#include <vector>
+
 #include "Func_dppMeanFromConc.h"
-#include "ModelVector.h"
 #include "RbStatisticsHelper.h"
-#include "RlClade.h"
-#include "RlTimeTree.h"
 #include "RealPos.h"
-#include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "Procedure.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

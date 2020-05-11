@@ -1,13 +1,18 @@
 #ifndef UniformTopologyBranchLengthDistribution_H
 #define UniformTopologyBranchLengthDistribution_H
 
+#include <stddef.h>
+#include <vector>
+
 #include "Taxon.h"
 #include "Tree.h"
 #include "TreeChangeEventListener.h"
-#include "TypedDagNode.h"
 #include "TypedDistribution.h"
+#include "Clade.h"
+#include "TopologyNode.h"
 
 namespace RevBayesCore {
+class DagNode;
     
     class UniformTopologyBranchLengthDistribution : public TypedDistribution<Tree>, public TreeChangeEventListener {
         

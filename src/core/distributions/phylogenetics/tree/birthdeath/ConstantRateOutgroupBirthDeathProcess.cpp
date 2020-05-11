@@ -7,15 +7,25 @@
 //
 
 #include "ConstantRateOutgroupBirthDeathProcess.h"
-#include "DistributionExponential.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbConstants.h"
-#include "RbMathCombinatorialFunctions.h"
-#include "RbMathLogic.h"
 
 #include <cmath>
 #include <algorithm>
+#include <iostream>
+#include <map>
+#include <string>
+#include <utility>
+
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
+#include "RbMathCombinatorialFunctions.h"
+#include "AbstractRootedTreeDistribution.h"
+#include "TimeInterval.h"
+#include "Tree.h"
+#include "TreeChangeEventHandler.h"
+#include "TreeChangeEventMessage.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 
 using namespace RevBayesCore;
@@ -89,7 +99,8 @@ ConstantRateOutgroupBirthDeathProcess* ConstantRateOutgroupBirthDeathProcess::cl
 
 
 
-bool ConstantRateOutgroupBirthDeathProcess::isLnProbabilityNonZero( void ) {
+bool ConstantRateOutgroupBirthDeathProcess::isLnProbabilityNonZero( void )
+{
     // first check if the current tree matches the clade constraints
     return true;
     //recursivelyUpdateClades( value->getRoot() );
@@ -102,7 +113,7 @@ bool ConstantRateOutgroupBirthDeathProcess::isLnProbabilityNonZero( void ) {
  *
  * \return    The log-probability density.
  */
-double ConstantRateOutgroupBirthDeathProcess::computeLnProbabilityTimes( void ) const
+double ConstantRateOutgroupBirthDeathProcess::computeLnProbabilityTimes( void )
 {
 
     // proceed with probabilities
@@ -173,7 +184,7 @@ double ConstantRateOutgroupBirthDeathProcess::computeLnProbabilityTimes( void ) 
     
 }
 
-double ConstantRateOutgroupBirthDeathProcess::computeLnProbabilityDiversifiedSampling(std::vector<double> ages, double presentTime, double samplingProb, size_t num_taxa) const
+double ConstantRateOutgroupBirthDeathProcess::computeLnProbabilityDiversifiedSampling(std::vector<double> ages, double presentTime, double samplingProb, size_t num_taxa)
 {
     
     if (ages.size() < 1) {

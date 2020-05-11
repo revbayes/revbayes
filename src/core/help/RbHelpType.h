@@ -1,12 +1,10 @@
 #ifndef RbHelpType_H
 #define RbHelpType_H
 
+#include <vector>
+
 #include "RbHelpEntry.h"
 #include "RbHelpFunction.h"
-#include "RbHelpReference.h"
-
-#include <string>
-#include <vector>
 
 namespace RevBayesCore {
     

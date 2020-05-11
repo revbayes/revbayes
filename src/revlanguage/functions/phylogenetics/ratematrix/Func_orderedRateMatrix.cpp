@@ -1,13 +1,29 @@
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "OrderedRateMatrixFunction.h"
 #include "Func_orderedRateMatrix.h"
 #include "Natural.h"
-#include "RateMatrix_Ordered.h"
-#include "Real.h"
 #include "RealPos.h"
+#include "RlBoolean.h"
 #include "RlDeterministicNode.h"
 #include "RlRateMatrix.h"
-#include "RlSimplex.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RateGenerator.h"
+#include "RbBoolean.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "RlTypedFunction.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
+#include "TypedFunction.h"
 
 using namespace RevLanguage;
 
@@ -35,11 +51,12 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_orderedRateMatr
 {
     
     
-    RevBayesCore::TypedDagNode< long >* n          = static_cast<const Natural &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* lambda   = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* mu       = static_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    
-    RevBayesCore::OrderedRateMatrixFunction* f = new RevBayesCore::OrderedRateMatrixFunction( n, lambda, mu );
+    RevBayesCore::TypedDagNode< long >* n                               = static_cast<const Natural &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* lambda                        = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* mu                            = static_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::Boolean >* zero_state     = static_cast<const RlBoolean &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+
+    RevBayesCore::OrderedRateMatrixFunction* f = new RevBayesCore::OrderedRateMatrixFunction( n, lambda, mu, zero_state->getValue() );
     
     return f;
 }
@@ -55,10 +72,11 @@ const ArgumentRules& Func_orderedRateMatrix::getArgumentRules( void ) const
     if ( !rules_set )
     {
         
-        argumentRules.push_back( new ArgumentRule( "maxState"   , Natural::getClassTypeSpec(), "The maximum state for this rate matrix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "lambda"     , RealPos::getClassTypeSpec(), "The rate of gain.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
-        argumentRules.push_back( new ArgumentRule( "mu"         , RealPos::getClassTypeSpec(), "The rate of loss.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
-        
+        argumentRules.push_back( new ArgumentRule( "maxState"       , Natural::getClassTypeSpec(), "The maximum state for this rate matrix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "lambda"         , RealPos::getClassTypeSpec(), "The rate of gain.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
+        argumentRules.push_back( new ArgumentRule( "mu"             , RealPos::getClassTypeSpec(), "The rate of loss.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
+        argumentRules.push_back( new ArgumentRule( "allowZeroState" , RlBoolean::getClassTypeSpec(), "Can the character go into state 0.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+
         rules_set = true;
     }
     

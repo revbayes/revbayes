@@ -4,6 +4,12 @@
 #include "DistributionBivariatePoisson.h"
 #include "RandomNumberFactory.h"
 #include "RbConstants.h"
+#include "Cloner.h"
+#include "RbVector.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

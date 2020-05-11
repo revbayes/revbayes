@@ -16,11 +16,12 @@
  * $Id$
  */
 
-#include "RbException.h"
-#include "TransitionProbabilityMatrix.h"
-
-#include <cmath>
+#include <stddef.h>
 #include <iomanip>
+#include <ostream>
+
+#include "TransitionProbabilityMatrix.h"
+#include "Cloneable.h"
 
 
 using namespace RevBayesCore;

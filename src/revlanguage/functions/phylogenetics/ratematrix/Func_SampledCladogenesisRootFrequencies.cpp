@@ -7,22 +7,29 @@
 //
 
 #include "Func_SampledCladogenesisRootFrequencies.h"
-#include "AbstractCharacterHistoryBirthDeathProcess.h"
-#include "ConstantNode.h"
-#include "Integer.h"
-#include "Natural.h"
-#include "Probability.h"
-#include "RbConstants.h"
-#include "Real.h"
+
+#include <stddef.h>
+
 #include "RealPos.h"
 #include "RlMatrixReal.h"
-#include "RlBoolean.h"
 #include "RlDeterministicNode.h"
-#include "RlRateMatrix.h"
 #include "RlSimplex.h"
 #include "RlTimeTree.h"
 #include "SampledCladogenesisRootFrequenciesFunction.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "MatrixReal.h"
+#include "RateGenerator.h"
+#include "RbException.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "RlRateGenerator.h"
+#include "StochasticNode.h"
+#include "TypeSpec.h"
+
+namespace RevBayesCore { class Tree; }
 
 using namespace RevLanguage;
 

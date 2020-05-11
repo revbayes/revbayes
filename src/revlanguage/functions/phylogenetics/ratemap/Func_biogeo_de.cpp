@@ -1,20 +1,37 @@
+#include <stddef.h>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "BiogeographyRateGeneratorSequenceFunction.h"
-#include "Func_FreeBinary.h"
 #include "Func_biogeo_de.h"
-#include "DistanceRateModifier.h"
-#include "ModelVector.h"
 #include "Natural.h"
-#include "RlRateMatrix.h"
-#include "RateMatrix_FreeBinary.h"
-#include "RateGeneratorSequence_Biogeography.h"
-#include "Real.h"
-#include "RealPos.h"
 #include "RlBoolean.h"
 #include "RlDeterministicNode.h"
 #include "RlCharacterHistoryRateModifier.h"
 #include "RlRateGeneratorSequence.h"
 #include "RlSimplex.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RateGeneratorSequence.h"
+#include "RbBoolean.h"
+#include "RevNullObject.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "RlRateGenerator.h"
+#include "RlTypedFunction.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
+#include "TypedFunction.h"
+
+namespace RevBayesCore { class CharacterHistoryRateModifier; }
+namespace RevBayesCore { class RateGenerator; }
 
 using namespace RevLanguage;
 

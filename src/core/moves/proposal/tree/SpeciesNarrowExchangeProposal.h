@@ -1,14 +1,17 @@
 #ifndef SpeciesNarrowExchangeProposal_H
 #define SpeciesNarrowExchangeProposal_H
 
-#include <string>
 #include <set>
+#include <iosfwd>
+#include <vector>
 
 #include "Proposal.h"
-#include "StochasticNode.h"
-#include "Tree.h"
 
 namespace RevBayesCore {
+class DagNode;
+class TopologyNode;
+class Tree;
+template <class variableType> class StochasticNode;
     
     /**
      * The species-narrow-exchange operator.

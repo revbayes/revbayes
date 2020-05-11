@@ -18,14 +18,18 @@
 #ifndef RlTrace_H
 #define RlTrace_H
 
-#include "Trace.h"
-#include "TypedDagNode.h"
-#include "WorkspaceToCoreWrapperObject.h"
-
 #include <ostream>
-#include <string>
+#include <vector>
+
+#include "WorkspaceToCoreWrapperObject.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "TraceNumeric.h"
 
 namespace RevLanguage {
+class Argument;
+class RevVariable;
+class TypeSpec;
     
     class Trace : public WorkspaceToCoreWrapperObject<RevBayesCore::TraceNumeric> {
         
@@ -49,6 +53,7 @@ namespace RevLanguage {
         
     protected:
         
+        void                                        initMethods(void);
         void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);          //!< Set member variable
         
     };

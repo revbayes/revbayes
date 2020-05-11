@@ -1,18 +1,39 @@
+#include <stddef.h>
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include "ModelVector.h"
 #include "Natural.h"
-#include "RbUtil.h"
 #include "RlRootedTripletDistribution.h"
-#include "RlMemberFunction.h"
 #include "RlString.h"
 #include "RlTaxon.h"
 #include "RlTimeTree.h"
-#include "RealPos.h"
 #include "RootedTripletDistribution.h"
 #include "Taxon.h"
-#include "TreeUtilities.h"
 #include "TypeSpec.h"
-
-#include <sstream>
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "MemberProcedure.h"
+#include "MethodTable.h"
+#include "ModelObject.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlUtils.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
 using namespace RevLanguage;
 

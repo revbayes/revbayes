@@ -1,7 +1,11 @@
+#include <stddef.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "RlBoolean.h"
-#include "ContinuousStochasticNode.h"
 #include "MetropolisHastingsMove.h"
 #include "ModelVector.h"
 #include "Move_SynchronizedVectorFixedSingleElementSlide.h"
@@ -13,6 +17,17 @@
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
 #include "SynchronizedVectorFixedSingleElementSlideProposal.h"
+#include "DagNode.h"
+#include "ModelObject.h"
+#include "Move.h"
+#include "RbBoolean.h"
+#include "RbVector.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlMove.h"
+#include "StochasticNode.h"
+
+namespace RevBayesCore { class Proposal; }
 
 
 using namespace RevLanguage;

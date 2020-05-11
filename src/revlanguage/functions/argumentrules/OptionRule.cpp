@@ -15,14 +15,18 @@
  */
 
 #include "OptionRule.h"
-#include "Real.h"
-#include "RbException.h"
-#include "Integer.h"
-#include "RbUtil.h"
-#include "RlString.h"
 
+#include <stddef.h>
 #include <sstream>
-#include <typeinfo>
+#include <string>
+
+#include "RbException.h"
+#include "RlString.h"
+#include "Argument.h"
+#include "DagNode.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
 
 using namespace RevLanguage;
 

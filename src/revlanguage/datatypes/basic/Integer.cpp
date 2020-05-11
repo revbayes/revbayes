@@ -1,15 +1,27 @@
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include "RlBoolean.h"
 #include "Integer.h"
 #include "Natural.h"
 #include "Probability.h"
 #include "RealPos.h"
 #include "Real.h"
-#include "RbException.h"
-#include "RbUtil.h"
 #include "RlString.h"
 #include "TypeSpec.h"
-
-#include <sstream>
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RlConstantNode.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
 using namespace RevLanguage;
 

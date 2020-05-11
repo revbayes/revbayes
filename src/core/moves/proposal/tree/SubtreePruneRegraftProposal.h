@@ -1,13 +1,15 @@
 #ifndef SubtreePruneRegraftProposal_H
 #define SubtreePruneRegraftProposal_H
 
-#include <string>
+#include <iosfwd>
 
 #include "Proposal.h"
-#include "StochasticNode.h"
-#include "Tree.h"
+#include "TopologyNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+class Tree;
+template <class variableType> class StochasticNode;
     
     /**
      * The subtree-prune-and-regraft operator.

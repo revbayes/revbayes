@@ -1,10 +1,15 @@
 #ifndef SingleElementScaleMove_H
 #define SingleElementScaleMove_H
 
+#include <stddef.h>
+#include <iosfwd>
+#include <vector>
+
 #include "Proposal.h"
-#include "StochasticNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class variableType> class StochasticNode;
     
     /**
      * @brief Scaling proposal of a single element randomly picked from a vector of Stochastic nodes

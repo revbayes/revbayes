@@ -1,9 +1,19 @@
 #include "IndependentTopologyProposal.h"
+
+#include <algorithm>
+#include <cstddef>
+#include <string>
+
 #include "RandomNumberGenerator.h"
 #include "RandomNumberFactory.h"
-#include "Move.h"
 #include "RbConstants.h"
 #include "RbMathCombinatorialFunctions.h"
+#include "Cloneable.h"
+#include "RbVector.h"
+#include "StochasticNode.h"
+#include "TypedDistribution.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

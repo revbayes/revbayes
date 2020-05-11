@@ -1,27 +1,23 @@
 #ifndef Kimura81RateMatrixFunction_H
 #define Kimura81RateMatrixFunction_H
 
-#include "RateMatrix_Kimura81.h"
-#include "RbVector.h"
-#include "Simplex.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
-
-#include <vector>
+#include "RateGenerator.h"
 
 namespace RevBayesCore {
+class DagNode;
+class Simplex;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Kimura81 rate matrix function.
      *
-     * This function creates the Kimura81 rates matrix object by setting the exchangeability rates
+     * This function creates the Kimura81 rate matrix object by setting the exchangeability rates
      * and the base frequencies. The rate matrix takes care of the setting of the actual rates and transition probabilities.
      *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since Version 1.0, 2014-07-04
-     *
+     * @param k1 The ratio of transitions (A<->G, C<->T) to A<->C, G<->T transversions
+     * @param k2 The ratio of A<->T, C<->G transversions to A<->C, G<->T transversions
+     * @param bf The simplex of stationary base frequencies
      */
     class Kimura81RateMatrixFunction : public TypedFunction<RateGenerator> {
         
@@ -40,8 +36,8 @@ namespace RevBayesCore {
         
         // members
         
-        const TypedDagNode<double>*                         kappa_1;
-        const TypedDagNode<double>*                         kappa_2;
+        const TypedDagNode<double>*                         kappa_1; //!< The ratio of transitions (A<->G, C<->T) to A<->C, G<->T transversions
+        const TypedDagNode<double>*                         kappa_2; //!< The ratio of A<->T, C<->G transversions to A<->C, G<->T transversions
         const TypedDagNode< Simplex >*                      base_frequencies;
         
     };

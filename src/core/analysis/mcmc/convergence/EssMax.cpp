@@ -7,10 +7,11 @@
 //
 
 #include "EssMax.h"
-#include "RbConstants.h"
-#include "RbMathLogic.h"
 
-#include <cmath>
+
+#include "RbMathLogic.h"
+#include "Cloneable.h"
+#include "TraceNumeric.h"
 
 using namespace RevBayesCore;
 using namespace std;

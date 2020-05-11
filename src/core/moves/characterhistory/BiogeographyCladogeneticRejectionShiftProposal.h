@@ -170,9 +170,9 @@ storedCladogeneticEvent("")
     
     addNode( ctmc );
     
-    nodeProposal = new PathRejectionSampleProposal<charType>(n, l, r, true);
-    leftProposal = new PathRejectionSampleProposal<charType>(n, l, r, true);
-    rightProposal = new PathRejectionSampleProposal<charType>(n, l, r, true);
+    nodeProposal = new PathRejectionSampleProposal<charType>(n, l, r);
+    leftProposal = new PathRejectionSampleProposal<charType>(n, l, r);
+    rightProposal = new PathRejectionSampleProposal<charType>(n, l, r);
     
     for (size_t i = 0; i < numCharacters; i++)
     {

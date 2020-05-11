@@ -52,7 +52,6 @@ namespace RevLanguage {
 #include "ModelVector.h"
 #include "GibbsMixtureAllocationProposal.h"
 #include "RbException.h"
-#include "TypedDagNode.h"
 #include "TypeSpec.h"
 
 

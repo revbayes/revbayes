@@ -1,11 +1,13 @@
+#include <stddef.h>
+#include <ostream>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "RlBoolean.h"
-#include "ContinuousStochasticNode.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_RandomDive.h"
 #include "Probability.h"
-#include "RbException.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -13,6 +15,14 @@
 #include "HalfRandomDiveProposal.h"
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "Move.h"
+#include "RbBoolean.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlMove.h"
+#include "StochasticNode.h"
+
+namespace RevBayesCore { class Proposal; }
 
 
 using namespace RevLanguage;
@@ -111,21 +121,6 @@ const TypeSpec& Move_RandomDive::getClassTypeSpec(void)
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Move::getClassTypeSpec() ) );
     
     return rev_type_spec;
-}
-
-/**
- * Get the more detailed description of the function
- */
-std::string Move_RandomDive::getHelpDescription(void) const
-{
-    // create a variable for the description of the function
-    std::string details = "The multiplicative proposal of Dutta 2012, allows for long-distance moves.\n\n";
-    
-    details += "Useful for fat-tailed distributions, possibly for bimoodal distributions.\n\n";
-    
-    details += "Variables on [0,infinity) are log-transformed for proposals.";
-    
-    return details;
 }
 
 /**

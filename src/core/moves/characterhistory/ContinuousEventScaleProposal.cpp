@@ -1,13 +1,23 @@
+#include <cmath>
+#include <iostream>
+#include <cstddef>
+#include <vector>
+
 #include "DistributionNormal.h"
 #include "ContinuousEventScaleProposal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbException.h"
-#include "RlMove.h"
-#include "TypedDagNode.h"
+#include "CharacterEventContinuous.h"
+#include "CharacterHistoryContinuous.h"
+#include "ConditionedBirthDeathShiftProcessContinuous.h"
+#include "Move.h"
+#include "Proposal.h"
+#include "StochasticNode.h"
+#include "TypedDistribution.h"
 
-#include <cmath>
-#include <iostream>
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class Tree; }
 
 using namespace RevBayesCore;
 

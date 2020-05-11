@@ -1,5 +1,9 @@
 #include "MoveSchedule.h"
+
 #include "RbIterator.h"
+#include "Move.h"
+#include "RbIteratorImpl.h"
+#include "RbVector.h"
 
 using namespace RevBayesCore;
 

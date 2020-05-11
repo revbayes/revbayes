@@ -1,9 +1,15 @@
 #include "ProbabilityMonitor.h"
+
+#include <stddef.h>
+#include <ostream>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "DagNode.h"
 #include "Model.h"
 #include "Monitor.h"
-#include "RbFileManager.h"
-#include "StochasticNode.h"
+#include "Cloneable.h"
 
 using namespace RevBayesCore;
 

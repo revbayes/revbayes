@@ -1,12 +1,13 @@
 #include "AbstractCharacterData.h"
 
-#include "AbstractTaxonData.h"
-#include "RbConstants.h"
-#include "RbException.h"
-
-#include <sstream>
 #include <string>
-#include <algorithm>
+#include <cstddef>
+#include <iostream>
+#include <utility>
+#include <sstream> // IWYU pragma: keep
+
+#include "AbstractTaxonData.h"
+#include "RbException.h"
 
 using namespace RevBayesCore;
 
@@ -28,7 +29,8 @@ AbstractCharacterData::AbstractCharacterData(const AbstractCharacterData &d) :
     fileName(d.fileName),
     filePath(d.filePath),
     taxa(d.taxa),
-    taxonMap() {
+    taxonMap(),
+    homeologMap() {
     
     for (std::map<std::string, AbstractTaxonData*>::const_iterator it = d.taxonMap.begin(); it != d.taxonMap.end(); ++it)
     {
@@ -36,6 +38,15 @@ AbstractCharacterData::AbstractCharacterData(const AbstractCharacterData &d) :
         
         // add the sequence also as a member so that we can access it by name
         taxonMap.insert( std::pair<std::string, AbstractTaxonData* >( name, it->second->clone() ) );
+    }
+    
+    for (std::map<std::string, std::string>::const_iterator it = d.homeologMap.begin(); it != d.homeologMap.end(); ++it)
+    {
+        const std::string &name1 = it->first;
+        const std::string &name2 = it->second;
+        
+        // add the sequence also as a member so that we can access it by name
+        homeologMap.insert( std::pair<std::string, std::string >( name1, name2 ) );
     }
 }
 
@@ -139,7 +150,7 @@ AbstractCharacterData& AbstractCharacterData::operator=( const AbstractCharacter
 /**
  * Add a sequence (TaxonData) to the character data object.
  *
- * \param[in]    obsd    The TaxonData object that should be added.
+ * \param[in]    n    The TaxonData object that should be added.
  */
 void AbstractCharacterData::addMissingTaxon(const std::string &n) {
     
@@ -160,7 +171,7 @@ void AbstractCharacterData::addMissingTaxon(const std::string &n) {
 /**
  * Add a sequence (TaxonData) to the character data object.
  *
- * \param[in]    obsd    The TaxonData object that should be added.
+ * \param[in]    obs    The TaxonData object that should be added.
  */
 void AbstractCharacterData::addTaxonData(const AbstractTaxonData &obs)
 {
@@ -253,7 +264,7 @@ void AbstractCharacterData::deleteTaxon(size_t i) {
  * Delete a taxon.
  * Remove taxon object and free up its memory.
  *
- * \param[in]    i    The index of the taxon that will be excluded.
+ * \param[in]    s    The index of the taxon that will be excluded.
  */
 void AbstractCharacterData::deleteTaxon(const std::string& s) {
     
@@ -313,6 +324,59 @@ size_t AbstractCharacterData::getIndexOfTaxon(const std::string &n) const
     }
 
     throw RbException("Cannot find taxon '" + n + "' in the CharacterData matrix.");
+}
+
+
+/**
+* Get a string with the JSON representation of the character data.
+*
+* \return     A JSON-formatted string
+*/
+const std::string AbstractCharacterData::getJsonRepresentation(void) const {
+
+    //std::set<size_t>                            deletedTaxa;                                                                //!< Set of deleted taxa
+    //std::string                                 fileName;                                                                   //!< The path/filename from where this matrix originated
+    //std::string                                 filePath;                                                                   //!< The path/filename from where this matrix originated
+    //std::map<std::string, std::string >         homeologMap;
+    //std::vector<Taxon>                          taxa;                                                                       //!< names of the sequences
+    //std::map<std::string, AbstractTaxonData* >  taxonMap;
+
+    std::string jsonStr = "{\"CharacterDataMatrix\": {\n";
+    
+    jsonStr += std::string("   \"filePath\": \"")    + filePath + std::string("\",") + '\n';
+    jsonStr += std::string("   \"fileName\": \"")    + fileName + std::string("\",") + '\n';
+    jsonStr += std::string("   \"dataType\": \"")    + getDataType() + "\",\n";
+    jsonStr += std::string("   \"stateLabels\": \"") + getStateLabels() + "\",\n";
+    
+    jsonStr += "   \"taxa\": [";
+    for (int i=0; i<taxa.size(); i++)
+        {
+        jsonStr += "\"" + taxa[i].getName() + "\"";
+        if (i+1 < taxa.size())
+            jsonStr += ",";
+        }
+    jsonStr += "],\n";
+
+    jsonStr += "   \"deletedTaxa\": [";
+    for (std::set<size_t>::iterator it = deletedTaxa.begin(); it != deletedTaxa.end(); it++)
+        {
+        jsonStr += *it;
+        if (it != deletedTaxa.end())
+            jsonStr += ",";
+        }
+    jsonStr += "],\n";
+    
+    jsonStr += "   \"data\": [\n";
+    for (std::map<std::string,AbstractTaxonData* >::const_iterator it = taxonMap.begin(); it != taxonMap.end(); it++)
+        {
+        if (it != taxonMap.begin())
+            jsonStr += ",\n";
+        jsonStr += "   " + it->second->getJsonRepresentation();
+        }
+    jsonStr += "   ]";
+    jsonStr += "}}";
+
+    return jsonStr;
 }
 
 
@@ -494,6 +558,23 @@ AbstractTaxonData& AbstractCharacterData::getTaxonData( const std::string &tn ) 
 }
 
 
+const std::map<std::string, std::string > AbstractCharacterData::getHomeologMap()
+{
+    return homeologMap;
+}
+
+
+/**
+ * Get the homeolog character data currently assigned to the tip.
+ *
+ * \param[in] tipName        the name currently used on the tree.
+ */
+const std::string AbstractCharacterData::getHomeologPhase(const std::string& tipName)
+{
+    return homeologMap[tipName];
+}
+
+
 /**
  * Get the names of all taxa.
  *
@@ -525,7 +606,7 @@ const std::string& AbstractCharacterData::getTaxonNameWithIndex( size_t idx ) co
  * Since we didn't actually deleted the taxon but marked it for exclusion
  * we can now simply remove the flag.
  *
- * \param[in]    i    The name of the taxon that will be included.
+ * \param[in]    n    The name of the taxon that will be included.
  */
 void AbstractCharacterData::includeTaxon(const std::string &n) {
     
@@ -577,7 +658,7 @@ bool AbstractCharacterData::isSequenceMissing( const std::string &n ) const {
 /**
  * Is the taxon excluded.
  *
- * \param[in]    idx    The position of the taxon in question.
+ * \param[in]    i    The position of the taxon in question.
  */
 bool AbstractCharacterData::isTaxonExcluded(size_t i) const {
     
@@ -657,6 +738,31 @@ void AbstractCharacterData::setFilePath(const std::string& fn)
 
 
 /**
+ * Assign character homeolog data to a tip.
+ *
+ * \param[in] dataName       the name currently used in the character alignment.
+ * \param[in] tipName        the name to be used on the tree.
+ */
+void AbstractCharacterData::setHomeologPhase(const std::string& dataName, const std::string& tipName)
+{
+    homeologMap[tipName] = dataName;
+    AbstractTaxonData& t = getTaxonData( dataName );
+    t.setTaxon( Taxon(tipName) );
+    size_t numTax = taxa.size();
+    for (size_t i = 0; i < numTax ; ++i)
+    {
+        if ( taxa[i].getName() == dataName)
+        {
+            taxa[i] = Taxon(tipName);
+            break;
+        }
+    }
+    taxonMap.erase( dataName );
+    taxonMap.insert( std::pair<std::string, AbstractTaxonData* >( tipName, t.clone() ) );
+}
+
+
+/**
  * Change the name of a taxon
  *
  * \param[in] currentName    self explanatory.
@@ -731,6 +837,29 @@ void AbstractCharacterData::show(std::ostream &out) const {
             }
         std::cout << std::endl;
         }
+}
+
+
+/**
+ * Switch the currently assigned homeolog phase.
+ *
+ * \param[in] tipName1        self explanatory. 
+ * \param[in] tipName2        self explanatory.
+ */
+void AbstractCharacterData::switchHomeologPhase(const std::string& tipName1, const std::string& tipName2)
+{
+    std::string data1 = homeologMap[tipName1];
+    std::string data2 = homeologMap[tipName2];
+    homeologMap[tipName1] = data2;
+    homeologMap[tipName2] = data1;
+    AbstractTaxonData& t1 = getTaxonData( tipName1 );
+    AbstractTaxonData& t2 = getTaxonData( tipName2 );
+    t1.setTaxon( Taxon(tipName2) );
+    t2.setTaxon( Taxon(tipName1) );
+    taxonMap.erase( tipName1 );
+    taxonMap.erase( tipName2 );
+    taxonMap.insert( std::pair<std::string, AbstractTaxonData* >( tipName1, t2.clone() ) );
+    taxonMap.insert( std::pair<std::string, AbstractTaxonData* >( tipName2, t1.clone() ) );
 }
 
 

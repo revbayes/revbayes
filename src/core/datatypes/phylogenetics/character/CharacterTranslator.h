@@ -1,16 +1,16 @@
 #ifndef CharacterTranslator_H
 #define CharacterTranslator_H
 
-#include <string>
+#include <iosfwd>
 
 #include "AbstractDiscreteTaxonData.h"
-#include "AminoAcidState.h"
-#include "CodonState.h"
 #include "DiscreteTaxonData.h"
-#include "DnaState.h"
-#include "RnaState.h"
 
 namespace RevBayesCore {
+class AminoAcidState;
+class CodonState;
+class DnaState;
+class RnaState;
     
     
     namespace CharacterTranslator {

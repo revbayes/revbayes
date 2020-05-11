@@ -1,11 +1,13 @@
 #ifndef StationarityTest_H
 #define StationarityTest_H
 
+#include <stddef.h>
 #include <vector>
 
 #include "ConvergenceDiagnosticContinuous.h"
 
 namespace RevBayesCore {
+class TraceNumeric;
     
     /**
      * @brief Stationarity test statistic for assessing convergence.

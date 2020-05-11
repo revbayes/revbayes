@@ -1,12 +1,22 @@
 #ifndef DistanceMatrix_H
 #define DistanceMatrix_H
 
+#include <stddef.h>
+#include <iosfwd>
+#include <vector>
+
 #include "Cloneable.h"
-#include "DistanceMatrixReader.h"
 #include "Taxon.h"
-#include <string>
+#include "MatrixReal.h"
 
 namespace RevBayesCore {
+class DistanceMatrixReader;
+template <class valueType> class RbVector;
+
+     /** @brief Distance matrix class.
+      *
+      * This class stores a matrix of pairwise real-valued distances among a vector of taxa.
+      */
     
     class DistanceMatrix : public Cloneable {
         
@@ -25,28 +35,28 @@ namespace RevBayesCore {
         bool                                            operator<=(const DistanceMatrix &m) const { return operator<(m) || operator==(m); }
 
         virtual DistanceMatrix*                         clone(void) const;
-        const std::vector<Taxon>&                       getTaxa(void) const;
-        const MatrixReal&                               getMatrix(void) const;
-		size_t                                          getSize(void) const;
+        const std::vector<Taxon>&                       getTaxa(void) const;                 //!< Get the taxa whose pairwise distances are stored in the matrix
+        const MatrixReal&                               getMatrix(void) const;               //!< Get the matrix of distances (without taxon annotations)
+		size_t                                          getSize(void) const;                 //!< Get the number of tips of the tree associated with the matrix
         std::string                                     getFilename(void) const;
         //std::string                                     getDatatype(void) const;
-        RbVector<double>&                       		operator[](size_t index);
+        RbVector<double>&                       		operator[](size_t index);            //!< Overloaded subsetting operator
         const RbVector<double>&                 		operator[](size_t index) const;
-        double& 										getElement( size_t i, size_t j ) ;
-        void                                            setTaxon(const Taxon &t, size_t i);
-        size_t 											size(void) const;
+        double& 										getElement( size_t i, size_t j ) ;   //!< Get the element in the i-th row and the j-th column
+        void                                            setTaxon(const Taxon &t, size_t i);  //!< Set taxon t as the i-th taxon in the matrix
+        size_t 											size(void) const;                    //!< Get the number of elements in a row or column of the matrix
     
     protected:
-        MatrixReal								        matrix;
-		std::vector<Taxon>                              taxa;
+        MatrixReal								        matrix;                              //!< Matrix of real-valued distances
+		std::vector<Taxon>                              taxa;                                //!< Vector of taxa whose pairwise distances are stored in the matrix
         
     private:
-        size_t                                          num_tips;
+        size_t                                          num_tips;                            //!< The number of tips of the tree associated with the matrix
         std::string                                     filename;
         
     };
     
-    std::ostream&                                       operator<<(std::ostream& o, const DistanceMatrix& x);
+    std::ostream&                                       operator<<(std::ostream& o, const DistanceMatrix& x); //!< Overloaded output operator
 }
 
 

@@ -1,23 +1,36 @@
+#include <stddef.h>
+#include <ostream>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "BiogeographicTreeHistoryCtmc.h"
 //#include "TreeCharacterHistoryNhxMonitor.h"
 #include "TreeCharacterHistoryNodeMonitor.h"
 #include "Mntr_CharacterHistoryNewickFile.h"
 #include "ModelVector.h"
 #include "OptionRule.h"
 #include "Natural.h"
-#include "RbException.h"
-#include "Real.h"
 #include "RevObject.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlString.h"
 #include "RlTimeTree.h"
-#include "StandardState.h"
-#include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "Monitor.h"
+#include "RbBoolean.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlMonitor.h"
+#include "StochasticNode.h"
+#include "Real.h" // IWYU pragma: keep
+#include "StandardState.h" // IWYU pragma: keep
 
+namespace RevBayesCore { class AbstractHomologousDiscreteCharacterData; }
+namespace RevBayesCore { class Tree; }
+namespace RevBayesCore { template <class valueType> class RbVector; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 

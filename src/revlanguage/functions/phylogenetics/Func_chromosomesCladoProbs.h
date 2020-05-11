@@ -9,14 +9,23 @@
 #define Func_chromosomesCladoProbs_H
 
 
-#include "RlCladogeneticProbabilityMatrix.h"
-#include "RlMatrixReal.h"
-#include "RlTypedFunction.h"
-
-#include <map>
 #include <string>
+#include <iosfwd>
+#include <vector>
+
+#include "RlCladogeneticProbabilityMatrix.h"
+#include "RlTypedFunction.h"
+#include "CladogeneticProbabilityMatrix.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RevPtr.h"
+#include "RlDeterministicNode.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 namespace RevLanguage {
+class ArgumentRules;
+class TypeSpec;
     
     class Func_chromosomesCladoProbs : public TypedFunction<CladogeneticProbabilityMatrix> {
         

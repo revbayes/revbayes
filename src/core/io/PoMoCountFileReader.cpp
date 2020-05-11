@@ -1,12 +1,21 @@
+#include <stddef.h>
+#include <string>
+#include <iostream>
+#include <map>
+#include <utility>
+#include <vector>
+
 #include "DiscreteTaxonData.h"
 #include "PoMoCountFileReader.h"
 #include "PoMoState4.h"
 #include "PoMoState.h"
-#include "RbFileManager.h"
-
-#include "RbConstants.h"
-
-#include <string>
+#include "Cloneable.h"
+#include "DelimitedDataReader.h"
+#include "HomologousDiscreteCharacterData.h"
+#include "NaturalNumbersState.h"
+#include "RbException.h"
+#include "StringUtilities.h"
+#include "Taxon.h"
 
 
 using namespace RevBayesCore;

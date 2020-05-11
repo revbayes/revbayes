@@ -1,14 +1,15 @@
 #ifndef DirichletSimplexProposal_H
 #define DirichletSimplexProposal_H
 
-#include <set>
-#include <string>
+#include <stddef.h>
+#include <iosfwd>
 
 #include "Proposal.h"
 #include "Simplex.h"
-#include "StochasticNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class variableType> class StochasticNode;
     
     /**
      * The Dirichlet-simplex operator.

@@ -8,22 +8,27 @@
 
 #include "Move_MatrixRealSymmetricSlide.h"
 
+#include <stddef.h>
+#include <string>
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "ContinuousStochasticNode.h"
 #include "MetropolisHastingsMove.h"
-#include "Natural.h"
-#include "RbException.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlBoolean.h"
-#include "MatrixReal.h"
 #include "MatrixRealSymmetricSingleElementSlidingProposal.h"
 #include "RlMatrixRealSymmetric.h"
-#include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "Move.h"
+#include "RbBoolean.h"
+#include "StochasticNode.h"
+#include "StringUtilities.h"
+
+namespace RevBayesCore { class MatrixReal; }
+namespace RevBayesCore { class Proposal; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 
 using namespace RevLanguage;

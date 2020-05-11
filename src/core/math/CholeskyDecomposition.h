@@ -1,10 +1,9 @@
 #ifndef CholeskyDecomposition_H
 #define CholeskyDecomposition_H
 
-#include "MatrixComplex.h"
-#include "MatrixReal.h"
+#include <stddef.h>
 
-#include <complex>
+#include "MatrixReal.h"
 
 
 namespace RevBayesCore {

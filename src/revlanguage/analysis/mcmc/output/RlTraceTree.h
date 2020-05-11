@@ -14,7 +14,7 @@ namespace RevLanguage {
         
     public:
         
-//        TraceTree(void);                                                                                                                    //!< Default constructor
+        TraceTree(void);                                                                                                                    //!< Default constructor
         TraceTree(const RevBayesCore::TraceTree& x);                                                                                              //!< Copy constructor
         
         // Basic utility functions

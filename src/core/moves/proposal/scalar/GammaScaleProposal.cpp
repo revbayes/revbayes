@@ -1,12 +1,17 @@
 #include "GammaScaleProposal.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbException.h"
-#include "TypedDagNode.h"
-#include "DistributionGamma.h"
 
 #include <cmath>
 #include <iostream>
+
+#include "RandomNumberFactory.h"
+#include "RbException.h"
+#include "DistributionGamma.h"
+#include "Cloneable.h"
+#include "RbConstants.h"
+#include "StochasticNode.h"
+
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 

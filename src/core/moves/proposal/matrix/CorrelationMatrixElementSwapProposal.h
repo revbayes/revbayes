@@ -1,14 +1,15 @@
 #ifndef CorrelationMatrixElementSwapProposal_H
 #define CorrelationMatrixElementSwapProposal_H
 
-#include <set>
-#include <string>
+#include <stddef.h>
+#include <iosfwd>
 
 #include "Proposal.h"
-#include "MatrixReal.h"
-#include "StochasticNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+class MatrixReal;
+template <class variableType> class StochasticNode;
     
     /**
      * The Swap operator.

@@ -1,13 +1,18 @@
-#include "ArgumentRule.h"
-#include "Environment.h"
-#include "RbException.h"
-#include "RbUtil.h"
-#include "RlString.h"
-#include "SyntaxFormal.h"
-#include "TypeSpec.h"
-#include "Workspace.h"
-
+#include <stddef.h>
 #include <sstream>
+#include <string>
+
+#include "ArgumentRule.h"
+#include "RbException.h"
+#include "SyntaxFormal.h"
+#include "Workspace.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "SyntaxElement.h"
+
+namespace RevLanguage { class Environment; }
+namespace RevLanguage { class TypeSpec; }
 
 using namespace RevLanguage;
 

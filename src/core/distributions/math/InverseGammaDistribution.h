@@ -1,19 +1,23 @@
-//
-//  InverseGammaDistribution.h
-//  rb_mlandis
-//
-//  Created by Michael Landis on 3/19/13.
-//  Copyright (c) 2013 Michael Landis. All rights reserved.
-//
-
 #ifndef __rb_mlandis__InverseGammaDistribution__
 #define __rb_mlandis__InverseGammaDistribution__
 
-
 #include "ContinuousDistribution.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
+
+/**
+ * @brief Inverse Gamma distribution class.
+ *
+ * The Gamma distribution represents a family of distributions
+ * defined on the positive numbers. The Inverse Gamma distribution has 2 parameters:
+ * @param Shape The shape parameter of the distribution
+ * @param Rate  The Rate parameter of the distribution. The rate is the inverse of the scale.
+ * Instances of this class can be associated to stochastic variables.
+ *
+ */
+
     
     class InverseGammaDistribution : public ContinuousDistribution {
         

@@ -7,9 +7,13 @@
 //
 
 #include "StateCountRateModifierFunction.h"
+
 #include "StateCountRateModifier.h"
 #include "TypedDagNode.h"
-#include <cmath>
+#include "Assignable.h"
+#include "RbVector.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

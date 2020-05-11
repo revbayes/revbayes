@@ -1,15 +1,19 @@
 #ifndef RlHomologousCharacterData_H
 #define RlHomologousCharacterData_H
 
-#include "HomologousCharacterData.h"
-#include "RlAbstractCharacterData.h"
-
-#include <set>
-#include <string>
 #include <vector>
+#include <iosfwd>
+
+#include "RlAbstractCharacterData.h"
+#include "MethodTable.h"
+#include "RevPtr.h"
+
+namespace RevBayesCore { class HomologousCharacterData; }
 
 
 namespace RevLanguage {
+class Argument;
+class RevVariable;
     
     
     class HomologousCharacterData : public AbstractCharacterData {

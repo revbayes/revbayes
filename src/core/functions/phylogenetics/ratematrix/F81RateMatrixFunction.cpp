@@ -1,13 +1,26 @@
 #include "F81RateMatrixFunction.h"
-#include "RbException.h"
+
+#include <vector>
+
+#include "Cloneable.h"
+#include "RateMatrix_F81.h"
+#include "Simplex.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
+/**
+ * Default constructor.
+ *
+ * This function takes a single input:
+ * @param bf The simplex of base frequencies
+ */
 
 F81RateMatrixFunction::F81RateMatrixFunction(const TypedDagNode< Simplex > *bf) : TypedFunction<RateGenerator>( new RateMatrix_F81(bf->getValue().size()) ),
     base_frequencies( bf )
 {
-    // add the lambda parameter as a parent
     addParameter( base_frequencies );
     
     update();

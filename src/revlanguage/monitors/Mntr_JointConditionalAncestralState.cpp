@@ -1,29 +1,35 @@
 #include "Mntr_JointConditionalAncestralState.h"
 
+#include <stddef.h>
+#include <string>
+
 #include "BinaryState.h"
-#include "AbstractCharacterData.h"
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "OptionRule.h"
-#include "Model.h"
 #include "RlMonitor.h"
-#include "ModelVector.h"
-#include "Ellipsis.h"
 #include "Natural.h"
 #include "RbException.h"
 #include "RevObject.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
-#include "RlModel.h"
 #include "RlTimeTree.h"
-#include "RlBranchLengthTree.h"
 #include "RlString.h"
 #include "TypeSpec.h"
 #include "NaturalNumbersState.h"
 #include "DnaState.h"
 #include "StandardState.h"
-#include "RnaState.h"
 #include "AminoAcidState.h"
 #include "PoMoState.h"
+#include "AbstractHomologousDiscreteCharacterData.h"
+#include "DiscreteTaxonData.h"
+#include "JointConditionalAncestralStateMonitor.h"
+#include "Monitor.h"
+#include "RbBoolean.h"
+#include "RlBoolean.h"
+#include "RlTree.h"
+#include "StochasticNode.h"
+
+namespace RevBayesCore { class Tree; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 

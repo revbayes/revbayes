@@ -1,16 +1,16 @@
 #ifndef GeneralRateMatrix_H
 #define GeneralRateMatrix_H
 
-#include "AbstractRateMatrix.h"
-#include <complex>
+#include <stddef.h>
 #include <vector>
+
+#include "AbstractRateMatrix.h"
 
 
 namespace RevBayesCore {
     
-    class EigenSystem;
-    class Simplex;
     class TransitionProbabilityMatrix;
+class Assignable;
     
     
     /**

@@ -1,18 +1,17 @@
 #ifndef GeneralRateGeneratorSequenceFunction_H
 #define GeneralRateGeneratorSequenceFunction_H
 
-//#include "GeographyRateModifier.h"
-#include "CharacterHistoryRateModifier.h"
+#include <stddef.h>
+
 #include "RateGeneratorSequence.h"
-#include "RateMatrix.h"
-#include "RbVector.h"
-#include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <vector>
-
 namespace RevBayesCore {
+class CharacterHistoryRateModifier;
+class DagNode;
+class RateGenerator;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     class GeneralRateGeneratorSequenceFunction : public TypedFunction<RateGeneratorSequence> {
         

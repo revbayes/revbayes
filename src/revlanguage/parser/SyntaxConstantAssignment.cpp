@@ -1,12 +1,15 @@
-#include "RbException.h"
-#include "RbUtil.h"
-#include "RbOptions.h"
-#include "SyntaxConstantAssignment.h"
-#include "Workspace.h"
-
-#include <iostream>
-#include <list>
 #include <sstream>
+#include <string>
+
+#include "RbException.h"
+#include "SyntaxConstantAssignment.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "SyntaxAssignment.h"
+#include "TypeSpec.h"
+
+namespace RevLanguage { class SyntaxElement; }
 
 using namespace RevLanguage;
 

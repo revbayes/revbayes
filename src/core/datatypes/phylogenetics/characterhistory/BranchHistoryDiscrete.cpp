@@ -1,9 +1,11 @@
 #include "BranchHistoryDiscrete.h"
-#include "CharacterEventDiscrete.h"
-#include "CharacterEventCompare.h"
 
-#include <iostream>
-#include <iomanip>
+#include <vector>
+
+#include "CharacterEventDiscrete.h"
+#include "Cloneable.h"
+
+namespace RevBayesCore { class CharacterEvent; }
 
 using namespace RevBayesCore;
 

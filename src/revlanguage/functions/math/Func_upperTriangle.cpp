@@ -1,19 +1,33 @@
+#include <iosfwd>
+#include <vector>
+
 #include "ArgumentRule.h"
-#include "Ellipsis.h"
 #include "Func_upperTriangle.h"
-#include "Integer.h"
-#include "NormalizeVectorFunction.h"
-#include "MatrixReal.h"
 #include "ModelVector.h"
-#include "RbUtil.h"
 #include "RealPos.h"
-#include "RlBoolean.h"
 #include "RlDeterministicNode.h"
-#include "RlMatrixRealSymmetric.h"
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
-
 #include "UpperTriangle.h"
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "RbVector.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlFunction.h"
+#include "RlMatrixReal.h"
+#include "RlTypedFunction.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
+
+namespace RevBayesCore { class MatrixReal; }
 
 
 using namespace RevLanguage;

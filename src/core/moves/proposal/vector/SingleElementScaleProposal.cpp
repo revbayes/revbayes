@@ -1,6 +1,14 @@
 #include "SingleElementScaleProposal.h"
+
+#include <math.h>
+#include <ostream>
+
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
+#include "Cloneable.h"
+#include "StochasticNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

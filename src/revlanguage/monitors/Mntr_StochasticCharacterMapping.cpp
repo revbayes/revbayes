@@ -8,22 +8,34 @@
 
 #include "Mntr_StochasticCharacterMapping.h"
 
-#include "AbstractCharacterData.h"
+#include <stddef.h>
+#include <string>
+
 #include "ArgumentRule.h"
-#include "Model.h"
 #include "Natural.h"
 #include "NaturalNumbersState.h"
+#include "StandardState.h"
 #include "RlMonitor.h"
 #include "RbException.h"
 #include "RevObject.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
-#include "RlModel.h"
 #include "RlTimeTree.h"
-#include "RlBranchLengthTree.h"
 #include "RlString.h"
-#include "StandardState.h"
 #include "StateDependentSpeciationExtinctionProcess.h"
 #include "TypeSpec.h"
+#include "ArgumentRules.h"
+#include "DiscreteTaxonData.h"
+#include "Monitor.h"
+#include "RbBoolean.h"
+#include "RlBoolean.h"
+#include "RlTree.h"
+#include "StochasticCharacterMappingMonitor.h"
+#include "StochasticNode.h"
+#include "TypedDistribution.h"
+
+namespace RevBayesCore { class AbstractHomologousDiscreteCharacterData; }
+namespace RevBayesCore { class Tree; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 
 using namespace RevLanguage;
@@ -31,7 +43,7 @@ using namespace RevLanguage;
 
 Mntr_StochasticCharacterMapping::Mntr_StochasticCharacterMapping(void) : Monitor()
 {
-    
+
 }
 
 
@@ -43,29 +55,30 @@ Mntr_StochasticCharacterMapping::Mntr_StochasticCharacterMapping(void) : Monitor
  */
 Mntr_StochasticCharacterMapping* Mntr_StochasticCharacterMapping::clone(void) const
 {
-    
+
     return new Mntr_StochasticCharacterMapping(*this);
 }
 
 
 void Mntr_StochasticCharacterMapping::constructInternalObject( void )
 {
-    
-    const std::string& file_name      = static_cast<const RlString  &>( filename->getRevObject()           ).getValue();
-    bool               is             = static_cast<const RlBoolean &>( include_simmap->getRevObject()     ).getValue();
-    bool               sd             = static_cast<const RlBoolean &>( use_simmap_default->getRevObject() ).getValue();
-    const std::string& sep            = static_cast<const RlString  &>( separator->getRevObject()          ).getValue();
-    int                print_gen      = (int)static_cast<const Natural   &>( printgen->getRevObject()      ).getValue();
-    bool               app            = static_cast<const RlBoolean &>( append->getRevObject()             ).getValue();
-    bool               wv             = static_cast<const RlBoolean &>( version->getRevObject()            ).getValue();
-    
-    
+
+    const std::string& file_name      = static_cast<const RlString        &>( filename->getRevObject()           ).getValue();
+    bool               is             = static_cast<const RlBoolean       &>( include_simmap->getRevObject()     ).getValue();
+    bool               sd             = static_cast<const RlBoolean       &>( use_simmap_default->getRevObject() ).getValue();
+    const std::string& sep            = static_cast<const RlString        &>( separator->getRevObject()          ).getValue();
+    int                print_gen      = (int)static_cast<const Natural    &>( printgen->getRevObject()           ).getValue();
+    bool               app            = static_cast<const RlBoolean       &>( append->getRevObject()             ).getValue();
+    bool               wv             = static_cast<const RlBoolean       &>( version->getRevObject()            ).getValue();
+    size_t             idx            = (size_t)static_cast<const Natural &>( index->getRevObject()              ).getValue();
+
+
     RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn = NULL;
     RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn = NULL;
-    
+
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* cdbdp_tdn = NULL;
     RevBayesCore::StochasticNode<RevBayesCore::Tree>* cdbdp_sn = NULL;
-    
+
     if ( static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).isModelObject() )
     {
         ctmc_tdn = static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
@@ -75,7 +88,7 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
     {
         cdbdp_tdn = static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).getDagNode();
         cdbdp_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( cdbdp_tdn );
-        
+
         RevBayesCore::StateDependentSpeciationExtinctionProcess *sse_process = NULL;
         sse_process = dynamic_cast<RevBayesCore::StateDependentSpeciationExtinctionProcess*>( &cdbdp_sn->getDistribution() );
         sse_process->setSampleCharacterHistory( true );
@@ -84,45 +97,79 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
     {
         throw RbException("mnStochasticCharacterMap requires either a CTMC or a character-dependent birth death process (CDBDP).");
     }
-    
-    
-    RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState> *m;
-    if ( static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).isModelObject() )
-    {
-        m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>( ctmc_sn, (unsigned long)print_gen, file_name, is, sd, sep );
+
+
+    std::string model_type = "";
+    std::string data_type = "";
+    if ( static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).isModelObject() ) {
+        model_type = "ctmc";
+        data_type = ctmc_sn->getValue().getDataType();
     }
-    else
-    {
-        m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>( cdbdp_sn, (unsigned long)print_gen, file_name, is, sd, sep );
+    else {
+        model_type = "cdbdp";
+        data_type = "NaturalNumbers";
     }
-    m->setAppend( app );
-    m->setPrintVersion( wv );
     
-    delete value;
-    value = m;
     
+    if ( model_type == "ctmc" )
+    {
+        std::string data_type = ctmc_sn->getValue().getDataType();
+        if (data_type == "Standard") {
+            RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::StandardState>* m;
+            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::StandardState>( ctmc_sn, (unsigned long)print_gen, file_name, is, sd, sep, idx - 1 );
+            m->setAppend( app );
+            m->setPrintVersion( wv );
+            
+            delete value;
+            value = m;
+            
+        } else if (data_type == "NaturalNumbers") {
+            RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>* m;
+            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>( ctmc_sn, (unsigned long)print_gen, file_name, is, sd, sep, idx - 1 );
+            m->setAppend( app );
+            m->setPrintVersion( wv );
+            
+            delete value;
+            value = m;
+        }
+        
+    }
+    else if ( model_type == "cdbdp" )
+    {
+        if (data_type == "NaturalNumbers") {
+            RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>* m;
+            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>( cdbdp_sn, (unsigned long)print_gen, file_name, is, sd, sep );
+            m->setAppend( app );
+            m->setPrintVersion( wv );
+            
+            delete value;
+            value = m;
+        }
+    }
+    
+
 }
 
 
 /** Get Rev type of object */
 const std::string& Mntr_StochasticCharacterMapping::getClassType(void)
 {
-    
+
     static std::string revType = "Mntr_StochasticCharacterMap";
-    
+
     return revType;
-    
+
 }
 
 
 /** Get class type spec describing type of object */
 const TypeSpec& Mntr_StochasticCharacterMapping::getClassTypeSpec(void)
 {
-    
+
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Monitor::getClassTypeSpec() ) );
-    
+
     return rev_type_spec;
-    
+
 }
 
 
@@ -133,22 +180,22 @@ const TypeSpec& Mntr_StochasticCharacterMapping::getClassTypeSpec(void)
  */
 std::string Mntr_StochasticCharacterMapping::getMonitorName( void ) const
 {
-    
+
     // create a constructor function name variable that is the same for all instance of this class
     std::string c_name = "StochasticCharacterMap";
-    
+
     return c_name;
-    
+
 }
 
 
 /** Return member rules (no members) */
 const MemberRules& Mntr_StochasticCharacterMapping::getParameterRules(void) const
 {
-    
+
     static MemberRules monitor_rules;
     static bool rules_set = false;
-    
+
     if ( !rules_set )
     {
         monitor_rules.push_back( new ArgumentRule("ctmc"           , AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The continuous-time Markov process to monitor.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
@@ -160,39 +207,40 @@ const MemberRules& Mntr_StochasticCharacterMapping::getParameterRules(void) cons
         monitor_rules.push_back( new ArgumentRule("separator"      , RlString::getClassTypeSpec() , "The delimiter between variables. \t by default.",                              ArgumentRule::BY_VALUE,     ArgumentRule::ANY, new RlString("\t") ) );
         monitor_rules.push_back( new ArgumentRule("append"         , RlBoolean::getClassTypeSpec(), "Should we append to an existing file? False by default.",                  ArgumentRule::BY_VALUE,     ArgumentRule::ANY, new RlBoolean(false) ) );
         monitor_rules.push_back( new ArgumentRule("version"        , RlBoolean::getClassTypeSpec(), "Should we record the software version?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+        monitor_rules.push_back( new ArgumentRule("index"          , Natural::getClassTypeSpec(), "The index of the character to be mointored.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
 
         rules_set = true;
     }
-    
+
     return monitor_rules;
-    
+
 }
 
 
 /** Get type spec */
 const TypeSpec& Mntr_StochasticCharacterMapping::getTypeSpec( void ) const
 {
-    
+
     static TypeSpec type_spec = getClassTypeSpec();
-    
+
     return type_spec;
-    
+
 }
 
 
 /** Get type spec */
 void Mntr_StochasticCharacterMapping::printValue(std::ostream &o) const
 {
-    
+
     o << "Mntr_StochasticCharacterMap";
-    
+
 }
 
 
 /** Set a member variable */
 void Mntr_StochasticCharacterMapping::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
-    
+
     if ( name == "" ) {
         vars.push_back( var );
     }
@@ -232,9 +280,13 @@ void Mntr_StochasticCharacterMapping::setConstParameter(const std::string& name,
     {
         version = var;
     }
+    else if ( name == "index" )
+    {
+        index = var;
+    }
     else
     {
         Monitor::setConstParameter(name, var);
     }
-    
+
 }

@@ -1,15 +1,17 @@
+#include <stddef.h>
+#include <cmath>
+#include <iomanip>
+#include <iostream>
+#include <vector>
+
 #include "DagNode.h"
 #include "MetropolisHastingsMove.h"
 #include "Proposal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-#include "RbException.h"
 #include "RbMathLogic.h"
-
-#include <cmath>
-#include <iomanip>
-#include <sstream>
-#include <iostream>
+#include "AbstractMove.h"
+#include "RbOrderedSet.h"
 
 using namespace RevBayesCore;
 

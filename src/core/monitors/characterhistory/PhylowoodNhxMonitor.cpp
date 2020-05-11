@@ -1,11 +1,20 @@
 #include "PhylowoodNhxMonitor.h"
-#include "CharacterEventDiscrete.h"
-#include "DagNode.h"
-#include "Model.h"
-#include "Monitor.h"
-#include "RbException.h"
 
-#include <sstream>
+#include <iostream>
+#include <string>
+
+#include "CharacterEventDiscrete.h"
+#include "Monitor.h"
+#include "BranchHistory.h"
+#include "Cloneable.h"
+#include "RbFileManager.h"
+#include "StochasticNode.h"
+#include "TopologyNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class CharacterEvent; }
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

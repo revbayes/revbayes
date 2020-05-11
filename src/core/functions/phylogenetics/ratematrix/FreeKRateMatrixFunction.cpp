@@ -1,6 +1,16 @@
 #include "FreeKRateMatrixFunction.h"
+
+#include <math.h>
+#include <stddef.h>
+#include <vector>
+
 #include "RateMatrix_FreeK.h"
-#include "RbException.h"
+#include "Cloneable.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

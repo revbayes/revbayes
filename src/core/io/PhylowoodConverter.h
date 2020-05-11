@@ -9,6 +9,9 @@
 #ifndef __revbayes_proj__PhylowoodConverter__
 #define __revbayes_proj__PhylowoodConverter__
 
+#include <string>
+#include "TopologyNode.h"
+
 namespace RevBayesCore {
     
     class DelimitedDataReader;

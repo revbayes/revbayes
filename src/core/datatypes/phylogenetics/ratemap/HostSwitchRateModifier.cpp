@@ -1,10 +1,23 @@
-#include <iomanip>
 #include <cmath>
+#include <cstddef>
+#include <ostream>
+#include <set>
+#include <vector>
+
 #include "CharacterEventDiscrete.h"
 #include "HostSwitchRateModifier.h"
-#include "RbConstants.h"
 #include "Tree.h"
 #include "TreeUtilities.h"
+#include "Assignable.h"
+#include "CharacterHistoryRateModifier.h"
+#include "Cloneable.h"
+#include "DistanceMatrix.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "TopologyNode.h"
+
+namespace RevBayesCore { class CharacterEvent; }
 
 using namespace RevBayesCore;
 

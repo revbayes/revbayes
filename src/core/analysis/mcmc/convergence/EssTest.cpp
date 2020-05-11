@@ -1,5 +1,9 @@
 #include "EssTest.h"
 
+
+#include "Cloner.h"
+#include "TraceNumeric.h"
+
 using namespace RevBayesCore;
 using namespace std;
 

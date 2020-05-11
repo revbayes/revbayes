@@ -1,13 +1,20 @@
+#include <stddef.h>
+#include <fstream>
+#include <vector>
+
 #include "Argument.h"
-#include "ArgumentRule.h"
 #include "Ellipsis.h"
 #include "Func_clear.h"
-#include "RbException.h"
 #include "RlUtils.h"
 #include "TypeSpec.h"
 #include "Workspace.h"
-
-#include <fstream>
+#include "ArgumentRules.h"
+#include "Procedure.h"
+#include "RbHelpReference.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
 
 using namespace RevLanguage;
 
@@ -98,109 +105,6 @@ std::string Func_clear::getFunctionName( void ) const
     std::string f_name = "clear";
     
     return f_name;
-}
-
-
-/**
- * Get the author(s) of this function so they can receive credit (and blame) for it.
- */
-std::vector<std::string> Func_clear::getHelpAuthor(void) const
-{
-    // create a vector of authors for this function
-    std::vector<std::string> authors;
-    authors.push_back( "Sebastian Hoehna" );
-    
-    return authors;
-}
-
-
-/**
- * Get the (brief) description for this function
- */
-std::string Func_clear::getHelpDescription(void) const
-{
-    // create a variable for the description of the function
-    std::string description = "Clear (e.g., remove) variables and functions from the workspace.";
-    
-    return description;
-}
-
-
-/**
- * Get the more detailed description of the function
- */
-std::string Func_clear::getHelpDetails(void) const
-{
-    // create a variable for the description of the function
-    std::string details =  "The clear function removes either a given variable or all variables from the workspace. Clearing the workspace is very useful between analysis if you do not want to have old connections between variables hanging around." ;
-    
-    return details;
-}
-
-
-/**
- * Get an executable and instructive example.
- * These example should help the users to show how this function works but
- * are also used to test if this function still works.
- */
-std::string Func_clear::getHelpExample(void) const
-{
-    // create an example as a single string variable.
-    std::string example = "";
-    
-    example += "ls()   # check what is in the workspace\n";
-    example += "a <- 1\n";
-    example += "b := exp(a)\n";
-    example += "ls()   # check what is in the workspace\n";
-    example += "clear()\n";
-    example += "ls()   # check what is in the workspace\n";
-    example += "a <- 1\n";
-    example += "b := exp(a)\n";
-    example += "ls()   # check what is in the workspace\n";
-    example += "clear( b )\n";
-    example += "ls()   # check what is in the workspace\n";
-    
-    return example;
-}
-
-
-/**
- * Get some references/citations for this function
- *
- */
-std::vector<RevBayesCore::RbHelpReference> Func_clear::getHelpReferences(void) const
-{
-    // create an entry for each reference
-    std::vector<RevBayesCore::RbHelpReference> references;
-    
-    
-    return references;
-}
-
-
-/**
- * Get the names of similar and suggested other functions
- */
-std::vector<std::string> Func_clear::getHelpSeeAlso(void) const
-{
-    // create an entry for each suggested function
-    std::vector<std::string> see_also;
-    see_also.push_back( "exists" );
-    
-    
-    return see_also;
-}
-
-
-/**
- * Get the title of this help entry
- */
-std::string Func_clear::getHelpTitle(void) const
-{
-    // create a title variable
-    std::string title = "Clear the current workspace";
-    
-    return title;
 }
 
 

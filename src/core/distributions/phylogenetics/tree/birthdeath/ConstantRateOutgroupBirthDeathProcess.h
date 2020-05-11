@@ -1,21 +1,22 @@
-//
-//  ConstantRateOutgroupBirthDeathProcess.h
-//  revbayes-proj
-//
-//  Created by Michael Landis on 5/5/16.
-//  Copyright © 2016 Michael Landis. All rights reserved.
-//
-
 #ifndef ConstantRateOutgroupBirthDeathProcess_h
 #define ConstantRateOutgroupBirthDeathProcess_h
 
+#include <stddef.h>
+#include <iosfwd>
+#include <vector>
+
 #include "AbstractBirthDeathProcess.h"
 #include "TreeChangeEventListener.h"
+#include "Clade.h"
+#include "RbBitSet.h"
+#include "RbException.h"
+#include "Taxon.h"
+#include "TopologyNode.h"
 
 namespace RevBayesCore {
-    
-    class Clade;
-    class Taxon;
+class DagNode;
+class Tree;
+template <class valueType> class TypedDagNode;
     
     class ConstantRateOutgroupBirthDeathProcess : public AbstractBirthDeathProcess, TreeChangeEventListener {
 
@@ -48,8 +49,8 @@ namespace RevBayesCore {
         void                                                recursivelyCollectCladeAges( TopologyNode* node, std::vector<double>& ages, TopologyNode* barrier_node=NULL ) const;
 //        void                                                recursivelyCollectIngroupAges( TopologyNode* node, std::vector<double>& ages ) const;
         // helper functions
-        double                                              computeLnProbabilityTimes(void) const;                                          //!< Compute the log-transformed probability of the current value.
-        double                                              computeLnProbabilityDiversifiedSampling(std::vector<double> ages, double presentTime, double samplingProb, size_t num_taxa) const;
+        double                                              computeLnProbabilityTimes(void);                                          //!< Compute the log-transformed probability of the current value.
+        double                                              computeLnProbabilityDiversifiedSampling(std::vector<double> ages, double presentTime, double samplingProb, size_t num_taxa);
         double                                              lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const              { throw RbException("Cannot compute P(nTaxa)."); }
         double                                              simulateDivergenceTime(double origin, double present) const;                    //!< Simulate a speciation event.
         void                                                simulateOutgroupTree( void );

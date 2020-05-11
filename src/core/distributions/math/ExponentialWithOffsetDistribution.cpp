@@ -1,10 +1,23 @@
 #include "ExponentialWithOffsetDistribution.h"
+
+#include <assert.h>
+
 #include "DistributionExponential.h"
 #include "RandomNumberFactory.h"
+#include "Cloneable.h"
 #include "RbConstants.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
+
 
 using namespace RevBayesCore;
 
+/* Exponential with Offset Distribution Constructor
+ * @param l a double for the rate parameter of the distribution
+ * @param o a double for the offset of the distribution
+ *
+ */
 
 ExponentialWithOffsetDistribution::ExponentialWithOffsetDistribution(const TypedDagNode<double> *l, const TypedDagNode<double> *o) : ContinuousDistribution( new double( 0.0 ) ),
     lambda( l ),

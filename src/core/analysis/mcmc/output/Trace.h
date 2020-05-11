@@ -1,14 +1,19 @@
 #ifndef Trace_H
 #define Trace_H
 
+#include <stddef.h>
+#include <vector>
+#include <ostream>
+
 #include "RbVector.h"
 #include "Simplex.h"
-#include "Tree.h"
-
-#include <string>
-#include <vector>
+#include "Cloneable.h"
+#include "IsDerivedFrom.h"
+#include "RbException.h"
+#include "Serializer.h"
 
 namespace RevBayesCore {
+class Serializable;
 
     class AbstractTrace : public Cloneable {
 
@@ -45,6 +50,7 @@ namespace RevBayesCore {
         virtual void                    addObject(valueType* d);
         virtual bool                    isCoveredInInterval(const std::string &v, double i, bool verbose);
         bool                            isDirty(void) const                             { return dirty; };
+        void                            isDirty(bool d) const                             { dirty = d; };
         void                            removeLastObject();
         void                            removeObjectAtIndex(int index);
         

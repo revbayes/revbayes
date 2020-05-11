@@ -1,6 +1,13 @@
 #include "WattersonThetaFunction.h"
-#include "RbException.h"
+
+#include <stddef.h>
+
 #include "RbMathCombinatorialFunctions.h"
+#include "AbstractHomologousDiscreteCharacterData.h"
+#include "Cloneable.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

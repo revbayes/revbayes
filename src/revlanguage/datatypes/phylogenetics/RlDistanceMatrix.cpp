@@ -1,20 +1,41 @@
+#include <stddef.h>
+#include <vector>
+#include <iosfwd>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "DistanceMatrix.h"
 #include "MatrixReal.h"
 #include "ModelVector.h"
 #include "MemberProcedure.h"
 #include "Natural.h"
-#include "OptionRule.h"
 #include "RbVector.h"
-#include "RealPos.h"
 #include "RlDistanceMatrix.h"
-#include "RlBoolean.h"
 #include "RlMatrixReal.h"
 #include "RlMatrixRealSymmetric.h"
 #include "RlString.h"
-#include "RlSimplex.h"
 #include "RevVariable.h"
-#include <vector>
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "MethodTable.h"
+#include "ModelObject.h"
+#include "RbException.h"
+#include "RbVectorImpl.h"
+#include "Real.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RlConstantNode.h"
+#include "RlUtils.h"
+#include "Taxon.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
 using namespace RevLanguage;
 

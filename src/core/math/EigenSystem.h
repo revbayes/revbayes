@@ -18,10 +18,12 @@
 #ifndef EigenSystem_H
 #define EigenSystem_H
 
+#include <stddef.h>
+#include <complex>
+#include <vector>
+
 #include "MatrixComplex.h"
 #include "MatrixReal.h"
-
-#include <complex>
 
 
 namespace RevBayesCore {

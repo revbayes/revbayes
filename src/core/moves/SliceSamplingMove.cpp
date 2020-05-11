@@ -1,15 +1,18 @@
+#include <stdlib.h>
+#include <cmath>
+#include <cassert>
+#include <iomanip>
+#include <iostream>
+#include <utility>
+#include <vector>
+
 #include "DagNode.h"
 #include "SliceSamplingMove.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-#include "RbMathLogic.h"
-
-#include <cmath>
-#include <cassert>
-#include <iomanip>
-#include <sstream>
-#include <iostream>
-#include <utility>
+#include "AbstractMove.h"
+#include "RbOrderedSet.h"
+#include "StochasticNode.h"
 
 using namespace RevBayesCore;
 
@@ -124,9 +127,8 @@ public:
         lnPrior += variable->getLnProbability();
 
         // 2. then we recompute the probability for all the affected nodes
-        for (RbOrderedSet<DagNode*>::iterator it = affectedNodes.begin(); it != affectedNodes.end(); ++it)
+        for (auto& node: affectedNodes)
         {
-            DagNode* node = *it;
             if ( node->isClamped() )
                 lnLikelihood += node->getLnProbability();
             else

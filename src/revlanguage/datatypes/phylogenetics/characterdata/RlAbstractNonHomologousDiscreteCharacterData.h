@@ -1,16 +1,29 @@
 #ifndef RlAbstractNonHomologousDiscreteCharacterData_H
 #define RlAbstractNonHomologousDiscreteCharacterData_H
 
+#include <string>
+#include <vector>
+#include <iosfwd>
+
 #include "AbstractNonHomologousDiscreteCharacterData.h"
 #include "ModelObject.h"
 #include "RlNonHomologousCharacterData.h"
-
-#include <set>
-#include <string>
-#include <vector>
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "RevPtr.h"
+#include "RlConstantNode.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
 
 namespace RevLanguage {
+class Argument;
+class RevVariable;
+class TypeSpec;
     
     
     class AbstractNonHomologousDiscreteCharacterData : public ModelObject<RevBayesCore::AbstractNonHomologousDiscreteCharacterData>, public NonHomologousCharacterData {

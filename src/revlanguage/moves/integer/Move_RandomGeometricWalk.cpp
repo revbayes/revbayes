@@ -1,3 +1,7 @@
+#include <stddef.h>
+#include <ostream>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Integer.h"
@@ -5,12 +9,20 @@
 #include "Move_RandomGeometricWalk.h"
 #include "Probability.h"
 #include "RandomGeometricWalkProposal.h"
-#include "RbException.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlBoolean.h"
-#include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "Move.h"
+#include "RbBoolean.h"
+#include "Real.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlMove.h"
+#include "StochasticNode.h"
+
+namespace RevBayesCore { class Proposal; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 
 using namespace RevLanguage;

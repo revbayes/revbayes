@@ -1,23 +1,26 @@
+#include <sstream>
+#include <vector>
+
 #include "HomologousDiscreteCharacterData.h"
 #include "ArgumentRule.h"
-#include "ConstantNode.h"
 #include "PoMoCountFileReader.h"
-#include "Ellipsis.h"
 #include "Func_readPoMoCountFile.h"
-#include "ModelVector.h"
 #include "RbException.h"
-#include "RbFileManager.h"
-#include "RevNullObject.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
-#include "RlBoolean.h"
 #include "RlString.h"
-#include "RlUtils.h"
 #include "StringUtilities.h"
-#include "RlUserInterface.h"
-
-#include <map>
-#include <set>
-#include <sstream>
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "DiscreteTaxonData.h"
+#include "Integer.h"
+#include "Natural.h"
+#include "NaturalNumbersState.h"
+#include "PoMoState.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
 
 
 using namespace RevLanguage;

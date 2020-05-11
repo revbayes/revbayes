@@ -1,17 +1,27 @@
+#include <stddef.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "RlBoolean.h"
-#include "ContinuousStochasticNode.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_GammaScale.h"
 #include "Probability.h"
-#include "RbException.h"
-#include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "GammaScaleProposal.h"
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "Move.h"
+#include "RbBoolean.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlMove.h"
+#include "StochasticNode.h"
+
+namespace RevBayesCore { class Proposal; }
 
 
 using namespace RevLanguage;
@@ -207,83 +217,6 @@ void Move_GammaScale::setConstParameter(const std::string& name, const RevPtr<co
         Move::setConstParameter(name, var);
     }
     
-}
-
-/**
- * Get the author(s) of this function so they can receive credit (and blame) for it.
- */
-std::vector<std::string> Move_GammaScale::getHelpAuthor(void) const
-{
-    // create a vector of authors for this function
-    std::vector<std::string> authors;
-    authors.push_back( "Jeremy M. Brown" );
-    return authors;
-}
-
-/**
- * Get the names of similar and suggested other functions
- */
-std::vector<std::string> Move_GammaScale::getHelpSeeAlso(void) const
-{
-    // create an entry for each suggested function
-    std::vector<std::string> see_also;
-    see_also.push_back( "mvScale" );
-    return see_also;
-}
-
-/**
- * Get the (brief) description for this move
- */
-std::string Move_GammaScale::getHelpDescription(void) const
-{
-    // create a variable for the description of the function
-    std::string description = "A move to scale a single continuous value by multiplying by a value drawn from a Gamma(lambda,1) distribution. Lambda is the tuning parameter that controls the size of the proposals.";
-    return description;
-}
-
-/**
- * Get an executable and instructive example.
- * These example should help the users to show how this function works but
- * are also used to test if this function still works.
- */
-std::string Move_GammaScale::getHelpExample(void) const
-{
-    // create an example as a single string variable.
-    std::string example = "";
-    
-    example += "# Here is a simple example for conducting MCMC on the mean and sd of a Normal distribution.\n";
-    example += "\n";
-    example += "# Uniform(0,1) priors on the mean and sd\n";
-    example += "mean ~ dnUnif(0,1)\n";
-    example += "sd ~ dnUnif(0,1)\n";
-    example += "\n";
-    example += "# Dummy data (will not actually be analyzed)\n";
-    example += "data <- v(0.4,0.5,0.6)\n";
-    example += "\n";
-    example += "# Clamping data\n";
-    example += "for (i in 1:data.size()){ outcomes[i] ~ dnNorm(mean,sd); outcomes[i].clamp(data[i]) }\n";
-    example += "\n";
-    example += "# Initializing move and monitor counters\n";
-    example += "mvi = 1\n";
-    example += "mni = 1\n";
-    example += "\n";
-    example += "# Adding Gamma scale moves for the mean and sd (THIS MOVE IS HERE)\n";
-    example += "moves[mvi++] = mvGammaScale(mean)\n";
-    example += "moves[mvi++] = mvGammaScale(sd)\n";
-    example += "\n";
-    example += "# Instantiating the model\n";
-    example += "mymodel = model(outcomes)\n";
-    example += "\n";
-    example += "# Adding screen monitor for the mean\n";
-    example += "monitors[mni++] = mnScreen(mean, printgen=1000)\n";
-    example += "\n";
-    example += "# Creating MCMC object\n";
-    example += "mymcmc = mcmc(mymodel, moves, monitors)\n";
-    example += "\n";
-    example += "# Running MCMC under the prior\n";
-    example += "mymcmc.run(30000,underPrior=TRUE);\n";
-    
-    return example;
 }
 
 

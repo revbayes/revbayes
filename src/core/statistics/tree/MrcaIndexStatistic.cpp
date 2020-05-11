@@ -1,6 +1,17 @@
 #include "MrcaIndexStatistic.h"
-#include "RbConstants.h"
+
+#include <cstddef>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "RbException.h"
+#include "RbBitSet.h"
+#include "TopologyNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

@@ -2,10 +2,6 @@
 #define RlMatrixRealPos_H
 
 #include <iostream>
-
-
-
-#include <iostream>
 #include <vector>
 
 #include "MatrixReal.h"

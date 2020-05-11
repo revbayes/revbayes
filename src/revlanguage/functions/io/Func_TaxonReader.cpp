@@ -1,15 +1,32 @@
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "Func_TaxonReader.h"
 #include "ModelVector.h"
-#include "RbException.h"
-#include "RbFileManager.h"
-#include "RevNullObject.h"
 #include "RlString.h"
 #include "RlTaxon.h"
-#include "RlUserInterface.h"
 #include "TaxonReader.h"
-
-#include <sstream>
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlFunction.h"
+#include "Taxon.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
 
 using namespace RevLanguage;

@@ -1,16 +1,30 @@
-#include "ArgumentRule.h"
-#include "ModelVector.h"
-#include "MemberProcedure.h"
-#include "Natural.h"
-#include "OptionRule.h"
-#include "RbVector.h"
-#include "RealPos.h"
-#include "RlRelativeNodeAgeConstraints.h"
-#include "RlBoolean.h"
-#include "RlString.h"
-#include "RlSimplex.h"
-#include "RevVariable.h"
+#include <stddef.h>
 #include <vector>
+#include <iosfwd>
+#include <string>
+
+#include "MemberProcedure.h"
+#include "RlRelativeNodeAgeConstraints.h"
+#include "RlString.h"
+#include "RevVariable.h"
+#include "ArgumentRules.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "MethodTable.h"
+#include "ModelObject.h"
+#include "RelativeNodeAgeConstraints.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RlConstantNode.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
+
+namespace RevLanguage { class Argument; }
 
 using namespace RevLanguage;
 

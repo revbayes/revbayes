@@ -1,8 +1,11 @@
 #include "BranchHistoryContinuous.h"
-#include "CharacterEventContinuous.h"
 
-#include <iostream>
-#include <iomanip>
+#include <vector>
+
+#include "CharacterEventContinuous.h"
+#include "Cloneable.h"
+
+namespace RevBayesCore { class CharacterEvent; }
 
 using namespace RevBayesCore;
 

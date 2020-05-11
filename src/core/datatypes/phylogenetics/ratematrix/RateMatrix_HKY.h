@@ -23,10 +23,6 @@ namespace RevBayesCore {
      *      |                                         |
      *      |   pi_A     k*pi_C     pi_G         -    |
      *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2014-07-04, version 1.0
      */
     class RateMatrix_HKY : public TimeReversibleRateMatrix {
         

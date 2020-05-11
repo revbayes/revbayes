@@ -14,7 +14,10 @@
  * $Id$
  */
 
+#include <stddef.h>
 #include <cmath>
+#include <vector>
+#include <sstream> // IWYU pragma: keep
 
 #include "DistributionMultinomial.h"
 #include "RandomNumberGenerator.h"

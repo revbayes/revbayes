@@ -1,16 +1,17 @@
 #ifndef BranchHistory_H
 #define BranchHistory_H
 
-#include "CharacterEvent.h"
-#include "CharacterEventCompare.h"
-#include "Cloneable.h"
-#include "TopologyNode.h"
-
+#include <stddef.h>
 #include <ostream>
 #include <set>
 #include <vector>
 
+#include "CharacterEventCompare.h"
+#include "Cloneable.h"
+#include "TopologyNode.h"
+
 namespace RevBayesCore {
+class CharacterEvent;
 
     class BranchHistory : public Cloneable {
 

@@ -1,13 +1,13 @@
 #ifndef InfiniteSitesRateMatrixFunction_H
 #define InfiniteSitesRateMatrixFunction_H
 
-#include "RateMatrix_InfiniteSites.h"
-#include "TypedDagNode.h"
-#include "TypedFunction.h"
+#include <stddef.h>
 
-#include <vector>
+#include "TypedFunction.h"
+#include "RateGenerator.h"
 
 namespace RevBayesCore {
+class DagNode;
     
     
     /**

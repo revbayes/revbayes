@@ -1,13 +1,36 @@
 #include "RlRateMatrix.h"
 
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ModelVector.h"
 #include "Natural.h"
 #include "Real.h"
-#include "RealPos.h"
-#include "RlBoolean.h"
 #include "RlMemberFunction.h"
 #include "RlSimplex.h"
+#include "ArgumentRules.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "MemberFunction.h"
+#include "MemberProcedure.h"
+#include "MethodTable.h"
+#include "ModelObject.h"
+#include "RateGenerator.h"
+#include "RbVector.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlDeterministicNode.h"
+#include "RlTypedFunction.h"
+#include "Simplex.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
+
+namespace RevLanguage { class Argument; }
 
 using namespace RevLanguage;
 

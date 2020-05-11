@@ -1,10 +1,21 @@
-#include <iomanip>
 #include <cmath>
+#include <cstddef>
+#include <ostream>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "CharacterEventDiscrete.h"
 #include "GeographicArea.h"
 #include "DistanceRateModifier.h"
 #include "RbConstants.h"
 #include "TimeAtlas.h"
+#include "Assignable.h"
+#include "CharacterEvent.h"
+#include "CharacterHistoryRateModifier.h"
+#include "Cloneable.h"
+#include "RbException.h"
+
 #define EARTHRADIUSKM 6371
 
 using namespace RevBayesCore;

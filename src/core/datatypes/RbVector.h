@@ -155,7 +155,6 @@ template <class valueType>
 std::ostream&                                       operator<<(std::ostream& o, const RevBayesCore::RbVector<valueType>& x);
 
 #include "Cloner.h"
-#include "IsAbstract.h"
 #include "IsDerivedFrom.h"
 
 template <class valueType>

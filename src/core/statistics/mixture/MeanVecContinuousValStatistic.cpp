@@ -15,12 +15,14 @@
  */
  
 #include "MeanVecContinuousValStatistic.h"
-#include "DirichletProcessPriorDistribution.h"
-#include "StochasticNode.h"
 
+#include <stddef.h>
 #include <vector>
-#include <string>
-#include <ostream>
+
+#include "RbVector.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

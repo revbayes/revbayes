@@ -9,14 +9,17 @@
 #ifndef __RevBayes_development_branch__Mntr_StochasticBranchStateTimes__
 #define __RevBayes_development_branch__Mntr_StochasticBranchStateTimes__
 
-#include "StochasticBranchStateTimesMonitor.h"
-#include "RlMonitor.h"
-
 #include <ostream>
-#include <string>
+#include <vector>
+
+#include "RlMonitor.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
 
 
 namespace RevLanguage {
+class TypeSpec;
     
     class Mntr_StochasticBranchStateTimes : public Monitor {
         

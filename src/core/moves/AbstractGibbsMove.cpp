@@ -1,10 +1,14 @@
 #include "AbstractGibbsMove.h"
-#include "DagNode.h"
-#include "RbConstants.h"
-#include "RbException.h"
 
+#include <stddef.h>
 #include <cmath>
 #include <iomanip>
+#include <vector>
+
+#include "DagNode.h"
+#include "RbException.h"
+#include "Cloneable.h"
+#include "RbConstants.h" // IWYU pragma: keep
 
 
 using namespace RevBayesCore;

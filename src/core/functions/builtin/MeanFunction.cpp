@@ -1,5 +1,12 @@
 #include "MeanFunction.h"
 
+#include <vector>
+
+#include "RbVector.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
+
 using namespace RevBayesCore;
 
 /** MeanFunction of a RbVector Constructor

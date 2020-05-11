@@ -1,8 +1,8 @@
 #include "CharacterEventDiscrete.h"
-#include "CharacterEventType.h"
 
-#include <iostream>
-#include <sstream>
+#include <sstream> // IWYU pragma: keep
+
+#include "Cloneable.h"
 
 using namespace RevBayesCore;
 

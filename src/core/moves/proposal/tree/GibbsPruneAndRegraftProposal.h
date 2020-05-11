@@ -1,13 +1,16 @@
 #ifndef GibbsPruneAndRegraftProposal_H
 #define GibbsPruneAndRegraftProposal_H
 
-#include <string>
+#include <iosfwd>
+#include <vector>
 
 #include "Proposal.h"
-#include "StochasticNode.h"
-#include "Tree.h"
 
 namespace RevBayesCore {
+class DagNode;
+class TopologyNode;
+class Tree;
+template <class variableType> class StochasticNode;
     
     /**
      * The metropolized Gibbs fixed node-height prune-and-regraft operator.

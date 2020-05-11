@@ -1,4 +1,9 @@
 #include "RlAbstractCharacterData.h"
+
+#include <stddef.h>
+#include <iostream>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "MemberProcedure.h"
 #include "ModelVector.h"
@@ -7,6 +12,26 @@
 #include "RlBoolean.h"
 #include "RlString.h"
 #include "RlTaxon.h"
+#include "AbstractCharacterData.h"
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RevObject.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlUtils.h"
+#include "Taxon.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
 
 using namespace RevLanguage;
@@ -35,6 +60,7 @@ MethodTable AbstractCharacterData::getCharacterDataMethods( void ) const
     ArgumentRules* showdataArgRules             = new ArgumentRules();
     ArgumentRules* removeTaxaArgRules           = new ArgumentRules();
     ArgumentRules* removeTaxaArgRules2          = new ArgumentRules();
+    ArgumentRules* setHomeologPhaseArgRules     = new ArgumentRules();
     ArgumentRules* setTaxonNameArgRules         = new ArgumentRules();
     ArgumentRules* setTaxonObjectArgRules       = new ArgumentRules();
     ArgumentRules* taxaArgRules                 = new ArgumentRules();
@@ -60,6 +86,8 @@ MethodTable AbstractCharacterData::getCharacterDataMethods( void ) const
     percentageMissingArgRules->push_back(   new ArgumentRule("name" , RlString::getClassTypeSpec(), "The name of the taxon.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     removeTaxaArgRules->push_back(          new ArgumentRule("name" , RlString::getClassTypeSpec(), "The name of the taxon.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     removeTaxaArgRules2->push_back(         new ArgumentRule("names" , ModelVector<RlString>::getClassTypeSpec(), "The names of the taxa.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    setHomeologPhaseArgRules->push_back(    new ArgumentRule("data_name"  , RlString::getClassTypeSpec(), "The name used in the character alignment.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    setHomeologPhaseArgRules->push_back(    new ArgumentRule("tip_name"   , RlString::getClassTypeSpec(), "The tip name.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     setTaxonNameArgRules->push_back(        new ArgumentRule("current"    , RlString::getClassTypeSpec(), "The old name.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     setTaxonNameArgRules->push_back(        new ArgumentRule("new"        , RlString::getClassTypeSpec(), "The new name.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     setTaxonObjectArgRules->push_back(      new ArgumentRule("current"    , RlString::getClassTypeSpec(), "The old name.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
@@ -79,6 +107,7 @@ MethodTable AbstractCharacterData::getCharacterDataMethods( void ) const
     methods.addFunction( new MemberProcedure( "show", RlUtils::Void, showdataArgRules ) );
     methods.addFunction( new MemberProcedure( "removeTaxa", RlUtils::Void, removeTaxaArgRules ) );
     methods.addFunction( new MemberProcedure( "removeTaxa", RlUtils::Void, removeTaxaArgRules2 ) );
+    methods.addFunction( new MemberProcedure( "setHomeologPhase", RlUtils::Void, setHomeologPhaseArgRules ) );
     methods.addFunction( new MemberProcedure( "setTaxonName", RlUtils::Void, setTaxonNameArgRules ) );
     methods.addFunction( new MemberProcedure( "setTaxonObject", RlUtils::Void, setTaxonObjectArgRules ) );
     methods.addFunction( new MemberProcedure( "taxa", ModelVector<Taxon>::getClassTypeSpec(), taxaArgRules ) );
@@ -271,6 +300,23 @@ RevPtr<RevVariable> AbstractCharacterData::executeCharacterDataMethod(std::strin
         int n = (int)charDataObject->getNumberOfTaxa();
         
         return new RevVariable( new Natural(n) );
+    }
+    else if (name == "setHomeologPhase")
+    {
+        found = true;
+        
+        const RevObject& data_name = args[0].getVariable()->getRevObject();
+        if ( data_name.isType( RlString::getClassTypeSpec() ) )
+        {
+            std::string n = std::string( static_cast<const RlString&>( data_name ).getValue() );
+            const RevObject& tip_name = args[1].getVariable()->getRevObject();
+            if ( tip_name.isType( RlString::getClassTypeSpec() ) )
+            {
+                std::string name = std::string( static_cast<const RlString&>( tip_name ).getValue() );
+                charDataObject->setHomeologPhase( n ,name );
+            }
+        }
+        return NULL;
     }
     else if (name == "setTaxonName")
     {

@@ -1,16 +1,25 @@
-#include "ArgumentRule.h"
-#include "ArgumentRules.h"
-#include "Ellipsis.h"
+#include <stddef.h>
+#include <sstream>
+#include <list>
+#include <string>
+#include <vector>
+
 #include "RbException.h"
-#include "RbUtil.h"
-#include "RealPos.h"
 #include "Signals.h"
 #include "TypeSpec.h"
 #include "UserFunction.h"
 #include "UserFunctionDef.h"
 #include "Workspace.h"
+#include "Argument.h"
+#include "Environment.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "SyntaxElement.h"
 
-#include <sstream>
+namespace RevBayesCore { class DagNode; }
+namespace RevLanguage { class ArgumentRules; }
 
 using namespace RevLanguage;
 

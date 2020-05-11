@@ -1,11 +1,11 @@
 #ifndef HyperbolicSineFunction_h
 #define HyperbolicSineFunction_h
 
-#include <stdio.h>
 #include "ContinuousFunction.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     
     /**

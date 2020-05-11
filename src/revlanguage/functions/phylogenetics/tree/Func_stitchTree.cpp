@@ -1,14 +1,22 @@
 #include "Func_stitchTree.h"
+
 #include "ModelVector.h"
 #include "StitchTreeFunction.h"
-#include "RlBoolean.h"
-#include "Real.h"
-#include "RealPos.h"
 #include "RlTree.h"
 #include "RlTimeTree.h"
 #include "RlDeterministicNode.h"
 #include "RlTaxon.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "ModelObject.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "Taxon.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

@@ -1,12 +1,18 @@
 #ifndef NodeAgeConstrainedTreeDistribution_H
 #define NodeAgeConstrainedTreeDistribution_H
 
+#include <vector>
+
 #include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypedDistribution.h"
-#include "RelativeNodeAgeConstraints.h"
+#include "Clade.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbOrderedSet;
+template <class variableType> class StochasticNode;
     
     /**
      * @file

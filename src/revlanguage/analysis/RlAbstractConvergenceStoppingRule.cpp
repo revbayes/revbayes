@@ -1,15 +1,25 @@
 
+#include <stddef.h>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "EssMax.h"
-#include "AbstractConvergenceStoppingRule.h"
 #include "OptionRule.h"
 #include "RlAbstractConvergenceStoppingRule.h"
-#include "RealPos.h"
 #include "RbException.h"
 #include "RlString.h"
 #include "SemMin.h"
 #include "TypeSpec.h"
+#include "Natural.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlStoppingRule.h"
+
+namespace RevBayesCore { class BurninEstimatorContinuous; }
 
 
 using namespace RevLanguage;

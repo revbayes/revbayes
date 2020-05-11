@@ -1,6 +1,10 @@
 #include "NodeAgeByID.h"
-#include "RbConstants.h"
-#include "RbException.h"
+
+#include "TopologyNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

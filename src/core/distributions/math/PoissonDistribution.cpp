@@ -1,11 +1,16 @@
 #include "PoissonDistribution.h"
+
 #include "DistributionPoisson.h"
 #include "RandomNumberFactory.h"
 #include "RbConstants.h"
+#include "Cloneable.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-/** PoissonDistribution Constructor
+/** Poisson Distribution Constructor
  *  @param l lambda rate parameter
 */
 

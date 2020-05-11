@@ -1,13 +1,14 @@
+#include <cmath>
+#include <iostream>
+
 #include "DistributionCauchy.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "ScaleBactrianCauchyProposal.h"
-#include "RbConstants.h"
-#include "RbException.h"
-#include "TypedDagNode.h"
+#include "SimpleProposal.h"
+#include "StochasticNode.h"
 
-#include <cmath>
-#include <iostream>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

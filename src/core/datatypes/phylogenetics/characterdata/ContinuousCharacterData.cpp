@@ -1,4 +1,11 @@
 #include "ContinuousCharacterData.h"
+
+#include <math.h>
+#include <string>
+#include <iostream>
+#include <map>
+#include <utility>
+
 #include "ContinuousTaxonData.h"
 #include "NclReader.h"
 #include "NexusWriter.h"
@@ -6,9 +13,14 @@
 #include "RbException.h"
 #include "RbFileManager.h"
 #include "TypedDagNode.h"
+#include "AbstractCharacterData.h"
+#include "AbstractTaxonData.h"
+#include "Cloneable.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "Taxon.h"
 
-#include <string>
-#include <algorithm>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

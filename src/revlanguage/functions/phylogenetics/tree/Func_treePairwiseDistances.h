@@ -18,13 +18,24 @@
 #ifndef Func_treePairwiseDistances_H
 #define Func_treePairwiseDistances_H
 
+#include <string>
+#include <iosfwd>
+#include <vector>
+
 #include "RlDistanceMatrix.h"
 #include "RlTypedFunction.h"
-
-#include <string>
+#include "DeterministicNode.h"
+#include "DistanceMatrix.h"
+#include "DynamicNode.h"
+#include "RevPtr.h"
+#include "RlDeterministicNode.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 
 namespace RevLanguage {
+class ArgumentRules;
+class TypeSpec;
 
     class Func_treePairwiseDistances : public TypedFunction< DistanceMatrix > {
         

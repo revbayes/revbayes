@@ -35,7 +35,7 @@ namespace RevBayesCore {
 
 		const size_t 																getNumberOfPopulations( void );
 		const size_t 																getNumberOfSites( void );
-		HomologousDiscreteCharacterData<PoMoState>* getMatrix( void );
+		HomologousDiscreteCharacterData<PoMoState>*                                 getMatrix( void );
 		const size_t 																getVirtualPopulationSize( void );
 
 	protected:

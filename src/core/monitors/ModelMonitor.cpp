@@ -1,27 +1,30 @@
 #include "ModelMonitor.h"
+
+#include <stddef.h>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "DagNode.h"
 #include "Model.h"
 #include "Monitor.h"
-#include "RbFileManager.h"
-#include "StochasticNode.h"
+#include "Cloneable.h"
 
 using namespace RevBayesCore;
 
 /* Constructor */
-ModelMonitor::ModelMonitor(unsigned long g, const std::string &fname, const std::string &del) : VariableMonitor(std::vector<DagNode *>(),g,fname,del),
-    stochastic_nodes_only( false )
-{
-    
-}
+ModelMonitor::ModelMonitor(unsigned long g, const std::string &fname, const std::string &del, std::set<std::string> exclude_list) :
+    VariableMonitor(std::vector<DagNode *>(),g,fname,del),
+    stochastic_nodes_only( false ),
+    exclude(exclude_list)
+{}
 
 
 /**
  * Destructor.
  */
 ModelMonitor::~ModelMonitor()
-{
-    
-}
+{}
 
 
 /**
@@ -45,7 +48,7 @@ ModelMonitor* ModelMonitor::clone(void) const
 void ModelMonitor::resetDagNodes( void )
 {
     
-    // for savety we empty our dag nodes
+    // for safety we empty our dag nodes
     while ( nodes.empty() == false )
     {
         removeVariable( *nodes.begin() );
@@ -54,7 +57,7 @@ void ModelMonitor::resetDagNodes( void )
     if ( model != NULL )
     {
         // we only want to have each nodes once
-        // this should by default happen by here we check again
+        // this should by default happen but here we check again
         std::set<std::string> var_names;
         
         const std::vector<DagNode*> &n = model->getDagNodes();
@@ -63,22 +66,17 @@ void ModelMonitor::resetDagNodes( void )
             
             DagNode *the_node = *it;
             
-            // only simple numeric variable can be monitored (i.e. only integer and real numbers)
+            // only simple numeric variables can be monitored (i.e. only integer and real numbers)
             if ( the_node->isSimpleNumeric() && !the_node->isClamped())
             {
-                if ( (!stochastic_nodes_only && !the_node->isConstant() && the_node->getName() != "" && !the_node->isHidden() && !the_node->isElementVariable() ) || ( the_node->isStochastic() && !the_node->isClamped() && the_node->isHidden() == false  && the_node->isElementVariable() == false ) )
+                if ( (!stochastic_nodes_only && !the_node->isConstant() && the_node->getName() != "" && !the_node->isHidden() && !the_node->isElementVariable() ) ||
+                     ( the_node->isStochastic() && !the_node->isClamped() && the_node->isHidden() == false  && the_node->isElementVariable() == false ) )
                 {
                     const std::string &name = the_node->getName();
-                    if ( var_names.find( name ) == var_names.end() )
+                    if ( exclude.find(name) == exclude.end() && var_names.find( name ) == var_names.end() )
                     {
                         addVariable( the_node );
                         var_names.insert( name );
-                    }
-                    else
-                    {
-#ifdef DEBUG_SEBASTIAN
-                        std::cerr << "Trying to add variable with name '" << name << "' twice." << std::endl;
-#endif
                     }
                     
                 }

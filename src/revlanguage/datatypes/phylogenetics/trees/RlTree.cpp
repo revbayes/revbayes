@@ -1,6 +1,10 @@
+#include <sstream>
+#include <cstddef>
+#include <string>
+#include <vector>
+
 #include "ModelVector.h"
 #include "Natural.h"
-#include "RbUtil.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlBoolean.h"
 #include "RlClade.h"
@@ -12,8 +16,35 @@
 #include "TopologyNode.h"
 #include "TreeUtilities.h"
 #include "TypeSpec.h"
-
-#include <sstream>
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "Clade.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "MemberFunction.h"
+#include "MemberProcedure.h"
+#include "MethodTable.h"
+#include "ModelObject.h"
+#include "RbBoolean.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "Real.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlDeterministicNode.h"
+#include "RlTypedFunction.h"
+#include "RlUtils.h"
+#include "Taxon.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
 using namespace RevLanguage;
 
@@ -118,6 +149,24 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
 
         std::vector<RevBayesCore::Taxon> t = this->dag_node->getValue().getTaxa();
         return new RevVariable( new ModelVector<Taxon>( t ) );
+    }
+    else if (name == "setBranchLength")
+    {
+        found = true;
+
+        const RevObject& current = args[0].getVariable()->getRevObject();
+        if ( current.isType( Natural::getClassTypeSpec() ) )
+        {
+          size_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+          const RevObject& new_value = args[1].getVariable()->getRevObject();
+          if ( new_value.isType( RealPos::getClassTypeSpec() ) )
+          {
+            double value = static_cast<const RealPos&>( new_value ).getValue();
+            RevBayesCore::Tree &tree = dag_node->getValue();
+            RevBayesCore::TreeUtilities::setBranchLength( &tree, index ,value );
+          }
+        }
+        return NULL;
     }
     else if (name == "setTaxonName")
     {
@@ -235,6 +284,15 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         ModelVector<RealPos> *n = new ModelVector<RealPos>( es );
         return new RevVariable( n );
     }
+    else if ( name == "getIndices" )
+    {
+        found = true;        
+        RevBayesCore::Tree &tree = dag_node->getValue();        
+        std::vector<long> indices = tree.getNodeIndices();        
+        ModelVector<Natural> *n = new ModelVector<Natural>( indices );       
+        return new RevVariable( n );
+        
+    }
 
     return ModelObject<RevBayesCore::Tree>::executeMethod( name, args, found );
 }
@@ -257,49 +315,6 @@ const TypeSpec& Tree::getClassTypeSpec(void)
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( RevObject::getClassTypeSpec() ) );
 
     return rev_type_spec;
-}
-
-
-/**
- * Get the (brief) description for this function
- */
-std::string Tree::getHelpDescription(void) const
-{
-    std::string description = "";
-    description += "The Tree datatype stores information to describe the shared ancestry";
-    description += "of a taxon set. Information includes taxon labels, topology, node";
-    description += "count, and branch lengths. Tree objects also possess several useful";
-    description += "methods to traverse and manipulate the Tree's value.";
-    
-    return description;
-}
-
-
-
-/**
- * Get the names of similar and suggested other functions
- */
-std::vector<std::string> Tree::getHelpSeeAlso(void) const
-{
-    // create an entry for each suggested function
-    std::vector<std::string> see_also;
-    see_also.push_back( "TimeTree" );
-    see_also.push_back( "BranchLengthTree" );
-    
-    
-    return see_also;
-}
-
-
-/**
- * Get the title of this help entry
- */
-std::string Tree::getHelpTitle(void) const
-{
-    // create a title variable
-    std::string title = "Tree datatype";
-    
-    return title;
 }
 
 
@@ -350,6 +365,9 @@ void Tree::initMethods( void )
     
     ArgumentRules* esArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "getInverseES", ModelVector<RealPos>::getClassTypeSpec(), esArgRules ) );
+
+    ArgumentRules* indicesArgRules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "getIndices", ModelVector<Natural>::getClassTypeSpec(), indicesArgRules ) );
     
     ArgumentRules* meanInverseESArgRules = new ArgumentRules();
     meanInverseESArgRules->push_back( new ArgumentRule( "characters", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The character alignment from which to compute the mean inverse ES metric.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
@@ -380,6 +398,11 @@ void Tree::initMethods( void )
     ArgumentRules* taxaArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "taxa", ModelVector<Taxon>::getClassTypeSpec(), taxaArgRules ) );
     
+    ArgumentRules* setBranchLengthArgRules         = new ArgumentRules();
+    setBranchLengthArgRules->push_back(        new ArgumentRule("index"    , Natural::getClassTypeSpec(), "The index of the node.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    setBranchLengthArgRules->push_back(        new ArgumentRule("value"        , RealPos::getClassTypeSpec(), "The new branch length value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure( "setBranchLength", RlUtils::Void, setBranchLengthArgRules ) );
+
     ArgumentRules* setTaxonNameArgRules         = new ArgumentRules();
     setTaxonNameArgRules->push_back(        new ArgumentRule("current"    , RlString::getClassTypeSpec(), "The old name.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     setTaxonNameArgRules->push_back(        new ArgumentRule("new"        , RlString::getClassTypeSpec(), "The new name.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );

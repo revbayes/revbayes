@@ -1,15 +1,14 @@
 #ifndef NonHomologousCharacterData_H
 #define NonHomologousCharacterData_H
 
-#include "CharacterState.h"
-#include "Cloneable.h"
-#include "AbstractCharacterData.h"
-#include "AbstractTaxonData.h"
-
-#include <string>
+#include <stddef.h>
 #include <vector>
+#include <iosfwd>
+
+#include "AbstractCharacterData.h"
 
 namespace RevBayesCore {
+class AbstractTaxonData;
     
     /**
      * Abstract class for all character data objects.

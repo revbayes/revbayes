@@ -1,11 +1,13 @@
+#include <iostream>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "RbException.h"
 #include "RbFileManager.h"
 #include "ModuleSystem.h"
-#include "RbUtil.h"
-#include "StringUtilities.h"
-
-#include <iostream>
-#include <sstream>
+#include "Module.h"
 
 using namespace RevLanguage;
 

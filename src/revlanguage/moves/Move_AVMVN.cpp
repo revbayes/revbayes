@@ -1,3 +1,8 @@
+#include <stddef.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
@@ -11,10 +16,25 @@
 #include "RevObject.h"
 #include "RlBoolean.h"
 #include "RlSimplex.h"
-#include "RlString.h"
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
-#include "WorkspaceVector.h"
+#include "Argument.h"
+#include "ContinuousStochasticNode.h"
+#include "MemberProcedure.h"
+#include "MethodTable.h"
+#include "ModelObject.h"
+#include "Move.h"
+#include "Natural.h"
+#include "RbBoolean.h"
+#include "Real.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlMove.h"
+#include "RlUtils.h"
+#include "StochasticNode.h"
+
+namespace RevBayesCore { class Simplex; }
+namespace RevBayesCore { template <class valueType> class RbVector; }
 
 
 using namespace RevLanguage;
@@ -301,27 +321,6 @@ const TypeSpec& Move_AVMVN::getClassTypeSpec(void)
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Move::getClassTypeSpec() ) );
 
     return rev_type_spec;
-}
-
-/**
- * Get the more detailed description of the function
- */
-std::string Move_AVMVN::getHelpDescription(void) const
-{
-    // create a variable for the description of the function
-    std::string details = "The adaptive variance multivariate-normal proposal of Baele et al. 2017, uses MCMC samples to fit covariance matrix to parameters.\n\n";
-
-    details += "After user-defined waiting time, proposes using covariance matrix epsilon * I + (1 - epsilon) * sigmaSquared * empirical_matrix.\n\n";
-
-    details += "Internally transforms variables based on whether variables are (finitely) bounded, strictly positive, or simplexed.\n\n";
-
-    details += "Non-simplex-valued vector random variables are untransformed.\n\n";
-
-    details += "Add random variables to the move directly (e.g. branch_rates[1], not branch_rates).";
-
-    details += "WARNING: Disabling tuning disables both tuning of proposal variance and learning of empirical covariance matrix.";
-
-    return details;
 }
 
 /**

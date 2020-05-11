@@ -1,12 +1,21 @@
 #include "BirthDeathBurstProcess.h"
-#include "DistributionExponential.h"
+
+#include <cmath>
+#include <string>
+
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "StochasticNode.h"
+#include "AbstractRootedTreeDistribution.h"
+#include "TimeInterval.h"
+#include "TopologyNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
 
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
 
 
 using namespace RevBayesCore;
@@ -67,7 +76,7 @@ BirthDeathBurstProcess* BirthDeathBurstProcess::clone( void ) const
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double BirthDeathBurstProcess::computeLnProbabilityDivergenceTimes( void ) const
+double BirthDeathBurstProcess::computeLnProbabilityDivergenceTimes( void )
 {
     // prepare the probability computation
     prepareProbComputation();
@@ -84,7 +93,7 @@ double BirthDeathBurstProcess::computeLnProbabilityDivergenceTimes( void ) const
  *
  * \return    The log-probability density.
  */
-double BirthDeathBurstProcess::computeLnProbabilityTimes( void ) const
+double BirthDeathBurstProcess::computeLnProbabilityTimes( void )
 {
     
     double lnProbTimes = 0.0;
@@ -343,7 +352,7 @@ void BirthDeathBurstProcess::setBurstSpeciation( size_t index, bool tf )
 double BirthDeathBurstProcess::simulateDivergenceTime(double origin, double present) const
 {
     
-    // incorrect placeholder for constant FBDP
+    // incorrect placeholder
     
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;

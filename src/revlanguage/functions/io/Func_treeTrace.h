@@ -9,18 +9,17 @@
 #ifndef Func_treeTrace_H
 #define Func_treeTrace_H
 
-#include "RlBranchLengthTree.h"
-#include "Procedure.h"
-#include "RbFileManager.h"
-#include "RlTimeTree.h"
-#include "RlTraceTree.h"
-
-#include <map>
-#include <string>
 #include <vector>
+#include <iosfwd>
+
+#include "Procedure.h"
+#include "RevPtr.h"
 
 
 namespace RevLanguage {
+class ArgumentRules;
+class RevVariable;
+class TypeSpec;
     
     class Func_treeTrace : public Procedure {
         
@@ -35,10 +34,6 @@ namespace RevLanguage {
         // Regular functions
         RevPtr<RevVariable>                 execute(void);                                                                      //!< Execute function
         const ArgumentRules&                getArgumentRules(void) const;                                                       //!< Get argument rules
-        std::vector<std::string>            getHelpAuthor(void) const;      
-        std::string                         getHelpDescription(void) const; 
-        std::string                         getHelpExample(void) const;    
-        std::vector<std::string>            getHelpSeeAlso(void) const;     
         const TypeSpec&                     getReturnType(void) const;                                                          //!< Get type of return value
         
     private:

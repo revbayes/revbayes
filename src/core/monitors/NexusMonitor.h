@@ -1,11 +1,15 @@
 #ifndef SRC_CORE_MONITORS_NEXUSMONITOR_H_
 #define SRC_CORE_MONITORS_NEXUSMONITOR_H_
 
+#include <iosfwd>
+#include <vector>
+
 #include "AbstractFileMonitor.h"
 
-#include "TypedDagNode.h"
-
 namespace RevBayesCore {
+class DagNode;
+class Tree;
+template <class valueType> class TypedDagNode;
 
 /** @brief Monitor to output a distribution of trees in Nexus format.
  * The provided branch- or node-specific variables will be output on the trees as metadata.
@@ -20,7 +24,8 @@ public:
 
     virtual void printHeader();
     virtual void monitor(unsigned long gen);
-    virtual void closeStream();
+    virtual void closeStream();    
+    void swapNode(DagNode *oldN, DagNode *newN);
 
 protected:
     bool isNodeParameter;  //!< whether data is on the nodes or branches

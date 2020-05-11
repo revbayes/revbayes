@@ -1,13 +1,20 @@
+#include <ostream>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Mntr_StochasticVariable.h"
-#include "Model.h"
 #include "StochasticVariableMonitor.h"
 #include "Natural.h"
-#include "RbException.h"
 #include "RevObject.h"
 #include "RlString.h"
 #include "TypeSpec.h"
+#include "Monitor.h"
+#include "RbBoolean.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlMonitor.h"
 
 
 using namespace RevLanguage;

@@ -1,10 +1,12 @@
 #include "RlNonHomologousCharacterData.h"
-#include "ArgumentRule.h"
+
 #include "MemberProcedure.h"
-#include "ModelVector.h"
 #include "Natural.h"
-#include "RlBoolean.h"
-#include "RlString.h"
+#include "ArgumentRules.h"
+#include "RevVariable.h"
+
+namespace RevBayesCore { class AbstractCharacterData; }
+namespace RevLanguage { class Argument; }
 
 
 using namespace RevLanguage;

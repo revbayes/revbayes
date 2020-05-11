@@ -15,17 +15,17 @@
  */
 
 #include <cmath>
+#include <sstream> // IWYU pragma: keep
 
 #include "DistributionBeta.h"
 #include "DistributionBinomial.h"
 #include "DistributionGamma.h"
 #include "DistributionPoisson.h"
 #include "DistributionNegativeBinomial.h"
-#include "RbConstants.h"
 #include "RbException.h"
-#include "RbMathFunctions.h"
-#include "RbMathHelper.h"
 #include "RbMathLogic.h"
+
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 
@@ -127,29 +127,6 @@ double RbStatistics::NegativeBinomial::pdf(double r, double p, double q, double 
     return (asLog ? binom + log(q) : binom*q);
 }
 
-/*!
- * This function calculates the probability mass
- * for a binomially-distributed random variable.
- *
- * From R:
- *
- *     (1) pdf() has both p and q arguments, when one may be represented
- *         more accurately than the other (in particular, in df()).
- *     (2) pdf() does NOT check that inputs x and n are integers. This
- *         should be done in the calling function, where necessary.
- *         -- but is not the case at all when called e.g., from df() or dbeta() !
- *     (3) Also does not check for 0 <= p <= 1 and 0 <= q <= 1 or NaN's.
- *         Do this in the calling function.
- *
- * \brief NegativeBinomial probability mass.
- * \param r is the number of failures.
- * \param p is the success probability.
- * \param x is the number of successes.
- * \return Returns the probability mass.
- * \throws Does not throw an error.
- */
-#include "DistributionNormal.h"
-
 double RbStatistics::NegativeBinomial::quantile(double r, double p, double x) {
     throw RbException("Quantiles not implemented for nbinomial");
 }
@@ -183,10 +160,6 @@ double RbStatistics::NegativeBinomial::quantile(double r, double p, double x) {
  * \return Returns the probability mass.
  * \throws Does not throw an error.
  */
-
-#include <stdlib.h>
-#include <limits.h>
-#include "RandomNumberGenerator.h"
 
 #define repeat for (;;)
 

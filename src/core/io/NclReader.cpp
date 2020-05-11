@@ -1,8 +1,16 @@
+#include <stdio.h>
+#include <algorithm>
+#include <string>
+#include <exception>
+#include <iostream>
+#include <map>
+#include <set>
+#include <utility>
+#include <vector>
+
 #include "AminoAcidState.h"
-#include "ConstantNode.h"
 #include "HomologousDiscreteCharacterData.h"
 #include "DnaState.h"
-#include "NewickConverter.h"
 #include "NewickTreeReader.h"
 #include "NclReader.h"
 #include "NonHomologousDiscreteCharacterData.h"
@@ -13,12 +21,27 @@
 #include "TaxonMap.h"
 #include "Tree.h"
 #include "TopologyNode.h"
-#include "Tree.h"
 #include "TreeUtilities.h"
 #include "RlUserInterface.h"
-
-#include <algorithm>
-#include <string>
+#include "AbstractCharacterData.h"
+#include "Cloneable.h"
+#include "ContinuousCharacterData.h"
+#include "ContinuousTaxonData.h"
+#include "DiscreteTaxonData.h"
+#include "HomologousCharacterData.h"
+#include "NaturalNumbersState.h"
+#include "RbException.h"
+#include "Taxon.h"
+#include "nxsassumptionsblock.h"
+#include "nxscharactersblock.h"
+#include "nxsdefs.h"
+#include "nxsexception.h"
+#include "nxsmultiformat.h"
+#include "nxsreader.h"
+#include "nxsstring.h"
+#include "nxstaxablock.h"
+#include "nxstreesblock.h"
+#include "nxsunalignedblock.h"
 
 using namespace RevBayesCore;
 

@@ -19,13 +19,24 @@
 #ifndef Func_generalRateGeneratorSequence_H
 #define Func_generalRateGeneratorSequence_H
 
+#include <string>
+#include <iosfwd>
+#include <vector>
+
 #include "RlRateGeneratorSequence.h"
 #include "RlTypedFunction.h"
-
-#include <map>
-#include <string>
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RateGeneratorSequence.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlDeterministicNode.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 namespace RevLanguage {
+class ArgumentRules;
+class TypeSpec;
     
     class Func_generalRateGeneratorSequence :  public TypedFunction<RateGeneratorSequence> {
         

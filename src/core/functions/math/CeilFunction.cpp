@@ -1,11 +1,17 @@
 #include "CeilFunction.h"
+
 #include <cmath>
+
+#include "Cloneable.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
 
 /**
- * AbsoluteValueFunction of a TypedDagNode holding a value of type double
+ * CeilFunction of a TypedDagNode holding a value of type double
  * 
  * @param x a value of type double
  */

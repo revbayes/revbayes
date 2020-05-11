@@ -23,13 +23,12 @@
 #define UpperTriangle_H
 
 #include "RbVector.h"
-#include "MatrixReal.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <vector>
-
 namespace RevBayesCore {
+class DagNode;
+class MatrixReal;
+template <class valueType> class TypedDagNode;
     
     class UpperTriangle : public TypedFunction< RbVector<double> >{
         

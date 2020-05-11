@@ -7,9 +7,15 @@
 //
 
 #include "EpochRateMatrixFunction.h"
+
 #include "RateGenerator.h"
 #include "RateGenerator_Epoch.h"
-#include "RbException.h"
+#include "Assignable.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

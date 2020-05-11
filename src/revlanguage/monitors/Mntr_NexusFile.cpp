@@ -1,11 +1,25 @@
 #include "Mntr_NexusFile.h"
 
+#include <stddef.h>
+#include <algorithm>
+#include <ostream>
+#include <string>
+
 #include "Ellipsis.h"
 #include "Natural.h"
 #include "NexusMonitor.h"
 #include "RlBoolean.h"
 #include "RlString.h"
 #include "RlTimeTree.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "Monitor.h"
+#include "RbBoolean.h"
+#include "TypeSpec.h"
+
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class Tree; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 namespace RevLanguage {
 

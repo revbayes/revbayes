@@ -18,17 +18,14 @@
 #ifndef NodeAgeByID_H
 #define NodeAgeByID_H
 
-//#include "Statistic.h"
-#include "Clade.h"
-#include "Tree.h"
-#include "Tree.h"
-#include "TypedDagNode.h"
+#include <stddef.h>
+
 #include "TypedFunction.h"
 
-#include <vector>
-#include <string>
-
 namespace RevBayesCore {
+class DagNode;
+class Tree;
+template <class valueType> class TypedDagNode;
     
     class NodeAgeByID : public TypedFunction<double> {
         

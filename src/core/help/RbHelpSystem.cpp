@@ -1,18 +1,19 @@
+#include <stddef.h>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <map>
+#include <set>
+#include <utility>
+
 #include "RbException.h"
 #include "RbFileManager.h"
 #include "RbHelpSystem.h"
-#include "RbHelpRenderer.h"
-#include "RbSettings.h"
-#include "RbUtil.h"
-#include "StringUtilities.h"
+#include "RbHelpDistribution.h"
+#include "RbHelpFunction.h"
+#include "RbHelpType.h"
 
-#include <iostream>
-#include <sstream>
-#include <algorithm>
-#include <string>
-#include <vector>
-#include <iterator>
-#include <list>
+namespace RevBayesCore { class RbHelpEntry; }
 
 using namespace RevBayesCore;
 

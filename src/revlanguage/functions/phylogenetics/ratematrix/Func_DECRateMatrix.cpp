@@ -7,20 +7,43 @@
 //
 
 
+#include <cstddef>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "ConstantNode.h"
 #include "DECRateMatrixFunction.h"
 #include "Func_DECRateMatrix.h"
-#include "Integer.h"
 #include "Natural.h"
 #include "OptionRule.h"
-#include "RbConstants.h"
-#include "Real.h"
 #include "RealPos.h"
-#include "RlBoolean.h"
 #include "RlDeterministicNode.h"
 #include "RlRateMatrix.h"
 #include "RlSimplex.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "ModelObject.h"
+#include "ModelVector.h"
+#include "RateGenerator.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RevNullObject.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "RlString.h"
+#include "RlTypedFunction.h"
+#include "Simplex.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
+#include "TypedFunction.h"
 
 using namespace RevLanguage;
 

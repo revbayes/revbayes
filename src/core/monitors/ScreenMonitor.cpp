@@ -1,13 +1,14 @@
 #include "ScreenMonitor.h"
-#include "DagNode.h"
-#include "Model.h"
-#include "Monitor.h"
-#include "StringUtilities.h"
 
 #include <cmath>
 #include <iomanip>
-#include <sstream>
-#include <time.h>
+#include <iostream>
+#include <string>
+
+#include "DagNode.h"
+#include "Model.h"
+#include "Cloneable.h"
+#include "StringUtilities.h"
 
 using namespace RevBayesCore;
 
@@ -26,9 +27,7 @@ ScreenMonitor::ScreenMonitor(DagNode *n, unsigned long g, bool pp, bool l, bool 
     currentGen( 0 ),
     startGen( 0 ),
     replicateIndex( 0 )
-{
-    
-}
+{}
 
 
 ScreenMonitor::ScreenMonitor(const std::vector<DagNode *> &n, unsigned long g, bool pp, bool l, bool pr) : Monitor(g,n),
@@ -45,9 +44,7 @@ ScreenMonitor::ScreenMonitor(const std::vector<DagNode *> &n, unsigned long g, b
     currentGen( 0 ),
     startGen( 0 ),
     replicateIndex( 0 )
-{
-    
-}
+{}
 
 
 /* Clone the object */
@@ -57,17 +54,13 @@ ScreenMonitor* ScreenMonitor::clone(void) const
     return new ScreenMonitor(*this);
 }
 
-
-
-/**
- * Is this a screen monitor? Yes!
- */
+/** Is it a screen monitor ? Yes. **/
 bool ScreenMonitor::isScreenMonitor( void ) const
 {
     return true;
 }
 
-/** Monitor value at generation gen */
+
 void ScreenMonitor::monitor(unsigned long gen)
 {
 
@@ -228,7 +221,6 @@ void ScreenMonitor::monitor(unsigned long gen)
 }
 
 
-/** Print header for monitored values */
 void ScreenMonitor::printHeader( void )
 {
     if ( enabled == true )

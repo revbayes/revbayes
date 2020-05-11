@@ -1,11 +1,13 @@
 #include "MultiValueEventDistribution.h"
 
-#include "Assign.h"
-#include "Assignable.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
+#include <stddef.h>
+#include <string>
 
-#include <cmath>
+#include "DagNode.h"
+#include "RbConstants.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "TypedDagNode.h"
 
 using namespace RevBayesCore;
 

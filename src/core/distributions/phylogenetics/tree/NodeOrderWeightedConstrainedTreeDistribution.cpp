@@ -1,17 +1,21 @@
+#include <stddef.h>
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "RelativeNodeAgeWeightedConstraints.h"
 #include "NodeOrderWeightedConstrainedTreeDistribution.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbConstants.h"
-#include "RbException.h"
-#include "RbMathCombinatorialFunctions.h"
-#include "StochasticNode.h"
-#include "Taxon.h"
-#include "TopologyNode.h"
 #include "TreeUtilities.h"
+#include "Cloneable.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
 
-#include <algorithm>
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { template <class variableType> class StochasticNode; }
 
 using namespace RevBayesCore;
 

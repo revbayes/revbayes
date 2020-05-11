@@ -1,5 +1,7 @@
 #include "Taxon.h"
 
+#include <string>
+
 using namespace RevBayesCore;
 
 
@@ -151,6 +153,23 @@ const TimeInterval& Taxon::getAgeRange( void ) const
 
 
 /**
+* Get a JSON-formatted string description of this object.
+*
+* \return    The JSON-formatted string.
+*/
+const std::string Taxon::getJsonRespresentation(void) const {
+
+    std::string jsonStr = "";
+    jsonStr += "{\"Taxon\": {";
+    jsonStr += "\"name\": \"" + name + "\", ";
+    jsonStr += "\"speciesName\": \"" + species_name + "\", ";
+    jsonStr += "\"TimeInterval\": {\"minAge\": " + std::to_string(age_range.getMin()) + ", ";
+    jsonStr += "\"maxAge\": " + std::to_string(age_range.getMax()) + "}}";
+    return jsonStr;
+}
+
+
+/**
  * Get the name info for this taxon.
  *
  * \return    The name.
@@ -209,7 +228,7 @@ void Taxon::setName( const std::string &n )
 /**
  * Set the species name for this taxon.
  *
- * \param[in]    n     The species name.
+ * \param[in]    sn     The species name.
  */
 void Taxon::setSpeciesName( const std::string &sn )
 {

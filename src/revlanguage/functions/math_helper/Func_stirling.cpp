@@ -1,9 +1,20 @@
 #include "Func_stirling.h"
+
+#include <string>
+#include <vector>
+
 #include "RbMathCombinatorialFunctions.h"
 #include "Natural.h"
 #include "Integer.h"
 #include "Real.h"
 #include "OptionRule.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "RlString.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

@@ -7,11 +7,18 @@
 //
 
 #include "Func_lnProbability.h"
-#include "Probability.h"
+
 #include "Real.h"
 #include "LnProbabilityFunction.h"
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "StochasticNode.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

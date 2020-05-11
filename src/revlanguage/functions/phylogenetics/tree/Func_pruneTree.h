@@ -1,13 +1,24 @@
 #ifndef Func_pruneTree_h
 #define Func_pruneTree_h
 
+#include <string>
+#include <iosfwd>
+#include <vector>
+
 #include "RlTree.h"
 #include "RlTypedFunction.h"
-
-#include <map>
-#include <string>
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RevPtr.h"
+#include "RlDeterministicNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 namespace RevLanguage {
+class ArgumentRules;
+class RevVariable;
+class TypeSpec;
     
     class Func_pruneTree :  public TypedFunction<Tree> {
         

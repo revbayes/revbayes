@@ -51,9 +51,6 @@ namespace RevLanguage {
         
     protected:
         void                                initMethods(void);
-        std::string                         getHelpDescription(void) const;                             //!< Get the description for this function
-        std::vector<std::string>            getHelpSeeAlso(void) const;                                 //!< Get suggested other functions
-        std::string                         getHelpTitle(void) const;                                   //!< Get the title of this help entry
     };
     
 }

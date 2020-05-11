@@ -1,20 +1,7 @@
-/**
- * @file DistributionGeometric
- * This file contains the functions of the geometric distribution.
- *
- * @brief Implementation of the geometric distribution.
- *
- * (c) Copyright 2009- under GPL version 3
- * @date Last modified: $Date$
- * @author The RevBayes core development team
- * @license GPL version 3
- * @version 1.0
- * @since 2011-03-17, version 1.0
- *
- * $Id$
- */
+
 
 #include <cmath>
+#include <sstream> // IWYU pragma: keep
 
 #include "DistributionBeta.h"
 #include "DistributionBinomial.h"
@@ -23,20 +10,19 @@
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbException.h"
-#include "RbMathFunctions.h"
 #include "RbMathLogic.h"
+#include "RbMathFunctions.h" // IWYU pragma: keep
 
 using namespace RevBayesCore;
 
 /*!
- * This function calculates the probability density 
+ * This function calculates the cumulative probability density
  * for a Geometricly-distributed random variable.
  *
  * \brief Geometric probability density.
  * \param n is the number of trials. 
  * \param p is the success probability. 
- * \param x is the number of successes. 
- * \return Returns the probability density.
+ * \return Returns a double for the cumulative probability density.
  * \throws Does not throw an error.
  */
 double RbStatistics::Geometric::cdf(int n, double p) {
@@ -64,14 +50,13 @@ double RbStatistics::Geometric::cdf(int n, double p) {
 }
 
 /*!
- * This function calculates the probability density 
+ * This function calculates the log probability density
  * for a Geometricly-distributed random variable.
  *
  * \brief Geometric probability density.
  * \param n is the number of trials. 
  * \param p is the success probability. 
- * \param x is the number of successes. 
- * \return Returns the probability density.
+ * \return Returns a double of the log probability density.
  * \throws Does not throw an error.
  */
 double RbStatistics::Geometric::lnPdf(int n, double p) {
@@ -86,8 +71,7 @@ double RbStatistics::Geometric::lnPdf(int n, double p) {
  * \brief Geometric probability density.
  * \param n is the number of trials. 
  * \param p is the success probability. 
- * \param x is the number of successes. 
- * \return Returns the probability density.
+ * \return Returns a double with the probability density.
  * \throws Does not throw an error.
  */
 double RbStatistics::Geometric::pdf(int n, double p) {

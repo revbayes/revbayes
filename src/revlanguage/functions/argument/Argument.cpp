@@ -20,7 +20,8 @@
 
 #include "Argument.h"
 #include "RbException.h"
-#include "RbUtil.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
 
 using namespace RevLanguage;
 

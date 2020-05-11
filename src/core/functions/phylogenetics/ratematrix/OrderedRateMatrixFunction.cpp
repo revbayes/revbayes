@@ -1,16 +1,34 @@
 #include "OrderedRateMatrixFunction.h"
+
 #include "RateMatrix_Ordered.h"
-#include "RbException.h"
+#include "Cloneable.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-OrderedRateMatrixFunction::OrderedRateMatrixFunction(const TypedDagNode<long> *n, const TypedDagNode<double> *l, const TypedDagNode<double> *m) : TypedFunction<RateGenerator>( new RateMatrix_Ordered(n->getValue()) ),
+/**
+ * Default constructor.
+ *
+ * This function takes four inputs:
+ * @param n The number of states
+ * @param l The rate of gains
+ * @param m The number of losses
+ * @param allow_zero_state Should state '0' be allowed? (May not be appropriate for some counts)
+ */
+
+OrderedRateMatrixFunction::OrderedRateMatrixFunction(const TypedDagNode<long> *n, const TypedDagNode<double> *l, const TypedDagNode<double> *m, bool allow_zero_state) : TypedFunction<RateGenerator>( new RateMatrix_Ordered(n->getValue()) ),
     lambda( l ),
     mu( m )
 {
     
+    
+    
     addParameter( lambda );
     addParameter( mu );
+    
+    static_cast< RateMatrix_Ordered* >(value)->setAllowZeroState( allow_zero_state );
     
     update();
 }

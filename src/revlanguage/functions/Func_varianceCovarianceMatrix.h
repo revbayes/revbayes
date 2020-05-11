@@ -18,13 +18,23 @@
 #ifndef Func_varianceCovarianceMatrix_H
 #define Func_varianceCovarianceMatrix_H
 
+#include <string>
+#include <iosfwd>
+#include <vector>
+
 #include "RlMatrixRealSymmetric.h"
 #include "RlTypedFunction.h"
-
-#include <map>
-#include <string>
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "MatrixReal.h"
+#include "RevPtr.h"
+#include "RlDeterministicNode.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 namespace RevLanguage {
+class ArgumentRules;
+class TypeSpec;
     
     class Func_varianceCovarianceMatrix : public TypedFunction<MatrixRealSymmetric> {
         

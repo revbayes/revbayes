@@ -7,13 +7,24 @@
 //
 
 #include "Dist_studentT.h"
+
+#include <stddef.h>
+#include <ostream>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "StudentTDistribution.h"
-#include "ContinuousStochasticNode.h"
 #include "Natural.h"
-#include "Probability.h"
-#include "RealPos.h"
+#include "RbHelpReference.h"
+#include "Real.h"
+#include "RlDistribution.h"
+#include "RlTypedDistribution.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
+#include "TypedDistribution.h"
+
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 
@@ -91,102 +102,6 @@ std::string Dist_studentT::getDistributionFunctionName( void ) const
     std::string d_name = "StudentT";
     
     return d_name;
-}
-
-
-/**
- * Get the author(s) of this function so they can receive credit (and blame) for it.
- */
-std::vector<std::string> Dist_studentT::getHelpAuthor(void) const
-{
-    // create a vector of authors for this function
-    std::vector<std::string> authors;
-    authors.push_back( "Wade Dismukes and Kevin Quinteros" );
-    
-    return authors;
-}
-
-
-/**
- * Get the (brief) description for this function
- */
-std::string Dist_studentT::getHelpDescription(void) const
-{
-    // create a variable for the description of the function
-    std::string description = "The student's t probability distribution.";
-    
-    return description;
-}
-
-
-/**
- * Get the more detailed description of the function
- */
-std::string Dist_studentT::getHelpDetails(void) const
-{
-    // create a variable for the description of the function
-    std::string details;
-    return details;
-}
-
-
-/**
- * Get an executable and instructive example.
- * These example should help the users to show how this function works but
- * are also used to test if this function still works.
- */
-std::string Dist_studentT::getHelpExample(void) const
-{
-    // create an example as a single string variable.
-    std::string example = "";
-    
-    example += "# The most important use of the Student T distribution\n";
-    example += "# is arguable the quantile function.\n";
-    example += "# You can access it the following way:\n";
-    example += "df <- 10\n";
-    example += "a := qStudentT(0.025, df)\n";
-    example += "a\n";
-    
-    return example;
-}
-
-
-/**
- * Get some references/citations for this function
- *
- */
-std::vector<RevBayesCore::RbHelpReference> Dist_studentT::getHelpReferences(void) const
-{
-    // create an entry for each reference
-    std::vector<RevBayesCore::RbHelpReference> references;
-    
-    
-    return references;
-}
-
-
-/**
- * Get the names of similar and suggested other functions
- */
-std::vector<std::string> Dist_studentT::getHelpSeeAlso(void) const
-{
-    // create an entry for each suggested function
-    std::vector<std::string> see_also;
-    
-    
-    return see_also;
-}
-
-
-/**
- * Get the title of this help entry
- */
-std::string Dist_studentT::getHelpTitle(void) const
-{
-    // create a title variable
-    std::string title = "Student T Distribution";
-    
-    return title;
 }
 
 

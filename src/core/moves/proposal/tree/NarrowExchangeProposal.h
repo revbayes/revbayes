@@ -1,13 +1,15 @@
 #ifndef NarrowExchangeProposal_H
 #define NarrowExchangeProposal_H
 
-#include <string>
+#include <iosfwd>
 
 #include "Proposal.h"
-#include "StochasticNode.h"
-#include "Tree.h"
 
 namespace RevBayesCore {
+class DagNode;
+class TopologyNode;
+class Tree;
+template <class variableType> class StochasticNode;
     
     /**
      * The narrow-exchange operator.

@@ -1,5 +1,10 @@
 #include "PhyloCTMCSiteHomogeneousDolloBinary.h"
-#include "RbMathFunctions.h"
+
+#include <cstddef>
+
+#include "TopologyNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
 
 RevBayesCore::PhyloCTMCSiteHomogeneousDolloBinary::PhyloCTMCSiteHomogeneousDolloBinary(const TypedDagNode<Tree> *t, bool c, size_t nSites, bool amb, DolloAscertainmentBias::Coding ty, bool norm) :
     PhyloCTMCSiteHomogeneousDollo(  t, 1, c, nSites, amb, DolloAscertainmentBias::Coding(ty))

@@ -1,24 +1,56 @@
 #include "Dist_phyloCTMC.h"
 
+#include <stddef.h>
+#include <ostream>
+
 #include "RlDistributionMemberFunction.h"
 #include "PhyloCTMCSiteHomogeneous.h"
-#include "PhyloCTMCSiteHomogeneousNucleotide.h"
 #include "PhyloCTMCSiteHomogeneousBinary.h"
+#include "PhyloCTMCSiteHomogeneousNucleotide.h"
 #include "OptionRule.h"
 #include "Probability.h"
 #include "RevNullObject.h"
-#include "RlAminoAcidState.h"
 #include "RlBoolean.h"
-#include "RlDnaState.h"
 #include "RlMatrixReal.h"
 #include "RlRateGenerator.h"
-#include "RlRnaState.h"
 #include "RlString.h"
 #include "RlTree.h"
 #include "StandardState.h"
 #include "RlSimplex.h"
 #include "PoMoState.h"
 #include "NaturalNumbersState.h"
+#include "AbstractPhyloCTMCSiteHomogeneous.h"
+#include "AminoAcidState.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "CodonState.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DiscreteTaxonData.h"
+#include "DistributionMemberFunction.h"
+#include "DnaState.h"
+#include "HomologousDiscreteCharacterData.h"
+#include "IndirectReferenceFunction.h"
+#include "MatrixReal.h"
+#include "ModelObject.h"
+#include "ModelVector.h"
+#include "Natural.h"
+#include "PhyloCTMCSiteHomogeneousConditional.h"
+#include "RateGenerator.h"
+#include "RbBoolean.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "Real.h"
+#include "RealPos.h"
+#include "RlConstantNode.h"
+#include "RlDistribution.h"
+#include "RnaState.h"
+#include "Simplex.h"
+#include "StringUtilities.h"
+#include "Tree.h"
+#include "TypeSpec.h"
+#include "UserFunctionNode.h"
 
 using namespace RevLanguage;
 
@@ -529,7 +561,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         }
 
         RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::StandardState> *dist;
-        if (cd == RevBayesCore::AscertainmentBias::ALL)
+        if(cd == RevBayesCore::AscertainmentBias::ALL)
         {
             dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::StandardState>(tau, nChars, true, n, ambig, internal, gapmatch);
         }

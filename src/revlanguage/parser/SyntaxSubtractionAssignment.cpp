@@ -1,11 +1,13 @@
-#include "RbException.h"
-#include "RbUtil.h"
-#include "RbOptions.h"
-#include "SyntaxSubtractionAssignment.h"
+#include <stddef.h>
 
-#include <iostream>
-#include <list>
-#include <sstream>
+#include "RbException.h"
+#include "SyntaxSubtractionAssignment.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "SyntaxAssignment.h"
+
+namespace RevLanguage { class SyntaxElement; }
 
 using namespace RevLanguage;
 

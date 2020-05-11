@@ -1,5 +1,8 @@
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "Func_distanceRateModifier.h"
-#include "DistanceRateModifier.h"
 #include "DistanceRateModifierFunction.h"
 #include "ModelVector.h"
 #include "Real.h"
@@ -8,10 +11,24 @@
 #include "RlBoolean.h"
 #include "RlCharacterHistoryRateModifier.h"
 #include "RlDeterministicNode.h"
-#include "RlRateGeneratorSequence.h"
-#include "RlSimplex.h"
-#include "TimeAtlas.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "CharacterHistoryRateModifier.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "ModelObject.h"
+#include "RbBoolean.h"
+#include "RbVector.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "RlTypedFunction.h"
+#include "TypeSpec.h"
+#include "TypedFunction.h"
+
+namespace RevBayesCore { class TimeAtlas; }
 
 using namespace RevLanguage;
 

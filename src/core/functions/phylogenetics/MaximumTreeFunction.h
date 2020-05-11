@@ -23,15 +23,20 @@
 #ifndef MaximumTreeFunction_H
 #define MaximumTreeFunction_H
 
-#include "RateMatrix_GTR.h"
-#include "RbVector.h"
+#include <vector>
+#include <cstddef>
+#include <iosfwd>
+#include <map>
+#include <string>
+#include <utility>
+
 #include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <vector>
-
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     class MaximumTreeFunction : public TypedFunction<Tree> {
         

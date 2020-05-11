@@ -1,11 +1,22 @@
 #include "LogUniformDistribution.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbConstants.h"
 
 #include <cmath>
 
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
+#include "RbConstants.h"
+#include "Cloneable.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
+
 using namespace RevBayesCore;
+
+/*
+ * LogUniform Distribution Constructor
+ * @param mi a double for the minimum value
+ * @param ma a double for the maximum value
+ */
 
 LogUniformDistribution::LogUniformDistribution(const TypedDagNode<double> *mi, const TypedDagNode<double> *ma) : ContinuousDistribution( new double( 1.0 ) ),
     min( mi ),

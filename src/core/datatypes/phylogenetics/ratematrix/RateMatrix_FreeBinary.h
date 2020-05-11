@@ -9,9 +9,9 @@
 #ifndef __rb_mlandis__RateMatrix_FreeBinary__
 #define __rb_mlandis__RateMatrix_FreeBinary__
 
-#include "GeneralRateMatrix.h"
-#include <complex>
 #include <vector>
+
+#include "GeneralRateMatrix.h"
 
 
 namespace RevBayesCore {

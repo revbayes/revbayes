@@ -8,20 +8,29 @@
 
 //#include "BiogeographyRateGeneratorSequenceFunction.h"
 #include "Func_generalRateGeneratorSequence.h"
+
+#include <stddef.h>
+
 #include "GeneralRateGeneratorSequenceFunction.h"
 #include "ModelVector.h"
 #include "Natural.h"
-#include "RlRateMatrix.h"
-#include "RateMatrix.h"
 #include "RateGeneratorSequence.h"
-#include "Real.h"
-#include "RealPos.h"
 #include "RlCharacterHistoryRateModifier.h"
-#include "RlBoolean.h"
 #include "RlDeterministicNode.h"
 #include "RlRateGeneratorSequence.h"
-#include "RlSimplex.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "ModelObject.h"
+#include "RateGenerator.h"
+#include "RbVector.h"
+#include "RevObject.h"
+#include "RlFunction.h"
+#include "RlRateGenerator.h"
+#include "TypeSpec.h"
+
+namespace RevBayesCore { class CharacterHistoryRateModifier; }
 
 using namespace RevLanguage;
 

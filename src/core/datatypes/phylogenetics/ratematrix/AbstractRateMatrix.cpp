@@ -1,4 +1,10 @@
 #include "AbstractRateMatrix.h"
+
+#include <cmath>
+#include <fstream>
+#include <algorithm>
+#include <cstddef>
+
 #include "MatrixReal.h"
 #include "RandomNumberGenerator.h"
 #include "RandomNumberFactory.h"
@@ -7,12 +13,9 @@
 #include "RbMathMatrix.h"
 #include "DistributionPoisson.h"
 #include "TransitionProbabilityMatrix.h"
-
-#include <cmath>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <iomanip>
+#include "Cloneable.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 using namespace RevBayesCore;
 
@@ -361,8 +364,8 @@ bool AbstractRateMatrix::simulateStochasticMapping(double startAge, double endAg
 
     // transition probabilities
     TransitionProbabilityMatrix P(num_states);
-//    calculateTransitionProbabilities(startAge, endAge, rate, P);
-    exponentiateMatrixByScalingAndSquaring(branch_length * rate, P);
+    calculateTransitionProbabilities(startAge, endAge, rate, P);
+//    exponentiateMatrixByScalingAndSquaring(branch_length * rate, P);
     stochastic_matrix = std::vector<MatrixReal>();
 
     // dominating rate
@@ -617,4 +620,13 @@ void AbstractRateMatrix::setDiagonal(void)
 
     // set flags
     needs_update = true;
+}
+
+std::vector<int> AbstractRateMatrix::get_emitted_letters() const
+{
+    std::vector<int> emit(num_states);
+    for(int i=0;i<num_states;i++)
+        emit[i] = i;
+
+    return emit;
 }

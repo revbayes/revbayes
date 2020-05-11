@@ -6,21 +6,21 @@
 //  Copyright (c) 2015 Michael Landis. All rights reserved.
 //
 
+#include <cmath>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cstdlib>
+
 #include "DelimitedDataReader.h"
 #include "NclReader.h"
-#include "NewickTreeReader.h"
 #include "PhylowoodConverter.h"
 #include "RbFileManager.h"
 #include "Tree.h"
 #include "TimeAtlas.h"
 #include "TimeAtlasDataReader.h"
-#include "TypedDagNode.h"
-
-#include <cmath>
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <vector>
+#include "GeographicArea.h"
+#include "TopologyNode.h"
 
 using namespace RevBayesCore;
 

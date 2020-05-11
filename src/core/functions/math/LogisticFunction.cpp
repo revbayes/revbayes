@@ -1,8 +1,17 @@
 #include "LogisticFunction.h"
 #include <cmath>
+#include "Cloneable.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
-
+/**
+ * LogisticFunction of a TypedDagNode containing a value of type double
+ *
+ * @param a the value of type double
+ *
+ */
 LogisticFunction::LogisticFunction(const TypedDagNode<double> *a) : ContinuousFunction( new double(0.0) ),
     x( a )
 {

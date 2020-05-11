@@ -24,7 +24,7 @@ namespace RevLanguage {
         Dist_FBDRange( void );
         
         // Basic utility functions
-        Dist_FBDRange*                                              clone(void) const;                                                                       //!< Clone the object
+        Dist_FBDRange*                                          clone(void) const;                                                                      //!< Clone the object
         static const std::string&                               getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                                  getClassTypeSpec(void);                                                                 //!< Get class type spec
         std::vector<std::string>                                getDistributionFunctionAliases(void) const;                                             //!< Get the alternative names used for the constructor function in Rev.
@@ -47,10 +47,13 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                               mu;                                                                                     //!< The extinction rate(s)
         RevPtr<const RevVariable>                               psi;                                                                                    //!< The fossilization rate(s)
         RevPtr<const RevVariable>                               rho;                                                                                    //!< The extant sampling proportion
+        RevPtr<const RevVariable>                               lambda_a;                                                                               //!< The anagenetic speciation rate(s)
+        RevPtr<const RevVariable>                               beta;                                                                                   //!< The symmetric speciation probability
         RevPtr<const RevVariable>                               timeline;                                                                               //!< The interval times
         RevPtr<const RevVariable>                               fossil_counts;                                                                          //!< The fossil counts
         RevPtr<const RevVariable>                               presence_absence;
         RevPtr<const RevVariable>                               extended;
+        RevPtr<const RevVariable>                               bounded;
         std::string                                             start_condition;                                                                        //!< The start condition of the process (rootAge/originAge)
 
     };

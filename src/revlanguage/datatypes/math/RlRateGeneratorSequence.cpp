@@ -1,9 +1,14 @@
 #include "RlRateGeneratorSequence.h"
 
-#include "ArgumentRule.h"
 #include "MemberProcedure.h"
 #include "Natural.h"
-#include "RlBoolean.h"
+#include "ArgumentRules.h"
+#include "MethodTable.h"
+#include "RevObject.h"
+#include "RevVariable.h"
+#include "TypeSpec.h"
+
+namespace RevLanguage { class Argument; }
 
 using namespace RevLanguage;
 

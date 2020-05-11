@@ -1,6 +1,10 @@
 #include "SteppingStoneSampler.h"
 
+#include <stddef.h>
 #include <cmath>
+#include <vector>
+
+#include "Cloneable.h"
 
 #ifdef RB_MPI
 #include <mpi.h>

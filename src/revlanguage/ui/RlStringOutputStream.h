@@ -1,10 +1,9 @@
 #ifndef RlStringOutputStream_h
 #define RlStringOutputStream_h
 
-#include "RlUserInterfaceOutputStream.h"
+#include <iosfwd>
 
-#include <stdio.h>
-#include <string>
+#include "RlUserInterfaceOutputStream.h"
 
 class StringOutputStream : public UserInterfaceOutputStream {
     

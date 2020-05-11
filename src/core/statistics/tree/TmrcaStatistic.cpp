@@ -1,6 +1,21 @@
 #include "TmrcaStatistic.h"
+
+#include <algorithm>
+#include <cstddef>
+#include <iosfwd>
+#include <map>
+#include <string>
+#include <vector>
+
 #include "RbConstants.h"
 #include "RbException.h"
+#include "RbBitSet.h"
+#include "Taxon.h"
+#include "Tree.h"
+#include "TreeChangeEventMessage.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

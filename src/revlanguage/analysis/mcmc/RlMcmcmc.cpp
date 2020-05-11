@@ -1,14 +1,19 @@
+#include <stddef.h>
+#include <algorithm>
+#include <functional>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "ModelVector.h"
-#include "Model.h"
 #include "Natural.h"
 #include "Mcmcmc.h"
 #include "OptionRule.h"
 #include "Probability.h"
 #include "RevObject.h"
 #include "RbException.h"
-#include "Real.h"
 #include "RealPos.h"
 #include "RevNullObject.h"
 #include "RlModel.h"
@@ -18,6 +23,22 @@
 #include "RlString.h"
 #include "TypeSpec.h"
 #include "WorkspaceVector.h"
+#include "ModelObject.h"
+#include "Monitor.h"
+#include "MonteCarloAnalysis.h"
+#include "MonteCarloAnalysisOptions.h"
+#include "Move.h"
+#include "RbBoolean.h"
+#include "RbHelpReference.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlMonteCarloAnalysis.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class Model; }
 
 
 using namespace RevLanguage;
@@ -162,137 +183,6 @@ std::string Mcmcmc::getConstructorFunctionName( void ) const
     std::string c_name = "mcmcmc";
     
     return c_name;
-}
-
-
-/**
- * Get the author(s) of this function so they can receive credit (and blame) for it.
- */
-std::vector<std::string> Mcmcmc::getHelpAuthor(void) const
-{
-    // create a vector of authors for this function
-    std::vector<std::string> authors;
-    authors.push_back( "Michael Landis" );
-    authors.push_back( "Sebastian Hoehna" );
-    
-    return authors;
-}
-
-
-/**
- * Get the (brief) description for this function
- */
-std::string Mcmcmc::getHelpDescription(void) const
-{
-    std::string description = "";
-    description += "The Mcmcmc analysis object keeps a model and the associated moves and monitors.";
-    description += " The object is used to run Metropolis Couped Markov chain Monte Carlo (Mcmcmc) simulation on";
-    description += " the model, using the provided moves, to obtain a sample of the posterior probability";
-    description += " distribution. During the analysis, the monitors are responsible for sampling model parameters of interest.";
-    
-    return description;
-}
-
-
-/**
- * Get the more detailed description of the function
- */
-std::string Mcmcmc::getHelpDetails(void) const
-{
-    // create a variable for the description of the function
-    std::string details;
-    
-    details += "The Mcmcmc analysis object produced by a call to this function keeps copies of the model";
-    details += " and the associated moves and monitors. The Mcmcmc analysis object is used to run Markov";
-    details += " chain Monte Carlo (Mcmcmc) simulation on the model, using the provided moves,";
-    details += " to obtain a sample of the posterior probability distribution. During the analysis,";
-    details += " the monitors are responsible for sampling model parameters of interest.";
-    
-    return details;
-}
-
-
-/**
- * Get an executable and instructive example.
- * These example should help the users to show how this function works but
- * are also used to test if this function still works.
- */
-std::string Mcmcmc::getHelpExample(void) const
-{
-    // create an example as a single string variable.
-    std::string example = "";
-    
-    example += "# Create a simple model (unclamped)\n";
-    example += "a ~ exponential(1)\n";
-    example += "mymodel = model(a)\n";
-    example += "\n";
-    example += "# Create a move vector and a monitor vector\n";
-    example += "moves[1] = mvScale(a, lambda=1.0, weight=1.0)\n";
-    example += "monitors[1] = mnFile(a,\"output/out.log\")\n";
-    example += "\n";
-    example += "# Create an mcmcmc object\n";
-    example += "myMcmcmcObject = mcmcmc( mymodel, monitors, moves, nchains=4, deltaHeat=5)\n";
-    example += "\n";
-    example += "# Run a short analysis\n";
-    example += "myMcmcmcObject.burnin( generations = 400, tuningInterval = 100)\n";
-    example += "myMcmcmcObject.run( generations = 400)\n";
-    example += "\n";
-    example += "# print the summary of the operators (now tuned)\n";
-    example += "myMcmcmcObject.operatorSummary()\n";
-    
-    return example;
-}
-
-
-/**
- * Get some references/citations for this function
- *
- */
-std::vector<RevBayesCore::RbHelpReference> Mcmcmc::getHelpReferences(void) const
-{
-    // create an entry for each reference
-    std::vector<RevBayesCore::RbHelpReference> references;
-    
-    RevBayesCore::RbHelpReference ref1;
-    ref1.setCitation("Geyer,C.J. (1991) Markov chain Monte Carlo maximum likelihood. In Keramidas (ed.), Computing Science and Statistics: Proceedings of the 23rd Symposium on the Interface. Interface Foundation, Fairfax Station, pp. 156–163.");
-    references.push_back( ref1 );
-    
-    RevBayesCore::RbHelpReference ref2;
-    ref2.setCitation("Gilks,W.R. and Roberts,G.O. (1996) Strategies for improving MCMC. In Gilks,W.R., Richardson,S. and Spiegelhalter (eds) Markov chain Monte Carlo in Practice. Chapman&Hall, London, 89–114.");
-    references.push_back( ref2 );
-    
-    RevBayesCore::RbHelpReference ref3;
-    ref3.setCitation("Altekar, G.; Dwarkadas, S.; Huelsenbeck, J. P. & Ronquist, F. Parallel metropolis coupled Markov chain Monte Carlo for Bayesian phylogenetic inference Bioinformatics, Oxford Univ Press, 2004, 20, 407-415.");
-    references.push_back( ref3 );
-    
-    
-    return references;
-}
-
-
-/**
- * Get the names of similar and suggested other functions
- */
-std::vector<std::string> Mcmcmc::getHelpSeeAlso(void) const
-{
-    // create an entry for each suggested function
-    std::vector<std::string> see_also;
-    see_also.push_back( "mcmc" );
-    
-    
-    return see_also;
-}
-
-
-/**
- * Get the title of this help entry
- */
-std::string Mcmcmc::getHelpTitle(void) const
-{
-    // create a title variable
-    std::string title = "Metropolis-Coupled MCMC analysis object";
-    
-    return title;
 }
 
 

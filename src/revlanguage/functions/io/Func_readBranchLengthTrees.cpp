@@ -1,22 +1,31 @@
+#include <sstream>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ConstantNode.h"
-#include "Ellipsis.h"
 #include "Func_readBranchLengthTrees.h"
 #include "ModelVector.h"
 #include "NclReader.h"
-#include "RbException.h"
-#include "RbFileManager.h"
-#include "RevNullObject.h"
-#include "RlBoolean.h"
 #include "RlString.h"
 #include "RlBranchLengthTree.h"
-#include "RlUtils.h"
-#include "StringUtilities.h"
-#include "RlUserInterface.h"
-
-#include <map>
-#include <set>
-#include <sstream>
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlFunction.h"
+#include "Tree.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
 
 using namespace RevLanguage;

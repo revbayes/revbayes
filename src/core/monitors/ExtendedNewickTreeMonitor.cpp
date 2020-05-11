@@ -1,8 +1,18 @@
 #include "ExtendedNewickTreeMonitor.h"
+
+#include <stddef.h>
+#include <algorithm>
+#include <string>
+
 #include "DagNode.h"
-#include "Model.h"
-#include "Monitor.h"
 #include "RbException.h"
+#include "Cloneable.h"
+#include "StringUtilities.h"
+#include "TopologyNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { template <class valueType> class RbVector; }
 
 using namespace RevBayesCore;
 

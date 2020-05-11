@@ -1,12 +1,15 @@
-#include "DeterministicNode.h"
+#include <iosfwd>
+
 #include "Func_mtMam.h"
-#include "Natural.h"
 #include "RateMatrix_MtMam.h"
-#include "Real.h"
-#include "RealPos.h"
 #include "RlRateMatrix.h"
-#include "RlSimplex.h"
-#include "TypedDagNode.h"
+#include "ArgumentRules.h"
+#include "Procedure.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "RlRateGenerator.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

@@ -50,7 +50,6 @@ namespace RevLanguage {
 #include "ArgumentRule.h"
 #include "GreaterEqualFunction.h"
 #include "RbUtil.h"
-#include "RlBoolean.h"
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
 #include "TypeSpec.h"

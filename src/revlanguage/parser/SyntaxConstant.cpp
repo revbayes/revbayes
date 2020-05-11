@@ -1,8 +1,12 @@
-#include <iostream>
+#include <stddef.h>
 
-#include "ConstantNode.h"
 #include "RevObject.h"
 #include "SyntaxConstant.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "SyntaxElement.h"
+
+namespace RevLanguage { class Environment; }
 
 using namespace RevLanguage;
 

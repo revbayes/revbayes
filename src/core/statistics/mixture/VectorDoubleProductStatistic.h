@@ -17,14 +17,12 @@
 #ifndef VectorDoubleProductStatistic_H
 #define VectorDoubleProductStatistic_H
 
-#include "StochasticNode.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
-
-#include <vector>
-#include <string>
+#include "RbVector.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     class VectorDoubleProductStatistic : public TypedFunction< RbVector<double> > {
         

@@ -1,3 +1,10 @@
+#include <stdlib.h>
+#include <cstddef>
+#include <ostream>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "BurninEstimatorContinuous.h"
@@ -18,6 +25,21 @@
 #include "StringUtilities.h"
 #include "TypeSpec.h"
 #include "ModelVector.h"
+#include "Argument.h"
+#include "MemberProcedure.h"
+#include "MethodTable.h"
+#include "ModelObject.h"
+#include "RbBoolean.h"
+#include "RbVector.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlUtils.h"
+#include "Trace.h"
+#include "TraceNumeric.h"
+#include "TypedDagNode.h"
+#include "WorkspaceObject.h"
 
 
 using namespace RevLanguage;
@@ -344,7 +366,7 @@ const std::string& BurninEstimationConvergenceAssessment::getClassType(void)
 const TypeSpec& BurninEstimationConvergenceAssessment::getClassTypeSpec(void)
 {
     
-    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( RevObject::getClassTypeSpec() ) );
+    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( WorkspaceObject::getClassTypeSpec() ) );
     
 	return rev_type_spec;
 }

@@ -1,10 +1,12 @@
 #include "CholeskyDecomposition.h"
+
+#include <math.h>
+
 #include "MatrixReal.h"
 #include "RbMathMatrix.h"
-#include "RbConstants.h"
-
-#include <assert.h>
-#include <vector>
+#include "RbException.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 using namespace RevBayesCore;
 

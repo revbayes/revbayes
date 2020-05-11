@@ -8,12 +8,18 @@
 
 
 #include "StochasticBranchStateTimesMonitor.h"
-#include "DagNode.h"
-#include "Model.h"
-#include "Monitor.h"
-#include "RbFileManager.h"
+
+#include <stddef.h>
+#include <vector>
+
 #include "StochasticNode.h"
 #include "StateDependentSpeciationExtinctionProcess.h"
+#include "Cloneable.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
@@ -72,7 +78,7 @@ void StochasticBranchStateTimesMonitor::monitorVariables(unsigned long gen)
 
     StateDependentSpeciationExtinctionProcess *sse = dynamic_cast<StateDependentSpeciationExtinctionProcess*>( &cdbdp->getDistribution() );
     size_t num_nodes = tree->getValue().getNumberOfNodes();
-    std::vector<std::string*> character_histories( num_nodes );
+    std::vector<std::string> character_histories( num_nodes );
     
     // draw stochastic character map
     sse->drawStochasticCharacterMap( character_histories );

@@ -17,9 +17,12 @@
 #ifndef NaturalNumbersState_H
 #define NaturalNumbersState_H
 
-#include "DiscreteCharacterState.h"
+#include <stddef.h>
 #include <ostream>
-#include <set>
+#include <vector>
+
+#include "DiscreteCharacterState.h"
+#include "RbBitSet.h"
 
 namespace RevBayesCore {
     

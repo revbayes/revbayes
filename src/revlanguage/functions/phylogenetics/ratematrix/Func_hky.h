@@ -1,12 +1,23 @@
 #ifndef Func_hky_H
 #define Func_hky_H
 
+#include <string>
+#include <iosfwd>
+#include <vector>
+
 #include "RlRateMatrix.h"
 #include "RlTypedFunction.h"
-
-#include <string>
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RateGenerator.h"
+#include "RevPtr.h"
+#include "RlDeterministicNode.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 namespace RevLanguage {
+class ArgumentRules;
+class TypeSpec;
     
     /**
      * The RevLanguage wrapper of the HKY rate matrix function.

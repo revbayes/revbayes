@@ -1,9 +1,28 @@
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "SegregatingSitesFunction.h"
 #include "Func_SegregatingSites.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlBoolean.h"
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "Natural.h"
+#include "RbBoolean.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlTypedFunction.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
+#include "TypedFunction.h"
+
+namespace RevBayesCore { class AbstractHomologousDiscreteCharacterData; }
 
 using namespace RevLanguage;
 

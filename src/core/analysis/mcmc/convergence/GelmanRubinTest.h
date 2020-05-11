@@ -1,11 +1,13 @@
 #ifndef GelmanRubinTest_H
 #define GelmanRubinTest_H
 
+#include <stddef.h>
 #include <vector>
 
 #include "ConvergenceDiagnosticContinuous.h"
 
 namespace RevBayesCore {
+class TraceNumeric;
     
     /**
      * @brief Gelman-Rubin test statistic for assessing convergence.

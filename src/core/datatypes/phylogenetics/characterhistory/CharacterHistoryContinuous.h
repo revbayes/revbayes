@@ -1,13 +1,11 @@
 #ifndef CharacterHistoryContinuous_H
 #define CharacterHistoryContinuous_H
 
+#include <stddef.h>
+
 #include "BranchHistoryContinuous.h"
 #include "CharacterEventContinuous.h"
 #include "CharacterHistory.h"
-
-#include <ostream>
-#include <set>
-#include <vector>
 
 namespace RevBayesCore {
     

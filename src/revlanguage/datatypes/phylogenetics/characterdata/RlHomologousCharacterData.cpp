@@ -1,10 +1,30 @@
 #include "RlHomologousCharacterData.h"
+
+#include <stddef.h>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "MemberProcedure.h"
 #include "ModelVector.h"
 #include "Natural.h"
 #include "RlBoolean.h"
-#include "RlString.h"
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "HomologousCharacterData.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "RbVector.h"
+#include "RevObject.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlUtils.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
 
 using namespace RevLanguage;

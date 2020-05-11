@@ -1,14 +1,15 @@
 #include "ElementSwapSimplexProposal.h"
-#include "DistributionBeta.h"
+
+#include <stddef.h>
+#include <cmath>
+
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-#include "RbConstants.h"
-#include "RbException.h"
-#include "RbStatisticsHelper.h"
-#include "TypedDagNode.h"
+#include "Cloneable.h"
+#include "RbVectorImpl.h"
+#include "StochasticNode.h"
 
-#include <cmath>
-#include <iostream>
+namespace RevBayesCore { class DagNode; }
 
 
 using namespace RevBayesCore;

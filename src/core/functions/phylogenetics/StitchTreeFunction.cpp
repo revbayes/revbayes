@@ -7,8 +7,14 @@
 //
 
 #include "StitchTreeFunction.h"
-#include "RbException.h"
+
 #include <set>
+
+#include "RbBoolean.h"
+#include "TopologyNode.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

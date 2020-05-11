@@ -7,17 +7,20 @@
 //
 
 #include "Func_seed.h"
+
+#include <stddef.h>
+#include <vector>
+
 #include "ArgumentRule.h"
-#include "DeterministicNode.h"
-#include "Ellipsis.h"
 #include "Natural.h"
 #include "RandomNumberGenerator.h"
 #include "RandomNumberFactory.h"
-#include "RbUtil.h"
 #include "RevNullObject.h"
-#include "RealPos.h"
-#include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
 
 using namespace RevLanguage;
 

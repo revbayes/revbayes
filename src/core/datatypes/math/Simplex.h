@@ -18,17 +18,15 @@
 #ifndef Simplex_H
 #define Simplex_H
 
-#include "Cloneable.h"
-#include "MemberObject.h"
-#include "RbVector.h"
-
 #include <cstddef>
 #include <iostream>
 #include <vector>
 
+#include "MemberObject.h"
+#include "RbVector.h"
+
 namespace RevBayesCore {
-    
-    class EigenSystem;
+class DagNode;
     
     class Simplex : public RbVector<double>, public MemberObject<double> {
         

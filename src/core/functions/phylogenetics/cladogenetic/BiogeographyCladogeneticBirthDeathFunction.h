@@ -9,18 +9,22 @@
 #ifndef BiogeographyCladogeneticBirthDeathFunction__
 #define BiogeographyCladogeneticBirthDeathFunction__
 
-#include "AbstractCladogenicStateFunction.h"
-#include "CladogeneticSpeciationRateMatrix.h"
-#include "RbVector.h"
-#include "TypedDagNode.h"
-#include "TypedFunction.h"
-
+#include <stddef.h>
 #include <string>
 #include <sstream>
 #include <vector>
 #include <map>
+#include <set>
+
+#include "AbstractCladogenicStateFunction.h"
+#include "CladogeneticSpeciationRateMatrix.h"
+#include "TypedFunction.h"
 
 namespace RevBayesCore {
+class BranchHistory;
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     class BiogeographyCladogeneticBirthDeathFunction : public AbstractCladogenicStateFunction, public TypedFunction<CladogeneticSpeciationRateMatrix> {
         

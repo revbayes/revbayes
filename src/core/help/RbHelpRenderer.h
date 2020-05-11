@@ -1,10 +1,15 @@
 #ifndef RbHelpRenderer_H
 #define RbHelpRenderer_H
 
-#include "RbHelpFunction.h"
-#include "RbHelpType.h"
+#include <stddef.h>
+#include <iosfwd>
+#include <string> // IWYU pragma: keep
 
 namespace RevBayesCore {
+class RbHelpArgument;
+class RbHelpEntry;
+class RbHelpFunction;
+class RbHelpType;
     
     /**
      * @brief Class rendering the help to the console output.

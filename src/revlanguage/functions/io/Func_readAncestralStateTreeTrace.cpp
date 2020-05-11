@@ -1,25 +1,33 @@
+#include <math.h>
+#include <stddef.h>
+#include <map>
+#include <iostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
-#include "ConstantNode.h"
-#include "Ellipsis.h"
 #include "Func_readAncestralStateTreeTrace.h"
-#include "ModelVector.h"
-#include "NclReader.h"
 #include "NewickConverter.h"
 #include "OptionRule.h"
 #include "Probability.h"
 #include "RbException.h"
 #include "RbFileManager.h"
-#include "RlBranchLengthTree.h"
 #include "RlString.h"
-#include "RlTimeTree.h"
 #include "RlTraceTree.h"
-#include "RlUtils.h"
 #include "StringUtilities.h"
 #include "TreeUtilities.h"
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "Integer.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "Trace.h"
+#include "TraceTree.h"
+#include "TypeSpec.h"
 
-#include <map>
-#include <set>
-#include <sstream>
+namespace RevBayesCore { class Tree; }
 
 
 using namespace RevLanguage;

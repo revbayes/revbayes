@@ -1,9 +1,16 @@
 #include "MaxFunction.h"
+#include <stddef.h>
 #include "RbConstants.h"
+#include "Cloneable.h"
+#include "DagNode.h"
+#include "MatrixReal.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "TypedDagNode.h"
 
 using namespace RevBayesCore;
 /** MaxFunction of a RbVector Constructor
- * @param v the vector of values
+ * @param v the vector of double values
  */
 MaxFunction::MaxFunction(const TypedDagNode< RbVector<double> > *v) : TypedFunction<double>( new double(0.0) ),
     matrix(false),

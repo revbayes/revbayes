@@ -1,9 +1,15 @@
+#include <stddef.h>
+#include <iosfwd>
+
 #include "AbstractDiscreteTaxonData.h"
 #include "PattersonsDFunction.h"
-#include "RbException.h"
-#include "RbMathCombinatorialFunctions.h"
+#include "AbstractHomologousDiscreteCharacterData.h"
+#include "Cloneable.h"
+#include "DiscreteCharacterState.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

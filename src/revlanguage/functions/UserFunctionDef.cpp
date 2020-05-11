@@ -1,15 +1,12 @@
-#include "ArgumentRule.h"
+#include <stddef.h>
+#include <sstream>
+#include <list>
+
 #include "ArgumentRules.h"
-#include "Ellipsis.h"
 #include "RbException.h"
-#include "RbUtil.h"
-#include "RealPos.h"
-#include "Signals.h"
 #include "TypeSpec.h"
 #include "UserFunctionDef.h"
-#include "Workspace.h"
-
-#include <sstream>
+#include "SyntaxElement.h"
 
 using namespace RevLanguage;
 

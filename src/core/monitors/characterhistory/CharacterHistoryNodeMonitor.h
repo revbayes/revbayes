@@ -9,18 +9,19 @@
 #ifndef __rb_mlandis__CharacterHistoryNodeMonitor__
 #define __rb_mlandis__CharacterHistoryNodeMonitor__
 
-#include "Monitor.h"
-#include "BranchHistory.h"
-#include "StochasticNode.h"
-#include "TypedDagNode.h"
-#include "Tree.h"
-
 #include <fstream>
-#include <iostream>
-#include <string>
 #include <vector>
+#include <set>
+
+#include "Monitor.h"
 
 namespace RevBayesCore {
+class BranchHistory;
+class DagNode;
+class TopologyNode;
+class Tree;
+template <class valueType> class TypedDagNode;
+template <class variableType> class StochasticNode;
     
     class CharacterHistoryNodeMonitor : public Monitor {
         

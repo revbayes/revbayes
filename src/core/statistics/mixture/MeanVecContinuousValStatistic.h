@@ -17,14 +17,12 @@
 #ifndef MeanVecContinuousValStatistic_H
 #define MeanVecContinuousValStatistic_H
 
-#include "StochasticNode.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <vector>
-#include <string>
-
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     class MeanVecContinuousValStatistic : public TypedFunction<double> {
         

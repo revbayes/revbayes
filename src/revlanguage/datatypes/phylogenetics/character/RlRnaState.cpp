@@ -17,12 +17,27 @@
  */
 
 
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include "ConstantNode.h"
 #include "RlRnaState.h"
-#include "RbUtil.h"
 #include "TypeSpec.h"
-
-#include <sstream>
+#include "CharacterState.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RlConstantNode.h"
+#include "RnaState.h"
+#include "StringUtilities.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
 using namespace RevLanguage;
 

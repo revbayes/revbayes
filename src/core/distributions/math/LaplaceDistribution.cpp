@@ -1,11 +1,21 @@
 
 #include "LaplaceDistribution.h"
+
 #include "DistributionLaplace.h"
 #include "RandomNumberFactory.h"
+#include "Cloneable.h"
 #include "RbConstants.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
+
 
 using namespace RevBayesCore;
 
+/** Laplace Distribution Constructor
+ * @param m A real number for location parameter
+ * @param s A positive real for the scale parameter
+ */
 LaplaceDistribution::LaplaceDistribution(const TypedDagNode<double> *m, const TypedDagNode<double> *s) : ContinuousDistribution( new double( 0.0 ) ),
     mean( m ),
     scale( s )
@@ -26,9 +36,10 @@ LaplaceDistribution::~LaplaceDistribution( void )
 }
 
 
-double LaplaceDistribution::cdf( void ) const 
+/* Laplace distribution cumulative probability function. */
+double LaplaceDistribution::cdf( void ) const
 {
-    return RbStatistics::Laplace::cdf( mean->getValue(), scale->getValue(), *value);
+    return RbStatistics::Laplace::cdf( mean->getValue(), scale->getValue(), *value );
 }
 
 
@@ -44,7 +55,7 @@ double LaplaceDistribution::computeLnProbability( void )
 }
 
 
-double LaplaceDistribution::quantile(double p) const 
+double LaplaceDistribution::quantile( double p ) const 
 {
     return RbStatistics::Laplace::quantile(mean->getValue(), scale->getValue(), p);
 }
@@ -68,7 +79,7 @@ void LaplaceDistribution::redrawValue( void )
 }
 
 
-/** Swap a parameter of the distribution */
+/* Swap a parameter of the distribution */
 void LaplaceDistribution::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     if (oldP == mean)

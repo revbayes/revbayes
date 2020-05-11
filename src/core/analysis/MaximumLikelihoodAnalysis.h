@@ -60,7 +60,7 @@ namespace RevBayesCore {
         
         
 #ifdef RB_MPI
-        MPI_Comm analysis_comm;
+        MPI_Comm                                            analysis_comm;
 #endif
     };
     

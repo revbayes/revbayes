@@ -1,7 +1,14 @@
 #include "PhylogeneticIndependentContrastsFunction.h"
-#include "RbException.h"
 
 #include <cmath>
+
+#include "ContinuousCharacterData.h"
+#include "ContinuousTaxonData.h"
+#include "RbVectorImpl.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

@@ -1,9 +1,12 @@
 #include "Clade.h"
-#include "RbVectorUtilities.h"
 
 #include <algorithm>
 #include <iostream>
-#include <sstream>
+#include <string>
+#include <utility>
+
+#include "RbVectorUtilities.h"
+#include "RbException.h"
 
 
 using namespace RevBayesCore;

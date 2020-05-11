@@ -7,13 +7,22 @@
 //
 
 #include "Func_epoch.h"
+
 #include "EpochRateMatrixFunction.h"
-#include "Real.h"
 #include "RealPos.h"
 #include "RlDeterministicNode.h"
-#include "RlRateMatrix.h"
-#include "RlSimplex.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "ModelObject.h"
+#include "ModelVector.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

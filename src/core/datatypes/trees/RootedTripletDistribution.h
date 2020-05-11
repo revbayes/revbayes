@@ -19,21 +19,24 @@
 #ifndef RootedTripletDistribution_H
 #define RootedTripletDistribution_H
 
+#include <map>
+#include <vector>
+#include <string>
+#include <cstddef>
+#include <iosfwd>
+#include <utility>
+
 #include "Cloneable.h"
 #include "MemberObject.h"
 #include "Taxon.h"
-#include "TopologyNode.h"
 #include "Tree.h"
-#include "TypedDagNode.h"
-
-
-#include <map>
-#include <vector>
-#include <set>
-#include <string>
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 
 namespace RevBayesCore {
+class DagNode;
+class TopologyNode;
     
     class RootedTripletDistribution : public Cloneable, public MemberObject<std::vector < std::string > > {
         

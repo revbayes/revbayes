@@ -1,7 +1,16 @@
+#include <stddef.h>
+#include <ostream>
+#include <vector>
+
 #include "AbstractDiscreteTaxonData.h"
 #include "CharacterState.h"
 #include "FastaWriter.h"
 #include "RbFileManager.h"
+#include "AbstractHomologousDiscreteCharacterData.h"
+#include "AbstractNonHomologousDiscreteCharacterData.h"
+#include "Cloneable.h"
+#include "DiscreteCharacterState.h"
+#include "Taxon.h"
 
 using namespace RevBayesCore;
 

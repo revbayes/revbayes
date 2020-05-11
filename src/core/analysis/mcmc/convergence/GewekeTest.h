@@ -1,11 +1,10 @@
 #ifndef GewekeTest_H
 #define GewekeTest_H
 
-#include <vector>
-
 #include "ConvergenceDiagnosticContinuous.h"
 
 namespace RevBayesCore {
+class TraceNumeric;
     
     /**
      * @brief Geweke test statistic for assessing convergence.

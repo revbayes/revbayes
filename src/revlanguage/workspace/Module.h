@@ -2,7 +2,7 @@
 #define Module_H
 
 #include <vector>
-#include <string>
+#include <iosfwd>
 
 namespace RevLanguage {
     

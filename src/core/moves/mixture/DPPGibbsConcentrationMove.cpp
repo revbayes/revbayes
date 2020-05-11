@@ -1,39 +1,18 @@
-/**
- * @file
- * This file contains the declaration of DPPGibbsConcentrationMove, which performs a fully conditional Gibbs move on the concentration parameter of the DPP
- *   this move is conditional on the # of categories in the current state of the DPP
- *
- * @brief Declaration of DPPGibbsConcentrationMove
- *
- * (c) Copyright 2009- under GPL version 3
- * @date Last modified: $Date: 2012-05-11 14:54:35 +0200 (Fri, 11 May 2012) $
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- * @version 1.0
- * @since 2012-07-20, version 1.0
- *
- * $Id: DPPGibbsConcentrationMove.h $
- */
-
-
-#include <ostream>
-#include <cmath>
-
 #include "DPPGibbsConcentrationMove.h"
-#include "DirichletProcessPriorDistribution.h"
-#include "StochasticNode.h"
-#include "DeterministicNode.h"
-#include "TypedDagNode.h"
-#include "ConstantNode.h"
-#include "NormalizeVectorFunction.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "GammaDistribution.h"
+
+#include <math.h>
+#include <vector>
+
 #include "DistributionDirichlet.h"
 #include "DistributionGamma.h"
-#include "RbConstants.h"
-#include "RbMathVector.h"
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
+#include "DeterministicNode.h"
+#include "RbVector.h"
+#include "StochasticNode.h"
+#include "TypedDagNode.h"
 
+namespace RevBayesCore { class DagNode; }
 
 
 RevBayesCore::DPPGibbsConcentrationMove::DPPGibbsConcentrationMove(StochasticNode<double> *n, DeterministicNode<long>* v, TypedDagNode< double >* gS, TypedDagNode< double >* gR, int ne, double w) : AbstractGibbsMove( w ),
@@ -52,12 +31,6 @@ RevBayesCore::DPPGibbsConcentrationMove::DPPGibbsConcentrationMove(StochasticNod
 }
 
 
-/**
- * The clone function is a convenience function to create proper copies of inherited objected.
- * E.g. a.clone() will create a clone of the correct type even if 'a' is of derived type 'b'.
- *
- * \return A new copy of the process.
- */
 RevBayesCore::DPPGibbsConcentrationMove* RevBayesCore::DPPGibbsConcentrationMove::clone( void ) const
 {
     

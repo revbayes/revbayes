@@ -8,10 +8,18 @@
 
 
 #include "DECRateMatrixFunction.h"
-#include "RateMatrix_DECRateMatrix.h"
-#include "RbException.h"
-#include "RbMathCombinatorialFunctions.h"
+
 #include <cmath>
+#include <vector>
+
+#include "RateMatrix_DECRateMatrix.h"
+#include "RbMathCombinatorialFunctions.h"
+#include "Cloneable.h"
+#include "RbVector.h"
+#include "Simplex.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

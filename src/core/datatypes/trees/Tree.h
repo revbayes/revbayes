@@ -62,7 +62,7 @@ namespace RevBayesCore {
         // public Tree methods
         void                                                addBranchParameter(const std::string &n, const std::vector<double> &p, bool io);
         void                                                addNodeParameter(const std::string &n, const std::vector<double> &p, bool io);
-		void                                                addNodeParameter(const std::string &n, const std::vector<std::string*> &p, bool io);
+		void                                                addNodeParameter(const std::string &n, const std::vector<std::string> &p, bool io);
         void                                                clearParameters(void);                                                                              //!< Clear both the current node and branch parameters
         void                                                clearBranchParameters(void);
 		void                                                clearNodeParameters(void);
@@ -83,7 +83,8 @@ namespace RevBayesCore {
         TopologyNode&                                       getNode(size_t idx);                                                                                //!< Get the node at index
         const TopologyNode&                                 getNode(size_t idx) const;                                                                          //!< Get the node at index
         const std::vector<TopologyNode*>&                   getNodes(void) const;                                                                               //!< Get a pointer to the nodes in the Tree
-        std::vector<RbBitSet>                               getNodesAsBitset(void) const;                                                                               //!< Get a pointer to the nodes in the Tree
+        std::vector<RbBitSet>                               getNodesAsBitset(void) const;                                                                       //!< Get a pointer to the nodes in the Tree
+        std::vector<long>                                   getNodeIndices(void) const;                                                                         //!< Get a vector of node indices
         size_t                                              getNumberOfInteriorNodes(void) const;                                                               //!< Get the number of nodes in the Tree
         size_t                                              getNumberOfNodes(void) const;                                                                       //!< Get the number of nodes in the Tree
         size_t                                              getNumberOfExtantTips(void) const;                                                                  //!< Get the number of extant tip nodes in the Tree

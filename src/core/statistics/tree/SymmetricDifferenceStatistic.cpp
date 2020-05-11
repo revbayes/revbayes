@@ -1,9 +1,10 @@
 #include "SymmetricDifferenceStatistic.h"
-#include "TreeBipartitions.h"
-#include "TreeUtilities.h"
-#include <algorithm>
 
-#include <boost/dynamic_bitset.hpp>
+#include "TreeUtilities.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class Tree; }
 
 using namespace RevBayesCore;
 

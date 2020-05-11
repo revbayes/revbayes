@@ -1,22 +1,23 @@
-//
-//  WishartDistribution.cpp
-//  revbayes
-//
-//  Created by Nicolas Lartillot on 2014-03-26.
-//  Copyright (c) 2014 revbayes team. All rights reserved.
-//
-
 #include "WishartDistribution.h"
 
+#include <stdlib.h>
+#include <iostream>
+
 #include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbConstants.h"
-#include "RbStatisticsHelper.h"
-#include "DistributionNormal.h"
 #include "DistributionWishart.h"
+#include "Cloneable.h"
+
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 
+/**
+ * Default Constructor for the Wishart Distribution
+ * @param inomega0 A scale matrix of positive real numbers
+ * @param indf a positive long number for the degrees of freedom
+ *
+ */
 WishartDistribution::WishartDistribution(const TypedDagNode<MatrixReal> *inomega0, const TypedDagNode<long>* indf)  :
 TypedDistribution<RevBayesCore::MatrixReal>(new MatrixReal(inomega0->getValue().getDim())),
     omega0(inomega0),
@@ -33,6 +34,14 @@ TypedDistribution<RevBayesCore::MatrixReal>(new MatrixReal(inomega0->getValue().
     redrawValue();
 }
 
+
+/**
+ * Constructor for the Wishart Distribution
+ * @param inkappa a value for all diagonal elements of the scaling matrix
+ * @param indim the number of dimensions for the scaling matrix
+ * @param indf a positive long number for the degrees of freedom
+ *
+ */
 WishartDistribution::WishartDistribution(const TypedDagNode<long>* indim, const TypedDagNode<double> *inkappa, const TypedDagNode<long>* indf)  :
 TypedDistribution<RevBayesCore::MatrixReal>(new MatrixReal( size_t(indim->getValue()) )),
     omega0(NULL),

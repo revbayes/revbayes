@@ -1,16 +1,15 @@
 #ifndef DecomposedInverseWishartDistribution_H
 #define	DecomposedInverseWishartDistribution_H
 
-#include <iostream>
-
 #include "TypedDistribution.h"
 #include "MatrixReal.h"
-#include "RbVector.h"
 #include "TypedDagNode.h"
 
 
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
     
     /**
      * @brief Decomposed inverse Wishart distribution class.

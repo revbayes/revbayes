@@ -1,5 +1,7 @@
 #include "Procedure.h"
 
+#include "TypeSpec.h"
+
 using namespace RevLanguage;
 
 Procedure::Procedure() : Function()

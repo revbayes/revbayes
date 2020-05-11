@@ -1,5 +1,13 @@
 #include "AbsoluteValueVectorFunction.h"
+
+#include <stddef.h>
 #include <cmath>
+
+#include "Cloner.h"
+#include "RbVectorImpl.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 /**

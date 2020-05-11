@@ -1,14 +1,16 @@
 #ifndef DECRateMatrixFunction_H
 #define DECRateMatrixFunction_H
 
-#include "RateMatrix_DECRateMatrix.h"
-#include "Simplex.h"
-#include "TypedDagNode.h"
-#include "TypedFunction.h"
+#include <stddef.h>
 
-#include <vector>
+#include "TypedFunction.h"
+#include "RateGenerator.h"
 
 namespace RevBayesCore {
+class DagNode;
+class Simplex;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     class DECRateMatrixFunction : public TypedFunction<RateGenerator> {
         

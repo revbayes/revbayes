@@ -22,14 +22,23 @@
 #ifndef RootedTripletDistributionFunction_H
 #define RootedTripletDistributionFunction_H
 
-#include "RateMatrix_GTR.h"
-#include "TypedDagNode.h"
+#include <vector>
+#include <cstddef>
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
+
 #include "TypedFunction.h"
 #include "RootedTripletDistribution.h"
-
-#include <vector>
+#include "Taxon.h"
 
 namespace RevBayesCore {
+class DagNode;
+class TopologyNode;
+class Tree;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     class RootedTripletDistributionFunction : public TypedFunction<RootedTripletDistribution> {
         

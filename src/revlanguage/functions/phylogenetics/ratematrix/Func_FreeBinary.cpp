@@ -1,16 +1,23 @@
 #include "Func_FreeBinary.h"
-#include "FreeBinaryRateMatrixFunction.h"
+
 #include "FreeBinaryRateMatrixFunction.h"
 #include "ModelVector.h"
-#include "Natural.h"
-#include "RateMatrix_JC.h"
 #include "Real.h"
-#include "RealPos.h"
 #include "RlDeterministicNode.h"
 #include "RlRateMatrix.h"
-#include "RlSimplex.h"
 #include "RlBoolean.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "ModelObject.h"
+#include "RbBoolean.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
+#include "RealPos.h" // IWYU pragma: keep
+
+namespace RevBayesCore { template <class valueType> class RbVector; }
 
 using namespace RevLanguage;
 

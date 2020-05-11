@@ -19,7 +19,6 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
-//#include <random>
 #include <set>
 #include <string>
 
@@ -52,7 +51,7 @@ namespace RevBayesCore {
     friend class NodeTimeSlideUniformCharacterHistoryProposal;
 
     public:
-        PathRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l=1.0, double r=0.234, bool useTail=false);   //!<  constructor
+        PathRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l=1.0, double r=0.234);   //!<  constructor
 
         // Basic utility functions
         void                                                        assignNode(TopologyNode* nd);
@@ -93,7 +92,6 @@ namespace RevBayesCore {
         size_t                                                      numStates;
         size_t                                                      numCharacters;
 
-        bool                                                        useTail;
         bool                                                        node_assigned;
         bool                                                        sampled_characters_assigned;
         double                                                      lambda;
@@ -114,13 +112,12 @@ namespace RevBayesCore {
  * Here we simply allocate and initialize the Proposal object.
  */
 template<class charType>
-RevBayesCore::PathRejectionSampleProposal<charType>::PathRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l, double r, bool ut) : Proposal(r),
+RevBayesCore::PathRejectionSampleProposal<charType>::PathRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l, double r) : Proposal(r),
     ctmc(n),
     q_map_site( NULL ),
     q_map_sequence( NULL ),
     node(NULL),
     numCharacters(n->getValue().getNumberOfCharacters()),
-    useTail(ut),
     node_assigned(false),
     sampled_characters_assigned(false),
     lambda(l)
@@ -148,10 +145,10 @@ template<class charType>
 void RevBayesCore::PathRejectionSampleProposal<charType>::cleanProposal( void )
 {
 
-    if ( node->isRoot() && !useTail )
-    {
-        return;
-    }
+//    if ( node->isRoot() && !useTail )
+//    {
+//        return;
+//    }
     
     // delete old events
     std::multiset<CharacterEvent*,CharacterEventCompare>::reverse_iterator it_h;
@@ -198,10 +195,10 @@ template<class charType>
 double RevBayesCore::PathRejectionSampleProposal<charType>::computeLnProposal(const TopologyNode& nd, const BranchHistory& bh)
 {
     
-    if ( nd.isRoot() && !useTail )
-    {
-        return 0.0;
-    }
+//    if ( nd.isRoot() && !useTail )
+//    {
+//        return 0.0;
+//    }
     TreeHistoryCtmc<charType>* p = dynamic_cast< TreeHistoryCtmc<charType>* >( &ctmc->getDistribution() );
     if ( p == NULL )
     {
@@ -219,7 +216,7 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::computeLnProposal(co
     
     // get model parameters
     double currAge = 0.0;
-    if ( nd.isRoot() && useTail )
+    if ( nd.isRoot() )
     {
         currAge = nd.getAge() + p->getRootBranchLength();
     }
@@ -293,10 +290,10 @@ template<class charType>
 double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
 {
     
-    if ( node->isRoot() && !useTail )
-    {
-        return 0.0;
-    }
+//    if ( node->isRoot() && !useTail )
+//    {
+//        return 0.0;
+//    }
     
     TreeHistoryCtmc<charType>* p = dynamic_cast< TreeHistoryCtmc<charType>* >( &ctmc->getDistribution() );
     if ( p == NULL )
@@ -306,7 +303,7 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
 
     // get model parameters
     double branch_length = node->getBranchLength();
-    if ( node->isRoot() && useTail )
+    if ( node->isRoot() )
     {
         branch_length = p->getRootBranchLength();
     }
@@ -473,13 +470,18 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::prepareProposal( void 
         size_t num_nodes = tau.getNumberOfNodes();
 
         size_t node_index = 0;
-        do
-        {
+//        do {
             node_index = GLOBAL_RNG->uniform01() * num_nodes;
             node = &tau.getNode(node_index);
-
-        } while ( node->isRoot() == true && !useTail );
+            
+//        } while ( node->isRoot() == true && !useTail );
     }
+    
+    if (node->isRoot()) {
+//        std::cout << "root node!\n";
+//        std::cout << "\n";
+    }
+
 
     BranchHistory* bh = &p->getHistory(*node);
     const std::multiset<CharacterEvent*,CharacterEventCompare>& history = bh->getHistory();

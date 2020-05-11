@@ -1,13 +1,5 @@
-//
-//  Func_characterMapTree.h
-//  RevBayes_development_branch
-//
-//  Created by will freyman on 12/22/16.
-//  Copyright (c) 2016 will freyman. All rights reserved.
-//
-
-#ifndef __RevBayes_development_branch__Func_characterMapTree__
-#define __RevBayes_development_branch__Func_characterMapTree__
+#ifndef Func_characterMapTree_H
+#define Func_characterMapTree_H
 
 #include "Procedure.h"
 #include "RbFileManager.h"

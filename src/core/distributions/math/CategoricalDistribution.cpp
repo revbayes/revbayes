@@ -1,11 +1,25 @@
 #include "CategoricalDistribution.h"
+
+#include <cmath>
+#include <vector>
+
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
+#include "Cloneable.h"
+#include "RbVectorImpl.h"
+#include "Simplex.h"
+#include "TypedDagNode.h"
 
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
+
+/*Categorical Distribution Constructor
+ * The constructor takes has one input
+ * @param p A simplex of probabilities for each category
+ *
+ */
 
 CategoricalDistribution::CategoricalDistribution(const TypedDagNode< Simplex > *p) :
     TypedDistribution<long>( new long( 1 ) ),

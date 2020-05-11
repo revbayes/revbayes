@@ -1,12 +1,7 @@
 #include "RateMatrix.h"
-#include "RbException.h"
-#include "RbMathMatrix.h"
-#include "TypedDagNode.h"
 
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <iomanip>
+#include "RbException.h"
+#include "Assignable.h"
 
 using namespace RevBayesCore;
 

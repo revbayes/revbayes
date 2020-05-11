@@ -14,16 +14,16 @@
  * $Id$
  */
 
-#include <cassert>
+#include <stddef.h>
 #include <cmath>
-#include <iostream>
 #include <vector>
+#include <algorithm>
+#include <sstream> // IWYU pragma: keep
 
 #include "RbConstants.h"
 #include "RbException.h"
 #include "RbMathFunctions.h"
 #include "RbMathLogic.h"
-#include "RbSettings.h"
 
 
 using namespace RevBayesCore;

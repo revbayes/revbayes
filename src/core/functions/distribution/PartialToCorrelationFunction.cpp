@@ -1,6 +1,15 @@
+#include <stddef.h>
 #include <cmath>
+
 #include "PartialToCorrelationFunction.h"
-#include "RbException.h"
+#include "Cloner.h"
+#include "MatrixReal.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

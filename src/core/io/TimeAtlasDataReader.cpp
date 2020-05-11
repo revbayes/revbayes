@@ -7,23 +7,22 @@
 //
 
 #include "TimeAtlasDataReader.h"
-#include "RbFileManager.h"
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/foreach.hpp>
-#include "RbConstants.h"
-#include "RbException.h"
-
-#include "RlUserInterface.h"
-
 #include <algorithm>
 #include <iostream>
-#include <fstream>
-#include <cstdlib>
 #include <sstream>
-#include <set>
 #include <string>
+#include <exception>
+#include <utility>
+
+#include "RbFileManager.h"
+#include "RbConstants.h"
+#include "RbException.h"
+#include "RlUserInterface.h"
+#include "GeographicArea.h"
 
 using namespace RevBayesCore;
 

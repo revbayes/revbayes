@@ -1,13 +1,19 @@
 #ifndef AbstractPhyloContinuousCharacterProcess_H
 #define AbstractPhyloContinuousCharacterProcess_H
 
+#include <stddef.h>
+#include <vector>
+
 #include "ContinuousCharacterData.h"
-#include "RbVector.h"
-#include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypedDistribution.h"
+#include "TopologyNode.h"
 
 namespace RevBayesCore {
+class ContinuousTaxonData;
+class DagNode;
+class Tree;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Homogeneous distribution of character state evolution along a tree class (PhyloCTMC).

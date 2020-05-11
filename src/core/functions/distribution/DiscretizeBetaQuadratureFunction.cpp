@@ -1,9 +1,17 @@
 #include "DiscretizeBetaQuadratureFunction.h"
 
-#include "RbMathFunctions.h"
-#include "EigenSystem.h"
+#include <stddef.h>
 #include <cmath>
-#include <algorithm>
+#include <map>
+#include <utility>
+#include <vector>
+
+#include "EigenSystem.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 
 

@@ -1,15 +1,27 @@
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
-#include "Ellipsis.h"
 #include "Func_discretizeBetaQuadrature.h"
 #include "Integer.h"
-#include "NormalizeVectorFunction.h"
-#include "RbUtil.h"
 #include "RealPos.h"
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
-
 #include "DiscretizeBetaQuadratureFunction.h"
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "MatrixReal.h"
+#include "Real.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "RlMatrixRealPos.h"
+#include "RlTypedFunction.h"
+#include "TypedFunction.h"
 
 
 using namespace RevLanguage;

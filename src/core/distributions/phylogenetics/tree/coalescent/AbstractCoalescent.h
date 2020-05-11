@@ -1,25 +1,22 @@
 #ifndef AbstractCoalescent_H
 #define AbstractCoalescent_H
 
+#include <stddef.h>
+#include <vector>
+
 #include "Taxon.h"
 #include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypedDistribution.h"
+#include "Clade.h"
 
 namespace RevBayesCore {
     
-    class Clade;
     class TopologyNode;
     
     /**
-     * @file
      * This file contains the declaration of the random variable class for any coalescent process.
      *
      * @brief Declaration of the abstract coalescent process class.
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2015-04-14, version 1.0
      *
      */
     class AbstractCoalescent : public TypedDistribution<Tree> {

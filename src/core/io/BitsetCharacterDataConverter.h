@@ -9,13 +9,16 @@
 #ifndef BitsetCharacterDataConverter_h
 #define BitsetCharacterDataConverter_h
 
-#include "AbstractHomologousDiscreteCharacterData.h"
+#include <vector>
+#include <map>
+#include <cstddef>
+#include <iosfwd>
+
 #include "HomologousDiscreteCharacterData.h"
 #include "NaturalNumbersState.h"
 #include "StandardState.h"
-
-#include <vector>
-#include <map>
+#include "DiscreteTaxonData.h"
+#include "RbException.h"
 
 namespace RevBayesCore {
     

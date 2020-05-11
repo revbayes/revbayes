@@ -1,23 +1,28 @@
 #include "Mntr_AncestralState.h"
+
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "OptionRule.h"
-#include "Model.h"
 #include "AncestralStateMonitor.h"
 #include "RlMonitor.h"
-#include "ModelVector.h"
-#include "Ellipsis.h"
 #include "Natural.h"
 #include "RbException.h"
 #include "RevObject.h"
-#include "RlModel.h"
-#include "RlTimeTree.h"
-#include "RlBranchLengthTree.h"
 #include "RlString.h"
 #include "TypeSpec.h"
 #include "NaturalNumbersState.h"
 #include "DnaState.h"
-#include "RlStandardState.h"
+#include "Monitor.h"
+#include "RbBoolean.h"
+#include "RlBoolean.h"
+#include "RlTree.h"
+#include "StandardState.h"
+#include "TypedDistribution.h"
+
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class Tree; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 

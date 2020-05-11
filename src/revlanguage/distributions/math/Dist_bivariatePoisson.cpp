@@ -1,13 +1,39 @@
+#include <math.h>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Dist_bivariatePoisson.h"
 #include "BivariatePoissonDistribution.h"
 #include "Natural.h"
 #include "ModelVector.h"
-#include "Probability.h"
-#include "Real.h"
 #include "RealPos.h"
 #include "StochasticNode.h"
+#include "ConstantNode.h"
+#include "DagMemberFunction.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "RbHelpReference.h"
+#include "RbVector.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlDagMemberFunction.h"
+#include "RlDeterministicNode.h"
+#include "RlStochasticNode.h"
+#include "RlTypedDistribution.h"
+#include "RlTypedFunction.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
 using namespace RevLanguage;
 
@@ -114,114 +140,6 @@ std::string Dist_bivariatePoisson::getDistributionFunctionName( void ) const
     std::string d_name = "bivariatePoisson";
 
     return d_name;
-}
-
-
-/**
- * Get the author(s) of this function so they can receive credit (and blame) for it.
- */
-std::vector<std::string> Dist_bivariatePoisson::getHelpAuthor(void) const
-{
-    // create a vector of authors for this function
-    std::vector<std::string> authors;
-    authors.push_back( "Alexander Zarebski" );
-    authors.push_back( "Sebastian Hoehna" );
-
-    return authors;
-}
-
-
-/**
- * Get the (brief) description for this function
- */
-std::string Dist_bivariatePoisson::getHelpDescription(void) const
-{
-    // create a variable for the description of the function
-    std::string description = "A Bivariate Poisson distribution defines probabilities for pairs of natural numbers.";
-
-    return description;
-}
-
-
-/**
- * Get the more detailed description of the function
- */
-std::string Dist_bivariatePoisson::getHelpDetails(void) const
-{
-    // create a variable for the description of the function
-    std::string details;
-    return details;
-}
-
-
-/**
- * Get an executable and instructive example.
- * These example should help the users to show how this function works but
- * are also used to test if this function still works.
- */
-std::string Dist_bivariatePoisson::getHelpExample(void) const
-{
-    // create an example as a single string variable.
-    std::string example = "";
-
-    example += "th1 ~ dnUniform(0.0,10.0)\n";
-    example += "th2 ~ dnUniform(0.0,10.0)\n";
-    example += "th0 ~ dnUniform(0.0,10.0)\n";
-    example += " ~ dnBivariatePoisson(th1, th2, th0)\n";
-    example += "x.clamp([3, 3, 3])\n";
-    example += "oves[1] = mvSlide(th1, delta=0.01, weight=1.0)\n";
-    example += "moves[2] = mvSlide(th2, delta=0.01, weight=1.0)\n";
-    example += "oves[3] = mvSlide(th0, delta=0.01, weight=1.0)\n";
-    example += "monitors[1] = mnScreen(printgen=1000,  th0)\n";
-    example += "ymodel = model(th1)\n";
-    example += "mymcmc = mcmc(mymodel, monitors, moves)\n";
-    example += "ymcmc.burnin(generations=20000,tuningInterval=100)\n";
-    example += "mymcmc.run(generations=200000)\n";
-
-    return example;
-}
-
-
-/**
- * Get some references/citations for this function
- *
- */
-std::vector<RevBayesCore::RbHelpReference> Dist_bivariatePoisson::getHelpReferences(void) const
-{
-    // create an entry for each reference
-    std::vector<RevBayesCore::RbHelpReference> references;
-
-    RevBayesCore::RbHelpReference ref1;
-    ref1.setCitation("Karlis D, Ntzoufras J (2003). Bayesian and Non-Bayesian Analysis of Soccer Data using Bivariate Poisson Regression Models.");
-    references.push_back( ref1 );
-
-    return references;
-}
-
-
-/**
- * Get the names of similar and suggested other functions
- */
-std::vector<std::string> Dist_bivariatePoisson::getHelpSeeAlso(void) const
-{
-    // create an entry for each suggested function
-    std::vector<std::string> see_also;
-    see_also.push_back( "dnPoisson" );
-
-
-    return see_also;
-}
-
-
-/**
- * Get the title of this help entry
- */
-std::string Dist_bivariatePoisson::getHelpTitle(void) const
-{
-    // create a title variable
-    std::string title = "Bivariate Poisson Distribution";
-
-    return title;
 }
 
 

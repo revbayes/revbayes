@@ -1,15 +1,21 @@
+#include <stdlib.h>
+#include <cmath>
+#include <string>
+#include <complex>
+#include <iosfwd>
+#include <vector>
+
 #include "EigenSystem.h"
 #include "MatrixComplex.h"
 #include "MatrixReal.h"
 #include "RateMatrix_GTR.h"
 #include "RbException.h"
-#include "RbMathMatrix.h"
 #include "TransitionProbabilityMatrix.h"
-#include "RbMathLogic.h"
-
-#include <cmath>
-#include <string>
-#include <iomanip>
+#include "Assignable.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "StringUtilities.h"
+#include "TimeReversibleRateMatrix.h"
 
 using namespace RevBayesCore;
 

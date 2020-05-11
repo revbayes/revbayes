@@ -1,13 +1,15 @@
 #ifndef LayeredScaleProposal_H
 #define LayeredScaleProposal_H
 
-#include <string>
+#include <iosfwd>
+#include <vector>
 
 #include "Proposal.h"
-#include "StochasticNode.h"
-#include "Tree.h"
 
 namespace RevBayesCore {
+class DagNode;
+class Tree;
+template <class variableType> class StochasticNode;
 
     /**
      * The subtree-scale operator.

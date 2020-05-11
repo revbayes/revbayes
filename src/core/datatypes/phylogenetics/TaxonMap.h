@@ -1,11 +1,12 @@
 #ifndef TaxonMap_H
 #define TaxonMap_H
 
-#include "Taxon.h"
-
-#include <string>
+#include <stddef.h>
 #include <vector>
 #include <map>
+#include <iosfwd>
+
+#include "Taxon.h"
 
 namespace RevBayesCore {
     

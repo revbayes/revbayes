@@ -22,15 +22,16 @@
 #ifndef PoMoRootFrequenciesFunction_H
 #define PoMoRootFrequenciesFunction_H
 
-#include "RateMatrix.h"
-#include "RbVector.h"
-#include "Simplex.h"
-#include "TypedDagNode.h"
-#include "TypedFunction.h"
-
 #include <vector>
 
+#include "Simplex.h"
+#include "TypedFunction.h"
+#include "RateGenerator.h"
+
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     class PoMoRootFrequenciesFunction : public TypedFunction< Simplex > {
         

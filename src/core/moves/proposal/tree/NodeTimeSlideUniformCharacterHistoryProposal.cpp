@@ -1,13 +1,4 @@
 #include "DistributionUniform.h"
-#include "NodeTimeSlideUniformCharacterHistoryProposal.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbException.h"
-#include "TreeUtilities.h"
-#include "TypedDagNode.h"
-
-#include <cmath>
-#include <iostream>
 
 using namespace RevBayesCore;
 

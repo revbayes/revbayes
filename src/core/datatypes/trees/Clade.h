@@ -1,13 +1,13 @@
 #ifndef Clade_H
 #define Clade_H
 
+#include <stddef.h>
 #include <map>
 #include <set>
-#include <string>
 #include <vector>
+#include <iosfwd>
 
 #include "RbBitSet.h"
-#include "RbException.h"
 #include "Taxon.h"
 
 namespace RevBayesCore {

@@ -1,14 +1,17 @@
 #ifndef DispersalExtinctionRootStructureFunction_H
 #define DispersalExtinctionRootStructureFunction_H
 
-#include "RbVector.h"
+#include <stddef.h>
+#include <vector>
+#include <map>
+
 #include "Simplex.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <vector>
-
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     class DispersalExtinctionRootStructureFunction : public TypedFunction<Simplex> {
         

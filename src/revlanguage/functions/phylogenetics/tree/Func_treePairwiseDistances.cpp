@@ -1,12 +1,17 @@
 #include "Func_treePairwiseDistances.h"
+
 #include "DistanceMatrix.h"
-#include "ModelVector.h"
-#include "RlTimeTree.h"
-#include "RlBranchLengthTree.h"
-#include "RealPos.h"
 #include "RlDeterministicNode.h"
 #include "TreePairwiseDistances.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "RevVariable.h"
+#include "RlTree.h"
+#include "TypeSpec.h"
+
+namespace RevBayesCore { class Tree; }
 
 using namespace RevLanguage;
 

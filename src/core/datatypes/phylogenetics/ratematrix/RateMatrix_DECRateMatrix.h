@@ -1,13 +1,5 @@
-//
-//  RateMatrix_DECRateMatrix.h
-//  revbayes-proj
-//
-//  Created by Michael Landis on 3/16/15.
-//  Copyright (c) 2015 Michael Landis. All rights reserved.
-//
-
-#ifndef __revbayes_proj__RateMatrix_DECRateMatrix__
-#define __revbayes_proj__RateMatrix_DECRateMatrix__
+#ifndef RateMatrix_DECRateMatrix_H
+#define RateMatrix_DECRateMatrix_H
 
 #include "GeneralRateMatrix.h"
 #include "TransitionProbabilityMatrix.h"
