@@ -14,7 +14,6 @@ using namespace RevBayesCore;
  * @param m The mean of the natural logarithm of the variable
  * @param s The standard deviation of the natural logarithm of the variable
  */
-
 LognormalDistribution::LognormalDistribution(const TypedDagNode<double> *m, const TypedDagNode<double> *s) : ContinuousDistribution( new double( 1.0 ) ),
     mean( m ), 
     sd( s )

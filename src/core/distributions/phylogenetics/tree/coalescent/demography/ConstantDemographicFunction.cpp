@@ -8,7 +8,9 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-
+/**
+ * @param[in]   t    Pointer to theta, the effective population size. Here: theta is constant.
+ */
 ConstantDemographicFunction::ConstantDemographicFunction(const TypedDagNode<double>* t) : DemographicFunction(),
     theta( t )
 {
@@ -17,7 +19,9 @@ ConstantDemographicFunction::ConstantDemographicFunction(const TypedDagNode<doub
     
 }
 
-
+/**
+ * @param[in]    f    The constant demographic function to copy.
+ */
 ConstantDemographicFunction::ConstantDemographicFunction(const ConstantDemographicFunction &f) : DemographicFunction(f),
     theta( f.theta )
 {
@@ -31,6 +35,9 @@ ConstantDemographicFunction::~ConstantDemographicFunction( void )
 }
 
 
+/**
+ * @param[in]    f    The constant demographic function to copy.
+ */
 ConstantDemographicFunction& ConstantDemographicFunction::operator=(const ConstantDemographicFunction &f)
 {
     DemographicFunction::operator=( f );
@@ -43,27 +50,47 @@ ConstantDemographicFunction& ConstantDemographicFunction::operator=(const Consta
     return *this;
 }
 
-
+/**
+ * This is similar to the copy constructor but useful in inheritance.
+ *
+ * The clone function is a convenience function to create proper copies of inherited objects.
+ * E.g. a.clone() will create a clone of the correct type even if 'a' is of derived type 'B'.
+ *
+ * @return A new copy of myself
+ */
 ConstantDemographicFunction* ConstantDemographicFunction::clone( void ) const
 {
     
     return new ConstantDemographicFunction(*this);
 }
 
-
+/**
+ * @param[in]   t    Time
+ *
+ * @return  N(t)
+ */
 double ConstantDemographicFunction::getDemographic(double t) const
 {
     
     return theta->getValue();
 }
 
-
+/**
+ * @param[in]   start   Time at which the interval starts
+ * @param[in]   finish  Time at which the interval ends
+ *
+ * @return  Integral 1/N(x) dx between start and finish.
+ */
 double ConstantDemographicFunction::getIntegral(double start, double finish) const
 {
     double delta = finish - start;
     return delta / theta->getValue();
 }
 
+/**
+ * @param[in]   old_node    Pointer to the DAG node to be replaced
+ * @param[in]   new_node    Pointer to the DAG node replacing the other
+ */
 void ConstantDemographicFunction::swapNodeInternal(const DagNode *old_node, const DagNode *new_node)
 {
 
@@ -73,7 +100,6 @@ void ConstantDemographicFunction::swapNodeInternal(const DagNode *old_node, cons
     }
     
 }
-
 
 
 std::ostream& operator<<(std::ostream& o, const ConstantDemographicFunction& x)

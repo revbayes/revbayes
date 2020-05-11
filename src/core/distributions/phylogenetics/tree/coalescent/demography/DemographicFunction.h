@@ -11,46 +11,34 @@ namespace RevBayesCore {
     class DagNode;
     
     /**
-     * @brief DemographicFunction: interface for all core DemographicFunctions
+     * @brief DemographicFunction: interface for all core demographic functions.
      *
-     *
+     *  This class contains a vector of variables represented as DAG nodes.
      */
     class DemographicFunction : public Cloneable {
         
     public:
         // destructor
-        virtual                                                 ~DemographicFunction(void);
+        virtual                                                 ~DemographicFunction(void);                                 //!< Destructor
         
         // public methods
-        virtual void                                            addVariable(const DagNode *n);
-        virtual void                                            swapNode(const DagNode *oldN, const DagNode *newN);
-//        virtual void                                            removeVariable(DagNode *n);
+        virtual void                                            addVariable(const DagNode *n);                              //!< Add a variable to the nodes vector
+        virtual void                                            swapNode(const DagNode *oldN, const DagNode *newN);         //!< Replacing a DAG node containing a variabe with a different one
         
         // getters and setters
-        const std::vector<const DagNode *>&                     getDagNodes(void) const;                                                            //!< Get the nodes vector
-//        void                                                    setDagNodes(const std::vector<DagNode *>& args);
+        const std::vector<const DagNode *>&                     getDagNodes(void) const;                                    //!< Get the nodes vector
 
         // pure virtual public methods
         virtual DemographicFunction*                            clone(void) const = 0;                                      //!< Clone the DemographicFunction
-        virtual double                                          getDemographic(double t) const = 0;                         //!< demographic function N(t) at time t
-//        virtual double                                          getLogDemographic(double t) const = 0;                      //!< log-demographic function N(t) at time t
-//        virtual double                                          getIntensity(double t) const = 0;                           //!< demographic intensity function at time t (= integral 1/N(x) dx from 0 to t).
-//        virtual double                                          getInverseIntensity(double x) const = 0;                    //!< inverse demographic intensity function
+        virtual double                                          getDemographic(double t) const = 0;                         //!< Returns the demographic function N(t) at time t.
         virtual double                                          getIntegral(double start, double finish) const = 0;         //!< Calculates the integral 1/N(x) dx between start and finish.
-//        virtual int                                             getNumberOfArguments(void) const = 0;                       //!< number of arguments for this function
-//        virtual std::string                                     getArgumentName(int n) const = 0;                           //!<
-//        virtual double                                          getArgument(int n) const = 0;                               //!< the n'th argument of this function.
-//        virtual void                                            setArgument(int n, double value) const = 0;                 //!< Sets the value of the nth argument of this function
-//        virtual double                                          getLowerBound(int n) const = 0;                             //!< the lower bound of the nth argument of this function.
-//        virtual double                                          getUpperBound(int n) const = 0;                             //!< the upper bound of the nth argument of this function.
-//        virtual double                                          getThreshold(void) const = 0;                               //!< A threshold for underflow on calculation of likelihood of internode intervals.
 
     protected:
         DemographicFunction(void);                                                                                          //!< Default constructor
         DemographicFunction(const DemographicFunction &f);                                                                  //!< Copy constructor
         DemographicFunction&                                    operator=(const DemographicFunction &f);                    //!< Assignment operator
         
-        virtual void                                            swapNodeInternal(const DagNode *oldN, const DagNode *newN) {}
+        virtual void                                            swapNodeInternal(const DagNode *oldN, const DagNode *newN) {} //!< Internally replacing a DAG node containing a variable with a different one
 
     private:
         

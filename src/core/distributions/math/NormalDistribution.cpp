@@ -18,8 +18,6 @@ using namespace RevBayesCore;
  * @param mi minimum value
  * @param ma maximum value
  */
-
-
 NormalDistribution::NormalDistribution(const TypedDagNode<double> *m, const TypedDagNode<double> *s, const TypedDagNode<double> *mi, const TypedDagNode<double> *ma) : ContinuousDistribution( new double( 0.0 ) ),
     mean( m ),
     stDev( s ),
