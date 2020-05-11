@@ -17,9 +17,9 @@ namespace RevBayesCore {
     enum RangeModel { KNOWNCOUNTS, UNKNOWNCOUNTS, PRESENCEABSENCE };
 
     /**
-     * @brief Piecewise-constant fossilized birth-death process with serially sampled fossils.
+     * @brief Abstract piecewise-constant fossilized birth-death range process.
      *
-     * The piecewise-constant birth-death process has constant rates for each time interval.
+     * The piecewise-constant fossilized birth-death range process has constant rates for each time interval.
      * At the end of each time interval there may be an abrupt rate-shift (jump) for each
      * of the rates. Additionally, there may be sampling at the end of each interval.
      * Finally, fossils are sampled with rate psi, the others (fossils and extant taxa) are
