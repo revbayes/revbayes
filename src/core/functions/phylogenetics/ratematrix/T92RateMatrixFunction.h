@@ -1,24 +1,3 @@
-/**
- * @file
- * This file contains the declaration of the GTR rate matrix function class.
- * This class is derived from the function class and is used to
- * compute the rate matrix of a general time reversible (GTR) Markov chain.
- *
- * @brief Declaration of the GTR rate matrix function.
- *
- * (c) Copyright 2009- under GPL version 3
- * @date Last modified: $Date$
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- * @version 1.0
- * @since 2012-07-06, version 1.0
- * @interface Function
- *
- * $Id$
- */
-
-
-
 #ifndef T92RateMatrixFunction_H
 #define T92RateMatrixFunction_H
 
@@ -28,6 +7,16 @@
 namespace RevBayesCore {
 class DagNode;
 template <class valueType> class TypedDagNode;
+
+    /**
+     * @brief T92 rate matrix function.
+     *
+     * This function creates the T92 (Tamura 1992) rate matrix object by setting the compound frequency of G+C and the
+     * transition-transversion ratio. The rate matrix takes care of the setting of the actual rates and transition probabilities.
+     *
+     * @param eqGc The compound equilibrium frequency of bases G and C
+     * @param tstv The transition-transversion ratio (kappa)
+     */
     
     class T92RateMatrixFunction : public TypedFunction<RateGenerator> {
         
@@ -45,7 +34,7 @@ template <class valueType> class TypedDagNode;
     private:
         
         // members
-        const TypedDagNode< double >*                       equilibriumGc;
+        const TypedDagNode< double >*                       equilibriumGc; //!< The compound equilibrium frequency of bases G and C
         const TypedDagNode< double >*                       transitionTransversionRate;
         
     };

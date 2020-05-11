@@ -13,6 +13,15 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
+/**
+ * Default constructor.
+ *
+ * This function takes three inputs:
+ * @param tr The vector of substitution rates, whose number of elements equals half the number of the off-diagonal entries of the rate matrix.
+ * @param r Should the rates be rescaled so that the average rate equals 1?
+ * @param method Matrix exponentiation method.
+ */
+
 FreeSymmetricRateMatrixFunction::FreeSymmetricRateMatrixFunction(const TypedDagNode< RbVector<double> > *tr, bool r, std::string method) : TypedFunction<RateGenerator>( NULL ),
     transition_rates( tr )
 {
@@ -44,10 +53,10 @@ FreeSymmetricRateMatrixFunction* FreeSymmetricRateMatrixFunction::clone( void ) 
 void FreeSymmetricRateMatrixFunction::update( void )
 {
     // get the information from the arguments for reading the file
-    const std::vector<double>& r = transition_rates->getValue();
+    const std::vector<double>& trr = transition_rates->getValue();
     
     // set the base frequencies
-    static_cast< RateMatrix_FreeSymmetric* >(value)->setTransitionRates(r);
+    static_cast< RateMatrix_FreeSymmetric* >(value)->setTransitionRates(trr);
     
     value->update();
 }
