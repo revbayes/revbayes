@@ -11,6 +11,15 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
+/**
+ * Default constructor.
+ *
+ * This function takes three inputs:
+ * @param k1 The ratio of transitions (A<->G, C<->T) to A<->C, G<->T transversions
+ * @param k2 The ratio of A<->T, C<->G transversions to A<->C, G<->T transversions
+ * @param bf The simplex of base frequencies
+ */
+
 Kimura81RateMatrixFunction::Kimura81RateMatrixFunction(const TypedDagNode<double> *k1, const TypedDagNode<double> *k2, const TypedDagNode< Simplex > *bf) : TypedFunction<RateGenerator>( new RateMatrix_Kimura81(bf->getValue().size()) ),
     kappa_1( k1 ),
     kappa_2( k2 ),
