@@ -5,8 +5,8 @@
 
 #include "RlDistributionMemberFunction.h"
 #include "PhyloCTMCSiteHomogeneous.h"
-#include "PhyloCTMCSiteHomogeneousNucleotide.h"
 #include "PhyloCTMCSiteHomogeneousBinary.h"
+#include "PhyloCTMCSiteHomogeneousNucleotide.h"
 #include "OptionRule.h"
 #include "Probability.h"
 #include "RevNullObject.h"
@@ -561,7 +561,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         }
 
         RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::StandardState> *dist;
-        if (cd == RevBayesCore::AscertainmentBias::ALL)
+        if(cd == RevBayesCore::AscertainmentBias::ALL)
         {
             dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::StandardState>(tau, nChars, true, n, ambig, internal, gapmatch);
         }

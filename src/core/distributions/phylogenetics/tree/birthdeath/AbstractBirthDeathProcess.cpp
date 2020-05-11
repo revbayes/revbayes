@@ -44,7 +44,7 @@ AbstractBirthDeathProcess::~AbstractBirthDeathProcess(void)
  *
  * @return log-probability
  */
-double AbstractBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) const
+double AbstractBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
 {
     // prepare the probability computation
     prepareProbComputation();
@@ -93,7 +93,7 @@ double AbstractBirthDeathProcess::lnProbTreeShape(void) const
  * Prepare the probability computation. Here we can pre-calculate some values for more
  * efficient probability calculation. The derived classes may want to do something.
  */
-void AbstractBirthDeathProcess::prepareProbComputation( void ) const
+void AbstractBirthDeathProcess::prepareProbComputation( void ) 
 {}
 
 

@@ -63,7 +63,7 @@ DiversityDependentPureBirthProcess* DiversityDependentPureBirthProcess::clone( v
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double DiversityDependentPureBirthProcess::computeLnProbabilityTimes( void ) const
+double DiversityDependentPureBirthProcess::computeLnProbabilityTimes( void )
 {
     
     // variable declarations and initialization
