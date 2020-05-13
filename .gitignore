@@ -30,3 +30,5 @@ doxygen/DoxygenWarningLog.txt
 .cproject
 .project
 .settings/
+tests/test_OBDP/output_inferKT_macro_test/.Rhistory
+tests/test_OBDP/output_inferKT_macro_test/.RData

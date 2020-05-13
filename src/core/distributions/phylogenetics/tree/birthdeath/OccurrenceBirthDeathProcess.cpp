@@ -154,7 +154,7 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) 
         MatrixReal LogLikelihood = RevBayesCore::ComputeLnProbabilitiesForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, returnLogLikelihood, occAges, tree);
         double logLikelihood = LogLikelihood[0][0];
 
-        // std::cout << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;
+        std::cout << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;
 
         return logLikelihood;
     }
@@ -162,7 +162,7 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) 
     
     MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilitiesBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, occAges, tree);
     double logLikelihood = B_Lt_log[0][0];
-    // std::cout << "\n ==> Log-Likelihood Lt : " << logLikelihood << "\n" << std::endl;
+    std::cout << "\n ==> Log-Likelihood Lt : " << logLikelihood << "\n" << std::endl;
     // std::cout << "\ncomputeLnProbabilityTimes : " << computeLnProbabilityTimes() << "\n\n" << std::endl;
     
     return logLikelihood;

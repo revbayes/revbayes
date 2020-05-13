@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cmath>
 
+#include "RbConstants.h"
 #include "RbMathMatrix.h"
 #include "MatrixReal.h"
 #include "TypedDagNode.h"
@@ -173,14 +174,14 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
     const double gamma = birth + death + ps + om;
 
     // Initialize an empty matrix and a cursor to write lines in this matrix
-    MatrixReal B(S, (N + 1), 0.0);
+    MatrixReal B(S, (N + 1), RbConstants::Double::neginf);
     size_t indxJ = S-1;
 
     // Count the number of extant lineages
     // mutable size_t k = 0;
     // for(int h = 1; h < events.size(); h++){
     //     if(type == "extant leaf"){
-    //         k += 1;
+    //         k++;
     //     }
     // }
 
@@ -216,18 +217,27 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
         double th = events[h].time;
         std::string type = events[h].type;
 
+        // Events older than the start age : accepted
         if(th > start_age->getValue()) {
             std::cout << "WARNING : th > start_age : " << th << " > " << start_age->getValue() << " -> type : " << type << std::endl;
 
             // Time points before the start age
             if(type == "time point"){
                 for(int i = 0; i < N+1; i++){
-                    B[indxJ][i] = Mt[i];
+                    B[indxJ][i] = log(Mt[i]) + log_correction;
                 }
-                indxJ -= 1;
+                indxJ--;
             }
+            // Other events before the start age : rejected
             else{
-                return B;
+                if(returnLogLikelihood){
+                    MatrixReal LogLikelihood_reject(1, 1, RbConstants::Double::neginf);
+                    return LogLikelihood_reject;
+                }
+                else{
+                    MatrixReal B_reject(S, (N + 1), RbConstants::Double::neginf);
+                    return B_reject;
+                }
             }
 
             continue;
@@ -279,7 +289,7 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
         //     for(int i = 0; i < N+1; i++){
         //         Mt[i] *= ps * rp;
         //     }
-        //     k -= 1;
+        //     k--;
         // }
         //
         // if(type == "fossil leaf"){
@@ -287,7 +297,7 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
         //         Mt[i] = Mt[i-1] * ps * (1-rp);
         //     }
         //     Mt[0] = 0;
-        //     k -= 1;
+        //     k--;
         // }
 
         // For now, we assume there is no information/labels on removal
@@ -575,7 +585,7 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesBackwardsLt( const TypedDagNode<d
     const double gamma = birth + death + ps + om;
 
     // Initialize an empty matrix and a cursor indxJ to write lines in this matrix
-    MatrixReal B(S, (N + 1), 0.0);
+    MatrixReal B(S, (N + 1), RbConstants::Double::neginf);
     size_t indxJ = 0;
 
     // Count event types :
@@ -603,9 +613,35 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesBackwardsLt( const TypedDagNode<d
     // We then iterate over the following events until finding the time of origin
     for(int h = 0; h < events.size(); h++){
 
-        // First deal with the update along (thMinusOne, th)
         double th = events[h].time;
+        std::string type = events[h].type;
 
+        // Events older than the start age
+        if(th > start_age->getValue()) {
+            std::cout << "WARNING : th > start_age : " << th << " > " << start_age->getValue() << " -> type : " << type << std::endl;
+
+            // Time points older than the start age : accepted
+            if(type == "time point"){
+                double events_factor_log = log_correction;
+                if (ps != 0){events_factor_log    += log(ps) * (nb_fossil_leafs + nb_sampled_ancestors);}
+                if (om != 0){events_factor_log    += log(om) * nb_occurrences;}
+                if (birth != 0){events_factor_log += log(birth) * nb_branching_times;}
+                
+                for(int i = 0; i < N+1; i++){
+                    B[indxJ][i] = log(Lt[i]) + events_factor_log;
+                }
+                indxJ++;
+            }
+            // Other events older than the start age : rejected
+            else{
+                MatrixReal B_reject(S, (N + 1), RbConstants::Double::neginf);
+                return B_reject;
+            }
+
+            continue;
+        };
+
+        // First deal with the update along (thMinusOne, th)
         if( th != thMinusOne ){
 
             MatrixReal A( (N+1), (N+1), 0.0 );
@@ -619,8 +655,6 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesBackwardsLt( const TypedDagNode<d
         }
 
         // Second, deal with the update at time th
-        std::string type = events[h].type;
-
         if(type == "time point"){
             // Combine the scaling factors for all the events until present
             double events_factor_log = log_correction;
@@ -652,14 +686,14 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesBackwardsLt( const TypedDagNode<d
         //     for(int i = 0; i < N+1; i++){
         //         Lt[i] = Lt[i] * ps * rp;
         //     }
-        //     k += 1;
+        //     k++;
         // }
         //
         // if(type == "fossil leaf"){
         //     for(int i = 0; i < N; i++){
         //         Lt[i] = Lt[i+1] * ps * (1.0-rp);
         //     }
-        //     k += 1;
+        //     k++;
         // }
 
        // For now, we assume there is no information/labels on removal
@@ -938,7 +972,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDag
     // mutable size_t k = 0;
     // for(int h = 1; h < events.size(); h++){
     //     if(type == "extant leaf"){
-    //         k += 1;
+    //         k++;
     //     }
     // }
 
@@ -1002,14 +1036,14 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDag
             for(int i = 0; i < N+1; i++){
                 B[indxJ][i] = Mt[i];
             }
-            indxJ -= 1;
+            indxJ--;
         }
 
         if(type == "terminal removed"){
             for(int i = 0; i < N+1; i++){
                 Mt[i] *= ps_current * rp_current;
             }
-            k -= 1;
+            k--;
         }
 
         if(type == "fossil leaf"){
@@ -1017,7 +1051,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDag
                 Mt[i] = Mt[i-1] * ps_current * (1-rp_current);
             }
             Mt[0] = 0;
-            k -= 1;
+            k--;
         }
 
         // For now, we assume there is no information/labels on removal
@@ -1027,7 +1061,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDag
         //         Mt[i] = Mt[i-1] * ps * (1-rp) + ps * rp * Mt[i];
         //     }
         //     Mt[0] *= ps * rp;
-        //     k -= 1;
+        //     k--;
         // }
 
 
@@ -1063,7 +1097,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDag
             for(int i = 0; i < N+1; i++){
                 Mt[i] *= birth_current;
             }
-            k += 1;
+            k++;
         }
 
         // std::cout << "Event time : " << th << " - Event type : " << type << " -> Mt[0] : " << Mt[0] << " / Mt[1] : " << Mt[1] << std::endl;
@@ -1302,21 +1336,21 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLtPiecewise(  const TypedDag
             for(int i = 0; i < N+1; i++){
                 B[indxJ][i] = Lt[i];
             }
-            indxJ += 1;
+            indxJ++;
         }
 
         if(type == "terminal removed"){
             for(int i = 0; i < N+1; i++){
                 Lt[i] = Lt[i] * ps_current * rp_current;
             }
-            k += 1;
+            k++;
         }
 
         if(type == "fossil leaf"){
             for(int i = 0; i < N; i++){
                 Lt[i] = Lt[i+1] * ps_current * (1.0-rp_current);
             }
-            k += 1;
+            k++;
         }
 
        // For now, we assume there is no information/labels on removal
@@ -1326,7 +1360,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLtPiecewise(  const TypedDag
        //         Lt[i] = Lt[i] * ps * rp + Lt[i+1] * ps * (1.0-rp) ;
        //     }
        //     Lt[N] = Lt[N] * ps * rp;
-       //     k += 1;
+       //     k++;
        // }
 
         if(type == "sampled ancestor"){
@@ -1361,7 +1395,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLtPiecewise(  const TypedDag
             for(int i = 0; i < N+1; i++){
                 Lt[i] = Lt[i] * birth_current;
             }
-            k -= 1;
+            k--;
         }
 
         // std::cout << "Event time : " << th << " - Event type : " << type << " -> Lt[0] : " << Lt[0] << " / Lt[1] : " << Lt[1] << std::endl;
