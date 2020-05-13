@@ -122,11 +122,9 @@ void InferAncestralPopSizeFunction::update( void )
     const Tree tree = timeTree->getValue();
     const std::vector<double> occurrence_ages = occurrences->getValue();
 
-    std::cout << verbose << std::endl;
-
-	MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilitiesBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, verbose, occurrence_ages, tree);
-    bool returnLogLikelihood = false;
-	MatrixReal B_Mt_log = RevBayesCore::ComputeLnProbabilitiesForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, returnLogLikelihood, verbose, occurrence_ages, tree);
+    bool useMt;
+	MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, useMt = false, verbose, occurrence_ages, tree);
+	MatrixReal B_Mt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, useMt = true, verbose, occurrence_ages, tree);
 
 	// Realize the normalized Hadamar Product of B_Lt and B_Mt
 	MatrixReal D_Kt(S, (N + 1), 0.0);

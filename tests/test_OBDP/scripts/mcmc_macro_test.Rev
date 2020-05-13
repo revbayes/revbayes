@@ -38,12 +38,12 @@ psi ~ dnExp(10)
 omega ~ dnExp(5)
 rho ~ dnUnif(0.0, 1.0)
 rm <- 0.0
-N <- 15
+N <- 8
 cond <- "time"
 # start_time ~ dnUnif(7.7, 12.0)
 start_time ~ dnUnif(5.3, 10.0)
 useMt <- TRUE
-verbose <- FALSE
+verbose <- TRUE
 
 # Initialise my move index
 mvi = 1

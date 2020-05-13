@@ -17,10 +17,8 @@ namespace RevBayesCore {
 
 using namespace RevBayesCore;
 
-
 /**
- * Compute the joint log-probability density of the observations made up to any time t and the population
- * size at that time, as time decreases towards present : breadth-first forward traversal algorithm.
+ * Compute the joint log-probability density of the observations made up to any time t (direction depending on the algorithm).
  *
  * \param[in]    start_age              Start age of the process.
  * \param[in]    lambda                 Speciation rate.
@@ -33,14 +31,14 @@ using namespace RevBayesCore;
  * \param[in]    cond                   Condition of the process (none/survival/#Taxa).
  * \param[in]    time_points            Times for which we want to compute the density.
  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
- * \param[in]    returnLogLikelihood    If true the function returns the log likelihood instead of the full B_Mt matrix.
+ * \param[in]    useMt                  If true computes densities with the forwards traversal algorithm (Mt) otherwise uses backward one (Lt).
  * \param[in]    verbose                If true displays warnings and information messages.
  * \param[in]    occurrence_ages        Vector of occurrence ages.
  * \param[in]    timeTree               Tree for ancestral populations size inference.
  *
  * \return    The matrix of log-Mt values through time.
 */
-MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<double> *start_age,
+MatrixReal RevBayesCore::ComputeLnProbabilityDensitiesOBDP( const TypedDagNode<double> *start_age,
                                                             const TypedDagNode<double> *lambda,
                                                             const TypedDagNode<double> *mu,
                                                             const TypedDagNode<double> *psi,
@@ -51,24 +49,103 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
                                                             const std::string &cond,
                                                             const std::vector<double> &time_points,
                                                             bool useOrigin,
-                                                            bool returnLogLikelihood,
+                                                            bool useMt,
                                                             bool verbose,
                                                             const std::vector<double> &occurrence_ages,
                                                             const Tree &timeTree)
 {
+    // Use the forwards traversal algorithm (Mt)
+    if (useMt){
+        bool returnLogLikelihood = false;    // Input flag
+        
+        MatrixReal B_Mt_log = RevBayesCore::ForwardsTraversalMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, returnLogLikelihood, verbose, occurrence_ages, timeTree);
+        
+        return (B_Mt_log);
+    }
+    // Use the backwards traversal algorithm (Lt)
+    MatrixReal B_Lt_log = RevBayesCore::BackwardsTraversalLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, verbose, occurrence_ages, timeTree);
+    return (B_Lt_log);
 
-    // Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
-    struct Event {
-            Event(double d, std::string s) : time(d), type(s) {};
+};
 
-            std::string type;
-            double time;
 
-            std::string getEventType(void){ return type; }
-            double getEventTime(void){ return time; }
 
-        };
+/**
+ * Compute the joint log-probability density of the tree and occurrences.
+ *
+ * \param[in]    start_age              Start age of the process.
+ * \param[in]    lambda                 Speciation rate.
+ * \param[in]    mu                     Extinction rate.
+ * \param[in]    psi                    Extinction sampling rate.
+ * \param[in]    omega                  Occurrence sampling rate.
+ * \param[in]    rho                    Sampling probability at present time.
+ * \param[in]    removalPr              Removal probability after sampling.
+ * \param[in]    maxHiddenLin           Algorithm accuracy (maximal number of hidden lineages).
+ * \param[in]    cond                   Condition of the process (none/survival/#Taxa).
+ * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
+ * \param[in]    useMt                  If true computes densities with the forwards traversal algorithm (Mt) otherwise uses backward one (Lt).
+ * \param[in]    verbose                If true displays warnings and information messages.
+ * \param[in]    occurrence_ages        Vector of occurrence ages.
+ * \param[in]    timeTree               Tree for ancestral populations size inference.
+ *
+ * \return    The joint log-likelihood.
+*/
+double RevBayesCore::ComputeLnLikelihoodOBDP(   const TypedDagNode<double> *start_age,
+                                                const TypedDagNode<double> *lambda,
+                                                const TypedDagNode<double> *mu,
+                                                const TypedDagNode<double> *psi,
+                                                const TypedDagNode<double> *omega,
+                                                const TypedDagNode<double> *rho,
+                                                const TypedDagNode<double> *removalPr,
+                                                const TypedDagNode<long> *maxHiddenLin,
+                                                const std::string &cond,
+                                                bool useOrigin,
+                                                bool useMt,
+                                                bool verbose,
+                                                const std::vector<double> &occurrence_ages,
+                                                const Tree &timeTree)
+{   
+    // Use the forwards traversal algorithm (Mt)
+    if (useMt){
+        const std::vector<double> time_points_Mt( 1, 0.0 );      // Record the probability density at present to compute the likelihood
+        bool returnLogLikelihood = true;                         // Input flag
+        
+        MatrixReal LogLikelihood = RevBayesCore::ForwardsTraversalMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, returnLogLikelihood, verbose, occurrence_ages, timeTree);
+        
+        double logLikelihood = LogLikelihood[0][0];
+        if (verbose){std::cout << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;}
+        return (logLikelihood);
+    }
+    // Use the backwards traversal algorithm (Lt)
+    const std::vector<double> time_points_Lt(1, start_age->getValue());      // Record the probability density at the start age to compute the likelihood
+    
+    MatrixReal B_Lt_log = RevBayesCore::BackwardsTraversalLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, verbose, occurrence_ages, timeTree);
+    
+    // The likelihood corresponds to the first element of the B_Lt matrix
+    double logLikelihood = B_Lt_log[0][0];
+    if (verbose){std::cout << "\n ==> Log-Likelihood Lt : " << logLikelihood << "\n" << std::endl;}
+    return (logLikelihood);
+};
 
+
+/**
+ * Construct the vector containig all branching and sampling times + time points for which we want
+ * to compute the density.
+ *
+ * \param[in]    start_age              Start age of the process.
+ * \param[in]    time_points            Times for which we want to compute the density.
+ * \param[in]    verbose                If true displays warnings and information messages.
+ * \param[in]    occurrence_ages        Vector of occurrence ages.
+ * \param[in]    timeTree               Tree for ancestral populations size inference.
+ *
+ * \return    The matrix of log-Mt values through time.
+*/
+std::vector<Event> RevBayesCore::PoolEvents(    const TypedDagNode<double> *start_age,
+                                                const std::vector<double> &time_points,
+                                                bool verbose,
+                                                const std::vector<double> &occurrence_ages,
+                                                const Tree &timeTree)
+{
     // get node/time variables
     const size_t num_nodes = timeTree.getNumberOfNodes();
 
@@ -152,17 +229,59 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
 
     events.push_back(Event(0.0,"present time")) ;
 
-    // mutable std::vector<Event> events = RevBayesCore::poolTimes(*start_age, *time_points, timeTree);
+    return (events);
+};
 
-    // order times oldest to youngest
+
+
+/**
+ * Compute the joint log-probability density of the observations made up to any time t and the population
+ * size at that time, as time decreases towards present : breadth-first forwards traversal algorithm.
+ *
+ * \param[in]    start_age              Start age of the process.
+ * \param[in]    lambda                 Speciation rate.
+ * \param[in]    mu                     Extinction rate.
+ * \param[in]    psi                    Extinction sampling rate.
+ * \param[in]    omega                  Occurrence sampling rate.
+ * \param[in]    rho                    Sampling probability at present time.
+ * \param[in]    removalPr              Removal probability after sampling.
+ * \param[in]    maxHiddenLin           Algorithm accuracy (maximal number of hidden lineages).
+ * \param[in]    cond                   Condition of the process (none/survival/#Taxa).
+ * \param[in]    time_points            Times for which we want to compute the density.
+ * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
+ * \param[in]    returnLogLikelihood    If true the function returns the log likelihood instead of the full B_Mt matrix.
+ * \param[in]    verbose                If true displays warnings and information messages.
+ * \param[in]    occurrence_ages        Vector of occurrence ages.
+ * \param[in]    timeTree               Tree for ancestral populations size inference.
+ *
+ * \return    The matrix of log-Mt values through time.
+*/
+MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *start_age,
+                                                const TypedDagNode<double> *lambda,
+                                                const TypedDagNode<double> *mu,
+                                                const TypedDagNode<double> *psi,
+                                                const TypedDagNode<double> *omega,
+                                                const TypedDagNode<double> *rho,
+                                                const TypedDagNode<double> *removalPr,
+                                                const TypedDagNode<long> *maxHiddenLin,
+                                                const std::string &cond,
+                                                const std::vector<double> &time_points,
+                                                bool useOrigin,
+                                                bool returnLogLikelihood,
+                                                bool verbose,
+                                                const std::vector<double> &occurrence_ages,
+                                                const Tree &timeTree)
+{
+    // Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
+    std::vector<Event> events = RevBayesCore::PoolEvents(start_age, time_points, verbose, occurrence_ages, timeTree);
+
+    // Order times oldest to youngest
     struct AgeCompareReverse {
         bool operator()(const Event first, const Event second) {
             return first.time > second.time;
         }
     };
     std::sort( events.begin(), events.end(), AgeCompareReverse() );
-
-
 
     const double birth = lambda->getValue();
     const double death = mu->getValue();
@@ -171,7 +290,7 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
     const double rh = rho->getValue();
     const double rp = removalPr->getValue();
     const long N = maxHiddenLin->getValue();
-    // const RbVector<double> tau = time_points->getValue();
+    const RbVector<double> tau = time_points;
 
     const size_t S = tau.size();
     const double gamma = birth + death + ps + om;
@@ -179,14 +298,6 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
     // Initialize an empty matrix and a cursor to write lines in this matrix
     MatrixReal B(S, (N + 1), RbConstants::Double::neginf);
     size_t indxJ = S-1;
-
-    // Count the number of extant lineages
-    // mutable size_t k = 0;
-    // for(int h = 1; h < events.size(); h++){
-    //     if(type == "extant leaf"){
-    //         k++;
-    //     }
-    // }
 
     // Count event types :
     size_t k = 1;                       // Number of lineages
@@ -386,8 +497,6 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
         
         // Check that N is big enough
         if (Mt[N]>0.001){
-            if (verbose){std::cout << "\nWARNING : Mt[N] contains a non-negligeable probability ( Mt[N] > max(Mt)/1000 ) -> you should increase N\n" << std::endl;}
-
             // In that case the optimal N value cannot be estimated because it is greater than the chosen one
             N_optimal = N+1;
         }
@@ -398,17 +507,16 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
             }
             N_optimal = std::max(N_optimal, N_optimal_tmp);
         }
-        // if (verbose){std::cout << "\nThe smallest sufficient N value ( such as Mt[N_optimal] < max(Mt)/1000 for all t ) is " << N_optimal << "\n" << std::endl;}
 
         thPlusOne = th;
     }
     
     // Give the estimated optimal N value
-    if (N_optimal != N+1){
-        if (verbose){std::cout << "\nThe smallest sufficient N value ( such as Mt[N_optimal] < max(Mt)/1000 for all t ) is " << N_optimal << "\n" << std::endl;}
+    if ((N_optimal < N) & verbose){
+        std::cout << "\nTo improve performance, set N to a lower value - current value = " << N << ", optimal value ( such as Mt[N_optimal] < max(Mt)/1000 for all t ) = " << N_optimal << "\n" << std::endl;
     }
-    else{
-        if (verbose){std::cout << "\nWARNING : There is at least one time t such as Mt[N] contains a non-negligeable probability ( Mt[N] > max(Mt)/1000 ) -> you should increase N\n" << std::endl;}
+    else if (N_optimal == N+1){
+        std::cout << "\nWARNING : There is a time t at which Mt[N] contains a non-negligeable probability ( Mt[N] > max(Mt)/1000 ) -> you should increase N\n" << std::endl;
     }
 
     if(returnLogLikelihood){
@@ -432,7 +540,7 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
 
 /**
  * Compute the joint log probability density of observations made down any time t, conditioned on the population
- * size at that time, as time increases towards the past : breadth-first backward traversal algorithm.
+ * size at that time, as time increases towards the past : breadth-first backwards traversal algorithm.
  *
  * \param[in]    start_age              Start age of the process.
  * \param[in]    lambda                 Speciation rate.
@@ -451,7 +559,7 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
  *
  * \return    The matrix of log-Lt values through time.
  */
-MatrixReal RevBayesCore::ComputeLnProbabilitiesBackwardsLt( const TypedDagNode<double> *start_age,
+MatrixReal RevBayesCore::BackwardsTraversalLt( const TypedDagNode<double> *start_age,
                                                             const TypedDagNode<double> *lambda,
                                                             const TypedDagNode<double> *mu,
                                                             const TypedDagNode<double> *psi,
@@ -468,115 +576,15 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesBackwardsLt( const TypedDagNode<d
                                                             const Tree &timeTree)
 {
     // Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
-    struct Event {
-            Event(double d, std::string s) : time(d), type(s) {};
+    std::vector<Event> events = RevBayesCore::PoolEvents(start_age, time_points, verbose, occurrence_ages, timeTree);
 
-            std::string type;
-            double time;
-
-            std::string getEventType(void){ return type; }
-            double getEventTime(void){ return time; }
-
-        };
-
-    // get node/time variables
-    const size_t num_nodes = timeTree.getNumberOfNodes();
-
-    // number of extant lineages
-    size_t k = 0;
-
-    // vector of events
-    std::vector<Event>         events;
-
-    // classify nodes
-    events.clear();
-    events.push_back(Event(start_age->getValue(), "origin"));
-
-    for (size_t i = 0; i < num_nodes; i++)
-    {
-        const TopologyNode& n = timeTree.getNode( i );
-
-        //isFossil is an optional condition to obtain sampled ancestor node ages
-        /*
-        Node labels :
-        fl = fossil leaf
-        b  = "true" bifurcation
-        b' = "false" bifurcation (artefact of the sampled ancestors representation)
-        sa = sampled ancestor
-        el = extant leaf
-        . = time points at which density is computed
-
-         __|___             .
-        |  b   |
-        |      |            .
-        fl     |
-             b'|___ sa      .
-               |
-               |            .
-               el
-
-         1. Pick a fossil among those with brl > 0 (prob = 1/m)
-         2. Set brl = 0
-         */
-
-        if ( n.isFossil() && n.isSampledAncestor() )  //isFossil is optional (all sampled ancestors are fossils)
-        {
-            // node is sampled ancestor
-            events.push_back(Event(n.getAge(), "sampled ancestor")) ;
-
-        }
-        else if ( n.isFossil() && !n.isSampledAncestor() )
-        {
-          // node is a fossil leaf
-          // For now, we assume there is no information/labels on removal
-          // @todo add fossil-removed/non-removed
-            events.push_back(Event(n.getAge(),"fossil leaf")) ;
-            // events.push_back(Event(n.getAge(),"terminal non-removed")) ;
-        }
-        else if ( !n.isFossil() && n.isTip() )
-        {
-            // node is extant leaf : only their number is necessary to compute Lt and Mt
-            // events.push_back(Event(n.getAge(),"extant leaf") ;
-            // events.push_back(Event(n.getAge(), "terminal non-removed")) ;
-            // if (verbose){std::cout << n.getSpeciesName() << std::endl;}
-            k++;
-        }
-        else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
-        {
-            // node is a "true" bifurcation event
-            events.push_back(Event(n.getAge(),"branching time")) ;
-        }
-    }
-
-    const RbVector<double> tau = time_points;
-
-    for (size_t i = 0; i < tau.size(); i++)
-    {
-        events.push_back(Event(tau[i],"time point")) ;
-    }
-
-    for ( int i=0; i < occurrence_ages.size(); ++i)
-    {
-    // For now, we assume there is no information/labels on removal
-    // @todo add occurrence-removed/non-removed
-    events.push_back(Event(occurrence_ages[i],"occurrence")) ;
-    }
-
-    events.push_back(Event(0.0,"present time")) ;
-
-    // mutable std::vector<Event> events = RevBayesCore::poolTimes(*start_age, *time_points, timeTree);
-
-    // order times youngest to oldest
+    // Order times youngest to oldest
     struct AgeCompare {
         bool operator()(const Event first, const Event second) {
             return first.time < second.time;
         }
     };
     std::sort( events.begin(), events.end(), AgeCompare() );
-
-
-
-
 
     const double birth = lambda->getValue();
     const double death = mu->getValue();
@@ -585,10 +593,13 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesBackwardsLt( const TypedDagNode<d
     const double rh = rho->getValue();
     const double rp = removalPr->getValue();
     const long N = maxHiddenLin->getValue();
-    // const RbVector<double> tau = time_points->getValue();
+    const RbVector<double> tau = time_points;
 
     const size_t S = tau.size();
     const double gamma = birth + death + ps + om;
+
+    // Count the number of extant lineages
+    size_t k = timeTree.getNumberOfExtantTips();
 
     // Initialize an empty matrix and a cursor indxJ to write lines in this matrix
     MatrixReal B(S, (N + 1), RbConstants::Double::neginf);
@@ -768,8 +779,6 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesBackwardsLt( const TypedDagNode<d
         
         // Check that N is big enough
         if (Lt[N]>0.001){
-            if (verbose){std::cout << "\nWARNING : Lt[N] contains a non-negligeable probability ( Lt[N] > max(Lt)/1000 ) -> you should increase N\n" << std::endl;}
-
             // In that case the optimal N value cannot be estimated because it is greater than the chosen one
             N_optimal = N+1;
         }
@@ -788,11 +797,11 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesBackwardsLt( const TypedDagNode<d
     }
 
     // Give the estimated optimal N value
-    if (N_optimal != N+1){
-        if (verbose){std::cout << "\nThe smallest sufficient N value ( such as Lt[N_optimal] < max(Lt)/1000 for all t ) is " << N_optimal << "\n" << std::endl;}
+    if ((N_optimal < N) & verbose){
+        std::cout << "\nTo improve performance, set N to a lower value - current value = " << N << ", optimal value ( such as Lt[N_optimal] < max(Lt)/1000 for all t ) = " << N_optimal << "\n" << std::endl;
     }
-    else{
-        if (verbose){std::cout << "\nWARNING : There is at least one time t such as Lt[N] contains a non-negligeable probability ( Lt[N] > max(Lt)/1000 ) -> you should increase N\n" << std::endl;}
+    else if (N_optimal == N+1){
+        std::cout << "\nWARNING : There is a time t at which Lt[N] contains a non-negligeable probability ( Lt[N] > max(Lt)/1000 ) -> you should increase N\n" << std::endl;
     }
 
     return B;
@@ -802,7 +811,7 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesBackwardsLt( const TypedDagNode<d
 
 // /**
 //  * Compute the joint probability density of the observations made up to any time t and the population
-//  * size at that time, as time decreases towards present : breadth-first forward traversal algorithm.
+//  * size at that time, as time decreases towards present : breadth-first forwards traversal algorithm.
 //  *
 //  * \param[in]    start_age              Start age of the process.
 //  * \param[in]    lambda                 Speciation rate.
@@ -1121,7 +1130,7 @@ MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDag
 //
 // /**
 //  * Compute the probability density of observations made down any time t, conditioned on the population
-//  * size at that time, as time increases towards the past : breadth-first backward traversal algorithm.
+//  * size at that time, as time increases towards the past : breadth-first backwards traversal algorithm.
 //  *
 //  * \param[in]    start_age              Start age of the process.
 //  * \param[in]    lambda                 Speciation rate.
