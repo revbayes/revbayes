@@ -68,6 +68,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                               condition;                                        //!< The conditioning of the process ("time" or "survaval")
         RevPtr<const RevVariable>                               occurrence_ages;                                  //!< Occurrence ages
         RevPtr<const RevVariable>                               useMt;                                            //!< Forward traversal Mt algorithm (otherwise backward Lt)
+        RevPtr<const RevVariable>                               verbose;                                          //!< Display warnings and information messages
         RevPtr<const RevVariable>                               initialTree;                                      //!< Facultative initial tree
 
     };

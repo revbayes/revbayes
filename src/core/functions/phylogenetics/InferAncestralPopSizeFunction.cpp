@@ -45,6 +45,7 @@ using namespace RevBayesCore;
  * \param[in]    cdt            Condition of the process (none/survival/#Taxa).
  * \param[in]    tau            Times for which we want to compute the density.
  * \param[in]    uo             If true t is the origin time otherwise the root age of the process.
+ * \param[in]    vb             If true displays warnings and information messages.
  * \param[in]    tr             Tree for ancestral populations size inference.
  */
 InferAncestralPopSizeFunction::InferAncestralPopSizeFunction( 	const TypedDagNode<double> *sa,
@@ -59,7 +60,8 @@ InferAncestralPopSizeFunction::InferAncestralPopSizeFunction( 	const TypedDagNod
 	                                                          	const std::string& cdt,
                                                                 const TypedDagNode< RevBayesCore::RbVector<double> > *O,
 	                                                          	const std::vector<double> &tau,
-	                                                          	bool uo,
+                                                                bool uo,
+                                                                bool vb,
 
 	                                                          	TypedDagNode<Tree> *tr) : TypedFunction<MatrixReal>( new MatrixReal(tau.size(), (n->getValue() + 1), 0.0) ),
     start_age( sa ),
@@ -74,6 +76,7 @@ InferAncestralPopSizeFunction::InferAncestralPopSizeFunction( 	const TypedDagNod
     occurrences( O ),
     time_points ( tau ),
     useOrigin (uo),
+    verbose (vb),
     timeTree (tr)
 
 {
@@ -119,9 +122,9 @@ void InferAncestralPopSizeFunction::update( void )
     const Tree tree = timeTree->getValue();
     const std::vector<double> occurrence_ages = occurrences->getValue();
 
-	MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilitiesBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, occurrence_ages, tree);
+	MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilitiesBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, verbose, occurrence_ages, tree);
     bool returnLogLikelihood = false;
-	MatrixReal B_Mt_log = RevBayesCore::ComputeLnProbabilitiesForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, returnLogLikelihood, occurrence_ages, tree);
+	MatrixReal B_Mt_log = RevBayesCore::ComputeLnProbabilitiesForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, returnLogLikelihood, verbose, occurrence_ages, tree);
 
 	// Realize the normalized Hadamar Product of B_Lt and B_Mt
 	MatrixReal D_Kt(S, (N + 1), 0.0);

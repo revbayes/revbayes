@@ -40,6 +40,7 @@ template <class valueType> class TypedDagNode;
                                                             const TypedDagNode< RevBayesCore::RbVector<double> > *O,  
                                                             const std::vector<double> &tau,
                                                             bool uo,
+                                                            bool vb,
                                                             TypedDagNode<Tree> *tr);
       
       virtual                                               ~InferAncestralPopSizeFunction(void);
@@ -67,11 +68,10 @@ template <class valueType> class TypedDagNode;
       const std::vector<double>                             time_points;                           //!< Times at which density is computed
       const TypedDagNode< RbVector<double> > *              occurrences;                           //!< Occurrence ages of incomplete fossils
       const bool                                            useOrigin;                             //!< Start the process at the origin (otherwise root)
+      const bool                                            verbose;                               //!< Display warnings and information messages.
       const TypedDagNode< Tree > *                          timeTree;                              //!< Facultative initial tree
 
     };
-
-
 }
 
 #endif

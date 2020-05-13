@@ -45,6 +45,7 @@ using namespace RevBayesCore;
  * \param[in]    O              Occurrence ages.
  * \param[in]    uo             If true t is the origin time otherwise the root age of the process.
  * \param[in]    mt             If true computes densities with the Mt forward traversal algorithm otherwise uses Lt backward one.
+ * \param[in]    vb             If true displays warnings and information messages.
  * \param[in]    tr             Initial tree (facultative).
  */
 OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(   const TypedDagNode<double> *sa,
@@ -61,6 +62,7 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(   const TypedDagNode<d
                                                             //const std::vector<double> &O,
                                                             bool uo,
                                                             bool mt,
+                                                            bool vb,
                                                             TypedDagNode<Tree> *tr) :
     AbstractBirthDeathProcess( sa, cdt, tn, uo ),
     start_age( sa ),
@@ -75,7 +77,8 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(   const TypedDagNode<d
     taxa (tn),
     occurrence_ages( O ),
     useOrigin (uo),
-    useMt ( mt )
+    useMt ( mt ),
+    verbose ( vb )
 
 {
     addParameter( start_age );
@@ -151,19 +154,19 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) 
         const size_t k = value->getNumberOfExtantTips();
 
         bool returnLogLikelihood = true;
-        MatrixReal LogLikelihood = RevBayesCore::ComputeLnProbabilitiesForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, returnLogLikelihood, occAges, tree);
+        MatrixReal LogLikelihood = RevBayesCore::ComputeLnProbabilitiesForwardsMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, returnLogLikelihood, verbose, occAges, tree);
         double logLikelihood = LogLikelihood[0][0];
 
-        std::cout << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;
+        if (verbose){std::cout << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;}
 
         return logLikelihood;
     }
     const std::vector<double> time_points_Lt(1, start_age->getValue());
     
-    MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilitiesBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, occAges, tree);
+    MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilitiesBackwardsLt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, verbose, occAges, tree);
     double logLikelihood = B_Lt_log[0][0];
-    std::cout << "\n ==> Log-Likelihood Lt : " << logLikelihood << "\n" << std::endl;
-    // std::cout << "\ncomputeLnProbabilityTimes : " << computeLnProbabilityTimes() << "\n\n" << std::endl;
+    if (verbose){std::cout << "\n ==> Log-Likelihood Lt : " << logLikelihood << "\n" << std::endl;}
+    // if (verbose){std::cout << "\ncomputeLnProbabilityTimes : " << computeLnProbabilityTimes() << "\n\n" << std::endl;}
     
     return logLikelihood;
 }

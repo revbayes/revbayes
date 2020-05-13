@@ -22,6 +22,7 @@ namespace RevBayesCore {
                                                                     const std::string& cond,
                                                                     const std::vector<double> &time_points,
                                                                     bool useOrigin,
+                                                                    bool verbose,
                                                                     const std::vector<double> &occurrence_ages,
                                                                     const Tree &timeTree);
 
@@ -38,6 +39,7 @@ namespace RevBayesCore {
                                                                     const std::vector<double> &time_points,
                                                                     bool useOrigin,
                                                                     bool returnLogLikelihood,
+                                                                    bool verbose,
                                                                     const std::vector<double> &occurrence_ages,
                                                                     const Tree &timeTree);
 

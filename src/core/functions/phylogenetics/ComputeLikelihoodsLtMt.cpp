@@ -34,6 +34,8 @@ using namespace RevBayesCore;
  * \param[in]    time_points            Times for which we want to compute the density.
  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
  * \param[in]    returnLogLikelihood    If true the function returns the log likelihood instead of the full B_Mt matrix.
+ * \param[in]    verbose                If true displays warnings and information messages.
+ * \param[in]    occurrence_ages        Vector of occurrence ages.
  * \param[in]    timeTree               Tree for ancestral populations size inference.
  *
  * \return    The matrix of log-Mt values through time.
@@ -50,6 +52,7 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
                                                             const std::vector<double> &time_points,
                                                             bool useOrigin,
                                                             bool returnLogLikelihood,
+                                                            bool verbose,
                                                             const std::vector<double> &occurrence_ages,
                                                             const Tree &timeTree)
 {
@@ -125,7 +128,7 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
             // node is extant leaf : only their number is necessary to compute Lt and Mt
             // events.push_back(Event(n.getAge(),"extant leaf") ;
             // events.push_back(Event(n.getAge(), "terminal non-removed")) ;
-            // std::cout << n.getSpeciesName() << std::endl;
+            // if (verbose){std::cout << n.getSpeciesName() << std::endl;}
             nb_extant++;
         }
         else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
@@ -204,10 +207,10 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
     RbVector<double> Mt(N+1, 0.0);
     Mt[0] = 1;
     double thPlusOne = events[0].time;
-    // std::cout << k << std::endl;
+    // if (verbose){std::cout << k << std::endl;}
 
     if(thPlusOne != start_age->getValue()) {
-        std::cout << "WARNING : thPlusOne != start_age : " << thPlusOne << " != " << start_age->getValue() << " - type : " << events[0].type << std::endl;
+        if (verbose){std::cout << "WARNING : thPlusOne != start_age : " << thPlusOne << " != " << start_age->getValue() << " - type : " << events[0].type << std::endl;}
     };
 
     // Then we iterate over the next events
@@ -219,7 +222,7 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
 
         // Events older than the start age : accepted
         if(th > start_age->getValue()) {
-            std::cout << "WARNING : th > start_age : " << th << " > " << start_age->getValue() << " -> type : " << type << std::endl;
+            if (verbose){std::cout << "WARNING : th > start_age : " << th << " > " << start_age->getValue() << " -> type : " << type << std::endl;}
 
             // Time points before the start age
             if(type == "time point"){
@@ -253,9 +256,9 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
             }
 
             RbMath::expMatrixPade(A, A, 4);
-            // std::cout << "\nA : " << A << std::endl;
-            // std::cout << "\nMt : " << Mt << std::endl;
-            // std::cout << "\nlog(Mt[0]) : " << log(Mt[0]) << " - log(Mt[1]) : " << log(Mt[1]) << " - log(Mt[2]) : " << log(Mt[2]) << " - log(Mt[3]) : " << log(Mt[3]) << std::endl;
+            // if (verbose){std::cout << "\nA : " << A << std::endl;}
+            // if (verbose){std::cout << "\nMt : " << Mt << std::endl;}
+            // if (verbose){std::cout << "\nlog(Mt[0]) : " << log(Mt[0]) << " - log(Mt[1]) : " << log(Mt[1]) << " - log(Mt[2]) : " << log(Mt[2]) << " - log(Mt[3]) : " << log(Mt[3]) << std::endl;}
             Mt = A * Mt;
         }
 
@@ -264,24 +267,24 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
         if(type == "time point"){
             // Combine the scaling factors for all the events until present
             double events_factor_log = log_correction;
-            // std::cout << "log_correction : " << log_correction << std::endl;
+            // if (verbose){std::cout << "log_correction : " << log_correction << std::endl;}
             if (ps != 0){
                 events_factor_log += log(ps) * (nb_fossil_leafs + nb_sampled_ancestors);
-                // std::cout << "log(ps) * (nb_fossil_leafs + nb_sampled_ancestors) : " << log(ps) * (nb_fossil_leafs + nb_sampled_ancestors) << std::endl;
+                // if (verbose){std::cout << "log(ps) * (nb_fossil_leafs + nb_sampled_ancestors) : " << log(ps) * (nb_fossil_leafs + nb_sampled_ancestors) << std::endl;}
             }
             if (om != 0){
                 events_factor_log += log(om) * nb_occurrences;
-                // std::cout << "log(om) * nb_occurrences : " << log(om) * nb_occurrences << std::endl;
+                // if (verbose){std::cout << "log(om) * nb_occurrences : " << log(om) * nb_occurrences << std::endl;}
             }
             if (birth != 0){
                 events_factor_log += log(birth) * nb_branching_times;
-                // std::cout << "log(birth) * nb_branching_times : " << log(birth) * nb_branching_times << std::endl;
+                // if (verbose){std::cout << "log(birth) * nb_branching_times : " << log(birth) * nb_branching_times << std::endl;}
             }
-            // std::cout << "events_factor_log : " << events_factor_log << std::endl;
+            // if (verbose){std::cout << "events_factor_log : " << events_factor_log << std::endl;}
             for(int i = 0; i < N+1; i++){
                 B[indxJ][i] = log(Mt[i]) + events_factor_log;
             }
-            // std::cout << "Time point scaled log : log(Mt[0]) + events_factor_log : " << log(Mt[0]) + events_factor_log << " / log(Mt[N]) + events_factor_log : " << log(Mt[N]) + events_factor_log << std::endl;
+            // if (verbose){std::cout << "Time point scaled log : log(Mt[0]) + events_factor_log : " << log(Mt[0]) + events_factor_log << " / log(Mt[N]) + events_factor_log : " << log(Mt[N]) + events_factor_log << std::endl;}
             indxJ--;
         }
 
@@ -359,7 +362,7 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
         //     nb_occurrences++;
             
         //     log_correction -= log(c);
-        //     std::cout << "log(c) : " << log(c) << std::endl;
+        //     if (verbose){std::cout << "log(c) : " << log(c) << std::endl;}
         //  }
 
 
@@ -379,11 +382,11 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
         }
         log_correction -= log(c);
         
-        // std::cout << "Event time : " << th << " - Event type : " << type << " -> log(c) : " << log(c) << " -> Mt[0] : " << Mt[0] << " / Mt[1] : " << Mt[1] << " / Mt[N] : " << Mt[N] << std::endl;
+        // if (verbose){std::cout << "Event time : " << th << " - Event type : " << type << " -> log(c) : " << log(c) << " -> Mt[0] : " << Mt[0] << " / Mt[1] : " << Mt[1] << " / Mt[N] : " << Mt[N] << std::endl;}
         
         // Check that N is big enough
         if (Mt[N]>0.001){
-            std::cout << "\nWARNING : Mt[N] contains a non-negligeable probability ( Mt[N] > max(Mt)/1000 ) -> you should increase N\n" << std::endl;
+            if (verbose){std::cout << "\nWARNING : Mt[N] contains a non-negligeable probability ( Mt[N] > max(Mt)/1000 ) -> you should increase N\n" << std::endl;}
 
             // In that case the optimal N value cannot be estimated because it is greater than the chosen one
             N_optimal = N+1;
@@ -395,17 +398,17 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
             }
             N_optimal = std::max(N_optimal, N_optimal_tmp);
         }
-        // std::cout << "\nThe smallest sufficient N value ( such as Mt[N_optimal] < max(Mt)/1000 for all t ) is " << N_optimal << "\n" << std::endl;
+        // if (verbose){std::cout << "\nThe smallest sufficient N value ( such as Mt[N_optimal] < max(Mt)/1000 for all t ) is " << N_optimal << "\n" << std::endl;}
 
         thPlusOne = th;
     }
     
     // Give the estimated optimal N value
     if (N_optimal != N+1){
-        std::cout << "\nThe smallest sufficient N value ( such as Mt[N_optimal] < max(Mt)/1000 for all t ) is " << N_optimal << "\n" << std::endl;
+        if (verbose){std::cout << "\nThe smallest sufficient N value ( such as Mt[N_optimal] < max(Mt)/1000 for all t ) is " << N_optimal << "\n" << std::endl;}
     }
     else{
-        std::cout << "\nWARNING : There is at least one time t such as Mt[N] contains a non-negligeable probability ( Mt[N] > max(Mt)/1000 ) -> you should increase N\n" << std::endl;
+        if (verbose){std::cout << "\nWARNING : There is at least one time t such as Mt[N] contains a non-negligeable probability ( Mt[N] > max(Mt)/1000 ) -> you should increase N\n" << std::endl;}
     }
 
     if(returnLogLikelihood){
@@ -442,6 +445,8 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesForwardsMt(  const TypedDagNode<d
  * \param[in]    cond                   Condition of the process (none/survival/#Taxa).
  * \param[in]    time_points            Times for which we want to compute the density.
  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
+ * \param[in]    verbose                If true displays warnings and information messages.
+ * \param[in]    occurrence_ages        Vector of occurrence ages.
  * \param[in]    timeTree               Tree for ancestral populations size inference.
  *
  * \return    The matrix of log-Lt values through time.
@@ -458,6 +463,7 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesBackwardsLt( const TypedDagNode<d
                                                             const std::string& cond,
                                                             const std::vector<double> &time_points,
                                                             bool useOrigin,
+                                                            bool verbose,
                                                             const std::vector<double> &occurrence_ages,
                                                             const Tree &timeTree)
 {
@@ -532,7 +538,7 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesBackwardsLt( const TypedDagNode<d
             // node is extant leaf : only their number is necessary to compute Lt and Mt
             // events.push_back(Event(n.getAge(),"extant leaf") ;
             // events.push_back(Event(n.getAge(), "terminal non-removed")) ;
-            // std::cout << n.getSpeciesName() << std::endl;
+            // if (verbose){std::cout << n.getSpeciesName() << std::endl;}
             k++;
         }
         else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
@@ -618,7 +624,7 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesBackwardsLt( const TypedDagNode<d
 
         // Events older than the start age
         if(th > start_age->getValue()) {
-            std::cout << "WARNING : th > start_age : " << th << " > " << start_age->getValue() << " -> type : " << type << std::endl;
+            if (verbose){std::cout << "WARNING : th > start_age : " << th << " > " << start_age->getValue() << " -> type : " << type << std::endl;}
 
             // Time points older than the start age : accepted
             if(type == "time point"){
@@ -658,27 +664,27 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesBackwardsLt( const TypedDagNode<d
         if(type == "time point"){
             // Combine the scaling factors for all the events until present
             double events_factor_log = log_correction;
-            // std::cout << "log_correction : " << log_correction << std::endl;
+            // if (verbose){std::cout << "log_correction : " << log_correction << std::endl;}
             if (ps != 0){
                 events_factor_log += log(ps) * (nb_fossil_leafs + nb_sampled_ancestors);
-                // std::cout << "log(ps) * (nb_fossil_leafs + nb_sampled_ancestors) : " << log(ps) * (nb_fossil_leafs + nb_sampled_ancestors) << std::endl;
+                // if (verbose){std::cout << "log(ps) * (nb_fossil_leafs + nb_sampled_ancestors) : " << log(ps) * (nb_fossil_leafs + nb_sampled_ancestors) << std::endl;}
             }
             
             if (om != 0){
                 events_factor_log += log(om) * nb_occurrences;
-                // std::cout << "log(om) * nb_occurrences : " << log(om) * nb_occurrences << std::endl;
+                // if (verbose){std::cout << "log(om) * nb_occurrences : " << log(om) * nb_occurrences << std::endl;}
             }
             
             if (birth != 0){
                 events_factor_log += log(birth) * nb_branching_times;
-                // std::cout << "log(birth) * nb_branching_times : " << log(birth) * nb_branching_times << std::endl;
+                // if (verbose){std::cout << "log(birth) * nb_branching_times : " << log(birth) * nb_branching_times << std::endl;}
             }
 
-            // std::cout << "events_factor_log : " << events_factor_log  << " / Lt : " << Lt << std::endl;
+            // if (verbose){std::cout << "events_factor_log : " << events_factor_log  << " / Lt : " << Lt << std::endl;}
             for(int i = 0; i < N+1; i++){
                 B[indxJ][i] = log(Lt[i]) + events_factor_log;
             }
-            // std::cout << "Time point scaled log : log(Lt[0]) + events_factor_log : " << log(Lt[0]) + events_factor_log << " / log(Lt[N]) + events_factor_log : " << log(Lt[N]) + events_factor_log << std::endl;
+            // if (verbose){std::cout << "Time point scaled log : log(Lt[0]) + events_factor_log : " << log(Lt[0]) + events_factor_log << " / log(Lt[N]) + events_factor_log : " << log(Lt[N]) + events_factor_log << std::endl;}
             indxJ++;
         }
 
@@ -758,11 +764,11 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesBackwardsLt( const TypedDagNode<d
         }
         log_correction -= log(c);
         
-        // std::cout << "Event time : " << th << " - Event type : " << type << " -> log(c) : " << log(c) << " -> Lt[0] : " << Lt[0] << " / Lt[1] : " << Lt[1] << " / Lt[N] : " << Lt[N] << std::endl;
+        // if (verbose){std::cout << "Event time : " << th << " - Event type : " << type << " -> log(c) : " << log(c) << " -> Lt[0] : " << Lt[0] << " / Lt[1] : " << Lt[1] << " / Lt[N] : " << Lt[N] << std::endl;}
         
         // Check that N is big enough
         if (Lt[N]>0.001){
-            std::cout << "\nWARNING : Lt[N] contains a non-negligeable probability ( Lt[N] > max(Lt)/1000 ) -> you should increase N\n" << std::endl;
+            if (verbose){std::cout << "\nWARNING : Lt[N] contains a non-negligeable probability ( Lt[N] > max(Lt)/1000 ) -> you should increase N\n" << std::endl;}
 
             // In that case the optimal N value cannot be estimated because it is greater than the chosen one
             N_optimal = N+1;
@@ -774,19 +780,19 @@ MatrixReal RevBayesCore::ComputeLnProbabilitiesBackwardsLt( const TypedDagNode<d
             }
             N_optimal = std::max(N_optimal, N_optimal_tmp);
         }
-        // std::cout << "\nThe smallest sufficient N value ( such as Lt[N_optimal] < max(Lt)/1000 for all t ) is " << N_optimal << "\n" << std::endl;
+        // if (verbose){std::cout << "\nThe smallest sufficient N value ( such as Lt[N_optimal] < max(Lt)/1000 for all t ) is " << N_optimal << "\n" << std::endl;}
 
-        // std::cout << "Event time : " << th << " - Event type : " << type << " -> k : " << k << " -> Lt[0] : " << Lt[0] << " / Lt[1] : " << Lt[1] << " / Lt[N] : " << Lt[N] << std::endl;
+        // if (verbose){std::cout << "Event time : " << th << " - Event type : " << type << " -> k : " << k << " -> Lt[0] : " << Lt[0] << " / Lt[1] : " << Lt[1] << " / Lt[N] : " << Lt[N] << std::endl;}
 
         thMinusOne = th;
     }
 
     // Give the estimated optimal N value
     if (N_optimal != N+1){
-        std::cout << "\nThe smallest sufficient N value ( such as Lt[N_optimal] < max(Lt)/1000 for all t ) is " << N_optimal << "\n" << std::endl;
+        if (verbose){std::cout << "\nThe smallest sufficient N value ( such as Lt[N_optimal] < max(Lt)/1000 for all t ) is " << N_optimal << "\n" << std::endl;}
     }
     else{
-        std::cout << "\nWARNING : There is at least one time t such as Lt[N] contains a non-negligeable probability ( Lt[N] > max(Lt)/1000 ) -> you should increase N\n" << std::endl;
+        if (verbose){std::cout << "\nWARNING : There is at least one time t such as Lt[N] contains a non-negligeable probability ( Lt[N] > max(Lt)/1000 ) -> you should increase N\n" << std::endl;}
     }
 
     return B;

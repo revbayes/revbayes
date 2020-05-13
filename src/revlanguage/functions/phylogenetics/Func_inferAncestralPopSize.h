@@ -37,21 +37,22 @@ namespace RevLanguage {
 
   private:
 
-      RevPtr<const RevVariable>                               start_age;                                                                              //!< The time of origin
-      RevPtr<const RevVariable>                               lambda;                                                                                 //!< The speciation rate
-      RevPtr<const RevVariable>                               mu;                                                                                     //!< The extinction rate
-      RevPtr<const RevVariable>                               psi;                                                                                    //!< The serial sampling rate
-      RevPtr<const RevVariable>                               omega;                                                                                  //!< The occurrence sampling rate
-      RevPtr<const RevVariable>                               rho;                                                                                    //!< The taxon sampling fraction
-      RevPtr<const RevVariable>                               removalPr;                                                                              //!< The removal probability after sampling
-      RevPtr<const RevVariable>                               maxHiddenLin;                                                                           //!< The number of hidden lineages (algorithm accuracy)
-      std::string                                             start_condition;                                                                        //!< The start condition of the process (rootAge/originAge)
-      RevPtr<const RevVariable>                               condition;                                                                              //!< The conditioning of the process ("time" or "survaval")
-      RevPtr<const RevVariable>                               occurrence_ages;                                                                        //!< The occurrence ages of incomplete fossils
-      RevPtr<const RevVariable>                               extant;                                                                                 //!< The number of extant taxa
-      RevPtr<const RevVariable>                               time_points;                                                                            //!< The times at which density is computed
-      RevPtr<const RevVariable>                               timeTree;                                                                               //!< The tree for ancestral pop. size inference
-      RevPtr<const RevVariable>                               timeline;                                                                               //!< The rate shifts timeline
+      RevPtr<const RevVariable>                                       start_age;                              //!< The time of origin
+      RevPtr<const RevVariable>                                       lambda;                                 //!< The speciation rate
+      RevPtr<const RevVariable>                                       mu;                                     //!< The extinction rate
+      RevPtr<const RevVariable>                                       psi;                                    //!< The serial sampling rate
+      RevPtr<const RevVariable>                                       omega;                                  //!< The occurrence sampling rate
+      RevPtr<const RevVariable>                                       rho;                                    //!< The taxon sampling fraction
+      RevPtr<const RevVariable>                                       removalPr;                              //!< The removal probability after sampling
+      RevPtr<const RevVariable>                                       maxHiddenLin;                           //!< The number of hidden lineages (algorithm accuracy)
+      std::string                                                     start_condition;                        //!< The start condition of the process (rootAge/originAge)
+      RevPtr<const RevVariable>                                       condition;                              //!< The conditioning of the process ("time" or "survaval")
+      RevPtr<const RevVariable>                                       occurrence_ages;                        //!< The occurrence ages of incomplete fossils
+      RevPtr<const RevVariable>                                       extant;                                 //!< The number of extant taxa
+      RevPtr<const RevVariable>                                       time_points;                            //!< The times at which density is computed
+      RevPtr<const RevVariable>                                       verbose;                                //!< Display warnings and information messages
+      RevPtr<const RevVariable>                                       timeTree;                               //!< The tree for ancestral pop. size inference
+      RevPtr<const RevVariable>                                       timeline;                               //!< The rate shifts timeline
 
 
   };

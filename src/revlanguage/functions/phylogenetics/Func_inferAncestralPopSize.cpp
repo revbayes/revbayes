@@ -13,6 +13,7 @@
 #include "Real.h"
 #include "RealPos.h"
 #include "Natural.h"
+#include "RlBoolean.h"
 #include "RlMatrixReal.h"
 #include "MatrixReal.h"
 #include "RlTypedFunction.h"
@@ -58,6 +59,9 @@ RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_inferAncestralPopS
 
   bool                                                            uo              = ( start_condition == "originAge" ? true : false );
 
+  // verbose
+  bool                                                            vb              = static_cast<const RlBoolean &>( verbose->getRevObject() ).getValue();
+
   RevBayesCore::TypedDagNode< double >*                           rh              = static_cast<const RealPos &>( this->args[5].getVariable()->getRevObject() ).getDagNode();
 
   RevBayesCore::TypedDagNode< long >*                             n               = static_cast<const Natural &>( this->args[7].getVariable()->getRevObject() ).getDagNode();
@@ -97,7 +101,7 @@ RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_inferAncestralPopS
 
   RevBayesCore::TypedDagNode< double >*                           r               = static_cast<const RealPos &>( this->args[6].getVariable()->getRevObject() ).getDagNode();
 
-  RevBayesCore::InferAncestralPopSizeFunction* fxn = new RevBayesCore::InferAncestralPopSizeFunction( sa, l, m, p, o, rh, r, n, cdt, O, tau, uo, tr );
+  RevBayesCore::InferAncestralPopSizeFunction* fxn = new RevBayesCore::InferAncestralPopSizeFunction( sa, l, m, p, o, rh, r, n, cdt, O, tau, uo, vb, tr );
 
   return fxn;
 
@@ -135,13 +139,11 @@ const ArgumentRules& Func_inferAncestralPopSize::getArgumentRules( void ) const
         argumentRules.push_back( new OptionRule( "condition",           new RlString("time"), optionsCondition, "The condition of the process." ) );
 
         argumentRules.push_back( new ArgumentRule( "occurrence_ages",   ModelVector<Real>::getClassTypeSpec(), "Occurrence ages for incomplete fossils.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-
         argumentRules.push_back( new ArgumentRule( "time_points",       ModelVector<Real>::getClassTypeSpec(), "Time points for which we compute density.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-
         argumentRules.push_back( new ArgumentRule( "timeTree" ,         TimeTree::getClassTypeSpec(), "Tree for which ancestral pop. size has to be computed.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+        argumentRules.push_back( new ArgumentRule( "timeline",          ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
-        argumentRules.push_back( new ArgumentRule( "timeline",    ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-
+        argumentRules.push_back( new ArgumentRule( "verbose",           RlBoolean::getClassTypeSpec(), "If true displays warnings and information messages.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( false ) ) );
 
         rules_set = true;
     }
@@ -246,6 +248,10 @@ void Func_inferAncestralPopSize::setConstParameter(const std::string& name, cons
     else if ( name == "timeTree" )
     {
         timeTree = var;
+    }
+    else if ( name == "verbose" )
+    {
+        verbose = var;
     }
     else if ( name == "timeline" )
     {
