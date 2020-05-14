@@ -97,6 +97,7 @@ public:
 	virtual double computeLogLikelihood() = 0;
 
 	virtual mapHistories_t drawHistory() = 0;
+	virtual mapHistories_t drawHistoryAndComputeRates(std::vector<double>& averageLambda, std::vector<double>& averageMu, std::vector<double>& averagePhi, std::vector<double>& averageDelta, std::vector<long>& numChanges) = 0;
 	virtual mapHistories_t drawAncestralStates() = 0;
 
 	virtual vecHistories_t drawMultipleHistories(size_t nReplicas) = 0;

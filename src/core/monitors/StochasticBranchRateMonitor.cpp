@@ -4,6 +4,7 @@
 #include <ostream>
 #include <vector>
 
+#include "GeneralizedLineageHeterogeneousBirthDeathSamplingProcess.h"
 #include "StochasticNode.h"
 #include "StateDependentSpeciationExtinctionProcess.h"
 #include "Cloneable.h"
@@ -65,27 +66,35 @@ StochasticBranchRateMonitor* StochasticBranchRateMonitor::clone(void) const
 void StochasticBranchRateMonitor::monitorVariables(unsigned long gen)
 {
     
-    StateDependentSpeciationExtinctionProcess *sse = dynamic_cast<StateDependentSpeciationExtinctionProcess*>( &cdbdp->getDistribution() );
+	std::vector<double> speciation;
+	std::vector<double> extinction;
+	std::vector<double> sampling;
+	std::vector<double> destructive_sampling;
+    std::vector<long>   n_shifts;
+
     size_t num_nodes = cdbdp->getValue().getNumberOfNodes();
     std::vector<std::string> character_histories( num_nodes );
-    
-    // draw stochastic character map
-    sse->drawStochasticCharacterMap( character_histories );
-//    std::vector<double> time_in_states = sse->getTimeInStates();
-    std::vector<double> speciation = sse->getAverageSpeciationRatePerBranch();
-    std::vector<double> extinction = sse->getAverageExtinctionRatePerBranch();
-    std::vector<long>   n_shifts   = sse->getNumberOfShiftEventsPerBranch();
 
-    // print to monitor file
-//    for (int i = 0; i < time_in_states.size(); i++)
-//    {
-//        // add a separator before every new element
-//        out_stream << separator;
-//
-//        out_stream << time_in_states[i];
-//
-//    }
+    StateDependentSpeciationExtinctionProcess *sse = dynamic_cast<StateDependentSpeciationExtinctionProcess*>( &cdbdp->getDistribution() );
+    if ( sse != NULL )
+    {
+        // draw stochastic character map
+        sse->drawStochasticCharacterMap( character_histories );
+        speciation = sse->getAverageSpeciationRatePerBranch();
+        extinction = sse->getAverageExtinctionRatePerBranch();
+        n_shifts   = sse->getNumberOfShiftEventsPerBranch();
+    }
+    else
+    {
+    	GeneralizedLineageHeterogeneousBirthDeathSamplingProcess *glhbdsp = dynamic_cast<GeneralizedLineageHeterogeneousBirthDeathSamplingProcess*>( &cdbdp->getDistribution() );
+    	if ( glhbdsp != NULL )
+    	{
+    		glhbdsp->drawStochasticCharacterMap(character_histories, speciation, extinction, sampling, destructive_sampling, n_shifts);
+    	}
+
+    }
     
+    // print to monitor file
     for (int i = 0; i < speciation.size(); i++)
     {
         // add a separator before every new element
@@ -122,11 +131,33 @@ void StochasticBranchRateMonitor::monitorVariables(unsigned long gen)
 void StochasticBranchRateMonitor::printFileHeader()
 {
     
+	std::vector<double> speciation;
+	std::vector<double> extinction;
+	std::vector<double> sampling;
+	std::vector<double> destructive_sampling;
+    std::vector<long>   n_shifts;
+
+    size_t num_nodes = cdbdp->getValue().getNumberOfNodes();
+    std::vector<std::string> character_histories( num_nodes );
+
     StateDependentSpeciationExtinctionProcess *sse = dynamic_cast<StateDependentSpeciationExtinctionProcess*>( &cdbdp->getDistribution() );
-    std::vector<double> time_in_states = sse->getTimeInStates();
-    std::vector<double> speciation = sse->getAverageSpeciationRatePerBranch();
-    std::vector<double> extinction = sse->getAverageExtinctionRatePerBranch();
-    std::vector<long>   n_shifts   = sse->getNumberOfShiftEventsPerBranch();
+    if ( sse != NULL )
+    {
+        // draw stochastic character map
+        sse->drawStochasticCharacterMap( character_histories );
+        speciation = sse->getAverageSpeciationRatePerBranch();
+        extinction = sse->getAverageExtinctionRatePerBranch();
+        n_shifts   = sse->getNumberOfShiftEventsPerBranch();
+    }
+    else
+    {
+    	GeneralizedLineageHeterogeneousBirthDeathSamplingProcess *glhbdsp = dynamic_cast<GeneralizedLineageHeterogeneousBirthDeathSamplingProcess*>( &cdbdp->getDistribution() );
+    	if ( glhbdsp != NULL )
+    	{
+    		glhbdsp->drawStochasticCharacterMap(character_histories, speciation, extinction, sampling, destructive_sampling, n_shifts);
+    	}
+
+    }
     
 //    for (int i = 0; i < time_in_states.size(); i++)
 //    {
