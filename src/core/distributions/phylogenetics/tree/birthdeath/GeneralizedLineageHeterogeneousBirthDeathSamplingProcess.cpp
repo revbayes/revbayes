@@ -819,12 +819,49 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCha
         simmap_string = simmap_string + "}";
 
         // add the string to the character histories
-        character_histories[it->first] = simmap_string;
+        character_histories[it->first - 1] = simmap_string;
 
 	}
 
 }
 
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCharacterMap(std::vector<std::string>& character_histories, std::vector<double>& branch_lambda, std::vector<double>& branch_mu, std::vector<double>& branch_phi, std::vector<double>& branch_delta, std::vector<long>& num_events)
+{
+	// draw the stochastic map
+	TensorPhylo::Interface::mapHistories_t history = tp_ptr->drawHistoryAndComputeRates(branch_lambda, branch_mu, branch_phi, branch_delta, num_events);
+
+	// translate the map to a vector of strings
+	size_t node_index = 0;
+	for(TensorPhylo::Interface::mapHistories_t::iterator it = history.begin(); it != history.end(); ++it)
+	{
+		// get the history for the branch
+		std::vector< std::pair<double, size_t> > this_history = it->second;
+
+		// create the string
+        std::string simmap_string = "{";
+        std::vector< std::pair<double, size_t> >::iterator last_event = this_history.end();
+        last_event--;
+        for(std::vector< std::pair<double, size_t> >::iterator jt = this_history.begin(); jt != this_history.end(); ++jt)
+        {
+        	simmap_string = simmap_string + StringUtilities::toString(jt->second) + "," + StringUtilities::toString(jt->first);
+        	if ( jt != last_event )
+        	{
+        		simmap_string = simmap_string + ":";
+        	}
+        }
+        simmap_string = simmap_string + "}";
+
+        // add the string to the character histories
+        character_histories[it->first - 1] = simmap_string;
+
+//        std::cout << simmap_string << std::endl;
+//        std::cout << branch_lambda[it->first] << " -- " << branch_mu[it->first] << " -- " << num_events[it->first] << std::endl;
+
+	}
+
+//	throw RbException("STOP");
+
+}
 
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter)
