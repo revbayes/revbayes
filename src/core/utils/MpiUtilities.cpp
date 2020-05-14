@@ -115,6 +115,7 @@ void RevBayesCore::MpiUtilities::synchronizeRNG( void )
     if ( process_id == 0 )
     {
         seed = RevBayesCore::GLOBAL_RNG->getNewSeed();
+        seed = RevBayesCore::GLOBAL_RNG->getSeed();
     }
 
     #ifdef RB_MPI
@@ -122,6 +123,6 @@ void RevBayesCore::MpiUtilities::synchronizeRNG( void )
     #endif
 
     
-//    RevBayesCore::GLOBAL_RNG->setSeed( seed );
+    RevBayesCore::GLOBAL_RNG->setSeed( seed );
 
 }
