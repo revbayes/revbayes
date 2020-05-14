@@ -1,11 +1,3 @@
-//
-//  ConstantRateOutgroupBirthDeathProcess.h
-//  revbayes-proj
-//
-//  Created by Michael Landis on 5/5/16.
-//  Copyright © 2016 Michael Landis. All rights reserved.
-//
-
 #ifndef ConstantRateOutgroupBirthDeathProcess_h
 #define ConstantRateOutgroupBirthDeathProcess_h
 

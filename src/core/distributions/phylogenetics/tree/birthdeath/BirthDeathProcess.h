@@ -39,14 +39,14 @@ namespace RevBayesCore {
 
     protected:
         // Parameter management functions
-        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
+        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Swap a parameter
         virtual void                                        restoreSpecialization(const DagNode *restorer);
         virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
 
         // pure virtual helper functions
         virtual double                                      lnSpeciationRate(double t) const = 0;                                       //!< Get the log-transformed speciation rate at time t.
         virtual double                                      rateIntegral(double t_low, double t_high) const = 0;                        //!< Compute the rate integral.
-        virtual double                                      computeProbabilitySurvival(double start, double end) const = 0;                              //!< Compute the probability of survival of the process (without incomplete taxon sampling).
+        virtual double                                      computeProbabilitySurvival(double start, double end) const = 0;             //!< Compute the probability of survival of the process (without incomplete taxon sampling).
 
         virtual void                                        prepareRateIntegral(double end) const;                                      //!< Compute the rate integral.
         virtual void                                        prepareSurvivalProbability(double end, double r) const;                     //!< Compute the rate integral.

@@ -1,10 +1,10 @@
 ################################################################################
 #
 # RevBayes Validation Test: Felsenstein (81) with uniform time tree
-# 
+#
 # Model: Sequences evolve under the Felsenstein (81) model and the tree is drawn
-#        from a uniform time tree distribution. 
-#            
+#        from a uniform time tree distribution.
+#
 #
 # authors: Sebastian Hoehna
 #
@@ -70,7 +70,7 @@ Q_morpho <- fnJC(2)
 # Moves on the parameters to the Gamma distribution.
 #moves[mvi++] = mvScale(alpha_morpho,lambda=1, weight=2.0)
 
-#Combine all of our elements into a CTMC. Because we have not observed any invariant sites, 
+#Combine all of our elements into a CTMC. Because we have not observed any invariant sites,
 # we specify the coding is 'variable'.
 
 phyMorpho ~ dnPhyloCTMC(tree=phylogeny, Q=Q_morpho, type="Standard")
@@ -90,11 +90,10 @@ monitors[2] = mnFile(filename="output/bears_mk.trees",printgen=10, separator = T
 mymcmc = mcmc(mymodel, monitors, moves)
 
 validation = validationAnalysis( mymcmc, 100 )
-validation.burnin(generations=3000,tuningInterval=250)
-validation.run(generations=10000)
+validation.burnin(generations=1000,tuningInterval=100)
+validation.run(generations=4000)
 validation.summarize()
 
 
 # you may want to quit RevBayes now
 q()
-

@@ -15,14 +15,6 @@ subdir('libs')
 subdir('cmd')
 " >> $SRC/meson.build
 
-./generate_sources.sh core
-
-./generate_sources.sh revlanguage
-
-./generate_sources.sh libs
-
-./generate_sources.sh cmd
-
 ./generate_version_number.sh 
 echo "Saving old GitVersion.cpp in projects/meson/GitVersion_backup.cpp"
 if [ -e ../../src/revlanguage/utils/GitVersion.cpp ] ; then
@@ -30,3 +22,11 @@ if [ -e ../../src/revlanguage/utils/GitVersion.cpp ] ; then
 fi
 echo "Copying current GitVersion.cpp to src/revlanguage/utils"
 mv GitVersion.cpp ../../src/revlanguage/utils/
+
+./generate_sources.sh core
+
+./generate_sources.sh revlanguage
+
+./generate_sources.sh libs
+
+./generate_sources.sh cmd

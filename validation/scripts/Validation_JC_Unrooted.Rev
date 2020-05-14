@@ -1,10 +1,10 @@
 ################################################################################
 #
 # RevBayes Validation Test: Jukes-Cantor with birth-death process
-# 
+#
 # Model: Sequences evolve under the Jukes-Cantor model and the tree is drawn
 #        from a constant-rate birth-death process with uniform sampling.
-#            
+#
 #
 # authors: Sebastian Hoehna
 #
@@ -36,7 +36,7 @@ mvi = 1
 ######################
 
 #### specify the Jukes-Cantor substitution model applied uniformly to all sites ###
-Q <- fnJC(4) 
+Q <- fnJC(4)
 
 
 
@@ -61,7 +61,7 @@ for (i in 1:n_branches) {
 }
 
 TL := sum(bl)
-    
+
 psi := treeAssembly(topology, bl)
 
 
@@ -104,7 +104,7 @@ monitors[2] = mnFile(filename="output/primates_JC_bl_tree.trees",printgen=10, se
 mymcmc = mcmc(mymodel, monitors, moves)
 
 
-validation = validationAnalysis( mymcmc, 500 )
+validation = validationAnalysis( mymcmc, 100 )
 validation.burnin(generations=2000,tuningInterval=250)
 validation.run(generations=5000)
 validation.summarize()
@@ -112,4 +112,3 @@ validation.summarize()
 
 # you may want to quit RevBayes now
 q()
-

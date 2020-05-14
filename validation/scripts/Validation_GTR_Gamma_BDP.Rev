@@ -1,10 +1,10 @@
 ################################################################################
 #
 # RevBayes Validation Test: Jukes-Cantor with birth-death process
-# 
+#
 # Model: Sequences evolve under the Jukes-Cantor model and the tree is drawn
 #        from a constant-rate birth-death process with uniform sampling.
-#            
+#
 #
 # authors: Sebastian Hoehna
 #
@@ -34,7 +34,7 @@ mvi = 0
 ######################
 
 # specify the stationary frequency parameters
-pi_prior <- v(1,1,1,1) 
+pi_prior <- v(1,1,1,1)
 pi ~ dnDirichlet(pi_prior)
 moves[++mvi] = mvBetaSimplex(pi, weight=2.0)
 moves[++mvi] = mvDirichletSimplex(pi, weight=1.0)
@@ -48,7 +48,7 @@ moves[++mvi] = mvDirichletSimplex(er, weight=1.5)
 
 
 # create a deterministic variable for the rate matrix, GTR
-Q := fnGTR(er,pi) 
+Q := fnGTR(er,pi)
 
 
 
@@ -138,12 +138,11 @@ monitors[2] = mnFile(filename="output/primates_cytb_JC.trees",printgen=10, separ
 mymcmc = mcmc(mymodel, monitors, moves)
 
 
-validation = validationAnalysis( mymcmc, 1000 )
-validation.burnin(generations=5000,tuningInterval=250)
-validation.run(generations=10000)
+validation = validationAnalysis( mymcmc, 100 )
+validation.burnin(generations=1000,tuningInterval=100)
+validation.run(generations=4000)
 validation.summarize()
 
 
 # you may want to quit RevBayes now
 q()
-

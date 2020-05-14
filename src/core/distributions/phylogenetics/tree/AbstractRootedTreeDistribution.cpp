@@ -266,7 +266,7 @@ bool AbstractRootedTreeDistribution::isLnProbabilityNonZero(void)
  *
  * \return The diversity (number of species in the reconstructed tree).
  */
-int AbstractRootedTreeDistribution::diversity(double t) const
+int AbstractRootedTreeDistribution::diversity(double t)
 {
     recomputeDivergenceTimesSinceOrigin();
     
@@ -666,6 +666,7 @@ double AbstractRootedTreeDistribution::simulateNextAge(size_t n, double origin, 
 void AbstractRootedTreeDistribution::simulateTree( void )
 {
 
+    
     // the time tree object (topology & times)
     Tree *psi = new Tree();
 

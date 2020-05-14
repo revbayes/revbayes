@@ -45,7 +45,7 @@ namespace RevBayesCore {
         
         // members
         const TypedDagNode<double>*                         initialSpeciation;                                                                                  //!< The initial speciation rate (lambda_0).
-        const TypedDagNode<long>*                            capacity;                                                                                           //!< The carrying capacity (K).
+        const TypedDagNode<long>*                           capacity;                                                                                           //!< The carrying capacity (K).
         
     };
     

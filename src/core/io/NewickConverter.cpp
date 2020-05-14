@@ -72,7 +72,7 @@ Tree* NewickConverter::convertFromNewick(std::string const &n, bool reindex)
     // make all internal nodes bifurcating
     // this is important for fossil trees which have sampled ancestors
     t->makeInternalNodesBifurcating( reindex );
-    
+
     // trees with 2-degree root nodes should not be rerooted
     t->setRooted( root->getNumberOfChildren() == 2 );
     

@@ -250,7 +250,7 @@ void EpisodicBirthDeathProcess::prepareProbComputation( void ) const
 }
 
 
-void EpisodicBirthDeathProcess::prepareSurvivalProbability(double end, double r) const
+void EpisodicBirthDeathProcess::prepareSurvivalProbability(double end, double r)
 {
     // do the integration of int_{start}^{end} ( mu(s) exp(rate(t,s)) ds )
     // where rate(t,s) = int_{t}^{s} ( mu(x)-lambda(x) dx ) - sum_{for all t < m_i < s in massExtinctionTimes }( log(massExtinctionSurvivalProbability[i]) )
@@ -336,7 +336,7 @@ void EpisodicBirthDeathProcess::prepareSurvivalProbability(double end, double r)
 }
 
 
-void EpisodicBirthDeathProcess::prepareRateIntegral(double end) const
+void EpisodicBirthDeathProcess::prepareRateIntegral(double end)
 {
     
     double accummulated_rate_time = 0.0;

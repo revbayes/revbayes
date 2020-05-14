@@ -45,9 +45,11 @@ PiecewiseConstantFossilizedBirthDeathRangeProcess::PiecewiseConstantFossilizedBi
                                                                                                      const TypedDagNode< RbVector<double> > *intimes,
                                                                                                      const std::string &incondition,
                                                                                                      const std::vector<Taxon> &intaxa,
-                                                                                                     bool pa ) : condition(incondition),
+                                                                                                     bool bounded,
+                                                                                                     bool pa) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
-    AbstractPiecewiseConstantFossilizedRangeProcess(inspeciation, inextinction, inpsi, incounts, inrho, intimes, intaxa, pa)
+    AbstractPiecewiseConstantFossilizedRangeProcess(inspeciation, inextinction, inpsi, incounts, inrho, intimes, intaxa, bounded, pa),
+    condition(incondition)
 {
     dirty_gamma = std::vector<bool>(fbd_taxa.size(), true);
     gamma_i     = std::vector<size_t>(fbd_taxa.size(), 0);

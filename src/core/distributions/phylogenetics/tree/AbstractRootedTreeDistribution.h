@@ -61,7 +61,7 @@ namespace RevBayesCore {
         void                                                buildRandomBinaryTree(std::vector<TopologyNode *> &tips);
         virtual double                                      lnProbTreeShape(void) const;
         void                                                recomputeDivergenceTimesSinceOrigin(void) const;                                                    //!< Extract the divergence times from the tree.
-        int                                                 diversity(double t) const;                                                                          //!< Diversity at time t.
+        int                                                 diversity(double t);                                                                                //!< Diversity at time t.
         std::vector<double>                                 getAgesOfInternalNodesFromMostRecentSample(void) const;                                             //!< Get the ages of all internal nodes since the time of the most recent tip age.
         std::vector<double>                                 getAgesOfTipsFromMostRecentSample(void) const;                                                      //!< Get the ages of all tip nodes since the time of the most recent tip age.
 

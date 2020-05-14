@@ -99,7 +99,8 @@ ConstantRateOutgroupBirthDeathProcess* ConstantRateOutgroupBirthDeathProcess::cl
 
 
 
-bool ConstantRateOutgroupBirthDeathProcess::isLnProbabilityNonZero( void ) {
+bool ConstantRateOutgroupBirthDeathProcess::isLnProbabilityNonZero( void )
+{
     // first check if the current tree matches the clade constraints
     return true;
     //recursivelyUpdateClades( value->getRoot() );

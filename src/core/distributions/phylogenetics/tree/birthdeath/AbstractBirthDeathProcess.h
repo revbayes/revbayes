@@ -30,7 +30,7 @@ namespace RevBayesCore {
         virtual std::vector<double>                         simulateDivergenceTimes(size_t n, double origin, double present, double min) const;     //!< Simulate n speciation events.
         
         // members
-        std::string                                         condition;  //!< The condition of the process (none/survival/#taxa).
+        std::string                                         condition;                                          //!< The condition of the process (none/survival/#taxa).
     };
     
 }

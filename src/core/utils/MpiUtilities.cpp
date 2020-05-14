@@ -122,6 +122,6 @@ void RevBayesCore::MpiUtilities::synchronizeRNG( void )
     #endif
 
     
-    RevBayesCore::GLOBAL_RNG->setSeed( seed );
+//    RevBayesCore::GLOBAL_RNG->setSeed( seed );
 
 }
