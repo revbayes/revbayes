@@ -792,6 +792,41 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
 
 }
 
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCharacterMap(std::vector<std::string>& character_histories)
+{
+	// draw the stochastic map
+	TensorPhylo::Interface::mapHistories_t history = tp_ptr->drawHistory();
+
+	// translate the map to a vector of strings
+	size_t node_index = 0;
+	for(TensorPhylo::Interface::mapHistories_t::iterator it = history.begin(); it != history.end(); ++it)
+	{
+		// get the history for the branch
+		std::vector< std::pair<double, size_t> > this_history = it->second;
+
+		// create the string
+        std::string simmap_string = "{";
+        std::vector< std::pair<double, size_t> >::iterator last_event = this_history.end();
+        last_event--;
+        for(std::vector< std::pair<double, size_t> >::iterator jt = this_history.begin(); jt != this_history.end(); ++jt)
+        {
+        	simmap_string = simmap_string + StringUtilities::toString(jt->second) + "," + StringUtilities::toString(jt->first);
+        	if ( jt != last_event )
+        	{
+        		simmap_string = simmap_string + ":";
+        	}
+        }
+        simmap_string = simmap_string + "}";
+
+        // add the string to the character histories
+        character_histories[it->first] = simmap_string;
+
+	}
+
+}
+
+
+
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter)
 {
     if ( affecter == age )
