@@ -20,6 +20,11 @@ typedef std::vector< double > stdVectorXd;
 typedef std::vector< stdVectorXd > stdMatrixXd;
 typedef std::map< std::vector<unsigned>, double > eventMap_t;
 
+typedef size_t mapHistoriesKey_t;
+typedef std::vector< std::pair<double, size_t> > mapHistoriesVal_t;
+typedef std::map< mapHistoriesKey_t, mapHistoriesVal_t > mapHistories_t;
+typedef std::vector< mapHistories_t > vecHistories_t;
+
 typedef enum {
 	TIME=0,
 	ROOT_SURVIVAL=1,
@@ -90,6 +95,12 @@ public:
 	virtual void setSyncMonitors(const std::vector< double > &synchMonitoring) = 0;
 
 	virtual double computeLogLikelihood() = 0;
+
+	virtual mapHistories_t drawHistory() = 0;
+	virtual mapHistories_t drawAncestralStates() = 0;
+
+	virtual vecHistories_t drawMultipleHistories(size_t nReplicas) = 0;
+	virtual vecHistories_t drawMultipleAncestralStates(size_t nReplicas) = 0;
 
 	virtual void setDebugMode(debugMode_t aDebugMode) = 0;
 	virtual void setDebugMode(debugMode_t aDebugMode, const std::string &aFilePath) = 0;

@@ -78,6 +78,9 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* cdbdp_tdn = NULL;
     RevBayesCore::StochasticNode<RevBayesCore::Tree>* cdbdp_sn = NULL;
 
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* glhbdsp_tdn = NULL;
+    RevBayesCore::StochasticNode<RevBayesCore::Tree>* glhbdsp_sn = NULL;
+
     if ( static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).isModelObject() )
     {
         ctmc_tdn = static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
@@ -92,6 +95,11 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
         sse_process = dynamic_cast<RevBayesCore::StateDependentSpeciationExtinctionProcess*>( &cdbdp_sn->getDistribution() );
         sse_process->setSampleCharacterHistory( true );
     }
+    else if ( static_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).isModelObject() )
+    {
+    	glhbdsp_tdn = static_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).getDagNode();
+    	glhbdsp_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( glhbdsp_tdn );
+    }
     else
     {
         throw RbException("mnStochasticCharacterMap requires either a CTMC or a character-dependent birth death process (CDBDP).");
@@ -104,11 +112,16 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
         model_type = "ctmc";
         data_type = ctmc_sn->getValue().getDataType();
     }
-    else {
+    else if ( static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).isModelObject() )
+    {
         model_type = "cdbdp";
         data_type = "NaturalNumbers";
     }
-    
+    else
+    {
+        model_type = "glhbdsp";
+        data_type = "NaturalNumbers";
+    }
     
     if ( model_type == "ctmc" )
     {
@@ -144,6 +157,19 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
             delete value;
             value = m;
         }
+    }
+    else if ( model_type == "glhbdsp" )
+    {
+    	if (data_type == "NaturalNumbers")
+    	{
+            RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>* m;
+            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>( glhbdsp_sn, (unsigned long)print_gen, file_name, is, sd, sep );
+            m->setAppend( app );
+            m->setPrintVersion( wv );
+
+            delete value;
+            value = m;
+    	}
     }
     
 
@@ -199,6 +225,7 @@ const MemberRules& Mntr_StochasticCharacterMapping::getParameterRules(void) cons
     {
         monitor_rules.push_back( new ArgumentRule("ctmc"           , AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The continuous-time Markov process to monitor.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
         monitor_rules.push_back( new ArgumentRule("cdbdp"          , TimeTree::getClassTypeSpec(),  "The character dependent birth-death process to monitor.",                      ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL) );
+        monitor_rules.push_back( new ArgumentRule("glhbdsp"        , TimeTree::getClassTypeSpec(),  "The lineage-heterogeneous birth-death process to monitor.",                      ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL) );
         monitor_rules.push_back( new ArgumentRule("include_simmap" , RlBoolean::getClassTypeSpec(), "Should we log SIMMAP/phytools compatible newick strings? True by default.",    ArgumentRule::BY_VALUE,     ArgumentRule::ANY, new RlBoolean(true) ) );
         monitor_rules.push_back( new ArgumentRule("use_simmap_default" , RlBoolean::getClassTypeSpec(), "Should we use the default SIMMAP/phytools event ordering? True by default.",    ArgumentRule::BY_VALUE,     ArgumentRule::ANY, new RlBoolean(true) ) );
         monitor_rules.push_back( new ArgumentRule("index"          , Natural::getClassTypeSpec(), "The index of the character to be monitored.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
@@ -242,6 +269,10 @@ void Mntr_StochasticCharacterMapping::setConstParameter(const std::string& name,
     if ( name == "cdbdp" )
     {
         cdbdp = var;
+    }
+    else if ( name == "glhbdsp" )
+    {
+    	glhbdsp = var;
     }
     else if ( name == "ctmc" )
     {

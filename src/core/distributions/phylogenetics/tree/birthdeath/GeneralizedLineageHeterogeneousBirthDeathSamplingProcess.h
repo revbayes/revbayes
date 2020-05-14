@@ -51,6 +51,8 @@ namespace RevBayesCore {
         virtual void                                                      redrawValue(void);
         virtual void                                                      setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
         
+        void                                                              drawStochasticCharacterMap(std::vector<std::string>& character_histories);
+
         void                                                              dumpModel(std::string file_name);
 
         // parameter setters
