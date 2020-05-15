@@ -84,9 +84,17 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	zeta_dirty(true)
 {
 
+
 	//assert(Plugin::loader().isTensorPhyloLoaded());
 	try {
+		// create the pointer
 		tp_ptr = Plugin::loader().createTensorPhyloLik();
+
+		// set the random number generator
+		RandomNumberGenerator* rng = GLOBAL_RNG;
+		unsigned int seed = rng->getSeed();
+		tp_ptr->setSeed( size_t(seed) );
+
 	} catch (...) {
 		throw RbException("TensorPhylo is not loaded (use loadPlugin(...)).");
 	}
@@ -831,7 +839,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCha
 	TensorPhylo::Interface::mapHistories_t history = tp_ptr->drawHistoryAndComputeRates(branch_lambda, branch_mu, branch_phi, branch_delta, num_events);
 
 	// translate the map to a vector of strings
-	size_t node_index = 0;
 	for(TensorPhylo::Interface::mapHistories_t::iterator it = history.begin(); it != history.end(); ++it)
 	{
 		// get the history for the branch
@@ -854,12 +861,25 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCha
         // add the string to the character histories
         character_histories[it->first - 1] = simmap_string;
 
-//        std::cout << simmap_string << std::endl;
-//        std::cout << branch_lambda[it->first] << " -- " << branch_mu[it->first] << " -- " << num_events[it->first] << std::endl;
-
 	}
 
-//	throw RbException("STOP");
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawJointConditionalAncestralStates(std::vector<size_t>& startStates, std::vector<size_t>& endStates)
+{
+	// draw the ancestral states
+	TensorPhylo::Interface::mapHistories_t history = tp_ptr->drawAncestralStates();
+
+	// translate the ancestral states to revbayes format
+	for(TensorPhylo::Interface::mapHistories_t::iterator it = history.begin(); it != history.end(); ++it)
+	{
+		// get the history for the branch
+		std::vector< std::pair<double, size_t> > this_history = it->second;
+
+        // add the states
+		startStates[it->first - 1] = this_history[0].second;
+		endStates[it->first - 1]   = this_history[1].second;
+	}
 
 }
 

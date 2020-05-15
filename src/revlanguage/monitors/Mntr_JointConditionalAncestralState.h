@@ -48,6 +48,7 @@ class TypeSpec;
 		RevPtr<const RevVariable>                       tree;
 		RevPtr<const RevVariable>                       ctmc;
         RevPtr<const RevVariable>                       cdbdp;
+        RevPtr<const RevVariable>                       glhbdsp;
         RevPtr<const RevVariable>                       separator;
         RevPtr<const RevVariable>                       append;
 		RevPtr<const RevVariable>                       monitorType;

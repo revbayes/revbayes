@@ -3,6 +3,7 @@
 
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "StateDependentSpeciationExtinctionProcess.h"
+#include "GeneralizedLineageHeterogeneousBirthDeathSamplingProcess.h"
 #include "VariableMonitor.h"
 #include "Tree.h"
 #include "TypedDagNode.h"
@@ -141,8 +142,9 @@ void JointConditionalAncestralStateMonitor<characterType>::monitorVariables(unsi
         
         
     // get the distribution for the character
-    AbstractPhyloCTMCSiteHomogeneous<characterType> *dist_ctmc  = NULL;
-    StateDependentSpeciationExtinctionProcess       *dist_bd    = NULL;
+    AbstractPhyloCTMCSiteHomogeneous<characterType>          *dist_ctmc    = NULL;
+    StateDependentSpeciationExtinctionProcess                *dist_bd      = NULL;
+    GeneralizedLineageHeterogeneousBirthDeathSamplingProcess *dist_glhbdsp = NULL;
     if ( ctmc != NULL )
     {
         dist_ctmc = static_cast<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
@@ -151,26 +153,30 @@ void JointConditionalAncestralStateMonitor<characterType>::monitorVariables(unsi
     }
     else
     {
-        dist_bd = dynamic_cast<StateDependentSpeciationExtinctionProcess*>( &nodes[0]->getDistribution() ); // this does!
+        dist_bd = dynamic_cast<StateDependentSpeciationExtinctionProcess*>( &cdbdp->getDistribution() ); // this does!
+        if ( dist_bd == NULL )
+        {
+        	dist_glhbdsp = dynamic_cast<GeneralizedLineageHeterogeneousBirthDeathSamplingProcess*>( &cdbdp->getDistribution() );
+        }
         num_sites = 1;
         num_nodes = tree->getValue().getNumberOfNodes();
     }
         
-    std::vector<std::vector<characterType> > startStates(num_nodes,std::vector<characterType>(num_sites));
-    std::vector<std::vector<characterType> > endStates(num_nodes,std::vector<characterType>(num_sites));
+    std::vector<std::vector<characterType> > startStates(num_nodes, std::vector<characterType>(num_sites));
+    std::vector<std::vector<characterType> > endStates(num_nodes, std::vector<characterType>(num_sites));
     
     // draw ancestral states
     if ( ctmc != NULL )
     {
         dist_ctmc->drawJointConditionalAncestralStates(startStates, endStates);
     }
-    else
+    else if ( dist_bd != NULL )
     {
         std::vector<size_t> startStatesIndexes(num_nodes);
         std::vector<size_t> endStatesIndexes(num_nodes);
         dist_bd->drawJointConditionalAncestralStates(startStatesIndexes, endStatesIndexes);
         
-        // Let us check first the type of the data and the one we excpect.
+        // Let us check first the type of the data and the one we expect.
         characterType tmp = characterType();
         if ( dist_bd->getCharacterData().getTaxonData(0)[0].getDataType() != tmp.getDataType() )
         {
@@ -193,6 +199,41 @@ void JointConditionalAncestralStateMonitor<characterType>::monitorVariables(unsi
             
         delete tmp_char;
             
+    }
+    else if ( dist_glhbdsp != NULL )
+    {
+        std::vector<size_t> startStatesIndexes(num_nodes);
+        std::vector<size_t> endStatesIndexes(num_nodes);
+
+    	dist_glhbdsp->drawJointConditionalAncestralStates(startStatesIndexes, endStatesIndexes);
+
+        // Let us check first the type of the data and the one we expect.
+        characterType tmp = characterType();
+        if ( dist_glhbdsp->getCharacterData().getTaxonData(0)[0].getDataType() != tmp.getDataType() )
+        {
+            throw RbException("The character type in the ancestral state monitor does not match. \" The data has type " + dist_glhbdsp->getCharacterData().getTaxonData(0)[0].getDataType() + "\" but the monitor expected \"" + tmp.getDataType() + "\".");
+        }
+
+        // now give as an object that we can clone.
+        // this is necessary because otherwise we would not know the state labels or size of the character
+        characterType *tmp_char = dynamic_cast< characterType* >( dist_glhbdsp->getCharacterData().getTaxonData(0)[0].clone() );
+
+        for (size_t i = 0; i < startStatesIndexes.size(); i++)
+        {
+            startStates[i][0] = characterType( *tmp_char );
+            startStates[i][0].setStateByIndex(startStatesIndexes[i]);
+            startStates[i][0].setMissingState(false);
+            endStates[i][0]   = characterType( *tmp_char );
+            endStates[i][0].setStateByIndex(endStatesIndexes[i]);
+            endStates[i][0].setMissingState(false);
+        }
+
+        delete tmp_char;
+
+    }
+    else
+    {
+    	throw RbException("No valid distribution found.");
     }
         
     // print ancestral states
