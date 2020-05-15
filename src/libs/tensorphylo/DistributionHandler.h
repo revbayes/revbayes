@@ -1,178 +1,122 @@
 /*
- * DistributionHandlerImpl.h
+ * DistributionHandler.h
  *
  *  Created on: Mar 9, 2020
  *      Author: xaviermeyer
  */
 
-#ifndef INTERFACE_DISTRIBUTIONHANDLERIMPL_H_
-#define INTERFACE_DISTRIBUTIONHANDLERIMPL_H_
+#ifndef INTERFACE_DISTRIBUTIONHANDLER_H_
+#define INTERFACE_DISTRIBUTIONHANDLER_H_
 
-
-#include "DistributionHandler.h"
-
-#include "Tensor/IncFwdTensor.h"
-#include "Data/Structure/IncFwdTreeStructure.h"
-#include "Likelihood/Scheduler/IncFwdScheduler.h"
-#include "Parameters/IncFwdParameterContainer.h"
-#include "Data/Reader/IncFwdPhyloReader.h"
-#include "SynchronousEvents/IncFwdSynchronousEvents.h"
-#include "Likelihood/Approximator/IncFwdLikelihoodApproximator.h"
-#include "Test/Utils.h"
-
-#include <fstream>
-#include <Eigen/Core>
-
-#define BOOST_DLL_FORCE_ALIAS_INSTANTIATION
-#include <boost/dll/alias.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
+#include <boost/config.hpp>
+#include <string>
+#include <vector>
+#include <map>
 
 namespace TensorPhylo {
 namespace Interface {
 
-class DistributionHandlerImpl : public DistributionHandler {
-public: // CTOR-DTOR
+typedef std::vector< double > stdVectorXd;
+typedef std::vector< stdVectorXd > stdMatrixXd;
+typedef std::map< std::vector<unsigned>, double > eventMap_t;
 
-	DistributionHandlerImpl();
-	~DistributionHandlerImpl();
+typedef size_t mapHistoriesKey_t;
+typedef std::vector< std::pair<double, size_t> > mapHistoriesVal_t;
+typedef std::map< mapHistoriesKey_t, mapHistoriesVal_t > mapHistories_t;
+typedef std::vector< mapHistories_t > vecHistories_t;
 
-public: // CREATOR
 
-	static boost::shared_ptr<DistributionHandlerImpl> create() {
-		return boost::shared_ptr<DistributionHandlerImpl>(
-			new DistributionHandlerImpl());
-	}
+typedef enum {
+	TIME=0,
+	ROOT_SURVIVAL=1,
+	ROOT_MRCA=2,
+	ROOT_SAMPLING=3,
+	STEM_SURVIVAL=4,
+	STEM_ONE_SAMPLE=5,
+	STEM_TWO_EXT_SAMPLES=6,
+	STEM_TWO_SAMPLES=7,
+	ROOT_SAMPLING_AND_MRCA=8
+} conditionalProbability_t;
 
-public: // Implementation
+typedef enum {
+	AUTO_TUNING=0,
+	SEQUENTIAL_OPTIMIZED=1,
+	SEQUENTIAL_BRANCHWISE=2,
+	PARALLEL_OPTIMIZED=3,
+	PARALLEL_BRANCHWISE=4
+} approximatorVersion_t;
 
-	void setTree(const std::string &aNewickTreeStr);
-	void setData(const std::vector<std::string> &aTaxa, const std::map<std::string, std::vector<double> > &aProbabilityMap);
+typedef enum {
+	EULER=0,
+	RUNGE_KUTTA4=1,
+	RUNGE_KUTTA54=2,
+	RUNGE_KUTTA_DOPRI5=3
+} integrationScheme_t;
 
-	void setApplyTreeLikCorrection(bool aDoApply);
-	void setConditionalProbCompatibilityMode(bool setActive);
-	void setLikelihoodApproximator(approximatorVersion_t aApproxVersion);
-	void setConditionalProbabilityType(conditionalProbability_t aCondProb);
-	void setNumberOfThreads(size_t aNThreads);
+typedef enum {
+	DBG_NONE=0,
+	DBG_PRINT=1,
+	DBG_FILE=2
+} debugMode_t;
 
-	void setInitialDeltaT(double aInitDeltaT);
+typedef size_t version_t;
 
-	void setRootPrior(const stdVectorXd &aRootPrior);
+class BOOST_SYMBOL_VISIBLE DistributionHandler {
+public:
+	DistributionHandler() {};
+	virtual ~DistributionHandler() {};
 
-	void setLambda(const stdVectorXd &aTimes, const stdMatrixXd &aLambda);
-	void setMu(const stdVectorXd &aTimes, const stdMatrixXd &aMu);
-	void setPhi(const stdVectorXd &aTimes, const stdMatrixXd &aPhi);
-	void setDelta(const stdVectorXd &aTimes, const stdMatrixXd &aDelta);
+	virtual void setTree(const std::string &aNewickTree) = 0;
+	virtual void setData(const std::vector<std::string> &taxa, const std::map<std::string, std::vector<double> > &aProbabilityMap) = 0;
 
-	void setEta(const stdVectorXd &aTimes, const std::vector< stdMatrixXd > &aEta);
-	void setOmega(size_t aNState, const stdVectorXd &aTimes, const std::vector< eventMap_t > &aOmega);
+	virtual void setApplyTreeLikCorrection(bool doApply) = 0;
+	virtual void setConditionalProbCompatibilityMode(bool setActive) = 0;
+	virtual void setLikelihoodApproximator(approximatorVersion_t approxVersion) = 0;
+	virtual void setConditionalProbabilityType(conditionalProbability_t condProb) = 0;
+	virtual void setNumberOfThreads(size_t nThreads) = 0;
 
-	void setMassSpeciationEvents(const stdVectorXd &massSpeciationTimes, const stdMatrixXd &massSpeciationProb);
-	void setMassExtinctionEvents(const stdVectorXd &massExtinctionTimes, const stdMatrixXd &massExtinctionProb);
-	void setMassExtinctionStateChangeProb(const std::vector< stdMatrixXd> &massExtinctionStateChangeProb);
-	void setMassSamplingEvents(const stdVectorXd &massSamplingTimes, const stdMatrixXd &massSamplingProb);
-	void setMassDestrSamplingEvents(const stdVectorXd &massDestrSamplingTimes, const stdMatrixXd &massDestrSamplingProb);
+	virtual void setInitialDeltaT(double initDeltaT) = 0;
 
-	void setSyncMonitors(const std::vector< double > &aSynchMonitoring);
+	virtual void setRootPrior(const stdVectorXd &rootPrior) = 0;
 
-	double computeLogLikelihood();
-	mapHistories_t drawHistory();
-	mapHistories_t drawHistoryAndComputeRates(std::vector<double>& averageLambda, std::vector<double>& averageMu, std::vector<double>& averagePhi, std::vector<double>& averageDelta, std::vector<long>& numChanges);
-	mapHistories_t drawAncestralStates();
-	vecHistories_t drawMultipleHistories(size_t nReplicas);
-	vecHistories_t drawMultipleAncestralStates(size_t nReplicas);
+	virtual void setLambda(const stdVectorXd &times, const stdMatrixXd &lambdas) = 0;
+	virtual void setMu(const stdVectorXd &times, const stdMatrixXd &mus) = 0;
+	virtual void setPhi(const stdVectorXd &times, const stdMatrixXd &phis) = 0;
+	virtual void setDelta(const stdVectorXd &times, const stdMatrixXd &deltas) = 0;
 
-	void setDebugMode(debugMode_t aDebugMode);
-	void setDebugMode(debugMode_t aDebugMode, const std::string &aFilePath);
+	virtual void setEta(const stdVectorXd &times, const std::vector< stdMatrixXd > &etas) = 0;
+	virtual void setOmega(size_t aNState, const stdVectorXd &times, const std::vector< eventMap_t > &omegas) = 0;
 
-	void writeStateToFile(const std::string &aFilePath);
-	void loadStateFromFile(const std::string &aFilePath);
+	virtual void setMassSpeciationEvents(const stdVectorXd &massSpeciationTimes, const stdMatrixXd &massSpeciationProb) = 0;
+	virtual void setMassExtinctionEvents(const stdVectorXd &massExtinctionTimes, const stdMatrixXd &massExtinctionProb) = 0;
+	virtual void setMassExtinctionStateChangeProb(const std::vector< stdMatrixXd> &massExtinctionStateChangeProb) = 0;
+	virtual void setMassSamplingEvents(const stdVectorXd &massSamplingTimes, const stdMatrixXd &massSamplingProb) = 0;
+	virtual void setMassDestrSamplingEvents(const stdVectorXd &massDestrSamplingTimes, const stdMatrixXd &massDestrSamplingProb) = 0;
 
-	size_t getVersion() const;
+	virtual void setSyncMonitors(const std::vector< double > &synchMonitoring) = 0;
 
-	void setSeed(size_t aSeed) const;
+	virtual double computeLogLikelihood() = 0;
 
-private:
+	virtual mapHistories_t drawHistory() = 0;
+	virtual mapHistories_t drawHistoryAndComputeRates(std::vector<double>& averageLambda, std::vector<double>& averageMu, std::vector<double>& averagePhi, std::vector<double>& averageDelta, std::vector<long>& numChanges) = 0;
+	virtual mapHistories_t drawAncestralStates() = 0;
 
-	typedef enum {NONE=0, UPDATE=1, RESET=2} schedulerOperation_t;
-	bool dirtyAsyncRateShifts, dirtySyncEventTimes, dirtyApproximator;
-	bool dirtyLambda, dirtyMu, dirtyDelta, dirtyPhi, dirtyEta, dirtyOmega;
+	virtual vecHistories_t drawMultipleHistories(size_t nReplicas) = 0;
+	virtual vecHistories_t drawMultipleAncestralStates(size_t nReplicas) = 0;
 
-	debugMode_t debugMode;
-	std::string debugFilePath;
-	std::ofstream debugFile;
+	virtual void setDebugMode(debugMode_t aDebugMode) = 0;
+	virtual void setDebugMode(debugMode_t aDebugMode, const std::string &aFilePath) = 0;
 
-	schedulerOperation_t schedulerOperation;
+	virtual void writeStateToFile(const std::string &aFilePath) = 0;
+	virtual void loadStateFromFile(const std::string &aFilePath) = 0;
 
-	size_t nThreads;
-	double initDeltaT;
+	virtual size_t getVersion() const = 0;
 
-	bool applyTreeLikCorrection, compatibilityMode;
-	approximatorVersion_t approxVersion;
-	conditionalProbability_t condProbType;
+	virtual void setSeed(size_t aSeed) const = 0;
 
-	Eigen::VectorXd rootPrior;
-	std::vector<double> synchMonitoring;
-
-	Phylogeny::Data::ContainerSharedPtr ptrData;
-	Parameters::AsyncContainerSharedPtr ptrAsyncParams;
-	Parameters::SyncContainerSharedPtr ptrSyncParams;
-
-	Tensor::ContainerSharedPtr ptrTensors;
-	SynchronousEvents::ContainerSharedPtr ptrSyncEvents;
-
-	Phylogeny::Structure::TreeSharedPtr ptrTree;
-	Likelihood::Approximator::ApproximatorSharedPtr approximator;
-	boost::shared_ptr<Likelihood::Scheduler::BaseScheduler> scheduler;
-
-	void updateSchedulerOperationRateChange();
-	void updateSchedulerOperationSyncTimeChange();
-	void updateSchedulerOperationTimeChange();
-
-	void updateParameters();
-	void updateSyncEvents();
-
-	bool copyVectorWithCheck(const stdVectorXd &inVector, stdVectorXd &outVector);
-	bool copyMatrixWithCheck(const stdMatrixXd &inMatrix, std::vector< Eigen::VectorXd > &outMatrix);
-	bool copyVectorOfRateMatrixWithCheck(const std::vector< stdMatrixXd>  &inVecMatrix, std::vector< Eigen::MatrixXd > &outVecMatrix);
-	bool copyVectorOfProbMatrixWithCheck(const std::vector< stdMatrixXd>  &inVecMatrix, std::vector< Eigen::MatrixXd > &outVecMatrix);
-	bool copyVectorOfSparseTensorWithCheck(size_t aN, const std::vector< eventMap_t> &inVecSpTensors, std::vector< eventMap_t> &outVecSpTensors);
-
-	void printParamVectorDebug(const std::string &paramName, const std::vector<double> &aTime, const std::vector< Eigen::VectorXd > &params);
-	void printParamMatrixDebug(const std::string &paramName, const std::vector<double> &aTime, const std::vector< Eigen::MatrixXd > &params);
-	void printParamTensorDebug(const std::string &paramName, const std::vector<double> &aTime, const std::vector< eventMap_t > &params);
-
-	double debugLikelihoodEvaluation();
-	void debugChoseOutputStream(const std::string &string);
-
-	Likelihood::Approximator::StochasticMapping::StochasticMappingApproxSharedPtr createStochasticMappingApprox();
-
-	// For testing purpose
-	friend double Test::SequentialCPU::computeLikForInterfaceTests(int idApproximator,
-			   	  Phylogeny::NexusReader::NexusParserSharedPtr nexusParser,
-			      const std::string &parametersFile);
-
-	friend void Test::SequentialCPU::runBenchmarkNew(size_t nLikApproximation,
-				Phylogeny::NexusReader::NexusParserSharedPtr nexusParser,
-				const std::string &parametersFile,
-				const std::string &logFile);
-
-	friend double Test::SequentialCPU::computeLikForInterface(
-			Phylogeny::NexusReader::NexusParserSharedPtr nexusParser,
-			const std::string &parametersFile);
-
-	friend std::vector< TensorPhylo::Interface::mapHistories_t >
-		Test::SequentialCPU::computeStochasticMappingForInterface(
-				size_t nHistories,
-				Phylogeny::NexusReader::NexusParserSharedPtr nexusParser,
-				const std::string &parametersFile);
 };
-
-BOOST_DLL_ALIAS(
-	TensorPhylo::Interface::DistributionHandlerImpl::create,
-    createTensorPhyloDistributionHandler
-);
 
 } /* namespace Interface */
 } /* namespace TensorPhylo */
 
-#endif /* INTERFACE_DISTRIBUTIONHANDLERIMPL_H_ */
+#endif /* INTERFACE_DISTRIBUTIONHANDLER_H_ */
