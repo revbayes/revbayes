@@ -111,6 +111,8 @@ public:
 
 	virtual size_t getVersion() const = 0;
 
+	virtual void setSeed(size_t aSeed) const = 0;
+
 };
 
 } /* namespace Interface */
