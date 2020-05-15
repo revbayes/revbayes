@@ -62,7 +62,7 @@ void Mntr_JointConditionalAncestralState::constructInternalObject( void )
     bool                                wt      = static_cast<const RlBoolean &>( withTips->getRevObject() ).getValue();
     bool                                wss     = static_cast<const RlBoolean &>( withStartStates->getRevObject() ).getValue();
     bool                                wv      = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
-    std::string                            character = static_cast<const RlString &>( monitorType->getRevObject() ).getValue();
+    std::string                         character = static_cast<const RlString &>( monitorType->getRevObject() ).getValue();
     
 
     
@@ -72,6 +72,9 @@ void Mntr_JointConditionalAncestralState::constructInternalObject( void )
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* cdbdp_tdn = NULL;
     RevBayesCore::StochasticNode<RevBayesCore::Tree>* cdbdp_sn = NULL;
     
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* glhbdsp_tdn = NULL;
+    RevBayesCore::StochasticNode<RevBayesCore::Tree>* glhbdsp_sn = NULL;
+
     if ( static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).isModelObject() )
     {
         ctmc_tdn = static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
@@ -86,6 +89,11 @@ void Mntr_JointConditionalAncestralState::constructInternalObject( void )
     {
         cdbdp_tdn = static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).getDagNode();
         cdbdp_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( cdbdp_tdn );
+    }
+    else if ( static_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).isModelObject() )
+    {
+    	glhbdsp_tdn = static_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).getDagNode();
+    	glhbdsp_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( glhbdsp_tdn );
     }
     else
     {
@@ -117,9 +125,13 @@ void Mntr_JointConditionalAncestralState::constructInternalObject( void )
         {
             m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::NaturalNumbersState>(t, ctmc_sn, (unsigned long)g, fn, sep, wt, wss);
         }
-        else
+        else if ( static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).isModelObject() )
         {
             m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::NaturalNumbersState>(cdbdp_sn, (unsigned long)g, fn, sep, wt, wss);
+        }
+        else
+        {
+        	m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::NaturalNumbersState>(glhbdsp_sn, (unsigned long)g, fn, sep, wt, wss);
         }
         m->setAppend( ap );
         m->setPrintVersion(wv);
@@ -218,6 +230,7 @@ const MemberRules& Mntr_JointConditionalAncestralState::getParameterRules(void) 
         memberRules.push_back( new ArgumentRule("tree"           , Tree::getClassTypeSpec() , "", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
         memberRules.push_back( new ArgumentRule("ctmc"           , AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
         memberRules.push_back( new ArgumentRule("cdbdp"          , TimeTree::getClassTypeSpec(), "", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL) );
+        memberRules.push_back( new ArgumentRule("glhbdsp"        , TimeTree::getClassTypeSpec(), "", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL) );
         memberRules.push_back( new ArgumentRule("type"           , RlString::getClassTypeSpec() , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         memberRules.push_back( new ArgumentRule("withTips"       , RlBoolean::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         memberRules.push_back( new ArgumentRule("withStartStates", RlBoolean::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
@@ -269,6 +282,10 @@ void Mntr_JointConditionalAncestralState::setConstParameter(const std::string& n
     else if ( name == "cdbdp" )
     {
         cdbdp = var;
+    }
+    else if ( name == "glhbdsp" )
+    {
+    	glhbdsp = var;
     }
     else if ( name == "withTips" )
     {
