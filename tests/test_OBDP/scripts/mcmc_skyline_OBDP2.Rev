@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# RevBayes Validation Test:Skyline occurrence birth-death process, corrected for drifting fossils
+# RevBayes Validation Test:Skyline occurrence birth-death process
 #
 # Model: Tree is drawn from a piecewise constant birth-death process with occurrences.
 #
@@ -21,9 +21,9 @@ seed(12345)
 # set my move index
 
 mvi = 0
-taxa <- readTaxonData("data-episkyline-test/data_taxa.csv")
-sequences <- readDiscreteCharacterData("data-episkyline-test/data_seq.nex")
-occurrence_ages <- readMatrix(file="data-episkyline-test/data_occurrences.csv", delimiter="; ")[1]
+taxa <- readTaxonData("data-epi-small/data_taxa.csv")
+sequences <- readDiscreteCharacterData("data-epi-small/data_seq.nex")
+occurrence_ages <- readMatrix(file="data-epi-small/data_occurrences.csv", delimiter="; ")[1]
 
 #there are no sequences sampled exactly at t=0
 rho <- 0.0
@@ -35,7 +35,7 @@ rm <- 0.0
 alpha <- 10
 
 #accuracy of our algorithm number of hidden lineages
-N <- 30
+N <- 50
 
 #condition of the algorithm
 cond <- "time"
@@ -50,19 +50,22 @@ Mt <- TRUE
 #it is know that there was a major event that is meant to have affected the rates 30days before present
 timeline <- v(30.0)
 
+extinction ~ dnExp(alpha)
+omega ~ dnExp(alpha)
+#patients are tested 8 times as often as they are sequenced
+sampling := omega/8
+
+
+moves[mvi++] = mvScale(extinction, lambda = 0.1,tune=TRUE)
+moves[mvi++] = mvScale(omega, lambda = 0.1, tune=TRUE)
 for(i in 1:(timeline.size() + 1))
 {
     i
 
-    extinction[i] ~ dnExp(alpha)
-		speciation[i] ~ dnExp(alpha)
-		omega[i] ~ dnExp(alpha)
-		#patients are tested 8 times as often as they are sequenced
-		sampling[i] := omega[i]/8
 
-    moves[mvi++] = mvScale(extinction[i], lambda = 0.1,tune=TRUE)
-    moves[mvi++] = mvScale(speciation[i], lambda = 0.1, tune=TRUE)
-		moves[mvi++] = mvScale(omega[i], lambda = 0.1, tune=TRUE)
+		speciation[i] ~ dnExp(alpha)
+	  moves[mvi++] = mvScale(speciation[i], lambda = 0.1, tune=TRUE)
+
 
 
 }
@@ -124,22 +127,23 @@ mymodel = model(obd_tree)
 
 # We define our model.
 # We can use any node of our model as a handle, here we chose to use the rate matrix.
-monitors[1] = mnStochasticVariable(filename="output_sky/trace.out", printgen=1)
-monitors[2] = mnFile(filename="output_sky/trees.trees", printgen=1,obd_tree)
+monitors[1] = mnStochasticVariable(filename="output_epi_small/trace.out", printgen=1)
+monitors[2] = mnFile(filename="output_epi_small/trees.trees", printgen=1,obd_tree)
 monitors[3] = mnScreen(printgen=1,num_samp_anc)
 
-mymcmc = mcmc(mymodel, monitors, moves, moveschedule="mixed")
+mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
 
-mymcmc.run(generations=1000, tuningInterval=10, checkpointInterval=100, checkpointFile="output_sky/skyline.state")
+mymcmc.run(generations=100, tuningInterval=10, checkpointInterval=100, checkpointFile="output_epi_small/skyline.state")
 
 # check the performance of the MCMC/moves
 mymcmc.operatorSummary()
 
+
 # Read in the tree trace and construct the maximum clade credibility (MCC) tree #
-trace = readTreeTrace("output_sky/trees.trees")
+trace = readTreeTrace("output_epi_small/trees.trees")
 
 # Summarize tree trace and save MCC tree to file
-mccTree(trace, file="output_sky/tree.tre" )
+mccTree(trace, file="output_epi_small/tree.tre" )
 
 
 # you may want to quit RevBayes now
