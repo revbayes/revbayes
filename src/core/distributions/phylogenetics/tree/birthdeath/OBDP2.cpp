@@ -255,14 +255,19 @@ double OBDP2::computeLnProbabilityDivergenceTimes( void ) const
     std::cout << "Compute likelihood Mt piecewise" << std::endl;
     MatrixReal B_Mt = RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(start_age, timeline, lambda, mu, phi, omega, homogeneous_Phi, r, maxHiddenLin, cond, time_points_Mt, useOrigin, occAges, tree);
     const size_t k = value->getNumberOfExtantTips();
+    std::cout<<"k for Mt"<<k<<std::endl;
     const long N = maxHiddenLin->getValue();
 
-    double likelihood = B_Mt[0][0];
+    double likelihood = 0.0;
+
     // std::cout << "B_Mt[0][0] : " << B_Mt[0][0] << std::endl;
-    for(int i = 1; i < N+1; i++){
+    for(int i = 0; i < N+1; i++){
         // std::cout << "B_Mt[0][" << i << "] : " << B_Mt[0][i] << std::endl;
         // std::cout << "B_Mt[0][" << i << "] * pow(rh,k) * pow(1.0 - rh,i) : " << B_Mt[0][i] * pow(rh,k) * pow(1.0 - rh,i) << std::endl;
         likelihood += B_Mt[0][i] * pow(phi_event[0],k) * pow(1.0 - phi_event[0],i);
+        std::cout<<"Rho"<<phi_event[0]<<std::endl;
+        std::cout << std::setprecision(100);
+        std::cout<<"Likelihood Mt"<<likelihood<<std::endl;
     }
     std::cout << "Log Likelihood Mt = " << log(likelihood) << std::endl;
     return log(likelihood);

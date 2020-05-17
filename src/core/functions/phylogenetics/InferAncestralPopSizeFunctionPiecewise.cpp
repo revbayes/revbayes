@@ -195,6 +195,7 @@ InferAncestralPopSizeFunctionPiecewise* InferAncestralPopSizeFunctionPiecewise::
  */
 void InferAncestralPopSizeFunctionPiecewise::update( void )
 {
+		updateVectorParameters();
     size_t S = time_points.size();
     long N = maxHiddenLin->getValue();
 
@@ -202,6 +203,7 @@ void InferAncestralPopSizeFunctionPiecewise::update( void )
     const std::vector<double> occurrence_ages = occurrences->getValue();
 
 	MatrixReal B_Lt = RevBayesCore::ComputeLikelihoodsBackwardsLtPiecewise(start_age, timeline, lambda, mu, phi, omega, homogeneous_Phi, r, maxHiddenLin, cond, time_points, useOrigin, occurrence_ages, tree);
+	std::cout << "LT is ok, go to Mt" << std::endl;
 	MatrixReal B_Mt = RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(start_age, timeline, lambda, mu, phi, omega, homogeneous_Phi, r, maxHiddenLin, cond, time_points, useOrigin, occurrence_ages, tree);
 	// Realize the Hadamar Product of B_Lt and B_Mt
 	MatrixReal D_Kt(S, (N + 1), 0.0);
@@ -231,7 +233,7 @@ void InferAncestralPopSizeFunctionPiecewise::updateVectorParameters( void ) cons
     timeline.clear();
     timeline = interval_times->getValue();
 
-  
+
     timeline.insert(timeline.begin(),0.0);
 
     // clean all the sets
