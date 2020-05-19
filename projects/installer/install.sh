@@ -6,10 +6,10 @@ logfile=${root_folder}/log.txt
 
 uname_out="$(uname -s)"
 case "${uname_out}" in
-    Linux*)     machine=Linux; compiler=g++;;
-    Darwin*)    machine=Mac; compiler=clang++;;
-    CYGWIN*)    machine=Windows; compiler=g++;;
-    MINGW*)     machine=Windows; compiler=g++;;
+    Linux*)     machine=Linux; compiler=g++; build_args="";;
+    Darwin*)    machine=Mac; compiler=clang++; build_args="";;
+    CYGWIN*)    machine=Windows; compiler=g++; build_args="";;
+    MINGW*)     machine=Windows; compiler=g++; build_args=" -mac true";;
     *)          machine="UNKNOWN"
 esac
 
@@ -165,8 +165,15 @@ echo "############################"
 echo "Compiling RevBayes"
 echo "... will take a few minutes..."
 export MY_BOOST_ROOT=${boost_folder}
-bash build.sh
-
+bash build.sh ${build_args}  >> ${logfile} 2>&1
+if [ -f "rb" ]; then
+  echo "> RevBayes was sucessfully installed"
+  echo "> RevBayes was sucessfully installed" >> ${logfile} 2>&1
+else
+  echo "> [WARNING] RevBayes was not sucessfully installed. [WARNING] <"
+  echo "> RevBayes was not sucessfully installed." >> ${logfile} 2>&1
+  exit
+fi
 echo "> done"
 echo "############################"
 echo ""
