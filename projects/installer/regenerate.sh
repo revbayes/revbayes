@@ -43,6 +43,11 @@ Command line options are:
     shift
 done
 
+if [ "${MY_OS}" == "Windows-cygwin" ]; then
+  win="true"
+elif [ "${MY_OS}" == "Mac" ]; then
+  mac="true"
+fi
 
 
 #################
@@ -118,7 +123,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 elif [ "$win" = "true" ]
 then
 echo '
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -msse -msse2 -msse3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -msse -msse2 -msse3 -static-libgcc -static-libstdc++")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 '  >> "$BUILD_DIR/CMakeLists.txt"
 else
