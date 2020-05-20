@@ -42,11 +42,14 @@ else
 
 	bash ./regenerate.sh
 	cd ${BUILD_DIR}
-  bash build.sh
   if [ "${MY_OS}" == "Windows-cygwin" ]; then
-	   cmake . -DCMAKE_TOOLCHAIN_FILE=../mingw64_toolchain.cmake
+	  cmake . -DCMAKE_TOOLCHAIN_FILE=../mingw64_toolchain.cmake
+  elif [ "${MY_OS}" == "Mac" ]; then
+    #export CC=/usr/bin/clang
+    #export CXX=/usr/bin/clang++
+    cmake .
   else
-     cmake .
+    cmake .
   fi
 	make -j 4
 	cd ..
