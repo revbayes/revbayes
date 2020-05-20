@@ -6,10 +6,6 @@ logfile=${root_folder}/log.txt
 
 uname_out="$(uname -s)"
 case "${uname_out}" in
-    Linux*)     machine=Linux; compiler=g++; build_args="";;
-    Darwin*)    machine=Mac; compiler=clang++; build_args="";;
-    CYGWIN*)    machine=Windows; compiler=g++; build_args="";;
-    MINGW*)     machine=Windows; compiler=g++; build_args=" -mac true";;
     *)          machine="UNKNOWN"
 esac
 
