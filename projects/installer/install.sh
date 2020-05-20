@@ -147,7 +147,11 @@ echo ""
 # Compiling revbayes
 echo "############################"
 echo "Compiling RevBayes"
-echo "... will take a several minutes (most probably a few hours - hang tight) ..."
+if [ "${machine}" == "Windows-cygwin" ]; then
+  echo "... will take a several minutes (most probably a few hours - hang tight) ..."
+else
+  echo "... will take a several minutes ..."   
+fi
 export MY_OS=${machine}
 export MY_BOOST_ROOT=${boost_folder}
 bash build.sh ${build_args}  >> ${logfile} 2>&1
