@@ -45,8 +45,9 @@ done
 
 if [ "${MY_OS}" == "Windows-cygwin" ]; then
   win="true"
-elif [ "${MY_OS}" == "Mac" ]; then
-  mac="true"
+#elif [ "${MY_OS}" == "Mac" ]; then
+  #echo "MACOS"
+  #mac="true"
 fi
 
 
