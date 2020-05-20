@@ -8,8 +8,7 @@ uname_out="$(uname -s)"
 case "${uname_out}" in
     Linux*)     machine=Linux; compiler=g++;;
     Darwin*)    machine=Mac; compiler=clang++;;
-    CYGWIN*)    machine=Windows; compiler=g++;;
-    MINGW*)     machine=Windows; compiler=g++;;
+    CYGWIN*)    machine=Windows-cygwin; toolchain="x86_64-w64-mingw32"; compiler="${toolchain}-g++";;
     *)          machine="UNKNOWN"
 esac
 
@@ -91,30 +90,6 @@ else
   echo "> make found: ${make_bin}" >> ${logfile} 2>&1
 fi
 
-# Check unzip
-unzip_bin=`command -v unzip`
-if [ "${unzip_bin}" == "" ]; then
-  echo "'unzip' is unavailable on your system and is required to download dependencies."
-  echo "Please install make and retry (e.g., install with homebrew for MacOS or aptitude for Linux)."
-  echo "> no unzip" >> ${logfile} 2>&1
-  exit
-else
-  echo "> unzip found: ${unzip_bin}"
-  echo "> unzip found: ${unzip_bin}" >> ${logfile} 2>&1
-fi
-
-# Check perl
-perl_bin=`command -v perl`
-if [ "${perl_bin}" == "" ]; then
-  echo "'perl' is unavailable on your system and is required to download dependencies."
-  echo "Please install perl and retry (e.g., install with homebrew for MacOS or aptitude for Linux)."
-  echo "> no perl" >> ${logfile} 2>&1
-  exit
-else
-  echo "> perl found: ${perl_bin}"
-  echo "> perl found: ${perl_bin}" >> ${logfile} 2>&1
-fi
-
 # Check compiler
 compiler_bin=`command -v ${compiler}`
 if [ "${compiler_bin}" == "" ]; then
@@ -137,10 +112,19 @@ else
   fi
 fi
 
-if [ ! -d ${tmp_folder}/boost ]; then
-  echo "########################################"
-  echo "Dowloading and installing boost locally"
-  echo "... will take a few minutes..."
+
+echo "########################################"
+echo "Dowloading and installing boost locally"
+echo "... will take a few minutes..."
+if [ "${machine}" == "Windows-cygwin" ]; then
+  boost_folder=/usr/${toolchain}/sys-root/mingw
+  if [ ! -d ${boost_folder}/include/boost ]; then
+    echo "'boost' is unavailable on your system and is required."
+    echo "Please install boost and retry (i.e., install with cygwin - see instructions)."
+    echo "> no boost in ${boost_folder}" >> ${logfile} 2>&1
+    exit
+  fi
+else
   boost_build_folder=${tmp_folder}/boost_1_73_0
   boost_folder=${tmp_folder}/boost
   curl -fsSL https://dl.bintray.com/boostorg/release/1.73.0/source/boost_1_73_0.tar.gz -o ${tmp_folder}/boost.tar.gz
@@ -153,20 +137,20 @@ if [ ! -d ${tmp_folder}/boost ]; then
   ./bootstrap.sh --prefix=${boost_folder}  >> ${logfile} 2>&1
   ./b2 install  >> ${logfile} 2>&1
   cd ${root_folder}
-  echo "> boost available in: ${boost_folder}"
-  echo "> boost available in: ${boost_folder}" >> ${logfile} 2>&1
-  echo "> done"
-  echo "########################################"
-  echo ""
 fi
+echo "> boost available in: ${boost_folder}"
+echo "> boost available in: ${boost_folder}" >> ${logfile} 2>&1
+echo "> done"
+echo "########################################"
+echo ""
 
 # Compiling revbayes
 echo "############################"
 echo "Compiling RevBayes"
-echo "... will take a few minutes..."
+echo "... will take a several minutes (most probably a few hours - hang tight) ..."
+export MY_OS=${machine}
 export MY_BOOST_ROOT=${boost_folder}
 bash build.sh
-
 echo "> done"
 echo "############################"
 echo ""
@@ -174,8 +158,8 @@ echo ""
 echo "############################"
 echo "Cleanup..."
 cd ${root_folder}
-#rm -r build
-#rm checkCPPVersion
+rm -r ${tmp_folder}
+rm checkCPPVersion
 echo "> done"
 echo "############################"
 echo ""

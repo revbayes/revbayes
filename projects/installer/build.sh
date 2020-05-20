@@ -21,41 +21,36 @@ Command line options are:
     shift
 done
 
-if [ "$mpi" = "true" ] && [ "$travis" = "false" ]; then
+if [ "$mpi" = "true" ]; then
     BUILD_DIR="build-mpi"
 else
     BUILD_DIR="build"
 fi
 
-CC=gcc CXX=g++
-
-if [ "$travis" = "true" ]; then
-    CC=${C_COMPILER} CXX=${CXX_COMPILER}
-    all_args="-travis true -mpi ${USE_MPI} -help true -exec_name rb"
-else
-    all_args=""
-fi
-
-if [ "$1" = "clean" ]
-then
+if [ "$1" = "clean" ]; then
 	rm -rf ${BUILD_DIR}
 else
-if [ ! -d ${BUILD_DIR} ]; then
-	mkdir ${BUILD_DIR}
-fi
+  if [ ! -d ${BUILD_DIR} ]; then
+  	mkdir ${BUILD_DIR}
+  fi
 
-    #################
-    # generate git version number
-    bash ./generate_version_number.sh
-    cp ../../src/revlanguage/utils/GitVersion.cpp GitVersion_backup.cpp
-    mv GitVersion.cpp ../../src/revlanguage/utils/
+  #################
+  # generate git version number
+  bash ./generate_version_number.sh
+  cp ../../src/revlanguage/utils/GitVersion.cpp GitVersion_backup.cpp
+  mv GitVersion.cpp ../../src/revlanguage/utils/
 
-	bash ./regenerate.sh ${all_args}
+	bash ./regenerate.sh
 	cd ${BUILD_DIR}
-	cmake .
-	make -j 8
+  bash build.sh
+  if [ "${MY_OS}" == "Windows-cygwin" ]; then
+	   cmake . -DCMAKE_TOOLCHAIN_FILE=../mingw64_toolchain.cmake
+  else
+     cmake .
+  fi
+	make -j 4
 	cd ..
 
-    cp GitVersion_backup.cpp ../../src/revlanguage/utils/GitVersion.cpp
-    rm GitVersion_backup.cpp
+  cp GitVersion_backup.cpp ../../src/revlanguage/utils/GitVersion.cpp
+  rm GitVersion_backup.cpp
 fi
