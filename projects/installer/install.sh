@@ -54,19 +54,7 @@ else
   echo "> curl found: ${curl_bin}" >> ${logfile} 2>&1
 fi
 
-# Check python
-python_bin=`command -v python`
-if [ "${python_bin}" == "" ]; then
-  echo "'python' is unavailable on your system and is required to download dependencies."
-  echo "Please install python and retry (e.g., install with homebrew for MacOS or aptitude for Linux)."
-  echo "> no python" >> ${logfile} 2>&1
-  exit
-else
-  echo "> python found: ${python_bin}"
-  echo "> python found: ${python_bin}" >> ${logfile} 2>&1
-fi
-
-# Check autoconf
+# Check cmake
 cmake_bin=`command -v cmake`
 if [ "${cmake_bin}" == "" ]; then
   echo "'cmake' is unavailable on your system and is required to download dependencies."
@@ -150,7 +138,7 @@ echo "Compiling RevBayes"
 if [ "${machine}" == "Windows-cygwin" ]; then
   echo "... will take a several minutes (most probably a few hours - hang tight) ..."
 else
-  echo "... will take a several minutes ..."   
+  echo "... will take a several minutes ..."
 fi
 export MY_OS=${machine}
 export MY_BOOST_ROOT=${boost_folder}
