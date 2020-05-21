@@ -21,7 +21,7 @@ using namespace RevLanguage;
  */
 Func_loadPlugin* Func_loadPlugin::clone( void ) const
 {
-	
+
 	return new Func_loadPlugin( *this );
 }
 
@@ -29,13 +29,19 @@ Func_loadPlugin* Func_loadPlugin::clone( void ) const
 /** Execute function */
 RevPtr<RevVariable> Func_loadPlugin::execute( void )
 {
-	
+
 	// get the information from the arguments for reading the file
 	const RlString&    pn  = static_cast<const RlString&>( args[0].getVariable()->getRevObject() );
 	const RlString&    fn  = static_cast<const RlString&>( args[1].getVariable()->getRevObject() );
 
 	if(pn.getValue() == "TensorPhylo") {
-		bool successfulLoad = Plugin::loader().loadTensorPhylo(fn.getValue());
+
+		bool successfulLoad = false;
+		if(fn.getValue() == "") {
+			successfulLoad = Plugin::loader().loadTensorPhylo();
+		} else {
+			successfulLoad = Plugin::loader().loadTensorPhylo(fn.getValue());
+		}
 		if(!successfulLoad) {
 			throw RbException("Failed to locate TensorPhylo.");
 		}
@@ -44,25 +50,25 @@ RevPtr<RevVariable> Func_loadPlugin::execute( void )
 	}
 
     return new RevVariable( RlUtils::Void );
-    
+
 }
 
 
 /** Get argument rules */
 const ArgumentRules& Func_loadPlugin::getArgumentRules( void ) const
 {
-	
+
 	static ArgumentRules argumentRules = ArgumentRules();
 	static bool rules_set = false;
-	
+
 	if (!rules_set)
 	{
 		argumentRules.push_back( new ArgumentRule( "name", RlString::getClassTypeSpec(), "Name of the plugin (e.g., TensorPhylo).", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-		argumentRules.push_back( new ArgumentRule( "path", RlString::getClassTypeSpec(), "Relative or absolute path of the plugin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+		argumentRules.push_back( new ArgumentRule( "path", RlString::getClassTypeSpec(), "Relative or absolute path of the plugin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("") ) );
 		rules_set = true;
-		
+
 	}
-	
+
 	return argumentRules;
 }
 
@@ -70,9 +76,9 @@ const ArgumentRules& Func_loadPlugin::getArgumentRules( void ) const
 /** Get Rev type of object */
 const std::string& Func_loadPlugin::getClassType(void)
 {
-	
+
 	static std::string rev_type = "Func_loadPlugin";
-	
+
 	return rev_type;
 }
 
@@ -80,9 +86,9 @@ const std::string& Func_loadPlugin::getClassType(void)
 /** Get class type spec describing type of object */
 const TypeSpec& Func_loadPlugin::getClassTypeSpec(void)
 {
-	
+
 	static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
-	
+
 	return rev_type_spec;
 }
 
@@ -94,7 +100,7 @@ std::string Func_loadPlugin::getFunctionName( void ) const
 {
     // create a name variable that is the same for all instance of this class
     std::string f_name = "loadPlugin";
-    
+
     return f_name;
 }
 
@@ -102,9 +108,9 @@ std::string Func_loadPlugin::getFunctionName( void ) const
 /** Get type spec */
 const TypeSpec& Func_loadPlugin::getTypeSpec( void ) const
 {
-	
+
 	static TypeSpec type_spec = getClassTypeSpec();
-	
+
 	return type_spec;
 }
 
@@ -112,8 +118,7 @@ const TypeSpec& Func_loadPlugin::getTypeSpec( void ) const
 /** Get return type */
 const TypeSpec& Func_loadPlugin::getReturnType( void ) const
 {
-	
+
     static TypeSpec return_typeSpec = RlUtils::Void;
 	return return_typeSpec;
 }
-

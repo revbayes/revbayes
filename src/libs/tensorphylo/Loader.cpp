@@ -10,6 +10,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <stdlib.h>
 #include <boost/filesystem.hpp>
 
 #include <boost/dll.hpp>
@@ -21,7 +22,7 @@ using boost::system::error_code;
 
 namespace Plugin {
 
-const std::string Loader::DEFAULT_PLUGIN_PATH("./plugins");
+const std::string Loader::DEFAULT_PLUGIN_PATH(".plugins");
 const std::string Loader::PLUGIN_TENSORPHYLO_NAME("libTensorPhylo");
 
 Loader::Loader() {
@@ -35,7 +36,16 @@ bool Loader::isTensorPhyloLoaded() {
 }
 
 bool Loader::loadTensorPhylo() {
-	return loadTensorPhylo(DEFAULT_PLUGIN_PATH);
+
+	const char * home = std::getenv ("HOME");
+	if (home == NULL) {
+	  throw RbException("Path to your home folder not found.\nProvide the full path to the folder containing the TensorPhylo library.");
+	}
+	std::string pluginPath(home);
+	pluginPath += "/";
+	pluginPath += DEFAULT_PLUGIN_PATH;
+
+	return loadTensorPhylo(pluginPath);
 }
 
 
@@ -44,7 +54,7 @@ bool Loader::loadTensorPhylo(const std::string &aPluginFolder) {
 	// Checking for the plugin folder
 	boost::filesystem::path pluginPath(aPluginFolder);
 	if(!boost::filesystem::is_directory(pluginPath)) {
-		std::cerr << "Path not found : " << aPluginFolder << std::endl;
+		throw RbException("The folder doesn't exist.");
 		return false;
 	}
 
@@ -67,7 +77,7 @@ bool Loader::loadTensorPhylo(const std::string &aPluginFolder) {
 	}
 
 	if(!found) {
-		std::cerr << "Library libTensorPhylo not found in : " << pluginPath << std::endl;
+		throw RbException("Library libTensorPhylo not found in the given folder.");
 		return false;
 	}
 
