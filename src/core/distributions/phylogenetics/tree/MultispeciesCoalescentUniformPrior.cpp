@@ -2,6 +2,7 @@
 #include <cmath>
 #include <vector>
 #include <boost/math/special_functions/expint.hpp>
+#include <iostream>
 
 #include "MultispeciesCoalescentUniformPrior.h"
 #include "DistributionUniform.h"
@@ -90,7 +91,7 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
 
     // If the number of gene copies is 1, then there can be no coalescence event
     // and the probability is equal to 1.0 for the only possible event (no coalescence)
-    if (n <= 1)
+    if ( n <= 1 )
     {
         ln_prob_coal = 0.0;
     }
@@ -100,7 +101,6 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
 
         // When the shape term is 0 (as when n == 2), then we calculate
         // the upper incomplete gamma using an exponential integral instead
-        // (see )
         if (n == 2)
         {
             if (integral_limit > 0)
@@ -119,8 +119,8 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
         // Otherwise we calculate the incomplete gamma directly
         else
         {
-            double lower_incomplete_gamma = RbMath::incompleteGamma( integral_limit, nt-2, RbMath::lnGamma(nt-2) ) * gamma(nt-2);
-            double upper_incomplete_gamma = gamma(nt-2) - lower_incomplete_gamma;
+            double lower_incomplete_gamma = RbMath::incompleteGamma( integral_limit, nt-2, RbMath::lnGamma(nt-2) ) * RbMath::gamma(nt-2);
+            double upper_incomplete_gamma = RbMath::gamma(nt-2) - lower_incomplete_gamma;
 
             ln_prob_coal += log( upper_incomplete_gamma );
         }
