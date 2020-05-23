@@ -267,7 +267,9 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                 return RbConstants::Double::neginf;
             }
         }
-        else if ( !( b > o && o >= y && y >= d && d >= 0.0 ) )
+        // else if ( !( b > o && o >= y && y >= d && d >= 0.0 ) )
+        // Sebastian: This code is not safe if the values (y and d) are not exactly equal but differ due to machine rounding
+        else if ( !( b > o && o >= y && (y - d) > -1E-4 && d >= 0.0 ) )
         {
             return RbConstants::Double::neginf;
         }

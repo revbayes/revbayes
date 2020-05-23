@@ -138,7 +138,7 @@ void RevBayesCore::TreeUtilities::constructTimeTreeRecursively(TopologyNode *tn,
 
     // set the age
     double a = depth - n.getBranchLength();
-    if ( a < 1E-4 )
+    if ( a < 1E-3 )
     {
         a = 0.0;
     }

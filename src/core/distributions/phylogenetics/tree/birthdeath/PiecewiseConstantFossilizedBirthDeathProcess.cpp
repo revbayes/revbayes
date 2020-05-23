@@ -244,7 +244,8 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( 
                 }
             }
             // y == d
-            else if ( d_i[i] != taxa[i].getAgeRange().getMin() )
+            // Sebastian: This code is not safe because of numerical rounding issues
+            else if ( fabs(d_i[i] - taxa[i].getAgeRange().getMin()) > 1E-4 )
             {
                 return RbConstants::Double::neginf;
             }
