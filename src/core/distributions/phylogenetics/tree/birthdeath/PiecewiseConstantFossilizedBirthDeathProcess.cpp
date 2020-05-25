@@ -2,6 +2,7 @@
 #include <cmath>
 #include <cstddef>
 #include <iterator>
+#include <math.h>       /* fabs */
 #include <ostream>
 #include <string>
 #include <type_traits>
