@@ -896,12 +896,13 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
 
         }
 
-        if ( condition == SURVIVAL and current_num_active_nodes <= 1 )
+        if ( condition == SURVIVAL && current_num_active_nodes <= 1 )
         {
             delete root;
             root = NULL;
         }
-        else if ( condition == ROOT and root->getAge() < start_age )
+        // next we check that both sides of the root node were sampled ()
+        else if ( condition == ROOT && root->getAge() < start_age )
         {
             delete root;
             root = NULL;

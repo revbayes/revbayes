@@ -14,10 +14,12 @@ namespace RevBayesCore {
     class Clade;
     class Taxon;
     
+    enum RangeModel { KNOWNCOUNTS, UNKNOWNCOUNTS, PRESENCEABSENCE };
+
     /**
-     * @brief Piecewise-constant fossilized birth-death process with serially sampled fossils.
+     * @brief Abstract piecewise-constant fossilized birth-death range process.
      *
-     * The piecewise-constant birth-death process has constant rates for each time interval.
+     * The piecewise-constant fossilized birth-death range process has constant rates for each time interval.
      * At the end of each time interval there may be an abrupt rate-shift (jump) for each
      * of the rates. Additionally, there may be sampling at the end of each interval.
      * Finally, fossils are sampled with rate psi, the others (fossils and extant taxa) are
@@ -42,7 +44,8 @@ namespace RevBayesCore {
                                                              const TypedDagNode<double>* rho,
                                                              const TypedDagNode<RbVector<double> > *times,
                                                              const std::vector<Taxon> &taxa,
-                                                             bool pa );  //!< Constructor
+                                                             bool bounded,
+                                                             bool presence_absence);  //!< Constructor
 
         virtual ~AbstractPiecewiseConstantFossilizedRangeProcess(){};
 
@@ -63,10 +66,10 @@ namespace RevBayesCore {
         // helper functions
         size_t                                          l(double t) const;                                     //!< Find the index so that times[index-1] < t < times[index]
         double                                          p(size_t i, double t) const;
-        double                                          q(size_t i, double t, bool tilde = false) const;
-        double                                          integrateQ(size_t i, double t) const;
+        virtual double                                  q(size_t i, double t, bool tilde = false) const;
+        virtual double                                  integrateQ(size_t i, double t) const;
 
-        void                                            updateIntervals() const;
+        virtual void                                    updateIntervals() const;
 
         bool                                            ascending;
 
@@ -101,8 +104,8 @@ namespace RevBayesCore {
 
         std::vector<Taxon>                              fbd_taxa;                                                                                               //!< Taxon names that will be attached to new simulated trees.
 
-        bool                                            marginalize_k;
-        bool                                            presence_absence;
+        enum RangeModel                                 model;
+        bool                                            bounded;
 
         mutable std::vector<size_t>                     oldest_intervals;
         mutable std::vector<size_t>                     youngest_intervals;
