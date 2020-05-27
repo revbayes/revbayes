@@ -180,7 +180,10 @@ jobs:
       run: |
         ${GITHUB_WORKSPACE}/projects/meson/make_winroot.sh -ccache true
         ( cd ${GITHUB_WORKSPACE}/projects/meson/ ; ./generate.sh )
-
+        
+    - name: Update submodules
+        git submodule update --init --recursive
+        
     - name: Configure and build
       if: matrix.name != 'windows'
       env:
@@ -222,7 +225,6 @@ jobs:
         fi
         echo "\"Hello World\"" | rb
         echo ::group::Test suite
-        git submodule update --init --recursive
         cd tests
         ./run_integration_tests.sh -mpi ${USE_MPI} -windows ${IS_WINDOWS} rb
         cd
