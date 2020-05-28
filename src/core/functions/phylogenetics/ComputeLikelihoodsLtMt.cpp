@@ -113,7 +113,7 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(   const TypedDagNode<double> *star
         MatrixReal LogLikelihood = RevBayesCore::ForwardsTraversalMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, returnLogLikelihood, verbose, occurrence_ages, timeTree);
         
         double logLikelihood = LogLikelihood[0][0];
-        if (verbose){std::cout << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;}
+        if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;}
         return (logLikelihood);
     }
     // Use the backwards traversal algorithm (Lt)
@@ -506,6 +506,7 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
                 N_optimal_tmp--;
             }
             N_optimal = std::max(N_optimal, N_optimal_tmp);
+            // if (verbose){std::cout << "\nThe smallest sufficient N value ( such as Mt[N_optimal] < max(Mt)/1000 for all t ) is " << N_optimal << "\n" << std::endl;}
         }
 
         thPlusOne = th;
@@ -513,7 +514,10 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
     
     // Give the estimated optimal N value
     if ((N_optimal < N) & verbose){
-        std::cout << "\nTo improve performance, set N to a lower value - current value = " << N << ", optimal value ( such as Mt[N_optimal] < max(Mt)/1000 for all t ) = " << N_optimal << "\n" << std::endl;
+        std::cout << "\nTo improve performance, set N to a lower value -> current value : N = " << N << ", optimal value ( such as Mt[N_optimal] < max(Mt)/1000 for all t ) : N_optimal = " << N_optimal << "\n" << std::endl;
+    }
+    else if ((N_optimal == N) & verbose){
+        std::cout << "\nThe chosen N value is optimal ( such as Mt[N_optimal] < max(Mt)/1000 for all t ) : N = N_optimal = " << N_optimal << std::endl;
     }
     else if (N_optimal == N+1){
         std::cout << "\nWARNING : There is a time t at which Mt[N] contains a non-negligeable probability ( Mt[N] > max(Mt)/1000 ) -> you should increase N\n" << std::endl;
@@ -775,7 +779,7 @@ MatrixReal RevBayesCore::BackwardsTraversalLt( const TypedDagNode<double> *start
         }
         log_correction -= log(c);
         
-        // if (verbose){std::cout << "Event time : " << th << " - Event type : " << type << " -> log(c) : " << log(c) << " -> Lt[0] : " << Lt[0] << " / Lt[1] : " << Lt[1] << " / Lt[N] : " << Lt[N] << std::endl;}
+        // if (verbose){std::cout << "Event time : " << th << " - Event type : " << type << " -> log(c) : " << log(c) << " -> Lt[0] : " << Lt[0] << " / Lt[1] : " << Lt[1] << " / Lt[N-1] : " << Lt[N-1] << " / Lt[N] : " << Lt[N] << std::endl;}
         
         // Check that N is big enough
         if (Lt[N]>0.001){
@@ -788,17 +792,18 @@ MatrixReal RevBayesCore::BackwardsTraversalLt( const TypedDagNode<double> *start
                 N_optimal_tmp--;
             }
             N_optimal = std::max(N_optimal, N_optimal_tmp);
+            // if (verbose){std::cout << "\nThe smallest sufficient N value ( such as Lt[N_optimal] < max(Lt)/1000 for all t ) is " << N_optimal << "\n" << std::endl;}
         }
-        // if (verbose){std::cout << "\nThe smallest sufficient N value ( such as Lt[N_optimal] < max(Lt)/1000 for all t ) is " << N_optimal << "\n" << std::endl;}
-
-        // if (verbose){std::cout << "Event time : " << th << " - Event type : " << type << " -> k : " << k << " -> Lt[0] : " << Lt[0] << " / Lt[1] : " << Lt[1] << " / Lt[N] : " << Lt[N] << std::endl;}
 
         thMinusOne = th;
     }
 
     // Give the estimated optimal N value
     if ((N_optimal < N) & verbose){
-        std::cout << "\nTo improve performance, set N to a lower value - current value = " << N << ", optimal value ( such as Lt[N_optimal] < max(Lt)/1000 for all t ) = " << N_optimal << "\n" << std::endl;
+        std::cout << "\nTo improve performance, set N to a lower value -> current value : N = " << N << ", optimal value ( such as Lt[N_optimal] < max(Lt)/1000 for all t ) : N_optimal = " << N_optimal << "\n" << std::endl;
+    }
+    else if ((N_optimal == N) & verbose){
+        std::cout << "\nThe chosen N value is optimal ( such as Lt[N_optimal] < max(Lt)/1000 for all t ) : N = N_optimal = " << N_optimal << std::endl;
     }
     else if (N_optimal == N+1){
         std::cout << "\nWARNING : There is a time t at which Lt[N] contains a non-negligeable probability ( Lt[N] > max(Lt)/1000 ) -> you should increase N\n" << std::endl;
