@@ -322,13 +322,14 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
     size_t nb_occurrences = 0;          // Number of fossil occurrences
     size_t nb_branching_times = 0;      // Number of branching times
 
-    //Initialize rates to their root value
+    //Initialize rates to their root value and a cursor to update rates
     double birth_current = birth.back();
     double death_current = death.back();
     double ps_current = ps.back();
     double om_current = om.back();
     double rp_current = rp.back();
     double gamma_current = gamma.back();
+    size_t indx_rate = timeline.size();
 
     // Recording the correction terms c to avoid divergence towards extreme values (outside of double precision)
     double log_correction = 0;
@@ -400,14 +401,15 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
         }
 
         if(type == "rate shift"){
+        indx_rate--;
         //change rates appropriately, rate changes provided in timeline are in an ascending order
-        size_t where = LocateTimeSliceIndex(th,timeline) - 1;
-        birth_current = birth[where];
-        death_current = death[where];
-        ps_current = ps[where];
-        om_current = om[where];
-        rp_current = rp[where];
-        gamma_current = gamma[where];
+        //size_t where = LocateTimeSliceIndex(th,timeline) - 1;
+        birth_current = birth[indx_rate];
+        death_current = death[indx_rate];
+        ps_current = ps[indx_rate];
+        om_current = om[indx_rate];
+        rp_current = rp[indx_rate];
+        gamma_current = gamma[indx_rate];
 
         }
 
@@ -505,6 +507,7 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
     }
     else if ((N_optimal == N) & verbose){
       std::cout << "\nThe chosen N value is optimal ( such as Mt[N_optimal] < max(Mt)/1000 for all t ) : N = N_optimal = " << N_optimal << std::endl;
+    }
     else if (N_optimal == N+1){
       std::cout << "\nWARNING : There is a time t at which Mt[N] contains a non-negligeable probability ( Mt[N] > max(Mt)/1000 ) -> you should increase N\n" << std::endl;
     }
@@ -605,6 +608,7 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
     double om_current = om[0];
     double rp_current = rp[0];
     double gamma_current = gamma[0];
+    size_t indx_rate=0;
 
     // Count event types :
     size_t nb_fossil_leafs = 0;         // Number of fossil leafs
@@ -703,15 +707,14 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
         }
 
         if(type == "rate shift"){
-
+        indx_rate++;
         //change rates appropriately
-        size_t where = LocateTimeSliceIndex(th,timeline) ;
-        birth_current = birth[where];
-        death_current = death[where];
-        ps_current = ps[where];
-        om_current = om[where];
-        rp_current = rp[where];
-        gamma_current = gamma[where];
+        birth_current = birth[indx_rate];
+        death_current = death[indx_rate];
+        ps_current = ps[indx_rate];
+        om_current = om[indx_rate];
+        rp_current = rp[indx_rate];
+        gamma_current = gamma[indx_rate];
 
         }
 
@@ -785,6 +788,7 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
     }
     else if ((N_optimal == N) & verbose){
       std::cout << "\nThe chosen N value is optimal ( such as Lt[N_optimal] < max(Lt)/1000 for all t ) : N = N_optimal = " << N_optimal << std::endl;
+    }
     else if (N_optimal == N+1){
       std::cout << "\nWARNING : There is a time t at which Lt[N] contains a non-negligeable probability ( Lt[N] > max(Lt)/1000 ) -> you should increase N\n" << std::endl;
     }
@@ -793,10 +797,7 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
 }
 
 
-size_t RevBayesCore::LocateTimeSliceIndex(const double &t, const std::vector<double> &timeline)
-{
-    return std::distance(timeline.begin(),std::find(timeline.begin(),timeline.end(),t));
-}
+
 
 /////////////////////////leftovers
 // /**
@@ -1426,4 +1427,9 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLtPiecewise(  const TypedDag
     }
 
     return B;
+}
+
+size_t RevBayesCore::LocateTimeSliceIndex(const double &t, const std::vector<double> &timeline)
+{
+    return std::distance(timeline.begin(),std::find(timeline.begin(),timeline.end(),t));
 }
