@@ -49,7 +49,8 @@ namespace RevBayesCore {
                                                       TypedDagNode<Tree> *t,
                                                       const TypedDagNode<long> *n,
                                                       const TypedDagNode< RevBayesCore::RbVector<double> > *O,
-                                                      bool mt);  //!< Constructor
+                                                      bool mt,
+                                                      bool vb);  //!< Constructor
 
         // public member functions
         OBDP2*   clone(void) const;                                         //!< Create an independent clone
@@ -103,6 +104,7 @@ namespace RevBayesCore {
         const bool                                            useMt;                                 //!< Forward traversal Mt algorithm (otherwise backward Lt)
         const bool                                            useOrigin;
         const std::string &                                   cond;
+        const bool                                            verbose;                               //!< Display warnings and information messages
 
         mutable std::vector<double>                     timeline;                                              //!< The times of the instantaneous events and rate shifts.
 
