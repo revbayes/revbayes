@@ -195,30 +195,41 @@ InferAncestralPopSizeFunctionPiecewise* InferAncestralPopSizeFunctionPiecewise::
  */
 void InferAncestralPopSizeFunctionPiecewise::update( void )
 {
+		updateVectorParameters();
     size_t S = time_points.size();
     long N = maxHiddenLin->getValue();
 
     const Tree tree = timeTree->getValue();
     const std::vector<double> occurrence_ages = occurrences->getValue();
 
-	MatrixReal B_Lt = RevBayesCore::ComputeLikelihoodsBackwardsLtPiecewise(start_age, timeline, lambda, mu, phi, omega, homogeneous_Phi, r, maxHiddenLin, cond, time_points, useOrigin, occurrence_ages, tree);
-	MatrixReal B_Mt = RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(start_age, timeline, lambda, mu, phi, omega, homogeneous_Phi, r, maxHiddenLin, cond, time_points, useOrigin, occurrence_ages, tree);
-	// Realize the Hadamar Product of B_Lt and B_Mt
-	MatrixReal D_Kt(S, (N + 1), 0.0);
-	for (size_t j = 0; j < S; j++)
+		bool useMt;
+		bool verbose;
+	MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDPPiecewise(start_age, timeline, lambda, mu, phi, omega, homogeneous_Phi, r, maxHiddenLin, cond, time_points, useOrigin, useMt = false, verbose = true, occurrence_ages, tree);
+	std::cout << "LT is ok, go to Mt" << std::endl;
+	MatrixReal B_Mt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDPPiecewise(start_age, timeline, lambda, mu, phi, omega, homogeneous_Phi, r, maxHiddenLin, cond, time_points, useOrigin, useMt = true, verbose = true, occurrence_ages, tree);
+	// Realize the normalized Hadamar Product of B_Lt and B_Mt
+		MatrixReal D_Kt(S, (N + 1), 0.0);
+    for (size_t j = 0; j < S; j++){
+        // Compute the mean log-probability (later substracted in order to avoid extreme values, out of the double precision)
+        double B_Lt_Mt_log_mean = 0.0;
+        for (size_t i = 0; i < (N+1); i++)
         {
-            // Compute the normalization factor
-            double norm = 0.0;
-            for (size_t i = 0; i < (N+1); i++)
-            {
-                norm += B_Lt[j][i]*B_Mt[j][i];
-            }
-
-            for (size_t i = 0; i < (N+1); i++)
-            {
-                D_Kt[j][i] = (B_Lt[j][i] * B_Mt[j][i])/norm;
-            }
+            B_Lt_Mt_log_mean += B_Lt_log[j][i] + B_Mt_log[j][i];
         }
+        B_Lt_Mt_log_mean /= N;
+
+        // Compute the normalization factor
+        double norm = 0.0;
+        for (size_t i = 0; i < (N+1); i++)
+        {
+            norm += exp(B_Lt_log[j][i] + B_Mt_log[j][i] - B_Lt_Mt_log_mean);
+        }
+
+        for (size_t i = 0; i < (N+1); i++)
+        {
+            D_Kt[j][i] = exp(B_Lt_log[j][i] + B_Mt_log[j][i] - B_Lt_Mt_log_mean)/norm;
+        }
+    }
 
 	*this->value = D_Kt;
 
@@ -231,7 +242,7 @@ void InferAncestralPopSizeFunctionPiecewise::updateVectorParameters( void ) cons
     timeline.clear();
     timeline = interval_times->getValue();
 
-  
+
     timeline.insert(timeline.begin(),0.0);
 
     // clean all the sets

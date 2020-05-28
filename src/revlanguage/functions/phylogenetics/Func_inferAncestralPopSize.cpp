@@ -13,7 +13,6 @@
 #include "Real.h"
 #include "RealPos.h"
 #include "Natural.h"
-#include "RlBoolean.h"
 #include "RlMatrixReal.h"
 #include "MatrixReal.h"
 #include "RlTypedFunction.h"
@@ -44,7 +43,8 @@ Func_inferAncestralPopSize* Func_inferAncestralPopSize::clone( void ) const
 /** you probably have to change the first line of this function */
 RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_inferAncestralPopSize::createFunction( void ) const
 {
-  /**first we get parameters that are shared by the piecewise and constant rate models */
+
+/**first we get parameters that are shared by the piecewise and constant rate models */
 
   RevBayesCore::TypedDagNode< double >*                           sa              = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
 
@@ -71,24 +71,24 @@ RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_inferAncestralPopS
 
   if ( this->args[12].getVariable()->getRevObject() != RevNullObject::getInstance() )
   {
+      RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >*time = static_cast<const ModelVector<RealPos> &>( this->args[12].getVariable()->getRevObject() ).getDagNode();
 
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >*time = static_cast<const ModelVector<RealPos> &>( this->args[12].getVariable()->getRevObject() ).getDagNode();
+      RevBayesCore::DagNode* l = ( this->args[1].getVariable()->getRevObject() ).getDagNode();
 
-    RevBayesCore::DagNode* l = ( this->args[1].getVariable()->getRevObject() ).getDagNode();
+      RevBayesCore::DagNode* m = ( this->args[2].getVariable()->getRevObject() ).getDagNode();
 
-    RevBayesCore::DagNode* m = ( this->args[2].getVariable()->getRevObject() ).getDagNode();
+      RevBayesCore::DagNode* p = ( this->args[3].getVariable()->getRevObject() ).getDagNode();
 
-    RevBayesCore::DagNode* p = ( this->args[3].getVariable()->getRevObject() ).getDagNode();
+      RevBayesCore::DagNode* o = ( this->args[4].getVariable()->getRevObject() ).getDagNode();
 
-    RevBayesCore::DagNode* o = ( this->args[4].getVariable()->getRevObject() ).getDagNode();
+      RevBayesCore::DagNode* r = ( this->args[6].getVariable()->getRevObject() ).getDagNode();
 
-    RevBayesCore::DagNode* r = ( this->args[6].getVariable()->getRevObject() ).getDagNode();
+      RevBayesCore::InferAncestralPopSizeFunctionPiecewise* fxn = new RevBayesCore::InferAncestralPopSizeFunctionPiecewise( sa, l, m, p, o, rh, r, n, cdt, O, tau, uo, tr, time );
 
-    RevBayesCore::InferAncestralPopSizeFunctionPiecewise* fxn = new RevBayesCore::InferAncestralPopSizeFunctionPiecewise( sa, l, m, p, o, rh, r, n, cdt, O, tau, uo, tr, time );
-
-    return fxn;
+      return fxn;
 
   }
+
 
   RevBayesCore::TypedDagNode< double >*                           l               = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
 
@@ -113,57 +113,61 @@ RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_inferAncestralPopS
 /* but after this I don't think you need to change anything else in this file */
 const ArgumentRules& Func_inferAncestralPopSize::getArgumentRules( void ) const
 {
-  static ArgumentRules argumentRules = ArgumentRules();
-  static bool          rules_set = false;
 
-  if ( !rules_set )
-  {
-    std::vector<std::string> aliases;
-    aliases.push_back("rootAge");
-    aliases.push_back("originAge");
-    argumentRules.push_back( new ArgumentRule( aliases,             RealPos::getClassTypeSpec(), "The start age of the process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    static ArgumentRules argumentRules = ArgumentRules();
+    static bool          rules_set = false;
 
-    argumentRules.push_back( new ArgumentRule( "lambda",            RealPos::getClassTypeSpec(), "The speciation rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-    argumentRules.push_back( new ArgumentRule( "mu",                RealPos::getClassTypeSpec(), "The extinction rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
-    argumentRules.push_back( new ArgumentRule( "psi",               RealPos::getClassTypeSpec(), "The fossil sampling rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
-    argumentRules.push_back( new ArgumentRule( "omega",             RealPos::getClassTypeSpec(), "The occurrence rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
-    argumentRules.push_back( new ArgumentRule( "rho",               Probability::getClassTypeSpec(), "The sampling fraction at present.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(1.0) ) );
-    argumentRules.push_back( new ArgumentRule( "removalPr",         Probability::getClassTypeSpec(), "The removal probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(0.0) ) );
-    argumentRules.push_back( new ArgumentRule( "maxHiddenLin",      Natural::getClassTypeSpec(), "The number of hidden lineages (algorithm accuracy).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Natural(30) ) );
+    if ( !rules_set )
+    {
+        std::vector<std::string> aliases;
+        aliases.push_back("rootAge");
+        aliases.push_back("originAge");
+        argumentRules.push_back( new ArgumentRule( aliases,             RealPos::getClassTypeSpec(), "The start age of the process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
-    std::vector<std::string> optionsCondition;
-    optionsCondition.push_back( "time" );
-    optionsCondition.push_back( "survival" );
-    argumentRules.push_back( new OptionRule( "condition",           new RlString("time"), optionsCondition, "The condition of the process." ) );
+        std::vector<TypeSpec> paramTypes;
+        paramTypes.push_back( RealPos::getClassTypeSpec() );
+        paramTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
+        argumentRules.push_back( new ArgumentRule( "lambda",            paramTypes, "The speciation rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "mu",                paramTypes, "The extinction rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
+        argumentRules.push_back( new ArgumentRule( "psi",               paramTypes, "The fossil sampling rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
+        argumentRules.push_back( new ArgumentRule( "omega",             paramTypes, "The occurrence rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
+        argumentRules.push_back( new ArgumentRule( "rho",               Probability::getClassTypeSpec(), "The sampling fraction at present.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(1.0) ) );
+        argumentRules.push_back( new ArgumentRule( "removalPr",         Probability::getClassTypeSpec(), "The removal probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(0.0) ) );
+        argumentRules.push_back( new ArgumentRule( "maxHiddenLin",      Natural::getClassTypeSpec(), "The number of hidden lineages (algorithm accuracy).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Natural(30) ) );
 
-    argumentRules.push_back( new ArgumentRule( "occurrence_ages",   ModelVector<Real>::getClassTypeSpec(), "Occurrence ages for incomplete fossils.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-    argumentRules.push_back( new ArgumentRule( "time_points",       ModelVector<Real>::getClassTypeSpec(), "Time points for which we compute density.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-    argumentRules.push_back( new ArgumentRule( "timeTree" ,         TimeTree::getClassTypeSpec(), "Tree for which ancestral pop. size has to be computed.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
-    argumentRules.push_back( new ArgumentRule( "timeline",          ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        std::vector<std::string> optionsCondition;
+        optionsCondition.push_back( "time" );
+        optionsCondition.push_back( "survival" );
+        argumentRules.push_back( new OptionRule( "condition",           new RlString("time"), optionsCondition, "The condition of the process." ) );
 
-    argumentRules.push_back( new ArgumentRule( "verbose",           RlBoolean::getClassTypeSpec(), "If true displays warnings and information messages.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( false ) ) );
+        argumentRules.push_back( new ArgumentRule( "occurrence_ages",   ModelVector<Real>::getClassTypeSpec(), "Occurrence ages for incomplete fossils.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "time_points",       ModelVector<Real>::getClassTypeSpec(), "Time points for which we compute density.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "timeTree" ,         TimeTree::getClassTypeSpec(), "Tree for which ancestral pop. size has to be computed.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+        argumentRules.push_back( new ArgumentRule( "timeline",    ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
-    rules_set = true;
-  }
+        argumentRules.push_back( new ArgumentRule( "verbose",           RlBoolean::getClassTypeSpec(), "If true displays warnings and information messages.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( false ) ) );
 
-  return argumentRules;
+        rules_set = true;
+    }
+
+    return argumentRules;
 }
 
 const std::string& Func_inferAncestralPopSize::getClassType(void)
 {
 
-  static std::string rev_type = "Func_inferAncestralPopSize";
+    static std::string rev_type = "Func_inferAncestralPopSize";
 
-  return rev_type;
+    return rev_type;
 }
 
 /* Get class type spec describing type of object */
 const TypeSpec& Func_inferAncestralPopSize::getClassTypeSpec(void)
 {
 
-  static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
+    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
 
-  return rev_type_spec;
+    return rev_type_spec;
 }
 
 
@@ -172,17 +176,18 @@ const TypeSpec& Func_inferAncestralPopSize::getClassTypeSpec(void)
  */
 std::string Func_inferAncestralPopSize::getFunctionName( void ) const
 {
-  // create a name variable that is the same for all instance of this class
-  std::string f_name = "fnInferAncestralPopSize";
+    // create a name variable that is the same for all instance of this class
+    std::string f_name = "fnInferAncestralPopSize";
 
-  return f_name;
+    return f_name;
 }
 
 const TypeSpec& Func_inferAncestralPopSize::getTypeSpec( void ) const
 {
-  static TypeSpec type_spec = getClassTypeSpec();
 
-  return type_spec;
+    static TypeSpec type_spec = getClassTypeSpec();
+
+    return type_spec;
 }
 
 /**
@@ -197,64 +202,64 @@ const TypeSpec& Func_inferAncestralPopSize::getTypeSpec( void ) const
  */
 void Func_inferAncestralPopSize::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
-  if ( name == "rootAge" || name == "originAge" )
-  {
-      start_age = var;
-      start_condition = name;
-  }
-  else if ( name == "lambda" )
-  {
-      lambda = var;
-  }
-  else if ( name == "mu" )
-  {
-      mu = var;
-  }
-  else if ( name == "psi" )
-  {
-      psi = var;
-  }
-  else if ( name == "omega" )
-  {
-     omega = var;
-  }
-  else if ( name == "rho" )
-  {
-      rho = var;
-  }
-  else if ( name == "removalPr" )
-  {
-      removalPr = var;
-  }
-  else if ( name == "maxHiddenLin" )
-  {
-      maxHiddenLin = var;
-  }
-  else if ( name == "condition" )
-  {
-      condition = var;
-  }
-  else if ( name == "occurrence_ages" )
-  {
-      occurrence_ages = var;
-  }
-  else if ( name == "time_points" )
-  {
-      time_points = var;
-  }
-  else if ( name == "timeTree" )
-  {
-      timeTree = var;
-  }
-  else if ( name == "verbose" )
-  {
-      verbose = var;
-  }
-  else if ( name == "timeline" )
-  {
-      timeline = var;
-  }
-  else {
-    Function::setConstParameter(name, var);
-  }
+    if ( name == "rootAge" || name == "originAge" )
+    {
+        start_age = var;
+        start_condition = name;
+    }
+    else if ( name == "lambda" )
+    {
+        lambda = var;
+    }
+    else if ( name == "mu" )
+    {
+        mu = var;
+    }
+    else if ( name == "psi" )
+    {
+        psi = var;
+    }
+    else if ( name == "omega" )
+    {
+       omega = var;
+    }
+    else if ( name == "rho" )
+    {
+        rho = var;
+    }
+    else if ( name == "removalPr" )
+    {
+        removalPr = var;
+    }
+    else if ( name == "maxHiddenLin" )
+    {
+        maxHiddenLin = var;
+    }
+    else if ( name == "condition" )
+    {
+        condition = var;
+    }
+    else if ( name == "occurrence_ages" )
+    {
+        occurrence_ages = var;
+    }
+    else if ( name == "time_points" )
+    {
+        time_points = var;
+    }
+    else if ( name == "timeTree" )
+    {
+        timeTree = var;
+    }
+    else if ( name == "verbose" )
+    {
+        verbose = var;
+    }
+    else if ( name == "timeline" )
+    {
+        timeline = var;
+    }
+    else {
+      Function::setConstParameter(name, var);
+    }
 }
