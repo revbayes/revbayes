@@ -16,7 +16,7 @@ seed(12345)
 ### Read in taxon data
 tree <- readTrees("data_OBDP2_simple/tree.tre")[1]
 taxa <- tree.taxa()
-occurrence_ages <- readMatrix(file="data_OBDP2_simple/occurrences.csv", delimiter=";")[1]
+occurrence_ages <- readMatrix(file="data-OBDP2-simple/occurrences.csv", delimiter=";")[1]
 
 #set rate values
 speciation <- v(1.0,1.0,1.0)
@@ -26,9 +26,9 @@ sampling <- 0.25
 omega <- 0.5
 rm <- 1.0
 N <- 50
-cond <- "time"
+cond <- "survival2"
 origin_time <- 9
-Mt <- FALSE
+Mt <- TRUE
 
 #set timeline
 timeline <- v(1,2)
@@ -60,7 +60,6 @@ mymodel = model(obd_tree)
 monitors[1] = mnScreen(printgen=1)
 print("my model ok")
 mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
-print("SegfaulthunterREVSCRIPT")
 mymcmc.run(generations=1, tuningInterval=1)
 # you may want to quit RevBayes now
 q()
