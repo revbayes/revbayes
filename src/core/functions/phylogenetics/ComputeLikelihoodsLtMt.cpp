@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <iostream>
+#include <iomanip>
 #include <cmath>
 
 #include "RbConstants.h"
@@ -223,6 +224,8 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *sta
                                                           const std::vector<double> &occurrence_ages,
                                                           const Tree &timeTree)
 {
+    double logLikelihood = 0.0;
+
     // Use the forwards traversal algorithm (Mt)
     if (useMt){
         const std::vector<double> time_points_Mt( 1, 0.0 );      // Record the probability density at present to compute the likelihood
@@ -230,18 +233,31 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *sta
 
         MatrixReal LogLikelihood = RevBayesCore::ForwardsTraversalMt(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, returnLogLikelihood, verbose, occurrence_ages, timeTree);
 
-        double logLikelihood = LogLikelihood[0][0];
+        logLikelihood = LogLikelihood[0][0];
         if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;}
-        return (logLikelihood);
     }
     // Use the backwards traversal algorithm (Lt)
-    const std::vector<double> time_points_Lt(1, start_age->getValue());      // Record the probability density at the start age to compute the likelihood
+    else{
+        const std::vector<double> time_points_Lt(1, start_age->getValue());      // Record the probability density at the start age to compute the likelihood
 
-    MatrixReal B_Lt_log = RevBayesCore::BackwardsTraversalLt(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, verbose, occurrence_ages, timeTree);
+        MatrixReal B_Lt_log = RevBayesCore::BackwardsTraversalLt(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, verbose, occurrence_ages, timeTree);
 
-    // The likelihood corresponds to the first element of the B_Lt matrix
-    double logLikelihood = B_Lt_log[0][0];
-    if (verbose){std::cout << "\n ==> Log-Likelihood Lt : " << logLikelihood << "\n" << std::endl;}
+        // The likelihood corresponds to the first element of the B_Lt matrix
+        logLikelihood = B_Lt_log[0][0];
+        if (verbose){std::cout << "\n ==> Log-Likelihood Lt : " << logLikelihood << "\n" << std::endl;}
+    }
+
+    // We then deal with the conditioning
+    if(cond == "survival"){
+        std::vector<double> res = RevBayesCore::GetFunctionUandP(start_age, timeline, lambda, mu, psi, omega, rho, removalPr);
+        logLikelihood -= log( 1 - res[0] );
+    }
+    else if(cond == "survival2"){
+        std::vector<double> res = RevBayesCore::GetFunctionUandP(start_age, timeline, lambda, mu, psi, omega, rho, removalPr);
+        logLikelihood -= log( 1 - res[0] - res[1] );
+        std::cout << " at the time of origin, we have u = " << res[0] << " and p = " << res[1] << std::endl;
+    }
+
     return (logLikelihood);
 };
 
@@ -1045,4 +1061,87 @@ MatrixReal RevBayesCore::IncompleteBellPolynomial(unsigned N, unsigned K, std::v
     }
 
     return OutputMatrix;
+}
+
+std::vector<double> RevBayesCore::GetFunctionUandP(  const TypedDagNode<double> *start_age,
+                                                                  const std::vector<double> &timeline,
+                                                                  const std::vector<double> &lambda,
+                                                                  const std::vector<double> &mu,
+                                                                  const std::vector<double> &psi,
+                                                                  const std::vector<double> &omega,
+                                                                  const TypedDagNode<double> *rho,
+                                                                  const std::vector<double> &removalPr)
+{
+    //get rate vectors
+    const std::vector<double> birth = lambda;
+    const std::vector<double> death = mu;
+    const std::vector<double> ps = psi;
+    const std::vector<double> om = omega;
+    const std::vector<double> rp = removalPr;
+    const double rh = rho->getValue();
+    const double time = start_age->getValue();
+    const std::vector<double> d = timeline;
+
+    // quantities that help us compute u
+    double new_u = 1 - rh;
+    double old_u = 0.;
+    double new_p = rh;
+    double old_p = 0.;
+    double deltat = 0.;
+    double gamma = 0.;
+    double sqrtDelta = 0.;
+    double x1 = 0.;
+    double x2 = 0.;
+    double numerator = 0.;
+    double denominator = 0.;
+
+    // parameters
+    double birth_current = birth[0];
+    double death_current = death[0];
+    double ps_current = ps[0];
+    double om_current = om[0];
+    double rp_current = rp[0];
+
+    for (int i = 0; i < d.size(); i++){
+        // we take the parameters for this time period
+        birth_current = birth[i];
+        death_current = death[i];
+        ps_current = ps[i];
+        om_current = om[i];
+        rp_current = rp[i];
+        // we store the old_u that we need to compute new_u a bit further
+        old_u = new_u;
+        old_p = new_p;
+
+        deltat = 0.;
+        if( i < d.size()-1 ){
+            if( time > d[i+1] ){
+                deltat = d[i+1] - d[i];
+            }
+            else if( time > d[i] && time < d[i+1] ){
+                deltat = time - d[i];
+            }
+        }
+        else{
+            if( time > d[i] ){
+                deltat = time - d[i];
+            }
+        }
+
+        gamma = birth_current + death_current + ps_current + om_current;
+        sqrtDelta = sqrt( pow(gamma, 2) - 4.0 * birth_current * death_current );
+        x1 = (gamma - sqrtDelta)/(2*birth_current);
+        x2 = (gamma + sqrtDelta)/(2*birth_current);
+        numerator = x1*(x2 - old_u) - x2*(x1 - old_u)*exp(-sqrtDelta * deltat);
+        denominator = (x2 - old_u) - (x1 - old_u)*exp(-sqrtDelta * deltat);
+
+        // The new u and p are functions of the previous
+        new_u = numerator/denominator;
+        new_p = pow((sqrtDelta/birth_current),2) * pow((1/((x2-old_u) - (x1-old_u)*exp(-sqrtDelta* deltat))),2) * exp(-sqrtDelta* deltat) * old_p;
+    }
+
+    std::vector<double> res(2, 0.0);
+    res[0] = new_u;
+    res[1] = new_p;
+    return res;
 }
