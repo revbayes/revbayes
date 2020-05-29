@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <iostream>
+#include <iomanip>
 #include <cmath>
 
 #include "RbConstants.h"
@@ -223,6 +224,8 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *sta
                                                           const std::vector<double> &occurrence_ages,
                                                           const Tree &timeTree)
 {
+    double logLikelihood = 0.0;
+
     // Use the forwards traversal algorithm (Mt)
     if (useMt){
         const std::vector<double> time_points_Mt( 1, 0.0 );      // Record the probability density at present to compute the likelihood
@@ -230,18 +233,28 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *sta
 
         MatrixReal LogLikelihood = RevBayesCore::ForwardsTraversalMt(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, returnLogLikelihood, verbose, occurrence_ages, timeTree);
 
-        double logLikelihood = LogLikelihood[0][0];
+        logLikelihood = LogLikelihood[0][0];
         if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;}
-        return (logLikelihood);
     }
     // Use the backwards traversal algorithm (Lt)
-    const std::vector<double> time_points_Lt(1, start_age->getValue());      // Record the probability density at the start age to compute the likelihood
+    else{
+        const std::vector<double> time_points_Lt(1, start_age->getValue());      // Record the probability density at the start age to compute the likelihood
 
-    MatrixReal B_Lt_log = RevBayesCore::BackwardsTraversalLt(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, verbose, occurrence_ages, timeTree);
+        MatrixReal B_Lt_log = RevBayesCore::BackwardsTraversalLt(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, verbose, occurrence_ages, timeTree);
 
-    // The likelihood corresponds to the first element of the B_Lt matrix
-    double logLikelihood = B_Lt_log[0][0];
-    if (verbose){std::cout << "\n ==> Log-Likelihood Lt : " << logLikelihood << "\n" << std::endl;}
+        // The likelihood corresponds to the first element of the B_Lt matrix
+        logLikelihood = B_Lt_log[0][0];
+        if (verbose){std::cout << "\n ==> Log-Likelihood Lt : " << logLikelihood << "\n" << std::endl;}
+    }
+
+    // We then deal with the conditioning
+    if(cond == "survival"){
+        logLikelihood -= log( 1 - GetFunctionU(start_age, timeline, lambda, mu, psi, omega, rho, removalPr));
+    }
+    else if(cond == "survival2"){
+        logLikelihood -= log( 1 - GetFunctionU(start_age, timeline, lambda, mu, psi, omega, rho, removalPr) - GetFunctionP(start_age, timeline, lambda, mu, psi, omega, rho, removalPr) );
+    }
+        
     return (logLikelihood);
 };
 
@@ -737,9 +750,9 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
             // for(int i = 0; i < N+1; i++){
             //     Lt[i] = Lt[i] * birth;
             // }
-            Lt *= birth_current;
+            Lt = Lt * birth_current;
             k--;
-          if (birth_current!=0){events_factor_log += log(birth_current);};
+            if (birth_current!=0){events_factor_log += log(birth_current);};
         }
 
         // Correct probability vector to avoid divergence towards extreme values (outside of double precision) by scaling to a unit maximum value
@@ -1097,4 +1110,28 @@ MatrixReal RevBayesCore::IncompleteBellPolynomial(unsigned N, unsigned K, std::v
     }
 
     return OutputMatrix;
+}
+        
+double RevBayesCore::GetFunctionU(  const TypedDagNode<double> *start_age,
+                                                                  const std::vector<double> &timeline,
+                                                                  const std::vector<double> &lambda,
+                                                                  const std::vector<double> &mu,
+                                                                  const std::vector<double> &psi,
+                                                                  const std::vector<double> &omega,
+                                                                  const TypedDagNode<double> *rho,
+                                                                  const std::vector<double> &removalPr)
+{
+  return 0.5;
+}
+
+double RevBayesCore::GetFunctionP(  const TypedDagNode<double> *start_age,
+                                                                  const std::vector<double> &timeline,
+                                                                  const std::vector<double> &lambda,
+                                                                  const std::vector<double> &mu,
+                                                                  const std::vector<double> &psi,
+                                                                  const std::vector<double> &omega,
+                                                                  const TypedDagNode<double> *rho,
+                                                                  const std::vector<double> &removalPr)
+{
+  return 0.2;
 }

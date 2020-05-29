@@ -133,6 +133,23 @@ double               ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *sta
 
     MatrixReal IncompleteBellPolynomial(unsigned N, unsigned K, std::vector<double> Vector);
 
+    double GetFunctionU(  const TypedDagNode<double> *start_age,
+                                                                  const std::vector<double> &timeline,
+                                                                  const std::vector<double> &lambda,
+                                                                  const std::vector<double> &mu,
+                                                                  const std::vector<double> &psi,
+                                                                  const std::vector<double> &omega,
+                                                                  const TypedDagNode<double> *rho,
+                                                                  const std::vector<double> &removalPr);
+
+    double GetFunctionP(  const TypedDagNode<double> *start_age,
+                                                                  const std::vector<double> &timeline,
+                                                                  const std::vector<double> &lambda,
+                                                                  const std::vector<double> &mu,
+                                                                  const std::vector<double> &psi,
+                                                                  const std::vector<double> &omega,
+                                                                  const TypedDagNode<double> *rho,
+                                                                  const std::vector<double> &removalPr);
 
 
     };
