@@ -231,7 +231,8 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *sta
         MatrixReal LogLikelihood = RevBayesCore::ForwardsTraversalMt(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, returnLogLikelihood, verbose, occurrence_ages, timeTree);
 
         double logLikelihood = LogLikelihood[0][0];
-        if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;}
+        //if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;}
+        if (verbose){std::cout << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;}
         return (logLikelihood);
     }
     // Use the backwards traversal algorithm (Lt)
@@ -1435,8 +1436,8 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLtPiecewise(  const TypedDag
  * size at that time, as time increases towards the past : breadth-first backwards traversal algorithm.
  * This function is borrowed from Ankit Gupta, 
  * see his paper: "The probability distribution of the reconstructed phylogenetic tree with occurrence data".
- *
  * \param[in]    start_age              Start age of the process.
+ * \param[in]    timeline               Rate shifts times.
  * \param[in]    lambda                 Speciation rate.
  * \param[in]    mu                     Extinction rate.
  * \param[in]    psi                    Extinction sampling rate.
@@ -1447,29 +1448,28 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLtPiecewise(  const TypedDag
  * \param[in]    cond                   Condition of the process (none/survival/#Taxa).
  * \param[in]    time_points            Times for which we want to compute the density.
  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
- * \param[in]    verbose                If true displays warnings and information messages.
- * \param[in]    occurrence_ages        Vector of occurrence ages.
  * \param[in]    timeTree               Tree for ancestral populations size inference.
  *
- * \return    The log likelihood.
+ * \return    The matrix of Lt values through time.
  */
 double RevBayesCore::likelihoodWithAllSamplesRemoved(  const TypedDagNode<double> *start_age,
-                                                const TypedDagNode<double> *lambda,
-                                                const TypedDagNode<double> *mu,
-                                                const TypedDagNode<double> *psi,
-                                                const TypedDagNode<double> *omega,
-                                                const TypedDagNode<double> *rho,
-                                                const TypedDagNode<double> *removalPr,
-                                                const TypedDagNode<long> *maxHiddenLin,
-                                                const std::string& cond,
-                                                const std::vector<double> &time_points,
-                                                bool useOrigin,
-                                                bool verbose,
-                                                const std::vector<double> &occurrence_ages,
-                                                const Tree &timeTree)
+                                                                  const std::vector<double> &timeline,
+                                                                  const std::vector<double> &lambda,
+                                                                  const std::vector<double> &mu,
+                                                                  const std::vector<double> &psi,
+                                                                  const std::vector<double> &omega,
+                                                                  const TypedDagNode<double> *rho,
+                                                                  const std::vector<double> &removalPr,
+                                                                  const std::string& cond,
+                                                                  const std::vector<double> &time_points,
+                                                                  bool useOrigin,
+                                                                  bool verbose,
+                                                                  const std::vector<double> &occurrence_ages,
+                                                                  const Tree &timeTree  )
 {
+
     // Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
-    std::vector<Event> events = RevBayesCore::PoolEvents(start_age, time_points, verbose, occurrence_ages, timeTree);
+    std::vector<Event> events = RevBayesCore::PoolEvents(start_age, time_points, occurrence_ages, verbose, timeTree, timeline);
 
     // Order times youngest to oldest
     struct AgeCompare {
@@ -1479,36 +1479,42 @@ double RevBayesCore::likelihoodWithAllSamplesRemoved(  const TypedDagNode<double
     };
     std::sort( events.begin(), events.end(), AgeCompare() );
 
-    const double birth = lambda->getValue();
-    const double death = mu->getValue();
-    const double ps = psi->getValue();
-    const double om = omega->getValue();
-    const double rh = rho->getValue();
-    const double rp = removalPr->getValue();
-    const long N = maxHiddenLin->getValue();
-    const RbVector<double> tau = time_points;
+    // this variable is used to check that r==1 throughout and that the data can be observed with r=1.
+    bool impossible = false;
 
-    const size_t S = tau.size();
-    const double gamma = birth + death + ps + om;
+    //get rate vectors
+    const std::vector<double> birth = lambda;
+    const std::vector<double> death = mu;
+    const std::vector<double> ps = psi;
+    const std::vector<double> om = omega;
+    const std::vector<double> rp = removalPr;
+    const double rh = rho->getValue();
+    // Initialize rates to their present value
+    double birth_current = birth[0];
+    double death_current = death[0];
+    double ps_current = ps[0];
+    double om_current = om[0];
+    double rp_current = rp[0];
+    if(rp_current != 1.0){
+        std::cout << "Warning ! This function should be used only when r=1. Here, r = " << rp_current << std::endl;
+        impossible = true;
+    }
+    size_t indx_rate=0;
 
     // Count the number of extant lineages
     size_t k = timeTree.getNumberOfExtantTips();
 
     // starts to compute the likelihood
     double LogLikelihood = k*log(rh);
+    double log_factor = 0.0;
+    std::vector<double> v(1, 1);
 
     double p0 = 1-rh;
     double oldp0 = p0;
 
-    // Count event types :
-    size_t nb_fossil_leafs = 0;         // Number of fossil leafs
-    size_t nb_sampled_ancestors = 0;    // Number of sampled ancestors
-    size_t nb_occurrences = 0;          // Number of fossil occurrences
-    size_t nb_branching_times = 0;      // Number of branching times
-
     // We start at time 0 with type "present" in the vector of events
     double thMinusOne = events[0].time;
-    std::vector<double> v(1, 1);
+    double deltat = 0;
 
     // We then iterate over the following events until finding the time of origin
     for(int h = 0; h < events.size(); h++){
@@ -1524,37 +1530,55 @@ double RevBayesCore::likelihoodWithAllSamplesRemoved(  const TypedDagNode<double
 
         if( th != thMinusOne ){
             oldp0 = p0;
-            p0 = GetP0(th, birth, 1-rh, death, ps+om, 0);
-            v = TransformDerivativeContrVec(th-thMinusOne, birth, oldp0, death, ps+om, 0, k, v);
+            deltat = th-thMinusOne;
+            p0 = GetP0(deltat, birth_current, oldp0, death_current, ps_current+om_current, 0);
+            v = TransformDerivativeContrVec(deltat, birth_current, oldp0, death_current, ps_current+om_current, 0, k, v);
         }
+
+        if(type == "rate shift"){
+            indx_rate++;
+            birth_current = birth[indx_rate];
+            death_current = death[indx_rate];
+            ps_current = ps[indx_rate];
+            om_current = om[indx_rate];
+            rp_current = rp[indx_rate];
+            if(rp_current != 1.0){
+                std::cout << "Warning ! This function should be used only when r=1. Here, r = " << rp_current << std::endl;
+                impossible = true;
+            }
+        }
+
 
         if(type == "fossil leaf"){
            k++;
-           nb_fossil_leafs++;
+           log_factor += log(ps_current);
        }
 
         if(type == "sampled ancestor"){
-            nb_sampled_ancestors++;
+           std::cout << "Warning ! It should not be possible to see a sampled ancestor here. This function only deals with r = 1" << std::endl;
+           log_factor += log(ps_current);
+           impossible = true;
         }
 
         if(type == "occurrence"){
-           nb_occurrences++;
            std::cout << v.size() << std::endl;
            v.insert(v.begin(), 0.0);
+           log_factor += log(om_current);
         }
 
         if(type == "branching time"){
-            k--;
-            nb_branching_times++;
+           k--;
+           log_factor += log(birth_current);
         }
 
         thMinusOne = th;
     }
-    
-    LogLikelihood += nb_fossil_leafs * log(ps);
-    LogLikelihood += nb_occurrences * log(om);
-    LogLikelihood += nb_branching_times * log(birth);
-    LogLikelihood += log(v[0]);
+   
+    if (impossible){
+      LogLikelihood = -1e500;
+    }else{
+      LogLikelihood += log(v[0]) + log_factor;
+    }
 
     return LogLikelihood;
 }
