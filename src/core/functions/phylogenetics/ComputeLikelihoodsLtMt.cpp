@@ -737,8 +737,9 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
             // for(int i = 0; i < N+1; i++){
             //     Lt[i] = Lt[i] * birth;
             // }
+            Lt *= birth_current;
             k--;
-          if (birth_current!=0){events_factor_log += log(om_current);};
+          if (birth_current!=0){events_factor_log += log(birth_current);};
         }
 
         // Correct probability vector to avoid divergence towards extreme values (outside of double precision) by scaling to a unit maximum value
