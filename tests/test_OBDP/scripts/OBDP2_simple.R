@@ -24,7 +24,7 @@ extinction <- 0.9
 rho <- 0.2
 sampling <- 0.25
 omega <- 0.5
-rm <- 1.0
+rm <- 0.3
 N <- 50
 cond <- "survival2"
 origin_time <- 9
@@ -42,6 +42,7 @@ obd_tree ~  dnOBDP2(originAge=origin_time,
                     omega=omega,
                     phi=sampling,
                     Phi=rho,
+                    cond=cond,
                     r=rm,
                     occurrence_ages=occurrence_ages,
                     taxa=taxa,
