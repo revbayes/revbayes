@@ -349,8 +349,8 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
 
     double events_factor_log = 0;
     // Estimating the smallest sufficient N value for getting most of the probability density
-    size_t N_optimal = 0;
-    size_t N_optimal_tmp;
+    size_t N_limit = 0;
+    size_t N_limit_tmp;
 
     // We start at the time of origin, supposedly the first time in the vector of events
     RbVector<double> Mt(N+1, 0.0);
@@ -476,29 +476,33 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
         // Check that N is big enough
         if (Mt[N]>0.001){
             // In that case the optimal N value cannot be estimated because it is greater than the chosen one
-            N_optimal = N+1;
+            N_limit = N+1;
         }
         else{
-            N_optimal_tmp = N;
-            while (Mt[N_optimal_tmp-1]<0.001){
-                N_optimal_tmp--;
+            N_limit_tmp = N;
+            while (Mt[N_limit_tmp-1]<0.001){
+                N_limit_tmp--;
             }
-            N_optimal = std::max(N_optimal, N_optimal_tmp);
-             // if (verbose){std::cout << "\nThe smallest sufficient N value ( such as Mt[N_optimal] < max(Mt)/1000 for all t ) is " << N_optimal << "\n" << std::endl;}
+            N_limit = std::max(N_limit, N_limit_tmp);
+             // if (verbose){std::cout << "\nThe smallest sufficient N value ( such as Mt[N_limit] < max(Mt)/1000 for all t ) is " << N_limit << "\n" << std::endl;}
         }
 
         thPlusOne = th;
     }
 
     // Give the estimated optimal N value
-    if ((N_optimal < N) & verbose){
-      std::cout << "\nTo improve performance, set N to a lower value -> current value : N = " << N << ", optimal value ( such as Mt[N_optimal] < max(Mt)/1000 for all t ) : N_optimal = " << N_optimal << "\n" << std::endl;
+    size_t margin = 5;                        // Safety margin to avoid edge effects on the computation
+    if ((N > N_limit + margin) & verbose){
+      std::cout << "\nTo improve performance, set N (" << N << ") to a lower value -> optimal value : N_limit ( such as Mt[N_limit] < max(Mt)/1000 for all t ) + safety_margin = " << N_limit + margin << "\n" << std::endl;
     }
-    else if ((N_optimal == N) & verbose){
-      std::cout << "\nThe chosen N value is optimal ( such as Mt[N_optimal] < max(Mt)/1000 for all t ) : N = N_optimal = " << N_optimal << std::endl;
+    else if ((N == N_limit + margin) & verbose){
+      std::cout << "\nThe selected N value is at a safe margin from the limit of the high-probabilities area ( such as Mt[N_limit] < max(Mt)/1000 for all t ) : N = N_limit + safety_margin = " << N_limit + margin << std::endl;
     }
-    else if (N_optimal == N+1){
-      std::cout << "\nWARNING : There is a time t at which Mt[N] contains a non-negligeable probability ( Mt[N] > max(Mt)/1000 ) -> you should increase N\n" << std::endl;
+    else if ((N >= N_limit) & (N < N_limit + margin)){
+      std::cout << "\nWARNING : You should increase N -> The N value limiting the high-probabilities area ( such as Mt[N_limit] < max(Mt)/1000 for all t ) is coming closer to your N value (" << N << ") -> N_limit + safety_margin = " << N_limit + margin << std::endl;
+    }
+    else if (N_limit == N+1){
+      std::cout << "\nWARNING : You should increase N -> There is a time t at which Mt[N] contains a non-negligeable probability ( Mt[N] > max(Mt)/1000 )\n" << std::endl;
     }
     if(returnLogLikelihood){
 
@@ -601,8 +605,8 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
     double c;
 
     // Estimating the smallest sufficient N value for getting most of the probability density
-    size_t N_optimal = 0;
-    size_t N_optimal_tmp;
+    size_t N_limit = 0;
+    size_t N_limit_tmp;
 
     // We start at time 0 with type "present" in the vector of events
     double thMinusOne = events[0].time;
@@ -721,29 +725,33 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
         // Check that N is big enough
         if (Lt[N]>0.001){
             // In that case the optimal N value cannot be estimated because it is greater than the chosen one
-            N_optimal = N+1;
+            N_limit = N+1;
         }
         else{
-            N_optimal_tmp = N;
-            while (Lt[N_optimal_tmp-1]<0.001){
-                N_optimal_tmp--;
+            N_limit_tmp = N;
+            while (Lt[N_limit_tmp-1]<0.001){
+                N_limit_tmp--;
             }
-            N_optimal = std::max(N_optimal, N_optimal_tmp);
-            // if (verbose){std::cout << "\nThe smallest sufficient N value ( such as Lt[N_optimal] < max(Lt)/1000 for all t ) is " << N_optimal << "\n" << std::endl;}
+            N_limit = std::max(N_limit, N_limit_tmp);
+            // if (verbose){std::cout << "\nThe smallest sufficient N value ( such as Lt[N_limit] < max(Lt)/1000 for all t ) is " << N_limit << "\n" << std::endl;}
         }
 
         thMinusOne = th;
     }
 
     // Give the estimated optimal N value
-    if ((N_optimal < N) & verbose){
-      std::cout << "\nTo improve performance, set N to a lower value -> current value : N = " << N << ", optimal value ( such as Lt[N_optimal] < max(Lt)/1000 for all t ) : N_optimal = " << N_optimal << "\n" << std::endl;
+    size_t margin = 5;                        // Safety margin to avoid edge effects on the computation
+    if ((N > N_limit + margin) & verbose){
+      std::cout << "\nTo improve performance, set N (" << N << ") to a lower value -> optimal value : N_limit ( such as Lt[N_limit] < max(Lt)/1000 for all t ) + safety_margin = " << N_limit + margin << "\n" << std::endl;
     }
-    else if ((N_optimal == N) & verbose){
-      std::cout << "\nThe chosen N value is optimal ( such as Lt[N_optimal] < max(Lt)/1000 for all t ) : N = N_optimal = " << N_optimal << std::endl;
+    else if ((N == N_limit + margin) & verbose){
+      std::cout << "\nThe selected N value is at a safe margin from the limit of the high-probabilities area ( such as Lt[N_limit] < max(Lt)/1000 for all t ) : N = N_limit + safety_margin = " << N_limit + margin << std::endl;
     }
-    else if (N_optimal == N+1){
-      std::cout << "\nWARNING : There is a time t at which Lt[N] contains a non-negligeable probability ( Lt[N] > max(Lt)/1000 ) -> you should increase N\n" << std::endl;
+    else if ((N >= N_limit) & (N < N_limit + margin)){
+      std::cout << "\nWARNING : You should increase N -> The N value limiting the high-probabilities area ( such as Lt[N_limit] < max(Lt)/1000 for all t ) is coming closer to your N value (" << N << ") : N_limit + safety_margin = " << N_limit + margin << std::endl;
+    }
+    else if (N_limit == N+1){
+      std::cout << "\nWARNING : You should increase N -> There is a time t at which Lt[N] contains a non-negligeable probability ( Lt[N] > max(Lt)/1000 )\n" << std::endl;
     }
 
     return B;
@@ -798,9 +806,6 @@ double RevBayesCore::likelihoodWithAllSamplesRemoved(  const TypedDagNode<double
     };
     std::sort( events.begin(), events.end(), AgeCompare() );
 
-    // this variable is used to check that r==1 throughout and that the data can be observed with r=1.
-    bool impossible = false;
-
     //get rate vectors
     const std::vector<double> birth = lambda;
     const std::vector<double> death = mu;
@@ -814,9 +819,10 @@ double RevBayesCore::likelihoodWithAllSamplesRemoved(  const TypedDagNode<double
     double ps_current = ps[0];
     double om_current = om[0];
     double rp_current = rp[0];
+
     if(rp_current != 1.0){
         std::cout << "Warning ! This function should be used only when r=1. Here, r = " << rp_current << std::endl;
-        impossible = true;
+        return RbConstants::Double::neginf;
     }
     size_t indx_rate=0;
 
@@ -863,7 +869,7 @@ double RevBayesCore::likelihoodWithAllSamplesRemoved(  const TypedDagNode<double
             rp_current = rp[indx_rate];
             if(rp_current != 1.0){
                 std::cout << "Warning ! This function should be used only when r=1. Here, r = " << rp_current << std::endl;
-                impossible = true;
+                return RbConstants::Double::neginf;
             }
         }
 
@@ -875,8 +881,7 @@ double RevBayesCore::likelihoodWithAllSamplesRemoved(  const TypedDagNode<double
 
         if(type == "sampled ancestor"){
            std::cout << "Warning ! It should not be possible to see a sampled ancestor here. This function only deals with r = 1" << std::endl;
-           log_factor += log(ps_current);
-           impossible = true;
+           return RbConstants::Double::neginf;
         }
 
         if(type == "occurrence"){
@@ -893,11 +898,7 @@ double RevBayesCore::likelihoodWithAllSamplesRemoved(  const TypedDagNode<double
         thMinusOne = th;
     }
 
-    if (impossible){
-      LogLikelihood = -1e500;
-    }else{
-      LogLikelihood += log(v[0]) + log_factor;
-    }
+    LogLikelihood += log(v[0]) + log_factor;
 
     return LogLikelihood;
 }
