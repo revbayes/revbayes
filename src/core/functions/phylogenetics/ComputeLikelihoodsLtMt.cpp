@@ -165,7 +165,11 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(   const TypedDagNode<double> *star
         MatrixReal LogLikelihood = RevBayesCore::ForwardsTraversalMt(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, returnLogLikelihood, verbose, occurrence_ages, timeTree);
 
         double logLikelihood = LogLikelihood[0][0];
-        if (verbose){std::cout << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;}
+        double logLikelihood2 = likelihoodWithAllSamplesRemoved(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, verbose, occurrence_ages, timeTree);
+        if (verbose){
+          std::cout << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;
+          std::cout << "\n ==> Log-Likelihood Ankit : " << logLikelihood2 << "\n" << std::endl;
+        }
         return (logLikelihood);
     }
     // Use the backwards traversal algorithm (Lt)
@@ -2284,3 +2288,296 @@ MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLtPiecewise(  const TypedDag
 
     return B;
 }
+
+
+
+/**
+ * Compute the joint log probability density of observations made down any time t, conditioned on the population
+ * size at that time, as time increases towards the past : breadth-first backwards traversal algorithm.
+ * This function is borrowed from Ankit Gupta, 
+ * see his paper: "The probability distribution of the reconstructed phylogenetic tree with occurrence data".
+ *
+ * \param[in]    start_age              Start age of the process.
+ * \param[in]    lambda                 Speciation rate.
+ * \param[in]    mu                     Extinction rate.
+ * \param[in]    psi                    Extinction sampling rate.
+ * \param[in]    omega                  Occurrence sampling rate.
+ * \param[in]    rho                    Sampling probability at present time.
+ * \param[in]    removalPr              Removal probability after sampling.
+ * \param[in]    maxHiddenLin           Algorithm accuracy (maximal number of hidden lineages).
+ * \param[in]    cond                   Condition of the process (none/survival/#Taxa).
+ * \param[in]    time_points            Times for which we want to compute the density.
+ * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
+ * \param[in]    verbose                If true displays warnings and information messages.
+ * \param[in]    occurrence_ages        Vector of occurrence ages.
+ * \param[in]    timeTree               Tree for ancestral populations size inference.
+ *
+ * \return    The log likelihood.
+ */
+double RevBayesCore::likelihoodWithAllSamplesRemoved(  const TypedDagNode<double> *start_age,
+                                                const TypedDagNode<double> *lambda,
+                                                const TypedDagNode<double> *mu,
+                                                const TypedDagNode<double> *psi,
+                                                const TypedDagNode<double> *omega,
+                                                const TypedDagNode<double> *rho,
+                                                const TypedDagNode<double> *removalPr,
+                                                const TypedDagNode<long> *maxHiddenLin,
+                                                const std::string& cond,
+                                                const std::vector<double> &time_points,
+                                                bool useOrigin,
+                                                bool verbose,
+                                                const std::vector<double> &occurrence_ages,
+                                                const Tree &timeTree)
+{
+    // Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
+    std::vector<Event> events = RevBayesCore::PoolEvents(start_age, time_points, verbose, occurrence_ages, timeTree);
+
+    // Order times youngest to oldest
+    struct AgeCompare {
+        bool operator()(const Event first, const Event second) {
+            return first.time < second.time;
+        }
+    };
+    std::sort( events.begin(), events.end(), AgeCompare() );
+
+    const double birth = lambda->getValue();
+    const double death = mu->getValue();
+    const double ps = psi->getValue();
+    const double om = omega->getValue();
+    const double rh = rho->getValue();
+    const double rp = removalPr->getValue();
+    const long N = maxHiddenLin->getValue();
+    const RbVector<double> tau = time_points;
+
+    const size_t S = tau.size();
+    const double gamma = birth + death + ps + om;
+
+    // Count the number of extant lineages
+    size_t k = timeTree.getNumberOfExtantTips();
+
+    // starts to compute the likelihood
+    double LogLikelihood = k*log(rh);
+
+    double p0 = 1-rh;
+    double oldp0 = p0;
+
+    // Count event types :
+    size_t nb_fossil_leafs = 0;         // Number of fossil leafs
+    size_t nb_sampled_ancestors = 0;    // Number of sampled ancestors
+    size_t nb_occurrences = 0;          // Number of fossil occurrences
+    size_t nb_branching_times = 0;      // Number of branching times
+
+    // We start at time 0 with type "present" in the vector of events
+    double thMinusOne = events[0].time;
+    std::vector<double> v(1, 1);
+
+    // We then iterate over the following events until finding the time of origin
+    for(int h = 0; h < events.size(); h++){
+
+        double th = events[h].time;
+        std::string type = events[h].type;
+
+        // Events older than the start age
+        if(th > start_age->getValue()) {
+            if (verbose){std::cout << "WARNING : th > start_age : " << th << " > " << start_age->getValue() << " -> type : " << type << std::endl;}
+            continue;
+        };
+
+        if( th != thMinusOne ){
+            oldp0 = p0;
+            p0 = GetP0(th, birth, 1-rh, death, ps+om, 0);
+            v = TransformDerivativeContrVec(th-thMinusOne, birth, oldp0, death, ps+om, 0, k, v);
+        }
+
+        if(type == "fossil leaf"){
+           k++;
+           nb_fossil_leafs++;
+       }
+
+        if(type == "sampled ancestor"){
+            nb_sampled_ancestors++;
+        }
+
+        if(type == "occurrence"){
+           nb_occurrences++;
+           std::cout << v.size() << std::endl;
+           v.insert(v.begin(), 0.0);
+        }
+
+        if(type == "branching time"){
+            k--;
+            nb_branching_times++;
+        }
+
+        thMinusOne = th;
+    }
+    
+    LogLikelihood += nb_fossil_leafs * log(ps);
+    LogLikelihood += nb_occurrences * log(om);
+    LogLikelihood += nb_branching_times * log(birth);
+    LogLikelihood += log(v[0]);
+
+    return LogLikelihood;
+}
+
+ 
+// Below are the helper functions we need for analytical computation
+double RevBayesCore::GetQ(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega )
+{
+    double c1 = std::sqrt( (beta - mu - omega - psi)*(beta - mu - omega - psi)+4*beta*psi);
+    double c2 = (beta + mu + omega + psi - 2*beta*rhoc)/c1;
+    double q = 2*(1-c2*c2) + exp(-c1*t)*(1-c2)*(1-c2) + exp(c1*t)*(1+c2)*(1+c2);
+    return q;
+}
+
+double RevBayesCore::GetDerivativeQ(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned n )
+{
+    double c1 = std::sqrt( (beta - mu - omega - psi)*(beta - mu - omega - psi)+4*beta*psi);
+    double c2 = (beta + mu + omega + psi - 2*beta*rhoc)/c1;
+    double q = 0.0;
+    if(n == 1){    
+        q = -(4*beta/c1)*( exp(c1*t) -exp(-c1*t) + c2*( exp(c1*t) + exp(-c1*t) - 2 )    );
+    }else if(n == 2){
+        q = 8*( (beta/c1)*(beta/c1) )*(exp(c1*t) + exp(-c1*t) - 2);
+    }
+    return q;
+}
+
+unsigned RevBayesCore::nChoosek( unsigned n, unsigned k )
+{
+    if (k > n) return 0;
+    if (k * 2 > n) k = n-k;
+    if (k == 0) return 1;
+    unsigned result = n;
+    for( unsigned i = 2; i <= k; ++i ) {
+        result *= (n-i+1);
+        result /= i;
+    }
+    return result;
+}
+
+unsigned RevBayesCore::factorial( unsigned n )
+{
+    unsigned long long res = 1;
+    for(int i = 1; i<=n ; i++){
+        res *= i;
+    }
+    return res;
+}
+
+double RevBayesCore::GetMultiDerivativeRecQ(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned n, const unsigned NumObservedLineages )
+{
+    double q0 = 1. / GetQ(t,beta,rhoc,mu,psi,omega);
+    double q = 0.0;
+    if (n == 0){
+        q = std::pow(q0, NumObservedLineages);
+    }
+    else if (NumObservedLineages == 0){
+        q = 0;
+    }
+    else{
+        double Qder1 = GetDerivativeQ(t,beta,rhoc,mu,psi,omega,1);
+        double Qder2 = GetDerivativeQ(t,beta,rhoc,mu,psi,omega,2);  
+        for( unsigned m1 =0; m1 <= n; m1++){
+            if( (n-m1) % 2 == 0){
+                unsigned m2 = (n-m1)/2;
+                q += std::pow(-1, m1+m2) / std::pow(2,m2) * std::pow(q0, m1 + m2 + NumObservedLineages) * nChoosek(m1+m2+NumObservedLineages-1,m1+m2)*nChoosek(m1+m2,m1) *  std::pow(Qder1, m1) * std::pow(Qder2, m2);
+            }
+        }
+    }
+    q *= std::pow( GetQ(0,beta,rhoc,mu,psi,omega), NumObservedLineages ) * factorial(n);
+    return q;
+}
+
+
+double RevBayesCore::GetP0(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega)
+{
+    double c1 = std::sqrt( (beta - mu - omega - psi)*(beta - mu - omega - psi)+4*beta*psi);
+    double c2 = (beta + mu + omega + psi - 2*beta*rhoc)/c1;
+    double factor = ( exp(c1*t)*(1+c2)*(1+c2) - exp(-c1*t)*(1-c2)*(1-c2)) / GetQ(t,beta,rhoc,mu,psi,omega);
+    double p0 = (1/(2*beta))*( beta + mu +omega + psi)  - (c1/(2*beta))*factor;
+    return p0;
+}
+
+
+double RevBayesCore::GetDerP0(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned n)
+{
+    double c1 = std::sqrt( (beta - mu - omega - psi)*(beta - mu - omega - psi)+4*beta*psi);
+    double c2 = (beta + mu + omega + psi - 2*beta*rhoc)/c1;
+
+    double derfac = -2*beta/c1;
+    std::vector<double> factor(n+1, 0.0);
+    factor[0] = ( exp(c1*t)*(1+c2)*(1+c2) - exp(-c1*t)*(1-c2)*(1-c2) ) / 4; 
+    factor[1] =  derfac*( exp(c1*t)*(1+c2) + exp(-c1*t)*(1-c2))/2;
+    factor[2] = (derfac * derfac)*( exp(c1*t) - exp(-c1*t))/2;
+    double derp0 = 0.0;
+    for (unsigned i = 0; i<= n; i++){
+        derp0 += nChoosek(n,i)*factor[i]*GetMultiDerivativeRecQ(t,beta,rhoc,mu,psi,omega,n-i,1);
+    }
+    derp0 = -derp0*(c1/(2*beta));
+    return derp0;
+}
+
+
+std::vector<double> RevBayesCore::TransformDerivativeContrVec( const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned NumObservedLineages, const std::vector<double> v )
+{
+    unsigned n = v.size();
+    std::vector<double> v1(n, 0.0);
+
+    if(n > 1){
+        // requires computation of (n-1) derivatives
+        std::vector<double> derivativeVector(n-1, 0.0);
+        for (unsigned i=0; i< n-1; i++){
+            derivativeVector[i] = GetDerP0(t,beta,rhoc,mu,psi,omega,i+1);
+        }
+        //std::cout << derivativeVector << std::endl;
+        MatrixReal B = IncompleteBellPolynomial(n-1,n-1,derivativeVector);
+        //std::cout << B << std::endl;
+        MatrixReal A(n, n, 0.0);
+
+        for (unsigned i = 0; i < n; i++){
+            for (unsigned j = 0; j <= i; j++){
+                A[i][j] = nChoosek(i,j) * GetMultiDerivativeRecQ(t,beta,rhoc,mu,psi,omega,i-j,NumObservedLineages);
+            }
+        }
+
+        MatrixReal C = A*B;
+        //v1 = (C')*v;
+        for( int i = 0; i < n; i++){
+            for (int k = 0; k < n; k++){
+                v1[i] += C[k][i] * v[k];
+            }
+        }
+    }
+    else{
+        v1 = GetMultiDerivativeRecQ(t,beta,rhoc,mu,psi,omega,0,NumObservedLineages)*v;
+    }
+    return v1;
+}
+
+MatrixReal RevBayesCore::IncompleteBellPolynomial(unsigned N, unsigned K, std::vector<double> Vector)
+{
+    MatrixReal A(N, K, 0.0);
+    for (int i = 0; i < N; i++){
+        A[i][0] = Vector[i];
+    }
+
+    for (int n = 1; n < N; n++){
+        for (int k = 1; k < K; k++){
+            for (int m = 1; m <= n-k+1; m++){
+                A[n][k] += nChoosek(n, m-1) * Vector[m-1] * A[n-m][k-1];
+            }
+        }
+    }
+
+    MatrixReal OutputMatrix(N+1, K+1, 0.0);
+    OutputMatrix[0][0] = 1.;
+    for (int i = 1; i<N+1; i++){
+        for (int j = 1; j<K+1; j++){
+            OutputMatrix[i][j] = A[i-1][j-1];
+        }
+    }
+
+    return OutputMatrix;
+}
+

@@ -195,6 +195,43 @@ double               ComputeLnLikelihoodOBDPPiecewise(    const TypedDagNode<dou
                                                         const std::vector<double> &occurrence_ages,
                                                         const Tree &timeTree  );
 
-    };
 
+    double              likelihoodWithAllSamplesRemoved(   const TypedDagNode<double> *start_age,
+                                                    const TypedDagNode<double> *lambda,
+                                                    const TypedDagNode<double> *mu,
+                                                    const TypedDagNode<double> *psi,
+                                                    const TypedDagNode<double> *omega,
+                                                    const TypedDagNode<double> *rho,
+                                                    const TypedDagNode<double> *removalPr,
+                                                    const TypedDagNode<long> *maxHiddenLin,
+
+                                                    const std::string& cond,
+                                                    const std::vector<double> &time_points,
+                                                    bool useOrigin,
+                                                    bool verbose,
+                                                    const std::vector<double> &occurrence_ages,
+                                                    const Tree &timeTree);
+
+    
+    double GetQ(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega );
+    
+    double GetDerivativeQ(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned n );
+
+    unsigned nChoosek( unsigned n, unsigned k );
+
+    unsigned factorial( unsigned n );
+
+    double GetMultiDerivativeRecQ(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned n, const unsigned NumObservedLineages );
+
+    double GetP0(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega);
+
+    double GetDerP0(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned n);
+
+    std::vector<double> TransformDerivativeContrVec( const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned NumObservedLineages, const std::vector<double> v );
+
+    MatrixReal IncompleteBellPolynomial(unsigned N, unsigned K, std::vector<double> Vector);
+
+
+
+    };
 #endif
