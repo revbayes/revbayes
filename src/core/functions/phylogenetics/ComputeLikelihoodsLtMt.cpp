@@ -317,10 +317,6 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
 
     // Count event types :
     size_t k = 1;                       // Number of lineages
-    size_t nb_fossil_leafs = 0;         // Number of fossil leafs
-    size_t nb_sampled_ancestors = 0;    // Number of sampled ancestors
-    size_t nb_occurrences = 0;          // Number of fossil occurrences
-    size_t nb_branching_times = 0;      // Number of branching times
 
     //Initialize rates to their root value and a cursor to update rates
     double birth_current = birth.back();
@@ -415,22 +411,6 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
         }
 
         if(type == "time point"){
-            // // Combine the scaling factors for all the events until present
-            // double events_factor_log = log_correction;
-            // // if (verbose){std::cout << "log_correction : " << log_correction << std::endl;}
-            // if (ps_current != 0){
-            //     events_factor_log += log(ps_current) * (nb_fossil_leafs + nb_sampled_ancestors);
-            //     // if (verbose){std::cout << "log(ps) * (nb_fossil_leafs + nb_sampled_ancestors) : " << log(ps) * (nb_fossil_leafs + nb_sampled_ancestors) << std::endl;}
-            // }
-            // if (om_current != 0){
-            //     events_factor_log += log(om_current) * nb_occurrences;
-            //     // if (verbose){std::cout << "log(om) * nb_occurrences : " << log(om) * nb_occurrences << std::endl;}
-            // }
-            // if (birth_current != 0){
-            //     events_factor_log += log(birth_current) * nb_branching_times;
-            //     // if (verbose){std::cout << "log(birth) * nb_branching_times : " << log(birth) * nb_branching_times << std::endl;}
-            // }
-            // // if (verbose){std::cout << "events_factor_log : " << events_factor_log << std::endl;}
             for(int i = 0; i < N+1; i++){
                 B[indxJ][i] = log(Mt[i]) + events_factor_log + log_correction;
             }
@@ -440,43 +420,31 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
 
         if(type == "fossil leaf"){
             for(int i = N; i > 0 ; i--){
-                // Mt[i] = Mt[i-1] * ps * (1-rp) + ps * rp * Mt[i];
                 Mt[i] = Mt[i-1] * (1-rp_current) + rp_current * Mt[i];
             }
-            // Mt[0] *= ps * rp;
             Mt[0] *= rp_current;
             k--;
-            //nb_fossil_leafs++;
-            if(ps_current!=0){events_factor_log+=log(ps_current);}
+            events_factor_log+=log(ps_current);
         }
 
         if(type == "sampled ancestor"){
             for(int i = 0; i < N+1; i++){
-                // Mt[i] *= ps * (1-rp);
                 Mt[i] *= (1-rp_current);
             }
-            //nb_sampled_ancestors++;
-            if(ps_current!=0){events_factor_log+=log(ps_current);}
+            events_factor_log+=log(ps_current);
         }
 
         if(type == "occurrence"){
             for(int i = 0; i < N; i++){
-                // Mt[i] = Mt[i+1] * (i+1) * om * rp + (k+i) * om * (1-rp) * Mt[i];
                 Mt[i] = Mt[i+1] * (i+1) * rp_current + (k+i) * (1-rp_current) * Mt[i];
             }
-            // Mt[N] *= (k+N) * om * (1-rp);
             Mt[N] *= (k+N) * (1-rp_current);
-            //nb_occurrences++;
-            if(om_current!=0){events_factor_log+=log(om_current);}
+            events_factor_log+=log(om_current);
          }
 
         if(type == "branching time"){
-            // for(int i = 0; i < N+1; i++){
-            //     Mt[i] *= birth;
-            // }
             k++;
-            //nb_branching_times++;
-            if(birth_current!=0){events_factor_log+=log(birth_current);}
+            events_factor_log+=log(birth_current);
         }
 
         // Correct probability vector to avoid divergence towards extreme values (outside of double precision) by scaling to a unit maximum value
@@ -516,21 +484,12 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
     else if (N_optimal == N+1){
       std::cout << "\nWARNING : There is a time t at which Mt[N] contains a non-negligeable probability ( Mt[N] > max(Mt)/1000 ) -> you should increase N\n" << std::endl;
     }
-///////////////////// + log factor
     if(returnLogLikelihood){
-        // double events_factor_log = log_correction;
-        //
-        // if (ps_current != 0){events_factor_log += log(ps_current) * (nb_fossil_leafs + nb_sampled_ancestors); }
-        // if (om_current != 0){events_factor_log += log(om_current) * nb_occurrences; }
-        // if (birth_current != 0) {events_factor_log += log(birth_current) * nb_branching_times; }
 
         double likelihood = 0;
         for(int i = 0; i < N+1; i++){
             likelihood += Mt[i] * pow(rh, k) * pow(1.0 - rh, i);
         }
-        std::cout<<"events_factor_log Mt="<<events_factor_log<<std::endl;
-        std::cout<<"log corr="<<log_correction<<std::endl;
-        std::cout<<"Sum"<<log_correction+events_factor_log<<std::endl;
 
 
         MatrixReal LogLikelihood(1, 1, log(likelihood) + events_factor_log + log_correction );
@@ -706,40 +665,31 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
 
        if(type == "fossil leaf"){
            for(int i = 0; i < N; i++){
-               // Lt[i] = Lt[i] * ps * rp + Lt[i+1] * ps * (1.0-rp) ;
                Lt[i] = Lt[i] * rp_current + Lt[i+1] * (1.0-rp_current) ;
            }
-           // Lt[N] = Lt[N] * ps * rp;
            Lt[N] = Lt[N] * rp_current;
            k++;
-           if (ps_current!=0){events_factor_log += log(ps_current);};
+           events_factor_log += log(ps_current);
        }
 
        if(type == "sampled ancestor"){
            for(int i = 0; i < N+1; i++){
-               // Lt[i] = Lt[i] * ps * (1.0-rp);
                Lt[i] = Lt[i] * (1.0-rp_current);
            }
-           if (ps_current!=0){events_factor_log += log(ps_current);};
+          events_factor_log += log(ps_current);
        }
 
        if(type == "occurrence"){
            for(int i = N; i > 0; i--){
-               // Lt[i] = Lt[i-1] * i * om * rp + Lt[i] * (k+i) * om * (1-rp);
                Lt[i] = Lt[i-1] * i * rp_current + Lt[i] * (k+i) * (1-rp_current);
            }
-           // Lt[0] = Lt[0] * k * om * (1-rp);
            Lt[0] = Lt[0] * k * (1-rp_current);
-           if (om_current!=0){events_factor_log += log(om_current);};
+           events_factor_log += log(om_current);
         }
 
         if(type == "branching time"){
-            // for(int i = 0; i < N+1; i++){
-            //     Lt[i] = Lt[i] * birth;
-            // }
-            Lt *= birth_current;
             k--;
-          if (birth_current!=0){events_factor_log += log(birth_current);};
+        events_factor_log += log(birth_current);
         }
 
         // Correct probability vector to avoid divergence towards extreme values (outside of double precision) by scaling to a unit maximum value
@@ -768,8 +718,6 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
 
         thMinusOne = th;
     }
-    std::cout<<"events_factor_log LT="<<events_factor_log<<std::endl;
-    std::cout<<"log_correction LT="<<log_correction<<std::endl;
 
     // Give the estimated optimal N value
     if ((N_optimal < N) & verbose){

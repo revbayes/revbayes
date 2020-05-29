@@ -1,0 +1,16 @@
+#NEXUS
+
+	Begin taxa;
+	Dimensions ntax=5;
+	Taxlabels
+		L0
+		L1
+		F
+		Fr
+		SA
+		;
+End;
+
+Begin trees;
+tree TREE1 = ((Fr:2,(L1:3)SA:4):1,(F:2,L0:4):4):1;
+End;
