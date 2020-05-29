@@ -99,39 +99,6 @@ double               ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *sta
                                                                       const std::vector<double> &occurrence_ages,
                                                                       const Tree &timeTree);
 
-    size_t                  LocateTimeSliceIndex(const double &t, const std::vector<double> &timeline);
-
-    /////leftovers
-    MatrixReal ComputeLikelihoodsForwardsMtPiecewise(  const TypedDagNode<double> *start_age,
-                                                        const std::vector< double > &timeline,
-                                                        const std::vector< double > &lambda,
-                                                        const std::vector< double > &mu,
-                                                        const std::vector< double > &psi,
-                                                        const std::vector< double > &omega,
-                                                        const TypedDagNode<double> *rho,
-                                                        const std::vector< double > &removalPr,
-                                                        const TypedDagNode<long> *maxHiddenLin,
-                                                        const std::string& cond,
-                                                        const std::vector<double> &time_points,
-                                                        bool useOrigin,
-                                                        const std::vector<double> &occurrence_ages,
-                                                        const Tree &timeTree  );
-
-    MatrixReal ComputeLikelihoodsBackwardsLtPiecewise(  const TypedDagNode<double> *start_age,
-                                                        const std::vector< double > &timeline,
-                                                        const std::vector< double > &lambda,
-                                                        const std::vector< double > &mu,
-                                                        const std::vector< double > &psi,
-                                                        const std::vector< double > &omega,
-                                                        const TypedDagNode<double> *rho,
-                                                        const std::vector< double > &removalPr,
-                                                        const TypedDagNode<long> *maxHiddenLin,
-                                                        const std::string& cond,
-                                                        const std::vector<double> &time_points,
-                                                        bool useOrigin,
-                                                        const std::vector<double> &occurrence_ages,
-                                                        const Tree &timeTree  );
-
 
     double              likelihoodWithAllSamplesRemoved(   const TypedDagNode<double> *start_age,
                                                                       const std::vector<double> &timeline,
@@ -147,9 +114,9 @@ double               ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *sta
                                                                       bool verbose,
                                                                       const std::vector<double> &occurrence_ages,
                                                                       const Tree &timeTree);
-    
+
     double GetQ(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega );
-    
+
     double GetDerivativeQ(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned n );
 
     unsigned nChoosek( unsigned n, unsigned k );

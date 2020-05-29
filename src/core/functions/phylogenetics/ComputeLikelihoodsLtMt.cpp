@@ -231,8 +231,7 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *sta
         MatrixReal LogLikelihood = RevBayesCore::ForwardsTraversalMt(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, returnLogLikelihood, verbose, occurrence_ages, timeTree);
 
         double logLikelihood = LogLikelihood[0][0];
-        //if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;}
-        if (verbose){std::cout << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;}
+        if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;}
         return (logLikelihood);
     }
     // Use the backwards traversal algorithm (Lt)
@@ -336,6 +335,7 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
     double log_correction = 0;
     double c;
 
+    double events_factor_log = 0;
     // Estimating the smallest sufficient N value for getting most of the probability density
     size_t N_optimal = 0;
     size_t N_optimal_tmp;
@@ -365,7 +365,7 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
           // Time points before the start age
           if(type == "time point"){
               for(int i = 0; i < N+1; i++){
-                  B[indxJ][i] = log(Mt[i]) + log_correction;
+                  B[indxJ][i] = log(Mt[i]) + log_correction + events_factor_log;
               }
               indxJ--;
           }
@@ -415,24 +415,24 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
         }
 
         if(type == "time point"){
-            // Combine the scaling factors for all the events until present
-            double events_factor_log = log_correction;
-            // if (verbose){std::cout << "log_correction : " << log_correction << std::endl;}
-            if (ps_current != 0){
-                events_factor_log += log(ps_current) * (nb_fossil_leafs + nb_sampled_ancestors);
-                // if (verbose){std::cout << "log(ps) * (nb_fossil_leafs + nb_sampled_ancestors) : " << log(ps) * (nb_fossil_leafs + nb_sampled_ancestors) << std::endl;}
-            }
-            if (om_current != 0){
-                events_factor_log += log(om_current) * nb_occurrences;
-                // if (verbose){std::cout << "log(om) * nb_occurrences : " << log(om) * nb_occurrences << std::endl;}
-            }
-            if (birth_current != 0){
-                events_factor_log += log(birth_current) * nb_branching_times;
-                // if (verbose){std::cout << "log(birth) * nb_branching_times : " << log(birth) * nb_branching_times << std::endl;}
-            }
-            // if (verbose){std::cout << "events_factor_log : " << events_factor_log << std::endl;}
+            // // Combine the scaling factors for all the events until present
+            // double events_factor_log = log_correction;
+            // // if (verbose){std::cout << "log_correction : " << log_correction << std::endl;}
+            // if (ps_current != 0){
+            //     events_factor_log += log(ps_current) * (nb_fossil_leafs + nb_sampled_ancestors);
+            //     // if (verbose){std::cout << "log(ps) * (nb_fossil_leafs + nb_sampled_ancestors) : " << log(ps) * (nb_fossil_leafs + nb_sampled_ancestors) << std::endl;}
+            // }
+            // if (om_current != 0){
+            //     events_factor_log += log(om_current) * nb_occurrences;
+            //     // if (verbose){std::cout << "log(om) * nb_occurrences : " << log(om) * nb_occurrences << std::endl;}
+            // }
+            // if (birth_current != 0){
+            //     events_factor_log += log(birth_current) * nb_branching_times;
+            //     // if (verbose){std::cout << "log(birth) * nb_branching_times : " << log(birth) * nb_branching_times << std::endl;}
+            // }
+            // // if (verbose){std::cout << "events_factor_log : " << events_factor_log << std::endl;}
             for(int i = 0; i < N+1; i++){
-                B[indxJ][i] = log(Mt[i]) + events_factor_log;
+                B[indxJ][i] = log(Mt[i]) + events_factor_log + log_correction;
             }
             // if (verbose){std::cout << "Time point scaled log : log(Mt[0]) + events_factor_log : " << log(Mt[0]) + events_factor_log << " / log(Mt[N]) + events_factor_log : " << log(Mt[N]) + events_factor_log << std::endl;}
             indxJ--;
@@ -446,7 +446,8 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
             // Mt[0] *= ps * rp;
             Mt[0] *= rp_current;
             k--;
-            nb_fossil_leafs++;
+            //nb_fossil_leafs++;
+            if(ps_current!=0){events_factor_log+=log(ps_current);}
         }
 
         if(type == "sampled ancestor"){
@@ -454,7 +455,8 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
                 // Mt[i] *= ps * (1-rp);
                 Mt[i] *= (1-rp_current);
             }
-            nb_sampled_ancestors++;
+            //nb_sampled_ancestors++;
+            if(ps_current!=0){events_factor_log+=log(ps_current);}
         }
 
         if(type == "occurrence"){
@@ -464,7 +466,8 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
             }
             // Mt[N] *= (k+N) * om * (1-rp);
             Mt[N] *= (k+N) * (1-rp_current);
-            nb_occurrences++;
+            //nb_occurrences++;
+            if(om_current!=0){events_factor_log+=log(om_current);}
          }
 
         if(type == "branching time"){
@@ -472,7 +475,8 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
             //     Mt[i] *= birth;
             // }
             k++;
-            nb_branching_times++;
+            //nb_branching_times++;
+            if(birth_current!=0){events_factor_log+=log(birth_current);}
         }
 
         // Correct probability vector to avoid divergence towards extreme values (outside of double precision) by scaling to a unit maximum value
@@ -514,17 +518,22 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
     }
 ///////////////////// + log factor
     if(returnLogLikelihood){
-        double events_factor_log = log_correction;
-
-        if (ps_current != 0){events_factor_log += log(ps_current) * (nb_fossil_leafs + nb_sampled_ancestors); }
-        if (om_current != 0){events_factor_log += log(om_current) * nb_occurrences; }
-        if (birth_current != 0) {events_factor_log += log(birth_current) * nb_branching_times; }
+        // double events_factor_log = log_correction;
+        //
+        // if (ps_current != 0){events_factor_log += log(ps_current) * (nb_fossil_leafs + nb_sampled_ancestors); }
+        // if (om_current != 0){events_factor_log += log(om_current) * nb_occurrences; }
+        // if (birth_current != 0) {events_factor_log += log(birth_current) * nb_branching_times; }
 
         double likelihood = 0;
         for(int i = 0; i < N+1; i++){
             likelihood += Mt[i] * pow(rh, k) * pow(1.0 - rh, i);
         }
-        MatrixReal LogLikelihood(1, 1, log(likelihood) + events_factor_log );
+        std::cout<<"events_factor_log Mt="<<events_factor_log<<std::endl;
+        std::cout<<"log corr="<<log_correction<<std::endl;
+        std::cout<<"Sum"<<log_correction+events_factor_log<<std::endl;
+
+
+        MatrixReal LogLikelihood(1, 1, log(likelihood) + events_factor_log + log_correction );
         return LogLikelihood;
     }
 
@@ -602,7 +611,7 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
     size_t indxJ = 0;
 
 
-    // Initialize rates to their present value
+    // Initialize rates to their present value and a cursor for rate updates
     double birth_current = birth[0];
     double death_current = death[0];
     double ps_current = ps[0];
@@ -611,11 +620,6 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
     double gamma_current = gamma[0];
     size_t indx_rate=0;
 
-    // Count event types :
-    size_t nb_fossil_leafs = 0;         // Number of fossil leafs
-    size_t nb_sampled_ancestors = 0;    // Number of sampled ancestors
-    size_t nb_occurrences = 0;          // Number of fossil occurrences
-    size_t nb_branching_times = 0;      // Number of branching times
 
     // Recording the correction terms c to avoid divergence towards extreme values (outside of double precision)
     double log_correction = 0;
@@ -633,6 +637,9 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
     }
     // std::cout << "Event time : " << events[0].time << " - Event type : " << events[0].type << std::endl;
 
+    // Recording the log terms introduced by events
+    double events_factor_log = 0;
+
     // We then iterate over the following events until finding the time of origin
     for(int h = 0; h < events.size(); h++){
 
@@ -645,13 +652,9 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
 
           // Time points older than the start age : accepted
           if(type == "time point"){
-              double events_factor_log = log_correction;
-              if (ps_current != 0){events_factor_log    += log(ps_current) * (nb_fossil_leafs + nb_sampled_ancestors);}
-              if (om_current != 0){events_factor_log    += log(om_current) * nb_occurrences;}
-              if (birth_current != 0){events_factor_log += log(birth_current) * nb_branching_times;}
 
               for(int i = 0; i < N+1; i++){
-                  B[indxJ][i] = log(Lt[i]) + events_factor_log;
+                  B[indxJ][i] = log(Lt[i]) + events_factor_log + log_correction;
               }
               indxJ++;
           }
@@ -681,27 +684,9 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
 
         // Second, deal with the update at time th
         if(type == "time point"){
-            // Combine the scaling factors for all the events until present
-            double events_factor_log = log_correction;
-            // if (verbose){std::cout << "log_correction : " << log_correction << std::endl;}
-            if (ps_current != 0){
-                events_factor_log += log(ps_current) * (nb_fossil_leafs + nb_sampled_ancestors);
-                // if (verbose){std::cout << "log(ps) * (nb_fossil_leafs + nb_sampled_ancestors) : " << log(ps) * (nb_fossil_leafs + nb_sampled_ancestors) << std::endl;}
-            }
-
-            if (om_current != 0){
-                events_factor_log += log(om_current) * nb_occurrences;
-                // if (verbose){std::cout << "log(om) * nb_occurrences : " << log(om) * nb_occurrences << std::endl;}
-            }
-
-            if (birth_current != 0){
-                events_factor_log += log(birth_current) * nb_branching_times;
-                // if (verbose){std::cout << "log(birth) * nb_branching_times : " << log(birth) * nb_branching_times << std::endl;}
-            }
-
             // if (verbose){std::cout << "events_factor_log : " << events_factor_log  << " / Lt : " << Lt << std::endl;}
             for(int i = 0; i < N+1; i++){
-                B[indxJ][i] = log(Lt[i]) + events_factor_log;
+                B[indxJ][i] = log(Lt[i]) + events_factor_log + log_correction;
             }
             // if (verbose){std::cout << "Time point scaled log : log(Lt[0]) + events_factor_log : " << log(Lt[0]) + events_factor_log << " / log(Lt[N]) + events_factor_log : " << log(Lt[N]) + events_factor_log << std::endl;}
             indxJ++;
@@ -727,7 +712,7 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
            // Lt[N] = Lt[N] * ps * rp;
            Lt[N] = Lt[N] * rp_current;
            k++;
-           nb_fossil_leafs++;
+           if (ps_current!=0){events_factor_log += log(ps_current);};
        }
 
        if(type == "sampled ancestor"){
@@ -735,7 +720,7 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
                // Lt[i] = Lt[i] * ps * (1.0-rp);
                Lt[i] = Lt[i] * (1.0-rp_current);
            }
-           nb_sampled_ancestors++;
+           if (ps_current!=0){events_factor_log += log(ps_current);};
        }
 
        if(type == "occurrence"){
@@ -745,7 +730,7 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
            }
            // Lt[0] = Lt[0] * k * om * (1-rp);
            Lt[0] = Lt[0] * k * (1-rp_current);
-           nb_occurrences++;
+           if (om_current!=0){events_factor_log += log(om_current);};
         }
 
         if(type == "branching time"){
@@ -753,7 +738,7 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
             //     Lt[i] = Lt[i] * birth;
             // }
             k--;
-            nb_branching_times++;
+          if (birth_current!=0){events_factor_log += log(om_current);};
         }
 
         // Correct probability vector to avoid divergence towards extreme values (outside of double precision) by scaling to a unit maximum value
@@ -782,6 +767,8 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
 
         thMinusOne = th;
     }
+    std::cout<<"events_factor_log LT="<<events_factor_log<<std::endl;
+    std::cout<<"log_correction LT="<<log_correction<<std::endl;
 
     // Give the estimated optimal N value
     if ((N_optimal < N) & verbose){
@@ -798,643 +785,10 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
 }
 
 
-
-
-/////////////////////////leftovers
-// /**
-//  * Compute the joint probability density of the observations made up to any time t and the population
-//  * size at that time, as time decreases towards present, with piecewise constant rates : breadth-first forward traversal algorithm.
-//  *
-//  * \param[in]    start_age              Start age of the process.
-//  * \param[in]    timeline               Rate shifts times.
-//  * \param[in]    lambda                 Speciation rate.
-//  * \param[in]    mu                     Extinction rate.
-//  * \param[in]    psi                    Extinction sampling rate.
-//  * \param[in]    omega                  Occurrence sampling rate.
-//  * \param[in]    rho                    Sampling probability at present time.
-//  * \param[in]    removalPr              Removal probability after sampling.
-//  * \param[in]    maxHiddenLin           Algorithm accuracy (maximal number of hidden lineages).
-//  * \param[in]    cond                   Condition of the process (none/survival/#Taxa).
-//  * \param[in]    time_points            Times for which we want to compute the density.
-//  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
-//  * \param[in]    timeTree               Tree for ancestral populations size inference.
-//  *
-//  * \return    The matrix of Mt values through time.
-// */
-MatrixReal RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(   const TypedDagNode<double> *start_age,
-                                                                  const std::vector<double> &timeline,
-                                                                  const std::vector< double > &lambda,
-                                                                  const std::vector< double > &mu,
-                                                                  const std::vector< double > &psi,
-                                                                  const std::vector< double > &omega,
-                                                                  const TypedDagNode<double> *rho,
-                                                                  const std::vector< double > &removalPr,
-                                                                  const TypedDagNode<long> *maxHiddenLin,
-                                                                  const std::string& cond,
-                                                                  const std::vector<double> &time_points,
-                                                                  bool useOrigin,
-                                                                  const std::vector<double> &occurrence_ages,
-                                                                  const Tree &timeTree  )
-{
-
-    // Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
-    struct Event {
-            Event(double d, std::string s) : time(d), type(s) {};
-
-            std::string type;
-            double time;
-
-            std::string getEventType(void){ return type; }
-            double getEventTime(void){ return time; }
-
-        };
-
-
-    // get node/time variables
-    const size_t num_nodes = timeTree.getNumberOfNodes();
-
-    // number of extant lineages
-    size_t k = 0;
-
-    // vector of events
-    std::vector<Event>         events;
-
-    // classify nodes
-    events.clear();
-    events.push_back(Event(start_age->getValue(), "origin"));
-
-    for (size_t i = 0; i < num_nodes; i++)
-    {
-        const TopologyNode& n = timeTree.getNode( i );
-
-        //isFossil is an optional condition to obtain sampled ancestor node ages
-        /*
-        Node labels :
-        fl = fossil leaf
-        b  = "true" bifurcation
-        b' = "false" bifurcation (artefact of the sampled ancestors representation)
-        sa = sampled ancestor
-        el = extant leaf
-        . = time points at which density is computed
-
-         __|___             .
-        |  b   |
-        |      |            .
-        fl     |
-             b'|___ sa      .
-               |
-               |            .
-               el
-
-         1. Pick a fossil among those with brl > 0 (prob = 1/m)
-         2. Set brl = 0
-         */
-
-        if ( n.isFossil() && n.isSampledAncestor() )  //isFossil is optional (all sampled ancestors are fossils)
-        {
-            // node is sampled ancestor
-            events.push_back(Event(n.getAge(), "sampled ancestor")) ;
-
-        }
-        else if ( n.isFossil() && !n.isSampledAncestor() )
-        {
-            // node is fossil leaf
-            // For now, we assume there is no information/labels on removal
-            // @todo add fossil-removed/non-removed
-            events.push_back(Event(n.getAge(),"fossil leaf")) ;
-            std::cout<<"AGE fossil is:" << n.getAge() << std::endl;
-            // events.push_back(Event(n.getAge(),"terminal non-removed")) ;
-        }
-        else if ( !n.isFossil() && n.isTip() )
-        {
-            // node is extant leaf : only their number is necessary to compute Lt and Mt
-            // events.push_back(Event(n.getAge(),"extant leaf") ;
-            // events.push_back(Event(n.getAge(), "terminal non-removed")) ;
-            // std::cout << n.getSpeciesName() << std::endl;
-            std::cout<< "THERE IS AN EXTANT LEAF in Mt" << std::endl;
-            k++;
-        }
-        else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
-        {
-            // node is a "true" bifurcation event
-            events.push_back(Event(n.getAge(),"branching time")) ;
-        }
-    }
-
-    const RbVector<double> tau = time_points;
-
-    for (size_t i = 0; i < tau.size(); i++)
-    {
-        events.push_back(Event(tau[i],"time point")) ;
-    }
-
-    for ( int i=0; i < occurrence_ages.size(); ++i)
-    {
-        events.push_back(Event(occurrence_ages[i],"occurrence")) ;
-    }
-    //adding rate shift events to the events vector
-    const std::vector<double> d = timeline;
-    for ( int i=1; i < d.size(); i++)
-    {
-    events.push_back(Event(timeline[i],"rate shift")) ;
-    }
-
-    events.push_back(Event(0.0,"present time")) ;
-
-    // mutable std::vector<Event> events = RevBayesCore::poolTimes(*start_age, *time_points, timeTree);
-
-    // order times oldest to youngest
-    struct AgeCompareReverse {
-        bool operator()(const Event first, const Event second) {
-            return first.time > second.time;
-        }
-    };
-    std::sort( events.begin(), events.end(), AgeCompareReverse() );
-
-
-    const std::vector<double> birth = lambda;
-    std::cout << "birth vector" << birth << std::endl;
-
-    const std::vector<double> death = mu;
-    const std::vector<double> ps = psi;
-    const std::vector<double> om = omega;
-    const double rh = rho->getValue();
-    const std::vector<double> rp = removalPr;
-
-    const long N = maxHiddenLin->getValue();
-    // const RbVector<double> tau = time_points->getValue();
-
-    const size_t S = tau.size();
-    const std::vector<double> gamma = birth + death + ps + om;
-
-    // Initialize an empty matrix and a cursor to write lines in this matrix
-    MatrixReal B(S, (N + 1), 0.0);
-
-    double birth_current = birth.back();
-    double death_current = death.back();
-    double ps_current = ps.back();
-    double om_current = om.back();
-    double rp_current = rp.back();
-    double gamma_current = gamma.back();
-    size_t indxJ = S-1;
-
-    // Count the number of extant lineages
-    // mutable size_t k = 0;
-    // for(int h = 1; h < events.size(); h++){
-    //     if(type == "extant leaf"){
-    //         k += 1;
-    //     }
-    // }
-
-    // Number of extant lineages
-    k = 1;
-
-    // We start at the time of origin, supposedly the first time in the vector of events
-    RbVector<double> Mt(N+1, 0.0);
-    Mt[0] = 1;
-    double thPlusOne = events[0].time;
-    // std::cout << "Event time : " << events[0].time << " - Event type : " << events[0].type << std::endl;
-    // std::cout << k << std::endl;
-
-    if(thPlusOne != start_age->getValue()) {
-        std::cout << "WARNING : thPlusOne != start_age : " << thPlusOne << " != " << start_age->getValue() << std::endl;
-        return B;
-    };
-
-    // Then we iterate over the next events
-    for(int h = 1; h < events.size(); h++){
-
-        // First, deal with the update on time period (th, thPlusOne)
-        double th = events[h].time;
-
-        if(th > start_age->getValue()) {
-            std::cout << "WARNING : th > start_age : " << th << " > " << start_age->getValue() << std::endl;
-            continue;
-        };
-
-        if( th != thPlusOne ){
-            MatrixReal A( (N+1), (N+1), 0.0 );
-
-            for(int i = 0; i < (N + 1); i++){
-                A[i][i] = gamma_current * (k + i) * (th-thPlusOne);
-                if (i < N) A[i][i+1] = -death_current * (i + 1) * (th-thPlusOne);
-                if (i > 0) A[i][i-1] = -birth_current * (2*k + i - 1) * (th-thPlusOne);
-            }
-
-            RbMath::expMatrixPade(A, A, 4);
-            Mt = A * Mt;
-
-
-        }
-
-        // Second, deal with the update at punctual event th
-        std::string type = events[h].type;
-        if(type == "rate shift"){
-        //change rates appropriately, rate changes provided in timeline are in an ascending order
-        size_t where = LocateTimeSliceIndex(th,timeline) - 1;
-
-        std::cout <<"birth rate was " << birth_current << std::endl;
-        std::cout <<"birth rate shifts to "<< birth[where] <<std::endl;
-        birth_current = birth[where];
-        death_current = death[where];
-        ps_current = ps[where];
-        om_current = om[where];
-        rp_current = rp[where];
-        gamma_current = gamma[where];
-
-        }
-
-        if(type == "time point"){
-            for(int i = 0; i < N+1; i++){
-                B[indxJ][i] = Mt[i];
-            }
-            indxJ -= 1;
-        }
-
-        // if(type == "terminal removed"){
-        //     for(int i = 0; i < N+1; i++){
-        //         Mt[i] *= ps_current * rp_current;
-        //     }
-        //     k -= 1;
-        // }
-        //
-        // if(type == "fossil leaf"){
-        //     for(int i = N; i > 0; i--){
-        //         Mt[i] = Mt[i-1] * ps_current * (1-rp_current);
-        //     }
-        //     Mt[0] = 0;
-        //     k -= 1;
-        // }
-
-        // For now, we assume there is no information/labels on removal
-        // @todo add fossil-removed/non-removed
-        if(type == "fossil leaf"){
-            for(int i = N; i > 0 ; i--){
-                Mt[i] = Mt[i-1] * ps_current * (1-rp_current) + ps_current * rp_current * Mt[i];
-            }
-            Mt[0] *= ps_current * rp_current;
-            k -= 1;
-        }
-
-
-        if(type == "sampled ancestor"){
-            for(int i = 0; i < N+1; i++){
-                Mt[i] *= ps_current * (1-rp_current);
-            }
-        }
-
-        // if(type == "occurrence removed"){
-        //     for(int i = 0; i < N; i++){
-        //         Mt[i] = Mt[i+1] * (i+1) * om_current * rp_current;
-        //     }
-        //  }
-        //
-        // if(type == "occurrence"){
-        //     for(int i = 0; i < N+1; i++){
-        //         Mt[i] *= (k+i) * om_current * (1-rp_current);
-        //     }
-        // }
-
-        // For now, we assume there is no information/labels on removal
-        // @todo add occurrence-removed/non-removed
-        if(type == "occurrence"){
-            for(int i = 0; i < N; i++){
-                Mt[i] = Mt[i+1] * (i+1) * om_current * rp_current + (k+i) * om_current * (1-rp_current) * Mt[i];
-            }
-            Mt[N] *= (k+N) * om_current * (1-rp_current);
-         }
-
-
-        if(type == "branching time"){
-            for(int i = 0; i < N+1; i++){
-                Mt[i] *= birth_current;
-            }
-            k += 1;
-        }
-
-        // std::cout << "Event time : " << th << " - Event type : " << type << " -> Mt[0] : " << Mt[0] << " / Mt[1] : " << Mt[1] << std::endl;
-
-        thPlusOne = th;
-    }
-
-    // double likelihood = Mt[0];
-    // for(int i = 1; i < N+1; i++){
-    //     likelihood += Mt[i] * pow(rh,k) * pow(1.0 - rh,i);
-    // }
-    std::cout<<"extant taxa k: "<< k << std::endl;
-    std::cout << "Mt: B = " << std::endl;
-    std::cout << B << std::endl;
-
-    return B;
-}
-//
-// /**
-//  * Compute the probability density of observations made down any time t, conditioned on the population
-//  * size at that time, as time increases towards the past, with piecewise constant rates : breadth-first backward traversal algorithm.
-//  *
-//  * \param[in]    start_age              Start age of the process.
-//  * \param[in]    timeline               Rate shifts times.
-//  * \param[in]    lambda                 Speciation rate.
-//  * \param[in]    mu                     Extinction rate.
-//  * \param[in]    psi                    Extinction sampling rate.
-//  * \param[in]    omega                  Occurrence sampling rate.
-//  * \param[in]    rho                    Sampling probability at present time.
-//  * \param[in]    removalPr              Removal probability after sampling.
-//  * \param[in]    maxHiddenLin           Algorithm accuracy (maximal number of hidden lineages).
-//  * \param[in]    cond                   Condition of the process (none/survival/#Taxa).
-//  * \param[in]    time_points            Times for which we want to compute the density.
-//  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
-//  * \param[in]    timeTree               Tree for ancestral populations size inference.
-//  *
-//  * \return    The matrix of Lt values through time.
-//  */
-MatrixReal RevBayesCore::ComputeLikelihoodsBackwardsLtPiecewise(  const TypedDagNode<double> *start_age,
-                                                    const std::vector< double > &timeline,
-                                                    const std::vector< double > &lambda,
-                                                    const std::vector< double > &mu,
-                                                    const std::vector< double > &psi,
-                                                    const std::vector< double > &omega,
-                                                    const TypedDagNode<double> *rho,
-                                                    const std::vector< double > &removalPr,
-                                                    const TypedDagNode<long> *maxHiddenLin,
-                                                    const std::string& cond,
-                                                    const std::vector<double> &time_points,
-                                                    bool useOrigin,
-                                                    const std::vector<double> &occurrence_ages,
-                                                    const Tree &timeTree  )
-{
-    // Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
-    struct Event {
-            Event(double d, std::string s) : time(d), type(s) {};
-
-            std::string type;
-            double time;
-
-            std::string getEventType(void){ return type; }
-            double getEventTime(void){ return time; }
-
-        };
-
-    // get node/time variables
-    const size_t num_nodes = timeTree.getNumberOfNodes();
-
-    // number of extant lineages
-    size_t k = 0;
-
-    // vector of events
-    std::vector<Event>         events;
-
-    // classify nodes
-    events.clear();
-    events.push_back(Event(start_age->getValue(), "origin"));
-
-    for (size_t i = 0; i < num_nodes; i++)
-    {
-        const TopologyNode& n = timeTree.getNode( i );
-
-        //isFossil is an optional condition to obtain sampled ancestor node ages
-        /*
-        Node labels :
-        fl = fossil leaf
-        b  = "true" bifurcation
-        b' = "false" bifurcation (artefact of the sampled ancestors representation)
-        sa = sampled ancestor
-        el = extant leaf
-        . = time points at which density is computed
-
-         __|___             .
-        |  b   |
-        |      |            .
-        fl     |
-             b'|___ sa      .
-               |
-               |            .
-               el
-
-         1. Pick a fossil among those with brl > 0 (prob = 1/m)
-         2. Set brl = 0
-         */
-
-        if ( n.isFossil() && n.isSampledAncestor() )  //isFossil is optional (all sampled ancestors are fossils)
-        {
-            // node is sampled ancestor
-            events.push_back(Event(n.getAge(), "sampled ancestor")) ;
-
-        }
-        else if ( n.isFossil() && !n.isSampledAncestor() )
-        {
-          // node is a fossil leaf
-          // For now, we assume there is no information/labels on removal
-          // @todo add fossil-removed/non-removed
-            events.push_back(Event(n.getAge(),"fossil leaf")) ;
-            std::cout<<"AGE fossil is:" << n.getAge() << std::endl;
-            // events.push_back(Event(n.getAge(),"terminal non-removed")) ;
-        }
-        else if ( !n.isFossil() && n.isTip() )
-        {
-            // node is extant leaf : only their number is necessary to compute Lt and Mt
-            // events.push_back(Event(n.getAge(),"extant leaf") ;
-            // events.push_back(Event(n.getAge(), "terminal non-removed")) ;
-            // std::cout << n.getSpeciesName() << std::endl;
-            std::cout<< "THERE IS AN EXTANT LEAF in Lt" << std::endl;
-            k++;
-        }
-        else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
-        {
-            // node is a "true" bifurcation event
-            events.push_back(Event(n.getAge(),"branching time")) ;
-        }
-    }
-
-    const RbVector<double> tau = time_points;
-
-    for (size_t i = 0; i < tau.size(); i++)
-    {
-        events.push_back(Event(tau[i],"time point")) ;
-    }
-
-    for ( int i=0; i < occurrence_ages.size(); ++i)
-    {
-    // For now, we assume there is no information/labels on removal
-    // @todo add occurrence-removed/non-removed
-    events.push_back(Event(occurrence_ages[i],"occurrence")) ;
-    }
-    //adding rate shift events to the events vector
-    const std::vector<double> d = timeline;
-    for ( int i=1; i < d.size(); i++)
-    {
-    events.push_back(Event(timeline[i],"rate shift")) ;
-    }
-
-    events.push_back(Event(0.0,"present time")) ;
-
-    // mutable std::vector<Event> events = RevBayesCore::poolTimes(*start_age, *time_points, timeTree);
-
-    // order times youngest to oldest
-    struct AgeCompare {
-        bool operator()(const Event first, const Event second) {
-            return first.time < second.time;
-        }
-    };
-    std::sort( events.begin(), events.end(), AgeCompare() );
-
-
-
-
-
-    const std::vector<double> birth = lambda;
-    const std::vector<double> death = mu;
-    const std::vector<double> ps = psi;
-    const std::vector<double> om = omega;
-    const double rh = rho->getValue();
-    const std::vector<double> rp = removalPr;
-    const long N = maxHiddenLin->getValue();
-    // const RbVector<double> tau = time_points->getValue();
-
-    const size_t S = tau.size();
-    const std::vector<double> gamma = birth + death + ps + om;
-
-    // Initialize an empty matrix and a cursor indxJ to write lines in this matrix as well as the parameter sets.
-    MatrixReal B(S, (N + 1), 0.0);
-    double birth_current = birth[0];
-    std::cout << "Lt BIRTH rate" << birth_current << std::endl;
-    double death_current = death[0];
-    double ps_current = ps[0];
-    double om_current = om[0];
-    double rp_current = rp[0];
-    double gamma_current = gamma[0];
-
-    size_t indxJ = 0;
-
-
-    // We start at time 0 with type "present" in the vector of events
-    // size_t k = extant;
-    std::cout<<"rho: "<<rh << std::endl;
-    std::cout<<"extant taxa k: "<< k << std::endl;
-    double thMinusOne = events[0].time;
-    RbVector<double> Lt(N+1, pow(rh, k));
-    for ( int i = 0; i < (N + 1); i++){
-        Lt[i] *= pow( 1.0-rh, i );
-    }
-    // std::cout << "Event time : " << events[0].time << " - Event type : " << events[0].type << std::endl;
-
-    // We then iterate over the following events until finding the time of origin
-    for(int h = 1; h < events.size(); h++){
-
-        // First deal with the update along (thMinusOne, th)
-        double th = events[h].time;
-
-        if( th != thMinusOne ){
-
-            MatrixReal A( (N+1), (N+1), 0.0 );
-            for(int i = 0; i < (N + 1); i++){
-              A[i][i] = -gamma_current * (k + i) * (th - thMinusOne);
-              if (i < N) A[i][i+1] = birth_current * ( (2 * k) + i ) * (th - thMinusOne);
-              if (i > 0) A[i][i-1] = death_current * i * (th - thMinusOne);
-
-            }
-            RbMath::expMatrixPade(A, A, 4);
-            Lt = A * Lt;
-
-        }
-
-
-
-        // Second, deal with the update at time th
-        std::string type = events[h].type;
-        if(type == "rate shift"){
-        //change rates appropriately
-        size_t where = LocateTimeSliceIndex(th,timeline) ;
-        std::cout <<"birth rate was " << birth_current << std::endl;
-        std::cout <<"birth rate shifts to "<< birth[where] <<std::endl;
-
-        birth_current = birth[where];
-        death_current = death[where];
-        ps_current = ps[where];
-        om_current = om[where];
-        rp_current = rp[where];
-        gamma_current = gamma[where];
-        }
-
-        if(type == "time point"){
-            for(int i = 0; i < N+1; i++){
-                B[indxJ][i] = Lt[i];
-            }
-            indxJ += 1;
-        }
-
-        // if(type == "terminal removed"){
-        //     for(int i = 0; i < N+1; i++){
-        //         Lt[i] = Lt[i] * ps_current * rp_current;
-        //     }
-        //     k += 1;
-        // }
-        //
-        // if(type == "fossil leaf"){
-        //     for(int i = 0; i < N; i++){
-        //         Lt[i] = Lt[i+1] * ps_current * (1.0-rp_current);
-        //     }
-        //     k += 1;
-        // }
-
-       // For now, we assume there is no information/labels on removal
-       // @todo add fossil-removed/non-removed
-       if(type == "fossil leaf"){
-           for(int i = 0; i < N; i++){
-               Lt[i] = Lt[i] * ps_current * rp_current + Lt[i+1] * ps_current * (1.0-rp_current) ;
-           }
-           Lt[N] = Lt[N] * ps_current * rp_current;
-           k += 1;
-       }
-
-        if(type == "sampled ancestor"){
-            for(int i = 0; i < N+1; i++){
-                Lt[i] = Lt[i] * ps_current * (1.0-rp_current);
-            }
-        }
-
-        // if(type == "occurrence removed"){
-        //     for(int i = N; i > 0; i--){
-        //         Lt[i] = Lt[i-1] * i * om_current * rp_current;
-        //     }
-        //     Lt[0] = 0;
-        //  }
-        //
-        // if(type == "occurrence"){
-        //     for(int i = 0; i < N+1; i++){
-        //         Lt[i] = Lt[i] * (k+i) * om_current * (1-rp_current);
-        //     }
-        // }
-
-        // For now, we assume there is no information/labels on removal
-       // @todo add occurrence-removed/non-removed
-       if(type == "occurrence"){
-           for(int i = N; i > 0; i--){
-               Lt[i] = Lt[i-1] * i * om_current * rp_current + Lt[i] * (k+i) * om_current * (1-rp_current);
-           }
-           Lt[0] = Lt[0] * k * om_current * (1-rp_current);
-        }
-
-        if(type == "branching time"){
-            for(int i = 0; i < N+1; i++){
-                Lt[i] = Lt[i] * birth_current;
-            }
-            k -= 1;
-        }
-
-        // std::cout << "Event time : " << th << " - Event type : " << type << " -> Lt[0] : " << Lt[0] << " / Lt[1] : " << Lt[1] << std::endl;
-
-        thMinusOne = th;
-    }
-
-    return B;
-}
-
-
 /**
  * Compute the joint log probability density of observations made down any time t, conditioned on the population
  * size at that time, as time increases towards the past : breadth-first backwards traversal algorithm.
- * This function is borrowed from Ankit Gupta, 
+ * This function is borrowed from Ankit Gupta,
  * see his paper: "The probability distribution of the reconstructed phylogenetic tree with occurrence data".
  * \param[in]    start_age              Start age of the process.
  * \param[in]    timeline               Rate shifts times.
@@ -1573,7 +927,7 @@ double RevBayesCore::likelihoodWithAllSamplesRemoved(  const TypedDagNode<double
 
         thMinusOne = th;
     }
-   
+
     if (impossible){
       LogLikelihood = -1e500;
     }else{
@@ -1583,7 +937,7 @@ double RevBayesCore::likelihoodWithAllSamplesRemoved(  const TypedDagNode<double
     return LogLikelihood;
 }
 
- 
+
 // Below are the helper functions we need for analytical computation
 double RevBayesCore::GetQ(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega )
 {
@@ -1598,7 +952,7 @@ double RevBayesCore::GetDerivativeQ(  const double t, const double beta, const d
     double c1 = std::sqrt( (beta - mu - omega - psi)*(beta - mu - omega - psi)+4*beta*psi);
     double c2 = (beta + mu + omega + psi - 2*beta*rhoc)/c1;
     double q = 0.0;
-    if(n == 1){    
+    if(n == 1){
         q = -(4*beta/c1)*( exp(c1*t) -exp(-c1*t) + c2*( exp(c1*t) + exp(-c1*t) - 2 )    );
     }else if(n == 2){
         q = 8*( (beta/c1)*(beta/c1) )*(exp(c1*t) + exp(-c1*t) - 2);
@@ -1640,7 +994,7 @@ double RevBayesCore::GetMultiDerivativeRecQ(  const double t, const double beta,
     }
     else{
         double Qder1 = GetDerivativeQ(t,beta,rhoc,mu,psi,omega,1);
-        double Qder2 = GetDerivativeQ(t,beta,rhoc,mu,psi,omega,2);  
+        double Qder2 = GetDerivativeQ(t,beta,rhoc,mu,psi,omega,2);
         for( unsigned m1 =0; m1 <= n; m1++){
             if( (n-m1) % 2 == 0){
                 unsigned m2 = (n-m1)/2;
@@ -1670,7 +1024,7 @@ double RevBayesCore::GetDerP0(  const double t, const double beta, const double 
 
     double derfac = -2*beta/c1;
     std::vector<double> factor(n+1, 0.0);
-    factor[0] = ( exp(c1*t)*(1+c2)*(1+c2) - exp(-c1*t)*(1-c2)*(1-c2) ) / 4; 
+    factor[0] = ( exp(c1*t)*(1+c2)*(1+c2) - exp(-c1*t)*(1-c2)*(1-c2) ) / 4;
     factor[1] =  derfac*( exp(c1*t)*(1+c2) + exp(-c1*t)*(1-c2))/2;
     factor[2] = (derfac * derfac)*( exp(c1*t) - exp(-c1*t))/2;
     double derp0 = 0.0;
@@ -1742,9 +1096,4 @@ MatrixReal RevBayesCore::IncompleteBellPolynomial(unsigned N, unsigned K, std::v
     }
 
     return OutputMatrix;
-}
-
-size_t RevBayesCore::LocateTimeSliceIndex(const double &t, const std::vector<double> &timeline)
-{
-    return std::distance(timeline.begin(),std::find(timeline.begin(),timeline.end(),t));
 }

@@ -390,47 +390,8 @@ PiecewiseConstantOccurrenceBirthDeathProcess* PiecewiseConstantOccurrenceBirthDe
  */
 double PiecewiseConstantOccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) const
 {
-    // prepare the probability computation
-    std::cout << "PrepareProbComputation" << std::endl;
-    prepareProbComputation();
-
-    // variable declarations and initialization
-    const RevBayesCore::Tree tree(*value);
-    std::vector<double> occAges = std::vector<double>();
-    if (useMt) {
-    const std::vector<double> time_points_Mt( 1, 0.0 );
-    std::cout << "Compute likelihood Mt piecewise" << std::endl;
-    std::cout << "The timeline for rate shifts is:" << std::endl;
-    for (int i=0;i<timeline.size();++i) {
-    std::cout << timeline[i] << std::endl;
-    }
-    MatrixReal B_Mt = RevBayesCore::ComputeLikelihoodsForwardsMtPiecewise(start_age, timeline, lambda, mu, psi, omega, homogeneous_rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, occAges, tree);
-
-    const long N = maxHiddenLin->getValue();
-    const size_t k = value->getNumberOfExtantTips();
-
-    double likelihood = B_Mt[0][0];
-    // std::cout << "B_Mt[0][0] : " << B_Mt[0][0] << std::endl;
-    for(int i = 1; i < N+1; i++){
-        // std::cout << "B_Mt[0][" << i << "] : " << B_Mt[0][i] << std::endl;
-        // std::cout << "B_Mt[0][" << i << "] * pow(rh,k) * pow(1.0 - rh,i) : " << B_Mt[0][i] * pow(rh,k) * pow(1.0 - rh,i) << std::endl;
-        likelihood += B_Mt[0][i] * pow(rho,k) * pow(1.0 - rho,i);
-    }
-    return log(likelihood);
-  }
-    const std::vector<double> time_points_Lt(1, start_age->getValue());
-    MatrixReal B_Lt = RevBayesCore::ComputeLikelihoodsBackwardsLtPiecewise(start_age, timeline, lambda, mu, psi, omega, homogeneous_rho, removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, occAges, tree);
-
-    // const long N = maxHiddenLin->getValue();
-    // for(int i = 0; i < N+1; i++){
-    //     std::cout << "B_Lt[0][" << i << "] : " << B_Lt[0][i] << std::endl;
-    // }
-
-    double likelihood = B_Lt[0][0];
-    // std::cout << "\n ==> Log-Likelihood Lt : " << log(likelihood) << std::endl;
-    // std::cout << "\ncomputeLnProbabilityTimes : " << computeLnProbabilityTimes() << "\n\n" << std::endl;
-
-    return log(likelihood);
+    std::cout<<"Function was moved to OBDP2, returning NaN"<<std::endl;
+    return RbConstants::Double::neginf;
 }
 
 /**
