@@ -144,10 +144,15 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) 
     {
         occAges = std::vector<double>();
     }
-
-    double logLikelihood = RevBayesCore::ComputeLnLikelihoodOBDP(start_age, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, useOrigin, useMt, verbose, occAges, tree);
+    std::vector<double> timeline{0.0};
+		std::vector<double> lambd{lambda->getValue()};
+		std::vector<double> m{mu->getValue()};
+		std::vector<double> ps{psi->getValue()};
+		std::vector<double> omeg{omega->getValue()};
+		std::vector<double> removalP{removalPr->getValue()};
+    double logLikelihood = RevBayesCore::ComputeLnLikelihoodOBDP(start_age, timeline, lambd, m, ps, omeg, rho, removalP, maxHiddenLin, cond, useOrigin, useMt, verbose, occAges, tree);
     // if (verbose){std::cout << "\ncomputeLnProbabilityTimes : " << computeLnProbabilityTimes() << "\n\n" << std::endl;}
-    
+
     return logLikelihood;
 }
 

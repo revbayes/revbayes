@@ -98,115 +98,56 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_OBDP2::createDistribution( void ) 
     // maximum number of hidden lineages
     RevBayesCore::TypedDagNode< long >* n       = static_cast<const Natural &>( maxHiddenLin->getRevObject() ).getDagNode();
 
-    bool piecewise = false;
-
-    if ( lambda->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
+    // birth rate
+    RevBayesCore::DagNode* b_s = lambda->getRevObject().getDagNode();
+    // death rate
+    RevBayesCore::DagNode* d_s = mu->getRevObject().getDagNode();
+    // serial sampling rate
+    RevBayesCore::DagNode* s_s = phi->getRevObject().getDagNode();
+    // treatment probability
+    RevBayesCore::DagNode* t   = r->getRevObject().getDagNode();
+    // occurrence rate
+    RevBayesCore::DagNode* o_s  = omega->getRevObject().getDagNode();
+    // birth burst
+    RevBayesCore::DagNode* b_e = NULL;
+    // if (Lambda->getRevObject().isType( ModelVector<Probability>::getClassTypeSpec() ))
+    // {
+    //   b_e = Lambda->getRevObject().getDagNode();
+    // }
+    // death burst (mass extinction)
+    RevBayesCore::DagNode* d_e = NULL;
+    //if (Mu->getRevObject().isType( ModelVector<Probability>::getClassTypeSpec() ))
+    // {
+    //   d_e = Mu->getRevObject().getDagNode();
+    // }
+    // event sampling
+    RevBayesCore::DagNode* s_e = NULL;
+    if ( Phi->getRevObject() != RevNullObject::getInstance() )
     {
-        piecewise = true;
+        s_e = Phi->getRevObject().getDagNode();
     }
-
-    if ( mu->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
+    // rate change times
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ht = NULL;
+    if ( timeline->getRevObject() != RevNullObject::getInstance() )
     {
-        piecewise = true;
+        ht = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
-
-    if ( phi->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
+    // occurrence ages
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*  occAges = NULL;
+    if ( occurrence_ages->getRevObject() != RevNullObject::getInstance() )
     {
-        piecewise = true;
+        occAges                                  = static_cast<const ModelVector<Real> &>( occurrence_ages->getRevObject() ).getDagNode();
     }
+    // boolean : use Mt, otherwise use Lt
+    bool                                Mt      = static_cast<const RlBoolean &>( useMt->getRevObject() ).getValue();
 
-    if ( r->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
-    {
-        piecewise = true;
-    }
-
-    if ( omega->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
-    {
-        piecewise = true;
-    }
-
-    if ( Lambda->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
-    {
-        piecewise = true;
-    }
-
-    if ( Mu->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
-    {
-        piecewise = true;
-    }
-
-    if ( Phi->getRevObject().isType( ModelVector<Probability>::getClassTypeSpec() ) )
-    {
-        piecewise = true;
-    }
-
+    // boolean : verbose
+    bool                                vb      = static_cast<const RlBoolean &>( verbose->getRevObject() ).getValue();
 
     RevBayesCore::AbstractBirthDeathProcess* d;
 
-    // Until a constant-rate function exists, we defer all calculations to the piecewise-constant version
-    // if ( piecewise )
-    // {
-        // birth rate
-        RevBayesCore::DagNode* b_s = lambda->getRevObject().getDagNode();
-        // death rate
-        RevBayesCore::DagNode* d_s = mu->getRevObject().getDagNode();
-        // serial sampling rate
-        RevBayesCore::DagNode* s_s = phi->getRevObject().getDagNode();
-        // treatment probability
-        RevBayesCore::DagNode* t   = r->getRevObject().getDagNode();
-        // occurrence rate
-        RevBayesCore::DagNode* o_s  = omega->getRevObject().getDagNode();
-        // birth burst
-        RevBayesCore::DagNode* b_e = NULL;
-        if (Lambda->getRevObject().isType( ModelVector<Probability>::getClassTypeSpec() ))
-        {
-          b_e = Lambda->getRevObject().getDagNode();
-        }
-        // death burst (mass extinction)
-        RevBayesCore::DagNode* d_e = NULL;
-        if (Mu->getRevObject().isType( ModelVector<Probability>::getClassTypeSpec() ))
-        {
-          d_e = Mu->getRevObject().getDagNode();
-        }
-        // event sampling
-        RevBayesCore::DagNode* s_e = NULL;
-        if ( Phi->getRevObject() != RevNullObject::getInstance() )
-        {
-            s_e = Phi->getRevObject().getDagNode();
-        }
-        // rate change times
-        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ht = NULL;
-        if ( timeline->getRevObject() != RevNullObject::getInstance() )
-        {
-            ht = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
-        }
-        // occurrence ages
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*  occAges = NULL;
-        if ( occurrence_ages->getRevObject() != RevNullObject::getInstance() )
-        {
-            occAges                                  = static_cast<const ModelVector<Real> &>( occurrence_ages->getRevObject() ).getDagNode();
-        }
-        // boolean : use Mt, otherwise use Lt
-        bool                                Mt      = static_cast<const RlBoolean &>( useMt->getRevObject() ).getValue();
+        d = new RevBayesCore::OBDP2(sa, b_s, d_s, s_s, t, o_s, b_e, d_e, s_e, ht, cond, tree, uo, init, n, occAges, Mt, vb);
 
-
-        d = new RevBayesCore::OBDP2(sa, b_s, d_s, s_s, t, o_s, b_e, d_e, s_e, ht, cond, tree, uo, init, n, occAges, Mt);
-    // }
-    // else
-    // {
-    //     // birth rate
-    //     RevBayesCore::TypedDagNode<double>* b_s       = static_cast<const RealPos &>( lambda->getRevObject() ).getDagNode();
-    //     // death rate
-    //     RevBayesCore::TypedDagNode<double>* d_s       = static_cast<const RealPos &>( mu->getRevObject() ).getDagNode();
-    //     // serial sampling rate
-    //     RevBayesCore::TypedDagNode<double>* s_s       = static_cast<const RealPos &>( phi->getRevObject() ).getDagNode();
-    //     // treatment probability
-    //     RevBayesCore::TypedDagNode<double>* r         = static_cast<const RealPos &>( r->getRevObject() ).getDagNode();
-    //     // event sampling probability at present
-    //     RevBayesCore::TypedDagNode<double>* s_e       = static_cast<const RealPos &>( Phi->getRevObject() ).getDagNode();
-    //
-    //     // d = new RevBayesCore::ConstantRateSerialSampledBirthDeathProcess(sa, l, m, p, r, cond, t, uo, init);
-    // }
 
     return d;
 }
@@ -306,8 +247,8 @@ const MemberRules& Dist_OBDP2::getParameterRules(void) const
 
         std::vector<TypeSpec> other_event_paramTypes;
         other_event_paramTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
-        dist_member_rules.push_back( new ArgumentRule( "Lambda",  other_event_paramTypes, "The episodic birth burst probabilities.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        dist_member_rules.push_back( new ArgumentRule( "Mu",      other_event_paramTypes, "The episodic death burst (mass extinction) survival probabilities.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+      //  dist_member_rules.push_back( new ArgumentRule( "Lambda",  other_event_paramTypes, "The episodic birth burst probabilities.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+      //  dist_member_rules.push_back( new ArgumentRule( "Mu",      other_event_paramTypes, "The episodic death burst (mass extinction) survival probabilities.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         std::vector<TypeSpec> event_sampling_paramTypes;
         event_sampling_paramTypes.push_back( Probability::getClassTypeSpec() );
@@ -328,6 +269,7 @@ const MemberRules& Dist_OBDP2::getParameterRules(void) const
         dist_member_rules.push_back( new ArgumentRule( "maxHiddenLin",      Natural::getClassTypeSpec(), "The maximum number of hidden lineages.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Natural(30) ) );
         dist_member_rules.push_back( new ArgumentRule( "occurrence_ages" ,  ModelVector<Real>::getClassTypeSpec() , "The fixed occurrence ages", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
         dist_member_rules.push_back( new ArgumentRule( "useMt",             RlBoolean::getClassTypeSpec(), "If true computes densities with the Mt forward traversal algorithm otherwise uses Lt backward one.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( true ) ) );
+        dist_member_rules.push_back( new ArgumentRule( "verbose",           RlBoolean::getClassTypeSpec(), "If true displays warnings and information messages.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( false ) ) );
 
         rules_set = true;
     }
@@ -382,14 +324,14 @@ void Dist_OBDP2::setConstParameter(const std::string& name, const RevPtr<const R
     {
         omega = var;
     }
-    else if ( name == "Lambda" )
-    {
-        Lambda = var;
-    }
-    else if ( name == "Mu" )
-    {
-        Mu = var;
-    }
+    // else if ( name == "Lambda" )
+    // {
+    //     Lambda = var;
+    // }
+    // else if ( name == "Mu" )
+    // {
+    //     Mu = var;
+    // }
     else if ( name == "Phi" )
     {
         Phi = var;
@@ -418,6 +360,10 @@ void Dist_OBDP2::setConstParameter(const std::string& name, const RevPtr<const R
     else if ( name == "useMt" )
     {
         useMt = var;
+    }
+    else if ( name == "verbose" )
+    {
+        verbose = var;
     }
     else if ( name == "condition" )
     {

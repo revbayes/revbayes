@@ -18,7 +18,7 @@ class Taxon;
 
 template <class valueType> class RbVector;
 template <class valueType> class TypedDagNode;
-  
+
   /**
      * @brief Declaration of the deterministic variable for ancestral population size estimation.
      * @return The probability density of the number of hidden lineages through time, computed according to Manceau & al. 2020 algorithm (http://dx.doi.org/10.1101/755561)
@@ -37,12 +37,12 @@ template <class valueType> class TypedDagNode;
                                                             const TypedDagNode<long> *n,
 
                                                             const std::string& cdt,
-                                                            const TypedDagNode< RevBayesCore::RbVector<double> > *O,  
+                                                            const TypedDagNode< RevBayesCore::RbVector<double> > *O,
                                                             const std::vector<double> &tau,
                                                             bool uo,
                                                             bool vb,
                                                             TypedDagNode<Tree> *tr);
-      
+
       virtual                                               ~InferAncestralPopSizeFunction(void);
 
       // public member functions

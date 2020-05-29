@@ -56,7 +56,8 @@ OBDP2::OBDP2(                                                                   
                                                                                            TypedDagNode<Tree> *t,
                                                                                            const TypedDagNode<long> *n,
                                                                                            const TypedDagNode< RevBayesCore::RbVector<double> > *O,
-                                                                                           bool mt) : AbstractBirthDeathProcess( ra, cdt, tn, uo ),
+                                                                                           bool mt,
+                                                                                           bool vb) : AbstractBirthDeathProcess( ra, cdt, tn, uo ),
     interval_times(ht),
     offset( 0.0 ),
     start_age(ra),
@@ -64,7 +65,8 @@ OBDP2::OBDP2(                                                                   
     occurrence_ages(O),
     useMt ( mt ),
     useOrigin (uo),
-    cond (cdt)
+    cond (cdt),
+    verbose ( vb )
 
 
 {
@@ -242,8 +244,8 @@ double OBDP2::computeLnProbabilityDivergenceTimes( void ) const
     {
         occAges = std::vector<double>();
     }
-    bool verbose = 1;
-    double logLikelihood = RevBayesCore::ComputeLnLikelihoodOBDPPiecewise(start_age, timeline, lambda, mu, phi, omega, homogeneous_Phi, r, maxHiddenLin, cond, useOrigin, useMt, verbose, occAges, tree);
+    
+    double logLikelihood = RevBayesCore::ComputeLnLikelihoodOBDP(start_age, timeline, lambda, mu, phi, omega, homogeneous_Phi, r, maxHiddenLin, cond, useOrigin, useMt, verbose, occAges, tree);
     // if (verbose){std::cout << "\ncomputeLnProbabilityTimes : " << computeLnProbabilityTimes() << "\n\n" << std::endl;}
 
     return logLikelihood;

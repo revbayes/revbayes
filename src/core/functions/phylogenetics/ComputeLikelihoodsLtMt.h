@@ -20,23 +20,8 @@ struct Event {
 
 namespace RevBayesCore {
 
-    MatrixReal              ComputeLnProbabilityDensitiesOBDP(  const TypedDagNode<double> *start_age,
-                                                                const TypedDagNode<double> *lambda,
-                                                                const TypedDagNode<double> *mu,
-                                                                const TypedDagNode<double> *psi,
-                                                                const TypedDagNode<double> *omega,
-                                                                const TypedDagNode<double> *rho,
-                                                                const TypedDagNode<double> *removalPr,
-                                                                const TypedDagNode<long> *maxHiddenLin,
-                                                                const std::string &cond,
-                                                                const std::vector<double> &time_points,
-                                                                bool useOrigin,
-                                                                bool useMt,
-                                                                bool verbose,
-                                                                const std::vector<double> &occurrence_ages,
-                                                                const Tree &timeTree);
 
-MatrixReal          ComputeLnProbabilityDensitiesOBDPPiecewise( const TypedDagNode<double> *start_age,
+MatrixReal          ComputeLnProbabilityDensitiesOBDP(          const TypedDagNode<double> *start_age,
                                                                 const std::vector<double> &timeline,
                                                                 const std::vector<double> &lambda,
                                                                 const std::vector<double> &mu,
@@ -53,22 +38,8 @@ MatrixReal          ComputeLnProbabilityDensitiesOBDPPiecewise( const TypedDagNo
                                                                 const std::vector<double> &occurrence_ages,
                                                                 const Tree &timeTree);
 
-    double                  ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *start_age,
-                                                        const TypedDagNode<double> *lambda,
-                                                        const TypedDagNode<double> *mu,
-                                                        const TypedDagNode<double> *psi,
-                                                        const TypedDagNode<double> *omega,
-                                                        const TypedDagNode<double> *rho,
-                                                        const TypedDagNode<double> *removalPr,
-                                                        const TypedDagNode<long> *maxHiddenLin,
-                                                        const std::string &cond,
-                                                        bool useOrigin,
-                                                        bool useMt,
-                                                        bool verbose,
-                                                        const std::vector<double> &occurrence_ages,
-                                                        const Tree &timeTree);
 
-double               ComputeLnLikelihoodOBDPPiecewise(    const TypedDagNode<double> *start_age,
+double               ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *start_age,
                                                           const std::vector<double> &timeline,
                                                           const std::vector<double> &lambda,
                                                           const std::vector<double> &mu,
@@ -84,52 +55,18 @@ double               ComputeLnLikelihoodOBDPPiecewise(    const TypedDagNode<dou
                                                           const std::vector<double> &occurrence_ages,
                                                           const Tree &timeTree);
 
-    std::vector<Event>      PoolEvents( const TypedDagNode<double> *start_age,
-                                        const std::vector<double> &time_points,
-                                        bool verbose,
-                                        const std::vector<double> &occurrence_ages,
-                                        const Tree &timeTree);
 
-    std::vector<Event>      PoolEventsPiecewise(  const TypedDagNode<double> *start_age,
+    std::vector<Event>      PoolEvents         (  const TypedDagNode<double> *start_age,
                                                   const std::vector<double> &time_points,
                                                   const std::vector<double> &occurrence_ages,
+                                                  bool verbose,
                                                   const Tree &timeTree,
                                                   const std::vector<double> &timeline);
 
-    MatrixReal              ForwardsTraversalMt(    const TypedDagNode<double> *start_age,
-                                                    const TypedDagNode<double> *lambda,
-                                                    const TypedDagNode<double> *mu,
-                                                    const TypedDagNode<double> *psi,
-                                                    const TypedDagNode<double> *omega,
-                                                    const TypedDagNode<double> *rho,
-                                                    const TypedDagNode<double> *removalPr,
-                                                    const TypedDagNode<long> *maxHiddenLin,
-                                                    const std::string &cond,
-                                                    const std::vector<double> &time_points,
-                                                    bool useOrigin,
-                                                    bool returnLogLikelihood,
-                                                    bool verbose,
-                                                    const std::vector<double> &occurrence_ages,
-                                                    const Tree &timeTree);
-
-    MatrixReal              BackwardsTraversalLt(   const TypedDagNode<double> *start_age,
-                                                    const TypedDagNode<double> *lambda,
-                                                    const TypedDagNode<double> *mu,
-                                                    const TypedDagNode<double> *psi,
-                                                    const TypedDagNode<double> *omega,
-                                                    const TypedDagNode<double> *rho,
-                                                    const TypedDagNode<double> *removalPr,
-                                                    const TypedDagNode<long> *maxHiddenLin,
-
-                                                    const std::string& cond,
-                                                    const std::vector<double> &time_points,
-                                                    bool useOrigin,
-                                                    bool verbose,
-                                                    const std::vector<double> &occurrence_ages,
-                                                    const Tree &timeTree);
 
 
-    MatrixReal              ForwardsTraversalMtPiecewise(  const TypedDagNode<double> *start_age,
+
+    MatrixReal              ForwardsTraversalMt(  const TypedDagNode<double> *start_age,
                                                                     const std::vector<double> &timeline,
                                                                     const std::vector<double> &lambda,
                                                                     const std::vector<double> &mu,
@@ -146,7 +83,7 @@ double               ComputeLnLikelihoodOBDPPiecewise(    const TypedDagNode<dou
                                                                     const std::vector<double> &occurrence_ages,
                                                                     const Tree &timeTree);
 
-    MatrixReal              BackwardsTraversalLtPiecewise(   const TypedDagNode<double> *start_age,
+    MatrixReal              BackwardsTraversalLt(   const TypedDagNode<double> *start_age,
                                                                       const std::vector<double> &timeline,
                                                                       const std::vector<double> &lambda,
                                                                       const std::vector<double> &mu,

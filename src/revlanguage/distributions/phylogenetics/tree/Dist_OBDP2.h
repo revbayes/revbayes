@@ -48,16 +48,18 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                               phi;                                                                                    //!< The serial sampling rate(s)
         RevPtr<const RevVariable>                               r;
         RevPtr<const RevVariable>                               omega;                                                                                  //!< The occurrence sampling rate                                                                                 //!< The taxon sampling fraction(s)
-        RevPtr<const RevVariable>                               Lambda;                                                                                 //!< The speciation rate(s)
-        RevPtr<const RevVariable>                               Mu;                                                                                     //!< The extinction rate(s)
+        // RevPtr<const RevVariable>                               Lambda;                                                                                 //!< The speciation rate(s)
+        // RevPtr<const RevVariable>                               Mu;                                                                                     //!< The extinction rate(s)
         RevPtr<const RevVariable>                               Phi;                                                                                    //!< The serial sampling rate(s)
         RevPtr<const RevVariable>                               timeline;                                                                               //!< The interval change times
-        std::string                                             start_condition;                                                                     //!< The start condition of the process (rootAge/originAge)
-        RevPtr<const RevVariable>                               initial_tree;
-        RevPtr<const RevVariable>                               maxHiddenLin;                                     //!< The number of hidden lineages (algorithm accuracy)
-        RevPtr<const RevVariable>                               occurrence_ages;                                  //!< Occurrence ages
-        RevPtr<const RevVariable>                               useMt;
-                                                    //!< Forward traversal Mt algorithm (otherwise backward Lt)
+        std::string                                             start_condition;                                                                        //!< The start condition of the process (rootAge/originAge)
+        RevPtr<const RevVariable>                               initial_tree;                                                                           //!< Optional initial tree
+        RevPtr<const RevVariable>                               maxHiddenLin;                                                                           //!< The number of hidden lineages (algorithm accuracy)
+        RevPtr<const RevVariable>                               occurrence_ages;                                                                        //!< Occurrence ages
+        RevPtr<const RevVariable>                               useMt;                                                                                  //!< Forward traversal Mt algorithm (otherwise backward Lt)
+        RevPtr<const RevVariable>                               verbose;                                                                                //!< Display warnings and information messages
+
+
 
     };
 
