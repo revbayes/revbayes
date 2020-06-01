@@ -76,25 +76,14 @@ void Move_LayeredScaleProposal::constructInternalObject( void )
     //
 
     // now allocate a new move
-    std::cout << "HEHE 1"<<std::endl;
      double d = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-     std::cout << "HEHE 2"<<std::endl;
-
      double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-     std::cout << "HEHE 3"<<std::endl;
-
      double r = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
-     std::cout << "HEHE 4"<<std::endl;
 
      RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
-     std::cout << "HEHE 5"<<std::endl;
-
      RevBayesCore::StochasticNode<RevBayesCore::Tree> *st = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
-     std::cout << "HEHE 6"<<std::endl;
 
      bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-     std::cout << "HEHE 7"<<std::endl;
-
 
      RevBayesCore::Proposal *p = new RevBayesCore::LayeredScaleProposal(st, d, r);
      value = new RevBayesCore::MetropolisHastingsMove(p, w, t);
