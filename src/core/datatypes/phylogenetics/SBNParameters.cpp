@@ -411,6 +411,162 @@ std::vector<std::pair<size_t,double> > SBNParameters::computeLnProbabilityTopolo
   return lnProbability;
 }
 
+/* Helper function for UNROOTED trees. Computes for each branch the joint probability Pr(tree and root here) */
+std::vector<std::pair<size_t,double> > SBNParameters::computeLnProbabilityTopologyAndRooting( const std::vector<std::vector<size_t> >& compact_tree ) const
+{
+    std::vector<std::pair<size_t,double> > lnProbability;
+
+    // For storing cumulative log-probabilities from tip through this branch.
+    std::vector<double> ttr = std::vector<double>(compact_tree.size(),0.0);
+
+    // // Tip to root pass, here we do two things
+    // // 1) Get all nodes' subsplits (we will need these repeatedly)
+    // //      We do not make a subsplit for the root as the root is a trifurcation in an unrooted tree
+    // // 2) accumulate tipward tree probabilities, ttr[node] = log(Pr(all subsplits tipward of this subsplit | this subsplit))
+    // for (std::vector<TopologyNode*>::const_iterator it = postorder_nodes.begin(); it != (postorder_nodes.end()-1); ++it)
+    // {
+    //   size_t index = (*it)->getIndex();
+      
+    //   if ( (*it)->isTip() )
+    //   {
+    //     // 1)
+    //     per_node_subsplit[index] = (*it)->getSubsplit(taxa);
+
+    //     // 2) is already done, we filled the vector with 0s
+    //     // ttr[index] = 0.0;
+    //   }
+    //   else
+    //   {
+    //     std::vector<int> children = (*it)->getChildrenIndices();
+
+    //     // 1)
+    //     RbBitSet clade_1 = per_node_subsplit[children[0]].asCladeBitset();
+    //     RbBitSet clade_2 = per_node_subsplit[children[1]].asCladeBitset();
+    //     per_node_subsplit[index] = Subsplit(clade_1,clade_2);
+
+    //     double tmp = computeSubsplitTransitionProbability(per_node_subsplit[index],per_node_subsplit[children[0]]);
+
+    //     // 2)
+    //     ttr[index] = computeSubsplitTransitionProbability(per_node_subsplit[index],per_node_subsplit[children[0]]) + ttr[children[0]] + computeSubsplitTransitionProbability(per_node_subsplit[index],per_node_subsplit[children[1]]) + ttr[children[1]];
+    //   }
+    // }
+    // // Root to tip pass (this is where the fun starts)
+    // // Here we do several things
+    // // 1) We collect a vector at every node, rtt[node], which handles cumulative tree probabilities like ttr[node], but for the complement of the tree tipward of node.
+    // //    rtt[node] is a log-scale probability
+    // //    If node is a root descendant, we start the propagation.
+    // // 2) We use rtt[node], ttr[node], and Pr(root on this edge) to compute Pr(tree and root here)
+    // //
+    // // std::string preorder = "preorder";
+    // // tree->orderNodesForTraversal(preorder);
+    // // const std::vector<TopologyNode*> &preorder_nodes = tree->getNodes();
+    // //
+
+    // std::vector<double> rtt = std::vector<double>(tree->getNumberOfNodes(),0.0);
+
+    // // // For storing subsplits from alternative orientations of the tree
+    // // std::vector<Subsplit> per_node_reversed_subsplit = std::vector<Subsplit>(tree->getNumberOfNodes(),Subsplit());
+
+    // // Loop over edges of tree (exploit equivalency between an edge and the node that edge subtends)
+    // // The root has no edge so there is nothing to do for the root, so we skip it
+    // // A reversed postorder is a preorder
+    // for (std::vector<TopologyNode*>::const_reverse_iterator it = postorder_nodes.rbegin()+1; it != postorder_nodes.rend(); ++it)
+    // {
+    //   size_t index = (*it)->getIndex();
+
+    //   // Edges descending from root need to be handled differently
+    //   if ( (*it)->getParent().isRoot() )
+    //   {
+    //     // Get subsplits for other two descendants of root
+    //     std::vector<int> root_children_indices = tree->getRoot().getChildrenIndices();
+
+    //     std::vector<int> sibling_indices;
+
+    //     for (size_t i=0; i<3; ++i)
+    //     {
+    //       if (index != root_children_indices[i])
+    //       {
+    //         sibling_indices.push_back(root_children_indices[i]);
+    //       }
+    //     }
+
+    //     RbBitSet sib_0_bitset = per_node_subsplit[sibling_indices[0]].asCladeBitset();
+    //     RbBitSet sib_1_bitset = per_node_subsplit[sibling_indices[1]].asCladeBitset();
+    //     Subsplit sib_split = Subsplit(sib_0_bitset,sib_1_bitset);
+
+    //     std::vector<std::pair<Subsplit,Subsplit> > cases_subsplits;
+    //     per_node_subsplit[index].doVirtualRootingRootParent(per_node_subsplit[sibling_indices[0]],per_node_subsplit[sibling_indices[1]],per_node_subsplit[(*it)->getIndex()],cases_subsplits);
+
+    //     // Cases as indices
+    //     std::vector<std::pair<size_t,size_t> > cases = subsplitCasesToIndexCases(cases_subsplits);
+
+    //     // 1) Propagate rtt
+    //     rtt[index] = ttr[sibling_indices[0]] + computeSubsplitTransitionProbability(sib_split,per_node_subsplit[sibling_indices[0]]) + ttr[sibling_indices[1]] + computeSubsplitTransitionProbability(sib_split,per_node_subsplit[sibling_indices[1]]);
+
+    //     // 2) Compute Pr(tree,root here)
+    //     double pr_subtree_s = computeSubsplitTransitionProbability(cases[2].first,cases[2].second) + ttr[index];
+    //     double pr_subtree_not_s = computeSubsplitTransitionProbability(cases[5].first,cases[5].second) + rtt[index];
+    //     std::pair<size_t,double> root_split_and_tree_prob;
+    //     root_split_and_tree_prob.first = cases[2].first;
+    //     root_split_and_tree_prob.second = pr_subtree_s + pr_subtree_not_s + computeRootSplitProbability(cases[2].first);
+    //     lnProbability.push_back(root_split_and_tree_prob);
+
+    //   }
+    //   else
+    //   {
+    //     // Get all cases for virtual rooting of this edge (including current rooting)
+    //     std::vector<std::pair<Subsplit,Subsplit> > cases_subsplits;
+    //     per_node_subsplit[index].doVirtualRootingNonRootParent(per_node_subsplit[(*it)->getParent().getIndex()],per_node_subsplit[(*it)->getIndex()],cases_subsplits);
+
+    //     // Cases as indices
+    //     std::vector<std::pair<size_t,size_t> > cases = subsplitCasesToIndexCases(cases_subsplits);
+
+    //     // We will need to get the first subsplit both in our parent's sister node and in the rest of the tree
+    //     // Thus we need our sibling's index and our parent's sibling's index
+    //     size_t parent_index = (*it)->getParent().getIndex();
+    //     size_t grandparent_index = (*it)->getParent().getParent().getIndex();
+    //     size_t my_siblings_index = 0;
+    //     size_t my_parents_siblings_index = 0;
+
+    //     if ( &((*it)->getParent().getChild(0)) == (*it) )
+    //     {
+    //       my_siblings_index = 1;
+    //     }
+    //     my_siblings_index = (*it)->getParent().getChild(my_siblings_index).getIndex();
+
+    //     if ( &((*it)->getParent().getParent().getChild(0)) == &((*it)->getParent()) )
+    //     {
+    //       my_parents_siblings_index = 1;
+    //     }
+    //     my_parents_siblings_index = (*it)->getParent().getParent().getChild(my_parents_siblings_index).getIndex();
+
+    //     // 1) Propagate rtt
+    //     RbBitSet parents_clade = per_node_subsplit[(*it)->getParent().getIndex()].asCladeBitset();
+    //     RbBitSet parents_sisters_clade = per_node_subsplit[my_parents_siblings_index].asCladeBitset();
+    //     RbBitSet not_parents_clade = parents_clade;
+    //     ~not_parents_clade;
+    //     RbBitSet not_parents_sisters_clade = parents_sisters_clade;
+    //     ~not_parents_sisters_clade;
+    //     RbBitSet everyone_else = not_parents_clade & not_parents_sisters_clade;
+    //     Subsplit everyone_else_from_parents_sister_subsplit = Subsplit(everyone_else,parents_sisters_clade);
+
+    //     size_t everyone_else_from_parents_sister = getIndex(everyone_else_from_parents_sister_subsplit);
+
+    //     rtt[index] = ttr[my_siblings_index] + computeSubsplitTransitionProbability(cases[5].second,everyone_else_from_parents_sister) + rtt[parent_index] + computeSubsplitTransitionProbability(cases[5].second,getIndex(per_node_subsplit[my_siblings_index]));
+
+    //     // 2) Compute Pr(tree,root here)
+    //     double pr_subtree_s = computeSubsplitTransitionProbability(cases[2].first,cases[2].second) + ttr[index];
+    //     double pr_subtree_not_s = computeSubsplitTransitionProbability(cases[5].first,cases[5].second) + rtt[index];
+    //     std::pair<size_t,double> root_split_and_tree_prob;
+    //     root_split_and_tree_prob.first = cases[2].first;
+    //     root_split_and_tree_prob.second = pr_subtree_s + pr_subtree_not_s + computeRootSplitProbability(cases[2].first);
+    //     lnProbability.push_back(root_split_and_tree_prob);
+    //   }
+    // }
+
+  return lnProbability;
+}
+
 /* Computes the probability of the given UNROOTED tree under this SBN. */
 double SBNParameters::computeLnProbabilityUnrootedTopology( const Tree &tree ) const
 {
@@ -2182,140 +2338,141 @@ void SBNParameters::learnUnconstrainedSBNEM( std::vector<Tree> &trees, double &a
   makeRootSplits(root_split_counts_sa);
   makeCPDs(parent_child_counts_sa);
 
-  // // SBNParameters sbn_old = *this;
+  // SBNParameters sbn_old = *this;
 
-  // double old_score = RbConstants::Double::neginf;
+  double old_score = RbConstants::Double::neginf;
 
-  // // run EM, start on E-step because we have parameters from running SA
-  // size_t iter=0;
-  // for ( ; iter<500; ++iter )
-  // {
-  //   // To store counts
-  //   std::unordered_map<size_t,double> root_split_counts;
-  //   std::unordered_map<std::pair<size_t,size_t>,double> parent_child_counts;
+  // run EM, start on E-step because we have parameters from running SA
+  size_t iter=0;
+  for ( ; iter<500; ++iter )
+  {
+    // To store counts
+    std::unordered_map<size_t,double> root_split_counts;
+    std::unordered_map<std::pair<size_t,size_t>,double> parent_child_counts;
 
-  //   std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
-  //   double score = 0.0;
-  //   // E-step, compute q (per tree) and m (counts, across all trees)
-  //   for (size_t i=0; i<trees.size(); ++i)
-  //   {
-  //     // std::cout << "counting for tree " << i << std::endl;
-  //     // Get ln(Pr(tree,root)) for all branches
-  //     std::vector<std::pair<size_t,double> > pr_tree_and_root = computeLnProbabilityTopologyAndRooting(trees[i]);
-  //     // std::cout << "got components for q()" << std::endl;
+    std::cout << ">>>>>>E step, alpha = " << alpha << std::endl;
+    double score = 0.0;
+    // E-step, compute q (per tree) and m (counts, across all trees)
+    for (size_t i=0; i<trees.size(); ++i)
+    {
+      // std::cout << "counting for tree " << i << std::endl;
+      // Get ln(Pr(tree,root)) for all branches
+      std::vector<std::pair<size_t,double> > pr_tree_and_root = computeLnProbabilityTopologyAndRooting(trees[i]);
+      // std::cout << "got components for q()" << std::endl;
 
-  //     // So we can compute the probability of this tree
-  //     std::vector<double> per_edge_log_probs;
+      // So we can compute the probability of this tree
+      std::vector<double> per_edge_log_probs;
 
-  //     // turn ln(Pr(tree,root)) into q(root)
-  //     double max = RbConstants::Double::neginf;
-  //     for (size_t j=0; j<pr_tree_and_root.size(); ++j)
-  //     {
-  //       // if ( RbMath::isNan(pr_tree_and_root[j].second) )
-  //       // {
-  //       //   for (size_t xx=0; xx<pr_tree_and_root.size(); ++xx)
-  //       //   {
-  //       //     std::cout << "lnPr(root = " << pr_tree_and_root[xx].first << ") = " << pr_tree_and_root[j].second << std::endl;
-  //       //   }
-  //       //   throw(RbException("NaN tree probabilities!"));
-  //       // }
-  //       per_edge_log_probs.push_back(pr_tree_and_root[j].second);
-  //       if ( max < pr_tree_and_root[j].second )
-  //       {
-  //         max = pr_tree_and_root[j].second;
-  //       }
-  //     }
+      // turn ln(Pr(tree,root)) into q(root)
+      double max = RbConstants::Double::neginf;
+      for (size_t j=0; j<pr_tree_and_root.size(); ++j)
+      {
+        // if ( RbMath::isNan(pr_tree_and_root[j].second) )
+        // {
+        //   for (size_t xx=0; xx<pr_tree_and_root.size(); ++xx)
+        //   {
+        //     std::cout << "lnPr(root = " << pr_tree_and_root[xx].first << ") = " << pr_tree_and_root[j].second << std::endl;
+        //   }
+        //   throw(RbException("NaN tree probabilities!"));
+        // }
+        per_edge_log_probs.push_back(pr_tree_and_root[j].second);
+        if ( max < pr_tree_and_root[j].second )
+        {
+          max = pr_tree_and_root[j].second;
+        }
+      }
 
-  //     double sum = 0.0;
-  //     for (size_t j=0; j<pr_tree_and_root.size(); ++j)
-  //     {
-  //       pr_tree_and_root[j].second = exp(pr_tree_and_root[j].second - max);
-  //       sum += pr_tree_and_root[j].second;
-  //     }
+      double sum = 0.0;
+      for (size_t j=0; j<pr_tree_and_root.size(); ++j)
+      {
+        pr_tree_and_root[j].second = exp(pr_tree_and_root[j].second - max);
+        sum += pr_tree_and_root[j].second;
+      }
 
-  //     for (size_t j=0; j<pr_tree_and_root.size(); ++j)
-  //     {
-  //       pr_tree_and_root[j].second /= sum;
-  //       // if (pr_tree_and_root[j].second < 0.0000000001)
-  //       // {
-  //       //   std::cout << "in tree " << i << ", q[" << pr_tree_and_root[j].first << "] = " << pr_tree_and_root[j].second << std::endl;
-  //       // }
+      for (size_t j=0; j<pr_tree_and_root.size(); ++j)
+      {
+        pr_tree_and_root[j].second /= sum;
+        // if (pr_tree_and_root[j].second < 0.0000000001)
+        // {
+        //   std::cout << "in tree " << i << ", q[" << pr_tree_and_root[j].first << "] = " << pr_tree_and_root[j].second << std::endl;
+        // }
 
-  //       // If q is 0, then the contribution of this orientation to the lower bound is 0
-  //       if ( pr_tree_and_root[j].second >= DBL_EPSILON & RbMath::isFinite(per_edge_log_probs[j]) )
-  //       {
-  //         score += pr_tree_and_root[j].second * per_edge_log_probs[j];
-  //         // asymptotically speaking, the q * log(q) portion of the score function is 0 when q = 0
-  //         score -= pr_tree_and_root[j].second * log(pr_tree_and_root[j].second);
-  //       }
-  //     }
+        // If q is 0, then the contribution of this orientation to the lower bound is 0
+        if ( pr_tree_and_root[j].second >= DBL_EPSILON & RbMath::isFinite(per_edge_log_probs[j]) )
+        {
+          score += pr_tree_and_root[j].second * per_edge_log_probs[j];
+          // asymptotically speaking, the q * log(q) portion of the score function is 0 when q = 0
+          score -= pr_tree_and_root[j].second * log(pr_tree_and_root[j].second);
+        }
+      }
 
-  //     // make vector-pair q into a map
-  //     q.clear();
-  //     for (size_t j=0; j<pr_tree_and_root.size(); ++j)
-  //     {
-  //       q[pr_tree_and_root[j].first] = pr_tree_and_root[j].second;
-  //     }
+      // make vector-pair q into a map
+      q.clear();
+      for (size_t j=0; j<pr_tree_and_root.size(); ++j)
+      {
+        q[pr_tree_and_root[j].first] = pr_tree_and_root[j].second;
+      }
 
-  //     if (RbMath::isNan(score))
-  //     {
-  //       std::cout << "NaN tree prob, ln(Pr(tree and root)) vector contains:" << std::endl;
-  //       for (size_t j=0; j<per_edge_log_probs.size(); ++j)
-  //       {
-  //         std::cout << "  " << per_edge_log_probs[j] << std::endl;
-  //       }
-  //       throw(RbException("Error in EM algorithm, NaN tree probabilities."));
-  //     }
+      if (RbMath::isNan(score))
+      {
+        std::cout << "NaN tree prob, ln(Pr(tree and root)) vector contains:" << std::endl;
+        for (size_t j=0; j<per_edge_log_probs.size(); ++j)
+        {
+          std::cout << "  " << per_edge_log_probs[j] << std::endl;
+        }
+        throw(RbException("Error in EM algorithm, NaN tree probabilities."));
+      }
 
-  //     // std::cout << "about to recount, NOT using q" << std::endl;
-  //     // use q to re-count subsplits
-  //     countAllSubsplits(trees[i], parent_child_counts, root_split_counts, q, false);
+      // std::cout << "about to recount, NOT using q" << std::endl;
+      // use q to re-count subsplits
+      // countAllSubsplits(trees[i], parent_child_counts, root_split_counts, q, false);
+      countAllSubsplits(compact_trees[i], parent_child_counts, root_split_counts, q, false);
 
-  //   }
+    }
 
-  //   if ( alpha >= DBL_EPSILON )
-  //   {
-  //   // regularize all counts
-  //   regularizeCounts(parent_child_counts, root_split_counts, parent_child_counts_sa, root_split_counts_sa, alpha);
-  //   }
+    if ( alpha >= DBL_EPSILON )
+    {
+    // regularize all counts
+    regularizeCounts(parent_child_counts, root_split_counts, parent_child_counts_sa, root_split_counts_sa, alpha);
+    }
 
-  //   std::cout << ">>>>>>M step" << std::endl;
-  //   // M-step, compute p
-  //   makeRootSplits(root_split_counts);
-  //   makeCPDs(parent_child_counts);
+    std::cout << ">>>>>>M step" << std::endl;
+    // M-step, compute p
+    makeRootSplits(root_split_counts);
+    makeCPDs(parent_child_counts);
 
-  //   // double kl = KL(sbn_old);
+    // double kl = KL(sbn_old);
 
-  //   // std::cout << "KL(new || old) = " << kl << std::endl;
-  //   // if ( kl < threshold ) {
-  //   //   break;
-  //   // }
+    // std::cout << "KL(new || old) = " << kl << std::endl;
+    // if ( kl < threshold ) {
+    //   break;
+    // }
 
-  //   // sbn_old = *this;
+    // sbn_old = *this;
 
-  //   old_score = score;
-  //   // break;
+    old_score = score;
+    // break;
 
-  //   // if (iter == 100){break;}
+    // if (iter == 100){break;}
 
-  //   if ( iter >= min_loop_iter )
-  //   {
-  //     if ( iter < max_loop_iter )
-  //     {
-  //       // Contemplate loop termination
-  //       std::cout << "score - old_score = " << score - old_score << std::endl;
-  //       std::cout << "score = " << score << std::endl;
-  //       if ( fabs(score - old_score) < 0.000001 )
-  //       {
-  //         break;
-  //       }
-  //     }
-  //     else
-  //     {
-  //       break;
-  //     }
-  //   }
-  // }
+    if ( iter >= min_loop_iter )
+    {
+      if ( iter < max_loop_iter )
+      {
+        // Contemplate loop termination
+        std::cout << "score - old_score = " << score - old_score << std::endl;
+        std::cout << "score = " << score << std::endl;
+        if ( fabs(score - old_score) < 0.000001 )
+        {
+          break;
+        }
+      }
+      else
+      {
+        break;
+      }
+    }
+  }
 
   // Handle branch lengths (we only need to do this once!)
   fitBranchLengthDistributions(trees);
