@@ -14,27 +14,22 @@ namespace RevBayesCore {
     /**
      * @brief TVM (transversion model) rate matrix class.
      *
-     * This class implements the special HKY rate matrix with the known analytical solution for the transition probabilities.
-     * The HKY matrix has a transition-transversion rate kappa and the four base frequency parameters.
-     * The resulting rate matrix is computed by:
+     * This class implements the TVM rate matrix. The TVM matrix has four base frequency parameters
+     * and five exchangeability parameters. The resulting rate matrix is computed by:
      *
-     *      |     -       pi_C     k*pi_G      pi_T   |
-     *      |                                         |
-     *      |   pi_A        -       pi_G      k*pi_T  |
-     * Q =  |                                         |
-     *      |  k*pi_A     pi_C        -        pi_T   |
-     *      |                                         |
-     *      |   pi_A     k*pi_C     pi_G         -    |
+     *      |     -       pi_C*r_1  pi_G*r_2   pi_T*r_3  |
+     *      |                                                              |
+     *      |   pi_A*r_1      -     pi_G*r_4   pi_T*r_2  |
+     * Q =     |                                                              |
+     *      |  pi_A*r_2   pi_C*r_4      -      pi_T*r_5  |
+     *      |                                                              |
+     *      |   pi_A*r_3  pi_C*r_2   pi_G*r_5       -    |
      *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2014-07-04, version 1.0
      */
     class RateMatrix_TVM : public TimeReversibleRateMatrix {
         
     public:
-        RateMatrix_TVM(size_t n);                                                                                               //!< Construct rate matrix with n states
+        RateMatrix_TVM(void);                                                                                                   //!< Default constructor
         RateMatrix_TVM(const RateMatrix_TVM& m);                                                                                //!< Copy constructor
         virtual                             ~RateMatrix_TVM(void);                                                              //!< Destructor
         

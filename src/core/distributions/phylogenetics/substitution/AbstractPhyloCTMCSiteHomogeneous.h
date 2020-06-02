@@ -118,8 +118,7 @@ namespace RevBayesCore {
         // helper method for this and derived classes
         void                                                                recursivelyFlagNodeDirty(const TopologyNode& n);
         virtual void                                                        resizeLikelihoodVectors(void);
-        virtual void                                                        setActivePIDSpecialized(size_t i, size_t n);                                                 //!< Set the number of processes for this distribution.
-
+        virtual void                                                        setActivePIDSpecialized(size_t i, size_t n);                                                          //!< Set the number of processes for this distribution.
         virtual void                                                        updateTransitionProbabilities(size_t node_idx);
         virtual std::vector<double>                                         getRootFrequencies( size_t mixture = 0 ) const;
         virtual void                                                        getRootFrequencies( std::vector<std::vector<double> >& ) const;
@@ -247,10 +246,10 @@ namespace RevBayesCore {
         virtual void                                                        scale(size_t i);
         virtual void                                                        scale(size_t i, size_t l, size_t r);
         virtual void                                                        scale(size_t i, size_t l, size_t r, size_t m);
-        void                                                                simulate(const TopologyNode& node, std::vector< DiscreteTaxonData< charType > > &t, const std::vector<bool> &inv, const std::vector<size_t> &perSiteRates);
-
-
-
+        virtual void                                                        simulate(const TopologyNode& node, std::vector< DiscreteTaxonData< charType > > &t, const std::vector<bool> &inv, const std::vector<size_t> &perSiteRates);
+        
+        
+        
     };
 
 }
@@ -1309,8 +1308,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawStochasticCha
         // recurse towards tips
         const TopologyNode &right = root.getChild(0);
         const TopologyNode &left = root.getChild(1);
-        success |= recursivelyDrawStochasticCharacterMap(left,  character_histories, start_states, end_states, site, use_simmap_default);
-        success |= recursivelyDrawStochasticCharacterMap(right, character_histories, start_states, end_states, site, use_simmap_default);
+        success = recursivelyDrawStochasticCharacterMap(left,  character_histories, start_states, end_states, site, use_simmap_default);
+        success &= recursivelyDrawStochasticCharacterMap(right, character_histories, start_states, end_states, site, use_simmap_default);
 
         if (n_draws != 0) {
             std::cout << "Warning: numerical instability in P(t)=exp(Qt) caused stochastic mapping to fail (attempt: " << n_draws << "/" << max_draws << ")\n";
@@ -1494,8 +1493,8 @@ bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyDrawSt
     {
         const TopologyNode &right = node.getChild(0);
         const TopologyNode &left = node.getChild(1);
-        success |= recursivelyDrawStochasticCharacterMap(left, character_histories, start_states, end_states, site, use_simmap_default);
-        success |= recursivelyDrawStochasticCharacterMap(right, character_histories, start_states, end_states, site, use_simmap_default);
+        success &= recursivelyDrawStochasticCharacterMap(left, character_histories, start_states, end_states, site, use_simmap_default);
+        success &= recursivelyDrawStochasticCharacterMap(right, character_histories, start_states, end_states, site, use_simmap_default);
     }
 
     return success;

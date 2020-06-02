@@ -308,7 +308,7 @@ void AbstractRateMatrix::computeStochasticMatrix(size_t n)
         MatrixReal r_n_minus_1 = stochastic_matrix[n-1];
 
         // helps manage machine precision error/underflow for large R^n
-        double smallest_non_zero = RbConstants::Double::inf;
+        double smallest_non_zero = 1.0; //RbConstants::Double::inf;
         for (size_t i = 0; i < this->num_states; i++)
         {
             if (r_n_minus_1[i][i] < smallest_non_zero && r_n_minus_1[i][i] > 0.0)
