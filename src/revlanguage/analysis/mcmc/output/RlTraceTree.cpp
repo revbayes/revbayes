@@ -306,18 +306,41 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
         found = true;
         
         // get the tree which is the only argument for this method
-        const RevBayesCore::Clade &this_clade = static_cast<const Clade &>( args[0].getVariable()->getRevObject() ).getValue();
+        RevBayesCore::Clade this_clade = static_cast<const Clade &>( args[0].getVariable()->getRevObject() ).getValue();
         double strict = static_cast<const Probability &>( args[1].getVariable()->getRevObject() ).getValue();
-        
+        double stem = static_cast<const Probability &>( args[2].getVariable()->getRevObject() ).getValue();
+
         const std::vector<RevBayesCore::Tree>& trees = this->value->getValues();
 
         RevBayesCore::RbVector<double> ages;
+
+        RevBayesCore::RbBitSet bits = RevBayesCore::RbBitSet( this->value->getValues()[0].getNumberOfTips() );
+        for ( size_t i=0; i<this_clade.size(); ++i )
+        {
+            RevBayesCore::Taxon t = this_clade.getTaxon(i);
+            const std::string& n = t.getName();
+            const RevBayesCore::TopologyNode& tn = this->value->getValues()[0].getTipNodeWithName(n);
+            size_t index = tn.getIndex();
+            bits.set( index );
+        }
+        this_clade.setBitRepresentation( bits );
+        
         for (size_t i=this->value->getBurnin(); i<trees.size(); ++i)
         {
-            double age = trees[i].getRoot().getTmrca( this_clade);
-            if ( strict == false && age == -1 )
+            // default age
+            double age = -1;
+            
+            const RevBayesCore::TopologyNode* mrca = trees[i].getRoot().getMrca( this_clade, strict );
+            if ( mrca != NULL )
             {
-                age = trees[i].getMrca( this_clade, strict).getAge();
+                if ( stem == false )
+                {
+                    age = mrca->getAge();
+                }
+                else if ( mrca->isRoot() == false )
+                {
+                    age = mrca->getParent().getAge();
+                }
             }
             
             ages.push_back( age );
@@ -456,8 +479,9 @@ void TraceTree::initMethods( void )
     this->methods.addFunction( new MemberProcedure( "getUniqueTrees", ModelVector<Tree>::getClassTypeSpec(), getUniqueTreesArgRules) );
     
     ArgumentRules* get_tmrca_arg_rules = new ArgumentRules();
-    get_tmrca_arg_rules->push_back( new ArgumentRule("clade", Clade::getClassTypeSpec(), "The clade for which to compute the TMRCA.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
+    get_tmrca_arg_rules->push_back( new ArgumentRule("clade",  Clade::getClassTypeSpec(), "The clade for which to compute the TMRCA.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
     get_tmrca_arg_rules->push_back( new ArgumentRule("strict", RlBoolean::getClassTypeSpec(), "Return -1 if the clade is non-monophyletic and otherwise the non-strict TMRCA.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
+    get_tmrca_arg_rules->push_back( new ArgumentRule("stem",   RlBoolean::getClassTypeSpec(), "Do we want the age of the stem or crown of this clade?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
     this->methods.addFunction( new MemberProcedure( "getTMRCA", ModelVector<RealPos>::getClassTypeSpec(), get_tmrca_arg_rules) );
     
     ArgumentRules* get_trees_arg_rules = new ArgumentRules();
