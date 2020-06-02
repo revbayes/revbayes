@@ -227,15 +227,15 @@ bool Tree::containsClade(const TopologyNode &n, bool unrooted) const
 {
     RbBitSet your_taxa = RbBitSet( getNumberOfTips() );
     n.getTaxa( your_taxa );
-    
+
     bool contains = root->containsClade( your_taxa, true );
-    
+
     if ( contains == false && unrooted == true )
     {
         your_taxa.flip();
         contains = root->containsClade( your_taxa, true );;
     }
-    
+
     return contains;
 }
 
@@ -284,7 +284,7 @@ void Tree::dropTipNode( size_t index )
         grand_parent.addChild( sibling );
         sibling->setParent( &grand_parent );
 
-        // update character history 
+        // update character history
         if (parent.getTimeInStates().size() > 0 && sibling->getTimeInStates().size() > 0)
         {
             std::vector<double> sibling_state_times = sibling->getTimeInStates();
@@ -317,18 +317,18 @@ void Tree::dropTipNode( size_t index )
             root->removeChild(&node);
         }
     }
-    
+
     nodes.clear();
-    
+
     // bootstrap all nodes from the root and add the in a pre-order traversal
     fillNodesByPhylogeneticTraversal(root);
     for (unsigned int i = 0; i < nodes.size(); ++i)
     {
         nodes[i]->setIndex(i);
     }
-    
+
     num_nodes = nodes.size();
-    
+
     // count the number of tips
     num_tips = 0;
     for (size_t i = 0; i < num_nodes; ++i)
@@ -341,7 +341,7 @@ void Tree::dropTipNode( size_t index )
         }
         num_tips += ( nodes[i]->isTip() ? 1 : 0);
     }
-    
+
 }
 
 
@@ -543,15 +543,15 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
     {
         Clade clade = static_cast<const TypedDagNode<Clade> *>( args[0] )->getValue();
         clade.resetTaxonBitset( getTaxonBitSetMap() );
-        
+
         bool contained = root->containsClade(clade, true);
-        
+
         rv = Boolean( contained );
     }
     else if ( n == "hasSameTopology" )
     {
         const Tree& t = static_cast<const TypedDagNode<Tree> *>( args[0] )->getValue();
-        
+
         rv = Boolean( hasSameTopology(t) );
     }
     else
@@ -640,27 +640,27 @@ const TopologyNode& Tree::getInteriorNode( size_t indx ) const
 
 TopologyNode& Tree::getMrca(const Clade &c)
 {
-    
+
     return *(root->getMrca( c ));
 }
 
 
 const TopologyNode& Tree::getMrca(const Clade &c) const
 {
-    
+
     return *(root->getMrca( c ));
 }
 
 const TopologyNode& Tree::getMrca(const Clade &c, bool strict) const
 {
-    
+
     return *(root->getMrca( c,strict ));
 }
 
 
 const TopologyNode& Tree::getMrca(const TopologyNode &n) const
 {
-    
+
     return *(root->getMrca( n ));
 }
 
@@ -704,7 +704,6 @@ const std::vector<TopologyNode*>& Tree::getNodes(void) const
 }
 
 
-
 std::vector<RbBitSet> Tree::getNodesAsBitset(void) const
 {
 
@@ -722,6 +721,26 @@ std::vector<RbBitSet> Tree::getNodesAsBitset(void) const
     }
 
     return bs;
+}
+
+
+std::map<RbBitSet, TopologyNode*> Tree::getBitsetToNodeMap(void) const
+{
+
+    std::map<RbBitSet, TopologyNode*> bstn;
+
+    for ( size_t i=0; i<nodes.size(); ++i )
+    {
+        TopologyNode *n = nodes[i];
+        if ( n->isTip() == false )
+        {
+            RbBitSet taxa_this_node = RbBitSet(num_tips);
+            n->getTaxa(taxa_this_node);
+            bstn[taxa_this_node] = n;
+        }
+    }
+
+    return bstn;
 }
 
 
@@ -1087,10 +1106,10 @@ bool Tree::hasSameTopology(const Tree &t) const
 
     std::string a = getPlainNewickRepresentation();
     std::string b = t.getPlainNewickRepresentation();
-    
+
 //    std::cerr << std::endl << a << std::endl;
 //    std::cerr << std::endl << b << std::endl;
-    
+
     return a == b;
 }
 
@@ -1135,7 +1154,7 @@ void Tree::initFromString(const std::string &s)
 }
 
 
-bool Tree::isBinary(void) const 
+bool Tree::isBinary(void) const
 {
     for (size_t i = 0; i < getNumberOfInteriorNodes(); ++i)
     {
@@ -1395,7 +1414,7 @@ bool Tree::recursivelyPruneTaxa( TopologyNode* n, const RbBitSet& prune_map )
 
 void Tree::removeDuplicateTaxa( void )
 {
-    
+
     bool removed_replicate = true;
     while ( removed_replicate == true )
     {
@@ -1412,18 +1431,18 @@ void Tree::removeDuplicateTaxa( void )
                     dropTipNode( j );
                     break;
                 }
-                
+
             }
 
             if ( removed_replicate == true )
             {
                 break;
             }
-            
+
         }
 
     }
-    
+
 }
 
 
@@ -1637,7 +1656,7 @@ void Tree::setTaxonIndices(const TaxonMap &tm)
  */
 void Tree::setTaxonName(const std::string& current_name, const std::string& newName)
 {
-    
+
     TopologyNode& node = getTipNodeWithName( current_name );
     Taxon& t = node.getTaxon();
     t.setName( newName );
@@ -1654,30 +1673,30 @@ void Tree::setTaxonName(const std::string& current_name, const std::string& newN
  */
 void Tree::setTaxonObject(const std::string& current_name, const Taxon& new_taxon)
 {
-    
+
     const std::string &new_name = new_taxon.getName();
-    
+
     TopologyNode& node = getTipNodeWithName( current_name );
     node.setTaxon( new_taxon );
-    
+
     taxon_bitset_map.erase( current_name );
     taxon_bitset_map.insert( std::pair<std::string, size_t>( new_name, node.getIndex() ) );
-    
+
 }
 
 
 void Tree::unroot( void )
 {
-    
+
     if ( isRooted() == true )
     {
-        
+
         // get the root node because we need to make this tree unrooted (for topology comparison)
         TopologyNode *old_root = &getRoot();
-        
+
         // make the tree use branch lengths instead of ages
         old_root->setUseAges(false, true);
-        
+
         size_t child_index = 0;
         if ( old_root->getChild(child_index).isTip() == true )
         {
@@ -1685,24 +1704,24 @@ void Tree::unroot( void )
         }
         TopologyNode *new_root = &old_root->getChild( child_index );
         TopologyNode *second_child = &old_root->getChild( (child_index == 0 ? 1 : 0) );
-        
+
         double bl_first = new_root->getBranchLength();
         double bl_second = second_child->getBranchLength();
-        
+
         old_root->removeChild( new_root );
         old_root->removeChild( second_child );
         new_root->setParent( NULL );
         new_root->addChild( second_child );
         second_child->setParent( new_root );
-        
+
         second_child->setBranchLength( bl_first + bl_second );
-        
+
         // finally we need to set the new root to our tree copy
         setRooted( false );
         setRoot( new_root, true);
-        
+
     }
-    
+
 }
 
 
