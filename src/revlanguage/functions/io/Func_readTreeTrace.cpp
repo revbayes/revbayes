@@ -78,13 +78,15 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     size_t arg_index_separator = 3;
     size_t arg_index_burnin    = 4;
     size_t arg_index_thinning  = 5;
-    size_t arg_index_nexus  = 6;
-    size_t arg_index_nruns  = 7;
+    size_t arg_index_offset    = 6;
+    size_t arg_index_nexus     = 7;
+    size_t arg_index_nruns     = 8;
 
     // get the information from the arguments for reading the file
     const std::string&  treetype = static_cast<const RlString&>( args[arg_index_tree_type].getVariable()->getRevObject() ).getValue();
     const std::string&  sep      = static_cast<const RlString&>( args[arg_index_separator].getVariable()->getRevObject() ).getValue();
     long                thin     = static_cast<const Natural&>( args[arg_index_thinning].getVariable()->getRevObject() ).getValue();
+    long                offset   = static_cast<const Natural&>( args[arg_index_offset].getVariable()->getRevObject() ).getValue();
     bool nexus = static_cast<RlBoolean&>(args[arg_index_nexus].getVariable()->getRevObject()).getValue();
     long                nruns    = static_cast<const Natural&>( args[arg_index_nruns].getVariable()->getRevObject() ).getValue();
 
@@ -167,8 +169,8 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     WorkspaceVector<TraceTree> *rv = NULL;
     if ( treetype == "clock" )
     {
-        if(nexus) rv = readTreesNexus(vectorOfFileNames, true, thin);
-        else rv = readTrees(vectorOfFileNames, sep, true, thin);
+        if(nexus) rv = readTreesNexus(vectorOfFileNames, true, thin, offset);
+        else rv = readTrees(vectorOfFileNames, sep, true, thin, offset);
     }
     else if ( treetype == "non-clock" )
     {
@@ -183,8 +185,8 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
             }
         }
 
-        if(nexus) rv = readTreesNexus(vectorOfFileNames, false, thin);
-        else rv = readTrees(vectorOfFileNames, sep, false, thin);
+        if(nexus) rv = readTreesNexus(vectorOfFileNames, false, thin, offset);
+        else rv = readTrees(vectorOfFileNames, sep, false, thin, offset);
     }
     else
     {
@@ -255,6 +257,7 @@ const ArgumentRules& Func_readTreeTrace::getArgumentRules( void ) const
         argumentRules.push_back( new ArgumentRule( "burnin"   , burninTypes     , "The fraction/number of samples to discard as burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.25) ) );
 
         argumentRules.push_back( new ArgumentRule( "thinning", Natural::getClassTypeSpec(), "The frequency of samples to read, i.e., we will only used every n-th sample where n is defined by this argument.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( 1l ) ) );
+        argumentRules.push_back( new ArgumentRule( "offset",   Natural::getClassTypeSpec(), "The offset of the first sample to read, i.e., how many samples should we skip before we take the first sample.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( 0l ) ) );
 
         argumentRules.push_back( new ArgumentRule( "nexus", RlBoolean::getClassTypeSpec(), "Whether the file to read is in NEXUS format.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
 
@@ -318,7 +321,7 @@ const TypeSpec& Func_readTreeTrace::getReturnType( void ) const
 }
 
 
-WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<std::string> &vector_of_file_names, const std::string &delimitter, bool clock, long thinning)
+WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<std::string> &vector_of_file_names, const std::string &delimitter, bool clock, long thinning, long offset)
 {
     
     std::vector<TraceTree> data;
@@ -436,7 +439,7 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<std:
             ++n_samples;
             
             // we need to check if we skip this sample in case of thinning.
-            if ( (n_samples-1) % thinning > 0 )
+            if ( (n_samples-1-offset) % thinning > 0 )
             {
                 continue;
             }
@@ -477,7 +480,8 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<std:
  *
  * @note if multiple files are given, the traces will all be appended without regard for burnin
  * */
-WorkspaceVector<TraceTree>* Func_readTreeTrace::readTreesNexus(const std::vector<string> &fns, bool clock, long thin) {
+WorkspaceVector<TraceTree>* Func_readTreeTrace::readTreesNexus(const std::vector<string> &fns, bool clock, long thin, long offset)
+{
 
     std::vector<TraceTree> data;
 
@@ -501,7 +505,7 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTreesNexus(const std::vector
         for (size_t j=0; j<tmp.size(); ++j)
         {
             RevBayesCore::Tree* t = tmp[i];
-            if(nsamples % thin == 0) tt.addObject(t);
+            if ( (nsamples-offset) % thin == 0) tt.addObject(t);
             nsamples++;
         }
 
