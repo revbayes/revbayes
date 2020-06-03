@@ -315,12 +315,13 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
         RevBayesCore::RbVector<double> ages;
 
         RevBayesCore::RbBitSet bits = RevBayesCore::RbBitSet( this->value->getValues()[0].getNumberOfTips() );
+        const std::map<std::string, size_t>& taxon_map = this->value->getValues()[0].getTaxonBitSetMap();
         for ( size_t i=0; i<this_clade.size(); ++i )
         {
             RevBayesCore::Taxon t = this_clade.getTaxon(i);
-            const std::string& n = t.getName();
-            const RevBayesCore::TopologyNode& tn = this->value->getValues()[0].getTipNodeWithName(n);
-            size_t index = tn.getIndex();
+            const std::string& name = t.getName();
+            std::map<std::string,size_t>::const_iterator pos = taxon_map.find(name);
+            size_t index = pos->second;
             bits.set( index );
         }
         this_clade.setBitRepresentation( bits );
