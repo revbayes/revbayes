@@ -87,7 +87,7 @@ EpisodicBirthDeathSamplingTreatmentProcess::EpisodicBirthDeathSamplingTreatmentP
     heterogeneous_Phi    = NULL;
     heterogeneous_R      = NULL;
 
-    //@TODO @SEBASTIAN: some time we might want to allow "homogeneous" aka scalar Mu/Lambda
+    //@TODO @SEBASTIAN: sometime we might want to allow "homogeneous" aka scalar Mu/Lambda
 
     // We use a global timeline if
     //    1) the user provides one
@@ -190,7 +190,7 @@ EpisodicBirthDeathSamplingTreatmentProcess* EpisodicBirthDeathSamplingTreatmentP
 /**
  * Adds parameter-specific timeline to the set
  */
-void EpisodicBirthDeathSamplingTreatmentProcess::addTimesToGlobalTimeline(std::set<double> &event_times, const TypedDagNode<RbVector<double> > *par_times)
+void EpisodicBirthDeathSamplingTreatmentProcess::addTimesToGlobalTimeline(std::set<double> &event_times, const TypedDagNode<RbVector<double> > *par_times) const
 {
   if ( par_times != NULL )
   {
@@ -209,7 +209,7 @@ void EpisodicBirthDeathSamplingTreatmentProcess::addTimesToGlobalTimeline(std::s
  * If the sizes are wrong, throws an exception.
  * Uses param_name and is_rate to make a sensible error message
  */
-void EpisodicBirthDeathSamplingTreatmentProcess::checkVectorSizes(const TypedDagNode<RbVector<double> >* v, const TypedDagNode<RbVector<double> >* ref, int v1_minus_ref, std::string& param_name, bool is_rate) const
+void EpisodicBirthDeathSamplingTreatmentProcess::checkVectorSizes(const TypedDagNode<RbVector<double> >* v, const TypedDagNode<RbVector<double> >* ref, int v1_minus_ref, const std::string& param_name, bool is_rate) const
 {
   if ( v != NULL )
   {
@@ -230,8 +230,9 @@ void EpisodicBirthDeathSamplingTreatmentProcess::checkVectorSizes(const TypedDag
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityDivergenceTimes( void )
+double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityDivergenceTimes( void ) const
 {
+    
     // @TODO @ANDY Need to use big-R for event sampling times
     // update parameter vectors
     prepareTimeline();
@@ -241,7 +242,7 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityDivergenc
 
     if ( offset > DBL_EPSILON && phi_event[0] > DBL_EPSILON )
     {
-      throw(RbException("Event sampling fraction at the present is non-zero but there are no tips at the present."));
+      throw RbException("Event sampling fraction at the present is non-zero but there are no tips at the present.");
     }
 
     // precompute A_i, B_i, C_i, E_i(t_i)
@@ -249,6 +250,7 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityDivergenc
 
     // variable declarations and initialization
     double lnProbTimes = computeLnProbabilityTimes();
+    
 
     return lnProbTimes;
 }
@@ -543,7 +545,7 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
  * Non-burst trackers (1,3,4) are vectors of times of the samples.
  * All burst trackers (2,5,6) are vectors of vectors of samples, each vector corresponding to an event
  */
-void EpisodicBirthDeathSamplingTreatmentProcess::countAllNodes(void)
+void EpisodicBirthDeathSamplingTreatmentProcess::countAllNodes(void) const
 {
   // get node/time variables
   size_t num_nodes = value->getNumberOfNodes();
@@ -757,7 +759,7 @@ size_t EpisodicBirthDeathSamplingTreatmentProcess::findIndex(double t) const
  * return the index i so that x_{i-1} <= t < x_i
  * where x is one of the input vector timelines
  */
-size_t EpisodicBirthDeathSamplingTreatmentProcess::findIndex(double t, std::vector<double> &timeline) const
+size_t EpisodicBirthDeathSamplingTreatmentProcess::findIndex(double t, const std::vector<double>& timeline) const
 {
 
     // Linear search for interval because std::lower_bound is not cooperating
@@ -887,7 +889,7 @@ double EpisodicBirthDeathSamplingTreatmentProcess::lnProbTreeShape(void) const
  * The parameter has its own reference timeline, which we use to find the rate in the global intervals.
  * This works only for parameters Lambda,Mu,Phi,R where missing values are 0.0
  */
-void EpisodicBirthDeathSamplingTreatmentProcess::expandNonGlobalProbabilityParameterVector(std::vector<double> &par, std::vector<double> &par_times)
+void EpisodicBirthDeathSamplingTreatmentProcess::expandNonGlobalProbabilityParameterVector(std::vector<double>& par, const std::vector<double>& par_times) const
 {
     // @TODO @efficiency: this works but it would be faster to auto-advance indices rather than have an internal loop
     // Store the original values so we can overwrite the vector
@@ -922,7 +924,7 @@ void EpisodicBirthDeathSamplingTreatmentProcess::expandNonGlobalProbabilityParam
  * The parameter has its own reference timeline, which we use to find the rate in the global intervals.
  * This works only for parameters (lambda,mu,phi,r), where the global timeline is simply a finer grid than the variable-specific timelines.
  */
-void EpisodicBirthDeathSamplingTreatmentProcess::expandNonGlobalRateParameterVector(std::vector<double> &par, std::vector<double> &par_times)
+void EpisodicBirthDeathSamplingTreatmentProcess::expandNonGlobalRateParameterVector(std::vector<double> &par, const std::vector<double> &par_times) const
 {
     // Store the original values so we can overwrite the vector
     std::vector<double> old_par = par;
@@ -943,7 +945,7 @@ void EpisodicBirthDeathSamplingTreatmentProcess::expandNonGlobalRateParameterVec
  * Here we calculate all A_i, B_i, C_i, D_i(s_i), and E_i(s_i) for i = 1,...,l
  *
  */
-void EpisodicBirthDeathSamplingTreatmentProcess::prepareProbComputation( void )
+void EpisodicBirthDeathSamplingTreatmentProcess::prepareProbComputation( void ) const
 {
     // TODO: B and C are producing nan values upon initialization, but not when computing tree probabilities, which are working fine
 
@@ -1070,7 +1072,7 @@ void EpisodicBirthDeathSamplingTreatmentProcess::prepareProbComputation( void )
  *    3) Sort (assemble first if needed) the global timeline, attach the first time (the offset)
  * Then we can fill in our final vector for each parameter, which will be a vector of the same size as the global timeline
  */
-void EpisodicBirthDeathSamplingTreatmentProcess::prepareTimeline( void )
+void EpisodicBirthDeathSamplingTreatmentProcess::prepareTimeline( void ) const
 {
     // @TODO: @ANDY: Fill in the function to assemble the master timeline and all the parameter vectors!!!
     // clean all the sets
@@ -1597,7 +1599,7 @@ int EpisodicBirthDeathSamplingTreatmentProcess::survivors(double t) const
  * Sorts global times to run from present to past (0->inf) and orders ALL vector parameters to match this.
  * These can only be sorted after the local copies have values in them.
  */
-void EpisodicBirthDeathSamplingTreatmentProcess::sortGlobalTimesAndVectorParameter()
+void EpisodicBirthDeathSamplingTreatmentProcess::sortGlobalTimesAndVectorParameter( void ) const
 {
   std::vector<double> times_sorted_ascending  = global_timeline;
   std::vector<double> times_sorted_descending = global_timeline;
@@ -1743,7 +1745,7 @@ void EpisodicBirthDeathSamplingTreatmentProcess::sortGlobalTimesAndVectorParamet
 /**
  * Sorts times to run from present to past (0->inf) and orders par to match this.
  */
-void EpisodicBirthDeathSamplingTreatmentProcess::sortNonGlobalTimesAndVectorParameter(std::vector<double> &times, std::vector<double> &par)
+void EpisodicBirthDeathSamplingTreatmentProcess::sortNonGlobalTimesAndVectorParameter(std::vector<double> &times, std::vector<double>& par) const
 {
   std::vector<double> times_sorted_ascending = times;
   std::vector<double> times_sorted_descending = times;

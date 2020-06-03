@@ -56,37 +56,37 @@ namespace RevBayesCore {
                                                     Tree *t);  //!< Constructor
 
         // public member functions
-        EpisodicBirthDeathSamplingTreatmentProcess*   clone(void) const;                                                    //!< Create an independent clone
+        EpisodicBirthDeathSamplingTreatmentProcess*     clone(void) const;                                                    //!< Create an independent clone
 
     protected:
         // Parameter management functions
-        double                                          computeLnProbabilityDivergenceTimes(void);                          //!< Compute the log-transformed probability of the current value.
+        double                                          computeLnProbabilityDivergenceTimes(void) const;                    //!< Compute the log-transformed probability of the current value.
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);    //!< Swap a parameter
 
         // helper functions
-        void                                            addTimesToGlobalTimeline(std::set<double> &event_times, const TypedDagNode<RbVector<double> > *par_times);        //!< Adds timeline for parameter to set that we will use for global timeline
-        void                                            checkVectorSizes(const TypedDagNode<RbVector<double> >* v1, const TypedDagNode<RbVector<double> >* v2, int v1_minus_v2, std::string& param_name, bool is_rate) const;
+        void                                            addTimesToGlobalTimeline(std::set<double> &event_times, const TypedDagNode<RbVector<double> > *par_times) const;        //!< Adds timeline for parameter to set that we will use for global timeline
+        void                                            checkVectorSizes(const TypedDagNode<RbVector<double> >* v1, const TypedDagNode<RbVector<double> >* v2, int v1_minus_v2, const std::string& param_name, bool is_rate) const;
         double                                          computeLnProbabilityTimes(void) const;                              //!< Compute the log-transformed probability of the current value.
-        void                                            countAllNodes(void);                                                //!< Count bifurcating nodes, count all heterochronous nodes as either phi- or Phi-sampled and as either sampled ancestors or sampled extinct tips
+        void                                            countAllNodes(void) const;                                          //!< Count bifurcating nodes, count all heterochronous nodes as either phi- or Phi-sampled and as either sampled ancestors or sampled extinct tips
         double                                          lnD(size_t i, double t) const;                                      //!< Branch-segment probability at time t with index i, using pre-computed vectors
         double                                          E(size_t i, double t, bool computeSurvival = false) const;                                       //!< Extinction probability at time t with index i, using pre-computed vectors
+        void                                            expandNonGlobalProbabilityParameterVector(std::vector<double> &par, const std::vector<double> &par_times) const; //!< Updates vector par such that it matches the global timeline
+        void                                            expandNonGlobalRateParameterVector(std::vector<double> &par, const std::vector<double> &par_times) const; //!< Updates vector par such that it matches the global timeline
         size_t                                          findIndex(double t) const;                                          //!< Find the index so that times[index-1] < t < times[index]
-        size_t                                          findIndex(double t, std::vector<double> &timeline) const;
+        size_t                                          findIndex(double t, const std::vector<double>& timeline) const;
         void                                            getOffset(void) const;
         bool                                            isConstantRate(void) const;                                         //!< Checks if we have a constant-rate process
         double                                          lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const { throw RbException("Cannot compute P(nTaxa)."); }
         double                                          lnProbTreeShape(void) const;
-        void                                            prepareTimeline(void);
-        void                                            prepareProbComputation(void);
+        void                                            prepareTimeline(void) const;
+        void                                            prepareProbComputation(void) const;
         double                                          pSampling(double t) const;
         double                                          pSurvival(double start, double end) const;
         double                                          simulateDivergenceTime(double origin, double present) const;    //!< Simulate a speciation event.
-        void                                            sortGlobalTimesAndVectorParameter(void);                        //!< Sorts times to run from 0->inf, and orders ALL vector parameters to match
-        void                                            sortNonGlobalTimesAndVectorParameter(std::vector<double> &times, std::vector<double> &par);     //!< Sorts times to run from 0->inf, and orders par to match
+        void                                            sortGlobalTimesAndVectorParameter(void) const;                  //!< Sorts times to run from 0->inf, and orders ALL vector parameters to match
+        void                                            sortNonGlobalTimesAndVectorParameter(std::vector<double>& times, std::vector<double>& par) const;     //!< Sorts times to run from 0->inf, and orders par to match
         int                                             survivors(double t) const;                                      //!< Number of species alive at time t.
-        void                                            expandNonGlobalProbabilityParameterVector(std::vector<double> &par, std::vector<double> &par_times); //!< Updates vector par such that it matches the global timeline
-        void                                            expandNonGlobalRateParameterVector(std::vector<double> &par, std::vector<double> &par_times); //!< Updates vector par such that it matches the global timeline
         int                                             whichIntervalTime(double t) const;                                //!< If a time corresponds to an interval/event time, returns that interval, otherwise returns -1
 
         // members
@@ -124,35 +124,35 @@ namespace RevBayesCore {
         mutable std::vector<double>                     phi_event_times;                               //!< The user-specified non-zero times of the instantaneous events and rate shifts.
         mutable std::vector<double>                     global_timeline;                                       //!< The times of the instantaneous events and rate shifts.
 
-        std::vector<double>                             serial_tip_ages;                                       //!< The ages of all sampled dead lineages sampled by rate-sampling
-        std::vector<double>                             serial_sampled_ancestor_ages;                          //!< The ages of all sampled ancestors sampled by rate-sampling
-        std::vector<std::vector<double> >               event_tip_ages;                                        //!< The ages of all sampled dead lineages sampled at sampling events
-        std::vector<std::vector<double> >               event_sampled_ancestor_ages;                           //!< The ages of all sampled ancestors sampled at sampling events
-        std::vector<double>                             serial_bifurcation_times;                              //!< The ages of all bifurcation events in the tree NOT at a burst event
-        std::vector<std::vector<double> >               event_bifurcation_times;                               //!< The ages of all bifurcation events in the tree at burst events
+        mutable std::vector<double>                     serial_tip_ages;                                       //!< The ages of all sampled dead lineages sampled by rate-sampling
+        mutable std::vector<double>                     serial_sampled_ancestor_ages;                          //!< The ages of all sampled ancestors sampled by rate-sampling
+        mutable std::vector<std::vector<double> >       event_tip_ages;                                        //!< The ages of all sampled dead lineages sampled at sampling events
+        mutable std::vector<std::vector<double> >       event_sampled_ancestor_ages;                           //!< The ages of all sampled ancestors sampled at sampling events
+        mutable std::vector<double>                     serial_bifurcation_times;                              //!< The ages of all bifurcation events in the tree NOT at a burst event
+        mutable std::vector<std::vector<double> >       event_bifurcation_times;                               //!< The ages of all bifurcation events in the tree at burst events
 
         mutable double                                  offset;                                                //!< In the case there the most recent tip is at time y, we internally adjust by this time and treat y as the present; this does not affect the boundary times of the rate shifts
         int                                             num_extant_taxa;
 
-        std::vector<double>                             lambda;
-        std::vector<double>                             mu;
-        std::vector<double>                             phi;
-        std::vector<double>                             r;
-        std::vector<double>                             lambda_event;
-        std::vector<double>                             mu_event;
-        std::vector<double>                             phi_event;
-        std::vector<double>                             r_event;
+        mutable std::vector<double>                     lambda;
+        mutable std::vector<double>                     mu;
+        mutable std::vector<double>                     phi;
+        mutable std::vector<double>                     r;
+        mutable std::vector<double>                     lambda_event;
+        mutable std::vector<double>                     mu_event;
+        mutable std::vector<double>                     phi_event;
+        mutable std::vector<double>                     r_event;
 
-        std::vector<double>                             A_i;                                                   //!< Helper values
-        std::vector<double>                             B_i;                                                   //!< Helper values
-        std::vector<double>                             C_i;                                                   //!< Helper values
-        std::vector<double>                             E_previous;                                            //!< The probability that a lineage at time t has no sampled descendants.
-        std::vector<double>                             lnD_previous;                                          //!< The probability of an observed lineage
+        mutable std::vector<double>                     A_i;                                                   //!< Helper values
+        mutable std::vector<double>                     B_i;                                                   //!< Helper values
+        mutable std::vector<double>                     C_i;                                                   //!< Helper values
+        mutable std::vector<double>                     E_previous;                                            //!< The probability that a lineage at time t has no sampled descendants.
+        mutable std::vector<double>                     lnD_previous;                                          //!< The probability of an observed lineage
 
-        std::vector<double>                             A_survival_i;                                          //!< Helper values
-        std::vector<double>                             B_survival_i;                                          //!< Helper values
-        std::vector<double>                             C_survival_i;                                          //!< Helper values
-        std::vector<double>                             E_survival_previous;                                   //!< The probability that a lineage at time t has no sampled EXTANT descendants.
+        mutable std::vector<double>                     A_survival_i;                                          //!< Helper values
+        mutable std::vector<double>                     B_survival_i;                                          //!< Helper values
+        mutable std::vector<double>                     C_survival_i;                                          //!< Helper values
+        mutable std::vector<double>                     E_survival_previous;                                   //!< The probability that a lineage at time t has no sampled EXTANT descendants.
 
         std::string spn = "speciation";
         std::string exn = "extinction";
