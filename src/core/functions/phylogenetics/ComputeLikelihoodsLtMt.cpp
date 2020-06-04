@@ -255,7 +255,7 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *sta
     else if(cond == "survival2"){
         std::vector<double> res = RevBayesCore::GetFunctionUandP(start_age, timeline, lambda, mu, psi, omega, rho, removalPr);
         logLikelihood -= log( 1 - res[0] - res[1] );
-        std::cout << " at the time of origin, we have u = " << res[0] << " and p = " << res[1] << std::endl;
+        // if (verbose){std::cout << " at the time of origin, we have u = " << res[0] << " and p = " << res[1] << std::endl;}
     }
 
     return (logLikelihood);
