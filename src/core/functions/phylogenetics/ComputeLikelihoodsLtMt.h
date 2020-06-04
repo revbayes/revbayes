@@ -100,20 +100,20 @@ double               ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *sta
                                                                       const Tree &timeTree);
 
 
-    double              likelihoodWithAllSamplesRemoved(   const TypedDagNode<double> *start_age,
-                                                                      const std::vector<double> &timeline,
-                                                                      const std::vector<double> &lambda,
-                                                                      const std::vector<double> &mu,
-                                                                      const std::vector<double> &psi,
-                                                                      const std::vector<double> &omega,
-                                                                      const TypedDagNode<double> *rho,
-                                                                      const std::vector<double> &removalPr,
-                                                                      const std::string& cond,
-                                                                      const std::vector<double> &time_points,
-                                                                      bool useOrigin,
-                                                                      bool verbose,
-                                                                      const std::vector<double> &occurrence_ages,
-                                                                      const Tree &timeTree);
+    double              likelihoodWithAllSamplesRemoved(  const TypedDagNode<double> *start_age,
+                                                          const std::vector<double> &timeline,
+                                                          const std::vector<double> &lambda,
+                                                          const std::vector<double> &mu,
+                                                          const std::vector<double> &psi,
+                                                          const std::vector<double> &omega,
+                                                          const TypedDagNode<double> *rho,
+                                                          const std::vector<double> &removalPr,
+                                                          const std::string& cond,
+                                                          const std::vector<double> &time_points,
+                                                          bool useOrigin,
+                                                          bool verbose,
+                                                          const std::vector<double> &occurrence_ages,
+                                                          const Tree &timeTree);
 
     double GetQ(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega );
 
@@ -129,9 +129,9 @@ double               ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *sta
 
     double GetDerP0(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned n);
 
-    std::vector<double> TransformDerivativeContrVec( const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned NumObservedLineages, const std::vector<double> v );
+    void TransformDerivativeContrVec( const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned NumObservedLineages, std::vector<double>& v );
 
-    MatrixReal IncompleteBellPolynomial(unsigned N, unsigned K, std::vector<double> Vector);
+    MatrixReal IncompleteBellPolynomial(unsigned N, unsigned K, const std::vector<double> Vector);
 
     std::vector<double> GetFunctionUandP(  const TypedDagNode<double> *start_age,
                                                                   const std::vector<double> &timeline,
