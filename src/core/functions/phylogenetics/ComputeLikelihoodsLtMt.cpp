@@ -232,9 +232,10 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *sta
         bool returnLogLikelihood = true;                         // Input flag
 
         MatrixReal LogLikelihood = RevBayesCore::ForwardsTraversalMt(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, returnLogLikelihood, verbose, occurrence_ages, timeTree);
+        double logLikelihood2 = RevBayesCore::likelihoodWithAllSamplesRemoved(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, cond, time_points_Mt, useOrigin, verbose, occurrence_ages, timeTree);
 
         logLikelihood = LogLikelihood[0][0];
-        if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;}
+        if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood Mt : " << logLikelihood << " or (Ankit) " << logLikelihood2 << "\n" << std::endl;}
     }
     // Use the backwards traversal algorithm (Lt)
     else{
@@ -255,7 +256,6 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *sta
     else if(cond == "survival2"){
         std::vector<double> res = RevBayesCore::GetFunctionUandP(start_age, timeline, lambda, mu, psi, omega, rho, removalPr);
         logLikelihood -= log( 1 - res[0] - res[1] );
-        std::cout << " at the time of origin, we have u = " << res[0] << " and p = " << res[1] << std::endl;
     }
 
     return (logLikelihood);
@@ -794,7 +794,6 @@ double RevBayesCore::likelihoodWithAllSamplesRemoved(  const TypedDagNode<double
                                                                   const std::vector<double> &occurrence_ages,
                                                                   const Tree &timeTree  )
 {
-
     // Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
     std::vector<Event> events = RevBayesCore::PoolEvents(start_age, time_points, occurrence_ages, verbose, timeTree, timeline);
 
@@ -857,7 +856,7 @@ double RevBayesCore::likelihoodWithAllSamplesRemoved(  const TypedDagNode<double
             oldp0 = p0;
             deltat = th-thMinusOne;
             p0 = GetP0(deltat, birth_current, oldp0, death_current, ps_current+om_current, 0);
-            v = TransformDerivativeContrVec(deltat, birth_current, oldp0, death_current, ps_current+om_current, 0, k, v);
+            TransformDerivativeContrVec(deltat, birth_current, oldp0, death_current, ps_current+om_current, 0, k, v);
         }
 
         if(type == "rate shift"){
@@ -1002,10 +1001,10 @@ double RevBayesCore::GetDerP0(  const double t, const double beta, const double 
 }
 
 
-std::vector<double> RevBayesCore::TransformDerivativeContrVec( const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned NumObservedLineages, const std::vector<double> v )
+void RevBayesCore::TransformDerivativeContrVec( const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned NumObservedLineages, std::vector<double>& v )
 {
     unsigned n = v.size();
-    std::vector<double> v1(n, 0.0);
+    std::vector<double> transformedV(n, 0.0);
 
     if(n > 1){
         // requires computation of (n-1) derivatives
@@ -1013,9 +1012,7 @@ std::vector<double> RevBayesCore::TransformDerivativeContrVec( const double t, c
         for (unsigned i=0; i< n-1; i++){
             derivativeVector[i] = GetDerP0(t,beta,rhoc,mu,psi,omega,i+1);
         }
-        //std::cout << derivativeVector << std::endl;
         MatrixReal B = IncompleteBellPolynomial(n-1,n-1,derivativeVector);
-        //std::cout << B << std::endl;
         MatrixReal A(n, n, 0.0);
 
         for (unsigned i = 0; i < n; i++){
@@ -1028,17 +1025,17 @@ std::vector<double> RevBayesCore::TransformDerivativeContrVec( const double t, c
         //v1 = (C')*v;
         for( int i = 0; i < n; i++){
             for (int k = 0; k < n; k++){
-                v1[i] += C[k][i] * v[k];
+                transformedV[i] += C[k][i] * v[k];
             }
         }
     }
     else{
-        v1 = GetMultiDerivativeRecQ(t,beta,rhoc,mu,psi,omega,0,NumObservedLineages)*v;
+        transformedV = GetMultiDerivativeRecQ(t,beta,rhoc,mu,psi,omega,0,NumObservedLineages)*v;
     }
-    return v1;
+    v = transformedV;
 }
 
-MatrixReal RevBayesCore::IncompleteBellPolynomial(unsigned N, unsigned K, std::vector<double> Vector)
+MatrixReal RevBayesCore::IncompleteBellPolynomial(unsigned N, unsigned K, const std::vector<double> Vector)
 {
     MatrixReal A(N, K, 0.0);
     for (int i = 0; i < N; i++){
