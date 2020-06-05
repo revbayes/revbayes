@@ -50,44 +50,10 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
 
     double current_time = begin_age;
 
-    double fn = 0.0;
     size_t n = times.size();
     double nt = n;
 
-    for (size_t i=0; i<n; ++i)
-    {
-        // now we do the computation
-        //a is the time between the previous and the current coalescences
-        double a = times[i] - current_time;
-        current_time = times[i];
-
-        // get the number j of individuals we had before the current coalescence
-        size_t j = k - i;
-        double n_pairs = j * (j-1.0) / 2.0;
-
-        fn += a * n_pairs;
-    }
-
-    // compute the probability of no coalescent event in the final part of the branch
-    // only do this if the branch is not the root branch
-    if ( add_final_interval == true )
-    {
-        double final_interval = end_age - current_time;
-        size_t j = k - times.size();
-        double n_pairs = j * (j-1.0) / 2.0;
-        fn += final_interval * n_pairs;
-
-    }
-
-    double ln_prob_coal = RbConstants::LN2 - log( fn ) * (nt-2) - log( theta_max );
-
-//    shape, rate/x
-//    double lowerIncompleteGamma = RbMath::incompleteGamma( rate/x, shape, RbMath::lnGamma(shape) );
-//    double gamma = RbMath::gamma(shape);
-
-//    Gamma(n-2,2*fn/theta_max)
-
-    // Now we need to deal with the incomplete gamma term
+    double ln_prob_coal = 0.0;
 
     // If the number of gene copies is 1, then there can be no coalescence event
     // and the probability is equal to 1.0 for the only possible event (no coalescence)
@@ -97,6 +63,34 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
     }
     else
     {
+        double fn = 0.0;
+        for (size_t i=0; i<n; ++i)
+        {
+            // now we do the computation
+            // a is the time between the previous and the current coalescences
+            double a = times[i] - current_time;
+            current_time = times[i];
+
+            // get the number j of individuals we had before the current coalescence
+            size_t j = k - i;
+            double n_pairs = j * (j-1.0) / 2.0;
+
+            fn += a * n_pairs;
+        }
+
+        // compute the probability of no coalescent event in the final part of the branch
+        // only do this if the branch is not the root branch
+        if ( add_final_interval == true )
+        {
+            double final_interval = end_age - current_time;
+            size_t j = k - times.size();
+            double n_pairs = j * (j-1.0) / 2.0;
+            fn += final_interval * n_pairs;
+        }
+
+        ln_prob_coal = RbConstants::LN2 - log( fn ) * (nt-2) - log( theta_max );
+
+        // Now we need to deal with the incomplete gamma term
         double integral_limit = 2 * fn / theta_max;
 
         // When the shape term is 0 (as when n == 2), then we calculate

@@ -16,9 +16,7 @@ namespace RevBayesCore { class Tree; }
 
 using namespace RevBayesCore;
 
-MultispeciesCoalescentInverseGammaPrior::MultispeciesCoalescentInverseGammaPrior(const TypedDagNode<Tree> *sp, const std::vector<Taxon> &t) : AbstractMultispeciesCoalescent(sp, t),
-    shape ( NULL ),
-    rate( NULL )
+MultispeciesCoalescentInverseGammaPrior::MultispeciesCoalescentInverseGammaPrior(const TypedDagNode<Tree> *sp, const std::vector<Taxon> &t) : AbstractMultispeciesCoalescent(sp, t)
 {
 
 }
@@ -42,42 +40,55 @@ MultispeciesCoalescentInverseGammaPrior* MultispeciesCoalescentInverseGammaPrior
 
 double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(size_t k, const std::vector<double> &times, double begin_age, double end_age, size_t index, bool add_final_interval)
 {
+    if ( k == 1 ) return 0.0;
 
-    double alpha = getShape();
-    double beta = getRate();
+    double alpha = shape->getValue();
+    double beta = rate->getValue();
+
+    double current_time = begin_age;
 
     size_t n = times.size();
     double a = n;
 
-    double current_time = begin_age;
-    double b = 0.0;
-    for (size_t i=0; i<n; ++i)
+    double ln_prob_coal = 0.0;
+
+    // If the number of gene copies is 1, then there can be no coalescence event
+    // and the probability is equal to 1.0 for the only possible event (no coalescence)
+    if ( n <= 1 )
     {
-        // now we do the computation
-        // t is the time between the previous and the current coalescences
-        double t = times[i] - current_time;
-        current_time = times[i];
-
-        // get the number j of individuals we had before the current coalescence
-        size_t j = k - i;
-        double n_pairs = j * (j-1.0) / 2.0;
-
-        b += t * n_pairs;
+        ln_prob_coal = 0.0;
     }
-
-    // compute the probability of no coalescent event in the final part of the branch
-    // only do this if the branch is not the root branch
-    if ( add_final_interval == true )
+    else
     {
-        double final_interval = end_age - current_time;
-        size_t j = k - n;
-        double n_pairs = j * (j-1.0) / 2.0;
-        b += final_interval * n_pairs;
+        double b = 0.0;
+        for (size_t i=0; i<n; ++i)
+        {
+            // now we do the computation
+            // t is the time between the previous and the current coalescences
+            double t = times[i] - current_time;
+            current_time = times[i];
+
+            // get the number j of individuals we had before the current coalescence
+            size_t j = k - i;
+            double n_pairs = j * (j-1.0) / 2.0;
+
+            b += t * n_pairs;
+        }
+
+        // compute the probability of no coalescent event in the final part of the branch
+        // only do this if the branch is not the root branch
+        if ( add_final_interval == true )
+        {
+            double final_interval = end_age - current_time;
+            size_t j = k - times.size();
+            double n_pairs = j * (j-1.0) / 2.0;
+            b += final_interval * n_pairs;
+        }
+
+        b *= 2.0;
+
+        ln_prob_coal = RbConstants::LN2 * a + log(beta) * alpha + RbMath::lnGamma(a+alpha) - RbMath::lnGamma(alpha) - log(b+beta)*(a+alpha);
     }
-
-    b *= 2.0;
-
-    double ln_prob_coal = RbConstants::LN2 * a + log(beta) * alpha + RbMath::lnGamma(a+alpha) - RbMath::lnGamma(alpha) - log(b+beta)*(a+alpha);
 
     return ln_prob_coal;
 }
@@ -85,41 +96,14 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
 
 double MultispeciesCoalescentInverseGammaPrior::drawNe( size_t index )
 {
+    // Get the rng
+    RandomNumberGenerator* rng = GLOBAL_RNG;
 
-    double u = RbStatistics::InverseGamma::rv(getShape(), getRate(), *GLOBAL_RNG);
+    double u = RbStatistics::InverseGamma::rv(shape->getValue(), rate->getValue(), *rng);
 
     return u;
 }
 
-
-double  MultispeciesCoalescentInverseGammaPrior::getShape( void ) const
-{
-
-    if ( shape != NULL )
-    {
-        return shape->getValue();
-    }
-    else
-    {
-        std::cerr << "Error: Null Pointers for shape." << std::endl;
-        exit(-1);
-    }
-}
-
-
-double  MultispeciesCoalescentInverseGammaPrior::getRate( void ) const
-{
-
-    if ( rate != NULL )
-    {
-        return rate->getValue();
-    }
-    else
-    {
-        std::cerr << "Error: Null Pointers for rate." << std::endl;
-        exit(-1);
-    }
-}
 
 
 void MultispeciesCoalescentInverseGammaPrior::setShape(TypedDagNode<double>* s)
