@@ -991,8 +991,8 @@ double RevBayesCore::GetDerP0(  const double t, const double beta, const double 
     double derfac = -2*beta/c1;
     std::vector<double> factor(n+1, 0.0);
     factor[0] = ( exp(c1*t)*(1+c2)*(1+c2) - exp(-c1*t)*(1-c2)*(1-c2) ) / 4;
-    factor[1] =  derfac*( exp(c1*t)*(1+c2) + exp(-c1*t)*(1-c2))/2;
-    factor[2] = (derfac * derfac)*( exp(c1*t) - exp(-c1*t))/2;
+    if(n>0) {  factor[1] =  derfac*(exp(c1*t)*(1+c2) + exp(-c1*t)*(1-c2))/2;}
+    if(n>1) {  factor[2] = (derfac * derfac)*( exp(c1*t) - exp(-c1*t))/2;}
     double derp0 = 0.0;
     for (unsigned i = 0; i<= n; i++){
         derp0 += nChoosek(n,i)*factor[i]*GetMultiDerivativeRecQ(t,beta,rhoc,mu,psi,omega,n-i,1);

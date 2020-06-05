@@ -13,9 +13,9 @@
 #######################
 
 ### Read in taxon data
-tree <- readTrees("../data-OBDP2-simple/tree.tre")[1]
+tree <- readTrees("data-OBDP2-simple/tree.tre")[1]
 taxa <- tree.taxa()
-occurrence_ages <- readMatrix(file="../data-OBDP2-simple/occurrences.csv", delimiter=";")[1]
+occurrence_ages <- readMatrix(file="data-OBDP2-simple/occurrences.csv", delimiter=";")[1]
 
 seed(12345)
 
