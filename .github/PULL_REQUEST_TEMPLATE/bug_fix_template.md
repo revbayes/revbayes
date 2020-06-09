@@ -10,8 +10,9 @@ assignees: ''
 Thank you for contributing a bug fix to RevBayes!
 
 **Describe the bug**
-A  brief description of the suspected bug. Please include information, such as
-the branch, and the commit number that introduced the bug (if you are aware).
+A brief description of the suspected bug. Please link to the github issue number 
+or original bug report (if available). If known, include information such as how long
+this bug has existed or the commit number that introduced it.
 
 **A brief description of the fix**
 Briefly describe what needed to be fixed to achieve the correct behavior.
