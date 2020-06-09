@@ -10,7 +10,7 @@ assignees: ''
 Thank you for contributing to RevBayes!
 
 **Describe the contribution**
-A  brief description of your contribution. Is this meant to solve an issue? Enhance 
+A brief description of your contribution. Is this meant to solve an issue? Enhance 
 documentation?
 
 **A brief description of the expected behavior and output**
@@ -19,7 +19,6 @@ for this feature, or is it executed in the existing test suite?
 
 **Screenshots**
 If applicable, feel free to provide screenshots to help explain your problem.
-
 
 **Additional context**
 Add any other context about the problem here. Feel free to tag specific members of the 
