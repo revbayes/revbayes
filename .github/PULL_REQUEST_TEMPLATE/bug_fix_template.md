@@ -15,7 +15,8 @@ or original bug report (if available). If known, include information such as how
 this bug has existed or the commit number that introduced it.
 
 **A brief description of the fix**
-Briefly describe what needed to be fixed to achieve the correct behavior.
+Briefly describe what needed to be fixed to achieve the correct behavior. Include information
+on how you tested your fix.
 
 **Screenshots**
 If applicable, feel free to provide screenshots to help explain your problem.
