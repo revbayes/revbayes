@@ -179,7 +179,7 @@ RevBayesCore::EmpiricalSampleDistribution<valueType>& RevBayesCore::EmpiricalSam
 
         
 #ifdef RB_MPI
-        pid_per_sample = d.pid_per_sample;
+        pid_per_sample      = d.pid_per_sample;
 #endif
         
         // add the parameters of the distribution
@@ -320,16 +320,35 @@ void RevBayesCore::EmpiricalSampleDistribution<mixtureType>::executeMethod(const
     
     if ( n == "getSampleProbabilities" )
     {
-        
         bool log_transorm = static_cast<const TypedDagNode<Boolean>* >( args[0] )->getValue();
+        bool normalize    = static_cast<const TypedDagNode<Boolean>* >( args[1] )->getValue();
 
         rv.clear();
         rv.resize(num_samples);
         
         // Sebastian: Remember that ln_probs is not normalized and would need to be divided by num_samples!
+        double ln_sum = 0.0;
+        if ( normalize == true )
+        {
+            double max = RbConstants::Double::neginf;
+            for (size_t i = 0; i < num_samples; ++i)
+            {
+                if ( max < ln_probs[i] )
+                {
+                    max = ln_probs[i];
+                }
+            }
+            double sum = 0.0;
+            for (size_t i = 0; i < num_samples; ++i)
+            {
+                sum += exp(ln_probs[i]-max);
+            }
+            ln_sum = log(sum) + max;
+            
+        }
         for (size_t i = 0; i < num_samples; ++i)
         {
-            rv[i] = (log_transorm ? ln_probs[i] : exp(ln_probs[i]));
+            rv[i] = (log_transorm ? (ln_probs[i]-ln_sum) : exp(ln_probs[i]-ln_sum));
         }
     }
     else
@@ -418,8 +437,8 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::setValue(RbVector<val
     sample_block_start = 0;
     sample_block_end   = num_samples;
 #ifdef RB_MPI
-    sample_block_start = size_t(ceil( (double(this->pid-this->active_PID)   / this->num_processes ) * num_samples) );
-    sample_block_end   = size_t(ceil( (double(this->pid+1-this->active_PID) / this->num_processes ) * num_samples) );
+    sample_block_start = size_t(ceil( (double(this->pid   - this->active_PID)   / this->num_processes ) * num_samples) );
+    sample_block_end   = size_t(ceil( (double(this->pid+1 - this->active_PID)   / this->num_processes ) * num_samples) );
 #endif
     sample_block_size  = sample_block_end - sample_block_start;
     
