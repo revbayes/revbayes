@@ -9,7 +9,7 @@
 #include "ModelVector.h"
 #include "Natural.h"
 #include "OptionRule.h"
-#include "PiecewiseConstantFossilizedBirthDeathProcess.h"
+#include "PiecewiseConstantFossilizedBirthDeathRangeProcess.h"
 #include "Probability.h"
 #include "RealPos.h"
 #include "RlString.h"
@@ -116,7 +116,7 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_FBDRange::createDistribution( void
     bool pa = static_cast<const RlBoolean &>( presence_absence->getRevObject() ).getValue();
     bool ex = static_cast<const RlBoolean &>( extended->getRevObject() ).getValue();
 
-    RevBayesCore::PiecewiseConstantFossilizedBirthDeathProcess* d = new RevBayesCore::PiecewiseConstantFossilizedBirthDeathProcess(sa, l, m, p, c, r, la, b, rt, cond, t, uo, bo, pa, ex);
+    RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess* d = new RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess(sa, l, m, p, c, r, la, b, rt, cond, t, uo, bo, pa, ex);
 
     return d;
 }
