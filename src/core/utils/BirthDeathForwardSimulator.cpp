@@ -836,21 +836,22 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                 bool found = false;
                 for ( std::set<TopologyNode*>::const_iterator jt=sampled_nodes.begin(); jt!=sampled_nodes.end(); ++jt)
                 {
-                  if (*it == *jt)
-                  {
-                    found = true;
-                    break;
-                  }
+                    if (*it == *jt)
+                    {
+                        found = true;
+                        break;
+                    }
                 }
                 if ( found == false )
                 {
-                  extinct_not_sampled_nodes.insert(this_node);
+                    extinct_not_sampled_nodes.insert(this_node);
                 }
             }
         }
 
         bool complete_tree = !true;
-        bool prune = complete_tree == false && current_num_active_nodes > 0 && ( condition == ROOT && current_num_active_nodes >= 2 );
+//        bool prune = complete_tree == false && current_num_active_nodes > 0 && ( condition == ROOT && current_num_active_nodes >= 2 );
+        bool prune = complete_tree == false && current_num_active_nodes > 0;
         // now prune away all the extinct nodes
         if ( prune == true )
         {
@@ -902,7 +903,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
             root = NULL;
         }
         // next we check that both sides of the root node were sampled ()
-        else if ( condition == ROOT && root->getAge() < start_age )
+        else if ( condition == ROOT && (root->getAge() < start_age || current_num_active_nodes <= 1) )
         {
             delete root;
             root = NULL;
@@ -913,18 +914,22 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
     // build and return the tree
     Tree *my_tree = new Tree();
     my_tree->setRoot(root, true);
-
+    my_tree->setRooted( true );
+    
     size_t num_nodes = my_tree->getNumberOfNodes();
+
     for (size_t i=0; i<num_nodes; ++i)
     {
         TopologyNode &n = my_tree->getNode(i);
         if ( n.isTip() == true )
         {
             n.setName("Tip_"+ StringUtilities::toString(i+1) );
-        } else if ( n.isSampledAncestor() == true )
-        {
-          n.setName("Tip_"+ StringUtilities::toString(i+1) );
         }
+        else if ( n.isSampledAncestor() == true )
+        {
+            n.setName("Tip_"+ StringUtilities::toString(i+1) );
+        }
+        
     }
 
     return my_tree;

@@ -8,10 +8,10 @@ namespace RevBayesCore {
 class Tree;
     
     /**
-     * This class represents the writer object of character data objects into files in Fasta format.
+     * General case birth-death forward simulator.
      *
-     * This class currently has only one functionality,
-     * to write character data objects into a file in Fasta format.
+     * All parameters are vectors of vectors. The outer vector is for the epochs. The inner vector is for the state specific rates.
+     * For example, lambda[2][1] is the speciation rate in the 3rd epoch for a lineage in state 2.
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
