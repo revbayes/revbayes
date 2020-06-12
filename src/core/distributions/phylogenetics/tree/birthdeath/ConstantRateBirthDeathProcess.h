@@ -27,7 +27,8 @@ namespace RevBayesCore {
         
         // public member functions
         ConstantRateBirthDeathProcess*                      clone(void) const;                                                                      //!< Create an independent clone
-        
+        void                                                redrawValue( SimulationCondition condition = SimulationCondition::MCMC );
+
         
     protected:
         // Parameter management functions

@@ -3,9 +3,10 @@
 #include <vector>
 
 #include "ConstantRateBirthDeathProcess.h"
+#include "BirthDeathForwardSimulator.h"
+#include "BirthDeathProcess.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-#include "BirthDeathProcess.h"
 #include "TypedDagNode.h"
 
 namespace RevBayesCore { class Clade; }
@@ -76,6 +77,67 @@ double ConstantRateBirthDeathProcess::rateIntegral(double t_low, double t_high) 
     return rate;
 }
 
+
+
+void ConstantRateBirthDeathProcess::redrawValue( SimulationCondition condition )
+{
+
+    if ( condition == SimulationCondition::MCMC )
+    {
+        if ( starting_tree == NULL )
+        {
+            simulateTree();
+        }
+    }
+    else if ( condition == SimulationCondition::VALIDATION )
+    {
+        
+        BirthDeathForwardSimulator simulator;
+        
+        size_t num_epochs = 1;
+        std::vector< std::vector<double> > tmp = std::vector< std::vector<double> >( num_epochs, std::vector<double>(1,0) );
+
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = 0.0;
+        simulator.setBurstProbability( tmp );
+        
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = extinction->getValue();
+        simulator.setExtinctionRate( tmp );
+        
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = 0.0;
+        simulator.setMassExtinctionProbability( tmp );
+        
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = 1.0;
+        simulator.setSamplingProbability( tmp );
+        
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = 0.0;
+        simulator.setSamplingExtinctionProbability( tmp );
+        
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = 0.0;
+        simulator.setSamplingRate( tmp );
+        
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = 0.0;
+        simulator.setSamplingExtinctionRate( tmp );
+        
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = speciation->getValue();
+        simulator.setSpeciationRate( tmp );
+        
+        simulator.setTimeline( std::vector<double>(1,0) );
+        
+        
+        simulator.setRootCategoryProbabilities( std::vector<double>(1,1) );
+        
+        Tree *my_tree = simulator.simulateTreeConditionTime( getOriginAge(), BirthDeathForwardSimulator::SIM_CONDITION::ROOT);
+        
+        // store the new value
+        delete value;
+        value = my_tree;
+        taxa = value->getTaxa();
+    }
+    else
+    {
+        throw RbException("Uknown condition for simulating tree in episodic birth-death-sampling-treatment process.");
+    }
+}
 
 
 double ConstantRateBirthDeathProcess::simulateDivergenceTime(double origin, double present) const
