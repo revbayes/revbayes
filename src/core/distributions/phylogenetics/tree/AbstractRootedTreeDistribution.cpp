@@ -472,7 +472,8 @@ void AbstractRootedTreeDistribution::recomputeDivergenceTimesSinceOrigin( void )
     
     // retrieved the speciation times
     divergence_times = std::vector<double>();
-    for (size_t i = 0; i < value->getNumberOfInteriorNodes()+1; ++i)
+    size_t interior_nodes = value->getNumberOfInteriorNodes()+1;
+    for (size_t i = 0; i < interior_nodes; ++i)
     {
         const TopologyNode& n = value->getInteriorNode( i );
         double t = org - n.getAge();

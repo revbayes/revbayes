@@ -168,7 +168,7 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_FBDP::createDistribution( void ) c
     {
         Pt = static_cast<const ModelVector<RealPos> &>( rho_timeline->getRevObject() ).getDagNode();
     }
-
+    
     d = new RevBayesCore::EpisodicBirthDeathSamplingTreatmentProcess(sa,
                                                                      b_s,
                                                                      d_s,
