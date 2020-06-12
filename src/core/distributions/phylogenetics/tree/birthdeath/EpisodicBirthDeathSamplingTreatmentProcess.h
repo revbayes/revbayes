@@ -56,38 +56,39 @@ namespace RevBayesCore {
                                                     Tree *t);  //!< Constructor
 
         // public member functions
-        EpisodicBirthDeathSamplingTreatmentProcess*     clone(void) const;                                                    //!< Create an independent clone
+        EpisodicBirthDeathSamplingTreatmentProcess*     clone(void) const;                                                      //!< Create an independent clone
+        void                                            redrawValue(SimulationCondition c = SimulationCondition::MCMC);         //!< Draw a new random value from the distribution
 
     protected:
         // Parameter management functions
-        double                                          computeLnProbabilityDivergenceTimes(void) const;                    //!< Compute the log-transformed probability of the current value.
+        double                                          computeLnProbabilityDivergenceTimes(void) const;                        //!< Compute the log-transformed probability of the current value.
         // Parameter management functions
-        void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);    //!< Swap a parameter
+        void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);        //!< Swap a parameter
 
         // helper functions
         void                                            addTimesToGlobalTimeline(std::set<double> &event_times, const TypedDagNode<RbVector<double> > *par_times) const;        //!< Adds timeline for parameter to set that we will use for global timeline
         void                                            checkVectorSizes(const TypedDagNode<RbVector<double> >* v1, const TypedDagNode<RbVector<double> >* v2, int v1_minus_v2, const std::string& param_name, bool is_rate) const;
-        double                                          computeLnProbabilityTimes(void) const;                              //!< Compute the log-transformed probability of the current value.
-        void                                            countAllNodes(void) const;                                          //!< Count bifurcating nodes, count all heterochronous nodes as either phi- or Phi-sampled and as either sampled ancestors or sampled extinct tips
-        double                                          lnD(size_t i, double t) const;                                      //!< Branch-segment probability at time t with index i, using pre-computed vectors
+        double                                          computeLnProbabilityTimes(void) const;                                  //!< Compute the log-transformed probability of the current value.
+        void                                            countAllNodes(void) const;                                              //!< Count bifurcating nodes, count all heterochronous nodes as either phi- or Phi-sampled and as either sampled ancestors or sampled extinct tips
+        double                                          lnD(size_t i, double t) const;                                          //!< Branch-segment probability at time t with index i, using pre-computed vectors
         double                                          E(size_t i, double t, bool computeSurvival = false) const;                                       //!< Extinction probability at time t with index i, using pre-computed vectors
         void                                            expandNonGlobalProbabilityParameterVector(std::vector<double> &par, const std::vector<double> &par_times) const; //!< Updates vector par such that it matches the global timeline
         void                                            expandNonGlobalRateParameterVector(std::vector<double> &par, const std::vector<double> &par_times) const; //!< Updates vector par such that it matches the global timeline
-        size_t                                          findIndex(double t) const;                                          //!< Find the index so that times[index-1] < t < times[index]
+        size_t                                          findIndex(double t) const;                                              //!< Find the index so that times[index-1] < t < times[index]
         size_t                                          findIndex(double t, const std::vector<double>& timeline) const;
         void                                            getOffset(void) const;
-        bool                                            isConstantRate(void) const;                                         //!< Checks if we have a constant-rate process
+        bool                                            isConstantRate(void) const;                                             //!< Checks if we have a constant-rate process
         double                                          lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const { throw RbException("Cannot compute P(nTaxa)."); }
         double                                          lnProbTreeShape(void) const;
         void                                            prepareTimeline(void) const;
         void                                            prepareProbComputation(void) const;
         double                                          pSampling(double t) const;
         double                                          pSurvival(double start, double end) const;
-        double                                          simulateDivergenceTime(double origin, double present) const;    //!< Simulate a speciation event.
-        void                                            sortGlobalTimesAndVectorParameter(void) const;                  //!< Sorts times to run from 0->inf, and orders ALL vector parameters to match
+        double                                          simulateDivergenceTime(double origin, double present) const;            //!< Simulate a speciation event.
+        void                                            sortGlobalTimesAndVectorParameter(void) const;                          //!< Sorts times to run from 0->inf, and orders ALL vector parameters to match
         void                                            sortNonGlobalTimesAndVectorParameter(std::vector<double>& times, std::vector<double>& par) const;     //!< Sorts times to run from 0->inf, and orders par to match
-        int                                             survivors(double t) const;                                      //!< Number of species alive at time t.
-        int                                             whichIntervalTime(double t) const;                                //!< If a time corresponds to an interval/event time, returns that interval, otherwise returns -1
+        int                                             survivors(double t) const;                                              //!< Number of species alive at time t.
+        int                                             whichIntervalTime(double t) const;                                      //!< If a time corresponds to an interval/event time, returns that interval, otherwise returns -1
 
         // members
         bool                                            using_global_timeline;
@@ -115,14 +116,14 @@ namespace RevBayesCore {
         const TypedDagNode<RbVector<double> >*          interval_times_event_extinction;                       //!< The user-specified non-zero times of the instantaneous events and rate shifts.
         const TypedDagNode<RbVector<double> >*          interval_times_event_sampling;                         //!< The user-specified non-zero times of the instantaneous events and rate shifts.
 
-        mutable std::vector<double>                     lambda_times;                             //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        mutable std::vector<double>                     mu_times;                             //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        mutable std::vector<double>                     phi_times;                               //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        mutable std::vector<double>                     r_times;                              //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        mutable std::vector<double>                     lambda_event_times;                             //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        mutable std::vector<double>                     mu_event_times;                             //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        mutable std::vector<double>                     phi_event_times;                               //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        mutable std::vector<double>                     global_timeline;                                       //!< The times of the instantaneous events and rate shifts.
+        mutable std::vector<double>                     lambda_times;                                           //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        mutable std::vector<double>                     mu_times;                                               //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        mutable std::vector<double>                     phi_times;                                              //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        mutable std::vector<double>                     r_times;                                                //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        mutable std::vector<double>                     lambda_event_times;                                     //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        mutable std::vector<double>                     mu_event_times;                                         //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        mutable std::vector<double>                     phi_event_times;                                        //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        mutable std::vector<double>                     global_timeline;                                        //!< The times of the instantaneous events and rate shifts.
 
         mutable std::vector<double>                     serial_tip_ages;                                       //!< The ages of all sampled dead lineages sampled by rate-sampling
         mutable std::vector<double>                     serial_sampled_ancestor_ages;                          //!< The ages of all sampled ancestors sampled by rate-sampling

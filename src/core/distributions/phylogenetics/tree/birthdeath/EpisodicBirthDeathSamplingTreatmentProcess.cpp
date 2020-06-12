@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "BirthDeathForwardSimulator.h"
 #include "DistributionExponential.h"
 #include "EpisodicBirthDeathSamplingTreatmentProcess.h"
 #include "RandomNumberFactory.h"
@@ -103,7 +104,7 @@ EpisodicBirthDeathSamplingTreatmentProcess::EpisodicBirthDeathSamplingTreatmentP
 
       if ( times != times_sorted_ascending )
       {
-          throw(RbException("Rate change times must be provided in ascending order."));
+          throw RbException("Rate change times must be provided in ascending order.");
       }
 
     }
@@ -226,6 +227,7 @@ void EpisodicBirthDeathSamplingTreatmentProcess::checkVectorSizes(const TypedDag
   }
 }
 
+
 /**
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
@@ -251,7 +253,6 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityDivergenc
     // variable declarations and initialization
     double lnProbTimes = computeLnProbabilityTimes();
     
-
     return lnProbTimes;
 }
 
@@ -505,22 +506,25 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
     // condition on survival
     if ( condition == "survival" )
     {
-        double root_age = (&value->getRoot())->getAge();
+        double root_age = value->getRoot().getAge();
         // conditioning on survival depends on if we are using the origin or root age
         // origin: we condition on a single lineage surviving to the present and being sampled
         // root: we condition on the above plus the other root child leaving a sampled descendant
-        lnProbTimes -= log( pSurvival(root_age,0.0) );
-        if ( num_initial_lineages == 2 )
-        {
-          lnProbTimes -= log( pSampling(root_age) );
-        }
+//        double test_a = log( pSurvival(root_age,0.0) );
+//        double test_b = log( pSampling(root_age) );
+        
+        lnProbTimes -= num_initial_lineages * log( pSurvival(root_age,0.0) );
+//        if ( num_initial_lineages == 2 )
+//        {
+//            lnProbTimes -= log( pSampling(root_age) );
+//        }
     }
     else if ( condition == "sampling" )
     {
         // conditioning on sampling depends on if we are using the origin or root age
         // origin: the conditioning suggested by Stadler 2011 and used by Gavryuskina (2014), sampling at least one lineage
         // root age: sampling at least one descendent from each child of the root
-        double root_age = (&value->getRoot())->getAge();
+        double root_age = value->getRoot().getAge();
         lnProbTimes -= num_initial_lineages * log( pSampling(root_age) );
     }
 
@@ -1503,15 +1507,83 @@ double EpisodicBirthDeathSamplingTreatmentProcess::pSampling(double start) const
   return (1.0 - E(findIndex(start),start,false));
 }
 
+
 double EpisodicBirthDeathSamplingTreatmentProcess::pSurvival(double start, double end) const
 {
-  // This computation does not make sense unless there is sampling at the present, and will result in a divide by 0 error
-  if ( phi_event[0] < DBL_EPSILON )
-  {
-    return(RbConstants::Double::neginf);
-  }
-  return( (1.0 - E(findIndex(start),start,true))/(1.0 - E(findIndex(end),end,true)) );
+    // This computation does not make sense unless there is sampling at the present, and will result in a divide by 0 error
+    if ( phi_event[0] < DBL_EPSILON )
+    {
+        return RbConstants::Double::neginf;
+    }
+    return (1.0 - E(findIndex(start),start,true))/(1.0 - E(findIndex(end),end,true));
 }
+
+
+
+void EpisodicBirthDeathSamplingTreatmentProcess::redrawValue( SimulationCondition condition )
+{
+
+    if ( condition == SimulationCondition::MCMC )
+    {
+        if ( starting_tree == NULL )
+        {
+            simulateTree();
+        }
+    }
+    else if ( condition == SimulationCondition::VALIDATION )
+    {
+        // update timeline and parameter vectors
+        prepareTimeline();
+        
+        BirthDeathForwardSimulator simulator;
+        
+        size_t num_epochs = global_timeline.size();
+        std::vector< std::vector<double> > tmp = std::vector< std::vector<double> >( num_epochs, std::vector<double>(1,0) );
+
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = lambda_event[i];
+        simulator.setBurstProbability( tmp );
+        
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = mu[i];
+        simulator.setExtinctionRate( tmp );
+        
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = mu_event[i];
+        simulator.setMassExtinctionProbability( tmp );
+        
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = phi_event[i];
+        simulator.setSamplingProbability( tmp );
+        
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = r_event[i];
+        simulator.setSamplingExtinctionProbability( tmp );
+        
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = phi[i];
+        simulator.setSamplingRate( tmp );
+        
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = r[i];
+        simulator.setSamplingExtinctionRate( tmp );
+        
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = lambda[i];
+        simulator.setSpeciationRate( tmp );
+        
+        simulator.setTimeline( global_timeline );
+        
+        
+        simulator.setRootCategoryProbabilities( std::vector<double>(1,1) );
+        
+        Tree *my_tree = simulator.simulateTreeConditionTime( getOriginAge(), BirthDeathForwardSimulator::SIM_CONDITION::ROOT);
+        
+        // store the new value
+        delete value;
+        value = my_tree;
+        
+        // to be safe, we copy over the taxa
+        taxa = value->getTaxa();
+    }
+    else
+    {
+        throw RbException("Uknown condition for simulating tree in episodic birth-death-sampling-treatment process.");
+    }
+}
+
 
 /**
  * Simulate new speciation times.
