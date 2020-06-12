@@ -91,7 +91,7 @@ ValidationAnalysis::ValidationAnalysis( const MonteCarloAnalysis &m, size_t n ) 
             
                 if ( the_node->isStochastic() == true )
                 {
-                    the_node->redraw();
+                    the_node->redraw( SimulationCondition::VALIDATION );
                     
                     // we need to store the new simulated data
                     the_node->writeToFile(sim_directory_name);

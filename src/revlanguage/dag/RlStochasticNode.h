@@ -201,14 +201,6 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::StochasticNode<valueT
         
         return NULL;
     }
-    else if (name == "probability")
-    {
-        
-        // we found the corresponding member method
-        found = true;
-        
-        return RevPtr<RevVariable>( new RevVariable( new RealPos( exp( this->getLnProbability() ) ), "" ) );
-    }
     else if (name == "redraw")
     {
         

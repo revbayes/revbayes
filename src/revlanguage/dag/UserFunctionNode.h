@@ -32,7 +32,7 @@ namespace RevLanguage {
         UserFunctionNode&                       operator=(const UserFunctionNode& x);                               //!< Assignment operator
         
         // Public methods
-        void                                    bootstrap(void) {}                                                     //!< Bootstrap (or not)
+        void                                    bootstrap(void) {}                                                  //!< Bootstrap (or not)
         UserFunctionNode<rlType>*               clone(void) const;                                                  //!< Type-safe clone
         RevBayesCore::DagNode*                  cloneDAG(RevBayesCore::DagNodeMap &nodesMap, std::map<std::string, const RevBayesCore::DagNode* > &names) const;   //!< Clone the entire DAG connected to this node
         void                                    getIntegratedParents(RevBayesCore::RbOrderedSet<RevBayesCore::DagNode *>& ip) const;
@@ -42,9 +42,9 @@ namespace RevLanguage {
         const typename rlType::valueType&       getValue(void) const;                                               //!< Get the value (const)
         bool                                    isConstant(void) const;                                             //!< Is this DAG node constant?
         virtual void                            printStructureInfo(std::ostream& o, bool verbose=false) const;      //!< Print structure info
-        void                                    redraw(void) {}                                                     //!< Redraw (or not)
+        void                                    redraw(RevBayesCore::SimulationCondition c) {}                      //!< Redraw (or not)
         void                                    setMcmcMode(bool tf);                                               //!< Set the modus of the DAG node to MCMC mode.
-        void                                    setValueFromFile(const std::string &fn);                           //!< Set value from string.
+        void                                    setValueFromFile(const std::string &fn);                            //!< Set value from string.
         void                                    setValueFromString(const std::string &v);                           //!< Set value from string.
         void                                    update(void);                                                       //!< Update current value
         

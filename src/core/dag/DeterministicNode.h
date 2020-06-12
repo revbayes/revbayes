@@ -28,7 +28,7 @@ namespace RevBayesCore {
         const valueType&                                    getValue(void) const;
         bool                                                isConstant(void) const;                                                     //!< Is this DAG node constant?
         virtual void                                        printStructureInfo(std::ostream &o, bool verbose=false) const;              //!< Print the structural information (e.g. name, value-type, distribution/function, children, parents, etc.)
-        void                                                redraw(void);
+        void                                                redraw(SimulationCondition c = SimulationCondition::MCMC);
         void                                                reInitializeMe(void);                                                       //!< The DAG was re-initialized so maybe you want to reset some stuff (delegate to distribution)
         void                                                setMcmcMode(bool tf);                                                       //!< Set the modus of the DAG node to MCMC mode.
         void                                                setValueFromFile(const std::string &dir);                                   //!< Set value from string.
@@ -366,7 +366,7 @@ void RevBayesCore::DeterministicNode<valueType>::printStructureInfo( std::ostrea
 
 
 template<class valueType>
-void RevBayesCore::DeterministicNode<valueType>::redraw( void )
+void RevBayesCore::DeterministicNode<valueType>::redraw( SimulationCondition c )
 {
     // nothing to do
     // the touch should have called our update

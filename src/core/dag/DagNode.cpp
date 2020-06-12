@@ -250,6 +250,10 @@ void DagNode::executeMethod(const std::string &n, const std::vector<const DagNod
     {
         rv = const_cast<DagNode *>(this)->getLnProbability();
     }
+    else if ( n == "probability" )
+    {
+        rv = exp(const_cast<DagNode *>(this)->getLnProbability());
+    }
     else
     {
         throw RbException("A DAG node does not have a member method called '" + n + "'.");

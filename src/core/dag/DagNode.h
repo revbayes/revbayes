@@ -10,6 +10,7 @@
 #include "MemberObject.h"
 #include "Parallelizable.h"
 #include "RbVector.h"
+#include "SimulationConditions.h"
 
 namespace RevBayesCore {
 
@@ -49,7 +50,7 @@ template <class valueType> class RbOrderedSet;
         virtual void                                                printName(std::ostream &o, const std::string &sep, int l=-1, bool left=true, bool fv=true) const = 0;       //!< Monitor/Print this variable
         virtual void                                                printStructureInfo(std::ostream &o, bool verbose=false) const = 0;                          //!< Print the structural information (e.g. name, value-type, distribution/function, children, parents, etc.)
         virtual void                                                printValue(std::ostream &o, const std::string &sep, int l=-1, bool left=true, bool user=true, bool simple=true) const = 0;    //!< Monitor/Print this variable
-        virtual void                                                redraw(void) = 0;                                                                           //!< Redraw the current value of the node (applies only to stochastic nodes)
+        virtual void                                                redraw(SimulationCondition c = SimulationCondition::MCMC) = 0;                                                                           //!< Redraw the current value of the node (applies only to stochastic nodes)
         virtual void                                                setMcmcMode(bool tf) = 0;                                                                   //!< Set the modus of the DAG node to MCMC mode.
         virtual void                                                setValueFromFile(const std::string &dir) = 0;                                               //!< Set value from string.
         virtual void                                                setValueFromString(const std::string &v) = 0;                                               //!< Set value from string.

@@ -43,7 +43,7 @@ namespace RevBayesCore {
         bool                                                isIntegratedOut(void) const;
         bool                                                isStochastic(void) const;                                                   //!< Is this DAG node stochastic?
         virtual void                                        printStructureInfo(std::ostream &o, bool verbose=false) const;              //!< Print the structural information (e.g. name, value-type, distribution/function, children, parents, etc.)
-        void                                                redraw(void);                                                               //!< Redraw the current value of the node (applies only to stochastic nodes)
+        void                                                redraw(SimulationCondition c = SimulationCondition::MCMC);                  //!< Redraw the current value of the node (applies only to stochastic nodes)
         virtual void                                        reInitializeMe(void);                                                       //!< The DAG was re-initialized so maybe you want to reset some stuff (delegate to distribution)
         virtual void                                        setClamped(bool tf);                                                        //!< Set directly the flag whether this node is clamped.
         void                                                setIgnoreRedraw(bool tf=true);
@@ -625,13 +625,13 @@ void RevBayesCore::StochasticNode<valueType>::printStructureInfo( std::ostream &
 
 
 template<class valueType>
-void RevBayesCore::StochasticNode<valueType>::redraw( void )
+void RevBayesCore::StochasticNode<valueType>::redraw( SimulationCondition c )
 {
     
     // draw the value
     if ( ignore_redraw == false )
     {
-        distribution->redrawValue();
+        distribution->redrawValue( c );
     }
     
     // touch this node for probability recalculation

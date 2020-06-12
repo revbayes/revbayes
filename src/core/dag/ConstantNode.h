@@ -25,7 +25,7 @@ namespace RevBayesCore {
         const valueType&                                    getValue(void) const;
         bool                                                isConstant(void) const;                                                     //!< Is this DAG node constant?
         void                                                printStructureInfo(std::ostream &o, bool verbose=false) const;              //!< Print the structural information (e.g. name, value-type, distribution/function, children, parents, etc.)
-        void                                                redraw(void);
+        void                                                redraw(SimulationCondition c = SimulationCondition::MCMC);
         void                                                setMcmcMode(bool tf);                                                       //!< Set the modus of the DAG node to MCMC mode.
         void                                                setValue(const valueType &v);
         void                                                setValueFromFile(const std::string &dir);                                   //!< Set value from string.
@@ -229,7 +229,7 @@ void RevBayesCore::ConstantNode<valueType>::printStructureInfo(std::ostream &o, 
 
 
 template<class valueType>
-void RevBayesCore::ConstantNode<valueType>::redraw( void )
+void RevBayesCore::ConstantNode<valueType>::redraw( SimulationCondition c )
 {
     // nothing to do
 }
