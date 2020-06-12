@@ -634,7 +634,7 @@ const TopologyNode& Tree::getInteriorNode( size_t indx ) const
     {
         throw RbException("Cannot acces interior node '" + StringUtilities::to_string(indx) + "' for a tree with " + StringUtilities::to_string(n) + " tips.");
     }
-    return *nodes[ indx + getNumberOfTips() ];
+    return *nodes[ indx + n ];
 }
 
 
@@ -1738,6 +1738,7 @@ void Tree::unroot( void )
 // Write this object into a file in its default format.
 void Tree::writeToFile( const std::string &dir, const std::string &fn ) const
 {
+    
     // do not write a file if the tree is invalid
     if (this->getNumberOfTips() > 1)
     {
