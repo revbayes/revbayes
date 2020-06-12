@@ -10,7 +10,7 @@
 #include "ModelVector.h"
 #include "Natural.h"
 #include "OptionRule.h"
-#include "PiecewiseConstantFossilizedBirthDeathRangeProcess.h"
+#include "PiecewiseConstantFossilizedBirthDeathRangeMatrixProcess.h"
 #include "Probability.h"
 #include "RealPos.h"
 #include "RlString.h"
@@ -77,7 +77,7 @@ Dist_FBDRangeMatrix* Dist_FBDRangeMatrix::clone( void ) const
  *
  * \return A new internal distribution object.
  */
-RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess* Dist_FBDRangeMatrix::createDistribution( void ) const
+RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeMatrixProcess* Dist_FBDRangeMatrix::createDistribution( void ) const
 {
     
     // get the parameters
@@ -115,7 +115,7 @@ RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess* Dist_FBDRangeMa
     bool bo = static_cast<const RlBoolean &>( bounded->getRevObject() ).getValue();
     bool pa = static_cast<const RlBoolean &>( presence_absence->getRevObject() ).getValue();
 
-    RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess* d = new RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess(l, m, p, c, r, rt, cond, t, bo, pa);
+    RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeMatrixProcess* d = new RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeMatrixProcess(l, m, p, c, r, rt, cond, t, bo, pa);
 
     return d;
 }
