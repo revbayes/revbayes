@@ -1452,6 +1452,21 @@ void Tree::renameNodeParameter(const std::string &old_name, const std::string &n
 }
 
 
+/**
+ * Change node ids to be as in reference
+ * @param const reference tree whose node ids will be used
+ * @return tree with node ids as in reference but topology and branch lengths as in target
+ */
+void Tree::renumberNodes(const Tree &reference)
+{
+    std::map<RbBitSet, TopologyNode*> ref = reference.getBitsetToNodeMap();
+    std::map<RbBitSet, TopologyNode*> toret = getBitsetToNodeMap();
+    for (std::map<RbBitSet,TopologyNode*>::iterator it=ref.begin(); it!=ref.end(); ++it)
+      toret[it->first]->setIndex( it->second->getIndex());
+    return;
+}
+
+
 void Tree::reroot(const Clade &o, bool reindex)
 {
 
