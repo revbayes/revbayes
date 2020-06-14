@@ -1482,19 +1482,3 @@ std::vector<double> RevBayesCore::TreeUtilities::calculateEDR(Tree &t)
     }
     return edr;
 }
-
-/**
- * Change node ids in target to be as in reference
- * @param const target tree whose node ids will be changed in the output tree
- * @param const reference tree whose node ids will be used
- * @return tree with node ids as in reference but topology and branch lengths as in target
- */
-Tree* RevBayesCore::TreeUtilities::renumberNodes(const Tree &target, const Tree &reference)
-{
-    std::map<RbBitSet, TopologyNode*> ref = reference.getBitsetToNodeMap();
-    Tree *toreturn = target.clone();
-    std::map<RbBitSet, TopologyNode*> toret = toreturn->getBitsetToNodeMap();
-    for (std::map<RbBitSet,TopologyNode*>::iterator it=ref.begin(); it!=ref.end(); ++it)
-      toret[it->first]->setIndex( it->second->getIndex());
-    return toreturn;
-}
