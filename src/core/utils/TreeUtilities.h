@@ -61,8 +61,12 @@ namespace RevBayesCore {
         double                  calculateMPD(const Tree &t, const AbstractHomologousDiscreteCharacterData &c, size_t site_index, size_t state_index, bool zscore, bool branch_lengths, size_t num_randomizations); //!< calculate the Mean Pairwise Distance
         double                  calculateMNTD(const Tree &t, const AbstractHomologousDiscreteCharacterData &c, size_t site_index, size_t state_index, bool zscore, bool branch_lengths, size_t num_randomizations); //!< calculate the Mean Nearest Taxon Distance
         std::vector<double>     calculateEDR(Tree &t); //!< get distribution of weighted times between speciation/coalescent events in a tree
+<<<<<<< HEAD
         Tree*                   renumberNodes(const Tree &target, const Tree &reference); //!< Change node ids in target to be as in reference
 
+=======
+        
+>>>>>>> The function to renumber the nodes has been moved to the Tree class.
         // internal helper functions
         void                    constructTimeTreeRecursively(TopologyNode *tn, const TopologyNode &n, std::vector<TopologyNode*> &nodes, std::vector<double> &ages, double depth); //!< helper function for time tree conversion
         void                    processDistsInSubtree(const TopologyNode& node, MatrixReal& matrix, std::vector< std::pair<std::string, double> >& distsToNodeFather, const std::map< std::string, int >& namesToId); //!< helper function for distance matrix calculation
