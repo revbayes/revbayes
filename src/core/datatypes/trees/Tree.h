@@ -124,6 +124,7 @@ namespace RevBayesCore {
         void                                                makeInternalNodesBifurcating(bool reindex);                                                         //!< Make all the internal nodes bifurcating.
         void                                                orderNodesByIndex();
         void                                                pruneTaxa(const RbBitSet&);
+        void                                                renumberNodes(const Tree &reference);                                                               //!< Change node ids to be as in reference
         void                                                reroot(const Clade &outgroup, bool reindex);                                                        //!< Re-root the tree with the given outgroup
         void                                                reroot(const std::string &outgroup, bool reindex);                                                  //!< Re-root the tree with the given outgroup
         void                                                reroot(TopologyNode &n, bool reindex);
