@@ -1561,8 +1561,9 @@ void TopologyNode::makeBifurcating( void )
         // we need to be able to bifurcate sampled ancestor root nodes
         //if ( isRoot() == false )
         //{
+            size_t numChildren = getNumberOfChildren();
 
-            if ( getNumberOfChildren() == 1 )
+            if ( numChildren == 1 )
             {
 
                 TopologyNode *new_fossil = new TopologyNode( getTaxon() );
@@ -1579,6 +1580,60 @@ void TopologyNode::makeBifurcating( void )
                 // set the age and branch-length of the fossil
                 new_fossil->setAge( age );
                 new_fossil->setBranchLength( 0.0 );
+
+            }
+            else if ( numChildren > 2 )
+            {
+                std::cout << "NUM CHILDREN : " << numChildren <<std::endl;
+                TopologyNode *new_child = new TopologyNode();
+                std::vector<double> childBls ;
+                std::vector<TopologyNode*> nodesToMove = getChildren();
+                for (size_t i=1; i<numChildren; ++i)
+                {
+                  std::cout << "CHILD "<< i << std::endl;
+                  const TopologyNode& tmp = getChild( i );
+                  childBls.push_back(tmp.getBranchLength());
+                  std::cout << "childBls.size() : " << childBls.size() << " i-1 : "<< i-1 <<std::endl;
+                  std::cout << "CHILD BLs: "<< childBls[i-1] <<std::endl;
+                  std::cout << "AND THEN??? " <<std::endl;
+                }
+
+                std::cout << "BEFORE mini " << std::endl;
+                std::cout << "childBls.size() " << childBls.size() << std::endl;
+
+                double mini = childBls[0];
+                for (size_t i=1; i<childBls.size(); ++i)
+                {
+                  if (childBls[i] < mini) mini = childBls[i];
+                }
+                std::cout << "BEFORE GET AGE " << std::endl;
+                double parentAge = getAge();
+                std::cout << "parentAGE "<< parentAge << std::endl;
+                double halfMini = mini / 2;
+                std::cout << "halfMini "<< halfMini << std::endl;
+                double newAge = parentAge - halfMini;
+                std::cout << "newAge "<< newAge << std::endl;
+
+                for (size_t i=1; i<nodesToMove.size(); ++i)
+                {
+                  TopologyNode* tmp = nodesToMove[i ];
+                  tmp->setBranchLength(tmp->getBranchLength() - halfMini) ;
+                  removeChild(tmp);
+                  new_child->addChild(tmp);
+                  tmp->setParent (new_child);
+                }
+                std::cout << "before setParent " << std::endl;
+
+                addChild(new_child);
+                new_child->setParent( this );
+                std::cout << "before setAge " << std::endl;
+
+                new_child->setAge(newAge);
+                std::cout << "before setBl " << std::endl;
+
+                new_child->setBranchLength( mini/2 );
+                std::cout << "DONE " << std::endl;
+
 
             }
 
