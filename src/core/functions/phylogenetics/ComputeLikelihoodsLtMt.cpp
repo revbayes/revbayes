@@ -245,7 +245,7 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *sta
 
         // The likelihood corresponds to the first element of the B_Lt matrix
         logLikelihood = B_Lt_log[0][0];
-        if (verbose){std::cout << "\n ==> Log-Likelihood Lt : " << logLikelihood << "\n" << std::endl;}
+        if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood Lt : " << logLikelihood << "\n" << std::endl;}
     }
 
     // We then deal with the conditioning
@@ -342,7 +342,7 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
     double om_current = om.back();
     double rp_current = rp.back();
     double gamma_current = gamma.back();
-    size_t indx_rate = timeline.size();
+    size_t indx_rate = timeline.size()-1;
 
     // Recording the correction terms c to avoid divergence towards extreme values (outside of double precision)
     double log_correction = 0;
