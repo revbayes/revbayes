@@ -60,7 +60,7 @@ template <class valueType> class RbVector;
       void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
 
       // Helper functions
-      double                                              computeLnProbabilityTimes(void) const;                                          //!< Compute the log-transformed probability of the current value.
+      double                                              computeLnProbabilityTimes(void);                                          //!< Compute the log-transformed probability of the current value.
       double                                              lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const { throw RbException("Cannot compute P(nTaxa)."); }
       double                                              lnProbTreeShape(void) const;
       double                                              simulateDivergenceTime(double origin, double present) const;                    //!< Simulate a speciation event.
@@ -70,6 +70,7 @@ template <class valueType> class RbVector;
       double                                              pHatZero(double t) const;
       double                                              functionP(double t, double z) const;
       double                                              functionU(double t, double z) const;
+      void                                                prepareProbComputation(void) const;                       //!< Prepare likelihood calculation
 
       // Members
       const TypedDagNode< double > *                        start_age;                             //!< Start age of the process.

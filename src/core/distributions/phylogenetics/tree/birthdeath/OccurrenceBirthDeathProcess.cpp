@@ -120,6 +120,8 @@ OccurrenceBirthDeathProcess* OccurrenceBirthDeathProcess::clone( void ) const
     return new OccurrenceBirthDeathProcess( *this );
 }
 
+void OccurrenceBirthDeathProcess::prepareProbComputation( void ) const
+{}
 
 
 /**
@@ -157,7 +159,7 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) 
 }
 
 
-double OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void ) const
+double OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void )
 {
 
     double lnProbTimes = 0.0;

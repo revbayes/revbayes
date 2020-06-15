@@ -348,8 +348,6 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< TimeTree                   >( new Dist_FBDP());
         AddDistribution< TimeTree                   >( new Dist_PhylodynamicBDP());
 
-        AddDistribution< TimeTree                   >( new Dist_OccurrenceBirthDeathProcessR());
-
         // diversity-dependent pure-birth process
         AddDistribution< TimeTree                   >( new Dist_divDepYuleProcess() );
 

@@ -6,7 +6,6 @@
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "OccurrenceBirthDeathProcess.h"
-#include "PiecewiseConstantOccurrenceBirthDeathProcess.h"
 #include "Dist_occurrenceBirthDeathProcess.h"
 #include "ModelVector.h"
 #include "OptionRule.h"
@@ -187,7 +186,7 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
             ht = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
         }
         std::cout << tn << std::endl;
-        d = new RevBayesCore::PiecewiseConstantOccurrenceBirthDeathProcess(sa, rh, l, m, p, o, r, ht, lt, mt, pt, ot, rt, n, cond, tn, uo, Mt, tr);
+        //d = new RevBayesCore::PiecewiseConstantOccurrenceBirthDeathProcess(sa, rh, l, m, p, o, r, ht, lt, mt, pt, ot, rt, n, cond, tn, uo, Mt, tr);
     }
 else {
     // Get the parameters :

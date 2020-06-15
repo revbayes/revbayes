@@ -57,12 +57,12 @@ namespace RevBayesCore {
 
     protected:
         // Parameter management functions
-        double                                          computeLnProbabilityDivergenceTimes(void) const;                            //!< Compute the log-transformed probability of the current value.
+        double                                          computeLnProbabilityDivergenceTimes(void) ;                            //!< Compute the log-transformed probability of the current value.
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
 
         // helper functions
-        double                                          computeLnProbabilityTimes(void) const;                     //!< Compute the log-transformed probability of the current value.
+        double                                          computeLnProbabilityTimes(void);                     //!< Compute the log-transformed probability of the current value.
         void                                            countAllNodes(void) const;                                 //!< Count bifurcating nodes, count all heterochronous nodes as either phi- or Phi-sampled and as either sampled ancestors or sampled extinct tips
         // double                                          D(size_t i, double t) const;
         double                                          lnD(size_t i, double t) const;                                     //!< Branch-segment probability at time t with index i, using pre-computed vectors

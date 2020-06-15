@@ -227,7 +227,7 @@ OBDP2* OBDP2::clone( void ) const
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double OBDP2::computeLnProbabilityDivergenceTimes( void ) const
+double OBDP2::computeLnProbabilityDivergenceTimes( void )
 {
     // update parameter vectors
     updateVectorParameters();
@@ -244,7 +244,8 @@ double OBDP2::computeLnProbabilityDivergenceTimes( void ) const
     {
         occAges = std::vector<double>();
     }
-    
+
+    std::cout<<"in compute lb probability divergence times OBDP2"<<std::endl;
     double logLikelihood = RevBayesCore::ComputeLnLikelihoodOBDP(start_age, timeline, lambda, mu, phi, omega, homogeneous_Phi, r, maxHiddenLin, cond, useOrigin, useMt, verbose, occAges, tree);
     // if (verbose){std::cout << "\ncomputeLnProbabilityTimes : " << computeLnProbabilityTimes() << "\n\n" << std::endl;}
 
@@ -255,7 +256,7 @@ double OBDP2::computeLnProbabilityDivergenceTimes( void ) const
 /**
  * Compute the log probability of the current value under the current parameter values.
  */
-double OBDP2::computeLnProbabilityTimes( void ) const
+double OBDP2::computeLnProbabilityTimes( void )
 {
     // variable declarations and initialization
     double lnProbTimes = 0.0;
