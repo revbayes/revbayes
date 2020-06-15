@@ -19,16 +19,16 @@ occurrence_ages <- readMatrix(file="data-OBDP2-simple/occurrences.csv", delimite
 
 seed(12345)
 
-speciation <- v(1.0,1.0,1.0)
+speciation <- v(1.0,0.9,1.0)
 extinction <- 0.9
 rho <- 0.2
 sampling <- 0.25
 omega <- 0.5
 rm <- 1.0
-N <- 50
+N <- 100
 cond <- "survival2"
 origin_time <- 9
-Mt <- TRUE
+Mt <- FALSE
 timeline <- v(1,2)
 print(speciation)
 

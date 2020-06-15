@@ -1,15 +1,6 @@
-//
-//  Func_exp.cpp
-//  RevBayesCore
-//
-//  Created by Sebastian Hoehna on 8/7/12.
-//  Copyright 2012 __MyCompanyName__. All rights reserved.
-//
-
 #include <iosfwd>
 #include <string>
 #include <vector>
-
 #include "ExponentialFunction.h"
 #include "Func_exp.h"
 #include "Real.h"

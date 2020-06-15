@@ -12,14 +12,11 @@ template <class valueType> class TypedDagNode;
     /**
      * @brief Tim rate matrix function.
      *
-     * This function creates the Tim rates matrix object by setting the exchangeability rates
+     * This function creates the Tim (transition model) rate matrix object by setting the exchangeability rates
      * and the base frequencies. The rate matrix takes care of the setting of the actual rates and transition probabilities.
      *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since Version 1.0, 2014-07-04
-     *
+     * @param er The simplex of exchangeabilities (abccea): A<->C = G<->T, A<->G, A<->T = C<->G, C<->T
+     * @param bf The simplex of base frequencies
      */
     class TimRateMatrixFunction : public TypedFunction<RateGenerator> {
         
@@ -38,7 +35,7 @@ template <class valueType> class TypedDagNode;
         
         // members
         
-        const TypedDagNode< Simplex >*                      exchangeability_rates;
+        const TypedDagNode< Simplex >*                      exchangeability_rates; //!< A<->C = G<->T, A<->G, A<->T = C<->G, C<->T exchangeabilities
         const TypedDagNode< Simplex >*                      base_frequencies;
         
     };

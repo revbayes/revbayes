@@ -1,4 +1,7 @@
 #!/bin/sh
+
+set -e
+
 if [ "$1" = "clean" ]
 then
 	rm -rf build
@@ -10,7 +13,9 @@ fi
     #################
     # generate git version number
     ./generate_version_number.sh
-    cp ../../src/revlanguage/utils/GitVersion.cpp GitVersion_backup.cpp
+    if [ -e ../../src/revlanguage/utils/GitVersion.cpp ] ; then
+        cp ../../src/revlanguage/utils/GitVersion.cpp GitVersion_backup.cpp
+    fi
     mv GitVersion.cpp ../../src/revlanguage/utils/
 
 	./regenerate.sh $@
@@ -18,6 +23,8 @@ fi
 	ninja
 	cd ..
 	
-    cp GitVersion_backup.cpp ../../src/revlanguage/utils/GitVersion.cpp
-    rm GitVersion_backup.cpp
+    if [ -e  GitVersion_backup.cpp ] ; then
+        cp GitVersion_backup.cpp ../../src/revlanguage/utils/GitVersion.cpp
+        rm GitVersion_backup.cpp
+    fi
 fi

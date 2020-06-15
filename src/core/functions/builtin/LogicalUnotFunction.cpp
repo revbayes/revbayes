@@ -1,9 +1,7 @@
 #include "LogicalUnotFunction.h"
-
 #include "TypedDagNode.h"
 
 namespace RevBayesCore { class DagNode; }
-
 using namespace RevBayesCore;
 
 LogicalUnotFunction::LogicalUnotFunction(const TypedDagNode<Boolean> *l) : TypedFunction<Boolean>( new Boolean(false) ),

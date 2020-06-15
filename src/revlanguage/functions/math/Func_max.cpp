@@ -1,16 +1,7 @@
-//
-//  Func_max.cpp
-//  RevBayesCore
-//
-//  Created by Bastien Boussau on 02/11/14.
-//  Copyright 2012 __MyCompanyName__. All rights reserved.
-//
-
 #include <stddef.h>
 #include <iosfwd>
 #include <string>
 #include <vector>
-
 #include "MaxFunction.h"
 #include "Func_max.h"
 #include "ModelVector.h"

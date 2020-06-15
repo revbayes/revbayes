@@ -147,7 +147,7 @@ before_install:
   - if [ -n "${C_COMPILER}" ]; then sudo update-alternatives --install /usr/bin/gcc  gcc "${C_COMPILER}"  90; fi
   - if [ -n "${CXX_COMPILER}" ]; then sudo update-alternatives --install /usr/bin/g++  g++ "${CXX_COMPILER}"  90; fi
 
-script: ./travis-build.sh
+script: cd projects/cmake && ./build.sh -travis true
 
 # notifications
 notifications:

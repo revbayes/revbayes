@@ -1,9 +1,4 @@
-/* 
- * File:   InverseWishartDistribution.cpp
- * Author: nl
- * 
- * Created on 15 juillet 2014, 10:08
- */
+
 
 #include "InverseWishartDistribution.h"
 
@@ -20,6 +15,13 @@ namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 
+
+/**
+ * Default Constructor for the Inverse Wishart Distribution
+ * @param insigma0 A scale matrix of positive real numbers
+ * @param indf a positive long number for the degrees of freedom
+ *
+ */
 InverseWishartDistribution::InverseWishartDistribution(const TypedDagNode<MatrixReal> *insigma0, const TypedDagNode<long>* indf)  :
 TypedDistribution<RevBayesCore::MatrixReal>(new MatrixReal(insigma0->getValue().getDim())),
 sigma0(insigma0),
@@ -37,6 +39,17 @@ dim( NULL )  {
     redrawValue();
 }
 
+
+/**
+ * Constructor for the Inverse Wishart Distribution
+ * @param inkappaVector A vector for the diagonal of the scaling matrix
+ * @param indf a positive long number for the degrees of freedom
+ *
+ *@note For this parameterization the scaling matrix is calculated as:
+ *@note sigma0 = Diagonal(kappaVector)
+ *
+ *
+ */
 InverseWishartDistribution::InverseWishartDistribution(const TypedDagNode<RbVector<double> > *inkappaVector, const TypedDagNode<long>* indf)  :
 TypedDistribution<RevBayesCore::MatrixReal>(new MatrixReal( inkappaVector->getValue().size()) ),
     sigma0(NULL),
@@ -55,6 +68,19 @@ TypedDistribution<RevBayesCore::MatrixReal>(new MatrixReal( inkappaVector->getVa
     redrawValue();
 }
 
+/**
+ * Constructor for the Inverse Wishart Distribution
+ * @param inkappa A value for the diagonal of the scaling matrix
+ * @param indim The number of dimensions on the scaling matrix
+ * @param indf a positive long number for the degrees of freedom
+ *
+ *
+ *@note For this parameterization the scaling matrix is calculated as:
+ *@note sigma0=kappa * Identitymatrix
+ *@note Where the identity matrix has indim dimensions
+ *
+ *
+ */
 InverseWishartDistribution::InverseWishartDistribution(const TypedDagNode<long>* indim, const TypedDagNode<double> *inkappa, const TypedDagNode<long>* indf)  :
 TypedDistribution<RevBayesCore::MatrixReal>(new MatrixReal( size_t(indim->getValue()) )),
     sigma0(NULL),

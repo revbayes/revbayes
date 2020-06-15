@@ -159,8 +159,8 @@
 /* Tree priors (in folder "distributions/phylogenetics/tree") */
 #include "Dist_bdp.h"
 #include "Dist_bdp_complete.h"
+#include "Dist_BDSTP.h"
 #include "Dist_BirthDeathBurstProcess.h"
-// #include "Dist_BDSTP.h"
 #include "Dist_CharacterDependentBirthDeathProcess.h"
 #include "Dist_Coalescent.h"
 #include "Dist_CoalescentSkyline.h"
@@ -170,6 +170,7 @@
 #include "Dist_ConstrainedNodeOrder.h"
 #include "Dist_WeightedConstrainedNodeOrder.h"
 #include "Dist_DuplicationLoss.h"
+#include "Dist_FBDP.h"
 #include "Dist_FBDRange.h"
 #include "Dist_FBDRangeMatrix.h"
 #include "Dist_constPopMultispCoal.h"
@@ -183,12 +184,10 @@
 #include "Dist_multispeciesCoalescentInverseGammaPrior.h"
 #include "Dist_multispeciesCoalescentUniformPrior.h"
 #include "Dist_outgroupBirthDeath.h"
-#include "Dist_occurrenceBirthDeathProcess.h"
+#include "Dist_PhylodynamicBDP.h"
 #include "Dist_phyloDistanceGamma.h"
 #include "Dist_sampledSpeciationBirthDeathProcess.h"
-#include "Dist_BDSTP.h"
-#include "Dist_SSBDP.h"
-#include "Dist_occurrenceBirthDeathProcessR.h"
+#include "Dist_occurrenceBirthDeathProcess.h"
 #include "Dist_OBDP2.h"
 #include "Dist_TimeVaryingStateDependentSpeciationExtinctionProcess.h"
 #include "Dist_UltrametricTree.h"
@@ -344,9 +343,10 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< TimeTree                   >( new Dist_FBDRange());
         AddDistribution< MatrixReal                 >( new Dist_FBDRangeMatrix());
 
-        // serial-sampled-birth-death process
+        // birth-death-sampling-treatment processes and submodels
         AddDistribution< TimeTree                   >( new Dist_BDSTP());
-        AddDistribution< TimeTree                   >( new Dist_SSBDP());
+        AddDistribution< TimeTree                   >( new Dist_FBDP());
+        AddDistribution< TimeTree                   >( new Dist_PhylodynamicBDP());
 
         AddDistribution< TimeTree                   >( new Dist_OccurrenceBirthDeathProcessR());
 

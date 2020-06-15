@@ -8,6 +8,16 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
+/**
+ * Default constructor.
+ *
+ * This function takes four inputs:
+ * @param n The number of states
+ * @param l The rate of gains
+ * @param m The number of losses
+ * @param allow_zero_state Should state '0' be allowed? (May not be appropriate for some counts)
+ */
+
 OrderedRateMatrixFunction::OrderedRateMatrixFunction(const TypedDagNode<long> *n, const TypedDagNode<double> *l, const TypedDagNode<double> *m, bool allow_zero_state) : TypedFunction<RateGenerator>( new RateMatrix_Ordered(n->getValue()) ),
     lambda( l ),
     mu( m )
