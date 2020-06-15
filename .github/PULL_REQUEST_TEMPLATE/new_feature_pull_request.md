@@ -10,7 +10,7 @@ assignees: ''
 Thank you for contributing a new feature to RevBayes!
 
 **Describe the feature**
-A  brief description of the new feature. What is this intended to do? With which datatypes or
+A brief description of the new feature. What is this intended to do? With which datatypes or
 other analyses should this feature work? This will help us assign appropriate reviewers to
 the pull request.
 
@@ -20,9 +20,6 @@ for this feature, or is it executed in the existing test suite.
 
 **Screenshots**
 If applicable, feel free to provide screenshots to help explain your problem.
-
-**Computer info**
-Which OS are you using? 
 
 **Additional context**
 Add any other context about the problem here. Feel free to tag specific members of the 
