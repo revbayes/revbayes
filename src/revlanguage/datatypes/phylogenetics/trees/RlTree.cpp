@@ -310,8 +310,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     else if (name == "reRoot")
     {
         found = true;
-        const std::vector<RevBayesCore::Taxon> &taxa = static_cast<const ModelVector<Taxon>&>( args[0].getVariable()->getRevObject() ).getValue();
-        RevBayesCore::Clade tmp = RevBayesCore::Clade( taxa );
+        const RevBayesCore::Clade &tmp = static_cast<const Clade&>( args[0].getVariable()->getRevObject() ).getValue();
         RevBayesCore::Tree &tree = dag_node->getValue();
         tree.reroot(tmp, true);
         return NULL;
@@ -323,6 +322,21 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         RevBayesCore::Tree &tree = dag_node->getValue();
         std::vector<RevBayesCore::Taxon> t = tree.getNode(index).getClade().getTaxa();
         return new RevVariable( new ModelVector<Taxon>( t ) );
+    }
+    else if (name == "makeBifurcating")
+    {
+        found = true;
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        tree.makeInternalNodesBifurcating(true);
+        return NULL;
+    }
+    else if (name == "reRootAndMakeBifurcating")
+    {
+        found = true;
+        const RevBayesCore::Clade &tmp = static_cast<const Clade&>( args[0].getVariable()->getRevObject() ).getValue();
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        tree.rerootAndMakeBifurcating(tmp, true);
+        return NULL;
     }
 
     return ModelObject<RevBayesCore::Tree>::executeMethod( name, args, found );
@@ -493,6 +507,13 @@ void Tree::initMethods( void )
     ArgumentRules* getDescendantTaxaArgRules = new ArgumentRules();
     getDescendantTaxaArgRules->push_back( new ArgumentRule( "node", Natural::getClassTypeSpec(), "the index of the node.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "getDescendantTaxa", ModelVector<Taxon>::getClassTypeSpec(), getDescendantTaxaArgRules ) );
+
+    ArgumentRules* makeBifurcatingArgRules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "makeBifurcating", RlUtils::Void, makeBifurcatingArgRules   ) );
+
+    ArgumentRules* reRootAndMakeBifurcatingArgRules = new ArgumentRules();
+    reRootAndMakeBifurcatingArgRules->push_back( new ArgumentRule( "clade", Clade::getClassTypeSpec(), "The clade to use as outgroup.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure( "reRootAndMakeBifurcating", RlUtils::Void, reRootAndMakeBifurcatingArgRules ) );
 
 
     // member functions
