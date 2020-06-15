@@ -21,7 +21,8 @@ using namespace RevBayesCore;
 
 MultispeciesCoalescentUniformPrior::MultispeciesCoalescentUniformPrior(const TypedDagNode<Tree> *sp, const std::vector<Taxon> &t) : AbstractMultispeciesCoalescent(sp, t)
 {
-
+    double tree_length = 0.0;
+    double fn = 0.0;
 }
 
 
@@ -55,72 +56,77 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
 
     double ln_prob_coal = 0.0;
 
-    // If the number of gene copies is 1, then there can be no coalescence event
-    // and the probability is equal to 1.0 for the only possible event (no coalescence)
-    if ( n <= 1 )
+    for (size_t i=0; i<n; ++i)
+    {
+        // now we do the computation
+        // a is the time between the previous and the current coalescences
+
+        double a = times[i] - current_time;
+        current_time = times[i];
+
+        // get the number j of individuals we had before the current coalescence
+        size_t j = k - i;
+        double n_pairs = j * (j-1.0);
+
+        fn += a * n_pairs;
+    }
+
+    // compute the probability of no coalescent event in the final part of the branch
+    // only do this if the branch is not the root branch
+    if ( add_final_interval == true )
+    {
+        double final_interval = end_age - current_time;
+        size_t j = k - times.size();
+        double n_pairs = j * (j-1.0);
+        fn += final_interval * n_pairs;
+    }
+
+    // If we've gotten to the last node of the tree, then we can calculate the likelihood
+    // for the entire gene tree given the species tree using the total number of gene
+    // copies and the total coalescent rate over the entire genealogy
+    double num_tips = getNumberOfSpeciesTreeTips();
+    if ( index == 2*(num_tips-1) )
+    {
+        double ngc = getNumberOfGeneCopies();
+        double integral_limit = 2 * fn / theta_max;
+
+        double lower_incomplete_gamma = RbMath::incompleteGamma( integral_limit, ngc-2, RbMath::lnGamma( ngc-2 ) ) * RbMath::gamma( ngc-2 );
+        double upper_incomplete_gamma = RbMath::gamma( ngc-2 ) - lower_incomplete_gamma;
+
+        ln_prob_coal = RbConstants::LN2 + (( -ngc+2 ) * log( fn )) + log( upper_incomplete_gamma ) - log( theta_max );
+
+        // Remember to reset the total coalescent rate so that we don't just keep adding to it
+        // because we're now done with it for this particular gene tree
+        fn = 0.0;
+    }
+    // Otherwise we don't change the likelihood because we haven't finished adding up the
+    // total coalescent rate over the genealogy
+    else
     {
         ln_prob_coal = 0.0;
     }
-    else
-    {
-        double fn = 0.0;
-        for (size_t i=0; i<n; ++i)
-        {
-            // now we do the computation
-            // a is the time between the previous and the current coalescences
-            double a = times[i] - current_time;
-            current_time = times[i];
-
-            // get the number j of individuals we had before the current coalescence
-            size_t j = k - i;
-            double n_pairs = j * (j-1.0) / 2.0;
-
-            fn += a * n_pairs;
-        }
-
-        // compute the probability of no coalescent event in the final part of the branch
-        // only do this if the branch is not the root branch
-        if ( add_final_interval == true )
-        {
-            double final_interval = end_age - current_time;
-            size_t j = k - times.size();
-            double n_pairs = j * (j-1.0) / 2.0;
-            fn += final_interval * n_pairs;
-        }
-
-        ln_prob_coal = RbConstants::LN2 - log( fn ) * (nt-2) - log( theta_max );
-
-        // Now we need to deal with the incomplete gamma term
-        double integral_limit = 2 * fn / theta_max;
-
-        // When the shape term is 0 (as when n == 2), then we calculate
-        // the upper incomplete gamma using an exponential integral instead
-        if (n == 2)
-        {
-            if (integral_limit > 0)
-            {
-                double ei = boost::math::expint( -integral_limit );
-                double e1 = -ei;
-
-                ln_prob_coal += log(e1);
-            }
-            else
-            {
-                std::cerr << "The integral limit in dnMultiSpeciesCoalescentUniformPrior is negative." << std::endl;
-            }
-
-        }
-        // Otherwise we calculate the incomplete gamma directly
-        else
-        {
-            double lower_incomplete_gamma = RbMath::incompleteGamma( integral_limit, nt-2, RbMath::lnGamma(nt-2) ) * RbMath::gamma(nt-2);
-            double upper_incomplete_gamma = RbMath::gamma(nt-2) - lower_incomplete_gamma;
-
-            ln_prob_coal += log( upper_incomplete_gamma );
-        }
-    }
 
     return ln_prob_coal;
+}
+
+
+double MultispeciesCoalescentUniformPrior::recursiveInverseGamma( double a, double x )
+{
+
+    if ( a == 0 )
+    {
+        // Base case
+        // We need to get the exponential integral G(0,x) where x = the integral limit
+        double ei = boost::math::expint( -x );
+        double e1 = -ei;
+
+        return e1;
+    }
+    else
+    {
+        return (-pow(x,a) * exp(-x) / a) + (1.0/a) * recursiveInverseGamma( a+1.0, x );
+    }
+
 }
 
 
@@ -133,8 +139,24 @@ double MultispeciesCoalescentUniformPrior::drawNe( size_t index )
     double u = RbStatistics::Uniform::rv( 0, max_theta->getValue(), *rng);
 
     return u;
+
 }
 
+
+double MultispeciesCoalescentUniformPrior::getNumberOfGeneCopies()
+{
+    double nt = num_taxa;
+
+    return nt;
+}
+
+
+double MultispeciesCoalescentUniformPrior::getNumberOfSpeciesTreeTips()
+{
+    double num_species_tree_tips = species_tree->getValue().getNumberOfTips();
+
+    return num_species_tree_tips;
+}
 
 
 void MultispeciesCoalescentUniformPrior::setMaxTheta(TypedDagNode<double>* m)
@@ -145,6 +167,7 @@ void MultispeciesCoalescentUniformPrior::setMaxTheta(TypedDagNode<double>* m)
     max_theta = m;
 
     addParameter( max_theta );
+
 }
 
 
