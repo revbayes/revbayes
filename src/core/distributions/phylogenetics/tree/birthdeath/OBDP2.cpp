@@ -245,7 +245,6 @@ double OBDP2::computeLnProbabilityDivergenceTimes( void )
         occAges = std::vector<double>();
     }
 
-    std::cout<<"in compute lb probability divergence times OBDP2"<<std::endl;
     double logLikelihood = RevBayesCore::ComputeLnLikelihoodOBDP(start_age, timeline, lambda, mu, phi, omega, homogeneous_Phi, r, maxHiddenLin, cond, useOrigin, useMt, verbose, occAges, tree);
     // if (verbose){std::cout << "\ncomputeLnProbabilityTimes : " << computeLnProbabilityTimes() << "\n\n" << std::endl;}
 

@@ -227,27 +227,32 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *sta
     double logLikelihood = 0.0;
 
     // Use the forwards traversal algorithm (Mt)
-    if (useMt){
-        const std::vector<double> time_points_Mt( 1, 0.0 );      // Record the probability density at present to compute the likelihood
-        bool returnLogLikelihood = true;                         // Input flag
-
-        MatrixReal LogLikelihood = RevBayesCore::ForwardsTraversalMt(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, returnLogLikelihood, verbose, occurrence_ages, timeTree);
-        double logLikelihood2 = RevBayesCore::likelihoodWithAllSamplesRemoved(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, cond, time_points_Mt, useOrigin, verbose, occurrence_ages, timeTree);
-
-        logLikelihood = LogLikelihood[0][0];
-        if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood Mt : " << logLikelihood << " or (Ankit) " << logLikelihood2 << "\n" << std::endl;}
+    if(removalPr[0] == 1.0){
+    const std::vector<double> time_points_Mt( 1, 0.0 );      // Record the probability density at present to compute the likelihood
+    double logLikelihood = RevBayesCore::likelihoodWithAllSamplesRemoved(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, cond, time_points_Mt, useOrigin, verbose, occurrence_ages, timeTree);
+    if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood (Ankit) " << logLikelihood << "\n" << std::endl;}
     }
+    else {
+      if (useMt){
+          const std::vector<double> time_points_Mt( 1, 0.0 );      // Record the probability density at present to compute the likelihood
+          bool returnLogLikelihood = true;                         // Input flag
+
+          MatrixReal LogLikelihood = RevBayesCore::ForwardsTraversalMt(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, returnLogLikelihood, verbose, occurrence_ages, timeTree);
+
+          logLikelihood = LogLikelihood[0][0];
+          if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;}
+      }
     // Use the backwards traversal algorithm (Lt)
-    else{
-        const std::vector<double> time_points_Lt(1, start_age->getValue());      // Record the probability density at the start age to compute the likelihood
+      else{
+          const std::vector<double> time_points_Lt(1, start_age->getValue());      // Record the probability density at the start age to compute the likelihood
 
-        MatrixReal B_Lt_log = RevBayesCore::BackwardsTraversalLt(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, verbose, occurrence_ages, timeTree);
+          MatrixReal B_Lt_log = RevBayesCore::BackwardsTraversalLt(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, verbose, occurrence_ages, timeTree);
 
-        // The likelihood corresponds to the first element of the B_Lt matrix
-        logLikelihood = B_Lt_log[0][0];
-        if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood Lt : " << logLikelihood << "\n" << std::endl;}
-    }
-
+          // The likelihood corresponds to the first element of the B_Lt matrix
+          logLikelihood = B_Lt_log[0][0];
+          if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood Lt : " << logLikelihood << "\n" << std::endl;}
+      }
+  }
     // We then deal with the conditioning
     if(cond == "survival"){
         std::vector<double> res = RevBayesCore::GetFunctionUandP(start_age, timeline, lambda, mu, psi, omega, rho, removalPr);
