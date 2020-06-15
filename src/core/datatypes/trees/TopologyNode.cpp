@@ -1547,8 +1547,8 @@ bool TopologyNode::isTip( void ) const
 
 /**
  * Make this node an all its children bifurcating.
- * The root will not be changed. We throw an error if this node
- * has more than 2 children. If this node has only one child,
+ * The root will not be changed.
+ * If this node has only one child,
  * then we insert a dummy child.
  * This function is called recursively.
  */
