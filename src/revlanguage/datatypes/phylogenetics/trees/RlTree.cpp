@@ -310,8 +310,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     else if (name == "reRoot")
     {
         found = true;
-        const std::vector<RevBayesCore::Taxon> &taxa = static_cast<const ModelVector<Taxon>&>( args[0].getVariable()->getRevObject() ).getValue();
-        RevBayesCore::Clade tmp = RevBayesCore::Clade( taxa );
+        const RevBayesCore::Clade &tmp = static_cast<const Clade&>( args[0].getVariable()->getRevObject() ).getValue();
         RevBayesCore::Tree &tree = dag_node->getValue();
         tree.reroot(tmp, true);
         return NULL;
