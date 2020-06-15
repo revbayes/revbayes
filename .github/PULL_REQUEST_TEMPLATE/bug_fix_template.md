@@ -21,9 +21,6 @@ on how you tested your fix.
 **Screenshots**
 If applicable, feel free to provide screenshots to help explain your problem.
 
-**Computer info**
-Which OS are you using? Which version of RevBayes? This should be the first line you see when you start RevBayes.
-
 **Additional context**
 Add any other context about the problem here. Feel free to tag specific members of the
 RevBayes team as possible reviewers for the pull request.
