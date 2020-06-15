@@ -128,6 +128,7 @@ namespace RevBayesCore {
         void                                                reroot(const Clade &outgroup, bool reindex);                                                        //!< Re-root the tree with the given outgroup
         void                                                reroot(const std::string &outgroup, bool reindex);                                                  //!< Re-root the tree with the given outgroup
         void                                                reroot(TopologyNode &n, bool reindex);
+        void                                                rerootAndMakeBifurcating(const Clade &o, bool reindex);                                             //!< Re-root the tree with the given outgroup, and make sure we have a bifuration at the root and elsewhere
         void                                                removeDuplicateTaxa(void);
         void                                                renameNodeParameter(const std::string &old_name, const std::string &new_name);
         TopologyNode&                                       reverseParentChild(TopologyNode &n);                                                                //!< Reverse the parent child relationship.

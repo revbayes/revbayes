@@ -1255,6 +1255,8 @@ void Tree::makeInternalNodesBifurcating(bool reindex)
     // we need to reset the root so that the vector of nodes get filled again with the new number of nodes
     setRoot( &getRoot(), reindex );
 
+    taxon_bitset_map.clear();
+
 }
 
 
@@ -1459,17 +1461,23 @@ void Tree::renameNodeParameter(const std::string &old_name, const std::string &n
  */
 void Tree::renumberNodes(const Tree &reference)
 {
+    // First, internal nodes
     std::map<RbBitSet, TopologyNode*> ref = reference.getBitsetToNodeMap();
     std::map<RbBitSet, TopologyNode*> toret = getBitsetToNodeMap();
-    for (std::map<RbBitSet,TopologyNode*>::iterator it=ref.begin(); it!=ref.end(); ++it)
+    for (std::map<RbBitSet,TopologyNode*>::iterator it=ref.begin(); it!=ref.end(); ++it) {
       toret[it->first]->setIndex( it->second->getIndex());
+    }
+    // Second, the tip nodes
+    std::vector<std::string> tipNames = getTipNames();
+    for (auto i = 0; i<tipNames.size(); ++i) {
+      getTipNodeWithName(tipNames[i]).setIndex(reference.getTipNodeWithName(tipNames[i]).getIndex());
+    }
     return;
 }
 
 
 void Tree::reroot(const Clade &o, bool reindex)
 {
-
     bool strict = true;
 
     // for safety we reset the bitrepresentation of the clade
@@ -1504,6 +1512,7 @@ void Tree::reroot(const Clade &o, bool reindex)
 
 //        TopologyNode &new_root = outgroup_node->getParent();
         reverseParentChild( outgroup_node->getParent() );
+
         outgroup_node->getParent().setParent( NULL );
 
         // set the new root
@@ -1550,6 +1559,236 @@ void Tree::reroot(TopologyNode &n, bool reindex)
 
 	// set the new root
 	setRoot( &n.getParent(), reindex );
+
+}
+
+
+
+void Tree::rerootAndMakeBifurcating(const Clade &o, bool reindex)
+{
+    bool strict = true;
+
+    // for safety we reset the bitrepresentation of the clade
+    Clade outgroup = o;
+    outgroup.resetTaxonBitset( getTaxonBitSetMap() );
+
+    if ( root->containsClade(outgroup, strict ) == false )
+    {
+
+        // check for the inverted clade
+        RbBitSet b = outgroup.getBitRepresentation();
+        b.flip();
+        outgroup.setBitRepresentation(b);
+
+        if ( root->containsClade(outgroup, strict ) == false )
+        {
+            throw RbException("Cannot reroot the tree because we could not find an outgroup clade '" + outgroup.toString() + "'.");
+        }
+
+    }
+
+    //std::cout << "IN rerootAndMakeBifurcating 51 "<< getPlainNewickRepresentation() <<std::endl;
+
+    // reset parent/child relationships
+    TopologyNode *outgroup_node = root->getNode( outgroup, strict);
+
+    if ( outgroup_node == NULL )
+    {
+        throw RbException("Cannot reroot the tree because we could not find an outgroup clade '" + outgroup.toString() + "'.");
+    }
+
+    std::cout << "\t\t\tGOING THROUGH TREE"<<std::endl;
+    for (size_t i = 0 ; i < nodes.size(); ++i) {
+      std::cout << i << " : "<< nodes[i]->getNumberOfChildren() << " ; " << nodes[i]->getName() << std::endl;
+    }
+
+
+    if ( outgroup_node->isRoot() == false )
+    {
+      std::cout << "IN rerootAndMakeBifurcating 8"<<std::endl;
+
+//        TopologyNode &new_root = outgroup_node->getParent();
+        reverseParentChild( outgroup_node->getParent() );
+        std::cout << "IN rerootAndMakeBifurcating 9"<<std::endl;
+
+        outgroup_node->getParent().setParent( NULL );
+        std::cout << "IN rerootAndMakeBifurcating 10: "<< getPlainNewickRepresentation()  <<std::endl;
+
+        // set the new root
+        setRoot( &outgroup_node->getParent(), reindex );
+        std::cout << "IN rerootAndMakeBifurcating 11: "<< getPlainNewickRepresentation()  <<std::endl;
+
+    }
+    std::cout << "IN rerootAndMakeBifurcating 11bis: "<< getPlainNewickRepresentation()  <<std::endl;
+
+
+    std::cout << "\t\t\tGOING THROUGH TREE AND CLEANING ONE DEGREE NODES"<<std::endl;
+    for (size_t i = 0 ; i < nodes.size(); ++i) {
+      std::cout << "BEFORE: "<< i << " : "<< nodes[i]->getNumberOfChildren() << " ; " << nodes[i]->getName() << std::endl;
+
+      if (nodes[i]->getNumberOfChildren() == 1) {
+        TopologyNode *parent = nodes[nodes[i]->getParent().getIndex()];
+        std::vector<TopologyNode*> children = nodes[i]->getChildren() ;
+        TopologyNode *child = children[0];
+        double summ = nodes[i]->getBranchLength() + child->getBranchLength();
+        parent->removeChild(nodes[i]);
+        nodes[i]->removeChild(child);
+        parent->addChild(child);
+        child->setBranchLength(summ);
+        child->setParent(parent);
+      }
+      std::cout << "AFTER: "<<i << " : "<< nodes[i]->getNumberOfChildren() << " ; " << nodes[i]->getName() << std::endl;
+    }
+
+
+        std::cout << "\t\t\tGOING THROUGH TREE BEFORE MORE CLEANING "<<std::endl;
+        for (size_t i = 0 ; i < nodes.size(); ++i) {
+          std::cout << i << " : "<< nodes[i]->getNumberOfChildren() << " ; " << nodes[i]->getName() << std::endl;
+        }
+
+
+/////Clearing the node vector and filling it up again
+nodes.clear();
+// Go through all nodes from the root and add them in a pre-order traversal
+fillNodesByPhylogeneticTraversal(root);
+
+    for (unsigned int i = 0; i < nodes.size(); ++i)
+    {
+        nodes[i]->setIndex(i);
+    }
+
+std::cout << "IN rerootAndMakeBifurcating 11ter: "<< getPlainNewickRepresentation()  <<std::endl;
+
+
+    std::cout << "\t\t\tGOING THROUGH TREE AFTER CLEANING "<<std::endl;
+    for (size_t i = 0 ; i < nodes.size(); ++i) {
+      std::cout << i << " : "<< nodes[i]->getNumberOfChildren() << " ; " << nodes[i]->getName() << std::endl;
+    }
+
+
+
+    // if we have a trifurcation at the root, we need to change it into a bifurcation
+    size_t numChildren = root->getNumberOfChildren();
+    if ( numChildren==3) {
+        std::cout << "NUM CHILDREN : " << numChildren <<std::endl;
+        // which one of the 3 children do we want as outgroup?
+        size_t goodOutgroup = 0;
+        std::vector<TopologyNode*> nodesToMove = root->getChildren() ;
+        for (size_t i=0; i<numChildren; ++i)
+        {
+          if (root->getChild(i).getClade() == outgroup) {
+            goodOutgroup = i;
+            break;
+          }
+        }
+        nodesToMove.erase(nodesToMove.begin() + goodOutgroup);
+        std::cout << "IN rerootAndMakeBifurcating 11quad: "<< goodOutgroup <<std::endl;
+        TopologyNode *new_child = new TopologyNode();
+        std::vector<double> childBls ;
+        for (size_t i=0; i<nodesToMove.size(); ++i)
+        {
+          std::cout << "CHILD "<< i << std::endl;
+          const TopologyNode& tmp = *nodesToMove[i] ;
+          childBls.push_back(tmp.getBranchLength());
+          std::cout << "childBls.size() : " << childBls.size() <<std::endl;
+          std::cout << "CHILD BLs: "<< childBls[i] <<std::endl;
+          std::cout << "AND THEN??? " <<std::endl;
+        }
+
+        std::cout << "BEFORE mini " << std::endl;
+        std::cout << "childBls.size() " << childBls.size() << std::endl;
+
+        double mini = childBls[0];
+        for (size_t i=1; i<childBls.size(); ++i)
+        {
+          if (childBls[i] < mini) mini = childBls[i];
+        }
+        std::cout << "BEFORE GET AGE " << std::endl;
+        double parentAge = root->getAge();
+        std::cout << "parentAGE "<< parentAge << std::endl;
+        double halfMini = mini / 2;
+        std::cout << "halfMini "<< halfMini << std::endl;
+        double newAge = parentAge - halfMini;
+        std::cout << "newAge "<< newAge << std::endl;
+        std::cout << "nodesToMove.size() : " << nodesToMove.size() << std::endl;
+        for (size_t i=0; i<nodesToMove.size(); ++i)
+        {
+          TopologyNode* tmp = nodesToMove[i ];
+          tmp->setBranchLength(tmp->getBranchLength() - halfMini) ;
+          root->removeChild(tmp);
+          std::cout << "root->getNumberOfChildren() " <<root->getNumberOfChildren() << std::endl;
+          new_child->addChild(tmp);
+          tmp->setParent (new_child);
+        }
+        std::cout << "before setParent " << std::endl;
+
+        root->addChild(new_child);
+        new_child->setParent( root );
+        std::cout << "root->getNumberOfChildren() " <<root->getNumberOfChildren() << std::endl;
+
+        std::cout << "before setAge " << std::endl;
+
+        new_child->setAge(newAge);
+        std::cout << "before setBl " << std::endl;
+
+        new_child->setBranchLength( mini/2 );
+        std::cout << "DONE " << std::endl;
+    }
+    else if (numChildren >2) {
+      throw RbException("Problem when rerooting with  '" + outgroup.toString() + "'.");
+
+    }
+
+
+    /////MORE CLEANING 2?
+    nodes.clear();
+    // Go through all nodes from the root and add them in a pre-order traversal
+    fillNodesByPhylogeneticTraversal(root);
+
+        for (unsigned int i = 0; i < nodes.size(); ++i)
+        {
+            nodes[i]->setIndex(i);
+        }
+
+    num_nodes = nodes.size();
+
+    // count the number of tips
+    num_tips = 0;
+    for (size_t i = 0; i < num_nodes; ++i)
+    {
+        if ( nodes[i] == NULL )
+        {
+            std::cerr << "#nodes after filling:\t\t" << nodes.size() << std::endl;
+            std::cerr << i << " - " << nodes[i] << std::endl;
+            throw RbException("Problem while reading in tree.");
+        }
+
+        num_tips += ( nodes[i]->isTip() ? 1 : 0);
+    }
+    //////////////////////DONE 2?
+
+    std::cout << "\t\t\tGOING THROUGH TREE FINAL"<<std::endl;
+    for (size_t i = 0 ; i < nodes.size(); ++i) {
+      std::cout << i << " : "<< nodes[i]->getNumberOfChildren() << " ; " << nodes[i]->getName() << std::endl;
+    }
+    //
+    // std::cout << root->getNumberOfChildren() << std::endl;
+    // std::vector<size_t> temp;
+    // root->getIndicesOfNodesInSubtree(true, &temp);
+    // for (auto i = 0; i < temp.size(); ++i) {
+    //   std::cout << i << " : " << getNode(i).getName() << std::endl;
+    // }
+    // std::cout << "root->getChild(0).getNumberOfNodesInSubtree() : "<<root->getChild(0).getNumberOfNodesInSubtree(true) << std::endl;
+    // root->getChild(0).getIndicesOfNodesInSubtree(true, &temp);
+    // for (auto i = 0; i < temp.size(); ++i) {
+    //   std::cout << i << " : " << getNode(i).getName() << std::endl;
+    // }
+    //
+    // std::cout << "root->getChild(1).getNumberOfNodesInSubtree() : "<<root->getChild(1).getNumberOfNodesInSubtree(true) << std::endl;
+    //
+    // //getIndicesOfNodesInSubtree
+    //
+    std::cout << "IN rerootAndMakeBifurcating 12: "<< getPlainNewickRepresentation()  <<std::endl;
 
 }
 
