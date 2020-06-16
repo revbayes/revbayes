@@ -18,7 +18,8 @@ using namespace RevBayesCore;
 
 MultispeciesCoalescentInverseGammaPrior::MultispeciesCoalescentInverseGammaPrior(const TypedDagNode<Tree> *sp, const std::vector<Taxon> &t) : AbstractMultispeciesCoalescent(sp, t)
 {
-
+    a = 0.0;
+    b = 0.0;
 }
 
 
@@ -48,46 +49,51 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
     double current_time = begin_age;
 
     size_t n = times.size();
-    double a = n;
+    a += n;
 
+    for (size_t i=0; i<n; ++i)
+    {
+        // now we do the computation
+        // t is the time between the previous and the current coalescences
+        double t = times[i] - current_time;
+        current_time = times[i];
+
+        // get the number j of individuals we had before the current coalescence
+        size_t j = k - i;
+        double n_pairs = j * (j-1.0);
+
+        b += t * n_pairs;
+    }
+
+    // compute the probability of no coalescent event in the final part of the branch
+    // only do this if the branch is not the root branch
+    if ( add_final_interval == true )
+    {
+        double final_interval = end_age - current_time;
+        size_t j = k - times.size();
+        double n_pairs = j * (j-1.0);
+        b += final_interval * n_pairs;
+    }
+
+
+    // If we've gotten to the last node of the tree, then we can calculate the likelihood
+    // for the entire gene tree given the species tree using the total number of gene
+    // copies and the total coalescent rate over the entire genealogy
     double ln_prob_coal = 0.0;
 
-    // If the number of gene copies is 1, then there can be no coalescence event
-    // and the probability is equal to 1.0 for the only possible event (no coalescence)
-    if ( n <= 1 )
+    double num_tips = getNumberOfSpeciesTreeTips();
+
+    if ( index == 2*(num_tips-1) )
     {
-        ln_prob_coal = 0.0;
+        ln_prob_coal += RbConstants::LN2 * a + log(beta) * alpha + RbMath::lnGamma(a+alpha) - RbMath::lnGamma(alpha) - log(b+beta)*(a+alpha);
+
+        // Remember to reset the total coalescent rate and number of coalescent times so that
+        // we don't just keep adding to them; we're done with them for this particular gene tree
+        resetAB();
     }
     else
     {
-        double b = 0.0;
-        for (size_t i=0; i<n; ++i)
-        {
-            // now we do the computation
-            // t is the time between the previous and the current coalescences
-            double t = times[i] - current_time;
-            current_time = times[i];
-
-            // get the number j of individuals we had before the current coalescence
-            size_t j = k - i;
-            double n_pairs = j * (j-1.0) / 2.0;
-
-            b += t * n_pairs;
-        }
-
-        // compute the probability of no coalescent event in the final part of the branch
-        // only do this if the branch is not the root branch
-        if ( add_final_interval == true )
-        {
-            double final_interval = end_age - current_time;
-            size_t j = k - times.size();
-            double n_pairs = j * (j-1.0) / 2.0;
-            b += final_interval * n_pairs;
-        }
-
-        b *= 2.0;
-
-        ln_prob_coal = RbConstants::LN2 * a + log(beta) * alpha + RbMath::lnGamma(a+alpha) - RbMath::lnGamma(alpha) - log(b+beta)*(a+alpha);
+        ln_prob_coal += 0.0;
     }
 
     return ln_prob_coal;
@@ -104,6 +110,22 @@ double MultispeciesCoalescentInverseGammaPrior::drawNe( size_t index )
     return u;
 }
 
+
+double MultispeciesCoalescentInverseGammaPrior::getNumberOfSpeciesTreeTips( void )
+{
+    double num_species_tree_tips = species_tree->getValue().getNumberOfTips();
+
+    return num_species_tree_tips;
+}
+
+
+void MultispeciesCoalescentInverseGammaPrior::resetAB( void )
+{
+
+    a = 0.0;
+    b = 0.0;
+
+}
 
 
 void MultispeciesCoalescentInverseGammaPrior::setShape(TypedDagNode<double>* s)

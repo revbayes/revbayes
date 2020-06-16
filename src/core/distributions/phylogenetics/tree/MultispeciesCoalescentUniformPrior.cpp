@@ -21,7 +21,7 @@ using namespace RevBayesCore;
 
 MultispeciesCoalescentUniformPrior::MultispeciesCoalescentUniformPrior(const TypedDagNode<Tree> *sp, const std::vector<Taxon> &t) : AbstractMultispeciesCoalescent(sp, t)
 {
-
+    fn = 0.0;
 }
 
 
@@ -53,8 +53,6 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
     size_t n = times.size();
     double nt = n;
 
-    double ln_prob_coal = 0.0;
-
     for (size_t i=0; i<n; ++i)
     {
         // now we do the computation
@@ -83,14 +81,17 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
     // If we've gotten to the last node of the tree, then we can calculate the likelihood
     // for the entire gene tree given the species tree using the total number of gene
     // copies and the total coalescent rate over the entire genealogy
+    double ln_prob_coal = 0.0;
+
     double num_tips = getNumberOfSpeciesTreeTips();
+
     if ( index == 2*(num_tips-1) )
     {
         double ngc = getNumberOfGeneCopies();
         double integral_limit = 2 * fn / theta_max;
 
         double upper_incomplete_gamma = 0.0;
-        if ( ngc <= 0 )
+        if ( ngc <= 2 )
         {
             upper_incomplete_gamma = recursiveIncompleteGamma( ngc-2.0, integral_limit );
         }
@@ -110,7 +111,7 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
     // total coalescent rate over the genealogy
     else
     {
-        ln_prob_coal = 0.0;
+        ln_prob_coal += 0.0;
     }
 
     return ln_prob_coal;
