@@ -21,8 +21,7 @@ using namespace RevBayesCore;
 
 MultispeciesCoalescentUniformPrior::MultispeciesCoalescentUniformPrior(const TypedDagNode<Tree> *sp, const std::vector<Taxon> &t) : AbstractMultispeciesCoalescent(sp, t)
 {
-    double tree_length = 0.0;
-    double fn = 0.0;
+
 }
 
 
@@ -90,14 +89,22 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
         double ngc = getNumberOfGeneCopies();
         double integral_limit = 2 * fn / theta_max;
 
-        double lower_incomplete_gamma = RbMath::incompleteGamma( integral_limit, ngc-2, RbMath::lnGamma( ngc-2 ) ) * RbMath::gamma( ngc-2 );
-        double upper_incomplete_gamma = RbMath::gamma( ngc-2 ) - lower_incomplete_gamma;
+        double upper_incomplete_gamma = 0.0;
+        if ( ngc <= 0 )
+        {
+            upper_incomplete_gamma = recursiveIncompleteGamma( ngc-2.0, integral_limit );
+        }
+        else
+        {
+            double lower_incomplete_gamma = RbMath::incompleteGamma( integral_limit, ngc-2.0, RbMath::lnGamma( ngc-2.0 ) ) * RbMath::gamma( ngc-2.0 );
+            upper_incomplete_gamma = RbMath::gamma( ngc-2.0 ) - lower_incomplete_gamma;
+        }
 
         ln_prob_coal = RbConstants::LN2 + (( -ngc+2 ) * log( fn )) + log( upper_incomplete_gamma ) - log( theta_max );
 
         // Remember to reset the total coalescent rate so that we don't just keep adding to it
         // because we're now done with it for this particular gene tree
-        fn = 0.0;
+        resetFn();
     }
     // Otherwise we don't change the likelihood because we haven't finished adding up the
     // total coalescent rate over the genealogy
@@ -110,7 +117,9 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
 }
 
 
-double MultispeciesCoalescentUniformPrior::recursiveInverseGamma( double a, double x )
+/** Calculates the incomplete gamma recursively for shape parameter <= 0 **/
+/** a is the shape parameter and x is the integral limit **/
+double MultispeciesCoalescentUniformPrior::recursiveIncompleteGamma( double a, double x )
 {
 
     if ( a == 0 )
@@ -124,7 +133,7 @@ double MultispeciesCoalescentUniformPrior::recursiveInverseGamma( double a, doub
     }
     else
     {
-        return (-pow(x,a) * exp(-x) / a) + (1.0/a) * recursiveInverseGamma( a+1.0, x );
+        return (-pow(x,a) * exp(-x) / a) + (1.0/a) * recursiveIncompleteGamma( a+1.0, x );
     }
 
 }
@@ -143,7 +152,8 @@ double MultispeciesCoalescentUniformPrior::drawNe( size_t index )
 }
 
 
-double MultispeciesCoalescentUniformPrior::getNumberOfGeneCopies()
+/** Get number of gene copies (i.e., number of tips in gene tree) **/
+double MultispeciesCoalescentUniformPrior::getNumberOfGeneCopies( void )
 {
     double nt = num_taxa;
 
@@ -151,7 +161,7 @@ double MultispeciesCoalescentUniformPrior::getNumberOfGeneCopies()
 }
 
 
-double MultispeciesCoalescentUniformPrior::getNumberOfSpeciesTreeTips()
+double MultispeciesCoalescentUniformPrior::getNumberOfSpeciesTreeTips( void )
 {
     double num_species_tree_tips = species_tree->getValue().getNumberOfTips();
 
@@ -167,6 +177,14 @@ void MultispeciesCoalescentUniformPrior::setMaxTheta(TypedDagNode<double>* m)
     max_theta = m;
 
     addParameter( max_theta );
+
+}
+
+
+void MultispeciesCoalescentUniformPrior::resetFn( void )
+{
+
+    fn = 0.0;
 
 }
 

@@ -23,10 +23,10 @@ namespace RevBayesCore {
         double                                              computeLnCoalescentProbability(size_t k, const std::vector<double> &t, double a, double b, size_t index, bool f);
         double                                              drawNe(size_t index);
 
-        double                                              recursiveInverseGamma(double a, double x);
-        double                                              getNumberOfGeneCopies();
-        double                                              getNumberOfSpeciesTreeTips();
-
+        double                                              recursiveIncompleteGamma(double a, double x);
+        double                                              getNumberOfGeneCopies(void);
+        double                                              getNumberOfSpeciesTreeTips(void);
+        void                                                resetFn(void);
 
     private:
 
