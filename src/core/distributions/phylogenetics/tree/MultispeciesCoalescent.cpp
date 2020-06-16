@@ -41,6 +41,7 @@ MultispeciesCoalescent* MultispeciesCoalescent::clone( void ) const
 
 double MultispeciesCoalescent::computeLnCoalescentProbability(size_t k, const std::vector<double> &times, double begin_age, double end_age, size_t index, bool add_final_interval)
 {
+    if ( k == 1 ) return 0.0;
 
     double theta = 1.0 / getNe( index );
 
@@ -77,9 +78,17 @@ double MultispeciesCoalescent::computeLnCoalescentProbability(size_t k, const st
     {
         double final_interval = end_age - current_time;
         size_t j = k - times.size();
-        double n_pairs = j * (j-1.0);
-        //ln_prob_coal -= j*(j-1.0)/2.0 * final_interval * theta;
-        ln_prob_coal -= n_pairs * theta * final_interval;
+
+        if (j == 1)
+        {
+            ln_prob_coal += 0.0;
+        }
+        else
+        {
+            double n_pairs = j * (j-1.0);
+            //ln_prob_coal -= j*(j-1.0)/2.0 * final_interval * theta;
+            ln_prob_coal -= n_pairs * theta * final_interval;
+        }
 
     }
 

@@ -101,7 +101,7 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
             upper_incomplete_gamma = RbMath::gamma( ngc-2.0 ) - lower_incomplete_gamma;
         }
 
-        ln_prob_coal = RbConstants::LN2 + (( -ngc+2 ) * log( fn )) + log( upper_incomplete_gamma ) - log( theta_max );
+        ln_prob_coal += RbConstants::LN2 + (( -ngc+2 ) * log( fn )) + log( upper_incomplete_gamma ) - log( theta_max );
 
         // Remember to reset the total coalescent rate so that we don't just keep adding to it
         // because we're now done with it for this particular gene tree
