@@ -1568,8 +1568,6 @@ void Tree::rerootAndMakeBifurcating(const Clade &o, bool reindex)
 {
     bool strict = true;
 
-    std::cout << "getTreeLength() :"<< getTreeLength()<<std::endl;
-
     // for safety we reset the bitrepresentation of the clade
     Clade outgroup = o;
     outgroup.resetTaxonBitset( getTaxonBitSetMap() );
@@ -1588,8 +1586,6 @@ void Tree::rerootAndMakeBifurcating(const Clade &o, bool reindex)
         }
 
     }
-    std::cout << "1getTreeLength() :"<< getTreeLength()<<std::endl;
-
 
     // reset parent/child relationships
     TopologyNode *outgroup_node = root->getNode( outgroup, strict);
@@ -1610,7 +1606,6 @@ void Tree::rerootAndMakeBifurcating(const Clade &o, bool reindex)
         setRoot( &outgroup_node->getParent(), reindex );
 
     }
-    std::cout << "2getTreeLength() :"<< getTreeLength()<<std::endl;
 
     // GOING THROUGH TREE AND CLEANING ONE DEGREE NODES
     for (size_t i = 0 ; i < nodes.size(); ++i) {
@@ -1626,7 +1621,6 @@ void Tree::rerootAndMakeBifurcating(const Clade &o, bool reindex)
         child->setParent(parent);
       }
     }
-    std::cout << "3getTreeLength() :"<< getTreeLength()<<std::endl;
 
     // Clearing the node vector and filling it up again
     nodes.clear();
@@ -1637,7 +1631,6 @@ void Tree::rerootAndMakeBifurcating(const Clade &o, bool reindex)
     {
         nodes[i]->setIndex(i);
     }
-    std::cout << "4getTreeLength() :"<< getTreeLength()<<std::endl;
 
     // if we have a trifurcation at the root, we need to change it into a bifurcation
     size_t numChildren = root->getNumberOfChildren();
@@ -1683,7 +1676,6 @@ void Tree::rerootAndMakeBifurcating(const Clade &o, bool reindex)
       throw RbException("Problem when rerooting with  '" + outgroup.toString() + "'.");
 
     }
-    std::cout << "5getTreeLength() :"<< getTreeLength()<<std::endl;
 
 
     /////MORE CLEANING!
@@ -1697,21 +1689,7 @@ void Tree::rerootAndMakeBifurcating(const Clade &o, bool reindex)
         }
 
     num_nodes = nodes.size();
-    std::cout << "6getTreeLength() :"<< getTreeLength()<<std::endl;
 
-    // count the number of tips
-    num_tips = 0;
-    for (size_t i = 0; i < num_nodes; ++i)
-    {
-        if ( nodes[i] == NULL )
-        {
-            std::cerr << "#nodes after filling:\t\t" << nodes.size() << std::endl;
-            std::cerr << i << " - " << nodes[i] << std::endl;
-            throw RbException("Problem while reading in tree.");
-        }
-
-        num_tips += ( nodes[i]->isTip() ? 1 : 0);
-    }
 
 }
 
