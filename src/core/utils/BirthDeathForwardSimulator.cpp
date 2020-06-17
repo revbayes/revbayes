@@ -542,7 +542,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
 
                     // (2) a mass-extinction event
                     double this_mass_extinction_prob = getMuProbability(current_time_index, i);
-                    if ( this_mass_extinction_prob < 1.0 )
+                    if ( this_mass_extinction_prob > 0.0 )
                     {
                         std::set<TopologyNode*> old_active_nodes_in_category = active_nodes_in_actegories[i];
                         for ( std::set<TopologyNode*>::const_iterator it=old_active_nodes_in_category.begin(); it!=old_active_nodes_in_category.end(); ++it)
