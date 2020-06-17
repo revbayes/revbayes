@@ -30,20 +30,20 @@
 
 using namespace RevBayesCore;
 
-ValidationAnalysis::ValidationAnalysis( const MonteCarloAnalysis &m, size_t n ) : Cloneable( ), Parallelizable( ),
-    num_runs( n )
+ValidationAnalysis::ValidationAnalysis( const MonteCarloAnalysis &m, size_t n, const std::string& d ) : Cloneable( ), Parallelizable( ),
+    num_runs( n ),
+    output_directory(d)
 {
     
-    std::string directory = "output";
     // some general constant variables
-    RbFileManager fm = RbFileManager( directory );
+    RbFileManager fm = RbFileManager( output_directory );
     const std::string path_separator = fm.getPathSeparator();
     
     // remove all monitors if there are any
     MonteCarloAnalysis *sampler = m.clone();
     sampler->removeMonitors();
     
-    StochasticVariableMonitor mntr = StochasticVariableMonitor(10, "output/posterior_samples.var", "\t");
+    StochasticVariableMonitor mntr = StochasticVariableMonitor(10, output_directory + "/posterior_samples.var", "\t");
     sampler->addMonitor( mntr );
     
     size_t run_block_start = size_t(floor( (double(pid)   / num_processes ) * num_runs) );
@@ -73,7 +73,7 @@ ValidationAnalysis::ValidationAnalysis( const MonteCarloAnalysis &m, size_t n ) 
             
             // create a new directory name for this simulation
             std::stringstream s;
-            s << directory << path_separator << "Validation_Sim_" << i;
+            s << output_directory << path_separator << "Validation_Sim_" << i;
             std::string sim_directory_name = s.str();
             
             // create an independent copy of the analysis
@@ -130,7 +130,8 @@ ValidationAnalysis::ValidationAnalysis( const MonteCarloAnalysis &m, size_t n ) 
 
 
 ValidationAnalysis::ValidationAnalysis(const ValidationAnalysis &a) : Cloneable( a ), Parallelizable( a ),
-    num_runs( a.num_runs )
+    num_runs( a.num_runs ),
+    output_directory( a.output_directory )
 {
     
     runs = std::vector<MonteCarloAnalysis*>(num_runs,NULL);
@@ -189,6 +190,7 @@ ValidationAnalysis& ValidationAnalysis::operator=(const ValidationAnalysis &a)
         simulation_values.clear();
         
         num_runs                    = a.num_runs;
+        output_directory            = a.output_directory;
 //        credible_interval_size      = a.credible_interval_size;
         
         
@@ -434,7 +436,7 @@ void ValidationAnalysis::summarizeSim(double credible_interval_size, size_t idx)
 {
     
     std::stringstream ss;
-    ss << "output/Validation_Sim_" << idx << "/" << "posterior_samples.var";
+    ss << output_directory << "/Validation_Sim_" << idx << "/" << "posterior_samples.var";
     std::string fn = ss.str();
         
     TraceReader reader;

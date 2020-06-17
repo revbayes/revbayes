@@ -41,9 +41,10 @@ namespace RevLanguage {
         virtual void                                printValue(std::ostream& o) const;                                                      //!< Print value (for user)
         void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
         
-        RevPtr<const RevVariable>                   simulations; //!< number of analyses to run
-        RevPtr<const RevVariable>                   sampler;  //!< sampler object to run
-        
+        RevPtr<const RevVariable>                   simulations;                        //!< number of analyses to run
+        RevPtr<const RevVariable>                   sampler;                            //!< sampler object to run
+        RevPtr<const RevVariable>                   output_directory;                   //!<  the directory for the simulation output
+
     };
     
 }
