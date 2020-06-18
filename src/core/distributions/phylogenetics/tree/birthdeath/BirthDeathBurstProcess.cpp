@@ -149,7 +149,7 @@ double BirthDeathBurstProcess::computeLnProbabilityTimes( void ) const
         if ( lineage_bursted_at_event[i] == true )
         {
             
-            if ( fabs(node_age - burst_time) < 1E-10 )
+            if ( fabs(node_age - burst_time) < 1E-4 )
             {
                 // node is sampled ancestor
                 ++num_lineages_burst_at_event;
@@ -171,7 +171,7 @@ double BirthDeathBurstProcess::computeLnProbabilityTimes( void ) const
     lnProbTimes += lnQ(process_time) * num_initial_lineages;
     
     // add the log probability for the internal node ages
-    lnProbTimes += internal_node_ages.size() * log( birth_rate );
+    lnProbTimes += (internal_node_ages.size()-num_lineages_burst_at_event) * log( birth_rate );
     for (size_t i=0; i<internal_node_ages.size(); i++)
     {
         lnProbTimes += lnQ(internal_node_ages[i]);
@@ -183,8 +183,8 @@ double BirthDeathBurstProcess::computeLnProbabilityTimes( void ) const
         lnProbTimes += log(burst_prob) * num_lineages_burst_at_event;
     }
     
-    lnProbTimes += log( pow(1.0-burst_prob, num_lineages_alive_at_burst-num_lineages_burst_at_event) + pow(2*burst_prob*pZero(burst_time), num_lineages_alive_at_burst-num_lineages_burst_at_event) );
-    
+    lnProbTimes += (num_lineages_alive_at_burst-num_lineages_burst_at_event) * log( 1.0-burst_prob + 2*burst_prob*pZero(burst_time) );
+
     // condition on survival
     if ( condition == "survival")
     {
@@ -346,6 +346,25 @@ void BirthDeathBurstProcess::setBurstSpeciation( size_t index, bool tf )
 
 
 
+void BirthDeathBurstProcess::setValue(Tree *v, bool force)
+{
+    AbstractBirthDeathProcess::setValue(v,force);
+    
+    double t = getBurstTime();
+    
+    lineage_bursted_at_event.resize( v->getNumberOfNodes() );
+    
+    for (size_t i=0; i<value->getNumberOfNodes(); ++i)
+    {
+        const TopologyNode& n = value->getNode(i);
+        if ( n.isTip() == false )
+        {
+            setBurstSpeciation(i, fabs( n.getAge() - t ) < 1E-4);
+        }
+    }
+}
+
+
 /**
  * Simulate new speciation times.
  */
@@ -465,6 +484,74 @@ double BirthDeathBurstProcess::lnQ(double t) const
     
     return log( D );
 }
+
+
+#include "BirthDeathForwardSimulator.h"
+void BirthDeathBurstProcess::redrawValue( SimulationCondition condition )
+{
+
+    if ( condition == SimulationCondition::MCMC )
+    {
+        if ( starting_tree == NULL )
+        {
+            simulateTree();
+        }
+    }
+    else if ( condition == SimulationCondition::VALIDATION )
+    {
+        
+        BirthDeathForwardSimulator simulator;
+        
+        size_t num_epochs = 2;
+        std::vector< std::vector<double> > tmp = std::vector< std::vector<double> >( num_epochs, std::vector<double>(1,0) );
+
+        tmp[0][0] = 0.0;
+        tmp[1][0] = beta->getValue();
+        simulator.setBurstProbability( tmp );
+        
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = mu->getValue();
+        simulator.setExtinctionRate( tmp );
+        
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = 0.0;
+        simulator.setMassExtinctionProbability( tmp );
+        
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = 0.0;
+        tmp[0][0] = 1.0;
+        simulator.setSamplingProbability( tmp );
+        
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = 0.0;
+        simulator.setSamplingExtinctionProbability( tmp );
+        
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = 0.0;
+        simulator.setSamplingRate( tmp );
+        
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = 0.0;
+        simulator.setSamplingExtinctionRate( tmp );
+        
+        for (size_t i=0; i<num_epochs; ++i) tmp[i][0] = lambda->getValue();
+        simulator.setSpeciationRate( tmp );
+        
+        std::vector<double> timeline = std::vector<double>(2,0);
+        timeline[1] = getBurstTime();
+        simulator.setTimeline( timeline );
+        
+        
+        
+        simulator.setRootCategoryProbabilities( std::vector<double>(1,1) );
+        
+        Tree *my_tree = simulator.simulateTreeConditionTime( getOriginAge(), BirthDeathForwardSimulator::SIM_CONDITION::ROOT);
+        
+        // store the new value
+//        delete value;
+        setValue(my_tree);
+        taxa = value->getTaxa();
+    }
+    else
+    {
+        throw RbException("Uknown condition for simulating tree in birth-death-burst process.");
+    }
+}
+
 
 
 /**

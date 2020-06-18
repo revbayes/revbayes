@@ -29,7 +29,9 @@ template <class valueType> class TypedDagNode;
         double                                              getBurstTime(void) const;
         bool                                                isBurstSpeciation(size_t i) const;
         void                                                setBurstSpeciation(size_t i, bool tf);
-        
+        void                                                setValue(Tree *v, bool f=false);
+        void                                                redrawValue(SimulationCondition c = SimulationCondition::MCMC);         //!< Draw a new random value from the distribution
+
     protected:
         double                                              computeLnProbabilityDivergenceTimes(void) const;                                      //!< Compute the log-transformed probability of the current value.
         // Parameter management functions
