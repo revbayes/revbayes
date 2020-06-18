@@ -1086,8 +1086,7 @@ std::string NclReader::intuitDataType(std::string& s)
     {
         return "dna";
     }
-    //    std::cout << "HEHEHEE: "<< (double)nucCount / (s.size()-nMissing)  << " "<<nucCount << " " << s.size() << " " << nMissing <<std::endl;
-    //std::cout << notDna << " " << notRna <<" "<< notAa << " " << notStd << std::endl;
+
     return "";
 }
 
