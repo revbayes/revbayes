@@ -135,7 +135,7 @@ void ConstantRateBirthDeathProcess::redrawValue( SimulationCondition condition )
     }
     else
     {
-        throw RbException("Uknown condition for simulating tree in episodic birth-death-sampling-treatment process.");
+        throw RbException("Uknown condition for simulating tree in birth-death process.");
     }
 }
 
