@@ -1,6 +1,7 @@
 #include "DagNode.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -252,7 +253,7 @@ void DagNode::executeMethod(const std::string &n, const std::vector<const DagNod
     }
     else if ( n == "probability" )
     {
-        rv = exp(const_cast<DagNode *>(this)->getLnProbability());
+        rv = std::exp(const_cast<DagNode *>(this)->getLnProbability());
     }
     else
     {
