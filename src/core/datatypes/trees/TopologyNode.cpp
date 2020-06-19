@@ -1547,8 +1547,8 @@ bool TopologyNode::isTip( void ) const
 
 /**
  * Make this node an all its children bifurcating.
- * The root will not be changed.
- * If this node has only one child,
+ * The root will not be changed. We throw an error if this node
+ * has more than 2 children. If this node has only one child,
  * then we insert a dummy child.
  * This function is called recursively.
  */
@@ -1561,9 +1561,8 @@ void TopologyNode::makeBifurcating( void )
         // we need to be able to bifurcate sampled ancestor root nodes
         //if ( isRoot() == false )
         //{
-            size_t numChildren = getNumberOfChildren();
 
-            if ( numChildren == 1 )
+            if ( getNumberOfChildren() == 1 )
             {
 
                 TopologyNode *new_fossil = new TopologyNode( getTaxon() );
@@ -1580,41 +1579,6 @@ void TopologyNode::makeBifurcating( void )
                 // set the age and branch-length of the fossil
                 new_fossil->setAge( age );
                 new_fossil->setBranchLength( 0.0 );
-
-            }
-            else if ( numChildren > 2 )
-            {
-                TopologyNode *new_child = new TopologyNode();
-                std::vector<double> childBls ;
-                std::vector<TopologyNode*> nodesToMove = getChildren();
-                for (size_t i=1; i<numChildren; ++i)
-                {
-                  const TopologyNode& tmp = getChild( i );
-                  childBls.push_back(tmp.getBranchLength());
-                }
-
-                double mini = childBls[0];
-                for (size_t i=1; i<childBls.size(); ++i)
-                {
-                  if (childBls[i] < mini) mini = childBls[i];
-                }
-                double parentAge = getAge();
-                double halfMini = mini / 2;
-                double newAge = parentAge - halfMini;
-
-                for (size_t i=1; i<nodesToMove.size(); ++i)
-                {
-                  TopologyNode* tmp = nodesToMove[i ];
-                  tmp->setBranchLength(tmp->getBranchLength() - halfMini) ;
-                  removeChild(tmp);
-                  new_child->addChild(tmp);
-                  tmp->setParent (new_child);
-                }
-                addChild(new_child);
-                new_child->setParent( this );
-                new_child->setAge(newAge);
-                new_child->setBranchLength( mini/2 );
-
 
             }
 
