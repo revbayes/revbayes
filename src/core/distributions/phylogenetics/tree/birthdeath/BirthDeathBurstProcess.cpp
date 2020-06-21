@@ -181,10 +181,9 @@ double BirthDeathBurstProcess::computeLnProbabilityTimes( void ) const
     if ( num_lineages_burst_at_event > 0 )
     {
         lnProbTimes += log(burst_prob) * num_lineages_burst_at_event;
+        lnProbTimes -= log(1.0-burst_prob+2*burst_prob*pZero(burst_time)) * num_lineages_burst_at_event;
     }
     
-    lnProbTimes += (num_lineages_alive_at_burst-num_lineages_burst_at_event) * log( 1.0-burst_prob + 2*burst_prob*pZero(burst_time) );
-
     // condition on survival
     if ( condition == "survival")
     {
