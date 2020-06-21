@@ -192,7 +192,7 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
             {
                 if ( the_node.isSampledAncestor() == true )
                 {
-                    if( the_node.getAge() - the_node.getParent().getAge() != 0 )
+                    if ( the_node.getAge() - the_node.getParent().getAge() != 0 )
                     {
                         return RbConstants::Double::neginf;
                     }
