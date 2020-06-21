@@ -157,7 +157,21 @@ namespace RevBayesCore {
         // internal helper functions
         void                                        recomputeBranchLength(void);                                                        //!< Recompute the length of this branch based on the ages.
         
+        bool getBurstSpeciation(void) const { return burst_speciation; }
+        bool getSamplingEvent(void) const { return sampling_event; }
+        bool getSerialSampling(void) const { return serial_sampling; }
+        bool getSerialSpeciation(void) const { return serial_speciation; }
+        void setBurstSpeciation(bool tf) { burst_speciation = tf; }
+        void setSamplingEvent(bool tf) { sampling_event = tf; }
+        void setSerialSampling(bool tf) { serial_sampling = tf; }
+        void setSerialSpeciation(bool tf) { serial_speciation = tf; }
+        
     protected:
+        
+        bool burst_speciation;
+        bool sampling_event;
+        bool serial_sampling;
+        bool serial_speciation;
         
         // helper methods
         virtual std::string                         buildNewickString(bool simmap);                                                     //!< compute the newick string for a tree rooting at this node

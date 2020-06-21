@@ -38,7 +38,11 @@ TopologyNode::TopologyNode(size_t indx) :
     interior_node( false ),
     root_node( true ),
     tip_node( true ),
-    sampled_ancestor( false )
+    sampled_ancestor( false ),
+    burst_speciation( false ),
+    sampling_event( false ),
+    serial_sampling( false ),
+    serial_speciation( false )
 {
     
 }
@@ -57,7 +61,11 @@ TopologyNode::TopologyNode(const Taxon& t, size_t indx) :
     interior_node( false ),
     root_node( true ),
     tip_node( true ),
-    sampled_ancestor( false )
+    sampled_ancestor( false ),
+    burst_speciation( false ),
+    sampling_event( false ),
+    serial_sampling( false ),
+    serial_speciation( false )
 {
     
 }
@@ -76,7 +84,11 @@ TopologyNode::TopologyNode(const std::string& n, size_t indx) :
     interior_node( false ),
     root_node( true ),
     tip_node( true ),
-    sampled_ancestor( false )
+    sampled_ancestor( false ),
+    burst_speciation( false ),
+    sampling_event( false ),
+    serial_sampling( false ),
+    serial_speciation( false )
 {
     
 }
@@ -96,7 +108,11 @@ TopologyNode::TopologyNode(const TopologyNode &n) :
     sampled_ancestor( n.sampled_ancestor ),
     node_comments( n.node_comments ),
     branch_comments( n.branch_comments ),
-    time_in_states( n.time_in_states )
+    time_in_states( n.time_in_states ),
+    burst_speciation( n.burst_speciation ),
+    sampling_event( n.sampling_event ),
+    serial_sampling( n.serial_sampling ),
+    serial_speciation( n.serial_speciation )
 {
     
     // copy the children
@@ -150,6 +166,10 @@ TopologyNode& TopologyNode::operator=(const TopologyNode &n)
         node_comments           = n.node_comments;
         branch_comments         = n.branch_comments;
         time_in_states          = n.time_in_states;
+        burst_speciation        = n.burst_speciation;
+        sampling_event          = n.sampling_event;
+        serial_sampling         = n.serial_sampling;
+        serial_speciation       = n.serial_speciation;
         
         // copy the members
         parent                  = n.parent;
@@ -1680,7 +1700,7 @@ size_t TopologyNode::removeChild(TopologyNode* c)
     }
     else
     {
-        throw(RbException("Cannot find node in list of children nodes"));
+        throw RbException("Cannot find node in list of children nodes");
     }
     
     // update the flags
