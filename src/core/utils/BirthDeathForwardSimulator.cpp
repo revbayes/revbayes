@@ -442,7 +442,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
 
         std::vector< std::set<TopologyNode*> > active_nodes_in_actegories = std::vector< std::set<TopologyNode*> >( NUM_CATEGORIES, std::set<TopologyNode*>() );
 
-        size_t current_time_index = NUM_TIME_INTERVALS - 1;
+        int current_time_index = int(NUM_TIME_INTERVALS) - 1;
         while ( current_time_index > 0 && timeline[current_time_index] > start_age )
         {
             --current_time_index;
@@ -471,6 +471,8 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
         TopologyNode *right = new TopologyNode();
         root->addChild( right );
         right->setParent( root );
+        
+        root->setSerialSpeciation( true );
 
         // now add the two children to the active nodes
         active_nodes_in_actegories[root_cat_index].insert( left  );
@@ -532,6 +534,8 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                                 active_nodes_in_actegories[i].erase( this_node );
                                 active_nodes_in_actegories[i].insert( left );
                                 active_nodes_in_actegories[i].insert( right );
+                                
+                                this_node->setBurstSpeciation( true );
 
                             } // end-if there was a burst speciation event for this node
 
@@ -579,7 +583,9 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                             {
                                 TopologyNode *this_node = *it;
                                 this_node->setAge( event_age );
-
+                                
+//                                this_node->setSamplingEvent( true );
+                                
                                 // store this node
                                 sampled_nodes.insert( this_node );
 
@@ -592,22 +598,36 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                                 }
                                 else
                                 {
-                                  // left child (sampled ancestor)
-                                  TopologyNode *left = new TopologyNode();
-                                  this_node->addChild( left );
-                                  left->setParent( this_node );
-                                  left->setAge( event_age );
-                                  left->setSampledAncestor( true );
-                                  sampled_nodes.insert( left );
+                                    // left child (sampled ancestor)
+                                    TopologyNode *left = new TopologyNode();
+                                    this_node->addChild( left );
+                                    left->setParent( this_node );
+                                    left->setAge( event_age );
+                                    left->setSampledAncestor( true );
+                                    left->setSamplingEvent( true );
+                                    sampled_nodes.insert( left );
 
-                                  // right child
-                                  TopologyNode *right = new TopologyNode();
-                                  this_node->addChild( right );
-                                  right->setParent( this_node );
+                                    // right child
+                                    TopologyNode *right = new TopologyNode();
+                                    this_node->addChild( right );
+                                    right->setParent( this_node );
 
-                                  // update the active node set
-                                  active_nodes_in_actegories[i].erase( this_node );
-                                  active_nodes_in_actegories[i].insert( right );
+                                    // update the active node set
+                                    active_nodes_in_actegories[i].erase( this_node );
+                                    active_nodes_in_actegories[i].insert( right );
+                                    
+                                    
+//                                    // left child (descendant/continuation of sampled ancestor)
+//                                    TopologyNode *left = new TopologyNode();
+//                                    this_node->addChild( left );
+//                                    left->setParent( this_node );
+//
+//                                    this_node->setSampledAncestor( true );
+//                                    sampled_nodes.insert( this_node );
+//
+//                                    // update the active node set
+//                                    active_nodes_in_actegories[i].erase( this_node );
+//                                    active_nodes_in_actegories[i].insert( left );
                                 }
 
                             } // end-if there was a sampling event for this node
@@ -624,7 +644,8 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                 // update the interval index
                 --current_time_index;
 
-                if ( current_time_index < NUM_TIME_INTERVALS )
+//                if ( current_time_index < NUM_TIME_INTERVALS )
+                if ( current_time_index >= 0 )
                 {
                     // update all the rate summaries
                     current_lambda   = getLambdaRate(current_time_index, NUM_CATEGORIES);
@@ -692,6 +713,8 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                             current_mu_total        += current_mu[i];
                             current_phi_total       += current_phi[i];
                             current_rate_total      += this_cat_lambda + current_mu[i] + current_phi[i];
+
+                            this_node->setSerialSpeciation( true );
 
                             // now stop the loop
                             break;
@@ -763,7 +786,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
 
                             TopologyNode *this_node = *it;
                             this_node->setAge( next_age );
-
+                            
                             // // the current node to our set of sampled nodes
                             // sampled_nodes.insert( this_node );
 
@@ -783,22 +806,23 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                             } // end-of this node died during sampling
                             else
                             {
-                              // left child (sampled ancestor)
-                              TopologyNode *left = new TopologyNode();
-                              this_node->addChild( left );
-                              left->setParent( this_node );
-                              left->setAge( next_age );
-                              left->setSampledAncestor( true );
-                              sampled_nodes.insert( left );
+                                // left child (sampled ancestor)
+                                TopologyNode *left = new TopologyNode();
+                                this_node->addChild( left );
+                                left->setParent( this_node );
+                                left->setAge( next_age );
+                                left->setSampledAncestor( true );
+                                left->setSerialSampling( true );
+                                sampled_nodes.insert( left );
 
-                              // right child
-                              TopologyNode *right = new TopologyNode();
-                              this_node->addChild( right );
-                              right->setParent( this_node );
+                                // right child
+                                TopologyNode *right = new TopologyNode();
+                                this_node->addChild( right );
+                                right->setParent( this_node );
 
-                              // update the active node set
-                              active_nodes_in_actegories[i].erase( this_node );
-                              active_nodes_in_actegories[i].insert( right );
+                                // update the active node set
+                                active_nodes_in_actegories[i].erase( this_node );
+                                active_nodes_in_actegories[i].insert( right );
                             }
                             // now stop the loop
                             break;
@@ -862,33 +886,43 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                 if ( this_node->isRoot() == false ) // this should truly never happen, only if there was no survivor
                 {
                     TopologyNode &parent = this_node->getParent();
-                    TopologyNode *sibling = &parent.getChild( 0 );
-                    if ( sibling == this_node ) sibling = &parent.getChild( 1 );
-
-                    if ( parent.isRoot() == false )
+                    
+                    if ( parent.getNumberOfChildren() == 1 )
                     {
-                        TopologyNode &grandparent = parent.getParent();
-                        TopologyNode *uncle = &grandparent.getChild( 0 );
-                        if ( uncle == &parent ) uncle = &grandparent.getChild( 1 );
-
-                        parent.removeChild( sibling );
-                        grandparent.removeChild( &parent );
-                        parent.setParent( NULL );
-
-                        sibling->setParent( &grandparent );
-                        grandparent.addChild( sibling );
-
-                        sibling->setSampledAncestor(false);
-
-                        delete &parent; // this will also delete this child node
+                        parent.removeChild( this_node );
+                        delete this_node;
                     }
                     else
                     {
-                        parent.removeChild( sibling );
-                        sibling->setParent( NULL );
-                        root = sibling;
+                        TopologyNode *sibling = &parent.getChild( 0 );
+                        if ( sibling == this_node ) sibling = &parent.getChild( 1 );
 
-                        delete &parent;
+                        if ( parent.isRoot() == false )
+                        {
+                            TopologyNode &grandparent = parent.getParent();
+                            TopologyNode *uncle = &grandparent.getChild( 0 );
+                            if ( uncle == &parent ) uncle = &grandparent.getChild( 1 );
+
+                            parent.removeChild( sibling );
+                            grandparent.removeChild( &parent );
+                            parent.setParent( NULL );
+
+                            sibling->setParent( &grandparent );
+                            grandparent.addChild( sibling );
+
+                            sibling->setSampledAncestor(false);
+
+                            delete &parent; // this will also delete this child node
+                        }
+                        else
+                        {
+                            parent.removeChild( sibling );
+                            sibling->setParent( NULL );
+                            root = sibling;
+
+                            delete &parent;
+                        }
+
                     }
 
                 }
