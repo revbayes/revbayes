@@ -158,7 +158,10 @@ protected                               {
                                             return REAL;
                                         }
 {DIGIT}+                                {
-                                            yylval.intValue = int(strtol(yytext,NULL,10)); 
+                                            yylval.longIntValue = strtol(yytext,NULL,10);
+                                            if ((yylval.longIntValue == LONG_MIN || yylval.longIntValue == LONG_MAX) && errno == ERANGE) {
+                                                yy_fatal_error("Integer value out of range.");
+                                            }
                                             return INT;
                                         }
 {ID}                                    {
