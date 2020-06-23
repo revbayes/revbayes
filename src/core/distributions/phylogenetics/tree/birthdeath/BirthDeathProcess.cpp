@@ -54,7 +54,7 @@ BirthDeathProcess::BirthDeathProcess(const TypedDagNode<double> *ra, const Typed
  *
  * \return   The log-transformed probability density.
  */
-double BirthDeathProcess::computeLnProbabilityTimes( void ) const
+double BirthDeathProcess::computeLnProbabilityTimes( void )
 {
     
     // variable declarations and initialization
@@ -159,7 +159,7 @@ double BirthDeathProcess::computeLnProbabilityTimes( void ) const
 }
 
 
-double BirthDeathProcess::lnP1(double end, double r) const
+double BirthDeathProcess::lnP1(double end, double r)
 {
     
     double ln_p = 0;
@@ -185,7 +185,7 @@ double BirthDeathProcess::lnP1(double end, double r) const
 }
 
 
-void BirthDeathProcess::prepareRateIntegral(double end) const
+void BirthDeathProcess::prepareRateIntegral(double end)
 {
     size_t num_taxa = value->getNumberOfTips();
     
@@ -199,7 +199,7 @@ void BirthDeathProcess::prepareRateIntegral(double end) const
 
 }
 
-void BirthDeathProcess::prepareSurvivalProbability(double end, double r) const
+void BirthDeathProcess::prepareSurvivalProbability(double end, double r)
 {
     size_t num_taxa = value->getNumberOfTips();
     
@@ -214,7 +214,7 @@ void BirthDeathProcess::prepareSurvivalProbability(double end, double r) const
 }
 
 
-double BirthDeathProcess::lnP1(double t, double T, double r) const
+double BirthDeathProcess::lnP1(double t, double T, double r)
 {
     
     // get the survival probability

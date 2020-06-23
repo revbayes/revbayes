@@ -13,14 +13,11 @@ class DagNode;
     /**
      * @brief JC rate matrix function.
      *
-     * This function creates the JC rates matrix object by setting the number of states in the constructor.
+     * This function creates the JC rate matrix object by setting the number of states in the constructor.
      * The rate matrix takes care of the setting of the actual rates and transition probabilities.
      * In this case they are actually constant.
      *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since Version 1.0, 2014-07-04
+     * @param ns The number of states.
      *
      */
     class JcRateMatrixFunction : public TypedFunction<RateGenerator> {

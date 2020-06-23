@@ -22,7 +22,6 @@ template <class valueType> class TypedDagNode;
      * @f$ \mu_1 @f$, @f$ \mu_2 @f$, @f$ \sigma_1 @f$, @f$ \sigma_2 @f$, and @f$ p @f$.
      */
 
-
     class BimodalLognormalDistribution : public ContinuousDistribution {
 
     public:
@@ -31,7 +30,7 @@ template <class valueType> class TypedDagNode;
                                      const TypedDagNode<double> *p);
 
         // public member functions
-        double                                              cdf(void) const;                                                                //!< Cummulative density function
+        double                                              cdf(void) const;                                                                //!< Cumulative density function
         BimodalLognormalDistribution*                       clone(void) const;                                                              //!< Create an independent clone
         double                                              computeLnProbability(void);
         double                                              getMax(void) const;
