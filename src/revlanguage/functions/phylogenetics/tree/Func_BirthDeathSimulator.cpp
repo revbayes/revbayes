@@ -20,6 +20,7 @@
 #include "IndirectReferenceFunction.h"
 #include "ModelObject.h"
 #include "Procedure.h"
+#include "OptionRule.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "RevObject.h"
@@ -27,6 +28,7 @@
 #include "RevVariable.h"
 #include "RlConstantNode.h"
 #include "RlFunction.h"
+#include "RlString.h"
 #include "Simplex.h"
 #include "TypedDagNode.h"
 #include "TypedFunction.h"
@@ -59,9 +61,6 @@ Func_BirthDeathSimulator* Func_BirthDeathSimulator::clone( void ) const
 /** Execute function */
 RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
 {
-
-//    int num_taxa                = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
-//    const std::string& type     = static_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
 
     RevBayesCore::BirthDeathForwardSimulator simulator;
 
@@ -257,12 +256,27 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
     const std::vector<double> &root_probs = static_cast<const Simplex &>( args[arg_index].getVariable()->getRevObject() ).getValue();
     simulator.setRootCategoryProbabilities( root_probs );
 
-
     ++arg_index;
     double time = static_cast<const RealPos &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+    
+    ++arg_index;
+    RevBayesCore::BirthDeathForwardSimulator::SIM_CONDITION cdt = RevBayesCore::BirthDeathForwardSimulator::TIME;
+    const std::string& cdt_str = static_cast<const RlString &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+    if ( cdt_str == "time" )
+    {
+        cdt = RevBayesCore::BirthDeathForwardSimulator::TIME;
+    }
+    else if ( cdt_str == "root" )
+    {
+        cdt = RevBayesCore::BirthDeathForwardSimulator::ROOT;
+    }
+    else if ( cdt_str == "survival" )
+    {
+        cdt = RevBayesCore::BirthDeathForwardSimulator::SURVIVAL;
+    }
 
     // the time tree object (topology + times)
-    RevBayesCore::Tree *my_tree = simulator.simulateTreeConditionTime( time, RevBayesCore::BirthDeathForwardSimulator::ROOT );
+    RevBayesCore::Tree *my_tree = simulator.simulateTreeConditionTime( time, cdt );
 
     return new RevVariable( new TimeTree( my_tree ) );
 }
@@ -272,10 +286,10 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
 const ArgumentRules& Func_BirthDeathSimulator::getArgumentRules( void ) const
 {
 
-    static ArgumentRules argumentRules = ArgumentRules();
+    static ArgumentRules argument_rules = ArgumentRules();
     static bool rules_set = false;
 
-    if ( !rules_set )
+    if ( rules_set == false )
     {
         std::vector<TypeSpec> rate_options;
         rate_options.push_back( ModelVector< ModelVector< RealPos > >::getClassTypeSpec() );
@@ -287,34 +301,30 @@ const ArgumentRules& Func_BirthDeathSimulator::getArgumentRules( void ) const
         prob_options.push_back( ModelVector< Probability >::getClassTypeSpec() );
         prob_options.push_back( Probability::getClassTypeSpec() );
 
-        argumentRules.push_back( new ArgumentRule( "timeline", ModelVector< RealPos >::getClassTypeSpec(), "The endpoints of the time intervals (episodes). You should include 0 at the end. We use ages before the present.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new ModelVector<RealPos>( RevBayesCore::RbVector<double>(1,0) ) ) );
-        argumentRules.push_back( new ArgumentRule( "lambda", rate_options, "The speciation rates for each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "mu", rate_options, "The extinction rates for each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos( 0.0 ) ) );
-        argumentRules.push_back( new ArgumentRule( "phi", rate_options, "The sampling rates for each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos( 0.0 ) ) );
-        argumentRules.push_back( new ArgumentRule( "r", prob_options, "The extinction probability when rate-sampling happens for each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability( 0.0 ) ) );
+        argument_rules.push_back( new ArgumentRule( "timeline", ModelVector< RealPos >::getClassTypeSpec(), "The endpoints of the time intervals (episodes). You should include 0 at the end. We use ages before the present.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new ModelVector<RealPos>( RevBayesCore::RbVector<double>(1,0) ) ) );
+        argument_rules.push_back( new ArgumentRule( "lambda", rate_options, "The speciation rates for each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argument_rules.push_back( new ArgumentRule( "mu", rate_options, "The extinction rates for each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos( 0.0 ) ) );
+        argument_rules.push_back( new ArgumentRule( "phi", rate_options, "The sampling rates for each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos( 0.0 ) ) );
+        argument_rules.push_back( new ArgumentRule( "r", prob_options, "The extinction probability when rate-sampling happens for each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability( 0.0 ) ) );
 
-        argumentRules.push_back( new ArgumentRule( "Lambda", prob_options, "The burst probability at the end of each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability( 0.0 ) ) );
-        argumentRules.push_back( new ArgumentRule( "Mu", prob_options, "The (mass) extinction probability at the end of each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability( 0.0 ) ) );
-        argumentRules.push_back( new ArgumentRule( "Phi", prob_options, "The sampling probability at the end of each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability( 0.0 ) ) );
-        argumentRules.push_back( new ArgumentRule( "R", prob_options, "The extinction probability when event-sampling happens for each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability( 0.0 ) ) );
+        argument_rules.push_back( new ArgumentRule( "Lambda", prob_options, "The burst probability at the end of each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability( 0.0 ) ) );
+        argument_rules.push_back( new ArgumentRule( "Mu", prob_options, "The (mass) extinction probability at the end of each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability( 0.0 ) ) );
+        argument_rules.push_back( new ArgumentRule( "Phi", prob_options, "The sampling probability at the end of each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability( 0.0 ) ) );
+        argument_rules.push_back( new ArgumentRule( "R", prob_options, "The extinction probability when event-sampling happens for each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability( 0.0 ) ) );
 
-        argumentRules.push_back( new ArgumentRule( "rootCategory", Simplex::getClassTypeSpec(), "The probabilities of the categories for the root.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Simplex( RevBayesCore::Simplex(1,1) ) ) );
+        argument_rules.push_back( new ArgumentRule( "rootCategory", Simplex::getClassTypeSpec(), "The probabilities of the categories for the root.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Simplex( RevBayesCore::Simplex(1,1) ) ) );
 
-        argumentRules.push_back( new ArgumentRule( "time", RealPos::getClassTypeSpec(), "The time/age before the present.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-
-
-//        argumentRules.push_back( new ArgumentRule( "num_taxa", Natural::getClassTypeSpec(), "How many taxa this tree has.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-//
-//        std::vector<std::string> optionsCondition;
-//        optionsCondition.push_back( "balanced" );
-//        optionsCondition.push_back( "caterpillar" );
-//        //        optionsCondition.push_back( "random" );
-//        argumentRules.push_back( new OptionRule( "type"    , new RlString("balanced"), optionsCondition, "The type of the shape of the topology." ) );
+        argument_rules.push_back( new ArgumentRule( "time", RealPos::getClassTypeSpec(), "The time/age before the present.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        std::vector<std::string> options_condition;
+        options_condition.push_back( "time" );
+        options_condition.push_back( "root" );
+        options_condition.push_back( "survival" );
+        argument_rules.push_back( new OptionRule( "condition", new RlString("root"), options_condition, "What outcome should we condition on?" ) );
 
         rules_set = true;
     }
 
-    return argumentRules;
+    return argument_rules;
 }
 
 
@@ -344,7 +354,7 @@ const TypeSpec& Func_BirthDeathSimulator::getClassTypeSpec(void)
 std::string Func_BirthDeathSimulator::getFunctionName( void ) const
 {
     // create a name variable that is the same for all instance of this class
-    std::string f_name = "simBirthDeath";
+    std::string f_name = "simForwardBirthDeath";
 
     return f_name;
 }
