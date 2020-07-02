@@ -11,7 +11,7 @@ using namespace RevBayesCore;
 
 
 template <>
-bool Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool verbose)
+int Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool verbose)
 {
 
     double sample = atof( v.c_str() );
@@ -37,12 +37,12 @@ bool Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool
     double upper = 1.0 - lower;
     bool covered = ( quantile >= lower && quantile <= upper );
 
-    return covered;
+    return (covered ? 0 : (quantile < lower ? -1 : 1) );
 }
 
 
 template <>
-bool Trace<RbVector<double > >::isCoveredInInterval(const std::string &v, double i, bool verbose)
+int Trace<RbVector<double > >::isCoveredInInterval(const std::string &v, double i, bool verbose)
 {
 
     RbVector<double> sample = RbVector<double>();
@@ -91,12 +91,12 @@ bool Trace<RbVector<double > >::isCoveredInInterval(const std::string &v, double
     double include_prob = num_covered / sample.size();
     covered = ( include_prob > rng->uniform01() );
 
-    return covered;
+    return (covered ? 0 : -1);
 }
 
 
 template <>
-bool Trace<Simplex>::isCoveredInInterval(const std::string &v, double i, bool verbose)
+int Trace<Simplex>::isCoveredInInterval(const std::string &v, double i, bool verbose)
 {
 
     Simplex sample = Simplex();
@@ -140,5 +140,5 @@ bool Trace<Simplex>::isCoveredInInterval(const std::string &v, double i, bool ve
     double include_prob = num_covered / sample.size();
     covered = ( include_prob > rng->uniform01() );
 
-    return covered;
+    return (covered ? 0 : -1);
 }

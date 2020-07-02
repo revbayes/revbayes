@@ -21,8 +21,8 @@ namespace RevBayesCore {
 
         TraceTree*                                 clone(void) const;
 
-        bool                                       isCoveredInInterval(const std::string &v, double size, bool verbose){ return TreeSummary::isCoveredInInterval(v,size,verbose); };
-        bool                                       isCoveredInInterval(const Tree &t, double size, bool verbose){ return TreeSummary::isCoveredInInterval(t,size,verbose); };
+        int                                        isCoveredInInterval(const std::string &v, double size, bool verbose){ return (TreeSummary::isCoveredInInterval(v,size,verbose) ? 0 : -1); };
+        int                                        isCoveredInInterval(const Tree &t, double size, bool verbose){ return (TreeSummary::isCoveredInInterval(t,size,verbose) ? 0 : -1); };
         bool                                       isDirty() const { return Trace<Tree>::isDirty(); };
         void                                       isDirty(bool d) const { return Trace<Tree>::isDirty(d); };
     };
