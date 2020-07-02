@@ -170,18 +170,18 @@ double BirthDeathBurstProcess::computeLnProbabilityTimes( void ) const
     // add the log probability of the initial sequences
     lnProbTimes += lnQ(process_time) * num_initial_lineages;
     
-    // add the log probability for the internal node ages
-    lnProbTimes += (internal_node_ages.size()-num_lineages_burst_at_event) * log( birth_rate );
-    for (size_t i=0; i<internal_node_ages.size(); i++)
-    {
-        lnProbTimes += lnQ(internal_node_ages[i]);
-    }
-    
     // add the log probability for the burst event
     if ( num_lineages_burst_at_event > 0 )
     {
         lnProbTimes += log(burst_prob) * num_lineages_burst_at_event;
         lnProbTimes -= log(1.0-burst_prob+2*burst_prob*pZero(burst_time)) * num_lineages_burst_at_event;
+    }
+    
+    // add the log probability for the internal node ages
+    lnProbTimes += (internal_node_ages.size()-num_lineages_burst_at_event) * log( birth_rate );
+    for (size_t i=0; i<internal_node_ages.size(); i++)
+    {
+        lnProbTimes += lnQ(internal_node_ages[i]);
     }
     
     // condition on survival
@@ -436,7 +436,7 @@ double BirthDeathBurstProcess::lnQ(double t) const
     double A = birth - death;
     double B = 0.0;
     double D = 0.0;
-    if ( t < t_b )
+    if ( t < (t_b+1E-4) )
     {
         B = ((1.0 - 2.0*(1.0-sampling)) * birth + death ) /  A;
         
@@ -452,7 +452,6 @@ double BirthDeathBurstProcess::lnQ(double t) const
 
         B = ((1.0 - 2.0*((1.0-burst)*E_previous+burst*E_previous*E_previous)) * birth + death ) /  A;
 //        B = B_tmp;
-//        std::cerr << B << " - " << B_tmp << std::endl;
         
 //        D = 4.0*exp(-A*t);
 //        double tmp = 1.0 + B + exp(-A*t)*(1.0-B);
