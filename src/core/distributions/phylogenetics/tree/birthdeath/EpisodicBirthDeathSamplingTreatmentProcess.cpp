@@ -303,8 +303,25 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
     // get node/time variables
     size_t num_nodes = value->getNumberOfNodes();
 
+    // add the event-sampling terms (iia)
+    for (size_t i = 0; i < global_timeline.size(); ++i)
+    {
+        // Only compute extinction probability when there is an extinction event
+        if (mu_event[i] > DBL_EPSILON)
+        {
+            if ( RbMath::isFinite(lnProbTimes) == false )
+            {
+                return RbConstants::Double::nan;
+            }
 
-    // add the event-sampling terms (ii)
+            // Calculate probability of the survivors
+            int active_lineages_at_t = survivors(global_timeline[i]);
+                    
+            lnProbTimes += active_lineages_at_t * log(1 - mu_event[i]);
+        }
+        
+    }
+    // add the event-sampling terms (iib)
     for (size_t i = 0; i < global_timeline.size(); ++i)
     {
         // Only compute sampling probability when there is a sampling event
@@ -312,7 +329,6 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
         {
             if ( RbMath::isFinite(lnProbTimes) == false )
             {
-                // throw(RbException("nan-likelihood in (ii)"));
                 return RbConstants::Double::nan;
             }
 
@@ -327,22 +343,12 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
             {
 
                 return RbConstants::Double::neginf;
-//                std::stringstream ss;
-//                ss << "The event sampling rate at timeline[" << i << "] is one, but the tree has unsampled tips at this time.";
-//                throw RbException(ss.str());
-
             }
             else
             {
                 ln_sampling_event_prob += N_i * log(phi_event[i]);
-                if ( i > 0 && phi_event[i] < (1.0 - 1E-8) )
-                {
-//                    ln_sampling_event_prob -= N_i * log(1.0-phi_event[i]);
-                }
-                // Sebastian: Instead of adding the sampling probability to ln_D we could add it here.
-                // however, our validation analysis shows that this doesn't work?!?
-                // Sebastian: We do not need to multiply with the probability of the non-sampled lineages
-                // because this probability is implicit in ln_D
+
+                // Instead of adding the sampling probability to ln_D we add it here.
                 if ( i > 0 && (active_lineages_at_t - N_i) > 0 )
                 {
                     ln_sampling_event_prob += (active_lineages_at_t - N_i) * log(1 - phi_event[i]);
@@ -357,9 +363,6 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
             {
                 // Cannot have sampled ancestors if r(t) == 1
                 return RbConstants::Double::neginf;
-                //std::stringstream ss;
-                //ss << "The conditional probability of death on sampling rate in interval " << i << " is one, but the tree has sampled ancesors in this interval.";
-                //throw RbException(ss.str());
             }
             if ( global_timeline[i] > DBL_EPSILON )
             {
@@ -370,7 +373,6 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
                 }
                 if ( N_i > R_i )
                 {
-//                    ln_sampling_event_prob += (N_i - R_i) * log(r_event[i] + (1 - r_event[i])*E(i,global_timeline[i]));
                     ln_sampling_event_prob += (N_i - R_i) * log(r_event[i] + (1 - r_event[i])*E_previous[i]);
                 }
                 
@@ -692,7 +694,7 @@ double EpisodicBirthDeathSamplingTreatmentProcess::lnD(size_t i, double t) const
             // however, our validation analysis shows that this doesn't work even though the likelihoods are identical?!?
 //            this_lnD_i += log(1.0-phi_event[i]);
 //            this_lnD_i += log(1.0-lambda_event[i]+2*lambda_event[i]*E_previous[i]);
-            this_lnD_i += log(1.0-mu_event[i]);
+//            this_lnD_i += log(1.0-mu_event[i]);
         }
         else
         {
