@@ -325,6 +325,10 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
             // Make sure that we aren't claiming to have sampled all lineages without having sampled all lineages
             if (phi_event[i] >= (1.0 - DBL_EPSILON) && (active_lineages_at_t != N_i) )
             {
+                RbSettings::userSettings().setPrintNodeIndex(false);
+                std::cerr << value->getNewickRepresentation() << std::endl;
+                RbSettings::userSettings().setPrintNodeIndex(true);
+
                 return RbConstants::Double::neginf;
 //                std::stringstream ss;
 //                ss << "The event sampling rate at timeline[" << i << "] is one, but the tree has unsampled tips at this time.";
@@ -439,7 +443,6 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
         {
 
             lnProbTimes += event_bifurcation_times[i].size() * log(lambda_event[i]);
-//            lnProbTimes -= event_bifurcation_times[i].size() * log(2*lambda_event[i]*E(i,global_timeline[i])+(1.0 - lambda_event[i]));
 
             // Sebastian: Instead of adding the burst probability to ln_D we could add it here.
             // however, our validation analysis shows that this doesn't work?!?
@@ -758,7 +761,7 @@ size_t EpisodicBirthDeathSamplingTreatmentProcess::findIndex(double t) const
     {
         for (size_t i=0; i < global_timeline.size()-1; ++i)
         {
-            if (t >= (global_timeline[i]-1E-5) && t < (global_timeline[i+1]+1E-5))
+            if (t >= (global_timeline[i]-1E-5) && t < (global_timeline[i+1]-1E-5))
             {
                 return i;
             }
@@ -1674,7 +1677,7 @@ int EpisodicBirthDeathSamplingTreatmentProcess::survivors(double t) const
         TopologyNode* n = *it;
         double my_age = n->getAge();
 //        if ( n->isRoot() == false )
-//            std::cerr << "My_age = " << my_age << "\t\t P_age = " << n->getParent().getAge() << "\t\t t = " << t << std::endl;
+//            std::cerr << "My_age = " << my_age << "\t\t P_age = " << n->getParent().getAge() << "\t\t t = " << t;
         // my age needs to be smaller that the requested time
         if ( (my_age - t) < 1E-4 )
         {
@@ -1682,7 +1685,12 @@ int EpisodicBirthDeathSamplingTreatmentProcess::survivors(double t) const
             if ( n->isRoot() == false && (n->getParent().getAge() - t) > 1E-4 )
             {
                 survivors++;
+//                std::cerr << " -> Yes" << std::endl;
             }
+//            else
+//            {
+//                std::cerr << " -> No" << std::endl;
+//            }
         }
         else if ( (my_age - t) < -1E-4 )
         {
@@ -1690,8 +1698,17 @@ int EpisodicBirthDeathSamplingTreatmentProcess::survivors(double t) const
             if ( n->isRoot() == false && (n->getParent().getAge() - t) > -1E-4 )
             {
                 survivors++;
+//                std::cerr << " -> Yes" << std::endl;
             }
+//            else
+//            {
+//                std::cerr << " -> No" << std::endl;
+//            }
         }
+//        else
+//        {
+//            std::cerr << " -> No" << std::endl;
+//        }
         
     }
 
