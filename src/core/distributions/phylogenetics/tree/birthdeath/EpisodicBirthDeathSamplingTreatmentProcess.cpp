@@ -336,21 +336,15 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
                 ln_sampling_event_prob += N_i * log(phi_event[i]);
                 if ( i > 0 && phi_event[i] < (1.0 - 1E-8) )
                 {
-                    ln_sampling_event_prob -= N_i * log(1.0-phi_event[i]);
+//                    ln_sampling_event_prob -= N_i * log(1.0-phi_event[i]);
                 }
-//                else if ( i > 0 && phi_event[i] > (1.0 - 1E-8) )
-//                {
-//                    std::stringstream ss;
-//                    ss << "The event sampling rate at timeline[" << i << "] is one ...";
-//                    throw RbException(ss.str());
-//                }
                 // Sebastian: Instead of adding the sampling probability to ln_D we could add it here.
                 // however, our validation analysis shows that this doesn't work?!?
                 // Sebastian: We do not need to multiply with the probability of the non-sampled lineages
                 // because this probability is implicit in ln_D
                 if ( i > 0 && (active_lineages_at_t - N_i) > 0 )
                 {
-//                    ln_sampling_event_prob += (active_lineages_at_t - N_i) * log(1 - phi_event[i]);
+                    ln_sampling_event_prob += (active_lineages_at_t - N_i) * log(1 - phi_event[i]);
                 }
 //                std::cerr << "#alive:\t\t" << active_lineages_at_t << std::endl;
 //                std::cerr << "#sampled:\t\t" << N_i << std::endl;
@@ -450,9 +444,11 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
             // Sebastian: Instead of adding the burst probability to ln_D we could add it here.
             // however, our validation analysis shows that this doesn't work?!?
             int active_lineages_at_t = survivors(global_timeline[i]); //A(t_{\rho_i})
-            int A_minus_K = active_lineages_at_t - 2*int(event_bifurcation_times[i].size());
+            int A_minus_K = active_lineages_at_t - int(event_bifurcation_times[i].size());
             lnProbTimes += A_minus_K * log(2*lambda_event[i]*E_previous[i]+(1.0 - lambda_event[i]));
 //            lnProbTimes += A_minus_K * log(2*lambda_event[i]*E(i,global_timeline[i])+(1.0 - lambda_event[i]));
+//            std::cerr << "E(" << global_timeline[i] << ") = " << E_previous[i] << std::endl;
+//            std::cerr << "A-K = " << A_minus_K << std::endl;
 
         }
 
@@ -694,7 +690,7 @@ double EpisodicBirthDeathSamplingTreatmentProcess::lnD(size_t i, double t) const
             this_lnD_i = lnD_previous[i];
             // Sebastian: Instead of adding the burst and sampling probability to ln_D we could add it directly for each lineage.
             // however, our validation analysis shows that this doesn't work even though the likelihoods are identical?!?
-            this_lnD_i += log(1.0-phi_event[i]);
+//            this_lnD_i += log(1.0-phi_event[i]);
 //            this_lnD_i += log(1.0-lambda_event[i]+2*lambda_event[i]*E_previous[i]);
             this_lnD_i += log(1.0-mu_event[i]);
         }
@@ -1677,11 +1673,21 @@ int EpisodicBirthDeathSamplingTreatmentProcess::survivors(double t) const
     {
         TopologyNode* n = *it;
         double my_age = n->getAge();
+//        if ( n->isRoot() == false )
+//            std::cerr << "My_age = " << my_age << "\t\t P_age = " << n->getParent().getAge() << "\t\t t = " << t << std::endl;
         // my age needs to be smaller that the requested time
-        if ( (my_age - t) < RbSettings::userSettings().getTolerance() )
+        if ( (my_age - t) < 1E-4 )
         {
             // my parents age needs to be larger/older than the requested time
-            if ( n->isRoot() == false && (n->getParent().getAge() - t) >= -RbSettings::userSettings().getTolerance() )
+            if ( n->isRoot() == false && (n->getParent().getAge() - t) > 1E-4 )
+            {
+                survivors++;
+            }
+        }
+        else if ( (my_age - t) < -1E-4 )
+        {
+            // my parents age needs to be larger/older than the requested time
+            if ( n->isRoot() == false && (n->getParent().getAge() - t) > -1E-4 )
             {
                 survivors++;
             }
