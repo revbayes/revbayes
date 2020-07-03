@@ -135,9 +135,9 @@ double BirthDeathBurstProcess::computeLnProbabilityTimes( void ) const
         if ( n.isRoot() == false )
         {
             double parent_age = n.getParent().getAge();
-            if ( fabs(node_age - burst_time) > 1E-10 &&
+            if ( fabs(node_age - burst_time) > 1E-4 &&
                  node_age < burst_time &&
-                 fabs(parent_age - burst_time) > 1E-10 &&
+                 fabs(parent_age - burst_time) > 1E-4 &&
                  parent_age > burst_time )
             {
                 ++num_lineages_alive_at_burst;
@@ -174,7 +174,7 @@ double BirthDeathBurstProcess::computeLnProbabilityTimes( void ) const
     if ( num_lineages_burst_at_event > 0 )
     {
         lnProbTimes += log(burst_prob) * num_lineages_burst_at_event;
-        lnProbTimes -= log(1.0-burst_prob+2*burst_prob*pZero(burst_time)) * num_lineages_burst_at_event;
+        lnProbTimes += log(1.0-burst_prob+2*burst_prob*pZero(burst_time)) * num_lineages_alive_at_burst;
     }
     
     // add the log probability for the internal node ages
@@ -403,7 +403,7 @@ double BirthDeathBurstProcess::pZero(double t) const
     
     double A = birth - death;
     
-    if ( t < t_b )
+    if ( t < (t_b+1E-4) )
     {
         double B = ((1.0 - 2.0*(1.0-sampling)) * birth + death ) /  A;
         E = birth + death - A * (1.0 + B - exp(-A*t) * (1.0-B)) / (1.0+B+exp(-A*t)*(1.0-B));
@@ -450,7 +450,8 @@ double BirthDeathBurstProcess::lnQ(double t) const
         double E_previous = birth + death - A * (1.0 + B_previous - exp(-A*t_b) * (1.0-B_previous)) / (1.0+B_previous+exp(-A*t_b)*(1.0-B_previous));
         E_previous /= (2*birth);
 
-        B = ((1.0 - 2.0*((1.0-burst)*E_previous+burst*E_previous*E_previous)) * birth + death ) /  A;
+//        B = ((1.0 - 2.0*((1.0-burst)*E_previous+burst*E_previous*E_previous)) * birth + death ) /  A;
+        B = ((1.0 - 2.0*E_previous) * birth + death ) /  A;
 //        B = B_tmp;
         
 //        D = 4.0*exp(-A*t);
@@ -461,7 +462,7 @@ double BirthDeathBurstProcess::lnQ(double t) const
         lnD_previous -= 2 * log(1 + B_previous + exp(-A * t_b) * (1 - B_previous));
         
         double this_lnD = lnD_previous;
-        this_lnD += log(1-burst+2*burst*E_previous);
+//        this_lnD += log(1-burst+2*burst*E_previous);
 
         // D <- D * 4 * exp(-A*(next_t-current_t))
         // D <- D / ( 1+B+exp(-A*(next_t-current_t))*(1-B) )^2
