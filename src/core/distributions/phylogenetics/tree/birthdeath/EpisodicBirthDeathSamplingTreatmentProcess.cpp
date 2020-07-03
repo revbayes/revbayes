@@ -325,9 +325,6 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
             // Make sure that we aren't claiming to have sampled all lineages without having sampled all lineages
             if (phi_event[i] >= (1.0 - DBL_EPSILON) && (active_lineages_at_t != N_i) )
             {
-                RbSettings::userSettings().setPrintNodeIndex(false);
-                std::cerr << value->getNewickRepresentation() << std::endl;
-                RbSettings::userSettings().setPrintNodeIndex(true);
 
                 return RbConstants::Double::neginf;
 //                std::stringstream ss;
