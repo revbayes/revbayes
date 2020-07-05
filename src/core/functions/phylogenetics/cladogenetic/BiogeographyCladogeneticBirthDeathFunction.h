@@ -30,7 +30,7 @@ template <class valueType> class TypedDagNode;
         
     public:
         
-        BiogeographyCladogeneticBirthDeathFunction( const TypedDagNode< RbVector< double > >* sr, unsigned mrs, TypedDagNode< RbVector< RbVector<double> > >* cm, TypedDagNode< RbVector< double > >* cw, std::string ct="cutset");
+        BiogeographyCladogeneticBirthDeathFunction( const TypedDagNode<RbVector<double> >* sr, TypedDagNode< RbVector<double> >* wf, TypedDagNode< RbVector< RbVector<double> > >* bf, unsigned mrs, std::string ct="cutset");
         virtual                                                     ~BiogeographyCladogeneticBirthDeathFunction(void);
         
         const static unsigned NUM_CLADO_EVENT_TYPES                 = 3;
@@ -79,8 +79,9 @@ template <class valueType> class TypedDagNode;
         // parameters
         const TypedDagNode< RbVector<double> >*                     speciationRates;
         const TypedDagNode< RbVector<double> >*                     hiddenRateMultipliers;
-        const TypedDagNode< RbVector<RbVector<double> > >*          connectivityMatrix;
-        const TypedDagNode< RbVector<double> >*                     connectivityWeights;
+        const TypedDagNode< RbVector<double> >*                     withinRegionFeatures;
+        const TypedDagNode< RbVector<RbVector<double> > >*          betweenRegionFeatures;
+//        const TypedDagNode< RbVector<double> >*                     connectivityWeights;
         
         // dimensions
         unsigned                                                    numCharacters;
