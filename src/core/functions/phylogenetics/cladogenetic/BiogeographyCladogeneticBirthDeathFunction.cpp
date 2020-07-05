@@ -28,17 +28,17 @@ using namespace RevBayesCore;
 
 //TypedFunction<MatrixReal>( new MatrixReal( mc + 1, (mc + 1) * (mc + 1), 0.0 ) ),
 BiogeographyCladogeneticBirthDeathFunction::BiogeographyCladogeneticBirthDeathFunction( const TypedDagNode< RbVector< double > >* sr,
+                                                                                        TypedDagNode< RbVector<double> >* wf,
+                                                                                        TypedDagNode< RbVector< RbVector<double> > >* bf,
                                                                                         unsigned mrs,
-                                                                                        TypedDagNode< RbVector< RbVector<double> > >* cm,
-                                                                                        TypedDagNode< RbVector< double > >* cw,
                                                                                         std::string ct ):
 TypedFunction<CladogeneticSpeciationRateMatrix>( new CladogeneticSpeciationRateMatrix(  pow(2,mrs)-1) ),
 speciationRates( sr ),
-connectivityMatrix( cm ),
-connectivityWeights( cw ),
-numCharacters( (unsigned)cm->getValue().size() ),
+withinRegionFeatures( wf ),
+betweenRegionFeatures( bf ),
+numCharacters( (unsigned)wf->getValue().size() ),
 num_states( 2 ),
-numIntStates( pow(2,cm->getValue().size())-1 ),
+numIntStates( pow(2,wf->getValue().size())-1 ),
 maxRangeSize(mrs),
 numEventTypes( (unsigned)sr->getValue().size() ),
 use_hidden_rate(false),
@@ -46,8 +46,8 @@ use_cutset_mean(true),
 connectivityType( ct )
 {
     addParameter( speciationRates );
-    addParameter( connectivityMatrix );
-    addParameter( connectivityWeights );
+    addParameter( withinRegionFeatures );
+    addParameter( betweenRegionFeatures );
     
     
     if (numCharacters > 10)
@@ -56,7 +56,7 @@ connectivityType( ct )
     }
     
     buildBits();
-    buildRanges(ranges, connectivityMatrix, true);
+    buildRanges(ranges, betweenRegionFeatures, true);
     
     numRanges = (unsigned)ranges.size();
 //    numRanges++; // add one for the null range
@@ -751,14 +751,15 @@ double BiogeographyCladogeneticBirthDeathFunction::computeCutsetScore( std::vect
     double cost = 0.0;
     
     // get value for connectivity mtx
-    const RbVector<RbVector<double> >& mtx = connectivityMatrix->getValue();
+    const RbVector<double>& wf = withinRegionFeatures->getValue();
+    const RbVector<RbVector<double> >& bf = betweenRegionFeatures->getValue();
     
     // compute modularity score depending on event type
     if (event_type == SYMPATRY)
     {
         // sympatry depends on matrix diagonal value
         unsigned i = eventMapBuddingRegions[idx];
-        cost = mtx[i][i];
+        cost = wf[i];
     }
     else if (event_type == ALLOPATRY)
     {
@@ -774,7 +775,7 @@ double BiogeographyCladogeneticBirthDeathFunction::computeCutsetScore( std::vect
         for (size_t i = 0; i < cutset.size(); i++) {
             size_t v1 = cutset[i][0];
             size_t v2 = cutset[i][1];
-            cost += mtx[v1][v2];
+            cost += bf[v1][v2];
 //            std::cout << "\t" << v1 << " -- " << v2 << " : " << mtx[v1][v2] << "\n";
         }
         
@@ -795,7 +796,7 @@ double BiogeographyCladogeneticBirthDeathFunction::computeModularityScore(std::v
     double Q = 0.0;
     
     // get value for connectivity mtx
-    const RbVector<RbVector<double> >& mtx = connectivityMatrix->getValue();
+    const RbVector<RbVector<double> >& mtx = betweenRegionFeatures->getValue();
     size_t n = mtx.size();
     
     // get left/right area sets
@@ -995,13 +996,13 @@ void BiogeographyCladogeneticBirthDeathFunction::swapParameterInternal(const Dag
     {
         hiddenRateMultipliers = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
-    if (oldP == connectivityMatrix)
+    if (oldP == withinRegionFeatures)
     {
-        connectivityMatrix = static_cast<const TypedDagNode< RbVector<RbVector<double> > >* >( newP );
+        withinRegionFeatures = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
     }
-    if (oldP == connectivityWeights)
+    if (oldP == betweenRegionFeatures)
     {
-        connectivityWeights = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        betweenRegionFeatures = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
     }
 }
 
@@ -1095,7 +1096,7 @@ void BiogeographyCladogeneticBirthDeathFunction::update( void )
 void BiogeographyCladogeneticBirthDeathFunction::updateEventMapWeights(void) {
     
     // get weight vector
-    const RbVector<double>& weights = connectivityWeights->getValue();
+//    const RbVector<double>& weights = connectivityWeights->getValue();
     
     // get max factors
     std::vector<double> max_value( NUM_CLADO_EVENT_TYPES, 0.0 );
@@ -1112,12 +1113,13 @@ void BiogeographyCladogeneticBirthDeathFunction::updateEventMapWeights(void) {
         unsigned event_type = it->second;
         
         // get power
-        double weight = weights[event_type];
+//        double weight = weights[event_type];
         
         // get event score
         double v = 0.0;
 //        v = std::pow( (1 + std::exp( eventMapFactors[idx]) ), weight );
-        v = std::pow( eventMapFactors[idx], weight );
+//        v = std::pow( eventMapFactors[idx], weight );
+        v = eventMapFactors[idx];
         eventMapWeights[ idx ] = v; //        z = (1 + exp(-z))^rho
         
         // get event score stats for renormalization
