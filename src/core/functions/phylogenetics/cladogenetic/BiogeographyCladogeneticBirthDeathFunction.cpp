@@ -642,7 +642,8 @@ void BiogeographyCladogeneticBirthDeathFunction::buildEventMapFactors(void)
         unsigned event_type = it->second;
 
 //        eventMapFactors[ idx ] = eventMapFactors[ idx ] / max_value[ event_type ];
-        eventMapFactors[ idx ] = eventMapFactors[ idx ] / (sum_value[ event_type ] / n_value[ event_type ]);
+//        eventMapFactors[ idx ] = eventMapFactors[ idx ] / (sum_value[ event_type ] / n_value[ event_type ]);
+        eventMapFactors[ idx ] = eventMapFactors[ idx ]; // / (sum_value[ event_type ] / n_value[ event_type ]);
     }
     
 //    printEventMap( eventMapFactors );
@@ -1138,7 +1139,8 @@ void BiogeographyCladogeneticBirthDeathFunction::updateEventMapWeights(void) {
         std::vector<unsigned> idx = it->first;
         unsigned event_type = it->second;
 //        eventMapWeights[ idx ] = eventMapWeights[ idx ] / max_value[event_type];
-        eventMapWeights[ idx ] = eventMapWeights[ idx ] / (sum_value[event_type] / n_value[event_type]);
+//        eventMapWeights[ idx ] = eventMapWeights[ idx ] / (sum_value[event_type] / n_value[event_type]);
+        eventMapWeights[ idx ] = eventMapWeights[ idx ]; // / (sum_value[event_type] / n_value[event_type]);
 
     }
     
