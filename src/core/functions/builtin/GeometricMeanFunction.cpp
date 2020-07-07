@@ -1,6 +1,7 @@
 #include "GeometricMeanFunction.h"
 
 #include <vector>
+#include <cmath>
 
 #include "RbVector.h"
 #include "TypedDagNode.h"
