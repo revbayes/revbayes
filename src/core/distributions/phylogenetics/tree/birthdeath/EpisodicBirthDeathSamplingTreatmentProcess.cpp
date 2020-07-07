@@ -353,8 +353,6 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
                 {
                     ln_sampling_event_prob += (active_lineages_at_t - N_i) * log(1 - phi_event[i]);
                 }
-//                std::cerr << "#alive:\t\t" << active_lineages_at_t << std::endl;
-//                std::cerr << "#sampled:\t\t" << N_i << std::endl;
 
             }
 
@@ -425,9 +423,6 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
         if ( r[index] > 1.0 - DBL_EPSILON )
         {
             return RbConstants::Double::neginf;
-            //std::stringstream ss;
-            //ss << "The conditional probability of death on sampling rate in interval " << i << " is one, but the tree has sampled ancesors in this interval.";
-            //throw RbException(ss.str());
         }
 
         lnProbTimes += log(phi[index]) + log(1 - r[index]);
@@ -443,14 +438,10 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
 
             lnProbTimes += event_bifurcation_times[i].size() * log(lambda_event[i]);
 
-            // Sebastian: Instead of adding the burst probability to ln_D we could add it here.
-            // however, our validation analysis shows that this doesn't work?!?
+            // Instead of adding the burst probability to ln_D we add it here.
             int active_lineages_at_t = survivors(global_timeline[i]); //A(t_{\rho_i})
             int A_minus_K = active_lineages_at_t - int(event_bifurcation_times[i].size());
             lnProbTimes += A_minus_K * log(2*lambda_event[i]*E_previous[i]+(1.0 - lambda_event[i]));
-//            lnProbTimes += A_minus_K * log(2*lambda_event[i]*E(i,global_timeline[i])+(1.0 - lambda_event[i]));
-//            std::cerr << "E(" << global_timeline[i] << ") = " << E_previous[i] << std::endl;
-//            std::cerr << "A-K = " << A_minus_K << std::endl;
 
         }
 
@@ -469,7 +460,6 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
         lnProbTimes += log( lambda[index] );
     }
 
-    size_t num_active_at_burst = 1;
     // Compute probabilities of branch segments on all branches
     for (size_t i=0; i<num_nodes; ++i)
     {
@@ -485,7 +475,6 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
             --index;
         }
         double this_ln_D = lnD(index,t);
-        if ( index > 0) ++num_active_at_burst;
 
         if ( n.isTip() )
         {
@@ -498,10 +487,6 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
 
     }
     lnProbTimes += lnD(findIndex(value->getRoot().getAge()),value->getRoot().getAge());
-
-//    std::cerr << "#active:\t\t" << num_active_at_burst << std::endl;
-//    std::cerr << "#surviv:\t\t" << survivors(global_timeline[1]) << std::endl;
-//    std::cerr << "#burstd:\t\t" << event_bifurcation_times[1].size() << std::endl;
 
     // condition on survival
     if ( condition == "survival" )
@@ -691,10 +676,6 @@ double EpisodicBirthDeathSamplingTreatmentProcess::lnD(size_t i, double t) const
             // D <- D * (1-this_p_s) * (1-this_p_d) * (1-this_p_b + 2*this_p_b*E)
             this_lnD_i = lnD_previous[i];
             // Sebastian: Instead of adding the burst and sampling probability to ln_D we could add it directly for each lineage.
-            // however, our validation analysis shows that this doesn't work even though the likelihoods are identical?!?
-//            this_lnD_i += log(1.0-phi_event[i]);
-//            this_lnD_i += log(1.0-lambda_event[i]+2*lambda_event[i]*E_previous[i]);
-//            this_lnD_i += log(1.0-mu_event[i]);
         }
         else
         {
@@ -1590,14 +1571,17 @@ void EpisodicBirthDeathSamplingTreatmentProcess::redrawValue( SimulationConditio
         
         simulator.setRootCategoryProbabilities( std::vector<double>(1,1) );
         
-        Tree *my_tree = simulator.simulateTreeConditionTime( getOriginAge(), BirthDeathForwardSimulator::SIM_CONDITION::ROOT);
-        
-        // store the new value
-        delete value;
-        value = my_tree;
-        
-        // to be safe, we copy over the taxa
-        taxa = value->getTaxa();
+        do {
+            Tree *my_tree = simulator.simulateTreeConditionTime( getOriginAge(), BirthDeathForwardSimulator::SIM_CONDITION::ROOT);
+            
+            // store the new value
+            delete value;
+            value = my_tree;
+            
+            // to be safe, we copy over the taxa
+            taxa = value->getTaxa();
+
+        } while ( RbMath::isFinite( computeLnProbability() ) == false );
     }
     else
     {
