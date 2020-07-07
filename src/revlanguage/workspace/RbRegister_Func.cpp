@@ -205,6 +205,7 @@
 #include "Func_gamma.h"
 #include "Func_lnProbability.h"
 #include "Func_geographicalDistance.h"
+#include "Func_geometricMean.h"
 #include "Func_hyperbolicTangent.h"
 #include "Func_hyperbolicSine.h"
 #include "Func_ln.h"
@@ -413,6 +414,9 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         // gamma function
         addFunction( new Func_gamma() );
 
+        // geometric mean function
+        addFunction( new Func_geometricMean() );
+        
         // logistic function
         addFunction( new Func_logistic() );
 
