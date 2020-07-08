@@ -615,19 +615,6 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                                     // update the active node set
                                     active_nodes_in_actegories[i].erase( this_node );
                                     active_nodes_in_actegories[i].insert( right );
-                                    
-                                    
-//                                    // left child (descendant/continuation of sampled ancestor)
-//                                    TopologyNode *left = new TopologyNode();
-//                                    this_node->addChild( left );
-//                                    left->setParent( this_node );
-//
-//                                    this_node->setSampledAncestor( true );
-//                                    sampled_nodes.insert( this_node );
-//
-//                                    // update the active node set
-//                                    active_nodes_in_actegories[i].erase( this_node );
-//                                    active_nodes_in_actegories[i].insert( left );
                                 }
 
                             } // end-if there was a sampling event for this node
@@ -797,6 +784,9 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                                 // update the active node set
                                 active_nodes_in_actegories[i].erase( this_node );
 
+                                // the current node to our set of sampled nodes
+                                sampled_nodes.insert( this_node );
+
                                 // update counters
                                 --current_num_active_nodes;
                                 current_lambda_total    -= current_lambda[i];
@@ -857,15 +847,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                 TopologyNode *this_node = *it;
                 this_node->setAge( 0.0 );
 
-                bool found = false;
-                for ( std::set<TopologyNode*>::const_iterator jt=sampled_nodes.begin(); jt!=sampled_nodes.end(); ++jt)
-                {
-                    if (*it == *jt)
-                    {
-                        found = true;
-                        break;
-                    }
-                }
+                bool found = sampled_nodes.find( this_node ) != sampled_nodes.end();
                 if ( found == false )
                 {
                     extinct_not_sampled_nodes.insert(this_node);

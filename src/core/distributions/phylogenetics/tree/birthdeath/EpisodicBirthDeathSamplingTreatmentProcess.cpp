@@ -334,30 +334,31 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
 
             // Calculate probability of the samples
             double ln_sampling_event_prob = 0.0;
-            int R_i = int(event_sampled_ancestor_ages[i].size());
-            int N_i = R_i + int(event_tip_ages[i].size());
-            int active_lineages_at_t = survivors(global_timeline[i]); //A(t_{\rho_i})
+            int S_i = int(event_sampled_ancestor_ages[i].size());
+            int T_i = int(event_tip_ages[i].size());
+            int I_i = S_i + T_i;
+            int L_i = survivors(global_timeline[i]); //A(t_{\rho_i})
             
             // Make sure that we aren't claiming to have sampled all lineages without having sampled all lineages
-            if (phi_event[i] >= (1.0 - DBL_EPSILON) && (active_lineages_at_t != N_i) )
+            if (phi_event[i] >= (1.0 - DBL_EPSILON) && (L_i != I_i) )
             {
 
                 return RbConstants::Double::neginf;
             }
             else
             {
-                ln_sampling_event_prob += N_i * log(phi_event[i]);
+                ln_sampling_event_prob += I_i * log(phi_event[i]);
 
                 // Instead of adding the sampling probability to ln_D we add it here.
-                if ( i > 0 && (active_lineages_at_t - N_i) > 0 )
+                if ( i > 0 && (L_i - I_i) > 0 )
                 {
-                    ln_sampling_event_prob += (active_lineages_at_t - N_i) * log(1 - phi_event[i]);
+                    ln_sampling_event_prob += (L_i - I_i) * log(1 - phi_event[i]);
                 }
 
             }
 
             // Calculate probability of the sampled ancestors
-            if ( r_event[i] > (1.0 - DBL_EPSILON) && R_i > 0 )
+            if ( r_event[i] > (1.0 - DBL_EPSILON) && S_i > 0 )
             {
                 // Cannot have sampled ancestors if r(t) == 1
                 return RbConstants::Double::neginf;
@@ -365,13 +366,13 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
             if ( global_timeline[i] > DBL_EPSILON )
             {
                 // only add these terms for sampling that is not at the present
-                if ( R_i > 0 )
+                if ( S_i > 0 )
                 {
-                    ln_sampling_event_prob += R_i * log(1 - r[i]);
+                    ln_sampling_event_prob += S_i * log(1 - r_event[i]);
                 }
-                if ( N_i > R_i )
+                if ( I_i > S_i )
                 {
-                    ln_sampling_event_prob += (N_i - R_i) * log(r_event[i] + (1 - r_event[i])*E_previous[i]);
+                    ln_sampling_event_prob += (I_i - S_i) * log(r_event[i] + (1 - r_event[i])*E_previous[i]);
                 }
                 
             }
@@ -399,12 +400,7 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
         {
             double this_prob = r[index] + (1 - r[index]) * E(index,t);
             this_prob *= phi[index];
-            // double this_prob = phi[index] * r[index];
-            // // Avoid computation in the case of r = 1
-            // if (r[t] <= 1 - DBL_EPSILON)
-            // {
-            //   this_prob += phi[index] * (1 - r[index]) * E(index,t);
-            // }
+            
             lnProbTimes += log( this_prob );
         }
     }
@@ -702,7 +698,8 @@ double EpisodicBirthDeathSamplingTreatmentProcess::E(size_t i, double t, bool co
     if (computeSurvival == true)
     {
         // E <- (b + d - A *(1+B-exp(-A*(next_t-current_t))*(1-B))/(1+B+exp(-A*(next_t-current_t))*(1-B)) ) / (2*b)
-        E_i = lambda[i] + mu[i];
+//        E_i = lambda[i] + mu[i];
+        E_i = lambda[i] + mu[i] + phi[i]*r[i];
         E_i -= A_survival_i[i] * (1 + B_survival_i[i] - exp(-A_survival_i[i] * (t - s)) * (1 - B_survival_i[i])) / (1 + B_survival_i[i] + exp(-A_survival_i[i] * (t - s)) * (1 - B_survival_i[i]));
         E_i /= (2 * lambda[i]);
     }
@@ -957,7 +954,7 @@ void EpisodicBirthDeathSamplingTreatmentProcess::prepareProbComputation( void ) 
     double t = global_timeline[0];
 
     // Compute all starting at 1
-    A_i[0] = sqrt( pow(lambda[0] - mu[0] - phi[0],2.0) + 4 * lambda[0] * phi[0]);
+    A_i[0] = sqrt( pow(lambda[0] - mu[0] - phi[0],2.0) + 4 * lambda[0] * phi[0] * (1-r[0]) );
 
     // At the present, only sampling is allowed, no birth/death bursts
     C_i[0] = (1 - phi_event[0]);
@@ -985,7 +982,7 @@ void EpisodicBirthDeathSamplingTreatmentProcess::prepareProbComputation( void ) 
         lnD_previous[i] = lnD(i-1, t);
 
         // now we can compute A_i, B_i and C_i at the end of this interval.
-        A_i[i] = sqrt( pow(lambda[i] - mu[i] - phi[i],2.0) + 4 * lambda[i] * phi[i]);
+        A_i[i] = sqrt( pow(lambda[i] - mu[i] - phi[i],2.0) + 4 * lambda[i] * phi[i] * (1-r[i]));
 
         // Only one type of event is allowed
         // sampling:    C_i <- E*(1-this_p_s)
@@ -1026,12 +1023,14 @@ void EpisodicBirthDeathSamplingTreatmentProcess::prepareProbComputation( void ) 
         E_survival_previous = std::vector<double>(global_timeline.size(),0.0);
 
         // Compute all starting at 1
-        A_survival_i[0] = sqrt( pow(lambda[0] - mu[0],2.0));
+//        A_survival_i[0] = sqrt( pow(lambda[0] - mu[0],2.0));
+        A_survival_i[0] = sqrt( pow(lambda[0] - mu[0] - phi[0]*r[0],2.0));
 
         // At the present, only sampling is allowed, no birth/death bursts
         C_survival_i[0] = (1 - phi_event[0]);
 
-        B_survival_i[0] = (1.0 - 2.0 * C_survival_i[0]) * lambda[0] + mu[0];
+//        B_survival_i[0] = (1.0 - 2.0 * C_survival_i[0]) * lambda[0] + mu[0];
+        B_survival_i[0] = (1.0 - 2.0 * C_survival_i[0]) * lambda[0] + mu[0] + phi[0]*r[0];
         B_survival_i[0] /= A_survival_i[0];
         
         // Andy says it should be 1.0, Sebastian's equation say it should be 0.0
@@ -1045,7 +1044,8 @@ void EpisodicBirthDeathSamplingTreatmentProcess::prepareProbComputation( void ) 
             E_survival_previous[i] = E(i-1, t, true);
 
             // now we can compute A_survival_i, B_survival_i and C_survival_i at the end of this interval.
-            A_survival_i[i] = lambda[i] - mu[i];
+//            A_survival_i[i] = lambda[i] - mu[i];
+            A_survival_i[i] = lambda[i] - mu[i] - phi[i]*r[i];
 
             // Only one type of event is allowed
             if ( lambda_event[i] >= DBL_EPSILON )
@@ -1061,7 +1061,8 @@ void EpisodicBirthDeathSamplingTreatmentProcess::prepareProbComputation( void ) 
                 C_survival_i[i] = E_survival_previous[i];
             }
 
-            B_survival_i[i] = (1.0 - 2.0 * C_survival_i[i]) * lambda[i] + mu[i];
+//            B_survival_i[i] = (1.0 - 2.0 * C_survival_i[i]) * lambda[i] + mu[i];
+            B_survival_i[i] = (1.0 - 2.0 * C_survival_i[i]) * lambda[i] + mu[i] + phi[i]*r[i];
             B_survival_i[i] /= A_survival_i[i];
         }
 
