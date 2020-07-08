@@ -778,7 +778,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                         double num_lineages_in_category = double( active_nodes_in_actegories[i].size() );
                         double this_cat_phi = current_phi[i];
                         double this_cat_r = current_r[i];
-                        if ( u < (num_lineages_in_category*this_cat_phi)/current_mu_total )
+                        if ( u < (num_lineages_in_category*this_cat_phi)/current_phi_total )
                         {
                             size_t this_node_index = size_t( floor(u*num_lineages_in_category) );
                             std::set<TopologyNode*>::const_iterator it = active_nodes_in_actegories[i].begin();
