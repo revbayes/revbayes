@@ -318,7 +318,7 @@ const MemberRules& Dist_FBDP::getParameterRules(void) const
         std::vector<std::string> aliases_event_sampling_timeline;
         aliases_event_sampling_timeline.push_back("PhiTimeline");
         aliases_event_sampling_timeline.push_back("rhoTimeline");
-        dist_member_rules.push_back( new ArgumentRule( aliases_event_sampling_timeline,       ModelVector<RealPos>::getClassTypeSpec(), "Times at which all taxa are sampled with some probability. There is always a sampling event at the present.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( aliases_event_sampling_timeline,       ModelVector<RealPos>::getClassTypeSpec(), "Times at which all taxa are sampled with some probability. There is always additionally a sampling event at the present.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         std::vector<std::string> optionsCondition;
         optionsCondition.push_back( "time" );
@@ -368,7 +368,7 @@ void Dist_FBDP::setConstParameter(const std::string& name, const RevPtr<const Re
     {
         mu = var;
     }
-    else if ( name == "phi" || name == "psi" )
+    else if ( name == "phi" || name == "psi" || name == "phi/psi" )
     {
         phi = var;
     }
@@ -380,7 +380,7 @@ void Dist_FBDP::setConstParameter(const std::string& name, const RevPtr<const Re
     {
         Mu = var;
     }
-    else if ( name == "Phi" || name == "rho" )
+    else if ( name == "Phi" || name == "rho" || name == "Phi/rho" )
     {
         rho = var;
     }
@@ -401,7 +401,7 @@ void Dist_FBDP::setConstParameter(const std::string& name, const RevPtr<const Re
     {
         mu_timeline = var;
     }
-    else if ( name == "phiTimeline" || name == "psiTimeline" )
+    else if ( name == "phiTimeline" || name == "psiTimeline" || name == "phiTimeline/psiTimeline" )
     {
         phi_timeline = var;
     }
@@ -413,7 +413,7 @@ void Dist_FBDP::setConstParameter(const std::string& name, const RevPtr<const Re
     {
         Mu_timeline = var;
     }
-    else if ( name == "PhiTimeline" || name == "rhoTimeline" )
+    else if ( name == "PhiTimeline" || name == "rhoTimeline"  || name == "PhiTimeline/rhoTimeline")
     {
         rho_timeline = var;
     }
