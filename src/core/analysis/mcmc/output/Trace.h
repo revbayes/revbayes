@@ -22,7 +22,7 @@ class Serializable;
         virtual                         ~AbstractTrace(void) {}
 
         virtual void                    addValueFromString(const std::string &s) = 0;
-        virtual bool                    isCoveredInInterval(const std::string &v, double i, bool verbose) = 0;
+        virtual int                     isCoveredInInterval(const std::string &v, double i, bool verbose) = 0;
 
     };
     
@@ -48,7 +48,7 @@ class Serializable;
 
         virtual void                    addObject(valueType d);
         virtual void                    addObject(valueType* d);
-        virtual bool                    isCoveredInInterval(const std::string &v, double i, bool verbose);
+        virtual int                     isCoveredInInterval(const std::string &v, double i, bool verbose);
         bool                            isDirty(void) const                             { return dirty; };
         void                            isDirty(bool d) const                             { dirty = d; };
         void                            removeLastObject();
@@ -105,13 +105,13 @@ class Serializable;
      * Template specializations
      */
     template <>
-    bool Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool verbose);
+    int Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool verbose);
 
     template <>
-    bool Trace<RbVector<double > >::isCoveredInInterval(const std::string &v, double i, bool verbose);
+    int Trace<RbVector<double > >::isCoveredInInterval(const std::string &v, double i, bool verbose);
 
     template <>
-    bool Trace<Simplex>::isCoveredInInterval(const std::string &v, double i, bool verbose);
+    int Trace<Simplex>::isCoveredInInterval(const std::string &v, double i, bool verbose);
 
 }
 
@@ -166,7 +166,7 @@ RevBayesCore::Trace<valueType>* RevBayesCore::Trace<valueType>::clone() const
 
 
 template <class valueType>
-bool RevBayesCore::Trace<valueType>::isCoveredInInterval(const std::string & /*v*/, double /*alpha*/, bool /*verbose*/)
+int RevBayesCore::Trace<valueType>::isCoveredInInterval(const std::string & /*v*/, double /*alpha*/, bool /*verbose*/)
 {
     throw RbException("Cannot compute interval coverage for '" + parmName + "' because there are not trace objects implemented for this value type.");
 }

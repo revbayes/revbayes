@@ -369,7 +369,17 @@ void ValidationAnalysis::summarizeAll( double credible_interval_size )
     size_t run_block_end   = std::max( int(run_block_start), int(floor( (double(pid+1) / num_processes ) * num_runs) ) - 1);
     //    size_t stone_block_size  = stone_block_end - stone_block_start;
     
-    // Summarize the chain
+    // delete the old coverage file
+    std::fstream out_stream;
+    
+    RbFileManager fm = RbFileManager(output_directory,"coverage.txt");
+    fm.createDirectoryForFile();
+    
+    // open the stream to the file
+    out_stream.open( fm.getFullFileName().c_str(), std::fstream::out );
+    out_stream.close();
+    
+    // Summarize the specific MCMC run
     for (size_t i = run_block_start; i <= run_block_end; ++i)
     {
         
@@ -503,15 +513,31 @@ void ValidationAnalysis::summarizeSim(double credible_interval_size, size_t idx)
             if ( trace_map.find( parameter_name ) != trace_map.end() )
             {
                 // create a trace
-                bool cov = trace_map[parameter_name]->isCoveredInInterval(the_node->getValueAsString(), credible_interval_size, false);
+                int cov = trace_map[parameter_name]->isCoveredInInterval(the_node->getValueAsString(), credible_interval_size, false);
                 
                 if ( coverage_count.find(parameter_name) == coverage_count.end() )
                 {
                     coverage_count.insert( std::pair<std::string,int>(parameter_name,0) );
                 }
-                if ( cov == true )
+                if ( cov == 0 )
                 {
                     coverage_count[ parameter_name ]++;
+                }
+                else
+                {
+                    // the filestream object
+                    std::fstream out_stream;
+                    
+                    RbFileManager fm = RbFileManager(output_directory,"coverage.txt");
+                    fm.createDirectoryForFile();
+                    
+                    // open the stream to the file
+                    out_stream.open( fm.getFullFileName().c_str(), std::fstream::out | std::fstream::app);
+
+                    out_stream << idx << "\t" << cov << std::endl;
+                    
+                    out_stream.close();
+                    
                 }
                 
             }
