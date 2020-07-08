@@ -157,7 +157,7 @@ typedef union YYSTYPE
     char*                                           c_string;
     std::string*                                    string;
     double                                          realValue;
-    int                                             intValue;
+    long                                            longIntValue;
     bool                                            boolValue;
     RevLanguage::SyntaxElement*                     syntaxElement;
     RevLanguage::SyntaxVariable*                    syntaxVariable;

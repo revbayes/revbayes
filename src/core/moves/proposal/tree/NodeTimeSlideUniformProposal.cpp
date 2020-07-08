@@ -103,7 +103,7 @@ double NodeTimeSlideUniformProposal::doProposal( void )
         double u = rng->uniform01();
         size_t index = size_t( std::floor(tau.getNumberOfNodes() * u) );
         node = &tau.getNode(index);
-    } while ( node->isRoot() || node->isTip() );
+    } while ( node->isRoot() || node->isTip() || node->isSampledAncestor(true) );
     
     TopologyNode& parent = node->getParent();
     

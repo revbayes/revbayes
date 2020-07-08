@@ -1,5 +1,5 @@
-#ifndef Dist_BDSTP_H
-#define Dist_BDSTP_H
+#ifndef Dist_PhylodynamicBDP_H
+#define Dist_PhylodynamicBDP_H
 
 #include "RlBirthDeathProcess.h"
 
@@ -18,13 +18,13 @@ namespace RevLanguage {
      * @since 2014-01-26, version 1.0
      *c
      */
-    class Dist_BDSTP : public BirthDeathProcess {
+    class Dist_PhylodynamicBDP : public BirthDeathProcess {
 
     public:
-        Dist_BDSTP( void );
+        Dist_PhylodynamicBDP( void );
 
         // Basic utility functions
-        Dist_BDSTP*                                             clone(void) const;                                                                      //!< Clone the object
+        Dist_PhylodynamicBDP*                                   clone(void) const;                                                                      //!< Clone the object
         static const std::string&                               getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                                  getClassTypeSpec(void);                                                                 //!< Get class type spec
         std::vector<std::string>                                getDistributionFunctionAliases(void) const;                                             //!< Get the alternative names used for the constructor function in Rev.
