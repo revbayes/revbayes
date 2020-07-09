@@ -419,6 +419,24 @@ std::vector<double> BirthDeathForwardSimulator::getRootCategoryProbabilities( si
 }
 
 
+bool BirthDeathForwardSimulator::hasExtantSurvivor(const TopologyNode &n) const
+{
+    if ( n.isTip() == true )
+    {
+        return n.getAge() == 0.0;
+    }
+    else
+    {
+        bool survivor = false;
+        for (size_t i=0; i<n.getNumberOfChildren(); ++i)
+        {
+            survivor |= hasExtantSurvivor( n.getChild(i) );
+        }
+        return survivor;
+    }
+}
+
+
 Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SIM_CONDITION condition) const
 {
 
@@ -919,7 +937,10 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
             root = NULL;
         }
         // next we check that both sides of the root node were sampled ()
-        else if ( condition == ROOT && (root->getAge() < start_age || current_num_active_nodes <= 1) )
+        else if ( condition == ROOT && (root->getAge() < start_age ||
+                                        current_num_active_nodes <= 1 ||
+                                        hasExtantSurvivor(root->getChild(0)) == false ||
+                                        hasExtantSurvivor(root->getChild(1)) == false ) )
         {
             delete root;
             root = NULL;

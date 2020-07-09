@@ -5,8 +5,10 @@
 #include <vector>
 
 namespace RevBayesCore {
-class Tree;
-    
+
+    class Tree;
+    class TopologyNode;
+
     /**
      * General case birth-death forward simulator.
      *
@@ -53,6 +55,7 @@ class Tree;
         double                                  getRProbability( size_t i, size_t n ) const;
         std::vector<double>                     getRRate( size_t i, size_t n ) const;
         std::vector<double>                     getRootCategoryProbabilities( size_t n ) const;
+        bool                                    hasExtantSurvivor(const TopologyNode &n) const;
 
         std::vector<std::vector< double > >     lambda;
         std::vector<std::vector< double > >     Lambda;
