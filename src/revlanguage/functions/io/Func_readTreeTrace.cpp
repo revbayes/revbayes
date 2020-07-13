@@ -133,7 +133,9 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
         // check that the file/path name has been correctly specified
         std::string  bn = static_cast<const RlString&>( args[arg_index_files].getVariable()->getRevObject() ).getValue();
         
-        StringUtilities::replaceSubstring(bn,".trees","");
+        std::string file_extension = bn.substr(StringUtilities::findLastOf(bn, '.'), string::npos);
+
+        StringUtilities::replaceSubstring(bn,file_extension,"");
         
         for (size_t i = 0; i < nruns; i++)
         {
@@ -143,7 +145,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
                 run = "_run_" + StringUtilities::to_string(i+1);
             }
 
-            const std::string  fn = bn + run + ".trees";
+            const std::string  fn = bn + run + file_extension;
 
             RevBayesCore::RbFileManager myFileManager( fn );
 
