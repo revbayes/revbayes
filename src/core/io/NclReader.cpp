@@ -285,11 +285,9 @@ std::vector<Tree*>* NclReader::convertTreesFromNcl(void)
             {
                 const NxsFullTreeDescription & ftd = trb->GetFullTreeDescription(j);
                 NxsSimpleTree tree(ftd, -1, -1.0);
-                //                tree.WriteAsNewick(std::cout, true, true, true, tb);
+tree.WriteAsNewick(std::cout, true, true, true, tb);
                 Tree* rbTree = translateNclSimpleTreeToBranchLengthTree(tree,tb,ftd.IsRooted());
-                //                rbTree->fillNodeTimes();
-                //                rbTree->equalizeBranchLengths();
-                
+std::cerr << rbTree->getNewickRepresentation() << std::endl;
                 rbTreesFromFile->push_back( rbTree );
             }
         }
@@ -1878,9 +1876,9 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const std::string &file_nam
         return NULL;
     }
         
-    std::vector<std::string> file_nameVector;
+    std::vector<std::string> file_name_vector;
     std::string str = file_name;
-    file_nameVector.push_back( str );
+    file_name_vector.push_back( str );
         
     std::vector<Tree*>* cvm = convertTreesFromNcl();
     
@@ -1888,11 +1886,11 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const std::string &file_nam
 }
 
 
-std::vector<Tree*> NclReader::readTimeTrees( const std::string &treefile_name )
+std::vector<Tree*>* NclReader::readTimeTrees( const std::string &treefile_name )
 {
     
-    std::vector<Tree*> trees;
-    std::vector<Tree*> *m = readBranchLengthTrees( treefile_name );
+    std::vector<Tree*>* trees = new std::vector<Tree*>();
+    std::vector<Tree*>* m = readBranchLengthTrees( treefile_name );
     
     if (m != NULL)
     {
@@ -1900,7 +1898,7 @@ std::vector<Tree*> NclReader::readTimeTrees( const std::string &treefile_name )
         {
             Tree* convertedTree = TreeUtilities::convertTree( *(*it) );
             delete (*it);
-            trees.push_back( convertedTree );
+            trees->push_back( convertedTree );
         }
     }
     

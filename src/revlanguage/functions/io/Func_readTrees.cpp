@@ -69,11 +69,13 @@ RevPtr<RevVariable> Func_readTrees::execute( void )
         {
             ModelVector<TimeTree> *trees = new ModelVector<TimeTree>();
             
-            std::vector<RevBayesCore::Tree*> tmp = reader.readTimeTrees( fn );
-            for (std::vector<RevBayesCore::Tree*>::iterator t = tmp.begin(); t != tmp.end(); ++t)
+            std::vector<RevBayesCore::Tree*>* tmp = reader.readTimeTrees( fn );
+            for (std::vector<RevBayesCore::Tree*>::iterator t = tmp->begin(); t != tmp->end(); ++t)
             {
                 trees->push_back( TimeTree(*t) );
             }
+            delete tmp;
+            
             return new RevVariable( trees );
         }
         else if ( treetype == "non-clock" )

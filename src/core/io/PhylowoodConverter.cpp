@@ -63,9 +63,13 @@ void PhylowoodConverter::convert(void) {
     // get tree info
     NclReader reader = NclReader();
     std::vector<Tree> trees;
-    std::vector<Tree*> tmp = reader.readTimeTrees( treeFilename );
-    if (tmp.size() > 0)
-        tree = tmp[0];
+    std::vector<Tree*>* tmp = reader.readTimeTrees( treeFilename );
+    if (tmp->size() > 0)
+    {
+        tree = (*tmp)[0];
+    }
+    delete tmp;
+    
     num_nodes = tree->getNumberOfNodes();
     
     // get state info

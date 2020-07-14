@@ -496,20 +496,23 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTreesNexus(const std::vector
         // get the global instance of the NCL reader and clear warnings from its warnings buffer
         RevBayesCore::NclReader reader = RevBayesCore::NclReader();
 
-        std::vector<RevBayesCore::Tree*> tmp;
-        if ( clock ) {
+        std::vector<RevBayesCore::Tree*>* tmp;
+        if ( clock )
+        {
             tmp = reader.readTimeTrees( fn );
         }
-        else {
-            tmp = *reader.readBranchLengthTrees( fn );
+        else
+        {
+            tmp = reader.readBranchLengthTrees( fn );
         }
         int nsamples = 0;
-        for (size_t j=0; j<tmp.size(); ++j)
+        for (size_t j=0; j<tmp->size(); ++j)
         {
-            RevBayesCore::Tree* t = tmp[i];
+            RevBayesCore::Tree* t = (*tmp)[i];
             if ( (nsamples-offset) % thin == 0) tt.addObject(t);
             nsamples++;
         }
+        delete tmp;
 
         data.push_back(TraceTree(tt));
     }
