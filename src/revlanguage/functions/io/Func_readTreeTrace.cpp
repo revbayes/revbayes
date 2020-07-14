@@ -508,7 +508,7 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTreesNexus(const std::vector
         int nsamples = 0;
         for (size_t j=0; j<tmp->size(); ++j)
         {
-            RevBayesCore::Tree* t = (*tmp)[i];
+            RevBayesCore::Tree* t = (*tmp)[j];
             if ( (nsamples-offset) % thin == 0) tt.addObject(t);
             nsamples++;
         }
