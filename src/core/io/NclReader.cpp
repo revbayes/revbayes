@@ -285,9 +285,9 @@ std::vector<Tree*>* NclReader::convertTreesFromNcl(void)
             {
                 const NxsFullTreeDescription & ftd = trb->GetFullTreeDescription(j);
                 NxsSimpleTree tree(ftd, -1, -1.0);
-tree.WriteAsNewick(std::cout, true, true, true, tb);
+
                 Tree* rbTree = translateNclSimpleTreeToBranchLengthTree(tree,tb,ftd.IsRooted());
-std::cerr << rbTree->getNewickRepresentation() << std::endl;
+
                 rbTreesFromFile->push_back( rbTree );
             }
         }
