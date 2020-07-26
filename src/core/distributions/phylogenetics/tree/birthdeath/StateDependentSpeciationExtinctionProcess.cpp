@@ -495,7 +495,7 @@ double StateDependentSpeciationExtinctionProcess::computeRootLikelihood( void ) 
         speciation_rates = lambda->getValue();
     }
 
-    bool speciation_node = false;
+    bool speciation_node = true;
     if ( left.isSampledAncestor() || right.isSampledAncestor() )
     {
         speciation_node = (phi == NULL);
@@ -2487,7 +2487,7 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
     // now draw a state for the root cladogenetic event
     
     // get root frequencies
-    const RbVector<double> &freqs = getRootFrequencies();
+    const RbVector<double> &root_freqs = getRootFrequencies();
     
     std::map<std::vector<unsigned>, double> sample_probs;
     double sample_probs_sum = 0.0;
@@ -2504,7 +2504,7 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
             
             // we need to sample from the ancestor, left, and right states jointly,
             // so keep track of the probability of each clado event
-            double prob = freqs[states[0]] * speciation_rate;
+            double prob = root_freqs[states[0]] * speciation_rate;
             sample_probs[ states ] = prob;
             sample_probs_sum += prob;
         }
@@ -2514,8 +2514,8 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
         for (size_t i = 0; i < num_states; i++)
         {
             std::vector<unsigned> states = boost::assign::list_of(i)(i)(i);
-            sample_probs[ states ] = freqs[i];
-            sample_probs_sum += freqs[i];
+            sample_probs[ states ] = root_freqs[i] * speciation_rates[i];
+            sample_probs_sum += root_freqs[i] * speciation_rates[i];
         }
     }
     
@@ -2914,13 +2914,6 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
     {
         num_lineages += lineages_in_state[i].size();
     }
-    if (num_lineages < min_num_lineages and condition_on_num_tips == false)
-    {
-        delete tip_data;
-        nodes.clear();
-        delete sim_tree;
-        return false;
-    }
   
     // prune extinct lineage if necessary
     if (prune_extinct_lineages == true)
@@ -2936,6 +2929,22 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
                 }
             }
         }
+    }
+    
+    if (sim_tree->getNumberOfTips() < min_num_lineages && condition_on_num_tips == false)
+    {
+        delete tip_data;
+        nodes.clear();
+        delete sim_tree;
+        return false;
+    }
+    
+    if ( (sim_tree->getNumberOfTips() < 2 || sim_tree->getRoot().getNumberOfChildren() != 2 || sim_tree->getRoot().getAge() != process_age->getValue()) && condition_on_tree == true)
+    {
+        delete tip_data;
+        nodes.clear();
+        delete sim_tree;
+        return false;
     }
     
     // update character history vectors 
