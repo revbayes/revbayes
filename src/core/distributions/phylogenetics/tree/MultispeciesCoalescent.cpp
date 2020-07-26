@@ -47,11 +47,11 @@ double MultispeciesCoalescent::computeLnCoalescentProbability(size_t k, const st
 
     double ln_prob_coal = 0;
     double current_time = begin_age;
+
     for (size_t i=0; i<times.size(); ++i)
     {
-
         // now we do the computation
-        //a is the time between the previous and the current coalescences
+        // a is the time between the previous and the current coalescences
         double a = times[i] - current_time;
 
         current_time = times[i];
@@ -60,16 +60,14 @@ double MultispeciesCoalescent::computeLnCoalescentProbability(size_t k, const st
         size_t j = k - i;
 
         // compute the number of pairs: pairs = C(j choose 2) = j * (j-1.0) / 2.0
-        //double n_pairs = j * (j-1.0) / 2.0;
-        double n_pairs = j * (j-1.0);
+        double n_pairs = j * (j-1.0) / 2.0;
         double lambda = n_pairs * theta;
 
         // add the density for this coalescent event
         //lnProbCoal += log( lambda ) - lambda * a;
         //Corrected version:
-        //ln_prob_coal += log( theta ) - lambda * a;
-        ln_prob_coal += log( 2 * theta ) - lambda * a;
-
+        ln_prob_coal += log( theta ) - lambda * a;
+        //ln_prob_coal += log( 2 * theta ) - lambda * a;
     }
 
     // compute the probability of no coalescent event in the final part of the branch
@@ -79,17 +77,8 @@ double MultispeciesCoalescent::computeLnCoalescentProbability(size_t k, const st
         double final_interval = end_age - current_time;
         size_t j = k - times.size();
 
-        if (j == 1)
-        {
-            ln_prob_coal += 0.0;
-        }
-        else
-        {
-            double n_pairs = j * (j-1.0);
-            //ln_prob_coal -= j*(j-1.0)/2.0 * final_interval * theta;
-            ln_prob_coal -= n_pairs * theta * final_interval;
-        }
-
+        double n_pairs = j * (j-1.0) / 2.0;
+        ln_prob_coal -= n_pairs * theta * final_interval;
     }
 
     return ln_prob_coal;

@@ -53,10 +53,15 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
     size_t n = times.size();
     double nt = n;
 
+    // std::cout << "theta max: " << theta_max << std::endl;
+    // std::cout << "n: " << n << std::endl;
+
     for (size_t i=0; i<n; ++i)
     {
         // now we do the computation
         // a is the time between the previous and the current coalescences
+
+        // std::cout << "current time: " << current_time << std::endl;
 
         double a = times[i] - current_time;
         current_time = times[i];
@@ -66,6 +71,9 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
         double n_pairs = j * (j-1.0);
 
         fn += a * n_pairs;
+        //
+        // std::cout << "j: " << j << std::endl;
+        // std::cout << "fn += " << a * n_pairs << std::endl;
     }
 
     // compute the probability of no coalescent event in the final part of the branch
@@ -76,6 +84,10 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
         size_t j = k - times.size();
         double n_pairs = j * (j-1.0);
         fn += final_interval * n_pairs;
+        //
+        // std::cout << "final interval: " << final_interval << std::endl;
+        // std::cout << "j: " << j << std::endl;
+        // std::cout << "fn += " << final_interval * n_pairs << std::endl;
     }
 
     // If we've gotten to the last node of the tree, then we can calculate the likelihood
@@ -89,6 +101,10 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
     {
         double ngc = getNumberOfGeneCopies();
         double integral_limit = 2 * fn / theta_max;
+
+        // std::cout << "fn total: " << fn << std::endl;
+        // std::cout << "ngc: " << ngc << std::endl;
+        // std::cout << "integral limit: " << integral_limit << std::endl;
 
         double upper_incomplete_gamma = 0.0;
         if ( ngc <= 2 )
@@ -113,6 +129,8 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
     {
         ln_prob_coal += 0.0;
     }
+
+    // std::cout << "ln prob coal: " << ln_prob_coal << "\n" << std::endl;
 
     return ln_prob_coal;
 }

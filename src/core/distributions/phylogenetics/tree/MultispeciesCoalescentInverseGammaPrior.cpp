@@ -18,8 +18,7 @@ using namespace RevBayesCore;
 
 MultispeciesCoalescentInverseGammaPrior::MultispeciesCoalescentInverseGammaPrior(const TypedDagNode<Tree> *sp, const std::vector<Taxon> &t) : AbstractMultispeciesCoalescent(sp, t)
 {
-    a = 0.0;
-    b = 0.0;
+
 }
 
 
@@ -41,15 +40,27 @@ MultispeciesCoalescentInverseGammaPrior* MultispeciesCoalescentInverseGammaPrior
 
 double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(size_t k, const std::vector<double> &times, double begin_age, double end_age, size_t index, bool add_final_interval)
 {
+    // k is the number of entering lineages, so the log like is 0 if
+    // there is only one lineages (as the probability of no coalescence
+    // is equal to 1.0 in this case, as it is the only possible outcome)
     if ( k == 1 ) return 0.0;
 
     double alpha = shape->getValue();
     double beta = rate->getValue();
 
+    double ln_prob_coal = 0.0;
     double current_time = begin_age;
 
+    // Get the number of coalescences
     size_t n = times.size();
-    a += n;
+
+    // Get the rb term from Jones (2017)
+    // We assume autosomal nuclear genes, so ploidy = 2
+    double a = n;
+    double r = -a * log(2.0);
+
+    // We need to get the branch gamma term (gamma_b in Jones 2017)
+    double b = 0.0;
 
     for (size_t i=0; i<n; ++i)
     {
@@ -60,7 +71,7 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
 
         // get the number j of individuals we had before the current coalescence
         size_t j = k - i;
-        double n_pairs = j * (j-1.0);
+        double n_pairs = j * (j-1.0) / 2.0;
 
         b += t * n_pairs;
     }
@@ -70,31 +81,22 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
     if ( add_final_interval == true )
     {
         double final_interval = end_age - current_time;
-        size_t j = k - times.size();
-        double n_pairs = j * (j-1.0);
+        size_t j = k - n;
+        double n_pairs = j * (j-1.0) / 2.0;
         b += final_interval * n_pairs;
     }
 
+    // Divide by ploidy
+    b /= 2.0;
 
-    // If we've gotten to the last node of the tree, then we can calculate the likelihood
-    // for the entire gene tree given the species tree using the total number of gene
-    // copies and the total coalescent rate over the entire genealogy
-    double ln_prob_coal = 0.0;
-
-    double num_tips = getNumberOfSpeciesTreeTips();
-
-    if ( index == 2*(num_tips-1) )
+    // Calculate the log gamma ratio
+    double log_gamma_ratio = 0.0;
+    for (size_t i=0; i<n; ++i)
     {
-        ln_prob_coal += RbConstants::LN2 * a + log(beta) * alpha + RbMath::lnGamma(a+alpha) - RbMath::lnGamma(alpha) - log(b+beta)*(a+alpha);
+        log_gamma_ratio += log(alpha + i);
+    }
 
-        // Remember to reset the total coalescent rate and number of coalescent times so that
-        // we don't just keep adding to them; we're done with them for this particular gene tree
-        resetAB();
-    }
-    else
-    {
-        ln_prob_coal += 0.0;
-    }
+    ln_prob_coal += r + (alpha * log(beta)) + log_gamma_ratio - ((alpha + a) * log(beta + b));
 
     return ln_prob_coal;
 }
@@ -111,23 +113,6 @@ double MultispeciesCoalescentInverseGammaPrior::drawNe( size_t index )
 }
 
 
-double MultispeciesCoalescentInverseGammaPrior::getNumberOfSpeciesTreeTips( void )
-{
-    double num_species_tree_tips = species_tree->getValue().getNumberOfTips();
-
-    return num_species_tree_tips;
-}
-
-
-void MultispeciesCoalescentInverseGammaPrior::resetAB( void )
-{
-
-    a = 0.0;
-    b = 0.0;
-
-}
-
-
 void MultispeciesCoalescentInverseGammaPrior::setShape(TypedDagNode<double>* s)
 {
 
@@ -137,7 +122,6 @@ void MultispeciesCoalescentInverseGammaPrior::setShape(TypedDagNode<double>* s)
 
     addParameter( shape );
 }
-
 
 
 void MultispeciesCoalescentInverseGammaPrior::setRate(TypedDagNode<double>* r)

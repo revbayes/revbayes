@@ -24,8 +24,6 @@ namespace RevBayesCore {
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Swap a parameter
         double                                              computeLnCoalescentProbability(size_t k, const std::vector<double> &t, double a, double b, size_t index, bool f);
         double                                              drawNe(size_t index);
-        double                                              getNumberOfSpeciesTreeTips( void );
-        void                                                resetAB( void );
 
 
     private:
@@ -33,8 +31,6 @@ namespace RevBayesCore {
         // members
         const TypedDagNode<double>*                          shape;
         const TypedDagNode<double>*                          rate;
-        double                                               a;
-        double                                               b;
 
     };
 
