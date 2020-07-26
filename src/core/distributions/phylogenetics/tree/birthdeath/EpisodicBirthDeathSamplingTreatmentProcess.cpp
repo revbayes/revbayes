@@ -661,7 +661,8 @@ double EpisodicBirthDeathSamplingTreatmentProcess::lnD(size_t i, double t) const
     {
         // TODO: this can't be right, if phi_event[0] = 0 this will blow up
         // return log(phi_event[0]);
-        return phi_event[0] <= DBL_EPSILON ? 0.0 : log(phi_event[0]);
+//        return phi_event[0] <= DBL_EPSILON ? 0.0 : log(phi_event[0]);
+        return 0.0;
     }
     else
     {
