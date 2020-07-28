@@ -307,12 +307,19 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         const int& n = tree.getRoot().getIndex();
         return new RevVariable( new Natural( n ) );
     }
-    else if (name == "reRoot")
+    else if (name == "reroot")
     {
         found = true;
         const RevBayesCore::Clade &tmp = static_cast<const Clade&>( args[0].getVariable()->getRevObject() ).getValue();
+        bool make_bifurcating = static_cast<RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
         RevBayesCore::Tree &tree = dag_node->getValue();
-        tree.reroot(tmp, true);
+        if (make_bifurcating)
+        {
+            tree.rerootAndMakeBifurcating(tmp, true);
+        }
+        else {
+            tree.reroot(tmp, true);
+        }
         return NULL;
     }
     else if ( name == "getDescendantTaxa" )
@@ -328,14 +335,6 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         found = true;
         RevBayesCore::Tree &tree = dag_node->getValue();
         tree.makeInternalNodesBifurcating(true);
-        return NULL;
-    }
-    else if (name == "reRootAndMakeBifurcating")
-    {
-        found = true;
-        const RevBayesCore::Clade &tmp = static_cast<const Clade&>( args[0].getVariable()->getRevObject() ).getValue();
-        RevBayesCore::Tree &tree = dag_node->getValue();
-        tree.rerootAndMakeBifurcating(tmp, true);
         return NULL;
     }
 
@@ -502,7 +501,8 @@ void Tree::initMethods( void )
 
     ArgumentRules* rerootArgRules = new ArgumentRules();
     rerootArgRules->push_back( new ArgumentRule( "clade", Clade::getClassTypeSpec(), "The clade to use as outgroup.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    methods.addFunction( new MemberProcedure( "reRoot", RlUtils::Void, rerootArgRules ) );
+    rerootArgRules->push_back( new ArgumentRule( "make_bifurcating", RlBoolean::getClassTypeSpec(), "Do we want a bifurcation at the root?", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure( "reroot", RlUtils::Void, rerootArgRules ) );
 
     ArgumentRules* getDescendantTaxaArgRules = new ArgumentRules();
     getDescendantTaxaArgRules->push_back( new ArgumentRule( "node", Natural::getClassTypeSpec(), "the index of the node.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
@@ -510,11 +510,6 @@ void Tree::initMethods( void )
 
     ArgumentRules* makeBifurcatingArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "makeBifurcating", RlUtils::Void, makeBifurcatingArgRules   ) );
-
-    ArgumentRules* reRootAndMakeBifurcatingArgRules = new ArgumentRules();
-    reRootAndMakeBifurcatingArgRules->push_back( new ArgumentRule( "clade", Clade::getClassTypeSpec(), "The clade to use as outgroup.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    methods.addFunction( new MemberProcedure( "reRootAndMakeBifurcating", RlUtils::Void, reRootAndMakeBifurcatingArgRules ) );
-
 
     // member functions
     ArgumentRules* parentArgRules = new ArgumentRules();
