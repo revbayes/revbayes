@@ -83,6 +83,7 @@
 #include "RlMatrixReal.h"
 #include "RlMatrixRealPos.h"
 #include "RlMatrixRealSymmetric.h"
+#include "RlStochasticMatrix.h"
 
 /* Container types (in folder "datatypes/math") */
 #include "ModelVector.h"
@@ -129,6 +130,7 @@ void RevLanguage::Workspace::initializeVectorTypeGlobalWorkspace(void)
         AddWorkspaceVectorType<MatrixReal,3>::addTypeToWorkspace( *this, new MatrixReal() );
         AddWorkspaceVectorType<MatrixRealPos,3>::addTypeToWorkspace( *this, new MatrixRealPos() );
         AddWorkspaceVectorType<MatrixRealSymmetric,3>::addTypeToWorkspace( *this, new MatrixRealSymmetric() );
+        AddWorkspaceVectorType<StochasticMatrix,3>::addTypeToWorkspace( *this, new StochasticMatrix() );
         AddWorkspaceVectorType<AbstractHomologousDiscreteCharacterData,3>::addTypeToWorkspace( *this, new AbstractHomologousDiscreteCharacterData() );
         AddWorkspaceVectorType<ContinuousCharacterData,3>::addTypeToWorkspace( *this, new ContinuousCharacterData() );
         AddWorkspaceVectorType<CharacterHistoryRateModifier,3>::addTypeToWorkspace( *this, new CharacterHistoryRateModifier() );

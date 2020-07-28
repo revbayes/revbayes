@@ -12,6 +12,13 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
+/*
+ * Tajimas D Function Constructor
+ *
+ * @param a A character data set with the alignment
+ * @param e A boolean for whether we exclude the ambiguous sites from the alignment
+ */
+
 TajimasDFunction::TajimasDFunction(const TypedDagNode<AbstractHomologousDiscreteCharacterData> *a, bool e) : TypedFunction<double>( new double(0.0) ),
     alignment( a ),
     exclude_ambiguous_sites( e )

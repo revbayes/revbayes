@@ -13,24 +13,11 @@ namespace RevBayesCore {
     class TransitionProbabilityMatrix;
     
     /**
-     * @brief HKY (Hasegawa, Kishino and Yano 1985) rate matrix class.
+     * @brief Generalised Time Reversible Model (GTR)rate matrix class (Tavare 1986).
      *
-     * This class implements the special HKY rate matrix with the known analytical solution for the transition probabilities.
-     * The HKY matrix has a transition-transversion rate kappa and the four base frequency parameters.
-     * The resulting rate matrix is computed by:
+     * This class implements the special GTR rate matrix with the known analytical solution for the transition probabilities.
+     * The GTR matrix has 6 transition probabilities and the four base frequency parameters.
      *
-     *      |     -       pi_C     k*pi_G      pi_T   |
-     *      |                                         |
-     *      |   pi_A        -       pi_G      k*pi_T  |
-     * Q =  |                                         |
-     *      |  k*pi_A     pi_C        -        pi_T   |
-     *      |                                         |
-     *      |   pi_A     k*pi_C     pi_G         -    |
-     *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2014-07-04, version 1.0
      */
     class RateMatrix_GTR : public TimeReversibleRateMatrix {
         

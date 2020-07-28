@@ -214,6 +214,7 @@
 #include "Func_max.h"
 #include "Func_mean.h"
 #include "Func_meanPositive.h"
+#include "Func_meanSimplex.h"
 #include "Func_median.h"
 #include "Func_min.h"
 #include "Func_normalize.h"
@@ -227,7 +228,9 @@
 #include "Func_sumPositive.h"
 #include "Func_sumInteger.h"
 #include "Func_sumNatural.h"
+#include "Func_sumSimplex.h"
 #include "Func_standardDeviation.h"
+#include "Func_stochasticMatrix.h"
 #include "Func_sqrt.h"
 #include "Func_trunc.h"
 #include "Func_upperTriangle.h"
@@ -422,12 +425,16 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         // matrix function (converts into MatrixReal)
         addFunction( new Func_matrix() );
 
+        // stochastic matrix (converts into row-stochastic matrix)
+        addFunction( new Func_stochasticMatrix() );
+
         // max function
         addFunction( new Func_max()  );
 
         // mean function
         addFunction( new Func_mean()  );
         addFunction( new Func_meanPositive()  );
+        addFunction( new Func_meanSimplex()  );
 
         // median function
         addFunction( new Func_median()  );
@@ -453,6 +460,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_sumPositive()  );
         addFunction( new Func_sumInteger()  );
         addFunction( new Func_sumNatural()  );
+        addFunction( new Func_sumSimplex()  );
 
         // standard deviation function
         addFunction( new Func_standardDeviation()  );

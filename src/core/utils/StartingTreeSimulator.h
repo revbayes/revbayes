@@ -24,7 +24,7 @@ class Tree;
         
     public:
         
-        enum SIM_CONDITION { TIME, SURVIVAL, ROOT };
+//        enum SIM_CONDITION { TIME, SURVIVAL, ROOT };
         
         StartingTreeSimulator();
         

@@ -14,7 +14,6 @@ template <class valueType> class TypedDagNode;
      * Useful application are for base 2, e and 10.
      *
      * Re-implemented here for use with TypedDagNode
-     *
      */
     class LogFunction : public ContinuousFunction {
         

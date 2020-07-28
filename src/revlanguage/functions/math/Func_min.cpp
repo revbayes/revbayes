@@ -1,16 +1,7 @@
-//
-//  Func_exp.cpp
-//  RevBayesCore
-//
-//  Created by Sebastian Hoehna on 8/7/12.
-//  Copyright 2012 __MyCompanyName__. All rights reserved.
-//
-
 #include <stddef.h>
 #include <iosfwd>
 #include <string>
 #include <vector>
-
 #include "MinFunction.h"
 #include "Func_min.h"
 #include "ModelVector.h"

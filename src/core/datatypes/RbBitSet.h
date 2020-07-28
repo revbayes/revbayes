@@ -52,6 +52,7 @@ namespace RevBayesCore {
         void                            set(size_t i);
         size_t                          size(void) const;
         void                            unset(size_t i);
+        std::string print();
 
 
     private:

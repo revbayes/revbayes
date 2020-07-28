@@ -105,7 +105,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::resizeLikelihoodVectors( void 
     }
 }
 
-void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::updateTransitionProbabilities(size_t node_idx, double brlen)
+void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::updateTransitionProbabilities(size_t node_idx)
 {
     // first, get the clock rate for the branch
     double rate = 1.0;
@@ -305,7 +305,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::setDeathRate(const TypedDagNod
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t root, size_t left, size_t right)
 {
     // compute the transition probability matrix
-    updateTransitionProbabilities( root, 0 );
+    updateTransitionProbabilities( root );
 
     // get the root frequencies
     std::vector<std::vector<double> > ff;
@@ -369,7 +369,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t root, size_t left, size_t right, size_t middle)
 {
     // compute the transition probability matrix
-    updateTransitionProbabilities( root, 0 );
+    updateTransitionProbabilities( root );
 
     // get the root frequencies
     std::vector<std::vector<double> > ff;
@@ -438,7 +438,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right)
 {
     // compute the transition probability matrix
-    updateTransitionProbabilities( node_index, node.getBranchLength() );
+    updateTransitionProbabilities( node_index );
 
     // get the root frequencies
     std::vector<std::vector<double> > ff;
@@ -509,7 +509,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(
 {
 
     // compute the transition probability matrix
-    updateTransitionProbabilities( node_index, node.getBranchLength() );
+    updateTransitionProbabilities( node_index );
 
     // get the root frequencies
     std::vector<std::vector<double> > ff;
@@ -592,7 +592,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipLikelihood(const Top
     const std::vector<RbBitSet> &amb_char_node = this->ambiguous_char_matrix[data_tip_index];
     
     // compute the transition probabilities
-    updateTransitionProbabilities( node_index, node.getBranchLength() );
+    updateTransitionProbabilities( node_index );
 
     // get the root frequencies
     std::vector<std::vector<double> > ff;
@@ -1721,7 +1721,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::simulate( const TopologyNode &
         const TopologyNode &child = *(*it);
 
         // update the transition probability matrix
-        this->updateTransitionProbabilities( child.getIndex(), child.getBranchLength() );
+        this->updateTransitionProbabilities( child.getIndex() );
 
         double u = rng->uniform01();
 

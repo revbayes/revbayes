@@ -16,8 +16,8 @@
 
 using namespace RevBayesCore;
 
-/** Construct rate matrix with n states */
-RateMatrix_TVM::RateMatrix_TVM(size_t n) : TimeReversibleRateMatrix( n ), rates(5,1)
+/** Construct rate matrix with 4 states and all five exchangeabilities set to 1 */
+RateMatrix_TVM::RateMatrix_TVM(void) : TimeReversibleRateMatrix( 4 ), rates(5,1)
 {
     
     theEigenSystem       = new EigenSystem(the_rate_matrix);

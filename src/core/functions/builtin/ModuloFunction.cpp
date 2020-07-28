@@ -1,5 +1,4 @@
 #include "ModuloFunction.h"
-
 #include "Cloneable.h"
 #include "TypedDagNode.h"
 
@@ -8,8 +7,8 @@ namespace RevBayesCore { class DagNode; }
 using namespace RevBayesCore;
 /* ModuloFunction of TypedDagNodes of types long
  *
- * @param l a value of type long
- * @param r a value of type long
+ * @param l a value of type long, the dividend of the remainder division
+ * @param r a value of type long, the divisor of the remainder division
  */
 ModuloFunction::ModuloFunction(const TypedDagNode<long> *l, const TypedDagNode<long> *r) : TypedFunction<long>( new long(0) ),
     left( l ),
