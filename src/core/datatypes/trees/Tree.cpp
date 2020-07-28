@@ -1509,14 +1509,8 @@ void Tree::reroot(const Clade &o, bool reindex)
 
     if ( outgroup_node->isRoot() == false )
     {
+      reroot(*outgroup_node, reindex);
 
-//        TopologyNode &new_root = outgroup_node->getParent();
-        reverseParentChild( outgroup_node->getParent() );
-
-        outgroup_node->getParent().setParent( NULL );
-
-        // set the new root
-        setRoot( &outgroup_node->getParent(), reindex );
     }
 
 }
@@ -1539,14 +1533,9 @@ void Tree::reroot(const std::string &outgroup, bool reindex)
     {
         throw RbException("Cannot reroot the tree because we could not find an outgroup with name '" + outgroup + "'.");
     }
-
-    // reset parent/child relationships
-	TopologyNode& outgroup_node = getTipNode( outgroup_index );
-    reverseParentChild( outgroup_node.getParent() );
-    outgroup_node.getParent().setParent( NULL );
-
-	// set the new root
-	setRoot( &outgroup_node.getParent(), reindex );
+    
+    TopologyNode& outgroup_node = getTipNode( outgroup_index );
+    reroot(outgroup_node, reindex);
 
 }
 
