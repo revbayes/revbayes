@@ -333,6 +333,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     else if (name == "makeBifurcating")
     {
         found = true;
+        bool fossils_only = static_cast<RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
         RevBayesCore::Tree &tree = dag_node->getValue();
         tree.makeInternalNodesBifurcating(true);
         return NULL;
@@ -509,6 +510,7 @@ void Tree::initMethods( void )
     methods.addFunction( new MemberProcedure( "getDescendantTaxa", ModelVector<Taxon>::getClassTypeSpec(), getDescendantTaxaArgRules ) );
 
     ArgumentRules* makeBifurcatingArgRules = new ArgumentRules();
+    makeBifurcatingArgRules->push_back( new ArgumentRule( "fossils_only", RlBoolean::getClassTypeSpec(), "Do we want to bifurcate only nodes with degree 1, or all nodes with degree different from 2?", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "makeBifurcating", RlUtils::Void, makeBifurcatingArgRules   ) );
 
     // member functions
