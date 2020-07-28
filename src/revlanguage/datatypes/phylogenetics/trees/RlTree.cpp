@@ -501,12 +501,8 @@ void Tree::initMethods( void )
 
     ArgumentRules* rerootArgRules = new ArgumentRules();
     rerootArgRules->push_back( new ArgumentRule( "clade", Clade::getClassTypeSpec(), "The clade to use as outgroup.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-<<<<<<< HEAD
     rerootArgRules->push_back( new ArgumentRule( "make_bifurcating", RlBoolean::getClassTypeSpec(), "Do we want a bifurcation at the root?", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "reroot", RlUtils::Void, rerootArgRules ) );
-=======
-    methods.addFunction( new MemberProcedure( "reRoot", RlUtils::Void, rerootArgRules ) );
->>>>>>> 47463832d7e8b3d77f2d3e9b58de1ffa67501ecc
 
     ArgumentRules* getDescendantTaxaArgRules = new ArgumentRules();
     getDescendantTaxaArgRules->push_back( new ArgumentRule( "node", Natural::getClassTypeSpec(), "the index of the node.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
@@ -514,14 +510,6 @@ void Tree::initMethods( void )
 
     ArgumentRules* makeBifurcatingArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "makeBifurcating", RlUtils::Void, makeBifurcatingArgRules   ) );
-<<<<<<< HEAD
-=======
-
-    ArgumentRules* reRootAndMakeBifurcatingArgRules = new ArgumentRules();
-    reRootAndMakeBifurcatingArgRules->push_back( new ArgumentRule( "clade", Clade::getClassTypeSpec(), "The clade to use as outgroup.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    methods.addFunction( new MemberProcedure( "reRootAndMakeBifurcating", RlUtils::Void, reRootAndMakeBifurcatingArgRules ) );
-
->>>>>>> 47463832d7e8b3d77f2d3e9b58de1ffa67501ecc
 
     // member functions
     ArgumentRules* parentArgRules = new ArgumentRules();
