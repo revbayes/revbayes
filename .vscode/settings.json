@@ -1,0 +1,8 @@
+{
+    "C_Cpp.errorSquiggles": "Enabled",
+    "C_Cpp.default.intelliSenseMode": "clang-x64"
+},
+
+"files.watcherExclude": {
+    "**/largeFolder": true
+}
