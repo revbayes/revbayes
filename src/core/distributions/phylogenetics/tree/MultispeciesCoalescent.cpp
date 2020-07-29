@@ -43,7 +43,7 @@ double MultispeciesCoalescent::computeLnCoalescentProbability(size_t k, const st
 {
     if ( k == 1 ) return 0.0;
 
-    double theta = 1.0 / getNe( index );
+    double theta = 2.0 / getNe( index );
 
     double ln_prob_coal = 0;
     double current_time = begin_age;
@@ -67,7 +67,6 @@ double MultispeciesCoalescent::computeLnCoalescentProbability(size_t k, const st
         //lnProbCoal += log( lambda ) - lambda * a;
         //Corrected version:
         ln_prob_coal += log( theta ) - lambda * a;
-        //ln_prob_coal += log( 2 * theta ) - lambda * a;
     }
 
     // compute the probability of no coalescent event in the final part of the branch
