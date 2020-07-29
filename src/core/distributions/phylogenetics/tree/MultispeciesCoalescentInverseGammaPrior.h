@@ -1,16 +1,16 @@
 #ifndef MultispeciesCoalescentInverseGammaPrior_H
 #define MultispeciesCoalescentInverseGammaPrior_H
 
-#include "AbstractMultispeciesCoalescent.h"
+#include "AbstractMultispeciesCoalescentGenewise.h"
 
 namespace RevBayesCore {
 
     class Clade;
 
-    class MultispeciesCoalescentInverseGammaPrior : public AbstractMultispeciesCoalescent {
+    class MultispeciesCoalescentInverseGammaPrior : public AbstractMultispeciesCoalescentGenewise {
 
     public:
-        MultispeciesCoalescentInverseGammaPrior(const TypedDagNode<Tree> *st, const std::vector<Taxon> &t);
+        MultispeciesCoalescentInverseGammaPrior(const TypedDagNode<Tree> *st, const std::vector<Taxon> &t, size_t ngt);
         virtual                                            ~MultispeciesCoalescentInverseGammaPrior(void);                                                                       //!< Virtual destructor
 
         // public member functions

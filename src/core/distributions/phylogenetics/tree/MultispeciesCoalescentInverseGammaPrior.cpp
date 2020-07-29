@@ -2,12 +2,13 @@
 #include <cmath>
 #include <vector>
 
+#include "ModelVector.h"
 #include "MultispeciesCoalescentInverseGammaPrior.h"
 #include "DistributionInverseGamma.h"
 #include "RandomNumberFactory.h"
 #include "RbConstants.h"
 #include "RbMathFunctions.h"
-#include "AbstractMultispeciesCoalescent.h"
+#include "AbstractMultispeciesCoalescentGenewise.h"
 #include "TypedDagNode.h"
 
 namespace RevBayesCore { class DagNode; }
@@ -16,7 +17,7 @@ namespace RevBayesCore { class Tree; }
 
 using namespace RevBayesCore;
 
-MultispeciesCoalescentInverseGammaPrior::MultispeciesCoalescentInverseGammaPrior(const TypedDagNode<Tree> *sp, const std::vector<Taxon> &t) : AbstractMultispeciesCoalescent(sp, t)
+MultispeciesCoalescentInverseGammaPrior::MultispeciesCoalescentInverseGammaPrior(const TypedDagNode<Tree> *sp, const std::vector<Taxon> &t, size_t ngt) : AbstractMultispeciesCoalescentGenewise(sp, t, ngt)
 {
 
 }
@@ -41,15 +42,16 @@ MultispeciesCoalescentInverseGammaPrior* MultispeciesCoalescentInverseGammaPrior
 double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(size_t k, const std::vector<double> &times, double begin_age, double end_age, size_t index, bool add_final_interval)
 {
     // k is the number of entering lineages, so the log like is 0 if
-    // there is only one lineages (as the probability of no coalescence
+    // there is only one lineage (as the probability of no coalescence
     // is equal to 1.0 in this case, as it is the only possible outcome)
     if ( k == 1 ) return 0.0;
 
     double alpha = shape->getValue();
     double beta = rate->getValue();
 
-    double ln_prob_coal = 0.0;
     double current_time = begin_age;
+
+    double ln_prob_coal = 0.0;
 
     // Get the number of coalescences
     size_t n = times.size();
@@ -57,7 +59,7 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
     // Get the rb term from Jones (2017)
     // We assume autosomal nuclear genes, so ploidy = 2
     double a = n;
-    double r = -a * log(2.0);
+    double log_r = -a * log(2.0);
 
     // We need to get the branch gamma term (gamma_b in Jones 2017)
     double b = 0.0;
@@ -96,7 +98,7 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
         log_gamma_ratio += log(alpha + i);
     }
 
-    ln_prob_coal += r + (alpha * log(beta)) + log_gamma_ratio - ((alpha + a) * log(beta + b));
+    ln_prob_coal += log_r + (alpha * log(beta)) - ((alpha + a) * log(beta + b)) + log_gamma_ratio;
 
     return ln_prob_coal;
 }
@@ -148,6 +150,7 @@ void MultispeciesCoalescentInverseGammaPrior::swapParameterInternal(const DagNod
     {
         shape = static_cast<const TypedDagNode< double >* >( newP );
     }
-    AbstractMultispeciesCoalescent::swapParameterInternal(oldP, newP);
+
+    AbstractMultispeciesCoalescentGenewise::swapParameterInternal(oldP, newP);
 
 }
