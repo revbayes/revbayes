@@ -106,22 +106,26 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     
     double oldLnLike = 0.0;
     bool check_likelihood_shortcuts = rng->uniform01() < 0.001;
+    check_likelihood_shortcuts = true;
     if ( check_likelihood_shortcuts == true )
     {
+//        tree->touch();
+//        tree->keep();
         for (RbOrderedSet<DagNode*>::iterator it = affected.begin(); it != affected.end(); ++it)
         {
             (*it)->touch();
             oldLnLike += (*it)->getLnProbability();
+//            (*it)->keep();
         }
     }
     
     // pick a random node which is not the root and neithor the direct descendant of the root
     TopologyNode* node;
-    size_t nide_idx = 0;
+    size_t node_idx = 0;
     do {
         double u = rng->uniform01();
-        nide_idx = size_t( std::floor(tau.getNumberOfNodes() * u) );
-        node = &tau.getNode(nide_idx);
+        node_idx = size_t( std::floor(tau.getNumberOfNodes() * u) );
+        node = &tau.getNode(node_idx);
     } while ( node->isRoot() || node->isTip() ); 
     
     TopologyNode& parent = node->getParent();
@@ -140,8 +144,8 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     stored_age = my_age;
     
     
-    stored_rates[nide_idx] = (rates == NULL ? rates_vec[nide_idx]->getValue() : rates->getValue()[nide_idx]);
-    for (size_t i = 0; i < node->getNumberOfChildren(); i++)
+    stored_rates[node_idx] = (rates == NULL ? rates_vec[node_idx]->getValue() : rates->getValue()[node_idx]);
+    for (size_t i = 0; i < node->getNumberOfChildren(); ++i)
     {
         size_t child_idx = node->getChild(i).getIndex();
         stored_rates[child_idx] = (rates == NULL ? rates_vec[child_idx]->getValue() : rates->getValue()[child_idx]);
@@ -153,6 +157,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     double a = delta * m + 1.0;
     double b = delta * (1.0-m) + 1.0;
     double new_m = RbStatistics::Beta::rv(a, b, *rng);
+        
     double my_new_age = (parent_age-child_Age) * new_m + child_Age;
     
     // compute the Hastings ratio
@@ -162,7 +167,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     double backward = RbStatistics::Beta::lnPdf(new_a, new_b, m);
     
     // set the age
-    tau.getNode(nide_idx).setAge( my_new_age );
+    tau.getNode(node_idx).setAge( my_new_age );
     
     // touch the tree so that the likelihoods are getting stored
     tree->touch();
@@ -170,32 +175,34 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     // get the probability ratio of the tree
     double tree_prob_ratio = tree->getLnProbabilityRatio();
     
+    // we also need to get the prob ratio of all descendants of the tree
+    
+    
     
     // set the rates
-    double pa = node->getParent().getAge();
-    double my_new_rate = (pa - my_age) * stored_rates[nide_idx] / (pa - my_new_age);
+    double my_new_rate = (parent_age - my_age) * stored_rates[node_idx] / (parent_age - my_new_age);
     
     // now we set the new value
     // this will automatically call a touch
     if ( rates == NULL )
     {
-        rates_vec[nide_idx]->setValue( new double( my_new_rate ) );
+        rates_vec[node_idx]->setValue( new double( my_new_rate ) );
     }
     else
     {
-        rates->getValue()[nide_idx] = my_new_rate;
+        rates->getValue()[node_idx] = my_new_rate;
         rates->touch();
     }
     // get the probability ratio of the new rate
-    double rates_prob_ratio = ( rates == NULL ? rates_vec[nide_idx]->getLnProbabilityRatio() : 0.0 );
-    double jacobian = log((pa - my_age) / (pa - my_new_age));
+    double rates_prob_ratio = ( rates == NULL ? rates_vec[node_idx]->getLnProbabilityRatio() : 0.0 );
+    double jacobian = log((parent_age - my_age) / (parent_age - my_new_age));
     
     for (size_t i = 0; i < node->getNumberOfChildren(); i++)
     {
         size_t child_idx = node->getChild(i).getIndex();
         double a = node->getChild(i).getAge();
         double child_new_rate = (my_age - a) * stored_rates[child_idx] / (my_new_age - a);
-        
+                
         // now we set the new value
         // this will automatically call a touch
         if ( rates == NULL )
@@ -225,7 +232,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         tree->touch();
         if ( rates == NULL )
         {
-            rates_vec[nide_idx]->touch();
+            rates_vec[node_idx]->touch();
         }
         else
         {
@@ -280,8 +287,8 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         tree->keep();
         if ( rates == NULL )
         {
-            rates_vec[nide_idx]->touch();
-            rates_vec[nide_idx]->keep();
+            rates_vec[node_idx]->touch();
+            rates_vec[node_idx]->keep();
         }
         else
         {
@@ -304,7 +311,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         tree->restore();
         if ( rates == NULL )
         {
-            rates_vec[nide_idx]->restore();
+            rates_vec[node_idx]->restore();
         }
         else
         {
@@ -334,8 +341,8 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
             tree->keep();
             if ( rates == NULL )
             {
-                rates_vec[nide_idx]->touch();
-                rates_vec[nide_idx]->keep();
+                rates_vec[node_idx]->touch();
+                rates_vec[node_idx]->keep();
             }
             else
             {
@@ -358,7 +365,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
             tree->restore();
             if ( rates == NULL )
             {
-                rates_vec[nide_idx]->restore();
+                rates_vec[node_idx]->restore();
             }
             else
             {
