@@ -31,8 +31,13 @@ while echo $1 | grep ^- > /dev/null; do
 -boost_root     string          : specify directory containing Boost headers (e.g. `/usr/include`). Defaults to unset.
 -boost_lib      string          : specify directory containing Boost libraries. (e.g. `/usr/lib`). Defaults to unset.
 
-Example:
-  ./build.sh -mpi true -help true'
+You can also specify cmake variables as -DCMAKE_VAR1=value1 -DCMAKE_VAR2=value2
+
+Examples:
+  ./build.sh -mpi true -help true
+  ./build.sh -boost_root /home/santa/boost_1.72
+  ./build.sh -DBOOST_ROOT=/home/santa/boost_1.72
+  ./build.sh -mpi true -DHELP=ON -DBOOST_ROOT=/home/santa/boost_1.72'
         exit
     fi
 
@@ -93,11 +98,11 @@ if [ "$travis" = "true" ] ; then
 fi
 
 if [ -n "$boost_root" ] ; then
-    cmake_args="-DLOCAL_BOOST_ROOT=\"${boost_root}\""
+    cmake_args="-DBOOST_ROOT=\"${boost_root}\" $cmake_args"
 fi
 
 if [ -n "$boost_lib" ] ; then
-    cmake_args="-DLOCAL_BOOST_LIBRARY=\"${boost_lib}\""
+    cmake_args="-DBOOST_LIBRARYDIR=\"${boost_lib}\" $cmake_args"
 fi
 
 if [ "$help" = "true" ] ; then
@@ -142,6 +147,8 @@ fi
     echo "Running './regenerate.sh $(pwd)/$BUILD_DIR"
     ./regenerate.sh $(pwd)/$BUILD_DIR
     cd ${BUILD_DIR}
+    echo
+    echo
     echo "Running 'cmake ../../../src $cmake_args' in $(pwd)"
     cmake ../../../src $cmake_args
     echo
