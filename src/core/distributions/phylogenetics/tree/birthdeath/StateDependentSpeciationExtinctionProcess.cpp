@@ -310,7 +310,14 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
                 
                 if ( obs_state.isSet( j ) == true || gap == true )
                 {
-                    node_likelihood[num_states+j] = sampling[j];
+                	if ( node.isFossil() )
+                	{
+                		node_likelihood[num_states+j] = sampling[j] * extinction[j];
+                	}
+                	else
+                	{
+                		node_likelihood[num_states+j] = sampling[j];
+                	}
                 }
                 else
                 {

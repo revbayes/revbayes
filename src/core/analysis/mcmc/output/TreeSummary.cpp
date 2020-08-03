@@ -734,7 +734,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
         
         Clade clade = n->getClade();
         Split split( clade.getBitRepresentation(), clade.getMrca(), rooted);
-        
+
         // annotate clade posterior prob
         if ( ( !n->isTip() || ( n->isRoot() && !clade.getMrca().empty() ) ) && report.clade_probs )
         {
@@ -1112,23 +1112,23 @@ long TreeSummary::splitFrequency(const Split &n) const
 }
 
 
-TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& tmp, std::vector<TopologyNode*>& children, RbBitSet& child_b ) const
+TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, std::vector<TopologyNode*>& children, RbBitSet& child_b ) const
 {
     size_t num_taxa = child_b.size();
     
     RbBitSet node( num_taxa );
     n.getTaxa(node);
     
-    RbBitSet clade = tmp.first;
+    RbBitSet clade = split.first;
     
     RbBitSet mask  = node | clade;
     
     bool compatible = (mask == node);
-    bool child      = (mask == clade);
+    bool ischild      = (mask == clade);
     
-    Split c = tmp;
+    Split c = split;
     // check if the flipped unrooted split is compatible
-    if ( !rooted && !compatible && !child)
+    if ( !rooted && !compatible && !ischild)
     {
         RbBitSet clade_flip = clade; ~clade_flip;
         mask  = node | clade_flip;
@@ -1156,12 +1156,12 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& tmp, std
         
         for (size_t i = 0; i < x.size(); i++)
         {
-            RbBitSet child_b(clade.size());
+            RbBitSet child_bset(clade.size());
             
-            TopologyNode* child = findParentNode(*x[i], c, new_children, child_b );
+            TopologyNode* child = findParentNode(*x[i], c, new_children, child_bset );
             
             // add this child to the mask
-            child_mask = (child_b | child_mask);
+            child_mask = (child_bset | child_mask);
             
             // check if child is a compatible parent
             if (child != NULL)
@@ -1174,12 +1174,12 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& tmp, std
         children = new_children;
         
         // check that we found all the children
-        if ( parent == &n && child_mask != clade)
+        if ( parent == &n && child_mask != c.first && !n.isTip())
         {
             parent = NULL;
         }
     }
-    else if (child)
+    else if (ischild)
     {
         child_b = node;
         children.push_back(&n);
