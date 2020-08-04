@@ -690,13 +690,6 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
             {
                 tmp_tree->reroot( outgroup, true );
             }
-            else
-            {
-                std::vector<std::string> tip_names = traces.front()->objectAt(0).getTipNames();
-                std::sort(tip_names.begin(),tip_names.end());
-                std::string outgrp = tip_names[0];
-                tmp_tree->reroot( outgrp, true );
-            }
         }
         else if ( tmp_tree->isRooted() != rooted )
         {
