@@ -11,16 +11,21 @@
 
 #include "CladogeneticSpeciationRateMatrix.h"
 #include "RlCladogeneticSpeciationRateMatrix.h"
+#include "RlCladogeneticProbabilityMatrix.h"
 #include "ConstantNode.h"
 #include "DagNode.h"
 #include "DeterministicNode.h"
 #include "DynamicNode.h"
 #include "IndirectReferenceFunction.h"
+#include "MemberFunction.h"
 #include "ModelObject.h"
+#include "ModelVector.h"
+#include "RealPos.h"
 #include "RevObject.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "RlConstantNode.h"
+#include "RlMemberFunction.h"
 #include "TypeSpec.h"
 #include "TypedDagNode.h"
 #include "TypedFunction.h"
@@ -63,7 +68,20 @@ CladogeneticSpeciationRateMatrix* CladogeneticSpeciationRateMatrix::clone() cons
 /* Map calls to member methods */
 RevPtr<RevVariable> CladogeneticSpeciationRateMatrix::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
 {
-    ; // do nothing for now
+    
+    if (name == "getSpeciationRateSumsPerState")
+    {
+        found = true;
+        std::vector<double> v = this->dag_node->getValue().getSpeciationRateSumPerState();
+        return new RevVariable( new ModelVector<RealPos>( v ) );
+    }
+    else if (name == "getCladogeneticProbabilityMatrix")
+    {
+        found = true;
+        RevBayesCore::CladogeneticProbabilityMatrix p = this->dag_node->getValue().getCladogeneticProbabilityMatrix();
+        return new RevVariable( new CladogeneticProbabilityMatrix( p ) );
+    }
+    
     return ModelObject<RevBayesCore::CladogeneticSpeciationRateMatrix>::executeMethod( name, args, found );
 }
 
@@ -93,5 +111,11 @@ const TypeSpec& CladogeneticSpeciationRateMatrix::getTypeSpec(void) const {
 }
 
 void CladogeneticSpeciationRateMatrix::initMethods(void) {
-    ; // do nothing
+    
+    ArgumentRules* speciationRateSumPerStateArgRules = new ArgumentRules();
+    methods.addFunction( new MemberFunction<CladogeneticSpeciationRateMatrix, ModelVector<RealPos> >( "getSpeciationRateSumPerState", this, speciationRateSumPerStateArgRules ) );
+
+    ArgumentRules* cladogeneticProbabilityMatrixArgRules = new ArgumentRules();
+    methods.addFunction( new MemberFunction<CladogeneticSpeciationRateMatrix, CladogeneticProbabilityMatrix>( "getCladogeneticProbabilityMatrix", this, cladogeneticProbabilityMatrixArgRules ) );
+
 }
