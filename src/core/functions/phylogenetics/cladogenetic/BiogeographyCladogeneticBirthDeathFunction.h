@@ -18,6 +18,7 @@
 
 #include "AbstractCladogenicStateFunction.h"
 #include "CladogeneticSpeciationRateMatrix.h"
+#include "CladogeneticProbabilityMatrix.h"
 #include "TypedFunction.h"
 
 namespace RevBayesCore {
@@ -46,10 +47,14 @@ template <class valueType> class TypedDagNode;
                                                                      size_t right_index ) const;
         
         BiogeographyCladogeneticBirthDeathFunction*                 clone(void) const;
+        
         std::map< std::vector<unsigned>, double >                   getEventMap(double t=0.0);
         const std::map< std::vector<unsigned>, double >&            getEventMap(double t=0.0) const;
+       
         void                                                        setRateMultipliers(const TypedDagNode< RbVector< double > >* rm);
         void                                                        update(void);
+        
+       
         
     protected:
         
@@ -119,7 +124,7 @@ template <class valueType> class TypedDagNode;
         // manages string-based simplex mapping??
         std::vector<std::string>                                    eventTypes;
         std::map<std::string, unsigned>                             eventStringToStateMap;
-        
+
     };
     
 }

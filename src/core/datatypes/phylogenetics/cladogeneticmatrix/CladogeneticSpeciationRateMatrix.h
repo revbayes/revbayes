@@ -13,13 +13,17 @@
 #include <iosfwd>
 
 #include "Assignable.h"
+#include "CladogeneticProbabilityMatrix.h"
 #include "Cloneable.h"
+#include "DagNode.h"
+#include "MemberObject.h"
 #include "Printable.h"
+#include "RbVector.h"
 #include "Serializable.h"
 
 namespace RevBayesCore {
     
-    class CladogeneticSpeciationRateMatrix : public Cloneable, public Assignable, public Printable, public Serializable {
+    class CladogeneticSpeciationRateMatrix : public Cloneable, public Assignable, public Printable, public Serializable, public MemberObject<RbVector<double> >, public MemberObject<CladogeneticProbabilityMatrix> {
         
     public:
 
@@ -37,11 +41,24 @@ namespace RevBayesCore {
         virtual CladogeneticSpeciationRateMatrix*               clone(void) const;
         virtual void                                            initFromString( const std::string &s );
         
+        void                                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, CladogeneticProbabilityMatrix &rv) const;     //!< Map the member methods to internal function calls
+        void                                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;     //!< Map the member methods to internal function calls
+        
+        
         // virtual methods that may need to overwritten
         virtual void                                            update(void) {};
         virtual std::map<std::vector<unsigned>, double>         getEventMap(double t=0.0);
         virtual const std::map<std::vector<unsigned>, double>&  getEventMap(double t=0.0) const;
         void                                                    setEventMap(std::map<std::vector<unsigned>, double> m);
+        
+        // MJL: for TensorPhylo parameterization
+        virtual std::vector<double>                             getSpeciationRateSumPerState(void);
+        virtual const std::vector<double>&                      getSpeciationRateSumPerState(void) const;
+        void                                                    setSpeciationRateSumPerState(std::vector<double> r);
+        CladogeneticProbabilityMatrix                           getCladogeneticProbabilityMatrix(void);
+        const CladogeneticProbabilityMatrix&                    getCladogeneticProbabilityMatrix(void) const;
+        void                                                    setCladogeneticProbabilityMatrix(CladogeneticProbabilityMatrix p);
+        
         
         // public methods
         size_t                                                  getNumberOfStates(void) const;      //!< Return the number of states
@@ -56,6 +73,10 @@ namespace RevBayesCore {
         // protected members available for derived classes
         size_t                                                  num_states;                         //!< The number of character states
         std::map<std::vector<unsigned>, double>                 event_map;
+        
+        // MJL: TensorPhylo parameterization
+        std::vector<double>                                     speciation_rate_sum_per_state;
+        CladogeneticProbabilityMatrix                           cladogenetic_probability_matrix;
         
     };
     

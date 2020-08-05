@@ -205,7 +205,7 @@ void BiogeographyCladogeneticBirthDeathFunction::buildBits( void )
             for (size_t m = 0; m < statesToBitsByNumOn[k].size(); m++)
             {
                 if (statesToBitsByNumOn[k][m] == 1) {
-                    s.insert( m );
+                    s.insert( (unsigned)m );
                 }
             }
             statesToBitsetsByNumOn[k] = s;
@@ -909,7 +909,6 @@ const std::map< std::vector<unsigned>, double >&  BiogeographyCladogeneticBirthD
     return eventMap;
 }
 
-
 /*
  * Prints the event map -- for debugging mostly
  */
@@ -1017,11 +1016,19 @@ void BiogeographyCladogeneticBirthDeathFunction::update( void )
     // reset the transition matrix
     delete value;
     
+    // create temp variables for exiting speciation rates and cladogenetic event probabilities
+    std::vector<double> speciation_rate_sum_per_state;
+    CladogeneticProbabilityMatrix cladogenetic_probability_matrix;
+    
     // check for a hidden rate category
     if (use_hidden_rate) {
         value = new CladogeneticSpeciationRateMatrix( numRanges * 2 );
+        cladogenetic_probability_matrix = CladogeneticProbabilityMatrix(numRanges * 2);
+        speciation_rate_sum_per_state = std::vector<double>( numRanges * 2, 0.0 );
     } else {
         value = new CladogeneticSpeciationRateMatrix( numRanges );
+        cladogenetic_probability_matrix = CladogeneticProbabilityMatrix(numRanges);
+        speciation_rate_sum_per_state = std::vector<double>( numRanges, 0.0 );
     }
     
     // update clado event factors
@@ -1031,8 +1038,8 @@ void BiogeographyCladogeneticBirthDeathFunction::update( void )
     const std::vector<double>& sr = speciationRates->getValue();
     
     // assign the correct rate to each event
-    for (unsigned i = 0; i < numRanges; i++)
-    {
+//    for (unsigned i = 0; i < numRanges; i++)
+//    {
         std::map<std::vector<unsigned>, unsigned>::iterator it;
         for (it = eventMapTypes.begin(); it != eventMapTypes.end(); it++)
         {
@@ -1060,18 +1067,18 @@ void BiogeographyCladogeneticBirthDeathFunction::update( void )
                 speciation_rate = sr[ event_type ];
             }
             
-            // get speciation rate
-            double v = speciation_rate; // / eventMapCounts[ idx[0] ][ event_type ] );
-            
             // divide by two if asymmetric event
             double f_asymm = ( idx[1] == idx[2] ? 1.0 : 0.5 );
             
             // rescale by connectivity weight
             double c_weight = eventMapWeights[ idx ];
-            v *= f_asymm * c_weight;
+            
+            // compute the cladogenetic event rate
+            double clado_rate = speciation_rate * f_asymm * c_weight;
 
             // save the rate in the event map
-            eventMap[ idx ] += v;
+            eventMap[ idx ] += clado_rate;
+            speciation_rate_sum_per_state[ idx[0] ] += eventMap[ idx ];
             if (use_hidden_rate == true)
             {
                 std::vector<unsigned> idx_hidden(3);
@@ -1079,13 +1086,25 @@ void BiogeographyCladogeneticBirthDeathFunction::update( void )
                 idx_hidden[1] = idx[1] + numRanges + 1;
                 idx_hidden[2] = idx[2] + numRanges + 1;
                 const std::vector<double>& rate_multipliers = hiddenRateMultipliers->getValue();
-                eventMap[ idx_hidden ] += (v * rate_multipliers[0]);
+                eventMap[ idx_hidden ] += (clado_rate * rate_multipliers[0]);
+                speciation_rate_sum_per_state[ idx_hidden[0] ] += eventMap[ idx_hidden ];
             }
         }
+//    }
+    
+    // populate TensorPhylo rate/prob structures
+    std::map<std::vector<unsigned>, double> clado_prob_event_map = cladogenetic_probability_matrix.getEventMap();
+    for (std::map<std::vector<unsigned>, double>::iterator jt = eventMap.begin(); jt != eventMap.end(); jt++) {
+        const std::vector<unsigned>& idx = jt->first;
+        clado_prob_event_map[ idx ] = eventMap[ idx ] / speciation_rate_sum_per_state[ idx[0] ];
     }
+    cladogenetic_probability_matrix.setEventMap(clado_prob_event_map);
     
     // done!
     value->setEventMap(eventMap);
+    value->setCladogeneticProbabilityMatrix( cladogenetic_probability_matrix );
+    value->setSpeciationRateSumPerState( speciation_rate_sum_per_state );
+    
     
     //printEventMap( eventMap );
 }
