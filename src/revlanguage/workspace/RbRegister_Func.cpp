@@ -201,10 +201,12 @@
 #include "Func_diagonalMatrix.h"
 #include "Func_empiricalQuantile.h"
 #include "Func_exp.h"
+#include "Func_expVector.h"
 #include "Func_floor.h"
 #include "Func_gamma.h"
 #include "Func_lnProbability.h"
 #include "Func_geographicalDistance.h"
+#include "Func_geometricMean.h"
 #include "Func_hyperbolicTangent.h"
 #include "Func_hyperbolicSine.h"
 #include "Func_ln.h"
@@ -223,6 +225,8 @@
 //#include "Func_powerVector.h"
 #include "Func_round.h"
 #include "Func_shortestDistance.h"
+#include "Func_sigmoid.h"
+#include "Func_sigmoidVector.h"
 #include "Func_sort.h"
 #include "Func_sum.h"
 #include "Func_sumPositive.h"
@@ -254,6 +258,7 @@
 #include "Func_dppMeanFromConc.h"
 #include "Func_fnNormalizedQuantile.h"
 #include "Func_numUniqueInVector.h"
+#include "Func_rateShifts.h"
 #include "Func_stirling.h"
 #include "Func_varianceCovarianceMatrix.h"
 #include "Func_decomposedVarianceCovarianceMatrix.h"
@@ -405,6 +410,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
         // exponential function
         addFunction( new Func_exp() );
+        addFunction( new Func_expVector() );
 
 		// floor function
         addFunction( new Func_floor<Real,Integer>()  );
@@ -413,6 +419,9 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         // gamma function
         addFunction( new Func_gamma() );
 
+        // geometric mean function
+        addFunction( new Func_geometricMean() );
+        
         // logistic function
         addFunction( new Func_logistic() );
 
@@ -451,6 +460,14 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
         // sort vector function
         addFunction( new Func_sort() );
+
+        // sigmoid function
+        addFunction( new Func_sigmoid() );
+        addFunction( new Func_sigmoidVector() );
+
+        // rate shift function
+        addFunction( new Func_shiftEvents<RealPos>()              );
+        addFunction( new Func_shiftEvents<ModelVector<RealPos>>() );
 
 		// square root function
         addFunction( new Func_sqrt()  );

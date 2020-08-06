@@ -51,7 +51,7 @@ namespace RevLanguage {
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "ModelVector.h"
-#include "MixtureAllocationProposal.h"
+#include "../../../core/moves/mixture/OrderedEventSlideProposal.h"
 #include "RbException.h"
 #include "TypeSpec.h"
 

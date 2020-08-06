@@ -91,7 +91,7 @@ RevPtr<RevVariable> AbstractDiscreteTaxonData::executeMethod(std::string const &
 const std::string& AbstractDiscreteTaxonData::getClassType(void)
 {
     
-    static std::string rev_type = "AbstractAbstractDiscreteTaxonData";
+    static std::string rev_type = "AbstractDiscreteTaxonData";
     
     return rev_type;
 }

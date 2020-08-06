@@ -3,6 +3,7 @@
 
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "StateDependentSpeciationExtinctionProcess.h"
+#include "GeneralizedLineageHeterogeneousBirthDeathSamplingProcess.h"
 #include "VariableMonitor.h"
 #include "TypedDagNode.h"
 #include "StochasticNode.h"
@@ -159,6 +160,7 @@ void StochasticCharacterMappingMonitor<characterType>::monitorVariables(unsigned
 
     // get the distribution for the character
     StateDependentSpeciationExtinctionProcess *sse_process = NULL;
+    GeneralizedLineageHeterogeneousBirthDeathSamplingProcess *glhbdsp_process = NULL;
     AbstractPhyloCTMCSiteHomogeneous<characterType> *ctmc_dist = NULL;
     if ( ctmc != NULL )
     {
@@ -167,7 +169,11 @@ void StochasticCharacterMappingMonitor<characterType>::monitorVariables(unsigned
     }
     else
     {
-        sse_process = dynamic_cast<StateDependentSpeciationExtinctionProcess*>( &nodes[0]->getDistribution() );
+        sse_process = dynamic_cast<StateDependentSpeciationExtinctionProcess*>( &cdbdp->getDistribution() );
+        if ( sse_process == NULL )
+        {
+        	glhbdsp_process = dynamic_cast<GeneralizedLineageHeterogeneousBirthDeathSamplingProcess*>( &cdbdp->getDistribution() );
+        }
         num_nodes = tree->getValue().getNumberOfNodes();
     }
         
@@ -178,9 +184,13 @@ void StochasticCharacterMappingMonitor<characterType>::monitorVariables(unsigned
     {
         ctmc_dist->drawStochasticCharacterMap( character_histories, index, use_simmap_default );
     }
-    else
+    else if ( sse_process != NULL )
     {
         sse_process->drawStochasticCharacterMap( character_histories );
+    }
+    else
+    {
+    	glhbdsp_process->drawStochasticCharacterMap( character_histories );
     }
 
     // print to monitor file

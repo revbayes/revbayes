@@ -175,11 +175,22 @@ void AbstractCharacterData::addMissingTaxon(const std::string &n) {
  */
 void AbstractCharacterData::addTaxonData(const AbstractTaxonData &obs)
 {
-    
-    // add the sequence name to the list
-    taxa.push_back( obs.getTaxon() );
-    
-    // add the sequence also as a member so that we can access it by name
+	// check if the taxon is already in the data
+	std::map<std::string, AbstractTaxonData* >::iterator it = taxonMap.find( obs.getTaxonName() );
+	if ( it == taxonMap.end() )
+	{
+	    // add the sequence name to the list
+	    taxa.push_back( obs.getTaxon() );
+	}
+	else
+	{
+		// remove the taxon data
+		delete it->second;
+		taxonMap.erase(it);
+	}
+
+
+    // add the sequence as a member so that we can access it by name
     taxonMap.insert( std::pair<std::string, AbstractTaxonData* >( obs.getTaxonName(), obs.clone() ) );
 }
 
@@ -858,8 +869,8 @@ void AbstractCharacterData::switchHomeologPhase(const std::string& tipName1, con
     t2.setTaxon( Taxon(tipName1) );
     taxonMap.erase( tipName1 );
     taxonMap.erase( tipName2 );
-    taxonMap.insert( std::pair<std::string, AbstractTaxonData* >( tipName1, t2.clone() ) );
-    taxonMap.insert( std::pair<std::string, AbstractTaxonData* >( tipName2, t1.clone() ) );
+    taxonMap.insert( std::pair<std::string, AbstractTaxonData* >( tipName1, &t2 ) );
+    taxonMap.insert( std::pair<std::string, AbstractTaxonData* >( tipName2, &t1 ) );
 }
 
 

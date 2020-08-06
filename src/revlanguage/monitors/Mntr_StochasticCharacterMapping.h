@@ -46,6 +46,7 @@ class TypeSpec;
         RevPtr<const RevVariable>                       printgen;
         RevPtr<const RevVariable>                       version;
         RevPtr<const RevVariable>                       cdbdp;
+        RevPtr<const RevVariable>                       glhbdsp;
         RevPtr<const RevVariable>                       ctmc;
         RevPtr<const RevVariable>                       separator;
         RevPtr<const RevVariable>                       append;
