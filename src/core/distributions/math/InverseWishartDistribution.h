@@ -1,9 +1,4 @@
-/* 
- * File:   InverseInverseWishartDistribution.h
- * Author: nl
- *
- * Created on 15 juillet 2014, 10:08
- */
+
 
 #ifndef INVERSEWISHARTDISTRIBUTION_H
 #define	INVERSEWISHARTDISTRIBUTION_H
@@ -17,17 +12,25 @@ namespace RevBayesCore {
 class DagNode;
 template <class valueType> class RbVector;
     
+
+
+/**
+ * @brief Inverse Wishart distribution class.
+ *
+ * The Wishart distribution represents a family of distributions
+ * defined on the real positive definite matrices. The Inverse Wishart distribution has 2 parameters:
+ * @param V a scaling matrix
+ * @param df the degrees of freedom.
+ * Instances of this class can be associated to stochastic variables.
+ *
+ */
+
     class InverseWishartDistribution : public TypedDistribution<MatrixReal>   {
         
     public:
         
-        // inverse InverseWishart distribution of parameter sigma0 and df degrees of freedom
         InverseWishartDistribution(const TypedDagNode<MatrixReal> *insigma0, const TypedDagNode<long>* indf);
-
-        // inverse InverseWishart distribution of parameter sigma0 = Diagonal(kappaVector) and df degrees of freedom
         InverseWishartDistribution(const TypedDagNode<RbVector<double> > *inkappaVector, const TypedDagNode<long>* indf);
-
-        // inverse InverseWishart distribution of parameter sigma0 kappa * Identitymatrix and df degrees of freedom
         InverseWishartDistribution(const TypedDagNode<long>* indim, const TypedDagNode<double> *inkappa, const TypedDagNode<long>* indf);
 
         virtual                                            ~InverseWishartDistribution(void) {}
@@ -51,11 +54,11 @@ template <class valueType> class RbVector;
 
     private:
 
-        const TypedDagNode<MatrixReal>*                     sigma0;
-        const TypedDagNode<RbVector<double> >*              kappaVector;
-        const TypedDagNode<double>*                         kappa;
-        const TypedDagNode<long>*                            df;
-        const TypedDagNode<long>*                            dim;
+        const TypedDagNode<MatrixReal>*                     sigma0;             //!< a scaling matrix
+        const TypedDagNode<RbVector<double> >*              kappaVector;        //!< A vector with the values of the diagonal of the scaling matrix
+        const TypedDagNode<double>*                         kappa;              //!< A value with the value on the diagonal of the scaling matrix
+        const TypedDagNode<long>*                            df;                //!< The degrees of freedom
+        const TypedDagNode<long>*                            dim;               //!< The number of dimensions on the scaling matrix
                 
     };
     

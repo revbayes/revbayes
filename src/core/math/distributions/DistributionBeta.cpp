@@ -21,8 +21,8 @@ using namespace RevBayesCore;
  * \brief Beta probability density.
  * \param a parameter of the Beta.
  * \param b parameter of the Beta.
+ * \param x point where the density is calculated
  * \return Returns the probability density.
- * \throws Does not throw an error.
  */
 double RbStatistics::Beta::pdf(double a, double b, double x)
 {
@@ -47,8 +47,8 @@ double RbStatistics::Beta::pdf(double a, double b, double x)
  * \brief Beta log probability density.
  * \param a parameter of the Beta.
  * \param b parameter of the Beta.
+ * \param x point where the density is calculated
  * \return Returns the natural log of the probability density.
- * \throws Does not throw an error.
  */
 double RbStatistics::Beta::lnPdf(double a, double b, double x)
 {
@@ -63,8 +63,8 @@ double RbStatistics::Beta::lnPdf(double a, double b, double x)
  * \brief Beta cumulative probability.
  * \param a parameter of the Beta.
  * \param b parameter of the Beta.
+ * \param x point where the probability is calculated
  * \return Returns the cumulative probability.
- * \throws Does not throw an error.
  */
 double RbStatistics::Beta::cdf(double a, double b, double x)
 {
@@ -87,6 +87,7 @@ double RbStatistics::Beta::cdf(double a, double b, double x)
     return cdf;
 }
 
+
 /*!
  * This function returns the quantile for a
  * Beta-distributed random variable.
@@ -94,12 +95,9 @@ double RbStatistics::Beta::cdf(double a, double b, double x)
  * \brief Beta quantile.
  * \param a parameter of the Beta.
  * \param b parameter of the Beta.
- * \param p is the probability up to the quantile.
+ * \param x the probability up to the quantile.
  * \return Returns the quantile.
- * \throws Does not throw an error.
  */
-
-
 double RbStatistics::Beta::quantile(double alpha, double beta, double x)
 {
     
@@ -179,14 +177,20 @@ double RbStatistics::Beta::quantile(double alpha, double beta, double x)
 }
 
 
-/* Reference:
+#define expmax	(DBL_MAX_EXP * RbConstants::LN2)/* = log(DBL_MAX) */
+
+/** Draw a random variable according to a beta distribution.
+ * Reference:
  * R. C. H. Cheng (1978).
  * Generating beta variates with nonintegral shape parameters.
  * Communications of the ACM 21, 317-322.
  * (Algorithms BB and BC)
- */
-#define expmax	(DBL_MAX_EXP * RbConstants::LN2)/* = log(DBL_MAX) */
-
+ *
+ * @param aa alpha parameter of the distribution
+ * @param bb beta parameter of the distribution
+ * @param rng random number generator
+ * @return draw
+ **/
 double RbStatistics::Beta::rv(double aa, double bb, RandomNumberGenerator& rng)
 {
     double a, b, alpha;

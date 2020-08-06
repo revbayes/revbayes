@@ -132,27 +132,6 @@ const TypeSpec& StochasticMatrix::getClassTypeSpec(void)
     return rev_type_spec;
 }
 
-
-///** Return member rules (no members) */
-//const MemberRules& StochasticMatrix::getParameterRules(void) const
-//{
-//
-//    static MemberRules memberRules;
-//    static bool rules_set = false;
-//
-//    if ( !rules_set )
-//    {
-//
-//        memberRules.push_back( new ArgumentRule("x", RevObject::getClassTypeSpec(), ArgumentRule::BY_CONSTANT_REFERENCE ) );
-//        memberRules.push_back( new Ellipsis( RevObject::getClassTypeSpec() ) );
-//
-//        rules_set = true;
-//    }
-//
-//    return memberRules;
-//}
-
-
 /** Get type spec */
 const TypeSpec& StochasticMatrix::getTypeSpec( void ) const
 {

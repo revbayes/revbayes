@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <utility>
 
+#include "DagNode.h"
 #include "RbException.h"
 
 using namespace RevBayesCore;
@@ -52,6 +53,23 @@ CladogeneticSpeciationRateMatrix* CladogeneticSpeciationRateMatrix::clone( void 
     return new CladogeneticSpeciationRateMatrix( *this );
 }
 
+void CladogeneticSpeciationRateMatrix::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, CladogeneticProbabilityMatrix &rv) const
+{
+
+    if ( n == "getCladogeneticProbabilityMatrix" )
+    {
+        rv = cladogenetic_probability_matrix;
+    }
+}
+
+void CladogeneticSpeciationRateMatrix::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<double> &rv) const
+{
+
+    if ( n == "getSpeciationRateSumPerState" )
+    {
+        rv = speciation_rate_sum_per_state;
+    }
+}
 
 std::map<std::vector<unsigned>, double> CladogeneticSpeciationRateMatrix::getEventMap(double t)
 {
@@ -61,6 +79,35 @@ std::map<std::vector<unsigned>, double> CladogeneticSpeciationRateMatrix::getEve
 const std::map<std::vector<unsigned>, double>& CladogeneticSpeciationRateMatrix::getEventMap(double t) const
 {
     return event_map;
+}
+
+std::vector<double> CladogeneticSpeciationRateMatrix::getSpeciationRateSumPerState(void)
+{
+    return speciation_rate_sum_per_state;
+}
+
+const std::vector<double>& CladogeneticSpeciationRateMatrix::getSpeciationRateSumPerState(void) const
+{
+    return speciation_rate_sum_per_state;
+}
+
+void CladogeneticSpeciationRateMatrix::setSpeciationRateSumPerState(std::vector<double> r)
+{
+    speciation_rate_sum_per_state = r;
+}
+
+CladogeneticProbabilityMatrix CladogeneticSpeciationRateMatrix::getCladogeneticProbabilityMatrix(void)
+{
+    return cladogenetic_probability_matrix;
+}
+const CladogeneticProbabilityMatrix& CladogeneticSpeciationRateMatrix::getCladogeneticProbabilityMatrix(void) const
+{
+    return cladogenetic_probability_matrix;
+}
+
+void CladogeneticSpeciationRateMatrix::setCladogeneticProbabilityMatrix(CladogeneticProbabilityMatrix p)
+{
+    cladogenetic_probability_matrix = p;
 }
 
 size_t CladogeneticSpeciationRateMatrix::getNumberOfStates( void ) const

@@ -99,7 +99,8 @@ ConstantRateOutgroupBirthDeathProcess* ConstantRateOutgroupBirthDeathProcess::cl
 
 
 
-bool ConstantRateOutgroupBirthDeathProcess::isLnProbabilityNonZero( void ) {
+bool ConstantRateOutgroupBirthDeathProcess::isLnProbabilityNonZero( void )
+{
     // first check if the current tree matches the clade constraints
     return true;
     //recursivelyUpdateClades( value->getRoot() );
@@ -112,7 +113,7 @@ bool ConstantRateOutgroupBirthDeathProcess::isLnProbabilityNonZero( void ) {
  *
  * \return    The log-probability density.
  */
-double ConstantRateOutgroupBirthDeathProcess::computeLnProbabilityTimes( void ) const
+double ConstantRateOutgroupBirthDeathProcess::computeLnProbabilityTimes( void )
 {
 
     // proceed with probabilities
@@ -183,7 +184,7 @@ double ConstantRateOutgroupBirthDeathProcess::computeLnProbabilityTimes( void ) 
     
 }
 
-double ConstantRateOutgroupBirthDeathProcess::computeLnProbabilityDiversifiedSampling(std::vector<double> ages, double presentTime, double samplingProb, size_t num_taxa) const
+double ConstantRateOutgroupBirthDeathProcess::computeLnProbabilityDiversifiedSampling(std::vector<double> ages, double presentTime, double samplingProb, size_t num_taxa)
 {
     
     if (ages.size() < 1) {

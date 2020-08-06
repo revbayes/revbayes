@@ -1207,10 +1207,10 @@ bool StateDependentSpeciationExtinctionProcess::recursivelyDrawStochasticCharact
         else
         {
             // use the simulated state
-            new_state = current_state;
             if (set_amb_char_data == true)
             {
                 // overwrite the character data 
+                char_state.setMissingState(false);
                 char_state.setStateByIndex(new_state);
             }
         }

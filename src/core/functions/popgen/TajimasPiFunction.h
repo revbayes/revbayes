@@ -15,10 +15,6 @@ template <class valueType> class TypedDagNode;
      * This function can be used to compute the per site or per locus estimator.
      *
      *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since Version 1.0, 2015-04-30
-     *
      */
     class TajimasPiFunction : public TypedFunction<double> {
         

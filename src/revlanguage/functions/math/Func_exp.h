@@ -13,13 +13,9 @@ namespace RevLanguage {
      *
      * The RevLanguage wrapper of the exp function connects
      * the variables/parameters of the function and creates the internal ExponentialFunction object.
-     * Please read the ExponentialFunction.h for more info.
      *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2014-07-27, version 1.0
-     *
+     * @copybrief RevBayesCore::ExponentialFunction
+     * @see RevBayesCore::ExponentialFunction for the internal object
      */
     class Func_exp : public TypedFunction<RealPos> {
         

@@ -1,5 +1,4 @@
 #include "DiscretizeBetaFunction.h"
-
 #include "DistributionBeta.h"
 #include "RbMathFunctions.h"
 #include "RbVectorImpl.h"
@@ -12,7 +11,7 @@ namespace RevBayesCore { class DagNode; }
  * @param a double value
  * @param b double value
  * @param nc number of categories to use in the approximation
- * @param med a bool of whether to use the median values to represent each category
+ * @param med a bool of whether to use the median values to represent each category. If false then the mean values are used
  */
 
 RevBayesCore::DiscretizeBetaFunction::DiscretizeBetaFunction(const TypedDagNode<double> *a, const TypedDagNode<double> *b, const TypedDagNode<long> *nc, bool med) : TypedFunction< RbVector<double> >( new RbVector<double>(nc->getValue(), 1.0) ),
