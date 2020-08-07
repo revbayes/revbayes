@@ -439,7 +439,9 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     else if (name == "setNumStatesPartition")
     {
         found = true;
-
+        std::cout << "Please note setNumStatesPartition() partitions by the maximum state, not "  //
+        "the maximum state number. For example, a character with states 1 and 2 is assumed to" //
+        "also have state 0, whether or not it is coded in this matrix.";
         const RevObject& argument = args[0].getVariable()->getRevObject();
         RevBayesCore::AbstractHomologousDiscreteCharacterData &v = dag_node->getValue();
         size_t nChars = v.getNumberOfCharacters();
@@ -492,7 +494,9 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     else if (name == "setNumStatesVector")
     {
         found = true;
-
+        std::cout << "Please note setNumStatesVector() partitions by the maximum state, not "  //
+        "the maximum state number. For example, a character with states 1 and 2 is assumed to" //
+        "also have state 0, whether or not it is coded in this matrix.";
         RevBayesCore::AbstractHomologousDiscreteCharacterData &v = dag_node->getValue();
         size_t nChars = v.getNumberOfCharacters();
         size_t nTaxa = v.getNumberOfTaxa();
