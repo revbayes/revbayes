@@ -97,8 +97,15 @@ Tree* Tree::clone(void) const
 /* Map calls to member methods */
 RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
 {
-
-    if (name == "dropTip")
+    
+    if ( name == "calculateEDR" )
+    {
+        found = true;
+        std::vector<double> edr = RevBayesCore::TreeUtilities::calculateEDR( dag_node->getValue() );
+        ModelVector<RealPos> *n = new ModelVector<RealPos>( edr );
+        return new RevVariable( n );
+    }
+    else if (name == "dropTip")
     {
         found = true;
 
@@ -127,6 +134,46 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         RevBayesCore::Clade c = this->dag_node->getValue().getMrca( tmp ).getClade();
         return new RevVariable( new Clade( c ) );
     }
+    else if ( name == "getDescendantTaxa" )
+    {
+        found = true;
+        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        std::vector<RevBayesCore::Taxon> t = tree.getNode(index).getClade().getTaxa();
+        return new RevVariable( new ModelVector<Taxon>( t ) );
+    }
+    else if ( name == "getIndices" )
+    {
+        found = true;
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        std::vector<long> indices = tree.getNodeIndices();
+        ModelVector<Natural> *n = new ModelVector<Natural>( indices );
+        return new RevVariable( n );
+    }
+    else if ( name == "getInverseES" )
+    {
+        found = true;
+        std::vector<double> es = RevBayesCore::TreeUtilities::getInverseES( dag_node->getValue() );
+        ModelVector<RealPos> *n = new ModelVector<RealPos>( es );
+        return new RevVariable( n );
+    }
+    else if ( name == "getPSSP" )
+    {
+        found = true;
+        const AbstractHomologousDiscreteCharacterData c = static_cast<const AbstractHomologousDiscreteCharacterData& >( args[0].getVariable()->getRevObject() ).getValue();
+        size_t state_index = static_cast<const Natural&>( args[1].getVariable()->getRevObject() ).getValue();
+
+        std::vector<double> bl = RevBayesCore::TreeUtilities::getPSSP( dag_node->getValue(), c.getValue(), state_index );
+        ModelVector<RealPos> *n = new ModelVector<RealPos>( bl );
+        return new RevVariable( n );
+    }
+    else if (name == "getRootIndex")
+    {
+        found = true;
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        long n = tree.getRoot().getIndex();
+        return new RevVariable( new Natural( n ) );
+    }
     else if (name == "isBinary")
     {
         found = true;
@@ -143,12 +190,48 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         bool tf = this->dag_node->getValue().getNode((size_t)index).isInternal();
         return new RevVariable( new RlBoolean( tf ) );
     }
+    else if (name == "makeBifurcating")
+    {
+        found = true;
+        bool fossils_only = static_cast<RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        tree.makeInternalNodesBifurcating(true);
+        return NULL;
+    }
+    else if (name == "makeUltrametric")
+    {
+
+        found = true;
+
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        RevBayesCore::TreeUtilities::makeUltrametric(&tree);
+
+        return NULL;
+    }
     else if (name == "names" || name == "taxa")
     {
         found = true;
 
         std::vector<RevBayesCore::Taxon> t = this->dag_node->getValue().getTaxa();
         return new RevVariable( new ModelVector<Taxon>( t ) );
+    }
+    else if (name == "nodeName")
+    {
+        found = true;
+
+        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        const std::string& n = this->dag_node->getValue().getNode((size_t)index).getName();
+        return new RevVariable( new RlString( n ) );
+    }
+    else if (name == "offset")
+    {
+        found = true;
+
+        double f = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        RevBayesCore::TreeUtilities::offsetTree(&tree, &tree.getRoot(), f);
+
+        return NULL;
     }
     else if (name == "setBranchLength")
     {
@@ -186,13 +269,13 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         }
         return NULL;
     }
-    else if (name == "nodeName")
+    else if (name == "renumberNodes")
     {
         found = true;
-
-        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
-        const std::string& n = this->dag_node->getValue().getNode((size_t)index).getName();
-        return new RevVariable( new RlString( n ) );
+        const RevBayesCore::Tree &reference = static_cast<const Tree&>( args[0].getVariable()->getRevObject() ).getValue();
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        tree.renumberNodes(reference);
+        return NULL;
     }
     else if (name == "removeDuplicateTaxa")
     {
@@ -203,6 +286,21 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
 
         return NULL;
     }
+    else if (name == "reroot")
+    {
+        found = true;
+        const RevBayesCore::Clade &tmp = static_cast<const Clade&>( args[0].getVariable()->getRevObject() ).getValue();
+        bool make_bifurcating = static_cast<RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        if (make_bifurcating)
+        {
+            tree.rerootAndMakeBifurcating(tmp, true);
+        }
+        else {
+            tree.reroot(tmp, true);
+        }
+        return NULL;
+    }
     else if (name == "rescale")
     {
         found = true;
@@ -210,16 +308,6 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         double f = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
         RevBayesCore::Tree &tree = dag_node->getValue();
         RevBayesCore::TreeUtilities::rescaleTree(&tree, &tree.getRoot(), f);
-
-        return NULL;
-    }
-    else if (name == "offset")
-    {
-        found = true;
-
-        double f = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
-        RevBayesCore::Tree &tree = dag_node->getValue();
-        RevBayesCore::TreeUtilities::offsetTree(&tree, &tree.getRoot(), f);
 
         return NULL;
     }
@@ -249,94 +337,6 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         }
         long index = this->dag_node->getValue().getTipNodeWithName( tip_name ).getIndex() + 1;
         return new RevVariable( new Natural( index ) );
-    }
-    else if (name == "makeUltrametric")
-    {
-
-        found = true;
-
-        RevBayesCore::Tree &tree = dag_node->getValue();
-        RevBayesCore::TreeUtilities::makeUltrametric(&tree);
-
-        return NULL;
-    }
-    else if ( name == "getPSSP" )
-    {
-        found = true;
-        const AbstractHomologousDiscreteCharacterData c = static_cast<const AbstractHomologousDiscreteCharacterData& >( args[0].getVariable()->getRevObject() ).getValue();
-        size_t state_index = static_cast<const Natural&>( args[1].getVariable()->getRevObject() ).getValue();
-
-        std::vector<double> bl = RevBayesCore::TreeUtilities::getPSSP( dag_node->getValue(), c.getValue(), state_index );
-        ModelVector<RealPos> *n = new ModelVector<RealPos>( bl );
-        return new RevVariable( n );
-    }
-    else if ( name == "calculateEDR" )
-    {
-        found = true;
-        std::vector<double> edr = RevBayesCore::TreeUtilities::calculateEDR( dag_node->getValue() );
-        ModelVector<RealPos> *n = new ModelVector<RealPos>( edr );
-        return new RevVariable( n );
-    }
-    else if ( name == "getInverseES" )
-    {
-        found = true;
-        std::vector<double> es = RevBayesCore::TreeUtilities::getInverseES( dag_node->getValue() );
-        ModelVector<RealPos> *n = new ModelVector<RealPos>( es );
-        return new RevVariable( n );
-    }
-    else if ( name == "getIndices" )
-    {
-        found = true;
-        RevBayesCore::Tree &tree = dag_node->getValue();
-        std::vector<long> indices = tree.getNodeIndices();
-        ModelVector<Natural> *n = new ModelVector<Natural>( indices );
-        return new RevVariable( n );
-    }
-    else if (name == "renumberNodes")
-    {
-        found = true;
-        const RevBayesCore::Tree &reference = static_cast<const Tree&>( args[0].getVariable()->getRevObject() ).getValue();
-        RevBayesCore::Tree &tree = dag_node->getValue();
-        tree.renumberNodes(reference);
-        return NULL;
-    }
-    else if (name == "getRootIndex")
-    {
-        found = true;
-        RevBayesCore::Tree &tree = dag_node->getValue();
-        const int& n = tree.getRoot().getIndex();
-        return new RevVariable( new Natural( n ) );
-    }
-    else if (name == "reroot")
-    {
-        found = true;
-        const RevBayesCore::Clade &tmp = static_cast<const Clade&>( args[0].getVariable()->getRevObject() ).getValue();
-        bool make_bifurcating = static_cast<RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
-        RevBayesCore::Tree &tree = dag_node->getValue();
-        if (make_bifurcating)
-        {
-            tree.rerootAndMakeBifurcating(tmp, true);
-        }
-        else {
-            tree.reroot(tmp, true);
-        }
-        return NULL;
-    }
-    else if ( name == "getDescendantTaxa" )
-    {
-        found = true;
-        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
-        RevBayesCore::Tree &tree = dag_node->getValue();
-        std::vector<RevBayesCore::Taxon> t = tree.getNode(index).getClade().getTaxa();
-        return new RevVariable( new ModelVector<Taxon>( t ) );
-    }
-    else if (name == "makeBifurcating")
-    {
-        found = true;
-        bool fossils_only = static_cast<RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
-        RevBayesCore::Tree &tree = dag_node->getValue();
-        tree.makeInternalNodesBifurcating(true);
-        return NULL;
     }
 
     return ModelObject<RevBayesCore::Tree>::executeMethod( name, args, found );
