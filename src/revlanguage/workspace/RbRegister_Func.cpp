@@ -127,6 +127,7 @@
 /* Rate matrix functions (in folder "functions/phylogenetics/ratematrix") */
 #include "Func_BinaryMutationCoalescentRateMatrix.h"
 #include "Func_blosum62.h"
+#include "Func_biogeographyRateMatrix.h"
 #include "Func_chromosomes.h"
 #include "Func_chromosomesPloidy.h"
 
@@ -315,6 +316,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         /* Rate matrix generator functions (in folder "functions/evolution/ratematrix") */
         addFunction( new Func_BinaryMutationCoalescentRateMatrix()          );
         addFunction( new Func_blosum62()                                    );
+        addFunction( new Func_biogeographyRateMatrix()                      );
         addFunction( new Func_chromosomes()                                 );
         addFunction( new Func_chromosomesPloidy()                           );
 
