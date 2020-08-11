@@ -107,28 +107,29 @@ namespace RevBayesCore {
         std::vector<std::string>                            getTipNames() const;
         TopologyNode&                                       getTipNode(size_t indx);                                                                            //!< Get a pointer to tip node i
         const TopologyNode&                                 getTipNode(size_t indx) const;                                                                      //!< Get a pointer to tip node i
-        TopologyNode&                                       getTipNodeWithName(const std::string &n);                                                           //!< Get a pointer to tip node i
-        const TopologyNode&                                 getTipNodeWithName(const std::string &n) const;                                                     //!< Get a pointer to tip node i
-        std::vector<TopologyNode*>                          getTipNodesWithSpeciesName(const std::string &n);                                                   //!< Get a pointer to tip node i
-        double                                              getTmrca(const TopologyNode &n);
-        double                                              getTmrca(const Clade &c);
-        double                                              getTmrca(const std::vector<Taxon> &t);
+        TopologyNode&                                       getTipNodeWithName(const std::string& n);                                                           //!< Get a pointer to tip node i
+        const TopologyNode&                                 getTipNodeWithName(const std::string& n) const;                                                     //!< Get a pointer to tip node i
+        std::vector<TopologyNode*>                          getTipNodesWithSpeciesName(const std::string& n);                                                   //!< Get a pointer to tip node i
+        double                                              getTmrca(const TopologyNode& n);
+        double                                              getTmrca(const Clade& c);
+        double                                              getTmrca(const std::vector<Taxon>& t);
         TreeChangeEventHandler&                             getTreeChangeEventHandler(void) const;                                                              //!< Get the change-event handler for this tree
         double                                              getTreeLength(void) const;
-        bool                                                hasSameTopology( const Tree &t ) const;                                                             //!< Has this tree the same topology?
+        bool                                                hasSameTopology(const Tree &t) const;                                                             //!< Has this tree the same topology?
         bool                                                isBinary(void) const;                                                                               //!< Is the Tree binary
         bool                                                isBroken(void) const;                                                                               //!< Is this tree ultrametric?
         bool                                                isNegativeConstraint(void) const;                                                                   //!< Is this tree used as a negative constraint?
         bool                                                isRooted(void) const;                                                                               //!< Is the Tree rooted
         bool                                                isUltrametric(void) const;                                                                          //!< Is this tree ultrametric?
-        void                                                makeInternalNodesBifurcating(bool reindex);                                                         //!< Make all the internal nodes bifurcating.
+        void                                                makeInternalNodesBifurcating(bool reindex, bool fossils_only);                                                         //!< Make all the internal nodes bifurcating.
+        void                                                makeRootBifurcating(const Clade& o, bool reindex);                                                         //!< Make all the internal nodes bifurcating.
         void                                                orderNodesByIndex();
-        void                                                pruneTaxa(const RbBitSet&);
+        void                                                pruneTaxa(const RbBitSet& bs);
         void                                                renumberNodes(const Tree &reference);                                                               //!< Change node ids to be as in reference
-        void                                                reroot(const Clade &outgroup, bool reindex);                                                        //!< Re-root the tree with the given outgroup
-        void                                                reroot(const std::string &outgroup, bool reindex);                                                  //!< Re-root the tree with the given outgroup
-        void                                                reroot(TopologyNode &n, bool reindex);
-        void                                                rerootAndMakeBifurcating(const Clade &o, bool reindex);                                             //!< Re-root the tree with the given outgroup, and make sure we have a bifuration at the root and elsewhere
+        void                                                reroot(const Clade& o, bool make_bifurcating, bool reindex);                                                        //!< Re-root the tree with the given outgroup
+        void                                                reroot(const std::string& outgroup, bool make_bifurcating, bool reindex);                                                  //!< Re-root the tree with the given outgroup
+        void                                                reroot(TopologyNode &n, bool make_bifurcating, bool reindex);
+//        void                                                rerootAndMakeBifurcating(const Clade &o, bool reindex);                                             //!< Re-root the tree with the given outgroup, and make sure we have a bifuration at the root and elsewhere
         void                                                removeDuplicateTaxa(void);
         void                                                renameNodeParameter(const std::string &old_name, const std::string &new_name);
         TopologyNode&                                       reverseParentChild(TopologyNode &n);                                                                //!< Reverse the parent child relationship.

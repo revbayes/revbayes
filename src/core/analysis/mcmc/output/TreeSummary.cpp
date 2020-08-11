@@ -686,16 +686,16 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
 
         if ( tmp_tree->isRooted() == false && rooted == false )
         {
-            if( use_outgroup )
+            if ( use_outgroup == true )
             {
-                tmp_tree->reroot( outgroup, true );
+                tmp_tree->reroot( outgroup, false, true );
             }
             else
             {
                 std::vector<std::string> tip_names = traces.front()->objectAt(0).getTipNames();
                 std::sort(tip_names.begin(),tip_names.end());
                 std::string outgrp = tip_names[0];
-                tmp_tree->reroot( outgrp, true );
+                tmp_tree->reroot( outgrp, false, true );
             }
         }
         else if ( tmp_tree->isRooted() != rooted )
@@ -1188,14 +1188,14 @@ int TreeSummary::getTopologyFrequency(const RevBayesCore::Tree &tree, bool verbo
     {
         if( use_outgroup )
         {
-            t.reroot( outgroup, true );
+            t.reroot( outgroup, false, true );
         }
         else
         {
             std::vector<std::string> tip_names = traces.front()->objectAt(0).getTipNames();
             std::sort(tip_names.begin(),tip_names.end());
-            std::string outgrp = tip_names[0];
-            t.reroot( outgrp, true );
+            const std::string& my_outgroup = tip_names[0];
+            t.reroot( my_outgroup, false, true );
         }
     }
 
@@ -1292,16 +1292,16 @@ bool TreeSummary::isCoveredInInterval(const std::string &v, double ci_size, bool
 
     if ( tree.isRooted() == false && rooted == false )
     {
-        if( use_outgroup )
+        if ( use_outgroup == true )
         {
-            tree.reroot( outgroup, true );
+            tree.reroot( outgroup, false, true );
         }
         else
         {
             std::vector<std::string> tip_names = traces.front()->objectAt(0).getTipNames();
             std::sort(tip_names.begin(),tip_names.end());
-            std::string outgrp = tip_names[0];
-            tree.reroot( outgrp, true );
+            const std::string& this_outgroup = tip_names[0];
+            tree.reroot( this_outgroup, false, true );
         }
     }
 
@@ -1856,10 +1856,9 @@ void TreeSummary::summarize( bool verbose )
 
     std::vector<std::string> tip_names = traces.front()->objectAt(0).getTipNames();
     std::sort(tip_names.begin(),tip_names.end());
-    std::string outgrp = tip_names[0];
+    const std::string& this_outgroup = tip_names[0];
 
     rooted = traces.front()->objectAt(0).isRooted();
-    size_t num_taxa = traces.front()->objectAt(0).getNumberOfTips();
 
     clade_samples.clear();
     tree_samples.clear();
@@ -1898,13 +1897,13 @@ void TreeSummary::summarize( bool verbose )
 
             if ( rooted == false )
             {
-                if( use_outgroup )
+                if ( use_outgroup == true )
                 {
-                    tree.reroot( outgroup, true );
+                    tree.reroot( outgroup, false, true );
                 }
                 else
                 {
-                    tree.reroot( outgrp, true );
+                    tree.reroot( this_outgroup, false, true );
                 }
             }
 

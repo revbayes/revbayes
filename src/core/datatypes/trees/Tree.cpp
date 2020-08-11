@@ -1247,10 +1247,12 @@ bool Tree::isUltrametric( void ) const
 }
 
 
-void Tree::makeInternalNodesBifurcating(bool reindex)
+void Tree::makeInternalNodesBifurcating(bool reindex, bool as_fossils)
 {
 
-    getRoot().makeBifurcating();
+    // delegate the call to the nodes which will make the tree bifurcating recursively.
+    getRoot().makeBifurcating( as_fossils );
+    
 
     // we need to reset the root so that the vector of nodes get filled again with the new number of nodes
     setRoot( &getRoot(), reindex );
@@ -1258,6 +1260,58 @@ void Tree::makeInternalNodesBifurcating(bool reindex)
     taxon_bitset_map.clear();
 
 }
+
+void Tree::makeRootBifurcating(const Clade& outgroup, bool as_fossils)
+{
+    size_t num_root_children = root->getNumberOfChildren();
+    if ( num_root_children == 3 )
+    {
+        // which one of the 3 children do we want as outgroup?
+        size_t good_outgroup = 0;
+        double good_bl = 0.0;
+        double half_bl = 0.0;
+        std::vector<TopologyNode*> nodes_to_move = root->getChildren() ;
+        for (size_t i = 0; i < num_root_children; ++i)
+        {
+            if ( root->getChild(i).getClade() == outgroup )
+            {
+                good_outgroup = i;
+                good_bl = root->getChild(i).getBranchLength();
+                half_bl = good_bl / 2.0;
+                root->getChild(i).setBranchLength(half_bl);
+//                    root->getChild(i).setAge(root->getChild(i).getAge() + half_bl);
+                break;
+            }
+        }
+        nodes_to_move.erase(nodes_to_move.begin() + good_outgroup);
+          
+        TopologyNode *new_child = new TopologyNode();
+        double parent_age = root->getAge();
+  
+        double new_age = parent_age - half_bl;
+    
+        for (size_t i = 0; i < nodes_to_move.size(); ++i)
+        {
+            TopologyNode* tmp = nodes_to_move[i];
+            //  double newBl = tmp->getBranchLength() - halfMini;
+            root->removeChild(tmp);
+            new_child->addChild(tmp);
+            tmp->setParent (new_child);
+            //  tmp->setBranchLength(newBl) ;
+        }
+    
+        root->addChild(new_child);
+        new_child->setParent( root );
+        new_child->setAge(new_age);
+        new_child->setBranchLength( half_bl );
+    }
+    else if (num_root_children > 2)
+    {
+        throw RbException("Problem when rerooting with  '" + outgroup.toString() + "'.");
+    } // end-if the root node has 3 children
+
+} 
+
 
 
 // method to order nodes by their existing index
@@ -1476,7 +1530,7 @@ void Tree::renumberNodes(const Tree &reference)
 }
 
 
-void Tree::reroot(const Clade &o, bool reindex)
+void Tree::reroot(const Clade &o, bool make_bifurcating, bool reindex)
 {
     bool strict = true;
 
@@ -1499,24 +1553,26 @@ void Tree::reroot(const Clade &o, bool reindex)
 
     }
 
-    // reset parent/child relationships
+    // get the node representing the outgroup
     TopologyNode *outgroup_node = root->getNode( outgroup, strict);
 
+    // check that we properly got a node
     if ( outgroup_node == NULL )
     {
         throw RbException("Cannot reroot the tree because we could not find an outgroup with name '" + outgroup.toString() + "'.");
     }
 
+    // only reroot if the node is not the root node
     if ( outgroup_node->isRoot() == false )
     {
-      reroot(*outgroup_node, reindex);
-
+        // reset parent/child relationships
+        reroot(*outgroup_node, make_bifurcating, reindex);
     }
 
 }
 
 
-void Tree::reroot(const std::string &outgroup, bool reindex)
+void Tree::reroot(const std::string &outgroup, bool make_bifurcating, bool reindex)
 {
     std::vector<std::string> tip_names = getTipNames();
     size_t outgroup_index = tip_names.size();
@@ -1535,150 +1591,31 @@ void Tree::reroot(const std::string &outgroup, bool reindex)
     }
     
     TopologyNode& outgroup_node = getTipNode( outgroup_index );
-    reroot(outgroup_node, reindex);
+    reroot(outgroup_node, make_bifurcating, reindex);
 
 }
 
 
-void Tree::reroot(TopologyNode &n, bool reindex)
+void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
 {
 	// reset parent/child relationships
 	reverseParentChild( n.getParent() );
     n.getParent().setParent( NULL );
+    
+    // if we have a trifurcation at the root, we need to change it into a bifurcation
+    if ( make_bifurcating == true )
+    {
+        // first, we make the root bifurcating
+        makeRootBifurcating(n.getClade(), reindex);
+        
+        // second, we make all other nodes bifurcating
+        makeInternalNodesBifurcating(reindex, true);
+        
+    } // end-if we do not want to make the tree bifurcating
+
 
 	// set the new root
 	setRoot( &n.getParent(), reindex );
-
-}
-
-
-
-void Tree::rerootAndMakeBifurcating(const Clade &o, bool reindex)
-{
-    bool strict = true;
-
-    // for safety we reset the bitrepresentation of the clade
-    Clade outgroup = o;
-    outgroup.resetTaxonBitset( getTaxonBitSetMap() );
-
-    if ( root->containsClade(outgroup, strict ) == false )
-    {
-
-        // check for the inverted clade
-        RbBitSet b = outgroup.getBitRepresentation();
-        b.flip();
-        outgroup.setBitRepresentation(b);
-
-        if ( root->containsClade(outgroup, strict ) == false )
-        {
-            throw RbException("Cannot reroot the tree because we could not find an outgroup clade '" + outgroup.toString() + "'.");
-        }
-
-    }
-
-    // reset parent/child relationships
-    TopologyNode *outgroup_node = root->getNode( outgroup, strict);
-
-    if ( outgroup_node == NULL )
-    {
-        throw RbException("Cannot reroot the tree because we could not find an outgroup clade '" + outgroup.toString() + "'.");
-    }
-
-    if ( outgroup_node->isRoot() == false )
-    {
-
-        reverseParentChild( outgroup_node->getParent() );
-
-        outgroup_node->getParent().setParent( NULL );
-
-        // set the new root
-        setRoot( &outgroup_node->getParent(), reindex );
-
-    }
-
-    // GOING THROUGH TREE AND CLEANING ONE DEGREE NODES
-    for (size_t i = 0 ; i < nodes.size(); ++i) {
-      if (nodes[i]->getNumberOfChildren() == 1) {
-        TopologyNode *parent = nodes[nodes[i]->getParent().getIndex()];
-        std::vector<TopologyNode*> children = nodes[i]->getChildren() ;
-        TopologyNode *child = children[0];
-        double summ = nodes[i]->getBranchLength() + child->getBranchLength();
-        parent->removeChild(nodes[i]);
-        nodes[i]->removeChild(child);
-        parent->addChild(child);
-        child->setBranchLength(summ);
-        child->setParent(parent);
-      }
-    }
-
-    // Clearing the node vector and filling it up again
-    nodes.clear();
-    // Go through all nodes from the root and add them in a pre-order traversal
-    fillNodesByPhylogeneticTraversal(root);
-
-    for (unsigned int i = 0; i < nodes.size(); ++i)
-    {
-        nodes[i]->setIndex(i);
-    }
-
-    // if we have a trifurcation at the root, we need to change it into a bifurcation
-    size_t numChildren = root->getNumberOfChildren();
-    if ( numChildren==3) {
-        // which one of the 3 children do we want as outgroup?
-        size_t goodOutgroup = 0;
-        double goodBl = 0.0;
-        double halfBl = 0.0;
-        std::vector<TopologyNode*> nodesToMove = root->getChildren() ;
-        for (size_t i = 0; i < numChildren; ++i)
-        {
-          if (root->getChild(i).getClade() == outgroup) {
-            goodOutgroup = i;
-            goodBl = root->getChild(i).getBranchLength();
-            halfBl = goodBl / 2;
-            root->getChild(i).setBranchLength(halfBl);
-            root->getChild(i).setAge(root->getChild(i).getAge() + halfBl);
-            break;
-          }
-        }
-        nodesToMove.erase(nodesToMove.begin() + goodOutgroup);
-        TopologyNode *new_child = new TopologyNode();
-        double parentAge = root->getAge();
-
-        double newAge = parentAge - halfBl;
-
-        for (size_t i = 0; i < nodesToMove.size(); ++i)
-        {
-          TopologyNode* tmp = nodesToMove[i ];
-        //  double newBl = tmp->getBranchLength() - halfMini;
-          root->removeChild(tmp);
-          new_child->addChild(tmp);
-          tmp->setParent (new_child);
-        //  tmp->setBranchLength(newBl) ;
-        }
-
-        root->addChild(new_child);
-        new_child->setParent( root );
-        new_child->setAge(newAge);
-        new_child->setBranchLength( halfBl );
-    }
-    else if (numChildren > 2) {
-      throw RbException("Problem when rerooting with  '" + outgroup.toString() + "'.");
-
-    }
-
-
-    /////MORE CLEANING!
-    nodes.clear();
-    // Go through all nodes from the root and add them in a pre-order traversal
-    fillNodesByPhylogeneticTraversal(root);
-
-        for (unsigned int i = 0; i < nodes.size(); ++i)
-        {
-            nodes[i]->setIndex(i);
-        }
-
-    num_nodes = nodes.size();
-
 
 }
 

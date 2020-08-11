@@ -194,8 +194,16 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     {
         found = true;
         bool fossils_only = static_cast<RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+        
         RevBayesCore::Tree &tree = dag_node->getValue();
-        tree.makeInternalNodesBifurcating(true);
+        tree.makeInternalNodesBifurcating( true, fossils_only );
+
+        if ( args[1].getVariable()->getRevObject() != RevNullObject::getInstance() )
+        {
+            const RevBayesCore::Clade& outgroup = static_cast<Clade &>( args[1].getVariable()->getRevObject() ).getValue();
+            tree.makeRootBifurcating( outgroup, true );
+        }
+        
         return NULL;
     }
     else if (name == "makeUltrametric")
@@ -292,13 +300,8 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         const RevBayesCore::Clade &tmp = static_cast<const Clade&>( args[0].getVariable()->getRevObject() ).getValue();
         bool make_bifurcating = static_cast<RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
         RevBayesCore::Tree &tree = dag_node->getValue();
-        if (make_bifurcating)
-        {
-            tree.rerootAndMakeBifurcating(tmp, true);
-        }
-        else {
-            tree.reroot(tmp, true);
-        }
+        tree.reroot(tmp, make_bifurcating, true);
+        
         return NULL;
     }
     else if (name == "rescale")
@@ -511,6 +514,7 @@ void Tree::initMethods( void )
 
     ArgumentRules* makeBifurcatingArgRules = new ArgumentRules();
     makeBifurcatingArgRules->push_back( new ArgumentRule( "fossils_only", RlBoolean::getClassTypeSpec(), "Do we want to bifurcate only nodes with degree 1, or all nodes with degree different from 2?", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    makeBifurcatingArgRules->push_back( new ArgumentRule( "clade", Clade::getClassTypeSpec(), "The clade to use as outgroup.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "makeBifurcating", RlUtils::Void, makeBifurcatingArgRules   ) );
 
     // member functions

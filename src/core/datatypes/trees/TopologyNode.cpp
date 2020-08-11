@@ -1552,7 +1552,7 @@ bool TopologyNode::isTip( void ) const
  * then we insert a dummy child.
  * This function is called recursively.
  */
-void TopologyNode::makeBifurcating( void )
+void TopologyNode::makeBifurcating( bool as_fossils )
 {
 
     if ( isTip() == false )
@@ -1565,20 +1565,48 @@ void TopologyNode::makeBifurcating( void )
             if ( getNumberOfChildren() == 1 )
             {
 
-                TopologyNode *new_fossil = new TopologyNode( getTaxon() );
-                taxon = Taxon("");
+                // should we remove the node or add it as a fossil?
+                if ( as_fossils == true )
+                {
+                    TopologyNode *new_fossil = new TopologyNode( getTaxon() );
+                    taxon = Taxon("");
 
-                // connect to the old fossil
-                addChild( new_fossil );
-                new_fossil->setParent( this );
+                    // connect to the old fossil
+                    addChild( new_fossil );
+                    new_fossil->setParent( this );
 
-                // set the fossil flags
-                setSampledAncestor( false );
-                new_fossil->setSampledAncestor( true );
+                    // set the fossil flags
+                    setSampledAncestor( false );
+                    new_fossil->setSampledAncestor( true );
 
-                // set the age and branch-length of the fossil
-                new_fossil->setAge( age );
-                new_fossil->setBranchLength( 0.0 );
+                    // set the age and branch-length of the fossil
+                    new_fossil->setAge( age );
+                    new_fossil->setBranchLength( 0.0 );
+                }
+                else
+                {
+                    // we are going to delete myself by connect my parent and my child
+                    TopologyNode& parent = getParent();
+                    TopologyNode& child = getChild(0);
+                    
+                    // the new branch length needs to be the branch length of the parent and child
+                    double summ = getBranchLength() + child.getBranchLength();
+                    
+                    // now remove myself from the parent
+                    parent.removeChild( this );
+                    
+                    // and my child from me
+                    removeChild( &child );
+                    
+                    // and stich my parent and my child together
+                    parent.addChild( &child );
+                    child.setParent( &parent );
+                    
+                    // finally, adapt the branch lengths
+                    child.setBranchLength(summ);
+                    
+                }
+
 
             }
 
@@ -1587,7 +1615,7 @@ void TopologyNode::makeBifurcating( void )
         // call this function recursively for all its children
         for (size_t i=0; i<getNumberOfChildren(); ++i)
         {
-            getChild( i ).makeBifurcating();
+            getChild( i ).makeBifurcating( as_fossils );
         }
 
     }
