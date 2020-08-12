@@ -14,13 +14,13 @@ namespace RevBayesCore {
     class AbstractMultispeciesCoalescentGenewise : public TypedDistribution<Tree> {
 
     public:
-        AbstractMultispeciesCoalescentGenewise(const TypedDagNode<Tree> *st, const std::vector<Taxon> &t, size_t ngt);
+        AbstractMultispeciesCoalescentGenewise(const TypedDagNode<Tree> *st, const std::vector< std::vector<Taxon> > &t, size_t ngt);
         virtual                                            ~AbstractMultispeciesCoalescentGenewise(void);                                                                       //!< Virtual destructor
 
         // public member functions
         double                                              computeLnProbability(void);
         void                                                redrawValue(void);
-        virtual void                                        setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
+        // virtual void                                        setValues(std::vector<Tree*> *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
 
         // pure virtual member functions
         virtual AbstractMultispeciesCoalescentGenewise*             clone(void) const = 0;                                                                                  //!< Create an independent clone
@@ -28,25 +28,27 @@ namespace RevBayesCore {
     protected:
         // Parameter management functions
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Swap a parameter
-        virtual double                                      computeLnCoalescentProbability(size_t k, const std::vector<double> &t, double a, double b, size_t index, bool f) = 0;
+        virtual double                                      computeLnCoalescentProbability(std::vector<size_t> k, const std::vector< std::vector<double> > &t, double a, double b, size_t index, bool f) = 0;
         virtual double                                      drawNe(size_t index);
 
         // helper functions
-        void                                                attachTimes(Tree *psi, std::vector<TopologyNode *> &tips, size_t index, const std::vector<double> &times);
-        void                                                buildRandomBinaryTree(std::vector<TopologyNode *> &tips);
+        // void                                                attachTimes(Tree *psi, std::vector<TopologyNode *> &tips, size_t index, const std::vector<double> &times);
+        // void                                                buildRandomBinaryTree(std::vector<TopologyNode *> &tips);
         double                                              recursivelyComputeLnProbability(const TopologyNode &n);
         void                                                resetTipAllocations(void);
         void                                                simulateTrees(void);
 
         // members
-        std::vector<Taxon>                                  taxa;
-        const TypedDagNode<Tree>*                           species_tree;
-        size_t                                              num_taxa;
-        double                                              log_tree_topology_prob;
-        size_t                                              num_gene_trees;
-        std::vector<Tree* >*                                gene_trees;
+        std::vector< std::vector<Taxon> >                                   taxa;                       //!< A vector holding the vectors of taxa for each gene tree
+        const TypedDagNode<Tree>*                                           species_tree;               //!< The species tree
+        size_t                                                              num_species;                //!< The number of tips in the species tree
+        std::vector<size_t>                                                 num_taxa;                   //!< A vector holding the number of tips for each gene tree
+        std::vector<double>                                                 log_tree_topology_prob;     //!< Combinatorial topology prob for species tree
+        size_t                                                              num_gene_trees;             //!< Number of genes/gene trees
+        std::vector<Tree* >*                                                gene_trees;                 //!< A vector holding all gene trees embedded in the species tree
 
-        std::vector< std::set< const TopologyNode* > >      individuals_per_branch;
+        std::vector< std::vector< std::set< const TopologyNode* > > >       individuals_per_branch;     //!< A vector holding the vectors that contain the individuals per branch for each gene tree
+
 
     };
 

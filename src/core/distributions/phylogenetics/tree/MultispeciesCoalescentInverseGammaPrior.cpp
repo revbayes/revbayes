@@ -17,7 +17,7 @@ namespace RevBayesCore { class Tree; }
 
 using namespace RevBayesCore;
 
-MultispeciesCoalescentInverseGammaPrior::MultispeciesCoalescentInverseGammaPrior(const TypedDagNode<Tree> *sp, const std::vector<Taxon> &t, size_t ngt) : AbstractMultispeciesCoalescentGenewise(sp, t, ngt)
+MultispeciesCoalescentInverseGammaPrior::MultispeciesCoalescentInverseGammaPrior(const TypedDagNode<Tree> *sp, const std::vector< std::vector<Taxon> > &t, size_t ngt) : AbstractMultispeciesCoalescentGenewise(sp, t, ngt)
 {
 
 }
@@ -39,12 +39,15 @@ MultispeciesCoalescentInverseGammaPrior* MultispeciesCoalescentInverseGammaPrior
 }
 
 
-double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(size_t k, const std::vector<double> &times, double begin_age, double end_age, size_t index, bool add_final_interval)
+double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(std::vector<size_t> k, const std::vector< std::vector<double> > &times, double begin_age, double end_age, size_t index, bool add_final_interval)
 {
-    // k is the number of entering lineages, so the log like is 0 if
-    // there is only one lineage (as the probability of no coalescence
-    // is equal to 1.0 in this case, as it is the only possible outcome)
-    if ( k == 1 ) return 0.0;
+    // Index is the index of the species node
+
+    // k is a vector holding the number of entering lineages per gene
+    // So the log like is 0 for a particular gene i in this branch of the
+    // species tree if k[i] = 1, as there is only one lineage and the
+    // probability of no coalescence is equal to 1.0 in this case (as it
+    // is the only possible outcome)
 
     double alpha = shape->getValue();
     double beta = rate->getValue();
@@ -53,51 +56,63 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
 
     double ln_prob_coal = 0.0;
 
-    // Get the number of coalescences
-    size_t n = times.size();
+    // Initialize terms that are summed over all genes
+    double a = 0; // q_b term in Jones (2017)
+    double b = 0; // gamma_b term in Jones (2017)
+    double log_r = 0; // log(r_b) term in Jones (2017)
 
-    // Get the rb term from Jones (2017)
-    // We assume autosomal nuclear genes, so ploidy = 2
-    double a = n;
-    double log_r = -a * log(2.0);
-
-    // We need to get the branch gamma term (gamma_b in Jones 2017)
-    double b = 0.0;
-
-    for (size_t i=0; i<n; ++i)
+    for (size_t i=0; i<num_gene_trees; i++)
     {
-        // now we do the computation
-        // t is the time between the previous and the current coalescences
-        double t = times[i] - current_time;
-        current_time = times[i];
+        // We only need to calculate terms if k > 1
+        if ( k[i] > 1 )
+        {
+            // Get the number of coalescences
+            size_t n = times[i].size();
 
-        // get the number j of individuals we had before the current coalescence
-        size_t j = k - i;
-        double n_pairs = j * (j-1.0) / 2.0;
+            // Branch ploidy term (log)
+            // We assume autosomal nuclear genes, so ploidy = 2
+            log_r += -n * log(2.0);
 
-        b += t * n_pairs;
+            // Branch event term
+            a += n;
+
+            // Branch gamma term
+            for (size_t m=0; m<n; ++m)
+            {
+                // Get the time t between the previous and the current coalescences
+                double t = times[i][m] - current_time;
+                current_time = times[i][m];
+
+                // Get the number j of individuals we had before the current coalescence
+                size_t j = k[i] - m;
+                double n_pairs = j * (j-1.0) / 2.0;
+
+                b += t * n_pairs;
+            }
+
+            // compute the probability of no coalescent event in the final part of the branch
+            // only do this if the branch is not the root branch
+            if ( add_final_interval == true )
+            {
+                double final_interval = end_age - current_time;
+                size_t j = k[i] - n;
+                double n_pairs = j * (j-1.0) / 2.0;
+                b += final_interval * n_pairs;
+            }
+        }
     }
 
-    // compute the probability of no coalescent event in the final part of the branch
-    // only do this if the branch is not the root branch
-    if ( add_final_interval == true )
-    {
-        double final_interval = end_age - current_time;
-        size_t j = k - n;
-        double n_pairs = j * (j-1.0) / 2.0;
-        b += final_interval * n_pairs;
-    }
-
-    // Divide by ploidy
+    // Get final branch gamma term by dividing sum by ploidy
     b /= 2.0;
 
     // Calculate the log gamma ratio
     double log_gamma_ratio = 0.0;
-    for (size_t i=0; i<n; ++i)
+    for (size_t i=0; i<a; ++i)
     {
         log_gamma_ratio += log(alpha + i);
     }
 
+    // Finally calculate the total log probability over all gene trees for this branch of the species tree
     ln_prob_coal += log_r + (alpha * log(beta)) - ((alpha + a) * log(beta + b)) + log_gamma_ratio;
 
     return ln_prob_coal;
