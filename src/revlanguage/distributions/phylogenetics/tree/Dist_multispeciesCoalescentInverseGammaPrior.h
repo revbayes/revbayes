@@ -49,8 +49,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                           rate;                                                                                   //!< The rate of the inverse gamma distribution
         RevPtr<const RevVariable>                           species_tree;                                                                           //!< The species tree
         RevPtr<const RevVariable>                           taxa;                                                                                   //!< The taxa
-        RevPtr<const RevVariable>                           num_gene_trees;
-        RevPtr<const RevVariable>                           gene_trees;                                                                       //!< The number of genes
+        RevPtr<const RevVariable>                           num_gene_trees;                                                                         //!< The number of genes
 
 
     };
