@@ -85,8 +85,9 @@ RevBayesCore::MultispeciesCoalescentInverseGammaPrior* Dist_multispeciesCoalesce
 
     for (size_t i=0; i<ngt; ++i)
     {
-        const std::vector<RevBayesCore::Taxon>      &t  = static_cast<const ModelVector<Taxon> &>( taxa[i].getRevObject() ).getValue();
-        tv.push_back(t);
+        const std::vector<RevBayesCore::Taxon>                      &t = static_cast<const ModelVector<Taxon> &>( taxa[i].getRevObject() ).getValue();
+        std::vector<RevBayesCore::Taxon>                            tc = t;
+        tv.push_back(tc);
     }
 
     RevBayesCore::MultispeciesCoalescentInverseGammaPrior*   d = new RevBayesCore::MultispeciesCoalescentInverseGammaPrior( st, tv, ngt );
