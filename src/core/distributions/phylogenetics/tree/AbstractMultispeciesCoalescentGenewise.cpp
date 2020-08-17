@@ -52,7 +52,6 @@ AbstractMultispeciesCoalescentGenewise::AbstractMultispeciesCoalescentGenewise(c
 
         for (RevBayesCore::RbIterator<RevBayesCore::Taxon> it=taxa[i].begin(); it!=taxa[i].end(); ++it)
         {
-            std::cout << it->getSpeciesName() << std::endl;
             sn.insert( it->getSpeciesName() );
         }
 
@@ -391,13 +390,17 @@ void AbstractMultispeciesCoalescentGenewise::simulateTrees( void )
     }
 
     // Simulate all gene trees
-    std::vector< std::map< const TopologyNode *, std::vector< TopologyNode* > > > individuals_per_branch;
-    std::vector< std::vector< TopologyNode * > > nodes_at_node;
-    std::vector< std::vector<TopologyNode * > > initial_individuals_at_branch;
-    std::vector< std::vector<TopologyNode * > > incoming_lineages;
 
+    // Set up genewise data structures
+    std::vector< std::map< const TopologyNode *, std::vector< TopologyNode* > > > individuals_per_branch_genewise;
+    // std::vector< std::vector<TopologyNode * > > incoming_lineages_genewise;
+    // std::vector< std::map<TopologyNode *, double> > nodes_2_ages_genewise;
+
+    // We loop through each gene tree to get the information about individuals
     for (size_t i=0; i<num_gene_trees; ++i)
     {
+        std::map< const TopologyNode *, std::vector< TopologyNode* > > current_individuals_per_branch;
+
         for (RevBayesCore::RbIterator<RevBayesCore::Taxon> it=taxa[i].begin(); it!=taxa[i].end(); ++it)
         {
             TopologyNode *n = new TopologyNode( *it );
@@ -416,11 +419,13 @@ void AbstractMultispeciesCoalescentGenewise::simulateTrees( void )
             }
 
             n->setAge( 0.0 );
-            nodes_at_node[i] = individuals_per_branch[ i ][ species_node ];
-            nodes_at_node[i].push_back( n );
+
+            // Add nodes for this branch
+            std::vector<TopologyNode * > &current_nodes_at_node = current_individuals_per_branch[ species_node ];
+            current_nodes_at_node.push_back( n );
         }
 
-        std::vector< std::map<TopologyNode *, double> > nodes_2_ages;
+        std::map<TopologyNode *, double> current_nodes_2_ages;
         TopologyNode *root = NULL;
         // we loop over the nodes of the species tree in phylogenetic traversal
         for (std::vector<TopologyNode *>::const_iterator it = species_tree_nodes.begin(); it != species_tree_nodes.end(); ++it)
@@ -428,20 +433,21 @@ void AbstractMultispeciesCoalescentGenewise::simulateTrees( void )
             TopologyNode *sp_node = *it;
             const TopologyNode *sp_parent_node = NULL;
             double branch_length = RbConstants::Double::inf;
+
             if ( sp_node->isRoot() == false )
             {
                 sp_parent_node = &sp_node->getParent();
                 branch_length = sp_parent_node->getAge() - sp_node->getAge();
             }
 
-            initial_individuals_at_branch[i] = individuals_per_branch[i][sp_node];
+            std::vector<TopologyNode * > current_initial_individuals_at_branch = current_individuals_per_branch[sp_node];
             double branch_ne = drawNe( sp_node->getIndex() );
 
             double theta = 1.0 / branch_ne;
 
             double prev_coalescent_time = 0.0;
 
-            size_t j = initial_individuals_at_branch[i].size();
+            size_t j = current_initial_individuals_at_branch.size();
             double n_pairs = j * (j-1) / 2.0;
             double lambda = n_pairs * theta;
             double u = RbStatistics::Exponential::rv( lambda, *rng);
@@ -450,13 +456,13 @@ void AbstractMultispeciesCoalescentGenewise::simulateTrees( void )
             while ( next_coalescent_time < branch_length && j > 1 )
             {
                 // randomly coalesce two lineages
-                size_t index = static_cast<size_t>( floor(rng->uniform01()*initial_individuals_at_branch[i].size()) );
-                TopologyNode *left = initial_individuals_at_branch[i][index];
-                initial_individuals_at_branch[i].erase( initial_individuals_at_branch[i].begin() + index);
+                size_t index = static_cast<size_t>( floor(rng->uniform01()*current_initial_individuals_at_branch.size()) );
+                TopologyNode *left = current_initial_individuals_at_branch[index];
+                current_initial_individuals_at_branch.erase( current_initial_individuals_at_branch.begin() + index);
 
-                index = static_cast<size_t>( floor(rng->uniform01()*initial_individuals_at_branch[i].size()) );
-                TopologyNode *right = initial_individuals_at_branch[i][index];
-                initial_individuals_at_branch[i].erase( initial_individuals_at_branch[i].begin() + index);
+                index = static_cast<size_t>( floor(rng->uniform01()*current_initial_individuals_at_branch.size()) );
+                TopologyNode *right = current_initial_individuals_at_branch[index];
+                current_initial_individuals_at_branch.erase( current_initial_individuals_at_branch.begin() + index);
 
                 TopologyNode *new_parent = new TopologyNode();
                 new_parent->addChild(left);
@@ -471,9 +477,9 @@ void AbstractMultispeciesCoalescentGenewise::simulateTrees( void )
                     std::cerr << "Oh, the root is NULL :(" << std::endl;
                 }
 
-                initial_individuals_at_branch[i].push_back( new_parent );
+                current_initial_individuals_at_branch.push_back( new_parent );
 
-                nodes_2_ages[i][new_parent] = next_coalescent_time + sp_node->getAge();
+                current_nodes_2_ages[new_parent] = next_coalescent_time + sp_node->getAge();
 
 
                 prev_coalescent_time = next_coalescent_time;
@@ -486,11 +492,9 @@ void AbstractMultispeciesCoalescentGenewise::simulateTrees( void )
 
             if ( sp_parent_node != NULL )
             {
-                incoming_lineages[i] = individuals_per_branch[i][sp_parent_node];
-                incoming_lineages[i].insert(incoming_lineages[i].end(), initial_individuals_at_branch[i].begin(), initial_individuals_at_branch[i].end());
+                std::vector<TopologyNode *> &current_incoming_lineages = current_individuals_per_branch[sp_parent_node];
+                current_incoming_lineages.insert(current_incoming_lineages.end(), current_initial_individuals_at_branch.begin(), current_initial_individuals_at_branch.end());
             }
-
-
         }
 
         // the time tree object (topology + times)
@@ -502,11 +506,16 @@ void AbstractMultispeciesCoalescentGenewise::simulateTrees( void )
         // initialize the topology by setting the root
         psi->setRoot(root, true);
 
-        for ( std::map<TopologyNode*, double>::iterator it = nodes_2_ages[i].begin(); it != nodes_2_ages[i].end(); ++it)
+        for ( std::map<TopologyNode*, double>::iterator it = current_nodes_2_ages.begin(); it != current_nodes_2_ages.end(); ++it)
         {
             TopologyNode *node = it->first;
             node->setAge( it->second );
         }
+
+        // Add individuals and lineages for this gene to the appropriate genewise vectors
+        individuals_per_branch_genewise.push_back( current_individuals_per_branch );
+        // incoming_lineages_genewise.push_back( current_incoming_lineages );
+        // nodes_2_ages_genewise.push_back( current_nodes_2_ages );
 
         // finally store the new value
         value[i] = *psi;
