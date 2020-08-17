@@ -17,7 +17,7 @@ namespace RevBayesCore { class Tree; }
 
 using namespace RevBayesCore;
 
-MultispeciesCoalescentInverseGammaPrior::MultispeciesCoalescentInverseGammaPrior(const TypedDagNode<Tree> *sp, const std::vector< std::vector<Taxon> > &t, size_t ngt) : AbstractMultispeciesCoalescentGenewise(sp, t, ngt)
+MultispeciesCoalescentInverseGammaPrior::MultispeciesCoalescentInverseGammaPrior(const TypedDagNode<Tree> *sp, RbVector< RbVector<Taxon> > t, size_t ngt) : AbstractMultispeciesCoalescentGenewise(sp, t, ngt)
 {
 
 }

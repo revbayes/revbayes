@@ -14,7 +14,8 @@ namespace RevBayesCore {
     class AbstractMultispeciesCoalescentGenewise : public TypedDistribution<Tree> {
 
     public:
-        AbstractMultispeciesCoalescentGenewise(const TypedDagNode<Tree> *st, const std::vector< std::vector<Taxon> > &t, size_t ngt);
+        //AbstractMultispeciesCoalescentGenewise(const TypedDagNode<Tree> *st, const std::vector< std::vector<Taxon> > &t, size_t ngt);
+        AbstractMultispeciesCoalescentGenewise(const TypedDagNode<Tree> *st, RbVector< RbVector<Taxon> > t, size_t ngt);
         virtual                                            ~AbstractMultispeciesCoalescentGenewise(void);                                                                       //!< Virtual destructor
 
         // public member functions
@@ -39,7 +40,7 @@ namespace RevBayesCore {
         void                                                simulateTrees(void);
 
         // members
-        std::vector< std::vector<Taxon> >                                   taxa;                       //!< A vector holding the vectors of taxa for each gene tree
+        RbVector< RbVector<Taxon> >                                         taxa;                       //!< A vector holding the vectors of taxa for each gene tree
         const TypedDagNode<Tree>*                                           species_tree;               //!< The species tree
         size_t                                                              num_species;                //!< The number of tips in the species tree
         std::vector<size_t>                                                 num_taxa;                   //!< A vector holding the number of tips for each gene tree

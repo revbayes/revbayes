@@ -25,7 +25,7 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-AbstractMultispeciesCoalescentGenewise::AbstractMultispeciesCoalescentGenewise(const TypedDagNode<Tree> *sp, const std::vector< std::vector<Taxon> > &t, size_t ngt) : TypedDistribution<Tree>( NULL ),
+AbstractMultispeciesCoalescentGenewise::AbstractMultispeciesCoalescentGenewise(const TypedDagNode<Tree> *sp, RevBayesCore::RbVector< RevBayesCore::RbVector<Taxon> > t, size_t ngt) : TypedDistribution<Tree>( NULL ),
     taxa( t ),
     species_tree( sp ),
     num_taxa( ),
@@ -48,8 +48,19 @@ AbstractMultispeciesCoalescentGenewise::AbstractMultispeciesCoalescentGenewise(c
     std::vector< std::set<std::string> > species_names;
     for (size_t i=0; i<num_gene_trees; ++i)
     {
-        for (std::vector<Taxon>::const_iterator it=taxa[i].begin(); it!=taxa[i].end(); ++it)
+        //for (std::set<Taxon>::iterator it=taxa[i].begin(); it!=taxa[i].end(); ++it)
+        //
+        // for (RevBayesCore::RbIterator<RevBayesCore::Taxon> it=taxa[i]->getValue().begin(); it!=taxa[i]->getValue().end(); ++it)
+        // {
+        //     gene2species[it->getName()] = it->getSpeciesName();
+        // }
+
+        //for (size_t j=0; j < taxa[i].size(); j++)
+        for (RevBayesCore::RbIterator<RevBayesCore::Taxon> it=taxa[i].begin(); it!=taxa[i].end(); ++it)
+
         {
+            //std::set<Taxon>::iterator it;
+
             species_names[i].insert( it->getSpeciesName() );
         }
     }
@@ -328,7 +339,7 @@ void AbstractMultispeciesCoalescentGenewise::resetTipAllocations( void )
 
     for (size_t i=0; i<num_gene_trees; ++i)
     {
-        for (std::vector<Taxon>::const_iterator it = taxa[i].begin(); it != taxa[i].end(); ++it)
+        for (RevBayesCore::RbIterator<RevBayesCore::Taxon> it=taxa[i].begin(); it!=taxa[i].end(); ++it)
         {
             const std::string &name = it->getName();
             individual_names_2_species_names[i][name] = it->getSpeciesName();
@@ -394,7 +405,7 @@ void AbstractMultispeciesCoalescentGenewise::simulateTrees( void )
 
     for (size_t i=0; i<num_gene_trees; ++i)
     {
-        for (std::vector< Taxon >::iterator it = taxa[i].begin(); it != taxa[i].end(); ++it)
+        for (RevBayesCore::RbIterator<RevBayesCore::Taxon> it=taxa[i].begin(); it!=taxa[i].end(); ++it)
         {
             TopologyNode *n = new TopologyNode( *it );
             const std::string &species_name = n->getSpeciesName();
