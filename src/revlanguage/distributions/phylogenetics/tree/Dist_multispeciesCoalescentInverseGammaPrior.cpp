@@ -81,17 +81,20 @@ RevBayesCore::MultispeciesCoalescentInverseGammaPrior* Dist_multispeciesCoalesce
     //const std::vector< std::vector<RevBayesCore::Taxon> >                &t  = static_cast<const ModelVector< ModelVector<Taxon> > &>( taxa[0].getRevObject() ).getValue();
     size_t                                                          ngt = size_t( static_cast<const Natural &>( num_gene_trees->getRevObject() ).getValue() );
 
-    std::vector< std::vector<RevBayesCore::Taxon> > *tv;
-    tv->reserve(ngt);
+    RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::Taxon> > t = static_cast<const ModelVector<ModelVector<Taxon> > &>( taxa->getRevObject() ).getValue();
 
-    for (size_t i=0; i<ngt; ++i)
-    {
-        const std::vector<RevBayesCore::Taxon>                      &t = static_cast<const ModelVector<Taxon> &>( taxa[i].getRevObject() ).getValue();
-        std::vector<RevBayesCore::Taxon>                            tc = t;
-        tv->push_back(tc);
-    }
+    //
+    // std::vector< std::vector<RevBayesCore::Taxon> > *tv;
+    // tv->reserve(ngt);
+    //
+    // for (size_t i=0; i<ngt; ++i)
+    // {
+    //     const std::vector<RevBayesCore::Taxon>                      &t = static_cast<const ModelVector<Taxon> &>( taxa[i].getRevObject() ).getValue();
+    //     std::vector<RevBayesCore::Taxon>                            tc = t;
+    //     tv->push_back(tc);
+    // }
 
-    RevBayesCore::MultispeciesCoalescentInverseGammaPrior*   d = new RevBayesCore::MultispeciesCoalescentInverseGammaPrior( st, *tv, ngt );
+    RevBayesCore::MultispeciesCoalescentInverseGammaPrior*   d = new RevBayesCore::MultispeciesCoalescentInverseGammaPrior( st, t, ngt );
 
 
     //const std::vector<RevBayesCore::Taxon>      &t  = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();

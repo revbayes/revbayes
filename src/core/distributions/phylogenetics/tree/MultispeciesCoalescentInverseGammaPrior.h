@@ -10,7 +10,7 @@ namespace RevBayesCore {
     class MultispeciesCoalescentInverseGammaPrior : public AbstractMultispeciesCoalescentGenewise {
 
     public:
-        MultispeciesCoalescentInverseGammaPrior(const TypedDagNode<Tree> *st, const std::vector< std::vector<Taxon> > &t, size_t ngt);
+        MultispeciesCoalescentInverseGammaPrior(const TypedDagNode<Tree> *st, RbVector< RbVector<Taxon> > t, size_t ngt);
         virtual                                            ~MultispeciesCoalescentInverseGammaPrior(void);                                                                       //!< Virtual destructor
 
         // public member functions
