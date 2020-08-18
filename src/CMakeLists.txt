@@ -65,21 +65,22 @@ if ("${CONTINUOUS_INTEGRATION}" STREQUAL "TRUE")
 endif()
 
 
-MESSAGE("My Boost information:")
-MESSAGE("  Boost_INCLUDE_DIRS: ${LOCAL_BOOST_ROOT}")
-MESSAGE("  Boost_LIBRARIES: ${LOCAL_BOOST_LIBRARY}")
+MESSAGE("Boost location hints:")
+if (BOOST_ROOT)
+  MESSAGE("  BOOST_ROOT: ${BOOST_ROOT}")
+else()
+  MESSAGE("  BOOST_ROOT not set")
+endif()
+if (BOOST_INCLUDEDIR)
+  MESSAGE("  BOOST_INCLUDEDIR: ${BOOST_INCLUDEDIR}")
+endif()
+if (BOOST_LIBRARYDIR)
+  MESSAGE("  BOOST_LIBRARYDIR: ${BOOST_LIBRARYDIR}")
+endif()
 
 set(Boost_USE_MULTITHREADED ON)
 
-if ( NOT "${LOCAL_BOOST_ROOT}" STREQUAL "" AND NOT "${LOCAL_BOOST_LIBRARY}" STREQUAL "" )
-   SET(BOOST_ROOT ${LOCAL_BOOST_ROOT})
-   SET(BOOST_LIBRARY ${LOCAL_BOOST_LIBRARY})
-   SET(Boost_REALPATH ON)
-#   SET(Boost_NO_SYSTEM_PATHS ON)
-#   SET(Boost_USE_STATIC_RUNTIME ON)
-#   SET(Boost_USE_STATIC_LIBS ON)
-endif()
-
+MESSAGE("Searching for BOOST:")
 find_package(Boost
 1.60.0
 COMPONENTS regex
@@ -89,10 +90,10 @@ system
 filesystem
 date_time
 serialization REQUIRED)
-MESSAGE("Boost information:")
+MESSAGE("Boost configuration results:")
 MESSAGE("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIR}")
-MESSAGE("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
 MESSAGE("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
+MESSAGE("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
 # This will look for "generated_include_dirs.cmake" in the module path.
