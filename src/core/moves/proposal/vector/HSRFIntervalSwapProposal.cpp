@@ -92,31 +92,6 @@ double HSRFIntervalSwapProposal::getProposalTuningParameter( void ) const
  */
 double HSRFIntervalSwapProposal::doProposal( void )
 {
-    // Code to swap a single pair of intervals
-    // // Get random number generator
-    // RandomNumberGenerator* rng     = GLOBAL_RNG;
-    //
-    // // Choose i, we will swap i with i+1
-    // double u = rng->uniform01() * double(delta.size() - 1);
-    // size_t i = size_t(floor(u));
-    //
-    // // store the index so we can revert the move
-    // stored_index = i;
-    //
-    // // copy value
-    // double d_i = delta[i]->getValue();
-    // double s_i = sigma[i]->getValue();
-    //
-    // // Swap
-    // delta[i]->getValue() = delta[i+1]->getValue();
-    // sigma[i]->getValue() = sigma[i+1]->getValue();
-    //
-    // delta[i+1]->getValue() = d_i;
-    // sigma[i+1]->getValue() = s_i;
-    //
-    // return 0.0;
-
-    // Code to swap all of 1,2 3,4 5,6 ... or 2,3 4,5 6,7 ...
 
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
@@ -124,12 +99,13 @@ double HSRFIntervalSwapProposal::doProposal( void )
     // Do we first swap 1,2 or 2,3? 50-50 for either, so move is symmetric
     double u = rng->uniform01() * 2;
     size_t start = size_t(floor(u));
-    size_t end = size_t(floor(delta.size() - start)/2);
+    size_t end_plus_1 = size_t(start + 2 * (floor((delta.size() - start)/2)-1) + 1);
 
     // store the starting index so we can revert the move
     stored_index = start;
+    size_t i = start;
+    for (size_t i=start; i<end_plus_1; ++i) {
 
-    for (size_t i=start; i<end; ++i) {
       // copy value
       double d_i = delta[i]->getValue();
       double s_i = sigma[i]->getValue();
@@ -183,43 +159,26 @@ void HSRFIntervalSwapProposal::printParameterSummary(std::ostream &o, bool name_
  */
 void HSRFIntervalSwapProposal::undoProposal( void )
 {
-  // Code for moving a single value
-  // size_t i = stored_index;
-  //
-  // // copy value
-  // double d_i = delta[i]->getValue();
-  // double s_i = sigma[i]->getValue();
-  //
-  // // Swap
-  // delta[i]->getValue() = delta[i+1]->getValue();
-  // sigma[i]->getValue() = sigma[i+1]->getValue();
-  //
-  // delta[i+1]->getValue() = d_i;
-  // sigma[i+1]->getValue() = s_i;
 
-  // Code to swap all of 1,2 3,4 5,6 ... or 2,3 4,5 6,7 ...
+    size_t start = stored_index;
+    size_t end_plus_1 = size_t(start + 2 * (floor((delta.size() - start)/2)-1) + 1);
 
-  size_t start = stored_index;
-  size_t end = size_t(floor(delta.size() - start)/2);
+    // Undoing the move is just running the move exactly the same way (1,2),(3,4)->(2,1),(4,3)->(1,2),(3,4)
+    for (size_t i=start; i<end_plus_1; ++i) {
 
-  // store the starting index so we can revert the move
-  stored_index = start;
+      // copy value
+      double d_i = delta[i]->getValue();
+      double s_i = sigma[i]->getValue();
 
-  for (size_t i=start; i<end; ++i) {
-    // copy value
-    double d_i = delta[i]->getValue();
-    double s_i = sigma[i]->getValue();
+      // Swap
+      delta[i]->getValue() = delta[i+1]->getValue();
+      sigma[i]->getValue() = sigma[i+1]->getValue();
 
-    // Swap
-    delta[i]->getValue() = delta[i+1]->getValue();
-    sigma[i]->getValue() = sigma[i+1]->getValue();
+      delta[i+1]->getValue() = d_i;
+      sigma[i+1]->getValue() = s_i;
 
-    delta[i+1]->getValue() = d_i;
-    sigma[i+1]->getValue() = s_i;
-
-    ++i;
-  }
-
+      ++i;
+    }
 
 }
 
