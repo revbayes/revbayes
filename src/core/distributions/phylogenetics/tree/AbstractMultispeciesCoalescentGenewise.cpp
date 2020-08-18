@@ -25,7 +25,7 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-AbstractMultispeciesCoalescentGenewise::AbstractMultispeciesCoalescentGenewise(const TypedDagNode<Tree> *sp, RevBayesCore::RbVector< RevBayesCore::RbVector<Taxon> > t, size_t ngt) : TypedDistribution<Tree>( NULL ),
+AbstractMultispeciesCoalescentGenewise::AbstractMultispeciesCoalescentGenewise(const TypedDagNode<Tree> *sp, RevBayesCore::RbVector< RevBayesCore::RbVector<Taxon> > t, size_t ngt) : TypedDistribution< RbVector<Tree> >( new RbVector<Tree>() ),
     taxa( t ),
     species_tree( sp ),
     num_taxa( ),

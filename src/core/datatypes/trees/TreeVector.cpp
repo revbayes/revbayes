@@ -7,10 +7,18 @@
 
 using namespace RevBayesCore;
 
-TreeVector::TreeVector(void)
+TreeVector::TreeVector(void) : RbVector<Tree>()
 {
 
 }
+
+
+
+TreeVector::~TreeVector(void)
+{
+
+}
+
 
 
 bool TreeVector::operator==(const TreeVector &mve) const
@@ -95,6 +103,21 @@ const std::vector<Tree>& TreeVector::getValues(void) const
 void TreeVector::setNumberOfTrees(long n)
 {
     num_trees = n;
+}
+
+
+
+void TreeVector::executeMethod(const std::string &n, const std::vector<const DagNode*> &args, Tree &rv) const
+{
+    if ( n == "[]" )
+    {
+        long index = static_cast<const TypedDagNode<long> *> ( args[0] )->getValue()-1;
+        rv = this->operator[](index);
+    }
+    else
+    {
+        throw RbException("A tree vector object does not have a member method called '" + n + "'.");
+    }
 }
 
 

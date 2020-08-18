@@ -20,7 +20,7 @@ namespace RevLanguage {
      * @since 2014-01-26, version 1.0
      *
      */
-    class Dist_multispeciesCoalescentInverseGammaPrior :  public  TypedDistribution<TimeTree> {
+    class Dist_multispeciesCoalescentInverseGammaPrior :  public  TypedDistribution< ModelVector<TimeTree> > {
 
     public:
         Dist_multispeciesCoalescentInverseGammaPrior( void );
