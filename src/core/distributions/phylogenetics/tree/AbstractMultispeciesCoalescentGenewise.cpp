@@ -519,7 +519,7 @@ void AbstractMultispeciesCoalescentGenewise::simulateTrees( void )
 
         // finally store the new value
         value[i] = *psi;
-        gene_trees->push_back( psi );
+        gene_trees.push_back( psi );
 
     }
 
