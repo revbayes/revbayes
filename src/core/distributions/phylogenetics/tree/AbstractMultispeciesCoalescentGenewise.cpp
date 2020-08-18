@@ -181,59 +181,60 @@ double AbstractMultispeciesCoalescentGenewise::recursivelyComputeLnProbability( 
 
     double ln_prob_coal = 0;
 
+    if ( species_node.isTip() == false )
+    {
+        for (size_t i=0; i<num_gene_trees; i++)
+        {
+            individuals_per_branch_genewise[ i ][ species_node.getIndex() ].clear();
+        }
+
+        for (size_t j=0; j<species_node.getNumberOfChildren(); ++j)
+        {
+            ln_prob_coal += recursivelyComputeLnProbability( species_node.getChild(j) );
+        }
+    }
+
     double species_age = species_node.getAge();
     double parent_species_age = RbConstants::Double::inf;
 
-    std::vector< std::vector<double> > coal_times;
-    std::vector< std::map<double, const TopologyNode *> > coal_times_2_nodes;
-    std::vector< std::set<const TopologyNode*> > remaining_individuals;
-    std::vector<size_t> initial_individuals_sizes;
-
-
-    for (size_t i=0; i<num_gene_trees; ++i)
+    if ( species_node.isRoot() == false )
     {
-        if ( species_node.isTip() == false )
-        {
-            individuals_per_branch_genewise[ i ][ species_node.getIndex() ].clear();
+        const TopologyNode &species_parent_node = species_node.getParent();
+        parent_species_age = species_parent_node.getAge();
+    }
 
-            for (size_t j=0; j<species_node.getNumberOfChildren(); ++j)
-            {
-                ln_prob_coal += recursivelyComputeLnProbability( species_node.getChild(j) );
-            }
-        }
+    std::vector< std::vector<double> > coal_times_genewise;
+    std::vector<size_t> initial_individuals_sizes_genewise;
 
-
-
-        if ( species_node.isRoot() == false )
-        {
-            const TopologyNode &species_parent_node = species_node.getParent();
-            parent_species_age = species_parent_node.getAge();
-        }
-
+    for (size_t i=0; i<num_gene_trees; i++)
+    {
         // create a local copy of the individuals per branch
-        const std::set<const TopologyNode*> &initial_individuals = individuals_per_branch_genewise[i][species_node.getIndex()];
-        remaining_individuals[i] = initial_individuals;
+        const std::set<const TopologyNode*> &current_initial_individuals = individuals_per_branch_genewise[i][species_node.getIndex()];
+        std::set<const TopologyNode*> current_remaining_individuals = current_initial_individuals;
 
-        // Get number of initial individuals
-        initial_individuals_sizes[i] = initial_individuals.size();
+        // Get number of initial individuals for this gene
+        initial_individuals_sizes_genewise.push_back( current_initial_individuals.size() );
 
-        // get all coalescent events among the individuals
-        for ( std::set<const TopologyNode*>::iterator it = remaining_individuals[i].begin(); it != remaining_individuals[i].end(); ++it)
+        // Get all coalescent events among the individuals for this gene
+        std::vector<double> current_coal_times;
+        std::map<double, const TopologyNode *> current_coal_times_2_nodes;
+
+        for ( std::set<const TopologyNode*>::iterator it = current_remaining_individuals.begin(); it != current_remaining_individuals.end(); ++it)
         {
             const TopologyNode *ind = (*it);
             if ( ind->isRoot() == false )
             {
                 const TopologyNode &parent = ind->getParent();
                 double parent_age = parent.getAge();
-                coal_times_2_nodes[ i ][ parent_age ] = &parent;
+                current_coal_times_2_nodes[ parent_age ] = &parent;
             }
         }
 
         double current_time = species_age;
-        while ( current_time < parent_species_age && coal_times_2_nodes[i].size() > 0 )
+        while ( current_time < parent_species_age && current_coal_times_2_nodes.size() > 0 )
         {
 
-            const TopologyNode *parent = coal_times_2_nodes[i].begin()->second;
+            const TopologyNode *parent = current_coal_times_2_nodes.begin()->second;
             double parent_age = parent->getAge();
             current_time = parent_age;
 
@@ -243,26 +244,26 @@ double AbstractMultispeciesCoalescentGenewise::recursivelyComputeLnProbability( 
                 // get the left and right child of the parent
                 const TopologyNode *left = &parent->getChild( 0 );
                 const TopologyNode *right = &parent->getChild( 1 );
-                if ( remaining_individuals[i].find( left ) == remaining_individuals[i].end() || remaining_individuals[i].find( right ) == remaining_individuals[i].end() )
+                if ( current_remaining_individuals.find( left ) == current_remaining_individuals.end() || current_remaining_individuals.find( right ) == current_remaining_individuals.end() )
                 {
                     // one of the children does not belong to this species tree branch
                     return RbConstants::Double::neginf;
                 }
 
                 //We remove the coalescent event and the coalesced lineages
-                coal_times_2_nodes[i].erase( coal_times_2_nodes[i].begin() );
-                remaining_individuals[i].erase( remaining_individuals[i].find( left ) );
-                remaining_individuals[i].erase( remaining_individuals[i].find( right ) );
+                current_coal_times_2_nodes.erase( current_coal_times_2_nodes.begin() );
+                current_remaining_individuals.erase( current_remaining_individuals.find( left ) );
+                current_remaining_individuals.erase( current_remaining_individuals.find( right ) );
 
                 //We insert the parent in the vector of lineages in this branch
-                remaining_individuals[i].insert( parent );
+                current_remaining_individuals.insert( parent );
                 if ( parent->isRoot() == false )
                 {
                     const TopologyNode *grand_parent = &parent->getParent();
-                    coal_times_2_nodes[ i ][ grand_parent->getAge() ] = grand_parent;
+                    current_coal_times_2_nodes[ grand_parent->getAge() ] = grand_parent;
                 }
 
-                coal_times[i].push_back( parent_age );
+                current_coal_times.push_back( parent_age );
 
 
             } //End if coalescence in the species tree branch
@@ -274,26 +275,34 @@ double AbstractMultispeciesCoalescentGenewise::recursivelyComputeLnProbability( 
                 break;
             }
 
-
         } // end of while loop
-    }
 
+        // Add coal times to genewise data structure
+        coal_times_genewise.push_back( current_coal_times );
 
-
-    ln_prob_coal += computeLnCoalescentProbability(initial_individuals_sizes, coal_times, species_age, parent_species_age, species_node.getIndex(), species_node.isRoot() == false);
-
-
-
-    // merge the two sets of individuals that go into the next species
-    for (size_t i=0; i<num_gene_trees; ++i)
-    {
+        // merge the two sets of individuals that go into the next species
         if ( species_node.isRoot() == false )
         {
-            std::vector< std::set<const TopologyNode *> > incoming_lineages;
-            incoming_lineages[i] = individuals_per_branch_genewise[ i ][ species_node.getParent().getIndex() ];
-            incoming_lineages[i].insert( remaining_individuals[i].begin(), remaining_individuals[i].end());
+            std::set<const TopologyNode *> &current_incoming_lineages = individuals_per_branch_genewise[ i ][ species_node.getParent().getIndex() ];
+            current_incoming_lineages.insert( current_remaining_individuals.begin(), current_remaining_individuals.end());
         }
     }
+
+
+
+    ln_prob_coal += computeLnCoalescentProbability(initial_individuals_sizes_genewise, coal_times_genewise, species_age, parent_species_age, species_node.getIndex(), species_node.isRoot() == false);
+
+
+    //
+    // // merge the two sets of individuals that go into the next species
+    // for (size_t i=0; i<num_gene_trees; ++i)
+    // {
+    //     if ( species_node.isRoot() == false )
+    //     {
+    //         std::set<const TopologyNode *> &current_incoming_lineages = individuals_per_branch_genewise[ i ][ species_node.getParent().getIndex() ];
+    //         current_incoming_lineages.insert( current_remaining_individuals.begin(), current_remaining_individuals.end());
+    //     }
+    // }
 
 
     return ln_prob_coal;
