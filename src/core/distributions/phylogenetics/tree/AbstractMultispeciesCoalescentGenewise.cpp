@@ -194,7 +194,7 @@ double AbstractMultispeciesCoalescentGenewise::recursivelyComputeLnProbability( 
     {
         if ( species_node.isTip() == false )
         {
-            individuals_per_branch[ i ][ species_node.getIndex() ].clear();
+            individuals_per_branch_genewise[ i ][ species_node.getIndex() ].clear();
 
             for (size_t j=0; j<species_node.getNumberOfChildren(); ++j)
             {
@@ -211,7 +211,7 @@ double AbstractMultispeciesCoalescentGenewise::recursivelyComputeLnProbability( 
         }
 
         // create a local copy of the individuals per branch
-        const std::set<const TopologyNode*> &initial_individuals = individuals_per_branch[i][species_node.getIndex()];
+        const std::set<const TopologyNode*> &initial_individuals = individuals_per_branch_genewise[i][species_node.getIndex()];
         remaining_individuals[i] = initial_individuals;
 
         // Get number of initial individuals
@@ -290,7 +290,7 @@ double AbstractMultispeciesCoalescentGenewise::recursivelyComputeLnProbability( 
         if ( species_node.isRoot() == false )
         {
             std::vector< std::set<const TopologyNode *> > incoming_lineages;
-            incoming_lineages[i] = individuals_per_branch[ i ][ species_node.getParent().getIndex() ];
+            incoming_lineages[i] = individuals_per_branch_genewise[ i ][ species_node.getParent().getIndex() ];
             incoming_lineages[i].insert( remaining_individuals[i].begin(), remaining_individuals[i].end());
         }
     }
@@ -327,27 +327,29 @@ void AbstractMultispeciesCoalescentGenewise::resetTipAllocations( void )
 
     // Second, let's create a map from individual names to the species names for each gene tree
     // This is a vector of maps between individual names and species names
-    std::vector< std::map<std::string, std::string> > individual_names_2_species_names;
+    // std::vector< std::map<std::string, std::string> > individual_names_2_species_names_genewise;
 
     for (size_t i=0; i<num_gene_trees; ++i)
     {
+        std::map<std::string, std::string> individual_names_2_species_names;
+
         for (RevBayesCore::RbIterator<RevBayesCore::Taxon> it=taxa[i].begin(); it!=taxa[i].end(); ++it)
         {
             const std::string &name = it->getName();
-            individual_names_2_species_names[i][name] = it->getSpeciesName();
+            individual_names_2_species_names[name] = it->getSpeciesName();
         }
 
         // Create maps for the individuals to branches
-        individuals_per_branch[i] = std::vector< std::set< const TopologyNode* > >(sp.getNumberOfNodes(), std::set< const TopologyNode* >() );
+        individuals_per_branch_genewise.push_back( std::vector< std::set< const TopologyNode* > >(sp.getNumberOfNodes(), std::set< const TopologyNode* >() ) );
         for (size_t j=0; j<num_taxa[i]; ++j)
         {
-    //        const std::string &tip_name = it->getName();
-            const TopologyNode &n = value->getNode( j );
+            //const TopologyNode &n = value->getNode( j );
+            const TopologyNode &n = gene_trees[i]->getNode( j );
             const std::string &individual_name = n.getName();
-            const std::string &species_name = individual_names_2_species_names[ i ][ individual_name ];
+            const std::string &species_name = individual_names_2_species_names[ individual_name ];
 
             TopologyNode *species_node = species_names_2_species_nodes[species_name];
-            individuals_per_branch[ i ][ species_node->getIndex() ].insert( &n );
+            individuals_per_branch_genewise[ i ][ species_node->getIndex() ].insert( &n );
         }
     }
 
@@ -518,13 +520,26 @@ void AbstractMultispeciesCoalescentGenewise::simulateTrees( void )
         // nodes_2_ages_genewise.push_back( current_nodes_2_ages );
 
         // finally store the new value
-        value[i] = *psi;
+        //value[i] = *psi;
         gene_trees.push_back( psi );
 
     }
 
     resetTipAllocations();
 
+}
+
+
+
+std::vector<Tree*> AbstractMultispeciesCoalescentGenewise::getTrees(void) const
+{
+    return gene_trees;
+}
+
+
+size_t AbstractMultispeciesCoalescentGenewise::getNumberOfGeneTrees(void) const
+{
+    return num_gene_trees;
 }
 
 
@@ -537,4 +552,19 @@ void AbstractMultispeciesCoalescentGenewise::swapParameterInternal(const DagNode
         species_tree = static_cast<const TypedDagNode< Tree >* >( newP );
     }
 
+}
+
+
+
+std::ostream& RevBayesCore::operator<<(std::ostream& o, const AbstractMultispeciesCoalescentGenewise& x)
+{
+
+    std::vector<Tree*> trees = x.getTrees();
+
+    for ( size_t i=0; i<x.getNumberOfGeneTrees(); ++i )
+    {
+        o << trees[i]->getNewickRepresentation();
+    }
+
+    return o;
 }

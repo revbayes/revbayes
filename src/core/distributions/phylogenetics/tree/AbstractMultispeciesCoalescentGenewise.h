@@ -22,7 +22,9 @@ namespace RevBayesCore {
         // public member functions
         double                                              computeLnProbability(void);
         void                                                redrawValue(void);
-        // virtual void                                        setValues(std::vector<Tree*> *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
+
+        std::vector<Tree*>                                  getTrees(void) const;
+        size_t                                              getNumberOfGeneTrees(void) const;
 
         // pure virtual member functions
         virtual AbstractMultispeciesCoalescentGenewise*             clone(void) const = 0;                                                                                  //!< Create an independent clone
@@ -49,10 +51,12 @@ namespace RevBayesCore {
         size_t                                                              num_gene_trees;             //!< Number of genes/gene trees
         std::vector<Tree*>                                                  gene_trees;                 //!< A vector holding all gene trees embedded in the species tree
 
-        std::vector< std::vector< std::set< const TopologyNode* > > >       individuals_per_branch;     //!< A vector holding the vectors that contain the individuals per branch for each gene tree
-
+        std::vector< std::vector< std::set< const TopologyNode* > > >       individuals_per_branch_genewise;     //!< A vector holding the vectors that contain the individuals per branch for each gene tree
 
     };
+
+    // Global functions using the class
+    std::ostream&                       operator<<(std::ostream& o, const AbstractMultispeciesCoalescentGenewise& x);
 
 }
 
