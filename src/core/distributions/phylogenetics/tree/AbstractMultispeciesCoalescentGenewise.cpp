@@ -325,12 +325,15 @@ void AbstractMultispeciesCoalescentGenewise::resetTipAllocations( void )
         }
     }
 
-    // Second, let's create a map from individual names to the species names for each gene tree
-    // This is a vector of maps between individual names and species names
-    // std::vector< std::map<std::string, std::string> > individual_names_2_species_names_genewise;
+    // Second, let's create maps from individual names to the species names for each gene tree
+
+    // Get reference to gene trees
+    std::vector<Tree>& values = *value;
 
     for (size_t i=0; i<num_gene_trees; ++i)
     {
+        Tree current_tree = values[i];
+
         std::map<std::string, std::string> individual_names_2_species_names;
 
         for (RevBayesCore::RbIterator<RevBayesCore::Taxon> it=taxa[i].begin(); it!=taxa[i].end(); ++it)
@@ -343,8 +346,7 @@ void AbstractMultispeciesCoalescentGenewise::resetTipAllocations( void )
         individuals_per_branch_genewise.push_back( std::vector< std::set< const TopologyNode* > >(sp.getNumberOfNodes(), std::set< const TopologyNode* >() ) );
         for (size_t j=0; j<num_taxa[i]; ++j)
         {
-            //const TopologyNode &n = value->getNode( j );
-            const TopologyNode &n = gene_trees[i]->getNode( j );
+            const TopologyNode &n = values[i].getNode( j );
             const std::string &individual_name = n.getName();
             const std::string &species_name = individual_names_2_species_names[ individual_name ];
 
@@ -373,6 +375,8 @@ void AbstractMultispeciesCoalescentGenewise::resetTipAllocations( void )
 
 void AbstractMultispeciesCoalescentGenewise::simulateTrees( void )
 {
+    // Clear the current values
+    value->clear();
 
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -520,8 +524,8 @@ void AbstractMultispeciesCoalescentGenewise::simulateTrees( void )
         // nodes_2_ages_genewise.push_back( current_nodes_2_ages );
 
         // finally store the new value
-        //value[i] = *psi;
-        gene_trees.push_back( psi );
+        value->push_back(*psi);
+        gene_trees.push_back(psi);
 
     }
 
@@ -535,6 +539,7 @@ std::vector<Tree*> AbstractMultispeciesCoalescentGenewise::getTrees(void) const
 {
     return gene_trees;
 }
+
 
 
 size_t AbstractMultispeciesCoalescentGenewise::getNumberOfGeneTrees(void) const
