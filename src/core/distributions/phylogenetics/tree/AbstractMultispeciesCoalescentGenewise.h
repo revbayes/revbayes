@@ -6,6 +6,7 @@
 #include "Tree.h"
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
+#include "TreeVector.h"
 
 namespace RevBayesCore {
 
@@ -46,7 +47,7 @@ namespace RevBayesCore {
         std::vector<size_t>                                                 num_taxa;                   //!< A vector holding the number of tips for each gene tree
         double                                                              log_tree_topology_prob;     //!< Combinatorial topology prob for species tree
         size_t                                                              num_gene_trees;             //!< Number of genes/gene trees
-        std::vector<Tree* >*                                                gene_trees;                 //!< A vector holding all gene trees embedded in the species tree
+        std::vector<Tree*>                                                  gene_trees;                 //!< A vector holding all gene trees embedded in the species tree
 
         std::vector< std::vector< std::set< const TopologyNode* > > >       individuals_per_branch;     //!< A vector holding the vectors that contain the individuals per branch for each gene tree
 

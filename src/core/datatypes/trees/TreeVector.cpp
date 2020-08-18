@@ -48,7 +48,7 @@ bool TreeVector::operator!=(const TreeVector &mve) const
 
 void TreeVector::addValues(const Tree *t, long n)
 {
-    for (size_t i=0; i<n; i++)
+    for (size_t i=0; i<(size_t)n; i++)
     {
         Tree *tree_copy = t->clone();
         values.push_back( *tree_copy );
