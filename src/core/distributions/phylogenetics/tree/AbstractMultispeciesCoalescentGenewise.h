@@ -12,7 +12,7 @@ namespace RevBayesCore {
 
     class Clade;
 
-    class AbstractMultispeciesCoalescentGenewise : public TypedDistribution<Tree> {
+    class AbstractMultispeciesCoalescentGenewise : public TypedDistribution< RbVector<Tree> > {
 
     public:
         //AbstractMultispeciesCoalescentGenewise(const TypedDagNode<Tree> *st, const std::vector< std::vector<Taxon> > &t, size_t ngt);

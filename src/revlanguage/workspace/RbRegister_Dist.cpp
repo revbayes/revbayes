@@ -377,7 +377,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // multispecies coalescent (per branch constant population sizes)
         AddDistribution< TimeTree                   >( new Dist_constPopMultispCoal() );
-        AddDistribution< TimeTree      >( new Dist_multispeciesCoalescentInverseGammaPrior() );
+        AddDistribution< ModelVector<TimeTree>      >( new Dist_multispeciesCoalescentInverseGammaPrior() );
         AddDistribution< TimeTree                   >( new Dist_multispeciesCoalescentUniformPrior() );
         AddDistribution< TimeTree                   >( new Dist_MultispeciesCoalescentMigration() );
 

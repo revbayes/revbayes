@@ -19,12 +19,12 @@ namespace RevBayesCore {
      * @author
      * @since 2014-03-18, version 1.0
      */
-    class TreeVector {
+    class TreeVector : public RbVector<Tree>, public MemberObject<Tree> {
 
     public:
 
         TreeVector(void);                                              //!< Default constructor
-        virtual                             ~TreeVector() {}
+        virtual                             ~TreeVector(void);
 
         bool                                operator==(const TreeVector &mve) const;
         bool                                operator!=(const TreeVector &mve) const;
@@ -38,6 +38,9 @@ namespace RevBayesCore {
         const std::vector<Tree>&            getValues(void) const;                                          //!< Get the values for this element.
         void                                setNumberOfTrees(long n);
         void                                setValues(const std::vector<Tree> &v, const long n);
+
+        // Utility functions
+        void                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, Tree &rv) const;
 
 
     private:
