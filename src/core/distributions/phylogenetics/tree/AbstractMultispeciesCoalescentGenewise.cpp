@@ -65,6 +65,10 @@ AbstractMultispeciesCoalescentGenewise::AbstractMultispeciesCoalescentGenewise(c
         log_tree_topology_prob += (num_taxa[i] - 1) * RbConstants::LN2 - 2.0 * ln_fact - std::log( num_taxa[i] ) ;
     }
 
+    // Clear the current values
+    value->clear();
+    individuals_per_branch_genewise.clear();
+
     redrawValue();
 
 }
@@ -152,6 +156,7 @@ AbstractMultispeciesCoalescentGenewise::~AbstractMultispeciesCoalescentGenewise(
 // }
 
 
+
 double AbstractMultispeciesCoalescentGenewise::computeLnProbability( void )
 {
     resetTipAllocations();
@@ -169,16 +174,16 @@ double AbstractMultispeciesCoalescentGenewise::computeLnProbability( void )
 }
 
 
+
 double AbstractMultispeciesCoalescentGenewise::drawNe( size_t index )
 {
-
     return 1.0;
 }
 
 
+
 double AbstractMultispeciesCoalescentGenewise::recursivelyComputeLnProbability( const RevBayesCore::TopologyNode &species_node )
 {
-
     double ln_prob_coal = 0;
 
     if ( species_node.isTip() == false )
@@ -205,6 +210,7 @@ double AbstractMultispeciesCoalescentGenewise::recursivelyComputeLnProbability( 
 
     std::vector< std::vector<double> > coal_times_genewise;
     std::vector<size_t> initial_individuals_sizes_genewise;
+    std::vector< std::set<const TopologyNode*> > remaining_individuals_genewise;
 
     for (size_t i=0; i<num_gene_trees; i++)
     {
@@ -231,9 +237,9 @@ double AbstractMultispeciesCoalescentGenewise::recursivelyComputeLnProbability( 
         }
 
         double current_time = species_age;
+
         while ( current_time < parent_species_age && current_coal_times_2_nodes.size() > 0 )
         {
-
             const TopologyNode *parent = current_coal_times_2_nodes.begin()->second;
             double parent_age = parent->getAge();
             current_time = parent_age;
@@ -277,36 +283,30 @@ double AbstractMultispeciesCoalescentGenewise::recursivelyComputeLnProbability( 
 
         } // end of while loop
 
-        // Add coal times to genewise data structure
+        // Add coal times and remaining individuals to genewise data structures
         coal_times_genewise.push_back( current_coal_times );
+        remaining_individuals_genewise.push_back( current_remaining_individuals );
+    }
 
-        // merge the two sets of individuals that go into the next species
+
+    // Calculate log likleihood for the branch
+    ln_prob_coal += computeLnCoalescentProbability(initial_individuals_sizes_genewise, coal_times_genewise, species_age, parent_species_age, species_node.getIndex(), species_node.isRoot() == false);
+
+
+    // merge the two sets of individuals that go into the next species
+    for (size_t i=0; i<num_gene_trees; ++i)
+    {
         if ( species_node.isRoot() == false )
         {
             std::set<const TopologyNode *> &current_incoming_lineages = individuals_per_branch_genewise[ i ][ species_node.getParent().getIndex() ];
-            current_incoming_lineages.insert( current_remaining_individuals.begin(), current_remaining_individuals.end());
+            current_incoming_lineages.insert( remaining_individuals_genewise[i].begin(), remaining_individuals_genewise[i].end());
         }
     }
 
 
-
-    ln_prob_coal += computeLnCoalescentProbability(initial_individuals_sizes_genewise, coal_times_genewise, species_age, parent_species_age, species_node.getIndex(), species_node.isRoot() == false);
-
-
-    //
-    // // merge the two sets of individuals that go into the next species
-    // for (size_t i=0; i<num_gene_trees; ++i)
-    // {
-    //     if ( species_node.isRoot() == false )
-    //     {
-    //         std::set<const TopologyNode *> &current_incoming_lineages = individuals_per_branch_genewise[ i ][ species_node.getParent().getIndex() ];
-    //         current_incoming_lineages.insert( current_remaining_individuals.begin(), current_remaining_individuals.end());
-    //     }
-    // }
-
-
     return ln_prob_coal;
 }
+
 
 
 void AbstractMultispeciesCoalescentGenewise::redrawValue( void )
@@ -317,8 +317,10 @@ void AbstractMultispeciesCoalescentGenewise::redrawValue( void )
 }
 
 
+
 void AbstractMultispeciesCoalescentGenewise::resetTipAllocations( void )
 {
+    individuals_per_branch_genewise.clear();
 
     const Tree &sp = species_tree->getValue();
     const std::vector< TopologyNode* > &species_tree_nodes = sp.getNodes();
@@ -342,7 +344,6 @@ void AbstractMultispeciesCoalescentGenewise::resetTipAllocations( void )
     for (size_t i=0; i<num_gene_trees; ++i)
     {
         Tree current_tree = values[i];
-
         std::map<std::string, std::string> individual_names_2_species_names;
 
         for (RevBayesCore::RbIterator<RevBayesCore::Taxon> it=taxa[i].begin(); it!=taxa[i].end(); ++it)
@@ -353,6 +354,7 @@ void AbstractMultispeciesCoalescentGenewise::resetTipAllocations( void )
 
         // Create maps for the individuals to branches
         individuals_per_branch_genewise.push_back( std::vector< std::set< const TopologyNode* > >(sp.getNumberOfNodes(), std::set< const TopologyNode* >() ) );
+
         for (size_t j=0; j<num_taxa[i]; ++j)
         {
             const TopologyNode &n = values[i].getNode( j );
@@ -363,7 +365,6 @@ void AbstractMultispeciesCoalescentGenewise::resetTipAllocations( void )
             individuals_per_branch_genewise[ i ][ species_node->getIndex() ].insert( &n );
         }
     }
-
 }
 
 
@@ -386,6 +387,7 @@ void AbstractMultispeciesCoalescentGenewise::simulateTrees( void )
 {
     // Clear the current values
     value->clear();
+    individuals_per_branch_genewise.clear();
 
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -405,11 +407,8 @@ void AbstractMultispeciesCoalescentGenewise::simulateTrees( void )
     }
 
     // Simulate all gene trees
-
     // Set up genewise data structures
     std::vector< std::map< const TopologyNode *, std::vector< TopologyNode* > > > individuals_per_branch_genewise;
-    // std::vector< std::vector<TopologyNode * > > incoming_lineages_genewise;
-    // std::vector< std::map<TopologyNode *, double> > nodes_2_ages_genewise;
 
     // We loop through each gene tree to get the information about individuals
     for (size_t i=0; i<num_gene_trees; ++i)
@@ -439,6 +438,9 @@ void AbstractMultispeciesCoalescentGenewise::simulateTrees( void )
             std::vector<TopologyNode * > &current_nodes_at_node = current_individuals_per_branch[ species_node ];
             current_nodes_at_node.push_back( n );
         }
+
+        // Keep track of individuals per branch
+        individuals_per_branch_genewise.push_back(current_individuals_per_branch);
 
         std::map<TopologyNode *, double> current_nodes_2_ages;
         TopologyNode *root = NULL;
@@ -527,11 +529,6 @@ void AbstractMultispeciesCoalescentGenewise::simulateTrees( void )
             node->setAge( it->second );
         }
 
-        // Add individuals and lineages for this gene to the appropriate genewise vectors
-        individuals_per_branch_genewise.push_back( current_individuals_per_branch );
-        // incoming_lineages_genewise.push_back( current_incoming_lineages );
-        // nodes_2_ages_genewise.push_back( current_nodes_2_ages );
-
         // finally store the new value
         value->push_back(*psi);
         gene_trees.push_back(psi);
@@ -555,6 +552,7 @@ size_t AbstractMultispeciesCoalescentGenewise::getNumberOfGeneTrees(void) const
 {
     return num_gene_trees;
 }
+
 
 
 /** Swap a parameter of the distribution */
