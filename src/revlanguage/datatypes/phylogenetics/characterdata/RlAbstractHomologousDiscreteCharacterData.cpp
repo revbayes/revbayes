@@ -439,9 +439,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     else if (name == "setNumStatesPartition")
     {
         found = true;
-        std::cout << "Note setNumStatesVector() partitions by the maximum state, not "  //
-        "the maximum state number. For example, a character with states 1 and 2 is assumed to" //
-        "also have state 0, whether or not it is coded in this matrix.";
+        RBOUT("Note setNumStatesPartition() partitions by the maximum observed state, not the total number of observed states.");
         const RevObject& argument = args[0].getVariable()->getRevObject();
         RevBayesCore::AbstractHomologousDiscreteCharacterData &v = dag_node->getValue();
         size_t nChars = v.getNumberOfCharacters();
@@ -491,12 +489,10 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         }
         return NULL;
     }
-    else if (name == "setNumStatesVector")
+    else if (name == "getNumStatesVector")
     {
         found = true;
-        std::cout << "Note setNumStatesVector() partitions by the maximum state, not "  //
-        "the maximum state number. For example, a character with states 1 and 2 is assumed to" //
-        "also have state 0, whether or not it is coded in this matrix.";
+        RBOUT("Note getNumStatesVector() partitions by the maximum observed state, not the total number of observed states.");
         RevBayesCore::AbstractHomologousDiscreteCharacterData &v = dag_node->getValue();
         size_t nChars = v.getNumberOfCharacters();
         size_t nTaxa = v.getNumberOfTaxa();
@@ -677,7 +673,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     ArgumentRules* setCodonPartitionArgRules        = new ArgumentRules();
     ArgumentRules* setCodonPartitionArgRules2       = new ArgumentRules();
     ArgumentRules* setNumStatesPartitionArgRules    = new ArgumentRules();
-    ArgumentRules* setNumStatesVectorArgRules       = new ArgumentRules();
+    ArgumentRules* getNumStatesVectorArgRules       = new ArgumentRules();
     ArgumentRules* squareBracketArgRules            = new ArgumentRules();
 
     ArgumentRules* maxGcContentArgRules                 = new ArgumentRules();
@@ -740,7 +736,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     methods.addFunction( new MemberProcedure( "setCodonPartition",                      RlUtils::Void,                      setCodonPartitionArgRules       ) );
     methods.addFunction( new MemberProcedure( "setCodonPartition",                      RlUtils::Void,                      setCodonPartitionArgRules2      ) );
     methods.addFunction( new MemberProcedure( "setNumStatesPartition",                  RlUtils::Void,                      setNumStatesPartitionArgRules   ) );
-    methods.addFunction( new MemberProcedure( "setNumStatesVector"  ,                   ModelVector<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec(), setNumStatesVectorArgRules      ) );
+    methods.addFunction( new MemberProcedure( "getNumStatesVector"  ,                   ModelVector<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec(), getNumStatesVectorArgRules      ) );
     methods.addFunction( new MemberProcedure( "isHomologous",                           RlBoolean::getClassTypeSpec(),      ishomologousArgRules            ) );
     methods.addFunction( new MemberProcedure( "expandCharacters",                       AbstractHomologousDiscreteCharacterData::getClassTypeSpec(),        expandCharactersArgRules         ) );
     methods.addFunction( new MemberProcedure( "getEmpiricalBaseFrequencies",            Simplex::getClassTypeSpec(),        empiricalBaseArgRules           ) );
