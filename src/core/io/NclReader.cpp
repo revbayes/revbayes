@@ -1969,7 +1969,8 @@ Tree* NclReader::translateNclSimpleTreeToBranchLengthTree(NxsSimpleTree& nTree, 
         tau->getNode(nodes[i]->getIndex()).setBranchLength( brlens[i] );
     }
     
-    tau->makeInternalNodesBifurcating(true);
+    bool fossils_only = true;
+    tau->makeInternalNodesBifurcating(true, fossils_only);
 
     // only trees with 2-degree root nodes are rooted trees.
     tau->setRooted( root->getNumberOfChildren() == 2 );

@@ -398,7 +398,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
 
                         double tmp = 0.0;
 
-                        for ( size_t i=0; i<val.size(); ++i )
+                        for ( size_t i=0; i<this->num_chars; ++i )
                         {
                             // check whether we observed this state
                             if ( val.isSet(i) == true )
@@ -428,7 +428,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
 
                         double tmp = 0.0;
                         const std::vector< double >& weights = this->value->getCharacter(char_data_node_index, this_site_index).getWeights();
-                        for ( size_t i=0; i<val.size(); ++i )
+                        for ( size_t i=0; i<this->num_chars; ++i )
                         {
                             // check whether we observed this state
                             if ( val.isSet(i) == true )
