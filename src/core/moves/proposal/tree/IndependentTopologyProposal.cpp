@@ -119,17 +119,18 @@ double IndependentTopologyProposal::doProposal( void )
     {
         TopologyNode *node;
 
+        bool make_bifurcating = false;
         // get the outgroup node
         if( outgroup.size() > 0 )
         {
-            proposal_tree.reroot( outgroup, true );
+            proposal_tree.reroot( outgroup, make_bifurcating, true );
             node = proposal_tree.getRoot().getNode( outgroup, true );
         }
         // or root the tree randomly
         else
         {
             node = &proposal_tree.getNode( size_t( rng->uniform01() * (proposal_tree.getNumberOfNodes() - 1) ) );
-            proposal_tree.reroot(*node, true);
+            proposal_tree.reroot(*node, make_bifurcating, true);
         }
 
         // get the old root
@@ -157,7 +158,7 @@ double IndependentTopologyProposal::doProposal( void )
         hr += brlen;
 
         // reroot the tree
-        proposal_tree.reroot(*node, true);
+        proposal_tree.reroot(*node, make_bifurcating, true);
         proposal_tree.setRooted(true);
 
         // restore tip indices

@@ -434,7 +434,9 @@ double UltrametricTreeDistribution::computeLnProbability( void )
     Tree *my_tree_unrooted = my_time_tree.clone();
     my_tree_unrooted->unroot();
 
-    my_tree_unrooted->reroot( outgroup, true);
+    bool make_bifurcating = false;
+    bool reindex = true;
+    my_tree_unrooted->reroot( outgroup, make_bifurcating, reindex);
 
     std::string my_tree_newick = my_tree_unrooted->getPlainNewickRepresentation();
 
@@ -615,7 +617,9 @@ void UltrametricTreeDistribution::executeMethod(const std::string &n, const std:
         Tree *my_tree_unrooted = this_tree.clone();
         my_tree_unrooted->unroot();
 
-        my_tree_unrooted->reroot( outgroup, true);
+        bool make_bifurcating = false;
+        bool reindex = true;
+        my_tree_unrooted->reroot( outgroup, make_bifurcating, reindex);
 
         std::string my_tree_newick = my_tree_unrooted->getPlainNewickRepresentation();
 
@@ -720,7 +724,9 @@ void UltrametricTreeDistribution::prepareTreeSamples(const std::vector<Tree> &tr
 
         Tree tree = trees[i];
 
-        tree.reroot( outgroup, true );
+        bool make_bifurcating = false;
+        bool reindex = true;
+        tree.reroot( outgroup, make_bifurcating, reindex);
 
         std::string newick = tree.getPlainNewickRepresentation();
         trees_newick[i] = newick;

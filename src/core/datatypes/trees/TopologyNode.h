@@ -134,7 +134,7 @@ namespace RevBayesCore {
         bool                                        isSampledAncestor(bool propagate=false) const;                                                      //!< Is node (or a child node) a sampled ancestor?
         bool                                        isTip(void) const;                                                                  //!< Is node tip?
         bool                                        isUltrametric(double& depth) const;                                                 //!< Check if the subtree subtending from this node is ultramtric.
-        void                                        makeBifurcating(void);                                                              //!< Make this and all its descendants bifurcating.
+        void                                        makeBifurcating(bool as_fossils);                                                   //!< Make this and all its descendants bifurcating.
         void                                        renameNodeParameter(const std::string &old_name, const std::string &new_name);
         void                                        removeAllChildren(void);                                                            //!< Removes all of the children of the node
         size_t                                      removeChild(TopologyNode* c);                                                       //!< Removes a specific child
