@@ -15,6 +15,7 @@
 #include "Probability.h"
 #include "RlString.h"
 #include "RlSimplex.h"
+#include "RlUserInterface.h"
 #include "RbBitSet.h"
 #include "AbstractDiscreteTaxonData.h"
 #include "Argument.h"
@@ -445,11 +446,14 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         size_t nChars = v.getNumberOfCharacters();
         size_t nTaxa = v.getNumberOfTaxa();
 
-            // e.g. data.setNumStatesPartition(2)
+        bool warn = false;
+
+        // e.g. data.setNumStatesPartition(2)
         size_t n = size_t( static_cast<const Natural&>( argument ).getValue() );
         for (size_t i = 0; i < nChars; i++)
         {
-            int max = 0;
+            RevBayesCore::RbBitSet observed(v.getNumberOfStates());
+            size_t max = 0;
             for (size_t j = 0; j < nTaxa; j++)
             {
                 const RevBayesCore::AbstractDiscreteTaxonData& td = v.getTaxonData(j);
@@ -460,15 +464,23 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
                         const RevBayesCore::RbBitSet& state = td.getCharacter(i).getState();
                         for (size_t k = 0; k < state.size(); k++)
                         {
-                            if (state.isSet(k) && k +1 > max)
+                            if (state.isSet(k) )
                             {
-                                max = static_cast<int>(k)+1;
+                                observed.set(k);
+
+                                if ( k > max )
+                                {
+                                    max = k;
+                                }
                             }
                         }
                     }
                     else
                     {
-                        int k = int(td.getCharacter(i).getStateIndex()) + 1;
+                        size_t k = td.getCharacter(i).getStateIndex();
+
+                        observed.set(k);
+
                         if (k > max)
                         {
                             max = k;
@@ -477,7 +489,12 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
                 }
             }
 
-            if (max == n)
+            if ( observed.getNumberSetBits() != max + 1 )
+            {
+                warn = true;
+            }
+
+            if ( max + 1 == n)
             {
                 v.includeCharacter(i);
             }
@@ -487,96 +504,105 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
             }
 
         }
+
+        if ( warn == true )
+        {
+            std::stringstream ss;
+            ss << "NOTE: " << name << "() partitions by the maximum observed state, not the total number of observed states.";
+            RBOUT(ss.str());
+        }
+
         return NULL;
     }
-    else if (name == "setNumStatesVector")
+    else if (name == "getNumStatesVector")
     {
         found = true;
 
         RevBayesCore::AbstractHomologousDiscreteCharacterData &v = dag_node->getValue();
         size_t nChars = v.getNumberOfCharacters();
         size_t nTaxa = v.getNumberOfTaxa();
-        std::vector<int> statesVec;
-        ModelVector<AbstractHomologousDiscreteCharacterData> matVec;
+
+        bool warn = false;
+
+        std::vector<RevBayesCore::AbstractHomologousDiscreteCharacterData*> matVec;
+
+        for (size_t x = 0; x < v.getNumberOfStates(); x++)
+        {
+            matVec.push_back(v.clone());
+        }
 
         for (size_t i = 0; i < nChars; i++)
         {
-          int max = 0;
-          for (size_t j = 0; j < nTaxa; j++)
-          {
-              const RevBayesCore::AbstractDiscreteTaxonData& td = v.getTaxonData(j);
-              if ( td.getCharacter(i).isMissingState() == false && td.getCharacter(i).isGapState() == false)
-              {
-                  if (td.getCharacter(i).getNumberObservedStates() > 1)
-                  {
-                      const RevBayesCore::RbBitSet& state = td.getCharacter(i).getState();
-                      for (size_t k = 0; k < state.size(); k++)
-                      {
-                          if (state.isSet(k) && k +1 > max)
-                          {
-                              max = static_cast<int>(k)+1;
-                              statesVec.push_back(max);
-                          }
-                      }
-                  }
-                  else
-                  {
-                      int k = int(td.getCharacter(i).getStateIndex()) + 1;
-                      if (k > max)
-                      {
-                          statesVec.push_back(static_cast<int>(k));
-                      }
-                    }
-                  }
-                }
-              }
-              std::set<int> uniqueStates;
-              uniqueStates.insert(statesVec.begin(), statesVec.end());
-
-
-            for (int x = 0; x < uniqueStates.size(); x++) {
-              size_t n = size_t( static_cast<const Natural&>( x ).getValue() );
-              for (size_t i = 0; i < nChars; i++)
-              {
-                int max = 0;
-                for (size_t j = 0; j < nTaxa; j++)
+            RevBayesCore::RbBitSet observed(v.getNumberOfStates());
+            size_t max = 0;
+            for (size_t j = 0; j < nTaxa; j++)
+            {
+                const RevBayesCore::AbstractDiscreteTaxonData& td = v.getTaxonData(j);
+                if ( td.getCharacter(i).isMissingState() == false && td.getCharacter(i).isGapState() == false)
                 {
-                    const RevBayesCore::AbstractDiscreteTaxonData& td = v.getTaxonData(j);
-                    if ( td.getCharacter(i).isMissingState() == false && td.getCharacter(i).isGapState() == false)
+                    if (td.getCharacter(i).getNumberObservedStates() > 1)
                     {
-                        if (td.getCharacter(i).getNumberObservedStates() > 1)
+                        const RevBayesCore::RbBitSet& state = td.getCharacter(i).getState();
+                        for (size_t k = 0; k < state.size(); k++)
                         {
-                          const RevBayesCore::RbBitSet& state = td.getCharacter(i).getState();
-                            for (size_t k = 0; k < state.size(); k++)
+                            if (state.isSet(k) )
                             {
-                                if (state.isSet(k) && k +1 > max)
+                                observed.set(k);
+
+                                if ( k > max )
                                 {
-                                max = static_cast<int>(k)+1;
+                                    max = k;
                                 }
                             }
                         }
-                        else
+                    }
+                    else
+                    {
+                        size_t k = td.getCharacter(i).getStateIndex();
+
+                        observed.set(k);
+
+                        if (k > max)
                         {
-                            int k = int(td.getCharacter(i).getStateIndex()) + 1;
-                            if (k > max)
-                            {
-                                max = static_cast<int>(k);
-                            }
+                            max = k;
                         }
                     }
                 }
-              if (max == x)
-              {
-                  v.includeCharacter(i);
-              }
-              else
-              {
-                  v.excludeCharacter(i);
-              }
             }
-              matVec.push_back(AbstractHomologousDiscreteCharacterData(v));
-          }
-            return new RevVariable (new ModelVector<AbstractHomologousDiscreteCharacterData>(matVec));
+
+            if ( observed.getNumberSetBits() != max + 1 )
+            {
+                warn = true;
+            }
+
+            for (size_t x = 0; x < v.getNumberOfStates(); x++)
+            {
+                if ( max == x)
+                {
+                    matVec[x]->includeCharacter(i);
+                }
+                else
+                {
+                    matVec[x]->excludeCharacter(i);
+                }
+            }
+        }
+
+        if ( warn == true )
+        {
+            std::stringstream ss;
+            ss << "NOTE: " << name << "() partitions by the maximum observed state, not the total number of observed states.";
+            RBOUT(ss.str());
+        }
+
+        ModelVector<AbstractHomologousDiscreteCharacterData>* partition = new ModelVector<AbstractHomologousDiscreteCharacterData>();
+
+        for( size_t i = 0; i < matVec.size(); i++ )
+        {
+            partition->push_back(AbstractHomologousDiscreteCharacterData(matVec[i]));
+        }
+
+        return new RevVariable (partition);
     }
     else if ( name == "translateCharacters" )
     {
@@ -673,7 +699,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     ArgumentRules* setCodonPartitionArgRules        = new ArgumentRules();
     ArgumentRules* setCodonPartitionArgRules2       = new ArgumentRules();
     ArgumentRules* setNumStatesPartitionArgRules    = new ArgumentRules();
-    ArgumentRules* setNumStatesVectorArgRules       = new ArgumentRules();
+    ArgumentRules* getNumStatesVectorArgRules       = new ArgumentRules();
     ArgumentRules* squareBracketArgRules            = new ArgumentRules();
 
     ArgumentRules* maxGcContentArgRules                 = new ArgumentRules();
@@ -736,7 +762,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     methods.addFunction( new MemberProcedure( "setCodonPartition",                      RlUtils::Void,                      setCodonPartitionArgRules       ) );
     methods.addFunction( new MemberProcedure( "setCodonPartition",                      RlUtils::Void,                      setCodonPartitionArgRules2      ) );
     methods.addFunction( new MemberProcedure( "setNumStatesPartition",                  RlUtils::Void,                      setNumStatesPartitionArgRules   ) );
-    methods.addFunction( new MemberProcedure( "setNumStatesVector"  ,                   ModelVector<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec(), setNumStatesVectorArgRules      ) );
+    methods.addFunction( new MemberProcedure( "getNumStatesVector"  ,                   ModelVector<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec(), getNumStatesVectorArgRules      ) );
     methods.addFunction( new MemberProcedure( "isHomologous",                           RlBoolean::getClassTypeSpec(),      ishomologousArgRules            ) );
     methods.addFunction( new MemberProcedure( "expandCharacters",                       AbstractHomologousDiscreteCharacterData::getClassTypeSpec(),        expandCharactersArgRules         ) );
     methods.addFunction( new MemberProcedure( "getEmpiricalBaseFrequencies",            Simplex::getClassTypeSpec(),        empiricalBaseArgRules           ) );
