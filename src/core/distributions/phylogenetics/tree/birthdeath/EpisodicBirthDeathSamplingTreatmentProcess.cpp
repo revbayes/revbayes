@@ -235,7 +235,10 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityDivergenc
     prepareTimeline();
 
     // Assign nodes to sets
-    countAllNodes();
+    if ( countAllNodes() )
+    {
+        return RbConstants::Double::neginf;
+    }
 
     if ( offset > DBL_EPSILON && phi_event[0] > DBL_EPSILON )
     {
@@ -267,13 +270,13 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
     // Only check if we have any events of any kind, this means we can avoid checking in purely serial models
     if ( heterogeneous_Lambda != NULL || heterogeneous_Mu != NULL || heterogeneous_Phi != NULL)
     {
-      for (size_t i=0; i<global_timeline.size(); ++i)
-      {
-        if ( (phi_event[i] > DBL_EPSILON && (mu_event[i] > DBL_EPSILON || lambda_event[i] > DBL_EPSILON)) || (mu_event[i] > DBL_EPSILON && lambda_event[i] > DBL_EPSILON) )
+        for (size_t i=0; i<global_timeline.size(); ++i)
         {
-          return RbConstants::Double::neginf;
+            if ( (phi_event[i] > DBL_EPSILON && (mu_event[i] > DBL_EPSILON || lambda_event[i] > DBL_EPSILON)) || (mu_event[i] > DBL_EPSILON && lambda_event[i] > DBL_EPSILON) )
+            {
+                return RbConstants::Double::neginf;
+            }
         }
-      }
     }
 
     if ( use_origin == true )
@@ -541,7 +544,7 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
  * Non-burst trackers (1,3,4) are vectors of times of the samples.
  * All burst trackers (2,5,6) are vectors of vectors of samples, each vector corresponding to an event
  */
-void EpisodicBirthDeathSamplingTreatmentProcess::countAllNodes(void)
+bool EpisodicBirthDeathSamplingTreatmentProcess::countAllNodes(void)
 {
   // get node/time variables
   size_t num_nodes = value->getNumberOfNodes();
@@ -630,7 +633,13 @@ void EpisodicBirthDeathSamplingTreatmentProcess::countAllNodes(void)
               }
           }
       }
+      else if ( n.isInternal() && n.getChild(0).isSampledAncestor() && n.getChild(1).isSampledAncestor() )
+      {
+          return true;
+      }
   }
+
+  return false;
 }
 
 // /**
