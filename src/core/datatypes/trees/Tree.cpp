@@ -926,6 +926,7 @@ const std::map<std::string, size_t>& Tree::getTaxonBitSetMap( void ) const
             taxon_bitset_map[ordered_taxa[i]] = i;
         }
     }
+    
     return taxon_bitset_map;
 }
 
@@ -1284,6 +1285,8 @@ void Tree::makeInternalNodesBifurcating(bool reindex, bool as_fossils)
     // we need to reset the root so that the vector of nodes get filled again with the new number of nodes
     setRoot( &getRoot(), reindex );
 
+    // clear the taxon bitset map
+    // the next time someone call getTaxonBitset() it will be rebuilt
     taxon_bitset_map.clear();
 
 }
@@ -1336,6 +1339,16 @@ void Tree::makeRootBifurcating(const Clade& outgroup, bool as_fossils)
     {
         throw RbException("Problem when rerooting with  '" + outgroup.toString() + "'.");
     } // end-if the root node has 3 children
+    
+
+    // we need to reset the root so that the vector of nodes get filled again with the new number of nodes
+    // it only makes sense to reindex the nodes because we have more nodes now!
+    bool reindex = true;
+    setRoot( &getRoot(), reindex );
+
+    // clear the taxon bitset map
+    // the next time someone call getTaxonBitset() it will be rebuilt
+    taxon_bitset_map.clear();
 
 } 
 
@@ -1764,14 +1777,14 @@ void Tree::setTaxonIndices(const TaxonMap &tm)
  * \param[in] current_name    self explanatory.
  * \param[in] newName         self explanatory.
  */
-void Tree::setTaxonName(const std::string& current_name, const std::string& newName)
+void Tree::setTaxonName(const std::string& current_name, const std::string& new_name)
 {
 
     TopologyNode& node = getTipNodeWithName( current_name );
     Taxon& t = node.getTaxon();
-    t.setName( newName );
+    t.setName( new_name );
     taxon_bitset_map.erase( current_name );
-    taxon_bitset_map.insert( std::pair<std::string, size_t>( newName, node.getIndex() ) );
+    taxon_bitset_map.insert( std::pair<std::string, size_t>( new_name, node.getIndex() ) );
 }
 
 
