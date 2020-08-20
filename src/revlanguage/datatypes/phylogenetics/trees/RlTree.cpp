@@ -228,7 +228,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         found = true;
 
         RevBayesCore::Tree &tree = dag_node->getValue();
-        RevBayesCore::TreeUtilities::makeUltrametric(&tree);
+        RevBayesCore::TreeUtilities::makeUltrametric(tree);
 
         return NULL;
     }
@@ -253,7 +253,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
 
         double f = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
         RevBayesCore::Tree &tree = dag_node->getValue();
-        RevBayesCore::TreeUtilities::offsetTree(&tree, &tree.getRoot(), f);
+        RevBayesCore::TreeUtilities::offsetTree(tree.getRoot(), f);
 
         return NULL;
     }
@@ -264,14 +264,14 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         const RevObject& current = args[0].getVariable()->getRevObject();
         if ( current.isType( Natural::getClassTypeSpec() ) )
         {
-          size_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
-          const RevObject& new_value = args[1].getVariable()->getRevObject();
-          if ( new_value.isType( RealPos::getClassTypeSpec() ) )
-          {
-            double value = static_cast<const RealPos&>( new_value ).getValue();
-            RevBayesCore::Tree &tree = dag_node->getValue();
-            RevBayesCore::TreeUtilities::setBranchLength( &tree, index ,value );
-          }
+            size_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+            const RevObject& new_value = args[1].getVariable()->getRevObject();
+            if ( new_value.isType( RealPos::getClassTypeSpec() ) )
+            {
+                double value = static_cast<const RealPos&>( new_value ).getValue();
+                RevBayesCore::Tree &tree = dag_node->getValue();
+                tree.getNode(index).setBranchLength(value);
+            }
         }
         return NULL;
     }
@@ -326,7 +326,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
 
         double f = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
         RevBayesCore::Tree &tree = dag_node->getValue();
-        RevBayesCore::TreeUtilities::rescaleTree(&tree, &tree.getRoot(), f);
+        RevBayesCore::TreeUtilities::rescaleTree(tree.getRoot(), f);
 
         return NULL;
     }

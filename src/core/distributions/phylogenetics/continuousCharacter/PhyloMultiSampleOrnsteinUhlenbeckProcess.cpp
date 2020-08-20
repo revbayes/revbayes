@@ -189,7 +189,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcess::computeCovariance(MatrixReal &ind
             const TopologyNode *right_tip_node = &this->tau->getValue().getTipNode( right_index );
             
             // get mrca
-            size_t mrca_index = TreeUtilities::getMrcaIndex(left_tip_node, right_tip_node);
+            size_t mrca_index = TreeUtilities::getMrcaIndex(*left_tip_node, *right_tip_node);
             
             // get sum of alpha*branchlength for non-shared branches
             double sum_AT = 0.0;
