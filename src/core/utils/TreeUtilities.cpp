@@ -1148,21 +1148,21 @@ void RevBayesCore::TreeUtilities::makeUltrametric(Tree& tree)
     tree.getRoot().setUseAges(true, true);
     
     double max = 0.0;
-    std::vector<double > ages ;
+    std::vector<double> ages ;
     for (size_t i = 0; i < tree.getNumberOfTips(); ++i)
     {
         TopologyNode* node = &(tree.getTipNode( i ) );
         double age = node->getBranchLength();
         node = &(node->getParent());
 
-        while (!node->isRoot() )
+        while ( node->isRoot() == false )
         {
             age += node->getBranchLength();
             node = &(node->getParent());
         }
         if (age > max)
         {
-          max = age;
+            max = age;
         }
         ages.push_back(age);
 
@@ -1173,8 +1173,6 @@ void RevBayesCore::TreeUtilities::makeUltrametric(Tree& tree)
     {
         tree.getTipNode( i ).setBranchLength(tree.getTipNode( i ).getBranchLength() + max - ages[i]);
     }
-
-    setAgesRecursively(tree.getRoot(), max);
 
     // make sure that all the tips have an age of 0
     for (size_t i = 0; i < tree.getNumberOfTips(); ++i)
