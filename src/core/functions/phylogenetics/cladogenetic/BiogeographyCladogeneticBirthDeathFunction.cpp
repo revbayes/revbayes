@@ -49,7 +49,6 @@ connectivityType( ct )
     addParameter( withinRegionFeatures );
     addParameter( betweenRegionFeatures );
     
-    
     if (numCharacters > 10)
     {
         throw RbException(">10 characters currently unsupported");
@@ -62,8 +61,18 @@ connectivityType( ct )
 //    numRanges++; // add one for the null range
     
     buildEventMap();
+    if (connectivityType == "none")
+    {
+        ; // do nothing
+    }
+    else if (connectivityType == "cutset")
+    {
+        buildCutsets();
+//        buildCutsetFactors();
+    }
+    buildBuddingRegions();
     buildEventMapFactors();
-    updateEventMapWeights();
+//    updateEventMapWeights();
     
     update();
     
@@ -586,19 +595,12 @@ void BiogeographyCladogeneticBirthDeathFunction::buildEventMap( void ) {
 void BiogeographyCladogeneticBirthDeathFunction::buildEventMapFactors(void)
 {
     
-    if (connectivityType == "none")
-    {
-        ; // do nothing
-    }
-    else if (connectivityType == "cutset")
-    {
-        buildCutsets();
-//        buildCutsetFactors();
-    }
-    buildBuddingRegions();
-    
     std::vector<double> max_value( NUM_CLADO_EVENT_TYPES, 0.0 );
     std::vector<double> sum_value( NUM_CLADO_EVENT_TYPES, 0.0 );
+    std::vector<double> ln_sum_value( NUM_CLADO_EVENT_TYPES, 0.0 );
+    std::vector<double> prod_value( NUM_CLADO_EVENT_TYPES, 1.0 );
+    std::vector<double> mean_value( NUM_CLADO_EVENT_TYPES, 0.0 );
+    std::vector<double> geomean_value( NUM_CLADO_EVENT_TYPES, 0.0 );
     std::vector<unsigned> n_value( NUM_CLADO_EVENT_TYPES, 0 );
     
     // loop over all events and their types
@@ -627,12 +629,24 @@ void BiogeographyCladogeneticBirthDeathFunction::buildEventMapFactors(void)
             max_value[event_type] = v;
         }
         sum_value[event_type] += v;
+        ln_sum_value[event_type] += std::log(v);
+        prod_value[event_type] *= v;
         n_value[event_type] += 1;
 
     }
     
 //    printEventMap( eventMapFactors );
 
+    for (size_t i = 0; i < mean_value.size(); i++) {
+        mean_value[i] = 0.0;
+        geomean_value[i] = 0.0;
+        if (n_value[i] > 0) {
+            mean_value[i] = sum_value[i] / n_value[i];
+//            std::cout << i << " " << prod_value[i] << " " << n_value
+//            geomean_value[i] = std::pow( prod_value[i], (1.0/n_value[i])); //std::exp( (1.0/n_value[i]) * ln_sum_value[i] );
+            geomean_value[i] = std::exp( (1.0/n_value[i]) * ln_sum_value[i] );
+        }
+    }
     
     // normalize event factors by max factor of event type
     for (it = eventMapTypes.begin(); it != eventMapTypes.end(); it++)
@@ -643,7 +657,10 @@ void BiogeographyCladogeneticBirthDeathFunction::buildEventMapFactors(void)
 
 //        eventMapFactors[ idx ] = eventMapFactors[ idx ] / max_value[ event_type ];
 //        eventMapFactors[ idx ] = eventMapFactors[ idx ] / (sum_value[ event_type ] / n_value[ event_type ]);
-        eventMapFactors[ idx ] = eventMapFactors[ idx ]; // / (sum_value[ event_type ] / n_value[ event_type ]);
+//        double mean_value = (sum_value[ event_type ] / n_value[ event_type ]);
+//        eventMapFactors[ idx ] = eventMapFactors[ idx ] / mean_value[ event_type ];
+        eventMapFactors[ idx ] = eventMapFactors[ idx ] / geomean_value[ event_type ];
+        eventMapWeights[ idx ] = eventMapFactors[ idx ];
     }
     
 //    printEventMap( eventMapFactors );
@@ -776,8 +793,8 @@ double BiogeographyCladogeneticBirthDeathFunction::computeCutsetScore( std::vect
         for (size_t i = 0; i < cutset.size(); i++) {
             size_t v1 = cutset[i][0];
             size_t v2 = cutset[i][1];
-            cost += bf[v1][v2];
-//            std::cout << "\t" << v1 << " -- " << v2 << " : " << mtx[v1][v2] << "\n";
+            cost += (1.0 / bf[v1][v2]);
+//            std::cout << "\t" << v1 << " -- " << v2 << " : " << bf[v1][v2] << "\n";
         }
         
         // take the inverse sum of costs
@@ -1031,8 +1048,12 @@ void BiogeographyCladogeneticBirthDeathFunction::update( void )
         speciation_rate_sum_per_state = std::vector<double>( numRanges, 0.0 );
     }
     
+    // update modularity score
+    buildEventMapFactors();
+//    updateEventMapWeights();
+    
     // update clado event factors
-    updateEventMapWeights();
+//    updateEventMapWeights();
     
     // get speciation rates across cladogenetic events
     const std::vector<double>& sr = speciationRates->getValue();
@@ -1112,57 +1133,57 @@ void BiogeographyCladogeneticBirthDeathFunction::update( void )
 /*
  *  Transform the constant eventMapFactors values with the eventMapWeights values
  */
-
-void BiogeographyCladogeneticBirthDeathFunction::updateEventMapWeights(void) {
-    
-    // get weight vector
-//    const RbVector<double>& weights = connectivityWeights->getValue();
-    
-    // get max factors
-    std::vector<double> max_value( NUM_CLADO_EVENT_TYPES, 0.0 );
-    std::vector<double> sum_value( NUM_CLADO_EVENT_TYPES, 0.0 );
-    std::vector<unsigned> n_value( NUM_CLADO_EVENT_TYPES, 0 );
-
-
-    // loop over all events and their types
-    std::map< std::vector<unsigned>, unsigned >::iterator it;
-    for (it = eventMapTypes.begin(); it != eventMapTypes.end(); it++)
-    {
-        // get event info
-        std::vector<unsigned> idx = it->first;
-        unsigned event_type = it->second;
-        
-        // get power
-//        double weight = weights[event_type];
-        
-        // get event score
-        double v = 0.0;
-//        v = std::pow( (1 + std::exp( eventMapFactors[idx]) ), weight );
-//        v = std::pow( eventMapFactors[idx], weight );
-        v = eventMapFactors[idx];
-        eventMapWeights[ idx ] = v; //        z = (1 + exp(-z))^rho
-        
-        // get event score stats for renormalization
-        sum_value[event_type] += v;
-        n_value[event_type] += 1;
-        if ( v > max_value[event_type] )
-        {
-            max_value[event_type] = v;
-        }
-     
-    }
-    
-    for (it = eventMapTypes.begin(); it != eventMapTypes.end(); it++)
-    {
-        // get event info
-        std::vector<unsigned> idx = it->first;
-        unsigned event_type = it->second;
-//        eventMapWeights[ idx ] = eventMapWeights[ idx ] / max_value[event_type];
+//
+//void BiogeographyCladogeneticBirthDeathFunction::updateEventMapWeights(void) {
+//
+//    // get weight vector
+////    const RbVector<double>& weights = connectivityWeights->getValue();
+//
+//    // get max factors
+//    std::vector<double> max_value( NUM_CLADO_EVENT_TYPES, 0.0 );
+//    std::vector<double> sum_value( NUM_CLADO_EVENT_TYPES, 0.0 );
+//    std::vector<unsigned> n_value( NUM_CLADO_EVENT_TYPES, 0 );
+//
+//
+//    // loop over all events and their types
+//    std::map< std::vector<unsigned>, unsigned >::iterator it;
+//    for (it = eventMapTypes.begin(); it != eventMapTypes.end(); it++)
+//    {
+//        // get event info
+//        std::vector<unsigned> idx = it->first;
+//        unsigned event_type = it->second;
+//
+//        // get power
+////        double weight = weights[event_type];
+//
+//        // get event score
+//        double v = 0.0;
+////        v = std::pow( (1 + std::exp( eventMapFactors[idx]) ), weight );
+////        v = std::pow( eventMapFactors[idx], weight );
+//        v = eventMapFactors[idx];
+//        eventMapWeights[ idx ] = v; //        z = (1 + exp(-z))^rho
+//
+//        // get event score stats for renormalization
+//        sum_value[event_type] += v;
+//        n_value[event_type] += 1;
+//        if ( v > max_value[event_type] )
+//        {
+//            max_value[event_type] = v;
+//        }
+//
+//    }
+//
+//    for (it = eventMapTypes.begin(); it != eventMapTypes.end(); it++)
+//    {
+//        // get event info
+//        std::vector<unsigned> idx = it->first;
+//        unsigned event_type = it->second;
+////        eventMapWeights[ idx ] = eventMapWeights[ idx ] / max_value[event_type];
+////        eventMapWeights[ idx ] = eventMapWeights[ idx ] / (sum_value[event_type] / n_value[event_type]);
 //        eventMapWeights[ idx ] = eventMapWeights[ idx ] / (sum_value[event_type] / n_value[event_type]);
-        eventMapWeights[ idx ] = eventMapWeights[ idx ]; // / (sum_value[event_type] / n_value[event_type]);
-
-    }
-    
-    return;
-}
+//
+//    }
+//
+//    return;
+//}
 
