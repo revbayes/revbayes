@@ -77,7 +77,7 @@ template <class valueType> class TypedDagNode;
         size_t                                                      computeNumStates(size_t numAreas, size_t maxRangeSize);
         void                                                        printEventMap(std::map< std::vector< unsigned >, double > x);
         unsigned                                                    sumBits(const std::vector<unsigned>& b);
-        void                                                        updateEventMapWeights(void);
+//        void                                                        updateEventMapWeights(void);
         void                                                        updateEventMapCutsetWeights(void);
         void                                                        updateEventMapModularityWeights(void);
         
