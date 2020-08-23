@@ -186,7 +186,7 @@ void RateMatrix_Biogeography::fillRateMatrix( void )
     std::vector<unsigned>::iterator jt;
     
     // i is the integer-valued index of the starting state
-    for (size_t i = 1; i < transitions.size(); i++)
+    for (size_t i = 0; i < transitions.size(); i++)
     {
         unsigned startState = (unsigned)i;
         
@@ -358,60 +358,6 @@ RateMatrix_Biogeography* RateMatrix_Biogeography::clone( void ) const
     return new RateMatrix_Biogeography( *this );
 }
 
-
-//void RateMatrix_Biogeography::computeConditionSurvival(MatrixReal& r)
-//{
-//    for (size_t i = 1; i < num_states; i++)
-//    {
-//        double row_sum = 0.0;
-//        for (size_t j = 1; j < num_states; j++)
-//        {
-//            row_sum += r[i][j];
-//        }
-//        for (size_t j = 1; j < num_states; j++)
-//        {
-//            r[i][j] /= row_sum;
-//        }
-//        r[i][0] = 0.0;
-//        r[0][i] = 0.0;
-//    }
-//    r[0][0] = 1.0;
-//}
-//
-//void RateMatrix_Biogeography::computeConditionSurvival(TransitionProbabilityMatrix& r)
-//{
-//    for (size_t i = 1; i < num_states; i++)
-//    {
-//        double row_sum = 0.0;
-//        for (size_t j = 1; j < num_states; j++)
-//        {
-//            row_sum += r[i][j];
-//        }
-//        for (size_t j = 1; j < num_states; j++)
-//        {
-//            r[i][j] /= row_sum;
-//        }
-//        r[i][0] = 0.0;
-//        r[0][i] = 0.0;
-//    }
-//    r[0][0] = 1.0;
-//}
-
-//MatrixReal RateMatrix_Biogeography::getStochasticMatrix(size_t n)
-//{
-//
-//    if (conditionSurvival && false)
-//    {
-//        MatrixReal m = stochastic_matrix[n];
-//        //computeConditionSurvival(m);
-//        return m;
-//    }
-//    else
-//    {
-//        return stochastic_matrix[n];
-//    }
-//}
-
 const RbVector<RbVector<double> >& RateMatrix_Biogeography::getDispersalRates(void) const
 {
     return dispersalRates;
@@ -515,7 +461,7 @@ void RateMatrix_Biogeography::makeTransitions(void)
     affectingAreas.resize(num_states);
     
     // populate integer-valued transitions between states
-    for (size_t i = 1; i < num_states; i++)
+    for (size_t i = 0; i < num_states; i++)
     {
         std::vector<unsigned> b = statesToBitsByNumOn[i];
         
@@ -530,6 +476,10 @@ void RateMatrix_Biogeography::makeTransitions(void)
             // ignore events larger than maxRangeSize
             if (numBitsOn(tmp) > maxRangeSize || numBitsOn(b) > maxRangeSize)
             {
+                continue;
+            }
+            // ignore all-0 ranges (this is an extinction event)
+            if (numBitsOn(tmp) == 0) {
                 continue;
             }
             
@@ -565,24 +515,6 @@ void RateMatrix_Biogeography::setExtirpationRates(const RbVector<double>& er)
     extirpationRates = er;
     needs_update = true;
 }
-//
-//void RateMatrix_Biogeography::setRangeSize(const std::vector<double>& rs)
-//{
-//    rangeSize = rs;
-//    needs_update = true;
-//}
-//
-//void RateMatrix_Biogeography::setCladogeneticMatrix(const RevBayesCore::MatrixReal &cp)
-//{
-//    cladogeneticMatrix = cp;
-//    needs_update = true;
-//}
-//
-//void RateMatrix_Biogeography::setBirthRate(const double &br)
-//{
-//    birthRate = br;
-//    needs_update = true;
-//}
 
 /** Calculate the transition probabilities for the real case */
 void RateMatrix_Biogeography::tiProbsEigens(double t, TransitionProbabilityMatrix& P) const
