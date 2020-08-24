@@ -11,6 +11,7 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         name: [ubuntu-gcc-4.9,
                ubuntu-gcc-5,
