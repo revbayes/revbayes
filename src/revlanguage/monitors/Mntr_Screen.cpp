@@ -41,7 +41,11 @@ void Mntr_Screen::constructInternalObject( void )
     
     // now allocate space for a new Mntr_Screen object
     int g = (int)static_cast<const Natural &>( printgen->getRevObject() ).getValue();
-
+    if ( g <= 0 )
+    {
+        throw RbException( "Number of generations for monitor screen print must be greater than 0.");
+    }
+    
     vars.erase( unique( vars.begin(), vars.end() ), vars.end() );
     sort( vars.begin(), vars.end(), compareVarNames );
     std::vector<RevBayesCore::DagNode *> n;
@@ -122,7 +126,7 @@ void Mntr_Screen::setConstParameter(const std::string& name, const RevPtr<const 
         vars.push_back( var );
     }
     else if ( name == "printgen" )
-    {
+    {   
         printgen = var;
     }
     else if ( name == "prior" )
