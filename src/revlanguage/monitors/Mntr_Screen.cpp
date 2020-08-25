@@ -41,7 +41,7 @@ void Mntr_Screen::constructInternalObject( void )
     delete value;
     
     // now allocate space for a new Mntr_Screen object
-    int g = (int)static_cast<const IntegerPos &>( printgen->getRevObject() ).getValue();
+    unsigned long g = (unsigned long) static_cast<const IntegerPos &>( printgen->getRevObject() ).getValue();
     vars.erase( unique( vars.begin(), vars.end() ), vars.end() );
     sort( vars.begin(), vars.end(), compareVarNames );
     std::vector<RevBayesCore::DagNode *> n;

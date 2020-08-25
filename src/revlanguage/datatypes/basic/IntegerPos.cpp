@@ -63,7 +63,7 @@ RevObject* IntegerPos::add( const RevObject& rhs ) const
         return add( static_cast<const RealPos&>( rhs ) );
     }
     
-    return IntegerPos::add( rhs );
+    return Integer::add( rhs );
 }
 
 
@@ -154,7 +154,7 @@ RevObject* IntegerPos::convertTo( const TypeSpec& type ) const
         return new DiscreteCharacterState( RevBayesCore::StandardState( o.str() ) );
     }
 
-    return IntegerPos::convertTo( type );
+    return Integer::convertTo( type );
 }
 
 
@@ -280,7 +280,7 @@ double IntegerPos::isConvertibleTo( const TypeSpec& type, bool once ) const
         return 0.7;
     }
     
-    return IntegerPos::isConvertibleTo( type, once );
+    return Integer::isConvertibleTo( type, once );
 }
 
 
@@ -301,7 +301,7 @@ RevObject* IntegerPos::multiply( const RevObject& rhs ) const
     if ( rhs.getTypeSpec().isDerivedOf( RealPos::getClassTypeSpec() ) )
         return multiply( static_cast<const RealPos&>( rhs ) );
     
-    return IntegerPos::multiply( rhs );
+    return Integer::multiply( rhs );
 }
 
 

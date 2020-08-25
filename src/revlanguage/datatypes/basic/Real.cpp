@@ -164,10 +164,10 @@ RevObject* Real::convertTo( const TypeSpec& type ) const
         return new Probability(dag_node->getValue());
     if ( type == Integer::getClassTypeSpec() && dag_node->getValue() == int(dag_node->getValue()) )
         return new Integer( int(dag_node->getValue()) );
+    if ( type == IntegerPos::getClassTypeSpec() && dag_node->getValue() > 0.0 && dag_node->getValue() == int(dag_node->getValue()) )
+        return new IntegerPos( int(dag_node->getValue()) );
     if ( type == Natural::getClassTypeSpec() && dag_node->getValue() >= 0.0 && dag_node->getValue() == int(dag_node->getValue()) )
         return new Natural( int(dag_node->getValue()) );
-    if ( type == IntegerPos::getClassTypeSpec() && dag_node->getValue() == int(dag_node->getValue()) )
-        return new IntegerPos( int(dag_node->getValue()) );
 
     if ( type == RlString::getClassTypeSpec() ) 
     {
