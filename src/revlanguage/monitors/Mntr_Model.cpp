@@ -6,7 +6,7 @@
 #include "ArgumentRules.h"
 #include "Mntr_Model.h"
 #include "ModelMonitor.h"
-#include "IntegerPos.h
+#include "IntegerPos.h"
 #include "RevObject.h"
 #include "RlString.h"
 #include "TypeSpec.h"
@@ -47,7 +47,7 @@ void Mntr_Model::constructInternalObject( void )
     // now allocate a new sliding move
     const std::string&                  fn      = static_cast<const RlString &>( filename->getRevObject() ).getValue();
     const std::string&                  sep     = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    unsigned int                                 g       = (int)static_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
+    unsigned int                        g       = (int)static_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
     bool                                pp      = static_cast<const RlBoolean &>( posterior->getRevObject() ).getValue();
     bool                                l       = static_cast<const RlBoolean &>( likelihood->getRevObject() ).getValue();
     bool                                pr      = static_cast<const RlBoolean &>( prior->getRevObject() ).getValue();

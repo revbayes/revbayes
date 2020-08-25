@@ -11,7 +11,7 @@
 #include "Mntr_CharacterHistoryNewickFile.h"
 #include "ModelVector.h"
 #include "OptionRule.h"
-#include "Natural.h"
+#include "IntegerPos.h"
 #include "RevObject.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlString.h"
