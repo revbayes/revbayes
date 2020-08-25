@@ -233,7 +233,7 @@ bool Tree::containsClade(const TopologyNode &n, bool unrooted) const
     if ( contains == false && unrooted == true )
     {
         your_taxa.flip();
-        contains = root->containsClade( your_taxa, true );;
+        contains = root->containsClade( your_taxa, true );
     }
 
     return contains;
@@ -1598,7 +1598,7 @@ void Tree::reroot(const Clade &o, bool make_bifurcating, bool reindex)
     }
 
     // get the node representing the outgroup
-    TopologyNode *outgroup_node = root->getNode( outgroup, strict);
+    TopologyNode *outgroup_node = root->getNode(outgroup, strict);
 
     // check that we properly got a node
     if ( outgroup_node == NULL )
