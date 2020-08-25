@@ -10,7 +10,7 @@
 #include "Ellipsis.h"
 #include "ExtendedNewickTreeMonitor.h"
 #include "Mntr_ExtendedNewickFile.h"
-#include "Natural.h"
+#include "IntegerPos.h"
 #include "RevObject.h"
 #include "RlString.h"
 #include "RlTimeTree.h"
@@ -58,7 +58,7 @@ void Mntr_ExtendedNewickFile::constructInternalObject( void )
     // now allocate a new sliding move
     const std::string& fn = static_cast<const RlString &>( filename->getRevObject() ).getValue();
     const std::string& sep = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    int g = (int)static_cast<const Natural &>( printgen->getRevObject() ).getValue();
+    unsigned int g = (int)static_cast<const IntegerPos &>( printgen->getRevObject() ).getValue();
     bool wv = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::Tree> *t = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
     
@@ -138,7 +138,7 @@ const MemberRules& Mntr_ExtendedNewickFile::getParameterRules(void) const
         memberRules.push_back( new ArgumentRule("tree"    , TimeTree::getClassTypeSpec(), "The tree variable.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         memberRules.push_back( new Ellipsis( "Variables at nodes or branches.", RevObject::getClassTypeSpec() ) );
         memberRules.push_back( new ArgumentRule("isNodeParameter" , RlBoolean::getClassTypeSpec(), "Is this a node or branch parameter?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-        memberRules.push_back( new ArgumentRule("printgen"  , Natural::getClassTypeSpec()  , "How frequently do we print.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
+        memberRules.push_back( new ArgumentRule("printgen"  , IntegerPos::getClassTypeSpec()  , "How frequently do we print.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new IntegerPos(1) ) );
         memberRules.push_back( new ArgumentRule("separator" , RlString::getClassTypeSpec() , "The separator between variables.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
         memberRules.push_back( new ArgumentRule("posterior" , RlBoolean::getClassTypeSpec(), "Should we print the posterior probability as well.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         memberRules.push_back( new ArgumentRule("likelihood", RlBoolean::getClassTypeSpec(), "Should we print the likelihood as well?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
