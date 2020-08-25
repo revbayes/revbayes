@@ -257,6 +257,27 @@ double BranchRateTreeDistribution::computeLnProbability( void )
 
     // get our branch length tree
     const Tree &branch_length_tree = *value;
+    
+    // we need to reroot the timetree
+    if ( touched_time_tree == true )
+    {
+        Clade outgroup = branch_length_tree.getRoot().getChild(0).getClade();
+        
+        // check first if the outgroup is contained in the tree
+        bool strict = true;
+        bool contains = time_tree_unrooted->getRoot().containsClade(outgroup, strict);
+
+        // if the outgroup is not contained in the current time tree,
+        // then the topology must mismatch and thus the probability is 0.0
+        if ( contains == false )
+        {
+            return RbConstants::Double::neginf;
+        }
+
+        bool make_bifurcating = false;
+        bool reindex = true;
+        time_tree_unrooted->reroot(outgroup, make_bifurcating, reindex);
+    }
 
     // compare if the time tree and branch length tree topologies match
     const std::map<std::string, size_t> &time_tree_taxon_bitmap = time_tree_unrooted->getTaxonBitSetMap();
@@ -279,6 +300,8 @@ double BranchRateTreeDistribution::computeLnProbability( void )
     
     if ( newick_time_tree != newick_branch_length_tree )
     {
+//        std::cerr << newick_time_tree << std::endl;
+//        std::cerr << newick_branch_length_tree << std::endl;
         return RbConstants::Double::neginf;
     }
 
