@@ -12,7 +12,7 @@
 #include <string>
 
 #include "ArgumentRule.h"
-#include "Natural.h"
+#include "IntegerPos.h"
 #include "RlMonitor.h"
 #include "RevObject.h"
 #include "RlTimeTree.h"
@@ -59,7 +59,7 @@ void Mntr_StochasticBranchStateTimes::constructInternalObject( void )
     
     const std::string& file_name      = static_cast<const RlString  &>( filename->getRevObject()           ).getValue();
     const std::string& sep            = static_cast<const RlString  &>( separator->getRevObject()          ).getValue();
-    int                print_gen      = (int)static_cast<const Natural   &>( printgen->getRevObject()      ).getValue();
+    unsigned int                print_gen      = (int)static_cast<const IntegerPos   &>( printgen->getRevObject()      ).getValue();
     bool               app            = static_cast<const RlBoolean &>( append->getRevObject()             ).getValue();
     bool               wv             = static_cast<const RlBoolean &>( version->getRevObject()            ).getValue();
     

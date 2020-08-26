@@ -204,6 +204,7 @@
 #include <list>
 
 #include "Integer.h"
+#include "IntegerPos.h"
 #include "Natural.h"
 #include "Probability.h"
 #include "Parser.h"
