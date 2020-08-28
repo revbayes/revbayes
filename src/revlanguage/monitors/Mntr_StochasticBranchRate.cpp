@@ -4,7 +4,7 @@
 #include <string>
 
 #include "ArgumentRule.h"
-#include "Natural.h"
+#include "IntegerPos.h"
 #include "RlMonitor.h"
 #include "RevObject.h"
 #include "RlTimeTree.h"
@@ -51,7 +51,7 @@ void Mntr_StochasticBranchRate::constructInternalObject( void )
     
     const std::string& file_name      = static_cast<const RlString  &>( filename->getRevObject()           ).getValue();
     const std::string& sep            = static_cast<const RlString  &>( separator->getRevObject()          ).getValue();
-    int                print_gen      = (int)static_cast<const Natural   &>( printgen->getRevObject()      ).getValue();
+    unsigned int                print_gen      = (int)static_cast<const IntegerPos   &>( printgen->getRevObject()      ).getValue();
     bool               app            = static_cast<const RlBoolean &>( append->getRevObject()             ).getValue();
     bool               wv             = static_cast<const RlBoolean &>( version->getRevObject()            ).getValue();
     
@@ -121,7 +121,7 @@ const MemberRules& Mntr_StochasticBranchRate::getParameterRules(void) const
     {
         monitor_rules.push_back( new ArgumentRule("cdbdp"          , TimeTree::getClassTypeSpec(),  "The character dependent birth-death process to monitor.",                      ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
         monitor_rules.push_back( new ArgumentRule("filename"       , RlString::getClassTypeSpec() , "The file to save sampled character histories.",                                ArgumentRule::BY_VALUE,     ArgumentRule::ANY ) );
-        monitor_rules.push_back( new ArgumentRule("printgen"       , Natural::getClassTypeSpec()  , "How frequently (in number of iterations) should we save sampled character histories? 1 by default.",                              ArgumentRule::BY_VALUE,     ArgumentRule::ANY, new Natural(1) ) );
+        monitor_rules.push_back( new ArgumentRule("printgen"       , IntegerPos::getClassTypeSpec()  , "How frequently (in number of iterations) should we save sampled character histories? 1 by default.",                              ArgumentRule::BY_VALUE,     ArgumentRule::ANY, new IntegerPos(1) ) );
         monitor_rules.push_back( new ArgumentRule("separator"      , RlString::getClassTypeSpec() , "The delimiter between variables. \t by default.",                              ArgumentRule::BY_VALUE,     ArgumentRule::ANY, new RlString("\t") ) );
         monitor_rules.push_back( new ArgumentRule("append"         , RlBoolean::getClassTypeSpec(), "Should we append to an existing file? False by default.",                  ArgumentRule::BY_VALUE,     ArgumentRule::ANY, new RlBoolean(false) ) );
         monitor_rules.push_back( new ArgumentRule("version"        , RlBoolean::getClassTypeSpec(), "Should we record the software version?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
