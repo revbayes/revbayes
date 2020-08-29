@@ -75,12 +75,13 @@ namespace RevLanguage {
 #include "DeterministicNode.h"
 #include "MethodTable.h"
 #include "Natural.h"
-#include "RbException.h"
 #include "Probability.h"
+#include "RbException.h"
+#include "RbMathLogic.h"
 #include "RevPtr.h"
-#include "TypeSpec.h"
 #include "RevVariable.h"
 #include "RlBoolean.h"
+#include "TypeSpec.h"
 #include "Workspace.h"
 #include "WorkspaceVector.h"
 
@@ -521,7 +522,7 @@ double ModelVector<rlType>::isConvertibleTo( const TypeSpec& type, bool once ) c
         }
 
         // we cannot convert to a Simplex if the elements are not normalized
-        if ( type.getType() == "Simplex" && sum != 1.0 )
+        if ( type.getType() == "Simplex" && RevBayesCore::RbMath::compEssentiallyEqual(sum, 1.0) == false )
         {
             return -1;
         }
