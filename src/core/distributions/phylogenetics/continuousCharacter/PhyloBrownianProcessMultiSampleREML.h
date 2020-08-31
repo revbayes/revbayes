@@ -62,8 +62,6 @@ namespace RevBayesCore {
 
         
         std::vector<Taxon>                                                  taxa;
-//        std::map<std::string, size_t>                                       species_to;
-
         
     };
     
