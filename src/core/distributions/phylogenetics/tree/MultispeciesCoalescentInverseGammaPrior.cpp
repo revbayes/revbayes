@@ -72,7 +72,7 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
             // Branch ploidy term (log)
             // We assume autosomal nuclear genes, so ploidy = 2
             double nc = n;
-            log_r += -nc * log(2.0);
+            log_r += nc * log(2.0);
 
             // Branch event term
             a += nc;
@@ -86,7 +86,7 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
 
                 // Get the number j of individuals we had before the current coalescence
                 size_t j = k[i] - m;
-                double n_pairs = j * (j-1.0) / 2.0;
+                double n_pairs = j * (j-1.0);
 
                 b += t * n_pairs;
             }
@@ -97,14 +97,14 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
             {
                 double final_interval = end_age - current_time;
                 size_t j = k[i] - n;
-                double n_pairs = j * (j-1.0) / 2.0;
+                double n_pairs = j * (j-1.0);
                 b += final_interval * n_pairs;
             }
         }
     }
 
-    // Get final branch gamma term by dividing sum by ploidy
-    b /= 2.0;
+    // // Get final branch gamma term by dividing sum by ploidy
+    // b /= 2.0;
 
     // Calculate the log gamma ratio
     double log_gamma_ratio = 0.0;
