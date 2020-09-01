@@ -159,7 +159,7 @@ void PhyloBrownianProcessREML::recursiveComputeLnProbability( const TopologyNode
 {
 
     // check for recomputation
-    if ( node.isTip() == false && dirty_nodes[node_index] == true )
+    if ( node.isTip() == false ) // && dirty_nodes[node_index] == true
     {
         // mark as computed
         dirty_nodes[node_index] = false;
@@ -276,10 +276,10 @@ void PhyloBrownianProcessREML::recursivelyFlagNodeDirty( const TopologyNode &n )
     size_t index = n.getIndex();
     
     // if this node is already dirty, the also all the ancestral nodes must have been flagged as dirty
-    if ( !dirty_nodes[index] )
+    if ( dirty_nodes[index] == false )
     {
         // the root doesn't have an ancestor
-        if ( !n.isRoot() )
+        if ( n.isRoot() == false )
         {
             recursivelyFlagNodeDirty( n.getParent() );
         }
