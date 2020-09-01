@@ -188,6 +188,7 @@ void PhyloBrownianProcessREML::recursiveComputeLnProbability( const TopologyNode
             double delta_right  = 0.0;
             double t_left       = 0.0;
             double t_right      = 0.0;
+            double stdev        = 0.0;
             if ( use_missing_data == false )
             {
                 delta_left  = this->contrast_uncertainty[this->active_likelihood[left_index]][left_index];
@@ -199,9 +200,10 @@ void PhyloBrownianProcessREML::recursiveComputeLnProbability( const TopologyNode
 
                 // set delta_node = (t_l*t_r)/(t_l+t_r);
                 this->contrast_uncertainty[this->active_likelihood[node_index]][node_index] = (t_left*t_right) / (t_left+t_right);
+
+                stdev = sqrt(t_left+t_right);
             }
 
-            double stdev = sqrt(t_left+t_right);
             for (int site=0; site<this->num_sites; ++site)
             {
 
@@ -213,6 +215,8 @@ void PhyloBrownianProcessREML::recursiveComputeLnProbability( const TopologyNode
                     // add the propagated uncertainty to the branch lengths
                     t_left  = v_left  + delta_left;
                     t_right = v_right + delta_right;
+                    
+                    stdev = sqrt(t_left+t_right);
                 }
                 if ( missing_data[left_index][site] == true && missing_data[right_index][site] == true )
                 {
