@@ -58,12 +58,17 @@ AbstractMultispeciesCoalescentGenewise::AbstractMultispeciesCoalescentGenewise(c
         species_names.push_back( sn );
     }
 
-    // Get combinatorial topology probs
-    for (size_t i=0; i<num_gene_trees; ++i)
-    {
-        double ln_fact = RbMath::lnFactorial((int)(num_taxa[i]));
-        log_tree_topology_prob += (num_taxa[i] - 1) * RbConstants::LN2 - 2.0 * ln_fact - std::log( num_taxa[i] ) ;
-    }
+    // Get combinatorial topology prob
+    const Tree &sptree = species_tree->getValue();
+    int num_taxa_sp_tree = sptree.getTaxa().size();
+    double ln_fact = RbMath::lnFactorial((int)(num_taxa_sp_tree));
+    log_tree_topology_prob = (num_taxa_sp_tree - 1) * RbConstants::LN2 - 2.0 * ln_fact - std::log( num_taxa_sp_tree ) ;
+
+    // for (size_t i=0; i<num_gene_trees; ++i)
+    // {
+    //     double ln_fact = RbMath::lnFactorial((int)(num_taxa[i]));
+    //     log_tree_topology_prob += (num_taxa[i] - 1) * RbConstants::LN2 - 2.0 * ln_fact - std::log( num_taxa[i] ) ;
+    // }
 
     // Clear the current values
     value->clear();
@@ -80,46 +85,45 @@ AbstractMultispeciesCoalescentGenewise::~AbstractMultispeciesCoalescentGenewise(
 }
 
 
+void AbstractMultispeciesCoalescentGenewise::attachTimes(std::vector<Tree*> psi, std::vector< std::vector<TopologyNode *> > &tips, size_t index, const std::vector< std::vector<double> > &times) {
 
-// void AbstractMultispeciesCoalescentGenewise::attachTimes(std::vector<Tree *psi>, std::vector< std::vector<TopologyNode *> > &tips, size_t index, const std::vector< std::vector<double> > &times) {
-//
-//     for (size_t i=0; i<num_gene_trees; ++i)
-//     {
-//         if (index < num_taxa[i]-1)
-//         {
-//             // Get the rng
-//             RandomNumberGenerator* rng = GLOBAL_RNG;
-//
-//             // randomly draw one node from the list of tips
-//             size_t tip_index = static_cast<size_t>( floor(rng->uniform01()*tips.size()) );
-//
-//             // get the node from the list
-//             TopologyNode* parent = tips.at(tip_index);
-//             psi->getNode( parent->getIndex() ).setAge( times[num_taxa - index - 2] );
-//
-//             // remove the randomly drawn node from the list
-//             tips.erase(tips.begin()+tip_index);
-//
-//             // add a left child
-//             TopologyNode* leftChild = &parent->getChild(0);
-//             if ( !leftChild->isTip() )
-//             {
-//                 tips.push_back(leftChild);
-//             }
-//
-//             // add a right child
-//             TopologyNode* rightChild = &parent->getChild(1);
-//             if ( !rightChild->isTip() )
-//             {
-//                 tips.push_back(rightChild);
-//             }
-//
-//             // recursive call to this function
-//             attachTimes(psi, tips, index+1, times);
-//         }
-//     }
-// }
-//
+    for (size_t i=0; i<num_gene_trees; ++i)
+    {
+        if (index < num_taxa[i]-1)
+        {
+            // Get the rng
+            RandomNumberGenerator* rng = GLOBAL_RNG;
+
+            // randomly draw one node from the list of tips
+            size_t tip_index = static_cast<size_t>( floor(rng->uniform01()*tips[i].size()) );
+
+            // get the node from the list
+            TopologyNode* parent = tips[i].at(tip_index);
+            psi[i]->getNode( parent->getIndex() ).setAge( times[i][num_taxa[i] - index - 2] );
+
+            // remove the randomly drawn node from the list
+            tips[i].erase(tips[i].begin()+tip_index);
+
+            // add a left child
+            TopologyNode* leftChild = &parent->getChild(0);
+            if ( !leftChild->isTip() )
+            {
+                tips[i].push_back(leftChild);
+            }
+
+            // add a right child
+            TopologyNode* rightChild = &parent->getChild(1);
+            if ( !rightChild->isTip() )
+            {
+                tips[i].push_back(rightChild);
+            }
+
+            // recursive call to this function
+            attachTimes(psi, tips, index+1, times);
+        }
+    }
+}
+
 //
 // void AbstractMultispeciesCoalescentGenewise::buildRandomBinaryTree(std::vector<TopologyNode*> &tips)
 // {
@@ -167,7 +171,6 @@ double AbstractMultispeciesCoalescentGenewise::computeLnProbability( void )
     const Tree &sp = species_tree->getValue();
 
     ln_prob_coal = recursivelyComputeLnProbability( sp.getRoot() );
-
 
     return ln_prob_coal; // + logTreeTopologyProb;
 
@@ -289,7 +292,7 @@ double AbstractMultispeciesCoalescentGenewise::recursivelyComputeLnProbability( 
     }
 
 
-    // Calculate log likleihood for the branch
+    // Calculate log likelihood for the branch
     ln_prob_coal += computeLnCoalescentProbability(initial_individuals_sizes_genewise, coal_times_genewise, species_age, parent_species_age, species_node.getIndex(), species_node.isRoot() == false);
 
 
@@ -302,7 +305,6 @@ double AbstractMultispeciesCoalescentGenewise::recursivelyComputeLnProbability( 
             current_incoming_lineages.insert( remaining_individuals_genewise[i].begin(), remaining_individuals_genewise[i].end());
         }
     }
-
 
     return ln_prob_coal;
 }
@@ -460,7 +462,7 @@ void AbstractMultispeciesCoalescentGenewise::simulateTrees( void )
             std::vector<TopologyNode * > current_initial_individuals_at_branch = current_individuals_per_branch[sp_node];
             double branch_ne = drawNe( sp_node->getIndex() );
 
-            double theta = 1.0 / branch_ne;
+            double theta = 2.0 / branch_ne;
 
             double prev_coalescent_time = 0.0;
 
@@ -563,6 +565,11 @@ void AbstractMultispeciesCoalescentGenewise::swapParameterInternal(const DagNode
     {
         species_tree = static_cast<const TypedDagNode< Tree >* >( newP );
     }
+
+    // if ( oldP == gene_trees )
+    // {
+    //     gene_trees = static_cast< std::vector< Tree* > >( newP );
+    // }
 
 }
 

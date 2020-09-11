@@ -51,7 +51,7 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
     double current_time = begin_age;
 
     size_t n = times.size();
-    double nt = n;
+    double nc = n; // This is the number of coalescences, i.e., (m-n)
 
     for (size_t i=0; i<n; ++i)
     {
@@ -84,17 +84,17 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
     double integral_limit = 2.0 * fn / theta_max;
     double upper_incomplete_gamma = 0.0;
 
-    if ( k == 2 )
+    if ( nc == 2 )
     {
-        upper_incomplete_gamma = recursiveIncompleteGamma( k-2.0, integral_limit );
+        upper_incomplete_gamma = recursiveIncompleteGamma( nc-2.0, integral_limit );
     }
     else
     {
-        double lower_incomplete_gamma = RbMath::incompleteGamma( integral_limit, k-2.0, RbMath::lnGamma( k-2.0 ) ) * RbMath::gamma( k-2.0 );
-        upper_incomplete_gamma = RbMath::gamma( k-2.0 ) - lower_incomplete_gamma;
+        double lower_incomplete_gamma = RbMath::incompleteGamma( integral_limit, nc-2.0, RbMath::lnGamma( nc-2.0 ) ) * RbMath::gamma( nc-2.0 );
+        upper_incomplete_gamma = RbMath::gamma( nc-2.0 ) - lower_incomplete_gamma;
     }
 
-    ln_prob_coal += RbConstants::LN2 + (( -k+2 ) * log( fn )) + log( upper_incomplete_gamma ) - log( theta_max );
+    ln_prob_coal += RbConstants::LN2 + (( -nc+2 ) * log( fn )) + log( upper_incomplete_gamma ) - log( theta_max );
 
 
     // If we've gotten to the last node of the tree, then we can calculate the likelihood

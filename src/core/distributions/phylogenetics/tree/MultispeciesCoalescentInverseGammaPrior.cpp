@@ -55,16 +55,19 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
     double ln_prob_coal = 0.0;
 
     // Initialize terms that are summed over all genes
-    double a = 0.0; // q_b term in Jones (2017)
-    double b = 0.0; // gamma_b term in Jones (2017)
-    double log_r = 0.0; // log(r_b) term in Jones (2017)
+    // double a = 0.0; // q_b term in Jones (2017)
+    // double b = 0.0; // gamma_b term in Jones (2017)
+    // double log_r = 0.0; // log(r_b) term in Jones (2017)
+
+    double a = 0.0;
+    double b = 0.0;
 
     for (size_t i=0; i<num_gene_trees; i++)
     {
         double current_time = begin_age;
 
         // We only need to calculate terms if k > 1
-        if ( k[i] > 1 )
+        if ( !(k[i] == 1) )
         {
             // Get the number of coalescences
             size_t n = times[i].size();
@@ -72,7 +75,7 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
             // Branch ploidy term (log)
             // We assume autosomal nuclear genes, so ploidy = 2
             double nc = n;
-            log_r += nc * log(2.0);
+            //log_r += nc * log(2.0);
 
             // Branch event term
             a += nc;
@@ -114,7 +117,10 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
     }
 
     // Finally calculate the total log probability over all gene trees for this branch of the species tree
-    double log_branch_like = log_r + (alpha * log(beta)) - ((alpha + a) * log(beta + b)) + log_gamma_ratio;
+    //double log_branch_like = log_r + (alpha * log(beta)) - ((alpha + a) * log(beta + b)) + log_gamma_ratio;
+
+    double log_branch_like = (a * log(RbConstants::LN2)) + (alpha * log(beta)) - ((alpha + a) * log(beta + b)) + log_gamma_ratio;
+
     ln_prob_coal += log_branch_like;
 
     return ln_prob_coal;
