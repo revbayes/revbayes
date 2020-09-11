@@ -22,6 +22,7 @@ namespace RevBayesCore {
         // public member functions
         double                                              computeLnProbability(void);
         void                                                redrawValue(void);
+        virtual void                                        setValue(RbVector<Tree>* v, bool f=false);   
 
         std::vector<Tree*>                                  getTrees(void) const;
         size_t                                              getNumberOfGeneTrees(void) const;
@@ -37,7 +38,7 @@ namespace RevBayesCore {
 
         // helper functions
         void                                                attachTimes(std::vector<Tree*> psi, std::vector< std::vector<TopologyNode *> > &tips, size_t index, const std::vector< std::vector<double> > &times);
-        // void                                                buildRandomBinaryTree(std::vector<TopologyNode *> &tips);
+        void                                                buildRandomBinaryTree(std::vector< std::vector<TopologyNode*> > &tips);
         double                                              recursivelyComputeLnProbability(const TopologyNode &n);
         void                                                resetTipAllocations(void);
         void                                                simulateTrees(void);
