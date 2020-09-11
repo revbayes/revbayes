@@ -124,40 +124,44 @@ void AbstractMultispeciesCoalescentGenewise::attachTimes(std::vector<Tree*> psi,
     }
 }
 
-//
-// void AbstractMultispeciesCoalescentGenewise::buildRandomBinaryTree(std::vector<TopologyNode*> &tips)
-// {
-//
-//     if (tips.size() < num_taxa)
-//     {
-//         // Get the rng
-//         RandomNumberGenerator* rng = GLOBAL_RNG;
-//
-//         // randomly draw one node from the list of tips
-//         size_t index = static_cast<size_t>( floor(rng->uniform01()*tips.size()) );
-//
-//         // get the node from the list
-//         TopologyNode* parent = tips.at(index);
-//
-//         // remove the randomly drawn node from the list
-//         tips.erase(tips.begin()+index);
-//
-//         // add a left child
-//         TopologyNode* leftChild = new TopologyNode(0);
-//         parent->addChild(leftChild);
-//         leftChild->setParent(parent);
-//         tips.push_back(leftChild);
-//
-//         // add a right child
-//         TopologyNode* rightChild = new TopologyNode(0);
-//         parent->addChild(rightChild);
-//         rightChild->setParent(parent);
-//         tips.push_back(rightChild);
-//
-//         // recursive call to this function
-//         buildRandomBinaryTree(tips);
-//     }
-// }
+
+void AbstractMultispeciesCoalescentGenewise::buildRandomBinaryTree(std::vector< std::vector<TopologyNode*> > &tips)
+{
+
+    for (size_t i=0; i<num_gene_trees; ++i)
+    {
+        if (tips[i].size() < num_taxa[i])
+        {
+            // Get the rng
+            RandomNumberGenerator* rng = GLOBAL_RNG;
+
+            // randomly draw one node from the list of tips
+            size_t index = static_cast<size_t>( floor(rng->uniform01()*tips[i].size()) );
+
+            // get the node from the list
+            TopologyNode* parent = tips[i].at(index);
+
+            // remove the randomly drawn node from the list
+            tips[i].erase(tips[i].begin()+index);
+
+            // add a left child
+            TopologyNode* leftChild = new TopologyNode(0);
+            parent->addChild(leftChild);
+            leftChild->setParent(parent);
+            tips[i].push_back(leftChild);
+
+            // add a right child
+            TopologyNode* rightChild = new TopologyNode(0);
+            parent->addChild(rightChild);
+            rightChild->setParent(parent);
+            tips[i].push_back(rightChild);
+
+            // recursive call to this function
+            buildRandomBinaryTree(tips);
+        }
+    }
+
+}
 
 
 
@@ -370,18 +374,24 @@ void AbstractMultispeciesCoalescentGenewise::resetTipAllocations( void )
 }
 
 
-// /**
-//  * Set the current value.
-//  */
-// void AbstractMultispeciesCoalescentGenewise::setValues(std::vector<Tree*> *v, bool f )
-// {
-//
-//     // delegate to super class
-//     TypedDistribution<Tree>::setValue(v, f);
-//
-//     resetTipAllocations();
-//
-// }
+
+/**
+ * Set the current value.
+ */
+void AbstractMultispeciesCoalescentGenewise::setValue(RbVector<Tree>* v, bool f )
+{
+
+    // free memory
+    if (value != v)
+    {
+        delete value;
+    }
+
+    value = v;
+
+    resetTipAllocations();
+
+}
 
 
 
