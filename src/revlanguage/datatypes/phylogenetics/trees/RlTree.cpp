@@ -97,8 +97,15 @@ Tree* Tree::clone(void) const
 /* Map calls to member methods */
 RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
 {
-
-    if (name == "dropTip")
+    
+    if ( name == "calculateEDR" )
+    {
+        found = true;
+        std::vector<double> edr = RevBayesCore::TreeUtilities::calculateEDR( dag_node->getValue() );
+        ModelVector<RealPos> *n = new ModelVector<RealPos>( edr );
+        return new RevVariable( n );
+    }
+    else if (name == "dropTip")
     {
         found = true;
 
@@ -137,6 +144,46 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         RevBayesCore::Clade c = this->dag_node->getValue().getMrca( tmp ).getClade();
         return new RevVariable( new Clade( c ) );
     }
+    else if ( name == "getDescendantTaxa" )
+    {
+        found = true;
+        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        std::vector<RevBayesCore::Taxon> t = tree.getNode(index).getClade().getTaxa();
+        return new RevVariable( new ModelVector<Taxon>( t ) );
+    }
+    else if ( name == "getIndices" )
+    {
+        found = true;
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        std::vector<long> indices = tree.getNodeIndices();
+        ModelVector<Natural> *n = new ModelVector<Natural>( indices );
+        return new RevVariable( n );
+    }
+    else if ( name == "getInverseES" )
+    {
+        found = true;
+        std::vector<double> es = RevBayesCore::TreeUtilities::getInverseES( dag_node->getValue() );
+        ModelVector<RealPos> *n = new ModelVector<RealPos>( es );
+        return new RevVariable( n );
+    }
+    else if ( name == "getPSSP" )
+    {
+        found = true;
+        const AbstractHomologousDiscreteCharacterData c = static_cast<const AbstractHomologousDiscreteCharacterData& >( args[0].getVariable()->getRevObject() ).getValue();
+        size_t state_index = static_cast<const Natural&>( args[1].getVariable()->getRevObject() ).getValue();
+
+        std::vector<double> bl = RevBayesCore::TreeUtilities::getPSSP( dag_node->getValue(), c.getValue(), state_index );
+        ModelVector<RealPos> *n = new ModelVector<RealPos>( bl );
+        return new RevVariable( n );
+    }
+    else if (name == "getRootIndex")
+    {
+        found = true;
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        long n = tree.getRoot().getIndex();
+        return new RevVariable( new Natural( n ) );
+    }
     else if (name == "isBinary")
     {
         found = true;
@@ -153,12 +200,56 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         bool tf = this->dag_node->getValue().getNode((size_t)index).isInternal();
         return new RevVariable( new RlBoolean( tf ) );
     }
+    else if (name == "makeBifurcating")
+    {
+        found = true;
+        bool fossils_only = static_cast<RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+        
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        tree.makeInternalNodesBifurcating( true, fossils_only );
+
+        if ( args[1].getVariable()->getRevObject() != RevNullObject::getInstance() )
+        {
+            const RevBayesCore::Clade& outgroup = static_cast<Clade &>( args[1].getVariable()->getRevObject() ).getValue();
+            tree.makeRootBifurcating( outgroup, true );
+        }
+        
+        return NULL;
+    }
+    else if (name == "makeUltrametric")
+    {
+
+        found = true;
+
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        RevBayesCore::TreeUtilities::makeUltrametric(&tree);
+
+        return NULL;
+    }
     else if (name == "names" || name == "taxa")
     {
         found = true;
 
         std::vector<RevBayesCore::Taxon> t = this->dag_node->getValue().getTaxa();
         return new RevVariable( new ModelVector<Taxon>( t ) );
+    }
+    else if (name == "nodeName")
+    {
+        found = true;
+
+        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        const std::string& n = this->dag_node->getValue().getNode((size_t)index).getName();
+        return new RevVariable( new RlString( n ) );
+    }
+    else if (name == "offset")
+    {
+        found = true;
+
+        double f = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        RevBayesCore::TreeUtilities::offsetTree(&tree, &tree.getRoot(), f);
+
+        return NULL;
     }
     else if (name == "setBranchLength")
     {
@@ -181,7 +272,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     else if (name == "setTaxonName")
     {
         found = true;
-        
+
         const RevObject& current = args[0].getVariable()->getRevObject();
         if ( current.isType( RlString::getClassTypeSpec() ) )
         {
@@ -196,13 +287,13 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         }
         return NULL;
     }
-    else if (name == "nodeName")
+    else if (name == "renumberNodes")
     {
         found = true;
-
-        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
-        const std::string& n = this->dag_node->getValue().getNode((size_t)index).getName();
-        return new RevVariable( new RlString( n ) );
+        const RevBayesCore::Tree &reference = static_cast<const Tree&>( args[0].getVariable()->getRevObject() ).getValue();
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        tree.renumberNodes(reference);
+        return NULL;
     }
     else if (name == "removeDuplicateTaxa")
     {
@@ -210,26 +301,26 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
 
         RevBayesCore::Tree &tree = dag_node->getValue();
         tree.removeDuplicateTaxa();
+
+        return NULL;
+    }
+    else if (name == "reroot")
+    {
+        found = true;
+        const RevBayesCore::Clade &tmp = static_cast<const Clade&>( args[0].getVariable()->getRevObject() ).getValue();
+        bool make_bifurcating = static_cast<RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        tree.reroot(tmp, make_bifurcating, true);
         
         return NULL;
     }
     else if (name == "rescale")
     {
         found = true;
-        
-        double f = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
-        RevBayesCore::Tree &tree = dag_node->getValue();
-        RevBayesCore::TreeUtilities::rescaleTree(&tree, &tree.getRoot(), f);
-        
-        return NULL;
-    }
-    else if (name == "offset")
-    {
-        found = true;
 
         double f = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
         RevBayesCore::Tree &tree = dag_node->getValue();
-        RevBayesCore::TreeUtilities::offsetTree(&tree, &tree.getRoot(), f);
+        RevBayesCore::TreeUtilities::rescaleTree(&tree, &tree.getRoot(), f);
 
         return NULL;
     }
@@ -247,7 +338,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     else if (name == "tipIndex")
     {
         found = true;
-        
+
         std::string tip_name = "";
         if ( args[0].getVariable()->getRevObject().getType() == RlString::getClassType() )
         {
@@ -259,49 +350,6 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         }
         long index = this->dag_node->getValue().getTipNodeWithName( tip_name ).getIndex() + 1;
         return new RevVariable( new Natural( index ) );
-    }
-    else if (name == "makeUltrametric")
-    {
-
-        found = true;
-
-        RevBayesCore::Tree &tree = dag_node->getValue();
-        RevBayesCore::TreeUtilities::makeUltrametric(&tree);
-
-        return NULL;
-    }
-    else if ( name == "getPSSP" )
-    {
-        found = true;
-        const AbstractHomologousDiscreteCharacterData c = static_cast<const AbstractHomologousDiscreteCharacterData& >( args[0].getVariable()->getRevObject() ).getValue();
-        size_t state_index = static_cast<const Natural&>( args[1].getVariable()->getRevObject() ).getValue();
-        
-        std::vector<double> bl = RevBayesCore::TreeUtilities::getPSSP( dag_node->getValue(), c.getValue(), state_index );
-        ModelVector<RealPos> *n = new ModelVector<RealPos>( bl );
-        return new RevVariable( n );
-    }
-    else if ( name == "calculateEDR" )
-    {
-        found = true;
-        std::vector<double> edr = RevBayesCore::TreeUtilities::calculateEDR( dag_node->getValue() );
-        ModelVector<RealPos> *n = new ModelVector<RealPos>( edr );
-        return new RevVariable( n );
-    }
-    else if ( name == "getInverseES" )
-    {
-        found = true;
-        std::vector<double> es = RevBayesCore::TreeUtilities::getInverseES( dag_node->getValue() );
-        ModelVector<RealPos> *n = new ModelVector<RealPos>( es );
-        return new RevVariable( n );
-    }
-    else if ( name == "getIndices" )
-    {
-        found = true;        
-        RevBayesCore::Tree &tree = dag_node->getValue();        
-        std::vector<long> indices = tree.getNodeIndices();        
-        ModelVector<Natural> *n = new ModelVector<Natural>( indices );       
-        return new RevVariable( n );
-        
     }
 
     return ModelObject<RevBayesCore::Tree>::executeMethod( name, args, found );
@@ -354,36 +402,36 @@ void Tree::initMethods( void )
     ArgumentRules* same_topology_arg_rules = new ArgumentRules();
     same_topology_arg_rules->push_back(        new ArgumentRule("tree"    , Tree::getClassTypeSpec(), "The reference tree.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberFunction<Tree, RlBoolean>( "hasSameTopology", this, same_topology_arg_rules ) );
-    
+
     ArgumentRules* nnodesArgRules = new ArgumentRules();
     methods.addFunction( new MemberFunction<Tree, Natural>( "nnodes", this, nnodesArgRules ) );
 
     ArgumentRules* ntipsArgRules = new ArgumentRules();
     methods.addFunction( new MemberFunction<Tree, Natural>( "ntips", this, ntipsArgRules ) );
-    
+
     ArgumentRules* fitchArgRules = new ArgumentRules();
     fitchArgRules->push_back( new ArgumentRule( "characters", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The character alignment from which to compute the Fitch Score.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberFunction<Tree, Natural>( "fitchScore", this, fitchArgRules ) );
-    
+
     ArgumentRules* psArgRules = new ArgumentRules();
     psArgRules->push_back( new ArgumentRule( "characters", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The character alignment to use when computing the Parsimoniously Same State Paths (PSSP).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
     psArgRules->push_back( new ArgumentRule( "stateIndex", Natural::getClassTypeSpec(), "The state index.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "getPSSP", ModelVector<RealPos>::getClassTypeSpec(), psArgRules ) );
-    
+
     ArgumentRules* edrArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "calculateEDR", ModelVector<RealPos>::getClassTypeSpec(), edrArgRules ) );
-    
+
     ArgumentRules* esArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "getInverseES", ModelVector<RealPos>::getClassTypeSpec(), esArgRules ) );
 
     ArgumentRules* indicesArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "getIndices", ModelVector<Natural>::getClassTypeSpec(), indicesArgRules ) );
-    
+
     ArgumentRules* meanInverseESArgRules = new ArgumentRules();
     meanInverseESArgRules->push_back( new ArgumentRule( "characters", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The character alignment from which to compute the mean inverse ES metric.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
     meanInverseESArgRules->push_back( new ArgumentRule( "stateIndex", Natural::getClassTypeSpec(), "The state index.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberFunction<Tree, RealPos>( "meanInverseES", this, meanInverseESArgRules ) );
-    
+
     ArgumentRules* nriArgRules = new ArgumentRules();
     nriArgRules->push_back( new ArgumentRule( "characters", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The character alignment from which to compute the Mean Phylogenetic Distance.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
     nriArgRules->push_back( new ArgumentRule( "stateIndex", Natural::getClassTypeSpec(), "The index of the character state.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
@@ -392,7 +440,7 @@ void Tree::initMethods( void )
     nriArgRules->push_back( new ArgumentRule( "useBranchLengths", RlBoolean::getClassTypeSpec(), "Should MPD use branch length or nodal distances?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
     nriArgRules->push_back( new ArgumentRule( "randomizations", Natural::getClassTypeSpec(),  "How many randomizations should be performed when calculating z-score?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1000) ) );
     methods.addFunction( new MemberFunction<Tree, Real>( "calculateMPD", this, nriArgRules ) );
-    
+
     ArgumentRules* ntiArgRules = new ArgumentRules();
     ntiArgRules->push_back( new ArgumentRule( "characters", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The character alignment from which to compute the Mean Nearest Taxon Distance.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
     ntiArgRules->push_back( new ArgumentRule( "stateIndex", Natural::getClassTypeSpec(), "The index of the character state.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
@@ -407,7 +455,7 @@ void Tree::initMethods( void )
 
     ArgumentRules* taxaArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "taxa", ModelVector<Taxon>::getClassTypeSpec(), taxaArgRules ) );
-    
+
     ArgumentRules* setBranchLengthArgRules         = new ArgumentRules();
     setBranchLengthArgRules->push_back(        new ArgumentRule("index"    , Natural::getClassTypeSpec(), "The index of the node.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     setBranchLengthArgRules->push_back(        new ArgumentRule("value"        , RealPos::getClassTypeSpec(), "The new branch length value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
@@ -421,7 +469,7 @@ void Tree::initMethods( void )
     ArgumentRules* nodeNameArgRules = new ArgumentRules();
     nodeNameArgRules->push_back( new ArgumentRule( "node", Natural::getClassTypeSpec(), "The index of the node.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "nodeName", RlString::getClassTypeSpec(),  nodeNameArgRules ) );
-    
+
     ArgumentRules* tip_index_arg_rules = new ArgumentRules();
     std::vector<TypeSpec> tip_index_arg_types;
     tip_index_arg_types.push_back( RlString::getClassTypeSpec() );
@@ -436,15 +484,12 @@ void Tree::initMethods( void )
     drop_tip_arg_rules->push_back( new ArgumentRule( "node", tip_types, "The index of the node.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "dropTip", RlUtils::Void,  drop_tip_arg_rules ) );
 
-
     ArgumentRules* rescaleArgRules = new ArgumentRules();
     rescaleArgRules->push_back( new ArgumentRule( "factor", RealPos::getClassTypeSpec(), "The scaling factor.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "rescale", RlUtils::Void, rescaleArgRules ) );
-    
-    
+
     ArgumentRules* remove_duplicate_taxa_arg_rules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "removeDuplicateTaxa", RlUtils::Void, remove_duplicate_taxa_arg_rules ) );
-    
 
     ArgumentRules* offsetArgRules = new ArgumentRules();
     offsetArgRules->push_back( new ArgumentRule( "factor", RealPos::getClassTypeSpec(), "The offset factor.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
@@ -464,6 +509,26 @@ void Tree::initMethods( void )
     get_clade_arg_rules->push_back( new ArgumentRule( "clade", clade_types, "Vector of some of the taxa included in the clade.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "getClade", Clade::getClassTypeSpec(), get_clade_arg_rules ) );
 
+    ArgumentRules* renumberNodesArgRules = new ArgumentRules();
+    renumberNodesArgRules->push_back( new ArgumentRule( "referenceTree", Tree::getClassTypeSpec(), "Tree with identical topology but different node ids.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure( "renumberNodes", RlUtils::Void, renumberNodesArgRules   ) );
+
+    ArgumentRules* getRootIndexArgRules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "getRootIndex", Natural::getClassTypeSpec(),  getRootIndexArgRules ) );
+
+    ArgumentRules* rerootArgRules = new ArgumentRules();
+    rerootArgRules->push_back( new ArgumentRule( "clade", Clade::getClassTypeSpec(), "The clade to use as outgroup.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    rerootArgRules->push_back( new ArgumentRule( "make_bifurcating", RlBoolean::getClassTypeSpec(), "Do we want a bifurcation at the root?", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure( "reroot", RlUtils::Void, rerootArgRules ) );
+
+    ArgumentRules* getDescendantTaxaArgRules = new ArgumentRules();
+    getDescendantTaxaArgRules->push_back( new ArgumentRule( "node", Natural::getClassTypeSpec(), "the index of the node.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure( "getDescendantTaxa", ModelVector<Taxon>::getClassTypeSpec(), getDescendantTaxaArgRules ) );
+
+    ArgumentRules* makeBifurcatingArgRules = new ArgumentRules();
+    makeBifurcatingArgRules->push_back( new ArgumentRule( "fossils_only", RlBoolean::getClassTypeSpec(), "Do we want to bifurcate only nodes with degree 1, or all nodes with degree different from 2?", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    makeBifurcatingArgRules->push_back( new ArgumentRule( "clade", Clade::getClassTypeSpec(), "The clade to use as outgroup.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure( "makeBifurcating", RlUtils::Void, makeBifurcatingArgRules   ) );
 
     // member functions
     ArgumentRules* parentArgRules = new ArgumentRules();

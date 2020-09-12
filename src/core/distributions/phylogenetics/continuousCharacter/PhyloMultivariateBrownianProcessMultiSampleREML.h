@@ -47,8 +47,6 @@ namespace RevBayesCore {
         // Parameter management functions.
         virtual void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                                //!< Swap a parameter
         
-//        const TypedDagNode< RbVector< double > >*                           within_species_variances;
-//        const TypedDagNode< RbVector< double > >*                           within_species_variances2;
         const TypedDagNode< RbVector< RbVector< double > > >*               within_species_variances;
 
         
@@ -65,7 +63,6 @@ namespace RevBayesCore {
         
         
         std::vector<Taxon>                                                  taxa;
-        //        std::map<std::string, size_t>                                       species_to;
         const TypedDagNode< MatrixReal >*                                   rate_matrix;
         size_t                                                              active_matrix;
         std::vector<MatrixReal>                                             precision_matrices;

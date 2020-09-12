@@ -159,12 +159,12 @@ void PhyloBrownianProcessREML::recursiveComputeLnProbability( const TopologyNode
 {
 
     // check for recomputation
-    if ( node.isTip() == false && dirty_nodes[node_index] )
+    if ( node.isTip() == false && dirty_nodes[node_index] == true )
     {
         // mark as computed
         dirty_nodes[node_index] = false;
 
-        std::vector<double> &p_node  = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
+        std::vector<double> &p_node   = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
         std::vector<double> &mu_node  = this->contrasts[this->active_likelihood[node_index]][node_index];
 
         
@@ -217,19 +217,47 @@ void PhyloBrownianProcessREML::recursiveComputeLnProbability( const TopologyNode
             for (int i=0; i<this->num_sites; i++)
             {
 
-                mu_node[i] = (mu_left[i]*t_right + mu_right[i]*t_left) / (t_left+t_right);
+                
+                if ( missing_data[left_index][i] == true && missing_data[right_index][i] == true )
+                {
+                    missing_data[node_index][i] = true;
+                    
+                    p_node[i]  = p_left[i] + p_right[i];
+                    mu_node[i] = RbConstants::Double::nan;
+                }
+                else if ( missing_data[left_index][i] == true && missing_data[right_index][i] == false )
+                {
+                    missing_data[node_index][i] = false;
+                    
+                    p_node[i]  = p_left[i] + p_right[i];
+                    mu_node[i] = mu_right[i];
+                }
+                else if ( missing_data[left_index][i] == false && missing_data[right_index][i] == true )
+                {
+                    missing_data[node_index][i] = false;
+                    
+                    p_node[i]  = p_left[i] + p_right[i];
+                    mu_node[i] = mu_left[i];
+                }
+                else
+                {
+                    missing_data[node_index][i] = false;
 
-                // get the site specific rate of evolution
-                double standDev = this->computeSiteRate(i) * stdev;
+                    // get the site specific rate of evolution
+                    double standDev = this->computeSiteRate(i) * stdev;
 
-                // compute the contrasts for this site and node
-                double contrast = mu_left[i] - mu_right[i];
+                    // compute the contrasts for this site and node
+                    double contrast = mu_left[i] - mu_right[i];
 
-                // compute the probability for the contrasts at this node
-                double lnl_node = RbStatistics::Normal::lnPdf(0, standDev, contrast);
+                    // compute the probability for the contrasts at this node
+                    double lnl_node = RbStatistics::Normal::lnPdf(0, standDev, contrast);
 
-                // sum up the probabilities of the contrasts
-                p_node[i] = lnl_node + p_left[i] + p_right[i];
+                    // sum up the probabilities of the contrasts
+                    p_node[i] = lnl_node + p_left[i] + p_right[i];
+                    
+                    mu_node[i] = (mu_left[i]*t_right + mu_right[i]*t_left) / (t_left+t_right);
+                }
+                    
 
             } // end for-loop over all sites
 
@@ -275,10 +303,11 @@ void PhyloBrownianProcessREML::resetValue( void )
 {
     
     // check if the vectors need to be resized
-    partial_likelihoods = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    contrasts = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    contrast_uncertainty = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
-    
+    partial_likelihoods     = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
+    contrasts               = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
+    contrast_uncertainty    = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
+    missing_data            = std::vector<std::vector<bool> >(this->num_nodes, std::vector<bool>(this->num_sites, false) );
+
     // create a vector with the correct site indices
     // some of the sites may have been excluded
     std::vector<size_t> site_indices = std::vector<size_t>(this->num_sites,0);
@@ -306,7 +335,17 @@ void PhyloBrownianProcessREML::resetValue( void )
             if ( (*it)->isTip() )
             {
                 ContinuousTaxonData& taxon = this->value->getTaxonData( (*it)->getName() );
-                double &c = taxon.getCharacter(site_indices[site]);
+                
+                double c = taxon.getCharacter(site_indices[site]);
+                
+                if ( RbMath::isFinite(c) == false )
+                {
+                    missing_data[(*it)->getIndex()][site] = true;
+                }
+//                else
+//                {
+//
+//                }
                 contrasts[0][(*it)->getIndex()][site] = c;
                 contrasts[1][(*it)->getIndex()][site] = c;
                 contrast_uncertainty[0][(*it)->getIndex()] = 0;
