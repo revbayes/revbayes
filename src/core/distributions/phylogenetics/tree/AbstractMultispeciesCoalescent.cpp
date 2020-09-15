@@ -259,9 +259,6 @@ double AbstractMultispeciesCoalescent::recursivelyComputeLnProbability( const Re
         incoming_lineages.insert( remaining_individuals.begin(), remaining_individuals.end());
     }
 
-    // std::cout << "species age: " << species_age << std::endl;
-    // std::cout << "ln prob coal (standard): " << ln_prob_coal << std::endl;
-
     return ln_prob_coal;
 }
 
