@@ -216,6 +216,7 @@
 #include "Dist_cppNormal.h"
 #include "Dist_decomposedInverseWishart.h"
 #include "Dist_dirichlet.h"
+#include "Dist_dirichletSorted.h"
 #include "Dist_exponential.h"
 #include "Dist_exponentialError.h"
 #include "Dist_exponentialOffset.h"
@@ -472,6 +473,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // dirichlet distribution
         AddDistribution< Simplex                    >( new Dist_dirichlet() );
+
+        // sorted dirichlet distribution
+        AddDistribution< Simplex                    >( new Dist_dirichletSorted() );
 
         // scaled Dirichlet distribution
         AddDistribution< Simplex                    >( new Dist_scaledDirichlet() );
