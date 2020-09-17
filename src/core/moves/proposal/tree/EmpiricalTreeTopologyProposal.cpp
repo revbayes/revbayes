@@ -238,7 +238,7 @@ void EmpiricalTreeTopologyProposal::undoProposal( void )
     TopologyNode& node = tau.getRoot();
     
     // undo the proposal
-    TreeUtilities::setAges(&tau, &node, stored_ages );
+    TreeUtilities::setAges(node, stored_ages );
     
 }
 

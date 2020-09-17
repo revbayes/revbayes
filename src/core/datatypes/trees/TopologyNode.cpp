@@ -1783,13 +1783,19 @@ void TopologyNode::renameNodeParameter(const std::string &old_name, const std::s
 
 void TopologyNode::setAge(double a, bool propagate)
 {
-    if ( sampled_ancestor && propagate )
+    if ( sampled_ancestor == true && propagate == true )
     {
         parent->setAge(a);
         return;
     }
 
     age = a;
+    
+    // we should also update the taxon age if this is a tip node
+    if ( isTip() == true )
+    {
+        getTaxon().setAge( a );
+    }
 
     // we need to recompute my branch-length
     recomputeBranchLength();

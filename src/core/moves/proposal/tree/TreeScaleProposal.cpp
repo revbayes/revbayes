@@ -98,14 +98,14 @@ double TreeScaleProposal::doProposal( void )
     
     // now we store all necessary values
     storedAges = std::vector<double>(tau.getNumberOfNodes(), 0.0);
-    TreeUtilities::getAges(&tau, &node, storedAges);
+    TreeUtilities::getAges(node, storedAges);
     
     // draw new ages 
     double u = rng->uniform01();
     double scaling_factor = std::exp( delta * ( u - 0.5 ) );
     
     // rescale the subtrees
-    TreeUtilities::rescaleSubtree(&tau, &node, scaling_factor );
+    TreeUtilities::rescaleSubtree(node, scaling_factor );
     
     if ( rootAge != NULL )
     {
@@ -163,7 +163,7 @@ void TreeScaleProposal::undoProposal( void )
     TopologyNode& node = tau.getRoot();
     
     // undo the proposal
-    TreeUtilities::setAges(&tau, &node, storedAges );
+    TreeUtilities::setAges(node, storedAges );
     
     if ( rootAge != NULL )
     {

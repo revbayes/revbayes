@@ -268,28 +268,32 @@ std::vector<double> BirthDeathForwardSimulator::getMuRate( size_t index, size_t 
 }
 
 
-double BirthDeathForwardSimulator::getPhiProbability( size_t index, size_t n ) const
+double BirthDeathForwardSimulator::getPhiProbability( size_t time_index, size_t cat_index ) const
 {
-    if ( Phi.size() > index )
+    if ( Phi.size() > time_index )
     {
-        if ( Phi[index].size() > n )
+        if ( Phi[time_index].size() > cat_index )
         {
-            return Phi[index][n];
+            return Phi[time_index][cat_index];
         }
-        else if ( Phi[index].size() == 1 )
+        else if ( Phi[time_index].size() == 1 )
         {
-            return Phi[index][0];
+            return Phi[time_index][0];
         }
         else
         {
             throw RbException("Problem in the birth-death simulation: We could not get the sampling event probabilities.");
         }
     }
+    else if ( time_index > 0 )
+    {
+        return 0.0;     // we return by default 0.0
+    }
     else if ( Phi.size() == 1 )
     {
-        if ( Phi[0].size() > n )
+        if ( Phi[0].size() > cat_index )
         {
-            return Phi[0][n];
+            return Phi[0][cat_index];
         }
         else if ( Phi[0].size() == 1 )
         {

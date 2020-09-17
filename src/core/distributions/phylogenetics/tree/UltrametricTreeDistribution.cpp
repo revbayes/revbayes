@@ -673,8 +673,8 @@ void UltrametricTreeDistribution::simulateTree( void )
     value->setRoot( new_root, true);
     value->setRooted( true );
 
-    TreeUtilities::makeUltrametric(value);
-    TreeUtilities::rescaleTree(value, &(value->getRoot()), root_age->getValue()/value->getRoot().getAge());
+    TreeUtilities::makeUltrametric(*value);
+    TreeUtilities::rescaleTree(value->getRoot(), root_age->getValue()/value->getRoot().getAge());
 
 }
 
