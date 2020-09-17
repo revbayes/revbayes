@@ -48,7 +48,7 @@ bool TimeInterval::operator!=(const RevBayesCore::TimeInterval &t) const
 double TimeInterval::getMin(void) const
 {
 
-    if( RbMath::isNan(min) )
+    if ( RbMath::isNan(min) )
     {
         return 0.0;
     }
