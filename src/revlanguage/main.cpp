@@ -191,7 +191,7 @@ int main(int argc, char* argv[]) {
     {
         source_files = args["file"].as<std::vector<std::string> >();
     }
-//    source_files.push_back("scripts/mcmc_ncl_cont_uBM.rev");
+//    source_files.push_back("scripts/mcmc.Rev");
     
     if ( args.count("args") && args.count("cmd"))
     {

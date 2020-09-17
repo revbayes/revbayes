@@ -277,6 +277,46 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
 
         return new RevVariable( new Natural(max_pd) );
     }
+    else if (name == "maxStates")
+    {
+        found = true;
+
+        RevBayesCore::AbstractHomologousDiscreteCharacterData &v = dag_node->getValue();
+        size_t nChars = v.getNumberOfCharacters();
+        size_t nTaxa = v.getNumberOfTaxa();
+
+        int max = 0;
+        for (size_t i = 0; i < nChars; i++)
+        {
+            for (size_t j = 0; j < nTaxa; j++)
+            {
+                const RevBayesCore::AbstractDiscreteTaxonData& td = v.getTaxonData(j);
+                if ( td.getCharacter(i).isMissingState() == false && td.getCharacter(i).isGapState() == false)
+                {
+                    if (td.getCharacter(i).getNumberObservedStates() > 1)
+                    {
+                        const RevBayesCore::RbBitSet& state = td.getCharacter(i).getState();
+                        for (size_t k = 0; k < state.size(); k++)
+                        {
+                            if (state.isSet(k) && k +1 > max)
+                            {
+                                max = static_cast<int>(k)+1;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        int k = int(td.getCharacter(i).getStateIndex()) + 1;
+                        if (k > max)
+                        {
+                            max = k;
+                        }
+                    }
+                }
+            }
+        }
+        return new RevVariable( new Natural(max) );
+    }
     else if ( name == "maxVariableBlockLength" )
     {
         found = true;
@@ -678,6 +718,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
 
     ArgumentRules* maxGcContentArgRules                 = new ArgumentRules();
     ArgumentRules* maxInvariableBlockLengthArgRules     = new ArgumentRules();
+    ArgumentRules* max_states_arg_rules                 = new ArgumentRules();
     ArgumentRules* maxVariableBlockLengthArgRules       = new ArgumentRules();
     ArgumentRules* minGcContentArgRules                 = new ArgumentRules();
     ArgumentRules* maxPairwiseDifferenceArgRules        = new ArgumentRules();
@@ -743,6 +784,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     methods.addFunction( new MemberProcedure( "getNumInvariantSites",                   Natural::getClassTypeSpec(),        invSitesArgRules                ) );
     methods.addFunction( new MemberProcedure( "maxGcContent",                           Probability::getClassTypeSpec(),    maxGcContentArgRules                ) );
     methods.addFunction( new MemberProcedure( "maxInvariableBlockLength",               Natural::getClassTypeSpec(),        maxInvariableBlockLengthArgRules    ) );
+    methods.addFunction( new MemberProcedure( "maxStates",                              Natural::getClassTypeSpec(),        max_states_arg_rules                ) );
     methods.addFunction( new MemberProcedure( "maxVariableBlockLength",                 Natural::getClassTypeSpec(),        maxVariableBlockLengthArgRules      ) );
     methods.addFunction( new MemberProcedure( "minGcContent",                           Probability::getClassTypeSpec(),    minGcContentArgRules                ) );
     methods.addFunction( new MemberProcedure( "maxPairwiseDifference",                  Natural::getClassTypeSpec(),        maxPairwiseDifferenceArgRules       ) );

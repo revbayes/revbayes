@@ -249,8 +249,12 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
         double tmp_sampling_extinction_probs = static_cast<const Probability &>( args[arg_index].getVariable()->getRevObject() ).getValue();
         sampling_extinction_probability.push_back( std::vector<double>(1, tmp_sampling_extinction_probs) );
     }
-    simulator.setSamplingExtinctionProbability( sampling_extinction_probability );
+    else
+    {
+        sampling_extinction_probability = sampling_extinction_rates;
+    }
 
+    simulator.setSamplingExtinctionProbability( sampling_extinction_probability );
 
     ++arg_index;
     const std::vector<double> &root_probs = static_cast<const Simplex &>( args[arg_index].getVariable()->getRevObject() ).getValue();
@@ -262,6 +266,11 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
     ++arg_index;
     RevBayesCore::BirthDeathForwardSimulator::SIM_CONDITION cdt = RevBayesCore::BirthDeathForwardSimulator::TIME;
     const std::string& cdt_str = static_cast<const RlString &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+
+    ++arg_index;
+    int max_lineages = static_cast<const Natural &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+    simulator.setMaxNumLineages(max_lineages);
+
     if ( cdt_str == "time" )
     {
         cdt = RevBayesCore::BirthDeathForwardSimulator::TIME;
@@ -307,10 +316,10 @@ const ArgumentRules& Func_BirthDeathSimulator::getArgumentRules( void ) const
         argument_rules.push_back( new ArgumentRule( "phi", rate_options, "The sampling rates for each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos( 0.0 ) ) );
         argument_rules.push_back( new ArgumentRule( "r", prob_options, "The extinction probability when rate-sampling happens for each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability( 0.0 ) ) );
 
-        argument_rules.push_back( new ArgumentRule( "Lambda", prob_options, "The burst probability at the end of each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability( 0.0 ) ) );
-        argument_rules.push_back( new ArgumentRule( "Mu", prob_options, "The (mass) extinction probability at the end of each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability( 0.0 ) ) );
+        argument_rules.push_back( new ArgumentRule( "Lambda", prob_options, "The burst probability at the end of each interval (first value is ignored).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability( 0.0 ) ) );
+        argument_rules.push_back( new ArgumentRule( "Mu", prob_options, "The (mass) extinction probability at the end of each interval (first value is ignored).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability( 0.0 ) ) );
         argument_rules.push_back( new ArgumentRule( "Phi", prob_options, "The sampling probability at the end of each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability( 0.0 ) ) );
-        argument_rules.push_back( new ArgumentRule( "R", prob_options, "The extinction probability when event-sampling happens for each interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability( 0.0 ) ) );
+        argument_rules.push_back( new ArgumentRule( "R", prob_options, "The extinction probability when event-sampling happens for each interval (first value is ignored). If NULL, r is used instead.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         argument_rules.push_back( new ArgumentRule( "rootCategory", Simplex::getClassTypeSpec(), "The probabilities of the categories for the root.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Simplex( RevBayesCore::Simplex(1,1) ) ) );
 
@@ -320,6 +329,8 @@ const ArgumentRules& Func_BirthDeathSimulator::getArgumentRules( void ) const
         options_condition.push_back( "root" );
         options_condition.push_back( "survival" );
         argument_rules.push_back( new OptionRule( "condition", new RlString("root"), options_condition, "What outcome should we condition on?" ) );
+
+        argument_rules.push_back( new ArgumentRule( "maxNumLineages", Natural::getClassTypeSpec(), "The maximum number of lineages allowed by the simulator. Simulations that reach this size will be aborted and re-started.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Natural( 100000 ) ) );
 
         rules_set = true;
     }

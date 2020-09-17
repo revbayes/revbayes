@@ -49,8 +49,12 @@ double GeneralRateMatrix::averageRate(void) const
         for (size_t j=0; j<num_states; j++)
         {
             if (emit[i] != emit[j])
+            {
                 ave += stationary_freqs[i] * (*the_rate_matrix)[i][j];
+            }
+            
         }
+        
     }
     
     return ave;
