@@ -80,7 +80,7 @@ namespace RevBayesCore {
         TopologyNode&                                       getMrca(const Clade &c);
         const TopologyNode&                                 getMrca(const Clade &c) const;
         const TopologyNode&                                 getMrca(const Clade &c, bool strict) const;
-        std::string                                         getNewickRepresentation() const;                                                                    //!< Get the newick representation of this Tree
+        std::string                                         getNewickRepresentation( bool round = true ) const;                                                 //!< Get the newick representation of this Tree
         TopologyNode&                                       getNode(size_t idx);                                                                                //!< Get the node at index
         const TopologyNode&                                 getNode(size_t idx) const;                                                                          //!< Get the node at index
         const std::vector<TopologyNode*>&                   getNodes(void) const;                                                                               //!< Get a pointer to the nodes in the Tree

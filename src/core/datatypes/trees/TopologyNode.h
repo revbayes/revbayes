@@ -79,9 +79,9 @@ namespace RevBayesCore {
         void                                        clearParameters(void);                                                              //!< Clear the node and branch parameters
         void                                        clearBranchParameters(void);
 		void                                        clearNodeParameters(void);
-        virtual std::string                         computeNewick(void);                                                                //!< Compute the newick string for this clade
+        virtual std::string                         computeNewick(bool round = true);                                                                //!< Compute the newick string for this clade
         std::string                                 computePlainNewick(void) const;                                                     //!< Compute the newick string for this clade as a plain string without branch length
-        std::string                                 computeSimmapNewick(void);                                                          //!< Compute the newick string compatible with SIMMAP and phytools
+        std::string                                 computeSimmapNewick(bool round = true);                                                          //!< Compute the newick string compatible with SIMMAP and phytools
         bool                                        containsClade(const TopologyNode* c, bool strict) const;
         bool                                        containsClade(const Clade &c, bool strict) const;
         bool                                        containsClade(const RbBitSet &c, bool strict) const;
@@ -158,7 +158,7 @@ namespace RevBayesCore {
     protected:
         
         // helper methods
-        virtual std::string                         buildNewickString(bool simmap);                                                     //!< compute the newick string for a tree rooting at this node
+        virtual std::string                         buildNewickString(bool simmap, bool round);                                                     //!< compute the newick string for a tree rooting at this node
         
         // protected members
         bool                                        use_ages;

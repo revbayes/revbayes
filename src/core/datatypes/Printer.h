@@ -16,8 +16,10 @@
 #define Printer_H
 
 #include <string>
+#include <limits>
 
 #include "StringUtilities.h"
+#include "TopologyNode.h"
 
 namespace RevBayesCore {
     
@@ -57,6 +59,8 @@ namespace RevBayesCore {
         static void                     printForComplexStoring( const objType &a, std::ostream &o, const std::string & /*sep*/, int l, bool left )
         {
             std::stringstream ss;
+            // set precision of stringstream to max
+            ss.precision(std::numeric_limits<double>::digits10);
             ss << a;
             std::string s = ss.str();
             if ( l > 0 )
@@ -80,7 +84,19 @@ namespace RevBayesCore {
         static void                     printForComplexStoring( const objType &a, std::ostream &o, const std::string &sep, int l, bool left ) { a.printForComplexStoring(o, sep, l, left); }
 
     };
-    
+    // define printForComplexStoring for Trees, since in that case we need to tell computeNewick not to round
+
+    template<>
+    inline void Printer<Tree,1>::printForComplexStoring( const Tree &a, std::ostream &o, const std::string &sep, int l, bool left )
+    {
+        std::stringstream ss;
+        ss << a.getNewickRepresentation( false );
+        std::string s = ss.str();
+        if (l > 0) {
+            StringUtilities::fillWithSpaces(s, l, left);
+        }
+        o << s;
+    }
 }
 
 

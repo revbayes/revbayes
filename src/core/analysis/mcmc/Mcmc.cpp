@@ -306,6 +306,7 @@ void Mcmc::checkpoint( void ) const
     
     // clean up
     out_stream_moves.close();
+    printf("Checkpointing done\n");
 }
 
 
@@ -930,7 +931,7 @@ void Mcmc::initializeMonitors(void)
     {
         monitors[i].setModel( model );
     }
-    
+
 }
 
 

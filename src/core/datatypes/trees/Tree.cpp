@@ -665,10 +665,10 @@ const TopologyNode& Tree::getMrca(const TopologyNode &n) const
 }
 
 
-std::string Tree::getNewickRepresentation() const
+std::string Tree::getNewickRepresentation(bool round ) const
 {
 
-    return root->computeNewick();
+    return root->computeNewick( round );
 }
 
 

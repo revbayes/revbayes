@@ -13,6 +13,7 @@
 
 #include <ostream>
 #include <string>
+#include <limits>
 
 namespace RevBayesCore {
     
@@ -87,11 +88,19 @@ namespace RevBayesCore {
     // printValue //
     ////////////////
     template<>
-    inline void TypedDagNode<double>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/) const
+    inline void TypedDagNode<double>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool simple) const
     {
         
         std::stringstream ss;
-        ss.precision(RbSettings::userSettings().getOutputPrecision());
+        if (!simple)
+        {
+            ss.precision(std::numeric_limits<double>::digits10);
+        }
+
+        else
+        {
+            ss.precision(RbSettings::userSettings().getOutputPrecision());
+        }
         ss << getValue();
         std::string s = ss.str();
         if ( l > 0 )
@@ -269,34 +278,6 @@ void RevBayesCore::TypedDagNode<valueType>::printValue(std::ostream &o, const st
         StringUtilities::fillWithSpaces(s, l, left);
     }
     o << s;
-    
-//    // check if this is a container
-//    const Container *c = dynamic_cast< const Container *>( &getValue() );
-//    if ( c == NULL || flatten == false )
-//    {
-//        std::stringstream ss;
-//        ss << getValue();
-//        std::string s = ss.str();
-//        if ( l > 0 )
-//        {
-//            StringUtilities::fillWithSpaces(s, l, left);
-//        }
-//        o << s;
-//    }
-//    else
-//    {
-//        for (size_t i=0; i<c->size(); ++i)
-//        {
-//            c->printElement(o, i, sep, l, left);
-//            if ( i < (c->size()-1) )
-//            {
-//                o << sep;
-//            }
-//            
-//        }
-//        
-//    }
-    
 }
 
 
