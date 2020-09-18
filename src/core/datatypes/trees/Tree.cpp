@@ -859,9 +859,9 @@ const TopologyNode& Tree::getRoot(void) const
  * Get the tree and character history in newick format
  * compatible with SIMMAP and phytools
  */
-std::string Tree::getSimmapNewickRepresentation() const
+std::string Tree::getSimmapNewickRepresentation(bool round) const
 {
-    return root->computeSimmapNewick();
+    return root->computeSimmapNewick(round);
 }
 
 

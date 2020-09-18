@@ -90,7 +90,7 @@ namespace RevBayesCore {
     inline void Printer<Tree,1>::printForComplexStoring( const Tree &a, std::ostream &o, const std::string &sep, int l, bool left )
     {
         std::stringstream ss;
-        ss << a.getNewickRepresentation( false );
+        ss << a.getSimmapNewickRepresentation( false );
         std::string s = ss.str();
         if (l > 0) {
             StringUtilities::fillWithSpaces(s, l, left);
