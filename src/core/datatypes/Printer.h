@@ -19,7 +19,7 @@
 #include <limits>
 
 #include "StringUtilities.h"
-#include "TopologyNode.h"
+#include "Tree.h"
 
 namespace RevBayesCore {
     
