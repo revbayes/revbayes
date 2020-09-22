@@ -549,7 +549,7 @@ TopologyNode* TopologyNode::clone(void) const
 std::string TopologyNode::computeNewick( bool round )
 {
 
-    return buildNewickString(round);
+    return buildNewickString(false, round);
 }
 
 
