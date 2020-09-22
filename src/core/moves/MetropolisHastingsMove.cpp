@@ -297,10 +297,6 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         
         if ( RbMath::isAComputableNumber(ln_prior_ratio) && RbMath::isAComputableNumber(ln_likelihood_ratio) && RbMath::isAComputableNumber(ln_hastings_ratio) )
         {
-            if (the_node->getLnProbabilityRatio() == -INFINITY) {
-                std::cout << the_node->getName() << std::endl;
-                printf("Oops\n");
-            }
 
             if ( the_node->isClamped() )
             {
