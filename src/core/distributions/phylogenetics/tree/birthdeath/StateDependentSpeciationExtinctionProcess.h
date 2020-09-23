@@ -104,11 +104,12 @@ namespace RevBayesCore {
         void                                                            buildRandomBinaryTree(std::vector<TopologyNode *> &tips);
         std::vector<double>                                             pExtinction(double start, double end) const;                                                        //!< Compute the probability of extinction of the process (without incomplete taxon sampling).
         virtual double                                                  pSurvival(double start, double end) const;                                                          //!< Compute the probability of survival of the process (without incomplete taxon sampling).
+        double                                                          pSurvival(double start, double end, bool speciation) const;                                                          //!< Compute the probability of survival of the process (without incomplete taxon sampling).
         void                                                            recursivelyFlagNodeDirty(const TopologyNode& n);
         bool                                                            simulateTree(size_t attempts = 0);
         bool                                                            simulateTreeConditionedOnTips(size_t attempts = 0);
-        std::vector<double>                                             calculateTotalAnageneticRatePerState(void);
-        std::vector<double>                                             calculateTotalSpeciationRatePerState(void);
+        std::vector<double>                                             calculateTotalAnageneticRatePerState(void) const;
+        std::vector<double>                                             calculateTotalSpeciationRatePerState(void) const;
         void                                                            computeNodeProbability(const TopologyNode &n, size_t nIdx) const;
         double                                                          computeRootLikelihood() const;
         
