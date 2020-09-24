@@ -162,6 +162,54 @@ StateDependentSpeciationExtinctionProcess::~StateDependentSpeciationExtinctionPr
 }
 
 
+std::vector<double> StateDependentSpeciationExtinctionProcess::calculateTotalSpeciationRatePerState( void ) const
+{
+    std::vector<double> total_rates = std::vector<double>(num_states, 0);
+    std::map<std::vector<unsigned>, double> eventMap;
+    std::vector<double> speciation_rates;
+    std::map<std::vector<unsigned>, double>::iterator it;
+    if ( use_cladogenetic_events == true )
+    {
+        // get cladogenesis event map (sparse speciation rate matrix)
+        eventMap = cladogenesis_matrix->getValue().getEventMap();
+        // iterate over each cladogenetic event possible
+        for (it = eventMap.begin(); it != eventMap.end(); it++)
+        {
+            const std::vector<unsigned>& states = it->first;
+            total_rates[states[0]] += it->second;
+        }
+    }
+    else
+    {
+        speciation_rates = lambda->getValue();
+        for (size_t i = 0; i < num_states; i++)
+        {
+            total_rates[i] += speciation_rates[i];
+        }
+    }
+    return total_rates;
+}
+
+
+std::vector<double> StateDependentSpeciationExtinctionProcess::calculateTotalAnageneticRatePerState( void ) const
+{
+    std::vector<double> total_rates = std::vector<double>(num_states, 0);
+    const RateGenerator *rate_matrix = &getEventRateMatrix();
+    for (size_t i = 0; i < num_states; i++)
+    {
+        for (size_t j = 0; j < num_states; j++)
+        {
+            if (i != j)
+            {
+                total_rates[i] += rate_matrix->getRate(i, j, 0.0, getEventRate());
+            }
+        }
+    }
+
+    return total_rates;
+}
+
+
 /**
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
@@ -258,7 +306,8 @@ double StateDependentSpeciationExtinctionProcess::computeLnProbability( void )
     // conditioning on survival
     if ( condition == "survival" )
     {
-        lnProbTimes = - num_initial_lineages*log( pSurvival(0, process_time) );
+        lnProbTimes = - log( pSurvival(0, process_time,num_initial_lineages>1) );
+        
     }
     
     // multiply the probability of a descendant of the initial species
@@ -1683,18 +1732,34 @@ std::vector<double> StateDependentSpeciationExtinctionProcess::pExtinction(doubl
 double StateDependentSpeciationExtinctionProcess::pSurvival(double start, double end) const
 {
 
+    // delegate to specific function that manages survival between origin and root
+    return pSurvival(start, end, use_origin);
+}
+
+
+double StateDependentSpeciationExtinctionProcess::pSurvival(double start, double end, bool speciation) const
+{
+
     std::vector< double > initial_state = pExtinction(start,end);
+    std::vector<double>   speciation_rates = calculateTotalSpeciationRatePerState();
 
     double prob = 0.0;
     const RbVector<double> &freqs = getRootFrequencies();
     for (size_t i=0; i<num_states; ++i)
     {
-        prob += freqs[i] * initial_state[i];
-        //        prob += freqs[i]*(1.0-initial_state[i])*(1.0-initial_state[i])*speciation_rates[i];
+        // we need to check if we should condition on survival of the speciation event
+        if ( speciation == true )
+        {
+            prob += freqs[i]*(1.0-initial_state[i])*(1.0-initial_state[i])*speciation_rates[i];
+        }
+        else
+        {
+            prob += freqs[i]*(1.0-initial_state[i]);
+        }
         
     }
     
-    return 1.0-prob;
+    return prob;
 }
 
 
@@ -1941,54 +2006,6 @@ void StateDependentSpeciationExtinctionProcess::setValue(Tree *v, bool f )
         drawStochasticCharacterMap(character_histories);
     }
     static_cast<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
-}
-
-
-std::vector<double> StateDependentSpeciationExtinctionProcess::calculateTotalSpeciationRatePerState( void ) 
-{
-    std::vector<double> total_rates = std::vector<double>(num_states, 0);
-    std::map<std::vector<unsigned>, double> eventMap;
-    std::vector<double> speciation_rates;
-    std::map<std::vector<unsigned>, double>::iterator it;
-    if ( use_cladogenetic_events == true )
-    {
-        // get cladogenesis event map (sparse speciation rate matrix)
-        eventMap = cladogenesis_matrix->getValue().getEventMap();
-        // iterate over each cladogenetic event possible
-        for (it = eventMap.begin(); it != eventMap.end(); it++)
-        {
-            const std::vector<unsigned>& states = it->first;
-            total_rates[states[0]] += it->second;
-        }
-    }
-    else
-    {
-        speciation_rates = lambda->getValue();
-        for (size_t i = 0; i < num_states; i++)
-        {
-            total_rates[i] += speciation_rates[i];    
-        }
-    }
-    return total_rates;
-}
-
-
-std::vector<double> StateDependentSpeciationExtinctionProcess::calculateTotalAnageneticRatePerState( void ) 
-{
-    std::vector<double> total_rates = std::vector<double>(num_states, 0);
-    const RateGenerator *rate_matrix = &getEventRateMatrix();
-    for (size_t i = 0; i < num_states; i++)
-    {
-        for (size_t j = 0; j < num_states; j++)
-        {
-            if (i != j)
-            {
-                total_rates[i] += rate_matrix->getRate(i, j, 0.0, getEventRate());
-            } 
-        }
-    }
-
-    return total_rates;
 }
 
 

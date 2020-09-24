@@ -893,7 +893,10 @@ std::vector<Taxon> Tree::getTaxa() const
     for (size_t i = 0; i < getNumberOfTips(); ++i)
     {
         const TopologyNode& n = getTipNode( i );
-        taxa.push_back( n.getTaxon() );
+        Taxon taxon = n.getTaxon();
+        taxon.setAge(n.getAge());
+        taxa.push_back( taxon );
+
     }
 
     return taxa;

@@ -101,6 +101,12 @@ size_t BirthDeathForwardSimulator::getNumberOfCategories( void ) const
 
 double BirthDeathForwardSimulator::getLambdaProbability( size_t index, size_t n ) const
 {
+    // There is no burst speciation at the present day
+    if ( index == 0 )
+    {
+        return 0.0;
+    }
+
     if ( Lambda.size() > index )
     {
         if ( Lambda[index].size() > n )
@@ -184,7 +190,7 @@ double BirthDeathForwardSimulator::getMuProbability( size_t index, size_t n ) co
     // std::cout << "getting mu probability for index " << index << " with n = " << n << std::endl;
 
     // There is no mass extinction at the present day
-    if ( n == 0 )
+    if ( index == 0 )
     {
         return 0.0;
     }
@@ -357,7 +363,7 @@ double BirthDeathForwardSimulator::getRProbability( size_t index, size_t n ) con
 {
 
     // There is no death-after-sampling at the present day
-    if ( n == 0 )
+    if ( index == 0 )
     {
         return 0.0;
     }
@@ -1044,6 +1050,13 @@ void BirthDeathForwardSimulator::setMaxNumLineages( const int m )
 
 void BirthDeathForwardSimulator::setMassExtinctionProbability( const std::vector<std::vector< double > > &m )
 {
+    // std::cout << "Mass extinction probability vector looks like this:" << std::endl;
+    // for (size_t i=0; i<m.size(); ++i) {
+    //     for (size_t j=0; j<m.size(); ++j) {
+    //         std::cout << m[i][j] << ", ";
+    //     }
+    //     std::cout << std::endl;
+    // }
     Mu = m;
 }
 
