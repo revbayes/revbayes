@@ -395,7 +395,7 @@ std::string TopologyNode::buildNewickString( bool simmap = false, bool round = t
                     o << ",";
                 }
                 j++;
-                o << children[i]->buildNewickString( simmap );
+                o << children[i]->buildNewickString( simmap, round );
             }
         }
 
