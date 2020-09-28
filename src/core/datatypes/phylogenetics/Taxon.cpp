@@ -198,8 +198,8 @@ const std::string& Taxon::getSpeciesName( void ) const
  */
 void Taxon::setAge(double a)
 {
-    age_range.setMin(a);
     age_range.setMax(a);
+    age_range.setMin(a);
 }
 
 
