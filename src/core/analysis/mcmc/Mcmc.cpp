@@ -306,7 +306,6 @@ void Mcmc::checkpoint( void ) const
     
     // clean up
     out_stream_moves.close();
-    printf("Checkpointing done\n");
 }
 
 
@@ -917,7 +916,7 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
         moves[i].setMoveTuningParameter( atof(key_value[1].c_str()) );
         
     }
-    
+
     // clean up
     in_file_moves.close();
     
