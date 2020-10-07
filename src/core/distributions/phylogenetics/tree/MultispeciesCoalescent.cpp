@@ -74,6 +74,9 @@ double MultispeciesCoalescent::computeLnCoalescentProbability(size_t k, const st
         // add the density for this coalescent event
         //lnProbCoal += log( lambda ) - lambda * a;
         //Corrected version:
+
+        // std::cout << "term: " << log( theta ) - lambda * a << std::endl;
+
         ln_prob_coal += log( theta ) - lambda * a;
     }
 
@@ -89,6 +92,8 @@ double MultispeciesCoalescent::computeLnCoalescentProbability(size_t k, const st
 
         double n_pairs = j * (j-1.0) / 2.0;
         ln_prob_coal -= n_pairs * theta * final_interval;
+
+        // std::cout << "term: " << n_pairs * theta * final_interval << std::endl;
     }
 
     // std::cout << "ln prob coal: " << ln_prob_coal << std::endl;

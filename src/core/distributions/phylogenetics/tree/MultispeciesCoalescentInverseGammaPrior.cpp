@@ -68,11 +68,15 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
 
     for (size_t i=0; i<num_gene_trees; i++)
     {
+        // std::cout << "gene " << i << std::endl;
+
         double current_time = begin_age;
 
         // We only need to calculate terms if k > 1
         if ( !(k[i] == 1) )
         {
+            // double temp_b = 0.0;
+
             // Get the number of coalescences
             size_t n = times[i].size();
 
@@ -83,6 +87,8 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
 
             // Branch event term
             a += nc;
+
+            // std::cout << "\ta[" << i << "]: " << nc << std::endl;
 
             // Branch gamma term
             for (size_t m=0; m<n; ++m)
@@ -96,6 +102,7 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
                 double n_pairs = j * (j-1.0);
 
                 b += t * n_pairs;
+                // temp_b += t*n_pairs;
             }
 
             // compute the probability of no coalescent event in the final part of the branch
@@ -106,7 +113,10 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
                 size_t j = k[i] - n;
                 double n_pairs = j * (j-1.0);
                 b += final_interval * n_pairs;
+                // temp_b += final_interval * n_pairs;
             }
+
+            // std::cout << "\tb[" << i << "]: " << temp_b << std::endl;
         }
     }
 
@@ -126,14 +136,14 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
     // Finally calculate the total log probability over all gene trees for this branch of the species tree
     //double log_branch_like = log_r + (alpha * log(beta)) - ((alpha + a) * log(beta + b)) + log_gamma_ratio;
 
-    double log_branch_like = (a * RbConstants::LN2) + (alpha * log(beta)) - ((alpha + a) * log(beta + b)) + log_gamma_ratio;
+    double ln_branch_like = (a * RbConstants::LN2) + (alpha * log(beta)) - ((alpha + a) * log(beta + b)) + log_gamma_ratio;
 
     // std::cout << "alpha: " << alpha << std::endl;
     // std::cout << "beta: " << beta << std::endl;
     // std::cout << "log gamma ratio: " << log_gamma_ratio << std::endl;
     // std::cout << "log branch like: " << log_branch_like << std::endl;
 
-    ln_prob_coal += log_branch_like;
+    ln_prob_coal += ln_branch_like;
 
     return ln_prob_coal;
 }
