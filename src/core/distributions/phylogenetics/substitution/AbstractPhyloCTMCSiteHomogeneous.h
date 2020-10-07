@@ -884,7 +884,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     // That means we should probabily call this function as a job,
     // where a job is defined as computing the lnProbability for a subset of the data (block)
     // Sebastian: this call is very slow; a lot of work happens in nextCycle()
-
+    
 
     // we need to check here if we still are listining to this tree for change events
     // the tree could have been replaced without telling us
@@ -1203,13 +1203,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawJointConditio
 {
 
 	// if we already have ancestral states, don't make new ones
-
+    
     // MJL 181028: Disabling this flag to allow multiple monitors to work for same dnPhyloCTMC (e.g. ancestral states + stochastic mapping)
 //	if ( has_ancestral_states == true )
 //    {
 //		return;
 //    }
-
+    
     RandomNumberGenerator* rng = GLOBAL_RNG;
 
     // get working variables
@@ -1229,7 +1229,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawJointConditio
 
     // clear the container for sampling the site-rates
     sampled_site_mixtures.resize(this->num_sites);
-
+    
     for (size_t i = 0; i < this->num_sites; ++i)
 //    for (size_t i = pattern_block_start; i < this->pattern_block_end; ++i)
     {
@@ -3200,35 +3200,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setRateMatrix(con
 
 }
 
-//-- Helper to sort mixture models based on arbitrary property. This method performs the
-//   sorting in-place, just provide the property list that matches the rate matrices.
-//template<class charType>
-//void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::quickSortByProperty
-//  ( RbVector<RateGenerator> &mixture_models
-//  , std::vector<double>     &prop
-//  , size_t                  lo
-//  , size_t                  hi
-//  )
-//{
-//    size_t i = lo;
-//    size_t j = hi;
-//    size_t p = prop[(i + j) / 2];
-//
-//    while (i <= j)
-//    {
-//      while ( prop[i] < p ) { i++; }
-//      while ( prop[j] > p ) { j--; }
-//      if (i <= j)
-//        {
-//          std::swap(prop[i]           , prop[j]          );
-//          //std::swap(mixture_models[i] , mixture_models[j]);
-//          i++; j--;
-//        }
-//    }
-//    if (j > lo) { quickSortByProperty(mixture_models, prop, lo, j ); }
-//    if (i < hi) { quickSortByProperty(mixture_models, prop, i , hi); }
-//}
-
 
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setRateMatrix(const TypedDagNode< RbVector< RateGenerator > > *rm)
@@ -3258,27 +3229,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setRateMatrix(con
         ss << "Rate generator dimensions (" << rm->getValue()[0].size() << " do not match the number of character states (" << this->num_chars << ")";
         throw(RbException(ss.str()));
     }
-
-
-    //--- WORK HERE ---
-
-    //-- Get vector of determinants for each model
-    //std::vector<double> dets(num_matrices, 1.0);
-    //for ( size_t i = 0; i < num_matrices; ++i )
-    //{
-    //  std::vector<double> eigen_vals = heterogeneous_rate_matrices->getValue()[i].getEigenSystem().getRealEigenvalues();
-    //  dets[i] = eigen_vals[0];
-    //  for ( size_t j = 1; j < eigen_vals.size(); ++j )
-    //    {
-    //      dets[i] *= eigen_vals[j];
-    //    }
-    //}
-    //
-    //-- In-place pairwise quicksort
-    //quickSortByProperty(heterogeneous_rate_matrices->getValue(), dets, 0, num_matrices-1);
-
-    //--- END WORK ---
-
 
     // add the new parameter
     this->addParameter( heterogeneous_rate_matrices );
