@@ -38,10 +38,14 @@ AbstractMultispeciesCoalescentGenewise::AbstractMultispeciesCoalescentGenewise(c
     // this will also ensure that the parameters are not getting deleted before we do
     addParameter( species_tree );
 
+    // std::cout << "num_gene_trees: " << ngt << std::endl;
+
     // Get num_taxa for all gene trees
     for (size_t i=0; i<num_gene_trees; ++i)
     {
         num_taxa.push_back( taxa[i].size() );
+        // std::cout << "num_taxa[" << i << "]: " << taxa[i].size() << std::endl;
+        // std::cout << "taxa: " << taxa[i] << std::endl;
     }
 
     // Get species names
@@ -59,20 +63,15 @@ AbstractMultispeciesCoalescentGenewise::AbstractMultispeciesCoalescentGenewise(c
     }
 
     // Get combinatorial topology prob
-    const Tree &sptree = species_tree->getValue();
-    int num_taxa_sp_tree = sptree.getTaxa().size();
-    double ln_fact = RbMath::lnFactorial((int)(num_taxa_sp_tree));
-    log_tree_topology_prob = (num_taxa_sp_tree - 1) * RbConstants::LN2 - 2.0 * ln_fact - std::log( num_taxa_sp_tree ) ;
-
-    // for (size_t i=0; i<num_gene_trees; ++i)
-    // {
-    //     double ln_fact = RbMath::lnFactorial((int)(num_taxa[i]));
-    //     log_tree_topology_prob += (num_taxa[i] - 1) * RbConstants::LN2 - 2.0 * ln_fact - std::log( num_taxa[i] ) ;
-    // }
+    for (size_t i=0; i<num_gene_trees; ++i)
+    {
+        double ln_fact = RbMath::lnFactorial((int)(num_taxa[i]));
+        log_tree_topology_prob += (num_taxa[i] - 1) * RbConstants::LN2 - 2.0 * ln_fact - std::log( num_taxa[i] ) ;
+    }
 
     // Clear the current values
-    value->clear();
-    individuals_per_branch_genewise.clear();
+    //value->clear();
+    //individuals_per_branch_genewise.clear();
 
     redrawValue();
 
@@ -208,6 +207,9 @@ double AbstractMultispeciesCoalescentGenewise::recursivelyComputeLnProbability( 
 
     double species_age = species_node.getAge();
     double parent_species_age = RbConstants::Double::inf;
+    //
+    // std::cout << "\nspecies age: " << species_age << std::endl;
+    // std::cout << "index: " << species_node.getIndex() << std::endl;
 
     if ( species_node.isRoot() == false )
     {
@@ -225,8 +227,10 @@ double AbstractMultispeciesCoalescentGenewise::recursivelyComputeLnProbability( 
         const std::set<const TopologyNode*> &current_initial_individuals = individuals_per_branch_genewise[i][species_node.getIndex()];
         std::set<const TopologyNode*> current_remaining_individuals = current_initial_individuals;
 
-        // Get number of initial individuals for this gene
+        // Get number of initial individuals for this gene in this branch
         initial_individuals_sizes_genewise.push_back( current_initial_individuals.size() );
+
+        // std::cout << "current initial individuals: " << current_initial_individuals.size() << std::endl;
 
         // Get all coalescent events among the individuals for this gene
         std::vector<double> current_coal_times;
@@ -290,6 +294,13 @@ double AbstractMultispeciesCoalescentGenewise::recursivelyComputeLnProbability( 
 
         } // end of while loop
 
+        // std::cout << "current coal times: " << std::endl;
+        // for (size_t k=0; k<current_coal_times.size(); k++) {
+        //     std::cout << current_coal_times[k] << " " << std::endl;
+        // }
+        //
+        // std::cout << "remaining individuals: " << current_remaining_individuals.size() << std::endl;
+
         // Add coal times and remaining individuals to genewise data structures
         coal_times_genewise.push_back( current_coal_times );
         remaining_individuals_genewise.push_back( current_remaining_individuals );
@@ -323,7 +334,10 @@ void AbstractMultispeciesCoalescentGenewise::redrawValue( void )
 }
 
 
-
+/**
+ * Build the map between species nodes and embedded individuals for each gene
+ * (i.e., individuals_per_branch_genewise).
+ */
 void AbstractMultispeciesCoalescentGenewise::resetTipAllocations( void )
 {
     individuals_per_branch_genewise.clear();
@@ -331,7 +345,7 @@ void AbstractMultispeciesCoalescentGenewise::resetTipAllocations( void )
     const Tree &sp = species_tree->getValue();
     const std::vector< TopologyNode* > &species_tree_nodes = sp.getNodes();
 
-    // First let's create a map from species names to the nodes of the species tree
+    // First let's create a map from species names to the tip nodes
     std::map<std::string, TopologyNode * > species_names_2_species_nodes;
     for (std::vector< TopologyNode *>::const_iterator it = species_tree_nodes.begin(); it != species_tree_nodes.end(); ++it)
     {
@@ -342,7 +356,7 @@ void AbstractMultispeciesCoalescentGenewise::resetTipAllocations( void )
         }
     }
 
-    // Second, let's create maps from individual names to the species names for each gene tree
+    // Now we build the map between the species nodes and the embedded individuals
 
     // Get reference to gene trees
     std::vector<Tree>& values = *value;
@@ -350,8 +364,9 @@ void AbstractMultispeciesCoalescentGenewise::resetTipAllocations( void )
     for (size_t i=0; i<num_gene_trees; ++i)
     {
         Tree current_tree = values[i];
-        std::map<std::string, std::string> individual_names_2_species_names;
 
+        // Create a map between individual names and species names
+        std::map<std::string, std::string> individual_names_2_species_names;
         for (RevBayesCore::RbIterator<RevBayesCore::Taxon> it=taxa[i].begin(); it!=taxa[i].end(); ++it)
         {
             const std::string &name = it->getName();
@@ -409,11 +424,14 @@ void AbstractMultispeciesCoalescentGenewise::simulateTrees( void )
     const std::vector< TopologyNode* > &species_tree_nodes = sp.getNodes();
     std::map<std::string, TopologyNode * > species_names_2_nodes;
 
+    // std::cout << "sp tree: " << sp << std::endl;
+
     for (std::vector< TopologyNode *>::const_iterator it = species_tree_nodes.begin(); it != species_tree_nodes.end(); ++it)
     {
         if ( (*it)->isTip() == true )
         {
             const std::string &name = (*it)->getName();
+            // std::cout << "name: " << name << std::endl;
             species_names_2_nodes[name] = *it;
         }
     }
@@ -427,6 +445,7 @@ void AbstractMultispeciesCoalescentGenewise::simulateTrees( void )
     {
         std::map< const TopologyNode *, std::vector< TopologyNode* > > current_individuals_per_branch;
 
+        // First we deal with the tips
         for (RevBayesCore::RbIterator<RevBayesCore::Taxon> it=taxa[i].begin(); it!=taxa[i].end(); ++it)
         {
             TopologyNode *n = new TopologyNode( *it );
@@ -444,16 +463,17 @@ void AbstractMultispeciesCoalescentGenewise::simulateTrees( void )
                 throw RbException("Could not match a taxon with name" + species_name + " to any of the tips in the species tree.");
             }
 
-            n->setAge( 0.0 );
+            n->setAge( 0.0 ); // Assumes all taxa are modern
 
             // Add nodes for this branch
             std::vector<TopologyNode * > &current_nodes_at_node = current_individuals_per_branch[ species_node ];
             current_nodes_at_node.push_back( n );
         }
 
-        // Keep track of individuals per branch
-        individuals_per_branch_genewise.push_back(current_individuals_per_branch);
+        // // Keep track of individuals per branch
+        // individuals_per_branch_genewise.push_back(current_individuals_per_branch);
 
+        // Now deal with the internal nodes
         std::map<TopologyNode *, double> current_nodes_2_ages;
         TopologyNode *root = NULL;
         // we loop over the nodes of the species tree in phylogenetic traversal
@@ -525,6 +545,9 @@ void AbstractMultispeciesCoalescentGenewise::simulateTrees( void )
                 current_incoming_lineages.insert(current_incoming_lineages.end(), current_initial_individuals_at_branch.begin(), current_initial_individuals_at_branch.end());
             }
         }
+
+        // Now save the individuals per branch for this gene
+        individuals_per_branch_genewise.push_back(current_individuals_per_branch);
 
         // the time tree object (topology + times)
         Tree *psi = new Tree();
