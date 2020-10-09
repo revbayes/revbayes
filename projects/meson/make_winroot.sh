@@ -87,7 +87,7 @@ echo
 echo "4. Installing boost to ${SYSROOT}"
 echo
 cd ${SYSROOT}
-PKGS="boost-1.71.0-1"
+PKGS="boost-1.71.0-2"
 for PKG in ${PKGS} ; do
     FILE=mingw-w64-x86_64-${PKG}-any.pkg.tar.xz
     rm -f ${FILE}
