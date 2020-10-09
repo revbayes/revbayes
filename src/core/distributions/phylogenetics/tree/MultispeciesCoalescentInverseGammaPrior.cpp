@@ -17,7 +17,9 @@ namespace RevBayesCore { class Tree; }
 
 using namespace RevBayesCore;
 
-MultispeciesCoalescentInverseGammaPrior::MultispeciesCoalescentInverseGammaPrior(const TypedDagNode<Tree> *sp, RbVector< RbVector<Taxon> > t, size_t ngt) : AbstractMultispeciesCoalescentGenewise(sp, t, ngt)
+MultispeciesCoalescentInverseGammaPrior::MultispeciesCoalescentInverseGammaPrior(const TypedDagNode<Tree> *sp, RbVector< RbVector<Taxon> > t, size_t ngt) : AbstractMultispeciesCoalescentGenewise(sp, t, ngt),
+    shape( NULL ),
+    rate( NULL )
 {
 
 }
@@ -52,6 +54,9 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
     double alpha = shape->getValue();
     double beta = rate->getValue();
 
+    // std::cout << "alpha: " << alpha << std::endl;
+    // std::cout << "beta: " << beta << std::endl;
+
     double ln_prob_coal = 0.0;
 
     // Initialize terms that are summed over all genes
@@ -68,7 +73,13 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
 
     for (size_t i=0; i<num_gene_trees; i++)
     {
-        // std::cout << "gene " << i << std::endl;
+        // std::cout << "gene " << i+1 << std::endl;
+        // std::cout << "k: " << k[i] << std::endl;
+        // std::cout << "times: ";
+        // for (size_t j=0; j<times[i].size(); j++) {
+        //     std::cout << times[i][j] << " ";
+        // }
+        // std::cout << std::endl;
 
         double current_time = begin_age;
 
@@ -79,6 +90,8 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
 
             // Get the number of coalescences
             size_t n = times[i].size();
+
+            // std::cout << "n: " << n << std::endl;
 
             // Branch ploidy term (log)
             // We assume autosomal nuclear genes, so ploidy = 2
@@ -97,6 +110,8 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
                 double t = times[i][m] - current_time;
                 current_time = times[i][m];
 
+                // std::cout << "t: " << t << std::endl;
+
                 // Get the number j of individuals we had before the current coalescence
                 size_t j = k[i] - m;
                 double n_pairs = j * (j-1.0);
@@ -110,6 +125,9 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
             if ( add_final_interval == true )
             {
                 double final_interval = end_age - current_time;
+
+                // std::cout << "final interval: " << final_interval << std::endl;
+
                 size_t j = k[i] - n;
                 double n_pairs = j * (j-1.0);
                 b += final_interval * n_pairs;
@@ -157,6 +175,36 @@ double MultispeciesCoalescentInverseGammaPrior::drawNe( size_t index )
     double u = RbStatistics::InverseGamma::rv(shape->getValue(), rate->getValue(), *rng);
 
     return u;
+}
+
+
+double  MultispeciesCoalescentInverseGammaPrior::getShape(size_t index) const
+{
+
+    if ( shape != NULL )
+    {
+        return shape->getValue();
+    }
+    else
+    {
+        std::cerr << "Error: Null Pointers for shape." << std::endl;
+        exit(-1);
+    }
+}
+
+
+double  MultispeciesCoalescentInverseGammaPrior::getRate(size_t index) const
+{
+
+    if ( rate != NULL )
+    {
+        return rate->getValue();
+    }
+    else
+    {
+        std::cerr << "Error: Null Pointers for rate." << std::endl;
+        exit(-1);
+    }
 }
 
 

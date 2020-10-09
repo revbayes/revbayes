@@ -207,7 +207,7 @@ double AbstractMultispeciesCoalescentGenewise::recursivelyComputeLnProbability( 
 
     double species_age = species_node.getAge();
     double parent_species_age = RbConstants::Double::inf;
-    //
+
     // std::cout << "\nspecies age: " << species_age << std::endl;
     // std::cout << "index: " << species_node.getIndex() << std::endl;
 
@@ -298,7 +298,7 @@ double AbstractMultispeciesCoalescentGenewise::recursivelyComputeLnProbability( 
         // for (size_t k=0; k<current_coal_times.size(); k++) {
         //     std::cout << current_coal_times[k] << " " << std::endl;
         // }
-        //
+
         // std::cout << "remaining individuals: " << current_remaining_individuals.size() << std::endl;
 
         // Add coal times and remaining individuals to genewise data structures
@@ -306,6 +306,11 @@ double AbstractMultispeciesCoalescentGenewise::recursivelyComputeLnProbability( 
         remaining_individuals_genewise.push_back( current_remaining_individuals );
     }
 
+    // std::cout << "initial individuals genewise: ";
+    // for (size_t k=0; k<num_gene_trees; k++) {
+    //     std::cout << initial_individuals_sizes_genewise[k] << " ";
+    // }
+    // std::cout << "\n" << std::endl;
 
     // Calculate log likelihood for the branch
     ln_prob_coal += computeLnCoalescentProbability(initial_individuals_sizes_genewise, coal_times_genewise, species_age, parent_species_age, species_node.getIndex(), species_node.isRoot() == false);

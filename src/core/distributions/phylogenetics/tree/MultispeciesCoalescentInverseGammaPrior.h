@@ -24,6 +24,8 @@ namespace RevBayesCore {
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Swap a parameter
         double                                              computeLnCoalescentProbability(std::vector<size_t> k, const std::vector< std::vector<double> > &t, double a, double b, size_t index, bool f);
         double                                              drawNe(size_t index);
+        double                                              getShape(size_t index) const;
+        double                                              getRate(size_t index) const;
 
 
     private:
