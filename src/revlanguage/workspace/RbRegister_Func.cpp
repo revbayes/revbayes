@@ -231,7 +231,6 @@
 #include "Func_sumNatural.h"
 #include "Func_sumSimplex.h"
 #include "Func_standardDeviation.h"
-#include "Func_stochasticMatrix.h"
 #include "Func_sqrt.h"
 #include "Func_trunc.h"
 #include "Func_upperTriangle.h"
@@ -425,9 +424,6 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
         // matrix function (converts into MatrixReal)
         addFunction( new Func_matrix() );
-
-        // stochastic matrix (converts into row-stochastic matrix)
-        addFunction( new Func_stochasticMatrix() );
 
         // max function
         addFunction( new Func_max()  );
