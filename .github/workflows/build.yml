@@ -250,6 +250,7 @@ jobs:
       with:
         name: testiphy-results
         path: '~/testiphy'
+
     - name: Notify Slack
       uses: 8398a7/action-slack@v3.8.0
       if: always()
@@ -261,9 +262,9 @@ jobs:
             username: 'action-slack',
             attachments: [{
               color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
-              text: `${process.env.AS_WORKFLOW}, ${process.env.AS_JOB} (${process.env.AS_COMMIT}) of ${process.env.AS_REPO}@${process.env.AS_REF} by ${process.env.AS_AUTHOR}: ${{ job.status }}`,
+              text: `${process.env.AS_WORKFLOW}, ${{ matrix.name }} (${process.env.AS_COMMIT}) of ${process.env.AS_REPO}@${process.env.AS_REF} by ${process.env.AS_AUTHOR}: ${{ job.status }}`,
             }]
           }
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        MATRIX_CONTEXT: ${{ toJson(matrix) }}
+        
