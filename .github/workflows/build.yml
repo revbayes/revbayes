@@ -250,3 +250,25 @@ jobs:
       with:
         name: testiphy-results
         path: '~/testiphy'
+
+  notify:
+    name: Notify Slack
+    needs: build
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+    - uses: technote-space/workflow-conclusion-action@v1.1.1
+    - uses: 8398a7/action-slack@v3.8.0
+      with:
+        status: custom
+        fields: workflow,commit,repo,ref,author
+        custom_payload: |
+          {
+            username: 'action-slack',
+            attachments: [{
+              color: '${{ env.WORKFLOW_CONCLUSION }}' === 'success' ? 'good' : '${{ env.WORKFLOW_CONCLUSION }}' === 'failure' ? 'danger' : 'warning',
+              text: `${process.env.AS_WORKFLOW} (${process.env.AS_COMMIT}) of ${process.env.AS_REPO}@${process.env.AS_REF} by ${process.env.AS_AUTHOR}: ${{ env.WORKFLOW_CONCLUSION }}`,
+            }]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
