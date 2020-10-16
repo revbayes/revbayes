@@ -49,6 +49,9 @@ namespace RevBayesCore {
     private:
         // helper methods
         RbVector<valueType>*                                simulate();
+        virtual void                                        keepSpecialization(const DagNode* affecter);
+        virtual void                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
         
         // private members
         TypedDistribution<valueType>*                       base_distribution;
@@ -379,6 +382,23 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevBayesCore::EmpiricalSampleDistr
 
 
 template <class valueType>
+void RevBayesCore::EmpiricalSampleDistribution<valueType>::keepSpecialization(const DagNode *affecter )
+{
+        
+    // call keep for each sample
+    for (size_t i = 0; i < num_samples; ++i)
+    {
+        if ( i >= sample_block_start && i < sample_block_end )
+        {
+            base_distribution_instances[i]->keep( affecter );
+        }
+        
+    }
+    
+}
+
+
+template <class valueType>
 RevBayesCore::RbVector<valueType>* RevBayesCore::EmpiricalSampleDistribution<valueType>::simulate()
 {
     
@@ -464,6 +484,40 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::setValue(RbVector<val
     
     // delegate class
     TypedDistribution< RbVector<valueType> >::setValue( v, force );
+    
+}
+
+
+template <class valueType>
+void RevBayesCore::EmpiricalSampleDistribution<valueType>::touchSpecialization(const DagNode *toucher, bool touchAll )
+{
+        
+    // call keep for each sample
+    for (size_t i = 0; i < num_samples; ++i)
+    {
+        if ( i >= sample_block_start && i < sample_block_end )
+        {
+            base_distribution_instances[i]->touch( toucher, touchAll );
+        }
+        
+    }
+    
+}
+
+
+template <class valueType>
+void RevBayesCore::EmpiricalSampleDistribution<valueType>::restoreSpecialization(const DagNode *restorer )
+{
+        
+    // call keep for each sample
+    for (size_t i = 0; i < num_samples; ++i)
+    {
+        if ( i >= sample_block_start && i < sample_block_end )
+        {
+            base_distribution_instances[i]->restore( restorer );
+        }
+        
+    }
     
 }
 

@@ -259,8 +259,9 @@ double BranchRateTreeDistribution::computeLnProbability( void )
     const Tree &branch_length_tree = *value;
     
     // we need to reroot the timetree
-    if ( touched_time_tree == true )
+    if ( touched_time_tree == true || touched_branch_length_tree == true )
     {
+        
         Clade outgroup = branch_length_tree.getRoot().getChild(0).getClade();
         
         // check first if the outgroup is contained in the tree
@@ -277,6 +278,7 @@ double BranchRateTreeDistribution::computeLnProbability( void )
         bool make_bifurcating = false;
         bool reindex = true;
         time_tree_unrooted->reroot(outgroup, make_bifurcating, reindex);
+        
     }
 
     // compare if the time tree and branch length tree topologies match
