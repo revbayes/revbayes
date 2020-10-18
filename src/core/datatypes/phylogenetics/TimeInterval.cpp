@@ -76,7 +76,7 @@ void TimeInterval::setMin(double s)
  */
 double TimeInterval::getMax(void) const
 {
-    if( RbMath::isNan(max) )
+    if ( RbMath::isNan(max) )
     {
         return getMin();
     }
@@ -90,7 +90,7 @@ double TimeInterval::getMax(void) const
  */
 void TimeInterval::setMax(double s)
 {
-    if ( s < min )
+    if ( (min - s) > 1E-6 )
     {
         throw RbException("Time interval max < min");
     }

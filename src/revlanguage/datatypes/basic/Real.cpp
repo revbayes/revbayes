@@ -1,22 +1,3 @@
-/**
- * @file
- * This file contains the implementation of Real, which
- * is the primitive RevBayes type for real numbers.
- *
- * @brief Implementation of Real
- *
- * (c) Copyright 2009-
- * @date Last modified: $Date$
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- * @version 1.0
- * @since 2009-11-20, version 1.0
- * @extends RbObject
- *
- * $Id$
- */
-
-
 #include <sstream>
 #include <string>
 #include <vector>
@@ -145,7 +126,8 @@ Real* Real::add(const Integer &rhs) const
  *
  * \return A new copy of the process.
  */
-Real* Real::clone(void) const {
+Real* Real::clone(void) const
+{
 
 	return new Real(*this);
 }
@@ -244,7 +226,8 @@ Real* Real::divide(const Integer &rhs) const
 
 
 /** Get Rev type of object */
-const std::string& Real::getClassType(void) { 
+const std::string& Real::getClassType(void)
+{
     
     static std::string rev_type = "Real";
     
@@ -252,7 +235,8 @@ const std::string& Real::getClassType(void) {
 }
 
 /** Get class type spec describing type of object */
-const TypeSpec& Real::getClassTypeSpec(void) { 
+const TypeSpec& Real::getClassTypeSpec(void)
+{
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( RevObject::getClassTypeSpec() ) );
     
@@ -261,7 +245,8 @@ const TypeSpec& Real::getClassTypeSpec(void) {
 
 
 /** Get type spec */
-const TypeSpec& Real::getTypeSpec( void ) const {
+const TypeSpec& Real::getTypeSpec( void ) const
+{
     
     static TypeSpec type_spec = getClassTypeSpec();
     
