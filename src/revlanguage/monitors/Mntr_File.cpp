@@ -9,7 +9,7 @@
 #include "Ellipsis.h"
 #include "VariableMonitor.h"
 #include "Mntr_File.h"
-#include "Natural.h"
+#include "IntegerPos.h"
 #include "RevObject.h"
 #include "RlString.h"
 #include "TypeSpec.h"
@@ -50,7 +50,7 @@ void Mntr_File::constructInternalObject( void )
     // now allocate a new sliding move
     const std::string& fn = static_cast<const RlString &>( filename->getRevObject() ).getValue();
     const std::string& sep = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    int g = (int)static_cast<const Natural &>( printgen->getRevObject() ).getValue();
+    unsigned int g = (int)static_cast<const IntegerPos &>( printgen->getRevObject() ).getValue();
     
     // sort, remove duplicates, the create monitor vector
     vars.erase( unique( vars.begin(), vars.end() ), vars.end() );
@@ -115,7 +115,7 @@ const MemberRules& Mntr_File::getParameterRules(void) const
         
         filemonitorMemberRules.push_back( new Ellipsis( "Variables to monitor", RevObject::getClassTypeSpec() ) );
         filemonitorMemberRules.push_back( new ArgumentRule("filename"  , RlString::getClassTypeSpec() , "The name of the file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        filemonitorMemberRules.push_back( new ArgumentRule("printgen"  , Natural::getClassTypeSpec()  , "How often should we print.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
+        filemonitorMemberRules.push_back( new ArgumentRule("printgen"  , IntegerPos::getClassTypeSpec()  , "How often should we print.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new IntegerPos(1) ) );
         filemonitorMemberRules.push_back( new ArgumentRule("separator" , RlString::getClassTypeSpec() , "The separator/delimiter between values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
         filemonitorMemberRules.push_back( new ArgumentRule("posterior" , RlBoolean::getClassTypeSpec(), "Should we print the posterior probability as well?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         filemonitorMemberRules.push_back( new ArgumentRule("likelihood", RlBoolean::getClassTypeSpec(), "Should we print the likelihood as well?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );

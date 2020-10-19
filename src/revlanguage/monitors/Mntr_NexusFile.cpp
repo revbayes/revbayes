@@ -6,7 +6,7 @@
 #include <string>
 
 #include "Ellipsis.h"
-#include "Natural.h"
+#include "IntegerPos.h"
 #include "NexusMonitor.h"
 #include "RlBoolean.h"
 #include "RlString.h"
@@ -36,7 +36,7 @@ void Mntr_NexusFile::constructInternalObject( void ) {
 
     // now allocate a new monitor
     const std::string& fn = static_cast<const RlString &>( filename->getRevObject() ).getValue();
-    int g = (int)static_cast<const Natural &>( printgen->getRevObject() ).getValue();
+    unsigned int g = (int)static_cast<const IntegerPos &>( printgen->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::Tree> *t = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
 
     vars.erase( unique( vars.begin(), vars.end() ), vars.end() );
@@ -89,7 +89,7 @@ const MemberRules& Mntr_NexusFile::getParameterRules(void) const {
         memberRules.push_back( new Ellipsis( "Variables at nodes or branches.", RevObject::getClassTypeSpec() ) );
         memberRules.push_back( new ArgumentRule("isNodeParameter" , RlBoolean::getClassTypeSpec(), "Is this a node or branch parameter?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         memberRules.push_back( new ArgumentRule("writeTaxa" , RlBoolean::getClassTypeSpec(), "Should a taxa block be written?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
-        memberRules.push_back( new ArgumentRule("printgen"  , Natural::getClassTypeSpec()  , "How frequently do we print.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
+        memberRules.push_back( new ArgumentRule("printgen"  , IntegerPos::getClassTypeSpec()  , "How frequently do we print.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new IntegerPos(1) ) );
 
         rules_set = true;
     }

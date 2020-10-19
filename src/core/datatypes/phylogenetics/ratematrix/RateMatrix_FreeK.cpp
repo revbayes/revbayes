@@ -98,6 +98,8 @@ RateMatrix_FreeK::RateMatrix_FreeK(const RateMatrix_FreeK& m) : GeneralRateMatri
     cc_ijk                = m.cc_ijk;
 
     theEigenSystem->setRateMatrixPtr(the_rate_matrix);
+
+    emit_letters          = m.emit_letters;
 }
 
 
@@ -132,6 +134,8 @@ RateMatrix_FreeK& RateMatrix_FreeK::operator=(const RateMatrix_FreeK &r)
         cc_ijk               = r.cc_ijk;
         
         theEigenSystem->setRateMatrixPtr(the_rate_matrix);
+
+        emit_letters         = r.emit_letters;
 
     }
     

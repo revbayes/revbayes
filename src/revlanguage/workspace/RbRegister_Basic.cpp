@@ -86,6 +86,7 @@
 
 /* Primitive types (in folder "datatypes/basic") */
 #include "Integer.h"
+#include "IntegerPos.h"
 #include "Natural.h"
 #include "Probability.h"
 #include "RlBoolean.h"

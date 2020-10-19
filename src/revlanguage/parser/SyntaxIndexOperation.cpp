@@ -5,6 +5,7 @@
 
 #include "RlContainer.h"
 #include "Integer.h"
+#include "IntegerPos.h"
 #include "RevNullObject.h"
 #include "RlMemberMethod.h"
 #include "SyntaxIndexOperation.h"
