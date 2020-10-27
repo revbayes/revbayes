@@ -110,21 +110,6 @@ Simplex* Simplex::clone( void ) const
 }
 
 
-void Simplex::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, double &rv) const
-{
-    
-    if ( n == "[]" )
-    {
-        long index = static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
-        rv = this->operator[](index);
-    }
-    else
-    {
-        throw RbException("A simplex object does not have a member method called '" + n + "'.");
-    }
-    
-}
-
 void Simplex::initFromString( const std::string &s )
 {
     this->clear();
