@@ -229,7 +229,6 @@
 #include "Func_sumPositive.h"
 #include "Func_sumInteger.h"
 #include "Func_sumNatural.h"
-#include "Func_sumSimplex.h"
 #include "Func_standardDeviation.h"
 #include "Func_sqrt.h"
 #include "Func_trunc.h"
@@ -457,7 +456,6 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_sumPositive()  );
         addFunction( new Func_sumInteger()  );
         addFunction( new Func_sumNatural()  );
-        addFunction( new Func_sumSimplex()  );
 
         // standard deviation function
         addFunction( new Func_standardDeviation()  );

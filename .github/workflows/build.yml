@@ -100,12 +100,12 @@ jobs:
         sudo apt-get install -y pandoc libcairo2-dev ccache
         if [ "${{ matrix.compiler }}" = "gcc" ]; then
           sudo apt-get install -y g++-${{ matrix.version }}
-          echo "::set-env name=C_COMPILER::gcc-${{ matrix.version }}"
-          echo "::set-env name=CXX_COMPILER::g++-${{ matrix.version }}"
+          echo "C_COMPILER=gcc-${{ matrix.version }}" >> $GITHUB_ENV
+          echo "CXX_COMPILER=g++-${{ matrix.version }}" >> $GITHUB_ENV
         else
           sudo apt-get install -y clang-${{ matrix.version }}
-          echo "::set-env name=C_COMPILER::clang-${{ matrix.version }}"
-          echo "::set-env name=CXX_COMPILER::clang++-${{ matrix.version }}"
+          echo "C_COMPILER=clang-${{ matrix.version }}" >> $GITHUB_ENV
+          echo "CXX_COMPILER=clang++-${{ matrix.version }}" >> $GITHUB_ENV
         fi
         if [ "${{ matrix.mpi }}" = true ] ; then
           sudo apt-get install libopenmpi-dev
@@ -114,6 +114,13 @@ jobs:
     - name: Install (macOS)
       if: runner.os == 'macOS'
       run: |
+          # this is a recommended workaround for issue https://github.com/actions/virtual-environments/issues/1811
+          brew uninstall openssl@1.0.2t
+          brew uninstall python@2.7.17
+          brew untap local/openssl
+          brew untap local/python2
+          # end workaround
+          
           brew update
           brew install pkg-config pandoc boost ccache coreutils
           sudo xcode-select -switch /Applications/Xcode_${{ matrix.version }}.app
@@ -166,9 +173,9 @@ jobs:
           cd boost_1_71_0
           ./bootstrap.sh --with-libraries=atomic,chrono,filesystem,system,regex,thread,date_time,program_options,math,serialization
           ./b2 link=static
-          echo "::set-env name=BOOST_ROOT::${GITHUB_WORKSPACE}/boost_1_71_0"
-          echo "::set-env name=BOOST_INCLUDE_DIR::${GITHUB_WORKSPACE}/boost_1_71_0"
-          echo "::set-env name=BOOST_LIBRARY_DIR::${GITHUB_WORKSPACE}/boost_1_71_0/stage/lib"
+          echo "BOOST_ROOT=${GITHUB_WORKSPACE}/boost_1_71_0" >> $GITHUB_ENV
+          echo "BOOST_INCLUDE_DIR=${GITHUB_WORKSPACE}/boost_1_71_0" >> $GITHUB_ENV
+          echo "BOOST_LIBRARY_DIR=${GITHUB_WORKSPACE}/boost_1_71_0/stage/lib" >> $GITHUB_ENV
         else
           sudo apt-get install -y libboost-dev libboost-program-options-dev libboost-date-time-dev libboost-filesystem-dev libboost-regex-dev libboost-serialization-dev libboost-system-dev libboost-thread-dev
         fi
@@ -250,3 +257,25 @@ jobs:
       with:
         name: testiphy-results
         path: '~/testiphy'
+
+  notify:
+    name: Notify Slack
+    needs: build
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+    - uses: technote-space/workflow-conclusion-action@v1.1.1
+    - uses: 8398a7/action-slack@v3.8.0
+      with:
+        status: custom
+        fields: workflow,commit,repo,ref,author
+        custom_payload: |
+          {
+            username: 'action-slack',
+            attachments: [{
+              color: '${{ env.WORKFLOW_CONCLUSION }}' === 'success' ? 'good' : '${{ env.WORKFLOW_CONCLUSION }}' === 'failure' ? 'danger' : 'warning',
+              text: `${process.env.AS_WORKFLOW} (${process.env.AS_COMMIT}) of ${process.env.AS_REPO}@${process.env.AS_REF} by ${process.env.AS_AUTHOR}: ${{ env.WORKFLOW_CONCLUSION }}`,
+            }]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
