@@ -54,54 +54,40 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
     double alpha = shape->getValue();
     double beta = rate->getValue();
 
-    // std::cout << "alpha: " << alpha << std::endl;
-    // std::cout << "beta: " << beta << std::endl;
-
-    double ln_prob_coal = 0.0;
-
     // Initialize terms that are summed over all genes
-    // double a = 0.0; // q_b term in Jones (2017)
-    // double b = 0.0; // gamma_b term in Jones (2017)
-    // double log_r = 0.0; // log(r_b) term in Jones (2017)
+    int a = 0; // q_b term in Jones (2017); branchQ term in *BEAST
+    double b = 0.0; // gamma_b term in Jones (2017); branch_gamma term in *BEAST
+    //double log_r = 0.0; // log(r_b) term in Jones (2017); branchLogR term in *BEAST
 
-    double a = 0.0;
-    double b = 0.0;
-
-    // std::cout << "----------------\nstart age: " << begin_age << std::endl;
-    // std::cout << "end age: " << end_age << std::endl;
-
+    // std::cout << "-------------------" << std::endl;
+    //
+    // std::cout << "beta: " << beta << std::endl;
+    //
+    // std::cout << "start: " << begin_age << std::endl;
+    // std::cout << "end: " << end_age << std::endl;
 
     for (size_t i=0; i<num_gene_trees; i++)
     {
-        // std::cout << "gene " << i+1 << std::endl;
         // std::cout << "k: " << k[i] << std::endl;
-        // std::cout << "times: ";
-        // for (size_t j=0; j<times[i].size(); j++) {
-        //     std::cout << times[i][j] << " ";
-        // }
-        // std::cout << std::endl;
-
-        double current_time = begin_age;
 
         // We only need to calculate terms if k > 1
-        if ( !(k[i] == 1) )
+        if ( k[i] > 1 )
         {
-            // double temp_b = 0.0;
+            double current_time = begin_age;
+            double gene_b = 0.0;
 
             // Get the number of coalescences
             size_t n = times[i].size();
+            // double nc = n;
 
-            // std::cout << "n: " << n << std::endl;
+            // std::cout << "n: " << n <<std::endl;
 
             // Branch ploidy term (log)
             // We assume autosomal nuclear genes, so ploidy = 2
-            double nc = n;
-            //log_r += nc * log(2.0);
+            //log_r -= nc * RbConstants::LN2;
 
             // Branch event term
-            a += nc;
-
-            // std::cout << "\ta[" << i << "]: " << nc << std::endl;
+            a += n;
 
             // Branch gamma term
             for (size_t m=0; m<n; ++m)
@@ -110,14 +96,15 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
                 double t = times[i][m] - current_time;
                 current_time = times[i][m];
 
-                // std::cout << "t: " << t << std::endl;
-
                 // Get the number j of individuals we had before the current coalescence
                 size_t j = k[i] - m;
-                double n_pairs = j * (j-1.0);
+                double n_pairs = j * (j-1.0) / 2.0;
 
-                b += t * n_pairs;
-                // temp_b += t*n_pairs;
+                gene_b += t * n_pairs;
+
+                // std::cout << "t: " << t << std::endl;
+                // std::cout << "n_pairs: " << n_pairs << std::endl;
+
             }
 
             // compute the probability of no coalescent event in the final part of the branch
@@ -125,24 +112,23 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
             if ( add_final_interval == true )
             {
                 double final_interval = end_age - current_time;
-
-                // std::cout << "final interval: " << final_interval << std::endl;
-
                 size_t j = k[i] - n;
-                double n_pairs = j * (j-1.0);
-                b += final_interval * n_pairs;
-                // temp_b += final_interval * n_pairs;
+                double n_pairs = j * (j-1.0) / 2.0;
+                gene_b += final_interval * n_pairs;
+
+                // std::cout << "t: " << final_interval << std::endl;
+                // std::cout << "n_pairs: " << n_pairs << std::endl;
+
             }
 
-            // std::cout << "\tb[" << i << "]: " << temp_b << std::endl;
+        b += gene_b / 2.0;
+        // std::cout << "b for gene[" << i << "]: " << gene_b << std::endl;
+        // std::cout << "current b: " << b << std::endl;
         }
     }
 
-    // std::cout << "a: " << a << std::endl;
-    // std::cout << "b: " << b << std::endl;
-
-    // // Get final branch gamma term by dividing sum by ploidy
-    // b /= 2.0;
+    // std::cout << "final a: " << a << std::endl;
+    // std::cout << "final b: " << b << std::endl;
 
     // Calculate the log gamma ratio
     double log_gamma_ratio = 0.0;
@@ -152,18 +138,22 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
     }
 
     // Finally calculate the total log probability over all gene trees for this branch of the species tree
-    //double log_branch_like = log_r + (alpha * log(beta)) - ((alpha + a) * log(beta + b)) + log_gamma_ratio;
+    //double ln_prob_coal = log_r + (alpha * log(beta)) - ((alpha + a) * log(beta + b)) + log_gamma_ratio;
 
-    double ln_branch_like = (a * RbConstants::LN2) + (alpha * log(beta)) - ((alpha + a) * log(beta + b)) + log_gamma_ratio;
+    if ((a == 0) && (b == 0.0))
+    {
+        return 0.0;
+    }
+    else
+    {
+        double ln_prob_coal = (-a * RbConstants::LN2) + (alpha * log(beta)) - ((alpha + a) * log(beta + b)) + log_gamma_ratio;
 
-    // std::cout << "alpha: " << alpha << std::endl;
-    // std::cout << "beta: " << beta << std::endl;
-    // std::cout << "log gamma ratio: " << log_gamma_ratio << std::endl;
-    // std::cout << "log branch like: " << log_branch_like << std::endl;
+        // std::cout << "ln prob coal: " << ln_prob_coal << "\n" << std::endl;
 
-    ln_prob_coal += ln_branch_like;
+        return ln_prob_coal;
+    }
 
-    return ln_prob_coal;
+
 }
 
 
