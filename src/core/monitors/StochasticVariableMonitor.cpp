@@ -18,7 +18,7 @@ StochasticVariableMonitor::StochasticVariableMonitor(unsigned long g, const std:
     posterior  = false;
     prior      = false;
     likelihood = false;
-    flatten    = true;
+    flatten    = false;
 }
 
 
