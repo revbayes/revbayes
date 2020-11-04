@@ -736,10 +736,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     site_invariant.resize( pattern_block_size );
     invariant_site_index.resize( pattern_block_size );
     size_t length = char_matrix.size();
+    
     for (size_t i=0; i<pattern_block_size; ++i)
     {
         bool inv = true;
-        bool allow_ambiguous_as_invariant = true;
+        bool allow_ambiguous_as_invariant = !true;
         size_t taxon_index = 0;
 
         if ( using_ambiguous_characters == true )
@@ -801,7 +802,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
 
         site_invariant[i] = inv;
     }
-
+    
     // finally we resize the partial likelihood vectors to the new pattern counts
     resizeLikelihoodVectors();
 
@@ -3367,6 +3368,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
         for (size_t site = 0; site < pattern_block_size; ++site, ++patterns)
         {
 
+           
             if ( RbSettings::userSettings().getUseScaling() == true )
             {
 
@@ -3401,6 +3403,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
                 {
                     rv[site] = log( oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
                 }
+                else
+                {
+                    throw RbException("Used a site that was excluded.");
+                }
 
 //                rv[site] = log( oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
 //                if ( this->site_invariant[site] == true )
@@ -3411,7 +3417,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
             }
 
         }
-
+        
     }
     else
     {
