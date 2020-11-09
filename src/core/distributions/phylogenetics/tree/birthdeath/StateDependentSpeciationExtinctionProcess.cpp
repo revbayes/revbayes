@@ -310,7 +310,14 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
                 
                 if ( obs_state.isSet( j ) == true || gap == true )
                 {
-                    node_likelihood[num_states+j] = sampling[j];
+                	if ( node.isFossil() )
+                	{
+                		node_likelihood[num_states+j] = sampling[j] * extinction[j];
+                	}
+                	else
+                	{
+                		node_likelihood[num_states+j] = sampling[j];
+                	}
                 }
                 else
                 {
@@ -1195,10 +1202,10 @@ bool StateDependentSpeciationExtinctionProcess::recursivelyDrawStochasticCharact
         else
         {
             // use the simulated state
-            new_state = current_state;
             if (set_amb_char_data == true)
             {
                 // overwrite the character data 
+                char_state.setMissingState(false);
                 char_state.setStateByIndex(new_state);
             }
         }

@@ -8,6 +8,13 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
+/**
+ * Default constructor.
+ *
+ * This function takes a single input:
+ * @param k The transition-transversion ratio (kappa)
+ */
+
 K80RateMatrixFunction::K80RateMatrixFunction(const TypedDagNode<double> *k) : TypedFunction<RateGenerator>( new RateMatrix_Kimura80() ),
     kappa( k )
 {

@@ -30,7 +30,7 @@ Model::Model(const DagNode *source) : Parallelizable()
 
 /**
  * Constructor from a set of DAG nodes.
- * The model graph is extracted by obtaining all DAG nodes that are connected to either of the provide source nodes.
+ * The model graph is extracted by obtaining all DAG nodes that are connected to either of the provided source nodes.
  * The entire model graph is copied and a map between the pointers to the original DAG nodes and
  * the copied DAG nodes is created for convenient access.
  *
@@ -70,9 +70,9 @@ Model::Model(const Model &m) : Parallelizable(m),
 
 /**
  * Destructor.
- * We have created new copied of the DAG nodes so we need to delete these here again.
+ * This object contains a new copy of the DAG nodes so we need to delete these here.
  */
-Model::~Model( void ) 
+Model::~Model()
 {
     
     // delete each DAG node from the copied model graph.
@@ -226,7 +226,7 @@ void Model::addSourceNode(const DagNode *sourceNode)
  * The clone function is a convenience function to create proper copies of inherited objected.
  * E.g. a.clone() will create a clone of the correct type even if 'a' is of derived type 'B'.
  *
- * \return A new copy of myself 
+ * \return A new copy of this model
  */
 Model* Model::clone( void ) const 
 {
@@ -238,9 +238,9 @@ Model* Model::clone( void ) const
 /**
  * Constant getter function for the vector of DAG nodes of the model.
  *
- * \return Vector of DAG nodes constituting to this model.
+ * \return Vector of DAG nodes constituting this model.
  */
-const std::vector<DagNode *>& Model::getDagNodes( void ) const 
+const std::vector<DagNode *>& Model::getDagNodes() const
 {
     
     return nodes;
@@ -250,9 +250,9 @@ const std::vector<DagNode *>& Model::getDagNodes( void ) const
 /**
  * Non-constant getter function for the vector of DAG nodes of the model.
  *
- * \return Vector of DAG nodes constituting to this model.
+ * \return Vector of DAG nodes constituting this model.
  */
-std::vector<DagNode *>& Model::getDagNodes( void ) 
+std::vector<DagNode *>& Model::getDagNodes()
 {
     
     return nodes;
@@ -265,15 +265,18 @@ std::vector<DagNode *>& Model::getDagNodes( void )
  *
  * \return Map between pointers from original to copied DAG nodes.
  */
-const DagNodeMap& Model::getNodesMap( void ) const
+const DagNodeMap& Model::getNodesMap() const
 {
     
     return nodesMap;
 }
 
 
-
-std::vector<DagNode*> Model::getOrderedStochasticNodes( void )
+/**
+ * Creates a vector of stochastic nodes in parent-children order,
+ * starting from the first node of the model
+ */
+std::vector<DagNode*> Model::getOrderedStochasticNodes()
 {
     
     std::vector<DagNode *> ordered_nodes;
@@ -283,10 +286,16 @@ std::vector<DagNode*> Model::getOrderedStochasticNodes( void )
     return ordered_nodes;
 }
 
+
 /**
- * Creates a vector of stochastic nodes, starting from the source nodes to the sink nodes
+ * Creates a vector of stochastic nodes,
+ * starting with the parents of the called node, then the node, then its children
+ *
+ * @param dagNode called node
+ * @param[out] orderedStochasticNodes vector to store the nodes in
+ * @param visitedNodes nodes that have already been added to the vector
  */
-void Model::getOrderedStochasticNodes(const DagNode* dagNode,  std::vector<DagNode*>& orderedStochasticNodes, std::set<const DagNode*>& visitedNodes)
+void Model::getOrderedStochasticNodes(const DagNode* dagNode, std::vector<DagNode*>& orderedStochasticNodes, std::set<const DagNode*>& visitedNodes)
 {
     
     if (visitedNodes.find(dagNode) != visitedNodes.end())
@@ -329,7 +338,10 @@ void Model::getOrderedStochasticNodes(const DagNode* dagNode,  std::vector<DagNo
 
 
 /**
- * Set the active PID of this specific model object.
+ * Set the active PID and number of processes of this specific model object.
+ *
+ * @param a new active PID
+ * @param n new number of processes
  */
 void Model::setActivePIDSpecialized(size_t a, size_t n)
 {

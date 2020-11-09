@@ -38,10 +38,13 @@
 using namespace RevBayesCore;
 
 
+/** Calculate Robinson-Foulds distance between two trees
+ * @param a,b trees between which to calculate the distance
+ * @return RF distance
+ */
 double RevBayesCore::TreeUtilities::computeRobinsonFouldDistance(const RevBayesCore::Tree &a, const RevBayesCore::Tree &b)
 {
 
-    //const TopologyNode& r = tree->getValue().getRoot();
     std::vector<RbBitSet> bipartitions_a = a.getNodesAsBitset();
     std::vector<RbBitSet> bipartitions_b = b.getNodesAsBitset();
     bool found = false;
@@ -83,7 +86,14 @@ double RevBayesCore::TreeUtilities::computeRobinsonFouldDistance(const RevBayesC
     return distance;
 }
 
-
+/**
+ * Helper function to recusively build a time tree
+ * @param tn current time tree node
+ * @param n current node
+ * @param nodes current vector of nodes of the time tree
+ * @param ages current vector of ages of the time tree
+ * @param depth depth of the current node
+ */
 void RevBayesCore::TreeUtilities::constructTimeTreeRecursively(TopologyNode *tn, const TopologyNode &n, std::vector<TopologyNode*> &nodes, std::vector<double> &ages, double depth)
 {
 
@@ -155,7 +165,12 @@ void RevBayesCore::TreeUtilities::constructTimeTreeRecursively(TopologyNode *tn,
 
 }
 
-
+/**
+ * Convert tree to time tree (with clock)
+ * @param t input tree
+ * @param resetIndex whether to reorder node indexes
+ * @return time tree
+ */
 RevBayesCore::Tree* RevBayesCore::TreeUtilities::convertTree(const Tree &t, bool resetIndex)
 {
     // create time tree object (topology + times)
@@ -196,16 +211,21 @@ RevBayesCore::Tree* RevBayesCore::TreeUtilities::convertTree(const Tree &t, bool
 }
 
 
-
+/** Get ages of all nodes below a specific node
+ * @param[in] t input tree
+ * @param[in] n specified node
+ * @param[out] ages return vector to fill with ages
+ * @param[in] internalsOnly whether to get ages for only internal nodes and not tips
+ */
 void RevBayesCore::TreeUtilities::getAges(Tree *t, TopologyNode *n, std::vector<double>& ages, bool internalsOnly)
 {
     // we only get internal node ages if internalsOnly==true
-    if (n->isTip() == false )
+    if (!n->isTip())
     {
         // get the age of the node
         ages[n->getIndex()] = n->getAge();
 
-        // get both children ages
+        // get all children ages
         std::vector<TopologyNode*> children = n->getChildren();
         for (size_t i = 0; i < children.size(); i++)
             getAges( t, children[i], ages);
@@ -217,43 +237,48 @@ void RevBayesCore::TreeUtilities::getAges(Tree *t, TopologyNode *n, std::vector<
 
 }
 
-
+/**
+ * Calculate average distance matrix from distance matrix
+ * @param matvect distance matrix
+ * @return average distance matrix
+ *
+ */
 RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDistanceMatrix(const RbVector<RevBayesCore::DistanceMatrix>& matvect)
 {
     // gather all taxa across all source matrices into a single vector
     std::vector<RevBayesCore::Taxon> allTaxa;
-    
+
     for(RbConstIterator<DistanceMatrix> it = matvect.begin(); it != matvect.end(); ++it)
     {
         allTaxa.insert(allTaxa.end(), it->getTaxa().begin(), it->getTaxa().end());
     }
-    
+
     // convert the vector of taxa into a vector of strings for easier sorting
     std::vector<std::string> allNames( allTaxa.size() );
-    
+
     for(size_t i = 0; i < allTaxa.size(); i++)
     {
         allNames[i] = allTaxa[i].getName();
     }
-    
+
     // get rid of duplicates by converting from vector to unordered_set
     boost::unordered_set<std::string> uniqueNames;
-    
+
     for(size_t j = 0; j < allNames.size(); j++)
     {
         uniqueNames.insert(allNames[j]);
     }
-    
+
     // repopulate the original vector with unique values only
     allNames.assign( uniqueNames.begin(), uniqueNames.end() );
-    
+
     // initialize the sum and divisor matrices using the size-based constructor:
     RevBayesCore::MatrixReal sumMatrix = MatrixReal( allNames.size() );
     RevBayesCore::MatrixReal divisorMatrix = MatrixReal( allNames.size() );
-    
+
     // initialize the corresponding Boolean matrix of the right dimensions, filled with 'false'
     RevBayesCore::MatrixBoolean mask = MatrixBoolean( allNames.size() );
-    
+
     for(RbConstIterator<DistanceMatrix> mat = matvect.begin(); mat != matvect.end(); ++mat)
     {
         std::vector<Taxon> taxa = mat->getTaxa();
@@ -272,10 +297,10 @@ RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDista
             }
         }
     }
-    
+
     // divide the sum matrix by the divisor matrix
     RevBayesCore::MatrixReal averageMatrix = MatrixReal( allNames.size() );
-    
+
     for(size_t i = 0; i != averageMatrix.getNumberOfRows(); i++)
     {
         for(size_t j = 0; j != averageMatrix.getNumberOfColumns(); j++)
@@ -286,7 +311,7 @@ RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDista
             }
         }
     }
-    
+
     // convert from a vector of strings back to a vector of taxa:
     std::vector<Taxon> uniqueTaxa( allNames.size() );
 
@@ -294,17 +319,21 @@ RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDista
     {
         uniqueTaxa[k] = Taxon( allNames[k] );
     }
-        
+
     // initialize a distance matrix based on the average matrix and taxon vector obtained above:
     DistanceMatrix dm = DistanceMatrix( averageMatrix, uniqueTaxa );
-    
+
     // combine with the Boolean mask into an average distance matrix:
     AverageDistanceMatrix adm = AverageDistanceMatrix( dm, mask );
-    
+
     return adm;
 }
 
-
+/**
+ * Calculate distance matrix based on branch lengths between all tips of a tree
+ * @param tree input tree
+ * @return distance matrix
+ */
 RevBayesCore::DistanceMatrix* RevBayesCore::TreeUtilities::getDistanceMatrix(const Tree& tree)
 {
 
@@ -332,11 +361,14 @@ RevBayesCore::DistanceMatrix* RevBayesCore::TreeUtilities::getDistanceMatrix(con
 }
 
 
-
-
+/**
+ * Get node index of the MRCA of two nodes
+ * @param left,right input nodes
+ * @return index of MRCA
+ */
 size_t RevBayesCore::TreeUtilities::getMrcaIndex(const TopologyNode *left, const TopologyNode *right)
 {
-    
+
     if ( left == right )  //same
     {
         return left->getIndex();
@@ -349,14 +381,20 @@ size_t RevBayesCore::TreeUtilities::getMrcaIndex(const TopologyNode *left, const
     {
         return RevBayesCore::TreeUtilities::getMrcaIndex( left, &right->getParent() );
     }
-    
+
 }
 
-
+/**
+ * Get the age of the oldest tip below a specific node of a binary tree
+ * @param[in] t binary tree
+ * @param[in] n top node
+ * @param[out] oldest current oldest age found
+ *
+ * @todo for some reason, this function only works for binary trees
+ */
 void RevBayesCore::TreeUtilities::getOldestTip(Tree* t, TopologyNode *n, double& oldest)
 {
 
-    // we only rescale internal nodes
     if ( !n->isTip() )
     {
 
@@ -364,11 +402,10 @@ void RevBayesCore::TreeUtilities::getOldestTip(Tree* t, TopologyNode *n, double&
 #ifdef ASSERTIONS_TREE
         if ( n->getNumberOfChildren() != 2 )
         {
-            throw RbException("NNI is only implemented for binary trees!");
+            throw RbException("Oldest tip is only implemented for binary trees!");
         }
 #endif
 
-        // rescale both children
         getOldestTip( t, &n->getChild(0), oldest);
         getOldestTip( t, &n->getChild(1), oldest);
     }
@@ -381,7 +418,11 @@ void RevBayesCore::TreeUtilities::getOldestTip(Tree* t, TopologyNode *n, double&
     }
 }
 
-
+/**
+ * Get all tips below specified node, recursively
+ * @param n current node
+ * @param[out] taxa vector of tips found so far
+ */
 void RevBayesCore::TreeUtilities::getTaxaInSubtree(TopologyNode *n, std::vector<TopologyNode*> &taxa )
 {
 
@@ -403,7 +444,12 @@ void RevBayesCore::TreeUtilities::getTaxaInSubtree(TopologyNode *n, std::vector<
 
 }
 
-
+/**
+ * Offset the age of a node and its children by a factor
+ * @param t tree to be modified
+ * @param n top node to offset
+ * @param factor offset value
+ */
 void RevBayesCore::TreeUtilities::offsetTree(Tree *t, TopologyNode *n, double factor)
 {
     // rescale the time of the node
@@ -420,7 +466,10 @@ void RevBayesCore::TreeUtilities::offsetTree(Tree *t, TopologyNode *n, double fa
 }
 
 
-
+/**
+ * Make tree ultrametric by extending terminal branches to the present
+ * @param t tree to be modified
+ */
 void RevBayesCore::TreeUtilities::makeUltrametric(Tree *t)
 {
 
@@ -431,7 +480,7 @@ void RevBayesCore::TreeUtilities::makeUltrametric(Tree *t)
         TopologyNode* node = &(t->getTipNode( i ) );
         double age = node->getBranchLength();
         node = &(node->getParent());
-        
+
         while (!node->isRoot() )
         {
             age += node->getBranchLength();
@@ -448,9 +497,8 @@ void RevBayesCore::TreeUtilities::makeUltrametric(Tree *t)
     for (size_t i = 0; i < t->getNumberOfTips(); ++i)
     {
         t->getTipNode( i ).setBranchLength(t->getTipNode( i ).getBranchLength() + max - ages[i]);
-//        t->getTipNode( i ).setAge(0.0);
     }
-    
+
     setAgesRecursively(t, &(t->getRoot()), max);
 
     // make sure that all the tips have an age of 0
@@ -458,10 +506,14 @@ void RevBayesCore::TreeUtilities::makeUltrametric(Tree *t)
     {
         t->getTipNode( i ).setAge(0.0);
     }
-    
+
 }
 
-
+/**
+ * Get nodal distance between two nodes. Nodal distance is 1 for each node on the shortest path between the two.
+ * @param left,right nodes between which to calculate the distance
+ * @return nodal distance
+ */
 int RevBayesCore::TreeUtilities::getNodalDistance(const TopologyNode *left, const TopologyNode *right)
 {
     if ( left == right || &left->getParent() == right || left == &right->getParent() )
@@ -478,7 +530,11 @@ int RevBayesCore::TreeUtilities::getNodalDistance(const TopologyNode *left, cons
     }
 }
 
-
+/**
+ * Get matrix of nodal distances between all tips of a tree
+ * @param tree input tree
+ * @return distance matrix indexed by tip indexes
+ */
 RevBayesCore::DistanceMatrix* RevBayesCore::TreeUtilities::getNodalDistanceMatrix(const Tree& tree)
 {
     RevBayesCore::MatrixReal matrix = MatrixReal( tree.getNumberOfTips() );
@@ -495,7 +551,12 @@ RevBayesCore::DistanceMatrix* RevBayesCore::TreeUtilities::getNodalDistanceMatri
     return new DistanceMatrix(matrix, names);
 }
 
-
+/**
+* Rescale tree by scaling the age of a node and all its children by a factor
+* @param t tree to be modified
+* @param n top node to rescale
+* @param factor factor used for rescaling
+*/
 void RevBayesCore::TreeUtilities::rescaleTree(Tree *t, TopologyNode *n, double factor)
 {
     // rescale the time of the node
@@ -510,7 +571,7 @@ void RevBayesCore::TreeUtilities::rescaleTree(Tree *t, TopologyNode *n, double f
 #ifdef ASSERTIONS_TREE
         if ( n->getNumberOfChildren() != 2 )
         {
-            throw RbException("Tree scaling  is only implemented for binary trees!");
+            throw RbException("Tree scaling is only implemented for binary trees!");
         }
 #endif
 
@@ -521,7 +582,15 @@ void RevBayesCore::TreeUtilities::rescaleTree(Tree *t, TopologyNode *n, double f
 
 }
 
-
+/**
+* Rescale subtree by scaling the age of an internal node and all its children except tips by a factor
+* @param t tree to be modified
+* @param n top node to rescale
+* @param factor factor used for rescaling
+* @param verbose whether to explicitly check for the tree being binary
+*
+* @note the difference with rescaleTree is that rescaleSubtree will do nothing on tips
+*/
 void RevBayesCore::TreeUtilities::rescaleSubtree(Tree *t, TopologyNode *n, double factor, bool verbose)
 {
     // we only rescale internal nodes
@@ -547,6 +616,12 @@ void RevBayesCore::TreeUtilities::rescaleSubtree(Tree *t, TopologyNode *n, doubl
 
 }
 
+/**
+ * Set ages of a node and its children to values given by a vector
+ * @param t tree to be modified
+ * @param n top node
+ * @param ages new age values
+ */
 void RevBayesCore::TreeUtilities::setAges(Tree *t, TopologyNode *n, std::vector<double>& ages)
 {
     // we only rescale internal nodes
@@ -561,31 +636,43 @@ void RevBayesCore::TreeUtilities::setAges(Tree *t, TopologyNode *n, std::vector<
         {
             setAges( t, children[i], ages);
         }
-        
+
     }
 
 }
 
+/**
+ * Set age of node then rescale all children to keep the branch lengths constant
+ * @param t tree to be modified
+ * @param n node whose age is set
+ * @param age new node age
+ */
 void RevBayesCore::TreeUtilities::setAgesRecursively(RevBayesCore::Tree *t, RevBayesCore::TopologyNode *n, double age)
 {
     // first, we set the age of this node
     n->setAge( age );
-    
+
     // we only rescale internal nodes
     if ( n->isTip() == false )
     {
-        
+
         // rescale both children
         std::vector<TopologyNode*> children = n->getChildren();
         for (size_t i = 0; i < children.size(); ++i)
         {
             setAgesRecursively( t, children[i], age-children[i]->getBranchLength());
         }
-        
+
     }
-    
+
 }
 
+/**
+ * Set branch length of a node
+ * @param t tree to be modified
+ * @param index node index
+ * @param value new node age
+ */
 void RevBayesCore::TreeUtilities::setBranchLength(Tree *t, size_t index, double value)
 {
     // set the length of the branch leading to the node with index index
@@ -593,6 +680,13 @@ void RevBayesCore::TreeUtilities::setBranchLength(Tree *t, size_t index, double 
 
 }
 
+/**
+ * Helper function for calculating distance matrix between all tips of a tree, recursively
+ * @param[in] node current node
+ * @param[out] matrix current distance matrix
+ * @param[out] distsToNodeFather vector to store distance between leaves and node parent
+ * @param[in] namesToId map of node names to their index
+ */
 void RevBayesCore::TreeUtilities::processDistsInSubtree(const RevBayesCore::TopologyNode& node, RevBayesCore::MatrixReal& matrix, std::vector< std::pair<std::string, double> >& distsToNodeFather, const std::map< std::string, int >& namesToId)
 {
 	distsToNodeFather.clear();
@@ -675,43 +769,42 @@ void RevBayesCore::TreeUtilities::processDistsInSubtree(const RevBayesCore::Topo
 }
 
 
-
+/**
+ * Find path from a given node to the root, recursively
+ * @param[in] node current node
+ * @param[out] pathFromNodeToRoot path found so far
+ */
 void RevBayesCore::TreeUtilities::climbUpTheTree(const TopologyNode& node, boost::unordered_set <const TopologyNode* >& pathFromNodeToRoot) {
-    try {
-        if (! (node.isRoot( ) ) ) {
-            pathFromNodeToRoot.insert(&node);
-            climbUpTheTree(node.getParent(), pathFromNodeToRoot);
-        }
-    }
-    catch (RbException &e)
-    {
-        throw e;
-    }
 
-    return;
+    if (! (node.isRoot( ) ) ) {
+        pathFromNodeToRoot.insert(&node);
+        climbUpTheTree(node.getParent(), pathFromNodeToRoot);
+    }
 }
 
-
+/**
+ * Helper function to get the MRCA age, recursively
+ * @param node current node
+ * @param pathFromOtherNodeToRoot path between other node and root of the tree
+ * @return MRCA age
+ */
 double RevBayesCore::TreeUtilities::getAgeOfMRCARecursive(const TopologyNode& node, boost::unordered_set <const TopologyNode* >& pathFromOtherNodeToRoot) {
-    try {
 
-        if ( node.isRoot() || pathFromOtherNodeToRoot.find(&node) != pathFromOtherNodeToRoot.end() ) {
-            return node.getAge();
-        }
-        else {
-            return getAgeOfMRCARecursive( node.getParent(), pathFromOtherNodeToRoot );
-        }
+    if ( node.isRoot() || pathFromOtherNodeToRoot.find(&node) != pathFromOtherNodeToRoot.end() ) {
+        return node.getAge();
     }
-    catch (RbException &e)
-    {
-        throw e;
+    else {
+        return getAgeOfMRCARecursive( node.getParent(), pathFromOtherNodeToRoot );
     }
-
-
 }
 
 
-
+/**
+ * Get age of the MRCA of two tips given by names
+ * @param t input tree
+ * @param first,second tip names
+ * @return MRCA age
+ */
 double RevBayesCore::TreeUtilities::getAgeOfMRCA(const Tree &t, std::string first, std::string second) {
 
     const TopologyNode &node1 = t.getTipNodeWithName(first) ;
@@ -732,7 +825,12 @@ double RevBayesCore::TreeUtilities::getAgeOfMRCA(const Tree &t, std::string firs
 
 }
 
-
+/**
+ * Calculate the Colless metric for a specific node
+ * @param node current node
+ * @param size current size
+ * @return metric for the node
+ */
 int RevBayesCore::TreeUtilities::getCollessMetric(const TopologyNode & node, int& size)
 {
     if( node.isTip() )
@@ -763,8 +861,10 @@ int RevBayesCore::TreeUtilities::getCollessMetric(const TopologyNode & node, int
 }
 
 
-/* 
- * Gamma-statistic from Pybus & Harvey (2000) equation 1
+/**
+ * Calculate the Gamma statistic from Pybus & Harvey (2000) equation 1
+ * @param t input tree
+ * @return gamma statistic
  */
 double RevBayesCore::TreeUtilities::getGammaStatistic(const Tree &t)
 {
@@ -787,7 +887,7 @@ double RevBayesCore::TreeUtilities::getGammaStatistic(const Tree &t)
             break;
         }
     }
-    
+
     double n = t.getNumberOfTips();
     if (n < 3)
     {
@@ -798,7 +898,7 @@ double RevBayesCore::TreeUtilities::getGammaStatistic(const Tree &t)
     double T = 0;
     for (int j = 2; j <= n; j++)
     {
-        T = T + (j * distances[j - 2]); 
+        T = T + (j * distances[j - 2]);
     }
 
     double a = 1 / ( n - 2 );
@@ -810,10 +910,10 @@ double RevBayesCore::TreeUtilities::getGammaStatistic(const Tree &t)
         {
             temp = temp + (k * distances[k - 2]);
         }
-        b = b + temp; 
+        b = b + temp;
     }
     double num = (a * b) - (T / 2);
-    
+
     double den = T * sqrt( (1 / (12 * (n - 2))) );
 
 
@@ -821,8 +921,11 @@ double RevBayesCore::TreeUtilities::getGammaStatistic(const Tree &t)
 }
 
 
-/* 
- * Algorithm from Fitch (1970) "Distinguishing Homologous from Analogous Proteins"
+/**
+ * Calculate the parsimony score of a tree and alignment based on the algorithm from Fitch (1970) "Distinguishing Homologous from Analogous Proteins".
+ * @param t input tree
+ * @param c input character state alignment
+ * @return parsimony score
  */
 int RevBayesCore::TreeUtilities::getFitchScore(const Tree &t, const AbstractHomologousDiscreteCharacterData &c)
 {
@@ -834,7 +937,14 @@ int RevBayesCore::TreeUtilities::getFitchScore(const Tree &t, const AbstractHomo
     return score;
 }
 
-
+/**
+ * Helper function for the parsimony score calculation
+ * @param node current node
+ * @param c input character state alignment
+ * @param site current site index
+ * @param score current parsimony score
+ * @return set of parsimonious characters at the node
+ */
 std::set<size_t> RevBayesCore::TreeUtilities::recursivelyComputeFitch(const TopologyNode &node, const AbstractHomologousDiscreteCharacterData &c, size_t site, int &score)
 {
     if (node.isTip() == true)
@@ -869,13 +979,14 @@ std::set<size_t> RevBayesCore::TreeUtilities::recursivelyComputeFitch(const Topo
 }
 
 
-/* 
- *
- * The mean inverse equal splits metric for tips in a single state as described in:
+/**
+ * Calculate the mean inverse equal splits metric for tips in a single state as described in:
  * Rabosky and Goldberg (2017) "FiSSE: A simple nonparametric test for the effects of a binary character on lineage diversiﬁcation rates"
- *
  * This metric is typically calculated for a single character at a time, but here it is extended over multiple characters.
- *
+ * @param t input tree
+ * @param c input character state alignment
+ * @param state_index index of the specific state
+ * @return mean inverse ES
  */
 double RevBayesCore::TreeUtilities::getMeanInverseES(const Tree &t, const AbstractHomologousDiscreteCharacterData &c, size_t state_index)
 {
@@ -944,12 +1055,16 @@ double RevBayesCore::TreeUtilities::getMeanInverseES(const Tree &t, const Abstra
     return mean_inverse_es;
 }
 
-
+/**
+ * Calculate the inverse equal splits metric for all tips.
+ * @param t input tree
+ * @return vector of inverse ES for tips
+ */
 std::vector<double> RevBayesCore::TreeUtilities::getInverseES(const Tree &t)
 {
     if (t.isRooted() == false)
     {
-        throw RbException("Mean inverse ES can only be calculated on rooted trees.");
+        throw RbException("Inverse ES can only be calculated on rooted trees.");
     }
 
     std::vector<double> inverse_es;
@@ -982,11 +1097,15 @@ std::vector<double> RevBayesCore::TreeUtilities::getInverseES(const Tree &t)
 }
 
 
-/* 
- * Returns the Parsimoniously Same State Paths (PSSP). This is the set of branch lengths 
- * from clades parsimoniously reconstructed to have the same state. Given (((A,B),C),(D,E)), if A, B, 
- * D, and E are in state 0, then PSSP(0) will contain the four branch lengths in (A,B) and (D,E). Uses 
+/**
+ * Calculate the Parsimoniously Same State Paths (PSSP). This is the set of branch lengths
+ * from clades parsimoniously reconstructed to have the same state. Given (((A,B),C),(D,E)), if A, B,
+ * D, and E are in state 0, then PSSP(0) will contain the four branch lengths in (A,B) and (D,E). Uses
  * Fitch's (1970) algorithm for parsimony ancestral state reconstruction.
+ * @param t input tree
+ * @param c input character state alignment
+ * @param state_index index of the specific state
+ * @return vector of PSSP
  */
 std::vector<double> RevBayesCore::TreeUtilities::getPSSP(const Tree &t, const AbstractHomologousDiscreteCharacterData &c, size_t state_index)
 {
@@ -999,7 +1118,13 @@ std::vector<double> RevBayesCore::TreeUtilities::getPSSP(const Tree &t, const Ab
     return branch_lengths;
 }
 
-
+/** Helper function for PSSP calculation
+ * @param current node
+ * @param c input character state alignment
+ * @param branch_lengths PSSP calculated so far
+ * @param state_index index of the specific state
+ * @return set of branches in state given by state_index
+ */
 std::set<size_t> RevBayesCore::TreeUtilities::recursivelyGetPSSP(const TopologyNode &node, const AbstractHomologousDiscreteCharacterData &c, std::vector<double> &branch_lengths, size_t state_index)
 {
     if (node.isTip() == true)
@@ -1041,15 +1166,22 @@ std::set<size_t> RevBayesCore::TreeUtilities::recursivelyGetPSSP(const TopologyN
 }
 
 
-/* 
- *
+/**
  * Calculate the Mean Pairwise Distance (MPD; Webb 2000; Webb et al 2002) for taxa with a certain observed character state.
  * The z-score of the MPD (optionally calculated using randomizations) is equivalent to the Net Relatedness Index (NRI; Webb 2000).
- *
+ * @param t input tree
+ * @param c input character state alignment
+ * @param site_index index of the character site
+ * @param state_index index of the specific state
+ * @param zscore whether to calculate the z-score
+ * @param branch_lengths whether to use branch lengths in the calculation
+ * @param num_randomizations number of randomizations used to calculate the z-score
+ * @return observed MPD or z-score of the MPD
  */
-double RevBayesCore::TreeUtilities::calculateMPD(const Tree &t, const AbstractHomologousDiscreteCharacterData &c, size_t site_index, size_t state_index, bool zscore, bool branch_lengths, size_t num_randomizations)
+double RevBayesCore::TreeUtilities::calculateMPD(const Tree &t, const AbstractHomologousDiscreteCharacterData &c, size_t site_index, size_t state_index,
+                                                 bool zscore, bool branch_lengths, size_t num_randomizations)
 {
- 
+
     // use either pairwise branch length or nodal distances
     DistanceMatrix* distances;
     if (branch_lengths == true)
@@ -1083,14 +1215,14 @@ double RevBayesCore::TreeUtilities::calculateMPD(const Tree &t, const AbstractHo
                     num_dist += 1.0;
                 }
             }
-        }   
+        }
     }
     double obs_mean_distance = 0.0;
     if (num_dist != 0)
     {
         obs_mean_distance = total_dist/num_dist;
     }
-   
+
     if (zscore == false)
     {
         return obs_mean_distance;
@@ -1113,7 +1245,7 @@ double RevBayesCore::TreeUtilities::calculateMPD(const Tree &t, const AbstractHo
                 new_tip_names.push_back(new_name);
             }
         }
-        
+
         // calculate mean pairwise distances for the random taxa
         double total_dist = 0.0;
         double num_dist = 0.0;
@@ -1131,15 +1263,15 @@ double RevBayesCore::TreeUtilities::calculateMPD(const Tree &t, const AbstractHo
                         num_dist += 1.0;
                     }
                 }
-            }   
+            }
         }
-        
+
         double temp_mean_distance = 0.0;
         if (num_dist != 0)
         {
             temp_mean_distance = total_dist/num_dist;
         }
-        random_mean_distances.push_back(temp_mean_distance); 
+        random_mean_distances.push_back(temp_mean_distance);
     }
 
     // zscore = (mpd_obs - mpd_rand_mean) / mpd_rand_sd
@@ -1170,15 +1302,22 @@ double RevBayesCore::TreeUtilities::calculateMPD(const Tree &t, const AbstractHo
 }
 
 
-/* 
- *
+/**
  * Calculate the Mean Nearest Taxon Distance (MNTD; Webb 2000; Webb et al 2002) for taxa with a certain observed character state.
  * The z-score of the MNTD (optionally calculated using randomizations) is equivalent to the Nearest Taxa Index (NTI; Webb 2000).
- *
+ * @param t input tree
+ * @param c input character state alignment
+ * @param site_index index of the character site
+ * @param state_index index of the specific state
+ * @param zscore whether to calculate the z-score
+ * @param branch_lengths whether to use branch lengths in the calculation
+ * @param num_randomizations number of randomizations used to calculate the z-score
+ * @return observed MNTD or z-score of the MNTD
  */
-double RevBayesCore::TreeUtilities::calculateMNTD(const Tree &t, const AbstractHomologousDiscreteCharacterData &c, size_t site_index, size_t state_index, bool zscore, bool branch_lengths, size_t num_randomizations)
+double RevBayesCore::TreeUtilities::calculateMNTD(const Tree &t, const AbstractHomologousDiscreteCharacterData &c, size_t site_index, size_t state_index,
+                                                  bool zscore, bool branch_lengths, size_t num_randomizations)
 {
- 
+
     // use either pairwise branch length or nodal distances
     DistanceMatrix* distances;
     if (branch_lengths == true)
@@ -1221,14 +1360,14 @@ double RevBayesCore::TreeUtilities::calculateMNTD(const Tree &t, const AbstractH
             }
             total_dist += min_dist;
             num_dist += 1.0;
-        }   
+        }
     }
     double obs_mean_distance = 0.0;
     if (num_dist != 0)
     {
         obs_mean_distance = total_dist/num_dist;
     }
-   
+
     if (zscore == false)
     {
         return obs_mean_distance;
@@ -1253,7 +1392,7 @@ double RevBayesCore::TreeUtilities::calculateMNTD(const Tree &t, const AbstractH
                 new_tip_names.push_back(new_name);
             }
         }
-        
+
         // calculate mean nearest taxon distance for the random taxa
         for (size_t i = 0; i < tip_names.size(); ++i)
         {
@@ -1278,18 +1417,17 @@ double RevBayesCore::TreeUtilities::calculateMNTD(const Tree &t, const AbstractH
                 }
                 total_dist += min_dist;
                 num_dist += 1.0;
-            }   
+            }
         }
-        
+
         double temp_mean_distance = 0.0;
         if (num_dist != 0)
         {
             temp_mean_distance = total_dist/num_dist;
         }
-        random_mean_distances.push_back(temp_mean_distance); 
+        random_mean_distances.push_back(temp_mean_distance);
     }
 
-    // zscore = (mntd_obs - mntd_rand_mean) / mntd_rand_sd
     double random_mean = 0.0;
     for (size_t i = 0; i < random_mean_distances.size(); ++i)
     {
@@ -1316,7 +1454,13 @@ double RevBayesCore::TreeUtilities::calculateMNTD(const Tree &t, const AbstractH
     return 0.0;
 }
 
-
+/**
+ * Calculate distribution of times between speciation/coalescent events in a tree,
+ * where the times are normalized by the number of lineages observed at that event.
+ * The moments of this distribution can be informative statistics for distinguishing different birth-death processes.
+ * @param t input tree
+ * @return vector of weighted times
+ */
 std::vector<double> RevBayesCore::TreeUtilities::calculateEDR(Tree &t)
 {
     TopologyNode node = t.getRoot();
@@ -1338,4 +1482,3 @@ std::vector<double> RevBayesCore::TreeUtilities::calculateEDR(Tree &t)
     }
     return edr;
 }
-      

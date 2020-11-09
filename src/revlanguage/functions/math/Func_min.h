@@ -13,13 +13,9 @@ namespace RevLanguage {
      *
      * The RevLanguage wrapper of the sum function connects
      * the variables/parameters of the function and creates the internal MinFunction object.
-     * Please read the MinFunction.h for more info.
      *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Bastien Boussau)
-     * @since 2014-07-27, version 1.0
-     *
+     * @copybrief RevBayesCore::MinFunction
+     * @see RevBayesCore::MinFunction for the internal object
      */
     class Func_min :  public TypedFunction<Real> {
         

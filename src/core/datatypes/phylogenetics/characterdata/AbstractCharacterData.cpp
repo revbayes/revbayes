@@ -343,9 +343,10 @@ const std::string AbstractCharacterData::getJsonRepresentation(void) const {
 
     std::string jsonStr = "{\"CharacterDataMatrix\": {\n";
     
-    jsonStr += std::string("   \"filePath\": \"") + filePath + std::string("\",") + '\n';
-    jsonStr += std::string("   \"fileName\": \"") + fileName + std::string("\",") + '\n';
-    jsonStr += std::string("   \"dataType\": \"") + getDataType() + "\"\n";
+    jsonStr += std::string("   \"filePath\": \"")    + filePath + std::string("\",") + '\n';
+    jsonStr += std::string("   \"fileName\": \"")    + fileName + std::string("\",") + '\n';
+    jsonStr += std::string("   \"dataType\": \"")    + getDataType() + "\",\n";
+    jsonStr += std::string("   \"stateLabels\": \"") + getStateLabels() + "\",\n";
     
     jsonStr += "   \"taxa\": [";
     for (int i=0; i<taxa.size(); i++)
@@ -363,7 +364,7 @@ const std::string AbstractCharacterData::getJsonRepresentation(void) const {
         if (it != deletedTaxa.end())
             jsonStr += ",";
         }
-    jsonStr += "]\n";
+    jsonStr += "],\n";
     
     jsonStr += "   \"data\": [\n";
     for (std::map<std::string,AbstractTaxonData* >::const_iterator it = taxonMap.begin(); it != taxonMap.end(); it++)
@@ -373,6 +374,7 @@ const std::string AbstractCharacterData::getJsonRepresentation(void) const {
         jsonStr += "   " + it->second->getJsonRepresentation();
         }
     jsonStr += "   ]";
+    jsonStr += "}}";
 
     return jsonStr;
 }
@@ -856,8 +858,8 @@ void AbstractCharacterData::switchHomeologPhase(const std::string& tipName1, con
     t2.setTaxon( Taxon(tipName1) );
     taxonMap.erase( tipName1 );
     taxonMap.erase( tipName2 );
-    taxonMap.insert( std::pair<std::string, AbstractTaxonData* >( tipName1, t2.clone() ) );
-    taxonMap.insert( std::pair<std::string, AbstractTaxonData* >( tipName2, t1.clone() ) );
+    taxonMap.insert( std::pair<std::string, AbstractTaxonData* >( tipName1, &t2 ) );
+    taxonMap.insert( std::pair<std::string, AbstractTaxonData* >( tipName2, &t1 ) );
 }
 
 

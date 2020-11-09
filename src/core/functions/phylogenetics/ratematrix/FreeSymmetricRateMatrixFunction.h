@@ -14,14 +14,12 @@ template <class valueType> class TypedDagNode;
     /**
      * @brief Free symmetric rate matrix function.
      *
-     * This function creates the free (symmetric) rates matrix object by setting the substitution rates.
+     * This function creates the free (symmetric) rate matrix object by setting the substitution rates.
      * The rate matrix takes care of the setting of the actual rates and transition probabilities.
      *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since Version 1.0, 2015-09-29
-     *
+     * @param tr The vector of substitution rates, whose number of elements equals half the number of the off-diagonal entries of the rate matrix.
+     * @param r Should the rates be rescaled so that the average rate equals 1?
+     * @param method Matrix exponentiation method.
      */
     class FreeSymmetricRateMatrixFunction : public TypedFunction<RateGenerator> {
         
@@ -39,7 +37,7 @@ template <class valueType> class TypedDagNode;
     private:
         
         // members
-        const TypedDagNode< RbVector<double> >*             transition_rates;
+        const TypedDagNode< RbVector<double> >*             transition_rates; //!< Vector of transition rates: of length (k-1)k/2 for a k-state model
         
     };
     

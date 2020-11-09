@@ -74,6 +74,7 @@ namespace RevBayesCore {
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, double &rv) const;     //!< Map the member methods to internal function calls
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, long &rv) const;       //!< Map the member methods to internal function calls
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, Boolean &rv) const;    //!< Map the member methods to internal function calls
+        std::map<RbBitSet, TopologyNode*>                   getBitsetToNodeMap(void) const;                                                                     //!< Get a map between node bitsets and nodes in the Tree
         std::vector<Taxon>                                  getFossilTaxa() const;                                                                              //!< Get all the taxa in the tree
         const TopologyNode&                                 getMrca(const TopologyNode &n) const;
         TopologyNode&                                       getMrca(const Clade &c);
@@ -83,7 +84,8 @@ namespace RevBayesCore {
         TopologyNode&                                       getNode(size_t idx);                                                                                //!< Get the node at index
         const TopologyNode&                                 getNode(size_t idx) const;                                                                          //!< Get the node at index
         const std::vector<TopologyNode*>&                   getNodes(void) const;                                                                               //!< Get a pointer to the nodes in the Tree
-        std::vector<RbBitSet>                               getNodesAsBitset(void) const;                                                                               //!< Get a pointer to the nodes in the Tree
+        std::vector<RbBitSet>                               getNodesAsBitset(void) const;                                                                       //!< Get a vector of bitset representations of nodes
+        std::vector<long>                                   getNodeIndices(void) const;                                                                         //!< Get a vector of node indices
         size_t                                              getNumberOfInteriorNodes(void) const;                                                               //!< Get the number of nodes in the Tree
         size_t                                              getNumberOfNodes(void) const;                                                                       //!< Get the number of nodes in the Tree
         size_t                                              getNumberOfExtantTips(void) const;                                                                  //!< Get the number of extant tip nodes in the Tree
@@ -105,26 +107,29 @@ namespace RevBayesCore {
         std::vector<std::string>                            getTipNames() const;
         TopologyNode&                                       getTipNode(size_t indx);                                                                            //!< Get a pointer to tip node i
         const TopologyNode&                                 getTipNode(size_t indx) const;                                                                      //!< Get a pointer to tip node i
-        TopologyNode&                                       getTipNodeWithName(const std::string &n);                                                           //!< Get a pointer to tip node i
-        const TopologyNode&                                 getTipNodeWithName(const std::string &n) const;                                                     //!< Get a pointer to tip node i
-        std::vector<TopologyNode*>                          getTipNodesWithSpeciesName(const std::string &n);                                                   //!< Get a pointer to tip node i
-        double                                              getTmrca(const TopologyNode &n);
-        double                                              getTmrca(const Clade &c);
-        double                                              getTmrca(const std::vector<Taxon> &t);
+        TopologyNode&                                       getTipNodeWithName(const std::string& n);                                                           //!< Get a pointer to tip node i
+        const TopologyNode&                                 getTipNodeWithName(const std::string& n) const;                                                     //!< Get a pointer to tip node i
+        std::vector<TopologyNode*>                          getTipNodesWithSpeciesName(const std::string& n);                                                   //!< Get a pointer to tip node i
+        double                                              getTmrca(const TopologyNode& n);
+        double                                              getTmrca(const Clade& c);
+        double                                              getTmrca(const std::vector<Taxon>& t);
         TreeChangeEventHandler&                             getTreeChangeEventHandler(void) const;                                                              //!< Get the change-event handler for this tree
         double                                              getTreeLength(void) const;
-        bool                                                hasSameTopology( const Tree &t ) const;                                                             //!< Has this tree the same topology?
+        bool                                                hasSameTopology(const Tree &t) const;                                                             //!< Has this tree the same topology?
         bool                                                isBinary(void) const;                                                                               //!< Is the Tree binary
         bool                                                isBroken(void) const;                                                                               //!< Is this tree ultrametric?
         bool                                                isNegativeConstraint(void) const;                                                                   //!< Is this tree used as a negative constraint?
         bool                                                isRooted(void) const;                                                                               //!< Is the Tree rooted
         bool                                                isUltrametric(void) const;                                                                          //!< Is this tree ultrametric?
-        void                                                makeInternalNodesBifurcating(bool reindex);                                                         //!< Make all the internal nodes bifurcating.
+        void                                                makeInternalNodesBifurcating(bool reindex, bool fossils_only);                                                         //!< Make all the internal nodes bifurcating.
+        void                                                makeRootBifurcating(const Clade& o, bool reindex);                                                         //!< Make all the internal nodes bifurcating.
         void                                                orderNodesByIndex();
-        void                                                pruneTaxa(const RbBitSet&);
-        void                                                reroot(const Clade &outgroup, bool reindex);                                                        //!< Re-root the tree with the given outgroup
-        void                                                reroot(const std::string &outgroup, bool reindex);                                                  //!< Re-root the tree with the given outgroup
-        void                                                reroot(TopologyNode &n, bool reindex);
+        void                                                pruneTaxa(const RbBitSet& bs);
+        void                                                renumberNodes(const Tree &reference);                                                               //!< Change node ids to be as in reference
+        void                                                reroot(const Clade& o, bool make_bifurcating, bool reindex);                                                        //!< Re-root the tree with the given outgroup
+        void                                                reroot(const std::string& outgroup, bool make_bifurcating, bool reindex);                                                  //!< Re-root the tree with the given outgroup
+        void                                                reroot(TopologyNode &n, bool make_bifurcating, bool reindex);
+//        void                                                rerootAndMakeBifurcating(const Clade &o, bool reindex);                                             //!< Re-root the tree with the given outgroup, and make sure we have a bifuration at the root and elsewhere
         void                                                removeDuplicateTaxa(void);
         void                                                renameNodeParameter(const std::string &old_name, const std::string &new_name);
         TopologyNode&                                       reverseParentChild(TopologyNode &n);                                                                //!< Reverse the parent child relationship.

@@ -58,7 +58,7 @@ RateMatrix_Kimura80& RateMatrix_Kimura80::assign(const Assignable &m)
  * @param startAge a double that denotes the start of the branch
  * @param endAge a double that denotes the end of the branch
  * @param rate a double that denotes the overall substitution rate
- * @param p A transition probability matrix
+ * @param P A transition probability matrix
  *
  *  */
 void RateMatrix_Kimura80::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
@@ -105,7 +105,7 @@ RateMatrix_Kimura80* RateMatrix_Kimura80::clone( void ) const
 }
 
 /*
- * Sets Kapps of the rate matrix
+ * Sets kappa for the rate matrix
  * @param k Kappa, the transition:transversion ratio
  */
 void RateMatrix_Kimura80::setKappa( double k )

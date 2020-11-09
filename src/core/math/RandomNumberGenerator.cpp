@@ -15,7 +15,12 @@ RandomNumberGenerator::RandomNumberGenerator(void) :
 {
     boost::posix_time::ptime t0(boost::posix_time::min_date_time);
     boost::posix_time::ptime t1 = boost::posix_time::microsec_clock::local_time();
-    unsigned int seed = (unsigned int) (t1-t0).total_microseconds();
+
+    // limit seed to INT_MAX
+    // otherwise results in seeds that are impossible to set via Rev,
+    // as Natural datatype is limited to INT_MAX
+    seed = static_cast<unsigned int>( (t1-t0).total_microseconds() );
+    seed = seed % RbConstants::Integer::max;
     
     boost::mt19937 rng;
     rng.seed( seed );
@@ -28,7 +33,6 @@ RandomNumberGenerator::RandomNumberGenerator(void) :
 /* Get the seed values */
 unsigned int RandomNumberGenerator::getSeed( void ) const
 {
-    unsigned int seed = (unsigned int) (RbConstants::UnsignedInteger::max * last_u);
     return seed;
 }
 
@@ -38,7 +42,8 @@ void RandomNumberGenerator::setSeed(unsigned int s)
 {
 
     boost::mt19937 rng;
-    rng.seed( s );
+    seed = s % RbConstants::Integer::max; //see constructor for explanation of this
+    rng.seed( seed );
     zeroone = boost::uniform_01<boost::mt19937>(rng);
 
 }

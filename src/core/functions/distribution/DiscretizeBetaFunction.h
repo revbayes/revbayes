@@ -4,16 +4,22 @@
 #include "TypedFunction.h"
 #include "RbVector.h"
 
-/**
- *
- * @brief Declaration of the discretized Beta function.
- *
- */
 
 namespace RevBayesCore {
 class DagNode;
 template <class valueType> class TypedDagNode;
-    
+
+/**
+ *
+ * @brief Declaration of the discretized Beta function.
+ *
+ * This is a function to turn the Beta function into discrete groups.
+ * @param a the alpha value of the beta distribution
+ * @param b the beta value of the beta distribution
+ * @param nc the number of categories for the distribution
+ * @param med a boolean for whether the median value should be used for each category. The mean value is used if set to false
+ *
+ */
     class DiscretizeBetaFunction : public TypedFunction< RbVector<double> >{
         
     public:
