@@ -195,6 +195,7 @@
 #include "Func_characterMapTree.h"
 #include "Func_consensusTree.h"
 #include "Func_convertToPhylowood.h"
+#include "Func_FileExists.h"
 #include "Func_listFiles.h"
 #include "Func_maxdiff.h"
 #include "Func_mapTree.h"
@@ -508,6 +509,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
 		addFunction( new Func_characterMapTree()                        );
         addFunction( new Func_consensusTree()                           );
         addFunction( new Func_convertToPhylowood()                      );
+        addFunction( new Func_fileExists()                              );
         addFunction( new Func_listFiles()                               );
         addFunction( new Func_maxdiff()                                 );
         addFunction( new Func_mapTree()                                 );
