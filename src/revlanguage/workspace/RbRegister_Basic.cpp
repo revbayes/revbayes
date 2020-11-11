@@ -195,7 +195,7 @@
 #include "Func_characterMapTree.h"
 #include "Func_consensusTree.h"
 #include "Func_convertToPhylowood.h"
-#include "Func_FileExists.h"
+#include "Func_fileExists.h"
 #include "Func_listFiles.h"
 #include "Func_maxdiff.h"
 #include "Func_mapTree.h"
