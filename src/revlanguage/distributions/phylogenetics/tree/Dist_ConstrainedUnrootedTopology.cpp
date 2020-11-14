@@ -171,7 +171,7 @@ std::string Dist_ConstrainedUnrootedTopology::getDistributionFunctionName( void 
 {
 
     // create a distribution name variable that is the same for all instance of this class
-    std::string d_name = "ConstrainedUnrootedTopology";
+    std::string d_name = "ConstrainedTopology";
     return d_name;
 }
 
