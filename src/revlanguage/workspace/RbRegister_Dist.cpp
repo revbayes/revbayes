@@ -169,6 +169,7 @@
 #include "Dist_CoalescentSkyline.h"
 #include "Dist_conditionedBirthDeathShiftProcessContinuous.h"
 #include "Dist_ConstrainedTopology.h"
+#include "Dist_ConstrainedUnrootedTopology.h"
 #include "Dist_ConstrainedNodeAge.h"
 #include "Dist_ConstrainedNodeOrder.h"
 #include "Dist_WeightedConstrainedNodeOrder.h"
@@ -392,6 +393,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // constrained topology distribution
         AddDistribution< TimeTree                   >( new Dist_ConstrainedTopology() );
+
+        // constrained topology distribution
+        AddDistribution< BranchLengthTree           >( new Dist_ConstrainedUnrootedTopology() );
 
         // uniform time tree distribution
         AddDistribution< TimeTree                   >( new Dist_uniformTimeTree() );

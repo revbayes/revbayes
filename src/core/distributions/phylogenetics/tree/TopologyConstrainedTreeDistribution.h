@@ -63,8 +63,9 @@ namespace RevBayesCore {
         RbBitSet                                            recursivelyAddBackboneConstraints(const TopologyNode& node, size_t backbone_idx);
         void                                                recursivelyFlagNodesDirty(const TopologyNode& n);
         RbBitSet                                            recursivelyUpdateClades(const TopologyNode& node);
-        Tree*                                               simulateTree(void);
-        
+        Tree*                                               simulateRootedTree(void);
+        Tree*                                               simulateUnrootedTree(void);
+
 
         // members
         std::vector<std::vector<RbBitSet> >                 active_backbone_clades;
@@ -83,6 +84,9 @@ namespace RevBayesCore {
         size_t                                              num_backbones;
         bool                                                use_multiple_backbones;
         Tree*                                               starting_tree;
+        
+        bool                                                rooting_known;
+        bool                                                is_rooted;
 
     };
     

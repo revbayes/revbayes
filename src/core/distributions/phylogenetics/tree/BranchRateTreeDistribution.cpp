@@ -420,6 +420,7 @@ void BranchRateTreeDistribution::fireTreeChangeEvent(const TopologyNode &n, cons
 
 }
 
+
 void BranchRateTreeDistribution::keepSpecialization(const DagNode* affecter)
 {
     
