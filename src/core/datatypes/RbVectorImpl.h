@@ -188,7 +188,7 @@ namespace RevBayesCore {
         {
             if ( i >= values.size() )
             {
-                throw(RbException("Vector index out of range"));
+                throw RbException("Vector index out of range") ;
             }
             return *values[i];
         }
@@ -196,7 +196,7 @@ namespace RevBayesCore {
         {
             if ( i >= values.size() )
             {
-                throw(RbException("Vector index out of range"));
+                throw RbException("Vector index out of range");
             }
             return *values[i];
         }

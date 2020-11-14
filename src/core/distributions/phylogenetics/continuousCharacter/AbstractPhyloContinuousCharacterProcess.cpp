@@ -239,6 +239,8 @@ void AbstractPhyloContinuousCharacterProcess::setSiteRate(const TypedDagNode<RbV
     homogeneous_site_rate       = NULL;
     heterogeneous_site_rates    = NULL;
     
+    this->num_sites = r->getValue().size();
+    
     
     // set the value
     heterogeneous_site_rates = r;
