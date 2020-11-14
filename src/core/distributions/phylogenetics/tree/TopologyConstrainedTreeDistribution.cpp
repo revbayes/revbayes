@@ -55,11 +55,11 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDi
     use_multiple_backbones( false ),
     starting_tree( t )
 {
-    AbstractRootedTreeDistribution* tree_base_distribution = dynamic_cast<AbstractRootedTreeDistribution*>(base_distribution);
-    if (tree_base_distribution == NULL)
-    {
-        throw(RbException("Can only constrain tree distributions of type AbstractRootedTreeDistribution"));
-    }
+//    AbstractRootedTreeDistribution* tree_base_distribution = dynamic_cast<AbstractRootedTreeDistribution*>(base_distribution);
+//    if (tree_base_distribution == NULL)
+//    {
+//        throw(RbException("Can only constrain tree distributions of type AbstractRootedTreeDistribution"));
+//    }
     
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
