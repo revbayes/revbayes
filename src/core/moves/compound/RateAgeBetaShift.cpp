@@ -106,7 +106,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     
     double oldLnLike = 0.0;
     bool check_likelihood_shortcuts = rng->uniform01() < 0.001;
-    check_likelihood_shortcuts = true;
+//    check_likelihood_shortcuts = true;
     if ( check_likelihood_shortcuts == true )
     {
 //        tree->touch();
@@ -175,9 +175,6 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     // get the probability ratio of the tree
     double tree_prob_ratio = tree->getLnProbabilityRatio();
     
-    // we also need to get the prob ratio of all descendants of the tree
-    
-    
     
     // set the rates
     double my_new_rate = (parent_age - my_age) * stored_rates[node_idx] / (parent_age - my_new_age);
@@ -225,6 +222,120 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     if ( rates != NULL )
     {
         rates_prob_ratio = rates->getLnProbabilityRatio();
+    }
+    
+    
+    // we also need to get the prob ratio of all descendants of the tree
+    double tree_like_ratio = 0.0;
+    const std::vector<DagNode*>& tree_desc = tree->getChildren();
+    for (size_t i=0; i<tree_desc.size(); ++i)
+    {
+        DagNode* the_node = tree_desc[i];
+        StochasticNode< AbstractHomologousDiscreteCharacterData >* test_stoch = dynamic_cast<StochasticNode< AbstractHomologousDiscreteCharacterData >* >(the_node);
+        if ( test_stoch != NULL )
+        {
+            TypedDistribution< AbstractHomologousDiscreteCharacterData >* test_dist = dynamic_cast< TypedDistribution< AbstractHomologousDiscreteCharacterData >* >(&test_stoch->getDistribution());
+            if ( test_dist == NULL )
+            {
+                if ( the_node->isClamped() == true )
+                {
+                    tree_like_ratio += the_node->getLnProbabilityRatio();
+                }
+                else
+                {
+                    tree_prob_ratio += the_node->getLnProbabilityRatio();
+                }
+            }
+        }
+        else
+        {
+            if ( the_node->isClamped() == true )
+            {
+                tree_like_ratio += the_node->getLnProbabilityRatio();
+            }
+            else
+            {
+                tree_prob_ratio += the_node->getLnProbabilityRatio();
+            }
+        }
+    }
+    
+    // we also need to get the prob ratio of all descendants of the rates
+    double rates_like_ratio = 0.0;
+    if ( rates == NULL )
+    {
+        for (size_t j = 0; j < node->getNumberOfChildren(); ++j)
+        {
+            size_t child_idx = node->getChild(j).getIndex();
+            const std::vector<DagNode*>& rates_desc = rates_vec[child_idx]->getChildren();
+            for (size_t i=0; i<rates_desc.size(); ++i)
+            {
+                DagNode* the_node = rates_desc[i];
+                StochasticNode< AbstractHomologousDiscreteCharacterData >* test_stoch = dynamic_cast<StochasticNode< AbstractHomologousDiscreteCharacterData >* >(the_node);
+                if ( test_stoch != NULL )
+                {
+                    TypedDistribution< AbstractHomologousDiscreteCharacterData >* test_dist = dynamic_cast< TypedDistribution< AbstractHomologousDiscreteCharacterData >* >(&test_stoch->getDistribution());
+                    if ( test_dist == NULL )
+                    {
+                        if ( the_node->isClamped() == true )
+                        {
+                            rates_like_ratio += the_node->getLnProbabilityRatio();
+                        }
+                        else
+                        {
+                            rates_prob_ratio += the_node->getLnProbabilityRatio();
+                        }
+                        
+                    }
+                }
+                else
+                {
+                    if ( the_node->isClamped() == true )
+                    {
+                        rates_like_ratio += the_node->getLnProbabilityRatio();
+                    }
+                    else
+                    {
+                        rates_prob_ratio += the_node->getLnProbabilityRatio();
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        const std::vector<DagNode*>& rates_desc = rates->getChildren();
+        for (size_t i=0; i<rates_desc.size(); ++i)
+        {
+            DagNode* the_node = rates_desc[i];
+            StochasticNode< AbstractHomologousDiscreteCharacterData >* test_stoch = dynamic_cast<StochasticNode< AbstractHomologousDiscreteCharacterData >* >(the_node);
+            if ( test_stoch != NULL )
+            {
+                TypedDistribution< AbstractHomologousDiscreteCharacterData >* test_dist = dynamic_cast< TypedDistribution< AbstractHomologousDiscreteCharacterData >* >(&test_stoch->getDistribution());
+                if ( test_dist == NULL )
+                {
+                    if ( the_node->isClamped() == true )
+                    {
+                        rates_like_ratio += the_node->getLnProbabilityRatio();
+                    }
+                    else
+                    {
+                        rates_prob_ratio += the_node->getLnProbabilityRatio();
+                    }
+                }
+            }
+            else
+            {
+                if ( the_node->isClamped() == true )
+                {
+                    rates_like_ratio += the_node->getLnProbabilityRatio();
+                }
+                else
+                {
+                    rates_prob_ratio += the_node->getLnProbabilityRatio();
+                }
+            }
+        }
     }
     
     if ( check_likelihood_shortcuts == true )
@@ -276,8 +387,9 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     }
     
     double hastings_ratio = backward - forward + jacobian;
-    double ln_acceptance_ratio = pHeat * prHeat * (tree_prob_ratio + rates_prob_ratio) + hastings_ratio;
-    
+    double ln_posterior_ratio = pHeat * (lHeat * (tree_like_ratio + rates_like_ratio) + prHeat * (tree_prob_ratio + rates_prob_ratio));
+    double ln_acceptance_ratio = ln_posterior_ratio + hastings_ratio;
+
     if (ln_acceptance_ratio >= 0.0)
     {
         num_accepted_total++;

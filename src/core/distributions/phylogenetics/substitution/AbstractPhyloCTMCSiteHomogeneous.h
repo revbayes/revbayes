@@ -3960,8 +3960,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
 {
     const TopologyNode* node = tau->getValue().getNodes()[node_idx];
 
-    if (node->isRoot()) throw RbException("dnPhyloCTMC called updateTransitionProbabilities for the root node\n");
-
+    if ( node->isRoot() == true )
+    {
+        throw RbException("dnPhyloCTMC called updateTransitionProbabilities for the root node\n");
+    }
     // second, get the clock rate for the branch
     double rate = 1.0;
     if ( this->branch_heterogeneous_clock_rates == true )
