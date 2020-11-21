@@ -490,12 +490,6 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
     {
 
     }
-
-    // Simulating complete trees only works if the tree is not conditioned on survival or sampling of the root
-    if ( complete_tree && condition != TIME )
-    {
-        throw(RbException("The option completeTree is only compatible with condition = \"time\"."));
-    }
     
     size_t NUM_TIME_INTERVALS = timeline.size();
     size_t NUM_CATEGORIES = getNumberOfCategories();
@@ -936,7 +930,14 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                 }
             }
             
-            bool prune = !complete_tree;
+            // Complete trees should still meet the user's condition choice, but checking requires destructive pruning
+            TopologyNode *complete_root = NULL;
+            if ( complete_tree )
+            {
+                complete_root = root->clone();
+            }
+
+            bool prune = true;
             // now prune away all the extinct nodes
             if ( prune == true )
             {
@@ -1005,6 +1006,12 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
             {
                 delete root;
                 root = NULL;
+            }
+
+            // The sampled portion of the complete tree will meet the user's condition choice
+            if ( root != NULL && complete_tree )
+            {
+                root = complete_root;
             }
 
         }
