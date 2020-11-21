@@ -29,6 +29,7 @@ namespace RevBayesCore {
         
         // setters
         void                                    setBurstProbability( const std::vector<std::vector< double > > &l );
+        void                                    setCompleteTree( const bool c );
         void                                    setExtinctionRate( const std::vector<std::vector< double > > &m );
         void                                    setMaxNumLineages( const int m );
         void                                    setMassExtinctionProbability( const std::vector<std::vector< double > > &m );
@@ -69,7 +70,7 @@ namespace RevBayesCore {
         std::vector<double>                     root_cat_probability;
         std::vector<double>                     timeline;
         size_t                                  MAX_NUM_LINEAGES;
-        
+        bool                                    complete_tree;        
     };
     
 }

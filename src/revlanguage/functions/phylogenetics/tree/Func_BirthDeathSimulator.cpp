@@ -271,6 +271,10 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
     int max_lineages = static_cast<const Natural &>( args[arg_index].getVariable()->getRevObject() ).getValue();
     simulator.setMaxNumLineages(max_lineages);
 
+    ++arg_index;
+    int complete_tree = static_cast<const Natural &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+    simulator.setCompleteTree(complete_tree);
+
     if ( cdt_str == "time" )
     {
         cdt = RevBayesCore::BirthDeathForwardSimulator::TIME;
@@ -331,6 +335,7 @@ const ArgumentRules& Func_BirthDeathSimulator::getArgumentRules( void ) const
         argument_rules.push_back( new OptionRule( "condition", new RlString("root"), options_condition, "What outcome should we condition on?" ) );
 
         argument_rules.push_back( new ArgumentRule( "maxNumLineages", Natural::getClassTypeSpec(), "The maximum number of lineages allowed by the simulator. Simulations that reach this size will be aborted and re-started.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Natural( 100000 ) ) );
+        argument_rules.push_back( new ArgumentRule( "completeTree", RlBoolean::getClassTypeSpec(), "Should the tree include all lineages, even those that went extinct? Only valid for condition = \"time\".", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( false ) ) );
 
         rules_set = true;
     }

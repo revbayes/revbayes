@@ -491,6 +491,12 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
 
     }
 
+    // Simulating complete trees only works if the tree is not conditioned on survival or sampling of the root
+    if ( complete_tree && condition != TIME )
+    {
+        throw(RbException("The option completeTree is only compatible with condition = \"time\"."));
+    }
+    
     size_t NUM_TIME_INTERVALS = timeline.size();
     size_t NUM_CATEGORIES = getNumberOfCategories();
 
@@ -929,10 +935,8 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                     }
                 }
             }
-
-            bool complete_tree = !true;
-    //        bool prune = complete_tree == false && current_num_active_nodes > 0 && ( condition == ROOT && current_num_active_nodes >= 2 );
-            bool prune = complete_tree == false && current_num_active_nodes > 0;
+            
+            bool prune = !complete_tree;
             // now prune away all the extinct nodes
             if ( prune == true )
             {
@@ -1002,6 +1006,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                 delete root;
                 root = NULL;
             }
+
         }
 
     } while ( root == NULL );
@@ -1036,6 +1041,10 @@ void BirthDeathForwardSimulator::setBurstProbability( const std::vector<std::vec
     Lambda = l;
 }
 
+void BirthDeathForwardSimulator::setCompleteTree( const bool c )
+{
+    complete_tree = c;
+}
 
 void BirthDeathForwardSimulator::setExtinctionRate( const std::vector<std::vector< double > > &m )
 {
