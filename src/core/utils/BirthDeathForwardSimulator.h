@@ -29,9 +29,9 @@ namespace RevBayesCore {
         
         // setters
         void                                    setBurstProbability( const std::vector<std::vector< double > > &l );
-        void                                    setCompleteTree( const bool c );
+        void                                    setCompleteTree( bool c );
         void                                    setExtinctionRate( const std::vector<std::vector< double > > &m );
-        void                                    setMaxNumLineages( const int m );
+        void                                    setMaxNumLineages( size_t m );
         void                                    setMassExtinctionProbability( const std::vector<std::vector< double > > &m );
         void                                    setRootCategoryProbabilities( const std::vector<double> &p );
         void                                    setSamplingProbability( const std::vector<std::vector< double > > &p );
