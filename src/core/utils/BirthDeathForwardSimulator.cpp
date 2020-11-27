@@ -558,6 +558,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
             current_phi_total       += num_lineages_in_category * current_phi[i];
         }
         double current_rate_total = current_lambda_total + current_mu_total + current_phi_total;
+        
 
         double current_age = start_age;
         while ( current_age > 0.0 && current_num_active_nodes > 0 )
@@ -600,6 +601,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                                 active_nodes_in_actegories[i].insert( right );
                                 
                                 this_node->setBurstSpeciation( true );
+                                
 
                             } // end-if there was a burst speciation event for this node
 
@@ -679,6 +681,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                                     // update the active node set
                                     active_nodes_in_actegories[i].erase( this_node );
                                     active_nodes_in_actegories[i].insert( right );
+                                    
                                 }
 
                             } // end-if there was a sampling event for this node
@@ -767,6 +770,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                             current_rate_total      += this_cat_lambda + current_mu[i] + current_phi[i];
 
                             this_node->setSerialSpeciation( true );
+                            
 
                             // now stop the loop
                             break;
@@ -878,6 +882,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                                 // update the active node set
                                 active_nodes_in_actegories[i].erase( this_node );
                                 active_nodes_in_actegories[i].insert( right );
+                                
                             }
                             // now stop the loop
                             break;
@@ -931,9 +936,10 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                 }
             }
             
-            // Complete trees should still meet the user's condition choice, but checking requires destructive pruning
+            // Complete trees should still meet the user's condition choice,
+            // but checking requires destructive pruning
             TopologyNode *complete_root = NULL;
-            if ( complete_tree )
+            if ( complete_tree == true )
             {
                 complete_root = root->clone();
             }
@@ -952,8 +958,10 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                         
                         if ( parent.getNumberOfChildren() == 1 )
                         {
+
                             parent.removeChild( this_node );
                             delete this_node;
+                            
                         }
                         else
                         {
@@ -974,16 +982,18 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                                 grandparent.addChild( sibling );
 
                                 sibling->setSampledAncestor(false);
-
+                                
                                 delete &parent; // this will also delete this child node
+
                             }
                             else
                             {
                                 parent.removeChild( sibling );
                                 sibling->setParent( NULL );
                                 root = sibling;
-
+                                
                                 delete &parent;
+
                             }
 
                         }
@@ -996,8 +1006,11 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
 
             if ( condition == SURVIVAL && current_num_active_nodes <= 1 )
             {
+
                 delete root;
+                delete complete_root;
                 root = NULL;
+                
             }
             // next we check that both sides of the root node were sampled ()
             else if ( condition == ROOT && (root->getAge() < start_age ||
@@ -1005,14 +1018,21 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                                             hasExtantSurvivor(root->getChild(0)) == false ||
                                             hasExtantSurvivor(root->getChild(1)) == false ) )
             {
+
                 delete root;
+                delete complete_root;
                 root = NULL;
+                
             }
 
             // The sampled portion of the complete tree will meet the user's condition choice
-            if ( root != NULL && complete_tree )
+            if ( root != NULL && complete_tree == true )
             {
+
+                // we need to free the old memory
+                delete root;
                 root = complete_root;
+
             }
 
         }
@@ -1049,7 +1069,7 @@ void BirthDeathForwardSimulator::setBurstProbability( const std::vector<std::vec
     Lambda = l;
 }
 
-void BirthDeathForwardSimulator::setCompleteTree( const bool c )
+void BirthDeathForwardSimulator::setCompleteTree( bool c )
 {
     complete_tree = c;
 }
@@ -1059,7 +1079,7 @@ void BirthDeathForwardSimulator::setExtinctionRate( const std::vector<std::vecto
     mu = m;
 }
 
-void BirthDeathForwardSimulator::setMaxNumLineages( const int m )
+void BirthDeathForwardSimulator::setMaxNumLineages( size_t m )
 {
     MAX_NUM_LINEAGES = m;
 }
@@ -1067,13 +1087,6 @@ void BirthDeathForwardSimulator::setMaxNumLineages( const int m )
 
 void BirthDeathForwardSimulator::setMassExtinctionProbability( const std::vector<std::vector< double > > &m )
 {
-    // std::cout << "Mass extinction probability vector looks like this:" << std::endl;
-    // for (size_t i=0; i<m.size(); ++i) {
-    //     for (size_t j=0; j<m.size(); ++j) {
-    //         std::cout << m[i][j] << ", ";
-    //     }
-    //     std::cout << std::endl;
-    // }
     Mu = m;
 }
 

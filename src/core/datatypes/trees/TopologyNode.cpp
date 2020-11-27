@@ -25,6 +25,7 @@
 
 using namespace RevBayesCore;
 
+
 /** Default constructor (interior node, no name). Give the node an optional index ID */
 TopologyNode::TopologyNode(size_t indx) :
     use_ages( true ),
@@ -141,7 +142,7 @@ TopologyNode::~TopologyNode(void)
     {
         parent->removeChild(this);
     }
-
+    
 }
 
 

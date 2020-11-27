@@ -42,7 +42,7 @@ RevPtr<RevVariable> Func_fileExists::execute( void )
     // check that the file/path name exists
     RevBayesCore::RbFileManager my_file_manager( fn );
     
-    return new RevVariable( new RlBoolean( my_file_manager.testDirectory() ) );
+    return new RevVariable( new RlBoolean( my_file_manager.testFile() ) );
 }
 
 

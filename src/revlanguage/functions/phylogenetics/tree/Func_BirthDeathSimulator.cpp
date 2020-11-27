@@ -268,11 +268,11 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
     const std::string& cdt_str = static_cast<const RlString &>( args[arg_index].getVariable()->getRevObject() ).getValue();
 
     ++arg_index;
-    int max_lineages = static_cast<const Natural &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+    long max_lineages = static_cast<const Natural &>( args[arg_index].getVariable()->getRevObject() ).getValue();
     simulator.setMaxNumLineages(max_lineages);
 
     ++arg_index;
-    int complete_tree = static_cast<const Natural &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+    bool complete_tree = static_cast<const RlBoolean &>( args[arg_index].getVariable()->getRevObject() ).getValue();
     simulator.setCompleteTree(complete_tree);
 
     if ( cdt_str == "time" )

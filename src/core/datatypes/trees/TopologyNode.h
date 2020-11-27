@@ -165,9 +165,9 @@ namespace RevBayesCore {
         void setSamplingEvent(bool tf) { sampling_event = tf; }
         void setSerialSampling(bool tf) { serial_sampling = tf; }
         void setSerialSpeciation(bool tf) { serial_speciation = tf; }
-        
+                
     protected:
-        
+
         bool burst_speciation;
         bool sampling_event;
         bool serial_sampling;

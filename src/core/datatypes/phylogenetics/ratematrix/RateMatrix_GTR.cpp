@@ -150,7 +150,6 @@ RateMatrix_GTR* RateMatrix_GTR::clone( void ) const
 }
 
 
-
 /** Calculate the transition probabilities for the real case */
 void RateMatrix_GTR::tiProbsEigens(double t, TransitionProbabilityMatrix& P) const
 {
