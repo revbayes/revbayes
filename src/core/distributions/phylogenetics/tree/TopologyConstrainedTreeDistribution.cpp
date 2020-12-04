@@ -53,7 +53,9 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDi
     monophyly_constraints( c ),
     num_backbones( 0 ),
     use_multiple_backbones( false ),
-    starting_tree( t )
+    starting_tree( t ),
+    rooting_known( false ),
+    is_rooted( true )
 {
 //    AbstractRootedTreeDistribution* tree_base_distribution = dynamic_cast<AbstractRootedTreeDistribution*>(base_distribution);
 //    if (tree_base_distribution == NULL)
@@ -101,7 +103,9 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(const T
     stored_clades( d.stored_clades ),
     num_backbones( d.num_backbones ),
     use_multiple_backbones( d.use_multiple_backbones ),
-    starting_tree( (d.starting_tree==NULL ? NULL : d.starting_tree->clone()) )
+    starting_tree( (d.starting_tree==NULL ? NULL : d.starting_tree->clone()) ),
+    rooting_known( d.rooting_known ),
+    is_rooted( d.is_rooted )
 {
     // the copy constructor of the TypedDistribution creates a new copy of the value
     // however, here we want to hold exactly the same value as the base-distribution
@@ -168,6 +172,8 @@ TopologyConstrainedTreeDistribution& TopologyConstrainedTreeDistribution::operat
         num_backbones                   = d.num_backbones;
         use_multiple_backbones          = d.use_multiple_backbones;
         starting_tree                   = (d.starting_tree == NULL ? NULL : d.starting_tree->clone());
+        rooting_known                   = d.rooting_known;
+        is_rooted                       = d.is_rooted;
 
         // add the parameters of the base distribution
         const std::vector<const DagNode*>& pars = base_distribution->getParameters();
