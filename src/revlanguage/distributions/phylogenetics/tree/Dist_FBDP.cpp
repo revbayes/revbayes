@@ -169,6 +169,13 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_FBDP::createDistribution( void ) c
         Pt = static_cast<const ModelVector<RealPos> &>( rho_timeline->getRevObject() ).getDagNode();
     }
     
+    // tree for initialization
+    RevBayesCore::Tree* init = NULL;
+    if ( initial_tree->getRevObject() != RevNullObject::getInstance() )
+    {
+        init = static_cast<const TimeTree &>( initial_tree->getRevObject() ).getDagNode()->getValue().clone();
+    }
+
     d = new RevBayesCore::EpisodicBirthDeathSamplingTreatmentProcess(sa,
                                                                      b_s,
                                                                      d_s,
@@ -189,7 +196,7 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_FBDP::createDistribution( void ) c
                                                                      cond,
                                                                      tn,
                                                                      uo,
-                                                                     NULL);
+                                                                     init);
 
     return d;
 }
@@ -326,6 +333,7 @@ const MemberRules& Dist_FBDP::getParameterRules(void) const
         optionsCondition.push_back( "sampling" );
         dist_member_rules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
         dist_member_rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "initialTree" , TimeTree::getClassTypeSpec() , "Instead of drawing a tree from the distribution, initialize distribution with this tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
 
         rules_set = true;
     }
@@ -416,6 +424,10 @@ void Dist_FBDP::setConstParameter(const std::string& name, const RevPtr<const Re
     else if ( name == "PhiTimeline" || name == "rhoTimeline"  || name == "PhiTimeline/rhoTimeline")
     {
         rho_timeline = var;
+    }
+    else if ( name == "initialTree" )
+    {
+        initial_tree = var;
     }
     else
     {
