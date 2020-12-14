@@ -14,6 +14,7 @@
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
+#include "DistributionExponential.h"
 #include "RbException.h"
 #include "StochasticNode.h"
 #include "Taxon.h"
@@ -53,7 +54,9 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDi
     monophyly_constraints( c ),
     num_backbones( 0 ),
     use_multiple_backbones( false ),
-    starting_tree( t )
+    starting_tree( t ),
+    rooting_known( false ),
+    is_rooted( true )
 {
 //    AbstractRootedTreeDistribution* tree_base_distribution = dynamic_cast<AbstractRootedTreeDistribution*>(base_distribution);
 //    if (tree_base_distribution == NULL)
@@ -101,7 +104,9 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(const T
     stored_clades( d.stored_clades ),
     num_backbones( d.num_backbones ),
     use_multiple_backbones( d.use_multiple_backbones ),
-    starting_tree( (d.starting_tree==NULL ? NULL : d.starting_tree->clone()) )
+    starting_tree( (d.starting_tree==NULL ? NULL : d.starting_tree->clone()) ),
+    rooting_known( d.rooting_known ),
+    is_rooted( d.is_rooted )
 {
     // the copy constructor of the TypedDistribution creates a new copy of the value
     // however, here we want to hold exactly the same value as the base-distribution
@@ -168,6 +173,8 @@ TopologyConstrainedTreeDistribution& TopologyConstrainedTreeDistribution::operat
         num_backbones                   = d.num_backbones;
         use_multiple_backbones          = d.use_multiple_backbones;
         starting_tree                   = (d.starting_tree == NULL ? NULL : d.starting_tree->clone());
+        rooting_known                   = d.rooting_known;
+        is_rooted                       = d.is_rooted;
 
         // add the parameters of the base distribution
         const std::vector<const DagNode*>& pars = base_distribution->getParameters();
@@ -541,6 +548,7 @@ void TopologyConstrainedTreeDistribution::redrawValue( void )
         {
             base_distribution->redrawValue();
             is_rooted = base_distribution->getValue().isRooted();
+            rooting_known = true;
         }
             
         if ( is_rooted == true )
@@ -926,9 +934,6 @@ Tree* TopologyConstrainedTreeDistribution::simulateUnrootedTree( void )
     const std::vector<Taxon> &taxa = tree_base_distribution->getTaxa();
     size_t num_taxa = taxa.size();
     
-    // add a clounter variable of how many missing taxa we have already added
-    size_t n_added_missing_taxa = 0;
-    
     // create the tip nodes
     std::vector<TopologyNode*> nodes;
     for (size_t i=0; i<num_taxa; ++i)
@@ -937,12 +942,81 @@ Tree* TopologyConstrainedTreeDistribution::simulateUnrootedTree( void )
         // create the i-th taxon
         TopologyNode* node = new TopologyNode( taxa[i], i );
         
-        // set the age of this tip node
-        node->setAge( taxa[i].getAge() );
-        
         // add the new node to the list
         nodes.push_back( node );
         
+    }
+    
+    if ( backbone_topology != NULL )
+    {
+        psi = backbone_topology->getValue().clone();
+        std::vector<TopologyNode*> inserted_nodes = psi->getNodes();
+        
+        for (size_t i=0; i<num_taxa; ++i)
+        {
+            
+            bool contains = false;
+            for ( size_t j=0; j<inserted_nodes.size(); ++j )
+            {
+                if ( inserted_nodes[j]->getName() == taxa[i].getName() )
+                {
+                    contains = true;
+                    break;
+                }
+            }
+            
+            if ( contains == false )
+            {
+                // randomly pick a branch to add
+                size_t index = size_t(GLOBAL_RNG->uniform01() * inserted_nodes.size());
+                while ( inserted_nodes[index]->isRoot() ) {
+                    index = size_t(GLOBAL_RNG->uniform01() * inserted_nodes.size());
+                }
+                
+                TopologyNode* new_node = new TopologyNode(taxa[i]);
+                TopologyNode* tmp_node = new TopologyNode();
+                
+                tmp_node->addChild( new_node );
+                new_node->setParent( tmp_node );
+                
+                TopologyNode* child = inserted_nodes[index];
+                TopologyNode* parent = &child->getParent();
+                
+                if ( parent->getNumberOfChildren() > 3 )
+                {
+                    throw RbException("Wrong number of children.");
+                }
+                
+                parent->removeChild( child );
+                parent->addChild( tmp_node );
+                tmp_node->setParent( parent );
+                
+                child->setParent( tmp_node );
+                tmp_node->addChild( child );
+                
+                tmp_node->setBranchLength( child->getBranchLength() * 0.5 );
+                child->setBranchLength( child->getBranchLength() * 0.5 );
+                new_node->setBranchLength( RbStatistics::Exponential::rv(10.0, *GLOBAL_RNG) );
+                
+                inserted_nodes.push_back( tmp_node );
+                inserted_nodes.push_back( new_node );
+                
+                if ( tmp_node->getNumberOfChildren() != 2 )
+                {
+                    throw RbException("Wrong number of children.");
+                }
+                if ( parent->getNumberOfChildren() > 3 )
+                {
+                    throw RbException("Wrong number of children.");
+                }
+            }
+            
+        }
+        
+        // initialize the topology by setting the root
+        psi->setRoot(&psi->getRoot(), true);
+        
+        return psi;
     }
     
     // we need a sorted vector of constraints, starting with the smallest
@@ -976,17 +1050,6 @@ Tree* TopologyConstrainedTreeDistribution::simulateUnrootedTree( void )
     // create a clade that contains all species
     Clade all_species = Clade(taxa);
     sorted_clades.push_back(all_species);
-    
-    // DO WE NEED TO SORT THE TAXA?
-    // try this crummy bubble sort
-    size_t num_clades = sorted_clades.size();
-    for (int i = 0; i < num_clades - 1; i++) {
-        for (int j = 0; j < num_clades - i - 1; j++) {
-            if (sorted_clades[j].getAge() > sorted_clades[j+1].getAge()) {
-                std::swap(sorted_clades[j], sorted_clades[j+1]);
-            }
-        }
-    }
 
     
     std::vector<Clade> virtual_taxa;

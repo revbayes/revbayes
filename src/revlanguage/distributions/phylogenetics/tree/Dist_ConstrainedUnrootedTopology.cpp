@@ -11,7 +11,6 @@
 #include "ModelVector.h"
 #include "RlBoolean.h"
 #include "RlClade.h"
-#include "RlTimeTree.h"
 #include "ConstantNode.h"
 #include "DagMemberFunction.h"
 #include "DagNode.h"
@@ -90,7 +89,7 @@ RevBayesCore::TopologyConstrainedTreeDistribution* Dist_ConstrainedUnrootedTopol
     RevBayesCore::Tree* init = NULL;
     if ( initial_tree->getRevObject() != RevNullObject::getInstance() )
     {
-        init = static_cast<const TimeTree &>( initial_tree->getRevObject() ).getDagNode()->getValue().clone();
+        init = static_cast<const BranchLengthTree &>( initial_tree->getRevObject() ).getDagNode()->getValue().clone();
     }
     
     // create the internal distribution object
@@ -100,17 +99,17 @@ RevBayesCore::TopologyConstrainedTreeDistribution* Dist_ConstrainedUnrootedTopol
     {
         ; // do nothing
     }
-    else if ( backbone->getRevObject().isType( ModelVector<TimeTree>::getClassTypeSpec() ) )
+    else if ( backbone->getRevObject().isType( ModelVector<BranchLengthTree>::getClassTypeSpec() ) )
     {
         RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::Tree> >* bb = NULL;
-        bb = static_cast<const ModelVector<TimeTree> &>( backbone->getRevObject() ).getDagNode();
+        bb = static_cast<const ModelVector<BranchLengthTree> &>( backbone->getRevObject() ).getDagNode();
         
         dist->setBackbone( NULL, bb );
     }
-    else if ( backbone->getRevObject().isType( TimeTree::getClassTypeSpec() ) )
+    else if ( backbone->getRevObject().isType( BranchLengthTree::getClassTypeSpec() ) )
     {
         RevBayesCore::TypedDagNode<RevBayesCore::Tree>* bb = NULL;
-        bb = static_cast<const TimeTree&>( backbone->getRevObject() ).getDagNode();
+        bb = static_cast<const BranchLengthTree&>( backbone->getRevObject() ).getDagNode();
 
         dist->setBackbone( bb, NULL );
     }
