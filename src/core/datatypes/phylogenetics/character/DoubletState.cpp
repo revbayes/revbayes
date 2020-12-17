@@ -75,69 +75,31 @@ std::string DoubletState::getStringValue(void) const
         return "--";
     }
 
-    std::vector<unsigned int> codon_pos = getDoubletStates();
+    RbBitSet letters1(4);
+    RbBitSet letters2(4);
 
-    std::string str_val = "";
-
-    for (size_t i=0; i<2; ++i)
+    for(int i=0;i<state.size();i++)
     {
-        switch ( codon_pos[i] )
+        if (state[i])
         {
-            case 0x0:
-                str_val += "A";
-                break;
-            case 0x1:
-                str_val += "C";
-                break;
-//            case 0x3:
-//                str_val += "M";
-//                break;
-            case 0x2:
-                str_val += "G";
-                break;
-//            case 0x5:
-//                str_val += "R";
-//                break;
-//            case 0x6:
-//                str_val += "S";
-//                break;
-//            case 0x7:
-//                str_val += "V";
-//                break;
-            case 0x3:
-                str_val += "T";
-                break;
-//            case 0x9:
-//                str_val += "W";
-//                break;
-//            case 0xA:
-//                str_val += "Y";
-//                break;
-//            case 0xB:
-//                str_val += "H";
-//                break;
-//            case 0xC:
-//                str_val += "K";
-//                break;
-//            case 0xD:
-//                str_val += "D";
-//                break;
-//            case 0xE:
-//                str_val += "B";
-//                break;
-            case 0xF:
-                str_val += "N";
-                break;
-//            case 0xF:
-//                str_val += "-";
-//                break;
+            auto& doublet = DOUBLETS[i];
 
-            default:
-                str_val += "?";
+            DnaState dna_pos1 = DnaState( std::string(1, doublet[0]) );
+            DnaState dna_pos2 = DnaState( std::string(1, doublet[1]) );
+
+            letters1.set( dna_pos1.getStateIndex() );
+            letters2.set( dna_pos2.getStateIndex() );
         }
     }
 
-    return str_val;
+    std::string str_val = DnaState(letters1).getStringValue() + DnaState(letters2).getStringValue();
+
+    DoubletState tmp(str_val);
+
+    if (tmp.getState() == state)
+        return str_val;
+
+    throw RbException("This ambiguous doublet character is not representable as a two-letter code");
 }
 
 
@@ -214,7 +176,7 @@ void DoubletState::setState(const std::string &s)
                 for (size_t j=0; j<4; ++j)
                 {
                     // test if the bit is set for the second doublet position
-                    if ( bs_pos_0.isSet(j)  )
+                    if ( bs_pos_1.isSet(j)  )
                     {
                         ++num_observed_states;
                         size_t doublet_index = i*4 + j;
