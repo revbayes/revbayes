@@ -179,22 +179,27 @@ void DoubletState::setMissingState( bool tf )
 
 void DoubletState::setState(const std::string &s)
 {
+    if (s.size() != 2)
+        throw RbException("Doublet state '"+s+"' does not have size 2!");
+
+    /* A C G T */
     std::string symbol = s;
-    if ( symbol == "??" )
+    StringUtilities::replaceSubstring(symbol, "U", "T");
+    DnaState dna_pos_0 = DnaState( std::string(1, symbol[0]) );
+    DnaState dna_pos_1 = DnaState( std::string(1, symbol[1]) );
+
+    // Here we treat A? as AN instead of ??
+    if ( dna_pos_0.isMissingState() and dna_pos_1.isMissingState())
     {
         setMissingState( true );
     }
-    else if ( symbol == "--" )
+    // Here we treat A- as AN instead of --
+    else if ( dna_pos_0.isGapState() and dna_pos_1.isGapState())
     {
         setGapState( true );
     }
     else
     {
-        /* A C G T */
-        StringUtilities::replaceSubstring(symbol, "U", "T");
-        DnaState dna_pos_0 = DnaState( std::string(1, symbol[0]) );
-        DnaState dna_pos_1 = DnaState( std::string(1, symbol[1]) );
-
         RbBitSet bs_pos_0 = dna_pos_0.getState();
         RbBitSet bs_pos_1 = dna_pos_1.getState();
 
@@ -203,29 +208,22 @@ void DoubletState::setState(const std::string &s)
 
         for (size_t i=0; i<4; ++i)
         {
-
             // test if the bit is set for the first doublet position
-            if ( bs_pos_0.isSet( i ) == true )
+            if ( bs_pos_0.isSet(i) )
             {
-
                 for (size_t j=0; j<4; ++j)
                 {
-
                     // test if the bit is set for the second doublet position
-                    if ( bs_pos_0.isSet( j ) == true )
+                    if ( bs_pos_0.isSet(j)  )
                     {
                         ++num_observed_states;
                         size_t doublet_index = i*4 + j;
                         state.set( doublet_index );
                         index_single_state = doublet_index;
                     }
-
                 } // end for-loop over all possible states for the second doublet position
-
             }
-
         } // end for-loop over all possible states for the first doublet position
-
     } // end if this is not a missing or gap state
 }
 
