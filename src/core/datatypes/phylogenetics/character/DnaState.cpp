@@ -11,7 +11,7 @@ using namespace RevBayesCore;
 DnaState::DnaState( size_t n ) : DiscreteCharacterState( 4 ),
     state( ' ' )
 {
-    
+
 }
 
 
@@ -19,8 +19,20 @@ DnaState::DnaState( size_t n ) : DiscreteCharacterState( 4 ),
 DnaState::DnaState(const std::string &s) : DiscreteCharacterState( 4 ),
  state( ' ' )
 {
-    
     setState(s);
+}
+
+DnaState::DnaState(const RbBitSet& bs)  : DiscreteCharacterState( 4)
+{
+    int mask = 0;
+    if (bs[0]) mask |= 1;
+    if (bs[1]) mask |= 2;
+    if (bs[2]) mask |= 4;
+    if (bs[3]) mask |= 8;
+
+    auto states = " ACMGRSVTWYHKDBN";
+
+    state = states[mask];
 }
 
 
