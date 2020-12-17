@@ -88,7 +88,7 @@ RevBayesCore::AbstractDiscreteTaxonData* CharacterTranslator::translateCharacter
         }
         else
         {
-            trans_taxon_data = translateToCodon( d );
+            trans_taxon_data = translateToDoublet( d );
         }
     }
     else
