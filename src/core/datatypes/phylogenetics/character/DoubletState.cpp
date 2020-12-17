@@ -99,7 +99,7 @@ std::string DoubletState::getStringValue(void) const
     if (tmp.getState() == state)
         return str_val;
 
-    throw RbException("This ambiguous doublet character is not representable as a two-letter code");
+    throw RbException("This ambiguous doublet character (which looks like of like "+str_val+") is not representable as a two-letter code");
 }
 
 
