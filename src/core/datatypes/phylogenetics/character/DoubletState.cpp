@@ -151,43 +151,50 @@ void DoubletState::setState(const std::string &s)
     DnaState dna_pos_0 = DnaState( std::string(1, symbol[0]) );
     DnaState dna_pos_1 = DnaState( std::string(1, symbol[1]) );
 
-    // Here we treat A? as AN instead of ??
     if ( dna_pos_0.isMissingState() and dna_pos_1.isMissingState())
     {
         setMissingState( true );
+        return;
     }
-    // Here we treat A- as AN instead of --
-    else if ( dna_pos_0.isGapState() and dna_pos_1.isGapState())
+
+    // Complain about mixed missing/non-missing letters like A?
+    if ( dna_pos_0.isMissingState() or dna_pos_1.isMissingState())
+        throw RbException("Doublet letter '"+s+"' not allowed: consider changing to '\?\?' or replacing '?' with 'N'");
+
+    if ( dna_pos_0.isGapState() and dna_pos_1.isGapState())
     {
         setGapState( true );
+        return;
     }
-    else
+
+    // Complain about mixed gap/non-gap letters like A-
+    if ( dna_pos_0.isGapState() or dna_pos_1.isGapState())
+        throw RbException("Doublet letter '"+s+"' not allowed: consider changing to '--' or replacing '-' with 'N'");
+
+    RbBitSet bs_pos_0 = dna_pos_0.getState();
+    RbBitSet bs_pos_1 = dna_pos_1.getState();
+
+    num_observed_states = 0;
+    state.clear();
+
+    for (size_t i=0; i<4; ++i)
     {
-        RbBitSet bs_pos_0 = dna_pos_0.getState();
-        RbBitSet bs_pos_1 = dna_pos_1.getState();
-
-        num_observed_states = 0;
-        state.clear();
-
-        for (size_t i=0; i<4; ++i)
+        // test if the bit is set for the first doublet position
+        if ( bs_pos_0.isSet(i) )
         {
-            // test if the bit is set for the first doublet position
-            if ( bs_pos_0.isSet(i) )
+            for (size_t j=0; j<4; ++j)
             {
-                for (size_t j=0; j<4; ++j)
+                // test if the bit is set for the second doublet position
+                if ( bs_pos_1.isSet(j)  )
                 {
-                    // test if the bit is set for the second doublet position
-                    if ( bs_pos_1.isSet(j)  )
-                    {
-                        ++num_observed_states;
-                        size_t doublet_index = i*4 + j;
-                        state.set( doublet_index );
-                        index_single_state = doublet_index;
-                    }
-                } // end for-loop over all possible states for the second doublet position
-            }
-        } // end for-loop over all possible states for the first doublet position
-    } // end if this is not a missing or gap state
+                    ++num_observed_states;
+                    size_t doublet_index = i*4 + j;
+                    state.set( doublet_index );
+                    index_single_state = doublet_index;
+                }
+            } // end for-loop over all possible states for the second doublet position
+        }
+    } // end for-loop over all possible states for the first doublet position
 
     assert(state.getNumberSetBits() > 0);
 }
