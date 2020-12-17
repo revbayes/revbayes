@@ -170,6 +170,7 @@ void RateMatrix_GTR::tiProbsEigens(double t, TransitionProbabilityMatrix& P) con
     double*         p = P.theMatrix;
     for (size_t i=0; i<num_states; i++) 
     {
+        double rowsum = 0.0;
         for (size_t j=0; j<num_states; j++, ++p) 
         {
             double sum = 0.0;
@@ -178,10 +179,15 @@ void RateMatrix_GTR::tiProbsEigens(double t, TransitionProbabilityMatrix& P) con
                 sum += (*ptr++) * eigValExp[s];
             }
             
-//                      P[i][j] = (sum < 0.0) ? 0.0 : sum;
-            (*p) = (sum < 0.0) ? 0.0 : sum;
-
+            sum = (sum < 0.0) ? 0.0 : sum;
+            rowsum += sum;
+            (*p) = sum;
         }
+
+        // Normalize transition probabilities for row to sum to 1.0
+        auto p2 = p - num_states;
+        for (size_t j=0; j<num_states; j++, ++p2)
+            *p2 /= rowsum;
     }
 }
 
@@ -254,13 +260,20 @@ void RateMatrix_GTR::tiProbsComplexEigens(double t, TransitionProbabilityMatrix&
     const std::complex<double>* ptr = &cc_ijk[0];
     for (size_t i=0; i<num_states; i++) 
     {
+        double rowsum = 0.0;
         for (size_t j=0; j<num_states; j++) 
         {
             std::complex<double> sum = std::complex<double>(0.0, 0.0);
             for (size_t s=0; s<num_states; s++)
                 sum += (*ptr++) * ceigValExp[s];
-            P[i][j] = (sum.real() < 0.0) ? 0.0 : sum.real();
+
+            double real_sum = (sum.real() < 0.0) ? 0.0 : sum.real();
+            P[i][j] = real_sum;
+            rowsum += real_sum;
         }
+        // Normalize transition probabilities for row to sum to 1.0
+        for (size_t j=0; j<num_states; j++)
+            P[i][j] /= rowsum;
     }
 }
 
