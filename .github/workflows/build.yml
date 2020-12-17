@@ -257,8 +257,8 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     steps:
-    - uses: technote-space/workflow-conclusion-action@v1.1.1
-    - uses: 8398a7/action-slack@v3.8.0
+    - uses: technote-space/workflow-conclusion-action@v2.0.1
+    - uses: 8398a7/action-slack@v3.8.1
       with:
         status: custom
         fields: workflow,commit,repo,ref,author
