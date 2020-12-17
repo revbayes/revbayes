@@ -1,6 +1,7 @@
 #include "DoubletState.h"
 
 #include <string>
+#include <cassert>
 
 #include "DnaState.h"
 #include "RbException.h"
@@ -187,6 +188,8 @@ void DoubletState::setState(const std::string &s)
             }
         } // end for-loop over all possible states for the first doublet position
     } // end if this is not a missing or gap state
+
+    assert(state.getNumberSetBits() > 0);
 }
 
 
