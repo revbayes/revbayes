@@ -185,7 +185,7 @@ void RateMatrix_GTR::tiProbsEigens(double t, TransitionProbabilityMatrix& P) con
         }
 
         // Normalize transition probabilities for row to sum to 1.0
-        auto p2 = p - num_states;
+        double* p2 = p - num_states;
         for (size_t j=0; j<num_states; j++, ++p2)
             *p2 /= rowsum;
     }

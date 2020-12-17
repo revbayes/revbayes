@@ -30,7 +30,7 @@ DnaState::DnaState(const RbBitSet& bs)  : DiscreteCharacterState( 4)
     if (bs[2]) mask |= 4;
     if (bs[3]) mask |= 8;
 
-    auto states = " ACMGRSVTWYHKDBN";
+    const char* states = " ACMGRSVTWYHKDBN";
 
     state = states[mask];
 }
