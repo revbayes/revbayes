@@ -98,7 +98,47 @@ Tree* Tree::clone(void) const
 RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
 {
     
-    if ( name == "calculateEDR" )
+    
+    if ( name == "addFossil" )
+    {
+        found = true;
+        
+        const RevBayesCore::Taxon& taxon = static_cast<const Taxon&>(args[0].getVariable()->getRevObject()).getValue();
+        RevBayesCore::Clade tmp;
+        if ( args[1].getVariable()->getRevObject().isType( ModelVector<Taxon>::getClassTypeSpec() ) )
+        {
+            const std::vector<RevBayesCore::Taxon> &taxa = static_cast<const ModelVector<Taxon>&>( args[1].getVariable()->getRevObject() ).getValue();
+            tmp = RevBayesCore::Clade( taxa );
+        }
+        else if ( args[1].getVariable()->getRevObject().isType( Clade::getClassTypeSpec() ) )
+        {
+            tmp = static_cast<const Clade&>( args[1].getVariable()->getRevObject() ).getValue();
+        }
+        tmp.resetTaxonBitset( this->dag_node->getValue().getTaxonBitSetMap() );
+        RevBayesCore::TopologyNode& n = this->dag_node->getValue().getMrca( tmp );
+        
+        RevBayesCore::TopologyNode& p = n.getParent();
+        
+        RevBayesCore::TopologyNode* new_p = new RevBayesCore::TopologyNode();
+        RevBayesCore::TopologyNode* new_f = new RevBayesCore::TopologyNode(taxon, this->dag_node->getValue().getNumberOfTips()+1);
+
+        new_f->setAge(taxon.getAge());
+        double max_child_age = (taxon.getAge() > n.getAge() ? taxon.getAge() : n.getAge());
+        new_p->setAge( (p.getAge() - max_child_age) / 2.0 + max_child_age);
+        
+        new_p->addChild( new_f );
+        new_p->addChild( &n );
+        p.removeChild( &n );
+        p.addChild( new_p );
+        new_p->setParent( &p );
+        new_f->setParent( new_p );
+        n.setParent( new_p );
+        
+        this->dag_node->getValue().setRoot( &this->dag_node->getValue().getRoot(), true);
+        
+        return NULL;
+    }
+    else if ( name == "calculateEDR" )
     {
         found = true;
         std::vector<double> edr = RevBayesCore::TreeUtilities::calculateEDR( dag_node->getValue() );
@@ -398,6 +438,14 @@ const TypeSpec& Tree::getTypeSpec( void ) const
  */
 void Tree::initMethods( void )
 {
+    ArgumentRules* add_fossil_arg_rules = new ArgumentRules();
+    add_fossil_arg_rules->push_back( new ArgumentRule( "fossil", Taxon::getClassTypeSpec(), "The fossil taxon.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    std::vector<TypeSpec> add_fossil_clade_types;
+    add_fossil_clade_types.push_back( ModelVector<Taxon>::getClassTypeSpec() );
+    add_fossil_clade_types.push_back( Clade::getClassTypeSpec() );
+    add_fossil_arg_rules->push_back( new ArgumentRule( "clade", add_fossil_clade_types, "Vector of some/all of the taxa included in the clade.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure( "addFossil", RlUtils::Void, add_fossil_arg_rules ) );
+    
     ArgumentRules* isBinaryArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "isBinary", RlBoolean::getClassTypeSpec(), isBinaryArgRules ) );
 
