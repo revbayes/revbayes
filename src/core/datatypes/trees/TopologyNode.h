@@ -135,6 +135,8 @@ namespace RevBayesCore {
         bool                                        isTip(void) const;                                                                  //!< Is node tip?
         bool                                        isUltrametric(double& depth) const;                                                 //!< Check if the subtree subtending from this node is ultramtric.
         void                                        makeBifurcating(bool as_fossils);                                                   //!< Make this and all its descendants bifurcating.
+        void                                        recomputeAge(bool recursive);                                                       //!< Recompute the age of this node based on the childs age and the branch length leading to it.
+        void                                        recomputeBranchLength(void);                                                        //!< Recompute the length of this branch based on the ages.
         void                                        renameNodeParameter(const std::string &old_name, const std::string &new_name);
         void                                        removeAllChildren(void);                                                            //!< Removes all of the children of the node
         size_t                                      removeChild(TopologyNode* c);                                                       //!< Removes a specific child
@@ -155,8 +157,6 @@ namespace RevBayesCore {
         void                                        setUseAges(bool tf, bool recursive);
         
         // internal helper functions
-        void                                        recomputeBranchLength(void);                                                        //!< Recompute the length of this branch based on the ages.
-        
         bool getBurstSpeciation(void) const { return burst_speciation; }
         bool getSamplingEvent(void) const { return sampling_event; }
         bool getSerialSampling(void) const { return serial_sampling; }

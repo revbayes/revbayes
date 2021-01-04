@@ -1179,6 +1179,10 @@ void RevBayesCore::TreeUtilities::makeUltrametric(Tree& tree)
     {
         tree.getTipNode( i ).setAge(0.0);
     }
+    
+    // finally, make sure that all the internal nodes have the ages properly set
+    tree.getRoot().recomputeAge(true, true);
+
 
 }
 

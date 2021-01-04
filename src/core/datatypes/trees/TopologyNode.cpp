@@ -1677,6 +1677,28 @@ void TopologyNode::makeBifurcating( bool as_fossils )
 }
 
 
+void TopologyNode::recomputeAge( bool recursive )
+{
+
+    if ( children.size() == 0 )
+    {
+        age = 0.0;
+    }
+    else if ( RbMath::isFinite( age ) == true )
+    {
+        if ( recursive == true )
+        {
+            for (size_t i=0; i<children.size(); ++i)
+            {
+                children[i]->recomputeAge(recursive);
+            }
+        }
+        age = children[0]->getBranchLength() + children[0]->getAge();
+    }
+
+}
+
+
 void TopologyNode::recomputeBranchLength( void )
 {
 
