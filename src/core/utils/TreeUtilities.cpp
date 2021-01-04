@@ -1174,14 +1174,14 @@ void RevBayesCore::TreeUtilities::makeUltrametric(Tree& tree)
         tree.getTipNode( i ).setBranchLength(tree.getTipNode( i ).getBranchLength() + max - ages[i]);
     }
 
-    // make sure that all the tips have an age of 0
-    for (size_t i = 0; i < tree.getNumberOfTips(); ++i)
-    {
-        tree.getTipNode( i ).setAge(0.0);
-    }
+//    // make sure that all the tips have an age of 0
+//    for (size_t i = 0; i < tree.getNumberOfTips(); ++i)
+//    {
+//        tree.getTipNode( i ).setAge(0.0);
+//    }
     
     // finally, make sure that all the internal nodes have the ages properly set
-    tree.getRoot().recomputeAge(true, true);
+    tree.getRoot().recomputeAge(true);
 
 
 }

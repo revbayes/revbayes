@@ -1684,7 +1684,7 @@ void TopologyNode::recomputeAge( bool recursive )
     {
         age = 0.0;
     }
-    else if ( RbMath::isFinite( age ) == true )
+    else 
     {
         if ( recursive == true )
         {
