@@ -126,7 +126,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         double max_child_age = (taxon.getAge() > n.getAge() ? taxon.getAge() : n.getAge());
         if ( p.getAge() < max_child_age )
         {
-            RevBayesCore::TreeUtilities::rescaleTree(this->dag_node->getValue().getRoot(), max_child_age / p.getAge() + 0.1);
+            RevBayesCore::TreeUtilities::rescaleTree(this->dag_node->getValue().getRoot(), max_child_age / p.getAge() + 0.5);
             max_child_age = (taxon.getAge() > n.getAge() ? taxon.getAge() : n.getAge());
         }
         
@@ -267,16 +267,6 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
             tree.makeRootBifurcating( outgroup, true );
         }
         
-        return NULL;
-    }
-    else if (name == "makeUltrametric")
-    {
-
-        found = true;
-
-        RevBayesCore::Tree &tree = dag_node->getValue();
-        RevBayesCore::TreeUtilities::makeUltrametric(tree);
-
         return NULL;
     }
     else if (name == "names" || name == "taxa")
@@ -560,9 +550,6 @@ void Tree::initMethods( void )
     setNegativeConstraint->push_back( new ArgumentRule( "flag", RlBoolean::getClassTypeSpec(), "Is the tree a negative constraint?.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "setNegativeConstraint", RlUtils::Void, setNegativeConstraint ) );
 
-    ArgumentRules* makeUltraArgRules = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "makeUltrametric", RlUtils::Void, makeUltraArgRules ) );
-
     ArgumentRules* get_clade_arg_rules = new ArgumentRules();
     std::vector<TypeSpec> clade_types;
     clade_types.push_back( ModelVector<Taxon>::getClassTypeSpec() );
@@ -579,7 +566,7 @@ void Tree::initMethods( void )
 
     ArgumentRules* rerootArgRules = new ArgumentRules();
     rerootArgRules->push_back( new ArgumentRule( "clade", Clade::getClassTypeSpec(), "The clade to use as outgroup.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    rerootArgRules->push_back( new ArgumentRule( "make_bifurcating", RlBoolean::getClassTypeSpec(), "Do we want a bifurcation at the root?", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    rerootArgRules->push_back( new ArgumentRule( "makeBifurcating", RlBoolean::getClassTypeSpec(), "Do we want a bifurcation at the root?", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "reroot", RlUtils::Void, rerootArgRules ) );
 
     ArgumentRules* getDescendantTaxaArgRules = new ArgumentRules();
