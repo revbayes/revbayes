@@ -124,6 +124,12 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
 
         new_f->setAge(taxon.getAge());
         double max_child_age = (taxon.getAge() > n.getAge() ? taxon.getAge() : n.getAge());
+        if ( p.getAge() < max_child_age )
+        {
+            RevBayesCore::TreeUtilities::rescaleTree(this->dag_node->getValue().getRoot(), max_child_age / p.getAge() + 0.1);
+            max_child_age = (taxon.getAge() > n.getAge() ? taxon.getAge() : n.getAge());
+        }
+        
         new_p->setAge( (p.getAge() - max_child_age) / 2.0 + max_child_age);
         
         new_p->addChild( new_f );
