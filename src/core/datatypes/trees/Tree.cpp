@@ -1667,6 +1667,34 @@ void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
 }
 
 
+/**
+ * Resets a map of the taxa to their BitSet indices.
+ * The taxa are ordered alphabetically in the BitSet.
+ */
+void Tree::resetTaxonBitSetMap( void )
+{
+    taxon_bitset_map.clear();
+    
+    // get all taxon names
+    std::vector<Taxon> unordered_taxa = getTaxa();
+    std::vector<std::string> ordered_taxa;
+    for (size_t i = 0; i < unordered_taxa.size(); ++i)
+    {
+        ordered_taxa.push_back(unordered_taxa[i].getName());
+    }
+
+    // order taxon names
+    std::sort(ordered_taxa.begin(), ordered_taxa.end());
+
+    // add taxa to bitset map
+    for (size_t i = 0; i < ordered_taxa.size(); ++i)
+    {
+        taxon_bitset_map[ordered_taxa[i]] = i;
+    }
+    
+}
+
+
 TopologyNode& Tree::reverseParentChild(TopologyNode &n)
 {
     TopologyNode* ret = &n;

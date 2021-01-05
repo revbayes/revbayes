@@ -135,6 +135,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         n.setParent( new_p );
         
         this->dag_node->getValue().setRoot( &this->dag_node->getValue().getRoot(), true);
+        this->dag_node->getValue().resetTaxonBitSetMap();
         
         return NULL;
     }
