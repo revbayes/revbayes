@@ -14,6 +14,7 @@ help="false"
 jupyter="false"
 boost_root=""
 boost_lib=""
+j=4
 
 cmake_args=""
 # parse command line arguments
@@ -152,8 +153,8 @@ fi
     echo "Running 'cmake ../../../src $cmake_args' in $(pwd)"
     cmake ../../../src $cmake_args
     echo
-    echo "Running 'make -j4' in $(pwd)"
-    make -j 4
+    echo "Running 'make -j $j' in $(pwd)"
+    make -j $j
     cd ..
 
     if [ -e  GitVersion_backup.cpp ] ; then
