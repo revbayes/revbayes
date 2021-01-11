@@ -92,7 +92,7 @@ for PKG in ${PKGS} ; do
     FILE=mingw-w64-x86_64-${PKG}-any.pkg.tar.zst
     rm -f ${FILE}
     wget --no-verbose --show-progress http://repo.msys2.org/mingw/x86_64/${FILE}
-    tar -I zstd -Jxf ${FILE}
+    tar -I zstd -xf ${FILE}
     rm ${FILE}
 done
 
