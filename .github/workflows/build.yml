@@ -114,6 +114,8 @@ jobs:
     - name: Install (macOS)
       if: runner.os == 'macOS'
       run: |
+          rm -rf /usr/local/bin/2to3 
+          
           brew update
           brew install pkg-config pandoc boost ccache coreutils
           sudo xcode-select -switch /Applications/Xcode_${{ matrix.version }}.app
