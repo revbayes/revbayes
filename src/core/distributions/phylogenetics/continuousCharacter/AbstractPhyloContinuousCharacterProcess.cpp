@@ -76,10 +76,7 @@ double AbstractPhyloContinuousCharacterProcess::computeBranchTime( size_t nodeId
         branch_time = sigma * sigma * brlen;
     }
     
-    // prevent division by zero
-    return branch_time <= 0.0 ? 1e-16 : branch_time;
-    
-//    return branch_time;
+    return branch_time;
 }
 
 
