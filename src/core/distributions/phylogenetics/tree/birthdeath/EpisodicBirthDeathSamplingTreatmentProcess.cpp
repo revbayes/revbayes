@@ -1534,6 +1534,7 @@ void EpisodicBirthDeathSamplingTreatmentProcess::redrawValue( SimulationConditio
         prepareTimeline();
         
         BirthDeathForwardSimulator simulator;
+        simulator.setMaxNumLineages(50000);
         
         size_t num_epochs = global_timeline.size();
         std::vector< std::vector<double> > tmp = std::vector< std::vector<double> >( num_epochs, std::vector<double>(1,0) );
