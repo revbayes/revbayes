@@ -260,6 +260,7 @@ namespace RevBayesCore {
         }
         void                                                printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true ) const
         {
+            // if flatten == TRUE, save each element of vector separately
             if (flatten) {
                 for (size_t i = 0; i < size(); ++i) {
                     if (i > 0) {
@@ -269,6 +270,8 @@ namespace RevBayesCore {
                             this->operator[](i), o, sep, l, left);
                 }
             }
+
+            // otherwise, save full vector
             else {
                 o << "[";
                 for (size_t i=0; i<size(); ++i)
@@ -284,8 +287,10 @@ namespace RevBayesCore {
         }
         void                                                printForComplexStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true ) const
         {
+            // set precision to maximum
             o.precision( std::numeric_limits<double>::digits10 );
 
+            // if flatten == TRUE, save each element of vector separately
             if (flatten) {
                 for (size_t i=0; i<size(); ++i)
                 {
@@ -296,6 +301,8 @@ namespace RevBayesCore {
                     Printer<valueType, IsDerivedFrom<valueType, Printable>::Is >::printForComplexStoring( this->operator[](i), o, sep, l, left );
                 }
             }
+
+            // otherwise, save full vector
             else {
                 o << "[";
                 for (size_t i=0; i<size(); ++i)

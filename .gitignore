@@ -34,3 +34,5 @@ doxygen/DoxygenWarningLog.txt
 .cproject
 .project
 .settings/
+src/.idea
+src/cmake-build-debug

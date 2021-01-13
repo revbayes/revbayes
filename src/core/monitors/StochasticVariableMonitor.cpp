@@ -18,7 +18,7 @@ StochasticVariableMonitor::StochasticVariableMonitor(unsigned long g, const std:
     posterior  = false;
     prior      = false;
     likelihood = false;
-    flatten    = false;
+    flatten    = false; // this is the only monitor where we want to save vectors fully, instead of element by element
 }
 
 

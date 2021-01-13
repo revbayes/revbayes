@@ -43,7 +43,8 @@ namespace RevBayesCore {
             o.setf( previousFlags );
             o.precision( previousPrecision );
         }
-        
+
+        // print with rounding
         static void                     printForSimpleStoring( const objType &a, std::ostream &o, const std::string & /*sep*/, int l, bool left, bool flatten = true)
         {
             std::stringstream ss;
@@ -55,7 +56,8 @@ namespace RevBayesCore {
             }
             o << s;
         }
-        
+
+        // print without rounding
         static void                     printForComplexStoring( const objType &a, std::ostream &o, const std::string & /*sep*/, int l, bool left, bool flatten = true )
         {
             std::stringstream ss;
@@ -90,6 +92,8 @@ namespace RevBayesCore {
     inline void Printer<Tree,0>::printForComplexStoring( const Tree &a, std::ostream &o, const std::string &sep, int l, bool left, bool flatten )
     {
         std::stringstream ss;
+
+        // call getNewickRepresentation with round == FALSE
         ss << a.getNewickRepresentation( false );
         std::string s = ss.str();
         if (l > 0) {

@@ -1302,7 +1302,7 @@ void ContinuousCharacterData::printForUser( std::ostream &o, const std::string &
 }
 
 
-//!< print object for user (in user-formatted way)
+//!< print object with standard rounding
 void ContinuousCharacterData::printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const
 {
     
@@ -1311,7 +1311,7 @@ void ContinuousCharacterData::printForSimpleStoring( std::ostream &o, const std:
 }
 
 
-//!< print object for user (in user-formatted way)
+//!< print object with maximum precision
 void ContinuousCharacterData::printForComplexStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const
 {
     o << "{Hello}";

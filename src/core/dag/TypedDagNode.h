@@ -90,13 +90,15 @@ namespace RevBayesCore {
     template<>
     inline void TypedDagNode<double>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool simple, bool flatten) const
     {
-        
         std::stringstream ss;
+
+        // if simple == FALSE, print with maximum precision allowed
         if (!simple)
         {
             ss.precision(std::numeric_limits<double>::digits10);
         }
 
+        // otherwise, use standard RB precision
         else
         {
             ss.precision(RbSettings::userSettings().getOutputPrecision());
