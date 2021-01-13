@@ -352,7 +352,7 @@ std::string TopologyNode::buildNewickString( bool simmap = false, bool round = t
     // depending on the value of round, get standard precision or maximum
     if (round)
     {
-        o.precision(RbSettings::userSettings().getOutputPrecision());
+        o.precision( 6 );
     }
     else
     {
