@@ -596,8 +596,7 @@ void RevBayesCore::StochasticNode<valueType>::keepMe( const DagNode* affecter )
 template<class valueType>
 void RevBayesCore::StochasticNode<valueType>::printStructureInfo( std::ostream &o, bool verbose ) const
 {
-    
-    
+        
     o << "_dagType      = Stochastic node (distribution)" << std::endl;
     o << "_distribution = " << "<" << distribution << ">" << std::endl;
     o << "_clamped      = " << ( this->clamped ? "TRUE" : "FALSE" ) << std::endl;

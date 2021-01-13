@@ -154,7 +154,7 @@ void PhyloBrownianProcessREML::recursiveComputeLnProbability( const TopologyNode
         
         for (size_t j = 1; j < num_children; ++j)
         {
-        
+
             size_t left_index = node_index;
             const TopologyNode *left = &node;
             if ( j == 1 )
@@ -263,6 +263,9 @@ void PhyloBrownianProcessREML::recursiveComputeLnProbability( const TopologyNode
                     mu_node[site] = (mu_left[site]*t_right + mu_right[site]*t_left) / (t_left+t_right);
                 }
                     
+
+                // compute the estimate of mu for this site and node
+                mu_node[i] = (mu_left[i]*t_right + mu_right[i]*t_left) / (t_left+t_right);
 
             } // end for-loop over all sites
 

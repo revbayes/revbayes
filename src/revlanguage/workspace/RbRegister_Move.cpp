@@ -37,6 +37,7 @@
 #include "DPPTableValueUpdate.h"
 #include "GibbsMixtureAllocationProposal.h"
 #include "Integer.h"
+#include "IntegerPos.h"
 #include "MixtureAllocationProposal.h"
 #include "ModelObject.h"
 #include "ModelVector.h"

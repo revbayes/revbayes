@@ -4,6 +4,7 @@
 
 #include "ConstantNode.h"
 #include "Integer.h"
+#include "IntegerPos.h"
 #include "Natural.h"
 #include "RlBoolean.h"
 #include "Probability.h"
@@ -145,9 +146,11 @@ RevObject* Real::convertTo( const TypeSpec& type ) const
         return new Probability(dag_node->getValue());
     if ( type == Integer::getClassTypeSpec() && dag_node->getValue() == int(dag_node->getValue()) )
         return new Integer( int(dag_node->getValue()) );
+    if ( type == IntegerPos::getClassTypeSpec() && dag_node->getValue() > 0.0 && dag_node->getValue() == int(dag_node->getValue()) )
+        return new IntegerPos( int(dag_node->getValue()) );
     if ( type == Natural::getClassTypeSpec() && dag_node->getValue() >= 0.0 && dag_node->getValue() == int(dag_node->getValue()) )
         return new Natural( int(dag_node->getValue()) );
-    
+
     if ( type == RlString::getClassTypeSpec() ) 
     {
         std::ostringstream o;
@@ -289,6 +292,11 @@ double Real::isConvertibleTo(const TypeSpec& type, bool once) const
         return 0.3;
     }
     
+    if ( once && type == IntegerPos::getClassTypeSpec() && dag_node->getValue() >= 1.0 && dag_node->getValue() == int(dag_node->getValue()) )
+    {
+        return 0.7;
+    }
+
     if ( once && type == Natural::getClassTypeSpec() && dag_node->getValue() >= 0.0 && dag_node->getValue() == int(dag_node->getValue()) )
     {
         return 0.2;
