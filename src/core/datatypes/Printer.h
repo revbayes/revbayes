@@ -30,7 +30,7 @@ namespace RevBayesCore {
         
     public:
         //!< Printer the given object.
-        static void                     printForUser( const objType &a, std::ostream &o, const std::string & /*sep*/, int /*l*/, bool /*left*/) {
+        static void                     printForUser( const objType &a, std::ostream &o, const std::string & /*sep*/, int /*l*/, bool /*left*/ ) {
             
             long previousPrecision = o.precision();
             std::ios_base::fmtflags previousFlags = o.flags();
@@ -44,7 +44,7 @@ namespace RevBayesCore {
             o.precision( previousPrecision );
         }
         
-        static void                     printForSimpleStoring( const objType &a, std::ostream &o, const std::string & /*sep*/, int l, bool left )
+        static void                     printForSimpleStoring( const objType &a, std::ostream &o, const std::string & /*sep*/, int l, bool left, bool flatten = true)
         {
             std::stringstream ss;
             ss << a;
@@ -56,7 +56,7 @@ namespace RevBayesCore {
             o << s;
         }
         
-        static void                     printForComplexStoring( const objType &a, std::ostream &o, const std::string & /*sep*/, int l, bool left )
+        static void                     printForComplexStoring( const objType &a, std::ostream &o, const std::string & /*sep*/, int l, bool left, bool flatten = true )
         {
             std::stringstream ss;
             // set precision of stringstream to max
@@ -80,14 +80,14 @@ namespace RevBayesCore {
     public:
         //!< Printer the given object.
         static void                     printForUser( const objType &a, std::ostream &o, const std::string &sep, int l, bool left ) { a.printForUser(o, sep, l, left); }
-        static void                     printForSimpleStoring( const objType &a, std::ostream &o, const std::string &sep, int l, bool left ) { a.printForSimpleStoring(o, sep, l, left); }
-        static void                     printForComplexStoring( const objType &a, std::ostream &o, const std::string &sep, int l, bool left ) { a.printForComplexStoring(o, sep, l, left); }
+        static void                     printForSimpleStoring( const objType &a, std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true) { a.printForSimpleStoring(o, sep, l, left, flatten); }
+        static void                     printForComplexStoring( const objType &a, std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true ) { a.printForComplexStoring(o, sep, l, left, flatten); }
 
     };
     // define printForComplexStoring for Trees, since in that case we need to tell computeNewick not to round
 
     template<>
-    inline void Printer<Tree,0>::printForComplexStoring( const Tree &a, std::ostream &o, const std::string &sep, int l, bool left )
+    inline void Printer<Tree,0>::printForComplexStoring( const Tree &a, std::ostream &o, const std::string &sep, int l, bool left, bool flatten )
     {
         std::stringstream ss;
         ss << a.getNewickRepresentation( false );

@@ -202,7 +202,7 @@ void Mcmc::checkpoint( void ) const
 {
     // initialize variables
     std::string separator = "\t";
-    bool flatten = false;
+    bool flatten = true;
     
     RbFileManager fm = RbFileManager(checkpoint_file_name);
     fm.createDirectoryForFile();
@@ -250,7 +250,7 @@ void Mcmc::checkpoint( void ) const
         DagNode *node = *it;
         
         // print the value
-        node->printValue(out_stream, separator, -1, false, false, flatten);
+        node->printValue(out_stream, separator, -1, false, false, false, flatten);
     }
     
     

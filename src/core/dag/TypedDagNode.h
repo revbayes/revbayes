@@ -33,7 +33,7 @@ namespace RevBayesCore {
         virtual std::string                                 getValueAsString(void) const;
         virtual bool                                        isSimpleNumeric(void) const;                                                                                //!< Is this variable a simple numeric variable? Currently only integer and real number are.
         virtual void                                        printName(std::ostream &o, const std::string &sep, int l=-1, bool left=true, bool fv=true) const;           //!< Monitor/Print this variable
-        virtual void                                        printValue(std::ostream &o, const std::string &sep, int l=-1, bool left=true, bool user=true, bool simple=true) const;  //!< Monitor/Print this variable
+        virtual void                                        printValue(std::ostream &o, const std::string &sep, int l=-1, bool left=true, bool user=true, bool simple=true, bool flatten=true) const;  //!< Monitor/Print this variable
         virtual void                                        writeToFile(const std::string &dir) const;                                                                  //!< Write the value of this node to a file within the given directory.
 
         // getters and setters
@@ -88,7 +88,7 @@ namespace RevBayesCore {
     // printValue //
     ////////////////
     template<>
-    inline void TypedDagNode<double>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool simple) const
+    inline void TypedDagNode<double>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool simple, bool flatten) const
     {
         
         std::stringstream ss;
@@ -112,7 +112,7 @@ namespace RevBayesCore {
 
     
     template<>
-    inline void TypedDagNode<long>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/) const
+    inline void TypedDagNode<long>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/, bool /*flatten*/) const
     {
         
         std::stringstream ss;
@@ -127,7 +127,7 @@ namespace RevBayesCore {
     
     
     template<>
-    inline void TypedDagNode<unsigned int>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/) const
+    inline void TypedDagNode<unsigned int>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/, bool /*flatten*/) const
     {
         
         std::stringstream ss;
@@ -142,7 +142,7 @@ namespace RevBayesCore {
     
     
     template<>
-    inline void TypedDagNode<std::string>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/) const
+    inline void TypedDagNode<std::string>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/, bool /*flatten*/) const
     {
         
         std::stringstream ss;
@@ -202,7 +202,7 @@ std::string RevBayesCore::TypedDagNode<valueType>::getValueAsString( void ) cons
 {
     
     std::stringstream ss;
-    Printer<valueType, IsDerivedFrom<valueType, Printable>::Is >::printForSimpleStoring( getValue(), ss, ",", -1, true );
+    Printer<valueType, IsDerivedFrom<valueType, Printable>::Is >::printForSimpleStoring( getValue(), ss, ",", -1, true, false );
 
     
     return ss.str();
@@ -254,7 +254,7 @@ void RevBayesCore::TypedDagNode<valueType>::printName(std::ostream &o, const std
 
 
 template<class valueType>
-void RevBayesCore::TypedDagNode<valueType>::printValue(std::ostream &o, const std::string &sep, int l, bool left, bool user, bool simple) const
+void RevBayesCore::TypedDagNode<valueType>::printValue(std::ostream &o, const std::string &sep, int l, bool left, bool user, bool simple, bool flatten) const
 {
     
     std::stringstream ss;
@@ -265,11 +265,11 @@ void RevBayesCore::TypedDagNode<valueType>::printValue(std::ostream &o, const st
     }
     else if ( simple == true )
     {
-        Printer<valueType, IsDerivedFrom<valueType, Printable>::Is >::printForSimpleStoring( getValue(), ss, sep, l, left );
+        Printer<valueType, IsDerivedFrom<valueType, Printable>::Is >::printForSimpleStoring( getValue(), ss, sep, l, left, flatten );
     }
     else
     {
-        Printer<valueType, IsDerivedFrom<valueType, Printable>::Is >::printForComplexStoring( getValue(), ss, sep, l, left );
+        Printer<valueType, IsDerivedFrom<valueType, Printable>::Is >::printForComplexStoring( getValue(), ss, sep, l, left, flatten );
     }
     
     std::string s = ss.str();

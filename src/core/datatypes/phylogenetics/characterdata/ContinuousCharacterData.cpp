@@ -1303,7 +1303,7 @@ void ContinuousCharacterData::printForUser( std::ostream &o, const std::string &
 
 
 //!< print object for user (in user-formatted way)
-void ContinuousCharacterData::printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left ) const
+void ContinuousCharacterData::printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const
 {
     
     o << *this;
@@ -1312,7 +1312,7 @@ void ContinuousCharacterData::printForSimpleStoring( std::ostream &o, const std:
 
 
 //!< print object for user (in user-formatted way)
-void ContinuousCharacterData::printForComplexStoring( std::ostream &o, const std::string &sep, int l, bool left ) const
+void ContinuousCharacterData::printForComplexStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const
 {
     o << "{Hello}";
 }
