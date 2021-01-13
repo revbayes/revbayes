@@ -4,7 +4,7 @@ project('RevBayes', ['cpp', 'c'],
           'buildtype=release',
           'cpp_std=c++11'
         ],
-        meson_version: '>= 0.47',
+        meson_version: '>= 0.53',
         license: 'GPLv2')
 
 cpp = meson.get_compiler('cpp')
@@ -131,3 +131,21 @@ endif
 
 subdir('tests')
 
+####
+
+summary({'host': host_machine.system()
+        }, section: 'Architecture')
+
+summary({'exe name': rb_name,
+         'mpi': get_option('mpi'),
+         'jupyter': get_option('jupyter'),
+         'studio': get_option('studio'),
+        },section: 'Options')
+
+summary({'prefix': get_option('prefix'),
+        },section: 'Directories')
+
+summary({'optimization': get_option('optimization'),
+         'b_ndebug': get_option('b_ndebug'),
+         'debug': get_option('debug'),
+        },section: 'Configuration')
