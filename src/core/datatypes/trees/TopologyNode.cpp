@@ -349,7 +349,6 @@ std::string TopologyNode::buildNewickString( bool simmap = false, bool round = t
     std::stringstream o;
 
     std::fixed(o);
-
     // depending on the value of round, get standard precision or maximum
     if (round)
     {
