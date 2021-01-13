@@ -312,8 +312,6 @@ void PhyloBrownianProcessMultiSampleREML::recursiveComputeLnProbability( const T
             for (int i=0; i<this->num_sites; i++)
             {
                 
-                mu_node[i] = (mu_left[i]*t_right + mu_right[i]*t_left) / (t_left+t_right);
-                
                 // get the site specific rate of evolution
                 double standDev = this->computeSiteRate(i) * stdev;
                 
@@ -326,6 +324,9 @@ void PhyloBrownianProcessMultiSampleREML::recursiveComputeLnProbability( const T
                 // sum up the probabilities of the contrasts
                 p_node[i] = lnl_node + p_left[i] + p_right[i];
                 
+                // compute the estimate of mu for this site and node
+                mu_node[i] = (mu_left[i]*t_right + mu_right[i]*t_left) / (t_left+t_right);
+
             } // end for-loop over all sites
             
         } // end for-loop over all children
