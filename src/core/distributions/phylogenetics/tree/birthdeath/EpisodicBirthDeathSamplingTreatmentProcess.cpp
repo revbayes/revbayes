@@ -963,10 +963,6 @@ void EpisodicBirthDeathSamplingTreatmentProcess::prepareProbComputation( void ) 
     B_i[0] /= A_i[0];
 
     // E_{i-1}(0) = 1, and our E(i,t) function requires i >= 0, so we hard-code this explicitly
-    // Sebastian: This should be the probability of going extinct, which is in this case the probability of non-sampling.
-    // Andy: This is not E_0(t_0) this is E_{-1}(t_0)
-    // E_previous[0] = (1 - phi_event[0]);
-    // Andy says it should be 1.0, Sebastian's equation say it should be 0.0
     E_previous[0] = 1.0;
 
     // we always initialize the probability of observing the lineage at the present with the sampling probability
