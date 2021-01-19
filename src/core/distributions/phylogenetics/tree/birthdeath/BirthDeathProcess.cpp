@@ -133,7 +133,6 @@ double BirthDeathProcess::computeLnProbabilityTimes( void ) const
         double p_0_T = 1.0 - pSurvival(0,present_time,1.0)               * exp( rateIntegral(0,present_time) );
         double p_0_t = 1.0 - pSurvival(last_event_time,present_time,1.0) * exp( rateIntegral(last_event_time,present_time) );
         double log_F_t = log(p_0_t) - log(p_0_T);
-//        double log_F_t = log(p_0_t);
 
 //        if ( log_F_t > 0.0 )
 //        {
@@ -143,10 +142,8 @@ double BirthDeathProcess::computeLnProbabilityTimes( void ) const
         // get an estimate of the actual number of taxa
         int m = incomplete_clades[i].getNumberMissingTaxa();
         
-//        m = 0;
-        
         // multiply the probability for the missing species
-//        ln_prob_times += m * log_F_t;
+        ln_prob_times += m * log_F_t;
 //        ln_prob_times -= RbMath::lnFactorial(m);
 
         total_species += m;
