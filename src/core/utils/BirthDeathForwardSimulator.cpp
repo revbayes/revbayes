@@ -1014,7 +1014,6 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
 
             if ( condition == SURVIVAL && current_num_active_nodes <= 1 )
             {
-//                std::cerr << "Failed simulation because of condition on survival and there were " << current_num_active_nodes << std::endl;
 
                 delete root;
                 delete complete_root;
@@ -1027,7 +1026,6 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                                             hasExtantSurvivor(root->getChild(0)) == false ||
                                             hasExtantSurvivor(root->getChild(1)) == false ) )
             {
-//                std::cerr << "Failed simulation because condition on root and there were " << current_num_active_nodes << std::endl;
 
                 delete root;
                 delete complete_root;
@@ -1038,7 +1036,6 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
             // The sampled portion of the complete tree will meet the user's condition choice
             if ( root != NULL && complete_tree == true )
             {
-//                std::cerr << "Failed simulation because condition on complete tree there were " << current_num_active_nodes << std::endl;
 
                 // we need to free the old memory
                 delete root;
