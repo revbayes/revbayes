@@ -21,13 +21,15 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-TreeScaleProposal::TreeScaleProposal( StochasticNode<Tree> *t, StochasticNode<double> *r, double d ) : Proposal(),
+TreeScaleProposal::TreeScaleProposal( StochasticNode<Tree> *t, StochasticNode< RbVector<Tree> > *vec_n, StochasticNode<double> *r, double d ) : Proposal(),
     tree( t ),
+    vector_variable( vec_n),
     rootAge( r ),
     delta( d )
 {
     // tell the base class to add the node
     addNode( tree );
+    addNode( vector_variable );
     addNode( rootAge );
     
 }
@@ -88,8 +90,19 @@ double TreeScaleProposal::doProposal( void )
     
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
-    
-    Tree& tau = tree->getValue();
+        
+    // get the current tree either from the single variable or the vector of trees
+    Tree *tmp = NULL;
+    if ( tree != NULL )
+    {
+        tmp = &tree->getValue();
+    }
+    else
+    {
+        tree_index = floor(rng->uniform01() * vector_variable->getValue().size());
+        tmp = &(vector_variable->getValue()[tree_index]);
+    }
+    Tree& tau = *tmp;
     
     TopologyNode& node = tau.getRoot();
     
@@ -157,8 +170,18 @@ void TreeScaleProposal::printParameterSummary(std::ostream &o, bool name_only) c
  */
 void TreeScaleProposal::undoProposal( void )
 {
-    
-    Tree& tau = tree->getValue();
+        
+    // get the current tree either from the single variable or the vector of trees
+    Tree *tmp = NULL;
+    if ( tree != NULL )
+    {
+        tmp = &tree->getValue();
+    }
+    else
+    {
+        tmp = &(vector_variable->getValue()[tree_index]);
+    }
+    Tree& tau = *tmp;
     
     TopologyNode& node = tau.getRoot();
     
@@ -185,6 +208,10 @@ void TreeScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     if ( oldN == tree )
     {
         tree = static_cast<StochasticNode<Tree>* >(newN);
+    }
+    else if ( oldN == rootAge )
+    {
+        vector_variable = static_cast<StochasticNode< RbVector<Tree> >* >(newN);
     }
     else if ( oldN == rootAge )
     {

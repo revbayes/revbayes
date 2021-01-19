@@ -18,12 +18,14 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-RootTimeSlideUniformProposal::RootTimeSlideUniformProposal( StochasticNode<Tree> *n, StochasticNode<double> *o ) : Proposal(),
+RootTimeSlideUniformProposal::RootTimeSlideUniformProposal( StochasticNode<Tree> *n, StochasticNode< RbVector<Tree> >* vec_n, StochasticNode<double> *o ) : Proposal(),
     variable( n ),
+    vector_variable( vec_n ),
     origin( o )
 {
     // tell the base class to add the node
     addNode( variable );
+    addNode( vector_variable );
     addNode( origin );
     
 }
@@ -90,7 +92,18 @@ double RootTimeSlideUniformProposal::doProposal( void )
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
-    Tree& tau = variable->getValue();
+    // get the current tree either from the single variable or the vector of trees
+    Tree *tmp = NULL;
+    if ( variable != NULL )
+    {
+        tmp = &variable->getValue();
+    }
+    else
+    {
+        tree_index = floor(rng->uniform01() * vector_variable->getValue().size());
+        tmp = &(vector_variable->getValue()[tree_index]);
+    }
+    Tree& tau = *tmp;
     
     // pick a random node which is not the root and neithor the direct descendant of the root
     TopologyNode* node = &tau.getRoot();
@@ -113,7 +126,6 @@ double RootTimeSlideUniformProposal::doProposal( void )
     node->setAge( my_new_age );
     
     return 0.0;
-    
 }
 
 
@@ -151,7 +163,16 @@ void RootTimeSlideUniformProposal::undoProposal( void )
 {
     
     // undo the proposal
-    variable->getValue().getRoot().setAge( storedAge );
+    
+    // specific handling for single tree vs vector of trees
+    if ( variable != NULL )
+    {
+        variable->getValue().getRoot().setAge( storedAge );
+    }
+    else
+    {
+        vector_variable->getValue()[tree_index].getRoot().setAge( storedAge );
+    }
     
 }
 
@@ -164,11 +185,15 @@ void RootTimeSlideUniformProposal::undoProposal( void )
  */
 void RootTimeSlideUniformProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
-    if (oldN == variable)
+    if ( oldN == variable )
     {
         variable = static_cast<StochasticNode<Tree>* >(newN) ;
     }
-    else if (oldN == origin)
+    else if ( oldN == vector_variable )
+    {
+        vector_variable = static_cast<StochasticNode< RbVector<Tree> >* >(newN) ;
+    }
+    else if ( oldN == origin )
     {
         origin = static_cast<StochasticNode<double>* >(newN) ;
     }
