@@ -14,6 +14,7 @@
 #include "StringUtilities.h"
 
 #include <vector>
+#include <algorithm>
 #include <iostream>
 #include <string>
 
@@ -71,6 +72,17 @@ namespace RevBayesCore {
 //        void                                                clear(void) { values.clear(); }
 //        void                                                insert(size_t i, const valueType &v) { values[i] = v; }
 //        void                                                push_back(const valueType &v) { values.push_back( v ); }
+//        void                                                insert(size_t i, const valueType &v) { delete values[i]; values[i] = Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( v ); }
+//        void                                                push_back(const valueType &v) { values.push_back( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( v ) ); }
+//        RbIterator<valueType>                               begin(void) { return RbIterator<valueType>( this->values.begin() ); }
+//        RbConstIterator<valueType>                          begin(void) const { return RbConstIterator<valueType>( this->values.begin() ); }
+//        RbIterator<valueType>                               end(void) { return RbIterator<valueType>( this->values.end() ); }
+//        RbConstIterator<valueType>                          end(void) const { return RbConstIterator<valueType>( this->values.end() ); }
+//        void                                                erase(size_t i) { valueType *tmp=values[i]; values.erase(values.begin()+i); delete tmp; }
+//        RbIterator<valueType>                               erase(RbIterator<valueType> pos) { valueType *tmp=*pos; delete tmp; return this->std::vector<valueType>::erase( pos ); }
+//        RbConstIterator<valueType>                          erase(RbConstIterator<valueType> pos) { valueType *tmp=*pos; delete tmp; return this->std::vector<valueType>::erase( pos ); }
+        RbIterator<valueType>                               find(const valueType &x) { return RbIterator<valueType>( std::find(this->std::vector<valueType>::begin(), this->std::vector<valueType>::end(), x) ); }
+        RbConstIterator<valueType>                          find(const valueType &x) const { return RbConstIterator<valueType>( std::find(this->std::vector<valueType>::begin(), this->std::vector<valueType>::end(), x) ); }
         virtual size_t                                      size(void) const { return this->std::vector<valueType>::size(); }
         valueType&                                          operator[](size_t i)
         {
@@ -176,7 +188,7 @@ namespace RevBayesCore {
         {
             if ( i >= values.size() )
             {
-                throw(RbException("Vector index out of range"));
+                throw RbException("Vector index out of range") ;
             }
             return *values[i];
         }
@@ -184,7 +196,7 @@ namespace RevBayesCore {
         {
             if ( i >= values.size() )
             {
-                throw(RbException("Vector index out of range"));
+                throw RbException("Vector index out of range");
             }
             return *values[i];
         }
@@ -210,8 +222,10 @@ namespace RevBayesCore {
         RbIterator<valueType>                               end(void) { return RbIterator<valueType>( this->values.end() ); }
         RbConstIterator<valueType>                          end(void) const { return RbConstIterator<valueType>( this->values.end() ); }
         void                                                erase(size_t i) { valueType *tmp=values[i]; values.erase(values.begin()+i); delete tmp; }
-        RbIterator<valueType>                               erase(RbIterator<valueType> pos) { valueType *tmp=*pos; delete tmp; return this->std::vector<valueType>::erase( pos ); }
-        RbConstIterator<valueType>                          erase(RbConstIterator<valueType> pos) { valueType *tmp=*pos; delete tmp; return this->std::vector<valueType>::erase( pos ); }
+        RbIterator<valueType>                               erase(RbIterator<valueType> pos) { valueType *tmp=&(*pos); delete tmp; return RbIterator<valueType>( this->values.erase( pos.getStlIterator() ) );}
+        RbConstIterator<valueType>                          erase(RbConstIterator<valueType> pos) { valueType *tmp=*pos; delete tmp; return RbConstIterator<valueType>( this->values.erase( pos.getStlIterator() ) ); }
+        RbIterator<valueType>                               find(const valueType &x) { return RbIterator<valueType>( std::find(this->values.begin(), this->values.end(), &x) ); }
+        RbConstIterator<valueType>                          find(const valueType &x) const { return RbConstIterator<valueType>( std::find(this->values.begin(), this->values.end(), &x) ); }
         size_t                                              size(void) const { return this->values.size(); }
 
         void                                                swap( valueType& a, valueType& b)

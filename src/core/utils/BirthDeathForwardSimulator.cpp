@@ -16,7 +16,9 @@
 using namespace RevBayesCore;
 
 
-BirthDeathForwardSimulator::BirthDeathForwardSimulator( void )
+BirthDeathForwardSimulator::BirthDeathForwardSimulator( void ) :
+    MAX_NUM_LINEAGES(50000),
+    complete_tree(false)
 {
 
 }
@@ -32,20 +34,42 @@ bool BirthDeathForwardSimulator::checkParameters( void ) const
         throw RbException("You need to provide the same number of time intervals as speciation rates.");
     }
 
-//    if ( mu.size() != NUM_TIME_INTERVALS )
-//    {
-//        throw RbException("You need to provide the same number of time intervals as extinction rates.");
-//    }
-//
-//    if ( phi.size() != NUM_TIME_INTERVALS )
-//    {
-//        throw RbException("You need to provide the same number of time intervals as fossilization rates.");
-//    }
-//
-//    if ( r.size() != NUM_TIME_INTERVALS )
-//    {
-//        throw RbException("You need to provide the same number of time intervals as treatment probabilities.");
-//    }
+   if ( !(mu.size() == NUM_TIME_INTERVALS || mu.size() == 1) )
+   {
+       throw RbException("You need to provide the same number of time intervals as extinction rates.");
+   }
+
+   if ( !(phi.size() == NUM_TIME_INTERVALS || phi.size() == 1) )
+   {
+       throw RbException("You need to provide the same number of time intervals as fossilization rates.");
+   }
+
+   if ( !(r.size() == NUM_TIME_INTERVALS || r.size() == 1) )
+   {
+       throw RbException("You need to provide the same number of time intervals as treatment probabilities.");
+   }
+
+   if ( !(Lambda.size() == NUM_TIME_INTERVALS || Lambda.size() == 1) )
+   {
+       throw RbException("You need to provide the same number of time intervals as speciation probabilities.");
+   }
+
+   if ( !(Mu.size() == NUM_TIME_INTERVALS || Mu.size() == 1) )
+   {
+       throw RbException("You need to provide the same number of time intervals as extinction probabilities.");
+   }
+
+   if ( !(Phi.size() == NUM_TIME_INTERVALS || Phi.size() == 1) )
+   {
+       throw RbException("You need to provide the same number of time intervals as fossilization probabilities.");
+   }
+
+   if ( !(R.size() == NUM_TIME_INTERVALS || R.size() == 1) )
+   {
+       std::cout << "R.size() == " << R.size() << std::endl;
+       std::cout << "r.size() == " << r.size() << std::endl;
+       throw RbException("You need to provide the same number of time intervals as event-treatment probabilities.");
+   }
 
     size_t NUM_CATEGORIES = getNumberOfCategories();
 
@@ -79,6 +103,12 @@ size_t BirthDeathForwardSimulator::getNumberOfCategories( void ) const
 
 double BirthDeathForwardSimulator::getLambdaProbability( size_t index, size_t n ) const
 {
+    // There is no burst speciation at the present day
+    if ( index == 0 )
+    {
+        return 0.0;
+    }
+
     if ( Lambda.size() > index )
     {
         if ( Lambda[index].size() > n )
@@ -158,6 +188,14 @@ std::vector<double> BirthDeathForwardSimulator::getLambdaRate( size_t index, siz
 
 double BirthDeathForwardSimulator::getMuProbability( size_t index, size_t n ) const
 {
+    
+    // std::cout << "getting mu probability for index " << index << " with n = " << n << std::endl;
+
+    // There is no mass extinction at the present day
+    if ( index == 0 )
+    {
+        return 0.0;
+    }
 
     if ( Mu.size() > index )
     {
@@ -238,28 +276,32 @@ std::vector<double> BirthDeathForwardSimulator::getMuRate( size_t index, size_t 
 }
 
 
-double BirthDeathForwardSimulator::getPhiProbability( size_t index, size_t n ) const
+double BirthDeathForwardSimulator::getPhiProbability( size_t time_index, size_t cat_index ) const
 {
-    if ( Phi.size() > index )
+    if ( Phi.size() > time_index )
     {
-        if ( Phi[index].size() > n )
+        if ( Phi[time_index].size() > cat_index )
         {
-            return Phi[index][n];
+            return Phi[time_index][cat_index];
         }
-        else if ( Phi[index].size() == 1 )
+        else if ( Phi[time_index].size() == 1 )
         {
-            return Phi[index][0];
+            return Phi[time_index][0];
         }
         else
         {
             throw RbException("Problem in the birth-death simulation: We could not get the sampling event probabilities.");
         }
     }
+    else if ( time_index > 0 )
+    {
+        return 0.0;     // we return by default 0.0
+    }
     else if ( Phi.size() == 1 )
     {
-        if ( Phi[0].size() > n )
+        if ( Phi[0].size() > cat_index )
         {
-            return Phi[0][n];
+            return Phi[0][cat_index];
         }
         else if ( Phi[0].size() == 1 )
         {
@@ -321,6 +363,12 @@ std::vector<double> BirthDeathForwardSimulator::getPhiRate( size_t index, size_t
 
 double BirthDeathForwardSimulator::getRProbability( size_t index, size_t n ) const
 {
+
+    // There is no death-after-sampling at the present day
+    if ( index == 0 )
+    {
+        return 0.0;
+    }
 
     if ( R.size() > index )
     {
@@ -444,7 +492,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
     {
 
     }
-
+    
     size_t NUM_TIME_INTERVALS = timeline.size();
     size_t NUM_CATEGORIES = getNumberOfCategories();
 
@@ -512,6 +560,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
             current_phi_total       += num_lineages_in_category * current_phi[i];
         }
         double current_rate_total = current_lambda_total + current_mu_total + current_phi_total;
+        
 
         double current_age = start_age;
         while ( current_age > 0.0 && current_num_active_nodes > 0 )
@@ -554,6 +603,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                                 active_nodes_in_actegories[i].insert( right );
                                 
                                 this_node->setBurstSpeciation( true );
+                                
 
                             } // end-if there was a burst speciation event for this node
 
@@ -606,20 +656,23 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                                 
                                 // store this node
                                 sampled_nodes.insert( this_node );
+                                
+                                if ( event_age > 0.0 )
+                                {
 
-                                // simulate also if this sampling lead to a death event (i.e., treatment)
-                                u = rng->uniform01();
-                                if ( u < this_sampling_extinction_prob )
-                                {
-                                    // update the active node set
-                                    active_nodes_in_actegories[i].erase( this_node );
-                                }
-                                else
-                                {
-                                    // left child (sampled ancestor)
-                                    TopologyNode *left = new TopologyNode();
-                                    this_node->addChild( left );
-                                    left->setParent( this_node );
+                                    // simulate also if this sampling lead to a death event (i.e., treatment)
+                                    u = rng->uniform01();
+                                    if ( u < this_sampling_extinction_prob )
+                                    {
+                                        // update the active node set
+                                        active_nodes_in_actegories[i].erase( this_node );
+                                    }
+                                    else
+                                    {
+                                        // left child (sampled ancestor)
+                                        TopologyNode *left = new TopologyNode();
+                                        this_node->addChild( left );
+                                        left->setParent( this_node );
                                     left->setAge( event_age );
                                     left->setSampledAncestor( true );
                                     left->setSamplingEvent( true );
@@ -633,6 +686,8 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                                     // update the active node set
                                     active_nodes_in_actegories[i].erase( this_node );
                                     active_nodes_in_actegories[i].insert( right );
+                                    
+                                }
                                 }
 
                             } // end-if there was a sampling event for this node
@@ -692,6 +747,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                         double this_cat_lambda = current_lambda[i];
                         if ( u < (num_lineages_in_category*this_cat_lambda)/current_lambda_total )
                         {
+                            u = rng->uniform01();
                             size_t this_node_index = size_t( floor(u*num_lineages_in_category) );
                             std::set<TopologyNode*>::const_iterator it = active_nodes_in_actegories[i].begin();
                             std::advance(it, this_node_index);
@@ -720,6 +776,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                             current_rate_total      += this_cat_lambda + current_mu[i] + current_phi[i];
 
                             this_node->setSerialSpeciation( true );
+                            
 
                             // now stop the loop
                             break;
@@ -831,6 +888,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                                 // update the active node set
                                 active_nodes_in_actegories[i].erase( this_node );
                                 active_nodes_in_actegories[i].insert( right );
+                                
                             }
                             // now stop the loop
                             break;
@@ -852,75 +910,100 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
                 current_age = next_age;
             }
 
+            // Ensure tree doesn't get too big to manage
+            if ( current_num_active_nodes > MAX_NUM_LINEAGES )
+            {
+//                std::cerr << "Failed simulation because there were " << current_num_active_nodes << std::endl;
+//                std::cerr << "Allowed were " << MAX_NUM_LINEAGES << std::endl;
+                delete root;
+                root = NULL;
+                break;
+            }
+
         } // end-while we still have time and nodes to simulate forward
 
 
-        // set the ages of all remaining active nodes to 0.0
-        // add nodes that were not sampled at the present to the extinct pile
-        for ( size_t i=0; i<NUM_CATEGORIES; ++i)
+        // If we have not already given up because the tree got too big, we can now clean up the tree and check if it meets conditioning standards
+        if ( root != NULL ) 
         {
-            const std::set<TopologyNode*> &active_nodes_in_category = active_nodes_in_actegories[i];
-            for ( std::set<TopologyNode*>::const_iterator it=active_nodes_in_category.begin(); it!=active_nodes_in_category.end(); ++it)
+            // set the ages of all remaining active nodes to 0.0
+            // add nodes that were not sampled at the present to the extinct pile
+            for ( size_t i=0; i<NUM_CATEGORIES; ++i)
             {
-                TopologyNode *this_node = *it;
-                this_node->setAge( 0.0 );
-
-                bool found = sampled_nodes.find( this_node ) != sampled_nodes.end();
-                if ( found == false )
+                const std::set<TopologyNode*> &active_nodes_in_category = active_nodes_in_actegories[i];
+                for ( std::set<TopologyNode*>::const_iterator it=active_nodes_in_category.begin(); it!=active_nodes_in_category.end(); ++it)
                 {
-                    extinct_not_sampled_nodes.insert(this_node);
+                    TopologyNode *this_node = *it;
+                    this_node->setAge( 0.0 );
+
+                    bool found = sampled_nodes.find( this_node ) != sampled_nodes.end();
+                    if ( found == false )
+                    {
+                        extinct_not_sampled_nodes.insert(this_node);
+                    }
                 }
             }
-        }
-
-        bool complete_tree = !true;
-//        bool prune = complete_tree == false && current_num_active_nodes > 0 && ( condition == ROOT && current_num_active_nodes >= 2 );
-        bool prune = complete_tree == false && current_num_active_nodes > 0;
-        // now prune away all the extinct nodes
-        if ( prune == true )
-        {
-            for ( std::set<TopologyNode*>::const_iterator it=extinct_not_sampled_nodes.begin(); it!=extinct_not_sampled_nodes.end(); ++it)
+            
+            // Complete trees should still meet the user's condition choice,
+            // but checking requires destructive pruning
+            TopologyNode *complete_root = NULL;
+            if ( complete_tree == true )
             {
-                TopologyNode *this_node = *it;
+                complete_root = root->clone();
+            }
 
-                if ( this_node->isRoot() == false ) // this should truly never happen, only if there was no survivor
+            bool prune = true;
+            // now prune away all the extinct nodes
+            if ( prune == true )
+            {
+                for ( std::set<TopologyNode*>::const_iterator it=extinct_not_sampled_nodes.begin(); it!=extinct_not_sampled_nodes.end(); ++it)
                 {
-                    TopologyNode &parent = this_node->getParent();
-                    
-                    if ( parent.getNumberOfChildren() == 1 )
-                    {
-                        parent.removeChild( this_node );
-                        delete this_node;
-                    }
-                    else
-                    {
-                        TopologyNode *sibling = &parent.getChild( 0 );
-                        if ( sibling == this_node ) sibling = &parent.getChild( 1 );
+                    TopologyNode *this_node = *it;
 
-                        if ( parent.isRoot() == false )
+                    if ( this_node->isRoot() == false ) // this should truly never happen, only if there was no survivor
+                    {
+                        TopologyNode &parent = this_node->getParent();
+                        
+                        if ( parent.getNumberOfChildren() == 1 )
                         {
-                            TopologyNode &grandparent = parent.getParent();
-                            TopologyNode *uncle = &grandparent.getChild( 0 );
-                            if ( uncle == &parent ) uncle = &grandparent.getChild( 1 );
 
-                            parent.removeChild( sibling );
-                            grandparent.removeChild( &parent );
-                            parent.setParent( NULL );
-
-                            sibling->setParent( &grandparent );
-                            grandparent.addChild( sibling );
-
-                            sibling->setSampledAncestor(false);
-
-                            delete &parent; // this will also delete this child node
+                            parent.removeChild( this_node );
+                            delete this_node;
+                            
                         }
                         else
                         {
-                            parent.removeChild( sibling );
-                            sibling->setParent( NULL );
-                            root = sibling;
+                            TopologyNode *sibling = &parent.getChild( 0 );
+                            if ( sibling == this_node ) sibling = &parent.getChild( 1 );
 
-                            delete &parent;
+                            if ( parent.isRoot() == false )
+                            {
+                                TopologyNode &grandparent = parent.getParent();
+                                TopologyNode *uncle = &grandparent.getChild( 0 );
+                                if ( uncle == &parent ) uncle = &grandparent.getChild( 1 );
+
+                                parent.removeChild( sibling );
+                                grandparent.removeChild( &parent );
+                                parent.setParent( NULL );
+
+                                sibling->setParent( &grandparent );
+                                grandparent.addChild( sibling );
+
+                                sibling->setSampledAncestor(false);
+                                
+                                delete &parent; // this will also delete this child node
+
+                            }
+                            else
+                            {
+                                parent.removeChild( sibling );
+                                sibling->setParent( NULL );
+                                root = sibling;
+                                
+                                delete &parent;
+
+                            }
+
                         }
 
                     }
@@ -929,21 +1012,37 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
 
             }
 
-        }
+            if ( condition == SURVIVAL && current_num_active_nodes <= 1 )
+            {
 
-        if ( condition == SURVIVAL && current_num_active_nodes <= 1 )
-        {
-            delete root;
-            root = NULL;
-        }
-        // next we check that both sides of the root node were sampled ()
-        else if ( condition == ROOT && (root->getAge() < start_age ||
-                                        current_num_active_nodes <= 1 ||
-                                        hasExtantSurvivor(root->getChild(0)) == false ||
-                                        hasExtantSurvivor(root->getChild(1)) == false ) )
-        {
-            delete root;
-            root = NULL;
+                delete root;
+                delete complete_root;
+                root = NULL;
+                
+            }
+            // next we check that both sides of the root node were sampled ()
+            else if ( condition == ROOT && (root->getAge() < start_age ||
+                                            current_num_active_nodes <= 1 ||
+                                            hasExtantSurvivor(root->getChild(0)) == false ||
+                                            hasExtantSurvivor(root->getChild(1)) == false ) )
+            {
+
+                delete root;
+                delete complete_root;
+                root = NULL;
+                
+            }
+
+            // The sampled portion of the complete tree will meet the user's condition choice
+            if ( root != NULL && complete_tree == true )
+            {
+
+                // we need to free the old memory
+                delete root;
+                root = complete_root;
+
+            }
+
         }
 
     } while ( root == NULL );
@@ -954,6 +1053,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
     my_tree->setRooted( true );
     
     size_t num_nodes = my_tree->getNumberOfNodes();
+//    std::cerr << "Successful simulation with " << num_nodes << std::endl;
 
     for (size_t i=0; i<num_nodes; ++i)
     {
@@ -978,10 +1078,19 @@ void BirthDeathForwardSimulator::setBurstProbability( const std::vector<std::vec
     Lambda = l;
 }
 
+void BirthDeathForwardSimulator::setCompleteTree( bool c )
+{
+    complete_tree = c;
+}
 
 void BirthDeathForwardSimulator::setExtinctionRate( const std::vector<std::vector< double > > &m )
 {
     mu = m;
+}
+
+void BirthDeathForwardSimulator::setMaxNumLineages( size_t m )
+{
+    MAX_NUM_LINEAGES = m;
 }
 
 

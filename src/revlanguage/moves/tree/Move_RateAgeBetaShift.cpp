@@ -64,7 +64,7 @@ void Move_RateAgeBetaShift::constructInternalObject( void )
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tmpRates = static_cast<const ModelVector<RealPos> &>( rates->getRevObject() ).getDagNode();
     std::vector< RevBayesCore::StochasticNode<double> *> rates;
-    RevBayesCore::StochasticNode< RevBayesCore::RbVector<double> >* snode_rates = static_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<double> > *>( tmpRates );
+    RevBayesCore::StochasticNode< RevBayesCore::RbVector<double> >* snode_rates = dynamic_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<double> > *>( tmpRates );
     if ( tmpRates->isStochastic() == false )
     {
         RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> >*dnode = static_cast< RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> > *>( tmpRates );

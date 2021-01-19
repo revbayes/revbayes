@@ -28,10 +28,11 @@ using namespace RevBayesCore;
  * \param[in]    w   The weight how often the proposal will be used (per iteration).
  * \param[in]    t   If auto tuning should be used.
  */
-HSRFHyperpriorsGibbsMove::HSRFHyperpriorsGibbsMove( StochasticNode<double> *g, std::vector< StochasticNode<double> *> l, std::vector< StochasticNode<double> *> n, double z, double w) : AbstractGibbsMove(w),
+HSRFHyperpriorsGibbsMove::HSRFHyperpriorsGibbsMove( StochasticNode<double> *g, std::vector< StochasticNode<double> *> l, std::vector< StochasticNode<double> *> n, double p, double z, double w) : AbstractGibbsMove(w),
     global_scale( g ),
     local_scales( l ),
     normals( n ),
+    prop_global_only( p ),
     zeta( z )
 {
 
@@ -194,20 +195,35 @@ void HSRFHyperpriorsGibbsMove::performGibbsMove( void )
     double two_zeta_squared = 2.0 * std::pow(zeta,2.0);
     double two_zeta_squared_eta_squared = two_zeta_squared * eta_squared;
 
-    for (size_t i = 0; i < field_size; ++i) {
-        double lambda_squared_inverse = 1.0 / std::pow(local_scales[i]->getValue(),2.0);
+    // prop_global_only >= DBL_EPSILON keeps RNG output unchanged with analyses run before prop_global_only was added
+    if ( prop_global_only >= DBL_EPSILON && (GLOBAL_RNG)->uniform01() < prop_global_only )
+    {
+        for (size_t i = 0; i < field_size; ++i) {
+            double lambda_squared = std::pow(local_scales[i]->getValue(),2.0);
 
-        double delta_theta_squared = std::pow(normals[i]->getValue(),2.0);
+            double delta_theta_squared = std::pow(normals[i]->getValue(),2.0);
 
-        double psi_inverse = RbStatistics::Helper::rndGamma(1.0, *GLOBAL_RNG) / (1.0 + lambda_squared_inverse); // psi_inverse ~ Gamma(1.0, 1.0 + 1.0/lambda[i]^2)
+            eta_squared_rate += delta_theta_squared/lambda_squared;
+        }
+    }
+    else
+    {
+        for (size_t i = 0; i < field_size; ++i) {
+            double lambda_squared_inverse = 1.0 / std::pow(local_scales[i]->getValue(),2.0);
 
-        double lambda_squared = 1/(RbStatistics::Helper::rndGamma(1, *GLOBAL_RNG) / (psi_inverse + delta_theta_squared/two_zeta_squared_eta_squared) ); // lambda_squared[i] ~ Gamma(0.5, psi_inverse[i] + delta_theta^2/(2*eta^2*zeta^2)
+            double delta_theta_squared = std::pow(normals[i]->getValue(),2.0);
 
-        local_scales[i]->getValue() = std::sqrt(lambda_squared);
-        local_scales[i]->touch();
-        local_scales[i]->keep();
+            double psi_inverse = RbStatistics::Helper::rndGamma(1.0, *GLOBAL_RNG) / (1.0 + lambda_squared_inverse); // psi_inverse ~ Gamma(1.0, 1.0 + 1.0/lambda[i]^2)
 
-        eta_squared_rate += delta_theta_squared/lambda_squared;
+            double lambda_squared = 1/(RbStatistics::Helper::rndGamma(1, *GLOBAL_RNG) / (psi_inverse + delta_theta_squared/two_zeta_squared_eta_squared) ); // lambda_squared[i] ~ Gamma(0.5, psi_inverse[i] + delta_theta^2/(2*eta^2*zeta^2)
+
+            local_scales[i]->getValue() = std::sqrt(lambda_squared);
+            local_scales[i]->touch();
+            local_scales[i]->keep();
+
+            eta_squared_rate += delta_theta_squared/lambda_squared;
+        }
+
     }
 
     // get global scale and sample global scale auxiliary variable

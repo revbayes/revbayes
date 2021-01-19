@@ -27,9 +27,11 @@ class DagNode;
         UniformTopologyBranchLengthDistribution*            clone(void) const;                                                      //!< Create an independent clone
         double                                              computeLnProbability(void);
         virtual void                                        fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                                 //!< This node was changed in the tree
+        const std::vector<Taxon>&                           getTaxa(void) const;
         void                                                redrawValue(void);
         virtual void                                        setValue(Tree *v, bool f=false);                                        //!< Set the current value, e.g. attach an observation (clamp)
-        
+        virtual void                                        simulateClade(std::vector<TopologyNode *> &n);
+
     protected:
         // Parameter management functions
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);        //!< Swap a parameter
@@ -38,7 +40,6 @@ class DagNode;
         
         // helper functions
         void                                                simulateTree(void);
-        void                                                simulateClade(std::vector<TopologyNode*> &n);                           //!< Simulate n speciation events.
         
         // members
         TypedDistribution<double>*                          branch_length_prior;

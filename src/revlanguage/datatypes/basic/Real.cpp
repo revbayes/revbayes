@@ -1,28 +1,10 @@
-/**
- * @file
- * This file contains the implementation of Real, which
- * is the primitive RevBayes type for real numbers.
- *
- * @brief Implementation of Real
- *
- * (c) Copyright 2009-
- * @date Last modified: $Date$
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- * @version 1.0
- * @since 2009-11-20, version 1.0
- * @extends RbObject
- *
- * $Id$
- */
-
-
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include "ConstantNode.h"
 #include "Integer.h"
+#include "IntegerPos.h"
 #include "Natural.h"
 #include "RlBoolean.h"
 #include "Probability.h"
@@ -145,7 +127,8 @@ Real* Real::add(const Integer &rhs) const
  *
  * \return A new copy of the process.
  */
-Real* Real::clone(void) const {
+Real* Real::clone(void) const
+{
 
 	return new Real(*this);
 }
@@ -163,9 +146,11 @@ RevObject* Real::convertTo( const TypeSpec& type ) const
         return new Probability(dag_node->getValue());
     if ( type == Integer::getClassTypeSpec() && dag_node->getValue() == int(dag_node->getValue()) )
         return new Integer( int(dag_node->getValue()) );
+    if ( type == IntegerPos::getClassTypeSpec() && dag_node->getValue() > 0.0 && dag_node->getValue() == int(dag_node->getValue()) )
+        return new IntegerPos( int(dag_node->getValue()) );
     if ( type == Natural::getClassTypeSpec() && dag_node->getValue() >= 0.0 && dag_node->getValue() == int(dag_node->getValue()) )
         return new Natural( int(dag_node->getValue()) );
-    
+
     if ( type == RlString::getClassTypeSpec() ) 
     {
         std::ostringstream o;
@@ -244,7 +229,8 @@ Real* Real::divide(const Integer &rhs) const
 
 
 /** Get Rev type of object */
-const std::string& Real::getClassType(void) { 
+const std::string& Real::getClassType(void)
+{
     
     static std::string rev_type = "Real";
     
@@ -252,7 +238,8 @@ const std::string& Real::getClassType(void) {
 }
 
 /** Get class type spec describing type of object */
-const TypeSpec& Real::getClassTypeSpec(void) { 
+const TypeSpec& Real::getClassTypeSpec(void)
+{
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( RevObject::getClassTypeSpec() ) );
     
@@ -261,7 +248,8 @@ const TypeSpec& Real::getClassTypeSpec(void) {
 
 
 /** Get type spec */
-const TypeSpec& Real::getTypeSpec( void ) const {
+const TypeSpec& Real::getTypeSpec( void ) const
+{
     
     static TypeSpec type_spec = getClassTypeSpec();
     
@@ -304,6 +292,11 @@ double Real::isConvertibleTo(const TypeSpec& type, bool once) const
         return 0.3;
     }
     
+    if ( once && type == IntegerPos::getClassTypeSpec() && dag_node->getValue() >= 1.0 && dag_node->getValue() == int(dag_node->getValue()) )
+    {
+        return 0.7;
+    }
+
     if ( once && type == Natural::getClassTypeSpec() && dag_node->getValue() >= 0.0 && dag_node->getValue() == int(dag_node->getValue()) )
     {
         return 0.2;

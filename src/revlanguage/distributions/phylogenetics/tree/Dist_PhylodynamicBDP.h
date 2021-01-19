@@ -59,7 +59,8 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                               Lambda_timeline;                                                                        //!< The burst times
         RevPtr<const RevVariable>                               Mu_timeline;                                                                            //!< The mass extinction times
         RevPtr<const RevVariable>                               Phi_timeline;                                                                           //!< The event sampling times
-        std::string                                             start_condition;                                                                     //!< The start condition of the process (rootAge/originAge)
+        std::string                                             start_condition;                                                                //!< The start condition of the process (rootAge/originAge)
+        RevPtr<const RevVariable>                               initial_tree;
 
     };
 

@@ -333,13 +333,13 @@ void AbstractRateMatrix::computeStochasticMatrix(size_t n)
 void AbstractRateMatrix::rescaleToAverageRate(double r)
 {
 
-    double curAve = averageRate();
-    double scaleFactor = r / curAve;
+    double cur_ave = averageRate();
+    double scale_factor = r / cur_ave;
     for (size_t i=0; i<num_states; i++)
     {
         for (size_t j=0; j<num_states; j++)
         {
-            (*the_rate_matrix)[i][j] *= scaleFactor;
+            (*the_rate_matrix)[i][j] *= scale_factor;
         }
     }
 

@@ -120,7 +120,7 @@ double EmpiricalTreeTopologyProposal::doProposal( void )
     size_t node_index = n_tips + size_t(floor(rng->uniform01() * (nodes.size()-n_tips)) );
     
     TopologyNode &random_root = *nodes[node_index];
-    proposed_tree->reroot(random_root, true);
+    proposed_tree->reroot(random_root, false, true);
     
     std::vector<double> a = std::vector<double>(nodes.size()-n_tips-1,alpha);
     std::vector<double> proposed_ages = RbStatistics::Dirichlet::rv(a, *rng);
@@ -238,7 +238,7 @@ void EmpiricalTreeTopologyProposal::undoProposal( void )
     TopologyNode& node = tau.getRoot();
     
     // undo the proposal
-    TreeUtilities::setAges(&tau, &node, stored_ages );
+    TreeUtilities::setAges(node, stored_ages );
     
 }
 

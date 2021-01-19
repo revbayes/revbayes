@@ -307,8 +307,8 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
         
         // get the tree which is the only argument for this method
         RevBayesCore::Clade this_clade = static_cast<const Clade &>( args[0].getVariable()->getRevObject() ).getValue();
-        double strict = static_cast<const Probability &>( args[1].getVariable()->getRevObject() ).getValue();
-        double stem = static_cast<const Probability &>( args[2].getVariable()->getRevObject() ).getValue();
+        bool strict = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+        bool stem   = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
 
         const std::vector<RevBayesCore::Tree>& trees = this->value->getValues();
 
@@ -347,7 +347,7 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
             ages.push_back( age );
         }
         
-        return new RevVariable( new ModelVector<RealPos>( ages ) );
+        return new RevVariable( new ModelVector<Real>( ages ) );
     }
     else if ( name == "getTrees" )
     {
@@ -483,7 +483,7 @@ void TraceTree::initMethods( void )
     get_tmrca_arg_rules->push_back( new ArgumentRule("clade",  Clade::getClassTypeSpec(), "The clade for which to compute the TMRCA.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
     get_tmrca_arg_rules->push_back( new ArgumentRule("strict", RlBoolean::getClassTypeSpec(), "Return -1 if the clade is non-monophyletic and otherwise the non-strict TMRCA.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     get_tmrca_arg_rules->push_back( new ArgumentRule("stem",   RlBoolean::getClassTypeSpec(), "Do we want the age of the stem or crown of this clade?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
-    this->methods.addFunction( new MemberProcedure( "getTMRCA", ModelVector<RealPos>::getClassTypeSpec(), get_tmrca_arg_rules) );
+    this->methods.addFunction( new MemberProcedure( "getTMRCA", ModelVector<Real>::getClassTypeSpec(), get_tmrca_arg_rules) );
     
     ArgumentRules* get_trees_arg_rules = new ArgumentRules();
     this->methods.addFunction( new MemberProcedure( "getTrees", ModelVector<Tree>::getClassTypeSpec(), get_trees_arg_rules) );

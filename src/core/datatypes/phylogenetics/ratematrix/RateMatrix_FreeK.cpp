@@ -75,9 +75,11 @@ RateMatrix_FreeK::RateMatrix_FreeK(size_t n, bool r, METHOD method) : GeneralRat
     
     // Initialize emit_letters to [0...N-1]
     emit_letters.resize(num_states);
-    for(int i=0;i<num_states;i++)
+    for (int i=0; i<num_states; ++i)
+    {
         emit_letters[i] = i;
-
+    }
+    
     update();
 }
 
@@ -86,18 +88,22 @@ RateMatrix_FreeK::RateMatrix_FreeK(size_t n, bool r, METHOD method) : GeneralRat
 RateMatrix_FreeK::RateMatrix_FreeK(const RateMatrix_FreeK& m) : GeneralRateMatrix( m )
 {
     
-    rescale               = m.rescale;
-    my_method             = m.my_method;
+    rescale                 = m.rescale;
+    my_method               = m.my_method;
     
-    matrixProducts        = new std::vector<MatrixReal>( *m.matrixProducts );
-    singleStepMatrix      = m.singleStepMatrix;
-    maxRate               = m.maxRate;
+    matrixProducts          = new std::vector<MatrixReal>( *m.matrixProducts );
+    singleStepMatrix        = m.singleStepMatrix;
+    maxRate                 = m.maxRate;
     
-    theEigenSystem        = new EigenSystem( *m.theEigenSystem );
-    c_ijk                 = m.c_ijk;
-    cc_ijk                = m.cc_ijk;
+    theEigenSystem          = new EigenSystem( *m.theEigenSystem );
+    c_ijk                   = m.c_ijk;
+    cc_ijk                  = m.cc_ijk;
+    
+    emit_letters            = m.emit_letters;
 
     theEigenSystem->setRateMatrixPtr(the_rate_matrix);
+
+    emit_letters          = m.emit_letters;
 }
 
 
@@ -132,6 +138,8 @@ RateMatrix_FreeK& RateMatrix_FreeK::operator=(const RateMatrix_FreeK &r)
         cc_ijk               = r.cc_ijk;
         
         theEigenSystem->setRateMatrixPtr(the_rate_matrix);
+
+        emit_letters         = r.emit_letters;
 
     }
     

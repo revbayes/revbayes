@@ -125,12 +125,12 @@ double NearestNeighborInterchangeProposal::doProposal( void )
     double my_age       = node->getAge();
     
     // now we store all necessary values
-    storedChosenNode   = node;
+    storedChosenNode    = node;
     storedUncle         = uncle;
     
     storedAges = std::vector<double>(tau.getNumberOfNodes(), 0.0);
-    TreeUtilities::getAges(&tau, storedChosenNode, storedAges);
-    TreeUtilities::getAges(&tau, storedUncle, storedAges);
+    TreeUtilities::getAges(*storedChosenNode, storedAges);
+    TreeUtilities::getAges(*storedUncle, storedAges);
 
     // now exchange the two nodes
     grandparent.removeChild( uncle );
@@ -158,7 +158,7 @@ double NearestNeighborInterchangeProposal::doProposal( void )
 
         // rescale the subtrees
         double scaling_factor = my_new_age / my_age;
-        TreeUtilities::rescaleSubtree(&tau, node, scaling_factor );
+        TreeUtilities::rescaleSubtree(*node, scaling_factor );
         
         // compute the Hastings ratio
         size_t nNodes = node->getNumberOfNodesInSubtree(false);
@@ -178,7 +178,7 @@ double NearestNeighborInterchangeProposal::doProposal( void )
         lnHastingsratio += log( parent_age / gparent_age);
         
         double scaling_factor = uncles_new_age / uncles_age;
-        TreeUtilities::rescaleSubtree(&tau, uncle, scaling_factor );
+        TreeUtilities::rescaleSubtree(*uncle, scaling_factor );
 
         size_t nNodes = uncle->getNumberOfNodesInSubtree(false);
         lnHastingsratio += (nNodes > 1 ? log( scaling_factor ) * (nNodes-1) : 0.0 );
@@ -241,8 +241,8 @@ void NearestNeighborInterchangeProposal::undoProposal( void )
         storedChosenNode->setParent( &parent );
     
         // rescale to old ages
-        TreeUtilities::setAges(&variable->getValue(), storedChosenNode, storedAges);
-        TreeUtilities::setAges(&variable->getValue(), storedUncle, storedAges);
+        TreeUtilities::setAges(*storedChosenNode, storedAges);
+        TreeUtilities::setAges(*storedUncle, storedAges);
     }
     
 }

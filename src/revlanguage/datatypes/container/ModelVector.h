@@ -75,11 +75,13 @@ namespace RevLanguage {
 #include "DeterministicNode.h"
 #include "MethodTable.h"
 #include "Natural.h"
+#include "Probability.h"
 #include "RbException.h"
+#include "RbMathLogic.h"
 #include "RevPtr.h"
-#include "TypeSpec.h"
 #include "RevVariable.h"
 #include "RlBoolean.h"
+#include "TypeSpec.h"
 #include "Workspace.h"
 #include "WorkspaceVector.h"
 
@@ -314,6 +316,44 @@ RevPtr<RevVariable> ModelVector<rlType>::executeMethod( std::string const &name,
         // return a new RevVariable with the size of this container
         return RevPtr<RevVariable>( new RevVariable( new RlBoolean( false ), "" ) );
     }
+    else if ( name == "erase" )
+    {
+        found = true;
+        
+        // Check whether the DAG node is actually a constant node
+        if ( this->dag_node->isConstant() == false )
+        {
+            throw RbException( "We can only erase from constant variables." );
+        }
+        
+        RevBayesCore::RbVector<typename rlType::valueType> &v = this->dag_node->getValue();
+        
+        if ( args[0].getVariable()->getRevObject().isType( ModelVector<rlType>::getClassTypeSpec() ) )
+        {
+            const ModelVector<rlType> &v_x = static_cast<const ModelVector<rlType>&>( args[0].getVariable()->getRevObject() );
+            const RevBayesCore::RbVector<typename rlType::valueType> &x = v_x.getValue();
+            for (size_t i = 0; i < x.size(); ++i )
+            {
+                RevBayesCore::RbIterator<typename rlType::valueType> pos = v.find( x[i] );
+                if ( pos != v.end() )
+                {
+                    v.erase( pos );
+                }
+            }
+        }
+        else
+        {
+            const rlType &rl_x = static_cast<const rlType&>( args[0].getVariable()->getRevObject() );
+            const typename rlType::valueType &x = rl_x.getValue();
+            RevBayesCore::RbIterator<typename rlType::valueType> pos = v.find( x );
+            if ( pos != v.end() )
+            {
+                v.erase( pos );
+            }
+        }
+        
+        return NULL;
+    }
     else if ( name == "find" )
     {
         found = true;
@@ -440,6 +480,13 @@ void ModelVector<rlType>::initMethods( void )
     contains_arg_rules->push_back( new ArgumentRule( "x", rlType::getClassTypeSpec(), "The element.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     this->methods.addFunction( new MemberProcedure( "contains", RlBoolean::getClassTypeSpec(), contains_arg_rules ) );
 
+    ArgumentRules* erase_arg_rules = new ArgumentRules();
+    std::vector<TypeSpec> erase_value_types;
+    erase_value_types.push_back( rlType::getClassTypeSpec() );
+    erase_value_types.push_back( ModelVector<rlType>::getClassTypeSpec() );
+    erase_arg_rules->push_back( new ArgumentRule( "x", erase_value_types, "The element that you want to erase.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    this->methods.addFunction( new MemberProcedure( "erase", RlUtils::Void, erase_arg_rules) );
+
     ArgumentRules* find_arg_rules = new ArgumentRules();
     find_arg_rules->push_back( new ArgumentRule( "x", rlType::getClassTypeSpec(), "The element.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     this->methods.addFunction( new MemberProcedure( "find", RlBoolean::getClassTypeSpec(), find_arg_rules ) );
@@ -486,6 +533,7 @@ double ModelVector<rlType>::isConvertibleTo( const TypeSpec& type, bool once ) c
         // Simply check whether our elements can be converted to the desired element type
         typename RevBayesCore::RbConstIterator<elementType> i;
         double penalty = 0.0;
+        double sum = 0.0;
         for ( i = this->getValue().begin(); i != this->getValue().end(); ++i )
         {
             const elementType& org_internal_element = *i;
@@ -509,7 +557,19 @@ double ModelVector<rlType>::isConvertibleTo( const TypeSpec& type, bool once ) c
                 }
                 penalty += element_penalty;
             }
-            
+
+            if( type.getType() == "Simplex" )
+            {
+                Probability* ro = static_cast<Probability*>( org_element.convertTo( Probability::getClassTypeSpec() ) );
+                sum += ro->getValue();
+                delete ro;
+            }
+        }
+
+        // we cannot convert to a Simplex if the elements are not normalized
+        if ( type.getType() == "Simplex" && RevBayesCore::RbMath::compEssentiallyEqual(sum, 1.0) == false )
+        {
+            return -1;
         }
 
         return penalty;

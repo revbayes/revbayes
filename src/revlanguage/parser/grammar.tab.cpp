@@ -204,6 +204,7 @@
 #include <list>
 
 #include "Integer.h"
+#include "IntegerPos.h"
 #include "Natural.h"
 #include "Probability.h"
 #include "Parser.h"
@@ -282,7 +283,7 @@ typedef union YYSTYPE
     char*                                           c_string;
     std::string*                                    string;
     double                                          realValue;
-    int                                             intValue;
+    long                                            longIntValue;
     bool                                            boolValue;
     RevLanguage::SyntaxElement*                     syntaxElement;
     RevLanguage::SyntaxVariable*                    syntaxVariable;
@@ -3279,11 +3280,11 @@ yyreduce:
   case 155:
 #line 842 "./grammar.y"
     {
-                    if ( (yyvsp[(1) - (1)].intValue) < 0 ) {
-                        (yyval.syntaxElement) = new SyntaxConstant(new Integer((yyvsp[(1) - (1)].intValue)) );
+                    if ( (yyvsp[(1) - (1)].longIntValue) < 0 ) {
+                        (yyval.syntaxElement) = new SyntaxConstant(new Integer((yyvsp[(1) - (1)].longIntValue)) );
                     }
                     else { 
-                        (yyval.syntaxElement) = new SyntaxConstant(new Natural((yyvsp[(1) - (1)].intValue)) );
+                        (yyval.syntaxElement) = new SyntaxConstant(new Natural((yyvsp[(1) - (1)].longIntValue)) );
                     }
                 }
     break;

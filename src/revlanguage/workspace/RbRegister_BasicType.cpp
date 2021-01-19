@@ -67,6 +67,7 @@
 
 /* Primitive types (in folder "datatypes/basic") */
 #include "Integer.h"
+#include "IntegerPos.h"
 #include "Natural.h"
 #include "Probability.h"
 #include "RlBoolean.h"
@@ -96,6 +97,7 @@ void RevLanguage::Workspace::initializeBasicTypeGlobalWorkspace(void)
         /* Add primitive types (in folder "datatypes/basic") (alphabetic order) */
         AddWorkspaceVectorType<Integer,4>::addTypeToWorkspace(     *this, new Integer()     );
         AddWorkspaceVectorType<Natural,4>::addTypeToWorkspace(     *this, new Natural()     );
+        AddWorkspaceVectorType<IntegerPos,4>::addTypeToWorkspace(  *this, new IntegerPos()  );
         AddWorkspaceVectorType<Probability,4>::addTypeToWorkspace( *this, new Probability() );
         AddWorkspaceVectorType<Real,4>::addTypeToWorkspace(        *this, new Real()        );
         AddWorkspaceVectorType<RealPos,4>::addTypeToWorkspace(     *this, new RealPos()     );

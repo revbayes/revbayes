@@ -76,10 +76,7 @@ double AbstractPhyloContinuousCharacterProcess::computeBranchTime( size_t nide_i
         branch_time = sigma * sigma * brlen;
     }
     
-    // prevent division by zero
-    return branch_time <= 0.0 ? 1e-16 : branch_time;
-    
-//    return branch_time;
+    return branch_time;
 }
 
 
@@ -238,6 +235,8 @@ void AbstractPhyloContinuousCharacterProcess::setSiteRate(const TypedDagNode<RbV
     this->removeParameter( heterogeneous_site_rates );
     homogeneous_site_rate       = NULL;
     heterogeneous_site_rates    = NULL;
+    
+    this->num_sites = r->getValue().size();
     
     
     // set the value

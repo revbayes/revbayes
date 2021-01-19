@@ -882,8 +882,8 @@ void AbstractCharacterData::switchHomeologPhase(const std::string& tipName1, con
     t2.setTaxon( Taxon(tipName1) );
     taxonMap.erase( tipName1 );
     taxonMap.erase( tipName2 );
-    taxonMap.insert( std::pair<std::string, AbstractTaxonData* >( tipName1, t2.clone() ) );
-    taxonMap.insert( std::pair<std::string, AbstractTaxonData* >( tipName2, t1.clone() ) );
+    taxonMap.insert( std::pair<std::string, AbstractTaxonData* >( tipName1, &t2 ) );
+    taxonMap.insert( std::pair<std::string, AbstractTaxonData* >( tipName2, &t1 ) );
 }
 
 

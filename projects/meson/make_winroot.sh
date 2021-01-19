@@ -87,12 +87,12 @@ echo
 echo "4. Installing boost to ${SYSROOT}"
 echo
 cd ${SYSROOT}
-PKGS="boost-1.70.0-2"
+PKGS="boost-1.75.0-2 libwinpthread-git-9.0.0.6090.ad98746a-1"
 for PKG in ${PKGS} ; do
-    FILE=mingw-w64-x86_64-${PKG}-any.pkg.tar.xz
+    FILE=mingw-w64-x86_64-${PKG}-any.pkg.tar.zst
     rm -f ${FILE}
     wget --no-verbose --show-progress http://repo.msys2.org/mingw/x86_64/${FILE}
-    tar -Jxf ${FILE}
+    tar -I zstd -xf ${FILE}
     rm ${FILE}
 done
 

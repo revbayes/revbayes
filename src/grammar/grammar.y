@@ -81,7 +81,7 @@ Parser& parser = Parser::getParser();
     char*                                           c_string;
     std::string*                                    string;
     double                                          realValue;
-    int                                             intValue;
+    long                                             longIntValue;
     bool                                            boolValue;
     RevLanguage::SyntaxElement*                     syntaxElement;
     RevLanguage::SyntaxVariable*                    syntaxVariable;
@@ -96,7 +96,7 @@ Parser& parser = Parser::getParser();
 /* Return types of the elements handled by the parser */
 %type <c_string> NAME STRING
 %type <realValue> REAL RBINF
-%type <intValue> INT RBNULL
+%type <longIntValue> INT RBNULL
 %type <boolValue> FALSE TRUE
 %type <string> RBTAB
 %type <string> identifier typeSpec optDims dimList 

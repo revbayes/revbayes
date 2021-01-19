@@ -26,12 +26,22 @@ set(OPTIMIZATION_FLAGS "-O3 -DNDEBUG")
 if (CMAKE_SYSTEM_PROCESSOR MATCHES "^arm*|aarch64")
    add_definitions(-DRB_ARM)
 else()
-   set(OPTIMIZATION_FLAGS "${OPTIMIZATION_FLAGS} -msse -msse2 -msse3")
+  #  We need to enable SSE3 instructions even in debug builds.
+  #  Otherwise we get errors failing to inline __mm_hadd_pd( ) in PhyloCTMCSiteHomogeneousNucleotide.h
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse -msse2 -msse3")
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse -msse2 -msse3")
 endif()
 
 if (CMAKE_BUILD_TYPE MATCHES DEBUG)
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -Wall -msse -msse2 -msse3")
    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -Wall -msse -msse2 -msse3")
+
+     # These just add noise:
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-sign-compare -Wno-unknown-pragmas")
+     # These could be bugs, but there are so many we can't see the really bad ones. So>
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wreorder")
+     # Not necessarily a bug:
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable -Wno-unused-but-set-variable")
 else()
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPTIMIZATION_FLAGS}")
    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPTIMIZATION_FLAGS}")
@@ -65,21 +75,22 @@ if ("${CONTINUOUS_INTEGRATION}" STREQUAL "TRUE")
 endif()
 
 
-MESSAGE("My Boost information:")
-MESSAGE("  Boost_INCLUDE_DIRS: ${LOCAL_BOOST_ROOT}")
-MESSAGE("  Boost_LIBRARIES: ${LOCAL_BOOST_LIBRARY}")
+MESSAGE("Boost location hints:")
+if (BOOST_ROOT)
+  MESSAGE("  BOOST_ROOT: ${BOOST_ROOT}")
+else()
+  MESSAGE("  BOOST_ROOT not set")
+endif()
+if (BOOST_INCLUDEDIR)
+  MESSAGE("  BOOST_INCLUDEDIR: ${BOOST_INCLUDEDIR}")
+endif()
+if (BOOST_LIBRARYDIR)
+  MESSAGE("  BOOST_LIBRARYDIR: ${BOOST_LIBRARYDIR}")
+endif()
 
 set(Boost_USE_MULTITHREADED ON)
 
-if ( NOT "${LOCAL_BOOST_ROOT}" STREQUAL "" AND NOT "${LOCAL_BOOST_LIBRARY}" STREQUAL "" )
-   SET(BOOST_ROOT ${LOCAL_BOOST_ROOT})
-   SET(BOOST_LIBRARY ${LOCAL_BOOST_LIBRARY})
-   SET(Boost_REALPATH ON)
-#   SET(Boost_NO_SYSTEM_PATHS ON)
-#   SET(Boost_USE_STATIC_RUNTIME ON)
-#   SET(Boost_USE_STATIC_LIBS ON)
-endif()
-
+MESSAGE("Searching for BOOST:")
 find_package(Boost
 1.60.0
 COMPONENTS regex
@@ -89,10 +100,10 @@ system
 filesystem
 date_time
 serialization REQUIRED)
-MESSAGE("Boost information:")
+MESSAGE("Boost configuration results:")
 MESSAGE("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIR}")
-MESSAGE("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
 MESSAGE("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
+MESSAGE("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
 # This will look for "generated_include_dirs.cmake" in the module path.

@@ -26,11 +26,11 @@ ExtendedNewickTreeMonitor::ExtendedNewickTreeMonitor(TypedDagNode<Tree> *t, cons
     nodeVariables( n )
 {
 //    this->nodes.insert( tree );
-    
+
     for (std::vector<DagNode*>::iterator it = nodeVariables.begin(); it != nodeVariables.end(); ++it)
     {
         this->nodes.push_back( *it );
-        
+
         // tell the node that we have a reference to it (avoids deletion)
         (*it)->incrementReferenceCount();
     }
@@ -40,7 +40,7 @@ ExtendedNewickTreeMonitor::ExtendedNewickTreeMonitor(TypedDagNode<Tree> *t, cons
 /* Clone the object */
 ExtendedNewickTreeMonitor* ExtendedNewickTreeMonitor::clone(void) const
 {
-    
+
     return new ExtendedNewickTreeMonitor(*this);
 }
 
@@ -48,9 +48,9 @@ ExtendedNewickTreeMonitor* ExtendedNewickTreeMonitor::clone(void) const
 /** Monitor value at generation gen */
 void ExtendedNewickTreeMonitor::monitorVariables(unsigned long gen)
 {
-    
+
     out_stream << separator;
-    
+
     tree->getValue().clearParameters();
     for (std::vector<DagNode*>::iterator it = nodeVariables.begin(); it != nodeVariables.end(); ++it)
     {
@@ -75,28 +75,29 @@ void ExtendedNewickTreeMonitor::monitorVariables(unsigned long gen)
             {
                 node.addBranchParameter( name, values[i]);
             }
-            
+
         }
     }
-            
+
     out_stream << tree->getValue();
-    
+    out_stream.flush();
+
 }
 
 
 /** Print header for monitored values */
 void ExtendedNewickTreeMonitor::printFileHeader()
 {
-    
+
     // add a separator tree
     out_stream << separator << "Tree";
-    
+
 }
 
 
 void ExtendedNewickTreeMonitor::swapNode(DagNode *oldN, DagNode *newN)
 {
-    
+
     TypedDagNode< RbVector<double> >* nodeVar = dynamic_cast< TypedDagNode< RbVector<double> > *>(oldN);
     if ( oldN == tree )
     {
@@ -117,9 +118,7 @@ void ExtendedNewickTreeMonitor::swapNode(DagNode *oldN, DagNode *newN)
 //        nodeVariables.erase( nodeVar );
 //        nodeVariables.insert( static_cast< TypedDagNode< RbVector<double> > *>(newN) );
     }
-    
+
     // delegate to base class
     VariableMonitor::swapNode(oldN, newN);
 }
-
-

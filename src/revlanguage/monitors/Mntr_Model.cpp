@@ -7,6 +7,7 @@
 #include "ModelMonitor.h"
 #include "ModelVector.h"
 #include "Natural.h"
+#include "IntegerPos.h"
 #include "RevObject.h"
 #include "RlString.h"
 #include "TypeSpec.h"
@@ -47,7 +48,7 @@ void Mntr_Model::constructInternalObject( void )
     // now allocate a new sliding move
     const std::string&                  fn      = static_cast<const RlString &>( filename->getRevObject() ).getValue();
     const std::string&                  sep     = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    int                                 g       = (int)static_cast<const Natural  &>( printgen->getRevObject() ).getValue();
+    unsigned int                        g       = (int)static_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
     bool                                pp      = static_cast<const RlBoolean &>( posterior->getRevObject() ).getValue();
     bool                                l       = static_cast<const RlBoolean &>( likelihood->getRevObject() ).getValue();
     bool                                pr      = static_cast<const RlBoolean &>( prior->getRevObject() ).getValue();
@@ -120,7 +121,7 @@ const MemberRules& Mntr_Model::getParameterRules(void) const
     {
         
         memberRules.push_back( new ArgumentRule("filename"      , RlString::getClassTypeSpec() , "The name of the file where to store the values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        memberRules.push_back( new ArgumentRule("printgen"      , Natural::getClassTypeSpec()  , "The frequency how often to sample values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
+        memberRules.push_back( new ArgumentRule("printgen"      , IntegerPos::getClassTypeSpec()  , "The frequency how often to sample values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new IntegerPos(1) ) );
         memberRules.push_back( new ArgumentRule("separator"     , RlString::getClassTypeSpec() , "The separator between different variables.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
         memberRules.push_back( new ArgumentRule("posterior"     , RlBoolean::getClassTypeSpec(), "Should we print the joint posterior probability?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         memberRules.push_back( new ArgumentRule("likelihood"    , RlBoolean::getClassTypeSpec(), "Should we print the likelihood?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );

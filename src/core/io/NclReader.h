@@ -80,8 +80,7 @@ namespace RevBayesCore {
         // functions for reading trees
         std::vector<Tree* >*                                    readBranchLengthTrees(const std::string &fn);                                   //!< Read trees
         std::vector<Tree* >*                                    readBranchLengthTrees(const std::string &fn, std::vector<std::map<int,std::string> >& translationTables);
-        std::vector<Tree*>                                      readTimeTrees(const std::string &treeFilename);
-     // std::vector<AdmixtureTree* >                            readAdmixtureTrees(const std::string &treeFileName);
+        std::vector<Tree* >*                                    readTimeTrees(const std::string &treeFilename);
         
     private:
         
@@ -107,7 +106,6 @@ namespace RevBayesCore {
         void                                                    constructBranchLengthTreefromNclRecursively(TopologyNode* tn, std::vector<TopologyNode*> &nodes, std::vector<double> &brlens, const NxsSimpleNode* tnNcl, const NxsTaxaBlock *tb);  //!< Constructs a tree from NCL
      // void                                                    constructTreefromNclRecursively(TopologyNode* tn, const NxsSimpleNode* tnNcl, const NxsTaxaBlock *tb);  //!< Constructs a tree from NCL
         std::vector<Tree* >*                                    readBranchLengthTrees(const std::string &fn, const std::string &fileFormat);     //!< Read trees
-     // void                                                    readBranchLengthTrees(const char* fileName, const std::string fileFormat);       //!< Reads trees contained in a file
         std::vector<Tree* >*                                    convertTreesFromNcl(void);                                                       //!< Converts trees stored by NCL into RevBayes formatted trees
         Tree*                                                   translateNclSimpleTreeToBranchLengthTree(NxsSimpleTree &nTree,const NxsTaxaBlock *tb, bool rooted);  //!< Translate a single NCL tree into a RevBayes tree
         

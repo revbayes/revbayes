@@ -1,11 +1,3 @@
-//
-//  DistributionLKJ.cpp
-//  revbayes
-//
-//  Created by Michael R. May on 2017-08-04.
-//  Copyright (c) 2014 revbayes team. All rights reserved.
-//
-
 #include <stddef.h>
 #include <cmath>
 

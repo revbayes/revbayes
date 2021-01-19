@@ -133,7 +133,9 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
         // check that the file/path name has been correctly specified
         std::string  bn = static_cast<const RlString&>( args[arg_index_files].getVariable()->getRevObject() ).getValue();
         
-        StringUtilities::replaceSubstring(bn,".trees","");
+        std::string file_extension = bn.substr(StringUtilities::findLastOf(bn, '.'), string::npos);
+
+        StringUtilities::replaceSubstring(bn,file_extension,"");
         
         for (size_t i = 0; i < nruns; i++)
         {
@@ -143,7 +145,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
                 run = "_run_" + StringUtilities::to_string(i+1);
             }
 
-            const std::string  fn = bn + run + ".trees";
+            const std::string  fn = bn + run + file_extension;
 
             RevBayesCore::RbFileManager myFileManager( fn );
 
@@ -494,20 +496,23 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTreesNexus(const std::vector
         // get the global instance of the NCL reader and clear warnings from its warnings buffer
         RevBayesCore::NclReader reader = RevBayesCore::NclReader();
 
-        std::vector<RevBayesCore::Tree*> tmp;
-        if ( clock ) {
+        std::vector<RevBayesCore::Tree*>* tmp;
+        if ( clock )
+        {
             tmp = reader.readTimeTrees( fn );
         }
-        else {
-            tmp = *reader.readBranchLengthTrees( fn );
+        else
+        {
+            tmp = reader.readBranchLengthTrees( fn );
         }
         int nsamples = 0;
-        for (size_t j=0; j<tmp.size(); ++j)
+        for (size_t j=0; j<tmp->size(); ++j)
         {
-            RevBayesCore::Tree* t = tmp[i];
+            RevBayesCore::Tree* t = (*tmp)[j];
             if ( (nsamples-offset) % thin == 0) tt.addObject(t);
             nsamples++;
         }
+        delete tmp;
 
         data.push_back(TraceTree(tt));
     }

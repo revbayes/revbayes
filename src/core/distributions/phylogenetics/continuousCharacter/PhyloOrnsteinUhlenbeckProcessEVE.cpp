@@ -162,12 +162,12 @@ void PhyloOrnsteinUhlenbeckProcessEVE::computeCovariance(MatrixReal &covariance)
     // calculate the covariance between all leaf pairs
     for (size_t left_index=0; left_index<num_species; ++left_index)
     {
-        const TopologyNode *left_tip_node = &this->tau->getValue().getTipNode( left_index );
+        const TopologyNode& left_tip_node = this->tau->getValue().getTipNode( left_index );
         
         for (size_t right_index=(left_index+1); right_index<num_species; ++right_index)
         {
             
-            const TopologyNode *right_tip_node = &this->tau->getValue().getTipNode( right_index );
+            const TopologyNode& right_tip_node = this->tau->getValue().getTipNode( right_index );
             
             // get mrca
             size_t mrca_index = TreeUtilities::getMrcaIndex(left_tip_node, right_tip_node);
@@ -177,7 +177,7 @@ void PhyloOrnsteinUhlenbeckProcessEVE::computeCovariance(MatrixReal &covariance)
             
             // first, the computation for the left subtree
             size_t current_index = left_index;
-            const TopologyNode *current_node = left_tip_node;
+            const TopologyNode *current_node = &left_tip_node;
             while (current_index != mrca_index)
             {
                 sum_AT += computeBranchAlpha(current_index) * current_node->getBranchLength();
@@ -187,7 +187,7 @@ void PhyloOrnsteinUhlenbeckProcessEVE::computeCovariance(MatrixReal &covariance)
             
             // second, the computation for the right subtree
             current_index = right_index;
-            current_node = right_tip_node;
+            current_node = &right_tip_node;
             while (current_index != mrca_index)
             {
                 sum_AT += computeBranchAlpha(current_index) * current_node->getBranchLength();
