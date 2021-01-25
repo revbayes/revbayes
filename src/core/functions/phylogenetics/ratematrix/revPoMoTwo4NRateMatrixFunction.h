@@ -14,10 +14,10 @@
  * $Id$
  */
 
-#ifndef PoMoTwoRateMatrixFunction_H
-#define PoMoTwoRateMatrixFunction_H
+#ifndef revPoMoTwo4NRateMatrixFunction_H
+#define revPoMoTwo4NRateMatrixFunction_H
 
-#include "RateMatrix_PoMoTwo.h"
+#include "RateMatrix_revPoMoTwo4N.h"
 #include "RbVector.h"
 #include "MatrixReal.h"
 #include "TypedDagNode.h"
@@ -28,15 +28,15 @@
 
 namespace RevBayesCore {
 
-    class PoMoTwoRateMatrixFunction : public TypedFunction<RateGenerator> {
+    class revPoMoTwo4NRateMatrixFunction : public TypedFunction<RateGenerator> {
 
     public:
-        PoMoTwoRateMatrixFunction(const TypedDagNode< long > *ps, const TypedDagNode< RbVector<double> > *rho, const TypedDagNode< Simplex > *pi );
+        revPoMoTwo4NRateMatrixFunction( const TypedDagNode< long > *n, const TypedDagNode< Simplex > *bf, const TypedDagNode< RbVector<double> > *ex  );
 
-        virtual                                             ~PoMoTwoRateMatrixFunction(void);                                                    //!< Virtual destructor
+        virtual                                             ~revPoMoTwo4NRateMatrixFunction(void);                                                    //!< Virtual destructor
 
         // public member functions
-        PoMoTwoRateMatrixFunction*                          clone(void) const;                                                              //!< Create an independent clone
+        revPoMoTwo4NRateMatrixFunction*                     clone(void) const;                                                              //!< Create an independent clone
         void                                                update(void);
 
     protected:
@@ -45,9 +45,9 @@ namespace RevBayesCore {
     private:
 
         // members
-        const TypedDagNode< long >*                          populationSize;
-        const TypedDagNode< RbVector<double> >*              exchangeabilities;
-        const TypedDagNode< Simplex >*                       equilibriumFrequencies;
+        const TypedDagNode< long >*                          N;
+        const TypedDagNode< Simplex >*                       pi;
+        const TypedDagNode< RbVector<double> >*              rho;
 
     };
 

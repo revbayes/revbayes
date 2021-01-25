@@ -2,7 +2,7 @@
 #include "EigenSystem.h"
 #include "MatrixComplex.h"
 #include "MatrixReal.h"
-#include "RateMatrix_PoMoBalance.h"
+#include "RateMatrix_PoMoKN.h"
 #include "RbException.h"
 #include "RbMathMatrix.h"
 #include "TransitionProbabilityMatrix.h"
@@ -17,13 +17,11 @@ using namespace RevBayesCore;
 
 
 /** Construct rate matrix with n states */
-RateMatrix_PoMoBalance::RateMatrix_PoMoBalance( size_t ss, double in_n ) : TimeReversibleRateMatrix( ss ),
+RateMatrix_PoMoKN::RateMatrix_PoMoKN(long num_states, long in_k, long in_n, long in_nmr) : TimeReversibleRateMatrix( num_states ),
+    K( in_k ),
     N( in_n ),
-    pi( 4, 0.25),
-    rho( 6, 0.001 ),
-    sigma(  4, 0.0 ),
-    beta(  1.0 )
-    
+    mu( in_nmr, 0.01 ),
+    phi( in_k, 1.0 )
 {
     
     eigen_system       = new EigenSystem(the_rate_matrix);
@@ -35,13 +33,11 @@ RateMatrix_PoMoBalance::RateMatrix_PoMoBalance( size_t ss, double in_n ) : TimeR
 
 
 /** Copy constructor */
-RateMatrix_PoMoBalance::RateMatrix_PoMoBalance(const RateMatrix_PoMoBalance& m) : TimeReversibleRateMatrix( m ),
+RateMatrix_PoMoKN::RateMatrix_PoMoKN(const RateMatrix_PoMoKN& m) : TimeReversibleRateMatrix( m ),
+    K( m.K ),
     N( m.N ),
-    pi( m.pi ),
-    rho( m.rho ),
-    sigma( m.sigma ),
-    beta( m.beta )
-
+    mu( m.mu ),
+    phi( m.phi )
 {
     
     eigen_system        = new EigenSystem( *m.eigen_system );
@@ -53,14 +49,14 @@ RateMatrix_PoMoBalance::RateMatrix_PoMoBalance(const RateMatrix_PoMoBalance& m) 
 
 
 /** Destructor */
-RateMatrix_PoMoBalance::~RateMatrix_PoMoBalance(void)
+RateMatrix_PoMoKN::~RateMatrix_PoMoKN(void)
 {
     
     delete eigen_system;
 }
 
 
-RateMatrix_PoMoBalance& RateMatrix_PoMoBalance::operator=(const RateMatrix_PoMoBalance &r)
+RateMatrix_PoMoKN& RateMatrix_PoMoKN::operator=(const RateMatrix_PoMoKN &r)
 {
     
     if (this != &r)
@@ -72,11 +68,10 @@ RateMatrix_PoMoBalance& RateMatrix_PoMoBalance::operator=(const RateMatrix_PoMoB
         eigen_system        = new EigenSystem( *r.eigen_system );
         c_ijk               = r.c_ijk;
         cc_ijk              = r.cc_ijk;
+        K                   = r.K;
         N                   = r.N;
-        pi                  = r.pi;
-        rho                 = r.rho;
-        sigma               = r.sigma;
-        beta                = r.beta;
+        mu                  = r.mu;
+        phi                 = r.phi;
 
         
         eigen_system->setRateMatrixPtr(the_rate_matrix);
@@ -86,10 +81,10 @@ RateMatrix_PoMoBalance& RateMatrix_PoMoBalance::operator=(const RateMatrix_PoMoB
 }
 
 
-RateMatrix_PoMoBalance& RateMatrix_PoMoBalance::assign(const Assignable &m)
+RateMatrix_PoMoKN& RateMatrix_PoMoKN::assign(const Assignable &m)
 {
     
-    const RateMatrix_PoMoBalance *rm = dynamic_cast<const RateMatrix_PoMoBalance*>(&m);
+    const RateMatrix_PoMoKN *rm = dynamic_cast<const RateMatrix_PoMoKN*>(&m);
     if ( rm != NULL )
     {
         return operator=(*rm);
@@ -104,7 +99,7 @@ RateMatrix_PoMoBalance& RateMatrix_PoMoBalance::assign(const Assignable &m)
 
 
 /** Do precalculations on eigenvectors */
-void RateMatrix_PoMoBalance::calculateCijk(void)
+void RateMatrix_PoMoKN::calculateCijk(void)
 {
     
     if ( eigen_system->isComplex() == false )
@@ -145,7 +140,7 @@ void RateMatrix_PoMoBalance::calculateCijk(void)
 
 
 /** Calculate the transition probabilities */
-void RateMatrix_PoMoBalance::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
+void RateMatrix_PoMoKN::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
 {
     double t = rate * (startAge - endAge);
     if ( eigen_system->isComplex() == false )
@@ -159,146 +154,112 @@ void RateMatrix_PoMoBalance::calculateTransitionProbabilities(double startAge, d
 }
 
 
-RateMatrix_PoMoBalance* RateMatrix_PoMoBalance::clone( void ) const
+RateMatrix_PoMoKN* RateMatrix_PoMoKN::clone( void ) const
 {
-    return new RateMatrix_PoMoBalance( *this );
+    return new RateMatrix_PoMoKN( *this );
 }
 
 
-/*
-To build thie PoMoBalance rate matrix we need 4 vectors that organize 8 parameters describing genetic drift,
-mutation, allele flow and selection between population 1 and 2:
-
-effective population size:  nu     = ( N_1         , N_2 )
-mutation:                   mu     = ( mu_{Aa}     , mu_{aA} )
-allele flow:                lambda = ( lambda_{12} , lambda_{21} )
-allelic selection:          sigma  = ( sigma_a     , sigma_A )
-*/
-
-void RateMatrix_PoMoBalance::computeOffDiagonal( void )
+/*populating the rate matrix*/
+void RateMatrix_PoMoKN::computeOffDiagonal( void )
 {
     
-    
-    MatrixReal& m = *the_rate_matrix;
-    // frequency of allele A in population 1 (n1) and 2 (n2)
-    // create the combine state-space between the two populations
-    // {n1A,(N1-n1)a}{n2A,(N2-n2)a}
+  MatrixReal& m = *the_rate_matrix;
 
-    for (int i=0; i<num_states; i++){
+ /*  
+  INFORMATION ABOUT THE PoMoKN RATE MATRIX
 
-        for (int j=0; j<num_states; j++){
+  It includes both fixed and polymorphic sites, but only biallelic states are considered.
 
-            m[i][j] = 0.0;
-        
-        }
+  The pomo rate matrices defined here first list the fixed states {Na0}, {Na1} ...,
+  these occupying positions 0:(K-1), and then polymorphic states.
 
+  K alleles comprise (K*K-K)/2 pairwise combinations of alleles.
+  This is the number of edges in the pomo state-space. Each edge comprises N-1 polymorphic states, 
+  each of which represents a state of allelic frequencies in the population (summing to N).
+  Example for a random allele pair aiaj: {(N-1)ai,1aj}, {(N-2)ai,2aj}, ..., {1ai,(N-1)aj}
+
+  The polymorphic edges are listed in the following order a0a1, a0a2, a0a3, ..., a(K-2)aK-1
+  We say the a0a1 polymorphic states sit at edge 0. Thus, {(N-1)a0,1a1} sits at position K and 
+  {1a0,(N-1)a1} sits N-2 positions further (i.e., K+N-2).
+  More generally, the polymorphic states of the allele pair sitting at edge E occupy the positions
+  [K+E*N-E]:[K+(E+1)*(N-1)-1].
+  */
+
+
+
+  //populate rate matrix with 0.0
+  // **total waste of time with sparse matrices like pomos**
+  for (int i=0; i< num_states; i++){
+    for (int j=0; j< num_states; j++){
+      m[i][j] = 0.0;        
     }
+  }
+
+  //first edge
+  int E = 0;
+
+  //reciprocal of the population size
+  double rN = 1.0/N;
+
+  //these for loops go through the (K*K-K) edges of the pomo state-space
+  //their represent all the possible pairwise combinations of alleles: a0a1, a1a2, ..., aK-2aK-1
+  for (int i=0; i<K; i++){
+    for (int j=i+1; j<K; j++){
+
+      //mutations
+      m[i][K+E*N-E]          = mu[2*E];    //{Nai} -> {(N-1)ai,1aj}
+      m[j][K+(E+1)*(N-1)-1]  = mu[2*E+1];  //{Naj} -> {1ai,(N-1)aj}
+
+      //fixations
+      m[K+E*N-E]        [i]  = (N-1.0)*phi[i]*rN;  //{(N-1)ai,1aj} -> {Nai} 
+      m[K+(E+1)*(N-1)-1][j]  = (N-1.0)*phi[j]*rN;  //{1ai,(N-1)aj} -> {Naj} 
 
 
-    // Mutations
+      //the pomo rate matrix is entirely defined by fixations and mutations if N=2
+      if (N>2) {
 
-    m[0][N+2]   = rho[0]*pi[1];
-    m[0][2*N+1] = rho[1]*pi[2];
-    m[0][3*N]   = rho[2]*pi[3];
-    m[1][4]     = rho[0]*pi[0];
-    m[1][4*N-1] = rho[3]*pi[2];
-    m[1][5*N-2] = rho[4]*pi[3];
-    m[2][N+3]   = rho[1]*pi[0];
-    m[2][3*N+1] = rho[3]*pi[1];
-    m[2][6*N-3] = rho[5]*pi[3];
-    m[3][2*N+2] = rho[2]*pi[0];
-    m[3][4*N]   = rho[4]*pi[1];
-    m[3][5*N-1] = rho[5]*pi[2];
+        //frequency shifts from singletons
+        m[K+E*N-E]        [K+E*N-E+1]       = (N-1.0)*phi[j]*rN;  //{(N-1)ai,1aj} -> {(N-2)ai,2aj}
+        m[K+(E+1)*(N-1)-1][K+(E+1)*(N-1)-2] = (N-1.0)*phi[i]*rN;  //{1ai,(N-1)aj} -> {2ai,(N-2)aj}
 
-    // Fixations
+        //frequency shifts for all the other polymorphic states
+        if (N>3) {
 
-    m[4][1]     = (1.0+sigma[1])*(N-1.0)/(N*beta);
-    m[N+2][0]   = (1.0+sigma[0])*(N-1.0)/(N*beta);
-    m[N+3][2]   = (1.0+sigma[2])*(N-1.0)/(N*beta);
-    m[2*N+1][0] = (1.0+sigma[0])*(N-1.0)/(N*beta);
-    m[2*N+2][3] = (1.0+sigma[3])*(N-1.0)/(N*beta);
-    m[3*N+1][2] = (1.0+sigma[2])*(N-1.0)/(N*beta);
-    m[4*N][3]   = (1.0+sigma[3])*(N-1.0)/(N*beta);
-    m[5*N-1][3] = (1.0+sigma[3])*(N-1.0)/(N*beta);
-    m[3*N][0]   = (1.0+sigma[0])*(N-1.0)/(N*beta);
-    m[4*N-1][1] = (1.0+sigma[1])*(N-1.0)/(N*beta);
-    m[5*N-2][1] = (1.0+sigma[1])*(N-1.0)/(N*beta);
-    m[6*N-3][2] = (1.0+sigma[2])*(N-1.0)/(N*beta);
+          //polymorphic states are populated in two fronts, thus the need for the middle frequency
+          int S = N/2+1; 
 
-    // reamining polymorphic sites
+          for (int n=2; n<S; n++){
 
-    if (N > 2){
+            //populates the first half of the polymorphic edge aiaj
+            m[K+E*N-E+n-1]    [K+E*N-E+n]         = n*(N-n)*phi[j]*rN; //{nai,(N-n)aj} -> {(n-1)ai,(N-n+1)aj}
+            m[K+E*N-E+n-1]    [K+E*N-E+n-2]       = n*(N-n)*phi[i]*rN; //{nai,(N-n)aj} -> {(n+1)ai,(N-n-1)aj}
 
-        for (int n=1; n<(N-1); n++) {
+            //populates the second half of the polymorphic edge aiaj
+            m[K+(E+1)*(N-1)-n][K+(E+1)*(N-1)-n-1] = (N-n)*n*phi[i]*rN; //{(N-n)ai,naj} -> {(N-n+1)ai,(n-1)aj}
+            m[K+(E+1)*(N-1)-n][K+(E+1)*(N-1)-n+1] = (N-n)*n*phi[j]*rN; //{(N-n)ai,naj} -> {(N-n-1)ai,(n+1)aj}
 
-        m[4+n-1][4+n-1+1]             = n*(N-n)*(1.0+sigma[0])*midpoint_beta(n,1)/N;
-        m[N+3-1+1-n][N+3-1+1-n+1]     = n*(N-n)*(1.0+sigma[1])*midpoint_beta(N-n,0)/N;
+          }
 
-        m[N+n+2+n-1][N+n+2+n-1]       = n*(N-n)*(1.0+sigma[0])*midpoint_beta(n,1)/N;
-        m[2*N+2-1+1-n][2*N+2-1-n]     = n*(N-n)*(1.0+sigma[2])*midpoint_beta(N-n,0)/N;
-
-        m[2*N+2+n-1][2*N+2+n]         = n*(N-n)*(1.0+sigma[0])*midpoint_beta(n,1)/N;
-        m[3*N+1-1+1-n][3*N+1-1+1-n-1] = n*(N-n)*(1.0+sigma[3])*midpoint_beta(N-n,0)/N;
-
-        m[3*N+1+n-1][3*N+1+n]         = n*(N-n)*(1.0+sigma[1])*midpoint_beta(n,1)/N;
-        m[4*N-1+1-n][4*N-1+1-n-1]     = n*(N-n)*(1.0+sigma[2])*midpoint_beta(N-n,0)/N;
-
-        m[4*N+n-1][4*N+n]             = n*(N-n)*(1.0+sigma[1])*midpoint_beta(n,1)/N;
-        m[5*N-1-1+1-n][5*N-1-1+1-n-1] = n*(N-n)*(1.0+sigma[3])*midpoint_beta(N-n,0)/N;
-
-        m[5*N-1+n-1][5*N-1+n]         = n*(N-n)*(1.0+sigma[2])*midpoint_beta(n,1)/N;
-        m[6*N-3-1+1-n][6*N-3-1+1-n-1] = n*(N-n)*(1.0+sigma[3])*midpoint_beta(N-n,0)/N;
+        }
 
       }
 
+      //update edge
+      E += 1; 
+
     }
-
-
-    needs_update = true;
-}
-
-
-
-
-double RateMatrix_PoMoBalance::midpoint_beta( double n, int indicator ) const
-{
-
-  // allele frequency n is in the midpoint
-  // will only happen for N even
-  if ( n == N/2) {
-    
-    if (indicator == 0) {
-        return 1/beta;
-    } else {
-        return 1/beta;
-    }
-
-  // allele frequency n is lower than the midpoint 
-  } else if ( n < N/2 ) {
-
-    if (indicator == 0) {
-        return 1/beta;
-    } else {
-        return beta;
-    }
-
-  // allele frequency n is higher than the midpoint 
-  } else {
-
-    if (indicator == 0) {
-        return beta;
-    } else {
-        return 1/beta;
-    }
-
   }
 
+  // set flags
+  needs_update = true;
 
 }
+
 
 
 /** Calculate the transition probabilities for the real case */
-void RateMatrix_PoMoBalance::tiProbsEigens(double t, TransitionProbabilityMatrix& P) const
+void RateMatrix_PoMoKN::tiProbsEigens(double t, TransitionProbabilityMatrix& P) const
 {
     
     // get a reference to the eigenvalues
@@ -332,7 +293,7 @@ void RateMatrix_PoMoBalance::tiProbsEigens(double t, TransitionProbabilityMatrix
 
 
 /** Calculate the transition probabilities for the complex case */
-void RateMatrix_PoMoBalance::tiProbsComplexEigens(double t, TransitionProbabilityMatrix& P) const
+void RateMatrix_PoMoKN::tiProbsComplexEigens(double t, TransitionProbabilityMatrix& P) const
 {
     
     // get a reference to the eigenvalues
@@ -362,20 +323,9 @@ void RateMatrix_PoMoBalance::tiProbsComplexEigens(double t, TransitionProbabilit
 }
 
 
-void RateMatrix_PoMoBalance::setN( double n )
-{
-    
-    N = n;
-    
-    // set flags
-    needs_update = true;
-    
-}
-
-
-void RateMatrix_PoMoBalance::setPi(const std::vector<double> &p )
-{
-    pi = p;
+void RateMatrix_PoMoKN::setK( long & na )
+{   
+    K = na;
     
     // set flags
     needs_update = true;
@@ -383,33 +333,36 @@ void RateMatrix_PoMoBalance::setPi(const std::vector<double> &p )
 }
 
 
-void RateMatrix_PoMoBalance::setRho( const std::vector<double> &r )
+void RateMatrix_PoMoKN::setN( long & ni )
 {
-    rho = r;
+    N = ni;
+    
+    // set flags
+    needs_update = true;
+    
+}
+
+
+void RateMatrix_PoMoKN::setMu( const std::vector<double> &m )
+{
+    mu = m;
     
     // set flags
     needs_update = true;
 }
 
-void RateMatrix_PoMoBalance::setSigma( const std::vector<double> &s )
+void RateMatrix_PoMoKN::setPhi( const std::vector<double> &f )
 {
-    sigma = s;
+    phi = f;
     
     // set flags
     needs_update = true;
 }
 
-void RateMatrix_PoMoBalance::setBeta( double b )
-{
-    beta = b;
-    
-    // set flags
-    needs_update = true;
-}
 
 
 /** Update the eigen system */
-void RateMatrix_PoMoBalance::updateEigenSystem(void)
+void RateMatrix_PoMoKN::updateEigenSystem(void)
 {
     
     eigen_system->update();
@@ -418,7 +371,7 @@ void RateMatrix_PoMoBalance::updateEigenSystem(void)
 }
 
 
-void RateMatrix_PoMoBalance::update( void )
+void RateMatrix_PoMoKN::update( void )
 {
     
     if ( needs_update )

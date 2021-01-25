@@ -1,0 +1,116 @@
+#include "Func_revPoMoTwo4N.h"
+#include "Func_revPoMoTwo4N.h"
+#include "revPoMoTwo4NRateMatrixFunction.h"
+#include "ModelVector.h"
+#include "Natural.h"
+#include "RateMatrix_revPoMoTwo4N.h"
+#include "Real.h"
+#include "RealPos.h"
+#include "RlDeterministicNode.h"
+#include "RlRateMatrix.h"
+#include "RlSimplex.h"
+#include "TypedDagNode.h"
+
+using namespace RevLanguage;
+
+/** default constructor */
+Func_revPoMoTwo4N::Func_revPoMoTwo4N( void ) : TypedFunction<RateMatrix>( ) {
+
+}
+
+
+/**
+ * The clone function is a convenience function to create proper copies of inherited objected.
+ * E.g. a.clone() will create a clone of the correct type even if 'a' is of derived type 'b'.
+ *
+ * \return A new copy of the process.
+ */
+Func_revPoMoTwo4N* Func_revPoMoTwo4N::clone( void ) const {
+
+    return new Func_revPoMoTwo4N( *this );
+}
+
+
+RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_revPoMoTwo4N::createFunction( void ) const
+{
+    RevBayesCore::TypedDagNode< long >*                          n  = static_cast<const Natural              &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>*           bf = static_cast<const Simplex              &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ex = static_cast<const ModelVector<RealPos> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+
+    if ( bf->getValue().size() !=  4 )
+    {
+        throw RbException("The number of base frequencies pi does not match the number of alleles: 4.");
+    }
+
+    if ( ex->getValue().size() !=  6 )
+    {
+        throw RbException("The number of exchangeabilities rho does not match the number of pairwise combinations of alleles: 6.");
+    }
+    
+    RevBayesCore::revPoMoTwo4NRateMatrixFunction* f = new RevBayesCore::revPoMoTwo4NRateMatrixFunction( n, bf, ex );
+
+    return f;
+}
+
+
+/* Get argument rules */
+const ArgumentRules& Func_revPoMoTwo4N::getArgumentRules( void ) const
+{
+
+  static ArgumentRules argumentRules = ArgumentRules();
+  static bool          rules_set = false;
+
+  if ( !rules_set )
+  {
+
+    argumentRules.push_back( new ArgumentRule( "N"          , Natural::getClassTypeSpec(), "Population size", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    argumentRules.push_back( new ArgumentRule( "pi"         , Simplex::getClassTypeSpec(), "Allele base frequencies: pi=(pi_A,pi_C,pi_G,pi_T)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    argumentRules.push_back( new ArgumentRule( "rho"        , ModelVector<RealPos>::getClassTypeSpec(), "Exchangeabilities: rho=(rho_AC,rho_AG,rho_AT,rho_CG,rho_CT,rho_GT)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+     
+    rules_set = true;
+  }
+
+  return argumentRules;
+}
+
+
+const std::string& Func_revPoMoTwo4N::getClassType(void)
+{
+
+  static std::string rev_type = "Func_revPoMoTwo4N";
+
+	return rev_type;
+
+}
+
+
+/* Get class type spec describing type of object */
+const TypeSpec& Func_revPoMoTwo4N::getClassTypeSpec(void)
+{
+
+  static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
+
+	return rev_type_spec;
+
+}
+
+
+/**
+ * Get the primary Rev name for this function.
+ */
+std::string Func_revPoMoTwo4N::getFunctionName( void ) const
+{
+    // create a name variable that is the same for all instance of this class
+    std::string f_name = "fnReversiblePoMoTwo4N";
+
+    return f_name;
+}
+
+
+const TypeSpec& Func_revPoMoTwo4N::getTypeSpec( void ) const
+{
+
+    static TypeSpec type_spec = getClassTypeSpec();
+
+    return type_spec;
+}

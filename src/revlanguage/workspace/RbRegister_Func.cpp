@@ -145,9 +145,15 @@
 #include "Func_orderedRateMatrix.h"
 #include "Func_pomo.h"
 #include "Func_reversiblePoMo.h"
-#include "Func_PoMoTwo.h"
-#include "Func_PoMoThree.h"
-#include "Func_PoMoBalance.h"
+#include "Func_PoMoKN.h"
+#include "Func_PoMo4N.h"
+#include "Func_PoMo2N.h"
+#include "Func_revPoMoKN.h"
+#include "Func_revPoMo4N.h"
+#include "Func_revPoMo2N.h"
+#include "Func_revPoMoBalance4N.h"
+#include "Func_revPoMoTwo4N.h"
+#include "Func_revPoMoThree4N.h"
 #include "Func_rtRev.h"
 #include "Func_vt.h"
 #include "Func_t92.h"
@@ -325,9 +331,15 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_orderedRateMatrix()                           );
         addFunction( new Func_pomo()                                        );
         addFunction( new Func_reversiblePoMo()                              );
-        addFunction( new Func_PoMoTwo()                                     );
-        addFunction( new Func_PoMoThree()                                   );
-        addFunction( new Func_PoMoBalance()                                 );
+        addFunction( new Func_PoMoKN()                                      );
+        addFunction( new Func_PoMo4N()                                      );
+        addFunction( new Func_PoMo2N()                                      );
+        addFunction( new Func_revPoMoKN()                                   );
+        addFunction( new Func_revPoMo4N()                                   );
+        addFunction( new Func_revPoMo2N()                                   );
+        addFunction( new Func_revPoMoBalance4N()                            );
+        addFunction( new Func_revPoMoTwo4N()                                );
+        addFunction( new Func_revPoMoThree4N()                              );
         addFunction( new Func_rtRev()                                       );
         addFunction( new Func_t92()                                         );
         addFunction( new Func_TamuraNei()                                   );

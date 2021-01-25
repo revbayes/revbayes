@@ -1,5 +1,5 @@
-#ifndef Func_PoMoBalance_H
-#define Func_PoMoBalance_H
+#ifndef Func_revPoMo2N_H
+#define Func_revPoMo2N_H
 
 #include "RlRateMatrix.h"
 #include "RlTypedFunction.h"
@@ -22,13 +22,13 @@ namespace RevLanguage {
      * @since 2014-08-14, version 1.0
      *
      */
-    class Func_PoMoBalance : public TypedFunction<RateMatrix> {
+    class Func_revPoMo2N : public TypedFunction<RateMatrix> {
         
     public:
-        Func_PoMoBalance( void );
+        Func_revPoMo2N( void );
         
         // Basic utility functions
-        Func_PoMoBalance*                                                   clone(void) const;                                          //!< Clone the object
+        Func_revPoMo2N*                                                     clone(void) const;                                          //!< Clone the object
         static const std::string&                                           getClassType(void);                                         //!< Get Rev type
         static const TypeSpec&                                              getClassTypeSpec(void);                                     //!< Get class type spec
         std::string                                                         getFunctionName(void) const;                                //!< Get the primary name of the function in Rev

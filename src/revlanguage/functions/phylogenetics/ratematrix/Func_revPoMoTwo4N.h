@@ -1,9 +1,9 @@
 /**
  * @file
- * This file contains the declaration of the RevLanguage PoMoTwo function, which
- * is used to created a deterministic variable associated with the PoMoTwo function.
+ * This file contains the declaration of the RevLanguage revPoMoTwo4N function, which
+ * is used to created a deterministic variable associated with the revPoMoTwo4N function.
  *
- * @brief Declaration and implementation of Func_PoMoTwo
+ * @brief Declaration and implementation of Func_revPoMoTwo4N
  *
  * (c) Copyright 2009- under GPL version 3
  * @date Last modified: 17/09/2019
@@ -14,8 +14,8 @@
  */
 
 
-#ifndef Func_PoMoTwo_H
-#define Func_PoMoTwo_H
+#ifndef Func_revPoMoTwo4N_H
+#define Func_revPoMoTwo4N_H
 
 #include "RlRateMatrix.h"
 #include "RlTypedFunction.h"
@@ -25,13 +25,13 @@
 
 namespace RevLanguage {
 
-    class Func_PoMoTwo : public TypedFunction<RateMatrix> {
+    class Func_revPoMoTwo4N : public TypedFunction<RateMatrix> {
 
     public:
-        Func_PoMoTwo( void );
+        Func_revPoMoTwo4N( void );
 
         // Basic utility functions
-        Func_PoMoTwo*                                                   clone(void) const;                                          //!< Clone the object
+        Func_revPoMoTwo4N*                                                   clone(void) const;                                          //!< Clone the object
         static const std::string&                                       getClassType(void);                                         //!< Get Rev type
         static const TypeSpec&                                          getClassTypeSpec(void);                                     //!< Get class type spec
         std::string                                                     getFunctionName(void) const;                                //!< Get the primary name of the function in Rev
