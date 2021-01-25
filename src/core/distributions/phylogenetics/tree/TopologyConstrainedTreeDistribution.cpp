@@ -28,6 +28,8 @@
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
 
+using std::vector;
+
 namespace RevBayesCore { class DagNode; }
 namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
 
@@ -620,6 +622,26 @@ void TopologyConstrainedTreeDistribution::setBackbone(const TypedDagNode<Tree> *
     }
 }
 
+void set_ages_for_constraint(Clade& clade, const vector<Taxon>& taxa)
+{
+    // set the ages of each of the taxa in the constraint
+    for (size_t j = 0; j < clade.size(); ++j)
+    {
+        bool found = false;
+        for (auto& taxon: taxa)
+        {
+            if ( taxon.getName() == clade.getTaxonName(j) )
+            {
+                clade.setTaxonAge(j, taxon.getAge());
+                found = true;
+                break;
+            }
+        }
+        if (not found)
+            throw RbException("set_ages_for_constraint: can't find taxon " + clade.getTaxonName(j) + " in full taxon set!");
+    }
+}
+
 /**
  *
  */
@@ -668,20 +690,10 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
         {
             throw RbException("Cannot simulate tree: clade constraints are older than the origin age.");
         }
-        
+
         // set the ages of each of the taxa in the constraint
-        for (size_t j = 0; j < monophyly_constraint.size(); ++j)
-        {
-            for (size_t k = 0; k < num_taxa; ++k)
-            {
-                if ( taxa[k].getName() == monophyly_constraint.getTaxonName(j) )
-                {
-                    monophyly_constraint.setTaxonAge(j, taxa[k].getAge());
-                    break;
-                }
-            }
-        }
-        
+        set_ages_for_constraint(monophyly_constraint, taxa);
+
         // set ages for optional constraints
         std::vector<Clade> optional_constraints = monophyly_constraint.getOptionalConstraints();
         for (auto& optional_constraint: optional_constraints)
@@ -705,7 +717,6 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
         // populate sorted clades vector
         if ( monophyly_constraint.size() > 1 && monophyly_constraint.size() < num_taxa )
         {
-        
             if ( monophyly_constraint.isOptionalMatch() == true )
             {
                 std::vector<Clade> optional_constraints = monophyly_constraint.getOptionalConstraints();
