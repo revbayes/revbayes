@@ -622,7 +622,7 @@ void TopologyConstrainedTreeDistribution::setBackbone(const TypedDagNode<Tree> *
     }
 }
 
-void set_ages_for_constraint(Clade& clade, const vector<Taxon>& taxa)
+void set_ages_for_constraint_top(Clade& clade, const vector<Taxon>& taxa)
 {
     // set the ages of each of the taxa in the constraint
     for (size_t j = 0; j < clade.size(); ++j)
@@ -640,6 +640,19 @@ void set_ages_for_constraint(Clade& clade, const vector<Taxon>& taxa)
         if (not found)
             throw RbException("set_ages_for_constraint: can't find taxon " + clade.getTaxonName(j) + " in full taxon set!");
     }
+}
+
+void set_ages_for_constraint(Clade& clade, const vector<Taxon>& taxa)
+{
+    // set the ages of each of the taxa in the constraint
+    set_ages_for_constraint_top( clade, taxa );
+
+    // set ages for optional constraints
+    std::vector<Clade> optional_constraints = clade.getOptionalConstraints();
+    for (auto& optional_constraint: optional_constraints)
+        set_ages_for_constraint_top( optional_constraint, taxa );
+
+    clade.setOptionalConstraints( optional_constraints );
 }
 
 /**
@@ -693,13 +706,6 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
 
         // set the ages of each of the taxa in the constraint
         set_ages_for_constraint( monophyly_constraint, taxa );
-
-        // set ages for optional constraints
-        std::vector<Clade> optional_constraints = monophyly_constraint.getOptionalConstraints();
-        for (auto& optional_constraint: optional_constraints)
-            set_ages_for_constraint( optional_constraint, taxa );
-        
-        monophyly_constraint.setOptionalConstraints( optional_constraints );
 
         // populate sorted clades vector
         if ( monophyly_constraint.size() > 1 && monophyly_constraint.size() < num_taxa )
