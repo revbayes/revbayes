@@ -119,6 +119,7 @@ jobs:
           brew update
           brew install pkg-config pandoc boost ccache coreutils
           sudo xcode-select -switch /Applications/Xcode_${{ matrix.version }}.app
+          ccache --set-config=cache_dir=$HOME/.ccache
 
     - name: Install (Windows meson cross compile)
       if: matrix.name == 'windows'
