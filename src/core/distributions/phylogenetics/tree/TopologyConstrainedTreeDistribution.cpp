@@ -684,16 +684,16 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
         
         // set ages for optional constraints
         std::vector<Clade> optional_constraints = monophyly_constraint.getOptionalConstraints();
-        for (size_t k = 0; k < optional_constraints.size(); k++)
+        for (auto& optional_constraint: optional_constraints)
         {
-            for (size_t opt_taxon_idx = 0; opt_taxon_idx < optional_constraints[k].size(); opt_taxon_idx++)
+            for (size_t opt_taxon_idx = 0; opt_taxon_idx < optional_constraint.size(); opt_taxon_idx++)
             {
                 for (size_t full_taxon_idx = 0; full_taxon_idx < num_taxa; full_taxon_idx++)
                 {
-                    if ( taxa[full_taxon_idx].getName() == optional_constraints[k].getTaxonName(opt_taxon_idx) )
+                    if ( taxa[full_taxon_idx].getName() == optional_constraint.getTaxonName(opt_taxon_idx) )
                     {
                         
-                        optional_constraints[k].setTaxonAge(opt_taxon_idx, taxa[full_taxon_idx].getAge());
+                        optional_constraint.setTaxonAge(opt_taxon_idx, taxa[full_taxon_idx].getAge());
                         break;
                     }
                 }
