@@ -662,28 +662,28 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
     // we need a sorted vector of constraints, starting with the smallest
     std::vector<Clade> sorted_clades;
     
-    for (size_t i = 0; i < monophyly_constraints.size(); ++i)
+    for (auto& monophyly_constraint: monophyly_constraints)
     {
-        if ( monophyly_constraints[i].getAge() > max_age )
+        if ( monophyly_constraint.getAge() > max_age )
         {
             throw RbException("Cannot simulate tree: clade constraints are older than the origin age.");
         }
         
         // set the ages of each of the taxa in the constraint
-        for (size_t j = 0; j < monophyly_constraints[i].size(); ++j)
+        for (size_t j = 0; j < monophyly_constraint.size(); ++j)
         {
             for (size_t k = 0; k < num_taxa; ++k)
             {
-                if ( taxa[k].getName() == monophyly_constraints[i].getTaxonName(j) )
+                if ( taxa[k].getName() == monophyly_constraint.getTaxonName(j) )
                 {
-                    monophyly_constraints[i].setTaxonAge(j, taxa[k].getAge());
+                    monophyly_constraint.setTaxonAge(j, taxa[k].getAge());
                     break;
                 }
             }
         }
         
         // set ages for optional constraints
-        std::vector<Clade> optional_constraints = monophyly_constraints[i].getOptionalConstraints();
+        std::vector<Clade> optional_constraints = monophyly_constraint.getOptionalConstraints();
         for (size_t k = 0; k < optional_constraints.size(); k++)
         {
             for (size_t opt_taxon_idx = 0; opt_taxon_idx < optional_constraints[k].size(); opt_taxon_idx++)
@@ -701,20 +701,20 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
             
         }
         
-        monophyly_constraints[i].setOptionalConstraints( optional_constraints );
+        monophyly_constraint.setOptionalConstraints( optional_constraints );
         // populate sorted clades vector
-        if ( monophyly_constraints[i].size() > 1 && monophyly_constraints[i].size() < num_taxa )
+        if ( monophyly_constraint.size() > 1 && monophyly_constraint.size() < num_taxa )
         {
         
-            if ( monophyly_constraints[i].isOptionalMatch() == true )
+            if ( monophyly_constraint.isOptionalMatch() == true )
             {
-                std::vector<Clade> optional_constraints = monophyly_constraints[i].getOptionalConstraints();
+                std::vector<Clade> optional_constraints = monophyly_constraint.getOptionalConstraints();
                 size_t idx = (size_t)( GLOBAL_RNG->uniform01() * optional_constraints.size() );
                 sorted_clades.push_back( optional_constraints[idx] );
             }
             else
             {
-                sorted_clades.push_back( monophyly_constraints[i] );
+                sorted_clades.push_back( monophyly_constraint );
             }
         }
         
