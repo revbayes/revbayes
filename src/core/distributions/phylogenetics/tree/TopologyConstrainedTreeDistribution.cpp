@@ -692,28 +692,15 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
         }
 
         // set the ages of each of the taxa in the constraint
-        set_ages_for_constraint(monophyly_constraint, taxa);
+        set_ages_for_constraint( monophyly_constraint, taxa );
 
         // set ages for optional constraints
         std::vector<Clade> optional_constraints = monophyly_constraint.getOptionalConstraints();
         for (auto& optional_constraint: optional_constraints)
-        {
-            for (size_t opt_taxon_idx = 0; opt_taxon_idx < optional_constraint.size(); opt_taxon_idx++)
-            {
-                for (size_t full_taxon_idx = 0; full_taxon_idx < num_taxa; full_taxon_idx++)
-                {
-                    if ( taxa[full_taxon_idx].getName() == optional_constraint.getTaxonName(opt_taxon_idx) )
-                    {
-                        
-                        optional_constraint.setTaxonAge(opt_taxon_idx, taxa[full_taxon_idx].getAge());
-                        break;
-                    }
-                }
-            }
-            
-        }
+            set_ages_for_constraint( optional_constraint, taxa );
         
         monophyly_constraint.setOptionalConstraints( optional_constraints );
+
         // populate sorted clades vector
         if ( monophyly_constraint.size() > 1 && monophyly_constraint.size() < num_taxa )
         {
@@ -728,9 +715,9 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
                 sorted_clades.push_back( monophyly_constraint );
             }
         }
-        
+
     }
-    
+
     
     // create a clade that contains all species
     Clade all_species = Clade(taxa);
