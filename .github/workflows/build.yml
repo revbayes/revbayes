@@ -115,15 +115,18 @@ jobs:
     - name: Install (macOS)
       if: runner.os == 'macOS'
       run: |
+          rm -rf /usr/local/bin/2to3 
+          
           brew update
           brew install pkg-config pandoc boost ccache coreutils
           sudo xcode-select -switch /Applications/Xcode_${{ matrix.version }}.app
+          ccache --set-config=cache_dir=$HOME/.ccache
 
     - name: Install (Windows meson cross compile)
       if: matrix.name == 'windows'
       run: |
           sudo apt-get update
-          sudo apt-get install -y pandoc libcairo2-dev ccache dos2unix
+          sudo apt-get install -y pandoc libcairo2-dev ccache dos2unix zstd
           sudo apt-get install git python3-setuptools python3-pip g++-mingw-w64 wine64
           sudo -H pip3 install meson
           sudo -H pip3 install ninja

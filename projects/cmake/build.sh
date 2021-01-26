@@ -31,6 +31,7 @@ while echo $1 | grep ^- > /dev/null; do
 -help           <true|false>    : update the help database and build the YAML help generator. Defaults to false.
 -boost_root     string          : specify directory containing Boost headers (e.g. `/usr/include`). Defaults to unset.
 -boost_lib      string          : specify directory containing Boost libraries. (e.g. `/usr/lib`). Defaults to unset.
+-j              integer         : the number of threads to use when compiling RevBayes. Defaults to 4.
 
 You can also specify cmake variables as -DCMAKE_VAR1=value1 -DCMAKE_VAR2=value2
 
