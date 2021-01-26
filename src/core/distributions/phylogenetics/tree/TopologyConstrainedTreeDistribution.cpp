@@ -780,16 +780,26 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
 //        std::cout << it->getAge() << std::endl;
 //    }
     
-    // DO WE NEED TO SORT THE TAXA?
-    // try this crummy bubble sort
-    size_t num_clades = sorted_clades.size();
-    for (int i = 0; i < num_clades - 1; i++) {
-        for(int j = 0; j < num_clades - i - 1; j++){
-            if (sorted_clades[j].getAge() > sorted_clades[j+1].getAge()) {
-                std::swap(sorted_clades[j], sorted_clades[j+1]);
+    auto clade_before = [&](const Clade& clade1, const Clade& clade2)
+        {
+            if (clade_nested_within(clade1, clade2))
+            {
+                if (clade1.getAge() > clade2.getAge())
+                    throw RbException("TopologyConstrainedTreeDistribution - cannot simulate tree: nested clade constraint has larger Age");
+                return true;
             }
-        }
-    }
+            else if (clade_nested_within(clade2,clade1))
+            {
+                if (clade2.getAge() > clade1.getAge())
+                    throw RbException("TopologyConstrainedTreeDistribution - cannot simulate tree: nested clade constraint has larger Age");
+                return false;
+            }
+            if (clades_overlap(clade1,clade2))
+                throw RbException("TopologyConstrainedTreeDistribution - cannot simulate tree: clade constraints conflict!");
+            return (clade1.getAge() < clade2.getAge());
+        };
+
+    std::sort(sorted_clades.begin(), sorted_clades.end(), clade_before);
     
 //    for(std::vector<Clade>::iterator it = sorted_clades.begin(); it != sorted_clades.end(); it++)
 //    {
