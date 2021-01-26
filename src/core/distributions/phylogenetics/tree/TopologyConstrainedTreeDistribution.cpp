@@ -790,7 +790,7 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
                 return false;
             }
             if (clades_overlap(clade1,clade2))
-                throw RbException("TopologyConstrainedTreeDistribution - cannot simulate tree: clade constraints conflict!");
+                throw RbException("Cannot simulate tree: conflicting monophyletic clade constraints. Check that all clade constraints are properly nested.");
             return (clade1.getAge() < clade2.getAge());
         };
 
