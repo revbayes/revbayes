@@ -10,7 +10,6 @@
 #include "AbstractPhyloCTMCSiteHomogeneous.h"
 #include "DiscreteTaxonData.h"
 #include "HomologousDiscreteCharacterData.h"
-#include "NaturalNumbersState.h"
 #include "PhyloCTMCSiteHomogeneous.h"
 #include "RbException.h"
 #include "TypedDistribution.h"

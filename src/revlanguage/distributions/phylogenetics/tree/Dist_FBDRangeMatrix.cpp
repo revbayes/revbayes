@@ -26,6 +26,7 @@
 #include "RevObject.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
+#include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlBoolean.h"
 #include "RlDagMemberFunction.h"
 #include "RlDeterministicNode.h"
@@ -112,10 +113,9 @@ RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess* Dist_FBDRangeMa
         rt = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
 
-    bool bo = static_cast<const RlBoolean &>( bounded->getRevObject() ).getValue();
     bool pa = static_cast<const RlBoolean &>( presence_absence->getRevObject() ).getValue();
 
-    RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess* d = new RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess(l, m, p, c, r, rt, cond, t, bo, pa);
+    RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess* d = new RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess(l, m, p, c, r, rt, cond, t, pa);
 
     return d;
 }
@@ -210,11 +210,7 @@ const MemberRules& Dist_FBDRangeMatrix::getParameterRules(void) const
 
         dist_member_rules.push_back( new ArgumentRule( "timeline",   ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process (from oldest to youngest).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
-        std::vector<TypeSpec> intTypes;
-        intTypes.push_back( Natural::getClassTypeSpec() );
-        intTypes.push_back( ModelVector<Natural>::getClassTypeSpec() );
-        intTypes.push_back( ModelVector<ModelVector<Natural> >::getClassTypeSpec() );
-        dist_member_rules.push_back( new ArgumentRule( "k",   intTypes, "The fossil observation counts (total or [interval] or [interval][species]).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "k", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The fossil observation count data matrix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         std::vector<std::string> optionsCondition;
         optionsCondition.push_back( "time" );
@@ -222,8 +218,10 @@ const MemberRules& Dist_FBDRangeMatrix::getParameterRules(void) const
         dist_member_rules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
         dist_member_rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa with stratigraphic ranges used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         
-        dist_member_rules.push_back( new ArgumentRule( "bounded" , RlBoolean::getClassTypeSpec() , "Treat first and last occurrence ages as known range boundaries?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-        dist_member_rules.push_back( new ArgumentRule( "binary" , RlBoolean::getClassTypeSpec() , "Treat fossil counts as binary presence/absence data?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+        std::vector<std::string> optionsUncertainty;
+        optionsUncertainty.push_back( "auto" );
+        optionsUncertainty.push_back( "custom" );
+        dist_member_rules.push_back( new OptionRule( "uncertainty", new RlString("auto"), optionsUncertainty, "Use automatic or custom first/last occurrence age range uncertainty?" ) );
 
         rules_set = true;
     }

@@ -9,7 +9,6 @@ using namespace RevBayesCore;
  * Default constructor.
  */
 Taxon::Taxon( void ) :
-    age_range(  ),
     name( "" ),
     species_name( "" )
 {
@@ -23,7 +22,6 @@ Taxon::Taxon( void ) :
  * \param[in]    n     The name of the taxon.
  */
 Taxon::Taxon(const std::string &n) :
-    age_range(  ),
     name( n ),
     species_name( n )
 {
@@ -47,11 +45,6 @@ bool Taxon::operator==(const RevBayesCore::Taxon &t) const
     {
         return false;
     }
-    
-//    if ( age_range != t.age_range)
-//    {
-//        return false;
-//    }
 
     return true;
 }
@@ -137,18 +130,40 @@ bool Taxon::operator>=(const RevBayesCore::Taxon &t) const
  */
 double Taxon::getAge( void ) const
 {
-    return age_range.getMin();
+    return min_age.getMin();
 }
 
 
 /**
- * Get the date info for this taxon.
+ * Get the min age range for this taxon.
  *
- * \return    The date.
+ * \return    The age range.
+ */
+const TimeInterval& Taxon::getMinAgeRange( void ) const
+{
+    return min_age;
+}
+
+
+/**
+ * Get the max age range for this taxon.
+ *
+ * \return    The age range.
+ */
+const TimeInterval& Taxon::getMaxAgeRange( void ) const
+{
+    return max_age;
+}
+
+
+/**
+ * Get the age range for this taxon.
+ *
+ * \return    The age range.
  */
 const TimeInterval& Taxon::getAgeRange( void ) const
 {
-    return age_range;
+    return TimeInterval(min_age.getMin(), max_age.getMax());
 }
 
 
@@ -163,8 +178,8 @@ const std::string Taxon::getJsonRespresentation(void) const {
     jsonStr += "{\"Taxon\": {";
     jsonStr += "\"name\": \"" + name + "\", ";
     jsonStr += "\"speciesName\": \"" + species_name + "\", ";
-    jsonStr += "\"TimeInterval\": {\"minAge\": " + std::to_string(age_range.getMin()) + ", ";
-    jsonStr += "\"maxAge\": " + std::to_string(age_range.getMax()) + "}}";
+    jsonStr += "\"TimeInterval\": {\"minAge\": " + std::to_string(min_age.getMin()) + ", ";
+    jsonStr += "\"maxAge\": " + std::to_string(max_age.getMax()) + "}}";
     return jsonStr;
 }
 
@@ -198,19 +213,42 @@ const std::string& Taxon::getSpeciesName( void ) const
  */
 void Taxon::setAge(double a)
 {
-    age_range.setMin(a);
-    age_range.setMax(a);
+    min_age = TimeInterval(a,a);
+    max_age = TimeInterval(a,a);
 }
 
 
 /**
- * Set the date info for this taxon.
+ * Set the age range for this taxon.
  *
- * \param[in]    d     The date.
+ * \param[in]    d     The age range.
  */
 void Taxon::setAgeRange( const TimeInterval &d )
 {
-    age_range = d;
+    min_age = TimeInterval(d.getMin(),d.getMin());
+    max_age = TimeInterval(d.getMax(),d.getMax());
+}
+
+
+/**
+ * Set the min age range for this taxon.
+ *
+ * \param[in]    d     The age range.
+ */
+void Taxon::setMinAgeRange( const TimeInterval &d )
+{
+    min_age = d;
+}
+
+
+/**
+ * Set the max age range for this taxon.
+ *
+ * \param[in]    d     The age range.
+ */
+void Taxon::setMaxAgeRange( const TimeInterval &d )
+{
+    max_age = d;
 }
 
 

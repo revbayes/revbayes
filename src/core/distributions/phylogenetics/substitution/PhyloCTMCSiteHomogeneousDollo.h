@@ -8,7 +8,6 @@
 #include "AbstractPhyloCTMCSiteHomogeneous.h"
 #include "DiscreteTaxonData.h"
 #include "HomologousDiscreteCharacterData.h"
-#include "NaturalNumbersState.h"
 #include "PhyloCTMCSiteHomogeneous.h"
 #include "PhyloCTMCSiteHomogeneousConditional.h"
 #include "RbException.h"

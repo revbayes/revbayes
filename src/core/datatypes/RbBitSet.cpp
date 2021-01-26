@@ -200,7 +200,7 @@ bool RbBitSet::isSet(size_t i) const
 
 void RbBitSet::resize(size_t size)
 {
-    value.resize(size);
+    value.resize(size,false);
 }
 
 void RbBitSet::set(size_t i)

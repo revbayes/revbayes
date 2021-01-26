@@ -46,7 +46,6 @@ namespace RevBayesCore {
                                                       const std::vector<Taxon> &taxa,
                                                       bool uo,
                                                       bool pa,
-                                                      bool bounds,
                                                       bool ex );  //!< Constructor
         
         // public member functions
@@ -71,7 +70,7 @@ namespace RevBayesCore {
         double                                          lnProbTreeShape(void) const;
 
         double                                          q(size_t i, double t, bool tilde = false) const;
-        double                                          integrateQ(size_t i, double t) const;
+        double                                          integrateQ(size_t i, double t, bool marginalized=true) const;
 
         double                                          simulateDivergenceTime(double origin, double present) const;    //!< Simulate a speciation event.
         std::vector<double>                             simulateDivergenceTimes(size_t n, double origin, double present, double min) const;                 //!< Simulate n speciation events.
