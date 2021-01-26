@@ -862,10 +862,9 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
                 clades.push_back( virtual_taxa[j] );
             }
 
-            if ( found_all == false && found_some == true )
-            {
-                throw RbException("Cannot simulate tree: conflicting monophyletic clade constraints. Check that all clade constraints are properly nested.");
-            }
+            // We check for conflicts when comparing clades during the sort.
+            // So any overlapping clades should be nested.
+            assert(found_all == found_some);
         }
 
         std::vector<TopologyNode*> nodes_in_clade;
