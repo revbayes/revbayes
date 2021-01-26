@@ -822,8 +822,8 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
 
         ++i;
         const Clade &c = *it;
-        std::vector<Taxon> taxa = c.getTaxa();
-        std::vector<Clade> clades;
+        std::vector<Taxon> unclaimed_taxa = c.getTaxa();
+        std::vector<Clade> children;
 
         int j = i;
         std::vector<Clade>::reverse_iterator jt(it);
@@ -843,10 +843,10 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
             bool found_some = false;
             for (auto& taxon_nested: taxa_nested)
             {
-                std::vector<Taxon>::iterator kt = std::find(taxa.begin(), taxa.end(), taxon_nested);
-                if ( kt != taxa.end() )
+                std::vector<Taxon>::iterator kt = std::find(unclaimed_taxa.begin(), unclaimed_taxa.end(), taxon_nested);
+                if ( kt != unclaimed_taxa.end() )
                 {
-                    taxa.erase( kt );
+                    unclaimed_taxa.erase( kt );
                     found_some = true;
                 }
                 else
@@ -859,7 +859,7 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
             {
                 //                c.addTaxon( virtual_taxa[j] );
                 //                taxa.push_back( virtual_taxa[j] );
-                clades.push_back( virtual_taxa[j] );
+                children.push_back( virtual_taxa[j] );
             }
 
             // We check for conflicts when comparing clades during the sort.
@@ -869,14 +869,14 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
 
         std::vector<TopologyNode*> nodes_in_clade;
 
-        for (auto& taxon: taxa)
+        for (auto& taxon: unclaimed_taxa)
         {
             Clade tmp_clade = Clade( taxon );
             tmp_clade.setAge( taxon.getAge() );
-            clades.push_back( tmp_clade );
+            children.push_back( tmp_clade );
         }
 
-        for (auto& clade: clades)
+        for (auto& clade: children)
         {
             for (size_t j = 0; j < nodes.size(); ++j)
             {
