@@ -29,6 +29,7 @@
 #include "TypedDistribution.h"
 
 using std::vector;
+using std::set;
 
 namespace RevBayesCore { class DagNode; }
 namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
@@ -653,6 +654,50 @@ void set_ages_for_constraint(Clade& clade, const vector<Taxon>& taxa)
         set_ages_for_constraint_top( optional_constraint, taxa );
 
     clade.setOptionalConstraints( optional_constraints );
+}
+
+bool clade_nested_within(const Clade& clade1, const Clade& clade2)
+{
+    set<Taxon> taxa1;
+    for(auto& taxon: clade1.getTaxa())
+        taxa1.insert(taxon);
+
+    set<Taxon> taxa2;
+    for(auto& taxon: clade2.getTaxa())
+        taxa2.insert(taxon);
+
+    return std::includes(clade2.begin(), clade2.end(), clade1.begin(), clade1.end());
+}
+
+bool clades_overlap(const Clade& clade1, const Clade& clade2)
+{
+    set<Taxon> taxa1;
+    for(auto& taxon: clade1.getTaxa())
+        taxa1.insert(taxon);
+
+    set<Taxon> taxa2;
+    for(auto& taxon: clade2.getTaxa())
+        taxa2.insert(taxon);
+
+    auto i = taxa1.begin();
+    auto j = taxa2.begin();
+    while (i != taxa1.end() && j != taxa2.end())
+    {
+      if (*i == *j)
+        return true;
+      else if (*i < *j)
+        ++i;
+      else
+        ++j;
+    }
+    return false;
+}
+
+bool clades_conflict(const Clade& clade1, const Clade& clade2)
+{
+    return clades_overlap(clade1, clade2) and
+        (not clade_nested_within(clade1, clade2)) and
+        (not clade_nested_within(clade2, clade2));
 }
 
 /**
