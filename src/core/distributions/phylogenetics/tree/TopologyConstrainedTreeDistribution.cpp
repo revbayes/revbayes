@@ -801,6 +801,14 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
 //        std::cout << it->getAge() << std::endl;
 //    }
 
+    /*
+     * Walk clade constraints from tips to root.
+     * For each clade, make a tree with other clades ("virtual taxa") or tip taxa as the leaves.
+     * To find virtual taxa, walk back from the current taxon to the start of the sorted_clades list:
+     *   If we find a nested clade, add it as a child.
+     *   Remove its tip taxa from the unclaimed_taxa set to avoid adding grandchildren as children.
+     */
+
     std::vector<Clade> virtual_taxa;
     int i = -1;
     for (std::vector<Clade>::iterator it = sorted_clades.begin(); it != sorted_clades.end(); it++)
