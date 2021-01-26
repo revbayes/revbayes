@@ -705,25 +705,23 @@ bool clades_conflict(const Clade& clade1, const Clade& clade2)
  */
 Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
 {
-    
     // the time tree object (topology & times)
     Tree *psi = new Tree();
-    
+
     // internally we treat unrooted topologies the same as rooted
     psi->setRooted( true );
-    
+
     AbstractRootedTreeDistribution* tree_base_distribution = dynamic_cast<AbstractRootedTreeDistribution*>( base_distribution );
     size_t num_taxa = tree_base_distribution->getNumberOfTaxa();
     const std::vector<Taxon> &taxa = tree_base_distribution->getTaxa();
-    
+
     // add a clounter variable of how many missing taxa we have already added
     size_t n_added_missing_taxa = 0;
-    
+
     // create the tip nodes
     std::vector<TopologyNode*> nodes;
     for (size_t i=0; i<num_taxa; ++i)
     {
-        
         // create the i-th taxon
         TopologyNode* node = new TopologyNode( taxa[i], i );
         
@@ -732,16 +730,14 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
         
         // add the new node to the list
         nodes.push_back( node );
-        
     }
-    
-    
+
     double ra = tree_base_distribution->getRootAge();
     double max_age = tree_base_distribution->getOriginAge();
-    
+
     // we need a sorted vector of constraints, starting with the smallest
     std::vector<Clade> sorted_clades;
-    
+
     for (auto& monophyly_constraint: monophyly_constraints)
     {
         if ( monophyly_constraint.getAge() > max_age )
@@ -769,17 +765,16 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
 
     }
 
-    
     // create a clade that contains all species
     Clade all_species = Clade(taxa);
     all_species.setAge( ra );
     sorted_clades.push_back(all_species);
-    
+
 //    for(std::vector<Clade>::iterator it = sorted_clades.begin(); it != sorted_clades.end(); it++)
 //    {
 //        std::cout << it->getAge() << std::endl;
 //    }
-    
+
     auto clade_before = [&](const Clade& clade1, const Clade& clade2)
         {
             if (clade_nested_within(clade1, clade2))
@@ -800,13 +795,12 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
         };
 
     std::sort(sorted_clades.begin(), sorted_clades.end(), clade_before);
-    
+
 //    for(std::vector<Clade>::iterator it = sorted_clades.begin(); it != sorted_clades.end(); it++)
 //    {
 //        std::cout << it->getAge() << std::endl;
 //    }
 
-    
     std::vector<Clade> virtual_taxa;
     int i = -1;
     for (std::vector<Clade>::iterator it = sorted_clades.begin(); it != sorted_clades.end(); it++)
@@ -816,9 +810,8 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
         {
             continue;
         }
-        
 //        std::cout << it->getAge() << std::endl;
-        
+
         ++i;
         const Clade &c = *it;
         std::vector<Taxon> taxa = c.getTaxa();
