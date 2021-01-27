@@ -14,6 +14,7 @@ help="false"
 jupyter="false"
 boost_root=""
 boost_lib=""
+j=4
 
 cmake_args=""
 # parse command line arguments
@@ -30,6 +31,7 @@ while echo $1 | grep ^- > /dev/null; do
 -help           <true|false>    : update the help database and build the YAML help generator. Defaults to false.
 -boost_root     string          : specify directory containing Boost headers (e.g. `/usr/include`). Defaults to unset.
 -boost_lib      string          : specify directory containing Boost libraries. (e.g. `/usr/lib`). Defaults to unset.
+-j              integer         : the number of threads to use when compiling RevBayes. Defaults to 4.
 
 You can also specify cmake variables as -DCMAKE_VAR1=value1 -DCMAKE_VAR2=value2
 
@@ -152,8 +154,8 @@ fi
     echo "Running 'cmake ../../../src $cmake_args' in $(pwd)"
     cmake ../../../src $cmake_args
     echo
-    echo "Running 'make -j4' in $(pwd)"
-    make -j 4
+    echo "Running 'make -j $j' in $(pwd)"
+    make -j $j
     cd ..
 
     if [ -e  GitVersion_backup.cpp ] ; then
