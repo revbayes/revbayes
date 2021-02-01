@@ -120,7 +120,7 @@ const std::string& Dist_multispeciesCoalescentInverseGammaPrior::getClassType(vo
 const TypeSpec& Dist_multispeciesCoalescentInverseGammaPrior::getClassTypeSpec(void)
 {
 
-    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution<TimeTree>::getClassTypeSpec() ) );
+    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution< ModelVector<TimeTree> >::getClassTypeSpec() ) );
 
     return rev_type_spec;
 }
