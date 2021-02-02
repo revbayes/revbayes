@@ -216,7 +216,7 @@ void RateMatrix_revPoMoThree4N::computeOffDiagonal( void )
   fitness_ratio_AT = phi[0]/phi[3];
   fitness_ratio_CG = phi[1]/phi[2];
   fitness_ratio_CT = phi[1]/phi[3];
-  fitness_ratio_GT = phi[3]/phi[3];
+  fitness_ratio_GT = phi[2]/phi[3];
 
   double scaling_AC, scaling_AG, scaling_AT, scaling_CG, scaling_CT, scaling_GT ;
   scaling_AC = scaling_AG = scaling_AT = scaling_CG = scaling_CT = scaling_GT = 0.0; 
@@ -236,73 +236,90 @@ void RateMatrix_revPoMoThree4N::computeOffDiagonal( void )
   }
 
   double rho_AC, rho_AG, rho_AT, rho_CG, rho_CT, rho_GT ;
-  double k1 = 2.0/3.0;
+  double k = 2.0/3.0;
 
-  rho_AC = rho[0]*N*pow(phi[1],N)*scaling_AC*k1 / (phi[0]*phi[1]*( phi_A + phi_C ));
-  rho_AG = rho[1]*N*pow(phi[2],N)*scaling_AG*k1 / (phi[0]*phi[2]*( phi_A + phi_G ));
-  rho_AT = rho[2]*N*pow(phi[3],N)*scaling_AT*k1 / (phi[0]*phi[3]*( phi_A + phi_T ));
-  rho_CG = rho[3]*N*pow(phi[2],N)*scaling_CG*k1 / (phi[1]*phi[2]*( phi_C + phi_G ));
-  rho_CT = rho[4]*N*pow(phi[3],N)*scaling_CT*k1 / (phi[1]*phi[3]*( phi_C + phi_T )); 
-  rho_GT = rho[5]*N*pow(phi[3],N)*scaling_GT*k1 / (phi[2]*phi[3]*( phi_G + phi_T ));
+  rho_AC = rho[0]*N*pow(phi[1],N)*scaling_AC*k / (phi[0]*phi[1]*( phi_A + phi_C ));
+  rho_AG = rho[1]*N*pow(phi[2],N)*scaling_AG*k / (phi[0]*phi[2]*( phi_A + phi_G ));
+  rho_AT = rho[2]*N*pow(phi[3],N)*scaling_AT*k / (phi[0]*phi[3]*( phi_A + phi_T ));
+  rho_CG = rho[3]*N*pow(phi[2],N)*scaling_CG*k / (phi[1]*phi[2]*( phi_C + phi_G ));
+  rho_CT = rho[4]*N*pow(phi[3],N)*scaling_CT*k / (phi[1]*phi[3]*( phi_C + phi_T )); 
+  rho_GT = rho[5]*N*pow(phi[3],N)*scaling_GT*k / (phi[2]*phi[3]*( phi_G + phi_T ));
 
 	
-  // mutations
-  m[0][5]  = rho_AC*pi[1];    //mutation AC
-  m[0][7]  = rho_AG*pi[2];    //mutation AG
-  m[0][9]  = rho_AT*pi[3];    //mutation AT
+//mutations
+  //AC
+  m[0][4]   = rho_AC*pi[1];    //{3A} -> {2A,1C}
+  m[1][5]   = rho_AC*pi[0];    //{3C} -> {1A,2C}
 
-  m[1][4]  = rho_AC*pi[0];    //mutation CA
-  m[1][11] = rho_CG*pi[2];    //mutation CG
-  m[1][13] = rho_CT*pi[3];    //mutation CT
+  //AG
+  m[0][6]   = rho_AG*pi[2];    //{3A} -> {2A,1G}
+  m[2][7]   = rho_AG*pi[0];    //{3G} -> {1A,2G}
 
-  m[2][6]  = rho_AG*pi[0];    //mutation GA
-  m[2][10] = rho_CG*pi[1];    //mutation GC
-  m[2][15] = rho_GT*pi[3];    //mutation GT
+  //AT
+  m[0][8]   = rho_AT*pi[3];    //{3A} -> {2A,1T}
+  m[3][9]   = rho_AT*pi[0];    //{3T} -> {1A,2T}
 
-  m[3][8]  = rho_AT*pi[0];    //mutation TA
-  m[3][12] = rho_CT*pi[1];    //mutation TC
-  m[3][14] = rho_GT*pi[2];    //mutation TG
+  //CG
+  m[1][10]  = rho_CG*pi[2];    //{3C} -> {2C,1G}
+  m[2][11]  = rho_CG*pi[1];    //{3G} -> {1C,2G}
+
+  //CT
+  m[1][12]  = rho_CT*pi[3];    //{3C} -> {2C,1T}
+  m[3][13]  = rho_CT*pi[1];    //{3T} -> {1C,2T}
+
+  //GT
+  m[2][14]  = rho_GT*pi[3];    //{3G} -> {2G,1T}
+  m[3][15]  = rho_GT*pi[2];    //{3T} -> {1G,2T}
 
 
+  //fixations
+  //AC
+  m[4][0]   = phi_A*k;  //{2A,1C} -> {3A} 
+  m[5][1]   = phi_C*k;  //{1A,2C} -> {3C} 
 
-  //fixations: genetic drift and selection
-  double k2 = 3.0/2.0;
+  //AG
+  m[6][0]   = phi_A*k;  //{2A,1G} -> {3A} 
+  m[7][2]   = phi_G*k;  //{1A,2G} -> {3G} 
 
-  m[4][1]   = phi_C*k2 ;             //C fixed
-  m[4][5]   = phi_A*k2 ;             //A increases in frequency
+  //AT
+  m[8][0]   = phi_A*k;  //{2A,1T} -> {3A} 
+  m[9][3]   = phi_T*k;  //{1A,2T} -> {3T} 
 
-  m[5][0]   = phi_A*k2 ;             //A fixed
-  m[5][4]   = phi_C*k2 ;             //C increases in frequency
+  //CG
+  m[10][1]  = phi_C*k;  //{2C,1G} -> {3C} 
+  m[11][2]  = phi_G*k;  //{1C,2G} -> {3G}
 
-  m[6][2]   = phi_G*k2 ;             //G fixed
-  m[6][7]   = phi_A*k2 ;             //A increases in frequency
+  //CT
+  m[12][1]  = phi_C*k;  //{2C,1T} -> {3C} 
+  m[13][3]  = phi_T*k;  //{1C,2T} -> {3T} 
 
-  m[7][0]   = phi_A*k2 ;             //A fixed
-  m[7][6]   = phi_G*k2 ;             //G increases in frequency
+  //GT
+  m[14][2]  = phi_G*k;  //{2G,1T} -> {3G} 
+  m[15][3]  = phi_T*k;  //{1G,2T} -> {3T} 
 
-  m[8][3]   = phi_T*k2 ;             //T fixed
-  m[8][9]   = phi_A*k2 ;             //A increases in frequency
-  
-  m[9][0]   = phi_A*k2 ;             //A fixed
-  m[9][8]   = phi_T*k2 ;             //T increases in frequency
+  // frequency shifts
+  m[4][5]    = phi_C*k;  //{2A,1C} -> {1A,2C}
+  m[5][4]    = phi_A*k;  //{1A,2C} -> {2A,1C}
 
-  m[10][2]  = phi_G*k2 ;             //G fixed
-  m[10][11] = phi_C*k2 ;             //C increases in frequency
+  //AG
+  m[6][7]    = phi_G*k;  //{2A,1G} -> {1A,2G}
+  m[7][6]    = phi_A*k;  //{1A,2G} -> {2A,1G}
 
-  m[11][1]  = phi_C*k2 ;             //C fixed
-  m[11][10] = phi_G*k2 ;             //G increases in frequency
+  //AT
+  m[8][9]    = phi_T*k;  //{2A,1T} -> {1A,2T}
+  m[9][8]    = phi_A*k;  //{1A,2T} -> {2A,1T}
 
-  m[12][3]  = phi_T*k2 ;             //T fixed
-  m[12][13] = phi_C*k2 ;             //C increases in frequency
+  //CG
+  m[10][11]  = phi_G*k;  //{2C,1G} -> {1C,2G}
+  m[11][10]  = phi_C*k;  //{1C,2G} -> {2C,1G}
 
-  m[13][1]  = phi_C*k2 ;             //C fixed
-  m[13][12] = phi_T*k2 ;             //T increases in frequency
+  //CT
+  m[12][13]  = phi_T*k;  //{2C,1T} -> {1C,2T}
+  m[13][12]  = phi_C*k;  //{1C,2T} -> {2C,1T}
 
-  m[14][3]  = phi_T*k2 ;             //T fixed
-  m[14][15] = phi_G*k2 ;             //G increases in frequency
-  
-  m[15][2]  = phi_G*k2 ;             //G fixed
-  m[15][14] = phi_T*k2 ;             //T increases in frequency
+  //GT
+  m[14][15]  = phi_T*k;  //{2G,1T} -> {1G,2T}
+  m[15] [14] = phi_G*k;  //{1G,2T} -> {2G,1T}
 
   // set flags
   needs_update = true;
