@@ -7,23 +7,40 @@
 
 #include "Move_GraphFlipEdge.h"
 
+#include <stddef.h>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "RlBoolean.h"
-#include "MatrixReal.h"
 #include "GraphFlipEdgeProposal.h"
 #include "MetropolisHastingsMove.h"
 #include "ModelVector.h"
 #include "Natural.h"
 #include "Probability.h"
-#include "RbException.h"
-#include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
-#include "RlMatrixReal.h"
 #include "RlMatrixRealSymmetric.h"
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "Move.h"
+#include "RbBoolean.h"
+#include "RbVector.h"
+#include "RlConstantNode.h"
+#include "StochasticNode.h"
+#include "StringUtilities.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
+
+namespace RevBayesCore { class MatrixReal; }
+namespace RevBayesCore { class Proposal; }
 
 
 using namespace RevLanguage;

@@ -10,7 +10,7 @@
 #include <string>
 
 namespace RevBayesCore {
-    
+
     /**
      * @brief Up-Down Sliding Proposal for several parameters jointly.
      *
@@ -26,10 +26,10 @@ namespace RevBayesCore {
      *
      */
     class UpDownSlideBactrianProposal : public Proposal {
-        
+
     public:
         UpDownSlideBactrianProposal(double l);                                 //!< Constructor
-        
+
         void                                        addVariable(StochasticNode<double> *v, bool up);                                    //!< Add an up-scaling variable
         void                                        addVariable(StochasticNode<RbVector<double> > *v, bool up);                         //!< Add an up-scaling variable
         void                                        cleanProposal(void);                                                                //!< Clean up proposal
@@ -44,28 +44,30 @@ namespace RevBayesCore {
         void                                        setProposalTuningParameter(double tp);
         void                                        tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                        undoProposal(void);                                                                 //!< Reject the proposal
-        
+
     protected:
-        
+
         void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
-        
-        
+
+
     private:
         // parameters
-        
-        std::vector<StochasticNode<double> *>               upScalarVariables;
-        std::vector<StochasticNode<RbVector<double> > *>    upVectorVariables;
-        std::vector<StochasticNode<double> *>               downScalarVariables;
-        std::vector<StochasticNode<RbVector<double> > *>    downVectorVariables;
-        
-        double                                              lambda;                                                                     //!< The Slide parameter of the Proposal (larger lambda -> larger proposals).
-        double                                              storedDelta;                                                        //!< The stored value of the last modified UpDown.
-        
-        
-        
+
+        std::vector<StochasticNode<double> *>               up_scalar_variables;
+        std::vector<StochasticNode<RbVector<double> > *>    up_vector_variables;
+        std::vector<StochasticNode<double> *>               down_scalar_variables;
+        std::vector<StochasticNode<RbVector<double> > *>    down_vector_variables;
+
+        double                                              lambda;                                                                     //!< The scale parameter of the Proposal (larger lambda -> larger proposals).
+        std::vector<double>                                 stored_up_scalar_values;
+        std::vector<std::vector<double> >                   stored_up_vector_values;
+        std::vector<double>                                 stored_down_scalar_values;
+        std::vector<std::vector<double> >                   stored_down_vector_values;
+
+
+
     };
-    
+
 }
 
 #endif
-

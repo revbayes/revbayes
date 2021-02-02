@@ -1,13 +1,26 @@
+#include <stddef.h>
+#include <cmath>
+#include <iostream>
+#include <algorithm>
+#include <iterator>
+#include <set>
+#include <vector>
+
 #include "DistributionDirichlet.h"
 #include "EmpiricalTreeTopologyProposal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-#include "RbException.h"
 #include "TreeUtilities.h"
-#include "TypedDagNode.h"
+#include "Cloner.h"
+#include "Proposal.h"
+#include "RbOrderedSet.h"
+#include "RbVector.h"
+#include "StochasticNode.h"
+#include "TopologyNode.h"
+#include "TraceTree.h"
+#include "Tree.h"
 
-#include <cmath>
-#include <iostream>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
@@ -107,7 +120,7 @@ double EmpiricalTreeTopologyProposal::doProposal( void )
     size_t node_index = n_tips + size_t(floor(rng->uniform01() * (nodes.size()-n_tips)) );
     
     TopologyNode &random_root = *nodes[node_index];
-    proposed_tree->reroot(random_root, true);
+    proposed_tree->reroot(random_root, false, true);
     
     std::vector<double> a = std::vector<double>(nodes.size()-n_tips-1,alpha);
     std::vector<double> proposed_ages = RbStatistics::Dirichlet::rv(a, *rng);

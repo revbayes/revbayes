@@ -1,21 +1,23 @@
+#include <stdlib.h>
+#include <cmath>
+#include <cassert>
+#include <iomanip>
+#include <iostream>
+#include <vector>
+
 #include "DagNode.h"
 #include "DistributionNormal.h"
-#include "DistributionLognormal.h"
 #include "LognormalDistribution.h"
-#include "NormalDistribution.h"
 #include "EllipticalSliceSamplingLognormalIIDMove.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
-#include "RbMathLogic.h"
 #include "TypedDagNode.h"
-
-#include <cmath>
-#include <cassert>
-#include <iomanip>
-#include <sstream>
-#include <iostream>
-#include <utility>
+#include "AbstractMove.h"
+#include "RbException.h"
+#include "RbOrderedSet.h"
+#include "StochasticNode.h"
+#include "TypedDistribution.h"
 
 using namespace RevBayesCore;
 

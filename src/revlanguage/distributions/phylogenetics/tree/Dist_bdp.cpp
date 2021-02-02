@@ -1,17 +1,28 @@
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Clade.h"
 #include "ConstantRateBirthDeathProcess.h"
 #include "Dist_bdp.h"
 #include "ModelVector.h"
-#include "Natural.h"
 #include "Probability.h"
-#include "Real.h"
 #include "RealPos.h"
-#include "RlClade.h"
 #include "RlString.h"
-#include "RlTaxon.h"
-#include "RlTimeTree.h"
+#include "RbVector.h"
+#include "RevNullObject.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBirthDeathProcess.h"
+#include "Taxon.h"
+#include "TypeSpec.h"
+#include "RlClade.h" // IWYU pragma: keep
+#include "RlTaxon.h" // IWYU pragma: keep
+
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 

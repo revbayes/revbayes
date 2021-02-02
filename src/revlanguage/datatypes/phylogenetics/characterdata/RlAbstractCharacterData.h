@@ -1,15 +1,18 @@
 #ifndef RlAbstractCharacterData_H
 #define RlAbstractCharacterData_H
 
-#include "AbstractCharacterData.h"
-#include "ModelObject.h"
-
-#include <set>
-#include <string>
 #include <vector>
+#include <iosfwd>
+
+#include "MethodTable.h"
+#include "RevPtr.h"
+
+namespace RevBayesCore { class AbstractCharacterData; }
 
 
 namespace RevLanguage {
+class Argument;
+class RevVariable;
     
     
     class AbstractCharacterData {

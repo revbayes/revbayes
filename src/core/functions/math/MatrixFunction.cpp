@@ -6,9 +6,18 @@
 //  Copyright © 2017 Michael Landis. All rights reserved.
 //
 
+#include <stddef.h>
+#include <vector>
+
 #include "MatrixReal.h"
 #include "MatrixFunction.h"
 #include "TypedDagNode.h"
+#include "Cloneable.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "TypedFunction.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

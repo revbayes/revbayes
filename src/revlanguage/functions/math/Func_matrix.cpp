@@ -9,15 +9,19 @@
 #include "Func_matrix.h"
 
 #include "ArgumentRule.h"
-#include "Ellipsis.h"
 #include "ModelVector.h"
-#include "RbUtil.h"
-#include "RealPos.h"
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
-#include "RlSimplex.h"
 #include "MatrixFunction.h"
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "ModelObject.h"
+#include "RbVector.h"
+#include "Real.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "StringUtilities.h"
 
 
 using namespace RevLanguage;

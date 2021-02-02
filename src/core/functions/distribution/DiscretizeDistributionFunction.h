@@ -2,11 +2,12 @@
 #define DiscretizeDistributionFunction_H
 
 #include "TypedFunction.h"
-#include "ContinuousDistribution.h"
 #include "RbVector.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class ContinuousDistribution;
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     
     /**
@@ -16,9 +17,8 @@ namespace RevBayesCore {
      *   x[i] = quantile(dist, (i+0.5)/k)
      * Note that I assume: 0 <= i < k
      *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since Version 1.0, 2015-01-07
+     *@param c the distribution to be discretized
+     *@param nc the number of categories
      *
      */
     class DiscretizeDistributionFunction : public TypedFunction< RbVector<double> > {

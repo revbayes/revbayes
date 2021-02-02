@@ -1,11 +1,21 @@
+#include <stddef.h>
+#include <iosfwd>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "Func_writeFasta.h"
-#include "RbException.h"
 #include "RevNullObject.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
-#include "RlDnaState.h"
 #include "RlString.h"
 #include "FastaWriter.h"
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
+
+namespace RevBayesCore { class AbstractHomologousDiscreteCharacterData; }
 
 
 

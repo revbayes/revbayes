@@ -1,15 +1,24 @@
 #ifndef DistributionFunctionCdf_H
 #define DistributionFunctionCdf_H
 
-#include "Probability.h"
-#include "RlContinuousDistribution.h"
-#include "RlTypedFunction.h"
-#include "RlPositiveContinuousDistribution.h"
-
 #include <string>
 #include <vector>
+#include <iosfwd>
+
+#include "Probability.h"
+#include "RlTypedFunction.h"
+#include "ArgumentRules.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RevPtr.h"
+#include "RlDeterministicNode.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 namespace RevLanguage {
+class ContinuousDistribution;
+class PositiveContinuousDistribution;
+class TypeSpec;
     
     
     /**

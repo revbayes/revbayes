@@ -1,16 +1,31 @@
+#include <cmath>
+#include <algorithm>
+#include <cstddef>
+#include <iostream>
+#include <map>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "NewickConverter.h"
-#include "RlBoolean.h"
-#include "RbConstants.h"
 #include "RbException.h"
-#include "RbMathLogic.h"
-#include "RbOptions.h"
 #include "Tree.h"
 #include "Taxon.h"
 #include "TopologyNode.h"
 #include "TypedDagNode.h"
 #include "TreeUtilities.h"
+#include "Clade.h"
+#include "DagNode.h"
+#include "RbBitSet.h"
+#include "RbBoolean.h"
+#include "RbFileManager.h"
+#include "StringUtilities.h"
+#include "TaxonMap.h"
+#include "TreeChangeEventHandler.h"
 
-#include <cmath>
+namespace RevBayesCore { class AbstractHomologousDiscreteCharacterData; }
+namespace RevBayesCore { class TreeChangeEventListener; }
 
 using namespace RevBayesCore;
 
@@ -144,7 +159,7 @@ void Tree::addNodeParameter(std::string const &name, const std::vector<double> &
 
 }
 
-void Tree::addNodeParameter(std::string const &name, const std::vector<std::string*> &parameters, bool internalOnly)
+void Tree::addNodeParameter(std::string const &name, const std::vector<std::string> &parameters, bool internalOnly)
 {
 
     getRoot().addNodeParameters(name,parameters,internalOnly);
@@ -212,15 +227,15 @@ bool Tree::containsClade(const TopologyNode &n, bool unrooted) const
 {
     RbBitSet your_taxa = RbBitSet( getNumberOfTips() );
     n.getTaxa( your_taxa );
-    
+
     bool contains = root->containsClade( your_taxa, true );
-    
+
     if ( contains == false && unrooted == true )
     {
         your_taxa.flip();
         contains = root->containsClade( your_taxa, true );;
     }
-    
+
     return contains;
 }
 
@@ -269,7 +284,7 @@ void Tree::dropTipNode( size_t index )
         grand_parent.addChild( sibling );
         sibling->setParent( &grand_parent );
 
-        // update character history 
+        // update character history
         if (parent.getTimeInStates().size() > 0 && sibling->getTimeInStates().size() > 0)
         {
             std::vector<double> sibling_state_times = sibling->getTimeInStates();
@@ -302,18 +317,18 @@ void Tree::dropTipNode( size_t index )
             root->removeChild(&node);
         }
     }
-    
+
     nodes.clear();
-    
+
     // bootstrap all nodes from the root and add the in a pre-order traversal
     fillNodesByPhylogeneticTraversal(root);
     for (unsigned int i = 0; i < nodes.size(); ++i)
     {
         nodes[i]->setIndex(i);
     }
-    
+
     num_nodes = nodes.size();
-    
+
     // count the number of tips
     num_tips = 0;
     for (size_t i = 0; i < num_nodes; ++i)
@@ -326,7 +341,7 @@ void Tree::dropTipNode( size_t index )
         }
         num_tips += ( nodes[i]->isTip() ? 1 : 0);
     }
-    
+
 }
 
 
@@ -528,15 +543,15 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
     {
         Clade clade = static_cast<const TypedDagNode<Clade> *>( args[0] )->getValue();
         clade.resetTaxonBitset( getTaxonBitSetMap() );
-        
+
         bool contained = root->containsClade(clade, true);
-        
+
         rv = Boolean( contained );
     }
     else if ( n == "hasSameTopology" )
     {
         const Tree& t = static_cast<const TypedDagNode<Tree> *>( args[0] )->getValue();
-        
+
         rv = Boolean( hasSameTopology(t) );
     }
     else
@@ -625,27 +640,27 @@ const TopologyNode& Tree::getInteriorNode( size_t indx ) const
 
 TopologyNode& Tree::getMrca(const Clade &c)
 {
-    
+
     return *(root->getMrca( c ));
 }
 
 
 const TopologyNode& Tree::getMrca(const Clade &c) const
 {
-    
+
     return *(root->getMrca( c ));
 }
 
 const TopologyNode& Tree::getMrca(const Clade &c, bool strict) const
 {
-    
+
     return *(root->getMrca( c,strict ));
 }
 
 
 const TopologyNode& Tree::getMrca(const TopologyNode &n) const
 {
-    
+
     return *(root->getMrca( n ));
 }
 
@@ -689,7 +704,6 @@ const std::vector<TopologyNode*>& Tree::getNodes(void) const
 }
 
 
-
 std::vector<RbBitSet> Tree::getNodesAsBitset(void) const
 {
 
@@ -707,6 +721,39 @@ std::vector<RbBitSet> Tree::getNodesAsBitset(void) const
     }
 
     return bs;
+}
+
+
+std::map<RbBitSet, TopologyNode*> Tree::getBitsetToNodeMap(void) const
+{
+
+    std::map<RbBitSet, TopologyNode*> bstn;
+
+    for ( size_t i=0; i<nodes.size(); ++i )
+    {
+        TopologyNode *n = nodes[i];
+        if ( n->isTip() == false )
+        {
+            RbBitSet taxa_this_node = RbBitSet(num_tips);
+            n->getTaxa(taxa_this_node);
+            bstn[taxa_this_node] = n;
+        }
+    }
+
+    return bstn;
+}
+
+
+std::vector<long> Tree::getNodeIndices(void) const
+{
+    std::vector<long> indices;
+
+    for ( size_t i=0; i<nodes.size(); ++i )
+    {
+        indices.push_back(nodes[i]->getIndex() );
+    }
+
+    return indices;
 }
 
 
@@ -1059,10 +1106,10 @@ bool Tree::hasSameTopology(const Tree &t) const
 
     std::string a = getPlainNewickRepresentation();
     std::string b = t.getPlainNewickRepresentation();
-    
+
 //    std::cerr << std::endl << a << std::endl;
 //    std::cerr << std::endl << b << std::endl;
-    
+
     return a == b;
 }
 
@@ -1107,7 +1154,7 @@ void Tree::initFromString(const std::string &s)
 }
 
 
-bool Tree::isBinary(void) const 
+bool Tree::isBinary(void) const
 {
     for (size_t i = 0; i < getNumberOfInteriorNodes(); ++i)
     {
@@ -1200,15 +1247,71 @@ bool Tree::isUltrametric( void ) const
 }
 
 
-void Tree::makeInternalNodesBifurcating(bool reindex)
+void Tree::makeInternalNodesBifurcating(bool reindex, bool as_fossils)
 {
 
-    getRoot().makeBifurcating();
+    // delegate the call to the nodes which will make the tree bifurcating recursively.
+    getRoot().makeBifurcating( as_fossils );
+    
 
     // we need to reset the root so that the vector of nodes get filled again with the new number of nodes
     setRoot( &getRoot(), reindex );
 
+    taxon_bitset_map.clear();
+
 }
+
+void Tree::makeRootBifurcating(const Clade& outgroup, bool as_fossils)
+{
+    size_t num_root_children = root->getNumberOfChildren();
+    if ( num_root_children == 3 )
+    {
+        // which one of the 3 children do we want as outgroup?
+        size_t good_outgroup = 0;
+        double good_bl = 0.0;
+        double half_bl = 0.0;
+        std::vector<TopologyNode*> nodes_to_move = root->getChildren() ;
+        for (size_t i = 0; i < num_root_children; ++i)
+        {
+            if ( root->getChild(i).getClade() == outgroup )
+            {
+                good_outgroup = i;
+                good_bl = root->getChild(i).getBranchLength();
+                half_bl = good_bl / 2.0;
+                root->getChild(i).setBranchLength(half_bl);
+//                    root->getChild(i).setAge(root->getChild(i).getAge() + half_bl);
+                break;
+            }
+        }
+        nodes_to_move.erase(nodes_to_move.begin() + good_outgroup);
+          
+        TopologyNode *new_child = new TopologyNode();
+        double parent_age = root->getAge();
+  
+        double new_age = parent_age - half_bl;
+    
+        for (size_t i = 0; i < nodes_to_move.size(); ++i)
+        {
+            TopologyNode* tmp = nodes_to_move[i];
+            //  double newBl = tmp->getBranchLength() - halfMini;
+            root->removeChild(tmp);
+            new_child->addChild(tmp);
+            tmp->setParent (new_child);
+            //  tmp->setBranchLength(newBl) ;
+        }
+    
+        root->addChild(new_child);
+        new_child->setParent( root );
+        new_child->setAge(new_age);
+        new_child->setBranchLength( half_bl );
+    }
+    else if (num_root_children > 2)
+    {
+        throw RbException("Problem when rerooting with  '" + outgroup.toString() + "'.");
+    } // end-if the root node has 3 children
+
+} 
+
 
 
 // method to order nodes by their existing index
@@ -1367,7 +1470,7 @@ bool Tree::recursivelyPruneTaxa( TopologyNode* n, const RbBitSet& prune_map )
 
 void Tree::removeDuplicateTaxa( void )
 {
-    
+
     bool removed_replicate = true;
     while ( removed_replicate == true )
     {
@@ -1384,18 +1487,18 @@ void Tree::removeDuplicateTaxa( void )
                     dropTipNode( j );
                     break;
                 }
-                
+
             }
 
             if ( removed_replicate == true )
             {
                 break;
             }
-            
+
         }
 
     }
-    
+
 }
 
 
@@ -1405,9 +1508,30 @@ void Tree::renameNodeParameter(const std::string &old_name, const std::string &n
 }
 
 
-void Tree::reroot(const Clade &o, bool reindex)
+/**
+ * Change node ids to be as in reference
+ * @param const reference tree whose node ids will be used
+ * @return tree with node ids as in reference but topology and branch lengths as in target
+ */
+void Tree::renumberNodes(const Tree &reference)
 {
+    // First, internal nodes
+    std::map<RbBitSet, TopologyNode*> ref = reference.getBitsetToNodeMap();
+    std::map<RbBitSet, TopologyNode*> toret = getBitsetToNodeMap();
+    for (std::map<RbBitSet,TopologyNode*>::iterator it=ref.begin(); it!=ref.end(); ++it) {
+      toret[it->first]->setIndex( it->second->getIndex());
+    }
+    // Second, the tip nodes
+    std::vector<std::string> tipNames = getTipNames();
+    for (auto i = 0; i<tipNames.size(); ++i) {
+      getTipNodeWithName(tipNames[i]).setIndex(reference.getTipNodeWithName(tipNames[i]).getIndex());
+    }
+    return;
+}
 
+
+void Tree::reroot(const Clade &o, bool make_bifurcating, bool reindex)
+{
     bool strict = true;
 
     // for safety we reset the bitrepresentation of the clade
@@ -1429,29 +1553,26 @@ void Tree::reroot(const Clade &o, bool reindex)
 
     }
 
-    // reset parent/child relationships
+    // get the node representing the outgroup
     TopologyNode *outgroup_node = root->getNode( outgroup, strict);
 
+    // check that we properly got a node
     if ( outgroup_node == NULL )
     {
         throw RbException("Cannot reroot the tree because we could not find an outgroup with name '" + outgroup.toString() + "'.");
     }
 
+    // only reroot if the node is not the root node
     if ( outgroup_node->isRoot() == false )
     {
-
-//        TopologyNode &new_root = outgroup_node->getParent();
-        reverseParentChild( outgroup_node->getParent() );
-        outgroup_node->getParent().setParent( NULL );
-
-        // set the new root
-        setRoot( &outgroup_node->getParent(), reindex );
+        // reset parent/child relationships
+        reroot(*outgroup_node, make_bifurcating, reindex);
     }
 
 }
 
 
-void Tree::reroot(const std::string &outgroup, bool reindex)
+void Tree::reroot(const std::string &outgroup, bool make_bifurcating, bool reindex)
 {
     std::vector<std::string> tip_names = getTipNames();
     size_t outgroup_index = tip_names.size();
@@ -1468,23 +1589,30 @@ void Tree::reroot(const std::string &outgroup, bool reindex)
     {
         throw RbException("Cannot reroot the tree because we could not find an outgroup with name '" + outgroup + "'.");
     }
-
-    // reset parent/child relationships
-	TopologyNode& outgroup_node = getTipNode( outgroup_index );
-    reverseParentChild( outgroup_node.getParent() );
-    outgroup_node.getParent().setParent( NULL );
-
-	// set the new root
-	setRoot( &outgroup_node.getParent(), reindex );
+    
+    TopologyNode& outgroup_node = getTipNode( outgroup_index );
+    reroot(outgroup_node, make_bifurcating, reindex);
 
 }
 
 
-void Tree::reroot(TopologyNode &n, bool reindex)
+void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
 {
 	// reset parent/child relationships
 	reverseParentChild( n.getParent() );
     n.getParent().setParent( NULL );
+    
+    // if we have a trifurcation at the root, we need to change it into a bifurcation
+    if ( make_bifurcating == true )
+    {
+        // first, we make the root bifurcating
+        makeRootBifurcating(n.getClade(), reindex);
+        
+        // second, we make all other nodes bifurcating
+        makeInternalNodesBifurcating(reindex, true);
+        
+    } // end-if we do not want to make the tree bifurcating
+
 
 	// set the new root
 	setRoot( &n.getParent(), reindex );
@@ -1609,7 +1737,7 @@ void Tree::setTaxonIndices(const TaxonMap &tm)
  */
 void Tree::setTaxonName(const std::string& current_name, const std::string& newName)
 {
-    
+
     TopologyNode& node = getTipNodeWithName( current_name );
     Taxon& t = node.getTaxon();
     t.setName( newName );
@@ -1626,30 +1754,30 @@ void Tree::setTaxonName(const std::string& current_name, const std::string& newN
  */
 void Tree::setTaxonObject(const std::string& current_name, const Taxon& new_taxon)
 {
-    
+
     const std::string &new_name = new_taxon.getName();
-    
+
     TopologyNode& node = getTipNodeWithName( current_name );
     node.setTaxon( new_taxon );
-    
+
     taxon_bitset_map.erase( current_name );
     taxon_bitset_map.insert( std::pair<std::string, size_t>( new_name, node.getIndex() ) );
-    
+
 }
 
 
 void Tree::unroot( void )
 {
-    
+
     if ( isRooted() == true )
     {
-        
+
         // get the root node because we need to make this tree unrooted (for topology comparison)
         TopologyNode *old_root = &getRoot();
-        
+
         // make the tree use branch lengths instead of ages
         old_root->setUseAges(false, true);
-        
+
         size_t child_index = 0;
         if ( old_root->getChild(child_index).isTip() == true )
         {
@@ -1657,24 +1785,24 @@ void Tree::unroot( void )
         }
         TopologyNode *new_root = &old_root->getChild( child_index );
         TopologyNode *second_child = &old_root->getChild( (child_index == 0 ? 1 : 0) );
-        
+
         double bl_first = new_root->getBranchLength();
         double bl_second = second_child->getBranchLength();
-        
+
         old_root->removeChild( new_root );
         old_root->removeChild( second_child );
         new_root->setParent( NULL );
         new_root->addChild( second_child );
         second_child->setParent( new_root );
-        
+
         second_child->setBranchLength( bl_first + bl_second );
-        
+
         // finally we need to set the new root to our tree copy
         setRooted( false );
         setRoot( new_root, true);
-        
+
     }
-    
+
 }
 
 

@@ -1,12 +1,35 @@
+#include <stddef.h>
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include "ConstantNode.h"
-#include "ModelVector.h"
 #include "RlTaxon.h"
-#include "RbUtil.h"
 #include "RlString.h"
 #include "RealPos.h"
 #include "TypeSpec.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "MemberProcedure.h"
+#include "MethodTable.h"
+#include "ModelObject.h"
+#include "RbHelpReference.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "StringUtilities.h"
+#include "Taxon.h"
+#include "TimeInterval.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
-#include <sstream>
+namespace RevLanguage { class Argument; }
 
 using namespace RevLanguage;
 
@@ -146,105 +169,6 @@ std::string Taxon::getConstructorFunctionName( void ) const
     std::string c_name = "taxon";
     
     return c_name;
-}
-
-
-/**
- * Get the author(s) of this function so they can receive credit (and blame) for it.
- */
-std::vector<std::string> Taxon::getHelpAuthor(void) const
-{
-    // create a vector of authors for this function
-    std::vector<std::string> authors;
-    authors.push_back( "Michael Landis" );
-    
-    return authors;
-}
-
-
-/**
- * Get the (brief) description for this function
- */
-std::string Taxon::getHelpDescription(void) const
-{
-    // create a variable for the description of the function
-    std::string descriptions = "The taxon function creates a Taxon object.";
-    
-    return descriptions;
-}
-
-
-/**
- * Get the more detailed description of the function
- */
-std::string Taxon::getHelpDetails(void) const
-{
-    // create a variable for the description of the function
-    std::string details = "Each Taxon object records that taxon's name in addition to other information, such as age (which is non-zero for fossils). Character matrices and trees contain Taxon vectors (Taxon[]) that are used to match leaf nodes to data entries for phylogenetic analyses. For multispecies coalescent analyses, Taxon objects are also used to assign species memberships to individuals.";
-
-    return details;
-}
-
-
-/**
- * Get an executable and instructive example.
- * These example should help the users to show how this function works but
- * are also used to test if this function still works.
- */
-std::string Taxon::getHelpExample(void) const
-{
-    // create an example as a single string variable.
-    std::string example = "";
-    
-    example += "# we can create a Taxon object\n";
-    example += "taxon_gorilla = taxon(\"Gorilla_gorilla\")\n";
-    example += "# we can create a dummy vector of Taxon objects for simulation\n";
-    example += "for (i in 1:10) { taxa[i] = taxon(\"Taxon\"+i) }\n";
-    example += "phy ~ dnBDP(lambda=1, mu=0, rootAge=1, taxa=taxa)\n";
-    example += "# retrieve the taxon list for 'phy'\n";
-    example += "phy.taxa()\n";
-    
-    return example;
-}
-
-
-/**
- * Get some references/citations for this function
- *
- */
-std::vector<RevBayesCore::RbHelpReference> Taxon::getHelpReferences(void) const
-{
-    // create an entry for each reference
-    std::vector<RevBayesCore::RbHelpReference> references;
-    
-    
-    return references;
-}
-
-
-/**
- * Get the names of similar and suggested other functions
- */
-std::vector<std::string> Taxon::getHelpSeeAlso(void) const
-{
-    // create an entry for each suggested function
-    std::vector<std::string> see_also;
-    see_also.push_back( "readTaxonData" );
-    
-    
-    return see_also;
-}
-
-
-/**
- * Get the title of this help entry
- */
-std::string Taxon::getHelpTitle(void) const
-{
-    // create a title variable
-    std::string title = "Taxon object";
-    
-    return title;
 }
 
 

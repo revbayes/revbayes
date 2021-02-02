@@ -1,15 +1,17 @@
+#include <iostream>
+#include <string>
+#include <cstdlib>
+#include <vector>
+
 #include "ModuleSystem.h"
 #include "RevLanguageMain.h"
 #include "Parser.h"
 #include "RbException.h"
-#include "RbFileManager.h"
 #include "RbSettings.h"
 #include "Workspace.h"
 #include "RlUserInterface.h"
 #include "RbVersion.h"
-#include <iostream>
-#include <string>
-#include <cstdlib>
+#include "StringUtilities.h"
 
 #ifdef RB_MPI
 #include <mpi.h>
@@ -21,7 +23,7 @@ RevLanguageMain::RevLanguageMain(bool b) : batch_mode(b)
 }
 
 
-void RevLanguageMain::startRevLanguageEnvironment(std::vector<std::string> sourceFiles)
+void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string> &args, const std::vector<std::string> &source_files)
 {
     
     int pid = 0;
@@ -49,12 +51,43 @@ void RevLanguageMain::startRevLanguageEnvironment(std::vector<std::string> sourc
 
     // process the command line arguments as source file names    
     std::string line;
-    std::string commandLine;
+    std::string command_line;
     int result = 0;
 
-    for (unsigned int i =0 ; i < sourceFiles.size(); i++)
+    for (unsigned int i =0 ; i < args.size(); ++i)
     {
-        line = "source(\"" + sourceFiles[i] + "\")";
+        if ( StringUtilities::isNumber( args[i] ) )
+        {
+            command_line = "args[" + StringUtilities::to_string(i+1) + "] = " + args[i];
+        }
+        else
+        {
+            command_line = "args[" + StringUtilities::to_string(i+1) + "] = \"" + args[i] + "\"";
+        }
+        result = RevLanguage::Parser::getParser().processCommand(command_line, &RevLanguage::Workspace::userWorkspace());
+        
+        // We just hope for better input next time
+        if (result == 2)
+        {
+            result = 0;
+            
+            if( batch_mode == true )
+            {
+                RevLanguage::Workspace::userWorkspace().clear();
+                RevLanguage::Workspace::globalWorkspace().clear();
+                
+#ifdef RB_MPI
+                MPI_Finalize();
+#endif
+                
+                exit(1);
+            }
+        }
+    }
+    
+    for (unsigned int i =0 ; i < source_files.size(); ++i)
+    {
+        line = "source(\"" + source_files[i] + "\")";
         
         // let only the master process print to the screen
         if ( pid == 0 )
@@ -65,14 +98,14 @@ void RevLanguageMain::startRevLanguageEnvironment(std::vector<std::string> sourc
         // Process the command line
         if (result == 1)
         {
-            commandLine += line;
+            command_line += line;
         }
         else
         {
-            commandLine = line;
+            command_line = line;
         }
         
-        result = RevLanguage::Parser::getParser().processCommand(commandLine, &RevLanguage::Workspace::userWorkspace());
+        result = RevLanguage::Parser::getParser().processCommand(command_line, &RevLanguage::Workspace::userWorkspace());
 
         // We just hope for better input next time
         if (result == 2)

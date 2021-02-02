@@ -1,13 +1,20 @@
-#include "ArgumentRule.h"
-#include "ArgumentRules.h"
-#include "RbException.h"
+#include <stddef.h>
+#include <sstream>
+#include <list>
+#include <vector>
+
 #include "Signals.h"
 #include "SyntaxElement.h"
 #include "TypeSpec.h"
 #include "UserFunctionDef.h"
 #include "UserProcedure.h"
+#include "Argument.h"
+#include "Environment.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
 
-#include <sstream>
+namespace RevLanguage { class ArgumentRules; }
 
 using namespace RevLanguage;
 

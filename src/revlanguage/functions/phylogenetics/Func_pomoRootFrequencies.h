@@ -18,12 +18,23 @@
 #ifndef Func_pomoRootFrequencies_H
 #define Func_pomoRootFrequencies_H
 
+#include <string>
+#include <iosfwd>
+#include <vector>
+
 #include "RlSimplex.h"
 #include "RlTypedFunction.h"
-
-#include <string>
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RevPtr.h"
+#include "RlDeterministicNode.h"
+#include "Simplex.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 namespace RevLanguage {
+class ArgumentRules;
+class TypeSpec;
     
     class Func_pomoRootFrequencies : public TypedFunction<Simplex> {
         

@@ -1,7 +1,13 @@
 
 
 #include "PoMoRootFrequenciesFunction.h"
-#include "RbException.h"
+
+#include <stddef.h>
+
+#include "RbVector.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

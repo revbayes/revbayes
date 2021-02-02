@@ -1,13 +1,19 @@
 #include "SpeciesNarrowExchangeProposal.h"
+
+#include <stddef.h>
+#include <cmath>
+#include <iterator>
+
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
-#include "RbException.h"
 #include "TreeUtilities.h"
-#include "TypedDagNode.h"
+#include "Cloneable.h"
+#include "StochasticNode.h"
+#include "TopologyNode.h"
+#include "Tree.h"
 
-#include <cmath>
-#include <iostream>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

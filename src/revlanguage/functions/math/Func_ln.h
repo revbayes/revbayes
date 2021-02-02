@@ -39,12 +39,6 @@ namespace RevLanguage {
         const ArgumentRules&                            getArgumentRules(void) const;                               //!< Get argument rules
         
     protected:
-        std::vector<std::string>                        getHelpAuthor(void) const;                                  //!< Get the author(s) of this function
-        std::string                                     getHelpDescription(void) const;                             //!< Get the description for this function
-        std::string                                     getHelpExample(void) const;                                 //!< Get an executable and instructive example
-        std::vector<std::string>                        getHelpSeeAlso(void) const;                                 //!< Get suggested other functions
-        std::string                                     getHelpTitle(void) const;                                   //!< Get the title of this help entry
-
         
     };
     

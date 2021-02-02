@@ -1,8 +1,16 @@
 #include "Func_InfiniteSitesRateMatrix.h"
+
+#include <stddef.h>
+
 #include "InfiniteSitesRateMatrixFunction.h"
 #include "Natural.h"
-#include "RateMatrix_InfiniteSites.h"
 #include "RlRateMatrix.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

@@ -1,14 +1,16 @@
 #ifndef TreeAssemblyFunction_H
 #define TreeAssemblyFunction_H
 
-#include "RbVector.h"
+#include <stddef.h>
+#include <set>
+
 #include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <vector>
-
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     class TreeAssemblyFunction : public TypedFunction<Tree> {
         

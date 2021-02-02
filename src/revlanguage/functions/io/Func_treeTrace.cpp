@@ -9,19 +9,29 @@
 
 
 #include "Func_treeTrace.h"
+
+#include <math.h>
+#include <stddef.h>
+
 #include "ArgumentRule.h"
-#include "ConstantNode.h"
 #include "ModelVector.h"
-#include "OptionRule.h"
 #include "Probability.h"
-#include "RbException.h"
 #include "RlTree.h"
 #include "RlTraceTree.h"
 #include "TypedDagNode.h"
-
-#include <map>
-#include <set>
-#include <sstream>
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "Integer.h"
+#include "ModelObject.h"
+#include "RbVector.h"
+#include "RevObject.h"
+#include "RevVariable.h"
+#include "RlBranchLengthTree.h"
+#include "RlFunction.h"
+#include "RlTimeTree.h"
+#include "TraceTree.h"
+#include "Tree.h"
+#include "TypeSpec.h"
 
 
 using namespace RevLanguage;
@@ -116,74 +126,6 @@ const TypeSpec& Func_treeTrace::getClassTypeSpec(void)
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
     
     return rev_type_spec;
-}
-
-
-/**
- * Get the author(s) of this function so they can receive credit (and blame) for it.
- */
-std::vector<std::string> Func_treeTrace::getHelpAuthor(void) const
-{
-    // create a vector of authors for this function
-    std::vector<std::string> authors;
-    authors.push_back( "Will Freyman" );
-    
-    return authors;
-}
-
-
-/**
- * Get the (brief) description for this function
- */
-std::string Func_treeTrace::getHelpDescription(void) const
-{
-    std::string description = "";
-    description += "Creates a tree trace object from a vector of trees.";
-    
-    return description;
-}
-
-
-/**
- * Get an executable and instructive example.
- * These example should help the users to show how this function works but
- * are also used to test if this function still works.
- */
-std::string Func_treeTrace::getHelpExample(void) const
-{
-    // create an example as a single string variable.
-    std::string example = "";
-    
-    example += "# Read in a vector of trees\n";
-    example += "trees = readTrees(\"trees.nex\")\n";
-    example += "\n";
-    example += "# Create a tree trace\n";
-    example += "tree_trace = treeTrace(trees, burnin=0.25)\n";
-    example += "\n";
-    example += "# Create a distribution of trees from the tree trace\n";
-    example += "tree ~ dnEmpiricalTree(tree_trace)\n";
-    example += "\n";
-    example += "# Add an MCMC move\n";
-    example += "moves[1] = mvEmpiricalTree(tree)\n";
-    
-    return example;
-}
-
-
-/**
- * Get the names of similar and suggested other functions
- */
-std::vector<std::string> Func_treeTrace::getHelpSeeAlso(void) const
-{
-    // create an entry for each suggested function
-    std::vector<std::string> see_also;
-    see_also.push_back( "mvEmpiricalTree" );
-    see_also.push_back( "treeTrace" );
-    see_also.push_back( "readTreeTrace" );
-    see_also.push_back( "readTrees" );
-    
-    
-    return see_also;
 }
 
 

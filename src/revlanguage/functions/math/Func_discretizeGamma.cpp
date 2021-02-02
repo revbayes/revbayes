@@ -1,17 +1,34 @@
+#include <iosfwd>
+#include <vector>
+
 #include "ArgumentRule.h"
-#include "Ellipsis.h"
 #include "Func_discretizeGamma.h"
 #include "Integer.h"
-#include "NormalizeVectorFunction.h"
 #include "ModelVector.h"
-#include "RbUtil.h"
 #include "RealPos.h"
 #include "RlBoolean.h"
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
-
 #include "DiscretizeGammaFunction.h"
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "RbBoolean.h"
+#include "RbVector.h"
+#include "Real.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlFunction.h"
+#include "RlTypedFunction.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
 
 using namespace RevLanguage;

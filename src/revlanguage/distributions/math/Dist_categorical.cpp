@@ -1,10 +1,35 @@
+#include <math.h>
+#include <stddef.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "CategoricalDistribution.h"
-#include "ContinuousStochasticNode.h"
 #include "Dist_categorical.h"
 #include "RlSimplex.h"
-#include "RealPos.h"
+#include "DagMemberFunction.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "Natural.h"
+#include "RbHelpReference.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlDagMemberFunction.h"
+#include "RlDeterministicNode.h"
+#include "RlDistribution.h"
+#include "RlStochasticNode.h"
+#include "RlTypedDistribution.h"
+#include "RlTypedFunction.h"
+#include "StochasticNode.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
+#include "TypedFunction.h"
+
+namespace RevBayesCore { class Simplex; }
 
 using namespace RevLanguage;
 
@@ -85,134 +110,6 @@ std::string Dist_categorical::getDistributionFunctionName( void ) const
     std::string d_name = "categorical";
     
     return d_name;
-}
-
-
-/**
- * Get the author(s) of this function so they can receive credit (and blame) for it.
- */
-std::vector<std::string> Dist_categorical::getHelpAuthor(void) const
-{
-    // create a vector of authors for this function
-    std::vector<std::string> authors;
-    authors.push_back( "Fredrik Ronquist" );
-    
-    return authors;
-}
-
-
-/**
- * Get the (brief) description for this function
- */
-std::string Dist_categorical::getHelpDescription(void) const
-{
-    std::string description = "";
-    description += "The categorical distribution, sometimes referred to as the generalized Bernoulli";
-    description += " distribution. It describes the probability of one of K different outcomes,";
-    description += " labeled from 1 to K, with each outcome probability separately specified.";
-
-    return description;
-}
-
-
-/**
- * Get the more detailed description of the function
- */
-std::string Dist_categorical::getHelpDetails(void) const
-{
-    // create a variable for the description of the function
-    std::string details = "";
-    details += "The argument to the constructor is a simplex containing the";
-    details += " probabilities of the outcomes. The outcomes are labeled from";
-    details += " 1 to K, where K is the number of elements in the simplex.";
-    details += " Outcome i has probability specified by component i";
-    details += " in the simplex.\n\n";
-    
-    details += "A typical scenario where a categorical variable is used";
-    details += " is in the definition of a variable drawn from a mixture.";
-    details += " A vector of mixture components is set up first, and then";
-    details += " a stochastic variable drawn from a categorical distribution";
-    details += " is used as an index in a deterministic assignment that";
-    details += " points to a component in the mixture. See example below.";
-    
-    return details;
-}
-
-
-/**
- * Get an executable and instructive example.
- * These example should help the users to show how this function works but
- * are also used to test if this function still works.
- */
-std::string Dist_categorical::getHelpExample(void) const
-{
-    // create an example as a single string variable.
-    std::string example = "";
-
-    example += "# Define a stochastic variable x that is drawn from\n";
-    example += "# a categorical distribution with 4 categories, each\n";
-    example += "# category having the same probability, then examine\n";
-    example += "# the value of x.\n";
-    example += "x ~ dnCat( simplex(1,1,1,1) )\n";
-    example += "x\n";
-    example += "\n";
-    example += "# Draw 10 values from the distribution and place them\n";
-    example += "# in a vector a, then examine a.\n";
-    example += "for ( i in 1:10 ) {\n";
-    example += "    a[i] <- x\n";
-    example += "    x.redraw()\n";
-    example += "}\n";
-    example += "a\n";
-    example += "\n";
-    example += "# Use x in defining a deterministic variable y taking\n";
-    example += "# on values from a mixture of RealPos values representing\n";
-    example += "# rates from a discretized scaled gamma distribution\n";
-    example += "# with four categories.\n";
-    example += "shape ~ dnExp( 10.0 )\n";
-    example += "rates := fnDiscretizeGamma( shape, shape, 4 )\n";
-    example += "y := rates[x]\n";
-    
-    return example;
-}
-
-
-/**
- * Get some references/citations for this function
- *
- */
-std::vector<RevBayesCore::RbHelpReference> Dist_categorical::getHelpReferences(void) const
-{
-    // create an entry for each reference
-    std::vector<RevBayesCore::RbHelpReference> references;
-    
-    
-    return references;
-}
-
-
-/**
- * Get the names of similar and suggested other functions
- */
-std::vector<std::string> Dist_categorical::getHelpSeeAlso(void) const
-{
-    // create an entry for each suggested function
-    std::vector<std::string> see_also;
-    see_also.push_back( "dnBinomial" );
-    
-    
-    return see_also;
-}
-
-
-/**
- * Get the title of this help entry
- */
-std::string Dist_categorical::getHelpTitle(void) const
-{
-    // create a title variable
-    std::string title = "The Categorical Distribution";
-    
-    return title;
 }
 
 

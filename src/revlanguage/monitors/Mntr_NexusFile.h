@@ -1,9 +1,16 @@
 #ifndef SRC_REVLANGUAGE_MONITORS_MNTRNEXUSFILE_H_
 #define SRC_REVLANGUAGE_MONITORS_MNTRNEXUSFILE_H_
 
+#include <iosfwd>
+#include <vector>
+
 #include "RlMonitor.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
 
 namespace RevLanguage {
+class TypeSpec;
 
 /** @copybrief RevBayesCore::NexusMonitor
  * @see Mntr_ExtendedNewickFile for output in table format

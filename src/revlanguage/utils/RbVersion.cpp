@@ -1,5 +1,9 @@
 #include "RbVersion.h"
+
+#include <string>
+
 #include "GitVersion.h"
+#include "StringUtilities.h"
 
 #ifdef RB_MPI
 #include <mpi.h>
@@ -30,7 +34,7 @@ std::string RbVersion::getGitCommit( void ) const
 
 std::string RbVersion::getVersion( void ) const
 {
-    return "1.0.12";
+    return "1.1.0";
 }
 
 
@@ -44,7 +48,7 @@ std::string RbVersion::getHeader( void ) const
 #ifdef RB_MPI
     int num_processes = -1;
     MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
-    header += "MPI enabled: using " + std::to_string(num_processes) + " processes.\n";
+    header += "MPI enabled: using " + StringUtilities::to_string(num_processes) + " processes.\n";
 #endif
     header += "\n";
     header += "Visit the website www.RevBayes.com for more information about RevBayes.\n";

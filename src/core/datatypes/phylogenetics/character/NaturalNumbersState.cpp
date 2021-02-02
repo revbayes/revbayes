@@ -1,10 +1,10 @@
 #include "NaturalNumbersState.h"
-#include "RbException.h"
-#include <assert.h>
-#include <sstream>
-#include <iostream>
-#include <boost/lexical_cast.hpp>
 
+#include <boost/lexical_cast.hpp>
+#include <string>
+
+#include "RbException.h"
+#include "Cloneable.h"
 
 using namespace RevBayesCore;
 
@@ -165,6 +165,15 @@ void NaturalNumbersState::setGapState( bool tf )
 void NaturalNumbersState::setMissingState( bool tf )
 {
     is_missing = tf;
+    
+    if ( is_missing == true )
+    {
+        for (size_t i=0; i<getNumberOfStates(); ++i)
+        {
+            state.set(i);
+        }
+        num_observed_states = getNumberOfStates();
+    }
 }
 
 

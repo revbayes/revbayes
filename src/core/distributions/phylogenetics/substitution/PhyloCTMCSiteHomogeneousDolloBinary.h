@@ -1,9 +1,15 @@
 #ifndef PhyloCTMCSiteHomogeneousDolloBinary_H
 #define PhyloCTMCSiteHomogeneousDolloBinary_H
 
+#include <stddef.h>
+#include <map>
+#include <vector>
+
 #include "PhyloCTMCSiteHomogeneousDollo.h"
 
 namespace RevBayesCore {
+class Tree;
+template <class valueType> class TypedDagNode;
 
     struct DolloBinaryAscertainmentBias {
 

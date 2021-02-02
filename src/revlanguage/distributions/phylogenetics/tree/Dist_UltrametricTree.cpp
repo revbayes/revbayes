@@ -1,3 +1,9 @@
+#include <math.h>
+#include <stddef.h>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Dist_UltrametricTree.h"
@@ -10,6 +16,41 @@
 #include "RlTrace.h"
 #include "RlTraceTree.h"
 #include "UltrametricTreeDistribution.h"
+#include "ConstantNode.h"
+#include "DagMemberFunction.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "Distribution.h"
+#include "DistributionMemberFunction.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "MethodTable.h"
+#include "ModelObject.h"
+#include "Natural.h"
+#include "RbVector.h"
+#include "Real.h"
+#include "RevNullObject.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlDagMemberFunction.h"
+#include "RlDeterministicNode.h"
+#include "RlDistribution.h"
+#include "RlStochasticNode.h"
+#include "RlTypedDistribution.h"
+#include "RlTypedFunction.h"
+#include "StochasticNode.h"
+#include "TraceNumeric.h"
+#include "Tree.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
+
+namespace RevBayesCore { class TraceTree; }
+namespace RevBayesCore { template <class valueType> class Trace; }
 
 using namespace RevLanguage;
 

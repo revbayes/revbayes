@@ -2,28 +2,27 @@
 #define AbstractCharacterHistoryBirthDeathProcess_h
 
 
-#include "CharacterHistoryDiscrete.h"
-#include "MemberObject.h"
 #include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypedDistribution.h"
 
 namespace RevBayesCore {
     
-    class Clade;
+    class CharacterHistory;
+    class DagNode;
+    template <class valueType> class RbOrderedSet;
     
     class AbstractCharacterHistoryBirthDeathProcess : public TypedDistribution<Tree> {
         
     public:
-        AbstractCharacterHistoryBirthDeathProcess(void);                                             //!< Constructor
+        AbstractCharacterHistoryBirthDeathProcess(void);                                                                    //!< Constructor
         
         virtual                                            ~AbstractCharacterHistoryBirthDeathProcess(void);                //!< Virtual destructor
         
         // public member functions
         AbstractCharacterHistoryBirthDeathProcess*          clone(void) const = 0;                                          //!< Create an independent clone
         virtual double                                      computeLnProbability(void) = 0;                                 //!< Compute ln prob of current value
-        virtual CharacterHistory&                           getCharacterHistory(void) = 0;                                      //!< Get the character histories
-        virtual const CharacterHistory&                     getCharacterHistory(void) const = 0;                                      //!< Get the character histories
+        virtual CharacterHistory&                           getCharacterHistory(void) = 0;                                  //!< Get the character histories
+        virtual const CharacterHistory&                     getCharacterHistory(void) const = 0;                            //!< Get the character histories
         virtual void                                        redrawValue(void) = 0;                                          //!< Draw a new random value from distribution
         virtual void                                        setValue(Tree *v, bool force) = 0;
         

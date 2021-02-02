@@ -1,14 +1,25 @@
+#include <stddef.h>
+#include <ostream>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "NearestNeighborInterchange_nonClockProposal.h"
 #include "RevObject.h"
-#include "RbException.h"
 #include "RealPos.h"
 #include "RlBranchLengthTree.h"
 #include "Move_NNINonclock.h"
-#include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "Move.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlMove.h"
+#include "StochasticNode.h"
+
+namespace RevBayesCore { class Proposal; }
+namespace RevBayesCore { class Tree; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 
 using namespace RevLanguage;

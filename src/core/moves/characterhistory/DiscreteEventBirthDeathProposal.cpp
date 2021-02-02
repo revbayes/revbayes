@@ -1,14 +1,19 @@
+#include <stddef.h>
+#include <cmath>
+#include <iostream>
+
 #include "CharacterEventDiscrete.h"
 #include "CharacterHistoryDiscrete.h"
-#include "DistributionNormal.h"
 #include "DiscreteEventBirthDeathProposal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-#include "RbException.h"
-#include "TypedDagNode.h"
+#include "AbstractCharacterHistoryBirthDeathProcess.h"
+#include "Cloneable.h"
+#include "EventBirthDeathProposal.h"
 
-#include <cmath>
-#include <iostream>
+namespace RevBayesCore { class CharacterEvent; }
+namespace RevBayesCore { class Tree; }
+namespace RevBayesCore { template <class variableType> class StochasticNode; }
 
 using namespace RevBayesCore;
 

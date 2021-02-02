@@ -1,17 +1,18 @@
-//
-//  StudentTDistribution.h
-//  revbayes_work
-//
-//  Created by Dismukes, Wade T [EEOBS] on 11/4/16.
-//  Copyright © 2016 Dismukes, Wade T [EEOBS]. All rights reserved.
-//
+    /**
+     * @brief Student's T distribution class.
+     *
+     * Student's T distribution represents a family of distributions
+     * defined on the set of real numbers. Student's T distribution has 1 parameter:
+     * @param df The degrees of freedom
+     * Instances of this class can be associated to stochastic variables.
+     *
+     */
 
-#include <stdio.h>
-
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 #ifndef StudentTDistribution_H
 #define StudentTDistribution_H
 
-#include "TypedDagNode.h"
 #include "ContinuousDistribution.h"
 
 namespace RevBayesCore {

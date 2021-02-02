@@ -1,20 +1,26 @@
+#include <stddef.h>
+#include <ostream>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "RlBoolean.h"
 #include "ContinuousStochasticNode.h"
 #include "MetropolisHastingsMove.h"
-#include "ModelVector.h"
 #include "Move_LevyJumpSum.h"
-#include "Natural.h"
 #include "LevyJumpSumProposal.h"
-#include "RbException.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
-#include "RlTimeTree.h"
-#include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "Move.h"
+#include "RbBoolean.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlMove.h"
+
+namespace RevBayesCore { class Proposal; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 
 

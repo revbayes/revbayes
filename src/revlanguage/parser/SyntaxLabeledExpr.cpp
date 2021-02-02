@@ -1,9 +1,12 @@
-#include "Environment.h"
-#include "RbException.h"
-#include "RbUtil.h"
-#include "SyntaxLabeledExpr.h"
-
+#include <stddef.h>
 #include <sstream>
+#include <set>
+
+#include "Environment.h"
+#include "SyntaxLabeledExpr.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "SyntaxElement.h"
 
 using namespace RevLanguage;
 

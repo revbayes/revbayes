@@ -1,7 +1,9 @@
 #ifndef RbSettings_H
 #define RbSettings_H
 
-#include <string>
+#include <stddef.h>
+#include <iosfwd>
+#include <string> // IWYU pragma: keep
 
 class RbSettings {
 

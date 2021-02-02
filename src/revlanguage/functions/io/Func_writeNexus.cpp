@@ -1,3 +1,7 @@
+#include <stddef.h>
+#include <iosfwd>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "Func_writeNexus.h"
 #include "ModelVector.h"
@@ -5,11 +9,24 @@
 #include "RevNullObject.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlContinuousCharacterData.h"
-#include "RlDnaState.h"
 #include "RlString.h"
 #include "RlTimeTree.h"
 #include "RlTree.h"
 #include "NexusWriter.h"
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "ModelObject.h"
+#include "RbVector.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class AbstractHomologousDiscreteCharacterData; }
+namespace RevBayesCore { class ContinuousCharacterData; }
+namespace RevBayesCore { class Tree; }
 
 
 

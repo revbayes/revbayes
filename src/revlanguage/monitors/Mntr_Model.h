@@ -39,6 +39,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                   append;
         RevPtr<const RevVariable>                   version;
         RevPtr<const RevVariable>                   stochOnly;
+        RevPtr<const RevVariable>                   exclude;  //!< Vector of variable names to exclude from logging
         
     };
     

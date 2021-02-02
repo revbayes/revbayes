@@ -1,6 +1,18 @@
 #include "CharacterTranslator.h"
+
+#include <stddef.h>
+#include <string>
+
 #include "RbException.h"
 #include "StringUtilities.h"
+#include "AminoAcidState.h"
+#include "Cloneable.h"
+#include "CodonState.h"
+#include "DoubletState.h"
+#include "DiscreteCharacterState.h"
+#include "DnaState.h"
+#include "NaturalNumbersState.h"
+#include "RnaState.h"
 
 
 
@@ -64,6 +76,21 @@ RevBayesCore::AbstractDiscreteTaxonData* CharacterTranslator::translateCharacter
             trans_taxon_data = translateToCodon( d );
         }
     }
+    else if ( type == "Doublet")
+    {
+        if ( d.getCharacter(0).getDataType() == "DNA" )
+        {
+            trans_taxon_data = translateToDoubletFromDna( dynamic_cast< const DiscreteTaxonData<DnaState>& >(d) );
+        }
+        else if ( d.getCharacter(0).getDataType() == "RNA" )
+        {
+            trans_taxon_data = translateToDoubletFromRna( dynamic_cast< const DiscreteTaxonData<RnaState>& >(d) );
+        }
+        else
+        {
+            trans_taxon_data = translateToDoublet( d );
+        }
+    }
     else
     {
         throw RbException("Cannot translate character data object of type \""+ d.getCharacter(0).getDataType() +"\" into type \"" + type + "\"" );
@@ -102,6 +129,53 @@ DiscreteTaxonData<CodonState>* CharacterTranslator::translateToCodon(const Abstr
     throw RbException("Cannot translate character data object of type \""+ d.getCharacter(0).getDataType() +"\" into type \"Codon\"" );
     
     return NULL;
+}
+
+
+DiscreteTaxonData<CodonState>* CharacterTranslator::translateToDoublet(const AbstractDiscreteTaxonData &d)
+{
+    throw RbException("Cannot translate character data object of type \""+ d.getCharacter(0).getDataType() +"\" into type \"Doublet\"" );
+
+    return NULL;
+}
+
+
+DiscreteTaxonData<DoubletState>* CharacterTranslator::translateToDoubletFromDna(const DiscreteTaxonData<DnaState> &d)
+{
+    size_t length = d.getNumberOfCharacters();
+
+    DiscreteTaxonData<DoubletState> *trans_taxon_data = new DiscreteTaxonData<DoubletState>( d.getTaxon() );
+
+    for (size_t i=0; i<(length-1); i+=2)
+    {
+        std::string doublet_string = d.getCharacter(i).getStringValue();
+        doublet_string += d.getCharacter(i+1).getStringValue();
+        DoubletState cs = DoubletState( doublet_string );
+
+        trans_taxon_data->addCharacter( cs );
+    }
+
+    return trans_taxon_data;
+}
+
+
+DiscreteTaxonData<DoubletState>* CharacterTranslator::translateToDoubletFromRna(const DiscreteTaxonData<RnaState> &d)
+{
+    size_t length = d.getNumberOfCharacters();
+
+    DiscreteTaxonData<DoubletState> *trans_taxon_data = new DiscreteTaxonData<DoubletState>( d.getTaxon() );
+
+    for (size_t i=0; i<(length-1); i+=2)
+    {
+        std::string doublet_string = d.getCharacter(i).getStringValue();
+        doublet_string += d.getCharacter(i+1).getStringValue();
+        StringUtilities::replaceSubstring(doublet_string, "U", "T");
+        DoubletState cs = DoubletState( doublet_string );
+
+        trans_taxon_data->addCharacter( cs );
+    }
+
+    return trans_taxon_data;
 }
 
 

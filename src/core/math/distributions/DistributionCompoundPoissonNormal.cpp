@@ -7,15 +7,15 @@
 //
 
 
+#include <stddef.h>
 #include <cmath>
-#include <iostream>
 
 #include "RbMathCombinatorialFunctions.h"
 #include "DistributionCompoundPoissonNormal.h"
 #include "DistributionPoisson.h"
 #include "DistributionNormal.h"
-#include "RbStatisticsHelper.h"
-#include "RbException.h"
+
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 
 using namespace RevBayesCore;

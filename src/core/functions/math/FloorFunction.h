@@ -2,9 +2,10 @@
 #define FloorFunction_H
 
 #include "TypedFunction.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Round down to the next integer.
@@ -17,7 +18,7 @@ namespace RevBayesCore {
     public:
         FloorFunction(const TypedDagNode<double> *a);
         
-        FloorFunction*                      clone(void) const;                                                  //!< Create a clon.
+        FloorFunction*                      clone(void) const;                                                  //!< Create a clone.
         void                                update(void);                                                       //!< Recompute the value
         
     protected:

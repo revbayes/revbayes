@@ -1,7 +1,8 @@
 #include "RelativeNodeAgeConstraints.h"
-#include "RelativeNodeAgeConstraintsReader.h"
+
 #include <sstream>
-#include <string>
+
+#include "RelativeNodeAgeConstraintsReader.h"
 
 using namespace RevBayesCore;
 

@@ -1,11 +1,10 @@
 #ifndef EssTest_H
 #define EssTest_H
 
-#include <vector>
-
 #include "ConvergenceDiagnosticContinuous.h"
 
 namespace RevBayesCore {
+class TraceNumeric;
     
     /**
      * @brief ESS test statistic for assessing convergence.

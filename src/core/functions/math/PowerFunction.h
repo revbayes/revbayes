@@ -2,18 +2,17 @@
 #define PowerFunction_H
 
 #include "ContinuousFunction.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     
     /**
-     * The power function, f(a,b) = a^b.
+     * @brief The power function, f(b,e) = b^e.
      *
      *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2014-08-29, version 1.0
+     * Reimplemented here for use with TypedDagNode
      *
      */
     class PowerFunction : public ContinuousFunction {
@@ -21,7 +20,7 @@ namespace RevBayesCore {
     public:
         PowerFunction(const TypedDagNode<double> *b, const TypedDagNode<double> *e);
         
-        PowerFunction*                      clone(void) const;                                                  //!< Create a clon.
+        PowerFunction*                      clone(void) const;                                                  //!< Create a clone.
         void                                update(void);                                                       //!< Recompute the value
         
     protected:

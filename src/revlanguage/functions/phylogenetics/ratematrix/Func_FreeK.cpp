@@ -1,17 +1,26 @@
 #include "Func_FreeK.h"
+
 #include "FreeKRateMatrixFunction.h"
 #include "ModelVector.h"
-#include "Natural.h"
 #include "OptionRule.h"
-#include "RateMatrix_JC.h"
-#include "Real.h"
 #include "RealPos.h"
 #include "RlBoolean.h"
 #include "RlDeterministicNode.h"
 #include "RlRateMatrix.h"
-#include "RlSimplex.h"
-#include "TransitionProbabilityMatrix.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "ModelObject.h"
+#include "RbBoolean.h"
+#include "RbVector.h"
+#include "RevObject.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "RlString.h"
+#include "TypeSpec.h"
+
+namespace RevLanguage { class Real; }
 
 using namespace RevLanguage;
 

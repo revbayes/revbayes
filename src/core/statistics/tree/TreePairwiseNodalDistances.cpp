@@ -1,5 +1,10 @@
 #include "TreePairwiseNodalDistances.h"
 
+#include "Tree.h"
+#include "TreeUtilities.h"
+
+namespace RevBayesCore { class DagNode; }
+
 
 using namespace RevBayesCore;
 

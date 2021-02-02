@@ -9,9 +9,17 @@
 #ifndef CladogeneticProbabilityMatrix_Epoch_Epoch_h
 #define CladogeneticProbabilityMatrix_Epoch_Epoch_h
 
+#include <stddef.h>
+#include <iosfwd>
+#include <map>
+#include <vector>
+
 #include "CladogeneticProbabilityMatrix.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 namespace RevBayesCore {
+class Assignable;
     
     //    class TransitionProbabilityMatrix;
     
@@ -28,7 +36,7 @@ namespace RevBayesCore {
         virtual void                                        initFromString( const std::string &s );
         
         // virtual methods that may need to overwritten
-        virtual void                                        update(void) {};
+        virtual void                                        update(void);
         std::map<std::vector<unsigned>, double>             getEventMap(double t=0.0);
         const std::map<std::vector<unsigned>, double>&      getEventMap(double t=0.0) const;
         const RbVector<double>&                             getEpochTimes(void) const;                                                                //!< Return the epoch times
@@ -39,6 +47,7 @@ namespace RevBayesCore {
         void                                                setEpochCladogeneticProbabilityMatrix(const CladogeneticProbabilityMatrix& cp, double t); //!< Update only epoch matrix at time t
         void                                                setEpochTimes(const RbVector<double> &t);                                                 //!< Directly set the epoch times
         
+        virtual void                                        printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const;            //!< print object for user (in user-formatted way)
         
     protected:
         

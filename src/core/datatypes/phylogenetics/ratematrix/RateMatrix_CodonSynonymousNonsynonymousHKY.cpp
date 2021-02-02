@@ -1,15 +1,23 @@
+#include <stddef.h>
+#include <cmath>
+#include <complex>
+#include <iosfwd>
+#include <vector>
+
 #include "CodonState.h"
 #include "EigenSystem.h"
 #include "MatrixComplex.h"
 #include "MatrixReal.h"
 #include "RateMatrix_CodonSynonymousNonsynonymousHKY.h"
 #include "RbException.h"
-#include "RbMathMatrix.h"
 #include "TransitionProbabilityMatrix.h"
-
-#include <cmath>
-#include <string>
-#include <iomanip>
+#include "AminoAcidState.h"
+#include "Assignable.h"
+#include "Cloneable.h"
+#include "DiscreteCharacterState.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "TimeReversibleRateMatrix.h"
 
 using namespace RevBayesCore;
 

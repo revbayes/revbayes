@@ -2,11 +2,11 @@
 #define MarginalLikelihoodEstimator_H
 
 
+#include <vector>
+#include <iosfwd>
+
 #include "Cloneable.h"
 #include "Parallelizable.h"
-
-#include <string>
-#include <vector>
 
 namespace RevBayesCore {
     

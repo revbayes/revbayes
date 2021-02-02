@@ -1,15 +1,24 @@
+#include <cmath>
+#include <cstddef>
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
+
 #include "ConstantNode.h"
 #include "PhyloDistanceGamma.h"
 #include "DistributionGamma.h"
-#include "RandomNumberFactory.h"
-#include "TreePairwiseDistances.h"
 #include "StochasticNode.h"
+#include "DistanceMatrix.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "StringUtilities.h"
+#include "Tree.h"
+#include "TreeUtilities.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
 
-#include <cmath>
-#include <cstring>
-
-
-#include "RandomNumberGenerator.h"
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

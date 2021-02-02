@@ -1,10 +1,21 @@
+#include <stddef.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "ContinuousStochasticNode.h"
 #include "Dist_unif.h"
 #include "Real.h"
-#include "RealPos.h"
 #include "UniformDistribution.h"
+#include "RbHelpReference.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlContinuousDistribution.h"
+#include "TypeSpec.h"
+
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 
@@ -85,105 +96,6 @@ std::string Dist_unif::getDistributionFunctionName( void ) const
     std::string d_name = "Uniform";
     
     return d_name;
-}
-
-
-
-/**
- * Get the author(s) of this function so they can receive credit (and blame) for it.
- */
-std::vector<std::string> Dist_unif::getHelpAuthor(void) const
-{
-    // create a vector of authors for this function
-    std::vector<std::string> authors;
-    authors.push_back( "Michael Landis" );
-    
-    return authors;
-}
-
-
-/**
- * Get the (brief) description for this function
- */
-std::string Dist_unif::getHelpDescription(void) const
-{
-    // create a variable for the description of the function
-    std::string description = "Uniform distribution with lower and uppper bounds.";
-    
-    return description;
-}
-
-
-/**
- * Get the more detailed description of the function
- */
-std::string Dist_unif::getHelpDetails(void) const
-{
-    // create a variable for the description of the function
-    std::string details = "";
-    details += "The uniform distribution has density, f(x) = 1/(b-a), where b is the upper bound and a is the lower bound.";
-    
-    return details;
-}
-
-
-/**
- * Get an executable and instructive example.
- * These example should help the users to show how this function works but
- * are also used to test if this function still works.
- */
-std::string Dist_unif::getHelpExample(void) const
-{
-    // create an example as a single string variable.
-    std::string example = "";
-    
-    example += "# set the lower bound\n";
-    example += "a <- -2.5\n";
-    example += "# set the upper bound\n";
-    example += "b <- -3.9\n";
-    example += "# create a stochastic node with a uniform prior\n";
-    example += "u ~ dnUniform(a, b)\n";
-    return example;
-}
-
-
-/**
- * Get some references/citations for this function
- *
- */
-std::vector<RevBayesCore::RbHelpReference> Dist_unif::getHelpReferences(void) const
-{
-    // create an entry for each reference
-    std::vector<RevBayesCore::RbHelpReference> references;
-    
-    
-    return references;
-}
-
-
-/**
- * Get the names of similar and suggested other functions
- */
-std::vector<std::string> Dist_unif::getHelpSeeAlso(void) const
-{
-    // create an entry for each suggested function
-    std::vector<std::string> see_also;
-    // see_also.push_back( "dnLognormal" );
-    
-    
-    return see_also;
-}
-
-
-/**
- * Get the title of this help entry
- */
-std::string Dist_unif::getHelpTitle(void) const
-{
-    // create a title variable
-    std::string title = "Uniform Distribution";
-    
-    return title;
 }
 
 

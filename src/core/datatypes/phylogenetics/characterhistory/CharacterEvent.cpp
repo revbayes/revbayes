@@ -1,7 +1,6 @@
 #include "CharacterEvent.h"
-#include "CharacterEventType.h"
+
 #include <iostream>
-#include <sstream>
 
 using namespace RevBayesCore;
 

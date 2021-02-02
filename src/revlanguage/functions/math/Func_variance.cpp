@@ -1,3 +1,7 @@
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "VarianceFunction.h"
 #include "Func_variance.h"
 #include "ModelVector.h"
@@ -5,6 +9,20 @@
 #include "RealPos.h"
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "ModelObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlTypedFunction.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
+#include "TypedFunction.h"
+
+namespace RevBayesCore { template <class valueType> class RbVector; }
 
 using namespace RevLanguage;
 

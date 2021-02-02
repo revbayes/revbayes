@@ -1,17 +1,36 @@
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include "ConstantNode.h"
-#include "Integer.h"
-#include "Natural.h"
 #include "ModelVector.h"
-#include "RlBoolean.h"
-#include "Probability.h"
 #include "RlMatrixRealSymmetric.h"
-#include "RbUtil.h"
-#include "RlString.h"
 #include "TypeSpec.h"
 #include "RlMemberFunction.h"
+#include "ArgumentRules.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "MatrixReal.h"
+#include "MemberFunction.h"
+#include "MethodTable.h"
+#include "ModelObject.h"
+#include "RbVector.h"
+#include "RealPos.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlDeterministicNode.h"
+#include "RlMatrixReal.h"
+#include "RlTypedFunction.h"
+#include "StringUtilities.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
-#include <iomanip>
-#include <sstream>
+namespace RevLanguage { class Argument; }
 
 using namespace RevLanguage;
 

@@ -1,22 +1,37 @@
+#include <stddef.h>
+#include <ostream>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "BiogeographicTreeHistoryCtmc.h"
 #include "TreeCharacterHistoryNhxMonitor.h"
 #include "Mntr_CharacterHistoryNhxFile.h"
-#include "Natural.h"
+#include "IntegerPos.h"
 #include "OptionRule.h"
 #include "Probability.h"
-#include "RbException.h"
 #include "RevObject.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlAtlas.h"
 #include "RlString.h"
 #include "RlTimeTree.h"
-#include "StandardState.h"
-#include "TimeAtlas.h"
-#include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "Integer.h"
+#include "Monitor.h"
+#include "RbBoolean.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlMonitor.h"
+#include "StochasticNode.h"
+#include "StandardState.h" // IWYU pragma: keep
+#include "GeographicArea.h" // IWYU pragma: keep
+
+namespace RevBayesCore { class AbstractHomologousDiscreteCharacterData; }
+namespace RevBayesCore { class TimeAtlas; }
+namespace RevBayesCore { class Tree; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 
 using namespace RevLanguage;
@@ -45,8 +60,8 @@ void Mntr_CharacterHistoryNhxFile::constructInternalObject( void ) {
     // now allocate a new sliding move
     const std::string& fn = static_cast<const RlString &>( filename->getRevObject() ).getValue();
     const std::string& sep = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    int g = (int)static_cast<const Natural &>( samplegen->getRevObject() ).getValue();
-    int mg = (int)static_cast<const Natural &>( maxgen->getRevObject() ).getValue();
+    unsigned int g = (int)static_cast<const IntegerPos &>( samplegen->getRevObject() ).getValue();
+    unsigned int mg = (int)static_cast<const IntegerPos &>( maxgen->getRevObject() ).getValue();
     
     int burn = 0;
 
@@ -131,8 +146,8 @@ const MemberRules& Mntr_CharacterHistoryNhxFile::getParameterRules(void) const
         Mntr_CharacterHistoryNhxFileMemberRules.push_back( new ArgumentRule("ctmc"      , AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         Mntr_CharacterHistoryNhxFileMemberRules.push_back( new ArgumentRule("tree"      , TimeTree::getClassTypeSpec()             , "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         Mntr_CharacterHistoryNhxFileMemberRules.push_back( new ArgumentRule("atlas"     , RlAtlas::getClassTypeSpec()              , "", ArgumentRule::BY_CONSTANT_REFERENCE , ArgumentRule::ANY) );
-        Mntr_CharacterHistoryNhxFileMemberRules.push_back( new ArgumentRule("samplegen" , Natural::getClassTypeSpec()              , "", ArgumentRule::BY_VALUE             , ArgumentRule::ANY, new Natural(1) ) );
-        Mntr_CharacterHistoryNhxFileMemberRules.push_back( new ArgumentRule("maxgen"    , Natural::getClassTypeSpec()              , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+        Mntr_CharacterHistoryNhxFileMemberRules.push_back( new ArgumentRule("samplegen" , IntegerPos::getClassTypeSpec()              , "", ArgumentRule::BY_VALUE             , ArgumentRule::ANY, new IntegerPos(1) ) );
+        Mntr_CharacterHistoryNhxFileMemberRules.push_back( new ArgumentRule("maxgen"    , IntegerPos::getClassTypeSpec()              , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
         std::vector<TypeSpec> burninTypes;
         burninTypes.push_back( Probability::getClassTypeSpec() );
         burninTypes.push_back( Integer::getClassTypeSpec() );

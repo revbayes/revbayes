@@ -38,9 +38,17 @@
  */
 
 #include "CorrespondenceAnalysis.h"
+
+#include <stddef.h>
+#include <vector>
+
 #include "DualityDiagram.h"
 #include "MatrixReal.h"
 #include "RbMathMatrix.h"
+#include "Cloneable.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 using namespace RevBayesCore;
 

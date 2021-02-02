@@ -6,18 +6,37 @@
 //  Copyright (c) 2015 Michael Landis. All rights reserved.
 //
 
+#include <vector>
+#include <iosfwd>
+
 #include "DispersalExtinctionRateStructureFunction.h"
 #include "Func_DECRates.h"
 #include "Natural.h"
-#include "RateMatrix_JC.h"
-#include "Real.h"
 #include "RealPos.h"
 #include "RlDeterministicNode.h"
-#include "RlRateMatrix.h"
-#include "RlSimplex.h"
-#include "TransitionProbabilityMatrix.h"
 #include "TypedDagNode.h"
-#include <vector>
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "ModelVector.h"
+#include "RbConstants.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlFunction.h"
+#include "RlTypedFunction.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
 using namespace RevLanguage;
 

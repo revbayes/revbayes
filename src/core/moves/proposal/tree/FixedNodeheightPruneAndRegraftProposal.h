@@ -1,13 +1,17 @@
 #ifndef FixedNodeheightPruneAndRegraftProposal_H
 #define FixedNodeheightPruneAndRegraftProposal_H
 
-#include <string>
+#include <stddef.h>
+#include <iosfwd>
+#include <vector>
 
 #include "Proposal.h"
-#include "StochasticNode.h"
-#include "Tree.h"
 
 namespace RevBayesCore {
+class DagNode;
+class TopologyNode;
+class Tree;
+template <class variableType> class StochasticNode;
     
     /**
      * The fixed node-height prune-and-regraft operator.

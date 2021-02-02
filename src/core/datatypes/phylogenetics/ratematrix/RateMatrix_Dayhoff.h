@@ -6,8 +6,6 @@
 
 namespace RevBayesCore {
     
-    class TransitionProbabilityMatrix;
-    
     class RateMatrix_Dayhoff : public RateMatrix_Empirical {
         
     public:

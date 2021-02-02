@@ -1,9 +1,25 @@
 #ifndef PhyloCTMCSiteHomogeneousDollo_H
 #define PhyloCTMCSiteHomogeneousDollo_H
 
-#include "PhyloCTMCSiteHomogeneousBinary.h"
+#include <cstddef>
+#include <map>
+#include <vector>
+
+#include "AbstractPhyloCTMCSiteHomogeneous.h"
+#include "DiscreteTaxonData.h"
+#include "HomologousDiscreteCharacterData.h"
+#include "NaturalNumbersState.h"
+#include "PhyloCTMCSiteHomogeneous.h"
+#include "PhyloCTMCSiteHomogeneousConditional.h"
+#include "RbException.h"
+#include "StandardState.h"
+#include "TopologyNode.h"
+#include "TypedDistribution.h"
 
 namespace RevBayesCore {
+class DagNode;
+class Tree;
+template <class valueType> class TypedDagNode;
 
     struct DolloAscertainmentBias {
 
@@ -42,7 +58,7 @@ namespace RevBayesCore {
 
             double                                              sumRootLikelihood( void );
             void                                                resizeLikelihoodVectors(void);
-            void                                                updateTransitionProbabilities(size_t nodeIdx, double brlen);
+            void                                                updateTransitionProbabilities(size_t nodeIdx);
             void                                                getStationaryFrequencies( std::vector<std::vector<double> >& ) const;
 
             virtual double                                      computeIntegratedNodeCorrection(const std::vector<std::vector<std::vector<double> > >& partials, size_t nodeIndex, size_t mask, size_t mixture, const std::vector<double> &f);

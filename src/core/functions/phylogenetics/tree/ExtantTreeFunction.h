@@ -10,13 +10,12 @@
 #define ExtantTreeFunction_h
 
 #include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <map>
-#include <set>
-
 namespace RevBayesCore {
+class DagNode;
+class TopologyNode;
+template <class valueType> class TypedDagNode;
     
     class ExtantTreeFunction : public TypedFunction<Tree> {
         

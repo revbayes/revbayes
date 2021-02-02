@@ -6,15 +6,20 @@
  */
 
 #include "PhyloOrnsteinUhlenbeckProcess.h"
-#include "ConstantNode.h"
+
+#include <stddef.h>
+#include <cmath>
+
 #include "DistributionNormal.h"
 #include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
 #include "RbConstants.h"
-#include "StochasticNode.h"
+#include "Cloner.h"
+#include "RbVectorImpl.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
 
-#include <cmath>
-#include <iostream>
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 
 

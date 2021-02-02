@@ -1,25 +1,19 @@
 #include "Func_convertToPhylowood.h"
+
+#include <stddef.h>
+#include <vector>
+
 #include "ArgumentRule.h"
-#include "ConstantNode.h"
-#include "ModelVector.h"
-#include "NexusWriter.h"
 #include "OptionRule.h"
 #include "PhylowoodConverter.h"
 #include "Probability.h"
-#include "RbException.h"
-#include "RevNullObject.h"
-#include "RlBranchLengthTree.h"
 #include "RlString.h"
-#include "RlTimeTree.h"
-#include "RlTraceTree.h"
-#include "RlAncestralStateTrace.h"
-#include "RlUtils.h"
-#include "StringUtilities.h"
-#include "WorkspaceVector.h"
-
-#include <map>
-#include <set>
-#include <sstream>
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "RlTree.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

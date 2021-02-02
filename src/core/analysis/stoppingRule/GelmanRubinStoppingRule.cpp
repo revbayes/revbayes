@@ -1,9 +1,18 @@
+#include <cstddef>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "GelmanRubinTest.h"
 #include "GelmanRubinStoppingRule.h"
 #include "RbException.h"
 #include "RbFileManager.h"
 #include "StringUtilities.h"
 #include "TraceContinuousReader.h"
+#include "AbstractConvergenceStoppingRule.h"
+#include "BurninEstimatorContinuous.h"
+#include "Cloner.h"
+#include "TraceNumeric.h"
 
 
 using namespace RevBayesCore;

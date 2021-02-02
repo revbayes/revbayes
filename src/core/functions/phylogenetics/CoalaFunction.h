@@ -22,13 +22,15 @@
 #ifndef CoalaFunction_H
 #define CoalaFunction_H
 
-#include "MatrixReal.h"
-#include "TypedDagNode.h"
-#include "TypedFunction.h"
-
 #include <vector>
 
+#include "MatrixReal.h"
+#include "TypedFunction.h"
+#include "RbVector.h"
+
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     class CoalaFunction : public TypedFunction< RbVector<double> > {
         

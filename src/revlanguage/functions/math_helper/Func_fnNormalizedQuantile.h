@@ -1,16 +1,3 @@
-/**
- * @file
- * This file contains the declaration of Func_fnNormalizedQuantile,
- * which returns a vector of normalized gamma rates for n categories
- * for among-site rate variation
- *
- * @brief Declaration of Func_fnNormalizedQuantile
- *
- * (c) Copyright 2009- under GPL version 3
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- */
-
 #ifndef Func_fnNormalizedQuantile_H
 #define Func_fnNormalizedQuantile_H
 
@@ -22,6 +9,10 @@
 
 namespace RevLanguage {
     
+    /** @brief Function to create a normalized vector from a continuous distribution
+     *
+     * @see RevBayesCore::NormalizeVectorFunction for the created core object
+     **/
     template <typename valType>
     class Func_fnNormalizedQuantile : public TypedFunction< ModelVector<valType> > {
         
@@ -29,15 +20,15 @@ namespace RevLanguage {
         Func_fnNormalizedQuantile();
         
         // Basic utility functions
-        Func_fnNormalizedQuantile*                                                  clone(void) const;                                          //!< Clone the object
-        static const std::string&                                                   getClassType(void);                                         //!< Get class name
-        static const TypeSpec&                                                      getClassTypeSpec(void);                                     //!< Get class type spec
-        std::string                                                                 getFunctionName(void) const;                                //!< Get the primary name of the function in Rev
-        const TypeSpec&                                                             getTypeSpec(void) const;                                    //!< Get language type of the object
+        Func_fnNormalizedQuantile*                                                  clone(void) const;
+        static const std::string&                                                   getClassType(void);
+        static const TypeSpec&                                                      getClassTypeSpec(void);
+        std::string                                                                 getFunctionName(void) const;
+        const TypeSpec&                                                             getTypeSpec(void) const;
         
         // Regular functions
-        RevBayesCore::TypedFunction< RevBayesCore::RbVector< double > >*            createFunction(void) const;                                 //!< Create a function object
-        const ArgumentRules&                                                        getArgumentRules(void) const;                               //!< Get argument rules
+        RevBayesCore::TypedFunction< RevBayesCore::RbVector< double > >*            createFunction(void) const;  //!< Create a new NormalizeVectorFunction object
+        const ArgumentRules&                                                        getArgumentRules(void) const;
         
     };
     
@@ -46,16 +37,10 @@ namespace RevLanguage {
 
 #include "ArgumentRule.h"
 #include "Ellipsis.h"
-#include "ModelVector.h"
 #include "NormalizeVectorFunction.h"
-#include "RbUtil.h"
-#include "Real.h"
-#include "RealPos.h"
 #include "RlDeterministicNode.h"
-#include "TypedDagNode.h"
 #include "QuantileFunction.h"
 #include "TypeSpec.h"
-#include "GammaDistribution.h"
 #include "VectorFunction.h"
 #include "TypedDistribution.h"
 #include "ContinuousDistribution.h"
@@ -66,20 +51,16 @@ using namespace RevLanguage;
 
 template <typename valType>
 Func_fnNormalizedQuantile<valType>::Func_fnNormalizedQuantile() : TypedFunction< ModelVector<valType> >()
-{
-    
-}
+{}
 
-/* Clone object */
+
 template <typename valType>
 Func_fnNormalizedQuantile<valType>* Func_fnNormalizedQuantile<valType>::clone( void ) const
 {
-    
     return new Func_fnNormalizedQuantile( *this );
 }
 
 
-/** Execute function: We rely on getValue and overloaded push_back to provide functionality */
 template <typename valType>
 RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_fnNormalizedQuantile<valType>::createFunction( void ) const
 {
@@ -105,7 +86,6 @@ RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_fnNormalized
 }
 
 
-/** Get argument rules */
 template <typename valType>
 const ArgumentRules& Func_fnNormalizedQuantile<valType>::getArgumentRules( void ) const
 {
@@ -125,7 +105,6 @@ const ArgumentRules& Func_fnNormalizedQuantile<valType>::getArgumentRules( void 
 }
 
 
-/** Get class name of object */
 template <typename valType>
 const std::string& Func_fnNormalizedQuantile<valType>::getClassType(void)
 {
@@ -136,7 +115,6 @@ const std::string& Func_fnNormalizedQuantile<valType>::getClassType(void)
 }
 
 
-/** Get class type spec describing type of object */
 template <typename valType>
 const RevLanguage::TypeSpec& Func_fnNormalizedQuantile<valType>::getClassTypeSpec(void)
 {
@@ -147,9 +125,6 @@ const RevLanguage::TypeSpec& Func_fnNormalizedQuantile<valType>::getClassTypeSpe
 }
 
 
-/**
- * Get the primary Rev name for this function.
- */
 template <typename valType>
 std::string RevLanguage::Func_fnNormalizedQuantile<valType>::getFunctionName( void ) const
 {
@@ -160,7 +135,6 @@ std::string RevLanguage::Func_fnNormalizedQuantile<valType>::getFunctionName( vo
 }
 
 
-/** Get type spec */
 template <typename valType>
 const RevLanguage::TypeSpec& Func_fnNormalizedQuantile<valType>::getTypeSpec( void ) const
 {

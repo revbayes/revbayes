@@ -2,17 +2,28 @@
 #define RlContinuousCharacterData_H
 
 #include <iostream>
-
+#include <string>
+#include <vector>
 
 #include "ContinuousCharacterData.h"
 #include "ModelObject.h"
 #include "RlHomologousCharacterData.h"
 #include "TypedDagNode.h"
-
-#include <ostream>
-#include <string>
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RlConstantNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
 namespace RevLanguage {
+class Argument;
+class RevVariable;
+class TypeSpec;
     
     class ContinuousCharacterData : public ModelObject<RevBayesCore::ContinuousCharacterData>, public HomologousCharacterData {
         

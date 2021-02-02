@@ -4,18 +4,18 @@
 
 #include "RbVector.h"
 #include "TypedFunction.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     
     /**
-     * The power function for a vector, f(a,b) = a^b.
+     * @brief The power function for a vector, f(b,e) = b^e.
      *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2014-08-29, version 1.0
+     *Where:
+     *@param b is a vector of doubles
+     *@param e is double
      *
      */
     class PowerVectorFunction : public TypedFunction<RbVector<double> > {

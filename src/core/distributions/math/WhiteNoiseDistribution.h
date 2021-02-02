@@ -2,23 +2,19 @@
 #define WhiteNoiseDistribution_H
 
 #include "ContinuousDistribution.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     /**
-     * @brief Gamma distribution class.
+     * @brief White Noise distribution class
      *
-     * The Gamma distribution represents a family of distributions
+     * The White Noise distribution represents a family of distributions
      * defined on the positive real numbers. The Gamma distribution has 2 parameters:
-     *   alpha
-     *   beta
+     * @param mu The mean of the distribution
+     * @param sigma the standard deviation of the distribution
      * Instances of this class can be associated to stochastic variables.
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2013-04-12, version 1.0
-     *
      */
     class WhiteNoiseDistribution : public ContinuousDistribution {
         

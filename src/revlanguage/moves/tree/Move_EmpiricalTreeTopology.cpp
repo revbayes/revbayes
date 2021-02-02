@@ -1,16 +1,26 @@
+#include <stddef.h>
+#include <ostream>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "MetropolisHastingsMove.h"
 #include "Move_EmpiricalTreeTopology.h"
-#include "RbException.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlBoolean.h"
 #include "RlTimeTree.h"
 #include "RlTraceTree.h"
-#include "EmpiricalTreeTopologyProposal.h"
-#include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "Move.h"
+#include "RbBoolean.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlMove.h"
+#include "StochasticNode.h"
+
+namespace RevBayesCore { class TraceTree; }
+namespace RevBayesCore { class Tree; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 
 using namespace RevLanguage;

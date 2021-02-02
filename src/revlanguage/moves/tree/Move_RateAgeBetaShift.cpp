@@ -1,3 +1,8 @@
+#include <stddef.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "ModelVector.h"
@@ -10,6 +15,20 @@
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
 #include "VectorFunction.h"
+#include "DeterministicNode.h"
+#include "ModelObject.h"
+#include "Move.h"
+#include "RateAgeBetaShift.h"
+#include "RbBoolean.h"
+#include "Real.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlMove.h"
+#include "StochasticNode.h"
+#include "TypedFunction.h"
+
+namespace RevBayesCore { class Tree; }
+namespace RevBayesCore { template <class valueType> class RbVector; }
 
 
 using namespace RevLanguage;

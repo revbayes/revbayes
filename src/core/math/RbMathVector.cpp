@@ -15,14 +15,10 @@
  */
 
 
-#include <cassert>
-#include <cmath>
-#include <iostream>
+#include <stddef.h>
 #include <vector>
 
-#include "RbException.h"
 #include "RbMathVector.h"
-#include "RbSettings.h"
 
 using namespace RevBayesCore;
 

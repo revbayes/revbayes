@@ -1,18 +1,32 @@
+#include <stdio.h>
+#include <iostream>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
+#include <sstream> // IWYU pragma: keep
+
 #include "ArgumentRules.h"
 #include "MemberProcedure.h"
 #include "MethodTable.h"
-#include "ModelVector.h"
 #include "OptionRule.h"
 #include "RbException.h"
 #include "RbHelpType.h"
-#include "RbUtil.h"
 #include "RevObject.h"
 #include "RlUtils.h"
-#include "RlString.h"
 #include "TypeSpec.h"
+#include "ArgumentRule.h"
+#include "RbHelpArgument.h"
+#include "RbHelpEntry.h"
+#include "RbHelpFunction.h"
+#include "RevMemberObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
 
-#include <sstream>
-#include <stdio.h>
+namespace RevBayesCore { class DagNode; }
+namespace RevLanguage { class Argument; }
+namespace RevLanguage { class UserFunction; }
 
 using namespace RevLanguage;
 
@@ -284,12 +298,6 @@ void RevObject::addSpecificHelpFields(RevBayesCore::RbHelpEntry *e) const
     
     help_constructor.setArguments( arguments );
     
-    // details
-    help_constructor.setDetails( getConstructorDetails() );
-    
-    // example
-    help_constructor.setExample( getConstructorExample() );
-    
     //
     std::vector<RevBayesCore::RbHelpFunction> constructors;
     constructors.push_back( help_constructor );
@@ -357,28 +365,7 @@ RevBayesCore::RbHelpEntry* RevObject::getHelpEntry( void ) const
     // aliases
     std::vector<std::string> aliases = getConstructorFunctionAliases();
     help_entry.setAliases( aliases );
-    
-    // title
-    help_entry.setTitle( getHelpTitle() );
-    
-    // description
-    help_entry.setDescription( getHelpDescription() );
-    
-    // details
-    help_entry.setDetails( getHelpDetails() );
-    
-    // example
-    help_entry.setExample( getHelpExample() );
-    
-    // references
-    help_entry.setReferences( getHelpReferences() );
-    
-    // author
-    help_entry.setAuthor( getHelpAuthor() );
-    
-    // see also
-    help_entry.setSeeAlso( getHelpSeeAlso() );
-    
+
     const TypeSpec* parentTypeSpec = type_spec.getParentTypeSpec();
 
     std::vector<std::string> typeSpec;
@@ -491,12 +478,6 @@ std::vector<RevBayesCore::RbHelpFunction> RevObject::getHelpMethods( void ) cons
         
         // return value
         help_method.setReturnType( the_function.getReturnType().getType() );
-        
-//        // details
-//        help_method.setDetails( the_function.getHelpDetails() );
-//        
-//        // example
-//        help_method.setExample( the_function.getHelpExample() );
         
         //
         help_methods.push_back( help_method );

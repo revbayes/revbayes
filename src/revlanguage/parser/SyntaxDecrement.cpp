@@ -1,12 +1,14 @@
-#include "RbException.h"
-#include "RbUtil.h"
-#include "RbOptions.h"
-#include "SyntaxDecrement.h"
-#include "Workspace.h"
-
+#include <stddef.h>
 #include <iostream>
-#include <list>
-#include <sstream>
+#include <set>
+
+#include "RbException.h"
+#include "SyntaxDecrement.h"
+#include "Environment.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "SyntaxElement.h"
 
 using namespace RevLanguage;
 

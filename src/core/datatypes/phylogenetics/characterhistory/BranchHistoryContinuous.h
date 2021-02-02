@@ -1,13 +1,11 @@
 #ifndef BranchHistoryContinuous_H
 #define BranchHistoryContinuous_H
 
+#include <stddef.h>
+#include <set>
+
 #include "BranchHistory.h"
 #include "CharacterEventContinuous.h"
-#include "TopologyNode.h"
-
-#include <ostream>
-#include <set>
-#include <vector>
 
 namespace RevBayesCore {
     

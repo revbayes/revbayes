@@ -1,5 +1,12 @@
 #include "VarianceFunction.h"
 
+#include <vector>
+
+#include "RbVector.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
+
 using namespace RevBayesCore;
 
 /**

@@ -1,5 +1,10 @@
 #include "TaxonMap.h"
+
+#include <cstddef>
+#include <utility>
+
 #include "Tree.h"
+#include "TimeInterval.h"
 
 using namespace RevBayesCore;
 

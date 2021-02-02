@@ -1,11 +1,12 @@
 #ifndef EssMax_H
 #define EssMax_H
 
-#include <vector>
+#include <stddef.h>
 
 #include "BurninEstimatorContinuous.h"
 
 namespace RevBayesCore {
+class TraceNumeric;
 
     class EssMax : public BurninEstimatorContinuous {
     

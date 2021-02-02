@@ -2,18 +2,19 @@
 #define MixtureCladogeneticStateFunction_h
 
 
-#include "AbstractCladogenicStateFunction.h"
-#include "CladogeneticProbabilityMatrix.h"
-#include "RbVector.h"
-#include "Simplex.h"
-#include "TypedDagNode.h"
-#include "TypedFunction.h"
-
-#include <sstream>
+#include <stddef.h>
 #include <vector>
 #include <map>
 
+#include "AbstractCladogenicStateFunction.h"
+#include "CladogeneticProbabilityMatrix.h"
+#include "TypedFunction.h"
+
 namespace RevBayesCore {
+class DagNode;
+class Simplex;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     class MixtureCladogeneticStateFunction : public AbstractCladogenicStateFunction, public TypedFunction<CladogeneticProbabilityMatrix> {
         

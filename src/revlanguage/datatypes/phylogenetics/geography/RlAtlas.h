@@ -2,7 +2,6 @@
 #define RlAtlas_H
 
 #include "ModelObject.h"
-#include "RlAtlas.h"
 #include "TimeAtlas.h"
 #include "TypedDagNode.h"
 

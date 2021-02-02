@@ -1,10 +1,17 @@
 #include "Func_powerVector.h"
+
 #include "ModelVector.h"
 #include "PowerVectorFunction.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

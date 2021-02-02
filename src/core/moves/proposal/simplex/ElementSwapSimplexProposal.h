@@ -1,14 +1,14 @@
 #ifndef ElementSwapSimplexProposal_H
 #define ElementSwapSimplexProposal_H
 
-#include <set>
-#include <string>
+#include <iosfwd>
 
 #include "SimpleProposal.h"
 #include "Simplex.h"
-#include "StochasticNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class variableType> class StochasticNode;
     
     /**
      * The element swap simplex operator.

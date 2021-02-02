@@ -1,7 +1,20 @@
+#include <cmath>
+#include <cstddef>
+#include <set>
+#include <vector>
+
 #include "BranchHistory.h"
 #include "CharacterEventDiscrete.h"
 #include "RateGeneratorSequence_Biogeography.h"
-#include <cmath>
+#include "Cloneable.h"
+#include "DistanceRateModifier.h"
+#include "RateGenerator.h"
+#include "RateGeneratorSequence.h"
+#include "RateGeneratorSequenceUsingMatrix.h"
+#include "RbException.h"
+#include "TransitionProbabilityMatrix.h"
+
+namespace RevBayesCore { class CharacterEvent; }
 
 using namespace RevBayesCore;
 

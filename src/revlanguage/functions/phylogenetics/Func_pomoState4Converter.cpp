@@ -1,11 +1,29 @@
 #include "Func_pomoState4Converter.h"
+
+#include <map>
+#include <string>
+#include <vector>
+
 #include "ModelVector.h"
 #include "Natural.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
-#include "RlDeterministicNode.h"
 #include "RlTaxon.h"
 #include "PoMoState4Converter.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "HomologousDiscreteCharacterData.h"
+#include "ModelObject.h"
+#include "RbIterator.h"
+#include "RbIteratorImpl.h"
+#include "RbVector.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "Taxon.h"
+#include "TypeSpec.h"
+
+namespace RevBayesCore { class AbstractHomologousDiscreteCharacterData; }
 
 using namespace RevLanguage;
 

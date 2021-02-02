@@ -41,9 +41,11 @@
 #ifndef _DUALITYDIAGRAM_H_
 #define _DUALITYDIAGRAM_H_
 
+#include <stddef.h>
+#include <vector>
+
 #include "Cloneable.h"
 #include "MatrixReal.h"
-#include "RbException.h"
 
 namespace RevBayesCore
 {

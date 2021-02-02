@@ -1,5 +1,14 @@
 #include "ChronoToPhyloFunction.h"
-#include "RbException.h"
+
+#include <stddef.h>
+
+#include "RbBoolean.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "TopologyNode.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

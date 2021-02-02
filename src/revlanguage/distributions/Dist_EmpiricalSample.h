@@ -46,7 +46,6 @@ namespace RevLanguage {
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Real.h"
-#include "RealPos.h"
 #include "RlDistributionMemberFunction.h"
 #include "RlSimplex.h"
 #include "StochasticNode.h"

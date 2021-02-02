@@ -75,11 +75,13 @@ namespace RevLanguage {
 #include "DeterministicNode.h"
 #include "MethodTable.h"
 #include "Natural.h"
+#include "Probability.h"
 #include "RbException.h"
+#include "RbMathLogic.h"
 #include "RevPtr.h"
-#include "TypeSpec.h"
 #include "RevVariable.h"
 #include "RlBoolean.h"
+#include "TypeSpec.h"
 #include "Workspace.h"
 #include "WorkspaceVector.h"
 
@@ -486,6 +488,7 @@ double ModelVector<rlType>::isConvertibleTo( const TypeSpec& type, bool once ) c
         // Simply check whether our elements can be converted to the desired element type
         typename RevBayesCore::RbConstIterator<elementType> i;
         double penalty = 0.0;
+        double sum = 0.0;
         for ( i = this->getValue().begin(); i != this->getValue().end(); ++i )
         {
             const elementType& org_internal_element = *i;
@@ -509,7 +512,19 @@ double ModelVector<rlType>::isConvertibleTo( const TypeSpec& type, bool once ) c
                 }
                 penalty += element_penalty;
             }
-            
+
+            if( type.getType() == "Simplex" )
+            {
+                Probability* ro = static_cast<Probability*>( org_element.convertTo( Probability::getClassTypeSpec() ) );
+                sum += ro->getValue();
+                delete ro;
+            }
+        }
+
+        // we cannot convert to a Simplex if the elements are not normalized
+        if ( type.getType() == "Simplex" && RevBayesCore::RbMath::compEssentiallyEqual(sum, 1.0) == false )
+        {
+            return -1;
         }
 
         return penalty;

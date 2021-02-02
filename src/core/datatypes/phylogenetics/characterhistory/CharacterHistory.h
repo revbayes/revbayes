@@ -1,18 +1,17 @@
 #ifndef CharacterHistory_H
 #define CharacterHistory_H
 
-#include "BranchHistory.h"
-#include "CharacterEvent.h"
-#include "Cloneable.h"
-
-#include <ostream>
-#include <set>
+#include <stddef.h>
 #include <vector>
+
+#include "Cloneable.h"
 
 namespace RevBayesCore {
     
     
     class Tree;
+class BranchHistory;
+class CharacterEvent;
     
     class CharacterHistory : public Cloneable {
         

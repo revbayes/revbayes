@@ -18,17 +18,16 @@
 #ifndef MrcaIndexStatistic_H
 #define MrcaIndexStatistic_H
 
+#include <stddef.h>
+
 //#include "Statistic.h"
 #include "Clade.h"
-#include "Tree.h"
-#include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <vector>
-#include <string>
-
 namespace RevBayesCore {
+class DagNode;
+class Tree;
+template <class valueType> class TypedDagNode;
     
     class MrcaIndexStatistic : public TypedFunction<long> {
         

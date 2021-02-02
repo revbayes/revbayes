@@ -1,7 +1,6 @@
 #ifndef DivergenceTimeCDF_H
 #define DivergenceTimeCDF_H
 
-#include <cmath>
 #include <stdio.h>
 #include <vector>
 

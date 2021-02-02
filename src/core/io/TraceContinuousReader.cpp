@@ -1,10 +1,12 @@
-#include "RbConstants.h"
-#include "RbException.h"
-#include "RbFileManager.h"
-#include "StringUtilities.h"
-#include "TraceContinuousReader.h"
+#include <stdlib.h>
+#include <iosfwd>
+#include <vector>
 
-#include <map>
+#include "RbFileManager.h"
+#include "TraceContinuousReader.h"
+#include "DelimitedDataReader.h"
+#include "Trace.h"
+#include "TraceNumeric.h"
 
 
 using namespace RevBayesCore;

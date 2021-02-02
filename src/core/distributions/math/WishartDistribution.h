@@ -1,23 +1,27 @@
-//
-//  WishartDistribution.h
-//  revbayes
-//
-//  Created by Nicolas Lartillot on 2014-03-26.
-//  Copyright (c) 2014 revbayes team. All rights reserved.
-//
-
-#ifndef __revbayes__WishartDistribution__
-#define __revbayes__WishartDistribution__
-
-#include <iostream>
-
-
+#ifndef WishartDistribution_H
+#define WishartDistribution_H
 
 #include "TypedDistribution.h"
 #include "MatrixReal.h"
 #include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+
+
+/**
+ * @brief Wishart distribution class.
+ *
+ * The Gamma distribution represents a family of distributions
+ * defined on the positive real numbers. The Wishart distribution is a multivariate generalization of the Gamma distribution.
+ * The Wishart distribution has 2 parameters:
+ *
+ * @param V A square scaling matrix.
+ * @param Df The degrees of freedom
+ * Instances of this class can be associated to stochastic variables.
+ */
+
+
     
     class WishartDistribution : public TypedDistribution<MatrixReal>   {
         
@@ -47,14 +51,14 @@ namespace RevBayesCore {
 
         // members
         
-        const TypedDagNode<MatrixReal>*                     omega0;
-        const TypedDagNode<double>*                         kappa;
-        const TypedDagNode<long>*                           df;
-        const TypedDagNode<long>*                           dim;
+        const TypedDagNode<MatrixReal>*                     omega0;     //!<The scaling matrix
+        const TypedDagNode<double>*                         kappa;      //!<A value for the diagonal elements of the scaling matrix
+        const TypedDagNode<long>*                           df;         //!<The degrees of freedom
+        const TypedDagNode<long>*                           dim;        //!<The number of dimensions of the scaling matrix
         
     };
     
 }
 
 
-#endif /* defined(__revbayes__WishartDistribution__) */
+#endif /* defined(WishartDistribution_H) */

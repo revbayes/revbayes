@@ -1,15 +1,13 @@
 #ifndef CodonSynonymousNonsynonymousRateMatrixFunction_H
 #define CodonSynonymousNonsynonymousRateMatrixFunction_H
 
-#include "RateMatrix_CodonSynonymousNonsynonymous.h"
-#include "RbVector.h"
-#include "Simplex.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
-
-#include <vector>
+#include "RateGenerator.h"
 
 namespace RevBayesCore {
+class DagNode;
+class Simplex;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief HKY rate matrix function.

@@ -17,10 +17,12 @@
 #ifndef PoMoState_H
 #define PoMoState_H
 
-#include "DiscreteCharacterState.h"
-#include "DistributionBinomial.h"
+#include <stddef.h>
 #include <ostream>
-#include <set>
+#include <vector>
+
+#include "DiscreteCharacterState.h"
+#include "RbBitSet.h"
 
 namespace RevBayesCore {
     

@@ -1,18 +1,27 @@
+#include <ostream>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "MatrixReal.h"
 #include "ModelVector.h"
 #include "Move_CorrelationMatrixReparameterization.h"
-#include "RbException.h"
 #include "RealPos.h"
 #include "RevObject.h"
-#include "RlBoolean.h"
 #include "RlMatrixReal.h"
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
-#include "VectorFunction.h"
-#include "ContinuousCharacterData.h"
 #include "RlContinuousCharacterData.h"
+#include "CorrelationMatrixReparameterizationMove.h"
+#include "ModelObject.h"
+#include "Move.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlMove.h"
+#include "StochasticNode.h"
+
+namespace RevBayesCore { class ContinuousCharacterData; }
+namespace RevBayesCore { class MatrixReal; }
+namespace RevBayesCore { template <class valueType> class RbVector; }
 
 using namespace RevLanguage;
 

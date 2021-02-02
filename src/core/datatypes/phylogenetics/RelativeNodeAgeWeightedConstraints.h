@@ -8,11 +8,16 @@
 #ifndef __RelativeNodeAgeWeightedConstraints__
 #define __RelativeNodeAgeWeightedConstraints__
 
+#include <stddef.h>
+#include <iosfwd>
+#include <utility>
+#include <vector>
+
 #include "Cloneable.h"
-#include "RelativeNodeAgeWeightedConstraintsReader.h"
-#include <string>
 
 namespace RevBayesCore {
+class RelativeNodeAgeWeightedConstraintsReader;
+
     class RelativeNodeAgeWeightedConstraints : public Cloneable
     {
         

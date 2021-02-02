@@ -1,8 +1,16 @@
+#include <stdio.h>
+#include <algorithm>
+#include <string>
+#include <exception>
+#include <iostream>
+#include <map>
+#include <set>
+#include <utility>
+#include <vector>
+
 #include "AminoAcidState.h"
-#include "ConstantNode.h"
 #include "HomologousDiscreteCharacterData.h"
 #include "DnaState.h"
-#include "NewickConverter.h"
 #include "NewickTreeReader.h"
 #include "NclReader.h"
 #include "NonHomologousDiscreteCharacterData.h"
@@ -13,12 +21,27 @@
 #include "TaxonMap.h"
 #include "Tree.h"
 #include "TopologyNode.h"
-#include "Tree.h"
 #include "TreeUtilities.h"
 #include "RlUserInterface.h"
-
-#include <algorithm>
-#include <string>
+#include "AbstractCharacterData.h"
+#include "Cloneable.h"
+#include "ContinuousCharacterData.h"
+#include "ContinuousTaxonData.h"
+#include "DiscreteTaxonData.h"
+#include "HomologousCharacterData.h"
+#include "NaturalNumbersState.h"
+#include "RbException.h"
+#include "Taxon.h"
+#include "nxsassumptionsblock.h"
+#include "nxscharactersblock.h"
+#include "nxsdefs.h"
+#include "nxsexception.h"
+#include "nxsmultiformat.h"
+#include "nxsreader.h"
+#include "nxsstring.h"
+#include "nxstaxablock.h"
+#include "nxstreesblock.h"
+#include "nxsunalignedblock.h"
 
 using namespace RevBayesCore;
 
@@ -1065,8 +1088,7 @@ std::string NclReader::intuitDataType(std::string& s)
     {
         return "dna";
     }
-    //    std::cout << "HEHEHEE: "<< (double)nucCount / (s.size()-nMissing)  << " "<<nucCount << " " << s.size() << " " << nMissing <<std::endl;
-    //std::cout << notDna << " " << notRna <<" "<< notAa << " " << notStd << std::endl;
+
     return "";
 }
 
@@ -1947,7 +1969,8 @@ Tree* NclReader::translateNclSimpleTreeToBranchLengthTree(NxsSimpleTree& nTree, 
         tau->getNode(nodes[i]->getIndex()).setBranchLength( brlens[i] );
     }
     
-    tau->makeInternalNodesBifurcating(true);
+    bool fossils_only = true;
+    tau->makeInternalNodesBifurcating(true, fossils_only);
 
     // only trees with 2-degree root nodes are rooted trees.
     tau->setRooted( root->getNumberOfChildren() == 2 );

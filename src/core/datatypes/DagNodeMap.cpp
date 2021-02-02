@@ -1,5 +1,9 @@
-#include "DagNode.h"
+#include <stddef.h>
+#include <vector>
+
 #include "DagNodeMap.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

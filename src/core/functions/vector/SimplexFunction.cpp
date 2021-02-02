@@ -1,5 +1,10 @@
 #include "SimplexFunction.h"
+
+#include <stddef.h>
+
 #include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

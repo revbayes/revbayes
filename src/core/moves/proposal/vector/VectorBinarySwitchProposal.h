@@ -1,15 +1,16 @@
 #ifndef VectorBinarySwitchProposal_H
 #define VectorBinarySwitchProposal_H
 
-#include "RbVector.h"
-#include "Proposal.h"
-#include "StochasticNode.h"
-
 #include <ostream>
 #include <vector>
-#include <string>
+#include <cstddef>
+#include <set>
+
+#include "Proposal.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class variableType> class StochasticNode;
     
     /**
      * @brief Sliding proposal of a all elements of a vector.

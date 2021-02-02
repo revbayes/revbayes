@@ -16,10 +16,14 @@
  */
 
 #include "RootedTripletDistribution.h"
+
+#include <ostream>
+
 #include "RbException.h"
-#include "RbOptions.h"
 #include "TopologyNode.h"
 #include "Tree.h"
+
+namespace RevBayesCore { class DagNode; }
 
 
 using namespace RevBayesCore;

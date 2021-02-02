@@ -1,14 +1,17 @@
+#include <math.h>
+#include <stddef.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "Clade.h"
 #include "Dist_CharacterDependentBirthDeathProcess.h"
-#include "HomologousDiscreteCharacterData.h"
 #include "ModelVector.h"
 #include "Natural.h"
 #include "OptionRule.h"
 #include "Probability.h"
 #include "RateGenerator.h"
-#include "Real.h"
 #include "RealPos.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlBoolean.h"
@@ -17,10 +20,44 @@
 #include "RlRateGenerator.h"
 #include "RlSimplex.h"
 #include "RlString.h"
-#include "RlTaxon.h"
 #include "RlTimeTree.h"
 #include "StateDependentSpeciationExtinctionProcess.h"
 #include "StochasticNode.h"
+#include "CladogeneticSpeciationRateMatrix.h"
+#include "ConstantNode.h"
+#include "DagMemberFunction.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DistributionMemberFunction.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "Integer.h"
+#include "MemberProcedure.h"
+#include "MethodTable.h"
+#include "ModelObject.h"
+#include "RbBoolean.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RevNullObject.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlDagMemberFunction.h"
+#include "RlDeterministicNode.h"
+#include "RlDistribution.h"
+#include "RlStochasticNode.h"
+#include "RlTypedDistribution.h"
+#include "RlTypedFunction.h"
+#include "RlUtils.h"
+#include "Tree.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
+
+namespace RevBayesCore { class Simplex; }
 
 using namespace RevLanguage;
 
@@ -119,9 +156,10 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_CharacterDependentBirt
     
     size_t prune = static_cast<const RlBoolean &>( prune_extinct_lineages->getRevObject() ).getValue();
     
+    bool allow_shifts_extinct = static_cast<const RlBoolean &>( allow->getRevObject() ).getValue();
     
     // finally make the distribution 
-    RevBayesCore::StateDependentSpeciationExtinctionProcess*   d = new RevBayesCore::StateDependentSpeciationExtinctionProcess( ra, ex, q, r, bf, rh, cond, uo, min_l, max_l, exact_l, max_t, prune, cond_tip_states, cond_num_tips, cond_tree );
+    RevBayesCore::StateDependentSpeciationExtinctionProcess*   d = new RevBayesCore::StateDependentSpeciationExtinctionProcess( ra, ex, q, r, bf, rh, cond, uo, min_l, max_l, exact_l, max_t, prune, cond_tip_states, cond_num_tips, cond_tree, allow_shifts_extinct );
    
     
     size_t ex_size = ex->getValue().size();
@@ -301,6 +339,7 @@ const MemberRules& Dist_CharacterDependentBirthDeathProcess::getParameterRules(v
         memberRules.push_back( new ArgumentRule("exactNumLineages", Natural::getClassTypeSpec(), "The exact number of lineages to simulate; applied under the numTips condition.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(100) ) );
         memberRules.push_back( new ArgumentRule("maxTime", RealPos::getClassTypeSpec(), "Maximum time for lineages to coalesce when simulating; applied under the numTips and tipStates condition.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(1000.0) ) );
         memberRules.push_back( new ArgumentRule("pruneExtinctLineages", RlBoolean::getClassTypeSpec(), "When simulating should extinct lineages be pruned off?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+        memberRules.push_back( new ArgumentRule("allowRateShiftsAtExtinctLineages", RlBoolean::getClassTypeSpec(), "Should we allow rate shifts to occur on extinct lineages?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
 
         rules_set = true;
     }
@@ -386,6 +425,10 @@ void Dist_CharacterDependentBirthDeathProcess::setConstParameter(const std::stri
     else if ( name == "simulateCondition" )
     {
         simulation_condition = var;
+    }
+    else if ( name == "allowRateShiftsAtExtinctLineages" )
+    {
+        allow = var;
     }
     else
     {

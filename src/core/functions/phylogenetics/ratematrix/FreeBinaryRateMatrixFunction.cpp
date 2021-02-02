@@ -7,7 +7,15 @@
 //
 
 #include "FreeBinaryRateMatrixFunction.h"
-#include "RbException.h"
+
+#include <vector>
+
+#include "Cloneable.h"
+#include "RateMatrix_FreeBinary.h"
+#include "RbVector.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

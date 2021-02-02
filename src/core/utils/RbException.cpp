@@ -15,7 +15,6 @@
 
 #include "RbException.h"
 
-#include <string>
 #include <iostream>
 
 

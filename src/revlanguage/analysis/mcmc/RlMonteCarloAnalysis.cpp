@@ -1,10 +1,13 @@
 
+#include <stddef.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "ConstantNode.h"
 #include "MaxIterationStoppingRule.h"
 #include "MonteCarloAnalysis.h"
-#include "Model.h"
 #include "Natural.h"
 #include "OptionRule.h"
 #include "RbException.h"
@@ -18,6 +21,20 @@
 #include "StoppingRule.h"
 #include "TypeSpec.h"
 #include "WorkspaceVector.h"
+#include "Argument.h"
+#include "MemberProcedure.h"
+#include "MethodTable.h"
+#include "RbBoolean.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RevNullObject.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlUtils.h"
+#include "Trace.h"
+#include "WorkspaceToCoreWrapperObject.h"
 
 
 using namespace RevLanguage;
@@ -224,7 +241,8 @@ const MemberRules& MonteCarloAnalysis::getParameterRules(void) const
         std::vector<std::string> options_combine;
         options_combine.push_back( "sequential" );
         options_combine.push_back( "mixed" );
-        member_rules.push_back( new OptionRule( "combineTraces", new RlString( "sequential" ), options_combine, "The way how we combine the traces ones the simulation is finished." ) );
+        options_combine.push_back( "none" );
+        member_rules.push_back( new OptionRule( "combine", new RlString( "none" ), options_combine, "How should we combine the traces once the simulation is finished." ) );
 
         // the number of tries to initialize the MCMC until it fails
         member_rules.push_back( new ArgumentRule("ntries"   , Natural::getClassTypeSpec(), "The number of initialization attempts.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1000) ) );
@@ -315,7 +333,7 @@ void MonteCarloAnalysis::setConstParameter(const std::string& name, const RevPtr
     {
         num_runs = var;
     }
-    else if ( name == "combineTraces")
+    else if ( name == "combine")
     {
         combine_traces = var;
     }

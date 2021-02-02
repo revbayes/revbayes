@@ -6,7 +6,7 @@
 #include "TopologyNode.h"
 
 namespace RevLanguage {
-    
+
     /**
      * @brief Rev function to simumlate a birth-death tree.
      *
@@ -21,29 +21,28 @@ namespace RevLanguage {
      *
      */
     class Func_BirthDeathSimulator : public Procedure {
-        
+
     public:
         Func_BirthDeathSimulator( void );
-        
+
         // Basic utility functions
         Func_BirthDeathSimulator*                   clone(void) const;                                          //!< Clone object
         static const std::string&                   getClassType(void);                                         //!< Get Rev simTree
         static const TypeSpec&                      getClassTypeSpec(void);                                     //!< Get class simTree spec
         std::string                                 getFunctionName(void) const;                                //!< Get the primary name of the function in Rev
         const TypeSpec&                             getTypeSpec(void) const;                                    //!< Get language simTree of the object
-        
+
         // Func_source functions
         const ArgumentRules&                        getArgumentRules(void) const;                               //!< Get argument rules
         const TypeSpec&                             getReturnType(void) const;                                  //!< Get simTree of return val
-        
+
         RevPtr<RevVariable>                         execute(void);                                              //!< Execute function
-        
+
     private:
-        
-        
+
+
     };
-    
+
 }
 
 #endif
-

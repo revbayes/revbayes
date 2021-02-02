@@ -1,11 +1,19 @@
 #include "Dist_phyloDistanceGamma.h"
+
+#include <stddef.h>
+#include <ostream>
+
 #include "PhyloDistanceGamma.h"
-#include "OptionRule.h"
-#include "RevNullObject.h"
-#include "RlBoolean.h"
-#include "RlRateGenerator.h"
 #include "RlString.h"
 #include "RlTree.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "ModelObject.h"
+#include "ModelVector.h"
+#include "RbVector.h"
+#include "TypeSpec.h"
+
+namespace RevBayesCore { class Tree; }
 
 using namespace RevLanguage;
 

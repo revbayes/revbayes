@@ -1,7 +1,6 @@
 #ifndef DistributionMultivariateNormal_h
 #define DistributionMultivariateNormal_h
 
-#include <iostream>
 #include <vector>
 
 #include "MatrixReal.h"

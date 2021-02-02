@@ -1,14 +1,21 @@
+#include <stddef.h>
+#include <iosfwd>
+#include <vector>
+
 #include "Argument.h"
 #include "ArgumentRule.h"
 #include "Ellipsis.h"
 #include "Func_concatenate.h"
 #include "OptionRule.h"
-#include "RbException.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlString.h"
-#include "RlUtils.h"
 #include "TypeSpec.h"
-#include "Workspace.h"
+#include "ArgumentRules.h"
+#include "Procedure.h"
+#include "RbHelpReference.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
 
 using namespace RevLanguage;
 
@@ -108,103 +115,6 @@ std::string Func_concatenate::getFunctionName( void ) const
     return f_name;
 }
 
-
-/**
- * Get the author(s) of this function so they can receive credit (and blame) for it.
- */
-std::vector<std::string> Func_concatenate::getHelpAuthor(void) const
-{
-    // create a vector of authors for this function
-    std::vector<std::string> authors;
-    authors.push_back( "Michael Landis" );
-    
-    return authors;
-}
-
-
-/**
- * Get the (brief) description for this function
- */
-std::string Func_concatenate::getHelpDescription(void) const
-{
-    // create a variable for the description of the function
-    std::string description = "Creates a new data matrix by concatentating the provided data matrices (by order).";
-    
-    return description;
-}
-
-
-/**
- * Get the more detailed description of the function
- */
-std::string Func_concatenate::getHelpDetails(void) const
-{
-    // create a variable for the description of the function
-    std::string details;
-    
-    return details;
-}
-
-
-/**
- * Get an executable and instructive example.
- * These example should help the users to show how this function works but
- * are also used to test if this function still works.
- */
-std::string Func_concatenate::getHelpExample(void) const
-{
-    // create an example as a single string variable.
-    std::string example = "";
-    
-    example += "# read in character data for locus_1\n";
-    example += "locus_1 = readDiscreteCharacterData(\"locus_1.nex\")\n";
-    example += "# read in character data for locus_2\n";
-    example += "locus_2 = readDiscreteCharacterData(\"locus_2.nex\")\n";
-    example += "# create concated locus for 1+2 (union of taxa)\n";
-    example += "locus_1_and_2 = concatenate( locus_1, locus_2 )\n";
-
-    
-    return example;
-}
-
-
-/**
- * Get some references/citations for this function
- *
- */
-std::vector<RevBayesCore::RbHelpReference> Func_concatenate::getHelpReferences(void) const
-{
-    // create an entry for each reference
-    std::vector<RevBayesCore::RbHelpReference> references;
-    
-    return references;
-}
-
-
-/**
- * Get the names of similar and suggested other functions
- */
-std::vector<std::string> Func_concatenate::getHelpSeeAlso(void) const
-{
-    // create an entry for each suggested function
-    std::vector<std::string> see_also;
-    // see_also.push_back( "dnLognormal" );
-    
-    
-    return see_also;
-}
-
-
-/**
- * Get the title of this help entry
- */
-std::string Func_concatenate::getHelpTitle(void) const
-{
-    // create a title variable
-    std::string title = "Concatenate character matrices";
-    
-    return title;
-}
 
 /** Get type spec */
 const TypeSpec& Func_concatenate::getTypeSpec( void ) const

@@ -2,12 +2,13 @@
 #define PhyloBrownianProcess_H
 
 #include "RbVector.h"
-#include "Tree.h"
 #include "TopologyNode.h"
-#include "TypedDagNode.h"
 #include "TypedDistribution.h"
 
 namespace RevBayesCore {
+class DagNode;
+class Tree;
+template <class valueType> class TypedDagNode;
     
     class PhyloBrownianProcess : public TypedDistribution< RbVector<double> > {
         

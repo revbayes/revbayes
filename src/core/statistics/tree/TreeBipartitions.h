@@ -1,17 +1,21 @@
 #ifndef TreeBipartitions_H
 #define TreeBipartitions_H
 
-#include "Tree.h"
-#include "TypedDagNode.h"
-#include "TypedFunction.h"
-
-#include <boost/dynamic_bitset.hpp>
-
-
+#include <stddef.h>
 #include <vector>
-#include <string>
+#include <iosfwd>
+#include <map>
+
+#include "TypedFunction.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "boost/dynamic_bitset.hpp" // IWYU pragma: keep
 
 namespace RevBayesCore {
+class DagNode;
+class TopologyNode;
+class Tree;
+template <class valueType> class TypedDagNode;
     
     class TreeBipartitions : public TypedFunction< RbVector<boost::dynamic_bitset<> > > {
         

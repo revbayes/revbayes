@@ -1,23 +1,17 @@
 #ifndef TajimasDFunction_H
 #define TajimasDFunction_H
 
-#include "AbstractHomologousDiscreteCharacterData.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <vector>
-
 namespace RevBayesCore {
+class AbstractHomologousDiscreteCharacterData;
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Computing Tajima's D function.
      *
      * This function computes Tajima's D = (pi - theta) / C.
-     *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since Version 1.0, 2015-04-30
      *
      */
     class TajimasDFunction : public TypedFunction<double> {

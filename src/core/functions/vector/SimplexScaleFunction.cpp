@@ -7,7 +7,16 @@
 //
 
 #include "SimplexScaleFunction.h"
+
+#include <stddef.h>
+
 #include "TypedDagNode.h"
+#include "Cloneable.h"
+#include "RbIterator.h"
+#include "RbIteratorImpl.h"
+#include "RbVectorImpl.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

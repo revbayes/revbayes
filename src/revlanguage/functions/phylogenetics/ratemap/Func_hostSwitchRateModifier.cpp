@@ -7,18 +7,24 @@
 //
 
 #include "Func_hostSwitchRateModifier.h"
+
 #include "HostSwitchRateModifierFunction.h"
 #include "CharacterHistoryRateModifier.h"
 #include "ModelVector.h"
-#include "RbVector.h"
 #include "RealPos.h"
-#include "RlDistanceMatrix.h"
 #include "RlDeterministicNode.h"
-#include "RlSimplex.h"
 #include "RlTree.h"
-#include "Natural.h"
-#include "RlRateGeneratorSequence.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "ModelObject.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
+
+namespace RevBayesCore { class Tree; }
+namespace RevBayesCore { template <class valueType> class RbVector; }
 
 using namespace RevLanguage;
 

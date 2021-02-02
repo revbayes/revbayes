@@ -1,10 +1,22 @@
+#include <stddef.h>
+#include <iostream>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "DelimitedCharacterDataWriter.h"
 #include "HomologousDiscreteCharacterData.h"
 #include "NclReader.h"
-#include "NexusWriter.h"
-#include "StandardState.h"
 #include "TreeDiscreteCharacterData.h"
+#include "AbstractHomologousDiscreteCharacterData.h"
+#include "Cloneable.h"
+#include "RbException.h"
+#include "RbFileManager.h"
+#include "TopologyNode.h"
+#include "Tree.h"
+#include "StandardState.h" // IWYU pragma: keep
 
+namespace RevBayesCore { class AbstractCharacterData; }
 
 
 using namespace RevBayesCore;

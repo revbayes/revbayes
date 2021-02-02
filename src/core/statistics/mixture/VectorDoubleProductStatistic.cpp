@@ -15,12 +15,13 @@
  */
 
 #include "VectorDoubleProductStatistic.h"
-#include "DirichletProcessPriorDistribution.h"
-#include "StochasticNode.h"
 
+#include <stddef.h>
 #include <vector>
-#include <string>
-#include <ostream>
+
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

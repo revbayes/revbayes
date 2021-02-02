@@ -1,15 +1,21 @@
+#include "ModelVector.h"
+#include <ostream>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Mntr_Model.h"
-#include "Model.h"
 #include "ModelMonitor.h"
-#include "ModelVector.h"
-#include "Natural.h"
-#include "RbException.h"
+#include "IntegerPos.h"
 #include "RevObject.h"
-#include "RlModel.h"
 #include "RlString.h"
 #include "TypeSpec.h"
+#include "Monitor.h"
+#include "RbBoolean.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlMonitor.h"
 
 
 using namespace RevLanguage;
@@ -41,14 +47,21 @@ void Mntr_Model::constructInternalObject( void )
     // now allocate a new sliding move
     const std::string&                  fn      = static_cast<const RlString &>( filename->getRevObject() ).getValue();
     const std::string&                  sep     = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    int                                 g       = (int)static_cast<const Natural  &>( printgen->getRevObject() ).getValue();
+    unsigned int                        g       = (int)static_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
     bool                                pp      = static_cast<const RlBoolean &>( posterior->getRevObject() ).getValue();
     bool                                l       = static_cast<const RlBoolean &>( likelihood->getRevObject() ).getValue();
     bool                                pr      = static_cast<const RlBoolean &>( prior->getRevObject() ).getValue();
     bool                                ap      = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
     bool                                so      = static_cast<const RlBoolean &>( stochOnly->getRevObject() ).getValue();
     bool                                wv      = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
-    RevBayesCore::ModelMonitor *m = new RevBayesCore::ModelMonitor((unsigned long)g, fn, sep);
+
+    ModelVector<RlString> excl = static_cast<const ModelVector<RlString> &>(exclude->getRevObject());
+    std::set<std::string> exclude_list;
+    for ( size_t i = 0; i < excl.size(); ++i ) {
+        exclude_list.insert(excl[i]);
+    }
+
+    RevBayesCore::ModelMonitor *m = new RevBayesCore::ModelMonitor((unsigned long)g, fn, sep, exclude_list);
     
     // now set the flags
     m->setAppend( ap );
@@ -107,7 +120,7 @@ const MemberRules& Mntr_Model::getParameterRules(void) const
     {
         
         memberRules.push_back( new ArgumentRule("filename"      , RlString::getClassTypeSpec() , "The name of the file where to store the values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        memberRules.push_back( new ArgumentRule("printgen"      , Natural::getClassTypeSpec()  , "The frequency how often to sample values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
+        memberRules.push_back( new ArgumentRule("printgen"      , IntegerPos::getClassTypeSpec()  , "The frequency how often to sample values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new IntegerPos(1) ) );
         memberRules.push_back( new ArgumentRule("separator"     , RlString::getClassTypeSpec() , "The separator between different variables.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
         memberRules.push_back( new ArgumentRule("posterior"     , RlBoolean::getClassTypeSpec(), "Should we print the joint posterior probability?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         memberRules.push_back( new ArgumentRule("likelihood"    , RlBoolean::getClassTypeSpec(), "Should we print the likelihood?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
@@ -115,7 +128,7 @@ const MemberRules& Mntr_Model::getParameterRules(void) const
         memberRules.push_back( new ArgumentRule("append"        , RlBoolean::getClassTypeSpec(), "Should we append to an existing file?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
         memberRules.push_back( new ArgumentRule("stochasticOnly", RlBoolean::getClassTypeSpec(), "Should we monitor stochastic variables only?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
         memberRules.push_back( new ArgumentRule("version", RlBoolean::getClassTypeSpec(), "Should we record the software version?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
-        
+        memberRules.push_back( new ArgumentRule{"exclude", ModelVector<RlString>::getClassTypeSpec(), "Variables to exclude from the monitor", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new ModelVector<RlString>()});
         
         rules_set = true;
     }
@@ -180,6 +193,10 @@ void Mntr_Model::setConstParameter(const std::string& name, const RevPtr<const R
     else if ( name == "version" )
     {
         version = var;
+    }
+    else if ( name == "exclude" )
+    {
+        exclude = var;
     }
     else 
     {

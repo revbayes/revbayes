@@ -1,12 +1,28 @@
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "F81RateMatrixFunction.h"
 #include "Func_f81.h"
-#include "RateMatrix_F81.h"
-#include "Real.h"
-#include "RealPos.h"
 #include "RlDeterministicNode.h"
 #include "RlRateMatrix.h"
 #include "RlSimplex.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RateGenerator.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "RlTypedFunction.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
+#include "TypedFunction.h"
+
+namespace RevBayesCore { class Simplex; }
 
 using namespace RevLanguage;
 

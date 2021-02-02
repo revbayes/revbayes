@@ -6,16 +6,15 @@
 //  Copyright (c) 2014 revbayes team. All rights reserved.
 //
 
+#include <stddef.h>
 #include <cmath>
-#include "CholeskyDecomposition.h"
-#include "DistributionBeta.h"
+
 #include "DistributionGilbertGraph.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-#include "RbException.h"
-#include "RbConstants.h"
-#include "RbMathFunctions.h"
-#include "RbStatisticsHelper.h"
+#include "MatrixReal.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 
 using namespace RevBayesCore;

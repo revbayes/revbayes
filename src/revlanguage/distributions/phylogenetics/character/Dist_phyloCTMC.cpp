@@ -1,24 +1,57 @@
 #include "Dist_phyloCTMC.h"
 
+#include <stddef.h>
+#include <ostream>
+
 #include "RlDistributionMemberFunction.h"
 #include "PhyloCTMCSiteHomogeneous.h"
-#include "PhyloCTMCSiteHomogeneousNucleotide.h"
 #include "PhyloCTMCSiteHomogeneousBinary.h"
+#include "PhyloCTMCSiteHomogeneousNucleotide.h"
 #include "OptionRule.h"
 #include "Probability.h"
 #include "RevNullObject.h"
-#include "RlAminoAcidState.h"
 #include "RlBoolean.h"
-#include "RlDnaState.h"
 #include "RlMatrixReal.h"
 #include "RlRateGenerator.h"
-#include "RlRnaState.h"
 #include "RlString.h"
 #include "RlTree.h"
 #include "StandardState.h"
 #include "RlSimplex.h"
 #include "PoMoState.h"
 #include "NaturalNumbersState.h"
+#include "AbstractPhyloCTMCSiteHomogeneous.h"
+#include "AminoAcidState.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "CodonState.h"
+#include "DoubletState.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DiscreteTaxonData.h"
+#include "DistributionMemberFunction.h"
+#include "DnaState.h"
+#include "HomologousDiscreteCharacterData.h"
+#include "IndirectReferenceFunction.h"
+#include "MatrixReal.h"
+#include "ModelObject.h"
+#include "ModelVector.h"
+#include "Natural.h"
+#include "PhyloCTMCSiteHomogeneousConditional.h"
+#include "RateGenerator.h"
+#include "RbBoolean.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "Real.h"
+#include "RealPos.h"
+#include "RlConstantNode.h"
+#include "RlDistribution.h"
+#include "RnaState.h"
+#include "Simplex.h"
+#include "StringUtilities.h"
+#include "Tree.h"
+#include "TypeSpec.h"
+#include "UserFunctionNode.h"
 
 using namespace RevLanguage;
 
@@ -407,6 +440,75 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         
         d = dist;
     }
+    else if ( dt == "Doublet" )
+    {
+        auto dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::DoubletState>(tau, 16, true, n, ambig, internal, gapmatch);
+
+        // set the root frequencies (by default these are NULL so this is OK)
+        dist->setRootFrequencies( rf );
+
+        // set the probability for invariant site (by default this p_inv=0.0)
+        dist->setPInv( p_invNode );
+
+        if ( rate->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
+        {
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = static_cast<const ModelVector<RealPos> &>( rate->getRevObject() ).getDagNode();
+
+            // sanity check
+            if ( (nNodes-1) != clockRates->getValue().size() )
+            {
+                throw RbException( "The number of clock rates does not match the number of branches" );
+            }
+
+            dist->setClockRate( clockRates );
+        }
+        else
+        {
+            RevBayesCore::TypedDagNode<double>* clockRate = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
+            dist->setClockRate( clockRate );
+        }
+        dist->setUseSiteMatrices(use_site_matrices, sp);
+
+        // set the rate matrix
+        if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
+        {
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
+
+            if (use_site_matrices == false)
+            {
+                // sanity check
+                if ( (nNodes-1) != rm->getValue().size())
+                {
+                    throw RbException( "The number of substitution matrices does not match the number of branches" );
+                }
+
+                // sanity check
+                if ( root_frequencies == NULL || root_frequencies->getRevObject() == RevNullObject::getInstance() )
+                {
+                    throw RbException( "If you provide branch-heterogeneous substitution matrices, then you also need to provide root frequencies." );
+                }
+            }
+
+            dist->setRateMatrix( rm );
+        }
+        else
+        {
+            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
+            dist->setRateMatrix( rm );
+        }
+
+        if ( site_ratesNode != NULL && site_ratesNode->getValue().size() > 0 )
+        {
+            dist->setSiteRates( site_ratesNode );
+        }
+
+        if ( site_rates_probsNode != NULL && site_rates_probsNode->getValue().size() > 0 )
+        {
+            dist->setSiteRatesProbs( site_rates_probsNode );
+        }
+
+        d = dist;
+    }
     else if ( dt == "PoMo" )
     {
 
@@ -529,7 +631,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         }
 
         RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::StandardState> *dist;
-        if (cd == RevBayesCore::AscertainmentBias::ALL)
+        if(cd == RevBayesCore::AscertainmentBias::ALL)
         {
             dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::StandardState>(tau, nChars, true, n, ambig, internal, gapmatch);
         }
@@ -947,6 +1049,7 @@ const MemberRules& Dist_phyloCTMC::getParameterRules(void) const
         options.push_back( "RNA" );
         options.push_back( "AA" );
         options.push_back( "Codon" );
+        options.push_back( "Doublet" );
         options.push_back( "PoMo" );
         options.push_back( "Protein" );
         options.push_back( "Standard" );

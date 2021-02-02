@@ -1,10 +1,18 @@
 #include "RateMatrix_Blosum62.h"
+
+#include <stddef.h>
+#include <vector>
+
 #include "RbVectorUtilities.h"
+#include "Cloneable.h"
+#include "MatrixReal.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 
 using namespace RevBayesCore;
 
-/** Construct rate matrix with n states */
+/** Default Constructor for the Blosum62 rate matrix with 20 states */
 RateMatrix_Blosum62::RateMatrix_Blosum62( void ) : RateMatrix_Empirical( 20 )
 {
     

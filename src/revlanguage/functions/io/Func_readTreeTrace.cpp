@@ -1,6 +1,13 @@
+#include <math.h>
+#include <stddef.h>
+#include <map>
+#include <set>
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ConstantNode.h"
-#include "Ellipsis.h"
 #include "Func_readTreeTrace.h"
 #include "ModelVector.h"
 #include "NclReader.h"
@@ -10,20 +17,40 @@
 #include "ProgressBar.h"
 #include "RbException.h"
 #include "RbFileManager.h"
-#include "RlBranchLengthTree.h"
 #include "RlClade.h"
 #include "RlString.h"
-#include "RlTimeTree.h"
 #include "RlTraceTree.h"
 #include "RlUserInterface.h"
-#include "RlUtils.h"
 #include "StringUtilities.h"
 #include "TraceTree.h"
 #include "TreeUtilities.h"
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "Clade.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "Integer.h"
+#include "ModelObject.h"
+#include "Natural.h"
+#include "RbBoolean.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RevNullObject.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlConstantNode.h"
+#include "RlFunction.h"
+#include "Trace.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
-#include <map>
-#include <set>
-#include <sstream>
+namespace RevBayesCore { class Tree; }
 
 
 using namespace RevLanguage;
@@ -52,17 +79,24 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     size_t arg_index_burnin    = 4;
     size_t arg_index_thinning  = 5;
     size_t arg_index_nexus  = 6;
+    size_t arg_index_nruns  = 7;
 
     // get the information from the arguments for reading the file
     const std::string&  treetype = static_cast<const RlString&>( args[arg_index_tree_type].getVariable()->getRevObject() ).getValue();
     const std::string&  sep      = static_cast<const RlString&>( args[arg_index_separator].getVariable()->getRevObject() ).getValue();
     long                thin     = static_cast<const Natural&>( args[arg_index_thinning].getVariable()->getRevObject() ).getValue();
     bool nexus = static_cast<RlBoolean&>(args[arg_index_nexus].getVariable()->getRevObject()).getValue();
+    long                nruns    = static_cast<const Natural&>( args[arg_index_nruns].getVariable()->getRevObject() ).getValue();
 
     std::vector<std::string> vectorOfFileNames;
     
     if ( args[0].getVariable()->getRevObject().isType( ModelVector<RlString>::getClassTypeSpec() ) )
     {
+        if( nruns > 1 )
+        {
+            throw RbException("Specify only a single base filename when nruns > 1");
+        }
+
         const ModelVector<RlString>& fn = static_cast<const ModelVector<RlString> &>( args[arg_index_files].getVariable()->getRevObject() ).getValue();
         std::vector<std::string> tmp;
         for (size_t i = 0; i < fn.size(); i++)
@@ -95,28 +129,42 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     else
     {
         // check that the file/path name has been correctly specified
-        const std::string&  fn       = static_cast<const RlString&>( args[arg_index_files].getVariable()->getRevObject() ).getValue();
-        RevBayesCore::RbFileManager myFileManager( fn );
+        std::string  bn = static_cast<const RlString&>( args[arg_index_files].getVariable()->getRevObject() ).getValue();
         
-        if ( !myFileManager.testFile() && !(myFileManager.testDirectory() && myFileManager.getFileName() == "" ) )
-        {
-            std::string errorStr = "Could not find filename: " + myFileManager.getFileName() + "\n";
-            myFileManager.formatError(errorStr);
-            throw RbException(errorStr);
-        }
+        StringUtilities::replaceSubstring(bn,".trees","");
         
-        // set up a vector of strings containing the name or names of the files to be read
-        if ( myFileManager.isFile() )
+        for (size_t i = 0; i < nruns; i++)
         {
-            vectorOfFileNames.push_back( myFileManager.getFullFileName() );
-        }
-        else
-        {
-            myFileManager.setStringWithNamesOfFilesInDirectory( vectorOfFileNames );
+            std::string run = "";
+            if ( nruns > 1 )
+            {
+                run = "_run_" + StringUtilities::to_string(i+1);
+            }
+
+            const std::string  fn = bn + run + ".trees";
+
+            RevBayesCore::RbFileManager myFileManager( fn );
+
+            if ( !myFileManager.testFile() && !(myFileManager.testDirectory() && myFileManager.getFileName() == "" ) )
+            {
+                std::string errorStr = "Could not find filename: " + myFileManager.getFileName() + "\n";
+                myFileManager.formatError(errorStr);
+                throw RbException(errorStr);
+            }
+
+            // set up a vector of strings containing the name or names of the files to be read
+            if ( myFileManager.isFile() )
+            {
+                vectorOfFileNames.push_back( myFileManager.getFullFileName() );
+            }
+            else
+            {
+                myFileManager.setStringWithNamesOfFilesInDirectory( vectorOfFileNames );
+            }
         }
     }
     
-    TraceTree *rv;
+    WorkspaceVector<TraceTree> *rv = NULL;
     if ( treetype == "clock" )
     {
         if(nexus) rv = readTreesNexus(vectorOfFileNames, true, thin);
@@ -128,6 +176,11 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
         if ( args[arg_index_outgroup].getVariable() != NULL && args[arg_index_outgroup].getVariable()->getRevObject() != RevNullObject::getInstance())
         {
             og = static_cast<const Clade &>( args[arg_index_outgroup].getVariable()->getRevObject() ).getValue();
+
+            for(size_t i = 0; i < rv->getValue().size(); i++)
+            {
+                rv->getValue()[i].getValue().setOutgroup(og);
+            }
         }
 
         if(nexus) rv = readTreesNexus(vectorOfFileNames, false, thin);
@@ -144,16 +197,32 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     if ( b.isType( Integer::getClassTypeSpec() ) )
     {
         burnin = static_cast<const Integer &>(b).getValue();
+
+        for(size_t i = 0; i < rv->getValue().size(); i++)
+        {
+            (*rv)[i].getValue().setBurnin(burnin);
+        }
     }
     else
     {
         double burninFrac = static_cast<const Probability &>(b).getValue();
-        burnin = long( floor( rv->getValue().size()*burninFrac ) );
+
+        for(size_t i = 0; i < rv->getValue().size(); i++)
+        {
+            burnin = long( floor( rv->getValue()[i].getValue().size()*burninFrac ) );
+
+            (*rv)[i].getValue().setBurnin(burnin);
+        }
     }
 
-    rv->getValue().setBurnin(burnin);
-
-    return new RevVariable( rv );
+    if( nruns == 1 )
+    {
+        return new RevVariable( &(*rv)[0] );
+    }
+    else
+    {
+        return new RevVariable( rv );
+    }
 }
 
 
@@ -171,7 +240,7 @@ const ArgumentRules& Func_readTreeTrace::getArgumentRules( void ) const
         std::vector<TypeSpec> fileTypes;
         fileTypes.push_back( RlString::getClassTypeSpec() );
         fileTypes.push_back( ModelVector<RlString>::getClassTypeSpec() );
-        argumentRules.push_back( new ArgumentRule( "file"     , fileTypes, "The name of the tree trace file(s).", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "file"     , fileTypes, "The name of the tree trace file(s), or directories containing them.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         
         std::vector<std::string> tree_options;
         tree_options.push_back( "clock" );
@@ -188,6 +257,8 @@ const ArgumentRules& Func_readTreeTrace::getArgumentRules( void ) const
         argumentRules.push_back( new ArgumentRule( "thinning", Natural::getClassTypeSpec(), "The frequency of samples to read, i.e., we will only used every n-th sample where n is defined by this argument.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( 1l ) ) );
 
         argumentRules.push_back( new ArgumentRule( "nexus", RlBoolean::getClassTypeSpec(), "Whether the file to read is in NEXUS format.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
+
+        argumentRules.push_back( new ArgumentRule( "nruns", Natural::getClassTypeSpec(), "The number of trace files with the same basename (i.e. the number of filenames with pattern <file>_run_<n>.trees", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( 1l ) ) );
 
         rules_set = true;
     }
@@ -247,10 +318,10 @@ const TypeSpec& Func_readTreeTrace::getReturnType( void ) const
 }
 
 
-TraceTree* Func_readTreeTrace::readTrees(const std::vector<std::string> &vector_of_file_names, const std::string &delimitter, bool clock, long thinning)
+WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<std::string> &vector_of_file_names, const std::string &delimitter, bool clock, long thinning)
 {
     
-    std::vector<RevBayesCore::TraceTree> data;
+    std::vector<TraceTree> data;
     
     // Set up a map with the file name to be read as the key and the file type as the value. Note that we may not
     // read all of the files in the string called "vectorOfFileNames" because some of them may not be in a format
@@ -305,6 +376,9 @@ TraceTree* Func_readTreeTrace::readTrees(const std::vector<std::string> &vector_
         size_t index = 0;
         progress.start();
         
+        RevBayesCore::TraceTree t(clock);
+        t.setFileName(fn);
+
         /* Command-processing loop */
         while ( in_file.good() )
         {
@@ -342,18 +416,15 @@ TraceTree* Func_readTreeTrace::readTrees(const std::vector<std::string> &vector_
                 {
                     
                     std::string parmName = columns[j];
-                    if ( parmName == "Posterior" || parmName == "Likelihood" || parmName == "Prior")
+                    if ( parmName == "Posterior" || parmName == "Likelihood" || parmName == "Prior" || parmName == "Replicate_ID")
                     {
                         continue;
                     }
                     index = j;
                     
-                    RevBayesCore::TraceTree t = RevBayesCore::TraceTree( clock );
-                    
                     t.setParameterName(parmName);
-                    t.setFileName(fn);
-                    
-                    data.push_back( t );
+
+                    break;
                 }
                 
                 has_header_been_read = true;
@@ -370,9 +441,6 @@ TraceTree* Func_readTreeTrace::readTrees(const std::vector<std::string> &vector_
                 continue;
             }
             
-            // adding values to the Traces
-            RevBayesCore::TraceTree& t = data[0];
-            
             RevBayesCore::Tree *tau = NULL;
             if ( clock == true )
             {
@@ -384,24 +452,6 @@ TraceTree* Func_readTreeTrace::readTrees(const std::vector<std::string> &vector_
             {
                 RevBayesCore::NewickConverter c;
                 tau = c.convertFromNewick( columns[index] );
-                
-                // moved the reroot functionality below into
-                // RevBayesCore::TreeSummary<BranchLengthTree>::summarizeTrees()
-                // so that tree traces retain their original topology
-                // will freyman 12/12/14
-                
-                //            if ( outgroup == "" )
-                //            {
-                //                RevBayesCore::BranchLengthTree& referenceTree = *tau;
-                //                outgroup = referenceTree.getTipNode(0).getName();
-                //            }
-                //            // re-root the tree so that we can compare the the trees
-                //            tau->reroot( outgroup );
-                
-                //                if ( outgroup.size() > 0 )
-                //                {
-                //                    //                tau->reroot( outgroup, false );
-                //                }
             }
             
             t.addObject( tau );
@@ -411,9 +461,11 @@ TraceTree* Func_readTreeTrace::readTrees(const std::vector<std::string> &vector_
         in_file.close();
         
         progress.finish();
+
+        data.push_back( TraceTree(t) );
     }
     
-    return new TraceTree( data[0] );
+    return new WorkspaceVector<TraceTree>( data );
 }
 
 /** Create tree trace from one or several Nexus file(s)
@@ -425,12 +477,15 @@ TraceTree* Func_readTreeTrace::readTrees(const std::vector<std::string> &vector_
  *
  * @note if multiple files are given, the traces will all be appended without regard for burnin
  * */
-TraceTree *Func_readTreeTrace::readTreesNexus(const std::vector<string> &fns, bool clock, long thin) {
-    RevBayesCore::TraceTree tt = RevBayesCore::TraceTree();
-    tt.setParameterName("tree");
+WorkspaceVector<TraceTree>* Func_readTreeTrace::readTreesNexus(const std::vector<string> &fns, bool clock, long thin) {
+
+    std::vector<TraceTree> data;
 
     for (size_t i=0; i<fns.size(); ++i)
     {
+        RevBayesCore::TraceTree tt = RevBayesCore::TraceTree();
+        tt.setParameterName("tree");
+
         const std::string fn = fns[i];
         // get the global instance of the NCL reader and clear warnings from its warnings buffer
         RevBayesCore::NclReader reader = RevBayesCore::NclReader();
@@ -449,9 +504,11 @@ TraceTree *Func_readTreeTrace::readTreesNexus(const std::vector<string> &fns, bo
             if(nsamples % thin == 0) tt.addObject(t);
             nsamples++;
         }
+
+        data.push_back(TraceTree(tt));
     }
 
-    return new TraceTree(tt);
+    return new WorkspaceVector<TraceTree>(data);
 }
 
 

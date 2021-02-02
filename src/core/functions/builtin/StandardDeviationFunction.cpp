@@ -1,12 +1,18 @@
 #include "StandardDeviationFunction.h"
 
 #include <cmath>
+#include <vector>
+
+#include "RbVector.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
 /**
- * 
- *
+ * StandardDeviationFunction of a RbVector Constructor.
+ * @param v the vector of values of type double
  */
 StandardDeviationFunction::StandardDeviationFunction(const TypedDagNode< RbVector<double> > *v) : TypedFunction<double>( new double(0.0) ),
 vals( v )

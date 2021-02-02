@@ -1,17 +1,18 @@
 #ifndef CorrelationMatrixReparameterizationMove_H
 #define CorrelationMatrixReparameterizationMove_H
 
-#include <map>
+#include <stddef.h>
 #include <ostream>
-#include <set>
-#include <string>
 
 #include "AbstractMove.h"
-#include "StochasticNode.h"
-#include "PhyloMultivariateBrownianProcessREML.h"
-#include "ContinuousCharacterData.h"
+#include "MatrixReal.h"
 
 namespace RevBayesCore {
+class ContinuousCharacterData;
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
+template <class variableType> class StochasticNode;
     
     class CorrelationMatrixReparameterizationMove : public AbstractMove {
         

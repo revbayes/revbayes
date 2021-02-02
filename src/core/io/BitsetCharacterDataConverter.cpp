@@ -7,12 +7,16 @@
 //
 
 #include "BitsetCharacterDataConverter.h"
+
+#include <math.h>
+#include <sstream>
+#include <string>
+
 #include "DiscreteTaxonData.h"
 #include "StandardState.h"
 #include "NaturalNumbersState.h"
-
-#include <algorithm>
-#include <sstream>
+#include "Cloneable.h"
+#include "Taxon.h"
 
 
 using namespace RevBayesCore;

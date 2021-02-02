@@ -1,7 +1,19 @@
 #include "K80RateMatrixFunction.h"
-#include "RbException.h"
+
+#include "Cloneable.h"
+#include "RateMatrix_Kimura80.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
+
+/**
+ * Default constructor.
+ *
+ * This function takes a single input:
+ * @param k The transition-transversion ratio (kappa)
+ */
 
 K80RateMatrixFunction::K80RateMatrixFunction(const TypedDagNode<double> *k) : TypedFunction<RateGenerator>( new RateMatrix_Kimura80() ),
     kappa( k )

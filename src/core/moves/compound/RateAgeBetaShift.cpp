@@ -1,12 +1,20 @@
+#include <stddef.h>
+#include <cmath>
+#include <iomanip>
+#include <ostream>
+#include <vector>
+
 #include "DistributionBeta.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RateAgeBetaShift.h"
 #include "TopologyNode.h"
-#include "TreeUtilities.h"
-
-#include <cmath>
-#include <iomanip>
+#include "AbstractMove.h"
+#include "DagNode.h"
+#include "RbException.h"
+#include "RbOrderedSet.h"
+#include "StochasticNode.h"
+#include "Tree.h"
 
 using namespace RevBayesCore;
 

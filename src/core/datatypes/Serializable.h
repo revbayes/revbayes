@@ -1,7 +1,7 @@
 #ifndef Serializable_H
 #define Serializable_H
 
-#include <string>
+#include <iosfwd>
 
 namespace RevBayesCore {
     

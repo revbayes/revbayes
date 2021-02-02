@@ -2,20 +2,18 @@
 #define RoundFunction_H
 
 #include "TypedFunction.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     /**
-     * \brief Round a real number to the next integer.
+     * @brief Round a real number to the next integer.
      *
      * Round a real number to the closest integer.
      * That is, all value x.5 to x.9999 will be rounded up.
      * Otherwise we round down.
      *
-     * \copyright (c) Copyright 2009-2015 (GPL version 3)
-     * \author The RevBayes Development Core Team (Sebastian Hoehna)
-     * \since Version 1.0, 2012-08-13
      *
      */
     class RoundFunction : public TypedFunction<long> {

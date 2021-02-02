@@ -1,14 +1,14 @@
 #ifndef CorrelationMatrixPartialElementBetaProposal_H
 #define CorrelationMatrixPartialElementBetaProposal_H
 
-#include <set>
-#include <string>
+#include <iosfwd>
 
 #include "Proposal.h"
 #include "MatrixReal.h"
-#include "StochasticNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class variableType> class StochasticNode;
     
     /**
      * The Beta operator.

@@ -1,20 +1,24 @@
+#include <stddef.h>
+#include <sstream>
+#include <map>
+#include <string>
+#include <utility>
+
 #include "ConstructorFunction.h"
 #include "FunctionTable.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
 #include "RbException.h"
 #include "RbHelpSystem.h"
 #include "RevAbstractType.h"
 #include "RevObject.h"
-#include "RbUtil.h"
 #include "RlDistribution.h"
 #include "StringUtilities.h"
-#include "Function.h"
 #include "Workspace.h"
-
-#include <cassert>
-#include <sstream>
-#include <vector>
+#include "Environment.h"
+#include "RbHelpDistribution.h"
+#include "RbHelpType.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 
@@ -124,59 +128,42 @@ bool Workspace::addDistribution( Distribution *dist )
 
 
 /** 
- * Add a type to the workspace 
+ * Add a type to the workspace
  */
-bool Workspace::addType(RevObject *exampleObj)
+bool Workspace::addType( RevObject *templ )
 {
-
-    const std::string& name = exampleObj->getType();
-
-    if (typeTable.find(name) != typeTable.end())
+    std::string name = templ->getType();
+    
+    // add the constructor function if there is one
+    // (constructors can be overloaded)
+    if ( templ->getConstructorFunctionName() != "c_name" )
     {
-        // free memory
-        delete exampleObj;
-        
-        throw RbException("There is already a type named '" + name + "' in the workspace");
+        function_table.addFunction( new ConstructorFunction(templ) );
+
+        // only add the type to the table if the entry doesn't already exist
+        // add a clone of the  template for so as not to interfere with the constructor's copy
+        if ( typeTable.find( name ) == typeTable.end() )
+        {
+            typeTable.insert(std::pair<std::string, RevObject*>( name, templ->clone() ) );
+        }
     }
-    
-    typeTable.insert(std::pair<std::string, RevObject*>(name, exampleObj));
-   
-    // add the help entry for this type to the global help system instance
-    RevBayesCore::RbHelpType* help_type = static_cast<RevBayesCore::RbHelpType*>( exampleObj->getHelpEntry() );
-    RevBayesCore::RbHelpSystem::getHelpSystem().addHelpType( help_type );
-    
-    return true;
-}
-
-
-/** 
- * Add a type with constructor to the workspace
- */
-bool Workspace::addTypeWithConstructor( RevObject *templ )
-{
-    const std::string& name = templ->getConstructorFunctionName();
-
-    if (typeTable.find( name ) != typeTable.end() )
+    // or, if the type exists already, throw an error
+    else if (typeTable.find( name ) != typeTable.end() )
     {
-        
         // free memory
         delete templ;
-        
+
         throw RbException("There is already a type named '" + name + "' in the workspace");
     }
-    
-    // only add the type to the table if we haven't gotten one with this signature already
-    if (typeTable.find( templ->getType() ) == typeTable.end())
+    // otherwise, add the template to the type table
+    else
     {
-        typeTable.insert(std::pair<std::string, RevObject*>(templ->getType(), templ->clone()));
+        typeTable.insert(std::pair<std::string, RevObject*>( name, templ ) );
     }
-    
-    
-    function_table.addFunction( new ConstructorFunction(templ) );
-    
+
     // add the help entry for this type to the global help system instance
-    RevBayesCore::RbHelpSystem::getHelpSystem().addHelpType( static_cast<RevBayesCore::RbHelpType*>(templ->getHelpEntry()) );
-    
+    RevBayesCore::RbHelpSystem::getHelpSystem().addHelpType( static_cast<RevBayesCore::RbHelpType*>( templ->getHelpEntry() ) );
+
     return true;
 }
 

@@ -26,14 +26,12 @@
 
 #include <sstream>
 #include <vector>
-#include <set>
 #include <cstdlib>
+#include <stdio.h>
+#include <string>
 
 /* Files including helper classes */
-#include "AddContinuousDistribution.h"
-#include "AddDistribution.h"
 #include "AddWorkspaceVectorType.h"
-#include "AddVectorizedWorkspaceType.h"
 #include "RbException.h"
 #include "RevAbstractType.h"
 #include "RlUserInterface.h"
@@ -41,12 +39,35 @@
 
 /// Miscellaneous types ///
 
+#include "ConstantNode.h"               // for ConstantNode
+#include "DagNode.h"                    // for DagNode
+#include "DeterministicNode.h"          // for DeterministicNode
+#include "DynamicNode.h"                // for DynamicNode
+#include "Func__vectorIndexOperator.h"  // for Func__vectorIndexOperator
+#include "Func_modelVector.h"           // for Func_modelVector
+#include "IndirectReferenceFunction.h"  // for IndirectReferenceFunction
+#include "ModelObject.h"                // for ModelObject, ModelObject<>::v...
+#include "RbBoolean.h"                  // for Boolean, operator<<
+#include "RbVector.h"                   // for RbVector
+#include "RbVectorImpl.h"               // for RbVectorImpl
+#include "RevNullObject.h"              // for RevNullObject
+#include "RevPtr.h"                     // for RevPtr
+#include "RlConstantNode.h"             // for ConstantNode
+#include "RlDeterministicNode.h"        // for DeterministicNode
+#include "RlTypedFunction.h"            // for TypedFunction
+#include "Simplex.h"                    // for Simplex
+#include "TypedDagNode.h"               // for TypedDagNode
+#include "TypedFunction.h"              // for TypedFunction
+#include "UserFunctionNode.h"           // for UserFunctionNode
+#include "VectorFunction.h"             // for VectorFunction
+#include "VectorIndexOperator.h"        // for VectorIndexOperator
+
 /* Base types (in folder "datatypes") */
 #include "RevObject.h"
-#include "AbstractModelObject.h"
 
 /* Primitive types (in folder "datatypes/basic") */
 #include "Integer.h"
+#include "IntegerPos.h"
 #include "Natural.h"
 #include "Probability.h"
 #include "RlBoolean.h"
@@ -60,8 +81,6 @@
 
 /* Container types (in folder "datatypes/math") */
 #include "ModelVector.h"
-#include "WorkspaceVector.h"
-
 
 
 /** Initialize global workspace */
@@ -78,6 +97,7 @@ void RevLanguage::Workspace::initializeBasicTypeGlobalWorkspace(void)
         /* Add primitive types (in folder "datatypes/basic") (alphabetic order) */
         AddWorkspaceVectorType<Integer,4>::addTypeToWorkspace(     *this, new Integer()     );
         AddWorkspaceVectorType<Natural,4>::addTypeToWorkspace(     *this, new Natural()     );
+        AddWorkspaceVectorType<IntegerPos,4>::addTypeToWorkspace(  *this, new IntegerPos()  );
         AddWorkspaceVectorType<Probability,4>::addTypeToWorkspace( *this, new Probability() );
         AddWorkspaceVectorType<Real,4>::addTypeToWorkspace(        *this, new Real()        );
         AddWorkspaceVectorType<RealPos,4>::addTypeToWorkspace(     *this, new RealPos()     );

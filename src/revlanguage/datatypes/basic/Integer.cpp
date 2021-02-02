@@ -1,15 +1,28 @@
+#include <sstream>
+#include <string>
+#include <vector>
+
+#include "IntegerPos.h"
 #include "RlBoolean.h"
 #include "Integer.h"
 #include "Natural.h"
 #include "Probability.h"
 #include "RealPos.h"
 #include "Real.h"
-#include "RbException.h"
-#include "RbUtil.h"
 #include "RlString.h"
 #include "TypeSpec.h"
-
-#include <sstream>
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RlConstantNode.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
 using namespace RevLanguage;
 
@@ -126,7 +139,11 @@ RevObject* Integer::convertTo( const TypeSpec& type ) const
     {
         return new RealPos( double(dag_node->getValue()) );
     }
-    
+    if ( type == IntegerPos::getClassTypeSpec() && dag_node->getValue() > 0)
+    {
+        return new IntegerPos( dag_node->getValue() );
+    }
+
     if ( type == Natural::getClassTypeSpec() && dag_node->getValue() >= 0)
     {
         return new Natural( dag_node->getValue() );
@@ -279,7 +296,11 @@ double Integer::isConvertibleTo( const TypeSpec& type, bool once ) const
     {
         return 0.3;
     }
-    
+    if ( once && type == IntegerPos::getClassTypeSpec() && dag_node->getValue() > 0 )
+    {
+        return 0.1;
+    }
+
     if ( once && type == Natural::getClassTypeSpec() && dag_node->getValue() >= 0 )
     {
         return 0.1;

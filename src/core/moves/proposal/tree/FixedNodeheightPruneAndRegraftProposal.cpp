@@ -1,12 +1,16 @@
 #include "FixedNodeheightPruneAndRegraftProposal.h"
+
+#include <cmath>
+
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
-#include "RbException.h"
-#include "TypedDagNode.h"
+#include "Cloneable.h"
+#include "StochasticNode.h"
+#include "TopologyNode.h"
+#include "Tree.h"
 
-#include <cmath>
-#include <iostream>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
@@ -48,9 +52,10 @@ FixedNodeheightPruneAndRegraftProposal* FixedNodeheightPruneAndRegraftProposal::
 
 
 
-void FixedNodeheightPruneAndRegraftProposal::findNewBrothers(std::vector<TopologyNode *> &b, TopologyNode &p, TopologyNode *n) {
+void FixedNodeheightPruneAndRegraftProposal::findNewBrothers(std::vector<TopologyNode *> &b, TopologyNode &p, TopologyNode *n)
+{
     // security check that I'm not a tip
-    if (!n->isTip() && &p != n)
+    if ( (n->isTip() == false) && (&p != n) )
     {
         // check the first child
         std::vector<TopologyNode*> children = n->getChildren();
@@ -112,7 +117,7 @@ double FixedNodeheightPruneAndRegraftProposal::doProposal( void )
     
     Tree& tau = variable->getValue();
     
-    if ( tau.getNumberOfTips() < 3)
+    if ( tau.getNumberOfTips() < 3 )
     {
         failed = true;
         return RbConstants::Double::neginf;
@@ -140,7 +145,7 @@ double FixedNodeheightPruneAndRegraftProposal::doProposal( void )
     findNewBrothers(new_brothers, *parent, &tau.getRoot());
 
     // we only need to propose a new tree if there are any other re-attachement points
-    if ( new_brothers.size() < 1)
+    if ( new_brothers.size() < 1 )
     {
         failed = true;
         return RbConstants::Double::neginf;
@@ -208,7 +213,7 @@ void FixedNodeheightPruneAndRegraftProposal::undoProposal( void )
 {
     
     // we undo the proposal only if it didn't fail
-    if ( !failed )
+    if ( failed == false )
     {
         // undo the proposal
         TopologyNode& parent = storedNewBrother->getParent();

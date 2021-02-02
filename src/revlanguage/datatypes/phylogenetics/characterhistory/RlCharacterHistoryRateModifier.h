@@ -9,14 +9,25 @@
 #ifndef RlCharacterHistoryRateModifier_h
 #define RlCharacterHistoryRateModifier_h
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ModelObject.h"
 #include "CharacterHistoryRateModifier.h"
 #include "TypedDagNode.h"
-
-#include <ostream>
-#include <string>
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "RevPtr.h"
+#include "RlConstantNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
 namespace RevLanguage {
+class TypeSpec;
     
     class CharacterHistoryRateModifier : public ModelObject<RevBayesCore::CharacterHistoryRateModifier> {
         

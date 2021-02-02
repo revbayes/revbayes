@@ -1,7 +1,22 @@
 #include "PhyloDiversityFunction.h"
+
+#include <algorithm>
+#include <cstddef>
+#include <iosfwd>
+#include <string>
+
 #include "Clade.h"
-#include "RbConstants.h"
 #include "TypedFunction.h"
+#include "RbBitSet.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "Taxon.h"
+#include "TopologyNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 
 using namespace RevBayesCore;

@@ -1,0 +1,23 @@
+# Largely copied from `Validation_Poisson.Rev`
+n_samples = 15
+
+n <- 7 # Choose an arbitrary number of trials
+p ~ dnUniform(0,1)
+
+mi = 0
+moves[++mi] = mvScale(p)
+
+for ( i in 1:n_samples){
+	x[i] ~ dnBinomial(p, n)
+	x[i].clamp(1)
+}
+
+mymodel = model(p)
+monitors = VectorMonitors()
+mymcmc = mcmc(mymodel, monitors, moves)
+validation = validationAnalysis( mymcmc, 1000 )
+validation.burnin(generations=10000,tuningInterval=100)
+validation.run(generations=30000)
+validation.summarize( coverageProbability=0.9 )
+
+q()

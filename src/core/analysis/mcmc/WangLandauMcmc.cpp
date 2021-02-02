@@ -6,12 +6,20 @@
 //  Copyright (c) 2013 Michael Landis. All rights reserved.
 //
 
+#include <stddef.h>
 #include <cmath>
+#include <vector>
+
 #include "RbConstants.h"
 #include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-
 #include "WangLandauMcmc.h"
+#include "Mcmc.h"
+#include "Model.h"
+#include "Move.h"
+#include "MoveSchedule.h"
+#include "RbVector.h"
+
+namespace RevBayesCore { class Monitor; }
 
 using namespace RevBayesCore;
 

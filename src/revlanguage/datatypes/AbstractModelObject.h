@@ -18,7 +18,12 @@
 #ifndef AbstractModelObject_H
 #define AbstractModelObject_H
 
+#include <iosfwd>
+
 #include "RevObject.h"
+#include "DagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 namespace RevLanguage {
     

@@ -1,28 +1,13 @@
-/**
- * @file DistributionGamma
- * This file contains the functions of the gamma distribution.
- *
- * @brief Implementation of the gamma distribution.
- *
- * (c) Copyright 2009- under GPL version 3
- * @date Last modified: $Date$
- * @author The RevBayes core development team
- * @license GPL version 3
- * @version 1.0
- * @since 2011-03-17, version 1.0
- *
- * $Id$
- */
+
 
 #include <cmath>
 
 #include "DistributionChisq.h"
 #include "DistributionGamma.h"
-#include "DistributionNormal.h"
 #include "RbStatisticsHelper.h"
-#include "RbConstants.h"
 #include "RbMathFunctions.h"
-#include "RbMathLogic.h"
+
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 

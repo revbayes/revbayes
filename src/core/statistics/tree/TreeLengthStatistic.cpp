@@ -1,5 +1,13 @@
 #include "TreeLengthStatistic.h"
 
+#include <vector>
+
+#include "TopologyNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
+
 using namespace RevBayesCore;
 
 TreeLengthStatistic::TreeLengthStatistic(const TypedDagNode<Tree> *t) : TypedFunction<double>( new double(0.0) ), tree( t ) {

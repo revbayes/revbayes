@@ -7,9 +7,13 @@
 //
 
 #include "SiteRateModifierFunction.h"
+
 #include "SiteRateModifier.h"
 #include "TypedDagNode.h"
-#include <cmath>
+#include "Assignable.h"
+#include "RbVector.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

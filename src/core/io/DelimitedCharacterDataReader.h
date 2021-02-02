@@ -1,9 +1,11 @@
 #ifndef DelimitedCharacterDataReader_H
 #define DelimitedCharacterDataReader_H
 
-#include "DelimitedDataReader.h"
-#include <string>
+#include <stddef.h>
 #include <vector>
+#include <iosfwd>
+
+#include "DelimitedDataReader.h"
 
 namespace RevBayesCore {
     

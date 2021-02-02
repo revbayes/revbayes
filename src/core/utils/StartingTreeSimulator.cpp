@@ -1,12 +1,25 @@
 #include "StartingTreeSimulator.h"
 
+#include <stddef.h>
+#include <algorithm>
+#include <iosfwd>
+#include <iterator>
+#include <map>
+#include <string>
+#include <type_traits>
+#include <utility>
+
 #include "DistributionExponential.h"
 #include "RandomNumberGenerator.h"
 #include "RandomNumberFactory.h"
 #include "RbConstants.h"
-
-
 #include "TopologyNode.h"
+#include "Clade.h"
+#include "RbException.h"
+#include "StringUtilities.h"
+#include "Taxon.h"
+#include "TimeInterval.h"
+#include "Tree.h"
 
 using namespace RevBayesCore;
 

@@ -8,16 +8,20 @@
 
 
 
+#include <stddef.h>
 #include <cmath>
+#include <vector>
+
 #include "DistributionMultivariateNormal.h"
 #include "DistributionWishart.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbException.h"
 #include "RbConstants.h"
-#include "RbMathFunctions.h"
-#include "RbStatisticsHelper.h"
 #include "DistributionNormal.h"
+#include "Cloneable.h"
+#include "MatrixReal.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 
 using namespace RevBayesCore;

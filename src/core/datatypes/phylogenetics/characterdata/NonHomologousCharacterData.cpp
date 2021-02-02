@@ -9,6 +9,7 @@
 #include "NonHomologousCharacterData.h"
 
 #include <sstream>
+#include <string>
 
 std::ostream& RevBayesCore::operator<<(std::ostream& o, const NonHomologousCharacterData& x) {
     

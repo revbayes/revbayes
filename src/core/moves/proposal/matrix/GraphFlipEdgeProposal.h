@@ -2,13 +2,17 @@
 #define GraphFlipEdgeProposal_H
 
 #include <set>
-#include <string>
+#include <cstddef>
+#include <iosfwd>
 
 #include "Proposal.h"
-#include "MatrixReal.h"
-#include "StochasticNode.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 namespace RevBayesCore {
+class DagNode;
+class MatrixReal;
+template <class variableType> class StochasticNode;
     
     /**
      * The sliding operator.

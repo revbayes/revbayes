@@ -4,10 +4,7 @@
 using namespace RevBayesCore;
 
 
-CharacterState::CharacterState()
-{
-    
-}
+CharacterState::CharacterState() {}
 
 
 std::ostream& RevBayesCore::operator<<(std::ostream& o, const CharacterState& x)

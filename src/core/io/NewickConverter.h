@@ -20,8 +20,8 @@
 #define NewickConverter_H
 
 
-#include <string>
 #include <vector>
+#include <iosfwd>
 
 namespace RevBayesCore {
 

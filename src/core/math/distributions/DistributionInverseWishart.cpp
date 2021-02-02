@@ -7,14 +7,15 @@
 
 
 #include "DistributionInverseWishart.h"
-#include "DistributionMultivariateNormal.h"
-#include "RbException.h"
-#include "RbConstants.h"
-#include "RbMathFunctions.h"
-#include "RbStatisticsHelper.h"
-#include "DistributionNormal.h"
 
 #include <cmath>
+
+#include "DistributionMultivariateNormal.h"
+#include "RbConstants.h"
+#include "DistributionNormal.h"
+#include "Cloneable.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 using namespace RevBayesCore;
 

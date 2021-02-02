@@ -14,11 +14,17 @@
 
 #include "RlAncestralStateTrace.h"
 
+#include <string>
+
 #include "ArgumentRules.h"
-#include "MemberProcedure.h"
-#include "MethodTable.h"
 #include "Natural.h"
-#include "RlUtils.h"
+#include "ArgumentRule.h"
+#include "RbException.h"
+#include "RevVariable.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
+
+namespace RevLanguage { class Argument; }
 
 using namespace RevLanguage;
 

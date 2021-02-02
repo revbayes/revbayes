@@ -7,16 +7,28 @@
 //
 
 #include "Func_rangeEvolutionRateModifier.h"
+
+#include <stddef.h>
+#include <ostream>
+
 #include "RangeEvolutionRateModifierFunction.h"
 #include "CharacterHistoryRateModifier.h"
 #include "ModelVector.h"
 #include "RbVector.h"
 #include "Real.h"
-#include "RealPos.h"
-#include "RlBoolean.h"
 #include "RlDeterministicNode.h"
-#include "RlRateGeneratorSequence.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "ModelObject.h"
+#include "Natural.h"
+#include "RbException.h"
+#include "RbVectorImpl.h"
+#include "RevObject.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

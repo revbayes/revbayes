@@ -1,13 +1,13 @@
 #ifndef CovarionFunction_H
 #define CovarionFunction_H
 
-#include "RateMatrix_FreeBinary.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
-
-#include <vector>
+#include "RateGenerator.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Hidden state rate matrix function.

@@ -1,5 +1,14 @@
+#include <stddef.h>
+#include <vector>
+
 #include "RbException.h"
 #include "TimeReversibleRateMatrix.h"
+#include "AbstractRateMatrix.h"
+#include "Assignable.h"
+#include "Cloneable.h"
+#include "MatrixReal.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 using namespace RevBayesCore;
 

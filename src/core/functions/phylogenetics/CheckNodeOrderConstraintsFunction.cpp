@@ -1,6 +1,17 @@
 #include "CheckNodeOrderConstraintsFunction.h"
+
+#include <stddef.h>
+#include <iostream>
+#include <vector>
+
 #include "RbException.h"
 #include "TreeUtilities.h"
+#include "Cloneable.h"
+#include "RelativeNodeAgeConstraints.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class Tree; }
 
 using namespace RevBayesCore;
 

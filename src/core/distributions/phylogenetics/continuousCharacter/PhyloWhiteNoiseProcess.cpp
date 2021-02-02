@@ -1,12 +1,17 @@
 #include "PhyloWhiteNoiseProcess.h"
+
+#include <stddef.h>
+#include <cmath>
+
 #include "DistributionGamma.h"
 #include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbConstants.h"
-#include "StochasticNode.h"
+#include "Cloner.h"
+#include "RbVectorImpl.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
 
-#include <cmath>
-#include <iostream>
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 
 

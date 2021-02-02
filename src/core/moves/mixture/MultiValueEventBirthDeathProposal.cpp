@@ -1,15 +1,16 @@
 #include "MultiValueEventBirthDeathProposal.h"
 
-#include "MultiValueEventDistribution.h"
+#include <cmath>
 
+#include "MultiValueEventDistribution.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-#include "RbException.h"
-#include "TreeUtilities.h"
-#include "TypedDagNode.h"
+#include "Cloneable.h"
+#include "MultiValueEvent.h"
+#include "StochasticNode.h"
+#include "TypedDistribution.h"
 
-#include <cmath>
-#include <iostream>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

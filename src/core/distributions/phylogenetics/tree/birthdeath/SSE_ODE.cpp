@@ -1,30 +1,35 @@
+#include <stddef.h>
+#include <map>
+#include <utility>
+#include <vector>
 
-
-#include <cmath>
 #include "SSE_ODE.h"
+#include "RateGenerator.h"
+#include "TimeInterval.h"
 
 using namespace RevBayesCore;
 
 
-SSE_ODE::SSE_ODE( const std::vector<double> &m, const RateGenerator* q, double r, bool backward_time, bool extinction_only ) :
+SSE_ODE::SSE_ODE( const std::vector<double> &m, const RateGenerator* q, double r, bool backward_time, bool extinction_only, bool allow_shifts_extinct ) :
     mu( m ),
     num_states( q->getNumberOfStates() ),
     Q( q ),
     rate( r ),
     extinction_only( extinction_only ),
-    backward_time( backward_time )
+    backward_time( backward_time ),
+    allow_rate_shifts_extinction( allow_shifts_extinct )
 {
     
 }
 
 
-void SSE_ODE::operator()(const state_type &x, state_type &dxdt, const double t)
+void SSE_ODE::operator()(const std::vector< double > &x, std::vector< double > &dxdt, const double t)
 {
     // ClaSSE equations A1 and A2 from Goldberg and Igic, 2012
     
     // catch negative extinction probabilities that can result from
     // rounding errors in the ODE stepper
-    state_type safe_x = x;
+    std::vector< double > safe_x = x;
     for (size_t i = 0; i < num_states * 2; ++i)
     {
         safe_x[i] = ( x[i] < 0.0 ? 0.0 : x[i] );
@@ -67,7 +72,7 @@ void SSE_ODE::operator()(const state_type &x, state_type &dxdt, const double t)
         double no_event_rate = mu[i] + lambda_sum;
         for (size_t j = 0; j < num_states; ++j)
         {
-            if ( i != j )
+            if ( i != j && allow_rate_shifts_extinction == true )
             {
                 no_event_rate += Q->getRate(i, j, age, rate);
             }
@@ -102,7 +107,7 @@ void SSE_ODE::operator()(const state_type &x, state_type &dxdt, const double t)
         // anagenetic state change
         for (size_t j = 0; j < num_states; ++j)
         {
-            if ( i != j )
+            if ( i != j && allow_rate_shifts_extinction == true )
             {
                 dxdt[i] += Q->getRate(i, j, age, rate) * safe_x[j];
             }

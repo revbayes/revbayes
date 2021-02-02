@@ -20,10 +20,9 @@
 #ifndef TreeChangeEventHandler_H
 #define TreeChangeEventHandler_H
 
-#include "TopologyNode.h"
-
 #include <set>
-#include <string>
+
+#include "TopologyNode.h"
 
 namespace RevBayesCore {
     

@@ -1,7 +1,7 @@
 #include "RevAbstractType.h"
-#include "TypeSpec.h"
 
-#include <sstream>
+#include "TypeSpec.h"
+#include "RevObject.h"
 
 using namespace RevLanguage;
 

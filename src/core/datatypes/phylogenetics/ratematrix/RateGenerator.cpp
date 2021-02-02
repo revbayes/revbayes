@@ -1,16 +1,22 @@
+#include <fstream>
+#include <string>
+#include <iomanip>
+#include <cstddef>
+#include <vector>
+
 #include "CharacterEventDiscrete.h"
 #include "RateGenerator.h"
 #include "RateMatrix.h"
 #include "RbException.h"
-#include "RbMathMatrix.h"
 #include "TransitionProbabilityMatrix.h"
 #include "TypedDagNode.h"
+#include "Assignable.h"
+#include "Cloneable.h"
+#include "RbVector.h"
+#include "Simplex.h"
 
-
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <iomanip>
+namespace RevBayesCore { class CharacterEvent; }
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

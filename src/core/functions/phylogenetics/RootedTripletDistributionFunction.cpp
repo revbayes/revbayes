@@ -1,11 +1,13 @@
 #include "RootedTripletDistributionFunction.h"
-#include "RbException.h"
-#include "RootedTripletDistribution.h"
-#include "TopologyNode.h"
-#include "Tree.h"
-#include "TreeUtilities.h"
 
-#include <boost/dynamic_bitset.hpp>
+#include "RootedTripletDistribution.h"
+#include "Cloneable.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class Tree; }
 
 using namespace RevBayesCore;
 

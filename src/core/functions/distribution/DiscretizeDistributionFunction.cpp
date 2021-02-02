@@ -1,7 +1,25 @@
 #include "DiscretizeDistributionFunction.h"
 
+#include <vector>
+
+#include "Cloneable.h"
+#include "ContinuousDistribution.h"
+#include "RbVectorImpl.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
+
 
 using namespace RevBayesCore;
+
+/*
+ * Default Constructor for the DiscretizeDistributionFunction
+ *
+ * @param d a type ContinuousDistribution for the distribution to be discretized
+ * @param nc A type long value for the number of categories
+ *
+ */
+
 
 DiscretizeDistributionFunction::DiscretizeDistributionFunction(ContinuousDistribution *d, const TypedDagNode<long> *nc) : TypedFunction< RbVector<double> >( new RbVector<double>(nc->getValue(), 1.0) ),
     dist( d ),

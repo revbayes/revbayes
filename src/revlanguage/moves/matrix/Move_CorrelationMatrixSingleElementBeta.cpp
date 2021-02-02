@@ -7,21 +7,29 @@
 
 #include "Move_CorrelationMatrixSingleElementBeta.h"
 
+#include <stddef.h>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "RlBoolean.h"
-#include "MatrixReal.h"
 #include "CorrelationMatrixElementBetaProposal.h"
 #include "MetropolisHastingsMove.h"
-#include "Natural.h"
 #include "Probability.h"
-#include "RbException.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlMatrixReal.h"
-#include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "Move.h"
+#include "RbBoolean.h"
+#include "RbHelpReference.h"
+#include "StochasticNode.h"
+#include "StringUtilities.h"
+
+namespace RevBayesCore { class MatrixReal; }
+namespace RevBayesCore { class Proposal; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 
 using namespace RevLanguage;
@@ -78,105 +86,6 @@ const TypeSpec& Move_CorrelationMatrixSingleElementBeta::getClassTypeSpec(void)
     static TypeSpec revClassTypeSpec = TypeSpec( getClassType(), new TypeSpec( Move::getClassTypeSpec() ) );
     
 	return revClassTypeSpec; 
-}
-
-
-/**
- * Get the author(s) of this function so they can receive credit (and blame) for it.
- */
-std::vector<std::string> Move_CorrelationMatrixSingleElementBeta::getHelpAuthor(void) const
-{
-    // create a vector of authors for this function
-    std::vector<std::string> authors;
-    authors.push_back( "Michael R. May" );
-    
-    return authors;
-}
-
-
-/**
- * Get the (brief) description for this function
- */
-std::string Move_CorrelationMatrixSingleElementBeta::getHelpDescription(void) const
-{
-    // create a variable for the description of the function
-    std::string descriptions = "";
-    descriptions += "Beta proposal on a random element of a correlation matrix.";
-    
-    return descriptions;
-}
-
-
-/**
- * Get the more detailed description of the function
- */
-std::string Move_CorrelationMatrixSingleElementBeta::getHelpDetails(void) const
-{
-    // create a variable for the description of the function
-    std::string details = "";
-    details += "This move chooses a single element of the correlation matrix at random, and draws a proposed value from a Beta distribution centered on the current value (and stretched to range from -1 to 1).";
-    
-    return details;
-}
-
-
-/**
- * Get an executable and instructive example.
- * These example should help the users to show how this function works but
- * are also used to test if this function still works.
- */
-std::string Move_CorrelationMatrixSingleElementBeta::getHelpExample(void) const
-{
-    // create an example as a single string variable.
-    std::string example = "\n";
-    
-    example += "# we draw a correlation matrix from an LKJ distribution\n";
-    example += "R ~ dnLKJ(eta=1, dim=5)\n\n";
-    example += "# we specify a beta move on the correlation matrix\n";
-    example += "moves[1] = mvCorrelationMatrixSingleElementBeta(R, alpha=10.0)\n";
-    
-    return example;
-}
-
-
-/**
- * Get some references/citations for this function
- *
- */
-std::vector<RevBayesCore::RbHelpReference> Move_CorrelationMatrixSingleElementBeta::getHelpReferences(void) const
-{
-    // create an entry for each reference
-    std::vector<RevBayesCore::RbHelpReference> references;
-    
-    
-    return references;
-}
-
-
-/**
- * Get the names of similar and suggested other functions
- */
-std::vector<std::string> Move_CorrelationMatrixSingleElementBeta::getHelpSeeAlso(void) const
-{
-    // create an entry for each suggested function
-    std::vector<std::string> see_also;
-    see_also.push_back( "mvCorrelationMatrixSpecificElementBeta" );
-    see_also.push_back( "mvCorrelationMatrixRandomWalk" );
-    
-    
-    return see_also;
-}
-
-
-/**
- * Get the title of this help entry
- */
-std::string Move_CorrelationMatrixSingleElementBeta::getHelpTitle(void) const
-{
-    // create a title variable
-    std::string title = "Correlation Matrix Beta proposal.";
-    
-    return title;
 }
 
 

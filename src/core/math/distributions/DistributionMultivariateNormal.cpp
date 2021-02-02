@@ -8,16 +8,17 @@
 
 
 #include "DistributionMultivariateNormal.h"
+
+#include <stddef.h>
+#include <cmath>
+
 #include "DistributionNormal.h"
-#include "EigenSystem.h"
 #include "CholeskyDecomposition.h"
 #include "RbConstants.h"
-#include "RbException.h"
-#include "RbMathFunctions.h"
 #include "RbMathLogic.h"
-#include "RbStatisticsHelper.h"
-
-#include <cmath>
+#include "Cloneable.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 using namespace RevBayesCore;
 

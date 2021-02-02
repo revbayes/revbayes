@@ -1,5 +1,12 @@
 #include "SimplexFromVectorFunction.h"
+
+#include <stddef.h>
+
 #include "TypedDagNode.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

@@ -18,13 +18,23 @@
 #ifndef Func_treeAssemblyn_H
 #define Func_treeAssemblyn_H
 
+#include <string>
+#include <iosfwd>
+#include <vector>
+
 #include "RlTree.h"
 #include "RlTypedFunction.h"
-
-#include <map>
-#include <string>
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RevPtr.h"
+#include "RlDeterministicNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 namespace RevLanguage {
+class ArgumentRules;
+class TypeSpec;
     
     class Func_treeAssembly :  public TypedFunction<Tree> {
         

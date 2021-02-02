@@ -1,13 +1,22 @@
 #include "UniformTopologyDistribution.h"
+
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <iosfwd>
+#include <map>
+#include <string>
+
 #include "Clade.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbException.h"
 #include "TopologyNode.h"
+#include "RbBitSet.h"
+#include "TimeInterval.h"
 
-#include <algorithm>
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

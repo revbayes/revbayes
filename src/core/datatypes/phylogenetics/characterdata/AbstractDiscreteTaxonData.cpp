@@ -1,5 +1,10 @@
 #include "AbstractDiscreteTaxonData.h"
 
+#include <ostream>
+
+#include "CharacterState.h"
+#include "Cloneable.h"
+
 using namespace RevBayesCore;
 
 

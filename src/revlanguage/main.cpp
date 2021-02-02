@@ -1,39 +1,38 @@
-#include <stdio.h>
+#include <stdlib.h>
+#include <boost/program_options.hpp> // IWYU pragma: keep
 #include <string>
 #include <vector>
+#include <iostream>
 
-#include <boost/program_options.hpp>
 namespace po = boost::program_options;
 using po::variables_map;
 
+#include "MpiUtilities.h"
+#include "Parser.h"
 #include "RbVersion.h"
 #include "RbException.h"
 #include "RbSettings.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
 #include "RevClient.h"
 #include "RevLanguageMain.h"
 #include "RlCommandLineOutputStream.h"
-#include "RlUserInterfaceOutputStream.h"
 #include "RlUserInterface.h"
-#include "Parser.h"
+#include "StringUtilities.h"
 #include "Workspace.h"
 
 #ifdef RB_MPI
 #include <mpi.h>
+#include "RandomNumberFactory.h" // IWYU pragma: keep
+#include "RandomNumberGenerator.h" // IWYU pragma: keep
 #endif
 
-
-using std::string;
-using std::vector;
-
-string usage()
+std::string usage()
 {
     return "Usage: rb [OPTIONS]\n       rb [OPTIONS] <file1> [<file2> ...]";
     // Other usages not mentioned
 }
 
-string short_description()
+
+std::string short_description()
 {
     return "Bayesian phylogenetic inference using probabilistic graphical models and an interpreted language";
 }
@@ -41,6 +40,7 @@ string short_description()
 //
 variables_map parse_cmd_line(int argc, char* argv[])
 {
+    
     using namespace po;
 
     // Put all options in one group for now.
@@ -54,9 +54,13 @@ variables_map parse_cmd_line(int argc, char* argv[])
 //	("verbose,V",value<int>()->implicit_value(1),"Log extra information for debugging.")
 
 	("batch,b","Run in batch mode.")
+        // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
+        ("args",value<std::vector<std::string> >()->multitoken(),"Command line arguments to initialize RevBayes variables.")
+        // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
+        ("cmd",value<std::vector<std::string> >()->multitoken(),"Script and command line arguments to initialize RevBayes variables.")
 	// composing means that --file can occur multiple times
-	("file",value<vector<string> >()->composing(),"File(s) to source.")
-	("setOption",value<vector<string> >()->composing(),"Set an option key=value.")
+        ("file",value<std::vector<std::string> >()->composing(),"File(s) to source.")
+        ("setOption",value<std::vector<std::string> >()->composing(),"Set an option key=value.")
 	;
 
     // Treat all positional options as "file" options.
@@ -66,11 +70,36 @@ variables_map parse_cmd_line(int argc, char* argv[])
     // Parse the command line into variables_map 'args'
     variables_map args;
 
-    store(command_line_parser(argc, argv).options(general).positional(p).run(), args);
+    try {
+        store(command_line_parser(argc, argv).options(general).positional(p).run(), args);
+    }
+    catch(po::error& e)
+    {
+        std::cout << "ERROR: " << e.what() << std::endl;
+        std::cout << std::endl;
+        
+        int rank = 0;
+#ifdef RB_MPI
+        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#endif
+        if (rank == 0)
+        {
+            std::cout << usage() << std::endl;
+            std::cout << short_description() << std::endl;
+            std::cout << std::endl;
+            std::cout << general << std::endl;
+            std::cout << "See http://revbayes.github.io for more information." << std::endl;
+        }
+#ifdef RB_MPI
+        MPI_Finalize();
+#endif
+        std::exit(0);
+        
+    }
     notify(args);
 
     // Print flags and usage info in this function since we know the flags here.
-    if (args.count("help"))
+    if ( args.count("help") > 0 )
     {
 	// Do we want to avoid displaying --file here, since its a positional option also?
 
@@ -80,21 +109,22 @@ variables_map parse_cmd_line(int argc, char* argv[])
 #endif
         if (rank == 0)
         {
-            std::cout<<usage()<<"\n";
-            std::cout<<short_description()<<"\n\n";
-            std::cout<<general<<"\n";
-            std::cout<<"See http://revbayes.github.io for more information\n";
+            std::cout<< usage() << std::endl;
+            std::cout<< short_description() << std::endl;
+            std::cout << std::endl;
+            std::cout<< general << std::endl;
+            std::cout<< "See http://revbayes.github.io for more information." << std::endl;
         }
 #ifdef RB_MPI
         MPI_Finalize();
 #endif
-	std::exit(0);
+        std::exit(0);
     }
 
     return args;
 }
 
-#ifndef MAC_GUI
+#ifndef MAC_GUI // don't include main for the Mac GUI written in Swift
 
 int main(int argc, char* argv[]) {
 
@@ -108,69 +138,86 @@ int main(int argc, char* argv[]) {
         MPI_Comm_rank(MPI_COMM_WORLD, &process_id);
         MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
 
-        unsigned int seed = 0;
-
-        // sync the random number generators
-        if ( process_id == 0 )
-        {
-            seed = RevBayesCore::GLOBAL_RNG->getSeed();
-
-        }
-
-        MPI_Bcast(&seed, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
-        RevBayesCore::GLOBAL_RNG->setSeed( seed );
+        RevBayesCore::MpiUtilities::synchronizeRNG( MPI_COMM_WORLD );
 
     }
     catch (char* str)
     {
         return -1;
     }
+#else
+    RevBayesCore::MpiUtilities::synchronizeRNG(  );
 #endif
 
     /* Parse argv to get the command line arguments */
     variables_map args = parse_cmd_line(argc, argv);
 
-    if (args.count("version"))
+    if ( args.count("version") > 0 )
     {
-        std::cout<<RbVersion().getVersion()<<std::endl;
+        std::cout << RbVersion().getVersion() << std::endl;
         exit(0);
     }
 
-    if (args.count("verbose"))
+    if ( args.count("verbose") > 0 )
     {
         int verbosity = args["verbose"].as<int>();
     }
 
-    if (args.count("setOption"))
+    if ( args.count("setOption") > 0 )
     {
-        vector<string> options = args["setOption"].as<vector<string> >();
+        std::vector<std::string> options = args["setOption"].as<std::vector<std::string> >();
         for(int i=0;i<options.size();i++)
         {
-            vector<string> tokens;
+            std::vector<std::string> tokens;
             StringUtilities::stringSplit(options[i], "=", tokens);
             if (tokens.size() != 2)
-                    throw RbException("Option '"+options[i]+"' must have the form key=value");
+            {
+                throw RbException("Option '"+options[i]+"' must have the form key=value");
+            }
             else
+            {
                 RbSettings::userSettings().setOption( tokens[0], tokens[1], false );
+            }
         }
     }
-
+    
     /*default to interactive mode*/
-    bool batch_mode = args.count("batch");
+    bool batch_mode = (args.count("batch") > 0);
     // FIXME -- the batch_mode variable appears to have no effect if true.
 
     /* seek out files from command line */
-    vector<string> sourceFiles;
-    if (args.count("file"))
-	sourceFiles = args["file"].as<vector<string> >();
+    std::vector<std::string> source_files;
+    if ( args.count("file") > 0 )
+    {
+        source_files = args["file"].as<std::vector<std::string> >();
+    }
+    
+    if ( args.count("args") and args.count("cmd"))
+        throw RbException("command line: received both --args and --cmd");
+
+    std::vector<std::string> rb_args;
+    if ( args.count("args") > 0 )
+    {
+        rb_args = args["args"].as<std::vector<std::string> >();
+    }
+    else if ( args.count("cmd") > 0)
+    {
+        rb_args = args["cmd"].as<std::vector<std::string> >();
+        source_files.push_back(rb_args[0]);
+        rb_args.erase(rb_args.begin());
+
+        // Let's make batch mode default to true for scripts.
+        if (not args.count("batch"))
+            batch_mode = true;
+    }
+
 
     /* initialize environment */
     RevLanguageMain rl = RevLanguageMain(batch_mode);
 
     CommandLineOutputStream *rev_output = new CommandLineOutputStream();
     RevLanguage::UserInterface::userInterface().setOutputStream( rev_output );
-    rl.startRevLanguageEnvironment(sourceFiles);
+    rl.startRevLanguageEnvironment(rb_args, source_files);
 
 #   ifdef RB_XCODE
 
@@ -251,7 +298,4 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-#else
-
-    // do initialization here for Mac GUI
 #endif

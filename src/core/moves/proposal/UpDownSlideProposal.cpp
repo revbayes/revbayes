@@ -1,12 +1,15 @@
 #include "UpDownSlideProposal.h"
+
+#include <stddef.h>
+#include <algorithm>
+
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-#include "RbException.h"
-#include "TreeUtilities.h"
-#include "TypedDagNode.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "StochasticNode.h"
 
-#include <cmath>
-#include <iostream>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
@@ -16,14 +19,13 @@ using namespace RevBayesCore;
  * Here we simply allocate and initialize the Proposal object.
  */
 UpDownSlideProposal::UpDownSlideProposal( double l ) : Proposal(),
-    upScalarVariables(  ),
-    upVectorVariables(  ),
-    downScalarVariables(  ),
-    downVectorVariables(  ),
-    lambda( l ),
-    storedDelta( 0.0 )
+    up_scalar_variables(  ),
+    up_vector_variables(  ),
+    down_scalar_variables(  ),
+    down_vector_variables(  ),
+    lambda( l )
 {
-    
+
 }
 
 
@@ -32,21 +34,21 @@ UpDownSlideProposal::UpDownSlideProposal( double l ) : Proposal(),
  */
 void UpDownSlideProposal::addVariable( StochasticNode<double> *v, bool up)
 {
-    
-    
+
+
     // add it to the nodes vector
     addNode( v );
-    
+
     // add it to my internal vector
     if ( up == true )
     {
-        upScalarVariables.push_back( v );
+        up_scalar_variables.push_back( v );
     }
     else
     {
-        downScalarVariables.push_back( v );
+        down_scalar_variables.push_back( v );
     }
-    
+
 }
 
 
@@ -55,23 +57,22 @@ void UpDownSlideProposal::addVariable( StochasticNode<double> *v, bool up)
  */
 void UpDownSlideProposal::addVariable( StochasticNode<RbVector<double> > *v, bool up)
 {
-    
-    
+
+
     // add it to the nodes vector
     addNode( v );
-    
+
     // add it to my internal vector
     if ( up == true )
     {
-        upVectorVariables.push_back( v );
+        up_vector_variables.push_back( v );
     }
     else
     {
-        downVectorVariables.push_back( v );
+        down_vector_variables.push_back( v );
     }
-    
-}
 
+}
 
 /**
  * The cleanProposal function may be called to clean up memory allocations after AbstractMove
@@ -80,7 +81,7 @@ void UpDownSlideProposal::addVariable( StochasticNode<RbVector<double> > *v, boo
  */
 void UpDownSlideProposal::cleanProposal( void )
 {
-    
+
 }
 
 /**
@@ -91,7 +92,7 @@ void UpDownSlideProposal::cleanProposal( void )
  */
 UpDownSlideProposal* UpDownSlideProposal::clone( void ) const
 {
-    
+
     return new UpDownSlideProposal( *this );
 }
 
@@ -104,7 +105,7 @@ UpDownSlideProposal* UpDownSlideProposal::clone( void ) const
 const std::string& UpDownSlideProposal::getProposalName( void ) const
 {
     static std::string name = "UpDownSlide";
-    
+
     return name;
 }
 
@@ -127,53 +128,61 @@ double UpDownSlideProposal::getProposalTuningParameter( void ) const
  */
 double UpDownSlideProposal::doProposal( void )
 {
-    
+
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
-    
+
     // Generate new value (no reflection, so we simply abort later if we propose value here outside of support)
     double u = rng->uniform01();
-    double delta = lambda * ( u - 0.5 ) ;
-    
-    // copy value
-    storedDelta = delta;
-    
+    double delta = lambda * (u - 0.5) ;
+
+    stored_up_scalar_values = std::vector<double>(up_scalar_variables.size(), 0.0);
     // Slide all the single variable up
-    for (size_t i=0; i<upScalarVariables.size(); ++i)
+    for (size_t i=0; i<up_scalar_variables.size(); ++i)
     {
-        upScalarVariables[i]->getValue() += delta;
+        stored_up_scalar_values[i] = up_scalar_variables[i]->getValue();
+        up_scalar_variables[i]->getValue() += delta;
     }
-    
+
+    stored_up_vector_values = std::vector<std::vector<double> >(up_vector_variables.size(), std::vector<double>());
     // Slide all the vector variables up
-    for (size_t i=0; i<upVectorVariables.size(); ++i)
+    for (size_t i=0; i<up_vector_variables.size(); ++i)
     {
-        RbVector<double> &v = upVectorVariables[i]->getValue();
+        RbVector<double> &v = up_vector_variables[i]->getValue();
+
+        stored_up_vector_values[i] = std::vector<double>(v.size(), 0.0);
         for (size_t j=0; j<v.size(); ++j)
         {
+            stored_up_vector_values[i][j] = v[j];
             v[j] += delta;
         }
     }
-    
+
+    stored_down_scalar_values = std::vector<double>(down_scalar_variables.size(), 0.0);
     // Slide all the single variable down
-    for (size_t i=0; i<downScalarVariables.size(); ++i)
+    for (size_t i=0; i<down_scalar_variables.size(); ++i)
     {
-        downScalarVariables[i]->getValue() -= delta;
+        stored_down_scalar_values[i] = down_scalar_variables[i]->getValue();
+        down_scalar_variables[i]->getValue() -= delta;
     }
-    
+
+    stored_down_vector_values = std::vector<std::vector<double> >(down_vector_variables.size(), std::vector<double>());
     // Slide all the vector variables down
-    for (size_t i=0; i<downVectorVariables.size(); ++i)
+    for (size_t i=0; i<down_vector_variables.size(); ++i)
     {
-        RbVector<double> &v = downVectorVariables[i]->getValue();
+        RbVector<double> &v = down_vector_variables[i]->getValue();
+
+        stored_down_vector_values[i] = std::vector<double>(v.size(), 0.0);
         for (size_t j=0; j<v.size(); ++j)
         {
+            stored_down_vector_values[i][j] = v[j];
             v[j] -= delta;
         }
-
     }
-    
+
     // compute the Hastings ratio (symmetric move)
     double lnHastingsratio = 0.0;
-    
+
     return lnHastingsratio;
 }
 
@@ -184,7 +193,7 @@ double UpDownSlideProposal::doProposal( void )
  */
 void UpDownSlideProposal::prepareProposal( void )
 {
-    
+
 }
 
 
@@ -198,13 +207,13 @@ void UpDownSlideProposal::prepareProposal( void )
  */
 void UpDownSlideProposal::printParameterSummary(std::ostream &o, bool name_only) const
 {
-    
+
     o << "lambda = ";
     if (name_only == false)
     {
         o << lambda;
     }
-    
+
 }
 
 
@@ -213,21 +222,21 @@ void UpDownSlideProposal::printParameterSummary(std::ostream &o, bool name_only)
  */
 void UpDownSlideProposal::removeVariable( StochasticNode<double> *v, bool up)
 {
-    
-    
+
+
     // add it to the nodes vector
     removeNode( v );
-    
+
     // add it to my internal vector
     if ( up == true )
     {
-        upScalarVariables.erase(std::remove(upScalarVariables.begin(), upScalarVariables.end(), v), upScalarVariables.end());
+        up_scalar_variables.erase(std::remove(up_scalar_variables.begin(), up_scalar_variables.end(), v), up_scalar_variables.end());
     }
     else
     {
-        downScalarVariables.erase(std::remove(downScalarVariables.begin(), downScalarVariables.end(), v), downScalarVariables.end());
+        down_scalar_variables.erase(std::remove(down_scalar_variables.begin(), down_scalar_variables.end(), v), down_scalar_variables.end());
     }
-    
+
 }
 
 
@@ -236,23 +245,22 @@ void UpDownSlideProposal::removeVariable( StochasticNode<double> *v, bool up)
  */
 void UpDownSlideProposal::removeVariable( StochasticNode<RbVector<double> > *v, bool up)
 {
-    
-    
+
+
     // add it to the nodes vector
     removeNode( v );
-    
+
     // add it to my internal vector
     if ( up == true )
     {
-        upVectorVariables.erase(std::remove(upVectorVariables.begin(), upVectorVariables.end(), v), upVectorVariables.end());
+        up_vector_variables.erase(std::remove(up_vector_variables.begin(), up_vector_variables.end(), v), up_vector_variables.end());
     }
     else
     {
-        downVectorVariables.erase(std::remove(downVectorVariables.begin(), downVectorVariables.end(), v), downVectorVariables.end());
+        down_vector_variables.erase(std::remove(down_vector_variables.begin(), down_vector_variables.end(), v), down_vector_variables.end());
     }
-    
-}
 
+}
 
 /**
  * Reject the Proposal.
@@ -263,41 +271,39 @@ void UpDownSlideProposal::removeVariable( StochasticNode<RbVector<double> > *v, 
  */
 void UpDownSlideProposal::undoProposal( void )
 {
-    
-    double delta = -storedDelta;
-    
+
     // Slide all the single variable up
-    for (size_t i=0; i<upScalarVariables.size(); ++i)
+    for (size_t i=0; i<up_scalar_variables.size(); ++i)
     {
-        upScalarVariables[i]->getValue() += delta;
+        up_scalar_variables[i]->getValue() = stored_up_scalar_values[i];
     }
-    
+
     // Slide all the vector variables up
-    for (size_t i=0; i<upVectorVariables.size(); ++i)
+    for (size_t i=0; i<up_vector_variables.size(); ++i)
     {
-        RbVector<double> &v = upVectorVariables[i]->getValue();
+        RbVector<double> &v = up_vector_variables[i]->getValue();
         for (size_t j=0; j<v.size(); ++j)
         {
-            v[j] += delta;
+            v[j] = stored_up_vector_values[i][j];
         }
     }
-    
+
     // Slide all the single variable down
-    for (size_t i=0; i<downScalarVariables.size(); ++i)
+    for (size_t i=0; i<down_scalar_variables.size(); ++i)
     {
-        downScalarVariables[i]->getValue() -= delta;
+        down_scalar_variables[i]->getValue() = stored_down_scalar_values[i];
     }
-    
+
     // Slide all the vector variables down
-    for (size_t i=0; i<downVectorVariables.size(); ++i)
+    for (size_t i=0; i<down_vector_variables.size(); ++i)
     {
-        RbVector<double> &v = downVectorVariables[i]->getValue();
+        RbVector<double> &v = down_vector_variables[i]->getValue();
         for (size_t j=0; j<v.size(); ++j)
         {
-            v[j] -= delta;
+            v[j] = stored_down_vector_values[i][j];
         }
     }
-    
+
 }
 
 
@@ -309,39 +315,39 @@ void UpDownSlideProposal::undoProposal( void )
  */
 void UpDownSlideProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
-    
-    for (size_t i = 0; i < upScalarVariables.size(); ++i)
+
+    for (size_t i = 0; i < up_scalar_variables.size(); ++i)
     {
-        if ( upScalarVariables[i] == oldN )
+        if ( up_scalar_variables[i] == oldN )
         {
-            upScalarVariables[i] = static_cast<StochasticNode<double> *>(newN);
+            up_scalar_variables[i] = static_cast<StochasticNode<double> *>(newN);
         }
     }
-    
-    for (size_t i = 0; i < upVectorVariables.size(); ++i)
+
+    for (size_t i = 0; i < up_vector_variables.size(); ++i)
     {
-        if ( upVectorVariables[i] == oldN )
+        if ( up_vector_variables[i] == oldN )
         {
-            upVectorVariables[i] = static_cast<StochasticNode<RbVector<double> > *>(newN);
+            up_vector_variables[i] = static_cast<StochasticNode<RbVector<double> > *>(newN);
         }
     }
-    
-    for (size_t i = 0; i < downScalarVariables.size(); ++i)
+
+    for (size_t i = 0; i < down_scalar_variables.size(); ++i)
     {
-        if ( downScalarVariables[i] == oldN )
+        if ( down_scalar_variables[i] == oldN )
         {
-            downScalarVariables[i] = static_cast<StochasticNode<double> *>(newN);
+            down_scalar_variables[i] = static_cast<StochasticNode<double> *>(newN);
         }
     }
-    
-    for (size_t i = 0; i < downVectorVariables.size(); ++i)
+
+    for (size_t i = 0; i < down_vector_variables.size(); ++i)
     {
-        if ( downVectorVariables[i] == oldN )
+        if ( down_vector_variables[i] == oldN )
         {
-            downVectorVariables[i] = static_cast<StochasticNode<RbVector<double> > *>(newN);
+            down_vector_variables[i] = static_cast<StochasticNode<RbVector<double> > *>(newN);
         }
     }
-    
+
 }
 
 
@@ -360,7 +366,7 @@ void UpDownSlideProposal::setProposalTuningParameter(double tp)
  */
 void UpDownSlideProposal::tune( double rate )
 {
-    
+
     if ( rate > 0.44 )
     {
         lambda *= (1.0 + ((rate-0.44)/0.56) );
@@ -369,6 +375,5 @@ void UpDownSlideProposal::tune( double rate )
     {
         lambda /= (2.0 - rate/0.44 );
     }
-    
-}
 
+}

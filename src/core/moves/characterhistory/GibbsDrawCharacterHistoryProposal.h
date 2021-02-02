@@ -1,14 +1,15 @@
 #ifndef GibbsDrawCharacterHistoryProposal_H
 #define GibbsDrawCharacterHistoryProposal_H
 
-#include <set>
-#include <string>
+#include <iosfwd>
 
-#include "StateDependentSpeciationExtinctionProcess.h"
 #include "Proposal.h"
-#include "StochasticNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+class StateDependentSpeciationExtinctionProcess;
+class Tree;
+template <class variableType> class StochasticNode;
     
     class GibbsDrawCharacterHistoryProposal : public Proposal {
         

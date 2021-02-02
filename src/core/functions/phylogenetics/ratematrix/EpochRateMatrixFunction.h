@@ -10,14 +10,12 @@
 #define __revbayes_proj__EpochRateMatrixFunction__
 
 #include "RateGenerator.h"
-#include "RateMatrix.h"
-#include "RbVector.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <vector>
-
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     class EpochRateMatrixFunction : public TypedFunction<RateGenerator> {
         

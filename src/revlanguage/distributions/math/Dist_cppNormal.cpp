@@ -6,13 +6,24 @@
 //  Copyright (c) 2014 Michael Landis. All rights reserved.
 //
 
+#include <ostream>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Dist_cppNormal.h"
 #include "CompoundPoissonNormalDistribution.h"
-#include "Natural.h"
-#include "Probability.h"
-#include "StochasticNode.h"
+#include "Real.h"
+#include "RealPos.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlContinuousDistribution.h"
+#include "RlTypedDistribution.h"
+#include "TypeSpec.h"
+#include "TypedDistribution.h"
+
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 

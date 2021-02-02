@@ -1,11 +1,10 @@
 #ifndef MatrixReader_H
 #define MatrixReader_H
 
-#include "DelimitedDataReader.h"
+#include <stddef.h>
+#include <iosfwd>
+
 #include "MatrixReal.h"
-#include "Taxon.h"
-#include <string>
-#include <vector>
 
 namespace RevBayesCore {
 	

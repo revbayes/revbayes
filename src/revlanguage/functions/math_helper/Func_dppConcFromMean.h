@@ -18,11 +18,15 @@
 #ifndef RlFunc_dppConcFromMean_H
 #define RlFunc_dppConcFromMean_H
 
-#include "Procedure.h"
+#include <iosfwd>
 
-#include <string>
+#include "Procedure.h"
+#include "RevPtr.h"
 
 namespace RevLanguage {
+class ArgumentRules;
+class RevVariable;
+class TypeSpec;
     
     class Func_dppConcFromMean : public Procedure {
         

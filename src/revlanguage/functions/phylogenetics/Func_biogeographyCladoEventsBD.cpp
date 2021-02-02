@@ -4,13 +4,37 @@
 //  Created by Michael Landis on 12/16/18.
 //
 
+#include <stddef.h>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "BiogeographyCladogeneticBirthDeathFunction.h"
 #include "CladogeneticSpeciationRateMatrix.h"
 #include "Func_biogeographyCladoEventsBD.h"
 #include "ModelVector.h"
-#include "OptionRule.h"
 #include "RealPos.h"
-#include "RlString.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "ModelObject.h"
+#include "Natural.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RevNullObject.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlCladogeneticSpeciationRateMatrix.h"
+#include "RlDeterministicNode.h"
+#include "RlFunction.h"
+#include "RlTypedFunction.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 using namespace RevLanguage;
 

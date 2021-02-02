@@ -1,7 +1,16 @@
 #include "CladeSpecificHierarchicalBranchRateFunction.h"
-#include "RbException.h"
 
-#include <cmath>
+#include <iosfwd>
+#include <string>
+
+#include "RbException.h"
+#include "RbBitSet.h"
+#include "RbVectorImpl.h"
+#include "TopologyNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

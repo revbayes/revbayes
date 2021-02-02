@@ -1,13 +1,26 @@
+#include <stddef.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Natural.h"
 #include "BootstrapAnalysis.h"
-#include "RbException.h"
 #include "RealPos.h"
 #include "RlMaximumLikelihoodAnalysis.h"
 #include "RlBootstrapAnalysis.h"
-#include "RlString.h"
 #include "TypeSpec.h"
+#include "Argument.h"
+#include "MemberProcedure.h"
+#include "MethodTable.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlUtils.h"
+#include "WorkspaceToCoreWrapperObject.h"
+
+namespace RevBayesCore { class MaximumLikelihoodAnalysis; }
 
 
 using namespace RevLanguage;

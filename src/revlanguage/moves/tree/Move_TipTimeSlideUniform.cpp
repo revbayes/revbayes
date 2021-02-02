@@ -1,14 +1,29 @@
+#include <stddef.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_TipTimeSlideUniform.h"
 #include "TipTimeSlideUniformProposal.h"
-#include "RbException.h"
 #include "RealPos.h"
 #include "RevObject.h"
+#include "RlString.h"
 #include "RlTimeTree.h"
+#include "RlTaxon.h"
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "Move.h"
+#include "RevNullObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlMove.h"
+#include "StochasticNode.h"
+#include "Taxon.h"
+#include "TopologyNode.h"
+#include "Tree.h"
 
 
 using namespace RevLanguage;
@@ -49,8 +64,26 @@ void Move_TipTimeSlideUniform::constructInternalObject( void )
         d = static_cast<RevBayesCore::StochasticNode<double> *>( tmp );
     }
 
-    RevBayesCore::Proposal *p = new RevBayesCore::TipTimeSlideUniformProposal( t, d );
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,false);
+    RevBayesCore::TipTimeSlideUniformProposal *p = new RevBayesCore::TipTimeSlideUniformProposal( t, d);
+
+    if ( tip != NULL && tip->getRevObject() != RevNullObject::getInstance() )
+    {
+        std::string tip_name = "";
+        if ( tip->getRevObject().getType() == RlString::getClassType() )
+        {
+            tip_name = static_cast<const RlString&>( tip->getRevObject() ).getValue();
+        }
+        else if ( tip->getRevObject().getType() == Taxon::getClassType() )
+        {
+            tip_name = static_cast<const Taxon&>( tip->getRevObject() ).getValue().getSpeciesName();
+        }
+
+        long index = tmp->getValue().getTipNodeWithName( tip_name ).getIndex();
+
+        p->useIndex(index);
+    }
+
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, false);
 }
 
 
@@ -108,6 +141,10 @@ const MemberRules& Move_TipTimeSlideUniform::getParameterRules(void) const
         
         memberRules.push_back( new ArgumentRule( "tree", TimeTree::getClassTypeSpec(), "The tree on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
         memberRules.push_back( new ArgumentRule( "origin", RealPos::getClassTypeSpec() , "The variable for the origin of the process giving a maximum age.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL) );
+        std::vector<TypeSpec> tip_index_arg_types;
+        tip_index_arg_types.push_back( RlString::getClassTypeSpec() );
+        tip_index_arg_types.push_back( Taxon::getClassTypeSpec() );
+        memberRules.push_back( new ArgumentRule( "tip", tip_index_arg_types, "The name of a specific tip/taxon.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         /* Inherit weight from Move, put it after variable */
         const MemberRules& inheritedRules = Move::getParameterRules();
@@ -158,6 +195,10 @@ void Move_TipTimeSlideUniform::setConstParameter(const std::string& name, const 
     else if (name == "origin")
     {
         origin = var;
+    }
+    else if (name == "tip")
+    {
+        tip = var;
     }
     else
     {

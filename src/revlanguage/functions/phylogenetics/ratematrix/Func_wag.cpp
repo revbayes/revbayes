@@ -1,14 +1,31 @@
+#include <stddef.h>
+#include <iostream>
+#include <string>
+#include <vector>
+
 #include "WagRateMatrixFunction.h"
 #include "Func_wag.h"
-#include "Real.h"
-#include "RealPos.h"
 #include "RlDeterministicNode.h"
 #include "RlRateMatrix.h"
 #include "RlSimplex.h"
 #include "Simplex.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RateGenerator.h"
+#include "RbException.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "RlTypedFunction.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
+#include "TypedFunction.h"
 
-#include <iostream>
+namespace RevLanguage { class RevObject; }
 
 using namespace RevLanguage;
 

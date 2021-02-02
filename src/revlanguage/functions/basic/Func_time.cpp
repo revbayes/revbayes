@@ -1,23 +1,21 @@
 #include "Func_time.h"
-#include "ArgumentRule.h"
-#include "DeterministicNode.h"
-#include "Ellipsis.h"
+
+#include <string>
+
 #include "Natural.h"
 #include "OptionRule.h"
-#include "RandomNumberGenerator.h"
-#include "RandomNumberFactory.h"
-#include "RbUtil.h"
 #include "RevNullObject.h"
-#include "RealPos.h"
-#include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "RbHelpReference.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "RlString.h"
 
-#include "boost/date_time/posix_time/posix_time.hpp"
-#include "boost/date_time/gregorian/gregorian.hpp"
-#include "boost/date_time/gregorian/greg_month.hpp"
-
-#include <ctime>
-#include <ostream>
+#include "boost/date_time/posix_time/posix_time.hpp" // IWYU pragma: keep
+#include "boost/date_time/gregorian/gregorian.hpp" // IWYU pragma: keep
+#include "boost/date_time/gregorian/greg_month.hpp" // IWYU pragma: keep
 
 using namespace RevLanguage;
 
@@ -125,103 +123,6 @@ std::string Func_time::getFunctionName( void ) const
     std::string f_name = "time";
     
     return f_name;
-}
-
-
-/**
- * Get the author(s) of this function so they can receive credit (and blame) for it.
- */
-std::vector<std::string> Func_time::getHelpAuthor(void) const
-{
-    // create a vector of authors for this function
-    std::vector<std::string> authors;
-    authors.push_back( "Sebastian Hoehna" );
-    
-    return authors;
-}
-
-
-/**
- * Get the (brief) description for this function
- */
-std::string Func_time::getHelpDescription(void) const
-{
-    // create a variable for the description of the function
-    std::string description = "Get the current system time in milliseconds.";
-    
-    return description;
-}
-
-
-/**
- * Get the more detailed description of the function
- */
-std::string Func_time::getHelpDetails(void) const
-{
-    // create a variable for the description of the function
-    std::string details;
-    return details;
-}
-
-
-/**
- * Get an executable and instructive example.
- * These example should help the users to show how this function works but
- * are also used to test if this function still works.
- */
-std::string Func_time::getHelpExample(void) const
-{
-    // create an example as a single string variable.
-    std::string example = "";
-    
-    example += "time()\n";
-    example += "\n";
-    example += "# Wait a little bit\n";
-    example += "sum = 0\n";
-    example += "for (i in 1:10000) sum += i\n";
-    example += "# Now print the time again\n";
-    example += "time()\n";
-    
-    return example;
-}
-
-
-/**
- * Get some references/citations for this function
- *
- */
-std::vector<RevBayesCore::RbHelpReference> Func_time::getHelpReferences(void) const
-{
-    // create an entry for each reference
-    std::vector<RevBayesCore::RbHelpReference> references;
-    
-    
-    return references;
-}
-
-
-/**
- * Get the names of similar and suggested other functions
- */
-std::vector<std::string> Func_time::getHelpSeeAlso(void) const
-{
-    // create an entry for each suggested function
-    std::vector<std::string> see_also;
-    
-    
-    return see_also;
-}
-
-
-/**
- * Get the title of this help entry
- */
-std::string Func_time::getHelpTitle(void) const
-{
-    // create a title variable
-    std::string title = "Get the time information";
-    
-    return title;
 }
 
 

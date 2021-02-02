@@ -1,3 +1,8 @@
+#include <stddef.h>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "DagNode.h"
 #include "Move.h"
 #include "Proposal.h"

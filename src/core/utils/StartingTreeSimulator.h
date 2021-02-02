@@ -1,12 +1,14 @@
 #ifndef StartingTreeSimulator_H
 #define StartingTreeSimulator_H
 
-#include "Tree.h"
-
-#include <string>
 #include <vector>
+#include <set>
 
 namespace RevBayesCore {
+class Clade;
+class Taxon;
+class TopologyNode;
+class Tree;
     
     /**
      * This class represents the writer object of character data objects into files in Fasta format.
@@ -22,7 +24,7 @@ namespace RevBayesCore {
         
     public:
         
-        enum SIM_CONDITION { TIME, SURVIVAL, ROOT };
+//        enum SIM_CONDITION { TIME, SURVIVAL, ROOT };
         
         StartingTreeSimulator();
         

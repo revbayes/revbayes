@@ -25,7 +25,7 @@ namespace RevBayesCore {
         
     public:
         
-        EpochCladogeneticStateFunction( const TypedDagNode< RbVector< double > >* et, const TypedDagNode< RbVector< CladogeneticProbabilityMatrix > >* cp, unsigned nc, unsigned ns);
+        EpochCladogeneticStateFunction( const TypedDagNode< RbVector< double > >* et, const TypedDagNode< RbVector< CladogeneticProbabilityMatrix > >* cp, unsigned ns);
         virtual                                                 ~EpochCladogeneticStateFunction(void);                                              //!< Virtual destructor
         
         // public member functions
@@ -40,14 +40,10 @@ namespace RevBayesCore {
         void                                                    swapParameterInternal(const DagNode *oldP, const DagNode *newP);                        //!< Implementation of swaping parameters
         
     private:
-//        size_t                                                  findEpochIndex( double t ) const;
-//        void                                                    buildEventMap(void);
-        
+
         // members
         const TypedDagNode< RbVector<double> >*                 epochTimes;
         const TypedDagNode< RbVector<CladogeneticProbabilityMatrix> >*             cladoProbs;
-        unsigned                                                numCharacters;
-        unsigned                                                numStates;
         unsigned                                                numEpochs;
 
     };

@@ -1,14 +1,17 @@
 #ifndef Mntr_StochasticBranchRate_H
 #define Mntr_StochasticBranchRate_H
 
-#include "StochasticBranchRateMonitor.h"
-#include "RlMonitor.h"
-
 #include <ostream>
-#include <string>
+#include <vector>
+
+#include "RlMonitor.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
 
 
 namespace RevLanguage {
+class TypeSpec;
     
     class Mntr_StochasticBranchRate : public Monitor {
         

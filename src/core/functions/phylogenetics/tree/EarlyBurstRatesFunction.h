@@ -2,13 +2,12 @@
 #define EarlyBurstRatesFunction_H
 
 #include "RbVector.h"
-#include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <vector>
-
 namespace RevBayesCore {
+class DagNode;
+class Tree;
+template <class valueType> class TypedDagNode;
     
     class EarlyBurstRatesFunction : public TypedFunction< RbVector<double> > {
         

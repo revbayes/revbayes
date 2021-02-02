@@ -2,6 +2,7 @@
 #define DynamicNode_H
 
 #include "TypedDagNode.h"
+#include "DagNodeMap.h"
 #include <set>
 
 namespace RevBayesCore {
@@ -65,13 +66,13 @@ RevBayesCore::DynamicNode<valueType>::~DynamicNode( void )
 
 /** Clone the entire graph: clone children, swap parents */
 template<class valueType>
-RevBayesCore::DagNode* RevBayesCore::DynamicNode<valueType>::cloneDAG( DagNodeMap& newNodes, std::map<std::string, const DagNode* > &names ) const
+RevBayesCore::DagNode* RevBayesCore::DynamicNode<valueType>::cloneDAG( DagNodeMap& new_nodes, std::map<std::string, const DagNode* > &names ) const
 {
     
     // Return our clone if we have already been cloned
-    if ( newNodes.find( this ) != newNodes.end() )
+    if ( new_nodes.find( this ) != new_nodes.end() )
     {
-        return ( newNodes[ this ] );
+        return ( new_nodes[ this ] );
     }
     
     // just for self checking purposes we keep track of the names for the variables we already cloned
@@ -98,7 +99,7 @@ RevBayesCore::DagNode* RevBayesCore::DynamicNode<valueType>::cloneDAG( DagNodeMa
     DynamicNode* copy = clone();
     
     // Add this node and its copy to the map
-    newNodes[ this ] = copy;
+    new_nodes[ this ] = copy;
     
     // Parent management is delegated to derived classes, so get the parents through their getParents function
     std::vector<const DagNode*> my_parents = this->getParents();
@@ -107,28 +108,28 @@ RevBayesCore::DagNode* RevBayesCore::DynamicNode<valueType>::cloneDAG( DagNodeMa
     // cloneDAG on our copy, its copy, etc, when we call cloneDAG on our parents
     for ( std::vector<const DagNode*>::const_iterator i = my_parents.begin(); i != my_parents.end(); ++i )
     {
-        const DagNode *theParam = (*i);
+        const DagNode *the_param = (*i);
         
-        theParam->removeChild( copy );
+        the_param->removeChild( copy );
         
-        theParam->decrementReferenceCount();
+        the_param->decrementReferenceCount();
     }
     
     // Now replace the parents of the copy (which are now the same as our parents) with the parent clones
     for ( std::vector<const DagNode*>::const_iterator i = my_parents.begin(); i != my_parents.end(); ++i )
     {
         // Get the i-th parent
-        const DagNode *theParam = (*i);
+        const DagNode *the_param = (*i);
         
         // Get its clone. If we already have cloned this parent (parameter), then we will get the previously created clone
-        DagNode* theParamClone = theParam->cloneDAG( newNodes, names );
+        DagNode* the_param_clone = the_param->cloneDAG( new_nodes, names );
         
         // Add the copy back as a child of this parent so that the swapping works
-        theParam->addChild( copy );
-        theParam->incrementReferenceCount();
+        the_param->addChild( copy );
+        the_param->incrementReferenceCount();
         
         // Swap the parent of the copy with its clone. This will remove the copy again as the child of our parent.
-        copy->swapParent( theParam, theParamClone);
+        copy->swapParent( the_param, the_param_clone);
     }
     
     // Make sure the children clone themselves
@@ -136,8 +137,7 @@ RevBayesCore::DagNode* RevBayesCore::DynamicNode<valueType>::cloneDAG( DagNodeMa
     for ( std::vector<DagNode* >::const_iterator i = children_to_clone.begin(); i != children_to_clone.end(); i++ )
     {
         DagNode *the_node = *i;
-        std::string n = the_node->getName();
-        the_node->cloneDAG( newNodes, names );
+        the_node->cloneDAG( new_nodes, names );
     }
     
     return copy;

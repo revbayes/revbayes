@@ -1,3 +1,10 @@
+#include <stddef.h>
+#include <cmath>
+#include <cassert>
+#include <iomanip>
+#include <iostream>
+#include <vector>
+
 #include "DagNode.h"
 #include "DistributionNormal.h"
 #include "NormalDistribution.h"
@@ -5,15 +12,12 @@
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
-#include "RbMathLogic.h"
 #include "TypedDagNode.h"
-
-#include <cmath>
-#include <cassert>
-#include <iomanip>
-#include <sstream>
-#include <iostream>
-#include <utility>
+#include "AbstractMove.h"
+#include "RbException.h"
+#include "RbOrderedSet.h"
+#include "StochasticNode.h"
+#include "TypedDistribution.h"
 
 using namespace RevBayesCore;
 
@@ -26,10 +30,11 @@ using namespace RevBayesCore;
  * \param[in]    w   The weight how often the proposal will be used (per iteration).
  * \param[in]    t   If auto tuning should be used.
  */
-EllipticalSliceSamplingSimpleMove::EllipticalSliceSamplingSimpleMove( std::vector< StochasticNode<double> *> n, double window_, double weight_, bool t ) : AbstractMove( std::vector<DagNode*>(), weight_ ,t),
+EllipticalSliceSamplingSimpleMove::EllipticalSliceSamplingSimpleMove( std::vector< StochasticNode<double> *> n, double window_, double weight_, bool t , bool fa) : AbstractMove( std::vector<DagNode*>(), weight_ ,t),
     variables( n ),
     window( window_ ),
-    total_movement( 0.0 )
+    total_movement( 0.0 ),
+    force_accept( fa )
 {
     // Check window is valid (in [0,2*pi])
     if (window > RbConstants::TwoPI)
@@ -235,6 +240,8 @@ void EllipticalSliceSamplingSimpleMove::performMcmcMove( double prHeat, double l
     // Log-likelihood threshold (Murray step 2)
     double L_f = lnL();
 
+    assert(L_f == lnL(f));
+
     double logy = L_f + log(unif());
 
     // Find initial boundaries and draw first value (Murray step 3)
@@ -279,7 +286,24 @@ void EllipticalSliceSamplingSimpleMove::performMcmcMove( double prHeat, double l
     }
 
     if ( loop_iterations == 1000 ) {
+      if ( force_accept )
+      {
+        // After 1000 steps we should have hit theta = 0, so it should be possible to set f_prime = f and accept
+        cos_theta = 1.0;
+
+        for (size_t j = 0; j < f.size(); ++j)
+        {
+            f_prime[j] = f[j];
+        }
+
+        // step 5 (step 6 is return value)
+        double L_f_prime = lnL(f_prime);
+
+      }
+      else
+      {
         throw(RbException("mvEllipticalSliceSamplingSimple has iterated 1000 times without success. This should not be possible, something may be wrong."));
+      }
     }
 
     total_movement += cos_theta;

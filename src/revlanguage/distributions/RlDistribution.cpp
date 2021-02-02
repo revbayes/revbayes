@@ -1,12 +1,23 @@
-#include "Argument.h"
+#include <stddef.h>
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "OptionRule.h"
 #include "RlDistribution.h"
 #include "StringUtilities.h"
 #include "TypeSpec.h"
+#include "MethodTable.h"
+#include "RbHelpArgument.h"
+#include "RbHelpDistribution.h"
+#include "RbHelpFunction.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
 
-#include <sstream>
+namespace RevBayesCore { class RbHelpEntry; }
 
 using namespace RevLanguage;
 
@@ -228,12 +239,6 @@ void Distribution::addSpecificHelpFields(RevBayesCore::RbHelpEntry *e) const
     
     // return value
     help_constructor.setReturnType( getVariableTypeSpec().getType() );
-    
-    // details
-    help_constructor.setDetails( getConstructorDetails() );
-    
-    // example
-    help_constructor.setExample( getConstructorExample() );
     
     //
     std::vector<RevBayesCore::RbHelpFunction> constructors;

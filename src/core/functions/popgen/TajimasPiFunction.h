@@ -1,13 +1,12 @@
 #ifndef TajimasPiFunction_H
 #define TajimasPiFunction_H
 
-#include "AbstractHomologousDiscreteCharacterData.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <vector>
-
 namespace RevBayesCore {
+class AbstractHomologousDiscreteCharacterData;
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Computing Tajima's pi function.
@@ -15,10 +14,6 @@ namespace RevBayesCore {
      * This function computes Tajima's pi, which is an estimator of theta = 4*N*mu.
      * This function can be used to compute the per site or per locus estimator.
      *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since Version 1.0, 2015-04-30
      *
      */
     class TajimasPiFunction : public TypedFunction<double> {

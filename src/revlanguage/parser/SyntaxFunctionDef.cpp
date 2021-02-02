@@ -1,14 +1,29 @@
+#include <stddef.h>
+#include <sstream>
+#include <list>
+#include <set>
+#include <string>
+
 #include "Environment.h"
 #include "RbException.h"
-#include "RbUtil.h"
 #include "SyntaxFunctionDef.h"
 #include "UserFunction.h"
 #include "UserFunctionDef.h"
 #include "RlUserInterface.h"
 #include "UserProcedure.h"
 #include "Workspace.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "FunctionTable.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlUtils.h"
+#include "SyntaxElement.h"
+#include "SyntaxFormal.h"
+#include "TypeSpec.h"
 
-#include <sstream>
+namespace RevLanguage { class Function; }
 
 using namespace RevLanguage;
 

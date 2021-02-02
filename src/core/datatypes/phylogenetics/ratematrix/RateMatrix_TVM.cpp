@@ -1,19 +1,23 @@
+#include <stddef.h>
+#include <cmath>
+#include <complex>
+#include <vector>
+
 #include "EigenSystem.h"
 #include "MatrixComplex.h"
 #include "MatrixReal.h"
 #include "RateMatrix_TVM.h"
 #include "RbException.h"
-#include "RbMathMatrix.h"
 #include "TransitionProbabilityMatrix.h"
-
-#include <cmath>
-#include <string>
-#include <iomanip>
+#include "Assignable.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "TimeReversibleRateMatrix.h"
 
 using namespace RevBayesCore;
 
-/** Construct rate matrix with n states */
-RateMatrix_TVM::RateMatrix_TVM(size_t n) : TimeReversibleRateMatrix( n ), rates(5,1)
+/** Construct rate matrix with 4 states and all five exchangeabilities set to 1 */
+RateMatrix_TVM::RateMatrix_TVM(void) : TimeReversibleRateMatrix( 4 ), rates(5,1)
 {
     
     theEigenSystem       = new EigenSystem(the_rate_matrix);

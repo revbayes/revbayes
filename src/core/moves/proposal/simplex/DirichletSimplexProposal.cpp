@@ -1,13 +1,24 @@
 #include "DirichletSimplexProposal.h"
-#include "DistributionDirichlet.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbException.h"
-#include "RbStatisticsHelper.h"
-#include "TypedDagNode.h"
 
 #include <cmath>
 #include <iostream>
+#include <cstddef>
+#include <map>
+#include <utility>
+#include <vector>
+
+#include "DistributionDirichlet.h"
+#include "RandomNumberFactory.h"
+#include "RbException.h"
+#include "RbStatisticsHelper.h"
+#include "Cloneable.h"
+#include "RbConstants.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "StochasticNode.h"
+
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 

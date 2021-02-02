@@ -1,9 +1,25 @@
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "LogisticFunction.h"
 #include "Func_logistic.h"
 #include "Probability.h"
 #include "Real.h"
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "RlTypedFunction.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
+#include "TypedFunction.h"
 
 using namespace RevLanguage;
 

@@ -1,9 +1,14 @@
 #include "RandomMoveSchedule.h"
+
+#include <stddef.h>
+
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbIterator.h"
-
-#include <iostream>
+#include "Move.h"
+#include "RbIteratorImpl.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 using namespace RevBayesCore;
 

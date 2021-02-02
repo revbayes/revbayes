@@ -1,12 +1,20 @@
 #ifndef BirthDeathBurstProcess_H
 #define BirthDeathBurstProcess_H
 
+#include <stddef.h>
+#include <iosfwd>
+#include <vector>
+
 #include "AbstractBirthDeathProcess.h"
+#include "MemberObject.h"
+#include "RbException.h"
 
 namespace RevBayesCore {
     
-    class Clade;
     class Taxon;
+class DagNode;
+template <class valueType> class RbOrderedSet;
+template <class valueType> class TypedDagNode;
     
     class BirthDeathBurstProcess : public AbstractBirthDeathProcess, public MemberObject< long > {
         
@@ -23,7 +31,7 @@ namespace RevBayesCore {
         void                                                setBurstSpeciation(size_t i, bool tf);
         
     protected:
-        double                                              computeLnProbabilityDivergenceTimes(void) const;                                //!< Compute the log-transformed probability of the current value.
+        double                                              computeLnProbabilityDivergenceTimes(void);                                      //!< Compute the log-transformed probability of the current value.
         // Parameter management functions
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
         
@@ -36,7 +44,7 @@ namespace RevBayesCore {
         virtual void                                        touchSpecialization(DagNode *toucher, bool touchAll);
         
         // helper functions
-        double                                              computeLnProbabilityTimes(void) const;                                          //!< Compute the log-transformed probability of the current value.
+        double                                              computeLnProbabilityTimes(void);                                                //!< Compute the log-transformed probability of the current value.
         double                                              lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const { throw RbException("Cannot compute P(nTaxa)."); }
         double                                              lnProbTreeShape(void) const;
         double                                              simulateDivergenceTime(double origin, double present) const;                    //!< Simulate a speciation event.

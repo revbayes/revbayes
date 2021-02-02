@@ -1,9 +1,14 @@
-#include "RbException.h"
-#include "RbUtil.h"
-#include "SyntaxClassDef.h"
-#include "Workspace.h"
-
+#include <stddef.h>
 #include <sstream>
+#include <list>
+
+#include "RbException.h"
+#include "SyntaxClassDef.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "SyntaxElement.h"
+
+namespace RevLanguage { class Environment; }
 
 using namespace RevLanguage;
 

@@ -1,5 +1,7 @@
 #include "RbHelpType.h"
 
+#include "RbHelpReference.h"
+
 using namespace RevBayesCore;
 
 

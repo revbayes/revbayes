@@ -9,9 +9,12 @@
 #ifndef __rb_mlandis__GeographicArea__
 #define __rb_mlandis__GeographicArea__
 
-#include "Cloneable.h"
+#include <stddef.h>
 #include <set>
 #include <vector>
+#include <iosfwd>
+
+#include "Cloneable.h"
 
 namespace RevBayesCore {
 

@@ -9,15 +9,23 @@
 #ifndef Func_covarion_h
 #define Func_covarion_h
 
+#include <string>
+#include <iosfwd>
+#include <vector>
+
 #include "RateGenerator.h"
-#include "ModelVector.h"
 #include "RlRateMatrix.h"
 #include "RlTypedFunction.h"
-
-#include <map>
-#include <string>
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RevPtr.h"
+#include "RlDeterministicNode.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 namespace RevLanguage {
+class ArgumentRules;
+class TypeSpec;
     
     class Func_covarion : public TypedFunction<RateMatrix> {
         

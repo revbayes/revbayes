@@ -1,8 +1,18 @@
 #include "RoundFunction.h"
+
 #include <cmath>
 
-using namespace RevBayesCore;
+#include "Cloneable.h"
+#include "TypedDagNode.h"
 
+namespace RevBayesCore { class DagNode; }
+
+using namespace RevBayesCore;
+/**
+ * Constructor RoundFunction of a TypedDagNode
+ *
+ * @param x a double of the value to be rounded
+ */
 RoundFunction::RoundFunction(const TypedDagNode<double> *x) : TypedFunction<long>( new long(0) ),
     a( x )
 {

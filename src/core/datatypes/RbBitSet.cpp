@@ -1,4 +1,8 @@
 #include "RbBitSet.h"
+
+#include <string>
+#include <sstream> // IWYU pragma: keep
+
 #include "RbException.h"
 
 using namespace RevBayesCore;
@@ -235,6 +239,18 @@ void RbBitSet::unset(size_t i)
 
     // set the internal value
     value[i] = false;
+}
+
+std::string RbBitSet::print()
+{
+    std::stringstream o;
+    o << "[";
+    for (size_t i=0; i<size(); ++i)
+    {
+        o << ( isSet(i) ? "1" : "0");
+    }
+    o << "]";
+    return o.str();
 }
 
 

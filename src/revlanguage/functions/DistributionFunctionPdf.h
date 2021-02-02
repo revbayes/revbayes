@@ -60,7 +60,6 @@ namespace RevLanguage {
 
 #include "ArgumentRule.h"
 #include "DeterministicNode.h"
-#include "DistributionFunctionPdf.h"
 #include "Probability.h"
 #include "ProbabilityDensityFunction.h"
 #include "RevObject.h"

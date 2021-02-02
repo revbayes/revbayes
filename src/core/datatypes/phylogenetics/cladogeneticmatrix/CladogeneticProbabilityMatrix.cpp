@@ -7,13 +7,12 @@
 //
 
 #include "CladogeneticProbabilityMatrix.h"
-#include "RbException.h"
-#include "RbMathMatrix.h"
 
 #include <fstream>
-#include <sstream>
-#include <string>
 #include <iomanip>
+#include <utility>
+
+#include "RbException.h"
 
 using namespace RevBayesCore;
 

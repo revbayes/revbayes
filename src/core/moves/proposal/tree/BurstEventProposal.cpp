@@ -1,14 +1,19 @@
-#include "BirthDeathBurstProcess.h"
-#include "BurstEventProposal.h"
-#include "DistributionUniform.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbException.h"
-#include "TreeUtilities.h"
-#include "TypedDagNode.h"
-
+#include <stddef.h>
 #include <cmath>
 #include <iostream>
+
+#include "BirthDeathBurstProcess.h"
+#include "BurstEventProposal.h"
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
+#include "Proposal.h"
+#include "StochasticNode.h"
+#include "TimeInterval.h"
+#include "TopologyNode.h"
+#include "Tree.h"
+#include "TypedDistribution.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

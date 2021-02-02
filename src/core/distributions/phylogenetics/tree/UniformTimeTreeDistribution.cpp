@@ -1,4 +1,8 @@
-#include "Clade.h"
+#include <stddef.h>
+#include <algorithm>
+#include <cmath>
+#include <vector>
+
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
@@ -6,9 +10,13 @@
 #include "StochasticNode.h"
 #include "TopologyNode.h"
 #include "UniformTimeTreeDistribution.h"
+#include "Taxon.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
 
-#include <algorithm>
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
 
 using namespace RevBayesCore;
 
@@ -130,7 +138,7 @@ double UniformTimeTreeDistribution::computeLnProbability( void )
     double age = root_age->getValue();
     
     // we need to check that the root age matches
-    if ( age != value->getRoot().getAge() )
+    if ( fabs(age - value->getRoot().getAge() ) > 1E-7 )
     {
         return RbConstants::Double::neginf;
     }

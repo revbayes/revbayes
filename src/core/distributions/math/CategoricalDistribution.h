@@ -1,17 +1,19 @@
 #ifndef CategoricalDistribution_H
 #define CategoricalDistribution_H
 
-#include "Simplex.h"
-#include "TypedDagNode.h"
 #include "TypedDistribution.h"
 
 namespace RevBayesCore {
+class DagNode;
+class Simplex;
+template <class valueType> class TypedDagNode;
     
     /**
      * \brief Categorical distribution
      *
-     * This class implements the categorical distribution. The number
-     * of categories in the distribution is determined by the length,
+     * This class implements the categorical distribution. The distribution has one parameter:
+     * @param p a simplex of probabilities for each category
+     * The number of categories in the distribution is determined by the length,
      * k, of the simplex parameter probs.
      *
      * The sample space is considered to be { 1, 2, 3, ..., k }.
@@ -22,7 +24,6 @@ namespace RevBayesCore {
      * when using it as an index, which should be a common
      * scenario.
      *
-     * \author Fredrik Ronquist
      */
 
     class CategoricalDistribution : public TypedDistribution<long> {

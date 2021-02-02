@@ -1,20 +1,32 @@
 
+#include <stddef.h>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <set>
+#include <sstream>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "ConstantNode.h"
 #include "Ellipsis.h"
 #include "Model.h"
-#include "ModelVector.h"
 #include "RevObject.h"
-#include "RbException.h"
 #include "RlModel.h"
 #include "RlString.h"
 #include "TypeSpec.h"
-
-#include <vector>
-#include <fstream>
-#include <algorithm>
-#include <string>
+#include "Argument.h"
+#include "DagNode.h"
+#include "MemberProcedure.h"
+#include "MethodTable.h"
+#include "RbBoolean.h"
+#include "RbFileManager.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlUtils.h"
+#include "StringUtilities.h"
+#include "Workspace.h"
+#include "WorkspaceToCoreWrapperObject.h"
 
 using namespace RevLanguage;
 

@@ -1,14 +1,25 @@
 #include "Move_EmpiricalTree.h"
+
+#include <stddef.h>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "IndependentPriorProposal.h"
-#include "ModelVector.h"
 #include "MetropolisHastingsMove.h"
-#include "RbException.h"
 #include "RealPos.h"
 #include "RlTree.h"
-#include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "Move.h"
+#include "RbBoolean.h"
+#include "RlBoolean.h"
+#include "StochasticNode.h"
+#include "StringUtilities.h"
+#include "Tree.h"
+#include "TypedDistribution.h"
+
+namespace RevBayesCore { class Proposal; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 
 using namespace RevLanguage;
@@ -67,73 +78,6 @@ const TypeSpec& Move_EmpiricalTree::getClassTypeSpec(void)
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Move::getClassTypeSpec() ) );
     
     return rev_type_spec;
-}
-
-
-/**
- * Get the author(s) of this function so they can receive credit (and blame) for it.
- */
-std::vector<std::string> Move_EmpiricalTree::getHelpAuthor(void) const
-{
-    // create a vector of authors for this function
-    std::vector<std::string> authors;
-    authors.push_back( "Will Freyman" );
-    authors.push_back( "Sebastian Hoehna" );
-    authors.push_back( "Will Pett" );
-    authors.push_back( "Jiansi Gao" );
-    
-    return authors;
-}
-
-
-/**
- * Get the (brief) description for this function
- */
-std::string Move_EmpiricalTree::getHelpDescription(void) const
-{
-    std::string description = "";
-    description += "An MCMC move that operates on empirical tree distributions.";
-    
-    return description;
-}
-
-
-/**
- * Get an executable and instructive example.
- * These example should help the users to show how this function works but
- * are also used to test if this function still works.
- */
-std::string Move_EmpiricalTree::getHelpExample(void) const
-{
-    // create an example as a single string variable.
-    std::string example = "";
-    
-    example += "# Read in tree trace\n";
-    example += "tree_trace = readTreeTrace(\"output/my.trees\", burnin=0.25)\n";
-    example += "\n";
-    example += "# Create a distribution of trees\n";
-    example += "tree ~ dnEmpiricalTree(tree_trace)\n";
-    example += "\n";
-    example += "# Add an MCMC move\n";
-    example += "moves[1] = mvEmpiricalTree(tree)\n";
-    
-    return example;
-}
-
-
-/**
- * Get the names of similar and suggested other functions
- */
-std::vector<std::string> Move_EmpiricalTree::getHelpSeeAlso(void) const
-{
-    // create an entry for each suggested function
-    std::vector<std::string> see_also;
-    see_also.push_back( "mvEmpiricalTree" );
-    see_also.push_back( "treeTrace" );
-    see_also.push_back( "readTreeTrace" );
-    
-    
-    return see_also;
 }
 
 

@@ -1,14 +1,22 @@
+#include <stddef.h>
+#include <ostream>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Dist_PhyloMvtBrownian.h"
-#include "ModelVector.h"
 #include "PhyloMultivariateBrownianProcess.h"
-#include "MatrixReal.h"
-#include "Real.h"
 #include "RlMatrixRealSymmetric.h"
 #include "RlTimeTree.h"
-#include "StochasticNode.h"
-#include "Tree.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlDistribution.h"
+#include "TypeSpec.h"
+
+namespace RevBayesCore { class MatrixReal; }
+namespace RevBayesCore { class Tree; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 

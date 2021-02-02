@@ -79,10 +79,12 @@ RbGTKGui::RbGTKGui( void ) :
     /* seek out files from command line */
     std::vector<std::string> sourceFiles;
     
+    std::vector<std::string> rb_args;
+
     /* initialize environment */
     rev_output = new StringOutputStream();
     RevLanguage::UserInterface::userInterface().setOutputStream( rev_output );
-    rl_interpreter.startRevLanguageEnvironment(sourceFiles);
+    rl_interpreter.startRevLanguageEnvironment(rb_args, sourceFiles);
 
     
 }

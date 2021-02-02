@@ -7,6 +7,7 @@
 #include "AbstractCharacterHistoryBirthDeathProcess.h"
 #include "Proposal.h"
 #include "StochasticNode.h"
+#include "CharacterEvent.h"
 
 namespace RevBayesCore {
     

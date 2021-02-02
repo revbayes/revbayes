@@ -8,7 +8,8 @@
 #ifndef DISTRIBUTIONDECOMPOSEDINVERSEWISHART_H
 #define	DISTRIBUTIONDECOMPOSEDINVERSEWISHART_H
 
-#include <iostream>
+#include <stddef.h>
+
 #include "MatrixReal.h"
 
 namespace RevBayesCore {

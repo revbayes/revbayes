@@ -25,25 +25,68 @@
 
 #include <sstream>
 #include <vector>
-#include <set>
 #include <cstdlib>
+#include <stdio.h>
+#include <string>
 
 /* Files including helper classes */
-#include "AddContinuousDistribution.h"
-#include "AddDistribution.h"
-#include "AddWorkspaceVectorType.h"
-#include "AddVectorizedWorkspaceType.h"
 #include "RbException.h"
 #include "RlUserInterface.h"
 #include "Workspace.h"
 
 /// Miscellaneous types ///
 
+#include "BinaryAddition.h"                               // for BinaryAddition
+#include "BinaryDivision.h"                               // for BinaryDivision
+#include "BinaryMultiplication.h"                         // for BinaryMulti...
+#include "BinarySubtraction.h"                            // for BinarySubtr...
+#include "ConstantNode.h"                                 // for ConstantNode
+#include "DagNode.h"                                      // for DagNode
+#include "DeterministicNode.h"                            // for Determinist...
+#include "DynamicNode.h"                                  // for DynamicNode
+#include "EquationFunction.h"                             // for EquationFun...
+#include "Func__conversion.h"                             // for Func__conve...
+#include "GreaterEqualFunction.h"                         // for GreaterEqua...
+#include "GreaterThanFunction.h"                          // for GreaterThan...
+#include "IfElseFunction.h"                               // for IfElseFunction
+#include "IndirectReferenceFunction.h"                    // for IndirectRef...
+#include "LessEqualFunction.h"                            // for LessEqualFu...
+#include "LessThanFunction.h"                             // for LessThanFun...
+#include "MatrixReal.h"                                   // for MatrixReal
+#include "ModelObject.h"                                  // for ModelObject
+#include "NotEqualFunction.h"                             // for NotEqualFun...
+#include "RbBoolean.h"                                    // for Boolean
+#include "RbUtil.h"                                       // for operator*
+#include "RbVector.h"                                     // for RbVector
+#include "RbVectorImpl.h"                                 // for RbVectorImpl
+#include "ReplicateFunction.h"                            // for ReplicateFu...
+#include "RevPtr.h"                                       // for RevPtr
+#include "RlBranchLengthTree.h"                           // for BranchLengt...
+#include "RlConstantNode.h"                               // for ConstantNode
+#include "RlDeterministicNode.h"                          // for Determinist...
+#include "RlRateGenerator.h"                              // for RateGenerator
+#include "RlTimeTree.h"                                   // for TimeTree
+#include "RlTypedFunction.h"                              // for TypedFunction
+#include "ScalarMatrixMultiplication.h"                   // for ScalarMatri...
+#include "ScalarVectorAddition.h"                         // for ScalarVecto...
+#include "ScalarVectorDivision.h"                         // for ScalarVecto...
+#include "ScalarVectorMultiplication.h"                   // for ScalarVecto...
+#include "ScalarVectorSubtraction.h"                      // for ScalarVecto...
+#include "TypeConversionFunction.h"                       // for TypeConvers...
+#include "TypedDagNode.h"                                 // for TypedDagNode
+#include "TypedFunction.h"                                // for TypedFunction
+#include "UnaryMinus.h"                                   // for UnaryMinus
+#include "UserFunctionNode.h"                             // for UserFunctio...
+#include "VectorAppendElement.h"                          // for VectorAppen...
+#include "VectorAppendVector.h"                           // for VectorAppen...
+#include "VectorScalarDivision.h"                         // for VectorScala...
+#include "VectorScalarSubtraction.h"                      // for VectorScala...
+
 /* Base types (in folder "datatypes") */
-#include "RevObject.h"
 
 /* Primitive types (in folder "datatypes/basic") */
 #include "Integer.h"
+#include "IntegerPos.h"
 #include "Natural.h"
 #include "Probability.h"
 #include "RlBoolean.h"
@@ -53,49 +96,31 @@
 
 /* Container types (in folder "datatypes/container") */
 #include "ModelVector.h"
-#include "WorkspaceVector.h"
 
 /* Evolution types (in folder "datatypes/evolution") */
 
 /* Character state types (in folder "datatypes/evolution/character") */
-#include "RlAminoAcidState.h"
 #include "RlDiscreteCharacterState.h"
-#include "RlDnaState.h"
-#include "RlRnaState.h"
-#include "RlStandardState.h"
 
 /* Character data types (in folder "datatypes/evolution/datamatrix") */
-#include "RlAbstractCharacterData.h"
 
 /* Tree types (in folder "datatypes/evolution/trees") */
-#include "RlClade.h"
-#include "RlRootedTripletDistribution.h"
-
 
 /* Taxon types (in folder "datatypes/evolution") */
-#include "RlTaxon.h"
-
 
 /* Math types (in folder "datatypes/math") */
 #include "RlMatrixReal.h"
 #include "RlMatrixRealSymmetric.h"
-#include "RlRateGeneratorSequence.h"
-#include "RlRateMatrix.h"
 #include "RlSimplex.h"
+
 
 /// Distributions ///
 
 /* Distribution types (in folder "distributions") */
 
 /* Character evolution models (in folder "distributions/evolution/character") */
-#include "Dist_phyloCTMC.h"
-#include "Dist_phyloCTMCDASequence.h"
-#include "Dist_phyloCTMCDASiteIID.h"
-#include "Dist_phyloCTMCClado.h"
 
 /* Argument rules (in folder "functions/argumentrules") */
-#include "ArgumentRule.h"
-
 
 /* Basic functions (in folder "functions/basic"). */
 
@@ -113,7 +138,6 @@
 #include "Func_license.h"
 #include "Func_listOptions.h"
 #include "Func_ls.h"
-#include "Func_modelVector.h"
 #include "Func_printSeed.h"
 #include "Func_quit.h"
 #include "Func_range.h"
@@ -126,7 +150,6 @@
 #include "Func_system.h"
 #include "Func_time.h"
 #include "Func_type.h"
-#include "Func_workspaceVector.h"
 
 
 /* Internal functions (in folder ("functions/internal") */
@@ -174,26 +197,28 @@
 #include "Func_consensusTree.h"
 #include "Func_convertToPhylowood.h"
 #include "Func_listFiles.h"
+#include "Func_maxdiff.h"
 #include "Func_mapTree.h"
 #include "Func_mccTree.h"
 #include "Func_module.h"
+#include "Func_readAncestralStateTreeTrace.h"
+#include "Func_readAncestralStateTrace.h"
 #include "Func_readAtlas.h"
+#include "Func_readBranchLengthTrees.h"
 #include "Func_readCharacterDataDelimited.h"
 #include "Func_readCharacterDataUniversal.h"
 #include "Func_readContinuousCharacterData.h"
 #include "Func_readDataDelimitedFile.h"
 #include "Func_readDiscreteCharacterData.h"
 #include "Func_readDistanceMatrix.h"
+#include "Func_readMatrix.h"
 #include "Func_readRelativeNodeAgeConstraints.h"
 #include "Func_readRelativeNodeAgeWeightedConstraints.h"
 #include "Func_readStochasticVariableTrace.h"
 #include "Func_readTrace.h"
 #include "Func_readTrees.h"
-#include "Func_readBranchLengthTrees.h"
 #include "Func_readTreeTrace.h"
-#include "Func_readAncestralStateTreeTrace.h"
-#include "Func_readAncestralStateTrace.h"
-#include "Func_readMatrix.h"
+#include "Func_readVCF.h"
 #include "Func_source.h"
 #include "Func_summarizeCharacterMaps.h"
 #include "Func_TaxonReader.h"
@@ -205,49 +230,48 @@
 
 
 /* Math functions (in folder "functions/math") */
-#include "Func_abs.h"
-#include "Func_ceil.h"
-#include "Func_diagonalMatrix.h"
-#include "Func_exp.h"
-#include "Func_floor.h"
-#include "Func_lnProbability.h"
-#include "Func_hyperbolicTangent.h"
-#include "Func_ln.h"
-#include "Func_log.h"
-#include "Func_max.h"
-#include "Func_mean.h"
-#include "Func_min.h"
-#include "Func_normalize.h"
+//#include "Func_abs.h"
+//#include "Func_ceil.h"
+//#include "Func_diagonalMatrix.h"
+//#include "Func_exp.h"
+//#include "Func_floor.h"
+//#include "Func_lnProbability.h"
+//#include "Func_hyperbolicTangent.h"
+//#include "Func_ln.h"
+//#include "Func_log.h"
+//#include "Func_max.h"
+//#include "Func_mean.h"
+//#include "Func_min.h"
+//#include "Func_normalize.h"
 #include "Func_power.h"
 #include "Func_powerVector.h"
-#include "Func_probability.h"
-#include "Func_round.h"
-#include "Func_simplex.h"
-#include "Func_simplexFromVector.h"
-#include "Func_sum.h"
-#include "Func_sumPositive.h"
-#include "Func_standardDeviation.h"
-#include "Func_sqrt.h"
-#include "Func_trunc.h"
-#include "Func_variance.h"
+//#include "Func_round.h"
+//#include "Func_simplex.h"
+//#include "Func_simplexFromVector.h"
+//#include "Func_sum.h"
+//#include "Func_sumPositive.h"
+//#include "Func_standardDeviation.h"
+//#include "Func_sqrt.h"
+//#include "Func_trunc.h"
+//#include "Func_variance.h"
 
 
 /* Statistics functions (in folder "functions/statistics") */
 /* These are functions related to statistical distributions */
-#include "Func_discretizeBeta.h"
-#include "Func_discretizeBetaQuadrature.h"
-#include "Func_discretizeGamma.h"
-#include "Func_discretizeGammaQuadrature.h"
-#include "Func_discretizeLognormalQuadrature.h"
-#include "Func_discretizeDistribution.h"
-#include "Func_discretizePositiveDistribution.h"
-#include "Func_dppConcFromMean.h"
-#include "Func_dppMeanFromConc.h"
-#include "Func_fnNormalizedQuantile.h"
-#include "Func_numUniqueInVector.h"
-#include "Func_stirling.h"
-#include "Func_varianceCovarianceMatrix.h"
-#include "Func_decomposedVarianceCovarianceMatrix.h"
+//#include "Func_discretizeBeta.h"
+//#include "Func_discretizeBetaQuadrature.h"
+//#include "Func_discretizeGamma.h"
+//#include "Func_discretizeGammaQuadrature.h"
+//#include "Func_discretizeLognormalQuadrature.h"
+//#include "Func_discretizeDistribution.h"
+//#include "Func_discretizePositiveDistribution.h"
+//#include "Func_dppConcFromMean.h"
+//#include "Func_dppMeanFromConc.h"
+//#include "Func_fnNormalizedQuantile.h"
+//#include "Func_numUniqueInVector.h"
+//#include "Func_stirling.h"
+//#include "Func_varianceCovarianceMatrix.h"
+//#include "Func_decomposedVarianceCovarianceMatrix.h"
 
 
 /** Initialize global workspace */
@@ -486,6 +510,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_consensusTree()                           );
         addFunction( new Func_convertToPhylowood()                      );
         addFunction( new Func_listFiles()                               );
+        addFunction( new Func_maxdiff()                                 );
         addFunction( new Func_mapTree()                                 );
         addFunction( new Func_mccTree()                                 );
         addFunction( new Func_module()                                  );
@@ -507,6 +532,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_readTreeTrace()                           );
 		addFunction( new Func_readCharacterDataDelimited()              );
         addFunction( new Func_readDataDelimitedFile()                   );
+        addFunction( new Func_readVCF()                                 );
         addFunction( new Func_source()                                  );
         addFunction( new Func_summarizeCharacterMaps()                  );
         addFunction( new Func_treeTrace()                               );

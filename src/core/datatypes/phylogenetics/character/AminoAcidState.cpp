@@ -1,9 +1,9 @@
 #include "AminoAcidState.h"
-#include "RbException.h"
 
-#include <stdio.h>
-#include <iostream>
-#include <sstream>
+#include <sstream> // IWYU pragma: keep
+
+#include "RbException.h"
+#include "Cloneable.h"
 
 using namespace RevBayesCore;
 
