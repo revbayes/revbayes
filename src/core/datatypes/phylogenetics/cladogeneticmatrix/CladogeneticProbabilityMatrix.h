@@ -9,12 +9,15 @@
 #ifndef CladogeneticProbabilityMatrix_h
 #define CladogeneticProbabilityMatrix_h
 
-#include "Assignable.h"
-#include "Cloneable.h"
-#include "MatrixReal.h"
-#include "Printable.h"
+#include <stddef.h>
 #include <map>
 #include <vector>
+#include <iosfwd>
+
+#include "Assignable.h"
+#include "Cloneable.h"
+#include "Printable.h"
+#include "Serializable.h"
 
 namespace RevBayesCore {
     

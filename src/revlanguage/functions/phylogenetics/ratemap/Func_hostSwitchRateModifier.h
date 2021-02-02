@@ -9,13 +9,23 @@
 #ifndef Func_hostSwitchRateModifier_h
 #define Func_hostSwitchRateModifier_h
 
+#include <string>
+#include <iosfwd>
+#include <vector>
+
 #include "RlCharacterHistoryRateModifier.h"
 #include "RlTypedFunction.h"
-
-#include <map>
-#include <string>
+#include "CharacterHistoryRateModifier.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RevPtr.h"
+#include "RlDeterministicNode.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 namespace RevLanguage {
+class ArgumentRules;
+class TypeSpec;
     
     class Func_hostSwitchRateModifier : public TypedFunction<CharacterHistoryRateModifier> {
         

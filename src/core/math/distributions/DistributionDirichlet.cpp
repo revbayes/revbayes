@@ -14,11 +14,20 @@
  * $Id$
  */
 
+#include <stddef.h>
 #include <cmath>
+#include <ostream>
+#include <vector>
+
 #include "DistributionDirichlet.h"
 #include "RbException.h"
 #include "RbMathFunctions.h"
 #include "RbStatisticsHelper.h"
+#include "Cloner.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 

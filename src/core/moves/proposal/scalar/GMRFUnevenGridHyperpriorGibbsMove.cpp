@@ -1,22 +1,23 @@
-#include "DagNode.h"
-#include "DistributionHalfCauchy.h"
-#include "DistributionNormal.h"
+#include <stddef.h>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <vector>
+
 #include "HalfCauchyDistribution.h"
 #include "GMRFUnevenGridHyperpriorGibbsMove.h"
 #include "NormalDistribution.h"
 #include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbConstants.h"
-#include "RbMathLogic.h"
 #include "RbStatisticsHelper.h"
 #include "TypedDagNode.h"
+#include "AbstractGibbsMove.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "StochasticNode.h"
+#include "TypedDistribution.h"
 
-#include <cmath>
-#include <cassert>
-#include <iomanip>
-#include <sstream>
-#include <iostream>
-#include <utility>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

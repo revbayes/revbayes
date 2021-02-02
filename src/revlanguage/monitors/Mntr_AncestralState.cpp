@@ -1,23 +1,28 @@
 #include "Mntr_AncestralState.h"
+
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "OptionRule.h"
-#include "Model.h"
 #include "AncestralStateMonitor.h"
 #include "RlMonitor.h"
-#include "ModelVector.h"
-#include "Ellipsis.h"
-#include "Natural.h"
+#include "IntegerPos.h"
 #include "RbException.h"
 #include "RevObject.h"
-#include "RlModel.h"
-#include "RlTimeTree.h"
-#include "RlBranchLengthTree.h"
 #include "RlString.h"
 #include "TypeSpec.h"
 #include "NaturalNumbersState.h"
 #include "DnaState.h"
-#include "RlStandardState.h"
+#include "Monitor.h"
+#include "RbBoolean.h"
+#include "RlBoolean.h"
+#include "RlTree.h"
+#include "StandardState.h"
+#include "TypedDistribution.h"
+
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class Tree; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 
@@ -44,7 +49,7 @@ void Mntr_AncestralState::constructInternalObject( void )
 {
     const std::string&                  fn      = static_cast<const RlString &>( filename->getRevObject() ).getValue();
     const std::string&                  sep     = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    int                                 g       = (int)static_cast<const Natural  &>( printgen->getRevObject() ).getValue();
+    unsigned int                                 g       = (int)static_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* t = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::DagNode*				ch		= ctmc->getRevObject().getDagNode();
     bool                                ap      = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
@@ -136,7 +141,7 @@ const MemberRules& Mntr_AncestralState::getParameterRules(void) const
         memberRules.push_back( new ArgumentRule("ctmc"          , RevObject::getClassTypeSpec(), "The CTMC process.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
         memberRules.push_back( new ArgumentRule("filename"      , RlString::getClassTypeSpec() , "The name of the file for storing the samples.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         memberRules.push_back( new ArgumentRule("type"          , RlString::getClassTypeSpec() , "The type of data to store.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        memberRules.push_back( new ArgumentRule("printgen"      , Natural::getClassTypeSpec()  , "The frequency how often to sample.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
+        memberRules.push_back( new ArgumentRule("printgen"      , IntegerPos::getClassTypeSpec()  , "The frequency how often to sample.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new IntegerPos(1) ) );
         memberRules.push_back( new ArgumentRule("separator"     , RlString::getClassTypeSpec() , "The separator between columns in the file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
         memberRules.push_back( new ArgumentRule("append"        , RlBoolean::getClassTypeSpec(), "Should we append or overwrite if the file exists?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
         memberRules.push_back( new ArgumentRule("version"   , RlBoolean::getClassTypeSpec(), "Should we record the software version?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );

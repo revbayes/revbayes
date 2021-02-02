@@ -1,15 +1,15 @@
 #ifndef ShrinkExpandScaleProposal_H
 #define ShrinkExpandScaleProposal_H
 
-#include "RbVector.h"
-#include "Proposal.h"
-#include "StochasticNode.h"
-
+#include <stddef.h>
 #include <ostream>
 #include <vector>
-#include <string>
+
+#include "Proposal.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class variableType> class StochasticNode;
     
     /**
      * @brief Scaling Proposal of a all elements of a vector.

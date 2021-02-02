@@ -1,5 +1,26 @@
 #include "RlContinuousStochasticNode.h"
+
+#include <math.h>
+#include <stddef.h>
+#include <ostream>
+#include <string>
+
 #include "RealPos.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "MemberProcedure.h"
+#include "Real.h"
+#include "RevVariable.h"
+#include "RlContinuousDistribution.h"
+#include "RlDistribution.h"
+#include "RlPositiveContinuousDistribution.h"
+#include "RlTypedDistribution.h"
+#include "RlUtils.h"
+#include "StringUtilities.h"
+#include "Probability.h" // IWYU pragma: keep
+
+namespace RevBayesCore { class ContinuousDistribution; }
 
 using namespace RevLanguage;
 

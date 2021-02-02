@@ -1,18 +1,19 @@
 #ifndef ChromosomesCladogenicStateFunction_H
 #define ChromosomesCladogenicStateFunction_H
 
-#include "AbstractCladogenicStateFunction.h"
-#include "CladogeneticProbabilityMatrix.h"
-#include "RbVector.h"
-#include "Simplex.h"
-#include "TypedDagNode.h"
-#include "TypedFunction.h"
-
-#include <sstream>
+#include <stddef.h>
 #include <vector>
 #include <map>
 
+#include "AbstractCladogenicStateFunction.h"
+#include "CladogeneticProbabilityMatrix.h"
+#include "TypedFunction.h"
+
 namespace RevBayesCore {
+class BranchHistory;
+class DagNode;
+class Simplex;
+template <class valueType> class TypedDagNode;
 
     class ChromosomesCladogenicStateFunction : public AbstractCladogenicStateFunction, public TypedFunction<CladogeneticProbabilityMatrix> {
         

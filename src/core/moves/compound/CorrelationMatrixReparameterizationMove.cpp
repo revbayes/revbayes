@@ -1,12 +1,24 @@
 #include "CorrelationMatrixReparameterizationMove.h"
-#include "DistributionInverseWishart.h"
-#include "InverseWishartDistribution.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbConstants.h"
 
 #include <cmath>
 #include <iomanip>
+#include <iostream>
+#include <vector>
+
+#include "DistributionInverseWishart.h"
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
+#include "Cloneable.h"
+#include "DagNode.h"
+#include "PhyloMultivariateBrownianProcessREML.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "StochasticNode.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
+
+namespace RevBayesCore { class ContinuousCharacterData; }
 
 using namespace RevBayesCore;
 

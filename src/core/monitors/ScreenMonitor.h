@@ -1,50 +1,54 @@
 #ifndef ScreenMonitor_H
 #define ScreenMonitor_H
 
-#include "Monitor.h"
-
-#include <iostream>
-#include <queue>
-#include <string>
+#include <ctime>
+#include <iosfwd>
 #include <vector>
 
+#include "Monitor.h"
+
 namespace RevBayesCore {
-        
+class DagNode;
+
+    /** @brief Monitor to write data to standard output
+     *
+     * @see RevLanguage::Mntr_Screen for the RL implementation
+    */
     class ScreenMonitor : public Monitor {
         
     public:
         // Constructors and Destructors
-        ScreenMonitor(DagNode *n, unsigned long g, bool pp=true, bool l=true, bool pr=true);                                                                //!< Constructor with single DAG node
-        ScreenMonitor(const std::vector<DagNode *> &n, unsigned long g, bool pp=true, bool l=true, bool pr=true);                                              //!< Constructor with vector of DAG node
+        ScreenMonitor(DagNode *n, unsigned long g, bool pp=true, bool l=true, bool pr=true);  //!< Constructor with single DAG node
+        ScreenMonitor(const std::vector<DagNode *> &n, unsigned long g, bool pp=true, bool l=true, bool pr=true);  //!< Constructor with vector of DAG nodes
         
         // basic methods
-        ScreenMonitor*                      clone(void) const;                                                  //!< Clone the object
+        ScreenMonitor*                      clone(void) const;
         
         // Monitor functions
-        bool                                isScreenMonitor(void) const;                                        //!< Is this a screen monitor?
-        void                                monitor(unsigned long gen);                                         //!< Monitor at generation gen
+        bool                                isScreenMonitor(void) const;
+        void                                monitor(unsigned long gen);
         void                                reset(size_t numCycles);
         void                                setReplicateIndex(size_t idx);
         
         // ScreenMonitor functions
-        void                                printHeader(void);                                                  //!< Print header
+        void                                printHeader(void);
 
     private:
         
         // parameters
-        bool                                posterior;
-        bool                                prior;
-        bool                                likelihood;
-        bool                                printWaitingTime;
-        bool                                printElapsedTime;
-        std::string                         prefixSeparator;
-        std::string                         suffixSeparator;
-        size_t                              headerPrintingInterval;
-        time_t                              startTime;
-        size_t                              numCycles;                                                          //!< Total number of cycles to monitor
-        size_t                              currentGen;
-        size_t                              startGen;
-        size_t                              replicateIndex;
+        bool                                posterior; //!< whether to print the posterior
+        bool                                prior; //!< whether to print the prior
+        bool                                likelihood; //!< whether to print the likelihood
+        bool                                printWaitingTime; //!< whether to print the estimated time to completion
+        bool                                printElapsedTime; //!< whether to print the time spent
+        std::string                         prefixSeparator; //!< separator before each column header
+        std::string                         suffixSeparator; //!<separator after each column header
+        size_t                              headerPrintingInterval; //!< print the header each n iterations
+        time_t                              startTime; //!< time of start of the run
+        size_t                              numCycles; //!< planned number of iterations                                                       //!< Total number of cycles to monitor
+        size_t                              currentGen; //!< current generation of the run
+        size_t                              startGen; //!< start generation of the run
+        size_t                              replicateIndex; //!< replicate index of the monitored run
         
     };
     

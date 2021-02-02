@@ -23,6 +23,7 @@
 #include "RandomNumberGenerator.h"
 #include "TypedDistribution.h"
 #include "Trace.h"
+#include "Tree.h"
 
 namespace RevBayesCore {
     

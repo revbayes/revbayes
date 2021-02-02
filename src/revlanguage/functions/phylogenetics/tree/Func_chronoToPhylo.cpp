@@ -1,4 +1,5 @@
 #include "Func_chronoToPhylo.h"
+
 #include "ChronoToPhyloFunction.h"
 #include "ModelVector.h"
 #include "RealPos.h"
@@ -7,6 +8,15 @@
 #include "RlTimeTree.h"
 #include "RlTree.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "ModelObject.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
+
+namespace RevBayesCore { template <class valueType> class RbVector; }
 
 using namespace RevLanguage;
 

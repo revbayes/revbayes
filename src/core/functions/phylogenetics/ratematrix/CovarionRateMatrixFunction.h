@@ -10,14 +10,13 @@
 #define CovarionRateMatrixFunction_h
 
 
-#include "RateMatrix_GTR.h"
-#include "RbVector.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
-
-#include <vector>
+#include "RateGenerator.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief GTR rate matrix function.

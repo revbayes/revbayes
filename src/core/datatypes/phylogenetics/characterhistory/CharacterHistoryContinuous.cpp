@@ -1,8 +1,12 @@
 #include "CharacterHistoryContinuous.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
+
+#include <vector>
+
 #include "RbException.h"
 #include "Tree.h"
+#include "Cloneable.h"
+
+namespace RevBayesCore { class BranchHistory; }
 
 using namespace RevBayesCore;
 

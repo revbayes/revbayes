@@ -1,15 +1,17 @@
-#include "CharacterEventContinuous.h"
-#include "CharacterHistoryContinuous.h"
-#include "ConditionedBirthDeathShiftProcessContinuous.h"
-#include "DistributionNormal.h"
-#include "ContinuousEventBirthDeathProposal.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbException.h"
-#include "TypedDagNode.h"
-
-#include <cmath>
 #include <iostream>
+#include <vector>
+
+#include "CharacterEventContinuous.h"
+#include "ConditionedBirthDeathShiftProcessContinuous.h"
+#include "ContinuousEventBirthDeathProposal.h"
+#include "Cloneable.h"
+#include "EventBirthDeathProposal.h"
+#include "RbConstants.h"
+#include "TypedDistribution.h"
+
+namespace RevBayesCore { class CharacterEvent; }
+namespace RevBayesCore { class Tree; }
+namespace RevBayesCore { template <class variableType> class StochasticNode; }
 
 using namespace RevBayesCore;
 

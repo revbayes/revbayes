@@ -1,3 +1,9 @@
+#include <math.h>
+#include <stddef.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "Dist_GilbertGraph.h"
 #include "Natural.h"
@@ -5,6 +11,24 @@
 #include "RlMatrixRealSymmetric.h"
 #include "StochasticNode.h"
 #include "GilbertGraphDistribution.h"
+#include "ArgumentRules.h"
+#include "DagMemberFunction.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "MatrixReal.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlDagMemberFunction.h"
+#include "RlDeterministicNode.h"
+#include "RlDistribution.h"
+#include "RlStochasticNode.h"
+#include "RlTypedDistribution.h"
+#include "RlTypedFunction.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
+#include "TypedFunction.h"
 
 using namespace RevLanguage;
 

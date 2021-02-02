@@ -1,8 +1,21 @@
 #include "PowerVectorFunction.h"
+
+#include <stddef.h>
 #include <cmath>
+#include <vector>
+
+#include "Cloner.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
-
+/**
+ * PowerVectorFunction Constructor
+ *
+ * @param b A RbVector vector of doubles that are the bases
+ * @param e A double that is the exponent for each base
+ */
 PowerVectorFunction::PowerVectorFunction(const TypedDagNode<RbVector<double> > *b, const TypedDagNode<double> *e) : TypedFunction<RbVector<double> >( new RbVector<double>(b->getValue().size(),0) ),
     base( b ),
     exponent( e )

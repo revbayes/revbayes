@@ -8,8 +8,8 @@
 #include <string>
 
 namespace RevLanguage {
-    
-    
+
+
     /**
      * The RevLanguage wrapper of the scaling move.
      *
@@ -26,11 +26,11 @@ namespace RevLanguage {
      *
      */
     class Move_EllipticalSliceSamplingSimple : public Move {
-        
+
     public:
-        
+
         Move_EllipticalSliceSamplingSimple(void);                                                                                                               //!< Default constructor
-        
+
         // Basic utility functions
         virtual Move_EllipticalSliceSamplingSimple*                 clone(void) const;                                                                          //!< Clone object
         void                                        constructInternalObject(void);                                                              //!< We construct the a new internal SlidingMove.
@@ -40,17 +40,18 @@ namespace RevLanguage {
         const MemberRules&                          getParameterRules(void) const;                                                              //!< Get member rules (const)
         virtual const TypeSpec&                     getTypeSpec(void) const;                                                                    //!< Get language type of the object
         virtual void                                printValue(std::ostream& o) const;                                                          //!< Print value (for user)
-            
+
     protected:
-        
+
         void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);           //!< Set member variable
-        
+
         RevPtr<const RevVariable>                   x;                                                                                          //!< The variable on which the move works
         RevPtr<const RevVariable>                   window;                                                                                     //!< The tuning parameter
         RevPtr<const RevVariable>                   tune;                                                                                       //!< If autotuning should be used.
-        
+        RevPtr<const RevVariable>                   forceAccept;                                                                                       //!< If autotuning should be used.
+
     };
-    
+
 }
 
 #endif

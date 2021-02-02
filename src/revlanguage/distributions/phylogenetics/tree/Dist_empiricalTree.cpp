@@ -1,17 +1,43 @@
+#include <math.h>
+#include <stddef.h>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Dist_empiricalTree.h"
-#include "ModelVector.h"
 #include "Natural.h"
-#include "OptionRule.h"
-#include "Probability.h"
-#include "Real.h"
-#include "RealPos.h"
 #include "RlDistributionMemberFunction.h"
-#include "RlString.h"
 #include "RlTrace.h"
 #include "RlTraceTree.h"
 #include "StochasticNode.h"
+#include "DagMemberFunction.h"
+#include "DeterministicNode.h"
+#include "DistributionMemberFunction.h"
+#include "DynamicNode.h"
+#include "EmpiricalDistribution.h"
+#include "MethodTable.h"
+#include "RevNullObject.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlDagMemberFunction.h"
+#include "RlDeterministicNode.h"
+#include "RlDistribution.h"
+#include "RlStochasticNode.h"
+#include "RlTree.h"
+#include "RlTypedDistribution.h"
+#include "RlTypedFunction.h"
+#include "TraceNumeric.h"
+#include "TraceTree.h"
+#include "Tree.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
+#include "TypedFunction.h"
+
+namespace RevBayesCore { template <class valueType> class Trace; }
 
 using namespace RevLanguage;
 
@@ -132,72 +158,6 @@ const MemberRules& Dist_empiricalTree::getParameterRules(void) const
     }
     
     return member_rules;
-}
-
-
-/**
- * Get the author(s) of this function so they can receive credit (and blame) for it.
- */
-std::vector<std::string> Dist_empiricalTree::getHelpAuthor(void) const
-{
-    // create a vector of authors for this function
-    std::vector<std::string> authors;
-    authors.push_back( "Will Freyman" );
-    authors.push_back( "Sebastian Hoehna" );
-    authors.push_back( "Will Pett" );
-    
-    return authors;
-}
-
-
-/**
- * Get the (brief) description for this function
- */
-std::string Dist_empiricalTree::getHelpDescription(void) const
-{
-    std::string description = "";
-    description += "Creates a distribution of trees from a trace of trees.";
-    
-    return description;
-}
-
-
-/**
- * Get an executable and instructive example.
- * These example should help the users to show how this function works but
- * are also used to test if this function still works.
- */
-std::string Dist_empiricalTree::getHelpExample(void) const
-{
-    // create an example as a single string variable.
-    std::string example = "";
-    
-    example += "# Read in tree trace\n";
-    example += "tree_trace = readTreeTrace(\"output/my.trees\", burnin=0.25)\n";
-    example += "\n";
-    example += "# Create a distribution of trees\n";
-    example += "tree ~ dnEmpiricalTree(tree_trace)\n";
-    example += "\n";
-    example += "# Add an MCMC move\n";
-    example += "moves[1] = mvEmpiricalTree(tree)\n";
-    
-    return example;
-}
-
-
-/**
- * Get the names of similar and suggested other functions
- */
-std::vector<std::string> Dist_empiricalTree::getHelpSeeAlso(void) const
-{
-    // create an entry for each suggested function
-    std::vector<std::string> see_also;
-    see_also.push_back( "mvEmpiricalTree" );
-    see_also.push_back( "treeTrace" );
-    see_also.push_back( "readTreeTrace" );
-    
-    
-    return see_also;
 }
 
 

@@ -1,6 +1,10 @@
+#include <iosfwd>
+
 #include "Real.h"
 #include "RlString.h"
 #include "RlUtils.h"
+
+namespace RevLanguage { class RevObject; }
 
 using namespace RevLanguage;
 

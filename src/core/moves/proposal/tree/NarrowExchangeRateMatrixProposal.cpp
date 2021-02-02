@@ -1,13 +1,22 @@
+#include <stddef.h>
+#include <cmath>
+#include <iostream>
+#include <vector>
+
 #include "MixtureDistribution.h"
 #include "NarrowExchangeRateMatrixProposal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
-#include "RbException.h"
-#include "TypedDagNode.h"
-
-#include <cmath>
-#include <iostream>
+#include "DagNode.h"
+#include "MemberObject.h"
+#include "Proposal.h"
+#include "RateGenerator.h"
+#include "RbOrderedSet.h"
+#include "StochasticNode.h"
+#include "TopologyNode.h"
+#include "Tree.h"
+#include "TypedDistribution.h"
 
 using namespace RevBayesCore;
 

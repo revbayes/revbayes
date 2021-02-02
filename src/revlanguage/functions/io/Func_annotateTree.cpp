@@ -1,22 +1,31 @@
+#include <stddef.h>
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
-#include "ConstantNode.h"
 #include "Func_annotateTree.h"
-#include "ModelVector.h"
 #include "NexusWriter.h"
 #include "Probability.h"
-#include "RbException.h"
-#include "RevNullObject.h"
 #include "RlBranchLengthTree.h"
 #include "RlString.h"
 #include "RlTimeTree.h"
 #include "RlTraceTree.h"
-#include "RlUtils.h"
-#include "StringUtilities.h"
-
-#include <map>
-#include <set>
-#include <sstream>
-
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "Clade.h"
+#include "RbBoolean.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlFunction.h"
+#include "RlTree.h"
+#include "Taxon.h"
+#include "TopologyNode.h"
+#include "TraceTree.h"
+#include "Tree.h"
+#include "TypeSpec.h"
+#include "WorkspaceVector.h"
 
 using namespace RevLanguage;
 
@@ -42,8 +51,26 @@ RevPtr<RevVariable> Func_annotateTree::execute( void )
     // get the input tree
     RevBayesCore::Tree* tree = static_cast<const Tree&>( this->args[arg_index++].getVariable()->getRevObject() ).getValue().clone();
     
-    // get the  tree trace
-    TraceTree& tt = static_cast<TraceTree&>( args[arg_index++].getVariable()->getRevObject() );
+    // get the  tree trace(s)
+    RevBayesCore::TreeSummary* summary = NULL;
+
+    RevObject& b = args[arg_index++].getVariable()->getRevObject();
+    if ( b.isType( TraceTree::getClassTypeSpec() ) )
+    {
+        summary = &( static_cast<TraceTree &>(b).getValue() );
+    }
+    else
+    {
+        std::vector<TraceTree>& tt = static_cast<const WorkspaceVector<TraceTree> &>(b).getValue();
+
+        std::vector<RevBayesCore::TraceTree* > vec;
+        for(size_t i = 0; i < tt.size(); i++)
+        {
+            vec.push_back(&(tt[i].getValue()));
+        }
+
+        summary = new RevBayesCore::TreeSummary( vec, tt.front().getValue().isClock() );
+    }
     
     // get the filename
     const std::string& filename = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
@@ -64,7 +91,7 @@ RevPtr<RevVariable> Func_annotateTree::execute( void )
     // RevBayesCore::TreeSummary summary = RevBayesCore::TreeSummary( tt.getValue() );
     
     bool verbose = true;
-    tt.getValue().annotateTree( *tree, report, verbose );
+    summary->annotateTree( *tree, report, verbose );
     
     // return the tree
     if ( filename != "" )
@@ -85,13 +112,18 @@ RevPtr<RevVariable> Func_annotateTree::execute( void )
     }
     
     Tree* t;
-    if ( tt.getValue().isClock() )
+    if ( summary->isClock() )
     {
         t = new TimeTree( tree );
     }
     else
     {
         t = new BranchLengthTree( tree );
+    }
+
+    if ( b.isType( TraceTree::getClassTypeSpec() ) == false )
+    {
+        delete summary;
     }
 
     return new RevVariable( t );
@@ -109,7 +141,10 @@ const ArgumentRules& Func_annotateTree::getArgumentRules( void ) const
     if (!rules_set)
     {
         argumentRules.push_back( new ArgumentRule( "tree", Tree::getClassTypeSpec()        , "The input tree which will be annotated.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "trace", TraceTree::getClassTypeSpec()   , "The sample trace.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
+        std::vector<TypeSpec> traceArgRules;
+        traceArgRules.push_back( TraceTree::getClassTypeSpec() );
+        traceArgRules.push_back( WorkspaceVector<TraceTree>::getClassTypeSpec() );
+        argumentRules.push_back( new ArgumentRule( "trace", traceArgRules, "The sample trace.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "file"     , RlString::getClassTypeSpec()    , "The name of the file where to store the tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("")  ) );
 
         argumentRules.push_back( new ArgumentRule( "ages" , RlBoolean::getClassTypeSpec() , "Annotate node ages?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );

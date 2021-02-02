@@ -1,9 +1,13 @@
+#include <stddef.h>
+#include <ios>
+#include <string>
+#include <vector>
+
 #include "RbException.h"
 #include "RbFileManager.h"
 #include "StringUtilities.h"
 #include "TraceReader.h"
-
-#include <map>
+#include "Trace.h"
 
 using namespace RevBayesCore;
 
@@ -14,7 +18,7 @@ std::vector<ModelTrace> TraceReader::readStochasticVariableTrace( const std::str
     
     // check that the file/path name has been correctly specified
     RevBayesCore::RbFileManager fm( fn );
-    if ( !fm.testFile() || !fm.testDirectory() )
+    if ( fm.testFile() == false || fm.testDirectory() == false )
     {        
         std::string errorStr = "";
         fm.formatError( errorStr );

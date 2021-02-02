@@ -7,6 +7,7 @@
 namespace RevBayesCore {
     
     class TransitionProbabilityMatrix;
+class Assignable;
     
     
     
@@ -27,9 +28,6 @@ namespace RevBayesCore {
      *      |    1    k    1    -    |
      *
      *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2014-11-18, version 1.0
      */
     class RateMatrix_Kimura80 : public TimeReversibleRateMatrix {
         

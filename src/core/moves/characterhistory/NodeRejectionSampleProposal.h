@@ -14,7 +14,6 @@
 #include "RateGeneratorSequence.h"
 #include "RbException.h"
 #include "StochasticNode.h"
-//#include "TransitionProbability.h"
 #include "TreeChangeEventMessage.h"
 #include "TopologyNode.h"
 #include "TypedDagNode.h"
@@ -128,9 +127,9 @@ RevBayesCore::NodeRejectionSampleProposal<charType>::NodeRejectionSampleProposal
 
     addNode( ctmc );
 
-    nodeProposal = new PathRejectionSampleProposal<charType>(n, l, r, true);
-    leftProposal = new PathRejectionSampleProposal<charType>(n, l, r, true);
-    rightProposal = new PathRejectionSampleProposal<charType>(n, l, r, true);
+    nodeProposal = new PathRejectionSampleProposal<charType>(n, l, r);
+    leftProposal = new PathRejectionSampleProposal<charType>(n, l, r);
+    rightProposal = new PathRejectionSampleProposal<charType>(n, l, r);
     
     for (size_t i = 0; i < numCharacters; i++)
     {
@@ -264,16 +263,15 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void 
     storedLnProb = 0.0;
     proposedLnProb = 0.0;
 
+    // sample a node from the tree that is not a tip node
     const Tree& tree = p->getTree();
     std::vector<TopologyNode*> nds = tree.getNodes();
     node = NULL;
-
     do
     {
         size_t idx = GLOBAL_RNG->uniform01() * nds.size();
         node = nds[idx];
     } while ( node->isTip() == true );
-
 
     // prepare the path proposals
     nodeProposal->assignNode(node);

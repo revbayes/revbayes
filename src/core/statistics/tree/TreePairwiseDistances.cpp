@@ -1,5 +1,10 @@
 #include "TreePairwiseDistances.h"
 
+#include "Tree.h"
+#include "TreeUtilities.h"
+
+namespace RevBayesCore { class DagNode; }
+
 
 using namespace RevBayesCore;
 
@@ -137,8 +142,9 @@ RevBayesCore::DistanceMatrix* TreePairwiseDistances::getDistanceMatrix(const Typ
 void TreePairwiseDistances::update( void )
 {
     
-    RevBayesCore::DistanceMatrix matrix =	*(getDistanceMatrix( *tree ) );
-    *value = matrix;
+    RevBayesCore::DistanceMatrix * matrix =	getDistanceMatrix( *tree );
+    *value = *matrix;
+    delete matrix;
 }
 
 

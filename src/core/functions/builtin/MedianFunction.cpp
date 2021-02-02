@@ -1,7 +1,14 @@
 #include "MedianFunction.h"
-#include "RbConstants.h"
 
+#include <stddef.h>
 #include <cmath>
+
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "TypedDagNode.h"
+#include "RbConstants.h" // IWYU pragma: keep
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

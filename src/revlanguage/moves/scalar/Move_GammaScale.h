@@ -47,10 +47,6 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                   x;                                                                                          //!< The variable on which the move works
         RevPtr<const RevVariable>                   lambda;                                                                                     //!< The tuning parameter
         RevPtr<const RevVariable>                   tune;                                                                                       //!< If autotuning should be used.
-        std::vector<std::string>                    getHelpAuthor(void) const;  //!< Get the author(s) of this function
-        std::vector<std::string>                    getHelpSeeAlso(void) const; //!< Get suggested other functions
-        std::string                                 getHelpDescription(void) const;  //!< Get the description for this function
-        std::string                                 getHelpExample(void) const; //!< Get an executable and instructive example
     };
     
 }

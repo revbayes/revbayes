@@ -1,15 +1,24 @@
+#include <stddef.h>
+#include <sstream>
+#include <list>
+#include <set>
+#include <vector>
+
 #include "Argument.h"
 #include "Environment.h"
 #include "RlMemberMethod.h"
 #include "RbException.h"
-#include "RbUtil.h"
-#include "RbOptions.h"
-#include "RlMemberFunction.h"
 #include "RlString.h"
 #include "SyntaxFunctionCall.h"
 #include "Workspace.h"
-
-#include <sstream>
+#include "MethodTable.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "SyntaxElement.h"
+#include "SyntaxLabeledExpr.h"
+#include "SyntaxVariable.h"
 
 using namespace RevLanguage;
 

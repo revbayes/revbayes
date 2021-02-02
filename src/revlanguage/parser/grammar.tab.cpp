@@ -200,8 +200,11 @@
 
 /* The following statements go into the resulting C code */
 
-#include "Environment.h"
+#include <iostream>
+#include <list>
+
 #include "Integer.h"
+#include "IntegerPos.h"
 #include "Natural.h"
 #include "Probability.h"
 #include "Parser.h"
@@ -234,12 +237,10 @@
 #include "SyntaxVariableDecl.h"
 #include "SyntaxVariable.h"
 #include "SyntaxWorkspaceVariableAssignment.h"
-#include "Workspace.h"
+#include "RbConstants.h"
+#include "RevPtr.h"
 
-#include <iostream>
-#include <list>
-#include <sstream>
-#include <string>
+namespace RevLanguage { class Environment; }
 
 using namespace RevLanguage;
 
@@ -282,7 +283,7 @@ typedef union YYSTYPE
     char*                                           c_string;
     std::string*                                    string;
     double                                          realValue;
-    int                                             intValue;
+    long                                            longIntValue;
     bool                                            boolValue;
     RevLanguage::SyntaxElement*                     syntaxElement;
     RevLanguage::SyntaxVariable*                    syntaxVariable;
@@ -360,6 +361,7 @@ typedef short int yytype_int16;
 # elif ! defined YYSIZE_T && (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 #  include <stddef.h> /* INFRINGES ON USER NAME SPACE */
+
 #  define YYSIZE_T size_t
 # else
 #  define YYSIZE_T unsigned int
@@ -372,6 +374,7 @@ typedef short int yytype_int16;
 # if defined YYENABLE_NLS && YYENABLE_NLS
 #  if ENABLE_NLS
 #   include <libintl.h> /* INFRINGES ON USER NAME SPACE */
+
 #   define YY_(msgid) dgettext ("bison-runtime", msgid)
 #  endif
 # endif
@@ -419,6 +422,7 @@ YYID (i)
 #    define YYSTACK_ALLOC __alloca
 #   elif defined _MSC_VER
 #    include <malloc.h> /* INFRINGES ON USER NAME SPACE */
+
 #    define alloca _alloca
 #   else
 #    define YYSTACK_ALLOC alloca
@@ -1243,6 +1247,7 @@ while (YYID (0))
 
 # ifndef YYFPRINTF
 #  include <stdio.h> /* INFRINGES ON USER NAME SPACE */
+
 #  define YYFPRINTF fprintf
 # endif
 
@@ -3275,11 +3280,11 @@ yyreduce:
   case 155:
 #line 842 "./grammar.y"
     {
-                    if ( (yyvsp[(1) - (1)].intValue) < 0 ) {
-                        (yyval.syntaxElement) = new SyntaxConstant(new Integer((yyvsp[(1) - (1)].intValue)) );
+                    if ( (yyvsp[(1) - (1)].longIntValue) < 0 ) {
+                        (yyval.syntaxElement) = new SyntaxConstant(new Integer((yyvsp[(1) - (1)].longIntValue)) );
                     }
                     else { 
-                        (yyval.syntaxElement) = new SyntaxConstant(new Natural((yyvsp[(1) - (1)].intValue)) );
+                        (yyval.syntaxElement) = new SyntaxConstant(new Natural((yyvsp[(1) - (1)].longIntValue)) );
                     }
                 }
     break;

@@ -1,8 +1,8 @@
 #include "RlNaturalNumbersState.h"
+
 #include "ConstantNode.h"
-#include "RbUtil.h"
 #include "TypeSpec.h"
-#include <sstream>
+#include "RevObject.h"
 
 using namespace RevLanguage;
 

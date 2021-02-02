@@ -1,12 +1,23 @@
 #include "Func_treeAssembly.h"
+
+#include <stddef.h>
+
 #include "ModelVector.h"
 #include "RbException.h"
-#include "Real.h"
 #include "RealPos.h"
 #include "RlTree.h"
 #include "RlDeterministicNode.h"
 #include "TreeAssemblyFunction.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "DagNode.h"
+#include "ModelObject.h"
+#include "RbVector.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 
@@ -37,21 +48,21 @@ RevBayesCore::TypedFunction<RevBayesCore::Tree>* Func_treeAssembly::createFuncti
     
     // TreeAssemblyFunction acts directly on the value of the topology node
     // Current topology variable cannot already be parent of another TreeAssemblyFunction
-    bool topologyInUse = false;
+    bool topology_in_use = false;
     const std::vector<RevBayesCore::DagNode*>& tauChildren = tau->getChildren();
     for (size_t i = 0; i < tauChildren.size(); i++)
     {
         RevBayesCore::DeterministicNode<RevBayesCore::Tree>* tauChild = dynamic_cast<RevBayesCore::DeterministicNode<RevBayesCore::Tree>*>(tauChildren[i]);
-        if (tauChild != NULL)
+        if ( tauChild != NULL )
         {
             RevBayesCore::TreeAssemblyFunction* tf = dynamic_cast<RevBayesCore::TreeAssemblyFunction*>(&tauChild->getFunction());
-            if (tf != NULL)
+            if ( tf != NULL )
             {
-                topologyInUse = true;
+                topology_in_use = true;
             }
         }
     }
-    if (topologyInUse)
+    if ( topology_in_use == true )
     {
         throw RbException("Variable \"" + tau->getName() + "\" cannot be used with more than one treeAssembly function.");
     }

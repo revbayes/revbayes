@@ -18,7 +18,7 @@
 #ifndef RbVersion_H
 #define RbVersion_H
 
-#include <string>
+#include <iosfwd>
 
 class RbVersion {
     

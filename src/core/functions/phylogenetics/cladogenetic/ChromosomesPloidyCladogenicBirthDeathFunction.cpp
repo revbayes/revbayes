@@ -6,8 +6,16 @@
 
 
 #include "ChromosomesPloidyCladogenicBirthDeathFunction.h"
+
+#include <stddef.h>
+#include <utility>
+
 #include "CladogeneticSpeciationRateMatrix.h"
-#include "RbException.h"
+#include "Cloneable.h"
+#include "RbVector.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 
 using namespace RevBayesCore;

@@ -15,16 +15,15 @@
  */
 
 #include <cmath>
-#include <iostream>
 #include <vector>
+#include <algorithm>
 
-#include "RbConstants.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "RbMathFunctions.h"
 #include "DistributionBivariatePoisson.h"
 #include "DistributionPoisson.h"
-#include "RbStatisticsHelper.h"
-#include "RbException.h"
+
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 
 using namespace RevBayesCore;

@@ -1,18 +1,28 @@
+#include <stddef.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "GMRFUnevenGridHyperpriorGibbsMove.h"
 #include "ModelVector.h"
 #include "Move_GMRFUnevenGridHyperpriorGibbs.h"
-#include "Natural.h"
 #include "RbException.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
-#include "RlBoolean.h"
-#include "RlMatrixReal.h"
-#include "RlMatrixRealSymmetric.h"
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "DagNode.h"
+#include "ModelObject.h"
+#include "Move.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlMove.h"
+#include "StochasticNode.h"
+
+namespace RevBayesCore { template <class valueType> class RbVector; }
 
 
 using namespace RevLanguage;

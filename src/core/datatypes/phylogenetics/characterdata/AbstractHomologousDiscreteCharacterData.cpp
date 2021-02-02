@@ -1,9 +1,12 @@
 #include "AbstractHomologousDiscreteCharacterData.h"
+
+#include <sstream>
+#include <string>
+
 #include "DelimitedCharacterDataWriter.h"
 #include "NexusWriter.h"
 #include "RbFileManager.h"
-
-#include <sstream>
+#include "Cloneable.h"
 
 using namespace RevBayesCore;
 

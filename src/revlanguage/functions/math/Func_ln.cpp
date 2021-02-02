@@ -6,12 +6,28 @@
 //  Copyright 2012 __MyCompanyName__. All rights reserved.
 //
 
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "LnFunction.h"
 #include "Func_ln.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "RlTypedFunction.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
+#include "TypedFunction.h"
 
 using namespace RevLanguage;
 
@@ -91,80 +107,6 @@ std::string Func_ln::getFunctionName( void ) const
     std::string f_name = "ln";
     
     return f_name;
-}
-
-
-/**
- * Get the author(s) of this function so they can receive credit (and blame) for it.
- */
-std::vector<std::string> Func_ln::getHelpAuthor(void) const
-{
-    // create a vector of authors for this function
-    std::vector<std::string> authors;
-    authors.push_back( "Jordan Koch" );
-    
-    return authors;
-}
-
-
-/**
- * Get the (brief) description for this function
- */
-std::string Func_ln::getHelpDescription(void) const
-{
-    std::string description = "";
-    description += "Returns the natural log of a (positive) value.";
-    
-    return description;
-}
-
-/**
- * Get an executable and instructive example.
- * These example should help the users to show how this function works but
- * are also used to test if this function still works.
- */
-std::string Func_ln::getHelpExample(void) const
-{
-    // create an example as a single string variable.
-    std::string example = "";
-    
-    example =  "# create a stochastic node with an exponential distribution\n";
-    example += "x ~ dnExponential(1)\n";
-    example += "\n";
-    example += "# create a determinstic node that takes the natural log of x\n";
-    example += "y := ln(x)\n";
-    example += "\n";
-    example += "# print the values for x and y\n";
-    example += "x # x has the stochastic value of 2.940149\n";
-    example += "y # y has the determined value of 1.07846\n";
-
-    return example;
-}
-
-
-/**
- * Get the names of similar and suggested other functions
- */
-std::vector<std::string> Func_ln::getHelpSeeAlso(void) const
-{
-    // create an entry for each suggested function
-    std::vector<std::string> see_also;
-    see_also.push_back( "log" );
-    
-    
-    return see_also;
-}
-
-
-/**
- * Get the title of this help entry
- */
-std::string Func_ln::getHelpTitle(void) const
-{
-    // create a title variable
-    std::string title = "Natural log function";
-    
-    return title;
 }
 
 

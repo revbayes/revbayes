@@ -1,6 +1,14 @@
 #include "ChromosomesCladogenicStateFunction.h"
-#include "MatrixReal.h"
+
+#include <utility>
+
 #include "RbException.h"
+#include "Cloneable.h"
+#include "Simplex.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class BranchHistory; }
+namespace RevBayesCore { class DagNode; }
 
 
 using namespace RevBayesCore;

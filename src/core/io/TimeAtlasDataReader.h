@@ -9,14 +9,16 @@
 #ifndef __rb_mlandis__TimeAtlasDataReader__
 #define __rb_mlandis__TimeAtlasDataReader__
 
-#include "DelimitedDataReader.h"
-#include "GeographicArea.h"
-#include <boost/property_tree/ptree.hpp>
-
-#include <string>
+#include <stddef.h>
 #include <vector>
+#include <iosfwd>
+
+#include "DelimitedDataReader.h"
+#include "boost/property_tree/ptree_fwd.hpp"
 
 namespace RevBayesCore {
+class GeographicArea;
+
     class TimeAtlasDataReader : public DelimitedDataReader
     {
     public:

@@ -1,15 +1,28 @@
 #include "PhyloOrnsteinUhlenbeckProcessEVE.h"
+
+#include <cmath>
+#include <cstddef>
+#include <string>
+#include <iosfwd>
+
 #include "ConstantNode.h"
 #include "DistributionNormal.h"
 #include "DistributionMultivariateNormal.h"
 #include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
 #include "RbException.h"
 #include "StochasticNode.h"
 #include "TopologyNode.h"
 #include "TreeUtilities.h"
+#include "Cloneable.h"
+#include "ContinuousCharacterData.h"
+#include "ContinuousTaxonData.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
 
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 
 using namespace RevBayesCore;

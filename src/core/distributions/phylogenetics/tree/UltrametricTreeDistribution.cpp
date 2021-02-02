@@ -1,15 +1,34 @@
-#include "Clade.h"
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <iostream>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
-#include "RbMathCombinatorialFunctions.h"
 #include "StochasticNode.h"
 #include "TopologyNode.h"
 #include "TreeUtilities.h"
 #include "UltrametricTreeDistribution.h"
+#include "RbBitSet.h"
+#include "RbBoolean.h"
+#include "RbException.h"
+#include "RbMathLogic.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "StringUtilities.h"
+#include "Trace.h"
+#include "TraceTree.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
 
-#include <algorithm>
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
 
 
 #ifdef RB_MPI
@@ -380,7 +399,7 @@ double UltrametricTreeDistribution::computeLnProbability( void )
     Tree *my_tree_unrooted = my_tree.clone();
     my_tree_unrooted->unroot();
 
-    my_tree_unrooted->reroot( outgroup, true);
+    my_tree_unrooted->reroot( outgroup, false, true);
     
     std::string my_tree_newick = my_tree_unrooted->getPlainNewickRepresentation();
     
@@ -560,7 +579,7 @@ void UltrametricTreeDistribution::executeMethod(const std::string &n, const std:
         Tree *my_tree_unrooted = this_tree.clone();
         my_tree_unrooted->unroot();
         
-        my_tree_unrooted->reroot( outgroup, true);
+        my_tree_unrooted->reroot( outgroup, false, true);
         
         std::string my_tree_newick = my_tree_unrooted->getPlainNewickRepresentation();
         
@@ -665,7 +684,7 @@ void UltrametricTreeDistribution::prepareTreeSamples(const std::vector<Tree> &tr
         
         Tree tree = trees[i];
         
-        tree.reroot( outgroup, true );
+        tree.reroot( outgroup, false, true );
         
         std::string newick = tree.getPlainNewickRepresentation();
         trees_newick[i] = newick;

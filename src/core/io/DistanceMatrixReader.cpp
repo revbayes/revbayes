@@ -1,7 +1,10 @@
 #include "DistanceMatrixReader.h"
-#include "RbFileManager.h"
 
-#include "RbConstants.h"
+#include <stdlib.h>
+#include <string>
+
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 
 using namespace RevBayesCore;

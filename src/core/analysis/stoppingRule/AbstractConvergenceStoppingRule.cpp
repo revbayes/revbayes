@@ -1,8 +1,9 @@
-#include "EssTest.h"
+#include <stddef.h>
+#include <iosfwd>
+
 #include "AbstractConvergenceStoppingRule.h"
-#include "RbFileManager.h"
-#include "StringUtilities.h"
-#include "TraceContinuousReader.h"
+#include "BurninEstimatorContinuous.h"
+#include "StoppingRule.h"
 
 
 using namespace RevBayesCore;

@@ -6,11 +6,17 @@
 //  Copyright 2013 UC Berkeley. All rights reserved.
 //
 
-#include <iostream>
+#include <cstddef>
+#include <vector>
+
 #include "PseudoGibbsMetaMove.h"
 #include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
 #include "RbStatisticsHelper.h"
+#include "AbstractHomologousDiscreteCharacterData.h"
+#include "Cloneable.h"
+
+namespace RevBayesCore { class Move; }
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 

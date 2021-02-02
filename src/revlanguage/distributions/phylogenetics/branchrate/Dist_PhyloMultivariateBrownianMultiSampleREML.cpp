@@ -1,12 +1,27 @@
 #include "Dist_PhyloMultivariateBrownianMultiSampleREML.h"
-#include "OptionRule.h"
+
+#include <stddef.h>
+#include <ostream>
+
 #include "PhyloMultivariateBrownianProcessMultiSampleREML.h"
-#include "RevNullObject.h"
 #include "RlMatrixReal.h"
 #include "RlMatrixRealSymmetric.h"
-#include "RlString.h"
 #include "RlTaxon.h"
 #include "RlTree.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "MatrixReal.h"
+#include "ModelObject.h"
+#include "ModelVector.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RealPos.h"
+#include "RlDistribution.h"
+#include "StringUtilities.h"
+#include "Tree.h"
+#include "TypeSpec.h"
+
+namespace RevBayesCore { class Taxon; }
 
 using namespace RevLanguage;
 

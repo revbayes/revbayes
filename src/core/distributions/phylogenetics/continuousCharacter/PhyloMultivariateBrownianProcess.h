@@ -1,17 +1,19 @@
 #ifndef PhyloMultivariateBrownianProcess_H
 #define PhyloMultivariateBrownianProcess_H
 
-#include <iostream>
+#include <stddef.h>
+#include <vector>
 
-
-#include "ModelVector.h"
 #include "MatrixReal.h"
-#include "Real.h"
-#include "Tree.h"
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "TopologyNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+class Tree;
     
     class PhyloMultivariateBrownianProcess : public TypedDistribution< RbVector< RbVector<double> > > {
         

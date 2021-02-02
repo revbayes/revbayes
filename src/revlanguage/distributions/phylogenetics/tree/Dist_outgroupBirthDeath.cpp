@@ -6,21 +6,29 @@
 //  Copyright © 2016 Michael Landis. All rights reserved.
 //
 
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "Clade.h"
 #include "ConstantRateOutgroupBirthDeathProcess.h"
 #include "Dist_outgroupBirthDeath.h"
 #include "ModelVector.h"
-#include "Natural.h"
 #include "OptionRule.h"
 #include "Probability.h"
-#include "Real.h"
 #include "RealPos.h"
-#include "RlClade.h"
 #include "RlString.h"
 #include "RlTaxon.h"
-#include "RlTimeTree.h"
+#include "ModelObject.h"
+#include "RbVector.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBirthDeathProcess.h"
+#include "Taxon.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
 
 using namespace RevLanguage;
 

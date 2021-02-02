@@ -1,13 +1,14 @@
 #include "RateMatrix_InfiniteSites.h"
-#include "RbException.h"
-#include "RbMathMatrix.h"
-#include "TransitionProbabilityMatrix.h"
 
 #include <cmath>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <iomanip>
+
+#include "RbException.h"
+#include "TransitionProbabilityMatrix.h"
+#include "Assignable.h"
+#include "Cloneable.h"
+#include "MatrixReal.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 using namespace RevBayesCore;
 

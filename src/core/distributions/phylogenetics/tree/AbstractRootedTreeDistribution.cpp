@@ -1,4 +1,11 @@
-#include "Clade.h"
+#include <stddef.h>
+#include <algorithm>
+#include <cmath>
+#include <ostream>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "AbstractRootedTreeDistribution.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
@@ -8,10 +15,14 @@
 #include "StochasticNode.h"
 #include "Taxon.h"
 #include "TopologyNode.h"
-#include "TreeUtilities.h"
+#include "RbSettings.h"
+#include "StringUtilities.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
 
-#include <algorithm>
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
 
 using namespace RevBayesCore;
 
@@ -174,7 +185,7 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
 
     // multiply the probability of a descendant of the initial species
     lnProbTimes += computeLnProbabilityDivergenceTimes();
-    
+        
     return lnProbTimes + lnProbTreeShape();
 }
 
@@ -192,7 +203,7 @@ bool AbstractRootedTreeDistribution::isLnProbabilityNonZero(void)
  *
  * \return The diversity (number of species in the reconstructed tree).
  */
-int AbstractRootedTreeDistribution::diversity(double t) const
+int AbstractRootedTreeDistribution::diversity(double t)
 {
     recomputeDivergenceTimesSinceOrigin();
     
@@ -390,7 +401,7 @@ double AbstractRootedTreeDistribution::lnProbTreeShape(void) const
  *
  * Fills vector of times. The caller needs to deallocate this vector.
  */
-void AbstractRootedTreeDistribution::recomputeDivergenceTimesSinceOrigin( void ) const
+void AbstractRootedTreeDistribution::recomputeDivergenceTimesSinceOrigin( void )
 {
     
     // get the time of the process
@@ -569,6 +580,15 @@ void AbstractRootedTreeDistribution::simulateClade(std::vector<TopologyNode *> &
 }
 
 
+double AbstractRootedTreeDistribution::simulateCladeAge(size_t n, double origin, double present, double min) const
+{
+    
+    std::vector<double> times = simulateDivergenceTimes(n, origin, present, min);
+    
+    return times.back();
+}
+
+
 double AbstractRootedTreeDistribution::simulateNextAge(size_t n, double origin, double present, double min) const
 {
 
@@ -581,6 +601,7 @@ double AbstractRootedTreeDistribution::simulateNextAge(size_t n, double origin, 
 void AbstractRootedTreeDistribution::simulateTree( void )
 {
 
+    
     // the time tree object (topology & times)
     Tree *psi = new Tree();
 

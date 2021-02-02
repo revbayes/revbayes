@@ -1,10 +1,14 @@
+#include <stddef.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "ModelVector.h"
 #include "Move_VectorSlide.h"
 #include "Natural.h"
-#include "RbException.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -12,6 +16,24 @@
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
 #include "VectorSlideProposal.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "Move.h"
+#include "RbBoolean.h"
+#include "RbVector.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlMove.h"
+#include "StochasticNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
+
+namespace RevBayesCore { class Proposal; }
 
 
 using namespace RevLanguage;

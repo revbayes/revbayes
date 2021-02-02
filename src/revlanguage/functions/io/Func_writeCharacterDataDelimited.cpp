@@ -1,12 +1,25 @@
+#include <stddef.h>
+#include <iosfwd>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "Func_writeCharacterDataDelimited.h"
-#include "RbException.h"
 #include "RevNullObject.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlContinuousCharacterData.h"
-#include "RlDnaState.h"
 #include "RlString.h"
 #include "DelimitedCharacterDataWriter.h"
+#include "AbstractHomologousDiscreteCharacterData.h"
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "ContinuousCharacterData.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
+
+namespace RevBayesCore { class HomologousCharacterData; }
 
 
 

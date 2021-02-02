@@ -1,9 +1,28 @@
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "TajimasDFunction.h"
 #include "Func_TajimasD.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlBoolean.h"
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RbBoolean.h"
+#include "Real.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlTypedFunction.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
+#include "TypedFunction.h"
+
+namespace RevBayesCore { class AbstractHomologousDiscreteCharacterData; }
 
 using namespace RevLanguage;
 

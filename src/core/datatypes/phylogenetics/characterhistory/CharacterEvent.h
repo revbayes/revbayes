@@ -2,7 +2,7 @@
 #define CharacterEvent_H
 
 #include <stdlib.h>
-#include <vector>
+#include <iosfwd>
 
 #include "Cloneable.h"
 #include "CharacterEventType.h"

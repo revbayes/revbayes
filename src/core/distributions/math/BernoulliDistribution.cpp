@@ -1,14 +1,26 @@
 #include "BernoulliDistribution.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbConstants.h"
 
 #include <cmath>
 
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
+#include "RbConstants.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
+
 using namespace RevBayesCore;
 
-BernoulliDistribution::BernoulliDistribution(const TypedDagNode<double> *q) : TypedDistribution<long>( new long( 0 ) ),
-    p( q )
+
+/*
+ * Bernoulli Distribution Constructor
+ *
+ * @param p a value of type double for the probability of succcess
+ *
+ */
+
+BernoulliDistribution::BernoulliDistribution(const TypedDagNode<double> *p) : TypedDistribution<long>( new long( 0 ) ),
+    p( p )
 {
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters

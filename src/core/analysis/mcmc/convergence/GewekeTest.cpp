@@ -1,7 +1,11 @@
 #include "GewekeTest.h"
-#include "DistributionNormal.h"
 
+#include <stddef.h>
 #include <cmath>
+
+#include "DistributionNormal.h"
+#include "Cloner.h"
+#include "TraceNumeric.h"
 
 using namespace RevBayesCore;
 using namespace std;

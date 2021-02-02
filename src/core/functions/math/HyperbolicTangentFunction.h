@@ -2,13 +2,14 @@
 #define HyperbolicTangentFunction_H
 
 #include "ContinuousFunction.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     
     /**
-     * \brief Hyperbolic tangent of a real number.
+     * @brief Hyperbolic tangent of a real number.
      *
      * Compute the hyperbolic tangent of a real number x (tanh(x) = exp(2x)-1 / (exp(2x)+1)).
      *

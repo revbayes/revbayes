@@ -1,8 +1,8 @@
 #include "TimeInterval.h"
 
-#include "RbConstants.h"
 #include "RbException.h"
 #include "RbMathLogic.h"
+#include "RbConstants.h" // IWYU pragma: keep
 
 using namespace RevBayesCore;
 

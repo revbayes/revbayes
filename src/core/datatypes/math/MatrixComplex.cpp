@@ -8,8 +8,6 @@
 
 #include "MatrixComplex.h"
 
-#include <cstring>
-
 using namespace RevBayesCore;
 
 MatrixComplex::MatrixComplex( size_t n, size_t k) : elements( std::vector<std::vector<std::complex<double> > >(n, std::vector<std::complex<double> >(k, 0.0) ) ), nRows( n ), nCols( k ){

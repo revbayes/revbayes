@@ -1,12 +1,19 @@
 #include "Func_hky.h"
+
 #include "HkyRateMatrixFunction.h"
-#include "RateMatrix_HKY.h"
-#include "Real.h"
 #include "RealPos.h"
 #include "RlDeterministicNode.h"
 #include "RlRateMatrix.h"
 #include "RlSimplex.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "RbException.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "Simplex.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

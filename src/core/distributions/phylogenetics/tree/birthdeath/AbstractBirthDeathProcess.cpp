@@ -1,15 +1,19 @@
-#include "Clade.h"
-#include "AbstractBirthDeathProcess.h"
-#include "RbConstants.h"
-#include "RbException.h"
-#include "RbMathCombinatorialFunctions.h"
-#include "StochasticNode.h"
-#include "Taxon.h"
-#include "TopologyNode.h"
-#include "TreeUtilities.h"
-
+#include <stddef.h>
 #include <algorithm>
 #include <cmath>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
+#include "AbstractBirthDeathProcess.h"
+#include "RbConstants.h"
+#include "RbMathCombinatorialFunctions.h"
+#include "TopologyNode.h"
+#include "AbstractRootedTreeDistribution.h"
+#include "Tree.h"
+
+namespace RevBayesCore { class Taxon; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevBayesCore;
 
@@ -40,7 +44,7 @@ AbstractBirthDeathProcess::~AbstractBirthDeathProcess(void)
  *
  * @return log-probability
  */
-double AbstractBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) const
+double AbstractBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
 {
     // prepare the probability computation
     prepareProbComputation();
@@ -89,7 +93,7 @@ double AbstractBirthDeathProcess::lnProbTreeShape(void) const
  * Prepare the probability computation. Here we can pre-calculate some values for more
  * efficient probability calculation. The derived classes may want to do something.
  */
-void AbstractBirthDeathProcess::prepareProbComputation( void ) const
+void AbstractBirthDeathProcess::prepareProbComputation( void ) 
 {}
 
 

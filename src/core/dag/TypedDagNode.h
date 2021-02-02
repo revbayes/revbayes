@@ -152,9 +152,6 @@ namespace RevBayesCore {
 #include "Printable.h"
 #include "Printer.h"
 #include "RbContainer.h"
-#include "RbFileManager.h"
-#include "RbUtil.h"
-#include "StringUtilities.h"
 
 #include <vector>
 

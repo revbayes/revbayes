@@ -1,30 +1,18 @@
-/**
- * @file DistributionF
- * This file contains the functions of the F distribution.
- *
- * @brief Implementation of the F distribution.
- *
- * (c) Copyright 2009- under GPL version 3
- * @date Last modified: $Date$
- * @author The RevBayes core development team
- * @license GPL version 3
- * @version 1.0
- * @since 2011-03-17, version 1.0
- *
- * $Id$
- */
+
 
 #include <cmath>
+#include <sstream> // IWYU pragma: keep
 
 #include "DistributionBeta.h"
 #include "DistributionBinomial.h"
 #include "DistributionChisq.h"
 #include "DistributionF.h"
 #include "DistributionGamma.h"
-#include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbException.h"
 #include "RbMathLogic.h"
+
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 
 using namespace RevBayesCore;

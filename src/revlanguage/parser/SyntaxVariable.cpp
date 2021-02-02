@@ -1,23 +1,16 @@
-#include "Argument.h"
-#include "Environment.h"
-#include "Integer.h"
-#include "ModelVector.h"
-#include "Natural.h"
-#include "RbException.h"
-#include "RevObject.h"
-#include "RbUtil.h"
-#include "RbOptions.h"
-#include "RlString.h"
-#include "SyntaxFunctionCall.h"
-#include "RevVariable.h"
-#include "Workspace.h"
-#include "SyntaxVariable.h"
-
+#include <stddef.h>
 #include <iostream>
-#include <list>
 #include <set>
 #include <string>
-#include <sstream>
+#include <vector>
+
+#include "Environment.h"
+#include "RbException.h"
+#include "RevObject.h"
+#include "RevVariable.h"
+#include "SyntaxVariable.h"
+#include "RevPtr.h"
+#include "SyntaxElement.h"
 
 using namespace RevLanguage;
 

@@ -9,15 +9,23 @@
 #ifndef Func_epoch_H
 #define Func_epoch_H
 
-#include "RateGenerator.h"
-#include "ModelVector.h"
-#include "RlRateMatrix.h"
-#include "RlTypedFunction.h"
-
-#include <map>
 #include <string>
+#include <iosfwd>
+#include <vector>
+
+#include "RateGenerator.h"
+#include "RlTypedFunction.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RevPtr.h"
+#include "RlDeterministicNode.h"
+#include "RlRateGenerator.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 namespace RevLanguage {
+class ArgumentRules;
+class TypeSpec;
     
     class Func_epoch : public TypedFunction<RateGenerator> {
         

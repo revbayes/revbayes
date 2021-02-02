@@ -1,4 +1,9 @@
 #include "Move_IndependentTopology.h"
+
+#include <stddef.h>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "IndependentTopologyProposal.h"
@@ -11,6 +16,20 @@
 #include "RlTypedDistribution.h"
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "DagNode.h"
+#include "ModelObject.h"
+#include "Move.h"
+#include "RevNullObject.h"
+#include "RlDistribution.h"
+#include "RlTree.h"
+#include "StochasticNode.h"
+#include "StringUtilities.h"
+#include "TypedDistribution.h"
+
+namespace RevBayesCore { class Clade; }
+namespace RevBayesCore { class Proposal; }
+namespace RevBayesCore { class Tree; }
+namespace RevBayesCore { template <class valueType> class RbVector; }
 
 
 using namespace RevLanguage;

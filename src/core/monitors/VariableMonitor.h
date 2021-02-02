@@ -1,12 +1,15 @@
 #ifndef FileMonitor_H
 #define FileMonitor_H
 
-#include "AbstractFileMonitor.h"
-
-#include <string>
+#include <stddef.h>
 #include <vector>
+#include <iosfwd>
+
+#include "AbstractFileMonitor.h"
+#include "MonteCarloAnalysisOptions.h"
 
 namespace RevBayesCore {
+class DagNode;
 
     class VariableMonitor : public AbstractFileMonitor {
 
@@ -19,23 +22,23 @@ namespace RevBayesCore {
         VariableMonitor*                        clone(void) const;                                                  //!< Clone the object
         
         // monitor methods
-        virtual void printHeader();
-        virtual void monitor(unsigned long gen);
+        virtual void                            printHeader();
+        virtual void                            monitor(unsigned long gen);
 
-        virtual void printFileHeader();
-        virtual void monitorVariables(unsigned long gen);
-        void combineReplicates(size_t n_reps, MonteCarloAnalysisOptions::TraceCombinationTypes tc);
+        virtual void                            printFileHeader();
+        virtual void                            monitorVariables(unsigned long gen);
+        void                                    combineReplicates(size_t n_reps, MonteCarloAnalysisOptions::TraceCombinationTypes tc);
 
         // setters
-        void setPrintLikelihood(bool tf);
-        void setPrintPosterior(bool tf);
-        void setPrintPrior(bool tf);
+        void                                    setPrintLikelihood(bool tf);
+        void                                    setPrintPosterior(bool tf);
+        void                                    setPrintPrior(bool tf);
 
     protected:
-        bool                                posterior;
-        bool                                prior;
-        bool                                likelihood;
-        std::string                         separator;
+        bool                                    posterior;
+        bool                                    prior;
+        bool                                    likelihood;
+        std::string                             separator;
     };
     
 }

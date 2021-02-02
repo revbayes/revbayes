@@ -16,13 +16,12 @@
 #ifndef ChromosomesRateMatrixFunction_H
 #define ChromosomesRateMatrixFunction_H
 
-#include "RateMatrix_Chromosomes.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
-
-#include <vector>
+#include "RateGenerator.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     class ChromosomesRateMatrixFunction : public TypedFunction<RateGenerator> {
 

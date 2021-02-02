@@ -1,10 +1,13 @@
 #ifndef RandomIntegerWalkProposal_H
 #define RandomIntegerWalkProposal_H
 
+#include <iosfwd>
+
 #include "Proposal.h"
-#include "StochasticNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class variableType> class StochasticNode;
     
     /**
      * The random-interger-walk operator.

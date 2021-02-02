@@ -18,19 +18,12 @@
 #ifndef SymmetricDifferenceStatistic_H
 #define SymmetricDifferenceStatistic_H
 
-//#include "Statistic.h"
-#include "Tree.h"
-#include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <boost/dynamic_bitset.hpp>
-
-
-#include <vector>
-#include <string>
-
 namespace RevBayesCore {
+class DagNode;
+class Tree;
+template <class valueType> class TypedDagNode;
     
     class SymmetricDifferenceStatistic : public TypedFunction< double > {
         

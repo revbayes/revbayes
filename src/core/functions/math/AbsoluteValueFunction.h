@@ -2,9 +2,10 @@
 #define AbsoluteValueFunction_H
 
 #include "ContinuousFunction.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     
     /**
@@ -19,7 +20,7 @@ namespace RevBayesCore {
     public:
         AbsoluteValueFunction(const TypedDagNode<double> *a);
         
-        AbsoluteValueFunction*              clone(void) const;                                                  //!< Create a clon.
+        AbsoluteValueFunction*              clone(void) const;                                                  //!< Create a clone
         void                                update(void);                                                       //!< Recompute the value
         
     protected:

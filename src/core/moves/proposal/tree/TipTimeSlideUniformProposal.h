@@ -25,7 +25,7 @@ namespace RevBayesCore {
     class TipTimeSlideUniformProposal : public Proposal {
         
     public:
-        TipTimeSlideUniformProposal( StochasticNode<Tree> *n, TypedDagNode<double>* o);                                               //!<  constructor
+        TipTimeSlideUniformProposal( StochasticNode<Tree> *n, TypedDagNode<double>* o);             //!<  constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                        //!< Clean up proposal
@@ -38,7 +38,8 @@ namespace RevBayesCore {
         void                                    setProposalTuningParameter(double tp);
         void                                    tune(double r);                                             //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                    undoProposal(void);                                         //!< Reject the proposal
-        
+        void                                    useIndex(size_t index);                                     //!< Only sample a specific node index
+
     protected:
         
         void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);             //!< Swap the DAG nodes on which the Proposal is working on
@@ -50,6 +51,9 @@ namespace RevBayesCore {
         StochasticNode<Tree>*                   tree;                                                   //!< The variable the Proposal is working on
         TypedDagNode<double>*                   origin;
         
+        bool                                    use_index;
+        size_t                                  node_index;
+
         // stored objects to undo proposal
         TopologyNode*                           storedNode;
         double                                  storedAge;

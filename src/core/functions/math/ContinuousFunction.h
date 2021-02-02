@@ -3,8 +3,6 @@
 
 #include "TypedFunction.h"
 
-#include <iostream>
-
 namespace RevBayesCore {
     
     /**

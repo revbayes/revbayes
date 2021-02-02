@@ -1,3 +1,8 @@
+#include <stddef.h>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Clade.h"
@@ -5,15 +10,29 @@
 #include "Dist_episodicBirthDeath.h"
 #include "DeterministicNode.h"
 #include "ModelVector.h"
-#include "Natural.h"
 #include "Probability.h"
-#include "Real.h"
 #include "RealPos.h"
-#include "RlClade.h"
 #include "RlString.h"
-#include "RlTaxon.h"
-#include "RlTimeTree.h"
 #include "VectorFunction.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "RbVector.h"
+#include "RevNullObject.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBirthDeathProcess.h"
+#include "RlConstantNode.h"
+#include "Taxon.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
+#include "RlClade.h" // IWYU pragma: keep
+#include "RlTaxon.h" // IWYU pragma: keep
 
 using namespace RevLanguage;
 

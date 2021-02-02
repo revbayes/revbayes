@@ -1,21 +1,34 @@
-#include "AminoAcidState.h"
+#include <stddef.h>
+#include <ostream>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "DnaState.h"
 #include "MetropolisHastingsMove.h"
-#include "ModelVector.h"
 #include "Move_NodeTimeSlideUniformCharacterHistory.h"
 #include "NodeTimeSlideUniformCharacterHistoryProposal.h"
-#include "RbException.h"
 #include "RealPos.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlRateGenerator.h"
 #include "RlTimeTree.h"
-#include "RnaState.h"
-#include "StandardState.h"
 #include "StochasticNode.h"
-#include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "AbstractHomologousDiscreteCharacterData.h"
+#include "Move.h"
+#include "PathRejectionSampleProposal.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlMove.h"
+#include "RnaState.h" // IWYU pragma: keep
+#include "AminoAcidState.h" // IWYU pragma: keep
+#include "StandardState.h" // IWYU pragma: keep
+
+namespace RevBayesCore { class DnaState; }
+namespace RevBayesCore { class Proposal; }
+namespace RevBayesCore { class RateGenerator; }
+namespace RevBayesCore { class Tree; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 

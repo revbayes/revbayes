@@ -1,6 +1,19 @@
+#include <stddef.h>
+#include <algorithm>
+#include <map>
+#include <ostream>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "DagNode.h"
 #include "Monitor.h"
 #include "RbException.h"
+#include "MonteCarloAnalysisOptions.h"
+#include "StringUtilities.h"
+
+namespace RevBayesCore { class Mcmc; }
+namespace RevBayesCore { class Model; }
 
 using namespace RevBayesCore;
 
@@ -8,13 +21,13 @@ using namespace RevBayesCore;
 Monitor::Monitor(unsigned long g) :
     enabled( true ),
     printgen( g ),
-    model( NULL )
+    model( nullptr )
 {}
 
 Monitor::Monitor(unsigned long g, DagNode *n) :
     enabled( true ),
     printgen( g ),
-    model( NULL )
+    model( nullptr )
 {
     
     nodes.push_back( n );
@@ -31,7 +44,7 @@ Monitor::Monitor(unsigned long g, const std::vector<DagNode *> &n) :
     enabled( true ),
     printgen( g ),
     nodes( n ),
-    model( NULL )
+    model( nullptr )
 {
     
     for (std::vector<DagNode*>::iterator it = nodes.begin(); it != nodes.end(); it++)
@@ -189,7 +202,9 @@ void Monitor::closeStream( void )
  * @param ct combining mode (sequential or mixed)
  */
 void Monitor::combineReplicates( size_t n_reps, MonteCarloAnalysisOptions::TraceCombinationTypes ct )
-{}
+{
+    
+}
 
 
 /**

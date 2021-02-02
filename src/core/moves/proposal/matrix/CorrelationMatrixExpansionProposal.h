@@ -1,16 +1,17 @@
 #ifndef CorrelationMatrixExpansionProposal_H
 #define CorrelationMatrixExpansionProposal_H
 
-#include <set>
-#include <string>
+#include <iosfwd>
 
 #include "Proposal.h"
 #include "MatrixReal.h"
-#include "StochasticNode.h"
-#include "PhyloMultivariateBrownianProcessREML.h"
-#include "ContinuousCharacterData.h"
 
 namespace RevBayesCore {
+class ContinuousCharacterData;
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
+template <class variableType> class StochasticNode;
     
     /**
      * The Beta operator.

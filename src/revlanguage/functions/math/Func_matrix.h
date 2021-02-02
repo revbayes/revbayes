@@ -9,12 +9,23 @@
 #ifndef Func_matrix_h
 #define Func_matrix_h
 
+#include <string>
+#include <iosfwd>
+#include <vector>
+
 #include "RlMatrixReal.h"
 #include "RlTypedFunction.h"
-
-#include <string>
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "MatrixReal.h"
+#include "RevPtr.h"
+#include "RlDeterministicNode.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 namespace RevLanguage {
+class ArgumentRules;
+class TypeSpec;
     
     /**
      * The RevLanguage wrapper of the simplex function.

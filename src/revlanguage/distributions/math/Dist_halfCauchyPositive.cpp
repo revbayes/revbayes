@@ -1,10 +1,21 @@
+#include <stddef.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "ContinuousStochasticNode.h"
 #include "Dist_halfCauchyPositive.h"
 #include "HalfCauchyDistribution.h"
-#include "Real.h"
 #include "RealPos.h"
+#include "RbHelpReference.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlPositiveContinuousDistribution.h"
+#include "TypeSpec.h"
+
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 
@@ -110,109 +121,6 @@ std::string Dist_halfCauchyPositive::getDistributionFunctionName( void ) const
     std::string d_name = "halfCauchy";
     
     return d_name;
-}
-
-
-/**
- * Get the author(s) of this function so they can receive credit (and blame) for it.
- */
-std::vector<std::string> Dist_halfCauchyPositive::getHelpAuthor(void) const
-{
-    // create a vector of authors for this function
-    std::vector<std::string> authors;
-    authors.push_back( "Andrew Magee" );
-    
-    return authors;
-}
-
-
-/**
- * Get the (brief) description for this function
- */
-std::string Dist_halfCauchyPositive::getHelpDescription(void) const
-{
-    // create a variable for the description of the function
-    std::string description = "Half-Cauchy distribution with location equal to ‘location’ and scale equal to ‘scale’.";
-    
-    return description;
-}
-
-
-/**
- * Get the more detailed description of the function
- */
-std::string Dist_halfCauchyPositive::getHelpDetails(void) const
-{
-    // create a variable for the description of the function
-    std::string details = "";
-    details += "The half-Cauchy distribution has density:\n\n";
-    details += "f(x) = 2/(pi * sigma) * 1/(1 + x-(location/scale)^2)";
-    
-    return details;
-}
-
-
-/**
- * Get an executable and instructive example.
- * These example should help the users to show how this function works but
- * are also used to test if this function still works.
- */
-std::string Dist_halfCauchyPositive::getHelpExample(void) const
-{
-    // create an example as a single string variable.
-    std::string example = "";
-
-    example += "# we simulate some obversations\n";
-    example += "x <- rHalfCauchy(n=10,location=0,scale=1)\n";
-    example += "# let's see what the minimum is (you could do the max too). If this is not ‘location’, we're in trouble!\n";
-    example += "min(x)\n";
-    example += "# let's also see what the mean and the variance are.\n";
-    example += "The mean will not converge with more samples, the Cauchy family has no moments.\n";
-    example += "mean(x)\n";
-    example += "var(x)\n";
-    example += "sd(x)\n";
-    
-    return example;
-}
-
-
-/**
- * Get some references/citations for this function
- *
- */
-std::vector<RevBayesCore::RbHelpReference> Dist_halfCauchyPositive::getHelpReferences(void) const
-{
-    // create an entry for each reference
-    std::vector<RevBayesCore::RbHelpReference> references;
-    
-    
-    return references;
-}
-
-
-/**
- * Get the names of similar and suggested other functions
- */
-/*std::vector<std::string> Dist_halfCauchy::getHelpSeeAlso(void) const
-{
-    // create an entry for each suggested function
-    std::vector<std::string> see_also;
-    see_also.push_back( "dnLognormal" );
-    
-    
-    return see_also;
-}
-*/
-
-/**
- * Get the title of this help entry
- */
-std::string Dist_halfCauchyPositive::getHelpTitle(void) const
-{
-    // create a title variable
-    std::string title = "half-Cauchy Distribution";
-    
-    return title;
 }
 
 

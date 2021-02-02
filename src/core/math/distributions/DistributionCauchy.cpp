@@ -19,9 +19,6 @@
 #include "DistributionCauchy.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
-#include "RbException.h"
-#include "RbMathFunctions.h"
-#include "RbMathLogic.h"
 
 using namespace RevBayesCore;
 

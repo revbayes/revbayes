@@ -1,8 +1,12 @@
 #include "PointMassDistribution.h"
-#include "DistributionUniform.h"
-#include "RandomNumberFactory.h"
 
 #include <math.h>
+
+#include "Cloneable.h"
+#include "RbException.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

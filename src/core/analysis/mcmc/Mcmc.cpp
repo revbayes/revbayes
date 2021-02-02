@@ -1,26 +1,36 @@
+#include <stdlib.h>
+#include <cmath>
+#include <iostream>
+#include <map>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "DagNode.h"
-#include "VariableMonitor.h"
 #include "Mcmc.h"
 #include "MoveSchedule.h"
 #include "RandomMoveSchedule.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbException.h"
 #include "RbMathLogic.h"
-#include "RbOptions.h"
 #include "RlUserInterface.h"
 #include "SingleRandomMoveSchedule.h"
-#include "RandomMoveSchedule.h"
-#include "ExtendedNewickTreeMonitor.h"
-
-#include <unistd.h>
-
-#include <cmath>
-#include <iomanip>
-#include <sstream>
-#include <typeinfo>
 #include "SequentialMoveSchedule.h"
+#include "AbstractFileMonitor.h"
+#include "Model.h"
+#include "Monitor.h"
+#include "MonteCarloAnalysisOptions.h"
+#include "MonteCarloSampler.h"
+#include "Move.h"
+#include "RbConstIterator.h"
+#include "RbConstIteratorImpl.h"
+#include "RbFileManager.h"
+#include "RbIterator.h"
+#include "RbIteratorImpl.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "StringUtilities.h"
 
 #ifdef RB_MPI
 #include <mpi.h>
@@ -311,7 +321,7 @@ void Mcmc::disableScreenMonitor( bool all, size_t rep )
      
         if ( all == true || rep > 0 || process_active == false )
         {
-            
+
             bool is = monitors[i].isScreenMonitor();
             if ( is == true )
             {
@@ -341,7 +351,7 @@ void Mcmc::finishMonitors( size_t n_reps, MonteCarloAnalysisOptions::TraceCombin
             monitors[i].closeStream();
             
             // combine results if we used more than one replicate
-            if ( n_reps > 1 )
+            if ( n_reps > 1 && tc != MonteCarloAnalysisOptions::NONE )
             {
                 monitors[i].combineReplicates( n_reps, tc );
             }
@@ -1088,15 +1098,10 @@ void Mcmc::redrawStartingValues( void )
         
         if ( the_node->isClamped() == false && the_node->isStochastic() == true )
         {
-            
+
             the_node->redraw();
             the_node->reInitialized();
             
-        }
-        else if ( the_node->isClamped() == true )
-        {
-            // make sure that the clamped node also recompute their probabilities
-            the_node->touch();
         }
         
         the_node->touch();

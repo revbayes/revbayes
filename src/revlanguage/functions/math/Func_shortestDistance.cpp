@@ -7,14 +7,24 @@
 //
 
 #include "Func_shortestDistance.h"
+
+#include <stddef.h>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ConstantNode.h"
 #include "ShortestDistanceFunction.h"
-#include "Probability.h"
 #include "RbVector.h"
 #include "RealPos.h"
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "Natural.h"
+#include "RevObject.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

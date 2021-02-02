@@ -20,11 +20,11 @@
 #define DiscretizeBetaQuadratureFunction_H
 
 #include "TypedFunction.h"
-#include "ContinuousDistribution.h"
 #include "MatrixReal.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     class DiscretizeBetaQuadratureFunction : public TypedFunction< MatrixReal >{
         

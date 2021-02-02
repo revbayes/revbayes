@@ -43,6 +43,7 @@ namespace RevBayesCore {
         void                                setEpochTimes(const RbVector<double> &t);                                                                           //!< Directly set the epoch times
         void                                setEpochRates(const RbVector<double>& r);                                                                           //!< Directly set the epoch rates
         virtual bool                        simulateStochasticMapping(double startAge, double endAge, double rate,std::vector<size_t>& transition_states, std::vector<double>& transition_times);
+        virtual void                        printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const;            //!< print object for user (in user-formatted way)
         void                                update(void);
         
     private:

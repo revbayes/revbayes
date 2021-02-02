@@ -1,18 +1,17 @@
 #ifndef BiogeographyRateGeneratorSequenceFunction_H
 #define BiogeographyRateGeneratorSequenceFunction_H
 
-//#include "CountRateModifier.h"
-#include "DistanceRateModifier.h"
-#include "RateGenerator.h"
-#include "RateGeneratorSequence_Biogeography.h"
-#include "RbVector.h"
-#include "Tree.h"
-#include "TypedDagNode.h"
-#include "TypedFunction.h"
+#include <stddef.h>
 
-#include <vector>
+#include "TypedFunction.h"
+#include "RateGeneratorSequence.h"
 
 namespace RevBayesCore {
+class CharacterHistoryRateModifier;
+class DagNode;
+class RateGenerator;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     class BiogeographyRateGeneratorSequenceFunction : public TypedFunction<RateGeneratorSequence> {
         

@@ -15,9 +15,10 @@
 #ifndef __RateMatrix_Chromosomes__
 #define __RateMatrix_Chromosomes__
 
-#include "AbstractRateMatrix.h"
-#include <complex>
+#include <stddef.h>
 #include <vector>
+
+#include "AbstractRateMatrix.h"
 
 
 namespace RevBayesCore {

@@ -9,13 +9,16 @@
 #ifndef __revbayes_proj__Func_convertToPhylowood__
 #define __revbayes_proj__Func_convertToPhylowood__
 
-#include "Procedure.h"
-#include "RbFileManager.h"
+#include <iosfwd>
 
-#include <string>
+#include "Procedure.h"
+#include "RevPtr.h"
 
 
 namespace RevLanguage {
+class ArgumentRules;
+class RevVariable;
+class TypeSpec;
     
     class Func_convertToPhylowood :  public Procedure {
         

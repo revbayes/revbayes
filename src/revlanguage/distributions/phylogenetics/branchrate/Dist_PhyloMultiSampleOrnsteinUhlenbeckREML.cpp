@@ -1,11 +1,25 @@
 #include "Dist_PhyloMultiSampleOrnsteinUhlenbeckREML.h"
+
+#include <stddef.h>
+#include <ostream>
+
 #include "PhyloMultiSampleOrnsteinUhlenbeckProcessREML.h"
-#include "OptionRule.h"
-#include "RevNullObject.h"
-#include "RlBoolean.h"
-#include "RlString.h"
 #include "RlTaxon.h"
 #include "RlTree.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "ModelObject.h"
+#include "ModelVector.h"
+#include "Natural.h"
+#include "RbVector.h"
+#include "Real.h"
+#include "RealPos.h"
+#include "RlDistribution.h"
+#include "StringUtilities.h"
+#include "Tree.h"
+#include "TypeSpec.h"
+
+namespace RevBayesCore { class Taxon; }
 
 using namespace RevLanguage;
 

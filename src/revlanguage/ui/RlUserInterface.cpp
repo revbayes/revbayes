@@ -1,3 +1,7 @@
+#include <stddef.h>
+#include <iostream>
+#include <string>
+
 #include "RbSettings.h"
 #include "RbUtil.h"
 #include "StringUtilities.h"

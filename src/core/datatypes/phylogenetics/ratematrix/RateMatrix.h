@@ -1,15 +1,16 @@
 #ifndef RateMatrix_H
 #define RateMatrix_H
 
-#include "RateGenerator.h"
-#include "MatrixReal.h"
-#include "MemberObject.h"
+#include <stddef.h>
 #include <vector>
+
+#include "RateGenerator.h"
 
 
 namespace RevBayesCore {
 
     class TransitionProbabilityMatrix;
+class Assignable;
 
 
     class RateMatrix : public RateGenerator {

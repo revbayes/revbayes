@@ -1,4 +1,8 @@
-#include "ArgumentRule.h"
+#include <stddef.h>
+#include <vector>
+#include <iosfwd>
+#include <string>
+
 #include "RbVector.h"
 #include "TimeAtlas.h"
 #include "GeographicArea.h"
@@ -8,12 +12,27 @@
 #include "OptionRule.h"
 #include "RealPos.h"
 #include "RlAtlas.h"
-#include "RlBoolean.h"
 #include "RlString.h"
-#include "RlSimplex.h"
-#include "TimeAtlas.h"
 #include "RevVariable.h"
-#include <vector>
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "MethodTable.h"
+#include "ModelObject.h"
+#include "RbVectorImpl.h"
+#include "Real.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RlConstantNode.h"
+#include "RlUtils.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
 
 using namespace RevLanguage;
 

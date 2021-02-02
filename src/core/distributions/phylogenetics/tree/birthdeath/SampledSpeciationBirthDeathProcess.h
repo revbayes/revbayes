@@ -2,7 +2,7 @@
 #define SampledSpeciationBirthDeathProcess_h
 
 #include "AbstractCharacterHistoryBirthDeathProcess.h"
-#include "CharacterHistory.h"
+#include "CharacterHistoryDiscrete.h"
 #include "MemberObject.h"
 #include "Tree.h"
 #include "TypedDagNode.h"

@@ -1,19 +1,20 @@
 #ifndef ContinuousCharacterData_H
 #define ContinuousCharacterData_H
 
+#include <set>
+#include <vector>
+#include <cstddef>
+#include <iosfwd>
+
 #include "ContinuousTaxonData.h"
 #include "DistanceMatrix.h"
 #include "HomologousCharacterData.h"
 #include "MemberObject.h"
 #include "Printable.h"
 
-#include <map>
-#include <set>
-#include <string>
-#include <vector>
-#include <algorithm>
-
 namespace RevBayesCore {
+class AbstractCharacterData;
+class DagNode;
     
     /**
      * Class for all Continuous character data objects.

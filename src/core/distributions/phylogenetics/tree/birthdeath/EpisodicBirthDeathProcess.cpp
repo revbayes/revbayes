@@ -1,16 +1,32 @@
-#include "Clade.h"
+#include <stddef.h>
+#include <algorithm>
+#include <cmath>
+#include <iosfwd>
+#include <iterator>
+#include <set>
+#include <utility>
+#include <vector>
+
 #include "DivergenceTimeCDF.h"
 #include "EpisodicBirthDeathProcess.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-#include "RbConstants.h"
-#include "RbMathCombinatorialFunctions.h"
 #include "RbMathLogic.h"
-#include "TopologyNode.h"
+#include "BirthDeathProcess.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
 
-#include <boost/math/tools/roots.hpp>
-#include <algorithm>
-#include <cmath>
+#include "boost/format.hpp" // IWYU pragma: keep
+#include "boost/math/tools/toms748_solve.hpp"
+#include "boost/optional/optional.hpp"
+#include <boost/math/tools/roots.hpp> // IWYU pragma: keep
+
+
+namespace RevBayesCore { class Clade; }
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class Taxon; }
 
 using namespace RevBayesCore;
 
@@ -154,7 +170,7 @@ size_t EpisodicBirthDeathProcess::lower_index(double t, size_t min, size_t max) 
  *
  *
  */
-void EpisodicBirthDeathProcess::prepareProbComputation( void ) const
+void EpisodicBirthDeathProcess::prepareProbComputation( void )
 {
     
     // clean all the sets
@@ -225,7 +241,7 @@ void EpisodicBirthDeathProcess::prepareProbComputation( void ) const
 }
 
 
-void EpisodicBirthDeathProcess::prepareSurvivalProbability(double end, double r) const
+void EpisodicBirthDeathProcess::prepareSurvivalProbability(double end, double r)
 {
     // do the integration of int_{start}^{end} ( mu(s) exp(rate(t,s)) ds )
     // where rate(t,s) = int_{t}^{s} ( mu(x)-lambda(x) dx ) - sum_{for all t < m_i < s in massExtinctionTimes }( log(massExtinctionSurvivalProbability[i]) )
@@ -311,7 +327,7 @@ void EpisodicBirthDeathProcess::prepareSurvivalProbability(double end, double r)
 }
 
 
-void EpisodicBirthDeathProcess::prepareRateIntegral(double end) const
+void EpisodicBirthDeathProcess::prepareRateIntegral(double end)
 {
     
     double accummulated_rate_time = 0.0;

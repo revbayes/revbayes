@@ -7,9 +7,11 @@
 //
 
 #include "Func_constructRootedTripletDistribution.h"
+
+#include <stddef.h>
+
 #include "ModelVector.h"
-#include "RealPos.h"
-#include "RlBranchLengthTree.h" 
+#include "RlBranchLengthTree.h"
 #include "RlDeterministicNode.h"
 #include "RlRootedTripletDistribution.h"
 #include "RlString.h"
@@ -17,6 +19,19 @@
 #include "RlTaxon.h"
 #include "RootedTripletDistributionFunction.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "ModelObject.h"
+#include "RbVector.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlFunction.h"
+#include "RlTree.h"
+#include "TypeSpec.h"
+
+namespace RevBayesCore { class Taxon; }
+namespace RevBayesCore { class Tree; }
 
 using namespace RevLanguage;
 

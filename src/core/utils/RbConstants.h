@@ -60,6 +60,11 @@ namespace RbConstants {
          */
     }
     
+    namespace UnsignedInteger {
+        const unsigned int       max         = std::numeric_limits<unsigned int>::max();
+        const unsigned int       min         = std::numeric_limits<unsigned int>::min();
+    }
+    
     
     /* ----- The following constants and entry points are part of the R API ---- */
     

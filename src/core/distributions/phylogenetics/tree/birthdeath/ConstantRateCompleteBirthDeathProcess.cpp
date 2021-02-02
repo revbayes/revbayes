@@ -1,14 +1,20 @@
-#include "Clade.h"
+#include <stddef.h>
+#include <cmath>
+#include <iosfwd>
+#include <vector>
+
 #include "ConstantRateCompleteBirthDeathProcess.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbMathCombinatorialFunctions.h"
-#include "StochasticNode.h"
 #include "TopologyNode.h"
+#include "AbstractBirthDeathProcess.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
 
-#include <algorithm>
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class Taxon; }
 
 using namespace RevBayesCore;
 
@@ -42,7 +48,7 @@ ConstantRateCompleteBirthDeathProcess* ConstantRateCompleteBirthDeathProcess::cl
  *
  * \return   The log-transformed probability density.
  */
-double ConstantRateCompleteBirthDeathProcess::computeLnProbabilityTimes( void ) const
+double ConstantRateCompleteBirthDeathProcess::computeLnProbabilityTimes( void )
 {
 
     double ln_prob_times = 0;

@@ -1,5 +1,13 @@
 #include "CodonSynonymousNonsynonymousHKYRateMatrixFunction.h"
-#include "RbException.h"
+
+#include <vector>
+
+#include "Cloneable.h"
+#include "RateMatrix_CodonSynonymousNonsynonymousHKY.h"
+#include "Simplex.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

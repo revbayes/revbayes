@@ -1,15 +1,14 @@
 #ifndef DagNode_H
 #define DagNode_H
 
-#include "DagNodeMap.h"
-#include "MemberObject.h"
-#include "Parallelizable.h"
-#include "RbOrderedSet.h"
-
+#include <stddef.h>
 #include <map>
 #include <set>
-#include <string>
 #include <vector>
+#include <iosfwd>
+
+#include "MemberObject.h"
+#include "Parallelizable.h"
 
 namespace RevBayesCore {
 
@@ -17,6 +16,8 @@ namespace RevBayesCore {
     class Monitor;
     class Move;
     class AbstractTrace;
+class DagNodeMap;
+template <class valueType> class RbOrderedSet;
 
     class DagNode : public Parallelizable, public MemberObject<double> {
 

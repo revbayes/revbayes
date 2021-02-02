@@ -1,10 +1,9 @@
 #ifndef SteppingStoneSampler_H
 #define SteppingStoneSampler_H
 
-#include "MarginalLikelihoodEstimator.h"
+#include <iosfwd>
 
-#include <string>
-#include <vector>
+#include "MarginalLikelihoodEstimator.h"
 
 namespace RevBayesCore {
     

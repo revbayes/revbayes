@@ -1,15 +1,18 @@
 #ifndef PhylogeneticIndependentContrastsFunction_H
 #define PhylogeneticIndependentContrastsFunction_H
 
-#include "ContinuousCharacterData.h"
-#include "RbVector.h"
-#include "Tree.h"
-#include "TypedDagNode.h"
-#include "TypedFunction.h"
-
+#include <stddef.h>
 #include <vector>
 
+#include "RbVector.h"
+#include "TypedFunction.h"
+#include "TopologyNode.h"
+
 namespace RevBayesCore {
+class ContinuousCharacterData;
+class DagNode;
+class Tree;
+template <class valueType> class TypedDagNode;
     
     class PhylogeneticIndependentContrastsFunction : public TypedFunction< RbVector<double> > {
         

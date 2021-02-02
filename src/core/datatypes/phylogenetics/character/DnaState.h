@@ -16,9 +16,11 @@
 #ifndef DnaState_H
 #define DnaState_H
 
-#include "DiscreteCharacterState.h"
+#include <stddef.h>
 #include <ostream>
-#include <set>
+
+#include "DiscreteCharacterState.h"
+#include "RbBitSet.h"
 
 namespace RevBayesCore {
 
@@ -27,6 +29,7 @@ namespace RevBayesCore {
     public:
                                         DnaState(size_t n=4);                               //!< Default constructor
                                         DnaState(const std::string &s);                     //!< Constructor with nucleotide observation
+                                        DnaState(const RbBitSet& bs);                       //!< Constructor with which letters are observed.
 
         DnaState*                       clone(void) const;                                  //!< Get a copy of this object
 

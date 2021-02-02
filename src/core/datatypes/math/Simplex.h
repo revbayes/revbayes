@@ -18,19 +18,17 @@
 #ifndef Simplex_H
 #define Simplex_H
 
-#include "Cloneable.h"
-#include "MemberObject.h"
-#include "RbVector.h"
-
 #include <cstddef>
 #include <iostream>
 #include <vector>
 
+#include "MemberObject.h"
+#include "RbVector.h"
+
 namespace RevBayesCore {
+class DagNode;
     
-    class EigenSystem;
-    
-    class Simplex : public RbVector<double>, public MemberObject<double> {
+    class Simplex : public RbVector<double> {
         
     public:
         Simplex(void);                       //!< Default constructor required by revlanguage use of this class
@@ -49,7 +47,6 @@ namespace RevBayesCore {
         Simplex*                                clone(void) const;
         
         // utility funcions
-        void                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, double &rv) const;       //!< Map the member methods to internal function calls
         virtual void                            initFromString(const std::string &s);
         
     protected:

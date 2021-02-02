@@ -5,15 +5,28 @@
 //
 
 
-#include "ArgumentRule.h"
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "CladogeneticSpeciationRateMatrix.h"
-#include "ModelVector.h"
-#include "Natural.h"
-#include "Real.h"
-#include "RealPos.h"
-#include "RlBoolean.h"
 #include "RlCladogeneticSpeciationRateMatrix.h"
-#include "RlRateMatrix.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
+
+namespace RevLanguage { class Argument; }
 
 using namespace RevLanguage;
 

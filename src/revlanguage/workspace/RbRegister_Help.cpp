@@ -1,9 +1,14 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ostream>
+
+#include "RbException.h"
 #include "RbHelpSystem.h"
+#include "RbHelpType.h"
 #include "RlUserInterface.h"
 #include "Workspace.h"
 
 // The types of which we add extra help
-#include "RlMonteCarloAnalysis.h"
 #include "RlTimeTree.h"
 
 

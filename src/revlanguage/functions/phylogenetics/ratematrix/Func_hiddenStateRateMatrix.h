@@ -1,13 +1,23 @@
 #ifndef Func_hiddenStateRateMatrix_H
 #define Func_hiddenStateRateMatrix_H
 
+#include <string>
+#include <iosfwd>
+#include <vector>
+
 #include "RlTypedFunction.h"
 #include "RlRateMatrix.h"
-
-#include <map>
-#include <string>
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RateGenerator.h"
+#include "RevPtr.h"
+#include "RlDeterministicNode.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 namespace RevLanguage {
+class ArgumentRules;
+class TypeSpec;
     
     /**
      * The RevLanguage wrapper of the Hidden state rate matrix function.

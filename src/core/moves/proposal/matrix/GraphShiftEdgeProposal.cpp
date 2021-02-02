@@ -1,13 +1,18 @@
+#include <iostream>
+#include <cstddef>
+#include <vector>
+
 #include "DistributionBinomial.h"
 #include "GraphShiftEdgeProposal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-#include "RbException.h"
 #include "RbVector.h"
-#include "TypedDagNode.h"
+#include "MatrixReal.h"
+#include "Proposal.h"
+#include "RbVectorImpl.h"
+#include "StochasticNode.h"
 
-#include <cmath>
-#include <iostream>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

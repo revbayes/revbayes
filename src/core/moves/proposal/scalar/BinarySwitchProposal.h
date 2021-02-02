@@ -1,10 +1,13 @@
 #ifndef BinarySwitchProposal_H
 #define BinarySwitchProposal_H
 
+#include <iosfwd>
+
 #include "Proposal.h"
-#include "StochasticNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class variableType> class StochasticNode;
     
     /**
      * The random-binary-walk operator.

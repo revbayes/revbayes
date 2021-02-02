@@ -16,9 +16,11 @@
 #ifndef StandardState_H
 #define StandardState_H
 
-#include "DiscreteCharacterState.h"
+#include <stddef.h>
 #include <ostream>
-#include <set>
+
+#include "DiscreteCharacterState.h"
+#include "RbBitSet.h"
 
 namespace RevBayesCore {
 

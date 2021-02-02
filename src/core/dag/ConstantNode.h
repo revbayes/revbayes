@@ -3,6 +3,7 @@
 
 #include "StringUtilities.h"
 #include "TypedDagNode.h"
+#include "DagNodeMap.h"
 
 namespace RevBayesCore {
     

@@ -1,5 +1,14 @@
 #include "MinFunction.h"
+
+#include <stddef.h>
+
 #include "RbConstants.h"
+#include "Cloneable.h"
+#include "DagNode.h"
+#include "MatrixReal.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "TypedDagNode.h"
 
 using namespace RevBayesCore;
 

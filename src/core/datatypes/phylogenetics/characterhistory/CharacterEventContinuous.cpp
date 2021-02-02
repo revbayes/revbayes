@@ -1,9 +1,9 @@
 #include "CharacterEventContinuous.h"
-#include "CharacterEventType.h"
-#include "RbException.h"
 
-#include <iostream>
-#include <sstream>
+#include <sstream> // IWYU pragma: keep
+
+#include "RbException.h"
+#include "Cloneable.h"
 
 using namespace RevBayesCore;
 

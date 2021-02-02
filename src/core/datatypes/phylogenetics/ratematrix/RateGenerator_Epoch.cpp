@@ -6,6 +6,11 @@
 //  Copyright (c) 2015 Michael Landis. All rights reserved.
 //
 
+#include <iomanip>
+#include <cstddef>
+#include <iostream>
+#include <vector>
+
 #include "AbstractRateMatrix.h"
 #include "DistributionPoisson.h"
 #include "RateGenerator_Epoch.h"
@@ -13,14 +18,14 @@
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbException.h"
-#include "RbMathMatrix.h"
 #include "TransitionProbabilityMatrix.h"
-
 #include "RateMatrix.h"
-
-#include <cmath>
-#include <string>
-#include <iomanip>
+#include "Assignable.h"
+#include "Cloneable.h"
+#include "MatrixReal.h"
+#include "RateGenerator.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 using namespace RevBayesCore;
 
@@ -410,11 +415,11 @@ void RateGenerator_Epoch::sampleNumberOfTransitionsPerInterval(std::vector<size_
         size_t b = breakpoint_states[i+1];
         
         
-        std::cout << a << " -> " << b << "\n";
-        std::cout << breakpoint_times[i] << " " << breakpoint_times[i+1] << "\n";
-        std::cout << dt << "\n";
-        std::cout << r << "\n";
-        std::cout << epoch_idx << "\n";
+//        std::cout << a << " -> " << b << "\n";
+//        std::cout << breakpoint_times[i] << " " << breakpoint_times[i+1] << "\n";
+//        std::cout << dt << "\n";
+//        std::cout << r << "\n";
+//        std::cout << epoch_idx << "\n";
         
         // sample cmf
         double u = GLOBAL_RNG->uniform01();
@@ -434,7 +439,7 @@ void RateGenerator_Epoch::sampleNumberOfTransitionsPerInterval(std::vector<size_
             } else {
                 uniform_nth_power[i].push_back( uniform_nth_power[i][n-1] * uniform_first_power[i] );
             }
-            std::cout << uniform_nth_power[i][n] << "\n";
+//            std::cout << uniform_nth_power[i][n] << "\n";
             
             // prob of a->b after n events in segment i
             double p_b_given_a = uniform_nth_power[i][n][a][b];
@@ -500,4 +505,29 @@ std::ostream& RevBayesCore::operator<<(std::ostream& o, const RateGenerator_Epoc
     o.precision(previousPrecision);
     
     return o;
+}
+
+void RateGenerator_Epoch::printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const {
+    
+    std::streamsize previousPrecision = o.precision();
+    std::ios_base::fmtflags previousFlags = o.flags();
+    
+    std::stringstream prev_time( "Inf" );
+    for (size_t i = 0; i < epochTimes.size(); i++) {
+        
+        std::stringstream curr_time;
+        curr_time << epochTimes[i];
+        o << "\n";
+        o << "Epoch with index " << i << "\n";
+        o << "Epoch time from " << prev_time.str() << " to " << curr_time.str() << "\n";
+        o << std::setprecision(4) << std::fixed;
+        o << "Epoch rate multiplier " << epochRates[i] << "\n";
+        o.setf(previousFlags);
+        o.precision(previousPrecision);
+        o << "Epoch rate generator:\n";
+        // append each clado matrix's print statement
+        epochRateGenerators[i].printForUser(o, sep, l, left);
+        o << "\n";
+        prev_time.str( curr_time.str() );
+    }
 }

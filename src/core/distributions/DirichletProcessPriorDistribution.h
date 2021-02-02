@@ -74,12 +74,9 @@ namespace RevBayesCore {
     
 }
 
-#include "Cloner.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbMathCombinatorialFunctions.h"
-
-#include <cmath>
 
 
 /** DirichletProcessPriorDistribution Constructor

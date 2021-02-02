@@ -9,7 +9,9 @@
 #define	DISTRIBUTIONINVERSEWISHART_H
 
 
-#include <iostream>
+#include <stddef.h>
+#include <vector>
+
 #include "MatrixReal.h"
 
 namespace RevBayesCore {

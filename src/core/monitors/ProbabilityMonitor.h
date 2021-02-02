@@ -1,12 +1,12 @@
 #ifndef ProbabilityMonitor_H
 #define ProbabilityMonitor_H
 
+#include <iosfwd>
+
 #include "VariableMonitor.h"
 
-#include <string>
-#include <vector>
-
 namespace RevBayesCore {
+class Model;
     
     /**
      * @brief A monitor class that monitors all stochastic variables of a model and prints their probability into a file.

@@ -1,10 +1,27 @@
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "PattersonsDFunction.h"
 #include "Func_PattersonsD.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
-#include "RlBoolean.h"
 #include "RlDeterministicNode.h"
 #include "RlString.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "Real.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlTypedFunction.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
+#include "TypedFunction.h"
+
+namespace RevBayesCore { class AbstractHomologousDiscreteCharacterData; }
 
 using namespace RevLanguage;
 

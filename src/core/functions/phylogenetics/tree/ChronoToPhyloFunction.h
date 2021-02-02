@@ -2,13 +2,12 @@
 #define ChronoToPhyloFunction_h
 
 #include "Tree.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <map>
-#include <set>
-
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     class ChronoToPhyloFunction : public TypedFunction<Tree> {
         

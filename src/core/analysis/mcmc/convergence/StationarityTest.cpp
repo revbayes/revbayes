@@ -1,7 +1,10 @@
 #include "StationarityTest.h"
-#include "DistributionNormal.h"
 
 #include <cmath>
+
+#include "DistributionNormal.h"
+#include "Cloner.h"
+#include "TraceNumeric.h"
 
 using namespace RevBayesCore;
 using namespace std;

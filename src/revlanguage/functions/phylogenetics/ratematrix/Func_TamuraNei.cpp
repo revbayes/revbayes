@@ -1,12 +1,20 @@
 #include "Func_TamuraNei.h"
+
 #include "TamuraNeiRateMatrixFunction.h"
-#include "RateMatrix_Kimura80.h"
-#include "Real.h"
 #include "RealPos.h"
 #include "RlDeterministicNode.h"
 #include "RlRateMatrix.h"
 #include "RlSimplex.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "RbVector.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
+
+namespace RevBayesCore { class Simplex; }
 
 using namespace RevLanguage;
 

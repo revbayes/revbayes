@@ -1,7 +1,17 @@
 #include "Simplex.h"
-#include "TypedDagNode.h"
 
 #include <iomanip>
+#include <string>
+
+#include "TypedDagNode.h"
+#include "IsDerivedFrom.h"
+#include "RbException.h"
+#include "RbVectorImpl.h"
+#include "Serializer.h"
+#include "StringUtilities.h"
+
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class Serializable; }
 
 using namespace RevBayesCore;
 
@@ -99,21 +109,6 @@ Simplex* Simplex::clone( void ) const
     return new Simplex(*this);
 }
 
-
-void Simplex::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, double &rv) const
-{
-    
-    if ( n == "[]" )
-    {
-        long index = static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
-        rv = this->operator[](index);
-    }
-    else
-    {
-        throw RbException("A simplex object does not have a member method called '" + n + "'.");
-    }
-    
-}
 
 void Simplex::initFromString( const std::string &s )
 {

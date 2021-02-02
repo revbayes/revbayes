@@ -1,14 +1,20 @@
+#include <cmath>
+#include <iostream>
+#include <cstddef>
+#include <vector>
+
 #include "DistributionUniform.h"
 #include "TipTimeSlideUniformProposal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-#include "RbConstants.h"
 #include "RbException.h"
-#include "TreeUtilities.h"
 #include "TypedDagNode.h"
+#include "Proposal.h"
+#include "StochasticNode.h"
+#include "TopologyNode.h"
+#include "Tree.h"
 
-#include <cmath>
-#include <iostream>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
@@ -20,6 +26,7 @@ using namespace RevBayesCore;
 TipTimeSlideUniformProposal::TipTimeSlideUniformProposal( StochasticNode<Tree> *n, TypedDagNode<double> *o ) : Proposal(),
     tree( n ),
     origin( o ),
+    use_index( false ),
     failed( false )
 {
     // tell the base class to add the node
@@ -95,27 +102,31 @@ double TipTimeSlideUniformProposal::doProposal( void )
     
     std::vector<size_t> tips;
 
-    for (size_t i = 0; i < tau.getNumberOfTips(); ++i)
+    if( use_index == false )
     {
-        TopologyNode* node = &tau.getNode(i);
-        if ( node->isFossil() )
+        for (size_t i = 0; i < tau.getNumberOfTips(); ++i)
         {
-            tips.push_back(i);
+            TopologyNode* node = &tau.getNode(i);
+            if ( node->isFossil() )
+            {
+                tips.push_back(i);
+            }
+
         }
 
-    }
+        if ( tips.empty() )
+        {
+            failed = true;
+            return 0;
+        }
 
-    if ( tips.empty() )
-    {
-        failed = true;
-        return 0;
+        // pick a random fossil node
+        double u = rng->uniform01();
+        node_index = tips[ size_t( std::floor(tips.size() * u) ) ];
     }
-
-    // pick a random fossil node
-    double u = rng->uniform01();
-    size_t index = size_t( std::floor(tips.size() * u) );
-    TopologyNode* node = &tau.getNode(tips[index]);
     
+    TopologyNode* node = &tau.getNode(node_index);
+
     TopologyNode& parent = node->getParent();
 
     // we need to work with the times
@@ -201,6 +212,16 @@ void TipTimeSlideUniformProposal::undoProposal( void )
     {
         storedNode->setAge( storedAge );
     }
+}
+
+
+/**
+ * Set a specific tip index to sample
+ */
+void TipTimeSlideUniformProposal::useIndex( size_t index )
+{
+    use_index = true;
+    node_index = index;
 }
 
 

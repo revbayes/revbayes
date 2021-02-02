@@ -1,12 +1,13 @@
+#include <cmath>
+#include <iostream>
+
 #include "DistributionNormal.h"
 #include "LevyJumpSumProposal.h"
 #include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbException.h"
-#include "TypedDagNode.h"
+#include "ContinuousStochasticNode.h"
+#include "Proposal.h"
 
-#include <cmath>
-#include <iostream>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

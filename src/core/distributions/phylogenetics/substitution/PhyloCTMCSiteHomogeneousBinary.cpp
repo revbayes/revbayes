@@ -1,5 +1,14 @@
 #include "PhyloCTMCSiteHomogeneousBinary.h"
 
+#include <math.h>
+#include <cstddef>
+#include <utility>
+
+#include "RbBitSet.h"
+#include "TopologyNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
+
 RevBayesCore::PhyloCTMCSiteHomogeneousBinary::PhyloCTMCSiteHomogeneousBinary(const TypedDagNode<Tree> *t, bool c, size_t nSites, bool amb, BinaryAscertainmentBias::Coding ty, bool internal, bool gapmatch) :
 PhyloCTMCSiteHomogeneousConditional<BinaryState>(  t, 2, c, nSites, amb, AscertainmentBias::Coding(ty), internal, gapmatch )
 {

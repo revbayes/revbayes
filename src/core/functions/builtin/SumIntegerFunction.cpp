@@ -1,5 +1,12 @@
 #include "SumIntegerFunction.h"
 
+#include "RbConstIterator.h"
+#include "RbConstIteratorImpl.h"
+#include "RbVector.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
+
 using namespace RevBayesCore;
 
 /**

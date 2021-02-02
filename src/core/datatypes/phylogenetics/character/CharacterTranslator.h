@@ -1,17 +1,17 @@
 #ifndef CharacterTranslator_H
 #define CharacterTranslator_H
 
-#include <string>
+#include <iosfwd>
 
 #include "AbstractDiscreteTaxonData.h"
-#include "AminoAcidState.h"
-#include "CodonState.h"
 #include "DiscreteTaxonData.h"
-#include "DnaState.h"
-#include "RnaState.h"
 
 namespace RevBayesCore {
-    
+class AminoAcidState;
+class CodonState;
+class DnaState;
+class RnaState;
+class DoubletState;
     
     namespace CharacterTranslator {
     
@@ -21,6 +21,10 @@ namespace RevBayesCore {
         DiscreteTaxonData<CodonState>*          translateToCodon(const AbstractDiscreteTaxonData &d);
         DiscreteTaxonData<CodonState>*          translateToCodonFromDna(const DiscreteTaxonData<DnaState> &d);
         DiscreteTaxonData<CodonState>*          translateToCodonFromRna(const DiscreteTaxonData<RnaState> &d);
+
+        DiscreteTaxonData<CodonState>*          translateToDoublet(const AbstractDiscreteTaxonData &d);
+        DiscreteTaxonData<DoubletState>*        translateToDoubletFromDna(const DiscreteTaxonData<DnaState> &d);
+        DiscreteTaxonData<DoubletState>*        translateToDoubletFromRna(const DiscreteTaxonData<RnaState> &d);
 
         DiscreteTaxonData<DnaState>*            translateToDna(const AbstractDiscreteTaxonData &d);
 //        DiscreteTaxonData<DnaState>*            translateToDna(const DiscreteTaxonData<AminoAcidState> &d);                                   

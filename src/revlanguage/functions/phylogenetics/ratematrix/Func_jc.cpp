@@ -1,8 +1,16 @@
 #include "Func_jc.h"
+
+#include <stddef.h>
+
 #include "JcRateMatrixFunction.h"
 #include "Natural.h"
-#include "RateMatrix_JC.h"
 #include "RlRateMatrix.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

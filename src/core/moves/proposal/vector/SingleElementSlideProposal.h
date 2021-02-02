@@ -1,15 +1,15 @@
 #ifndef SingleElementSlideMove_H
 #define SingleElementSlideMove_H
 
-#include "RbVector.h"
-#include "Proposal.h"
-#include "StochasticNode.h"
-
+#include <stddef.h>
 #include <ostream>
 #include <vector>
-#include <string>
+
+#include "Proposal.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class variableType> class StochasticNode;
     
     /**
      * @brief Scaling move of a single element randomly picked from a vector.

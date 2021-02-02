@@ -1,20 +1,20 @@
 #ifndef CheckNodeOrderConstraintsFunction_H
 #define CheckNodeOrderConstraintsFunction_H
 
-#include "RelativeNodeAgeConstraints.h"
-#include "RbVector.h"
-#include "Tree.h"
-#include "TypedDagNode.h"
-#include "TypedFunction.h"
-
 #include <set>
+#include <iosfwd>
+#include <map>
+#include <string>
+#include <utility>
 
-#include <vector>
-
-#include <boost/functional/hash.hpp>
-#include <boost/unordered_set.hpp>
+#include "TypedFunction.h"
+#include "RbBoolean.h"
 
 namespace RevBayesCore {
+class DagNode;
+class RelativeNodeAgeConstraints;
+class Tree;
+template <class valueType> class TypedDagNode;
     
     class CheckNodeOrderConstraintsFunction : public TypedFunction<Boolean> {
         

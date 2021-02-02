@@ -1,8 +1,11 @@
+#include <stdlib.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ConstantNode.h"
 #include "DelimitedDataReader.h"
-#include "HomologousDiscreteCharacterData.h"
-#include "Ellipsis.h"
 #include "Func_readDataDelimitedFile.h"
 #include "ModelObject.h"
 #include "ModelVector.h"
@@ -10,14 +13,35 @@
 #include "Real.h"
 #include "RealPos.h"
 #include "Natural.h"
-#include "RlAbstractHomologousDiscreteCharacterData.h"
-#include "RlContinuousCharacterData.h"
 #include "RlMatrixReal.h"
 #include "RlMatrixRealPos.h"
-#include "RlStandardState.h"
 #include "RlString.h"
 #include "StringUtilities.h"
 #include "WorkspaceVector.h"
+#include "AbstractModelObject.h"
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "IndirectReferenceFunction.h"
+#include "Integer.h"
+#include "MatrixReal.h"
+#include "RbBoolean.h"
+#include "RbConstants.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlConstantNode.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "UserFunctionNode.h"
+#include "WorkspaceToCoreWrapperObject.h"
 
 
 using namespace RevLanguage;
@@ -188,7 +212,7 @@ RevPtr<RevVariable> Func_readDataDelimitedFile::execute( void )
                     if ( matrix[i][j].isType(Real::getClassTypeSpec()) == false )
                     {
                         
-                        RealPos *tmp = (RealPos*)(matrix[i][j].convertTo(RealPos::getClassTypeSpec()));
+                        Real *tmp = (Real*)(matrix[i][j].convertTo(Real::getClassTypeSpec()));
                         m[i][j] = (tmp)->getValue();
                         delete tmp;
                     }

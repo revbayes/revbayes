@@ -17,13 +17,14 @@
 #ifndef OptionRule_H
 #define OptionRule_H
 
-#include "ArgumentRule.h"
-#include "ModelVector.h"
-#include "RlString.h"
+#include <iosfwd>
+#include <vector>
 
-#include <string>
+#include "ArgumentRule.h"
 
 namespace RevLanguage {
+class Argument;
+class RlString;
 
 class OptionRule : public ArgumentRule {
 

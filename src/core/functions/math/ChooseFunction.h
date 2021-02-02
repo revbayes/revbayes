@@ -2,9 +2,10 @@
 #define ChooseFunction_h
 
 #include "TypedFunction.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Calculates the binomial coefficient of a choose b for two

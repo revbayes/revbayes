@@ -14,7 +14,7 @@ namespace RevBayesCore {
     /**
      * @brief Free symmetric rate matrix class.
      *
-     * This class implements the free symmetric rate matrix .
+     * This class implements the free symmetric rate matrix. Each state has an equal probability of transitioning to any other state.
      * The resulting rate matrix is computed by:
      *
      *      |   -        r[1]    r[2]      ...         r[k-1]    |
@@ -26,9 +26,6 @@ namespace RevBayesCore {
      *      | r[k-1]        ...        r[(k-1)k/2]        -      |
      *
      *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2015-09-29, version 1.0
      */
     class RateMatrix_FreeSymmetric : public GeneralRateMatrix {
         
@@ -36,9 +33,9 @@ namespace RevBayesCore {
         
         enum METHOD { SCALING_AND_SQUARING, SCALING_AND_SQUARING_PADE, SCALING_AND_SQUARING_TAYLOR, UNIFORMIZATION, EIGEN };
         
-        RateMatrix_FreeSymmetric(size_t k);                                                                                     //!< Construct rate matrix with n states
-        RateMatrix_FreeSymmetric(size_t k, bool r);
-        RateMatrix_FreeSymmetric(size_t k, bool r, std::string method);
+        RateMatrix_FreeSymmetric(size_t k);                                                                                     //!< Construct rate matrix with k states
+        RateMatrix_FreeSymmetric(size_t k, bool r);                                                                             //!< Construct rate matrix with k states. Also specifies whether to rescale the matrix.
+        RateMatrix_FreeSymmetric(size_t k, bool r, std::string method);                                                         //!< Construct rate matrix with k states. Also specifies whether to rescale the matrix and which method of matrix exponentiation to use
         RateMatrix_FreeSymmetric(const RateMatrix_FreeSymmetric& m);                                                            //!< Copy constructor
         virtual                            ~RateMatrix_FreeSymmetric(void);                                                     //!< Destructor
         
@@ -60,26 +57,26 @@ namespace RevBayesCore {
         void                                tiProbsScalingAndSquaring(double t, TransitionProbabilityMatrix& P) const;          //!< Calculate transition probabilities with scaling and squaring
         void                                updateEigenSystem(void);                                                            //!< Update the system of eigenvalues and eigenvectors
         void                                updateUniformization(void);                                                         //!< Update the system for uniformization
-        void                                expandUniformization(int truncation, double tolerance) const;
-        void                                expMatrixTaylor(MatrixReal &A, MatrixReal &F, double tolerance) const;
+        void                                expandUniformization(int truncation, double tolerance) const;                       //!< Expand a matrix via uniformization
+        void                                expMatrixTaylor(MatrixReal &A, MatrixReal &F, double tolerance) const;              //!< Exponentaite a matrix via Taylor series
         void                                checkMatrixDiff(MatrixReal x, double tolerance, bool& diff) const;
         void                                checkMatrixIrreducible(double tolerance, TransitionProbabilityMatrix& P) const;
         
-        bool                                rescale;
+        bool                                rescale;                                                                          //!< A boolean for whether the matrix is rescaled such that the average rate is 1
         
         // members for uniformization
         MatrixReal                          singleStepMatrix;
         std::vector<MatrixReal>*            matrixProducts;
-        double                              maxRate;
+        double                              maxRate;                                                                           //!< The max rate of the matrix
 
-        void                                exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const;
-        inline void                         multiplyMatrices(TransitionProbabilityMatrix& p,  TransitionProbabilityMatrix& q,  TransitionProbabilityMatrix& r) const;
+        void                                exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const; //!< Exponentiate the matrix by sqauring and scaling
+        inline void                         multiplyMatrices(TransitionProbabilityMatrix& p,  TransitionProbabilityMatrix& q,  TransitionProbabilityMatrix& r) const;  //!< Perform matrix multiplication on two matrices
         
         EigenSystem*                        theEigenSystem;                                                                     //!< Holds the eigen system
         std::vector<double>                 c_ijk;                                                                              //!< Vector of precalculated product of eigenvectors and their inverse
         std::vector<std::complex<double> >  cc_ijk;                                                                             //!< Vector of precalculated product of eigenvectors and thier inverse for complex case
         
-        METHOD                              my_method;
+        METHOD                              my_method;                                                                          //!< The method for matrix exponentation
         
     };
     

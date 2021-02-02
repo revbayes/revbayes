@@ -1,5 +1,8 @@
 #include "MultiValueEvent.h"
 
+#include <ostream>
+#include <string>
+
 #include "RbException.h"
 
 using namespace RevBayesCore;

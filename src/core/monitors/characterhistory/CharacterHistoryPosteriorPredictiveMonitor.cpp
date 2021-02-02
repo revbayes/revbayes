@@ -7,12 +7,21 @@
 //
 
 #include "CharacterHistoryPosteriorPredictiveMonitor.h"
+
+#include <stddef.h>
+#include <string>
+
 #include "DagNode.h"
 #include "Model.h"
 #include "Monitor.h"
-#include "RbException.h"
-
-#include <sstream>
+#include "BranchHistory.h"
+#include "CharacterEvent.h"
+#include "Cloneable.h"
+#include "RbFileManager.h"
+#include "StochasticNode.h"
+#include "TopologyNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
 
 using namespace RevBayesCore;
 

@@ -1,18 +1,22 @@
+#include <fstream>
+#include <cstddef>
+#include <set>
+#include <vector>
+
 #include "CharacterEventDiscrete.h"
-#include "MatrixReal.h"
 #include "RateGeneratorSequenceUsingMatrix.h"
 #include "RateMatrix.h"
 #include "RateMatrix_JC.h"
 #include "RbVector.h"
 #include "RbException.h"
-#include "RbMathMatrix.h"
-#include "TransitionProbabilityMatrix.h"
+#include "CharacterHistoryRateModifier.h"
+#include "Cloneable.h"
+#include "RateGenerator.h"
+#include "RateGeneratorSequence.h"
+#include "RbVectorImpl.h"
 
-#include <cmath>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <iomanip>
+namespace RevBayesCore { class CharacterEvent; }
+namespace RevBayesCore { class TransitionProbabilityMatrix; }
 
 using namespace RevBayesCore;
 

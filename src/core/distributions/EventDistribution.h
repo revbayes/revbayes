@@ -27,7 +27,8 @@ namespace RevBayesCore {
     public:
         // constructor(s)
         EventDistribution(TypedDistribution<long> *ep, TypedDistribution<valueType> *vp);
-        
+        EventDistribution(const EventDistribution<valueType> &ep);
+
         // public member functions
         EventDistribution*                                  clone(void) const;                                                                                  //!< Create an independent clone
         double                                              computeLnProbability(void);
@@ -83,6 +84,29 @@ RevBayesCore::EventDistribution<valueType>::EventDistribution(TypedDistribution<
     }
     
     simulate();
+}
+
+
+template <class valueType>
+RevBayesCore::EventDistribution<valueType>::EventDistribution( const EventDistribution<valueType> &d ) : TypedDistribution< RbVector<valueType> >(d),
+    event_prior( d.event_prior->clone() ),
+    value_prior( d.value_prior->clone() )
+{
+    
+    // add the parameters of the distribution
+    const std::vector<const DagNode*>& even_prior_pars = event_prior->getParameters();
+    for (std::vector<const DagNode*>::const_iterator it = even_prior_pars.begin(); it != even_prior_pars.end(); ++it)
+    {
+        this->addParameter( *it );
+    }
+    
+    // add the parameters of the distribution
+    const std::vector<const DagNode*>& value_prior_pars = value_prior->getParameters();
+    for (std::vector<const DagNode*>::const_iterator it = value_prior_pars.begin(); it != value_prior_pars.end(); ++it)
+    {
+        this->addParameter( *it );
+    }    
+    
 }
 
 

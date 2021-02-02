@@ -1,11 +1,16 @@
 #include "VariableMonitor.h"
+
+#include <fstream>
+#include <string>
+
 #include "DagNode.h"
-#include "Monitor.h"
 #include "Model.h"
 #include "RbException.h"
 #include "RbFileManager.h"
 #include "RbSettings.h"
 #include "RbVersion.h"
+#include "Cloneable.h"
+#include "StringUtilities.h"
 
 using namespace RevBayesCore;
 

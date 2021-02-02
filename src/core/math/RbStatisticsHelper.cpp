@@ -6,16 +6,16 @@
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
+#include <cmath>
+#include <sstream> // IWYU pragma: keep
+
 #include "DistributionNormal.h"
 #include "RbStatisticsHelper.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "RbMathFunctions.h"
 #include "RbMathLogic.h"
-
-#include <cmath>
-#include <cstdlib>
-#include <iostream>
-#include <sstream>
+#include "RandomNumberGenerator.h"
+#include "RbException.h"
 
 using namespace RevBayesCore;
 

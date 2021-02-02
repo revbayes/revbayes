@@ -1,8 +1,9 @@
 #include "Func_pruneTree.h"
+
+#include <stddef.h>
+
 #include "ModelVector.h"
 #include "PruneTreeFunction.h"
-#include "Real.h"
-#include "RealPos.h"
 #include "RlBoolean.h"
 #include "RlBranchLengthTree.h"
 #include "RlDeterministicNode.h"
@@ -11,6 +12,17 @@
 #include "RlTimeTree.h"
 #include "RlTree.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "ModelObject.h"
+#include "RbBoolean.h"
+#include "RbVector.h"
+#include "RevObject.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "Taxon.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

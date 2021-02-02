@@ -1,10 +1,12 @@
 #include "RateMatrix_PoMo4.h"
+
 #include "MatrixReal.h"
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
-
-#include <cmath>
-#include <iomanip>
+#include "Assignable.h"
+#include "Cloneable.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 using namespace RevBayesCore;
 
@@ -483,6 +485,27 @@ void RateMatrix_PoMo4::setMutationRates(const RateGenerator& mm)
     mu[3][0] = mm.getRate(3,0,age,rate);
     mu[3][1] = mm.getRate(3,1,age,rate);
     mu[3][2] = mm.getRate(3,2,age,rate);
+}
+
+
+void RateMatrix_PoMo4::setMutationRates(const std::vector<double>& r, const Simplex& s)
+{
+    
+    double age = 0.0;
+    double rate = 1.0;
+    
+    mu[0][1] = r[0] * s[1];
+    mu[0][2] = r[1] * s[2];
+    mu[0][3] = r[2] * s[3];
+    mu[1][0] = r[0] * s[0];
+    mu[1][2] = r[3] * s[2];
+    mu[1][3] = r[4] * s[3];
+    mu[2][0] = r[1] * s[0];
+    mu[2][1] = r[3] * s[1];
+    mu[2][3] = r[5] * s[3];
+    mu[3][0] = r[2] * s[0];
+    mu[3][1] = r[4] * s[1];
+    mu[3][2] = r[5] * s[2];
 }
 
 

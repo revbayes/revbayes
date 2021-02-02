@@ -7,14 +7,18 @@
 //
 
 #include "Func_sort.h"
+
 #include "ArgumentRule.h"
-#include "RbUtil.h"
-#include "RevNullObject.h"
 #include "Real.h"
 #include "RlBoolean.h"
 #include "SortVectorFunction.h"
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "RbBoolean.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
 
 using namespace RevLanguage;
 

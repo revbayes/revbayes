@@ -1,18 +1,27 @@
+#include <stddef.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "RlBoolean.h"
-#include "ContinuousStochasticNode.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_BetaProbability.h"
-#include "Natural.h"
-#include "RbException.h"
-#include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "Probability.h"
 #include "BetaProbabilityProposal.h"
-#include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "Move.h"
+#include "RbBoolean.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlMove.h"
+#include "StochasticNode.h"
+
+namespace RevBayesCore { class Proposal; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 
 using namespace RevLanguage;

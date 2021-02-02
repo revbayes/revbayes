@@ -1,12 +1,27 @@
+#include <vector>
+
 #include "RateGenerator.h"
 #include "TamuraNeiRateMatrixFunction.h"
 #include "TypedFunction.h"
-#include "RbException.h"
+#include "Assignable.h"
+#include "RateMatrix_TamuraNei.h"
+#include "Simplex.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
+/**
+ * Default constructor.
+ *
+ * This function takes three inputs:
+ * @param k1 The ratio of A<->G transitions to transversions
+ * @param k2 The ratio of C<->T transitions to transversions
+ * @param bf The simplex of base frequencies
+ */
 
-TamuraNeiRateMatrixFunction::TamuraNeiRateMatrixFunction(const TypedDagNode<double> *k1, const TypedDagNode<double> *k2, const TypedDagNode< Simplex > *bf) : TypedFunction<RateGenerator>( new RateMatrix_TamuraNei(bf->getValue().size()) ),
+TamuraNeiRateMatrixFunction::TamuraNeiRateMatrixFunction(const TypedDagNode<double> *k1, const TypedDagNode<double> *k2, const TypedDagNode< Simplex > *bf) : TypedFunction<RateGenerator>( new RateMatrix_TamuraNei() ),
     kappa_1( k1 ),
     kappa_2( k2 ),
     base_frequencies( bf )

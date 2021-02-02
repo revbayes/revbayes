@@ -1,17 +1,20 @@
+#include <stddef.h>
+#include <string>
+#include <sstream>
+#include <vector>
+
 #include "Argument.h"
-#include "RbConstants.h"
 #include "RbException.h"
-#include "RbUtil.h"
-#include "RbOptions.h"
 #include "RevNullObject.h"
 #include "RlFunction.h"
 #include "TypeSpec.h"
 #include "RevVariable.h"
 #include "Workspace.h"
-
-#include <cassert>
-#include <string>
-#include <sstream>
+#include "DagNode.h"
+#include "Environment.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "StringUtilities.h"
 
 using namespace RevLanguage;
 

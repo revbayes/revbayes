@@ -19,17 +19,15 @@
 #ifndef ExtendedNewickTreeMonitor_H
 #define ExtendedNewickTreeMonitor_H
 
-#include "VariableMonitor.h"
-#include "RbVector.h"
-#include "Tree.h"
-#include "TypedDagNode.h"
-
 #include <fstream>
-#include <iostream>
-#include <string>
 #include <vector>
 
+#include "VariableMonitor.h"
+
 namespace RevBayesCore {
+class DagNode;
+class Tree;
+template <class valueType> class TypedDagNode;
     
     class ExtendedNewickTreeMonitor : public VariableMonitor {
         

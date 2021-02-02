@@ -1,17 +1,22 @@
 #include "RateMatrix_JC.h"
-#include "RbException.h"
-#include "RbMathMatrix.h"
-#include "TransitionProbabilityMatrix.h"
 
-#include <cmath>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <iomanip>
+#include <math.h>
+
+#include "TransitionProbabilityMatrix.h"
+#include "Assignable.h"
+#include "Cloneable.h"
+#include "RbException.h"
+
+
+
+
 
 using namespace RevBayesCore;
 
-/** Construct rate matrix with n states */
+/** Jukes Cantor Rate Matrix Constructor
+ *
+ * @param n the size of the matrix
+ *  */
 RateMatrix_JC::RateMatrix_JC(size_t n) : TimeReversibleRateMatrix( n )
 {
     

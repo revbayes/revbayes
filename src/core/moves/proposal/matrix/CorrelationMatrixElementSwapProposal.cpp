@@ -1,12 +1,14 @@
 #include "CorrelationMatrixElementSwapProposal.h"
+
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-#include "RbConstants.h"
-#include "RbException.h"
-#include "TypedDagNode.h"
+#include "Cloneable.h"
+#include "MatrixReal.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "StochasticNode.h"
 
-#include <cmath>
-#include <iostream>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

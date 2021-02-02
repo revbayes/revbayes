@@ -19,12 +19,12 @@
 #define RbMathGaussianElimination_H
 
 
-#include "MatrixComplex.h"
-#include "MatrixReal.h"
 #include <vector>
 #include <complex>
 
 namespace RevBayesCore {
+class MatrixComplex;
+class MatrixReal;
 
     namespace RbMath {
     

@@ -1,11 +1,16 @@
 #ifndef RelativeNodeAgeConstraints_H
 #define RelativeNodeAgeConstraints_H
 
+#include <stddef.h>
+#include <iosfwd>
+#include <utility>
+#include <vector>
+
 #include "Cloneable.h"
-#include "RelativeNodeAgeConstraintsReader.h"
-#include <string>
 
 namespace RevBayesCore {
+class RelativeNodeAgeConstraintsReader;
+
     class RelativeNodeAgeConstraints : public Cloneable {
         
     public:

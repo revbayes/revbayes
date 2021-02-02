@@ -1,13 +1,12 @@
 #ifndef SegregatingSitesFunction_H
 #define SegregatingSitesFunction_H
 
-#include "AbstractHomologousDiscreteCharacterData.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <vector>
-
 namespace RevBayesCore {
+class AbstractHomologousDiscreteCharacterData;
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Segregating sites function.

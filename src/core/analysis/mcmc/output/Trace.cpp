@@ -1,7 +1,11 @@
 #include "Trace.h"
 
+#include <stdlib.h>
+
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
+#include "Cloner.h"
+#include "RbVectorImpl.h"
 
 using namespace RevBayesCore;
 

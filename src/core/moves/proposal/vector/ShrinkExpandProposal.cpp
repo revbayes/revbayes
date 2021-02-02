@@ -1,11 +1,12 @@
 #include "ShrinkExpandProposal.h"
-#include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
-#include "RbException.h"
-#include "TypedDagNode.h"
 
 #include <cmath>
-#include <iostream>
+
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
+#include "StochasticNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

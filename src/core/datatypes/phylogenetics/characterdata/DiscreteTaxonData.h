@@ -37,6 +37,7 @@ namespace RevBayesCore {
         void                                            concatenate(const DiscreteTaxonData &d);                            //!< Concatenate sequences
         const charType&                                 getCharacter(size_t index) const;                                   //!< Get the character at position index
         charType&                                       getCharacter(size_t index);                                         //!< Get the character at position index (non-const to return non-const character)
+        std::string                                     getJsonRepresentation(void) const;
         size_t                                          getNumberOfCharacters(void) const;                                  //!< How many characters
         double                                          getPercentageMissing(void) const;                                   //!< Returns the percentage of missing data for this sequence
         std::string                                     getStringRepresentation(size_t idx) const;
@@ -55,7 +56,7 @@ namespace RevBayesCore {
 
     // Global functions using the class
     template<class charType>
-    std::ostream&                       operator<<(std::ostream& o, const DiscreteTaxonData<charType>& x);          //!< Overloaded output operator
+    std::ostream&                                       operator<<(std::ostream& o, const DiscreteTaxonData<charType>& x);  //!< Overloaded output operator
 
 }
 
@@ -415,6 +416,33 @@ size_t RevBayesCore::DiscreteTaxonData<charType>::getNumberOfCharacters(void) co
 {
 
     return sequence.size();
+}
+
+
+/**
+* Obtain a JSON-formatted string describing the object.
+*
+* \return            JSON-formatted string.
+*/
+template<class charType>
+std::string RevBayesCore::DiscreteTaxonData<charType>::getJsonRepresentation(void) const {
+
+    std::string jsonStr = "";
+    
+    jsonStr += "{\"DiscreteTaxonData\": ";
+    jsonStr += taxon.getJsonRespresentation();
+    jsonStr += ", \"charData\": [";
+    for (int i=0; i<sequence.size(); i++)
+        {
+        jsonStr += "\"" + sequence[i].getStringValue() + "\"";
+        if (i + 1 < sequence.size())
+            jsonStr += ",";
+        }
+    jsonStr += "]";
+    
+    jsonStr += "}}";
+    
+    return jsonStr;
 }
 
 

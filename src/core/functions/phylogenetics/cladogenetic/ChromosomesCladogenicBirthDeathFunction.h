@@ -7,17 +7,19 @@
 #ifndef ChromosomesCladogenicBirthDeathFunction__
 #define ChromosomesCladogenicBirthDeathFunction__
 
-#include "AbstractCladogenicStateFunction.h"
-#include "CladogeneticSpeciationRateMatrix.h"
-#include "RbVector.h"
-#include "TypedDagNode.h"
-#include "TypedFunction.h"
-
-#include <sstream>
+#include <stddef.h>
 #include <vector>
 #include <map>
 
+#include "AbstractCladogenicStateFunction.h"
+#include "CladogeneticSpeciationRateMatrix.h"
+#include "TypedFunction.h"
+
 namespace RevBayesCore {
+class BranchHistory;
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     class ChromosomesCladogenicBirthDeathFunction : public AbstractCladogenicStateFunction, public TypedFunction<CladogeneticSpeciationRateMatrix> {
         

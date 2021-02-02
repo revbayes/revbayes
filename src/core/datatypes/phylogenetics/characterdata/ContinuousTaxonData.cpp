@@ -1,9 +1,12 @@
 #include "ContinuousTaxonData.h"
-#include "RbConstants.h"
+
+#include <stdio.h>
+#include <ostream>
+
 #include "RbException.h"
 #include "RbMathLogic.h"
-
-#include<stdio.h>
+#include "Cloneable.h"
+#include "RbConstants.h" // IWYU pragma: keep
 
 using namespace RevBayesCore;
 
@@ -159,7 +162,7 @@ double& ContinuousTaxonData::getCharacter(size_t index)
 /**
  * Get-operator for convenience access.
  *
- * \param[in]    i    The position of the character.
+ * \param[in]    index    The position of the character.
  *
  * \return            A const reference to the character
  */
@@ -174,6 +177,33 @@ const double& ContinuousTaxonData::getCharacter(size_t index) const
     return sequence[index];
 }
 
+
+/**
+* Get a JSON-formatted string description of this object
+*
+* \return            A JSON-formatted string
+*/
+std::string ContinuousTaxonData::getJsonRepresentation(void) const {
+
+    std::string jsonStr = "";
+    
+    jsonStr += "{\"ContinuousTaxonData\": {";
+    jsonStr += taxon.getJsonRespresentation();
+    jsonStr += ", \"charData\": [";
+    for (int i=0; i<sequence.size(); i++)
+        {
+        char tempCStr[20];
+        sprintf(tempCStr, "%.10e", sequence[i]);
+        std::string tempStr = tempCStr;
+        jsonStr += tempStr;
+        if (i + 1 < sequence.size())
+            jsonStr += ",";
+        }
+    jsonStr += "]";
+    jsonStr += "}}";
+    
+    return jsonStr;
+}
 
 /**
  * Get the number of character stored in this object

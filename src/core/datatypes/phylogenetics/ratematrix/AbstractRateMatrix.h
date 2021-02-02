@@ -1,9 +1,11 @@
 #ifndef AbstractRateMatrix_H
 #define AbstractRateMatrix_H
 
+#include <stddef.h>
+#include <vector>
+
 #include "MatrixReal.h"
 #include "RateMatrix.h"
-#include <vector>
 
 
 namespace RevBayesCore {
@@ -44,7 +46,8 @@ namespace RevBayesCore {
         double                              getRate(size_t from, size_t to, double age, double rate) const;         //!< Calculate the rate from state i to state j over the given time interval scaled by a rate
         void                                rescaleToAverageRate(double r);                                                             //!< Rescale the rate matrix such that the average rate is "r"
         void                                setDiagonal(void);                                                                          //!< Set the diagonal such that each row sums to zero
-        
+        virtual std::vector<int>            get_emitted_letters() const;                                                                //!<Find out what alphet letter each state emits        
+
         // pure virtual methods you have to overwrite
         virtual double                      averageRate(void) const = 0;                                                                //!< Calculate the average rate
         virtual void                        calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const = 0;   //!< Calculate the transition matrix

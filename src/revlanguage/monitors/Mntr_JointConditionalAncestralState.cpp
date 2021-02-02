@@ -1,29 +1,35 @@
 #include "Mntr_JointConditionalAncestralState.h"
 
+#include <stddef.h>
+#include <string>
+
 #include "BinaryState.h"
-#include "AbstractCharacterData.h"
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "OptionRule.h"
-#include "Model.h"
 #include "RlMonitor.h"
-#include "ModelVector.h"
-#include "Ellipsis.h"
-#include "Natural.h"
+#include "IntegerPos.h"
 #include "RbException.h"
 #include "RevObject.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
-#include "RlModel.h"
 #include "RlTimeTree.h"
-#include "RlBranchLengthTree.h"
 #include "RlString.h"
 #include "TypeSpec.h"
 #include "NaturalNumbersState.h"
 #include "DnaState.h"
 #include "StandardState.h"
-#include "RnaState.h"
 #include "AminoAcidState.h"
 #include "PoMoState.h"
+#include "AbstractHomologousDiscreteCharacterData.h"
+#include "DiscreteTaxonData.h"
+#include "JointConditionalAncestralStateMonitor.h"
+#include "Monitor.h"
+#include "RbBoolean.h"
+#include "RlBoolean.h"
+#include "RlTree.h"
+#include "StochasticNode.h"
+
+namespace RevBayesCore { class Tree; }
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 
@@ -50,7 +56,7 @@ void Mntr_JointConditionalAncestralState::constructInternalObject( void )
 {
     const std::string&                  fn      = static_cast<const RlString &>( filename->getRevObject() ).getValue();
     const std::string&                  sep     = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    int                                 g       = (int)static_cast<const Natural  &>( printgen->getRevObject() ).getValue();
+    unsigned int                        g       = (int)static_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* t = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
     
     bool                                ap      = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
@@ -215,7 +221,7 @@ const MemberRules& Mntr_JointConditionalAncestralState::getParameterRules(void) 
         asMonitorMemberRules.push_back( new ArgumentRule("cdbdp"          , TimeTree::getClassTypeSpec(), "", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL) );
         asMonitorMemberRules.push_back( new ArgumentRule("filename"       , RlString::getClassTypeSpec() , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         asMonitorMemberRules.push_back( new ArgumentRule("type"           , RlString::getClassTypeSpec() , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        asMonitorMemberRules.push_back( new ArgumentRule("printgen"       , Natural::getClassTypeSpec()  , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
+        asMonitorMemberRules.push_back( new ArgumentRule("printgen"       , IntegerPos::getClassTypeSpec()  , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new IntegerPos(1) ) );
         asMonitorMemberRules.push_back( new ArgumentRule("separator"      , RlString::getClassTypeSpec() , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
         asMonitorMemberRules.push_back( new ArgumentRule("append"         , RlBoolean::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
         asMonitorMemberRules.push_back( new ArgumentRule("withTips"       , RlBoolean::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );

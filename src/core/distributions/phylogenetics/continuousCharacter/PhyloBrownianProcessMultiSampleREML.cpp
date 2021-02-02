@@ -1,12 +1,28 @@
+#include <cmath>
+#include <cstddef>
+#include <iosfwd>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "DistributionNormal.h"
 #include "PhyloBrownianProcessMultiSampleREML.h"
 #include "RandomNumberFactory.h"
-#include "RandomNumberGenerator.h"
 #include "RbException.h"
 #include "StochasticNode.h"
 #include "TopologyNode.h"
+#include "AbstractPhyloBrownianProcess.h"
+#include "ContinuousCharacterData.h"
+#include "ContinuousTaxonData.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "Taxon.h"
+#include "Tree.h"
+#include "TreeChangeEventHandler.h"
+#include "TypedDagNode.h"
 
-#include <cmath>
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class RandomNumberGenerator; }
 
 
 using namespace RevBayesCore;
@@ -296,8 +312,6 @@ void PhyloBrownianProcessMultiSampleREML::recursiveComputeLnProbability( const T
             for (int i=0; i<this->num_sites; i++)
             {
                 
-                mu_node[i] = (mu_left[i]*t_right + mu_right[i]*t_left) / (t_left+t_right);
-                
                 // get the site specific rate of evolution
                 double standDev = this->computeSiteRate(i) * stdev;
                 
@@ -310,6 +324,9 @@ void PhyloBrownianProcessMultiSampleREML::recursiveComputeLnProbability( const T
                 // sum up the probabilities of the contrasts
                 p_node[i] = lnl_node + p_left[i] + p_right[i];
                 
+                // compute the estimate of mu for this site and node
+                mu_node[i] = (mu_left[i]*t_right + mu_right[i]*t_left) / (t_left+t_right);
+
             } // end for-loop over all sites
             
         } // end for-loop over all children

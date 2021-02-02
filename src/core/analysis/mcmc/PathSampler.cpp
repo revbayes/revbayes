@@ -1,7 +1,9 @@
 #include "PathSampler.h"
 
-#include <iostream>
+#include <stddef.h>
 #include <vector>
+
+#include "Cloneable.h"
 
 #ifdef RB_MPI
 #include <mpi.h>

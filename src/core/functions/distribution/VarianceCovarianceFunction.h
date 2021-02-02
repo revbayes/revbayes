@@ -23,14 +23,13 @@
 #ifndef VarianceCovarianceFunction_H
 #define VarianceCovarianceFunction_H
 
-#include "RbVector.h"
 #include "MatrixReal.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <vector>
-
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     class VarianceCovarianceFunction : public TypedFunction<MatrixReal> {
         

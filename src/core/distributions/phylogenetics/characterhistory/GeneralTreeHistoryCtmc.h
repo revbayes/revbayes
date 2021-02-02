@@ -101,7 +101,7 @@ namespace RevBayesCore {
 #include "CharacterEventDiscrete.h"
 #include "PathRejectionSampleProposal.h"
 #include "RateMatrix_JC.h"
-#include "RbConstants.h"
+
 
 template<class charType>
 RevBayesCore::GeneralTreeHistoryCtmc<charType>::GeneralTreeHistoryCtmc(const TypedDagNode<Tree> *tau, size_t nChars, size_t nSites, bool useAmbigChar, bool internal) : TreeHistoryCtmc<charType>( tau, nChars, nSites, useAmbigChar, internal )
@@ -683,11 +683,11 @@ template<class charType>
 bool RevBayesCore::GeneralTreeHistoryCtmc<charType>::samplePathHistory(const TopologyNode& node)
 {
     
-    if ( node.isRoot() == true )
-    {
-        return true;
-    }
-    
+//    if ( node.isRoot() == true )
+//    {
+//        return true;
+//    }
+//    
     PathRejectionSampleProposal<charType> p( this->getStochasticNode() );
     p.setRateGenerator( homogeneousRateGenerator );
     
@@ -1038,9 +1038,7 @@ void RevBayesCore::GeneralTreeHistoryCtmc<charType>::simulateHistory(const Topol
         dt = RbStatistics::Exponential::rv(sr, *GLOBAL_RNG);
         if (curr_age - dt > end_age)
         {
-            // NOTE: cannot call sum of rates using counts because it may be non-iid evolution
-            double sr = rm.getSumOfRates(currState, curr_age, branch_rate);
-            
+    
             // next event type
             CharacterEventDiscrete* evt = new CharacterEventDiscrete(0, 0, curr_age - dt);
             double u = GLOBAL_RNG->uniform01() * sr;
@@ -1073,9 +1071,6 @@ void RevBayesCore::GeneralTreeHistoryCtmc<charType>::simulateHistory(const Topol
                 if (found) break;
             }
             
-            // update sum of rates
-            //            sr += rm.getSumOfRatesDifferential(currState, evt, t-dt, branch_rate);
-            
             // update counts
             counts[ static_cast<CharacterEventDiscrete*>(currState[i])->getState() ] -= 1;
             counts[s] += 1;
@@ -1083,6 +1078,9 @@ void RevBayesCore::GeneralTreeHistoryCtmc<charType>::simulateHistory(const Topol
             // update history
             curr_age -= dt;
             currState[i] = evt;
+            
+            // update sum of rates
+            sr = rm.getSumOfRates(currState, curr_age, branch_rate);
         }
     }
     

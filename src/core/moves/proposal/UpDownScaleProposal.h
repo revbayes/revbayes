@@ -1,16 +1,16 @@
 #ifndef UpDownScaleProposal_H
 #define UpDownScaleProposal_H
 
-#include "RbVector.h"
-#include "Proposal.h"
-#include "StochasticNode.h"
-#include "Tree.h"
-
 #include <ostream>
 #include <vector>
-#include <string>
+
+#include "Proposal.h"
 
 namespace RevBayesCore {
+class DagNode;
+class Tree;
+template <class valueType> class RbVector;
+template <class variableType> class StochasticNode;
     
     /**
      * @brief Up-Down Scaling Proposal for several parameters jointly.

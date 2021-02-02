@@ -1,9 +1,17 @@
-#include "ArgumentRule.h"
+#include <stddef.h>
+#include <sstream>
+#include <vector>
+
 #include "ConstructorFunction.h"
 #include "RevObject.h"
 #include "TypeSpec.h"
+#include "Argument.h"
+#include "Procedure.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
 
-#include <sstream>
+namespace RevLanguage { class ArgumentRules; }
 
 using namespace RevLanguage;
 

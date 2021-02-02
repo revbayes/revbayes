@@ -1,18 +1,31 @@
 project('RevBayes', ['cpp', 'c'],
-        version: '1.0.10',
+        version: '1.0.12',
         default_options: [
           'buildtype=release',
-          'cpp_std=c++14'
+          'cpp_std=c++11'
         ],
-        meson_version: '>= 0.47',
+        meson_version: '>= 0.53',
         license: 'GPLv2')
 
 cpp = meson.get_compiler('cpp')
 cc = meson.get_compiler('c')
 
+# For cross-compilation, `host_machine`  is where the binary will RUN
+#                        `build_machine` is where the binary is   COMPILED.
+
+if host_machine.cpu_family().startswith('x86_64')
+  add_project_arguments(['-msse','-msse2','-msse3'], language : 'cpp')
+  add_project_arguments(['-DRB_x86_64'], language: 'cpp')
+elif host_machine.cpu_family().startswith('x86')
+  add_project_arguments(['-msse','-msse2','-msse3'], language : 'cpp')
+  add_project_arguments(['-DRB_x86'], language: 'cpp')
+elif host_machine.cpu_family().startswith('arm') or host_machine.cpu_family().startswith('aarch')
+  # Only add sse flags for Intel architecture -- not on (say) ARM
+  add_project_arguments(['-DRB_ARM'], language: 'cpp')
+endif
 
 if get_option('buildtype') == 'release' or get_option('buildtype') == 'plain'
-  add_project_arguments(['-O3','-msse','-msse2','-msse3'], language : 'cpp')
+  add_project_arguments(['-O3'], language : 'cpp')
   add_project_arguments(['-O3'], language : 'c')
 endif
 
@@ -36,6 +49,7 @@ add_project_arguments([# These just add noise:
 # Handle file too large error when cross-compiling to windows
 if host_machine.system() == 'windows'
   add_project_arguments(['-Wa,-mbig-obj'], language : 'cpp')
+  add_project_arguments(['-DRB_WIN'], language : 'cpp')
 endif
 
 boost_modules = [ 'regex',
@@ -117,3 +131,21 @@ endif
 
 subdir('tests')
 
+####
+
+summary({'host': host_machine.system()
+        }, section: 'Architecture')
+
+summary({'exe name': rb_name,
+         'mpi': get_option('mpi'),
+         'jupyter': get_option('jupyter'),
+         'studio': get_option('studio'),
+        },section: 'Options')
+
+summary({'prefix': get_option('prefix'),
+        },section: 'Directories')
+
+summary({'optimization': get_option('optimization'),
+         'b_ndebug': get_option('b_ndebug'),
+         'debug': get_option('debug'),
+        },section: 'Configuration')

@@ -7,12 +7,10 @@
 //
 
 #include "RlCharacterHistoryRateModifier.h"
+
 #include "CharacterHistoryRateModifier.h"
-#include "ArgumentRule.h"
-#include "ModelVector.h"
-#include "MemberProcedure.h"
-#include "Natural.h"
-#include "RlBoolean.h"
+#include "RevObject.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

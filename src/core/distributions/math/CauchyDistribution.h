@@ -2,9 +2,21 @@
 #define CauchyDistribution_H
 
 #include "ContinuousDistribution.h"
-#include "TypedDagNode.h"
+
+/**
+     * @brief Cauchy distribution class.
+     *
+     * The Cauchy distribution represents a family of distributions
+     * defined on the real numbers. The Cauchy distribution has 2 parameters:
+     * @param location
+     * @param scale
+     *
+     * Instances of this class can be associated to stochastic variables.
+     */
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     class CauchyDistribution : public ContinuousDistribution {
         

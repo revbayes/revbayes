@@ -1,10 +1,15 @@
 #include "Clade.h"
-#include "RbVectorUtilities.h"
 
 #include <algorithm>
 #include <iostream>
-#include <sstream>
+#include <string>
+#include <utility>
 
+#include "RbVectorUtilities.h"
+#include "RbException.h"
+
+using std::vector;
+using std::set;
 
 using namespace RevBayesCore;
 
@@ -566,11 +571,91 @@ std::string Clade::toString( void ) const
     return s;
 }
 
+namespace RevBayesCore
+{
 
-std::ostream& RevBayesCore::operator<<(std::ostream& o, const Clade& x) {
+std::ostream& operator<<(std::ostream& o, const Clade& x) {
    
     o << x.toString();
    
     return o;
 }
 
+void set_ages_for_constraint_top(Clade& clade, const vector<Taxon>& taxa)
+{
+    // set the ages of each of the taxa in the constraint
+    for (size_t j = 0; j < clade.size(); ++j)
+    {
+        bool found = false;
+        for (auto& taxon: taxa)
+        {
+            if ( taxon.getName() == clade.getTaxonName(j) )
+            {
+                clade.setTaxonAge(j, taxon.getAge());
+                found = true;
+                break;
+            }
+        }
+        if (not found)
+            throw RbException("set_ages_for_constraint: can't find taxon " + clade.getTaxonName(j) + " in full taxon set!");
+    }
+}
+
+void set_ages_for_constraint(Clade& clade, const vector<Taxon>& taxa)
+{
+    // set the ages of each of the taxa in the constraint
+    set_ages_for_constraint_top( clade, taxa );
+
+    // set ages for optional constraints
+    std::vector<Clade> optional_constraints = clade.getOptionalConstraints();
+    for (auto& optional_constraint: optional_constraints)
+        set_ages_for_constraint_top( optional_constraint, taxa );
+
+    clade.setOptionalConstraints( optional_constraints );
+}
+
+bool clade_nested_within(const Clade& clade1, const Clade& clade2)
+{
+    set<Taxon> taxa1;
+    for(auto& taxon: clade1.getTaxa())
+        taxa1.insert(taxon);
+
+    set<Taxon> taxa2;
+    for(auto& taxon: clade2.getTaxa())
+        taxa2.insert(taxon);
+
+    return std::includes(clade2.begin(), clade2.end(), clade1.begin(), clade1.end());
+}
+
+bool clades_overlap(const Clade& clade1, const Clade& clade2)
+{
+    set<Taxon> taxa1;
+    for(auto& taxon: clade1.getTaxa())
+        taxa1.insert(taxon);
+
+    set<Taxon> taxa2;
+    for(auto& taxon: clade2.getTaxa())
+        taxa2.insert(taxon);
+
+    auto i = taxa1.begin();
+    auto j = taxa2.begin();
+    while (i != taxa1.end() && j != taxa2.end())
+    {
+      if (*i == *j)
+        return true;
+      else if (*i < *j)
+        ++i;
+      else
+        ++j;
+    }
+    return false;
+}
+
+bool clades_conflict(const Clade& clade1, const Clade& clade2)
+{
+    return clades_overlap(clade1, clade2) and
+        (not clade_nested_within(clade1, clade2)) and
+        (not clade_nested_within(clade2, clade2));
+}
+
+}

@@ -7,19 +7,41 @@
 //
 
 #include "Func_DECCladoProbs.h"
+
+#include <stddef.h>
+#include <map>
+#include <utility>
+
 #include "CladogeneticProbabilityMatrix.h"
 #include "ConstantNode.h"
 #include "DECCladogeneticStateFunction.h"
-#include "MatrixReal.h"
 #include "ModelVector.h"
 #include "OptionRule.h"
-#include "Real.h"
 #include "RealPos.h"
 #include "RlCladogeneticProbabilityMatrix.h"
 #include "RlDeterministicNode.h"
 #include "RlSimplex.h"
 #include "RlString.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "DagNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "Natural.h"
+#include "RbBoolean.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlConstantNode.h"
+#include "RlFunction.h"
+#include "Simplex.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
+#include "UserFunctionNode.h"
 
 using namespace RevLanguage;
 
@@ -47,6 +69,13 @@ RevBayesCore::TypedFunction< RevBayesCore::CladogeneticProbabilityMatrix >* Func
     // supplied arguments
     RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* ep = static_cast<const Simplex &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     unsigned nc = (unsigned)static_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getValue();
+    unsigned max_num_areas = RevBayesCore::DECCladogeneticStateFunction::MAX_NUM_AREAS;
+    if (nc > max_num_areas) {
+        std::stringstream ss;
+        ss << "fnDECCladoProbs only supports up to " << max_num_areas << " areas\n";
+        throw RbException(ss.str());
+    }
+    
     unsigned mrs = (unsigned)static_cast<const Natural &>( this->args[2].getVariable()->getRevObject() ).getValue();
     if (mrs <= 1) mrs = nc;
     std::string pt = static_cast<const RlString &> ( this->args[3].getVariable()->getRevObject() ).getValue();

@@ -1,13 +1,15 @@
 #ifndef NearestNeighborInterchange_nonClockProposal_H
 #define NearestNeighborInterchange_nonClockProposal_H
 
-#include <string>
+#include <iosfwd>
 
 #include "Proposal.h"
-#include "StochasticNode.h"
-#include "Tree.h"
 
 namespace RevBayesCore {
+class DagNode;
+class TopologyNode;
+class Tree;
+template <class variableType> class StochasticNode;
     
     /**
      * The subtree-prune-and-regraft operator.

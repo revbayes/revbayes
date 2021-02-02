@@ -4,8 +4,13 @@
 #include "RlFunction.h"
 #include "Parser.h"
 #include "Workspace.h"
-#include "TerminalFormatter.h"
 #include "RbSettings.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "Environment.h"
+#include "RevPtr.h"
+#include "TypeSpec.h"
+#include "boost/algorithm/string/trim.hpp"
 
 
 #ifdef RB_MPI
@@ -16,18 +21,16 @@ extern "C" {
 #include "linenoise.h"
 }
 
-#include "lineeditUtils.h"
-
-
 #include <boost/foreach.hpp>
-#include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include "boost/algorithm/string_regex.hpp"
-#include <boost/lexical_cast.hpp>
-#include <boost/assign/std/vector.hpp>
-
+#include <stdlib.h>
 #include <iostream>
-#include <sstream>
+#include <algorithm>
+#include <map>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
 //#define ctrl(C) ((C) - '@')
 
 const char* default_prompt = (char*) "> ";
@@ -44,7 +47,7 @@ std::vector<std::string> getFileList(const std::string &path)
     const std::string& wd = s.getWorkingDirectory();
     
     RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(wd, path);
-    fm.setStringWithNamesOfFilesInDirectory( v );
+    fm.setStringWithNamesOfFilesInDirectory( v, false );
     
     return v;
 }

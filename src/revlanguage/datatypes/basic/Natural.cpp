@@ -1,4 +1,6 @@
-#include "ConstantNode.h"
+#include <sstream>
+#include <string>
+
 #include "RlBoolean.h"
 #include "Natural.h"
 #include "Integer.h"
@@ -6,15 +8,12 @@
 #include "RealPos.h"
 #include "Real.h"
 #include "RbException.h"
-#include "RbUtil.h"
 #include "RlDiscreteCharacterState.h"
 #include "RlString.h"
 #include "StandardState.h"
 #include "TypeSpec.h"
-
-#include <climits>
-#include <sstream>
-#include <climits>
+#include "RevObject.h"
+#include "TypedDagNode.h"
 
 using namespace RevLanguage;
 

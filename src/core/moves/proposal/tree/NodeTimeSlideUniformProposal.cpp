@@ -1,14 +1,17 @@
+#include <stddef.h>
+#include <cmath>
+#include <iostream>
+
 #include "DistributionUniform.h"
 #include "NodeTimeSlideUniformProposal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-#include "RbConstants.h"
-#include "RbException.h"
-#include "TreeUtilities.h"
-#include "TypedDagNode.h"
+#include "Proposal.h"
+#include "StochasticNode.h"
+#include "TopologyNode.h"
+#include "Tree.h"
 
-#include <cmath>
-#include <iostream>
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
@@ -100,7 +103,7 @@ double NodeTimeSlideUniformProposal::doProposal( void )
         double u = rng->uniform01();
         size_t index = size_t( std::floor(tau.getNumberOfNodes() * u) );
         node = &tau.getNode(index);
-    } while ( node->isRoot() || node->isTip() );
+    } while ( node->isRoot() || node->isTip() || node->isSampledAncestor(true) );
     
     TopologyNode& parent = node->getParent();
     

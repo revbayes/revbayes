@@ -1,11 +1,21 @@
 #include "CharacterHistoryNodeMonitor.h"
+
+#include <stddef.h>
+#include <string>
+
 #include "CharacterEventDiscrete.h"
 #include "DagNode.h"
 #include "Model.h"
 #include "Monitor.h"
-#include "RbException.h"
+#include "BranchHistory.h"
+#include "Cloneable.h"
+#include "RbFileManager.h"
+#include "StochasticNode.h"
+#include "TopologyNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
 
-#include <sstream>
+namespace RevBayesCore { class CharacterEvent; }
 
 using namespace RevBayesCore;
 

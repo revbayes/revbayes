@@ -2,11 +2,10 @@
 #define ModuloFunction_H
 
 #include "TypedFunction.h"
-#include "TypedDagNode.h"
-
-#include <vector>
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     
     /**

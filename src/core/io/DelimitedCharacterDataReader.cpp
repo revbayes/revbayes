@@ -1,9 +1,6 @@
 #include "DelimitedCharacterDataReader.h"
-#include "RbFileManager.h"
-#include "RbConstants.h"
 
-#include <boost/algorithm/string/trim_all.hpp>
-
+#include "boost/algorithm/string/trim.hpp"
 
 using namespace RevBayesCore;
 

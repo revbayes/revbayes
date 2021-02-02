@@ -1,8 +1,18 @@
-#include "ArgumentRule.h"
+#include <iosfwd>
+
 #include "Func_VectorMonitors.h"
 #include "RlMonitor.h"
 #include "TypeSpec.h"
 #include "WorkspaceVector.h"
+#include "ArgumentRules.h"
+#include "Procedure.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "WorkspaceToCoreWrapperObject.h"
 
 
 using namespace RevLanguage;

@@ -1,10 +1,15 @@
 #ifndef VectorScaleProposal_H
 #define VectorScaleProposal_H
 
+#include <stddef.h>
+#include <iosfwd>
+
 #include "Proposal.h"
-#include "StochasticNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
+template <class variableType> class StochasticNode;
     
     /**
      * @brief Scaling proposal of all elements of a Stochastic vector.

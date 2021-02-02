@@ -1,10 +1,11 @@
 #ifndef CompoundPoissonNormalDistribution_H
 #define CompoundPoissonNormalDistribution_H
 
-#include "TypedDagNode.h"
 #include "ContinuousDistribution.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief Compound Poisson Normal distribution class.

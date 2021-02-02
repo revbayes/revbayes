@@ -1,13 +1,15 @@
 #ifndef BranchLengthScaleProposal_H
 #define BranchLengthScaleProposal_H
 
-#include <string>
+#include <stddef.h>
+#include <iosfwd>
 
 #include "Proposal.h"
-#include "StochasticNode.h"
-#include "Tree.h"
 
 namespace RevBayesCore {
+class DagNode;
+class Tree;
+template <class variableType> class StochasticNode;
     
     /**
      * The narrow-exchange operator.

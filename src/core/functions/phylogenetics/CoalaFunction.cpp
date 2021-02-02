@@ -1,6 +1,12 @@
 #include "CoalaFunction.h"
-#include "RbException.h"
-#include "RbMathVector.h"
+
+#include <stddef.h>
+
+#include "Cloneable.h"
+#include "RbVectorImpl.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

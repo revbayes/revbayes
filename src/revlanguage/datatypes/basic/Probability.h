@@ -16,12 +16,15 @@
 #ifndef Probability_H
 #define Probability_H
 
+#include <ostream>
+
 #include "RealPos.h"
 
-#include <ostream>
-#include <string>
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 namespace RevLanguage {
+class RevObject;
+class TypeSpec;
 
     class Probability : public RealPos {
     
@@ -32,15 +35,23 @@ namespace RevLanguage {
         
         // Basic utility functions
         Probability*                    clone(void) const;                                                      //!< Clone object
+        void                            constructInternalObject(void);                                          //!< We construct the a new internal MCMC object.
         virtual RevObject*              convertTo(const TypeSpec& type) const;                                  //!< Convert to type
         static const std::string&       getClassType(void);                                                     //!< Get Rev type
         static const TypeSpec&          getClassTypeSpec(void);                                                 //!< Get class type spec
+        std::string                     getConstructorFunctionName(void) const;                                 //!< Get the name used for the constructor function in Rev.
+        const MemberRules&              getParameterRules(void) const;                                          //!< Get member rules (const)
         const TypeSpec&                 getTypeSpec(void) const;                                                //!< Get language type of the object
         virtual double                  isConvertibleTo(const TypeSpec& type, bool once) const;                 //!< Is convertible to type?
 
         std::string                     getGuiName(void) { return "Probability"; }
         std::string                     getGuiUnicodeSymbol(void) { return "P"; }
         std::string                     getGuiInfo(void) { return ""; }
+
+    protected:
+        void                            setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);   //!< Set member variable
+
+        RevPtr<const RevVariable>       real;
     };
     
 }

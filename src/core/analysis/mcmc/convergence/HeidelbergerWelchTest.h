@@ -1,11 +1,10 @@
 #ifndef HeidelbergerWelchTest_H
 #define HeidelbergerWelchTest_H
 
-#include <vector>
-
 #include "ConvergenceDiagnosticContinuous.h"
 
 namespace RevBayesCore {
+class TraceNumeric;
     
     /**
      * @brief Heidelberger-Welch test statistic for assessing convergence.

@@ -1,10 +1,17 @@
 #include "RbHelpRenderer.h"
 
+#include <string>
+#include <vector>
+
 #include "RbException.h"
 #include "RbHelpDistribution.h"
-#include "RlUserInterface.h"
 #include "StringUtilities.h"
 #include "TerminalFormatter.h"
+#include "RbHelpArgument.h"
+#include "RbHelpEntry.h"
+#include "RbHelpFunction.h"
+#include "RbHelpReference.h"
+#include "RbHelpType.h"
 
 using namespace RevBayesCore;
 
@@ -232,7 +239,7 @@ std::string HelpRenderer::renderDescription(const RbHelpEntry &helpEntry, size_t
         result.append( TerminalFormatter::makeUnderlined("Description") );
         result.append( section_break );
     
-        result.append( StringUtilities::formatTabWrap(description, 1, w) );
+        result.append( StringUtilities::formatTabWrap(description, 1, w, false) );
         result.append( line_break );
         result.append( section_break );
     }
@@ -254,7 +261,7 @@ std::string HelpRenderer::renderDetails(const RbHelpEntry &helpEntry, size_t w) 
         result.append( TerminalFormatter::makeUnderlined("Details") );
         result.append( section_break );
         
-        result.append( StringUtilities::formatTabWrap(details, 1, w) );
+        result.append( StringUtilities::formatTabWrap(details, 1, w, false) );
         result.append( line_break );
         result.append( section_break );
     }

@@ -1,7 +1,22 @@
 #include "GtrRateMatrixFunction.h"
-#include "RbException.h"
+
+#include <vector>
+
+#include "Cloneable.h"
+#include "RateMatrix_GTR.h"
+#include "Simplex.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
+/**
+ * Default constructor.
+ *
+ * This function takes two inputs:
+ * @param er The simplex of exchangeabilities
+ * @param bf The simplex of stationary base frequencies
+ */
 
 GtrRateMatrixFunction::GtrRateMatrixFunction(const TypedDagNode< Simplex > *er, const TypedDagNode< Simplex > *bf) : TypedFunction<RateGenerator>( new RateMatrix_GTR(bf->getValue().size()) ),
     exchangeability_rates( er ),

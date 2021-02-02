@@ -1,15 +1,11 @@
 #ifndef AbstractGibbsMove_H
 #define AbstractGibbsMove_H
 
+#include <ostream>
+
 #include "AbstractMove.h"
 
-#include <ostream>
-#include <set>
-#include <vector>
-
 namespace RevBayesCore {
-
-    class DagNode;
 
     /**
      * Base class for all Gibbs moves within an MCMC (and all other variants).

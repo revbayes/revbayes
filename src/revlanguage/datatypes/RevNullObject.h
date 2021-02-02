@@ -1,13 +1,17 @@
 #ifndef RevNullObject_H
 #define RevNullObject_H
 
-#include "RevVariable.h"
-#include "WorkspaceObject.h"
-
 #include <ostream>
-#include <string>
+#include <vector>
+
+#include "WorkspaceObject.h"
+#include "RevObject.h"
+#include "RevPtr.h"
 
 namespace RevLanguage {
+class Argument;
+class RevVariable;
+class TypeSpec;
 
 class RevNullObject : public WorkspaceObject {
     

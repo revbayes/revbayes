@@ -9,14 +9,15 @@
 #ifndef StateCountRateModifierFunction_hpp
 #define StateCountRateModifierFunction_hpp
 
+#include <stddef.h>
+
 #include "CharacterHistoryRateModifier.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <iostream>
-#include <vector>
-
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     class StateCountRateModifierFunction : public TypedFunction<CharacterHistoryRateModifier> {
         

@@ -1,11 +1,13 @@
 #include "RateMatrix_PoMo.h"
+
 #include "MatrixReal.h"
 #include "RbException.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "TransitionProbabilityMatrix.h"
-
-#include <cmath>
-#include <iomanip>
+#include "Assignable.h"
+#include "Cloneable.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 using namespace RevBayesCore;
 
@@ -35,16 +37,20 @@ RateMatrix_PoMo::RateMatrix_PoMo(size_t n, size_t vps, const std::vector<double>
 }
 
 /** Construct rate matrix with n states, a matrix of mutation rates, and a vector of selection coefficients */
-RateMatrix_PoMo::RateMatrix_PoMo(size_t n, size_t vps, const RateGenerator &mm, const std::vector<double> sc)  : AbstractRateMatrix( n ), N( vps ), matrix_size( n )
+RateMatrix_PoMo::RateMatrix_PoMo(size_t n, size_t vps, const RateGenerator &mm, const std::vector<double> sc) : AbstractRateMatrix( n + size_t(RbMath::kchoose2(n))*(vps-1) ),
+    N( vps ),
+    matrix_size( n + size_t(RbMath::kchoose2(n))*(vps-1) ),
+    num_raw_states( n )
 {
-    std::vector<double> temp (4, 0.0);
-    for (size_t i = 0; i<4 ; ++i)
+    std::vector<double> temp (n, 0.0);
+    for (size_t i = 0; i<n ; ++i)
     {
         mu.push_back(temp);
         s.push_back(1.0);
     }
     setMutationRates(mm);
     setSelectionCoefficients(sc);
+    
     update();
 }
 

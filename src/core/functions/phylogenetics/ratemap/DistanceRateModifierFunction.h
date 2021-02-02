@@ -9,15 +9,13 @@
 #ifndef __rb_mlandis__DistanceRateModifierFunction__
 #define __rb_mlandis__DistanceRateModifierFunction__
 
-#include "TimeAtlas.h"
 #include "CharacterHistoryRateModifier.h"
-#include "TypedDagNode.h"
 #include "TypedFunction.h"
 
-#include <iostream>
-#include <vector>
-
 namespace RevBayesCore {
+class DagNode;
+class TimeAtlas;
+template <class valueType> class TypedDagNode;
     
     class DistanceRateModifierFunction : public TypedFunction<CharacterHistoryRateModifier> {
         

@@ -15,10 +15,6 @@
 #ifndef RbMathHelper_H
 #define RbMathHelper_H
 
-#include <vector>
-#include "RandomNumberGenerator.h"
-#include "RbException.h"
-
 namespace RevBayesCore {
     
     namespace RbMath {

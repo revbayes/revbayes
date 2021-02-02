@@ -1,12 +1,16 @@
 #ifndef MultiValueEventDistribution_H
 #define MultiValueEventDistribution_H
 
+#include <iosfwd>
+#include <vector>
+
 #include "MultiValueEvent.h"
-#include "RbVector.h"
-#include "TypedDagNode.h"
 #include "TypedDistribution.h"
+#include "MemberObject.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
     
     
     /**

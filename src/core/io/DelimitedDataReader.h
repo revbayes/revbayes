@@ -1,8 +1,10 @@
 #ifndef DelimitedDataReader_H
 #define DelimitedDataReader_H
 
+#include <stddef.h>
 #include <vector>
-#include <string>
+#include <iosfwd>
+#include <string> // IWYU pragma: keep
 
 namespace RevBayesCore {
     

@@ -1,9 +1,20 @@
 #include "LognormalWithOffsetDistribution.h"
+
 #include "DistributionLognormal.h"
 #include "RandomNumberFactory.h"
 #include "RbConstants.h"
+#include "Cloneable.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
+
+/** LogNormalWithOffsetDistribution constructor
+ * @param m The mean of the natural logarithm of the variable
+ * @param s The standard deviation of the natural logarithm of the variable
+ * @param o Offset
+*/
 
 LognormalWithOffsetDistribution::LognormalWithOffsetDistribution(const TypedDagNode<double> *m, const TypedDagNode<double> *s, const TypedDagNode<double> *o) : ContinuousDistribution( new double( 1.0 ) ),
     mean( m ),

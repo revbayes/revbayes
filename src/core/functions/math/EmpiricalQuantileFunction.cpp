@@ -1,6 +1,13 @@
 #include "EmpiricalQuantileFunction.h"
 
+#include <stddef.h>
 #include <cmath>
+
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

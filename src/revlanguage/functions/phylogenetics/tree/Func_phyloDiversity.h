@@ -16,12 +16,23 @@
 #ifndef Func_phyloDiversity_H
 #define Func_phyloDiversity_H
 
-#include "RlTree.h"
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "RealPos.h"
 #include "RlTypedFunction.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RevPtr.h"
+#include "RlDeterministicNode.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
 
 
 namespace RevLanguage {
+class ArgumentRules;
+class TypeSpec;
     
     class Func_phyloDiversity : public TypedFunction<RealPos> {
         

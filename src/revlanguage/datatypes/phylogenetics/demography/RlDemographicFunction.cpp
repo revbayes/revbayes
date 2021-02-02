@@ -1,14 +1,18 @@
 
-#include "ArgumentRule.h"
-#include "ArgumentRules.h"
-#include "ConstantNode.h"
-#include "ModelVector.h"
+#include <stddef.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "DemographicFunction.h"
-#include "OptionRule.h"
-#include "RevObject.h"
-#include "RbException.h"
 #include "RlDemographicFunction.h"
 #include "TypeSpec.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "StringUtilities.h"
+#include "WorkspaceToCoreWrapperObject.h"
+
+namespace RevLanguage { class Argument; }
 
 
 using namespace RevLanguage;

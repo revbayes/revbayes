@@ -1,3 +1,8 @@
+#include <stddef.h>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
@@ -10,6 +15,19 @@
 #include "RlTimeTree.h"
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "DagNode.h"
+#include "ModelObject.h"
+#include "Move.h"
+#include "RbVector.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlMove.h"
+#include "StochasticNode.h"
+
+namespace RevBayesCore { class Proposal; }
+namespace RevBayesCore { class RateGenerator; }
+namespace RevBayesCore { class Tree; }
 
 
 using namespace RevLanguage;

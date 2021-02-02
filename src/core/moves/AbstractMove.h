@@ -1,12 +1,12 @@
 #ifndef AbstractMove_H
 #define AbstractMove_H
 
+#include <stddef.h>
+#include <ostream>
+#include <vector>
+
 #include "Move.h"
 #include "RbOrderedSet.h"
-
-#include <ostream>
-#include <set>
-#include <vector>
 
 namespace RevBayesCore {
         

@@ -1,3 +1,7 @@
+# ---------- Generated files -------------------
+src/generated_include_dirs.cmake
+src/*/CMakeLists.txt
+
 # ----------------------------------------------
 projects/cmake/*
 !projects/cmake/README.txt
@@ -7,6 +11,7 @@ projects/cmake/*
 # ----------------------------------------------
 src/revlanguage/constants.h
 src/ui/constants.h
+src/revlanguage/utils/GitVersion.cpp
 projects/xcode/revbayes.xcodeproj
 .DS_Store
 .history

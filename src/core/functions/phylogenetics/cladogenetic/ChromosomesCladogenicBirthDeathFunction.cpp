@@ -6,9 +6,17 @@
 
 
 #include "ChromosomesCladogenicBirthDeathFunction.h"
+
+#include <utility>
+
 #include "CladogeneticSpeciationRateMatrix.h"
-#include "MatrixReal.h"
 #include "RbException.h"
+#include "Cloneable.h"
+#include "RbVector.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class BranchHistory; }
+namespace RevBayesCore { class DagNode; }
 
 
 using namespace RevBayesCore;

@@ -1,13 +1,16 @@
-#include "Clade.h"
+#include <cmath>
+#include <iosfwd>
+#include <vector>
+
 #include "ConstantRateBirthDeathProcess.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-#include "RbConstants.h"
-#include "RbMathCombinatorialFunctions.h"
-#include "TopologyNode.h"
+#include "BirthDeathProcess.h"
+#include "TypedDagNode.h"
 
-#include <algorithm>
-#include <cmath>
+namespace RevBayesCore { class Clade; }
+namespace RevBayesCore { class DagNode; }
+namespace RevBayesCore { class Taxon; }
 
 using namespace RevBayesCore;
 

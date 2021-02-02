@@ -7,18 +7,27 @@
 //
 
 #include "Func_formatDiscreteCharacterData.h"
+
+#include <stddef.h>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
-#include "Ellipsis.h"
 #include "Natural.h"
-#include "RbException.h"
 #include "RevNullObject.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
-#include "RlDnaState.h"
 #include "RlString.h"
-#include "DelimitedCharacterDataWriter.h"
 #include "HomologousDiscreteCharacterData.h"
-#include "NaturalNumbersState.h"
 #include "BitsetCharacterDataConverter.h"
+#include "AbstractHomologousDiscreteCharacterData.h"
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "TypeSpec.h"
+
+namespace RevBayesCore { class NaturalNumbersState; }
+namespace RevBayesCore { class StandardState; }
 
 
 using namespace RevLanguage;

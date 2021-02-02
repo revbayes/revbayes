@@ -26,59 +26,56 @@
 
 #include <sstream>
 #include <vector>
-#include <set>
 #include <cstdlib>
+#include <stdio.h>
+#include <math.h>
 
 /* Files including helper classes */
-#include "AddContinuousDistribution.h"
-#include "AddDistribution.h"
-#include "AddWorkspaceVectorType.h"
-#include "AddVectorizedWorkspaceType.h"
 #include "RbException.h"
-#include "RevAbstractType.h"
 #include "RlUserInterface.h"
 #include "Workspace.h"
 
 /// Miscellaneous types ///
 
+#include "DagMemberFunction.h"                        // for DagMemberFunction
+#include "DeterministicNode.h"                        // for DeterministicNode
+#include "DynamicNode.h"                              // for DynamicNode
+#include "Func_workspaceVector.h"                     // for Func_workspaceV...
+#include "RbVector.h"                                 // for RbVector
+#include "RbVectorImpl.h"                             // for RbVectorImpl
+#include "RevPtr.h"                                   // for RevPtr
+#include "RlDagMemberFunction.h"                      // for DagMemberFunction
+#include "RlDeterministicNode.h"                      // for DeterministicNode
+#include "RlStochasticNode.h"                         // for StochasticNode
+#include "RlStoppingRule.h"                           // for StoppingRule
+#include "RlTypedDistribution.h"                      // for TypedDistribution
+#include "RlTypedFunction.h"                          // for TypedFunction
+#include "StochasticNode.h"                           // for StochasticNode
+#include "Tree.h"                                     // for Tree, operator<<
+#include "TypedDagNode.h"                             // for TypedDagNode
+#include "TypedDistribution.h"                        // for TypedDistribution
+#include "TypedFunction.h"                            // for TypedFunction
+#include "WorkspaceToCoreWrapperObject.h"             // for WorkspaceToCore...
+
 /* Base types (in folder "datatypes") */
 #include "RevObject.h"
-#include "AbstractModelObject.h"
 
 /* Container types (in folder "datatypes/container") */
 #include "RlCorrespondenceAnalysis.h"
-#include "RlMatrixReal.h"
-#include "RlMatrixRealPos.h"
-#include "RlMatrixRealSymmetric.h"
-#include "RlRateGeneratorSequence.h"
-#include "RlRateMatrix.h"
-#include "RlSimplex.h"
 
 /* Container types (in folder "datatypes/math") */
-#include "ModelVector.h"
 #include "WorkspaceVector.h"
 
 /* Container types (in folder "distributions/phylogenetics") */
-#include "Dist_bdp.h"
 
 /* Evolution types (in folder "datatypes/phylogenetics") */
-#include "RlDistanceMatrix.h"
 
 /* Character state types (in folder "datatypes/phylogenetics/character") */
-#include "RlAminoAcidState.h"
-#include "RlDnaState.h"
-#include "RlRnaState.h"
-#include "RlStandardState.h"
 
 /* Character data types (in folder "datatypes/phylogenetics/datamatrix") */
-#include "RlAbstractCharacterData.h"
-#include "RlAbstractHomologousDiscreteCharacterData.h"
-#include "RlContinuousCharacterData.h"
 
 /* Tree types (in folder "datatypes/phylogenetics/trees") */
 #include "RlClade.h"
-#include "RlRootedTripletDistribution.h"
-
 
 /* Taxon types (in folder "datatypes/phylogenetics") */
 #include "RlTaxon.h"
@@ -96,6 +93,8 @@
 #include "RlPowerPosteriorAnalysis.h"
 #include "RlSteppingStoneSampler.h"
 #include "RlValidationAnalysis.h"
+#include "RlTrace.h"
+#include "RlTraceTree.h"
 #include "RlAncestralStateTrace.h"
 
 /// Stopping Rules ///
@@ -110,17 +109,14 @@
 /// Types ///
 
 /* These types are needed as template types for the moves */
-#include "RlBranchLengthTree.h"
-#include "RlCharacterHistoryRateModifier.h"
 #include "RlMonitor.h"
 #include "RlMove.h"
-#include "RlRateGenerator.h"
-#include "RlCladogeneticProbabilityMatrix.h"
-#include "RlCladogeneticSpeciationRateMatrix.h"
 #include "RlTimeTree.h"
 
 #include "Func_VectorMonitors.h"
 #include "Func_VectorMoves.h"
+
+#include "Probability.h"
 
 
 
@@ -131,67 +127,42 @@ void RevLanguage::Workspace::initializeTypeGlobalWorkspace(void)
     try
     {
 
-        addTypeWithConstructor( new Clade() );
-        addTypeWithConstructor( new Taxon() );
-        
         addFunction( new Func_VectorMoves()  );
         addFunction( new Func_VectorMonitors()  );
 
-
         addFunction( new Func_workspaceVector<Model>() );
-        
-        //        AddWorkspaceVectorType<AbstractModelObject,2>::addTypeToWorkspace( *this, NULL );
-//        addFunction( new Func_workspaceVector<AbstractModelObject>() );
-
-//        addFunction( new Func_workspaceVector<Dist_bdp>() );
-        addFunction( new Func_workspaceVector<TypedDistribution<TimeTree> >() );
+        addFunction( new Func_workspaceVector<Trace>() );
+        addFunction( new Func_workspaceVector<TraceTree>() );
 		addFunction( new Func_workspaceVector<AncestralStateTrace>() );
-
-//        AddVectorizedWorkspaceType<Monitor,3>::addTypeToWorkspace( *this, new Monitor() );
         addFunction( new Func_workspaceVector<Monitor>() );
-
-        //        AddVectorizedWorkspaceType<Move,3>::addTypeToWorkspace( *this, new Move() );
         addFunction( new Func_workspaceVector<Move>() );
-
         addFunction( new Func_workspaceVector<StoppingRule>() );
 
-        /* Add evolution types (in folder "datatypes/evolution") (alphabetic order) */
-
-        /* Add character types (in folder "datatypes/evolution/character") (alphabetic order) */
-
-        /* Add data matrix types (in folder "datatypes/evolution/datamatrix") (alphabetic order) */
-
-        /* Add tree types (in folder "datatypes/evolution/trees") (alphabetic order) */
-       // addTypeWithConstructor( "rootedTripletDist", new RootedTripletDistribution() );
-
-
-
         /* Add math types (in folder "datatypes/math") */
-        addTypeWithConstructor( new CorrespondenceAnalysis()                    );
-        //addTypeWithConstructor( new RateGeneratorSequence()                     );
-//        addType( new MatrixReal()                                               );
+        addType( new CorrespondenceAnalysis()                    );
 
         /* Add inference types (in folder "datatypes/inference") (alphabetic order) */
-        addTypeWithConstructor( new BootstrapAnalysis()                             );
-        addTypeWithConstructor( new BurninEstimationConvergenceAssessment()         );
-        addTypeWithConstructor( new HillClimber()                                   );
-        addTypeWithConstructor( new Mcmc()                                          );
-        addTypeWithConstructor( new Mcmcmc()                                        );
-        addTypeWithConstructor( new Model()                                         );
-        addTypeWithConstructor( new PathSampler()                                   );
-        addTypeWithConstructor( new PosteriorPredictiveAnalysis()                   );
-        addTypeWithConstructor( new PosteriorPredictiveSimulation()                 );
-        addTypeWithConstructor( new PowerPosteriorAnalysis()                        );
-        addTypeWithConstructor( new SteppingStoneSampler()                          );
-        addTypeWithConstructor( new ValidationAnalysis()                            );
+        addType( new BootstrapAnalysis()                             );
+        addType( new BurninEstimationConvergenceAssessment()         );
+        addType( new HillClimber()                                   );
+        addType( new Mcmc()                                          );
+        addType( new Mcmcmc()                                        );
+        addType( new Model()                                         );
+        addType( new PathSampler()                                   );
+        addType( new PosteriorPredictiveAnalysis()                   );
+        addType( new PosteriorPredictiveSimulation()                 );
+        addType( new PowerPosteriorAnalysis()                        );
+        addType( new SteppingStoneSampler()                          );
+        addType( new ValidationAnalysis()                            );
 
         /* Add stopping rules (in folder "analysis/stoppingRules") (alphabetic order) */
-        addTypeWithConstructor( new GelmanRubinStoppingRule()                   );
-        addTypeWithConstructor( new GewekeStoppingRule()                        );
-        addTypeWithConstructor( new MaxIterationStoppingRule()                  );
-        addTypeWithConstructor( new MaxTimeStoppingRule()                       );
-        addTypeWithConstructor( new MinEssStoppingRule()                        );
-        addTypeWithConstructor( new StationarityStoppingRule()                  );
+        addType( new GelmanRubinStoppingRule()                   );
+        addType( new GewekeStoppingRule()                        );
+        addType( new MaxIterationStoppingRule()                  );
+        addType( new MaxTimeStoppingRule()                       );
+        addType( new MinEssStoppingRule()                        );
+        addType( new StationarityStoppingRule()                  );
+
     }
     catch(RbException& rbException)
     {

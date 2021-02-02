@@ -1,14 +1,13 @@
 #ifndef ScaledDirichletDistribution_H
 #define ScaledDirichletDistribution_H
 
-#include "RbVector.h"
 #include "Simplex.h"
-#include "TypedDagNode.h"
 #include "TypedDistribution.h"
 
-#include <vector>
-
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class RbVector;
+template <class valueType> class TypedDagNode;
     
     /**
      * @brief ScaledDirichlet distribution class.

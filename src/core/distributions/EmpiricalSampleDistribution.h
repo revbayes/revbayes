@@ -223,7 +223,7 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
     {
         if ( i >= sample_block_start && i < sample_block_end )
         {
-            ln_probs[i] = base_distribution_instances[i]->computeLnProbability() / num_samples;
+            ln_probs[i] = base_distribution_instances[i]->computeLnProbability();
         }
         
     }
@@ -322,6 +322,8 @@ void RevBayesCore::EmpiricalSampleDistribution<mixtureType>::executeMethod(const
 
         rv.clear();
         rv.resize(num_samples);
+        
+        // Sebastian: Remember that ln_probs is not normalized and would need to be divided by num_samples!
         for (size_t i = 0; i < num_samples; ++i)
         {
             rv[i] = (log_transorm ? ln_probs[i] : exp(ln_probs[i]));
@@ -423,7 +425,7 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::setValue(RbVector<val
     {
         TypedDistribution<valueType> *base_distribution_clone = base_distribution->clone();
         base_distribution_instances[i] = base_distribution_clone;
-        base_distribution_clone->setValue( (*v)[i].clone() );
+        base_distribution_clone->setValue( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( (*v)[i]) );
     }
     
 #ifdef RB_MPI

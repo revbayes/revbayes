@@ -2,24 +2,20 @@
 #define ExponentialWithOffsetDistribution_H
 
 #include "ContinuousDistribution.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     /**
-     * @brief Exponential distribution with offset distribution class.
+     * @brief Exponential distribution with Offset distribution class.
      *
      * The Exponential distribution with offset represents a family of distributions
      * defined on the real number. The difference here is that the offset can result into negative observation. 
      * The Exponential distribution has 2 parameters:
-     *   lambda .. the rate
-     *   offset .. the offset
+     *@param lambda the rate
+     *@param offset the offset. This shifts the distribution by the offset amount
      * Instances of this class can be associated to stochastic variables.
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2013-04-12, version 1.0
-     *
      */
     class ExponentialWithOffsetDistribution : public ContinuousDistribution {
         

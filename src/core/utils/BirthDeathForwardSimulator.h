@@ -1,12 +1,11 @@
 #ifndef BirthDeathForwardSimulator_H
 #define BirthDeathForwardSimulator_H
 
-#include "Tree.h"
-
-#include <string>
+#include <stddef.h>
 #include <vector>
 
 namespace RevBayesCore {
+class Tree;
     
     /**
      * This class represents the writer object of character data objects into files in Fasta format.

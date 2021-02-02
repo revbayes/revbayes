@@ -1,16 +1,16 @@
 #ifndef Move_H
 #define Move_H
 
-#include "Cloneable.h"
-#include "RbOrderedSet.h"
-
+#include <stddef.h>
 #include <ostream>
-#include <set>
 #include <vector>
+
+#include "Cloneable.h"
 
 namespace RevBayesCore {
     
     class DagNode;
+template <class valueType> class RbOrderedSet;
     
     /**
      * Base class for all move within an MCMC (and all other variants).

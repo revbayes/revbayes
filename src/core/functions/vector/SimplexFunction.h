@@ -22,14 +22,14 @@
 #ifndef SimplexFunction_H
 #define SimplexFunction_H
 
-#include "RbVector.h"
-#include "Simplex.h"
-#include "TypedFunction.h"
-#include "TypedDagNode.h"
-
 #include <vector>
 
+#include "Simplex.h"
+#include "TypedFunction.h"
+
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     class SimplexFunction : public TypedFunction< Simplex > {
         

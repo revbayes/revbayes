@@ -7,11 +7,15 @@
 //
 
 #include "DECStationaryFrequenciesFunction.h"
+
 //#include "StationaryFrequencies_DECRateMatrix.h"
 #include "TransitionProbabilityMatrix.h"
 #include "TypedFunction.h"
-#include "RbException.h"
-#include <cmath>
+#include "Cloneable.h"
+#include "RateGenerator.h"
+#include "TypedDagNode.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 

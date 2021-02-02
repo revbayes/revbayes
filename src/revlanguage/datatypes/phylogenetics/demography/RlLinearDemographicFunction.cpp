@@ -1,13 +1,19 @@
+#include <ostream>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "LinearDemographicFunction.h"
-#include "ModelVector.h"
-#include "RbException.h"
 #include "RealPos.h"
 #include "RevObject.h"
-#include "RlString.h"
 #include "RlLinearDemographicFunction.h"
 #include "TypeSpec.h"
+#include "DemographicFunction.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlDemographicFunction.h"
+
+namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 
 using namespace RevLanguage;

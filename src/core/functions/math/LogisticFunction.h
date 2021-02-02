@@ -2,20 +2,22 @@
 #define LogisticFunction_H
 
 #include "ContinuousFunction.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     
     /**
-     * \brief Logistic function value of a real number.
+     * @brief Logistic function value of a real number.
      *
-     * Compute the logistic function of a real number x (tanh(x) = exp(x) / (1 + exp(x))).
+     * Compute the logistic function of a real number x (y = exp(x) / (1 + exp(x))).
      *
-     * \copyright (c) Copyright 2009-2015 (GPL version 3)
-     * \author The RevBayes Development Core Team (Nicolas Lartillot)
-     * \since Version 1.0, 2015-01-31
+     * This function has one parameter:
      *
+     * @param x a double for the value of the logistic function
+     *
+     * 
      */
     class LogisticFunction : public ContinuousFunction {
         

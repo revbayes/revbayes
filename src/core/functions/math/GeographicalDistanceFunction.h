@@ -1,11 +1,11 @@
 #ifndef GeographicalDistanceFunction_hpp
 #define GeographicalDistanceFunction_hpp
 
-#include <stdio.h>
 #include "ContinuousFunction.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
     
     
     /**

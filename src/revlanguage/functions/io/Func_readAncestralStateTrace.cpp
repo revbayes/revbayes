@@ -11,22 +11,29 @@
  *
  */
 
+#include <stddef.h>
+#include <iostream>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
-#include "ConstantNode.h"
-#include "Ellipsis.h"
 #include "Func_readAncestralStateTrace.h"
 #include "RbException.h"
 #include "RbFileManager.h"
 #include "RlString.h"
 #include "RlAncestralStateTrace.h"
-#include "RlUtils.h"
 #include "StringUtilities.h"
-#include "TreeUtilities.h"
 #include "WorkspaceVector.h"
-
-#include <map>
-#include <set>
-#include <sstream>
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlFunction.h"
+#include "Trace.h"
+#include "TypeSpec.h"
+#include "WorkspaceToCoreWrapperObject.h"
 
 
 using namespace RevLanguage;

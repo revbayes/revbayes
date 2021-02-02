@@ -1,15 +1,24 @@
+#include <stddef.h>
+#include <sstream>
+#include <algorithm>
+#include <functional>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "ArgumentRule.h"
-#include "ConstantNode.h"
 #include "FunctionTable.h"
 #include "RbException.h"
-#include "RbUtil.h"
-#include "RevNullObject.h"
 #include "RlFunction.h"
-#include "StochasticNode.h"
-
-#include <iomanip>
-#include <ostream>
-#include <sstream>
+#include "Argument.h"
+#include "ArgumentRules.h"
+#include "DagNode.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "StringUtilities.h"
+#include "TypeSpec.h"
 
 using namespace RevLanguage;
 

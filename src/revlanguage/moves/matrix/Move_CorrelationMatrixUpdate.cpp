@@ -7,21 +7,30 @@
 
 #include "Move_CorrelationMatrixUpdate.h"
 
+#include <stddef.h>
+#include <string>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "CorrelationMatrixProposal.h"
 #include "RlBoolean.h"
-#include "MatrixReal.h"
 #include "MetropolisHastingsMove.h"
 #include "ModelVector.h"
-#include "Natural.h"
-#include "RbException.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlMatrixReal.h"
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
+#include "ModelObject.h"
+#include "Move.h"
+#include "RbBoolean.h"
+#include "StochasticNode.h"
+#include "StringUtilities.h"
+
+namespace RevBayesCore { class MatrixReal; }
+namespace RevBayesCore { class Proposal; }
+namespace RevBayesCore { template <class valueType> class RbVector; }
 
 
 using namespace RevLanguage;

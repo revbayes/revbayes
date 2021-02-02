@@ -1,4 +1,13 @@
 #include "Parser.h"
+
+#include <stdio.h>
+#include <cstdlib>
+#include <cstring>
+#include <list>
+#include <sstream>
+#include <iostream>
+#include <vector>
+
 #include "RbException.h"
 #include "RbHelpRenderer.h"
 #include "RbHelpSystem.h"
@@ -7,23 +16,24 @@
 #include "RevNullObject.h"
 #include "RlString.h"
 #include "SyntaxElement.h"
-#include "SyntaxFormal.h"
 #include "SyntaxFunctionCall.h"
 #include "SyntaxVariable.h"
 #include "RlUserInterface.h"
 #include "Signals.h"
 #include "Workspace.h"
-
-#include <cstdlib>
-#include <cstring>
-#include <list>
-#include <sstream>
+#include "FunctionTable.h"
+#include "RevObject.h"
+#include "RlFunction.h"
+#include "SyntaxFormal.h" // IWYU pragma: keep
 
 #ifdef RB_MPI
 #include <mpi.h>
 #endif
 
 #include "grammar.tab.h"
+
+namespace RevBayesCore { class RbHelpEntry; }
+namespace RevLanguage { class Environment; }
 
 // Global flags indicating flex state
 bool foundNewline;

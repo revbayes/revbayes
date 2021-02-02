@@ -27,9 +27,6 @@ namespace RevBayesCore {
      *      |   (1-pi_GC)/2        k*pi_GC/2        pi_GC/2             -         |
      *
      *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2014-07-04, version 1.0
      */
     class RateMatrix_Tamura92 : public TimeReversibleRateMatrix {
         

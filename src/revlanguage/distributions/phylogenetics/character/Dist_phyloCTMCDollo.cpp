@@ -1,16 +1,41 @@
 #include "Dist_phyloCTMCDollo.h"
 
+#include <stddef.h>
+#include <ostream>
+
 #include "PhyloCTMCSiteHomogeneousConditional.h"
 #include "PhyloCTMCSiteHomogeneousDollo.h"
 #include "PhyloCTMCSiteHomogeneousDolloBinary.h"
 #include "OptionRule.h"
-#include "Probability.h"
 #include "RevNullObject.h"
 #include "RlBoolean.h"
 #include "RlRateGenerator.h"
 #include "RlString.h"
 #include "RlTree.h"
 #include "RlSimplex.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "IndirectReferenceFunction.h"
+#include "ModelObject.h"
+#include "ModelVector.h"
+#include "Natural.h"
+#include "PhyloCTMCSiteHomogeneousBinary.h"
+#include "RateGenerator.h"
+#include "RbBoolean.h"
+#include "RbException.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "RealPos.h"
+#include "RlConstantNode.h"
+#include "RlDistribution.h"
+#include "StringUtilities.h"
+#include "Tree.h"
+#include "TypeSpec.h"
+#include "UserFunctionNode.h"
+
+namespace RevBayesCore { class Simplex; }
 
 using namespace RevLanguage;
 

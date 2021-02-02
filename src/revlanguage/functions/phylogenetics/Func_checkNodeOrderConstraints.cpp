@@ -6,17 +6,34 @@
 //  Copyright 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "Clade.h"
+#include <stddef.h>
+#include <iostream>
+#include <string>
+#include <vector>
+
 #include "Func_checkNodeOrderConstraints.h"
-#include "ModelVector.h"
-#include "Natural.h"
-#include "RlClade.h"
 #include "RlTimeTree.h"
-#include "RealPos.h"
 #include "RlDeterministicNode.h"
 #include "RlRelativeNodeAgeConstraints.h"
 #include "CheckNodeOrderConstraintsFunction.h"
 #include "TypedDagNode.h"
+#include "Argument.h"
+#include "ArgumentRule.h"
+#include "ArgumentRules.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "RbBoolean.h"
+#include "RbException.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlFunction.h"
+#include "RlTypedFunction.h"
+#include "TypeSpec.h"
+#include "TypedFunction.h"
+
+namespace RevBayesCore { class RelativeNodeAgeConstraints; }
+namespace RevBayesCore { class Tree; }
 
 using namespace RevLanguage;
 

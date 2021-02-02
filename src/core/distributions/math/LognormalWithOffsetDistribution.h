@@ -23,9 +23,23 @@
 #define LognormalWithOffsetDistribution_H
 
 #include "ContinuousDistribution.h"
-#include "TypedDagNode.h"
 
 namespace RevBayesCore {
+class DagNode;
+template <class valueType> class TypedDagNode;
+
+/**
+ * @brief Lognormal distribution with offset.
+ *
+ * The LognormalWithOffset distribution represents a family of distributions defined on those positive real numbers
+ * that are greater than the value of the offset parameter. The LognormalWithOffset distribution has 3 parameters:
+ * @param m The mean of the natural logarithm of the variable
+ * @param s The standard deviation of the natural logarithm of the variable
+ * @param o Offset
+ *
+ * Instances of this class can be associated to stochastic variables.
+ *
+ */
     
     class LognormalWithOffsetDistribution : public ContinuousDistribution {
         
@@ -39,7 +53,7 @@ namespace RevBayesCore {
         double                                              computeLnProbability(void);
         double                                              getMax(void) const;
         double                                              getMin(void) const;
-        double                                              quantile(double p) const;                                                       //!< Qu
+        double                                              quantile(double p) const;                                                   
         void                                                redrawValue(void);
         
     protected:

@@ -49,7 +49,6 @@ namespace RevLanguage {
 }
 
 #include "RlStochasticNode.h"
-#include "TypedDistribution.h"
 
 template <typename rlType>
 RevLanguage::TypedDistribution<rlType>::TypedDistribution() : Distribution(),

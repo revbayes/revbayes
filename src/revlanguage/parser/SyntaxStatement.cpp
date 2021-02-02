@@ -1,18 +1,21 @@
+#include <stddef.h>
+#include <cassert>
+#include <iostream>
+#include <list>
+
 #include "RlBoolean.h"
-#include "Environment.h"
-#include "RbException.h"
-#include "RbUtil.h"
 #include "RevNullObject.h"
 #include "Signals.h"
 #include "SyntaxForLoop.h"
 #include "SyntaxStatement.h"
 #include "RlUserInterface.h"
-#include "Workspace.h"
+#include "RbBoolean.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "SyntaxElement.h"
 
-#include <cassert>
-#include <iostream>
-#include <list>
-#include <sstream>
+namespace RevLanguage { class Environment; }
 
 using namespace RevLanguage;
 

@@ -1,17 +1,46 @@
+#include <math.h>
+#include <stddef.h>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "Clade.h"
 #include "Dist_FBDRangeMatrix.h"
 #include "ModelVector.h"
 #include "Natural.h"
 #include "OptionRule.h"
 #include "PiecewiseConstantFossilizedBirthDeathRangeProcess.h"
 #include "Probability.h"
-#include "Real.h"
 #include "RealPos.h"
-#include "RlClade.h"
 #include "RlString.h"
 #include "RlTaxon.h"
+#include "DagMemberFunction.h"
+#include "DeterministicNode.h"
+#include "DynamicNode.h"
+#include "MatrixReal.h"
+#include "ModelObject.h"
+#include "RbBoolean.h"
+#include "RbVector.h"
+#include "RevNullObject.h"
+#include "RevObject.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlBoolean.h"
+#include "RlDagMemberFunction.h"
+#include "RlDeterministicNode.h"
+#include "RlMatrixReal.h"
+#include "RlStochasticNode.h"
+#include "RlTypedDistribution.h"
+#include "RlTypedFunction.h"
+#include "StochasticNode.h"
+#include "Taxon.h"
+#include "TypeSpec.h"
+#include "TypedDagNode.h"
+#include "TypedDistribution.h"
+#include "TypedFunction.h"
+
+namespace RevBayesCore { class DagNode; }
 
 using namespace RevLanguage;
 
@@ -83,9 +112,10 @@ RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess* Dist_FBDRangeMa
         rt = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
 
+    bool bo = static_cast<const RlBoolean &>( bounded->getRevObject() ).getValue();
     bool pa = static_cast<const RlBoolean &>( presence_absence->getRevObject() ).getValue();
 
-    RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess* d = new RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess(l, m, p, c, r, rt, cond, t, pa);
+    RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess* d = new RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess(l, m, p, c, r, rt, cond, t, bo, pa);
 
     return d;
 }
@@ -192,6 +222,7 @@ const MemberRules& Dist_FBDRangeMatrix::getParameterRules(void) const
         dist_member_rules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
         dist_member_rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa with stratigraphic ranges used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         
+        dist_member_rules.push_back( new ArgumentRule( "bounded" , RlBoolean::getClassTypeSpec() , "Treat first and last occurrence ages as known range boundaries?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         dist_member_rules.push_back( new ArgumentRule( "binary" , RlBoolean::getClassTypeSpec() , "Treat fossil counts as binary presence/absence data?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
 
         rules_set = true;
@@ -258,6 +289,10 @@ void Dist_FBDRangeMatrix::setConstParameter(const std::string& name, const RevPt
     else if ( name == "condition" )
     {
         condition = var;
+    }
+    else if ( name == "bounded" )
+    {
+        bounded = var;
     }
     else if ( name == "binary" )
     {
