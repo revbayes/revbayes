@@ -6,7 +6,7 @@ using namespace RevBayesCore;
 
 revPoMo2NRateMatrixFunction::revPoMo2NRateMatrixFunction(    const TypedDagNode< long > *ni, 
                                                              const TypedDagNode< Simplex > *bf,
-                                                             const TypedDagNode< RbVector<double> > *ex, 
+                                                             const TypedDagNode< double > *ex, 
                                                              const TypedDagNode< RbVector<double> > *f ) : 
 TypedFunction<RateGenerator>( new RateMatrix_revPoMo2N( computeNumStates( ni->getValue() ),  ni->getValue()  ) ),
 N( ni),
@@ -54,7 +54,7 @@ void revPoMo2NRateMatrixFunction::update( void )
     // get the information from the arguments for reading the file
     long                        ni = N->getValue();
     const Simplex&              bf = pi->getValue();
-    const std::vector<double>&  ex = rho->getValue();
+    double                      ex = rho->getValue();
     const std::vector<double>&  f  = phi->getValue();
 
     // set the base frequencies
@@ -83,7 +83,7 @@ void revPoMo2NRateMatrixFunction::swapParameterInternal(const DagNode *oldP, con
 
     if (oldP == rho)
     {
-        rho = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        rho = static_cast<const TypedDagNode< double >* >( newP );
     }
 
     if (oldP == phi)

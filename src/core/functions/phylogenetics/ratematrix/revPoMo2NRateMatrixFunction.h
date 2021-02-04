@@ -29,7 +29,7 @@ namespace RevBayesCore {
 
         revPoMo2NRateMatrixFunction(const TypedDagNode< long > *ni, 
                                     const TypedDagNode< Simplex > *bf,
-                                    const TypedDagNode< RbVector<double> > *ex, 
+                                    const TypedDagNode< double > *ex, 
                                     const TypedDagNode< RbVector<double> > *f ) ;
 
         virtual                                            ~revPoMo2NRateMatrixFunction(void);                                                    //!< Virtual destructor
@@ -49,7 +49,7 @@ namespace RevBayesCore {
         // members
         const TypedDagNode< long >*                             N;
         const TypedDagNode< Simplex >*                          pi;
-        const TypedDagNode< RbVector<double> >*                 rho;
+        const TypedDagNode< double >*                           rho;
         const TypedDagNode< RbVector<double> >*                 phi;
         
     };

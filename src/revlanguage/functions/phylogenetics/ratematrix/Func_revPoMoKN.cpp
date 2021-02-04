@@ -68,11 +68,11 @@ const ArgumentRules& Func_revPoMoKN::getArgumentRules( void ) const
     
     if ( !rules_set )
     {
-        argumentRules.push_back( new ArgumentRule( "K"   , Natural::getClassTypeSpec(), "Number of alleles.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "N"   , Natural::getClassTypeSpec(), "Number of individuals.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "pi"  , Simplex::getClassTypeSpec(), "Vector of allele frequencies.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "rho" , ModelVector<RealPos>::getClassTypeSpec(), "Vector of mutation rates: mu=(mu_a0a1,mu_a1a0,mu_a0a2,...).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "phi" , ModelVector<RealPos>::getClassTypeSpec(), "Vector of fitness coefficients: phi=(phi_0,phi_1,...).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );  
+        argumentRules.push_back( new ArgumentRule( "K"   , Natural::getClassTypeSpec(), "Number of alleles", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "N"   , Natural::getClassTypeSpec(), "Number of individuals", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "pi"  , Simplex::getClassTypeSpec(), "Vector of allele frequencies_ pi=(pi_a0,pi_a1,...,pi_ak)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "rho" , ModelVector<RealPos>::getClassTypeSpec(), "Vector of exchangeabilities: rho=(rho_a0a1,rho_a0a2,...,rho_a0ak,rho_a1a2,...)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "phi" , ModelVector<RealPos>::getClassTypeSpec(), "Vector of fitness coefficients: phi=(phi_0,phi_1,...,phi_ak)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );  
 
         rules_set = true;
     }

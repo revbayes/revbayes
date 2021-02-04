@@ -70,9 +70,9 @@ const ArgumentRules& Func_revPoMoThree4N::getArgumentRules( void ) const
   {
 
     argumentRules.push_back( new ArgumentRule( "N"          , Natural::getClassTypeSpec(), "Population size", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-    argumentRules.push_back( new ArgumentRule( "pi"         , Simplex::getClassTypeSpec(), "Allele base frequencies: pi=(pi_A,pi_C,pi_G,pi_T)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-    argumentRules.push_back( new ArgumentRule( "rho"        , ModelVector<RealPos>::getClassTypeSpec(), "Exchangeabilities: rho=(rho_AC,rho_AG,rho_AT,rho_CG,rho_CT,rho_GT)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-    argumentRules.push_back( new ArgumentRule( "phi"        , ModelVector<RealPos>::getClassTypeSpec(), "Fitness coefficients: phi=(phi_A,phi_C,phi_G,phi_T)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    argumentRules.push_back( new ArgumentRule( "pi"         , Simplex::getClassTypeSpec(), "Vector of allele frequencies: pi=(pi_a0,pi_a1,pi_a2,pi_a3)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    argumentRules.push_back( new ArgumentRule( "rho"        , ModelVector<RealPos>::getClassTypeSpec(), "Vector of exchangeabilities: rho=(rho_a0a1,rho_a0a2,rho_a0a3,rho_a1a2,rho_a1a3,rho_a2a3)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    argumentRules.push_back( new ArgumentRule( "phi"        , ModelVector<RealPos>::getClassTypeSpec(), "Vector of fitness coefficients: phi=(phi_a0,phi_a1,phi_a2,phi_a3)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
  
     rules_set = true;
   }

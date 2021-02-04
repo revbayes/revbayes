@@ -31,7 +31,7 @@ namespace RevBayesCore {
 
         void                                                    setN( long &ni );
         void                                                    setPi(  const Simplex &bf );
-        void                                                    setRho( const std::vector<double> &ex );
+        void                                                    setRho( double &ex );
         void                                                    setPhi( const std::vector<double> &f );
 
         void                                                    update(void);
@@ -49,7 +49,7 @@ namespace RevBayesCore {
         
         long                                                    N;
         Simplex                                                 pi; 
-        std::vector<double>                                     rho;   
+        double                                                  rho;   
         std::vector<double>                                     phi;                                                                           //!< Vector of precalculated product of eigenvectors and their inverse
                 
     };

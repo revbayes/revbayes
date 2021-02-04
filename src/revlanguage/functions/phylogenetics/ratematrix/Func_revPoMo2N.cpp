@@ -36,13 +36,9 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_revPoMo2N::crea
 {
     RevBayesCore::TypedDagNode< long                          >* ni = static_cast<const Natural              &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::Simplex          >* bf = static_cast<const Simplex              &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ex = static_cast<const ModelVector<RealPos> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double                        >* ex = static_cast<const RealPos              &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* fc = static_cast<const ModelVector<RealPos> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
 
-    if ( ex->getValue().size() != 1 )
-    {
-        throw RbException("The number of exchangeabilities should match the number of biallelic polymorphic types: 1.");
-    }
     if ( bf->getValue().size() != 2 )
     {
         throw RbException("The number of allele frequencies should match the number of alleles: 2.");
@@ -67,10 +63,10 @@ const ArgumentRules& Func_revPoMo2N::getArgumentRules( void ) const
     
     if ( !rules_set )
     {
-        argumentRules.push_back( new ArgumentRule( "N"   , Natural::getClassTypeSpec(), "Number of individuals.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "pi"  , Simplex::getClassTypeSpec(), "Vector of allele frequencies: pi=(pi_a0,pi_a1).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "rho" , ModelVector<RealPos>::getClassTypeSpec(), "Vector of mutation rates: mu=(mu_a0a1,mu_a1a0).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "phi" , ModelVector<RealPos>::getClassTypeSpec(), "Vector of fitness coefficients: phi=(phi_0,phi_1).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );  
+        argumentRules.push_back( new ArgumentRule( "N"   , Natural::getClassTypeSpec(), "Number of individuals", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "pi"  , Simplex::getClassTypeSpec(), "Vector of allele frequencies: pi=(pi_a0,pi_a1)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "rho" , RealPos::getClassTypeSpec(), "Vector of exchangeabilities: rho=(rho_a0a1)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "phi" , ModelVector<RealPos>::getClassTypeSpec(), "Vector of fitness coefficients: phi=(phi_0,phi_1)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );  
 
         rules_set = true;
     }

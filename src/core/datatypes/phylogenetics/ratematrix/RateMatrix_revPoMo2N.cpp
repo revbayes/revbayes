@@ -20,7 +20,7 @@ using namespace RevBayesCore;
 RateMatrix_revPoMo2N::RateMatrix_revPoMo2N(long num_states, long in_n ) : TimeReversibleRateMatrix( num_states ),
     N( in_n ),
     pi( 2, 0.5 ),
-    rho( 1, 0.01 ),
+    rho( 0.01 ),
     phi( 2, 1.0 )
 {
     
@@ -198,8 +198,8 @@ void RateMatrix_revPoMo2N::computeOffDiagonal( void )
   double rN = 1.0/N;
 
 //mutations
-  m[0][2]  = rho[0]*pi[1];  //{Na0} -> {(N-1)a0,1a1}
-  m[1][N]  = rho[0]*pi[0];  //{Na1} -> {1a0,(N-1)a1}
+  m[0][2]  = rho*pi[1];  //{Na0} -> {(N-1)a0,1a1}
+  m[1][N]  = rho*pi[0];  //{Na1} -> {1a0,(N-1)a1}
 
   //fixations
   m[2][0]  = (N-1.0)*phi[0]*rN;  //{(N-1)a0,1a1} -> {Na0} 
@@ -325,7 +325,7 @@ void RateMatrix_revPoMo2N::setPi( const Simplex &bf )
     needs_update = true;
 }
 
-void RateMatrix_revPoMo2N::setRho( const std::vector<double> &ex )
+void RateMatrix_revPoMo2N::setRho( double &ex )
 {
     rho = ex;
     
