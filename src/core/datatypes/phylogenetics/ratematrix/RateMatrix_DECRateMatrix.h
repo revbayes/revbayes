@@ -27,6 +27,7 @@ namespace RevBayesCore {
         // RateMatrix functions
         double                              averageRate(void) const;
         void                                calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;   //!< Calculate the transition matrix
+        void                                calculateTransitionProbabilitiesForStochasticMapping(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;   //!< Calculate the transition matrix
         RateMatrix_DECRateMatrix*           clone(void) const;
         void                                fillRateMatrix(void);
         const RbVector<RbVector<double> >&  getDispersalRates(void) const;
