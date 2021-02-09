@@ -412,6 +412,25 @@ void RateMatrix_DECRateMatrix::calculateTransitionProbabilities(double startAge,
     return;
 }
 
+
+/**
+ Stochastic mapping under matrix uniformization requires P(t)=exp(Qt). This
+ relationship does not hold when the DEC rate matrix conditions on survival,
+ P'(t)_ij = P(t)_ij / (1-P(t)_i0). Instead, using the standard P(t) with
+ uniformization guarantees the condition on survival is satisfied, since
+ state 0 is an absorbing state, meaning it cannot be sampled as a possible
+ end state.
+ */
+void RateMatrix_DECRateMatrix::calculateTransitionProbabilitiesForStochasticMapping(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
+{
+    double t = scalingFactor * rate * (startAge - endAge);
+    
+    //We use repeated squaring to quickly obtain exponentials, as in Poujol and Lartillot, Bioinformatics 2014.
+    exponentiateMatrixByScalingAndSquaring(t, P);
+    
+}
+
+
 RateMatrix_DECRateMatrix* RateMatrix_DECRateMatrix::clone( void ) const
 {
     return new RateMatrix_DECRateMatrix( *this );
