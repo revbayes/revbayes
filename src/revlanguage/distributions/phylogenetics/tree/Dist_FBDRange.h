@@ -53,7 +53,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                               fossil_counts;                                                                          //!< The fossil counts
         RevPtr<const RevVariable>                               presence_absence;
         RevPtr<const RevVariable>                               extended;
-        RevPtr<const RevVariable>                               bounded;
+        RevPtr<const RevVariable>                               uncertainty;
         std::string                                             start_condition;                                                                        //!< The start condition of the process (rootAge/originAge)
 
     };

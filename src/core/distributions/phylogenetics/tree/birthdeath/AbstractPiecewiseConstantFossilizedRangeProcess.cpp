@@ -11,6 +11,7 @@
 #include "RbMathLogic.h"
 #include "DagNode.h"
 #include "RbException.h"
+#include "RbMathFunctions.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "Taxon.h"
@@ -39,8 +40,8 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
                                                                                                  const TypedDagNode<double> *inrho,
                                                                                                  const TypedDagNode< RbVector<double> > *intimes,
                                                                                                  const std::vector<Taxon> &intaxa,
-                                                                                                 bool ua) :
-    ascending(false), homogeneous_rho(inrho), timeline( intimes ), fbd_taxa(intaxa), ages_from_counts(ua)
+                                                                                                 bool afc) :
+    ascending(false), homogeneous_rho(inrho), timeline( intimes ), fbd_taxa(intaxa), ages_from_counts(afc)
 {
     // initialize all the pointers to NULL
     homogeneous_lambda             = NULL;
@@ -177,7 +178,7 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
     b_i = std::vector<double>(fbd_taxa.size(), 0.0);
     d_i = std::vector<double>(fbd_taxa.size(), 0.0);
 
-    H = std::vector<double>(fbd_taxa.size(), 0.0);
+    lnQ = std::vector<double>(fbd_taxa.size(), 0.0);
 
     p_i         = std::vector<double>(num_intervals, 1.0);
     q_i         = std::vector<double>(num_intervals, 0.0);
@@ -318,11 +319,37 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
             // integrate o over full range of oi
             if ( ages_from_counts == true )
             {
-                double delta = std::max(d, times[oi]);
-                double delta_plus_Ls_alpha = oi > 0 ? std::min(b, times[oi-1]) : b;
+            	// non-singleton
+            	// (Case 2)
+            	if ( oi != yi )
+            	{
+					double delta = times[oi];
+					double delta_plus_Ls = oi > 0 ? std::min(b, times[oi-1]) : b;
 
-                H[i] = integrateQ(oi, delta_plus_Ls_alpha) - integrateQ(oi, delta);
-                lnProbTimes += log( H[i] ) - fossil[oi]*( delta - times[oi] );
+					lnQ[i] = H(oi,times[oi],delta_plus_Ls) - H(oi,times[oi],delta);
+					//if ( k_oi.isPositiveState() )
+					//{
+						lnQ[i] -= Z(0,oi,times[oi],delta_plus_Ls,false) - Z(0,oi,times[oi],delta,false);
+					//}
+					lnQ[i] = log(lnQ[i]);
+            	}
+            	// singleton
+            	// (Case 6)
+            	else
+            	{
+            		double delta = std::max(d, times[oi]);
+					double delta_plus_Ls = oi > 0 ? std::min(b, times[oi-1]) : b;
+
+					lnQ[i] = H(oi,delta_plus_Ls,delta_plus_Ls) - H(oi,delta_plus_Ls,delta) - (H(oi,delta,delta_plus_Ls) - H(oi,delta,delta));
+					lnQ[i] /= fossil[oi];
+					//if ( k_oi.isPositiveState() )
+					//{
+						lnQ[i] -= Z(0,oi,delta_plus_Ls,delta_plus_Ls,true) - Z(0,oi,delta_plus_Ls,delta,true) - (Z(0,oi,delta,delta_plus_Ls,true) - Z(0,oi,delta,delta,true));
+					//}
+					lnQ[i] = log(lnQ[i]);
+            	}
+
+            	lnProbTimes += lnQ[i];
             }
             // user-defined uncertainty for o
             else
@@ -336,39 +363,55 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                 if ( oi != yi )
                 {
                     // no uncertainty in o
+                	// (Eq 6)
                     if( o == o_min )
                     {
                         lnProbTimes += fossil[oi] * ( o - times[oi] );
                     }
                     // integrate from o_min to o
+                    // (Case 2)
                     else
                     {
-                        // delta = times[oi]
-                        H[i] = integrateQ(oi, o) - integrateQ(oi, o_min);
-                        lnProbTimes += log( H[i] ); // fossil[oi]*( delta - times[oi] ) = 0
+                        lnQ[i] = H(oi,times[oi],o) - H(oi,times[oi],o_min);
+                    	//if ( k_oi.isPositiveState() )
+                    	//{
+                    		lnQ[i] -= Z(0,oi,times[oi],o,false) - Z(0,oi,times[oi],o_min,false);
+                    	//}
+                    	lnQ[i] = log(lnQ[i]);
+
+                        lnProbTimes += lnQ[i];
                     }
                 }
                 // singleton
                 else
                 {
                     // include last sampling density for extinct species
-                    if ( y > 0.0 )
+                    if ( o_min != y_max && y > 0.0 )
                     {
                         lnProbTimes += log(fossil[oi]);
                     }
 
                     // no uncertainty in o
-                    if( o == o_min )
+                    if ( o == o_min )
                     {
                         // no uncertainty in y
+                    	// (Eq 6)
                         if ( y == y_max )
                         {
-                            lnProbTimes += fossil[oi] * ( o - y );
+                        	lnProbTimes += fossil[oi] * ( o - y );
                         }
                         // integrate over y to y_max
+                        // (Case 6)
                         else
                         {
-                            lnProbTimes += log( exp(-fossil[oi] * y) - exp(-fossil[oi] * y_max) ) - fossil[oi] * o - log(fossil[oi]);
+                        	lnQ[i] = H(oi,y_max,o) - H(oi,y,o);
+                        	lnQ[i] /= fossil[oi];
+                        	//if ( k_oi.isPositiveState() )
+							//{
+								lnQ[i] -= Z(0,oi,y_max,o,true) - Z(0,oi,y,o,true);
+							//}
+							lnQ[i] = log(lnQ[i]);
+							lnProbTimes += lnQ[i];
                         }
                     }
                     // integrate from o_min to o
@@ -377,18 +420,30 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                         // delta = y
 
                         // no uncertainty in y
+                    	// (Case 6)
                         if ( y == y_max )
                         {
-                            H[i] = integrateQ(oi, o) - integrateQ(oi, o_min);
-                            lnProbTimes += log( H[i] ) - fossil[oi]*( y - times[oi] );
+                        	lnQ[i] = H(oi,y,o) - H(oi,y,o_min);
+                        	lnQ[i] /= fossil[oi];
+							//if ( k_oi.isPositiveState() )
+							//{
+								lnQ[i] -= Z(0,oi,y,o,true) - Z(0,oi,y,o_min,true);
+							//}
                         }
                         // integrate over y to y_max
+                        // (Case 6)
                         else
                         {
-                            H[i] = integrateQ(oi, o) - integrateQ(oi, o_min);
-                            lnProbTimes += log( H[i] );
-                            lnProbTimes += log( exp(-fossil[oi] * y) - exp(-fossil[oi] * y_max) ) - fossil[oi] * times[oi] - log(fossil[oi]);
+                        	lnQ[i] = H(oi,y_max,o) - H(oi,y_max,o_min) - H(oi,y,o) + H(oi,y,o_min);
+                        	lnQ[i] /= fossil[oi];
+							//if ( k_oi.isPositiveState() )
+							//{
+								lnQ[i] -= Z(0,oi,y_max,o,true) - Z(0,oi,y_max,o_min,true) - Z(0,oi,y,o,true) + Z(0,oi,y,o_min,true);
+							//}
                         }
+
+                        lnQ[i] = log(lnQ[i]);
+                        lnProbTimes += lnQ[i];
                     }
                 }
             }
@@ -396,25 +451,43 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
         // k_oi fixed
         else
         {
-            lnProbTimes += k_oi.getStateIndex() * log(fossil[oi]);
+        	size_t k = k_oi.getStateIndex();
+
+            lnProbTimes += k * log(fossil[oi]);
 
             // integrate o over full range of oi
             if ( ages_from_counts == true )
             {
-                double delta = std::max(d, times[oi]);
-                double delta_plus_Ls_alpha = oi > 0 ? std::min(b, times[oi-1]) : b;
+            	// non-singleton
+				// (Case 1)
+				if ( oi != yi )
+				{
+					double delta = std::max(d, times[oi]);
+					double delta_plus_Ls = oi > 0 ? std::min(b, times[oi-1]) : b;
 
-                H[i] = integrateQ(oi, delta_plus_Ls_alpha, false) - integrateQ(oi, delta, false);
-                lnProbTimes += log( H[i] );
+					lnQ[i] = log( Z(k, oi, times[oi], delta_plus_Ls, false) - Z(k, oi, times[oi], delta, false) );
+					lnProbTimes += lnQ[i] - RbMath::lnFactorial(k);
+				}
+				// singleton
+				// (Case 5)
+				else
+				{
+					double delta = std::max(d, times[oi]);
+					double delta_plus_Ls = oi > 0 ? std::min(b, times[oi-1]) : b;
+
+					lnQ[i] = Z(k,oi,delta_plus_Ls,delta_plus_Ls,true) - Z(k,oi,delta_plus_Ls,delta,true) - (Z(k,oi,delta,delta_plus_Ls,true) - Z(k,oi,delta,delta,true));
+					lnQ[i] = log(lnQ[i]);
+					lnProbTimes += lnQ[i] - RbMath::lnFactorial(k);
+				}
             }
             // user-defined uncertainty for o
             else
             {
-                if( o_min > 0.0  && k_oi.getStateIndex() == 0 )
+                if ( o_min > 0.0  && k_oi.getStateIndex() == 0 )
                 {
                     throw("Fossil count = 0 but first occurrence > 0");
                 }
-                else if( o == 0.0  && k_oi.getStateIndex() > 0 )
+                else if ( o == 0.0  && k_oi.getStateIndex() > 0 )
                 {
                     throw("Fossil count > 0 but first occurrence = 0");
                 }
@@ -423,40 +496,56 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                 if ( oi != yi )
                 {
                     // integrate from o_min to o
-                    if( o != o_min )
+                	// (Case 1)
+                    if ( o != o_min )
                     {
-                        H[i] = integrateQ(oi, o, false) - integrateQ(oi, o_min, false);
-                        lnProbTimes += log( H[i] );
+                        lnQ[i] = log( Z(k, oi, times[oi], o, false) - Z(k, oi, times[oi], o_min, false) );
+                        lnProbTimes += lnQ[i] - RbMath::lnFactorial(k);
                     }
                     // no uncertainty in o
+                    // (Eq 5)
                     else
                     {
-                        // lnProbTimes += 0;
+                    	lnProbTimes += k * log(o - times[oi]) - RbMath::lnFactorial(k);
                     }
                 }
                 // singleton
                 else
                 {
                     // integrate from o_min to o
-                    if( o != o_min )
+                    // (Case 5)
+                    if ( o != o_min )
                     {
                         // integrate from y to y_max
                         if ( y != y_max )
                         {
-                            // ??
+                        	lnQ[i] = Z(k, oi, y_max, o, true) - Z(k, oi, y_max, o_min, true) - (Z(k, oi, y, o, true) - Z(k, oi, y, o_min, true));
                         }
                         // no uncertainty in y
                         else
                         {
-                            H[i] = integrateQ(oi, o, false) - integrateQ(oi, o_min, false);
-                            lnProbTimes += log( H[i] );
+                        	lnQ[i] = Z(k, oi, y, o, true) - Z(k, oi, y, o_min, true);
                         }
                     }
-                    // integrate from y to y_max
-                    else if ( y != y_max )
+                    // no uncertainty in o
+                    else
                     {
-                        // ??
+						// integrate from y to y_max
+                        // (Case 5)
+						if ( y != y_max )
+						{
+							lnQ[i] = Z(k, oi, y_max, o, true) - Z(k, oi, y, o, true);
+						}
+						// no uncertainty in y
+						// (Eq 5)
+						else
+						{
+							lnProbTimes += k * log(o - y) - RbMath::lnFactorial(k);
+						}
                     }
+
+                    lnQ[i] = log(lnQ[i]);
+                    lnProbTimes += lnQ[i] - RbMath::lnFactorial(k);
                 }
             }
         }
@@ -471,15 +560,19 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
             double Ls = times[j-1] - times[j];
 
             // k >= 0
+            // (Eq 6)
             if ( k.isMissingState() )
             {
                 lnProbTimes += fossil[j] * Ls;
             }
             // k > 0
+            // (Eq 6)
             else if ( k.isPositiveState() )
             {
                 lnProbTimes += fossil[j] * Ls + log( 1.0 - exp( - Ls * fossil[j] ) );
             }
+            // k fixed
+            // (Eq 5)
             else
             {
                 lnProbTimes += k.getStateIndex() * log(fossil[j] * Ls) - RbMath::lnFactorial(k.getStateIndex());
@@ -497,50 +590,71 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
             // (if k_yi = 0 then o = y = 0.0)
             if ( k_yi.isMissingState() || k_yi.isPositiveState() )
             {
-                // include last sampling density for extinct species
-                lnProbTimes += log(fossil[yi]);
+            	// include last sampling density for extinct species
+				if ( y > 0.0 )
+				{
+					lnProbTimes += log(fossil[yi]);
+				}
 
                 // integrate y over full range of yi
+				// (Case 4)
                 if ( ages_from_counts == true )
                 {
                     double Ls = times[yi-1] - std::max(d, times[yi]);
 
-                    lnProbTimes += fossil[yi] * Ls + log( 1.0 - exp( - Ls * fossil[yi] ) );
+                    double tmp = fossil[yi] * (1.0 - exp(fossil[yi] * Ls));
+					//if ( k_yi.isPositiveState() )
+					//{
+						tmp += Ls;
+					//}
+					lnProbTimes += log(tmp);
                 }
                 // user-defined uncertainty in y
                 else
                 {
                     // no uncertainty in y
+                	// (Eq 6)
                     if ( y == y_max )
                     {
-                        lnProbTimes += fossil[yi] * ( times[yi-1] - y );
+                        double tmp = exp(fossil[yi] * ( times[yi-1] - y ));
+                        //if ( k_yi.isPositiveState() )
+                        //{
+                        	tmp = expm1(fossil[yi] * ( times[yi-1] - y ));
+                        //}
+                        lnProbTimes += log(tmp);
                     }
                     // integrate over y to y_max
+                    // (Case 4)
                     else
                     {
-                        lnProbTimes += log( exp(-fossil[oi] * y) - exp(-fossil[oi] * y_max) ) - fossil[oi] * times[yi-1] - log(fossil[oi]);
+                    	double tmp = fossil[yi] *( exp(fossil[yi] * (times[yi-1]-y)) - exp(fossil[yi] * (times[yi-1]-y_max)) );
+                    	//if ( k_yi.isPositiveState() )
+						//{
+							tmp += (times[yi-1]-y_max) - (times[yi-1]-y);
+						//}
+                        lnProbTimes += log(tmp);
                     }
                 }
             }
             // k_yi fixed
             else
             {
-                if( y > 0.0  && k_yi.getStateIndex() == 0 )
-                {
-                    throw("Fossil count = 0 but last occurrence > 0");
-                }
+            	size_t k = k_yi.getStateIndex();
 
-                lnProbTimes += k_yi.getStateIndex() * log(fossil[yi]);
+                lnProbTimes += k * log(fossil[yi]);
 
                 // integrate y over full range of yi
+                // (Case 3)
                 if ( ages_from_counts == true )
                 {
-                    // ??
+                	double Ls = times[yi-1] - std::max(d, times[yi]);
+                	lnProbTimes += (k+1)*log(Ls) - RbMath::lnFactorial(k + 1);
                 }
                 // user-defined uncertainty for y
+                // (Case 3)
                 else if ( y != y_max )
                 {
-                    // ??
+                	lnProbTimes += log(pow(times[yi-1]-y,k+1) - pow(times[yi-1]-y_max,k+1)) - RbMath::lnFactorial(k + 1);
                 }
             }
         }
@@ -682,9 +796,9 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::getSpeciationRate( size_
 
 
 /**
- * \ln\int exp(psi t) q_tilde(t)/q(t) dt
+ * \int exp(psi (t-t_i)) q_tilde(t)/q(t) dt
  */
-double AbstractPiecewiseConstantFossilizedRangeProcess::integrateQ( size_t i, double t, bool marginalized) const
+double AbstractPiecewiseConstantFossilizedRangeProcess::H(size_t i, double x, double t) const
 {
     // get the parameters
     double b = birth[i];
@@ -702,18 +816,50 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::integrateQ( size_t i, do
 
     double e = exp(-A*dt);
 
-    double diff2 = b + d + (marginalized ? f : -f);
+    double diff2 = b + d -f;
     double tmp = (1+B)/(A-diff2) - e*(1-B)/(A+diff2);
-    double intQ = exp(-(diff2-A)*dt/2) * tmp;
+    double H = exp(-f*(x-ti) ) * exp(-(diff2-A)*dt/2) * tmp;
 
-//    double tmp = (1.0+B) + e*(1.0-B);
-//    double q = 4.0*e / (tmp*tmp);
-//    double q_tilde = sqrt(q*exp(-(b+d+f)*dt));
-//    double p = b + d + f - A * ((1.0+B)-e*(1.0-B))/((1.0+B)+e*(1.0-B));
-//    p /= 2*b;
-//    double intQ = q_tilde/q * exp(f*dt) * ( b*p - f)/(b*d-f*d-b*f);
+    return H;
+}
 
-    return intQ;
+
+/**
+ * \int (t-t_j)^k q_tilde(t)/q(t) dt
+ */
+double AbstractPiecewiseConstantFossilizedRangeProcess::Z(size_t k, size_t i, double x, double t, bool integrate) const
+{
+    // get the parameters
+    double b = birth[i];
+    double d = death[i];
+    double f = fossil[i];
+    double r = (i == num_intervals - 1 ? homogeneous_rho->getValue() : 0.0);
+    double ti = times[i];
+
+    double diff = b - d - f;
+    double bp   = b*f;
+
+    double A = sqrt( diff*diff + 4.0*bp);
+    double B = ( (1.0 - 2.0*(1.0-r)*p_i[i] )*b + d + f ) / A;
+
+    double sum = b + d + f;
+    double alpha = 0.5*(A+sum);
+
+    double tmp1 = pow(-2,k+integrate)* RbMath::incompleteGamma(k+1, (alpha-A)*(t-x), RbMath::lnGamma((alpha-A)*(t-x))) * exp(-(alpha-A)*(x-ti));
+    double tmp2 = pow(2,k+integrate) * RbMath::incompleteGamma(k+1, alpha*(t-x), RbMath::lnGamma(alpha*(t-x)))         * exp(-alpha*(x-ti));
+
+    if(integrate == true)
+    {
+    	tmp1 = ( (1-B)/(A+sum) ) * ( exp(-alpha*(x-ti))     * pow(t-x,k+1)/(k+1) + tmp2);
+    	tmp2 = ( (1+B)/(A-sum) ) * ( exp(-(alpha-A)*(x-ti)) * pow(t-x,k+1)/(k+1) + tmp1);
+    }
+    else
+	{
+    	tmp1 *= (1+B)/pow(A-sum,k+1);
+    	tmp2 *= (1-B)/pow(A+sum,k+1);
+	}
+
+    return tmp1 - tmp2;
 }
 
 

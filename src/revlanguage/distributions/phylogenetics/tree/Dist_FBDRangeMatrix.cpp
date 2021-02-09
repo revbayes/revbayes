@@ -113,9 +113,9 @@ RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess* Dist_FBDRangeMa
         rt = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
 
-    bool pa = static_cast<const RlBoolean &>( presence_absence->getRevObject() ).getValue();
+    bool afc = static_cast<const RlString &>( uncertainty->getRevObject() ).getValue() == "auto";
 
-    RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess* d = new RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess(l, m, p, c, r, rt, cond, t, pa);
+    RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess* d = new RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess(l, m, p, c, r, rt, cond, t, afc);
 
     return d;
 }
@@ -288,13 +288,9 @@ void Dist_FBDRangeMatrix::setConstParameter(const std::string& name, const RevPt
     {
         condition = var;
     }
-    else if ( name == "bounded" )
+    else if ( name == "uncertainty" )
     {
-        bounded = var;
-    }
-    else if ( name == "binary" )
-    {
-        presence_absence = var;
+        uncertainty = var;
     }
     else
     {

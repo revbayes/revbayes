@@ -44,7 +44,7 @@ namespace RevBayesCore {
                                                       const TypedDagNode<RbVector<double> > *times,
                                                       const std::string &condition,
                                                       const std::vector<Taxon> &taxa,
-                                                      bool pa);  //!< Constructor
+                                                      bool ages_from_counts);  //!< Constructor
         
         // public member functions
         PiecewiseConstantFossilizedBirthDeathRangeProcess*   clone(void) const;                                         //!< Create an independent clone

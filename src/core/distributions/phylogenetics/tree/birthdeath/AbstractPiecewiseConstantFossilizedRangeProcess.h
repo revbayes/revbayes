@@ -44,7 +44,7 @@ namespace RevBayesCore {
                                                              const TypedDagNode<double>* rho,
                                                              const TypedDagNode<RbVector<double> > *times,
                                                              const std::vector<Taxon> &taxa,
-                                                             bool ages_from_counts=false);  //!< Constructor
+                                                             bool ages_from_counts);  //!< Constructor
 
         virtual ~AbstractPiecewiseConstantFossilizedRangeProcess(){};
 
@@ -65,7 +65,8 @@ namespace RevBayesCore {
         size_t                                          l(double t) const;                                     //!< Find the index so that times[index-1] < t < times[index]
         double                                          p(size_t i, double t) const;
         virtual double                                  q(size_t i, double t, bool tilde = false) const;
-        virtual double                                  integrateQ(size_t i, double t, bool marginalized=true) const;
+        virtual double                                  H(size_t i, double x, double t) const;
+        virtual double                                  Z(size_t k, size_t i, double x, double t, bool integrate) const;
 
         virtual void                                    updateIntervals() const;
 
@@ -94,7 +95,7 @@ namespace RevBayesCore {
         mutable std::vector<double>                     b_i;
         mutable std::vector<double>                     d_i;
 
-        mutable std::vector<double>                     H;
+        mutable std::vector<double>                     lnQ;
 
         mutable std::vector<double>                     q_i;
         mutable std::vector<double>                     q_tilde_i;

@@ -53,10 +53,10 @@ PiecewiseConstantFossilizedBirthDeathProcess::PiecewiseConstantFossilizedBirthDe
                                                                                            const std::string &incondition,
                                                                                            const std::vector<Taxon> &intaxa,
                                                                                            bool uo,
-                                                                                           bool pa,
+                                                                                           bool afc,
                                                                                            bool ex) :
     AbstractBirthDeathProcess(ra, incondition, intaxa, uo),
-    AbstractPiecewiseConstantFossilizedRangeProcess(inspeciation, inextinction, inpsi, incounts, inrho, intimes, intaxa, pa),
+    AbstractPiecewiseConstantFossilizedRangeProcess(inspeciation, inextinction, inpsi, incounts, inrho, intimes, intaxa, afc),
     extended(ex)
 {
     for(std::vector<const DagNode*>::iterator it = range_parameters.begin(); it != range_parameters.end(); it++)
@@ -176,7 +176,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( 
             // if this is a sampled tree, then integrate out the speciation times for descendants of sampled ancestors
             if( extended == false )
             {
-                size_t oi = bounded ? l(o) : oldest_intervals[i];
+                size_t oi = ages_from_counts ? l(o) : oldest_intervals[i];
 
                 double x = 0.0;
 
@@ -189,20 +189,20 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( 
                     x += q_tilde_i[j] - q_i[j];
                 }
 
-                if( bounded == false )
+                if( ages_from_counts == false )
                 {
                     double a = std::max(d_i[i], times[oi]);
                     double Ls_plus_a = oi > 0 ? std::min(y_a, times[oi-1]) : y_a;
                     double Ls = Ls_plus_a - a;
 
                     // replace H_i
-                    if ( model == KNOWNCOUNTS )
+                    if ( ages_from_counts = false )
                     {
-                        x += log( Ls ) - log( H[i] );
+                        x += log( Ls ) - lnQ[i];
                     }
                     else
                     {
-                        x += log(expm1(Ls*fossil[oi])) - log(H[i]) - log(fossil[oi]);
+                        x += log(expm1(Ls*fossil[oi])) - lnQ[i] - log(fossil[oi]);
                     }
                 }
                 else
@@ -234,7 +234,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( 
             size_t di = l(d_i[i]);
 
             // check constraints
-            if( bounded == false )
+            if( ages_from_counts == false )
             {
                 if( youngest_intervals[i] != di)
                 {
@@ -257,7 +257,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( 
 
                 // replace one unobserved fossil sample with an observed fossil sample
                 // i.e increment the observed fossil count
-                if ( model == PRESENCEABSENCE )
+                if ( ages_from_counts == true )
                 {
                     double Ls = times[di-1] - std::max(d_i[i], times[di]);
                     lnProb += log( fossil[di] ) - log( 1.0 - exp( - Ls * fossil[di] ) );
@@ -430,7 +430,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::q( size_t i, double t, bool
 /**
  * \ln\int exp(psi t) q_tilde(t)/q(t) dt
  */
-double PiecewiseConstantFossilizedBirthDeathProcess::integrateQ( size_t i, double t ) const
+double PiecewiseConstantFossilizedBirthDeathProcess::H( size_t i, double x, double t ) const
 {
     double s = symmetric[i];
 
@@ -456,7 +456,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::integrateQ( size_t i, doubl
 
     double e = exp(-A*dt);
 
-    double diff2 = b + d + 2.0*a + (model == KNOWNCOUNTS ? f : -f);
+    double diff2 = b + d + 2.0*a + -f;
     double tmp = (1+B)/(A-diff2) - e*(1-B)/(A+diff2);
     double intQ = exp(-(diff2-A)*dt/2) * tmp;
 

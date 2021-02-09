@@ -112,11 +112,10 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_FBDRange::createDistribution( void
         rt = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
 
-    bool bo = static_cast<const RlBoolean &>( bounded->getRevObject() ).getValue();
-    bool pa = static_cast<const RlBoolean &>( presence_absence->getRevObject() ).getValue();
+    bool afc = static_cast<const RlString &>( uncertainty->getRevObject() ).getValue() == "auto";
     bool ex = static_cast<const RlBoolean &>( extended->getRevObject() ).getValue();
 
-    RevBayesCore::PiecewiseConstantFossilizedBirthDeathProcess* d = new RevBayesCore::PiecewiseConstantFossilizedBirthDeathProcess(sa, l, m, p, c, r, la, b, rt, cond, t, uo, bo, pa, ex);
+    RevBayesCore::PiecewiseConstantFossilizedBirthDeathProcess* d = new RevBayesCore::PiecewiseConstantFossilizedBirthDeathProcess(sa, l, m, p, c, r, la, b, rt, cond, t, uo, afc, ex);
 
     return d;
 }
@@ -233,9 +232,11 @@ const MemberRules& Dist_FBDRange::getParameterRules(void) const
         dist_member_rules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
         dist_member_rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         
-        dist_member_rules.push_back( new ArgumentRule( "bounded" , RlBoolean::getClassTypeSpec() , "Treat first and last occurrence ages as known range boundaries?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-        dist_member_rules.push_back( new ArgumentRule( "binary" , RlBoolean::getClassTypeSpec() , "Treat fossil counts as binary presence/absence data?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
-        dist_member_rules.push_back( new ArgumentRule( "extended" , RlBoolean::getClassTypeSpec() , "Treat tip nodes as extinction events?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+        std::vector<std::string> optionsUncertainty;
+		optionsUncertainty.push_back( "auto" );
+		optionsUncertainty.push_back( "custom" );
+		dist_member_rules.push_back( new OptionRule( "uncertainty", new RlString("auto"), optionsUncertainty, "Use automatic or custom first/last occurrence age range uncertainty?" ) );
+		dist_member_rules.push_back( new ArgumentRule( "extended" , RlBoolean::getClassTypeSpec() , "Treat tip nodes as extinction events?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
 
         rules_set = true;
     }
@@ -307,13 +308,9 @@ void Dist_FBDRange::setConstParameter(const std::string& name, const RevPtr<cons
     {
         fossil_counts = var;
     }
-    else if ( name == "bounded" )
+    else if ( name == "uncertainty" )
     {
-        bounded = var;
-    }
-    else if ( name == "binary" )
-    {
-        presence_absence = var;
+    	uncertainty = var;
     }
     else if ( name == "extended" )
     {
