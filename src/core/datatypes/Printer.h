@@ -19,7 +19,6 @@
 #include <limits>
 
 #include "StringUtilities.h"
-#include "Tree.h"
 
 namespace RevBayesCore {
     

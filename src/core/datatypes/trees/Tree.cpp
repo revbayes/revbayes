@@ -1345,12 +1345,28 @@ void Tree::orderNodesByIndex( void )
 
 // Prints tree for user (rounding)
 void Tree::printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const {
-    o << this;
+    long previousPrecision = o.precision();
+    std::ios_base::fmtflags previousFlags = o.flags();
+
+    std::fixed( o );
+    o.precision( 3 );
+
+    o << *this;
+    
+    o.setf( previousFlags );
+    o.precision( previousPrecision );
 }
 
 // Prints tree for simple storing (rounding)
 void Tree::printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const {
-    o << this;
+    std::stringstream ss;
+    ss << *this;
+    std::string s = ss.str();
+    if ( l > 0 ) 
+    {
+        StringUtilities::fillWithSpaces(s, l, left);
+    }
+    o << s;
 }
 
 // Prints tree for complex storing (no rounding; mostly checkpointing)
