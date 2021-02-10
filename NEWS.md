@@ -1,4 +1,4 @@
-### Current changes
+### Current changes (development branch)
 
 #### New models/analyses
 
@@ -8,6 +8,8 @@
 
 
 ### Version 1.1.1
+
+**Warning**: this version includes changes to the Random Number Generator, meaning analysis output will be different from v1.1.0, even when run with the same seed. 
 
 #### New models/analyses
 
