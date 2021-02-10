@@ -13,20 +13,30 @@ using namespace RevBayesCore;
 RandomNumberGenerator::RandomNumberGenerator(void) :
         zeroone( boost::mt19937() )
 {
-    boost::posix_time::ptime t0(boost::posix_time::min_date_time);
-    boost::posix_time::ptime t1 = boost::posix_time::microsec_clock::local_time();
-
-    // limit seed to INT_MAX
-    // otherwise results in seeds that are impossible to set via Rev,
-    // as Natural datatype is limited to INT_MAX
-    seed = static_cast<unsigned int>( (t1-t0).total_microseconds() );
-    seed = seed % RbConstants::Integer::max;
+    
+    seed = getNewSeed();
     
     boost::mt19937 rng;
     rng.seed( seed );
     zeroone = boost::uniform_01<boost::mt19937>(rng);
     last_u = zeroone();
 
+}
+
+
+/* Get the seed values */
+unsigned int RandomNumberGenerator::getNewSeed( void ) const
+{
+    boost::posix_time::ptime t0(boost::posix_time::min_date_time);
+    boost::posix_time::ptime t1 = boost::posix_time::microsec_clock::local_time();
+
+    // limit seed to INT_MAX
+    // otherwise results in seeds that are impossible to set via Rev,
+    // as Natural datatype is limited to INT_MAX
+    unsigned int new_seed = static_cast<unsigned int>( (t1-t0).total_microseconds() );
+    new_seed = new_seed % RbConstants::Integer::max;
+    
+    return new_seed;
 }
 
 
