@@ -1314,7 +1314,7 @@ void ContinuousCharacterData::printForSimpleStoring( std::ostream &o, const std:
 //!< print object with maximum precision
 void ContinuousCharacterData::printForComplexStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const
 {
-    o << "{Hello}";
+    throw RbException( "Complex printing has not yet been implemented for this datatype" );
 }
 
 

@@ -25,7 +25,7 @@ namespace RevBayesCore {
     
     template <typename objType, int>
     // general case: T is not derived from Printable
-    // calls copy constructor
+    // implements printing for a general object
     class Printer {
         
     public:
@@ -76,7 +76,7 @@ namespace RevBayesCore {
     
     template <typename objType>
     // T is derived from Printable
-    // calls clone
+    // calls printFor... for the corresponding object type
     class Printer<objType,1> {
         
     public:
