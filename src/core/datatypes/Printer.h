@@ -86,24 +86,8 @@ namespace RevBayesCore {
         static void                     printForComplexStoring( const objType &a, std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true ) { a.printForComplexStoring(o, sep, l, left, flatten); }
 
     };
-    // define printForComplexStoring for Trees, since in that case we need to tell computeNewick not to round
 
-    template<>
-    inline void Printer<Tree,0>::printForComplexStoring( const Tree &a, std::ostream &o, const std::string &sep, int l, bool left, bool flatten )
-    {
-        std::stringstream ss;
-
-        // call getNewickRepresentation with round == FALSE
-        ss << a.getNewickRepresentation( false );
-        std::string s = ss.str();
-        if (l > 0) {
-            StringUtilities::fillWithSpaces(s, l, left);
-        }
-        o << s;
-    }
 }
-
-
 
 #endif
 

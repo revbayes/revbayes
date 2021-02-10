@@ -1343,6 +1343,29 @@ void Tree::orderNodesByIndex( void )
 
 }
 
+// Prints tree for user (rounding)
+void Tree::printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const {
+    o << this;
+}
+
+// Prints tree for simple storing (rounding)
+void Tree::printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const {
+    o << this;
+}
+
+// Prints tree for complex storing (no rounding; mostly checkpointing)
+void Tree::printForComplexStoring ( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const {
+    std::stringstream ss;
+
+    // call getNewickRepresentation with round == FALSE
+    ss << this->getNewickRepresentation( false );
+    std::string s = ss.str();
+    if (l > 0) {
+        StringUtilities::fillWithSpaces(s, l, left);
+    }
+    o << s;
+}
+
 void Tree::pruneTaxa(const RbBitSet& prune_map )
 {
     nodes.clear();
