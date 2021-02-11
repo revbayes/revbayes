@@ -261,7 +261,17 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
                 // Fit by type conversion. For now, we also modify the type of the incoming variable wrapper.
                 RevObject* converted_object = the_var->getRevObject().convertTo( *it );
                 
-                RevPtr<RevVariable> the_new_var = RevPtr<RevVariable>( new RevVariable(converted_object, the_var->getName() ) );
+                RevPtr<RevVariable> the_new_var = NULL;
+                if ( the_var->getRevObject().isConstant() == true )
+                {
+                    the_new_var = the_var;
+                    the_new_var->replaceRevObject( converted_object );
+                    the_new_var->setRequiredTypeSpec( *it );
+                }
+                else
+                {
+                    the_new_var = RevPtr<RevVariable>( new RevVariable(converted_object, the_var->getName() ) );
+                }
                 
                 if ( !isEllipsis() )
                 {
