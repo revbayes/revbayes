@@ -9,6 +9,7 @@
 #include "Ellipsis.h"
 #include "Mntr_Screen.h"
 #include "Natural.h"
+#include "IntegerPos.h"
 #include "ScreenMonitor.h"
 #include "TypeSpec.h"
 #include "Monitor.h"
@@ -40,8 +41,7 @@ void Mntr_Screen::constructInternalObject( void )
     delete value;
     
     // now allocate space for a new Mntr_Screen object
-    int g = (int)static_cast<const Natural &>( printgen->getRevObject() ).getValue();
-
+    unsigned long g = (unsigned long) static_cast<const IntegerPos &>( printgen->getRevObject() ).getValue();
     vars.erase( unique( vars.begin(), vars.end() ), vars.end() );
     sort( vars.begin(), vars.end(), compareVarNames );
     std::vector<RevBayesCore::DagNode *> n;
@@ -89,7 +89,7 @@ const MemberRules& Mntr_Screen::getParameterRules(void) const
     {
         
         memberRules.push_back( new Ellipsis( "Variables to monitor.", RevObject::getClassTypeSpec() ) );
-        memberRules.push_back( new ArgumentRule("printgen"  , Natural::getClassTypeSpec()  , "The frequency how often the variables are monitored.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
+        memberRules.push_back( new ArgumentRule("printgen"  , IntegerPos::getClassTypeSpec()  , "The frequency how often the variables are monitored.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new IntegerPos(1) ) );
         memberRules.push_back( new ArgumentRule("posterior" , RlBoolean::getClassTypeSpec(), "Monitor the joint posterior probability.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         memberRules.push_back( new ArgumentRule("likelihood", RlBoolean::getClassTypeSpec(), "Monitor the joint likelihood.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         memberRules.push_back( new ArgumentRule("prior"     , RlBoolean::getClassTypeSpec(), "Monitor the joint prior probability.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
@@ -122,7 +122,7 @@ void Mntr_Screen::setConstParameter(const std::string& name, const RevPtr<const 
         vars.push_back( var );
     }
     else if ( name == "printgen" )
-    {
+    {   
         printgen = var;
     }
     else if ( name == "prior" )

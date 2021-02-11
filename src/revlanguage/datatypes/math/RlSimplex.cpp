@@ -178,7 +178,6 @@ RevObject* Simplex::convertTo( const TypeSpec& type ) const
 RevPtr<RevVariable> Simplex::executeMethod( std::string const &name, const std::vector<Argument> &args, bool &found )
 {
     
-    
     if ( name == "size" )
     {
         found = true;
@@ -280,10 +279,8 @@ Probability* Simplex::getElement(size_t idx) const
  */
 void Simplex::initMethods( void )
 {
-    
-    ArgumentRules* elementArgRules = new ArgumentRules();
-    elementArgRules->push_back( new ArgumentRule( "index", Natural::getClassTypeSpec(), "The index of the element.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    this->methods.addFunction( new MemberFunction<Simplex,Probability >("[]", this, elementArgRules ) );
+	ArgumentRules* sizeArgRules = new ArgumentRules();
+	this->methods.addFunction( new MemberProcedure( "size", Natural::getClassTypeSpec(), sizeArgRules) );
 
 }
 

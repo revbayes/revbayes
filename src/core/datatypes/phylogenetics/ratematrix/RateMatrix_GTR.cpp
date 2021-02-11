@@ -133,13 +133,13 @@ void RateMatrix_GTR::calculateCijk(void)
 void RateMatrix_GTR::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
 {
     double t = rate * (startAge - endAge);
-	if ( theEigenSystem->isComplex() == false )
+    if ( theEigenSystem->isComplex() == false )
     {
-		tiProbsEigens(t, P);
+        tiProbsEigens(t, P);
     }
-	else
+    else
     {
-		tiProbsComplexEigens(t, P);
+        tiProbsComplexEigens(t, P);
     }
 }
 
@@ -160,28 +160,34 @@ void RateMatrix_GTR::tiProbsEigens(double t, TransitionProbabilityMatrix& P) con
     
     // precalculate the product of the eigenvalue and the branch length
     std::vector<double> eigValExp(num_states);
-	for (size_t s=0; s<num_states; s++)
+    for (size_t s=0; s<num_states; s++)
     {
-		eigValExp[s] = exp(eigenValue[s] * t);
+        eigValExp[s] = exp(eigenValue[s] * t);
     }
     
     // calculate the transition probabilities
-	const double* ptr = &c_ijk[0];
+    const double* ptr = &c_ijk[0];
     double*         p = P.theMatrix;
-	for (size_t i=0; i<num_states; i++) 
+    for (size_t i=0; i<num_states; i++) 
     {
-		for (size_t j=0; j<num_states; j++, ++p) 
+        double rowsum = 0.0;
+        for (size_t j=0; j<num_states; j++, ++p) 
         {
-			double sum = 0.0;
-			for (size_t s=0; s<num_states; s++)
+            double sum = 0.0;
+            for (size_t s=0; s<num_states; s++)
             {
-				sum += (*ptr++) * eigValExp[s];
+                sum += (*ptr++) * eigValExp[s];
             }
             
-//			P[i][j] = (sum < 0.0) ? 0.0 : sum;
-			(*p) = (sum < 0.0) ? 0.0 : sum;
-
+            sum = (sum < 0.0) ? 0.0 : sum;
+            rowsum += sum;
+            (*p) = sum;
         }
+
+        // Normalize transition probabilities for row to sum to 1.0
+        double* p2 = p - num_states;
+        for (size_t j=0; j<num_states; j++, ++p2)
+            *p2 /= rowsum;
     }
 }
 
@@ -244,23 +250,30 @@ void RateMatrix_GTR::tiProbsComplexEigens(double t, TransitionProbabilityMatrix&
     
     // precalculate the product of the eigenvalue and the branch length
     std::vector<std::complex<double> > ceigValExp(num_states);
-	for (size_t s=0; s<num_states; s++)
+    for (size_t s=0; s<num_states; s++)
     {
         std::complex<double> ev = std::complex<double>(eigenValueReal[s], eigenValueComp[s]);
-		ceigValExp[s] = exp(ev * t);
+        ceigValExp[s] = exp(ev * t);
     }
     
     // calculate the transition probabilities
-	const std::complex<double>* ptr = &cc_ijk[0];
-	for (size_t i=0; i<num_states; i++) 
+    const std::complex<double>* ptr = &cc_ijk[0];
+    for (size_t i=0; i<num_states; i++) 
     {
-		for (size_t j=0; j<num_states; j++) 
+        double rowsum = 0.0;
+        for (size_t j=0; j<num_states; j++) 
         {
-			std::complex<double> sum = std::complex<double>(0.0, 0.0);
-			for (size_t s=0; s<num_states; s++)
-				sum += (*ptr++) * ceigValExp[s];
-			P[i][j] = (sum.real() < 0.0) ? 0.0 : sum.real();
+            std::complex<double> sum = std::complex<double>(0.0, 0.0);
+            for (size_t s=0; s<num_states; s++)
+                sum += (*ptr++) * ceigValExp[s];
+
+            double real_sum = (sum.real() < 0.0) ? 0.0 : sum.real();
+            P[i][j] = real_sum;
+            rowsum += real_sum;
         }
+        // Normalize transition probabilities for row to sum to 1.0
+        for (size_t j=0; j<num_states; j++)
+            P[i][j] /= rowsum;
     }
 }
 
