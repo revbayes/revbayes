@@ -89,6 +89,10 @@ if (BOOST_LIBRARYDIR)
 endif()
 
 set(Boost_USE_MULTITHREADED ON)
+if ("${STATIC_BOOST}" STREQUAL "ON")
+	MESSAGE("Static linking Boost")
+	set(Boost_USE_STATIC_LIBS ON)
+endif()
 
 MESSAGE("Searching for BOOST:")
 find_package(Boost
