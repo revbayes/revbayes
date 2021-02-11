@@ -591,11 +591,13 @@ void MonteCarloAnalysis::resetReplicates( void )
     }
     
     // to be safe, we should synchronize the random number generators
-#ifdef RB_MPI
-    MpiUtilities::synchronizeRNG( analysis_comm );
-#else
-    MpiUtilities::synchronizeRNG(  );
-#endif
+    // Sebastian: We cannot re-synchronize the RNG after we just shifted it.
+    // If an anlysis has all values preset, then each replicate would be identical!!!
+//#ifdef RB_MPI
+//    MpiUtilities::synchronizeRNG( analysis_comm );
+//#else
+//    MpiUtilities::synchronizeRNG(  );
+//#endif
 }
 
 

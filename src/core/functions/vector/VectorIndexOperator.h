@@ -23,6 +23,7 @@
 #define VectorIndexOperator_H
 
 #include "RbVector.h"
+#include "Simplex.h"
 #include "TypedFunction.h"
 
 namespace RevBayesCore {
@@ -32,6 +33,7 @@ namespace RevBayesCore {
         
     public:
         VectorIndexOperator(const TypedDagNode< RbVector<valueType> >* v, const TypedDagNode<long>* idx);
+        VectorIndexOperator(const TypedDagNode< Simplex >* v, const TypedDagNode<long>* idx);
         virtual                                            ~VectorIndexOperator(void);                                              //!< Virtual destructor
         
         // public member functions
@@ -44,20 +46,58 @@ namespace RevBayesCore {
     private:
         
         // members
-        const TypedDagNode<long>*                            index;
-        const TypedDagNode<RbVector<valueType> >*           vector;
-        
+        const TypedDagNode<long>*                           index;
+        const TypedDagNode<RbVector<valueType> >*           value_vector;
+        const TypedDagNode< Simplex >*                      value_simplex;
+
     };
-    
+
+
+    template<>
+    inline void                                                    VectorIndexOperator<double>::update( void )
+    {
+
+        const RbVector<double> &v = (value_vector != NULL ? value_vector->getValue() : value_simplex->getValue());
+        size_t idx = size_t(index->getValue());
+
+        if ( idx < 1 || idx > v.size() )
+        {
+            std::stringstream ss_err;
+            ss_err << "Index out of bounds: The vector of size " << v.size() << " does not have an element for index " << idx << ".";
+            throw RbException(ss_err.str());
+        }
+
+        delete this->value;
+        this->value = new double( v[idx - 1] );
+    }
+   
 }
 
 
 #include "RbException.h"
 
 template <class valueType>
-RevBayesCore::VectorIndexOperator<valueType>::VectorIndexOperator( const TypedDagNode< RbVector<valueType> >* v, const TypedDagNode<long> *idx) : TypedFunction<valueType>( NULL ), index( idx ), vector( v ) {
+RevBayesCore::VectorIndexOperator<valueType>::VectorIndexOperator( const TypedDagNode< RbVector<valueType> >* v, const TypedDagNode<long> *idx) : TypedFunction<valueType>( NULL ),
+    index( idx ),
+    value_vector( v ),
+    value_simplex( NULL )
+{
     // add the vector parameter as a parent
-    this->addParameter( vector );
+    this->addParameter( value_vector );
+    this->addParameter( index );
+    
+    update();
+}
+
+
+template <class valueType>
+RevBayesCore::VectorIndexOperator<valueType>::VectorIndexOperator( const TypedDagNode< Simplex >* v, const TypedDagNode<long> *idx) : TypedFunction<valueType>( NULL ),
+    index( idx ),
+    value_vector( NULL ),
+    value_simplex( v )
+{
+    // add the vector parameter as a parent
+    this->addParameter( value_simplex );
     this->addParameter( index );
     
     update();
@@ -79,33 +119,37 @@ RevBayesCore::VectorIndexOperator<valueType>* RevBayesCore::VectorIndexOperator<
 }
 
 
+
 template <class valueType>
 void RevBayesCore::VectorIndexOperator<valueType>::update( void )
 {
-    
-    const RbVector<valueType> &v = vector->getValue();
+
+    const RbVector<valueType> &v = value_vector->getValue();
     size_t idx = size_t(index->getValue());
-    
+
     if ( idx < 1 || idx > v.size() )
     {
         std::stringstream ss_err;
         ss_err << "Index out of bounds: The vector of size " << v.size() << " does not have an element for index " << idx << ".";
         throw RbException(ss_err.str());
     }
-    
+
     delete this->value;
     this->value = Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( v[idx - 1] );
 }
-
 
 
 template <class valueType>
 void RevBayesCore::VectorIndexOperator<valueType>::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     
-    if (oldP == vector)
+    if (oldP == value_vector)
     {
-        vector = static_cast<const TypedDagNode< RbVector<valueType> >* >( newP );
+        value_vector = static_cast<const TypedDagNode< RbVector<valueType> >* >( newP );
+    }
+    else if (oldP == value_simplex)
+    {
+        value_simplex = static_cast<const TypedDagNode< Simplex >* >( newP );
     }
     else if (oldP == index)
     {
