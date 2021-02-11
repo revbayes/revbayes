@@ -105,6 +105,7 @@ void RevLanguage::Workspace::initializeBasicTypeGlobalWorkspace(void)
         AddWorkspaceVectorType<RlString,4>::addTypeToWorkspace(    *this, new RlString()    );
         AddWorkspaceVectorType<Simplex,4>::addTypeToWorkspace(     *this, new Simplex()     );
 
+
     }
     catch(RbException& rbException)
     {
