@@ -279,11 +279,7 @@ double MultispeciesCoalescentMigration::computeLnProbability( void )
         
         // add the probability that there was no coalescent event until then
         ln_probability += log( probabilities[num_populations*num_individuals] );
-        if ( RbMath::isFinite( log(probabilities[num_populations*num_individuals]) ) == false )
-        {
-            std::cerr << "lnl = " << ln_probability << std::endl;
-        }
-
+        
         // we need to reset the probability of no coalescent event
         probabilities[num_populations*num_individuals] = 1.0;
         
@@ -296,9 +292,7 @@ double MultispeciesCoalescentMigration::computeLnProbability( void )
             // get the index of the left and right coalescing individuals
             size_t left_coalescing_individual  = this_individual->getChild(0).getIndex();
             size_t right_coalescing_individual = this_individual->getChild(1).getIndex();
-            
-//            std::cerr << "Coalescing " << left_coalescing_individual << " and " << right_coalescing_individual << std::endl;
-            
+                       
             // now compute the probability of a coalescent event
             // this could have happened in any population, so we need to integrate over all possible populations
             // and take the product of the probabilities that both indvididuals were present in that population
@@ -310,10 +304,6 @@ double MultispeciesCoalescentMigration::computeLnProbability( void )
                                      probabilities[num_populations*left_coalescing_individual+pop_index] *
                                      probabilities[num_populations*right_coalescing_individual+pop_index]);
                 
-            }
-            if ( RbMath::isFinite( log(prob_coalescent) ) == false )
-            {
-                std::cerr << "lnl = " << prob_coalescent << std::endl;
             }
             ln_probability += log( prob_coalescent );
             
@@ -346,8 +336,6 @@ double MultispeciesCoalescentMigration::computeLnProbability( void )
             size_t right_coalescing_pop = this_species->getChild(1).getIndex();
             size_t new_pop_index        = this_species->getIndex();
             
-//            std::cerr << "Speciation of " << left_coalescing_pop << " and " << right_coalescing_pop << " into " << new_pop_index << std::endl;
-
             // "move" all the individuals into the new population
             // that means, we need to add the probabilities of the two descendant populations
             for ( size_t ind_index=0; ind_index<num_individuals; ++ind_index )
@@ -365,18 +353,6 @@ double MultispeciesCoalescentMigration::computeLnProbability( void )
         // update the event age
         previous_event_age = next_event_age;
         
-//        std::cerr << "Ind\t\tPop_1\tPop_2\tPop_3\tPop_4\tPop_5" << std::endl;
-//        for ( size_t i=0; i<num_individuals; ++i )
-//        {
-//            std::cerr << i;
-//            std::cerr << "\t\t";
-//            for ( size_t j=0; j<num_populations; ++j )
-//            {
-//                std::cerr << probabilities[num_populations*i+j];
-//                std::cerr << "\t\t";
-//            }
-//            std::cerr << std::endl;
-//        }
     }
     
     return ln_probability; // + logTreeTopologyProb;
@@ -403,14 +379,12 @@ double MultispeciesCoalescentMigration::getNe(size_t index) const
     {
         if ( index >= Nes->getValue().size() )
         {
-            std::cerr << "Error: Cannot access Ne for population '" << index << "'." << std::endl;
             exit(-1);
         }
         return Nes->getValue()[index];
     }
     else
     {
-        std::cerr << "Error: Null Pointers for Ne and Nes." << std::endl;
         exit(-1);
     }
 }
@@ -686,8 +660,6 @@ void MultispeciesCoalescentMigration::simulateTree( void )
 //                individuals_at_current_branch.push_back( new_parent );
                 individuals_2_population.insert( std::pair<TopologyNode *, size_t>(new_parent,next_event_node) );
                 
-                if ( individuals_2_population.find( left ) == individuals_2_population.end() ) std::cerr << "Couldn't erase left node." << std::endl;
-                if ( individuals_2_population.find( right ) == individuals_2_population.end() ) std::cerr << "Couldn't erase right node." << std::endl;
                 individuals_2_population.erase( left );
                 individuals_2_population.erase( right );
                 --num_individuals_in_population[ next_event_node ];

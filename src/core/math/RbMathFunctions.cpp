@@ -586,7 +586,6 @@ double RbMath::incompleteBeta(double a, double b, double x) {
 		it++;
 		if ( it_max < it )
         {
-			//std::cerr << "Error in incompleteBeta: Maximum number of iterations exceeded!" << std::endl;
 			return RbConstants::Double::inf;
         }
 		term = term * temp * rx / ( pp + ( double ) ( i ) );

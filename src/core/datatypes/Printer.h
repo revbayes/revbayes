@@ -22,7 +22,7 @@
 namespace RevBayesCore {
     
     template <typename objType, int>
-    // general case: T is not derived from Printable
+    // general case: objType is not derived from Printable
     // calls copy constructor
     class Printer {
         

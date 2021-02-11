@@ -259,16 +259,17 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
             else if ( the_var->getRevObject().isConvertibleTo( *it, once ) != -1  && (*it).isDerivedOf( the_var->getRequiredTypeSpec() ) )
             {
                 // Fit by type conversion. For now, we also modify the type of the incoming variable wrapper.
-                RevObject* convertedObject = the_var->getRevObject().convertTo( *it );
-                the_var->replaceRevObject( convertedObject );
-                the_var->setRequiredTypeSpec( *it );
+                RevObject* converted_object = the_var->getRevObject().convertTo( *it );
+                
+                RevPtr<RevVariable> the_new_var = RevPtr<RevVariable>( new RevVariable(converted_object, the_var->getName() ) );
+                
                 if ( !isEllipsis() )
                 {
-                    return Argument( the_var, arg.getLabel(), false );
+                    return Argument( the_new_var, arg.getLabel(), false );
                 }
                 else
                 {
-                    return Argument( the_var, arg.getLabel(), false );
+                    return Argument( the_new_var, arg.getLabel(), false );
                 }
             }
             else

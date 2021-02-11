@@ -335,8 +335,6 @@ void Tree::dropTipNode( size_t index )
     {
         if ( nodes[i] == NULL )
         {
-            std::cerr << "#nodes after filling:\t\t" << nodes.size() << std::endl;
-            std::cerr << i << " - " << nodes[i] << std::endl;
             throw RbException("Problem while reading in tree.");
         }
         num_tips += ( nodes[i]->isTip() ? 1 : 0);
@@ -1117,9 +1115,6 @@ bool Tree::hasSameTopology(const Tree &t) const
     std::string a = getPlainNewickRepresentation();
     std::string b = t.getPlainNewickRepresentation();
 
-//    std::cerr << std::endl << a << std::endl;
-//    std::cerr << std::endl << b << std::endl;
-
     return a == b;
 }
 
@@ -1570,10 +1565,11 @@ void Tree::renumberNodes(const Tree &reference)
     }
     // Second, the tip nodes
     std::vector<std::string> tipNames = getTipNames();
-    for (auto i = 0; i<tipNames.size(); ++i) {
+    for (size_t i = 0; i<tipNames.size(); ++i)
+    {
       getTipNodeWithName(tipNames[i]).setIndex(reference.getTipNodeWithName(tipNames[i]).getIndex());
     }
-    return;
+    
 }
 
 

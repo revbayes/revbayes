@@ -369,18 +369,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         }
     
         if ( RbMath::isFinite(ln_prob_ratio) && fabs(ln_prob_ratio) > 1E-2 )
-        {
-            double ln_prob_ratio_2 = 0;
-            double new_ln_like_2 = 0;
-            for (RbOrderedSet<DagNode*>::iterator it = affected.begin(); it != affected.end(); ++it)
-            {
-                
-                double tmp2 = (*it)->getLnProbabilityRatio();
-                ln_prob_ratio_2 += tmp2;
-                new_ln_like_2 += (*it)->getLnProbability();
-                std::cerr << "\tP(" << (*it)->getName() << ") = " << tmp2 << std::endl;
-            }
-            
+        {            
             throw RbException("Likelihood shortcut computation failed in rate-age-proposal.");
         }
         

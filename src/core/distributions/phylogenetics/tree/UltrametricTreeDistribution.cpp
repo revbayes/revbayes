@@ -383,32 +383,19 @@ double UltrametricTreeDistribution::computeBranchRateLnProbability(const Tree &m
                 if ( root_branch_fraction != NULL )
                 {
                     ln_prob += rate_prior->computeLnProbability();
-                    //ln_prob += rate_prior->computeLnProbability() + log(events) - 2*log(branch_rate);
                 }
                 else
                 {
                     if ( root_included == false )
                     {
                         ln_prob += rate_prior->computeLnProbability();
-                        //ln_prob += rate_prior->computeLnProbability() + log(events) - 2*log(branch_rate);
                         root_included = true;
                     }
                 }
             }
             else
             {
-    //            if ( RbMath::isFinite( branch_rate ) == false )
-    //            {
-    //                std::cerr << "Rate = " << branch_rate << ",\t\ttime = " << branch_time << ",\t\tevents = " << branch_exp_num_events << std::endl;
-    //            }
                 ln_prob += rate_prior->computeLnProbability();
-                //ln_prob += rate_prior->computeLnProbability() + log(events) - 2*log(branch_rate);
-    //            std::cerr << the_node->computePlainNewick() << "\t\tP("<< branch_exp_num_events << "/" << branch_time << "=" << branch_rate << ") = " << rate_prior->computeLnProbability() << "\t\tSum = " << ln_prob << std::endl;
-
-    //            if ( RbMath::isFinite( ln_prob ) == false )
-    //            {
-    //                std::cerr << "Rate = " << branch_rate << ",\t\ttime = " << branch_time << ",\t\tevents = " << branch_exp_num_events << ",\t\tprob = " << ln_prob << std::endl;
-    //            }
             }
         }
 
@@ -462,18 +449,12 @@ double UltrametricTreeDistribution::computeLnProbability( void )
         if ( i >= sample_block_start && i < sample_block_end )
         {
             const std::map<std::string, size_t> &your_taxon_bitmap = trees[i].getTaxonBitSetMap();
-            if ( my_taxon_bitmap != your_taxon_bitmap )
-            {
-                std::cerr << "Ooohhh" << std::endl;
-            }
 
             ln_probs[i] = computeBranchRateLnProbability( my_time_tree, my_tree_newick, my_splits, i );
 
             if ( sample_prior_density != NULL && RbMath::isFinite( ln_probs[i] ) )
             {
-//                ++num_observed;
                 ln_probs[i] -= sample_prior_density->getValues()[i+BURNIN];
-                //std::cerr << "ln_probs[" << i << "] = " << ln_probs[i] << std::endl;
             }
 
         }

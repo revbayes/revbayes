@@ -419,12 +419,6 @@ double MatrixReal::getLogDet() const
         
 //        if (std::isnan(tot))
 //        {
-//            std::cerr << "in MatrixReal::getLogDet(): nan\n";
-//            std::cerr << "eigen values:\n";
-//            for (size_t i=0; i<nRows; i++)
-//            {
-//                std::cerr << eigenval[i] << '\n';
-//            }
 //            RbException("Problem when computing log-determinant.");
 //        }
         return tot;

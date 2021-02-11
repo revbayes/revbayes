@@ -530,7 +530,6 @@ void RevBayesCore::GeneralTreeHistoryCtmc<charType>::initializeTipValues( void )
                     
                     if ( state.isGapState() == true )
                     {
-                        //                        std::cerr << state.getStateIndex() << std::endl;
                         s = 0;
                     }
                     

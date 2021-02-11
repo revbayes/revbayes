@@ -176,6 +176,8 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
     // proceed as long as derived classes validate a non-zero likeilhood
     if ( isLnProbabilityNonZero() == false )
     {
+        std::cerr << "Prob zero" << std::endl;
+
         return RbConstants::Double::neginf;
     }
     
@@ -209,6 +211,8 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
             }
             else if( the_node.getAge() - the_node.getParent().getAge() > 0 )
             {
+                std::cerr << "node younger than parent" << std::endl;
+
                 return RbConstants::Double::neginf;
             }
             
@@ -230,6 +234,8 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
     
     if ( ra > getOriginAge() || ra != getRootAge() )
     {
+        std::cerr << "root not root age" << std::endl;
+
         return RbConstants::Double::neginf;
     }
         
@@ -239,6 +245,8 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
     {
         if ( ra < (*it)->getAge() )
         {
+            std::cerr << "root younger than node" << std::endl;
+
             return RbConstants::Double::neginf;
         }
     }

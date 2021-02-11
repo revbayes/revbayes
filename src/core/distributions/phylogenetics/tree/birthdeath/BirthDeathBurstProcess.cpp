@@ -174,8 +174,6 @@ double BirthDeathBurstProcess::computeLnProbabilityTimes( void ) const
     if ( num_lineages_burst_at_event > 0 )
     {
         lnProbTimes += log(burst_prob) * num_lineages_burst_at_event;
-//        std::cerr << "E(" << burst_time << ") = " << pZero(burst_time) << std::endl;
-//        std::cerr << "A-K = " << num_lineages_alive_at_burst << std::endl;
         lnProbTimes += log(1.0-burst_prob+2*burst_prob*pZero(burst_time)) * num_lineages_alive_at_burst;
     }
     
@@ -183,7 +181,6 @@ double BirthDeathBurstProcess::computeLnProbabilityTimes( void ) const
     lnProbTimes += (internal_node_ages.size()-num_lineages_burst_at_event) * log( birth_rate );
     for (size_t i=0; i<internal_node_ages.size(); i++)
     {
-//        std::cerr << "lnD(" << internal_node_ages[i] << ") = " << lnQ(internal_node_ages[i]) << std::endl;
         lnProbTimes += lnQ(internal_node_ages[i]);
     }
     

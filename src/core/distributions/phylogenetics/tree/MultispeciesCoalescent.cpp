@@ -106,7 +106,6 @@ double  MultispeciesCoalescent::getNe(size_t index) const
     }
     else
     {
-        std::cerr << "Error: Null Pointers for Ne and Nes." << std::endl;
         exit(-1);
     }
 }

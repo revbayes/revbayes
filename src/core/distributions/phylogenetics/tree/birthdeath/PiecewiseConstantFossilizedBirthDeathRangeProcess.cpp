@@ -103,11 +103,11 @@ PiecewiseConstantFossilizedBirthDeathRangeProcess::PiecewiseConstantFossilizedBi
 
     if ( heterogeneous_beta == NULL && homogeneous_beta == NULL)
     {
-        throw(RbException("Symmetric speciation probability must be of type Probability or Probability[]"));
+        throw RbException("Symmetric speciation probability must be of type Probability or Probability[]");
     }
-    else if( heterogeneous_beta != NULL )
+    else if ( heterogeneous_beta != NULL )
     {
-        if( timeline == NULL ) throw(no_timeline_err);
+        if ( timeline == NULL ) throw(no_timeline_err);
 
         if (heterogeneous_beta->getValue().size() != timeline->getValue().size() + 1)
         {
@@ -160,8 +160,8 @@ double PiecewiseConstantFossilizedBirthDeathRangeProcess::computeLnProbabilityDi
 double PiecewiseConstantFossilizedBirthDeathRangeProcess::computeLnProbabilityTimes( void ) const
 {
     double lnProb = computeLnProbabilityRanges();
-
-    for(size_t i = 0; i < taxa.size(); i++)
+    
+    for (size_t i = 0; i < taxa.size(); i++)
     {
         // if this is an extended tree, then include the anagenetic speciation density for descendants of sampled ancestors
         // otherwise, integrate out the speciation times for descendants of sampled ancestors
@@ -231,7 +231,7 @@ double PiecewiseConstantFossilizedBirthDeathRangeProcess::computeLnProbabilityTi
 
         // if this is a sampled tree
         // replace extinction events with sampling events
-        if( extended == false )
+        if ( extended == false )
         {
             size_t di = l(d_i[i]);
 
@@ -300,7 +300,7 @@ double PiecewiseConstantFossilizedBirthDeathRangeProcess::computeLnProbabilityTi
 
 double PiecewiseConstantFossilizedBirthDeathRangeProcess::getMaxTaxonAge( const TopologyNode& node ) const
 {
-    if( node.isTip() )
+    if ( node.isTip() )
     {
         return node.getTaxon().getAgeRange().getMax();
     }
@@ -308,7 +308,7 @@ double PiecewiseConstantFossilizedBirthDeathRangeProcess::getMaxTaxonAge( const 
     {
         double max = 0;
 
-        for( size_t i = 0; i < node.getNumberOfChildren(); i++)
+        for ( size_t i = 0; i < node.getNumberOfChildren(); i++)
         {
             max = std::max( getMaxTaxonAge( node.getChild(i) ), max );
         }
@@ -439,7 +439,7 @@ double PiecewiseConstantFossilizedBirthDeathRangeProcess::integrateQ( size_t i, 
 
     if ( s > 0.0 )
     {
-        throw(RbException("Cannot integrate first occurrence age for beta > 0.0"));
+        throw RbException("Cannot integrate first occurrence age for beta > 0.0");
     }
 
     // get the parameters
@@ -492,7 +492,7 @@ void PiecewiseConstantFossilizedBirthDeathRangeProcess::simulateClade(std::vecto
             double max = n[i]->getTaxon().getAgeRange().getMax();
 
             // in the extended tree, tip ages are extinction times
-            if( extended )
+            if ( extended )
             {
                 n[i]->setAge( present + rng->uniform01() * ( min - present ) );
             }
@@ -504,8 +504,12 @@ void PiecewiseConstantFossilizedBirthDeathRangeProcess::simulateClade(std::vecto
         }
 
         double first_occurrence = getMaxTaxonAge( *n[i] );
+        if ( n[i]->isInternal() == true )
+        {
+            first_occurrence = fmax(n[i]->getAge(),first_occurrence);
+        }
 
-        if( first_occurrence > minimum_age )
+        if ( first_occurrence > minimum_age )
         {
             minimum_age = first_occurrence;
         }
@@ -522,11 +526,11 @@ void PiecewiseConstantFossilizedBirthDeathRangeProcess::simulateClade(std::vecto
     // reset the age
     double max_age = getOriginAge();
 
-    if( minimum_age > max_age )
+    if ( minimum_age > max_age )
     {
         std::stringstream s;
         s << "Tree age is " << max_age << " but oldest fossil occurrence is " << minimum_age;
-        throw(RbException(s.str()));
+        throw RbException(s.str());
     }
 
 
@@ -550,7 +554,7 @@ void PiecewiseConstantFossilizedBirthDeathRangeProcess::simulateClade(std::vecto
             {
                 active_nodes.push_back( n[i] );
             }
-            if( current_age >= first_occurrences[i] )
+            if ( current_age >= first_occurrences[i] )
             {
                 active_right_nodes.push_back( n[i] );
             }
@@ -623,10 +627,11 @@ void PiecewiseConstantFossilizedBirthDeathRangeProcess::simulateClade(std::vecto
                 left_child->setParent( parent );
                 right_child->setParent( parent );
                 parent->setAge( next_sim_age );
-
+                
                 // insert the parent to our list
                 n.push_back( parent );
-                first_occurrences.push_back( std::max(fa_left, fa_right) );
+                first_occurrences.push_back( next_sim_age );
+//                first_occurrences.push_back( std::max(fa_left, fa_right) );
 
                 current_age = next_sim_age;
                 ages.push_back( next_sim_age );
@@ -655,14 +660,14 @@ void PiecewiseConstantFossilizedBirthDeathRangeProcess::simulateClade(std::vecto
         {
             if( first_occurrences[0] > age )
             {
-                throw(RbException("Cannot simulate clade of age " + StringUtilities::toString(age) + ", minimum age is " + StringUtilities::toString(minimum_age) ));
+                throw RbException("Cannot simulate clade of age " + StringUtilities::toString(age) + ", minimum age is " + StringUtilities::toString(minimum_age) );
             }
             else
             {
                 std::swap( left_child, right_child );
             }
         }
-        else if( age > first_occurrences[0] )
+        else if ( age > first_occurrences[0] )
         {
             if( rng->uniform01() < 0.5 )
             {
@@ -680,7 +685,7 @@ void PiecewiseConstantFossilizedBirthDeathRangeProcess::simulateClade(std::vecto
         left_child->setParent( parent );
         right_child->setParent( parent );
         parent->setAge( age );
-
+        
         // insert the parent to our list
         n.push_back( parent );
     }
@@ -760,7 +765,7 @@ int PiecewiseConstantFossilizedBirthDeathRangeProcess::updateStartEndTimes( cons
 
     bool sa = node.isSampledAncestor(true);
 
-    for(int c = 0; c < children.size(); c++)
+    for (int c = 0; c < children.size(); c++)
     {
         const TopologyNode& child = *children[c];
 

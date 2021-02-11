@@ -207,7 +207,7 @@ void Taxon::setAge(double a)
     else
     {
         age_range.setMin(a);
-        age_range.setMax(a);
+//        age_range.setMax(a);
     }
 }
 

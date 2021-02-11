@@ -913,8 +913,6 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
             // Ensure tree doesn't get too big to manage
             if ( current_num_active_nodes > MAX_NUM_LINEAGES )
             {
-//                std::cerr << "Failed simulation because there were " << current_num_active_nodes << std::endl;
-//                std::cerr << "Allowed were " << MAX_NUM_LINEAGES << std::endl;
                 delete root;
                 root = NULL;
                 break;
@@ -1053,7 +1051,6 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
     my_tree->setRooted( true );
     
     size_t num_nodes = my_tree->getNumberOfNodes();
-//    std::cerr << "Successful simulation with " << num_nodes << std::endl;
 
     for (size_t i=0; i<num_nodes; ++i)
     {

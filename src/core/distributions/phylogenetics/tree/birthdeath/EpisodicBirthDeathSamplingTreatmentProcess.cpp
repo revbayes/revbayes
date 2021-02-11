@@ -566,18 +566,10 @@ void EpisodicBirthDeathSamplingTreatmentProcess::countAllNodes(void) const
           if (at_event == -1 || phi_event[at_event] < DBL_EPSILON)
           {
               serial_sampled_ancestor_ages.push_back(t);
-//              if ( n.getSerialSampling() == false )
-//              {
-//                  std::cerr << "Node should not have been a serial sampling event." << std::endl;
-//              }
           }
           else
           {
               event_sampled_ancestor_ages[at_event].push_back(t);
-//              if ( n.getSamplingEvent() == false )
-//              {
-//                  std::cerr << "Node should not have been a event sampling event." << std::endl;
-//              }
           }
       }
       else if ( n.isTip() && n.isFossil() && !n.isSampledAncestor() )
@@ -589,18 +581,10 @@ void EpisodicBirthDeathSamplingTreatmentProcess::countAllNodes(void) const
           if (at_event == -1 || phi_event[at_event] < DBL_EPSILON)
           {
               serial_tip_ages.push_back(t);
-//              if ( n.getSerialSampling() == false )
-//              {
-//                  std::cerr << "Node should not have been a serial sampling event." << std::endl;
-//              }
           }
           else
           {
               event_tip_ages[at_event].push_back(t);
-//              if ( n.getSamplingEvent() == false )
-//              {
-//                  std::cerr << "Node should not have been a event sampling event." << std::endl;
-//              }
           }
       }
       else if ( n.isTip() && !n.isFossil() )
@@ -615,10 +599,6 @@ void EpisodicBirthDeathSamplingTreatmentProcess::countAllNodes(void) const
           else
           {
               serial_tip_ages.push_back(0.0);
-//              if ( n.getSerialSampling() == false )
-//              {
-//                  std::cerr << "Node should not have been a serial sampling event." << std::endl;
-//              }
           }
       }
       else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
@@ -632,18 +612,10 @@ void EpisodicBirthDeathSamplingTreatmentProcess::countAllNodes(void) const
               if ( at_event == -1 )
               {
                   serial_bifurcation_times.push_back(t);
-//                  if ( n.getSerialSpeciation() == false && (n.getBurstSpeciation() == true || n.getSamplingEvent() == true || n.getSerialSampling() == true ) )
-//                  {
-//                      std::cerr << "Node should not have been a serial speciation event." << std::endl;
-//                  }
               }
               else
               {
                   event_bifurcation_times[at_event].push_back(t);
-//                  if ( n.getBurstSpeciation() == false )
-//                  {
-//                      std::cerr << "Node should not have been a burst speciation event." << std::endl;
-//                  }
               }
           }
       }
@@ -1662,12 +1634,7 @@ int EpisodicBirthDeathSamplingTreatmentProcess::survivors(double t) const
             if ( n->isRoot() == false && (n->getParent().getAge() - t) > 1E-4 )
             {
                 survivors++;
-//                std::cerr << " -> Yes" << std::endl;
             }
-//            else
-//            {
-//                std::cerr << " -> No" << std::endl;
-//            }
         }
         else if ( (my_age - t) < -1E-4 )
         {
@@ -1675,17 +1642,8 @@ int EpisodicBirthDeathSamplingTreatmentProcess::survivors(double t) const
             if ( n->isRoot() == false && (n->getParent().getAge() - t) > -1E-4 )
             {
                 survivors++;
-//                std::cerr << " -> Yes" << std::endl;
             }
-//            else
-//            {
-//                std::cerr << " -> No" << std::endl;
-//            }
         }
-//        else
-//        {
-//            std::cerr << " -> No" << std::endl;
-//        }
         
     }
 

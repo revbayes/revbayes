@@ -196,7 +196,6 @@ double RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::computeInternalNod
     // check that node ages are consistent with character event ages
     if ( bh->areEventTimesValid(node) == false )
     {
-//        std::cerr << "Rejecting (invalid times)." << std::endl;
         return RbConstants::Double::neginf;
     }
 //    bh->print();
