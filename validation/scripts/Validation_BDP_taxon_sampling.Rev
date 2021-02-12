@@ -2,8 +2,7 @@
 #
 # RevBayes Validation Test
 #
-#
-# Model: A constant-rate birth-death process with a mass-sampling event.
+# Model: A constant-rate birth-death process with complete taxon sampling.
 #
 #
 # authors: Sebastian Hoehna
@@ -41,8 +40,6 @@ monitors  = VectorMonitors()
 diversification ~ dnLognormal(ln(0.01),sd=0.58)
 turnover ~ dnLognormal(ln(0.01),sd=0.58)
 
-sampling ~ dnBeta(20,2)
-
 # now transform the diversification and turnover rates into speciation and extinction rates
 speciation := diversification + turnover
 extinction := turnover
@@ -50,7 +47,7 @@ extinction := turnover
 # specify a prior on the root age (our informed guess is about 75-80 mya)
 root <- tree.rootAge()
 
-sampling_fraction <- 1.0
+sampling_fraction <- 0.42
 
 # create some moves that change the stochastic variables
 # all moves are sliding proposals but you could use scaling proposals for the rates too
@@ -58,11 +55,9 @@ moves.append( mvSlide(diversification,delta=1,tune=true,weight=1) )
 moves.append( mvSlide(turnover,delta=1,tune=true,weight=1) )
 moves.append( mvScale(diversification,lambda=1,tune=true,weight=1) )
 moves.append( mvScale(turnover,lambda=1,tune=true,weight=1) )
-moves.append( mvBetaProbability(sampling,tune=true,weight=2) )
 
 # construct a variable for the tree drawn from a birth death process
-psi ~ dnEpisodicFossilizedBirthDeathProcess(lambda=[speciation,speciation], mu=[extinction,extinction], phi=[0.0,0.0], rho=[sampling_fraction,sampling], timeline=[abs(root)*0.15], rootAge=abs(root), taxa=taxa, condition="survival" )
-
+psi ~ dnEpisodicFossilizedBirthDeathProcess(lambda=speciation, mu=extinction, phi=0.0, rootAge=abs(root), rho=sampling_fraction, taxa=taxa, condition="survival" )
 
 psi.clamp( tree )
 
@@ -81,7 +76,7 @@ mymodel = model( root )
 mymcmc = mcmc(mymodel, monitors, moves)
 
 
-validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_BDP_Sampling" )
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_BDP_taxon_sampling" )
 validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
 validation.run(generations=NUM_MCMC_ITERATIONS)
 validation.summarize()
