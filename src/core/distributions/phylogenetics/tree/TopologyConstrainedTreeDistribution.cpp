@@ -546,8 +546,9 @@ void TopologyConstrainedTreeDistribution::redrawValue( void )
     {
         if ( rooting_known == false )
         {
-            base_distribution->redrawValue();
-            is_rooted = base_distribution->getValue().isRooted();
+//            base_distribution->redrawValue();
+//            is_rooted = base_distribution->getValue().isRooted();
+            is_rooted = true;
             rooting_known = true;
             value = NULL;
         }
@@ -658,6 +659,7 @@ void TopologyConstrainedTreeDistribution::setBackbone(const TypedDagNode<Tree> *
  */
 Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( void )
 {
+        
     // the time tree object (topology & times)
     Tree *psi = new Tree();
 
