@@ -1,0 +1,99 @@
+################################################################################
+#
+# RevBayes Validation Test
+#
+#
+# Model: A episodic-birth-death process with a sampling event.
+#
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+## Global settings
+
+
+NUM_VALIDATION_REPLICATES = 10000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+#######################
+# Reading in the Data #
+#######################
+
+# read in the tree which is our observation
+tree <- readTrees( "data/primates.tree" )[1]
+
+# Get some useful variables from the data. We need these later on.
+taxa <- tree.taxa()
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
+
+##############
+# Tree model #
+##############
+
+NUM_INTERVALS = 4
+
+for (i in 1:NUM_INTERVALS) {
+
+    # Specify a prior on the diversification and turnover rate
+    diversification[i] ~ dnLognormal(ln(0.01),sd=0.58)
+    turnover[i] ~ dnLognormal(ln(0.01),sd=0.58)
+
+	# create some moves that change the stochastic variables
+	# all moves are sliding proposals but you could use scaling proposals for the rates too
+	moves.append( mvSlide(diversification[i],delta=1,tune=true,weight=1) )
+	moves.append( mvSlide(turnover[i],delta=1,tune=true,weight=1) )
+	moves.append( mvScale(diversification[i],lambda=1,tune=true,weight=1) )
+	moves.append( mvScale(turnover[i],lambda=1,tune=true,weight=1) )
+
+    # now transform the diversification and turnover rates into speciation and extinction rates
+    speciation[i] := diversification[i] + turnover[i]
+    extinction[i] := turnover[i]
+
+}
+
+
+sampling ~ dnBeta(20,2)
+moves.append( mvBetaProbability(sampling,tune=true,weight=2) )
+
+
+# specify a prior on the root age (our informed guess is about 75-80 mya)
+root <- tree.rootAge()
+
+sampling_fraction <- 1.0
+
+# construct a variable for the tree drawn from a birth death process
+psi ~ dnEpisodicFossilizedBirthDeathProcess(lambda=speciation, mu=extinction, phi=rep(0.0,NUM_INTERVALS), timeline=abs(root)*0.5*(1:(NUM_INTERVALS-1))/NUM_INTERVALS, rootAge=abs(root), rho=[sampling_fraction,0.0,sampling,0.0], taxa=taxa, condition="survival" )
+
+
+psi.clamp( tree )
+
+
+
+
+#############
+# The Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model( root )
+
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_EBDP_Sampling" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize()
+
+
+# you may want to quit RevBayes now
+q()
