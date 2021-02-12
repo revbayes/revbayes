@@ -1814,11 +1814,11 @@ void TopologyNode::setAge(double a, bool propagate)
 
     age = a;
     
-    // we should also update the taxon age if this is a tip node
-    if ( isTip() == true )
-    {
-        getTaxon().setAge( a );
-    }
+//    // we should also update the taxon age if this is a tip node
+//    if ( isTip() == true )
+//    {
+//        getTaxon().setAge( a );
+//    }
 
     // we need to recompute my branch-length
     recomputeBranchLength();

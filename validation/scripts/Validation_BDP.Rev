@@ -1,31 +1,34 @@
 ################################################################################
 #
-# RevBayes Validation Test: Constant-rate birth-death process
-# 
-# Model: A constant-rate birth-death process with uniform taxon sampling. 
-#            
+# RevBayes Validation Test
+#
+# Model: A constant-rate birth-death process with complete taxon sampling.
+#
 #
 # authors: Sebastian Hoehna
 #
 ################################################################################
 
+## Global settings
+
+
+NUM_VALIDATION_REPLICATES = 10000
+NUM_MCMC_ITERATIONS       = 10000
+
+
 #######################
 # Reading in the Data #
 #######################
 
-###### This just defines a single model for all sites #######
-
-### Read in sequence data for both genes
-
-
+# read in the tree which is our observation
 tree <- readTrees( "data/primates.tree" )[1]
 
 # Get some useful variables from the data. We need these later on.
 taxa <- tree.taxa()
 
-# set my move index
-mi = 0
-
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
 
 
 
@@ -34,8 +37,8 @@ mi = 0
 ##############
 
 # Specify a prior on the diversification and turnover rate
-diversification ~ dnExp(1)
-turnover ~ dnExp(1)
+diversification ~ dnLognormal(ln(0.01),sd=0.58)
+turnover ~ dnLognormal(ln(0.01),sd=0.58)
 
 # now transform the diversification and turnover rates into speciation and extinction rates
 speciation := diversification + turnover
@@ -48,20 +51,21 @@ sampling_fraction <- 1.0
 
 # create some moves that change the stochastic variables
 # all moves are sliding proposals but you could use scaling proposals for the rates too
-moves[++mi] = mvSlide(diversification,delta=1,tune=true,weight=1)
-moves[++mi] = mvSlide(turnover,delta=1,tune=true,weight=1)
-moves[++mi] = mvScale(diversification,lambda=1,tune=true,weight=1)
-moves[++mi] = mvScale(turnover,lambda=1,tune=true,weight=1)
+moves.append( mvSlide(diversification,delta=1,tune=true,weight=1) )
+moves.append( mvSlide(turnover,delta=1,tune=true,weight=1) )
+moves.append( mvScale(diversification,lambda=1,tune=true,weight=1) )
+moves.append( mvScale(turnover,lambda=1,tune=true,weight=1) )
 
 # construct a variable for the tree drawn from a birth death process
-psi ~ dnBDP(lambda=speciation, mu=extinction, rootAge=abs(root), rho=sampling_fraction, taxa=taxa, condition="nTaxa" )
+psi ~ dnEpisodicFossilizedBirthDeathProcess(lambda=speciation, mu=extinction, phi=0.0, rootAge=abs(root), rho=sampling_fraction, taxa=taxa, condition="survival" )
+
 psi.clamp( tree )
 
 
 
 
 #############
-# THE Model #
+# The Model #
 #############
 
 # We define our model.
@@ -69,21 +73,14 @@ psi.clamp( tree )
 mymodel = model( root )
 
 
-
-
-
-
-monitors[1] = mnModel(filename="output/primates_BDP.log",printgen=1, separator = TAB)
-
 mymcmc = mcmc(mymodel, monitors, moves)
 
 
-validation = validationAnalysis( mymcmc, 1000 )
-validation.burnin(generations=2000,tuningInterval=200)
-validation.run(generations=10000)
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_BDP" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
 validation.summarize()
 
 
 # you may want to quit RevBayes now
 q()
-
