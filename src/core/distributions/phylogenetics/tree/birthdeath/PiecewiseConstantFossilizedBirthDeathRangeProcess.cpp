@@ -694,7 +694,6 @@ void PiecewiseConstantFossilizedBirthDeathRangeProcess::simulateClade(std::vecto
         throw RbException("Unexpected number of taxa (" + StringUtilities::toString(n.size()) + ") in tree simulation");
     }
 
-
 }
 
 std::vector<double> PiecewiseConstantFossilizedBirthDeathRangeProcess::simulateDivergenceTimes(size_t n, double origin, double present, double min) const
