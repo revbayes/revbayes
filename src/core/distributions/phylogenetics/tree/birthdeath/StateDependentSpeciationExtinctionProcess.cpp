@@ -307,7 +307,6 @@ double StateDependentSpeciationExtinctionProcess::computeLnProbability( void )
     if ( condition == "survival" )
     {
         lnProbTimes = - log( pSurvival(0, process_time,num_initial_lineages>1) );
-        
     }
     
     // multiply the probability of a descendant of the initial species
@@ -515,7 +514,9 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
                 size_t                      right_index     = right.getIndex();
                 scaling_factors[node_index][active_likelihood[node_index]] += scaling_factors[left_index][active_likelihood[left_index]] + scaling_factors[right_index][active_likelihood[right_index]];
             }
+            
         }
+        
     }
     
 }
@@ -1733,7 +1734,7 @@ double StateDependentSpeciationExtinctionProcess::pSurvival(double start, double
 {
 
     // delegate to specific function that manages survival between origin and root
-    return pSurvival(start, end, use_origin);
+    return pSurvival(start, end, use_origin == false);
 }
 
 
