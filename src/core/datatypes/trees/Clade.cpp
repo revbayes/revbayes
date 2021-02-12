@@ -726,4 +726,3 @@ void Clade::setAges(const std::vector<Taxon>& taxa)
         }
     }
 }
-
