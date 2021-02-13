@@ -153,10 +153,9 @@ EpisodicBirthDeathSamplingTreatmentProcess::EpisodicBirthDeathSamplingTreatmentP
 
     addParameter( heterogeneous_R );
 
-    //TODO: make sure the offset is added properly into the computation, need to offset *all* times, including interval times
-    //          this means we also need to check that the first interval time is not less than the first tip (which we should probably to anyways)
+    //TODO: should check that the first interval time is not less than the first tip in offset computation
 
-    //TODO: returning neginf and nan are not currently coherent
+    //TODO: returning neginf and nan are not currently consistently used for different issues with invalid values.
 
     // updateVectorParameters();
     prepareTimeline();
@@ -214,9 +213,6 @@ void EpisodicBirthDeathSamplingTreatmentProcess::checkVectorSizes(const TypedDag
 {
   if ( v != NULL )
   {
-    // std::cout << "checking vector sizes" << std::endl;
-    // std::cout << "v->getValue().size() = " << v->getValue().size() << std::endl;
-    // std::cout << "ref->getValue().size() = " << ref->getValue().size() << std::endl;
     if ( v->getValue().size() - ref->getValue().size() != v1_minus_ref )
     {
       std::string vec_type = is_rate ? "rates" : "probabilities";
@@ -235,7 +231,6 @@ void EpisodicBirthDeathSamplingTreatmentProcess::checkVectorSizes(const TypedDag
 double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityDivergenceTimes( void ) const
 {
     
-    // @TODO @ANDY Need to use big-R for event sampling times
     // update parameter vectors
     prepareTimeline();
 
@@ -464,7 +459,7 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
         double t = n.getAge();
         
         size_t index = findIndex(t);
-        // Sebastian: We need to check for the boundary of the epochs!
+        // @TODO: We may need to check more carefully for the boundary of the epochs!
         double diff = t - global_timeline[index];
         if ( index > 0 && fabs(diff) < 1E-4 )
         {
@@ -491,14 +486,8 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
         // conditioning on survival depends on if we are using the origin or root age
         // origin: we condition on a single lineage surviving to the present and being sampled
         // root: we condition on the above plus the other root child leaving a sampled descendant
-//        double test_a = log( pSurvival(root_age,0.0) );
-//        double test_b = log( pSampling(root_age) );
         
         lnProbTimes -= num_initial_lineages * log( pSurvival(root_age,0.0) );
-//        if ( num_initial_lineages == 2 )
-//        {
-//            lnProbTimes -= log( pSampling(root_age) );
-//        }
     }
     else if ( condition == "sampling" )
     {
@@ -631,9 +620,6 @@ double EpisodicBirthDeathSamplingTreatmentProcess::lnD(size_t i, double t) const
     // D(0) = 1
     if ( t < DBL_EPSILON )
     {
-        // TODO: this can't be right, if phi_event[0] = 0 this will blow up
-        // return log(phi_event[0]);
-//        return phi_event[0] <= DBL_EPSILON ? 0.0 : log(phi_event[0]);
         return 0.0;
     }
     else
@@ -642,16 +628,12 @@ double EpisodicBirthDeathSamplingTreatmentProcess::lnD(size_t i, double t) const
         double this_lnD_i = 0.0;
         if (i > 0)
         {
-            // D <- D * (1-this_p_s) * (1-this_p_d) * (1-this_p_b + 2*this_p_b*E)
             this_lnD_i = lnD_previous[i];
-            // Sebastian: Instead of adding the burst and sampling probability to ln_D we could add it directly for each lineage.
         }
         else
         {
             this_lnD_i = phi_event[0] <= DBL_EPSILON ? 0.0 : log(phi_event[0]);
         }
-        // D <- D * 4 * exp(-A*(next_t-current_t))
-        // D <- D / ( 1+B+exp(-A*(next_t-current_t))*(1-B) )^2
         this_lnD_i += 2*RbConstants::LN2 + (-A_i[i] * (t - s));
         this_lnD_i -= 2 * log(1 + B_i[i] + exp(-A_i[i] * (t - s)) * (1 - B_i[i]));
 
@@ -670,14 +652,12 @@ double EpisodicBirthDeathSamplingTreatmentProcess::E(size_t i, double t, bool co
     // Are we computing E(t) for survival conditioning?
     if (computeSurvival == true)
     {
-        // E <- (b + d - A *(1+B-exp(-A*(next_t-current_t))*(1-B))/(1+B+exp(-A*(next_t-current_t))*(1-B)) ) / (2*b)
         E_i = lambda[i] + mu[i] + phi[i]*r[i];
         E_i -= A_survival_i[i] * (1 + B_survival_i[i] - exp(-A_survival_i[i] * (t - s)) * (1 - B_survival_i[i])) / (1 + B_survival_i[i] + exp(-A_survival_i[i] * (t - s)) * (1 - B_survival_i[i]));
         E_i /= (2 * lambda[i]);
     }
     else
     {
-        // E <- (b + d + s - A *(1+B-exp(-A*(next_t-current_t))*(1-B))/(1+B+exp(-A*(next_t-current_t))*(1-B)) ) / (2*b)
         E_i = lambda[i] + mu[i] + phi[i];
         E_i -= A_i[i] * (1 + B_i[i] - exp(-A_i[i] * (t - s)) * (1 - B_i[i])) / (1 + B_i[i] + exp(-A_i[i] * (t - s)) * (1 - B_i[i]));
         E_i /= (2 * lambda[i]);
@@ -938,7 +918,6 @@ void EpisodicBirthDeathSamplingTreatmentProcess::prepareProbComputation( void ) 
     E_previous[0] = 1.0;
 
     // we always initialize the probability of observing the lineage at the present with the sampling probability
-    // TODO: This can't be right, if there is no event sampling this will blow up
     lnD_previous[0] = 0.0;
 
     for (size_t i=1; i<global_timeline.size(); ++i)
@@ -953,9 +932,6 @@ void EpisodicBirthDeathSamplingTreatmentProcess::prepareProbComputation( void ) 
         A_i[i] = sqrt( pow(lambda[i] - mu[i] - phi[i],2.0) + 4 * lambda[i] * phi[i]);
 
         // Only one type of event is allowed
-        // sampling:    C_i <- E*(1-this_p_s)
-        // speciation:  C_i <- ((1-this_p_b)*E+this_p_b*E*E)
-        // extinction:  C_i <- (E*(1-this_p_d)+this_p_d)
         if ( phi_event[i] >= DBL_EPSILON )
         {
             C_i[i] = (1 - phi_event[i]) * E_previous[i];
@@ -973,7 +949,6 @@ void EpisodicBirthDeathSamplingTreatmentProcess::prepareProbComputation( void ) 
             C_i[i] = E_previous[i];
         }
 
-        // B <- ((1-2*tmp)*b+d+s)/A
         B_i[i] = (1.0 - 2.0 * C_i[i]) * lambda[i] + mu[i] + phi[i];
         B_i[i] /= A_i[i];
 
@@ -999,7 +974,6 @@ void EpisodicBirthDeathSamplingTreatmentProcess::prepareProbComputation( void ) 
         B_survival_i[0] = (1.0 - 2.0 * C_survival_i[0]) * lambda[0] + mu[0] + phi[0]*r[0];
         B_survival_i[0] /= A_survival_i[0];
         
-        // Andy says it should be 1.0, Sebastian's equation say it should be 0.0
         E_survival_previous[0] = 1.0;
 
         for (size_t i=1; i<global_timeline.size(); ++i)
@@ -1044,7 +1018,6 @@ void EpisodicBirthDeathSamplingTreatmentProcess::prepareProbComputation( void ) 
  */
 void EpisodicBirthDeathSamplingTreatmentProcess::prepareTimeline( void ) const
 {
-    // @TODO: @ANDY: Fill in the function to assemble the master timeline and all the parameter vectors!!!
     // clean all the sets
     lambda.clear();
     mu.clear();
@@ -1132,7 +1105,6 @@ void EpisodicBirthDeathSamplingTreatmentProcess::prepareTimeline( void ) const
     {
         phi_event_times = interval_times_event_sampling->getValue();
     }
-    // @TODO: @ANDY: Check that we cleared all parameters!
 
     // If it's a constant-rate process, make sure we only have scalars
     bool using_constant_rate_process = isConstantRate();
@@ -1155,7 +1127,6 @@ void EpisodicBirthDeathSamplingTreatmentProcess::prepareTimeline( void ) const
             throw RbException("Both heterogeneous and homogeneous rate change times provided");
         }
 
-        // @TODO: @ANDY: keep on checking for all other parameters!
         // check that the number of provided parameters matches the global timeline
         // Right now, the global timeline is only the interval times, i.e. breaks between pieces/episodes/windows
         checkVectorSizes(heterogeneous_lambda,interval_times_global,1,spn,true);
@@ -1167,7 +1138,6 @@ void EpisodicBirthDeathSamplingTreatmentProcess::prepareTimeline( void ) const
         checkVectorSizes(heterogeneous_Phi,interval_times_global,1,smp,false);
         checkVectorSizes(heterogeneous_R,interval_times_global,0,etrt,false);
 
-        // @TODO: Make sure that times and parameters are stored backwards in time!
         sortGlobalTimesAndVectorParameter();
 
         // we are done with setting up the timeline (i.e., using the provided global timeline) and checking all dimension of parameters
@@ -1301,18 +1271,11 @@ void EpisodicBirthDeathSamplingTreatmentProcess::prepareTimeline( void ) const
         // we are done with setting up the timeline (i.e., using the all the provided timeline) and checking all dimension of parameters
 
     }
-    // else
-    // {
-    //   // Constant-rate process, taking the time to do all that checking is a waste, all we need is the one-vector for the timeline
-    //
-    // }
 
-    // @TODO: @ANDY: Check about the offset
+    // @TODO: @ANDY: Double check the offset works
     // Add s_0
     getOffset();
     global_timeline.insert(global_timeline.begin(),offset);
-
-    // @TODO: @ANDY: Make sure this populates properly all parameter vectors (backwards in time, etc.)
 
     // For each parameter vector, we now make sure that its size matches the size of the global vector
     // For a RATE parameter, there are three cases
@@ -1561,7 +1524,7 @@ void EpisodicBirthDeathSamplingTreatmentProcess::redrawValue( SimulationConditio
  */
 double EpisodicBirthDeathSamplingTreatmentProcess::simulateDivergenceTime(double origin, double present) const
 {
-    // incorrect placeholder
+    // incorrect placeholder, there is no way to simulate an FBD tree consistent with fossil times, we use a coalescent simulator instead
 
 
     // Get the rng
@@ -1625,8 +1588,7 @@ int EpisodicBirthDeathSamplingTreatmentProcess::survivors(double t) const
     {
         TopologyNode* n = *it;
         double my_age = n->getAge();
-//        if ( n->isRoot() == false )
-//            std::cerr << "My_age = " << my_age << "\t\t P_age = " << n->getParent().getAge() << "\t\t t = " << t;
+
         // my age needs to be smaller that the requested time
         if ( (my_age - t) < 1E-4 )
         {
