@@ -473,9 +473,14 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::setValue(RbVector<val
 #ifdef RB_MPI
     // now we need to populate which process is responsible for the given sample
     pid_per_sample = std::vector<size_t>( num_samples, 0 );
-    for (size_t i = 0; i < num_samples; ++i)
+    for (size_t i = 0; i < (this->num_processes-this->active_PID); ++i)
     {
-        pid_per_sample[i] = size_t(floor( double(i) / num_samples * this->num_processes ) ) + this->active_PID;
+        size_t this_pid_sample_block_start = size_t(ceil( (double(i   - this->active_PID)   / this->num_processes ) * num_samples) );
+        size_t this_pid_sample_block_end   = size_t(ceil( (double(i+1 - this->active_PID)   / this->num_processes ) * num_samples) );
+        for (size_t j = this_pid_sample_block_start; j < this_pid_sample_block_end; ++j)
+        {
+            pid_per_sample[j] = i;
+        }
     }
 #endif
     
