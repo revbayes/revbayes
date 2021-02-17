@@ -1490,10 +1490,10 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> StateDependentSpeciationExtinction
         static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData( v.clone() );
    
         // simulate character history over the tree conditioned on the new tip data
-        size_t num_nodes = value->getNumberOfNodes();
-        std::vector<std::string> character_histories(num_nodes);
-        drawStochasticCharacterMap(character_histories);
-        static_cast<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
+//        size_t num_nodes = value->getNumberOfNodes();
+//        std::vector<std::string> character_histories(num_nodes);
+//        drawStochasticCharacterMap(character_histories);
+//        static_cast<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
 
         return NULL;
     }
@@ -2000,13 +2000,13 @@ void StateDependentSpeciationExtinctionProcess::setValue(Tree *v, bool f )
     static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData(tip_data);
    
     // simulate character history over the new tree
-    size_t num_nodes = value->getNumberOfNodes();
-    if (num_nodes > 2)
-    {
-        std::vector<std::string> character_histories(num_nodes);
-        drawStochasticCharacterMap(character_histories);
-    }
-    static_cast<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
+//    size_t num_nodes = value->getNumberOfNodes();
+//    if (num_nodes > 2)
+//    {
+//        std::vector<std::string> character_histories(num_nodes);
+//        drawStochasticCharacterMap(character_histories);
+//    }
+//    static_cast<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
 }
 
 
