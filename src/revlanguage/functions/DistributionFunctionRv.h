@@ -76,7 +76,7 @@ RevLanguage::DistributionFunctionRv<valueType>::DistributionFunctionRv( TypedDis
     templateObject( d )
 {
     
-    argRules.push_back( new ArgumentRule("size", Natural::getClassTypeSpec(), "Number of random values to draw.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1)));
+    argRules.push_back( new ArgumentRule("n", Natural::getClassTypeSpec(), "Number of random values to draw.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1)));
     const ArgumentRules &memberRules = templateObject->getParameterRules();
     for (std::vector<ArgumentRule*>::const_iterator it = memberRules.begin(); it != memberRules.end(); ++it)
     {

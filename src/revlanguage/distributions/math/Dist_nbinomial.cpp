@@ -120,7 +120,7 @@ const MemberRules& Dist_nbinomial::getParameterRules(void) const
     
     if ( !rules_set ) 
     {
-        dist_member_rules.push_back( new ArgumentRule( "r", Natural::getClassTypeSpec(), "Number of failures.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "size", Natural::getClassTypeSpec(), "Number of failures.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "p", Probability::getClassTypeSpec()    , "Probability of success.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         rules_set = true;
     }
@@ -141,7 +141,7 @@ const TypeSpec& Dist_nbinomial::getTypeSpec( void ) const
 void Dist_nbinomial::printValue(std::ostream& o) const
 {
     
-    o << "NegativeBinomial(r=";
+    o << "NegativeBinomial(size=";
     if ( r != NULL )
     {
         o << r->getName();
@@ -167,7 +167,7 @@ void Dist_nbinomial::setConstParameter(const std::string& name, const RevPtr<con
     {
         p = var;
     }
-    else if ( name == "r" )
+    else if ( name == "size" )
     {
         r = var;
     }
