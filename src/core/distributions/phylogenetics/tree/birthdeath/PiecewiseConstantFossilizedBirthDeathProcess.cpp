@@ -166,7 +166,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( 
         if ( I[i] == true )
         {
             double y_a = b_i[i];
-            double o   = taxa[i].getAgeRange().getMax();
+            double o   = taxa[i].getMaxAge();
 
             size_t y_ai = l(y_a);
 
@@ -243,7 +243,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( 
                 }
             }
             // y == d
-            else if ( d_i[i] != taxa[i].getAgeRange().getMin() )
+            else if ( d_i[i] != taxa[i].getMinAge() )
             {
                 return RbConstants::Double::neginf;
             }
@@ -299,7 +299,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::getMaxTaxonAge( const Topol
 {
     if( node.isTip() )
     {
-        return node.getTaxon().getAgeRange().getMax();
+        return node.getTaxon().getMaxAge();
     }
     else
     {
@@ -485,8 +485,8 @@ void PiecewiseConstantFossilizedBirthDeathProcess::simulateClade(std::vector<Top
         // make sure the tip age is equal to the last occurrence
         if( n[i]->isTip() )
         {
-            double min = n[i]->getTaxon().getAgeRange().getMin();
-            double max = n[i]->getTaxon().getAgeRange().getMax();
+            double min = n[i]->getTaxon().getMinAge();
+            double max = n[i]->getTaxon().getMaxAge();
 
             // in the extended tree, tip ages are extinction times
             if( extended )

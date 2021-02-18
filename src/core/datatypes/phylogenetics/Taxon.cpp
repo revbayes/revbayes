@@ -135,13 +135,24 @@ double Taxon::getAge( void ) const
 
 
 /**
- * Get the min age range for this taxon.
+ * Get the age range for this taxon.
  *
  * \return    The age range.
  */
-const TimeInterval& Taxon::getMinAgeRange( void ) const
+TimeInterval Taxon::getAgeRange( void ) const
 {
-    return min_age;
+    return TimeInterval(min_age.getMin(), max_age.getMax());
+}
+
+
+/**
+ * Get the max age for this taxon.
+ *
+ * \return    The age.
+ */
+double Taxon::getMaxAge( void ) const
+{
+    return max_age.getMin();
 }
 
 
@@ -157,13 +168,24 @@ const TimeInterval& Taxon::getMaxAgeRange( void ) const
 
 
 /**
- * Get the age range for this taxon.
+ * Get the min age for this taxon.
+ *
+ * \return    The age.
+ */
+double Taxon::getMinAge( void ) const
+{
+    return min_age.getMin();
+}
+
+
+/**
+ * Get the min age range for this taxon.
  *
  * \return    The age range.
  */
-const TimeInterval& Taxon::getAgeRange( void ) const
+const TimeInterval& Taxon::getMinAgeRange( void ) const
 {
-    return TimeInterval(min_age.getMin(), max_age.getMax());
+    return min_age;
 }
 
 

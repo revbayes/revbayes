@@ -220,8 +220,8 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
         double b = b_i[i];
         double d = d_i[i];
 
-        double o     = fbd_taxa[i].getAgeRange().getMax();
-        double y     = fbd_taxa[i].getAgeRange().getMin();
+        double o     = fbd_taxa[i].getMaxAge();
+        double y     = fbd_taxa[i].getMinAge();
         double o_min = fbd_taxa[i].getMaxAgeRange().getMin();
         double y_max = fbd_taxa[i].getMinAgeRange().getMax();
 

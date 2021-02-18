@@ -206,7 +206,7 @@ void PiecewiseConstantFossilizedBirthDeathRangeProcess::redrawValue(void)
     // get the max first occurence
     for (size_t i = 0; i < fbd_taxa.size(); i++)
     {
-        double o = fbd_taxa[i].getAgeRange().getMax();
+        double o = fbd_taxa[i].getMaxAge();
         if ( o > max ) max = o;
     }
     
@@ -220,8 +220,8 @@ void PiecewiseConstantFossilizedBirthDeathRangeProcess::redrawValue(void)
     // get random uniform draws
     for (size_t i = 0; i < fbd_taxa.size(); i++)
     {
-        double b = fbd_taxa[i].getAgeRange().getMax() + rng->uniform01()*(max - fbd_taxa[i].getAgeRange().getMax());
-        double d = rng->uniform01()*fbd_taxa[i].getAgeRange().getMin();
+        double b = fbd_taxa[i].getMaxAge() + rng->uniform01()*(max - fbd_taxa[i].getMaxAge());
+        double d = rng->uniform01()*fbd_taxa[i].getMinAge();
 
         (*this->value)[i][0] = b;
         (*this->value)[i][1] = d;
