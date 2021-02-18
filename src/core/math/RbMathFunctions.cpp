@@ -630,7 +630,7 @@ double RbMath::incompleteBeta(double a, double b, double x) {
  */
 
 
-double RbMath::incompleteGamma(double x, double alpha, double scale) {
+double RbMath::incompleteGamma(double x, double alpha) {
 
     // (1) series expansion     if (alpha>x || x<=1)
     // (2) continued fraction   otherwise
@@ -648,11 +648,11 @@ double RbMath::incompleteGamma(double x, double alpha, double scale) {
     if (x < 0.0 || alpha <= 0.0) 
     {
         std::ostringstream s;
-        s << "Cannot compute incomplete gamma function for x = " << x << ", alpha = " << alpha << "and scale = " << scale;
+        s << "Cannot compute incomplete gamma function for x = " << x << ", alpha = " << alpha;
         throw RbException(s.str());
     }
     
-    factor = exp(alpha * log(x) - x - scale);
+    factor = exp(alpha * log(x) - x - RbMath::lnGamma(alpha));
     
     if (x > 1 && x >= alpha) {
         // continued fraction
@@ -711,73 +711,6 @@ double RbMath::incompleteGamma(double x, double alpha, double scale) {
     }
     return gin;
 
-}
-
-
-double RbMath::incompleteGamma_old(double x, double alpha, double scale) {
-    
-	double			p = alpha, g = scale,
-    accurate = 1e-8, overflow = 1e30,
-    rn = 0.0, a = 0.0, b = 0.0, an = 0.0, 
-    gin, dif = 0.0, term = 0.0, pn[6];
-    
-	if (x == 0.0) 
-		return (0.0);
-	if (x < 0 || p <= 0) 
-		return (-1.0);
-    
-	double factor = exp(p*log(x)-x-g);   
-	if (x > 1 && x >= p) 
-		goto l30;
-	gin = 1.0;  
-	term = 1.0;  
-	rn = p;
-l20:
-    rn++;
-    term *= x/rn;   
-    gin += term;
-    if (term > accurate) 
-        goto l20;
-    gin *= factor/p;
-    goto l50;
-l30:
-    a = 1.0-p;   
-    b = a+x+1.0;  
-    term = 0.0;
-    pn[0] = 1.0;  
-    pn[1] = x;  
-    pn[2] = x+1;  
-    pn[3] = x*b;
-    gin = pn[2]/pn[3];
-l32:
-    a++;  
-    b += 2.0;  
-    term++;   
-    an = a*term;
-    for (int i=0; i<2; i++) 
-        pn[i+4] = b*pn[i+2]-an*pn[i];
-    if (pn[5] == 0) 
-        goto l35;
-    rn = pn[4]/pn[5];   
-    dif = fabs(gin-rn);
-    if (dif>accurate) 
-        goto l34;
-    if (dif<=accurate*rn) 
-        goto l42;
-l34:
-    gin = rn;
-l35:
-    for (int i=0; i<4; i++) 
-        pn[i] = pn[i+2];
-    if (fabs(pn[4]) < overflow) 
-        goto l32;
-    for (int i=0; i<4; i++) 
-        pn[i] /= overflow;
-    goto l32;
-l42:
-    gin = 1.0-factor*gin;
-l50:
-    return (gin);
 }
 
 

@@ -81,7 +81,7 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
 //    double gamma = RbMath::gamma(shape);
     
 //    Gamma(n-2,2*fn/theta_max)
-    double lower_incomplete_gamma = RbMath::incompleteGamma( 2*fn/theta_max, n-1, RbMath::lnGamma(n-1) );
+    double lower_incomplete_gamma = RbMath::incompleteGamma( 2*fn/theta_max, n-1 );
     
     double gamma = RbMath::lnGamma(n-1);
     gamma = 0.0;
