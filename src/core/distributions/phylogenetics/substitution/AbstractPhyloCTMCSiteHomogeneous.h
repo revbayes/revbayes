@@ -715,7 +715,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
                     // we use the index of the state
                     char_matrix[node_index][patternIndex] = c.getStateIndex();
                     if ( c.getStateIndex() >= this->num_chars )
+                    {
                         throw RbException("Problem with state index in PhyloCTMC!");
+                    }
+                    
                 }
                 else
                 {
@@ -736,11 +739,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     site_invariant.resize( pattern_block_size );
     invariant_site_index.resize( pattern_block_size );
     size_t length = char_matrix.size();
-    
+        
     for (size_t i=0; i<pattern_block_size; ++i)
     {
         bool inv = true;
-        bool allow_ambiguous_as_invariant = !true;
+        bool allow_ambiguous_as_invariant = true;
         size_t taxon_index = 0;
 
         if ( using_ambiguous_characters == true )
@@ -751,17 +754,20 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
             {
                 inv = false;
             }
-            else if ( val.getNumberSetBits() > 1 && allow_ambiguous_as_invariant == true )
-            {
-
-                while ( val.getNumberSetBits() > 1 && taxon_index<length )
-                {
-                    val = ambiguous_char_matrix[taxon_index][i];
-                    ++taxon_index;
-                }
-            }
             else
             {
+                // if this char was ambiguous, then we need to move ahead until
+                // we find the first non-ambiguous character which we use as our
+                // reference character to test
+                if ( val.getNumberSetBits() > 1 && allow_ambiguous_as_invariant == true )
+                {
+                    
+                    while ( val.getNumberSetBits() > 1 && taxon_index<length )
+                    {
+                        val = ambiguous_char_matrix[taxon_index][i];
+                        ++taxon_index;
+                    }
+                }
                 invariant_site_index[i] = val.getFirstSetBit();
 
                 ++taxon_index;
@@ -778,6 +784,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
         }
         else
         {
+            
             while ( taxon_index<(length-1) && gap_matrix[taxon_index][i] == true  )
             {
                 ++taxon_index;
@@ -801,6 +808,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
         }
 
         site_invariant[i] = inv;
+        
     }
     
     // finally we resize the partial likelihood vectors to the new pattern counts
