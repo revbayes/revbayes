@@ -136,7 +136,7 @@ fi
 
     #################
     # generate git version number
-    ./generate_version_number.sh
+    bash generate_version_number.sh
     if [ -e ../../src/revlanguage/utils/GitVersion.cpp ] ; then
         cp ../../src/revlanguage/utils/GitVersion.cpp GitVersion_backup.cpp
     fi
@@ -153,7 +153,7 @@ fi
     fi
 
     echo "Running './regenerate.sh $(pwd)/$BUILD_DIR"
-    ./regenerate.sh $(pwd)/$BUILD_DIR
+    bash regenerate.sh $(pwd)/$BUILD_DIR
     cd ${BUILD_DIR}
     echo
     echo

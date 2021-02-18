@@ -16,6 +16,7 @@
 #define Printer_H
 
 #include <string>
+#include <limits>
 
 #include "StringUtilities.h"
 
@@ -23,12 +24,12 @@ namespace RevBayesCore {
     
     template <typename objType, int>
     // general case: objType is not derived from Printable
-    // calls copy constructor
+    // implements printing for a general object
     class Printer {
         
     public:
         //!< Printer the given object.
-        static void                     printForUser( const objType &a, std::ostream &o, const std::string & /*sep*/, int /*l*/, bool /*left*/) {
+        static void                     printForUser( const objType &a, std::ostream &o, const std::string & /*sep*/, int /*l*/, bool /*left*/ ) {
             
             long previousPrecision = o.precision();
             std::ios_base::fmtflags previousFlags = o.flags();
@@ -41,8 +42,9 @@ namespace RevBayesCore {
             o.setf( previousFlags );
             o.precision( previousPrecision );
         }
-        
-        static void                     printForSimpleStoring( const objType &a, std::ostream &o, const std::string & /*sep*/, int l, bool left )
+
+        // print with rounding
+        static void                     printForSimpleStoring( const objType &a, std::ostream &o, const std::string & /*sep*/, int l, bool left, bool flatten = true)
         {
             std::stringstream ss;
             ss << a;
@@ -53,10 +55,13 @@ namespace RevBayesCore {
             }
             o << s;
         }
-        
-        static void                     printForComplexStoring( const objType &a, std::ostream &o, const std::string & /*sep*/, int l, bool left )
+
+        // print without rounding
+        static void                     printForComplexStoring( const objType &a, std::ostream &o, const std::string & /*sep*/, int l, bool left, bool flatten = true )
         {
             std::stringstream ss;
+            // set precision of stringstream to max
+            ss.precision(std::numeric_limits<double>::digits10);
             ss << a;
             std::string s = ss.str();
             if ( l > 0 )
@@ -70,20 +75,18 @@ namespace RevBayesCore {
     
     template <typename objType>
     // T is derived from Printable
-    // calls clone
+    // calls printFor... for the corresponding object type
     class Printer<objType,1> {
         
     public:
         //!< Printer the given object.
         static void                     printForUser( const objType &a, std::ostream &o, const std::string &sep, int l, bool left ) { a.printForUser(o, sep, l, left); }
-        static void                     printForSimpleStoring( const objType &a, std::ostream &o, const std::string &sep, int l, bool left ) { a.printForSimpleStoring(o, sep, l, left); }
-        static void                     printForComplexStoring( const objType &a, std::ostream &o, const std::string &sep, int l, bool left ) { a.printForComplexStoring(o, sep, l, left); }
+        static void                     printForSimpleStoring( const objType &a, std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true) { a.printForSimpleStoring(o, sep, l, left, flatten); }
+        static void                     printForComplexStoring( const objType &a, std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true ) { a.printForComplexStoring(o, sep, l, left, flatten); }
 
     };
-    
+
 }
-
-
 
 #endif
 
