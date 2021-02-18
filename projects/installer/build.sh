@@ -47,7 +47,7 @@ else
   elif [ "${MY_OS}" == "Mac" ]; then
     #export CC=/usr/bin/clang
     #export CXX=/usr/bin/clang++
-    cmake .
+    cmake -D Boost_NO_BOOST_CMAKE:BOOL=ON .
   else
     cmake .
   fi
