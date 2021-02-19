@@ -616,27 +616,32 @@ double RbMath::incompleteBeta(double a, double b, double x) {
 	return value;
 }
 
+
 /*!
- * This function returns the incomplete gamma ratio I(x,alpha) where x is
- * the upper limit of the integration and alpha is the shape parameter.
+* This function returns the incomplete gamma function
+ * where x is the upper or lower limit of the integration
+ * and alpha is the shape parameter.
  *
  * \brief Incomplete gamma function.
  * \param alpha is the shape parameter of the gamma. 
  * \param x is the upper limit of integration. 
- * \return Returns -1 if in error and the incomplete gamma ratio otherwise. 
- * \throws Does not throw an error.
+ * \param regularized indicates the regularized incomplete gamma
+ * \param lower indicates x is the lower limit of integration, upper otherwise
+ * \return Returns the incomplete gamma function.
+ * \throws RbException on error
  * \see Bhattacharjee, G. P. 1970. The incomplete gamma integral. Applied 
  *      Statistics, 19:285-287.
  */
 
 
-double RbMath::incompleteGamma(double x, double alpha) {
+double RbMath::incompleteGamma(double x, double alpha, bool regularized, bool lower)
+{
 
     // (1) series expansion     if (alpha>x || x<=1)
     // (2) continued fraction   otherwise
     // RATNEST FORTRAN by
     // Bhattacharjee GP (1970) The incomplete gamma integral.  Applied Statistics,
-    // 19: 285-287 (AS32)
+    // 19: 285-287 (ASA032)
     
     double accurate = 1e-8, overflow = 1e30;
     double factor, gin, rn, a, b, an, dif, term;
@@ -652,7 +657,8 @@ double RbMath::incompleteGamma(double x, double alpha) {
         throw RbException(s.str());
     }
     
-    factor = exp(alpha * log(x) - x - RbMath::lnGamma(alpha));
+    double scale = regularized ? RbMath::lnGamma(alpha) : 0.0;
+    factor = exp(alpha * log(x) - x - scale );
     
     if (x > 1 && x >= alpha) {
         // continued fraction
@@ -709,7 +715,7 @@ double RbMath::incompleteGamma(double x, double alpha) {
         while (term > accurate);
         gin *= factor / alpha;
     }
-    return gin;
+    return lower ? gin : 1.0 - gin;
 
 }
 
