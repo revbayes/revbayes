@@ -503,7 +503,88 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::bootstrap( void )
     pattern_counts = bootstrapped_pattern_counts;
 
 }
+namespace RevBayesCore
+{
+inline void mark_ambiguous_and_missing_as_gap(AbstractHomologousDiscreteCharacterData& data, const vector<size_t>& site_indices, std::vector<TopologyNode*> nodes)
+{
+    for (auto& node: nodes)
+    {
+        if ( node->isTip() )
+        {
+            AbstractDiscreteTaxonData& taxon_data = data.getTaxonData( node->getName() );
+            for (auto site_index: site_indices)
+            {
+                DiscreteCharacterState &c = taxon_data.getCharacter(site_index);
 
+                if ( c.isAmbiguous() or  c.isMissingState() )
+                {
+                    c.setGapState( true );
+                }
+            }
+        }
+    }
+}
+
+inline void mark_unknown_as_gap(AbstractHomologousDiscreteCharacterData& data, const vector<size_t>& site_indices, std::vector<TopologyNode*> nodes)
+{
+    for (auto& node: nodes)
+    {
+        if ( node->isTip() )
+        {
+            AbstractDiscreteTaxonData& taxon_data = data.getTaxonData( node->getName() );
+            for (auto site_index: site_indices)
+            {
+                DiscreteCharacterState &c = taxon_data.getCharacter(site_index);
+
+                if ( c.getNumberOfStates() == c.getNumberObservedStates() or c.isMissingState())
+                {
+                    c.setGapState( true );
+                }
+            }
+        }
+    }
+}
+
+inline bool has_ambiguous_nongap_characters(AbstractHomologousDiscreteCharacterData& data, const vector<size_t>& site_indices, std::vector<TopologyNode*> nodes)
+{
+    for (auto& node: nodes)
+    {
+        if ( node->isTip() )
+        {
+            AbstractDiscreteTaxonData& taxon_data = data.getTaxonData( node->getName() );
+            for (auto site_index: site_indices)
+            {
+                DiscreteCharacterState &c = taxon_data.getCharacter(site_index);
+
+                if ( not c.isGapState() and (c.isAmbiguous() or c.isMissingState()) )
+                    return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+inline bool has_weighted_characters(AbstractHomologousDiscreteCharacterData& data, const vector<size_t>& site_indices, std::vector<TopologyNode*> nodes)
+{
+    for (auto& node: nodes)
+    {
+        if ( node->isTip() )
+        {
+            AbstractDiscreteTaxonData& taxon_data = data.getTaxonData( node->getName() );
+            for (auto site_index: site_indices)
+            {
+                DiscreteCharacterState &c = taxon_data.getCharacter(site_index);
+
+                if ( c.isWeighted() ) return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+}
 
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
@@ -531,79 +612,20 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     // some of the sites may have been excluded
     std::vector<size_t> site_indices = getIncludedSiteIndices();
 
-    // check whether there are ambiguous characters (besides gaps)
-    bool ambiguousCharacters = false;
-
     // find the unique site patterns and compute their respective frequencies
     std::vector<TopologyNode*> nodes = tau->getValue().getNodes();
-    for (size_t site = 0; site < num_sites; ++site)
-    {
 
-        for (std::vector<TopologyNode*>::iterator it = nodes.begin(); it != nodes.end(); ++it)
-        {
-            if ( (*it)->isTip() )
-            {
-                AbstractDiscreteTaxonData& taxon = value->getTaxonData( (*it)->getName() );
-                DiscreteCharacterState &c = taxon.getCharacter(site_indices[site]);
+    if (treatAmbiguousAsGaps)
+        mark_ambiguous_and_missing_as_gap(*value, site_indices, nodes);
 
-                // if we treat unknown characters as gaps and this is an unknown character then we change it
-                // because we might then have a pattern more
-                if ( treatAmbiguousAsGaps && (c.isAmbiguous() || c.isMissingState()) )
-                {
-                    c.setGapState( true );
-                }
-                else if ( treatUnknownAsGap && (c.getNumberOfStates() == c.getNumberObservedStates() || c.isMissingState()) )
-                {
-                    c.setGapState( true );
-                }
-                else if ( !c.isGapState() && (c.isAmbiguous() || c.isMissingState()) )
-                {
-                    ambiguousCharacters = true;
-                    break;
-                }
-            }
-        }
+    if (treatUnknownAsGap)
+        mark_unknown_as_gap(*value, site_indices, nodes);
 
-        // break the loop if there was an ambiguous character
-        if ( ambiguousCharacters )
-        {
-            break;
-        }
-    }
+    // set the global variable if we use ambiguous characters (besides gaps)
+    using_ambiguous_characters = has_ambiguous_nongap_characters(*value, site_indices, nodes);
 
-    // set the global variable if we use ambiguous characters
-    using_ambiguous_characters = ambiguousCharacters;
-
-    // check whether there are weighted characters
-    bool weightedCharacters = false;
-
-    for (size_t site = 0; site < num_sites; ++site)
-    {
-
-        for (std::vector<TopologyNode*>::iterator it = nodes.begin(); it != nodes.end(); ++it)
-        {
-            if ( (*it)->isTip() )
-            {
-                AbstractDiscreteTaxonData& taxon = value->getTaxonData( (*it)->getName() );
-                DiscreteCharacterState &c = taxon.getCharacter(site_indices[site]);
-
-                if ( c.isWeighted() )
-                {
-                    weightedCharacters = true;
-                    break;
-                }
-            }
-        }
-
-        // break the loop if there was an ambiguous character
-        if ( weightedCharacters )
-        {
-            break;
-        }
-    }
-
-    // set the global variable if we use ambiguous characters
-    using_weighted_characters = weightedCharacters;
+    // set the global variable if we use weighted characters
+    using_weighted_characters = has_weighted_characters(*value, site_indices, nodes);
 
     std::vector<bool> unique(num_sites, true);
     std::vector<size_t> indexOfSitePattern;
@@ -617,11 +639,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
         {
             // create the site pattern
             std::string pattern = "";
-            for (std::vector<TopologyNode*>::iterator it = nodes.begin(); it != nodes.end(); ++it)
+            for (auto& node: nodes)
             {
-                if ( (*it)->isTip() )
+                if ( node->isTip() )
                 {
-                    AbstractDiscreteTaxonData& taxon = value->getTaxonData( (*it)->getName() );
+                    AbstractDiscreteTaxonData& taxon = value->getTaxonData( node->getName() );
                     CharacterState &c = taxon.getCharacter(site_indices[site]);
                     pattern += c.getStringValue();
                 }
@@ -684,9 +706,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     std::vector<size_t> process_pattern_counts = std::vector<size_t>(pattern_block_size,0);
     taxon_name_2_tip_index_map.clear();
     // allocate and fill the cells of the matrices
-    for (std::vector<TopologyNode*>::iterator it = nodes.begin(); it != nodes.end(); ++it)
+    for (auto& the_node: nodes)
     {
-        TopologyNode *the_node = *it;
         if ( the_node->isTip() )
         {
             size_t node_index = the_node->getIndex();
