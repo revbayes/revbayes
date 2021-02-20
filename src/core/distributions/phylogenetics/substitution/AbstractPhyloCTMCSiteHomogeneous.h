@@ -3429,10 +3429,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
                 {
                     rv[site] = log( oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
                 }
-                else
-                {
-                    throw RbException("Used a site that was excluded.");
-                }
 
             }
 
