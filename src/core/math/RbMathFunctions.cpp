@@ -701,7 +701,7 @@ double RbMath::incompleteGamma(double x, double alpha, bool regularized, bool lo
                 pn3 /= overflow;
             }
         } while (true);
-	gin = 1.0 - factor * gin;
+        gin = 1.0 - factor * gin;
     } else {
         // series expansion
         gin = 1;
