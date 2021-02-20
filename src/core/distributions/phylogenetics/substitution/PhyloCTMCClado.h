@@ -1485,7 +1485,13 @@ double RevBayesCore::PhyloCTMCClado<charType>::sumRootLikelihood( void )
                 
                 if ( this->site_invariant[site] )
                 {
-                    sumPartialProbs += log( p_inv * f[ this->invariant_site_index[site] ] * exp(this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site]) + oneMinusPInv * per_mixture_Likelihoods[site] / this->num_site_rates ) * *patterns;
+                    double ftotal = 0.0;
+                    for ( size_t c = 0; c < this->invariant_site_index[site].size(); c++ )
+                    {
+                        ftotal += f[this->invariant_site_index[site][c]];
+                    }
+
+                    sumPartialProbs += log( p_inv * ftotal * exp(this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site]) + oneMinusPInv * per_mixture_Likelihoods[site] / this->num_site_rates ) * *patterns;
                 }
                 else
                 {
@@ -1499,7 +1505,13 @@ double RevBayesCore::PhyloCTMCClado<charType>::sumRootLikelihood( void )
                 
                 if ( this->site_invariant[site] )
                 {
-                    sumPartialProbs += log( p_inv * f[ this->invariant_site_index[site] ]  + oneMinusPInv * per_mixture_Likelihoods[site] / this->num_site_rates ) * *patterns;
+                    double ftotal = 0.0;
+                    for ( size_t c = 0; c < this->invariant_site_index[site].size(); c++ )
+                    {
+                        ftotal += f[this->invariant_site_index[site][c]];
+                    }
+
+                    sumPartialProbs += log( p_inv * ftotal + oneMinusPInv * per_mixture_Likelihoods[site] / this->num_site_rates ) * *patterns;
                 }
                 else
                 {
