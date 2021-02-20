@@ -86,9 +86,8 @@ void RevBayesCore::DiscretizeGammaFunction::update( void )
         for (int i=0; i<nCats-1; i++) 
             (*value)[i] = RbStatistics::ChiSquare::quantile((i + 1.0) / nCats, 2.0 * a) / (2.0 * b);
         /* calculate the cumulative values */
-        double lnGammaValue = RbMath::lnGamma(a + 1.0);
         for (int i=0; i<nCats-1; i++) 
-            (*value)[i] = RbMath::incompleteGamma((*value)[i] * b, a + 1.0, lnGammaValue);
+            (*value)[i] = RbMath::incompleteGamma((*value)[i] * b, a + 1.0);
         (*value)[nCats-1] = 1.0;
         /* calculate the relative values and rescale */
         for (int i=nCats-1; i>0; i--){

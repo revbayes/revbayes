@@ -113,8 +113,7 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
         }
         else
         {
-            double lower_incomplete_gamma = RbMath::incompleteGamma( integral_limit, ngc-2.0, RbMath::lnGamma( ngc-2.0 ) ) * RbMath::gamma( ngc-2.0 );
-            upper_incomplete_gamma = RbMath::gamma( ngc-2.0 ) - lower_incomplete_gamma;
+            upper_incomplete_gamma = RbMath::incompleteGamma( integral_limit, ngc-2.0, false, false );
         }
 
         ln_prob_coal += RbConstants::LN2 + (( -ngc+2 ) * log( fn )) + log( upper_incomplete_gamma ) - log( theta_max );
