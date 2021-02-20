@@ -716,12 +716,10 @@ double RbMath::incompleteGamma(double x, double alpha, bool regularized, bool lo
         gin *= factor / alpha;
     }
 
-    if ( lower = false )
-    {
-        gin = 1.0 - gin;
-    }
-
-    return regularized ? gin : exp(log(gin) + scale);
+    gin = lower ? gin : 1.0 - gin;
+    gin = regularized ? gin : exp(log(gin) + scale);
+	
+    return gin;
 }
 
 
