@@ -43,9 +43,9 @@ class DagNode;
         void                                            initFromFile( const std::string &dir, const std::string &fn );              //!< Read and resurrect this object from a file in its default format.
         void                                            initFromString( const std::string &s );                                     //!< Serialize (resurrect) the object from a string value
         void                                            writeToFile(const std::string &dir, const std::string &fn) const;           //!< Write this object into a file in its default format.
-        void                                            printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const;                    //!< print object for user (in user-formatted way)
-        void                                            printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left ) const;           //!< print object for user (in user-formatted way)
-        void                                            printForComplexStoring( std::ostream &o, const std::string &sep, int l, bool left ) const;          //!< print object for user (in user-formatted way)
+        void                                            printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const;                                  //!< print object for user (in user-formatted way)
+        void                                            printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const;           //!< print object with standard rounding
+        void                                            printForComplexStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const;          //!< print object with maximum precision
 
         // CharacterData functions
         void                                            concatenate(const ContinuousCharacterData &d, std::string type = "");                              //!< Concatenate data matrices

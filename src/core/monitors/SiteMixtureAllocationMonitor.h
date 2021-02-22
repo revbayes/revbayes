@@ -128,7 +128,7 @@ void SiteMixtureAllocationMonitor<characterType>::monitorVariables(unsigned long
 	// TODO: come up with a way to do this that doesn't involve ancestral states
 	AbstractPhyloCTMCSiteHomogeneous<characterType> *dist_ctmc = static_cast<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
 	const TypedDagNode<Tree> *tree = dist_ctmc->getTree();
-	size_t num_sites = dist_ctmc->getValue().getNumberOfCharacters();
+	size_t num_sites = dist_ctmc->getValue().getNumberOfIncludedCharacters();
 	size_t num_nodes = tree->getValue().getNumberOfNodes();
 	std::vector<std::vector<characterType> > startStates(num_nodes,std::vector<characterType>(num_sites));
 	std::vector<std::vector<characterType> > endStates(num_nodes,std::vector<characterType>(num_sites));

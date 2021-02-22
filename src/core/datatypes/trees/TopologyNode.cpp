@@ -6,8 +6,10 @@
 #include <map>
 #include <set>
 #include <string>
+#include <sstream>
 #include <utility>
 #include <vector>
+#include <limits>
 
 #include "Clade.h"
 #include "RbException.h"
@@ -340,14 +342,22 @@ void TopologyNode::addNodeParameters(std::string const &n, const std::vector<std
  * Build newick string.
  * If simmap = true build a newick string compatible with SIMMAP and phytools.
  */
-std::string TopologyNode::buildNewickString( bool simmap = false )
+std::string TopologyNode::buildNewickString( bool simmap = false, bool round = true )
 {
 
     // create the newick string
     std::stringstream o;
 
     std::fixed(o);
-    o.precision( 6 );
+    // depending on the value of round, get standard precision or maximum
+    if (round)
+    {
+        o.precision( 6 );
+    }
+    else
+    {
+        o.precision( std::numeric_limits<double>::digits10 );
+    }
 
     std::vector<std::string> fossil_comments;
 
@@ -386,7 +396,7 @@ std::string TopologyNode::buildNewickString( bool simmap = false )
                     o << ",";
                 }
                 j++;
-                o << children[i]->buildNewickString( simmap );
+                o << children[i]->buildNewickString( simmap, round );
             }
         }
 
@@ -537,10 +547,10 @@ TopologyNode* TopologyNode::clone(void) const
 
 
 
-std::string TopologyNode::computeNewick( void )
+std::string TopologyNode::computeNewick( bool round )
 {
 
-    return buildNewickString();
+    return buildNewickString(false, round);
 }
 
 
@@ -591,9 +601,9 @@ std::string TopologyNode::computePlainNewick( void ) const
 }
 
 
-std::string TopologyNode::computeSimmapNewick( void )
+std::string TopologyNode::computeSimmapNewick( bool round )
 {
-    return buildNewickString( true );
+    return buildNewickString( true, round );
 }
 
 

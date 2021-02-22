@@ -112,7 +112,7 @@ void CladogeneticSpeciationRateMatrix::printForUser(std::ostream &o, const std::
 
 
 
-void CladogeneticSpeciationRateMatrix::printForSimpleStoring(std::ostream &o, const std::string &sep, int l, bool left) const
+void CladogeneticSpeciationRateMatrix::printForSimpleStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten) const
 {
     /*
     
@@ -138,7 +138,7 @@ void CladogeneticSpeciationRateMatrix::printForSimpleStoring(std::ostream &o, co
 
 
 
-void CladogeneticSpeciationRateMatrix::printForComplexStoring(std::ostream &o, const std::string &sep, int l, bool left) const
+void CladogeneticSpeciationRateMatrix::printForComplexStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten) const
 {
     /*
     o << "[ ";

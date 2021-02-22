@@ -665,10 +665,10 @@ const TopologyNode& Tree::getMrca(const TopologyNode &n) const
 }
 
 
-std::string Tree::getNewickRepresentation() const
+std::string Tree::getNewickRepresentation(bool round ) const
 {
 
-    return root->computeNewick();
+    return root->computeNewick( round );
 }
 
 
@@ -859,9 +859,9 @@ const TopologyNode& Tree::getRoot(void) const
  * Get the tree and character history in newick format
  * compatible with SIMMAP and phytools
  */
-std::string Tree::getSimmapNewickRepresentation() const
+std::string Tree::getSimmapNewickRepresentation(bool round) const
 {
-    return root->computeSimmapNewick();
+    return root->computeSimmapNewick(round);
 }
 
 
@@ -1341,6 +1341,45 @@ void Tree::orderNodesByIndex( void )
 
     nodes = nodes_copy;
 
+}
+
+// Prints tree for user (rounding)
+void Tree::printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const {
+    long previousPrecision = o.precision();
+    std::ios_base::fmtflags previousFlags = o.flags();
+
+    std::fixed( o );
+    o.precision( 3 );
+
+    o << *this;
+    
+    o.setf( previousFlags );
+    o.precision( previousPrecision );
+}
+
+// Prints tree for simple storing (rounding)
+void Tree::printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const {
+    std::stringstream ss;
+    ss << *this;
+    std::string s = ss.str();
+    if ( l > 0 ) 
+    {
+        StringUtilities::fillWithSpaces(s, l, left);
+    }
+    o << s;
+}
+
+// Prints tree for complex storing (no rounding; mostly checkpointing)
+void Tree::printForComplexStoring ( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const {
+    std::stringstream ss;
+
+    // call getNewickRepresentation with round == FALSE
+    ss << this->getNewickRepresentation( false );
+    std::string s = ss.str();
+    if (l > 0) {
+        StringUtilities::fillWithSpaces(s, l, left);
+    }
+    o << s;
 }
 
 void Tree::pruneTaxa(const RbBitSet& prune_map )

@@ -226,7 +226,7 @@ void VariableMonitor::monitorVariables(unsigned long gen)
         DagNode *node = *i;
 
         // print the value
-        node->printValue(out_stream, separator, -1, false, false, flatten);
+        node->printValue(out_stream, separator, -1, false, false, true, flatten);
     }
 
 }

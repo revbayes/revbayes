@@ -290,7 +290,7 @@ void RateGenerator::printForUser(std::ostream &o, const std::string &sep, int l,
 
 
 
-void RateGenerator::printForSimpleStoring(std::ostream &o, const std::string &sep, int l, bool left) const
+void RateGenerator::printForSimpleStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten) const
 {
     
     // print the RbMatrix with each column of equal width and each column centered on the decimal
@@ -314,7 +314,7 @@ void RateGenerator::printForSimpleStoring(std::ostream &o, const std::string &se
 
 
 
-void RateGenerator::printForComplexStoring(std::ostream &o, const std::string &sep, int l, bool left) const
+void RateGenerator::printForComplexStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten) const
 {
     
     o << "[ ";

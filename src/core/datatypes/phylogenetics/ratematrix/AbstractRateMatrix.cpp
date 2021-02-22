@@ -199,6 +199,16 @@ std::vector<double> AbstractRateMatrix::calculateStationaryFrequencies(void) con
     return pi;
 }
 
+/** This function computes the transition probability matrix that is used for
+ stochastic mapping. In general, we use the matrix uniformization method
+ for stochastic mapping, which requires P(t) = exp(Qt). This function may be
+ overridden if an alternative method is needed to compute P(t) for the model.
+ See RateMatrix_DECRateMatrix for an example.
+ */
+void AbstractRateMatrix::calculateTransitionProbabilitiesForStochasticMapping(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
+{
+    calculateTransitionProbabilities(startAge, endAge, rate, P);
+}
 
 
 /** This function checks that the rate matrix is time reversible. It takes as
@@ -364,7 +374,7 @@ bool AbstractRateMatrix::simulateStochasticMapping(double startAge, double endAg
 
     // transition probabilities
     TransitionProbabilityMatrix P(num_states);
-    calculateTransitionProbabilities(startAge, endAge, rate, P);
+    calculateTransitionProbabilitiesForStochasticMapping(startAge, endAge, rate, P);
 //    exponentiateMatrixByScalingAndSquaring(branch_length * rate, P);
     stochastic_matrix = std::vector<MatrixReal>();
 

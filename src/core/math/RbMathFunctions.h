@@ -32,8 +32,7 @@ namespace RevBayesCore {
         double                      gamma(double x);                                                                //!< Calculate the Gamma function 
         double                      gamma_old(double x);                                                            //!< Calculate the Gamma function 
         double                      incompleteBeta(double a, double b, double x);                                   //!< Xxx 
-        double                      incompleteGamma(double x, double alpha, double scale);                          //!< Xxx 
-        double                      incompleteGamma_old(double x, double alpha, double scale);                      //!< Xxx 
+        double                      incompleteGamma(double x, double alpha, bool regularized=true, bool lower=true);//!< Xxx
         double                      lnGamma_sign(double a, int *sgn);                                               //!< Calculate the log of the Gamma function
         double                      lnGamma(double a);                                                              //!< Calculate the log of the Gamma function
         double                      lnGamma_old(double a);                                                          //!< Calculate the log of the Gamma function

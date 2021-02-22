@@ -178,7 +178,7 @@ namespace RevBayesCore {
         std::vector<std::vector<bool> >                                     gap_matrix;
         std::vector<size_t>                                                 pattern_counts;
         std::vector<bool>                                                   site_invariant;
-        std::vector<size_t>                                                 invariant_site_index;
+        std::vector<std::vector<size_t> >                                   invariant_site_index;
         size_t                                                              num_patterns;
         bool                                                                compressed;
         std::vector<size_t>                                                 site_pattern;    // an array that keeps track of which pattern is used for each site
@@ -294,7 +294,7 @@ char_matrix(),
 gap_matrix(),
 pattern_counts(),
 site_invariant( num_sites, false ),
-invariant_site_index( num_sites, 0 ),
+invariant_site_index( num_sites ),
 num_patterns( num_sites ),
 compressed( c ),
 site_pattern( std::vector<size_t>(num_sites, 0) ),
@@ -503,7 +503,88 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::bootstrap( void )
     pattern_counts = bootstrapped_pattern_counts;
 
 }
+namespace RevBayesCore
+{
+inline void mark_ambiguous_and_missing_as_gap(AbstractHomologousDiscreteCharacterData& data, const vector<size_t>& site_indices, std::vector<TopologyNode*> nodes)
+{
+    for (auto& node: nodes)
+    {
+        if ( node->isTip() )
+        {
+            AbstractDiscreteTaxonData& taxon_data = data.getTaxonData( node->getName() );
+            for (auto site_index: site_indices)
+            {
+                DiscreteCharacterState &c = taxon_data.getCharacter(site_index);
 
+                if ( c.isAmbiguous() or  c.isMissingState() )
+                {
+                    c.setGapState( true );
+                }
+            }
+        }
+    }
+}
+
+inline void mark_unknown_as_gap(AbstractHomologousDiscreteCharacterData& data, const vector<size_t>& site_indices, std::vector<TopologyNode*> nodes)
+{
+    for (auto& node: nodes)
+    {
+        if ( node->isTip() )
+        {
+            AbstractDiscreteTaxonData& taxon_data = data.getTaxonData( node->getName() );
+            for (auto site_index: site_indices)
+            {
+                DiscreteCharacterState &c = taxon_data.getCharacter(site_index);
+
+                if ( c.getNumberOfStates() == c.getNumberObservedStates() or c.isMissingState())
+                {
+                    c.setGapState( true );
+                }
+            }
+        }
+    }
+}
+
+inline bool has_ambiguous_nongap_characters(AbstractHomologousDiscreteCharacterData& data, const vector<size_t>& site_indices, std::vector<TopologyNode*> nodes)
+{
+    for (auto& node: nodes)
+    {
+        if ( node->isTip() )
+        {
+            AbstractDiscreteTaxonData& taxon_data = data.getTaxonData( node->getName() );
+            for (auto site_index: site_indices)
+            {
+                DiscreteCharacterState &c = taxon_data.getCharacter(site_index);
+
+                if ( not c.isGapState() and (c.isAmbiguous() or c.isMissingState()) )
+                    return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+inline bool has_weighted_characters(AbstractHomologousDiscreteCharacterData& data, const vector<size_t>& site_indices, std::vector<TopologyNode*> nodes)
+{
+    for (auto& node: nodes)
+    {
+        if ( node->isTip() )
+        {
+            AbstractDiscreteTaxonData& taxon_data = data.getTaxonData( node->getName() );
+            for (auto site_index: site_indices)
+            {
+                DiscreteCharacterState &c = taxon_data.getCharacter(site_index);
+
+                if ( c.isWeighted() ) return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+}
 
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
@@ -531,79 +612,20 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     // some of the sites may have been excluded
     std::vector<size_t> site_indices = getIncludedSiteIndices();
 
-    // check whether there are ambiguous characters (besides gaps)
-    bool ambiguousCharacters = false;
-
     // find the unique site patterns and compute their respective frequencies
     std::vector<TopologyNode*> nodes = tau->getValue().getNodes();
-    for (size_t site = 0; site < num_sites; ++site)
-    {
 
-        for (std::vector<TopologyNode*>::iterator it = nodes.begin(); it != nodes.end(); ++it)
-        {
-            if ( (*it)->isTip() )
-            {
-                AbstractDiscreteTaxonData& taxon = value->getTaxonData( (*it)->getName() );
-                DiscreteCharacterState &c = taxon.getCharacter(site_indices[site]);
+    if (treatAmbiguousAsGaps)
+        mark_ambiguous_and_missing_as_gap(*value, site_indices, nodes);
 
-                // if we treat unknown characters as gaps and this is an unknown character then we change it
-                // because we might then have a pattern more
-                if ( treatAmbiguousAsGaps && (c.isAmbiguous() || c.isMissingState()) )
-                {
-                    c.setGapState( true );
-                }
-                else if ( treatUnknownAsGap && (c.getNumberOfStates() == c.getNumberObservedStates() || c.isMissingState()) )
-                {
-                    c.setGapState( true );
-                }
-                else if ( !c.isGapState() && (c.isAmbiguous() || c.isMissingState()) )
-                {
-                    ambiguousCharacters = true;
-                    break;
-                }
-            }
-        }
+    if (treatUnknownAsGap)
+        mark_unknown_as_gap(*value, site_indices, nodes);
 
-        // break the loop if there was an ambiguous character
-        if ( ambiguousCharacters )
-        {
-            break;
-        }
-    }
+    // set the global variable if we use ambiguous characters (besides gaps)
+    using_ambiguous_characters = has_ambiguous_nongap_characters(*value, site_indices, nodes);
 
-    // set the global variable if we use ambiguous characters
-    using_ambiguous_characters = ambiguousCharacters;
-
-    // check whether there are weighted characters
-    bool weightedCharacters = false;
-
-    for (size_t site = 0; site < num_sites; ++site)
-    {
-
-        for (std::vector<TopologyNode*>::iterator it = nodes.begin(); it != nodes.end(); ++it)
-        {
-            if ( (*it)->isTip() )
-            {
-                AbstractDiscreteTaxonData& taxon = value->getTaxonData( (*it)->getName() );
-                DiscreteCharacterState &c = taxon.getCharacter(site_indices[site]);
-
-                if ( c.isWeighted() )
-                {
-                    weightedCharacters = true;
-                    break;
-                }
-            }
-        }
-
-        // break the loop if there was an ambiguous character
-        if ( weightedCharacters )
-        {
-            break;
-        }
-    }
-
-    // set the global variable if we use ambiguous characters
-    using_weighted_characters = weightedCharacters;
+    // set the global variable if we use weighted characters
+    using_weighted_characters = has_weighted_characters(*value, site_indices, nodes);
 
     std::vector<bool> unique(num_sites, true);
     std::vector<size_t> indexOfSitePattern;
@@ -617,11 +639,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
         {
             // create the site pattern
             std::string pattern = "";
-            for (std::vector<TopologyNode*>::iterator it = nodes.begin(); it != nodes.end(); ++it)
+            for (auto& node: nodes)
             {
-                if ( (*it)->isTip() )
+                if ( node->isTip() )
                 {
-                    AbstractDiscreteTaxonData& taxon = value->getTaxonData( (*it)->getName() );
+                    AbstractDiscreteTaxonData& taxon = value->getTaxonData( node->getName() );
                     CharacterState &c = taxon.getCharacter(site_indices[site]);
                     pattern += c.getStringValue();
                 }
@@ -684,9 +706,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     std::vector<size_t> process_pattern_counts = std::vector<size_t>(pattern_block_size,0);
     taxon_name_2_tip_index_map.clear();
     // allocate and fill the cells of the matrices
-    for (std::vector<TopologyNode*>::iterator it = nodes.begin(); it != nodes.end(); ++it)
+    for (auto& the_node: nodes)
     {
-        TopologyNode *the_node = *it;
         if ( the_node->isTip() )
         {
             size_t node_index = the_node->getIndex();
@@ -694,8 +715,14 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
             AbstractDiscreteTaxonData& taxon = value->getTaxonData( the_node->getName() );
 
             // resize the column
-            ambiguous_char_matrix[node_index].resize(pattern_block_size);
-            char_matrix[node_index].resize(pattern_block_size);
+            if ( using_ambiguous_characters == true )
+            {
+                ambiguous_char_matrix[node_index].resize(pattern_block_size);
+            }
+            else
+            {
+                char_matrix[node_index].resize(pattern_block_size);
+            }
             gap_matrix[node_index].resize(pattern_block_size);
             for (size_t patternIndex = 0; patternIndex < pattern_block_size; ++patternIndex)
             {
@@ -729,67 +756,60 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
 
     }
 
+    bool allow_ambiguous_as_invariant = true;
+
     // now copy back the pattern count vector
     pattern_counts = process_pattern_counts;
 
     // reset the vector if a site is invariant
     site_invariant.resize( pattern_block_size );
+    invariant_site_index.clear();
     invariant_site_index.resize( pattern_block_size );
     size_t length = char_matrix.size();
     for (size_t i=0; i<pattern_block_size; ++i)
     {
         bool inv = true;
-        bool allow_ambiguous_as_invariant = true;
         size_t taxon_index = 0;
+
+        while ( taxon_index<(length-1) && gap_matrix[taxon_index][i] == true  )
+        {
+            ++taxon_index;
+        }
 
         if ( using_ambiguous_characters == true )
         {
             RbBitSet val = ambiguous_char_matrix[taxon_index][i];
 
-            if ( val.getNumberSetBits() > 1 && allow_ambiguous_as_invariant == false )
+            for (; taxon_index<length; ++taxon_index)
             {
-                inv = false;
-            }
-            else if ( val.getNumberSetBits() > 1 && allow_ambiguous_as_invariant == true )
-            {
-
-                while ( val.getNumberSetBits() > 1 && taxon_index<length )
+                if ( gap_matrix[taxon_index][i] == false )
                 {
-                    val = ambiguous_char_matrix[taxon_index][i];
-                    ++taxon_index;
+                    val &= ambiguous_char_matrix[taxon_index][i];
+                }
+
+                if (   ( allow_ambiguous_as_invariant == true  &&  val.getNumberSetBits() == 0 && gap_matrix[taxon_index][i] == false)
+                    || ( allow_ambiguous_as_invariant == false && (val.getNumberSetBits() == 0 || gap_matrix[taxon_index][i] == true ) ) )
+                {
+                    inv = false;
+                    break;
                 }
             }
-            else
-            {
-                invariant_site_index[i] = val.getFirstSetBit();
 
-                ++taxon_index;
-                for (; taxon_index<length; ++taxon_index)
+            for ( size_t c = 0; c < this->num_chars; c++ )
+            {
+                if ( val.isSet(c) )
                 {
-                    if (   ( allow_ambiguous_as_invariant == true  &&  val != ambiguous_char_matrix[taxon_index][i] && gap_matrix[taxon_index][i] == false)
-                        || ( allow_ambiguous_as_invariant == false && (val != ambiguous_char_matrix[taxon_index][i] || gap_matrix[taxon_index][i] == true ) ) )
-                    {
-                        inv = false;
-                        break;
-                    }
+                    invariant_site_index[i].push_back(c);
                 }
             }
         }
         else
         {
-            while ( taxon_index<(length-1) && gap_matrix[taxon_index][i] == true  )
-            {
-                ++taxon_index;
-            }
-
             unsigned long c = char_matrix[taxon_index][i];
-            invariant_site_index[i] = c;
+            invariant_site_index[i].push_back(c);
 
             for (; taxon_index<length; ++taxon_index)
             {
-//                if (  (invariant_site_index[i] != char_matrix[taxon_index][i] || gap_matrix[taxon_index][i] == true) )
-//                {
-
                 if (   ( allow_ambiguous_as_invariant == true  &&  c != char_matrix[taxon_index][i] && gap_matrix[taxon_index][i] == false)
                     || ( allow_ambiguous_as_invariant == false && (c != char_matrix[taxon_index][i] || gap_matrix[taxon_index][i] == true ) ) )
                 {
@@ -3369,44 +3389,40 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
 
             if ( RbSettings::userSettings().getUseScaling() == true )
             {
-
-                if ( this->site_invariant[site] == true  && this->invariant_site_index[site] < this->num_chars )
+                if ( this->site_invariant[site] == true )
                 {
-//                    rv[site] = log( prob_invariant * f[ this->invariant_site_index[site] ] * exp(this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site]) + oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
-                    rv[site] = log( prob_invariant * f[ this->invariant_site_index[site] ] + oneMinusPInv * per_mixture_Likelihoods[site] / exp(this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site]) ) * *patterns;
+                    double ftotal = 0.0;
+                    for ( size_t c = 0; c < this->invariant_site_index[site].size(); c++ )
+                    {
+                        ftotal += f[this->invariant_site_index[site][c]];
+                    }
+
+                    rv[site] = log( prob_invariant * ftotal + oneMinusPInv * per_mixture_Likelihoods[site] / exp(this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site]) ) * *patterns;
                 }
-                else if ( this->site_invariant[site] == false )
+                else
                 {
                     rv[site] = log( oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
                     rv[site] -= this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] * *patterns;
                 }
 
-//                rv[site] = log( oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
-//                rv[site] -= this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] * *patterns;
-//
-//                if ( this->site_invariant[site] == true )
-//                {
-//                    rv[site] += log( prob_invariant * f[ this->invariant_site_index[site] ] ) * *patterns;
-//                }
-
             }
             else // no scaling
             {
 
-                if ( this->site_invariant[site] == true && this->invariant_site_index[site] < this->num_chars )
+                if ( this->site_invariant[site] == true )
                 {
-                    rv[site] = log( prob_invariant * f[ this->invariant_site_index[site] ]  + oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
+                    double ftotal = 0.0;
+                    for ( size_t c = 0; c < this->invariant_site_index[site].size(); c++ )
+                    {
+                        ftotal += f[this->invariant_site_index[site][c]];
+                    }
+
+                    rv[site] = log( prob_invariant * ftotal  + oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
                 }
-                else if ( this->site_invariant[site] == false )
+                else
                 {
                     rv[site] = log( oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
                 }
-
-//                rv[site] = log( oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
-//                if ( this->site_invariant[site] == true )
-//                {
-//                    rv[site] += log( prob_invariant * f[ this->invariant_site_index[site] ] ) * *patterns;
-//                }
 
             }
 
@@ -3519,11 +3535,17 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
             for (size_t matrix = 0; matrix < num_site_matrices; ++matrix)
             {
                 // the first rate category is the invariant
-                if ( this->site_invariant[site] == true && this->invariant_site_index[site] < this->num_chars )
+                if ( this->site_invariant[site] == true )
                 {
-                    rv[site][matrix] = log( prob_invariant * ff[matrix][ this->invariant_site_index[site] ] * matrix_probs[matrix] ) * *patterns;
+                    double ftotal = 0.0;
+                    for ( size_t c = 0; c < this->invariant_site_index[site].size(); c++ )
+                    {
+                        ftotal += f[this->invariant_site_index[site][c]];
+                    }
+
+                    rv[site][matrix] = log( prob_invariant * ftotal * matrix_probs[matrix] ) * *patterns;
                 }
-                else if ( this->site_invariant[site] == false )
+                else
                 {
                     rv[site][matrix] = RbConstants::Double::neginf;
                 }
@@ -3668,11 +3690,17 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
         for (size_t site = 0; site < pattern_block_size; ++site, ++patterns)
         {
             // the first rate category is the invariant
-            if ( this->site_invariant[site] == true && this->invariant_site_index[site] < this->num_chars )
+            if ( this->site_invariant[site] == true )
             {
-                rv[site][0] = log( prob_invariant * f[ this->invariant_site_index[site] ] ) * *patterns;
+                double ftotal = 0.0;
+                for ( size_t c = 0; c < this->invariant_site_index[site].size(); c++ )
+                {
+                    ftotal += f[this->invariant_site_index[site][c]];
+                }
+
+                rv[site][0] = log( prob_invariant * ftotal ) * *patterns;
             }
-            else if ( this->site_invariant[site] == false )
+            else
             {
                 rv[site][0] = RbConstants::Double::neginf;
             }

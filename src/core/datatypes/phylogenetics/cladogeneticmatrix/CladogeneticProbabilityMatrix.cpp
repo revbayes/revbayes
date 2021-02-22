@@ -142,7 +142,7 @@ void CladogeneticProbabilityMatrix::printForUser(std::ostream &o, const std::str
 
 
 
-void CladogeneticProbabilityMatrix::printForSimpleStoring(std::ostream &o, const std::string &sep, int l, bool left) const
+void CladogeneticProbabilityMatrix::printForSimpleStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten) const
 {
     /*
     
@@ -168,7 +168,7 @@ void CladogeneticProbabilityMatrix::printForSimpleStoring(std::ostream &o, const
 
 
 
-void CladogeneticProbabilityMatrix::printForComplexStoring(std::ostream &o, const std::string &sep, int l, bool left) const
+void CladogeneticProbabilityMatrix::printForComplexStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten) const
 {
     /*
     o << "[ ";
