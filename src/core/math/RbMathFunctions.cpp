@@ -656,9 +656,9 @@ double RbMath::incompleteGamma(double x, double alpha, bool regularized, bool lo
         s << "Cannot compute incomplete gamma function for x = " << x << ", alpha = " << alpha;
         throw RbException(s.str());
     }
-    
-    double scale = regularized ? RbMath::lnGamma(alpha) : 0.0;
-    factor = exp(alpha * log(x) - x - scale );
+
+    double scale = RbMath::lnGamma(alpha);
+    factor = exp(alpha * log(x) - x - scale);
     
     if (x > 1 && x >= alpha) {
         // continued fraction
@@ -701,7 +701,7 @@ double RbMath::incompleteGamma(double x, double alpha, bool regularized, bool lo
                 pn3 /= overflow;
             }
         } while (true);
-        gin = 1 - factor * gin;
+        gin = 1.0 - factor * gin;
     } else {
         // series expansion
         gin = 1;
@@ -715,8 +715,11 @@ double RbMath::incompleteGamma(double x, double alpha, bool regularized, bool lo
         while (term > accurate);
         gin *= factor / alpha;
     }
-    return lower ? gin : 1.0 - gin;
 
+    gin = lower ? gin : 1.0 - gin;
+    gin = regularized ? gin : exp(log(gin) + scale);
+	
+    return gin;
 }
 
 
