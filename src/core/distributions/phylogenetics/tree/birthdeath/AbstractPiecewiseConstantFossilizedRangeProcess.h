@@ -66,7 +66,7 @@ namespace RevBayesCore {
         double                                          p(size_t i, double t) const;
         virtual double                                  q(size_t i, double t, bool tilde = false) const;
         virtual double                                  H(size_t i, double x, double t) const;
-        virtual double                                  Z(size_t k, size_t i, double x, double t, bool integrate) const;
+        virtual double                                  Z(size_t k, size_t i, double x, double t) const;
 
         virtual void                                    updateIntervals() const;
 
@@ -84,8 +84,7 @@ namespace RevBayesCore {
         const TypedDagNode<double >*                    homogeneous_rho;                                       //!< The homogeneous speciation rates.
         const TypedDagNode<RbVector<double> >*          timeline;                                              //!< The times of the instantaneous sampling events.
 
-        const TypedDagNode<long>*                       fossil_count;                                          //!< The total number of fossil observations.
-        const TypedDagNode<HomologousDiscreteCharacterData<NaturalNumbersState> >* fossil_count_data;          //!< The number of fossil observations, per species/interval as character data.
+        const TypedDagNode<AbstractHomologousDiscreteCharacterData>* fossil_count_data;                        //!< The number of fossil observations, per species/interval as character data.
 
         mutable std::vector<double>                     birth;
         mutable std::vector<double>                     death;

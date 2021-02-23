@@ -50,7 +50,6 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
     heterogeneous_lambda           = NULL;
     heterogeneous_mu               = NULL;
     heterogeneous_psi              = NULL;
-    fossil_count                   = NULL;
     fossil_count_data              = NULL;
 
     RbException no_timeline_err = RbException("No time intervals provided for piecewise constant fossilized birth death process");
@@ -123,17 +122,10 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
         }
     }
 
-    fossil_count      = dynamic_cast<const TypedDagNode<long> *>(incounts);
-    fossil_count_data = dynamic_cast<const TypedDagNode<HomologousDiscreteCharacterData<NaturalNumbersState> >*>(incounts);
-
-    range_parameters.push_back( fossil_count );
+    fossil_count_data = dynamic_cast<const TypedDagNode<AbstractHomologousDiscreteCharacterData>* >(incounts);
     range_parameters.push_back( fossil_count_data );
 
-    if ( fossil_count != NULL && homogeneous_psi == NULL)
-    {
-        throw(RbException("Heterogeneous fossil sampling rates provided, but homogeneous fossil counts"));
-    }
-    else if ( fossil_count_data != NULL )
+    if ( fossil_count_data != NULL )
     {
         if( timeline == NULL ) throw(no_timeline_err);
 
@@ -329,7 +321,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
 					lnQ[i] = H(oi,times[oi],delta_plus_Ls) - H(oi,times[oi],delta);
 					//if ( k_oi.isPositiveState() )
 					//{
-						lnQ[i] -= Z(0,oi,times[oi],delta_plus_Ls,false) - Z(0,oi,times[oi],delta,false);
+						lnQ[i] -= Z(0,oi,times[oi],delta_plus_Ls) - Z(0,oi,times[oi],delta);
 					//}
 					lnQ[i] = log(lnQ[i]);
             	}
@@ -344,7 +336,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
 					lnQ[i] /= fossil[oi];
 					//if ( k_oi.isPositiveState() )
 					//{
-						lnQ[i] -= Z(0,oi,delta_plus_Ls,delta_plus_Ls,true) - Z(0,oi,delta_plus_Ls,delta,true) - (Z(0,oi,delta,delta_plus_Ls,true) - Z(0,oi,delta,delta,true));
+						lnQ[i] -= Z(1,oi,delta,delta_plus_Ls) - Z(1,oi,delta,delta);
 					//}
 					lnQ[i] = log(lnQ[i]);
             	}
@@ -375,7 +367,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                         lnQ[i] = H(oi,times[oi],o) - H(oi,times[oi],o_min);
                     	//if ( k_oi.isPositiveState() )
                     	//{
-                    		lnQ[i] -= Z(0,oi,times[oi],o,false) - Z(0,oi,times[oi],o_min,false);
+                    		lnQ[i] -= Z(0,oi,times[oi],o) - Z(0,oi,times[oi],o_min);
                     	//}
                     	lnQ[i] = log(lnQ[i]);
 
@@ -408,6 +400,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                         	lnQ[i] /= fossil[oi];
                         	//if ( k_oi.isPositiveState() )
 							//{
+                        	    lnQ[i] -= Z(1,oi,y,o) - Z(1,oi,y_max,o) - (Z(1,oi,y,o_min) - Z(1,oi,y_max,o_min));
 								lnQ[i] -= Z(0,oi,y_max,o,true) - Z(0,oi,y,o,true);
 							//}
 							lnQ[i] = log(lnQ[i]);
@@ -438,7 +431,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                         	lnQ[i] /= fossil[oi];
 							//if ( k_oi.isPositiveState() )
 							//{
-								lnQ[i] -= Z(0,oi,y_max,o,true) - Z(0,oi,y_max,o_min,true) - Z(0,oi,y,o,true) + Z(0,oi,y,o_min,true);
+								lnQ[i] -= Z(1,oi,y,o) - Z(1,oi,y_max,o) - (Z(1,oi,y,o_min) - Z(1,oi,y_max,o_min));
 							//}
                         }
 
@@ -465,7 +458,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
 					double delta = std::max(d, times[oi]);
 					double delta_plus_Ls = oi > 0 ? std::min(b, times[oi-1]) : b;
 
-					lnQ[i] = log( Z(k, oi, times[oi], delta_plus_Ls, false) - Z(k, oi, times[oi], delta, false) );
+					lnQ[i] = log( Z(k, oi, times[oi], delta_plus_Ls) - Z(k, oi, times[oi], delta) );
 					lnProbTimes += lnQ[i] - RbMath::lnFactorial(k);
 				}
 				// singleton
@@ -475,7 +468,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
 					double delta = std::max(d, times[oi]);
 					double delta_plus_Ls = oi > 0 ? std::min(b, times[oi-1]) : b;
 
-					lnQ[i] = Z(k,oi,delta_plus_Ls,delta_plus_Ls,true) - Z(k,oi,delta_plus_Ls,delta,true) - (Z(k,oi,delta,delta_plus_Ls,true) - Z(k,oi,delta,delta,true));
+					lnQ[i] = Z(k+1,oi,delta,delta_plus_Ls) - Z(k+1,oi,delta,delta);
 					lnQ[i] = log(lnQ[i]);
 					lnProbTimes += lnQ[i] - RbMath::lnFactorial(k);
 				}
@@ -499,7 +492,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                 	// (Case 1)
                     if ( o != o_min )
                     {
-                        lnQ[i] = log( Z(k, oi, times[oi], o, false) - Z(k, oi, times[oi], o_min, false) );
+                        lnQ[i] = log( Z(k, oi, times[oi], o) - Z(k, oi, times[oi], o_min) );
                         lnProbTimes += lnQ[i] - RbMath::lnFactorial(k);
                     }
                     // no uncertainty in o
@@ -519,7 +512,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                         // integrate from y to y_max
                         if ( y != y_max )
                         {
-                        	lnQ[i] = Z(k, oi, y_max, o, true) - Z(k, oi, y_max, o_min, true) - (Z(k, oi, y, o, true) - Z(k, oi, y, o_min, true));
+                            lnQ[i] = Z(k+1, oi, y, o) - Z(k+1, oi, y_max, o) - (Z(k+1, oi, y, o_min) - Z(k+1, oi, y_max, o_min));
                         }
                         // no uncertainty in y
                         else
@@ -710,15 +703,12 @@ NaturalNumbersState AbstractPiecewiseConstantFossilizedRangeProcess::getFossilCo
 {
 
     // remove the old parameter first
-    if ( fossil_count != NULL )
+    if( fossil_count_data != NULL )
     {
-        return NaturalNumbersState(fossil_count->getValue());
-    }
-    else if( fossil_count_data != NULL )
-    {
-        interval = ascending ? fossil_count_data->getValue().getNumberOfTaxa() - 1 - interval : interval;
+        interval = ascending ? num_intervals - 1 - interval : interval;
 
-        return fossil_count_data->getValue().getCharacter(species, interval);
+        const NaturalNumbersState& count = dynamic_cast<const NaturalNumbersState&>(fossil_count_data->getValue().getCharacter(species, interval));
+        return count;
     }
 
     NaturalNumbersState s;
@@ -827,7 +817,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::H(size_t i, double x, do
 /**
  * \int (t-t_j)^k q_tilde(t)/q(t) dt
  */
-double AbstractPiecewiseConstantFossilizedRangeProcess::Z(size_t k, size_t i, double x, double t, bool integrate) const
+double AbstractPiecewiseConstantFossilizedRangeProcess::Z(size_t k, size_t i, double x, double t) const
 {
     // get the parameters
     double b = birth[i];
@@ -845,19 +835,11 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::Z(size_t k, size_t i, do
     double sum = b + d + f;
     double alpha = 0.5*(A+sum);
 
-    double tmp1 = pow(-2,k+integrate)* RbMath::incompleteGamma(k+1, (alpha-A)*(t-x), RbMath::lnGamma((alpha-A)*(t-x))) * exp(-(alpha-A)*(x-ti));
-    double tmp2 = pow(2,k+integrate) * RbMath::incompleteGamma(k+1, alpha*(t-x), RbMath::lnGamma(alpha*(t-x)))         * exp(-alpha*(x-ti));
+    double tmp1 = pow(-2,k)* RbMath::incompleteGamma((alpha-A)*(t-x), k+1) * exp(-(alpha-A)*(x-ti));
+    double tmp2 = pow(2,k) * RbMath::incompleteGamma(alpha*(t-x), k+1)     * exp(-alpha*(x-ti));
 
-    if(integrate == true)
-    {
-    	tmp1 = ( (1-B)/(A+sum) ) * ( exp(-alpha*(x-ti))     * pow(t-x,k+1)/(k+1) + tmp2);
-    	tmp2 = ( (1+B)/(A-sum) ) * ( exp(-(alpha-A)*(x-ti)) * pow(t-x,k+1)/(k+1) + tmp1);
-    }
-    else
-	{
-    	tmp1 *= (1+B)/pow(A-sum,k+1);
-    	tmp2 *= (1-B)/pow(A+sum,k+1);
-	}
+    tmp1 *= (1+B)/pow(A-sum,k+1);
+    tmp2 *= (1-B)/pow(A+sum,k+1);
 
     return tmp1 - tmp2;
 }
@@ -944,8 +926,10 @@ void AbstractPiecewiseConstantFossilizedRangeProcess::updateIntervals() const
 {
     std::vector<bool> youngest(fbd_taxa.size(), true);
 
-    for (int i = (int)num_intervals - 1; i >= 0; i--)
+    for (size_t interval = num_intervals; interval > 0; interval--)
     {
+        size_t i = interval - 1;
+
         double b = getSpeciationRate(i);
         double d = getExtinctionRate(i);
         double f = getFossilizationRate(i);
@@ -981,7 +965,7 @@ void AbstractPiecewiseConstantFossilizedRangeProcess::updateIntervals() const
         {
             for(size_t j = 0; j < fbd_taxa.size(); j++)
             {
-                NaturalNumbersState s = getFossilCount(i,j);
+                NaturalNumbersState s = getFossilCount(j,i);
 
                 if( s.isMissingState() == false && (s.getStateIndex() > 0 || s.isPositiveState()) )
                 {
@@ -1038,12 +1022,8 @@ void AbstractPiecewiseConstantFossilizedRangeProcess::swapParameterInternal(cons
     {
         timeline = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
-    else if (oldP == fossil_count)
-    {
-        fossil_count = static_cast<const TypedDagNode< long >* >( newP );
-    }
     else if (oldP == fossil_count_data)
     {
-        fossil_count_data = static_cast<const TypedDagNode<HomologousDiscreteCharacterData<NaturalNumbersState> >* >( newP );
+        fossil_count_data = static_cast<const TypedDagNode<AbstractHomologousDiscreteCharacterData>* >( newP );
     }
 }
