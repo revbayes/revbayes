@@ -268,7 +268,7 @@ const ArgumentRules& Func_readCharacterDataDelimited::getArgumentRules( void ) c
         argumentRules.push_back( new OptionRule( "type", new RlString("NaturalNumbers"), type_options, "The type of data." ) );
         argumentRules.push_back( new ArgumentRule( "stateLabels", RlString::getClassTypeSpec(), "The state labels (for standard states) or max number for NaturalNumbers.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "" ) ) );
         argumentRules.push_back( new ArgumentRule( "delimiter", RlString::getClassTypeSpec(), "The delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "\t" ) ) );
-        argumentRules.push_back( new ArgumentRule( "headers", RlBoolean::getClassTypeSpec(), "Has this file a header line?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
+        argumentRules.push_back( new ArgumentRule( "header", RlBoolean::getClassTypeSpec(), "Has this file a header line?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
         rules_set = true;
         
     }
