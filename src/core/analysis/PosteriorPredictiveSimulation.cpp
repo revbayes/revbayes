@@ -170,8 +170,7 @@ void RevBayesCore::PosteriorPredictiveSimulation::run( int thinning )
   
                         // create a taxon data object for each tip
                         DiscreteTaxonData<NaturalNumbersState> this_tip_data = DiscreteTaxonData<NaturalNumbersState>(tips[tip_index]);
-                        NaturalNumbersState state = NaturalNumbersState(0, num_states);
-                        state.setState(state_str);
+                        NaturalNumbersState state = NaturalNumbersState(state_str, num_states);
                         this_tip_data.addCharacter(state);
                         tip_data->addTaxonData(this_tip_data);
                     }

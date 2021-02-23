@@ -30,8 +30,8 @@ namespace RevBayesCore {
     class NaturalNumbersState : public DiscreteCharacterState {
         
     public:
-        NaturalNumbersState(size_t s=0, size_t m=0);                                        //!< Constructor with an observation
-        NaturalNumbersState(const std::string &s, size_t m=0);                              //!< Constructor with an observation
+        NaturalNumbersState(size_t m=10);                                                   //!< Constructor with an observation
+        NaturalNumbersState(const std::string &s, size_t m=10);                             //!< Constructor with an observation
                 
         NaturalNumbersState*            clone(void) const;                                  //!< Get a copy of this object
         

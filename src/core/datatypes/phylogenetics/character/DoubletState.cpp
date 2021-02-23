@@ -28,7 +28,7 @@ DoubletState::DoubletState(size_t n)
       num_observed_states( 0 ),
       state(16)
 {
-    setStateByIndex( n );
+
 }
 
 
