@@ -6,9 +6,9 @@ logfile=${root_folder}/log.txt
 
 uname_out="$(uname -s)"
 case "${uname_out}" in
-    Linux*)     machine=Linux; compiler=g++;;
-    Darwin*)    machine=Mac; compiler=clang++;;
-    CYGWIN*)    machine=Windows-cygwin; toolchain="x86_64-w64-mingw32"; compiler="${toolchain}-g++";;
+    Linux*)     machine=Linux; compiler=g++;distr="";;
+    Darwin*)    machine=Mac; compiler=clang++;distr="";;
+    CYGWIN*)    machine=Windows-cygwin; toolchain="x86_64-w64-mingw32"; compiler="${toolchain}-g++";distr="";;
     *)          machine="UNKNOWN"
 esac
 
@@ -20,7 +20,14 @@ if [ "${machine}" == "UNKNOWN" ]; then
   exit
 else
   echo "The installation will proceed for a '${machine}' system and will take several minutes."
-  echo "${machine} - ${compiler}" > ${logfile}
+
+  if [ "${machine}" == "Linux" ]; then
+    foundGentooString=`uname -a | grep -i gentoo`
+    if [ "${foundGentooString}" != "" ]; then
+      distr="Gentoo"
+    fi
+  fi
+  echo "${machine} - ${compiler} - ${distr}" > ${logfile}
 fi
 
 echo "########################################"
@@ -123,7 +130,11 @@ else
   cd ${boost_build_folder}
   mkdir -p ${boost_folder}
   ./bootstrap.sh --prefix=${boost_folder}  >> ${logfile} 2>&1
-  ./b2 install  >> ${logfile} 2>&1
+  if [ "${distr}" == "Gentoo" ]; then
+    ./b2 install --ignore-site-config  >> ${logfile} 2>&1
+  else
+    ./b2 install  >> ${logfile} 2>&1
+  fi
   cd ${root_folder}
 fi
 echo "> boost available in: ${boost_folder}"
