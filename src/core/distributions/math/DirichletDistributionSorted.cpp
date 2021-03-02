@@ -5,6 +5,9 @@
 #include "RbVector.h"
 #include "TypedDagNode.h"
 
+#include <algorithm>
+
+
 namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
@@ -20,7 +23,6 @@ DirichletDistributionSorted::DirichletDistributionSorted(const TypedDagNode< RbV
     // this will also ensure that the parameters are not getting deleted before we do
     addParameter( alpha );
 
-    // TODO - actually sort here later
     *value = RbStatistics::Dirichlet::rv(alpha->getValue(), *GLOBAL_RNG);
     value->sort(false);
 
@@ -46,9 +48,17 @@ DirichletDistributionSorted* DirichletDistributionSorted::clone( void ) const
 
 double DirichletDistributionSorted::computeLnProbability( void )
 {
-  //this->operator[](i)
-  for (size_t i = 1; i < value->size(); ++i )
-    if (value->operator[](i-1) < value->operator[](i)) { return RbConstants::Double::neginf; }
+
+  ////this->operator[](i)
+    double cur = value->operator[](1);
+    for (size_t i = 2; i < value->size(); ++i )
+    {
+        if ( value->operator[](i) > cur )
+        {
+            return RbConstants::Double::neginf;
+        }
+        cur = value->operator[](i);
+    }
 
     return RbStatistics::Dirichlet::lnPdf(alpha->getValue(), *value);
 }
@@ -58,6 +68,7 @@ void DirichletDistributionSorted::redrawValue( void )
 {
     *value = RbStatistics::Dirichlet::rv(alpha->getValue(), *GLOBAL_RNG);
     value->sort(false);
+
 }
 
 /** Swap a parameter of the distribution */
