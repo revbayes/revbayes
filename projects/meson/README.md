@@ -45,6 +45,7 @@ pip3 install meson ninja
    
     ``` sh
     ( cd revbayes/ ; git checkout development )  # Probably you want the development branch
+    ( cd revbayes/ ; git submodule init ; git submodule update ) # Download tests required for the build
     ( cd revbayes/projects/meson/ ; ./generate.sh )
     meson build revbayes --prefix=$HOME/Applications/revbayes
     ninja -C build install
