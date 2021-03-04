@@ -158,7 +158,7 @@ double RbStatistics::Helper::pointChi2(double prob, double v) {
     do {
         q = ch;
         p1 = 0.5 * ch;
-        if ((t = RbMath::incompleteGamma(p1, xx, g)) < 0) {
+        if ((t = RbMath::incompleteGamma(p1, xx)) < 0) {
             throw new RbException("Arguments out of range: t < 0");
         }
         p2 = p - t;
