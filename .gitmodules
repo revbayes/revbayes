@@ -1,3 +1,3 @@
 [submodule "tests"]
 	path = tests
-	url = git@github.com:revbayes/tests.git
+	url = https://github.com/revbayes/tests.git
