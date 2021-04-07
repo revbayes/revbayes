@@ -480,17 +480,17 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
         // if (verbose){std::cout << "Event time : " << th << " - Event type : " << type << " -> log(c) : " << log(c) << " -> Mt[0] : " << Mt[0] << " / Mt[1] : " << Mt[1] << " / Mt[N] : " << Mt[N] << std::endl;}
 
         // Check that N is big enough
-        if (Mt[N]>0.001){
+        if (Mt[N]>0.01){
             // In that case the optimal N value cannot be estimated because it is greater than the chosen one
             N_limit = N+1;
         }
         else{
             N_limit_tmp = N;
-            while (Mt[N_limit_tmp-1]<0.001){
+            while (Mt[N_limit_tmp-1]<0.01){
                 N_limit_tmp--;
             }
             N_limit = std::max(N_limit, N_limit_tmp);
-             // if (verbose){std::cout << "\nThe smallest sufficient N value ( such as Mt[N_limit] < max(Mt)/1000 for all t ) is " << N_limit << "\n" << std::endl;}
+             // if (verbose){std::cout << "\nThe smallest sufficient N value ( such as Mt[N_limit] < max(Mt)/100 for all t ) is " << N_limit << "\n" << std::endl;}
         }
 
         thPlusOne = th;
@@ -499,16 +499,16 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
     // Give the estimated optimal N value
     size_t margin = 5;                        // Safety margin to avoid edge effects on the computation
     if ((N > N_limit + margin) & verbose){
-      std::cout << "\nTo improve performance, set N (" << N << ") to a lower value -> optimal value : N_limit ( such as Mt[N_limit] < max(Mt)/1000 for all t ) + safety_margin = " << N_limit + margin << "\n" << std::endl;
+      std::cout << "\nTo improve performance, set N (" << N << ") to a lower value -> optimal value : N_limit ( such as Mt[N_limit] < max(Mt)/100 for all t ) + safety_margin = " << N_limit + margin << "\n" << std::endl;
     }
     else if ((N == N_limit + margin) & verbose){
-      std::cout << "\nThe selected N value is at a safe margin from the limit of the high-probabilities area ( such as Mt[N_limit] < max(Mt)/1000 for all t ) : N = N_limit + safety_margin = " << N_limit + margin << std::endl;
+      std::cout << "\nThe selected N value is at a safe margin from the limit of the high-probabilities area ( such as Mt[N_limit] < max(Mt)/100 for all t ) : N = N_limit + safety_margin = " << N_limit + margin << std::endl;
     }
     else if ((N >= N_limit) & (N < N_limit + margin)){
-      std::cout << "\nWARNING : You should increase N -> The N value limiting the high-probabilities area ( such as Mt[N_limit] < max(Mt)/1000 for all t ) is coming closer to your N value (" << N << ") -> N_limit + safety_margin = " << N_limit + margin << std::endl;
+      std::cout << "\nWARNING : You should increase N -> The N value limiting the high-probabilities area ( such as Mt[N_limit] < max(Mt)/100 for all t ) is coming closer to your N value (" << N << ") -> N_limit + safety_margin = " << N_limit + margin << std::endl;
     }
     else if (N_limit == N+1){
-      std::cout << "\nWARNING : You should increase N -> There is a time t at which Mt[N] contains a non-negligeable probability ( Mt[N] > max(Mt)/1000 )\n" << std::endl;
+      std::cout << "\nWARNING : You should increase N -> There is a time t at which Mt[N] contains a non-negligeable probability ( Mt[N] > max(Mt)/100 )\n" << std::endl;
     }
     if(returnLogLikelihood){
 
@@ -729,17 +729,17 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
         // if (verbose){std::cout << "Event time : " << th << " - Event type : " << type << " -> log(c) : " << log(c) << " -> Lt[0] : " << Lt[0] << " / Lt[1] : " << Lt[1] << " / Lt[N-1] : " << Lt[N-1] << " / Lt[N] : " << Lt[N] << std::endl;}
 
         // Check that N is big enough
-        if (Lt[N]>0.001){
+        if (Lt[N]>0.01){
             // In that case the optimal N value cannot be estimated because it is greater than the chosen one
             N_limit = N+1;
         }
         else{
             N_limit_tmp = N;
-            while (Lt[N_limit_tmp-1]<0.001){
+            while (Lt[N_limit_tmp-1]<0.01){
                 N_limit_tmp--;
             }
             N_limit = std::max(N_limit, N_limit_tmp);
-            // if (verbose){std::cout << "\nThe smallest sufficient N value ( such as Lt[N_limit] < max(Lt)/1000 for all t ) is " << N_limit << "\n" << std::endl;}
+            // if (verbose){std::cout << "\nThe smallest sufficient N value ( such as Lt[N_limit] < max(Lt)/100 for all t ) is " << N_limit << "\n" << std::endl;}
         }
 
         thMinusOne = th;
@@ -748,16 +748,16 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
     // Give the estimated optimal N value
     size_t margin = 5;                        // Safety margin to avoid edge effects on the computation
     if ((N > N_limit + margin) & verbose){
-      std::cout << "\nTo improve performance, set N (" << N << ") to a lower value -> optimal value : N_limit ( such as Lt[N_limit] < max(Lt)/1000 for all t ) + safety_margin = " << N_limit + margin << "\n" << std::endl;
+      std::cout << "\nTo improve performance, set N (" << N << ") to a lower value -> optimal value : N_limit ( such as Lt[N_limit] < max(Lt)/100 for all t ) + safety_margin = " << N_limit + margin << "\n" << std::endl;
     }
     else if ((N == N_limit + margin) & verbose){
-      std::cout << "\nThe selected N value is at a safe margin from the limit of the high-probabilities area ( such as Lt[N_limit] < max(Lt)/1000 for all t ) : N = N_limit + safety_margin = " << N_limit + margin << std::endl;
+      std::cout << "\nThe selected N value is at a safe margin from the limit of the high-probabilities area ( such as Lt[N_limit] < max(Lt)/100 for all t ) : N = N_limit + safety_margin = " << N_limit + margin << std::endl;
     }
     else if ((N >= N_limit) & (N < N_limit + margin)){
-      std::cout << "\nWARNING : You should increase N -> The N value limiting the high-probabilities area ( such as Lt[N_limit] < max(Lt)/1000 for all t ) is coming closer to your N value (" << N << ") : N_limit + safety_margin = " << N_limit + margin << std::endl;
+      std::cout << "\nWARNING : You should increase N -> The N value limiting the high-probabilities area ( such as Lt[N_limit] < max(Lt)/100 for all t ) is coming closer to your N value (" << N << ") : N_limit + safety_margin = " << N_limit + margin << std::endl;
     }
     else if (N_limit == N+1){
-      std::cout << "\nWARNING : You should increase N -> There is a time t at which Lt[N] contains a non-negligeable probability ( Lt[N] > max(Lt)/1000 )\n" << std::endl;
+      std::cout << "\nWARNING : You should increase N -> There is a time t at which Lt[N] contains a non-negligeable probability ( Lt[N] > max(Lt)/100 )\n" << std::endl;
     }
 
     return B;
