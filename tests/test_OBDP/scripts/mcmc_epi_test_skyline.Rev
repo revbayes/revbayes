@@ -1,0 +1,129 @@
+###############################################################################
+#
+# RevBayes Validation Test:Skyline occurrence birth-death process
+#
+# Model: Tree is drawn from a birth-death process with occurrences, with piecewise
+# constant birth rate
+#
+# authors: Antoine Zwaans + Jérémy Andreoletti (based on Walker Pett's FBDP test)
+#
+################################################################################
+
+
+
+#######################
+# Reading in the Data #
+#######################
+
+### Read in taxon data
+taxa <- readTaxonData("data/simulations/epidemio_taxa.csv")
+sequences <- readDiscreteCharacterData("data/simulations/epidemio_seq.nex")
+occurrence_ages <- readMatrix(file="data/simulations/epidemio_occurrences.csv", delimiter="; ")[1]
+
+######################
+# Parameters' priors #
+######################
+
+seed(12345)
+
+#set my move index
+mvi = 0
+
+#there are sequences sampled at present
+rho ~ dnBeta(1,1)
+
+#infected individuals remain infectious after being sampled
+rm <- 0.0
+
+#accuracy of our algorithm number of hidden lineages
+N <- 15
+
+#condition of the algorithm
+cond <- "time"
+
+#the first occurrence is found at t=41.98, we place the origin in a window before
+origin_time ~ dnUnif(42,71.0)
+
+#Use Mt likelihood
+Mt <- TRUE
+
+extinction ~ dnExp(10)
+extinction.setValue(0.01)
+omega ~ dnExp(10)
+sampling ~ dnExp(10)
+
+#moves for constant parameters
+moves[mvi++] = mvScale(extinction, lambda = 0.1,tune=TRUE)
+moves[mvi++] = mvScale(omega, lambda = 0.1, tune=TRUE)
+moves[mvi++] = mvScale(rho, lambda = 0.1, tune=TRUE)
+moves[mvi++] = mvSlide(origin_time, delta=0.01,tune=TRUE,weight=5.0)
+
+#we split the timeline 30 days before present for the birth rate
+timeline <- v(30.0)
+
+#setting up the piecewise constant birth rate, and moves
+for(i in 1:(timeline.size() + 1)){
+     speciation[i] ~ dnExp(10)
+     speciation[i].setValue(0.005)
+     moves[mvi++] = mvScale(speciation[i], lambda = 0.1, tune=TRUE)
+}
+
+verbose <- FALSE
+
+##############
+# Tree prior #
+##############
+
+### Define the tree-prior distribution as the piecewise constant birth-death process ###
+obd_tree ~  dnOBDP( originAge=origin_time,
+                    timeline=timeline,
+                    lambda=speciation,
+                    mu=extinction,
+                    omega=omega,
+                    psi=sampling,
+                    rho=rho,
+                    r=rm,
+                    occurrence_ages=occurrence_ages,
+                    taxa=taxa,
+                    useMt=Mt,
+                    verbose=verbose)
+
+
+#moves[mvi++] = mvFNPR(obd_tree, weight=20.0)
+#moves[mvi++] = mvCollapseExpandFossilBranch(obd_tree, origin_time, weight=10.0)
+#moves[mvi++] = mvNodeTimeSlideUniform(obd_tree, weight=2.0)
+#moves[mvi++] = mvRootTimeSlideUniform(obd_tree, origin_time, weight=1.0)
+num_samp_anc := obd_tree.numSampledAncestors()
+
+############################
+# Sequence evolution model #
+############################
+
+#### Strict clock model with lambda = 0.005
+branch_rates ~ dnExponential(250.0)
+#moves[mvi++] = mvScale(branch_rates, lambda=0.01, tune=TRUE)
+
+
+#### Jukes-Cantor substitution model
+Q <- fnJC(4) 
+
+phySeq ~ dnPhyloCTMC(tree=obd_tree, Q=Q, branchRates=branch_rates, type="DNA")
+phySeq.clamp(sequences)
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+mymodel = model(obd_tree)
+
+monitors[1] = mnStochasticVariable(filename="output/mcmc_OBDP_epi_test_skyline.out", printgen=1)
+monitors[2] = mnFile(filename="output/mcmc_OBDP_epi_test_skyline.trees", printgen=1,obd_tree)
+monitors[3] = mnScreen(printgen=1,num_samp_anc)
+
+mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
+
+mymcmc.run(generations=10)
+
+# you may want to quit RevBayes now
+q()

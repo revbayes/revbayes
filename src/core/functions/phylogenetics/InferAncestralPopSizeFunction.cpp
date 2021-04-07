@@ -5,8 +5,6 @@
 //  Completed by Jérémy Andréoletti, Antoine Zwaans 03.2020.
 //
 #include "InferAncestralPopSizeFunction.h"
-
-// #include "ComputeLikelihoodsLtMtFunction.h"
 #include "ComputeLikelihoodsLtMt.h"
 
 #include <vector>

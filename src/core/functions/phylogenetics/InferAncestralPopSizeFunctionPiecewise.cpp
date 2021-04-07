@@ -5,8 +5,6 @@
 //  Completed by Jérémy Andréoletti, Antoine Zwaans 03.2020.
 //
 #include "InferAncestralPopSizeFunctionPiecewise.h"
-
-// #include "ComputeLikelihoodsLtMtFunction.h"
 #include "ComputeLikelihoodsLtMt.h"
 
 #include <vector>
@@ -77,14 +75,14 @@ InferAncestralPopSizeFunctionPiecewise::InferAncestralPopSizeFunctionPiecewise( 
 	homogeneous_mu       = NULL;
 	heterogeneous_mu     = NULL;
 
-	homogeneous_phi      = NULL;
-	heterogeneous_phi    = NULL;
+	homogeneous_psi      = NULL;
+	heterogeneous_psi    = NULL;
 
 	homogeneous_o        = NULL;
 	heterogeneous_o      = NULL;
 
-	homogeneous_Phi      = NULL;
-	heterogeneous_Phi    = NULL;
+	homogeneous_rho      = NULL;
+	heterogeneous_rho    = NULL;
 
 	homogeneous_r        = NULL;
 	heterogeneous_r      = NULL;
@@ -114,11 +112,11 @@ InferAncestralPopSizeFunctionPiecewise::InferAncestralPopSizeFunctionPiecewise( 
 	addParameter( homogeneous_mu );
 	addParameter( heterogeneous_mu );
 
-	heterogeneous_phi = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inserialsampling);
-	homogeneous_phi = dynamic_cast<const TypedDagNode<double >*>(inserialsampling);
+	heterogeneous_psi = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inserialsampling);
+	homogeneous_psi = dynamic_cast<const TypedDagNode<double >*>(inserialsampling);
 
-	addParameter( homogeneous_phi );
-	addParameter( heterogeneous_phi );
+	addParameter( homogeneous_psi );
+	addParameter( heterogeneous_psi );
 
 	heterogeneous_r = dynamic_cast<const TypedDagNode<RbVector<double> >*>(intreatment);
 	homogeneous_r = dynamic_cast<const TypedDagNode<double >*>(intreatment);
@@ -132,11 +130,11 @@ InferAncestralPopSizeFunctionPiecewise::InferAncestralPopSizeFunctionPiecewise( 
 	addParameter( homogeneous_o );
 	addParameter( heterogeneous_o );
 
-	heterogeneous_Phi = dynamic_cast<const TypedDagNode<RbVector<double> >*>(ineventsampling);
-	homogeneous_Phi = dynamic_cast<const TypedDagNode<double >*>(ineventsampling);
+	heterogeneous_rho = dynamic_cast<const TypedDagNode<RbVector<double> >*>(ineventsampling);
+	homogeneous_rho = dynamic_cast<const TypedDagNode<double >*>(ineventsampling);
 
-	addParameter( homogeneous_Phi );
-	addParameter( heterogeneous_Phi );
+	addParameter( homogeneous_rho );
+	addParameter( heterogeneous_rho );
 
 
 	//check that lengths of vector arguments are sane
@@ -150,9 +148,9 @@ InferAncestralPopSizeFunctionPiecewise::InferAncestralPopSizeFunctionPiecewise( 
 		throw(RbException("If provided as a vector, argument mu must have one more element than timeline."));
 	}
 
-	if ( heterogeneous_phi != NULL && !(interval_times->getValue().size() == heterogeneous_phi->getValue().size() - 1) )
+	if ( heterogeneous_psi != NULL && !(interval_times->getValue().size() == heterogeneous_psi->getValue().size() - 1) )
 	{
-		throw(RbException("If provided as a vector, argument phi must have one more element than timeline."));
+		throw(RbException("If provided as a vector, argument psi must have one more element than timeline."));
 	}
 
 	if ( heterogeneous_r != NULL && !(interval_times->getValue().size() == heterogeneous_r->getValue().size() - 1) )
@@ -165,9 +163,9 @@ InferAncestralPopSizeFunctionPiecewise::InferAncestralPopSizeFunctionPiecewise( 
 		throw(RbException("If provided as a vector, argument o must have one more element than timeline."));
 	}
 
-	if ( heterogeneous_Phi != NULL && !(interval_times->getValue().size() == heterogeneous_Phi->getValue().size() - 1) )
+	if ( heterogeneous_rho != NULL && !(interval_times->getValue().size() == heterogeneous_rho->getValue().size() - 1) )
 	{
-		throw(RbException("If provided as a vector, argument Phi must have one more element than timeline."));
+		throw(RbException("If provided as a vector, argument rho must have one more element than timeline."));
 	}
 
 	update();
@@ -204,9 +202,9 @@ void InferAncestralPopSizeFunctionPiecewise::update( void )
 
 		bool useMt;
 		bool verbose;
-	MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age, timeline, lambda, mu, phi, omega, homogeneous_Phi, r, maxHiddenLin, cond, time_points, useOrigin, useMt = false, verbose = true, occurrence_ages, tree);
+	MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age, timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, time_points, useOrigin, useMt = false, verbose = true, occurrence_ages, tree);
 	std::cout << "LT is ok, go to Mt" << std::endl;
-	MatrixReal B_Mt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age, timeline, lambda, mu, phi, omega, homogeneous_Phi, r, maxHiddenLin, cond, time_points, useOrigin, useMt = true, verbose = true, occurrence_ages, tree);
+	MatrixReal B_Mt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age, timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, time_points, useOrigin, useMt = true, verbose = true, occurrence_ages, tree);
 	// Realize the normalized Hadamar Product of B_Lt and B_Mt
 		MatrixReal D_Kt(S, (N + 1), 0.0);
     for (size_t j = 0; j < S; j++){
@@ -248,10 +246,10 @@ void InferAncestralPopSizeFunctionPiecewise::updateVectorParameters( void ) cons
     // clean all the sets
     lambda.clear();
     mu.clear();
-    phi.clear();
+    psi.clear();
     r.clear();
     omega.clear();
-    phi_event.clear();
+    psi_event.clear();
 
     // Get vector of birth rates
     if ( heterogeneous_lambda != NULL )
@@ -274,13 +272,13 @@ void InferAncestralPopSizeFunctionPiecewise::updateVectorParameters( void ) cons
     }
 
     // Get vector of serial sampling rates
-    if ( heterogeneous_phi != NULL )
+    if ( heterogeneous_psi != NULL )
     {
-      phi = heterogeneous_phi->getValue();
+      psi = heterogeneous_psi->getValue();
     }
     else
     {
-      phi = std::vector<double>(timeline.size(),homogeneous_phi->getValue());
+      psi = std::vector<double>(timeline.size(),homogeneous_psi->getValue());
     }
 
     // Get vector of conditional death upon sampling probabilities
@@ -304,23 +302,23 @@ void InferAncestralPopSizeFunctionPiecewise::updateVectorParameters( void ) cons
     }
 
     // Get vector of event sampling probabilities
-    if ( heterogeneous_Phi != NULL )
+    if ( heterogeneous_rho != NULL )
     {
-      // User has specified phi_event_0,...,phi_event_{l-1}
-      phi_event = heterogeneous_Phi->getValue();
+      // User has specified psi_event_0,...,psi_event_{l-1}
+      psi_event = heterogeneous_rho->getValue();
     }
     else
     {
-        phi_event = std::vector<double>(timeline.size(),0.0);
-        if ( homogeneous_Phi != NULL )
+        psi_event = std::vector<double>(timeline.size(),0.0);
+        if ( homogeneous_rho != NULL )
         {
             // User specified the sampling fraction at the present
-            phi_event[0] = homogeneous_Phi->getValue();
+            psi_event[0] = homogeneous_rho->getValue();
         }
         else
         {
             // set the final sampling to one (for sampling at the present)
-            phi_event[0] = 1.0;
+            psi_event[0] = 1.0;
       }
 
     }
@@ -357,13 +355,13 @@ void InferAncestralPopSizeFunctionPiecewise::swapParameterInternal( const DagNod
     {
         homogeneous_mu = static_cast<const TypedDagNode<double>* >( newP );
     }
-		else if (oldP == heterogeneous_phi)
+		else if (oldP == heterogeneous_psi)
     {
-        heterogeneous_phi = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        heterogeneous_psi = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
-		else if (oldP == homogeneous_phi)
+		else if (oldP == homogeneous_psi)
     {
-        homogeneous_phi = static_cast<const TypedDagNode<double>* >( newP );
+        homogeneous_psi = static_cast<const TypedDagNode<double>* >( newP );
     }
 		else if (oldP == heterogeneous_o)
     {
@@ -373,13 +371,13 @@ void InferAncestralPopSizeFunctionPiecewise::swapParameterInternal( const DagNod
     {
         homogeneous_o = static_cast<const TypedDagNode<double>* >( newP );
     }
-		else if (oldP == heterogeneous_Phi)
+		else if (oldP == heterogeneous_rho)
     {
-        heterogeneous_Phi = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        heterogeneous_rho = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
-    else if (oldP == homogeneous_Phi)
+    else if (oldP == homogeneous_rho)
     {
-        homogeneous_Phi = static_cast<const TypedDagNode<double>* >( newP );
+        homogeneous_rho = static_cast<const TypedDagNode<double>* >( newP );
     }
 		else if (oldP == heterogeneous_r)
     {

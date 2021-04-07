@@ -63,10 +63,10 @@ template <class valueType> class TypedDagNode;
       const TypedDagNode<RbVector<double> >*          heterogeneous_r;
       const TypedDagNode<double >*                    homogeneous_o;                                         //!< The homogeneous conditional probability of death upon treatment.
       const TypedDagNode<RbVector<double> >*          heterogeneous_o;                                         //!< The heterogeneous conditional probability of death upon treatment.
-      const TypedDagNode<double >*                    homogeneous_phi;                                       //!< The homogeneous sampling rates.
-      const TypedDagNode<RbVector<double> >*          heterogeneous_phi;                                     //!< The heterogeneous sampling rates.
-      const TypedDagNode<double >*                    homogeneous_Phi;                                       //!< The probability of sampling a tip at the present.
-      const TypedDagNode<RbVector<double> >*          heterogeneous_Phi;                                     //!< The probability of sampling individuals at set time intervals.
+      const TypedDagNode<double >*                    homogeneous_psi;                                       //!< The homogeneous sampling rates.
+      const TypedDagNode<RbVector<double> >*          heterogeneous_psi;                                     //!< The heterogeneous sampling rates.
+      const TypedDagNode<double >*                    homogeneous_rho;                                       //!< The probability of sampling a tip at the present.
+      const TypedDagNode<RbVector<double> >*          heterogeneous_rho;                                     //!< The probability of sampling individuals at set time intervals.
       const TypedDagNode<RbVector<double> >*          interval_times;
 
 
@@ -82,10 +82,10 @@ template <class valueType> class TypedDagNode;
 
       mutable std::vector<double>                     lambda;
       mutable std::vector<double>                     mu;
-      mutable std::vector<double>                     phi;
+      mutable std::vector<double>                     psi;
       mutable std::vector<double>                     r;
       mutable std::vector<double>                     omega;
-      mutable std::vector<double>                     phi_event;
+      mutable std::vector<double>                     psi_event;
       mutable std::vector<double>                     timeline;                                              //!< The times of the instantaneous events and rate shifts.
 
 
