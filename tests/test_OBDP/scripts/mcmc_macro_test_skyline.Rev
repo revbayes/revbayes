@@ -32,25 +32,39 @@ morpho.addMissingTaxa( taxa )
 ## Tree-prior distribution : occurrece birth-death process
 
 # OBDP parameters priors
-lambda ~ dnExp(10)
+
+timeline <- v(1,2,3,4)
+
+# Initialise my move index
+mvi =0
+
+for (i in 1:(timeline.size()+1)) {
+    lambda[i] ~ dnExp(10)
+    lambda[i].setValue(0.005)
+    moves[mvi++] = mvScale(lambda[i], lambda=1.0, weight=1.0, tune=TRUE)
+}
+
+
+# lambda ~ dnExp(10)
 mu ~ dnExp(10)
+mu.setValue(0.01)
 psi ~ dnExp(10)
+psi.setValue(1)
 omega ~ dnExp(5)
 rho ~ dnUnif(0.0, 1.0)
 rm <- 0.0
-N <- 15
+N <- 12
 cond <- "time"
 # start_time ~ dnUnif(7.7, 12.0)
 start_time ~ dnUnif(5.3, 10.0)
+start_time.setValue(5.5)
 useMt <- TRUE
 verbose <- TRUE
 
-# Initialise my move index
-mvi = 1
 
 # Create some moves that change the stochastic variables
 # all moves are sliding proposals but you could use scaling proposals for the rates too
-moves[mvi++] = mvScale(lambda, lambda=1.0, weight=1.0, tune=TRUE)
+# moves[mvi++] = mvScale(lambda, lambda=1.0, weight=1.0, tune=TRUE)
 moves[mvi++] = mvScale(mu, lambda=1.0, weight=1.0, tune=TRUE)
 moves[mvi++] = mvScale(psi, lambda=1.0, weight=1.0, tune=TRUE)
 moves[mvi++] = mvScale(omega, lambda=1.0, weight=1.0, tune=TRUE)
@@ -58,7 +72,9 @@ moves[mvi++] = mvScale(omega, lambda=1.0, weight=1.0, tune=TRUE)
 moves[mvi++] = mvSlide(rho, delta=0.1,  weight=1.0, tune=TRUE)
 moves[mvi++] = mvSlide(start_time, delta=0.1,  weight=1.0, tune=TRUE)
 
+
 obd_tree ~ dnOBDP2( originAge=start_time,
+                    timeline=timeline,
                     lambda=lambda,
                     mu=mu, 
                     psi=psi, 
@@ -71,6 +87,7 @@ obd_tree ~ dnOBDP2( originAge=start_time,
                     occurrence_ages=occurrence_ages, 
                     useMt=useMt,
                     verbose=verbose)
+print("here ok")
 
 
 moves[mvi++] = mvFNPR(obd_tree, weight=20.0)
@@ -141,11 +158,11 @@ mymodel = model(obd_tree)
 monitors[1] = mnStochasticVariable(filename="output_macro_test_Mt/mcmc_OBDP_macro_test-small.out", printgen=1)
 monitors[2] = mnFile(filename="output_macro_test_Mt/mcmc_OBDP_macro_test-small.trees", printgen=1, obd_tree)
 monitors[3] = mnScreen(printgen=1, num_samp_anc, start_time)
-print("my model ok")
+
 mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
 # mymcmc = mcmc(mymodel, monitors, moves)
 
-mymcmc.run(generations=50, tuningInterval=100)
+mymcmc.run(generations=30, tuningInterval=100)
 
 # check the performance of the MCMC/moves
 mymcmc.operatorSummary()

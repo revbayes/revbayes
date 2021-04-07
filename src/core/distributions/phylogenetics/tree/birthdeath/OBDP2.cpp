@@ -73,20 +73,20 @@ OBDP2::OBDP2(                                                                   
     // initialize all the pointers to NULL
     homogeneous_lambda   = NULL;
     homogeneous_mu       = NULL;
-    homogeneous_phi      = NULL;
+    homogeneous_psi      = NULL;
     homogeneous_r        = NULL;
     homogeneous_o        = NULL;
     // homogeneous_Lambda   = NULL;
     // homogeneous_Mu       = NULL;
-    homogeneous_Phi      = NULL;
+    homogeneous_rho      = NULL;
     heterogeneous_lambda = NULL;
     heterogeneous_mu     = NULL;
-    heterogeneous_phi    = NULL;
+    heterogeneous_psi    = NULL;
     heterogeneous_r      = NULL;
     heterogeneous_o      = NULL;
     heterogeneous_Lambda = NULL;
     heterogeneous_Mu     = NULL;
-    heterogeneous_Phi    = NULL;
+    heterogeneous_rho    = NULL;
 
     std::vector<double> times = timeline;
     std::vector<double> times_sorted_ascending = times;
@@ -112,11 +112,11 @@ OBDP2::OBDP2(                                                                   
     addParameter( homogeneous_mu );
     addParameter( heterogeneous_mu );
 
-    heterogeneous_phi = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inserialsampling);
-    homogeneous_phi = dynamic_cast<const TypedDagNode<double >*>(inserialsampling);
+    heterogeneous_psi = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inserialsampling);
+    homogeneous_psi = dynamic_cast<const TypedDagNode<double >*>(inserialsampling);
 
-    addParameter( homogeneous_phi );
-    addParameter( heterogeneous_phi );
+    addParameter( homogeneous_psi );
+    addParameter( heterogeneous_psi );
 
     heterogeneous_r = dynamic_cast<const TypedDagNode<RbVector<double> >*>(intreatment);
     homogeneous_r = dynamic_cast<const TypedDagNode<double >*>(intreatment);
@@ -142,11 +142,11 @@ OBDP2::OBDP2(                                                                   
     // addParameter( homogeneous_Mu );
     addParameter( heterogeneous_Mu );
 
-    heterogeneous_Phi = dynamic_cast<const TypedDagNode<RbVector<double> >*>(ineventsampling);
-    homogeneous_Phi = dynamic_cast<const TypedDagNode<double >*>(ineventsampling);
+    heterogeneous_rho = dynamic_cast<const TypedDagNode<RbVector<double> >*>(ineventsampling);
+    homogeneous_rho = dynamic_cast<const TypedDagNode<double >*>(ineventsampling);
 
-    addParameter( homogeneous_Phi );
-    addParameter( heterogeneous_Phi );
+    addParameter( homogeneous_rho );
+    addParameter( heterogeneous_rho );
 
     //TODO: make sure the offset is added properly into the computation, need to offset *all* times, including interval times
     //          thie means we also need to check that the first interval time is not less than the first tip (which we should probably to anyways)
@@ -164,9 +164,9 @@ OBDP2::OBDP2(                                                                   
       throw(RbException("If provided as a vector, argument mu must have one more element than timeline."));
     }
 
-    if ( heterogeneous_phi != NULL && !(interval_times->getValue().size() == heterogeneous_phi->getValue().size() - 1) )
+    if ( heterogeneous_psi != NULL && !(interval_times->getValue().size() == heterogeneous_psi->getValue().size() - 1) )
     {
-      throw(RbException("If provided as a vector, argument phi must have one more element than timeline."));
+      throw(RbException("If provided as a vector, argument psi must have one more element than timeline."));
     }
 
     if ( heterogeneous_r != NULL && !(interval_times->getValue().size() == heterogeneous_r->getValue().size() - 1) )
@@ -189,9 +189,9 @@ OBDP2::OBDP2(                                                                   
       throw(RbException("If provided, argument Mu must be of same length as timeline."));
     }
 
-    if ( heterogeneous_Phi != NULL && !(interval_times->getValue().size() == heterogeneous_Phi->getValue().size() - 1) )
+    if ( heterogeneous_rho != NULL && !(interval_times->getValue().size() == heterogeneous_rho->getValue().size() - 1) )
     {
-      throw(RbException("If provided as a vector, argument Phi must have one more element than timeline."));
+      throw(RbException("If provided as a vector, argument rho must have one more element than timeline."));
     }
 
     updateVectorParameters();
@@ -245,7 +245,7 @@ double OBDP2::computeLnProbabilityDivergenceTimes( void )
         occAges = std::vector<double>();
     }
 
-    double logLikelihood = RevBayesCore::ComputeLnLikelihoodOBDP(start_age, timeline, lambda, mu, phi, omega, homogeneous_Phi, r, maxHiddenLin, cond, useOrigin, useMt, verbose, occAges, tree);
+    double logLikelihood = RevBayesCore::ComputeLnLikelihoodOBDP(start_age, timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, useOrigin, useMt, verbose, occAges, tree);
     // if (verbose){std::cout << "\ncomputeLnProbabilityTimes : " << computeLnProbabilityTimes() << "\n\n" << std::endl;}
 
     return logLikelihood;
@@ -289,7 +289,7 @@ double OBDP2::computeLnProbabilityTimes( void )
     for (size_t i = 0; i < timeline.size(); ++i)
     {
         // Only compute sampling probability when there is a sampling event
-        if (phi_event[i] > DBL_EPSILON)
+        if (psi_event[i] > DBL_EPSILON)
         {
             if ( RbMath::isFinite(lnProbTimes) == false )
             {
@@ -312,7 +312,7 @@ double OBDP2::computeLnProbabilityTimes( void )
             }
 
             // Make sure that we aren't claiming to have sampled all lineages without having sampled all lineages
-            if (phi_event[i] >= (1.0 - DBL_EPSILON) && (active_lineages_at_t != N_i) )
+            if (psi_event[i] >= (1.0 - DBL_EPSILON) && (active_lineages_at_t != N_i) )
             {
                 return RbConstants::Double::neginf;
                 //std::stringstream ss;
@@ -322,10 +322,10 @@ double OBDP2::computeLnProbabilityTimes( void )
             }
             else
             {
-                ln_sampling_event_prob += N_i * log(phi_event[i]);
+                ln_sampling_event_prob += N_i * log(psi_event[i]);
                 if ( (active_lineages_at_t - N_i) > 0 )
                 {
-                    ln_sampling_event_prob += (active_lineages_at_t - N_i) * log(1 - phi_event[i]);
+                    ln_sampling_event_prob += (active_lineages_at_t - N_i) * log(1 - psi_event[i]);
                 }
             }
 
@@ -361,7 +361,7 @@ double OBDP2::computeLnProbabilityTimes( void )
         size_t index = findIndex(t);
 
         // add the log probability for the serial sampling events
-        if ( phi[index] == 0.0 )
+        if ( psi[index] == 0.0 )
         {
             return RbConstants::Double::neginf;
             //std::stringstream ss;
@@ -371,12 +371,12 @@ double OBDP2::computeLnProbabilityTimes( void )
         else
         {
             double this_prob = r[index] + (1 - r[index]) * E(index,t);
-            this_prob *= phi[index];
-            // double this_prob = phi[index] * r[index];
+            this_prob *= psi[index];
+            // double this_prob = psi[index] * r[index];
             // // Avoid computation in the case of r = 1
             // if (r[t] <= 1 - DBL_EPSILON)
             // {
-            //   this_prob += phi[index] * (1 - r[index]) * E(index,t);
+            //   this_prob += psi[index] * (1 - r[index]) * E(index,t);
             // }
             lnProbTimes += log( this_prob );
         }
@@ -402,7 +402,7 @@ double OBDP2::computeLnProbabilityTimes( void )
             //throw RbException(ss.str());
         }
 
-        lnProbTimes += log(phi[index]) + log(1 - r[index]);
+        lnProbTimes += log(psi[index]) + log(1 - r[index]);
 
     }
 
@@ -565,8 +565,8 @@ void OBDP2::countAllNodes(void) const
         // node is sampled ancestor
           int at_event = whichIntervalTime(t);
 
-          // If this tip is not at an event time (and specifically at an event time with Phi[i] > 0), it's a serial tip
-          if (at_event == -1 || phi_event[at_event] < DBL_EPSILON)
+          // If this tip is not at an event time (and specifically at an event time with rho[i] > 0), it's a serial tip
+          if (at_event == -1 || psi_event[at_event] < DBL_EPSILON)
           {
             serial_sampled_ancestor_ages.push_back(t);
           }
@@ -580,8 +580,8 @@ void OBDP2::countAllNodes(void) const
           // node is serial leaf
           int at_event = whichIntervalTime(t);
 
-          // If this tip is not at an event time (and specifically at an event time with Phi[i] > 0), it's a serial tip
-          if (at_event == -1 || phi_event[at_event] < DBL_EPSILON)
+          // If this tip is not at an event time (and specifically at an event time with rho[i] > 0), it's a serial tip
+          if (at_event == -1 || psi_event[at_event] < DBL_EPSILON)
           {
             serial_tip_ages.push_back(t);
           }
@@ -592,8 +592,8 @@ void OBDP2::countAllNodes(void) const
       }
       else if ( n.isTip() && !n.isFossil() )
       {
-        // Node is at present, this can happen even if Phi[0] = 0, so we check if there is really a sampling event at the present
-        if (phi_event[0] >= DBL_EPSILON)
+        // Node is at present, this can happen even if rho[0] = 0, so we check if there is really a sampling event at the present
+        if (psi_event[0] >= DBL_EPSILON)
         {
           // node is extant leaf
           num_extant_taxa++;
@@ -651,9 +651,9 @@ double OBDP2::lnD(size_t i, double t) const
     // D(0) = 1
     if ( t < DBL_EPSILON )
     {
-        // TODO: this can't be right, if phi_event[0] = 0 this will blow up
-        // return log(phi_event[0]);
-        return phi_event[0] <= DBL_EPSILON ? 0.0 : log(phi_event[0]);
+        // TODO: this can't be right, if psi_event[0] = 0 this will blow up
+        // return log(psi_event[0]);
+        return psi_event[0] <= DBL_EPSILON ? 0.0 : log(psi_event[0]);
     }
     else
     {
@@ -664,12 +664,12 @@ double OBDP2::lnD(size_t i, double t) const
             // D <- D * (1-this_p_s) * (1-this_p_d) * (1-this_p_b + 2*this_p_b*E)
             this_lnD_i = lnD_previous[i];
             // std::cout << "this_lnD_i is now " << this_lnD_i << std::endl;
-            this_lnD_i += log(1.0-phi_event[i]) + log(1.0-mu_event[i]) + log(1-lambda_event[i]+2*lambda_event[i]*E_previous[i]);
+            this_lnD_i += log(1.0-psi_event[i]) + log(1.0-mu_event[i]) + log(1-lambda_event[i]+2*lambda_event[i]*E_previous[i]);
             // std::cout << "this_lnD_i is now " << this_lnD_i << std::endl;
         }
         else
         {
-            this_lnD_i = phi_event[0] <= DBL_EPSILON ? 0.0 : log(phi_event[0]);
+            this_lnD_i = psi_event[0] <= DBL_EPSILON ? 0.0 : log(psi_event[0]);
             // std::cout << "this_lnD_i is now " << this_lnD_i << std::endl;
         }
         // D <- D * 4 * exp(-A*(next_t-current_t))
@@ -698,7 +698,7 @@ double OBDP2::E(size_t i, double t) const
     // E <- (b + d + s - A *(1+B-exp(-A*(next_t-current_t))*(1-B))/(1+B+exp(-A*(next_t-current_t))*(1-B)) ) / (2*b)
     double s = timeline[i];
 
-    double E_i = lambda[i] + mu[i] + phi[i];
+    double E_i = lambda[i] + mu[i] + psi[i];
     E_i -= A_i[i] * (1 + B_i[i] - exp(-A_i[i] * (t - s)) * (1 - B_i[i])) / (1 + B_i[i] + exp(-A_i[i] * (t - s)) * (1 - B_i[i]));
     E_i /= (2 * lambda[i]);
 
@@ -711,7 +711,7 @@ double OBDP2::E(size_t i, double t) const
  * Argument type is one of:
  *                         1: no sampled descendants at any point in time (this is the same as E(i,t))
  *                         2: no sampled descendants at any point in time AND lineage goes extinct before present day
- *                         3: no sampled descendants at time 0 (this only works if 1 > Phi[0] > 0)
+ *                         3: no sampled descendants at time 0 (this only works if 1 > rho[0] > 0)
  *                         4: no extant descendants at time 0
  */
 double OBDP2::modifiedE(int i, double t, size_t condition_type) const
@@ -721,13 +721,13 @@ double OBDP2::modifiedE(int i, double t, size_t condition_type) const
     {
       if (condition_type == 1 || condition_type == 3)
       {
-        if ( phi_event[0] > DBL_EPSILON )
+        if ( psi_event[0] > DBL_EPSILON )
         {
           return 1.0;
         }
         else
         {
-          return 1.0 - phi_event[0];
+          return 1.0 - psi_event[0];
         }
       }
       else
@@ -748,23 +748,23 @@ double OBDP2::modifiedE(int i, double t, size_t condition_type) const
     double E_i;
 
     if ( condition_type == 1 || condition_type == 2 ) {
-      // E_i = lambda[i] + mu[i] + phi[i];
+      // E_i = lambda[i] + mu[i] + psi[i];
       // E_i -= A_i[i] * (1 + B_i[i] - exp(-A_i[i] * (t - s)) * (1 - B_i[i])) / (1 + B_i[i] + exp(-A_i[i] * (t - s)) * (1 - B_i[i]));
       // E_i /= (2 * lambda[i]);
 
       double E_i_minus_1 = modifiedE(i-1,s,condition_type);
 
-      double A = sqrt( pow(lambda[i] - mu[i] - phi[i],2.0) + 4 * lambda[i] * phi[i]);
+      double A = sqrt( pow(lambda[i] - mu[i] - psi[i],2.0) + 4 * lambda[i] * psi[i]);
 
       double C = (1.0 - lambda_event[i]) * (1 - mu_event[i]) * E_i_minus_1;
       C += (1.0 - mu_event[i]) * lambda_event[i] * E_i_minus_1 * E_i_minus_1;
       C += (1.0 - lambda_event[i]) * mu_event[i];
-      C *= (1.0 - phi_event[i]);
+      C *= (1.0 - psi_event[i]);
 
-      double B = (1.0 - 2.0 * C) * lambda[i] + mu[i] + phi[i];
+      double B = (1.0 - 2.0 * C) * lambda[i] + mu[i] + psi[i];
       B /= A;
 
-      E_i = lambda[i] + mu[i] + phi[i];
+      E_i = lambda[i] + mu[i] + psi[i];
       E_i -= A * (1.0 + B - exp(-A * (t - s)) * (1.0 - B)) / (1.0 + B + exp(-A * (t - s)) * (1.0 - B));
       E_i /= (2.0 * lambda[i]);
 
@@ -774,9 +774,9 @@ double OBDP2::modifiedE(int i, double t, size_t condition_type) const
       // TODO: double check this is giving us appropriate r(t_s)
       double E_i_minus_1 = modifiedE(i-1,s,condition_type);
 
-      double delta = mu[i] + phi[i] * r[i];
+      double delta = mu[i] + psi[i] * r[i];
 
-      double G = mu_event[i] + (1.0 - mu_event[i])*phi_event[i]*r[i] + ((1.0 - mu_event[i])*(1.0 - phi_event[i]*r[i]))*E_i_minus_1;
+      double G = mu_event[i] + (1.0 - mu_event[i])*psi_event[i]*r[i] + ((1.0 - mu_event[i])*(1.0 - psi_event[i]*r[i]))*E_i_minus_1;
 
       double F = (1 - lambda_event[i])*G + lambda_event[i]*G*G;
 
@@ -909,12 +909,12 @@ void OBDP2::updateVectorParameters( void ) const
     // clean all the sets
     lambda.clear();
     mu.clear();
-    phi.clear();
+    psi.clear();
     r.clear();
     omega.clear();
     lambda_event.clear();
     mu_event.clear();
-    phi_event.clear();
+    psi_event.clear();
 
     // Get vector of birth rates
     if ( heterogeneous_lambda != NULL )
@@ -937,13 +937,13 @@ void OBDP2::updateVectorParameters( void ) const
     }
 
     // Get vector of serial sampling rates
-    if ( heterogeneous_phi != NULL )
+    if ( heterogeneous_psi != NULL )
     {
-      phi = heterogeneous_phi->getValue();
+      psi = heterogeneous_psi->getValue();
     }
     else
     {
-      phi = std::vector<double>(timeline.size(),homogeneous_phi->getValue());
+      psi = std::vector<double>(timeline.size(),homogeneous_psi->getValue());
     }
 
     // Get vector of conditional death upon sampling probabilities
@@ -995,23 +995,23 @@ void OBDP2::updateVectorParameters( void ) const
     }
 
     // Get vector of event sampling probabilities
-    if ( heterogeneous_Phi != NULL )
+    if ( heterogeneous_rho != NULL )
     {
-      // User has specified phi_event_0,...,phi_event_{l-1}
-      phi_event = heterogeneous_Phi->getValue();
+      // User has specified psi_event_0,...,psi_event_{l-1}
+      psi_event = heterogeneous_rho->getValue();
     }
     else
     {
-        phi_event = std::vector<double>(timeline.size(),0.0);
-        if ( homogeneous_Phi != NULL )
+        psi_event = std::vector<double>(timeline.size(),0.0);
+        if ( homogeneous_rho != NULL )
         {
             // User specified the sampling fraction at the present
-            phi_event[0] = homogeneous_Phi->getValue();
+            psi_event[0] = homogeneous_rho->getValue();
         }
         else
         {
             // set the final sampling to one (for sampling at the present)
-            phi_event[0] = 1.0;
+            psi_event[0] = 1.0;
       }
 
     }
@@ -1044,18 +1044,18 @@ void OBDP2::prepareProbComputation( void ) const
     double t = timeline[0];
 
     // Compute all starting at 1
-    A_i[0] = sqrt( pow(lambda[0] - mu[0] - phi[0],2.0) + 4 * lambda[0] * phi[0]);
+    A_i[0] = sqrt( pow(lambda[0] - mu[0] - psi[0],2.0) + 4 * lambda[0] * psi[0]);
 
     // At the present, only sampling is allowed, no birth/death bursts
-    C_i[0] = (1 - phi_event[0]);
+    C_i[0] = (1 - psi_event[0]);
 
-    B_i[0] = (1.0 - 2.0 * C_i[0]) * lambda[0] + mu[0] + phi[0];
+    B_i[0] = (1.0 - 2.0 * C_i[0]) * lambda[0] + mu[0] + psi[0];
     B_i[0] /= A_i[0];
 
     // E_{i-1}(0) = 1, and our E(i,t) function requires i >= 0, so we hard-code this explicitly
     // Sebastian: This should be the probability of going extinct, which is in this case the probability of non-sampling.
     // Andy: This is not E_0(t_0) this is E_{-1}(t_0)
-    // E_previous[0] = (1 - phi_event[0]);
+    // E_previous[0] = (1 - psi_event[0]);
     E_previous[0] = 1.0;
 
     // we always initialize the probability of observing the lineage at the present with the sampling probability
@@ -1071,14 +1071,14 @@ void OBDP2::prepareProbComputation( void ) const
         lnD_previous[i] = lnD(i-1, t);
 
         // now we can compute A_i, B_i and C_i at the end of this interval.
-        A_i[i] = sqrt( pow(lambda[i] - mu[i] - phi[i],2.0) + 4 * lambda[i] * phi[i]);
+        A_i[i] = sqrt( pow(lambda[i] - mu[i] - psi[i],2.0) + 4 * lambda[i] * psi[i]);
 
         C_i[i] = (1.0 - lambda_event[i]) * (1 - mu_event[i]) * E_previous[i];
         C_i[i] += (1.0 - mu_event[i]) * lambda_event[i] * E_previous[i] * E_previous[i];
         C_i[i] += (1.0 - lambda_event[i]) * mu_event[i];
-        C_i[i] *= (1.0 - phi_event[i]);
+        C_i[i] *= (1.0 - psi_event[i]);
 
-        B_i[i] = (1.0 - 2.0 * C_i[i]) * lambda[i] + mu[i] + phi[i];
+        B_i[i] = (1.0 - 2.0 * C_i[i]) * lambda[i] + mu[i] + psi[i];
         B_i[i] /= A_i[i];
 
     }
@@ -1108,7 +1108,7 @@ double OBDP2::simulateDivergenceTime(double origin, double present) const
     double age = origin - present;
     double b = lambda[i];
     double d = mu[i];
-    double p_e = phi_event[i];
+    double p_e = psi_event[i];
 
 
     // get a random draw
@@ -1215,9 +1215,9 @@ void OBDP2::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
     {
         heterogeneous_mu = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
-    else if (oldP == heterogeneous_phi)
+    else if (oldP == heterogeneous_psi)
     {
-        heterogeneous_phi = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        heterogeneous_psi = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
     else if (oldP == homogeneous_lambda)
     {
@@ -1227,9 +1227,9 @@ void OBDP2::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
     {
         homogeneous_mu = static_cast<const TypedDagNode<double>* >( newP );
     }
-    else if (oldP == homogeneous_phi)
+    else if (oldP == homogeneous_psi)
     {
-        homogeneous_phi = static_cast<const TypedDagNode<double>* >( newP );
+        homogeneous_psi = static_cast<const TypedDagNode<double>* >( newP );
     }
     // Treatment
     else if (oldP == heterogeneous_r)
@@ -1258,9 +1258,9 @@ void OBDP2::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
     {
         heterogeneous_Mu = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
-    else if (oldP == heterogeneous_Phi)
+    else if (oldP == heterogeneous_rho)
     {
-        heterogeneous_Phi = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        heterogeneous_rho = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
     // else if (oldP == homogeneous_Lambda)
     // {
@@ -1270,9 +1270,9 @@ void OBDP2::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
     // {
     //     homogeneous_Mu = static_cast<const TypedDagNode<double>* >( newP );
     // }
-    else if (oldP == homogeneous_Phi)
+    else if (oldP == homogeneous_rho)
     {
-        homogeneous_Phi = static_cast<const TypedDagNode<double>* >( newP );
+        homogeneous_rho = static_cast<const TypedDagNode<double>* >( newP );
     }
     else
     {
