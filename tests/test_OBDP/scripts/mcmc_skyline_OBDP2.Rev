@@ -2,75 +2,72 @@
 #
 # RevBayes Validation Test:Skyline occurrence birth-death process
 #
-# Model: Tree is drawn from a piecewise constant birth-death process with occurrences.
+# Model: Tree is drawn from a birth-death process with occurrences, with piecewise
+# constant birth rate
 #
-#
-# authors: Antoine Zwaans (from Walker Pett's FBDP test function)
+# authors: Antoine Zwaans + Jérémy Andreoletti (based on Walker Pett's FBDP test)
 #
 ################################################################################
 
-seed(12345)
+
 
 #######################
 # Reading in the Data #
 #######################
 
 ### Read in taxon data
+taxa <- readTaxonData("data-epi-test/data_taxa.csv")
+sequences <- readDiscreteCharacterData("data-epi-test/data_seq.nex")
+occurrence_ages <- readMatrix(file="data-epi-test/data_occurrences.csv", delimiter="; ")[1]
 
+seed(12345)
 
-# set my move index
-
+#set my move index
 mvi = 0
-taxa <- readTaxonData("data-epi-small/data_taxa.csv")
-sequences <- readDiscreteCharacterData("data-epi-small/data_seq.nex")
-occurrence_ages <- readMatrix(file="data-epi-small/data_occurrences.csv", delimiter="; ")[1]
 
-#there are no sequences sampled exactly at t=0
-rho <- 0.0
+#there are sequences sampled at present
+rho ~ dnBeta(1,1)
 
 #infected individuals remain infectious after being sampled
 rm <- 0.0
 
-#alpha is 1/lambda for the exponential distribution
-alpha <- 10
-
 #accuracy of our algorithm number of hidden lineages
-N <- 50
+N <- 100
 
 #condition of the algorithm
 cond <- "time"
 
 #the first occurrence is found at t=41.98,we place the origin in a window before
 origin_time ~ dnUnif(41.98199999999932,71.0)
-moves[mvi++] = mvSlide(origin_time, delta=0.01,tune=TRUE,weight=5.0)
 
-#Which likelihood algorithm is used
+#Use Mt likelihood
 Mt <- TRUE
 
-#it is know that there was a major event that is meant to have affected the rates 30days before present
-timeline <- v(30.0)
+extinction ~ dnExp(10)
+omega ~ dnExp(10)
 
-extinction ~ dnExp(alpha)
-omega ~ dnExp(alpha)
-#patients are tested 8 times as often as they are sequenced
+#sequencing is 8 times less frequent than sampling
 sampling := omega/8
 
-
+#moves for constant parameters
 moves[mvi++] = mvScale(extinction, lambda = 0.1,tune=TRUE)
 moves[mvi++] = mvScale(omega, lambda = 0.1, tune=TRUE)
+moves[mvi++] = mvScale(rho, lambda = 0.1, tune=TRUE)
+moves[mvi++] = mvSlide(origin_time, delta=0.01,tune=TRUE,weight=5.0)
+
+#we split the timeline 30 days before present for the brith rate
+timeline <- v(30.0)
+
+#setting up the piecewise constant birth rate, and moves
 for(i in 1:(timeline.size() + 1))
 {
     i
-
-
-		speciation[i] ~ dnExp(alpha)
+		speciation[i] ~ dnExp(10)
 	  moves[mvi++] = mvScale(speciation[i], lambda = 0.1, tune=TRUE)
-
-
 
 }
 
-print(speciation)
+
 ### Define the tree-prior distribution as the piecewise constant birth-death process ###
 obd_tree ~  dnOBDP2(originAge=origin_time,
                     timeline=timeline,
@@ -127,23 +124,23 @@ mymodel = model(obd_tree)
 
 # We define our model.
 # We can use any node of our model as a handle, here we chose to use the rate matrix.
-monitors[1] = mnStochasticVariable(filename="output_epi_small/trace.out", printgen=1)
-monitors[2] = mnFile(filename="output_epi_small/trees.trees", printgen=1,obd_tree)
+monitors[1] = mnStochasticVariable(filename="output_epi_sky/trace.out", printgen=1)
+monitors[2] = mnFile(filename="output_epi_sky/trees.trees", printgen=1,obd_tree)
 monitors[3] = mnScreen(printgen=1,num_samp_anc)
 
 mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
 
-mymcmc.run(generations=100, tuningInterval=10, checkpointInterval=100, checkpointFile="output_epi_small/skyline.state")
+mymcmc.run(generations=100, tuningInterval=10, checkpointInterval=100, checkpointFile="output_epi_sky/skyline.state")
 
 # check the performance of the MCMC/moves
 mymcmc.operatorSummary()
 
 
 # Read in the tree trace and construct the maximum clade credibility (MCC) tree #
-trace = readTreeTrace("output_epi_small/trees.trees")
+trace = readTreeTrace("output_epi_sky/trees.trees")
 
 # Summarize tree trace and save MCC tree to file
-mccTree(trace, file="output_epi_small/tree.tre" )
+mccTree(trace, file="output_epi_sky/tree.tre" )
 
 
 # you may want to quit RevBayes now
