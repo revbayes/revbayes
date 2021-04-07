@@ -103,7 +103,7 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_OBDP2::createDistribution( void ) 
     // death rate
     RevBayesCore::DagNode* d_s = mu->getRevObject().getDagNode();
     // serial sampling rate
-    RevBayesCore::DagNode* s_s = phi->getRevObject().getDagNode();
+    RevBayesCore::DagNode* s_s = psi->getRevObject().getDagNode();
     // treatment probability
     RevBayesCore::DagNode* t   = r->getRevObject().getDagNode();
     // occurrence rate
@@ -122,9 +122,9 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_OBDP2::createDistribution( void ) 
     // }
     // event sampling
     RevBayesCore::DagNode* s_e = NULL;
-    if ( Phi->getRevObject() != RevNullObject::getInstance() )
+    if ( rho->getRevObject() != RevNullObject::getInstance() )
     {
-        s_e = Phi->getRevObject().getDagNode();
+        s_e = rho->getRevObject().getDagNode();
     }
     // rate change times
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ht = NULL;
@@ -241,7 +241,7 @@ const MemberRules& Dist_OBDP2::getParameterRules(void) const
         paramTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
         dist_member_rules.push_back( new ArgumentRule( "lambda",  paramTypes, "The birth rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "mu",      paramTypes, "The death rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        dist_member_rules.push_back( new ArgumentRule( "phi",     paramTypes, "The serial sampling rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "psi",     paramTypes, "The (fossil) serial sampling rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "r",       paramTypes, "The probabilit(y|ies) of death upon sampling (treatment).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "omega",       paramTypes, "The occurrence rates", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
 
@@ -253,7 +253,7 @@ const MemberRules& Dist_OBDP2::getParameterRules(void) const
         std::vector<TypeSpec> event_sampling_paramTypes;
         event_sampling_paramTypes.push_back( Probability::getClassTypeSpec() );
         event_sampling_paramTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
-        dist_member_rules.push_back( new ArgumentRule( "Phi",     event_sampling_paramTypes, "The probability of sampling taxa at sampling events (at present only if input is scalar).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "rho",     event_sampling_paramTypes, "The probability of sampling taxa at sampling events (at present only if input is scalar).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
 
         dist_member_rules.push_back( new ArgumentRule( "timeline",    ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new ModelVector<RealPos>() ) );
@@ -313,9 +313,9 @@ void Dist_OBDP2::setConstParameter(const std::string& name, const RevPtr<const R
     {
         mu = var;
     }
-    else if ( name == "phi" )
+    else if ( name == "psi" )
     {
-        phi = var;
+        psi = var;
     }
     else if ( name == "r" )
     {
@@ -333,9 +333,9 @@ void Dist_OBDP2::setConstParameter(const std::string& name, const RevPtr<const R
     // {
     //     Mu = var;
     // }
-    else if ( name == "Phi" )
+    else if ( name == "rho" )
     {
-        Phi = var;
+        rho = var;
     }
     else if ( name == "rootAge" || name == "originAge" )
     {
