@@ -11,7 +11,7 @@
 #include "RbFileManager.h"
 #include "StringUtilities.h"
 
-#	ifdef RB_WIN
+#	ifdef _WIN32
 #include <windows.h>
 #   endif
 
@@ -169,7 +169,7 @@ void RbSettings::initializeUserSettings(void)
     }
 
     // initialize the current directory to be the directory the binary is sitting in
-#	ifdef RB_WIN
+#	ifdef _WIN32
     
     char buffer[MAX_DIR_PATH];
     GetModuleFileName( NULL, buffer, MAX_DIR_PATH );

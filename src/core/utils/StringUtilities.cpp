@@ -263,7 +263,7 @@ std::string StringUtilities::formatStringForScreen(const std::string &s, const s
 std::string StringUtilities::getStringWithDeletedLastPathComponent(const std::string& s)
 {
     
-#	ifdef RB_WIN
+#	ifdef _WIN32
     std::string pathSeparator = "\\";
 #	else
     std::string pathSeparator = "/";
@@ -329,7 +329,7 @@ std::string StringUtilities::getFileContentsAsString(const std::string& s)
 /** Find the last component of a file path */
 std::string StringUtilities::getLastPathComponent(const std::string& s)
 {
-#	ifdef RB_WIN
+#	ifdef _WIN32
     std::string pathSeparator = "\\";
 #	else
     std::string pathSeparator = "/";

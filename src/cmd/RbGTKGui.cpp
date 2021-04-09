@@ -496,7 +496,7 @@ static void menuitem_set_wd_response( gchar *string )
         RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager( std::string(filename) );
         
         std::string fn = std::string(filename);
-#       if defined (RB_WIN)
+#       if defined (_WIN32)
         StringUtilities::replaceSubstring(fn, "\\", "\\\\");
 #       endif
 
@@ -528,7 +528,7 @@ static void menuitem_source_response( gchar *string )
         filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
         std::string fn = std::string(filename);
 
-#       if defined (RB_WIN)
+#       if defined (_WIN32)
         StringUtilities::replaceSubstring(fn, "\\", "\\\\");
 #       endif
         
