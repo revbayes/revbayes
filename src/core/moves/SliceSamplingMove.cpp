@@ -302,7 +302,8 @@ find_slice_boundaries_doubling(double x0,slice_function& g,double logy, double w
 
     //  std::cerr<<"[]    L0 = "<<L<<"   x0 = "<<x0<<"   R0 = "<<R<<"\n";
 
-    return {L,R,gL_cached,gR_cached};
+    // FIXME: GCC 5 complains if we don't write out the tuple type. GCC 7 does not need it.  How about GCC 6?
+    return std::tuple<double,double,optional<double>,optional<double>>{L,R,gL_cached,gR_cached};
 }
 
 double search_interval(double x0,double& L, double& R, slice_function& g,double logy)
