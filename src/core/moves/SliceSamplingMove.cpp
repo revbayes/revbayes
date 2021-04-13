@@ -5,6 +5,9 @@
 #include <iostream>
 #include <utility>
 #include <vector>
+#include <tuple>
+
+#include <boost/optional.hpp>
 
 #include "DagNode.h"
 #include "SliceSamplingMove.h"
@@ -14,8 +17,14 @@
 #include "RbOrderedSet.h"
 #include "StochasticNode.h"
 
+using boost::optional;
+
 using namespace RevBayesCore;
 
+const double log_0 = RbConstants::Double::min;
+
+// How can we make a run-time adjustable log level?
+int log_level = 0;
 
 /** 
  * Constructor
@@ -25,10 +34,12 @@ using namespace RevBayesCore;
  * \param[in]    w   The weight how often the proposal will be used (per iteration).
  * \param[in]    t   If auto tuning should be used.
  */
-SliceSamplingMove::SliceSamplingMove( StochasticNode<double> *n, double window_, double weight_, bool t ) : AbstractMove( std::vector<DagNode*>(), weight_ ,t),
-    variable( n ),
-    window( window_ ),
-    total_movement( 0.0 )
+SliceSamplingMove::SliceSamplingMove( StochasticNode<double> *n, double window_, double weight_, BoundarySearchMethod s, bool t )
+    : AbstractMove( std::vector<DagNode*>(), weight_ ,t),
+      variable( n ),
+      window( window_ ),
+      total_movement( 0.0 ),
+      search_method ( s )
 {
     assert( not variable->isClamped() );
 
@@ -225,6 +236,75 @@ find_slice_boundaries_stepping_out(double x0,slice_function& g,double logy, doub
   return std::pair<double,double>(L,R);
 }
 
+std::tuple<double,double,optional<double>,optional<double>>
+find_slice_boundaries_doubling(double x0,slice_function& g,double logy, double w, int K)
+{
+    assert(x0 + w > x0);
+    assert(g.in_range(x0));
+
+    double u = uniform()*w;
+    double L = x0 - u;
+    double R = L + w;
+    assert(L < x0);
+    assert(x0 < R);
+
+    optional<double> gL_cached;
+    auto gL = [&]() {
+        if (not gL_cached)
+            gL_cached = (g.in_range(L))?g(L):log_0;
+        return *gL_cached;
+    };
+
+    optional<double> gR_cached;
+    auto gR = [&]() {
+        if (not gR_cached)
+            gR_cached = (g.in_range(R))?g(R):log_0;
+        return *gR_cached;
+    };
+
+    auto too_large = [](double L, double R, double w)
+    {
+        double M = (L+R)/2;
+        double W = R-L;
+        assert(W > 0);
+        bool ok = (L < M) and (M < R) and (W+w > W) and (L-w < L) and (R+w>R);
+        return not ok;
+    };
+
+    while ( K > 0 and (gL() > logy or gR() > logy))
+    {
+        if (log_level >= 4)
+            std::cerr<<"!!    L0 = "<<L<<" (g(L) = "<<gL()<<")  x0 = "<<x0<<"   R0 = "<<R<<" (g(R) = "<<gR()<<")\n";
+
+        double W2 = (R-L);
+        if (uniform() < 0.5)
+        {
+            double L2 = L - W2;
+            if (too_large(L2, R, w))
+                break;
+            L = L2;
+            gL_cached = {};
+        }
+        else
+        {
+            double R2 = R + W2;
+            if (too_large(L, R2, w))
+                break;
+            R = R2;
+            gR_cached = {};
+        }
+
+        K --;
+    }
+
+    assert(L < R);
+    assert( L < (L+R)/2 and (L+R)/2 < R);
+
+    //  std::cerr<<"[]    L0 = "<<L<<"   x0 = "<<x0<<"   R0 = "<<R<<"\n";
+
+    return {L,R,gL_cached,gR_cached};
+}
+
 double search_interval(double x0,double& L, double& R, slice_function& g,double logy)
 {
   //  assert(g(x0) > g(L) and g(x0) > g(R));
@@ -252,7 +332,77 @@ double search_interval(double x0,double& L, double& R, slice_function& g,double 
   return x0;
 }
 
-double slice_sample(double x0, slice_function& g,double w, int m)
+
+bool pre_slice_sampling_check_OK(double x0, slice_function& g)
+{
+    // If x is not in the range then this could be a range that is reduced to avoid loss of precision.
+    if (not g.in_range(x0))
+    {
+        if (log_level >= 4) std::cerr<<x0<<" not in range!";
+        return false;
+    }
+    else
+    {
+        assert(g.in_range(x0));
+        return true;
+    }
+}
+
+bool can_propose_same_interval_doubling(double x0, double x1, double w, double L, double R, optional<double> gL_cached, optional<double> gR_cached, slice_function& g, double log_y)
+{
+    bool D = false;
+
+    auto gL = [&]() {
+        if (not gL_cached)
+            gL_cached = (g.in_range(L))?g(L):log_0;
+        return *gL_cached;
+    };
+
+    auto gR = [&]() {
+        if (not gR_cached)
+            gR_cached = (g.in_range(R))?g(R):log_0;
+        return *gR_cached;
+    };
+
+    bool ok = true;
+    while (ok and R-L > 1.1*w)
+    {
+        double M = (R+L)/2;
+        assert( L < M and M < R);
+
+        // Check if x0 and x1 are in different halves of the interval.
+        if ((x0 < M and x1 >= M) or (x0 >= M and x1 < M))
+            D = true;
+
+        if (x1 < M)
+        {
+            R = M;
+            gR_cached = {};
+        }
+        else
+        {
+            L = M;
+            gL_cached = {};
+        }
+
+        if (D and log_y >= gL() and log_y >= gR())
+            ok = false;
+    }
+
+    // FIXME - this is clunky.  Do we really want to set x by evaluate g( )?
+    if (D)
+    {
+        // We may have set x to L or R, so reset it to the right values.
+        if (ok)
+            g(x1);
+        else
+            g(x0);
+    }
+
+    return ok;
+}
+
+double slice_sample_stepping_out(double x0, slice_function& g,double w, int m)
 {
   assert(g.in_range(x0));
 
@@ -278,19 +428,54 @@ double slice_sample(double x0, slice_function& g,double w, int m)
 }
 
 
+// We need to SET the value INSIDE this routine.
+// Are we assuming that calling g sets the value?
+double slice_sample_doubling(double x0, slice_function& g, double w, int m)
+{
+    // 0. Check that the values are OK
+    if (not pre_slice_sampling_check_OK(x0, g))
+        return x0;
+
+    // 1. Determine the slice level, in log terms.
+    double logy = g() + log(uniform()); // - exponential(1);
+
+    // 2. Find the initial interval to sample from.
+    // FIXME: use structured bindings after we switch to c++17
+    // auto [L,R,gL_cached,gR_cached] = find_slice_boundaries_doubling(x0,g,logy,w,m);
+    auto B = find_slice_boundaries_doubling(x0,g,logy,w,m);
+    auto L = std::get<0>(B);
+    auto R = std::get<1>(B);
+    auto gL_cached = std::get<2>(B);
+    auto gR_cached = std::get<3>(B);
+
+    // 3. Sample from the interval, shrinking it on each rejection
+    double x1 = search_interval(x0,L,R,g,logy);
+
+    // 4. Check that we can propose the same interval from x2
+    // We need to SET the value INSIDE this routine if we recompute g().
+    if (can_propose_same_interval_doubling(x0, x1, w, L, R, gL_cached, gR_cached, g, logy))
+        return x1;
+    else
+        return x0;
+}
+
 void SliceSamplingMove::performMcmcMove( double prHeat, double lHeat, double pHeat )
 {
   slice_function g(variable, prHeat, lHeat, pHeat);
 
   double x1 = g.current_value();
 
-  double x2 = slice_sample(x1, g, window, 100);
+  double x2;
+  if (search_method == search_doubling)
+      x2 = slice_sample_doubling(x1, g, window, 40);
+  else
+      x2 = slice_sample_stepping_out(x1, g, window, 40);
 
   total_movement += std::abs(x2 - x1);
 
   numPr += g.get_num_evals();
 
-  if (auto_tuning and num_tried_total > 3)
+  if (auto_tuning and num_tried_total > 3 and search_method == search_stepping_out)
   {
     double predicted_window = 4.0*total_movement/num_tried_total;
     window = 0.95*window + 0.05*predicted_window;

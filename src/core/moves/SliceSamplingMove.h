@@ -26,7 +26,9 @@ namespace RevBayesCore {
     class SliceSamplingMove : public AbstractMove {
 
     public:
-        SliceSamplingMove(StochasticNode<double> *p, double window_, double weight_, bool autoTune = false);        //!< Constructor
+        enum BoundarySearchMethod { search_stepping_out, search_doubling };
+
+        SliceSamplingMove(StochasticNode<double> *p, double window_, double weight_, BoundarySearchMethod, bool autoTune = false);        //!< Constructor
         virtual                                                 ~SliceSamplingMove(void);                           //!< Destructor
 
         // public methods
@@ -50,6 +52,7 @@ namespace RevBayesCore {
         double                                                  window;                                             //!< Window width for slice sampling
         double                                                  total_movement;                                     //!< total distance moved under auto-tuning
         int                                                     numPr;                                              //!< Number of probability evaluations
+        BoundarySearchMethod                                    search_method;                                      //!< Method of searching for the slice boundary.
     };
 }
 
