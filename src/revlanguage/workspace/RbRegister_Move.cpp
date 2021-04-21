@@ -105,7 +105,7 @@
 #include "Move_DirichletSimplex.h"
 #include "Move_BetaSimplex.h"
 #include "Move_SortedBetaSimplex.h"
-#include "Move_ElementSwapSimplex.h"
+#include "Move_VectorSimplexSwap.h"
 
 /* Moves on vectors */
 #include "Move_ElementScale.h"
@@ -289,7 +289,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_DirichletSimplex() );
         addType( new Move_BetaSimplex() );
         addType( new Move_SortedBetaSimplex() );
-        addType( new Move_ElementSwapSimplex() );
+        addType( new Move_VectorSimplexSwap() );
 
         /* Moves on vectors */
         addType( new Move_MultipleElementScale() );
@@ -349,7 +349,6 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_DPPTableValueUpdate<Real>(    new RevBayesCore::SlideProposal( NULL, 1.0 ) ) );
         addType( new Move_DPPTableValueUpdate<RealPos>( new RevBayesCore::ScaleProposal( NULL, 1.0 ) ) );
         addType( new Move_DPPTableValueUpdate<Simplex>( new RevBayesCore::BetaSimplexProposal( NULL, 10.0 ) ) );
-        //addType( new Move_DPPTableValueUpdate<Simplex>( new RevBayesCore::SortedBetaSimplexProposal( NULL, 10.0 ) ) );
 
 //        addType("mvDPPScaleCatVals",                new Move_DPPScaleCatValsMove() );
 //        addType("mvDPPScaleCatAllocateAux",         new Move_DPPScaleCatAllocateAux() );
