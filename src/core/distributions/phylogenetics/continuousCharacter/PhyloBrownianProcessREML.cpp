@@ -140,10 +140,8 @@ void PhyloBrownianProcessREML::recursiveComputeLnProbability( const TopologyNode
 {
 
     // check for recomputation
-    if ( node.isTip() == false ) // && dirty_nodes[node_index] == true
+    if ( node.isTip() == false && (dirty_nodes[node_index] == true || use_missing_data) )
     {
-        // mark as computed
-        dirty_nodes[node_index] = false;
 
         std::vector<double> &p_node   = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
         std::vector<double> &mu_node  = this->contrasts[this->active_likelihood[node_index]][node_index];
@@ -167,6 +165,9 @@ void PhyloBrownianProcessREML::recursiveComputeLnProbability( const TopologyNode
             const TopologyNode &right = node.getChild(j);
             size_t right_index = right.getIndex();
             recursiveComputeLnProbability( right, right_index );
+            
+            // mark as computed
+            dirty_nodes[node_index] = false;
 
             const std::vector<double> &p_left  = this->partial_likelihoods[this->active_likelihood[left_index]][left_index];
             const std::vector<double> &p_right = this->partial_likelihoods[this->active_likelihood[right_index]][right_index];
@@ -215,17 +216,23 @@ void PhyloBrownianProcessREML::recursiveComputeLnProbability( const TopologyNode
                     // add the propagated uncertainty to the branch lengths
                     t_left  = v_left  + delta_left;
                     t_right = v_right + delta_right;
+
+                    // set delta_node = (t_l*t_r)/(t_l+t_r);
+                    this->contrast_uncertainty_per_site[this->active_likelihood[node_index]][node_index][site] = (t_left*t_right) / (t_left+t_right);
                     
                     stdev = sqrt(t_left+t_right);
                 }
-                if ( missing_data[left_index][site] == true && missing_data[right_index][site] == true )
+                
+                if ( use_missing_data == true && missing_data[left_index][site] == true && missing_data[right_index][site] == true )
                 {
                     missing_data[node_index][site] = true;
                     
                     p_node[site]  = p_left[site] + p_right[site];
                     mu_node[site] = RbConstants::Double::nan;
+
+                    this->contrast_uncertainty_per_site[this->active_likelihood[node_index]][node_index][site] = 0.0;
                 }
-                else if ( missing_data[left_index][site] == true && missing_data[right_index][site] == false )
+                else if ( use_missing_data == true && missing_data[left_index][site] == true && missing_data[right_index][site] == false )
                 {
                     missing_data[node_index][site] = false;
                     
@@ -235,7 +242,7 @@ void PhyloBrownianProcessREML::recursiveComputeLnProbability( const TopologyNode
                     this->contrast_uncertainty_per_site[this->active_likelihood[node_index]][node_index][site] = t_right;
 
                 }
-                else if ( missing_data[left_index][site] == false && missing_data[right_index][site] == true )
+                else if ( use_missing_data == true && missing_data[left_index][site] == false && missing_data[right_index][site] == true )
                 {
                     missing_data[node_index][site] = false;
                     
@@ -246,7 +253,6 @@ void PhyloBrownianProcessREML::recursiveComputeLnProbability( const TopologyNode
                 }
                 else
                 {
-                    missing_data[node_index][site] = false;
 
                     // get the site specific rate of evolution
                     double standDev = this->computeSiteRate(site) * stdev;
@@ -261,6 +267,13 @@ void PhyloBrownianProcessREML::recursiveComputeLnProbability( const TopologyNode
                     p_node[site] = lnl_node + p_left[site] + p_right[site];
                     
                     mu_node[site] = (mu_left[site]*t_right + mu_right[site]*t_left) / (t_left+t_right);
+                    
+                    if ( use_missing_data == true )
+                    {
+                        missing_data[node_index][site] = false;
+                        this->contrast_uncertainty_per_site[this->active_likelihood[node_index]][node_index][site] = (t_left*t_right) / (t_left+t_right);
+                    }
+                    
                 }
                 
 
@@ -508,6 +521,7 @@ void PhyloBrownianProcessREML::touchSpecialization( const DagNode* affecter, boo
     
     if ( touchAll )
     {
+        // mark all nodes for recomputation
         for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
         {
             (*it) = true;
