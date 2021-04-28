@@ -176,19 +176,20 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     }
     else if ( treetype == "non-clock" )
     {
+        if(nexus) rv = readTreesNexus(vectorOfFileNames, false, thin, offset);
+        else rv = readTrees(vectorOfFileNames, sep, false, thin, offset);
+        
         RevBayesCore::Clade og;
         if ( args[arg_index_outgroup].getVariable() != NULL && args[arg_index_outgroup].getVariable()->getRevObject() != RevNullObject::getInstance())
         {
             og = static_cast<const Clade &>( args[arg_index_outgroup].getVariable()->getRevObject() ).getValue();
 
-            for(size_t i = 0; i < rv->getValue().size(); i++)
+            for (size_t i = 0; i < rv->getValue().size(); ++i)
             {
                 rv->getValue()[i].getValue().setOutgroup(og);
             }
         }
 
-        if(nexus) rv = readTreesNexus(vectorOfFileNames, false, thin, offset);
-        else rv = readTrees(vectorOfFileNames, sep, false, thin, offset);
     }
     else
     {
