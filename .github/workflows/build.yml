@@ -164,7 +164,7 @@ jobs:
           export CXX=g++-4.9
           sudo update-alternatives --install /usr/bin/gcc  gcc /usr/bin/gcc-4.9  90
           sudo update-alternatives --install /usr/bin/g++  g++ /usr/bin/g++-4.9  90
-          curl -O -L https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz
+          curl -O -L https://boostorg.jfrog.io/artifactory/main/release/1.71.0/source/boost_1_71_0.tar.gz
           tar -xzf boost_1_71_0.tar.gz
           cd boost_1_71_0
           ./bootstrap.sh --with-libraries=atomic,chrono,filesystem,system,regex,thread,date_time,program_options,math,serialization
