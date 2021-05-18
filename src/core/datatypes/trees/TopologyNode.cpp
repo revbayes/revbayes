@@ -264,7 +264,7 @@ void TopologyNode::addChild(TopologyNode* c, size_t pos )
     // add child to beginning if pos is out of bounds
     if( pos > children.size() )
     {
-        throw(RbException("Child position index out of bounds"));
+        throw RbException("Child position index out of bounds");
     }
 
     // add the child at pos offset from the end
