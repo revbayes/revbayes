@@ -845,6 +845,40 @@ double TopologyNode::getAge( void ) const
 }
 
 
+RbBitSet TopologyNode::getAllClades(std::vector<RbBitSet> &all_clades, size_t num_tips, bool internal_only) const
+{
+
+    RbBitSet this_bs = RbBitSet(num_tips);
+    if ( isTip() == true )
+    {
+//        taxa.set( index );
+        // We can't use indices for tree comparison because different trees may
+        // have different indices for the same taxon.
+        // Instead make the BitSet ordered by taxon names.
+        // Eventually this should be refactored with the TaxonMap class.
+        std::map<std::string, size_t> taxon_bitset_map = tree->getTaxonBitSetMap();
+        this_bs.set( taxon_bitset_map[taxon.getName()] );
+        
+        if ( internal_only == false )
+        {
+            all_clades.push_back( this_bs );
+        }
+    }
+    else
+    {
+        for ( std::vector<TopologyNode* >::const_iterator i=children.begin(); i!=children.end(); i++ )
+        {
+            RbBitSet child_bs = (*i)->getAllClades(all_clades, num_tips, internal_only);
+            this_bs |= child_bs;
+        }
+        all_clades.push_back( this_bs );
+
+    }
+
+    return this_bs;
+}
+
+
 /*
  * Get the branch length.
  * We compute the difference of my time and my parents time.

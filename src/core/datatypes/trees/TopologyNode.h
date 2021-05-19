@@ -79,9 +79,9 @@ namespace RevBayesCore {
         void                                        clearParameters(void);                                                              //!< Clear the node and branch parameters
         void                                        clearBranchParameters(void);
 		void                                        clearNodeParameters(void);
-        virtual std::string                         computeNewick(bool round = true);                                                                //!< Compute the newick string for this clade
+        virtual std::string                         computeNewick(bool round = true);                                                   //!< Compute the newick string for this clade
         std::string                                 computePlainNewick(void) const;                                                     //!< Compute the newick string for this clade as a plain string without branch length
-        std::string                                 computeSimmapNewick(bool round = true);                                                          //!< Compute the newick string compatible with SIMMAP and phytools
+        std::string                                 computeSimmapNewick(bool round = true);                                             //!< Compute the newick string compatible with SIMMAP and phytools
         bool                                        containsClade(const TopologyNode* c, bool strict) const;
         bool                                        containsClade(const Clade &c, bool strict) const;
         bool                                        containsClade(const RbBitSet &c, bool strict) const;
@@ -89,7 +89,8 @@ namespace RevBayesCore {
         std::string                                 fillCladeIndices(std::map<std::string,size_t> &clade_index_map) const;              //!< Fill this map recursively with all clade indices.
         void                                        fireTreeChangeEvent(const unsigned& m = RevBayesCore::TreeChangeEventMessage::DEFAULT);
         double                                      getAge(void) const;                                                                 //!< Get the age (time ago from present) for this node
-        const std::vector<std::string>&             getBranchParameters(void) const;                                                        //!< Get the branch length leading towards this node
+        RbBitSet                                    getAllClades(std::vector<RbBitSet> &taxa, size_t n, bool io) const;                 //!< Fill all the taxon bitset
+        const std::vector<std::string>&             getBranchParameters(void) const;                                                    //!< Get the branch length leading towards this node
         double                                      getBranchLength(void) const;                                                        //!< Get the branch length leading towards this node
         size_t                                      getCladeIndex(const TopologyNode* c) const;
         const TopologyNode&                         getChild(size_t i) const;                                                           //!< Returns the i-th child

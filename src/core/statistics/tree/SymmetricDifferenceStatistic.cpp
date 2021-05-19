@@ -44,7 +44,11 @@ SymmetricDifferenceStatistic* SymmetricDifferenceStatistic::clone( void ) const
 void SymmetricDifferenceStatistic::update( void )
 {
     
-    *value = TreeUtilities::computeRobinsonFouldDistance(tree1->getValue(), tree2->getValue());
+    // do we assume that trees are symmetric, i.e., have the same taxa and are bifurcating?
+    // if so, then the RF distance is simply twice the difference of Tree A to Tree B
+    // for now we simply do not assume symmetry for safety
+    bool trees_are_symmetric = false;
+    *value = TreeUtilities::computeRobinsonFouldDistance(tree1->getValue(), tree2->getValue(), trees_are_symmetric);
 
 }
 

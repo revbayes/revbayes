@@ -710,10 +710,10 @@ const std::vector<TopologyNode*>& Tree::getNodes(void) const
 }
 
 
-std::vector<RbBitSet> Tree::getNodesAsBitset(void) const
+std::vector<RbBitSet>* Tree::getNodesAsBitset(void) const
 {
 
-    std::vector<RbBitSet> bs;
+    std::vector<RbBitSet>* bs = new std::vector<RbBitSet>();
 
     for ( size_t i=0; i<nodes.size(); ++i )
     {
@@ -722,7 +722,7 @@ std::vector<RbBitSet> Tree::getNodesAsBitset(void) const
         {
             RbBitSet taxa_this_node = RbBitSet(num_tips);
             n->getTaxa(taxa_this_node);
-            bs.push_back( taxa_this_node );
+            bs->push_back( taxa_this_node );
         }
     }
 
