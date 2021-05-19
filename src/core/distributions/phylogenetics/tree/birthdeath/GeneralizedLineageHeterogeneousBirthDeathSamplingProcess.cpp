@@ -341,9 +341,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setLambda(const T
 	// include the parameter
 	addParameter(lambda_const);
 
-	// dispatch an update
-//	updateLambda(true);
-
 	// flag for update
 	lambda_dirty = true;
 	probability_dirty = true;
@@ -364,9 +361,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setLambda(const T
 	addParameter(lambda_var);
 	addParameter(lambda_times);
 
-	// dispatch an update
-//	updateLambda(true);
-
 	// flag for update
 	lambda_dirty = true;
 	probability_dirty = true;
@@ -385,9 +379,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setMu(const Typed
 
 	// include the parameter
 	addParameter(mu_const);
-
-	// dispatch an update
-//	updateMu(true);
 
 	// flag for update
 	mu_dirty = true;
@@ -409,9 +400,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setMu(const Typed
 	addParameter(mu_var);
 	addParameter(mu_times);
 
-	// dispatch an update
-//	updateMu(true);
-
 	// flag for update
 	mu_dirty = true;
 	probability_dirty = true;
@@ -430,9 +418,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setPhi(const Type
 
 	// include the parameter
 	addParameter(phi_const);
-
-	// dispatch an update
-//	updatePhi(true);
 
 	// flag for update
 	phi_dirty = true;
@@ -454,9 +439,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setPhi(const Type
 	addParameter(phi_var);
 	addParameter(phi_times);
 
-	// dispatch an update
-//	updatePhi(true);
-
 	// flag for update
 	phi_dirty = true;
 	probability_dirty = true;
@@ -475,9 +457,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setDelta(const Ty
 
 	// include the parameter
 	addParameter(delta_const);
-
-	// dispatch an update
-//	updateDelta(true);
 
 	// flag for update
 	delta_dirty = true;
@@ -499,9 +478,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setDelta(const Ty
 	addParameter(delta_var);
 	addParameter(delta_times);
 
-	// dispatch an update
-//	updateDelta(true);
-
 	// flag for update
 	delta_dirty = true;
 	probability_dirty = true;
@@ -521,9 +497,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setUpsilon(const 
 	// include the parameter
 	addParameter(upsilon);
 	addParameter(upsilon_times);
-
-	// dispatch an update
-//	updateUpsilon(true);
 
 	// flag for update
 	upsilon_dirty = true;
@@ -545,9 +518,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setGamma(const Ty
 	addParameter(gamma);
 	addParameter(gamma_times);
 
-	// dispatch an update
-//	updateGamma(true);
-
 	// flag for update
 	gamma_dirty = true;
 	probability_dirty = true;
@@ -566,9 +536,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setRho(const Type
 
 	// include the parameter
 	addParameter(rho_simple);
-
-	// dispatch an update
-//	updateRho(true);
 
 	// flag for update
 	rho_dirty = true;
@@ -590,9 +557,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setRho(const Type
 	addParameter(rho);
 	addParameter(rho_times);
 
-	// dispatch an update
-//	updateRho(true);
-
 	// flag for update
 	rho_dirty = true;
 	probability_dirty = true;
@@ -613,9 +577,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setXi(const Typed
 	addParameter(xi);
 	addParameter(xi_times);
 
-	// dispatch an update
-//	updateXi(true);
-
 	// flag for update
 	xi_dirty = true;
 	probability_dirty = true;
@@ -635,9 +596,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const Type
 	// include the parameter
 	addParameter(eta_simple);
 
-	// dispatch an update
-//	updateEta(true);
-
 	// flag for update
 	eta_dirty = true;
 	probability_dirty = true;
@@ -656,9 +614,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const Type
 
 	// include the parameter
 	addParameter(eta_const);
-
-	// dispatch an update
-//	updateEta(true);
 
 	// flag for update
 	eta_dirty = true;
@@ -680,9 +635,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const Type
 	addParameter(eta_var);
 	addParameter(eta_times);
 
-	// dispatch an update
-//	updateEta(true);
-
 	// flag for update
 	eta_dirty = true;
 	probability_dirty = true;
@@ -701,9 +653,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setOmega(const Ty
 
 	// include the parameter
 	addParameter(omega_const);
-
-	// dispatch an update
-//	updateOmega(true);
 
 	// flag for update
 	omega_dirty = true;
@@ -725,9 +674,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setOmega(const Ty
 	addParameter(omega_var);
 	addParameter(omega_times);
 
-	// dispatch an update
-//	updateOmega(true);
-
 	// flag for update
 	omega_dirty = true;
 	probability_dirty = true;
@@ -745,9 +691,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setZeta(const Typ
 
 	// include the parameter
 	addParameter(zeta);
-
-	// dispatch an update
-//	updateZeta(true);
 
 	// flag for update
 	zeta_dirty = true;
@@ -1016,62 +959,50 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
     {
     	if ( restorer == root_frequency )
     	{
-//    		updateRootFrequency();
     		root_frequency_dirty = true;
     	}
     	else if ( restorer == lambda_const || restorer == lambda_var || restorer == lambda_times  )
     	{
-//    		updateLambda();
     		lambda_dirty = true;
     	}
     	else if ( restorer == mu_const || restorer == mu_var || restorer == mu_times  )
     	{
-//    		updateMu();
     		mu_dirty = true;
     	}
     	else if ( restorer == phi_const || restorer == phi_var || restorer == phi_times  )
     	{
-//    		updatePhi();
     		phi_dirty = true;
     	}
     	else if ( restorer == delta_const || restorer == delta_var || restorer == delta_times )
     	{
-//    		updateDelta();
     		delta_dirty = true;
     	}
     	else if ( restorer == upsilon || restorer == upsilon_times  )
     	{
-//    		updateUpsilon();
     		upsilon_dirty = true;
     	}
     	else if ( restorer == gamma || restorer == gamma_times )
     	{
-//    		updateGamma();
     		gamma_dirty = true;
     	}
     	else if ( restorer == rho_simple || restorer == rho || restorer == rho_times  )
     	{
-//    		updateRho();
     		rho_dirty = true;
     	}
     	else if ( restorer == xi || restorer == xi_times  )
     	{
-//    		updateXi();
     		xi_dirty = true;
     	}
     	else if ( restorer == eta_simple || restorer == eta_const || restorer == eta_var || restorer == eta_times  )
     	{
-//    		updateEta();
     		eta_dirty = true;
     	}
     	else if ( restorer == omega_const || restorer == omega_var || restorer == omega_times  )
     	{
-//    		updateOmega();
     		omega_dirty = true;
     	}
     	else if ( restorer == zeta  )
     	{
-//    		updateZeta();
     		zeta_dirty = true;
     	}
     }
@@ -1215,73 +1146,61 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecializati
         if ( affecter == root_frequency )
 		{
 			root_frequency_dirty = true;
-//			updateRootFrequency();
 			probability_dirty = true;
 		}
         else if ( affecter == lambda_const || affecter == lambda_var || affecter == lambda_times  )
     	{
     		lambda_dirty = true;
-//    		updateLambda();
     		probability_dirty = true;
     	}
     	else if ( affecter == mu_const || affecter == mu_var || affecter == mu_times  )
     	{
     		mu_dirty = true;
-//    		updateMu();
     		probability_dirty = true;
     	}
     	else if ( affecter == phi_const || affecter == phi_var || affecter == phi_times  )
     	{
     		phi_dirty = true;
-//    		updatePhi();
     		probability_dirty = true;
     	}
     	else if ( affecter == delta_const || affecter == delta_var || affecter == delta_times )
     	{
     		delta_dirty = true;
-//    		updateDelta();
     		probability_dirty = true;
     	}
     	else if ( affecter == upsilon || affecter == upsilon_times  )
     	{
     		upsilon_dirty = true;
-//    		updateUpsilon();
     		probability_dirty = true;
     	}
     	else if ( affecter == gamma || affecter == gamma_times )
     	{
     		gamma_dirty = true;
-//    		updateGamma();
     		probability_dirty = true;
     	}
     	else if ( affecter == rho_simple || affecter == rho || affecter == rho_times  )
     	{
     		rho_dirty = true;
-//    		updateRho();
     		probability_dirty = true;
     	}
     	else if ( affecter == xi || affecter == xi_times  )
     	{
     		xi_dirty = true;
-//    		updateXi();
     		probability_dirty = true;
     	}
     	else if ( affecter == eta_simple || affecter == eta_const || affecter == eta_var || affecter == eta_times  )
     	{
     		eta_dirty = true;
-//    		updateEta();
     		probability_dirty = true;
     	}
     	else if ( affecter == omega_const || affecter == omega_var || affecter == omega_times  )
     	{
     		omega_dirty = true;
-//    		updateOmega();
     		probability_dirty = true;
     	}
     	else if ( affecter == zeta  )
     	{
     		zeta_dirty = true;
-//    		updateZeta();
     		probability_dirty = true;
     	}
     }
@@ -1530,12 +1449,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateLambda(bool
 			std::vector< std::vector<double> > params = RbToStd( lambda_var->getValue() );
 			std::vector<double>                times  = RbToStd( lambda_times->getValue() );
 
-//			// handle some errors
-//			if ( params.size() != times.size() + 1 )
-//			{
-//				throw RbException( "Number of lambda vectors does not match the number of intervals." );
-//			}
-
 			// set the parameters
 			tp_ptr->setLambda(times, params);
 
@@ -1571,12 +1484,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateMu(bool for
 			std::vector< std::vector<double> > params = RbToStd( mu_var->getValue() );
 			std::vector<double>                times  = RbToStd( mu_times->getValue() );
 
-//			// handle some errors
-//			if ( params.size() != times.size() + 1 )
-//			{
-//				throw RbException( "Number of mu vectors does not match the number of intervals." );
-//			}
-
 			// set the parameters
 			tp_ptr->setMu(times, params);
 		}
@@ -1611,12 +1518,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updatePhi(bool fo
 			std::vector< std::vector<double> > params = RbToStd( phi_var->getValue() );
 			std::vector<double>                times  = RbToStd( phi_times->getValue() );
 
-//			// handle some errors
-//			if ( params.size() != times.size() + 1 )
-//			{
-//				throw RbException( "Number of phi vectors does not match the number of intervals." );
-//			}
-
 			// set the parameters
 			tp_ptr->setPhi(times, params);
 		}
@@ -1650,12 +1551,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateDelta(bool 
 			std::vector< std::vector<double> > params = RbToStd( delta_var->getValue() );
 			std::vector<double>                times  = RbToStd( delta_times->getValue() );
 
-//			// handle some errors
-//			if ( params.size() != times.size() + 1 )
-//			{
-//				throw RbException( "Number of delta vectors does not match the number of intervals." );
-//			}
-
 			// set the parameters
 			tp_ptr->setDelta(times, params);
 		}
@@ -1679,12 +1574,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateUpsilon(boo
 			// convert to std
 			params = RbToStd( upsilon->getValue() );
 			times  = RbToStd( upsilon_times->getValue() );
-
-//			// handle some errors
-//			if ( params.size() != times.size() )
-//			{
-//				throw RbException( "Number of upsilon events does not match the number of times." );
-//			}
 
 			// set the parameters
 			tp_ptr->setMassSpeciationEvents(times, params);
@@ -1710,12 +1599,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateGamma(bool 
 			// convert to std
 			params = RbToStd( gamma->getValue() );
 			times  = RbToStd( gamma_times->getValue() );
-
-//			// handle some errors
-//			if ( params.size() != times.size() )
-//			{
-//				throw RbException( "Number of gamma events does not match the number of times." );
-//			}
 
 			// set the parameters
 			tp_ptr->setMassExtinctionEvents(times, params);
@@ -1755,12 +1638,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateRho(bool fo
 				// convert to std
 				params = RbToStd( rho->getValue() );
 				times  = RbToStd( rho_times->getValue() );
-
-//				// handle some errors
-//				if ( params.size() != times.size() )
-//				{
-//					throw RbException( "Number of rho events does not match the number of times." );
-//				}
 			}
 
 			// set the parameters
@@ -1787,12 +1664,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateXi(bool for
 			// convert to std
 			params = RbToStd( xi->getValue() );
 			times  = RbToStd( xi_times->getValue() );
-
-//			// handle some errors
-//			if ( params.size() != times.size() )
-//			{
-//				throw RbException( "Number of xi events does not match the number of times." );
-//			}
 
 			// set the parameters
 			tp_ptr->setMassDestrSamplingEvents(times, params);
@@ -1850,12 +1721,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateEta(bool fo
 			std::vector< std::vector< std::vector<double> > > params = RbToStd( eta_var->getValue() );
 			std::vector<double>                               times  = RbToStd( eta_times->getValue() );
 
-//			// handle some errors
-//			if ( params.size() != times.size() + 1 )
-//			{
-//				throw RbException( "Number of eta matrices does not match the number of intervals." );
-//			}
-
 			// set the parameters
 			tp_ptr->setEta(times, params);
 		}
@@ -1888,12 +1753,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateOmega(bool 
 			std::vector< std::map< std::vector<unsigned>, double > > params = RbToStd( omega_var->getValue() );
 			std::vector<double>                                      times  = RbToStd( omega_times->getValue() );
 
-//			// handle some errors
-//			if ( params.size() != times.size() + 1 )
-//			{
-//				throw RbException( "Number of omega matrices does not match the number of intervals." );
-//			}
-
 			// set the parameters
 			tp_ptr->setOmega(num_states, times, params);
 		}
@@ -1916,12 +1775,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateZeta(bool f
 
 			// convert to std
 			params = RbToStd( zeta->getValue() );
-
-//			// handle some errors
-//			if ( params.size() != gamma_times->getValue().size() )
-//			{
-//				throw RbException( "Number of zeta matrices does not match the number of times." );
-//			}
 
 			// set the parameters
 			tp_ptr->setMassExtinctionStateChangeProb(params);
