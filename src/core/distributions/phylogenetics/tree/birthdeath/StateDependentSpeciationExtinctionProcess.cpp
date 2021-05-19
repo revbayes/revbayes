@@ -1489,6 +1489,8 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> StateDependentSpeciationExtinction
         
         static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData( v.clone() );
    
+        // Sebastian (20210519): We should not waste computations here if we actually don't need it. Try to do lazy evaluations.
+        // I keep this here if we find out later that these were indeed.
         // simulate character history over the tree conditioned on the new tip data
 //        size_t num_nodes = value->getNumberOfNodes();
 //        std::vector<std::string> character_histories(num_nodes);
@@ -2006,7 +2008,7 @@ void StateDependentSpeciationExtinctionProcess::setValue(Tree *v, bool f )
 //        std::vector<std::string> character_histories(num_nodes);
 //        drawStochasticCharacterMap(character_histories);
 //    }
-//    static_cast<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
+    static_cast<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
 }
 
 
