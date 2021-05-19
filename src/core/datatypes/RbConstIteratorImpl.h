@@ -35,10 +35,8 @@ namespace RevBayesCore {
         // constructor(s)
         RbConstIteratorImpl(void) { }
         RbConstIteratorImpl(const iteratorType &i) { it = i; }
-//        RbConstIteratorImpl(const RbConstIteratorImpl<valueType,indicator> &v);
         
         // public (stl-like) vector functions
-//        RbConstIteratorImpl<valueType,indicator>            operator+(size_t i) const { return RbConstIteratorImpl<valueType,indicator>(it+i); }                                                                        //!< Increment index (prefix)
         RbConstIteratorImpl<valueType,indicator>&           operator++(void) { ++it; return *this; }                                                                        //!< Increment index (prefix)
         const RbConstIteratorImpl<valueType,indicator>&     operator++(void) const { ++it; return *this; }                                                                  //!< Increment index (prefix)
         RbConstIteratorImpl<valueType,indicator>&           operator--(void) { --it; return *this; }                                                                        //!< Decrement index (prefix)
@@ -66,10 +64,8 @@ namespace RevBayesCore {
         // constructor(s)
         RbConstIteratorImpl(void) { }
         RbConstIteratorImpl(const iteratorType &i) { it = i; }
-//        RbConstIteratorImpl(const RbConstIteratorImpl<valueType,1> &v);
         
         // public (stl-like) vector functions
-//        RbConstIteratorImpl<valueType,1>                    operator+(size_t i) const { return RbConstIteratorImpl<valueType,1>(it+i); }                                                                        //!< Increment index (prefix)
         RbConstIteratorImpl<valueType,1>&                   operator++(void) { ++it; return *this; }                                                                        //!< Increment index (prefix)
         const RbConstIteratorImpl<valueType,1>&             operator++(void) const { ++it; return *this; }                                                                  //!< Increment index (prefix)
         RbConstIteratorImpl<valueType,1>&                   operator--(void) { --it; return *this; }                                                                        //!< Decrement index (prefix)
