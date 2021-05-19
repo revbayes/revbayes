@@ -2000,7 +2000,9 @@ void StateDependentSpeciationExtinctionProcess::setValue(Tree *v, bool f )
         tip_data->addTaxonData(this_tip_data);
     }
     static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData(tip_data);
-   
+    
+    // Sebastian (20210519): We should not waste computations here if we actually don't need it. Try to do lazy evaluations.
+    // I keep this here if we find out later that these were indeed.
     // simulate character history over the new tree
 //    size_t num_nodes = value->getNumberOfNodes();
 //    if (num_nodes > 2)
