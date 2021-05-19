@@ -507,19 +507,6 @@ void TreeSummary::mapContinuous(Tree &tree, const std::string &n, size_t paramIn
                     {
 
                         root_checked = true;
-                        
-//                        const std::string& this_clade_newick = summary_newick[j];
-//                        std::map<std::string,size_t>::const_iterator this_clade_it = sample_clade_indices.find( this_clade_newick );
-//
-//                        if ( this_clade_it == sample_clade_indices.end() )
-//                        {
-//                            for (std::map<std::string,size_t>::const_iterator tmp_it = sample_clade_indices.begin(); tmp_it != sample_clade_indices.end(); ++tmp_it)
-//                            {
-//                                std::cerr << tmp_it->first << std::endl;
-//                            }
-//                            throw RbException(" Could not find index for clade '" + this_clade_newick + "'.");
-//                        }
-//                        size_t sample_clade_index = this_clade_it->second;
 
                         const TopologyNode &sample_node = sample_tree.getRoot();
 
