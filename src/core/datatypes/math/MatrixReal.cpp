@@ -417,10 +417,6 @@ double MatrixReal::getLogDet() const
             }
         }
         
-//        if (std::isnan(tot))
-//        {
-//            RbException("Problem when computing log-determinant.");
-//        }
         return tot;
     }
     
