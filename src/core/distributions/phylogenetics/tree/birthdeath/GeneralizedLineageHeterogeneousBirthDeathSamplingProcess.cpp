@@ -38,52 +38,53 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	age(age_),
 	condition_type(condition_type_),
 	num_states(num_states_),
+	use_origin(use_origin_),
 	root_frequency(root_frequency_),
+	root_frequency_dirty(true),
 	lambda_const(NULL),
 	lambda_var(NULL),
 	lambda_times(NULL),
+	lambda_dirty(true),
 	mu_const(NULL),
 	mu_var(NULL),
 	mu_times(NULL),
+	mu_dirty(true),
 	phi_const(NULL),
 	phi_var(NULL),
 	phi_times(NULL),
+	phi_dirty(true),
 	delta_const(NULL),
 	delta_var(NULL),
 	delta_times(NULL),
+	delta_dirty(true),
 	upsilon(NULL),
 	upsilon_times(NULL),
+	upsilon_dirty(true),
 	gamma(NULL),
 	gamma_times(NULL),
+	gamma_dirty(true),
 	rho_simple(NULL),
 	rho(NULL),
 	rho_times(NULL),
+	rho_dirty(true),
 	xi(NULL),
 	xi_times(NULL),
+	xi_dirty(true),
 	eta_simple(NULL),
 	eta_const(NULL),
 	eta_var(NULL),
 	eta_times(NULL),
+	eta_dirty(true),
 	omega_const(NULL),
 	omega_var(NULL),
 	omega_times(NULL),
-	zeta(NULL),
-	use_origin(use_origin_),
-	tree_dirty(true),
-	root_freq_dirty(true),
-	lambda_dirty(true),
-	mu_dirty(true),
-	phi_dirty(true),
-	delta_dirty(true),
-	upsilon_dirty(true),
-	gamma_dirty(true),
-	rho_dirty(true),
-	xi_dirty(true),
-	eta_dirty(true),
 	omega_dirty(true),
-	zeta_dirty(true)
+	zeta(NULL),
+	zeta_dirty(true),
+	tree_dirty(true)
 {
 
+	std::cout << "Creating distribution" << std::endl;
 
 	//assert(Plugin::loader().isTensorPhyloLoaded());
 	try {
@@ -272,18 +273,29 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::buildSerialSample
 
 double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbability(void)
 {
+
+	std::cout << "Computing probability" << std::endl;
+
 	// make sure we need to recompute
 	if ( probability_dirty == false )
 	{
 		return current_ln_prob;
 	}
+	else
+	{
+		// make sure all parameters are up-to-date
+		// on the tensorphylo side
+		prepareParameters(false);
+	}
+
+	std::cout << "Done preparing parameters." << std::endl;
 
 	// store the old likelihood
     old_ln_prob = current_ln_prob;
 
     // calculate a likelihood!
-//	tp_ptr->writeStateToFile("params.dat");
-		//tp_ptr->loadStateFromFile("state.dat");
+    // tp_ptr->writeStateToFile("params.dat");
+	// tp_ptr->loadStateFromFile("state.dat");
     current_ln_prob = tp_ptr->computeLogLikelihood();
 
     // flag the likelihood as up-to-date
@@ -336,10 +348,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setLambda(const T
 	addParameter(lambda_const);
 
 	// dispatch an update
-	updateLambda(true);
+//	updateLambda(true);
 
-	// mark clean
-	lambda_dirty = false;
+	// flag for update
+	lambda_dirty = true;
+	probability_dirty = true;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setLambda(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
@@ -358,10 +371,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setLambda(const T
 	addParameter(lambda_times);
 
 	// dispatch an update
-	updateLambda(true);
+//	updateLambda(true);
 
-	// mark clean
-	lambda_dirty = false;
+	// flag for update
+	lambda_dirty = true;
+	probability_dirty = true;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setMu(const TypedDagNode< RbVector<double> >* param)
@@ -379,10 +393,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setMu(const Typed
 	addParameter(mu_const);
 
 	// dispatch an update
-	updateMu(true);
+//	updateMu(true);
 
-	// mark clean
-	mu_dirty = false;
+	// flag for update
+	mu_dirty = true;
+	probability_dirty = true;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setMu(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
@@ -401,10 +416,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setMu(const Typed
 	addParameter(mu_times);
 
 	// dispatch an update
-	updateMu(true);
+//	updateMu(true);
 
-	// mark clean
-	mu_dirty = false;
+	// flag for update
+	mu_dirty = true;
+	probability_dirty = true;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setPhi(const TypedDagNode< RbVector<double> >* param)
@@ -422,10 +438,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setPhi(const Type
 	addParameter(phi_const);
 
 	// dispatch an update
-	updatePhi(true);
+//	updatePhi(true);
 
-	// mark clean
-	phi_dirty = false;
+	// flag for update
+	phi_dirty = true;
+	probability_dirty = true;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setPhi(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
@@ -444,10 +461,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setPhi(const Type
 	addParameter(phi_times);
 
 	// dispatch an update
-	updatePhi(true);
+//	updatePhi(true);
 
-	// mark clean
-	phi_dirty = false;
+	// flag for update
+	phi_dirty = true;
+	probability_dirty = true;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setDelta(const TypedDagNode< RbVector<double> >* param)
@@ -465,10 +483,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setDelta(const Ty
 	addParameter(delta_const);
 
 	// dispatch an update
-	updateDelta(true);
+//	updateDelta(true);
 
-	// mark clean
-	delta_dirty = false;
+	// flag for update
+	delta_dirty = true;
+	probability_dirty = true;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setDelta(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
@@ -487,10 +506,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setDelta(const Ty
 	addParameter(delta_times);
 
 	// dispatch an update
-	updateDelta(true);
+//	updateDelta(true);
 
-	// mark clean
-	delta_dirty = false;
+	// flag for update
+	delta_dirty = true;
+	probability_dirty = true;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setUpsilon(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
@@ -509,10 +529,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setUpsilon(const 
 	addParameter(upsilon_times);
 
 	// dispatch an update
-	updateUpsilon(true);
+//	updateUpsilon(true);
 
-	// mark clean
-	upsilon_dirty = false;
+	// flag for update
+	upsilon_dirty = true;
+	probability_dirty = true;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setGamma(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
@@ -531,10 +552,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setGamma(const Ty
 	addParameter(gamma_times);
 
 	// dispatch an update
-	updateGamma(true);
+//	updateGamma(true);
 
-	// mark clean
-	gamma_dirty = false;
+	// flag for update
+	gamma_dirty = true;
+	probability_dirty = true;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setRho(const TypedDagNode< double >* param)
@@ -552,10 +574,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setRho(const Type
 	addParameter(rho_simple);
 
 	// dispatch an update
-	updateRho(true);
+//	updateRho(true);
 
-	// mark clean
-	rho_dirty = false;
+	// flag for update
+	rho_dirty = true;
+	probability_dirty = true;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setRho(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
@@ -574,10 +597,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setRho(const Type
 	addParameter(rho_times);
 
 	// dispatch an update
-	updateRho(true);
+//	updateRho(true);
 
-	// mark clean
-	rho_dirty = false;
+	// flag for update
+	rho_dirty = true;
+	probability_dirty = true;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setXi(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
@@ -596,10 +620,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setXi(const Typed
 	addParameter(xi_times);
 
 	// dispatch an update
-	updateXi(true);
+//	updateXi(true);
 
-	// mark clean
-	xi_dirty = false;
+	// flag for update
+	xi_dirty = true;
+	probability_dirty = true;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const TypedDagNode< double >* param)
@@ -617,10 +642,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const Type
 	addParameter(eta_simple);
 
 	// dispatch an update
-	updateEta(true);
+//	updateEta(true);
 
-	// mark clean
-	eta_dirty = false;
+	// flag for update
+	eta_dirty = true;
+	probability_dirty = true;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const TypedDagNode< RateGenerator >* param)
@@ -638,10 +664,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const Type
 	addParameter(eta_const);
 
 	// dispatch an update
-	updateEta(true);
+//	updateEta(true);
 
-	// mark clean
-	eta_dirty = false;
+	// flag for update
+	eta_dirty = true;
+	probability_dirty = true;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const TypedDagNode< RbVector< RateGenerator > >* param, const TypedDagNode< RbVector<double> >* times)
@@ -660,10 +687,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const Type
 	addParameter(eta_times);
 
 	// dispatch an update
-	updateEta(true);
+//	updateEta(true);
 
-	// mark clean
-	eta_dirty = false;
+	// flag for update
+	eta_dirty = true;
+	probability_dirty = true;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setOmega(const TypedDagNode< CladogeneticProbabilityMatrix >* param)
@@ -681,10 +709,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setOmega(const Ty
 	addParameter(omega_const);
 
 	// dispatch an update
-	updateOmega(true);
+//	updateOmega(true);
 
-	// mark clean
-	omega_dirty = false;
+	// flag for update
+	omega_dirty = true;
+	probability_dirty = true;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setOmega(const TypedDagNode< RbVector< CladogeneticProbabilityMatrix > >* param, const TypedDagNode< RbVector<double> >* times)
@@ -703,10 +732,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setOmega(const Ty
 	addParameter(omega_times);
 
 	// dispatch an update
-	updateOmega(true);
+//	updateOmega(true);
 
-	// mark clean
-	omega_dirty = false;
+	// flag for update
+	omega_dirty = true;
+	probability_dirty = true;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setZeta(const TypedDagNode< RbVector< MatrixReal > >* param)
@@ -723,10 +753,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setZeta(const Typ
 	addParameter(zeta);
 
 	// dispatch an update
-	updateZeta(true);
+//	updateZeta(true);
 
-	// mark clean
-	zeta_dirty = false;
+	// flag for update
+	zeta_dirty = true;
+	probability_dirty = true;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v, bool f)
@@ -928,28 +959,28 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecializatio
     }
 
     // clear all flags
-    probability_dirty = false;
-    tree_dirty        = false;
-    root_freq_dirty   = false;
-    lambda_dirty      = false;
-    mu_dirty          = false;
-    phi_dirty         = false;
-    delta_dirty       = false;
-    upsilon_dirty     = false;
-    gamma_dirty       = false;
-    rho_dirty         = false;
-    xi_dirty          = false;
-    eta_dirty         = false;
-    omega_dirty       = false;
-    zeta_dirty        = false;
-    old_ln_prob       = current_ln_prob; // make sure we don't accidently restore the outdated likelihood
+    probability_dirty    = false;
+    tree_dirty           = false;
+    root_frequency_dirty = false;
+    lambda_dirty         = false;
+    mu_dirty             = false;
+    phi_dirty            = false;
+    delta_dirty          = false;
+    upsilon_dirty        = false;
+    gamma_dirty          = false;
+    rho_dirty            = false;
+    xi_dirty             = false;
+    eta_dirty            = false;
+    omega_dirty          = false;
+    zeta_dirty           = false;
+    old_ln_prob          = current_ln_prob; // make sure we don't accidently restore the outdated likelihood
 
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::prepareParameters(bool force)
 {
 
-//	std::cout << "Preparing parameters" << std::endl;
+	std::cout << "Preparing parameters" << std::endl;
 
 	// make sure all the parameters are up-to-date
 	updateTree(force);
@@ -964,10 +995,13 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::prepareParameters
 	updateRho(force);
 	updateXi(force);
 	updateEta(force);
+
 	updateOmega(force);
+	std::cout << "Done preparing parameters (1)" << std::endl;
+
 	updateZeta(force);
 
-//	std::cout << "Done preparing parameters" << std::endl;
+	std::cout << "Done preparing parameters (2)" << std::endl;
 
 }
 
@@ -993,60 +1027,65 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
 
     if ( restorer != this->dag_node )
     {
-    	if ( restorer == lambda_const || restorer == lambda_var || restorer == lambda_times  )
+    	if ( restorer == root_frequency )
     	{
-    		updateLambda();
-    		lambda_dirty = false;
+//    		updateRootFrequency();
+    		root_frequency_dirty = true;
+    	}
+    	else if ( restorer == lambda_const || restorer == lambda_var || restorer == lambda_times  )
+    	{
+//    		updateLambda();
+    		lambda_dirty = true;
     	}
     	else if ( restorer == mu_const || restorer == mu_var || restorer == mu_times  )
     	{
-    		updateMu();
-    		mu_dirty = false;
+//    		updateMu();
+    		mu_dirty = true;
     	}
     	else if ( restorer == phi_const || restorer == phi_var || restorer == phi_times  )
     	{
-    		updatePhi();
-    		phi_dirty = false;
+//    		updatePhi();
+    		phi_dirty = true;
     	}
     	else if ( restorer == delta_const || restorer == delta_var || restorer == delta_times )
     	{
-    		updateDelta();
-    		delta_dirty = false;
+//    		updateDelta();
+    		delta_dirty = true;
     	}
     	else if ( restorer == upsilon || restorer == upsilon_times  )
     	{
-    		updateUpsilon();
-    		upsilon_dirty = false;
+//    		updateUpsilon();
+    		upsilon_dirty = true;
     	}
     	else if ( restorer == gamma || restorer == gamma_times )
     	{
-    		updateGamma();
-    		gamma_dirty = false;
+//    		updateGamma();
+    		gamma_dirty = true;
     	}
     	else if ( restorer == rho_simple || restorer == rho || restorer == rho_times  )
     	{
-    		updateRho();
-    		rho_dirty = false;
+//    		updateRho();
+    		rho_dirty = true;
     	}
     	else if ( restorer == xi || restorer == xi_times  )
     	{
-    		updateXi();
-    		xi_dirty = false;
+//    		updateXi();
+    		xi_dirty = true;
     	}
     	else if ( restorer == eta_simple || restorer == eta_const || restorer == eta_var || restorer == eta_times  )
     	{
-    		updateEta();
-    		eta_dirty = false;
+//    		updateEta();
+    		eta_dirty = true;
     	}
     	else if ( restorer == omega_const || restorer == omega_var || restorer == omega_times  )
     	{
-    		updateOmega();
-    		omega_dirty = false;
+//    		updateOmega();
+    		omega_dirty = true;
     	}
     	else if ( restorer == zeta  )
     	{
-    		updateZeta();
-    		omega_dirty = false;
+//    		updateZeta();
+    		zeta_dirty = true;
     	}
     }
 
@@ -1177,7 +1216,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecializati
 
         // update the tree
         tree_dirty = true;
-        updateTree();
+//        updateTree();
 
         // make sure we update the likelihood
         probability_dirty = true;
@@ -1186,70 +1225,76 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecializati
 
     if ( affecter != this->dag_node )
     {
-    	if ( affecter == lambda_const || affecter == lambda_var || affecter == lambda_times  )
+        if ( affecter == root_frequency )
+		{
+			root_frequency_dirty = true;
+//			updateRootFrequency();
+			probability_dirty = true;
+		}
+        else if ( affecter == lambda_const || affecter == lambda_var || affecter == lambda_times  )
     	{
     		lambda_dirty = true;
-    		updateLambda();
+//    		updateLambda();
     		probability_dirty = true;
     	}
     	else if ( affecter == mu_const || affecter == mu_var || affecter == mu_times  )
     	{
     		mu_dirty = true;
-    		updateMu();
+//    		updateMu();
     		probability_dirty = true;
     	}
     	else if ( affecter == phi_const || affecter == phi_var || affecter == phi_times  )
     	{
     		phi_dirty = true;
-    		updatePhi();
+//    		updatePhi();
     		probability_dirty = true;
     	}
     	else if ( affecter == delta_const || affecter == delta_var || affecter == delta_times )
     	{
     		delta_dirty = true;
-    		updateDelta();
+//    		updateDelta();
     		probability_dirty = true;
     	}
     	else if ( affecter == upsilon || affecter == upsilon_times  )
     	{
     		upsilon_dirty = true;
-    		updateUpsilon();
+//    		updateUpsilon();
     		probability_dirty = true;
     	}
     	else if ( affecter == gamma || affecter == gamma_times )
     	{
     		gamma_dirty = true;
-    		updateGamma();
+//    		updateGamma();
     		probability_dirty = true;
     	}
     	else if ( affecter == rho_simple || affecter == rho || affecter == rho_times  )
     	{
     		rho_dirty = true;
-    		updateRho();
+//    		updateRho();
     		probability_dirty = true;
     	}
     	else if ( affecter == xi || affecter == xi_times  )
     	{
     		xi_dirty = true;
-    		updateXi();
+//    		updateXi();
     		probability_dirty = true;
     	}
     	else if ( affecter == eta_simple || affecter == eta_const || affecter == eta_var || affecter == eta_times  )
     	{
     		eta_dirty = true;
-    		updateEta();
+//    		updateEta();
     		probability_dirty = true;
     	}
     	else if ( affecter == omega_const || affecter == omega_var || affecter == omega_times  )
     	{
     		omega_dirty = true;
-    		updateOmega();
+//    		updateOmega();
     		probability_dirty = true;
     	}
     	else if ( affecter == zeta  )
     	{
     		zeta_dirty = true;
-    		updateZeta();
+//    		updateZeta();
     		probability_dirty = true;
     	}
     }
@@ -1407,6 +1452,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 
 		// set the tree
 		tp_ptr->setTree(var);
+
 	}
 }
 
@@ -1451,7 +1497,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateData(bool f
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateRootFrequency(bool force)
 {
-	if ( force | root_freq_dirty )
+	if ( force | root_frequency_dirty )
 	{
 		// create empty vector
 		std::vector<double> var;
@@ -1466,7 +1512,12 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateRootFrequen
 
 		// set the parameters
 		tp_ptr->setRootPrior(var);
+
 	}
+
+	// flag as clean
+	root_frequency_dirty = false;
+
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateLambda(bool force)
@@ -1500,8 +1551,14 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateLambda(bool
 
 			// set the parameters
 			tp_ptr->setLambda(times, params);
+
 		}
+
 	}
+
+	// flag as clean
+	lambda_dirty = false;
+
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateMu(bool force)
@@ -1536,7 +1593,12 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateMu(bool for
 			// set the parameters
 			tp_ptr->setMu(times, params);
 		}
+
 	}
+
+	// flag as clean
+	mu_dirty = false;
+
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updatePhi(bool force)
@@ -1572,6 +1634,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updatePhi(bool fo
 			tp_ptr->setPhi(times, params);
 		}
 	}
+
+	// flag as clean
+	phi_dirty = false;
+
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateDelta(bool force)
@@ -1608,6 +1674,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateDelta(bool 
 		}
 	}
 
+	// flag as clean
+	delta_dirty = false;
+
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateUpsilon(bool force)
@@ -1633,7 +1702,12 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateUpsilon(boo
 			// set the parameters
 			tp_ptr->setMassSpeciationEvents(times, params);
 		}
+
 	}
+
+	// flag as clean
+	upsilon_dirty = false;
+
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateGamma(bool force)
@@ -1659,7 +1733,12 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateGamma(bool 
 			// set the parameters
 			tp_ptr->setMassExtinctionEvents(times, params);
 		}
+
 	}
+
+	// flag as clean
+	gamma_dirty = false;
+
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateRho(bool force)
@@ -1700,7 +1779,12 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateRho(bool fo
 			// set the parameters
 			tp_ptr->setMassSamplingEvents(times, params);
 		}
+
 	}
+
+	// flag as clean
+	rho_dirty = false;
+
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateXi(bool force)
@@ -1728,6 +1812,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateXi(bool for
 		}
 
 	}
+
+	// flag as clean
+	xi_dirty = false;
+
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateEta(bool force)
@@ -1784,28 +1872,38 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateEta(bool fo
 			// set the parameters
 			tp_ptr->setEta(times, params);
 		}
+
 	}
+
+	// flag as clean
+	eta_dirty = false;
+
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateOmega(bool force)
 {
+	std::cout << "Updating omega" << std::endl;
 	if ( force | omega_dirty )
 	{
 		if ( omega_const != NULL )
 		{
+			std::cout << "Const omega (1)" << std::endl;
 			// create intermediate parameters
 			RbVector< CladogeneticProbabilityMatrix > intermediate_parameters;
 			intermediate_parameters.push_back( omega_const->getValue() );
-
+			std::cout << "Const omega (2)" << std::endl;
 			// create empty vectors
 			std::vector< std::map< std::vector<unsigned>, double > > params = RbToStd( intermediate_parameters );
 			std::vector<double>                                      times;
-
+			std::cout << "Const omega (3)" << std::endl;
 			// set the parameters
+			std::cout << num_states << " -- " << times << " -- " << params.size() << std::endl;
 			tp_ptr->setOmega(num_states, times, params);
+			std::cout << "Const omega (4)" << std::endl;
 		}
 		else if ( omega_var != NULL )
 		{
+			std::cout << "Var omega" << std::endl;
 			// create empty vectors
 			std::vector< std::map< std::vector<unsigned>, double > > params = RbToStd( omega_var->getValue() );
 			std::vector<double>                                      times  = RbToStd( omega_times->getValue() );
@@ -1819,7 +1917,14 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateOmega(bool 
 			// set the parameters
 			tp_ptr->setOmega(num_states, times, params);
 		}
+
 	}
+
+	std::cout << "Done updating omega" << std::endl;
+
+	// flag as clean
+	omega_dirty = false;
+
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateZeta(bool force)
@@ -1845,6 +1950,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateZeta(bool f
 		}
 
 	}
+
+	// flag as clean
+	zeta_dirty = false;
+
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
@@ -1856,122 +1965,152 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::swapParameterInte
 	if ( oldP == root_frequency )
 	{
 		root_frequency = static_cast<const TypedDagNode<Simplex>* >( newP );
+		root_frequency_dirty = true;
 	}
 	if ( oldP == lambda_const )
 	{
 		lambda_const = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		lambda_dirty = true;
 	}
 	if ( oldP == lambda_var )
 	{
 		lambda_var = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+		lambda_dirty = true;
 	}
 	if ( oldP == lambda_times )
 	{
 		lambda_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		lambda_dirty = true;
 	}
 	if ( oldP == mu_const )
 	{
 		mu_const = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		mu_dirty = true;
 	}
 	if ( oldP == mu_var )
 	{
 		mu_var = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+		mu_dirty = true;
 	}
 	if ( oldP == mu_times )
 	{
 		mu_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		mu_dirty = true;
 	}
 	if ( oldP == phi_const )
 	{
 		phi_const = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		phi_dirty = true;
 	}
 	if ( oldP == phi_var )
 	{
 		phi_var = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+		phi_dirty = true;
 	}
 	if ( oldP == phi_times )
 	{
 		phi_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		phi_dirty = true;
 	}
 	if ( oldP == delta_const )
 	{
 		delta_const = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		delta_dirty = true;
 	}
 	if ( oldP == delta_var )
 	{
 		delta_var = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+		delta_dirty = true;
 	}
 	if ( oldP == delta_times )
 	{
 		delta_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		delta_dirty = true;
 	}
 	if ( oldP == upsilon )
 	{
 		upsilon = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+		upsilon_dirty = true;
 	}
 	if ( oldP == upsilon_times )
 	{
 		upsilon_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		upsilon_dirty = true;
 	}
 	if ( oldP == gamma )
 	{
 		gamma = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+		gamma_dirty = true;
 	}
 	if ( oldP == gamma_times )
 	{
 		gamma_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		gamma_dirty = true;
 	}
 	if ( oldP == rho_simple )
 	{
 		rho_simple = static_cast<const TypedDagNode<double>* >( newP );
+		rho_dirty = true;
 	}
 	if ( oldP == rho )
 	{
 		rho = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+		rho_dirty = true;
 	}
 	if ( oldP == rho_times )
 	{
 		rho_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		rho_dirty = true;
 	}
 	if ( oldP == xi )
 	{
 		xi = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+		xi_dirty = true;
 	}
 	if ( oldP == xi_times )
 	{
 		xi_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		xi_dirty = true;
 	}
 	if ( oldP == eta_const )
 	{
 		eta_const = static_cast<const TypedDagNode<RateGenerator >* >( newP );
+		eta_dirty = true;
 	}
 	if ( oldP == eta_simple )
 	{
 		eta_simple = static_cast<const TypedDagNode<double>* >( newP );
+		eta_dirty = true;
 	}
 	if ( oldP == eta_var )
 	{
 		eta_var = static_cast<const TypedDagNode<RbVector<RateGenerator > >* >( newP );
+		eta_dirty = true;
 	}
 	if ( oldP == eta_times )
 	{
 		eta_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		eta_dirty = true;
 	}
 	if ( oldP == omega_const )
 	{
 		omega_const = static_cast<const TypedDagNode<CladogeneticProbabilityMatrix >* >( newP );
+		omega_dirty = true;
 	}
 	if ( oldP == omega_var )
 	{
 		omega_var = static_cast<const TypedDagNode<RbVector<CladogeneticProbabilityMatrix > >* >( newP );
+		omega_dirty = true;
 	}
 	if ( oldP == omega_times )
 	{
 		omega_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		omega_dirty = true;
 	}
 	if ( oldP == zeta )
 	{
 		zeta = static_cast<const TypedDagNode<RbVector<MatrixReal > >* >( newP );
+		zeta_dirty = true;
 	}
 }
 

@@ -138,63 +138,64 @@ namespace RevBayesCore {
 		const TypedDagNode< double>*                                     age;
 		const std::string&                                               condition_type;
 		const size_t                                                     num_states;
+		bool                                                             use_origin;
+
 		const TypedDagNode< Simplex >*                                   root_frequency;
+		bool                                                             root_frequency_dirty;
 
 		const TypedDagNode< RbVector< double> >*                         lambda_const;
 		const TypedDagNode< RbVector< RbVector<double> > >*              lambda_var;
 		const TypedDagNode< RbVector< double > >*                        lambda_times;
+		bool                                                             lambda_dirty;
 
 		const TypedDagNode< RbVector< double> >*                         mu_const;
 		const TypedDagNode< RbVector< RbVector<double> > >*              mu_var;
 		const TypedDagNode< RbVector< double > >*                        mu_times;
+		bool                                                             mu_dirty;
 
 		const TypedDagNode< RbVector< double> >*                         phi_const;
 		const TypedDagNode< RbVector< RbVector<double> > >*              phi_var;
 		const TypedDagNode< RbVector< double > >*                        phi_times;
+		bool                                                             phi_dirty;
 
 		const TypedDagNode< RbVector< double> >*                         delta_const;
 		const TypedDagNode< RbVector< RbVector<double> > >*              delta_var;
 		const TypedDagNode< RbVector< double > >*                        delta_times;
+		bool                                                             delta_dirty;
 
 		const TypedDagNode< RbVector< RbVector<double> > >*              upsilon;
 		const TypedDagNode< RbVector< double > >*                        upsilon_times;
+		bool                                                             upsilon_dirty;
 
 		const TypedDagNode< RbVector< RbVector<double> > >*              gamma;
 		const TypedDagNode< RbVector< double > >*                        gamma_times;
+		bool                                                             gamma_dirty;
 
 		const TypedDagNode< double >*                                    rho_simple;
 		const TypedDagNode< RbVector< RbVector<double> > >*              rho;
 		const TypedDagNode< RbVector< double > >*                        rho_times;
+		bool                                                             rho_dirty;
 
 		const TypedDagNode< RbVector< RbVector<double> > >*              xi;
 		const TypedDagNode< RbVector< double > >*                        xi_times;
+		bool                                                             xi_dirty;
 
 		const TypedDagNode< double >*                                    eta_simple;
 		const TypedDagNode< RateGenerator >*                             eta_const;
 		const TypedDagNode< RbVector< RateGenerator > >*                 eta_var;
 		const TypedDagNode< RbVector< double > >*                        eta_times;
+		bool                                                             eta_dirty;
 
 		const TypedDagNode< CladogeneticProbabilityMatrix >*             omega_const;
 		const TypedDagNode< RbVector< CladogeneticProbabilityMatrix > >* omega_var;
 		const TypedDagNode< RbVector< double > >*                        omega_times;
+		bool                                                             omega_dirty;
 
 		const TypedDagNode< RbVector< MatrixReal > >*                    zeta;
-		bool                                                             use_origin;
+		bool                                                             zeta_dirty;
 
-		// book-keeping
+		// misc. book-keeping
 		bool tree_dirty;
-		bool root_freq_dirty;
-		bool lambda_dirty;
-		bool mu_dirty;
-		bool phi_dirty;
-		bool delta_dirty;
-		bool upsilon_dirty;
-		bool gamma_dirty;
-		bool rho_dirty;
-		bool xi_dirty;
-		bool eta_dirty;
-		bool omega_dirty;
-		bool zeta_dirty;
 
     };
     
