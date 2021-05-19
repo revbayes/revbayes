@@ -216,13 +216,6 @@ int RevBayesCore::UniformPartitioningDistribution<valueType>::getCurrentIndex( v
 }
 
 
-//template <class valueType>
-//const std::vector<valueType>& RevBayesCore::UniformPartitioningDistribution<valueType>::getParameterValues( void ) const
-//{
-//    return parameter_values->getValue();
-//}
-
-
 template <class valueType>
 RevBayesCore::RbVector<valueType>* RevBayesCore::UniformPartitioningDistribution<valueType>::getPartition( void )
 {
