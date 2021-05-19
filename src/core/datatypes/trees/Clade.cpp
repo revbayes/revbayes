@@ -127,10 +127,11 @@ bool Clade::operator==(const Clade &c) const
         return false;
     }
     
-    if ( c.clade_name != clade_name )
-    {
-        return false;
-    }
+    // Sebastian (20210519): We currently do not compare the clade names anymore.
+//    if ( c.clade_name != clade_name )
+//    {
+//        return false;
+//    }
     
     // Sebastian (10/19/2015): We cannot use the clade age for comparison because
     //                         otherwise we cannot find the same clade in different trees.
@@ -175,10 +176,11 @@ bool Clade::operator<(const Clade &c) const
         return false;
     }
     
-    if ( c.clade_name != clade_name )
-    {
-        return c.clade_name < clade_name;
-    }
+    // Sebastian (20210519): We don't compare the clade name anymore but only it's other members
+//    if ( c.clade_name != clade_name )
+//    {
+//        return c.clade_name < clade_name;
+//    }
     
     for (size_t i = 0; i < taxa.size(); ++i)
     {
