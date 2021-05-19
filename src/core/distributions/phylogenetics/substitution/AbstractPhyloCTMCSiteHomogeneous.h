@@ -616,11 +616,15 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     std::vector<TopologyNode*> nodes = tau->getValue().getNodes();
 
     if (treatAmbiguousAsGaps)
+    {
         mark_ambiguous_and_missing_as_gap(*value, site_indices, nodes);
-
+    }
+    
     if (treatUnknownAsGap)
+    {
         mark_unknown_as_gap(*value, site_indices, nodes);
-
+    }
+    
     // set the global variable if we use ambiguous characters (besides gaps)
     using_ambiguous_characters = has_ambiguous_nongap_characters(*value, site_indices, nodes);
 
