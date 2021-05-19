@@ -84,8 +84,6 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	tree_dirty(true)
 {
 
-	std::cout << "Creating distribution" << std::endl;
-
 	//assert(Plugin::loader().isTensorPhyloLoaded());
 	try {
 		// create the pointer
@@ -274,8 +272,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::buildSerialSample
 double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbability(void)
 {
 
-	std::cout << "Computing probability" << std::endl;
-
 	// make sure we need to recompute
 	if ( probability_dirty == false )
 	{
@@ -287,8 +283,6 @@ double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbab
 		// on the tensorphylo side
 		prepareParameters(false);
 	}
-
-	std::cout << "Done preparing parameters." << std::endl;
 
 	// store the old likelihood
     old_ln_prob = current_ln_prob;
@@ -980,8 +974,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecializatio
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::prepareParameters(bool force)
 {
 
-	std::cout << "Preparing parameters" << std::endl;
-
 	// make sure all the parameters are up-to-date
 	updateTree(force);
 	updateData(force);
@@ -995,13 +987,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::prepareParameters
 	updateRho(force);
 	updateXi(force);
 	updateEta(force);
-
 	updateOmega(force);
-	std::cout << "Done preparing parameters (1)" << std::endl;
-
 	updateZeta(force);
-
-	std::cout << "Done preparing parameters (2)" << std::endl;
 
 }
 
@@ -1390,7 +1377,7 @@ std::vector< std::map< std::vector<unsigned>, double > > GeneralizedLineageHeter
 			std::vector<unsigned> key = it->first;
 			double val = it->second;
 			// 1-indexing to 0-indexing
-			for(size_t iK=0; iK<key.size(); ++iK) key[iK] -= 1;
+//			for(size_t iK=0; iK<key.size(); ++iK) key[iK] -= 1;
 			std_object[i][key] = val;
 		}
 	}
@@ -1882,28 +1869,21 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateEta(bool fo
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateOmega(bool force)
 {
-	std::cout << "Updating omega" << std::endl;
 	if ( force | omega_dirty )
 	{
 		if ( omega_const != NULL )
 		{
-			std::cout << "Const omega (1)" << std::endl;
 			// create intermediate parameters
 			RbVector< CladogeneticProbabilityMatrix > intermediate_parameters;
 			intermediate_parameters.push_back( omega_const->getValue() );
-			std::cout << "Const omega (2)" << std::endl;
 			// create empty vectors
 			std::vector< std::map< std::vector<unsigned>, double > > params = RbToStd( intermediate_parameters );
 			std::vector<double>                                      times;
-			std::cout << "Const omega (3)" << std::endl;
 			// set the parameters
-			std::cout << num_states << " -- " << times << " -- " << params.size() << std::endl;
 			tp_ptr->setOmega(num_states, times, params);
-			std::cout << "Const omega (4)" << std::endl;
 		}
 		else if ( omega_var != NULL )
 		{
-			std::cout << "Var omega" << std::endl;
 			// create empty vectors
 			std::vector< std::map< std::vector<unsigned>, double > > params = RbToStd( omega_var->getValue() );
 			std::vector<double>                                      times  = RbToStd( omega_times->getValue() );
@@ -1919,8 +1899,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateOmega(bool 
 		}
 
 	}
-
-	std::cout << "Done updating omega" << std::endl;
 
 	// flag as clean
 	omega_dirty = false;
