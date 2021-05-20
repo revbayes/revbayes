@@ -641,7 +641,6 @@ double StateDependentSpeciationExtinctionProcess::computeRootLikelihood( void ) 
 
     for (size_t i = 0; i < num_states; ++i)
     {
-        std::cerr << "R[" << (i+1) << "] = " << freqs[i] * node_likelihood[num_states + i] << std::endl;
         prob += freqs[i] * node_likelihood[num_states + i];
     }
 
@@ -3131,10 +3130,12 @@ void StateDependentSpeciationExtinctionProcess::numericallyIntegrateProcess(std:
         ode.setSerialSamplingRate( serial_sampling_rates );
     }
     
-//    double dt = root_age->getValue() / NUM_TIME_SLICES * 10;
+   
     typedef boost::numeric::odeint::runge_kutta_dopri5< std::vector< double > > stepper_type;
-    boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-7, 1E-7, stepper_type() ) , ode , likelihoods , begin_age , end_age , dt );
 
+//    boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-7, 1E-7, stepper_type() ) , ode , likelihoods , begin_age , end_age , dt );
+      boost::numeric::odeint::integrate_adaptive( stepper_type(), ode , likelihoods , begin_age , end_age , dt );
+    
     // catch negative extinction probabilities that can result from
     // rounding errors in the ODE stepper
     for (size_t i = 0; i < 2 * num_states; ++i)
