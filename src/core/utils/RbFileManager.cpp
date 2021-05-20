@@ -13,7 +13,7 @@
 #include "StringUtilities.h"
 #include "boost/filesystem/path.hpp"
 
-#ifdef RB_WIN
+#ifdef _WIN32
 #	include <dirent.h>
 #   include <unistd.h>
 #   include <windows.h>
@@ -36,7 +36,7 @@ RbFileManager::RbFileManager( void ) :
     new_line( "" )
 {
     
-#	ifdef RB_WIN
+#	ifdef _WIN32
     path_separator = "\\";
     new_line = "\r\n";
 #   else
@@ -54,7 +54,7 @@ RbFileManager::RbFileManager( void ) :
     full_file_name += file_name;
     
     
-#    ifdef RB_WIN
+#    ifdef _WIN32
     StringUtilities::replaceSubstring(full_file_name,"/","\\");
 #   endif
     
@@ -69,7 +69,7 @@ RbFileManager::RbFileManager(const std::string &fn) :
     path_separator( "" )
 {
     
-#	ifdef RB_WIN
+#	ifdef _WIN32
     path_separator = "\\";
 #	else
     path_separator = "/";
@@ -77,7 +77,7 @@ RbFileManager::RbFileManager(const std::string &fn) :
     
     parsePathFileNames( fn );
     
-#   ifdef RB_WIN
+#   ifdef _WIN32
     StringUtilities::replaceSubstring(file_path,"/","\\");
 #   endif
     
@@ -89,7 +89,7 @@ RbFileManager::RbFileManager(const std::string &fn) :
     
     full_file_name += file_name;
     
-#   ifdef RB_WIN
+#   ifdef _WIN32
     StringUtilities::replaceSubstring(full_file_name,"/","\\");
 #   endif
     
@@ -104,7 +104,7 @@ RbFileManager::RbFileManager(const std::string &pn, const std::string &fn) :
     path_separator( "" )
 {
     
-#	ifdef RB_WIN
+#	ifdef _WIN32
     path_separator = "\\";
     new_line = "\r\n";
 #	else
@@ -116,7 +116,7 @@ RbFileManager::RbFileManager(const std::string &pn, const std::string &fn) :
     std::string tmp = pn + path_separator + fn;
     parsePathFileNames( tmp );
 
-#   ifdef RB_WIN
+#   ifdef _WIN32
     StringUtilities::replaceSubstring(file_path,"/","\\");
 #   endif
     
@@ -128,7 +128,7 @@ RbFileManager::RbFileManager(const std::string &pn, const std::string &fn) :
     
     full_file_name += file_name;
     
-#   ifdef RB_WIN
+#   ifdef _WIN32
     StringUtilities::replaceSubstring(full_file_name,"/","\\");
 #   endif
     
@@ -206,7 +206,7 @@ std::string RbFileManager::expandUserDir(std::string path)
         char const *hdrive = getenv("HOMEDRIVE"), *hpath = getenv("HOMEPATH");
         if ( hdrive != NULL )
         {
-# ifdef RB_WIN
+# ifdef _WIN32
             path = std::string(hdrive) + hpath + "\\" + path;
 # else
             path.replace(0, 1, std::string(hdrive) + hpath);
@@ -613,7 +613,7 @@ bool RbFileManager::listDirectoryContents(const std::string& dirpath)
 bool RbFileManager::makeDirectory(const std::string &dn)
 {
     
-#	ifdef RB_WIN
+#	ifdef _WIN32
     
     CreateDirectory(dn.c_str(), NULL);
     
@@ -683,7 +683,7 @@ bool RbFileManager::parsePathFileNames(const std::string &input_string)
 {
     std::string name = input_string;
     
-#	ifdef RB_WIN
+#	ifdef _WIN32
     StringUtilities::replaceSubstring(name,"/","\\");
 #   endif
     
@@ -813,7 +813,7 @@ void RbFileManager::setFileName(std::string const &s)
 void RbFileManager::setFilePath(std::string const &s)
 {
     file_path = s;
-#	ifdef RB_WIN
+#	ifdef _WIN32
     StringUtilities::replaceSubstring(file_path,"/","\\");
 #   endif
     
@@ -856,7 +856,7 @@ bool RbFileManager::setStringWithNamesOfFilesInDirectory(const std::string& dirp
             
             bool skip_me = false;
 
-#ifdef RB_WIN
+#ifdef _WIN32
             if (stat( entrypath.c_str(), &entryinfo )) {
               // if this returned a non-zero value, something is wrong
               skip_me = true;
