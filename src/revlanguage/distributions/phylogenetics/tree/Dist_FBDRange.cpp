@@ -209,7 +209,11 @@ const MemberRules& Dist_FBDRange::getParameterRules(void) const
         paramTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
         dist_member_rules.push_back( new ArgumentRule( "lambda",  paramTypes, "The (asymmetric) speciation rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "mu",      paramTypes, "The extinction rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
-        dist_member_rules.push_back( new ArgumentRule( "psi",     paramTypes, "The fossil sampling rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
+        
+        std::vector<std::string> aliases_serial_sampling;
+        aliases_serial_sampling.push_back("phi");
+        aliases_serial_sampling.push_back("psi");
+        dist_member_rules.push_back( new ArgumentRule( aliases_serial_sampling,     paramTypes, "The fossil sampling rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
         dist_member_rules.push_back( new ArgumentRule( "rho",     Probability::getClassTypeSpec(), "The extant sampling fraction.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
 
         dist_member_rules.push_back( new ArgumentRule( "lambda_a",  paramTypes, "The anagenetic speciation rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
@@ -295,7 +299,7 @@ void Dist_FBDRange::setConstParameter(const std::string& name, const RevPtr<cons
         start_age = var;
         start_condition = name;
     }
-    else if ( name == "psi" )
+    else if ( name == "psi" || name == "phi" || name == "psi/phi" )
     {
         psi = var;
     }

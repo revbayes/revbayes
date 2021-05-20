@@ -641,6 +641,7 @@ double StateDependentSpeciationExtinctionProcess::computeRootLikelihood( void ) 
 
     for (size_t i = 0; i < num_states; ++i)
     {
+        std::cerr << "R[" << (i+1) << "] = " << freqs[i] * node_likelihood[num_states + i] << std::endl;
         prob += freqs[i] * node_likelihood[num_states + i];
     }
 
