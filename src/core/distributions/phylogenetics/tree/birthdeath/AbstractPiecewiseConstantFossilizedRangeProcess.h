@@ -102,7 +102,7 @@ namespace RevBayesCore {
 
         std::vector<Taxon>                              fbd_taxa;                                                                                               //!< Taxon names that will be attached to new simulated trees.
 
-        bool                                            ages_from_counts;
+        bool                                            auto_uncertainty;
 
         mutable std::vector<size_t>                     oldest_intervals;
         mutable std::vector<size_t>                     youngest_intervals;

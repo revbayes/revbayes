@@ -41,7 +41,7 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
                                                                                                  const TypedDagNode< RbVector<double> > *intimes,
                                                                                                  const std::vector<Taxon> &intaxa,
                                                                                                  bool afc) :
-    ascending(false), homogeneous_rho(inrho), timeline( intimes ), fbd_taxa(intaxa), ages_from_counts(afc)
+    ascending(false), homogeneous_rho(inrho), timeline( intimes ), fbd_taxa(intaxa), auto_uncertainty(afc)
 {
     // initialize all the pointers to NULL
     homogeneous_lambda             = NULL;
@@ -53,6 +53,8 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
     fossil_count_data              = NULL;
 
     RbException no_timeline_err = RbException("No time intervals provided for piecewise constant fossilized birth death process");
+
+    range_parameters.push_back( homogeneous_rho );
 
     heterogeneous_lambda = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inspeciation);
     homogeneous_lambda = dynamic_cast<const TypedDagNode<double >*>(inspeciation);
@@ -122,34 +124,8 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
         }
     }
 
-    fossil_count_data = dynamic_cast<const TypedDagNode<AbstractHomologousDiscreteCharacterData>* >(incounts);
-    range_parameters.push_back( fossil_count_data );
-
-    if ( fossil_count_data != NULL )
-    {
-        if( timeline == NULL ) throw(no_timeline_err);
-
-        if ( fossil_count_data->getValue().getNumberOfTaxa() != fbd_taxa.size())
-        {
-            std::stringstream ss;
-            ss << "Number of species fossil counts (" << fossil_count_data->getValue().getNumberOfTaxa() << ") does not match number of taxa (" << fbd_taxa.size() << ")";
-            throw(RbException(ss.str()));
-        }
-        else if ( fossil_count_data->getValue().getNumberOfCharacters() != timeline->getValue().size() + 1)
-        {
-            std::stringstream ss;
-            ss << "Number of fossil counts per species (" << fossil_count_data->getValue().getNumberOfCharacters() << ") does not match number of time intervals (" << timeline->getValue().size() + 1 << ")";
-            throw(RbException(ss.str()));
-        }
-    }
-    else if ( ages_from_counts == true )
-    {
-        throw(RbException("You must provide fossil count data when using uncertainty=\"auto\""));
-    }
-
-    range_parameters.push_back( homogeneous_rho );
     range_parameters.push_back( timeline );
-    
+
     num_intervals = timeline == NULL ? 1 : timeline->getValue().size()+1;
 
     if ( num_intervals > 1 )
@@ -171,6 +147,27 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
         }
     }
 
+    fossil_count_data = dynamic_cast<const TypedDagNode<AbstractHomologousDiscreteCharacterData>* >(incounts);
+    range_parameters.push_back( fossil_count_data );
+
+    if ( fossil_count_data != NULL )
+    {
+        if( timeline == NULL ) throw(no_timeline_err);
+
+        if ( fossil_count_data->getValue().getNumberOfTaxa() != fbd_taxa.size())
+        {
+            std::stringstream ss;
+            ss << "Number of species fossil counts (" << fossil_count_data->getValue().getNumberOfTaxa() << ") does not match number of taxa (" << fbd_taxa.size() << ")";
+            throw(RbException(ss.str()));
+        }
+        else if ( fossil_count_data->getValue().getNumberOfCharacters() != timeline->getValue().size() + 1)
+        {
+            std::stringstream ss;
+            ss << "Number of fossil counts per species (" << fossil_count_data->getValue().getNumberOfCharacters() << ") does not match number of time intervals (" << timeline->getValue().size() + 1 << ")";
+            throw(RbException(ss.str()));
+        }
+    }
+
     b_i = std::vector<double>(fbd_taxa.size(), 0.0);
     d_i = std::vector<double>(fbd_taxa.size(), 0.0);
 
@@ -185,10 +182,78 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
     fossil      = std::vector<double>(num_intervals, 0.0);
     times       = std::vector<double>(num_intervals, 0.0);
 
-    oldest_intervals = std::vector<size_t>( fbd_taxa.size(), 0 );
+    updateIntervals();
+
+    // find oldest and youngest intervals
+    oldest_intervals = std::vector<size_t>( fbd_taxa.size(), num_intervals - 1 );
     youngest_intervals = std::vector<size_t>( fbd_taxa.size(), num_intervals - 1 );
 
-    updateIntervals();
+    for(size_t i = 0; i < fbd_taxa.size(); i++)
+    {
+        double o     = fbd_taxa[i].getMaxAge();
+        double y     = fbd_taxa[i].getMinAge();
+        double o_min = fbd_taxa[i].getMaxAgeRange().getMin();
+        double y_max = fbd_taxa[i].getMinAgeRange().getMax();
+
+        bool youngest = true;
+
+        for (size_t interval = num_intervals; interval > 0; interval--)
+        {
+            size_t j = interval - 1;
+
+            if( fossil_count_data != NULL )
+            {
+                NaturalNumbersState s = getFossilCount(i,j);
+
+                if( s.isMissingState() == false && (s.getStateIndex() > 0 || s.isPositiveState()) )
+                {
+                    oldest_intervals[i] = j;
+                    if( youngest == true )
+                    {
+                        youngest_intervals[i] = j;
+                        youngest = false;
+                    }
+                }
+            }
+            else
+            {
+                if( o >= times[j] )
+                {
+                    oldest_intervals[i] = j;
+                }
+
+                if( y >= times[j] )
+                {
+                    youngest_intervals[i] = j;
+                }
+            }
+        }
+
+        // check data constraints
+
+        // check consistency between fossil counts and age ranges
+        if( fossil_count_data != NULL && (oldest_intervals[i] != l(o) || youngest_intervals[i] != l(y)) )
+        {
+            std::stringstream ss;
+            ss << "Inconsistent age range and fossil count data for taxon " << fbd_taxa[i].getName();
+            throw(RbException(ss.str()));
+        }
+
+        // check data constraints
+        if( oldest_intervals[i] != l(o_min) || youngest_intervals[i] != l(y_max) )
+        {
+            std::stringstream ss;
+            ss << "First/last occurrence uncertainty spans multiple intervals for taxon " << fbd_taxa[i].getName();
+            throw(RbException(ss.str()));
+        }
+
+        if( o_min < y_max )
+        {
+            std::stringstream ss;
+            ss << "First occurrence uncertainty overlaps last occurrence for taxon " << fbd_taxa[i].getName();
+            throw(RbException(ss.str()));
+        }
+    }
 }
 
 /**
@@ -223,37 +288,13 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
 
         size_t bi = l(b);
         size_t di = l(d);
-        size_t oi = ages_from_counts ? oldest_intervals[i] : l(o);
-        size_t yi = ages_from_counts ? youngest_intervals[i] : l(y);
+        size_t oi = oldest_intervals[i];
+        size_t yi = youngest_intervals[i];
 
-        // using user-defined first/last age uncertainty
-        if ( ages_from_counts == false )
+        // check model constraints
+        if ( !( b > o && ((y == 0.0 && d == 0.0) || (y > 0 && y > d)) && d >= 0.0 ) )
         {
-            // check data constraints
-            if( oi != l(o_min) || yi != l(y_max) )
-            {
-                throw("First/last occurrence uncertainty spans multiple intervals");
-            }
-
-            if( o_min < y_max )
-            {
-                throw("First occurrence uncertainty overlaps last occurrence");
-            }
-
-            // check model constraints
-            if ( !( b > o && ((y == 0.0 && d == 0.0) || (y > 0 && y > d)) && d >= 0.0 ) )
-            {
-                return RbConstants::Double::neginf;
-            }
-        }
-        // first/last age uncertainty comes from count data
-        else
-        {
-            // check model constraints
-            if ( !( b > d && ((y == 0.0 && d == 0.0) || (y > 0 && yi <= di)) && d >= 0.0 ) )
-            {
-                return RbConstants::Double::neginf;
-            }
+            return RbConstants::Double::neginf;
         }
 
         // count the number of rho-sampled tips
@@ -283,7 +324,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
         }
 
         // if there's no uncertainty in o, include factor for the first appearance
-        if( ages_from_counts == false && o == o_min )
+        if( auto_uncertainty == false && o == o_min )
         {
             lnProbTimes += q(oi, o, true) - q(oi, o);
         }
@@ -305,15 +346,25 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
          */
         NaturalNumbersState k_oi = getFossilCount(i,oi);
 
+        // make sure extant taxa don't have fossils
+        if ( o == 0.0 )
+        {
+            if ( fossil_count_data != NULL && (k_oi.isAmbiguous() == true || k_oi.getStateIndex() > 0) )
+            {
+                std::stringstream ss;
+                ss << "First occurrence fossil count > 0 for extant taxon " << fbd_taxa[i].getName();
+                throw(RbException(ss.str()));
+            }
+        }
         // treating missing as positive, i.e. k_oi is always positive
         // (if k_oi is zero, then o == 0.0)
-        if ( k_oi.isMissingState() || k_oi.isPositiveState() )
+        else if ( k_oi.isMissingState() || k_oi.isPositiveState() )
         {
             // include first sampling density
             lnProbTimes += log(fossil[oi]);
 
             // integrate o over full range of oi
-            if ( ages_from_counts == true )
+            if ( auto_uncertainty == true )
             {
             	// non-singleton
             	// (Case 2)
@@ -344,11 +395,6 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
             // user-defined uncertainty for o
             else
             {
-                if ( o_min == 0.0 )
-                {
-                    throw("Fossil count > 0 but first occurrence = 0");
-                }
-
                 // non-singleton
                 if ( oi != yi )
                 {
@@ -433,7 +479,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
             lnProbTimes += k * log(fossil[oi]);
 
             // integrate o over full range of oi
-            if ( ages_from_counts == true )
+            if ( auto_uncertainty == true )
             {
             	// non-singleton
 				// (Case 1)
@@ -460,15 +506,6 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
             // user-defined uncertainty for o
             else
             {
-                if ( o_min > 0.0  && k_oi.getStateIndex() == 0 )
-                {
-                    throw("Fossil count = 0 but first occurrence > 0");
-                }
-                else if ( o == 0.0  && k_oi.getStateIndex() > 0 )
-                {
-                    throw("Fossil count > 0 but first occurrence = 0");
-                }
-
                 // non-singleton
                 if ( oi != yi )
                 {
@@ -575,7 +612,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
 
                 // integrate y over full range of yi
 				// (Case 4)
-                if ( ages_from_counts == true )
+                if ( auto_uncertainty == true )
                 {
                     double Ls = times[yi-1] - std::max(d, times[yi]);
 
@@ -613,7 +650,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
 
                 // integrate y over full range of yi
                 // (Case 3)
-                if ( ages_from_counts == true )
+                if ( auto_uncertainty == true )
                 {
                 	double Ls = times[yi-1] - std::max(d, times[yi]);
                 	lnProbTimes += (k+1)*log(Ls) - RbMath::lnFactorial(k + 1);
@@ -826,7 +863,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::Z(size_t k, size_t i, do
     }
     catch(RbException&)
     {
-        return RbConstants::Double::neginf;
+        return RbConstants::Double::nan;
     }
 
     return tmp1 - tmp2;
@@ -912,8 +949,6 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::q( size_t i, double t, b
  */
 void AbstractPiecewiseConstantFossilizedRangeProcess::updateIntervals() const
 {
-    std::vector<bool> youngest(fbd_taxa.size(), true);
-
     for (size_t interval = num_intervals; interval > 0; interval--)
     {
         size_t i = interval - 1;
@@ -947,24 +982,6 @@ void AbstractPiecewiseConstantFossilizedRangeProcess::updateIntervals() const
             q_i[i-1]       = log(4.0) + ln_e - 2.0*log(tmp);
             q_tilde_i[i-1] = 0.5 * ( q_i[i-1] - (b+d+f)*dt );
             p_i[i-1]       = (b + d + f - A * ((1.0+B)-exp(ln_e)*(1.0-B))/tmp)/(2.0*b);
-        }
-
-        if( ages_from_counts == true )
-        {
-            for(size_t j = 0; j < fbd_taxa.size(); j++)
-            {
-                NaturalNumbersState s = getFossilCount(j,i);
-
-                if( s.isMissingState() == false && (s.getStateIndex() > 0 || s.isPositiveState()) )
-                {
-                    oldest_intervals[j] = i;
-                    if( youngest[j] )
-                    {
-                        youngest_intervals[j] = i;
-                        youngest[j] = false;
-                    }
-                }
-            }
         }
     }
 }

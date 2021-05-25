@@ -176,7 +176,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( 
             // if this is a sampled tree, then integrate out the speciation times for descendants of sampled ancestors
             if( extended == false )
             {
-                size_t oi = ages_from_counts ? l(o) : oldest_intervals[i];
+                size_t oi = auto_uncertainty ? l(o) : oldest_intervals[i];
 
                 double x = 0.0;
 
@@ -189,14 +189,14 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( 
                     x += q_tilde_i[j] - q_i[j];
                 }
 
-                if( ages_from_counts == false )
+                if( auto_uncertainty == false )
                 {
                     double a = std::max(d_i[i], times[oi]);
                     double Ls_plus_a = oi > 0 ? std::min(y_a, times[oi-1]) : y_a;
                     double Ls = Ls_plus_a - a;
 
                     // replace H_i
-                    if ( ages_from_counts = false )
+                    if ( auto_uncertainty = false )
                     {
                         x += log( Ls ) - lnQ[i];
                     }
@@ -234,7 +234,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( 
             size_t di = l(d_i[i]);
 
             // check constraints
-            if( ages_from_counts == false )
+            if( auto_uncertainty == false )
             {
                 if( youngest_intervals[i] != di)
                 {
@@ -257,7 +257,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( 
 
                 // replace one unobserved fossil sample with an observed fossil sample
                 // i.e increment the observed fossil count
-                if ( ages_from_counts == true )
+                if ( auto_uncertainty == true )
                 {
                     double Ls = times[di-1] - std::max(d_i[i], times[di]);
                     lnProb += log( fossil[di] ) - log( 1.0 - exp( - Ls * fossil[di] ) );
