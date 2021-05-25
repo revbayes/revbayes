@@ -142,6 +142,10 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
             throw(RbException(ss.str()));
         }
     }
+    else if ( ages_from_counts == true )
+    {
+        throw(RbException("You must provide fossil count data when using uncertainty=\"auto\""));
+    }
 
     range_parameters.push_back( homogeneous_rho );
     range_parameters.push_back( timeline );
@@ -226,7 +230,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
         if ( ages_from_counts == false )
         {
             // check data constraints
-            if( oi != l(o_min) || yi != y_max )
+            if( oi != l(o_min) || yi != l(y_max) )
             {
                 throw("First/last occurrence uncertainty spans multiple intervals");
             }
@@ -319,10 +323,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
 					double delta_plus_Ls = oi > 0 ? std::min(b, times[oi-1]) : b;
 
 					lnQ[i] = H(oi,times[oi],delta_plus_Ls) - H(oi,times[oi],delta);
-					//if ( k_oi.isPositiveState() )
-					//{
-						lnQ[i] -= Z(0,oi,times[oi],delta_plus_Ls) - Z(0,oi,times[oi],delta);
-					//}
+					lnQ[i] -= Z(0,oi,times[oi],delta_plus_Ls) - Z(0,oi,times[oi],delta);
 					lnQ[i] = log(lnQ[i]);
             	}
             	// singleton
@@ -332,12 +333,9 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
             		double delta = std::max(d, times[oi]);
 					double delta_plus_Ls = oi > 0 ? std::min(b, times[oi-1]) : b;
 
-					lnQ[i] = H(oi,delta_plus_Ls,delta_plus_Ls) - H(oi,delta_plus_Ls,delta) - (H(oi,delta,delta_plus_Ls) - H(oi,delta,delta));
+					lnQ[i] = H(oi,delta,delta_plus_Ls) - H(oi,delta_plus_Ls,delta_plus_Ls) - (H(oi,delta,delta) - H(oi,delta_plus_Ls,delta));
 					lnQ[i] /= fossil[oi];
-					//if ( k_oi.isPositiveState() )
-					//{
-						lnQ[i] -= Z(1,oi,delta,delta_plus_Ls) - Z(1,oi,delta,delta);
-					//}
+					lnQ[i] -= Z(1,oi,delta,delta_plus_Ls) - Z(1,oi,delta,delta);
 					lnQ[i] = log(lnQ[i]);
             	}
 
@@ -365,10 +363,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                     else
                     {
                         lnQ[i] = H(oi,times[oi],o) - H(oi,times[oi],o_min);
-                    	//if ( k_oi.isPositiveState() )
-                    	//{
-                    		lnQ[i] -= Z(0,oi,times[oi],o) - Z(0,oi,times[oi],o_min);
-                    	//}
+                    	lnQ[i] -= Z(0,oi,times[oi],o) - Z(0,oi,times[oi],o_min);
                     	lnQ[i] = log(lnQ[i]);
 
                         lnProbTimes += lnQ[i];
@@ -398,11 +393,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                         {
                         	lnQ[i] = H(oi,y_max,o) - H(oi,y,o);
                         	lnQ[i] /= fossil[oi];
-                        	//if ( k_oi.isPositiveState() )
-							//{
-                        	    lnQ[i] -= Z(1,oi,y,o) - Z(1,oi,y_max,o) - (Z(1,oi,y,o_min) - Z(1,oi,y_max,o_min));
-								lnQ[i] -= Z(0,oi,y_max,o,true) - Z(0,oi,y,o,true);
-							//}
+                        	lnQ[i] += Z(1,oi,y_max,o) - Z(1,oi,y,o) - (Z(1,oi,y_max,o_min) - Z(1,oi,y,o_min));
 							lnQ[i] = log(lnQ[i]);
 							lnProbTimes += lnQ[i];
                         }
@@ -417,11 +408,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                         if ( y == y_max )
                         {
                         	lnQ[i] = H(oi,y,o) - H(oi,y,o_min);
-                        	lnQ[i] /= fossil[oi];
-							//if ( k_oi.isPositiveState() )
-							//{
-								lnQ[i] -= Z(0,oi,y,o,true) - Z(0,oi,y,o_min,true);
-							//}
+							lnQ[i] += Z(0,oi,y,o) - Z(0,oi,y,o_min);
                         }
                         // integrate over y to y_max
                         // (Case 6)
@@ -429,10 +416,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                         {
                         	lnQ[i] = H(oi,y_max,o) - H(oi,y_max,o_min) - H(oi,y,o) + H(oi,y,o_min);
                         	lnQ[i] /= fossil[oi];
-							//if ( k_oi.isPositiveState() )
-							//{
-								lnQ[i] -= Z(1,oi,y,o) - Z(1,oi,y_max,o) - (Z(1,oi,y,o_min) - Z(1,oi,y_max,o_min));
-							//}
+							lnQ[i] += Z(1,oi,y_max,o) - Z(1,oi,y,o) - (Z(1,oi,y_max,o_min) - Z(1,oi,y,o_min));
                         }
 
                         lnQ[i] = log(lnQ[i]);
@@ -458,8 +442,8 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
 					double delta = std::max(d, times[oi]);
 					double delta_plus_Ls = oi > 0 ? std::min(b, times[oi-1]) : b;
 
-					lnQ[i] = log( Z(k, oi, times[oi], delta_plus_Ls) - Z(k, oi, times[oi], delta) );
-					lnProbTimes += lnQ[i] - RbMath::lnFactorial(k);
+					lnQ[i] = Z(k, oi, times[oi], delta_plus_Ls) - Z(k, oi, times[oi], delta);
+					lnProbTimes += log(lnQ[i]) - RbMath::lnFactorial(k);
 				}
 				// singleton
 				// (Case 5)
@@ -470,7 +454,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
 
 					lnQ[i] = Z(k+1,oi,delta,delta_plus_Ls) - Z(k+1,oi,delta,delta);
 					lnQ[i] = log(lnQ[i]);
-					lnProbTimes += lnQ[i] - RbMath::lnFactorial(k);
+					lnProbTimes += lnQ[i] - RbMath::lnFactorial(k+1);
 				}
             }
             // user-defined uncertainty for o
@@ -492,8 +476,8 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                 	// (Case 1)
                     if ( o != o_min )
                     {
-                        lnQ[i] = log( Z(k, oi, times[oi], o) - Z(k, oi, times[oi], o_min) );
-                        lnProbTimes += lnQ[i] - RbMath::lnFactorial(k);
+                        lnQ[i] = Z(k, oi, times[oi], o) - Z(k, oi, times[oi], o_min);
+                        lnProbTimes += log(lnQ[i]) - RbMath::lnFactorial(k);
                     }
                     // no uncertainty in o
                     // (Eq 5)
@@ -506,39 +490,39 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                 else
                 {
                     // integrate from o_min to o
-                    // (Case 5)
                     if ( o != o_min )
                     {
                         // integrate from y to y_max
+                        // (Case 5)
                         if ( y != y_max )
                         {
-                            lnQ[i] = Z(k+1, oi, y, o) - Z(k+1, oi, y_max, o) - (Z(k+1, oi, y, o_min) - Z(k+1, oi, y_max, o_min));
+                            lnQ[i] = Z(k+1, oi, y_max, o) - Z(k+1, oi, y, o) - (Z(k+1, oi, y_max, o_min) - Z(k+1, oi, y, o_min));
+                            lnProbTimes += log(-lnQ[i]) - RbMath::lnFactorial(k+1);
                         }
                         // no uncertainty in y
+                        // (Case 1)
                         else
                         {
-                        	lnQ[i] = Z(k, oi, y, o, true) - Z(k, oi, y, o_min, true);
+                        	lnQ[i] = Z(k, oi, y, o) - Z(k, oi, y, o_min);
+                        	lnProbTimes += lnQ[i] - RbMath::lnFactorial(k);
                         }
                     }
                     // no uncertainty in o
                     else
                     {
 						// integrate from y to y_max
-                        // (Case 5)
+                        // (Case 3)
 						if ( y != y_max )
 						{
-							lnQ[i] = Z(k, oi, y_max, o, true) - Z(k, oi, y, o, true);
+						    lnProbTimes += log(pow(o-y,k+1) - pow(o-y_max,k+1)) - RbMath::lnFactorial(k + 1);
 						}
 						// no uncertainty in y
 						// (Eq 5)
-						else
+						else if( o != y )
 						{
 							lnProbTimes += k * log(o - y) - RbMath::lnFactorial(k);
 						}
                     }
-
-                    lnQ[i] = log(lnQ[i]);
-                    lnProbTimes += lnQ[i] - RbMath::lnFactorial(k);
                 }
             }
         }
@@ -596,10 +580,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                     double Ls = times[yi-1] - std::max(d, times[yi]);
 
                     double tmp = fossil[yi] * (1.0 - exp(fossil[yi] * Ls));
-					//if ( k_yi.isPositiveState() )
-					//{
-						tmp += Ls;
-					//}
+					tmp += Ls;
 					lnProbTimes += log(tmp);
                 }
                 // user-defined uncertainty in y
@@ -610,10 +591,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                     if ( y == y_max )
                     {
                         double tmp = exp(fossil[yi] * ( times[yi-1] - y ));
-                        //if ( k_yi.isPositiveState() )
-                        //{
-                        	tmp = expm1(fossil[yi] * ( times[yi-1] - y ));
-                        //}
+                        tmp = expm1(fossil[yi] * ( times[yi-1] - y ));
                         lnProbTimes += log(tmp);
                     }
                     // integrate over y to y_max
@@ -621,10 +599,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                     else
                     {
                     	double tmp = fossil[yi] *( exp(fossil[yi] * (times[yi-1]-y)) - exp(fossil[yi] * (times[yi-1]-y_max)) );
-                    	//if ( k_yi.isPositiveState() )
-						//{
-							tmp += (times[yi-1]-y_max) - (times[yi-1]-y);
-						//}
+                    	tmp += (times[yi-1]-y_max) - (times[yi-1]-y);
                         lnProbTimes += log(tmp);
                     }
                 }
@@ -648,6 +623,12 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                 else if ( y != y_max )
                 {
                 	lnProbTimes += log(pow(times[yi-1]-y,k+1) - pow(times[yi-1]-y_max,k+1)) - RbMath::lnFactorial(k + 1);
+                }
+                // no uncertainty in y
+                // (Eq 5)
+                else
+                {
+                    lnProbTimes += k * log(times[yi-1]-y_max) - RbMath::lnFactorial(k);
                 }
             }
         }
@@ -835,11 +816,18 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::Z(size_t k, size_t i, do
     double sum = b + d + f;
     double alpha = 0.5*(A+sum);
 
-    double tmp1 = pow(-2,k)* RbMath::incompleteGamma((alpha-A)*(t-x), k+1) * exp(-(alpha-A)*(x-ti));
-    double tmp2 = pow(2,k) * RbMath::incompleteGamma(alpha*(t-x), k+1)     * exp(-alpha*(x-ti));
+    double tmp1 = pow(-2,k) * (1+B) * exp(-(alpha-A)*(x-ti)) / pow(A-sum,k+1);
+    double tmp2 = pow(2,k)  * (1-B) * exp(-alpha*(x-ti))     / pow(A+sum,k+1);
 
-    tmp1 *= (1+B)/pow(A-sum,k+1);
-    tmp2 *= (1-B)/pow(A+sum,k+1);
+    try
+    {
+        tmp1 *= RbMath::incompleteGamma((alpha-A)*(t-x), k+1, false, false);
+        tmp2 *= RbMath::incompleteGamma(alpha*(t-x), k+1, false, false);
+    }
+    catch(RbException&)
+    {
+        return RbConstants::Double::neginf;
+    }
 
     return tmp1 - tmp2;
 }
