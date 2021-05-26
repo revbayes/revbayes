@@ -3147,6 +3147,30 @@ void StateDependentSpeciationExtinctionProcess::numericallyIntegrateProcess(std:
         
     }
     
+    // catch too large extinction probabilities that can result from
+    // rounding errors in the ODE stepper
+    // for safety we set all likelihoods to nan if rounding errors happened
+    bool rounding_error = false;
+    for (size_t i = 0; i < num_states; ++i)
+    {
+        
+        // Sebastian: The extinction probabilities here are probabilities (not log-transformed).
+        // So they must be between 0 and 1.
+        rounding_error |= ( likelihoods[i] > 1.0 );
+        
+    }
+    
+    if ( rounding_error == true )
+    {
+        for (size_t i = 0; i < (2*num_states); ++i)
+        {
+            
+            // invalidate likelihoods
+            likelihoods[i] = RbConstants::Double::nan;
+            
+        }
+    }
+    
 }
 
 
