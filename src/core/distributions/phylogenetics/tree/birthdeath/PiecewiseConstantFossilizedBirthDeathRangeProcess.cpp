@@ -231,28 +231,37 @@ void PiecewiseConstantFossilizedBirthDeathRangeProcess::redrawValue(void)
 
 void PiecewiseConstantFossilizedBirthDeathRangeProcess::keepSpecialization(DagNode *toucher)
 {
+    dirty_taxa = std::vector<bool>(fbd_taxa.size(), false);
     dirty_gamma = std::vector<bool>(fbd_taxa.size(), false);
 }
 
 
 void PiecewiseConstantFossilizedBirthDeathRangeProcess::restoreSpecialization(DagNode *toucher)
 {
-
+    partial_likelihood = stored_likelihood;
+    dirty_taxa = std::vector<bool>(fbd_taxa.size(), false);
 }
 
 
 void PiecewiseConstantFossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, bool touchAll)
 {
+    stored_likelihood = partial_likelihood;
+
     if ( toucher == dag_node )
     {
         std::set<size_t> touched_indices = dag_node->getTouchedElementIndices();
 
         for ( std::set<size_t>::iterator it = touched_indices.begin(); it != touched_indices.end(); it++)
         {
-            size_t touched_range = (*it) / fbd_taxa.size();
+            size_t i = (*it) / fbd_taxa.size();
 
-            dirty_gamma[touched_range] = true;
+            dirty_taxa[i] = true;
+            dirty_gamma[i] = true;
         }
+    }
+    else
+    {
+        dirty_taxa = std::vector<bool>(fbd_taxa.size(), true);
     }
 }
 

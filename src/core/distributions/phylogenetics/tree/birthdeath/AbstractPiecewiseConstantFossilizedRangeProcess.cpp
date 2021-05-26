@@ -41,8 +41,12 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
                                                                                                  const TypedDagNode< RbVector<double> > *intimes,
                                                                                                  const std::vector<Taxon> &intaxa,
                                                                                                  bool afc) :
-    ascending(false), homogeneous_rho(inrho), timeline( intimes ), fbd_taxa(intaxa), auto_uncertainty(afc)
+    ascending(false), homogeneous_rho(inrho), timeline( intimes ), fbd_taxa(intaxa), auto_uncertainty(afc), origin(0.0)
 {
+    dirty_taxa = std::vector<bool>(fbd_taxa.size(), true);
+    partial_likelihood = std::vector<double>(fbd_taxa.size(), 0.0);
+    stored_likelihood = std::vector<double>(fbd_taxa.size(), 0.0);
+
     // initialize all the pointers to NULL
     homogeneous_lambda             = NULL;
     homogeneous_mu                 = NULL;
@@ -272,9 +276,6 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
     size_t num_extant_sampled = 0;
     size_t num_extant_unsampled = 0;
 
-    double maxb = 0;
-    double maxl = 0;
-
     // add the fossil tip age terms
     for (size_t i = 0; i < fbd_taxa.size(); ++i)
     {
@@ -286,399 +287,398 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
         double o_min = fbd_taxa[i].getMaxAgeRange().getMin();
         double y_max = fbd_taxa[i].getMinAgeRange().getMax();
 
-        size_t bi = l(b);
-        size_t di = l(d);
-        size_t oi = oldest_intervals[i];
-        size_t yi = youngest_intervals[i];
-
-        // check model constraints
-        if ( !( b > o && ((y == 0.0 && d == 0.0) || (y > 0 && y > d)) && d >= 0.0 ) )
-        {
-            return RbConstants::Double::neginf;
-        }
-
         // count the number of rho-sampled tips
         num_extant_sampled   += (d == 0.0 && y == 0.0);  // l
         num_extant_unsampled += (d == 0.0 && y > 0.0); // n - m - l
 
-        /*
-         * compute speciation/extinction densities
-         */
-
-        // find the origin time
-        if (b > maxb)
+        if ( dirty_taxa[i] == true )
         {
-            maxl = birth[bi];
-        }
+            partial_likelihood[i] = 0.0;
 
-        // include speciation density
-        lnProbTimes += log( birth[bi] );
+            size_t bi = l(b);
+            size_t di = l(d);
+            size_t oi = oldest_intervals[i];
+            size_t yi = youngest_intervals[i];
 
-        // multiply by q at the birth time
-        lnProbTimes += q(bi, b);
-
-        // include intermediate q terms
-        for (size_t j = bi; j < oi; j++)
-        {
-            lnProbTimes += q_i[j];
-        }
-
-        // if there's no uncertainty in o, include factor for the first appearance
-        if( auto_uncertainty == false && o == o_min )
-        {
-            lnProbTimes += q(oi, o, true) - q(oi, o);
-        }
-
-        // include intermediate q_tilde terms
-        for (size_t j = oi; j < di; j++)
-        {
-            lnProbTimes += q_tilde_i[j];
-        }
-
-        // divide by q_tilde at the death time
-        lnProbTimes -= q( di, d, true);
-
-        // include extinction density
-        if (d > 0.0) lnProbTimes += log( death[di] );
-
-        /*
-         * compute sampling density in the first interval
-         */
-        NaturalNumbersState k_oi = getFossilCount(i,oi);
-
-        // make sure extant taxa don't have fossils
-        if ( o == 0.0 )
-        {
-            if ( fossil_count_data != NULL && (k_oi.isAmbiguous() == true || k_oi.getStateIndex() > 0) )
+            // check model constraints
+            if ( !( b > o && ((y == 0.0 && d == 0.0) || (y > 0 && y > d)) && d >= 0.0 ) )
             {
-                std::stringstream ss;
-                ss << "First occurrence fossil count > 0 for extant taxon " << fbd_taxa[i].getName();
-                throw(RbException(ss.str()));
+                return RbConstants::Double::neginf;
             }
-        }
-        // treating missing as positive, i.e. k_oi is always positive
-        // (if k_oi is zero, then o == 0.0)
-        else if ( k_oi.isMissingState() || k_oi.isPositiveState() )
-        {
-            // include first sampling density
-            lnProbTimes += log(fossil[oi]);
 
-            // integrate o over full range of oi
-            if ( auto_uncertainty == true )
+            // include speciation density
+            partial_likelihood[i] += log( birth[bi] );
+
+            /*
+             * compute speciation/extinction densities
+             */
+
+            // multiply by q at the birth time
+            partial_likelihood[i] += q(bi, b);
+
+            // include intermediate q terms
+            for (size_t j = bi; j < oi; j++)
             {
-            	// non-singleton
-            	// (Case 2)
-            	if ( oi != yi )
-            	{
-					double delta = times[oi];
-					double delta_plus_Ls = oi > 0 ? std::min(b, times[oi-1]) : b;
-
-					lnQ[i] = H(oi,times[oi],delta_plus_Ls) - H(oi,times[oi],delta);
-					lnQ[i] -= Z(0,oi,times[oi],delta_plus_Ls) - Z(0,oi,times[oi],delta);
-					lnQ[i] = log(lnQ[i]);
-            	}
-            	// singleton
-            	// (Case 6)
-            	else
-            	{
-            		double delta = std::max(d, times[oi]);
-					double delta_plus_Ls = oi > 0 ? std::min(b, times[oi-1]) : b;
-
-					lnQ[i] = H(oi,delta,delta_plus_Ls) - H(oi,delta_plus_Ls,delta_plus_Ls) - (H(oi,delta,delta) - H(oi,delta_plus_Ls,delta));
-					lnQ[i] /= fossil[oi];
-					lnQ[i] -= Z(1,oi,delta,delta_plus_Ls) - Z(1,oi,delta,delta);
-					lnQ[i] = log(lnQ[i]);
-            	}
-
-            	lnProbTimes += lnQ[i];
+                partial_likelihood[i] += q_i[j];
             }
-            // user-defined uncertainty for o
-            else
+
+            // if there's no uncertainty in o, include factor for the first appearance
+            if( auto_uncertainty == false && o == o_min )
             {
-                // non-singleton
-                if ( oi != yi )
+                partial_likelihood[i] += q(oi, o, true) - q(oi, o);
+            }
+
+            // include intermediate q_tilde terms
+            for (size_t j = oi; j < di; j++)
+            {
+                partial_likelihood[i] += q_tilde_i[j];
+            }
+
+            // divide by q_tilde at the death time
+            partial_likelihood[i] -= q( di, d, true);
+
+            // include extinction density
+            if (d > 0.0) partial_likelihood[i] += log( death[di] );
+
+            /*
+             * compute sampling density in the first interval
+             */
+            NaturalNumbersState k_oi = getFossilCount(i,oi);
+
+            // make sure extant taxa don't have fossils
+            if ( o == 0.0 )
+            {
+                if ( fossil_count_data != NULL && (k_oi.isAmbiguous() == true || k_oi.getStateIndex() > 0) )
                 {
-                    // no uncertainty in o
-                	// (Eq 6)
-                    if( o == o_min )
-                    {
-                        lnProbTimes += fossil[oi] * ( o - times[oi] );
-                    }
-                    // integrate from o_min to o
+                    std::stringstream ss;
+                    ss << "First occurrence fossil count > 0 for extant taxon " << fbd_taxa[i].getName();
+                    throw(RbException(ss.str()));
+                }
+            }
+            // treating missing as positive, i.e. k_oi is always positive
+            // (if k_oi is zero, then o == 0.0)
+            else if ( k_oi.isMissingState() || k_oi.isPositiveState() )
+            {
+                // include first sampling density
+                partial_likelihood[i] += log(fossil[oi]);
+
+                // integrate o over full range of oi
+                if ( auto_uncertainty == true )
+                {
+                    // non-singleton
                     // (Case 2)
-                    else
+                    if ( oi != yi )
                     {
-                        lnQ[i] = H(oi,times[oi],o) - H(oi,times[oi],o_min);
-                    	lnQ[i] -= Z(0,oi,times[oi],o) - Z(0,oi,times[oi],o_min);
-                    	lnQ[i] = log(lnQ[i]);
+                        double delta = times[oi];
+                        double delta_plus_Ls = oi > 0 ? std::min(b, times[oi-1]) : b;
 
-                        lnProbTimes += lnQ[i];
-                    }
-                }
-                // singleton
-                else
-                {
-                    // include last sampling density for extinct species
-                    if ( o_min != y_max && y > 0.0 )
-                    {
-                        lnProbTimes += log(fossil[oi]);
-                    }
-
-                    // no uncertainty in o
-                    if ( o == o_min )
-                    {
-                        // no uncertainty in y
-                    	// (Eq 6)
-                        if ( y == y_max )
-                        {
-                        	lnProbTimes += fossil[oi] * ( o - y );
-                        }
-                        // integrate over y to y_max
-                        // (Case 6)
-                        else
-                        {
-                        	lnQ[i] = H(oi,y_max,o) - H(oi,y,o);
-                        	lnQ[i] /= fossil[oi];
-                        	lnQ[i] += Z(1,oi,y_max,o) - Z(1,oi,y,o) - (Z(1,oi,y_max,o_min) - Z(1,oi,y,o_min));
-							lnQ[i] = log(lnQ[i]);
-							lnProbTimes += lnQ[i];
-                        }
-                    }
-                    // integrate from o_min to o
-                    else
-                    {
-                        // delta = y
-
-                        // no uncertainty in y
-                    	// (Case 6)
-                        if ( y == y_max )
-                        {
-                        	lnQ[i] = H(oi,y,o) - H(oi,y,o_min);
-							lnQ[i] += Z(0,oi,y,o) - Z(0,oi,y,o_min);
-                        }
-                        // integrate over y to y_max
-                        // (Case 6)
-                        else
-                        {
-                        	lnQ[i] = H(oi,y_max,o) - H(oi,y_max,o_min) - H(oi,y,o) + H(oi,y,o_min);
-                        	lnQ[i] /= fossil[oi];
-							lnQ[i] += Z(1,oi,y_max,o) - Z(1,oi,y,o) - (Z(1,oi,y_max,o_min) - Z(1,oi,y,o_min));
-                        }
-
+                        lnQ[i] = H(oi,times[oi],delta_plus_Ls) - H(oi,times[oi],delta);
+                        lnQ[i] -= Z(0,oi,times[oi],delta_plus_Ls) - Z(0,oi,times[oi],delta);
                         lnQ[i] = log(lnQ[i]);
-                        lnProbTimes += lnQ[i];
                     }
-                }
-            }
-        }
-        // k_oi fixed
-        else
-        {
-        	size_t k = k_oi.getStateIndex();
-
-            lnProbTimes += k * log(fossil[oi]);
-
-            // integrate o over full range of oi
-            if ( auto_uncertainty == true )
-            {
-            	// non-singleton
-				// (Case 1)
-				if ( oi != yi )
-				{
-					double delta = std::max(d, times[oi]);
-					double delta_plus_Ls = oi > 0 ? std::min(b, times[oi-1]) : b;
-
-					lnQ[i] = Z(k, oi, times[oi], delta_plus_Ls) - Z(k, oi, times[oi], delta);
-					lnProbTimes += log(lnQ[i]) - RbMath::lnFactorial(k);
-				}
-				// singleton
-				// (Case 5)
-				else
-				{
-					double delta = std::max(d, times[oi]);
-					double delta_plus_Ls = oi > 0 ? std::min(b, times[oi-1]) : b;
-
-					lnQ[i] = Z(k+1,oi,delta,delta_plus_Ls) - Z(k+1,oi,delta,delta);
-					lnQ[i] = log(lnQ[i]);
-					lnProbTimes += lnQ[i] - RbMath::lnFactorial(k+1);
-				}
-            }
-            // user-defined uncertainty for o
-            else
-            {
-                // non-singleton
-                if ( oi != yi )
-                {
-                    // integrate from o_min to o
-                	// (Case 1)
-                    if ( o != o_min )
-                    {
-                        lnQ[i] = Z(k, oi, times[oi], o) - Z(k, oi, times[oi], o_min);
-                        lnProbTimes += log(lnQ[i]) - RbMath::lnFactorial(k);
-                    }
-                    // no uncertainty in o
-                    // (Eq 5)
+                    // singleton
+                    // (Case 6)
                     else
                     {
-                    	lnProbTimes += k * log(o - times[oi]) - RbMath::lnFactorial(k);
+                        double delta = std::max(d, times[oi]);
+                        double delta_plus_Ls = oi > 0 ? std::min(b, times[oi-1]) : b;
+
+                        lnQ[i] = H(oi,delta,delta_plus_Ls) - H(oi,delta_plus_Ls,delta_plus_Ls) - (H(oi,delta,delta) - H(oi,delta_plus_Ls,delta));
+                        lnQ[i] /= fossil[oi];
+                        lnQ[i] -= Z(1,oi,delta,delta_plus_Ls) - Z(1,oi,delta,delta);
+                        lnQ[i] = log(lnQ[i]);
                     }
+
+                    partial_likelihood[i] += lnQ[i];
                 }
-                // singleton
+                // user-defined uncertainty for o
                 else
                 {
-                    // integrate from o_min to o
-                    if ( o != o_min )
+                    // non-singleton
+                    if ( oi != yi )
                     {
-                        // integrate from y to y_max
-                        // (Case 5)
-                        if ( y != y_max )
+                        // no uncertainty in o
+                        // (Eq 6)
+                        if( o == o_min )
                         {
-                            lnQ[i] = Z(k+1, oi, y_max, o) - Z(k+1, oi, y, o) - (Z(k+1, oi, y_max, o_min) - Z(k+1, oi, y, o_min));
-                            lnProbTimes += log(-lnQ[i]) - RbMath::lnFactorial(k+1);
+                            partial_likelihood[i] += fossil[oi] * ( o - times[oi] );
                         }
-                        // no uncertainty in y
-                        // (Case 1)
+                        // integrate from o_min to o
+                        // (Case 2)
                         else
                         {
-                        	lnQ[i] = Z(k, oi, y, o) - Z(k, oi, y, o_min);
-                        	lnProbTimes += lnQ[i] - RbMath::lnFactorial(k);
+                            lnQ[i] = H(oi,times[oi],o) - H(oi,times[oi],o_min);
+                            lnQ[i] -= Z(0,oi,times[oi],o) - Z(0,oi,times[oi],o_min);
+                            lnQ[i] = log(lnQ[i]);
+
+                            partial_likelihood[i] += lnQ[i];
                         }
                     }
-                    // no uncertainty in o
+                    // singleton
                     else
                     {
-						// integrate from y to y_max
-                        // (Case 3)
-						if ( y != y_max )
-						{
-						    lnProbTimes += log(pow(o-y,k+1) - pow(o-y_max,k+1)) - RbMath::lnFactorial(k + 1);
-						}
-						// no uncertainty in y
-						// (Eq 5)
-						else if( o != y )
-						{
-							lnProbTimes += k * log(o - y) - RbMath::lnFactorial(k);
-						}
+                        // include last sampling density for extinct species
+                        if ( o_min != y_max && y > 0.0 )
+                        {
+                            partial_likelihood[i] += log(fossil[oi]);
+                        }
+
+                        // no uncertainty in o
+                        if ( o == o_min )
+                        {
+                            // no uncertainty in y
+                            // (Eq 6)
+                            if ( y == y_max )
+                            {
+                                partial_likelihood[i] += fossil[oi] * ( o - y );
+                            }
+                            // integrate over y to y_max
+                            // (Case 6)
+                            else
+                            {
+                                lnQ[i] = H(oi,y_max,o) - H(oi,y,o);
+                                lnQ[i] /= fossil[oi];
+                                lnQ[i] += Z(1,oi,y_max,o) - Z(1,oi,y,o) - (Z(1,oi,y_max,o_min) - Z(1,oi,y,o_min));
+                                lnQ[i] = log(lnQ[i]);
+                                partial_likelihood[i] += lnQ[i];
+                            }
+                        }
+                        // integrate from o_min to o
+                        else
+                        {
+                            // delta = y
+
+                            // no uncertainty in y
+                            // (Case 6)
+                            if ( y == y_max )
+                            {
+                                lnQ[i] = H(oi,y,o) - H(oi,y,o_min);
+                                lnQ[i] += Z(0,oi,y,o) - Z(0,oi,y,o_min);
+                            }
+                            // integrate over y to y_max
+                            // (Case 6)
+                            else
+                            {
+                                lnQ[i] = H(oi,y_max,o) - H(oi,y_max,o_min) - H(oi,y,o) + H(oi,y,o_min);
+                                lnQ[i] /= fossil[oi];
+                                lnQ[i] += Z(1,oi,y_max,o) - Z(1,oi,y,o) - (Z(1,oi,y_max,o_min) - Z(1,oi,y,o_min));
+                            }
+
+                            lnQ[i] = log(lnQ[i]);
+                            partial_likelihood[i] += lnQ[i];
+                        }
                     }
                 }
             }
-        }
-
-        /*
-         * compute sampling density in intervening intervals
-         */
-        for(size_t j = oi + 1; j < yi; j++)
-        {
-            NaturalNumbersState k = getFossilCount(i,j);
-
-            double Ls = times[j-1] - times[j];
-
-            // k >= 0
-            // (Eq 6)
-            if ( k.isMissingState() )
-            {
-                lnProbTimes += fossil[j] * Ls;
-            }
-            // k > 0
-            // (Eq 6)
-            else if ( k.isPositiveState() )
-            {
-                lnProbTimes += fossil[j] * Ls + log( 1.0 - exp( - Ls * fossil[j] ) );
-            }
-            // k fixed
-            // (Eq 5)
+            // k_oi fixed
             else
             {
-                lnProbTimes += k.getStateIndex() * log(fossil[j] * Ls) - RbMath::lnFactorial(k.getStateIndex());
-            }
-        }
+                size_t k = k_oi.getStateIndex();
 
-        /*
-         * compute sampling density in last interval
-         */
-        if ( oi != yi )
-        {
-            NaturalNumbersState k_yi = getFossilCount(i,yi);
+                partial_likelihood[i] += k * log(fossil[oi]);
 
-            // treat missing as positive, i.e. k_yi is always positive
-            // (if k_yi = 0 then o = y = 0.0)
-            if ( k_yi.isMissingState() || k_yi.isPositiveState() )
-            {
-            	// include last sampling density for extinct species
-				if ( y > 0.0 )
-				{
-					lnProbTimes += log(fossil[yi]);
-				}
-
-                // integrate y over full range of yi
-				// (Case 4)
+                // integrate o over full range of oi
                 if ( auto_uncertainty == true )
                 {
-                    double Ls = times[yi-1] - std::max(d, times[yi]);
+                    // non-singleton
+                    // (Case 1)
+                    if ( oi != yi )
+                    {
+                        double delta = std::max(d, times[oi]);
+                        double delta_plus_Ls = oi > 0 ? std::min(b, times[oi-1]) : b;
 
-                    double tmp = fossil[yi] * (1.0 - exp(fossil[yi] * Ls));
-					tmp += Ls;
-					lnProbTimes += log(tmp);
+                        lnQ[i] = Z(k, oi, times[oi], delta_plus_Ls) - Z(k, oi, times[oi], delta);
+                        lnQ[i] = log(lnQ[i]);
+                        partial_likelihood[i] += lnQ[i] - RbMath::lnFactorial(k);
+                    }
+                    // singleton
+                    // (Case 5)
+                    else
+                    {
+                        double delta = std::max(d, times[oi]);
+                        double delta_plus_Ls = oi > 0 ? std::min(b, times[oi-1]) : b;
+
+                        lnQ[i] = Z(k+1,oi,delta,delta_plus_Ls) - Z(k+1,oi,delta,delta);
+                        lnQ[i] = log(lnQ[i]);
+                        partial_likelihood[i] += lnQ[i] - RbMath::lnFactorial(k+1);
+                    }
                 }
-                // user-defined uncertainty in y
+                // user-defined uncertainty for o
                 else
                 {
-                    // no uncertainty in y
-                	// (Eq 6)
-                    if ( y == y_max )
+                    // non-singleton
+                    if ( oi != yi )
                     {
-                        double tmp = exp(fossil[yi] * ( times[yi-1] - y ));
-                        tmp = expm1(fossil[yi] * ( times[yi-1] - y ));
-                        lnProbTimes += log(tmp);
+                        // integrate from o_min to o
+                        // (Case 1)
+                        if ( o != o_min )
+                        {
+                            lnQ[i] = Z(k, oi, times[oi], o) - Z(k, oi, times[oi], o_min);
+                            lnQ[i] = log(lnQ[i]);
+                            partial_likelihood[i] += lnQ[i] - RbMath::lnFactorial(k);
+                        }
+                        // no uncertainty in o
+                        // (Eq 5)
+                        else
+                        {
+                            partial_likelihood[i] += k * log(o - times[oi]) - RbMath::lnFactorial(k);
+                        }
                     }
-                    // integrate over y to y_max
-                    // (Case 4)
+                    // singleton
                     else
                     {
-                    	double tmp = fossil[yi] *( exp(fossil[yi] * (times[yi-1]-y)) - exp(fossil[yi] * (times[yi-1]-y_max)) );
-                    	tmp += (times[yi-1]-y_max) - (times[yi-1]-y);
-                        lnProbTimes += log(tmp);
+                        // integrate from o_min to o
+                        if ( o != o_min )
+                        {
+                            // integrate from y to y_max
+                            // (Case 5)
+                            if ( y != y_max )
+                            {
+                                lnQ[i] = Z(k+1, oi, y_max, o) - Z(k+1, oi, y, o) - (Z(k+1, oi, y_max, o_min) - Z(k+1, oi, y, o_min));
+                                lnQ[i] = log(-lnQ[i]);
+                                partial_likelihood[i] += lnQ[i] - RbMath::lnFactorial(k+1);
+                            }
+                            // no uncertainty in y
+                            // (Case 1)
+                            else
+                            {
+                                lnQ[i] = Z(k, oi, y, o) - Z(k, oi, y, o_min);
+                                lnQ[i] = log(lnQ[i]);
+                                partial_likelihood[i] += lnQ[i] - RbMath::lnFactorial(k);
+                            }
+                        }
+                        // no uncertainty in o
+                        else
+                        {
+                            // integrate from y to y_max
+                            // (Case 3)
+                            if ( y != y_max )
+                            {
+                                partial_likelihood[i] += log(pow(o-y,k+1) - pow(o-y_max,k+1)) - RbMath::lnFactorial(k + 1);
+                            }
+                            // no uncertainty in y
+                            // (Eq 5)
+                            else if( o != y )
+                            {
+                                partial_likelihood[i] += k * log(o - y) - RbMath::lnFactorial(k);
+                            }
+                        }
                     }
                 }
             }
-            // k_yi fixed
-            else
+
+            /*
+             * compute sampling density in intervening intervals
+             */
+            for(size_t j = oi + 1; j < yi; j++)
             {
-            	size_t k = k_yi.getStateIndex();
+                NaturalNumbersState k = getFossilCount(i,j);
 
-                lnProbTimes += k * log(fossil[yi]);
+                double Ls = times[j-1] - times[j];
 
-                // integrate y over full range of yi
-                // (Case 3)
-                if ( auto_uncertainty == true )
+                // k >= 0
+                // (Eq 6)
+                if ( k.isMissingState() )
                 {
-                	double Ls = times[yi-1] - std::max(d, times[yi]);
-                	lnProbTimes += (k+1)*log(Ls) - RbMath::lnFactorial(k + 1);
+                    partial_likelihood[i] += fossil[j] * Ls;
                 }
-                // user-defined uncertainty for y
-                // (Case 3)
-                else if ( y != y_max )
+                // k > 0
+                // (Eq 6)
+                else if ( k.isPositiveState() )
                 {
-                	lnProbTimes += log(pow(times[yi-1]-y,k+1) - pow(times[yi-1]-y_max,k+1)) - RbMath::lnFactorial(k + 1);
+                    partial_likelihood[i] += fossil[j] * Ls + log( 1.0 - exp( - Ls * fossil[j] ) );
                 }
-                // no uncertainty in y
+                // k fixed
                 // (Eq 5)
                 else
                 {
-                    lnProbTimes += k * log(times[yi-1]-y_max) - RbMath::lnFactorial(k);
+                    partial_likelihood[i] += k.getStateIndex() * log(fossil[j] * Ls) - RbMath::lnFactorial(k.getStateIndex());
+                }
+            }
+
+            /*
+             * compute sampling density in last interval
+             */
+            if ( oi != yi )
+            {
+                NaturalNumbersState k_yi = getFossilCount(i,yi);
+
+                // treat missing as positive, i.e. k_yi is always positive
+                // (if k_yi = 0 then o = y = 0.0)
+                if ( k_yi.isMissingState() || k_yi.isPositiveState() )
+                {
+                    // include last sampling density for extinct species
+                    if ( y > 0.0 )
+                    {
+                        partial_likelihood[i] += log(fossil[yi]);
+                    }
+
+                    // integrate y over full range of yi
+                    // (Case 4)
+                    if ( auto_uncertainty == true )
+                    {
+                        double Ls = times[yi-1] - std::max(d, times[yi]);
+
+                        double tmp = fossil[yi] * (1.0 - exp(fossil[yi] * Ls));
+                        tmp += Ls;
+                        partial_likelihood[i] += log(tmp);
+                    }
+                    // user-defined uncertainty in y
+                    else
+                    {
+                        // no uncertainty in y
+                        // (Eq 6)
+                        if ( y == y_max )
+                        {
+                            double tmp = exp(fossil[yi] * ( times[yi-1] - y ));
+                            tmp = expm1(fossil[yi] * ( times[yi-1] - y ));
+                            partial_likelihood[i] += log(tmp);
+                        }
+                        // integrate over y to y_max
+                        // (Case 4)
+                        else
+                        {
+                            double tmp = fossil[yi] *( exp(fossil[yi] * (times[yi-1]-y)) - exp(fossil[yi] * (times[yi-1]-y_max)) );
+                            tmp += (times[yi-1]-y_max) - (times[yi-1]-y);
+                            partial_likelihood[i] += log(tmp);
+                        }
+                    }
+                }
+                // k_yi fixed
+                else
+                {
+                    size_t k = k_yi.getStateIndex();
+
+                    partial_likelihood[i] += k * log(fossil[yi]);
+
+                    // integrate y over full range of yi
+                    // (Case 3)
+                    if ( auto_uncertainty == true )
+                    {
+                        double Ls = times[yi-1] - std::max(d, times[yi]);
+                        partial_likelihood[i] += (k+1)*log(Ls) - RbMath::lnFactorial(k + 1);
+                    }
+                    // user-defined uncertainty for y
+                    // (Case 3)
+                    else if ( y != y_max )
+                    {
+                        partial_likelihood[i] += log(pow(times[yi-1]-y,k+1) - pow(times[yi-1]-y_max,k+1)) - RbMath::lnFactorial(k + 1);
+                    }
+                    // no uncertainty in y
+                    // (Eq 5)
+                    else
+                    {
+                        partial_likelihood[i] += k * log(times[yi-1]-y_max) - RbMath::lnFactorial(k);
+                    }
                 }
             }
         }
 
-        // abort if likelihood is infinite
-        if ( RbMath::isFinite(lnProbTimes) == false )
-        {
-            return RbConstants::Double::neginf;
-        }
+        lnProbTimes += partial_likelihood[i];
     }
 
-    // the origin is not a speciation event
-    lnProbTimes -= log(maxl);
+    // (the origin is not a speciation event)
+    lnProbTimes -= log( birth[l(origin)] );
 
     // add the sampled extant tip age term
     if ( homogeneous_rho->getValue() > 0.0)

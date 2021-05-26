@@ -196,7 +196,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( 
                     double Ls = Ls_plus_a - a;
 
                     // replace H_i
-                    if ( auto_uncertainty = false )
+                    if ( auto_uncertainty == false )
                     {
                         x += log( Ls ) - lnQ[i];
                     }
@@ -788,6 +788,7 @@ int PiecewiseConstantFossilizedBirthDeathProcess::updateStartEndTimes( const Top
             if( node.isRoot() )
             {
                 b_i[i] = getOriginAge();
+                origin = b_i[i];
             }
         }
     }

@@ -70,8 +70,6 @@ namespace RevBayesCore {
         void                                            updateGamma(bool force = false);                             //!< Number of species alive at time t.
         void                                            redrawValue(void);
 
-        mutable double                                  origin;
-
         std::vector<size_t>                             gamma_i;
         std::vector<std::vector<bool> >                 gamma_links;
         std::vector<bool>                               dirty_gamma;

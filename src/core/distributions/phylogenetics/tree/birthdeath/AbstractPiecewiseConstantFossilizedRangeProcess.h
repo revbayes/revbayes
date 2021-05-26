@@ -70,6 +70,10 @@ namespace RevBayesCore {
 
         virtual void                                    updateIntervals() const;
 
+        void                                            keepSpecialization(DagNode *toucher);
+        void                                            restoreSpecialization(DagNode *toucher);
+        void                                            touchSpecialization(DagNode *toucher, bool touchAll);
+
         bool                                            ascending;
 
         size_t                                          num_intervals;
@@ -108,6 +112,13 @@ namespace RevBayesCore {
         mutable std::vector<size_t>                     youngest_intervals;
 
         std::vector<const DagNode*>                     range_parameters;
+
+        mutable double                                  origin;
+
+        mutable std::vector<double>                     partial_likelihood;
+        mutable std::vector<double>                     stored_likelihood;
+
+        std::vector<bool>                               dirty_taxa;
     };
 }
 
