@@ -55,8 +55,8 @@ namespace RevBayesCore {
         double                                          getSpeciationRate( size_t index ) const;
 
     protected:
-        virtual void                                    updateStartEndTimes() const = 0;
-        virtual double                                  computeLnProbabilityRanges() const;
+        virtual void                                    updateStartEndTimes() = 0;
+        virtual double                                  computeLnProbabilityRanges();
 
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
@@ -68,7 +68,7 @@ namespace RevBayesCore {
         virtual double                                  H(size_t i, double x, double t) const;
         virtual double                                  Z(size_t k, size_t i, double x, double t) const;
 
-        virtual void                                    updateIntervals() const;
+        virtual void                                    updateIntervals();
 
         void                                            keepSpecialization(DagNode *toucher);
         void                                            restoreSpecialization(DagNode *toucher);
@@ -90,35 +90,35 @@ namespace RevBayesCore {
 
         const TypedDagNode<AbstractHomologousDiscreteCharacterData>* fossil_count_data;                        //!< The number of fossil observations, per species/interval as character data.
 
-        mutable std::vector<double>                     birth;
-        mutable std::vector<double>                     death;
-        mutable std::vector<double>                     fossil;
-        mutable std::vector<double>                     times;
+        std::vector<double>                     birth;
+        std::vector<double>                     death;
+        std::vector<double>                     fossil;
+        std::vector<double>                     times;
 
-        mutable std::vector<double>                     b_i;
-        mutable std::vector<double>                     d_i;
+        std::vector<double>                     b_i;
+        std::vector<double>                     d_i;
 
-        mutable std::vector<double>                     lnQ;
+        std::vector<double>                     lnQ;
 
-        mutable std::vector<double>                     q_i;
-        mutable std::vector<double>                     q_tilde_i;
-        mutable std::vector<double>                     p_i;
+        std::vector<double>                     q_i;
+        std::vector<double>                     q_tilde_i;
+        std::vector<double>                     p_i;
 
-        std::vector<Taxon>                              fbd_taxa;                                                                                               //!< Taxon names that will be attached to new simulated trees.
+        std::vector<Taxon>                      fbd_taxa;                                                                                               //!< Taxon names that will be attached to new simulated trees.
 
-        bool                                            auto_uncertainty;
+        bool                                    auto_uncertainty;
 
-        mutable std::vector<size_t>                     oldest_intervals;
-        mutable std::vector<size_t>                     youngest_intervals;
+        std::vector<size_t>                     oldest_intervals;
+        std::vector<size_t>                     youngest_intervals;
 
-        std::vector<const DagNode*>                     range_parameters;
+        std::vector<const DagNode*>             range_parameters;
 
-        mutable double                                  origin;
+        double                                  origin;
 
-        mutable std::vector<double>                     partial_likelihood;
-        mutable std::vector<double>                     stored_likelihood;
+        std::vector<double>                     partial_likelihood;
+        std::vector<double>                     stored_likelihood;
 
-        std::vector<bool>                               dirty_taxa;
+        std::vector<bool>                       dirty_taxa;
     };
 }
 

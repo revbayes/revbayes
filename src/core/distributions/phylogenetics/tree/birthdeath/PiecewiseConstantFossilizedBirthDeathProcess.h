@@ -57,8 +57,8 @@ namespace RevBayesCore {
         void                                            simulateClade(std::vector<TopologyNode *> &n, double age, double present);
 
     protected:
-        void                                            updateStartEndTimes() const;
-        int                                             updateStartEndTimes(const TopologyNode & ) const;
+        void                                            updateStartEndTimes();
+        int                                             updateStartEndTimes(const TopologyNode & );
 
         double                                          pSurvival(double start, double end) const;             //!< Compute the probability of survival of the process (without incomplete taxon sampling).
 
@@ -76,10 +76,14 @@ namespace RevBayesCore {
         double                                          simulateDivergenceTime(double origin, double present) const;    //!< Simulate a speciation event.
         std::vector<double>                             simulateDivergenceTimes(size_t n, double origin, double present, double min) const;                 //!< Simulate n speciation events.
 
+        void                                            keepSpecialization(DagNode *toucher);
+        void                                            restoreSpecialization(DagNode *toucher);
+        void                                            touchSpecialization(DagNode *toucher, bool touchAll);
+
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
 
-        virtual void                                    updateIntervals() const;
+        virtual void                                    updateIntervals();
 
     private:
         

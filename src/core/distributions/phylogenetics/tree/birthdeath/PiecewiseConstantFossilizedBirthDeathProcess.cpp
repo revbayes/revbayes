@@ -772,7 +772,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::simulateDivergenceTime(doub
 }
 
 
-int PiecewiseConstantFossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node ) const
+int PiecewiseConstantFossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
 {
     if( node.isTip() )
     {
@@ -828,7 +828,7 @@ int PiecewiseConstantFossilizedBirthDeathProcess::updateStartEndTimes( const Top
  *
  *
  */
-void PiecewiseConstantFossilizedBirthDeathProcess::updateIntervals() const
+void PiecewiseConstantFossilizedBirthDeathProcess::updateIntervals()
 {
     AbstractPiecewiseConstantFossilizedRangeProcess::updateIntervals();
 
@@ -853,9 +853,43 @@ void PiecewiseConstantFossilizedBirthDeathProcess::updateIntervals() const
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-void PiecewiseConstantFossilizedBirthDeathProcess::updateStartEndTimes( void ) const
+void PiecewiseConstantFossilizedBirthDeathProcess::updateStartEndTimes( void )
 {
+    std::vector<double> stored_b_i = b_i;
+
     updateStartEndTimes(getValue().getRoot());
+
+    for ( size_t i = 0; i < stored_b_i.size(); i++ )
+    {
+        if ( stored_b_i[i] != b_i[i] )
+        {
+            dirty_taxa[i] = true;
+        }
+    }
+}
+
+
+void PiecewiseConstantFossilizedBirthDeathProcess::keepSpecialization(DagNode *toucher)
+{
+    dirty_taxa = std::vector<bool>(fbd_taxa.size(), false);
+}
+
+
+void PiecewiseConstantFossilizedBirthDeathProcess::restoreSpecialization(DagNode *toucher)
+{
+    partial_likelihood = stored_likelihood;
+    dirty_taxa = std::vector<bool>(fbd_taxa.size(), false);
+}
+
+
+void PiecewiseConstantFossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, bool touchAll)
+{
+    stored_likelihood = partial_likelihood;
+
+    if ( toucher != (DagNode*)dag_node || touchAll == true )
+    {
+        dirty_taxa = std::vector<bool>(fbd_taxa.size(), true);
+    }
 }
 
 

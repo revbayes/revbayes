@@ -178,7 +178,7 @@ double PiecewiseConstantFossilizedBirthDeathRangeProcess::pSurvival(double start
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-void PiecewiseConstantFossilizedBirthDeathRangeProcess::updateStartEndTimes( void ) const
+void PiecewiseConstantFossilizedBirthDeathRangeProcess::updateStartEndTimes( void )
 {
     origin = 0;
 

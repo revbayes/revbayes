@@ -264,7 +264,7 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRanges( void ) const
+double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRanges( void )
 {
     // prepare the probability computation
     updateIntervals();
@@ -947,7 +947,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::q( size_t i, double t, b
  *
  *
  */
-void AbstractPiecewiseConstantFossilizedRangeProcess::updateIntervals() const
+void AbstractPiecewiseConstantFossilizedRangeProcess::updateIntervals()
 {
     for (size_t interval = num_intervals; interval > 0; interval--)
     {

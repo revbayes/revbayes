@@ -50,7 +50,7 @@ namespace RevBayesCore {
         PiecewiseConstantFossilizedBirthDeathRangeProcess*   clone(void) const;                                         //!< Create an independent clone
 
     protected:
-        void                                            updateStartEndTimes() const;
+        void                                            updateStartEndTimes();
 
         // Parameter management functions
         double                                          computeLnProbability(void);                            //!< Compute the log-transformed probability of the current value.
