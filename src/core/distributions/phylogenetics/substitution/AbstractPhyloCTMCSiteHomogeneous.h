@@ -1383,7 +1383,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawStochasticCha
         std::string simmap_string = "{" + end_states[root_index][site].getStringValue() + "," + StringUtilities::toString( root.getBranchLength() ) + "}";
         character_histories[root_index] = simmap_string;
 
-        // get the sampled mixture components
+        // get the sampled site-matrix and site-rate indexes
         getSampledMixtureComponents(site, sampled_site_rate_component, sampled_site_matrix_component);
 
         // recurse towards tips
@@ -1430,17 +1430,17 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getSampledMixture
 	// get the mixture component (in vector form)
 	size_t mixture_component_index = sampled_site_mixtures[site_index];
 
-	rate_component = 0;
-    if (this->site_rates != NULL)
-    {
-    	rate_component = mixture_component_index % num_site_rates;
-    }
-
-    // determine the matrix (row index)
-    matrix_component = 0;
+	matrix_component = 0;
     if (this->site_matrix_probs != NULL)
     {
-    	matrix_component = (mixture_component_index - rate_component) / num_site_rates;
+    	matrix_component = mixture_component_index % num_matrices;
+    }
+
+    // determine the rate (row index)
+    rate_component = 0;
+    if (this->site_rates != NULL)
+    {
+    	rate_component = (mixture_component_index - matrix_component) / num_matrices;
     }
 
 
