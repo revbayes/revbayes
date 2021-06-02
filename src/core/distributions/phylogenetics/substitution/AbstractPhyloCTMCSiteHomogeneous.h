@@ -83,6 +83,7 @@ namespace RevBayesCore {
         virtual double                                                      computeLnProbability(void);
         virtual std::vector<charType>                                       drawAncestralStatesForNode(const TopologyNode &n);
         virtual void                                                        drawJointConditionalAncestralStates(std::vector<std::vector<charType> >& startStates, std::vector<std::vector<charType> >& endStates);
+        virtual void                                                        drawSiteMixtureAllocations();
         virtual void                                                        drawStochasticCharacterMap(std::vector<std::string>& character_histories, size_t site, bool use_simmap_default=true);
         void                                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;     //!< Map the member methods to internal function calls
         void                                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, MatrixReal &rv) const;     //!< Map the member methods to internal function calls
@@ -1275,7 +1276,92 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawJointConditio
     has_ancestral_states = true;
 
 }
+template<class charType>
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawSiteMixtureAllocations()
+{
 
+    RandomNumberGenerator* rng = GLOBAL_RNG;
+
+    // get working variables
+    std::vector<double> siteProbVector = getMixtureProbs();
+
+    const TopologyNode &root = tau->getValue().getRoot();
+    size_t node_index = root.getIndex();
+
+    // get the pointers to the partial likelihoods and the marginal likelihoods
+    double*         p_node  = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+
+    // get pointers the likelihood for both subtrees
+    const double*   p_site           = p_node;
+
+    // sample root states
+    std::vector<double> p( this->num_site_mixtures*this->num_chars, 0.0);
+
+    // clear the container for sampling the site-rates
+    this->sampled_site_mixtures.resize(this->num_sites);
+
+    for (size_t i = 0; i < this->num_sites; ++i)
+//    for (size_t i = pattern_block_start; i < this->pattern_block_end; ++i)
+    {
+
+        // sum to sample
+        double sum = 0.0;
+
+        // if the matrix is compressed use the pattern for this site
+        size_t pattern = i - pattern_block_start;
+        if ( compressed == true )
+        {
+            pattern = site_pattern[i - pattern_block_start];
+        }
+
+        // get ptr to first mixture cat for site
+        p_site          = p_node  + pattern * this->siteOffset;
+
+        // iterate over all mixture categories
+        for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
+        {
+
+            // get pointers to the likelihood for this mixture category
+            const double* p_site_mixture_j       = p_site;
+
+            // iterate over all starting states
+            for (size_t state = 0; state < this->num_chars; ++state)
+            {
+                size_t k = this->num_chars * mixture + state;
+                p[k] = *p_site_mixture_j * siteProbVector[mixture];
+                sum += p[k];
+
+                // increment the pointers to the next state for (site,rate)
+                p_site_mixture_j++;
+            }
+
+            // increment the pointers to the next mixture category for given site
+            p_site       += this->mixtureOffset;
+
+        } // end-for over all mixtures (=rate categories)
+
+        // sample char from p
+        bool stop = false;
+        double u = rng->uniform01() * sum;
+        for (size_t mixture = 0; mixture < this->num_site_mixtures; mixture++)
+        {
+            for (size_t state = 0; state < this->num_chars; state++)
+            {
+                size_t k = this->num_chars * mixture + state;
+                u -= p[k];
+                if (u < 0.0)
+                {
+                	this->sampled_site_mixtures[i] = mixture;
+                    stop = true;
+                    break;
+                }
+            }
+            if (stop) break;
+        }
+
+    }
+
+}
 
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawStochasticCharacterMap(std::vector<std::string>& character_histories, size_t site, bool use_simmap_default)
@@ -1297,33 +1383,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawStochasticCha
         std::string simmap_string = "{" + end_states[root_index][site].getStringValue() + "," + StringUtilities::toString( root.getBranchLength() ) + "}";
         character_histories[root_index] = simmap_string;
 
-        // the mixture components are in a vector that is a flattened version of a
-        // matrix with rate components in columns and matrix components in rows.
-        // the matrix is in row-major order.
-        // here, we compute the row and column indices from the vector index.
-
-        size_t mixture_component_index = this->sampled_site_mixtures[site];
-
-        // get the number of rate categories
-        size_t num_site_rates = 1;
-        if (this->site_rates != NULL)
-        {
-        	num_site_rates = this->site_rates->getValue().size();
-        }
-
-        // determine the rate (column index)
-        sampled_site_rate_component = 0;
-        if (this->site_rates != NULL)
-        {
-        	sampled_site_rate_component = mixture_component_index % num_site_rates;
-        }
-
-        // determine the matrix (row index)
-        sampled_site_matrix_component = 0;
-        if (this->site_matrix_probs != NULL)
-        {
-        	sampled_site_matrix_component = (mixture_component_index - sampled_site_rate_component) / num_site_rates;
-        }
+        // get the sampled mixture components
+        getSampledMixtureComponents(site, sampled_site_rate_component, sampled_site_matrix_component);
 
         // recurse towards tips
         const TopologyNode &right = root.getChild(0);
@@ -1361,12 +1422,13 @@ bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::hasSiteMatrixMixt
 
 	return ret;
 }
+
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getSampledMixtureComponents(size_t &site_index, size_t &rate_component, size_t &matrix_component )
 {
 
 	// get the mixture component (in vector form)
-	size_t mixture_component_index = this->sampled_site_mixtures[site_index];
+	size_t mixture_component_index = sampled_site_mixtures[site_index];
 
 	rate_component = 0;
     if (this->site_rates != NULL)
