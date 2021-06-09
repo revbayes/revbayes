@@ -8,7 +8,6 @@
 #include "RbVectorUtilities.h"
 #include "RbException.h"
 
-
 using namespace RevBayesCore;
 
 
@@ -128,10 +127,11 @@ bool Clade::operator==(const Clade &c) const
         return false;
     }
     
-    if ( c.clade_name != clade_name )
-    {
-        return false;
-    }
+    // Sebastian (20210519): We currently do not compare the clade names anymore.
+//    if ( c.clade_name != clade_name )
+//    {
+//        return false;
+//    }
     
     // Sebastian (10/19/2015): We cannot use the clade age for comparison because
     //                         otherwise we cannot find the same clade in different trees.
@@ -176,10 +176,11 @@ bool Clade::operator<(const Clade &c) const
         return false;
     }
     
-    if ( c.clade_name != clade_name )
-    {
-        return c.clade_name < clade_name;
-    }
+    // Sebastian (20210519): We don't compare the clade name anymore but only it's other members
+//    if ( c.clade_name != clade_name )
+//    {
+//        return c.clade_name < clade_name;
+//    }
     
     for (size_t i = 0; i < taxa.size(); ++i)
     {
@@ -272,6 +273,20 @@ std::vector<Taxon>::iterator Clade::end(void)
 Clade* Clade::clone(void) const 
 {
     return new Clade(*this);
+}
+
+
+
+/**
+ * Does the provided clade conflicts with this clade? A conflict is if the clades overlap but are non-nested.
+ *
+ * \param[in]    c    The clade.
+ *
+ * \return True/False whether the clades are nested.
+ */
+bool Clade::conflicts(const Clade& c) const
+{
+    return overlaps(c) && ( isNestedWithin(c) == false ) && ( c.isNestedWithin(*this) == false );
 }
 
 
@@ -413,6 +428,7 @@ const std::string& Clade::getTaxonName(size_t i) const
     return taxa[i].getName();
 }
 
+
 /**
  * Is this clade a negative clade constraint (used with e.g. dnConstrainedTopology).
  *
@@ -425,6 +441,49 @@ bool Clade::isNegativeConstraint(void) const
 
 
 /**
+ * Is the provided clade nested within me? It is only nested if all it's taxa are nested within me.
+ *
+ * \param[in]    c    Theclade.
+ *
+ * \return       True/False, if there is an overlap.
+ */
+bool Clade::isNestedWithin(const Clade& c) const
+{
+    size_t N = taxa.size();
+
+    // do a quick test if the other clade has more taxa
+    // in that case it could never be nested.
+    if ( N < c.size() )
+    {
+        return false;
+    }
+
+    bool nested = true;
+    for ( size_t i=0; i<c.size(); ++i)
+    {
+        const Taxon& t = c.getTaxon(i);
+        bool found = false;
+        for ( size_t j=0; j<N; ++j)
+        {
+            if ( taxa[j] == t )
+            {
+                found = true;
+                break;
+            }
+        }
+        
+        if ( found == false )
+        {
+            nested = false;
+            break;
+        }
+    }
+
+    return nested;
+}
+
+
+/**
  * Is this clade a negative clade constraint (used with e.g. dnConstrainedTopology).
  *
  * \return       The true/false value of whether the clade is a negative constraint.
@@ -432,6 +491,32 @@ bool Clade::isNegativeConstraint(void) const
 bool Clade::isOptionalMatch(void) const
 {
     return is_optional_match;
+}
+
+
+/**
+ * Does the provided clade overlaps with myself? An overlap is if we share at least one taxon.
+ *
+ * \param[in]    c    Theclade.
+ *
+ * \return       True/False, if there is an overlap.
+ */
+bool Clade::overlaps(const Clade& c) const
+{
+    size_t N = taxa.size();
+    for ( size_t i=0; i<c.size(); ++i)
+    {
+        const Taxon& t = c.getTaxon(i);
+        for ( size_t j=0; j<N; ++j)
+        {
+            if ( taxa[j] == t )
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 
@@ -608,11 +693,38 @@ std::string Clade::toString( void ) const
     return s;
 }
 
+namespace RevBayesCore
+{
 
-std::ostream& RevBayesCore::operator<<(std::ostream& o, const Clade& x) {
+std::ostream& operator<<(std::ostream& o, const Clade& x) {
    
     o << x.toString();
    
     return o;
 }
 
+}
+
+void Clade::setAges(const std::vector<Taxon>& taxa)
+{
+    size_t N = size();
+    // set the ages of each of the taxa in the constraint
+    for (size_t j = 0; j < N; ++j)
+    {
+        bool found = false;
+        for (size_t i=0; i<taxa.size(); ++i)
+        {
+            const Taxon& t = taxa[i];
+            if ( t.getName() == getTaxonName(j) )
+            {
+                setTaxonAge(j, t.getAge());
+                found = true;
+                break;
+            }
+        }
+        if ( found == false )
+        {
+            throw RbException("set_ages_for_constraint: can't find taxon " + getTaxonName(j) + " in full taxon set!");
+        }
+    }
+}

@@ -293,6 +293,7 @@ void Tree::dropTipNode( size_t index )
                 sibling_state_times[i] += parent.getTimeInStates()[i];
             }
             sibling->setTimeInStates(sibling_state_times);
+            sibling->setNumberOfShiftEvents( sibling->getNumberOfShiftEvents() + parent.getNumberOfShiftEvents() );
         }
     }
     else
@@ -310,6 +311,7 @@ void Tree::dropTipNode( size_t index )
             if (root->getTimeInStates().size() > 0)
             {
                 root->setTimeInStates(std::vector<double>(root->getTimeInStates().size(), 0.0));
+                root->setNumberOfShiftEvents( 0 );
             }
         }
         else
@@ -335,8 +337,6 @@ void Tree::dropTipNode( size_t index )
     {
         if ( nodes[i] == NULL )
         {
-            std::cerr << "#nodes after filling:\t\t" << nodes.size() << std::endl;
-            std::cerr << i << " - " << nodes[i] << std::endl;
             throw RbException("Problem while reading in tree.");
         }
         num_tips += ( nodes[i]->isTip() ? 1 : 0);
@@ -665,16 +665,18 @@ const TopologyNode& Tree::getMrca(const TopologyNode &n) const
 }
 
 
-std::string Tree::getNewickRepresentation() const
+std::string Tree::getNewickRepresentation(bool round ) const
 {
+
     if ( root == NULL )
     {
         return "";
     }
     else
     {
-        return root->computeNewick();
+        return root->computeNewick( round );
     }
+
 }
 
 
@@ -710,10 +712,10 @@ const std::vector<TopologyNode*>& Tree::getNodes(void) const
 }
 
 
-std::vector<RbBitSet> Tree::getNodesAsBitset(void) const
+std::vector<RbBitSet>* Tree::getNodesAsBitset(void) const
 {
 
-    std::vector<RbBitSet> bs;
+    std::vector<RbBitSet>* bs = new std::vector<RbBitSet>();
 
     for ( size_t i=0; i<nodes.size(); ++i )
     {
@@ -722,7 +724,7 @@ std::vector<RbBitSet> Tree::getNodesAsBitset(void) const
         {
             RbBitSet taxa_this_node = RbBitSet(num_tips);
             n->getTaxa(taxa_this_node);
-            bs.push_back( taxa_this_node );
+            bs->push_back( taxa_this_node );
         }
     }
 
@@ -865,9 +867,9 @@ const TopologyNode& Tree::getRoot(void) const
  * Get the tree and character history in newick format
  * compatible with SIMMAP and phytools
  */
-std::string Tree::getSimmapNewickRepresentation() const
+std::string Tree::getSimmapNewickRepresentation(bool round) const
 {
-    return root->computeSimmapNewick();
+    return root->computeSimmapNewick(round);
 }
 
 
@@ -1116,9 +1118,6 @@ bool Tree::hasSameTopology(const Tree &t) const
 
     std::string a = getPlainNewickRepresentation();
     std::string b = t.getPlainNewickRepresentation();
-
-//    std::cerr << std::endl << a << std::endl;
-//    std::cerr << std::endl << b << std::endl;
 
     return a == b;
 }
@@ -1386,6 +1385,45 @@ void Tree::orderNodesByIndex( void )
 
 }
 
+// Prints tree for user (rounding)
+void Tree::printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const {
+    long previousPrecision = o.precision();
+    std::ios_base::fmtflags previousFlags = o.flags();
+
+    std::fixed( o );
+    o.precision( 3 );
+
+    o << *this;
+    
+    o.setf( previousFlags );
+    o.precision( previousPrecision );
+}
+
+// Prints tree for simple storing (rounding)
+void Tree::printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const {
+    std::stringstream ss;
+    ss << *this;
+    std::string s = ss.str();
+    if ( l > 0 ) 
+    {
+        StringUtilities::fillWithSpaces(s, l, left);
+    }
+    o << s;
+}
+
+// Prints tree for complex storing (no rounding; mostly checkpointing)
+void Tree::printForComplexStoring ( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const {
+    std::stringstream ss;
+
+    // call getNewickRepresentation with round == FALSE
+    ss << this->getNewickRepresentation( false );
+    std::string s = ss.str();
+    if (l > 0) {
+        StringUtilities::fillWithSpaces(s, l, left);
+    }
+    o << s;
+}
+
 void Tree::pruneTaxa(const RbBitSet& prune_map )
 {
     nodes.clear();
@@ -1570,10 +1608,11 @@ void Tree::renumberNodes(const Tree &reference)
     }
     // Second, the tip nodes
     std::vector<std::string> tipNames = getTipNames();
-    for (auto i = 0; i<tipNames.size(); ++i) {
+    for (size_t i = 0; i<tipNames.size(); ++i)
+    {
       getTipNodeWithName(tipNames[i]).setIndex(reference.getTipNodeWithName(tipNames[i]).getIndex());
     }
-    return;
+    
 }
 
 

@@ -9,11 +9,12 @@ all_args="$@"
 debug="false"
 travis="false"
 mpi="false"
-gentoo="false"
 help="false"
 jupyter="false"
 boost_root=""
 boost_lib=""
+static_boost="false"
+j=4
 
 cmake_args=""
 # parse command line arguments
@@ -30,6 +31,8 @@ while echo $1 | grep ^- > /dev/null; do
 -help           <true|false>    : update the help database and build the YAML help generator. Defaults to false.
 -boost_root     string          : specify directory containing Boost headers (e.g. `/usr/include`). Defaults to unset.
 -boost_lib      string          : specify directory containing Boost libraries. (e.g. `/usr/lib`). Defaults to unset.
+-static_boost	<true|false>    : link using static Boost libraries. Defaults to false.
+-j              integer         : the number of threads to use when compiling RevBayes. Defaults to 4.
 
 You can also specify cmake variables as -DCMAKE_VAR1=value1 -DCMAKE_VAR2=value2
 
@@ -105,6 +108,10 @@ if [ -n "$boost_lib" ] ; then
     cmake_args="-DBOOST_LIBRARYDIR=\"${boost_lib}\" $cmake_args"
 fi
 
+if [ "$static_boost" = "true" ] ; then
+    cmake_args="-DSTATIC_BOOST=ON $cmake_args"
+fi
+
 if [ "$help" = "true" ] ; then
     cmake_args="-DHELP=ON $cmake_args"
 fi
@@ -128,7 +135,7 @@ fi
 
     #################
     # generate git version number
-    ./generate_version_number.sh
+    bash generate_version_number.sh
     if [ -e ../../src/revlanguage/utils/GitVersion.cpp ] ; then
         cp ../../src/revlanguage/utils/GitVersion.cpp GitVersion_backup.cpp
     fi
@@ -152,8 +159,8 @@ fi
     echo "Running 'cmake ../../../src $cmake_args' in $(pwd)"
     cmake -D Boost_NO_BOOST_CMAKE:BOOL=ON ../../../src $cmake_args
     echo
-    echo "Running 'make -j4' in $(pwd)"
-    make -j 4
+    echo "Running 'make -j $j' in $(pwd)"
+    make -j $j
     cd ..
 
     if [ -e  GitVersion_backup.cpp ] ; then

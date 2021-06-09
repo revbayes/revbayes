@@ -285,11 +285,6 @@ double BranchRateTreeDistribution::computeLnProbability( void )
     const std::map<std::string, size_t> &time_tree_taxon_bitmap = time_tree_unrooted->getTaxonBitSetMap();
     const std::map<std::string, size_t> &branch_length_tree_taxon_bitmap = branch_length_tree.getTaxonBitSetMap();
 
-    if ( time_tree_taxon_bitmap != branch_length_tree_taxon_bitmap )
-    {
-        std::cerr << "Ooohhh" << std::endl;
-    }
-
     // Check that the topologies are identical
     if ( touched_time_tree == true )
     {
@@ -302,8 +297,6 @@ double BranchRateTreeDistribution::computeLnProbability( void )
     
     if ( newick_time_tree != newick_branch_length_tree )
     {
-//        std::cerr << newick_time_tree << std::endl;
-//        std::cerr << newick_branch_length_tree << std::endl;
         return RbConstants::Double::neginf;
     }
 

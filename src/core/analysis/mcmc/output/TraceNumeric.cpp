@@ -46,6 +46,7 @@ TraceNumeric* TraceNumeric::clone() const
 void TraceNumeric::computeStatistics( void )
 {
 
+    // Sebastian (20210519): The convergence test are currently broken and don't work anymore.
 //    // test stationarity within chain
 //    size_t nBlocks = 10;
 //    StationarityTest testS = StationarityTest(nBlocks, 0.01);
@@ -60,8 +61,11 @@ void TraceNumeric::computeStatistics( void )
 
 double TraceNumeric::getMean() const
 {
-    if( isDirty() == false ) return mean;
-
+    if ( isDirty() == false )
+    {
+        return mean;
+    }
+    
     double m = 0;
     size_t size = values.size();
     for (size_t i=burnin; i<size; i++)

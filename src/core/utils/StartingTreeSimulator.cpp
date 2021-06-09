@@ -296,7 +296,7 @@ void StartingTreeSimulator::simulateClade( std::set<TopologyNode*> &nodes) const
             min_age = a;
         }
     }
-    
+
     std::set<TopologyNode*> current_nodes;
     std::multimap<double,TopologyNode*> serial_nodes;
     for (std::set<TopologyNode*>::const_iterator it=nodes.begin(); it!=nodes.end(); ++it)
@@ -335,7 +335,7 @@ void StartingTreeSimulator::simulateClade( std::set<TopologyNode*> &nodes) const
     // j is the number of active lineages at the current time
     size_t j = num_taxa_at_present;
     //    double theta = Ne->getValue();
-    double theta = 10.0;
+    double theta = 1.0;
     
     // the current age of the process
     double sim_age = min_age;

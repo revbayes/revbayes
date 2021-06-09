@@ -164,7 +164,6 @@
 #include "Dist_BDSTP.h"
 #include "Dist_BirthDeathBurstProcess.h"
 #include "Dist_BranchRateTree.h"
-// #include "Dist_BDSTP.h"
 #include "Dist_CharacterDependentBirthDeathProcess.h"
 #include "Dist_Coalescent.h"
 #include "Dist_CoalescentSkyline.h"

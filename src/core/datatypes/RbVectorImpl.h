@@ -67,20 +67,6 @@ namespace RevBayesCore {
         RbIterator<valueType>                               erase(RbIterator<valueType> pos) { return this->std::vector<valueType>::erase( pos.getStlIterator() ); }
         RbConstIterator<valueType>                          erase(RbConstIterator<valueType> pos) { return this->std::vector<valueType>::erase( pos ); }
 
-//        valueType&                                          operator[](size_t i) { return values[i]; }
-//        const valueType&                                    operator[](size_t i) const { return values[i]; }
-//        void                                                clear(void) { values.clear(); }
-//        void                                                insert(size_t i, const valueType &v) { values[i] = v; }
-//        void                                                push_back(const valueType &v) { values.push_back( v ); }
-//        void                                                insert(size_t i, const valueType &v) { delete values[i]; values[i] = Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( v ); }
-//        void                                                push_back(const valueType &v) { values.push_back( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( v ) ); }
-//        RbIterator<valueType>                               begin(void) { return RbIterator<valueType>( this->values.begin() ); }
-//        RbConstIterator<valueType>                          begin(void) const { return RbConstIterator<valueType>( this->values.begin() ); }
-//        RbIterator<valueType>                               end(void) { return RbIterator<valueType>( this->values.end() ); }
-//        RbConstIterator<valueType>                          end(void) const { return RbConstIterator<valueType>( this->values.end() ); }
-//        void                                                erase(size_t i) { valueType *tmp=values[i]; values.erase(values.begin()+i); delete tmp; }
-//        RbIterator<valueType>                               erase(RbIterator<valueType> pos) { valueType *tmp=*pos; delete tmp; return this->std::vector<valueType>::erase( pos ); }
-//        RbConstIterator<valueType>                          erase(RbConstIterator<valueType> pos) { valueType *tmp=*pos; delete tmp; return this->std::vector<valueType>::erase( pos ); }
         RbIterator<valueType>                               find(const valueType &x) { return RbIterator<valueType>( std::find(this->std::vector<valueType>::begin(), this->std::vector<valueType>::end(), x) ); }
         RbConstIterator<valueType>                          find(const valueType &x) const { return RbConstIterator<valueType>( std::find(this->std::vector<valueType>::begin(), this->std::vector<valueType>::end(), x) ); }
         virtual size_t                                      size(void) const { return this->std::vector<valueType>::size(); }
@@ -88,7 +74,7 @@ namespace RevBayesCore {
         {
             if ( i >= std::vector<valueType>::size() )
             {
-                throw(RbException("Vector index out of range. You tried to access index '" + StringUtilities::to_string(i) + "' for a vector of size '" + StringUtilities::to_string(std::vector<valueType>::size()) + "'."));
+                throw RbException("Vector index out of range. You tried to access index '" + StringUtilities::to_string(i) + "' for a vector of size '" + StringUtilities::to_string(std::vector<valueType>::size()) + "'.");
             }
             return std::vector<valueType>::operator [](i);
         }
@@ -120,31 +106,57 @@ namespace RevBayesCore {
             }
             o << " ]";
         }
-        void                                                printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left ) const
+        void                                                printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true ) const
         {
-            for (size_t i=0; i<size(); ++i)
-            {
-                if (i > 0)
-                {
-                    o << sep;
+            if (flatten) {
+                for (size_t i = 0; i < size(); ++i) {
+                    if (i > 0) {
+                        o << sep;
+                    }
+                    Printer<valueType, IsDerivedFrom<valueType, Printable>::Is>::printForSimpleStoring(
+                            this->operator[](i), o, sep, l, left);
                 }
-                Printer<valueType, IsDerivedFrom<valueType, Printable>::Is >::printForSimpleStoring( this->operator[](i), o, sep, l, left );
-
+            }
+            else {
+                o << "[";
+                for (size_t i=0; i<size(); ++i)
+                {
+                    if (i > 0)
+                    {
+                        o << ",";
+                    }
+                    Printer<valueType, IsDerivedFrom<valueType, Printable>::Is >::printForSimpleStoring( this->operator[](i), o, sep, l, left );
+                }
+                o << "]";
             }
         }
-        void                                                printForComplexStoring( std::ostream &o, const std::string &sep, int l, bool left ) const
+        void                                                printForComplexStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true ) const
         {
-            o << "[";
-            for (size_t i=0; i<size(); ++i)
-            {
-                if (i > 0)
-                {
-                    o << ",";
-                }
-                Printer<valueType, IsDerivedFrom<valueType, Printable>::Is >::printForComplexStoring( this->operator[](i), o, sep, l, left );
+            o.precision( std::numeric_limits<double>::digits10 );
 
+            if (flatten) {
+                for (size_t i=0; i<size(); ++i)
+                {
+                    if (i > 0)
+                    {
+                        o << sep;
+                    }
+                    Printer<valueType, IsDerivedFrom<valueType, Printable>::Is >::printForComplexStoring( this->operator[](i), o, sep, l, left );
+                }
             }
-            o << "]";
+            else {
+                o << "[";
+                for (size_t i=0; i<size(); ++i)
+                {
+                    if (i > 0)
+                    {
+                        o << ",";
+                    }
+                    Printer<valueType, IsDerivedFrom<valueType, Printable>::Is >::printForComplexStoring( this->operator[](i), o, sep, l, left );
+                }
+                o << "]";
+            }
+
         }
         
     };
@@ -212,7 +224,7 @@ namespace RevBayesCore {
                 valueType* v = values[i];
                 delete v;
             }
-            
+
             values.clear();
         }
         void                                                insert(size_t i, const valueType &v) { delete values[i]; values[i] = Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( v ); }
@@ -233,7 +245,7 @@ namespace RevBayesCore {
             valueType *temp = Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( a );
             a = b;
             b = *temp;
-            
+
             delete temp;
         }
         void                                                printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const
@@ -250,38 +262,73 @@ namespace RevBayesCore {
             }
             o << " ]";
         }
-        void                                                printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left ) const
+        void                                                printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true ) const
         {
-            for (size_t i=0; i<size(); ++i)
-            {
-                if (i > 0)
-                {
-                    o << sep;
+            // if flatten == TRUE, save each element of vector separately
+            if (flatten) {
+                for (size_t i = 0; i < size(); ++i) {
+                    if (i > 0) {
+                        o << sep;
+                    }
+                    Printer<valueType, IsDerivedFrom<valueType, Printable>::Is>::printForSimpleStoring(
+                            this->operator[](i), o, sep, l, left);
                 }
-                Printer<valueType, IsDerivedFrom<valueType, Printable>::Is >::printForSimpleStoring( this->operator[](i), o, sep, l, left );
+            }
+
+            // otherwise, save full vector
+            else {
+                o << "[";
+                for (size_t i=0; i<size(); ++i)
+                {
+                    if (i > 0)
+                    {
+                        o << ",";
+                    }
+                    Printer<valueType, IsDerivedFrom<valueType, Printable>::Is >::printForSimpleStoring( this->operator[](i), o, sep, l, left );
+                }
+                o << "]";
             }
         }
-        void                                                printForComplexStoring( std::ostream &o, const std::string &sep, int l, bool left ) const
+        void                                                printForComplexStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true ) const
         {
-            o << "[";
-            for (size_t i=0; i<size(); ++i)
-            {
-                if (i > 0)
+            // set precision to maximum
+            o.precision( std::numeric_limits<double>::digits10 );
+
+            // if flatten == TRUE, save each element of vector separately
+            if (flatten) {
+                for (size_t i=0; i<size(); ++i)
                 {
-                    o << ",";
+                    if (i > 0)
+                    {
+                        o << sep;
+                    }
+                    Printer<valueType, IsDerivedFrom<valueType, Printable>::Is >::printForComplexStoring( this->operator[](i), o, sep, l, left );
                 }
-                Printer<valueType, IsDerivedFrom<valueType, Printable>::Is >::printForComplexStoring( this->operator[](i), o, sep, l, left );
             }
-            o << "]";
+
+            // otherwise, save full vector
+            else {
+                o << "[";
+                for (size_t i=0; i<size(); ++i)
+                {
+                    if (i > 0)
+                    {
+                        o << ",";
+                    }
+                    Printer<valueType, IsDerivedFrom<valueType, Printable>::Is >::printForComplexStoring( this->operator[](i), o, sep, l, left );
+                }
+                o << "]";
+            }
+
         }
 
     protected:
-        
+
         // private members
         std::vector<valueType*>                             values;
     };
 
-    
+
 }
 
 

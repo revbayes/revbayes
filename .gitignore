@@ -23,7 +23,7 @@ history.txt
 /GRTAGS
 /GTAGS
 # generated files
-validation/output/*
+validation/output*
 src/meson.build
 src/core/meson.build
 src/libs/meson.build

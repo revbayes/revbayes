@@ -37,7 +37,8 @@ namespace RevBayesCore {
         double                  calculateMPD(const Tree& t, const AbstractHomologousDiscreteCharacterData& c, size_t site_index, size_t state_index, bool zscore, bool branch_lengths, size_t num_randomizations); //!< calculate the Mean Pairwise Distance
         double                  calculateMNTD(const Tree& t, const AbstractHomologousDiscreteCharacterData& c, size_t site_index, size_t state_index, bool zscore, bool branch_lengths, size_t num_randomizations); //!< calculate the Mean Nearest Taxon Distance
         void                    climbUpTheTree(const TopologyNode& node, boost::unordered_set< const TopologyNode* >& node_root_path) ; //!< find path from given node to root
-        double                  computeRobinsonFouldDistance(const Tree& a, const Tree& b);                                             //!< Robinson-Foulds distance
+        double                  computeRobinsonFouldDistance(const std::vector<RbBitSet>& a, const std::vector<RbBitSet>& b, bool symmetric);//!< Robinson-Foulds distance
+        double                  computeRobinsonFouldDistance(const Tree& a, const Tree& b, bool symmetric);                             //!< Robinson-Foulds distance
         Tree*                   convertTree(const Tree& t, bool resetIndex=true);                                                       //!< convert tree to time tree
         double                  getAgeOfMRCA(const Tree& t, const std::string& first, const std::string& second);                       //!< calculate age of MRCA based on tip names
         void                    getAges(const TopologyNode& n, std::vector<double>& ages, bool internals_only=true);                    //!< fill vector with node ages

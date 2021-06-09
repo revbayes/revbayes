@@ -258,7 +258,6 @@ void MetropolisHastingsMove::performHillClimbingMove( double lHeat, double pHeat
 
 void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, double pHeat )
 {
-
     const RbOrderedSet<DagNode*> &affected_nodes = getAffectedNodes();
     const std::vector<DagNode*> nodes = getDagNodes();
 
@@ -380,6 +379,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
         if ( RbMath::isAComputableNumber(ln_prior_ratio) && RbMath::isAComputableNumber(ln_likelihood_ratio) && RbMath::isAComputableNumber(ln_hastings_ratio) )
         {
+
             if ( the_node->isClamped() )
             {
                 try {

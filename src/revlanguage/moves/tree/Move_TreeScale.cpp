@@ -51,6 +51,9 @@ void Move_TreeScale::constructInternalObject( void )
     // now allocate a new tree scale move
 
     // get the tree(s) variable
+    // we either expect to receive a stochastic variable on a single tree (e.g., the species tree), or on a vector of trees (e.g., gene trees)
+    // to avoid re-implementing the move for a single scalar and vector, we allow for both single values and vectors
+    // however, we need to check to make sure that our type conversions stay proper
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = NULL;
     RevBayesCore::StochasticNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *vec_t = NULL;
     if ( tree->getRevObject().isType( TimeTree::getClassTypeSpec() ) )

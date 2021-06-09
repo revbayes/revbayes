@@ -52,6 +52,7 @@ namespace RevBayesCore {
         
         // public methods
         void                                        addTaxon(const Taxon &t);                                   //!< Add a taxon to our list.
+        bool                                        conflicts(const Clade& c) const;                            //!< Is there a conflict between the clades, i.e. a partial overlap.
         double                                      getAge(void) const;                                         //!< Get the age of this clade.
         const RbBitSet&                             getBitRepresentation(void) const;                           //!< Get the clade as a bit representation.
         const std::string&                          getCladeName(void) const;                                   //!< Get the name of the clade.
@@ -64,9 +65,12 @@ namespace RevBayesCore {
         const Taxon&                                getTaxon(size_t i) const;                                   //!< Get a single taxon name.
         const std::string&                          getTaxonName(size_t i) const;                               //!< Get a single taxon name.
         bool                                        isNegativeConstraint(void) const;                           //!< Get negative constraint flag.
+        bool                                        isNestedWithin(const Clade& c) const;                       //!< Is the provided clade nested within me?
         bool                                        isOptionalMatch(void) const;                                //!< Get negative constraint flag.
+        bool                                        overlaps(const Clade& c) const;                              //!< Does the provided clade overlap with me?
         void                                        resetTaxonBitset(const std::map<std::string, size_t> map);
         void                                        setAge(double a);                                           //!< Set the age of the clade.
+        void                                        setAges(const std::vector<Taxon>& taxa);                         //!< Set the aged of the taxa based on this set.
         void                                        setBitRepresentation(const RbBitSet &b);
         void                                        setCladeName(const std::string& n);                         //!< Set the name of the clade.
         void                                        setOptionalConstraints(std::vector<Clade> c);               //!< Set optional clade constraints.

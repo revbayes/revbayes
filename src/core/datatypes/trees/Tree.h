@@ -23,12 +23,12 @@
 #define Tree_H
 
 #include "RbBoolean.h"
-#include "RbVector.h"
 #include "Cloneable.h"
 #include "MemberObject.h"
 #include "Serializable.h"
 #include "TaxonMap.h"
 #include "TreeChangeEventHandler.h"
+#include "Printable.h"
 
 #include <vector>
 #include <string>
@@ -37,7 +37,7 @@ namespace RevBayesCore {
 
     class TopologyNode;
 
-    class Tree : public Cloneable, public MemberObject<double>, public MemberObject<long>, public MemberObject<Boolean>, public Serializable {
+    class Tree : public Cloneable, public MemberObject<double>, public MemberObject<long>, public MemberObject<Boolean>, public Serializable, public Printable {
 
     public:
         Tree(void);                                                                                                                                             //!< Default constructor
@@ -80,11 +80,11 @@ namespace RevBayesCore {
         TopologyNode&                                       getMrca(const Clade &c);
         const TopologyNode&                                 getMrca(const Clade &c) const;
         const TopologyNode&                                 getMrca(const Clade &c, bool strict) const;
-        std::string                                         getNewickRepresentation() const;                                                                    //!< Get the newick representation of this Tree
+        std::string                                         getNewickRepresentation( bool round = true ) const;                                                 //!< Get the newick representation of this Tree
         TopologyNode&                                       getNode(size_t idx);                                                                                //!< Get the node at index
         const TopologyNode&                                 getNode(size_t idx) const;                                                                          //!< Get the node at index
         const std::vector<TopologyNode*>&                   getNodes(void) const;                                                                               //!< Get a pointer to the nodes in the Tree
-        std::vector<RbBitSet>                               getNodesAsBitset(void) const;                                                                       //!< Get a vector of bitset representations of nodes
+        std::vector<RbBitSet>*                              getNodesAsBitset(void) const;                                                                       //!< Get a vector of bitset representations of nodes
         std::vector<long>                                   getNodeIndices(void) const;                                                                         //!< Get a vector of node indices
         size_t                                              getNumberOfInteriorNodes(void) const;                                                               //!< Get the number of nodes in the Tree
         size_t                                              getNumberOfNodes(void) const;                                                                       //!< Get the number of nodes in the Tree
@@ -98,7 +98,7 @@ namespace RevBayesCore {
         std::string                                         getPlainNewickRepresentation() const;                                                               //!< Get the newick representation of this Tree
         TopologyNode&                                       getRoot(void);                                                                                      //!< Get a pointer to the root node of the Tree
         const TopologyNode&                                 getRoot(void) const;                                                                                //!< Get a pointer to the root node of the Tree
-        std::string                                         getSimmapNewickRepresentation() const;                                                              //!< Get the SIMMAP and phytools compatible newick representation of this Tree
+        std::string                                         getSimmapNewickRepresentation(bool round = true ) const;                                            //!< Get the SIMMAP and phytools compatible newick representation of this Tree
         std::vector<std::string>                            getSpeciesNames() const;                                                                            //!< Get all the species represented in the tree
         std::vector<Taxon>                                  getTaxa() const;                                                                                    //!< Get all the taxa in the tree
 
@@ -124,6 +124,9 @@ namespace RevBayesCore {
         void                                                makeInternalNodesBifurcating(bool reindex, bool fossils_only);                                                         //!< Make all the internal nodes bifurcating.
         void                                                makeRootBifurcating(const Clade& o, bool reindex);                                                         //!< Make all the internal nodes bifurcating.
         void                                                orderNodesByIndex();
+        void                                                printForUser(std::ostream &o, const std::string &sep, int l, bool left) const;             //!< Prints tree for user
+        void                                                printForSimpleStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true) const; //!< Prints tree for storing without rounding
+        void                                                printForComplexStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true) const; //!< Prints tree for storing with rounding (mainly checkpointing) 
         void                                                pruneTaxa(const RbBitSet& bs);
         void                                                renumberNodes(const Tree &reference);                                                               //!< Change node ids to be as in reference
         void                                                reroot(const Clade& o, bool make_bifurcating, bool reindex);                                                        //!< Re-root the tree with the given outgroup

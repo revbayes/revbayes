@@ -48,8 +48,8 @@ namespace RevBayesCore {
         size_t                                                  size(void) const;                   //!< Get the size of the rate matrix, same as the number of states
         
         virtual void                                            printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const;
-        virtual void                                            printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left ) const;
-        virtual void                                            printForComplexStoring( std::ostream &o, const std::string &sep, int l, bool left ) const;
+        virtual void                                            printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const;
+        virtual void                                            printForComplexStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const;
         
     protected:
         

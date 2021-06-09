@@ -375,16 +375,31 @@ void RevBayesCore::TreeUtilities::climbUpTheTree(const TopologyNode& node, boost
     }
 }
 
+/** Calculate Robinson-Foulds distance between two trees
+ * @param a,b trees between which to calculate the distance
+ * @return RF distance
+ */
+double RevBayesCore::TreeUtilities::computeRobinsonFouldDistance(const RevBayesCore::Tree& a, const RevBayesCore::Tree& b, bool symmetric)
+{
+    
+    std::vector<RbBitSet>* bipartitions_a = a.getNodesAsBitset();
+    std::vector<RbBitSet>* bipartitions_b = b.getNodesAsBitset();
+    
+    double RF_distance = TreeUtilities::computeRobinsonFouldDistance(*bipartitions_a, *bipartitions_b, symmetric);
+    
+    delete bipartitions_a;
+    delete bipartitions_b;
+    
+    return RF_distance;
+}
 
 /** Calculate Robinson-Foulds distance between two trees
  * @param a,b trees between which to calculate the distance
  * @return RF distance
  */
-double RevBayesCore::TreeUtilities::computeRobinsonFouldDistance(const RevBayesCore::Tree& a, const RevBayesCore::Tree& b)
+double RevBayesCore::TreeUtilities::computeRobinsonFouldDistance(const std::vector<RevBayesCore::RbBitSet>& bipartitions_a, const std::vector<RevBayesCore::RbBitSet>& bipartitions_b, bool symmetric)
 {
 
-    std::vector<RbBitSet> bipartitions_a = a.getNodesAsBitset();
-    std::vector<RbBitSet> bipartitions_b = b.getNodesAsBitset();
     bool found = false;
     double distance = 0.0;
     for (size_t i = 0; i< bipartitions_a.size(); ++i)
@@ -403,22 +418,32 @@ double RevBayesCore::TreeUtilities::computeRobinsonFouldDistance(const RevBayesC
             distance += 1.0;
         }
     }
-    for (size_t i = 0; i< bipartitions_b.size(); ++i)
+    
+    if ( symmetric == true )
     {
-        found = false;
-        for (size_t j = 0; j < bipartitions_b.size(); ++j)
+        distance *= 2;
+    }
+    else
+    {
+
+        for (size_t i = 0; i< bipartitions_b.size(); ++i)
         {
-            if (bipartitions_b[i] == bipartitions_a[j])
+            found = false;
+            for (size_t j = 0; j < bipartitions_a.size(); ++j)
             {
-                found = true;
-                break;
+                if (bipartitions_b[i] == bipartitions_a[j])
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found == false)
+            {
+                distance += 1.0;
             }
         }
-
-        if (found == false)
-        {
-            distance += 1.0;
-        }
+        
     }
 
     return distance;

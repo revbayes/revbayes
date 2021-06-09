@@ -61,10 +61,6 @@ if ("${MPI}" STREQUAL "ON")
    set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS}")
 endif()
 
-if (WIN32)
-   add_definitions(-DRB_WIN)
-endif()
-
 if ("${JUPYTER}" STREQUAL "ON")
    add_definitions(-DRB_XCODE)
 endif()
@@ -89,6 +85,10 @@ if (BOOST_LIBRARYDIR)
 endif()
 
 set(Boost_USE_MULTITHREADED ON)
+if ("${STATIC_BOOST}" STREQUAL "ON")
+	MESSAGE("Static linking Boost")
+	set(Boost_USE_STATIC_LIBS ON)
+endif()
 
 MESSAGE("Searching for BOOST:")
 find_package(Boost

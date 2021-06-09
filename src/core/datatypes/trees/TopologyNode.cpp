@@ -7,8 +7,10 @@
 #include <math.h>
 #include <set>
 #include <string>
+#include <sstream>
 #include <utility>
 #include <vector>
+#include <limits>
 
 #include "Clade.h"
 #include "RbException.h"
@@ -40,6 +42,7 @@ TopologyNode::TopologyNode(size_t indx) :
     root_node( true ),
     tip_node( true ),
     sampled_ancestor( false ),
+    num_shift_events( 0 ),
     burst_speciation( false ),
     sampling_event( false ),
     serial_sampling( false ),
@@ -63,6 +66,7 @@ TopologyNode::TopologyNode(const Taxon& t, size_t indx) :
     root_node( true ),
     tip_node( true ),
     sampled_ancestor( false ),
+    num_shift_events( 0 ),
     burst_speciation( false ),
     sampling_event( false ),
     serial_sampling( false ),
@@ -86,6 +90,7 @@ TopologyNode::TopologyNode(const std::string& n, size_t indx) :
     root_node( true ),
     tip_node( true ),
     sampled_ancestor( false ),
+    num_shift_events( 0 ),
     burst_speciation( false ),
     sampling_event( false ),
     serial_sampling( false ),
@@ -110,6 +115,7 @@ TopologyNode::TopologyNode(const TopologyNode &n) :
     node_comments( n.node_comments ),
     branch_comments( n.branch_comments ),
     time_in_states( n.time_in_states ),
+    num_shift_events( n.num_shift_events ),
     burst_speciation( n.burst_speciation ),
     sampling_event( n.sampling_event ),
     serial_sampling( n.serial_sampling ),
@@ -170,6 +176,7 @@ TopologyNode& TopologyNode::operator=(const TopologyNode &n)
         serial_speciation       = n.serial_speciation;
         taxon                   = n.taxon;
         time_in_states          = n.time_in_states;
+        num_shift_events        = n.num_shift_events;
         tip_node                = n.tip_node;
         use_ages                = n.use_ages;
 
@@ -262,7 +269,7 @@ void TopologyNode::addChild(TopologyNode* c, size_t pos )
     // add child to beginning if pos is out of bounds
     if( pos > children.size() )
     {
-        throw(RbException("Child position index out of bounds"));
+        throw RbException("Child position index out of bounds");
     }
 
     // add the child at pos offset from the end
@@ -360,14 +367,22 @@ void TopologyNode::addNodeParameters(std::string const &n, const std::vector<std
  * Build newick string.
  * If simmap = true build a newick string compatible with SIMMAP and phytools.
  */
-std::string TopologyNode::buildNewickString( bool simmap = false )
+std::string TopologyNode::buildNewickString( bool simmap = false, bool round = true )
 {
 
     // create the newick string
     std::stringstream o;
 
     std::fixed(o);
-    o.precision( 6 );
+    // depending on the value of round, get standard precision or maximum
+    if (round)
+    {
+        o.precision( 6 );
+    }
+    else
+    {
+        o.precision( std::numeric_limits<double>::digits10 );
+    }
 
     std::vector<std::string> fossil_comments;
 
@@ -406,7 +421,7 @@ std::string TopologyNode::buildNewickString( bool simmap = false )
                     o << ",";
                 }
                 j++;
-                o << children[i]->buildNewickString( simmap );
+                o << children[i]->buildNewickString( simmap, round );
             }
         }
 
@@ -557,10 +572,10 @@ TopologyNode* TopologyNode::clone(void) const
 
 
 
-std::string TopologyNode::computeNewick( void )
+std::string TopologyNode::computeNewick( bool round )
 {
 
-    return buildNewickString();
+    return buildNewickString(false, round);
 }
 
 
@@ -611,9 +626,9 @@ std::string TopologyNode::computePlainNewick( void ) const
 }
 
 
-std::string TopologyNode::computeSimmapNewick( void )
+std::string TopologyNode::computeSimmapNewick( bool round )
 {
-    return buildNewickString( true );
+    return buildNewickString( true, round );
 }
 
 
@@ -832,6 +847,40 @@ double TopologyNode::getAge( void ) const
 {
 
     return age;
+}
+
+
+RbBitSet TopologyNode::getAllClades(std::vector<RbBitSet> &all_clades, size_t num_tips, bool internal_only) const
+{
+
+    RbBitSet this_bs = RbBitSet(num_tips);
+    if ( isTip() == true )
+    {
+//        taxa.set( index );
+        // We can't use indices for tree comparison because different trees may
+        // have different indices for the same taxon.
+        // Instead make the BitSet ordered by taxon names.
+        // Eventually this should be refactored with the TaxonMap class.
+        std::map<std::string, size_t> taxon_bitset_map = tree->getTaxonBitSetMap();
+        this_bs.set( taxon_bitset_map[taxon.getName()] );
+        
+        if ( internal_only == false )
+        {
+            all_clades.push_back( this_bs );
+        }
+    }
+    else
+    {
+        for ( std::vector<TopologyNode* >::const_iterator i=children.begin(); i!=children.end(); i++ )
+        {
+            RbBitSet child_bs = (*i)->getAllClades(all_clades, num_tips, internal_only);
+            this_bs |= child_bs;
+        }
+        all_clades.push_back( this_bs );
+
+    }
+
+    return this_bs;
 }
 
 
@@ -1370,6 +1419,12 @@ std::string TopologyNode::getIndividualName() const
 }
 
 
+size_t TopologyNode::getNumberOfShiftEvents( void ) const
+{
+    return num_shift_events;
+}
+
+
 std::string TopologyNode::getSpeciesName() const
 {
     std::string name = taxon.getSpeciesName();
@@ -1814,11 +1869,11 @@ void TopologyNode::setAge(double a, bool propagate)
 
     age = a;
     
-    // we should also update the taxon age if this is a tip node
-    if ( isTip() == true )
-    {
-        getTaxon().setAge( a );
-    }
+//    // we should also update the taxon age if this is a tip node
+//    if ( isTip() == true )
+//    {
+//        getTaxon().setAge( a );
+//    }
 
     // we need to recompute my branch-length
     recomputeBranchLength();
@@ -1882,6 +1937,12 @@ void TopologyNode::setName(std::string const &n)
     taxon.setName( n );
     taxon.setSpeciesName( n );
 
+}
+
+
+void TopologyNode::setNumberOfShiftEvents(size_t n)
+{
+    num_shift_events = n;
 }
 
 //SK

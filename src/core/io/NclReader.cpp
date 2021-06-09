@@ -1282,7 +1282,7 @@ std::vector<AbstractCharacterData*> NclReader::readMatrices(const std::string &f
         myFileManager.setStringWithNamesOfFilesInDirectory(vectorOffile_names);
     else
     {
-#       if defined (RB_WIN)
+#       if defined (_WIN32)
         vectorOffile_names.push_back( myFileManager.getFilePath() + "\\" + myFileManager.getFileName() );
 #       else
         vectorOffile_names.push_back( myFileManager.getFilePath() + "/" + myFileManager.getFileName() );
@@ -1682,7 +1682,7 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const std::string &fn)
         std::string filepath = myFileManager.getFilePath();
         if ( filepath != "" )
         {
-#           if defined RB_WIN
+#           if defined _WIN32
             filepath += "\\";
 #           else
             filepath += "/";

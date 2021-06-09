@@ -206,7 +206,7 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
     b_i = std::vector<double>(fbd_taxa.size(), 0.0);
     d_i = std::vector<double>(fbd_taxa.size(), 0.0);
 
-    if( bounded == false ) H = std::vector<double>(fbd_taxa.size(), 0.0);
+    if ( bounded == false ) H = std::vector<double>(fbd_taxa.size(), 0.0);
 
     p_i         = std::vector<double>(num_intervals, 1.0);
     q_i         = std::vector<double>(num_intervals, 0.0);

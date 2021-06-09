@@ -66,8 +66,6 @@ namespace RevBayesCore {
         virtual double                                      computeRootLikelihood(const TopologyNode &n);
         virtual double                                      computeInternalNodeLikelihood(const TopologyNode &n);
         virtual double                                      computeTipLikelihood(const TopologyNode &node);
-        // (not needed)        void                         keepSpecialization(const DagNode* affecter);
-        // (not needed)        void                         restoreSpecialization(const DagNode *restorer);
         virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
         
     private:
@@ -530,7 +528,6 @@ void RevBayesCore::GeneralTreeHistoryCtmc<charType>::initializeTipValues( void )
                     
                     if ( state.isGapState() == true )
                     {
-                        //                        std::cerr << state.getStateIndex() << std::endl;
                         s = 0;
                     }
                     

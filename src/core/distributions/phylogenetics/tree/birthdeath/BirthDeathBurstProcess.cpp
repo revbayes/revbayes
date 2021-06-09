@@ -174,8 +174,6 @@ double BirthDeathBurstProcess::computeLnProbabilityTimes( void ) const
     if ( num_lineages_burst_at_event > 0 )
     {
         lnProbTimes += log(burst_prob) * num_lineages_burst_at_event;
-//        std::cerr << "E(" << burst_time << ") = " << pZero(burst_time) << std::endl;
-//        std::cerr << "A-K = " << num_lineages_alive_at_burst << std::endl;
         lnProbTimes += log(1.0-burst_prob+2*burst_prob*pZero(burst_time)) * num_lineages_alive_at_burst;
     }
     
@@ -183,7 +181,6 @@ double BirthDeathBurstProcess::computeLnProbabilityTimes( void ) const
     lnProbTimes += (internal_node_ages.size()-num_lineages_burst_at_event) * log( birth_rate );
     for (size_t i=0; i<internal_node_ages.size(); i++)
     {
-//        std::cerr << "lnD(" << internal_node_ages[i] << ") = " << lnQ(internal_node_ages[i]) << std::endl;
         lnProbTimes += lnQ(internal_node_ages[i]);
     }
     
@@ -454,34 +451,16 @@ double BirthDeathBurstProcess::lnQ(double t) const
         E_previous /= (2*birth);
 
         B = ((1.0 - 2.0*((1.0-burst)*E_previous+burst*E_previous*E_previous)) * birth + death ) /  A;
-//        B = ((1.0 - 2.0*E_previous) * birth + death ) /  A;
-//        B = B_tmp;
-        
-//        D = 4.0*exp(-A*t);
-//        double tmp = 1.0 + B + exp(-A*t)*(1.0-B);
-//        D /= (tmp*tmp);
+
         
         double lnD_previous = 2*RbConstants::LN2 + (-A*t_b);
         lnD_previous -= 2 * log(1 + B_previous + exp(-A * t_b) * (1 - B_previous));
         
         double this_lnD = lnD_previous;
-//        this_lnD += log(1-burst+2*burst*E_previous);
-
-        // D <- D * 4 * exp(-A*(next_t-current_t))
-        // D <- D / ( 1+B+exp(-A*(next_t-current_t))*(1-B) )^2
         this_lnD += 2*RbConstants::LN2 + (-A * (t - t_b));
         this_lnD -= 2 * log(1 + B + exp(-A * (t - t_b)) * (1 - B));
 
         return this_lnD;
-//        double D_tb_a = 4.0*exp(-A*t_b);
-//        double tmp_tb_a = 1.0 + B + exp(-A*t_b)*(1.0-B);
-//        D_tb_a /= (tmp_tb_a*tmp_tb_a);
-//
-//        double D_tb_b = 4.0*exp(-A*t_b);
-//        double tmp_tb_b = 1.0 + B_tmp + exp(-A*t_b)*(1.0-B_tmp);
-//        D_tb_b /= (tmp_tb_b*tmp_tb_b);
-//
-//        D *= (D_tb_b / D_tb_a);
     }
     
     return log( D );

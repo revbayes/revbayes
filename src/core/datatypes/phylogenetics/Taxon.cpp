@@ -207,7 +207,9 @@ void Taxon::setAge(double a)
     else
     {
         age_range.setMin(a);
-        age_range.setMax(a);
+        // Sebastian (20210519): We should not automatically set the max age
+        // because otherwise we always get a range of size 0.
+//        age_range.setMax(a);
     }
 }
 
