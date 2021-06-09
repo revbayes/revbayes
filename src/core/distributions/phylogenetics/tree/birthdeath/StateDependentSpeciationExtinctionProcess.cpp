@@ -1489,6 +1489,8 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> StateDependentSpeciationExtinction
         
         static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData( v.clone() );
    
+        // Sebastian (20210519): We should not waste computations here if we actually don't need it. Try to do lazy evaluations.
+        // I keep this here if we find out later that these were indeed.
         // simulate character history over the tree conditioned on the new tip data
 //        size_t num_nodes = value->getNumberOfNodes();
 //        std::vector<std::string> character_histories(num_nodes);
@@ -1998,7 +2000,9 @@ void StateDependentSpeciationExtinctionProcess::setValue(Tree *v, bool f )
         tip_data->addTaxonData(this_tip_data);
     }
     static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData(tip_data);
-   
+    
+    // Sebastian (20210519): We should not waste computations here if we actually don't need it. Try to do lazy evaluations.
+    // I keep this here if we find out later that these were indeed.
     // simulate character history over the new tree
 //    size_t num_nodes = value->getNumberOfNodes();
 //    if (num_nodes > 2)
@@ -2006,7 +2010,7 @@ void StateDependentSpeciationExtinctionProcess::setValue(Tree *v, bool f )
 //        std::vector<std::string> character_histories(num_nodes);
 //        drawStochasticCharacterMap(character_histories);
 //    }
-//    static_cast<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
+    static_cast<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
 }
 
 
@@ -2098,6 +2102,7 @@ bool StateDependentSpeciationExtinctionProcess::simulateTreeConditionedOnTips( s
         tip_node->setAge(t);
         tip_node->setNodeType(true, false, false);
         tip_node->setTimeInStates(std::vector<double>(num_states, 0.0));
+        tip_node->setNumberOfShiftEvents( 0 );
         lineages_in_state[state_index].push_back(i);
         nodes.push_back(tip_node);
     }
@@ -2339,6 +2344,9 @@ bool StateDependentSpeciationExtinctionProcess::simulateTreeConditionedOnTips( s
             // remove this lineage from the new state and add it to old state
             lineages_in_state[new_state].erase(std::remove(lineages_in_state[new_state].begin(), lineages_in_state[new_state].end(), node_index), lineages_in_state[new_state].end());
             lineages_in_state[event_state].push_back(node_index);
+            
+            // increment the shift counter
+            nodes[node_index]->setNumberOfShiftEvents( nodes[node_index]->getNumberOfShiftEvents() + 1 );
 
         }
         
@@ -2373,6 +2381,7 @@ bool StateDependentSpeciationExtinctionProcess::simulateTreeConditionedOnTips( s
             p->setAge(t);
             p->setNodeType(false, is_root, true);
             p->setTimeInStates(std::vector<double>(num_states, 0.0));
+            p->setNumberOfShiftEvents(0);
             p->addChild(nodes[daughter1]);
             p->addChild(nodes[daughter2]);
             nodes[daughter1]->setParent(p);
@@ -2426,6 +2435,7 @@ bool StateDependentSpeciationExtinctionProcess::simulateTreeConditionedOnTips( s
         {
             average_speciation[i] = branch_total_speciation/sim_tree->getNodes()[i]->getBranchLength();
             average_extinction[i] = branch_total_extinction/sim_tree->getNodes()[i]->getBranchLength();
+            num_shift_events[i]   = sim_tree->getNodes()[i]->getNumberOfShiftEvents();
         }
     }    
     
@@ -2507,6 +2517,7 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
     root->setAge(t);
     root->setNodeType(false, true, true);
     root->setTimeInStates(std::vector<double>(num_states, 0.0));
+    root->setNumberOfShiftEvents(0);
     nodes.push_back(root);
 
     // now draw a state for the root cladogenetic event
@@ -2587,6 +2598,7 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
     left->setParent(root);
     left->setNodeType(true, false, false);
     left->setTimeInStates(std::vector<double>(num_states, 0.0));
+    left->setNumberOfShiftEvents(0);
     lineages_in_state[l].push_back(1);
     nodes.push_back(left);
 
@@ -2596,6 +2608,7 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
     right->setParent(root);
     right->setNodeType(true, false, false);
     right->setTimeInStates(std::vector<double>(num_states, 0.0));
+    right->setNumberOfShiftEvents(0);
     lineages_in_state[r].push_back(2);
     nodes.push_back(right);
 
@@ -2778,6 +2791,9 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
                 }
             } 
             lineages_in_state[new_state].push_back(event_index);
+            
+            // increment the counter for the shift events
+            nodes[event_index]->setNumberOfShiftEvents( nodes[event_index]->getNumberOfShiftEvents() + 1 );
         }
         
         if (event_type == "speciation")
@@ -2909,6 +2925,7 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
             left->setParent(nodes[event_index]);
             left->setNodeType(true, false, false);
             left->setTimeInStates(std::vector<double>(num_states, 0.0));
+            left->setNumberOfShiftEvents( 0 );
             lineages_in_state[l].push_back(index);
             nodes.push_back(left);
 
@@ -2919,6 +2936,7 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
             right->setParent(nodes[event_index]);
             right->setNodeType(true, false, false);
             right->setTimeInStates(std::vector<double>(num_states, 0.0));
+            right->setNumberOfShiftEvents( 0 );
             lineages_in_state[r].push_back(index);
             nodes.push_back(right);
            
@@ -2989,6 +3007,7 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
         {
             average_speciation[i] = branch_total_speciation/sim_tree->getNodes()[i]->getBranchLength();
             average_extinction[i] = branch_total_extinction/sim_tree->getNodes()[i]->getBranchLength();
+            num_shift_events[i]   = sim_tree->getNodes()[i]->getNumberOfShiftEvents();
         }
     }    
     
@@ -3126,10 +3145,12 @@ void StateDependentSpeciationExtinctionProcess::numericallyIntegrateProcess(std:
         ode.setSerialSamplingRate( serial_sampling_rates );
     }
     
-//    double dt = root_age->getValue() / NUM_TIME_SLICES * 10;
+   
     typedef boost::numeric::odeint::runge_kutta_dopri5< std::vector< double > > stepper_type;
-    boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-7, 1E-7, stepper_type() ) , ode , likelihoods , begin_age , end_age , dt );
 
+    boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-7, 1E-7, stepper_type() ) , ode , likelihoods , begin_age , end_age , dt );
+//      boost::numeric::odeint::integrate_adaptive( stepper_type(), ode , likelihoods , begin_age , end_age , dt );
+    
     // catch negative extinction probabilities that can result from
     // rounding errors in the ODE stepper
     for (size_t i = 0; i < 2 * num_states; ++i)
@@ -3139,6 +3160,30 @@ void StateDependentSpeciationExtinctionProcess::numericallyIntegrateProcess(std:
         // These are densities because they are multiplied by the probability density of the speciation event happening.
         likelihoods[i] = ( likelihoods[i] < 0.0 ? 0.0 : likelihoods[i] );
         
+    }
+    
+    // catch too large extinction probabilities that can result from
+    // rounding errors in the ODE stepper
+    // for safety we set all likelihoods to nan if rounding errors happened
+    bool rounding_error = false;
+    for (size_t i = 0; i < num_states; ++i)
+    {
+        
+        // Sebastian: The extinction probabilities here are probabilities (not log-transformed).
+        // So they must be between 0 and 1.
+        rounding_error |= ( likelihoods[i] > 1.0 );
+        
+    }
+    
+    if ( rounding_error == true )
+    {
+        for (size_t i = 0; i < (2*num_states); ++i)
+        {
+            
+            // invalidate likelihoods
+            likelihoods[i] = RbConstants::Double::nan;
+            
+        }
     }
     
 }

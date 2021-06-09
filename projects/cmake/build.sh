@@ -152,7 +152,7 @@ fi
     fi
 
     echo "Running './regenerate.sh $(pwd)/$BUILD_DIR"
-    bash regenerate.sh $(pwd)/$BUILD_DIR
+    ./regenerate.sh $(pwd)/$BUILD_DIR
     cd ${BUILD_DIR}
     echo
     echo

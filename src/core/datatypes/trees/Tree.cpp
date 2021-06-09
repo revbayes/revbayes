@@ -293,6 +293,7 @@ void Tree::dropTipNode( size_t index )
                 sibling_state_times[i] += parent.getTimeInStates()[i];
             }
             sibling->setTimeInStates(sibling_state_times);
+            sibling->setNumberOfShiftEvents( sibling->getNumberOfShiftEvents() + parent.getNumberOfShiftEvents() );
         }
     }
     else
@@ -310,6 +311,7 @@ void Tree::dropTipNode( size_t index )
             if (root->getTimeInStates().size() > 0)
             {
                 root->setTimeInStates(std::vector<double>(root->getTimeInStates().size(), 0.0));
+                root->setNumberOfShiftEvents( 0 );
             }
         }
         else
@@ -710,10 +712,10 @@ const std::vector<TopologyNode*>& Tree::getNodes(void) const
 }
 
 
-std::vector<RbBitSet> Tree::getNodesAsBitset(void) const
+std::vector<RbBitSet>* Tree::getNodesAsBitset(void) const
 {
 
-    std::vector<RbBitSet> bs;
+    std::vector<RbBitSet>* bs = new std::vector<RbBitSet>();
 
     for ( size_t i=0; i<nodes.size(); ++i )
     {
@@ -722,7 +724,7 @@ std::vector<RbBitSet> Tree::getNodesAsBitset(void) const
         {
             RbBitSet taxa_this_node = RbBitSet(num_tips);
             n->getTaxa(taxa_this_node);
-            bs.push_back( taxa_this_node );
+            bs->push_back( taxa_this_node );
         }
     }
 

@@ -616,11 +616,15 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     std::vector<TopologyNode*> nodes = tau->getValue().getNodes();
 
     if (treatAmbiguousAsGaps)
+    {
         mark_ambiguous_and_missing_as_gap(*value, site_indices, nodes);
-
+    }
+    
     if (treatUnknownAsGap)
+    {
         mark_unknown_as_gap(*value, site_indices, nodes);
-
+    }
+    
     // set the global variable if we use ambiguous characters (besides gaps)
     using_ambiguous_characters = has_ambiguous_nongap_characters(*value, site_indices, nodes);
 
@@ -1302,33 +1306,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawStochasticCha
         std::string simmap_string = "{" + end_states[root_index][site].getStringValue() + "," + StringUtilities::toString( root.getBranchLength() ) + "}";
         character_histories[root_index] = simmap_string;
 
-        // the mixture components are in a vector that is a flattened version of a
-        // matrix with rate components in columns and matrix components in rows.
-        // the matrix is in row-major order.
-        // here, we compute the row and column indices from the vector index.
-
-        size_t mixture_component_index = this->sampled_site_mixtures[site];
-
-        // get the number of rate categories
-        size_t num_site_rates = 1;
-        if (this->site_rates != NULL)
-        {
-        	num_site_rates = this->site_rates->getValue().size();
-        }
-
-        // determine the rate (column index)
-        sampled_site_rate_component = 0;
-        if (this->site_rates != NULL)
-        {
-        	sampled_site_rate_component = mixture_component_index % num_site_rates;
-        }
-
-        // determine the matrix (row index)
-        sampled_site_matrix_component = 0;
-        if (this->site_matrix_probs != NULL)
-        {
-        	sampled_site_matrix_component = (mixture_component_index - sampled_site_rate_component) / num_site_rates;
-        }
+        // get the sampled site-matrix and site-rate indexes
+        getSampledMixtureComponents(site, sampled_site_rate_component, sampled_site_matrix_component);
 
         // recurse towards tips
         const TopologyNode &right = root.getChild(0);
@@ -1373,17 +1352,17 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getSampledMixture
 	// get the mixture component (in vector form)
 	size_t mixture_component_index = this->sampled_site_mixtures[site_index];
 
-	rate_component = 0;
-    if (this->site_rates != NULL)
-    {
-    	rate_component = mixture_component_index % num_site_rates;
-    }
-
-    // determine the matrix (row index)
-    matrix_component = 0;
+	matrix_component = 0;
     if (this->site_matrix_probs != NULL)
     {
-    	matrix_component = (mixture_component_index - rate_component) / num_site_rates;
+    	matrix_component = mixture_component_index % num_matrices;
+    }
+
+    // determine the rate (row index)
+    rate_component = 0;
+    if (this->site_rates != NULL)
+    {
+    	rate_component = (mixture_component_index - matrix_component) / num_matrices;
     }
 
 

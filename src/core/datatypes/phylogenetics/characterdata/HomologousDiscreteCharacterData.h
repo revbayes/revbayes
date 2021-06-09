@@ -196,47 +196,6 @@ double RevBayesCore::HomologousDiscreteCharacterData<charType>::computeMultinomi
 
     size_t num_sites = getNumberOfIncludedCharacters();
     
-//    // check whether there are ambiguous characters (besides gaps)
-//    bool ambiguousCharacters = false;
-//    
-//    // find the unique site patterns and compute their respective frequencies
-//    for (size_t site = 0; site < num_sites; ++site)
-//    {
-//        
-//        for (size_t i = 0; i < num_sequences; ++i)
-//        {
-//            
-//            const DiscreteTaxonData<charType>& seq = this->getTaxonData(i);
-//            DiscreteCharacterState &c = seq.getCharacter(site_indices[site]);
-//                
-//            // if we treat unknown characters as gaps and this is an unknown character then we change it
-//            // because we might then have a pattern more
-//            if ( treatAmbiguousAsGaps && (c.isAmbiguous() || c.isMissingState()) )
-//            {
-//                c.setGapState( true );
-//            }
-//            else if ( treatUnknownAsGap && (c.getNumberOfStates() == c.getNumberObservedStates() || c.isMissingState()) )
-//            {
-//                c.setGapState( true );
-//            }
-//            else if ( !c.isGapState() && (c.isAmbiguous() || c.isMissingState()) )
-//            {
-//                ambiguousCharacters = true;
-//                break;
-//            }
-//            
-//        }
-//        
-//        // break the loop if there was an ambiguous character
-//        if ( ambiguousCharacters )
-//        {
-//            break;
-//        }
-//    }
-//    
-//    // set the global variable if we use ambiguous characters
-//    bool using_ambiguous_characters = ambiguousCharacters;
-    
     // find the unique site patterns and compute their respective frequencies
     std::map<std::string,size_t> patterns;
     for (size_t site = 0; site < num_sites; ++site)

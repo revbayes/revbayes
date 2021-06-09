@@ -451,34 +451,16 @@ double BirthDeathBurstProcess::lnQ(double t) const
         E_previous /= (2*birth);
 
         B = ((1.0 - 2.0*((1.0-burst)*E_previous+burst*E_previous*E_previous)) * birth + death ) /  A;
-//        B = ((1.0 - 2.0*E_previous) * birth + death ) /  A;
-//        B = B_tmp;
-        
-//        D = 4.0*exp(-A*t);
-//        double tmp = 1.0 + B + exp(-A*t)*(1.0-B);
-//        D /= (tmp*tmp);
+
         
         double lnD_previous = 2*RbConstants::LN2 + (-A*t_b);
         lnD_previous -= 2 * log(1 + B_previous + exp(-A * t_b) * (1 - B_previous));
         
         double this_lnD = lnD_previous;
-//        this_lnD += log(1-burst+2*burst*E_previous);
-
-        // D <- D * 4 * exp(-A*(next_t-current_t))
-        // D <- D / ( 1+B+exp(-A*(next_t-current_t))*(1-B) )^2
         this_lnD += 2*RbConstants::LN2 + (-A * (t - t_b));
         this_lnD -= 2 * log(1 + B + exp(-A * (t - t_b)) * (1 - B));
 
         return this_lnD;
-//        double D_tb_a = 4.0*exp(-A*t_b);
-//        double tmp_tb_a = 1.0 + B + exp(-A*t_b)*(1.0-B);
-//        D_tb_a /= (tmp_tb_a*tmp_tb_a);
-//
-//        double D_tb_b = 4.0*exp(-A*t_b);
-//        double tmp_tb_b = 1.0 + B_tmp + exp(-A*t_b)*(1.0-B_tmp);
-//        D_tb_b /= (tmp_tb_b*tmp_tb_b);
-//
-//        D *= (D_tb_b / D_tb_a);
     }
     
     return log( D );
