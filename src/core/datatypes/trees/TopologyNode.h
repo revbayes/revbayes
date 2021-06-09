@@ -116,6 +116,7 @@ namespace RevBayesCore {
         const TopologyNode*                         getNode(const TopologyNode &n, bool strict) const;
         const std::vector<std::string>&             getNodeParameters(void) const;                                                      //!< Get the branch length leading towards this node
         size_t                                      getNumberOfChildren(void) const;                                                    //!< Returns the number of children
+        size_t                                      getNumberOfShiftEvents(void) const;
         size_t                                      getNumberOfNodesInSubtree(bool tips) const;
         TopologyNode&                               getParent(void);                                                                    //!< Returns the node's parent
         const TopologyNode&                         getParent(void) const;                                                              //!< Returns the node's parent
@@ -147,6 +148,7 @@ namespace RevBayesCore {
         void                                        setIndex(size_t idx);                                                               //!< Set the index of the node
 
         void                                        setName(const std::string& n);                                                      //!< Set the name of this node
+        void                                        setNumberOfShiftEvents(size_t n);                                                   //!< Set the number of shift events for stochastic character maps
   		void										setNodeType(bool tip, bool root, bool interior); //SK
         void                                        setParent(TopologyNode* p);                                                         //!< Sets the node's parent
         void                                        setSampledAncestor(bool tf);                                                        //!< Set if the node is a sampled ancestor
@@ -198,6 +200,7 @@ namespace RevBayesCore {
        
         // for stochastic maps
         std::vector<double>                         time_in_states;
+        size_t                                      num_shift_events;
         
 //        RevLanguage::RevPtr<TaxonMap>               taxon_map;
         

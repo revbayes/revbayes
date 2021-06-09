@@ -293,6 +293,7 @@ void Tree::dropTipNode( size_t index )
                 sibling_state_times[i] += parent.getTimeInStates()[i];
             }
             sibling->setTimeInStates(sibling_state_times);
+            sibling->setNumberOfShiftEvents( sibling->getNumberOfShiftEvents() + parent.getNumberOfShiftEvents() );
         }
     }
     else
@@ -310,6 +311,7 @@ void Tree::dropTipNode( size_t index )
             if (root->getTimeInStates().size() > 0)
             {
                 root->setTimeInStates(std::vector<double>(root->getTimeInStates().size(), 0.0));
+                root->setNumberOfShiftEvents( 0 );
             }
         }
         else

@@ -42,6 +42,7 @@ TopologyNode::TopologyNode(size_t indx) :
     root_node( true ),
     tip_node( true ),
     sampled_ancestor( false ),
+    num_shift_events( 0 ),
     burst_speciation( false ),
     sampling_event( false ),
     serial_sampling( false ),
@@ -65,6 +66,7 @@ TopologyNode::TopologyNode(const Taxon& t, size_t indx) :
     root_node( true ),
     tip_node( true ),
     sampled_ancestor( false ),
+    num_shift_events( 0 ),
     burst_speciation( false ),
     sampling_event( false ),
     serial_sampling( false ),
@@ -88,6 +90,7 @@ TopologyNode::TopologyNode(const std::string& n, size_t indx) :
     root_node( true ),
     tip_node( true ),
     sampled_ancestor( false ),
+    num_shift_events( 0 ),
     burst_speciation( false ),
     sampling_event( false ),
     serial_sampling( false ),
@@ -112,6 +115,7 @@ TopologyNode::TopologyNode(const TopologyNode &n) :
     node_comments( n.node_comments ),
     branch_comments( n.branch_comments ),
     time_in_states( n.time_in_states ),
+    num_shift_events( n.num_shift_events ),
     burst_speciation( n.burst_speciation ),
     sampling_event( n.sampling_event ),
     serial_sampling( n.serial_sampling ),
@@ -172,6 +176,7 @@ TopologyNode& TopologyNode::operator=(const TopologyNode &n)
         serial_speciation       = n.serial_speciation;
         taxon                   = n.taxon;
         time_in_states          = n.time_in_states;
+        num_shift_events        = n.num_shift_events;
         tip_node                = n.tip_node;
         use_ages                = n.use_ages;
 
@@ -1414,6 +1419,12 @@ std::string TopologyNode::getIndividualName() const
 }
 
 
+size_t TopologyNode::getNumberOfShiftEvents( void ) const
+{
+    return num_shift_events;
+}
+
+
 std::string TopologyNode::getSpeciesName() const
 {
     std::string name = taxon.getSpeciesName();
@@ -1926,6 +1937,12 @@ void TopologyNode::setName(std::string const &n)
     taxon.setName( n );
     taxon.setSpeciesName( n );
 
+}
+
+
+void TopologyNode::setNumberOfShiftEvents(size_t n)
+{
+    num_shift_events = n;
 }
 
 //SK
