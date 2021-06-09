@@ -56,7 +56,7 @@ namespace RevBayesCore {
 
     protected:
         virtual void                                    updateStartEndTimes() = 0;
-        virtual double                                  computeLnProbabilityRanges();
+        virtual double                                  computeLnProbabilityRanges(bool force = false);
 
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter

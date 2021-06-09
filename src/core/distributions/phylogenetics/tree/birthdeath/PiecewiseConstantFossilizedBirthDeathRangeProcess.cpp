@@ -116,8 +116,8 @@ void PiecewiseConstantFossilizedBirthDeathRangeProcess::updateGamma(bool force)
     {
         if ( dirty_gamma[i] || force )
         {
-            double ai = (*this->value)[i][0];
-            double bi = (*this->value)[i][1];
+            double bi = (*this->value)[i][0];
+            double di = (*this->value)[i][1];
 
             if ( force == true ) gamma_i[i] = 0;
 
@@ -125,11 +125,11 @@ void PiecewiseConstantFossilizedBirthDeathRangeProcess::updateGamma(bool force)
             {
                 if (i == j) continue;
 
-                double aj = (*this->value)[j][0];
-                double bj = (*this->value)[j][1];
+                double bj = (*this->value)[j][0];
+                double dj = (*this->value)[j][1];
 
-                bool linki = ( ai < aj && ai > bj );
-                bool linkj = ( aj < ai && aj > bi );
+                bool linki = ( bi < bj && bi > dj );
+                bool linkj = ( bj < bi && bj > di );
 
                 if ( gamma_links[i][j] != linki && force == false )
                 {

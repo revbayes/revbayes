@@ -264,7 +264,7 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRanges( void )
+double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRanges( bool force )
 {
     // prepare the probability computation
     updateIntervals();
@@ -287,11 +287,17 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
         double o_min = fbd_taxa[i].getMaxAgeRange().getMin();
         double y_max = fbd_taxa[i].getMinAgeRange().getMax();
 
+        // check model constraints
+        if ( !( b > o && ((y == 0.0 && d == 0.0) || (y > 0 && y > d)) && d >= 0.0 ) )
+        {
+            return RbConstants::Double::neginf;
+        }
+
         // count the number of rho-sampled tips
         num_extant_sampled   += (d == 0.0 && y == 0.0);  // l
         num_extant_unsampled += (d == 0.0 && y > 0.0); // n - m - l
 
-        if ( dirty_taxa[i] == true )
+        if ( dirty_taxa[i] == true || force )
         {
             partial_likelihood[i] = 0.0;
 
@@ -299,12 +305,6 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
             size_t di = l(d);
             size_t oi = oldest_intervals[i];
             size_t yi = youngest_intervals[i];
-
-            // check model constraints
-            if ( !( b > o && ((y == 0.0 && d == 0.0) || (y > 0 && y > d)) && d >= 0.0 ) )
-            {
-                return RbConstants::Double::neginf;
-            }
 
             // include speciation density
             partial_likelihood[i] += log( birth[bi] );

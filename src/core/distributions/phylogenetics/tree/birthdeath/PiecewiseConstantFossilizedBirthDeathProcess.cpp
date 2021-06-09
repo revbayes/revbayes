@@ -439,11 +439,9 @@ double PiecewiseConstantFossilizedBirthDeathProcess::H( size_t i, double x, doub
 
     double diff2 = b + d + 2.0*a + -f;
     double tmp = (1+B)/(A-diff2) - e*(1-B)/(A+diff2);
-    double intQ = exp(-(diff2-A)*dt/2) * tmp;
+    double H = exp(-f*(x-ti) ) * exp(-(diff2-A)*dt/2) * tmp;
 
-    intQ *= exp(-a*dt);
-
-    return intQ;
+    return H;
 }
 
 
@@ -517,9 +515,9 @@ void PiecewiseConstantFossilizedBirthDeathProcess::simulateClade(std::vector<Top
             double max = n[i]->getTaxon().getMaxAge();
 
             // in the extended tree, tip ages are extinction times
-            if( extended )
+            if ( extended )
             {
-                n[i]->setAge( present + rng->uniform01() * ( min - present ) );
+                n[i]->setAge( rng->uniform01() * min );
             }
             // in the sampled tree, tip ages are sampling times
             else
@@ -738,7 +736,8 @@ std::vector<double> PiecewiseConstantFossilizedBirthDeathProcess::simulateDiverg
  */
 double PiecewiseConstantFossilizedBirthDeathProcess::simulateDivergenceTime(double origin, double present) const
 {
-    // incorrect placeholder
+    // incorrect placeholder for constant SSBDP
+
 
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -749,8 +748,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::simulateDivergenceTime(doub
     double age = origin - present;
     double b = birth[i];
     double d = death[i];
-    //double f = fossil[i];
-    double r = homogeneous_rho->getValue();
+    double p_e = homogeneous_rho->getValue();
 
 
     // get a random draw
@@ -761,11 +759,25 @@ double PiecewiseConstantFossilizedBirthDeathProcess::simulateDivergenceTime(doub
     double t = 0.0;
     if ( b > d )
     {
-        t = ( log( ( (b-d) / (1 - (u)*(1-((b-d)*exp((d-b)*age))/(r*b+(b*(1-r)-d)*exp((d-b)*age) ) ) ) - (b*(1-r)-d) ) / (r * b) ) )  /  (b-d);
+        if( p_e > 0.0 )
+        {
+            t = ( log( ( (b-d) / (1 - (u)*(1-((b-d)*exp((d-b)*age))/(p_e*b+(b*(1-p_e)-d)*exp((d-b)*age) ) ) ) - (b*(1-p_e)-d) ) / (p_e * b) ) )  /  (b-d);
+        }
+        else
+        {
+            t = log( 1 - u * (exp(age*(d-b)) - 1) / exp(age*(d-b)) ) / (b-d);
+        }
     }
     else
     {
-        t = ( log( ( (b-d) / (1 - (u)*(1-(b-d)/(r*b*exp((b-d)*age)+(b*(1-r)-d) ) ) ) - (b*(1-r)-d) ) / (r * b) ) )  /  (b-d);
+        if( p_e > 0.0 )
+        {
+            t = ( log( ( (b-d) / (1 - (u)*(1-(b-d)/(p_e*b*exp((b-d)*age)+(b*(1-p_e)-d) ) ) ) - (b*(1-p_e)-d) ) / (p_e * b) ) )  /  (b-d);
+        }
+        else
+        {
+            t = log( 1 - u * (1 - exp(age*(b-d)))  ) / (b-d);
+        }
     }
 
     return present + t;
@@ -794,14 +806,26 @@ int PiecewiseConstantFossilizedBirthDeathProcess::updateStartEndTimes( const Top
         // if child is a tip, set the species/end time
         if( child.isTip() )
         {
-            d_i[i] = child.getAge();
+            double age = child.getAge();
+
+            if ( age != d_i[i] )
+            {
+                d_i[i] = age;
+                dirty_taxa[i] = true;
+            }
         }
 
         // is child a new species?
         // set start time at this node
         if( ( sa == false && c > 0 ) || ( sa && !child.isSampledAncestor() ) )
         {
-            b_i[i] = node.getAge(); // y_{a(i)}
+            double age = node.getAge(); // y_{a(i)}
+
+            if ( age != b_i[i] )
+            {
+                b_i[i] = age;
+                dirty_taxa[i] = true;
+            }
 
             I[i] = sa;
         }
@@ -815,8 +839,14 @@ int PiecewiseConstantFossilizedBirthDeathProcess::updateStartEndTimes( const Top
             // set the start time to the origin
             if( node.isRoot() )
             {
-                b_i[i] = getOriginAge();
-                origin = b_i[i];
+                double age = getOriginAge();
+
+                if ( age != b_i[i] )
+                {
+                    b_i[i] = age;
+                    origin = age;
+                    dirty_taxa[i] = true;
+                }
             }
         }
     }
@@ -832,8 +862,10 @@ void PiecewiseConstantFossilizedBirthDeathProcess::updateIntervals()
 {
     AbstractPiecewiseConstantFossilizedRangeProcess::updateIntervals();
 
-    for (int i = (int)num_intervals - 1; i >= 0; i--)
+    for (size_t interval = num_intervals; interval > 0; interval--)
     {
+        size_t i = interval - 1;
+
         double a = getAnageneticSpeciationRate(i);
         double s = getSymmetricSpeciationProbability(i);
 
@@ -855,17 +887,7 @@ void PiecewiseConstantFossilizedBirthDeathProcess::updateIntervals()
  */
 void PiecewiseConstantFossilizedBirthDeathProcess::updateStartEndTimes( void )
 {
-    std::vector<double> stored_b_i = b_i;
-
     updateStartEndTimes(getValue().getRoot());
-
-    for ( size_t i = 0; i < stored_b_i.size(); i++ )
-    {
-        if ( stored_b_i[i] != b_i[i] )
-        {
-            dirty_taxa[i] = true;
-        }
-    }
 }
 
 
@@ -901,9 +923,6 @@ void PiecewiseConstantFossilizedBirthDeathProcess::touchSpecialization(DagNode *
  */
 void PiecewiseConstantFossilizedBirthDeathProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
-    AbstractBirthDeathProcess::swapParameterInternal(oldP, newP);
-    AbstractPiecewiseConstantFossilizedRangeProcess::swapParameterInternal(oldP, newP);
-
     if (oldP == heterogeneous_lambda_a)
     {
         heterogeneous_lambda_a = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
@@ -919,5 +938,10 @@ void PiecewiseConstantFossilizedBirthDeathProcess::swapParameterInternal(const D
     else if (oldP == homogeneous_beta)
     {
         homogeneous_beta = static_cast<const TypedDagNode<double>* >( newP );
+    }
+    else
+    {
+        AbstractBirthDeathProcess::swapParameterInternal(oldP, newP);
+        AbstractPiecewiseConstantFossilizedRangeProcess::swapParameterInternal(oldP, newP);
     }
 }

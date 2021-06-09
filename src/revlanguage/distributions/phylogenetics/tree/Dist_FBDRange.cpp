@@ -22,6 +22,7 @@
 #include "RevObject.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
+#include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlBirthDeathProcess.h"
 #include "RlBoolean.h"
 #include "Taxon.h"
@@ -220,11 +221,7 @@ const MemberRules& Dist_FBDRange::getParameterRules(void) const
 
         dist_member_rules.push_back( new ArgumentRule( "timeline",    ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
-        std::vector<TypeSpec> intTypes;
-        intTypes.push_back( Natural::getClassTypeSpec() );
-        intTypes.push_back( ModelVector<Natural>::getClassTypeSpec() );
-        intTypes.push_back( ModelVector<ModelVector<Natural> >::getClassTypeSpec() );
-        dist_member_rules.push_back( new ArgumentRule( "k",   intTypes, "The fossil observation counts (total or [interval] or [interval][species]).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "k", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The fossil observation count data matrix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         std::vector<std::string> optionsCondition;
         optionsCondition.push_back( "time" );

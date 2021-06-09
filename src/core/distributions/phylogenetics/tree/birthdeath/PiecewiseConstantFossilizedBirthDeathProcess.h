@@ -102,7 +102,6 @@ namespace RevBayesCore {
         const TypedDagNode<RbVector<double> >*          heterogeneous_lambda_a;                                  //!< The heterogeneous anagenetic speciation rates.
         const TypedDagNode<double >*                    homogeneous_beta;                                        //!< The homogeneous symmetric speciation prob.
         const TypedDagNode<RbVector<double> >*          heterogeneous_beta;                                      //!< The heterogeneous symmetric speciation probs.
-
     };
 }
 
