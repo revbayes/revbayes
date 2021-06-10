@@ -41,7 +41,7 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
                                                                                                  const TypedDagNode< RbVector<double> > *intimes,
                                                                                                  const std::vector<Taxon> &intaxa,
                                                                                                  bool afc) :
-    ascending(false), homogeneous_rho(inrho), timeline( intimes ), fbd_taxa(intaxa), auto_uncertainty(afc), origin(0.0)
+    ascending(true), homogeneous_rho(inrho), timeline( intimes ), fbd_taxa(intaxa), auto_uncertainty(afc), origin(0.0)
 {
     dirty_taxa = std::vector<bool>(fbd_taxa.size(), true);
     partial_likelihood = std::vector<double>(fbd_taxa.size(), 0.0);
@@ -141,11 +141,11 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
         sort(times_sorted_ascending.begin(), times_sorted_ascending.end() );
         sort(times_sorted_descending.rbegin(), times_sorted_descending.rend() );
 
-        if( times == times_sorted_ascending )
+        if( times == times_sorted_descending )
         {
-            ascending = true;
+            ascending = false;
         }
-        else if ( times != times_sorted_descending )
+        else if ( times != times_sorted_ascending )
         {
             throw(RbException("Interval times must be provided in order"));
         }
