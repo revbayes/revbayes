@@ -245,6 +245,7 @@ std::vector<double> PiecewiseConstantCoalescent::simulateCoalescentAges( size_t 
             valid = current_interval >= interval_starts.size() || sim_age < interval_starts[current_interval];
             if ( valid == false )
             {
+                prevCoalescentTime = interval_starts[current_interval];
                 ++current_interval;
             }
             
