@@ -212,7 +212,7 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
                 if( s.isMissingState() == false && (s.getStateIndex() > 0 || s.isPositiveState()) )
                 {
                     oldest_intervals[i] = j;
-                    if( youngest == true )
+                    if( youngest == true && y > 0 )
                     {
                         youngest_intervals[i] = j;
                         youngest = false;
@@ -725,7 +725,7 @@ NaturalNumbersState AbstractPiecewiseConstantFossilizedRangeProcess::getFossilCo
     {
         interval = ascending ? num_intervals - 1 - interval : interval;
 
-        const NaturalNumbersState& count = dynamic_cast<const NaturalNumbersState&>(fossil_count_data->getValue().getCharacter(species, interval));
+        const NaturalNumbersState& count = dynamic_cast<const NaturalNumbersState&>(fossil_count_data->getValue().getTaxonData(fbd_taxa[species].getName()).getCharacter(interval));
         return count;
     }
 
