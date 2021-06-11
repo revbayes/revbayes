@@ -119,8 +119,11 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     // number of processors
     size_t num_procs = size_t(static_cast<const Natural &>( n_proc->getRevObject() ).getValue());
 
+    // indexing
+    bool zi = static_cast<const RlBoolean &>( zero_index->getRevObject() ).getValue();
+
     // make the distribution
-    RevBayesCore::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess* d = new RevBayesCore::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess(tax, sa, cond, root_freq, num_states, use_origin, num_procs);
+    RevBayesCore::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess* d = new RevBayesCore::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess(tax, sa, cond, root_freq, num_states, use_origin, zi, num_procs);
 
     // speciation rates
     if ( lambda->getRevObject() != RevNullObject::getInstance() )
@@ -476,6 +479,10 @@ const MemberRules& Dist_GLHBDSP::getParameterRules(void) const
 		// number of processors
         dist_member_rules.push_back( new ArgumentRule( "nProc", Natural::getClassTypeSpec(), "The number of processors for parallel calculations.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
 
+        // zero indexing
+        dist_member_rules.push_back( new ArgumentRule( "zeroIndex", RlBoolean::getClassTypeSpec(), "Does the state space include zero?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
+
+
         rules_set = true;
     }
 
@@ -618,6 +625,10 @@ void Dist_GLHBDSP::setConstParameter(const std::string& name, const RevPtr<const
 	else if ( name == "nProc" )
 	{
 		n_proc = var;
+	}
+	else if ( name == "zeroIndex" )
+	{
+		zero_index = var;
 	}
 	else
 	{

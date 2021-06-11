@@ -28,6 +28,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	const TypedDagNode<Simplex >*                                   root_frequency_,
 	const size_t                                                    num_states_,
 	bool                                                            use_origin_,
+	bool                                                            zero_indexed_,
 	size_t                                                          n_proc_
 ) : TypedDistribution<Tree>( new TreeDiscreteCharacterData() ),
 	current_ln_prob(0.0),
@@ -39,6 +40,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	condition_type(condition_type_),
 	num_states(num_states_),
 	use_origin(use_origin_),
+	zero_indexed(zero_indexed_),
 	root_frequency(root_frequency_),
 	root_frequency_dirty(true),
 	lambda_const(NULL),
@@ -1296,7 +1298,10 @@ std::vector< std::map< std::vector<unsigned>, double > > GeneralizedLineageHeter
 			std::vector<unsigned> key = it->first;
 			double val = it->second;
 			// 1-indexing to 0-indexing
-//			for(size_t iK=0; iK<key.size(); ++iK) key[iK] -= 1;
+			if ( zero_indexed == false )
+			{
+				for(size_t iK=0; iK<key.size(); ++iK) key[iK] -= 1;
+			}
 			std_object[i][key] = val;
 		}
 	}
