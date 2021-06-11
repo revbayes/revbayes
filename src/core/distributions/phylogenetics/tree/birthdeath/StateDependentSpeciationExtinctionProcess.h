@@ -39,7 +39,6 @@ namespace RevBayesCore {
                                                   const TypedDagNode<RateGenerator>* q,
                                                   const TypedDagNode<double>* r,
                                                   const TypedDagNode<Simplex>* p,
-                                                  const TypedDagNode<double> *rh,
                                                   const std::string &cdt,
                                                   bool uo,
                                                   size_t min_num_lineages,
@@ -67,8 +66,10 @@ namespace RevBayesCore {
         double                                                          getRootAge(void) const;
         virtual void                                                    redrawValue(void);
         void                                                            setCladogenesisMatrix(const TypedDagNode< CladogeneticSpeciationRateMatrix > *r);
-        void                                                            setSerialSamplingRates(const TypedDagNode< RbVector<double> > *r);
         void                                                            setSampleCharacterHistory(bool sample_history);                                                     //!< Set whether or not we are sampling the character history along branches.
+        void                                                            setSamplingFraction(const TypedDagNode< double > *r);
+        void                                                            setSamplingFraction(const TypedDagNode< RbVector<double> > *r);
+        void                                                            setSerialSamplingRates(const TypedDagNode< RbVector<double> > *r);
         void                                                            setSpeciationRates(const TypedDagNode< RbVector<double> > *r);
         void                                                            setNumberOfTimeSlices(double n);                                                                    //!< Set the number of time slices for the numerical ODE.
         virtual void                                                    setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
@@ -143,7 +144,8 @@ namespace RevBayesCore {
         const TypedDagNode<RateGenerator>*                              Q;
         const TypedDagNode<double>*                                     rate;                                                                                               //!< Sampling probability of each species.
         const TypedDagNode<double>*                                     rho;                                                                                                //!< Sampling probability of each species.
-        
+        const TypedDagNode<RbVector<double> >*                          rho_per_state;                                                                                                //!< Sampling probability of each species.
+
         RateMatrix_JC                                                   Q_default;
         size_t                                                          min_num_lineages;
         size_t                                                          max_num_lineages;
