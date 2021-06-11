@@ -39,6 +39,7 @@ namespace RevBayesCore {
 																 const TypedDagNode<Simplex >* root_frequency_,
 																 const size_t                  num_states_,
 																 bool                          use_origin_,
+																 bool                          zero_indexed_,
 																 size_t                        n_proc_);
 
         // pure virtual member functions
@@ -139,6 +140,7 @@ namespace RevBayesCore {
 		const std::string&                                               condition_type;
 		const size_t                                                     num_states;
 		bool                                                             use_origin;
+		bool                                                             zero_indexed;
 
 		const TypedDagNode< Simplex >*                                   root_frequency;
 		bool                                                             root_frequency_dirty;
