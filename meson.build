@@ -49,7 +49,6 @@ add_project_arguments([# These just add noise:
 # Handle file too large error when cross-compiling to windows
 if host_machine.system() == 'windows'
   add_project_arguments(['-Wa,-mbig-obj'], language : 'cpp')
-  add_project_arguments(['-DRB_WIN'], language : 'cpp')
 endif
 
 boost_modules = [ 'regex',
