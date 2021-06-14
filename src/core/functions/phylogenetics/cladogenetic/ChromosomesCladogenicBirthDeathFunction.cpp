@@ -203,11 +203,19 @@ void ChromosomesCladogenicBirthDeathFunction::update( void )
     // reset the transition matrix
     delete value;
     
+    // create temp variables for exiting speciation rates and cladogenetic event probabilities
+    std::vector<double> speciation_rate_sum_per_state;
+    CladogeneticProbabilityMatrix cladogenetic_probability_matrix;
+
     // check for a hidden rate category
     if (use_hidden_rate) { 
         value = new CladogeneticSpeciationRateMatrix( (maxChromo + 1) * 2 );
+        cladogenetic_probability_matrix = CladogeneticProbabilityMatrix((maxChromo + 1) * 2);
+        speciation_rate_sum_per_state = std::vector<double>( (maxChromo + 1) * 2, 0.0 );
     } else { 
         value = new CladogeneticSpeciationRateMatrix( maxChromo + 1 );
+        cladogenetic_probability_matrix = CladogeneticProbabilityMatrix((maxChromo + 1));
+        speciation_rate_sum_per_state = std::vector<double>( (maxChromo + 1), 0.0 );
     }
     
     const std::vector<double>& sr = speciationRates->getValue();
@@ -255,6 +263,7 @@ void ChromosomesCladogenicBirthDeathFunction::update( void )
                     
                     // save the rate in the event map
                     eventMap[ idx ] += v;
+                    speciation_rate_sum_per_state[ idx[0] ] += v;
                     if (use_hidden_rate == true) 
                     {
                         std::vector<unsigned> idx_hidden(3);
@@ -263,12 +272,25 @@ void ChromosomesCladogenicBirthDeathFunction::update( void )
                         idx_hidden[2] = idx[2] + maxChromo + 1;
                         const std::vector<double>& rate_multipliers = hiddenRateMultipliers->getValue();
                         eventMap[ idx_hidden ] += (v * rate_multipliers[0]);
+                        speciation_rate_sum_per_state[ idx_hidden[0] ] += (v * rate_multipliers[0]);
                     }
                 }
             }
         }
     }
+
+    // populate TensorPhylo rate/prob structures
+    std::map<std::vector<unsigned>, double> clado_prob_event_map = cladogenetic_probability_matrix.getEventMap();
+    for (std::map<std::vector<unsigned>, double>::iterator jt = eventMap.begin(); jt != eventMap.end(); jt++) {
+        const std::vector<unsigned>& idx = jt->first;
+        clado_prob_event_map[ idx ] = eventMap[ idx ] / speciation_rate_sum_per_state[ idx[0] ];
+    }
+    cladogenetic_probability_matrix.setEventMap(clado_prob_event_map);
+
+    // done!
     value->setEventMap(eventMap);
+    value->setCladogeneticProbabilityMatrix( cladogenetic_probability_matrix );
+    value->setSpeciationRateSumPerState( speciation_rate_sum_per_state );
 }
 
 

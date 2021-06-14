@@ -480,7 +480,7 @@ const MemberRules& Dist_GLHBDSP::getParameterRules(void) const
         dist_member_rules.push_back( new ArgumentRule( "nProc", Natural::getClassTypeSpec(), "The number of processors for parallel calculations.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
 
         // zero indexing
-        dist_member_rules.push_back( new ArgumentRule( "zeroIndex", RlBoolean::getClassTypeSpec(), "Does the state space include zero?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
+        dist_member_rules.push_back( new ArgumentRule( "zeroIndex", RlBoolean::getClassTypeSpec(), "Does the state space include zero?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
 
 
         rules_set = true;
