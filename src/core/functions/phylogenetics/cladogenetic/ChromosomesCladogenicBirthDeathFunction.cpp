@@ -281,6 +281,14 @@ void ChromosomesCladogenicBirthDeathFunction::update( void )
 
     // populate TensorPhylo rate/prob structures
     std::map<std::vector<unsigned>, double> clado_prob_event_map = cladogenetic_probability_matrix.getEventMap();
+
+    speciation_rate_sum_per_state[0] = 0.0;
+    std::vector<unsigned> idx_null(3);
+    idx_null[0] = 0;
+    idx_null[1] = 0;
+    idx_null[2] = 0;
+    clado_prob_event_map[ idx_null ] = 1.0;
+
     for (std::map<std::vector<unsigned>, double>::iterator jt = eventMap.begin(); jt != eventMap.end(); jt++) {
         const std::vector<unsigned>& idx = jt->first;
         clado_prob_event_map[ idx ] = eventMap[ idx ] / speciation_rate_sum_per_state[ idx[0] ];
