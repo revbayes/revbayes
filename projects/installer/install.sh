@@ -122,7 +122,7 @@ if [ "${machine}" == "Windows-cygwin" ]; then
 else
   boost_build_folder=${tmp_folder}/boost_1_73_0
   boost_folder=${tmp_folder}/boost
-  curl -fsSL https://dl.bintray.com/boostorg/release/1.73.0/source/boost_1_73_0.tar.gz -o ${tmp_folder}/boost.tar.gz
+  curl -fsSL https://boostorg.jfrog.io/artifactory/main/release/1.73.0/source/boost_1_73_0.tar.gz -o ${tmp_folder}/boost.tar.gz
   cd ${tmp_folder}
   tar -xzf boost.tar.gz
   echo "Compiling boost"
@@ -151,8 +151,10 @@ if [ "${machine}" == "Windows-cygwin" ]; then
 else
   echo "... will take a several minutes ..."
 fi
+echo "I am here!!!!"
 export MY_OS=${machine}
 export MY_BOOST_ROOT=${boost_folder}
+echo "I am building!!!!"
 bash build.sh ${build_args}  >> ${logfile} 2>&1
 if [ -f "rb" ]; then
   echo "> RevBayes was sucessfully installed"
