@@ -288,6 +288,14 @@ void ChromosomesCladogenicBirthDeathFunction::update( void )
     idx_null[1] = 0;
     idx_null[2] = 0;
     clado_prob_event_map[ idx_null ] = 1.0;
+    if (use_hidden_rate == true)
+    {
+        idx_null[0] = 0 + maxChromo + 1;
+        idx_null[1] = 0 + maxChromo + 1;
+        idx_null[2] = 0 + maxChromo + 1;
+        speciation_rate_sum_per_state[ idx_null[0] ] += 0.0;
+        clado_prob_event_map[ idx_null ] = 1.0;
+    }
 
     for (std::map<std::vector<unsigned>, double>::iterator jt = eventMap.begin(); jt != eventMap.end(); jt++) {
         const std::vector<unsigned>& idx = jt->first;
