@@ -55,6 +55,7 @@ namespace RevBayesCore {
         double                  getOldestTipAge(const TopologyNode& n);                                                                 //!< get the age of the oldest tip below specified node
         std::vector<double>     getPSSP(const Tree& t, const AbstractHomologousDiscreteCharacterData& c, size_t state_index);           //!< calculate the Parsimoniously Same State Paths
         void                    getTaxaInSubtree(TopologyNode& n, std::vector<TopologyNode*>& taxa );                                   //!< get taxa below specified node
+        bool                    isConnectedNNI(const Tree& a, const Tree& b);                                                           //!< Check if the two trees are connected by a single NNI move
         void                    offsetTree(TopologyNode& n, double factor);                                                             //!< offset node and its children by a factor
         void                    makeUltrametric(Tree& t);                                                                               //!< make the tree ultrametric by extending terminal branches
         void                    rescaleSubtree(TopologyNode& n, double factor, bool v=false);                                           //!< rescale tree ages below a node by a factor, except tips

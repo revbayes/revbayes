@@ -50,7 +50,7 @@ class Serializable;
         virtual void                    addObject(valueType* d);
         virtual int                     isCoveredInInterval(const std::string &v, double i, bool verbose);
         bool                            isDirty(void) const                             { return dirty; };
-        void                            isDirty(bool d) const                             { dirty = d; };
+        void                            setDirty(bool d)                                { dirty = d; };
         void                            removeLastObject();
         void                            removeObjectAtIndex(int index);
         
@@ -76,7 +76,7 @@ class Serializable;
         std::string                     parmName;
         std::vector<valueType>          values;                                     //!< the values of this trace
 
-        mutable bool                    dirty;
+        bool                            dirty;
 
     };
 

@@ -967,6 +967,71 @@ TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSe
 }
 
 
+MatrixReal TreeSummary::computeConnectivity(double credible_interval_size, const std::string &m, bool verbose)
+{
+    summarize( verbose );
+    std::vector<Tree*> unique_trees;
+//    std::vector< std::vector<RbBitSet>* > unique_trees_bs;
+    std::vector<size_t> sample_count;
+    NewickConverter converter;
+    double total_prob = 0;
+    double total_samples = sampleSize(true);
+    for (std::set<Sample<std::string> >::const_reverse_iterator it = tree_samples.rbegin(); it != tree_samples.rend(); ++it)
+    {
+        double freq = it->second;
+        double p = freq/total_samples;
+        total_prob += p;
+
+        sample_count.push_back( freq );
+
+        Tree* current_tree = converter.convertFromNewick( it->first );
+        unique_trees.push_back( current_tree );
+        
+//        std::vector<RbBitSet>* this_clade_bs = new std::vector<RbBitSet>();
+//        current_tree->getRoot().getAllClades(*this_clade_bs, current_tree->getNumberOfTips(), true);
+//        unique_trees_bs.push_back( this_clade_bs );
+        
+        if ( total_prob >= credible_interval_size )
+        {
+            break;
+        }
+
+    }
+    
+    size_t num_trees = unique_trees.size();
+    MatrixReal connectivity_matrix = MatrixReal(num_trees, num_trees, 0.0);
+    for (size_t i=0; i<num_trees; ++i)
+    {
+        
+        Tree* a = unique_trees[i];
+        
+        for (size_t j=i+1; j<num_trees; ++j)
+        {
+            
+            Tree* b = unique_trees[j];
+            
+//            std::vector<RbBitSet>* a = unique_trees_bs[i];
+//            std::vector<RbBitSet>* b = unique_trees_bs[j];
+            bool con = TreeUtilities::isConnectedNNI(*a, *b);
+
+            connectivity_matrix[i][j] = (con ? 1 : 2);
+            connectivity_matrix[j][i] = (con ? 1 : 2);
+        }
+    }
+    for (size_t i=0; i<unique_trees.size(); ++i)
+    {
+        Tree* tmp = unique_trees[i];
+//        std::vector<RbBitSet>* this_clade_bs = unique_trees_bs[i];
+
+        delete tmp;
+//        delete this_clade_bs;
+    }
+
+    return connectivity_matrix;
+}
+
+
+
 double TreeSummary::computeEntropy( double credible_interval_size, int num_taxa, bool verbose )
 {
     summarize( verbose );
@@ -1377,7 +1442,7 @@ bool TreeSummary::isDirty(void) const
 {
     bool dirty = false;
 
-    for(std::vector<TraceTree* >::const_iterator trace = traces.begin(); trace != traces.end(); trace++)
+    for (std::vector<TraceTree* >::const_iterator trace = traces.begin(); trace != traces.end(); trace++)
     {
         dirty = dirty || (*trace)->isDirty();
     }
@@ -1387,14 +1452,14 @@ bool TreeSummary::isDirty(void) const
 
 double TreeSummary::maxdiff( bool verbose )
 {
-    if(traces.size() <= 1)
+    if (traces.size() <= 1)
     {
         throw RbException("At least 2 traces are required to compute maxdiff");
     }
 
     std::set<Sample<Split> > splits_union;
 
-    for(std::vector<TraceTree* >::const_iterator trace = traces.begin(); trace != traces.end(); trace++)
+    for (std::vector<TraceTree* >::const_iterator trace = traces.begin(); trace != traces.end(); trace++)
     {
         (*trace)->summarize(verbose);
 
@@ -1955,6 +2020,6 @@ void TreeSummary::summarize( bool verbose )
 
     for (std::vector<TraceTree* >::iterator trace = traces.begin(); trace != traces.end(); ++trace)
     {
-        (*trace)->isDirty(false);
+        (*trace)->setDirty(false);
     }
 }

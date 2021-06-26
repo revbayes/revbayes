@@ -1161,6 +1161,26 @@ void RevBayesCore::TreeUtilities::getTaxaInSubtree(TopologyNode& n, std::vector<
 
 }
 
+/**
+ * Check if the two trees are connected by a single NNI move
+ */
+bool RevBayesCore::TreeUtilities::isConnectedNNI(const Tree& a, const Tree& b)
+{
+    
+    size_t num_nodes = a.getNumberOfNodes();
+    
+//    // now exchange the two nodes
+//    parent.removeChild( node_B );
+//    node->removeChild( node_A );
+//    parent.addChild( node_A );
+//    node->addChild( node_B );
+//    node_A->setParent( &parent );
+//    node_B->setParent( node );
+    
+    return false;
+}
+
+
 
 /**
  * Make tree ultrametric by extending terminal branches to the present
