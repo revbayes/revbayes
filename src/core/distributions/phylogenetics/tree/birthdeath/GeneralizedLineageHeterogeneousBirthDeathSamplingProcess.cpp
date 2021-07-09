@@ -784,15 +784,15 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCha
 
 		// create the string
         std::string simmap_string = "{";
-        std::vector< std::pair<double, size_t> >::iterator last_event = this_history.end();
-        last_event--;
-        for(std::vector< std::pair<double, size_t> >::iterator jt = this_history.begin(); jt != this_history.end(); ++jt)
+        std::vector< std::pair<double, size_t> >::reverse_iterator first_event = this_history.rend();
+        //first_event--; // apparently, this isn't for the reverse_iterator; uncomment to verify for yourself
+        for(std::vector< std::pair<double, size_t> >::reverse_iterator jt = this_history.rbegin(); jt != this_history.rend(); ++jt)
         {
-        	simmap_string = simmap_string + StringUtilities::toString(jt->second) + "," + StringUtilities::toString(jt->first);
-        	if ( jt != last_event )
-        	{
-        		simmap_string = simmap_string + ":";
-        	}
+            simmap_string = simmap_string + StringUtilities::toString(jt->second) + "," + StringUtilities::toString(jt->first);
+            if ( jt != first_event )
+            {
+                simmap_string = simmap_string + ":";
+            }
         }
         simmap_string = simmap_string + "}";
 
@@ -816,15 +816,15 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCha
 
 		// create the string
         std::string simmap_string = "{";
-        std::vector< std::pair<double, size_t> >::iterator last_event = this_history.end();
-        last_event--;
-        for(std::vector< std::pair<double, size_t> >::iterator jt = this_history.begin(); jt != this_history.end(); ++jt)
+        std::vector< std::pair<double, size_t> >::reverse_iterator first_event = this_history.rend();
+        //first_event--; // apparently, this isn't for the reverse_iterator; uncomment to verify for yourself
+        for(std::vector< std::pair<double, size_t> >::reverse_iterator jt = this_history.rbegin(); jt != this_history.rend(); ++jt)
         {
-        	simmap_string = simmap_string + StringUtilities::toString(jt->second) + "," + StringUtilities::toString(jt->first);
-        	if ( jt != last_event )
-        	{
-        		simmap_string = simmap_string + ":";
-        	}
+            simmap_string = simmap_string + StringUtilities::toString(jt->second) + "," + StringUtilities::toString(jt->first);
+            if ( jt != first_event )
+            {
+                simmap_string = simmap_string + ":";
+            }
         }
         simmap_string = simmap_string + "}";
 
