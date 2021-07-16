@@ -160,6 +160,56 @@ RateMatrix_revPoMo4N* RateMatrix_revPoMo4N::clone( void ) const
 }
 
 
+double RateMatrix_revPoMo4N::calculateReciprocalExpectedDivergence( void )
+{
+
+  // first the numerator
+
+  double sum_n = 0.0;
+
+  for (int n=1; n<(N+1); n++) {
+    
+    sum_n += pi[0]*pi[1]*rho[0]*pow(phi[1],n-1)*pow(phi[0],N-n);
+    sum_n += pi[0]*pi[2]*rho[1]*pow(phi[2],n-1)*pow(phi[0],N-n);
+    sum_n += pi[0]*pi[3]*rho[2]*pow(phi[3],n-1)*pow(phi[0],N-n);
+    sum_n += pi[1]*pi[2]*rho[3]*pow(phi[2],n-1)*pow(phi[1],N-n);
+    sum_n += pi[1]*pi[3]*rho[4]*pow(phi[3],n-1)*pow(phi[1],N-n);
+    sum_n += pi[2]*pi[3]*rho[5]*pow(phi[3],n-1)*pow(phi[2],N-n);
+
+  }
+
+  // then the denominator
+
+  double sum_d = 0.0;
+  double drift_coefficient;
+
+  for (int n=1; n<N; n++) {
+
+    drift_coefficient = 1.0/(n*(N-n));
+
+    sum_d += pi[0]*pi[1]*rho[0]*pow(phi[1],n-1)*pow(phi[0],N-n-1)*(n*phi[1]+(N-n)*phi[0])*drift_coefficient;
+    sum_d += pi[0]*pi[2]*rho[1]*pow(phi[2],n-1)*pow(phi[0],N-n-1)*(n*phi[2]+(N-n)*phi[0])*drift_coefficient;
+    sum_d += pi[0]*pi[3]*rho[2]*pow(phi[3],n-1)*pow(phi[0],N-n-1)*(n*phi[3]+(N-n)*phi[0])*drift_coefficient;
+    sum_d += pi[1]*pi[2]*rho[3]*pow(phi[2],n-1)*pow(phi[1],N-n-1)*(n*phi[2]+(N-n)*phi[1])*drift_coefficient;
+    sum_d += pi[1]*pi[3]*rho[4]*pow(phi[3],n-1)*pow(phi[1],N-n-1)*(n*phi[3]+(N-n)*phi[1])*drift_coefficient;
+    sum_d += pi[2]*pi[3]*rho[5]*pow(phi[3],n-1)*pow(phi[2],N-n-1)*(n*phi[3]+(N-n)*phi[2])*drift_coefficient;
+
+  }
+
+
+  // finaly the rate (the reciprocal)
+  double rRate;
+  rRate = ( pi[0]*pow(phi[0],N-1) +
+            pi[1]*pow(phi[1],N-1) +
+            pi[2]*pow(phi[2],N-1) +
+            pi[3]*pow(phi[3],N-1) + N*sum_d ) / ( 2.0*N*sum_n );
+
+  return rRate;
+
+}
+
+
+
 /*populating the rate matrix*/
 void RateMatrix_revPoMo4N::computeOffDiagonal( void )
 {
@@ -195,6 +245,9 @@ void RateMatrix_revPoMo4N::computeOffDiagonal( void )
     }
   }
 
+  // get the expected divergence (or number of evens) per unit of time
+  // normalize rate matrix such that one event happens per unit time.
+  double rRate = calculateReciprocalExpectedDivergence();
 
   //reciprocal of the population size
   double rN = 1.0/N;
@@ -202,142 +255,114 @@ void RateMatrix_revPoMo4N::computeOffDiagonal( void )
 
   //mutations
   //AC
-  m[0][4]      = rho[0]*pi[1];    //{NA} -> {(N-1)A,1C}
-  m[1][N+2]    = rho[0]*pi[0];    //{NC} -> {1A,(N-1)C}
+  m[0][4]      = N*rho[0]*pi[1]*rRate;    //{NA} -> {(N-1)A,1C}
+  m[1][N+2]    = N*rho[0]*pi[0]*rRate;    //{NC} -> {1A,(N-1)C}
 
   //AG
-  m[0][N+3]    = rho[1]*pi[2];    //{NA} -> {(N-1)A,1G}
-  m[2][2*N+1]  = rho[1]*pi[0];    //{NG} -> {1A,(N-1)G}
+  m[0][N+3]    = N*rho[1]*pi[2]*rRate;    //{NA} -> {(N-1)A,1G}
+  m[2][2*N+1]  = N*rho[1]*pi[0]*rRate;    //{NG} -> {1A,(N-1)G}
 
   //AT
-  m[0][2*N+2]  = rho[2]*pi[3];    //{NA} -> {(N-1)A,1T}
-  m[3][3*N]    = rho[2]*pi[0];    //{NT} -> {1A,(N-1)T}
+  m[0][2*N+2]  = N*rho[2]*pi[3]*rRate;    //{NA} -> {(N-1)A,1T}
+  m[3][3*N]    = N*rho[2]*pi[0]*rRate;    //{NT} -> {1A,(N-1)T}
 
   //CG
-  m[1][3*N+1]  = rho[3]*pi[2];    //{NC} -> {(N-1)C,1aG}
-  m[2][4*N-1]  = rho[3]*pi[1];    //{NG} -> {1C,(N-1)aG}
+  m[1][3*N+1]  = N*rho[3]*pi[2]*rRate;    //{NC} -> {(N-1)C,1aG}
+  m[2][4*N-1]  = N*rho[3]*pi[1]*rRate;    //{NG} -> {1C,(N-1)aG}
 
   //CT
-  m[1][4*N]    = rho[4]*pi[3];    //{NC} -> {(N-1)C,1T}
-  m[3][5*N-2]  = rho[4]*pi[1];    //{NT} -> {1C,(N-1)T}
+  m[1][4*N]    = N*rho[4]*pi[3]*rRate;    //{NC} -> {(N-1)C,1T}
+  m[3][5*N-2]  = N*rho[4]*pi[1]*rRate;    //{NT} -> {1C,(N-1)T}
 
   //GT
-  m[2][5*N-1]  = rho[5]*pi[3];    //{NG} -> {(N-1)G,1T}
-  m[3][6*N-3]  = rho[5]*pi[2];    //{NT} -> {1G,(N-1)T}
+  m[2][5*N-1]  = N*rho[5]*pi[3]*rRate;    //{NG} -> {(N-1)G,1T}
+  m[3][6*N-3]  = N*rho[5]*pi[2]*rRate;    //{NT} -> {1G,(N-1)T}
 
 
+ 
   //fixations
   //AC
-  m[4]    [0]   = (N-1.0)*phi[0]*rN;  //{(N-1)A,1C} -> {NA} 
-  m[N+2]  [1]   = (N-1.0)*phi[1]*rN;  //{1A,(N-1)C} -> {NC} 
+  m[4]    [0]   = (N-1.0)*phi[0]*rRate/((N-1)*phi[0]+phi[1]);  //{(N-1)A,1C} -> {NA} 
+  m[N+2]  [1]   = (N-1.0)*phi[1]*rRate/((N-1)*phi[1]+phi[0]);  //{1A,(N-1)C} -> {NC} 
 
   //AG
-  m[N+3]  [0]   = (N-1.0)*phi[0]*rN;  //{(N-1)A,1G} -> {NA} 
-  m[2*N+1] [2]  = (N-1.0)*phi[2]*rN;  //{1A,(N-1)G} -> {NG} 
+  m[N+3]  [0]   = (N-1.0)*phi[0]*rRate/((N-1)*phi[0]+phi[2]);  //{(N-1)A,1G} -> {NA} 
+  m[2*N+1] [2]  = (N-1.0)*phi[2]*rRate/((N-1)*phi[2]+phi[0]);  //{1A,(N-1)G} -> {NG} 
 
   //AT
-  m[2*N+2][0]   = (N-1.0)*phi[0]*rN;  //{(N-1)A,1T} -> {NA} 
-  m[3*N]   [3]  = (N-1.0)*phi[3]*rN;  //{1A,(N-1)T} -> {NT} 
+  m[2*N+2][0]   = (N-1.0)*phi[0]*rRate/((N-1)*phi[0]+phi[3]);  //{(N-1)A,1T} -> {NA} 
+  m[3*N]   [3]  = (N-1.0)*phi[3]*rRate/((N-1)*phi[3]+phi[0]);  //{1A,(N-1)T} -> {NT} 
 
   //CG
-  m[3*N+1][1]   = (N-1.0)*phi[1]*rN;  //{(N-1)C,1G} -> {NC} 
-  m[4*N-1] [2]  = (N-1.0)*phi[2]*rN;  //{1C,(N-1)G} -> {NG}
+  m[3*N+1][1]   = (N-1.0)*phi[1]*rRate/((N-1)*phi[1]+phi[2]);  //{(N-1)C,1G} -> {NC} 
+  m[4*N-1] [2]  = (N-1.0)*phi[2]*rRate/((N-1)*phi[2]+phi[1]);  //{1C,(N-1)G} -> {NG}
 
   //CT
-  m[4*N]  [1]   = (N-1.0)*phi[1]*rN;  //{(N-1)C,1T} -> {NC} 
-  m[5*N-2] [3]  = (N-1.0)*phi[3]*rN;  //{1C,(N-1)T} -> {NT} 
+  m[4*N]  [1]   = (N-1.0)*phi[1]*rRate/((N-1)*phi[1]+phi[3]);  //{(N-1)C,1T} -> {NC} 
+  m[5*N-2] [3]  = (N-1.0)*phi[3]*rRate/((N-1)*phi[3]+phi[1]);  //{1C,(N-1)T} -> {NT} 
 
   //GT
-  m[5*N-1][2]   = (N-1.0)*phi[2]*rN;  //{(N-1)G,1T} -> {NG} 
-  m[6*N-3] [3]  = (N-1.0)*phi[3]*rN;  //{1G,(N-1)T} -> {NT} 
+  m[5*N-1][2]   = (N-1.0)*phi[2]*rRate/((N-1)*phi[2]+phi[3]);  //{(N-1)G,1T} -> {NG} 
+  m[6*N-3] [3]  = (N-1.0)*phi[3]*rRate/((N-1)*phi[3]+phi[2]);  //{1G,(N-1)T} -> {NT} 
 
   //the pomo rate matrix is entirely defined by fixations and mutations if N=2
   if (N>2) {
 
     //frequency shifts from singletons
     //AC
-    m[4]     [5]     = (N-1.0)*phi[1]*rN;  //{(N-1)A,1C} -> {(N-2)A,2C}
-    m[N+2]   [N+1]   = (N-1.0)*phi[0]*rN;  //{1A,(N-1)C} -> {2A,(N-2)C}
+    m[4]     [5]     = (N-1.0)*phi[1]*rRate/((N-1)*phi[0]+phi[1]);  //{(N-1)A,1C} -> {(N-2)A,2C}
+    m[N+2]   [N+1]   = (N-1.0)*phi[0]*rRate/((N-1)*phi[1]+phi[0]);  //{1A,(N-1)C} -> {2A,(N-2)C}
 
     //AG
-    m[N+3]   [N+4]   = (N-1.0)*phi[2]*rN;  //{(N-1)A,1G} -> {(N-2)A,2G}
-    m[2*N+1] [2*N]   = (N-1.0)*phi[0]*rN;  //{1A,(N-1)G} -> {2A,(N-2)G}
+    m[N+3]   [N+4]   = (N-1.0)*phi[2]*rRate/((N-1)*phi[0]+phi[2]);  //{(N-1)A,1G} -> {(N-2)A,2G}
+    m[2*N+1] [2*N]   = (N-1.0)*phi[0]*rRate/((N-1)*phi[2]+phi[0]);  //{1A,(N-1)G} -> {2A,(N-2)G}
 
     //AT
-    m[2*N+2] [2*N+3] = (N-1.0)*phi[3]*rN;  //{(N-1)A,1T} -> {(N-2)A,2T}
-    m[3*N]   [3*N-1] = (N-1.0)*phi[0]*rN;  //{1A,(N-1)T} -> {2A,(N-2)T}
+    m[2*N+2] [2*N+3] = (N-1.0)*phi[3]*rRate/((N-1)*phi[0]+phi[3]);  //{(N-1)A,1T} -> {(N-2)A,2T}
+    m[3*N]   [3*N-1] = (N-1.0)*phi[0]*rRate/((N-1)*phi[3]+phi[0]);  //{1A,(N-1)T} -> {2A,(N-2)T}
 
     //CG
-    m[3*N+1] [3*N+2] = (N-1.0)*phi[2]*rN;  //{(N-1)C,1G} -> {(N-2)C,2G}
-    m[4*N-1] [4*N-2] = (N-1.0)*phi[1]*rN;  //{1C,(N-1)G} -> {2C,(N-2)G}
+    m[3*N+1] [3*N+2] = (N-1.0)*phi[2]*rRate/((N-1)*phi[1]+phi[2]);  //{(N-1)C,1G} -> {(N-2)C,2G}
+    m[4*N-1] [4*N-2] = (N-1.0)*phi[1]*rRate/((N-1)*phi[2]+phi[1]);  //{1C,(N-1)G} -> {2C,(N-2)G}
 
     //CT
-    m[4*N]   [4*N+1] = (N-1.0)*phi[3]*rN;  //{(N-1)C,1T} -> {(N-2)C,2T}
-    m[5*N-2] [5*N-3] = (N-1.0)*phi[1]*rN;  //{1C,(N-1)T} -> {2C,(N-2)T}
+    m[4*N]   [4*N+1] = (N-1.0)*phi[3]*rRate/((N-1)*phi[1]+phi[3]);  //{(N-1)C,1T} -> {(N-2)C,2T}
+    m[5*N-2] [5*N-3] = (N-1.0)*phi[1]*rRate/((N-1)*phi[3]+phi[1]);  //{1C,(N-1)T} -> {2C,(N-2)T}
 
     //GT
-    m[5*N-1] [5*N]   = (N-1.0)*phi[3]*rN;  //{(N-1)G,1T} -> {(N-2)G,2T}
-    m[6*N-3] [6*N-4] = (N-1.0)*phi[2]*rN;  //{1G,(N-1)T} -> {2G,(N-2)T}
+    m[5*N-1] [5*N]   = (N-1.0)*phi[3]*rRate/((N-1)*phi[2]+phi[3]);  //{(N-1)G,1T} -> {(N-2)G,2T}
+    m[6*N-3] [6*N-4] = (N-1.0)*phi[2]*rRate/((N-1)*phi[3]+phi[2]);  //{1G,(N-1)T} -> {2G,(N-2)T}
 
 
     //frequency shifts for all the other polymorphic states
     if (N>3) {
 
-      //polymorphic states are populated in two fronts, thus the need for the middle frequency
-      int S = N/2+1; 
-
-      for (int n=2; n<S; n++){
+      for (int n=2; n<(N-1); n++){
 
         //populates the first half of the polymorphic edges
         //AC
-        m[n+3]     [n+4]      = n*(N-n)*phi[1]*rN; //{nA,(N-n)C} -> {(n-1)A,(N-n+1)C}
-        m[n+3]     [n+2]      = n*(N-n)*phi[0]*rN; //{nA,(N-n)C} -> {(n+1)A,(N-n-1)C}
+        m[n+3]     [n+4]      = n*(N-n)*phi[1]*rRate/(n*phi[1]+(N-n)*phi[0]); //{nA,(N-n)C} -> {(n-1)A,(N-n+1)C}
+        m[n+3]     [n+2]      = n*(N-n)*phi[0]*rRate/(n*phi[1]+(N-n)*phi[0]); //{nA,(N-n)C} -> {(n+1)A,(N-n-1)C}
 
         //AG
-        m[N+n+2]   [N+n+3]    = n*(N-n)*phi[2]*rN; //{nA,(N-n)G} -> {(n-1)A,(N-n+1)G}
-        m[N+n+2]   [N+n+1]    = n*(N-n)*phi[0]*rN; //{nA,(N-n)G} -> {(n+1)A,(N-n-1)G}
+        m[N+n+2]   [N+n+3]    = n*(N-n)*phi[2]*rRate/(n*phi[2]+(N-n)*phi[0]); //{nA,(N-n)G} -> {(n-1)A,(N-n+1)G}
+        m[N+n+2]   [N+n+1]    = n*(N-n)*phi[0]*rRate/(n*phi[2]+(N-n)*phi[0]); //{nA,(N-n)G} -> {(n+1)A,(N-n-1)G}
 
         //AT
-        m[2*N+n+1] [2*N+n+2]  = n*(N-n)*phi[3]*rN; //{nA,(N-n)T} -> {(n-1)A,(N-n+1)T}
-        m[2*N+n+1] [2*N+n]    = n*(N-n)*phi[0]*rN; //{nA,(N-n)T} -> {(n+1)A,(N-n-1)T}
+        m[2*N+n+1] [2*N+n+2]  = n*(N-n)*phi[3]*rRate/(n*phi[3]+(N-n)*phi[0]); //{nA,(N-n)T} -> {(n-1)A,(N-n+1)T}
+        m[2*N+n+1] [2*N+n]    = n*(N-n)*phi[0]*rRate/(n*phi[3]+(N-n)*phi[0]); //{nA,(N-n)T} -> {(n+1)A,(N-n-1)T}
 
         //CG
-        m[3*N+n]   [3*N+n+1]  = n*(N-n)*phi[2]*rN; //{nC,(N-n)G} -> {(n-1)C,(N-n+1)G}
-        m[3*N+n]   [3*N+n-1]  = n*(N-n)*phi[1]*rN; //{nC,(N-n)G} -> {(n+1)C,(N-n-1)G}
+        m[3*N+n]   [3*N+n+1]  = n*(N-n)*phi[2]*rRate/(n*phi[2]+(N-n)*phi[1]); //{nC,(N-n)G} -> {(n-1)C,(N-n+1)G}
+        m[3*N+n]   [3*N+n-1]  = n*(N-n)*phi[1]*rRate/(n*phi[2]+(N-n)*phi[1]); //{nC,(N-n)G} -> {(n+1)C,(N-n-1)G}
 
         //CT
-        m[4*N+n-1] [4*N+n]    = n*(N-n)*phi[3]*rN; //{nC,(N-n)T} -> {(n-1)C,(N-n+1)T}
-        m[4*N+n-1] [4*N+n-2]  = n*(N-n)*phi[1]*rN; //{nC,(N-n)T} -> {(n+1)C,(N-n-1)T}
+        m[4*N+n-1] [4*N+n]    = n*(N-n)*phi[3]*rRate/(n*phi[3]+(N-n)*phi[1]); //{nC,(N-n)T} -> {(n-1)C,(N-n+1)T}
+        m[4*N+n-1] [4*N+n-2]  = n*(N-n)*phi[1]*rRate/(n*phi[3]+(N-n)*phi[1]); //{nC,(N-n)T} -> {(n+1)C,(N-n-1)T}
 
         //GT
-        m[5*N+n-2] [5*N+n-1]  = n*(N-n)*phi[3]*rN; //{nG,(N-n)T} -> {(n-1)G,(N-n+1)T}
-        m[5*N+n-2] [5*N+n-3]  = n*(N-n)*phi[2]*rN; //{nG,(N-n)T} -> {(n+1)G,(N-n-1)T}
-
-
-        //populates the second half of the polymorphic edges
-        //AC
-        m[N-n+3] [N-n+2]     = (N-n)*n*phi[0]*rN; //{(N-n)A,nC} -> {(N-n+1)A,(n-1)C}
-        m[N-n+3] [N-n+4]     = (N-n)*n*phi[1]*rN; //{(N-n)A,nC} -> {(N-n-1)A,(n+1)C}
-
-        //AG
-        m[2*N-n+2] [2*N-n+1] = (N-n)*n*phi[0]*rN; //{(N-n)A,nG} -> {(N-n+1)A,(n-1)G}
-        m[2*N-n+2] [2*N-n+3] = (N-n)*n*phi[2]*rN; //{(N-n)A,nG} -> {(N-n-1)A,(n+1)G}
-
-        //AT
-        m[3*N-n+1] [3*N-n]   = (N-n)*n*phi[0]*rN; //{(N-n)A,nT} -> {(N-n+1)A,(n-1)T}
-        m[3*N-n+1] [3*N-n+2] = (N-n)*n*phi[3]*rN; //{(N-n)A,nT} -> {(N-n-1)A,(n+1)T}
-
-        //CG
-        m[4*N-n] [4*N-n-1]   = (N-n)*n*phi[1]*rN; //{(N-n)C,nG} -> {(N-n+1)C,(n-1)G}
-        m[4*N-n] [4*N-n+1]   = (N-n)*n*phi[2]*rN; //{(N-n)C,nG} -> {(N-n-1)C,(n+1)G}
-
-        //CT
-        m[5*N-n-1] [5*N-n-2] = (N-n)*n*phi[1]*rN; //{(N-n)C,nT} -> {(N-n+1)C,(n-1)T}
-        m[5*N-n-1] [5*N-n]   = (N-n)*n*phi[3]*rN; //{(N-n)C,nT} -> {(N-n-1)C,(n+1)T}
-
-        //GT
-        m[6*N-n-2] [6*N-n-3] = (N-n)*n*phi[2]*rN; //{(N-n)G,nT} -> {(N-n+1)G,(n-1)T}
-        m[6*N-n-2] [6*N-n-1] = (N-n)*n*phi[3]*rN; //{(N-n)G,nT} -> {(N-n-1)G,(n+1)T}
+        m[5*N+n-2] [5*N+n-1]  = n*(N-n)*phi[3]*rRate/(n*phi[3]+(N-n)*phi[2]); //{nG,(N-n)T} -> {(n-1)G,(N-n+1)T}
+        m[5*N+n-2] [5*N+n-3]  = n*(N-n)*phi[2]*rRate/(n*phi[3]+(N-n)*phi[2]); //{nG,(N-n)T} -> {(n+1)G,(N-n-1)T}
 
       }
 
@@ -345,12 +370,64 @@ void RateMatrix_revPoMo4N::computeOffDiagonal( void )
 
   }
 
-
   // set flags
   needs_update = true;
-
 }
 
+
+std::vector<double> RateMatrix_revPoMo4N::getStationaryFrequencies( void ) const
+{
+
+  // calculating the normalization constant
+
+  double nc = pi[0]*pow(phi[0],N-1) +
+              pi[1]*pow(phi[1],N-1) +
+              pi[2]*pow(phi[2],N-1) +
+              pi[3]*pow(phi[3],N-1) ;
+
+  double drift_coefficient;
+
+  for (int n=1; n<N; n++) {
+
+    drift_coefficient = 1.0*N/(n*(N-n));
+
+    nc += pi[0]*pi[1]*rho[0]*pow(phi[1],n-1)*pow(phi[0],N-n-1)*(n*phi[1]+(N-n)*phi[0])*drift_coefficient;
+    nc += pi[0]*pi[2]*rho[1]*pow(phi[2],n-1)*pow(phi[0],N-n-1)*(n*phi[2]+(N-n)*phi[0])*drift_coefficient;
+    nc += pi[0]*pi[3]*rho[2]*pow(phi[3],n-1)*pow(phi[0],N-n-1)*(n*phi[3]+(N-n)*phi[0])*drift_coefficient;
+    nc += pi[1]*pi[2]*rho[3]*pow(phi[2],n-1)*pow(phi[1],N-n-1)*(n*phi[2]+(N-n)*phi[1])*drift_coefficient;
+    nc += pi[1]*pi[3]*rho[4]*pow(phi[3],n-1)*pow(phi[1],N-n-1)*(n*phi[3]+(N-n)*phi[1])*drift_coefficient;
+    nc += pi[2]*pi[3]*rho[5]*pow(phi[3],n-1)*pow(phi[2],N-n-1)*(n*phi[3]+(N-n)*phi[2])*drift_coefficient;
+
+  }
+
+  
+  // calculating the stationary vector
+
+  double rnc = 1.0/nc;
+  std::vector<double> stationary_freqs(4+6*(N-1),0.0);
+
+  stationary_freqs[0]  = pi[0]*pow(phi[0],N-1)*rnc;
+  stationary_freqs[1]  = pi[1]*pow(phi[1],N-1)*rnc;
+  stationary_freqs[2]  = pi[2]*pow(phi[2],N-1)*rnc;
+  stationary_freqs[3]  = pi[3]*pow(phi[3],N-1)*rnc;
+
+  for (int n=1; n<N; n++) {
+
+    drift_coefficient = 1.0*N/(n*(N-n));
+
+    stationary_freqs[3+n    ] = pi[0]*pi[1]*rho[0]*pow(phi[1],n-1)*pow(phi[0],N-n-1)*(n*phi[1]+(N-n)*phi[0])*drift_coefficient*rnc;
+    stationary_freqs[N+n+2  ] = pi[0]*pi[2]*rho[1]*pow(phi[2],n-1)*pow(phi[0],N-n-1)*(n*phi[2]+(N-n)*phi[0])*drift_coefficient*rnc;
+    stationary_freqs[2*N+n+1] = pi[0]*pi[3]*rho[2]*pow(phi[3],n-1)*pow(phi[0],N-n-1)*(n*phi[3]+(N-n)*phi[0])*drift_coefficient*rnc;
+    stationary_freqs[3*N+n  ] = pi[1]*pi[2]*rho[3]*pow(phi[2],n-1)*pow(phi[1],N-n-1)*(n*phi[2]+(N-n)*phi[1])*drift_coefficient*rnc;
+    stationary_freqs[4*N+n-1] = pi[1]*pi[3]*rho[4]*pow(phi[3],n-1)*pow(phi[1],N-n-1)*(n*phi[3]+(N-n)*phi[1])*drift_coefficient*rnc;
+    stationary_freqs[5*N+n-2] = pi[2]*pi[3]*rho[5]*pow(phi[3],n-1)*pow(phi[2],N-n-1)*(n*phi[3]+(N-n)*phi[2])*drift_coefficient*rnc;
+
+  }
+
+
+  return stationary_freqs;
+
+}
 
 
 /** Calculate the transition probabilities for the real case */
@@ -475,7 +552,7 @@ void RateMatrix_revPoMo4N::update( void )
         setDiagonal();
         
         // rescale
-        //rescaleToAverageRate( 3.0 );
+        //rescaleToAverageRate( 1.0 );
         
         // now update the eigensystem
         updateEigenSystem();
