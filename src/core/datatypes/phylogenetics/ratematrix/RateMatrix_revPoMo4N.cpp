@@ -248,6 +248,7 @@ void RateMatrix_revPoMo4N::computeOffDiagonal( void )
   // get the expected divergence (or number of evens) per unit of time
   // normalize rate matrix such that one event happens per unit time.
   double rRate = calculateReciprocalExpectedDivergence();
+  //std::cout << "rate:" << rRate << "\n";
 
   //reciprocal of the population size
   double rN = 1.0/N;
@@ -339,36 +340,43 @@ void RateMatrix_revPoMo4N::computeOffDiagonal( void )
 
       for (int n=2; n<(N-1); n++){
 
-        //populates the first half of the polymorphic edges
         //AC
-        m[n+3]     [n+4]      = n*(N-n)*phi[1]*rRate/(n*phi[1]+(N-n)*phi[0]); //{nA,(N-n)C} -> {(n-1)A,(N-n+1)C}
-        m[n+3]     [n+2]      = n*(N-n)*phi[0]*rRate/(n*phi[1]+(N-n)*phi[0]); //{nA,(N-n)C} -> {(n+1)A,(N-n-1)C}
+        m[n+3]     [n+4]      = n*(N-n)*phi[1]*rRate/(n*phi[1]+(N-n)*phi[0]); //{(N-n)A,nC} -> {(N-n-1)A,(n+1)C}
+        m[n+3]     [n+2]      = n*(N-n)*phi[0]*rRate/(n*phi[1]+(N-n)*phi[0]); //{(N-n)A,nC} -> {(N-n+1)A,(n-1)C}
 
         //AG
-        m[N+n+2]   [N+n+3]    = n*(N-n)*phi[2]*rRate/(n*phi[2]+(N-n)*phi[0]); //{nA,(N-n)G} -> {(n-1)A,(N-n+1)G}
-        m[N+n+2]   [N+n+1]    = n*(N-n)*phi[0]*rRate/(n*phi[2]+(N-n)*phi[0]); //{nA,(N-n)G} -> {(n+1)A,(N-n-1)G}
+        m[N+n+2]   [N+n+3]    = n*(N-n)*phi[2]*rRate/(n*phi[2]+(N-n)*phi[0]); //{(N-n)A,nG} -> {(N-n-1)A,(n+1)G}
+        m[N+n+2]   [N+n+1]    = n*(N-n)*phi[0]*rRate/(n*phi[2]+(N-n)*phi[0]); //{(N-n)A,nG} -> {(N-n+1)A,(n-1)G}
 
         //AT
-        m[2*N+n+1] [2*N+n+2]  = n*(N-n)*phi[3]*rRate/(n*phi[3]+(N-n)*phi[0]); //{nA,(N-n)T} -> {(n-1)A,(N-n+1)T}
-        m[2*N+n+1] [2*N+n]    = n*(N-n)*phi[0]*rRate/(n*phi[3]+(N-n)*phi[0]); //{nA,(N-n)T} -> {(n+1)A,(N-n-1)T}
+        m[2*N+n+1] [2*N+n+2]  = n*(N-n)*phi[3]*rRate/(n*phi[3]+(N-n)*phi[0]); //{(N-n)A,nT} -> {(N-n-1)A,(n+1)T}
+        m[2*N+n+1] [2*N+n]    = n*(N-n)*phi[0]*rRate/(n*phi[3]+(N-n)*phi[0]); //{(N-n)A,nT} -> {(N-n+1)A,(n-1)T}
 
         //CG
-        m[3*N+n]   [3*N+n+1]  = n*(N-n)*phi[2]*rRate/(n*phi[2]+(N-n)*phi[1]); //{nC,(N-n)G} -> {(n-1)C,(N-n+1)G}
-        m[3*N+n]   [3*N+n-1]  = n*(N-n)*phi[1]*rRate/(n*phi[2]+(N-n)*phi[1]); //{nC,(N-n)G} -> {(n+1)C,(N-n-1)G}
+        m[3*N+n]   [3*N+n+1]  = n*(N-n)*phi[2]*rRate/(n*phi[2]+(N-n)*phi[1]); //{(N-n)C,nG} -> {(N-n-1)C,(n+1)G}
+        m[3*N+n]   [3*N+n-1]  = n*(N-n)*phi[1]*rRate/(n*phi[2]+(N-n)*phi[1]); //{(N-n)C,nG} -> {(N-n+1)C,(n-1)G}
 
         //CT
-        m[4*N+n-1] [4*N+n]    = n*(N-n)*phi[3]*rRate/(n*phi[3]+(N-n)*phi[1]); //{nC,(N-n)T} -> {(n-1)C,(N-n+1)T}
-        m[4*N+n-1] [4*N+n-2]  = n*(N-n)*phi[1]*rRate/(n*phi[3]+(N-n)*phi[1]); //{nC,(N-n)T} -> {(n+1)C,(N-n-1)T}
+        m[4*N+n-1] [4*N+n]    = n*(N-n)*phi[3]*rRate/(n*phi[3]+(N-n)*phi[1]); //{(N-n)C,nT} -> {(N-n-1)C,(n+1)T}
+        m[4*N+n-1] [4*N+n-2]  = n*(N-n)*phi[1]*rRate/(n*phi[3]+(N-n)*phi[1]); //{(N-n)C,nT} -> {(N-n+1)C,(n-1)T}
 
         //GT
-        m[5*N+n-2] [5*N+n-1]  = n*(N-n)*phi[3]*rRate/(n*phi[3]+(N-n)*phi[2]); //{nG,(N-n)T} -> {(n-1)G,(N-n+1)T}
-        m[5*N+n-2] [5*N+n-3]  = n*(N-n)*phi[2]*rRate/(n*phi[3]+(N-n)*phi[2]); //{nG,(N-n)T} -> {(n+1)G,(N-n-1)T}
+        m[5*N+n-2] [5*N+n-1]  = n*(N-n)*phi[3]*rRate/(n*phi[3]+(N-n)*phi[2]); //{(N-n)G,nT} -> {(N-n-1)G,(n+1)T}
+        m[5*N+n-2] [5*N+n-3]  = n*(N-n)*phi[2]*rRate/(n*phi[3]+(N-n)*phi[2]); //{(N-n)G,nT} -> {(N-n+1)G,(n-1)T}
 
       }
 
     }
 
   }
+
+  //int n_states = 4+6*(N-1);
+  //std::vector<double> stationary_freqs; 
+  //stationary_freqs = getStationaryFrequencies();
+
+  //for (int i=0; i<n_states; i++) {
+  //  std::cout << "sf" << i << ":" << stationary_freqs[i] << "\n";
+  //}
 
   // set flags
   needs_update = true;

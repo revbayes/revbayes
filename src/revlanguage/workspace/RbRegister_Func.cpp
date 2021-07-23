@@ -201,7 +201,8 @@
 
 /* Input/output functions (in folder "functions/io") */
 #include "Func_readPoMoCountFile.h"
-
+#include "Func_convertCountFileToNaturalNumbers.h"
+#include "Func_convertFastaFileToNaturalNumbers.h"
 
 /* Math functions (in folder "functions/math") */
 #include "Func_abs.h"
@@ -381,6 +382,8 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_pomoRootFrequencies()                             );
         addFunction( new Func_pruneTree()                                       );
         addFunction( new Func_readPoMoCountFile()                               );
+        addFunction( new Func_convertCountFileToNaturalNumbers()                );
+        addFunction( new Func_convertFastaFileToNaturalNumbers()                );
         addFunction( new Func_simStartingTree()                                 );
         addFunction( new Func_simTree()                                         );
         addFunction( new Func_simCompleteTree()                                 );
