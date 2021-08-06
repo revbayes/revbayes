@@ -500,7 +500,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
 
                         lnQ[i] = Z(k+1,oi,delta,delta_plus_Ls) - Z(k+1,oi,delta,delta);
                         lnQ[i] = log(lnQ[i]);
-                        //partial_likelihood[i] += lnQ[i] - RbMath::lnFactorial(k+1);
+                        partial_likelihood[i] += lnQ[i] - RbMath::lnFactorial(k+1);
                     }
                 }
                 // user-defined uncertainty for o
