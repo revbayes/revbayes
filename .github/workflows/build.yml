@@ -242,6 +242,13 @@ jobs:
         ./testiphy rb
         echo ::endgroup::
 
+    - name: Upload build files
+      uses: actions/upload-artifact@v1
+      if: always()
+      with:
+        name: build-${{ matrix.name }}
+        path: projects/cmake/build
+
     - name: Upload test files if they failed
       uses: actions/upload-artifact@v1
       if: failure()
