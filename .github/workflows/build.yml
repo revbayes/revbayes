@@ -245,14 +245,14 @@ jobs:
       uses: actions/upload-artifact@v1
       if: failure()
       with:
-        name: test-results
+        name: test-results-${{ matrix.os }}
         path: tests
 
     - name: Upload testiphy files if they failed
       uses: actions/upload-artifact@v2-preview
       if: failure()
       with:
-        name: testiphy-results
+        name: testiphy-results-${{ matrix.os }}
         path: '~/testiphy'
 
   notify:
