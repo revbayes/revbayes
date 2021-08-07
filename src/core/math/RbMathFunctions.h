@@ -27,23 +27,23 @@ namespace RevBayesCore {
         double                      beta(double a, double b);                                                       //!< Beta function 
         double                      binomialDeviance(double x, double np);                                          //!< Evaluates the Deviance part
         int                         chebyshev_init(double *dos, int nos, double eta);
-        long double                 chebyshev_eval(long double x, const long double *a, const int n);
+        double                      chebyshev_eval(double x, const double *a, const int n);
         double                      expm1(double x);                                                                //!< Compute exp(x) - 1 for small x
-        long double                 gamma(long double x);                                                                //!< Calculate the Gamma function
+        double                      gamma(double x);                                                                //!< Calculate the Gamma function 
         double                      gamma_old(double x);                                                            //!< Calculate the Gamma function 
         double                      incompleteBeta(double a, double b, double x);                                   //!< Xxx 
-        long double                 incompleteGamma(long double x, long double alpha, bool regularized=true, bool lower=true);//!< Xxx
-        long double                 lnGamma_sign(long double a, int *sgn);                                               //!< Calculate the log of the Gamma function
-        long double                 lnGamma(long double a);                                                              //!< Calculate the log of the Gamma function
+        double                      incompleteGamma(double x, double alpha, bool regularized=true, bool lower=true);//!< Xxx
+        double                      lnGamma_sign(double a, int *sgn);                                               //!< Calculate the log of the Gamma function
+        double                      lnGamma(double a);                                                              //!< Calculate the log of the Gamma function
         double                      lnGamma_old(double a);                                                          //!< Calculate the log of the Gamma function
-        long double                 lnGammacor(long double x);
+        double                      lnGammacor(double x);
         double                      lnBeta(double a, double b);                                                     //!< Calculate the log of the Beta function 
         double                      logGamma1p(double x);                                                           //!< Compute log(gamma(1+x)) for small x
         double                      log1p(double x);                                                                //!< Compute log(1+x) for small x
         double                      log1pmx(double x);                                                              //!< Compute log(1+x)-x for small x
         double                      logcf(double x, double i, double d, double eps);
         double                      rbEpsilon(void);                                                                //!< Xxx 
-        long double                 stirlerr(long double n);
+        double                      stirlerr(double n);
         double                      trunc(double x);                                                                //!< Truncate x
         double                      log_sum_exp(const std::vector<double>& x, double max);
         double                      log_sum_exp(const std::vector<double>& x);

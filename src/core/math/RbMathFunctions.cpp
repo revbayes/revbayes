@@ -130,9 +130,9 @@ int RbMath::chebyshev_init(double *dos, int nos, double eta)
 }
 
 
-long double RbMath::chebyshev_eval(long double x, const long double *a, const int n)
+double RbMath::chebyshev_eval(double x, const double *a, const int n)
 {
-    long double b0, b1, b2, twox;
+    double b0, b1, b2, twox;
     int i;
     
     if (n < 1 || n > 1000) 
@@ -183,56 +183,56 @@ double RbMath::expm1(double x)
  * \return Returns the value of the gamma function. 
  * \throws Does not throw an error.
  */
-long double RbMath::gamma(long double x)
+double RbMath::gamma(double x) 
 {
-    const static long double gamcs[42] = {
-        +.8571195590989331421920062399942e-2L,
-        +.4415381324841006757191315771652e-2L,
-        +.5685043681599363378632664588789e-1L,
-        -.4219835396418560501012500186624e-2L,
-        +.1326808181212460220584006796352e-2L,
-        -.1893024529798880432523947023886e-3L,
-        +.3606925327441245256578082217225e-4L,
-        -.6056761904460864218485548290365e-5L,
-        +.1055829546302283344731823509093e-5L,
-        -.1811967365542384048291855891166e-6L,
-        +.3117724964715322277790254593169e-7L,
-        -.5354219639019687140874081024347e-8L,
-        +.9193275519859588946887786825940e-9L,
-        -.1577941280288339761767423273953e-9L,
-        +.2707980622934954543266540433089e-10L,
-        -.4646818653825730144081661058933e-11L,
-        +.7973350192007419656460767175359e-12L,
-        -.1368078209830916025799499172309e-12L,
-        +.2347319486563800657233471771688e-13L,
-        -.4027432614949066932766570534699e-14L,
-        +.6910051747372100912138336975257e-15L,
-        -.1185584500221992907052387126192e-15L,
-        +.2034148542496373955201026051932e-16L,
-        -.3490054341717405849274012949108e-17L,
-        +.5987993856485305567135051066026e-18L,
-        -.1027378057872228074490069778431e-18L,
-        +.1762702816060529824942759660748e-19L,
-        -.3024320653735306260958772112042e-20L,
-        +.5188914660218397839717833550506e-21L,
-        -.8902770842456576692449251601066e-22L,
-        +.1527474068493342602274596891306e-22L,
-        -.2620731256187362900257328332799e-23L,
-        +.4496464047830538670331046570666e-24L,
-        -.7714712731336877911703901525333e-25L,
-        +.1323635453126044036486572714666e-25L,
-        -.2270999412942928816702313813333e-26L,
-        +.3896418998003991449320816639999e-27L,
-        -.6685198115125953327792127999999e-28L,
-        +.1146998663140024384347613866666e-28L,
-        -.1967938586345134677295103999999e-29L,
-        +.3376448816585338090334890666666e-30L,
-        -.5793070335782135784625493333333e-31L
+    const static double gamcs[42] = {
+        +.8571195590989331421920062399942e-2,
+        +.4415381324841006757191315771652e-2,
+        +.5685043681599363378632664588789e-1,
+        -.4219835396418560501012500186624e-2,
+        +.1326808181212460220584006796352e-2,
+        -.1893024529798880432523947023886e-3,
+        +.3606925327441245256578082217225e-4,
+        -.6056761904460864218485548290365e-5,
+        +.1055829546302283344731823509093e-5,
+        -.1811967365542384048291855891166e-6,
+        +.3117724964715322277790254593169e-7,
+        -.5354219639019687140874081024347e-8,
+        +.9193275519859588946887786825940e-9,
+        -.1577941280288339761767423273953e-9,
+        +.2707980622934954543266540433089e-10,
+        -.4646818653825730144081661058933e-11,
+        +.7973350192007419656460767175359e-12,
+        -.1368078209830916025799499172309e-12,
+        +.2347319486563800657233471771688e-13,
+        -.4027432614949066932766570534699e-14,
+        +.6910051747372100912138336975257e-15,
+        -.1185584500221992907052387126192e-15,
+        +.2034148542496373955201026051932e-16,
+        -.3490054341717405849274012949108e-17,
+        +.5987993856485305567135051066026e-18,
+        -.1027378057872228074490069778431e-18,
+        +.1762702816060529824942759660748e-19,
+        -.3024320653735306260958772112042e-20,
+        +.5188914660218397839717833550506e-21,
+        -.8902770842456576692449251601066e-22,
+        +.1527474068493342602274596891306e-22,
+        -.2620731256187362900257328332799e-23,
+        +.4496464047830538670331046570666e-24,
+        -.7714712731336877911703901525333e-25,
+        +.1323635453126044036486572714666e-25,
+        -.2270999412942928816702313813333e-26,
+        +.3896418998003991449320816639999e-27,
+        -.6685198115125953327792127999999e-28,
+        +.1146998663140024384347613866666e-28,
+        -.1967938586345134677295103999999e-29,
+        +.3376448816585338090334890666666e-30,
+        -.5793070335782135784625493333333e-31
     };
     
     int i, n;
-    long double y;
-    long double sinpiy, value;
+    double y;
+    double sinpiy, value;
     
     /* For IEEE double precision DBL_EPSILON = 2^-52 = 2.220446049250313e-16 :
      * (xmin, xmax) are non-trivial, see ./gammalims.c
@@ -240,10 +240,10 @@ long double RbMath::gamma(long double x)
      * dxrel = sqrt(DBL_EPSILON) = 2 ^ -26
      */
 # define ngam 22
-# define xmin -170.5674972726612L
-# define xmax  171.61447887182298L
-# define xsml 2.2474362225598545e-308L
-# define dxrel 1.490116119384765696e-8L
+# define xmin -170.5674972726612
+# define xmax  171.61447887182298
+# define xsml 2.2474362225598545e-308
+# define dxrel 1.490116119384765696e-8
     
     if (isNan(x)) return x;
     
@@ -268,7 +268,7 @@ long double RbMath::gamma(long double x)
         if (x < 0) --n;
         y = x - n;/* n = floor(x)  ==>	y in [ 0, 1 ) */
         --n;
-        value = chebyshev_eval(y * 2 - 1, gamcs, ngam) + .9375L;
+        value = chebyshev_eval(y * 2 - 1, gamcs, ngam) + .9375;
         if (n == 0)
             return value;/* x = 1.dddd = 1+y */
         
@@ -279,7 +279,7 @@ long double RbMath::gamma(long double x)
             
             /* The answer is less than half precision */
             /* because x too near a negative integer. */
-            if (x < -0.5L && fabs(x - (int)(x - 0.5L) / x) < dxrel) {
+            if (x < -0.5 && fabs(x - (int)(x - 0.5) / x) < dxrel) {
                 std::ostringstream s;
                 s << "Cannot compute gamma function for x = " << x;
                 throw RbException(s.str());
@@ -328,13 +328,13 @@ long double RbMath::gamma(long double x)
             for (i = 2; i < y; i++) value *= i;
         }
         else { /* normal case */
-            value = exp((y - 0.5L) * log(y) - y + RbConstants::LN_SQRT_2PI +
+            value = exp((y - 0.5) * log(y) - y + RbConstants::LN_SQRT_2PI +
                         ((2*y == (int)2*y)? stirlerr(y) : lnGammacor(y)));
         }
         if (x > 0)
             return value;
         
-        if (fabs((x - (int)(x - 0.5L))/x) < dxrel){
+        if (fabs((x - (int)(x - 0.5))/x) < dxrel){
             
             /* The answer is less than half precision because */
             /* the argument is too near a negative integer. */
@@ -634,7 +634,7 @@ double RbMath::incompleteBeta(double a, double b, double x) {
  */
 
 
-long double RbMath::incompleteGamma(long double x, long double alpha, bool regularized, bool lower)
+double RbMath::incompleteGamma(double x, double alpha, bool regularized, bool lower)
 {
 
     // (1) series expansion     if (alpha>x || x<=1)
@@ -643,9 +643,9 @@ long double RbMath::incompleteGamma(long double x, long double alpha, bool regul
     // Bhattacharjee GP (1970) The incomplete gamma integral.  Applied Statistics,
     // 19: 285-287 (ASA032)
     
-    long double accurate = 1e-8L, overflow = 1e30L;
-    long double factor, gin, rn, a, b, an, dif, term;
-    long double pn0, pn1, pn2, pn3, pn4, pn5;
+    double accurate = 1e-8, overflow = 1e30;
+    double factor, gin, rn, a, b, an, dif, term;
+    double pn0, pn1, pn2, pn3, pn4, pn5;
     
     if (x == 0.0) {
         return lower ? 0.0 : regularized ? 1.0 : RbMath::gamma(alpha);
@@ -657,7 +657,7 @@ long double RbMath::incompleteGamma(long double x, long double alpha, bool regul
         throw RbException(s.str());
     }
 
-    long double scale = RbMath::lnGamma(alpha);
+    double scale = RbMath::lnGamma(alpha);
     factor = exp(alpha * log(x) - x - scale);
     
     if (x > 1 && x >= alpha) {
@@ -802,9 +802,9 @@ double RbMath::lnBeta(double a, double b)
  *    with those of the Sun Microsystems portable mathematical
  *    library.
  */
-long double RbMath::lnGamma_sign(long double x, int *sgn)
+double RbMath::lnGamma_sign(double x, int *sgn)
 {
-    long double ans, y, sinpiy;
+    double ans, y, sinpiy;
     
 #ifdef NOMORE_FOR_THREADS
     static double xmax = 0.;
@@ -820,8 +820,8 @@ long double RbMath::lnGamma_sign(long double x, int *sgn)
      dxrel = sqrt(DBL_EPSILON) = 2^-26 = 5^26 * 1e-26 (is *exact* below !)
      */
 #undef xmax
-#define xmax  2.5327372760800758e+305L
-#define dxrel 1.490116119384765696e-8L
+#define xmax  2.5327372760800758e+305
+#define dxrel 1.490116119384765696e-8
 #endif
     
     if (sgn != NULL) *sgn = 1;
@@ -856,7 +856,7 @@ long double RbMath::lnGamma_sign(long double x, int *sgn)
             return(M_LN_SQRT_2PI + (x - 0.5) * log(x) - x);
         else
 #endif
-            return RbConstants::LN_SQRT_2PI + (x - 0.5L) * log(x) - x + lnGammacor(x);
+            return RbConstants::LN_SQRT_2PI + (x - 0.5) * log(x) - x + lnGammacor(x);
     }
     /* else: x < -10; y = -x */
     sinpiy = fabs(sin(RbConstants::PI * y));
@@ -876,7 +876,7 @@ long double RbMath::lnGamma_sign(long double x, int *sgn)
     return ans;
 }
 
-long double RbMath::lnGamma(long double x)
+double RbMath::lnGamma(double x)
 {
     return lnGamma_sign(x, NULL);
 }
@@ -918,35 +918,35 @@ double RbMath::lnGamma_old(double a) {
  *    Loader(1999)'s stirlerr() {in ./stirlerr.c} is *very* similar in spirit,
  *    is faster and cleaner, but is only defined "fast" for half integers.
  */
-long double RbMath::lnGammacor(long double x)
+double RbMath::lnGammacor(double x)
 {
-    const static long double algmcs[15] = {
-        +.1666389480451863247205729650822e+0L,
-        -.1384948176067563840732986059135e-4L,
-        +.9810825646924729426157171547487e-8L,
-        -.1809129475572494194263306266719e-10L,
-        +.6221098041892605227126015543416e-13L,
-        -.3399615005417721944303330599666e-15L,
-        +.2683181998482698748957538846666e-17L,
-        -.2868042435334643284144622399999e-19L,
-        +.3962837061046434803679306666666e-21L,
-        -.6831888753985766870111999999999e-23L,
-        +.1429227355942498147573333333333e-24L,
-        -.3547598158101070547199999999999e-26L,
-        +.1025680058010470912000000000000e-27L,
-        -.3401102254316748799999999999999e-29L,
-        +.1276642195630062933333333333333e-30L
+    const static double algmcs[15] = {
+        +.1666389480451863247205729650822e+0,
+        -.1384948176067563840732986059135e-4,
+        +.9810825646924729426157171547487e-8,
+        -.1809129475572494194263306266719e-10,
+        +.6221098041892605227126015543416e-13,
+        -.3399615005417721944303330599666e-15,
+        +.2683181998482698748957538846666e-17,
+        -.2868042435334643284144622399999e-19,
+        +.3962837061046434803679306666666e-21,
+        -.6831888753985766870111999999999e-23,
+        +.1429227355942498147573333333333e-24,
+        -.3547598158101070547199999999999e-26,
+        +.1025680058010470912000000000000e-27,
+        -.3401102254316748799999999999999e-29,
+        +.1276642195630062933333333333333e-30
     };
     
-    long double tmp;
+    double tmp;
     
     /* For IEEE double precision DBL_EPSILON = 2^-52 = 2.220446049250313e-16 :
      *   xbig = 2 ^ 26.5
      *   xmax = DBL_MAX / 48 =  2^1020 / 3 */
 #define nalgm 5
-#define xbig  94906265.62425156L
+#define xbig  94906265.62425156
 #undef  xmax
-#define xmax  3.745194030963158e306L
+#define xmax  3.745194030963158e306
     
     if (x < 10)
     {
@@ -1176,57 +1176,57 @@ double RbMath::rbEpsilon(void) {
  *
  * see also lnGammacor() which computes almost the same!
  */
-long double RbMath::stirlerr(long double n)
+double RbMath::stirlerr(double n)
 {
     
-#define S0 0.083333333333333333333L       /* 1/12 */
-#define S1 0.00277777777777777777778L     /* 1/360 */
-#define S2 0.00079365079365079365079365L  /* 1/1260 */
-#define S3 0.000595238095238095238095238L /* 1/1680 */
-#define S4 0.0008417508417508417508417508L/* 1/1188 */
+#define S0 0.083333333333333333333       /* 1/12 */
+#define S1 0.00277777777777777777778     /* 1/360 */
+#define S2 0.00079365079365079365079365  /* 1/1260 */
+#define S3 0.000595238095238095238095238 /* 1/1680 */
+#define S4 0.0008417508417508417508417508/* 1/1188 */
     
     /*
      error for 0, 0.5, 1.0, 1.5, ..., 14.5, 15.0.
      */
-    const static long double sferr_halves[31] = {
-        0.0L, /* n=0 - wrong, place holder only */
-        0.1534264097200273452913848L,  /* 0.5 */
-        0.0810614667953272582196702L,  /* 1.0 */
-        0.0548141210519176538961390L,  /* 1.5 */
-        0.0413406959554092940938221L,  /* 2.0 */
-        0.03316287351993628748511048L, /* 2.5 */
-        0.02767792568499833914878929L, /* 3.0 */
-        0.02374616365629749597132920L, /* 3.5 */
-        0.02079067210376509311152277L, /* 4.0 */
-        0.01848845053267318523077934L, /* 4.5 */
-        0.01664469118982119216319487L, /* 5.0 */
-        0.01513497322191737887351255L, /* 5.5 */
-        0.01387612882307074799874573L, /* 6.0 */
-        0.01281046524292022692424986L, /* 6.5 */
-        0.01189670994589177009505572L, /* 7.0 */
-        0.01110455975820691732662991L, /* 7.5 */
-        0.010411265261972096497478567L, /* 8.0 */
-        0.009799416126158803298389475L, /* 8.5 */
-        0.009255462182712732917728637L, /* 9.0 */
-        0.008768700134139385462952823L, /* 9.5 */
-        0.008330563433362871256469318L, /* 10.0 */
-        0.007934114564314020547248100L, /* 10.5 */
-        0.007573675487951840794972024L, /* 11.0 */
-        0.007244554301320383179543912L, /* 11.5 */
-        0.006942840107209529865664152L, /* 12.0 */
-        0.006665247032707682442354394L, /* 12.5 */
-        0.006408994188004207068439631L, /* 13.0 */
-        0.006171712263039457647532867L, /* 13.5 */
-        0.005951370112758847735624416L, /* 14.0 */
-        0.005746216513010115682023589L, /* 14.5 */
-        0.005554733551962801371038690L  /* 15.0 */
+    const static double sferr_halves[31] = {
+        0.0, /* n=0 - wrong, place holder only */
+        0.1534264097200273452913848,  /* 0.5 */
+        0.0810614667953272582196702,  /* 1.0 */
+        0.0548141210519176538961390,  /* 1.5 */
+        0.0413406959554092940938221,  /* 2.0 */
+        0.03316287351993628748511048, /* 2.5 */
+        0.02767792568499833914878929, /* 3.0 */
+        0.02374616365629749597132920, /* 3.5 */
+        0.02079067210376509311152277, /* 4.0 */
+        0.01848845053267318523077934, /* 4.5 */
+        0.01664469118982119216319487, /* 5.0 */
+        0.01513497322191737887351255, /* 5.5 */
+        0.01387612882307074799874573, /* 6.0 */
+        0.01281046524292022692424986, /* 6.5 */
+        0.01189670994589177009505572, /* 7.0 */
+        0.01110455975820691732662991, /* 7.5 */
+        0.010411265261972096497478567, /* 8.0 */
+        0.009799416126158803298389475, /* 8.5 */
+        0.009255462182712732917728637, /* 9.0 */
+        0.008768700134139385462952823, /* 9.5 */
+        0.008330563433362871256469318, /* 10.0 */
+        0.007934114564314020547248100, /* 10.5 */
+        0.007573675487951840794972024, /* 11.0 */
+        0.007244554301320383179543912, /* 11.5 */
+        0.006942840107209529865664152, /* 12.0 */
+        0.006665247032707682442354394, /* 12.5 */
+        0.006408994188004207068439631, /* 13.0 */
+        0.006171712263039457647532867, /* 13.5 */
+        0.005951370112758847735624416, /* 14.0 */
+        0.005746216513010115682023589, /* 14.5 */
+        0.005554733551962801371038690  /* 15.0 */
     };
-    long double nn;
+    double nn;
     
     if (n <= 15.0) {
         nn = n + n;
         if (nn == (int)nn) return(sferr_halves[(int)nn]);
-        return(lnGamma(n + 1.) - (n + 0.5L)*log(n) + n - RbConstants::LN_SQRT_2PI);
+        return(lnGamma(n + 1.) - (n + 0.5)*log(n) + n - RbConstants::LN_SQRT_2PI);
     }
     
     nn = n*n;
