@@ -66,8 +66,8 @@ if ("${JUPYTER}" STREQUAL "ON")
 endif()
 
 if ("${CONTINUOUS_INTEGRATION}" STREQUAL "TRUE")
-   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g0 -O2")
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g0 -O2")
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g0 -O2 -msse2 -mfpmath=sse")
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g0 -O2 -msse2 -mfpmath=sse")
 endif()
 
 
