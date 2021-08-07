@@ -221,13 +221,6 @@ jobs:
         echo 'rm -f *.dll' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
         chmod +x ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
 
-    - name: Upload build files
-      uses: actions/upload-artifact@v1
-      if: always()
-      with:
-        name: build-${{ matrix.name }}
-        path: projects/cmake/build
-        
     - name: Test
       env:
         USE_MPI: ${{ matrix.mpi }}
