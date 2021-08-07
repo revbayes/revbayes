@@ -131,6 +131,12 @@ jobs:
           sudo -H pip3 install meson
           sudo -H pip3 install ninja
 
+
+    - name: Test Precision
+      run: |
+        g++ -o precision precision.cpp
+        ./precision
+        
     # Caches for different branches are isolated, so we don't need to put the branch name into the key.
     # The total size for all caches in a repository is 5Gb.
 
