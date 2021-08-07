@@ -47,7 +47,7 @@ jobs:
           - name: ubuntu-gcc-7
             os: ubuntu-latest
             compiler: gcc
-            version: "8"
+            version: "7"
             mpi: false
 
           - name: ubuntu-gcc-8
@@ -134,9 +134,9 @@ jobs:
 
     - name: Test Precision
       run: |
-        g++ -o precision precision.cpp
+        gcc -o precision precision.cpp
         ./precision
-        
+
     # Caches for different branches are isolated, so we don't need to put the branch name into the key.
     # The total size for all caches in a repository is 5Gb.
 
