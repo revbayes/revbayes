@@ -220,6 +220,14 @@ jobs:
         echo 'rm -f *.exe' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
         echo 'rm -f *.dll' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
         chmod +x ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
+
+    - name: Upload build files
+      uses: actions/upload-artifact@v1
+      if: always()
+      with:
+        name: build-${{ matrix.name }}
+        path: projects/cmake/build
+        
     - name: Test
       env:
         USE_MPI: ${{ matrix.mpi }}
@@ -241,13 +249,6 @@ jobs:
         cd testiphy
         ./testiphy rb
         echo ::endgroup::
-
-    - name: Upload build files
-      uses: actions/upload-artifact@v1
-      if: always()
-      with:
-        name: build-${{ matrix.name }}
-        path: projects/cmake/build
 
     - name: Upload test files if they failed
       uses: actions/upload-artifact@v1
