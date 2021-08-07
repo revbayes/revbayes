@@ -46,7 +46,7 @@ jobs:
           - name: ubuntu-gcc-7
             os: ubuntu-latest
             compiler: gcc
-            version: "8"
+            version: "7"
             mpi: false
 
           - name: ubuntu-gcc-8
