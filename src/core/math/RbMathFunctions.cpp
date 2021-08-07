@@ -643,9 +643,9 @@ double RbMath::incompleteGamma(double x, double alpha, bool regularized, bool lo
     // Bhattacharjee GP (1970) The incomplete gamma integral.  Applied Statistics,
     // 19: 285-287 (ASA032)
     
-    double accurate = 1e-8, overflow = 1e30;
-    double factor, gin, rn, a, b, an, dif, term;
-    double pn0, pn1, pn2, pn3, pn4, pn5;
+    long double accurate = 1e-8, overflow = 1e30;
+    long double factor, gin, rn, a, b, an, dif, term;
+    long double pn0, pn1, pn2, pn3, pn4, pn5;
     
     if (x == 0.0) {
         return lower ? 0.0 : RbMath::gamma(alpha);
@@ -657,7 +657,7 @@ double RbMath::incompleteGamma(double x, double alpha, bool regularized, bool lo
         throw RbException(s.str());
     }
 
-    double scale = RbMath::lnGamma(alpha);
+    long double scale = RbMath::lnGamma(alpha);
     factor = exp(alpha * log(x) - x - scale);
     
     if (x > 1 && x >= alpha) {
