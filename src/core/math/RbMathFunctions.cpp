@@ -648,7 +648,7 @@ double RbMath::incompleteGamma(double x, double alpha, bool regularized, bool lo
     double pn0, pn1, pn2, pn3, pn4, pn5;
     
     if (x == 0.0) {
-        return lower ? 0.0 : RbMath::gamma(alpha);
+        return lower ? 0.0 : regularized ? 1.0 : RbMath::gamma(alpha);
     }
     if (x < 0.0 || alpha <= 0.0) 
     {
