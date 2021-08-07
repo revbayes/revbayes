@@ -12,8 +12,6 @@ project(RevBayes)
 # So, we add the flag directly instead.
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffloat-store")
-
 if(NOT (${CMAKE_VERSION} VERSION_LESS "2.8.0"))
   find_program(CCACHE_PROGRAM ccache)
   if(CCACHE_PROGRAM)
