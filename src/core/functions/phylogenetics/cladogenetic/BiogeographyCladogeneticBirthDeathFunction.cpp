@@ -31,6 +31,7 @@ BiogeographyCladogeneticBirthDeathFunction::BiogeographyCladogeneticBirthDeathFu
                                                                                         TypedDagNode< RbVector<double> >* wf,
                                                                                         TypedDagNode< RbVector< RbVector<double> > >* bf,
                                                                                         unsigned mrs,
+                                                                                        unsigned msss,
                                                                                         std::string ct ):
 TypedFunction<CladogeneticSpeciationRateMatrix>( new CladogeneticSpeciationRateMatrix(  pow(2,mrs)-1) ),
 speciationRates( sr ),
@@ -40,6 +41,7 @@ numCharacters( (unsigned)wf->getValue().size() ),
 num_states( 2 ),
 numIntStates( pow(2,wf->getValue().size())-1 ),
 maxRangeSize(mrs),
+maxSubrangeSplitSize(msss),
 numEventTypes( (unsigned)sr->getValue().size() ),
 use_hidden_rate(false),
 use_cutset_mean(true),
@@ -473,10 +475,12 @@ void BiogeographyCladogeneticBirthDeathFunction::buildEventMap( void ) {
                     bl = bc[j];
                     br = bitAllopatryComplement(ba, bl);
                     
-                    if (sumBits(bl)==1 || sumBits(br)==1)
+                    // limit max allopatric split size
+                    //if (sumBits(bl)==1 || sumBits(br)==1)
+                    if ( sumBits(bl) <= maxSubrangeSplitSize || sumBits(br) <= maxSubrangeSplitSize )
                     {
                         
-                        unsigned sa = bitsToStatesByNumOn[ba];
+//                        unsigned sa = bitsToStatesByNumOn[ba];
                         unsigned sl = bitsToStatesByNumOn[bl];
                         unsigned sr = bitsToStatesByNumOn[br];
                         idx[1] = sl;
@@ -635,8 +639,6 @@ void BiogeographyCladogeneticBirthDeathFunction::buildEventMapFactors(void)
 
     }
     
-//    printEventMap( eventMapFactors );
-
     for (size_t i = 0; i < mean_value.size(); i++) {
         mean_value[i] = 0.0;
         geomean_value[i] = 0.0;
@@ -655,16 +657,10 @@ void BiogeographyCladogeneticBirthDeathFunction::buildEventMapFactors(void)
         std::vector<unsigned> idx = it->first;
         unsigned event_type = it->second;
 
-//        eventMapFactors[ idx ] = eventMapFactors[ idx ] / max_value[ event_type ];
-//        eventMapFactors[ idx ] = eventMapFactors[ idx ] / (sum_value[ event_type ] / n_value[ event_type ]);
-//        double mean_value = (sum_value[ event_type ] / n_value[ event_type ]);
-//        eventMapFactors[ idx ] = eventMapFactors[ idx ] / mean_value[ event_type ];
         eventMapFactors[ idx ] = eventMapFactors[ idx ] / geomean_value[ event_type ];
         eventMapWeights[ idx ] = eventMapFactors[ idx ];
     }
-    
-//    printEventMap( eventMapFactors );
-    
+        
     return;
 }
 
@@ -803,109 +799,109 @@ double BiogeographyCladogeneticBirthDeathFunction::computeCutsetScore( std::vect
     }
     return cost;
 }
-
-/*
- * This function computes the modularity score for a cladogenetic outcome
- */
-
-double BiogeographyCladogeneticBirthDeathFunction::computeModularityScore(std::vector<unsigned> idx, unsigned event_type)
-{
-    // return value
-    double Q = 0.0;
-    
-    // get value for connectivity mtx
-    const RbVector<RbVector<double> >& mtx = betweenRegionFeatures->getValue();
-    size_t n = mtx.size();
-    
-    // get left/right area sets
-    std::vector< std::set<unsigned> > daughter_ranges;
-    daughter_ranges.push_back( statesToBitsetsByNumOn[ idx[0] ] );
-    daughter_ranges.push_back( statesToBitsetsByNumOn[ idx[1] ] );
-    
-    // compute modularity score depending on event type
-    if (event_type == SYMPATRY)
-    {
-        
-        if (daughter_ranges[0].size() == 1 && daughter_ranges[1].size() == 1)
-        {
-            return 0.0;
-        }
-        
-        std::vector<double> z(n, 0.0);
-        
-        // get trunk range (larger range)
-        const std::set<unsigned>& s = ( daughter_ranges[0].size() > daughter_ranges[1].size() ? daughter_ranges[0] : daughter_ranges[1] );
-        
-        // compute z, the sum of ranges for the trunk range
-        std::set<unsigned>::iterator it1, it2;
-        for (it1 = s.begin(); it1 != s.end(); it1++)
-        {
-            for (it2 = s.begin(); it2 != s.end(); it2++)
-            {
-                if ( (*it1) != (*it2) ) {
-                    z[ *it1 ] += mtx[ *it1 ][ *it2 ];
-                }
-            }
-        }
-        
-        double z_sum = 0.0;
-        for (size_t i = 0; i < z.size(); i++) {
-            z_sum += z[i];
-        }
-        
-        for (size_t i = 0; i < n; i++)
-        {
-            for (size_t j = 0; j < n; j++)
-            {
-                if (i != j) {
-                    Q += mtx[i][j] - (z[i] * z[j] / (2 * z_sum));
-                }
-            }
-        }
-        
-    }
-    else if (event_type == ALLOPATRY)
-    {
-        std::vector<double> z(n, 0.0);
-        
-        // compute z, the sum of edges across daughter ranges
-        for (size_t i = 0; i < daughter_ranges.size(); i++) {
-            
-            // get one daughter range
-            const std::set<unsigned>& s = daughter_ranges[i];
-            
-            // sum connectivity scores
-            std::set<unsigned>::iterator it1, it2;
-            for (it1 = s.begin(); it1 != s.end(); it1++)
-            {
-                for (it2 = s.begin(); it2 != s.end(); it2++)
-                {
-                    if ( (*it1) != (*it2) ) {
-                        z[ *it1 ] += mtx[ *it1 ][ *it2 ];
-                    }
-                }
-            }
-        }
-        
-        double z_sum = 0.0;
-        for (size_t i = 0; i < z.size(); i++) {
-            z_sum += z[i];
-        }
-        
-        for (size_t i = 0; i < n; i++)
-        {
-            for (size_t j = 0; j < n; j++)
-            {
-                if (i != j) {
-                    Q += mtx[i][j] - (z[i] * z[j] / (2 * z_sum));
-                }
-            }
-        }
-        
-    }
-    
-    return Q;
-}
+//
+///*
+// * This function computes the modularity score for a cladogenetic outcome
+// */
+//
+//double BiogeographyCladogeneticBirthDeathFunction::computeModularityScore(std::vector<unsigned> idx, unsigned event_type)
+//{
+//    // return value
+//    double Q = 0.0;
+//    
+//    // get value for connectivity mtx
+//    const RbVector<RbVector<double> >& mtx = betweenRegionFeatures->getValue();
+//    size_t n = mtx.size();
+//    
+//    // get left/right area sets
+//    std::vector< std::set<unsigned> > daughter_ranges;
+//    daughter_ranges.push_back( statesToBitsetsByNumOn[ idx[0] ] );
+//    daughter_ranges.push_back( statesToBitsetsByNumOn[ idx[1] ] );
+//    
+//    // compute modularity score depending on event type
+//    if (event_type == SYMPATRY)
+//    {
+//        
+//        if (daughter_ranges[0].size() == 1 && daughter_ranges[1].size() == 1)
+//        {
+//            return 0.0;
+//        }
+//        
+//        std::vector<double> z(n, 0.0);
+//        
+//        // get trunk range (larger range)
+//        const std::set<unsigned>& s = ( daughter_ranges[0].size() > daughter_ranges[1].size() ? daughter_ranges[0] : daughter_ranges[1] );
+//        
+//        // compute z, the sum of ranges for the trunk range
+//        std::set<unsigned>::iterator it1, it2;
+//        for (it1 = s.begin(); it1 != s.end(); it1++)
+//        {
+//            for (it2 = s.begin(); it2 != s.end(); it2++)
+//            {
+//                if ( (*it1) != (*it2) ) {
+//                    z[ *it1 ] += mtx[ *it1 ][ *it2 ];
+//                }
+//            }
+//        }
+//        
+//        double z_sum = 0.0;
+//        for (size_t i = 0; i < z.size(); i++) {
+//            z_sum += z[i];
+//        }
+//        
+//        for (size_t i = 0; i < n; i++)
+//        {
+//            for (size_t j = 0; j < n; j++)
+//            {
+//                if (i != j) {
+//                    Q += mtx[i][j] - (z[i] * z[j] / (2 * z_sum));
+//                }
+//            }
+//        }
+//        
+//    }
+//    else if (event_type == ALLOPATRY)
+//    {
+//        std::vector<double> z(n, 0.0);
+//        
+//        // compute z, the sum of edges across daughter ranges
+//        for (size_t i = 0; i < daughter_ranges.size(); i++) {
+//            
+//            // get one daughter range
+//            const std::set<unsigned>& s = daughter_ranges[i];
+//            
+//            // sum connectivity scores
+//            std::set<unsigned>::iterator it1, it2;
+//            for (it1 = s.begin(); it1 != s.end(); it1++)
+//            {
+//                for (it2 = s.begin(); it2 != s.end(); it2++)
+//                {
+//                    if ( (*it1) != (*it2) ) {
+//                        z[ *it1 ] += mtx[ *it1 ][ *it2 ];
+//                    }
+//                }
+//            }
+//        }
+//        
+//        double z_sum = 0.0;
+//        for (size_t i = 0; i < z.size(); i++) {
+//            z_sum += z[i];
+//        }
+//        
+//        for (size_t i = 0; i < n; i++)
+//        {
+//            for (size_t j = 0; j < n; j++)
+//            {
+//                if (i != j) {
+//                    Q += mtx[i][j] - (z[i] * z[j] / (2 * z_sum));
+//                }
+//            }
+//        }
+//        
+//    }
+//    
+//    return Q;
+//}
 
 /*
  * Returns the eventMap container
@@ -1050,68 +1046,61 @@ void BiogeographyCladogeneticBirthDeathFunction::update( void )
     
     // update modularity score
     buildEventMapFactors();
-//    updateEventMapWeights();
-    
-    // update clado event factors
-//    updateEventMapWeights();
-    
+
     // get speciation rates across cladogenetic events
     const std::vector<double>& sr = speciationRates->getValue();
     
     // assign the correct rate to each event
-//    for (unsigned i = 0; i < numRanges; i++)
-//    {
-        std::map<std::vector<unsigned>, unsigned>::iterator it;
-        for (it = eventMapTypes.begin(); it != eventMapTypes.end(); it++)
+    std::map<std::vector<unsigned>, unsigned>::iterator it;
+    for (it = eventMapTypes.begin(); it != eventMapTypes.end(); it++)
+    {
+        const std::vector<unsigned>& idx = it->first;
+        eventMap[ idx ] = 0.0;
+        if (use_hidden_rate == true)
         {
-            const std::vector<unsigned>& idx = it->first;
-            eventMap[ idx ] = 0.0;
-            if (use_hidden_rate == true)
-            {
-                std::vector<unsigned> idx_hidden(3);
-                idx_hidden[0] = idx[0] + numRanges + 1;
-                idx_hidden[1] = idx[1] + numRanges + 1;
-                idx_hidden[2] = idx[2] + numRanges + 1;
-                eventMap[ idx_hidden ] = 0.0;
-            }
+            std::vector<unsigned> idx_hidden(3);
+            idx_hidden[0] = idx[0] + numRanges + 1;
+            idx_hidden[1] = idx[1] + numRanges + 1;
+            idx_hidden[2] = idx[2] + numRanges + 1;
+            eventMap[ idx_hidden ] = 0.0;
+        }
+    }
+    
+    for (it = eventMapTypes.begin(); it != eventMapTypes.end(); it++)
+    {
+        const std::vector<unsigned>& idx = it->first;
+        unsigned event_type = it->second;
+        double speciation_rate = 0.0;
+        
+        // check for NaN values
+        if (sr[ event_type ] == sr[ event_type ])
+        {
+            speciation_rate = sr[ event_type ];
         }
         
-        for (it = eventMapTypes.begin(); it != eventMapTypes.end(); it++)
-        {
-            const std::vector<unsigned>& idx = it->first;
-            unsigned event_type = it->second;
-            double speciation_rate = 0.0;
-            
-            // check for NaN values
-            if (sr[ event_type ] == sr[ event_type ])
-            {
-                speciation_rate = sr[ event_type ];
-            }
-            
-            // divide by two if asymmetric event
-            double f_asymm = ( idx[1] == idx[2] ? 1.0 : 0.5 );
-            
-            // rescale by connectivity weight
-            double c_weight = eventMapWeights[ idx ];
-            
-            // compute the cladogenetic event rate
-            double clado_rate = speciation_rate * f_asymm * c_weight;
+        // divide by two if asymmetric event
+        double f_asymm = ( idx[1] == idx[2] ? 1.0 : 0.5 );
+        
+        // rescale by connectivity weight
+        double c_weight = eventMapWeights[ idx ];
+        
+        // compute the cladogenetic event rate
+        double clado_rate = speciation_rate * f_asymm * c_weight;
 
-            // save the rate in the event map
-            eventMap[ idx ] += clado_rate;
-            speciation_rate_sum_per_state[ idx[0] ] += eventMap[ idx ];
-            if (use_hidden_rate == true)
-            {
-                std::vector<unsigned> idx_hidden(3);
-                idx_hidden[0] = idx[0] + numRanges + 1;
-                idx_hidden[1] = idx[1] + numRanges + 1;
-                idx_hidden[2] = idx[2] + numRanges + 1;
-                const std::vector<double>& rate_multipliers = hiddenRateMultipliers->getValue();
-                eventMap[ idx_hidden ] += (clado_rate * rate_multipliers[0]);
-                speciation_rate_sum_per_state[ idx_hidden[0] ] += eventMap[ idx_hidden ];
-            }
+        // save the rate in the event map
+        eventMap[ idx ] += clado_rate;
+        speciation_rate_sum_per_state[ idx[0] ] += eventMap[ idx ];
+        if (use_hidden_rate == true)
+        {
+            std::vector<unsigned> idx_hidden(3);
+            idx_hidden[0] = idx[0] + numRanges + 1;
+            idx_hidden[1] = idx[1] + numRanges + 1;
+            idx_hidden[2] = idx[2] + numRanges + 1;
+            const std::vector<double>& rate_multipliers = hiddenRateMultipliers->getValue();
+            eventMap[ idx_hidden ] += (clado_rate * rate_multipliers[0]);
+            speciation_rate_sum_per_state[ idx_hidden[0] ] += eventMap[ idx_hidden ];
         }
-//    }
+    }
     
     // populate TensorPhylo rate/prob structures
     std::map<std::vector<unsigned>, double> clado_prob_event_map = cladogenetic_probability_matrix.getEventMap();
@@ -1125,65 +1114,5 @@ void BiogeographyCladogeneticBirthDeathFunction::update( void )
     value->setEventMap(eventMap);
     value->setCladogeneticProbabilityMatrix( cladogenetic_probability_matrix );
     value->setSpeciationRateSumPerState( speciation_rate_sum_per_state );
-    
-    
-    //printEventMap( eventMap );
 }
-
-/*
- *  Transform the constant eventMapFactors values with the eventMapWeights values
- */
-//
-//void BiogeographyCladogeneticBirthDeathFunction::updateEventMapWeights(void) {
-//
-//    // get weight vector
-////    const RbVector<double>& weights = connectivityWeights->getValue();
-//
-//    // get max factors
-//    std::vector<double> max_value( NUM_CLADO_EVENT_TYPES, 0.0 );
-//    std::vector<double> sum_value( NUM_CLADO_EVENT_TYPES, 0.0 );
-//    std::vector<unsigned> n_value( NUM_CLADO_EVENT_TYPES, 0 );
-//
-//
-//    // loop over all events and their types
-//    std::map< std::vector<unsigned>, unsigned >::iterator it;
-//    for (it = eventMapTypes.begin(); it != eventMapTypes.end(); it++)
-//    {
-//        // get event info
-//        std::vector<unsigned> idx = it->first;
-//        unsigned event_type = it->second;
-//
-//        // get power
-////        double weight = weights[event_type];
-//
-//        // get event score
-//        double v = 0.0;
-////        v = std::pow( (1 + std::exp( eventMapFactors[idx]) ), weight );
-////        v = std::pow( eventMapFactors[idx], weight );
-//        v = eventMapFactors[idx];
-//        eventMapWeights[ idx ] = v; //        z = (1 + exp(-z))^rho
-//
-//        // get event score stats for renormalization
-//        sum_value[event_type] += v;
-//        n_value[event_type] += 1;
-//        if ( v > max_value[event_type] )
-//        {
-//            max_value[event_type] = v;
-//        }
-//
-//    }
-//
-//    for (it = eventMapTypes.begin(); it != eventMapTypes.end(); it++)
-//    {
-//        // get event info
-//        std::vector<unsigned> idx = it->first;
-//        unsigned event_type = it->second;
-////        eventMapWeights[ idx ] = eventMapWeights[ idx ] / max_value[event_type];
-////        eventMapWeights[ idx ] = eventMapWeights[ idx ] / (sum_value[event_type] / n_value[event_type]);
-//        eventMapWeights[ idx ] = eventMapWeights[ idx ] / (sum_value[event_type] / n_value[event_type]);
-//
-//    }
-//
-//    return;
-//}
 
