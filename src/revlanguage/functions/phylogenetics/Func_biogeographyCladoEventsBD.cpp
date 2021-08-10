@@ -53,12 +53,16 @@ Func_biogeographyCladoEventsBD* Func_biogeographyCladoEventsBD::clone( void ) co
 RevBayesCore::TypedFunction< RevBayesCore::CladogeneticSpeciationRateMatrix >* Func_biogeographyCladoEventsBD::createFunction( void ) const
 {
     
+    // speciation rate vector
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sr = static_cast<const ModelVector<RealPos> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     
+    // parameterized geography for within-region features (shape == (N))
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* wf = static_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     
+    // parameterized geography for between-region features (shape == (N,N))
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* bf = static_cast<const ModelVector<ModelVector<RealPos> > &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     
+    // support for hidden rate classes
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* rm = NULL;
     if (this->args[3].getVariable()->getRevObject() != RevNullObject::getInstance())
     {
@@ -69,13 +73,25 @@ RevBayesCore::TypedFunction< RevBayesCore::CladogeneticSpeciationRateMatrix >* F
         }
     }
     
+    // maximum range size (default == N)
+    int n_regions = (int)wf->getValue().size();
+    int mrs = 0;
+    if (this->args[4].getVariable()->getRevObject() != RevNullObject::getInstance()) {
+        mrs = (int)static_cast<const Natural &>( this->args[4].getVariable()->getRevObject() ).getValue();
+        if (mrs <= 1 || mrs > n_regions) mrs = n_regions;
+        assert( mrs > 1 );
+    }
     
-//    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* cw = static_cast<const ModelVector<Real> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
-//    std::string c_type = static_cast<const RlString &>( this->args[4].getVariable()->getRevObject() ).getValue();
-    int mrs = (int)static_cast<const Natural &>( this->args[4].getVariable()->getRevObject() ).getValue();
+    // maximum subrange split size (default == max_range_size)
+    int msss = 0;
+    if (this->args[5].getVariable()->getRevObject() != RevNullObject::getInstance()) {
+        msss = (int)static_cast<const Natural &>( this->args[5].getVariable()->getRevObject() ).getValue();
+        if (msss <= 0) msss = mrs;
+        assert( msss > 0 );
+    }
     
     
-    RevBayesCore::BiogeographyCladogeneticBirthDeathFunction* f = new RevBayesCore::BiogeographyCladogeneticBirthDeathFunction( sr, wf, bf, mrs );
+    RevBayesCore::BiogeographyCladogeneticBirthDeathFunction* f = new RevBayesCore::BiogeographyCladogeneticBirthDeathFunction( sr, wf, bf, mrs, msss );
     f->setRateMultipliers(rm);
     
     return f;
@@ -95,7 +111,8 @@ const ArgumentRules& Func_biogeographyCladoEventsBD::getArgumentRules( void ) co
         argumentRules.push_back( new ArgumentRule( "within_region_features", ModelVector<RealPos>::getClassTypeSpec(), "The within-region feature vector.", ArgumentRule::BY_VALUE, ArgumentRule::CONSTANT, NULL ) );
         argumentRules.push_back( new ArgumentRule( "between_region_features", ModelVector<ModelVector<RealPos> >::getClassTypeSpec(), "The between-region feature matrix.", ArgumentRule::BY_VALUE, ArgumentRule::CONSTANT, NULL ) );
         argumentRules.push_back( new ArgumentRule( "rate_multipliers", ModelVector<RealPos>::getClassTypeSpec() , "The rate multipliers for hidden rate classes.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        argumentRules.push_back( new ArgumentRule( "max_range_size", Natural::getClassTypeSpec(), "The maximum range size.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "max_range_size",          Natural::getClassTypeSpec(), "The maximum range size.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L) ) );
+        argumentRules.push_back( new ArgumentRule( "max_subrange_split_size", Natural::getClassTypeSpec(), "The maximum size of a daughter subrange following a between-region speciation event.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L) ) );
         
         rules_set = true;
     }
