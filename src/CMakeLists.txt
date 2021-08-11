@@ -42,7 +42,7 @@ if(CMAKE_BUILD_TYPE MATCHES DEBUG)
    # Not necessarily a bug:
    set(OPT_FLAGS "${OPT_FLAGS} -Wno-unused-variable")
 elseif ("${CONTINUOUS_INTEGRATION}" STREQUAL "TRUE")
-   set(OPT_FLAGS "${OPT_FLAGS} -O2 -mftpmath=sse -ffp-contract=off")
+   set(OPT_FLAGS "${OPT_FLAGS} -O2 -mfpmath=sse -ffp-contract=off")
 else()
    set(OPT_FLAGS "${OPT_FLAGS} -O3 -DNDEBUG")
 endif()
