@@ -38,7 +38,7 @@ if(CMAKE_BUILD_TYPE MATCHES DEBUG)
    # These just add noise:
    set(OPT_FLAGS "${OPT_FLAGS} -Wno-sign-compare -Wno-unknown-pragmas")
    # These could be bugs, but there are so many we can't see the really bad ones. So>
-   set(OPT_FLAGS "${OPT_FLAGS} -Wno-reorder")
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reorder")
    # Not necessarily a bug:
    set(OPT_FLAGS "${OPT_FLAGS} -Wno-unused-variable")
 elseif ("${CONTINUOUS_INTEGRATION}" STREQUAL "TRUE")
