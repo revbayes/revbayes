@@ -24,32 +24,31 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_MODULE_PATH})
 
 if (CMAKE_SYSTEM_PROCESSOR MATCHES "^arm*|aarch64")
    add_definitions(-DRB_ARM)
+
+   set(OPT_FLAGS "")
 else()
    #  We need to enable SSE3 instructions even in debug builds.
    #  Otherwise we get errors failing to inline __mm_hadd_pd( ) in PhyloCTMCSiteHomogeneousNucleotide.h
-   set(SSE_FLAGS "-msse -msse2 -msse3 -mfpmath=sse -ffp-contract=off")
-
-   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SSE_FLAGS}")
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SSE_FLAGS}")
+   set(OPT_FLAGS "-msse -msse2 -msse3")
 endif()
 
-if (CMAKE_BUILD_TYPE MATCHES DEBUG)
-   set(DEBUG_FLAGS "-g -O0 -Wall")
-
-   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${DEBUG_FLAGS}")
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DEBUG_FLAGS}")
+if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+   set(OPT_FLAGS "${OPT_FLAGS} -g -O0 -Wall")
 
    # These just add noise:
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-sign-compare -Wno-unknown-pragmas")
+   set(OPT_FLAGS "${OPT_FLAGS} -Wno-sign-compare -Wno-unknown-pragmas")
    # These could be bugs, but there are so many we can't see the really bad ones. So>
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reorder")
+   set(OPT_FLAGS "${OPT_FLAGS} -Wno-reorder")
    # Not necessarily a bug:
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
+   set(OPT_FLAGS "${OPT_FLAGS} -Wno-unused-variable")
+elseif ("${CONTINUOUS_INTEGRATION}" STREQUAL "TRUE")
+   set(OPT_FLAGS "${OPT_FLAGS} -O2 -mftpmath=sse -ffp-contract=off")
 else()
-   set(OPTIMIZATION_FLAGS "-O3 -DNDEBUG")
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPTIMIZATION_FLAGS}")
-   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPTIMIZATION_FLAGS}")
+   set(OPT_FLAGS "${OPT_FLAGS} -O3 -DNDEBUG")
 endif()
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPT_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPT_FLAGS}")
 
 if ("${RB_EXEC_NAME}" STREQUAL "")
    set(RB_EXEC_NAME "rb")
@@ -68,12 +67,6 @@ endif()
 if ("${JUPYTER}" STREQUAL "ON")
    add_definitions(-DRB_XCODE)
 endif()
-
-if ("${CONTINUOUS_INTEGRATION}" STREQUAL "TRUE")
-   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g0 -O2")
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g0 -O2")
-endif()
-
 
 MESSAGE("Boost location hints:")
 if (BOOST_ROOT)
