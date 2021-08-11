@@ -25,8 +25,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_MODULE_PATH})
 if (CMAKE_SYSTEM_PROCESSOR MATCHES "^arm*|aarch64")
    add_definitions(-DRB_ARM)
 else()
-  #  We need to enable SSE3 instructions even in debug builds.
-  #  Otherwise we get errors failing to inline __mm_hadd_pd( ) in PhyloCTMCSiteHomogeneousNucleotide.h
+   #  We need to enable SSE3 instructions even in debug builds.
+   #  Otherwise we get errors failing to inline __mm_hadd_pd( ) in PhyloCTMCSiteHomogeneousNucleotide.h
    set(SSE_FLAGS "-msse -msse2 -msse3 -mfpmath=sse -ffp-contract=off")
 
    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SSE_FLAGS}")
@@ -39,12 +39,12 @@ if (CMAKE_BUILD_TYPE MATCHES DEBUG)
    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${DEBUG_FLAGS}")
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DEBUG_FLAGS}")
 
-     # These just add noise:
+   # These just add noise:
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-sign-compare -Wno-unknown-pragmas")
-     # These could be bugs, but there are so many we can't see the really bad ones. So>
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wreorder")
-     # Not necessarily a bug:
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable -Wno-unused-but-set-variable")
+   # These could be bugs, but there are so many we can't see the really bad ones. So>
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reorder")
+   # Not necessarily a bug:
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
 else()
    set(OPTIMIZATION_FLAGS "-O3 -DNDEBUG")
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPTIMIZATION_FLAGS}")
@@ -52,7 +52,7 @@ else()
 endif()
 
 if ("${RB_EXEC_NAME}" STREQUAL "")
-   SET(RB_EXEC_NAME "rb")
+   set(RB_EXEC_NAME "rb")
 endif()
 
 if ("${MPI}" STREQUAL "ON")
