@@ -208,6 +208,7 @@ jobs:
         cp /usr/lib/gcc/x86_64-w64-mingw32/*-win32/libstdc++-6.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
         cp /home/runner/win_root/mingw64/bin/libboost_*.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
         cp /home/runner/win_root/mingw64/bin/libwinpthread-1.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
+        cp /home/runner/win_root/mingw64/bin/libopenlibm.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
         echo '#!/bin/bash' > ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
         echo 'cp ${GITHUB_WORKSPACE}/wincrossbuild/bin/* .' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
         echo 'if [ "$#" -gt "1" ]; then' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
