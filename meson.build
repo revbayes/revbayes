@@ -64,6 +64,8 @@ want_static = get_option('static')
 # This doesn't build an internal boost from the internal copy, yet.
 boost = dependency('boost', modules : boost_modules, static: want_static)
 
+openlibm = dependency('openlibm', static: want_static)
+
 rb_name = 'rb'
 if get_option('mpi')
   add_project_arguments(['-DRB_MPI'], language: 'cpp')
@@ -106,7 +108,7 @@ rb = executable(rb_name,
                 ['src/revlanguage/main.cpp'],
                 link_with: [core, revlanguage, libs],
                 include_directories: [src_inc],
-                dependencies: [boost, mpi],
+                dependencies: [boost, mpi, openlibm],
                 link_args: maybe_link_static,
                 install: true)
 
@@ -123,7 +125,7 @@ if get_option('studio')
                          ['src/cmd/main.cpp'],
                          link_with: [core, revlanguage, libs, cmd],
                          include_directories: [src_inc],
-                         dependencies: [boost, mpi, gtk2],
+                         dependencies: [boost, mpi, gtk2, openlibm],
                          install: true)
 
 endif
