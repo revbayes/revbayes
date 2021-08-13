@@ -122,6 +122,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
                 // add the probability of starting from this state
                 *p_site_j = *p_site_left_j * *p_site_right_j * *f_j;
 
+                assert(isnan(*p_site_j) || (0.0 <= *p_site_j and *p_site_j <= 1.00000000001));
+
                 // increment pointers
                 ++p_site_j; ++p_site_left_j; ++p_site_right_j;
             }
@@ -191,7 +193,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
                 // add the probability of starting from this state
                 *p_site_j = *p_site_left_j * *p_site_right_j * *p_site_middle_j * *f_j;
 
-                assert(0.0 <= *p_site_j and *p_site_j <= 1.00000000001);
+                assert(isnan(*p_site_j) || (0.0 <= *p_site_j and *p_site_j <= 1.00000000001));
 
                 // increment pointers
                 ++p_site_j; ++p_site_left_j; ++p_site_right_j; ++p_site_middle_j;
@@ -257,6 +259,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
                 
                 assert(0.0 <= sum and sum <= 1.00000000001);
 
+                assert(isnan(sum) || (0 <= sum and sum <= 1.00000000001));
+
                 // increment the pointers to the next starting state
                 tp_a+=this->num_chars;
 
@@ -317,6 +321,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
                 } // end-for over all distination character
                 
                 assert(0 <= sum and sum <= 1.00000000001);
+
+                assert(isnan(sum) || (0 <= sum and sum <= 1.00000000001));
 
                 // store the likelihood for this starting state
                 p_site_mixture[c1] = sum;
