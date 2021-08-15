@@ -25,7 +25,9 @@ using namespace RevBayesCore;
  */
 NodeRateTimeSlideUniformProposal::NodeRateTimeSlideUniformProposal( StochasticNode<Tree> *n, StochasticNode< RbVector<double> > *r ) : Proposal(),
     rates_node( r ),
-    variable( n )
+    variable( n ),
+    storedAge(),
+    storedNode(NULL)
 {
     // tell the base class to add the node
     addNode( rates_node );
@@ -41,7 +43,9 @@ NodeRateTimeSlideUniformProposal::NodeRateTimeSlideUniformProposal( StochasticNo
 NodeRateTimeSlideUniformProposal::NodeRateTimeSlideUniformProposal( StochasticNode<Tree> *n, std::vector<StochasticNode<double>* > r ) : Proposal(),
     rates_node( NULL ),
     rates_vector( r ),
-    variable( n )
+    variable( n ),
+    storedAge(0.0),
+    storedNode(NULL)
 {
     // tell the base class to add the node
     addNode( variable );

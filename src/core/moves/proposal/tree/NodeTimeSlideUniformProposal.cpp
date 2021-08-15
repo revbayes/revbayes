@@ -21,7 +21,9 @@ using namespace RevBayesCore;
  * Here we simply allocate and initialize the Proposal object.
  */
 NodeTimeSlideUniformProposal::NodeTimeSlideUniformProposal( StochasticNode<Tree> *n ) : Proposal(),
-    variable( n )
+    variable( n ),
+    storedNode(NULL),
+    storedAge()
 {
     // tell the base class to add the node
     addNode( variable );

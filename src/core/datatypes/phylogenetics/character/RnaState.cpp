@@ -7,7 +7,8 @@
 using namespace RevBayesCore;
 
 /** Default constructor */
-RnaState::RnaState( size_t n ) : DiscreteCharacterState( 4 )
+RnaState::RnaState( size_t n ) : DiscreteCharacterState( 4 ),
+    state( ' ' )
 {
     
 }

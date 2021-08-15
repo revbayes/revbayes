@@ -23,7 +23,9 @@ using namespace RevBayesCore;
  */
 NodeTimeScaleProposal::NodeTimeScaleProposal( StochasticNode<Tree> *n, double l ) : Proposal(),
     variable( n ),
-    lambda( l )
+    lambda( l ),
+    storedNode(NULL),
+    storedAge()
 {
     // tell the base class to add the node
     addNode( variable );

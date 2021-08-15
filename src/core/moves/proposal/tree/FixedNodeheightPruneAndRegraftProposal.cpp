@@ -20,7 +20,13 @@ using namespace RevBayesCore;
  * Here we simply allocate and initialize the Proposal object.
  */
 FixedNodeheightPruneAndRegraftProposal::FixedNodeheightPruneAndRegraftProposal( StochasticNode<Tree> *n ) : Proposal(),
-    variable( n )
+    variable( n ),
+    failed(false),
+    storedNewBrotherPos(),
+    storedBrother(NULL),
+    storedBrotherPos(),
+    storedParentPos(),
+    storedNewBrother(NULL)
 {
     // tell the base class to add the node
     addNode( variable );

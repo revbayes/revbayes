@@ -27,7 +27,10 @@ TipTimeSlideUniformProposal::TipTimeSlideUniformProposal( StochasticNode<Tree> *
     tree( n ),
     origin( o ),
     use_index( false ),
-    failed( false )
+    failed( false ),
+    storedNode(NULL),
+    storedAge(),
+    node_index()
 {
     // tell the base class to add the node
     addNode( tree );
