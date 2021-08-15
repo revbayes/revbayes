@@ -353,7 +353,7 @@ void RevBayesCore::AbstractTreeHistoryCtmc<charType>::initializeHistoriesVector(
     for (size_t i = 0; i < nodes.size(); i++)
     {
         TopologyNode* nd = nodes[i];
-        histories[nd->getIndex()] = new BranchHistory(num_sites,num_chars,nd->getIndex());
+        histories[nd->getIndex()] = new BranchHistory(num_chars,nd->getIndex());
     }
 
     historyLikelihoods.resize(2);
@@ -485,7 +485,7 @@ void RevBayesCore::AbstractTreeHistoryCtmc<charType>::simulate(void)
 
     // recursively simulate, starting with the root heading tipwards
     const TopologyNode& nd = tau->getValue().getRoot();
-    histories[ nd.getIndex() ] = new BranchHistory(num_sites, num_chars, nd.getIndex());
+    histories[ nd.getIndex() ] = new BranchHistory(num_chars, nd.getIndex());
     BranchHistory* bh = histories[ nd.getIndex() ];
 
     simulate(nd, bh, taxa);
