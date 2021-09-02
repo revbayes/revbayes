@@ -82,13 +82,14 @@ namespace RevBayesCore {
         void                                                                bootstrap(void);
         virtual double                                                      computeLnProbability(void);
         virtual std::vector<charType>                                       drawAncestralStatesForNode(const TopologyNode &n);
-        virtual void                                                        drawJointConditionalAncestralStates(std::vector<std::vector<charType> >& startStates, std::vector<std::vector<charType> >& endStates);
-        virtual void                                                        drawStochasticCharacterMap(std::vector<std::string>& character_histories, size_t site, bool use_simmap_default=true);
+        virtual void                                                        drawJointConditionalAncestralStates(std::vector<std::vector<charType> >& startStates, std::vector<std::vector<charType> >& endStates); //!< Simulate ancestral states for each node and each site
+        virtual void                                                        drawSiteMixtureAllocations(); //!< For site mixture models (rates and/or matrices), sample the allocation of each site among the mixture categories
+        virtual void                                                        drawStochasticCharacterMap(std::vector<std::string>& character_histories, size_t site, bool use_simmap_default=true); //!< Simulate the history of evolution along each branch for each site
         void                                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;     //!< Map the member methods to internal function calls
         void                                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, MatrixReal &rv) const;     //!< Map the member methods to internal function calls
         void                                                                fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                                                 //!< The tree has changed and we want to know which part.
-        virtual void                                                        recursivelyDrawJointConditionalAncestralStates(const TopologyNode &node, std::vector<std::vector<charType> >& startStates, std::vector<std::vector<charType> >& endStates, const std::vector<size_t>& sampledSiteRates);
-        virtual bool                                                        recursivelyDrawStochasticCharacterMap(const TopologyNode &node, std::vector<std::string>& character_histories, std::vector<std::vector<charType> >& start_states, std::vector<std::vector<charType> >& end_states, size_t site, bool use_simmap_default);
+        virtual void                                                        recursivelyDrawJointConditionalAncestralStates(const TopologyNode &node, std::vector<std::vector<charType> >& startStates, std::vector<std::vector<charType> >& endStates, const std::vector<size_t>& sampledSiteRates); //!< Simulate the ancestral states for a given node, conditional on its ancestor's state and the tip data
+        virtual bool                                                        recursivelyDrawStochasticCharacterMap(const TopologyNode &node, std::vector<std::string>& character_histories, std::vector<std::vector<charType> >& start_states, std::vector<std::vector<charType> >& end_states, size_t site, bool use_simmap_default); //!< Simulate the history of evolution for a given site on a given branch, conditional on start and end states
         virtual void                                                        redrawValue(void);
         void                                                                reInitialized(void);
         void                                                                setMcmcMode(bool tf);                                                                       //!< Change the likelihood computation to or from MCMC mode.
@@ -1275,7 +1276,92 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawJointConditio
     has_ancestral_states = true;
 
 }
+template<class charType>
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawSiteMixtureAllocations()
+{
 
+    RandomNumberGenerator* rng = GLOBAL_RNG;
+
+    // get working variables
+    std::vector<double> siteProbVector = getMixtureProbs();
+
+    const TopologyNode &root = tau->getValue().getRoot();
+    size_t node_index = root.getIndex();
+
+    // get the pointers to the partial likelihoods and the marginal likelihoods
+    double*         p_node  = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+
+    // get pointers the likelihood for both subtrees
+    const double*   p_site           = p_node;
+
+    // sample root states
+    std::vector<double> p( this->num_site_mixtures*this->num_chars, 0.0);
+
+    // clear the container for sampling the site-rates
+    this->sampled_site_mixtures.resize(this->num_sites);
+
+    for (size_t i = 0; i < this->num_sites; ++i)
+//    for (size_t i = pattern_block_start; i < this->pattern_block_end; ++i)
+    {
+
+        // sum to sample
+        double sum = 0.0;
+
+        // if the matrix is compressed use the pattern for this site
+        size_t pattern = i - pattern_block_start;
+        if ( compressed == true )
+        {
+            pattern = site_pattern[i - pattern_block_start];
+        }
+
+        // get ptr to first mixture cat for site
+        p_site          = p_node  + pattern * this->siteOffset;
+
+        // iterate over all mixture categories
+        for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
+        {
+
+            // get pointers to the likelihood for this mixture category
+            const double* p_site_mixture_j       = p_site;
+
+            // iterate over all starting states
+            for (size_t state = 0; state < this->num_chars; ++state)
+            {
+                size_t k = this->num_chars * mixture + state;
+                p[k] = *p_site_mixture_j * siteProbVector[mixture];
+                sum += p[k];
+
+                // increment the pointers to the next state for (site,rate)
+                p_site_mixture_j++;
+            }
+
+            // increment the pointers to the next mixture category for given site
+            p_site       += this->mixtureOffset;
+
+        } // end-for over all mixtures (=rate categories)
+
+        // sample char from p
+        bool stop = false;
+        double u = rng->uniform01() * sum;
+        for (size_t mixture = 0; mixture < this->num_site_mixtures; mixture++)
+        {
+            for (size_t state = 0; state < this->num_chars; state++)
+            {
+                size_t k = this->num_chars * mixture + state;
+                u -= p[k];
+                if (u < 0.0)
+                {
+                	this->sampled_site_mixtures[i] = mixture;
+                    stop = true;
+                    break;
+                }
+            }
+            if (stop) break;
+        }
+
+    }
+
+}
 
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawStochasticCharacterMap(std::vector<std::string>& character_histories, size_t site, bool use_simmap_default)
@@ -1336,12 +1422,13 @@ bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::hasSiteMatrixMixt
 
 	return ret;
 }
+
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getSampledMixtureComponents(size_t &site_index, size_t &rate_component, size_t &matrix_component )
 {
 
 	// get the mixture component (in vector form)
-	size_t mixture_component_index = this->sampled_site_mixtures[site_index];
+	size_t mixture_component_index = sampled_site_mixtures[site_index];
 
 	matrix_component = 0;
     if (this->site_matrix_probs != NULL)
