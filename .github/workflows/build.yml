@@ -125,7 +125,7 @@ jobs:
       if: matrix.name == 'windows'
       run: |
           sudo apt-get update
-          sudo apt-get install -y pandoc libcairo2-dev ccache dos2unix zstd libopenlibm-dev
+          sudo apt-get install -y pandoc libcairo2-dev ccache dos2unix zstd
           sudo apt-get install git python3-setuptools python3-pip g++-mingw-w64 wine64
           sudo -H pip3 install meson
           sudo -H pip3 install ninja
