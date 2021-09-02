@@ -16,6 +16,7 @@
 #include "TypeSpec.h"
 #include "NaturalNumbersState.h"
 #include "DnaState.h"
+#include "CodonState.h"
 #include "StandardState.h"
 #include "AminoAcidState.h"
 #include "PoMoState.h"
@@ -56,7 +57,7 @@ void Mntr_SiteMixtureAllocation::constructInternalObject( void )
 {
     const std::string&                  fn      = static_cast<const RlString &>( filename->getRevObject() ).getValue();
     const std::string&                  sep     = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    unsigned int                                 g       = (int)static_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
+    unsigned int                        g       = (int)static_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
     
     bool                                ap      = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
     bool                                wv      = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
@@ -80,6 +81,14 @@ void Mntr_SiteMixtureAllocation::constructInternalObject( void )
     {
         RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::DnaState> *m;
         m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::DnaState>(ctmc_sn, (unsigned long)g, fn, sep);
+        m->setAppend( ap );
+        m->setPrintVersion(wv);
+        value = m;
+    }
+    else if (character == "Codon")
+    {
+        RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::CodonState> *m;
+        m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::CodonState>(ctmc_sn, (unsigned long)g, fn, sep);
         m->setAppend( ap );
         m->setPrintVersion(wv);
         value = m;
@@ -126,7 +135,7 @@ void Mntr_SiteMixtureAllocation::constructInternalObject( void )
     }
     else
     {
-        throw RbException( "Incorrect character type specified. Valid options are: AA, DNA, NaturalNumbers, PoMo, Protein, RNA, Standard, Binary/Restriction" );
+        throw RbException( "Incorrect character type specified. Valid options are: AA, DNA, Codon, NaturalNumbers, PoMo, Protein, RNA, Standard, Binary/Restriction" );
     }
     
 }
