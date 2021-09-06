@@ -79,6 +79,7 @@
 #include "UserFunctionNode.h"                             // for UserFunctio...
 #include "VectorAppendElement.h"                          // for VectorAppen...
 #include "VectorAppendVector.h"                           // for VectorAppen...
+#include "VectorReverse.h"                                // for VectorRever...
 #include "VectorScalarDivision.h"                         // for VectorScala...
 #include "VectorScalarSubtraction.h"                      // for VectorScala...
 
@@ -142,6 +143,7 @@
 #include "Func_quit.h"
 #include "Func_range.h"
 #include "Func_replicate.h"
+#include "Func_reverse.h"
 #include "Func_seed.h"
 #include "Func_seq.h"
 #include "Func_setOption.h"
@@ -302,6 +304,12 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_appendVector<RealPos>()       );
         addFunction( new Func_appendVector<RlString>()      );
         addFunction( new Func_appendVector<RlBoolean>()     );
+        addFunction( new Func_reverse<Integer>()            );
+        addFunction( new Func_reverse<Real>()               );
+        addFunction( new Func_reverse<Natural>()            );
+        addFunction( new Func_reverse<RealPos>()            );
+        addFunction( new Func_reverse<RlString>()           );
+        addFunction( new Func_reverse<RlBoolean>()          );
         addFunction( new Func_clear()                       );
         addFunction( new Func_exists()                      );
         addFunction( new Func_getwd()                       );
