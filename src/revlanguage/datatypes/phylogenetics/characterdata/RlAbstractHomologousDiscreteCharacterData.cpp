@@ -158,6 +158,22 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
 
         return new RevVariable( new AbstractDiscreteTaxonData( element.clone() ) );
     }
+    else if (name == "applyMissingSitesMask")
+    {
+        found = true;
+        
+        size_t                          num_taxa        = this->dag_node->getValue().getNumberOfTaxa();
+        std::vector<std::vector<bool> > mask_gap        = std::vector<std::vector<bool> >(num_taxa, std::vector<bool>());
+        std::vector<std::vector<bool> > mask_missing    = std::vector<std::vector<bool> >(num_taxa, std::vector<bool>());
+        
+        const RevBayesCore::AbstractHomologousDiscreteCharacterData& ref = static_cast<const AbstractHomologousDiscreteCharacterData&>( args[0].getVariable()->getRevObject() ).getValue();
+
+        ref.fillMissingSitesMask(mask_gap, mask_missing);
+        this->dag_node->getValue().applyMissingSitesMask(mask_gap, mask_missing);
+
+        
+        return NULL;
+    }
     else if (name == "computeMultinomialProfileLikelihood")
     {
         found = true;
@@ -736,6 +752,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     ArgumentRules* empiricalBaseArgRules            = new ArgumentRules();
     ArgumentRules* ishomologousArgRules             = new ArgumentRules();
     ArgumentRules* invSitesArgRules                 = new ArgumentRules();
+    ArgumentRules* mask_missing_arg_rules           = new ArgumentRules();
     ArgumentRules* setCodonPartitionArgRules        = new ArgumentRules();
     ArgumentRules* setCodonPartitionArgRules2       = new ArgumentRules();
     ArgumentRules* setNumStatesPartitionArgRules    = new ArgumentRules();
@@ -762,6 +779,9 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     ArgumentRules* getStateDescriptionsArgRules         = new ArgumentRules();
 
 
+    mask_missing_arg_rules->push_back(       new ArgumentRule("ref",        AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The reference dataset/alignment which we use for applying the mask of missing sites.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+
+    
     setCodonPartitionArgRules->push_back(       new ArgumentRule("",        Natural::getClassTypeSpec()              , "The index of the codon position.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     setCodonPartitionArgRules2->push_back(      new ArgumentRule("",        ModelVector<Natural>::getClassTypeSpec() , "The indicies of the codon positions.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     setNumStatesPartitionArgRules->push_back(   new ArgumentRule("",        Natural::getClassTypeSpec()              , "The number of states in this partition.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
@@ -796,6 +816,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     varGcContentByCodonPositionArgRules->push_back(     new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
 
 
+    methods.addFunction( new MemberProcedure( "applyMissingSitesMask",                  RlUtils::Void,                      mask_missing_arg_rules              ) );
     methods.addFunction( new MemberProcedure( "chartype",                               RlString::getClassTypeSpec(),       chartypeArgRules                ) );
     methods.addFunction( new MemberProcedure( "computeSiteFrequencySpectrum",           ModelVector<Natural>::getClassTypeSpec(), comp_site_freq_spec_arg_rules     ) );
     methods.addFunction( new MemberProcedure( "computeStateFrequencies",                MatrixReal::getClassTypeSpec(),     compStateFreqArgRules           ) );

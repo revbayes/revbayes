@@ -46,10 +46,10 @@ namespace RevBayesCore {
         virtual void                                initFromString( const std::string &s ) = 0;                                 //!< Serialize (resurrect) the object from a string value
         virtual void                                writeToFile(const std::string &dir, const std::string &fn) const = 0;
 
-        // Container functions
-        void                                        clear(void);
+        // public functions
         void                                        addMissingTaxon(const std::string &n);                                      //!< Add taxon data
         void                                        addTaxonData(const AbstractTaxonData &obs);                                 //!< Add taxon data
+        void                                        clear(void);
         void                                        excludeTaxon(size_t i);                                                     //!< Exclude taxon
         void                                        excludeTaxon(const std::string& s);                                         //!< Exclude taxon
         void                                        deleteTaxon(size_t i);                                                      //!< Remove taxon

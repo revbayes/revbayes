@@ -2036,8 +2036,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
 
 }
 
-
-
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fireTreeChangeEvent( const RevBayesCore::TopologyNode &n, const unsigned& m )
 {
@@ -2261,29 +2259,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::redrawValue( void
     // therefore we create our own mask
     if ( do_mask == true )
     {
-        std::vector<size_t> site_indices = getIncludedSiteIndices();
-
-        // set the gap states as in the clamped data
-        for (size_t i = 0; i < tau->getValue().getNumberOfTips(); ++i)
-        {
-            // create a temporary variable for the taxon
-            std::vector<bool> taxon_mask_gap        = std::vector<bool>(num_sites,false);
-            std::vector<bool> taxon_mask_missing    = std::vector<bool>(num_sites,false);
-
-            const std::string &taxon_name = tau->getValue().getNode( i ).getName();
-            AbstractDiscreteTaxonData& taxon = value->getTaxonData( taxon_name );
-
-            for ( size_t site=0; site<site_indices.size(); ++site)
-            {
-                taxon_mask_gap[site]        = taxon.getCharacter( site_indices[site] ).isGapState();
-                taxon_mask_missing[site]    = taxon.getCharacter( site_indices[site] ).isMissingState();
-            }
-
-            mask_gap[i]         = taxon_mask_gap;
-            mask_missing[i]     = taxon_mask_missing;
-
-        }
-
+        this->value->fillMissingSitesMask(mask_gap, mask_missing);
     }
 
     // delete the old value first
@@ -2407,27 +2383,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::redrawValue( void
 
     if ( do_mask == true )
     {
-        // set the gap states as in the clamped data
-        for (size_t i = 0; i < tau->getValue().getNumberOfTips(); ++i)
-        {
-            const std::string &taxon_name = tau->getValue().getNode( i ).getName();
-            AbstractDiscreteTaxonData& taxon = value->getTaxonData( taxon_name );
-
-            for ( size_t site=0; site<num_sites; ++site)
-            {
-                DiscreteCharacterState &c = taxon.getCharacter(site);
-                if ( mask_gap[i][site] == true )
-                {
-                    c.setGapState( true );
-                }
-                if ( mask_missing[i][site] == true )
-                {
-                    c.setMissingState( true );
-                }
-            }
-
-        }
-
+        this->value->applyMissingSitesMask(mask_gap, mask_missing);
     }
 
     // compress the data and initialize internal variables
