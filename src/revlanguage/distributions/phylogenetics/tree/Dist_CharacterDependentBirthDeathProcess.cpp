@@ -124,14 +124,12 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_CharacterDependentBirt
     {
         bf = static_cast<const Simplex &>( root_frequencies->getRevObject() ).getDagNode();
     }
-
-    RevBayesCore::TypedDagNode<double>* rh   = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
     
     // condition
     const std::string& cond                  = static_cast<const RlString &>( condition->getRevObject() ).getValue();
    
     // condition for simulating under
-    const std::string& simulate_cond                  = static_cast<const RlString &>( simulation_condition->getRevObject() ).getValue();
+    const std::string& simulate_cond         = static_cast<const RlString &>( simulation_condition->getRevObject() ).getValue();
     
     bool cond_tip_states = false;
     bool cond_num_tips = false;
@@ -159,7 +157,7 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_CharacterDependentBirt
     bool allow_shifts_extinct = static_cast<const RlBoolean &>( allow->getRevObject() ).getValue();
     
     // finally make the distribution 
-    RevBayesCore::StateDependentSpeciationExtinctionProcess*   d = new RevBayesCore::StateDependentSpeciationExtinctionProcess( ra, ex, q, r, bf, rh, cond, uo, min_l, max_l, exact_l, max_t, prune, cond_tip_states, cond_num_tips, cond_tree, allow_shifts_extinct );
+    RevBayesCore::StateDependentSpeciationExtinctionProcess*   d = new RevBayesCore::StateDependentSpeciationExtinctionProcess( ra, ex, q, r, bf, cond, uo, min_l, max_l, exact_l, max_t, prune, cond_tip_states, cond_num_tips, cond_tree, allow_shifts_extinct );
    
     
     size_t ex_size = ex->getValue().size();
@@ -179,15 +177,40 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_CharacterDependentBirt
     } 
 
     std::stringstream ss_err;
-    if (ex_size != q_size) {
+    if (ex_size != q_size)
+    {
         ss_err << "State count mismatch between extinction rates (" << ex_size << ") and Q (" << q_size << ")";
         throw RbException(ss_err.str());
-    } if (ex_size != sp_size) {
+    }
+    if (ex_size != sp_size)
+    {
         ss_err << "State count mismatch between extinction rates (" << ex_size << ") and speciation rates (" << sp_size << ")";
         throw RbException(ss_err.str());
-    } if (q_size != sp_size) {
+    }
+    if (q_size != sp_size)
+    {
         ss_err << "State count mismatch between speciation rates (" << sp_size << ") and Q (" << q_size << ")";
         throw RbException(ss_err.str());
+    }
+    
+
+    // set sampling probabilities/fractions
+    if (rho->getRevObject().isType( Probability::getClassTypeSpec() ))
+    {
+        RevBayesCore::TypedDagNode<double>* rh   = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
+        d->setSamplingFraction( rh );
+    }
+    else if (rho->getRevObject().isType( ModelVector<Probability>::getClassTypeSpec() ))
+    {
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* rh   = static_cast<const ModelVector<Probability> &>( rho->getRevObject() ).getDagNode();
+        
+        if (rh->getValue().size() != ex_size)
+        {
+            ss_err << "State count mismatch between extinction rates (" << ex_size << ") and sampling probabilities (" << rh->getValue().size() << ")";
+            throw RbException(ss_err.str());
+        }
+        
+        d->setSamplingFraction( rh );
     }
     
     // set the number of time slices for the numeric ODE
@@ -326,7 +349,11 @@ const MemberRules& Dist_CharacterDependentBirthDeathProcess::getParameterRules(v
         memberRules.push_back( new ArgumentRule( "Q"         , RateGenerator::getClassTypeSpec()        , "The rate matrix of jumping between rate categories.", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, NULL ) );
         memberRules.push_back( new ArgumentRule( "delta"     , RealPos::getClassTypeSpec()              , "The rate-factor of jumping between rate categories.", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, new RealPos(1.0) ) );
         memberRules.push_back( new ArgumentRule( "pi"        , Simplex::getClassTypeSpec()              , "State frequencies at the root."              , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        memberRules.push_back( new ArgumentRule( "rho"       , Probability::getClassTypeSpec()          , "The taxon sampling probability."             , ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, new RealPos(1.0) ) );
+        
+        std::vector<TypeSpec> sampling_fraction_types;
+        sampling_fraction_types.push_back( Probability::getClassTypeSpec() );
+        sampling_fraction_types.push_back( ModelVector<Probability>::getClassTypeSpec() );
+        memberRules.push_back( new ArgumentRule( "rho"       , sampling_fraction_types, "The taxon sampling probability."             , ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, new RealPos(1.0) ) );
         
         std::vector<std::string> optionsCondition;
         optionsCondition.push_back( "time" );

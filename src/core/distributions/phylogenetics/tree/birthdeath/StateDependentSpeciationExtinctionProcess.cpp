@@ -65,7 +65,6 @@ StateDependentSpeciationExtinctionProcess::StateDependentSpeciationExtinctionPro
                                                                                    const TypedDagNode<RateGenerator>* q,
                                                                                    const TypedDagNode<double>* r,
                                                                                    const TypedDagNode< Simplex >* p,
-                                                                                   const TypedDagNode<double> *rh,
                                                                                    const std::string &cdt,
                                                                                    bool uo,
                                                                                    size_t min_num_lineages,
@@ -101,7 +100,8 @@ StateDependentSpeciationExtinctionProcess::StateDependentSpeciationExtinctionPro
     pi( p ),
     Q( q ),
     rate( r ),
-    rho( rh ),
+    rho( new ConstantNode<double>("", new double(1.0)) ),
+    rho_per_state( NULL ),
     Q_default( ext->getValue().size() ),
     min_num_lineages( min_num_lineages ),
     max_num_lineages( max_num_lineages ),
@@ -332,8 +332,26 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
             // this is a tip node
             TreeDiscreteCharacterData* tree = static_cast<TreeDiscreteCharacterData*>( this->value );
 
-            std::vector<double> sampling(num_states, rho->getValue());
-            std::vector<double> extinction(num_states, 1.0 - rho->getValue());
+            std::vector<double> sampling;
+            std::vector<double> extinction;
+            if ( rho != NULL && rho_per_state == NULL )
+            {
+                sampling   = std::vector<double>(num_states, rho->getValue());
+                extinction = std::vector<double>(num_states, 1.0 - rho->getValue());
+            }
+            else if ( rho == NULL && rho_per_state != NULL )
+            {
+                sampling   = rho_per_state->getValue();
+                extinction = std::vector<double>(num_states, 1.0);
+                for (size_t i=0; i<num_states; ++i)
+                {
+                    extinction[i] = 1.0 - sampling[i];
+                }
+            }
+            else
+            {
+                throw RbException("Either a global sampling fraction or state-specific sampling fraction needs to be set.");
+            }
 
             if (phi != NULL && node.isFossil())
             {
@@ -1718,12 +1736,26 @@ double StateDependentSpeciationExtinctionProcess::lnProbTreeShape(void) const
 std::vector<double> StateDependentSpeciationExtinctionProcess::pExtinction(double start, double end) const
 {
     
-    double samplingProbability = rho->getValue();
+    
+    std::vector<double> sampling_probability;
+    if ( rho != NULL && rho_per_state == NULL )
+    {
+        sampling_probability   = std::vector<double>(num_states, rho->getValue());
+    }
+    else if ( rho == NULL && rho_per_state != NULL )
+    {
+        sampling_probability   = rho_per_state->getValue();
+    }
+    else
+    {
+        throw RbException("Either a global sampling fraction or state-specific sampling fraction needs to be set.");
+    }
+
     std::vector< double > initial_state = std::vector<double>(2*num_states,0);
     for (size_t i=0; i<num_states; ++i)
     {
-        initial_state[i] = 1.0 - samplingProbability;
-        initial_state[num_states + i] = samplingProbability;
+        initial_state[i] = 1.0 - sampling_probability[i];
+        initial_state[num_states + i] = sampling_probability[i];
     }
     
     numericallyIntegrateProcess(initial_state, start, end, true, false);
@@ -1916,6 +1948,52 @@ void StateDependentSpeciationExtinctionProcess::setSerialSamplingRates(const Typ
 void StateDependentSpeciationExtinctionProcess::setSampleCharacterHistory(bool sample_history)
 {
     sample_character_history = sample_history;
+}
+
+
+void StateDependentSpeciationExtinctionProcess::setSamplingFraction(const TypedDagNode<double> *f)
+{
+    
+    // remove the old parameter first
+    this->removeParameter( rho );
+    this->removeParameter( rho_per_state );
+
+    
+    // set the value
+    rho = f;
+    rho_per_state = NULL;
+    
+    // add the new parameter
+    this->addParameter( rho );
+    
+    // redraw the current value
+    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
+    {
+        this->redrawValue();
+    }
+}
+
+
+void StateDependentSpeciationExtinctionProcess::setSamplingFraction(const TypedDagNode< RbVector<double> > *f)
+{
+    
+    // remove the old parameter first
+    this->removeParameter( rho );
+    this->removeParameter( rho_per_state );
+
+    
+    // set the value
+    rho_per_state = f;
+    rho = NULL;
+    
+    // add the new parameter
+    this->addParameter( rho_per_state );
+    
+    // redraw the current value
+    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
+    {
+        this->redrawValue();
+    }
 }
 
 
@@ -3066,6 +3144,10 @@ void StateDependentSpeciationExtinctionProcess::swapParameterInternal(const DagN
     {
         rho = static_cast<const TypedDagNode<double>* >( newP );
     }
+    if ( oldP == rho_per_state )
+    {
+        rho_per_state = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+    }
     if ( oldP == cladogenesis_matrix )
     {
         cladogenesis_matrix = static_cast<const TypedDagNode<CladogeneticSpeciationRateMatrix>* >( newP );
@@ -3148,8 +3230,8 @@ void StateDependentSpeciationExtinctionProcess::numericallyIntegrateProcess(std:
    
     typedef boost::numeric::odeint::runge_kutta_dopri5< std::vector< double > > stepper_type;
 
-    boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-7, 1E-7, stepper_type() ) , ode , likelihoods , begin_age , end_age , dt );
-//      boost::numeric::odeint::integrate_adaptive( stepper_type(), ode , likelihoods , begin_age , end_age , dt );
+//    boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-7, 1E-7, stepper_type() ) , ode , likelihoods , begin_age , end_age , dt );
+    boost::numeric::odeint::integrate_adaptive( stepper_type(), ode , likelihoods , begin_age , end_age , dt );
     
     // catch negative extinction probabilities that can result from
     // rounding errors in the ODE stepper

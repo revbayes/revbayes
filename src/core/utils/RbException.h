@@ -10,10 +10,10 @@ class RbException {
     public:
         // Exception types
         enum                        ExceptionType { DEFAULT,
+                                                    BUG,
                                                     MATH_ERROR,
                                                     MISSING_VARIABLE,
                                                     QUIT };         //!< Exception types
-        static std::string          ExceptionName[];                                        //!< Exception type names
 
                                     RbException(void);                                      //!< Default constructor
                                     RbException(const std::string& msg);                    //!< Default with message 
