@@ -191,6 +191,10 @@ TaxonReader::TaxonReader(const std::string &fn, char delim) : DelimitedDataReade
         }
     }
 
+    for (std::map<std::string, Taxon>::iterator it = taxon_map.begin(); it != taxon_map.end(); it++ )
+    {
+        taxa.push_back(it->second);
+    }
 }
 
 
