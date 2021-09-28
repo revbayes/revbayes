@@ -30,7 +30,7 @@ TaxonReader::TaxonReader(const std::string &fn, char delim) : DelimitedDataReade
     std::vector<std::string>& line = chars[0];
     std::map<std::string, int> column_map;
 
-    std::string arr[] = {"taxon","age","species","min","max", "minmin", "minmax", "maxmin", "maxmax"};
+    std::string arr[] = {"taxon", "species", "age", "min_age", "max_age", "status", "count"};
     std::vector<std::string> fields (arr, arr + sizeof(arr) / sizeof(arr[0]) );
     
     for (size_t i = 0 ; i < line.size() ; ++i)
@@ -56,50 +56,35 @@ TaxonReader::TaxonReader(const std::string &fn, char delim) : DelimitedDataReade
         }
     }
     
-    if (column_map.find("taxon") == column_map.end())
+    std::map<std::string,int>::iterator speciesit = column_map.find("species");
+    std::map<std::string,int>::iterator ageit = column_map.find("age");
+    std::map<std::string,int>::iterator minit = column_map.find("min_age");
+    std::map<std::string,int>::iterator maxit = column_map.find("max_age");
+    std::map<std::string,int>::iterator statusit = column_map.find("status");
+    std::map<std::string,int>::iterator countit = column_map.find("count");
+
+    if ( column_map.find("taxon") == column_map.end())
     {
         throw RbException("Taxon definition file must contain \"taxon\" field.");
     }
-    
-    std::map<std::string,int>::iterator speciesit = column_map.find("species");
-    std::map<std::string,int>::iterator ageit = column_map.find("age");
-    std::map<std::string,int>::iterator minit = column_map.find("min");
-    std::map<std::string,int>::iterator maxit = column_map.find("max");
-    std::map<std::string,int>::iterator minminit = column_map.find("minmin");
-    std::map<std::string,int>::iterator minmaxit = column_map.find("minmax");
-    std::map<std::string,int>::iterator maxminit = column_map.find("maxmin");
-    std::map<std::string,int>::iterator maxmaxit = column_map.find("maxmax");
+    if ( ageit == column_map.end() && minit == column_map.end())
+    {
+        throw RbException("Taxon definition file header must contain either \"age\" or (\"min_age\" and \"max_age\") fields");
+    }
+    if ( minit != column_map.end() && maxit == column_map.end() )
+    {
+        throw RbException("Taxon definition file header containing a \"min_age\" age field must also contain a \"max_age\" age field");
+    }
+    if ( maxit != column_map.end() && minit == column_map.end() )
+    {
+        throw RbException("Taxon definition file header containing a \"max_age\" age field must also contain a \"min_age\" age field");
+    }
+    if ( (minit != column_map.end() || maxit != column_map.end()) && ageit != column_map.end())
+    {
+        throw RbException("Taxon definition file header cannot contain both \"age\" and (\"min_age\" or \"max_age\") fields");
+    }
 
-    if ( (minit != column_map.end() || minminit != column_map.end() || minmaxit != column_map.end())
-            && maxit == column_map.end() && maxminit == column_map.end() && maxmaxit == column_map.end())
-    {
-        throw RbException("Taxon definition file header containing a \"min*\" age field must also contain a \"max*\" age field");
-    }
-    if ( (maxit != column_map.end() || maxminit != column_map.end() || maxmaxit != column_map.end())
-            && minit == column_map.end() && minminit == column_map.end() && minmaxit == column_map.end())
-    {
-        throw RbException("Taxon definition file header containing a \"max*\" age field must also contain a \"min*\" age field");
-    }
-    if ( (minminit == column_map.end() || minmaxit == column_map.end()) && minminit != minmaxit)
-    {
-        throw RbException("Taxon definition file header must contain both \"minmin\" and \"minmax\" age fields");
-    }
-    if ( (maxminit == column_map.end() || maxmaxit == column_map.end()) && maxminit != maxmaxit)
-    {
-        throw RbException("Taxon definition file header must contain both \"maxmin\" and \"maxmax\" age fields");
-    }
-    if ( (minit != column_map.end() || maxit != column_map.end()
-            || minminit != column_map.end() || minmaxit != column_map.end()
-            || maxminit != column_map.end() || maxmaxit != column_map.end()) && ageit != column_map.end())
-    {
-        throw RbException("Taxon definition file header cannot contain both \"age\" and (\"min*\" or \"max*\") fields");
-    }
-    if ( (minit != column_map.end() || maxit != column_map.end()) &&
-            (minminit != column_map.end() || minmaxit != column_map.end()
-            || maxminit != column_map.end() || maxmaxit != column_map.end()))
-    {
-        throw RbException("Taxon definition file header cannot contain both \"min/max\" and (\"min/maxmin\" or \"min/maxmax\") fields");
-    }
+    std::map<std::string, Taxon > taxon_map;
 
     for (size_t i = 1; i < chars.size(); ++i) //going through all the lines
     {
@@ -110,8 +95,30 @@ TaxonReader::TaxonReader(const std::string &fn, char delim) : DelimitedDataReade
             err << "Line " << i+1 << " in taxon definition file does not contain "<<column_map.size()<<" elements";
             throw RbException(err.str());
         }
-        Taxon t = Taxon( line[ column_map["taxon"] ] );
-        t.setAge( 0.0 );
+        std::string taxon_name = line[ column_map["taxon"] ];
+        std::string species_name = taxon_name;
+
+        bool found = ( taxon_map.find(taxon_name) != taxon_map.end() );
+
+        Taxon& taxon = taxon_map[taxon_name];
+
+        if ( speciesit != column_map.end() )
+        {
+            species_name = line[ column_map["species"] ];
+
+            if ( found == true && species_name != taxon.getSpeciesName() )
+            {
+                std::stringstream ss;
+                ss << "Inconsistent species name for taxon \"" << taxon_name << "\"";
+                throw(RbException(ss.str()));
+            }
+        }
+
+        if ( found == false )
+        {
+            taxon.setName(taxon_name);
+            taxon.setSpeciesName(species_name);
+        }
         
         if ( ageit != column_map.end() )
         {
@@ -119,87 +126,68 @@ TaxonReader::TaxonReader(const std::string &fn, char delim) : DelimitedDataReade
             std::stringstream ss;
             ss.str( line[ column_map["age"] ] );
             ss >> age;
-            t.setAge( age );
+
+            TimeInterval interval(age,age);
+
+            if ( found == false )
+            {
+                taxon.setAgeRange(interval);
+            }
+
+            taxon.addAge(interval);
         }
 
-        if ( minit != column_map.end() || minminit != column_map.end() )
+        if ( minit != column_map.end() )
         {
-            double age = 0;
+            double min_age, max_age;
             TimeInterval interval;
             std::stringstream ss;
 
-            if ( minminit != column_map.end() )
-            {
-                ss.str( line[ column_map["minmin"] ] );
-                ss >> age;
-                interval.setMin(age);
+            ss.str( line[ column_map["min_age"] ] );
+            ss >> min_age;
+            ss.clear();
 
-                ss.clear();
-                ss.str( line[ column_map["minmax"] ] );
-                ss >> age;
-                interval.setMax(age);
-            }
-            else if ( minit != column_map.end() )
+            ss.str( line[ column_map["max_age"] ] );
+            ss >> max_age;
+            ss.clear();
+
+            interval.setMin(min_age);
+            interval.setMax(max_age);
+
+            if ( found == false )
             {
-                ss.str( line[ column_map["min"] ] );
-                ss >> age;
-                interval.setMin(age);
-                interval.setMax(age);
+                taxon.setAgeRange(interval);
             }
 
-            t.setMinAgeRange(interval);
-        }
+            taxon.addAge(interval);
 
-        if ( maxit != column_map.end() || maxminit != column_map.end() )
-        {
-            double age = 0;
-            TimeInterval interval;
-            std::stringstream ss;
-
-            if ( maxminit != column_map.end() )
+            if ( countit != column_map.end() )
             {
-                ss.str( line[ column_map["maxmin"] ] );
-                ss >> age;
-                interval.setMin(age);
+                size_t k = 0;
+                std::stringstream ss;
 
-                ss.clear();
-                ss.str( line[ column_map["maxmax"] ] );
-                ss >> age;
-                interval.setMax(age);
+                ss.str( line[ column_map["count"] ] );
+                ss >> k;
+
+                for(size_t i = 1; i < k; i++)
+                {
+                    taxon.addAge(interval);
+                }
             }
-            else if ( maxit != column_map.end() )
+        }
+
+        if ( statusit != column_map.end() )
+        {
+            bool extinct = (line[ column_map["status"] ] == "extinct");
+
+            if ( found == true && extinct != taxon.isExtinct() )
             {
-                ss.str( line[ column_map["max"] ] );
-                ss >> age;
-                interval.setMin(age);
-                interval.setMax(age);
+                std::stringstream ss;
+                ss << "Inconsistent extinction status for taxon \"" << taxon_name << "\"";
+                throw(RbException(ss.str()));
             }
 
-            t.setMaxAgeRange(interval);
-        }
-
-        
-        if ( speciesit != column_map.end() )
-        {
-            t.setSpeciesName( line[ column_map["species"] ] );
-        }
-        
-        taxa.push_back( t );
-    }
-
-    
-    std::set<std::string> found;
-    for (size_t i = 0; i < taxa.size(); i++)
-    {
-        if (found.find(taxa[i].getName()) == found.end())
-        {
-            found.insert(taxa[i].getName());
-        }
-        else
-        {
-            std::stringstream ss;
-            ss << "Duplicate taxon name '" << taxa[i].getName() << "' encountered when reading taxon definition file";
-            throw(RbException(ss.str()));
+            taxon.setExtinct( extinct );
         }
     }
 
