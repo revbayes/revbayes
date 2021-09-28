@@ -10,7 +10,7 @@
 #include "ModelVector.h"
 #include "Natural.h"
 #include "OptionRule.h"
-#include "PiecewiseConstantFossilizedBirthDeathRangeProcess.h"
+#include "FossilizedBirthDeathMatrixProcess.h"
 #include "Probability.h"
 #include "RealPos.h"
 #include "RlString.h"
@@ -50,7 +50,7 @@ using namespace RevLanguage;
  *
  * The default constructor does nothing except allocating the object.
  */
-Dist_FBDRangeMatrix::Dist_FBDRangeMatrix() : TypedDistribution<MatrixReal >()
+Dist_FBDRangeMatrix::Dist_FBDRangeMatrix() : FossilizedBirthDeathRangeProcess<MatrixReal>()
 {
     
 }
@@ -78,7 +78,7 @@ Dist_FBDRangeMatrix* Dist_FBDRangeMatrix::clone( void ) const
  *
  * \return A new internal distribution object.
  */
-RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess* Dist_FBDRangeMatrix::createDistribution( void ) const
+RevBayesCore::FossilizedBirthDeathMatrixProcess* Dist_FBDRangeMatrix::createDistribution( void ) const
 {
     
     // get the parameters
@@ -96,13 +96,6 @@ RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess* Dist_FBDRangeMa
     // fossilization rate
     RevBayesCore::DagNode* p = psi->getRevObject().getDagNode();
 
-    // fossil counts
-    RevBayesCore::DagNode* c = NULL;
-    if ( fossil_counts->getRevObject() != RevNullObject::getInstance() )
-    {
-        c = fossil_counts->getRevObject().getDagNode();
-    }
-
     // sampling probability
     RevBayesCore::TypedDagNode<double>* r       = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
 
@@ -113,9 +106,9 @@ RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess* Dist_FBDRangeMa
         rt = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
 
-    bool afc = static_cast<const RlString &>( uncertainty->getRevObject() ).getValue() == "auto";
+    bool c = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
 
-    RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess* d = new RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess(l, m, p, c, r, rt, cond, t, afc);
+    RevBayesCore::FossilizedBirthDeathMatrixProcess* d = new RevBayesCore::FossilizedBirthDeathMatrixProcess(l, m, p, r, rt, cond, t, c);
 
     return d;
 }
@@ -210,18 +203,13 @@ const MemberRules& Dist_FBDRangeMatrix::getParameterRules(void) const
 
         dist_member_rules.push_back( new ArgumentRule( "timeline",   ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process (from oldest to youngest).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
-        dist_member_rules.push_back( new ArgumentRule( "k", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The fossil observation count data matrix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-
         std::vector<std::string> optionsCondition;
         optionsCondition.push_back( "time" );
         optionsCondition.push_back( "survival" );
         dist_member_rules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
         dist_member_rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa with stratigraphic ranges used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         
-        std::vector<std::string> optionsUncertainty;
-        optionsUncertainty.push_back( "auto" );
-        optionsUncertainty.push_back( "custom" );
-        dist_member_rules.push_back( new OptionRule( "uncertainty", new RlString("auto"), optionsUncertainty, "Use automatic or custom first/last occurrence age range uncertainty?" ) );
+        dist_member_rules.push_back( new ArgumentRule( "complete", RlBoolean::getClassTypeSpec(), "Assume complete fossil sampling?", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( true ) ) );
 
         rules_set = true;
     }
@@ -241,60 +229,4 @@ const TypeSpec& Dist_FBDRangeMatrix::getTypeSpec( void ) const
     static TypeSpec ts = getClassTypeSpec();
     
     return ts;
-}
-
-
-/**
- * Set a member variable.
- *
- * Sets a member variable with the given name and store the pointer to the variable.
- * The value of the variable might still change but this function needs to be called again if the pointer to
- * the variable changes. The current values will be used to create the distribution object.
- *
- * \param[in]    name     Name of the member variable.
- * \param[in]    var      Pointer to the variable.
- */
-void Dist_FBDRangeMatrix::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
-{
-    if ( name == "lambda" )
-    {
-        lambda = var;
-    }
-    else if ( name == "mu" )
-    {
-        mu = var;
-    }
-    else if ( name == "psi" )
-    {
-        psi = var;
-    }
-    else if ( name == "rho" )
-    {
-        rho = var;
-    }
-    else if ( name == "timeline" )
-    {
-        timeline = var;
-    }
-    else if ( name == "k" )
-    {
-        fossil_counts = var;
-    }
-    else if ( name == "taxa" )
-    {
-        taxa = var;
-    }
-    else if ( name == "condition" )
-    {
-        condition = var;
-    }
-    else if ( name == "uncertainty" )
-    {
-        uncertainty = var;
-    }
-    else
-    {
-        TypedDistribution<MatrixReal >::setConstParameter(name, var);
-    }
-    
 }

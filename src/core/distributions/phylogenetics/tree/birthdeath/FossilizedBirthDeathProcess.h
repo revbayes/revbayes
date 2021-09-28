@@ -1,9 +1,9 @@
-#ifndef PiecewiseConstantFossilizedBirthDeathProcess_H
-#define PiecewiseConstantFossilizedBirthDeathProcess_H
+#ifndef FossilizedBirthDeathProcess_H
+#define FossilizedBirthDeathProcess_H
 
 #include "RbVector.h"
 #include "AbstractBirthDeathProcess.h"
-#include "AbstractPiecewiseConstantFossilizedRangeProcess.h"
+#include "AbstractFossilizedBirthDeathProcess.h"
 
 namespace RevBayesCore {
     
@@ -28,28 +28,27 @@ namespace RevBayesCore {
      * @since 2014-03-18, version 1.0
      *
      */
-    class PiecewiseConstantFossilizedBirthDeathProcess : public AbstractBirthDeathProcess, public AbstractPiecewiseConstantFossilizedRangeProcess {
+    class FossilizedBirthDeathProcess : public AbstractBirthDeathProcess, public AbstractFossilizedBirthDeathProcess {
         
         using AbstractBirthDeathProcess::taxa;
 
     public:
-        PiecewiseConstantFossilizedBirthDeathProcess (const TypedDagNode<double>* ra,
-                                                      const DagNode *speciation,
-                                                      const DagNode *extinction,
-                                                      const DagNode *psi,
-                                                      const DagNode *counts,
-                                                      const TypedDagNode<double>* rho,
-                                                      const DagNode *lambda_a,
-                                                      const DagNode *beta,
-                                                      const TypedDagNode<RbVector<double> > *times,
-                                                      const std::string &condition,
-                                                      const std::vector<Taxon> &taxa,
-                                                      bool uo,
-                                                      bool pa,
-                                                      bool ex );  //!< Constructor
+        FossilizedBirthDeathProcess (const TypedDagNode<double>* ra,
+                                      const DagNode *speciation,
+                                      const DagNode *extinction,
+                                      const DagNode *psi,
+                                      const TypedDagNode<double>* rho,
+                                      const DagNode *lambda_a,
+                                      const DagNode *beta,
+                                      const TypedDagNode<RbVector<double> > *times,
+                                      const std::string &condition,
+                                      const std::vector<Taxon> &taxa,
+                                      bool use_origin,
+                                      bool complete,
+                                      bool extended );  //!< Constructor
         
         // public member functions
-        PiecewiseConstantFossilizedBirthDeathProcess*   clone(void) const;                                         //!< Create an independent clone
+        FossilizedBirthDeathProcess*   clone(void) const;                                         //!< Create an independent clone
 
         double                                          getAnageneticSpeciationRate( size_t index ) const;
         double                                          getSymmetricSpeciationProbability( size_t index ) const;

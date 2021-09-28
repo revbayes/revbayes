@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "DistributionExponential.h"
-#include "AbstractPiecewiseConstantFossilizedRangeProcess.h"
+#include "AbstractFossilizedBirthDeathProcess.h"
 #include "RbConstants.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "RbMathLogic.h"
@@ -33,15 +33,14 @@ using namespace RevBayesCore;
  * \param[in]    cdt            Condition of the process (none/survival/#Taxa).
  * \param[in]    tn             Taxa.
  */
-AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossilizedRangeProcess(const DagNode *inspeciation,
-                                                                                                 const DagNode *inextinction,
-                                                                                                 const DagNode *inpsi,
-                                                                                                 const DagNode *incounts,
-                                                                                                 const TypedDagNode<double> *inrho,
-                                                                                                 const TypedDagNode< RbVector<double> > *intimes,
-                                                                                                 const std::vector<Taxon> &intaxa,
-                                                                                                 bool afc) :
-    ascending(true), homogeneous_rho(inrho), timeline( intimes ), fbd_taxa(intaxa), auto_uncertainty(afc), origin(0.0)
+AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const DagNode *inspeciation,
+                                                                         const DagNode *inextinction,
+                                                                         const DagNode *inpsi,
+                                                                         const TypedDagNode<double> *inrho,
+                                                                         const TypedDagNode< RbVector<double> > *intimes,
+                                                                         const std::vector<Taxon> &intaxa,
+                                                                         bool c) :
+    ascending(true), homogeneous_rho(inrho), timeline( intimes ), fbd_taxa(intaxa), complete(c), origin(0.0)
 {
     dirty_taxa = std::vector<bool>(fbd_taxa.size(), true);
     partial_likelihood = std::vector<double>(fbd_taxa.size(), 0.0);
@@ -151,26 +150,7 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
         }
     }
 
-    fossil_count_data = dynamic_cast<const TypedDagNode<AbstractHomologousDiscreteCharacterData>* >(incounts);
     range_parameters.push_back( fossil_count_data );
-
-    if ( fossil_count_data != NULL )
-    {
-        if( timeline == NULL ) throw(no_timeline_err);
-
-        if ( fossil_count_data->getValue().getNumberOfTaxa() != fbd_taxa.size())
-        {
-            std::stringstream ss;
-            ss << "Number of species fossil counts (" << fossil_count_data->getValue().getNumberOfTaxa() << ") does not match number of taxa (" << fbd_taxa.size() << ")";
-            throw(RbException(ss.str()));
-        }
-        else if ( fossil_count_data->getValue().getNumberOfCharacters() != timeline->getValue().size() + 1)
-        {
-            std::stringstream ss;
-            ss << "Number of fossil counts per species (" << fossil_count_data->getValue().getNumberOfCharacters() << ") does not match number of time intervals (" << timeline->getValue().size() + 1 << ")";
-            throw(RbException(ss.str()));
-        }
-    }
 
     b_i = std::vector<double>(fbd_taxa.size(), 0.0);
     d_i = std::vector<double>(fbd_taxa.size(), 0.0);
@@ -196,8 +176,8 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
     {
         double o     = fbd_taxa[i].getMaxAge();
         double y     = fbd_taxa[i].getMinAge();
-        double o_min = fbd_taxa[i].getMaxAgeRange().getMin();
-        double y_max = fbd_taxa[i].getMinAgeRange().getMax();
+        double o_min = fbd_taxa[i].getMaxAge();
+        double y_max = fbd_taxa[i].getMinAge();
 
         bool youngest = true;
 
@@ -264,7 +244,7 @@ AbstractPiecewiseConstantFossilizedRangeProcess::AbstractPiecewiseConstantFossil
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRanges( bool force )
+double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool force )
 {
     // prepare the probability computation
     updateIntervals();
@@ -284,8 +264,8 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
 
         double o     = fbd_taxa[i].getMaxAge();
         double y     = fbd_taxa[i].getMinAge();
-        double o_min = fbd_taxa[i].getMaxAgeRange().getMin();
-        double y_max = fbd_taxa[i].getMinAgeRange().getMax();
+        double o_min = fbd_taxa[i].getMaxAge();
+        double y_max = fbd_taxa[i].getMinAge();
 
         // check model constraints
         if ( !( b > o && ((y == 0.0 && d == 0.0) || (y > 0 && y > d)) && d >= 0.0 ) )
@@ -323,7 +303,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
             }
 
             // if there's no uncertainty in o, include factor for the first appearance
-            if( auto_uncertainty == false && o == o_min )
+            if( complete == false && o == o_min )
             {
                 partial_likelihood[i] += q(oi, o, true) - q(oi, o);
             }
@@ -363,7 +343,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                 partial_likelihood[i] += log(fossil[oi]);
 
                 // integrate o over full range of oi
-                if ( auto_uncertainty == true )
+                if ( complete == true )
                 {
                     // non-singleton
                     // (Case 2)
@@ -478,7 +458,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
                 partial_likelihood[i] += k * log(fossil[oi]);
 
                 // integrate o over full range of oi
-                if ( auto_uncertainty == true )
+                if ( complete == true )
                 {
                     // non-singleton
                     // (Case 1)
@@ -615,7 +595,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
 
                     // integrate y over full range of yi
                     // (Case 4)
-                    if ( auto_uncertainty == true )
+                    if ( complete == true )
                     {
                         double Ls = times[yi-1] - std::max(d, times[yi]);
 
@@ -653,7 +633,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
 
                     // integrate y over full range of yi
                     // (Case 3)
-                    if ( auto_uncertainty == true )
+                    if ( complete == true )
                     {
                         double Ls = times[yi-1] - std::max(d, times[yi]);
                         partial_likelihood[i] += (k+1)*log(Ls) - RbMath::lnFactorial(k + 1);
@@ -696,7 +676,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::computeLnProbabilityRang
 }
 
 
-double AbstractPiecewiseConstantFossilizedRangeProcess::getExtinctionRate( size_t index ) const
+double AbstractFossilizedBirthDeathProcess::getExtinctionRate( size_t index ) const
 {
 
     // remove the old parameter first
@@ -717,7 +697,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::getExtinctionRate( size_
 }
 
 
-NaturalNumbersState AbstractPiecewiseConstantFossilizedRangeProcess::getFossilCount( size_t species, size_t interval ) const
+NaturalNumbersState AbstractFossilizedBirthDeathProcess::getFossilCount( size_t species, size_t interval ) const
 {
 
     // remove the old parameter first
@@ -736,7 +716,7 @@ NaturalNumbersState AbstractPiecewiseConstantFossilizedRangeProcess::getFossilCo
 }
 
 
-double AbstractPiecewiseConstantFossilizedRangeProcess::getFossilizationRate( size_t index ) const
+double AbstractFossilizedBirthDeathProcess::getFossilizationRate( size_t index ) const
 {
 
     // remove the old parameter first
@@ -757,7 +737,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::getFossilizationRate( si
 }
 
 
-double AbstractPiecewiseConstantFossilizedRangeProcess::getIntervalTime( size_t index ) const
+double AbstractFossilizedBirthDeathProcess::getIntervalTime( size_t index ) const
 {
 
     if ( index == num_intervals - 1 )
@@ -782,7 +762,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::getIntervalTime( size_t 
 }
 
 
-double AbstractPiecewiseConstantFossilizedRangeProcess::getSpeciationRate( size_t index ) const
+double AbstractFossilizedBirthDeathProcess::getSpeciationRate( size_t index ) const
 {
 
     // remove the old parameter first
@@ -806,7 +786,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::getSpeciationRate( size_
 /**
  * \int exp(psi (t-t_i)) q_tilde(t)/q(t) dt
  */
-double AbstractPiecewiseConstantFossilizedRangeProcess::H(size_t i, double x, double t) const
+double AbstractFossilizedBirthDeathProcess::H(size_t i, double x, double t) const
 {
     // get the parameters
     double b = birth[i];
@@ -835,7 +815,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::H(size_t i, double x, do
 /**
  * \int (t-t_j)^k q_tilde(t)/q(t) dt
  */
-double AbstractPiecewiseConstantFossilizedRangeProcess::Z(size_t k, size_t i, double x, double t) const
+double AbstractFossilizedBirthDeathProcess::Z(size_t k, size_t i, double x, double t) const
 {
     // get the parameters
     double b = birth[i];
@@ -876,7 +856,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::Z(size_t k, size_t i, do
  * t_0 is origin
  * t_l = 0.0
  */
-size_t AbstractPiecewiseConstantFossilizedRangeProcess::l(double t) const
+size_t AbstractFossilizedBirthDeathProcess::l(double t) const
 {
     return times.rend() - std::upper_bound( times.rbegin(), times.rend(), t);
 }
@@ -885,7 +865,7 @@ size_t AbstractPiecewiseConstantFossilizedRangeProcess::l(double t) const
 /**
  * p_i(t)
  */
-double AbstractPiecewiseConstantFossilizedRangeProcess::p( size_t i, double t ) const
+double AbstractFossilizedBirthDeathProcess::p( size_t i, double t ) const
 {
     // get the parameters
     double b = birth[i];
@@ -911,7 +891,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::p( size_t i, double t ) 
 /**
  * q_i(t)
  */
-double AbstractPiecewiseConstantFossilizedRangeProcess::q( size_t i, double t, bool tilde ) const
+double AbstractFossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) const
 {
     
     if ( t == 0.0 ) return 1.0;
@@ -945,7 +925,7 @@ double AbstractPiecewiseConstantFossilizedRangeProcess::q( size_t i, double t, b
  *
  *
  */
-void AbstractPiecewiseConstantFossilizedRangeProcess::updateIntervals()
+void AbstractFossilizedBirthDeathProcess::updateIntervals()
 {
     for (size_t interval = num_intervals; interval > 0; interval--)
     {
@@ -991,7 +971,7 @@ void AbstractPiecewiseConstantFossilizedRangeProcess::updateIntervals()
  * \param[in]    oldP      Pointer to the old parameter.
  * \param[in]    newP      Pointer to the new parameter.
  */
-void AbstractPiecewiseConstantFossilizedRangeProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void AbstractFossilizedBirthDeathProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     if (oldP == heterogeneous_lambda)
     {

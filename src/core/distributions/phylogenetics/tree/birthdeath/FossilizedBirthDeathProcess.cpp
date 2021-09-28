@@ -8,13 +8,13 @@
 #include <vector>
 
 #include "DistributionExponential.h"
-#include "PiecewiseConstantFossilizedBirthDeathProcess.h"
+#include "FossilizedBirthDeathProcess.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "AbstractBirthDeathProcess.h"
-#include "AbstractPiecewiseConstantFossilizedRangeProcess.h"
+#include "AbstractFossilizedBirthDeathProcess.h"
 #include "RbException.h"
 #include "RbMathFunctions.h"
 #include "StringUtilities.h"
@@ -42,11 +42,10 @@ using namespace RevBayesCore;
  * \param[in]    cdt            Condition of the process (none/survival/#Taxa).
  * \param[in]    tn             Taxa.
  */
-PiecewiseConstantFossilizedBirthDeathProcess::PiecewiseConstantFossilizedBirthDeathProcess(const TypedDagNode<double> *ra,
+FossilizedBirthDeathProcess::FossilizedBirthDeathProcess(const TypedDagNode<double> *ra,
                                                                                            const DagNode *inspeciation,
                                                                                            const DagNode *inextinction,
                                                                                            const DagNode *inpsi,
-                                                                                           const DagNode *incounts,
                                                                                            const TypedDagNode<double> *inrho,
                                                                                            const DagNode *inlambda_a,
                                                                                            const DagNode *inbeta,
@@ -54,10 +53,10 @@ PiecewiseConstantFossilizedBirthDeathProcess::PiecewiseConstantFossilizedBirthDe
                                                                                            const std::string &incondition,
                                                                                            const std::vector<Taxon> &intaxa,
                                                                                            bool uo,
-                                                                                           bool afc,
+                                                                                           bool c,
                                                                                            bool ex) :
     AbstractBirthDeathProcess(ra, incondition, intaxa, uo),
-    AbstractPiecewiseConstantFossilizedRangeProcess(inspeciation, inextinction, inpsi, incounts, inrho, intimes, intaxa, afc),
+    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, c),
     extended(ex)
 {
     for(std::vector<const DagNode*>::iterator it = range_parameters.begin(); it != range_parameters.end(); it++)
@@ -133,9 +132,9 @@ PiecewiseConstantFossilizedBirthDeathProcess::PiecewiseConstantFossilizedBirthDe
  *
  * \return A new copy of myself 
  */
-PiecewiseConstantFossilizedBirthDeathProcess* PiecewiseConstantFossilizedBirthDeathProcess::clone( void ) const
+FossilizedBirthDeathProcess* FossilizedBirthDeathProcess::clone( void ) const
 {
-    return new PiecewiseConstantFossilizedBirthDeathProcess( *this );
+    return new FossilizedBirthDeathProcess( *this );
 }
 
 
@@ -143,7 +142,7 @@ PiecewiseConstantFossilizedBirthDeathProcess* PiecewiseConstantFossilizedBirthDe
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
+double FossilizedBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
 {
     // variable declarations and initialization
     double lnProbTimes = computeLnProbabilityTimes();
@@ -156,7 +155,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityDiverge
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
+double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
 {
     double lnProb = computeLnProbabilityRanges();
 
@@ -168,7 +167,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( 
         {
             double y_a   = b_i[i];
             double o     = taxa[i].getMaxAge();
-            double o_min = taxa[i].getMaxAgeRange().getMin();
+            double o_min = taxa[i].getMaxAge();
 
             size_t y_ai = l(y_a);
 
@@ -192,7 +191,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( 
                 }
 
                 // if there's no uncertainty in o, replace factor for the first appearance
-                if( auto_uncertainty == false && o == o_min )
+                if( complete == false && o == o_min )
                 {
                     x -= q(oi, o, true) - q(oi, o);
                 }
@@ -201,7 +200,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( 
                     double Ls = 0.0;
 
                     // replace integrated Q_i terms
-                    if ( auto_uncertainty == true )
+                    if ( complete == true )
                     {
                         double a = std::max(d_i[i], times[oi]);
                         double Ls_plus_a = oi > 0 ? std::min(y_a, times[oi-1]) : y_a;
@@ -282,7 +281,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::computeLnProbabilityTimes( 
 }
 
 
-double PiecewiseConstantFossilizedBirthDeathProcess::getMaxTaxonAge( const TopologyNode& node ) const
+double FossilizedBirthDeathProcess::getMaxTaxonAge( const TopologyNode& node ) const
 {
     if( node.isTip() )
     {
@@ -301,7 +300,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::getMaxTaxonAge( const Topol
     }
 }
 
-double PiecewiseConstantFossilizedBirthDeathProcess::getAnageneticSpeciationRate( size_t index ) const
+double FossilizedBirthDeathProcess::getAnageneticSpeciationRate( size_t index ) const
 {
 
     // remove the old parameter first
@@ -321,7 +320,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::getAnageneticSpeciationRate
     }
 }
 
-double PiecewiseConstantFossilizedBirthDeathProcess::getSymmetricSpeciationProbability( size_t index ) const
+double FossilizedBirthDeathProcess::getSymmetricSpeciationProbability( size_t index ) const
 {
 
     // remove the old parameter first
@@ -341,7 +340,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::getSymmetricSpeciationProba
     }
 }
 
-double PiecewiseConstantFossilizedBirthDeathProcess::lnProbTreeShape(void) const
+double FossilizedBirthDeathProcess::lnProbTreeShape(void) const
 {
     // the fossilized birth death range divergence times density is derived for an unlabeled oriented tree
     // so we convert to a labeled oriented tree probability by multiplying by 1 / n!
@@ -359,7 +358,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::lnProbTreeShape(void) const
  *
  * \return Probability of survival.
  */
-double PiecewiseConstantFossilizedBirthDeathProcess::pSurvival(double start, double end) const
+double FossilizedBirthDeathProcess::pSurvival(double start, double end) const
 {
     double t = start;
 
@@ -371,7 +370,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::pSurvival(double start, dou
 /**
  * q_i(t)
  */
-double PiecewiseConstantFossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) const
+double FossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) const
 {
 
     if ( t == 0.0 ) return 0.0;
@@ -411,7 +410,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::q( size_t i, double t, bool
 /**
  * \int exp(psi t) q_tilde(t)/q(t) dt
  */
-double PiecewiseConstantFossilizedBirthDeathProcess::H( size_t i, double x, double t ) const
+double FossilizedBirthDeathProcess::H( size_t i, double x, double t ) const
 {
     double s = symmetric[i];
 
@@ -448,7 +447,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::H( size_t i, double x, doub
 /**
  * \int (t-t_j)^k q_tilde(t)/q(t) dt
  */
-double PiecewiseConstantFossilizedBirthDeathProcess::Z(size_t k, size_t i, double x, double t) const
+double FossilizedBirthDeathProcess::Z(size_t k, size_t i, double x, double t) const
 {
     double s = symmetric[i];
 
@@ -494,7 +493,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::Z(size_t k, size_t i, doubl
 /**
  *
  */
-void PiecewiseConstantFossilizedBirthDeathProcess::simulateClade(std::vector<TopologyNode *> &n, double age, double present)
+void FossilizedBirthDeathProcess::simulateClade(std::vector<TopologyNode *> &n, double age, double present)
 {
 
     // Get the rng
@@ -715,7 +714,7 @@ void PiecewiseConstantFossilizedBirthDeathProcess::simulateClade(std::vector<Top
 
 }
 
-std::vector<double> PiecewiseConstantFossilizedBirthDeathProcess::simulateDivergenceTimes(size_t n, double origin, double present, double min) const
+std::vector<double> FossilizedBirthDeathProcess::simulateDivergenceTimes(size_t n, double origin, double present, double min) const
 {
 
     std::vector<double> times(n, 0.0);
@@ -734,7 +733,7 @@ std::vector<double> PiecewiseConstantFossilizedBirthDeathProcess::simulateDiverg
 /**
  * Simulate new speciation times.
  */
-double PiecewiseConstantFossilizedBirthDeathProcess::simulateDivergenceTime(double origin, double present) const
+double FossilizedBirthDeathProcess::simulateDivergenceTime(double origin, double present) const
 {
     // incorrect placeholder for constant SSBDP
 
@@ -784,7 +783,7 @@ double PiecewiseConstantFossilizedBirthDeathProcess::simulateDivergenceTime(doub
 }
 
 
-int PiecewiseConstantFossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
+int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
 {
     if( node.isTip() )
     {
@@ -858,9 +857,9 @@ int PiecewiseConstantFossilizedBirthDeathProcess::updateStartEndTimes( const Top
  *
  *
  */
-void PiecewiseConstantFossilizedBirthDeathProcess::updateIntervals()
+void FossilizedBirthDeathProcess::updateIntervals()
 {
-    AbstractPiecewiseConstantFossilizedRangeProcess::updateIntervals();
+    AbstractFossilizedBirthDeathProcess::updateIntervals();
 
     for (size_t interval = num_intervals; interval > 0; interval--)
     {
@@ -885,26 +884,26 @@ void PiecewiseConstantFossilizedBirthDeathProcess::updateIntervals()
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-void PiecewiseConstantFossilizedBirthDeathProcess::updateStartEndTimes( void )
+void FossilizedBirthDeathProcess::updateStartEndTimes( void )
 {
     updateStartEndTimes(getValue().getRoot());
 }
 
 
-void PiecewiseConstantFossilizedBirthDeathProcess::keepSpecialization(DagNode *toucher)
+void FossilizedBirthDeathProcess::keepSpecialization(DagNode *toucher)
 {
     dirty_taxa = std::vector<bool>(fbd_taxa.size(), false);
 }
 
 
-void PiecewiseConstantFossilizedBirthDeathProcess::restoreSpecialization(DagNode *toucher)
+void FossilizedBirthDeathProcess::restoreSpecialization(DagNode *toucher)
 {
     partial_likelihood = stored_likelihood;
     dirty_taxa = std::vector<bool>(fbd_taxa.size(), false);
 }
 
 
-void PiecewiseConstantFossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, bool touchAll)
+void FossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, bool touchAll)
 {
     stored_likelihood = partial_likelihood;
 
@@ -921,7 +920,7 @@ void PiecewiseConstantFossilizedBirthDeathProcess::touchSpecialization(DagNode *
  * \param[in]    oldP      Pointer to the old parameter.
  * \param[in]    newP      Pointer to the new parameter.
  */
-void PiecewiseConstantFossilizedBirthDeathProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void FossilizedBirthDeathProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     if (oldP == heterogeneous_lambda_a)
     {
@@ -942,6 +941,6 @@ void PiecewiseConstantFossilizedBirthDeathProcess::swapParameterInternal(const D
     else
     {
         AbstractBirthDeathProcess::swapParameterInternal(oldP, newP);
-        AbstractPiecewiseConstantFossilizedRangeProcess::swapParameterInternal(oldP, newP);
+        AbstractFossilizedBirthDeathProcess::swapParameterInternal(oldP, newP);
     }
 }

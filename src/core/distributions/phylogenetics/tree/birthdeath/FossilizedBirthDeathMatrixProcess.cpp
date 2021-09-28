@@ -7,12 +7,12 @@
 #include <vector>
 
 #include "DistributionExponential.h"
-#include "PiecewiseConstantFossilizedBirthDeathRangeProcess.h"
+#include "FossilizedBirthDeathMatrixProcess.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "StochasticNode.h"
 #include "TypedDistribution.h"
-#include "AbstractPiecewiseConstantFossilizedRangeProcess.h"
+#include "AbstractFossilizedBirthDeathProcess.h"
 #include "MatrixReal.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
@@ -37,17 +37,16 @@ using namespace RevBayesCore;
  * \param[in]    cdt            Condition of the process (none/survival/#Taxa).
  * \param[in]    tn             Taxa.
  */
-PiecewiseConstantFossilizedBirthDeathRangeProcess::PiecewiseConstantFossilizedBirthDeathRangeProcess(const DagNode *inspeciation,
-                                                                                                     const DagNode *inextinction,
-                                                                                                     const DagNode *inpsi,
-                                                                                                     const DagNode *incounts,
-                                                                                                     const TypedDagNode<double> *inrho,
-                                                                                                     const TypedDagNode< RbVector<double> > *intimes,
-                                                                                                     const std::string &incondition,
-                                                                                                     const std::vector<Taxon> &intaxa,
-                                                                                                     bool afc) :
+FossilizedBirthDeathMatrixProcess::FossilizedBirthDeathMatrixProcess(const DagNode *inspeciation,
+                                                                     const DagNode *inextinction,
+                                                                     const DagNode *inpsi,
+                                                                     const TypedDagNode<double> *inrho,
+                                                                     const TypedDagNode< RbVector<double> > *intimes,
+                                                                     const std::string &incondition,
+                                                                     const std::vector<Taxon> &intaxa,
+                                                                     bool complete) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
-    AbstractPiecewiseConstantFossilizedRangeProcess(inspeciation, inextinction, inpsi, incounts, inrho, intimes, intaxa, afc),
+    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, complete),
     condition(incondition)
 {
     dirty_gamma = std::vector<bool>(fbd_taxa.size(), true);
@@ -70,9 +69,9 @@ PiecewiseConstantFossilizedBirthDeathRangeProcess::PiecewiseConstantFossilizedBi
  *
  * \return A new copy of myself 
  */
-PiecewiseConstantFossilizedBirthDeathRangeProcess* PiecewiseConstantFossilizedBirthDeathRangeProcess::clone( void ) const
+FossilizedBirthDeathMatrixProcess* FossilizedBirthDeathMatrixProcess::clone( void ) const
 {
-    return new PiecewiseConstantFossilizedBirthDeathRangeProcess( *this );
+    return new FossilizedBirthDeathMatrixProcess( *this );
 }
 
 
@@ -80,7 +79,7 @@ PiecewiseConstantFossilizedBirthDeathRangeProcess* PiecewiseConstantFossilizedBi
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double PiecewiseConstantFossilizedBirthDeathRangeProcess::computeLnProbability( void )
+double FossilizedBirthDeathMatrixProcess::computeLnProbability( void )
 {
     // prepare the probability computation
     updateGamma();
@@ -110,7 +109,7 @@ double PiecewiseConstantFossilizedBirthDeathRangeProcess::computeLnProbability( 
  *
  * \return Small gamma
  */
-void PiecewiseConstantFossilizedBirthDeathRangeProcess::updateGamma(bool force)
+void FossilizedBirthDeathMatrixProcess::updateGamma(bool force)
 {
     for (size_t i = 0; i < fbd_taxa.size(); i++)
     {
@@ -158,7 +157,7 @@ void PiecewiseConstantFossilizedBirthDeathRangeProcess::updateGamma(bool force)
  *
  * \return Probability of survival.
  */
-double PiecewiseConstantFossilizedBirthDeathRangeProcess::pSurvival(double start, double end) const
+double FossilizedBirthDeathMatrixProcess::pSurvival(double start, double end) const
 {
     double t = start;
 
@@ -178,7 +177,7 @@ double PiecewiseConstantFossilizedBirthDeathRangeProcess::pSurvival(double start
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-void PiecewiseConstantFossilizedBirthDeathRangeProcess::updateStartEndTimes( void )
+void FossilizedBirthDeathMatrixProcess::updateStartEndTimes( void )
 {
     origin = 0;
 
@@ -195,7 +194,7 @@ void PiecewiseConstantFossilizedBirthDeathRangeProcess::updateStartEndTimes( voi
 /**
  * Simulate new speciation times.
  */
-void PiecewiseConstantFossilizedBirthDeathRangeProcess::redrawValue(void)
+void FossilizedBirthDeathMatrixProcess::redrawValue(void)
 {
     // incorrect placeholder
     
@@ -229,21 +228,21 @@ void PiecewiseConstantFossilizedBirthDeathRangeProcess::redrawValue(void)
 }
 
 
-void PiecewiseConstantFossilizedBirthDeathRangeProcess::keepSpecialization(DagNode *toucher)
+void FossilizedBirthDeathMatrixProcess::keepSpecialization(DagNode *toucher)
 {
     dirty_taxa = std::vector<bool>(fbd_taxa.size(), false);
     dirty_gamma = std::vector<bool>(fbd_taxa.size(), false);
 }
 
 
-void PiecewiseConstantFossilizedBirthDeathRangeProcess::restoreSpecialization(DagNode *toucher)
+void FossilizedBirthDeathMatrixProcess::restoreSpecialization(DagNode *toucher)
 {
     partial_likelihood = stored_likelihood;
     dirty_taxa = std::vector<bool>(fbd_taxa.size(), false);
 }
 
 
-void PiecewiseConstantFossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, bool touchAll)
+void FossilizedBirthDeathMatrixProcess::touchSpecialization(DagNode *toucher, bool touchAll)
 {
     stored_likelihood = partial_likelihood;
 
@@ -272,7 +271,7 @@ void PiecewiseConstantFossilizedBirthDeathRangeProcess::touchSpecialization(DagN
  * \param[in]    oldP      Pointer to the old parameter.
  * \param[in]    newP      Pointer to the new parameter.
  */
-void PiecewiseConstantFossilizedBirthDeathRangeProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void FossilizedBirthDeathMatrixProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
-    AbstractPiecewiseConstantFossilizedRangeProcess::swapParameterInternal(oldP, newP);
+    AbstractFossilizedBirthDeathProcess::swapParameterInternal(oldP, newP);
 }

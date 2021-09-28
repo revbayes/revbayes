@@ -34,19 +34,18 @@ namespace RevBayesCore {
      * @since 2014-03-18, version 1.0
      *
      */
-    class AbstractPiecewiseConstantFossilizedRangeProcess {
+    class AbstractFossilizedBirthDeathProcess {
         
     public:
-        AbstractPiecewiseConstantFossilizedRangeProcess(const DagNode *speciation,
-                                                             const DagNode *extinction,
-                                                             const DagNode *psi,
-                                                             const DagNode *counts,
-                                                             const TypedDagNode<double>* rho,
-                                                             const TypedDagNode<RbVector<double> > *times,
-                                                             const std::vector<Taxon> &taxa,
-                                                             bool ages_from_counts);  //!< Constructor
+        AbstractFossilizedBirthDeathProcess(const DagNode *speciation,
+                                            const DagNode *extinction,
+                                            const DagNode *psi,
+                                            const TypedDagNode<double>* rho,
+                                            const TypedDagNode<RbVector<double> > *times,
+                                            const std::vector<Taxon> &taxa,
+                                            bool complete);  //!< Constructor
 
-        virtual ~AbstractPiecewiseConstantFossilizedRangeProcess(){};
+        virtual ~AbstractFossilizedBirthDeathProcess(){};
 
         double                                          getExtinctionRate( size_t index ) const;
         NaturalNumbersState                             getFossilCount( size_t species, size_t interval ) const;
@@ -106,7 +105,7 @@ namespace RevBayesCore {
 
         std::vector<Taxon>                      fbd_taxa;                                                                                               //!< Taxon names that will be attached to new simulated trees.
 
-        bool                                    auto_uncertainty;
+        bool                                    complete;
 
         std::vector<size_t>                     oldest_intervals;
         std::vector<size_t>                     youngest_intervals;
