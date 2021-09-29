@@ -168,6 +168,17 @@ double Taxon::getAge( void ) const
 
 
 /**
+ * Get the ages for this taxon.
+ *
+ * \return    The ages.
+ */
+std::vector<TimeInterval> Taxon::getAges( void ) const
+{
+    return ages;
+}
+
+
+/**
  * Get the age range for this taxon.
  *
  * \return    The age range.
