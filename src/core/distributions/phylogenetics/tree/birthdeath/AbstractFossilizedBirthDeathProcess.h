@@ -99,15 +99,18 @@ namespace RevBayesCore {
         std::vector<double>                     q_tilde_i;
         std::vector<double>                     p_i;
 
-        std::vector<Taxon>                      fbd_taxa;                                                                                               //!< Taxon names that will be attached to new simulated trees.
+        std::vector<Taxon>                      fbd_taxa;                                                      //!< Taxon names that will be attached to new simulated trees.
 
         bool                                    complete;
 
         std::vector<bool>                       analytic;
-        std::vector<double>                     o_i;
-        std::vector<double>                     y_i;
+        std::vector<size_t>                     y_i;
         std::vector<std::vector<double> >       x_i;
         std::vector<std::vector<double> >       nu_j;
+        std::vector<std::vector<double> >       Psi_i;
+
+        std::vector<double>                     o_i;
+        std::vector<double>                     stored_o_i;
 
         std::vector<const DagNode*>             range_parameters;
 
@@ -116,6 +119,7 @@ namespace RevBayesCore {
         std::vector<double>                     partial_likelihood;
         std::vector<double>                     stored_likelihood;
 
+        std::vector<bool>                       dirty_psi;
         std::vector<bool>                       dirty_taxa;
     };
 }

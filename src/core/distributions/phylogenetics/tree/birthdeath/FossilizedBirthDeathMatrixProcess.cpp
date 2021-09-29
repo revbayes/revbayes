@@ -232,24 +232,24 @@ void FossilizedBirthDeathMatrixProcess::redrawValue(void)
 
 void FossilizedBirthDeathMatrixProcess::keepSpecialization(DagNode *toucher)
 {
-    dirty_taxa = std::vector<bool>(fbd_taxa.size(), false);
     dirty_gamma = std::vector<bool>(fbd_taxa.size(), false);
+
+    AbstractFossilizedBirthDeathProcess::keepSpecialization(toucher);
 }
 
 
 void FossilizedBirthDeathMatrixProcess::restoreSpecialization(DagNode *toucher)
 {
-    partial_likelihood = stored_likelihood;
-    dirty_taxa = std::vector<bool>(fbd_taxa.size(), false);
+    AbstractFossilizedBirthDeathProcess::restoreSpecialization(toucher);
 }
 
 
 void FossilizedBirthDeathMatrixProcess::touchSpecialization(DagNode *toucher, bool touchAll)
 {
-    stored_likelihood = partial_likelihood;
-
     if ( toucher == dag_node )
     {
+        stored_likelihood = partial_likelihood;
+
         std::set<size_t> touched_indices = dag_node->getTouchedElementIndices();
 
         for ( std::set<size_t>::iterator it = touched_indices.begin(); it != touched_indices.end(); it++)
@@ -262,7 +262,7 @@ void FossilizedBirthDeathMatrixProcess::touchSpecialization(DagNode *toucher, bo
     }
     else
     {
-        dirty_taxa = std::vector<bool>(fbd_taxa.size(), true);
+        AbstractFossilizedBirthDeathProcess::touchSpecialization(toucher, touchAll);
     }
 }
 
