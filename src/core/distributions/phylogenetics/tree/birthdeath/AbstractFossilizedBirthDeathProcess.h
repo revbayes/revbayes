@@ -48,8 +48,7 @@ namespace RevBayesCore {
         virtual ~AbstractFossilizedBirthDeathProcess(){};
 
         double                                          getExtinctionRate( size_t index ) const;
-        NaturalNumbersState                             getFossilCount( size_t species, size_t interval ) const;
-        double                                          getFossilizationRate( size_t index ) const;
+        double                                          getFossilSamplingRate( size_t index ) const;
         double                                          getIntervalTime( size_t index ) const;
         double                                          getSpeciationRate( size_t index ) const;
 
@@ -64,8 +63,9 @@ namespace RevBayesCore {
         size_t                                          l(double t) const;                                     //!< Find the index so that times[index-1] < t < times[index]
         double                                          p(size_t i, double t) const;
         virtual double                                  q(size_t i, double t, bool tilde = false) const;
-        virtual double                                  H(size_t i, double x, double t) const;
-        virtual double                                  Z(size_t k, size_t i, double x, double t) const;
+        virtual double                                  integrateQ(size_t i, double nu, double dt, double psi, double x = 0.0) const;
+
+        void                                            redrawOldestAge(size_t i);
 
         virtual void                                    updateIntervals();
 
@@ -87,8 +87,6 @@ namespace RevBayesCore {
         const TypedDagNode<double >*                    homogeneous_rho;                                       //!< The homogeneous speciation rates.
         const TypedDagNode<RbVector<double> >*          timeline;                                              //!< The times of the instantaneous sampling events.
 
-        const TypedDagNode<AbstractHomologousDiscreteCharacterData>* fossil_count_data;                        //!< The number of fossil observations, per species/interval as character data.
-
         std::vector<double>                     birth;
         std::vector<double>                     death;
         std::vector<double>                     fossil;
@@ -96,8 +94,6 @@ namespace RevBayesCore {
 
         std::vector<double>                     b_i;
         std::vector<double>                     d_i;
-
-        std::vector<double>                     lnQ;
 
         std::vector<double>                     q_i;
         std::vector<double>                     q_tilde_i;
@@ -107,8 +103,11 @@ namespace RevBayesCore {
 
         bool                                    complete;
 
-        std::vector<size_t>                     oldest_intervals;
-        std::vector<size_t>                     youngest_intervals;
+        std::vector<bool>                       analytic;
+        std::vector<double>                     o_i;
+        std::vector<double>                     y_i;
+        std::vector<std::vector<double> >       x_i;
+        std::vector<std::vector<double> >       nu_j;
 
         std::vector<const DagNode*>             range_parameters;
 

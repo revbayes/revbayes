@@ -177,7 +177,7 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
             // if this is a sampled tree, then integrate out the speciation times for descendants of sampled ancestors
             if( extended == false )
             {
-                size_t oi = oldest_intervals[i];
+                size_t oi = 0; //oldest_intervals[i];
 
                 double x = 0.0;
 
@@ -211,7 +211,7 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
                         Ls = o - o_min;
                     }
 
-                    x += log( Ls ) - lnQ[i];
+                    //x += log( Ls ) - lnQ[i];
                 }
 
                 // compute definite integral
@@ -405,42 +405,6 @@ double FossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) const
     }
 
     return q;
-}
-
-/**
- * \int exp(psi t) q_tilde(t)/q(t) dt
- */
-double FossilizedBirthDeathProcess::H( size_t i, double x, double t ) const
-{
-    double s = symmetric[i];
-
-    if ( s > 0.0 )
-    {
-        throw(RbException("Cannot integrate first occurrence age for beta > 0.0"));
-    }
-
-    // get the parameters
-    double b = birth[i];
-    double d = death[i];
-    double f = fossil[i];
-    double a = anagenetic[i];
-    double r = (i == num_intervals - 1 ? homogeneous_rho->getValue() : 0.0);
-    double ti = times[i];
-
-    double diff = b - d - f;
-    double bp   = b*f;
-    double dt   = t - ti;
-
-    double A = sqrt( diff*diff + 4.0*bp);
-    double B = ( (1.0 - 2.0*(1.0-r)*p_i[i] )*b + d + f ) / A;
-
-    double e = exp(-A*dt);
-
-    double diff2 = b + d + 2.0*a + -f;
-    double tmp = (1+B)/(A-diff2) - e*(1-B)/(A+diff2);
-    double H = exp(-f*(x-ti) ) * exp(-(diff2-A)*dt/2) * tmp;
-
-    return H;
 }
 
 

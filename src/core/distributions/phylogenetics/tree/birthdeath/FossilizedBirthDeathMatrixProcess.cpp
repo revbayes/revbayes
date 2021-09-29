@@ -220,10 +220,12 @@ void FossilizedBirthDeathMatrixProcess::redrawValue(void)
     for (size_t i = 0; i < fbd_taxa.size(); i++)
     {
         double b = fbd_taxa[i].getMaxAge() + rng->uniform01()*(max - fbd_taxa[i].getMaxAge());
-        double d = rng->uniform01()*fbd_taxa[i].getMinAge();
+        double d = fbd_taxa[i].isExtinct() ? rng->uniform01()*fbd_taxa[i].getMinAge() : 0.0;
 
         (*this->value)[i][0] = b;
         (*this->value)[i][1] = d;
+
+        redrawOldestAge(i);
     }
 }
 
