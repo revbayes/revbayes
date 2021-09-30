@@ -355,10 +355,10 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                     // increase the oldest occurrence psi
                     psi_y_xj += delta_psi;
 
-                    double Q = integrateQ(oi, nu_j[i][nu_index], 0,           psi_y_xj, psi_x_y)
-                             - integrateQ(oi, nu_j[i][nu_index], x[j+1]-x[j], psi_y_xj, psi_x_y);
+                    double Q = integrateQ(oi, nu_j[i][nu_index], 0,           psi_y_xj)
+                             - integrateQ(oi, nu_j[i][nu_index], x[j+1]-x[j], psi_y_xj);
 
-                    double res = log(Q) + Psi_i[i][nu_index] + q;
+                    double res = log(Q) + Psi_i[i][nu_index] + q + ( complete ? 0.0 : psi_x_y );
 
                     results.push_back(res);
 
@@ -449,11 +449,8 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                     // sum over each possible oldest observation
                     Psi_i[i][0] += log(recip);
 
-                    if ( complete == false )
-                    {
-                        // multiply by (e^psi_y_o - 1)
-                        Psi_i[i][0] += log( std::expm1(psi_y_o) );
-                    }
+                    // multiply by e^psi_y_o
+                    Psi_i[i][0] += ( complete ? 0.0 : psi_y_o );
                 }
 
                 partial_likelihood[i] += Psi_i[i][0];
@@ -577,7 +574,7 @@ double AbstractFossilizedBirthDeathProcess::getSpeciationRate( size_t index ) co
 /**
  * \int q_tilde(t)/q(t)\Psi^{\nu-1}dPsi
  */
-double AbstractFossilizedBirthDeathProcess::integrateQ(size_t i, double nu, double dt, double psi, double x) const
+double AbstractFossilizedBirthDeathProcess::integrateQ(size_t i, double nu, double dt, double psi) const
 {
     // get the parameters
     double b = birth[i];
@@ -599,16 +596,13 @@ double AbstractFossilizedBirthDeathProcess::integrateQ(size_t i, double nu, doub
     double w_0 = 0.5*(1-B)*std::exp(-beta_0*psi);
     double w_1 = 0.5*(1-B)*std::exp(-beta_1*psi);
 
+    beta_0 -= ( complete == false );
+    beta_1 -= ( complete == false );
+
     try
     {
         double tmp1 = RbMath::incompleteGamma(beta_0*(psi + f*dt), nu, false, false) / std::pow(beta_0, nu);
         double tmp2 = RbMath::incompleteGamma(beta_1*(psi + f*dt), nu, false, false) / std::pow(beta_1, nu);
-
-        if ( complete == false )
-        {
-            tmp1 -= RbMath::incompleteGamma((beta_0-1)*(psi + f*dt), nu, false, false) * std::exp(x) / std::pow(beta_0-1, nu);
-            tmp2 -= RbMath::incompleteGamma((beta_1-1)*(psi + f*dt), nu, false, false) * std::exp(x) / std::pow(beta_1-1, nu);
-        }
 
         w_0 *= tmp1;
         w_1 *= tmp2;
