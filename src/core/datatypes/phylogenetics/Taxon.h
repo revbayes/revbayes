@@ -2,7 +2,7 @@
 #define Taxon_H
 
 #include <ostream>
-#include <vector>
+#include <map>
 
 #include "TimeInterval.h"
 
@@ -43,7 +43,7 @@ namespace RevBayesCore {
         double                              getMaxAge(void) const;                      //!< Get the max age for this taxon.
         double                              getMinAge(void) const;                      //!< Get the min age for this taxon.
         const std::string&                  getName(void) const;                        //!< Get the name for this taxon.
-        std::vector<TimeInterval>           getAges(void) const;                        //!< Get the occurrence ages.
+        std::map<TimeInterval, size_t>      getAges(void) const;                        //!< Get the occurrence ages.
         const std::string&                  getSpeciesName(void) const;                 //!< Get the name of the species.
         void                                setAge(double a);                           //!< Set the age.
         void                                setAgeRange(const TimeInterval &d);         //!< Set the date info.
@@ -55,7 +55,7 @@ namespace RevBayesCore {
         
         // private members
         TimeInterval                        age_range;
-        std::vector<TimeInterval>           ages;
+        std::map<TimeInterval, size_t>      ages;
         std::string                         name;
         std::string                         species_name;
         bool                                extinct;

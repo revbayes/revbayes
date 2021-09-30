@@ -132,7 +132,7 @@ bool Taxon::operator>=(const RevBayesCore::Taxon &t) const
  */
 void Taxon::addAge( const TimeInterval &d )
 {
-    ages.push_back(d);
+    ages[d]++;
 
     if ( d.getMax() > age_range.getMax() )
     {
@@ -172,7 +172,7 @@ double Taxon::getAge( void ) const
  *
  * \return    The ages.
  */
-std::vector<TimeInterval> Taxon::getAges( void ) const
+std::map<TimeInterval, size_t> Taxon::getAges( void ) const
 {
     return ages;
 }
