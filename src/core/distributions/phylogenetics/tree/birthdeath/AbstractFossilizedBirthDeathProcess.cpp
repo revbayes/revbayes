@@ -162,18 +162,18 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
 
     for ( size_t i = 0; i < fbd_taxa.size(); i++ )
     {
-        std::vector<TimeInterval> ages = fbd_taxa[i].getAges();
+        std::map<TimeInterval, size_t> ages = fbd_taxa[i].getAges();
 
         std::set<double> x;
         double oldest_y = 0.0;
 
         // get sorted unique uncertinaty break ages
-        for ( std::vector<TimeInterval>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
+        for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
         {
-            x.insert(Fi->getMin());
-            x.insert(Fi->getMax());
+            x.insert(Fi->first.getMin());
+            x.insert(Fi->first.getMax());
 
-            oldest_y = std::max(Fi->getMin(), oldest_y);
+            oldest_y = std::max(Fi->first.getMin(), oldest_y);
         }
 
         // put the sorted ages in a vector
@@ -187,15 +187,15 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
         {
             size_t nu = 0;
 
-            for ( std::vector<TimeInterval>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
+            for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
             {
                 // count the number of ranges with maximum > xj
-                nu += ( Fi->getMax() > x_i[i][j] );
+                nu += ( Fi->first.getMax() > x_i[i][j] ) * Fi->second;
 
                 // if this observation can be the oldest occurrence
                 // but its minimum age is younger than the oldest minimum
                 // then we augment this taxon with an oldest occurence age
-                if ( Fi->getMax() > oldest_y && Fi->getMin() < oldest_y )
+                if ( Fi->first.getMax() > oldest_y && Fi->first.getMin() < oldest_y )
                 {
                     analytic[i] = false;
                 }
@@ -206,7 +206,7 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
                 y_i.push_back(j);
             }
             nu_j[i].push_back(nu);
-            Psi_i[i].push_back(1.0);
+            Psi_i[i].push_back(0.0);
         }
     }
 }
@@ -269,7 +269,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
             // include extinction density
             if (d > 0.0) partial_likelihood[i] += log( death[di] );
 
-            std::vector<TimeInterval> ages = fbd_taxa[i].getAges();
+            std::map<TimeInterval, size_t> ages = fbd_taxa[i].getAges();
 
             if ( analytic[i] == true )
             {
@@ -325,20 +325,20 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                         Psi_i[i][nu_index] = 1.0;
 
                         // compute the product of psi in ranges whose maxima we've passed
-                        for ( size_t k = 0; k < ages.size(); k++ )
+                        for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
                         {
-                            if ( ages[k].getMin() <= x[j-1] && ages[k].getMax() >= x[j] )
+                            size_t k = std::distance(ages.begin(), Fi);
+
+                            if ( Fi->first.getMin() <= x[j-1] && Fi->first.getMax() >= x[j] )
                             {
                                 psi[k] += delta_psi;
                             }
 
-                            if ( ages[k].getMax() <= x[j-1] )
+                            if ( Fi->first.getMax() <= x[j-1] )
                             {
-                                Psi_i[i][nu_index] *= psi[k];
+                                Psi_i[i][nu_index] += log(psi[k]) * Fi->second;
                             }
                         }
-
-                        Psi_i[i][nu_index] = log(Psi_i[i][nu_index]);
                     }
 
                     // if we still haven't reached the oldest minimum
@@ -413,16 +413,16 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                         psi_y_o += fossil[j+1]*dt;
 
                         // increase running psi total for each observation
-                        for ( size_t k = 0; k < ages.size(); k++ )
+                        for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
                         {
-                            if ( ages[k].getMin() >= times[j] || ages[k].getMax() < times[j+1] )
+                            if ( Fi->first.getMin() >= times[j] || Fi->first.getMax() < times[j+1] )
                             {
                                 continue;
                             }
 
-                            double dt = std::min(std::min(ages[k].getMax(), o_i[i]), times[j]) - std::max(ages[k].getMin(), times[j+1]);
+                            double dt = std::min(std::min(Fi->first.getMax(), o_i[i]), times[j]) - std::max(Fi->first.getMin(), times[j+1]);
 
-                            psi[k] += fossil[j+1]*dt;
+                            psi[std::distance(ages.begin(), Fi)] += fossil[j+1]*dt;
                         }
                     }
 
@@ -431,17 +431,20 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
                     double recip = 0.0;
 
-                    for ( size_t k = 0; k < ages.size(); k++ )
+                    // factor sum over each possible oldest observation
+                    for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
                     {
-                        if ( ages[k].getMin() >= x_i[i][y_i[i]] )
+                        size_t k = std::distance(ages.begin(), Fi);
+
+                        if ( Fi->first.getMax() >= o_i[i] )
                         {
-                            recip += 1 / psi[k];
+                            recip += Fi->second / psi[k];
                         }
 
-                        Psi_i[i][0] += log(psi[k]);
+                        Psi_i[i][0] += log(psi[k]) * Fi->second;
                     }
 
-                    // sum over each possible oldest occurrence
+                    // sum over each possible oldest observation
                     Psi_i[i][0] += log(recip);
 
                     if ( complete == false )
@@ -463,10 +466,14 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
     // add the sampled extant tip age term
     if ( homogeneous_rho->getValue() > 0.0)
+    {
         lnProbTimes += num_extant_sampled * log( homogeneous_rho->getValue() );
+    }
     // add the unsampled extant tip age term
     if ( homogeneous_rho->getValue() < 1.0)
+    {
         lnProbTimes += num_extant_unsampled * log( 1.0 - homogeneous_rho->getValue() );
+    }
 
     if ( RbMath::isFinite(lnProbTimes) == false )
     {
