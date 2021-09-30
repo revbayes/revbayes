@@ -205,6 +205,7 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
             {
                 y_i.push_back(j);
             }
+
             nu_j[i].push_back(nu);
             Psi_i[i].push_back(0.0);
         }
@@ -324,11 +325,10 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                     {
                         Psi_i[i][nu_index] = 1.0;
 
+                        size_t k = 0;
                         // compute the product of psi in ranges whose maxima we've passed
-                        for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
+                        for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
                         {
-                            size_t k = std::distance(ages.begin(), Fi);
-
                             if ( Fi->first.getMin() <= x[j-1] && Fi->first.getMax() >= x[j] )
                             {
                                 psi[k] += delta_psi;
@@ -412,8 +412,9 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
                         psi_y_o += fossil[j+1]*dt;
 
+                        size_t k = 0;
                         // increase running psi total for each observation
-                        for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
+                        for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
                         {
                             if ( Fi->first.getMin() >= times[j] || Fi->first.getMax() < times[j+1] )
                             {
@@ -422,7 +423,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
                             double dt = std::min(std::min(Fi->first.getMax(), o_i[i]), times[j]) - std::max(Fi->first.getMin(), times[j+1]);
 
-                            psi[std::distance(ages.begin(), Fi)] += fossil[j+1]*dt;
+                            psi[k] += fossil[j+1]*dt;
                         }
                     }
 
@@ -431,16 +432,17 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
                     double recip = 0.0;
 
-                    // factor sum over each possible oldest observation
-                    for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
+                    size_t k = 0;
+                    // compute factors of the sum over each possible oldest observation
+                    for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
                     {
-                        size_t k = std::distance(ages.begin(), Fi);
-
+                        // compute sum of reciprocal ranges
                         if ( Fi->first.getMax() >= o_i[i] )
                         {
                             recip += Fi->second / psi[k];
                         }
 
+                        // compute product of ranges
                         Psi_i[i][0] += log(psi[k]) * Fi->second;
                     }
 
