@@ -15,6 +15,7 @@
 #include "RbMathFunctions.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
+#include "RlUserInterface.h"
 #include "Taxon.h"
 #include "TimeInterval.h"
 #include "TypedDagNode.h"
@@ -160,6 +161,8 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
     nu_j        = std::vector<std::vector<double> >(fbd_taxa.size(), std::vector<double>() );
     Psi_i       = std::vector<std::vector<double> >(fbd_taxa.size(), std::vector<double>() );
 
+    bool augmented = false;
+
     for ( size_t i = 0; i < fbd_taxa.size(); i++ )
     {
         std::map<TimeInterval, size_t> ages = fbd_taxa[i].getAges();
@@ -198,6 +201,7 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
                 if ( Fi->first.getMax() > oldest_y && Fi->first.getMin() < oldest_y )
                 {
                     analytic[i] = false;
+                    augmented = true;
                 }
             }
 
@@ -209,6 +213,13 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
             nu_j[i].push_back(nu);
             Psi_i[i].push_back(0.0);
         }
+    }
+
+    if ( augmented == true )
+    {
+        std::stringstream ss;
+        ss << "WARNING: Fossilized birth death process contains augmented data.";
+        RBOUT(ss.str());
     }
 }
 

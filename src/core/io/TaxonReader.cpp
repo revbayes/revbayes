@@ -37,7 +37,7 @@ TaxonReader::TaxonReader(const std::string &fn, char delim) : DelimitedDataReade
     {
         std::string tmp = line[i];
         StringUtilities::toLower( tmp );
-        if (std::find(fields.begin(), fields.end(), tmp) != fields.end())
+        if ( std::find(fields.begin(), fields.end(), tmp) != fields.end())
         {
             column_map[tmp] = int(i);
         }
@@ -52,7 +52,7 @@ TaxonReader::TaxonReader(const std::string &fn, char delim) : DelimitedDataReade
                     field_stream << ", ";
                 }
             }
-            throw RbException("Unrecognized field: "+tmp+" in the taxon definition file. Allowed fields: "+field_stream.str());
+            throw RbException("Unrecognized field: \'"+tmp+"\' in the taxon definition file. Allowed fields: "+field_stream.str());
         }
     }
     
