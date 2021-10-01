@@ -650,10 +650,10 @@ double RbMath::incompleteGamma(double x, double alpha, bool regularized, bool lo
     if (x == 0.0) {
         return lower ? 0.0 : regularized ? 1.0 : RbMath::gamma(alpha);
     }
-    if (x < 0.0 || alpha <= 0.0) 
+    if ( alpha <= 0.0 )
     {
         std::ostringstream s;
-        s << "Cannot compute incomplete gamma function for x = " << x << ", alpha = " << alpha;
+        s << "Cannot compute incomplete gamma function for alpha = " << alpha;
         throw RbException(s.str());
     }
 
