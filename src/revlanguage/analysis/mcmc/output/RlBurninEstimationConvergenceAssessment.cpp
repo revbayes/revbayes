@@ -399,7 +399,8 @@ const MemberRules& BurninEstimationConvergenceAssessment::getParameterRules(void
         filenameTypes.push_back( RlString::getClassTypeSpec() );
         filenameTypes.push_back( ModelVector<RlString>::getClassTypeSpec() );
         memberRules.push_back( new ArgumentRule("filename", filenameTypes, "The name of the file with the parameter samples.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        memberRules.push_back( new ArgumentRule("delimiter", RlString::getClassTypeSpec(), "The delimiter/separator between values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
+        std::vector<std::string> sep = {"separator","delimiter"};
+        memberRules.push_back( new ArgumentRule(sep, RlString::getClassTypeSpec(), "The separator/delimiter between values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("") ) );
         
         rules_set = true;
     }
@@ -532,7 +533,7 @@ void BurninEstimationConvergenceAssessment::setConstParameter(const std::string&
         }
         
     }
-    else if ( name == "delimiter")
+    else if ( name == "delimiter" || name == "separator" || name == "separator/delimiter")
     {
         delimiter = static_cast<const RlString&>( var->getRevObject() ).getValue();
     }

@@ -31,8 +31,9 @@ RevPtr<RevVariable> Func_readRelativeNodeAgeConstraints::execute( void )
     
     // get the information from the arguments for reading the file
     const RlString& fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() );
+    const std::string& del = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
     
-    RevBayesCore::RelativeNodeAgeConstraintsReader* dmr = new RevBayesCore::RelativeNodeAgeConstraintsReader( fn.getValue(), '\t' );
+    RevBayesCore::RelativeNodeAgeConstraintsReader* dmr = new RevBayesCore::RelativeNodeAgeConstraintsReader( fn.getValue(), del );
     RevBayesCore::RelativeNodeAgeConstraints* dm = new RevBayesCore::RelativeNodeAgeConstraints(dmr);
     
     return new RevVariable( new RlRelativeNodeAgeConstraints(dm) );
@@ -50,6 +51,8 @@ const ArgumentRules& Func_readRelativeNodeAgeConstraints::getArgumentRules( void
     {
         
         argumentRules.push_back( new ArgumentRule( "file", RlString::getClassTypeSpec(), "Relative or absolute name of the file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        std::vector<std::string> sep = {"separator","delimiter"};
+        argumentRules.push_back( new ArgumentRule( sep, RlString::getClassTypeSpec(), "The separator/delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "" ) ) );
         rules_set = true;
         
     }

@@ -38,7 +38,7 @@ RevPtr<RevVariable> Func_readMatrix::execute( void )
 	const RlString&    fn  = static_cast<const RlString&>( args[0].getVariable()->getRevObject() );
     const std::string& del = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
 
-    RevBayesCore::MatrixReader* mr = new RevBayesCore::MatrixReader( fn.getValue(), del[0] );
+    RevBayesCore::MatrixReader* mr = new RevBayesCore::MatrixReader( fn.getValue(), del );
     RevBayesCore::MatrixReal    m  = mr->getMatrix();
     MatrixReal*                 rm = new MatrixReal( m );
 
@@ -57,8 +57,9 @@ const ArgumentRules& Func_readMatrix::getArgumentRules( void ) const
 	if (!rules_set)
 	{
 		
-		argumentRules.push_back( new ArgumentRule( "file", RlString::getClassTypeSpec(), "Relative or absolute name of the file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "delimiter", RlString::getClassTypeSpec(), "The delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "\t" ) ) );
+		argumentRules.push_back( new ArgumentRule( "file", RlString::getClassTypeSpec(), "The name of the file to read.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+		std::vector<std::string> sep = {"separator","delimiter"};
+		argumentRules.push_back( new ArgumentRule( sep, RlString::getClassTypeSpec(), "The separator/delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "" ) ) );
 		rules_set = true;
 		
 	}

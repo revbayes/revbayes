@@ -21,9 +21,8 @@
 using namespace RevBayesCore;
 
 
-PoMoCountFileReader::PoMoCountFileReader(const std::string &fn, const size_t virtualPopulationSize, char d, size_t ns) : DelimitedDataReader(fn, d, ns), virtualPopulationSize_ ( virtualPopulationSize )
+PoMoCountFileReader::PoMoCountFileReader(const std::string &fn, const size_t virtualPopulationSize, std::string d, size_t ns) : DelimitedDataReader(fn, d, ns), virtualPopulationSize_ ( virtualPopulationSize )
 {
-	filename = fn;
 	matrix_ = new HomologousDiscreteCharacterData<PoMoState> ();
 
 	// chars is a matrix containing all the lines of the file fn.
