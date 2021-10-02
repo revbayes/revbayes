@@ -123,7 +123,8 @@ const ArgumentRules& Func_readAncestralStateTreeTrace::getArgumentRules( void ) 
         options.push_back( "clock" );
         options.push_back( "non-clock" );
         argumentRules.push_back( new OptionRule( "treetype", new RlString("clock"), options, "The type of tree." ) );
-        argumentRules.push_back( new ArgumentRule( "separator", RlString::getClassTypeSpec(), "The separater/delimiter between values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
+        std::vector<std::string> sep = {"separator","delimiter"};
+        argumentRules.push_back( new ArgumentRule( sep, RlString::getClassTypeSpec(), "The separator/delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("") ) );
 
         std::vector<TypeSpec> burninTypes;
         burninTypes.push_back( Probability::getClassTypeSpec() );
@@ -189,7 +190,7 @@ const TypeSpec& Func_readAncestralStateTreeTrace::getReturnType( void ) const
 }
 
 
-TraceTree* Func_readAncestralStateTreeTrace::readBranchLengthTrees(const std::vector<std::string> &vectorOfFileNames, const std::string &delimitter)
+TraceTree* Func_readAncestralStateTreeTrace::readBranchLengthTrees(const std::vector<std::string> &vectorOfFileNames, const std::string &delimiter)
 {
     
     
@@ -248,7 +249,7 @@ TraceTree* Func_readAncestralStateTreeTrace::readBranchLengthTrees(const std::ve
             std::vector<std::string> columns;
             
             // we should provide other delimiters too
-            StringUtilities::stringSplit(line, delimitter, columns);
+            StringUtilities::stringSplit(line, delimiter, columns);
             
             // we assume a header at the first line of the file
             if (!hasHeaderBeenRead) {
@@ -287,7 +288,7 @@ TraceTree* Func_readAncestralStateTreeTrace::readBranchLengthTrees(const std::ve
 }
 
 
-TraceTree* Func_readAncestralStateTreeTrace::readTimeTrees(const std::vector<std::string> &vectorOfFileNames, const std::string &delimitter) {
+TraceTree* Func_readAncestralStateTreeTrace::readTimeTrees(const std::vector<std::string> &vectorOfFileNames, const std::string &delimiter) {
     
     
     std::vector<RevBayesCore::TraceTree> data;
@@ -343,7 +344,7 @@ TraceTree* Func_readAncestralStateTreeTrace::readTimeTrees(const std::vector<std
             std::vector<std::string> columns;
             
             // we should provide other delimiters too
-            StringUtilities::stringSplit(line, delimitter, columns);
+            StringUtilities::stringSplit(line, delimiter, columns);
             
             // we assume a header at the first line of the file
             if ( hasHeaderBeenRead == false )

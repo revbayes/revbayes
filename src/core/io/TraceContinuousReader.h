@@ -24,7 +24,7 @@ namespace RevBayesCore {
         
     public:
         
-        TraceContinuousReader(const std::string &fn, char d='\t');              //!< Constructor
+        TraceContinuousReader(const std::string &fn, std::string d="");              //!< Constructor
         
         std::vector<TraceNumeric>&          getTraces(void);                            //!< Get the data.
         const std::vector<TraceNumeric>&    getTraces(void) const;                      //!< Get the data.

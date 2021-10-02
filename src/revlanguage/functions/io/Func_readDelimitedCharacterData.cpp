@@ -7,7 +7,7 @@
 #include "ArgumentRule.h"
 #include "DelimitedCharacterDataReader.h"
 #include "HomologousDiscreteCharacterData.h"
-#include "Func_readCharacterDataDelimited.h"
+#include "Func_readDelimitedCharacterData.h"
 #include "NaturalNumbersState.h"
 #include "OptionRule.h"
 #include "RbException.h"
@@ -40,14 +40,14 @@ using namespace RevLanguage;
  *
  * \return A new copy of the process.
  */
-Func_readCharacterDataDelimited* Func_readCharacterDataDelimited::clone( void ) const
+Func_readDelimitedCharacterData* Func_readDelimitedCharacterData::clone( void ) const
 {
     
-    return new Func_readCharacterDataDelimited( *this );
+    return new Func_readDelimitedCharacterData( *this );
 }
 
 
-std::string Func_readCharacterDataDelimited::bitToState(const std::string &s)
+std::string Func_readDelimitedCharacterData::bitToState(const std::string &s)
 {
     
     std::stringstream ss;
@@ -71,7 +71,7 @@ std::string Func_readCharacterDataDelimited::bitToState(const std::string &s)
 
 
 /** Execute function */
-RevPtr<RevVariable> Func_readCharacterDataDelimited::execute()
+RevPtr<RevVariable> Func_readDelimitedCharacterData::execute()
 {
     
     // get the information from the arguments for reading the file
@@ -89,7 +89,7 @@ RevPtr<RevVariable> Func_readCharacterDataDelimited::execute()
         RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::NaturalNumbersState> *coreStates = new RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::NaturalNumbersState>();
         
         // get data from file
-        RevBayesCore::DelimitedCharacterDataReader* tsv_data = new RevBayesCore::DelimitedCharacterDataReader(fn, del[0], lines_to_skip);
+        RevBayesCore::DelimitedCharacterDataReader* tsv_data = new RevBayesCore::DelimitedCharacterDataReader(fn, del, lines_to_skip);
 
         int max = lab == "" ? 0 : StringUtilities::asIntegerNumber( lab );
         
@@ -128,7 +128,7 @@ RevPtr<RevVariable> Func_readCharacterDataDelimited::execute()
         RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::NaturalNumbersState> *coreStates = new RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::NaturalNumbersState>();
         
         // get data from file
-        RevBayesCore::DelimitedCharacterDataReader* tsv_data = new RevBayesCore::DelimitedCharacterDataReader(fn, del[0], lines_to_skip);
+        RevBayesCore::DelimitedCharacterDataReader* tsv_data = new RevBayesCore::DelimitedCharacterDataReader(fn, del, lines_to_skip);
         
         // loop through data and get each NaturalNumbers value
         for (size_t i = 0; i < tsv_data->getData().size(); ++i)
@@ -167,7 +167,7 @@ RevPtr<RevVariable> Func_readCharacterDataDelimited::execute()
         RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::StandardState> *coreStates = new RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::StandardState>();
         
         // get data from file
-        RevBayesCore::DelimitedCharacterDataReader* tsv_data = new RevBayesCore::DelimitedCharacterDataReader(fn, del[0], lines_to_skip);
+        RevBayesCore::DelimitedCharacterDataReader* tsv_data = new RevBayesCore::DelimitedCharacterDataReader(fn, del, lines_to_skip);
         
         // loop through data and get each Standard value
         for (size_t i = 0; i < tsv_data->getData().size(); ++i)
@@ -209,7 +209,7 @@ RevPtr<RevVariable> Func_readCharacterDataDelimited::execute()
         RevBayesCore::ContinuousCharacterData *coreStates = new RevBayesCore::ContinuousCharacterData();
         
         // get data from file
-        RevBayesCore::DelimitedCharacterDataReader* tsv_data = new RevBayesCore::DelimitedCharacterDataReader(fn, del[0], lines_to_skip);
+        RevBayesCore::DelimitedCharacterDataReader* tsv_data = new RevBayesCore::DelimitedCharacterDataReader(fn, del, lines_to_skip);
         
         // loop through data and get each Continuous value
         for (size_t i = 0; i < tsv_data->getData().size(); ++i)
@@ -249,7 +249,7 @@ RevPtr<RevVariable> Func_readCharacterDataDelimited::execute()
 
 
 /** Get argument rules */
-const ArgumentRules& Func_readCharacterDataDelimited::getArgumentRules( void ) const
+const ArgumentRules& Func_readDelimitedCharacterData::getArgumentRules( void ) const
 {
     
     static ArgumentRules argumentRules = ArgumentRules();
@@ -267,7 +267,8 @@ const ArgumentRules& Func_readCharacterDataDelimited::getArgumentRules( void ) c
         type_options.push_back( "Continuous" );
         argumentRules.push_back( new OptionRule( "type", new RlString("NaturalNumbers"), type_options, "The type of data." ) );
         argumentRules.push_back( new ArgumentRule( "stateLabels", RlString::getClassTypeSpec(), "The state labels (for standard states) or max number for NaturalNumbers.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "" ) ) );
-        argumentRules.push_back( new ArgumentRule( "delimiter", RlString::getClassTypeSpec(), "The delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "\t" ) ) );
+        std::vector<std::string> sep = {"separator","delimiter"};
+        argumentRules.push_back( new ArgumentRule( sep, RlString::getClassTypeSpec(), "The separator/delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "" ) ) );
         argumentRules.push_back( new ArgumentRule( "header", RlBoolean::getClassTypeSpec(), "Has this file a header line?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
         rules_set = true;
         
@@ -278,17 +279,17 @@ const ArgumentRules& Func_readCharacterDataDelimited::getArgumentRules( void ) c
 
 
 /** Get Rev type of object */
-const std::string& Func_readCharacterDataDelimited::getClassType(void)
+const std::string& Func_readDelimitedCharacterData::getClassType(void)
 {
     
-    static std::string rev_type = "Func_readCharacterDataDelimited";
+    static std::string rev_type = "Func_readDelimitedCharacterData";
     
     return rev_type;
 }
 
 
 /** Get class type spec describing type of object */
-const TypeSpec& Func_readCharacterDataDelimited::getClassTypeSpec(void)
+const TypeSpec& Func_readDelimitedCharacterData::getClassTypeSpec(void)
 {
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
@@ -300,17 +301,30 @@ const TypeSpec& Func_readCharacterDataDelimited::getClassTypeSpec(void)
 /**
  * Get the primary Rev name for this function.
  */
-std::string Func_readCharacterDataDelimited::getFunctionName( void ) const
+std::string Func_readDelimitedCharacterData::getFunctionName( void ) const
 {
     // create a name variable that is the same for all instance of this class
-    std::string f_name = "readCharacterDataDelimited";
+    std::string f_name = "readDelimitedCharacterData";
     
     return f_name;
 }
 
 
+/**
+ * Get the primary Rev name for this function.
+ */
+std::vector<std::string> Func_readDelimitedCharacterData::getFunctionNameAliases( void ) const
+{
+    // create a name variable that is the same for all instance of this class
+    std::vector<std::string> f_names;
+    f_names.push_back("readCharacterDataDelimited");
+
+    return f_names;
+}
+
+
 /** Get type spec */
-const TypeSpec& Func_readCharacterDataDelimited::getTypeSpec( void ) const
+const TypeSpec& Func_readDelimitedCharacterData::getTypeSpec( void ) const
 {
     
     static TypeSpec type_spec = getClassTypeSpec();
@@ -320,7 +334,7 @@ const TypeSpec& Func_readCharacterDataDelimited::getTypeSpec( void ) const
 
 
 /** Get return type */
-const TypeSpec& Func_readCharacterDataDelimited::getReturnType( void ) const
+const TypeSpec& Func_readDelimitedCharacterData::getReturnType( void ) const
 {
     
     static TypeSpec return_typeSpec = NaturalNumbersState::getClassTypeSpec();

@@ -1,9 +1,7 @@
 #ifndef MatrixReader_H
 #define MatrixReader_H
 
-#include <stddef.h>
-#include <iosfwd>
-
+#include "DelimitedDataReader.h"
 #include "MatrixReal.h"
 
 namespace RevBayesCore {
@@ -21,13 +19,11 @@ namespace RevBayesCore {
 	 * @since 2015-03-03, version 1.0
 	 *
 	 */
-	class MatrixReader {
+	class MatrixReader : public DelimitedDataReader {
 		
     public:
-        MatrixReader(const std::string &fn, char d='\t', size_t ls=0);
+        MatrixReader(const std::string &fn, std::string d="", size_t ls=0);
         
-        void                                                readData( size_t ls);
-        const std::string&                                  getFilename(void);
         const MatrixReal&   							    getMatrix(void);
 
         
@@ -35,9 +31,7 @@ namespace RevBayesCore {
     protected:
         
         // protected member only accessible for derived classes
-        std::string                                         filename;
-        char                                                delimiter;
-		MatrixReal                                          matrix;
+        MatrixReal                                          matrix;
 		
 	};
 	

@@ -124,7 +124,8 @@ const ArgumentRules& Func_summarizeCharacterMaps::getArgumentRules( void ) const
         burninTypes.push_back( Probability::getClassTypeSpec() );
         burninTypes.push_back( Integer::getClassTypeSpec() );
         argumentRules.push_back( new ArgumentRule( "burnin"   , burninTypes  , "The fraction/number of samples to discard as burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.25) ) );
-        argumentRules.push_back( new ArgumentRule("separator" , RlString::getClassTypeSpec() , "The delimiter between variables. \t by default.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
+        std::vector<std::string> sep = {"separator","delimiter"};
+        argumentRules.push_back( new ArgumentRule( sep , RlString::getClassTypeSpec() , "The separator/delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
         argumentRules.push_back( new ArgumentRule( "verbose"   , RlBoolean::getClassTypeSpec()  , "Printing verbose output", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         
         rules_set = true;

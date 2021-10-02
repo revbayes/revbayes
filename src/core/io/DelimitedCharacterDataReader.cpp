@@ -5,11 +5,9 @@
 using namespace RevBayesCore;
 
 
-DelimitedCharacterDataReader::DelimitedCharacterDataReader(const std::string &fn, char d, size_t num_skipped) : DelimitedDataReader(fn, d, num_skipped)
+DelimitedCharacterDataReader::DelimitedCharacterDataReader(const std::string &fn, std::string d, size_t num_skipped) : DelimitedDataReader(fn, d, num_skipped)
 {
     
-    filename = fn;
-
     data = std::vector<std::vector<std::string> >( chars.size(), std::vector<std::string>() );
     for (size_t i = 0; i < chars.size(); ++i)
     {
