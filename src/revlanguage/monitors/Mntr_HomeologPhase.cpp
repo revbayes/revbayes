@@ -5,7 +5,6 @@
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "RlMonitor.h"
 #include "IntegerPos.h"
 #include "RevObject.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
@@ -22,7 +21,7 @@ namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 
-Mntr_HomeologPhase::Mntr_HomeologPhase(void) : Monitor()
+Mntr_HomeologPhase::Mntr_HomeologPhase(void) : FileMonitor()
 {
     
 }
@@ -45,7 +44,7 @@ void Mntr_HomeologPhase::constructInternalObject( void )
 {
     const std::string&                  fn      = static_cast<const RlString &>( filename->getRevObject() ).getValue();
     const std::string&                  sep     = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    unsigned int                                 g       = (int)static_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
+    unsigned int                        g       = (int)static_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
     
     bool                                ap      = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
     bool                                wv      = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
@@ -108,22 +107,21 @@ std::string Mntr_HomeologPhase::getMonitorName( void ) const
 const MemberRules& Mntr_HomeologPhase::getParameterRules(void) const
 {
     
-    static MemberRules asMonitorMemberRules;
+    static MemberRules memberRules;
     static bool rules_set = false;
     
     if ( !rules_set )
     {
-        asMonitorMemberRules.push_back( new ArgumentRule("ctmc"           , AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
-        asMonitorMemberRules.push_back( new ArgumentRule("filename"       , RlString::getClassTypeSpec() , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        asMonitorMemberRules.push_back( new ArgumentRule("printgen"       , IntegerPos::getClassTypeSpec()  , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new IntegerPos(1) ) );
-        asMonitorMemberRules.push_back( new ArgumentRule("separator"      , RlString::getClassTypeSpec() , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
-        asMonitorMemberRules.push_back( new ArgumentRule("append"         , RlBoolean::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
-        asMonitorMemberRules.push_back( new ArgumentRule("version"        , RlBoolean::getClassTypeSpec(), "Should we record the software version?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+        memberRules.push_back( new ArgumentRule("ctmc"           , AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
+
+        // add the rules from the base class
+        const MemberRules &parentRules = FileMonitor::getParameterRules();
+        memberRules.insert(memberRules.end(), parentRules.begin(), parentRules.end());
 
         rules_set = true;
     }
     
-    return asMonitorMemberRules;
+    return memberRules;
 }
 
 /** Get type spec */
@@ -148,32 +146,9 @@ void Mntr_HomeologPhase::printValue(std::ostream &o) const
 void Mntr_HomeologPhase::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     
-    if ( name == "" ) {
-        vars.push_back( var );
-    }
-    else if ( name == "filename" )
-    {
-        filename = var;
-    }
-    else if ( name == "separator" )
-    {
-        separator = var;
-    }
-    else if ( name == "ctmc" )
+    if ( name == "ctmc" )
     {
         ctmc = var;
-    }
-    else if ( name == "printgen" )
-    {
-        printgen = var;
-    }
-    else if ( name == "append" )
-    {
-        append = var;
-    }
-    else if ( name == "version" )
-    {
-        version = var;
     }
     else
     {

@@ -19,7 +19,7 @@
 #define Mntr_CharacterHistoryNewickFile_H
 
 #include "TreeCharacterHistoryNodeMonitor.h"
-#include "RlMonitor.h"
+#include "RlFileMonitor.h"
 #include "TypedDagNode.h"
 
 #include <ostream>
@@ -27,7 +27,7 @@
 
 namespace RevLanguage {
     
-    class Mntr_CharacterHistoryNewickFile : public Monitor {
+    class Mntr_CharacterHistoryNewickFile : public FileMonitor {
         
     public:
         
@@ -47,21 +47,14 @@ namespace RevLanguage {
         
         void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
         
-        std::set<RevPtr<const RevVariable> >        vars;
-        RevPtr<const RevVariable>                   filename;
         RevPtr<const RevVariable>                   tree;
         RevPtr<const RevVariable>                   ctmc;
-        RevPtr<const RevVariable>                   printgen;
-        RevPtr<const RevVariable>                   separator;
         RevPtr<const RevVariable>                   prior;
         RevPtr<const RevVariable>                   posterior;
         RevPtr<const RevVariable>                   likelihood;
         RevPtr<const RevVariable>                   type;
-//        RevPtr<const RevVariable>                      counts;
-//        RevPtr<const RevVariable>                      events;
-        RevPtr<const RevVariable>                      style;
-        RevPtr<const RevVariable>                      append;
-        
+        RevPtr<const RevVariable>                   style;
+
     };
     
 }
