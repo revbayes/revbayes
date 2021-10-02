@@ -31,7 +31,7 @@ using namespace RevLanguage;
 
 
 
-Mntr_ExtendedNewickFile::Mntr_ExtendedNewickFile(void) : Monitor()
+Mntr_ExtendedNewickFile::Mntr_ExtendedNewickFile(void) : FileMonitor()
 {
     
 }
@@ -134,17 +134,17 @@ const MemberRules& Mntr_ExtendedNewickFile::getParameterRules(void) const
     if ( !rules_set )
     {
     
-        memberRules.push_back( new ArgumentRule("filename", RlString::getClassTypeSpec(), "The name of the file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         memberRules.push_back( new ArgumentRule("tree"    , TimeTree::getClassTypeSpec(), "The tree variable.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         memberRules.push_back( new Ellipsis( "Variables at nodes or branches.", RevObject::getClassTypeSpec() ) );
         memberRules.push_back( new ArgumentRule("isNodeParameter" , RlBoolean::getClassTypeSpec(), "Is this a node or branch parameter?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-        memberRules.push_back( new ArgumentRule("printgen"  , IntegerPos::getClassTypeSpec()  , "How frequently do we print.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new IntegerPos(1) ) );
-        memberRules.push_back( new ArgumentRule("separator" , RlString::getClassTypeSpec() , "The separator between variables.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
         memberRules.push_back( new ArgumentRule("posterior" , RlBoolean::getClassTypeSpec(), "Should we print the posterior probability as well.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         memberRules.push_back( new ArgumentRule("likelihood", RlBoolean::getClassTypeSpec(), "Should we print the likelihood as well?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         memberRules.push_back( new ArgumentRule("prior"     , RlBoolean::getClassTypeSpec(), "Should we print the prior probability as well?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-        memberRules.push_back( new ArgumentRule("version"   , RlBoolean::getClassTypeSpec(), "Should we record the software version?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
         
+        // add the rules from the base class
+        const MemberRules &parentRules = FileMonitor::getParameterRules();
+        memberRules.insert(memberRules.end(), parentRules.begin(), parentRules.end());
+
         rules_set = true;
     }
     
@@ -176,10 +176,6 @@ void Mntr_ExtendedNewickFile::setConstParameter(const std::string& name, const R
     {
         vars.push_back( var );
     }
-    else if ( name == "filename" )
-    {
-        filename = var;
-    }
     else if ( name == "tree" )
     {
         tree = var;
@@ -187,14 +183,6 @@ void Mntr_ExtendedNewickFile::setConstParameter(const std::string& name, const R
     else if ( name == "isNodeParameter" )
     {
         isNodeParameter = var;
-    }
-    else if ( name == "separator" )
-    {
-        separator = var;
-    }
-    else if ( name == "printgen" )
-    {
-        printgen = var;
     }
     else if ( name == "prior" )
     {
@@ -208,12 +196,8 @@ void Mntr_ExtendedNewickFile::setConstParameter(const std::string& name, const R
     {
         likelihood = var;
     }
-    else if ( name == "version" )
-    {
-        version = var;
-    }
     else
     {
-        RevObject::setConstParameter(name, var);
+        FileMonitor::setConstParameter(name, var);
     }
 }

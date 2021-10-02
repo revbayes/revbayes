@@ -19,7 +19,7 @@
 #define Mntr_ExtendedNewickFile_H
 
 #include "ExtendedNewickTreeMonitor.h"
-#include "RlMonitor.h"
+#include "RlFileMonitor.h"
 #include "TypedDagNode.h"
 
 #include <ostream>
@@ -27,7 +27,7 @@
 
 namespace RevLanguage {
     
-    class Mntr_ExtendedNewickFile : public Monitor {
+    class Mntr_ExtendedNewickFile : public FileMonitor {
         
     public:
         
@@ -48,16 +48,12 @@ namespace RevLanguage {
         void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);   //!< Set member variable
         
         std::vector<RevPtr<const RevVariable> >     vars;
-        RevPtr<const RevVariable>                   filename;
         RevPtr<const RevVariable>                   tree;
         RevPtr<const RevVariable>                   isNodeParameter;
-        RevPtr<const RevVariable>                   printgen;
-        RevPtr<const RevVariable>                   separator;
         RevPtr<const RevVariable>                   prior;
         RevPtr<const RevVariable>                   posterior;
         RevPtr<const RevVariable>                   likelihood;
-        RevPtr<const RevVariable>                   version;
-        
+
     };
     
 }
