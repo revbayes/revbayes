@@ -12,8 +12,7 @@ jobs:
   build:
     strategy:
       matrix:
-        name: [ubuntu-gcc-4.9,
-               ubuntu-gcc-5,
+        name: [ubuntu-gcc-5,
                ubuntu-gcc-6,
                ubuntu-gcc-7,
                ubuntu-gcc-8,
@@ -25,12 +24,6 @@ jobs:
                ]
 
         include:
-          - name: ubuntu-gcc-4.9
-            os: ubuntu-16.04
-            compiler: gcc
-            version: "4.9"
-            mpi: false
-
           - name: ubuntu-gcc-5
             os: ubuntu-18.04
             compiler: gcc
@@ -157,23 +150,7 @@ jobs:
       run: |
         # Don't use weird boost version installed by github actions.
         sudo rm -rf /usr/local/share/boost
-        # We have to build boost for gcc-4.9 because the prebuilt packages have the ABI from gcc-5+
-        if [ "${{ matrix.os }}" = ubuntu-16.04 ] ; then
-          # These exports are supposed to affect b2, but they seem not to, so use update-alternatives
-          export CC=gcc-4.9
-          export CXX=g++-4.9
-          sudo update-alternatives --install /usr/bin/gcc  gcc /usr/bin/gcc-4.9  90
-          sudo update-alternatives --install /usr/bin/g++  g++ /usr/bin/g++-4.9  90
-          curl -O -L https://boostorg.jfrog.io/artifactory/main/release/1.71.0/source/boost_1_71_0.tar.gz
-          tar -xzf boost_1_71_0.tar.gz
-          cd boost_1_71_0
-          ./bootstrap.sh --with-libraries=atomic,chrono,filesystem,system,regex,thread,date_time,program_options,math,serialization
-          ./b2 link=static
-          echo "BOOST_ROOT=${GITHUB_WORKSPACE}/boost_1_71_0" >> $GITHUB_ENV
-          echo "BOOST_INCLUDE_DIR=${GITHUB_WORKSPACE}/boost_1_71_0" >> $GITHUB_ENV
-          echo "BOOST_LIBRARY_DIR=${GITHUB_WORKSPACE}/boost_1_71_0/stage/lib" >> $GITHUB_ENV
-        else
-          sudo apt-get install -y libboost-dev libboost-program-options-dev libboost-date-time-dev libboost-filesystem-dev libboost-regex-dev libboost-serialization-dev libboost-system-dev libboost-thread-dev
+        sudo apt-get install -y libboost-dev libboost-program-options-dev libboost-date-time-dev libboost-filesystem-dev libboost-regex-dev libboost-serialization-dev libboost-system-dev libboost-thread-dev
         fi
 
     - name: Install BOOST and set up build (Windows meson cross compile)
