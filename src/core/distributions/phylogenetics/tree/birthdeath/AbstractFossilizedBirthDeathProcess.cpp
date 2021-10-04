@@ -207,7 +207,7 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
 
             if ( x_i[i][j] == oldest_y )
             {
-                y_i.push_back(j);
+                y_i[i] = j;
             }
 
             nu_j[i].push_back(nu);
@@ -253,7 +253,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
         {
             return RbConstants::Double::neginf;
         }
-        if ( d > 0.0 != fbd_taxa[i].isExtinct() )
+        if ( (d > 0.0) != fbd_taxa[i].isExtinct() )
         {
             return RbConstants::Double::neginf;
         }
@@ -286,8 +286,8 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
             if ( analytic[i] == true )
             {
                 // merge sorted rate interval and age uncertainty boundaries
-                std::vector<double> x; x.reserve(times.size() + x_i[i].size());
-                std::vector<double>::iterator xit = std::set_union( times.begin(), times.end(), x_i[i].begin(), x_i[i].end(), x.begin() );
+                std::vector<double> x;
+                std::set_union( times.begin(), times.end(), x_i[i].begin(), x_i[i].end(), std::back_inserter(x) );
 
                 size_t oi = num_intervals - 1;
                 size_t nu_index = 0;
@@ -303,7 +303,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                 // include intermediate q terms
                 for (size_t j = bi; j < oi; j++)
                 {
-                    q += q_i[j];
+                    q -= q_i[j];
                 }
                 // include intermediate q_tilde terms
                 for (size_t j = oi; j < di; j++)
@@ -316,7 +316,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                 // compute the integral analytically
                 for ( size_t j = 0; j < x.size() - 1; j++ )
                 {
-                    if (x[j] > times[oi])
+                    if (x[j] > times[oi] && oi > 0)
                     {
                         oi--;
                         q -= q_i[oi];
@@ -405,36 +405,36 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
                     std::vector<double> psi(ages.size(), 0.0);
 
-                    for (size_t interval = num_intervals; interval > 0; interval--)
+                    for (size_t j = num_intervals - 1; j >= 0; j--)
                     {
-                        size_t j = interval - 1;
+                        double t_0 = ( j > 0 ? times[j-1] : RbConstants::Double::inf );
 
-                        if ( times[j] <= fbd_taxa[i].getMinAge() )
+                        if ( t_0 <= fbd_taxa[i].getMinAge() )
                         {
                             continue;
                         }
-                        if ( times[j+1] >= o_i[i] )
+                        if ( times[j] >= o_i[i] )
                         {
                             break;
                         }
 
                         // increase incomplete sampling psi
-                        double dt = std::min(o_i[i], times[j]) - std::max(fbd_taxa[i].getMinAge(), times[j+1]);
+                        double dt = std::min(o_i[i], t_0) - std::max(fbd_taxa[i].getMinAge(), times[j]);
 
-                        psi_y_o += fossil[j+1]*dt;
+                        psi_y_o += fossil[j]*dt;
 
                         size_t k = 0;
                         // increase running psi total for each observation
                         for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
                         {
-                            if ( Fi->first.getMin() >= times[j] || Fi->first.getMax() < times[j+1] )
+                            if ( Fi->first.getMin() >= t_0 || Fi->first.getMax() <= times[j] )
                             {
                                 continue;
                             }
 
-                            double dt = std::min(std::min(Fi->first.getMax(), o_i[i]), times[j]) - std::max(Fi->first.getMin(), times[j+1]);
+                            dt = std::min(std::min(Fi->first.getMax(), o_i[i]), t_0) - std::max(Fi->first.getMin(), times[j]);
 
-                            psi[k] += fossil[j+1]*dt;
+                            psi[k] += fossil[j]*dt;
                         }
                     }
 
@@ -605,7 +605,7 @@ double AbstractFossilizedBirthDeathProcess::integrateQ(size_t i, double nu, doub
     double beta_1 = 0.5*(sum - A)/f;
 
     double w_0 = 0.5*(1-B)*std::exp(-beta_0*psi);
-    double w_1 = 0.5*(1-B)*std::exp(-beta_1*psi);
+    double w_1 = 0.5*(1+B)*std::exp(-beta_1*psi);
 
     beta_0 -= ( complete == false );
     beta_1 -= ( complete == false );
