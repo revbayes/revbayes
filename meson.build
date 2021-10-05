@@ -146,7 +146,17 @@ summary({'exe name': rb_name,
 summary({'prefix': get_option('prefix'),
         },section: 'Directories')
 
+# 3.3 Enable/Disable extra debugging for dynamic programming
+assertions_off = get_option('b_ndebug') == 'true' or (get_option('b_ndebug') == 'if-release' and
+                                                      (get_option('buildtype') == 'release' or
+                                                       get_option('buildtype') == 'plain')
+                                                     )
+assertions_enabled = 'enabled'
+if assertions_off
+  assertions_enabled = 'disabled'
+endif
+
 summary({'optimization': get_option('optimization'),
-         'b_ndebug': get_option('b_ndebug'),
          'debug': get_option('debug'),
+         'assertions': assertions_enabled,
         },section: 'Configuration')
