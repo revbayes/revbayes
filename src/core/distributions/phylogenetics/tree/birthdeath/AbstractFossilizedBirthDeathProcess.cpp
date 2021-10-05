@@ -42,13 +42,8 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
                                                                          const TypedDagNode< RbVector<double> > *intimes,
                                                                          const std::vector<Taxon> &intaxa,
                                                                          bool c) :
-    ascending(true), homogeneous_rho(inrho), timeline( intimes ), fbd_taxa(intaxa), complete(c), origin(0.0)
+    ascending(true), homogeneous_rho(inrho), timeline( intimes ), fbd_taxa(intaxa), complete(c), origin(0.0), touched(false)
 {
-    dirty_taxa = std::vector<bool>(fbd_taxa.size(), true);
-    dirty_psi = std::vector<bool>(fbd_taxa.size(), true);
-    partial_likelihood = std::vector<double>(fbd_taxa.size(), 0.0);
-    stored_likelihood = std::vector<double>(fbd_taxa.size(), 0.0);
-
     // initialize all the pointers to NULL
     homogeneous_lambda             = NULL;
     homogeneous_mu                 = NULL;
@@ -159,7 +154,14 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
     y_i         = std::vector<size_t>(fbd_taxa.size(), 0.0);
     x_i         = std::vector<std::vector<double> >(fbd_taxa.size(), std::vector<double>() );
     nu_j        = std::vector<std::vector<double> >(fbd_taxa.size(), std::vector<double>() );
+
     Psi_i       = std::vector<std::vector<double> >(fbd_taxa.size(), std::vector<double>() );
+    stored_Psi_i = Psi_i;
+
+    dirty_taxa = std::vector<bool>(fbd_taxa.size(), true);
+    dirty_psi = std::vector<bool>(fbd_taxa.size(), true);
+    partial_likelihood = std::vector<double>(fbd_taxa.size(), 0.0);
+    stored_likelihood = partial_likelihood;
 
     bool augmented = false;
 
@@ -283,7 +285,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
             std::map<TimeInterval, size_t> ages = fbd_taxa[i].getAges();
 
-            if ( analytic[i] == true )
+            if ( false ) //analytic[i] == true )
             {
                 // merge sorted rate interval and age uncertainty boundaries
                 std::vector<double> x;
@@ -330,24 +332,27 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
                     double delta_psi = fossil[oi]*(x[j] - x[j-1]);
 
-                    // if we're past the minimum fossil age
-                    // then update our running psi totals
-                    if ( x[j] > x_i[i][0] && dirty_psi[i] == true )
+                    if ( dirty_psi[i] == true || force )
                     {
-                        Psi_i[i][nu_index] = 1.0;
-
-                        size_t k = 0;
-                        // compute the product of psi in ranges whose maxima we've passed
-                        for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
+                        // if we're past the minimum fossil age
+                        // then update our running psi totals
+                        if ( x[j] > x_i[i][0] )
                         {
-                            if ( Fi->first.getMin() <= x[j-1] && Fi->first.getMax() >= x[j] )
-                            {
-                                psi[k] += delta_psi;
-                            }
+                            Psi_i[i][nu_index] = 1.0;
 
-                            if ( Fi->first.getMax() <= x[j-1] )
+                            size_t k = 0;
+                            // compute the product of psi in ranges whose maxima we've passed
+                            for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
                             {
-                                Psi_i[i][nu_index] += log(psi[k]) * Fi->second;
+                                if ( Fi->first.getMin() <= x[j-1] && Fi->first.getMax() >= x[j] )
+                                {
+                                    psi[k] += delta_psi;
+                                }
+
+                                if ( Fi->first.getMax() <= x[j-1] )
+                                {
+                                    Psi_i[i][nu_index] += log(psi[k]) * Fi->second;
+                                }
                             }
                         }
                     }
@@ -399,7 +404,9 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                     partial_likelihood[i] += q_tilde_i[j];
                 }
 
-                if ( dirty_psi[i] )
+                double tmp = Psi_i[i][0];
+
+                if ( dirty_psi[i] || force )
                 {
                     double psi_y_o = 0.0;
 
@@ -462,6 +469,11 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
                     // multiply by e^psi_y_o
                     Psi_i[i][0] += ( complete ? 0.0 : psi_y_o );
+                }
+
+                if ( tmp != Psi_i[i][0] )
+                {
+                    tmp++;
                 }
 
                 partial_likelihood[i] += Psi_i[i][0];
@@ -706,9 +718,9 @@ void AbstractFossilizedBirthDeathProcess::redrawOldestAge(size_t i)
 {
     RandomNumberGenerator* rng = GLOBAL_RNG;
 
-    stored_o_i = o_i;
-
     o_i[i] = rng->uniform01()*(fbd_taxa[i].getMaxAge() - x_i[i][y_i[i]]) + x_i[i][y_i[i]];
+
+    //o_i = stored_o_i;
 
     dirty_psi[i]  = true;
     dirty_taxa[i] = true;
@@ -719,22 +731,35 @@ void AbstractFossilizedBirthDeathProcess::keepSpecialization(DagNode *toucher)
 {
     dirty_psi  = std::vector<bool>(fbd_taxa.size(), false);
     dirty_taxa = std::vector<bool>(fbd_taxa.size(), false);
+
+    touched = false;
 }
 
 
 void AbstractFossilizedBirthDeathProcess::restoreSpecialization(DagNode *toucher)
 {
     partial_likelihood = stored_likelihood;
-    o_i = stored_o_i;
 
     dirty_psi  = std::vector<bool>(fbd_taxa.size(), false);
     dirty_taxa = std::vector<bool>(fbd_taxa.size(), false);
+
+    if ( toucher == timeline || toucher == homogeneous_psi || toucher == heterogeneous_psi )
+    {
+        Psi_i = stored_Psi_i;
+    }
+
+    touched = false;
 }
 
 
 void AbstractFossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, bool touchAll)
 {
-    stored_likelihood = partial_likelihood;
+    if ( touched == false )
+    {
+        stored_likelihood = partial_likelihood;
+        stored_Psi_i = Psi_i;
+        touched = true;
+    }
 
     dirty_taxa = std::vector<bool>(fbd_taxa.size(), true);
 

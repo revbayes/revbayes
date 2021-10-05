@@ -108,6 +108,7 @@ namespace RevBayesCore {
         std::vector<std::vector<double> >       x_i;
         std::vector<std::vector<double> >       nu_j;
         std::vector<std::vector<double> >       Psi_i;
+        std::vector<std::vector<double> >       stored_Psi_i;
 
         std::vector<double>                     o_i;
         std::vector<double>                     stored_o_i;
@@ -121,6 +122,8 @@ namespace RevBayesCore {
 
         std::vector<bool>                       dirty_psi;
         std::vector<bool>                       dirty_taxa;
+
+        bool                                    touched;
     };
 }
 

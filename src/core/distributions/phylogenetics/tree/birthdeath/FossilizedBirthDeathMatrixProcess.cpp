@@ -248,7 +248,11 @@ void FossilizedBirthDeathMatrixProcess::touchSpecialization(DagNode *toucher, bo
 {
     if ( toucher == dag_node )
     {
-        stored_likelihood = partial_likelihood;
+        if ( touched == false )
+        {
+            stored_likelihood = partial_likelihood;
+            touched = true;
+        }
 
         std::set<size_t> touched_indices = dag_node->getTouchedElementIndices();
 
