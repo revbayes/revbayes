@@ -25,11 +25,6 @@ elif host_machine.cpu_family().startswith('arm') or host_machine.cpu_family().st
   add_project_arguments(['-DRB_ARM'], language: 'cpp')
 endif
 
-if get_option('buildtype') == 'release' or get_option('buildtype') == 'plain'
-  add_project_arguments(['-O3'], language : 'cpp')
-  add_project_arguments(['-O3'], language : 'c')
-endif
-
 if get_option('buildtype') == 'debug' or get_option('buildtype') == 'debugoptimized'
   # FIXME: -Woverloaded-virtual is useful, but has too many false-positives with GCC?
   add_project_arguments(['-Wall',
