@@ -21,7 +21,7 @@ using boost::optional;
 
 using namespace RevBayesCore;
 
-const double log_0 = RbConstants::Double::min;
+const double log_0 = RbConstants::Double::neginf;
 
 // How can we make a run-time adjustable log level?
 int log_level = 0;
