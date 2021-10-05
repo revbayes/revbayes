@@ -34,8 +34,10 @@ int log_level = 0;
  * \param[in]    w   The weight how often the proposal will be used (per iteration).
  * \param[in]    t   If auto tuning should be used.
  */
-SliceSamplingMove::SliceSamplingMove( StochasticNode<double> *n, double window_, double weight_, BoundarySearchMethod s, bool t )
+SliceSamplingMove::SliceSamplingMove( StochasticNode<double> *n, optional<double> lb, optional<double> ub, double window_, double weight_, BoundarySearchMethod s, bool t )
     : AbstractMove( std::vector<DagNode*>(), weight_ ,t),
+      lower_bound(lb),
+      upper_bound(ub),
       variable( n ),
       window( window_ ),
       total_movement( 0.0 ),
@@ -44,7 +46,6 @@ SliceSamplingMove::SliceSamplingMove( StochasticNode<double> *n, double window_,
     assert( not variable->isClamped() );
 
     addNode( n );
-    
 }
 
 
@@ -95,22 +96,19 @@ double uniform()
 
 struct interval
 {
-    bool has_lower_bound;
-    double lower_bound;
+    optional<double> lower_bound;
 
-    bool has_upper_bound;
-    double upper_bound;
+    optional<double> upper_bound;
 
     /// check if a value is below the lower bound on the range
-    bool below_lower_bound(double x) const { return (has_lower_bound and x<lower_bound); }
+    bool below_lower_bound(double x) const { return (lower_bound and x < *lower_bound); }
     /// check if a value is above the upper bound on the range
-    bool above_upper_bound(double x) const { return (has_upper_bound and x>upper_bound); }
+    bool above_upper_bound(double x) const { return (upper_bound and x > *upper_bound); }
     /// check if a value is in the range or not
     bool in_range(double x) const  { return (not below_lower_bound(x) and not above_upper_bound(x));}
 
-    interval():has_lower_bound(false),lower_bound(0),has_upper_bound(false),upper_bound(0.0) {}
-    interval(double l, double u):has_lower_bound(true),lower_bound(l),has_upper_bound(true),upper_bound(u) {}
-    interval(bool hl,double l, bool hu, double u):has_lower_bound(hl),lower_bound(l),has_upper_bound(hu),upper_bound(u) {}
+    interval() {};
+    interval(optional<double> lb, optional<double> ub): lower_bound(lb), upper_bound(ub) {}
 };
 
 namespace  {
@@ -156,6 +154,10 @@ namespace  {
             {
                 num_evals++;
 
+                if (below_lower_bound(x) or above_upper_bound(x))
+                    return RbConstants::Double::neginf;
+
+                // Don't set the variable to out-of-bounds values.
                 variable->getValue() = x;
 
                 // first we touch all the nodes
@@ -177,16 +179,15 @@ namespace  {
                 return variable->getValue();
             }
 
-        slice_function(StochasticNode<double> *n, double pr, double l, double p, bool pos_only=false)
-            :variable(n),
+        slice_function(StochasticNode<double> *n, optional<double> lb, optional<double> ub, double pr, double l, double p)
+            :interval(lb,ub),
+             variable(n),
              lHeat(l),
              pHeat(p),
              prHeat(pr),
              num_evals(0)
             {
                 variable->initiateGetAffectedNodes( affectedNodes );
-
-                has_lower_bound = pos_only;
             }
     };
 
@@ -228,8 +229,8 @@ find_slice_boundaries_stepping_out(double x0,slice_function& g,double logy, doub
 
     // Shrink interval to lower and upper bounds.
 
-    if (g.below_lower_bound(L)) L = g.lower_bound;
-    if (g.above_upper_bound(R)) R = g.upper_bound;
+    if (g.below_lower_bound(L)) L = *g.lower_bound;
+    if (g.above_upper_bound(R)) R = *g.upper_bound;
 
     assert(L < R);
 
@@ -251,14 +252,14 @@ find_slice_boundaries_doubling(double x0,slice_function& g,double logy, double w
     optional<double> gL_cached;
     auto gL = [&]() {
         if (not gL_cached)
-            gL_cached = (g.in_range(L))?g(L):log_0;
+            gL_cached = g(L);
         return *gL_cached;
     };
 
     optional<double> gR_cached;
     auto gR = [&]() {
         if (not gR_cached)
-            gR_cached = (g.in_range(R))?g(R):log_0;
+            gR_cached = g(R);
         return *gR_cached;
     };
 
@@ -355,13 +356,13 @@ bool can_propose_same_interval_doubling(double x0, double x1, double w, double L
 
     auto gL = [&]() {
         if (not gL_cached)
-            gL_cached = (g.in_range(L))?g(L):log_0;
+            gL_cached = g(L);
         return *gL_cached;
     };
 
     auto gR = [&]() {
         if (not gR_cached)
-            gR_cached = (g.in_range(R))?g(R):log_0;
+            gR_cached = g(R);
         return *gR_cached;
     };
 
@@ -462,7 +463,7 @@ double slice_sample_doubling(double x0, slice_function& g, double w, int m)
 
 void SliceSamplingMove::performMcmcMove( double prHeat, double lHeat, double pHeat )
 {
-    slice_function g(variable, prHeat, lHeat, pHeat);
+    slice_function g(variable, lower_bound, upper_bound, prHeat, lHeat, pHeat);
 
     double x1 = g.current_value();
 
