@@ -285,7 +285,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
             std::map<TimeInterval, size_t> ages = fbd_taxa[i].getAges();
 
-            if ( false ) //analytic[i] == true )
+            if ( analytic[i] == true )
             {
                 // merge sorted rate interval and age uncertainty boundaries
                 std::vector<double> x;
@@ -313,7 +313,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                     q += q_tilde_i[j];
                 }
 
-                double max_result = 0.0;
+                double max_result = RbConstants::Double::neginf;
 
                 // compute the integral analytically
                 for ( size_t j = 0; j < x.size() - 1; j++ )
@@ -344,12 +344,12 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                             // compute the product of psi in ranges whose maxima we've passed
                             for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
                             {
-                                if ( Fi->first.getMin() <= x[j-1] && Fi->first.getMax() >= x[j] )
+                                if ( Fi->first.getMin() < x[j] && Fi->first.getMax() >= x[j] )
                                 {
                                     psi[k] += delta_psi;
                                 }
 
-                                if ( Fi->first.getMax() <= x[j-1] )
+                                if ( Fi->first.getMax() <= x[j] )
                                 {
                                     Psi_i[i][nu_index] += log(psi[k]) * Fi->second;
                                 }
@@ -371,8 +371,8 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                     // increase the oldest occurrence psi
                     psi_y_xj += delta_psi;
 
-                    double Q = integrateQ(oi, nu_j[i][nu_index], 0,           psi_y_xj)
-                             - integrateQ(oi, nu_j[i][nu_index], x[j+1]-x[j], psi_y_xj);
+                    double Q = integrateQ(oi, nu_j[i][nu_index], x[j], x[j],   psi_y_xj)
+                             - integrateQ(oi, nu_j[i][nu_index], x[j], x[j+1], psi_y_xj);
 
                     double res = log(Q) + Psi_i[i][nu_index] + q + ( complete ? 0.0 : psi_x_y );
 
@@ -597,7 +597,7 @@ double AbstractFossilizedBirthDeathProcess::getSpeciationRate( size_t index ) co
 /**
  * \int q_tilde(t)/q(t)\Psi^{\nu-1}dPsi
  */
-double AbstractFossilizedBirthDeathProcess::integrateQ(size_t i, double nu, double dt, double psi) const
+double AbstractFossilizedBirthDeathProcess::integrateQ(size_t i, double nu, double t_min, double t, double psi) const
 {
     // get the parameters
     double b = birth[i];
@@ -616,16 +616,16 @@ double AbstractFossilizedBirthDeathProcess::integrateQ(size_t i, double nu, doub
     double beta_0 = 0.5*(sum + A)/f;
     double beta_1 = 0.5*(sum - A)/f;
 
-    double w_0 = 0.5*(1-B)*std::exp(-beta_0*psi);
-    double w_1 = 0.5*(1+B)*std::exp(-beta_1*psi);
+    double w_0 = 0.5*(1-B)*std::exp(-beta_0*(f*t_min-psi));
+    double w_1 = 0.5*(1+B)*std::exp(-beta_1*(f*t_min-psi));
 
     beta_0 -= ( complete == false );
     beta_1 -= ( complete == false );
 
     try
     {
-        double tmp1 = RbMath::incompleteGamma(beta_0*(psi + f*dt), nu, false, false) / std::pow(beta_0, nu);
-        double tmp2 = RbMath::incompleteGamma(beta_1*(psi + f*dt), nu, false, false) / std::pow(beta_1, nu);
+        double tmp1 = RbMath::incompleteGamma(beta_0*(psi + f*(t-t_min)), nu, false, false) / std::pow(beta_0, nu);
+        double tmp2 = RbMath::incompleteGamma(beta_1*(psi + f*(t-t_min)), nu, false, false) / std::pow(beta_1, nu);
 
         w_0 *= tmp1;
         w_1 *= tmp2;
