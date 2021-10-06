@@ -222,11 +222,6 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
         Psi_i[i] = std::vector<double>(x.size(), 0.0);
     }
 
-    for ( size_t i = 0; i < augmented.size(); i++)
-    {
-        std::cout << augmented[i] << std::endl;
-    }
-
     if ( warn_augment == true )
     {
         std::stringstream ss;
