@@ -161,7 +161,7 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
     dirty_taxa = std::vector<bool>(fbd_taxa.size(), true);
     dirty_psi = std::vector<bool>(fbd_taxa.size(), true);
 
-    bool augment = false;
+    bool warn_augment = false;
 
     for ( size_t i = 0; i < fbd_taxa.size(); i++ )
     {
@@ -170,7 +170,7 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
         std::set<double> uv;
         double oldest_y = 0.0;
 
-        // get sorted unique uncertinaty break ages
+        // get sorted unique uncertainty range ages
         for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
         {
             uv.insert(Fi->first.getMin());
@@ -197,11 +197,11 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
 
                 // if this observation can be the oldest occurrence
                 // but its minimum age is younger than the oldest minimum
-                // then we augment this taxon with an oldest occurence age
+                // then we augment this taxon with an oldest occurrence age
                 if ( Fi->first.getMax() > oldest_y && Fi->first.getMin() < oldest_y )
                 {
                     augmented[i] = true;
-                    augment = true;
+                    warn_augment = true;
                 }
             }
 
@@ -219,7 +219,12 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
         Psi_i[i] = std::vector<double>(x.size(), 0.0);
     }
 
-    if ( augment == true )
+    for ( size_t i = 0; i < augmented.size(); i++)
+    {
+        std::cout << augmented[i] << std::endl;
+    }
+
+    if ( warn_augment == true )
     {
         std::stringstream ss;
         ss << "WARNING: Fossilized birth death process contains augmented data.";
@@ -412,8 +417,10 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
                     std::vector<double> psi(ages.size(), 0.0);
 
-                    for (size_t j = num_intervals - 1; j >= 0; j--)
+                    for (size_t interval = num_intervals; interval > 0; interval--)
                     {
+                        size_t j = interval - 1;
+
                         double t_0 = ( j > 0 ? times[j-1] : RbConstants::Double::inf );
 
                         if ( t_0 <= fbd_taxa[i].getMinAge() )
@@ -611,16 +618,16 @@ double AbstractFossilizedBirthDeathProcess::integrateQ(size_t i, double nu, doub
     double beta_0 = 0.5*(sum + A)/f;
     double beta_1 = 0.5*(sum - A)/f;
 
-    double w_0 = 0.5*(1-B)*std::exp(-beta_0*(f*t_min-psi));
-    double w_1 = 0.5*(1+B)*std::exp(-beta_1*(f*t_min-psi));
+    double w_0 = 0.5*(1-B)*exp(-beta_0*(f*t_min-psi));
+    double w_1 = 0.5*(1+B)*exp(-beta_1*(f*t_min-psi));
 
     beta_0 -= ( complete == false );
     beta_1 -= ( complete == false );
 
     try
     {
-        double tmp1 = RbMath::incompleteGamma(beta_0*(psi + f*(t-t_min)), nu, false, false) / std::pow(beta_0, nu);
-        double tmp2 = RbMath::incompleteGamma(beta_1*(psi + f*(t-t_min)), nu, false, false) / std::pow(beta_1, nu);
+        double tmp1 = RbMath::incompleteGamma(beta_0*(psi + f*(t-t_min)), nu, false, false) / pow(beta_0, nu);
+        double tmp2 = RbMath::incompleteGamma(beta_1*(psi + f*(t-t_min)), nu, false, false) / pow(beta_1, nu);
 
         w_0 *= tmp1;
         w_1 *= tmp2;
