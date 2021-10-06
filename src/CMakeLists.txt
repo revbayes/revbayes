@@ -33,7 +33,7 @@ else()
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES DEBUG)
-   set(OPT_FLAGS "${OPT_FLAGS} -g -O0 -Wall")
+   set(OPT_FLAGS "${OPT_FLAGS} -g -Og -Wall")
 
    # These just add noise:
    set(OPT_FLAGS "${OPT_FLAGS} -Wno-sign-compare -Wno-unknown-pragmas")
