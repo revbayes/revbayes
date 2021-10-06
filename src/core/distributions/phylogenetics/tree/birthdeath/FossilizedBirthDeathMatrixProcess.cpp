@@ -241,6 +241,11 @@ void FossilizedBirthDeathMatrixProcess::keepSpecialization(DagNode *toucher)
 
 void FossilizedBirthDeathMatrixProcess::restoreSpecialization(DagNode *toucher)
 {
+    if ( toucher == dag_node )
+    {
+        updateStartEndTimes();
+    }
+
     AbstractFossilizedBirthDeathProcess::restoreSpecialization(toucher);
 }
 
@@ -266,9 +271,9 @@ void FossilizedBirthDeathMatrixProcess::touchSpecialization(DagNode *toucher, bo
 
                 redrawOldestOccurrence(i);
             }
-        }
 
-        updateStartEndTimes();
+            updateStartEndTimes();
+        }
 
         touched = true;
     }

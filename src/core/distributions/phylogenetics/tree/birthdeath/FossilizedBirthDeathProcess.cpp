@@ -156,6 +156,8 @@ double FossilizedBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
  */
 double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
 {
+    updateStartEndTimes();
+
     double lnProb = computeLnProbabilityRanges();
 
     for(size_t i = 0; i < taxa.size(); i++)
@@ -753,7 +755,6 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
             {
                 d_i[i] = age;
                 dirty_taxa[i] = true;
-                if ( touched == false ) redrawOldestOccurrence(i);
             }
         }
 
@@ -843,6 +844,11 @@ void FossilizedBirthDeathProcess::keepSpecialization(DagNode *toucher)
 
 void FossilizedBirthDeathProcess::restoreSpecialization(DagNode *toucher)
 {
+    if ( toucher == (DagNode*)dag_node )
+    {
+        updateStartEndTimes();
+    }
+
     AbstractFossilizedBirthDeathProcess::restoreSpecialization(toucher);
 }
 
