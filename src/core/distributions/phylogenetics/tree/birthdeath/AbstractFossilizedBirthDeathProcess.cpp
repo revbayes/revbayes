@@ -151,7 +151,7 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
     updateIntervals();
 
     partial_likelihood = std::vector<double>(fbd_taxa.size(), 0.0);
-    analytic    = std::vector<bool>(fbd_taxa.size(), !a);
+    augmented   = std::vector<bool>(fbd_taxa.size(), a);
     o_i         = std::vector<double>(fbd_taxa.size(), 0.0);
     y_i         = std::vector<size_t>(fbd_taxa.size(), 0.0);
     x_i         = std::vector<std::vector<double> >(fbd_taxa.size(), std::vector<double>() );
@@ -161,7 +161,7 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
     dirty_taxa = std::vector<bool>(fbd_taxa.size(), true);
     dirty_psi = std::vector<bool>(fbd_taxa.size(), true);
 
-    bool augmented = false;
+    bool augment = false;
 
     for ( size_t i = 0; i < fbd_taxa.size(); i++ )
     {
@@ -200,8 +200,8 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
                 // then we augment this taxon with an oldest occurence age
                 if ( Fi->first.getMax() > oldest_y && Fi->first.getMin() < oldest_y )
                 {
-                    analytic[i] = false;
-                    augmented = true;
+                    augmented[i] = true;
+                    augment = true;
                 }
             }
 
@@ -219,7 +219,7 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
         Psi_i[i] = std::vector<double>(x.size(), 0.0);
     }
 
-    if ( augmented == true )
+    if ( augment == true )
     {
         std::stringstream ss;
         ss << "WARNING: Fossilized birth death process contains augmented data.";
@@ -287,7 +287,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
             std::map<TimeInterval, size_t> ages = fbd_taxa[i].getAges();
 
-            if ( analytic[i] == true )
+            if ( augmented[i] == false )
             {
                 // merge sorted rate interval and age uncertainty boundaries
                 std::vector<double> x;
@@ -713,7 +713,7 @@ void AbstractFossilizedBirthDeathProcess::redrawOldestAge(size_t i)
 {
     RandomNumberGenerator* rng = GLOBAL_RNG;
 
-    if ( analytic[i] == false )
+    if ( augmented[i] == true )
     {
         o_i[i] = rng->uniform01()*(fbd_taxa[i].getMaxAge() - x_i[i][y_i[i]]) + x_i[i][y_i[i]];
 

@@ -104,7 +104,7 @@ namespace RevBayesCore {
 
         bool                                    complete;
 
-        std::vector<bool>                       analytic;
+        std::vector<bool>                       augmented;
         std::vector<size_t>                     y_i;
         std::vector<std::vector<double> >       x_i;
         std::vector<std::vector<double> >       nu_j;
