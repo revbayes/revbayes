@@ -107,8 +107,9 @@ RevBayesCore::FossilizedBirthDeathMatrixProcess* Dist_FBDRangeMatrix::createDist
     }
 
     bool c = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
+    bool a = static_cast<const RlBoolean &>( augmented->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathMatrixProcess* d = new RevBayesCore::FossilizedBirthDeathMatrixProcess(l, m, p, r, rt, cond, t, c);
+    RevBayesCore::FossilizedBirthDeathMatrixProcess* d = new RevBayesCore::FossilizedBirthDeathMatrixProcess(l, m, p, r, rt, cond, t, c, a);
 
     return d;
 }
@@ -210,6 +211,8 @@ const MemberRules& Dist_FBDRangeMatrix::getParameterRules(void) const
         dist_member_rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa with stratigraphic ranges used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         
         dist_member_rules.push_back( new ArgumentRule( "complete", RlBoolean::getClassTypeSpec(), "Assume complete fossil sampling?", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( true ) ) );
+
+        dist_member_rules.push_back( new ArgumentRule( "augmented", RlBoolean::getClassTypeSpec(), "Use data augmentation?", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( true ) ) );
 
         rules_set = true;
     }

@@ -44,9 +44,10 @@ FossilizedBirthDeathMatrixProcess::FossilizedBirthDeathMatrixProcess(const DagNo
                                                                      const TypedDagNode< RbVector<double> > *intimes,
                                                                      const std::string &incondition,
                                                                      const std::vector<Taxon> &intaxa,
-                                                                     bool complete) :
+                                                                     bool complete,
+                                                                     bool augmented) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
-    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, complete),
+    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, complete, augmented),
     condition(incondition)
 {
     dirty_gamma = std::vector<bool>(fbd_taxa.size(), true);
@@ -251,7 +252,8 @@ void FossilizedBirthDeathMatrixProcess::touchSpecialization(DagNode *toucher, bo
         if ( touched == false )
         {
             stored_likelihood = partial_likelihood;
-            touched = true;
+            stored_o_i = o_i;
+            stored_Psi_i = Psi_i;
         }
 
         std::set<size_t> touched_indices = dag_node->getTouchedElementIndices();
@@ -262,7 +264,11 @@ void FossilizedBirthDeathMatrixProcess::touchSpecialization(DagNode *toucher, bo
 
             dirty_taxa[i] = true;
             dirty_gamma[i] = true;
+
+            redrawOldestAge(i);
         }
+
+        touched = true;
     }
     else
     {

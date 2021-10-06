@@ -56,7 +56,7 @@ FossilizedBirthDeathProcess::FossilizedBirthDeathProcess(const TypedDagNode<doub
                                                                                            bool c,
                                                                                            bool ex) :
     AbstractBirthDeathProcess(ra, incondition, intaxa, uo),
-    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, c),
+    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, c, false),
     extended(ex)
 {
     for(std::vector<const DagNode*>::iterator it = range_parameters.begin(); it != range_parameters.end(); it++)

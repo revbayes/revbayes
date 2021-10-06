@@ -43,7 +43,8 @@ namespace RevBayesCore {
                                               const TypedDagNode<RbVector<double> > *times,
                                               const std::string &condition,
                                               const std::vector<Taxon> &taxa,
-                                              bool complete);  //!< Constructor
+                                              bool complete,
+                                              bool augmented);  //!< Constructor
         
         // public member functions
         FossilizedBirthDeathMatrixProcess*   clone(void) const;                                         //!< Create an independent clone

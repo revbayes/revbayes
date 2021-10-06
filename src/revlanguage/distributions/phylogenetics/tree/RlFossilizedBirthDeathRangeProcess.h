@@ -47,6 +47,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                           taxa;                                                                               //!< The taxa
         RevPtr<const RevVariable>                           condition;                                                                          //!< The condition of the process
         RevPtr<const RevVariable>                           complete;
+        RevPtr<const RevVariable>                           augmented;
     };
     
 }
@@ -201,6 +202,10 @@ void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::setConstParameter(co
     else if ( name == "complete" )
     {
         complete = var;
+    }
+    else if ( name == "augmented" )
+    {
+        augmented = var;
     }
 
 }
