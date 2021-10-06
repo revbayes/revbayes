@@ -151,6 +151,9 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
     updateIntervals();
 
     partial_likelihood = std::vector<double>(fbd_taxa.size(), 0.0);
+    integrated_Psi     = std::vector<double>(fbd_taxa.size(), 0.0);
+    integrated_Q       = std::vector<double>(fbd_taxa.size(), 0.0);
+
     augmented   = std::vector<bool>(fbd_taxa.size(), a);
     o_i         = std::vector<double>(fbd_taxa.size(), 0.0);
     y_i         = std::vector<size_t>(fbd_taxa.size(), 0.0);
@@ -240,7 +243,6 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 {
     // prepare the probability computation
     updateIntervals();
-    updateStartEndTimes();
 
     // variable declarations and initialization
     double lnProbTimes = 0.0;
@@ -294,37 +296,40 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
             if ( augmented[i] == false )
             {
-                // merge sorted rate interval and age uncertainty boundaries
-                std::vector<double> x;
-                std::set_union( times.begin(), times.end(), x_i[i].begin(), x_i[i].end(), std::back_inserter(x) );
+                double q = 0.0;
+                // include intermediate q terms
+                for (size_t j = bi; j < di; j++)
+                {
+                    q += q_i[j];
+                }
 
-                size_t oi = num_intervals - 1;
-                size_t nu_index = 0;
+                std::vector<double> terms_Q;
+                std::vector<double> terms_Psi;
 
-                std::vector<double> results;
+                double max_Q = RbConstants::Double::neginf;
+                double max_Psi = RbConstants::Double::neginf;
 
                 double psi_y_xj = 0.0;
                 double psi_x_y = 0.0;
 
                 std::vector<double> psi(ages.size(), 0.0);
 
-                double q = 0.0;
-                // include intermediate q terms
-                for (size_t j = bi; j < oi; j++)
-                {
-                    q -= q_i[j];
-                }
-                // include intermediate q_tilde terms
-                for (size_t j = oi; j < di; j++)
-                {
-                    q += q_tilde_i[j];
-                }
+                // merge sorted rate interval and age uncertainty boundaries
+                // from youngest to oldest
+                std::vector<double> x;
+                std::set_union( times.begin(), times.end(), x_i[i].begin(), x_i[i].end(), std::back_inserter(x) );
 
-                double max_result = RbConstants::Double::neginf;
+                size_t oi = di;
+                size_t nu_index = 0;
 
                 // compute the integral analytically
                 for ( size_t j = 0; j < x.size() - 1; j++ )
                 {
+                    if ( x[j] < times[di] )
+                    {
+                        continue;
+                    }
+
                     if (x[j] > times[oi] && oi > 0)
                     {
                         oi--;
@@ -338,6 +343,18 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                     }
 
                     double delta_psi = fossil[oi]*(x[j] - x[j-1]);
+
+                    // increase the oldest occurrence psi
+                    if ( x[j] > x_i[i][y_i[i]] )
+                    {
+                        psi_y_xj += delta_psi;
+                    }
+                    // if we still haven't reached the oldest minimum
+                    // increase the partial incomplete sampling psi
+                    if ( x[j] > x_i[i][0] && x[j] <= x_i[i][y_i[i]] )
+                    {
+                        psi_x_y += delta_psi;
+                    }
 
                     if ( dirty_psi[i] == true || force )
                     {
@@ -361,37 +378,37 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                                     Psi_i[i][j] += log(psi[k]) * Fi->second;
                                 }
                             }
+
+                            Psi_i[i][j] += log(nu_j[i][nu_index]) + ( complete ? 0.0 : psi_x_y );
+
+                            terms_Psi.push_back( Psi_i[i][j] );
+                            max_Psi = std::max( Psi_i[i][j], max_Psi);
                         }
+
                     }
 
-                    // if we still haven't reached the oldest minimum
-                    // increase the partial incomplete sampling psi
-                    if ( x[j] > x_i[i][0] && x[j] <= x_i[i][y_i[i]] )
-                    {
-                        psi_x_y += delta_psi;
-                    }
                     // skip to the oldest minimum fossil age
                     if ( x[j] < x_i[i][y_i[i]] )
                     {
                         continue;
                     }
-                    // increase the oldest occurrence psi
-                    if ( x[j] > x_i[i][y_i[i]] )
-                    {
-                        psi_y_xj += delta_psi;
-                    }
 
-                    double Q = integrateQ(oi, nu_j[i][nu_index], x[j], x[j],   psi_y_xj)
-                             - integrateQ(oi, nu_j[i][nu_index], x[j], x[j+1], psi_y_xj);
+                    double term_Q = integrateQ(oi, nu_j[i][nu_index], x[j], x[j],   psi_y_xj)
+                                  - integrateQ(oi, nu_j[i][nu_index], x[j], x[j+1], psi_y_xj);
 
-                    double res = log(Q) + Psi_i[i][j] + q + ( complete ? 0.0 : psi_x_y ) + log(nu_j[i][nu_index]);
+                    term_Q = log(term_Q) + q + Psi_i[i][j];
 
-                    results.push_back(res);
-
-                    max_result = std::max(res, max_result);
+                    terms_Q.push_back( term_Q );
+                    max_Q = std::max(term_Q, max_Q);
                 }
 
-                partial_likelihood[i] += RbMath::log_sum_exp(results, max_result);
+                integrated_Q[i]   = RbMath::log_sum_exp(terms_Q, max_Q);
+                partial_likelihood[i] += integrated_Q[i];
+
+                if ( dirty_psi[i] || force )
+                {
+                    integrated_Psi[i] = RbMath::log_sum_exp(terms_Psi, max_Psi);
+                }
             }
             else
             {
@@ -716,16 +733,13 @@ double AbstractFossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) 
  *
  *
  */
-void AbstractFossilizedBirthDeathProcess::redrawOldestAge(size_t i)
+void AbstractFossilizedBirthDeathProcess::redrawOldestOccurrence(size_t i)
 {
-    RandomNumberGenerator* rng = GLOBAL_RNG;
-
     if ( augmented[i] == true )
     {
-        o_i[i] = rng->uniform01()*(fbd_taxa[i].getMaxAge() - x_i[i][y_i[i]]) + x_i[i][y_i[i]];
-
-        dirty_psi[i]  = true;
         dirty_taxa[i] = true;
+        dirty_psi[i]  = true;
+        o_i[i] = GLOBAL_RNG->uniform01()*(fbd_taxa[i].getMaxAge() - x_i[i][y_i[i]]) + x_i[i][y_i[i]];
     }
 }
 
@@ -744,6 +758,7 @@ void AbstractFossilizedBirthDeathProcess::restoreSpecialization(DagNode *toucher
     partial_likelihood = stored_likelihood;
     o_i = stored_o_i;
     Psi_i = stored_Psi_i;
+    integrated_Psi = stored_integrated_Psi;
 
     dirty_psi  = std::vector<bool>(fbd_taxa.size(), false);
     dirty_taxa = std::vector<bool>(fbd_taxa.size(), false);
@@ -759,13 +774,14 @@ void AbstractFossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, 
         stored_likelihood = partial_likelihood;
         stored_o_i = o_i;
         stored_Psi_i = Psi_i;
-    }
+        stored_integrated_Psi = integrated_Psi;
 
-    dirty_taxa = std::vector<bool>(fbd_taxa.size(), true);
+        dirty_taxa = std::vector<bool>(fbd_taxa.size(), true);
 
-    if ( toucher == timeline || toucher == homogeneous_psi || toucher == heterogeneous_psi || touchAll )
-    {
-        dirty_psi  = std::vector<bool>(fbd_taxa.size(), true);
+        if ( toucher == timeline || toucher == homogeneous_psi || toucher == heterogeneous_psi || touchAll )
+        {
+            dirty_psi  = std::vector<bool>(fbd_taxa.size(), true);
+        }
     }
 
     touched = true;

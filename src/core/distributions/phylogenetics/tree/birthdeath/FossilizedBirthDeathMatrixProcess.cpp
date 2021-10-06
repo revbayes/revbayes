@@ -226,7 +226,7 @@ void FossilizedBirthDeathMatrixProcess::redrawValue(void)
         (*this->value)[i][0] = b;
         (*this->value)[i][1] = d;
 
-        redrawOldestAge(i);
+        redrawOldestOccurrence(i);
     }
 }
 
@@ -254,19 +254,21 @@ void FossilizedBirthDeathMatrixProcess::touchSpecialization(DagNode *toucher, bo
             stored_likelihood = partial_likelihood;
             stored_o_i = o_i;
             stored_Psi_i = Psi_i;
+
+            std::set<size_t> touched_indices = dag_node->getTouchedElementIndices();
+
+            for ( std::set<size_t>::iterator it = touched_indices.begin(); it != touched_indices.end(); it++)
+            {
+                size_t i = (*it) / fbd_taxa.size();
+
+                dirty_gamma[i] = true;
+                dirty_taxa[i]  = true;
+
+                redrawOldestOccurrence(i);
+            }
         }
 
-        std::set<size_t> touched_indices = dag_node->getTouchedElementIndices();
-
-        for ( std::set<size_t>::iterator it = touched_indices.begin(); it != touched_indices.end(); it++)
-        {
-            size_t i = (*it) / fbd_taxa.size();
-
-            dirty_taxa[i] = true;
-            dirty_gamma[i] = true;
-
-            redrawOldestAge(i);
-        }
+        updateStartEndTimes();
 
         touched = true;
     }

@@ -45,7 +45,8 @@ namespace RevBayesCore {
                                       const std::vector<Taxon> &taxa,
                                       bool use_origin,
                                       bool complete,
-                                      bool extended );  //!< Constructor
+                                      bool extended,
+                                      bool augmented);  //!< Constructor
         
         // public member functions
         FossilizedBirthDeathProcess*   clone(void) const;                                         //!< Create an independent clone
@@ -69,7 +70,7 @@ namespace RevBayesCore {
         double                                          lnProbTreeShape(void) const;
 
         double                                          q(size_t i, double t, bool tilde = false) const;
-        double                                          Z(size_t k, size_t i, double x, double t) const;
+        double                                          integrateQ(size_t i, double nu, double t_min, double t, double psi) const;
 
         double                                          simulateDivergenceTime(double origin, double present) const;    //!< Simulate a speciation event.
         std::vector<double>                             simulateDivergenceTimes(size_t n, double origin, double present, double min) const;                 //!< Simulate n speciation events.
@@ -90,8 +91,6 @@ namespace RevBayesCore {
 
         mutable std::vector<bool>                       I;
         bool                                            extended;
-
-        //mutable std::vector<bool>                       bifurcation;
 
         mutable std::vector<double>                     anagenetic;
         mutable std::vector<double>                     symmetric;

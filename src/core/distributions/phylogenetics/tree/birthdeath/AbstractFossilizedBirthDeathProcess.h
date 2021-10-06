@@ -66,13 +66,13 @@ namespace RevBayesCore {
         virtual double                                  q(size_t i, double t, bool tilde = false) const;
         virtual double                                  integrateQ(size_t i, double nu, double t_min, double t, double psi) const;
 
-        void                                            redrawOldestAge(size_t i);
-
         virtual void                                    updateIntervals();
 
         void                                            keepSpecialization(DagNode *toucher);
         void                                            restoreSpecialization(DagNode *toucher);
         void                                            touchSpecialization(DagNode *toucher, bool touchAll);
+
+        void                                            redrawOldestOccurrence(size_t i);
 
         bool                                            ascending;
 
@@ -120,6 +120,11 @@ namespace RevBayesCore {
 
         std::vector<double>                     partial_likelihood;
         std::vector<double>                     stored_likelihood;
+
+        std::vector<double>                     integrated_Psi;
+        std::vector<double>                     stored_integrated_Psi;
+
+        std::vector<double>                     integrated_Q;
 
         std::vector<bool>                       dirty_psi;
         std::vector<bool>                       dirty_taxa;

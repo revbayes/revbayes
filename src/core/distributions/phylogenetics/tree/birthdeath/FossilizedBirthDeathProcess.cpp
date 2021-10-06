@@ -43,20 +43,21 @@ using namespace RevBayesCore;
  * \param[in]    tn             Taxa.
  */
 FossilizedBirthDeathProcess::FossilizedBirthDeathProcess(const TypedDagNode<double> *ra,
-                                                                                           const DagNode *inspeciation,
-                                                                                           const DagNode *inextinction,
-                                                                                           const DagNode *inpsi,
-                                                                                           const TypedDagNode<double> *inrho,
-                                                                                           const DagNode *inlambda_a,
-                                                                                           const DagNode *inbeta,
-                                                                                           const TypedDagNode< RbVector<double> > *intimes,
-                                                                                           const std::string &incondition,
-                                                                                           const std::vector<Taxon> &intaxa,
-                                                                                           bool uo,
-                                                                                           bool c,
-                                                                                           bool ex) :
+                                                           const DagNode *inspeciation,
+                                                           const DagNode *inextinction,
+                                                           const DagNode *inpsi,
+                                                           const TypedDagNode<double> *inrho,
+                                                           const DagNode *inlambda_a,
+                                                           const DagNode *inbeta,
+                                                           const TypedDagNode< RbVector<double> > *intimes,
+                                                           const std::string &incondition,
+                                                           const std::vector<Taxon> &intaxa,
+                                                           bool uo,
+                                                           bool c,
+                                                           bool ex,
+                                                           bool a) :
     AbstractBirthDeathProcess(ra, incondition, intaxa, uo),
-    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, c, false),
+    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, c, a),
     extended(ex)
 {
     for(std::vector<const DagNode*>::iterator it = range_parameters.begin(); it != range_parameters.end(); it++)
@@ -115,8 +116,6 @@ FossilizedBirthDeathProcess::FossilizedBirthDeathProcess(const TypedDagNode<doub
         }
     }
 
-    //bifurcation   = std::vector<bool>(taxa.size() - 1, false);
-
     I             = std::vector<bool>(taxa.size(), false);
 
     anagenetic    = std::vector<double>(num_intervals, 0.0);
@@ -166,10 +165,10 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
         if ( I[i] == true )
         {
             double y_a   = b_i[i];
-            double o     = taxa[i].getMaxAge();
-            double o_min = taxa[i].getMaxAge();
+            double d     = d_i[i];
 
             size_t y_ai = l(y_a);
+            size_t di   = l(di);
 
             // offset speciation density
             lnProb -= log( birth[y_ai] );
@@ -177,41 +176,30 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
             // if this is a sampled tree, then integrate out the speciation times for descendants of sampled ancestors
             if( extended == false )
             {
-                size_t oi = 0; //oldest_intervals[i];
-
-                double x = 0.0;
-
                 // replace q with q~ at the birth time
-                x = q(y_ai, y_a, true) - q(y_ai, y_a);
+                double x = q(y_ai, y_a, true) - q(y_ai, y_a);
 
-                // replace intermediate q terms
-                for (size_t j = y_ai; j < oi; j++)
+                if ( augmented[i] == false )
                 {
-                    x += q_tilde_i[j] - q_i[j];
-                }
-
-                // if there's no uncertainty in o, replace factor for the first appearance
-                if( complete == false && o == o_min )
-                {
-                    x -= q(oi, o, true) - q(oi, o);
+                    // replace q terms
+                    for (size_t j = y_a; j < di; j++)
+                    {
+                        x += q_tilde_i[j];
+                    }
+                    // replace integrated Q with integrated Psi term
+                    x += integrated_Psi[i] - integrated_Q[i];
                 }
                 else
                 {
-                    double Ls = 0.0;
+                    size_t oi = l(o_i[i]);
 
-                    // replace integrated Q_i terms
-                    if ( complete == true )
+                    // replace intermediate q terms
+                    for (size_t j = y_ai; j < oi; j++)
                     {
-                        double a = std::max(d_i[i], times[oi]);
-                        double Ls_plus_a = oi > 0 ? std::min(y_a, times[oi-1]) : y_a;
-                        Ls = Ls_plus_a - a;
+                        x += q_tilde_i[j] - q_i[j];
                     }
-                    else
-                    {
-                        Ls = o - o_min;
-                    }
-
-                    //x += log( Ls ) - lnQ[i];
+                    // replace q terms at oldest occurrence age
+                    x -= q(oi, o_i[i], true) - q(oi, o_i[i]);
                 }
 
                 // compute definite integral
@@ -251,23 +239,6 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
             }
         }
     }
-
-
-//    for ( size_t i = 0; i < bifurcation.size(); i++)
-//    {
-//        const TopologyNode& node = this->value->getInteriorNode(i);
-//
-//        double s = symmetric[l(node.getAge())];
-//
-//        if ( bifurcation[i] )
-//        {
-//            lnProb += log( s );
-//        }
-//        else
-//        {
-//            lnProb += log( 1.0 - s );
-//        }
-//    }
 
     // condition on survival
     if ( condition == "survival" )
@@ -409,9 +380,9 @@ double FossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) const
 
 
 /**
- * \int (t-t_j)^k q_tilde(t)/q(t) dt
+ * \int q_tilde(t)/q(t)\Psi^{\nu-1}dPsi
  */
-double FossilizedBirthDeathProcess::Z(size_t k, size_t i, double x, double t) const
+double FossilizedBirthDeathProcess::integrateQ(size_t i, double nu, double t_min, double t, double psi) const
 {
     double s = symmetric[i];
 
@@ -426,7 +397,6 @@ double FossilizedBirthDeathProcess::Z(size_t k, size_t i, double x, double t) co
     double f = fossil[i];
     double a = anagenetic[i];
     double r = (i == num_intervals - 1 ? homogeneous_rho->getValue() : 0.0);
-    double ti = times[i];
 
     double diff = b - d - f;
     double bp   = b*f;
@@ -435,22 +405,30 @@ double FossilizedBirthDeathProcess::Z(size_t k, size_t i, double x, double t) co
     double B = ( (1.0 - 2.0*(1.0-r)*p_i[i] )*b + d + f ) / A;
 
     double sum = b + d + f + 2.0*a;
-    double alpha = 0.5*(A+sum);
 
-    double tmp1 = pow(-2,k) * (1+B) * exp(-(alpha-A)*(x-ti)) / pow(A-sum,k+1);
-    double tmp2 = pow(2,k)  * (1-B) * exp(-alpha*(x-ti))     / pow(A+sum,k+1);
+    double beta_0 = 0.5*(sum + A)/f;
+    double beta_1 = 0.5*(sum - A)/f;
+
+    double w_0 = 0.5*(1-B)*exp(-beta_0*(f*t_min-psi));
+    double w_1 = 0.5*(1+B)*exp(-beta_1*(f*t_min-psi));
+
+    beta_0 -= ( complete == false );
+    beta_1 -= ( complete == false );
 
     try
     {
-        tmp1 *= RbMath::incompleteGamma((alpha-A)*(t-x), k+1, false, false);
-        tmp2 *= RbMath::incompleteGamma(alpha*(t-x), k+1, false, false);
+        double tmp1 = RbMath::incompleteGamma(beta_0*(psi + f*(t-t_min)), nu, false, false) / pow(beta_0, nu);
+        double tmp2 = RbMath::incompleteGamma(beta_1*(psi + f*(t-t_min)), nu, false, false) / pow(beta_1, nu);
+
+        w_0 *= tmp1;
+        w_1 *= tmp2;
     }
     catch(RbException&)
     {
         return RbConstants::Double::nan;
     }
 
-    return tmp1 - tmp2;
+    return w_0 + w_1;
 }
 
 
@@ -775,6 +753,7 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
             {
                 d_i[i] = age;
                 dirty_taxa[i] = true;
+                if ( touched == false ) redrawOldestOccurrence(i);
             }
         }
 
@@ -788,6 +767,7 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
             {
                 b_i[i] = age;
                 dirty_taxa[i] = true;
+                if ( touched == false ) redrawOldestOccurrence(i);
             }
 
             I[i] = sa;
@@ -809,6 +789,7 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
                     b_i[i] = age;
                     origin = age;
                     dirty_taxa[i] = true;
+                    if ( touched == false ) redrawOldestOccurrence(i);
                 }
             }
         }
@@ -856,24 +837,35 @@ void FossilizedBirthDeathProcess::updateStartEndTimes( void )
 
 void FossilizedBirthDeathProcess::keepSpecialization(DagNode *toucher)
 {
-    dirty_taxa = std::vector<bool>(fbd_taxa.size(), false);
+    AbstractFossilizedBirthDeathProcess::keepSpecialization(toucher);
 }
 
 
 void FossilizedBirthDeathProcess::restoreSpecialization(DagNode *toucher)
 {
-    partial_likelihood = stored_likelihood;
-    dirty_taxa = std::vector<bool>(fbd_taxa.size(), false);
+    AbstractFossilizedBirthDeathProcess::restoreSpecialization(toucher);
 }
 
 
 void FossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, bool touchAll)
 {
-    stored_likelihood = partial_likelihood;
-
-    if ( toucher != (DagNode*)dag_node || touchAll == true )
+    if ( toucher == (DagNode*)dag_node )
     {
-        dirty_taxa = std::vector<bool>(fbd_taxa.size(), true);
+        if ( touched == false )
+        {
+            stored_likelihood = partial_likelihood;
+            stored_o_i = o_i;
+            stored_Psi_i = Psi_i;
+            stored_integrated_Psi = integrated_Psi;
+        }
+
+        updateStartEndTimes();
+
+        touched = true;
+    }
+    else
+    {
+        AbstractFossilizedBirthDeathProcess::touchSpecialization(toucher, touchAll);
     }
 }
 
