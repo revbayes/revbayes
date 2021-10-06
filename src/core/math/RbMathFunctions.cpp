@@ -657,8 +657,6 @@ double RbMath::incompleteGamma(double x, double alpha, bool regularized, bool lo
         s << "Cannot compute incomplete gamma function for alpha = " << alpha;
         throw RbException(s.str());
     }
-    // if x < 0 and alpha isn't an integer
-    // then x^alpha is complex
     if ( x < 0 && RbMath::isInt(alpha) == false )
     {
         std::ostringstream s;
@@ -667,10 +665,7 @@ double RbMath::incompleteGamma(double x, double alpha, bool regularized, bool lo
     }
 
     double scale = RbMath::lnGamma(alpha);
-
-    // if x < 0, then log(x) is complex (abs(x) + pi*i)
-    // so take log(abs(x)) and multiply by exp(alpha * pi*i) = (-1)^alpha
-    factor = exp(alpha * log(fabs(x)) - x - scale) * ( x < 0 ? pow(-1.0,alpha) : 1.0 );
+    factor = exp(alpha * log(fabs(x)) - x - scale) * pow(sgn(x), alpha);
     
     if (x > 1 && x >= alpha) {
         // continued fraction
@@ -729,7 +724,7 @@ double RbMath::incompleteGamma(double x, double alpha, bool regularized, bool lo
     }
 
     gin = lower ? gin : 1.0 - gin;
-    gin = regularized ? gin : exp(log(fabs(gin)) + scale) * ( gin < 0 ? -1.0 : 1.0 );
+    gin = regularized ? gin : exp(log(fabs(gin)) + scale) * sgn(gin);
 	
     return gin;
 }
