@@ -43,14 +43,14 @@ namespace RevBayesCore {
         virtual double                                      rateIntegral(double t_low, double t_high) const = 0;                        //!< Compute the rate integral.
         virtual double                                      computeProbabilitySurvival(double start, double end) const = 0;                              //!< Compute the probability of survival of the process (without incomplete taxon sampling).
 
-        virtual void                                        prepareRateIntegral(double end) const;                                      //!< Compute the rate integral.
-        virtual void                                        prepareSurvivalProbability(double end, double r) const;                     //!< Compute the rate integral.
+        virtual void                                        prepareRateIntegral(double end);                                            //!< Compute the rate integral.
+        virtual void                                        prepareSurvivalProbability(double end, double r);                           //!< Compute the rate integral.
         
         
         // helper functions
-        virtual double                                      computeLnProbabilityTimes(void) const;                                      //!< Compute the log-transformed probability of the current value.
-        double                                              lnP1(double T, double r) const;
-        double                                              lnP1(double t, double T, double r) const;
+        virtual double                                      computeLnProbabilityTimes(void);                                            //!< Compute the log-transformed probability of the current value.
+        double                                              lnP1(double T, double r);
+        double                                              lnP1(double t, double T, double r);
         double                                              lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const;         //!< Compute the log-transformed probability of the number of taxa.
         double                                              lnProbSurvival(double start, double end) const;                             //!< Compute the probability of survival of the process (without incomplete taxon sampling).
         double                                              lnProbSurvival(double start, double end, double r) const;                   //!< Compute the probability of survival of the process including uniform taxon sampling.
@@ -64,8 +64,8 @@ namespace RevBayesCore {
         std::vector<Clade>                                  incomplete_clades;                                                          //!< Topological constrains.
         std::vector<double>                                 incomplete_clade_ages;                                                      //!< Topological constrains.
         
-        mutable std::vector<double>                         log_p_survival;                                                             //!< Topological constrains.
-        mutable std::vector<double>                         rate_integral;                                                              //!< Topological constrains.
+        std::vector<double>                                 log_p_survival;                                                             //!< Topological constrains.
+        std::vector<double>                                 rate_integral;                                                              //!< Topological constrains.
         
         
     };

@@ -96,6 +96,11 @@ namespace RevBayesCore {
     // Global functions using the class
     std::ostream&                       operator<<(std::ostream& o, const Clade& x);                             //!< Overloaded output operator
 
+    void set_ages_for_constraint(Clade& clade, const std::vector<Taxon>& taxa);
+    bool clade_nested_within(const Clade& clade1, const Clade& clade2);
+    bool clades_overlap(const Clade& clade1, const Clade& clade2);
+    bool clades_conflict(const Clade& clade1, const Clade& clade2);
+
 }
 
 #endif

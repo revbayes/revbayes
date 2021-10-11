@@ -16,7 +16,7 @@ brew install meson boost
 
 ### Debian/Ubuntu Linux
 ``` sh
-apt-get install g++ meson libboost-dev
+apt-get install g++ meson libboost-all-dev
 ```
 
 ### Redhat Linux
@@ -26,11 +26,11 @@ dnf install gcc-c++ meson boost-devel
 
 ### Other
 
-You can [download ninja](https://github.com/ninja-build/ninja/releases) and install meson using python:
+You can install meson using python:
 ``` sh
 python3 -m venv meson
 source meson/bin/activate
-pip3 install meson
+pip3 install meson ninja
 ```
 
 ## Build RevBayes
@@ -45,6 +45,7 @@ pip3 install meson
    
     ``` sh
     ( cd revbayes/ ; git checkout development )  # Probably you want the development branch
+    ( cd revbayes/ ; git submodule init ; git submodule update ) # Download tests required for the build
     ( cd revbayes/projects/meson/ ; ./generate.sh )
     meson build revbayes --prefix=$HOME/Applications/revbayes
     ninja -C build install

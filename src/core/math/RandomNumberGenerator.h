@@ -13,6 +13,7 @@ namespace RevBayesCore {
                                                     RandomNumberGenerator(void);                            //!< Default constructor using time seed
                                             
         // Regular functions
+        unsigned int                                getNewSeed(void) const;                                 //!< Get the new seed values
         unsigned int                                getSeed(void) const;                                    //!< Get the seed values
         void                                        setSeed(unsigned int s);                                //!< Set the seeds of the RNG
         double                                      uniform01(void);                                        //!< Get a random [0,1) var

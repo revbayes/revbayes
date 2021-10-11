@@ -1088,8 +1088,7 @@ std::string NclReader::intuitDataType(std::string& s)
     {
         return "dna";
     }
-    //    std::cout << "HEHEHEE: "<< (double)nucCount / (s.size()-nMissing)  << " "<<nucCount << " " << s.size() << " " << nMissing <<std::endl;
-    //std::cout << notDna << " " << notRna <<" "<< notAa << " " << notStd << std::endl;
+
     return "";
 }
 
@@ -1287,7 +1286,7 @@ std::vector<AbstractCharacterData*> NclReader::readMatrices(const std::string &f
         myFileManager.setStringWithNamesOfFilesInDirectory(vectorOffile_names);
     else
     {
-#       if defined (RB_WIN)
+#       if defined (_WIN32)
         vectorOffile_names.push_back( myFileManager.getFilePath() + "\\" + myFileManager.getFileName() );
 #       else
         vectorOffile_names.push_back( myFileManager.getFilePath() + "/" + myFileManager.getFileName() );
@@ -1687,7 +1686,7 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const std::string &fn)
         std::string filepath = myFileManager.getFilePath();
         if ( filepath != "" )
         {
-#           if defined RB_WIN
+#           if defined _WIN32
             filepath += "\\";
 #           else
             filepath += "/";
@@ -1970,7 +1969,8 @@ Tree* NclReader::translateNclSimpleTreeToBranchLengthTree(NxsSimpleTree& nTree, 
         tau->getNode(nodes[i]->getIndex()).setBranchLength( brlens[i] );
     }
     
-    tau->makeInternalNodesBifurcating(true);
+    bool fossils_only = true;
+    tau->makeInternalNodesBifurcating(true, fossils_only);
 
     // only trees with 2-degree root nodes are rooted trees.
     tau->setRooted( root->getNumberOfChildren() == 2 );

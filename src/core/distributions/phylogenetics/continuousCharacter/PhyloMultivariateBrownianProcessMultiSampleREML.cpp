@@ -342,11 +342,12 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::recursiveComputeLnProbabil
                 // set delta_node = (t_l*t_r)/(t_l+t_r);
                 this->contrast_uncertainty[this->active_likelihood[node_index]][node_index][i] = (t_left*t_right) / (t_left+t_right);
 
-                mu_node[i] = (mu_left[i]*t_right + mu_right[i]*t_left) / (t_left+t_right);
-
                 // compute the contrasts for this site and node
                 these_contrasts[i] = mu_left[i] - mu_right[i];
                 
+                // compute the estimate of mu for this site and node
+                mu_node[i] = (mu_left[i]*t_right + mu_right[i]*t_left) / (t_left+t_right);
+
             } // end for-loop over all sites
             
 //            double lnl_contrast = RbStatistics::MultivariateNormal::lnPdfPrecision(means, precision_matrices[active_matrix], these_contrasts, these_branch_lengths[0]);

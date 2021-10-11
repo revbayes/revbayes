@@ -1,6 +1,7 @@
 #ifndef PhyloCTMCSiteHomogeneous_H
 #define PhyloCTMCSiteHomogeneous_H
 
+#include <cassert>
 #include "AbstractPhyloCTMCSiteHomogeneous.h"
 #include "DnaState.h"
 #include "RateMatrix.h"
@@ -121,6 +122,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
                 // add the probability of starting from this state
                 *p_site_j = *p_site_left_j * *p_site_right_j * *f_j;
 
+                assert(isnan(*p_site_j) || (0.0 <= *p_site_j and *p_site_j <= 1.00000000001));
+
                 // increment pointers
                 ++p_site_j; ++p_site_left_j; ++p_site_right_j;
             }
@@ -190,6 +193,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
                 // add the probability of starting from this state
                 *p_site_j = *p_site_left_j * *p_site_right_j * *p_site_middle_j * *f_j;
 
+                assert(isnan(*p_site_j) || (0.0 <= *p_site_j and *p_site_j <= 1.00000000001));
+
                 // increment pointers
                 ++p_site_j; ++p_site_left_j; ++p_site_right_j; ++p_site_middle_j;
             }
@@ -251,7 +256,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
 
                 // store the likelihood for this starting state
                 p_site_mixture[c1] = sum;
-                
+
+                assert(isnan(sum) || (0 <= sum and sum <= 1.00000000001));
+
                 // increment the pointers to the next starting state
                 tp_a+=this->num_chars;
 
@@ -310,7 +317,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
                     sum += p_site_mixture_left[c2] * p_site_mixture_middle[c2] * p_site_mixture_right[c2] * tp_a[c2];
 
                 } // end-for over all distination character
-                
+
+                assert(isnan(sum) || (0 <= sum and sum <= 1.00000000001));
+
                 // store the likelihood for this starting state
                 p_site_mixture[c1] = sum;
 
@@ -398,7 +407,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
 
                         double tmp = 0.0;
 
-                        for ( size_t i=0; i<val.size(); ++i )
+                        for ( size_t i=0; i<this->num_chars; ++i )
                         {
                             // check whether we observed this state
                             if ( val.isSet(i) == true )
@@ -428,7 +437,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
 
                         double tmp = 0.0;
                         const std::vector< double >& weights = this->value->getCharacter(char_data_node_index, this_site_index).getWeights();
-                        for ( size_t i=0; i<val.size(); ++i )
+                        for ( size_t i=0; i<this->num_chars; ++i )
                         {
                             // check whether we observed this state
                             if ( val.isSet(i) == true )

@@ -108,14 +108,13 @@ void RevBayesCore::DiscretizeGammaFromBetaQuantilesFunction::update( void )
         /* the mean value for each category is used to represent all of the values
         in that category */
         /* calculate the cumulative values */
-        double lnGammaValue = RbMath::lnGamma(s + 1.0);
         for (size_t i=0; i<nCats-1; i++)
         {
             (*value)[i] = RbStatistics::Gamma::quantile(s,r,beta_quants[i+1]);
       }
         for (size_t i=0; i<nCats-1; i++)
         {
-            (*value)[i] = RbMath::incompleteGamma((*value)[i] * r, s + 1.0, lnGammaValue);
+            (*value)[i] = RbMath::incompleteGamma((*value)[i] * r, s + 1.0);
         }
         (*value)[nCats-1] = 1.0;
 

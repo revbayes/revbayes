@@ -86,6 +86,7 @@
 
 /* Primitive types (in folder "datatypes/basic") */
 #include "Integer.h"
+#include "IntegerPos.h"
 #include "Natural.h"
 #include "Probability.h"
 #include "RlBoolean.h"
@@ -185,6 +186,8 @@
 #include "Func__scalarVectorSub.h"
 #include "Func__sub.h"
 #include "Func__uminus.h"
+#include "Func__vectorIndexOperator.h"
+#include "Func__simplexIndexOperator.h"
 #include "Func__vectorScalarDiv.h"
 #include "Func__vectorScalarSub.h"
 
@@ -499,6 +502,8 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func__conversion<ModelVector<ModelVector<Probability> >, ModelVector<ModelVector<Real> > >()        );
         
         
+        // index operation
+        addFunction( new Func__simplexIndexOperator() );
 
 
 

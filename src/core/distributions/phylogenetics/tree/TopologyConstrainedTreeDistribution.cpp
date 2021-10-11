@@ -28,6 +28,9 @@
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
 
+using std::vector;
+using std::set;
+
 namespace RevBayesCore { class DagNode; }
 namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
 
@@ -625,25 +628,23 @@ void TopologyConstrainedTreeDistribution::setBackbone(const TypedDagNode<Tree> *
  */
 Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
 {
-    
     // the time tree object (topology & times)
     Tree *psi = new Tree();
-    
+
     // internally we treat unrooted topologies the same as rooted
     psi->setRooted( true );
-    
+
     AbstractRootedTreeDistribution* tree_base_distribution = dynamic_cast<AbstractRootedTreeDistribution*>( base_distribution );
     size_t num_taxa = tree_base_distribution->getNumberOfTaxa();
     const std::vector<Taxon> &taxa = tree_base_distribution->getTaxa();
-    
+
     // add a clounter variable of how many missing taxa we have already added
     size_t n_added_missing_taxa = 0;
-    
+
     // create the tip nodes
     std::vector<TopologyNode*> nodes;
     for (size_t i=0; i<num_taxa; ++i)
     {
-        
         // create the i-th taxon
         TopologyNode* node = new TopologyNode( taxa[i], i );
         
@@ -652,102 +653,85 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
         
         // add the new node to the list
         nodes.push_back( node );
-        
     }
-    
-    
+
     double ra = tree_base_distribution->getRootAge();
     double max_age = tree_base_distribution->getOriginAge();
-    
+
     // we need a sorted vector of constraints, starting with the smallest
     std::vector<Clade> sorted_clades;
-    
-    for (size_t i = 0; i < monophyly_constraints.size(); ++i)
+
+    for (auto& monophyly_constraint: monophyly_constraints)
     {
-        if ( monophyly_constraints[i].getAge() > max_age )
+        if ( monophyly_constraint.getAge() > max_age )
         {
             throw RbException("Cannot simulate tree: clade constraints are older than the origin age.");
         }
-        
+
         // set the ages of each of the taxa in the constraint
-        for (size_t j = 0; j < monophyly_constraints[i].size(); ++j)
-        {
-            for (size_t k = 0; k < num_taxa; ++k)
-            {
-                if ( taxa[k].getName() == monophyly_constraints[i].getTaxonName(j) )
-                {
-                    monophyly_constraints[i].setTaxonAge(j, taxa[k].getAge());
-                    break;
-                }
-            }
-        }
-        
-        // set ages for optional constraints
-        std::vector<Clade> optional_constraints = monophyly_constraints[i].getOptionalConstraints();
-        for (size_t k = 0; k < optional_constraints.size(); k++)
-        {
-            for (size_t opt_taxon_idx = 0; opt_taxon_idx < optional_constraints[k].size(); opt_taxon_idx++)
-            {
-                for (size_t full_taxon_idx = 0; full_taxon_idx < num_taxa; full_taxon_idx++)
-                {
-                    if ( taxa[full_taxon_idx].getName() == optional_constraints[k].getTaxonName(opt_taxon_idx) )
-                    {
-                        
-                        optional_constraints[k].setTaxonAge(opt_taxon_idx, taxa[full_taxon_idx].getAge());
-                        break;
-                    }
-                }
-            }
-            
-        }
-        
-        monophyly_constraints[i].setOptionalConstraints( optional_constraints );
+        set_ages_for_constraint( monophyly_constraint, taxa );
+
         // populate sorted clades vector
-        if ( monophyly_constraints[i].size() > 1 && monophyly_constraints[i].size() < num_taxa )
+        if ( monophyly_constraint.size() > 1 && monophyly_constraint.size() < num_taxa )
         {
-        
-            if ( monophyly_constraints[i].isOptionalMatch() == true )
+            if ( monophyly_constraint.isOptionalMatch() == true )
             {
-                std::vector<Clade> optional_constraints = monophyly_constraints[i].getOptionalConstraints();
+                std::vector<Clade> optional_constraints = monophyly_constraint.getOptionalConstraints();
                 size_t idx = (size_t)( GLOBAL_RNG->uniform01() * optional_constraints.size() );
                 sorted_clades.push_back( optional_constraints[idx] );
             }
             else
             {
-                sorted_clades.push_back( monophyly_constraints[i] );
+                sorted_clades.push_back( monophyly_constraint );
             }
         }
-        
+
     }
-    
-    
+
     // create a clade that contains all species
     Clade all_species = Clade(taxa);
     all_species.setAge( ra );
     sorted_clades.push_back(all_species);
-    
-//    for(std::vector<Clade>::iterator it = sorted_clades.begin(); it != sorted_clades.end(); it++)
-//    {
-//        std::cout << it->getAge() << std::endl;
-//    }
-    
-    // DO WE NEED TO SORT THE TAXA?
-    // try this crummy bubble sort
-    size_t num_clades = sorted_clades.size();
-    for (int i = 0; i < num_clades - 1; i++) {
-        for(int j = 0; j < num_clades - i - 1; j++){
-            if (sorted_clades[j].getAge() > sorted_clades[j+1].getAge()) {
-                std::swap(sorted_clades[j], sorted_clades[j+1]);
-            }
-        }
-    }
-    
+
 //    for(std::vector<Clade>::iterator it = sorted_clades.begin(); it != sorted_clades.end(); it++)
 //    {
 //        std::cout << it->getAge() << std::endl;
 //    }
 
-    
+    auto clade_before = [&](const Clade& clade1, const Clade& clade2)
+        {
+            if (clade_nested_within(clade1, clade2))
+            {
+                if (clade1.getAge() > clade2.getAge())
+                    throw RbException("TopologyConstrainedTreeDistribution - cannot simulate tree: nested clade constraint has larger Age");
+                return true;
+            }
+            else if (clade_nested_within(clade2,clade1))
+            {
+                if (clade2.getAge() > clade1.getAge())
+                    throw RbException("TopologyConstrainedTreeDistribution - cannot simulate tree: nested clade constraint has larger Age");
+                return false;
+            }
+            if (clades_overlap(clade1,clade2))
+                throw RbException("Cannot simulate tree: conflicting monophyletic clade constraints. Check that all clade constraints are properly nested.");
+            return (clade1.getAge() < clade2.getAge());
+        };
+
+    std::sort(sorted_clades.begin(), sorted_clades.end(), clade_before);
+
+//    for(std::vector<Clade>::iterator it = sorted_clades.begin(); it != sorted_clades.end(); it++)
+//    {
+//        std::cout << it->getAge() << std::endl;
+//    }
+
+    /*
+     * Walk clade constraints from tips to root.
+     * For each clade, make a tree with other clades ("virtual taxa") or tip taxa as the leaves.
+     * To find virtual taxa, walk back from the current taxon to the start of the sorted_clades list:
+     *   If we find a nested clade, add it as a child.
+     *   Remove its tip taxa from the unclaimed_taxa set to avoid adding grandchildren as children.
+     */
+
     std::vector<Clade> virtual_taxa;
     int i = -1;
     for (std::vector<Clade>::iterator it = sorted_clades.begin(); it != sorted_clades.end(); it++)
@@ -757,14 +741,13 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
         {
             continue;
         }
-        
 //        std::cout << it->getAge() << std::endl;
-        
+
         ++i;
         const Clade &c = *it;
-        std::vector<Taxon> taxa = c.getTaxa();
-        std::vector<Clade> clades;
-        
+        std::vector<Taxon> unclaimed_taxa = c.getTaxa();
+        std::vector<Clade> children;
+
         int j = i;
         std::vector<Clade>::reverse_iterator jt(it);
         for (; jt != sorted_clades.rend(); jt++)
@@ -774,68 +757,61 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
             {
                 continue;
             }
-            
+
             j--;
             const Clade &c_nested = *jt;
             std::vector<Taxon> taxa_nested = c_nested.getTaxa();
-            
+
             bool found_all = true;
             bool found_some = false;
-            for (size_t k = 0; k < taxa_nested.size(); ++k)
+            for (auto& taxon_nested: taxa_nested)
             {
-                std::vector<Taxon>::iterator kt = std::find(taxa.begin(), taxa.end(), taxa_nested[k]);
-                if ( kt != taxa.end() )
+                std::vector<Taxon>::iterator kt = std::find(unclaimed_taxa.begin(), unclaimed_taxa.end(), taxon_nested);
+                if ( kt != unclaimed_taxa.end() )
                 {
-                    taxa.erase( kt );
+                    unclaimed_taxa.erase( kt );
                     found_some = true;
                 }
                 else
                 {
                     found_all = false;
                 }
-                
             }
-            
+
             if ( found_all == true )
             {
                 //                c.addTaxon( virtual_taxa[j] );
                 //                taxa.push_back( virtual_taxa[j] );
-                clades.push_back( virtual_taxa[j] );
+                children.push_back( virtual_taxa[j] );
             }
-            
-            if ( found_all == false && found_some == true )
-            {
-                throw RbException("Cannot simulate tree: conflicting monophyletic clade constraints. Check that all clade constraints are properly nested.");
-            }
-            
+
+            // We check for conflicts when comparing clades during the sort.
+            // So any overlapping clades should be nested.
+            assert(found_all == found_some);
         }
-        
-        
+
         std::vector<TopologyNode*> nodes_in_clade;
-        
-        
-        for (size_t k = 0; k < taxa.size(); ++k)
+
+        for (auto& taxon: unclaimed_taxa)
         {
-            Clade tmp_clade = Clade( taxa[k] );
-            tmp_clade.setAge( taxa[k].getAge() );
-            clades.push_back( tmp_clade );
+            Clade tmp_clade = Clade( taxon );
+            tmp_clade.setAge( taxon.getAge() );
+            children.push_back( tmp_clade );
         }
-        
-        for (size_t k = 0; k < clades.size(); ++k)
+
+        for (auto& clade: children)
         {
             for (size_t j = 0; j < nodes.size(); ++j)
             {
-                if (nodes[j]->getClade() == clades[k])
+                if (nodes[j]->getClade() == clade)
                 {
                     nodes_in_clade.push_back( nodes[j] );
                     nodes.erase( nodes.begin()+j );
                     break;
                 }
-                
             }
-            
         }
-        
+
 
         // here we need to start adding our "fake" tips
         for ( int index_missing_species = 0; index_missing_species < c.getNumberMissingTaxa(); ++index_missing_species)
@@ -845,18 +821,14 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
             missing_node->setAge( 0.0 );
             nodes_in_clade.push_back( missing_node );
         }
-        
+
         double clade_age = c.getAge();
-        
+
         double max_node_age = 0;
-        for (size_t j = 0; j < nodes_in_clade.size(); ++j)
-        {
-            if ( nodes_in_clade[j]->getAge() > max_node_age )
-            {
-                max_node_age = nodes_in_clade[j]->getAge();
-            }
-        }
-        
+        for (auto& node: nodes_in_clade)
+            if ( node->getAge() > max_node_age )
+                max_node_age = node->getAge();
+
         if ( clade_age <= max_node_age )
         {
             // Get the rng
@@ -865,22 +837,22 @@ Tree* TopologyConstrainedTreeDistribution::simulateTree( void )
 //            clade_age = rng->uniform01() * ( max_age - max_node_age ) + max_node_age;
             clade_age = tree_base_distribution->simulateCladeAge(nodes_in_clade.size(), max_age, 0, max_node_age);
         }
-        
+
         tree_base_distribution->simulateClade(nodes_in_clade, clade_age, 0.0);
         nodes.push_back( nodes_in_clade[0] );
-        
+
         std::vector<Taxon> v_taxa;
         nodes_in_clade[0]->getTaxa(v_taxa);
         Clade new_clade = Clade(v_taxa);
         new_clade.setAge( nodes_in_clade[0]->getAge() );
         virtual_taxa.push_back( new_clade );
     }
-    
+
     TopologyNode *root = nodes[0];
-    
+
     // initialize the topology by setting the root
     psi->setRoot(root, true);
-    
+
     return psi;
 }
 

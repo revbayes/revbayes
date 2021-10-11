@@ -2,9 +2,10 @@ project('RevBayes', ['cpp', 'c'],
         version: '1.0.12',
         default_options: [
           'buildtype=release',
-          'cpp_std=c++11'
+          'cpp_std=c++11',
+          'b_ndebug=if-release'
         ],
-        meson_version: '>= 0.47',
+        meson_version: '>= 0.53',
         license: 'GPLv2')
 
 cpp = meson.get_compiler('cpp')
@@ -22,11 +23,6 @@ elif host_machine.cpu_family().startswith('x86')
 elif host_machine.cpu_family().startswith('arm') or host_machine.cpu_family().startswith('aarch')
   # Only add sse flags for Intel architecture -- not on (say) ARM
   add_project_arguments(['-DRB_ARM'], language: 'cpp')
-endif
-
-if get_option('buildtype') == 'release' or get_option('buildtype') == 'plain'
-  add_project_arguments(['-O3'], language : 'cpp')
-  add_project_arguments(['-O3'], language : 'c')
 endif
 
 if get_option('buildtype') == 'debug' or get_option('buildtype') == 'debugoptimized'
@@ -49,7 +45,6 @@ add_project_arguments([# These just add noise:
 # Handle file too large error when cross-compiling to windows
 if host_machine.system() == 'windows'
   add_project_arguments(['-Wa,-mbig-obj'], language : 'cpp')
-  add_project_arguments(['-DRB_WIN'], language : 'cpp')
 endif
 
 boost_modules = [ 'regex',
@@ -64,6 +59,8 @@ want_static = get_option('static')
 
 # This doesn't build an internal boost from the internal copy, yet.
 boost = dependency('boost', modules : boost_modules, static: want_static)
+
+openlibm = dependency('openlibm', static: want_static)
 
 rb_name = 'rb'
 if get_option('mpi')
@@ -107,7 +104,7 @@ rb = executable(rb_name,
                 ['src/revlanguage/main.cpp'],
                 link_with: [core, revlanguage, libs],
                 include_directories: [src_inc],
-                dependencies: [boost, mpi],
+                dependencies: [boost, mpi, openlibm],
                 link_args: maybe_link_static,
                 install: true)
 
@@ -124,10 +121,38 @@ if get_option('studio')
                          ['src/cmd/main.cpp'],
                          link_with: [core, revlanguage, libs, cmd],
                          include_directories: [src_inc],
-                         dependencies: [boost, mpi, gtk2],
+                         dependencies: [boost, mpi, gtk2, openlibm],
                          install: true)
 
 endif
 
 subdir('tests')
 
+####
+
+summary({'host': host_machine.system()
+        }, section: 'Architecture')
+
+summary({'exe name': rb_name,
+         'mpi': get_option('mpi'),
+         'jupyter': get_option('jupyter'),
+         'studio': get_option('studio'),
+        },section: 'Options')
+
+summary({'prefix': get_option('prefix'),
+        },section: 'Directories')
+
+# 3.3 Enable/Disable extra debugging for dynamic programming
+assertions_off = get_option('b_ndebug') == 'true' or (get_option('b_ndebug') == 'if-release' and
+                                                      (get_option('buildtype') == 'release' or
+                                                       get_option('buildtype') == 'plain')
+                                                     )
+assertions_enabled = 'enabled'
+if assertions_off
+  assertions_enabled = 'disabled'
+endif
+
+summary({'optimization': get_option('optimization'),
+         'debug': get_option('debug'),
+         'assertions': assertions_enabled,
+        },section: 'Configuration')

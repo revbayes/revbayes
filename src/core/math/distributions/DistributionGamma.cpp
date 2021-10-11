@@ -104,7 +104,7 @@ double RbStatistics::Gamma::lnPdf(double shape, double rate, double x)
 double RbStatistics::Gamma::cdf(double shape, double rate, double x)
 {
     
-	return RbMath::incompleteGamma( rate*x, shape, RbMath::lnGamma(shape) );
+	return RbMath::incompleteGamma( rate*x, shape );
 }
 
 /*!

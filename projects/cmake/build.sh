@@ -14,6 +14,8 @@ help="false"
 jupyter="false"
 boost_root=""
 boost_lib=""
+static_boost="false"
+j=4
 
 cmake_args=""
 # parse command line arguments
@@ -30,9 +32,16 @@ while echo $1 | grep ^- > /dev/null; do
 -help           <true|false>    : update the help database and build the YAML help generator. Defaults to false.
 -boost_root     string          : specify directory containing Boost headers (e.g. `/usr/include`). Defaults to unset.
 -boost_lib      string          : specify directory containing Boost libraries. (e.g. `/usr/lib`). Defaults to unset.
+-static_boost	<true|false>    : link using static Boost libraries. Defaults to false.
+-j              integer         : the number of threads to use when compiling RevBayes. Defaults to 4.
 
-Example:
-  ./build.sh -mpi true -help true'
+You can also specify cmake variables as -DCMAKE_VAR1=value1 -DCMAKE_VAR2=value2
+
+Examples:
+  ./build.sh -mpi true -help true
+  ./build.sh -boost_root /home/santa/boost_1.72
+  ./build.sh -DBOOST_ROOT=/home/santa/boost_1.72
+  ./build.sh -mpi true -DHELP=ON -DBOOST_ROOT=/home/santa/boost_1.72'
         exit
     fi
 
@@ -93,11 +102,15 @@ if [ "$travis" = "true" ] ; then
 fi
 
 if [ -n "$boost_root" ] ; then
-    cmake_args="-DLOCAL_BOOST_ROOT=\"${boost_root}\""
+    cmake_args="-DBOOST_ROOT=\"${boost_root}\" $cmake_args"
 fi
 
 if [ -n "$boost_lib" ] ; then
-    cmake_args="-DLOCAL_BOOST_LIBRARY=\"${boost_lib}\""
+    cmake_args="-DBOOST_LIBRARYDIR=\"${boost_lib}\" $cmake_args"
+fi
+
+if [ "$static_boost" = "true" ] ; then
+    cmake_args="-DSTATIC_BOOST=ON $cmake_args"
 fi
 
 if [ "$help" = "true" ] ; then
@@ -142,11 +155,13 @@ fi
     echo "Running './regenerate.sh $(pwd)/$BUILD_DIR"
     ./regenerate.sh $(pwd)/$BUILD_DIR
     cd ${BUILD_DIR}
+    echo
+    echo
     echo "Running 'cmake ../../../src $cmake_args' in $(pwd)"
     cmake ../../../src $cmake_args
     echo
-    echo "Running 'make -j4' in $(pwd)"
-    make -j 4
+    echo "Running 'make -j $j' in $(pwd)"
+    make -j $j
     cd ..
 
     if [ -e  GitVersion_backup.cpp ] ; then

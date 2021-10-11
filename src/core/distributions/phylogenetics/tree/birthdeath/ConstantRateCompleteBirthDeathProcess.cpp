@@ -48,7 +48,7 @@ ConstantRateCompleteBirthDeathProcess* ConstantRateCompleteBirthDeathProcess::cl
  *
  * \return   The log-transformed probability density.
  */
-double ConstantRateCompleteBirthDeathProcess::computeLnProbabilityTimes( void ) const
+double ConstantRateCompleteBirthDeathProcess::computeLnProbabilityTimes( void )
 {
 
     double ln_prob_times = 0;
