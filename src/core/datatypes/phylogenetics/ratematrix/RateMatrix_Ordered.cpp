@@ -10,7 +10,7 @@
 
 using namespace RevBayesCore;
 
-/** Construct rate matrix with n states */
+/** Default constructor for an ordered rate matrix with n states */
 RateMatrix_Ordered::RateMatrix_Ordered(size_t n) : AbstractRateMatrix( n ),
     matrix_size( n ),
     allow_zero_state( true )
@@ -165,6 +165,7 @@ std::vector<double> RateMatrix_Ordered::getStationaryFrequencies( void ) const
     return stationary_freqs;
 }
 
+//!< Determine whether state '0' should be allowed
 void RateMatrix_Ordered::setAllowZeroState(bool tf)
 {
     
@@ -175,6 +176,7 @@ void RateMatrix_Ordered::setAllowZeroState(bool tf)
     
 }
 
+//!< Set the rate of gains
 void RateMatrix_Ordered::setLambda( double l )
 {
     
@@ -185,6 +187,7 @@ void RateMatrix_Ordered::setLambda( double l )
     
 }
 
+//!< Set the rate of losses
 void RateMatrix_Ordered::setMu( double m )
 {
     

@@ -11,7 +11,7 @@ using namespace RevBayesCore;
 
 /** Chi Square distribution Constructor
  * The constructor takes one input:
- * @param df Degrees of freedom, taken as a long
+ * @param df Degrees of freedom
  *
  */
 
