@@ -2,6 +2,8 @@
 #include <ostream>
 #include <string>
 
+#include <boost/optional.hpp>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "OptionRule.h"
@@ -19,6 +21,8 @@
 #include "RevVariable.h"
 #include "RlMove.h"
 #include "RlString.h"
+
+using boost::optional;
 
 namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
@@ -67,6 +71,18 @@ void Move_SliceSampling::constructInternalObject( void )
     // now allocate a new sliding move
     double window_ = static_cast<const RealPos &>( window->getRevObject() ).getValue();
     double weight_ = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+
+    optional<double> lower_bound_;
+    optional<double> upper_bound_;
+    // If the x variable is a RealPos, the lower bound needs to be at least zero.
+    if (dynamic_cast<const RealPos *>( & x->getRevObject() ))
+    {
+        if (lower_bound_)
+            lower_bound_ = std::max(0.0, *lower_bound_);
+        else
+            lower_bound_ = 0.0;
+    }
+
     RevBayesCore::TypedDagNode<double>* tmp = static_cast<const Real &>( x->getRevObject() ).getDagNode();
     RevBayesCore::ContinuousStochasticNode *node_ = static_cast<RevBayesCore::ContinuousStochasticNode *>( tmp );
     bool tune_ = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
@@ -83,7 +99,7 @@ void Move_SliceSampling::constructInternalObject( void )
 
     // finally create the internal move object
 
-    value = new RevBayesCore::SliceSamplingMove(node_ , window_, weight_ , search_method__, tune_);
+    value = new RevBayesCore::SliceSamplingMove(node_ , lower_bound_, upper_bound_, window_, weight_ , search_method__, tune_);
 }
 
 

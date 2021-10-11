@@ -21,7 +21,7 @@ using boost::optional;
 
 using namespace RevBayesCore;
 
-const double log_0 = RbConstants::Double::min;
+const double log_0 = RbConstants::Double::neginf;
 
 // How can we make a run-time adjustable log level?
 int log_level = 0;
@@ -34,8 +34,10 @@ int log_level = 0;
  * \param[in]    w   The weight how often the proposal will be used (per iteration).
  * \param[in]    t   If auto tuning should be used.
  */
-SliceSamplingMove::SliceSamplingMove( StochasticNode<double> *n, double window_, double weight_, BoundarySearchMethod s, bool t )
+SliceSamplingMove::SliceSamplingMove( StochasticNode<double> *n, optional<double> lb, optional<double> ub, double window_, double weight_, BoundarySearchMethod s, bool t )
     : AbstractMove( std::vector<DagNode*>(), weight_ ,t),
+      lower_bound(lb),
+      upper_bound(ub),
       variable( n ),
       window( window_ ),
       total_movement( 0.0 ),
@@ -44,7 +46,6 @@ SliceSamplingMove::SliceSamplingMove( StochasticNode<double> *n, double window_,
     assert( not variable->isClamped() );
 
     addNode( n );
-    
 }
 
 
@@ -95,145 +96,145 @@ double uniform()
 
 struct interval
 {
-  bool has_lower_bound;
-  double lower_bound;
+    optional<double> lower_bound;
 
-  bool has_upper_bound;
-  double upper_bound;
+    optional<double> upper_bound;
 
-  /// check if a value is below the lower bound on the range
-  bool below_lower_bound(double x) const { return (has_lower_bound and x<lower_bound); }
-  /// check if a value is above the upper bound on the range
-  bool above_upper_bound(double x) const { return (has_upper_bound and x>upper_bound); }
-  /// check if a value is in the range or not
-  bool in_range(double x) const  { return (not below_lower_bound(x) and not above_upper_bound(x));}
+    /// check if a value is below the lower bound on the range
+    bool below_lower_bound(double x) const { return (lower_bound and x < *lower_bound); }
+    /// check if a value is above the upper bound on the range
+    bool above_upper_bound(double x) const { return (upper_bound and x > *upper_bound); }
+    /// check if a value is in the range or not
+    bool in_range(double x) const  { return (not below_lower_bound(x) and not above_upper_bound(x));}
 
-  interval():has_lower_bound(false),lower_bound(0),has_upper_bound(false),upper_bound(0.0) {}
-  interval(double l, double u):has_lower_bound(true),lower_bound(l),has_upper_bound(true),upper_bound(u) {}
-  interval(bool hl,double l, bool hu, double u):has_lower_bound(hl),lower_bound(l),has_upper_bound(hu),upper_bound(u) {}
+    interval() {};
+    interval(optional<double> lb, optional<double> ub): lower_bound(lb), upper_bound(ub) {}
 };
 
 namespace  {
 
 /// This object allow computing the probability of the current point, and also store the variable's range
-class slice_function: public interval
-{
-    StochasticNode<double>* variable;
-    double lHeat;
-    double pHeat;
-    double prHeat;
-    RbOrderedSet<DagNode*> affectedNodes;
-    int num_evals;
-
-public:
-
-    int get_num_evals() const {return num_evals;}
-
-    double operator()()
+    class slice_function: public interval
     {
-        double lnPrior = 0.0;
-        double lnLikelihood = 0.0;
+        StochasticNode<double>* variable;
+        double lHeat;
+        double pHeat;
+        double prHeat;
+        RbOrderedSet<DagNode*> affectedNodes;
+        int num_evals;
 
-        // 1. compute the probability of the current value for each node
-        lnPrior += variable->getLnProbability();
+    public:
 
-        // 2. then we recompute the probability for all the affected nodes
-        for (auto& node: affectedNodes)
-        {
-            if ( node->isClamped() )
-                lnLikelihood += node->getLnProbability();
-            else
-                lnPrior += node->getLnProbability();
-        }
+        int get_num_evals() const {return num_evals;}
 
-        // 3. exponentiate with the chain heat
-        double lnPosterior = pHeat * (lHeat * lnLikelihood + prHeat * lnPrior);
+        double operator()()
+            {
+                double lnPrior = 0.0;
+                double lnLikelihood = 0.0;
 
-        return lnPosterior;
-    }
+                // 1. compute the probability of the current value for each node
+                lnPrior += variable->getLnProbability();
 
-    double operator()(double x)
-    {
-        num_evals++;
+                // 2. then we recompute the probability for all the affected nodes
+                for (auto& node: affectedNodes)
+                {
+                    if ( node->isClamped() )
+                        lnLikelihood += node->getLnProbability();
+                    else
+                        lnPrior += node->getLnProbability();
+                }
 
-        variable->getValue() = x;
+                // 3. exponentiate with the chain heat
+                double lnPosterior = pHeat * (lHeat * lnLikelihood + prHeat * lnPrior);
 
-        // first we touch all the nodes
-        // that will set the flags for recomputation
-        variable->touch();
+                return lnPosterior;
+            }
 
-        assert( not variable->isClamped() );
+        double operator()(double x)
+            {
+                num_evals++;
 
-        double Pr_ = (*this)();
+                if (below_lower_bound(x) or above_upper_bound(x))
+                    return RbConstants::Double::neginf;
 
-        // call accept for each node  --  automatically includes affected nodes
-        variable->keep();
+                // Don't set the variable to out-of-bounds values.
+                variable->getValue() = x;
 
-        return Pr_;
-    }
+                // first we touch all the nodes
+                // that will set the flags for recomputation
+                variable->touch();
 
-    double current_value() const
-    {
-        return variable->getValue();
-    }
+                assert( not variable->isClamped() );
 
-    slice_function(StochasticNode<double> *n, double pr, double l, double p, bool pos_only=false)
-        :variable(n),
-          lHeat(l),
-          pHeat(p),
-          prHeat(pr),
-          num_evals(0)
-    {
-        variable->initiateGetAffectedNodes( affectedNodes );
+                double Pr_ = (*this)();
 
-        has_lower_bound = pos_only;
-    }
-};
+                // call accept for each node  --  automatically includes affected nodes
+                variable->keep();
+
+                return Pr_;
+            }
+
+        double current_value() const
+            {
+                return variable->getValue();
+            }
+
+        slice_function(StochasticNode<double> *n, optional<double> lb, optional<double> ub, double pr, double l, double p)
+            :interval(lb,ub),
+             variable(n),
+             lHeat(l),
+             pHeat(p),
+             prHeat(pr),
+             num_evals(0)
+            {
+                variable->initiateGetAffectedNodes( affectedNodes );
+            }
+    };
 
 }
 
 std::pair<double,double> 
 find_slice_boundaries_stepping_out(double x0,slice_function& g,double logy, double w,int m)
 {
-  assert(g.in_range(x0));
+    assert(g.in_range(x0));
 
-  double u = uniform()*w;
-  double L = x0 - u;
-  double R = x0 + (w-u);
+    double u = uniform()*w;
+    double L = x0 - u;
+    double R = x0 + (w-u);
 
-  // Expand the interval until its ends are outside the slice, or until
-  // the limit on steps is reached.
+    // Expand the interval until its ends are outside the slice, or until
+    // the limit on steps is reached.
 
-  if (m>1) {
-    int J = uniform()*m;
-    int K = (m-1)-J;
+    if (m>1) {
+        int J = uniform()*m;
+        int K = (m-1)-J;
 
-    while (J>0 and (not g.below_lower_bound(L)) and g(L)>logy) {
-      L -= w;
-      J--;
+        while (J>0 and (not g.below_lower_bound(L)) and g(L)>logy) {
+            L -= w;
+            J--;
+        }
+
+        while (K>0 and (not g.above_upper_bound(R)) and g(R)>logy) {
+            R += w;
+            K--;
+        }
+    }
+    else {
+        while ((not g.below_lower_bound(L)) and g(L)>logy)
+            L -= w;
+
+        while ((not g.above_upper_bound(R)) and g(R)>logy)
+            R += w;
     }
 
-    while (K>0 and (not g.above_upper_bound(R)) and g(R)>logy) {
-      R += w;
-      K--;
-    }
-  }
-  else {
-    while ((not g.below_lower_bound(L)) and g(L)>logy)
-      L -= w;
+    // Shrink interval to lower and upper bounds.
 
-    while ((not g.above_upper_bound(R)) and g(R)>logy)
-      R += w;
-  }
+    if (g.below_lower_bound(L)) L = *g.lower_bound;
+    if (g.above_upper_bound(R)) R = *g.upper_bound;
 
-  // Shrink interval to lower and upper bounds.
+    assert(L < R);
 
-  if (g.below_lower_bound(L)) L = g.lower_bound;
-  if (g.above_upper_bound(R)) R = g.upper_bound;
-
-  assert(L < R);
-
-  return std::pair<double,double>(L,R);
+    return std::pair<double,double>(L,R);
 }
 
 std::tuple<double,double,optional<double>,optional<double>>
@@ -251,25 +252,25 @@ find_slice_boundaries_doubling(double x0,slice_function& g,double logy, double w
     optional<double> gL_cached;
     auto gL = [&]() {
         if (not gL_cached)
-            gL_cached = (g.in_range(L))?g(L):log_0;
+            gL_cached = g(L);
         return *gL_cached;
     };
 
     optional<double> gR_cached;
     auto gR = [&]() {
         if (not gR_cached)
-            gR_cached = (g.in_range(R))?g(R):log_0;
+            gR_cached = g(R);
         return *gR_cached;
     };
 
     auto too_large = [](double L, double R, double w)
-    {
-        double M = (L+R)/2;
-        double W = R-L;
-        assert(W > 0);
-        bool ok = (L < M) and (M < R) and (W+w > W) and (L-w < L) and (R+w>R);
-        return not ok;
-    };
+        {
+            double M = (L+R)/2;
+            double W = R-L;
+            assert(W > 0);
+            bool ok = (L < M) and (M < R) and (W+w > W) and (L-w < L) and (R+w>R);
+            return not ok;
+        };
 
     while ( K > 0 and (gL() > logy or gR() > logy))
     {
@@ -308,29 +309,29 @@ find_slice_boundaries_doubling(double x0,slice_function& g,double logy, double w
 
 double search_interval(double x0,double& L, double& R, slice_function& g,double logy)
 {
-  //  assert(g(x0) > g(L) and g(x0) > g(R));
-  assert(g(x0) >= logy);
-  assert(L < R);
-  assert(L <= x0 and x0 <= R);
+    //  assert(g(x0) > g(L) and g(x0) > g(R));
+    assert(g(x0) >= logy);
+    assert(L < R);
+    assert(L <= x0 and x0 <= R);
 
-  //double L0 = L, R0 = R;
+    //double L0 = L, R0 = R;
 
-  for (int i=0;i<200;i++)
-  {
-    double x1 = L + uniform()*(R-L);
-    double gx1 = g(x1);
+    for (int i=0;i<200;i++)
+    {
+        double x1 = L + uniform()*(R-L);
+        double gx1 = g(x1);
 
-    if (gx1 >= logy) return x1;
+        if (gx1 >= logy) return x1;
 
-    if (x1 > x0) 
-      R = x1;
-    else
-      L = x1;
-  }
+        if (x1 > x0) 
+            R = x1;
+        else
+            L = x1;
+    }
 
-  std::abort();
+    std::abort();
 
-  return x0;
+    return x0;
 }
 
 
@@ -355,13 +356,13 @@ bool can_propose_same_interval_doubling(double x0, double x1, double w, double L
 
     auto gL = [&]() {
         if (not gL_cached)
-            gL_cached = (g.in_range(L))?g(L):log_0;
+            gL_cached = g(L);
         return *gL_cached;
     };
 
     auto gR = [&]() {
         if (not gR_cached)
-            gR_cached = (g.in_range(R))?g(R):log_0;
+            gR_cached = g(R);
         return *gR_cached;
     };
 
@@ -405,27 +406,27 @@ bool can_propose_same_interval_doubling(double x0, double x1, double w, double L
 
 double slice_sample_stepping_out(double x0, slice_function& g,double w, int m)
 {
-  assert(g.in_range(x0));
+    assert(g.in_range(x0));
 
-  double gx0 = g();
+    double gx0 = g();
 #ifndef NDEBUG
-  volatile double diff = gx0 - g(x0);
-  assert(std::abs(diff) < 1.0e-9);
+    volatile double diff = gx0 - g(x0);
+    assert(std::abs(diff) < 1.0e-9);
 #endif
 
-  // Determine the slice level, in log terms.
+    // Determine the slice level, in log terms.
 
-  double logy = gx0 + log(uniform()); // - exponential(1.0);
+    double logy = gx0 + log(uniform()); // - exponential(1.0);
 
-  // Find the initial interval to sample from.
+    // Find the initial interval to sample from.
 
-  std::pair<double,double> interval = find_slice_boundaries_stepping_out(x0,g,logy,w,m);
-  double L = interval.first;
-  double R = interval.second;
+    std::pair<double,double> interval = find_slice_boundaries_stepping_out(x0,g,logy,w,m);
+    double L = interval.first;
+    double R = interval.second;
 
-  // Sample from the interval, shrinking it on each rejection
+    // Sample from the interval, shrinking it on each rejection
 
-  return search_interval(x0,L,R,g,logy);
+    return search_interval(x0,L,R,g,logy);
 }
 
 
@@ -462,25 +463,25 @@ double slice_sample_doubling(double x0, slice_function& g, double w, int m)
 
 void SliceSamplingMove::performMcmcMove( double prHeat, double lHeat, double pHeat )
 {
-  slice_function g(variable, prHeat, lHeat, pHeat);
+    slice_function g(variable, lower_bound, upper_bound, prHeat, lHeat, pHeat);
 
-  double x1 = g.current_value();
+    double x1 = g.current_value();
 
-  double x2;
-  if (search_method == search_doubling)
-      x2 = slice_sample_doubling(x1, g, window, 40);
-  else
-      x2 = slice_sample_stepping_out(x1, g, window, 40);
+    double x2;
+    if (search_method == search_doubling)
+        x2 = slice_sample_doubling(x1, g, window, 40);
+    else
+        x2 = slice_sample_stepping_out(x1, g, window, 40);
 
-  total_movement += std::abs(x2 - x1);
+    total_movement += std::abs(x2 - x1);
 
-  numPr += g.get_num_evals();
+    numPr += g.get_num_evals();
 
-  if (auto_tuning and num_tried_total > 3 and search_method == search_stepping_out)
-  {
-    double predicted_window = 4.0*total_movement/num_tried_total;
-    window = 0.95*window + 0.05*predicted_window;
-  }
+    if (auto_tuning and num_tried_total > 3 and search_method == search_stepping_out)
+    {
+        double predicted_window = 4.0*total_movement/num_tried_total;
+        window = 0.95*window + 0.05*predicted_window;
+    }
     
 }
 
@@ -541,13 +542,13 @@ void SliceSamplingMove::printSummary(std::ostream &o, bool current_period) const
     o<<"\n";
     if (num_tried_current_period > 0)
     {
-      o<<"  Ave. |x2-x1| = "<<total_movement/num_tried_current_period<<std::endl;
+        o<<"  Ave. |x2-x1| = "<<total_movement/num_tried_current_period<<std::endl;
     }
 
     // print the average distance moved
     if (num_tried_current_period > 0)
     {
-      o<<"  Ave. # of Pr evals = "<<double(numPr)/num_tried_current_period<<std::endl;
+        o<<"  Ave. # of Pr evals = "<<double(numPr)/num_tried_current_period<<std::endl;
     }
 
     //    proposal->printParameterSummary( o );
