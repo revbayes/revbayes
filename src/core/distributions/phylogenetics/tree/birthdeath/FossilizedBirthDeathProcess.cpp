@@ -368,59 +368,6 @@ double FossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) const
 
 
 /**
- * \int q_tilde(t)/q(t)\Psi^{\nu-1}dPsi
- */
-double FossilizedBirthDeathProcess::integrateQ(size_t i, double nu, double t_min, double t, double psi) const
-{
-    double s = symmetric[i];
-
-    if ( s > 0.0 )
-    {
-        throw(RbException("Cannot integrate first occurrence age for beta > 0.0"));
-    }
-
-    // get the parameters
-    double b = birth[i];
-    double d = death[i];
-    double f = fossil[i];
-    double a = anagenetic[i];
-    double r = (i == num_intervals - 1 ? homogeneous_rho->getValue() : 0.0);
-
-    double diff = b - d - f;
-    double bp   = b*f;
-
-    double A = sqrt( diff*diff + 4.0*bp);
-    double B = ( (1.0 - 2.0*(1.0-r)*p_i[i] )*b + d + f ) / A;
-
-    double sum = b + d + f + 2.0*a;
-
-    double beta_0 = 0.5*(sum + A)/f;
-    double beta_1 = 0.5*(sum - A)/f;
-
-    double w_0 = 0.5*(1-B)*exp(-beta_0*(f*t_min-psi));
-    double w_1 = 0.5*(1+B)*exp(-beta_1*(f*t_min-psi));
-
-    beta_0 -= ( complete == false );
-    beta_1 -= ( complete == false );
-
-    try
-    {
-        double tmp1 = RbMath::incompleteGamma(beta_0*(psi + f*(t-t_min)), nu, false, false) / pow(beta_0, nu);
-        double tmp2 = RbMath::incompleteGamma(beta_1*(psi + f*(t-t_min)), nu, false, false) / pow(beta_1, nu);
-
-        w_0 *= tmp1;
-        w_1 *= tmp2;
-    }
-    catch(RbException&)
-    {
-        return RbConstants::Double::nan;
-    }
-
-    return w_0 + w_1;
-}
-
-
-/**
  *
  */
 void FossilizedBirthDeathProcess::simulateClade(std::vector<TopologyNode *> &n, double age, double present)
