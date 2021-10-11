@@ -164,8 +164,6 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
     dirty_taxa = std::vector<bool>(fbd_taxa.size(), true);
     dirty_psi = std::vector<bool>(fbd_taxa.size(), true);
 
-    bool warn_augment = false;
-
     for ( size_t i = 0; i < fbd_taxa.size(); i++ )
     {
         std::map<TimeInterval, size_t> ages = fbd_taxa[i].getAges();
@@ -204,7 +202,6 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
                 if ( Fi->first.getMax() > oldest_y && Fi->first.getMin() < oldest_y )
                 {
                     augmented[i] = true;
-                    warn_augment = true;
                 }
             }
 
@@ -220,13 +217,6 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
         std::set_union( times.begin(), times.end(), x_i[i].begin(), x_i[i].end(), std::back_inserter(x) );
 
         Psi_i[i] = std::vector<double>(x.size(), 0.0);
-    }
-
-    if ( warn_augment == true )
-    {
-        std::stringstream ss;
-        ss << "WARNING: Fossilized birth death process contains augmented data.";
-        RBOUT(ss.str());
     }
 }
 
@@ -255,7 +245,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
         double y = fbd_taxa[i].getMinAge();
 
         // check model constraints
-        if ( !( b > o && ((y == 0.0 && d == 0.0) || (y > 0 && y > d)) && d >= 0.0 ) )
+        if ( !( b > o && y >= d && d >= 0.0 ) )
         {
             return RbConstants::Double::neginf;
         }
@@ -289,123 +279,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
             std::map<TimeInterval, size_t> ages = fbd_taxa[i].getAges();
 
-            if ( augmented[i] == false )
-            {
-                double q = 0.0;
-                // include intermediate q terms
-                for (size_t j = bi; j < di; j++)
-                {
-                    q += q_i[j];
-                }
-
-                std::vector<double> terms_Q;
-                std::vector<double> terms_Psi;
-
-                double max_Q = RbConstants::Double::neginf;
-                double max_Psi = RbConstants::Double::neginf;
-
-                double psi_y_xj = 0.0;
-                double psi_x_y = 0.0;
-
-                std::vector<double> psi(ages.size(), 0.0);
-
-                // merge sorted rate interval and age uncertainty boundaries
-                // from youngest to oldest
-                std::vector<double> x;
-                std::set_union( times.begin(), times.end(), x_i[i].begin(), x_i[i].end(), std::back_inserter(x) );
-
-                size_t oi = di;
-                size_t nu_index = 0;
-
-                // compute the integral analytically
-                for ( size_t j = 0; j < x.size() - 1; j++ )
-                {
-                    if ( x[j] < times[di] )
-                    {
-                        continue;
-                    }
-
-                    if (x[j] > times[oi] && oi > 0)
-                    {
-                        oi--;
-                        q -= q_i[oi];
-                        q += q_tilde_i[oi];
-                    }
-
-                    if (x[j] > x_i[i][nu_index])
-                    {
-                        nu_index++;
-                    }
-
-                    double delta_psi = fossil[oi]*(x[j] - x[j-1]);
-
-                    // increase the oldest occurrence psi
-                    if ( x[j] > x_i[i][y_i[i]] )
-                    {
-                        psi_y_xj += delta_psi;
-                    }
-                    // if we still haven't reached the oldest minimum
-                    // increase the partial incomplete sampling psi
-                    if ( x[j] > x_i[i][0] && x[j] <= x_i[i][y_i[i]] )
-                    {
-                        psi_x_y += delta_psi;
-                    }
-
-                    if ( dirty_psi[i] == true || force )
-                    {
-                        // if we're past the minimum fossil age
-                        // then update our running psi totals
-                        if ( x[j] > x_i[i][0] )
-                        {
-                            Psi_i[i][j] = 0.0;
-
-                            size_t k = 0;
-                            // compute the product of psi in ranges whose maxima we've passed
-                            for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
-                            {
-                                if ( Fi->first.getMin() < x[j] && Fi->first.getMax() >= x[j] )
-                                {
-                                    psi[k] += delta_psi;
-                                }
-
-                                if ( Fi->first.getMax() <= x[j] )
-                                {
-                                    Psi_i[i][j] += log(psi[k]) * Fi->second;
-                                }
-                            }
-
-                            Psi_i[i][j] += log(nu_j[i][nu_index]) + ( complete ? 0.0 : psi_x_y );
-
-                            terms_Psi.push_back( Psi_i[i][j] );
-                            max_Psi = std::max( Psi_i[i][j], max_Psi);
-                        }
-
-                    }
-
-                    // skip to the oldest minimum fossil age
-                    if ( x[j] < x_i[i][y_i[i]] )
-                    {
-                        continue;
-                    }
-
-                    double term_Q = integrateQ(oi, nu_j[i][nu_index], x[j], x[j],   psi_y_xj)
-                                  - integrateQ(oi, nu_j[i][nu_index], x[j], x[j+1], psi_y_xj);
-
-                    term_Q = log(term_Q) + q + Psi_i[i][j];
-
-                    terms_Q.push_back( term_Q );
-                    max_Q = std::max(term_Q, max_Q);
-                }
-
-                integrated_Q[i]   = RbMath::log_sum_exp(terms_Q, max_Q);
-                partial_likelihood[i] += integrated_Q[i];
-
-                if ( dirty_psi[i] || force )
-                {
-                    integrated_Psi[i] = RbMath::log_sum_exp(terms_Psi, max_Psi);
-                }
-            }
-            else
+            if ( augmented[i] == true )
             {
                 size_t oi = l(o_i[i]);
 
@@ -491,6 +365,151 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                 }
 
                 partial_likelihood[i] += Psi_i[i][0];
+            }
+            else
+            {
+                double q = 0.0;
+                // include intermediate q terms
+                for (size_t j = bi; j < di; j++)
+                {
+                    q += q_i[j];
+                }
+
+                std::vector<double> terms_Q;
+                std::vector<double> terms_Psi;
+
+                double max_Q = RbConstants::Double::neginf;
+                double max_Psi = RbConstants::Double::neginf;
+
+                double psi_y_xj = 0.0;
+                double psi_y_ti = 0.0;
+                double psi_x_y = 0.0;
+
+                std::vector<double> psi(ages.size(), 0.0);
+
+                // merge sorted rate interval and age uncertainty boundaries
+                // from youngest to oldest
+                std::vector<double> x;
+                std::set_union( times.rbegin(), times.rend(), x_i[i].begin(), x_i[i].end(), std::back_inserter(x) );
+
+                size_t oi = di;
+                size_t nu_index = 0;
+
+                // compute the integral analytically
+                for ( size_t j = 0; j < x.size() - 1; j++ )
+                {
+                    if ( x[j] < times[di] )
+                    {
+                        continue;
+                    }
+                    if ( oi > 0 && x[j] == times[oi-1] )
+                    {
+                        oi--;
+                        q -= q_i[oi];
+                        q += q_tilde_i[oi];
+
+                        psi_y_ti = psi_y_xj;
+                    }
+                    if ( x[j] == x_i[i][nu_index+1] )
+                    {
+                        nu_index++;
+                    }
+                    if ( x[j] >= x_i[i].back() )
+                    {
+                        break;
+                    }
+                    // if we're past the oldest minimum age
+                    // compute the Q term
+                    if ( x[j] >= x_i[i][y_i[i]] )
+                    {
+                        if ( x[j] == x_i[i][y_i[i]] )
+                        {
+                            psi_y_ti = fossil[oi]*(times[oi] - x[j]);
+                        }
+
+                        double term_Q = integrateQ(oi, nu_j[i][nu_index], x[j],   psi_y_ti)
+                                      - integrateQ(oi, nu_j[i][nu_index], x[j+1], psi_y_ti);
+
+                        term_Q = log(term_Q) + q + Psi_i[i][j] + log(nu_j[i][nu_index]) + ( complete ? 0.0 : psi_x_y );
+
+                        terms_Q.push_back( term_Q );
+                        max_Q = std::max(term_Q, max_Q);
+                    }
+
+                    double delta_psi = fossil[oi]*(x[j+1] - x[j]);
+
+                    if ( dirty_psi[i] == true || force )
+                    {
+                        // if we're past the oldest minimum age
+                        // compute the Psi term
+                        /*if ( x[j] >= x_i[i][y_i[i]] )
+                        {
+                            double term_Psi = Psi_i[i][j] + log(nu_j[i][nu_index]);
+
+                            if ( complete == true )
+                            {
+                                double diff = pow(psi_y_xj+delta_psi, nu_j[i][nu_index])
+                                             -pow(psi_y_xj,           nu_j[i][nu_index]);
+
+                                term_Psi += log(diff / nu_j[i][nu_index]);
+                            }
+                            else
+                            {
+                                double beta = pow(-1.0, nu_j[i][nu_index] + 1);
+
+                                beta *= RbMath::incompleteGamma(-(psi_y_xj+delta_psi), nu_j[i][nu_index],  false,  false)
+                                       -RbMath::incompleteGamma(-(psi_y_xj),           nu_j[i][nu_index],  false,  false);
+
+                                term_Psi += log(beta) + psi_x_y;
+                            }
+
+                            terms_Psi.push_back( term_Psi );
+                            max_Psi = std::max( term_Psi, max_Psi);
+                        }*/
+                        // if we're past the minimum age
+                        // then update our running psi totals
+                        if ( x[j] >= x_i[i][0] )
+                        {
+                            Psi_i[i][j+1] = 0.0;
+
+                            size_t k = 0;
+                            // compute the product of psi in ranges whose maxima we've passed
+                            for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
+                            {
+                                if ( Fi->first.getMin() <= x[j] && Fi->first.getMax() > x[j] )
+                                {
+                                    psi[k] += delta_psi;
+                                }
+
+                                if ( Fi->first.getMax() <= x[j+1] )
+                                {
+                                    Psi_i[i][j+1] += log(psi[k]) * Fi->second;
+                                }
+                            }
+                        }
+
+                    }
+                    // if we still haven't reached the oldest minimum age
+                    // increase the partial incomplete sampling psi
+                    if ( x[j] >= x_i[i][0] && x[j] < x_i[i][y_i[i]] )
+                    {
+                        psi_x_y += delta_psi;
+                    }
+                    // if we're past the oldest minimum age
+                    // increase the oldest occurrence psi
+                    if ( x[j] >= x_i[i][y_i[i]])
+                    {
+                        psi_y_xj += delta_psi;
+                    }
+                }
+
+                integrated_Q[i] = RbMath::log_sum_exp(terms_Q, max_Q);
+                partial_likelihood[i] += integrated_Q[i];
+
+                if ( dirty_psi[i] || force )
+                {
+                    integrated_Psi[i] = RbMath::log_sum_exp(terms_Psi, max_Psi);
+                }
             }
         }
 
@@ -611,18 +630,18 @@ double AbstractFossilizedBirthDeathProcess::getSpeciationRate( size_t index ) co
 /**
  * \int q_tilde(t)/q(t)\Psi^{\nu-1}dPsi
  */
-double AbstractFossilizedBirthDeathProcess::integrateQ(size_t i, double nu, double t_min, double t, double psi) const
+double AbstractFossilizedBirthDeathProcess::integrateQ(size_t i, double nu, double t, double psi) const
 {
     // get the parameters
     double b = birth[i];
     double d = death[i];
     double f = fossil[i];
     double r = (i == num_intervals - 1 ? homogeneous_rho->getValue() : 0.0);
+    double ti = times[i];
 
     double diff = b - d - f;
-    double bp   = b*f;
 
-    double A = sqrt( diff*diff + 4.0*bp);
+    double A = sqrt( diff*diff + 4.0*b*f);
     double B = ( (1.0 - 2.0*(1.0-r)*p_i[i] )*b + d + f ) / A;
 
     double sum = b + d + f;
@@ -630,16 +649,16 @@ double AbstractFossilizedBirthDeathProcess::integrateQ(size_t i, double nu, doub
     double beta_0 = 0.5*(sum + A)/f;
     double beta_1 = 0.5*(sum - A)/f;
 
-    double w_0 = 0.5*(1-B)*exp(-beta_0*(f*t_min-psi));
-    double w_1 = 0.5*(1+B)*exp(-beta_1*(f*t_min-psi));
+    double w_0 = 0.5*(1-B)*exp(beta_0*psi);
+    double w_1 = 0.5*(1+B)*exp(beta_1*psi);
 
     beta_0 -= ( complete == false );
     beta_1 -= ( complete == false );
 
     try
     {
-        double tmp1 = RbMath::incompleteGamma(beta_0*(psi + f*(t-t_min)), nu, false, false) / pow(beta_0, nu);
-        double tmp2 = RbMath::incompleteGamma(beta_1*(psi + f*(t-t_min)), nu, false, false) / pow(beta_1, nu);
+        double tmp1 = RbMath::incompleteGamma(beta_0*(psi + f*(t-ti)), nu, false, false) / pow(beta_0, nu);
+        double tmp2 = RbMath::incompleteGamma(beta_1*(psi + f*(t-ti)), nu, false, false) / pow(beta_1, nu);
 
         w_0 *= tmp1;
         w_1 *= tmp2;
@@ -805,7 +824,6 @@ void AbstractFossilizedBirthDeathProcess::updateIntervals()
 
         if (i > 0)
         {
-
             double r = (i == num_intervals - 1 ? homogeneous_rho->getValue() : 0.0);
             double t = getIntervalTime(i-1);
 

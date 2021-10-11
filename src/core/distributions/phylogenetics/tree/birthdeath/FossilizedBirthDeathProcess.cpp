@@ -181,17 +181,7 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
                 // replace q with q~ at the birth time
                 double x = q(y_ai, y_a, true) - q(y_ai, y_a);
 
-                if ( augmented[i] == false )
-                {
-                    // replace q terms
-                    for (size_t j = y_a; j < di; j++)
-                    {
-                        x += q_tilde_i[j];
-                    }
-                    // replace integrated Q with integrated Psi term
-                    x += integrated_Psi[i] - integrated_Q[i];
-                }
-                else
+                if ( augmented[i] == true )
                 {
                     size_t oi = l(o_i[i]);
 
@@ -202,6 +192,16 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
                     }
                     // replace q terms at oldest occurrence age
                     x -= q(oi, o_i[i], true) - q(oi, o_i[i]);
+                }
+                else
+                {
+                    // replace q terms
+                    for (size_t j = y_a; j < di; j++)
+                    {
+                        x += q_tilde_i[j];
+                    }
+                    // replace integrated Q with integrated Psi term
+                    x += integrated_Psi[i] - integrated_Q[i];
                 }
 
                 // compute definite integral
