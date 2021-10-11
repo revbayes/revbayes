@@ -47,7 +47,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                           taxa;                                                                               //!< The taxa
         RevPtr<const RevVariable>                           condition;                                                                          //!< The condition of the process
         RevPtr<const RevVariable>                           complete;
-        RevPtr<const RevVariable>                           augmented;
+
     };
     
 }
@@ -149,7 +149,6 @@ const MemberRules& RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::getPar
         memberRules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa with fossil occurrence information.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         memberRules.push_back( new ArgumentRule( "complete", RlBoolean::getClassTypeSpec(), "Assume complete fossil sampling?", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( true ) ) );
-        memberRules.push_back( new ArgumentRule( "augmented", RlBoolean::getClassTypeSpec(), "Use data augmentation?", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( true ) ) );
 
         rules_set = true;
     }
@@ -203,10 +202,6 @@ void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::setConstParameter(co
     else if ( name == "complete" )
     {
         complete = var;
-    }
-    else if ( name == "augmented" )
-    {
-        augmented = var;
     }
 
 }

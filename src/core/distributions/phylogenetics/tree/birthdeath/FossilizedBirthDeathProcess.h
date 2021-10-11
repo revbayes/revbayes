@@ -45,8 +45,7 @@ namespace RevBayesCore {
                                       const std::vector<Taxon> &taxa,
                                       bool use_origin,
                                       bool complete,
-                                      bool extended,
-                                      bool augmented);  //!< Constructor
+                                      bool extended);  //!< Constructor
         
         // public member functions
         FossilizedBirthDeathProcess*   clone(void) const;                                         //!< Create an independent clone

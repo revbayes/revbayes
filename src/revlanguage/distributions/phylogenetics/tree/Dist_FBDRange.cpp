@@ -107,10 +107,9 @@ RevBayesCore::FossilizedBirthDeathProcess* Dist_FBDRange::createDistribution( vo
     }
 
     bool c = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
-    bool a = static_cast<const RlBoolean &>( augmented->getRevObject() ).getValue();
     bool ex = static_cast<const RlBoolean &>( extended->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathProcess* d = new RevBayesCore::FossilizedBirthDeathProcess(sa, l, m, p, r, la, b, rt, cond, t, uo, c, ex, a);
+    RevBayesCore::FossilizedBirthDeathProcess* d = new RevBayesCore::FossilizedBirthDeathProcess(sa, l, m, p, r, la, b, rt, cond, t, uo, c, ex);
 
     return d;
 }

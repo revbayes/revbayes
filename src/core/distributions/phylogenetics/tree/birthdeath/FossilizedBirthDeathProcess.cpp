@@ -54,10 +54,9 @@ FossilizedBirthDeathProcess::FossilizedBirthDeathProcess(const TypedDagNode<doub
                                                            const std::vector<Taxon> &intaxa,
                                                            bool uo,
                                                            bool c,
-                                                           bool ex,
-                                                           bool a) :
+                                                           bool ex) :
     AbstractBirthDeathProcess(ra, incondition, intaxa, uo),
-    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, c, a),
+    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, c),
     extended(ex)
 {
     for(std::vector<const DagNode*>::iterator it = range_parameters.begin(); it != range_parameters.end(); it++)
@@ -181,28 +180,15 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
                 // replace q with q~ at the birth time
                 double x = q(y_ai, y_a, true) - q(y_ai, y_a);
 
-                if ( augmented[i] == true )
-                {
-                    size_t oi = l(o_i[i]);
+                size_t oi = l(o_i[i]);
 
-                    // replace intermediate q terms
-                    for (size_t j = y_ai; j < oi; j++)
-                    {
-                        x += q_tilde_i[j] - q_i[j];
-                    }
-                    // replace q terms at oldest occurrence age
-                    x -= q(oi, o_i[i], true) - q(oi, o_i[i]);
-                }
-                else
+                // replace intermediate q terms
+                for (size_t j = y_ai; j < oi; j++)
                 {
-                    // replace q terms
-                    for (size_t j = y_a; j < di; j++)
-                    {
-                        x += q_tilde_i[j];
-                    }
-                    // replace integrated Q with integrated Psi term
-                    x += integrated_Psi[i] - integrated_Q[i];
+                    x += q_tilde_i[j] - q_i[j];
                 }
+                // replace q terms at oldest occurrence age
+                x -= q(oi, o_i[i], true) - q(oi, o_i[i]);
 
                 // compute definite integral
                 lnProb += log(-expm1(x));
@@ -767,7 +753,6 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
             if ( age != b_i[i] )
             {
                 b_i[i] = age;
-                dirty_taxa[i] = true;
                 if ( touched == false ) redrawOldestOccurrence(i);
             }
 
@@ -789,7 +774,6 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
                 {
                     b_i[i] = age;
                     origin = age;
-                    dirty_taxa[i] = true;
                     if ( touched == false ) redrawOldestOccurrence(i);
                 }
             }
@@ -862,7 +846,6 @@ void FossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, bool tou
             stored_likelihood = partial_likelihood;
             stored_o_i = o_i;
             stored_Psi_i = Psi_i;
-            stored_integrated_Psi = integrated_Psi;
         }
 
         updateStartEndTimes();

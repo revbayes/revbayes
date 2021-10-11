@@ -44,10 +44,9 @@ FossilizedBirthDeathMatrixProcess::FossilizedBirthDeathMatrixProcess(const DagNo
                                                                      const TypedDagNode< RbVector<double> > *intimes,
                                                                      const std::string &incondition,
                                                                      const std::vector<Taxon> &intaxa,
-                                                                     bool complete,
-                                                                     bool augmented) :
+                                                                     bool complete) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
-    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, complete, augmented),
+    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, complete),
     condition(incondition)
 {
     dirty_gamma = std::vector<bool>(fbd_taxa.size(), true);

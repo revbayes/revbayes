@@ -43,8 +43,7 @@ namespace RevBayesCore {
                                             const TypedDagNode<double>* rho,
                                             const TypedDagNode<RbVector<double> > *times,
                                             const std::vector<Taxon> &taxa,
-                                            bool complete,
-                                            bool augmented);  //!< Constructor
+                                            bool complete);  //!< Constructor
 
         virtual ~AbstractFossilizedBirthDeathProcess(){};
 
@@ -104,7 +103,6 @@ namespace RevBayesCore {
 
         bool                                    complete;
 
-        std::vector<bool>                       augmented;
         std::vector<size_t>                     y_i;
         std::vector<std::vector<double> >       x_i;
         std::vector<std::vector<double> >       nu_j;
@@ -120,11 +118,6 @@ namespace RevBayesCore {
 
         std::vector<double>                     partial_likelihood;
         std::vector<double>                     stored_likelihood;
-
-        std::vector<double>                     integrated_Psi;
-        std::vector<double>                     stored_integrated_Psi;
-
-        std::vector<double>                     integrated_Q;
 
         std::vector<bool>                       dirty_psi;
         std::vector<bool>                       dirty_taxa;
