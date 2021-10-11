@@ -102,11 +102,9 @@ namespace RevBayesCore {
 
         bool                                    complete;
 
-        std::vector<size_t>                     y_i;
-        std::vector<std::vector<double> >       x_i;
-        std::vector<std::vector<double> >       nu_j;
-        std::vector<std::vector<double> >       Psi_i;
-        std::vector<std::vector<double> >       stored_Psi_i;
+        std::vector<double>                     y_i;
+        std::vector<double>                     Psi_i;
+        std::vector<double>                     stored_Psi_i;
 
         std::vector<double>                     o_i;
         std::vector<double>                     stored_o_i;
