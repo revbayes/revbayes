@@ -63,7 +63,6 @@ namespace RevBayesCore {
         size_t                                          l(double t) const;                                     //!< Find the index so that times[index-1] < t < times[index]
         double                                          p(size_t i, double t) const;
         virtual double                                  q(size_t i, double t, bool tilde = false) const;
-        virtual double                                  integrateQ(size_t i, double nu, double t, double psi) const;
 
         virtual void                                    updateIntervals();
 
