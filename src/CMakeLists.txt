@@ -22,33 +22,38 @@ endif()
 # Add extra CMake libraries into ./CMake
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_MODULE_PATH})
 
-set(OPTIMIZATION_FLAGS "-O3 -DNDEBUG")
 if (CMAKE_SYSTEM_PROCESSOR MATCHES "^arm*|aarch64")
    add_definitions(-DRB_ARM)
+
+   set(OPT_FLAGS "")
 else()
-  #  We need to enable SSE3 instructions even in debug builds.
-  #  Otherwise we get errors failing to inline __mm_hadd_pd( ) in PhyloCTMCSiteHomogeneousNucleotide.h
-   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse -msse2 -msse3")
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse -msse2 -msse3")
+   #  We need to enable SSE3 instructions even in debug builds.
+   #  Otherwise we get errors failing to inline __mm_hadd_pd( ) in PhyloCTMCSiteHomogeneousNucleotide.h
+   set(OPT_FLAGS "-msse -msse2 -msse3")
 endif()
 
-if (CMAKE_BUILD_TYPE MATCHES DEBUG)
-   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -Wall")
+if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+   set(OPT_FLAGS "${OPT_FLAGS} -g -O0 -Wall")
 
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -Wall ")
-     # These just add noise:
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-sign-compare -Wno-unknown-pragmas")
-     # These could be bugs, but there are so many we can't see the really bad ones. So>
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wreorder")
-     # Not necessarily a bug:
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable -Wno-unused-but-set-variable")
+   # These just add noise:
+   set(OPT_FLAGS "${OPT_FLAGS} -Wno-sign-compare -Wno-unknown-pragmas")
+   # These could be bugs, but there are so many we can't see the really bad ones. So>
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reorder")
+   # Not necessarily a bug:
+   set(OPT_FLAGS "${OPT_FLAGS} -Wno-unused-variable")
+elseif ("${CONTINUOUS_INTEGRATION}" STREQUAL "TRUE")
+   set(OPT_FLAGS "${OPT_FLAGS} -O2 -mfpmath=sse -ffp-contract=off")
+   find_library(OPENLIBM openlibm)
+   message("openlibm: ${OPENLIBM}")
 else()
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPTIMIZATION_FLAGS}")
-   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPTIMIZATION_FLAGS}")
+   set(OPT_FLAGS "${OPT_FLAGS} -O3 -DNDEBUG")
 endif()
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPT_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPT_FLAGS}")
 
 if ("${RB_EXEC_NAME}" STREQUAL "")
-   SET(RB_EXEC_NAME "rb")
+   set(RB_EXEC_NAME "rb")
 endif()
 
 if ("${MPI}" STREQUAL "ON")
@@ -61,19 +66,9 @@ if ("${MPI}" STREQUAL "ON")
    set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS}")
 endif()
 
-if (WIN32)
-   add_definitions(-DRB_WIN)
-endif()
-
 if ("${JUPYTER}" STREQUAL "ON")
    add_definitions(-DRB_XCODE)
 endif()
-
-if ("${CONTINUOUS_INTEGRATION}" STREQUAL "TRUE")
-   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g0 -O2")
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g0 -O2")
-endif()
-
 
 MESSAGE("Boost location hints:")
 if (BOOST_ROOT)
@@ -89,6 +84,10 @@ if (BOOST_LIBRARYDIR)
 endif()
 
 set(Boost_USE_MULTITHREADED ON)
+if ("${STATIC_BOOST}" STREQUAL "ON")
+	MESSAGE("Static linking Boost")
+	set(Boost_USE_STATIC_LIBS ON)
+endif()
 
 MESSAGE("Searching for BOOST:")
 find_package(Boost
@@ -171,7 +170,7 @@ else()
   message("Building ${RB_EXEC_NAME}")
   add_executable(${RB_EXEC_NAME} ${PROJECT_SOURCE_DIR}/revlanguage/main.cpp)
 
-  target_link_libraries(${RB_EXEC_NAME} rb-parser rb-core rb-libs ${Boost_LIBRARIES})
+  target_link_libraries(${RB_EXEC_NAME} rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${OPENLIBM})
 
   set_target_properties(${RB_EXEC_NAME} PROPERTIES PREFIX "../")
 

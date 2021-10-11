@@ -21,7 +21,7 @@ using namespace RevLanguage;
 
 Mntr_StochasticVariable::Mntr_StochasticVariable(void) : Monitor()
 {
-    
+
 }
 
 

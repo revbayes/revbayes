@@ -115,7 +115,7 @@ const MemberRules& Dist_multinomial::getParameterRules(void) const
     if ( !rules_set )
     {
         dist_member_rules.push_back( new ArgumentRule( "p", Simplex::getClassTypeSpec(), "The simplex of probabilities for the categories.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        dist_member_rules.push_back( new ArgumentRule( "n", Natural::getClassTypeSpec(), "The number of draws.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "size", Natural::getClassTypeSpec(), "The number of draws.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         rules_set = true;
     }
     
@@ -140,7 +140,7 @@ void Dist_multinomial::printValue(std::ostream& o) const
         o << p->getName();
     else
         o << "?";
-    o << ", n=";
+    o << ", size=";
     if ( n != NULL )
         o << n->getName();
     else
@@ -157,7 +157,7 @@ void Dist_multinomial::setConstParameter(const std::string& name, const RevPtr<c
     {
         p = var;
     }
-    else if ( name == "n" )
+    else if ( name == "size" )
     {
         n = var;
     }

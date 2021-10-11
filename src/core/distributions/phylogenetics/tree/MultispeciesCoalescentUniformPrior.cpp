@@ -76,19 +76,9 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
     
     double ln_prob_coal = RbConstants::LN2 - log( fn ) * (n-1) - log( theta_max );
     
-//    shape, rate/x
-//    double lowerIncompleteGamma = RbMath::incompleteGamma( rate/x, shape, RbMath::lnGamma(shape) );
-//    double gamma = RbMath::gamma(shape);
+    double lower_incomplete_gamma = RbMath::incompleteGamma( 2*fn/theta_max, n-1 );
     
-//    Gamma(n-2,2*fn/theta_max)
-    double lower_incomplete_gamma = RbMath::incompleteGamma( 2*fn/theta_max, n-1, RbMath::lnGamma(n-1) );
-    
-    double gamma = RbMath::lnGamma(n-1);
-    gamma = 0.0;
-
-    ln_prob_coal -= log( lower_incomplete_gamma ) - gamma;
-    
-    return ln_prob_coal;
+    return ln_prob_coal - log( lower_incomplete_gamma );
 }
 
 
