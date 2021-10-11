@@ -178,20 +178,12 @@ RevObject* Simplex::convertTo( const TypeSpec& type ) const
 RevPtr<RevVariable> Simplex::executeMethod( std::string const &name, const std::vector<Argument> &args, bool &found )
 {
     
-    
     if ( name == "size" )
     {
         found = true;
         
         // return a new RevVariable with the size of this container
         return RevPtr<RevVariable>( new RevVariable( new Natural( size() ), "" ) );
-    }
-    else if ( name == "[]" )
-    {
-        found = true;
-
-        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
-        return RevPtr<RevVariable>( new RevVariable( getElement( index ) ) );
     }
     
     return ModelObject<RevBayesCore::Simplex>::executeMethod( name, args, found );
@@ -289,10 +281,6 @@ void Simplex::initMethods( void )
 {
 	ArgumentRules* sizeArgRules = new ArgumentRules();
 	this->methods.addFunction( new MemberProcedure( "size", Natural::getClassTypeSpec(), sizeArgRules) );
-
-	ArgumentRules* elementArgRules = new ArgumentRules();
-	elementArgRules->push_back( new ArgumentRule( "index", Natural::getClassTypeSpec(), "The index of the element.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-	this->methods.addFunction( new MemberProcedure( "[]", Probability::getClassTypeSpec(), elementArgRules ) );
 
 }
 
