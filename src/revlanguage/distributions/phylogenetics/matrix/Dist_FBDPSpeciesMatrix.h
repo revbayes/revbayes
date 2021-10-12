@@ -1,9 +1,9 @@
-#ifndef Dist_FBDRangeMatrix_H
-#define Dist_FBDRangeMatrix_H
+#ifndef Dist_FBDPSpeciesMatrix_H
+#define Dist_FBDPSpeciesMatrix_H
 
-#include "ModelVector.h"
 #include "FossilizedBirthDeathMatrixProcess.h"
-#include "RlFossilizedBirthDeathRangeProcess.h"
+#include "RlFossilizedBirthDeathSpeciesProcess.h"
+#include "ModelVector.h"
 #include "RlMatrixReal.h"
 
 namespace RevLanguage {
@@ -19,13 +19,13 @@ namespace RevLanguage {
      * @since 2014-01-26, version 1.0
      *c
      */
-    class Dist_FBDRangeMatrix : public FossilizedBirthDeathRangeProcess<MatrixReal> {
+    class Dist_FBDPSpeciesMatrix : public FossilizedBirthDeathSpeciesProcess<MatrixReal> {
         
     public:
-        Dist_FBDRangeMatrix( void );
+        Dist_FBDPSpeciesMatrix( void );
         
         // Basic utility functions
-        Dist_FBDRangeMatrix*                                    clone(void) const;                                                                      //!< Clone the object
+        Dist_FBDPSpeciesMatrix*                                 clone(void) const;                                                                      //!< Clone the object
         static const std::string&                               getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                                  getClassTypeSpec(void);                                                                 //!< Get class type spec
         std::vector<std::string>                                getDistributionFunctionAliases(void) const;                                             //!< Get the alternative names used for the constructor function in Rev.

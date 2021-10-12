@@ -1,3 +1,5 @@
+#include "FossilizedBirthDeathMatrixProcess.h"
+
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
@@ -6,14 +8,13 @@
 #include <string>
 #include <vector>
 
+#include "AbstractFossilizedBirthDeathProcess.h"
 #include "DistributionExponential.h"
-#include "FossilizedBirthDeathMatrixProcess.h"
+#include "MatrixReal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "StochasticNode.h"
 #include "TypedDistribution.h"
-#include "AbstractFossilizedBirthDeathProcess.h"
-#include "MatrixReal.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "Taxon.h"
@@ -94,7 +95,7 @@ double FossilizedBirthDeathMatrixProcess::computeLnProbability( void )
     }
 
     // condition on survival
-    if ( condition == "survival" )
+    if ( condition == "sampling" )
     {
         lnProb -= log( pSurvival(origin,0) );
     }

@@ -7,14 +7,14 @@
 #include <type_traits>
 #include <vector>
 
+#include "AbstractBirthDeathProcess.h"
+#include "AbstractFossilizedBirthDeathProcess.h"
 #include "DistributionExponential.h"
 #include "FossilizedBirthDeathProcess.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbMathCombinatorialFunctions.h"
-#include "AbstractBirthDeathProcess.h"
-#include "AbstractFossilizedBirthDeathProcess.h"
 #include "RbException.h"
 #include "RbMathFunctions.h"
 #include "StringUtilities.h"
@@ -231,7 +231,7 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
     }
 
     // condition on survival
-    if ( condition == "survival" )
+    if ( condition == "sampling" )
     {
         double ps = log( pSurvival( getOriginAge(), 0) );
 

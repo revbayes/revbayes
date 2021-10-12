@@ -5,7 +5,7 @@
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "Dist_FBDRange.h"
+#include "Dist_FBDPSpecies.h"
 #include "ModelVector.h"
 #include "Natural.h"
 #include "OptionRule.h"
@@ -38,7 +38,7 @@ using namespace RevLanguage;
  *
  * The default constructor does nothing except allocating the object.
  */
-Dist_FBDRange::Dist_FBDRange() : FossilizedBirthDeathRangeProcess<TimeTree>()
+Dist_FBDPSpecies::Dist_FBDPSpecies() : FossilizedBirthDeathSpeciesProcess<TimeTree>()
 {
     
 }
@@ -50,9 +50,9 @@ Dist_FBDRange::Dist_FBDRange() : FossilizedBirthDeathRangeProcess<TimeTree>()
  *
  * \return A new copy of the process.
  */
-Dist_FBDRange* Dist_FBDRange::clone( void ) const
+Dist_FBDPSpecies* Dist_FBDPSpecies::clone( void ) const
 {
-    return new Dist_FBDRange(*this);
+    return new Dist_FBDPSpecies(*this);
 }
 
 
@@ -66,7 +66,7 @@ Dist_FBDRange* Dist_FBDRange::clone( void ) const
  *
  * \return A new internal distribution object.
  */
-RevBayesCore::FossilizedBirthDeathProcess* Dist_FBDRange::createDistribution( void ) const
+RevBayesCore::FossilizedBirthDeathProcess* Dist_FBDPSpecies::createDistribution( void ) const
 {
     
     // get the parameters
@@ -121,10 +121,10 @@ RevBayesCore::FossilizedBirthDeathProcess* Dist_FBDRange::createDistribution( vo
  *
  * \return The class' name.
  */
-const std::string& Dist_FBDRange::getClassType( void )
+const std::string& Dist_FBDPSpecies::getClassType( void )
 {
     
-    static std::string rev_type = "Dist_FBDRP";
+    static std::string rev_type = "Dist_FBDPSpecimen";
     
     return rev_type;
 }
@@ -135,10 +135,10 @@ const std::string& Dist_FBDRange::getClassType( void )
  *
  * \return TypeSpec of this class.
  */
-const TypeSpec& Dist_FBDRange::getClassTypeSpec( void )
+const TypeSpec& Dist_FBDPSpecies::getClassTypeSpec( void )
 {
     
-    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( FossilizedBirthDeathRangeProcess<TimeTree>::getClassTypeSpec() ) );
+    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( FossilizedBirthDeathSpeciesProcess<TimeTree>::getClassTypeSpec() ) );
     
     return rev_type_spec;
 }
@@ -149,11 +149,12 @@ const TypeSpec& Dist_FBDRange::getClassTypeSpec( void )
  *
  * \return Rev aliases of constructor function.
  */
-std::vector<std::string> Dist_FBDRange::getDistributionFunctionAliases( void ) const
+std::vector<std::string> Dist_FBDPSpecies::getDistributionFunctionAliases( void ) const
 {
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
     a_names.push_back( "FBDRP" );
+    a_names.push_back( "FBDPSpecies" );
     
     return a_names;
 }
@@ -166,10 +167,10 @@ std::vector<std::string> Dist_FBDRange::getDistributionFunctionAliases( void ) c
  *
  * \return Rev name of constructor function.
  */
-std::string Dist_FBDRange::getDistributionFunctionName( void ) const
+std::string Dist_FBDPSpecies::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
-    std::string d_name = "FossilizedBirthDeathRange";
+    std::string d_name = "FossilizedBirthDeathSpecies";
     
     return d_name;
 }
@@ -185,7 +186,7 @@ std::string Dist_FBDRange::getDistributionFunctionName( void ) const
  *
  * \return The member rules.
  */
-const MemberRules& Dist_FBDRange::getParameterRules(void) const
+const MemberRules& Dist_FBDPSpecies::getParameterRules(void) const
 {
     
     static MemberRules dist_member_rules;
@@ -211,7 +212,7 @@ const MemberRules& Dist_FBDRange::getParameterRules(void) const
         dist_member_rules.push_back( new ArgumentRule( "extended" , RlBoolean::getClassTypeSpec() , "Treat tip nodes as extinction events?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
 
         // add the rules from the base class
-        const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<TimeTree>::getParameterRules();
+        const MemberRules &parentRules = FossilizedBirthDeathSpeciesProcess<TimeTree>::getParameterRules();
         dist_member_rules.insert(dist_member_rules.end(), parentRules.begin(), parentRules.end());
 
         rules_set = true;
@@ -226,7 +227,7 @@ const MemberRules& Dist_FBDRange::getParameterRules(void) const
  *
  * \return The type spec of this object.
  */
-const TypeSpec& Dist_FBDRange::getTypeSpec( void ) const
+const TypeSpec& Dist_FBDPSpecies::getTypeSpec( void ) const
 {
     
     static TypeSpec ts = getClassTypeSpec();
@@ -245,7 +246,7 @@ const TypeSpec& Dist_FBDRange::getTypeSpec( void ) const
  * \param[in]    name     Name of the member variable.
  * \param[in]    var      Pointer to the variable.
  */
-void Dist_FBDRange::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+void Dist_FBDPSpecies::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     if ( name == "lambda_a" )
     {
@@ -266,7 +267,7 @@ void Dist_FBDRange::setConstParameter(const std::string& name, const RevPtr<cons
     }
     else
     {
-        FossilizedBirthDeathRangeProcess::setConstParameter(name, var);
+        FossilizedBirthDeathSpeciesProcess::setConstParameter(name, var);
     }
     
 }

@@ -1,10 +1,11 @@
+#include "BirthDeathRateShiftsProcess.h"
+
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <ostream>
 #include <vector>
 
-#include "AbstractFossilizedBirthDeathProcess.h"
 #include "DagNode.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
@@ -35,22 +36,22 @@ using namespace RevBayesCore;
  * \param[in]    cdt            Condition of the process (none/survival/#Taxa).
  * \param[in]    tn             Taxa.
  */
-AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const DagNode *inspeciation,
-                                                                         const DagNode *inextinction,
-                                                                         const DagNode *inpsi,
-                                                                         const TypedDagNode<double> *inrho,
-                                                                         const TypedDagNode< RbVector<double> > *intimes,
-                                                                         const std::vector<Taxon> &intaxa,
-                                                                         bool c,
-                                                                         double re) :
+BirthDeathRateShiftsProcess::BirthDeathRateShiftsProcess(const DagNode *inspeciation,
+                                                         const DagNode *inextinction,
+                                                         const DagNode *inpsi,
+                                                         const TypedDagNode<double> *inrho,
+                                                         const TypedDagNode< RbVector<double> > *intimes,
+                                                         const std::string& incond,
+                                                         const std::vector<Taxon> &intaxa,
+                                                         bool c) :
+    TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
     ascending(true),
+    condition(incond),
     homogeneous_rho(inrho),
     timeline( intimes ),
-    fbd_taxa(intaxa),
+    bd_taxa(intaxa),
     complete(c),
-    origin(0.0),
-    touched(false),
-    resampling(re)
+    touched(false)
 {
     // initialize all the pointers to NULL
     homogeneous_lambda             = NULL;
@@ -60,15 +61,15 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
     heterogeneous_mu               = NULL;
     heterogeneous_psi              = NULL;
 
-    RbException no_timeline_err = RbException("No time intervals provided for piecewise constant fossilized birth death process");
+    RbException no_timeline_err = RbException("No time intervals provided for time-heterogeneous birth death with rate shifts process");
 
-    range_parameters.push_back( homogeneous_rho );
+    addParameter( homogeneous_rho );
 
     heterogeneous_lambda = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inspeciation);
     homogeneous_lambda = dynamic_cast<const TypedDagNode<double >*>(inspeciation);
 
-    range_parameters.push_back( homogeneous_lambda );
-    range_parameters.push_back( heterogeneous_lambda );
+    addParameter( homogeneous_lambda );
+    addParameter( heterogeneous_lambda );
 
     if( heterogeneous_lambda != NULL )
     {
@@ -86,8 +87,8 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
     heterogeneous_mu = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inextinction);
     homogeneous_mu = dynamic_cast<const TypedDagNode<double >*>(inextinction);
 
-    range_parameters.push_back( homogeneous_mu );
-    range_parameters.push_back( heterogeneous_mu );
+    addParameter( homogeneous_mu );
+    addParameter( heterogeneous_mu );
 
     if( heterogeneous_mu != NULL )
     {
@@ -105,8 +106,8 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
     heterogeneous_psi = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inpsi);
     homogeneous_psi = dynamic_cast<const TypedDagNode<double >*>(inpsi);
 
-    range_parameters.push_back( homogeneous_psi );
-    range_parameters.push_back( heterogeneous_psi );
+    addParameter( homogeneous_psi );
+    addParameter( heterogeneous_psi );
 
     if( heterogeneous_psi != NULL )
     {
@@ -120,7 +121,7 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
         }
     }
 
-    range_parameters.push_back( timeline );
+    addParameter( timeline );
 
     num_intervals = timeline == NULL ? 1 : timeline->getValue().size()+1;
 
@@ -143,45 +144,40 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
         }
     }
 
-    b_i = std::vector<double>(fbd_taxa.size(), 0.0);
-    d_i = std::vector<double>(fbd_taxa.size(), 0.0);
-
-    p_i         = std::vector<double>(num_intervals, 1.0);
-    q_i         = std::vector<double>(num_intervals, 0.0);
-    q_tilde_i   = std::vector<double>(num_intervals, 0.0);
-
     birth       = std::vector<double>(num_intervals, 0.0);
     death       = std::vector<double>(num_intervals, 0.0);
     fossil      = std::vector<double>(num_intervals, 0.0);
     times       = std::vector<double>(num_intervals, 0.0);
 
+    partial_likelihood = std::vector<double>(bd_taxa.size(), 0.0);
+
+    Psi_i       = std::vector<double>(bd_taxa.size(), 0.0 );
+
+    dirty_taxa = std::vector<bool>(bd_taxa.size(), true);
+    dirty_psi = std::vector<bool>(bd_taxa.size(), true);
+
     updateIntervals();
-
-    partial_likelihood = std::vector<double>(fbd_taxa.size(), 0.0);
-
-    o_i         = std::vector<double>(fbd_taxa.size(), 0.0);
-    y_i         = std::vector<double>(fbd_taxa.size(), 0.0);
-    Psi_i       = std::vector<double>(fbd_taxa.size(), 0.0 );
-
-    dirty_taxa = std::vector<bool>(fbd_taxa.size(), true);
-    dirty_psi = std::vector<bool>(fbd_taxa.size(), true);
-
-    for ( size_t i = 0; i < fbd_taxa.size(); i++ )
-    {
-        // find the oldest minimum age
-        std::map<TimeInterval, size_t> ages = fbd_taxa[i].getAges();
-        for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
-        {
-            y_i[i] = std::max(Fi->first.getMin(), y_i[i]);
-        }
-    }
+    redrawValue();
 }
+
+
+/**
+ * The clone function is a convenience function to create proper copies of inherited objected.
+ * E.g. a.clone() will create a clone of the correct type even if 'a' is of derived type 'B'.
+ *
+ * \return A new copy of myself
+ */
+BirthDeathRateShiftsProcess* BirthDeathRateShiftsProcess::clone( void ) const
+{
+    return new BirthDeathRateShiftsProcess( *this );
+}
+
 
 /**
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool force )
+double BirthDeathRateShiftsProcess::computeLnProbability()
 {
     // prepare the probability computation
     updateIntervals();
@@ -193,32 +189,31 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
     size_t num_extant_unsampled = 0;
 
     // add the fossil tip age terms
-    for (size_t i = 0; i < fbd_taxa.size(); ++i)
+    for (size_t i = 0; i < bd_taxa.size(); ++i)
     {
-        double b = b_i[i];
-        double d = d_i[i];
+        double b = this->getValue()[i][0];
+        double d = this->getValue()[i][1];
 
-        double o = fbd_taxa[i].getMaxAge();
-        double y = fbd_taxa[i].getMinAge();
+        double o = bd_taxa[i].getMaxAge();
+        double y = bd_taxa[i].getMinAge();
 
         // check model constraints
         if ( !( b > o && y >= d && d >= 0.0 ) )
         {
             return RbConstants::Double::neginf;
         }
-        if ( (d > 0.0) != fbd_taxa[i].isExtinct() )
+        if ( (d > 0.0) != bd_taxa[i].isExtinct() )
         {
             return RbConstants::Double::neginf;
         }
 
         // count the number of rho-sampled tips
-        num_extant_sampled   += (d == 0.0 && y == 0.0);  // l
-        num_extant_unsampled += (d == 0.0 && y > 0.0); // n - m - l
+        num_extant_sampled   += (d == 0.0 && y == 0.0);
+        num_extant_unsampled += (d == 0.0 && y > 0.0);
 
-        if ( dirty_taxa[i] == true || force )
+        if ( dirty_taxa[i] == true )
         {
             size_t bi = l(b);
-            size_t oi = l(o_i[i]);
             size_t di = l(d);
 
             partial_likelihood[i] = 0.0;
@@ -226,34 +221,28 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
             // include speciation density
             partial_likelihood[i] += log( birth[bi] );
 
-            // multiply by q at the birth time
-            partial_likelihood[i] += q(bi, b);
-
-            // include intermediate q terms
-            for (size_t j = bi; j < oi; j++)
-            {
-                partial_likelihood[i] += q_i[j];
-            }
-
-            // replace q terms at oldest occurrence
-            partial_likelihood[i] += q(oi, o_i[i], true) - q(oi, o_i[i]);
-
-            // include intermediate q_tilde terms
-            for (size_t j = oi; j < di; j++)
-            {
-                partial_likelihood[i] += q_tilde_i[j];
-            }
-
-            // divide by q_tilde at the death time
-            partial_likelihood[i] -= q( di, d, true);
-
             // include extinction density
             if (d > 0.0) partial_likelihood[i] += log( death[di] );
 
+            double psi_b_d = 0.0;
 
-            if ( dirty_psi[i] || force )
+            // include poisson density
+            for ( size_t j = bi; j <= di; j++ )
             {
-                std::map<TimeInterval, size_t> ages = fbd_taxa[i].getAges();
+                double t_0 = ( j > 0 ? times[j-1] : RbConstants::Double::inf );
+
+                // increase incomplete sampling psi
+                double dt = std::min(b, t_0) - std::max(d, times[j]);
+
+                partial_likelihood[i] -= (birth[j] + death[j])*dt;
+
+                psi_b_d += fossil[j]*dt;
+            }
+
+            // include sampling density
+            if ( dirty_psi[i] )
+            {
+                std::map<TimeInterval, size_t> ages = bd_taxa[i].getAges();
 
                 double psi_y_o = 0.0;
 
@@ -265,17 +254,17 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
                     double t_0 = ( j > 0 ? times[j-1] : RbConstants::Double::inf );
 
-                    if ( t_0 <= fbd_taxa[i].getMinAge() )
+                    if ( t_0 <= bd_taxa[i].getMinAge() )
                     {
                         continue;
                     }
-                    if ( times[j] >= o_i[i] )
+                    if ( times[j] >= bd_taxa[i].getMaxAge() )
                     {
                         break;
                     }
 
                     // increase incomplete sampling psi
-                    double dt = std::min(o_i[i], t_0) - std::max(fbd_taxa[i].getMinAge(), times[j]);
+                    double dt = std::min(bd_taxa[i].getMaxAge(), t_0) - std::max(bd_taxa[i].getMinAge(), times[j]);
 
                     psi_y_o += fossil[j]*dt;
 
@@ -288,36 +277,44 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                             continue;
                         }
 
-                        dt = std::min(std::min(Fi->first.getMax(), o_i[i]), t_0) - std::max(Fi->first.getMin(), times[j]);
+                        dt = std::min(Fi->first.getMax(), t_0) - std::max(Fi->first.getMin(), times[j]);
 
                         psi[k] += fossil[j]*dt;
                     }
                 }
 
-                // include sampling density
-                Psi_i[i] = log(fossil[oi]);
+                // recompute Psi product
+                Psi_i[i] = 0.0;
 
-                double recip = 0.0;
+                double count = 0;
 
                 size_t k = 0;
-                // compute factors of the sum over each possible oldest observation
+                // compute product of psi totals
                 for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
                 {
-                    // compute sum of reciprocal ranges
-                    if ( Fi->first.getMax() >= o_i[i] )
-                    {
-                        recip += Fi->second / psi[k];
-                    }
+                    count += Fi->second;
 
-                    // compute product of ranges
                     Psi_i[i] += log(psi[k]) * Fi->second;
                 }
 
-                // sum over each possible oldest observation
-                Psi_i[i] += log(recip);
+                if ( complete == true )
+                {
+                    // compute poisson density for count
+                    Psi_i[i] -= RbMath::lnFactorial(count);
+                    Psi_i[i] -= psi_b_d;
+                }
+                else
+                {
+                    // compute poisson density for count + kappa, kappa >= 0
+                    Psi_i[i] += psi_y_o - psi_b_d;
+                    Psi_i[i] -= count*log(psi_b_d);
+                    Psi_i[i] += log(RbMath::incompleteGamma(psi_b_d, count, true, true));
+                }
+            }
 
-                // multiply by e^psi_y_o
-                Psi_i[i] += ( complete ? 0.0 : psi_y_o );
+            if ( condition == "sampling" )
+            {
+                partial_likelihood[i] -= log(-expm1(-psi_b_d));
             }
 
             partial_likelihood[i] += Psi_i[i];
@@ -325,9 +322,6 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
         lnProbTimes += partial_likelihood[i];
     }
-
-    // (the origin is not a speciation event)
-    lnProbTimes -= log( birth[l(origin)] );
 
     // add the sampled extant tip age term
     if ( homogeneous_rho->getValue() > 0.0)
@@ -349,7 +343,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 }
 
 
-double AbstractFossilizedBirthDeathProcess::getExtinctionRate( size_t index ) const
+double BirthDeathRateShiftsProcess::getExtinctionRate( size_t index ) const
 {
 
     // remove the old parameter first
@@ -370,7 +364,7 @@ double AbstractFossilizedBirthDeathProcess::getExtinctionRate( size_t index ) co
 }
 
 
-double AbstractFossilizedBirthDeathProcess::getFossilSamplingRate( size_t index ) const
+double BirthDeathRateShiftsProcess::getFossilSamplingRate( size_t index ) const
 {
 
     // remove the old parameter first
@@ -391,7 +385,7 @@ double AbstractFossilizedBirthDeathProcess::getFossilSamplingRate( size_t index 
 }
 
 
-double AbstractFossilizedBirthDeathProcess::getIntervalTime( size_t index ) const
+double BirthDeathRateShiftsProcess::getIntervalTime( size_t index ) const
 {
 
     if ( index == num_intervals - 1 )
@@ -416,7 +410,7 @@ double AbstractFossilizedBirthDeathProcess::getIntervalTime( size_t index ) cons
 }
 
 
-double AbstractFossilizedBirthDeathProcess::getSpeciationRate( size_t index ) const
+double BirthDeathRateShiftsProcess::getSpeciationRate( size_t index ) const
 {
 
     // remove the old parameter first
@@ -443,168 +437,104 @@ double AbstractFossilizedBirthDeathProcess::getSpeciationRate( size_t index ) co
  * t_0 is origin
  * t_l = 0.0
  */
-size_t AbstractFossilizedBirthDeathProcess::l(double t) const
+size_t BirthDeathRateShiftsProcess::l(double t) const
 {
     return times.rend() - std::upper_bound( times.rbegin(), times.rend(), t);
 }
 
 
 /**
- * p_i(t)
+ * Simulate new speciation times.
  */
-double AbstractFossilizedBirthDeathProcess::p( size_t i, double t ) const
+void BirthDeathRateShiftsProcess::redrawValue(void)
 {
-    // get the parameters
-    double b = birth[i];
-    double d = death[i];
-    double f = fossil[i];
-    double r = (i == num_intervals - 1 ? homogeneous_rho->getValue() : 0.0);
-    double ti = times[i];
-    
-    double diff = b - d - f;
-    double dt   = t - ti;
+    // incorrect placeholder
 
-    double A = sqrt( diff*diff + 4.0*b*f);
-    double B = ( (1.0 - 2.0*(1.0-r)*p_i[i] )*b + d + f ) / A;
+    // Get the rng
+    RandomNumberGenerator* rng = GLOBAL_RNG;
 
-    double ln_e = -A*dt;
-
-    double tmp = (1.0 + B) + exp(ln_e)*(1.0 - B);
-    
-    return (b + d + f - A * ((1.0+B)-exp(ln_e)*(1.0-B))/tmp)/(2.0*b);
-}
-
-
-/**
- * q_i(t)
- */
-double AbstractFossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) const
-{
-    
-    if ( t == 0.0 ) return 1.0;
-    
-    // get the parameters
-    double b = birth[i];
-    double d = death[i];
-    double f = fossil[i];
-    double r = (i == num_intervals - 1 ? homogeneous_rho->getValue() : 0.0);
-    double ti = times[i];
-    
-    double diff = b - d - f;
-    double dt   = t - ti;
-
-    double A = sqrt( diff*diff + 4.0*b*f);
-    double B = ( (1.0 - 2.0*(1.0-r)*p_i[i] )*b + d + f ) / A;
-
-    double ln_e = -A*dt;
-
-    double tmp = (1.0 + B) + exp(ln_e)*(1.0 - B);
-
-    double q = log(4.0) + ln_e - 2.0*log(tmp);
-
-    if (tilde) q = 0.5 * (q - (b+d+f)*dt);
-    
-    return q;
-}
-
-
-/**
- *
- *
- */
-void AbstractFossilizedBirthDeathProcess::redrawOldestOccurrence(size_t i, bool force)
-{
-    if ( force || GLOBAL_RNG->uniform01() < resampling )
+    double max = 0;
+    // get the max first occurence
+    for (size_t i = 0; i < bd_taxa.size(); i++)
     {
-        dirty_taxa[i] = true;
-        dirty_psi[i]  = true;
-        o_i[i] = GLOBAL_RNG->uniform01()*(fbd_taxa[i].getMaxAge() - y_i[i]) + y_i[i];
+        double o = bd_taxa[i].getMaxAge();
+        if ( o > max ) max = o;
+    }
+
+    max *= 1.1;
+
+    if (max == 0.0)
+    {
+        max = 1.0;
+    }
+
+    // get random uniform draws
+    for (size_t i = 0; i < bd_taxa.size(); i++)
+    {
+        double b = bd_taxa[i].getMaxAge() + rng->uniform01()*(max - bd_taxa[i].getMaxAge());
+        double d = bd_taxa[i].isExtinct() ? rng->uniform01()*bd_taxa[i].getMinAge() : 0.0;
+
+        (*this->value)[i][0] = b;
+        (*this->value)[i][1] = d;
     }
 }
 
 
-void AbstractFossilizedBirthDeathProcess::keepSpecialization(DagNode *toucher)
-{
-    dirty_psi  = std::vector<bool>(fbd_taxa.size(), false);
-    dirty_taxa = std::vector<bool>(fbd_taxa.size(), false);
-
-    touched = false;
-}
-
-
-void AbstractFossilizedBirthDeathProcess::restoreSpecialization(DagNode *toucher)
-{
-    partial_likelihood = stored_likelihood;
-    o_i = stored_o_i;
-    Psi_i = stored_Psi_i;
-
-    dirty_psi  = std::vector<bool>(fbd_taxa.size(), false);
-    dirty_taxa = std::vector<bool>(fbd_taxa.size(), false);
-
-    touched = false;
-}
-
-
-void AbstractFossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, bool touchAll)
-{
-    if ( touched == false )
-    {
-        stored_likelihood = partial_likelihood;
-        stored_o_i = o_i;
-        stored_Psi_i = Psi_i;
-
-        dirty_taxa = std::vector<bool>(fbd_taxa.size(), true);
-
-        if ( toucher == timeline || toucher == homogeneous_psi || toucher == heterogeneous_psi || touchAll )
-        {
-            dirty_psi  = std::vector<bool>(fbd_taxa.size(), true);
-        }
-    }
-
-    touched = true;
-}
-
-
 /**
  *
  *
  */
-void AbstractFossilizedBirthDeathProcess::updateIntervals()
+void BirthDeathRateShiftsProcess::updateIntervals()
 {
     for (size_t interval = num_intervals; interval > 0; interval--)
     {
         size_t i = interval - 1;
 
-        double b = getSpeciationRate(i);
-        double d = getExtinctionRate(i);
-        double f = getFossilSamplingRate(i);
-        double ti = getIntervalTime(i);
+        birth[i] = getSpeciationRate(i);
+        death[i] = getExtinctionRate(i);
+        fossil[i] = getFossilSamplingRate(i);
+        times[i] = getIntervalTime(i);
+    }
+}
 
-        birth[i] = b;
-        death[i] = d;
-        fossil[i] = f;
-        times[i] = ti;
 
-        if (i > 0)
+void BirthDeathRateShiftsProcess::keepSpecialization(DagNode *toucher)
+{
+    dirty_psi  = std::vector<bool>(bd_taxa.size(), false);
+    dirty_taxa = std::vector<bool>(bd_taxa.size(), false);
+
+    touched = false;
+}
+
+
+void BirthDeathRateShiftsProcess::restoreSpecialization(DagNode *toucher)
+{
+    partial_likelihood = stored_likelihood;
+    Psi_i = stored_Psi_i;
+
+    dirty_psi  = std::vector<bool>(bd_taxa.size(), false);
+    dirty_taxa = std::vector<bool>(bd_taxa.size(), false);
+
+    touched = false;
+}
+
+
+void BirthDeathRateShiftsProcess::touchSpecialization(DagNode *toucher, bool touchAll)
+{
+    if ( touched == false )
+    {
+        stored_likelihood = partial_likelihood;
+        stored_Psi_i = Psi_i;
+
+        dirty_taxa = std::vector<bool>(bd_taxa.size(), true);
+
+        if ( toucher == timeline || toucher == homogeneous_psi || toucher == heterogeneous_psi || touchAll )
         {
-            double r = (i == num_intervals - 1 ? homogeneous_rho->getValue() : 0.0);
-            double t = getIntervalTime(i-1);
-
-            double diff = b - d - f;
-            double dt   = t - ti;
-
-            double A = sqrt( diff*diff + 4.0*b*f);
-            double B = ( (1.0 - 2.0*(1.0-r)*p_i[i] )*b + d + f ) / A;
-
-            double ln_e = -A*dt;
-
-            double tmp = (1.0 + B) + exp(ln_e)*(1.0 - B);
-
-            q_i[i-1]       = log(4.0) + ln_e - 2.0*log(tmp);
-            q_tilde_i[i-1] = 0.5 * ( q_i[i-1] - (b+d+f)*dt );
-            p_i[i-1]       = (b + d + f - A * ((1.0+B)-exp(ln_e)*(1.0-B))/tmp)/(2.0*b);
+            dirty_psi  = std::vector<bool>(bd_taxa.size(), true);
         }
     }
+
+    touched = true;
 }
 
 
@@ -614,7 +544,7 @@ void AbstractFossilizedBirthDeathProcess::updateIntervals()
  * \param[in]    oldP      Pointer to the old parameter.
  * \param[in]    newP      Pointer to the new parameter.
  */
-void AbstractFossilizedBirthDeathProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void BirthDeathRateShiftsProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     if (oldP == heterogeneous_lambda)
     {

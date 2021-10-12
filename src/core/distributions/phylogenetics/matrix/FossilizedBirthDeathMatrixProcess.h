@@ -1,7 +1,6 @@
-#ifndef PiecewiseConstantFossilizedBirthDeathRangeProcess_H
-#define PiecewiseConstantFossilizedBirthDeathRangeProcess_H
+#ifndef FossilizedBirthDeathMatrixProcess_H
+#define FossilizedBirthDeathMatrixProcess_H
 
-#include "AbstractFossilizedBirthDeathProcess.h"
 #include "MatrixReal.h"
 #include "RbVector.h"
 #include "TypedDagNode.h"
@@ -9,6 +8,7 @@
 
 #include <vector>
 #include <set>
+#include "AbstractFossilizedBirthDeathProcess.h"
 
 namespace RevBayesCore {
     

@@ -1,9 +1,9 @@
 #ifndef FossilizedBirthDeathProcess_H
 #define FossilizedBirthDeathProcess_H
 
+#include "AbstractFossilizedBirthDeathProcess.h"
 #include "RbVector.h"
 #include "AbstractBirthDeathProcess.h"
-#include "AbstractFossilizedBirthDeathProcess.h"
 
 namespace RevBayesCore {
     

@@ -1,5 +1,5 @@
-#ifndef RlFossilizedBirthDeathRangeProcess_H
-#define RlFossilizedBirthDeathRangeProcess_H
+#ifndef RlFossilizedBirthDeathSpeciesProcess_H
+#define RlFossilizedBirthDeathSpeciesProcess_H
 
 #include "ModelVector.h"
 #include "OptionRule.h"
@@ -18,13 +18,13 @@ namespace RevLanguage {
      *
      */
     template <typename rlType>
-    class FossilizedBirthDeathRangeProcess : public TypedDistribution<rlType> {
+    class FossilizedBirthDeathSpeciesProcess : public TypedDistribution<rlType> {
         
     public:
-        virtual                                             ~FossilizedBirthDeathRangeProcess(void);                                            //!< Destructor
+        virtual                                             ~FossilizedBirthDeathSpeciesProcess(void);                                          //!< Destructor
         
         // Basic utility functions you have to overwrite
-        virtual FossilizedBirthDeathRangeProcess<rlType>*   clone(void) const = 0;                                                              //!< Clone the object
+        virtual FossilizedBirthDeathSpeciesProcess<rlType>* clone(void) const = 0;                                                              //!< Clone the object
 
         // Basic utility functions you may want to overwrite
         const MemberRules&                                  getParameterRules(void) const;                                                      //!< Get member rules (const)
@@ -34,7 +34,7 @@ namespace RevLanguage {
         static const TypeSpec&                              getClassTypeSpec(void);                                                             //!< Get class type spec
 
     protected:
-        FossilizedBirthDeathRangeProcess<rlType>( void );
+        FossilizedBirthDeathSpeciesProcess<rlType>( void );
         
         void                                                setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);   //!< Set member variable
     
@@ -60,7 +60,7 @@ namespace RevLanguage {
  * The default constructor does nothing except allocating the object.
  */
 template <typename rlType>
-RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::FossilizedBirthDeathRangeProcess() : TypedDistribution<rlType>()
+RevLanguage::FossilizedBirthDeathSpeciesProcess<rlType>::FossilizedBirthDeathSpeciesProcess() : TypedDistribution<rlType>()
 {
 
 }
@@ -72,7 +72,7 @@ RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::FossilizedBirthDeathRange
  * The default destructor does nothing.
  */
 template <typename rlType>
-RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::~FossilizedBirthDeathRangeProcess()
+RevLanguage::FossilizedBirthDeathSpeciesProcess<rlType>::~FossilizedBirthDeathSpeciesProcess()
 {
 
 }
@@ -84,10 +84,10 @@ RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::~FossilizedBirthDeathRang
  * \return The class' name.
  */
 template <typename rlType>
-const std::string& RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::getClassType(void)
+const std::string& RevLanguage::FossilizedBirthDeathSpeciesProcess<rlType>::getClassType(void)
 {
 
-    static std::string rev_type = "FossilizedBirthDeathRangeProcess";
+    static std::string rev_type = "FossilizedBirthDeathSpeciesProcess";
 
     return rev_type;
 }
@@ -99,7 +99,7 @@ const std::string& RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::getCla
  * \return TypeSpec of this class.
  */
 template <typename rlType>
-const TypeSpec& RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::getClassTypeSpec(void)
+const TypeSpec& RevLanguage::FossilizedBirthDeathSpeciesProcess<rlType>::getClassTypeSpec(void)
 {
 
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution<rlType>::getClassTypeSpec() ) );
@@ -125,7 +125,7 @@ const TypeSpec& RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::getClassT
  * \return The member rules.
  */
 template <typename rlType>
-const MemberRules& RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::getParameterRules(void) const
+const MemberRules& RevLanguage::FossilizedBirthDeathSpeciesProcess<rlType>::getParameterRules(void) const
 {
 
     static MemberRules memberRules;
@@ -145,7 +145,7 @@ const MemberRules& RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::getPar
 
         std::vector<std::string> optionsCondition;
         optionsCondition.push_back( "time" );
-        optionsCondition.push_back( "survival" );
+        optionsCondition.push_back( "sampling" );
         memberRules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
         memberRules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa with fossil occurrence information.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
@@ -171,7 +171,7 @@ const MemberRules& RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::getPar
  * \param[in]    var      Pointer to the variable.
  */
 template <typename rlType>
-void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+void RevLanguage::FossilizedBirthDeathSpeciesProcess<rlType>::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
 
     if ( name == "lambda" )
@@ -209,6 +209,10 @@ void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::setConstParameter(co
     else if ( name == "resampling" )
     {
         resampling = var;
+    }
+    else
+    {
+        TypedDistribution<rlType>::setConstParameter(name,var);
     }
 
 }

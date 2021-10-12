@@ -5,8 +5,7 @@
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-// #include "ConstantRateSerialSampledBirthDeathProcess.h"
-#include "Dist_FBDP.h"
+#include "Dist_FBDPSpecimen.h"
 #include "ModelVector.h"
 #include "OptionRule.h"
 #include "EpisodicBirthDeathSamplingTreatmentProcess.h"
@@ -44,7 +43,7 @@ using namespace RevLanguage;
  *
  * The default constructor does nothing except allocating the object.
  */
-Dist_FBDP::Dist_FBDP() : BirthDeathProcess()
+Dist_FBDPSpecimen::Dist_FBDPSpecimen() : BirthDeathProcess()
 {
 
 }
@@ -56,9 +55,9 @@ Dist_FBDP::Dist_FBDP() : BirthDeathProcess()
  *
  * \return A new copy of the process.
  */
-Dist_FBDP* Dist_FBDP::clone( void ) const
+Dist_FBDPSpecimen* Dist_FBDPSpecimen::clone( void ) const
 {
-    return new Dist_FBDP(*this);
+    return new Dist_FBDPSpecimen(*this);
 }
 
 
@@ -72,7 +71,7 @@ Dist_FBDP* Dist_FBDP::clone( void ) const
  *
  * \return A new internal distribution object.
  */
-RevBayesCore::AbstractBirthDeathProcess* Dist_FBDP::createDistribution( void ) const
+RevBayesCore::AbstractBirthDeathProcess* Dist_FBDPSpecimen::createDistribution( void ) const
 {
     // get the parameters
 
@@ -199,10 +198,10 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_FBDP::createDistribution( void ) c
  *
  * \return The class' name.
  */
-const std::string& Dist_FBDP::getClassType( void )
+const std::string& Dist_FBDPSpecimen::getClassType( void )
 {
 
-    static std::string rev_type = "Dist_FBDP";
+    static std::string rev_type = "Dist_FBDPSpecimen";
 
     return rev_type;
 }
@@ -213,7 +212,7 @@ const std::string& Dist_FBDP::getClassType( void )
  *
  * \return TypeSpec of this class.
  */
-const TypeSpec& Dist_FBDP::getClassTypeSpec( void )
+const TypeSpec& Dist_FBDPSpecimen::getClassTypeSpec( void )
 {
 
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( BirthDeathProcess::getClassTypeSpec() ) );
@@ -227,13 +226,14 @@ const TypeSpec& Dist_FBDP::getClassTypeSpec( void )
  *
  * \return Rev aliases of constructor function.
  */
-std::vector<std::string> Dist_FBDP::getDistributionFunctionAliases( void ) const
+std::vector<std::string> Dist_FBDPSpecimen::getDistributionFunctionAliases( void ) const
 {
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
     a_names.push_back( "FBDP" );
     a_names.push_back( "EFBDP" );
     a_names.push_back( "EpisodicFossilizedBirthDeathProcess" );
+    a_names.push_back( "FBDPSpecimen" );
 
     return a_names;
 }
@@ -246,7 +246,7 @@ std::vector<std::string> Dist_FBDP::getDistributionFunctionAliases( void ) const
  *
  * \return Rev name of constructor function.
  */
-std::string Dist_FBDP::getDistributionFunctionName( void ) const
+std::string Dist_FBDPSpecimen::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
     std::string d_name = "FossilizedBirthDeathProcess";
@@ -265,7 +265,7 @@ std::string Dist_FBDP::getDistributionFunctionName( void ) const
  *
  * \return The member rules.
  */
-const MemberRules& Dist_FBDP::getParameterRules(void) const
+const MemberRules& Dist_FBDPSpecimen::getParameterRules(void) const
 {
 
     static MemberRules dist_member_rules;
@@ -322,7 +322,7 @@ const MemberRules& Dist_FBDP::getParameterRules(void) const
  *
  * \return The type spec of this object.
  */
-const TypeSpec& Dist_FBDP::getTypeSpec( void ) const
+const TypeSpec& Dist_FBDPSpecimen::getTypeSpec( void ) const
 {
 
     static TypeSpec ts = getClassTypeSpec();
@@ -341,7 +341,7 @@ const TypeSpec& Dist_FBDP::getTypeSpec( void ) const
  * \param[in]    name     Name of the member variable.
  * \param[in]    var      Pointer to the variable.
  */
-void Dist_FBDP::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+void Dist_FBDPSpecimen::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     if ( name == "lambda" )
     {
