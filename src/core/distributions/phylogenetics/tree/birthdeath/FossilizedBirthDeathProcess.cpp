@@ -54,9 +54,10 @@ FossilizedBirthDeathProcess::FossilizedBirthDeathProcess(const TypedDagNode<doub
                                                            const std::vector<Taxon> &intaxa,
                                                            bool uo,
                                                            bool c,
+                                                           double re,
                                                            bool ex) :
     AbstractBirthDeathProcess(ra, incondition, intaxa, uo),
-    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, c),
+    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, c, re),
     extended(ex)
 {
     for(std::vector<const DagNode*>::iterator it = range_parameters.begin(); it != range_parameters.end(); it++)
@@ -121,6 +122,7 @@ FossilizedBirthDeathProcess::FossilizedBirthDeathProcess(const TypedDagNode<doub
     symmetric     = std::vector<double>(num_intervals, 0.0);
 
     redrawValue();
+    updateStartEndTimes(this->getValue().getRoot(), true);
 }
 
 
@@ -660,7 +662,7 @@ double FossilizedBirthDeathProcess::simulateDivergenceTime(double origin, double
 }
 
 
-int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
+int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node, bool force )
 {
     if( node.isTip() )
     {
@@ -677,7 +679,7 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
     {
         const TopologyNode& child = *children[c];
 
-        int i = updateStartEndTimes(child);
+        int i = updateStartEndTimes(child, force);
 
         // if child is a tip, set the species/end time
         if( child.isTip() )
@@ -700,7 +702,8 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
             if ( age != b_i[i] )
             {
                 b_i[i] = age;
-                if ( touched == false ) redrawOldestOccurrence(i);
+                dirty_taxa[i] = true;
+                if ( touched == false ) redrawOldestOccurrence(i, force);
             }
 
             I[i] = sa;
@@ -721,7 +724,8 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
                 {
                     b_i[i] = age;
                     origin = age;
-                    if ( touched == false ) redrawOldestOccurrence(i);
+                    dirty_taxa[i] = true;
+                    if ( touched == false ) redrawOldestOccurrence(i, force);
                 }
             }
         }

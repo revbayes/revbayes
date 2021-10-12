@@ -107,8 +107,9 @@ RevBayesCore::FossilizedBirthDeathMatrixProcess* Dist_FBDRangeMatrix::createDist
     }
 
     bool c = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
+    double re = static_cast<const Probability &>( resampling->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathMatrixProcess* d = new RevBayesCore::FossilizedBirthDeathMatrixProcess(l, m, p, r, rt, cond, t, c);
+    RevBayesCore::FossilizedBirthDeathMatrixProcess* d = new RevBayesCore::FossilizedBirthDeathMatrixProcess(l, m, p, r, rt, cond, t, c, re);
 
     return d;
 }

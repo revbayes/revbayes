@@ -43,7 +43,8 @@ namespace RevBayesCore {
                                             const TypedDagNode<double>* rho,
                                             const TypedDagNode<RbVector<double> > *times,
                                             const std::vector<Taxon> &taxa,
-                                            bool complete);  //!< Constructor
+                                            bool complete,
+                                            double resampling);  //!< Constructor
 
         virtual ~AbstractFossilizedBirthDeathProcess(){};
 
@@ -70,7 +71,7 @@ namespace RevBayesCore {
         void                                            restoreSpecialization(DagNode *toucher);
         void                                            touchSpecialization(DagNode *toucher, bool touchAll);
 
-        void                                            redrawOldestOccurrence(size_t i);
+        void                                            redrawOldestOccurrence(size_t i, bool force = false);
 
         bool                                            ascending;
 
@@ -120,6 +121,8 @@ namespace RevBayesCore {
         std::vector<bool>                       dirty_taxa;
 
         bool                                    touched;
+
+        double                                  resampling;
     };
 }
 

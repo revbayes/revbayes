@@ -45,6 +45,7 @@ namespace RevBayesCore {
                                       const std::vector<Taxon> &taxa,
                                       bool use_origin,
                                       bool complete,
+                                      double resampling,
                                       bool extended);  //!< Constructor
         
         // public member functions
@@ -57,7 +58,7 @@ namespace RevBayesCore {
 
     protected:
         void                                            updateStartEndTimes();
-        int                                             updateStartEndTimes(const TopologyNode & );
+        int                                             updateStartEndTimes(const TopologyNode &, bool force = false );
 
         double                                          pSurvival(double start, double end) const;             //!< Compute the probability of survival of the process (without incomplete taxon sampling).
 

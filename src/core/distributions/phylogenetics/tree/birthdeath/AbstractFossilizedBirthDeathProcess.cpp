@@ -41,8 +41,16 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
                                                                          const TypedDagNode<double> *inrho,
                                                                          const TypedDagNode< RbVector<double> > *intimes,
                                                                          const std::vector<Taxon> &intaxa,
-                                                                         bool c) :
-    ascending(true), homogeneous_rho(inrho), timeline( intimes ), fbd_taxa(intaxa), complete(c), origin(0.0), touched(false)
+                                                                         bool c,
+                                                                         double re) :
+    ascending(true),
+    homogeneous_rho(inrho),
+    timeline( intimes ),
+    fbd_taxa(intaxa),
+    complete(c),
+    origin(0.0),
+    touched(false),
+    resampling(re)
 {
     // initialize all the pointers to NULL
     homogeneous_lambda             = NULL;
@@ -504,11 +512,14 @@ double AbstractFossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) 
  *
  *
  */
-void AbstractFossilizedBirthDeathProcess::redrawOldestOccurrence(size_t i)
+void AbstractFossilizedBirthDeathProcess::redrawOldestOccurrence(size_t i, bool force)
 {
-    dirty_taxa[i] = true;
-    dirty_psi[i]  = true;
-    o_i[i] = GLOBAL_RNG->uniform01()*(fbd_taxa[i].getMaxAge() - y_i[i]) + y_i[i];
+    if ( force || GLOBAL_RNG->uniform01() < resampling )
+    {
+        dirty_taxa[i] = true;
+        dirty_psi[i]  = true;
+        o_i[i] = GLOBAL_RNG->uniform01()*(fbd_taxa[i].getMaxAge() - y_i[i]) + y_i[i];
+    }
 }
 
 
