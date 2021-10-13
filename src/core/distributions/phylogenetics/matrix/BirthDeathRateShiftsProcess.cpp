@@ -221,6 +221,12 @@ double BirthDeathRateShiftsProcess::computeLnProbability()
             // include speciation density
             partial_likelihood[i] += log( birth[bi] );
 
+            // skip the rest for extant taxa with no fossil samples
+            if ( o == 0.0 )
+            {
+                continue;
+            }
+
             // include extinction density
             if (d > 0.0) partial_likelihood[i] += log( death[di] );
 

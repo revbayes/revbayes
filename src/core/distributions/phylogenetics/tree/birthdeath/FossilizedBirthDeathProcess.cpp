@@ -214,15 +214,15 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
         {
             size_t di = l(d_i[i]);
 
-            // check constraints
-            if ( d_i[i] != taxa[i].getMinAge() )
-            {
-                return RbConstants::Double::neginf;
-            }
-
             // if the tip is a sampling event in the past
             if( d_i[i] > 0.0 )
             {
+                // check constraints
+                if ( d_i[i] != taxa[i].getMinAge() )
+                {
+                    return RbConstants::Double::neginf;
+                }
+
                 // replace observed extinction density with unobserved extinction density
                 lnProb -= log( death[di] );
                 lnProb += log( p(di, d_i[i]) );
@@ -389,7 +389,7 @@ void FossilizedBirthDeathProcess::simulateClade(std::vector<TopologyNode *> &n, 
         // make sure the tip age is equal to the last occurrence
         if( n[i]->isTip() )
         {
-            double min = n[i]->getTaxon().getMinAge();
+            double min = n[i]->getTaxon().isExtinct() ? n[i]->getTaxon().getMinAge() : 0.0;
             double max = n[i]->getTaxon().getMaxAge();
 
             // in the extended tree, tip ages are extinction times

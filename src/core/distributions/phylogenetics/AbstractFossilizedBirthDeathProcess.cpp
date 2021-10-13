@@ -236,6 +236,12 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                 partial_likelihood[i] += q_i[j];
             }
 
+            // skip the rest for extant taxa with no fossil samples
+            if ( o == 0.0 )
+            {
+                continue;
+            }
+
             // replace q terms at oldest occurrence
             partial_likelihood[i] += q(oi, o_i[i], true) - q(oi, o_i[i]);
 
@@ -495,7 +501,7 @@ double AbstractFossilizedBirthDeathProcess::p( size_t i, double t ) const
 double AbstractFossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) const
 {
     
-    if ( t == 0.0 ) return 1.0;
+    if ( t == 0.0 ) return 0.0;
     
     // get the parameters
     double b = birth[i];
