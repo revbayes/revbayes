@@ -14,12 +14,11 @@
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "RlBoolean.h"
-#include "RlMonitor.h"
 
 
 using namespace RevLanguage;
 
-Mntr_StochasticVariable::Mntr_StochasticVariable(void) : Monitor()
+Mntr_StochasticVariable::Mntr_StochasticVariable(void) : FileMonitor()
 {
 
 }
@@ -44,9 +43,9 @@ void Mntr_StochasticVariable::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    const std::string&                  fn      = static_cast<const RlString &>( filename->getRevObject() ).getValue();
-    const std::string&                  sep     = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    unsigned long                                g       = static_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
+    const std::string&                  fn      = static_cast<const RlString &> ( filename->getRevObject() ).getValue();
+    const std::string&                  sep     = static_cast<const RlString &> ( separator->getRevObject() ).getValue();
+    unsigned long                       g       = static_cast<const IntegerPos&>( printgen->getRevObject() ).getValue();
     bool                                ap      = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
     bool                                wv      = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
     RevBayesCore::StochasticVariableMonitor *m = new RevBayesCore::StochasticVariableMonitor((unsigned long)g, fn, sep);
@@ -84,23 +83,19 @@ const TypeSpec& Mntr_StochasticVariable::getClassTypeSpec(void)
 const MemberRules& Mntr_StochasticVariable::getParameterRules(void) const
 {
     
-    static MemberRules StochasticVariableMonitorMemberRules;
+    static MemberRules memberRules;
     static bool rules_set = false;
     
     if ( !rules_set )
     {
-        
-        StochasticVariableMonitorMemberRules.push_back( new ArgumentRule("filename"  , RlString::getClassTypeSpec() , "The name of the file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        StochasticVariableMonitorMemberRules.push_back( new ArgumentRule("printgen"  , IntegerPos::getClassTypeSpec()  , "The frequency how often we print.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new IntegerPos(1) ) );
-        StochasticVariableMonitorMemberRules.push_back( new ArgumentRule("separator" , RlString::getClassTypeSpec() , "The delimiter between variables.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
-        StochasticVariableMonitorMemberRules.push_back( new ArgumentRule("append"    , RlBoolean::getClassTypeSpec(), "Should we append or overwrite if the file exists?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
-        StochasticVariableMonitorMemberRules.push_back( new ArgumentRule("version"   , RlBoolean::getClassTypeSpec(), "Should we record the software version?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
-
+        // add the rules from the base class
+        const MemberRules &parentRules = FileMonitor::getParameterRules();
+        memberRules.insert(memberRules.end(), parentRules.begin(), parentRules.end());
         
         rules_set = true;
     }
     
-    return StochasticVariableMonitorMemberRules;
+    return memberRules;
 }
 
 
@@ -140,29 +135,6 @@ void Mntr_StochasticVariable::printValue(std::ostream &o) const
 void Mntr_StochasticVariable::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     
-    if ( name == "filename" )
-    {
-        filename = var;
-    }
-    else if ( name == "separator" )
-    {
-        separator = var;
-    }
-    else if ( name == "printgen" )
-    {
-        printgen = var;
-    }
-    else if ( name == "append" )
-    {
-        append = var;
-    }
-    else if ( name == "version" )
-    {
-        version = var;
-    }
-    else
-    {
-        Monitor::setConstParameter(name, var);
-    }
+    FileMonitor::setConstParameter(name, var);
     
 }

@@ -12,7 +12,7 @@
 #include <ostream>
 #include <vector>
 
-#include "RlMonitor.h"
+#include "RlFileMonitor.h"
 #include "RevObject.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
@@ -21,14 +21,14 @@
 namespace RevLanguage {
 class TypeSpec;
 
-    class Mntr_StochasticCharacterMapping : public Monitor {
+    class Mntr_StochasticCharacterMapping : public FileMonitor {
 
     public:
 
         Mntr_StochasticCharacterMapping(void);                                                                                            //!< Default constructor
 
         // Basic utility functions
-        virtual Mntr_StochasticCharacterMapping*  clone(void) const;                                                                      //!< Clone object
+        virtual Mntr_StochasticCharacterMapping*        clone(void) const;                                                                      //!< Clone object
         void                                            constructInternalObject(void);                                                          //!< We construct the a new internal monitor.
         static const std::string&                       getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                          getClassTypeSpec(void);                                                                 //!< Get class type spec
@@ -41,14 +41,8 @@ class TypeSpec;
 
         void                                            setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
 
-        std::vector<RevPtr<const RevVariable> >         vars;
-        RevPtr<const RevVariable>                       filename;
-        RevPtr<const RevVariable>                       printgen;
-        RevPtr<const RevVariable>                       version;
         RevPtr<const RevVariable>                       cdbdp;
         RevPtr<const RevVariable>                       ctmc;
-        RevPtr<const RevVariable>                       separator;
-        RevPtr<const RevVariable>                       append;
         RevPtr<const RevVariable>                       include_simmap;
         RevPtr<const RevVariable>                       use_simmap_default;
         RevPtr<const RevVariable>                       index;
