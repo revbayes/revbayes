@@ -1,4 +1,4 @@
-#include "FossilizedBirthDeathMatrixProcess.h"
+#include "FossilizedBirthDeathRangeProcess.h"
 
 #include <algorithm>
 #include <cmath>
@@ -38,7 +38,7 @@ using namespace RevBayesCore;
  * \param[in]    cdt            Condition of the process (none/survival/#Taxa).
  * \param[in]    tn             Taxa.
  */
-FossilizedBirthDeathMatrixProcess::FossilizedBirthDeathMatrixProcess(const DagNode *inspeciation,
+FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode *inspeciation,
                                                                      const DagNode *inextinction,
                                                                      const DagNode *inpsi,
                                                                      const TypedDagNode<double> *inrho,
@@ -71,9 +71,9 @@ FossilizedBirthDeathMatrixProcess::FossilizedBirthDeathMatrixProcess(const DagNo
  *
  * \return A new copy of myself 
  */
-FossilizedBirthDeathMatrixProcess* FossilizedBirthDeathMatrixProcess::clone( void ) const
+FossilizedBirthDeathRangeProcess* FossilizedBirthDeathRangeProcess::clone( void ) const
 {
-    return new FossilizedBirthDeathMatrixProcess( *this );
+    return new FossilizedBirthDeathRangeProcess( *this );
 }
 
 
@@ -81,7 +81,7 @@ FossilizedBirthDeathMatrixProcess* FossilizedBirthDeathMatrixProcess::clone( voi
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double FossilizedBirthDeathMatrixProcess::computeLnProbability( void )
+double FossilizedBirthDeathRangeProcess::computeLnProbability( void )
 {
     // prepare the probability computation
     updateGamma();
@@ -111,7 +111,7 @@ double FossilizedBirthDeathMatrixProcess::computeLnProbability( void )
  *
  * \return Small gamma
  */
-void FossilizedBirthDeathMatrixProcess::updateGamma(bool force)
+void FossilizedBirthDeathRangeProcess::updateGamma(bool force)
 {
     for (size_t i = 0; i < fbd_taxa.size(); i++)
     {
@@ -159,7 +159,7 @@ void FossilizedBirthDeathMatrixProcess::updateGamma(bool force)
  *
  * \return Probability of survival.
  */
-double FossilizedBirthDeathMatrixProcess::pSurvival(double start, double end) const
+double FossilizedBirthDeathRangeProcess::pSurvival(double start, double end) const
 {
     double t = start;
 
@@ -179,7 +179,7 @@ double FossilizedBirthDeathMatrixProcess::pSurvival(double start, double end) co
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-void FossilizedBirthDeathMatrixProcess::updateStartEndTimes( void )
+void FossilizedBirthDeathRangeProcess::updateStartEndTimes( void )
 {
     origin = 0;
 
@@ -196,7 +196,7 @@ void FossilizedBirthDeathMatrixProcess::updateStartEndTimes( void )
 /**
  * Simulate new speciation times.
  */
-void FossilizedBirthDeathMatrixProcess::redrawValue(void)
+void FossilizedBirthDeathRangeProcess::redrawValue(void)
 {
     // incorrect placeholder
     
@@ -232,7 +232,7 @@ void FossilizedBirthDeathMatrixProcess::redrawValue(void)
 }
 
 
-void FossilizedBirthDeathMatrixProcess::keepSpecialization(DagNode *toucher)
+void FossilizedBirthDeathRangeProcess::keepSpecialization(DagNode *toucher)
 {
     dirty_gamma = std::vector<bool>(fbd_taxa.size(), false);
 
@@ -240,7 +240,7 @@ void FossilizedBirthDeathMatrixProcess::keepSpecialization(DagNode *toucher)
 }
 
 
-void FossilizedBirthDeathMatrixProcess::restoreSpecialization(DagNode *toucher)
+void FossilizedBirthDeathRangeProcess::restoreSpecialization(DagNode *toucher)
 {
     if ( toucher == dag_node )
     {
@@ -251,7 +251,7 @@ void FossilizedBirthDeathMatrixProcess::restoreSpecialization(DagNode *toucher)
 }
 
 
-void FossilizedBirthDeathMatrixProcess::touchSpecialization(DagNode *toucher, bool touchAll)
+void FossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, bool touchAll)
 {
     if ( toucher == dag_node )
     {
@@ -291,7 +291,7 @@ void FossilizedBirthDeathMatrixProcess::touchSpecialization(DagNode *toucher, bo
  * \param[in]    oldP      Pointer to the old parameter.
  * \param[in]    newP      Pointer to the new parameter.
  */
-void FossilizedBirthDeathMatrixProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void FossilizedBirthDeathRangeProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     AbstractFossilizedBirthDeathProcess::swapParameterInternal(oldP, newP);
 }

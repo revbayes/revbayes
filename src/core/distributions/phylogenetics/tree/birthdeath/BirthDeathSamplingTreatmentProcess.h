@@ -1,5 +1,5 @@
-#ifndef EpisodicBirthDeathSamplingTreatmentProcess_H
-#define EpisodicBirthDeathSamplingTreatmentProcess_H
+#ifndef BirthDeathSamplingTreatmentProcess_H
+#define BirthDeathSamplingTreatmentProcess_H
 
 #include "AbstractBirthDeathProcess.h"
 #include "RbVector.h"
@@ -30,10 +30,10 @@ namespace RevBayesCore {
      * @since 2014-03-18, version 1.0
      *
      */
-    class EpisodicBirthDeathSamplingTreatmentProcess : public AbstractBirthDeathProcess {
+    class BirthDeathSamplingTreatmentProcess : public AbstractBirthDeathProcess {
 
     public:
-        EpisodicBirthDeathSamplingTreatmentProcess (const TypedDagNode<double> *ra,
+        BirthDeathSamplingTreatmentProcess (const TypedDagNode<double> *ra,
                                                     const DagNode *speciation,
                                                     const DagNode *extinction,
                                                     const DagNode *sampling,
@@ -55,7 +55,7 @@ namespace RevBayesCore {
                                                     bool use_origin);  //!< Constructor
 
         // public member functions
-        EpisodicBirthDeathSamplingTreatmentProcess*   clone(void) const;                                                    //!< Create an independent clone
+        BirthDeathSamplingTreatmentProcess*   clone(void) const;                                                    //!< Create an independent clone
 
     protected:
         // Parameter management functions

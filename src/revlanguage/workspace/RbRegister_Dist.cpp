@@ -171,10 +171,9 @@
 #include "Dist_ConstrainedNodeOrder.h"
 #include "Dist_WeightedConstrainedNodeOrder.h"
 #include "Dist_DuplicationLoss.h"
-#include "Dist_FBDPSpecies.h"
-#include "Dist_FBDPSpeciesMatrix.h"
+#include "Dist_FBDP.h"
+#include "Dist_FBDRP.h"
 #include "Dist_BDS.h"
-#include "Dist_FBDPSpecimen.h"
 #include "Dist_constPopMultispCoal.h"
 #include "Dist_divDepYuleProcess.h"
 #include "Dist_empiricalTree.h"
@@ -340,15 +339,14 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
 
         // fossilized-birth-death species process
-        AddDistribution< TimeTree                   >( new Dist_FBDPSpecies());
-        AddDistribution< MatrixReal                 >( new Dist_FBDPSpeciesMatrix());
+        AddDistribution< TimeTree                   >( new Dist_FBDP());
+        AddDistribution< MatrixReal                 >( new Dist_FBDRP());
 
         // birth-death with rate shifts model (Silvestro et al.)
         AddDistribution< MatrixReal                 >( new Dist_BDS());
 
         // birth-death-sampling-treatment processes and submodels
         AddDistribution< TimeTree                   >( new Dist_BDSTP());
-        AddDistribution< TimeTree                   >( new Dist_FBDPSpecimen());
         AddDistribution< TimeTree                   >( new Dist_PhylodynamicBDP());
 
         // diversity-dependent pure-birth process

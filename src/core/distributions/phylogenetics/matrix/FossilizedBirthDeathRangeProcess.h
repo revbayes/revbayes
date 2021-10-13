@@ -1,5 +1,5 @@
-#ifndef FossilizedBirthDeathMatrixProcess_H
-#define FossilizedBirthDeathMatrixProcess_H
+#ifndef FossilizedBirthDeathRangeProcess_H
+#define FossilizedBirthDeathRangeProcess_H
 
 #include "MatrixReal.h"
 #include "RbVector.h"
@@ -33,10 +33,10 @@ namespace RevBayesCore {
      * @since 2014-03-18, version 1.0
      *
      */
-    class FossilizedBirthDeathMatrixProcess : public TypedDistribution<MatrixReal>, public AbstractFossilizedBirthDeathProcess {
+    class FossilizedBirthDeathRangeProcess : public TypedDistribution<MatrixReal>, public AbstractFossilizedBirthDeathProcess {
         
     public:
-        FossilizedBirthDeathMatrixProcess (const DagNode *speciation,
+        FossilizedBirthDeathRangeProcess (const DagNode *speciation,
                                               const DagNode *extinction,
                                               const DagNode *psi,
                                               const TypedDagNode<double>* rho,
@@ -47,7 +47,7 @@ namespace RevBayesCore {
                                               double resampling);  //!< Constructor
         
         // public member functions
-        FossilizedBirthDeathMatrixProcess*   clone(void) const;                                         //!< Create an independent clone
+        FossilizedBirthDeathRangeProcess*               clone(void) const;                                     //!< Create an independent clone
 
     protected:
         void                                            updateStartEndTimes();

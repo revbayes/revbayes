@@ -5,11 +5,10 @@
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-// #include "ConstantRateSerialSampledBirthDeathProcess.h"
 #include "Dist_PhylodynamicBDP.h"
 #include "ModelVector.h"
 #include "OptionRule.h"
-#include "EpisodicBirthDeathSamplingTreatmentProcess.h"
+#include "BirthDeathSamplingTreatmentProcess.h"
 #include "Probability.h"
 #include "RealPos.h"
 #include "RlString.h"
@@ -161,26 +160,26 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_PhylodynamicBDP::createDistributio
         Pt = static_cast<const ModelVector<RealPos> &>( Phi_timeline->getRevObject() ).getDagNode();
     }
 
-    d = new RevBayesCore::EpisodicBirthDeathSamplingTreatmentProcess(sa,
-                                                                     b_s,
-                                                                     d_s,
-                                                                     s_s,
-                                                                     t_s,
-                                                                     b_e,
-                                                                     d_e,
-                                                                     s_e,
-                                                                     t_e,
-                                                                     gt,
-                                                                     lt,
-                                                                     mt,
-                                                                     pt,
-                                                                     rt,
-                                                                     Lt,
-                                                                     Mt,
-                                                                     Pt,
-                                                                     cond,
-                                                                     tn,
-                                                                     uo);
+    d = new RevBayesCore::BirthDeathSamplingTreatmentProcess(sa,
+                                                             b_s,
+                                                             d_s,
+                                                             s_s,
+                                                             t_s,
+                                                             b_e,
+                                                             d_e,
+                                                             s_e,
+                                                             t_e,
+                                                             gt,
+                                                             lt,
+                                                             mt,
+                                                             pt,
+                                                             rt,
+                                                             Lt,
+                                                             Mt,
+                                                             Pt,
+                                                             cond,
+                                                             tn,
+                                                             uo);
 
     return d;
 }

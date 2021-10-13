@@ -1,8 +1,8 @@
-#ifndef Dist_FBDPSpeciesMatrix_H
-#define Dist_FBDPSpeciesMatrix_H
+#ifndef Dist_FBDRP_H
+#define Dist_FBDRP_H
 
-#include "FossilizedBirthDeathMatrixProcess.h"
-#include "RlFossilizedBirthDeathSpeciesProcess.h"
+#include "FossilizedBirthDeathRangeProcess.h"
+#include "RlFossilizedBirthDeathProcess.h"
 #include "ModelVector.h"
 #include "RlMatrixReal.h"
 
@@ -19,13 +19,13 @@ namespace RevLanguage {
      * @since 2014-01-26, version 1.0
      *c
      */
-    class Dist_FBDPSpeciesMatrix : public FossilizedBirthDeathSpeciesProcess<MatrixReal> {
+    class Dist_FBDRP : public FossilizedBirthDeathProcess<MatrixReal> {
         
     public:
-        Dist_FBDPSpeciesMatrix( void );
+        Dist_FBDRP( void );
         
         // Basic utility functions
-        Dist_FBDPSpeciesMatrix*                                 clone(void) const;                                                                      //!< Clone the object
+        Dist_FBDRP*                                 clone(void) const;                                                                      //!< Clone the object
         static const std::string&                               getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                                  getClassTypeSpec(void);                                                                 //!< Get class type spec
         std::vector<std::string>                                getDistributionFunctionAliases(void) const;                                             //!< Get the alternative names used for the constructor function in Rev.
@@ -35,7 +35,7 @@ namespace RevLanguage {
         
         
         // Distribution functions you have to override
-        RevBayesCore::FossilizedBirthDeathMatrixProcess*        createDistribution(void) const;
+        RevBayesCore::FossilizedBirthDeathRangeProcess*        createDistribution(void) const;
 
     };
     

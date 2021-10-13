@@ -1,4 +1,4 @@
-#include "Dist_FBDPSpeciesMatrix.h"
+#include "Dist_FBDRP.h"
 
 #include <math.h>
 #include <stddef.h>
@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "FossilizedBirthDeathMatrixProcess.h"
+#include "FossilizedBirthDeathRangeProcess.h"
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "ModelVector.h"
@@ -51,7 +51,7 @@ using namespace RevLanguage;
  *
  * The default constructor does nothing except allocating the object.
  */
-Dist_FBDPSpeciesMatrix::Dist_FBDPSpeciesMatrix() : FossilizedBirthDeathSpeciesProcess<MatrixReal>()
+Dist_FBDRP::Dist_FBDRP() : FossilizedBirthDeathProcess<MatrixReal>()
 {
     
 }
@@ -63,9 +63,9 @@ Dist_FBDPSpeciesMatrix::Dist_FBDPSpeciesMatrix() : FossilizedBirthDeathSpeciesPr
  *
  * \return A new copy of the process.
  */
-Dist_FBDPSpeciesMatrix* Dist_FBDPSpeciesMatrix::clone( void ) const
+Dist_FBDRP* Dist_FBDRP::clone( void ) const
 {
-    return new Dist_FBDPSpeciesMatrix(*this);
+    return new Dist_FBDRP(*this);
 }
 
 
@@ -79,7 +79,7 @@ Dist_FBDPSpeciesMatrix* Dist_FBDPSpeciesMatrix::clone( void ) const
  *
  * \return A new internal distribution object.
  */
-RevBayesCore::FossilizedBirthDeathMatrixProcess* Dist_FBDPSpeciesMatrix::createDistribution( void ) const
+RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( void ) const
 {
     
     // get the parameters
@@ -110,7 +110,7 @@ RevBayesCore::FossilizedBirthDeathMatrixProcess* Dist_FBDPSpeciesMatrix::createD
     bool c = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
     double re = static_cast<const Probability &>( resampling->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathMatrixProcess* d = new RevBayesCore::FossilizedBirthDeathMatrixProcess(l, m, p, r, rt, cond, t, c, re);
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, re);
 
     return d;
 }
@@ -121,10 +121,10 @@ RevBayesCore::FossilizedBirthDeathMatrixProcess* Dist_FBDPSpeciesMatrix::createD
  *
  * \return The class' name.
  */
-const std::string& Dist_FBDPSpeciesMatrix::getClassType( void )
+const std::string& Dist_FBDRP::getClassType( void )
 {
     
-    static std::string rev_type = "Dist_FBDPSpeciesMatrix";
+    static std::string rev_type = "Dist_FBDRP";
     
     return rev_type;
 }
@@ -135,7 +135,7 @@ const std::string& Dist_FBDPSpeciesMatrix::getClassType( void )
  *
  * \return TypeSpec of this class.
  */
-const TypeSpec& Dist_FBDPSpeciesMatrix::getClassTypeSpec( void )
+const TypeSpec& Dist_FBDRP::getClassTypeSpec( void )
 {
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution<ModelVector<ModelVector<RealPos> > >::getClassTypeSpec() ) );
@@ -149,12 +149,11 @@ const TypeSpec& Dist_FBDPSpeciesMatrix::getClassTypeSpec( void )
  *
  * \return Rev aliases of constructor function.
  */
-std::vector<std::string> Dist_FBDPSpeciesMatrix::getDistributionFunctionAliases( void ) const
+std::vector<std::string> Dist_FBDRP::getDistributionFunctionAliases( void ) const
 {
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
-    a_names.push_back( "FBDRMatrix" );
-    a_names.push_back( "FBDPSpeciesMatrix" );
+    a_names.push_back( "FBDRP" );
     
     return a_names;
 }
@@ -167,10 +166,10 @@ std::vector<std::string> Dist_FBDPSpeciesMatrix::getDistributionFunctionAliases(
  *
  * \return Rev name of constructor function.
  */
-std::string Dist_FBDPSpeciesMatrix::getDistributionFunctionName( void ) const
+std::string Dist_FBDRP::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
-    std::string d_name = "FossilizedBirthDeathSpeciesMatrix";
+    std::string d_name = "FossilizedBirthDeathRangeProcess";
     
     return d_name;
 }
@@ -187,7 +186,7 @@ std::string Dist_FBDPSpeciesMatrix::getDistributionFunctionName( void ) const
  *
  * \return The member rules.
  */
-const MemberRules& Dist_FBDPSpeciesMatrix::getParameterRules(void) const
+const MemberRules& Dist_FBDRP::getParameterRules(void) const
 {
     
     static MemberRules dist_member_rules;
@@ -197,7 +196,7 @@ const MemberRules& Dist_FBDPSpeciesMatrix::getParameterRules(void) const
     {
 
         // add the rules from the base class
-        const MemberRules &parentRules = FossilizedBirthDeathSpeciesProcess<MatrixReal>::getParameterRules();
+        const MemberRules &parentRules = FossilizedBirthDeathProcess<MatrixReal>::getParameterRules();
         dist_member_rules.insert(dist_member_rules.end(), parentRules.begin(), parentRules.end());
         
         rules_set = true;
@@ -212,7 +211,7 @@ const MemberRules& Dist_FBDPSpeciesMatrix::getParameterRules(void) const
  *
  * \return The type spec of this object.
  */
-const TypeSpec& Dist_FBDPSpeciesMatrix::getTypeSpec( void ) const
+const TypeSpec& Dist_FBDRP::getTypeSpec( void ) const
 {
     
     static TypeSpec ts = getClassTypeSpec();

@@ -1,7 +1,7 @@
-#ifndef Dist_FBDPSpecies_H
-#define Dist_FBDPSpecies_H
+#ifndef Dist_FBDP_H
+#define Dist_FBDP_H
 
-#include "RlFossilizedBirthDeathSpeciesProcess.h"
+#include "RlFossilizedBirthDeathProcess.h"
 #include "FossilizedBirthDeathProcess.h"
 #include "RlTimeTree.h"
 
@@ -18,13 +18,13 @@ namespace RevLanguage {
      * @since 2014-01-26, version 1.0
      *c
      */
-    class Dist_FBDPSpecies : public FossilizedBirthDeathSpeciesProcess<TimeTree> {
+    class Dist_FBDP : public FossilizedBirthDeathProcess<TimeTree> {
         
     public:
-        Dist_FBDPSpecies( void );
+        Dist_FBDP( void );
         
         // Basic utility functions
-        Dist_FBDPSpecies*                                       clone(void) const;                                                                      //!< Clone the object
+        Dist_FBDP*                                              clone(void) const;                                                                      //!< Clone the object
         static const std::string&                               getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                                  getClassTypeSpec(void);                                                                 //!< Get class type spec
         std::vector<std::string>                                getDistributionFunctionAliases(void) const;                                             //!< Get the alternative names used for the constructor function in Rev.
