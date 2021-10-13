@@ -160,6 +160,38 @@ RateMatrix_revPoMo2N* RateMatrix_revPoMo2N::clone( void ) const
 }
 
 
+double RateMatrix_revPoMo2N::calculateReciprocalExpectedDivergence( void )
+{
+
+  // first the numerator
+
+  double sum_n = 0.0;
+
+  for (int n=1; n<(N+1); n++) {
+    sum_n += pi[0]*pi[1]*rho*pow(phi[1],n-1)*pow(phi[0],N-n);
+  }
+
+  // then the denominator
+
+  double sum_d = 0.0;
+  double drift_coefficient;
+
+  for (int n=1; n<N; n++) {
+    drift_coefficient = 1.0/(n*(N-n));
+    sum_d += pi[0]*pi[1]*rho*pow(phi[1],n-1)*pow(phi[0],N-n-1)*(n*phi[1]+(N-n)*phi[0])*drift_coefficient;
+  }
+
+
+  // finaly the rate (the reciprocal)
+  double rRate;
+  rRate = ( pi[0]*pow(phi[0],N-1) +
+            pi[1]*pow(phi[1],N-1) + N*sum_d ) / ( 2.0*N*sum_n );
+
+  return rRate;
+
+}
+
+
 /*populating the rate matrix*/
 void RateMatrix_revPoMo2N::computeOffDiagonal( void )
 {
@@ -192,48 +224,50 @@ void RateMatrix_revPoMo2N::computeOffDiagonal( void )
     }
   }
 
+  // get the expected divergence (or number of evens) per unit of time
+  // normalize rate matrix such that one event happens per unit time.
+  double rRate = calculateReciprocalExpectedDivergence();
+  //std::cout << "rate:" << rRate << "\n";
 
 
-  //reciprocal of the population size
-  double rN = 1.0/N;
-
-//mutations
-  m[0][2]  = rho*pi[1];  //{Na0} -> {(N-1)a0,1a1}
-  m[1][N]  = rho*pi[0];  //{Na1} -> {1a0,(N-1)a1}
+  //mutations
+  m[0][2]  = N*rho*pi[1]*rRate;  //{Na0} -> {(N-1)a0,1a1}
+  m[1][N]  = N*rho*pi[0]*rRate;  //{Na1} -> {1a0,(N-1)a1}
 
   //fixations
-  m[2][0]  = (N-1.0)*phi[0]*rN;  //{(N-1)a0,1a1} -> {Na0} 
-  m[N][1]  = (N-1.0)*phi[1]*rN;  //{1a0,(N-1)a1} -> {Na1} 
+  m[2][0]  = (N-1.0)*phi[0]*rRate/((N-1)*phi[0]+phi[1]);  //{(N-1)a0,1a1} -> {Na0} 
+  m[N][1]  = (N-1.0)*phi[1]*rRate/((N-1)*phi[1]+phi[0]);  //{1a0,(N-1)a1} -> {Na1} 
 
 
   //the pomo rate matrix is entirely defined by fixations and mutations if N=2
   if (N>2) {
 
     //frequency shifts from singletons
-    m[2][3]   = (N-1.0)*phi[1]*rN;  //{(N-1)a0,1a1} -> {(N-2)a0,2a1}
-    m[N][N-1] = (N-1.0)*phi[0]*rN;  //{1a0,(N-1)a1} -> {2a0,(N-2)a1}
+    m[2][3]   = (N-1.0)*phi[1]*rRate/((N-1)*phi[0]+phi[1]);  //{(N-1)a0,1a1} -> {(N-2)a0,2a1}
+    m[N][N-1] = (N-1.0)*phi[0]*rRate/((N-1)*phi[1]+phi[0]);  //{1a0,(N-1)a1} -> {2a0,(N-2)a1}
 
     //frequency shifts for all the other polymorphic states
     if (N>3) {
 
-      //polymorphic states are populated in two fronts, thus the need for the middle frequency
-      int S = N/2+1;
+      for (int n=2; n<(N-1); n++){
 
-      for (int n=2; n<S; n++){
-
-        //populates the first half of the polymorphic edge aiaj
-        m[n+1][2+n]  = n*(N-n)*phi[1]*rN; //{nai,(N-n)aj} -> {(n-1)ai,(N-n+1)aj}
-        m[n+1][n]    = n*(N-n)*phi[0]*rN; //{nai,(N-n)aj} -> {(n+1)ai,(N-n-1)aj}
-
-        //populates the second half of the polymorphic edge aiaj
-        m[N-n+1][N-n]   = (N-n)*n*phi[0]*rN; //{(N-n)ai,naj} -> {(N-n+1)ai,(n-1)aj}
-        m[N-n+1][N-n+2] = (N-n)*n*phi[1]*rN; //{(N-n)ai,naj} -> {(N-n-1)ai,(n+1)aj}
+        //ai aj
+        m[n+1][2+n]  = n*(N-n)*phi[1]*rRate/(n*phi[1]+(N-n)*phi[0]); //{naj,(N-n)ai} -> {(n+1)aj,(N-n-1)ai}
+        m[n+1][n]    = n*(N-n)*phi[0]*rRate/(n*phi[1]+(N-n)*phi[0]); //{naj,(N-n)ai} -> {(n-1)aj,(N-n+1)ai}
 
       }
 
     }
-
   }
+
+
+  //int n_states = N+1;
+  //std::vector<double> stationary_freqs; 
+  //stationary_freqs = getStationaryFrequencies();
+
+  //for (int i=0; i<n_states; i++) {
+  //  std::cout << "sf" << i << ":" << stationary_freqs[i] << "\n";
+  //}
 
 
   // set flags
@@ -241,7 +275,41 @@ void RateMatrix_revPoMo2N::computeOffDiagonal( void )
 
 }
 
+std::vector<double> RateMatrix_revPoMo2N::getStationaryFrequencies( void ) const
+{
 
+  // calculating the normalization constant
+
+  double nc = pi[0]*pow(phi[0],N-1) +
+              pi[1]*pow(phi[1],N-1) ;
+
+  double drift_coefficient;
+
+  for (int n=1; n<N; n++) {
+    drift_coefficient = 1.0*N/(n*(N-n));
+    nc += pi[0]*pi[1]*rho*pow(phi[1],n-1)*pow(phi[0],N-n-1)*(n*phi[1]+(N-n)*phi[0])*drift_coefficient;
+  }
+
+  
+  // calculating the stationary vector
+
+  double rnc = 1.0/nc;
+  std::vector<double> stationary_freqs(N+1,0.0);
+
+  stationary_freqs[0]  = pi[0]*pow(phi[0],N-1)*rnc;
+  stationary_freqs[1]  = pi[1]*pow(phi[1],N-1)*rnc;
+
+  for (int n=1; n<N; n++) {
+
+    drift_coefficient = 1.0*N/(n*(N-n));
+    stationary_freqs[1+n    ] = pi[0]*pi[1]*rho*pow(phi[1],n-1)*pow(phi[0],N-n-1)*(n*phi[1]+(N-n)*phi[0])*drift_coefficient*rnc;
+
+  }
+
+
+  return stationary_freqs;
+
+}
 
 /** Calculate the transition probabilities for the real case */
 void RateMatrix_revPoMo2N::tiProbsEigens(double t, TransitionProbabilityMatrix& P) const
