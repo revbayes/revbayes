@@ -189,6 +189,10 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
 
             taxon.setExtinct( extinct );
         }
+        else
+        {
+            taxon.setExtinct( taxon.getMinAge() > 0.0 );
+        }
     }
 
     for (std::map<std::string, Taxon>::iterator it = taxon_map.begin(); it != taxon_map.end(); it++ )
