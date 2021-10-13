@@ -19,7 +19,7 @@ jobs:
                ubuntu-gcc-9,
                ubuntu-gcc-9-mpi,
                ubuntu-clang-8,
-               macos-xcode-11.3.1,
+               macos-xcode-11.7,
                windows
                ]
 
@@ -66,10 +66,10 @@ jobs:
             version: "8"
             mpi: false
 
-          - name: macos-xcode-11.3.1
+          - name: macos-xcode-11.7
             os: macos-latest
             compiler: xcode
-            version: "11.3.1"
+            version: "11.7"
             mpi: false
   
           - name: windows
