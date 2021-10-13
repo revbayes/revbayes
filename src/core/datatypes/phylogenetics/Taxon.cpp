@@ -10,7 +10,8 @@ using namespace RevBayesCore;
  */
 Taxon::Taxon( void ) :
     name( "" ),
-    species_name( "" )
+    species_name( "" ),
+    extinct(false)
 {
     
 }
@@ -23,7 +24,8 @@ Taxon::Taxon( void ) :
  */
 Taxon::Taxon(const std::string &n) :
     name( n ),
-    species_name( n )
+    species_name( n ),
+    extinct(false)
 {
     
 }
@@ -124,13 +126,55 @@ bool Taxon::operator>=(const RevBayesCore::Taxon &t) const
 
 
 /**
+ * Add an occurrence age for this taxon, with uncertainty.
+ *
+ * \param[in]    d     The age range.
+ */
+void Taxon::addAge( const TimeInterval &d )
+{
+    ages[d]++;
+
+    if ( d.getMax() > age_range.getMax() )
+    {
+        age_range.setMax( d.getMax() );
+    }
+    if ( d.getMin() < age_range.getMin() )
+    {
+        age_range.setMin( d.getMin() );
+    }
+}
+
+
+/**
+ * Get the extinct status flag.
+ *
+ * \return    The flag
+ */
+bool Taxon::isExtinct(void) const
+{
+    return extinct;
+}
+
+
+/**
  * Get the age for this taxon.
  *
  * \return    The age.
  */
 double Taxon::getAge( void ) const
 {
-    return min_age.getMin();
+    return age_range.getMin();
+}
+
+
+/**
+ * Get the ages for this taxon.
+ *
+ * \return    The ages.
+ */
+std::map<TimeInterval, size_t> Taxon::getAges( void ) const
+{
+    return ages;
 }
 
 
@@ -141,7 +185,7 @@ double Taxon::getAge( void ) const
  */
 TimeInterval Taxon::getAgeRange( void ) const
 {
-    return TimeInterval(min_age.getMin(), max_age.getMax());
+    return age_range;
 }
 
 
@@ -152,18 +196,7 @@ TimeInterval Taxon::getAgeRange( void ) const
  */
 double Taxon::getMaxAge( void ) const
 {
-    return max_age.getMin();
-}
-
-
-/**
- * Get the max age range for this taxon.
- *
- * \return    The age range.
- */
-const TimeInterval& Taxon::getMaxAgeRange( void ) const
-{
-    return max_age;
+    return age_range.getMax();
 }
 
 
@@ -174,18 +207,7 @@ const TimeInterval& Taxon::getMaxAgeRange( void ) const
  */
 double Taxon::getMinAge( void ) const
 {
-    return min_age.getMin();
-}
-
-
-/**
- * Get the min age range for this taxon.
- *
- * \return    The age range.
- */
-const TimeInterval& Taxon::getMinAgeRange( void ) const
-{
-    return min_age;
+    return age_range.getMin();
 }
 
 
@@ -200,8 +222,8 @@ const std::string Taxon::getJsonRespresentation(void) const {
     jsonStr += "{\"Taxon\": {";
     jsonStr += "\"name\": \"" + name + "\", ";
     jsonStr += "\"speciesName\": \"" + species_name + "\", ";
-    jsonStr += "\"TimeInterval\": {\"minAge\": " + std::to_string(min_age.getMin()) + ", ";
-    jsonStr += "\"maxAge\": " + std::to_string(max_age.getMax()) + "}}";
+    jsonStr += "\"TimeInterval\": {\"minAge\": " + std::to_string(age_range.getMin()) + ", ";
+    jsonStr += "\"maxAge\": " + std::to_string(age_range.getMax()) + "}}";
     return jsonStr;
 }
 
@@ -235,8 +257,18 @@ const std::string& Taxon::getSpeciesName( void ) const
  */
 void Taxon::setAge(double a)
 {
-    min_age = TimeInterval(a,a);
-    max_age = TimeInterval(a,a);
+    if ( age_range.getMax() < a )
+    {
+        age_range.setMax(a);
+        age_range.setMin(a);
+    }
+    else
+    {
+        age_range.setMin(a);
+        // Sebastian (20210519): We should not automatically set the max age
+        // because otherwise we always get a range of size 0.
+//        age_range.setMax(a);
+    }
 }
 
 
@@ -247,30 +279,18 @@ void Taxon::setAge(double a)
  */
 void Taxon::setAgeRange( const TimeInterval &d )
 {
-    min_age = TimeInterval(d.getMin(),d.getMin());
-    max_age = TimeInterval(d.getMax(),d.getMax());
+    age_range = d;
 }
 
 
 /**
- * Set the min age range for this taxon.
+ * Set the extinct status flag.
  *
- * \param[in]    d     The age range.
+ * \param[in]    a     The age.
  */
-void Taxon::setMinAgeRange( const TimeInterval &d )
+void Taxon::setExtinct(bool e)
 {
-    min_age = d;
-}
-
-
-/**
- * Set the max age range for this taxon.
- *
- * \param[in]    d     The age range.
- */
-void Taxon::setMaxAgeRange( const TimeInterval &d )
-{
-    max_age = d;
+    extinct = e;
 }
 
 

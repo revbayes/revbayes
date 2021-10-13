@@ -50,7 +50,7 @@ RevPtr<RevVariable> Func_TaxonReader::execute( void )
     
     // get the information from the arguments for reading the file
     const RlString& fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() );
-    char del = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue()[0];
+    std::string del = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
     
     RevBayesCore::TaxonReader tr = RevBayesCore::TaxonReader(fn.getValue(), del);
     const std::vector<RevBayesCore::Taxon>& taxa = tr.getTaxa();
@@ -69,7 +69,8 @@ const ArgumentRules& Func_TaxonReader::getArgumentRules( void ) const
     if (!rules_set)
     {
         argumentRules.push_back( new ArgumentRule( "filename", RlString::getClassTypeSpec(), "Relative or absolute file name.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "delimiter", RlString::getClassTypeSpec(), "Delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
+        std::vector<std::string> sep = {"separator","delimiter"};
+        argumentRules.push_back( new ArgumentRule( sep, RlString::getClassTypeSpec(), "The separator/delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("") ) );
         rules_set = true;
     }
     

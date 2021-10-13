@@ -1,5 +1,5 @@
-#ifndef AbstractPiecewiseConstantFossilizedRangeProcess_H
-#define AbstractPiecewiseConstantFossilizedRangeProcess_H
+#ifndef BirthDeathRateShiftsProcess_H
+#define BirthDeathRateShiftsProcess_H
 
 #include "HomologousDiscreteCharacterData.h"
 #include "MatrixReal.h"
@@ -17,7 +17,7 @@ namespace RevBayesCore {
     class Taxon;
 
     /**
-     * @brief Abstract piecewise-constant fossilized birth-death range process.
+     * @brief Piecewise-constant fossilized birth-death with rateshifts process.
      *
      * The piecewise-constant fossilized birth-death range process has constant rates for each time interval.
      * At the end of each time interval there may be an abrupt rate-shift (jump) for each
@@ -34,45 +34,43 @@ namespace RevBayesCore {
      * @since 2014-03-18, version 1.0
      *
      */
-    class AbstractPiecewiseConstantFossilizedRangeProcess {
+    class BirthDeathRateShiftsProcess : public TypedDistribution<MatrixReal> {
         
     public:
-        AbstractPiecewiseConstantFossilizedRangeProcess(const DagNode *speciation,
-                                                             const DagNode *extinction,
-                                                             const DagNode *psi,
-                                                             const DagNode *counts,
-                                                             const TypedDagNode<double>* rho,
-                                                             const TypedDagNode<RbVector<double> > *times,
-                                                             const std::vector<Taxon> &taxa,
-                                                             bool ages_from_counts);  //!< Constructor
+        BirthDeathRateShiftsProcess(const DagNode *speciation,
+                                    const DagNode *extinction,
+                                    const DagNode *psi,
+                                    const TypedDagNode<double>* rho,
+                                    const TypedDagNode<RbVector<double> > *times,
+                                    const std::string &condition,
+                                    const std::vector<Taxon> &taxa,
+                                    bool complete);  //!< Constructor
 
-        virtual ~AbstractPiecewiseConstantFossilizedRangeProcess(){};
+        virtual ~BirthDeathRateShiftsProcess(){};
+
+        BirthDeathRateShiftsProcess*                    clone(void) const;                                         //!< Create an independent clone
 
         double                                          getExtinctionRate( size_t index ) const;
-        NaturalNumbersState                             getFossilCount( size_t species, size_t interval ) const;
-        double                                          getFossilizationRate( size_t index ) const;
+        double                                          getFossilSamplingRate( size_t index ) const;
         double                                          getIntervalTime( size_t index ) const;
         double                                          getSpeciationRate( size_t index ) const;
 
     protected:
-        virtual void                                    updateStartEndTimes() = 0;
-        virtual double                                  computeLnProbabilityRanges(bool force = false);
+        double                                          computeLnProbability();
 
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
 
         // helper functions
         size_t                                          l(double t) const;                                     //!< Find the index so that times[index-1] < t < times[index]
-        double                                          p(size_t i, double t) const;
-        virtual double                                  q(size_t i, double t, bool tilde = false) const;
-        virtual double                                  H(size_t i, double x, double t) const;
-        virtual double                                  Z(size_t k, size_t i, double x, double t) const;
 
         virtual void                                    updateIntervals();
 
         void                                            keepSpecialization(DagNode *toucher);
         void                                            restoreSpecialization(DagNode *toucher);
         void                                            touchSpecialization(DagNode *toucher, bool touchAll);
+
+        void                                            redrawValue(void);
 
         bool                                            ascending;
 
@@ -88,37 +86,27 @@ namespace RevBayesCore {
         const TypedDagNode<double >*                    homogeneous_rho;                                       //!< The homogeneous speciation rates.
         const TypedDagNode<RbVector<double> >*          timeline;                                              //!< The times of the instantaneous sampling events.
 
-        const TypedDagNode<AbstractHomologousDiscreteCharacterData>* fossil_count_data;                        //!< The number of fossil observations, per species/interval as character data.
-
         std::vector<double>                     birth;
         std::vector<double>                     death;
         std::vector<double>                     fossil;
         std::vector<double>                     times;
 
-        std::vector<double>                     b_i;
-        std::vector<double>                     d_i;
+        std::string                             condition;
 
-        std::vector<double>                     lnQ;
+        std::vector<Taxon>                      bd_taxa;                                                       //!< Taxon names that will be attached to new simulated trees.
 
-        std::vector<double>                     q_i;
-        std::vector<double>                     q_tilde_i;
-        std::vector<double>                     p_i;
+        bool                                    complete;
 
-        std::vector<Taxon>                      fbd_taxa;                                                                                               //!< Taxon names that will be attached to new simulated trees.
-
-        bool                                    auto_uncertainty;
-
-        std::vector<size_t>                     oldest_intervals;
-        std::vector<size_t>                     youngest_intervals;
-
-        std::vector<const DagNode*>             range_parameters;
-
-        double                                  origin;
+        std::vector<double>                     Psi_i;
+        std::vector<double>                     stored_Psi_i;
 
         std::vector<double>                     partial_likelihood;
         std::vector<double>                     stored_likelihood;
 
+        std::vector<bool>                       dirty_psi;
         std::vector<bool>                       dirty_taxa;
+
+        bool                                    touched;
     };
 }
 

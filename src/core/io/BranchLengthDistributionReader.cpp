@@ -7,10 +7,8 @@
 using namespace RevBayesCore;
 
 
-BranchLengthDistributionReader::BranchLengthDistributionReader(const std::string &fn, char d, size_t numSkipped) : DelimitedDataReader(fn, d, numSkipped)
+BranchLengthDistributionReader::BranchLengthDistributionReader(const std::string &fn, std::string d, size_t numSkipped) : DelimitedDataReader(fn, d, numSkipped)
 {
-	
-	filename = fn;
 	
 	for (size_t i = 0; i < chars.size(); ++i)
 	{

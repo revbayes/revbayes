@@ -6,7 +6,7 @@
 #include "ArgumentRule.h"
 #include "ConstantNode.h"
 #include "DelimitedDataReader.h"
-#include "Func_readDataDelimitedFile.h"
+#include "Func_readDelimitedDataFile.h"
 #include "ModelObject.h"
 #include "ModelVector.h"
 #include "RbException.h"
@@ -52,14 +52,14 @@ using namespace RevLanguage;
  *
  * \return A new copy of the process.
  */
-Func_readDataDelimitedFile* Func_readDataDelimitedFile::clone( void ) const
+Func_readDelimitedDataFile* Func_readDelimitedDataFile::clone( void ) const
 {
     
-    return new Func_readDataDelimitedFile( *this );
+    return new Func_readDelimitedDataFile( *this );
 }
 
 
-std::string Func_readDataDelimitedFile::bitToState(const std::string &s)
+std::string Func_readDelimitedDataFile::bitToState(const std::string &s)
 {
     
     std::stringstream ss;
@@ -83,7 +83,7 @@ std::string Func_readDataDelimitedFile::bitToState(const std::string &s)
 
 
 /** Execute function */
-RevPtr<RevVariable> Func_readDataDelimitedFile::execute( void )
+RevPtr<RevVariable> Func_readDelimitedDataFile::execute( void )
 {
     
     // get the information from the arguments for reading the file
@@ -93,7 +93,7 @@ RevPtr<RevVariable> Func_readDataDelimitedFile::execute( void )
     bool rownames          = static_cast<const RlBoolean&>( args[3].getVariable()->getRevObject() ).getValue();
     
     // get data from file
-    RevBayesCore::DelimitedDataReader* tsv_data = new RevBayesCore::DelimitedDataReader(fn, del[0], header);
+    RevBayesCore::DelimitedDataReader* tsv_data = new RevBayesCore::DelimitedDataReader(fn, del, header);
     const std::vector<std::vector<std::string> >&data = tsv_data->getChars();
 
     WorkspaceVector<WorkspaceVector<AbstractModelObject> > matrix;
@@ -275,7 +275,7 @@ RevPtr<RevVariable> Func_readDataDelimitedFile::execute( void )
 
 
 /** Get argument rules */
-const ArgumentRules& Func_readDataDelimitedFile::getArgumentRules( void ) const
+const ArgumentRules& Func_readDelimitedDataFile::getArgumentRules( void ) const
 {
     
     static ArgumentRules argumentRules = ArgumentRules();
@@ -284,9 +284,10 @@ const ArgumentRules& Func_readDataDelimitedFile::getArgumentRules( void ) const
     if (!rules_set)
     {
         
-        argumentRules.push_back( new ArgumentRule( "file",      RlString::getClassTypeSpec(), "The name of the file to read in.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "file",      RlString::getClassTypeSpec(), "The name of the file to read.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "header",    RlBoolean::getClassTypeSpec(), "Skip first line?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ));
-        argumentRules.push_back( new ArgumentRule( "delimiter", RlString::getClassTypeSpec(), "The delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "\t" ) ) );
+        std::vector<std::string> sep = {"separator","delimiter"};
+        argumentRules.push_back( new ArgumentRule( sep, RlString::getClassTypeSpec(), "The separator/delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "" ) ) );
         argumentRules.push_back( new ArgumentRule( "rownames",  RlBoolean::getClassTypeSpec(), "Skip first column?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ));
         rules_set = true;
         
@@ -297,17 +298,17 @@ const ArgumentRules& Func_readDataDelimitedFile::getArgumentRules( void ) const
 
 
 /** Get Rev type of object */
-const std::string& Func_readDataDelimitedFile::getClassType(void)
+const std::string& Func_readDelimitedDataFile::getClassType(void)
 {
     
-    static std::string rev_type = "Func_readDataDelimitedFile";
+    static std::string rev_type = "Func_readDelimitedDataFile";
     
     return rev_type;
 }
 
 
 /** Get class type spec describing type of object */
-const TypeSpec& Func_readDataDelimitedFile::getClassTypeSpec(void)
+const TypeSpec& Func_readDelimitedDataFile::getClassTypeSpec(void)
 {
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
@@ -319,10 +320,10 @@ const TypeSpec& Func_readDataDelimitedFile::getClassTypeSpec(void)
 /**
  * Get the primary Rev name for this function.
  */
-std::string Func_readDataDelimitedFile::getFunctionName( void ) const
+std::string Func_readDelimitedDataFile::getFunctionName( void ) const
 {
     // create a name variable that is the same for all instance of this class
-    std::string f_name = "readDataDelimitedFile";
+    std::string f_name = "readDelimitedDataFile";
 
     return f_name;
 }
@@ -331,18 +332,19 @@ std::string Func_readDataDelimitedFile::getFunctionName( void ) const
 /**
  * Get the primary Rev name for this function.
  */
-std::vector<std::string> Func_readDataDelimitedFile::getFunctionNameAliases( void ) const
+std::vector<std::string> Func_readDelimitedDataFile::getFunctionNameAliases( void ) const
 {
     // create a name variable that is the same for all instance of this class
     std::vector<std::string> f_names;
     f_names.push_back("readTable");
+    f_names.push_back("readDataDelimitedFile");
 
     return f_names;
 }
 
 
 /** Get type spec */
-const TypeSpec& Func_readDataDelimitedFile::getTypeSpec( void ) const
+const TypeSpec& Func_readDelimitedDataFile::getTypeSpec( void ) const
 {
     
     static TypeSpec type_spec = getClassTypeSpec();
@@ -352,7 +354,7 @@ const TypeSpec& Func_readDataDelimitedFile::getTypeSpec( void ) const
 
 
 /** Get return type */
-const TypeSpec& Func_readDataDelimitedFile::getReturnType( void ) const
+const TypeSpec& Func_readDelimitedDataFile::getReturnType( void ) const
 {
     
     static TypeSpec return_typeSpec = WorkspaceVector<WorkspaceVector<AbstractModelObject> >::getClassTypeSpec();

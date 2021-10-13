@@ -1,9 +1,9 @@
-#ifndef PiecewiseConstantFossilizedBirthDeathProcess_H
-#define PiecewiseConstantFossilizedBirthDeathProcess_H
+#ifndef FossilizedBirthDeathProcess_H
+#define FossilizedBirthDeathProcess_H
 
+#include "AbstractFossilizedBirthDeathProcess.h"
 #include "RbVector.h"
 #include "AbstractBirthDeathProcess.h"
-#include "AbstractPiecewiseConstantFossilizedRangeProcess.h"
 
 namespace RevBayesCore {
     
@@ -28,28 +28,28 @@ namespace RevBayesCore {
      * @since 2014-03-18, version 1.0
      *
      */
-    class PiecewiseConstantFossilizedBirthDeathProcess : public AbstractBirthDeathProcess, public AbstractPiecewiseConstantFossilizedRangeProcess {
+    class FossilizedBirthDeathProcess : public AbstractBirthDeathProcess, public AbstractFossilizedBirthDeathProcess {
         
         using AbstractBirthDeathProcess::taxa;
 
     public:
-        PiecewiseConstantFossilizedBirthDeathProcess (const TypedDagNode<double>* ra,
-                                                      const DagNode *speciation,
-                                                      const DagNode *extinction,
-                                                      const DagNode *psi,
-                                                      const DagNode *counts,
-                                                      const TypedDagNode<double>* rho,
-                                                      const DagNode *lambda_a,
-                                                      const DagNode *beta,
-                                                      const TypedDagNode<RbVector<double> > *times,
-                                                      const std::string &condition,
-                                                      const std::vector<Taxon> &taxa,
-                                                      bool uo,
-                                                      bool pa,
-                                                      bool ex );  //!< Constructor
+        FossilizedBirthDeathProcess (const TypedDagNode<double>* ra,
+                                      const DagNode *speciation,
+                                      const DagNode *extinction,
+                                      const DagNode *psi,
+                                      const TypedDagNode<double>* rho,
+                                      const DagNode *lambda_a,
+                                      const DagNode *beta,
+                                      const TypedDagNode<RbVector<double> > *times,
+                                      const std::string &condition,
+                                      const std::vector<Taxon> &taxa,
+                                      bool use_origin,
+                                      bool complete,
+                                      double resampling,
+                                      bool extended);  //!< Constructor
         
         // public member functions
-        PiecewiseConstantFossilizedBirthDeathProcess*   clone(void) const;                                         //!< Create an independent clone
+        FossilizedBirthDeathProcess*   clone(void) const;                                         //!< Create an independent clone
 
         double                                          getAnageneticSpeciationRate( size_t index ) const;
         double                                          getSymmetricSpeciationProbability( size_t index ) const;
@@ -58,7 +58,7 @@ namespace RevBayesCore {
 
     protected:
         void                                            updateStartEndTimes();
-        int                                             updateStartEndTimes(const TopologyNode & );
+        int                                             updateStartEndTimes(const TopologyNode &, bool force = false );
 
         double                                          pSurvival(double start, double end) const;             //!< Compute the probability of survival of the process (without incomplete taxon sampling).
 
@@ -70,8 +70,6 @@ namespace RevBayesCore {
         double                                          lnProbTreeShape(void) const;
 
         double                                          q(size_t i, double t, bool tilde = false) const;
-        double                                          H(size_t i, double x, double t) const;
-        virtual double                                  Z(size_t k, size_t i, double x, double t) const;
 
         double                                          simulateDivergenceTime(double origin, double present) const;    //!< Simulate a speciation event.
         std::vector<double>                             simulateDivergenceTimes(size_t n, double origin, double present, double min) const;                 //!< Simulate n speciation events.
@@ -83,7 +81,7 @@ namespace RevBayesCore {
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
 
-        virtual void                                    updateIntervals();
+        void                                            updateIntervals();
 
     private:
         
@@ -92,8 +90,6 @@ namespace RevBayesCore {
 
         mutable std::vector<bool>                       I;
         bool                                            extended;
-
-        //mutable std::vector<bool>                       bifurcation;
 
         mutable std::vector<double>                     anagenetic;
         mutable std::vector<double>                     symmetric;

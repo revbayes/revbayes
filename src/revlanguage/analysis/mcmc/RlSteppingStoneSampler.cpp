@@ -52,7 +52,7 @@ void SteppingStoneSampler::constructInternalObject( void )
     const std::string&   fn      = static_cast<const RlString &>( filename->getRevObject() ).getValue();
     const std::string&   pn      = static_cast<const RlString &>( powerColumnName->getRevObject() ).getValue();
     const std::string&   ln      = static_cast<const RlString &>( likelihoodColumnName->getRevObject() ).getValue();
-    const std::string&   del     = static_cast<const RlString &>( delimmiter->getRevObject() ).getValue();
+    const std::string&   del     = static_cast<const RlString &>( delimiter->getRevObject() ).getValue();
     
     value = new RevBayesCore::SteppingStoneSampler(fn, pn, ln, del);
     
@@ -121,8 +121,9 @@ const MemberRules& SteppingStoneSampler::getParameterRules(void) const
         samplerMemberRules.push_back( new ArgumentRule("filename"            , RlString::getClassTypeSpec(), "The name of the file where the likelhood samples are stored.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         samplerMemberRules.push_back( new ArgumentRule("powerColumnName"     , RlString::getClassTypeSpec(), "The name of the column of the powers.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         samplerMemberRules.push_back( new ArgumentRule("likelihoodColumnName", RlString::getClassTypeSpec(), "The name of the column of the likelihood samples.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        samplerMemberRules.push_back( new ArgumentRule("delimiter"           , RlString::getClassTypeSpec(), "The column delimiter.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "\t" ) ) );
-        
+        std::vector<std::string> sep = {"separator","delimiter"};
+        samplerMemberRules.push_back( new ArgumentRule(sep                   , RlString::getClassTypeSpec(), "The separator/delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "\t" ) ) );
+
         rules_set = true;
     }
     
@@ -163,9 +164,9 @@ void SteppingStoneSampler::setConstParameter(const std::string& name, const RevP
     {
         filename = var;
     }
-    else if ( name == "delimiter")
+    else if ( name == "delimiter" || name == "separator" || name == "separator/delimiter")
     {
-        delimmiter = var;
+        delimiter = var;
     }
     else
     {

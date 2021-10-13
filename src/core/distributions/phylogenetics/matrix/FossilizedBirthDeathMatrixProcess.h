@@ -1,7 +1,6 @@
-#ifndef PiecewiseConstantFossilizedBirthDeathRangeProcess_H
-#define PiecewiseConstantFossilizedBirthDeathRangeProcess_H
+#ifndef FossilizedBirthDeathMatrixProcess_H
+#define FossilizedBirthDeathMatrixProcess_H
 
-#include "AbstractPiecewiseConstantFossilizedRangeProcess.h"
 #include "MatrixReal.h"
 #include "RbVector.h"
 #include "TypedDagNode.h"
@@ -9,6 +8,7 @@
 
 #include <vector>
 #include <set>
+#include "AbstractFossilizedBirthDeathProcess.h"
 
 namespace RevBayesCore {
     
@@ -33,21 +33,21 @@ namespace RevBayesCore {
      * @since 2014-03-18, version 1.0
      *
      */
-    class PiecewiseConstantFossilizedBirthDeathRangeProcess : public TypedDistribution<MatrixReal>, public AbstractPiecewiseConstantFossilizedRangeProcess {
+    class FossilizedBirthDeathMatrixProcess : public TypedDistribution<MatrixReal>, public AbstractFossilizedBirthDeathProcess {
         
     public:
-        PiecewiseConstantFossilizedBirthDeathRangeProcess (const DagNode *speciation,
-                                                      const DagNode *extinction,
-                                                      const DagNode *psi,
-                                                      const DagNode *counts,
-                                                      const TypedDagNode<double>* rho,
-                                                      const TypedDagNode<RbVector<double> > *times,
-                                                      const std::string &condition,
-                                                      const std::vector<Taxon> &taxa,
-                                                      bool ages_from_counts);  //!< Constructor
+        FossilizedBirthDeathMatrixProcess (const DagNode *speciation,
+                                              const DagNode *extinction,
+                                              const DagNode *psi,
+                                              const TypedDagNode<double>* rho,
+                                              const TypedDagNode<RbVector<double> > *times,
+                                              const std::string &condition,
+                                              const std::vector<Taxon> &taxa,
+                                              bool complete,
+                                              double resampling);  //!< Constructor
         
         // public member functions
-        PiecewiseConstantFossilizedBirthDeathRangeProcess*   clone(void) const;                                         //!< Create an independent clone
+        FossilizedBirthDeathMatrixProcess*   clone(void) const;                                         //!< Create an independent clone
 
     protected:
         void                                            updateStartEndTimes();

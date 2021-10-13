@@ -1,5 +1,5 @@
-#ifndef Func_readCharacterDataDelimited_H
-#define Func_readCharacterDataDelimited_H
+#ifndef Func_readDelimitedCharacterData_H
+#define Func_readDelimitedCharacterData_H
 
 #include "Procedure.h"
 #include "RbFileManager.h"
@@ -22,14 +22,15 @@ namespace RevLanguage {
      * @since 2015-03-03, version 1.0
      *
      */
-    class Func_readCharacterDataDelimited :  public Procedure {
+    class Func_readDelimitedCharacterData :  public Procedure {
         
     public:
         // Basic utility functions
-        Func_readCharacterDataDelimited*    clone(void) const;                                          //!< Clone the object
+        Func_readDelimitedCharacterData*    clone(void) const;                                          //!< Clone the object
         static const std::string&           getClassType(void);                                         //!< Get Rev type
         static const TypeSpec&              getClassTypeSpec(void);                                     //!< Get class type spec
         std::string                         getFunctionName(void) const;                                //!< Get the primary name of the function in Rev
+        std::vector<std::string>            getFunctionNameAliases(void) const;                         //!< Get the aliases of the function in Rev
         const TypeSpec&                     getTypeSpec(void) const;                                    //!< Get language type of the object
         
         // Regular functions

@@ -5,11 +5,11 @@
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "Dist_FBDRange.h"
+#include "Dist_FBDPSpecies.h"
 #include "ModelVector.h"
 #include "Natural.h"
 #include "OptionRule.h"
-#include "PiecewiseConstantFossilizedBirthDeathProcess.h"
+#include "FossilizedBirthDeathProcess.h"
 #include "Probability.h"
 #include "RealPos.h"
 #include "RlString.h"
@@ -38,7 +38,7 @@ using namespace RevLanguage;
  *
  * The default constructor does nothing except allocating the object.
  */
-Dist_FBDRange::Dist_FBDRange() : BirthDeathProcess()
+Dist_FBDPSpecies::Dist_FBDPSpecies() : FossilizedBirthDeathSpeciesProcess<TimeTree>()
 {
     
 }
@@ -50,9 +50,9 @@ Dist_FBDRange::Dist_FBDRange() : BirthDeathProcess()
  *
  * \return A new copy of the process.
  */
-Dist_FBDRange* Dist_FBDRange::clone( void ) const
+Dist_FBDPSpecies* Dist_FBDPSpecies::clone( void ) const
 {
-    return new Dist_FBDRange(*this);
+    return new Dist_FBDPSpecies(*this);
 }
 
 
@@ -66,7 +66,7 @@ Dist_FBDRange* Dist_FBDRange::clone( void ) const
  *
  * \return A new internal distribution object.
  */
-RevBayesCore::AbstractBirthDeathProcess* Dist_FBDRange::createDistribution( void ) const
+RevBayesCore::FossilizedBirthDeathProcess* Dist_FBDPSpecies::createDistribution( void ) const
 {
     
     // get the parameters
@@ -96,13 +96,6 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_FBDRange::createDistribution( void
     // symmetric speciation probability
     RevBayesCore::DagNode* b = beta->getRevObject().getDagNode();
 
-    // fossil counts
-    RevBayesCore::DagNode* c = NULL;
-    if ( fossil_counts->getRevObject() != RevNullObject::getInstance() )
-    {
-        c = fossil_counts->getRevObject().getDagNode();
-    }
-
     // sampling probability
     RevBayesCore::TypedDagNode<double>* r       = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
 
@@ -113,10 +106,11 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_FBDRange::createDistribution( void
         rt = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
 
-    bool afc = static_cast<const RlString &>( uncertainty->getRevObject() ).getValue() == "auto";
+    bool c = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
     bool ex = static_cast<const RlBoolean &>( extended->getRevObject() ).getValue();
+    double re = static_cast<const Probability &>( resampling->getRevObject() ).getValue();
 
-    RevBayesCore::PiecewiseConstantFossilizedBirthDeathProcess* d = new RevBayesCore::PiecewiseConstantFossilizedBirthDeathProcess(sa, l, m, p, c, r, la, b, rt, cond, t, uo, afc, ex);
+    RevBayesCore::FossilizedBirthDeathProcess* d = new RevBayesCore::FossilizedBirthDeathProcess(sa, l, m, p, r, la, b, rt, cond, t, uo, c, re, ex);
 
     return d;
 }
@@ -127,10 +121,10 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_FBDRange::createDistribution( void
  *
  * \return The class' name.
  */
-const std::string& Dist_FBDRange::getClassType( void )
+const std::string& Dist_FBDPSpecies::getClassType( void )
 {
     
-    static std::string rev_type = "Dist_FBDRP";
+    static std::string rev_type = "Dist_FBDPSpecimen";
     
     return rev_type;
 }
@@ -141,10 +135,10 @@ const std::string& Dist_FBDRange::getClassType( void )
  *
  * \return TypeSpec of this class.
  */
-const TypeSpec& Dist_FBDRange::getClassTypeSpec( void )
+const TypeSpec& Dist_FBDPSpecies::getClassTypeSpec( void )
 {
     
-    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( BirthDeathProcess::getClassTypeSpec() ) );
+    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( FossilizedBirthDeathSpeciesProcess<TimeTree>::getClassTypeSpec() ) );
     
     return rev_type_spec;
 }
@@ -155,11 +149,12 @@ const TypeSpec& Dist_FBDRange::getClassTypeSpec( void )
  *
  * \return Rev aliases of constructor function.
  */
-std::vector<std::string> Dist_FBDRange::getDistributionFunctionAliases( void ) const
+std::vector<std::string> Dist_FBDPSpecies::getDistributionFunctionAliases( void ) const
 {
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
     a_names.push_back( "FBDRP" );
+    a_names.push_back( "FBDPSpecies" );
     
     return a_names;
 }
@@ -172,10 +167,10 @@ std::vector<std::string> Dist_FBDRange::getDistributionFunctionAliases( void ) c
  *
  * \return Rev name of constructor function.
  */
-std::string Dist_FBDRange::getDistributionFunctionName( void ) const
+std::string Dist_FBDPSpecies::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
-    std::string d_name = "FossilizedBirthDeathRange";
+    std::string d_name = "FossilizedBirthDeathSpecies";
     
     return d_name;
 }
@@ -191,7 +186,7 @@ std::string Dist_FBDRange::getDistributionFunctionName( void ) const
  *
  * \return The member rules.
  */
-const MemberRules& Dist_FBDRange::getParameterRules(void) const
+const MemberRules& Dist_FBDPSpecies::getParameterRules(void) const
 {
     
     static MemberRules dist_member_rules;
@@ -207,11 +202,6 @@ const MemberRules& Dist_FBDRange::getParameterRules(void) const
         std::vector<TypeSpec> paramTypes;
         paramTypes.push_back( RealPos::getClassTypeSpec() );
         paramTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
-        dist_member_rules.push_back( new ArgumentRule( "lambda",  paramTypes, "The (asymmetric) speciation rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        dist_member_rules.push_back( new ArgumentRule( "mu",      paramTypes, "The extinction rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
-        dist_member_rules.push_back( new ArgumentRule( "psi",     paramTypes, "The fossil sampling rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
-        dist_member_rules.push_back( new ArgumentRule( "rho",     Probability::getClassTypeSpec(), "The extant sampling fraction.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
-
         dist_member_rules.push_back( new ArgumentRule( "lambda_a",  paramTypes, "The anagenetic speciation rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
 
         std::vector<TypeSpec> betaParamTypes;
@@ -219,21 +209,11 @@ const MemberRules& Dist_FBDRange::getParameterRules(void) const
         betaParamTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
         dist_member_rules.push_back( new ArgumentRule( "beta",  betaParamTypes, "The probability of symmetric speciation.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
 
-        dist_member_rules.push_back( new ArgumentRule( "timeline",    ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "extended" , RlBoolean::getClassTypeSpec() , "Treat tip nodes as extinction events?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
 
-        dist_member_rules.push_back( new ArgumentRule( "k", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The fossil observation count data matrix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-
-        std::vector<std::string> optionsCondition;
-        optionsCondition.push_back( "time" );
-        optionsCondition.push_back( "survival" );
-        dist_member_rules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
-        dist_member_rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        
-        std::vector<std::string> optionsUncertainty;
-		optionsUncertainty.push_back( "auto" );
-		optionsUncertainty.push_back( "custom" );
-		dist_member_rules.push_back( new OptionRule( "uncertainty", new RlString("auto"), optionsUncertainty, "Use automatic or custom first/last occurrence age range uncertainty?" ) );
-		dist_member_rules.push_back( new ArgumentRule( "extended" , RlBoolean::getClassTypeSpec() , "Treat tip nodes as extinction events?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+        // add the rules from the base class
+        const MemberRules &parentRules = FossilizedBirthDeathSpeciesProcess<TimeTree>::getParameterRules();
+        dist_member_rules.insert(dist_member_rules.end(), parentRules.begin(), parentRules.end());
 
         rules_set = true;
     }
@@ -247,7 +227,7 @@ const MemberRules& Dist_FBDRange::getParameterRules(void) const
  *
  * \return The type spec of this object.
  */
-const TypeSpec& Dist_FBDRange::getTypeSpec( void ) const
+const TypeSpec& Dist_FBDPSpecies::getTypeSpec( void ) const
 {
     
     static TypeSpec ts = getClassTypeSpec();
@@ -266,21 +246,9 @@ const TypeSpec& Dist_FBDRange::getTypeSpec( void ) const
  * \param[in]    name     Name of the member variable.
  * \param[in]    var      Pointer to the variable.
  */
-void Dist_FBDRange::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+void Dist_FBDPSpecies::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
-    if ( name == "lambda" )
-    {
-        lambda = var;
-    }
-    else if ( name == "mu" )
-    {
-        mu = var;
-    }
-    else if ( name == "rho" )
-    {
-        rho = var;
-    }
-    else if ( name == "lambda_a" )
+    if ( name == "lambda_a" )
     {
         lambda_a = var;
     }
@@ -293,29 +261,13 @@ void Dist_FBDRange::setConstParameter(const std::string& name, const RevPtr<cons
         start_age = var;
         start_condition = name;
     }
-    else if ( name == "psi" )
-    {
-        psi = var;
-    }
-    else if ( name == "timeline" )
-    {
-        timeline = var;
-    }
-    else if ( name == "k" )
-    {
-        fossil_counts = var;
-    }
-    else if ( name == "uncertainty" )
-    {
-    	uncertainty = var;
-    }
     else if ( name == "extended" )
     {
         extended = var;
     }
     else
     {
-        BirthDeathProcess::setConstParameter(name, var);
+        FossilizedBirthDeathSpeciesProcess::setConstParameter(name, var);
     }
     
 }
