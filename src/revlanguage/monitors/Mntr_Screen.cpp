@@ -89,10 +89,10 @@ const MemberRules& Mntr_Screen::getParameterRules(void) const
     {
         
         memberRules.push_back( new Ellipsis( "Variables to monitor.", RevObject::getClassTypeSpec() ) );
-        memberRules.push_back( new ArgumentRule("printgen"  , IntegerPos::getClassTypeSpec()  , "The frequency how often the variables are monitored.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new IntegerPos(1) ) );
-        memberRules.push_back( new ArgumentRule("posterior" , RlBoolean::getClassTypeSpec(), "Monitor the joint posterior probability.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-        memberRules.push_back( new ArgumentRule("likelihood", RlBoolean::getClassTypeSpec(), "Monitor the joint likelihood.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-        memberRules.push_back( new ArgumentRule("prior"     , RlBoolean::getClassTypeSpec(), "Monitor the joint prior probability.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+        memberRules.push_back( new ArgumentRule("printgen"  , IntegerPos::getClassTypeSpec(), "The number of generations between displayed samples.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new IntegerPos(1) ) );
+        memberRules.push_back( new ArgumentRule("posterior" , RlBoolean::getClassTypeSpec() , "Monitor the joint posterior probability.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+        memberRules.push_back( new ArgumentRule("likelihood", RlBoolean::getClassTypeSpec() , "Monitor the joint likelihood.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+        memberRules.push_back( new ArgumentRule("prior"     , RlBoolean::getClassTypeSpec() , "Monitor the joint prior probability.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         
         rules_set = true;
     }
