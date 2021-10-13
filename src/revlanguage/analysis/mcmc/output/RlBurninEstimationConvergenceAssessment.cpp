@@ -533,7 +533,7 @@ void BurninEstimationConvergenceAssessment::setConstParameter(const std::string&
         }
         
     }
-    else if ( name == "delimiter" || name == "separator" || name == "separator/delimiter")
+    else if ( name == "delimiter" || name == "separator" )
     {
         delimiter = static_cast<const RlString&>( var->getRevObject() ).getValue();
     }

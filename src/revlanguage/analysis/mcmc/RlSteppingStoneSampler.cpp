@@ -164,7 +164,7 @@ void SteppingStoneSampler::setConstParameter(const std::string& name, const RevP
     {
         filename = var;
     }
-    else if ( name == "delimiter" || name == "separator" || name == "separator/delimiter")
+    else if ( name == "delimiter" || name == "separator" )
     {
         delimiter = var;
     }

@@ -163,7 +163,7 @@ void PathSampler::setConstParameter(const std::string& name, const RevPtr<const 
     {
         filename = var;
     }
-    else if ( name == "delimiter" || name == "separator" || name == "separator/delimiter")
+    else if ( name == "delimiter" || name == "separator" )
     {
         delimiter = var;
     }
