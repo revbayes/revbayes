@@ -390,7 +390,6 @@ void FossilizedBirthDeathProcess::simulateClade(std::vector<TopologyNode *> &n, 
         if( n[i]->isTip() )
         {
             double min = n[i]->getTaxon().isExtinct() ? n[i]->getTaxon().getMinAge() : 0.0;
-            double max = n[i]->getTaxon().getMaxAge();
 
             // in the extended tree, tip ages are extinction times
             if ( extended )
@@ -446,14 +445,14 @@ void FossilizedBirthDeathProcess::simulateClade(std::vector<TopologyNode *> &n, 
         std::vector<TopologyNode*> active_right_nodes;
         for (size_t i = 0; i < n.size(); ++i)
         {
-
             if ( current_age >= n[i]->getAge() )
             {
                 active_nodes.push_back( n[i] );
-            }
-            if( current_age >= first_occurrences[i] )
-            {
-                active_right_nodes.push_back( n[i] );
+
+                if( current_age >= first_occurrences[i] )
+                {
+                    active_right_nodes.push_back( n[i] );
+                }
             }
 
         }
@@ -473,7 +472,7 @@ void FossilizedBirthDeathProcess::simulateClade(std::vector<TopologyNode *> &n, 
 
         }
 
-        // only simulate if there are at least two valid/active nodes and one active left node
+        // only simulate if there are at least two valid/active nodes and one active right node
         if ( active_nodes.size() <= 2 || active_right_nodes.empty() )
         {
             current_age = next_node_age;
