@@ -1,5 +1,5 @@
-#ifndef RateMatrix_revPoMoThree4N_H
-#define RateMatrix_revPoMoThree4N_H
+#ifndef RateMatrix_revPoMoThree4_H
+#define RateMatrix_revPoMoThree4_H
 
 #include "TimeReversibleRateMatrix.h"
 #include <complex>
@@ -13,27 +13,25 @@ namespace RevBayesCore {
     
     
     
-    class RateMatrix_revPoMoThree4N : public TimeReversibleRateMatrix {
+    class RateMatrix_revPoMoThree4 : public TimeReversibleRateMatrix {
         
     public:
-        RateMatrix_revPoMoThree4N(void);                                                                                                       //!< Construct rate matrix with n states
-        RateMatrix_revPoMoThree4N(const RateMatrix_revPoMoThree4N& m);                                                                                //!< Copy constructor
-        virtual                             ~RateMatrix_revPoMoThree4N(void);                                                                  //!< Destructor
+        RateMatrix_revPoMoThree4(void);                                                                                                       //!< Construct rate matrix with n states
+        RateMatrix_revPoMoThree4(const RateMatrix_revPoMoThree4& m);                                                                                //!< Copy constructor
+        virtual                             ~RateMatrix_revPoMoThree4(void);                                                                  //!< Destructor
         
         // overloaded operators
-        RateMatrix_revPoMoThree4N&                     operator=(const RateMatrix_revPoMoThree4N& r);
+        RateMatrix_revPoMoThree4&                     operator=(const RateMatrix_revPoMoThree4& r);
         
         // RateMatrix functions
-        virtual RateMatrix_revPoMoThree4N&             assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
+        virtual RateMatrix_revPoMoThree4&             assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
         void                                           calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;    //!< Calculate the transition matrix
-        RateMatrix_revPoMoThree4N*                     clone(void) const;
+        RateMatrix_revPoMoThree4*                     clone(void) const;
 
 		
-		void 										   setN(double ps);
 		void 										   setPi( const std::vector<double> &f );
 		void 										   setRho( const std::vector<double> &r );
         void                                           setPhi( const std::vector<double> &fc );
-        std::vector<double>                            getStationaryFrequencies( void ) const;
 
         void                                           update(void);
         
@@ -49,7 +47,6 @@ namespace RevBayesCore {
         std::vector<double>                             c_ijk;                                                                              //!< Vector of precalculated product of eigenvectors and their inverse
         std::vector<std::complex<double> >              cc_ijk;                                                                             //!< Vector of precalculated product of eigenvectors and thier inverse for complex case
         
-        double                                          N;
         std::vector<double>                             pi;                                                                                 //!< Vector of precalculated product of eigenvectors and their inverse
         std::vector<double>                             rho;                                                                                //!< Vector of precalculated product of eigenvectors and their inverse
         std::vector<double>                             phi;                                                                                //!< Vector of precalculated product of eigenvectors and their inverse

@@ -2,7 +2,7 @@
 #include "EigenSystem.h"
 #include "MatrixComplex.h"
 #include "MatrixReal.h"
-#include "RateMatrix_revPoMoTwo4N.h"
+#include "RateMatrix_revPoMoThree4.h"
 #include "RbException.h"
 #include "RbMathMatrix.h"
 #include "TransitionProbabilityMatrix.h"
@@ -15,10 +15,10 @@
 using namespace RevBayesCore;
 
 /** Construct rate matrix with n states */
-RateMatrix_revPoMoTwo4N::RateMatrix_revPoMoTwo4N( void ) : TimeReversibleRateMatrix( 10 ),
-    N( 2 ),
+RateMatrix_revPoMoThree4::RateMatrix_revPoMoThree4( void ) : TimeReversibleRateMatrix( 16 ),
     pi(4, 0.25),
-    rho( 6, 0.01 )
+    rho( 6, 0.01 ),
+    phi( 4, 1.0 )
 {
     
     eigen_system       = new EigenSystem(the_rate_matrix);
@@ -30,10 +30,10 @@ RateMatrix_revPoMoTwo4N::RateMatrix_revPoMoTwo4N( void ) : TimeReversibleRateMat
 
 
 /** Copy constructor */
-RateMatrix_revPoMoTwo4N::RateMatrix_revPoMoTwo4N(const RateMatrix_revPoMoTwo4N& m) : TimeReversibleRateMatrix( m ),
-    N( m.N ),
+RateMatrix_revPoMoThree4::RateMatrix_revPoMoThree4(const RateMatrix_revPoMoThree4& m) : TimeReversibleRateMatrix( m ),
     pi( m.pi ),
-    rho( m.rho )
+    rho( m.rho ),
+    phi( m.phi )
 {
     
     eigen_system        = new EigenSystem( *m.eigen_system );
@@ -45,14 +45,14 @@ RateMatrix_revPoMoTwo4N::RateMatrix_revPoMoTwo4N(const RateMatrix_revPoMoTwo4N& 
 
 
 /** Destructor */
-RateMatrix_revPoMoTwo4N::~RateMatrix_revPoMoTwo4N(void)
+RateMatrix_revPoMoThree4::~RateMatrix_revPoMoThree4(void)
 {
     
     delete eigen_system;
 }
 
 
-RateMatrix_revPoMoTwo4N& RateMatrix_revPoMoTwo4N::operator=(const RateMatrix_revPoMoTwo4N &r)
+RateMatrix_revPoMoThree4& RateMatrix_revPoMoThree4::operator=(const RateMatrix_revPoMoThree4 &r)
 {
     
     if (this != &r)
@@ -64,9 +64,9 @@ RateMatrix_revPoMoTwo4N& RateMatrix_revPoMoTwo4N::operator=(const RateMatrix_rev
         eigen_system        = new EigenSystem( *r.eigen_system );
         c_ijk               = r.c_ijk;
         cc_ijk              = r.cc_ijk;
-        N    				= r.N;
         pi                  = r.pi;
         rho                 = r.rho;
+        phi                 = r.phi;
 
         eigen_system->setRateMatrixPtr(the_rate_matrix);
     }
@@ -75,10 +75,10 @@ RateMatrix_revPoMoTwo4N& RateMatrix_revPoMoTwo4N::operator=(const RateMatrix_rev
 }
 
 
-RateMatrix_revPoMoTwo4N& RateMatrix_revPoMoTwo4N::assign(const Assignable &m)
+RateMatrix_revPoMoThree4& RateMatrix_revPoMoThree4::assign(const Assignable &m)
 {
     
-    const RateMatrix_revPoMoTwo4N *rm = dynamic_cast<const RateMatrix_revPoMoTwo4N*>(&m);
+    const RateMatrix_revPoMoThree4 *rm = dynamic_cast<const RateMatrix_revPoMoThree4*>(&m);
     if ( rm != NULL )
     {
         return operator=(*rm);
@@ -93,7 +93,7 @@ RateMatrix_revPoMoTwo4N& RateMatrix_revPoMoTwo4N::assign(const Assignable &m)
 
 
 /** Do precalculations on eigenvectors */
-void RateMatrix_revPoMoTwo4N::calculateCijk(void)
+void RateMatrix_revPoMoThree4::calculateCijk(void)
 {
     
     if ( eigen_system->isComplex() == false )
@@ -134,7 +134,7 @@ void RateMatrix_revPoMoTwo4N::calculateCijk(void)
 
 
 /** Calculate the transition probabilities */
-void RateMatrix_revPoMoTwo4N::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
+void RateMatrix_revPoMoThree4::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
 {
     double t = rate * (startAge - endAge);
     if ( eigen_system->isComplex() == false )
@@ -148,15 +148,13 @@ void RateMatrix_revPoMoTwo4N::calculateTransitionProbabilities(double startAge, 
 }
 
 
-RateMatrix_revPoMoTwo4N* RateMatrix_revPoMoTwo4N::clone( void ) const
+RateMatrix_revPoMoThree4* RateMatrix_revPoMoThree4::clone( void ) const
 {
-    return new RateMatrix_revPoMoTwo4N( *this );
+    return new RateMatrix_revPoMoThree4( *this );
 }
 
 
-
-
-void RateMatrix_revPoMoTwo4N::computeOffDiagonal( void )
+void RateMatrix_revPoMoThree4::computeOffDiagonal( void )
 {
     
   MatrixReal& m = *the_rate_matrix;
@@ -195,121 +193,97 @@ void RateMatrix_revPoMoTwo4N::computeOffDiagonal( void )
     
   // populating the rate matrix with 0.0
   // **total waste of time with sparse matrices like pomos**
-  for (int i=0; i<10 ; i++){
-    for (int j=0; j<10; j++ ){
+  for (int i=0; i<16 ; i++){
+    for (int j=0; j<16; j++ ){
         m[i][j] = 0.0;
     }
   }
 
-
-  // calculating the harmonic number of N-1
-  // used to scale the mutation rates (or exchangeabilities)
-  double harmonic_number = boost::math::digamma(N) - boost::math::digamma(1.0);
-  double r = N*harmonic_number/2.0;	
-
-
-  // get the expected divergence (or number of evens) per unit of time
-  // normalize rate matrix such that one event happens per unit time.
-  // a common quantity to the numerator and denominator
-  double value = pi[0]*pi[1]*rho[0] +
-                 pi[0]*pi[2]*rho[1] +
-                 pi[0]*pi[3]*rho[2] +
-                 pi[1]*pi[2]*rho[3] +
-                 pi[1]*pi[3]*rho[4] +
-                 pi[2]*pi[3]*rho[5] ;
-
-  // receiprocal of the rate
-  double rRate = ( 1.0 + 4.0*r*value ) / ( 8.0*r*value );
-
   
-  // Mutations
-  m[0][4] = 2*rho[0]*r*pi[1]*rRate;    //mutation AC
-  m[0][5] = 2*rho[1]*r*pi[2]*rRate;    //mutation AG
-  m[0][6] = 2*rho[2]*r*pi[3]*rRate;    //mutation AT
+	
+  //mutations
+  //AC
+  m[0][4]   = 3*rho[0]*pi[1];    //{3A} -> {2A,1C}
+  m[1][5]   = 3*rho[0]*pi[0];    //{3C} -> {1A,2C}
 
-  m[1][4] = 2*rho[0]*r*pi[0]*rRate;    //mutation CA
-  m[1][7] = 2*rho[3]*r*pi[2]*rRate;    //mutation CG
-  m[1][8] = 2*rho[4]*r*pi[3]*rRate;    //mutation CT
+  //AG
+  m[0][6]   = 3*rho[1]*pi[2];    //{3A} -> {2A,1G}
+  m[2][7]   = 3*rho[1]*pi[0];    //{3G} -> {1A,2G}
 
-  m[2][5] = 2*rho[1]*r*pi[0]*rRate;    //mutation GA
-  m[2][7] = 2*rho[3]*r*pi[1]*rRate;    //mutation GC
-  m[2][9] = 2*rho[5]*r*pi[3]*rRate;    //mutation GT
+  //AT
+  m[0][8]   = 3*rho[2]*pi[3];    //{3A} -> {2A,1T}
+  m[3][9]   = 3*rho[2]*pi[0];    //{3T} -> {1A,2T}
 
-  m[3][6] = 2*rho[2]*r*pi[0]*rRate;    //mutation TA
-  m[3][8] = 2*rho[4]*r*pi[1]*rRate;    //mutation TC
-  m[3][9] = 2*rho[5]*r*pi[2]*rRate;    //mutation TG
+  //CG
+  m[1][10]  = 3*rho[3]*pi[2];    //{3C} -> {2C,1G}
+  m[2][11]  = 3*rho[3]*pi[1];    //{3G} -> {1C,2G}
+
+  //CT
+  m[1][12]  = 3*rho[4]*pi[3];    //{3C} -> {2C,1T}
+  m[3][13]  = 3*rho[4]*pi[1];    //{3T} -> {1C,2T}
+
+  //GT
+  m[2][14]  = 3*rho[5]*pi[3];    //{3G} -> {2G,1T}
+  m[3][15]  = 3*rho[5]*pi[2];    //{3T} -> {1G,2T}
 
 
-  // Fixations
-  // PoMoTwo only accouts for genetic drift
-  // selection is not indentifyable with two virtual individuals
-  m[4][0]   = 0.5*rRate;             //A fixed
-  m[4][1]   = 0.5*rRate;             //C fixed
+  //fixations
+  //AC
+  m[4][0]   = phi[0]/(2.0*phi[0]+1.0*phi[1]);  //{2A,1C} -> {3A} 
+  m[5][1]   = phi[1]/(2.0*phi[1]+1.0*phi[0]);  //{1A,2C} -> {3C} 
 
-  m[5][0]   = 0.5*rRate;             //A fixed
-  m[5][2]   = 0.5*rRate;             //G fixed
+  //AG
+  m[6][0]   = phi[0]/(2.0*phi[0]+1.0*phi[2]);  //{2A,1G} -> {3A} 
+  m[7][2]   = phi[2]/(2.0*phi[2]+1.0*phi[0]);  //{1A,2G} -> {3G} 
 
-  m[6][0]   = 0.5*rRate;             //A fixed
-  m[6][3]   = 0.5*rRate;             //T fixed
+  //AT
+  m[8][0]   = phi[0]/(2.0*phi[0]+1.0*phi[3]);  //{2A,1T} -> {3A} 
+  m[9][3]   = phi[3]/(2.0*phi[3]+1.0*phi[0]);  //{1A,2T} -> {3T} 
 
-  m[7][1]   = 0.5*rRate;             //C fixed
-  m[7][2]   = 0.5*rRate;             //G fixed
+  //CG
+  m[10][1]  = phi[1]/(2.0*phi[1]+1.0*phi[2]);  //{2C,1G} -> {3C} 
+  m[11][2]  = phi[2]/(2.0*phi[2]+1.0*phi[1]);  //{1C,2G} -> {3G}
 
-  m[8][1]   = 0.5*rRate;             //C fixed
-  m[8][3]   = 0.5*rRate;             //T fixed
-  
-  m[9][2]   = 0.5*rRate;             //G fixed
-  m[9][3]   = 0.5*rRate;             //T fixed
+  //CT
+  m[12][1]  = phi[1]/(2.0*phi[1]+1.0*phi[3]);  //{2C,1T} -> {3C} 
+  m[13][3]  = phi[3]/(2.0*phi[3]+1.0*phi[1]);  //{1C,2T} -> {3T} 
 
+  //GT
+  m[14][2]  = phi[2]/(2.0*phi[2]+1.0*phi[3]);  //{2G,1T} -> {3G} 
+  m[15][3]  = phi[3]/(2.0*phi[3]+1.0*phi[2]);  //{1G,2T} -> {3T} 
+
+  // frequency shifts
+  m[4][5]    = phi[1]/(2.0*phi[0]+1.0*phi[1]);  //{2A,1C} -> {1A,2C}
+  m[5][4]    = phi[0]/(2.0*phi[1]+1.0*phi[0]);  //{1A,2C} -> {2A,1C}
+
+  //AG
+  m[6][7]    = phi[2]/(2.0*phi[0]+1.0*phi[2]);  //{2A,1G} -> {1A,2G}
+  m[7][6]    = phi[0]/(2.0*phi[2]+1.0*phi[0]);  //{1A,2G} -> {2A,1G}
+
+  //AT
+  m[8][9]    = phi[3]/(2.0*phi[0]+1.0*phi[3]);  //{2A,1T} -> {1A,2T}
+  m[9][8]    = phi[0]/(2.0*phi[3]+1.0*phi[0]);  //{1A,2T} -> {2A,1T}
+
+  //CG
+  m[10][11]  = phi[2]/(2.0*phi[1]+1.0*phi[2]);  //{2C,1G} -> {1C,2G}
+  m[11][10]  = phi[1]/(2.0*phi[2]+1.0*phi[1]);  //{1C,2G} -> {2C,1G}
+
+  //CT
+  m[12][13]  = phi[3]/(2.0*phi[1]+1.0*phi[3]);  //{2C,1T} -> {1C,2T}
+  m[13][12]  = phi[1]/(2.0*phi[3]+1.0*phi[1]);  //{1C,2T} -> {2C,1T}
+
+  //GT
+  m[14][15]  = phi[3]/(2.0*phi[2]+1.0*phi[3]);  //{2G,1T} -> {1G,2T}
+  m[15] [14] = phi[2]/(2.0*phi[3]+1.0*phi[2]);  //{1G,2T} -> {2G,1T}
 
   // set flags
   needs_update = true;
 
 }
 
-std::vector<double> RateMatrix_revPoMoTwo4N::getStationaryFrequencies( void ) const
-{
-
-  // calculating the harmonic number of N-1
-  // used to scale the mutation rates (or exchangeabilities)
-  double harmonic_number = boost::math::digamma(N) - boost::math::digamma(1.0);
-  double r = N*harmonic_number/2.0;
-
-  // calculating the normalization constant
-
-  double nc = 1.0 +
-              4.0*pi[0]*pi[1]*rho[0]*r + 
-              4.0*pi[0]*pi[2]*rho[1]*r + 
-              4.0*pi[0]*pi[3]*rho[2]*r + 
-              4.0*pi[1]*pi[2]*rho[3]*r + 
-              4.0*pi[1]*pi[3]*rho[4]*r + 
-              4.0*pi[2]*pi[3]*rho[5]*r ;
-
-
-  // calculating the stationary vector
-
-  double rnc = 1.0/nc;
-
-  std::vector<double> stationary_freqs(16,0.0);
-
-  stationary_freqs[0]  = pi[0]*rnc;
-  stationary_freqs[1]  = pi[1]*rnc;
-  stationary_freqs[2]  = pi[2]*rnc;
-  stationary_freqs[3]  = pi[3]*rnc;
-  stationary_freqs[4]  = pi[0]*pi[1]*rho[0]*r*4.0*rnc;
-  stationary_freqs[5]  = pi[0]*pi[2]*rho[1]*r*4.0*rnc;
-  stationary_freqs[6]  = pi[0]*pi[3]*rho[2]*r*4.0*rnc;
-  stationary_freqs[7]  = pi[1]*pi[2]*rho[3]*r*4.0*rnc;
-  stationary_freqs[8]  = pi[1]*pi[3]*rho[4]*r*4.0*rnc;
-  stationary_freqs[9]  = pi[2]*pi[3]*rho[5]*r*4.0*rnc;
-
-  return stationary_freqs;
-
-}
-
 
 /** Calculate the transition probabilities for the real case */
-void RateMatrix_revPoMoTwo4N::tiProbsEigens(double t, TransitionProbabilityMatrix& P) const
+void RateMatrix_revPoMoThree4::tiProbsEigens(double t, TransitionProbabilityMatrix& P) const
 {
     
     // get a reference to the eigenvalues
@@ -343,7 +317,7 @@ void RateMatrix_revPoMoTwo4N::tiProbsEigens(double t, TransitionProbabilityMatri
 
 
 /** Calculate the transition probabilities for the complex case */
-void RateMatrix_revPoMoTwo4N::tiProbsComplexEigens(double t, TransitionProbabilityMatrix& P) const
+void RateMatrix_revPoMoThree4::tiProbsComplexEigens(double t, TransitionProbabilityMatrix& P) const
 {
     
     // get a reference to the eigenvalues
@@ -373,30 +347,32 @@ void RateMatrix_revPoMoTwo4N::tiProbsComplexEigens(double t, TransitionProbabili
 }
 
 
-void RateMatrix_revPoMoTwo4N::setN(double ps)
-{
-    N = ps;
-    // set flags
-    needs_update = true;
-}
 
 
-void RateMatrix_revPoMoTwo4N::setPi( const std::vector<double> &f )
+
+void RateMatrix_revPoMoThree4::setPi( const std::vector<double> &f )
 {
     pi = f;
     // set flags
     needs_update = true;
 }
 
-void RateMatrix_revPoMoTwo4N::setRho( const std::vector<double> &r )
+void RateMatrix_revPoMoThree4::setRho( const std::vector<double> &r )
 {
     rho = r;
     // set flags
     needs_update = true;
 }
 
+void RateMatrix_revPoMoThree4::setPhi( const std::vector<double> &fc )
+{
+    phi = fc;
+    // set flags
+    needs_update = true;
+}
+
 /** Update the eigen system */
-void RateMatrix_revPoMoTwo4N::updateEigenSystem(void)
+void RateMatrix_revPoMoThree4::updateEigenSystem(void)
 {
     
     eigen_system->update();
@@ -405,7 +381,7 @@ void RateMatrix_revPoMoTwo4N::updateEigenSystem(void)
 }
 
 
-void RateMatrix_revPoMoTwo4N::update( void )
+void RateMatrix_revPoMoThree4::update( void )
 {
     
     if ( needs_update )
@@ -417,7 +393,7 @@ void RateMatrix_revPoMoTwo4N::update( void )
         setDiagonal();
         
         // rescale
-        //rescaleToAverageRate(1.0);
+        //rescaleToAverageRate(e_rate);
         
         // now update the eigensystem
         updateEigenSystem();

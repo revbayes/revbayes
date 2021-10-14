@@ -203,128 +203,228 @@ void RateMatrix_revPoMoThree4N::computeOffDiagonal( void )
   }
 
   //scaling the fitness coefficients
-  double phi_A = pow( phi[0], 0.5*N-0.5 );
-  double phi_C = pow( phi[1], 0.5*N-0.5 );
-  double phi_G = pow( phi[2], 0.5*N-0.5 );
-  double phi_T = pow( phi[3], 0.5*N-0.5 );
+  std::vector<double> sphi(4,0.0);
+
+  sphi[0] = pow( phi[0], 0.5*N-0.5 );
+  sphi[1] = pow( phi[1], 0.5*N-0.5 );
+  sphi[2] = pow( phi[2], 0.5*N-0.5 );
+  sphi[3] = pow( phi[3], 0.5*N-0.5 );
 
   //scaling the mutation rates (or better, the exchangeabilities)
-  double fitness_ratio_AC, fitness_ratio_AG, fitness_ratio_AT, fitness_ratio_CG, fitness_ratio_CT, fitness_ratio_GT ;
+  std::vector<double> srho(6,0.0);
+  
+  double sAC, sAG, sAT, sCG, sCT, sGT = 0.0;
+  double dc; 
+  
+  for (int n = 1; n<N; n++){
 
-  fitness_ratio_AC = phi[0]/phi[1];
-  fitness_ratio_AG = phi[0]/phi[2];
-  fitness_ratio_AT = phi[0]/phi[3];
-  fitness_ratio_CG = phi[1]/phi[2];
-  fitness_ratio_CT = phi[1]/phi[3];
-  fitness_ratio_GT = phi[2]/phi[3];
+    // drift coefficient
+    dc = 1.0*N/(n*(N-n));
 
-  double scaling_AC, scaling_AG, scaling_AT, scaling_CG, scaling_CT, scaling_GT ;
-  scaling_AC = scaling_AG = scaling_AT = scaling_CG = scaling_CT = scaling_GT = 0.0; 
-
-  double rn;
-  for (int n=1; n<N; n++){
-    
-    rn = 1.0/(n*(N-n));
-
-    scaling_AC += pow(fitness_ratio_AC, n)*rn;
-    scaling_AG += pow(fitness_ratio_AG, n)*rn;
-    scaling_AT += pow(fitness_ratio_AT, n)*rn;
-    scaling_CG += pow(fitness_ratio_CG, n)*rn;
-    scaling_CT += pow(fitness_ratio_CT, n)*rn;
-    scaling_GT += pow(fitness_ratio_GT, n)*rn;
+    sAC += pow(phi[1], n-1)*pow(phi[0], N-n-1)*(n*phi[1] + (N-n)*phi[0])*dc;
+    sAG += pow(phi[2], n-1)*pow(phi[0], N-n-1)*(n*phi[2] + (N-n)*phi[0])*dc;
+    sAT += pow(phi[3], n-1)*pow(phi[0], N-n-1)*(n*phi[3] + (N-n)*phi[0])*dc;
+    sCG += pow(phi[2], n-1)*pow(phi[1], N-n-1)*(n*phi[2] + (N-n)*phi[1])*dc;
+    sCT += pow(phi[3], n-1)*pow(phi[1], N-n-1)*(n*phi[3] + (N-n)*phi[1])*dc;
+    sGT += pow(phi[3], n-1)*pow(phi[2], N-n-1)*(n*phi[3] + (N-n)*phi[2])*dc;
 
   }
 
-  double rho_AC, rho_AG, rho_AT, rho_CG, rho_CT, rho_GT ;
-  double k = 2.0/3.0;
+  double nm = 1/3.0;
 
-  rho_AC = rho[0]*N*pow(phi[1],N)*scaling_AC*k / (phi[0]*phi[1]*( phi_A + phi_C ));
-  rho_AG = rho[1]*N*pow(phi[2],N)*scaling_AG*k / (phi[0]*phi[2]*( phi_A + phi_G ));
-  rho_AT = rho[2]*N*pow(phi[3],N)*scaling_AT*k / (phi[0]*phi[3]*( phi_A + phi_T ));
-  rho_CG = rho[3]*N*pow(phi[2],N)*scaling_CG*k / (phi[1]*phi[2]*( phi_C + phi_G ));
-  rho_CT = rho[4]*N*pow(phi[3],N)*scaling_CT*k / (phi[1]*phi[3]*( phi_C + phi_T )); 
-  rho_GT = rho[5]*N*pow(phi[3],N)*scaling_GT*k / (phi[2]*phi[3]*( phi_G + phi_T ));
+  srho[0] = rho[0]*nm*sAC/( sphi[0]*sphi[0] + sphi[0]*sphi[1] + sphi[1]*sphi[1] );
+  srho[1] = rho[1]*nm*sAG/( sphi[0]*sphi[0] + sphi[0]*sphi[2] + sphi[2]*sphi[2] );
+  srho[2] = rho[2]*nm*sAT/( sphi[0]*sphi[0] + sphi[0]*sphi[3] + sphi[3]*sphi[3] );
+  srho[3] = rho[3]*nm*sCG/( sphi[1]*sphi[1] + sphi[1]*sphi[2] + sphi[2]*sphi[2] );
+  srho[4] = rho[4]*nm*sCT/( sphi[1]*sphi[1] + sphi[1]*sphi[3] + sphi[3]*sphi[3] );
+  srho[5] = rho[5]*nm*sGT/( sphi[2]*sphi[2] + sphi[2]*sphi[3] + sphi[3]*sphi[3] );
+  
 
-	
-//mutations
+
+  // get the expected divergence (or number of evens) per unit of time
+  // normalize rate matrix such that one event happens per unit time.
+  double value = pi[0]*pi[1]*srho[0]*( sphi[0]*sphi[0] + sphi[0]*sphi[1] + sphi[1]*sphi[1] ) +
+                 pi[0]*pi[2]*srho[1]*( sphi[0]*sphi[0] + sphi[0]*sphi[2] + sphi[2]*sphi[2] ) +
+                 pi[0]*pi[3]*srho[2]*( sphi[0]*sphi[0] + sphi[0]*sphi[3] + sphi[3]*sphi[3] ) +
+                 pi[1]*pi[2]*srho[3]*( sphi[1]*sphi[1] + sphi[1]*sphi[2] + sphi[2]*sphi[2] ) +
+                 pi[1]*pi[3]*srho[4]*( sphi[1]*sphi[1] + sphi[1]*sphi[3] + sphi[3]*sphi[3] ) +
+                 pi[2]*pi[3]*srho[5]*( sphi[2]*sphi[2] + sphi[2]*sphi[3] + sphi[3]*sphi[3] ) ;
+
+  double rRate = ( pi[0]*sphi[0]*sphi[0] +
+                   pi[1]*sphi[1]*sphi[1] +
+                   pi[2]*sphi[2]*sphi[2] +
+                   pi[3]*sphi[3]*sphi[3] + 3.0*value ) / ( 6.0*value );
+
+
+  //mutations
   //AC
-  m[0][4]   = rho_AC*pi[1];    //{3A} -> {2A,1C}
-  m[1][5]   = rho_AC*pi[0];    //{3C} -> {1A,2C}
+  m[0][4]   = 3.0*srho[0]*pi[1]*rRate;    //{3A} -> {2A,1C}
+  m[1][5]   = 3.0*srho[0]*pi[0]*rRate;    //{3C} -> {1A,2C}
 
   //AG
-  m[0][6]   = rho_AG*pi[2];    //{3A} -> {2A,1G}
-  m[2][7]   = rho_AG*pi[0];    //{3G} -> {1A,2G}
+  m[0][6]   = 3.0*srho[1]*pi[2]*rRate;    //{3A} -> {2A,1G}
+  m[2][7]   = 3.0*srho[1]*pi[0]*rRate;    //{3G} -> {1A,2G}
 
   //AT
-  m[0][8]   = rho_AT*pi[3];    //{3A} -> {2A,1T}
-  m[3][9]   = rho_AT*pi[0];    //{3T} -> {1A,2T}
+  m[0][8]   = 3.0*srho[2]*pi[3]*rRate;    //{3A} -> {2A,1T}
+  m[3][9]   = 3.0*srho[2]*pi[0]*rRate;    //{3T} -> {1A,2T}
 
   //CG
-  m[1][10]  = rho_CG*pi[2];    //{3C} -> {2C,1G}
-  m[2][11]  = rho_CG*pi[1];    //{3G} -> {1C,2G}
+  m[1][10]  = 3.0*srho[3]*pi[2]*rRate;    //{3C} -> {2C,1G}
+  m[2][11]  = 3.0*srho[3]*pi[1]*rRate;    //{3G} -> {1C,2G}
 
   //CT
-  m[1][12]  = rho_CT*pi[3];    //{3C} -> {2C,1T}
-  m[3][13]  = rho_CT*pi[1];    //{3T} -> {1C,2T}
+  m[1][12]  = 3.0*srho[4]*pi[3]*rRate;    //{3C} -> {2C,1T}
+  m[3][13]  = 3.0*srho[4]*pi[1]*rRate;    //{3T} -> {1C,2T}
 
   //GT
-  m[2][14]  = rho_GT*pi[3];    //{3G} -> {2G,1T}
-  m[3][15]  = rho_GT*pi[2];    //{3T} -> {1G,2T}
+  m[2][14]  = 3.0*srho[5]*pi[3]*rRate;    //{3G} -> {2G,1T}
+  m[3][15]  = 3.0*srho[5]*pi[2]*rRate;    //{3T} -> {1G,2T}
 
 
   //fixations
   //AC
-  m[4][0]   = phi_A*k;  //{2A,1C} -> {3A} 
-  m[5][1]   = phi_C*k;  //{1A,2C} -> {3C} 
+
+  m[4][0]   = 2.0*sphi[0]*rRate/(2.0*sphi[0]+sphi[1]);  //{2A,1C} -> {3A} 
+  m[5][1]   = 2.0*sphi[1]*rRate/(2.0*sphi[1]+sphi[0]);  //{1A,2C} -> {3C} 
 
   //AG
-  m[6][0]   = phi_A*k;  //{2A,1G} -> {3A} 
-  m[7][2]   = phi_G*k;  //{1A,2G} -> {3G} 
+  m[6][0]   = 2.0*sphi[0]*rRate/(2.0*sphi[0]+sphi[2]);  //{2A,1G} -> {3A} 
+  m[7][2]   = 2.0*sphi[2]*rRate/(2.0*sphi[2]+sphi[0]);  //{1A,2G} -> {3G} 
 
   //AT
-  m[8][0]   = phi_A*k;  //{2A,1T} -> {3A} 
-  m[9][3]   = phi_T*k;  //{1A,2T} -> {3T} 
+  m[8][0]   = 2.0*sphi[0]*rRate/(2.0*sphi[0]+sphi[3]);  //{2A,1T} -> {3A} 
+  m[9][3]   = 2.0*sphi[3]*rRate/(2.0*sphi[3]+sphi[0]);  //{1A,2T} -> {3T} 
 
   //CG
-  m[10][1]  = phi_C*k;  //{2C,1G} -> {3C} 
-  m[11][2]  = phi_G*k;  //{1C,2G} -> {3G}
+  m[10][1]  = 2.0*sphi[1]*rRate/(2.0*sphi[1]+sphi[2]);  //{2C,1G} -> {3C} 
+  m[11][2]  = 2.0*sphi[2]*rRate/(2.0*sphi[2]+sphi[0]);  //{1C,2G} -> {3G}
 
   //CT
-  m[12][1]  = phi_C*k;  //{2C,1T} -> {3C} 
-  m[13][3]  = phi_T*k;  //{1C,2T} -> {3T} 
+  m[12][1]  = 2.0*sphi[1]*rRate/(2.0*sphi[1]+sphi[3]);  //{2C,1T} -> {3C} 
+  m[13][3]  = 2.0*sphi[3]*rRate/(2.0*sphi[3]+sphi[1]);  //{1C,2T} -> {3T} 
 
   //GT
-  m[14][2]  = phi_G*k;  //{2G,1T} -> {3G} 
-  m[15][3]  = phi_T*k;  //{1G,2T} -> {3T} 
+  m[14][2]  = 2.0*sphi[2]*rRate/(2.0*sphi[2]+sphi[3]);  //{2G,1T} -> {3G} 
+  m[15][3]  = 2.0*sphi[3]*rRate/(2.0*sphi[3]+sphi[2]);  //{1G,2T} -> {3T} 
 
   // frequency shifts
-  m[4][5]    = phi_C*k;  //{2A,1C} -> {1A,2C}
-  m[5][4]    = phi_A*k;  //{1A,2C} -> {2A,1C}
+  m[4][5]    = 2.0*sphi[1]*rRate/(2.0*sphi[0]+sphi[1]);  //{2A,1C} -> {1A,2C}
+  m[5][4]    = 2.0*sphi[0]*rRate/(2.0*sphi[1]+sphi[0]);  //{1A,2C} -> {2A,1C}
 
   //AG
-  m[6][7]    = phi_G*k;  //{2A,1G} -> {1A,2G}
-  m[7][6]    = phi_A*k;  //{1A,2G} -> {2A,1G}
+  m[6][7]    = 2.0*sphi[2]*rRate/(2.0*sphi[0]+sphi[2]);  //{2A,1G} -> {1A,2G}
+  m[7][6]    = 2.0*sphi[0]*rRate/(2.0*sphi[2]+sphi[0]);  //{1A,2G} -> {2A,1G}
 
   //AT
-  m[8][9]    = phi_T*k;  //{2A,1T} -> {1A,2T}
-  m[9][8]    = phi_A*k;  //{1A,2T} -> {2A,1T}
+  m[8][9]    = 2.0*sphi[3]*rRate/(2.0*sphi[0]+sphi[3]);  //{2A,1T} -> {1A,2T}
+  m[9][8]    = 2.0*sphi[0]*rRate/(2.0*sphi[3]+sphi[0]);  //{1A,2T} -> {2A,1T}
 
   //CG
-  m[10][11]  = phi_G*k;  //{2C,1G} -> {1C,2G}
-  m[11][10]  = phi_C*k;  //{1C,2G} -> {2C,1G}
+  m[10][11]  = 2.0*sphi[2]*rRate/(2.0*sphi[1]+sphi[2]);  //{2C,1G} -> {1C,2G}
+  m[11][10]  = 2.0*sphi[1]*rRate/(2.0*sphi[2]+sphi[1]);  //{1C,2G} -> {2C,1G}
 
   //CT
-  m[12][13]  = phi_T*k;  //{2C,1T} -> {1C,2T}
-  m[13][12]  = phi_C*k;  //{1C,2T} -> {2C,1T}
+  m[12][13]  = 2.0*sphi[3]*rRate/(2.0*sphi[1]+sphi[3]);  //{2C,1T} -> {1C,2T}
+  m[13][12]  = 2.0*sphi[1]*rRate/(2.0*sphi[3]+sphi[1]);  //{1C,2T} -> {2C,1T}
 
   //GT
-  m[14][15]  = phi_T*k;  //{2G,1T} -> {1G,2T}
-  m[15] [14] = phi_G*k;  //{1G,2T} -> {2G,1T}
+  m[14][15]  = 2.0*sphi[3]*rRate/(2.0*sphi[2]+sphi[3]);  //{2G,1T} -> {1G,2T}
+  m[15] [14] = 2.0*sphi[2]*rRate/(2.0*sphi[3]+sphi[2]);  //{1G,2T} -> {2G,1T}
 
   // set flags
   needs_update = true;
 
 }
+
+
+std::vector<double> RateMatrix_revPoMoThree4N::getStationaryFrequencies( void ) const
+{
+
+  //scaling the fitness coefficients
+  std::vector<double> sphi(4,0.0);
+
+  sphi[0] = pow( phi[0], 0.5*N-0.5 );
+  sphi[1] = pow( phi[1], 0.5*N-0.5 );
+  sphi[2] = pow( phi[2], 0.5*N-0.5 );
+  sphi[3] = pow( phi[3], 0.5*N-0.5 );
+
+  //scaling the mutation rates (or better, the exchangeabilities)
+  std::vector<double> srho(6,0.0);
+  
+  double sAC, sAG, sAT, sCG, sCT, sGT = 0.0;
+  double dc; 
+
+  for (int n = 1; n<N; n++){
+
+    // drift coefficient
+    dc = 1.0*N/(n*(N-n));
+
+    sAC += pow(phi[1], n-1)*pow(phi[0], N-n-1)*(n*phi[1] + (N-n)*phi[0])*dc;
+    sAG += pow(phi[2], n-1)*pow(phi[0], N-n-1)*(n*phi[2] + (N-n)*phi[0])*dc;
+    sAT += pow(phi[3], n-1)*pow(phi[0], N-n-1)*(n*phi[3] + (N-n)*phi[0])*dc;
+    sCG += pow(phi[2], n-1)*pow(phi[1], N-n-1)*(n*phi[2] + (N-n)*phi[1])*dc;
+    sCT += pow(phi[3], n-1)*pow(phi[1], N-n-1)*(n*phi[3] + (N-n)*phi[1])*dc;
+    sGT += pow(phi[3], n-1)*pow(phi[2], N-n-1)*(n*phi[3] + (N-n)*phi[2])*dc;
+
+  }
+
+  double nm = N/3.0;
+
+  srho[0] = rho[0]*nm*sAC/( sphi[0]*sphi[0] + sphi[0]*sphi[1] + sphi[1]*sphi[1] );
+  srho[1] = rho[1]*nm*sAG/( sphi[0]*sphi[0] + sphi[0]*sphi[2] + sphi[2]*sphi[2] );
+  srho[2] = rho[2]*nm*sAT/( sphi[0]*sphi[0] + sphi[0]*sphi[3] + sphi[3]*sphi[3] );
+  srho[3] = rho[3]*nm*sCG/( sphi[1]*sphi[1] + sphi[1]*sphi[2] + sphi[2]*sphi[2] );
+  srho[4] = rho[4]*nm*sCT/( sphi[1]*sphi[1] + sphi[1]*sphi[3] + sphi[3]*sphi[3] );
+  srho[5] = rho[5]*nm*sGT/( sphi[2]*sphi[2] + sphi[2]*sphi[3] + sphi[3]*sphi[3] );
+
+ // calculating the normalization constant
+  double nc = pi[0]*sphi[0]*sphi[0] +
+              pi[1]*sphi[1]*sphi[1] +
+              pi[2]*sphi[2]*sphi[2] +
+              pi[3]*sphi[3]*sphi[3] +
+              3.0*pi[0]*pi[1]*srho[0]*(sphi[0]*sphi[0]+sphi[0]*sphi[1]+sphi[1]*sphi[1]) + 
+              3.0*pi[0]*pi[2]*srho[1]*(sphi[0]*sphi[0]+sphi[0]*sphi[2]+sphi[2]*sphi[2]) + 
+              3.0*pi[0]*pi[3]*srho[2]*(sphi[0]*sphi[0]+sphi[0]*sphi[3]+sphi[3]*sphi[3]) + 
+              3.0*pi[1]*pi[2]*srho[3]*(sphi[1]*sphi[1]+sphi[1]*sphi[2]+sphi[2]*sphi[2]) + 
+              3.0*pi[1]*pi[3]*srho[4]*(sphi[1]*sphi[1]+sphi[1]*sphi[3]+sphi[3]*sphi[3]) + 
+              3.0*pi[2]*pi[3]*srho[5]*(sphi[2]*sphi[2]+sphi[2]*sphi[3]+sphi[3]*sphi[3]) ;
+
+
+  // calculating the stationary vector
+
+  double rnc = 1.0/nc;
+
+  std::vector<double> stationary_freqs(16,0.0);
+
+  stationary_freqs[0]  = pi[0]*sphi[0]*sphi[0]*rnc;
+  stationary_freqs[1]  = pi[1]*sphi[1]*sphi[1]*rnc;
+  stationary_freqs[2]  = pi[2]*sphi[2]*sphi[2]*rnc;
+  stationary_freqs[3]  = pi[3]*sphi[3]*sphi[3]*rnc;
+
+  stationary_freqs[4]  = pi[0]*pi[1]*srho[0]*sphi[0]*( sphi[1] + 2.0*sphi[0] )*1.5*rnc;
+  stationary_freqs[5]  = pi[0]*pi[1]*srho[0]*sphi[1]*( sphi[0] + 2.0*sphi[1] )*1.5*rnc;
+
+  stationary_freqs[6]  = pi[0]*pi[2]*srho[1]*sphi[0]*( sphi[2] + 2.0*sphi[0] )*1.5*rnc;
+  stationary_freqs[7]  = pi[0]*pi[2]*srho[1]*sphi[2]*( sphi[0] + 2.0*sphi[2] )*1.5*rnc;
+
+  stationary_freqs[8]  = pi[0]*pi[3]*srho[2]*sphi[0]*( sphi[3] + 2.0*sphi[0] )*1.5*rnc;
+  stationary_freqs[9]  = pi[0]*pi[3]*srho[2]*sphi[3]*( sphi[0] + 2.0*sphi[3] )*1.5*rnc;
+
+  stationary_freqs[10] = pi[1]*pi[2]*srho[3]*sphi[1]*( sphi[2] + 2.0*sphi[1] )*1.5*rnc;
+  stationary_freqs[11] = pi[1]*pi[2]*srho[3]*sphi[2]*( sphi[1] + 2.0*sphi[2] )*1.5*rnc;
+
+  stationary_freqs[12] = pi[1]*pi[3]*srho[4]*sphi[1]*( sphi[3] + 2.0*sphi[1] )*1.5*rnc;
+  stationary_freqs[13] = pi[1]*pi[3]*srho[4]*sphi[3]*( sphi[1] + 2.0*sphi[3] )*1.5*rnc;
+
+  stationary_freqs[14] = pi[2]*pi[3]*srho[5]*sphi[2]*( sphi[3] + 2.0*sphi[2] )*1.5*rnc;
+  stationary_freqs[15] = pi[2]*pi[3]*srho[5]*sphi[3]*( sphi[2] + 2.0*sphi[3] )*1.5*rnc;
+
+
+  return stationary_freqs;
+
+}
+
 
 
 /** Calculate the transition probabilities for the real case */
@@ -443,7 +543,7 @@ void RateMatrix_revPoMoThree4N::update( void )
         setDiagonal();
         
         // rescale
-        //rescaleToAverageRate(e_rate);
+        //rescaleToAverageRate(1.0);
         
         // now update the eigensystem
         updateEigenSystem();
