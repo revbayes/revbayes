@@ -322,18 +322,12 @@ double BirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( void )
             if (N_i == 0)
             {
                 return RbConstants::Double::neginf;
-                //std::stringstream ss;
-                //ss << "The event sampling rate at timeline[ " << i << "] is > 0, but the tree has no samples at this time.";
-                //throw RbException(ss.str());
             }
 
             // Make sure that we aren't claiming to have sampled all lineages without having sampled all lineages
             if (phi_event[i] >= (1.0 - DBL_EPSILON) && (active_lineages_at_t != N_i) )
             {
                 return RbConstants::Double::neginf;
-                //std::stringstream ss;
-                //ss << "The event sampling rate at timeline[ " << i << "] is one, but the tree has unsampled tips at this time.";
-                //throw RbException(ss.str());
 
             }
             else
@@ -350,9 +344,6 @@ double BirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( void )
             {
                 // Cannot have sampled ancestors if r(t) == 1
                 return RbConstants::Double::neginf;
-                //std::stringstream ss;
-                //ss << "The conditional probability of death on sampling rate in interval " << i << " is one, but the tree has sampled ancesors in this interval.";
-                //throw RbException(ss.str());
             }
             if ( global_timeline[i] > DBL_EPSILON )
             {
@@ -363,7 +354,6 @@ double BirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( void )
             lnProbTimes += ln_sampling_event_prob;
         }
     }
-    // std::cout << "computed (ii); lnProbability = " << lnProbTimes << std::endl;
 
     // add the serial tip age terms (iii)
     for (size_t i = 0; i < serial_tip_ages.size(); ++i)
@@ -380,24 +370,14 @@ double BirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( void )
         if ( phi[index] == 0.0 )
         {
             return RbConstants::Double::neginf;
-            //std::stringstream ss;
-            //ss << "The serial sampling rate in interval " << i << " is zero, but the tree has serial sampled tips in this interval.";
-            //throw RbException(ss.str());
         }
         else
         {
             double this_prob = r[index] + (1 - r[index]) * E(index,t);
             this_prob *= phi[index];
-            // double this_prob = phi[index] * r[index];
-            // // Avoid computation in the case of r = 1
-            // if (r[t] <= 1 - DBL_EPSILON)
-            // {
-            //   this_prob += phi[index] * (1 - r[index]) * E(index,t);
-            // }
             lnProbTimes += log( this_prob );
         }
     }
-// std::cout << "computed (iii); lnProbability = " << lnProbTimes << std::endl;
 
     // add the serial sampled ancestor terms (iv)
     for (size_t i=0; i < serial_sampled_ancestor_ages.size(); ++i)
@@ -413,9 +393,6 @@ double BirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( void )
         if ( r[index] > 1.0 - DBL_EPSILON )
         {
             return RbConstants::Double::neginf;
-            //std::stringstream ss;
-            //ss << "The conditional probability of death on sampling rate in interval " << i << " is one, but the tree has sampled ancesors in this interval.";
-            //throw RbException(ss.str());
         }
 
         lnProbTimes += log(phi[index]) + log(1 - r[index]);
@@ -465,41 +442,9 @@ double BirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( void )
         lnProbTimes += this_ln_D;
       }
 
-//         if ( !n.isRoot() && !n.isSampledAncestor() )
-//         {
-// //        double t_start = n.getParent().getAge();
-// //        double t_end = n.getAge();
-//             double t_start = n.getAge();
-//             double t_end = n.getParent().getAge();
-//
-//             size_t interval_t_start = findIndex(t_start);
-//             size_t interval_t_end = findIndex(t_end);
-//
-//             double t_o = t_start;
-//             size_t interval_t_o = interval_t_start;
-//
-//             while ( interval_t_o < interval_t_end )
-//             {
-//                 double t_y = timeline[interval_t_o+1];
-//                 size_t interval_t_y = interval_t_o + 1;
-//
-//                 lnProbTimes -= lnD(interval_t_o,t_o);
-//                 lnProbTimes += lnD(interval_t_y,t_y);
-//
-//                 t_o = t_y;
-//                 interval_t_o = interval_t_y;
-//             }
-//
-//             lnProbTimes -= lnD(interval_t_o,t_o);
-//             lnProbTimes += lnD(interval_t_end,t_end);
-//             // std::cout << "    computing (vii); t_o = " << t_o << "; t_end = " << t_end << "; lnD(interval_t_o,t_o) = " << lnD(interval_t_o,t_o) << "; lnD(interval_t_end,t_end) = " << lnD(interval_t_end,t_end) << std::endl;
-//             // std::cout << "lnProbTimes is now " << lnProbTimes << std::endl;
-//         }
+    }
 
-      }
-      lnProbTimes += lnD(findIndex(value->getRoot().getAge()),value->getRoot().getAge());
-
-// std::cout << "computed (vii); lnProbability = " << lnProbTimes << std::endl;
+    lnProbTimes += lnD(findIndex(value->getRoot().getAge()),value->getRoot().getAge());
 
     // condition on survival
     if ( condition == "survival" )
@@ -642,23 +587,6 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void)
   return false;
 }
 
-// /**
-//  * Compute D_i(t)
-//  */
-// double BirthDeathSamplingTreatmentProcess::D(size_t i, double t) const
-// {
-//   // D(0) = 1
-//   if ( t < DBL_EPSILON )
-//   {
-//     return 1.0;
-//   }
-//   else
-//   {
-//     double D_i = 4 * exp(-A_i[i] * (t - timeline[i]));
-//     D_i /= pow((1 + B_i[i] + (exp(-A_i[i] * (t - timeline[i]))) * (1 - B_i[i])), 2.0);
-//     return D_i;
-//   }
-// }
 
 /**
  * Compute ln(D_i(t))
