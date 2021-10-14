@@ -1,9 +1,11 @@
+#include "Func_writeDelimitedCharacterData.h"
+
 #include <stddef.h>
 #include <iosfwd>
 #include <vector>
 
 #include "ArgumentRule.h"
-#include "Func_writeCharacterDataDelimited.h"
+#include "Delimiter.h"
 #include "RevNullObject.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlContinuousCharacterData.h"
@@ -32,10 +34,10 @@ using namespace RevLanguage;
  *
  * \return A new copy of myself
  */
-Func_writeCharacterDataDelimited* Func_writeCharacterDataDelimited::clone( void ) const
+Func_writeDelimitedCharacterData* Func_writeDelimitedCharacterData::clone( void ) const
 {
     
-    return new Func_writeCharacterDataDelimited( *this );
+    return new Func_writeDelimitedCharacterData( *this );
 }
 
 
@@ -47,7 +49,7 @@ Func_writeCharacterDataDelimited* Func_writeCharacterDataDelimited::clone( void 
  *
  * \return NULL because the output is going into a file
  */
-RevPtr<RevVariable> Func_writeCharacterDataDelimited::execute( void )
+RevPtr<RevVariable> Func_writeDelimitedCharacterData::execute( void )
 {
     
     // get the information from the arguments for reading the file
@@ -66,7 +68,7 @@ RevPtr<RevVariable> Func_writeCharacterDataDelimited::execute( void )
     const std::string& del = static_cast<const RlString&>( args[2].getVariable()->getRevObject() ).getValue();
     
     RevBayesCore::DelimitedCharacterDataWriter writer;
-    writer.writeData(fn.getValue(), *data, del[0]);
+    writer.writeData(fn.getValue(), *data, del);
     
     return NULL;
 }
@@ -81,7 +83,7 @@ RevPtr<RevVariable> Func_writeCharacterDataDelimited::execute( void )
  *
  * \return The argument rules.
  */
-const ArgumentRules& Func_writeCharacterDataDelimited::getArgumentRules( void ) const
+const ArgumentRules& Func_writeDelimitedCharacterData::getArgumentRules( void ) const
 {
     
     static ArgumentRules argument_rules = ArgumentRules();
@@ -95,7 +97,7 @@ const ArgumentRules& Func_writeCharacterDataDelimited::getArgumentRules( void ) 
         data_arg_types.push_back( AbstractHomologousDiscreteCharacterData::getClassTypeSpec() );
         data_arg_types.push_back( ContinuousCharacterData::getClassTypeSpec() );
         argument_rules.push_back( new ArgumentRule( "data"    , data_arg_types, "The character data object.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argument_rules.push_back( new ArgumentRule( "delimiter", RlString::getClassTypeSpec(), "The delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "\t" ) ) );
+        argument_rules.push_back( new Delimiter() );
         rules_set = true;
     }
     
@@ -108,10 +110,10 @@ const ArgumentRules& Func_writeCharacterDataDelimited::getArgumentRules( void ) 
  *
  * \return The class' name.
  */
-const std::string& Func_writeCharacterDataDelimited::getClassType(void)
+const std::string& Func_writeDelimitedCharacterData::getClassType(void)
 {
     
-    static std::string rev_type = "Func_writeCharacterDataDelimited";
+    static std::string rev_type = "Func_writeDelimitedCharacterData";
     
     return rev_type;
 }
@@ -122,7 +124,7 @@ const std::string& Func_writeCharacterDataDelimited::getClassType(void)
  *
  * \return TypeSpec of this class.
  */
-const TypeSpec& Func_writeCharacterDataDelimited::getClassTypeSpec(void)
+const TypeSpec& Func_writeDelimitedCharacterData::getClassTypeSpec(void)
 {
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
@@ -134,12 +136,25 @@ const TypeSpec& Func_writeCharacterDataDelimited::getClassTypeSpec(void)
 /**
  * Get the primary Rev name for this function.
  */
-std::string Func_writeCharacterDataDelimited::getFunctionName( void ) const
+std::string Func_writeDelimitedCharacterData::getFunctionName( void ) const
 {
     // create a name variable that is the same for all instance of this class
-    std::string f_name = "writeCharacterDataDelimited";
+    std::string f_name = "writeDelimitedCharacterData";
     
     return f_name;
+}
+
+
+/**
+ * Get the primary Rev name for this function.
+ */
+std::vector<std::string> Func_writeDelimitedCharacterData::getFunctionNameAliases( void ) const
+{
+    // create a name variable that is the same for all instance of this class
+    std::vector<std::string> f_names;
+    f_names.push_back("writeCharacterDataDelimited");
+
+    return f_names;
 }
 
 
@@ -148,7 +163,7 @@ std::string Func_writeCharacterDataDelimited::getFunctionName( void ) const
  *
  * \return The type spec of this object.
  */
-const TypeSpec& Func_writeCharacterDataDelimited::getTypeSpec( void ) const
+const TypeSpec& Func_writeDelimitedCharacterData::getTypeSpec( void ) const
 {
     
     static TypeSpec type_spec = getClassTypeSpec();
@@ -163,7 +178,7 @@ const TypeSpec& Func_writeCharacterDataDelimited::getTypeSpec( void ) const
  *
  * \return NULL
  */
-const TypeSpec& Func_writeCharacterDataDelimited::getReturnType( void ) const
+const TypeSpec& Func_writeDelimitedCharacterData::getReturnType( void ) const
 {
     
     static TypeSpec return_typeSpec = RevNullObject::getClassTypeSpec();

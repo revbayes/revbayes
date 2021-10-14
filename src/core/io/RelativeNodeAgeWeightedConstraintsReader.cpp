@@ -9,10 +9,9 @@
 using namespace RevBayesCore;
 
 
-RelativeNodeAgeWeightedConstraintsReader::RelativeNodeAgeWeightedConstraintsReader(const std::string &fn, char d, size_t ns, double thresh) : DelimitedDataReader(fn, d, ns)
+RelativeNodeAgeWeightedConstraintsReader::RelativeNodeAgeWeightedConstraintsReader(const std::string &fn, std::string d, size_t ns, double thresh) : DelimitedDataReader(fn, d, ns)
 {
     
-    filename = fn;
     for (size_t i = 0; i < chars.size(); ++i)
     {
         

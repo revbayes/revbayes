@@ -23,12 +23,11 @@ class GeographicArea;
     {
     public:
         
-        TimeAtlasDataReader(std::string fn, char d='\t');
+        TimeAtlasDataReader(std::string fn, std::string d="");
         TimeAtlasDataReader(const TimeAtlasDataReader& tadr);
         
         std::vector<double> getEpochs(void);
         std::vector<std::vector<GeographicArea*> > getAreas(void);
-        std::string getFilename(void);
         void readJson(void);
         void printJson(boost::property_tree::ptree const& pt);
         void fillData(boost::property_tree::ptree const& pt);
@@ -57,9 +56,6 @@ class GeographicArea;
                 return first.age > second.age;
             }
         };
-    
-    private:
-        std::string filename;
         
     };
 }

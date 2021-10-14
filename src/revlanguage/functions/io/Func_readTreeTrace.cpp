@@ -1,3 +1,5 @@
+#include "Func_readTreeTrace.h"
+
 #include <math.h>
 #include <stddef.h>
 #include <map>
@@ -7,8 +9,8 @@
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "Delimiter.h"
 #include "ConstantNode.h"
-#include "Func_readTreeTrace.h"
 #include "ModelVector.h"
 #include "NclReader.h"
 #include "NewickConverter.h"
@@ -247,7 +249,7 @@ const ArgumentRules& Func_readTreeTrace::getArgumentRules( void ) const
         tree_options.push_back( "non-clock" );
         argumentRules.push_back( new OptionRule( "treetype", new RlString("clock"), tree_options, "The type of trees." ) );
         argumentRules.push_back( new ArgumentRule( "outgroup"   , Clade::getClassTypeSpec(), "The clade (consisting of one or more taxa) used as an outgroup.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        argumentRules.push_back( new ArgumentRule( "separator", RlString::getClassTypeSpec(), "The separator/delimiter between values in the file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
+        argumentRules.push_back( new Delimiter() );
 
         std::vector<TypeSpec> burninTypes;
         burninTypes.push_back( Probability::getClassTypeSpec() );
@@ -318,7 +320,7 @@ const TypeSpec& Func_readTreeTrace::getReturnType( void ) const
 }
 
 
-WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<std::string> &vector_of_file_names, const std::string &delimitter, bool clock, long thinning)
+WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<std::string> &vector_of_file_names, const std::string &delimiter, bool clock, long thinning)
 {
     
     std::vector<TraceTree> data;
@@ -406,7 +408,7 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<std:
             std::vector<std::string> columns;
             
             // we should provide other delimiters too
-            StringUtilities::stringSplit(line, delimitter, columns);
+            StringUtilities::stringSplit(line, delimiter, columns);
             
             // we assume a header at the first line of the file
             if ( has_header_been_read == false )

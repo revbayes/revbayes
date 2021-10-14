@@ -1,10 +1,12 @@
+#include "Func_readDistanceMatrix.h"
+
 #include <sstream>
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "Delimiter.h"
 #include "DistanceMatrix.h"
 #include "DistanceMatrixReader.h"
-#include "Func_readDistanceMatrix.h"
 #include "RlDistanceMatrix.h"
 #include "RlString.h"
 #include "Argument.h"
@@ -36,8 +38,9 @@ RevPtr<RevVariable> Func_readDistanceMatrix::execute( void )
 	
 	// get the information from the arguments for reading the file
 	const RlString& fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() );
-	
-	RevBayesCore::DistanceMatrixReader* dmr = new RevBayesCore::DistanceMatrixReader( fn.getValue(), ' ' );
+	const std::string& del = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+
+	RevBayesCore::DistanceMatrixReader* dmr = new RevBayesCore::DistanceMatrixReader( fn.getValue(), del );
 	RevBayesCore::DistanceMatrix* dm = new RevBayesCore::DistanceMatrix(dmr);
 		
 	return new RevVariable( new DistanceMatrix(dm) );
@@ -55,6 +58,7 @@ const ArgumentRules& Func_readDistanceMatrix::getArgumentRules( void ) const
 	{
 		
 		argumentRules.push_back( new ArgumentRule( "file", RlString::getClassTypeSpec(), "Relative or absolute name of the file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+		argumentRules.push_back( new Delimiter() );
 		rules_set = true;
 		
 	}
