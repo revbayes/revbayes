@@ -1,10 +1,12 @@
+#include "Func_readMatrix.h"
+
 #include <sstream>
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "Delimiter.h"
 #include "MatrixReal.h"
 #include "MatrixReader.h"
-#include "Func_readMatrix.h"
 #include "RlMatrixReal.h"
 #include "RlString.h"
 #include "Argument.h"
@@ -58,8 +60,7 @@ const ArgumentRules& Func_readMatrix::getArgumentRules( void ) const
 	{
 		
 		argumentRules.push_back( new ArgumentRule( "file", RlString::getClassTypeSpec(), "The name of the file to read.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-		std::vector<std::string> sep = {"separator","delimiter"};
-		argumentRules.push_back( new ArgumentRule( sep, RlString::getClassTypeSpec(), "The separator/delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "" ) ) );
+		argumentRules.push_back( new Delimiter() );
 		rules_set = true;
 		
 	}

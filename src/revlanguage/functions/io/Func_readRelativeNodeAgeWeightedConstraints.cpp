@@ -1,10 +1,12 @@
+#include "Func_readRelativeNodeAgeWeightedConstraints.h"
+
 #include <sstream>
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "Delimiter.h"
 #include "RelativeNodeAgeWeightedConstraints.h"
 #include "RelativeNodeAgeWeightedConstraintsReader.h"
-#include "Func_readRelativeNodeAgeWeightedConstraints.h"
 #include "Real.h"
 #include "RlRelativeNodeAgeWeightedConstraints.h"
 #include "RlString.h"
@@ -53,8 +55,7 @@ const ArgumentRules& Func_readRelativeNodeAgeWeightedConstraints::getArgumentRul
     {
         
         argumentRules.push_back( new ArgumentRule( "file", RlString::getClassTypeSpec(), "Relative or absolute name of the file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        std::vector<std::string> sep = {"separator","delimiter"};
-        argumentRules.push_back( new ArgumentRule( sep, RlString::getClassTypeSpec(), "The separator/delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "" ) ) );
+        argumentRules.push_back( new Delimiter() );
         argumentRules.push_back( new ArgumentRule( "threshold", Real::getClassTypeSpec(), "weight threshold below which constraints are ignored.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         
         rules_set = true;

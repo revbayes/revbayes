@@ -1,9 +1,11 @@
+#include "Func_writeDelimitedCharacterData.h"
+
 #include <stddef.h>
 #include <iosfwd>
 #include <vector>
 
 #include "ArgumentRule.h"
-#include "Func_writeDelimitedCharacterData.h"
+#include "Delimiter.h"
 #include "RevNullObject.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlContinuousCharacterData.h"
@@ -95,8 +97,7 @@ const ArgumentRules& Func_writeDelimitedCharacterData::getArgumentRules( void ) 
         data_arg_types.push_back( AbstractHomologousDiscreteCharacterData::getClassTypeSpec() );
         data_arg_types.push_back( ContinuousCharacterData::getClassTypeSpec() );
         argument_rules.push_back( new ArgumentRule( "data"    , data_arg_types, "The character data object.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        std::vector<std::string> sep = {"separator","delimiter"};
-        argument_rules.push_back( new ArgumentRule( sep, RlString::getClassTypeSpec(), "The separator/delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "\t" ) ) );
+        argument_rules.push_back( new Delimiter() );
         rules_set = true;
     }
     

@@ -1,3 +1,5 @@
+#include "Func_readAncestralStateTreeTrace.h"
+
 #include <math.h>
 #include <stddef.h>
 #include <map>
@@ -5,8 +7,7 @@
 #include <string>
 #include <vector>
 
-#include "ArgumentRule.h"
-#include "Func_readAncestralStateTreeTrace.h"
+#include "Delimiter.h"
 #include "NewickConverter.h"
 #include "OptionRule.h"
 #include "Probability.h"
@@ -17,7 +18,9 @@
 #include "StringUtilities.h"
 #include "TreeUtilities.h"
 #include "Argument.h"
+#include "ArgumentRule.h"
 #include "ArgumentRules.h"
+#include "Delimiter.h"
 #include "Integer.h"
 #include "RevObject.h"
 #include "RevPtr.h"
@@ -123,8 +126,8 @@ const ArgumentRules& Func_readAncestralStateTreeTrace::getArgumentRules( void ) 
         options.push_back( "clock" );
         options.push_back( "non-clock" );
         argumentRules.push_back( new OptionRule( "treetype", new RlString("clock"), options, "The type of tree." ) );
-        std::vector<std::string> sep = {"separator","delimiter"};
-        argumentRules.push_back( new ArgumentRule( sep, RlString::getClassTypeSpec(), "The separator/delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("") ) );
+
+        argumentRules.push_back( new Delimiter() );
 
         std::vector<TypeSpec> burninTypes;
         burninTypes.push_back( Probability::getClassTypeSpec() );

@@ -1,3 +1,5 @@
+#include "Func_readTreeTrace.h"
+
 #include <math.h>
 #include <stddef.h>
 #include <map>
@@ -7,8 +9,8 @@
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "Delimiter.h"
 #include "ConstantNode.h"
-#include "Func_readTreeTrace.h"
 #include "ModelVector.h"
 #include "NclReader.h"
 #include "NewickConverter.h"
@@ -247,8 +249,7 @@ const ArgumentRules& Func_readTreeTrace::getArgumentRules( void ) const
         tree_options.push_back( "non-clock" );
         argumentRules.push_back( new OptionRule( "treetype", new RlString("clock"), tree_options, "The type of trees." ) );
         argumentRules.push_back( new ArgumentRule( "outgroup"   , Clade::getClassTypeSpec(), "The clade (consisting of one or more taxa) used as an outgroup.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        std::vector<std::string> sep = {"separator","delimiter"};
-        argumentRules.push_back( new ArgumentRule( sep, RlString::getClassTypeSpec(), "The separator/delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("") ) );
+        argumentRules.push_back( new Delimiter() );
 
         std::vector<TypeSpec> burninTypes;
         burninTypes.push_back( Probability::getClassTypeSpec() );

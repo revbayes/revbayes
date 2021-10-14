@@ -1,3 +1,5 @@
+#include "Func_readDelimitedCharacterData.h"
+
 #include <stdlib.h>
 #include <algorithm>
 #include <ostream>
@@ -6,8 +8,8 @@
 
 #include "ArgumentRule.h"
 #include "DelimitedCharacterDataReader.h"
+#include "Delimiter.h"
 #include "HomologousDiscreteCharacterData.h"
-#include "Func_readDelimitedCharacterData.h"
 #include "NaturalNumbersState.h"
 #include "OptionRule.h"
 #include "RbException.h"
@@ -267,9 +269,8 @@ const ArgumentRules& Func_readDelimitedCharacterData::getArgumentRules( void ) c
         type_options.push_back( "Continuous" );
         argumentRules.push_back( new OptionRule( "type", new RlString("NaturalNumbers"), type_options, "The type of data." ) );
         argumentRules.push_back( new ArgumentRule( "stateLabels", RlString::getClassTypeSpec(), "The state labels (for standard states) or max number for NaturalNumbers.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "" ) ) );
-        std::vector<std::string> sep = {"separator","delimiter"};
-        argumentRules.push_back( new ArgumentRule( sep, RlString::getClassTypeSpec(), "The separator/delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "" ) ) );
-        argumentRules.push_back( new ArgumentRule( "header", RlBoolean::getClassTypeSpec(), "Has this file a header line?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
+        argumentRules.push_back( new Delimiter() );
+        argumentRules.push_back( new ArgumentRule( "header", RlBoolean::getClassTypeSpec(), "Does this file have a header line?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
         rules_set = true;
         
     }

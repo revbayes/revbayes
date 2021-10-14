@@ -1,9 +1,11 @@
+#include "Func_TaxonReader.h"
+
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include "ArgumentRule.h"
-#include "Func_TaxonReader.h"
+#include "Delimiter.h"
 #include "ModelVector.h"
 #include "RlString.h"
 #include "RlTaxon.h"
@@ -69,8 +71,7 @@ const ArgumentRules& Func_TaxonReader::getArgumentRules( void ) const
     if (!rules_set)
     {
         argumentRules.push_back( new ArgumentRule( "filename", RlString::getClassTypeSpec(), "Relative or absolute file name.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        std::vector<std::string> sep = {"separator","delimiter"};
-        argumentRules.push_back( new ArgumentRule( sep, RlString::getClassTypeSpec(), "The separator/delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("") ) );
+        argumentRules.push_back( new Delimiter() );
         rules_set = true;
     }
     
