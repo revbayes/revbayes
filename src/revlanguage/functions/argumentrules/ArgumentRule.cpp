@@ -100,18 +100,11 @@ ArgumentRule::ArgumentRule(const std::vector<std::string>& argNames, const TypeS
     evalType( et ),
     nodeType( dt ),
     aliases( argNames ),
+    label( argNames.front() ),
     description( argDesc ),
     hasDefaultVal( false )
 {
-    label = "";
-    for (size_t i = 0; i < argNames.size(); i++)
-    {
-        if (i > 0)
-        {
-            label += "/";
-        }
-        label += argNames[i];
-    }
+
 }
 
 
@@ -125,18 +118,11 @@ ArgumentRule::ArgumentRule(const std::vector<std::string>& argNames, const std::
     evalType( et ),
     nodeType( dt ),
     aliases( argNames ),
+    label( argNames.front() ),
     description( argDesc ),
     hasDefaultVal( false )
 {
-    label = "";
-    for (size_t i = 0; i < argNames.size(); i++)
-    {
-        if (i > 0)
-        {
-            label += "/";
-        }
-        label += argNames[i];
-    }
+
 }
 
 
@@ -150,18 +136,11 @@ ArgumentRule::ArgumentRule(const std::vector<std::string>& argNames, const TypeS
     evalType( et ),
     nodeType( dt ),
     aliases( argNames ),
+    label( argNames.front() ),
     description( argDesc ),
     hasDefaultVal( true )
 {
-    label = "";
-    for (size_t i = 0; i < argNames.size(); i++)
-    {
-        if (i > 0)
-        {
-            label += "/";
-        }
-        label += argNames[i];
-    }
+
 }
 
 
@@ -175,18 +154,11 @@ ArgumentRule::ArgumentRule(const std::vector<std::string>& argNames, const std::
     evalType( et ),
     nodeType( dt ),
     aliases( argNames ),
+    label( argNames.front() ),
     description( argDesc ),
     hasDefaultVal( true )
 {
-    label = "";
-    for (size_t i = 0; i < argNames.size(); i++)
-    {
-        if (i > 0)
-        {
-            label += "/";
-        }
-        label += argNames[i];
-    }
+
 }
 
 

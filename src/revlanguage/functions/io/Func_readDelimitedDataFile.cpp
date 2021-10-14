@@ -1,3 +1,5 @@
+#include "Func_readDelimitedDataFile.h"
+
 #include <stdlib.h>
 #include <ostream>
 #include <string>
@@ -6,7 +8,7 @@
 #include "ArgumentRule.h"
 #include "ConstantNode.h"
 #include "DelimitedDataReader.h"
-#include "Func_readDelimitedDataFile.h"
+#include "Delimiter.h"
 #include "ModelObject.h"
 #include "ModelVector.h"
 #include "RbException.h"
@@ -286,8 +288,7 @@ const ArgumentRules& Func_readDelimitedDataFile::getArgumentRules( void ) const
         
         argumentRules.push_back( new ArgumentRule( "file",      RlString::getClassTypeSpec(), "The name of the file to read.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "header",    RlBoolean::getClassTypeSpec(), "Skip first line?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ));
-        std::vector<std::string> sep = {"separator","delimiter"};
-        argumentRules.push_back( new ArgumentRule( sep, RlString::getClassTypeSpec(), "The separator/delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "" ) ) );
+        argumentRules.push_back( new Delimiter() );
         argumentRules.push_back( new ArgumentRule( "rownames",  RlBoolean::getClassTypeSpec(), "Skip first column?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ));
         rules_set = true;
         

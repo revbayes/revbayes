@@ -1,10 +1,12 @@
+#include "Func_summarizeCharacterMaps.h"
+
 #include <math.h>
 #include <stddef.h>
 #include <sstream>
 #include <vector>
 
 #include "ArgumentRule.h"
-#include "Func_summarizeCharacterMaps.h"
+#include "Delimiter.h"
 #include "JointAncestralStateTrace.h"
 #include "Probability.h"
 #include "RevNullObject.h"
@@ -124,8 +126,7 @@ const ArgumentRules& Func_summarizeCharacterMaps::getArgumentRules( void ) const
         burninTypes.push_back( Probability::getClassTypeSpec() );
         burninTypes.push_back( Integer::getClassTypeSpec() );
         argumentRules.push_back( new ArgumentRule( "burnin"   , burninTypes  , "The fraction/number of samples to discard as burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.25) ) );
-        std::vector<std::string> sep = {"separator","delimiter"};
-        argumentRules.push_back( new ArgumentRule( sep , RlString::getClassTypeSpec() , "The separator/delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
+        argumentRules.push_back( new Delimiter() );
         argumentRules.push_back( new ArgumentRule( "verbose"   , RlBoolean::getClassTypeSpec()  , "Printing verbose output", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         
         rules_set = true;
