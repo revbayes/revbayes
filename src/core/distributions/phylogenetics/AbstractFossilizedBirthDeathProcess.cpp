@@ -262,81 +262,91 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
             {
                 std::map<TimeInterval, size_t> ages = fbd_taxa[i].getAges();
 
-                double psi_y_o = 0.0;
-
-                std::vector<double> psi(ages.size(), 0.0);
-
-                for (size_t interval = num_intervals; interval > 0; interval--)
+                // if there are multiple fossil ages
+                if ( o != y )
                 {
-                    size_t j = interval - 1;
+                    double psi_y_o = 0.0;
 
-                    double t_0 = ( j > 0 ? times[j-1] : RbConstants::Double::inf );
+                    std::vector<double> psi(ages.size(), 0.0);
 
-                    if ( t_0 <= fbd_taxa[i].getMinAge() )
+                    for (size_t interval = num_intervals; interval > 0; interval--)
                     {
-                        continue;
-                    }
-                    if ( times[j] >= o_i[i] )
-                    {
-                        break;
-                    }
+                        size_t j = interval - 1;
 
-                    // increase incomplete sampling psi
-                    double dt = std::min(o_i[i], t_0) - std::max(fbd_taxa[i].getMinAge(), times[j]);
-                    psi_y_o += fossil[j]*dt;
+                        double t_0 = ( j > 0 ? times[j-1] : RbConstants::Double::inf );
 
-                    size_t k = 0;
-                    // increase running psi total for each observation
-                    for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
-                    {
-                        if ( Fi->first.getMin() >= t_0 || Fi->first.getMax() <= times[j] )
+                        if ( t_0 <= fbd_taxa[i].getMinAge() )
                         {
                             continue;
                         }
+                        if ( times[j] >= o_i[i] )
+                        {
+                            break;
+                        }
 
-                        dt = std::min(std::min(Fi->first.getMax(), o_i[i]), t_0) - std::max(Fi->first.getMin(), times[j]);
+                        // increase incomplete sampling psi
+                        double dt = std::min(o_i[i], t_0) - std::max(fbd_taxa[i].getMinAge(), times[j]);
+                        psi_y_o += fossil[j]*dt;
 
-                        psi[k] += fossil[j]*dt;
+                        size_t k = 0;
+                        // increase running psi total for each observation
+                        for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
+                        {
+                            if ( Fi->first.getMin() >= t_0 || Fi->first.getMax() <= times[j] )
+                            {
+                                continue;
+                            }
+
+                            dt = std::min(std::min(Fi->first.getMax(), o_i[i]), t_0) - std::max(Fi->first.getMin(), times[j]);
+
+                            psi[k] += fossil[j]*dt;
+                        }
                     }
-                }
 
-                // include sampling density
-                Psi_i[i] = log(fossil[oi]);
+                    // include instantaneous sampling density
+                    Psi_i[i] = log(fossil[oi]);
 
-                double count = 0;
-                double recip = 0.0;
+                    double count = 0;
+                    double recip = 0.0;
 
-                size_t k = 0;
-                // compute factors of the sum over each possible oldest observation
-                for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
-                {
-                    count += Fi->second;
-
-                    // compute sum of reciprocal ranges
-                    if ( Fi->first.getMax() >= o_i[i] )
+                    size_t k = 0;
+                    // compute factors of the sum over each possible oldest observation
+                    for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
                     {
-                        recip += Fi->second / psi[k];
+                        count += Fi->second;
+
+                        // compute sum of reciprocal ranges
+                        if ( Fi->first.getMax() >= o_i[i] )
+                        {
+                            recip += Fi->second / psi[k];
+                        }
+
+                        // compute product of ranges
+                        Psi_i[i] += log(psi[k]) * Fi->second;
                     }
 
-                    // compute product of ranges
-                    Psi_i[i] += log(psi[k]) * Fi->second;
-                }
+                    // sum over each possible oldest observation
+                    Psi_i[i] += log(recip);
 
-                // sum over each possible oldest observation
-                Psi_i[i] += log(recip);
-
-                if ( complete == true )
-                {
-                    // compute poisson density for count
-                    Psi_i[i] -= RbMath::lnFactorial(count);
+                    if ( complete == true )
+                    {
+                        // compute poisson density for count
+                        Psi_i[i] -= RbMath::lnFactorial(count);
+                    }
+                    else
+                    {
+                        // compute poisson density for count + kappa, kappa >= 0
+                        Psi_i[i] -= log(count);
+                        Psi_i[i] += psi_y_o;
+                        Psi_i[i] -= (count-1)*log(psi_y_o);
+                        Psi_i[i] += count > 1 ? log(RbMath::incompleteGamma(psi_y_o, count-1, true, true)) : 0.0;
+                    }
                 }
+                // only one fossil age
                 else
                 {
-                    // compute poisson density for count + kappa, kappa >= 0
-                    Psi_i[i] -= log(count);
-                    Psi_i[i] += psi_y_o;
-                    Psi_i[i] -= (count-1)*log(psi_y_o);
-                    Psi_i[i] += count > 1 ? log(RbMath::incompleteGamma(psi_y_o, count-1, true, true)) : 0.0;
+                    // include instantaneous sampling density
+                    Psi_i[i] = ages.begin()->second * log(fossil[oi]);
                 }
             }
 
