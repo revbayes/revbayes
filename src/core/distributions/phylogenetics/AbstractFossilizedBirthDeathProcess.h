@@ -44,14 +44,10 @@ namespace RevBayesCore {
                                             const TypedDagNode<RbVector<double> > *times,
                                             const std::vector<Taxon> &taxa,
                                             bool complete,
+                                            bool extended,
                                             double resampling);  //!< Constructor
 
         virtual ~AbstractFossilizedBirthDeathProcess(){};
-
-        double                                          getExtinctionRate( size_t index ) const;
-        double                                          getFossilSamplingRate( size_t index ) const;
-        double                                          getIntervalTime( size_t index ) const;
-        double                                          getSpeciationRate( size_t index ) const;
 
     protected:
         virtual void                                    updateStartEndTimes() = 0;
@@ -61,19 +57,19 @@ namespace RevBayesCore {
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
 
         // helper functions
-        size_t                                          l(double t) const;                                     //!< Find the index so that times[index-1] < t < times[index]
+        size_t                                          findIndex(double t) const;                             //!< Find the index so that times[index-1] < t < times[index]
         double                                          p(size_t i, double t) const;
         virtual double                                  q(size_t i, double t, bool tilde = false) const;
 
-        virtual void                                    updateIntervals();
+        virtual void                                    prepareProbComputation();
 
         void                                            keepSpecialization(DagNode *toucher);
         void                                            restoreSpecialization(DagNode *toucher);
         void                                            touchSpecialization(DagNode *toucher, bool touchAll);
 
-        void                                            redrawOldestOccurrence(size_t i, bool force = false);
+        void                                            redrawAges(size_t i, bool force = false);
 
-        bool                                            ascending;
+        std::vector<Taxon>                              fbd_taxa;                                              //!< Taxa that will be attached to new simulated trees.
 
         size_t                                          num_intervals;
 
@@ -87,6 +83,8 @@ namespace RevBayesCore {
         const TypedDagNode<double >*                    homogeneous_rho;                                       //!< The homogeneous speciation rates.
         const TypedDagNode<RbVector<double> >*          timeline;                                              //!< The times of the instantaneous sampling events.
 
+        std::vector<const DagNode*>                     range_parameters;
+
         std::vector<double>                     birth;
         std::vector<double>                     death;
         std::vector<double>                     fossil;
@@ -94,25 +92,21 @@ namespace RevBayesCore {
 
         std::vector<double>                     b_i;
         std::vector<double>                     d_i;
+        std::vector<double>                     stored_d_i;
+        std::vector<double>                     o_i;
+        std::vector<double>                     y_i;
+
+        double                                  origin;
 
         std::vector<double>                     q_i;
         std::vector<double>                     q_tilde_i;
         std::vector<double>                     p_i;
 
-        std::vector<Taxon>                      fbd_taxa;                                                      //!< Taxon names that will be attached to new simulated trees.
+        std::vector<double>                     Psi;
+        std::vector<double>                     stored_Psi;
 
-        bool                                    complete;
-
-        std::vector<double>                     y_i;
-        std::vector<double>                     Psi_i;
-        std::vector<double>                     stored_Psi_i;
-
-        std::vector<double>                     o_i;
-        std::vector<double>                     stored_o_i;
-
-        std::vector<const DagNode*>             range_parameters;
-
-        double                                  origin;
+        std::vector<double>                     tau1;
+        std::vector<double>                     stored_tau1;
 
         std::vector<double>                     partial_likelihood;
         std::vector<double>                     stored_likelihood;
@@ -120,6 +114,8 @@ namespace RevBayesCore {
         std::vector<bool>                       dirty_psi;
         std::vector<bool>                       dirty_taxa;
 
+        bool                                    complete;
+        bool                                    extended;
         bool                                    touched;
 
         double                                  resampling;

@@ -43,13 +43,14 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
                                                                          const TypedDagNode< RbVector<double> > *intimes,
                                                                          const std::vector<Taxon> &intaxa,
                                                                          bool c,
+                                                                         bool ex,
                                                                          double re) :
-    ascending(true),
+    fbd_taxa(intaxa),
     homogeneous_rho(inrho),
     timeline( intimes ),
-    fbd_taxa(intaxa),
-    complete(c),
     origin(0.0),
+    complete(c),
+    extended(ex),
     touched(false),
     resampling(re)
 {
@@ -61,91 +62,89 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
     heterogeneous_mu               = NULL;
     heterogeneous_psi              = NULL;
 
-    RbException no_timeline_err = RbException("No time intervals provided for time-heterogeneous fossilized birth death process");
-
-    range_parameters.push_back( homogeneous_rho );
-
+    // cast the pointers from their input parameters
     heterogeneous_lambda = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inspeciation);
     homogeneous_lambda = dynamic_cast<const TypedDagNode<double >*>(inspeciation);
-
-    range_parameters.push_back( homogeneous_lambda );
-    range_parameters.push_back( heterogeneous_lambda );
-
-    if( heterogeneous_lambda != NULL )
-    {
-        if( timeline == NULL ) throw(no_timeline_err);
-
-        if (heterogeneous_lambda->getValue().size() != timeline->getValue().size() + 1)
-        {
-            std::stringstream ss;
-            ss << "Number of speciation rates (" << heterogeneous_lambda->getValue().size() << ") does not match number of time intervals (" << timeline->getValue().size() + 1 << ")";
-            throw(RbException(ss.str()));
-        }
-    }
-
-
     heterogeneous_mu = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inextinction);
     homogeneous_mu = dynamic_cast<const TypedDagNode<double >*>(inextinction);
-
-    range_parameters.push_back( homogeneous_mu );
-    range_parameters.push_back( heterogeneous_mu );
-
-    if( heterogeneous_mu != NULL )
-    {
-        if( timeline == NULL ) throw(no_timeline_err);
-
-        if (heterogeneous_mu->getValue().size() != timeline->getValue().size() + 1)
-        {
-            std::stringstream ss;
-            ss << "Number of extinction rates (" << heterogeneous_mu->getValue().size() << ") does not match number of time intervals (" << timeline->getValue().size() + 1 << ")";
-            throw(RbException(ss.str()));
-        }
-    }
-
-
     heterogeneous_psi = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inpsi);
     homogeneous_psi = dynamic_cast<const TypedDagNode<double >*>(inpsi);
 
+    // add the parameters to the model
+    range_parameters.push_back( timeline );
+    range_parameters.push_back( homogeneous_rho );
+    range_parameters.push_back( homogeneous_lambda );
+    range_parameters.push_back( heterogeneous_lambda );
+    range_parameters.push_back( homogeneous_mu );
+    range_parameters.push_back( heterogeneous_mu );
     range_parameters.push_back( homogeneous_psi );
     range_parameters.push_back( heterogeneous_psi );
 
-    if( heterogeneous_psi != NULL )
-    {
-        if( timeline == NULL ) throw(no_timeline_err);
-
-        if (heterogeneous_psi->getValue().size() != timeline->getValue().size() + 1)
-        {
-            std::stringstream ss;
-            ss << "Number of fossil sampling rates (" << heterogeneous_psi->getValue().size() << ") does not match number of time intervals (" << timeline->getValue().size() + 1 << ")";
-            throw(RbException(ss.str()));
-        }
-    }
-
-    range_parameters.push_back( timeline );
-
-    num_intervals = timeline == NULL ? 1 : timeline->getValue().size()+1;
+    // setup the timeline
+    num_intervals = timeline == NULL ? 1 : timeline->getValue().size();
 
     if ( num_intervals > 1 )
     {
         std::vector<double> times = timeline->getValue();
         std::vector<double> times_sorted_ascending = times;
-        std::vector<double> times_sorted_descending = times;
 
         sort(times_sorted_ascending.begin(), times_sorted_ascending.end() );
-        sort(times_sorted_descending.rbegin(), times_sorted_descending.rend() );
 
-        if( times == times_sorted_descending )
+         if ( times != times_sorted_ascending )
         {
-            ascending = false;
+            throw(RbException("Interval times must be provided in ascending order"));
         }
-        else if ( times != times_sorted_ascending )
+    }
+
+    RbException no_timeline_err = RbException("No time intervals provided for heterogeneous fossilized birth death process");
+
+    RbException inconsistent_rates = RbException("Inconsistent number of rates in fossilized birth death process.");
+
+    size_t num_rates = 0;
+
+    if( heterogeneous_lambda != NULL )
+    {
+        if ( timeline == NULL ) throw(no_timeline_err);
+
+        num_rates = heterogeneous_lambda->getValue().size();
+    }
+    if( heterogeneous_mu != NULL )
+    {
+        if ( timeline == NULL ) throw(no_timeline_err);
+
+        if ( num_rates == 0 ) num_rates = heterogeneous_mu->getValue().size();
+
+        if ( heterogeneous_mu->getValue().size() != num_rates ) throw(inconsistent_rates);
+    }
+    if( heterogeneous_psi != NULL )
+    {
+        if ( timeline == NULL ) throw(no_timeline_err);
+
+        if ( num_rates == 0 ) num_rates = heterogeneous_psi->getValue().size();
+
+        if ( heterogeneous_psi->getValue().size() != num_rates ) throw(inconsistent_rates);
+    }
+
+    if ( num_rates != num_intervals )
+    {
+        // if all the rate vectors are one longer than the timeline
+        // then assume the first time is 0
+        if ( num_rates == num_intervals + 1 )
         {
-            throw(RbException("Interval times must be provided in order"));
+            num_intervals++;
+        }
+        else
+        {
+            std::stringstream ss;
+            ss << "Number of rates does not match number of time intervals in fossilized birth death process.";
+            throw(RbException(ss.str()));
         }
     }
 
     b_i = std::vector<double>(fbd_taxa.size(), 0.0);
     d_i = std::vector<double>(fbd_taxa.size(), 0.0);
+    o_i = std::vector<double>(fbd_taxa.size(), 0.0);
+    y_i = std::vector<double>(fbd_taxa.size(), RbConstants::Double::inf);
 
     p_i         = std::vector<double>(num_intervals, 1.0);
     q_i         = std::vector<double>(num_intervals, 0.0);
@@ -158,24 +157,25 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
 
     partial_likelihood = std::vector<double>(fbd_taxa.size(), 0.0);
 
-    o_i         = std::vector<double>(fbd_taxa.size(), 0.0);
-    y_i         = std::vector<double>(fbd_taxa.size(), 0.0);
-    Psi_i       = std::vector<double>(fbd_taxa.size(), 0.0 );
+    tau1        = std::vector<double>(fbd_taxa.size(), 0.0);
+    Psi         = std::vector<double>(fbd_taxa.size(), 0.0 );
 
     dirty_taxa = std::vector<bool>(fbd_taxa.size(), true);
     dirty_psi = std::vector<bool>(fbd_taxa.size(), true);
 
     for ( size_t i = 0; i < fbd_taxa.size(); i++ )
     {
-        // find the oldest minimum age
         std::map<TimeInterval, size_t> ages = fbd_taxa[i].getAges();
         for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
         {
-            y_i[i] = std::max(Fi->first.getMin(), y_i[i]);
+            // find the oldest minimum age
+            o_i[i] = std::max(Fi->first.getMin(), o_i[i]);
+            // find the youngest maximum age
+            y_i[i] = std::min(Fi->first.getMax(), y_i[i]);
         }
     }
 
-    updateIntervals();
+    prepareProbComputation();
 }
 
 /**
@@ -185,7 +185,7 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
 double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool force )
 {
     // prepare the probability computation
-    updateIntervals();
+    prepareProbComputation();
 
     // variable declarations and initialization
     double lnProbTimes = 0.0;
@@ -203,7 +203,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
         double y = fbd_taxa[i].getMinAge();
 
         // check model constraints
-        if ( !( b > o && y >= d && d >= 0.0 ) )
+        if ( !( b > tau1[i] && tau1[i] > o_i[i] && y_i[i] >= d && (( extended && d >= 0.0) || (!extended && d > y ) )) )
         {
             return RbConstants::Double::neginf;
         }
@@ -218,9 +218,9 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
         if ( dirty_taxa[i] == true || force )
         {
-            size_t bi = l(b);
-            size_t oi = l(o_i[i]);
-            size_t di = l(d);
+            size_t bi = findIndex(b);
+            size_t oi = findIndex(tau1[i]);
+            size_t di = findIndex(d);
 
             partial_likelihood[i] = 0.0;
 
@@ -239,11 +239,13 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
             // skip the rest for extant taxa with no fossil samples
             if ( o == 0.0 )
             {
+                lnProbTimes += partial_likelihood[i];
+
                 continue;
             }
 
             // replace q terms at oldest occurrence
-            partial_likelihood[i] += q(oi, o_i[i], true) - q(oi, o_i[i]);
+            partial_likelihood[i] += q(oi, tau1[i], true) - q(oi, tau1[i]);
 
             // include intermediate q_tilde terms
             for (size_t j = oi; j < di; j++)
@@ -255,14 +257,13 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
             partial_likelihood[i] -= q( di, d, true);
 
             // include extinction density
-            if (d > 0.0) partial_likelihood[i] += log( death[di] );
-
+            if ( d > 0.0 ) partial_likelihood[i] += extended ? log( death[di] ) : log( p(di, d) );
 
             if ( dirty_psi[i] || force )
             {
                 std::map<TimeInterval, size_t> ages = fbd_taxa[i].getAges();
 
-                // if there are multiple fossil ages
+                // if there is a range of fossil ages
                 if ( o != y )
                 {
                     double psi_y_o = 0.0;
@@ -279,85 +280,107 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                         {
                             continue;
                         }
-                        if ( times[j] >= o_i[i] )
+                        if ( times[j] >= tau1[i] )
                         {
                             break;
                         }
 
                         // increase incomplete sampling psi
-                        double dt = std::min(o_i[i], t_0) - std::max(fbd_taxa[i].getMinAge(), times[j]);
+                        double dt = std::min(tau1[i], t_0) - std::max(std::max(fbd_taxa[i].getMinAge(), d_i[i]), times[j]);
                         psi_y_o += fossil[j]*dt;
 
                         size_t k = 0;
                         // increase running psi total for each observation
                         for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
                         {
-                            if ( Fi->first.getMin() >= t_0 || Fi->first.getMax() <= times[j] )
+                            if ( Fi->first.getMax() > times[j] )
                             {
-                                continue;
+                                double dt = 1.0;
+
+                                // only compute dt if this is a non-singleton
+                                if ( !( Fi->first.getMin() <= t_0 && (Fi->first.getMin() == Fi->first.getMax()) ) )
+                                {
+                                    dt = std::min(std::min(Fi->first.getMax(), tau1[i]), t_0) - std::max(std::max(Fi->first.getMin(), d_i[i]), times[j]);
+                                }
+
+                                psi[k] += fossil[j] * dt;
                             }
-
-                            dt = std::min(std::min(Fi->first.getMax(), o_i[i]), t_0) - std::max(Fi->first.getMin(), times[j]);
-
-                            psi[k] += fossil[j]*dt;
                         }
                     }
 
                     // include instantaneous sampling density
-                    Psi_i[i] = log(fossil[oi]);
+                    Psi[i] = log(fossil[oi]) + extended ? 0.0 : log(fossil[di]);
 
-                    double count = 0;
-                    double recip = 0.0;
+                    int count = 0;
+                    double recip_o = 0.0;
+                    double recip_y = 0.0;
+                    double recip_oy = 0.0;
 
                     size_t k = 0;
-                    // compute factors of the sum over each possible oldest observation
+                    // compute factors of the sum over each possible oldest/youngest observation
                     for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
                     {
                         count += Fi->second;
 
-                        // compute sum of reciprocal ranges
-                        if ( Fi->first.getMax() >= o_i[i] )
+                        // compute sum of reciprocal oldest ranges
+                        if ( Fi->first.getMax() >= tau1[i] )
                         {
-                            recip += Fi->second / psi[k];
+                            recip_o += Fi->second / psi[k];
+                        }
+                        // compute sum of reciprocal youngest ranges
+                        if ( Fi->first.getMin() <= d_i[i] )
+                        {
+                            recip_y += Fi->second / psi[k];
+
+                            // compute sum of reciprocal oldest+youngest ranges
+                            if ( Fi->first.getMax() >= tau1[i] )
+                            {
+                                double f = Fi->second / psi[k];
+
+                                recip_oy += f*(f-1.0);
+                            }
                         }
 
                         // compute product of ranges
-                        Psi_i[i] += log(psi[k]) * Fi->second;
+                        Psi[i] += log(psi[k]) * Fi->second;
                     }
 
-                    // sum over each possible oldest observation
-                    Psi_i[i] += log(recip);
+                    // sum over each possible oldest/youngest observation
+                    Psi[i] += extended ? log(recip_o) : log(recip_o * recip_y - recip_oy);
 
                     if ( complete == true )
                     {
                         // compute poisson density for count
-                        Psi_i[i] -= RbMath::lnFactorial(count);
+                        Psi[i] -= RbMath::lnFactorial(count);
                     }
                     else
                     {
                         // compute poisson density for count + kappa, kappa >= 0
-                        Psi_i[i] -= log(count);
-                        Psi_i[i] += psi_y_o;
-                        Psi_i[i] -= (count-1)*log(psi_y_o);
-                        Psi_i[i] += count > 1 ? log(RbMath::incompleteGamma(psi_y_o, count-1, true, true)) : 0.0;
+                        Psi[i] -= log(count);
+                        Psi[i] += psi_y_o;
+
+                        k = extended ? std::max(1, count-2) : count-1;
+
+                        Psi[i] -= k*log(psi_y_o);
+                        Psi[i] += k > 0 ? log(RbMath::incompleteGamma(psi_y_o, k, true, true)) : 0.0;
                     }
                 }
                 // only one fossil age
                 else
                 {
                     // include instantaneous sampling density
-                    Psi_i[i] = ages.begin()->second * log(fossil[oi]);
+                    Psi[i] = ages.begin()->second * log(fossil[oi]);
                 }
             }
 
-            partial_likelihood[i] += Psi_i[i];
+            partial_likelihood[i] += Psi[i];
         }
 
         lnProbTimes += partial_likelihood[i];
     }
 
     // (the origin is not a speciation event)
-    lnProbTimes -= log( birth[l(origin)] );
+    lnProbTimes -= log( birth[findIndex(origin)] );
 
     // add the sampled extant tip age term
     if ( homogeneous_rho->getValue() > 0.0)
@@ -379,101 +402,13 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 }
 
 
-double AbstractFossilizedBirthDeathProcess::getExtinctionRate( size_t index ) const
-{
-
-    // remove the old parameter first
-    if ( homogeneous_mu != NULL )
-    {
-        return homogeneous_mu->getValue();
-    }
-    else
-    {
-        size_t num = heterogeneous_mu->getValue().size();
-
-        if (index >= num)
-        {
-            throw(RbException("Extinction rate index out of bounds"));
-        }
-        return ascending ? heterogeneous_mu->getValue()[num - 1 - index] : heterogeneous_mu->getValue()[index];
-    }
-}
-
-
-double AbstractFossilizedBirthDeathProcess::getFossilSamplingRate( size_t index ) const
-{
-
-    // remove the old parameter first
-    if ( homogeneous_psi != NULL )
-    {
-        return homogeneous_psi->getValue();
-    }
-    else
-    {
-        size_t num = heterogeneous_psi->getValue().size();
-
-        if (index >= num)
-        {
-            throw(RbException("Fossil sampling rate index out of bounds"));
-        }
-        return ascending ? heterogeneous_psi->getValue()[num - 1 - index] : heterogeneous_psi->getValue()[index];
-    }
-}
-
-
-double AbstractFossilizedBirthDeathProcess::getIntervalTime( size_t index ) const
-{
-
-    if ( index == num_intervals - 1 )
-    {
-        return 0.0;
-    }
-    // remove the old parameter first
-    else if ( timeline != NULL )
-    {
-        size_t num = timeline->getValue().size();
-
-        if (index >= num)
-        {
-            throw(RbException("Interval time index out of bounds"));
-        }
-        return ascending ? timeline->getValue()[num - 1 - index] : timeline->getValue()[index];
-    }
-    else
-    {
-        throw(RbException("Interval time index out of bounds"));
-    }
-}
-
-
-double AbstractFossilizedBirthDeathProcess::getSpeciationRate( size_t index ) const
-{
-
-    // remove the old parameter first
-    if ( homogeneous_lambda != NULL )
-    {
-        return homogeneous_lambda->getValue();
-    }
-    else
-    {
-        size_t num = heterogeneous_lambda->getValue().size();
-
-        if (index >= num)
-        {
-            throw(RbException("Speciation rate index out of bounds"));
-        }
-        return ascending ? heterogeneous_lambda->getValue()[num - 1 - index] : heterogeneous_lambda->getValue()[index];
-    }
-}
-
-
 /**
  * return the index i so that t_{i-1} > t >= t_i
  * where t_i is the instantaneous sampling time (i = 0,...,l)
  * t_0 is origin
  * t_l = 0.0
  */
-size_t AbstractFossilizedBirthDeathProcess::l(double t) const
+size_t AbstractFossilizedBirthDeathProcess::findIndex(double t) const
 {
     return times.rend() - std::upper_bound( times.rbegin(), times.rend(), t);
 }
@@ -542,13 +477,18 @@ double AbstractFossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) 
  *
  *
  */
-void AbstractFossilizedBirthDeathProcess::redrawOldestOccurrence(size_t i, bool force)
+void AbstractFossilizedBirthDeathProcess::redrawAges(size_t i, bool force)
 {
     if ( force || GLOBAL_RNG->uniform01() < resampling )
     {
         dirty_taxa[i] = true;
         dirty_psi[i]  = true;
-        o_i[i] = GLOBAL_RNG->uniform01()*(fbd_taxa[i].getMaxAge() - y_i[i]) + y_i[i];
+        tau1[i] = GLOBAL_RNG->uniform01()*(fbd_taxa[i].getMaxAge() - o_i[i]) + o_i[i];
+
+        if ( extended == false )
+        {
+            d_i[i]  = GLOBAL_RNG->uniform01()*(y_i[i] - fbd_taxa[i].getMinAge()) + fbd_taxa[i].getMinAge();
+        }
     }
 }
 
@@ -565,8 +505,9 @@ void AbstractFossilizedBirthDeathProcess::keepSpecialization(DagNode *toucher)
 void AbstractFossilizedBirthDeathProcess::restoreSpecialization(DagNode *toucher)
 {
     partial_likelihood = stored_likelihood;
-    o_i = stored_o_i;
-    Psi_i = stored_Psi_i;
+    tau1 = stored_tau1;
+    d_i = stored_d_i;
+    Psi = stored_Psi;
 
     dirty_psi  = std::vector<bool>(fbd_taxa.size(), false);
     dirty_taxa = std::vector<bool>(fbd_taxa.size(), false);
@@ -580,8 +521,9 @@ void AbstractFossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, 
     if ( touched == false )
     {
         stored_likelihood = partial_likelihood;
-        stored_o_i = o_i;
-        stored_Psi_i = Psi_i;
+        stored_tau1 = tau1;
+        stored_d_i = d_i;
+        stored_Psi = Psi;
 
         dirty_taxa = std::vector<bool>(fbd_taxa.size(), true);
 
@@ -599,26 +541,54 @@ void AbstractFossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, 
  *
  *
  */
-void AbstractFossilizedBirthDeathProcess::updateIntervals()
+void AbstractFossilizedBirthDeathProcess::prepareProbComputation()
 {
+    if ( homogeneous_lambda != NULL )
+    {
+        birth = std::vector<double>(num_intervals, homogeneous_lambda->getValue() );
+    }
+    else
+    {
+        birth = heterogeneous_lambda->getValue();
+    }
+    if ( homogeneous_mu != NULL )
+    {
+        death = std::vector<double>(num_intervals, homogeneous_mu->getValue() );
+    }
+    else
+    {
+        birth = heterogeneous_psi->getValue();
+    }
+    if ( homogeneous_psi != NULL )
+    {
+        fossil = std::vector<double>(num_intervals, homogeneous_psi->getValue() );
+    }
+    else
+    {
+        birth = heterogeneous_psi->getValue();
+    }
+
+    times = timeline->getValue();
+
+    if ( times.size() < num_intervals )
+    {
+        times.insert(times.begin(), 0.0);
+    }
+
     for (size_t interval = num_intervals; interval > 0; interval--)
     {
+        // start with youngest interval
         size_t i = interval - 1;
 
-        double b = getSpeciationRate(i);
-        double d = getExtinctionRate(i);
-        double f = getFossilSamplingRate(i);
-        double ti = getIntervalTime(i);
-
-        birth[i] = b;
-        death[i] = d;
-        fossil[i] = f;
-        times[i] = ti;
+        double ti = times[i];
+        double b = birth[i];
+        double d = death[i];
+        double f = fossil[i];
 
         if (i > 0)
         {
             double r = (i == num_intervals - 1 ? homogeneous_rho->getValue() : 0.0);
-            double t = getIntervalTime(i-1);
+            double t = times[i-1];
 
             double diff = b - d - f;
             double dt   = t - ti;

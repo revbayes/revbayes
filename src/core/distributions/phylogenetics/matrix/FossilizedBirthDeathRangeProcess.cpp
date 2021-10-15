@@ -46,9 +46,10 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
                                                                      const std::string &incondition,
                                                                      const std::vector<Taxon> &intaxa,
                                                                      bool complete,
+                                                                     bool extended,
                                                                      double resample) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
-    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, complete, resample),
+    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, complete, extended, resample),
     condition(incondition)
 {
     dirty_gamma = std::vector<bool>(fbd_taxa.size(), true);
@@ -167,7 +168,7 @@ double FossilizedBirthDeathRangeProcess::pSurvival(double start, double end) con
 
     //std::fill(fossil.begin(), fossil.end(), 0.0);
 
-    double p0 = p(l(t), t);
+    double p0 = p(findIndex(t), t);
 
     //fossil = fossil_bak;
 
@@ -221,13 +222,21 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
     // get random uniform draws
     for (size_t i = 0; i < fbd_taxa.size(); i++)
     {
-        double b = fbd_taxa[i].getMaxAge() + rng->uniform01()*(max - fbd_taxa[i].getMaxAge());
-        double d = fbd_taxa[i].isExtinct() ? rng->uniform01()*fbd_taxa[i].getMinAge() : 0.0;
+        double b = fbd_taxa[i].getMaxAge() + rng->uniform01()*(max - o_i[i]);
+        double d = fbd_taxa[i].isExtinct();
+        if ( extended )
+        {
+            d *= rng->uniform01() * y_i[i];
+        }
+        else
+        {
+            d *= rng->uniform01() * ( y_i[i] - fbd_taxa[i].getMinAge() ) + fbd_taxa[i].getMinAge();
+        }
 
         (*this->value)[i][0] = b;
         (*this->value)[i][1] = d;
 
-        redrawOldestOccurrence(i,true);
+        redrawAges(i,true);
     }
 }
 
@@ -258,8 +267,9 @@ void FossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, boo
         if ( touched == false )
         {
             stored_likelihood = partial_likelihood;
-            stored_o_i = o_i;
-            stored_Psi_i = Psi_i;
+            stored_tau1 = tau1;
+            stored_d_i = d_i;
+            stored_Psi = Psi;
 
             std::set<size_t> touched_indices = dag_node->getTouchedElementIndices();
 
@@ -270,7 +280,7 @@ void FossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, boo
                 dirty_gamma[i] = true;
                 dirty_taxa[i]  = true;
 
-                redrawOldestOccurrence(i);
+                redrawAges(i,true);
             }
 
             updateStartEndTimes();

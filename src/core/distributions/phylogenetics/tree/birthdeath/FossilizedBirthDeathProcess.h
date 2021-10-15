@@ -45,19 +45,16 @@ namespace RevBayesCore {
                                       const std::vector<Taxon> &taxa,
                                       bool use_origin,
                                       bool complete,
-                                      double resampling,
-                                      bool extended);  //!< Constructor
+                                      bool extended,
+                                      double resampling);  //!< Constructor
         
         // public member functions
-        FossilizedBirthDeathProcess*   clone(void) const;                                         //!< Create an independent clone
-
-        double                                          getAnageneticSpeciationRate( size_t index ) const;
-        double                                          getSymmetricSpeciationProbability( size_t index ) const;
+        FossilizedBirthDeathProcess*                    clone(void) const;                                         //!< Create an independent clone
 
         void                                            simulateClade(std::vector<TopologyNode *> &n, double age, double present);
 
     protected:
-        void                                            updateStartEndTimes();
+        void                                            updateStartEndTimes(void);
         int                                             updateStartEndTimes(const TopologyNode &, bool force = false );
 
         double                                          pSurvival(double start, double end) const;             //!< Compute the probability of survival of the process (without incomplete taxon sampling).
@@ -81,7 +78,7 @@ namespace RevBayesCore {
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
 
-        void                                            updateIntervals();
+        void                                            prepareProbComputation(void);
 
     private:
         
@@ -89,7 +86,6 @@ namespace RevBayesCore {
         double                                          getMaxTaxonAge( const TopologyNode& ) const;
 
         mutable std::vector<bool>                       I;
-        bool                                            extended;
 
         mutable std::vector<double>                     anagenetic;
         mutable std::vector<double>                     symmetric;

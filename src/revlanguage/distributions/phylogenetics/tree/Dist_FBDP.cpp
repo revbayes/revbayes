@@ -208,8 +208,6 @@ const MemberRules& Dist_FBDP::getParameterRules(void) const
         betaParamTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
         dist_member_rules.push_back( new ArgumentRule( "beta",  betaParamTypes, "The probability of symmetric speciation.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
 
-        dist_member_rules.push_back( new ArgumentRule( "extended" , RlBoolean::getClassTypeSpec() , "Treat tip nodes as extinction events?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
-
         // add the rules from the base class
         const MemberRules &parentRules = FossilizedBirthDeathProcess<TimeTree>::getParameterRules();
         dist_member_rules.insert(dist_member_rules.end(), parentRules.begin(), parentRules.end());
@@ -259,10 +257,6 @@ void Dist_FBDP::setConstParameter(const std::string& name, const RevPtr<const Re
     {
         start_age = var;
         start_condition = name;
-    }
-    else if ( name == "extended" )
-    {
-        extended = var;
     }
     else
     {

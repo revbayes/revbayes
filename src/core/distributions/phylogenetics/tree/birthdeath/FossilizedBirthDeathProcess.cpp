@@ -54,11 +54,10 @@ FossilizedBirthDeathProcess::FossilizedBirthDeathProcess(const TypedDagNode<doub
                                                            const std::vector<Taxon> &intaxa,
                                                            bool uo,
                                                            bool c,
-                                                           double re,
-                                                           bool ex) :
+                                                           bool ex,
+                                                           double re) :
     AbstractBirthDeathProcess(ra, incondition, intaxa, uo),
-    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, c, re),
-    extended(ex)
+    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, c, ex, re)
 {
     for(std::vector<const DagNode*>::iterator it = range_parameters.begin(); it != range_parameters.end(); it++)
     {
@@ -170,8 +169,8 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
             double y_a   = b_i[i];
             double d     = d_i[i];
 
-            size_t y_ai = l(y_a);
-            size_t di   = l(di);
+            size_t y_ai = findIndex(y_a);
+            size_t di   = findIndex(di);
 
             // offset speciation density
             lnProb -= log( birth[y_ai] );
@@ -182,7 +181,7 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
                 // replace q with q~ at the birth time
                 double x = q(y_ai, y_a, true) - q(y_ai, y_a);
 
-                size_t oi = l(o_i[i]);
+                size_t oi = findIndex(tau1[i]);
 
                 // replace intermediate q terms
                 for (size_t j = y_ai; j < oi; j++)
@@ -190,13 +189,10 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
                     x += q_tilde_i[j] - q_i[j];
                 }
                 // replace q terms at oldest occurrence age
-                x -= q(oi, o_i[i], true) - q(oi, o_i[i]);
+                x -= q(oi, tau1[i], true) - q(oi, tau1[i]);
 
                 // compute definite integral
                 lnProb += log(-expm1(x));
-
-                // offset the extinction density for the ancestor (included later for all taxa)
-                lnProb -= log( p(y_ai, y_a) );
             }
             // if this is an extended tree, include the anagenetic speciation density for descendants of sampled ancestors
             else
@@ -205,27 +201,6 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
 
                 // offset the extinction density for the ancestor
                 lnProb -= log( death[y_ai] );
-            }
-        }
-
-        // if this is a sampled tree
-        // replace extinction events with sampling events
-        if( extended == false )
-        {
-            size_t di = l(d_i[i]);
-
-            // if the tip is a sampling event in the past
-            if( d_i[i] > 0.0 )
-            {
-                // check constraints
-                if ( d_i[i] != taxa[i].getMinAge() )
-                {
-                    return RbConstants::Double::neginf;
-                }
-
-                // replace observed extinction density with unobserved extinction density
-                lnProb -= log( death[di] );
-                lnProb += log( p(di, d_i[i]) );
             }
         }
     }
@@ -261,45 +236,6 @@ double FossilizedBirthDeathProcess::getMaxTaxonAge( const TopologyNode& node ) c
     }
 }
 
-double FossilizedBirthDeathProcess::getAnageneticSpeciationRate( size_t index ) const
-{
-
-    // remove the old parameter first
-    if ( homogeneous_lambda_a != NULL )
-    {
-        return homogeneous_lambda_a->getValue();
-    }
-    else
-    {
-        size_t num = heterogeneous_lambda_a->getValue().size();
-
-        if (index >= num)
-        {
-            throw(RbException("Anagenetic speciation rate index out of bounds"));
-        }
-        return ascending ? heterogeneous_lambda_a->getValue()[num - 1 - index] : heterogeneous_lambda_a->getValue()[index];
-    }
-}
-
-double FossilizedBirthDeathProcess::getSymmetricSpeciationProbability( size_t index ) const
-{
-
-    // remove the old parameter first
-    if ( homogeneous_beta != NULL )
-    {
-        return homogeneous_beta->getValue();
-    }
-    else
-    {
-        size_t num = heterogeneous_beta->getValue().size();
-
-        if (index >= num)
-        {
-            throw(RbException("Symmetric speciation probability index out of bounds"));
-        }
-        return ascending ? heterogeneous_beta->getValue()[num - 1 - index] : heterogeneous_beta->getValue()[index];
-    }
-}
 
 double FossilizedBirthDeathProcess::lnProbTreeShape(void) const
 {
@@ -323,10 +259,11 @@ double FossilizedBirthDeathProcess::pSurvival(double start, double end) const
 {
     double t = start;
 
-    double p0 = p(l(t), t);
+    double p0 = p(findIndex(t), t);
 
     return 1.0 - p0;
 }
+
 
 /**
  * q_i(t)
@@ -389,17 +326,17 @@ void FossilizedBirthDeathProcess::simulateClade(std::vector<TopologyNode *> &n, 
         // make sure the tip age is equal to the last occurrence
         if( n[i]->isTip() )
         {
-            double min = n[i]->getTaxon().isExtinct() ? n[i]->getTaxon().getMinAge() : 0.0;
+            bool extinct = n[i]->getTaxon().isExtinct();
 
             // in the extended tree, tip ages are extinction times
             if ( extended )
             {
-                n[i]->setAge( rng->uniform01() * min );
+                n[i]->setAge( extinct * rng->uniform01() * y_i[i] );
             }
             // in the sampled tree, tip ages are sampling times
             else
             {
-                n[i]->setAge(min);
+                n[i]->setAge( extinct * rng->uniform01() * ( y_i[i] - n[i]->getTaxon().getMinAge() ) + n[i]->getTaxon().getMinAge() );
             }
         }
 
@@ -619,7 +556,7 @@ double FossilizedBirthDeathProcess::simulateDivergenceTime(double origin, double
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
 
-    size_t i = l(present);
+    size_t i = findIndex(present);
 
     // get the parameters
     double age = origin - present;
@@ -702,7 +639,7 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node, 
             {
                 b_i[i] = age;
                 dirty_taxa[i] = true;
-                if ( touched == false ) redrawOldestOccurrence(i, force);
+                if ( touched == false ) redrawAges(i, force);
             }
 
             I[i] = sa;
@@ -724,7 +661,7 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node, 
                     b_i[i] = age;
                     origin = age;
                     dirty_taxa[i] = true;
-                    if ( touched == false ) redrawOldestOccurrence(i, force);
+                    if ( touched == false ) redrawAges(i, force);
                 }
             }
         }
@@ -737,28 +674,40 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node, 
  *
  *
  */
-void FossilizedBirthDeathProcess::updateIntervals()
+void FossilizedBirthDeathProcess::prepareProbComputation()
 {
-    AbstractFossilizedBirthDeathProcess::updateIntervals();
+    AbstractFossilizedBirthDeathProcess::prepareProbComputation();
+
+    if ( homogeneous_lambda_a != NULL )
+    {
+        anagenetic = std::vector<double>(num_intervals, homogeneous_lambda_a->getValue() );
+    }
+    else
+    {
+        anagenetic = heterogeneous_lambda_a->getValue();
+    }
+    if ( homogeneous_beta != NULL )
+    {
+        symmetric = std::vector<double>(num_intervals, homogeneous_beta->getValue() );
+    }
+    else
+    {
+        symmetric = heterogeneous_beta->getValue();
+    }
 
     for (size_t interval = num_intervals; interval > 0; interval--)
     {
         size_t i = interval - 1;
 
-        double a = getAnageneticSpeciationRate(i);
-        double s = getSymmetricSpeciationProbability(i);
-
-        anagenetic[i] = a;
-        symmetric[i] = s;
-
         if (i > 0)
         {
-            double dt = getIntervalTime(i-1) - times[i];
+            double dt = times[i-1] - times[i];
 
-            q_tilde_i[i-1] = - a - s * (birth[i] + death[i] + fossil[i]) * dt + (1.0 - s) * q_tilde_i[i-1];
+            q_tilde_i[i-1] = - anagenetic[i] - symmetric[i] * (birth[i] + death[i] + fossil[i]) * dt + (1.0 - symmetric[i]) * q_tilde_i[i-1];
         }
     }
 }
+
 
 /**
  * Compute the log-transformed probability of the current value under the current parameter values.
@@ -794,8 +743,9 @@ void FossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, bool tou
         if ( touched == false )
         {
             stored_likelihood = partial_likelihood;
-            stored_o_i = o_i;
-            stored_Psi_i = Psi_i;
+            stored_tau1 = tau1;
+            stored_d_i = d_i;
+            stored_Psi = Psi;
         }
 
         updateStartEndTimes();
