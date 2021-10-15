@@ -1,3 +1,5 @@
+#include "Func_readTrace.h"
+
 #include <math.h>
 #include <stdlib.h>
 #include <map>
@@ -6,7 +8,7 @@
 #include <vector>
 
 #include "ArgumentRule.h"
-#include "Func_readTrace.h"
+#include "Delimiter.h"
 #include "Probability.h"
 #include "RbException.h"
 #include "RbFileManager.h"
@@ -209,8 +211,7 @@ const ArgumentRules& Func_readTrace::getArgumentRules( void ) const
     {
         
         argumentRules.push_back( new ArgumentRule( "file"     , RlString::getClassTypeSpec(), "Name of the file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        std::vector<std::string> sep = {"separator","delimiter"};
-        argumentRules.push_back( new ArgumentRule( sep, RlString::getClassTypeSpec(), "The separator/delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("") ) );
+        argumentRules.push_back( new Delimiter() );
 
         std::vector<TypeSpec> burninTypes;
         burninTypes.push_back( Probability::getClassTypeSpec() );

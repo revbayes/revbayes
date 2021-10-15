@@ -1,3 +1,5 @@
+#include "RlBurninEstimationConvergenceAssessment.h"
+
 #include <stdlib.h>
 #include <cstddef>
 #include <ostream>
@@ -9,6 +11,7 @@
 #include "ArgumentRules.h"
 #include "BurninEstimatorContinuous.h"
 #include "ConvergenceDiagnosticContinuous.h"
+#include "Delimiter.h"
 #include "EssMax.h"
 #include "EssTest.h"
 #include "GelmanRubinTest.h"
@@ -17,7 +20,6 @@
 #include "OptionRule.h"
 #include "RbException.h"
 #include "RbFileManager.h"
-#include "RlBurninEstimationConvergenceAssessment.h"
 #include "RlString.h"
 #include "RlUserInterface.h"
 #include "SemMin.h"
@@ -399,8 +401,7 @@ const MemberRules& BurninEstimationConvergenceAssessment::getParameterRules(void
         filenameTypes.push_back( RlString::getClassTypeSpec() );
         filenameTypes.push_back( ModelVector<RlString>::getClassTypeSpec() );
         memberRules.push_back( new ArgumentRule("filename", filenameTypes, "The name of the file with the parameter samples.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        std::vector<std::string> sep = {"separator","delimiter"};
-        memberRules.push_back( new ArgumentRule(sep, RlString::getClassTypeSpec(), "The separator/delimiter between values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("") ) );
+        memberRules.push_back( new Delimiter() );
         
         rules_set = true;
     }
@@ -533,7 +534,7 @@ void BurninEstimationConvergenceAssessment::setConstParameter(const std::string&
         }
         
     }
-    else if ( name == "delimiter" || name == "separator" || name == "separator/delimiter")
+    else if ( name == "delimiter" || name == "separator" )
     {
         delimiter = static_cast<const RlString&>( var->getRevObject() ).getValue();
     }

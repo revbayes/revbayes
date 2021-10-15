@@ -69,7 +69,7 @@ void FileMonitor::setConstParameter(const std::string& name, const RevPtr<const 
     {
         filename = var;
     }
-    else if ( name == "separator" || name == "delimiter" || name == "separator/delimiter" )
+    else if ( name == "separator" || name == "delimiter" )
     {
         separator = var;
     }

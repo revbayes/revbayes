@@ -1,12 +1,14 @@
+#include "RlSteppingStoneSampler.h"
+
 #include <ostream>
 #include <string>
 #include <vector>
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
+#include "Delimiter.h"
 #include "RevObject.h"
 #include "Real.h"
-#include "RlSteppingStoneSampler.h"
 #include "RlString.h"
 #include "TypeSpec.h"
 #include "MemberProcedure.h"
@@ -121,8 +123,7 @@ const MemberRules& SteppingStoneSampler::getParameterRules(void) const
         samplerMemberRules.push_back( new ArgumentRule("filename"            , RlString::getClassTypeSpec(), "The name of the file where the likelhood samples are stored.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         samplerMemberRules.push_back( new ArgumentRule("powerColumnName"     , RlString::getClassTypeSpec(), "The name of the column of the powers.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         samplerMemberRules.push_back( new ArgumentRule("likelihoodColumnName", RlString::getClassTypeSpec(), "The name of the column of the likelihood samples.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        std::vector<std::string> sep = {"separator","delimiter"};
-        samplerMemberRules.push_back( new ArgumentRule(sep                   , RlString::getClassTypeSpec(), "The separator/delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "\t" ) ) );
+        samplerMemberRules.push_back( new Delimiter() );
 
         rules_set = true;
     }
@@ -164,7 +165,7 @@ void SteppingStoneSampler::setConstParameter(const std::string& name, const RevP
     {
         filename = var;
     }
-    else if ( name == "delimiter" || name == "separator" || name == "separator/delimiter")
+    else if ( name == "delimiter" || name == "separator" )
     {
         delimiter = var;
     }
