@@ -91,14 +91,17 @@ namespace RevBayesCore {
         std::vector<double>                     fossil;
         std::vector<double>                     times;
 
+        std::vector<double>                     o_i;
+        std::vector<double>                     y_i;
+
         std::string                             condition;
 
-        std::vector<Taxon>                      bd_taxa;                                                       //!< Taxon names that will be attached to new simulated trees.
+        std::vector<Taxon>                      taxa;                                                          //!< Taxon names that will be attached to new simulated trees.
 
         bool                                    complete;
 
-        std::vector<double>                     Psi_i;
-        std::vector<double>                     stored_Psi_i;
+        std::vector<double>                     Psi;
+        std::vector<double>                     stored_Psi;
 
         std::vector<double>                     partial_likelihood;
         std::vector<double>                     stored_likelihood;
