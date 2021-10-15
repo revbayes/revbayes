@@ -67,7 +67,7 @@ namespace RevBayesCore {
         void                                            restoreSpecialization(DagNode *toucher);
         void                                            touchSpecialization(DagNode *toucher, bool touchAll);
 
-        void                                            redrawAges(size_t i, bool force = false);
+        void                                            redrawAge(size_t i, bool force = false);
 
         std::vector<Taxon>                              fbd_taxa;                                              //!< Taxa that will be attached to new simulated trees.
 
@@ -92,7 +92,6 @@ namespace RevBayesCore {
 
         std::vector<double>                     b_i;
         std::vector<double>                     d_i;
-        std::vector<double>                     stored_d_i;
         std::vector<double>                     o_i;
         std::vector<double>                     y_i;
 
@@ -105,8 +104,8 @@ namespace RevBayesCore {
         std::vector<double>                     Psi;
         std::vector<double>                     stored_Psi;
 
-        std::vector<double>                     tau1;
-        std::vector<double>                     stored_tau1;
+        std::vector<double>                     age;
+        std::vector<double>                     stored_age;
 
         std::vector<double>                     partial_likelihood;
         std::vector<double>                     stored_likelihood;

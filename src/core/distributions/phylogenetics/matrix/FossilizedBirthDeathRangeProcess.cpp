@@ -236,7 +236,7 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
         (*this->value)[i][0] = b;
         (*this->value)[i][1] = d;
 
-        redrawAges(i,true);
+        redrawAge(i,true);
     }
 }
 
@@ -267,8 +267,7 @@ void FossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, boo
         if ( touched == false )
         {
             stored_likelihood = partial_likelihood;
-            stored_tau1 = tau1;
-            stored_d_i = d_i;
+            stored_age = age;
             stored_Psi = Psi;
 
             std::set<size_t> touched_indices = dag_node->getTouchedElementIndices();
@@ -280,7 +279,7 @@ void FossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, boo
                 dirty_gamma[i] = true;
                 dirty_taxa[i]  = true;
 
-                redrawAges(i,true);
+                redrawAge(i,true);
             }
 
             updateStartEndTimes();

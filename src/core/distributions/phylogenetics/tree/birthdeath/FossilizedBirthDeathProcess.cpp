@@ -168,6 +168,7 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
         {
             double y_a   = b_i[i];
             double d     = d_i[i];
+            double o     = age[i];
 
             size_t y_ai = findIndex(y_a);
             size_t di   = findIndex(di);
@@ -181,7 +182,7 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
                 // replace q with q~ at the birth time
                 double x = q(y_ai, y_a, true) - q(y_ai, y_a);
 
-                size_t oi = findIndex(tau1[i]);
+                size_t oi = findIndex(o);
 
                 // replace intermediate q terms
                 for (size_t j = y_ai; j < oi; j++)
@@ -189,7 +190,7 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
                     x += q_tilde_i[j] - q_i[j];
                 }
                 // replace q terms at oldest occurrence age
-                x -= q(oi, tau1[i], true) - q(oi, tau1[i]);
+                x -= q(oi, o, true) - q(oi, o);
 
                 // compute definite integral
                 lnProb += log(-expm1(x));
@@ -639,7 +640,7 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node, 
             {
                 b_i[i] = age;
                 dirty_taxa[i] = true;
-                if ( touched == false ) redrawAges(i, force);
+                if ( touched == false ) redrawAge(i, force);
             }
 
             I[i] = sa;
@@ -661,7 +662,7 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node, 
                     b_i[i] = age;
                     origin = age;
                     dirty_taxa[i] = true;
-                    if ( touched == false ) redrawAges(i, force);
+                    if ( touched == false ) redrawAge(i, force);
                 }
             }
         }
@@ -743,8 +744,7 @@ void FossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, bool tou
         if ( touched == false )
         {
             stored_likelihood = partial_likelihood;
-            stored_tau1 = tau1;
-            stored_d_i = d_i;
+            stored_age = age;
             stored_Psi = Psi;
         }
 
