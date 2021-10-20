@@ -238,13 +238,22 @@ void RevBayesCore::TreeUtilities::getAges(Tree *t, TopologyNode *n, std::vector<
 }
 
 /**
- * Calculate average distance matrix from distance matrix
- * @param matvect distance matrix
+ * Calculate average distance matrix from a vector of distance matrices
+ * @param matvect vector of distance matrices
+ * @param weights vector of weights, set to NULL by default. If no weights are provided, a vector of equal weights of the same length as matvect is created internally.
  * @return average distance matrix
  *
  */
-RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDistanceMatrix(const RbVector<RevBayesCore::DistanceMatrix>& matvect)
+RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDistanceMatrix(const RbVector<RevBayesCore::DistanceMatrix>& matvect, const RbVector<double>* weights = NULL)
 {
+    // test if a vector of weights was provided, and if not, set it to a vector of 1s
+    if (weights == NULL)
+    {
+        weights = new RbVector<double>(matvect.size(), 1.0);
+    }
+    
+    // note that the check that matvect.size() == weights.size() is performed upstream within AvgDistanceMatrixFunction()
+    
     // gather all taxa across all source matrices into a single vector
     std::vector<RevBayesCore::Taxon> allTaxa;
 
@@ -279,21 +288,23 @@ RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDista
     // initialize the corresponding Boolean matrix of the right dimensions, filled with 'false'
     RevBayesCore::MatrixBoolean mask = MatrixBoolean( allNames.size() );
 
-    for(RbConstIterator<DistanceMatrix> mat = matvect.begin(); mat != matvect.end(); ++mat)
+    for(size_t mat = 0; mat != matvect.size(); ++mat)
     {
-        std::vector<Taxon> taxa = mat->getTaxa();
+        std::vector<Taxon> taxa = matvect[mat].getTaxa();
+        
         for(size_t i = 0; i != taxa.size(); i++)
         {
             size_t rowInd = std::distance(allNames.begin(), std::find(allNames.begin(), allNames.end(), taxa[i].getName()));
+            
             for(size_t j = i + 1; j != taxa.size(); ++j)
             {
                 size_t colInd = std::distance(allNames.begin(), std::find(allNames.begin(), allNames.end(), taxa[j].getName()));
-                sumMatrix[rowInd][colInd] += mat->getMatrix()[i][j];
-                sumMatrix[colInd][rowInd] += mat->getMatrix()[i][j]; // by symmetry
-                divisorMatrix[rowInd][colInd] += 1.0;
-                divisorMatrix[colInd][rowInd] += 1.0;                // by symmetry
+                sumMatrix[rowInd][colInd] += matvect[mat].getMatrix()[i][j] * (*weights)[mat];
+                sumMatrix[colInd][rowInd] += matvect[mat].getMatrix()[i][j] * (*weights)[mat]; // by symmetry
+                divisorMatrix[rowInd][colInd] += (*weights)[mat];
+                divisorMatrix[colInd][rowInd] += (*weights)[mat];                              // by symmetry
                 mask[rowInd][colInd] = true;
-                mask[colInd][rowInd] = true;                         // by symmetry
+                mask[colInd][rowInd] = true;                                                   // by symmetry
             }
         }
     }
