@@ -44,7 +44,6 @@ namespace RevBayesCore {
                                             const TypedDagNode<RbVector<double> > *times,
                                             const std::vector<Taxon> &taxa,
                                             bool complete,
-                                            bool extended,
                                             double resampling);  //!< Constructor
 
         virtual ~AbstractFossilizedBirthDeathProcess(){};
@@ -114,7 +113,6 @@ namespace RevBayesCore {
         std::vector<bool>                       dirty_taxa;
 
         bool                                    complete;
-        bool                                    extended;
         bool                                    touched;
 
         double                                  resampling;

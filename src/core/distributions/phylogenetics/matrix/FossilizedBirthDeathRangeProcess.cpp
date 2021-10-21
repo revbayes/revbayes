@@ -46,10 +46,9 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
                                                                      const std::string &incondition,
                                                                      const std::vector<Taxon> &intaxa,
                                                                      bool complete,
-                                                                     bool extended,
                                                                      double resample) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
-    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, complete, extended, resample),
+    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, complete, resample),
     condition(incondition)
 {
     dirty_gamma = std::vector<bool>(fbd_taxa.size(), true);
@@ -222,16 +221,8 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
     // get random uniform draws
     for (size_t i = 0; i < fbd_taxa.size(); i++)
     {
-        double b = fbd_taxa[i].getMaxAge() + rng->uniform01()*(max - o_i[i]);
-        double d = fbd_taxa[i].isExtinct();
-        if ( extended )
-        {
-            d *= rng->uniform01() * y_i[i];
-        }
-        else
-        {
-            d *= rng->uniform01() * ( y_i[i] - fbd_taxa[i].getMinAge() ) + fbd_taxa[i].getMinAge();
-        }
+        double b = rng->uniform01() * (max - o_i[i]) + o_i[i];
+        double d = fbd_taxa[i].isExtinct() * rng->uniform01() * y_i[i];
 
         (*this->value)[i][0] = b;
         (*this->value)[i][1] = d;

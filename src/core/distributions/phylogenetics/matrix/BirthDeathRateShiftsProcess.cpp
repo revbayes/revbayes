@@ -114,7 +114,7 @@ BirthDeathRateShiftsProcess::BirthDeathRateShiftsProcess(const DagNode *inspecia
         if ( heterogeneous_psi->getValue().size() != num_rates ) throw(inconsistent_rates);
     }
 
-    if ( num_rates != num_intervals )
+    if ( num_rates > 0 && num_rates != num_intervals )
     {
         // if all the rate vectors are one longer than the timeline
         // then assume the first time is 0
@@ -157,7 +157,7 @@ BirthDeathRateShiftsProcess::BirthDeathRateShiftsProcess(const DagNode *inspecia
         }
     }
 
-    updateIntervals();
+    prepareProbComputation();
     redrawValue();
 }
 
@@ -181,7 +181,7 @@ BirthDeathRateShiftsProcess* BirthDeathRateShiftsProcess::clone( void ) const
 double BirthDeathRateShiftsProcess::computeLnProbability()
 {
     // prepare the probability computation
-    updateIntervals();
+    prepareProbComputation();
 
     // variable declarations and initialization
     double lnProbTimes = 0.0;
@@ -214,8 +214,8 @@ double BirthDeathRateShiftsProcess::computeLnProbability()
 
         if ( dirty_taxa[i] == true )
         {
-            size_t bi = l(b);
-            size_t di = l(d);
+            size_t bi = findIndex(b);
+            size_t di = findIndex(d);
 
             partial_likelihood[i] = 0.0;
 
@@ -329,7 +329,7 @@ double BirthDeathRateShiftsProcess::computeLnProbability()
                 else
                 {
                     // include instantaneous sampling density
-                    Psi[i] = ages.begin()->second * log(fossil[l(min_age)]);
+                    Psi[i] = ages.begin()->second * log(fossil[findIndex(min_age)]);
                 }
             }
 
@@ -370,7 +370,7 @@ double BirthDeathRateShiftsProcess::computeLnProbability()
  * t_0 is origin
  * t_l = 0.0
  */
-size_t BirthDeathRateShiftsProcess::l(double t) const
+size_t BirthDeathRateShiftsProcess::findIndex(double t) const
 {
     return times.rend() - std::upper_bound( times.rbegin(), times.rend(), t);
 }
@@ -417,7 +417,7 @@ void BirthDeathRateShiftsProcess::redrawValue(void)
  *
  *
  */
-void BirthDeathRateShiftsProcess::updateIntervals()
+void BirthDeathRateShiftsProcess::prepareProbComputation()
 {
     if ( homogeneous_lambda != NULL )
     {
@@ -444,7 +444,14 @@ void BirthDeathRateShiftsProcess::updateIntervals()
         birth = heterogeneous_psi->getValue();
     }
 
-    times = timeline->getValue();
+    if ( timeline != NULL )
+    {
+        times = timeline->getValue();
+    }
+    else
+    {
+        times.clear();
+    }
 
     if ( times.size() < num_intervals )
     {

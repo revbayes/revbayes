@@ -48,7 +48,7 @@ namespace RevBayesCore {
 
         virtual ~BirthDeathRateShiftsProcess(){};
 
-        BirthDeathRateShiftsProcess*                    clone(void) const;                                         //!< Create an independent clone
+        BirthDeathRateShiftsProcess*                    clone(void) const;                                     //!< Create an independent clone
 
         double                                          getExtinctionRate( size_t index ) const;
         double                                          getFossilSamplingRate( size_t index ) const;
@@ -62,9 +62,9 @@ namespace RevBayesCore {
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
 
         // helper functions
-        size_t                                          l(double t) const;                                     //!< Find the index so that times[index-1] < t < times[index]
+        size_t                                          findIndex(double t) const;                             //!< Find the index so that times[index-1] < t < times[index]
 
-        virtual void                                    updateIntervals();
+        virtual void                                    prepareProbComputation();
 
         void                                            keepSpecialization(DagNode *toucher);
         void                                            restoreSpecialization(DagNode *toucher);

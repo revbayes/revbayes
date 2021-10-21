@@ -54,10 +54,9 @@ FossilizedBirthDeathProcess::FossilizedBirthDeathProcess(const TypedDagNode<doub
                                                            const std::vector<Taxon> &intaxa,
                                                            bool uo,
                                                            bool c,
-                                                           bool ex,
                                                            double re) :
     AbstractBirthDeathProcess(ra, incondition, intaxa, uo),
-    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, c, ex, re)
+    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, c, re)
 {
     for(std::vector<const DagNode*>::iterator it = range_parameters.begin(); it != range_parameters.end(); it++)
     {
@@ -168,41 +167,16 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
         {
             double y_a   = b_i[i];
             double d     = d_i[i];
-            double o     = age[i];
 
             size_t y_ai = findIndex(y_a);
-            size_t di   = findIndex(di);
+            size_t di   = findIndex(d);
 
             // offset speciation density
             lnProb -= log( birth[y_ai] );
-
-            // if this is a sampled tree, then integrate out the speciation times for descendants of sampled ancestors
-            if( extended == false )
-            {
-                // replace q with q~ at the birth time
-                double x = q(y_ai, y_a, true) - q(y_ai, y_a);
-
-                size_t oi = findIndex(o);
-
-                // replace intermediate q terms
-                for (size_t j = y_ai; j < oi; j++)
-                {
-                    x += q_tilde_i[j] - q_i[j];
-                }
-                // replace q terms at oldest occurrence age
-                x -= q(oi, o, true) - q(oi, o);
-
-                // compute definite integral
-                lnProb += log(-expm1(x));
-            }
-            // if this is an extended tree, include the anagenetic speciation density for descendants of sampled ancestors
-            else
-            {
-                lnProb += log( anagenetic[y_ai] );
-
-                // offset the extinction density for the ancestor
-                lnProb -= log( death[y_ai] );
-            }
+            // offset the extinction density for the ancestor
+            lnProb -= log( death[y_ai] );
+            // include anagenetic speciation density
+            lnProb += log( anagenetic[y_ai] );
         }
     }
 
@@ -329,16 +303,7 @@ void FossilizedBirthDeathProcess::simulateClade(std::vector<TopologyNode *> &n, 
         {
             bool extinct = n[i]->getTaxon().isExtinct();
 
-            // in the extended tree, tip ages are extinction times
-            if ( extended )
-            {
-                n[i]->setAge( extinct * rng->uniform01() * y_i[i] );
-            }
-            // in the sampled tree, tip ages are sampling times
-            else
-            {
-                n[i]->setAge( extinct * rng->uniform01() * ( y_i[i] - n[i]->getTaxon().getMinAge() ) + n[i]->getTaxon().getMinAge() );
-            }
+            n[i]->setAge( extinct * rng->uniform01() * y_i[i] );
         }
 
         double first_occurrence = getMaxTaxonAge( *n[i] );

@@ -45,7 +45,6 @@ namespace RevBayesCore {
                                       const std::vector<Taxon> &taxa,
                                       bool use_origin,
                                       bool complete,
-                                      bool extended,
                                       double resampling);  //!< Constructor
         
         // public member functions

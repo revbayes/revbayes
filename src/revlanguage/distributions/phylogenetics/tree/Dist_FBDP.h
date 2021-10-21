@@ -45,7 +45,6 @@ namespace RevLanguage {
 
         RevPtr<const RevVariable>                               lambda_a;                                                                               //!< The anagenetic speciation rate(s)
         RevPtr<const RevVariable>                               beta;                                                                                   //!< The symmetric speciation probability
-        RevPtr<const RevVariable>                               extended;                                                                               //!< The flag determining whether to treat tips as sampling or extinction events
         RevPtr<const RevVariable>                               start_age;                                                                              //!< The start time of the process since the origin
         std::string                                             start_condition;                                                                        //!< The start condition of the process (rootAge/originAge)
 
