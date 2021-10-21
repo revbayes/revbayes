@@ -74,9 +74,6 @@ RevBayesCore::FossilizedBirthDeathProcess* Dist_FBDP::createDistribution( void )
     // the start age
     RevBayesCore::TypedDagNode<double>* sa       = static_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
 
-    // the start condition
-    bool uo = ( start_condition == "originAge" ? true : false );
-    
     // get the parameters
 
     // sampling condition
@@ -109,7 +106,7 @@ RevBayesCore::FossilizedBirthDeathProcess* Dist_FBDP::createDistribution( void )
     bool c = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
     double re = static_cast<const Probability &>( resampling->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathProcess* d = new RevBayesCore::FossilizedBirthDeathProcess(sa, l, m, p, r, la, b, rt, cond, t, uo, c, re);
+    RevBayesCore::FossilizedBirthDeathProcess* d = new RevBayesCore::FossilizedBirthDeathProcess(sa, l, m, p, r, la, b, rt, cond, t, c, re);
 
     return d;
 }
@@ -192,10 +189,7 @@ const MemberRules& Dist_FBDP::getParameterRules(void) const
     
     if ( !rules_set )
     {
-        std::vector<std::string> aliases;
-        aliases.push_back("rootAge");
-        aliases.push_back("originAge");
-        dist_member_rules.push_back( new ArgumentRule( aliases, RealPos::getClassTypeSpec()    , "The start time of the process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "originAge", RealPos::getClassTypeSpec(), "The start time of the process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         std::vector<TypeSpec> paramTypes;
         paramTypes.push_back( RealPos::getClassTypeSpec() );
@@ -252,10 +246,9 @@ void Dist_FBDP::setConstParameter(const std::string& name, const RevPtr<const Re
     {
         beta = var;
     }
-    else if ( name == "rootAge" || name == "originAge" )
+    else if ( name == "originAge" )
     {
         start_age = var;
-        start_condition = name;
     }
     else
     {

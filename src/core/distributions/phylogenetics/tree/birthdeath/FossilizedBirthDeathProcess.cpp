@@ -52,10 +52,9 @@ FossilizedBirthDeathProcess::FossilizedBirthDeathProcess(const TypedDagNode<doub
                                                            const TypedDagNode< RbVector<double> > *intimes,
                                                            const std::string &incondition,
                                                            const std::vector<Taxon> &intaxa,
-                                                           bool uo,
                                                            bool c,
                                                            double re) :
-    AbstractBirthDeathProcess(ra, incondition, intaxa, uo),
+    AbstractBirthDeathProcess(ra, incondition, intaxa, true),
     AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, c, re)
 {
     for(std::vector<const DagNode*>::iterator it = range_parameters.begin(); it != range_parameters.end(); it++)
@@ -142,10 +141,7 @@ FossilizedBirthDeathProcess* FossilizedBirthDeathProcess::clone( void ) const
  */
 double FossilizedBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
 {
-    // variable declarations and initialization
-    double lnProbTimes = computeLnProbabilityTimes();
-
-    return lnProbTimes;
+    return computeLnProbabilityTimes();
 }
 
 
@@ -183,9 +179,7 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
     // condition on survival
     if ( condition == "sampling" )
     {
-        double ps = log( pSurvival( getOriginAge(), 0) );
-
-        lnProb -= use_origin ? ps : 2.0*ps;
+        lnProb -= log( pSurvival( getOriginAge(), 0) );
     }
 
     return lnProb;
