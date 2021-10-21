@@ -72,12 +72,12 @@ RevBayesCore::FossilizedBirthDeathProcess* Dist_FBDP::createDistribution( void )
     // get the parameters
     
     // the start age
-    RevBayesCore::TypedDagNode<double>* sa       = static_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* sa = static_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
 
     // get the parameters
 
     // sampling condition
-    const std::string& cond                     = static_cast<const RlString &>( condition->getRevObject() ).getValue();
+    const std::string& cond  = static_cast<const RlString &>( condition->getRevObject() ).getValue();
     
     // get the taxa to simulate either from a vector of rev taxon objects or a vector of names
     std::vector<RevBayesCore::Taxon> t = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
@@ -94,7 +94,7 @@ RevBayesCore::FossilizedBirthDeathProcess* Dist_FBDP::createDistribution( void )
     RevBayesCore::DagNode* b = beta->getRevObject().getDagNode();
 
     // sampling probability
-    RevBayesCore::TypedDagNode<double>* r       = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* r = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
 
     // rate change times
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* rt = NULL;

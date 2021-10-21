@@ -55,8 +55,6 @@ namespace RevBayesCore {
         // Parameter management functions
         double                                          computeLnProbability(void);                            //!< Compute the log-transformed probability of the current value.
 
-        double                                          pSurvival(double start, double end) const;
-
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
 
@@ -73,8 +71,6 @@ namespace RevBayesCore {
         std::vector<size_t>                             gamma_i;
         std::vector<std::vector<bool> >                 gamma_links;
         std::vector<bool>                               dirty_gamma;
-
-        std::string                                     condition;
     };
 }
 

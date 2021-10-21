@@ -146,6 +146,7 @@ const MemberRules& RevLanguage::FossilizedBirthDeathProcess<rlType>::getParamete
         std::vector<std::string> optionsCondition;
         optionsCondition.push_back( "time" );
         optionsCondition.push_back( "sampling" );
+        optionsCondition.push_back( "survival" );
         memberRules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
         memberRules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa with fossil occurrence information.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 

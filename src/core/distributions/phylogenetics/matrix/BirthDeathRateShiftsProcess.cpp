@@ -199,7 +199,7 @@ double BirthDeathRateShiftsProcess::computeLnProbability()
         double min_age = taxa[i].getMinAge();
 
         // check model constraints
-        if ( !( b > o_i[i] && y_i[i] >= d && d >= 0.0 ) )
+        if ( !( b > o_i[i] && b > d && y_i[i] >= d && d >= 0.0 ) )
         {
             return RbConstants::Double::neginf;
         }
@@ -404,8 +404,8 @@ void BirthDeathRateShiftsProcess::redrawValue(void)
     // get random uniform draws
     for (size_t i = 0; i < taxa.size(); i++)
     {
-        double b = taxa[i].getMaxAge() + rng->uniform01()*(max - o_i[i]) + o_i[i];
-        double d = taxa[i].isExtinct() ? rng->uniform01()*y_i[i] : 0.0;
+        double b = taxa[i].getMaxAge() + rng->uniform01()*(max - taxa[i].getMaxAge()) + taxa[i].getMaxAge();
+        double d = taxa[i].isExtinct() ? rng->uniform01()*taxa[i].getMinAge() : 0.0;
 
         (*this->value)[i][0] = b;
         (*this->value)[i][1] = d;

@@ -35,8 +35,10 @@ using namespace RevBayesCore;
  * \param[in]    c              Fossil observation counts.
  * \param[in]    r              Instantaneous sampling probabilities.
  * \param[in]    t              Rate change times.
- * \param[in]    cdt            Condition of the process (none/survival/#Taxa).
+ * \param[in]    cdt            Condition of the process (time/sampling/survival).
  * \param[in]    tn             Taxa.
+ * \param[in]    c              Complete sampling?
+ * \param[in]    re             Augmented age resampling weight.
  */
 FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode *inspeciation,
                                                                      const DagNode *inextinction,
@@ -48,8 +50,7 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
                                                                      bool complete,
                                                                      double resample) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
-    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, complete, resample),
-    condition(incondition)
+    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete, resample)
 {
     dirty_gamma = std::vector<bool>(fbd_taxa.size(), true);
     gamma_i     = std::vector<size_t>(fbd_taxa.size(), 0);
@@ -92,12 +93,6 @@ double FossilizedBirthDeathRangeProcess::computeLnProbability( void )
     {
         // multiply by the number of possible birth locations
         lnProb += log( gamma_i[i] == 0 ? 1 : gamma_i[i] );
-    }
-
-    // condition on survival
-    if ( condition == "sampling" )
-    {
-        lnProb -= log( pSurvival(origin,0) );
     }
 
     return lnProb;
@@ -152,30 +147,6 @@ void FossilizedBirthDeathRangeProcess::updateGamma(bool force)
 
 
 /**
- * Compute the probability of survival if the process starts with one species at time start and ends at time end.
- *
- * \param[in]    start      Start time of the process.
- * \param[in]    end        End/stopping time of the process.
- *
- * \return Probability of survival.
- */
-double FossilizedBirthDeathRangeProcess::pSurvival(double start, double end) const
-{
-    double t = start;
-
-    //std::vector<double> fossil_bak = fossil;
-
-    //std::fill(fossil.begin(), fossil.end(), 0.0);
-
-    double p0 = p(findIndex(t), t);
-
-    //fossil = fossil_bak;
-
-    return 1.0 - p0;
-}
-
-
-/**
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
@@ -221,8 +192,8 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
     // get random uniform draws
     for (size_t i = 0; i < fbd_taxa.size(); i++)
     {
-        double b = rng->uniform01() * (max - o_i[i]) + o_i[i];
-        double d = fbd_taxa[i].isExtinct() * rng->uniform01() * y_i[i];
+        double b = fbd_taxa[i].getMaxAge() + rng->uniform01()*(max - fbd_taxa[i].getMaxAge()) + fbd_taxa[i].getMaxAge();
+        double d = fbd_taxa[i].isExtinct() ? rng->uniform01()*fbd_taxa[i].getMinAge() : 0.0;
 
         (*this->value)[i][0] = b;
         (*this->value)[i][1] = d;

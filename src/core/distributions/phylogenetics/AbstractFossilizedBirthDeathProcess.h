@@ -42,6 +42,7 @@ namespace RevBayesCore {
                                             const DagNode *psi,
                                             const TypedDagNode<double>* rho,
                                             const TypedDagNode<RbVector<double> > *times,
+                                            const std::string &condition,
                                             const std::vector<Taxon> &taxa,
                                             bool complete,
                                             double resampling);  //!< Constructor
@@ -57,7 +58,7 @@ namespace RevBayesCore {
 
         // helper functions
         size_t                                          findIndex(double t) const;                             //!< Find the index so that times[index-1] < t < times[index]
-        double                                          p(size_t i, double t) const;
+        double                                          p(size_t i, double t, bool survival = false) const;
         virtual double                                  q(size_t i, double t, bool tilde = false) const;
 
         virtual void                                    prepareProbComputation();
@@ -69,6 +70,7 @@ namespace RevBayesCore {
         void                                            redrawAge(size_t i, bool force = false);
 
         std::vector<Taxon>                              fbd_taxa;                                              //!< Taxa that will be attached to new simulated trees.
+        std::string                                     condition;
 
         size_t                                          num_intervals;
 
@@ -99,6 +101,7 @@ namespace RevBayesCore {
         std::vector<double>                     q_i;
         std::vector<double>                     q_tilde_i;
         std::vector<double>                     p_i;
+        std::vector<double>                     pS_i;
 
         std::vector<double>                     Psi;
         std::vector<double>                     stored_Psi;

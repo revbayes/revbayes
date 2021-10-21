@@ -25,26 +25,28 @@ using namespace RevBayesCore;
 
 /**
  * Constructor. 
- * We delegate most parameters to the base class and initialize the members.
  *
  * \param[in]    s              Speciation rates.
  * \param[in]    e              Extinction rates.
  * \param[in]    p              Fossil sampling rates.
- * \param[in]    c              Fossil observation counts.
  * \param[in]    r              Instantaneous sampling probabilities.
  * \param[in]    t              Rate change times.
- * \param[in]    cdt            Condition of the process (none/survival/#Taxa).
+ * \param[in]    cdt            Condition of the process (time/sampling/survival).
  * \param[in]    tn             Taxa.
+ * \param[in]    c              Complete sampling?
+ * \param[in]    re             Augmented age resampling weight.
  */
 AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const DagNode *inspeciation,
                                                                          const DagNode *inextinction,
                                                                          const DagNode *inpsi,
                                                                          const TypedDagNode<double> *inrho,
                                                                          const TypedDagNode< RbVector<double> > *intimes,
+                                                                         const std::string &incondition,
                                                                          const std::vector<Taxon> &intaxa,
                                                                          bool c,
                                                                          double re) :
     fbd_taxa(intaxa),
+    condition(incondition),
     homogeneous_rho(inrho),
     timeline( intimes ),
     origin(0.0),
@@ -145,6 +147,7 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
     y_i = std::vector<double>(fbd_taxa.size(), RbConstants::Double::inf);
 
     p_i         = std::vector<double>(num_intervals, 1.0);
+    pS_i        = std::vector<double>(num_intervals, 1.0);
     q_i         = std::vector<double>(num_intervals, 0.0);
     q_tilde_i   = std::vector<double>(num_intervals, 0.0);
 
@@ -361,8 +364,10 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
         lnProbTimes += partial_likelihood[i];
     }
 
-    // (the origin is not a speciation event)
-    lnProbTimes -= log( birth[findIndex(origin)] );
+    size_t ori = findIndex(origin);
+
+    // the origin is not a speciation event
+    lnProbTimes -= log( birth[ori] );
 
     // add the sampled extant tip age term
     if ( homogeneous_rho->getValue() > 0.0)
@@ -373,6 +378,17 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
     if ( homogeneous_rho->getValue() < 1.0)
     {
         lnProbTimes += num_extant_unsampled * log( 1.0 - homogeneous_rho->getValue() );
+    }
+
+    // condition on sampling
+    if ( condition == "sampling" )
+    {
+        lnProbTimes -= log( 1.0 - p(ori, origin, false) );
+    }
+    // condition on survival
+    else if ( condition == "survival" )
+    {
+        lnProbTimes -= log( 1.0 - p(ori, origin, true) );
     }
 
     if ( RbMath::isFinite(lnProbTimes) == false )
@@ -399,12 +415,13 @@ size_t AbstractFossilizedBirthDeathProcess::findIndex(double t) const
 /**
  * p_i(t)
  */
-double AbstractFossilizedBirthDeathProcess::p( size_t i, double t ) const
+double AbstractFossilizedBirthDeathProcess::p( size_t i, double t, bool survival ) const
 {
     // get the parameters
     double b = birth[i];
     double d = death[i];
-    double f = fossil[i];
+    double f = survival ? 0.0 : fossil[i];
+    double pi = survival ? pS_i[i] : p_i[i];
     double r = (i == num_intervals - 1 ? homogeneous_rho->getValue() : 0.0);
     double ti = times[i];
     
@@ -412,7 +429,7 @@ double AbstractFossilizedBirthDeathProcess::p( size_t i, double t ) const
     double dt   = t - ti;
 
     double A = sqrt( diff*diff + 4.0*b*f);
-    double B = ( (1.0 - 2.0*(1.0-r)*p_i[i] )*b + d + f ) / A;
+    double B = ( (1.0 - 2.0*(1.0-r)*pi )*b + d + f ) / A;
 
     double ln_e = -A*dt;
 
@@ -586,6 +603,20 @@ void AbstractFossilizedBirthDeathProcess::prepareProbComputation()
             q_i[i-1]       = log(4.0) + ln_e - 2.0*log(tmp);
             q_tilde_i[i-1] = 0.5 * ( q_i[i-1] - (b+d+f)*dt );
             p_i[i-1]       = (b + d + f - A * ((1.0+B)-exp(ln_e)*(1.0-B))/tmp)/(2.0*b);
+
+            if ( condition == "survival" )
+            {
+                diff = b - d;
+
+                A = sqrt( diff*diff);
+                B = ( (1.0 - 2.0*(1.0-r)*p_i[i] )*b + d ) / A;
+
+                ln_e = -A*dt;
+
+                tmp = (1.0 + B) + exp(ln_e)*(1.0 - B);
+
+                pS_i[i-1]  = (b + d - A * ((1.0+B)-exp(ln_e)*(1.0-B))/tmp)/(2.0*b);
+            }
         }
     }
 }

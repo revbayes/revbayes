@@ -85,7 +85,7 @@ RevBayesCore::BirthDeathRateShiftsProcess* Dist_BDS::createDistribution( void ) 
     // get the parameters
     
     // sampling condition
-    const std::string& cond                     = static_cast<const RlString &>( condition->getRevObject() ).getValue();
+    const std::string& cond  = static_cast<const RlString &>( condition->getRevObject() ).getValue();
     
     // get the taxa to simulate either from a vector of rev taxon objects or a vector of names
     std::vector<RevBayesCore::Taxon> t = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
@@ -98,7 +98,7 @@ RevBayesCore::BirthDeathRateShiftsProcess* Dist_BDS::createDistribution( void ) 
     RevBayesCore::DagNode* p = psi->getRevObject().getDagNode();
 
     // sampling probability
-    RevBayesCore::TypedDagNode<double>* r       = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* r = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
 
     // rate change times
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* rt = NULL;
@@ -206,6 +206,7 @@ const MemberRules& Dist_BDS::getParameterRules(void) const
         std::vector<std::string> optionsCondition;
         optionsCondition.push_back( "time" );
         optionsCondition.push_back( "sampling" );
+        optionsCondition.push_back( "survival" );
         memberRules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
         memberRules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa with fossil occurrence information.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 

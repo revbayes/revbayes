@@ -38,9 +38,13 @@ using namespace RevBayesCore;
  * \param[in]    p              Fossil sampling rates.
  * \param[in]    c              Fossil observation counts.
  * \param[in]    r              Instantaneous sampling probabilities.
+ * \param[in]    a              Anagenetic speciation rates.
+ * \param[in]    b              Symmetric speciation probability.
  * \param[in]    t              Rate change times.
- * \param[in]    cdt            Condition of the process (none/survival/#Taxa).
+ * \param[in]    cdt            Condition of the process (time/sampling/survival).
  * \param[in]    tn             Taxa.
+ * \param[in]    c              Complete sampling?
+ * \param[in]    re             Augmented age resampling weight.
  */
 FossilizedBirthDeathProcess::FossilizedBirthDeathProcess(const TypedDagNode<double> *ra,
                                                            const DagNode *inspeciation,
@@ -55,7 +59,7 @@ FossilizedBirthDeathProcess::FossilizedBirthDeathProcess(const TypedDagNode<doub
                                                            bool c,
                                                            double re) :
     AbstractBirthDeathProcess(ra, incondition, intaxa, true),
-    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, intaxa, c, re)
+    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, c, re)
 {
     for(std::vector<const DagNode*>::iterator it = range_parameters.begin(); it != range_parameters.end(); it++)
     {
@@ -141,7 +145,9 @@ FossilizedBirthDeathProcess* FossilizedBirthDeathProcess::clone( void ) const
  */
 double FossilizedBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
 {
-    return computeLnProbabilityTimes();
+    double lnProb = computeLnProbabilityTimes();
+
+    return lnProb;
 }
 
 
@@ -157,8 +163,7 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
 
     for(size_t i = 0; i < taxa.size(); i++)
     {
-        // if this is an extended tree, then include the anagenetic speciation density for descendants of sampled ancestors
-        // otherwise, integrate out the speciation times for descendants of sampled ancestors
+        // include the anagenetic speciation density for descendants of sampled ancestors
         if ( I[i] == true )
         {
             double y_a   = b_i[i];
@@ -174,12 +179,6 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
             // include anagenetic speciation density
             lnProb += log( anagenetic[y_ai] );
         }
-    }
-
-    // condition on survival
-    if ( condition == "sampling" )
-    {
-        lnProb -= log( pSurvival( getOriginAge(), 0) );
     }
 
     return lnProb;
@@ -226,11 +225,7 @@ double FossilizedBirthDeathProcess::lnProbTreeShape(void) const
  */
 double FossilizedBirthDeathProcess::pSurvival(double start, double end) const
 {
-    double t = start;
-
-    double p0 = p(findIndex(t), t);
-
-    return 1.0 - p0;
+    return AbstractFossilizedBirthDeathProcess::p(findIndex(start), start, true);
 }
 
 
@@ -297,7 +292,7 @@ void FossilizedBirthDeathProcess::simulateClade(std::vector<TopologyNode *> &n, 
         {
             bool extinct = n[i]->getTaxon().isExtinct();
 
-            n[i]->setAge( extinct * rng->uniform01() * y_i[i] );
+            n[i]->setAge( extinct * rng->uniform01() * n[i]->getTaxon().getMinAge() );
         }
 
         double first_occurrence = getMaxTaxonAge( *n[i] );
