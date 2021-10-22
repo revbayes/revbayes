@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "RbVector.h"
+#include "RbException.h"
 #include "TreeUtilities.h"
 #include "TypedDagNode.h"
 
@@ -24,6 +25,12 @@ weightVector( weights )
 {
     addParameter( matrixVector );
     addParameter( weightVector );
+    
+    // Make sure inputs are of correct size
+    if ( weightVector != NULL && weightVector->getValue().size() != matrixVector->getValue().size() )
+    {
+        throw RbException("fnAverageDistanceMatrix requires weights to be a vector with number of elements matching the number of distance matrices to be averaged");
+    }
     
     update();
 }
