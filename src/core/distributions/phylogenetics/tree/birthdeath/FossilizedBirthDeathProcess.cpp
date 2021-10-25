@@ -105,7 +105,7 @@ FossilizedBirthDeathProcess::FossilizedBirthDeathProcess(const TypedDagNode<doub
     symmetric     = std::vector<double>(num_intervals, 0.0);
 
     redrawValue();
-    updateStartEndTimes(this->getValue().getRoot(), true);
+    updateStartEndTimes(this->getValue().getRoot());
 }
 
 
@@ -139,8 +139,6 @@ double FossilizedBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
  */
 double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
 {
-    updateStartEndTimes();
-
     double lnProb = computeLnProbabilityRanges();
 
     for(size_t i = 0; i < taxa.size(); i++)
@@ -537,7 +535,7 @@ double FossilizedBirthDeathProcess::simulateDivergenceTime(double origin, double
 }
 
 
-int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node, bool force )
+int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
 {
     if( node.isTip() )
     {
@@ -554,7 +552,7 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node, 
     {
         const TopologyNode& child = *children[c];
 
-        int i = updateStartEndTimes(child, force);
+        int i = updateStartEndTimes(child);
 
         // if child is a tip, set the species/end time
         if( child.isTip() )
@@ -566,7 +564,7 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node, 
                 d_i[i] = age;
                 dirty_psi[i] = true;
                 dirty_taxa[i] = true;
-                //if ( touched == false ) redrawAge(i, force);
+                if ( touched == false ) redrawAge(i);
             }
         }
 
@@ -581,7 +579,7 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node, 
                 b_i[i] = age;
                 dirty_psi[i] = true;
                 dirty_taxa[i] = true;
-                //if ( touched == false ) redrawAge(i, force);
+                //if ( touched == false ) redrawAge(i);
             }
 
             I[i] = sa;
@@ -604,7 +602,7 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node, 
                     origin = age;
                     dirty_psi[i] = true;
                     dirty_taxa[i] = true;
-                    //if ( touched == false ) redrawAge(i, force);
+                    //if ( touched == false ) redrawAge(i);
                 }
             }
         }
@@ -668,11 +666,6 @@ void FossilizedBirthDeathProcess::keepSpecialization(DagNode *toucher)
 
 void FossilizedBirthDeathProcess::restoreSpecialization(DagNode *toucher)
 {
-    if ( toucher == (DagNode*)dag_node )
-    {
-        //updateStartEndTimes();
-    }
-
     AbstractFossilizedBirthDeathProcess::restoreSpecialization(toucher);
 }
 
@@ -684,11 +677,9 @@ void FossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, bool tou
         if ( touched == false )
         {
             stored_likelihood = partial_likelihood;
-            //stored_age = age;
+            stored_age = age;
             stored_Psi = Psi;
         }
-
-        //updateStartEndTimes();
 
         touched = true;
     }

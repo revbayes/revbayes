@@ -32,14 +32,14 @@ namespace RevBayesCore {
         
     public:
         FossilizedBirthDeathRangeProcess (const DagNode *speciation,
-                                              const DagNode *extinction,
-                                              const DagNode *psi,
-                                              const TypedDagNode<double>* rho,
-                                              const TypedDagNode<RbVector<double> > *times,
-                                              const std::string &condition,
-                                              const std::vector<Taxon> &taxa,
-                                              bool complete,
-                                              double resampling);  //!< Constructor
+										  const DagNode *extinction,
+										  const DagNode *psi,
+										  const TypedDagNode<double>* rho,
+										  const TypedDagNode<RbVector<double> > *times,
+										  const std::string &condition,
+										  const std::vector<Taxon> &taxa,
+										  bool complete,
+										  double resampling);  //!< Constructor
         
         // public member functions
         FossilizedBirthDeathRangeProcess*               clone(void) const;                                     //!< Create an independent clone

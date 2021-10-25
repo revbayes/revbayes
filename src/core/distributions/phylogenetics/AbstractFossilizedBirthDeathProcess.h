@@ -98,7 +98,7 @@ namespace RevBayesCore {
         std::vector<double>                     stored_Psi;
 
         std::vector<double>                     age;
-        //std::vector<double>                     stored_age;
+        std::vector<double>                     stored_age;
 
         std::vector<double>                     partial_likelihood;
         std::vector<double>                     stored_likelihood;
