@@ -48,7 +48,7 @@ namespace RevLanguage {
         
         RevPtr<const RevVariable>                   likelihoodColumnName;
         RevPtr<const RevVariable>                   powerColumnName;
-        RevPtr<const RevVariable>                   delimmiter;
+        RevPtr<const RevVariable>                   delimiter;
         RevPtr<const RevVariable>                   filename;
         
     };

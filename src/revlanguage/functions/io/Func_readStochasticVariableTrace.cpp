@@ -1,8 +1,10 @@
+#include "Func_readStochasticVariableTrace.h"
+
 #include <sstream>
 #include <vector>
 
 #include "ArgumentRule.h"
-#include "Func_readStochasticVariableTrace.h"
+#include "Delimiter.h"
 #include "RlString.h"
 #include "RlModelTrace.h"
 #include "TraceReader.h"
@@ -69,7 +71,7 @@ const ArgumentRules& Func_readStochasticVariableTrace::getArgumentRules( void ) 
     {
         
         argumentRules.push_back( new ArgumentRule( "file"     , RlString::getClassTypeSpec(), "The name of the file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "delimiter", RlString::getClassTypeSpec(), "The delimiter used between the output of variables.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
+        argumentRules.push_back( new Delimiter() );
         rules_set = true;
     }
     

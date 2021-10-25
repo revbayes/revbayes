@@ -7,7 +7,7 @@
 #include "ArgumentRule.h"
 #include "ConstantNode.h"
 #include "HomologousDiscreteCharacterData.h"
-#include "Func_readCharacterDataUniversal.h"
+#include "Func_readCharacterData.h"
 #include "ModelVector.h"
 #include "NclReader.h"
 #include "NonHomologousDiscreteCharacterData.h"
@@ -62,14 +62,14 @@ using namespace RevLanguage;
  *
  * \return A new copy of the process.
  */
-Func_readCharacterDataUniversal* Func_readCharacterDataUniversal::clone( void ) const {
+Func_readCharacterData* Func_readCharacterData::clone( void ) const {
     
-    return new Func_readCharacterDataUniversal( *this );
+    return new Func_readCharacterData( *this );
 }
 
 
 /** Execute function */
-RevPtr<RevVariable> Func_readCharacterDataUniversal::execute( void ) {
+RevPtr<RevVariable> Func_readCharacterData::execute( void ) {
         
     // get the information from the arguments for reading the file
     const std::string& fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
@@ -346,7 +346,7 @@ RevPtr<RevVariable> Func_readCharacterDataUniversal::execute( void ) {
 
 
 /** Get argument rules */
-const ArgumentRules& Func_readCharacterDataUniversal::getArgumentRules( void ) const {
+const ArgumentRules& Func_readCharacterData::getArgumentRules( void ) const {
     
     static ArgumentRules argumentRules = ArgumentRules();
     static bool rules_set = false;
@@ -361,15 +361,15 @@ const ArgumentRules& Func_readCharacterDataUniversal::getArgumentRules( void ) c
 
 
 /** Get Rev type of object */
-const std::string& Func_readCharacterDataUniversal::getClassType(void) {
+const std::string& Func_readCharacterData::getClassType(void) {
     
-    static std::string rev_type = "Func_readCharacterDataUniversal";
+    static std::string rev_type = "Func_readCharacterData";
     return rev_type;
 }
 
 
 /** Get class type spec describing type of object */
-const TypeSpec& Func_readCharacterDataUniversal::getClassTypeSpec(void) {
+const TypeSpec& Func_readCharacterData::getClassTypeSpec(void) {
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
     return rev_type_spec;
@@ -379,7 +379,7 @@ const TypeSpec& Func_readCharacterDataUniversal::getClassTypeSpec(void) {
 /**
  * Get the primary Rev name for this function.
  */
-std::string Func_readCharacterDataUniversal::getFunctionName( void ) const {
+std::string Func_readCharacterData::getFunctionName( void ) const {
 
     // create a name variable that is the same for all instance of this class
     std::string f_name = "readCharacterData";
@@ -389,7 +389,7 @@ std::string Func_readCharacterDataUniversal::getFunctionName( void ) const {
 
 
 /** Get type spec */
-const TypeSpec& Func_readCharacterDataUniversal::getTypeSpec( void ) const {
+const TypeSpec& Func_readCharacterData::getTypeSpec( void ) const {
     
     static TypeSpec type_spec = getClassTypeSpec();
     return type_spec;
@@ -397,7 +397,7 @@ const TypeSpec& Func_readCharacterDataUniversal::getTypeSpec( void ) const {
 
 
 /** Get return type */
-const TypeSpec& Func_readCharacterDataUniversal::getReturnType( void ) const {
+const TypeSpec& Func_readCharacterData::getReturnType( void ) const {
     
     static TypeSpec return_typeSpec = ModelVector<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec();
     return return_typeSpec;

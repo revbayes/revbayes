@@ -2,7 +2,7 @@
 #define Mntr_Model_H
 
 #include "ModelMonitor.h"
-#include "RlMonitor.h"
+#include "RlFileMonitor.h"
 #include "TypedDagNode.h"
 
 #include <ostream>
@@ -10,7 +10,7 @@
 
 namespace RevLanguage {
     
-    class Mntr_Model : public Monitor {
+    class Mntr_Model : public FileMonitor {
         
     public:
         
@@ -30,14 +30,9 @@ namespace RevLanguage {
         
         void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
         
-        RevPtr<const RevVariable>                   filename;
-        RevPtr<const RevVariable>                   printgen;
-        RevPtr<const RevVariable>                   separator;
         RevPtr<const RevVariable>                   prior;
         RevPtr<const RevVariable>                   posterior;
         RevPtr<const RevVariable>                   likelihood;
-        RevPtr<const RevVariable>                   append;
-        RevPtr<const RevVariable>                   version;
         RevPtr<const RevVariable>                   stochOnly;
         RevPtr<const RevVariable>                   exclude;  //!< Vector of variable names to exclude from logging
         

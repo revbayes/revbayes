@@ -25,7 +25,7 @@ namespace RevBayesCore {
     public:
         DelimitedCharacterDataWriter();
         
-        void                    writeData(const std::string& fn, const HomologousCharacterData &d, char del='\t');
+        void                    writeData(const std::string& fn, const HomologousCharacterData &d, std::string del="\t");
 //        void                    writeData(const std::string& fn, const Abstr &d, char del='\t');
 
         

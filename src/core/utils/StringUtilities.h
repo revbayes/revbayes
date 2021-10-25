@@ -42,9 +42,9 @@ namespace StringUtilities {
     std::string                 oneLiner(const std::string& input, size_t maxLen);                                  //!< Get a one-liner of specified length
     void                        replaceSubstring(std::string& str, const std::string& oldStr, const std::string& newStr);
     void                        replaceAllOccurrences(std::string& str, char old_ch, char new_ch);
-    void                        stringSplit(const std::string &str, const std::string &delim, std::vector<std::string>& results); //!< Split a string into pieces
+    void                        stringSplit(std::string str, std::string delim, std::vector<std::string>& results, bool trim = false); //!< Split a string into pieces
     void                        toLower(std::string& str);                                                          //!< Convert string's characters to lower case
-    std::string                 toString(double x, int digits=6);                                                          //!< Convert string's characters to lower case
+    std::string                 toString(double x, int digits=6);                                                   //!< Convert string's characters to lower case
     
     /**
      * Generic to_string function
