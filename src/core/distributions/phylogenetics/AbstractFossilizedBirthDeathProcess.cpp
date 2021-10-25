@@ -206,6 +206,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
         double min_age = taxa[i].getMinAge();
 
         // check model constraints
+        //if ( !( b > max_age && min_age >= d && d >= 0.0 ) )
         if ( !( b > o && o >= d && o >= o_i[i] && y_i[i] >= d && d >= 0.0 ) )
         {
             return RbConstants::Double::neginf;

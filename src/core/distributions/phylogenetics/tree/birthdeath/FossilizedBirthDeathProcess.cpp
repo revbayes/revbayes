@@ -563,6 +563,7 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node, 
             {
                 d_i[i] = age;
                 dirty_taxa[i] = true;
+                if ( touched == false ) redrawAge(i, force);
             }
         }
 
