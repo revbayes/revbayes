@@ -1,20 +1,10 @@
 #ifndef AbstractFossilizedBirthDeathProcess_H
 #define AbstractFossilizedBirthDeathProcess_H
 
-#include "HomologousDiscreteCharacterData.h"
-#include "MatrixReal.h"
-#include "NaturalNumbersState.h"
 #include "RbVector.h"
 #include "TypedDagNode.h"
-#include "TypedDistribution.h"
-
-#include <vector>
-#include <set>
 
 namespace RevBayesCore {
-    
-    class Clade;
-    class Taxon;
 
     /**
      * @brief Abstract piecewise-constant fossilized birth-death range process.
@@ -69,7 +59,7 @@ namespace RevBayesCore {
 
         void                                            redrawAge(size_t i, bool force = false);
 
-        std::vector<Taxon>                              fbd_taxa;                                              //!< Taxa that will be attached to new simulated trees.
+        std::vector<Taxon>                              taxa;                                                  //!< Taxa that will be attached to new simulated trees.
         std::string                                     condition;
 
         size_t                                          num_intervals;

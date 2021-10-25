@@ -45,7 +45,7 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
                                                                          const std::vector<Taxon> &intaxa,
                                                                          bool c,
                                                                          double re) :
-    fbd_taxa(intaxa),
+    taxa(intaxa),
     condition(incondition),
     homogeneous_rho(inrho),
     timeline( intimes ),
@@ -90,7 +90,7 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
 
         sort(times_sorted_ascending.begin(), times_sorted_ascending.end() );
 
-         if ( times != times_sorted_ascending )
+        if ( times != times_sorted_ascending )
         {
             throw(RbException("Interval times must be provided in ascending order"));
         }
@@ -141,10 +141,10 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
         }
     }
 
-    b_i = std::vector<double>(fbd_taxa.size(), 0.0);
-    d_i = std::vector<double>(fbd_taxa.size(), 0.0);
-    o_i = std::vector<double>(fbd_taxa.size(), 0.0);
-    y_i = std::vector<double>(fbd_taxa.size(), RbConstants::Double::inf);
+    b_i = std::vector<double>(taxa.size(), 0.0);
+    d_i = std::vector<double>(taxa.size(), 0.0);
+    o_i = std::vector<double>(taxa.size(), 0.0);
+    y_i = std::vector<double>(taxa.size(), RbConstants::Double::inf);
 
     p_i         = std::vector<double>(num_intervals, 1.0);
     pS_i        = std::vector<double>(num_intervals, 1.0);
@@ -156,17 +156,17 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
     fossil      = std::vector<double>(num_intervals, 0.0);
     times       = std::vector<double>(num_intervals, 0.0);
 
-    partial_likelihood = std::vector<double>(fbd_taxa.size(), 0.0);
+    partial_likelihood = std::vector<double>(taxa.size(), 0.0);
 
-    age        = std::vector<double>(fbd_taxa.size(), 0.0);
-    Psi         = std::vector<double>(fbd_taxa.size(), 0.0 );
+    age        = std::vector<double>(taxa.size(), 0.0);
+    Psi         = std::vector<double>(taxa.size(), 0.0 );
 
-    dirty_taxa = std::vector<bool>(fbd_taxa.size(), true);
-    dirty_psi = std::vector<bool>(fbd_taxa.size(), true);
+    dirty_taxa = std::vector<bool>(taxa.size(), true);
+    dirty_psi = std::vector<bool>(taxa.size(), true);
 
-    for ( size_t i = 0; i < fbd_taxa.size(); i++ )
+    for ( size_t i = 0; i < taxa.size(); i++ )
     {
-        std::map<TimeInterval, size_t> ages = fbd_taxa[i].getAges();
+        std::map<TimeInterval, size_t> ages = taxa[i].getAges();
         for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
         {
             // find the oldest minimum age
@@ -195,22 +195,22 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
     size_t num_extant_unsampled = 0;
 
     // add the fossil tip age terms
-    for (size_t i = 0; i < fbd_taxa.size(); ++i)
+    for (size_t i = 0; i < taxa.size(); ++i)
     {
         double b = b_i[i];
         double d = d_i[i];
 
         double o = age[i];
 
-        double max_age = fbd_taxa[i].getMaxAge();
-        double min_age = fbd_taxa[i].getMinAge();
+        double max_age = taxa[i].getMaxAge();
+        double min_age = taxa[i].getMinAge();
 
         // check model constraints
-        if ( !( b > o && o > d && o >= o_i[i] && y_i[i] >= d && d >= 0.0 ) )
+        if ( !( b > o && o >= d && o >= o_i[i] && y_i[i] >= d && d >= 0.0 ) )
         {
             return RbConstants::Double::neginf;
         }
-        if ( (d > 0.0) != fbd_taxa[i].isExtinct() )
+        if ( (d > 0.0) != taxa[i].isExtinct() )
         {
             return RbConstants::Double::neginf;
         }
@@ -234,7 +234,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
             partial_likelihood[i] += q(bi, b);
 
             // include intermediate q terms
-            for (size_t j = bi; j < oi; j++)
+            for (size_t j = oi; j < bi; j++)
             {
                 partial_likelihood[i] += q_i[j];
             }
@@ -251,7 +251,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
             partial_likelihood[i] += q(oi, o, true) - q(oi, o);
 
             // include intermediate q_tilde terms
-            for (size_t j = oi; j < di; j++)
+            for (size_t j = di; j < oi; j++)
             {
                 partial_likelihood[i] += q_tilde_i[j];
             }
@@ -264,7 +264,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
             if ( dirty_psi[i] || force )
             {
-                std::map<TimeInterval, size_t> ages = fbd_taxa[i].getAges();
+                std::map<TimeInterval, size_t> ages = taxa[i].getAges();
 
                 // if there is a range of fossil ages
                 if ( min_age != max_age )
@@ -273,11 +273,9 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
                     std::vector<double> psi(ages.size(), 0.0);
 
-                    for (size_t interval = num_intervals; interval > 0; interval--)
+                    for (size_t j = 0; j < num_intervals; j++)
                     {
-                        size_t j = interval - 1;
-
-                        double t_0 = ( j > 0 ? times[j-1] : RbConstants::Double::inf );
+                        double t_0 = ( j < num_intervals-1 ? times[j+1] : RbConstants::Double::inf );
 
                         if ( t_0 <= min_age )
                         {
@@ -408,7 +406,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
  */
 size_t AbstractFossilizedBirthDeathProcess::findIndex(double t) const
 {
-    return times.rend() - std::upper_bound( times.rbegin(), times.rend(), t);
+    return std::prev(std::upper_bound( times.begin(), times.end(), t)) - times.begin();
 }
 
 
@@ -422,7 +420,7 @@ double AbstractFossilizedBirthDeathProcess::p( size_t i, double t, bool survival
     double d = death[i];
     double f = survival ? 0.0 : fossil[i];
     double pi = survival ? pS_i[i] : p_i[i];
-    double r = (i == num_intervals - 1 ? homogeneous_rho->getValue() : 0.0);
+    double r = (i == 0 ? homogeneous_rho->getValue() : 0.0);
     double ti = times[i];
     
     double diff = b - d - f;
@@ -444,14 +442,13 @@ double AbstractFossilizedBirthDeathProcess::p( size_t i, double t, bool survival
  */
 double AbstractFossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) const
 {
-    
     if ( t == 0.0 ) return 0.0;
     
     // get the parameters
     double b = birth[i];
     double d = death[i];
     double f = fossil[i];
-    double r = (i == num_intervals - 1 ? homogeneous_rho->getValue() : 0.0);
+    double r = (i == 0 ? homogeneous_rho->getValue() : 0.0);
     double ti = times[i];
     
     double diff = b - d - f;
@@ -480,18 +477,18 @@ void AbstractFossilizedBirthDeathProcess::redrawAge(size_t i, bool force)
 {
     if ( force || GLOBAL_RNG->uniform01() < resampling )
     {
-        dirty_taxa[i] = true;
         dirty_psi[i]  = true;
+        dirty_taxa[i] = true;
 
-        age[i] = GLOBAL_RNG->uniform01()*(fbd_taxa[i].getMaxAge() - o_i[i]) + o_i[i];
+        age[i] = GLOBAL_RNG->uniform01()*(taxa[i].getMaxAge() - o_i[i]) + o_i[i];
     }
 }
 
 
 void AbstractFossilizedBirthDeathProcess::keepSpecialization(DagNode *toucher)
 {
-    dirty_psi  = std::vector<bool>(fbd_taxa.size(), false);
-    dirty_taxa = std::vector<bool>(fbd_taxa.size(), false);
+    dirty_psi  = std::vector<bool>(taxa.size(), false);
+    dirty_taxa = std::vector<bool>(taxa.size(), false);
 
     touched = false;
 }
@@ -503,8 +500,8 @@ void AbstractFossilizedBirthDeathProcess::restoreSpecialization(DagNode *toucher
     age = stored_age;
     Psi = stored_Psi;
 
-    dirty_psi  = std::vector<bool>(fbd_taxa.size(), false);
-    dirty_taxa = std::vector<bool>(fbd_taxa.size(), false);
+    dirty_psi  = std::vector<bool>(taxa.size(), false);
+    dirty_taxa = std::vector<bool>(taxa.size(), false);
 
     touched = false;
 }
@@ -518,11 +515,11 @@ void AbstractFossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, 
         stored_age = age;
         stored_Psi = Psi;
 
-        dirty_taxa = std::vector<bool>(fbd_taxa.size(), true);
+        dirty_taxa = std::vector<bool>(taxa.size(), true);
 
         if ( toucher == timeline || toucher == homogeneous_psi || toucher == heterogeneous_psi || touchAll )
         {
-            dirty_psi  = std::vector<bool>(fbd_taxa.size(), true);
+            dirty_psi  = std::vector<bool>(taxa.size(), true);
         }
     }
 
@@ -550,7 +547,7 @@ void AbstractFossilizedBirthDeathProcess::prepareProbComputation()
     }
     else
     {
-        birth = heterogeneous_psi->getValue();
+        death = heterogeneous_mu->getValue();
     }
     if ( homogeneous_psi != NULL )
     {
@@ -558,7 +555,7 @@ void AbstractFossilizedBirthDeathProcess::prepareProbComputation()
     }
     else
     {
-        birth = heterogeneous_psi->getValue();
+        fossil = heterogeneous_psi->getValue();
     }
 
     if ( timeline != NULL )
@@ -575,20 +572,17 @@ void AbstractFossilizedBirthDeathProcess::prepareProbComputation()
         times.insert(times.begin(), 0.0);
     }
 
-    for (size_t interval = num_intervals; interval > 0; interval--)
+    for (size_t i = 0; i < num_intervals; i++)
     {
-        // start with youngest interval
-        size_t i = interval - 1;
-
         double ti = times[i];
         double b = birth[i];
         double d = death[i];
         double f = fossil[i];
 
-        if (i > 0)
+        if (i < num_intervals-1)
         {
-            double r = (i == num_intervals - 1 ? homogeneous_rho->getValue() : 0.0);
-            double t = times[i-1];
+            double r = (i == 0 ? homogeneous_rho->getValue() : 0.0);
+            double t = times[i+1];
 
             double diff = b - d - f;
             double dt   = t - ti;
@@ -600,9 +594,9 @@ void AbstractFossilizedBirthDeathProcess::prepareProbComputation()
 
             double tmp = (1.0 + B) + exp(ln_e)*(1.0 - B);
 
-            q_i[i-1]       = log(4.0) + ln_e - 2.0*log(tmp);
-            q_tilde_i[i-1] = 0.5 * ( q_i[i-1] - (b+d+f)*dt );
-            p_i[i-1]       = (b + d + f - A * ((1.0+B)-exp(ln_e)*(1.0-B))/tmp)/(2.0*b);
+            q_i[i]       = log(4.0) + ln_e - 2.0*log(tmp);
+            q_tilde_i[i] = 0.5 * ( q_i[i] - (b+d+f)*dt );
+            p_i[i+1]       = (b + d + f - A * ((1.0+B)-exp(ln_e)*(1.0-B))/tmp)/(2.0*b);
 
             if ( condition == "survival" )
             {
@@ -615,7 +609,7 @@ void AbstractFossilizedBirthDeathProcess::prepareProbComputation()
 
                 tmp = (1.0 + B) + exp(ln_e)*(1.0 - B);
 
-                pS_i[i-1]  = (b + d - A * ((1.0+B)-exp(ln_e)*(1.0-B))/tmp)/(2.0*b);
+                pS_i[i]  = (b + d - A * ((1.0+B)-exp(ln_e)*(1.0-B))/tmp)/(2.0*b);
             }
         }
     }

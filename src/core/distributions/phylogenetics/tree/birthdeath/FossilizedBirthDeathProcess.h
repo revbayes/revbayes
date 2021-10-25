@@ -2,16 +2,12 @@
 #define FossilizedBirthDeathProcess_H
 
 #include "AbstractFossilizedBirthDeathProcess.h"
-#include "RbVector.h"
 #include "AbstractBirthDeathProcess.h"
 
 namespace RevBayesCore {
     
-    class Clade;
-    class Taxon;
-    
     /**
-     * @brief Piecewise-constant fossilized birth-death range distribution of sampled/extended trees.
+     * @brief Piecewise-constant fossilized birth-death range distribution of extended trees.
      *
      * The piecewise-constant fossilized birth-death range process has constant rates for each time interval.
      * At the end of each time interval there may be an abrupt rate-shift (jump) for each
@@ -30,7 +26,7 @@ namespace RevBayesCore {
      */
     class FossilizedBirthDeathProcess : public AbstractBirthDeathProcess, public AbstractFossilizedBirthDeathProcess {
         
-        using AbstractBirthDeathProcess::taxa;
+        using AbstractFossilizedBirthDeathProcess::taxa;
 
     public:
         FossilizedBirthDeathProcess (const TypedDagNode<double>* ra,

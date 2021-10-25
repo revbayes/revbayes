@@ -17,6 +17,7 @@
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "RlUserInterface.h"
+#include "StochasticNode.h"
 #include "Taxon.h"
 #include "TimeInterval.h"
 #include "TypedDagNode.h"
@@ -45,7 +46,6 @@ BirthDeathRateShiftsProcess::BirthDeathRateShiftsProcess(const DagNode *inspecia
                                                          const std::vector<Taxon> &intaxa,
                                                          bool c) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
-    ascending(true),
     condition(incond),
     homogeneous_rho(inrho),
     timeline( intimes ),
@@ -69,6 +69,15 @@ BirthDeathRateShiftsProcess::BirthDeathRateShiftsProcess(const DagNode *inspecia
     heterogeneous_psi = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inpsi);
     homogeneous_psi = dynamic_cast<const TypedDagNode<double >*>(inpsi);
 
+    addParameter( timeline );
+    addParameter( homogeneous_rho );
+    addParameter( homogeneous_lambda );
+    addParameter( heterogeneous_lambda );
+    addParameter( homogeneous_mu );
+    addParameter( heterogeneous_mu );
+    addParameter( homogeneous_psi );
+    addParameter( heterogeneous_psi );
+
     // setup the timeline
     num_intervals = timeline == NULL ? 1 : timeline->getValue().size();
 
@@ -79,7 +88,7 @@ BirthDeathRateShiftsProcess::BirthDeathRateShiftsProcess(const DagNode *inspecia
 
         sort(times_sorted_ascending.begin(), times_sorted_ascending.end() );
 
-         if ( times != times_sorted_ascending )
+        if ( times != times_sorted_ascending )
         {
             throw(RbException("Interval times must be provided in ascending order"));
         }
@@ -234,11 +243,10 @@ double BirthDeathRateShiftsProcess::computeLnProbability()
             double psi_b_d = 0.0;
 
             // include poisson density
-            for ( size_t j = bi; j <= di; j++ )
+            for ( size_t j = di; j <= bi; j++ )
             {
-                double t_0 = ( j > 0 ? times[j-1] : RbConstants::Double::inf );
+                double t_0 = ( j < num_intervals-1 ? times[j+1] : RbConstants::Double::inf );
 
-                // increase incomplete sampling psi
                 double dt = std::min(b, t_0) - std::max(d, times[j]);
 
                 partial_likelihood[i] -= (birth[j] + death[j])*dt;
@@ -258,11 +266,9 @@ double BirthDeathRateShiftsProcess::computeLnProbability()
 
                     std::vector<double> psi(ages.size(), 0.0);
 
-                    for (size_t interval = num_intervals; interval > 0; interval--)
+                    for (size_t j = 0; j < num_intervals; j++)
                     {
-                        size_t j = interval - 1;
-
-                        double t_0 = ( j > 0 ? times[j-1] : RbConstants::Double::inf );
+                        double t_0 = ( j < num_intervals-1 ? times[j+1] : RbConstants::Double::inf );
 
                         if ( t_0 <= std::max(d,min_age) )
                         {
@@ -321,8 +327,8 @@ double BirthDeathRateShiftsProcess::computeLnProbability()
                     {
                         // compute poisson density for count + kappa, kappa >= 0
                         Psi[i] += psi_y_o - psi_b_d;
-                        Psi[i] -= count*log(psi_b_d);
-                        Psi[i] += log(RbMath::incompleteGamma(psi_b_d, count, true, true));
+                        Psi[i] -= count*log(psi_y_o);
+                        Psi[i] += log(RbMath::incompleteGamma(psi_y_o, count, true, true));
                     }
                 }
                 // only one fossil age
@@ -365,14 +371,14 @@ double BirthDeathRateShiftsProcess::computeLnProbability()
 
 
 /**
- * return the index i so that t_{i-1} > t >= t_i
+ * return the index i so that t_i <= t < t_{i+1}
  * where t_i is the instantaneous sampling time (i = 0,...,l)
- * t_0 is origin
- * t_l = 0.0
+ * t_0 = 0.0
+ * t_l is origin
  */
 size_t BirthDeathRateShiftsProcess::findIndex(double t) const
 {
-    return times.rend() - std::upper_bound( times.rbegin(), times.rend(), t);
+    return std::prev(std::upper_bound( times.begin(), times.end(), t)) - times.begin();
 }
 
 
@@ -433,7 +439,7 @@ void BirthDeathRateShiftsProcess::prepareProbComputation()
     }
     else
     {
-        birth = heterogeneous_psi->getValue();
+        death = heterogeneous_mu->getValue();
     }
     if ( homogeneous_psi != NULL )
     {
@@ -441,7 +447,7 @@ void BirthDeathRateShiftsProcess::prepareProbComputation()
     }
     else
     {
-        birth = heterogeneous_psi->getValue();
+        fossil = heterogeneous_psi->getValue();
     }
 
     if ( timeline != NULL )
@@ -488,11 +494,22 @@ void BirthDeathRateShiftsProcess::touchSpecialization(DagNode *toucher, bool tou
         stored_likelihood = partial_likelihood;
         stored_Psi = Psi;
 
-        dirty_taxa = std::vector<bool>(taxa.size(), true);
-
         if ( toucher == timeline || toucher == homogeneous_psi || toucher == heterogeneous_psi || touchAll )
         {
+            dirty_taxa = std::vector<bool>(taxa.size(), true);
             dirty_psi  = std::vector<bool>(taxa.size(), true);
+        }
+        else if ( toucher == dag_node )
+        {
+            std::set<size_t> touched_indices = dag_node->getTouchedElementIndices();
+
+            for ( std::set<size_t>::iterator it = touched_indices.begin(); it != touched_indices.end(); it++)
+            {
+                size_t i = (*it) / taxa.size();
+
+                dirty_psi[i]  = true;
+                dirty_taxa[i]  = true;
+            }
         }
     }
 

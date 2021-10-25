@@ -52,9 +52,9 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
     AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete, resample)
 {
-    dirty_gamma = std::vector<bool>(fbd_taxa.size(), true);
-    gamma_i     = std::vector<size_t>(fbd_taxa.size(), 0);
-    gamma_links = std::vector<std::vector<bool> >(fbd_taxa.size(), std::vector<bool>(fbd_taxa.size(), false));
+    dirty_gamma = std::vector<bool>(taxa.size(), true);
+    gamma_i     = std::vector<size_t>(taxa.size(), 0);
+    gamma_links = std::vector<std::vector<bool> >(taxa.size(), std::vector<bool>(taxa.size(), false));
 
     for(std::vector<const DagNode*>::iterator it = range_parameters.begin(); it != range_parameters.end(); it++)
     {
@@ -89,7 +89,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbability( void )
 
     double lnProb = computeLnProbabilityRanges();
 
-    for( size_t i = 0; i < fbd_taxa.size(); i++ )
+    for( size_t i = 0; i < taxa.size(); i++ )
     {
         // multiply by the number of possible birth locations
         lnProb += log( gamma_i[i] == 0 ? 1 : gamma_i[i] );
@@ -108,7 +108,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbability( void )
  */
 void FossilizedBirthDeathRangeProcess::updateGamma(bool force)
 {
-    for (size_t i = 0; i < fbd_taxa.size(); i++)
+    for (size_t i = 0; i < taxa.size(); i++)
     {
         if ( dirty_gamma[i] || force )
         {
@@ -117,7 +117,7 @@ void FossilizedBirthDeathRangeProcess::updateGamma(bool force)
 
             if ( force == true ) gamma_i[i] = 0;
 
-            for (size_t j = 0; j < fbd_taxa.size(); j++)
+            for (size_t j = 0; j < taxa.size(); j++)
             {
                 if (i == j) continue;
 
@@ -154,7 +154,7 @@ void FossilizedBirthDeathRangeProcess::updateStartEndTimes( void )
 {
     origin = 0;
 
-    for (size_t i = 0; i < fbd_taxa.size(); i++)
+    for (size_t i = 0; i < taxa.size(); i++)
     {
         b_i[i] = (*this->value)[i][0];
         d_i[i] = (*this->value)[i][1];
@@ -176,9 +176,9 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
     
     double max = 0;
     // get the max first occurence
-    for (size_t i = 0; i < fbd_taxa.size(); i++)
+    for (size_t i = 0; i < taxa.size(); i++)
     {
-        double o = fbd_taxa[i].getMaxAge();
+        double o = taxa[i].getMaxAge();
         if ( o > max ) max = o;
     }
     
@@ -190,10 +190,10 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
     }
 
     // get random uniform draws
-    for (size_t i = 0; i < fbd_taxa.size(); i++)
+    for (size_t i = 0; i < taxa.size(); i++)
     {
-        double b = fbd_taxa[i].getMaxAge() + rng->uniform01()*(max - fbd_taxa[i].getMaxAge()) + fbd_taxa[i].getMaxAge();
-        double d = fbd_taxa[i].isExtinct() ? rng->uniform01()*fbd_taxa[i].getMinAge() : 0.0;
+        double b = taxa[i].getMaxAge() + rng->uniform01()*(max - taxa[i].getMaxAge()) + taxa[i].getMaxAge();
+        double d = taxa[i].isExtinct() ? rng->uniform01()*taxa[i].getMinAge() : 0.0;
 
         (*this->value)[i][0] = b;
         (*this->value)[i][1] = d;
@@ -205,7 +205,7 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
 
 void FossilizedBirthDeathRangeProcess::keepSpecialization(DagNode *toucher)
 {
-    dirty_gamma = std::vector<bool>(fbd_taxa.size(), false);
+    dirty_gamma = std::vector<bool>(taxa.size(), false);
 
     AbstractFossilizedBirthDeathProcess::keepSpecialization(toucher);
 }
@@ -236,7 +236,7 @@ void FossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, boo
 
             for ( std::set<size_t>::iterator it = touched_indices.begin(); it != touched_indices.end(); it++)
             {
-                size_t i = (*it) / fbd_taxa.size();
+                size_t i = (*it) / taxa.size();
 
                 dirty_gamma[i] = true;
                 dirty_taxa[i]  = true;

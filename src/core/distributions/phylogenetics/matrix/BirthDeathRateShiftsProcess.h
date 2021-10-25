@@ -1,20 +1,12 @@
 #ifndef BirthDeathRateShiftsProcess_H
 #define BirthDeathRateShiftsProcess_H
 
-#include "HomologousDiscreteCharacterData.h"
 #include "MatrixReal.h"
-#include "NaturalNumbersState.h"
 #include "RbVector.h"
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
 
-#include <vector>
-#include <set>
-
 namespace RevBayesCore {
-    
-    class Clade;
-    class Taxon;
 
     /**
      * @brief Piecewise-constant fossilized birth-death with rateshifts process.
@@ -50,11 +42,6 @@ namespace RevBayesCore {
 
         BirthDeathRateShiftsProcess*                    clone(void) const;                                     //!< Create an independent clone
 
-        double                                          getExtinctionRate( size_t index ) const;
-        double                                          getFossilSamplingRate( size_t index ) const;
-        double                                          getIntervalTime( size_t index ) const;
-        double                                          getSpeciationRate( size_t index ) const;
-
     protected:
         double                                          computeLnProbability();
 
@@ -71,8 +58,6 @@ namespace RevBayesCore {
         void                                            touchSpecialization(DagNode *toucher, bool touchAll);
 
         void                                            redrawValue(void);
-
-        bool                                            ascending;
 
         size_t                                          num_intervals;
 

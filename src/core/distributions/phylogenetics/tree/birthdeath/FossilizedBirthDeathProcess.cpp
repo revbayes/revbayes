@@ -18,6 +18,7 @@
 #include "RbException.h"
 #include "RbMathFunctions.h"
 #include "StringUtilities.h"
+#include "StochasticNode.h"
 #include "Taxon.h"
 #include "TimeInterval.h"
 #include "TopologyNode.h"
@@ -71,50 +72,31 @@ FossilizedBirthDeathProcess::FossilizedBirthDeathProcess(const TypedDagNode<doub
     heterogeneous_lambda_a           = NULL;
     heterogeneous_beta               = NULL;
 
-    RbException no_timeline_err = RbException("No time intervals provided for piecewise constant fossilized birth death process");
-
     heterogeneous_lambda_a = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inlambda_a);
     homogeneous_lambda_a = dynamic_cast<const TypedDagNode<double >*>(inlambda_a);
-
-    addParameter( homogeneous_lambda_a );
-    addParameter( heterogeneous_lambda_a );
-
-    if ( heterogeneous_lambda_a == NULL && homogeneous_lambda_a == NULL)
-    {
-        throw(RbException("Anagenetic speciation rate must be of type RealPos or RealPos[]"));
-    }
-    else if( heterogeneous_lambda_a != NULL )
-    {
-        if( timeline == NULL ) throw(no_timeline_err);
-
-        if (heterogeneous_lambda_a->getValue().size() != timeline->getValue().size() + 1)
-        {
-            std::stringstream ss;
-            ss << "Number of anagenetic speciation rates (" << heterogeneous_lambda_a->getValue().size() << ") does not match number of time intervals (" << timeline->getValue().size() + 1 << ")";
-            throw(RbException(ss.str()));
-        }
-    }
-
     heterogeneous_beta = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inbeta);
     homogeneous_beta = dynamic_cast<const TypedDagNode<double >*>(inbeta);
 
+    addParameter( homogeneous_lambda_a );
+    addParameter( heterogeneous_lambda_a );
     addParameter( homogeneous_beta );
     addParameter( heterogeneous_beta );
 
-    if ( heterogeneous_beta == NULL && homogeneous_beta == NULL)
-    {
-        throw(RbException("Symmetric speciation probability must be of type Probability or Probability[]"));
-    }
-    else if( heterogeneous_beta != NULL )
-    {
-        if( timeline == NULL ) throw(no_timeline_err);
+    RbException no_timeline_err = RbException("No time intervals provided for heterogeneous fossilized birth death process");
 
-        if (heterogeneous_beta->getValue().size() != timeline->getValue().size() + 1)
-        {
-            std::stringstream ss;
-            ss << "Number of symmetric speciation probabilities (" << heterogeneous_beta->getValue().size() << ") does not match number of time intervals (" << timeline->getValue().size() + 1 << ")";
-            throw(RbException(ss.str()));
-        }
+    RbException inconsistent_rates = RbException("Inconsistent number of rates in fossilized birth death process.");
+
+    if( heterogeneous_lambda_a != NULL )
+    {
+        if ( timeline == NULL ) throw(no_timeline_err);
+
+        if ( heterogeneous_lambda_a->getValue().size() != num_intervals ) throw(inconsistent_rates);
+    }
+    if( heterogeneous_beta != NULL )
+    {
+        if ( timeline == NULL ) throw(no_timeline_err);
+
+        if ( heterogeneous_beta->getValue().size() != num_intervals ) throw(inconsistent_rates);
     }
 
     I             = std::vector<bool>(taxa.size(), false);
@@ -241,7 +223,7 @@ double FossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) const
     double b = birth[i];
     double d = death[i];
     double f = fossil[i];
-    double r = (i == num_intervals - 1 ? homogeneous_rho->getValue() : 0.0);
+    double r = (i == 0 ? homogeneous_rho->getValue() : 0.0);
     double ti = times[i];
 
     double diff = b - d - f;
@@ -650,15 +632,13 @@ void FossilizedBirthDeathProcess::prepareProbComputation()
         symmetric = heterogeneous_beta->getValue();
     }
 
-    for (size_t interval = num_intervals; interval > 0; interval--)
+    for (size_t i = 0; i < num_intervals; i++)
     {
-        size_t i = interval - 1;
-
-        if (i > 0)
+        if ( i < num_intervals-1 )
         {
-            double dt = times[i-1] - times[i];
+            double dt = times[i+1] - times[i];
 
-            q_tilde_i[i-1] = - anagenetic[i] - symmetric[i] * (birth[i] + death[i] + fossil[i]) * dt + (1.0 - symmetric[i]) * q_tilde_i[i-1];
+            q_tilde_i[i] = - anagenetic[i] - symmetric[i] * (birth[i] + death[i] + fossil[i]) * dt + (1.0 - symmetric[i]) * q_tilde_i[i];
         }
     }
 }
@@ -693,7 +673,7 @@ void FossilizedBirthDeathProcess::restoreSpecialization(DagNode *toucher)
 
 void FossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, bool touchAll)
 {
-    if ( toucher == (DagNode*)dag_node )
+    if ( toucher == dag_node )
     {
         if ( touched == false )
         {
