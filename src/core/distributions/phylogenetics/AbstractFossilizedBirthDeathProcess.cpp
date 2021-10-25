@@ -488,8 +488,8 @@ void AbstractFossilizedBirthDeathProcess::redrawAge(size_t i, bool force)
 {
 //    if ( force || GLOBAL_RNG->uniform01() < resampling )
 //    {
-        dirty_psi[i]  = true;
-        dirty_taxa[i] = true;
+//        dirty_psi[i]  = true;
+//        dirty_taxa[i] = true;
 
         age[i] = GLOBAL_RNG->uniform01()*(taxa[i].getMaxAge() - o_i[i]) + o_i[i];
     //}

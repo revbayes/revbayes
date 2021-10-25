@@ -275,6 +275,8 @@ void FossilizedBirthDeathProcess::simulateClade(std::vector<TopologyNode *> &n, 
             bool extinct = n[i]->getTaxon().isExtinct();
 
             n[i]->setAge( extinct * rng->uniform01() * n[i]->getTaxon().getMinAge() );
+
+            redrawAge(i,true);
         }
 
         double first_occurrence = getMaxTaxonAge( *n[i] );
@@ -562,6 +564,7 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node, 
             if ( age != d_i[i] )
             {
                 d_i[i] = age;
+                dirty_psi[i] = true;
                 dirty_taxa[i] = true;
                 //if ( touched == false ) redrawAge(i, force);
             }
@@ -576,6 +579,7 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node, 
             if ( age != b_i[i] )
             {
                 b_i[i] = age;
+                dirty_psi[i] = true;
                 dirty_taxa[i] = true;
                 //if ( touched == false ) redrawAge(i, force);
             }
@@ -598,6 +602,7 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node, 
                 {
                     b_i[i] = age;
                     origin = age;
+                    dirty_psi[i] = true;
                     dirty_taxa[i] = true;
                     //if ( touched == false ) redrawAge(i, force);
                 }
