@@ -86,6 +86,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbability( void )
 {
     // prepare the probability computation
     updateGamma();
+    updateStartEndTimes();
 
     double lnProb = computeLnProbabilityRanges();
 
@@ -215,7 +216,7 @@ void FossilizedBirthDeathRangeProcess::restoreSpecialization(DagNode *toucher)
 {
     if ( toucher == dag_node )
     {
-        updateStartEndTimes();
+        //updateStartEndTimes();
     }
 
     AbstractFossilizedBirthDeathProcess::restoreSpecialization(toucher);
@@ -229,7 +230,7 @@ void FossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, boo
         if ( touched == false )
         {
             stored_likelihood = partial_likelihood;
-            stored_age = age;
+            //stored_age = age;
             stored_Psi = Psi;
 
             std::set<size_t> touched_indices = dag_node->getTouchedElementIndices();
@@ -240,11 +241,12 @@ void FossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, boo
 
                 dirty_gamma[i] = true;
                 dirty_taxa[i]  = true;
+                dirty_psi[i]  = true;
 
-                redrawAge(i,true);
+                //redrawAge(i,true);
             }
 
-            updateStartEndTimes();
+            //updateStartEndTimes();
         }
 
         touched = true;

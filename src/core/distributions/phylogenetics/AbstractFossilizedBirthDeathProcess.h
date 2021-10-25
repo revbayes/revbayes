@@ -39,6 +39,9 @@ namespace RevBayesCore {
 
         virtual ~AbstractFossilizedBirthDeathProcess(){};
 
+        std::vector<double>&                            getAges();
+        void                                            redrawAge(size_t i, bool force = false);
+
     protected:
         virtual void                                    updateStartEndTimes() = 0;
         virtual double                                  computeLnProbabilityRanges(bool force = false);
@@ -56,8 +59,6 @@ namespace RevBayesCore {
         void                                            keepSpecialization(DagNode *toucher);
         void                                            restoreSpecialization(DagNode *toucher);
         void                                            touchSpecialization(DagNode *toucher, bool touchAll);
-
-        void                                            redrawAge(size_t i, bool force = false);
 
         std::vector<Taxon>                              taxa;                                                  //!< Taxa that will be attached to new simulated trees.
         std::string                                     condition;
@@ -97,7 +98,7 @@ namespace RevBayesCore {
         std::vector<double>                     stored_Psi;
 
         std::vector<double>                     age;
-        std::vector<double>                     stored_age;
+        //std::vector<double>                     stored_age;
 
         std::vector<double>                     partial_likelihood;
         std::vector<double>                     stored_likelihood;

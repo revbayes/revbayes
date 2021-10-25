@@ -474,15 +474,25 @@ double AbstractFossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) 
  *
  *
  */
+std::vector<double>& AbstractFossilizedBirthDeathProcess::getAges(void)
+{
+    return age;
+}
+
+
+/**
+ *
+ *
+ */
 void AbstractFossilizedBirthDeathProcess::redrawAge(size_t i, bool force)
 {
-    if ( force || GLOBAL_RNG->uniform01() < resampling )
-    {
+//    if ( force || GLOBAL_RNG->uniform01() < resampling )
+//    {
         dirty_psi[i]  = true;
         dirty_taxa[i] = true;
 
         age[i] = GLOBAL_RNG->uniform01()*(taxa[i].getMaxAge() - o_i[i]) + o_i[i];
-    }
+    //}
 }
 
 
@@ -498,7 +508,7 @@ void AbstractFossilizedBirthDeathProcess::keepSpecialization(DagNode *toucher)
 void AbstractFossilizedBirthDeathProcess::restoreSpecialization(DagNode *toucher)
 {
     partial_likelihood = stored_likelihood;
-    age = stored_age;
+    //age = stored_age;
     Psi = stored_Psi;
 
     dirty_psi  = std::vector<bool>(taxa.size(), false);
@@ -513,7 +523,7 @@ void AbstractFossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, 
     if ( touched == false )
     {
         stored_likelihood = partial_likelihood;
-        stored_age = age;
+        //stored_age = age;
         stored_Psi = Psi;
 
         dirty_taxa = std::vector<bool>(taxa.size(), true);
