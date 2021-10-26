@@ -13,7 +13,7 @@
 #include <ostream>
 #include <vector>
 
-#include "RlMonitor.h"
+#include "RlFileMonitor.h"
 #include "RevObject.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
@@ -21,7 +21,7 @@
 namespace RevLanguage {
 class TypeSpec;
     
-    class Mntr_JointConditionalAncestralState : public Monitor {
+    class Mntr_JointConditionalAncestralState : public FileMonitor {
         
     public:
         
@@ -41,16 +41,10 @@ class TypeSpec;
         
         void                                            setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
         
-		std::vector<RevPtr<const RevVariable> >         vars;
-        RevPtr<const RevVariable>                       filename;
-        RevPtr<const RevVariable>                       printgen;
-        RevPtr<const RevVariable>                       version;
 		RevPtr<const RevVariable>                       tree;
 		RevPtr<const RevVariable>                       ctmc;
         RevPtr<const RevVariable>                       cdbdp;
-        RevPtr<const RevVariable>                       separator;
-        RevPtr<const RevVariable>                       append;
-		RevPtr<const RevVariable>                       monitorType;
+        RevPtr<const RevVariable>                       monitorType;
         RevPtr<const RevVariable>                       withTips;
         RevPtr<const RevVariable>                       withStartStates;
     };

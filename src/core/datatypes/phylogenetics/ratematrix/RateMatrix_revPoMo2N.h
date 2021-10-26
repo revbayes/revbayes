@@ -33,11 +33,13 @@ namespace RevBayesCore {
         void                                                    setPi(  const Simplex &bf );
         void                                                    setRho( double &ex );
         void                                                    setPhi( const std::vector<double> &f );
+        std::vector<double>                                     getStationaryFrequencies( void ) const;
 
         void                                                    update(void);
         
     private:
         void                                                    calculateCijk(void);                                                                //!< Do precalculations on eigenvectors and their inverse
+        double                                                  calculateReciprocalExpectedDivergence( void );
         void                                                    computeOffDiagonal( void );
         void                                                    tiProbsEigens(double t, TransitionProbabilityMatrix& P) const;                      //!< Calculate transition probabilities for real case
         void                                                    tiProbsComplexEigens(double t, TransitionProbabilityMatrix& P) const;               //!< Calculate transition probabilities for complex case

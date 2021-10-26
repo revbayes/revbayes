@@ -2,7 +2,7 @@
 #define Mntr_Probability_H
 
 #include "ModelMonitor.h"
-#include "RlMonitor.h"
+#include "RlFileMonitor.h"
 #include "TypedDagNode.h"
 
 #include <ostream>
@@ -10,7 +10,7 @@
 
 namespace RevLanguage {
     
-    class Mntr_Probability : public Monitor {
+    class Mntr_Probability : public FileMonitor {
         
     public:
         
@@ -29,15 +29,10 @@ namespace RevLanguage {
         
         void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
         
-        RevPtr<const RevVariable>                   filename;
-        RevPtr<const RevVariable>                   printgen;
-        RevPtr<const RevVariable>                   separator;
         RevPtr<const RevVariable>                   prior;
         RevPtr<const RevVariable>                   posterior;
         RevPtr<const RevVariable>                   likelihood;
-        RevPtr<const RevVariable>                   append;
-        RevPtr<const RevVariable>                   version;
-        
+
     };
     
 }

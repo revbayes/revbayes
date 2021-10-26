@@ -89,7 +89,7 @@ const MemberRules& Mntr_NexusFile::getParameterRules(void) const {
         memberRules.push_back( new Ellipsis( "Variables at nodes or branches.", RevObject::getClassTypeSpec() ) );
         memberRules.push_back( new ArgumentRule("isNodeParameter" , RlBoolean::getClassTypeSpec(), "Is this a node or branch parameter?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         memberRules.push_back( new ArgumentRule("writeTaxa" , RlBoolean::getClassTypeSpec(), "Should a taxa block be written?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
-        memberRules.push_back( new ArgumentRule("printgen"  , IntegerPos::getClassTypeSpec()  , "How frequently do we print.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new IntegerPos(1) ) );
+        memberRules.push_back( new ArgumentRule("printgen"  , IntegerPos::getClassTypeSpec()  , "The number of generations between stored samples.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new IntegerPos(1) ) );
 
         rules_set = true;
     }
@@ -113,26 +113,33 @@ void Mntr_NexusFile::printValue(std::ostream &o) const {
 
 void Mntr_NexusFile::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) {
 
-    if ( name == "" ) {
-        vars.push_back( var );
+    if ( name == "" )
+    {
+        vars.push_back(var);
     }
-    else if ( name == "filename" ) {
+    else if ( name == "filename" )
+    {
         filename = var;
     }
-    else if ( name == "tree" ) {
+    else if ( name == "tree" )
+    {
         tree = var;
     }
-    else if ( name == "isNodeParameter" ) {
+    else if ( name == "isNodeParameter" )
+    {
         isNodeParameter = var;
     }
-    else if ( name == "printgen" ) {
+    else if ( name == "printgen" )
+    {
         printgen = var;
     }
-    else if ( name == "writeTaxa" ) {
+    else if ( name == "writeTaxa" )
+    {
         writeTaxa = var;
     }
-    else {
-        RevObject::setConstParameter(name, var);
+    else
+    {
+        Monitor::setConstParameter(name, var);
     }
 }
 

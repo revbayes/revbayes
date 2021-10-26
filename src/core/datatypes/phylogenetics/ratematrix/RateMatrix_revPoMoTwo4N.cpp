@@ -154,6 +154,8 @@ RateMatrix_revPoMoTwo4N* RateMatrix_revPoMoTwo4N::clone( void ) const
 }
 
 
+
+
 void RateMatrix_revPoMoTwo4N::computeOffDiagonal( void )
 {
     
@@ -199,52 +201,109 @@ void RateMatrix_revPoMoTwo4N::computeOffDiagonal( void )
     }
   }
 
+
   // calculating the harmonic number of N-1
   // used to scale the mutation rates (or exchangeabilities)
   double harmonic_number = boost::math::digamma(N) - boost::math::digamma(1.0);
-	
-	
+  double r = N*harmonic_number/2.0;	
+
+
+  // get the expected divergence (or number of evens) per unit of time
+  // normalize rate matrix such that one event happens per unit time.
+  // a common quantity to the numerator and denominator
+  double value = pi[0]*pi[1]*rho[0] +
+                 pi[0]*pi[2]*rho[1] +
+                 pi[0]*pi[3]*rho[2] +
+                 pi[1]*pi[2]*rho[3] +
+                 pi[1]*pi[3]*rho[4] +
+                 pi[2]*pi[3]*rho[5] ;
+
+  // receiprocal of the rate
+  double rRate = ( 1.0 + 4.0*r*value ) / ( 8.0*r*value );
+
+  
   // Mutations
-  m[0][4] = rho[0]*harmonic_number*pi[1];    //mutation AC
-  m[0][5] = rho[1]*harmonic_number*pi[2];    //mutation AG
-  m[0][6] = rho[2]*harmonic_number*pi[3];    //mutation AT
+  m[0][4] = 2*rho[0]*r*pi[1]*rRate;    //mutation AC
+  m[0][5] = 2*rho[1]*r*pi[2]*rRate;    //mutation AG
+  m[0][6] = 2*rho[2]*r*pi[3]*rRate;    //mutation AT
 
-  m[1][4] = rho[0]*harmonic_number*pi[0];    //mutation CA
-  m[1][7] = rho[3]*harmonic_number*pi[2];    //mutation CG
-  m[1][8] = rho[4]*harmonic_number*pi[3];    //mutation CT
+  m[1][4] = 2*rho[0]*r*pi[0]*rRate;    //mutation CA
+  m[1][7] = 2*rho[3]*r*pi[2]*rRate;    //mutation CG
+  m[1][8] = 2*rho[4]*r*pi[3]*rRate;    //mutation CT
 
-  m[2][5] = rho[1]*harmonic_number*pi[0];    //mutation GA
-  m[2][7] = rho[3]*harmonic_number*pi[1];    //mutation GC
-  m[2][9] = rho[5]*harmonic_number*pi[3];    //mutation GT
+  m[2][5] = 2*rho[1]*r*pi[0]*rRate;    //mutation GA
+  m[2][7] = 2*rho[3]*r*pi[1]*rRate;    //mutation GC
+  m[2][9] = 2*rho[5]*r*pi[3]*rRate;    //mutation GT
 
-  m[3][6] = rho[2]*harmonic_number*pi[0];    //mutation TA
-  m[3][8] = rho[4]*harmonic_number*pi[1];    //mutation TC
-  m[3][9] = rho[5]*harmonic_number*pi[2];    //mutation TG
+  m[3][6] = 2*rho[2]*r*pi[0]*rRate;    //mutation TA
+  m[3][8] = 2*rho[4]*r*pi[1]*rRate;    //mutation TC
+  m[3][9] = 2*rho[5]*r*pi[2]*rRate;    //mutation TG
 
 
   // Fixations
   // PoMoTwo only accouts for genetic drift
   // selection is not indentifyable with two virtual individuals
-  m[4][0]   = 0.5;             //A fixed
-  m[4][1]   = 0.5;             //C fixed
+  m[4][0]   = 0.5*rRate;             //A fixed
+  m[4][1]   = 0.5*rRate;             //C fixed
 
-  m[5][0]   = 0.5;             //A fixed
-  m[5][2]   = 0.5;             //G fixed
+  m[5][0]   = 0.5*rRate;             //A fixed
+  m[5][2]   = 0.5*rRate;             //G fixed
 
-  m[6][0]   = 0.5;             //A fixed
-  m[6][3]   = 0.5;             //T fixed
+  m[6][0]   = 0.5*rRate;             //A fixed
+  m[6][3]   = 0.5*rRate;             //T fixed
 
-  m[7][1]   = 0.5;             //C fixed
-  m[7][2]   = 0.5;             //G fixed
+  m[7][1]   = 0.5*rRate;             //C fixed
+  m[7][2]   = 0.5*rRate;             //G fixed
 
-  m[8][1]   = 0.5;             //C fixed
-  m[8][3]   = 0.5;             //T fixed
+  m[8][1]   = 0.5*rRate;             //C fixed
+  m[8][3]   = 0.5*rRate;             //T fixed
   
-  m[9][2]   = 0.5;             //G fixed
-  m[9][3]   = 0.5;             //T fixed
+  m[9][2]   = 0.5*rRate;             //G fixed
+  m[9][3]   = 0.5*rRate;             //T fixed
+
 
   // set flags
   needs_update = true;
+
+}
+
+std::vector<double> RateMatrix_revPoMoTwo4N::getStationaryFrequencies( void ) const
+{
+
+  // calculating the harmonic number of N-1
+  // used to scale the mutation rates (or exchangeabilities)
+  double harmonic_number = boost::math::digamma(N) - boost::math::digamma(1.0);
+  double r = N*harmonic_number/2.0;
+
+  // calculating the normalization constant
+
+  double nc = 1.0 +
+              4.0*pi[0]*pi[1]*rho[0]*r + 
+              4.0*pi[0]*pi[2]*rho[1]*r + 
+              4.0*pi[0]*pi[3]*rho[2]*r + 
+              4.0*pi[1]*pi[2]*rho[3]*r + 
+              4.0*pi[1]*pi[3]*rho[4]*r + 
+              4.0*pi[2]*pi[3]*rho[5]*r ;
+
+
+  // calculating the stationary vector
+
+  double rnc = 1.0/nc;
+
+  std::vector<double> stationary_freqs(16,0.0);
+
+  stationary_freqs[0]  = pi[0]*rnc;
+  stationary_freqs[1]  = pi[1]*rnc;
+  stationary_freqs[2]  = pi[2]*rnc;
+  stationary_freqs[3]  = pi[3]*rnc;
+  stationary_freqs[4]  = pi[0]*pi[1]*rho[0]*r*4.0*rnc;
+  stationary_freqs[5]  = pi[0]*pi[2]*rho[1]*r*4.0*rnc;
+  stationary_freqs[6]  = pi[0]*pi[3]*rho[2]*r*4.0*rnc;
+  stationary_freqs[7]  = pi[1]*pi[2]*rho[3]*r*4.0*rnc;
+  stationary_freqs[8]  = pi[1]*pi[3]*rho[4]*r*4.0*rnc;
+  stationary_freqs[9]  = pi[2]*pi[3]*rho[5]*r*4.0*rnc;
+
+  return stationary_freqs;
 
 }
 
@@ -358,7 +417,7 @@ void RateMatrix_revPoMoTwo4N::update( void )
         setDiagonal();
         
         // rescale
-        //rescaleToAverageRate(e_rate);
+        //rescaleToAverageRate(1.0);
         
         // now update the eigensystem
         updateEigenSystem();

@@ -24,7 +24,7 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevLanguage;
 
-Mntr_File::Mntr_File(void) : Monitor() {
+Mntr_File::Mntr_File(void) : FileMonitor() {
     
 }
 
@@ -107,27 +107,24 @@ std::string Mntr_File::getMonitorName( void ) const
 const MemberRules& Mntr_File::getParameterRules(void) const
 {
     
-    static MemberRules filemonitorMemberRules;
+    static MemberRules memberRules;
     static bool rules_set = false;
     
     if ( !rules_set )
     {
-        
-        filemonitorMemberRules.push_back( new Ellipsis( "Variables to monitor", RevObject::getClassTypeSpec() ) );
-        filemonitorMemberRules.push_back( new ArgumentRule("filename"  , RlString::getClassTypeSpec() , "The name of the file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        filemonitorMemberRules.push_back( new ArgumentRule("printgen"  , IntegerPos::getClassTypeSpec()  , "How often should we print.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new IntegerPos(1) ) );
-        filemonitorMemberRules.push_back( new ArgumentRule("separator" , RlString::getClassTypeSpec() , "The separator/delimiter between values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
-        filemonitorMemberRules.push_back( new ArgumentRule("posterior" , RlBoolean::getClassTypeSpec(), "Should we print the posterior probability as well?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-        filemonitorMemberRules.push_back( new ArgumentRule("likelihood", RlBoolean::getClassTypeSpec(), "Should we print the likelihood as well?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-        filemonitorMemberRules.push_back( new ArgumentRule("prior"     , RlBoolean::getClassTypeSpec(), "Should we print the prior probability as well?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-        filemonitorMemberRules.push_back( new ArgumentRule("append"    , RlBoolean::getClassTypeSpec(), "Should we append or overwrite if the file exists?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
-        filemonitorMemberRules.push_back( new ArgumentRule("version", RlBoolean::getClassTypeSpec(), "Should we record the software version?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+        memberRules.push_back( new Ellipsis( "Variables to monitor.", RevObject::getClassTypeSpec() ) );
+        memberRules.push_back( new ArgumentRule("posterior" , RlBoolean::getClassTypeSpec(), "Should we print the posterior probability as well?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+        memberRules.push_back( new ArgumentRule("likelihood", RlBoolean::getClassTypeSpec(), "Should we print the likelihood as well?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+        memberRules.push_back( new ArgumentRule("prior"     , RlBoolean::getClassTypeSpec(), "Should we print the prior probability as well?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
 
+        // add the rules from the base class
+        const MemberRules &parentRules = FileMonitor::getParameterRules();
+        memberRules.insert(memberRules.end(), parentRules.begin(), parentRules.end());
 
         rules_set = true;
     }
     
-    return filemonitorMemberRules;
+    return memberRules;
 }
 
 /** Get type spec */
@@ -154,18 +151,6 @@ void Mntr_File::setConstParameter(const std::string& name, const RevPtr<const Re
     {
         vars.push_back( var );
     }
-    else if ( name == "filename" )
-    {
-        filename = var;
-    }
-    else if ( name == "separator" )
-    {
-        separator = var;
-    }
-    else if ( name == "printgen" )
-    {
-        printgen = var;
-    }
     else if ( name == "prior" )
     {
         prior = var;
@@ -178,16 +163,8 @@ void Mntr_File::setConstParameter(const std::string& name, const RevPtr<const Re
     {
         likelihood = var;
     }
-    else if (name == "append")
-    {
-        append = var;
-    }
-    else if (name == "version")
-    {
-        version = var;
-    }
     else
     {
-        RevObject::setConstParameter(name, var);
+        FileMonitor::setConstParameter(name, var);
     }
 }

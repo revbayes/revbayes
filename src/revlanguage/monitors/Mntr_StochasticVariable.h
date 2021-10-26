@@ -2,7 +2,7 @@
 #define Mntr_StochasticVariable_H
 
 #include "StochasticVariableMonitor.h"
-#include "RlMonitor.h"
+#include "RlFileMonitor.h"
 #include "TypedDagNode.h"
 
 #include <ostream>
@@ -10,7 +10,7 @@
 
 namespace RevLanguage {
     
-    class Mntr_StochasticVariable : public Monitor {
+    class Mntr_StochasticVariable : public FileMonitor {
         
     public:
         
@@ -29,13 +29,7 @@ namespace RevLanguage {
     protected:
         
         void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);   //!< Set member variable
-        
-        RevPtr<const RevVariable>                   filename;
-        RevPtr<const RevVariable>                   printgen;
-        RevPtr<const RevVariable>                   separator;
-        RevPtr<const RevVariable>                   append;
-        RevPtr<const RevVariable>                   version;
-        
+
     };
     
 }

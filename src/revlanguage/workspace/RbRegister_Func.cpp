@@ -156,6 +156,7 @@
 #include "Func_revPoMoBalance4N.h"
 #include "Func_revPoMoTwo4N.h"
 #include "Func_revPoMoThree4N.h"
+#include "Func_revPoMoThree4.h"
 #include "Func_rtRev.h"
 #include "Func_vt.h"
 #include "Func_t92.h"
@@ -200,7 +201,8 @@
 
 /* Input/output functions (in folder "functions/io") */
 #include "Func_readPoMoCountFile.h"
-
+#include "Func_convertCountFileToNaturalNumbers.h"
+#include "Func_convertFastaFileToNaturalNumbers.h"
 
 /* Math functions (in folder "functions/math") */
 #include "Func_abs.h"
@@ -321,6 +323,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_revPoMoBalance4N()                            );
         addFunction( new Func_revPoMoTwo4N()                                );
         addFunction( new Func_revPoMoThree4N()                              );
+        addFunction( new Func_revPoMoThree4()                               );
         addFunction( new Func_rtRev()                                       );
         addFunction( new Func_t92()                                         );
         addFunction( new Func_TamuraNei()                                   );
@@ -379,6 +382,8 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_pomoRootFrequencies()                             );
         addFunction( new Func_pruneTree()                                       );
         addFunction( new Func_readPoMoCountFile()                               );
+        addFunction( new Func_convertCountFileToNaturalNumbers()                );
+        addFunction( new Func_convertFastaFileToNaturalNumbers()                );
         addFunction( new Func_simStartingTree()                                 );
         addFunction( new Func_simTree()                                         );
         addFunction( new Func_simCompleteTree()                                 );

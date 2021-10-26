@@ -26,9 +26,8 @@
 
 using namespace RevBayesCore;
 
-TimeAtlasDataReader::TimeAtlasDataReader(std::string fn, char d) : DelimitedDataReader(fn, d)
+TimeAtlasDataReader::TimeAtlasDataReader(std::string fn, std::string d) : DelimitedDataReader(fn, d)
 {
-    filename = fn;
     readJson();
 }
 
@@ -37,14 +36,11 @@ TimeAtlasDataReader::TimeAtlasDataReader(const TimeAtlasDataReader& tadr) : Deli
     
     areas = tadr.areas;
     epochs = tadr.epochs;
-    filename = tadr.filename;
     
 }
 
 void TimeAtlasDataReader::readJson(void)
 {
-    
-    RBOUT( "Attempting to read the of file \"" + this->filename + "\"");
     
     std::ifstream readStream;
     RbFileManager* f = new RbFileManager(this->filename);
@@ -143,9 +139,6 @@ void TimeAtlasDataReader::readJson(void)
         
         
         sortEpochs();
-
-        RBOUT( "Successfully read file" );
-        //fillData(pt);
     }
     catch (std::exception const& e)
     {
@@ -192,9 +185,4 @@ std::vector<double> TimeAtlasDataReader::getEpochs(void)
 std::vector<std::vector<GeographicArea*> > TimeAtlasDataReader::getAreas(void)
 {
     return areas;
-}
-
-std::string TimeAtlasDataReader::getFilename(void)
-{
-    return filename;
 }

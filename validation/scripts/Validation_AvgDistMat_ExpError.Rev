@@ -1,0 +1,119 @@
+################################################################################
+#
+# RevBayes Validation Test: Average distance matrix with exponential error model
+#
+# Model: Pairwise distance matrices are calculated from two 3-tip ultrametric
+#        time trees with partially overlapping tip sets. We take the unweighted
+#        average of the two matrices such that one distance remains missing, and
+#        use the exponential error model to estimate a time tree on the union of
+#        their tip sets (4 tips).
+#
+# authors: David Cerny
+#
+################################################################################
+
+#######################
+# Reading in the Data #
+#######################
+
+# Read in the two incomplete time trees
+
+sourceTrees[1] <- readTrees("data/no_sp1.tre")
+sourceTrees[2] <- readTrees("data/no_sp2.tre")
+
+# Calculate the corresponding distance matrices
+
+distMatrices[1] := fnTreePairwiseDistances(sourceTrees[1][1])
+distMatrices[2] := fnTreePairwiseDistances(sourceTrees[2][1])
+
+# Calculate the (unweighted) average distance matrix
+
+ADM := fnAverageDistanceMatrix(distMatrices)
+
+# Get some useful variables from the data
+
+species_names <- ADM.distanceMatrix().names()
+n_species <- ADM.distanceMatrix().size()
+
+# Get the names of the taxa in the average distance matrix. We will use this to add
+# tips to the tree
+
+for (i in 1:n_species) {
+        species[i] <- taxon(taxonName=species_names[i])
+}
+
+# Set my move and monitor indices
+
+mvi = 0
+mni = 0
+
+##############
+# Tree Model #
+##############
+
+# The tree is drawn from a constant-rate birth-death process. Speciation and extinction
+# are fixed; root height is drawn from an exponential hyperprior
+
+speciation <- 0.1
+extinction <- 0.09
+tree_height ~ dnExp(1.0)
+
+# Construct a variable for the tree drawn from the birth-death process specified above.
+# Its taxon set is the union of the taxon sets of sourceTrees[1] and sourceTrees[2]
+
+tree ~ dnBDP(lambda=speciation, mu=extinction, rootAge=tree_height, condition="nTaxa", taxa=species)
+
+# Create some moves that operate on the stochastic variables
+
+moves[++mvi] = mvScale(tree_height, weight=2.0)
+moves[++mvi] = mvNarrow(tree, weight=10.0)
+moves[++mvi] = mvNNI(tree, weight=10.0)
+moves[++mvi] = mvFNPR(tree, weight=10.0)
+moves[++mvi] = mvSubtreeScale(tree, weight=10.0)
+moves[++mvi] = mvNodeTimeSlideUniform(tree, weight=15.0)
+
+###########################
+# Exponential Error Model #
+###########################
+
+# Calculate the distance matrix of the time tree drawn from the birth-death process
+
+mat := fnTreePairwiseDistances(tree)
+
+# Have it follow the exponential error distribution with a rate of 0.005
+
+exp_error_dist ~ dnExponentialError(distMat=mat, lambda=0.005)
+
+# Attach the data
+
+exp_error_dist.clamp(ADM)
+
+#############
+# THE Model #
+#############
+
+# We define our model. We can use any node of our model as a handle;
+# here we chose to use the phylogeny.
+
+mymodel = model(tree)
+
+# Set up the monitors that will output parameter values to file
+
+monitors[++mni] = mnModel(filename="output/avg_dist_mat_exp_error.log", printgen=50, separator = TAB)
+monitors[++mni] = mnFile(filename="output/avg_dist_mat_exp_error.trees", printgen=50, separator = TAB, tree)
+
+################
+# The Analysis #
+################
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+
+validation = validationAnalysis( mymcmc, 1000 )
+validation.burnin(generations=5000,tuningInterval=250)
+validation.run(generations=20000)
+validation.summarize()
+
+
+# you may want to quit RevBayes now
+q()
