@@ -253,7 +253,7 @@ std::vector<std::string> Dist_BDSTP::getDistributionFunctionAliases( void ) cons
 std::string Dist_BDSTP::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
-    std::string d_name = "BirthDeathSamplingTreatmentProcess";
+    std::string d_name = "BirthDeathSamplingTreatment";
 
     return d_name;
 }

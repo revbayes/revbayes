@@ -165,7 +165,7 @@ std::vector<std::string> Dist_FBDP::getDistributionFunctionAliases( void ) const
 std::string Dist_FBDP::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
-    std::string d_name = "FossilizedBirthDeathProcess";
+    std::string d_name = "FossilizedBirthDeath";
     
     return d_name;
 }

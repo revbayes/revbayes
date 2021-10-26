@@ -169,7 +169,7 @@ std::vector<std::string> Dist_FBDRP::getDistributionFunctionAliases( void ) cons
 std::string Dist_FBDRP::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
-    std::string d_name = "FossilizedBirthDeathRangeProcess";
+    std::string d_name = "FossilizedBirthDeathRange";
     
     return d_name;
 }
