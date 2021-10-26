@@ -103,8 +103,8 @@ RevBayesCore::FossilizedBirthDeathProcess* Dist_FBDP::createDistribution( void )
         rt = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
 
-    bool c = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
-    double re = static_cast<const Probability &>( resampling->getRevObject() ).getValue();
+    bool c  = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
+    bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
     RevBayesCore::FossilizedBirthDeathProcess* d = new RevBayesCore::FossilizedBirthDeathProcess(sa, l, m, p, r, la, b, rt, cond, t, c, re);
 
@@ -191,6 +191,10 @@ const MemberRules& Dist_FBDP::getParameterRules(void) const
     {
         dist_member_rules.push_back( new ArgumentRule( "originAge", RealPos::getClassTypeSpec(), "The start time of the process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
+        // add the rules from the base class
+        const MemberRules &parentRules = FossilizedBirthDeathProcess<TimeTree>::getParameterRules();
+        dist_member_rules.insert(dist_member_rules.end(), parentRules.begin(), parentRules.end());
+
         std::vector<TypeSpec> paramTypes;
         paramTypes.push_back( RealPos::getClassTypeSpec() );
         paramTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
@@ -200,10 +204,6 @@ const MemberRules& Dist_FBDP::getParameterRules(void) const
         betaParamTypes.push_back( Probability::getClassTypeSpec() );
         betaParamTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
         dist_member_rules.push_back( new ArgumentRule( "beta",  betaParamTypes, "The probability of symmetric speciation.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
-
-        // add the rules from the base class
-        const MemberRules &parentRules = FossilizedBirthDeathProcess<TimeTree>::getParameterRules();
-        dist_member_rules.insert(dist_member_rules.end(), parentRules.begin(), parentRules.end());
 
         rules_set = true;
     }

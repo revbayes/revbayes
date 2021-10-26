@@ -1,5 +1,5 @@
-#ifndef Move_FBDPAge_H
-#define Move_FBDPAge_H
+#ifndef Move_ResampleFBD_H
+#define Move_ResampleFBD_H
 
 #include "RlMove.h"
 #include "TypedDagNode.h"
@@ -21,14 +21,14 @@ namespace RevLanguage {
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
      * @copyright GPL version 3
      */
-    class Move_FBDPAge : public Move {
+    class Move_ResampleFBD : public Move {
         
     public:
         
-        Move_FBDPAge(void);                                                                                                                    //!< Default constructor
+        Move_ResampleFBD(void);                                                                                                                    //!< Default constructor
         
         // Basic utility functions
-        virtual Move_FBDPAge*                       clone(void) const;                                                                      //!< Clone object
+        virtual Move_ResampleFBD*                   clone(void) const;                                                                      //!< Clone object
         void                                        constructInternalObject(void);                                                          //!< We construct the a new internal Move.
         static const std::string&                   getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                      getClassTypeSpec(void);                                                                 //!< Get class type spec

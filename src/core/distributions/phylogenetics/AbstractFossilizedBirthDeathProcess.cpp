@@ -44,7 +44,7 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
                                                                          const std::string &incondition,
                                                                          const std::vector<Taxon> &intaxa,
                                                                          bool c,
-                                                                         double re) :
+                                                                         bool re) :
     taxa(intaxa),
     condition(incondition),
     homogeneous_rho(inrho),
@@ -52,7 +52,7 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
     origin(0.0),
     complete(c),
     resampled(false),
-    resampling_weight(re),
+    resampling(re),
     touched(false)
 {
     // initialize all the pointers to NULL
@@ -487,13 +487,10 @@ std::vector<double>& AbstractFossilizedBirthDeathProcess::getAges(void)
  *
  *
  */
-void AbstractFossilizedBirthDeathProcess::resampleAge(size_t i, bool store)
+void AbstractFossilizedBirthDeathProcess::resampleAge(size_t i)
 {
-    if ( store )
-    {
-        stored_age = age;
-        resampled = true;
-    }
+    stored_age = age;
+    resampled = true;
 
     age[i] = GLOBAL_RNG->uniform01()*(taxa[i].getMaxAge() - o_i[i]) + o_i[i];
 }

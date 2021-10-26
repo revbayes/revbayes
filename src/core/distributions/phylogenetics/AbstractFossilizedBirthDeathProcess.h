@@ -35,12 +35,12 @@ namespace RevBayesCore {
                                             const std::string &condition,
                                             const std::vector<Taxon> &taxa,
                                             bool complete,
-                                            double resampling);  //!< Constructor
+                                            bool resampling);  //!< Constructor
 
         virtual ~AbstractFossilizedBirthDeathProcess(){};
 
         std::vector<double>&                            getAges();
-        void                                            resampleAge(size_t i, bool store = true);
+        void                                            resampleAge(size_t i);
 
     protected:
         virtual void                                    updateStartEndTimes() = 0;
@@ -109,7 +109,7 @@ namespace RevBayesCore {
         bool                                    complete;
         bool                                    touched;
         bool                                    resampled;
-        double                                  resampling_weight;
+        bool                                    resampling;
     };
 }
 

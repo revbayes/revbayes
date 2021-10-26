@@ -58,7 +58,7 @@ FossilizedBirthDeathProcess::FossilizedBirthDeathProcess(const TypedDagNode<doub
                                                            const std::string &incondition,
                                                            const std::vector<Taxon> &intaxa,
                                                            bool c,
-                                                           double re) :
+                                                           bool re) :
     AbstractBirthDeathProcess(ra, incondition, intaxa, true),
     AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, c, re)
 {
@@ -274,7 +274,7 @@ void FossilizedBirthDeathProcess::simulateClade(std::vector<TopologyNode *> &n, 
 
             n[i]->setAge( extinct * rng->uniform01() * n[i]->getTaxon().getMinAge() );
 
-            resampleAge(i,false);
+            resampleAge(i);
         }
 
         double first_occurrence = getMaxTaxonAge( *n[i] );
@@ -565,7 +565,7 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
                 dirty_psi[i] = true;
                 dirty_taxa[i] = true;
                 // resample augmented age
-                if ( resampled == false && GLOBAL_RNG->uniform01() < resampling_weight )
+                if ( resampling == true && resampled == false )
                 {
                     resampleAge(i);
                 }
@@ -584,7 +584,7 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
                 dirty_psi[i] = true;
                 dirty_taxa[i] = true;
                 // resample augmented age
-                if ( resampled == false && GLOBAL_RNG->uniform01() < resampling_weight )
+                if ( resampling == true && resampled == false )
                 {
                     resampleAge(i);
                 }
@@ -611,7 +611,7 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
                     dirty_psi[i] = true;
                     dirty_taxa[i] = true;
                     // resample augmented age
-                    if ( resampled == false && GLOBAL_RNG->uniform01() < resampling_weight )
+                    if ( resampling == true && resampled == false )
                     {
                         resampleAge(i);
                     }

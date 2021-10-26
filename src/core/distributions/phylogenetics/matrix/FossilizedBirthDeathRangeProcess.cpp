@@ -48,7 +48,7 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
                                                                      const std::string &incondition,
                                                                      const std::vector<Taxon> &intaxa,
                                                                      bool complete,
-                                                                     double resample) :
+                                                                     bool resample) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
     AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete, resample)
 {
@@ -198,7 +198,7 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
         (*this->value)[i][0] = b;
         (*this->value)[i][1] = d;
 
-        resampleAge(i,false);
+        resampleAge(i);
     }
 }
 
@@ -235,7 +235,7 @@ void FossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, boo
                 dirty_psi[i]   = true;
                 dirty_taxa[i]  = true;
 
-                if ( resampled == false && GLOBAL_RNG->uniform01() < resampling_weight )
+                if ( resampling == true && resampled == false )
                 {
                     resampleAge(i);
                 }

@@ -47,7 +47,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                           taxa;                                                                               //!< The taxa
         RevPtr<const RevVariable>                           condition;                                                                          //!< The condition of the process
         RevPtr<const RevVariable>                           complete;
-        RevPtr<const RevVariable>                           resampling;
+        RevPtr<const RevVariable>                           resample;
 
     };
     
@@ -152,7 +152,7 @@ const MemberRules& RevLanguage::FossilizedBirthDeathProcess<rlType>::getParamete
 
         memberRules.push_back( new ArgumentRule( "complete", RlBoolean::getClassTypeSpec(), "Assume complete fossil sampling?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
 
-        memberRules.push_back( new ArgumentRule( "resampling", Probability::getClassTypeSpec(), "The frequency with which to resample augmented ages.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(1.0) ) );
+        memberRules.push_back( new ArgumentRule( "resample", RlBoolean::getClassTypeSpec(), "Resample augmented ages?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
 
         rules_set = true;
     }
@@ -207,9 +207,9 @@ void RevLanguage::FossilizedBirthDeathProcess<rlType>::setConstParameter(const s
     {
         complete = var;
     }
-    else if ( name == "resampling" )
+    else if ( name == "resample" )
     {
-        resampling = var;
+        resample = var;
     }
     else
     {
