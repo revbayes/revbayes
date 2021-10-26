@@ -288,12 +288,12 @@ double BirthDeathRateShiftsProcess::computeLnProbability()
                         // increase running psi total for each observation
                         for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
                         {
-                            if ( Fi->first.getMax() > times[j] )
+                            if ( Fi->first.getMin() < t_0 && Fi->first.getMax() > times[j] )
                             {
                                 double dt = 1.0;
 
                                 // only compute dt if this is a non-singleton
-                                if ( !( Fi->first.getMin() <= t_0 && (Fi->first.getMin() == Fi->first.getMax()) ) )
+                                if ( Fi->first.getMin() != Fi->first.getMax() )
                                 {
                                     dt = std::min(std::min(Fi->first.getMax(), b), t_0) - std::max(std::max(Fi->first.getMin(), d), times[j]);
                                 }
