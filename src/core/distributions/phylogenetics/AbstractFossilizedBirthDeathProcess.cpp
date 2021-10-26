@@ -34,7 +34,8 @@ using namespace RevBayesCore;
  * \param[in]    cdt            Condition of the process (time/sampling/survival).
  * \param[in]    tn             Taxa.
  * \param[in]    c              Complete sampling?
- * \param[in]    re             Augmented age resampling weight.
+ * \param[in]    re             Resample augmented ages?
+ * \param[in]    ex             Do tips represent extinction events?
  */
 AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const DagNode *inspeciation,
                                                                          const DagNode *inextinction,
@@ -44,13 +45,15 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
                                                                          const std::string &incondition,
                                                                          const std::vector<Taxon> &intaxa,
                                                                          bool c,
-                                                                         bool re) :
+                                                                         bool re,
+																		 bool ex) :
     taxa(intaxa),
     condition(incondition),
     homogeneous_rho(inrho),
     timeline( intimes ),
     origin(0.0),
     complete(c),
+	extended(ex),
     resampled(false),
     resampling(re),
     touched(false)
@@ -146,6 +149,7 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
     d_i = std::vector<double>(taxa.size(), 0.0);
     o_i = std::vector<double>(taxa.size(), 0.0);
     y_i = std::vector<double>(taxa.size(), RbConstants::Double::inf);
+    k_i = std::vector<size_t>(taxa.size(), 0.0);
 
     p_i         = std::vector<double>(num_intervals, 1.0);
     pS_i        = std::vector<double>(num_intervals, 1.0);
@@ -174,6 +178,8 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
             o_i[i] = std::max(Fi->first.getMin(), o_i[i]);
             // find the youngest maximum age
             y_i[i] = std::min(Fi->first.getMax(), y_i[i]);
+            // get the fossil count
+            k_i[i] += Fi->second;
         }
     }
 
@@ -210,7 +216,9 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
         // check model constraints
         //if ( !( b > max_age && min_age >= d && d >= 0.0 ) )
-        if ( !( b > o && o >= d && o >= o_i[i] && y_i[i] >= d && d >= 0.0 ) )
+        if ( !( b > o && o >= d && o >= o_i[i] && y_i[i] >= d
+        		&& (( extended && d >= 0.0) || (!extended && d >= min_age ))
+		      ) )
         {
             return RbConstants::Double::neginf;
         }
@@ -263,9 +271,6 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
             // divide by q_tilde at the death time
             partial_likelihood[i] -= q( di, d, true);
 
-            // include extinction density
-            if ( d > 0.0 ) partial_likelihood[i] += log( death[di] );
-
             if ( dirty_psi[i] || force )
             {
                 std::map<TimeInterval, size_t> ages = taxa[i].getAges();
@@ -313,44 +318,70 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                         }
                     }
 
-                    // include instantaneous sampling density
+                    // include density for oldest sample
                     Psi[i] = log(fossil[oi]);
 
-                    int count = 0;
-                    double recip = 0.0;
+                    // include density for youngest sample
+					if ( k_i[i] > 1 && not extended )
+					{
+						Psi[i] += log(fossil[di]);
+					}
+
+                    double recip_o = 0.0;
+					double recip_y = 0.0;
+					double recip_oy = 0.0;
 
                     size_t k = 0;
                     // compute factors of the sum over each possible oldest/youngest observation
                     for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
                     {
-                        count += Fi->second;
-
                         // compute sum of reciprocal oldest ranges
                         if ( Fi->first.getMax() >= o )
                         {
-                            recip += Fi->second / psi[k];
-                        }
+                        	recip_o += Fi->second / psi[k];
+						}
+						// compute sum of reciprocal youngest ranges
+						if ( Fi->first.getMin() <= d )
+						{
+							recip_y += Fi->second / psi[k];
+
+							// compute sum of reciprocal oldest+youngest ranges
+							if ( Fi->first.getMax() >= o )
+							{
+								double f = Fi->second / psi[k];
+
+								recip_oy += f*(f-1.0);
+							}
+						}
 
                         // compute product of ranges
                         Psi[i] += log(psi[k]) * Fi->second;
                     }
 
                     // sum over each possible oldest/youngest observation
-                    Psi[i] += log(recip);
+                    Psi[i] += extended ? log(recip_o) : log(recip_o * recip_y - recip_oy);
 
-                    if ( complete == true )
+                    if ( complete )
                     {
                         // compute poisson density for count
-                        Psi[i] -= RbMath::lnFactorial(count);
+                        Psi[i] -= RbMath::lnFactorial(k_i[i]);
                     }
-                    else
-                    {
-                        // compute poisson density for count + kappa, kappa >= 0
-                        Psi[i] -= log(count);
-                        Psi[i] += psi_y_o;
-                        Psi[i] -= (count-1)*log(psi_y_o);
-                        Psi[i] += count > 1 ? log(RbMath::incompleteGamma(psi_y_o, count-1, true, true)) : 0.0;
-                    }
+                    else if ( extended || k_i[i] > 1 )
+					{
+						// compute poisson density for count + kappa, kappa >= 0
+						Psi[i] -= log(k_i[i]);
+						Psi[i] += psi_y_o;
+
+						k = k_i[i] - 1;
+
+						Psi[i] -= k*log(psi_y_o);
+						Psi[i] += k > 0 ? log(RbMath::incompleteGamma(psi_y_o, k, true, true)) : 0.0;
+					}
+                    // compute the incomplete sampling term later
+					else
+					{
+						Psi[i] = psi_y_o;
+					}
                 }
                 // only one fossil age
                 else
@@ -360,7 +391,31 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                 }
             }
 
-            partial_likelihood[i] += Psi[i];
+            // include extinction density
+			if ( d > 0.0 )
+			{
+				// d is an extinction event
+				if ( extended )
+				{
+					partial_likelihood[i] += log( death[di] );
+				}
+				// d is the youngest sample
+				else if ( complete || k_i[i] > 1 )
+				{
+					partial_likelihood[i] += log( p( di, d ) );
+				}
+			}
+
+			// d is always the youngest age
+			if ( extended || complete || k_i[i] > 1 )
+			{
+				partial_likelihood[i] += Psi[i];
+			}
+			// either d or o could be the youngest age
+			else
+			{
+				partial_likelihood[i] += log( fossil[oi] * p( oi, o ) + exp(Psi[i]) * fossil[di] * p( di, d ) );
+			}
         }
 
         lnProbTimes += partial_likelihood[i];

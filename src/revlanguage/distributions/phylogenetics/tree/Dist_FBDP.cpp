@@ -105,8 +105,9 @@ RevBayesCore::FossilizedBirthDeathProcess* Dist_FBDP::createDistribution( void )
 
     bool c  = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
     bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
+    bool ex = static_cast<const RlBoolean &>( extended->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathProcess* d = new RevBayesCore::FossilizedBirthDeathProcess(sa, l, m, p, r, la, b, rt, cond, t, c, re);
+    RevBayesCore::FossilizedBirthDeathProcess* d = new RevBayesCore::FossilizedBirthDeathProcess(sa, l, m, p, r, la, b, rt, cond, t, c, re, ex);
 
     return d;
 }
@@ -205,6 +206,8 @@ const MemberRules& Dist_FBDP::getParameterRules(void) const
         betaParamTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
         dist_member_rules.push_back( new ArgumentRule( "beta",  betaParamTypes, "The probability of symmetric speciation.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
 
+        dist_member_rules.push_back( new ArgumentRule( "extended", RlBoolean::getClassTypeSpec(), "Should tips represent extinctin events?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+
         rules_set = true;
     }
     
@@ -250,6 +253,10 @@ void Dist_FBDP::setConstParameter(const std::string& name, const RevPtr<const Re
     {
         start_age = var;
     }
+    else if ( name == "extended" )
+	{
+    	extended = var;
+	}
     else
     {
         FossilizedBirthDeathProcess<TimeTree>::setConstParameter(name, var);
