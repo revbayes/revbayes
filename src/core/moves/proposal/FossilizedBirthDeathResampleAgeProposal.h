@@ -139,11 +139,12 @@ double RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::doProposa
 
     AbstractFossilizedBirthDeathProcess* dist = dynamic_cast<AbstractFossilizedBirthDeathProcess* >(&variable->getDistribution());
 
-    stored_ages = dist->getAges();
+    // touching handled by the distribution
+    //stored_ages = dist->getAges();
 
-    size_t i = rng->uniform01() * stored_ages.size();
+    size_t i = rng->uniform01() * dist->getAges().size();
 
-    dist->redrawAge(i, true);
+    dist->resampleAge(i);
 
     variable->addTouchedElementIndex(i);
 
@@ -189,10 +190,10 @@ void RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::undoProposa
 {
 	AbstractFossilizedBirthDeathProcess* dist = dynamic_cast<AbstractFossilizedBirthDeathProcess* >(&variable->getDistribution());
 
-	dist->getAges() = stored_ages;
+	// restoration handled by the distribution
+	//dist->getAges() = stored_ages;
 
 	variable->clearTouchedElementIndices();
-
 }
 
 

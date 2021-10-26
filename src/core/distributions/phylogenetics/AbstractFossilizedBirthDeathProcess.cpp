@@ -51,8 +51,9 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
     timeline( intimes ),
     origin(0.0),
     complete(c),
-    touched(false),
-    resampling(re)
+    resampled(false),
+    resampling_weight(re),
+    touched(false)
 {
     // initialize all the pointers to NULL
     homogeneous_lambda             = NULL;
@@ -297,12 +298,12 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                         // increase running psi total for each observation
                         for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
                         {
-                            if ( Fi->first.getMax() > times[j] )
+                            if ( Fi->first.getMin() < t_0 && Fi->first.getMax() > times[j] )
                             {
                                 double dt = 1.0;
 
                                 // only compute dt if this is a non-singleton
-                                if ( !( Fi->first.getMin() <= t_0 && (Fi->first.getMin() == Fi->first.getMax()) ) )
+                                if ( Fi->first.getMin() != Fi->first.getMax() )
                                 {
                                     dt = std::min(std::min(Fi->first.getMax(), o), t_0) - std::max(std::max(Fi->first.getMin(), d), times[j]);
                                 }
@@ -486,12 +487,15 @@ std::vector<double>& AbstractFossilizedBirthDeathProcess::getAges(void)
  *
  *
  */
-void AbstractFossilizedBirthDeathProcess::redrawAge(size_t i, bool force)
+void AbstractFossilizedBirthDeathProcess::resampleAge(size_t i, bool store)
 {
-	if ( force || GLOBAL_RNG->uniform01() < resampling )
-	{
-		age[i] = GLOBAL_RNG->uniform01()*(taxa[i].getMaxAge() - o_i[i]) + o_i[i];
-	}
+    if ( store )
+    {
+        stored_age = age;
+        resampled = true;
+    }
+
+    age[i] = GLOBAL_RNG->uniform01()*(taxa[i].getMaxAge() - o_i[i]) + o_i[i];
 }
 
 
@@ -500,6 +504,7 @@ void AbstractFossilizedBirthDeathProcess::keepSpecialization(DagNode *toucher)
     dirty_psi  = std::vector<bool>(taxa.size(), false);
     dirty_taxa = std::vector<bool>(taxa.size(), false);
 
+    resampled = false;
     touched = false;
 }
 
@@ -507,12 +512,17 @@ void AbstractFossilizedBirthDeathProcess::keepSpecialization(DagNode *toucher)
 void AbstractFossilizedBirthDeathProcess::restoreSpecialization(DagNode *toucher)
 {
     partial_likelihood = stored_likelihood;
-    age = stored_age;
     Psi = stored_Psi;
+
+    if ( resampled )
+    {
+        age = stored_age;
+    }
 
     dirty_psi  = std::vector<bool>(taxa.size(), false);
     dirty_taxa = std::vector<bool>(taxa.size(), false);
 
+    resampled = false;
     touched = false;
 }
 
@@ -522,7 +532,6 @@ void AbstractFossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, 
     if ( touched == false )
     {
         stored_likelihood = partial_likelihood;
-        stored_age = age;
         stored_Psi = Psi;
 
         dirty_taxa = std::vector<bool>(taxa.size(), true);

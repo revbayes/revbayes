@@ -274,7 +274,7 @@ void FossilizedBirthDeathProcess::simulateClade(std::vector<TopologyNode *> &n, 
 
             n[i]->setAge( extinct * rng->uniform01() * n[i]->getTaxon().getMinAge() );
 
-            redrawAge(i,true);
+            resampleAge(i,false);
         }
 
         double first_occurrence = getMaxTaxonAge( *n[i] );
@@ -564,7 +564,11 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
                 d_i[i] = age;
                 dirty_psi[i] = true;
                 dirty_taxa[i] = true;
-                if ( touched == false ) redrawAge(i);
+                // resample augmented age
+                if ( resampled == false && GLOBAL_RNG->uniform01() < resampling_weight )
+                {
+                    resampleAge(i);
+                }
             }
         }
 
@@ -579,7 +583,11 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
                 b_i[i] = age;
                 dirty_psi[i] = true;
                 dirty_taxa[i] = true;
-                //if ( touched == false ) redrawAge(i);
+                // resample augmented age
+                if ( resampled == false && GLOBAL_RNG->uniform01() < resampling_weight )
+                {
+                    resampleAge(i);
+                }
             }
 
             I[i] = sa;
@@ -602,7 +610,11 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
                     origin = age;
                     dirty_psi[i] = true;
                     dirty_taxa[i] = true;
-                    //if ( touched == false ) redrawAge(i);
+                    // resample augmented age
+                    if ( resampled == false && GLOBAL_RNG->uniform01() < resampling_weight )
+                    {
+                        resampleAge(i);
+                    }
                 }
             }
         }
@@ -677,8 +689,17 @@ void FossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, bool tou
         if ( touched == false )
         {
             stored_likelihood = partial_likelihood;
-            stored_age = age;
             stored_Psi = Psi;
+
+            std::set<size_t> touched_indices = dag_node->getTouchedElementIndices();
+
+            for ( std::set<size_t>::iterator it = touched_indices.begin(); it != touched_indices.end(); it++)
+            {
+                size_t i = (*it) / taxa.size();
+
+                dirty_psi[i]  = true;
+                dirty_taxa[i] = true;
+            }
         }
 
         touched = true;

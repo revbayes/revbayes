@@ -40,7 +40,7 @@ namespace RevBayesCore {
         virtual ~AbstractFossilizedBirthDeathProcess(){};
 
         std::vector<double>&                            getAges();
-        void                                            redrawAge(size_t i, bool force = false);
+        void                                            resampleAge(size_t i, bool store = true);
 
     protected:
         virtual void                                    updateStartEndTimes() = 0;
@@ -108,8 +108,8 @@ namespace RevBayesCore {
 
         bool                                    complete;
         bool                                    touched;
-
-        double                                  resampling;
+        bool                                    resampled;
+        double                                  resampling_weight;
     };
 }
 
