@@ -1,8 +1,8 @@
 ################################################################################
 #
-# RevBayes Validation Test: Constant-rate birth-death process
+# RevBayes Validation Test: Constant-rate birth-death-burst process
 #
-# Model: A constant-rate birth-death process with complete taxon sampling.
+# Model: A constant-rate birth-death-burst process with complete taxon sampling.
 #
 #
 # authors: Sebastian Hoehna
@@ -12,7 +12,7 @@
 ## Global settings
 
 
-NUM_VALIDATION_REPLICATES = 10000
+NUM_VALIDATION_REPLICATES = 1000
 NUM_MCMC_ITERATIONS       = 10000
 
 

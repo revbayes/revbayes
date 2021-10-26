@@ -1,23 +1,57 @@
-# Largely copied from `Validation_Poisson.Rev`
-n_samples = 15
+################################################################################
+#
+# RevBayes Validation Test: Binomial Distribution
+#
+# Model: Several random variables from a binomial distribution.
+#
+#
+# authors: Michael R. May
+#
+################################################################################
 
-n <- 7 # Choose an arbitrary number of trials
+
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
 p ~ dnUniform(0,1)
 
-mi = 0
-moves[++mi] = mvScale(p)
+n_samples = 15
+n <- 7 # Choose an arbitrary number of trials
 
 for ( i in 1:n_samples){
 	x[i] ~ dnBinomial(p, n)
 	x[i].clamp(1)
 }
 
-mymodel = model(p)
-monitors = VectorMonitors()
-mymcmc = mcmc(mymodel, monitors, moves)
-validation = validationAnalysis( mymcmc, 1000 )
-validation.burnin(generations=10000,tuningInterval=100)
-validation.run(generations=30000)
-validation.summarize( coverageProbability=0.9 )
+moves.append( mvScale(p,weight=2) )
+moves.append( mvSlide(p,weight=2) )
 
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(p)
+
+
+
+
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Binomial" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize()
+
+
+# you may want to quit RevBayes now
 q()
