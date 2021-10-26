@@ -53,7 +53,7 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
     timeline( intimes ),
     origin(0.0),
     complete(c),
-	extended(ex),
+    extended(ex),
     resampled(false),
     resampling(re),
     touched(false)
@@ -216,9 +216,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
         // check model constraints
         //if ( !( b > max_age && min_age >= d && d >= 0.0 ) )
-        if ( !( b > o && o >= d && o >= o_i[i] && y_i[i] >= d
-        		&& (( extended && d >= 0.0) || (!extended && d >= min_age ))
-		      ) )
+        if ( !( b > o && o >= d && o >= o_i[i] && y_i[i] >= d && (( extended && d >= 0.0) || (!extended && d >= min_age )) ) )
         {
             return RbConstants::Double::neginf;
         }
@@ -322,14 +320,14 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                     Psi[i] = log(fossil[oi]);
 
                     // include density for youngest sample
-					if ( k_i[i] > 1 && not extended )
-					{
-						Psi[i] += log(fossil[di]);
-					}
+                    if ( k_i[i] > 1 && not extended )
+                    {
+                        Psi[i] += log(fossil[di]);
+                    }
 
                     double recip_o = 0.0;
-					double recip_y = 0.0;
-					double recip_oy = 0.0;
+                    double recip_y = 0.0;
+                    double recip_oy = 0.0;
 
                     size_t k = 0;
                     // compute factors of the sum over each possible oldest/youngest observation
@@ -338,21 +336,21 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                         // compute sum of reciprocal oldest ranges
                         if ( Fi->first.getMax() >= o )
                         {
-                        	recip_o += Fi->second / psi[k];
-						}
-						// compute sum of reciprocal youngest ranges
-						if ( Fi->first.getMin() <= d )
-						{
-							recip_y += Fi->second / psi[k];
+                            recip_o += Fi->second / psi[k];
+                        }
+                        // compute sum of reciprocal youngest ranges
+                        if ( Fi->first.getMin() <= d )
+                        {
+                            recip_y += Fi->second / psi[k];
 
-							// compute sum of reciprocal oldest+youngest ranges
-							if ( Fi->first.getMax() >= o )
-							{
-								double f = Fi->second / psi[k];
+                            // compute sum of reciprocal oldest+youngest ranges
+                            if ( Fi->first.getMax() >= o )
+                            {
+                                double f = Fi->second / psi[k];
 
-								recip_oy += f*(f-1.0);
-							}
-						}
+                                recip_oy += f*(f-1.0);
+                            }
+                        }
 
                         // compute product of ranges
                         Psi[i] += log(psi[k]) * Fi->second;
@@ -368,20 +366,20 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                     }
                     else if ( extended || k_i[i] > 1 )
 					{
-						// compute poisson density for count + kappa, kappa >= 0
-						Psi[i] -= log(k_i[i]);
-						Psi[i] += psi_y_o;
+                        // compute poisson density for count + kappa, kappa >= 0
+                        Psi[i] -= log(k_i[i]);
+                        Psi[i] += psi_y_o;
 
-						k = k_i[i] - 1;
+                        k = k_i[i] - 1;
 
-						Psi[i] -= k*log(psi_y_o);
-						Psi[i] += k > 0 ? log(RbMath::incompleteGamma(psi_y_o, k, true, true)) : 0.0;
-					}
+                        Psi[i] -= k*log(psi_y_o);
+                        Psi[i] += k > 0 ? log(RbMath::incompleteGamma(psi_y_o, k, true, true)) : 0.0;
+                    }
                     // compute the incomplete sampling term later
-					else
-					{
-						Psi[i] = psi_y_o;
-					}
+                    else
+                    {
+                        Psi[i] = psi_y_o;
+                    }
                 }
                 // only one fossil age
                 else
@@ -394,28 +392,28 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
             // include extinction density
 			if ( d > 0.0 )
 			{
-				// d is an extinction event
-				if ( extended )
-				{
-					partial_likelihood[i] += log( death[di] );
-				}
-				// d is the youngest sample
-				else if ( complete || k_i[i] > 1 )
-				{
-					partial_likelihood[i] += log( p( di, d ) );
-				}
-			}
+                // d is an extinction event
+                if ( extended )
+                {
+                    partial_likelihood[i] += log( death[di] );
+                }
+                // d is the youngest sample
+                else if ( complete || k_i[i] > 1 )
+                {
+                    partial_likelihood[i] += log( p( di, d ) );
+                }
+            }
 
-			// d is always the youngest age
-			if ( extended || complete || k_i[i] > 1 )
-			{
-				partial_likelihood[i] += Psi[i];
-			}
-			// either d or o could be the youngest age
-			else
-			{
-				partial_likelihood[i] += log( fossil[oi] * p( oi, o ) + exp(Psi[i]) * fossil[di] * p( di, d ) );
-			}
+            // d is always the youngest age
+            if ( extended || complete || k_i[i] > 1 )
+            {
+                partial_likelihood[i] += Psi[i];
+            }
+            // either d or o could be the youngest age
+            else
+            {
+                partial_likelihood[i] += log( fossil[oi] * p( oi, o ) + exp(Psi[i]) * fossil[di] * p( di, d ) );
+            }
         }
 
         lnProbTimes += partial_likelihood[i];

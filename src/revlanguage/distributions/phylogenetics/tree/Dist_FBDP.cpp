@@ -254,9 +254,9 @@ void Dist_FBDP::setConstParameter(const std::string& name, const RevPtr<const Re
         start_age = var;
     }
     else if ( name == "extended" )
-	{
-    	extended = var;
-	}
+    {
+        extended = var;
+    }
     else
     {
         FossilizedBirthDeathProcess<TimeTree>::setConstParameter(name, var);

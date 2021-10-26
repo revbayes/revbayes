@@ -36,7 +36,7 @@ namespace RevBayesCore {
                                             const std::vector<Taxon> &taxa,
                                             bool complete,
                                             bool resampling,
-											bool extended);  //!< Constructor
+                                            bool extended);  //!< Constructor
 
         virtual ~AbstractFossilizedBirthDeathProcess(){};
 
@@ -109,7 +109,7 @@ namespace RevBayesCore {
         std::vector<bool>                       dirty_taxa;
 
         bool                                    complete;
-        bool									extended;
+        bool                                    extended;
         bool                                    resampled;
         bool                                    resampling;
         bool                                    touched;
