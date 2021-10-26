@@ -2,7 +2,7 @@
 dnFossilizedBirthDeath
 ## title
 ## description
-The fossilized birth death process (FBDP) describes diversification and sampling of extant and extinct species trees under a mixed model of asymmetric, symmetric and anagenetic speciation.
+The fossilized birth death process (FBDP) describes the diversification and sampling of extant and extinct species trees under a mixed model of asymmetric, symmetric and anagenetic speciation.
 ## details
 Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. If only a subset of fossil occurrences is provided for each species (e.g. only first and last occurrencces), then the remaining number of fossil samples may be marginalized by specifying `complete=FALSE`. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which are automatically marginalized during when the model is sampled using MCMC. To disable this behavior, use `resample=FALSE`. Tips represent extinction events, and therefore should be marginalized using MCMC using e.g. `mvTipTimeSlideUniform`.
 ## authors

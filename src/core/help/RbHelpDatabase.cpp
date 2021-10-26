@@ -311,7 +311,7 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnBinomial")][string("title")] = string(R"(Binomial Distribution)");
 	help_strings[string("dnBirthDeath")][string("name")] = string(R"(dnBirthDeath)");
 	help_strings[string("dnBirthDeathBurstProcess")][string("name")] = string(R"(dnBirthDeathBurstProcess)");
-	help_strings[string("dnBirthDeathSamplingTreatmentProcess")][string("name")] = string(R"(dnBirthDeathSamplingTreatment)");
+	help_strings[string("dnBirthDeathSamplingTreatment")][string("name")] = string(R"(dnBirthDeathSamplingTreatment)");
 	help_arrays[string("dnBivariatePoisson")][string("authors")].push_back(string(R"(Alexander Zarebski)"));
 	help_arrays[string("dnBivariatePoisson")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnBivariatePoisson")][string("description")] = string(R"(A Bivariate Poisson distribution defines probabilities for pairs of natural numbers.)");
@@ -485,10 +485,10 @@ x ~ dnExponential(lambda=rate)
 x.probability())");
 	help_strings[string("dnExponential")][string("name")] = string(R"(dnExponential)");
 	help_strings[string("dnExponential")][string("title")] = string(R"(Exponential Distribution)");
-	help_arrays[string("dnFossilizedBirthDeathProcess")][string("authors")].push_back(string(R"(Walker Pett)"));
-	help_strings[string("dnFossilizedBirthDeathProcess")][string("description")] = string(R"(The fossilized birth death process (FBDP) describes diversification and sampling of extant and extinct species trees under a mixed model of asymmetric, symmetric and anagenetic speciation.)");
-	help_strings[string("dnFossilizedBirthDeathProcess")][string("details")] = string(R"(Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. If only a subset of fossil occurrences is provided for each species (e.g. only first and last occurrencces), then the remaining number of fossil samples may be marginalized by specifying `complete=FALSE`. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which are automatically marginalized during when the model is sampled using MCMC. To disable this behavior, use `resample=FALSE`. Tips represent extinction events, and therefore should be marginalized using MCMC using e.g. `mvTipTimeSlideUniform`.)");
-	help_strings[string("dnFossilizedBirthDeathProcess")][string("example")] = string(R"(lambda ~ dnExp(10)
+	help_arrays[string("dnFossilizedBirthDeath")][string("authors")].push_back(string(R"(Walker Pett)"));
+	help_strings[string("dnFossilizedBirthDeath")][string("description")] = string(R"(The fossilized birth death process (FBDP) describes the diversification and sampling of extant and extinct species trees under a mixed model of asymmetric, symmetric and anagenetic speciation.)");
+	help_strings[string("dnFossilizedBirthDeath")][string("details")] = string(R"(Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. If only a subset of fossil occurrences is provided for each species (e.g. only first and last occurrencces), then the remaining number of fossil samples may be marginalized by specifying `complete=FALSE`. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which are automatically marginalized during when the model is sampled using MCMC. To disable this behavior, use `resample=FALSE`. Tips represent extinction events, and therefore should be marginalized using MCMC using e.g. `mvTipTimeSlideUniform`.)");
+	help_strings[string("dnFossilizedBirthDeath")][string("example")] = string(R"(lambda ~ dnExp(10)
 mu ~ dnExp(10)
 psi ~ dnExp(10)
 
@@ -509,14 +509,14 @@ moves.append( mvFNPR(bd, weight = taxa.size()) )
 moves.append( mvNodeTimeSlideUniform(bd, weight = taxa.size()) )
 moves.append( mvRootTimeSlideUniform(bd, origin=origin, weight = taxa.size()) )
 moves.append( mvTipTimeSlideUniform(bd, weight = taxa.size()) ))");
-	help_strings[string("dnFossilizedBirthDeathProcess")][string("name")] = string(R"(dnFossilizedBirthDeath)");
-	help_references[string("dnFossilizedBirthDeathProcess")].push_back(RbHelpReference(R"(The fossilized birth-death model for the analysis of stratigraphic range data under different speciation modes. Stadler, Tanja et al. Journal of theoretical biology, 447:41-55.)",R"()",R"(https://www.sciencedirect.com/science/article/pii/S002251931830119X )"));
-	help_arrays[string("dnFossilizedBirthDeathProcess")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRange)"));
-	help_arrays[string("dnFossilizedBirthDeathProcess")][string("see_also")].push_back(string(R"(dnBirthDeathSamplingTreatment)"));
-	help_arrays[string("dnFossilizedBirthDeathRangeProcess")][string("authors")].push_back(string(R"(Walker Pett)"));
-	help_strings[string("dnFossilizedBirthDeathRangeProcess")][string("description")] = string(R"(The fossilized birth death range process (FBDRP) describes the distribution of a matrix of species origination and extinction times under a model of asymmetric speciation and sampling of extinct species.)");
-	help_strings[string("dnFossilizedBirthDeathRangeProcess")][string("details")] = string(R"(Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. If only a subset of fossil occurrences is provided for each species (e.g. only first and last occurrencces), then the remaining number of fossil samples may be marginalized by specifying `complete=FALSE`. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which are automatically marginalized during when the model is sampled using MCMC. To disable this behavior, use `resample=FALSE`.)");
-	help_strings[string("dnFossilizedBirthDeathRangeProcess")][string("example")] = string(R"(lambda ~ dnExp(10)
+	help_strings[string("dnFossilizedBirthDeath")][string("name")] = string(R"(dnFossilizedBirthDeath)");
+	help_references[string("dnFossilizedBirthDeath")].push_back(RbHelpReference(R"(The fossilized birth-death model for the analysis of stratigraphic range data under different speciation modes. Stadler, Tanja et al. Journal of theoretical biology, 447:41-55.)",R"()",R"(https://www.sciencedirect.com/science/article/pii/S002251931830119X )"));
+	help_arrays[string("dnFossilizedBirthDeath")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRange)"));
+	help_arrays[string("dnFossilizedBirthDeath")][string("see_also")].push_back(string(R"(dnBirthDeathSamplingTreatment)"));
+	help_arrays[string("dnFossilizedBirthDeathRange")][string("authors")].push_back(string(R"(Walker Pett)"));
+	help_strings[string("dnFossilizedBirthDeathRange")][string("description")] = string(R"(The fossilized birth death range process (FBDRP) describes the distribution of a matrix of species origination and extinction times under a model of asymmetric speciation and sampling of extinct species.)");
+	help_strings[string("dnFossilizedBirthDeathRange")][string("details")] = string(R"(Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. If only a subset of fossil occurrences is provided for each species (e.g. only first and last occurrencces), then the remaining number of fossil samples may be marginalized by specifying `complete=FALSE`. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which are automatically marginalized during when the model is sampled using MCMC. To disable this behavior, use `resample=FALSE`.)");
+	help_strings[string("dnFossilizedBirthDeathRange")][string("example")] = string(R"(lambda ~ dnExp(10)
 mu ~ dnExp(10)
 psi ~ dnExp(10)
 
@@ -524,10 +524,10 @@ bd ~ dnFBDRP(lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa, complete=FALSE)
 
 moves.append( mvMatrixElementScale(bd, weight=taxa.size()) )
 moves.append( mvMatrixElementSlide(bd, weight=taxa.size()) ))");
-	help_strings[string("dnFossilizedBirthDeathRangeProcess")][string("name")] = string(R"(dnFossilizedBirthDeathRange)");
-	help_references[string("dnFossilizedBirthDeathRangeProcess")].push_back(RbHelpReference(R"(The fossilized birth-death model for the analysis of stratigraphic range data under different speciation modes. Stadler, Tanja et al. Journal of theoretical biology, 447:41-55.)",R"()",R"(https://www.sciencedirect.com/science/article/pii/S002251931830119X )"));
-	help_arrays[string("dnFossilizedBirthDeathRangeProcess")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeath)"));
-	help_arrays[string("dnFossilizedBirthDeathRangeProcess")][string("see_also")].push_back(string(R"(dnBirthDeathSamplingTreatment)"));
+	help_strings[string("dnFossilizedBirthDeathRange")][string("name")] = string(R"(dnFossilizedBirthDeathRange)");
+	help_references[string("dnFossilizedBirthDeathRange")].push_back(RbHelpReference(R"(The fossilized birth-death model for the analysis of stratigraphic range data under different speciation modes. Stadler, Tanja et al. Journal of theoretical biology, 447:41-55.)",R"()",R"(https://www.sciencedirect.com/science/article/pii/S002251931830119X )"));
+	help_arrays[string("dnFossilizedBirthDeathRange")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeath)"));
+	help_arrays[string("dnFossilizedBirthDeathRange")][string("see_also")].push_back(string(R"(dnBirthDeathSamplingTreatment)"));
 	help_arrays[string("dnGamma")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnGamma")][string("description")] = string(R"(Gamma probability distribution for positive real numbers.)");
 	help_strings[string("dnGamma")][string("details")] = string(R"(The gamma distribution is the probability of the sum of exponentially distributed variables. Thus, it provides a natural prior distribution for parameters that could be considered as sums of exponential variables.)");
