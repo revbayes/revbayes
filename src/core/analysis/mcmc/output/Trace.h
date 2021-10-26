@@ -76,7 +76,7 @@ class Serializable;
         std::string                     parmName;
         std::vector<valueType>          values;                                     //!< the values of this trace
 
-        bool                            dirty;
+        mutable bool                    dirty;
 
     };
 
