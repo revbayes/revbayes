@@ -287,8 +287,12 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
             std::vector<double> sampling(num_states, rho->getValue());
             std::vector<double> extinction(num_states, 1.0 - rho->getValue());
 
-            if (psi != NULL && node.isFossil())
+            if ( node.isFossil() )
             {
+            	if ( psi == NULL )
+				{
+					throw(RbException("Tree has serially sampled tips, but no serial sampling rate was provided."));
+				}
                 sampling = psi->getValue();
                 extinction = pExtinction(0.0, node.getAge());
             }
