@@ -412,7 +412,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
             // either d or o could be the youngest age
             else
             {
-                partial_likelihood[i] += log( fossil[oi] * p( oi, o ) + exp(Psi[i]) * fossil[di] * p( di, d ) );
+                partial_likelihood[i] += log( exp(q(di, d, true) - q(oi, o, true)) * fossil[oi] * p( oi, o ) + exp(Psi[i]) * fossil[di] * p( di, d ) );
             }
         }
 
