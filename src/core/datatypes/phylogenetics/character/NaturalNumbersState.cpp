@@ -8,29 +8,30 @@
 
 using namespace RevBayesCore;
 
-/** Default constructor */
-NaturalNumbersState::NaturalNumbersState(size_t m) : DiscreteCharacterState( m ),
+
+/** Constructor that sets the observation */
+NaturalNumbersState::NaturalNumbersState(const std::string &s, size_t m) : DiscreteCharacterState( m+1 ),
     is_gap( false ),
     is_missing( false ),
     is_positive( false ),
     single_state( 0 ),
     num_observed_states( 0 ),
-    max_state(m-1)
+    max_state(m)
 {
-
+    setState(s);
 }
 
 
 /** Constructor that sets the observation */
-NaturalNumbersState::NaturalNumbersState(const std::string &s, size_t m) : DiscreteCharacterState( m ),
+NaturalNumbersState::NaturalNumbersState(size_t s, size_t m) : DiscreteCharacterState( m+1 ),
     is_gap( false ),
     is_missing( false ),
     is_positive( false ),
     single_state( 0 ),
     num_observed_states( 0 ),
-    max_state(m-1)
+    max_state(m)
 {
-    setState(s);
+    setStateByIndex( s );
 }
 
 
@@ -59,7 +60,7 @@ void NaturalNumbersState::addStateDescriptions(const std::vector<std::string>& d
 std::string NaturalNumbersState::getDataType( void ) const
 {
     
-    return "NaturalNumber";
+    return "NaturalNumbers";
 }
 
 
@@ -231,7 +232,6 @@ void NaturalNumbersState::setState(const std::string &symbol)
                 state.insert(pos);
                 num_observed_states = 1;
                 single_state = pos;
-                max_state = std::max(single_state, max_state);
             }
         }
         catch( boost::bad_lexical_cast const& )
@@ -259,7 +259,7 @@ void NaturalNumbersState::addState(const std::string &symbol)
 
 RbBitSet NaturalNumbersState::getState(void) const
 {
-    RbBitSet bitstate(max_state + 1);
+    RbBitSet bitstate(max_state+1);
 
     for (std::set<size_t>::iterator it = state.begin(); it != state.end(); it++)
     {
@@ -286,6 +286,5 @@ void NaturalNumbersState::setStateByIndex(size_t index)
     single_state = index;
     state.clear();
     state.insert( index );
-    max_state = std::max(index, max_state);
 }
 
