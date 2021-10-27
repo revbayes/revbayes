@@ -15,7 +15,7 @@ NaturalNumbersState::NaturalNumbersState(size_t m) : DiscreteCharacterState( m )
     is_positive( false ),
     single_state( 0 ),
     num_observed_states( 0 ),
-    max_state(m - (m > 0))
+    max_state(m-1)
 {
 
 }
@@ -28,7 +28,7 @@ NaturalNumbersState::NaturalNumbersState(const std::string &s, size_t m) : Discr
     is_positive( false ),
     single_state( 0 ),
     num_observed_states( 0 ),
-    max_state(m - (m > 0))
+    max_state(m-1)
 {
     setState(s);
 }
