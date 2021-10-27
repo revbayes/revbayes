@@ -16,7 +16,6 @@ SSE_ODE::SSE_ODE( const std::vector<double> &m, const RateGenerator* q, double r
     Q( q ),
     rate( r ),
     extinction_only( extinction_only ),
-    use_speciation_from_event_map( false ),
     backward_time( backward_time ),
     allow_rate_shifts_extinction( allow_shifts_extinct )
 {

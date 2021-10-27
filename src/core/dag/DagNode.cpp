@@ -26,8 +26,7 @@ DagNode::DagNode( const std::string &n ) : Parallelizable(),
     prior_only( false ),
     touched_elements(),
     ref_count( 0 ),
-    visit_flags( std::vector<bool>(5, false) ),
-    type()
+    visit_flags( std::vector<bool>(5, false) )
 {
 
 }
@@ -51,8 +50,7 @@ DagNode::DagNode( const DagNode &n ) : Parallelizable( n ),
     prior_only( n.prior_only ),
     touched_elements( n.touched_elements ),
     ref_count( 0 ),
-    visit_flags( n.visit_flags ),
-    type()
+    visit_flags( n.visit_flags )
 {
 
 }

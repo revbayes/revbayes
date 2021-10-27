@@ -17,8 +17,7 @@ namespace RevBayesCore { class Tree; }
 
 using namespace RevBayesCore;
 
-MultispeciesCoalescentUniformPrior::MultispeciesCoalescentUniformPrior(const TypedDagNode<Tree> *sp, const std::vector<Taxon> &t) : AbstractMultispeciesCoalescent(sp, t),
-        max_theta(NULL)
+MultispeciesCoalescentUniformPrior::MultispeciesCoalescentUniformPrior(const TypedDagNode<Tree> *sp, const std::vector<Taxon> &t) : AbstractMultispeciesCoalescent(sp, t)
 {
     
 }
