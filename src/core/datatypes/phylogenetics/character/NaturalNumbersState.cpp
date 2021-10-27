@@ -8,28 +8,38 @@
 
 using namespace RevBayesCore;
 
-
-/** Constructor that sets the observation */
-NaturalNumbersState::NaturalNumbersState(const std::string &s, size_t m) : DiscreteCharacterState( m+1 ),
+/** Default constructor */
+NaturalNumbersState::NaturalNumbersState(size_t n) : DiscreteCharacterState( n ),
     is_gap( false ),
     is_missing( false ),
-    is_positive( false ),
-    single_state( 0 ),
+    index_single_state( 0 ),
     num_observed_states( 0 ),
-    max_state(m)
+    state(n)
+{
+    
+}
+
+
+
+/** Constructor that sets the observation */
+NaturalNumbersState::NaturalNumbersState(const std::string &s, int m) : DiscreteCharacterState( m ),
+    is_gap( false ),
+    is_missing( false ),
+    index_single_state( 0 ),
+    num_observed_states( 0 ),
+    state(m)
 {
     setState(s);
 }
 
 
 /** Constructor that sets the observation */
-NaturalNumbersState::NaturalNumbersState(size_t s, size_t m) : DiscreteCharacterState( m+1 ),
+NaturalNumbersState::NaturalNumbersState(int s, int m) : DiscreteCharacterState( m ),
     is_gap( false ),
     is_missing( false ),
-    is_positive( false ),
-    single_state( 0 ),
+    index_single_state( 0 ),
     num_observed_states( 0 ),
-    max_state(m)
+    state(m)
 {
     setStateByIndex( s );
 }
@@ -42,11 +52,10 @@ NaturalNumbersState* NaturalNumbersState::clone( void ) const
 }
 
 
-void NaturalNumbersState::addState(size_t s)
+void NaturalNumbersState::addState(int s)
 {
     
-    state.insert(s);
-    max_state = std::max(s, max_state);
+    state.set( s );
     ++num_observed_states;
 }
 
@@ -66,9 +75,9 @@ std::string NaturalNumbersState::getDataType( void ) const
 
 std::string NaturalNumbersState::getStateDescription( void ) const
 {
-    if (state_descriptions.size() > single_state)
+    if (state_descriptions.size() > index_single_state)
     {
-        return state_descriptions[ single_state ];
+        return state_descriptions[ index_single_state ];
     }
     else
     {
@@ -95,43 +104,42 @@ std::string NaturalNumbersState::getStateLabels( void ) const
 
 std::string NaturalNumbersState::getStringValue(void) const
 {
-    if ( isGapState() )
-    {
-        return "-";
-    }
     
     if ( isMissingState() )
     {
         return "?";
     }
     
-    if ( isPositiveState() )
+    if ( isGapState() )
     {
-        return "+";
+        return "-";
     }
-
+    
     if ( isAmbiguous() == true )
     {
         std::string tmp = "(";
         bool is_first = true;
-        for (std::set<size_t>::iterator it = state.begin(); it != state.end(); it++)
+        for (size_t i=0; i<getNumberOfStates(); ++i)
         {
-            if ( is_first == false )
+            if ( state.isSet(i) == true )
             {
-                tmp += " ";
+                if ( is_first == false )
+                {
+                    tmp += " ";
+                }
+                else
+                {
+                    is_first = false;
+                }
+                tmp += boost::lexical_cast<std::string>(i);
             }
-            else
-            {
-                is_first = false;
-            }
-            tmp += boost::lexical_cast<std::string>(*it);
         }
         tmp += ")";
         
         return tmp;
     }
     
-    return boost::lexical_cast<std::string>(single_state);
+    return boost::lexical_cast<std::string>(index_single_state);
     
 }
 
@@ -148,12 +156,6 @@ bool NaturalNumbersState::isMissingState( void ) const
 }
 
 
-bool NaturalNumbersState::isPositiveState( void ) const
-{
-    return is_positive;
-}
-
-
 void NaturalNumbersState::setGapState( bool tf )
 {
     is_gap = tf;
@@ -166,18 +168,11 @@ void NaturalNumbersState::setMissingState( bool tf )
     
     if ( is_missing == true )
     {
+        for (size_t i=0; i<getNumberOfStates(); ++i)
+        {
+            state.set(i);
+        }
         num_observed_states = getNumberOfStates();
-    }
-}
-
-
-void NaturalNumbersState::setPositiveState( bool tf )
-{
-    is_positive = tf;
-
-    if ( is_positive == true )
-    {
-        num_observed_states = getNumberOfStates() - 1;
     }
 }
 
@@ -192,10 +187,6 @@ void NaturalNumbersState::setState(const std::string &symbol)
     else if ( symbol == "?")
     {
         setMissingState( true );
-    }
-    else if ( symbol == "+")
-    {
-        setPositiveState( true );
     }
     else
     {
@@ -213,10 +204,9 @@ void NaturalNumbersState::setState(const std::string &symbol)
                     if (symbol[i] == ' ' || symbol[i] == ')') 
                     {
                         size_t pos = boost::lexical_cast<size_t>( temp );
-                        state.insert( pos );
-                        max_state = std::max(pos, max_state);
+                        state.set( pos );
                         num_observed++;
-                        single_state = pos;
+                        index_single_state = pos;
                         temp = "";
                     }
                     else
@@ -229,9 +219,9 @@ void NaturalNumbersState::setState(const std::string &symbol)
             else
             {
                 size_t pos = boost::lexical_cast<size_t>( symbol );
-                state.insert(pos);
+                state.set( pos );
                 num_observed_states = 1;
-                single_state = pos;
+                index_single_state = pos;
             }
         }
         catch( boost::bad_lexical_cast const& )
@@ -249,33 +239,26 @@ void NaturalNumbersState::addState(const std::string &symbol)
 {
     ++num_observed_states;
     
-    size_t s = boost::lexical_cast<size_t>( symbol );
+    std::string labels = getStateLabels();
+    size_t pos = labels.find(symbol);
     
-    state.insert( s );
-    max_state = std::max(s, max_state);
-    single_state = s;
+    state.set( pos );
+    index_single_state = pos;
 }
 
 
 RbBitSet NaturalNumbersState::getState(void) const
 {
-    RbBitSet bitstate(max_state+1);
-
-    for (std::set<size_t>::iterator it = state.begin(); it != state.end(); it++)
-    {
-        bitstate.set(*it);
-    }
-
-    return bitstate;
+    return state;
 }
 
 
 void NaturalNumbersState::setToFirstState(void)
 {
     num_observed_states = 1;
-    single_state = 0;
+    index_single_state = 0;
     state.clear();
-    state.insert( 0 );
+    state.set( 0 );
 }
 
 
@@ -283,8 +266,8 @@ void NaturalNumbersState::setStateByIndex(size_t index)
 {
     
     num_observed_states = 1;
-    single_state = index;
+    index_single_state = index;
     state.clear();
-    state.insert( index );
+    state.set( index );
 }
 

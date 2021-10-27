@@ -19,7 +19,6 @@
 
 #include <stddef.h>
 #include <ostream>
-#include <set>
 #include <vector>
 
 #include "DiscreteCharacterState.h"
@@ -30,8 +29,9 @@ namespace RevBayesCore {
     class NaturalNumbersState : public DiscreteCharacterState {
         
     public:
-        NaturalNumbersState(size_t s=0, size_t m=0);                                        //!< Constructor with an observation
-        NaturalNumbersState(const std::string &s, size_t m=0);                              //!< Constructor with an observation
+        NaturalNumbersState(size_t n=10);                                                      //!< Default constructor
+        NaturalNumbersState(const std::string &s, int m);                                   //!< Constructor with an observation
+        NaturalNumbersState(int s, int m);                                                  //!< Constructor with an observation
                 
         NaturalNumbersState*            clone(void) const;                                  //!< Get a copy of this object
         
@@ -42,7 +42,7 @@ namespace RevBayesCore {
         void                            setState(const std::string &symbol);                //!< Compute the internal state value for this character.
         void                            setStateByIndex(size_t index);                      //!< Set the discrete observation
 
-        void                            addState(size_t s);                                 //!< Add the state with the given index.
+        void                            addState(int s);                                    //!< Add the state with the given index.
         void                            addStateDescriptions(const std::vector<std::string>& d);
         std::string                     getDataType(void) const;                            //!< Get the datatype as a common string.
         std::string                     getStateDescription(void) const;
@@ -51,23 +51,20 @@ namespace RevBayesCore {
         std::string                     getStringValue(void) const;                         //!< Get a representation of the character as a string
         bool                            isGapState(void) const;                             //!< Get whether this is a gapped character state
         bool                            isMissingState(void) const;                         //!< Get whether this is a missing character state
-        bool                            isPositiveState(void) const;                        //!< Get whether this is a positive character state
         void                            setGapState(bool tf);                               //!< set whether this is a gapped character
         void                            setMissingState(bool tf);                           //!< set whether this is a missing character
-        void                            setPositiveState(bool tf);                          //!< set whether this is a positive character
         
     private:
         
         bool                            is_gap;
         bool                            is_missing;
-        bool                            is_positive;
-        size_t                          single_state;
+        size_t                          index_single_state;
         size_t                          num_observed_states;
-        size_t                          max_state;
-        std::set<size_t>                state;
+        RbBitSet                        state;
         std::vector<std::string>        state_descriptions;
 
     };
+//	extern size_t						g_MAX_NAT_NUM_STATES;
 }
 
 #endif
