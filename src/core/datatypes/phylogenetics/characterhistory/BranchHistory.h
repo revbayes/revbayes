@@ -16,20 +16,16 @@ class CharacterEvent;
     class BranchHistory : public Cloneable {
 
     public:
-
-        BranchHistory(size_t nc, size_t idx, std::set<int> sc);
-        BranchHistory(size_t nc, size_t idx);
-        BranchHistory(const BranchHistory& m);
-
         ~BranchHistory(void);
         
         // overloaded operators
         BranchHistory& operator=(const BranchHistory& bh);
+        //bool operator()(const BranchHistory&) const;
         bool operator<(const BranchHistory&) const;
 
 
         // pure virtual methods
-        virtual BranchHistory*                                          clone(void) const;
+        virtual BranchHistory*                                          clone(void) const = 0;
 
         // public methods
         bool                                                            areEventTimesValid(const TopologyNode &node) const;
@@ -64,7 +60,13 @@ class CharacterEvent;
         void                                                            updateHistory(const std::multiset<CharacterEvent*,CharacterEventCompare>& updateSet, const std::set<size_t>& indexSet);
         void                                                            updateHistory(const std::multiset<CharacterEvent*,CharacterEventCompare>& updateSet);
 
+        
+
     protected:
+        //BranchHistory(void);
+        BranchHistory(size_t nc, size_t idx);
+        BranchHistory(size_t nc, size_t idx, std::set<int> sc);
+        BranchHistory(const BranchHistory& m);
 
         // container/element arguments
         size_t                                                          n_characters;

@@ -136,12 +136,6 @@ bool BranchHistory::areEventTimesValid(const TopologyNode &node) const
 }
 
 
-BranchHistory* BranchHistory::clone(void) const
-{
-    return new BranchHistory(*this);
-}
-
-
 const std::vector<CharacterEvent*>& BranchHistory::getChildCharacters(void) const
 {
     return child_characters;
