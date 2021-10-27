@@ -289,10 +289,10 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
 
             if ( node.isFossil() )
             {
-            	if ( psi == NULL )
-				{
-					throw(RbException("Tree has serially sampled tips, but no serial sampling rate was provided."));
-				}
+                if ( psi == NULL )
+                {
+                    throw(RbException("Tree has serially sampled tips, but no serial sampling rate was provided."));
+                }
                 sampling = psi->getValue();
                 extinction = pExtinction(0.0, node.getAge());
             }

@@ -369,11 +369,11 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::computeNodeProbabilit
             
             if ( node.isFossil() )
             {
-            	if ( phi == NULL )
-            	{
-            		throw(RbException("Tree has serially sampled tips, but no serial sampling rate was provided."));
-            	}
-            	sampling = phi->getValue()[index_epoch];
+                if ( phi == NULL )
+                {
+                    throw(RbException("Tree has serially sampled tips, but no serial sampling rate was provided."));
+                }
+                sampling = phi->getValue()[index_epoch];
                 extinction = pExtinction(0.0, node.getAge());
             }
             
