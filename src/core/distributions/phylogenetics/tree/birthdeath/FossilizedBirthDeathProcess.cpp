@@ -142,45 +142,66 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
 {
     double lnProb = computeLnProbabilityRanges();
 
-    bool extended = false;
-
     for(size_t i = 0; i < taxa.size(); i++)
     {
         // include the anagenetic speciation density for descendants of sampled ancestors
-        if ( I[i] == true )
+        if ( dirty_taxa[i] && I[i] == true )
         {
-            double y_a = b_i[i];
-            double d   = d_i[i];
+            double b = b_i[i];
+            double d = d_i[i];
 
-            size_t y_ai = findIndex(y_a);
-            size_t di   = findIndex(d);
+            size_t bi  = findIndex(b);
+            size_t oi = findIndex(age[i]);
+            size_t di = findIndex(d);
 
             if ( extended )
             {
                 // offset speciation density
-                lnProb -= log( birth[y_ai] );
+                lnProb -= log( birth[bi] );
                 // offset the extinction density for the ancestor
-                lnProb -= log( death[y_ai] );
+                lnProb -= log( death[bi] );
                 // include anagenetic speciation density
-                lnProb += log( anagenetic[y_ai] );
+                lnProb += log( anagenetic[bi] );
             }
             else
             {
                 // replace q with q~ at the birth time
-                double x = q(y_ai, y_a, true) - q(y_ai, y_a);
+                double qbi = q(bi, b, true) - q(bi, b);
 
-                size_t oi = findIndex(age[i]);
-
+                double qob = 0.0;
                 // replace intermediate q terms
-                for (size_t j = oi; j < y_ai; j++)
+                for (size_t j = oi; j < b; j++)
                 {
-                    x += q_tilde_i[j] - q_i[j];
+                    qob += q_tilde_i[j] - q_i[j];
                 }
                 // replace q terms at oldest occurrence age
-                x -= q(oi, age[i], true) - q(oi, age[i]);
+                double qoi = q(oi, age[i], true) - q(oi, age[i]);
 
                 // compute definite integral
-                lnProb += log(-expm1(x));
+                double f1 = -expm1(qbi+qob-qoi);
+
+                if ( complete || k_i[i] > 1 || taxa[i].getMinAge() == taxa[i].getMaxAge() )
+                {
+                    partial_likelihood[i] += log(f1);
+                }
+                else
+                {
+                    double qdi = q(di, d, true) - q(di, d);
+                    double qod = 0.0;
+                    // replace intermediate q terms
+                    for (size_t j = di; j < oi; j++)
+                    {
+                        qod += q_tilde_i[j] - q_i[j];
+                    }
+
+                    // undo calculation from base class
+                    partial_likelihood[i] -= log(1.0 + exp(qdi-qoi-qod-Psi[i]));
+
+                    // compute definite integral
+                    double f2 = -expm1(qbi+qob+qod-qdi);
+
+                    partial_likelihood[i] += log(f1 + exp(qdi-qoi-qod-Psi[i]) * f2);
+                }
             }
         }
     }

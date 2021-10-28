@@ -238,7 +238,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
             partial_likelihood[i] = 0.0;
 
             // include speciation density
-            partial_likelihood[i] += log( birth[bi] );
+            partial_likelihood[i] += log(birth[bi]);
 
             // multiply by q at the birth time
             partial_likelihood[i] += q(bi, b);
@@ -268,7 +268,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                 partial_likelihood[i] += q_tilde_i[j];
             }
 
-            double qdi = q( di, d, true);
+            double qdi = q(di, d, true);
 
             // divide by q_tilde at the death time
             partial_likelihood[i] -= qdi;
@@ -320,6 +320,8 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                         }
                     }
 
+                    Psi[i] = 0.0;
+
                     double recip_o = 0.0;
                     double recip_y = 0.0;
                     double recip_oy = 0.0;
@@ -359,7 +361,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                         // include density for oldest sample
                         Psi[i] += log(fossil[oi]);
 
-                        // compute poisson density for count
+                        // compute poisson density for k
                         Psi[i] -= RbMath::lnFactorial(k_i[i]);
                     }
                     else if ( extended || k_i[i] > 1 )
@@ -373,7 +375,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
                         k = extended ? k_i[i] - 1 : k_i[i] - 2;
 
-                        Psi[i] -= k*log(psi_y_o);
+                        Psi[i] -= k * log(psi_y_o);
                         Psi[i] += k > 0 ? log(RbMath::incompleteGamma(psi_y_o, k, true, true)) : 0.0;
                     }
                     // compute the incomplete sampling term later
@@ -396,12 +398,12 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                 // d is an extinction event
                 if ( extended )
                 {
-                    partial_likelihood[i] += log( death[di] );
+                    partial_likelihood[i] += log(death[di]);
                 }
                 // d is the youngest sample
                 else if ( complete || k_i[i] > 1 )
                 {
-                    partial_likelihood[i] += log( p( di, d ) );
+                    partial_likelihood[i] += log(p( di, d ));
                 }
             }
 
@@ -410,13 +412,19 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
             {
                 partial_likelihood[i] += Psi[i];
             }
-            // let d be the oldest and youngest sample
+            // let d be the oldest and youngest sample for kappa=0
             else
             {
-                double x = qdi - qoi - q(di, d);
+                double qdi = q(di, d, true) - q(di, d);
+                double qod = 0.0;
+                // replace intermediate q terms
+                for (size_t j = di; j < oi; j++)
+                {
+                    qod += q_tilde_i[j] - q_i[j];
+                }
 
-                partial_likelihood[i] += Psi[i] + log( exp(x-Psi[i]) + 1.0 );
-                partial_likelihood[i] += log( fossil[di] * p( di, d ) );
+                partial_likelihood[i] += Psi[i] + log(1.0 + exp(qdi-qoi-qod-Psi[i]));
+                partial_likelihood[i] += log(fossil[di]) + log(p( di, d ));
             }
         }
 
@@ -426,7 +434,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
     size_t ori = findIndex(origin);
 
     // the origin is not a speciation event
-    lnProbTimes -= log( birth[ori] );
+    lnProbTimes -= log(birth[ori]);
 
     // add the sampled extant tip age term
     if ( homogeneous_rho->getValue() > 0.0)
@@ -442,12 +450,12 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
     // condition on sampling
     if ( condition == "sampling" )
     {
-        lnProbTimes -= log( 1.0 - p(ori, origin, false) );
+        lnProbTimes -= log(1.0 - p(ori, origin, false));
     }
     // condition on survival
     else if ( condition == "survival" )
     {
-        lnProbTimes -= log( 1.0 - p(ori, origin, true) );
+        lnProbTimes -= log(1.0 - p(ori, origin, true));
     }
 
     if ( RbMath::isFinite(lnProbTimes) == false )
