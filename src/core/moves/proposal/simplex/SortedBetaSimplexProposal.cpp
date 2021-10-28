@@ -24,12 +24,10 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-SortedBetaSimplexProposal::SortedBetaSimplexProposal( StochasticNode<Simplex> *n, double a, double p ) : SimpleProposal<Simplex>( n, p ),
-    storedValue( Simplex() ),
-    alpha( a )
+SortedBetaSimplexProposal::SortedBetaSimplexProposal( StochasticNode<Simplex> *n, double a, double p )
+    : SimpleProposal<Simplex>( n, p ), storedValue( Simplex() ), alpha( a )
 {
     // tell the base class to add the node
-
 }
 
 
@@ -40,7 +38,7 @@ SortedBetaSimplexProposal::SortedBetaSimplexProposal( StochasticNode<Simplex> *n
  */
 void SortedBetaSimplexProposal::cleanProposal( void )
 {
-    ; // do nothing
+    // do nothing
 }
 
 /**
@@ -51,7 +49,6 @@ void SortedBetaSimplexProposal::cleanProposal( void )
  */
 SortedBetaSimplexProposal* SortedBetaSimplexProposal::clone( void ) const
 {
-
     return new SortedBetaSimplexProposal( *this );
 }
 

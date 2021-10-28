@@ -37,7 +37,7 @@ mi = 0
 
 
 pi_prior <- v(1,1,1,1) 
-pi ~ dnDirichletSorted(pi_prior)
+pi ~ dnSortedDirichlet(pi_prior)
 moves[++mi] = mvSortedBetaSimplex(pi,weight=2)
 
 Q := fnF81(pi) 
