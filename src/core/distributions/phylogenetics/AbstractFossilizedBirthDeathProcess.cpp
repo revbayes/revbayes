@@ -316,15 +316,6 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                         }
                     }
 
-                    // include density for oldest sample
-                    Psi[i] = log(fossil[oi]);
-
-                    // include density for youngest sample
-                    if ( k_i[i] > 1 && not extended )
-                    {
-                        Psi[i] += log(fossil[di]);
-                    }
-
                     double recip_o = 0.0;
                     double recip_y = 0.0;
                     double recip_oy = 0.0;
@@ -361,16 +352,22 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
                     if ( complete )
                     {
+                        // include density for oldest sample
+                        Psi[i] += log(fossil[oi]);
+
                         // compute poisson density for count
                         Psi[i] -= RbMath::lnFactorial(k_i[i]);
                     }
                     else if ( extended || k_i[i] > 1 )
 					{
-                        // compute poisson density for count + kappa, kappa >= 0
+                        // include density for oldest sample
+                        Psi[i] += log(fossil[oi]);
+
+                        // compute poisson density for k + kappa, kappa >= 0
                         Psi[i] -= log(k_i[i]);
                         Psi[i] += psi_y_o;
 
-                        k = k_i[i] - 1;
+                        k = extended ? k_i[i] - 1 : k_i[i] - 2;
 
                         Psi[i] -= k*log(psi_y_o);
                         Psi[i] += k > 0 ? log(RbMath::incompleteGamma(psi_y_o, k, true, true)) : 0.0;
@@ -404,15 +401,18 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                 }
             }
 
-            // d is always the youngest age
-            if ( extended || complete || k_i[i] > 1 )
+            // d is the the youngest sample
+            if ( extended || complete || k_i[i] > 1 || min_age == max_age )
             {
                 partial_likelihood[i] += Psi[i];
             }
-            // either d or o could be the youngest age
+            // let d be the oldest and youngest sample
             else
             {
-                partial_likelihood[i] += log( exp(q(di, d, true) - q(oi, o, true)) * fossil[oi] * p( oi, o ) + exp(Psi[i]) * fossil[di] * p( di, d ) );
+                double x = q(di, d, true) - q(oi, o, true) + q(oi, o) - q(di, d);
+
+                partial_likelihood[i] += Psi[i] + log( exp(x-Psi[i]) + 1.0 );
+                partial_likelihood[i] += log( fossil[di] * p( di, d ) );
             }
         }
 
