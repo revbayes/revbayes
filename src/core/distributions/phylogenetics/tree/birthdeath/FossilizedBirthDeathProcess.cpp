@@ -147,6 +147,8 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
         // include the anagenetic speciation density for descendants of sampled ancestors
         if ( dirty_taxa[i] && I[i] == true )
         {
+            lnProb -= partial_likelihood[i];
+
             double b = b_i[i];
             double d = d_i[i];
 
@@ -157,11 +159,11 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
             if ( extended )
             {
                 // offset speciation density
-                lnProb -= log( birth[bi] );
+                partial_likelihood[i] -= log( birth[bi] );
                 // offset the extinction density for the ancestor
-                lnProb -= log( death[bi] );
+                partial_likelihood[i] -= log( death[bi] );
                 // include anagenetic speciation density
-                lnProb += log( anagenetic[bi] );
+                partial_likelihood[i] += log( anagenetic[bi] );
             }
             else
             {
@@ -203,6 +205,8 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
                     partial_likelihood[i] += log(f1 + exp(qdi-qoi-qod-Psi[i]) * f2);
                 }
             }
+
+            lnProb += partial_likelihood[i];
         }
     }
 
