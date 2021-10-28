@@ -75,6 +75,16 @@ if get_option('jupyter')
   add_project_arguments(['-DRB_XCODE'], language : 'cpp')
 endif
 
+if get_option('beagle')
+  rb_name += '-beagle'
+  add_project_arguments(['-DRB_BEAGLE','-DRB_BEAGLE_DEBUG'], language : 'cpp')
+  hmsbeagle = dependency('hmsbeagle-1')
+  eigen = dependency('eigen3')
+  beagle = [hmsbeagle,eigen]
+else
+  beagle = []
+endif
+
 ####
 subdir('src')
 
@@ -82,12 +92,12 @@ subdir('src')
 core = static_library('rb-core',
                       core_sources,
                       include_directories: [src_inc],
-                      dependencies: [mpi])
+                      dependencies: [mpi, beagle])
 
 revlanguage = static_library('rb-revlanguage',
                              revlanguage_sources,
                              include_directories: [src_inc],
-                             dependencies: [mpi])
+                             dependencies: [mpi, beagle])
 
 libs = static_library('rb-lib',
                       libs_sources,
@@ -104,7 +114,7 @@ rb = executable(rb_name,
                 ['src/revlanguage/main.cpp'],
                 link_with: [core, revlanguage, libs],
                 include_directories: [src_inc],
-                dependencies: [boost, mpi, openlibm],
+                dependencies: [boost, mpi, openlibm, beagle],
                 link_args: maybe_link_static,
                 install: true)
 
@@ -121,7 +131,7 @@ if get_option('studio')
                          ['src/cmd/main.cpp'],
                          link_with: [core, revlanguage, libs, cmd],
                          include_directories: [src_inc],
-                         dependencies: [boost, mpi, gtk2, openlibm],
+                         dependencies: [boost, mpi, gtk2, openlibm, beagle],
                          install: true)
 
 endif
