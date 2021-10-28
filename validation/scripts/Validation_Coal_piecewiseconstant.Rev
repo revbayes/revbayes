@@ -1,11 +1,11 @@
 ################################################################################
 #
-# RevBayes Validation Test: Exponential Demography Coalescent Process 
+# RevBayes Validation Test: Piecewise Constant Demography Coalescent Process 
 # 
-# Model: Exponential Demography Coalescent Process 
+# Model: Piecewise Constant Demography Coalescent Process 
 #            
 #
-# authors: Sebastian Hoehna
+# authors: Sebastian Hoehna, Ronja Billenstein
 #
 ################################################################################
 
@@ -32,15 +32,22 @@ monitors = VectorMonitors()
 
 pop_size_0 ~ dnUniform(0,1E3)
 pop_size_1 ~ dnUniform(0,1E3)
+pop_size_2 ~ dnUniform(0,1E3)
+pop_size_3 ~ dnUniform(0,1E3)
 moves.append( mvScale(pop_size_0, lambda=0.1, tune=true, weight=2.0) )
 moves.append( mvScale(pop_size_1, lambda=0.1, tune=true, weight=2.0) )
+moves.append( mvScale(pop_size_2, lambda=0.1, tune=true, weight=2.0) )
+moves.append( mvScale(pop_size_3, lambda=0.1, tune=true, weight=2.0) )
 
-expansion_start ~ dnUniform(50,100)
-moves.append( mvSlide(expansion_start, delta=0.1, tune=true, weight=2.0) )
-
-demo_const = dfConstant( pop_size_1 )
-demo_exp = dfExponential( N0=pop_size_0, N1=pop_size_1, t0=0, t1=expansion_start )
-psi ~ dnCoalescentDemography([demo_exp,demo_const], changePoints=[expansion_start], taxa=taxa)
+change_point_1 <- 50
+change_point_2 <- 100
+change_point_3 <- 150
+demo_const_0 = dfConstant( pop_size_0 )
+demo_const_1 = dfConstant( pop_size_1 )
+demo_const_2 = dfConstant( pop_size_2 )
+demo_const_3 = dfConstant( pop_size_3 )
+psi ~ dnCoalescentDemography([demo_const_3,demo_const_2,demo_const_1,demo_const_0], changePoints=[change_point_1,change_point_2,change_point_3], taxa=taxa)
+# psi ~ dnCoalescentDemography([demo_const_1,demo_const_0], changePoints=[change_point_1], taxa=taxa)
 
 ### the time tree is a stochastic node modeled by the constant-rate coalescent process (dnCoalescent)
 psi.clamp( observed_phylogeny )
@@ -54,7 +61,7 @@ psi.clamp( observed_phylogeny )
 mymodel = model(psi)
 
 ### set up the monitors that will output parameter values to file and screen 
-monitors.append( mnModel(filename="output/coal_exp.log",printgen=1, separator = TAB) )
+monitors.append( mnModel(filename="output/coal_pc.log",printgen=1, separator = TAB) )
 monitors.append( mnScreen(printgen=1, pop_size_0) )
 
 
@@ -66,7 +73,7 @@ monitors.append( mnScreen(printgen=1, pop_size_0) )
 mymcmc = mcmc(mymodel, monitors, moves)
 
 
-validation = validationAnalysis( mymcmc, 100, directory="output_coal_exp" )
+validation = validationAnalysis( mymcmc, 1000, directory="output_coal_pc" )
 validation.burnin(generations=2000,tuningInterval=200)
 validation.run(generations=10000)
 validation.summarize()

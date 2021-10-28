@@ -299,9 +299,24 @@ bool AbstractCoalescent::matchesConstraints( void )
  */
 void AbstractCoalescent::redrawValue( void )
 {
-    
-    simulateTree();
-    
+    bool homochronous = true;
+    // set tip names
+    for (size_t i=0; i<num_taxa; ++i)
+    {
+        if ( taxa[i].getAge() > 0.0 )
+        {
+          homochronous = false;
+          break;
+        }
+    }
+    if ( homochronous )
+    {
+        simulateTree();
+    }
+    else
+    {
+        simulateHeterochronousTree();
+    }
 }
 
 

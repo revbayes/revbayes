@@ -13,11 +13,12 @@
 # Reading in the Data #
 #######################
 
-observed_phylogeny <- readTrees( "data/primates.tree" )[1]
+#observed_phylogeny <- readTrees( "data/primates.tree" )[1]
+taxa <- readTaxonData("data/bears_taxa.tsv")
 
 # Get the names of the taxa in the tree and the age of the tree. We need these later on.
-taxa <- observed_phylogeny.taxa()
-n_taxa <- observed_phylogeny.ntips()
+#taxa <- observed_phylogeny.taxa()
+n_taxa <- taxa.size()
 
 # initialize the moves and monitors vectors
 moves = VectorMoves()
@@ -40,10 +41,10 @@ moves.append( mvSlide(expansion_start, delta=0.1, tune=true, weight=2.0) )
 
 demo_const = dfConstant( pop_size_1 )
 demo_exp = dfExponential( N0=pop_size_0, N1=pop_size_1, t0=0, t1=expansion_start )
-psi ~ dnCoalescentDemography([demo_exp,demo_const], changePoints=[expansion_start], taxa=taxa)
+psi ~ dnHeterochronousCoalescentDemography([demo_exp,demo_const], changePoints=[expansion_start], taxa=taxa)
 
 ### the time tree is a stochastic node modeled by the constant-rate coalescent process (dnCoalescent)
-psi.clamp( observed_phylogeny )
+psi.clamp( psi )
 
 #############
 # The Model 
@@ -53,11 +54,6 @@ psi.clamp( observed_phylogeny )
 ### workspace model wrapper ###
 mymodel = model(psi)
 
-### set up the monitors that will output parameter values to file and screen 
-monitors.append( mnModel(filename="output/coal_exp.log",printgen=1, separator = TAB) )
-monitors.append( mnScreen(printgen=1, pop_size_0) )
-
-
 
 ################
 # The Analysis #
@@ -66,7 +62,7 @@ monitors.append( mnScreen(printgen=1, pop_size_0) )
 mymcmc = mcmc(mymodel, monitors, moves)
 
 
-validation = validationAnalysis( mymcmc, 100, directory="output_coal_exp" )
+validation = validationAnalysis( mymcmc, 100, directory="output_coal_het_exp" )
 validation.burnin(generations=2000,tuningInterval=200)
 validation.run(generations=10000)
 validation.summarize()
