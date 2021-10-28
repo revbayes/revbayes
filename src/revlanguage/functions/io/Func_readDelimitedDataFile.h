@@ -1,29 +1,37 @@
+#ifndef Func_readDataDelimitedFile_hpp
+#define Func_readDataDelimitedFile_hpp
 
-#ifndef Func_writeCharacterDataDelimited_H
-#define Func_writeCharacterDataDelimited_H
 
 #include "Procedure.h"
+#include "RbFileManager.h"
+
+#include <map>
+#include <string>
+#include <vector>
 
 
 namespace RevLanguage {
     
     /**
-     * Function that writes character data as a delimited text file.
+     * The Rev procedure to read character data from delimited files.
      *
+     * This procedure can read several data types.
      *
      *
      * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Will Freyman)
-     * @since 2013-04-15, version 1.0
+     * @author The RevBayes Development Core Team (Michael Landis)
+     * @since 2015-03-03, version 1.0
+     *
      */
-    class Func_writeCharacterDataDelimited : public Procedure {
+    class Func_readDelimitedDataFile : public Procedure {
         
     public:
         // Basic utility functions
-        Func_writeCharacterDataDelimited*                    clone(void) const;                                          //!< Clone the object
+        Func_readDelimitedDataFile*         clone(void) const;                                          //!< Clone the object
         static const std::string&           getClassType(void);                                         //!< Get Rev type
         static const TypeSpec&              getClassTypeSpec(void);                                     //!< Get class type spec
         std::string                         getFunctionName(void) const;                                //!< Get the primary name of the function in Rev
+        std::vector<std::string>            getFunctionNameAliases(void) const;                         //!< Get the aliases of the function in Rev
         const TypeSpec&                     getTypeSpec(void) const;                                    //!< Get language type of the object
         
         // Regular functions
@@ -31,9 +39,11 @@ namespace RevLanguage {
         const ArgumentRules&                getArgumentRules(void) const;                               //!< Get argument rules
         const TypeSpec&                     getReturnType(void) const;                                  //!< Get type of return value
         
+    private:
+        std::string                         bitToState(const std::string &s);
         
     };
     
 }
 
-#endif
+#endif /* Func_readDataDelimitedFile_hpp */

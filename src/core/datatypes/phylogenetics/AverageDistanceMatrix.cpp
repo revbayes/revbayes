@@ -71,7 +71,8 @@ double AverageDistanceMatrix::getCompleteness(void) const
     {
         for(size_t j = 0; j != num_tips; j++)
         {
-            if(mask[i][j]) nonempty++;
+            // Exclude nondefined elements, unless they occur on the diagonal
+            if(i == j || mask[i][j]) nonempty++;
         }
     }
     

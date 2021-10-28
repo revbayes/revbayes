@@ -10,14 +10,29 @@
 ################################################################################
 
 
-# set my move index
-mi = 0
+## Global settings
 
-alpha <- 1.0
-beta  <- 1.0
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+alpha <- 2.0
+beta  <- 4.0
 p ~ dnBeta(alpha, beta)
 
-moves[++mi] = mvBetaProbability(p,weight=2)
+n_samples = 15
+n <- 7 # Choose an arbitrary number of trials
+
+for ( i in 1:n_samples){
+	x[i] ~ dnBinomial(p, n)
+	x[i].clamp(1)
+}
+
+moves.append( mvBetaProbability(p,weight=2) )
 
 #############
 # THE Model #
@@ -31,14 +46,11 @@ mymodel = model(p)
 
 
 
-
-monitors[1] = mnModel(filename="output/beta.log",printgen=10, separator = TAB)
-
 mymcmc = mcmc(mymodel, monitors, moves)
 
-validation = validationAnalysis( mymcmc, 1000 )
-validation.burnin(generations=10000,tuningInterval=250)
-validation.run(generations=30000)
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Beta" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
 validation.summarize()
 
 

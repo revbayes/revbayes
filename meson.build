@@ -2,7 +2,8 @@ project('RevBayes', ['cpp', 'c'],
         version: '1.0.12',
         default_options: [
           'buildtype=release',
-          'cpp_std=c++11'
+          'cpp_std=c++11',
+          'b_ndebug=if-release'
         ],
         meson_version: '>= 0.53',
         license: 'GPLv2')
@@ -22,11 +23,6 @@ elif host_machine.cpu_family().startswith('x86')
 elif host_machine.cpu_family().startswith('arm') or host_machine.cpu_family().startswith('aarch')
   # Only add sse flags for Intel architecture -- not on (say) ARM
   add_project_arguments(['-DRB_ARM'], language: 'cpp')
-endif
-
-if get_option('buildtype') == 'release' or get_option('buildtype') == 'plain'
-  add_project_arguments(['-O3'], language : 'cpp')
-  add_project_arguments(['-O3'], language : 'c')
 endif
 
 if get_option('buildtype') == 'debug' or get_option('buildtype') == 'debugoptimized'
@@ -63,6 +59,8 @@ want_static = get_option('static')
 
 # This doesn't build an internal boost from the internal copy, yet.
 boost = dependency('boost', modules : boost_modules, static: want_static)
+
+openlibm = dependency('openlibm', static: want_static)
 
 rb_name = 'rb'
 if get_option('mpi')
@@ -106,7 +104,7 @@ rb = executable(rb_name,
                 ['src/revlanguage/main.cpp'],
                 link_with: [core, revlanguage, libs],
                 include_directories: [src_inc],
-                dependencies: [boost, mpi],
+                dependencies: [boost, mpi, openlibm],
                 link_args: maybe_link_static,
                 install: true)
 
@@ -123,7 +121,7 @@ if get_option('studio')
                          ['src/cmd/main.cpp'],
                          link_with: [core, revlanguage, libs, cmd],
                          include_directories: [src_inc],
-                         dependencies: [boost, mpi, gtk2],
+                         dependencies: [boost, mpi, gtk2, openlibm],
                          install: true)
 
 endif
@@ -144,7 +142,17 @@ summary({'exe name': rb_name,
 summary({'prefix': get_option('prefix'),
         },section: 'Directories')
 
+# 3.3 Enable/Disable extra debugging for dynamic programming
+assertions_off = get_option('b_ndebug') == 'true' or (get_option('b_ndebug') == 'if-release' and
+                                                      (get_option('buildtype') == 'release' or
+                                                       get_option('buildtype') == 'plain')
+                                                     )
+assertions_enabled = 'enabled'
+if assertions_off
+  assertions_enabled = 'disabled'
+endif
+
 summary({'optimization': get_option('optimization'),
-         'b_ndebug': get_option('b_ndebug'),
          'debug': get_option('debug'),
+         'assertions': assertions_enabled,
         },section: 'Configuration')
