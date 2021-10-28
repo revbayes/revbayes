@@ -6,7 +6,6 @@
 #include "BinaryState.h"
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "RlMonitor.h"
 #include "IntegerPos.h"
 #include "RbException.h"
 #include "RevObject.h"
@@ -16,6 +15,7 @@
 #include "TypeSpec.h"
 #include "NaturalNumbersState.h"
 #include "DnaState.h"
+#include "CodonState.h"
 #include "StandardState.h"
 #include "AminoAcidState.h"
 #include "PoMoState.h"
@@ -33,7 +33,7 @@ namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 
-Mntr_SiteMixtureAllocation::Mntr_SiteMixtureAllocation(void) : Monitor()
+Mntr_SiteMixtureAllocation::Mntr_SiteMixtureAllocation(void) : FileMonitor()
 {
     
 }
@@ -56,7 +56,7 @@ void Mntr_SiteMixtureAllocation::constructInternalObject( void )
 {
     const std::string&                  fn      = static_cast<const RlString &>( filename->getRevObject() ).getValue();
     const std::string&                  sep     = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    unsigned int                                 g       = (int)static_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
+    unsigned int                        g       = (int)static_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
     
     bool                                ap      = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
     bool                                wv      = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
@@ -80,6 +80,14 @@ void Mntr_SiteMixtureAllocation::constructInternalObject( void )
     {
         RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::DnaState> *m;
         m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::DnaState>(ctmc_sn, (unsigned long)g, fn, sep);
+        m->setAppend( ap );
+        m->setPrintVersion(wv);
+        value = m;
+    }
+    else if (character == "Codon")
+    {
+        RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::CodonState> *m;
+        m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::CodonState>(ctmc_sn, (unsigned long)g, fn, sep);
         m->setAppend( ap );
         m->setPrintVersion(wv);
         value = m;
@@ -126,7 +134,7 @@ void Mntr_SiteMixtureAllocation::constructInternalObject( void )
     }
     else
     {
-        throw RbException( "Incorrect character type specified. Valid options are: AA, DNA, NaturalNumbers, PoMo, Protein, RNA, Standard, Binary/Restriction" );
+        throw RbException( "Incorrect character type specified. Valid options are: AA, DNA, Codon, NaturalNumbers, PoMo, Protein, RNA, Standard, Binary/Restriction" );
     }
     
 }
@@ -176,12 +184,11 @@ const MemberRules& Mntr_SiteMixtureAllocation::getParameterRules(void) const
     if ( !rules_set )
     {
         asMonitorMemberRules.push_back( new ArgumentRule("ctmc"           , AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
-        asMonitorMemberRules.push_back( new ArgumentRule("filename"       , RlString::getClassTypeSpec() , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         asMonitorMemberRules.push_back( new ArgumentRule("type"           , RlString::getClassTypeSpec() , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        asMonitorMemberRules.push_back( new ArgumentRule("printgen"       , IntegerPos::getClassTypeSpec()  , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new IntegerPos(1) ) );
-        asMonitorMemberRules.push_back( new ArgumentRule("separator"      , RlString::getClassTypeSpec() , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
-        asMonitorMemberRules.push_back( new ArgumentRule("append"         , RlBoolean::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
-        asMonitorMemberRules.push_back( new ArgumentRule("version"        , RlBoolean::getClassTypeSpec(), "Should we record the software version?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+
+        // add the rules from the base class
+        const MemberRules &parentRules = FileMonitor::getParameterRules();
+        asMonitorMemberRules.insert(asMonitorMemberRules.end(), parentRules.begin(), parentRules.end());
 
         rules_set = true;
     }
@@ -211,18 +218,7 @@ void Mntr_SiteMixtureAllocation::printValue(std::ostream &o) const
 void Mntr_SiteMixtureAllocation::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     
-    if ( name == "" ) {
-        vars.push_back( var );
-    }
-    else if ( name == "filename" )
-    {
-        filename = var;
-    }
-    else if ( name == "separator" )
-    {
-        separator = var;
-    }
-    else if ( name == "type" )
+    if ( name == "type" )
     {
         monitorType = var;
     }
@@ -230,21 +226,9 @@ void Mntr_SiteMixtureAllocation::setConstParameter(const std::string& name, cons
     {
         ctmc = var;
     }
-    else if ( name == "printgen" )
-    {
-        printgen = var;
-    }
-    else if ( name == "append" )
-    {
-        append = var;
-    }
-    else if ( name == "version" )
-    {
-        version = var;
-    }
     else
     {
-        Monitor::setConstParameter(name, var);
+        FileMonitor::setConstParameter(name, var);
     }
     
 }

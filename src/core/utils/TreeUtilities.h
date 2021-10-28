@@ -33,7 +33,7 @@ namespace RevBayesCore {
     namespace TreeUtilities {
 
         // these function are for public use
-        std::vector<double>     calculateEDR(const Tree& t);                                                                                  //!< get distribution of weighted times between speciation/coalescent events in a tree
+        std::vector<double>     calculateEDR(const Tree& t);                                                                            //!< get distribution of weighted times between speciation/coalescent events in a tree
         double                  calculateMPD(const Tree& t, const AbstractHomologousDiscreteCharacterData& c, size_t site_index, size_t state_index, bool zscore, bool branch_lengths, size_t num_randomizations); //!< calculate the Mean Pairwise Distance
         double                  calculateMNTD(const Tree& t, const AbstractHomologousDiscreteCharacterData& c, size_t site_index, size_t state_index, bool zscore, bool branch_lengths, size_t num_randomizations); //!< calculate the Mean Nearest Taxon Distance
         void                    climbUpTheTree(const TopologyNode& node, boost::unordered_set< const TopologyNode* >& node_root_path) ; //!< find path from given node to root
@@ -42,7 +42,7 @@ namespace RevBayesCore {
         Tree*                   convertTree(const Tree& t, bool resetIndex=true);                                                       //!< convert tree to time tree
         double                  getAgeOfMRCA(const Tree& t, const std::string& first, const std::string& second);                       //!< calculate age of MRCA based on tip names
         void                    getAges(const TopologyNode& n, std::vector<double>& ages, bool internals_only=true);                    //!< fill vector with node ages
-        AverageDistanceMatrix   getAverageDistanceMatrix(const RbVector<DistanceMatrix>& matvect);
+        AverageDistanceMatrix   getAverageDistanceMatrix(const RbVector<DistanceMatrix>& matvect, const RbVector<double>* weights);     //!< calculate the (possibly weighted) average of multiple distance matrices
         int                     getCollessMetric(const TopologyNode&, int& size);                                                       //!< calculate the Colless metric
         DistanceMatrix*         getDistanceMatrix(const Tree& tree);                                                                    //!< get matrix of all distances
         int                     getFitchScore(const Tree& t, const AbstractHomologousDiscreteCharacterData &c);                         //!< calculate the parsimony score

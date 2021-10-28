@@ -1,5 +1,5 @@
-#ifndef Func_readCharacterDataUniversal_H
-#define Func_readCharacterDataUniversal_H
+#ifndef Func_readCharacterData_H
+#define Func_readCharacterData_H
 
 #include "Procedure.h"
 #include "RbFileManager.h"
@@ -49,11 +49,11 @@ namespace RevLanguage {
      * the table is unlikely to complete with Yes's (Y) in all of the cells.
      */
     
-    class Func_readCharacterDataUniversal : public Procedure {
+    class Func_readCharacterData : public Procedure {
         
     public:
         // Basic utility functions
-        Func_readCharacterDataUniversal*    clone(void) const;                                                      //!< Clone the object
+        Func_readCharacterData*             clone(void) const;                                                      //!< Clone the object
         static const std::string&           getClassType(void);                                                     //!< Get Rev type
         static const TypeSpec&              getClassTypeSpec(void);                                                 //!< Get class type spec
         std::string                         getFunctionName(void) const;                                            //!< Get the primary name of the function in Rev

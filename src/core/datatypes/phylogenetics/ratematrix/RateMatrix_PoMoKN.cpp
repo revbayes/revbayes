@@ -1,89 +1,82 @@
-#include "CodonState.h"
-#include "EigenSystem.h"
-#include "MatrixComplex.h"
-#include "MatrixReal.h"
 #include "RateMatrix_PoMoKN.h"
-#include "RbException.h"
-#include "RbMathMatrix.h"
-#include "TransitionProbabilityMatrix.h"
 
-#include <cmath>
-#include <string>
-#include <iomanip>
+#include <assert.h>
+#include <cstddef>
+
+#include "RbException.h"
+#include "Assignable.h"
+#include "Cloneable.h"
+#include "MatrixReal.h"
+#include "TransitionProbabilityMatrix.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 using namespace RevBayesCore;
 
-
-
-
-/** Construct rate matrix with n states */
-RateMatrix_PoMoKN::RateMatrix_PoMoKN(long num_states, long in_k, long in_n, long in_nmr) : TimeReversibleRateMatrix( num_states ),
-    K( in_k ),
-    N( in_n ),
-    mu( in_nmr, 0.01 ),
-    phi( in_k, 1.0 )
+/*
+RateMatrix_PoMoKN::RateMatrix_PoMoKN(size_t num_states) : 
+AbstractRateMatrix( num_states ), 
+K( in_k ),
+N( in_n ),
+mu( in_nmr, 0.01 ),
+phi( in_k, 1.0 )
 {
-    
-    eigen_system       = new EigenSystem(the_rate_matrix);
-    c_ijk.resize(num_states * num_states * num_states);
-    cc_ijk.resize(num_states * num_states * num_states);
-    
     update();
 }
+*/
 
-
-/** Copy constructor */
-RateMatrix_PoMoKN::RateMatrix_PoMoKN(const RateMatrix_PoMoKN& m) : TimeReversibleRateMatrix( m ),
-    K( m.K ),
-    N( m.N ),
-    mu( m.mu ),
-    phi( m.phi )
+/** Construct rate matrix with n states, an exchangeability matrix, a simplex of equilibrium frequencies, and a virtual population size */
+RateMatrix_PoMoKN::RateMatrix_PoMoKN(long num_states, long in_k, long in_n, long in_nmr)  : 
+AbstractRateMatrix( num_states ), 
+K( in_k ),
+N( in_n ),
+mu( in_nmr, 0.01 ),
+phi( in_k, 1.0 )
 {
-    
-    eigen_system        = new EigenSystem( *m.eigen_system );
-    c_ijk               = m.c_ijk;
-    cc_ijk              = m.cc_ijk;
-    
-    eigen_system->setRateMatrixPtr(the_rate_matrix);
+  update();
 }
 
-
-/** Destructor */
-RateMatrix_PoMoKN::~RateMatrix_PoMoKN(void)
+/** Copy constructor */
+RateMatrix_PoMoKN::RateMatrix_PoMoKN(const RateMatrix_PoMoKN& m) : 
+AbstractRateMatrix( m ), 
+K( m.K ),
+N( m.N ),
+mu( m.mu ),
+phi( m.phi ) 
 {
-    
-    delete eigen_system;
+
 }
 
 
 RateMatrix_PoMoKN& RateMatrix_PoMoKN::operator=(const RateMatrix_PoMoKN &r)
 {
-    
-    if (this != &r)
-    {
-        TimeReversibleRateMatrix::operator=( r );
-        
-        delete eigen_system;
-        
-        eigen_system        = new EigenSystem( *r.eigen_system );
-        c_ijk               = r.c_ijk;
-        cc_ijk              = r.cc_ijk;
-        K                   = r.K;
-        N                   = r.N;
-        mu                  = r.mu;
-        phi                 = r.phi;
 
-        
-        eigen_system->setRateMatrixPtr(the_rate_matrix);
-    }
-    
-    return *this;
+  if (this != &r)
+  {
+    AbstractRateMatrix::operator=( r );
+    K                   = r.K;
+    N                   = r.N;
+    mu                  = r.mu;
+    phi                 = r.phi;
+  }
+
+  return *this;
 }
+
+
+
+
+/** Destructor */
+RateMatrix_PoMoKN::~RateMatrix_PoMoKN(void)
+{
+
+}
+
 
 
 RateMatrix_PoMoKN& RateMatrix_PoMoKN::assign(const Assignable &m)
 {
-    
+
     const RateMatrix_PoMoKN *rm = dynamic_cast<const RateMatrix_PoMoKN*>(&m);
     if ( rm != NULL )
     {
@@ -93,78 +86,20 @@ RateMatrix_PoMoKN& RateMatrix_PoMoKN::assign(const Assignable &m)
     {
         throw RbException("Could not assign rate matrix.");
     }
-    
+}
+
+
+double RateMatrix_PoMoKN::averageRate(void) const
+{
+    return 1.0;
 }
 
 
 
-/** Do precalculations on eigenvectors */
-void RateMatrix_PoMoKN::calculateCijk(void)
+
+
+void RateMatrix_PoMoKN::buildRateMatrix(void)
 {
-    
-    if ( eigen_system->isComplex() == false )
-    {
-        // real case
-        const MatrixReal& ev  = eigen_system->getEigenvectors();
-        const MatrixReal& iev = eigen_system->getInverseEigenvectors();
-        double* pc = &c_ijk[0];
-        for (size_t i=0; i<num_states; i++)
-        {
-            for (size_t j=0; j<num_states; j++)
-            {
-                for (size_t k=0; k<num_states; k++)
-                {
-                    *(pc++) = ev[i][k] * iev[k][j];
-                }
-            }
-        }
-    }
-    else
-    {
-        // complex case
-        const MatrixComplex& cev  = eigen_system->getComplexEigenvectors();
-        const MatrixComplex& ciev = eigen_system->getComplexInverseEigenvectors();
-        std::complex<double>* pc = &cc_ijk[0];
-        for (size_t i=0; i<num_states; i++)
-        {
-            for (size_t j=0; j<num_states; j++)
-            {
-                for (size_t k=0; k<num_states; k++)
-                {
-                    *(pc++) = cev[i][k] * ciev[k][j];
-                }
-            }
-        }
-    }
-}
-
-
-/** Calculate the transition probabilities */
-void RateMatrix_PoMoKN::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
-{
-    double t = rate * (startAge - endAge);
-    if ( eigen_system->isComplex() == false )
-    {
-        tiProbsEigens(t, P);
-    }
-    else
-    {
-        tiProbsComplexEigens(t, P);
-    }
-}
-
-
-RateMatrix_PoMoKN* RateMatrix_PoMoKN::clone( void ) const
-{
-    return new RateMatrix_PoMoKN( *this );
-}
-
-
-/*populating the rate matrix*/
-void RateMatrix_PoMoKN::computeOffDiagonal( void )
-{
-    
-  MatrixReal& m = *the_rate_matrix;
 
  /*  
   INFORMATION ABOUT THE PoMoKN RATE MATRIX
@@ -186,7 +121,7 @@ void RateMatrix_PoMoKN::computeOffDiagonal( void )
   [K+E*N-E]:[K+(E+1)*(N-1)-1].
   */
 
-
+   MatrixReal& m = *the_rate_matrix;
 
   //populate rate matrix with 0.0
   // **total waste of time with sparse matrices like pomos**
@@ -196,11 +131,12 @@ void RateMatrix_PoMoKN::computeOffDiagonal( void )
     }
   }
 
+
+  // set the diagonal vector
+  std::vector< double > diagonal(num_states,0.0); 
+
   //first edge
   int E = 0;
-
-  //reciprocal of the population size
-  double rN = 1.0/N;
 
   //these for loops go through the (K*K-K) edges of the pomo state-space
   //their represent all the possible pairwise combinations of alleles: a0a1, a1a2, ..., aK-2aK-1
@@ -208,36 +144,36 @@ void RateMatrix_PoMoKN::computeOffDiagonal( void )
     for (int j=i+1; j<K; j++){
 
       //mutations
-      m[i][K+E*N-E]          = mu[2*E];    //{Nai} -> {(N-1)ai,1aj}
-      m[j][K+(E+1)*(N-1)-1]  = mu[2*E+1];  //{Naj} -> {1ai,(N-1)aj}
+      m[i][K+E*N-E]          = N*mu[2*E];    //{Nai} -> {(N-1)ai,1aj}
+      m[j][K+(E+1)*(N-1)-1]  = N*mu[2*E+1];  //{Naj} -> {1ai,(N-1)aj}
+      diagonal[i] += m[i][K+E*N-E];
+      diagonal[j] += m[j][K+(E+1)*(N-1)-1] ;
 
       //fixations
-      m[K+E*N-E]        [i]  = (N-1.0)*phi[i]*rN;  //{(N-1)ai,1aj} -> {Nai} 
-      m[K+(E+1)*(N-1)-1][j]  = (N-1.0)*phi[j]*rN;  //{1ai,(N-1)aj} -> {Naj} 
-
+      m[K+E*N-E]        [i]  = (N-1.0)*phi[i]/(phi[j] + (N-1.0)*phi[i]);  //{(N-1)ai,1aj} -> {Nai} 
+      m[K+(E+1)*(N-1)-1][j]  = (N-1.0)*phi[j]/(phi[i] + (N-1.0)*phi[j]);  //{1ai,(N-1)aj} -> {Naj} 
+      diagonal[K+E*N-E]         += m[K+E*N-E]        [i];
+      diagonal[K+(E+1)*(N-1)-1] += m[K+(E+1)*(N-1)-1][j];
 
       //the pomo rate matrix is entirely defined by fixations and mutations if N=2
       if (N>2) {
 
         //frequency shifts from singletons
-        m[K+E*N-E]        [K+E*N-E+1]       = (N-1.0)*phi[j]*rN;  //{(N-1)ai,1aj} -> {(N-2)ai,2aj}
-        m[K+(E+1)*(N-1)-1][K+(E+1)*(N-1)-2] = (N-1.0)*phi[i]*rN;  //{1ai,(N-1)aj} -> {2ai,(N-2)aj}
+        m[K+E*N-E]        [K+E*N-E+1]       = (N-1.0)*phi[j]/(phi[j] + (N-1.0)*phi[i]);  //{(N-1)ai,1aj} -> {(N-2)ai,2aj}
+        m[K+(E+1)*(N-1)-1][K+(E+1)*(N-1)-2] = (N-1.0)*phi[i]/(phi[i] + (N-1.0)*phi[j]);  //{1ai,(N-1)aj} -> {2ai,(N-2)aj}
+        diagonal[K+E*N-E]         += m[K+E*N-E]        [K+E*N-E+1] ;
+        diagonal[K+(E+1)*(N-1)-1] += m[K+(E+1)*(N-1)-1][K+(E+1)*(N-1)-2];
 
         //frequency shifts for all the other polymorphic states
         if (N>3) {
 
-          //polymorphic states are populated in two fronts, thus the need for the middle frequency
-          int S = N/2+1; 
-
-          for (int n=2; n<S; n++){
+          //polymorphic states are populated
+          for (int n=2; n<(N-1); n++){
 
             //populates the first half of the polymorphic edge aiaj
-            m[K+E*N-E+n-1]    [K+E*N-E+n]         = n*(N-n)*phi[j]*rN; //{nai,(N-n)aj} -> {(n-1)ai,(N-n+1)aj}
-            m[K+E*N-E+n-1]    [K+E*N-E+n-2]       = n*(N-n)*phi[i]*rN; //{nai,(N-n)aj} -> {(n+1)ai,(N-n-1)aj}
-
-            //populates the second half of the polymorphic edge aiaj
-            m[K+(E+1)*(N-1)-n][K+(E+1)*(N-1)-n-1] = (N-n)*n*phi[i]*rN; //{(N-n)ai,naj} -> {(N-n+1)ai,(n-1)aj}
-            m[K+(E+1)*(N-1)-n][K+(E+1)*(N-1)-n+1] = (N-n)*n*phi[j]*rN; //{(N-n)ai,naj} -> {(N-n-1)ai,(n+1)aj}
+            m[K+E*N-E+n-1]    [K+E*N-E+n]         = n*(N-n)*phi[j]/(n*phi[j] + (N-n)*phi[i]); //{(N-n)ai,naj} -> {(N-n-1)ai,(n+1)aj}
+            m[K+E*N-E+n-1]    [K+E*N-E+n-2]       = n*(N-n)*phi[i]/(n*phi[j] + (N-n)*phi[i]); //{(N-n)ai,naj} -> {(N-n+1)ai,(n-1)aj}
+            diagonal[K+E*N-E+n-1] += m[K+E*N-E+n-1][K+E*N-E+n] + m[K+E*N-E+n-1][K+E*N-E+n-2];
 
           }
 
@@ -251,76 +187,102 @@ void RateMatrix_PoMoKN::computeOffDiagonal( void )
     }
   }
 
-  // set flags
-  needs_update = true;
+  // set the diagonal values and calculate the reciprocal of the average rate
 
-}
+  double rRate = 0.0;
 
-
-
-/** Calculate the transition probabilities for the real case */
-void RateMatrix_PoMoKN::tiProbsEigens(double t, TransitionProbabilityMatrix& P) const
-{
+  for (int j=0; j< num_states; j++){
+    m[j][j] = -diagonal[j];
+  }
+  
     
-    // get a reference to the eigenvalues
-    const std::vector<double>& eigenValue = eigen_system->getRealEigenvalues();
-    
-    // precalculate the product of the eigenvalue and the branch length
-    std::vector<double> eigValExp(num_states);
-    for (size_t s=0; s<num_states; s++)
-    {
-        eigValExp[s] = exp(eigenValue[s] * t);
-    }
-    
-    // calculate the transition probabilities
-    const double* ptr = &c_ijk[0];
-    double*         p = P.theMatrix;
-    for (size_t i=0; i<num_states; i++)
-    {
-        for (size_t j=0; j<num_states; j++, ++p)
-        {
-            double sum = 0.0;
-            for (size_t s=0; s<num_states; s++)
-            {
-                sum += (*ptr++) * eigValExp[s];
-            }
-            
-            //            P[i][j] = (sum < 0.0) ? 0.0 : sum;
-            (*p) = (sum < 0.0) ? 0.0 : sum;
+  /*
+  //I cannot make the stationary frequencies to work, so I will just skiping the matrix noralization
+  //std::vector< double > stationaryFrequencies = getStationaryFrequencies();
+  for (int j=0; j< num_states; j++){
+    rRate += diagonal[j]*stationaryVector[j];   
+    std::cout << "rate:" << stationaryVector[j] << "\n";
+  }
+
+
+  rRate = 1.0;///rRate;
+
+  // rescaling the matrix
+  //first edge
+  E = 0;
+
+  //these for loops go through the (K*K-K) edges of the pomo state-space
+  //their represent all the possible pairwise combinations of alleles: a0a1, a1a2, ..., aK-2aK-1
+  for (int i=0; i<K; i++){
+    for (int j=i+1; j<K; j++){
+
+      //mutations
+      m[i][K+E*N-E]          *= rRate;  //{Nai} -> {(N-1)ai,1aj}
+      m[j][K+(E+1)*(N-1)-1]  *= rRate;  //{Naj} -> {1ai,(N-1)aj}
+
+
+      //fixations
+      m[K+E*N-E]        [i]  *= rRate;  //{(N-1)ai,1aj} -> {Nai} 
+      m[K+(E+1)*(N-1)-1][j]  *= rRate;  //{1ai,(N-1)aj} -> {Naj} 
+
+      //the pomo rate matrix is entirely defined by fixations and mutations if N=2
+      if (N>2) {
+
+        //frequency shifts from singletons
+        m[K+E*N-E]        [K+E*N-E+1]       *= rRate;  //{(N-1)ai,1aj} -> {(N-2)ai,2aj}
+        m[K+(E+1)*(N-1)-1][K+(E+1)*(N-1)-2] *= rRate;  //{1ai,(N-1)aj} -> {2ai,(N-2)aj}
+
+        //frequency shifts for all the other polymorphic states
+        if (N>3) {
+
+          //polymorphic states are populated
+          for (int n=2; n<(N-1); n++){
+
+            //populates the first half of the polymorphic edge aiaj
+            m[K+E*N-E+n-1]    [K+E*N-E+n]         *= rRate; //{(N-n)ai,naj} -> {(N-n-1)ai,(n+1)aj}
+            m[K+E*N-E+n-1]    [K+E*N-E+n-2]       *= rRate; //{(N-n)ai,naj} -> {(N-n+1)ai,(n-1)aj}
+
+          }
+
         }
+
+      }
+
+      //update edge
+      E += 1; 
+
     }
+  }
+  */
+
+
 }
 
 
-/** Calculate the transition probabilities for the complex case */
-void RateMatrix_PoMoKN::tiProbsComplexEigens(double t, TransitionProbabilityMatrix& P) const
+/** Calculate the transition probabilities */
+void RateMatrix_PoMoKN::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
 {
-    
-    // get a reference to the eigenvalues
-    const std::vector<double>& eigenValueReal = eigen_system->getRealEigenvalues();
-    const std::vector<double>& eigenValueComp = eigen_system->getImagEigenvalues();
-    
-    // precalculate the product of the eigenvalue and the branch length
-    std::vector<std::complex<double> > ceigValExp(num_states);
-    for (size_t s=0; s<num_states; s++)
-    {
-        std::complex<double> ev = std::complex<double>(eigenValueReal[s], eigenValueComp[s]);
-        ceigValExp[s] = exp(ev * t);
-    }
-    
-    // calculate the transition probabilities
-    const std::complex<double>* ptr = &cc_ijk[0];
-    for (size_t i=0; i<num_states; i++)
-    {
-        for (size_t j=0; j<num_states; j++)
-        {
-            std::complex<double> sum = std::complex<double>(0.0, 0.0);
-            for (size_t s=0; s<num_states; s++)
-                sum += (*ptr++) * ceigValExp[s];
-            P[i][j] = (sum.real() < 0.0) ? 0.0 : sum.real();
-        }
-    }
+
+  // We use repeated squaring to quickly obtain exponentials, as in Poujol and Lartillot, Bioinformatics 2014.
+  // Mayrose et al. 2010 also used this method for chromosome evolution (named the squaring and scaling method in Moler and Van Loan 2003).
+  double t = rate * (startAge - endAge);
+  exponentiateMatrixByScalingAndSquaring(t, P );
+
+  return;
 }
+
+
+RateMatrix_PoMoKN* RateMatrix_PoMoKN::clone( void ) const
+{
+    return new RateMatrix_PoMoKN( *this );
+}
+
+
+std::vector<double> RateMatrix_PoMoKN::getStationaryFrequencies( void ) const
+{
+  return stationaryVector;
+}
+
 
 
 void RateMatrix_PoMoKN::setK( long & na )
@@ -360,38 +322,18 @@ void RateMatrix_PoMoKN::setPhi( const std::vector<double> &f )
 }
 
 
-
-/** Update the eigen system */
-void RateMatrix_PoMoKN::updateEigenSystem(void)
-{
-    
-    eigen_system->update();
-    calculateCijk();
-    
-}
-
-
 void RateMatrix_PoMoKN::update( void )
 {
-    
+
     if ( needs_update )
     {
-        // compute the off-diagonal values
-        computeOffDiagonal();
-        
-        // set the diagonal values
-        setDiagonal();
-        
-        // rescale
-        //rescaleToAverageRate( 3.0 );
-        
-        // now update the eigensystem
-        updateEigenSystem();
-        
+
+        buildRateMatrix();
+
+        // rescale: not useful, same loglk.
+        //rescaleToAverageRate( 1.0 );
+
         // clean flags
         needs_update = false;
     }
 }
-
-
-
