@@ -188,7 +188,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 {
     // prepare the probability computation
     prepareProbComputation();
-
+    
     updateStartEndTimes();
 
     // variable declarations and initialization
