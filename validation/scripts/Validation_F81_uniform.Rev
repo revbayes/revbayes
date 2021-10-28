@@ -1,30 +1,33 @@
 ################################################################################
 #
 # RevBayes Validation Test: Felsenstein (81) with uniform time tree
-# 
+#
 # Model: Sequences evolve under the Felsenstein (81) model and the tree is drawn
-#        from a uniform time tree distribution. 
-#            
+#        from a uniform time tree distribution.
+#
 #
 # authors: Sebastian Hoehna
 #
 ################################################################################
 
+
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
 #######################
 # Reading in the Data #
 #######################
-
-###### This just defines a single model for all sites #######
-
-### Read in sequence data for both genes
 
 data <- readDiscreteCharacterData("data/primates_cytb_small.nex")
 
 # Get some useful variables from the data. We need these later on.
 taxa <- data.taxa()
-
-# set my move index
-mi = 0
 
 
 
@@ -35,13 +38,11 @@ mi = 0
 #### specify the Felsenstein 1981 substitution model applied uniformly to all sites ###
 
 
-pi_prior <- v(1,1,1,1) 
+pi_prior <- v(1,1,1,1)
 pi ~ dnDirichlet(pi_prior)
-moves[++mi] = mvSimplexElementScale(pi,weight=2)
+moves.append( mvSimplexElementScale(pi,weight=2) )
 
-Q := fnF81(pi) 
-
-
+Q := fnF81(pi)
 
 
 
@@ -55,16 +56,16 @@ root ~ dnUniform(50.0,100.0)
 
 # create some moves that change the stochastic variables
 # all moves are sliding proposals but you could use scaling proposals for the rates too
-moves[++mi] = mvSlide(root,delta=1,tune=true,weight=1)
+moves.append( mvSlide(root,delta=1,tune=true,weight=1) )
 
 # construct a variable for the tree drawn from a birth death process
 psi ~ dnUniformTimeTree(rootAge=root, taxa=taxa )
 
-moves[++mi] = mvNarrow(psi, weight=5.0)
-moves[++mi] = mvNNI(psi, weight=1.0)
-moves[++mi] = mvFNPR(psi, weight=3.0)
-moves[++mi] = mvSubtreeScale(psi, weight=3.0)
-moves[++mi] = mvNodeTimeSlideUniform(psi, weight=15.0)
+moves.append( mvNarrow(psi, weight=5.0) )
+moves.append( mvNNI(psi, weight=1.0) )
+moves.append( mvFNPR(psi, weight=3.0) )
+moves.append( mvSubtreeScale(psi, weight=3.0) )
+moves.append( mvNodeTimeSlideUniform(psi, weight=15.0) )
 
 
 
@@ -98,18 +99,13 @@ mymodel = model(Q)
 
 
 
-
-
-monitors[1] = mnModel(filename="output/primates_cytb.log",printgen=10, separator = TAB)
-
 mymcmc = mcmc(mymodel, monitors, moves)
 
-validation = validationAnalysis( mymcmc, 1000 )
-validation.burnin(generations=3000,tuningInterval=250)
-validation.run(generations=10000)
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_F81_uniform" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
 validation.summarize()
 
 
 # you may want to quit RevBayes now
 q()
-
