@@ -194,7 +194,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 {
     // prepare the probability computation
     prepareProbComputation();
-    
+
     updateStartEndTimes();
 
     // variable declarations and initialization
@@ -322,39 +322,42 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
                     Psi[i] = 0.0;
 
-                    double recip_o = 0.0;
-                    double recip_y = 0.0;
-                    double recip_oy = 0.0;
-
-                    size_t k = 0;
-                    // compute factors of the sum over each possible oldest/youngest observation
-                    for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
+                    if ( (extended && k_i[i] > 1) || (!extended && k_i[i] > 2) )
                     {
-                        // compute sum of reciprocal oldest ranges
-                        if ( Fi->first.getMax() >= o )
-                        {
-                            recip_o += Fi->second / psi[k];
-                        }
-                        // compute sum of reciprocal youngest ranges
-                        if ( Fi->first.getMin() <= d )
-                        {
-                            recip_y += Fi->second / psi[k];
+                        double recip_o = 0.0;
+                        double recip_y = 0.0;
+                        double recip_oy = 0.0;
 
-                            // compute sum of reciprocal oldest+youngest ranges
+                        size_t k = 0;
+                        // compute factors of the sum over each possible oldest/youngest observation
+                        for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
+                        {
+                            // compute sum of reciprocal oldest ranges
                             if ( Fi->first.getMax() >= o )
                             {
-                                double f = Fi->second / psi[k];
-
-                                recip_oy += f*(f-1.0);
+                                recip_o += Fi->second / psi[k];
                             }
+                            // compute sum of reciprocal youngest ranges
+                            if ( Fi->first.getMin() <= d )
+                            {
+                                recip_y += Fi->second / psi[k];
+
+                                // compute sum of reciprocal oldest+youngest ranges
+                                if ( Fi->first.getMax() >= o )
+                                {
+                                    double f = Fi->second / psi[k];
+
+                                    recip_oy += f*(f-1.0);
+                                }
+                            }
+
+                            // compute product of ranges
+                            Psi[i] += log(psi[k]) * Fi->second;
                         }
 
-                        // compute product of ranges
-                        Psi[i] += log(psi[k]) * Fi->second;
+                        // sum over each possible oldest/youngest observation
+                        Psi[i] += extended ? log(recip_o) : log(recip_o * recip_y - recip_oy);
                     }
-
-                    // sum over each possible oldest/youngest observation
-                    Psi[i] += extended ? log(recip_o) : log(recip_o * recip_y - recip_oy);
 
                     if ( complete )
                     {
@@ -373,7 +376,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                         Psi[i] -= log(k_i[i]);
                         Psi[i] += psi_y_o;
 
-                        k = extended ? k_i[i] - 1 : k_i[i] - 2;
+                        int k = extended ? k_i[i] - 1 : k_i[i] - 2;
 
                         Psi[i] -= k * log(psi_y_o);
                         Psi[i] += k > 0 ? log(RbMath::incompleteGamma(psi_y_o, k, true, true)) : 0.0;
@@ -415,7 +418,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
             // let d be the oldest and youngest sample for kappa=0
             else
             {
-                double qdi = q(di, d, true) - q(di, d);
+                qdi = qdi - q(di, d);
                 double qod = 0.0;
                 // replace intermediate q terms
                 for (size_t j = di; j < oi; j++)

@@ -151,10 +151,11 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
             lnProb -= partial_likelihood[i];
 
             double b = b_i[i];
+            double o = age[i];
             double d = d_i[i];
 
             size_t bi = findIndex(b);
-            size_t oi = findIndex(age[i]);
+            size_t oi = findIndex(o);
             size_t di = findIndex(d);
 
             if ( extended )
@@ -178,7 +179,7 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
                     qob += q_tilde_i[j] - q_i[j];
                 }
                 // replace q terms at oldest occurrence age
-                double qoi = q(oi, age[i], true) - q(oi, age[i]);
+                double qoi = q(oi, o, true) - q(oi, o);
 
                 // compute definite integral
                 double f1 = -expm1(qbi+qob-qoi);
@@ -205,6 +206,9 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
 
                     partial_likelihood[i] += log(f1 + exp(qdi-qoi-qod-Psi[i]) * f2);
                 }
+
+                // offset the unobserved density for the ancestor
+                partial_likelihood[i] -= log(p(bi,b));
             }
 
             lnProb += partial_likelihood[i];
@@ -657,7 +661,7 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
         {
             double age = node.getAge(); // y_{a(i)}
 
-            if ( age != b_i[i] )
+            if ( age != b_i[i] || I[i] != sa )
             {
                 b_i[i] = age;
                 dirty_psi[i] = true;
