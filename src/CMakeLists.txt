@@ -66,6 +66,35 @@ if ("${MPI}" STREQUAL "ON")
    set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS}")
 endif()
 
+
+#if ("${BEAGLE}" STREQUAL "ON")
+if ("${RB_BEAGLE}" STREQUAL "ON")
+   #-- Maybe change these to a better spot later...
+   set(BEAGLE_INCLUDE_PATH  "/usr/local/include/libhmsbeagle")
+   set(BEAGLE_COMPILE_FLAGS "-I${beagle_root}/include/libhmsbeagle")
+   set(BEAGLE_LINK_FLAGS    "-L/usr/local/lib -lhmsbeagle")
+
+   #find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+   #set(EIGEN_ROOT          "/usr/local/include/eigen3")
+   #set(EIGEN_COMPILE_FLAGS "-I${EIGEN_ROOT}")
+
+   find_package(Eigen3 REQUIRED)
+   include_directories(${EIGEN3_INCLUDE_DIR})
+
+   add_definitions(-DRB_BEAGLE)
+   add_definitions(-DDEBUG_BEAGLE)
+
+   #find_package(BEAGLE REQUIRED)
+   include_directories(${BEAGLE_INCLUDE_PATH})
+   set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${BEAGLE_COMPILE_FLAGS} ${EIGEN_COMPILE_FLAGS}")
+   set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} ${BEAGLE_LINK_FLAGS}")
+
+   MESSAGE("My BEAGLE information:")
+   MESSAGE("  BEAGLE_INCLUDE_DIRS : ${BEAGLE_INCLUDE_PATH}")
+   MESSAGE("  BEAGLE_LIBRARIES    : ${BEAGLE_LINK_PATH}")
+endif()
+
+
 if ("${JUPYTER}" STREQUAL "ON")
    add_definitions(-DRB_XCODE)
 endif()

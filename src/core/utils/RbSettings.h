@@ -29,6 +29,17 @@ class RbSettings {
         bool                        getUseScaling(void) const;                          //!< Retrieve the flag whether we should scale the likelihood in CTMC models
         const std::string&          getWorkingDirectory(void) const;                    //!< Retrieve the current working directory
         void                        listOptions(void) const;                            //!< Retrieve a list of all user options and their current values
+    
+#if defined( RB_BEAGLE )
+    bool                        getUseBeagle(void) const;                           //!< Retrieve the flag whether we should use the BEAGLE library in CTMC models
+    bool                        getBeagleAuto(void) const;                          //!< Retrieve the flag whether we should automatically select the BEAGLE resource
+    size_t                      getBeagleResource(void) const;                      //!< Retrieve the BEAGLE resource to be used
+    bool                        getBeagleUseDoublePrecision(void) const;            //!< Retrieve the flag whether BEAGLE will use double precision floating point format
+    size_t                      getBeagleMaxCPUThreads(void) const;                 //!< Retrieve the maximum number of CPU threads BEAGLE is set to use        
+    const std::string&          getBeagleScalingMode(void) const;                   //!< Retrieve the BEAGLE numerical scaling mode
+    size_t                      getBeagleDynamicScalingFrequency(void) const;       //!< Retrieve the BEAGLE evaluation frequency for calculation of updated numerical scaling factors
+#endif /* RB_BEAGLE */
+
 
         // setters
         void                        setCollapseSampledAncestors(bool);                  //!< Set whether to should display sampled ancestors as 2-degree nodes when printing
@@ -41,6 +52,17 @@ class RbSettings {
         void                        setTolerance(double t);                             //!< Set the tolerance for comparing double
         void                        setUseScaling(bool s);                              //!< Set the flag whether we should scale the likelihood in CTMC models
         void                        setWorkingDirectory(const std::string &wd);         //!< Set the current working directory
+       
+#if defined( RB_BEAGLE )
+    void                        setUseBeagle(bool s);                               //!< Set the flag whether we should use the BEAGLE library in CTMC models
+    void                        setBeagleAuto(bool s);                              //!< Set the flag whether we should automatically select the BEAGLE resource
+    void                        setBeagleResource(size_t w);                        //!< Set the BEAGLE resource to be used
+    void                        setBeagleUseDoublePrecision(bool s);                //!< Set the flag whether BEAGLE will use double precision floating point format
+    void                        setBeagleMaxCPUThreads(size_t w);                   //!< Set the maximum number of CPU threads BEAGLE is set to use        
+    void                        setBeagleScalingMode(const std::string &bsm);       //!< Set the BEAGLE numerical scaling mode
+    void                        setBeagleDynamicScalingFrequency(size_t w);         //!< Set the BEAGLE evaluation frequency for calculation of updated numerical scaling factors
+#endif /* RB_BEAGLE */
+
     
     private:
                                     RbSettings(void);                                   //!< Default constructor
@@ -61,6 +83,16 @@ class RbSettings {
         double                      tolerance;                                          //!< Tolerance for comparison of doubles
         bool                        useScaling;
         std::string                 workingDirectory;
+
+#if defined( RB_BEAGLE )
+    bool                        useBeagle;
+    bool                        beagleAuto;
+    size_t                      beagleResource;        
+    bool                        beagleUseDoublePrecision;
+    size_t                      beagleMaxCPUThreads;
+    std::string                 beagleScalingMode;
+    size_t                      beagleDynamicScalingFrequency;
+#endif /* RB_BEAGLE */
     
 };
 

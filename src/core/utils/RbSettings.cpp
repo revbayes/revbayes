@@ -58,6 +58,52 @@ bool RbSettings::getCollapseSampledAncestors( void ) const
     return collapseSampledAncestors;
 }
 
+
+#if defined( RB_BEAGLE )
+bool RbSettings::getUseBeagle( void ) const
+{
+    // return the internal value
+    return useBeagle;
+}
+
+bool RbSettings::getBeagleAuto( void ) const
+{
+    // return the internal value
+    return beagleAuto;
+}
+
+size_t RbSettings::getBeagleResource( void ) const
+{
+    // return the internal value
+    return beagleResource;
+}
+
+bool RbSettings::getBeagleUseDoublePrecision( void ) const
+{
+    // return the internal value
+    return beagleUseDoublePrecision;
+}
+
+size_t RbSettings::getBeagleMaxCPUThreads( void ) const
+{
+    // return the internal value
+    return beagleMaxCPUThreads;
+}
+
+const std::string& RbSettings::getBeagleScalingMode( void ) const
+{
+    // return the internal value
+    return beagleScalingMode;
+}
+
+size_t RbSettings::getBeagleDynamicScalingFrequency( void ) const
+{
+    // return the internal value
+    return beagleDynamicScalingFrequency;
+}
+#endif /* RB_BEAGLE */
+
+
 std::string RbSettings::getOption(const std::string &key) const
 {
     if ( key == "moduledir" )
@@ -92,6 +138,36 @@ std::string RbSettings::getOption(const std::string &key) const
     {
         return collapseSampledAncestors ? "true" : "false";
     }
+#if defined( RB_BEAGLE )
+    else if ( key == "useBeagle" )
+    {
+        return useBeagle ? "true" : "false";
+    }
+    else if ( key == "beagleAuto" )
+    {
+        return beagleAuto ? "true" : "false";
+    }
+    else if ( key == "beagleResource" )
+    {
+        return StringUtilities::to_string(beagleResource);
+    }
+    else if ( key == "beagleUseDoublePrecision" )
+    {
+        return beagleUseDoublePrecision ? "true" : "false";
+    }
+    else if ( key == "beagleMaxCPUThreads" )
+    {
+        return StringUtilities::to_string(beagleMaxCPUThreads);
+    }
+    else if ( key == "beagleScalingMode" )
+    {
+        return beagleScalingMode;
+    }
+    else if ( key == "beagleDynamicScalingFrequency" )
+    {
+        return StringUtilities::to_string(beagleDynamicScalingFrequency);
+    }
+#endif /* RB_BEAGLE */
     else
     {
         std::cout << "Unknown user setting with key '" << key << "'." << std::endl;
@@ -141,6 +217,16 @@ void RbSettings::initializeUserSettings(void)
     outputPrecision = 7;
     printNodeIndex = true;      // print node indices of tree nodes as comments
     collapseSampledAncestors = true;
+
+#if defined( RB_BEAGLE )
+    useBeagle = false;                    // don't use BEAGLE by default
+    beagleAuto = true;                    // automatically select BEAGLE resource by default
+    beagleResource = 0;                   // the default BEAGLE resource
+    beagleUseDoublePrecision = true;      // BEAGLE will use double precision by default
+    beagleMaxCPUThreads = 0;              // no max set, auto threading up to number of cores
+    beagleScalingMode = "dynamic";        // dynamic rescale as needed plus fixed frequency
+    beagleDynamicScalingFrequency = 100;  // rescale every 100 evaluations by default
+#endif /* RB_BEAGLE */
     
     std::string user_dir = RevBayesCore::RbFileManager::expandUserDir("~");
     
@@ -215,6 +301,16 @@ void RbSettings::listOptions() const
     std::cout << "useScaling = " << (useScaling ? "true" : "false") << std::endl;
     std::cout << "scalingDensity = " << scalingDensity << std::endl;
     std::cout << "collapseSampledAncestors = " << (collapseSampledAncestors ? "true" : "false") << std::endl;
+
+#if defined( RB_BEAGLE )
+    std::cout << "useBeagle = " << (useBeagle ? "true" : "false") << std::endl;
+    std::cout << "beagleAuto = " << (beagleAuto ? "true" : "false") << std::endl;
+    std::cout << "beagleResource = " << beagleResource << std::endl;
+    std::cout << "beagleUseDoublePrecision = " << (beagleUseDoublePrecision ? "true" : "false") << std::endl;
+    std::cout << "beagleMaxCPUThreads" << beagleMaxCPUThreads << std::endl;
+    std::cout << "beagleScalingMode" << beagleScalingMode << std::endl;
+    std::cout << "beagleDynamicScalingFrequency" << beagleDynamicScalingFrequency << std::endl;
+#endif /* RB_BEAGLE */
 }
 
 
@@ -272,6 +368,71 @@ void RbSettings::setCollapseSampledAncestors(bool w)
     writeUserSettings();
 }
 
+#if defined( RB_BEAGLE )
+void RbSettings::setUseBeagle(bool w)
+{
+    // replace the internal value with this new value
+    useBeagle = w;
+
+    // save the current settings for the future.
+    writeUserSettings();
+}
+
+void RbSettings::setBeagleAuto(bool w)
+{
+    // replace the internal value with this new value
+    beagleAuto = w;
+
+    // save the current settings for the future.
+    writeUserSettings();
+}
+
+void RbSettings::setBeagleResource(size_t w)
+{
+    // replace the internal value with this new value
+    beagleResource = w;
+    
+    // save the current settings for the future.
+    writeUserSettings();
+}
+
+void RbSettings::setBeagleUseDoublePrecision(bool s)
+{
+    // replace the internal value with this new value
+    beagleUseDoublePrecision = s;
+    
+    // save the current settings for the future.
+    writeUserSettings();
+}
+
+void RbSettings::setBeagleMaxCPUThreads(size_t w)
+{
+    // replace the internal value with this new value
+    beagleMaxCPUThreads = w;
+    
+    // save the current settings for the future.
+    writeUserSettings();
+}
+
+void RbSettings::setBeagleScalingMode(const std::string &bsm)
+{
+    // replace the internal value with this new value
+    beagleScalingMode = bsm;
+    
+    // save the current settings for the future.
+    writeUserSettings();
+}
+
+void RbSettings::setBeagleDynamicScalingFrequency(size_t w)
+{
+    // replace the internal value with this new value
+    beagleDynamicScalingFrequency = w;
+    
+    // save the current settings for the future.
+    writeUserSettings();
+}
+#endif /* RB_BEAGLE */
+
 
 void RbSettings::setOption(const std::string &key, const std::string &v, bool write)
 {
@@ -319,6 +480,48 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
     {
         collapseSampledAncestors = value == "true";
     }
+#if defined( RB_BEAGLE )
+    else if ( key == "useBeagle" )
+    {
+        useBeagle = value == "true";
+    }
+    else if ( key == "beagleAuto" )
+    {
+        beagleAuto = value == "true";
+    }
+    else if ( key == "beagleResource" )
+    {
+        size_t w = atoi(value.c_str());
+        if (w < 0)
+            throw(RbException("beagleResource must be a positive integer"));
+        
+        beagleResource = atoi(value.c_str());
+    }
+    else if ( key == "beagleUseDoublePrecision" )
+    {
+        beagleUseDoublePrecision = value == "true";
+    }
+    else if ( key == "beagleMaxCPUThreads" )
+    {
+        size_t w = atoi(value.c_str());
+        if (w < 0)
+            throw(RbException("beagleMaxCPUThreads must be a positive integer"));
+        
+        beagleMaxCPUThreads = atoi(value.c_str());
+    }
+    else if ( key == "beagleScalingMode" )
+    {
+        beagleScalingMode = value;
+    }
+    else if ( key == "beagleDynamicScalingFrequency" )
+    {
+        size_t w = atoi(value.c_str());
+        if (w < 0)
+            throw(RbException("beagleDynamicScalingFrequency must be a positive integer"));
+        
+        beagleDynamicScalingFrequency = atoi(value.c_str());
+    }
+#endif /* RB_BEAGLE */
     else
     {
         std::cout << "Unknown user setting with key '" << key << "'." << std::endl;
@@ -394,6 +597,17 @@ void RbSettings::writeUserSettings( void )
     writeStream << "useScaling=" << (useScaling ? "true" : "false") << std::endl;
     writeStream << "scalingDensity=" << scalingDensity << std::endl;
     writeStream << "collapseSampledAncestors=" << (collapseSampledAncestors ? "true" : "false") << std::endl;
+
+#if defined( RB_BEAGLE )
+    writeStream << "useBeagle=" << (useBeagle ? "true" : "false") << std::endl;
+    writeStream << "beagleAuto=" << (beagleAuto ? "true" : "false") << std::endl;
+    writeStream << "beagleResource=" << beagleResource << std::endl;
+    writeStream << "beagleUseDoublePrecision=" << (beagleUseDoublePrecision ? "true" : "false") << std::endl;
+    writeStream << "beagleMaxCPUThreads=" << beagleMaxCPUThreads << std::endl;
+    writeStream << "beagleScalingMode=" << beagleScalingMode << std::endl;
+    writeStream << "beagleDynamicScalingFrequency=" << beagleDynamicScalingFrequency << std::endl;
+#endif /* RB_BEAGLE */
+    
     fm.closeFile( writeStream );
 
 }
