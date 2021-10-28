@@ -1,0 +1,26 @@
+# Largely copied from `Validation_HalfCauchy.Rev` 
+# and the dnBimodalNormal docstrings
+
+p ~ dnBeta(1.0,1.0)
+x ~ dnBimodalNormal(mean1=-1, mean2 = 1, sd1= 0.1, sd2 = 0.1, p = p)
+
+y ~ dnNormal(x, sd = 0.1)
+y.clamp(1)
+
+moves = VectorMoves()
+monitors = VectorMonitors()
+
+moves.append(mvSlide(p, delta = 0.1, weight = 1.0))
+moves.append(mvSlide(x, delta = 0.1, weight = 1.0))
+monitors.append(mnScreen(x, printgen=1000))
+
+mymodel = model(x)
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+validation = validationAnalysis( mymcmc, 1000 )
+validation.burnin(generations=10000,tuningInterval=100)
+validation.run(generations=30000)
+validation.summarize( coverageProbability=0.9 )
+
+q()
