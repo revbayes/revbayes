@@ -105,6 +105,7 @@ FossilizedBirthDeathProcess::FossilizedBirthDeathProcess(const TypedDagNode<doub
     anagenetic    = std::vector<double>(num_intervals, 0.0);
     symmetric     = std::vector<double>(num_intervals, 0.0);
 
+    
     redrawValue();
     updateStartEndTimes(this->getValue().getRoot());
 }
@@ -152,7 +153,7 @@ double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
             double b = b_i[i];
             double d = d_i[i];
 
-            size_t bi  = findIndex(b);
+            size_t bi = findIndex(b);
             size_t oi = findIndex(age[i]);
             size_t di = findIndex(d);
 
@@ -218,7 +219,7 @@ double FossilizedBirthDeathProcess::getMaxTaxonAge( const TopologyNode& node ) c
 {
     if( node.isTip() )
     {
-        return node.getTaxon().getMaxAge();
+        return age[node.getIndex()];
     }
     else
     {
@@ -302,6 +303,26 @@ double FossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) const
 /**
  *
  */
+void FossilizedBirthDeathProcess::redrawValue(void)
+{
+    AbstractBirthDeathProcess::redrawValue();
+
+    const std::vector<TopologyNode*> nodes = this->getValue().getNodes();
+
+    for( size_t i = 0; i < this->getValue().getNumberOfTips(); i++)
+    {
+        size_t j = find(taxa.begin(), taxa.end(), nodes[i]->getTaxon()) - taxa.begin();
+
+        nodes[i]->setIndex(j);
+    }
+
+    this->getValue().orderNodesByIndex();
+}
+
+
+/**
+ *
+ */
 void FossilizedBirthDeathProcess::simulateClade(std::vector<TopologyNode *> &n, double age, double present)
 {
 
@@ -313,6 +334,7 @@ void FossilizedBirthDeathProcess::simulateClade(std::vector<TopologyNode *> &n, 
 
     double current_age = RbConstants::Double::inf;
     double minimum_age = 0.0;
+    double max_age = getOriginAge();
 
     for (size_t i = 0; i < n.size(); ++i)
     {
@@ -321,18 +343,21 @@ void FossilizedBirthDeathProcess::simulateClade(std::vector<TopologyNode *> &n, 
         {
             bool extinct = n[i]->getTaxon().isExtinct();
 
+            size_t j = find(taxa.begin(), taxa.end(), n[i]->getTaxon()) - taxa.begin();
+
             // in the extended tree, tip ages are extinction times
             if ( extended )
             {
-                n[i]->setAge( extinct * rng->uniform01() * y_i[i] );
+                n[i]->setAge( extinct * rng->uniform01() * y_i[j] );
             }
             // in the sampled tree, tip ages are sampling times
             else
             {
-                n[i]->setAge( extinct * rng->uniform01() * ( y_i[i] - n[i]->getTaxon().getMinAge() ) + n[i]->getTaxon().getMinAge() );
+                n[i]->setAge( extinct * rng->uniform01() * ( y_i[j] - n[i]->getTaxon().getMinAge() ) + n[i]->getTaxon().getMinAge() );
             }
 
-            resampleAge(i);
+            double minmax = std::max(o_i[i], n[i]->getAge());
+            this->age[j] = GLOBAL_RNG->uniform01()*(std::min(max_age, taxa[i].getMaxAge()) - minmax) + minmax;
         }
 
         double first_occurrence = getMaxTaxonAge( *n[i] );
@@ -348,16 +373,12 @@ void FossilizedBirthDeathProcess::simulateClade(std::vector<TopologyNode *> &n, 
         {
             current_age = n[i]->getAge();
         }
-
     }
-
-    // reset the age
-    double max_age = getOriginAge();
 
     if( minimum_age > max_age )
     {
         std::stringstream s;
-        s << "Tree age is " << max_age << " but oldest fossil occurrence is " << minimum_age;
+        s << "Tree age is " << max_age << " but minimum fossil origin is " << minimum_age;
         throw(RbException(s.str()));
     }
 
@@ -527,17 +548,17 @@ void FossilizedBirthDeathProcess::simulateClade(std::vector<TopologyNode *> &n, 
 std::vector<double> FossilizedBirthDeathProcess::simulateDivergenceTimes(size_t n, double origin, double present, double min) const
 {
 
-    std::vector<double> times(n, 0.0);
+    std::vector<double> t(n, 0.0);
 
     for (size_t i = 0; i < n; ++i)
     {
-        times[i] = simulateDivergenceTime(origin, min);
+        t[i] = simulateDivergenceTime(origin, min);
     }
 
     // finally sort the times
-    std::sort(times.begin(), times.end());
+    std::sort(t.begin(), t.end());
 
-    return times;
+    return t;
 }
 
 /**
@@ -557,7 +578,7 @@ double FossilizedBirthDeathProcess::simulateDivergenceTime(double origin, double
     double age = origin - present;
     double b = birth[i];
     double d = death[i];
-    double p_e = homogeneous_rho->getValue();
+    double p_e = i == 0 ? homogeneous_rho->getValue() : 0.0;
 
 
     // get a random draw
@@ -597,7 +618,7 @@ int FossilizedBirthDeathProcess::updateStartEndTimes( const TopologyNode& node )
 {
     if( node.isTip() )
     {
-        return find(taxa.begin(), taxa.end(), node.getTaxon()) - taxa.begin();
+        return node.getIndex();
     }
 
     int species = -1;

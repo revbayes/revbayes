@@ -46,6 +46,7 @@ namespace RevBayesCore {
         // public member functions
         FossilizedBirthDeathProcess*                    clone(void) const;                                         //!< Create an independent clone
 
+        void                                            redrawValue(void);
         void                                            simulateClade(std::vector<TopologyNode *> &n, double age, double present);
 
     protected:
