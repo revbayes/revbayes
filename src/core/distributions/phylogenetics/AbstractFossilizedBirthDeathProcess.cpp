@@ -257,8 +257,10 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                 continue;
             }
 
+            double qoi = q(oi, o, true) - q(oi, o);
+
             // replace q terms at oldest occurrence
-            partial_likelihood[i] += q(oi, o, true) - q(oi, o);
+            partial_likelihood[i] += qoi;
 
             // include intermediate q_tilde terms
             for (size_t j = di; j < oi; j++)
@@ -266,8 +268,10 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                 partial_likelihood[i] += q_tilde_i[j];
             }
 
+            double qdi = q( di, d, true);
+
             // divide by q_tilde at the death time
-            partial_likelihood[i] -= q( di, d, true);
+            partial_likelihood[i] -= qdi;
 
             if ( dirty_psi[i] || force )
             {
@@ -409,7 +413,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
             // let d be the oldest and youngest sample
             else
             {
-                double x = q(di, d, true) - q(oi, o, true) + q(oi, o) - q(di, d);
+                double x = qdi - qoi - q(di, d);
 
                 partial_likelihood[i] += Psi[i] + log( exp(x-Psi[i]) + 1.0 );
                 partial_likelihood[i] += log( fossil[di] * p( di, d ) );
