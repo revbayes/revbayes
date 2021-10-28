@@ -1,0 +1,116 @@
+################################################################################
+#
+# RevBayes Validation Test: Felsenstein (81) with uniform time tree using sorted
+# dirichlet distribution
+# 
+# Model: Sequences evolve under the Felsenstein (81) model and the tree is drawn
+#        from a uniform time tree distribution. 
+#            
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+#######################
+# Reading in the Data #
+#######################
+
+###### This just defines a single model for all sites #######
+
+### Read in sequence data for both genes
+
+data <- readDiscreteCharacterData("data/primates_cytb_small.nex")
+
+# Get some useful variables from the data. We need these later on.
+taxa <- data.taxa()
+
+# set my move index
+mi = 0
+
+
+
+######################
+# Substitution Model #
+######################
+
+#### specify the Felsenstein 1981 substitution model applied uniformly to all sites ###
+
+
+pi_prior <- v(1,1,1,1) 
+pi ~ dnDirichletSorted(pi_prior)
+moves[++mi] = mvSortedBetaSimplex(pi,weight=2)
+
+Q := fnF81(pi) 
+
+
+
+
+
+##############
+# Tree model #
+##############
+
+
+# specify a prior on the root age (our informed guess is about 75-80 mya)
+root ~ dnUniform(50.0,100.0)
+
+# create some moves that change the stochastic variables
+# all moves are sliding proposals but you could use scaling proposals for the rates too
+moves[++mi] = mvSlide(root,delta=1,tune=true,weight=1)
+
+# construct a variable for the tree drawn from a birth death process
+psi ~ dnUniformTimeTree(rootAge=root, taxa=taxa )
+
+moves[++mi] = mvNarrow(psi, weight=5.0)
+moves[++mi] = mvNNI(psi, weight=1.0)
+moves[++mi] = mvFNPR(psi, weight=3.0)
+moves[++mi] = mvSubtreeScale(psi, weight=3.0)
+moves[++mi] = mvNodeTimeSlideUniform(psi, weight=15.0)
+
+
+
+
+
+
+###################
+# PhyloCTMC Model #
+###################
+
+# We use an empirical estimate of the clock rate which is 0.01 (=1%) per million years per site
+clockRate <- 0.01
+
+# the sequence evolution model
+seq ~ dnPhyloCTMC(tree=psi, Q=Q, branchRates=clockRate, type="DNA")
+
+# attach the data
+seq.clamp(data)
+
+
+
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(Q)
+
+
+
+
+
+
+monitors[1] = mnModel(filename="output/primates_cytb.log",printgen=10, separator = TAB)
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+validation = validationAnalysis( mymcmc, 100, directory="output_sorted_dirichlet" )
+validation.burnin(generations=3000,tuningInterval=250)
+validation.run(generations=10000)
+validation.summarize()
+
+
+# you may want to quit RevBayes now
+q()
+

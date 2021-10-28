@@ -104,6 +104,7 @@
 /* Moves on simplices */
 #include "Move_DirichletSimplex.h"
 #include "Move_BetaSimplex.h"
+#include "Move_SortedBetaSimplex.h"
 #include "Move_ElementSwapSimplex.h"
 
 /* Moves on vectors */
@@ -125,6 +126,7 @@
 #include "Move_VectorScale.h"
 #include "Move_VectorSlide.h"
 #include "Move_VectorSlideRecenter.h"
+#include "Move_VectorSimplexSwap.h"
 
 /* Moves on real valued matrices */
 #include "Move_MatrixSingleElementScale.h"
@@ -169,6 +171,7 @@
 #include "ScaleProposal.h"
 #include "SlideProposal.h"
 #include "BetaSimplexProposal.h"
+#include "SortedBetaSimplexProposal.h"
 
 
 /* Moves on character histories/data augmentation */
@@ -287,6 +290,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         /* Moves on simplices */
         addType( new Move_DirichletSimplex() );
         addType( new Move_BetaSimplex() );
+        addType( new Move_SortedBetaSimplex() );
         addType( new Move_ElementSwapSimplex() );
 
         /* Moves on vectors */
@@ -308,6 +312,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_VectorSingleElementSlide() );
         addType( new Move_VectorFixedSingleElementSlide() );
         addType( new Move_EllipticalSliceSamplingSimple() );
+        addType( new Move_VectorSimplexSwap() );
 
         addType( new Move_SynchronizedVectorFixedSingleElementSlide() );
 
