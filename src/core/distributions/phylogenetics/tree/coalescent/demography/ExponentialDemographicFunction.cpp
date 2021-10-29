@@ -140,6 +140,28 @@ double ExponentialDemographicFunction::getIntegral(double start, double finish) 
 }
 
 /**
+ * spaceholder
+ */
+double ExponentialDemographicFunction::getWaitingTime(double time, double lambda) const
+{
+    double N0 = theta_recent->getValue();
+    double N1 = theta_ancient->getValue();
+    double t0 = time_recent->getValue();
+    double t1 = time_ancient->getValue();
+    
+	double alpha = log( N1/N0 ) / (t0 - t1);
+	double inlog = exp(alpha * (time - t0)) + lambda * alpha * theta_recent->getValue();
+	if (inlog < 0)
+	{
+	    return -1;
+	}
+	else 
+	{
+	    return log(inlog) / alpha - time;
+	}
+}
+
+/**
  * @param[in]   old_node    Pointer to the DAG node to be replaced
  * @param[in]   new_node    Pointer to the DAG node replacing the other
  */

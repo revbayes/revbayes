@@ -320,6 +320,11 @@ std::vector<double> HeterochronousCoalescent::simulateCoalescentAges( size_t n )
     
     // the current age of the process
     double sim_age = 0.0;
+
+    size_t index_demographic_function = 0;
+    const DemographicFunction *current_demographic_function = &demographies[index_demographic_function];
+    const RbVector<double> &change_times = intervals->getValue();
+
     
     // draw a time for each speciation event condition on the time of the process
     for (size_t i = 0; i < n; ++i)
@@ -328,21 +333,38 @@ std::vector<double> HeterochronousCoalescent::simulateCoalescentAges( size_t n )
         do
         {
             double nPairs = j * (j-1) / 2.0;
-            double lambda = nPairs / theta;
-            double u = RbStatistics::Exponential::rv( lambda, *rng);
-            sim_age += u;
-            valid = sim_age < serial_times[index_serial_time] && j > 1;
-            if ( valid == false )
+            double lambda = RbStatistics::Exponential::rv( nPairs, *rng);
+            double waitingTime = current_demographic_function->getWaitingTime(sim_age, lambda);
+            sim_age += waitingTime;
+            
+            bool serial_tip_first = ( index_serial_time < serial_times.size() && ( index_demographic_function >= change_times.size() || serial_times[index_serial_time] < change_times[index_demographic_function]) );
+            
+            if ( serial_tip_first == false )
             {
-                // If j is 1 and we are still simulating coalescent events, we have >= 1 serial sample left to coalesce.
-                // There are no samples to coalesce now, but we cannot exit, thus, we advance to the next serial sample
-                // Alternately, when we cross a serial sampling time, the number of active lineages changes
-                // it is necessary to discard any "excess" time, which is drawn from an incorrect distribution
-                // then we can draw a new time according to the correct number of active lineages.
-                // Either we advance or go back, but in both situations we set the time to the current serial sample.
-                sim_age = serial_times[index_serial_time];
-                ++index_serial_time;
-                ++j;
+                valid = (index_demographic_function >= change_times.size() || sim_age < change_times[index_demographic_function]) && waitingTime > 0;
+                if ( valid == false )
+                {
+                    sim_age = change_times[index_demographic_function];
+                    ++index_demographic_function;
+                    current_demographic_function = &demographies[index_demographic_function];
+                }
+            }
+            else
+            {
+                // valid = index_serial_time >= serial_times.size() || (sim_age < serial_times[index_serial_time] && j > 1);
+                valid = (sim_age < serial_times[index_serial_time] && j > 1);
+                if ( valid == false )
+                {
+                    // If j is 1 and we are still simulating coalescent events, we have >= 1 serial sample left to coalesce.
+                    // There are no samples to coalesce now, but we cannot exit, thus, we advance to the next serial sample
+                    // Alternately, when we cross a serial sampling time, the number of active lineages changes
+                    // it is necessary to discard any "excess" time, which is drawn from an incorrect distribution
+                    // then we can draw a new time according to the correct number of active lineages.
+                    // Either we advance or go back, but in both situations we set the time to the current serial sample.
+                    sim_age = serial_times[index_serial_time];
+                    ++index_serial_time;
+                    ++j;
+                }
             }
         } while ( valid == false );
         

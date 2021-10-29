@@ -141,6 +141,14 @@ double LinearDemographicFunction::getIntegral(double start, double finish) const
 }
 
 /**
+ * spaceholder
+ */
+double LinearDemographicFunction::getWaitingTime(double time, double lambda) const
+{
+    return theta_recent->getValue() * lambda;
+}
+
+/**
  * @param[in]   old_node    Pointer to the DAG node to be replaced
  * @param[in]   new_node    Pointer to the DAG node replacing the other
  */
