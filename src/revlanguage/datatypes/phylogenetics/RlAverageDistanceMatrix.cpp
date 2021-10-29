@@ -169,7 +169,7 @@ RevPtr<RevVariable> AverageDistanceMatrix::executeMethod(std::string const &name
     else if ( name == "getElement" )
     {
         
-        if ( args.size() > 3 && args[0].getVariable()->getRevObject().isType( Natural::getClassTypeSpec() ) && args[1].getVariable()->getRevObject().isType( Natural::getClassTypeSpec() ) )
+        if ( args.size() > 1 && args[0].getVariable()->getRevObject().isType( Natural::getClassTypeSpec() ) && args[1].getVariable()->getRevObject().isType( Natural::getClassTypeSpec() ) )
         {
             found = true;
             // get the member with given indices
@@ -209,7 +209,7 @@ void AverageDistanceMatrix::initializeMethods( void )
 {
     // add method for call "distanceMatrix" as a function
     ArgumentRules* distanceMatrixArgRules = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "distanceMatrix", AverageDistanceMatrix::getClassTypeSpec(), distanceMatrixArgRules ) );
+    methods.addFunction( new MemberProcedure( "distanceMatrix", DistanceMatrix::getClassTypeSpec(), distanceMatrixArgRules ) );
     
     // add method for call "mask" as a function
     ArgumentRules* maskArgRules = new ArgumentRules();
@@ -221,17 +221,17 @@ void AverageDistanceMatrix::initializeMethods( void )
     
     // add method for call "size" as a function
     ArgumentRules* sizeArgRules = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "size", Real::getClassTypeSpec(), sizeArgRules ) );
+    methods.addFunction( new MemberProcedure( "size", Natural::getClassTypeSpec(), sizeArgRules ) );
     
     // add method for call "completeness" as a function
     ArgumentRules* complArgRules = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "completeness", Natural::getClassTypeSpec(), complArgRules) );
+    methods.addFunction( new MemberProcedure( "completeness", Real::getClassTypeSpec(), complArgRules) );
     
     // add method for call "getElement" as a function
     ArgumentRules* getElementArgRules = new ArgumentRules();
     getElementArgRules->push_back( new ArgumentRule( "i" , Natural::getClassTypeSpec(), "The row.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     getElementArgRules->push_back( new ArgumentRule( "j" , Natural::getClassTypeSpec(), "The column.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    methods.addFunction( new MemberProcedure( "getElement", Natural::getClassTypeSpec(), getElementArgRules) );
+    methods.addFunction( new MemberProcedure( "getElement", ModelVector<Real>::getClassTypeSpec(), getElementArgRules) );
 
 }
 

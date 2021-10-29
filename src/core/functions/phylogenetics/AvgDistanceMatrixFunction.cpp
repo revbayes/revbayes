@@ -3,15 +3,34 @@
 #include <vector>
 
 #include "RbVector.h"
+#include "RbException.h"
 #include "TreeUtilities.h"
 #include "TypedDagNode.h"
 
 using namespace RevBayesCore;
 
-AvgDistanceMatrixFunction::AvgDistanceMatrixFunction(const TypedDagNode< RbVector<DistanceMatrix> > *matvect) : TypedFunction< AverageDistanceMatrix >( new AverageDistanceMatrix() ),
-    matrixVector( matvect )
+AvgDistanceMatrixFunction::AvgDistanceMatrixFunction(const TypedDagNode< RbVector<DistanceMatrix> >* matvect) : TypedFunction< AverageDistanceMatrix >( new AverageDistanceMatrix() ),
+matrixVector( matvect )
+{
+    weightVector = NULL;
+    addParameter( matrixVector );
+    
+    update();
+}
+
+
+AvgDistanceMatrixFunction::AvgDistanceMatrixFunction(const TypedDagNode< RbVector<DistanceMatrix> >* matvect, const TypedDagNode< RbVector<double> >* weights) : TypedFunction< AverageDistanceMatrix >( new AverageDistanceMatrix() ),
+matrixVector( matvect ),
+weightVector( weights )
 {
     addParameter( matrixVector );
+    addParameter( weightVector );
+    
+    // Make sure inputs are of correct size
+    if ( weightVector != NULL && weightVector->getValue().size() != matrixVector->getValue().size() )
+    {
+        throw RbException("fnAverageDistanceMatrix requires weights to be a vector with number of elements matching the number of distance matrices to be averaged");
+    }
     
     update();
 }
@@ -32,8 +51,15 @@ AvgDistanceMatrixFunction* AvgDistanceMatrixFunction::clone( void ) const
 
 void AvgDistanceMatrixFunction::update( void )
 {
-
-    *value = TreeUtilities::getAverageDistanceMatrix( matrixVector->getValue() );
+    
+    if (weightVector == NULL)
+    {
+        *value = TreeUtilities::getAverageDistanceMatrix( matrixVector->getValue(), NULL );
+    }
+    else
+    {
+        *value = TreeUtilities::getAverageDistanceMatrix( matrixVector->getValue(), &weightVector->getValue() );
+    }
 }
 
 
@@ -43,6 +69,10 @@ void AvgDistanceMatrixFunction::swapParameterInternal(const DagNode *oldP, const
     if (oldP == matrixVector)
     {
         matrixVector = static_cast<const TypedDagNode< RbVector<DistanceMatrix> >* >( newP );
+    }
+    else if (oldP == weightVector)
+    {
+        weightVector = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
     
 }

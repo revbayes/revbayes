@@ -36,7 +36,7 @@ namespace RevBayesCore {
         double                  computeRobinsonFouldDistance(const Tree &a, const Tree &b); //!< Robinson-Foulds distance
         Tree*                   convertTree(const Tree &t, bool resetIndex=true); //!< convert tree to time tree
         void                    getAges(Tree *t, TopologyNode *n, std::vector<double>& ages, bool internalsOnly=true); //!< fill vector with node ages
-        AverageDistanceMatrix   getAverageDistanceMatrix(const RbVector<DistanceMatrix>& matvect);
+        AverageDistanceMatrix   getAverageDistanceMatrix(const RbVector<DistanceMatrix>& matvect, const RbVector<double>* weights); //!< calculate the (possibly weighted) average of multiple distance matrices
         DistanceMatrix*         getDistanceMatrix(const Tree& tree); //!< get matrix of all distances
         size_t                  getMrcaIndex(const TopologyNode *l, const TopologyNode *r); //!< get index of MRCA
         double                  getAgeOfMRCA(const Tree &t, std::string first, std::string second) ; //!< calculate age of MRCA based on tip names
