@@ -67,10 +67,11 @@ if ("${MPI}" STREQUAL "ON")
 endif()
 
 
-if ("${BEAGLE}" STREQUAL "ON")
+#if ("${BEAGLE}" STREQUAL "ON")
+if ("${RB_BEAGLE}" STREQUAL "ON")
    #-- Maybe change these to a better spot later...
-   set(BEAGLE_INCLUDE_PATH  "/usr/local/include/libhmsbeagle-1")
-   set(BEAGLE_COMPILE_FLAGS "-I${beagle_root}/include/libhmsbeagle-1")
+   set(BEAGLE_INCLUDE_PATH  "/usr/local/include/libhmsbeagle")
+   set(BEAGLE_COMPILE_FLAGS "-I${beagle_root}/include/libhmsbeagle")
    set(BEAGLE_LINK_FLAGS    "-L/usr/local/lib -lhmsbeagle")
 
    #find_package(Eigen3 3.3 REQUIRED NO_MODULE)

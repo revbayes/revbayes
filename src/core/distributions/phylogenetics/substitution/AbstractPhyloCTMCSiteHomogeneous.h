@@ -32,7 +32,7 @@
 #define RB_BEAGLE_INFO
 
 //-- Enable / Disable debugging by (un)commenting the following:
-//#define RB_BEAGLE_DEBUG
+#define RB_BEAGLE_DEBUG
 
 //-- Enable / Disable using eigen3 library by (un)commenting the following:
 #define RB_USE_EIGEN3
@@ -4266,10 +4266,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     }
 }
 
-/* Collection of BEAGLE alternative methods to replace some standard RevBayes
- * likelihood calculation methods (when beagle-lib is available).
- */
 
+/* Collection of BEAGLE helper methods (when beagle-lib is available). */
 #if defined( RB_BEAGLE )
 
 template<class charType>
@@ -4278,10 +4276,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleI
     std::stringstream ss;
 
     if ( BeagleInstance::getResourceID()           == -1    &&
-         RbSettings::userSettings().getUseBeagle() == true  &&
-         num_site_mixtures                         == 1     &&
-         tau->getValue().isRooted()                == false &&
-         num_site_rates                            == 1
+         RbSettings::userSettings().getUseBeagle() == true  
        )
     {
         #if defined ( RB_USE_EIGEN3 )

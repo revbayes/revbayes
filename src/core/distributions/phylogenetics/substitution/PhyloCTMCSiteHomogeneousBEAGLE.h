@@ -1,23 +1,13 @@
-//---------------------------------------------------------------------------------------[ Header ]
-//--{1
-
 #ifndef PhyloCTMCSiteHomogeneousBEAGLE_H
 #define PhyloCTMCSiteHomogeneousBEAGLE_H
 
 #include "AbstractPhyloCTMCSiteHomogeneous.h"
-#include "TopologyNode.h"
-
-#include "RbVector.h"
-
-//-- TODO: are these needed?
-#include "DnaState.h"
-#include "RateMatrix.h"
-#include "TransitionProbabilityMatrix.h"
-#include "TypedDistribution.h"
 
 
-//#define RB_BEAGLE_DEBUG
-
+#define RB_BEAGLE_DEBUG
+//#define RB_BEAGLE_DEBUG_EIGEN
+//#define RB_BEAGLE_DEBUG_TIP
+//#define RB_BEAGLE_DEBUG_BRANCH
 
 
 namespace RevBayesCore
@@ -76,6 +66,14 @@ namespace RevBayesCore
                                                          , size_t r
                                                          );
 
+            //-- Collect a BEAGLE operation for an internal node into the computation queue.
+            virtual void   computeInternalNodeLikelihood ( const TopologyNode &n
+                                                         , size_t nIdx
+                                                         , size_t l
+                                                         , size_t r
+                                                         , size_t m
+                                                         );
+
             //-- Collect a BEAGLE operation for a leaf node into the computation queue.
             virtual void   computeTipLikelihood          ( const TopologyNode &node
                                                          , size_t nIdx
@@ -99,10 +97,6 @@ namespace RevBayesCore
 
 } //-- End namespace
 
-//--}
-
-//-----------------------------------------------------------------------[ Imports / Constructors ]
-//--{1
 
 #include "ConstantNode.h"
 #include "DiscreteCharacterState.h"
@@ -112,23 +106,17 @@ namespace RevBayesCore
 #include <cstring>
 
 
-//-- Try to keep a clean(ish) file structure... Refer to the namespace of this class as 'This'.
-//   Remember to '#undef This' at the end of header file and NEVER have '#include'
-//   statements after this line.
-#define This RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>
-
-
 
 template<class charType>
-This::PhyloCTMCSiteHomogeneousBEAGLE ( const TypedDagNode<Tree>* t
-                                     , size_t nChars
-                                     , bool c
-                                     , size_t nSites
-                                     , bool amb
-                                     , bool internal
-                                     , bool gapmatch
-                                     )
-    : AbstractPhyloCTMCSiteHomogeneous<charType> ( t
+RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::PhyloCTMCSiteHomogeneousBEAGLE
+  ( const TypedDagNode<Tree>* t
+  , size_t nChars
+  , bool c
+  , size_t nSites
+  , bool amb
+  , bool internal
+  , bool gapmatch
+  ) : AbstractPhyloCTMCSiteHomogeneous<charType> ( t
                                                  , nChars
                                                  , 1
                                                  , c
@@ -142,7 +130,7 @@ This::PhyloCTMCSiteHomogeneousBEAGLE ( const TypedDagNode<Tree>* t
 
 
 template<class charType>
-This::~PhyloCTMCSiteHomogeneousBEAGLE ( void )
+RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::~PhyloCTMCSiteHomogeneousBEAGLE ( void )
 {
     // We don't delete the parameters, because they might be used somewhere else too.
     // The model needs to do that!
@@ -151,7 +139,8 @@ This::~PhyloCTMCSiteHomogeneousBEAGLE ( void )
 
 
 template<class charType>
-This* This::clone ( void ) const
+RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>*
+RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::clone ( void ) const
 {
     return new PhyloCTMCSiteHomogeneousBEAGLE<charType>(*this);
 }
@@ -163,7 +152,8 @@ This* This::clone ( void ) const
 //--{1
 
 template<class charType>
-double This::calculateBranchLength ( const TopologyNode &node, size_t node_index )
+double
+RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::calculateBranchLength ( const TopologyNode &node, size_t node_index )
 {
     double branch_len;
     double rate ;
@@ -190,11 +180,11 @@ double This::calculateBranchLength ( const TopologyNode &node, size_t node_index
       throw RbException("Error : Negative branch length!");
     }
 
-    // #if defined ( RB_BEAGLE_DEBUG )
-    //     std::stringstream ss;
-    //     ss << "Branch length: " << std::to_string(branch_len) << "\n";
-    //     RBOUT(ss.str());
-    // #endif /* RB_BEAGLE_DEBUG */
+#if defined ( RB_BEAGLE_DEBUG_BRANCH )
+    std::stringstream ss;
+    ss << "Branch length: " << std::to_string(branch_len) << "\n";
+    RBOUT(ss.str());
+#endif /* RB_BEAGLE_DEBUG_BRANCH */
 
     return branch_len;
 }
@@ -206,9 +196,9 @@ double This::calculateBranchLength ( const TopologyNode &node, size_t node_index
 //--{1
 
 template<class charType>
-double This::sumRootLikelihood (void )
+double
+RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::sumRootLikelihood (void )
 {
-    //computeLnProbability();
 
     #if defined ( RB_BEAGLE_DEBUG )
         std::stringstream ss;
@@ -224,7 +214,8 @@ double This::sumRootLikelihood (void )
 
 
 template<class charType>
-void This::computeRootLikelihood ( size_t root, size_t left, size_t right )
+void
+RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood ( size_t root, size_t left, size_t right )
 {
     //-- TODO : Calculate the lnLikelihood for rooted trees. Should be able to copy the code for the
     //          unroooted case, but must change the child indexes/partials buffers.
@@ -233,7 +224,12 @@ void This::computeRootLikelihood ( size_t root, size_t left, size_t right )
 
 
 template<class charType>
-void This::computeRootLikelihood ( size_t root, size_t left, size_t right, size_t middle )
+void
+RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood ( size_t root
+                                                                              , size_t left
+                                                                              , size_t right
+                                                                              , size_t middle
+                                                                              )
 {
     #if defined ( RB_BEAGLE_DEBUG )
         std::stringstream ss;
@@ -247,7 +243,7 @@ void This::computeRootLikelihood ( size_t root, size_t left, size_t right, size_
     size_t num_taxa  = (this->num_nodes + 2) / 2;
 
     size_t root_idx  = root + this->num_nodes * this->activeLikelihood[root];
-    this->b_node_indices.push_back(root_idx); //-- TESTING! -- not in original
+    //this->b_node_indices.push_back(root_idx); //-- TESTING! -- not in original
 
     size_t mid_idx   = middle + this->num_nodes * this->activeLikelihood[middle];
     size_t left_idx  = left   + this->num_nodes * this->activeLikelihood[left];
@@ -268,7 +264,7 @@ void This::computeRootLikelihood ( size_t root, size_t left, size_t right, size_
         , .child2Partials         = (int) right_partials
         , .child2TransitionMatrix = (int) right_idx
         };
-    this->b_ops.push_back(b_operation);  //-- TESTING! -- not in original
+    //this->b_ops.push_back(b_operation);  //-- TESTING! -- not in original
 
     //-- BEAGLE model parameters.
     int     b_parentBufferIndices     = (int) root_idx;
@@ -355,16 +351,8 @@ void This::computeRootLikelihood ( size_t root, size_t left, size_t right, size_
                           + this->parseBeagleReturnCode(b_code_calc_edges));
     }
 
-    //-- TODO: Super hacky way to force computation beyond high likelihood errors. Remove after testing!!!
-    if ( b_outSumLogLikelihood < 10 )
-    {
-        this->ln_beagle_probability = b_outSumLogLikelihood;
-    }
-    else
-    {
-        this->ln_beagle_probability = RbConstants::Double::neginf;
-    }
-
+    this->ln_beagle_probability = b_outSumLogLikelihood;
+    
     //-- Reset the beagle operations queues (TESTING)
     //this->b_ops.clear();
     //this->b_branch_lengths.clear();
@@ -379,11 +367,13 @@ void This::computeRootLikelihood ( size_t root, size_t left, size_t right, size_
 
 
 template<class charType>
-void This::computeInternalNodeLikelihood ( const TopologyNode &node
-                                         , size_t node_index
-                                         , size_t left
-                                         , size_t right
-                                         )
+void
+RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikelihood
+  ( const TopologyNode &node
+  , size_t node_index
+  , size_t left
+  , size_t right
+  )
 {
     double branch_length = calculateBranchLength(node, node_index);
 
@@ -411,9 +401,49 @@ void This::computeInternalNodeLikelihood ( const TopologyNode &node
 }
 
 
+template<class charType>
+void
+RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikelihood
+  ( const TopologyNode &node
+  , size_t node_index
+  , size_t left
+  , size_t right
+  , size_t middle
+  )
+{
+    double branch_length = calculateBranchLength(node, node_index);
+
+    size_t node_idx   = node_index + this->num_nodes * this->activeLikelihood[node_index];
+    size_t left_idx   = left       + this->num_nodes * this->activeLikelihood[left];
+    size_t right_idx  = right      + this->num_nodes * this->activeLikelihood[right];
+    size_t middle_idx = middle     + this->num_nodes * this->activeLikelihood[middle];
+
+    //-- Tips are actually just stored once, so we dont need offests.
+    size_t left_partials   = (node.getChild(0).isTip()) ? left  : left_idx;
+    size_t right_partials  = (node.getChild(1).isTip()) ? right : right_idx;
+    size_t middle_partials = (node.getChild(2).isTip()) ? middle : middle_idx;
+
+    //-- TODO : Check which operation for middle
+    BeagleOperation b_operation =
+        { .destinationPartials    = (int) node_idx
+        , .destinationScaleWrite  = BEAGLE_OP_NONE
+        , .destinationScaleRead   = BEAGLE_OP_NONE
+        , .child1Partials         = (int) left_partials
+        , .child1TransitionMatrix = (int) left_idx
+        , .child2Partials         = (int) right_partials
+        , .child2TransitionMatrix = (int) right_idx
+        };
+
+    this->b_ops.push_back(b_operation);
+    this->b_node_indices.push_back(node_idx);
+    this->b_branch_lengths.push_back(branch_length);
+}
+
+
 
 template<class charType>
-void This::computeTipLikelihood ( const TopologyNode &node, size_t node_index )
+void
+RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeTipLikelihood ( const TopologyNode &node, size_t node_index )
 {
     double branch_length = calculateBranchLength(node, node_index);
     this->b_branch_lengths.push_back(branch_length);
@@ -422,15 +452,6 @@ void This::computeTipLikelihood ( const TopologyNode &node, size_t node_index )
     this->b_node_indices.push_back(node_idx);
 }
 
-//--}
-
-
-//--------------------------------------------------------------------------------------[ Cleanup ]
-//--{1
-
-//-- Undefine the local namespace shortcut
-#undef This
 
 #endif
 
-//--}
