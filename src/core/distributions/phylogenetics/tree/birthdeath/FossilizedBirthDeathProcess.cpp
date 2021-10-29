@@ -216,7 +216,7 @@ double FossilizedBirthDeathProcess::pSurvival(double start, double end) const
 double FossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) const
 {
 
-    if ( t == 0.0 ) return 0.0;
+    if ( t == times[i] ) return 0.0;
 
     // get the parameters
     double b = birth[i];
@@ -294,7 +294,9 @@ void FossilizedBirthDeathProcess::simulateClade(std::vector<TopologyNode *> &n, 
         {
             bool extinct = n[i]->getTaxon().isExtinct();
 
-            n[i]->setAge( extinct * rng->uniform01() * n[i]->getTaxon().getMinAge() );
+            double present = times.front();
+
+            n[i]->setAge( extinct * rng->uniform01() * (n[i]->getTaxon().getMinAge() - present) + present );
 
             size_t j = find(taxa.begin(), taxa.end(), n[i]->getTaxon()) - taxa.begin();
 

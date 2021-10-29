@@ -149,10 +149,12 @@ BirthDeathRateShiftsProcess::BirthDeathRateShiftsProcess(const DagNode *inspecia
 
     partial_likelihood = std::vector<double>(taxa.size(), 0.0);
 
-    Psi       = std::vector<double>(taxa.size(), 0.0 );
+    Psi        = std::vector<double>(taxa.size(), 0.0 );
 
     dirty_taxa = std::vector<bool>(taxa.size(), true);
-    dirty_psi = std::vector<bool>(taxa.size(), true);
+    dirty_psi  = std::vector<bool>(taxa.size(), true);
+
+    double max_present = RbConstants::Double::inf;
 
     for ( size_t i = 0; i < taxa.size(); i++ )
     {
@@ -163,10 +165,18 @@ BirthDeathRateShiftsProcess::BirthDeathRateShiftsProcess(const DagNode *inspecia
             o_i[i] = std::max(Fi->first.getMin(), o_i[i]);
             // find the youngest maximum age
             y_i[i] = std::min(Fi->first.getMax(), y_i[i]);
+
+            max_present = std::min(max_present, y_i[i]);
         }
     }
 
     prepareProbComputation();
+    
+    if ( times.front() > max_present )
+    {
+        throw(RbException("Timeline start time is older than youngest fossil age."));
+    }
+
     redrawValue();
 }
 
@@ -195,8 +205,8 @@ double BirthDeathRateShiftsProcess::computeLnProbability()
     // variable declarations and initialization
     double lnProbTimes = 0.0;
 
-    size_t num_extant_sampled = 0;
-    size_t num_extant_unsampled = 0;
+    size_t num_rho_sampled = 0;
+    size_t num_rho_unsampled = 0;
 
     // add the fossil tip age terms
     for (size_t i = 0; i < taxa.size(); ++i)
@@ -207,19 +217,21 @@ double BirthDeathRateShiftsProcess::computeLnProbability()
         double max_age = taxa[i].getMaxAge();
         double min_age = taxa[i].getMinAge();
 
+        double present = times.front();
+
         // check model constraints
-        if ( !( b > o_i[i] && b > d && y_i[i] >= d && d >= 0.0 ) )
+        if ( !( b > o_i[i] && b > d && y_i[i] >= d && d >= present ) )
         {
             return RbConstants::Double::neginf;
         }
-        if ( (d > 0.0) != taxa[i].isExtinct() )
+        if ( (d > present) != taxa[i].isExtinct() )
         {
             return RbConstants::Double::neginf;
         }
 
         // count the number of rho-sampled tips
-        num_extant_sampled   += (d == 0.0 && min_age == 0.0);
-        num_extant_unsampled += (d == 0.0 && min_age > 0.0);
+        num_rho_sampled   += (d == present && min_age == present);
+        num_rho_unsampled += (d == present && min_age > present);
 
         if ( dirty_taxa[i] == true )
         {
@@ -232,13 +244,13 @@ double BirthDeathRateShiftsProcess::computeLnProbability()
             partial_likelihood[i] += log( birth[bi] );
 
             // skip the rest for extant taxa with no fossil samples
-            if ( max_age == 0.0 )
+            if ( max_age == present )
             {
                 continue;
             }
 
             // include extinction density
-            if (d > 0.0) partial_likelihood[i] += log( death[di] );
+            if (d > present) partial_likelihood[i] += log( death[di] );
 
             double psi_b_d = 0.0;
 
@@ -353,12 +365,12 @@ double BirthDeathRateShiftsProcess::computeLnProbability()
     // add the sampled extant tip age term
     if ( homogeneous_rho->getValue() > 0.0)
     {
-        lnProbTimes += num_extant_sampled * log( homogeneous_rho->getValue() );
+        lnProbTimes += num_rho_sampled * log( homogeneous_rho->getValue() );
     }
     // add the unsampled extant tip age term
     if ( homogeneous_rho->getValue() < 1.0)
     {
-        lnProbTimes += num_extant_unsampled * log( 1.0 - homogeneous_rho->getValue() );
+        lnProbTimes += num_rho_unsampled * log( 1.0 - homogeneous_rho->getValue() );
     }
 
     if ( RbMath::isFinite(lnProbTimes) == false )
@@ -407,11 +419,13 @@ void BirthDeathRateShiftsProcess::redrawValue(void)
         max = 1.0;
     }
 
+    double present = times.front();
+
     // get random uniform draws
     for (size_t i = 0; i < taxa.size(); i++)
     {
         double b = taxa[i].getMaxAge() + rng->uniform01()*(max - taxa[i].getMaxAge()) + taxa[i].getMaxAge();
-        double d = taxa[i].isExtinct() ? rng->uniform01()*taxa[i].getMinAge() : 0.0;
+        double d = taxa[i].isExtinct() ? rng->uniform01()*(taxa[i].getMinAge() - present) + present : present;
 
         (*this->value)[i][0] = b;
         (*this->value)[i][1] = d;
