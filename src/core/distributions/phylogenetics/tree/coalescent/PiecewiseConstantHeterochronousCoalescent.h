@@ -36,7 +36,7 @@ namespace RevBayesCore {
         virtual                                            ~PiecewiseConstantHeterochronousCoalescent(void);                                                                    //!< Virtual destructor
         
         // public member functions
-        PiecewiseConstantHeterochronousCoalescent*                        clone(void) const;                                                                                  //!< Create an independent clone
+        PiecewiseConstantHeterochronousCoalescent*          clone(void) const;                                                                                  //!< Create an independent clone
         
     protected:
         // Parameter management functions
