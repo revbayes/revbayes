@@ -29,7 +29,7 @@ namespace RevBayesCore {
 		
 		public:
 		
-		BranchLengthDistributionReader(const std::string &fn, char d='\t', size_t ns=0);
+		BranchLengthDistributionReader(const std::string &fn, std::string d="", size_t ns=0);
 		
 		const std::vector< std::pair<std::string, std::string > >&     		 getTipPairs(void);
 		const std::map < std::string, std::vector< double > >&   getBranchLengths(std::pair<std::string, std::string >& tipPair );
@@ -38,10 +38,10 @@ namespace RevBayesCore {
 		
 		protected:
 		
-		std::vector< std::pair < std::string, std::string > >             				 TipPairs;
+		std::vector< std::pair < std::string, std::string > >            TipPairs;
 		std::vector < std::map < std::string, std::vector< double > > >  matrix;
 		std::vector< std::string >                 		 				 geneFamilies;
-		std::map< std::pair<std::string, std::string >, size_t >  					 pairToIndex;
+		std::map< std::pair<std::string, std::string >, size_t >  		 pairToIndex;
 		
 	};
 	

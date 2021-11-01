@@ -1,5 +1,7 @@
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "AbstractDiscreteTaxonData.h"
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
 
 #include <sstream>
 #include <string>
@@ -75,6 +77,36 @@ void AbstractHomologousDiscreteCharacterData::fillMissingSitesMask(std::vector<s
 }
 
 
+void AbstractHomologousDiscreteCharacterData::removeRandomSites( double p )
+{
+
+    size_t num_taxa  = getNumberOfTaxa();
+    size_t num_sites = getNumberOfCharacters();
+    
+    RandomNumberGenerator *rng = GLOBAL_RNG;
+    
+    // set the gap states as in the clamped data
+    for (size_t i = 0; i < num_taxa; ++i)
+    {
+        const std::string &taxon_name = getTaxonNameWithIndex( i );
+        AbstractDiscreteTaxonData& taxon = getTaxonData( taxon_name );
+
+        for ( size_t site=0; site<num_sites; ++site)
+        {
+            DiscreteCharacterState &c = taxon.getCharacter(site);
+            if ( p > rng->uniform01() )
+            {
+                c.setGapState( true );
+                c.setMissingState( true );
+            }
+            
+        }
+
+    }
+    
+}
+
+
 void AbstractHomologousDiscreteCharacterData::writeToFile(const std::string &dir, const std::string &fn) const
 {
     if (this->getDataType() == "NaturalNumbers")
@@ -82,7 +114,7 @@ void AbstractHomologousDiscreteCharacterData::writeToFile(const std::string &dir
         // NEXUS does not support NaturalNumbers so write tab delimited file
         RbFileManager fm = RbFileManager(dir, fn + ".tsv");
         RevBayesCore::DelimitedCharacterDataWriter writer; 
-        writer.writeData(fm.getFullFileName(), *this, "\t"[0]);
+        writer.writeData(fm.getFullFileName(), *this);
     }
     else
     {

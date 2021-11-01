@@ -44,9 +44,25 @@ RevBayesCore::TypedFunction<RevBayesCore::AverageDistanceMatrix>* Func_avgDistan
     
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::DistanceMatrix> >* matrixVector = static_cast<const ModelVector<DistanceMatrix> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     
-    RevBayesCore::AvgDistanceMatrixFunction * f = new RevBayesCore::AvgDistanceMatrixFunction( matrixVector );
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* weightVector = NULL;
     
-    return f;
+    if (this->args[1].getVariable()->getRevObject() != RevNullObject::getInstance())
+    {
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* weightVector = static_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::AvgDistanceMatrixFunction * f = new RevBayesCore::AvgDistanceMatrixFunction( matrixVector, weightVector );
+        return f;
+    }
+    
+    if (weightVector == NULL)
+    {
+        RevBayesCore::AvgDistanceMatrixFunction * f = new RevBayesCore::AvgDistanceMatrixFunction( matrixVector, weightVector );
+        return f;
+    }
+    else
+    {
+        RevBayesCore::AvgDistanceMatrixFunction * f = new RevBayesCore::AvgDistanceMatrixFunction( matrixVector );
+        return f;
+    }
 }
 
 
@@ -61,6 +77,7 @@ const ArgumentRules& Func_avgDistanceMatrix::getArgumentRules( void ) const
     {
         
         argumentRules.push_back( new ArgumentRule( "distanceMatrices", ModelVector<DistanceMatrix>::getClassTypeSpec(), "The vector of distance matrices.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "weights", ModelVector<RealPos>::getClassTypeSpec(), "The vector of weights.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         
         rules_set = true;
     }

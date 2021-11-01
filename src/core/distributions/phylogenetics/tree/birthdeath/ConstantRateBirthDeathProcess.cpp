@@ -79,17 +79,21 @@ double ConstantRateBirthDeathProcess::rateIntegral(double t_low, double t_high) 
 
 
 
-void ConstantRateBirthDeathProcess::redrawValue( SimulationCondition condition )
+void ConstantRateBirthDeathProcess::redrawValue( SimulationCondition sim_condition )
 {
 
-    if ( condition == SimulationCondition::MCMC )
+    if ( sim_condition == SimulationCondition::MCMC )
     {
         if ( starting_tree == NULL )
         {
             simulateTree();
         }
     }
-    else if ( condition == SimulationCondition::VALIDATION )
+    else if ( sim_condition == SimulationCondition::VALIDATION && condition == "nTaxa" )
+    {
+        simulateTree();
+    }
+    else if ( sim_condition == SimulationCondition::VALIDATION )
     {
         
         BirthDeathForwardSimulator simulator;

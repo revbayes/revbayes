@@ -1,6 +1,6 @@
 ################################################################################
 #
-# RevBayes Validation Test: Jukes-Cantor with birth-death process
+# RevBayes Validation Test: GTR+Gamma with birth-death process
 #
 # Model: Sequences evolve under the Jukes-Cantor model and the tree is drawn
 #        from a constant-rate birth-death process with uniform sampling.
@@ -10,22 +10,23 @@
 #
 ################################################################################
 
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
 #######################
 # Reading in the Data #
 #######################
 
-###### This just defines a single model for all sites #######
-
-### Read in sequence data for both genes
-
 data <- readDiscreteCharacterData("data/primates_cytb_small.nex")
-#data <- readDiscreteCharacterData("data/test_large.nex")
 
 # Get some useful variables from the data. We need these later on.
 taxa <- data.taxa()
-
-# set my move index
-mvi = 0
 
 
 
@@ -36,15 +37,15 @@ mvi = 0
 # specify the stationary frequency parameters
 pi_prior <- v(1,1,1,1)
 pi ~ dnDirichlet(pi_prior)
-moves[++mvi] = mvBetaSimplex(pi, weight=2.0)
-moves[++mvi] = mvDirichletSimplex(pi, weight=1.0)
+moves.append( mvBetaSimplex(pi, weight=2.0) )
+moves.append( mvDirichletSimplex(pi, weight=1.0) )
 
 
 # specify the exchangeability rate parameters
 er_prior <- v(1,1,1,1,1,1)
 er ~ dnDirichlet(er_prior)
-moves[++mvi] = mvBetaSimplex(er, weight=3.0)
-moves[++mvi] = mvDirichletSimplex(er, weight=1.5)
+moves.append( mvBetaSimplex(er, weight=3.0) )
+moves.append( mvDirichletSimplex(er, weight=1.5) )
 
 
 # create a deterministic variable for the rate matrix, GTR
@@ -59,7 +60,7 @@ Q := fnGTR(er,pi)
 ##############
 
 # Specify a prior on the diversification and turnover rate
-diversification ~ dnGamma(2,2)
+diversification ~ dnLognormal(ln(0.2),0.2)
 turnover ~ dnGamma(2,2)
 
 # now transform the diversification and turnover rates into speciation and extinction rates
@@ -73,18 +74,18 @@ sampling_fraction <- 23 / 450 # 23 out of the ~ 450 primate species
 
 # create some moves that change the stochastic variables
 # all moves are sliding proposals but you could use scaling proposals for the rates too
-moves[++mvi] = mvSlide(diversification,delta=1,tune=true,weight=1)
-moves[++mvi] = mvSlide(turnover,delta=1,tune=true,weight=1)
-moves[++mvi] = mvSlide(root,delta=1,tune=true,weight=1)
+moves.append( mvSlide(diversification,delta=1,tune=true,weight=1) )
+moves.append( mvSlide(turnover,delta=1,tune=true,weight=1) )
+moves.append( mvSlide(root,delta=1,tune=true,weight=1) )
 
 # construct a variable for the tree drawn from a birth death process
 psi ~ dnBDP(lambda=abs(speciation), mu=abs(extinction), rootAge=abs(root), rho=sampling_fraction, taxa=taxa, condition="nTaxa" )
 
-moves[++mvi] = mvNarrow(psi, weight=5.0)
-moves[++mvi] = mvNNI(psi, weight=1.0)
-moves[++mvi] = mvFNPR(psi, weight=3.0)
-moves[++mvi] = mvSubtreeScale(psi, weight=3.0)
-moves[++mvi] = mvNodeTimeSlideUniform(psi, weight=15.0)
+moves.append( mvNarrow(psi, weight=5.0) )
+moves.append( mvNNI(psi, weight=1.0) )
+moves.append( mvFNPR(psi, weight=3.0) )
+moves.append( mvSubtreeScale(psi, weight=3.0) )
+moves.append( mvNodeTimeSlideUniform(psi, weight=15.0) )
 
 
 
@@ -98,7 +99,7 @@ alpha ~ dnLognormal( alpha_prior_mean, alpha_prior_sd )
 gamma_rates := fnDiscretizeGamma( alpha, alpha, 4, false )
 
 # add moves for the stationary frequencies, exchangeability rates and the shape parameter
-moves[++mvi] = mvScale(alpha,weight=2)
+moves.append( mvScale(alpha,weight=2) )
 
 
 
@@ -118,7 +119,6 @@ seq.clamp(data)
 
 
 
-
 #############
 # THE Model #
 #############
@@ -129,18 +129,11 @@ mymodel = model(Q)
 
 
 
-
-
-
-monitors[1] = mnModel(filename="output/primates_cytb_JC.log",printgen=10, separator = TAB)
-monitors[2] = mnFile(filename="output/primates_cytb_JC.trees",printgen=10, separator = TAB, psi)
-
 mymcmc = mcmc(mymodel, monitors, moves)
 
-
-validation = validationAnalysis( mymcmc, 100 )
-validation.burnin(generations=1000,tuningInterval=100)
-validation.run(generations=4000)
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_GTR_Gamma_BDP" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
 validation.summarize()
 
 

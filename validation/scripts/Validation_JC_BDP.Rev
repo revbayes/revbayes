@@ -10,21 +10,25 @@
 #
 ################################################################################
 
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
 #######################
 # Reading in the Data #
 #######################
-
-###### This just defines a single model for all sites #######
-
-### Read in sequence data for both genes
 
 data <- readDiscreteCharacterData("data/primates_cytb_small.nex")
 
 # Get some useful variables from the data. We need these later on.
 taxa <- data.taxa()
-
-# set my move index
-moves = VectorMoves()
 
 
 
@@ -34,8 +38,6 @@ moves = VectorMoves()
 
 #### specify the Jukes-Cantor substitution model applied uniformly to all sites ###
 Q <- fnJC(4)
-
-
 
 
 
@@ -106,10 +108,9 @@ monitors = VectorMonitors()
 
 mymcmc = mcmc(mymodel, monitors, moves)
 
-
-validation = validationAnalysis( mymcmc, 100 )
-validation.burnin(generations=500,tuningInterval=250)
-validation.run(generations=1000)
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_JC_BD" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
 validation.summarize()
 
 

@@ -1,0 +1,84 @@
+################################################################################
+#
+# RevBayes Validation Test: Piecewise Constant Demography Coalescent Process 
+# 
+# Model: Piecewise Constant Demography Coalescent Process 
+#            
+#
+# authors: Sebastian Hoehna, Ronja Billenstein
+#
+################################################################################
+
+#######################
+# Reading in the Data #
+#######################
+
+observed_phylogeny <- readTrees( "data/primates.tree" )[1]
+
+# Get the names of the taxa in the tree and the age of the tree. We need these later on.
+taxa <- observed_phylogeny.taxa()
+n_taxa <- observed_phylogeny.ntips()
+
+# initialize the moves and monitors vectors
+moves = VectorMoves()
+monitors = VectorMonitors()
+
+
+
+##############
+# Tree model #
+##############
+
+
+pop_size_0 ~ dnUniform(0,1E3)
+pop_size_1 ~ dnUniform(0,1E3)
+pop_size_2 ~ dnUniform(0,1E3)
+pop_size_3 ~ dnUniform(0,1E3)
+moves.append( mvScale(pop_size_0, lambda=0.1, tune=true, weight=2.0) )
+moves.append( mvScale(pop_size_1, lambda=0.1, tune=true, weight=2.0) )
+moves.append( mvScale(pop_size_2, lambda=0.1, tune=true, weight=2.0) )
+moves.append( mvScale(pop_size_3, lambda=0.1, tune=true, weight=2.0) )
+
+change_point_1 <- 50
+change_point_2 <- 100
+change_point_3 <- 150
+demo_const_0 = dfConstant( pop_size_0 )
+demo_const_1 = dfConstant( pop_size_1 )
+demo_const_2 = dfConstant( pop_size_2 )
+demo_const_3 = dfConstant( pop_size_3 )
+psi ~ dnCoalescentDemography([demo_const_3,demo_const_2,demo_const_1,demo_const_0], changePoints=[change_point_1,change_point_2,change_point_3], taxa=taxa)
+# psi ~ dnCoalescentDemography([demo_const_1,demo_const_0], changePoints=[change_point_1], taxa=taxa)
+
+### the time tree is a stochastic node modeled by the constant-rate coalescent process (dnCoalescent)
+psi.clamp( observed_phylogeny )
+
+#############
+# The Model 
+#############
+
+
+### workspace model wrapper ###
+mymodel = model(psi)
+
+### set up the monitors that will output parameter values to file and screen 
+monitors.append( mnModel(filename="output/coal_pc.log",printgen=1, separator = TAB) )
+monitors.append( mnScreen(printgen=1, pop_size_0) )
+
+
+
+################
+# The Analysis #
+################
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+
+validation = validationAnalysis( mymcmc, 1000, directory="output_coal_pc" )
+validation.burnin(generations=2000,tuningInterval=200)
+validation.run(generations=10000)
+validation.summarize()
+
+
+# you may want to quit RevBayes now
+q()
+

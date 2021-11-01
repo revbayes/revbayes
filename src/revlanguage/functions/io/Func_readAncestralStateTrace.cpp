@@ -104,7 +104,8 @@ const ArgumentRules& Func_readAncestralStateTrace::getArgumentRules( void ) cons
     {
 		
         argumentRules.push_back( new ArgumentRule( "file"     , RlString::getClassTypeSpec(), "The name of the file which holds the ancestral state trace.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "separator", RlString::getClassTypeSpec(), "The separater between sampled values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
+        std::vector<std::string> sep = {"separator","delimiter"};
+        argumentRules.push_back( new ArgumentRule( sep, RlString::getClassTypeSpec(), "The separater/delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("") ) );
         rules_set = true;
     }
     
@@ -163,7 +164,7 @@ const TypeSpec& Func_readAncestralStateTrace::getReturnType( void ) const
 }
 
 
-std::vector<RevBayesCore::AncestralStateTrace> Func_readAncestralStateTrace::readAncestralStates(const std::string &fileName, const std::string &delimitter)
+std::vector<RevBayesCore::AncestralStateTrace> Func_readAncestralStateTrace::readAncestralStates(const std::string &fileName, const std::string &delimiter)
 {
     
     RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(fileName);
@@ -206,7 +207,7 @@ std::vector<RevBayesCore::AncestralStateTrace> Func_readAncestralStateTrace::rea
 		
         // split every line into its columns
 		std::vector<std::string> columns;
-		StringUtilities::stringSplit(line, delimitter, columns);
+		StringUtilities::stringSplit(line, delimiter, columns);
 	
 		// we assume a header at the first line of the file
 		if (has_header_been_read == false) 

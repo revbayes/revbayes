@@ -28,7 +28,7 @@ namespace RevBayesCore {
 		
 	public:
 		
-		DistanceMatrixReader(const std::string &fn, char d='\t', size_t ns=0);
+		DistanceMatrixReader(const std::string &fn, std::string d="", size_t ns=0);
 		
 		const std::vector<Taxon>&                       getTaxa(void);
 		const MatrixReal&   							getMatrix(void);

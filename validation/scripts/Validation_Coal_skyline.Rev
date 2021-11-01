@@ -1,32 +1,33 @@
 ################################################################################
 #
-# RevBayes Validation Test: Constant-rate birth-death process
-# 
-# Model: A constant-rate birth-death process with uniform taxon sampling. 
-#            
+# RevBayes Validation Test: Skyline coalescent process
+#
+# Model: The skyline coalescent process on a fixed tree.
+#
 #
 # authors: Sebastian Hoehna
 #
 ################################################################################
 
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
 #######################
 # Reading in the Data #
 #######################
-
-###### This just defines a single model for all sites #######
-
-### Read in sequence data for both genes
-
 
 observed_phylogeny <- readTrees( "data/primates.tree" )[1]
 
 # Get the names of the taxa in the tree and the age of the tree. We need these later on.
 taxa <- observed_phylogeny.taxa()
 n_taxa <- observed_phylogeny.ntips()
-
-# initialize the moves and monitors vectors
-moves = VectorMoves()
-monitors = VectorMonitors()
 
 
 
@@ -56,10 +57,6 @@ psi.clamp( observed_phylogeny )
 ### workspace model wrapper ###
 mymodel = model(psi)
 
-### set up the monitors that will output parameter values to file and screen 
-monitors.append( mnModel(filename="output/coal_fixed_const.log",printgen=1, separator = TAB) )
-monitors.append( mnScreen(printgen=1, pop_size) )
-
 
 
 ################
@@ -68,13 +65,11 @@ monitors.append( mnScreen(printgen=1, pop_size) )
 
 mymcmc = mcmc(mymodel, monitors, moves)
 
-
-validation = validationAnalysis( mymcmc, 1000 )
-validation.burnin(generations=2000,tuningInterval=200)
-validation.run(generations=10000)
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Coal_skyline" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
 validation.summarize()
 
 
 # you may want to quit RevBayes now
 q()
-

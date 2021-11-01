@@ -6,7 +6,6 @@
 #include "BinaryState.h"
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "RlMonitor.h"
 #include "IntegerPos.h"
 #include "RbException.h"
 #include "RevObject.h"
@@ -33,7 +32,7 @@ namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 
-Mntr_JointConditionalAncestralState::Mntr_JointConditionalAncestralState(void) : Monitor()
+Mntr_JointConditionalAncestralState::Mntr_JointConditionalAncestralState(void) : FileMonitor()
 {
     
 }
@@ -211,27 +210,26 @@ std::string Mntr_JointConditionalAncestralState::getMonitorName( void ) const
 const MemberRules& Mntr_JointConditionalAncestralState::getParameterRules(void) const
 {
     
-    static MemberRules asMonitorMemberRules;
+    static MemberRules memberRules;
     static bool rules_set = false;
     
     if ( !rules_set )
     {
-        asMonitorMemberRules.push_back( new ArgumentRule("tree"           , Tree::getClassTypeSpec() , "", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
-        asMonitorMemberRules.push_back( new ArgumentRule("ctmc"           , AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
-        asMonitorMemberRules.push_back( new ArgumentRule("cdbdp"          , TimeTree::getClassTypeSpec(), "", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL) );
-        asMonitorMemberRules.push_back( new ArgumentRule("filename"       , RlString::getClassTypeSpec() , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        asMonitorMemberRules.push_back( new ArgumentRule("type"           , RlString::getClassTypeSpec() , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        asMonitorMemberRules.push_back( new ArgumentRule("printgen"       , IntegerPos::getClassTypeSpec()  , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new IntegerPos(1) ) );
-        asMonitorMemberRules.push_back( new ArgumentRule("separator"      , RlString::getClassTypeSpec() , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
-        asMonitorMemberRules.push_back( new ArgumentRule("append"         , RlBoolean::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
-        asMonitorMemberRules.push_back( new ArgumentRule("withTips"       , RlBoolean::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-        asMonitorMemberRules.push_back( new ArgumentRule("withStartStates", RlBoolean::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-        asMonitorMemberRules.push_back( new ArgumentRule("version"        , RlBoolean::getClassTypeSpec(), "Should we record the software version?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+        memberRules.push_back( new ArgumentRule("tree"           , Tree::getClassTypeSpec() , "", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
+        memberRules.push_back( new ArgumentRule("ctmc"           , AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
+        memberRules.push_back( new ArgumentRule("cdbdp"          , TimeTree::getClassTypeSpec(), "", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL) );
+        memberRules.push_back( new ArgumentRule("type"           , RlString::getClassTypeSpec() , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        memberRules.push_back( new ArgumentRule("withTips"       , RlBoolean::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+        memberRules.push_back( new ArgumentRule("withStartStates", RlBoolean::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+
+        // add the rules from the base class
+        const MemberRules &parentRules = FileMonitor::getParameterRules();
+        memberRules.insert(memberRules.end(), parentRules.begin(), parentRules.end());
 
         rules_set = true;
     }
     
-    return asMonitorMemberRules;
+    return memberRules;
 }
 
 /** Get type spec */
@@ -256,18 +254,7 @@ void Mntr_JointConditionalAncestralState::printValue(std::ostream &o) const
 void Mntr_JointConditionalAncestralState::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     
-    if ( name == "" ) {
-        vars.push_back( var );
-    }
-    else if ( name == "filename" )
-    {
-        filename = var;
-    }
-    else if ( name == "separator" )
-    {
-        separator = var;
-    }
-    else if ( name == "tree" )
+    if ( name == "tree" )
     {
         tree = var;
     }
@@ -283,14 +270,6 @@ void Mntr_JointConditionalAncestralState::setConstParameter(const std::string& n
     {
         cdbdp = var;
     }
-    else if ( name == "printgen" )
-    {
-        printgen = var;
-    }
-    else if ( name == "append" )
-    {
-        append = var;
-    }
     else if ( name == "withTips" )
     {
         withTips = var;
@@ -299,13 +278,9 @@ void Mntr_JointConditionalAncestralState::setConstParameter(const std::string& n
     {
         withStartStates = var;
     }
-    else if ( name == "version" )
-    {
-        version = var;
-    }
     else
     {
-        Monitor::setConstParameter(name, var);
+        FileMonitor::setConstParameter(name, var);
     }
     
 }
