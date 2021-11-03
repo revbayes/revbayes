@@ -141,11 +141,32 @@ double LinearDemographicFunction::getIntegral(double start, double finish) const
 }
 
 /**
- * spaceholder
+ * @param[in]   time    Current time in coalescent simulation process
+ * @param[in]   lambda  
+ *
+ * @return Waiting Time until next coalescent event
  */
 double LinearDemographicFunction::getWaitingTime(double time, double lambda) const
 {
-    return theta_recent->getValue() * lambda;
+    double N0 = theta_recent->getValue();
+    double N1 = theta_ancient->getValue();
+    double t0 = time_recent->getValue();
+    double t1 = time_ancient->getValue();
+    
+    if ( t1 < t0 || t0 < 0 || N1 < 0 || t < t0 || t > t1)
+    {
+        throw RbException("Impossible parameter values in Linear growth/decline demographic functions.");
+    }
+    
+    if ( N0 == N1 )
+    {
+        return N0 * lambda;
+    }
+    else
+    {
+        double alpha = ( N1-N0 ) / (t1 - t0);
+        return (N0 + (time-t0) * alpha) * lambda;
+    }
 }
 
 /**
