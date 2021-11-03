@@ -227,14 +227,14 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
     size_t num_taxa  = (this->num_nodes + 1) / 2;
 
     size_t root_idx  = root + this->num_nodes * this->activeLikelihood[root];
-    this->b_node_indices.push_back(root_idx); //-- TESTING! -- not in original
+    //this->b_node_indices.push_back(root_idx); //-- TESTING! -- not in original
 
     size_t left_idx  = left   + this->num_nodes * this->activeLikelihood[left];
     size_t right_idx = right  + this->num_nodes * this->activeLikelihood[right];
 
     //-- Tips are actually just stored once, so we dont need offests.
-    size_t left_partials  = (left   < num_taxa) ? left   : left_idx;
-    size_t right_partials = (right  < num_taxa) ? right  : right_idx;
+    size_t left_partials  = (left  < num_taxa) ? left  : left_idx;
+    size_t right_partials = (right < num_taxa) ? right : right_idx;
 
     //-- Push the last operation onto the queue
     BeagleOperation b_operation =
@@ -246,7 +246,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
         , .child2Partials         = (int) right_partials
         , .child2TransitionMatrix = (int) right_idx
         };
-    this->b_ops.push_back(b_operation);  //-- TESTING! -- not in original
+    //this->b_ops.push_back(b_operation);  //-- TESTING! -- not in original
 
     //-- BEAGLE model parameters.
     int     b_parentBufferIndices     = (int) root_idx;
@@ -267,31 +267,32 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
     int b_code_update_partials;
     int b_code_calc_edges;
 
-    //this->updateBeagleTransitionMatrices();
-    this->updateBeagleEigensystem();
     this->updateBeagleSiteRates();
 
-    for ( size_t i = 0; i < this->num_site_mixtures; ++i )
-    {
-        b_model_idx = this->active_eigen_system[i];
+    //this->updateBeagleTransitionMatrices();
 
-        //-- Update all transition matrices for model i.
-        b_code_update_transitions =
-            beagleUpdateTransitionMatrices( this->beagle_instance
-                                          , b_model_idx
-                                          , &this->b_node_indices[0]
-                                          , NULL
-                                          , NULL
-                                          , &this->b_branch_lengths[0]
-                                          , this->b_branch_lengths.size()
-                                          );
-        if ( b_code_update_transitions != 0 )
-        {
-            throw RbException( "Could not update transition matrix for model '"
-                             + std::to_string(i) + "'. "
-                             + this->parseBeagleReturnCode(b_code_update_transitions));
-        }
-    }
+    //this->updateBeagleEigensystem();
+    //for ( size_t i = 0; i < this->num_site_mixtures; ++i )
+    //{
+    //    b_model_idx = this->active_eigen_system[i];
+
+    //    //-- Update all transition matrices for model i.
+    //    b_code_update_transitions =
+    //        beagleUpdateTransitionMatrices( this->beagle_instance
+    //                                      , b_model_idx
+    //                                      , &this->b_node_indices[0]
+    //                                      , NULL
+    //                                      , NULL
+    //                                      , &this->b_branch_lengths[0]
+    //                                      , this->b_branch_lengths.size()
+    //                                      );
+    //    if ( b_code_update_transitions != 0 )
+    //    {
+    //        throw RbException( "Could not update transition matrix for model '"
+    //                         + std::to_string(i) + "'. "
+    //                         + this->parseBeagleReturnCode(b_code_update_transitions));
+    //    }
+    //}
 
     //-- Calculate and update all partial likelihood buffers
     b_code_update_partials = beagleUpdatePartials( this->beagle_instance
@@ -404,30 +405,30 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
     int b_code_update_partials;
     int b_code_calc_edges;
 
-    this->updateBeagleEigensystem();
     this->updateBeagleSiteRates();
 
-    for ( size_t i = 0; i < this->num_site_mixtures; ++i )
-    {
-        b_model_idx = this->active_eigen_system[i];
+    //this->updateBeagleEigensystem();
+    //for ( size_t i = 0; i < this->num_site_mixtures; ++i )
+    //{
+    //    b_model_idx = this->active_eigen_system[i];
 
-        //-- Update all transition matrices for model i.
-        b_code_update_transitions =
-            beagleUpdateTransitionMatrices( this->beagle_instance
-                                          , b_model_idx
-                                          , &this->b_node_indices[0]
-                                          , NULL
-                                          , NULL
-                                          , &this->b_branch_lengths[0]
-                                          , this->b_branch_lengths.size()
-                                          );
-        if ( b_code_update_transitions != 0 )
-        {
-            throw RbException( "Could not update transition matrix for model '"
-                             + std::to_string(i) + "'. "
-                             + this->parseBeagleReturnCode(b_code_update_transitions));
-        }
-    }
+    //    //-- Update all transition matrices for model i.
+    //    b_code_update_transitions =
+    //        beagleUpdateTransitionMatrices( this->beagle_instance
+    //                                      , b_model_idx
+    //                                      , &this->b_node_indices[0]
+    //                                      , NULL
+    //                                      , NULL
+    //                                      , &this->b_branch_lengths[0]
+    //                                      , this->b_branch_lengths.size()
+    //                                      );
+    //    if ( b_code_update_transitions != 0 )
+    //    {
+    //        throw RbException( "Could not update transition matrix for model '"
+    //                         + std::to_string(i) + "'. "
+    //                         + this->parseBeagleReturnCode(b_code_update_transitions));
+    //    }
+    //}
 
     //-- Calculate and update all partial likelihood buffers
     b_code_update_partials = beagleUpdatePartials( this->beagle_instance
@@ -494,6 +495,10 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikel
   , size_t right
   )
 {
+    // compute the transition probability matrix
+    this->updateTransitionProbabilities( node_index );
+
+    // compute the branch length
     double branch_length = calculateBranchLength(node, node_index);
 
     size_t node_idx  = node_index + this->num_nodes * this->activeLikelihood[node_index];
@@ -530,6 +535,18 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikel
   , size_t middle
   )
 {
+    // compute the transition probabilities
+    this->updateTransitionProbabilities( node_index );
+
+    const double* b_tp_begin = this->transition_prob_matrices[0].theMatrix;
+    // @Daniel/Sebastian/Killian: Collect calls to BEAGLE here into global vector (separate)
+    beagleSetTransitionMatrix( this->beagle_instance
+                             , (int) node_index + this->activeLikelihood[node_index]*this->num_nodes
+                             , b_tp_begin
+                             , (double) 1.0
+                             );
+
+    // compute branch length
     double branch_length = calculateBranchLength(node, node_index);
 
     size_t node_idx   = node_index + this->num_nodes * this->activeLikelihood[node_index];
@@ -564,11 +581,23 @@ template<class charType>
 void
 RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeTipLikelihood ( const TopologyNode &node, size_t node_index )
 {
+    // compute the transition probabilities
+    this->updateTransitionProbabilities( node_index );
+
+#if defined( RB_BEAGLE )
+    const double* b_tp_begin = this->transition_prob_matrices[0].theMatrix;
+    beagleSetTransitionMatrix( this->beagle_instance
+                             , node_index + this->activeLikelihood[node_index]*this->num_nodes
+                             , b_tp_begin
+                             , (double) 1.0
+                             );
+
     double branch_length = calculateBranchLength(node, node_index);
     this->b_branch_lengths.push_back(branch_length);
 
     size_t node_idx = node_index + this->num_nodes * this->activeLikelihood[node_index];
     this->b_node_indices.push_back(node_idx);
+#endif /* RB_BEAGLE */
 }
 
 
