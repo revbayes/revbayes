@@ -269,31 +269,31 @@ namespace RevBayesCore {
         size_t                                                              sampled_site_matrix_component;
 
 #if defined( RB_BEAGLE )
-        int                                                               beagle_instance;
+        int                                                                 beagle_instance;
         
-        std::vector<BeagleOperation>                                      b_ops;
-        std::vector<int>                                                  b_node_indices;
-        std::vector<double>                                               b_branch_lengths;
+        std::vector<BeagleOperation>                                        b_ops;
+        std::vector<int>                                                    b_node_indices;
+        std::vector<double>                                                 b_branch_lengths;
         
-        std::vector<double>                                               b_inPatternWeights;
+        std::vector<double>                                                 b_inPatternWeights;
         
         //-- TODO - can probably get rid of these later...
-        std::vector<double>                                               b_inCategoryRates ;
-        std::vector<double>                                               b_inCategoryWeights;
+        std::vector<double>                                                 b_inCategoryRates ;
+        std::vector<double>                                                 b_inCategoryWeights;
         
         //-- Pretty print BEAGLE error codes.
-        std::string                                                       parseBeagleReturnCode          ( int );
+        std::string                                                         parseBeagleReturnCode          ( int );
         
         //-- Initialize a BEAGLE instance.
-        void                                                              initializeBeagleInstance       ( void );
+        void                                                                initializeBeagleInstance       ( void );
         
         //-- Set the tree tip states and base frequencies for the BEAGLE instance.
-        void                                                              initializeBeagleTips           ( void );
+        void                                                                initializeBeagleTips           ( void );
         
         //-- BEAGLE updaters.
-        void                                                              updateBeagleEigensystem        ( void );
-        void                                                              updateBeagleTransitionMatrices ( void );
-        void                                                              updateBeagleSiteRates          ( void );
+        void                                                                updateBeagleEigensystem        ( void );
+        void                                                                updateBeagleSiteRates          ( void );
+        void                                                                updateBeagleTransitionMatrices ( void );
 #endif /* RB_BEAGLE */
         
     private:
@@ -951,14 +951,6 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
         if ( RbSettings::userSettings().getUseBeagle() == true )
         {
             this->initializeBeagleInstance();
-            //if ( BeagleInstance::getResourceID() == -1 )
-            //{
-            //    this->initializeBeagleInstance();
-            //}
-            //else
-            //{
-            //    this->beagle_instance = BeagleInstance::getResourceID();
-            //}
             std::stringstream ss;
             ss << "Using Beagle Instance '" << this->beagle_instance << "' to calculate lnLikelihood." << std::endl;
             RBOUT(ss.str());
@@ -4764,44 +4756,52 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigen
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleTransitionMatrices ( void )
 {
-//#if defined ( RB_BEAGLE_DEBUG )
-//    std::stringstream ss;
-//    ss << "Updating Transition Matrices...\n";
-//#endif /* RB_BEAGLE_DEBUG */
+#if defined ( RB_BEAGLE_DEBUG )
+    std::stringstream ss;
+    ss << "Updating Transition Matrices...\n";
+#endif /* RB_BEAGLE_DEBUG */
 
-//    int b_code_transition_matrix;
-//
-//    if (this->heterogeneous_rate_matrices != NULL)
-//    {
-//        rate_matrix = &this->heterogeneous_rate_matrices->getValue()[node_index];
-//
-//        b_code_transition_matrix =
-//            beagleSetTransitionMatrix( this->beagle_instance
-//                                     , 0
-//                                     , rate_matrix
-//                                     , 1
-//                                     );
-//        if ( b_code_transition_matrix != 0 )
-//        {
-//	        throw RbException( "Could not set transition matrix for model '"
-//                             + std::to_string(mixture) + "'. "
-//                             + this->parseBeagleReturnCode(b_code_transition_matrix));
-//        }
-//    }
-//    else if (this->homogeneous_rate_matrix != NULL)
-//    {
-//        rate_matrix = &this->homogeneous_rate_matrix->getValue();
-//    }
-//
-//#if defined ( RB_BEAGLE_DEBUG )
-//    ss << "\tTransition Matrices : ";
-//    for ( size_t j = 0; j < this->num_chars * this->num_chars; ++j )
-//    {
-//        if ( (j % this->num_chars) == 0) { ss << "\n\t\t"; };
-//        ss << std::fixed << std::setw(8) << std::setprecision(4) << rate_matrix[j] << " ";
-//    }
-//    RBOUT(ss.str());
-//#endif /* RB_BEAGLE_DEBUG */
+    int b_code_transition_matrix;
+
+    const double* b_transition_matrix = NULL;
+    int matrix_idx = 0;
+
+    for (size_t node_idx = 0; node_idx < this->num_nodes; ++node_idx)
+    {
+        for (size_t model_idx = 0; model_idx < this->num_site_mixtures; ++model_idx)
+        {
+            matrix_idx = node_idx * this->num_site_mixtures + model_idx;
+            b_transition_matrix = this->transition_prob_matrices[matrix_idx].theMatrix;
+
+#if defined ( RB_BEAGLE_DEBUG )
+            ss << "\tTransition Matrix (node=" + std::to_string(node_idx) + ", model=" + std::to_string(model_idx) + ") : ";
+            for ( size_t j = 0; j < this->num_chars * this->num_chars; ++j )
+            {
+                if ( (j % this->num_chars) == 0) { ss << "\n\t\t"; };
+                ss << std::fixed << std::setw(8) << std::setprecision(4) << b_transition_matrix[j] << " ";
+            }
+            RBOUT(ss.str()); // TODO : Remove later...
+#endif /* RB_BEAGLE_DEBUG */
+
+            b_code_transition_matrix =
+                beagleSetTransitionMatrix( this->beagle_instance
+                                         , matrix_idx
+                                         , b_transition_matrix
+                                         , 1
+                                         );
+            if ( b_code_transition_matrix != 0 )
+            {
+                throw RbException( "Could not set transition matrix for node "
+                                   + std::to_string(node_idx) + " model " + std::to_string(model_idx) + ": "
+                                   + this->parseBeagleReturnCode(b_code_transition_matrix));
+            }
+        }
+    }
+   
+
+#if defined ( RB_BEAGLE_DEBUG )
+    RBOUT(ss.str());
+#endif /* RB_BEAGLE_DEBUG */
 }
 
 
@@ -4818,7 +4818,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleSiteR
     int b_code_weights;
     int b_code_rates;
 
-    //-- Only homogeneous models for now...
     if (this->rate_variation_across_sites)
     {
         this->b_inCategoryWeights = this->site_rates_probs->getValue();
@@ -4857,13 +4856,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleSiteR
     }
 
 	b_code_rates =
-	    //beagleSetCategoryRatesWithIndex( this->beagle_instance
-        //                               , b_categoryWeightsIndex
-        //                               , &this->b_inCategoryRates[0]
-        //                               );
-	    beagleSetCategoryRates( this->beagle_instance
-                              , &this->b_inCategoryRates[0]
-                              );
+	    beagleSetCategoryRatesWithIndex( this->beagle_instance
+                                       , b_categoryWeightsIndex
+                                       , &this->b_inCategoryRates[0]
+                                       );
     if ( b_code_rates != 0 )
     {
 	    throw RbException( "Could not set category rates for model : "
