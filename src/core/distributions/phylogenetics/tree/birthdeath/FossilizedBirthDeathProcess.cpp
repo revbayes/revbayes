@@ -269,7 +269,7 @@ double FossilizedBirthDeathProcess::pSurvival(double start, double end) const
 double FossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) const
 {
 
-    if ( t == 0.0 ) return 0.0;
+    if ( t == times[i] ) return 0.0;
 
     // get the parameters
     double b = birth[i];
@@ -352,7 +352,9 @@ void FossilizedBirthDeathProcess::simulateClade(std::vector<TopologyNode *> &n, 
             // in the extended tree, tip ages are extinction times
             if ( extended )
             {
-                n[i]->setAge( extinct * rng->uniform01() * y_i[j] );
+                double present = times.front();
+
+                n[i]->setAge( extinct * rng->uniform01() * ( y_i[j] - present ) + present );
             }
             // in the sampled tree, tip ages are sampling times
             else

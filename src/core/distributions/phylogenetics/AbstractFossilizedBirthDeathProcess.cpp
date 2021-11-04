@@ -163,11 +163,13 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
 
     partial_likelihood = std::vector<double>(taxa.size(), 0.0);
 
-    age        = std::vector<double>(taxa.size(), 0.0);
+    age         = std::vector<double>(taxa.size(), 0.0);
     Psi         = std::vector<double>(taxa.size(), 0.0 );
 
-    dirty_taxa = std::vector<bool>(taxa.size(), true);
-    dirty_psi = std::vector<bool>(taxa.size(), true);
+    dirty_taxa  = std::vector<bool>(taxa.size(), true);
+    dirty_psi   = std::vector<bool>(taxa.size(), true);
+
+    double max_present = RbConstants::Double::inf;
 
     for ( size_t i = 0; i < taxa.size(); i++ )
     {
@@ -180,10 +182,17 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
             y_i[i] = std::min(Fi->first.getMax(), y_i[i]);
             // get the fossil count
             k_i[i] += Fi->second;
+
+            max_present = std::min(max_present, y_i[i]);
         }
     }
 
     prepareProbComputation();
+
+    if ( times.front() > max_present )
+    {
+        throw(RbException("Timeline start time is older than youngest fossil age."));
+    }
 }
 
 /**
@@ -194,14 +203,14 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 {
     // prepare the probability computation
     prepareProbComputation();
-
+    
     updateStartEndTimes();
 
     // variable declarations and initialization
     double lnProbTimes = 0.0;
 
-    size_t num_extant_sampled = 0;
-    size_t num_extant_unsampled = 0;
+    size_t num_rho_sampled = 0;
+    size_t num_rho_unsampled = 0;
 
     // add the fossil tip age terms
     for (size_t i = 0; i < taxa.size(); ++i)
@@ -214,20 +223,22 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
         double max_age = taxa[i].getMaxAge();
         double min_age = taxa[i].getMinAge();
 
+        double present = times.front();
+
         // check model constraints
         //if ( !( b > max_age && min_age >= d && d >= 0.0 ) )
-        if ( !( b > o && o >= d && o >= o_i[i] && y_i[i] >= d && (( extended && d >= 0.0) || (!extended && d >= min_age )) ) )
+        if ( !( b > o && o >= d && o >= o_i[i] && y_i[i] >= d && (( extended && d >= present) || (!extended && d >= min_age )) ) )
         {
             return RbConstants::Double::neginf;
         }
-        if ( (d > 0.0) != taxa[i].isExtinct() )
+        if ( (d > present) != taxa[i].isExtinct() )
         {
             return RbConstants::Double::neginf;
         }
 
         // count the number of rho-sampled tips
-        num_extant_sampled   += (d == 0.0 && min_age == 0.0);  // l
-        num_extant_unsampled += (d == 0.0 && min_age > 0.0); // n - m - l
+        num_rho_sampled   += (d == present && min_age == present);  // l
+        num_rho_unsampled += (d == present && min_age > present); // n - m - l
 
         if ( dirty_taxa[i] == true || force )
         {
@@ -250,7 +261,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
             }
 
             // skip the rest for extant taxa with no fossil samples
-            if ( max_age == 0.0 )
+            if ( max_age == present )
             {
                 lnProbTimes += partial_likelihood[i];
 
@@ -283,12 +294,13 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
                     double psi_y_o = 0.0;
 
                     std::vector<double> psi(ages.size(), 0.0);
-
+                    
+                    bool test = true;
                     for (size_t j = 0; j < num_intervals; j++)
                     {
                         double t_0 = ( j < num_intervals-1 ? times[j+1] : RbConstants::Double::inf );
 
-                        if ( t_0 <= min_age )
+                        if ( t_0 <= std::max(d,min_age) )
                         {
                             continue;
                         }
@@ -396,7 +408,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
             }
 
             // include extinction density
-			if ( d > 0.0 )
+			if ( d > present )
 			{
                 // d is an extinction event
                 if ( extended )
@@ -442,12 +454,12 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
     // add the sampled extant tip age term
     if ( homogeneous_rho->getValue() > 0.0)
     {
-        lnProbTimes += num_extant_sampled * log( homogeneous_rho->getValue() );
+        lnProbTimes += num_rho_sampled * log( homogeneous_rho->getValue() );
     }
     // add the unsampled extant tip age term
     if ( homogeneous_rho->getValue() < 1.0)
     {
-        lnProbTimes += num_extant_unsampled * log( 1.0 - homogeneous_rho->getValue() );
+        lnProbTimes += num_rho_unsampled * log( 1.0 - homogeneous_rho->getValue() );
     }
 
     // condition on sampling
@@ -514,7 +526,7 @@ double AbstractFossilizedBirthDeathProcess::p( size_t i, double t, bool survival
  */
 double AbstractFossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) const
 {
-    if ( t == 0.0 ) return 0.0;
+    if ( t == times[i] ) return 0.0;
     
     // get the parameters
     double b = birth[i];

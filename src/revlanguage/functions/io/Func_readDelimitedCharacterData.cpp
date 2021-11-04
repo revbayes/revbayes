@@ -30,6 +30,7 @@
 #include "RlBoolean.h"
 #include "RlFunction.h"
 #include "StandardState.h"
+#include "TaxaState.h"
 #include "Taxon.h"
 #include "TypeSpec.h"
 
@@ -83,6 +84,11 @@ RevPtr<RevVariable> Func_readDelimitedCharacterData::execute()
     const std::string&  del     = static_cast<const RlString&>( args[3].getVariable()->getRevObject() ).getValue();
     bool                header  = static_cast<const RlBoolean&>( args[4].getVariable()->getRevObject() ).getValue();
     size_t lines_to_skip = ( header == true ? 1 : 0 );
+   
+    if (lab == std::string(""))
+    {
+        throw RbException("You must enter a value for the state labels.");
+    }
 
     if (dt == "NaturalNumbers")
     {
@@ -93,7 +99,7 @@ RevPtr<RevVariable> Func_readDelimitedCharacterData::execute()
         // get data from file
         RevBayesCore::DelimitedCharacterDataReader* tsv_data = new RevBayesCore::DelimitedCharacterDataReader(fn, del, lines_to_skip);
 
-        int max = lab == "" ? 0 : StringUtilities::asIntegerNumber( lab );
+        int max = StringUtilities::asIntegerNumber( lab );
         
         // loop through data and get each NaturalNumbers value
         for (size_t i = 0; i < tsv_data->getData().size(); ++i)
@@ -118,6 +124,8 @@ RevPtr<RevVariable> Func_readDelimitedCharacterData::execute()
         
         }
         
+        // put coreNaturalNumbers matrix into rev language level matrix
+//        HomologousDiscreteCharacterData<RevLanguage::NaturalNumbersState> *rlCoreStates = new HomologousDiscreteCharacterData<RevLanguage::NaturalNumbersState>( coreStates );
         AbstractHomologousDiscreteCharacterData *rlCoreStates = new AbstractHomologousDiscreteCharacterData( coreStates );
         
         return new RevVariable( rlCoreStates );
@@ -158,6 +166,8 @@ RevPtr<RevVariable> Func_readDelimitedCharacterData::execute()
             
         }
         
+        // put coreNaturalNumbers matrix into rev language level matrix
+//        HomologousDiscreteCharacterData<RevLanguage::NaturalNumbersState> *rlCoreStates = new HomologousDiscreteCharacterData<RevLanguage::NaturalNumbersState>( coreStates );
         AbstractHomologousDiscreteCharacterData *rlCoreStates = new AbstractHomologousDiscreteCharacterData( coreStates );
         
         return new RevVariable( rlCoreStates );
@@ -165,13 +175,14 @@ RevPtr<RevVariable> Func_readDelimitedCharacterData::execute()
     }
     else if (dt == "Standard")
     {
-        // setup a matrix of Standard states
+        
+        // setup a matrix of NaturalNumbers states
         RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::StandardState> *coreStates = new RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::StandardState>();
         
         // get data from file
         RevBayesCore::DelimitedCharacterDataReader* tsv_data = new RevBayesCore::DelimitedCharacterDataReader(fn, del, lines_to_skip);
         
-        // loop through data and get each Standard value
+        // loop through data and get each NaturalNumbers value
         for (size_t i = 0; i < tsv_data->getData().size(); ++i)
         {
             
@@ -183,22 +194,19 @@ RevPtr<RevVariable> Func_readDelimitedCharacterData::execute()
             
             for (size_t j= 0; j < data.size(); ++j)
             {
-                RevBayesCore::StandardState coreState = RevBayesCore::StandardState( data[j] );
-
                 // make the core state
-                if (lab != "")
-                {
-                    coreState = RevBayesCore::StandardState( data[j], lab );
-                }
+                RevBayesCore::StandardState coreState = RevBayesCore::StandardState( data[j], lab );
                 
                 coreSeq.addCharacter( coreState );
             }
             
-            // add DiscreteTaxonData to the matrix of Standard states
+            // add DiscreteTaxonData to the matrix of NaturalNumbers states
             coreStates->addTaxonData( coreSeq );
             
         }
         
+        // put coreNaturalNumbers matrix into rev language level matrix
+//        HomologousDiscreteCharacterData<RevLanguage::StandardState> *rlCoreStates = new HomologousDiscreteCharacterData<RevLanguage::StandardState>( coreStates );
         AbstractHomologousDiscreteCharacterData *rlCoreStates = new AbstractHomologousDiscreteCharacterData( coreStates );
         
         return new RevVariable( rlCoreStates );
@@ -207,13 +215,13 @@ RevPtr<RevVariable> Func_readDelimitedCharacterData::execute()
     else if (dt == "Continuous")
     {
         
-        // setup a matrix of Continuous states
+        // setup a matrix of NaturalNumbers states
         RevBayesCore::ContinuousCharacterData *coreStates = new RevBayesCore::ContinuousCharacterData();
         
         // get data from file
         RevBayesCore::DelimitedCharacterDataReader* tsv_data = new RevBayesCore::DelimitedCharacterDataReader(fn, del, lines_to_skip);
         
-        // loop through data and get each Continuous value
+        // loop through data and get each NaturalNumbers value
         for (size_t i = 0; i < tsv_data->getData().size(); ++i)
         {
             
@@ -231,20 +239,63 @@ RevPtr<RevVariable> Func_readDelimitedCharacterData::execute()
                 coreSeq.addCharacter( coreState );
             }
             
-            // add DiscreteTaxonData to the matrix of Continuous states
+            // add DiscreteTaxonData to the matrix of NaturalNumbers states
             coreStates->addTaxonData( coreSeq );
 
         }
 
+        // put coreNaturalNumbers matrix into rev language level matrix
         ContinuousCharacterData *rlCoreStates = new ContinuousCharacterData( coreStates );
         
         return new RevVariable( rlCoreStates );
         
     }
+    else if (dt == "Taxa")
+    {
+
+        // setup a matrix of NaturalNumbers states
+        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::TaxaState> *coreStates = new RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::TaxaState>();
+
+        // get data from file
+        RevBayesCore::DelimitedCharacterDataReader* tsv_data = new RevBayesCore::DelimitedCharacterDataReader(fn, del, lines_to_skip);
+
+
+        int max = StringUtilities::asIntegerNumber( lab );
+
+        // loop through data and get each NaturalNumbers value
+        for (size_t i = 0; i < tsv_data->getData().size(); ++i)
+        {
+
+            // now put core state into DiscreteTaxonData
+            RevBayesCore::DiscreteTaxonData<RevBayesCore::TaxaState> coreSeq = RevBayesCore::DiscreteTaxonData<RevBayesCore::TaxaState>(tsv_data->getNames()[i]);
+
+            // get count from data
+            const std::vector<std::string> &data = tsv_data->getData()[i];
+
+            for (size_t j= 0; j < data.size(); ++j)
+            {
+                // make the core state
+                RevBayesCore::TaxaState coreState = RevBayesCore::TaxaState( std::to_string(i), max);
+
+                coreSeq.addCharacter( coreState );
+            }
+
+            // add DiscreteTaxonData to the matrix of NaturalNumbers states
+            coreStates->addTaxonData( coreSeq );
+
+        }
+
+        // put coreNaturalNumbers matrix into rev language level matrix
+//        HomologousDiscreteCharacterData<RevLanguage::StandardState> *rlCoreStates = new HomologousDiscreteCharacterData<RevLanguage::StandardState>( coreStates );
+        AbstractHomologousDiscreteCharacterData *rlCoreStates = new AbstractHomologousDiscreteCharacterData( coreStates );
+
+        return new RevVariable( rlCoreStates );
+
+    }
     else
     {
         
-        throw RbException( "Invalid data type. Valid data types are: NaturalNumbers|Bitset|Standard|Continuous" );
+        throw RbException( "Invalid data type. Valid data types are: NaturalNumbers|Bitset|Standard|Continuous|Taxa" );
         
     }
 }
@@ -267,6 +318,7 @@ const ArgumentRules& Func_readDelimitedCharacterData::getArgumentRules( void ) c
         type_options.push_back( "Bitset" );
         type_options.push_back( "Standard" );
         type_options.push_back( "Continuous" );
+        type_options.push_back( "Taxa" );
         argumentRules.push_back( new OptionRule( "type", new RlString("NaturalNumbers"), type_options, "The type of data." ) );
         argumentRules.push_back( new ArgumentRule( "stateLabels", RlString::getClassTypeSpec(), "The state labels (for standard states) or max number for NaturalNumbers.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "" ) ) );
         argumentRules.push_back( new Delimiter() );

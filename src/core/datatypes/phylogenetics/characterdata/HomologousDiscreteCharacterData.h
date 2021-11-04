@@ -789,7 +789,7 @@ RevBayesCore::AbstractHomologousDiscreteCharacterData* RevBayesCore::HomologousD
             const charType& org_char = seq[j];
             
             size_t num_states = org_char.getNumberOfStates();
-            NaturalNumbersState number_state = NaturalNumbersState(std::string("0"),int(num_states*n));
+            NaturalNumbersState number_state = NaturalNumbersState(0,int(num_states*n));
            
             if ( org_char.isMissingState() == true )
             {

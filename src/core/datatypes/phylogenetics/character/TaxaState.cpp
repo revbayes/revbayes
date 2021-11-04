@@ -1,4 +1,4 @@
-#include "NaturalNumbersState.h"
+#include "TaxaState.h"
 
 #include <boost/lexical_cast.hpp>
 #include <string>
@@ -9,71 +9,71 @@
 using namespace RevBayesCore;
 
 /** Default constructor */
-NaturalNumbersState::NaturalNumbersState(size_t n) : DiscreteCharacterState( n ),
-    is_gap( false ),
-    is_missing( false ),
-    index_single_state( 0 ),
-    num_observed_states( 0 ),
-    state(n)
+TaxaState::TaxaState(size_t n) : DiscreteCharacterState( n ),
+                                                     is_gap( false ),
+                                                     is_missing( false ),
+                                                     index_single_state( 0 ),
+                                                     num_observed_states( 0 ),
+                                                     state(n)
 {
-    
+
 }
 
 
 
 /** Constructor that sets the observation */
-NaturalNumbersState::NaturalNumbersState(const std::string &s, int m) : DiscreteCharacterState( m ),
-    is_gap( false ),
-    is_missing( false ),
-    index_single_state( 0 ),
-    num_observed_states( 0 ),
-    state(m)
+TaxaState::TaxaState(const std::string &s, int m) : DiscreteCharacterState( m ),
+                                                                        is_gap( false ),
+                                                                        is_missing( false ),
+                                                                        index_single_state( 0 ),
+                                                                        num_observed_states( 0 ),
+                                                                        state(m)
 {
     setState(s);
 }
 
 
 /** Constructor that sets the observation */
-NaturalNumbersState::NaturalNumbersState(int s, int m) : DiscreteCharacterState( m ),
-    is_gap( false ),
-    is_missing( false ),
-    index_single_state( 0 ),
-    num_observed_states( 0 ),
-    state(m)
+TaxaState::TaxaState(int s, int m) : DiscreteCharacterState( m ),
+                                                         is_gap( false ),
+                                                         is_missing( false ),
+                                                         index_single_state( 0 ),
+                                                         num_observed_states( 0 ),
+                                                         state(m)
 {
     setStateByIndex( s );
 }
 
 
-NaturalNumbersState* NaturalNumbersState::clone( void ) const
+TaxaState* TaxaState::clone( void ) const
 {
-    
-    return new NaturalNumbersState( *this );
+
+    return new TaxaState( *this );
 }
 
 
-void NaturalNumbersState::addState(int s)
+void TaxaState::addState(int s)
 {
-    
+
     state.set( s );
     ++num_observed_states;
 }
 
-void NaturalNumbersState::addStateDescriptions(const std::vector<std::string>& d)
+void TaxaState::addStateDescriptions(const std::vector<std::string>& d)
 {
     state_descriptions = d;
 }
 
 
 
-std::string NaturalNumbersState::getDataType( void ) const
+std::string TaxaState::getDataType( void ) const
 {
-    
-    return "NaturalNumbers";
+
+    return "Taxa";
 }
 
 
-std::string NaturalNumbersState::getStateDescription( void ) const
+std::string TaxaState::getStateDescription( void ) const
 {
     if (state_descriptions.size() > index_single_state)
     {
@@ -85,12 +85,12 @@ std::string NaturalNumbersState::getStateDescription( void ) const
     }
 }
 
-std::vector<std::string> NaturalNumbersState::getStateDescriptions( void ) const
+std::vector<std::string> TaxaState::getStateDescriptions( void ) const
 {
     return state_descriptions;
 }
 
-std::string NaturalNumbersState::getStateLabels( void ) const
+std::string TaxaState::getStateLabels( void ) const
 {
     std::string labels = "";
     size_t n = getNumberOfStates();
@@ -99,22 +99,22 @@ std::string NaturalNumbersState::getStateLabels( void ) const
         labels += boost::lexical_cast<std::string>(n);
     }
     return labels;
-    
+
 }
 
-std::string NaturalNumbersState::getStringValue(void) const
+std::string TaxaState::getStringValue(void) const
 {
-    
+
     if ( isMissingState() )
     {
         return "?";
     }
-    
+
     if ( isGapState() )
     {
         return "-";
     }
-    
+
     if ( isAmbiguous() == true )
     {
         std::string tmp = "(";
@@ -135,51 +135,42 @@ std::string NaturalNumbersState::getStringValue(void) const
             }
         }
         tmp += ")";
-        
+
         return tmp;
     }
-    
+
     return boost::lexical_cast<std::string>(index_single_state);
-    
+
 }
 
 
-bool NaturalNumbersState::isGapState( void ) const
+bool TaxaState::isGapState( void ) const
 {
     return is_gap;
 }
 
 
-bool NaturalNumbersState::isMissingState( void ) const
+bool TaxaState::isMissingState( void ) const
 {
     return is_missing;
 }
 
 
-void NaturalNumbersState::setGapState( bool tf )
+void TaxaState::setGapState( bool tf )
 {
     is_gap = tf;
 }
 
 
-void NaturalNumbersState::setMissingState( bool tf )
+void TaxaState::setMissingState( bool tf )
 {
     is_missing = tf;
-    
-    if ( is_missing == true )
-    {
-        for (size_t i=0; i<getNumberOfStates(); ++i)
-        {
-            state.set(i);
-        }
-        num_observed_states = getNumberOfStates();
-    }
 }
 
 
-void NaturalNumbersState::setState(const std::string &symbol)
+void TaxaState::setState(const std::string &symbol)
 {
-    
+
     if (symbol == "-")
     {
         setGapState( true );
@@ -201,7 +192,7 @@ void NaturalNumbersState::setState(const std::string &symbol)
                 size_t num_observed = 0;
                 for (size_t i = 1; i < symbol.size(); ++i)
                 {
-                    if (symbol[i] == ' ' || symbol[i] == ')') 
+                    if (symbol[i] == ' ' || symbol[i] == ')')
                     {
                         size_t pos = boost::lexical_cast<size_t>( temp );
                         state.set( pos );
@@ -215,7 +206,7 @@ void NaturalNumbersState::setState(const std::string &symbol)
                     }
                 }
                 num_observed_states = num_observed;
-            } 
+            }
             else
             {
                 size_t pos = boost::lexical_cast<size_t>( symbol );
@@ -226,34 +217,34 @@ void NaturalNumbersState::setState(const std::string &symbol)
         }
         catch( boost::bad_lexical_cast const& )
         {
-            
+
             throw RbException( "NaturalNumbers state was not valid integer." );
         }
-        
+
     }
-    
+
 }
 
 
-void NaturalNumbersState::addState(const std::string &symbol)
+void TaxaState::addState(const std::string &symbol)
 {
     ++num_observed_states;
-    
+
     std::string labels = getStateLabels();
     size_t pos = labels.find(symbol);
-    
+
     state.set( pos );
     index_single_state = pos;
 }
 
 
-RbBitSet NaturalNumbersState::getState(void) const
+RbBitSet TaxaState::getState(void) const
 {
     return state;
 }
 
 
-void NaturalNumbersState::setToFirstState(void)
+void TaxaState::setToFirstState(void)
 {
     num_observed_states = 1;
     index_single_state = 0;
@@ -262,9 +253,9 @@ void NaturalNumbersState::setToFirstState(void)
 }
 
 
-void NaturalNumbersState::setStateByIndex(size_t index)
+void TaxaState::setStateByIndex(size_t index)
 {
-    
+
     num_observed_states = 1;
     index_single_state = index;
     state.clear();

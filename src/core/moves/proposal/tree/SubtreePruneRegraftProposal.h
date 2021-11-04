@@ -53,7 +53,7 @@ template <class variableType> class StochasticNode;
         
         // stored objects to undo proposal
         bool                                    failed;
-        TopologyNode*                           storedChosenNode;
+        TopologyNode*                           storedChoosenNode;
         TopologyNode*                           storedBrother;
         bool                                    prunedroot;
     };

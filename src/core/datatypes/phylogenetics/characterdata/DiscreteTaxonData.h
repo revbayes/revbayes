@@ -167,7 +167,7 @@ RevBayesCore::DiscreteTaxonData<RevBayesCore::NaturalNumbersState>* RevBayesCore
     size_t num_states_first         = first_char.getNumberOfStates();
     size_t num_states_second        = second_char.getNumberOfStates();
     
-    NaturalNumbersState new_state(std::string("0"), num_states_first * num_states_second);
+    NaturalNumbersState new_state   = NaturalNumbersState(num_states_first * num_states_second);
     
     int k=0;
     bool first_state_set = false;

@@ -2,7 +2,7 @@
 dnBirthDeathRateShifts
 ## title
 ## description
-The birth death with rate shifts (BDS) model the distribution of a matrix of species origination and extinction times under a model of complete species sampling and incomplete fossil sampling.
+The birth death with rate shifts (BDS) model describes the distribution of a matrix of species origination and extinction times under complete species sampling and incomplete fossil sampling.
 ## details
 Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. If only a subset of fossil occurrences is provided for each species (e.g. only first and last occurrencces), then the remaining number of fossil samples may be marginalized by specifying `complete=FALSE`.
 ## authors

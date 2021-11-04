@@ -20,11 +20,7 @@ using namespace RevBayesCore;
  * Here we simply allocate and initialize the Proposal object.
  */
 SubtreePruneRegraftProposal::SubtreePruneRegraftProposal( StochasticNode<Tree> *n ) : Proposal(),
-    tree( n ),
-    storedBrother(NULL),
-    failed(false),
-    storedChosenNode(NULL),
-    prunedroot(false)
+    tree( n )
 {
     // tell the base class to add the node
     addNode( tree );
@@ -113,7 +109,7 @@ double SubtreePruneRegraftProposal::doProposal( void )
     } while ( node->isRoot() || node->getParent().isRoot() );
     
     // now we store all necessary values
-    storedChosenNode   = node;
+    storedChoosenNode   = node;
     TopologyNode &parent = node->getParent();
     TopologyNode &grandparent = parent.getParent();
     storedBrother = &parent.getChild( 0 );
@@ -129,7 +125,7 @@ double SubtreePruneRegraftProposal::doProposal( void )
         double u = rng->uniform01();
         size_t index = size_t( std::floor(tau.getNumberOfNodes() * u) );
         newBrother = &tau.getNode(index);
-    } while ( newBrother->isRoot() || newBrother == &parent || newBrother == storedBrother || newBrother == storedChosenNode || &(newBrother->getParent()) == storedChosenNode);
+    } while ( newBrother->isRoot() || newBrother == &parent || newBrother == storedBrother || newBrother == storedChoosenNode || &(newBrother->getParent()) == storedChoosenNode);
     
     TopologyNode &newGrandparent = newBrother->getParent();
     
@@ -155,14 +151,14 @@ double SubtreePruneRegraftProposal::doProposal( void )
     {
         prunedroot = true;
         // prune
-        std::vector<TopologyNode*> storedchildren = storedChosenNode->getChildren();
+        std::vector<TopologyNode*> storedchildren = storedChoosenNode->getChildren();
         std::vector<size_t> storedindices;
         std::vector<double> storedbrlens;
         for (size_t i = 0 ; i < storedchildren.size(); i++)
         {
             storedindices.push_back(storedchildren[i]->getIndex());
             storedbrlens.push_back(storedchildren[i]->getBranchLength());
-            storedChosenNode->removeChild(storedchildren[i]);
+            storedChoosenNode->removeChild(storedchildren[i]);
             storedchildren[i]->setParent(NULL);
             storedchildren[i]->setBranchLength(storedbrlens.back());
         }
@@ -188,10 +184,10 @@ double SubtreePruneRegraftProposal::doProposal( void )
         newParent->removeChild(newBrother);
 
         // re-attach
-        storedChosenNode->addChild(newBrother);
-        newBrother->setParent(storedChosenNode);
-        storedChosenNode->addChild(newParent);
-        newParent->setParent(storedChosenNode);
+        storedChoosenNode->addChild(newBrother);
+        newBrother->setParent(storedChoosenNode);
+        storedChoosenNode->addChild(newParent);
+        newParent->setParent(storedChoosenNode);
 
         tau.orderNodesByIndex();
     }
@@ -239,13 +235,13 @@ void SubtreePruneRegraftProposal::undoProposal( void )
     // undo the proposal
     if (!prunedroot)
     {
-        TopologyNode &parent = storedChosenNode->getParent();
+        TopologyNode &parent = storedChoosenNode->getParent();
         TopologyNode &grandparent = parent.getParent();
         TopologyNode* oldBrother = &parent.getChild( 0 );
         TopologyNode &newGrandparent = storedBrother->getParent();
 
         // check if we got the correct child
-        if ( storedChosenNode == oldBrother ) {
+        if ( storedChoosenNode == oldBrother ) {
             oldBrother = &parent.getChild( 1 );
         }
 
@@ -267,14 +263,14 @@ void SubtreePruneRegraftProposal::undoProposal( void )
         Tree& tau = tree->getValue();
 
         // prune
-        std::vector<TopologyNode*> storedchildren = storedChosenNode->getChildren();
+        std::vector<TopologyNode*> storedchildren = storedChoosenNode->getChildren();
         std::vector<size_t> storedindices;
         std::vector<double> storedbrlens;
         for (size_t i = 0 ; i < storedchildren.size(); i++)
         {
             storedindices.push_back(storedchildren[i]->getIndex());
             storedbrlens.push_back(storedchildren[i]->getBranchLength());
-            storedChosenNode->removeChild(storedchildren[i]);
+            storedChoosenNode->removeChild(storedchildren[i]);
             storedchildren[i]->setParent(NULL);
             storedchildren[i]->setBranchLength(storedbrlens.back());
         }
@@ -299,10 +295,10 @@ void SubtreePruneRegraftProposal::undoProposal( void )
         newParent->removeChild(storedBrother);
 
         // re-attach
-        storedChosenNode->addChild(storedBrother);
-        storedBrother->setParent(storedChosenNode);
-        storedChosenNode->addChild(newParent);
-        newParent->setParent(storedChosenNode);
+        storedChoosenNode->addChild(storedBrother);
+        storedBrother->setParent(storedChoosenNode);
+        storedChoosenNode->addChild(newParent);
+        newParent->setParent(storedChoosenNode);
 
         tau.orderNodesByIndex();
     }

@@ -14,8 +14,8 @@
  */
 
 
-#ifndef NaturalNumbersState_H
-#define NaturalNumbersState_H
+#ifndef TaxaState_H
+#define TaxaState_H
 
 #include <stddef.h>
 #include <ostream>
@@ -25,16 +25,16 @@
 #include "RbBitSet.h"
 
 namespace RevBayesCore {
-    
-    class NaturalNumbersState : public DiscreteCharacterState {
-        
+
+    class TaxaState : public DiscreteCharacterState {
+
     public:
-        NaturalNumbersState(size_t n=10);                                                      //!< Default constructor
-        NaturalNumbersState(const std::string &s, int m);                                   //!< Constructor with an observation
-        NaturalNumbersState(int s, int m);                                                  //!< Constructor with an observation
-                
-        NaturalNumbersState*            clone(void) const;                                  //!< Get a copy of this object
-        
+        TaxaState(size_t n=10);                                                      //!< Default constructor
+        TaxaState(const std::string &s, int m);                                   //!< Constructor with an observation
+        TaxaState(int s, int m);                                                  //!< Constructor with an observation
+
+        TaxaState*            clone(void) const;                                  //!< Get a copy of this object
+
         // Discrete character observation functions
         void                            addState(const std::string &symbol);                //!< Add a character state to the set of character states
         RbBitSet                        getState(void) const;                               //!< Get the state (as the bitset)
@@ -53,9 +53,9 @@ namespace RevBayesCore {
         bool                            isMissingState(void) const;                         //!< Get whether this is a missing character state
         void                            setGapState(bool tf);                               //!< set whether this is a gapped character
         void                            setMissingState(bool tf);                           //!< set whether this is a missing character
-        
+
     private:
-        
+
         bool                            is_gap;
         bool                            is_missing;
         size_t                          index_single_state;

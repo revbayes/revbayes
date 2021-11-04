@@ -367,8 +367,12 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::computeNodeProbabilit
             
             size_t index_epoch = computeEpochIndex( node.getAge() );
             
-            if (phi != NULL && node.isFossil())
+            if ( node.isFossil() )
             {
+                if ( phi == NULL )
+                {
+                    throw(RbException("Tree has serially sampled tips, but no serial sampling rate was provided."));
+                }
                 sampling = phi->getValue()[index_epoch];
                 extinction = pExtinction(0.0, node.getAge());
             }
@@ -1962,7 +1966,8 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::setValue(Tree *v, boo
     for (size_t i = 0; i < tips.size(); i++)
     {
         DiscreteTaxonData<NaturalNumbersState> this_tip_data = DiscreteTaxonData<NaturalNumbersState>(tips[i]);
-        NaturalNumbersState state = NaturalNumbersState("?", int(num_states) );
+        NaturalNumbersState state = NaturalNumbersState(0, int(num_states) );
+        state.setState("?");
         this_tip_data.addCharacter(state);
         tip_data->addTaxonData(this_tip_data);
     }
@@ -2212,16 +2217,13 @@ bool TimeVaryingStateDependentSpeciationExtinctionProcess::simulateTree( size_t 
             // set CharacterData object for each tip state
             for (size_t i = 0; i < num_states; i++)
             {
-                std::stringstream ss;
-                ss << i;
-
                 for (size_t j = 0; j < lineages_in_state[i].size(); j++)
                 {
                     size_t this_node = lineages_in_state[i][j];
                     if (nodes[this_node]->isTip() == true)
                     {
                         DiscreteTaxonData<NaturalNumbersState> this_tip_data = DiscreteTaxonData<NaturalNumbersState>(nodes[this_node]->getName());
-                        NaturalNumbersState state = NaturalNumbersState(ss.str(), int(num_states) );
+                        NaturalNumbersState state = NaturalNumbersState(i, int(num_states) );
                         this_tip_data.addCharacter(state);
                         tip_data->addTaxonData(this_tip_data);
                     }
@@ -2234,7 +2236,7 @@ bool TimeVaryingStateDependentSpeciationExtinctionProcess::simulateTree( size_t 
                         if (nodes[this_node]->isTip() == true)
                         {
                             DiscreteTaxonData<NaturalNumbersState> this_tip_data = DiscreteTaxonData<NaturalNumbersState>(nodes[this_node]->getName());
-                            NaturalNumbersState state = NaturalNumbersState(ss.str(), int(num_states) );
+                            NaturalNumbersState state = NaturalNumbersState(i, int(num_states) );
                             this_tip_data.addCharacter(state);
                             tip_data->addTaxonData(this_tip_data);
                         }
