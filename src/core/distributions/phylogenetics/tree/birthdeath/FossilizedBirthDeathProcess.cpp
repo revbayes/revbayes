@@ -729,6 +729,7 @@ void FossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, bool tou
     }
     else
     {
+        AbstractBirthDeathProcess::touchSpecialization(toucher, touchAll);
         AbstractFossilizedBirthDeathProcess::touchSpecialization(toucher, touchAll);
     }
 }
