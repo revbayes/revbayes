@@ -175,7 +175,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
     size_t num_taxa  = (this->num_nodes + 1) / 2;
 
     size_t root_idx  = root + this->num_nodes * this->activeLikelihood[root];
-    //this->b_node_indices.push_back(root_idx); //-- TESTING! -- not in original
+    this->b_node_indices.push_back(root_idx); //-- TESTING! -- not in original
 
     size_t left_idx  = left   + this->num_nodes * this->activeLikelihood[left];
     size_t right_idx = right  + this->num_nodes * this->activeLikelihood[right];
@@ -194,7 +194,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
         , .child2Partials         = (int) right_partials
         , .child2TransitionMatrix = (int) right_idx
         };
-    //this->b_ops.push_back(b_operation);  //-- TESTING! -- not in original
+    this->b_ops.push_back(b_operation);  //-- TESTING! -- not in original
 
     //-- BEAGLE model parameters.
     int     b_parentBufferIndices     = (int) root_idx;
@@ -217,13 +217,13 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
 
     //-- Update rates across sites 
     this->updateBeagleSiteRates();
+
 #if defined ( RB_BEAGLE_DEBUG )
     ss << "updated site rates" << std::endl;
     RBOUT(ss.str());
 #endif /* RB_BEAGLE_DEBUG */
 
 #if defined ( RB_BEAGLE_EIGEN )
-
     this->updateBeagleEigensystem();
     for ( size_t i = 0; i < this->num_site_mixtures; ++i )
     {
@@ -508,8 +508,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikel
 }
 
 
-
-//TODO : This should never exist.... Why is this here
+//TODO : This should probably never exist.... Why is this here
 template<class charType>
 void
 RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikelihood
@@ -533,7 +532,6 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikel
     size_t right_partials  = (node.getChild(1).isTip()) ? right  : right_idx;
     size_t middle_partials = (node.getChild(2).isTip()) ? middle : middle_idx;
 
-    // compute branch length
     double branch_length = this->calculateBranchLength(node, node_index);
 
     //-- TODO : Check which operation for middle
@@ -546,7 +544,6 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikel
         , .child2Partials         = (int) right_partials
         , .child2TransitionMatrix = (int) right_idx
         };
-
 
 #if !defined ( RB_BEAGLE_EIGEN )
     const double * b_tp_begin = this->transition_prob_matrices[0].theMatrix;
