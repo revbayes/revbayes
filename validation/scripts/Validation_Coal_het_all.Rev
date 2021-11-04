@@ -1,0 +1,90 @@
+################################################################################
+#
+# RevBayes Validation Test: Heterochronous demography coalescent process using different demographic models
+# 
+# Model: Heterochronous demography coalescent process combining different models (constant, exponential, linear, constant)
+#            
+#
+# authors: Sebastian Hoehna, Ronja Billenstein
+#
+################################################################################
+
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
+#######################
+# Reading in the Data #
+#######################
+
+taxa <- readTaxonData("data/bears_taxa.tsv")
+
+# Get the names of the taxa in the tree and the age of the tree. We need these later on.
+n_taxa <- taxa.size()
+
+
+##############
+# Tree model #
+##############
+
+
+pop_size_0 ~ dnUniform(0,1E3)
+pop_size_1 ~ dnUniform(0,1E3)
+pop_size_2 ~ dnUniform(0,1E3)
+moves.append( mvScale(pop_size_0, lambda=0.1, tune=true, weight=2.0) )
+moves.append( mvScale(pop_size_1, lambda=0.1, tune=true, weight=2.0) )
+moves.append( mvScale(pop_size_2, lambda=0.1, tune=true, weight=2.0) )
+
+change_point_0 ~ dnUniform(10,20)
+change_point_1 ~ dnUniform(30,40)
+change_point_2 ~ dnUniform(50,60)
+moves.append( mvSlide(change_point_0, delta=0.1, tune=true, weight=2.0) )
+moves.append( mvSlide(change_point_1, delta=0.1, tune=true, weight=2.0) )
+moves.append( mvSlide(change_point_2, delta=0.1, tune=true, weight=2.0) )
+
+# change_point_0 <- 25
+# change_point_1 <- 40
+# change_point_2 <- 55
+
+demo_const_0 = dfConstant( pop_size_0 )
+demo_exp = dfExponential( N0=pop_size_0, N1=pop_size_1, t0=change_point_0, t1=change_point_1 )
+demo_lin = dfLinear( N0=pop_size_1, N1=pop_size_2, t0=change_point_1, t1=change_point_2 )
+demo_const_1 = dfConstant( pop_size_2 )
+psi ~ dnCoalescentDemography([demo_const_0,demo_exp,demo_lin,demo_const_1], changePoints=[change_point_0,change_point_1,change_point_2], taxa=taxa)
+
+### the time tree is a stochastic node modeled by the constant-rate coalescent process (dnCoalescent)
+psi.clamp( psi )
+
+#############
+# The Model 
+#############
+
+
+### workspace model wrapper ###
+mymodel = model(psi)
+
+
+
+################
+# The Analysis #
+################
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Coal_het_all" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize()
+
+
+# you may want to quit RevBayes now
+q()
+

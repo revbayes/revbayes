@@ -171,7 +171,7 @@ double ExponentialDemographicFunction::getWaitingTime(double time, double lambda
 	    }
 	    else 
 	    {
-	        return log(inlog) / alpha - time;
+	        return log(inlog) / alpha - (time - t0);
 	    }
     }
 }
