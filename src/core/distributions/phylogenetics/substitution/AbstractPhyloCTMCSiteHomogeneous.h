@@ -121,6 +121,7 @@ namespace RevBayesCore {
         virtual void                                                        tipDrawJointConditionalAncestralStates(const TopologyNode &node, std::vector<std::vector<charType> >& startStates, std::vector<std::vector<charType> >& endStates, const std::vector<size_t>& sampledSiteRates);
         void	                                                            updateMarginalNodeLikelihoods(void);
         const TypedDagNode<Tree>*                                           getTree(void);
+        double                                                              calculateBranchLength(const TopologyNode &node, size_t node_index);
 
         void                                                                setClockRate(const TypedDagNode< double > *r);
         void                                                                setClockRate(const TypedDagNode< RbVector< double > > *r);
@@ -293,7 +294,6 @@ namespace RevBayesCore {
         //-- BEAGLE updaters.
         void                                                                updateBeagleEigensystem        ( void );
         void                                                                updateBeagleSiteRates          ( void );
-        void                                                                updateBeagleTransitionMatrices ( void );
 #endif /* RB_BEAGLE */
         
     private:
@@ -3085,6 +3085,43 @@ const RevBayesCore::TypedDagNode<RevBayesCore::Tree>* RevBayesCore::AbstractPhyl
 }
 
 
+//-- TODO : fix for invariable sites
+template<class charType>
+double
+RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::calculateBranchLength
+  ( const TopologyNode &node
+  , size_t node_index
+  )
+{
+    double branch_len;
+    double rate ;
+
+    if ( this->branch_heterogeneous_clock_rates == true )
+    {
+        rate = this->heterogeneous_clock_rates->getValue()[node_index];
+    }
+    else if ( this->homogeneous_clock_rate != NULL)
+    {
+        rate = this->homogeneous_clock_rate->getValue();
+    }
+    else
+    {
+        rate = 1.0;
+    }
+
+    //-- TODO: check if this should be invariable site...
+    //rate /= this->homogeneous_clock_rate->getValue();
+
+    branch_len = rate * node.getBranchLength();
+    if ( branch_len < 0 )
+    {
+      throw RbException("Error : Negative branch length!");
+    }
+
+    return branch_len;
+}
+
+
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setClockRate(const TypedDagNode< double > *r)
 {
@@ -4233,9 +4270,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     }
     double start_age = end_age + node->getBranchLength();
 
-    // first, get the rate matrix for this branch
-    RateMatrix_JC jc(this->num_chars);
-    const RateGenerator *rm = &jc;
+    //-- TODO : This should not be here, right
+    // first, get the rate matrix for this branch 
+    //RateMatrix_JC jc(this->num_chars);
+    //const RateGenerator *rm = &jc;
+    const RateGenerator *rm = NULL;
 
     if (this->branch_heterogeneous_substitution_matrices == false )
     {
@@ -4750,58 +4789,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigen
     #if defined ( RB_BEAGLE_DEBUG )
         RBOUT(ss.str());
     #endif /* RB_BEAGLE_DEBUG */
-}
-
-
-template<class charType>
-void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleTransitionMatrices ( void )
-{
-#if defined ( RB_BEAGLE_DEBUG )
-    std::stringstream ss;
-    ss << "Updating Transition Matrices...\n";
-#endif /* RB_BEAGLE_DEBUG */
-
-    int b_code_transition_matrix;
-
-    const double* b_transition_matrix = NULL;
-    int matrix_idx = 0;
-
-    for (size_t node_idx = 0; node_idx < this->num_nodes; ++node_idx)
-    {
-        for (size_t model_idx = 0; model_idx < this->num_site_mixtures; ++model_idx)
-        {
-            matrix_idx = node_idx * this->num_site_mixtures + model_idx;
-            b_transition_matrix = this->transition_prob_matrices[matrix_idx].theMatrix;
-
-#if defined ( RB_BEAGLE_DEBUG )
-            ss << "\tTransition Matrix (node=" + std::to_string(node_idx) + ", model=" + std::to_string(model_idx) + ") : ";
-            for ( size_t j = 0; j < this->num_chars * this->num_chars; ++j )
-            {
-                if ( (j % this->num_chars) == 0) { ss << "\n\t\t"; };
-                ss << std::fixed << std::setw(8) << std::setprecision(4) << b_transition_matrix[j] << " ";
-            }
-            RBOUT(ss.str()); // TODO : Remove later...
-#endif /* RB_BEAGLE_DEBUG */
-
-            b_code_transition_matrix =
-                beagleSetTransitionMatrix( this->beagle_instance
-                                         , matrix_idx
-                                         , b_transition_matrix
-                                         , 1
-                                         );
-            if ( b_code_transition_matrix != 0 )
-            {
-                throw RbException( "Could not set transition matrix for node "
-                                   + std::to_string(node_idx) + " model " + std::to_string(model_idx) + ": "
-                                   + this->parseBeagleReturnCode(b_code_transition_matrix));
-            }
-        }
-    }
-   
-
-#if defined ( RB_BEAGLE_DEBUG )
-    RBOUT(ss.str());
-#endif /* RB_BEAGLE_DEBUG */
 }
 
 
