@@ -41,7 +41,7 @@ taxa <- data.taxa()
 
 sigma ~ dnLognormal( ln(10.0), sd=0.587405 )
 optimum ~ dnUniform(-10,10)
-attraction ~ dnExponential(1.0)
+attraction ~ dnExponential(10.0)
 
 moves.append( mvScale(sigma, lambda=1.0, tune=true, weight=2.0) )
 moves.append( mvSlide(optimum, delta=1.0, tune=true, weight=2.0) )
