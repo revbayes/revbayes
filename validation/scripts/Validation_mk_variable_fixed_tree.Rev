@@ -1,18 +1,24 @@
 ################################################################################
 #
-# RevBayes Validation Test: Felsenstein (81) with uniform time tree
-# 
-# Model: Sequences evolve under the Felsenstein (81) model and the tree is drawn
-#        from a uniform time tree distribution. 
-#            
+# RevBayes Validation Test: Markov k model with ascertainment bias on a fixed tree
+#
+# Model: Morphology evolve under the Markov k model with ascertainment bias correction
+#        and the tree is fixed.
+#
 #
 # authors: Sebastian Hoehna
 #
 ################################################################################
 
-#######################
-# Reading in the Data #
-#######################
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
 
 #######################
 # Reading in the Data #
@@ -22,8 +28,6 @@
 morpho <- readDiscreteCharacterData("data/bears.nex")
 
 ## helpers
-mvi = 1
-mni = 1
 taxa <- morpho.names()
 n_taxa <- taxa.size()
 n_branches <- 2 * n_taxa - 2
@@ -51,9 +55,9 @@ alpha_morpho ~ dnExponential( 1.0 )
 rates_morpho := fnDiscretizeGamma( alpha_morpho, alpha_morpho, 4 )
 
 # Moves on the parameters to the Gamma distribution.
-moves[mvi++] = mvScale(alpha_morpho,lambda=1, weight=2.0)
+moves.append( mvScale(alpha_morpho,lambda=1, weight=2.0) )
 
-#Combine all of our elements into a CTMC. Because we have not observed any invariant sites, 
+#Combine all of our elements into a CTMC. Because we have not observed any invariant sites,
 # we specify the coding is 'variable'.
 
 phyMorpho ~ dnPhyloCTMC(tree=phylogeny, siteRates=rates_morpho, Q=Q_morpho, type="Standard", coding="variable")
@@ -62,20 +66,23 @@ phyMorpho.clamp(morpho)
 
 
 
+############
+# Analysis #
+############
+
+
 # initialize the model object #
 mymodel = model(phylogeny)
 
 
-monitors[1] = mnModel(filename="output/bears_mk.log",printgen=10, separator = TAB)
 
 mymcmc = mcmc(mymodel, monitors, moves)
 
-validation = validationAnalysis( mymcmc, 100 )
-validation.burnin(generations=3000,tuningInterval=250)
-validation.run(generations=10000)
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_mk_variable_fixed" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
 validation.summarize()
 
 
 # you may want to quit RevBayes now
 q()
-

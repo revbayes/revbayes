@@ -12,9 +12,13 @@
 
 ## Global settings
 
-
-NUM_VALIDATION_REPLICATES = 10000
+NUM_VALIDATION_REPLICATES = 1000
 NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
 
 
 #######################
@@ -26,10 +30,6 @@ tree <- readTrees( "data/primates.tree" )[1]
 
 # Get some useful variables from the data. We need these later on.
 taxa <- tree.taxa()
-
-# create the monitor and moves vectors
-moves     = VectorMoves()
-monitors  = VectorMonitors()
 
 
 

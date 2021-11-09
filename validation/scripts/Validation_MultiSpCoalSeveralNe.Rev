@@ -11,6 +11,16 @@
 #
 ################################################################################
 
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
 #######################
 # Reading in the Data #
 #######################
@@ -45,9 +55,6 @@ monitors = VectorMonitors()
 mean_Ne ~ dnGamma(shape=1.0,rate=1.0)
 moves.append(mvScale(mean_Ne,1,true,2.0) )
 
-print("mean_Ne: ")
-print(mean_Ne)
-
 shape <- 3.0
 rate := 2.0 * mean_Ne
 
@@ -68,16 +75,11 @@ for (i in 1:num_loci) {
 # We can use any node of our model as a handle, here we chose to use the rate matrix.
 mymodel = model( primate_tree )
 
-monitors.append(mnScreen(printgen=1, mean_Ne))
-
 mymcmc = mcmc(mymodel, monitors, moves)
 
-mymcmc.run(generations=1000)
-
-# you may want to quit RevBayes now
-q()
-
-validation = validationAnalysis( mymcmc, 100 )
-validation.burnin(generations=500,tuningInterval=25)
-validation.run(generations=500)
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_MSC_Ne" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
 validation.summarize()
+
+q()
