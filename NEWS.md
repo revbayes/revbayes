@@ -2,9 +2,13 @@
 
 #### New models/analyses
 
+#### New MCMC moves
+* slice sampling (mvSlice) can now do geometric scaling.
+
 #### New features
 
 #### Bug fixes
+
 
 
 ### Version 1.1.1
