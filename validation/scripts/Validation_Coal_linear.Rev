@@ -1,11 +1,11 @@
 ################################################################################
 #
-# RevBayes Validation Test: Skyline coalescent process
+# RevBayes Validation Test: Linear demography coalescent process 
+# 
+# Model: Linear demography coalescent process 
+#            
 #
-# Model: The skyline coalescent process on a fixed tree.
-#
-#
-# authors: Sebastian Hoehna
+# authors: Sebastian Hoehna, Ronja Billenstein
 #
 ################################################################################
 
@@ -36,22 +36,24 @@ n_taxa <- observed_phylogeny.ntips()
 # Tree model #
 ##############
 
-NUM_INTERVALS = ceil(n_taxa / 5)
-for (i in 1:NUM_INTERVALS) {
 
-    pop_size[i] ~ dnUniform(1E2,1E4)
-    moves.append( mvScale(pop_size[i], lambda=0.1, tune=true, weight=2.0) )
+pop_size_0 ~ dnUniform(0,1E3)
+pop_size_1 ~ dnUniform(0,1E3)
+moves.append( mvScale(pop_size_0, lambda=0.1, tune=true, weight=2.0) )
+moves.append( mvScale(pop_size_1, lambda=0.1, tune=true, weight=2.0) )
 
-}
+change_point ~ dnUniform(10,100)
+moves.append( mvSlide(change_point, delta=0.1, tune=true, weight=2.0) )
 
+demo_const = dfConstant( pop_size_1 )
+demo_lin = dfLinear( N0=pop_size_0, N1=pop_size_1, t0=0, t1=change_point )
+psi ~ dnCoalescentDemography([demo_lin,demo_const], changePoints=[change_point], taxa=taxa)
 
-### the time tree is a stochastic node modeled by the skyline coalescent process (dnCoalescentSkyline)
-psi ~ dnCoalescentSkyline(theta=pop_size, method="events", taxa=taxa)
+### the time tree is a stochastic node modeled by the constant-rate coalescent process (dnCoalescent)
 psi.clamp( observed_phylogeny )
 
-
 #############
-# The Model #
+# The Model 
 #############
 
 
@@ -66,7 +68,8 @@ mymodel = model(psi)
 
 mymcmc = mcmc(mymodel, monitors, moves)
 
-validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Coal_skyline" )
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Coal_lin" )
 validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
 validation.run(generations=NUM_MCMC_ITERATIONS)
 validation.summarize()
@@ -74,3 +77,4 @@ validation.summarize()
 
 # you may want to quit RevBayes now
 q()
+

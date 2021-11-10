@@ -9,14 +9,25 @@
 #
 ################################################################################
 
+## Global settings
 
-# set my move index
-mi = 0
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
+####################
+# Set up the model #
+####################
 
 n_samples = 20
 
 lambda ~ dnExponential(1.0)
-moves[++mi] = mvScale(lambda, weight=2)
+moves.append( mvScale(lambda, weight=2) )
 
 for (i in 1:n_samples) {
     x[i] ~ dnPoisson(lambda)
@@ -34,16 +45,11 @@ mymodel = model(lambda)
 
 
 
-
-
-
-monitors[1] = mnModel(filename="output/poisson.log",printgen=10, separator = TAB)
-
 mymcmc = mcmc(mymodel, monitors, moves)
 
-validation = validationAnalysis( mymcmc, 1000 )
-validation.burnin(generations=10000,tuningInterval=250)
-validation.run(generations=30000)
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Poisson" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
 validation.summarize()
 
 

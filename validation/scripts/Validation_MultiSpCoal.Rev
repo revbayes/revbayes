@@ -10,6 +10,16 @@
 #
 ################################################################################
 
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
 #######################
 # Reading in the Data #
 #######################
@@ -62,10 +72,9 @@ mymodel = model( primate_tree )
 
 mymcmc = mcmc(mymodel, monitors, moves)
 
-
-validation = validationAnalysis( mymcmc, 100 )
-validation.burnin(generations=500,tuningInterval=25)
-validation.run(generations=1000)
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_MSC" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
 validation.summarize()
 
 

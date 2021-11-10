@@ -140,7 +140,10 @@ double ExponentialDemographicFunction::getIntegral(double start, double finish) 
 }
 
 /**
- * spaceholder
+ * @param[in]   time    Current time in coalescent simulation process
+ * @param[in]   lambda  
+ *
+ * @return Waiting Time until next coalescent event
  */
 double ExponentialDemographicFunction::getWaitingTime(double time, double lambda) const
 {
@@ -149,16 +152,28 @@ double ExponentialDemographicFunction::getWaitingTime(double time, double lambda
     double t0 = time_recent->getValue();
     double t1 = time_ancient->getValue();
     
-	double alpha = log( N1/N0 ) / (t0 - t1);
-	double inlog = exp(alpha * (time - t0)) + lambda * alpha * theta_recent->getValue();
-	if (inlog < 0)
-	{
-	    return -1;
-	}
-	else 
-	{
-	    return log(inlog) / alpha - time;
-	}
+    if ( t1 < t0 || t0 < 0 || N1 < 0 || time < t0 || time > t1 )
+    {
+        throw RbException("Impossible parameter values in exponential growth/decline demographic functions.");
+    }
+    
+    if ( N0 == N1 )
+    {
+        return N0 * lambda;
+    }
+    else
+    {
+	    double alpha = log( N1/N0 ) / (t0 - t1);
+	    double inlog = exp(alpha * (time - t0)) + lambda * alpha * theta_recent->getValue();
+	    if (inlog < 0)
+	    {
+	        return -1;
+	    }
+	    else 
+	    {
+	        return log(inlog) / alpha - (time - t0);
+	    }
+    }
 }
 
 /**
