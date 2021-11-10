@@ -32,8 +32,6 @@ namespace RevBayesCore {
     protected:
         // Parameter management functions
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
-//        double                                              computeLnProbabilityTimes(void) const;                                         //!< Compute the log-transformed probability of the current value.
-//        double                                              lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const { throw RbException("Cannot compute P(nTaxa)."); }
         void                                                prepareProbComputation(void) const;
         
         void                                                prepareRateIntegral(double end);                                                        //!< Compute the rate integral.
