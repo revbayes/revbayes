@@ -11,8 +11,8 @@
 
 ## Global settings
 
-NUM_VALIDATION_REPLICATES = 10000
-NUM_MCMC_ITERATIONS       = 20000
+NUM_VALIDATION_REPLICATES = 100000
+NUM_MCMC_ITERATIONS       = 200000
 
 
 # create the monitor and moves vectors
@@ -32,11 +32,11 @@ mean2 ~ dnUniform(0,10)
 sd1 ~ dnExp(0.1)
 sd2 ~ dnExp(10)
 
-moves.append(mvSlide(p, delta = 0.1, weight = 1.0))
-moves.append(mvSlide(mean1, delta = 0.1, weight = 1.0))
-moves.append(mvSlide(mean2, delta = 0.1, weight = 1.0))
-moves.append(mvScale(sd1, lambda = 0.1, weight = 1.0))
-moves.append(mvScale(sd2, lambda = 0.1, weight = 1.0))
+moves.append( mvBetaProbability(p,weight=5) )
+moves.append(mvSlide(mean1, delta = 0.1, weight = 3.0))
+moves.append(mvSlide(mean2, delta = 0.1, weight = 3.0))
+moves.append(mvScale(sd1, lambda = 0.1, weight = 3.0))
+moves.append(mvScale(sd2, lambda = 0.1, weight = 3.0))
 
 for ( i in 1:NUM_SAMPELS ) {
   x[i] ~ dnBimodalLognormal(mean1=mean1, mean2 = mean2, sd1= sd1, sd2 = sd2, p = p)
@@ -56,6 +56,7 @@ mymcmc = mcmc(mymodel, monitors, moves)
 validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_BimodalLognormal" )
 validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
 validation.run(generations=NUM_MCMC_ITERATIONS)
-validation.summarize()
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
 
 q()
