@@ -135,7 +135,7 @@ fi
 
     #################
     # generate git version number
-    bash generate_version_number.sh
+    ./generate_version_number.sh
     if [ -e ../../src/revlanguage/utils/GitVersion.cpp ] ; then
         cp ../../src/revlanguage/utils/GitVersion.cpp GitVersion_backup.cpp
     fi
@@ -157,7 +157,7 @@ fi
     echo
     echo
     echo "Running 'cmake ../../../src $cmake_args' in $(pwd)"
-    cmake -D Boost_NO_BOOST_CMAKE:BOOL=ON ../../../src $cmake_args
+    cmake ../../../src $cmake_args
     echo
     echo "Running 'make -j $j' in $(pwd)"
     make -j $j
