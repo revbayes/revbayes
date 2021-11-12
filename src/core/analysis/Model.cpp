@@ -295,23 +295,20 @@ std::vector<DagNode*> Model::getOrderedStochasticNodes()
  * @param[out] orderedStochasticNodes vector to store the nodes in
  * @param visitedNodes nodes that have already been added to the vector
  */
-void Model::getOrderedStochasticNodes(const DagNode* dagNode, std::vector<DagNode*>& orderedStochasticNodes, std::set<const DagNode*>& visitedNodes)
+void Model::getOrderedStochasticNodes(const DagNode* the_dag_node, std::vector<DagNode*>& orderedStochasticNodes, std::set<const DagNode*>& visitedNodes)
 {
     
-    if (visitedNodes.find(dagNode) != visitedNodes.end())
+    if (visitedNodes.find(the_dag_node) != visitedNodes.end())
     {
         //The node has been visited before
         //we do nothing
         return;
     }
     
-    // add myself here for safety reasons
-    visitedNodes.insert( dagNode );
-    
-    if ( dagNode->isConstant() == false )
+    if ( the_dag_node->isConstant() == false )
     {
         // First I have to visit my parents
-        std::vector<const DagNode *> parents = dagNode->getParents() ;
+        std::vector<const DagNode *> parents = the_dag_node->getParents() ;
         std::vector<const DagNode *>::const_iterator it;
         for ( it=parents.begin() ; it != parents.end(); it++ )
         {
@@ -321,13 +318,16 @@ void Model::getOrderedStochasticNodes(const DagNode* dagNode, std::vector<DagNod
     }
 
     // Then I can add myself to the nodes visited, and to the ordered vector of stochastic nodes
-    if ( dagNode->isStochastic() ) //if the node is stochastic
+    if ( the_dag_node->isStochastic() && (visitedNodes.find(the_dag_node) == visitedNodes.end()) ) //if the node is stochastic
     {
-        orderedStochasticNodes.push_back( const_cast<DagNode*>( dagNode ) );
+        orderedStochasticNodes.push_back( const_cast<DagNode*>( the_dag_node ) );
     }
+    
+    // add myself here for safety reasons
+    visitedNodes.insert( the_dag_node );
 
     // Finally I will visit my children
-    std::vector<DagNode*> children = dagNode->getChildren() ;
+    std::vector<DagNode*> children = the_dag_node->getChildren() ;
     std::vector<DagNode*>::iterator it;
     for ( it = children.begin() ; it != children.end(); it++ )
     {
