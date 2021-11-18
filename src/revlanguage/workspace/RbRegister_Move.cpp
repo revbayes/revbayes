@@ -167,6 +167,7 @@
 
 // moves for the DPP table values
 #include "ScaleProposal.h"
+#include "SlideProposal.h"
 #include "BetaSimplexProposal.h"
 
 
@@ -334,6 +335,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_HomeologPhase() );
 
         /* Moves on mixtures (in folder "datatypes/inference/moves/mixture") */
+        addType( new Move_DPPTableValueUpdate<Real>(    new RevBayesCore::SlideProposal( NULL, 1.0 ) ) );
         addType( new Move_DPPTableValueUpdate<RealPos>( new RevBayesCore::ScaleProposal( NULL, 1.0 ) ) );
         addType( new Move_DPPTableValueUpdate<Simplex>( new RevBayesCore::BetaSimplexProposal( NULL, 10.0 ) ) );
 
