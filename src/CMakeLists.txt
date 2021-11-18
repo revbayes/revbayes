@@ -12,6 +12,12 @@ project(RevBayes)
 # So, we add the flag directly instead.
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
+# Disable the cmake code to find BOOST.
+# * It requires at least version 3.3, but we want to support version 2.8 for RHEL6/7
+# * We COULD disable this only if the cmake version is < 3.3
+# * However, then we would have two code paths to maintain, so...
+set(Boost_NO_BOOST_CMAKE ON)
+
 if(NOT (${CMAKE_VERSION} VERSION_LESS "2.8.0"))
   find_program(CCACHE_PROGRAM ccache)
   if(CCACHE_PROGRAM)
