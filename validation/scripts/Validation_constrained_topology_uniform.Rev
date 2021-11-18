@@ -1,0 +1,103 @@
+################################################################################
+#
+# RevBayes Validation Test: Constrained topology with uniform unrooted topology prior
+#
+# Model: Sequences evolve under the Jukes-Cantor model and the tree is drawn
+#        from a uniform unrooted topology prior with a constrained topology.
+#
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
+#######################
+# Reading in the Data #
+#######################
+
+data <- readDiscreteCharacterData("data/primates_cytb_small.nex")
+
+# Get some useful variables from the data. We need these later on.
+taxa <- data.taxa()
+
+
+
+######################
+# Substitution Model #
+######################
+
+#### specify the Jukes-Cantor substitution model applied uniformly to all sites ###
+Q <- fnJC(4)
+
+
+
+##############
+# Tree model #
+##############
+
+br_len_lambda <- 10.0
+
+# construct a variable for the tree drawn from a birth death process
+tree_prior = dnUniformTopologyBranchLength(taxa, branchLengthDistribution=dnExponential(br_len_lambda))
+
+constraints = [ clade( taxa[1], taxa[2], taxa[3] ) ]
+
+psi ~ dnConstrainedTopology( tree_prior, constraints )
+
+moves.append( mvNNI(psi, weight=n_branches/2.0) )
+moves.append( mvSPR(psi, weight=n_branches/10.0) )
+moves.append( mvBranchLengthScale(psi, weight=n_branches) )
+
+
+
+
+
+
+###################
+# PhyloCTMC Model #
+###################
+
+# We use an empirical estimate of the clock rate which is 0.01 (=1%) per million years per site
+clockRate <- 1.0
+
+# the sequence evolution model
+seq ~ dnPhyloCTMC(tree=psi, Q=Q, branchRates=clockRate, type="DNA")
+
+# attach the data
+seq.clamp(data)
+
+
+
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(Q)
+
+
+# We do not need any monitors, so we create only the empty vector.
+monitors = VectorMonitors()
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_constrained_uniform" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize()
+
+
+# you may want to quit RevBayes now
+q()

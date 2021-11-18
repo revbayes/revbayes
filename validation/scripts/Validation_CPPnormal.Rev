@@ -1,0 +1,55 @@
+################################################################################
+#
+# RevBayes Validation Test: Compound Poisson Normal Distribution
+#
+# Model: 10 random variable from an compound Poisson ormal distribution with
+#        a uniform prior on the mean and exponential prior on
+#        the standard deviation.
+#
+# Inference: MCMC algorithm with the following moves:
+#           - mvSlide
+#           - mvScale
+#
+# Authors: Sebastian Hoehna
+#
+################################################################################
+
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
+n_samples = 10
+
+mu ~ dnUniform( -10, 10 )
+sigma ~ dnExponential( 2.0 )
+lambda ~ dnExponential( 0.5 )
+
+moves.append( mvSlide(mu) )
+moves.append( mvScale(sigma) )
+moves.append( mvScale(lambda) )
+
+for (i in 1:n_samples ) {
+   x[i] ~ dnCppNormal(lambda,mu,sigma)
+   x[i].clamp( x[i] )
+}
+
+mymodel = model(mu)
+
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_CppNormal" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize()
+
+
+# you may want to quit RevBayes now
+q()

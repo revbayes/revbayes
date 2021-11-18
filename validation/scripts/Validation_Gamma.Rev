@@ -5,14 +5,14 @@
 # Model: Several random variable from a gamma distribution.
 #
 #
-# authors: Michael R. May
+# authors: Sebastian Hoehna
 #
 ################################################################################
 
 
 ## Global settings
 
-NUM_VALIDATION_REPLICATES = 200
+NUM_VALIDATION_REPLICATES = 1000
 NUM_MCMC_ITERATIONS       = 10000
 
 
@@ -25,76 +25,22 @@ rate ~ dnExp(2.0)
 moves.append( mvSlide(shape,weight=2) )
 moves.append( mvScale(rate,weight=2) )
 
-NUM_VARS = 2
-NUM_OBS = 3
+NUM_VARS = 3
+NUM_OBS = 10
 
-#for ( j in 1:NUM_VARS ) {
-#
-#  mean[j] ~ dnGamma(shape, rate)
-#  moves.append( mvSlide(mean[j],weight=2) )
-#
-#  for ( i in 1:NUM_OBS){
-#    index = (j-1)*NUM_OBS + i
-#	x[index] ~ dnNormal(mean[j], sd=1)
-#	x[index].clamp( x[index] )
-#  }
-#}
+for ( j in 1:NUM_VARS ) {
 
-mean_a ~ dnGamma(shape, rate)
-moves.append( mvSlide(mean_a,weight=2) )
+  mean[j] ~ dnGamma(shape, rate)
+  moves.append( mvSlide(mean[j],weight=2) )
 
-#for ( i in 1:NUM_OBS ){
-#  index = i
-#  x[index] ~ dnNormal(mean_a, sd=1)
-#  x[index].clamp( x[index] )
-#}
+  for ( i in 1:NUM_OBS){
+    index = (j-1)*NUM_OBS + i
+	x[index] ~ dnNormal(mean[j], sd=1)
+	x[index].clamp( x[index] )
+  }
+}
 
-x[1] ~ dnNormal(mean_a, sd=1)
-x[1].clamp( x[1] )
 
-x[2] ~ dnNormal(mean_a, sd=1)
-x[2].clamp( x[2] )
-
-x[3] ~ dnNormal(mean_a, sd=1)
-x[3].clamp( x[3] )
-
-#x_1 ~ dnNormal(mean_a, sd=1)
-#x_1.clamp( x_1 )
-#
-#x_2 ~ dnNormal(mean_a, sd=1)
-#x_2.clamp( x_2 )
-#
-#x_3 ~ dnNormal(mean_a, sd=1)
-#x_3.clamp( x_3 )
-
-mean_b ~ dnGamma(shape, rate)
-moves.append( mvSlide(mean_b,weight=2) )
-
-#for ( i in 1:NUM_OBS ){
-#  index = NUM_OBS + i
-#  x[index] ~ dnNormal(mean_b, sd=1)
-#  x[index].clamp( x[index] )
-#}
-
-x[4] ~ dnNormal(mean_b, sd=1)
-x[4].clamp( x[4] )
-
-x[5] ~ dnNormal(mean_b, sd=1)
-x[5].clamp( x[5] )
-
-x[6] ~ dnNormal(mean_b, sd=1)
-x[6].clamp( x[6] )
-
-x_4 ~ dnNormal(mean_b, sd=1)
-x_4.clamp( x_4 )
-
-x_5 ~ dnNormal(mean_b, sd=1)
-x_5.clamp( x_5 )
-
-x_6 ~ dnNormal(mean_b, sd=1)
-x_6.clamp( x_6 )
-
-x
 
 #############
 # THE Model #
@@ -104,10 +50,6 @@ x
 # We can use any node of our model as a handle, here we chose to use the rate matrix.
 mymodel = model(rate)
 
-
-#mymodel
-#
-#q()
 
 
 mymcmc = mcmc(mymodel, monitors, moves)
