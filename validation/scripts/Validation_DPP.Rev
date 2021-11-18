@@ -1,0 +1,74 @@
+################################################################################
+#
+# RevBayes Validation Test: Dirichlet Prior Process
+#
+# Model: Several random variable from a DPP.
+#
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 100
+NUM_MCMC_ITERATIONS       = 1000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+concentration ~ dnGamma(shape=4,rate=2)
+base_mean ~ dnUniform(-5,5)
+base_sd ~ dnExp(2.0)
+
+moves.append( mvSlide(base_mean,weight=2) )
+moves.append( mvScale(base_sd,weight=2) )
+moves.append( mvScale(concentration,weight=2) )
+
+NUM_VARS = 3
+NUM_OBS = 10
+NUM_ELEMENTS = 20
+
+#moves.append( mvDPPGibbsConcentration(concentration, gammaShape=4, gammaRate=2, numDPPCats=NUM_ELEMENTS, weight=2) )
+
+Sigma <- diagonalMatrix( NUM_ELEMENTS )
+
+for ( j in 1:NUM_VARS ) {
+
+  means[j] ~ dnDPP(concentration, dnNormal(base_mean,base_sd), numElements=NUM_ELEMENTS)
+  moves.append( mvDPPAllocateAuxGibbs( means[j], numAux=5, weight=2 ) )
+  moves.append( mvDPPValueSliding( means[j], weight=2 ) )
+#  moves.append( mvSlide(means[j],weight=2) )
+
+  for ( i in 1:NUM_OBS){
+    index = (j-1)*NUM_OBS + i
+	x[index] ~ dnMultivariateNormal(means[j], covariance=Sigma)
+	x[index].clamp( x[index] )
+  }
+}
+
+
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(concentration)
+
+
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_DPP" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize()
+
+
+# you may want to quit RevBayes now
+q()
