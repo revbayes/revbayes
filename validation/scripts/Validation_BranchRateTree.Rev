@@ -1,0 +1,137 @@
+################################################################################
+#
+# RevBayes Validation Test: BranchRateTree process
+#
+# Model: Sequences evolve under the Jukes-Cantor model and the tree is drawn
+#        from a branch-rate-tree process.
+#
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 100
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
+#######################
+# Reading in the Data #
+#######################
+
+data <- readDiscreteCharacterData("data/primates_cytb_small.nex")
+
+# Get some useful variables from the data. We need these later on.
+taxa <- data.taxa()
+
+
+
+######################
+# Substitution Model #
+######################
+
+#### specify the Jukes-Cantor substitution model applied uniformly to all sites ###
+Q <- fnJC(4)
+
+
+
+##############
+# Tree model #
+##############
+
+USE_FIXED_TREE = TRUE
+if ( USE_FIXED_TREE == FALSE ) {
+# Specify a prior on the diversification and turnover rate
+diversification ~ dnGamma(2,2)
+turnover ~ dnGamma(2,2)
+
+# now transform the diversification and turnover rates into speciation and extinction rates
+speciation := diversification + turnover
+extinction := turnover
+
+# specify a prior on the root age (our informed guess is about 75-80 mya)
+root ~ dnNormal(75.0,2.0)
+
+sampling_fraction <- 23 / 450 # 23 out of the ~ 450 primate species
+
+# create some moves that change the stochastic variables
+# all moves are sliding proposals but you could use scaling proposals for the rates too
+moves.append( mvSlide(diversification,delta=1,tune=true,weight=1) )
+moves.append( mvSlide(turnover,delta=1,tune=true,weight=1) )
+moves.append( mvSlide(root,delta=1,tune=true,weight=1) )
+
+# construct a variable for the tree drawn from a birth death process
+timetree ~ dnBDP(lambda=abs(speciation), mu=abs(extinction), rootAge=abs(root), rho=sampling_fraction, taxa=taxa, condition="nTaxa" )
+
+moves.append( mvNarrow(timetree, weight=5.0) )
+moves.append( mvNNI(timetree, weight=1.0) )
+moves.append( mvFNPR(timetree, weight=3.0) )
+moves.append( mvSubtreeScale(timetree, weight=3.0) )
+moves.append( mvNodeTimeSlideUniform(timetree, weight=15.0) )
+} else {
+  timetree <- readTrees("data/primates_small.tre")[1]
+}
+rf <- 0.5
+#rf ~ dnBeta(1,1)
+#moves.append( mvBetaProbability(rf, weight=2.0) )
+
+clock_mean ~ dnLoguniform( 1E-4,1E-2 )
+clock_sd   ~ dnExp( 5 )
+moves.append( mvScale(clock_mean, weight=2.0) )
+moves.append( mvScale(clock_sd, weight=2.0) )
+
+
+psi ~ dnBranchRateTree (branchRatePrior = dnLognormal( ln( clock_mean ),clock_sd ),
+                  timeTree = timetree,
+                  rootBranchFraction = rf)
+
+
+#moves.append( mvNNI(psi, weight=3.0) )
+#moves.append( mvBranchLengthScale(psi, weight=15.0) )
+
+
+
+###################
+# PhyloCTMC Model #
+###################
+
+# We use an empirical estimate of the clock rate which is 0.01 (=1%) per million years per site
+clockRate <- 0.005
+
+# the sequence evolution model
+seq ~ dnPhyloCTMC(tree=psi, Q=Q, branchRates=clockRate, type="DNA")
+
+# attach the data
+seq.clamp(data)
+
+
+
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(Q)
+
+
+# We do not need any monitors, so we create only the empty vector.
+monitors = VectorMonitors()
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_BranchRateTree" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize()
+
+
+# you may want to quit RevBayes now
+q()

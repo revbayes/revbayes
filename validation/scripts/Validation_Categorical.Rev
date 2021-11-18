@@ -1,14 +1,13 @@
 ################################################################################
 #
-# RevBayes Validation Test: Cauchy Distribution
+# RevBayes Validation Test: Categorical Distribution
 #
-# Model: Several random variable from a Beta distribution.
+# Model: Several draws from a categorical distribution with Dirichlet prior.
 #
 #
 # authors: Sebastian Hoehna
 #
 ################################################################################
-
 
 ## Global settings
 
@@ -20,27 +19,18 @@ NUM_MCMC_ITERATIONS       = 10000
 moves     = VectorMoves()
 monitors  = VectorMonitors()
 
-location ~ dnUniform(-10,10)
-scale ~ dnExp(2.0)
-moves.append( mvSlide(location,weight=2) )
-moves.append( mvScale(scale,weight=2) )
 
+prior <- 1:6
+pi ~ dnDirichlet(prior)
+moves.append( mvBetaSimplex(pi,weight=2) )
+moves.append( mvDirichletSimplex(pi,weight=2,numCats=4) )
 
-NUM_VARS = 3
-NUM_OBS = 10
+n_samples = 25
 
-for ( j in 1:NUM_VARS ) {
-
-  mean[j] ~ dnCauchy(location, scale)
-  moves.append( mvSlide(mean[j],weight=2) )
-
-  for ( i in 1:NUM_OBS){
-    index = (j-1)*NUM_OBS + i
-	x[index] ~ dnNormal(mean[j], sd=1)
-	x[index].clamp( x[index] )
-  }
+for (i in 1:n_samples) {
+    x[i] ~ dnCategorical(pi)
+    x[i].clamp( x[i] )
 }
-
 
 #############
 # THE Model #
@@ -48,15 +38,13 @@ for ( j in 1:NUM_VARS ) {
 
 # We define our model.
 # We can use any node of our model as a handle, here we chose to use the rate matrix.
-mymodel = model(location)
-
-
+mymodel = model(pi)
 
 
 
 mymcmc = mcmc(mymodel, monitors, moves)
 
-validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Cauchy" )
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Cat" )
 validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
 validation.run(generations=NUM_MCMC_ITERATIONS)
 validation.summarize()

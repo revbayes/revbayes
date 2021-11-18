@@ -1,0 +1,85 @@
+################################################################################
+#
+# RevBayes Validation Test: CTMC Distribution
+#
+# Model: A single site evolves for some time according to a CTMC
+#
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+#######################
+# Reading in the Data #
+#######################
+
+data <- readDiscreteCharacterData("data/primates_cytb.nex")
+
+
+
+######################
+# Substitution Model #
+######################
+
+#### specify the GTR+G substitution model applied uniformly to all sites ###
+er_prior <- v(1,1,1,1,1,1)
+er ~ dnDirichlet(er_prior)
+moves.append( mvSimplexElementScale(er,weight=3) )
+
+
+pi_prior <- v(1,1,1,1)
+pi ~ dnDirichlet(pi_prior)
+moves.append( mvSimplexElementScale(pi,weight=2) )
+
+
+#### create a deterministic variable for the rate matrix ####
+Q := fnGTR(er,pi)
+
+
+N_SITES = 100
+
+for (i in 1:N_SITES) {
+
+  x[i] ~ dnCTMC(Q = Q,
+                rootFrequencies = simplex(1,2,3,4),
+                type = "DNA")
+
+  x[i].clamp( x[i] )
+#                siteMatrices,
+#                siteRates,
+#                siteRatesProbs,
+
+}
+
+
+
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(Q)
+
+
+
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_CTMC" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize()
+
+# you may want to quit RevBayes now
+q()

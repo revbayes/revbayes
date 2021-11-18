@@ -1,8 +1,8 @@
 ################################################################################
 #
-# RevBayes Validation Test: Cauchy Distribution
+# RevBayes Validation Test: Chi-Square Distribution
 #
-# Model: Several random variable from a Beta distribution.
+# Model: Several random variable from a chi^2 distribution.
 #
 #
 # authors: Sebastian Hoehna
@@ -20,19 +20,16 @@ NUM_MCMC_ITERATIONS       = 10000
 moves     = VectorMoves()
 monitors  = VectorMonitors()
 
-location ~ dnUniform(-10,10)
-scale ~ dnExp(2.0)
-moves.append( mvSlide(location,weight=2) )
-moves.append( mvScale(scale,weight=2) )
-
+df ~ dnUniformNatural(1,20)
+moves.append( mvRandomNaturalWalk(df,weight=2) )
 
 NUM_VARS = 3
 NUM_OBS = 10
 
 for ( j in 1:NUM_VARS ) {
 
-  mean[j] ~ dnCauchy(location, scale)
-  moves.append( mvSlide(mean[j],weight=2) )
+  mean[j] ~ dnChisq(df)
+  moves.append( mvScale(mean[j],weight=2) )
 
   for ( i in 1:NUM_OBS){
     index = (j-1)*NUM_OBS + i
@@ -48,15 +45,13 @@ for ( j in 1:NUM_VARS ) {
 
 # We define our model.
 # We can use any node of our model as a handle, here we chose to use the rate matrix.
-mymodel = model(location)
-
-
+mymodel = model(df)
 
 
 
 mymcmc = mcmc(mymodel, monitors, moves)
 
-validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Cauchy" )
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Chisq" )
 validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
 validation.run(generations=NUM_MCMC_ITERATIONS)
 validation.summarize()
