@@ -1,0 +1,62 @@
+################################################################################
+#
+# RevBayes Validation Test: DiracDelta Distribution
+#
+# Model: Several random variable from a DiracDelta distribution.
+#
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+val ~ dnUniform(-10,10)
+moves.append( mvSlide(val,weight=2) )
+
+NUM_VARS = 3
+NUM_OBS = 10
+
+for ( j in 1:NUM_VARS ) {
+
+  mean[j] ~ dnDiracDelta(val)
+  moves.append( mvSlide(mean[j],weight=2) )
+
+  for ( i in 1:NUM_OBS){
+    index = (j-1)*NUM_OBS + i
+	x[index] ~ dnNormal(mean[j], sd=1)
+	x[index].clamp( x[index] )
+  }
+}
+
+
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(val)
+
+
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_DiracDelta" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize()
+
+
+# you may want to quit RevBayes now
+q()

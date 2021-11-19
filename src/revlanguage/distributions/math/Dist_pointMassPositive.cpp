@@ -14,7 +14,8 @@ Dist_pointMassPositive::Dist_pointMassPositive() : PositiveContinuousDistributio
 }
 
 
-Dist_pointMassPositive::~Dist_pointMassPositive() {
+Dist_pointMassPositive::~Dist_pointMassPositive()
+{
 
 }
 
