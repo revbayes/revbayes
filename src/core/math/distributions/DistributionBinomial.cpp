@@ -67,7 +67,8 @@ double RbStatistics::Binomial::cdf(double n, double p, double x)
  * \return Returns a double with the log probability density.
  * \throws Does not throw an error.
  */
-double RbStatistics::Binomial::lnPdf(double n, double p, double x) {
+double RbStatistics::Binomial::lnPdf(double n, double p, double x)
+{
 
     double q = 1.0 - p;
     return pdf(n, p, q, x, true);
