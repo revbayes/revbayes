@@ -31,8 +31,45 @@ int Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool 
         }
 
     }
+    
+    RandomNumberGenerator *rng = GLOBAL_RNG;
 
-    double quantile = (smaller_values_count + 0.5*equal_values_count) / double(values.size());
+    double u = rng->uniform01();
+    double quantile = (smaller_values_count + u*equal_values_count) / double(values.size());
+    double lower = (1.0 - alpha) / 2.0;
+    double upper = 1.0 - lower;
+    bool covered = ( quantile >= lower && quantile <= upper );
+
+    return (covered ? 0 : (quantile < lower ? -1 : 1) );
+}
+
+
+template <>
+int Trace<long>::isCoveredInInterval(const std::string &v, double alpha, bool verbose)
+{
+
+    long sample = atof( v.c_str() );
+
+    double smaller_values_count = 0;
+    double equal_values_count   = 0;
+    for (size_t j=0; j<values.size(); ++j)
+    {
+
+        if ( values[j] < sample )
+        {
+            ++smaller_values_count;
+        }
+        else if ( values[j] == sample )
+        {
+            ++equal_values_count;
+        }
+
+    }
+    
+    RandomNumberGenerator *rng = GLOBAL_RNG;
+
+    double u = rng->uniform01();
+    double quantile = (smaller_values_count + u*equal_values_count) / double(values.size());
     double lower = (1.0 - alpha) / 2.0;
     double upper = 1.0 - lower;
     bool covered = ( quantile >= lower && quantile <= upper );

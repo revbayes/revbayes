@@ -96,6 +96,7 @@ class Serializable;
      * Typedefs
      */
     typedef Trace<RevBayesCore::Simplex> TraceSimplex;
+    typedef Trace<long> TraceNumericInteger;
     typedef Trace<RevBayesCore::RbVector<double> > TraceNumericVector;
     typedef Trace<std::string> AncestralStateTrace;
     typedef Trace<std::string> ModelTrace;
