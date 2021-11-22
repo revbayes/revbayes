@@ -30,6 +30,12 @@ namespace RevBayesCore {
         // methods of the Cloneable interface
         virtual AbstractTaxonData*              clone(void) const = 0;
         
+        bool                                    operator==(const AbstractTaxonData &rm) const { return this == &rm; }
+        bool                                    operator!=(const AbstractTaxonData &rm) const { return !operator==(rm); }
+        bool                                    operator<(const AbstractTaxonData &rm) const { return this < &rm; }
+        bool                                    operator<=(const AbstractTaxonData &rm) const { return operator<(rm) || operator==(rm); }
+
+        
         // AbstractTaxonData functions
         virtual void                            concatenate(const AbstractTaxonData &d) = 0;                        //!< Concatenate sequences
         virtual std::string                     getJsonRepresentation(void) const = 0;                              //!< Return a JSON represenation of the taxon data

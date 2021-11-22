@@ -36,7 +36,7 @@
 
 using namespace RevLanguage;
 
-Dist_CTMC::Dist_CTMC() : TypedDistribution< AbstractHomologousDiscreteCharacterData >()
+Dist_CTMC::Dist_CTMC() : TypedDistribution< AbstractDiscreteTaxonData >()
 {
 
 }
@@ -56,13 +56,13 @@ Dist_CTMC* Dist_CTMC::clone( void ) const
 }
 
 
-RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharacterData >* Dist_CTMC::createDistribution( void ) const
+RevBayesCore::TypedDistribution< RevBayesCore::AbstractDiscreteTaxonData >* Dist_CTMC::createDistribution( void ) const
 {
 
     // get the parameters
     size_t this_num_sites = size_t( static_cast<const Natural &>( nSites->getRevObject() ).getValue() );
     const std::string& dt = static_cast<const RlString &>( type->getRevObject() ).getValue();
-    const std::string& code = static_cast<const RlString &>( coding->getRevObject() ).getValue();
+//    const std::string& code = static_cast<const RlString &>( coding->getRevObject() ).getValue();
 
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* site_rates_node = NULL;
     if ( site_rates != NULL && site_rates->getRevObject() != RevNullObject::getInstance() )
@@ -87,7 +87,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         }
     }
 
-    RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharacterData > *d = NULL;
+    RevBayesCore::TypedDistribution< RevBayesCore::AbstractDiscreteTaxonData > *d = NULL;
     const RevBayesCore::TypedDagNode< RevBayesCore::Simplex > *rf = NULL;
     if ( root_frequencies->getRevObject() != RevNullObject::getInstance() )
     {
@@ -114,11 +114,6 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         {
             throw RbException( "The number of substitution matrices does not match the number of matrix mixture probabilities" );
         }
-    }
-
-    if ( !(dt == "Binary" || dt == "Restriction" || dt == "Standard") && code != "all")
-    {
-        throw RbException( "Ascertainment bias correction only supported with Standard and Binary/Restriction datatypes" );
     }
 
     if ( dt == "DNA" )
@@ -513,7 +508,7 @@ std::string Dist_CTMC::getDistributionFunctionName( void ) const
 MethodTable Dist_CTMC::getDistributionMethods( void ) const
 {
     
-    MethodTable methods = TypedDistribution<AbstractHomologousDiscreteCharacterData>::getDistributionMethods();
+    MethodTable methods = TypedDistribution<AbstractDiscreteTaxonData>::getDistributionMethods();
     
     // member functions
     ArgumentRules* siteLikelihoodsArgRules = new ArgumentRules();
@@ -553,7 +548,7 @@ const MemberRules& Dist_CTMC::getParameterRules(void) const
         std::vector<TypeSpec> rateMatrixTypes;
         rateMatrixTypes.push_back( RateGenerator::getClassTypeSpec() );
         rateMatrixTypes.push_back( ModelVector<RateGenerator>::getClassTypeSpec() );
-        dist_member_rules.push_back( new ArgumentRule( "Q", rateMatrixTypes, "The global, branch-specific or site-mixture rate matrices.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "Q", rateMatrixTypes, "The global or site-mixture rate matrices.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         // optional argument for the root frequencies
         dist_member_rules.push_back( new ArgumentRule( "rootFrequencies", Simplex::getClassTypeSpec(), "The root specific frequencies of the characters, if applicable.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
@@ -687,10 +682,10 @@ void Dist_CTMC::setConstParameter(const std::string& name, const RevPtr<const Re
     {
         type = var;
     }
-    else if ( name == "coding" )
-    {
-        coding = var;
-    }
+//    else if ( name == "coding" )
+//    {
+//        coding = var;
+//    }
     else
     {
         Distribution::setConstParameter(name, var);
