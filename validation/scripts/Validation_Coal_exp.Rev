@@ -1,9 +1,9 @@
 ################################################################################
 #
-# RevBayes Validation Test: Exponential demography coalescent process 
-# 
-# Model: Exponential demography coalescent process 
-#            
+# RevBayes Validation Test: Exponential demography coalescent process
+#
+# Model: Exponential demography coalescent process
+#
 #
 # authors: Sebastian Hoehna, Ronja Billenstein
 #
@@ -53,7 +53,7 @@ psi ~ dnCoalescentDemography([demo_exp,demo_const], changePoints=[expansion_star
 psi.clamp( observed_phylogeny )
 
 #############
-# The Model 
+# The Model
 #############
 
 
@@ -72,9 +72,9 @@ mymcmc = mcmc(mymodel, monitors, moves)
 validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Coal_exp" )
 validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
 validation.run(generations=NUM_MCMC_ITERATIONS)
-validation.summarize()
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
 
 
 # you may want to quit RevBayes now
 q()
-

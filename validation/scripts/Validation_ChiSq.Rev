@@ -22,6 +22,7 @@ monitors  = VectorMonitors()
 
 df ~ dnUniformNatural(1,20)
 moves.append( mvRandomNaturalWalk(df,weight=2) )
+#moves.append( mvRandomGeometricWalk(df,weight=2) )
 
 NUM_VARS = 3
 NUM_OBS = 10
@@ -54,7 +55,8 @@ mymcmc = mcmc(mymodel, monitors, moves)
 validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Chisq" )
 validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
 validation.run(generations=NUM_MCMC_ITERATIONS)
-validation.summarize()
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
 
 
 # you may want to quit RevBayes now

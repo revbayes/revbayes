@@ -1,9 +1,9 @@
 ################################################################################
 #
-# RevBayes Validation Test: Heterochronous piecewise constant demography coalescent process 
-# 
-# Model: Heterochronous piecewise constant demography coalescent process 
-#            
+# RevBayes Validation Test: Heterochronous piecewise constant demography coalescent process
+#
+# Model: Heterochronous piecewise constant demography coalescent process
+#
 #
 # authors: Sebastian Hoehna, Ronja Billenstein
 #
@@ -56,7 +56,7 @@ psi ~ dnCoalescentDemography([demo_const_3,demo_const_2,demo_const_1,demo_const_
 psi.clamp( psi )
 
 #############
-# The Model 
+# The Model
 #############
 
 
@@ -74,9 +74,9 @@ mymcmc = mcmc(mymodel, monitors, moves)
 validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Coal_het_pc" )
 validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
 validation.run(generations=NUM_MCMC_ITERATIONS)
-validation.summarize()
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
 
 
 # you may want to quit RevBayes now
 q()
-

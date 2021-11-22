@@ -20,18 +20,27 @@ NUM_MCMC_ITERATIONS       = 10000
 moves     = VectorMoves()
 monitors  = VectorMonitors()
 
-p ~ dnUniform(0,1)
+n ~ dnUniformNatural(10,20)
+p ~ dnBeta(4,2)
+moves.append( mvRandomNaturalWalk(n,weight=5) )
+moves.append( mvRandomGeometricWalk(n,weight=5) )
+moves.append( mvBetaProbability(p, weight=5) )
 
-n_samples = 15
-n <- 7 # Choose an arbitrary number of trials
+NUM_VARS = 3
+NUM_OBS = 10
 
-for ( i in 1:n_samples){
-	x[i] ~ dnBinomial(p, n)
-	x[i].clamp(1)
+for ( j in 1:NUM_VARS ) {
+
+  mean[j] ~ dnBinomial(n,p)
+  moves.append( mvRandomNaturalWalk(mean[j],weight=20) )
+
+  for ( i in 1:NUM_OBS){
+    index = (j-1)*NUM_OBS + i
+	x[index] ~ dnNormal(mean[j], sd=1)
+	x[index].clamp( x[index] )
+  }
 }
 
-moves.append( mvScale(p,weight=2) )
-moves.append( mvSlide(p,weight=2) )
 
 #############
 # THE Model #
@@ -39,7 +48,7 @@ moves.append( mvSlide(p,weight=2) )
 
 # We define our model.
 # We can use any node of our model as a handle, here we chose to use the rate matrix.
-mymodel = model(p)
+mymodel = model(n)
 
 
 

@@ -29,17 +29,16 @@ NUM_VARS = 3
 NUM_OBS = 10
 
 
-#gm_p ~ dnBeta(2,8)
+gm_p ~ dnBeta(2,8)
 p ~ dnBeta(4,2)
-#moves.append( mvBetaProbability(gm_p, weight=2) )
-moves.append( mvBetaProbability(p, weight=2) )
+moves.append( mvBetaProbability(gm_p, weight=5) )
+moves.append( mvBetaProbability(p, weight=5) )
 
 for ( j in 1:NUM_VARS ) {
 
-#  tries[j] ~ dnGeometric(gm_p)
-  tries[j] ~ dnUniformNatural(1,20)
-  moves.append( mvRandomNaturalWalk(tries[j],weight=2) )
-#  moves.append( mvRandomGeometricWalk(tries[j],weight=2) )
+  tries[j] ~ dnGeometric(gm_p)
+  moves.append( mvRandomNaturalWalk(tries[j],weight=5) )
+  moves.append( mvRandomGeometricWalk(tries[j],weight=5) )
 
   for ( i in 1:NUM_OBS){
     index = (j-1)*NUM_OBS + i
@@ -49,6 +48,13 @@ for ( j in 1:NUM_VARS ) {
 }
 
 
+#for ( j in 1:NUM_VARS ) {
+#
+#  x[j] ~ dnGeometric(gm_p)
+#  x[j].clamp( x[j] )
+#
+#}
+
 
 #############
 # THE Model #
@@ -56,7 +62,7 @@ for ( j in 1:NUM_VARS ) {
 
 # We define our model.
 # We can use any node of our model as a handle, here we chose to use the rate matrix.
-mymodel = model(p)
+mymodel = model(gm_p)
 
 
 
@@ -65,7 +71,8 @@ mymcmc = mcmc(mymodel, monitors, moves)
 validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Geometric" )
 validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
 validation.run(generations=NUM_MCMC_ITERATIONS)
-validation.summarize()
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
 
 
 # you may want to quit RevBayes now
