@@ -1083,6 +1083,27 @@ exists(x))");
 	help_strings[string("fnCoala")][string("name")] = string(R"(fnCoala)");
 	help_references[string("fnCoala")].push_back(RbHelpReference(R"(A branch-heterogeneous model of protein evolution for efficient inference of ancestral sequences. Groussin M, Boussau B, Gouy M. Syst Biol. 2013 Jul;62(4):523-38.)",R"(10.1093/sysbio/syt016)",R"(https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3676677/ )"));
 	help_strings[string("fnCodon")][string("name")] = string(R"(fnCodon)");
+	help_strings[string("fnCodonGY94")][string("description")] = string(R"(The Goldman-Yang (1994) codon model.
+
+A rate matrix on the 61 non-stop codons (in the standard genetic code).
+
+Rates between codons with more than one nucleotide change are equal to 0.
+
+In this model the rate Q(i,j) from i -> j is proportional to the frequency of codon j.
+This means that the rate of change between low-frequency codons is lower than the rate
+between high-frequency codons, even when the nucleotide change involved is the same.
+In other words, the rate of change from nucleotide n1 -> n2 depends on its neighboring
+nucleotides.  This differs from the Muse-Gaut (1994) model, and is perhaps less realistic.
+
+Unlike the Muse-Gaut (1994) model, the Goldman-Yang (1994) model can allow all the codon
+frequencies to vary independently.)");
+	help_strings[string("fnCodonGY94")][string("example")] = string(R"(kappa ~ dnLognormal(0,1)
+omega ~ dnUniform(0,1)
+pi ~ dnDirichlet( rep(2.0,61) )
+Q := fnCodonGY94(kappa, omega, pi))");
+	help_strings[string("fnCodonGY94")][string("name")] = string(R"(fnCodonGY94)");
+	help_references[string("fnCodonGY94")].push_back(RbHelpReference(R"(Goldman, N. and Z. Yang (1994). A codon-based model of nucleotide substitution for protein-coding DNA sequences. Mol. Biol. Evol. (1994) 11 (5):725-736)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040153 )",R"()"));
+	help_strings[string("fnCodonGY94")][string("title")] = string(R"(The Goldman-Yang (1994) codon rate matrix)");
 	help_strings[string("fnCodonHKY")][string("name")] = string(R"(fnCodonHKY)");
 	help_strings[string("fnCovarion")][string("name")] = string(R"(fnCovarion)");
 	help_strings[string("fnCovarionRateMatrix")][string("name")] = string(R"(fnCovarionRateMatrix)");
