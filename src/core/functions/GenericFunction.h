@@ -18,7 +18,7 @@
  * Solution #2: The Boost.mp11 library allows us to do something to each element in a tuple.
  *
  * Problem #3: How do we describe the "thing" that we want to do to each element of the tuple?
- * Solution #3: We use lambda functions where the type has an argument of type "auto".
+ * Solution #3: We use lambda functions with an argument of type "auto".
  *              This makes the argument type into a template parameter.
  *
  */
@@ -65,6 +65,7 @@ namespace RevBayesCore
             arguments({args...}),
             func(f)
         {
+            // for each i: addParameter(get<i>(arguments))
             boost::mp11::tuple_for_each(arguments, [this](const auto& arg) {
                 this->addParameter(arg);
             });
@@ -77,7 +78,12 @@ namespace RevBayesCore
 
         void update(void)
         {
+            // 1. Get the argument values
+            // for each i: get<i>(values) = get<i>(arguments)->getValue()
             auto values = boost::mp11::tuple_transform([](auto& node) {return node->getValue();}, arguments);
+
+            // 2. Then call the function and store the result.
+            // *value = func( get<0>(values), get<1>(values), get<2>(values), ...)
             *this->value = boost::mp11::tuple_apply(*func, values);
         }
 

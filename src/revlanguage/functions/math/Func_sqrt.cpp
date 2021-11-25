@@ -3,7 +3,7 @@
 #include "Real.h"
 #include "RealPos.h"
 #include "RlDeterministicNode.h"
-#include "SqrtFunction.h"
+#include "GenericFunction.h"
 #include "TypedDagNode.h"
 #include "Argument.h"
 #include "ArgumentRule.h"
@@ -35,11 +35,11 @@ Func_sqrt* Func_sqrt::clone( void ) const {
 
 RevBayesCore::TypedFunction<double>* Func_sqrt::createFunction( void ) const
 {
-    
     RevBayesCore::TypedDagNode<double>* arg = static_cast<const Real &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::SqrtFunction* f = new RevBayesCore::SqrtFunction( arg );
-    
-    return f;
+
+    // We need to include template parameters because XCode (11.7,12.4,13.1) can't infer them.
+    // Why can't it infer them?  It works on Linux with clang-8...
+    return RevBayesCore::generic_function_ptr<double,double>(sqrt, arg);
 }
 
 
