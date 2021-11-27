@@ -28,42 +28,49 @@ jobs:
             os: ubuntu-18.04
             compiler: gcc
             version: "5"
+            install_boost: 1.74
             mpi: false
 
           - name: ubuntu-gcc-6
             os: ubuntu-18.04
             compiler: gcc
             version: "6"
+            install_boost: 1.74
             mpi: false
 
           - name: ubuntu-gcc-7
             os: ubuntu-latest
             compiler: gcc
             version: "7"
+            install_boost: 1.74
             mpi: false
 
           - name: ubuntu-gcc-8
             os: ubuntu-latest
             compiler: gcc
             version: "8"
+            install_boost: 1.74
             mpi: false
 
           - name: ubuntu-gcc-9
             os: ubuntu-latest
             compiler: gcc
             version: "9"
+            install_boost: 1.74
             mpi: false
 
           - name: ubuntu-gcc-9-mpi
             os: ubuntu-latest
             compiler: gcc
             version: "9"
+            install_boost: 1.74
             mpi: true
 
           - name: ubuntu-clang-8
             os: ubuntu-latest
             compiler: clang
             version: "8"
+            install_boost: 1.74
             mpi: false
 
           - name: macos-xcode-11.7
@@ -152,7 +159,16 @@ jobs:
       run: |
         # Don't use weird boost version installed by github actions.
         sudo rm -rf /usr/local/share/boost
-        sudo apt-get install -y libboost-dev libboost-program-options-dev libboost-date-time-dev libboost-filesystem-dev libboost-regex-dev libboost-serialization-dev libboost-system-dev libboost-thread-dev
+
+        # Maybe install a particular boost version.
+        if [ -n "${{ matrix.install_boost }}" ] ; then
+          sudo apt-get remove libboost-all-dev
+          sudo add-apt-repository ppa:mhier/libboost-latest
+          sudo apt-get update
+          sudo apt-get install -y libboost${{ matrix.install_boost }}-dev
+        else
+          sudo apt-get install -y libboost-all-dev
+        fi
 
     - name: Install BOOST and set up build (Windows meson cross compile)
       if: matrix.name == 'windows'
