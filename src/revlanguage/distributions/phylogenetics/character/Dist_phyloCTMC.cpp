@@ -178,7 +178,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 #ifdef RB_BEAGLE
         }
 #endif
-        
+ 
         // set the root frequencies (by default these are NULL so this is OK)
         dist->setRootFrequencies( rf );
 
@@ -225,13 +225,12 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
             }
             dist->setRateMatrix( rm );
         }
-
         else
         {
             RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
             dist->setRateMatrix( rm );
         }
-
+ 
         if ( site_ratesNode != NULL && site_ratesNode->getValue().size() > 0 )
         {
             dist->setSiteRates( site_ratesNode );
@@ -241,7 +240,6 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         {
             dist->setSiteRatesProbs( site_rates_probsNode );
         }
-        
 
         d = dist;
     }

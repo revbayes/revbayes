@@ -530,11 +530,11 @@ sampled_site_matrix_component( n.sampled_site_matrix_component )
     }
 
 #if defined( RB_BEAGLE )
-        if ( RbSettings::userSettings().getUseBeagle() == true )
-        {
-            this->beagle_instance = BeagleInstance::getResourceID();
-            //this->initializeBeagleInstance(); 
-        }
+    if ( RbSettings::userSettings().getUseBeagle() == true )
+    {
+        this->beagle_instance = BeagleInstance::getResourceID();
+        this->initializeBeagleInstance(); 
+    }
 #endif /* RB_BEAGLE */
 }
 
@@ -675,7 +675,6 @@ inline bool has_weighted_characters(AbstractHomologousDiscreteCharacterData& dat
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
 {
-
     // only if the value has been set
     if ( this->value == NULL )
     {
@@ -782,7 +781,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
         }
     }
 
-
     // compute which block of the data this process needs to compute
     pattern_block_start = size_t(floor( (double(pid-active_PID)   / num_processes ) * num_patterns) );
     pattern_block_end   = size_t(floor( (double(pid+1-active_PID) / num_processes ) * num_patterns) );
@@ -792,6 +790,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     std::vector<size_t> process_pattern_counts = std::vector<size_t>(pattern_block_size,0);
     taxon_name_2_tip_index_map.clear();
     // allocate and fill the cells of the matrices
+    
     for (auto& the_node: nodes)
     {
         if ( the_node->isTip() )
@@ -911,6 +910,24 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     // finally we resize the partial likelihood vectors to the new pattern counts
     resizeLikelihoodVectors();
 
+//#if defined( RB_BEAGLE )
+//    if ( RbSettings::userSettings().getUseBeagle() == true )
+//    {
+//        this->initializeBeagleTips(); 
+//        std::stringstream ss;
+//        if ( BeagleInstance::getResourceID() == -1 )
+//        {
+//            this->initializeBeagleInstance();
+//        }
+//        else
+//        {
+//            this->beagle_instance = BeagleInstance::getResourceID();
+//        }
+//        ss << "Beagle Instance = " << this->beagle_instance << std::endl;
+//        RBOUT(ss.str());
+//    }
+//#endif /* RB_BEAGLE */
+
 }
 
 
@@ -923,7 +940,6 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     // where a job is defined as computing the lnProbability for a subset of the data (block)
     // Sebastian: this call is very slow; a lot of work happens in nextCycle()
     
-
     // we need to check here if we still are listining to this tree for change events
     // the tree could have been replaced without telling us
     if ( tau->getValue().getTreeChangeEventHandler().isListening( this ) == false )
@@ -948,13 +964,13 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
 
     // we need to set up BEAGLE here...
 #if defined( RB_BEAGLE )
-        if ( RbSettings::userSettings().getUseBeagle() == true )
-        {
-            this->initializeBeagleInstance();
-            std::stringstream ss;
-            ss << "Using Beagle Instance '" << this->beagle_instance << "' to calculate lnLikelihood." << std::endl;
-            RBOUT(ss.str());
-        }
+    if ( RbSettings::userSettings().getUseBeagle() == true )
+    {
+        this->initializeBeagleInstance();
+        std::stringstream ss;
+        ss << "Using Beagle Instance '" << this->beagle_instance << "' to calculate lnLikelihood." << std::endl;
+        RBOUT(ss.str());
+    }
 #endif /* RB_BEAGLE */
 
     // only necessary if the root is actually dirty
@@ -1684,7 +1700,6 @@ bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyDrawSt
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<double> &rv) const
 {
-
     if ( n == "siteLikelihoods" )
     {
 
@@ -2436,10 +2451,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursiveMarginal
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::redrawValue( void )
 {
-
     bool do_mask = this->dag_node != NULL && this->dag_node->isClamped() && gap_match_clamped;
     std::vector<std::vector<bool> > mask_gap        = std::vector<std::vector<bool> >(tau->getValue().getNumberOfTips(), std::vector<bool>());
     std::vector<std::vector<bool> > mask_missing    = std::vector<std::vector<bool> >(tau->getValue().getNumberOfTips(), std::vector<bool>());
+    
     // we cannot use the stored gap matrix because it uses the pattern compression
     // therefore we create our own mask
     if ( do_mask == true )
@@ -2630,7 +2645,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::redrawValue( void
             changed_nodes[index] = true;
         }
     }
-
 }
 
 
@@ -2956,7 +2970,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setActivePIDSpeci
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setValue(AbstractHomologousDiscreteCharacterData *v, bool force)
 {
-
     if ( v->getMaxObservedStateIndex() > this->num_chars - 1)
     {
         // We might use different sized matrices for different partitions depending on the observed number of states.
@@ -2990,7 +3003,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setValue(Abstract
     template_state.setToFirstState();
     template_state.setGapState( false );
     template_state.setMissingState( false );
-
 }
 
 
@@ -3194,22 +3206,22 @@ template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setMcmcMode(bool tf)
 {
 
-//#if defined( RB_BEAGLE )
-//        if ( RbSettings::userSettings().getUseBeagle() == true )
-//        {
-//            std::stringstream ss;
-//            if ( BeagleInstance::getResourceID() == -1 )
-//            {
-//                this->initializeBeagleInstance();
-//            }
-//            else
-//            {
-//                this->beagle_instance = BeagleInstance::getResourceID();
-//            }
-//            ss << "Beagle Instance = " << this->beagle_instance << std::endl;
-//            RBOUT(ss.str());
-//        }
-//#endif /* RB_BEAGLE */
+#if defined( RB_BEAGLE )
+    if ( RbSettings::userSettings().getUseBeagle() == true )
+    {
+        std::stringstream ss;
+        if ( BeagleInstance::getResourceID() == -1 )
+        {
+            this->initializeBeagleInstance();
+        }
+        else
+        {
+            this->beagle_instance = BeagleInstance::getResourceID();
+        }
+        ss << "Beagle Instance = " << this->beagle_instance << std::endl;
+        RBOUT(ss.str());
+    }
+#endif /* RB_BEAGLE */
 
     // free old memory
     if ( in_mcmc_mode == true )
@@ -3481,7 +3493,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setUseSiteMatrice
 template<class charType>
 std::vector< std::vector<double> >* RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::sumMarginalLikelihoods( size_t node_index )
 {
-
     std::vector< std::vector<double> >* per_mixture_Likelihoods = new std::vector< std::vector<double> >(this->pattern_block_size, std::vector<double>(num_chars, 0.0) );
 
     std::vector<double> mixture_probs = getMixtureProbs();
@@ -4231,7 +4242,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateMarginalNod
     // update the marginal likelihoods by a recursive downpass
     this->recursiveMarginalLikelihoodComputation( tau->getValue().getRoot().getIndex() );
 
-
 }
 
 
@@ -4272,9 +4282,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
 
     //-- TODO : This should not be here, right
     // first, get the rate matrix for this branch 
-    //RateMatrix_JC jc(this->num_chars);
-    //const RateGenerator *rm = &jc;
-    const RateGenerator *rm = NULL;
+    RateMatrix_JC jc(this->num_chars);
+    const RateGenerator *rm = &jc;
+    //const RateGenerator *rm = NULL;
 
     if (this->branch_heterogeneous_substitution_matrices == false )
     {
@@ -4334,7 +4344,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleI
 {
     std::stringstream ss;
 
-    if ( BeagleInstance::getResourceID()           == -1    &&
+    if ( //BeagleInstance::getResourceID()           == -1    &&
          RbSettings::userSettings().getUseBeagle() == true  
        )
     {
@@ -4384,23 +4394,22 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleI
 
         this->beagle_instance = BeagleInstance::getResourceID();
         this->initializeBeagleTips();
-
     }
-    else if ( RbSettings::userSettings().getUseBeagle() == true && num_site_mixtures > 1 )
-    {
-        ss << "Failed to start BEAGLE instance, multiple site mixtures not currently supported. Reverting to RevBayes likelihood calculator." << std::endl;
-        RbSettings::userSettings().setUseBeagle(false);
-    }
-    else if ( RbSettings::userSettings().getUseBeagle() == true && tau->getValue().isRooted() == true )
-    {
-        ss << "Failed to start BEAGLE instance, rooted trees not currently supported. Reverting to RevBayes likelihood calculator." << std::endl;
-        RbSettings::userSettings().setUseBeagle(false);
-    }
-    else if ( RbSettings::userSettings().getUseBeagle() == true && num_site_rates > 1 )
-    {
-        ss << "Failed to start BEAGLE instance, site rate variation not currently supported. Reverting to RevBayes likelihood calculator." << std::endl;
-        RbSettings::userSettings().setUseBeagle(false);
-    }
+    //else if ( RbSettings::userSettings().getUseBeagle() == true && num_site_mixtures > 1 )
+    //{
+    //    ss << "Failed to start BEAGLE instance, multiple site mixtures not currently supported. Reverting to RevBayes likelihood calculator." << std::endl;
+    //    RbSettings::userSettings().setUseBeagle(false);
+    //}
+    //else if ( RbSettings::userSettings().getUseBeagle() == true && tau->getValue().isRooted() == true )
+    //{
+    //    ss << "Failed to start BEAGLE instance, rooted trees not currently supported. Reverting to RevBayes likelihood calculator." << std::endl;
+    //    RbSettings::userSettings().setUseBeagle(false);
+    //}
+    //else if ( RbSettings::userSettings().getUseBeagle() == true && num_site_rates > 1 )
+    //{
+    //    ss << "Failed to start BEAGLE instance, site rate variation not currently supported. Reverting to RevBayes likelihood calculator." << std::endl;
+    //    RbSettings::userSettings().setUseBeagle(false);
+    //}
     RBOUT(ss.str());
 }
 
@@ -4625,7 +4634,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigen
     size_t                           b_stateFrequenciesIndex;
     std::vector<double>              b_inStateFrequencies;
 
-    //-- ASRV for models.
+    //-- RAS for models.
     int                              b_categoryWeightsIndex;
     std::vector<double>              b_inCategoryWeights;
     std::vector<double>              b_inCategoryRates;
