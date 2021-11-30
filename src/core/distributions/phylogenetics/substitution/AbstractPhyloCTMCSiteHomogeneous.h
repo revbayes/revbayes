@@ -35,6 +35,7 @@
 #define RB_BEAGLE_DEBUG
 
 //-- Enable / Disable using eigen3 library by (un)commenting the following:
+#define RB_USE_EIGEN
 #define RB_USE_EIGEN3
 #if defined ( RB_USE_EIGEN3 )
 #include <Eigen/Core>
@@ -4360,6 +4361,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleI
         bool b_use_scaling         = RbSettings::userSettings().getBeagleScalingMode()   != "none"
                                    ? true : false;
 
+        //int  b_tipCount            = 2 * this->num_nodes;
+        //int  b_partialsBufferCount = 2 * this->num_nodes;
+        //int  b_compactBufferCount  = 2 * this->num_nodes;
         int  b_tipCount            = this->tau->getValue().getNumberOfTips();
         int  b_partialsBufferCount = 2 * this-> num_nodes
                                    + ( this->using_ambiguous_characters
@@ -4540,6 +4544,16 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleT
                         throw RbException( "Could not set tip partials for model"
                                          + this->parseBeagleReturnCode(b_code_tip_partials));
                     }
+                    //int b_code_tip_partials2 =
+                        //    beagleSetTipPartials( this->beagle_instance
+                        //                        , b_tipIndex + num_nodes
+                    //                        , b_inPartials
+                    //                        );
+                    //    if ( b_code_tip_partials2 != 0 )
+                    //    {
+                    //        throw RbException( "Could not set tip partials for model"
+                    //                         + this->parseBeagleReturnCode(b_code_tip_partials2));
+                    //    }
             }
             else
             {
@@ -4553,6 +4567,16 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleT
                     throw RbException( "Could not set tip states for model"
                                      + this->parseBeagleReturnCode(b_code_tip_states));
                 }
+	            //int b_code_tip_states2 =
+                //    beagleSetTipStates( this->beagle_instance
+                //                      , b_tipIndex + num_nodes
+                //                      , b_inStates
+                //                      );
+                //if ( b_code_tip_states2 != 0 )
+                //{
+                //    throw RbException( "Could not set tip states for model"
+                //                     + this->parseBeagleReturnCode(b_code_tip_states2));
+                //}
             }
 
 #if defined ( RB_BEAGLE_DEBUG )
@@ -4686,14 +4710,15 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigen
         }
     }
 
+    RBOUT(std::to_string(this->num_site_mixtures));
 
     for ( size_t i = 0; i < this->num_site_mixtures; ++i )
     {
         //-- TODO : Maybe add checks to only update if eigensystem changes (use touched bitmap)
 
         //-- Get correct model indices.
-        //model_idx = i + this->active_eigen_system[i] * this->num_site_mixtures;
-        b_model_idx             = this->active_eigen_system[i];  //-- Eigensystem index
+        b_model_idx = 0; //i + this->active_eigen_system[i] * this->num_site_mixtures;
+        //b_model_idx             = this->active_eigen_system[i];  //-- Eigensystem index
         b_stateFrequenciesIndex = i;                             //-- Pi vector index
 
         #if defined ( RB_BEAGLE_DEBUG )
@@ -4746,10 +4771,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigen
             b_flat_eigenvectors     = flat_eigenvectors;
             b_flat_inv_eigenvectors = flat_inv_eigenvectors;
         #else
+        #if defined ( RB_USE_EIGEN )
             eigen_system            = &rate_matrices[i].getEigenSystem();
             b_flat_eigenvalues      = eigen_system->getRealEigenvalues();
             b_flat_eigenvectors     = eigen_system->getEigenvectors().flattenMatrix();
             b_flat_inv_eigenvectors = eigen_system->getInverseEigenvectors().flattenMatrix();
+        #endif /* RB_USE_EIGEN */
         #endif /* RB_USE_EIGEN3 */
 
 
