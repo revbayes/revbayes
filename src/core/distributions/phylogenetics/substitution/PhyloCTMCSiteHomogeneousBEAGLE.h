@@ -228,7 +228,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
     for ( size_t i = 0; i < this->num_site_mixtures; ++i )
     {
         //b_model_idx = this->active_eigen_system[i];
-        b_model_idx = i + this->active_eigen_system[i] * this->num_site_mixtures;
+        b_model_idx = i + 0* this->active_eigen_system[i] * this->num_site_mixtures;
 
         //-- Update all transition matrices for model i.
         b_code_update_transitions =
@@ -327,7 +327,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
     size_t num_taxa = (this->num_nodes + 2) / 2;
 
     size_t root_idx  = root + this->num_nodes * this->activeLikelihood[root];
-    //this->b_node_indices.push_back(root_idx); //-- TESTING! -- not in original
+    this->b_node_indices.push_back(root_idx); //-- TESTING! -- not in original
 
     size_t mid_idx   = middle + this->num_nodes * this->activeLikelihood[middle];
     size_t left_idx  = left   + this->num_nodes * this->activeLikelihood[left];
@@ -365,11 +365,25 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
     this->updateBeagleSiteRates();
 
 #if defined ( RB_BEAGLE_EIGEN )
+    BeagleOperation b_operation =
+        { .destinationPartials    = (int) root_idx
+        , .destinationScaleWrite  = BEAGLE_OP_NONE
+        , .destinationScaleRead   = BEAGLE_OP_NONE
+        , .child1Partials         = (int) left_partials
+        , .child1TransitionMatrix = (int) left_partials
+        //, .child1TransitionMatrix = (int) left_idx
+        , .child2Partials         = (int) right_partials
+        , .child2TransitionMatrix = (int) right_partials
+        //, .child2TransitionMatrix = (int) right_idx
+        };
+
+    this->b_ops.push_back(b_operation);
+
     this->updateBeagleEigensystem();
     for ( size_t i = 0; i < this->num_site_mixtures; ++i )
     {
-        b_model_idx = 0; //this->active_eigen_system[i];
-        //b_model_idx = i + this->active_eigen_system[i] * this->num_site_mixtures;
+        //b_model_idx = 0; //this->active_eigen_system[i];
+        b_model_idx = i + this->active_eigen_system[i] * this->num_site_mixtures;
 
         //-- Update all transition matrices for model i.
         b_code_update_transitions =
@@ -389,12 +403,40 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
         }
     }
 
+    double *t = (double*)malloc(16 * sizeof(double));
+    beagleGetTransitionMatrix(this->beagle_instance, 3, t);
+    for ( size_t j = 0; j < this->num_chars * this->num_chars; ++j )
+    {
+        if ( (j % this->num_chars) == 0) { ss << "\n\t\t"; };
+        ss << std::fixed << std::setw(8) << std::setprecision(4) << t[j] << " ";
+    }
+    free(t);
+
+
     //-- Calculate and update all partial likelihood buffers
     b_code_update_partials = beagleUpdatePartials( this->beagle_instance
                                                  , &this->b_ops[0]
                                                  , this->b_ops.size()
                                                  , BEAGLE_OP_NONE
                                                  );
+
+
+
+    //double * partial = (double*)malloc(this->num_chars*this->num_sites*sizeof(double));
+    //for ( size_t i = 0; i < this->b_node_indices.size(); ++i ) {
+    //    if (this->b_node_indices[i] > num_taxa) {
+    //        beagleGetPartials(this->beagle_instance, this->b_node_indices[i], NULL, partial);
+    //        std::stringstream tss;
+    //        tss << "Partial buffer for node " + std::to_string(this->b_node_indices[i]) + ":\t";
+    //        for (size_t j = 0; j < this->num_chars*this->num_sites; ++j ) {
+    //            tss << std::to_string(partial[j]) + " ";
+    //        }
+    //        tss << std::endl;
+    //        RBOUT(tss.str());
+    //    }
+    //}
+    //free(partial);
+    
 #else
     RBOUT("HERE_1A");
     BeagleOperation b_operation =

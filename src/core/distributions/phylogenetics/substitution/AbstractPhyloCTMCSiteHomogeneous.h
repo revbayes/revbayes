@@ -4197,7 +4197,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
     }
     else if ( affecter == root_frequencies )
     {
-
         const TopologyNode &root = this->tau->getValue().getRoot();
         this->recursivelyFlagNodeDirty( root );
     }
@@ -4281,11 +4280,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     }
     double start_age = end_age + node->getBranchLength();
 
-    //-- TODO : This should not be here, right
     // first, get the rate matrix for this branch 
     RateMatrix_JC jc(this->num_chars);
     const RateGenerator *rm = &jc;
-    //const RateGenerator *rm = NULL;
 
     if (this->branch_heterogeneous_substitution_matrices == false )
     {
@@ -4377,7 +4374,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleI
                                      );
         int  b_stateCount          = this->num_chars;
         int  b_patternCount        = this->pattern_block_size;
-        int  b_eigenBufferCount    = this->num_site_mixtures * 2;
+        int  b_eigenBufferCount    = this->num_nodes * 2; //this->num_site_mixtures * 2; // TODO
         int  b_matrixBufferCount   = this->num_nodes * 2;
         int  b_categoryCount       = this->num_site_rates;
         int  b_scaleBufferCount    = (b_use_scaling ? (this->num_nodes * 2) : 0);
@@ -4717,7 +4714,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigen
         //-- TODO : Maybe add checks to only update if eigensystem changes (use touched bitmap)
 
         //-- Get correct model indices.
-        b_model_idx = 0; //i + this->active_eigen_system[i] * this->num_site_mixtures;
+        b_model_idx = i + this->active_eigen_system[i] * this->num_site_mixtures;
         //b_model_idx             = this->active_eigen_system[i];  //-- Eigensystem index
         b_stateFrequenciesIndex = i;                             //-- Pi vector index
 
@@ -4759,8 +4756,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigen
             eigen_system.compute(rate_matrix, true); //-- compute eigen values and vectors
 
             eigenvalues      = eigen_system.eigenvalues().real();
-            eigenvectors     = eigen_system.eigenvectors().real();
-            inv_eigenvectors = eigen_system.eigenvectors().inverse().real();
+            eigenvectors     = eigen_system.eigenvectors().real().transpose();
+            inv_eigenvectors = eigen_system.eigenvectors().inverse().real().transpose();
 
             std::vector<double> flat_eigenvalues(eigenvalues.data(), eigenvalues.data() + eigenvalues.rows() * eigenvalues.cols());
             std::vector<double> flat_eigenvectors(eigenvectors.data(), eigenvectors.data() + eigenvectors.rows() * eigenvectors.cols());
@@ -4805,19 +4802,19 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigen
             }
         #endif /* RB_BEAGLE_DEBUG */
 
-	    b_code_eigen_decomp =
-            beagleSetEigenDecomposition( this->beagle_instance
-                                       , b_model_idx
-                                       , &b_flat_eigenvectors[0]
-                                       , &b_flat_inv_eigenvectors[0]
-                                       , &b_flat_eigenvalues[0]
-                                       );
-        if ( b_code_eigen_decomp != 0 )
-        {
-	        throw RbException( "Could not set eigen decomposition for model '"
-                             + std::to_string(i) + "'. "
-                             + this->parseBeagleReturnCode(b_code_eigen_decomp));
-        }
+            b_code_eigen_decomp =
+                beagleSetEigenDecomposition( this->beagle_instance
+                , b_model_idx
+                , &b_flat_eigenvectors[0]
+                , &b_flat_inv_eigenvectors[0]
+                , &b_flat_eigenvalues[0]
+                );
+            if ( b_code_eigen_decomp != 0 )
+            {
+                throw RbException( "Could not set eigen decomposition for model '"
+                                   + std::to_string(i) + "'. "
+                                   + this->parseBeagleReturnCode(b_code_eigen_decomp));
+            }
     }
 
     //-- TODO : Do Eigen3 structs need freeing?
@@ -4841,10 +4838,20 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleSiteR
     int b_code_weights;
     int b_code_rates;
 
-    if (this->rate_variation_across_sites)
+
+    //if (this->rate_variation_across_sites)
+    if ( this->num_site_rates > 1 ) 
     {
+        RBOUT("HEREE_1");
+        for ( auto x : this->site_rates_probs->getValue() ) {
+            ss << std::to_string(x) << " ";
+        }
+        RBOUT(ss.str());
+
         this->b_inCategoryWeights = this->site_rates_probs->getValue();
+        RBOUT("HEREE_2");
         this->b_inCategoryRates   = this->site_rates->getValue();
+        RBOUT("HEREE_3");
     }
     else
     {
@@ -4852,21 +4859,22 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleSiteR
         this->b_inCategoryRates   = { 1.0 };
     }
 
-    #if defined ( RB_BEAGLE_DEBUG )
-        ss << "Setting Site Rates...\n";
-        ss << "\tCategory weights : \n\t\t";
-        for ( auto x : this->b_inCategoryWeights )
-        {
-          ss << std::to_string(x) << " ";
-        }
-        ss << "\n";
-        ss << "\tCategory rates : \n\t\t";
-        for ( auto x : this->b_inCategoryRates )
-        {
-          ss << std::to_string(x) << " ";
-        }
-    #endif /* RB_BEAGLE_DEBUG */
-
+#if defined ( RB_BEAGLE_DEBUG )
+    ss << "Setting Site Rates...\n";
+    ss << "\tCategory weights : \n\t\t";
+    for ( auto x : this->b_inCategoryWeights )
+    {
+        ss << std::to_string(x) << " ";
+    }
+    ss << "\n";
+    ss << "\tCategory rates : \n\t\t";
+    for ( auto x : this->b_inCategoryRates )
+    {
+        ss << std::to_string(x) << " ";
+    }
+    RBOUT(ss.str());
+#endif /* RB_BEAGLE_DEBUG */
+    
     b_code_weights =
         beagleSetCategoryWeights( this->beagle_instance
                                 , b_categoryWeightsIndex
@@ -4889,9 +4897,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleSiteR
 	  		             + this->parseBeagleReturnCode(b_code_rates));
     }
 
-    #if defined ( RB_BEAGLE_DEBUG )
-        RBOUT(ss.str());
-    #endif /* RB_BEAGLE_DEBUG */
+#if defined ( RB_BEAGLE_DEBUG )
+    RBOUT(ss.str());
+#endif /* RB_BEAGLE_DEBUG */
 }
 
 #endif /* RB_BEAGLE */
