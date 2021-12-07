@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5.1)
 project(RevBayes)
 
 # Consider:
@@ -7,7 +7,6 @@ project(RevBayes)
 
 # This is the RIGHT way, but requires cmake version >=3:
 #   set(CMAKE_CXX_STANDARD 11)
-# RHEL 6 & 7 compute clusters may have cmake 2.8.12
 #
 # https://gitlab.kitware.com/cmake/community/-/wikis/CMake-Versions-on-Linux-Distros
 #
