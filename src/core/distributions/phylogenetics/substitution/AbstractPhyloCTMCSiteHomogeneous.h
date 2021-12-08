@@ -4843,14 +4843,14 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleSiteR
     if ( this->num_site_rates > 1 ) 
     {
         RBOUT("HEREE_1");
-        for ( auto x : this->site_rates_probs->getValue() ) {
-            ss << std::to_string(x) << " ";
+        for ( size_t i = 0; i < this->site_rates_probs->getValue().size(); ++i ) {
+            ss << std::to_string(this->site_rates_probs->getValue()[i]) << " ";
         }
         RBOUT(ss.str());
 
-        this->b_inCategoryWeights = this->site_rates_probs->getValue();
+        this->b_inCategoryWeights = &(this->site_rates_probs->getValue())[0];
         RBOUT("HEREE_2");
-        this->b_inCategoryRates   = this->site_rates->getValue();
+        this->b_inCategoryRates   = &(this->site_rates->getValue())[0];
         RBOUT("HEREE_3");
     }
     else
