@@ -4645,6 +4645,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigen
 
     //-- Substitution model indexing.
     size_t                           b_model_idx;
+    size_t                           b_num_models;
 
     //-- Discrete rate matrices for models.
     const AbstractRateMatrix*        arm_ptr;
@@ -4707,9 +4708,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigen
         }
     }
 
-    RBOUT(std::to_string(this->num_site_mixtures));
+    //-- Get the number of models with unique eigensystems.
+    b_num_models = rate_matrices.size();
 
-    for ( size_t i = 0; i < this->num_site_mixtures; ++i )
+    //for ( size_t i = 0; i < this->num_site_mixtures; ++i )
+    for ( size_t i = 0; i < b_num_models; ++i )
     {
         //-- TODO : Maybe add checks to only update if eigensystem changes (use touched bitmap)
 
@@ -4835,23 +4838,19 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleSiteR
     // multiple site rate categories not yet supported
     int b_categoryWeightsIndex = 0;
 
+    std::vector<double> rates_probs(num_site_rates, 1.0/num_site_rates);
+
     int b_code_weights;
     int b_code_rates;
 
-
-    //if (this->rate_variation_across_sites)
     if ( this->num_site_rates > 1 ) 
     {
-        RBOUT("HEREE_1");
-        for ( size_t i = 0; i < this->site_rates_probs->getValue().size(); ++i ) {
-            ss << std::to_string(this->site_rates_probs->getValue()[i]) << " ";
+        if (this->site_rates_probs != NULL ) {
+            rates_probs = this->site_rates_probs->getValue();
         }
-        RBOUT(ss.str());
-
-        this->b_inCategoryWeights = &(this->site_rates_probs->getValue())[0];
-        RBOUT("HEREE_2");
-        this->b_inCategoryRates   = &(this->site_rates->getValue())[0];
-        RBOUT("HEREE_3");
+            
+        this->b_inCategoryWeights = rates_probs; 
+        this->b_inCategoryRates   = const_cast<RbVector<double>&>(this->site_rates->getValue());
     }
     else
     {
@@ -4872,14 +4871,14 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleSiteR
     {
         ss << std::to_string(x) << " ";
     }
-    RBOUT(ss.str());
 #endif /* RB_BEAGLE_DEBUG */
-    
+
     b_code_weights =
         beagleSetCategoryWeights( this->beagle_instance
                                 , b_categoryWeightsIndex
                                 , &this->b_inCategoryWeights[0]
                                 );
+
     if ( b_code_weights != 0 )
     {
 	    throw RbException( "Could not set category weights for model : "

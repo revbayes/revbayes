@@ -225,6 +225,8 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
 
 #if defined ( RB_BEAGLE_EIGEN )
     this->updateBeagleEigensystem();
+
+
     for ( size_t i = 0; i < this->num_site_mixtures; ++i )
     {
         //b_model_idx = this->active_eigen_system[i];
@@ -380,10 +382,17 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
     this->b_ops.push_back(b_operation);
 
     this->updateBeagleEigensystem();
-    for ( size_t i = 0; i < this->num_site_mixtures; ++i )
+
+    size_t b_num_models = this->num_site_mixtures - this->num_site_rates;
+    if ( b_num_models < 1 ) { b_num_models = 1; }
+
+    RBOUT("E:" + std::to_string(this->num_site_mixtures));
+    //for ( size_t i = 0; i < this->num_site_mixtures; ++i )
+    for ( size_t i = 0; i < b_num_models; ++i )
     {
         //b_model_idx = 0; //this->active_eigen_system[i];
         b_model_idx = i + this->active_eigen_system[i] * this->num_site_mixtures;
+    RBOUT("F");
 
         //-- Update all transition matrices for model i.
         b_code_update_transitions =
@@ -412,7 +421,6 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
     }
     free(t);
 
-
     //-- Calculate and update all partial likelihood buffers
     b_code_update_partials = beagleUpdatePartials( this->beagle_instance
                                                  , &this->b_ops[0]
@@ -438,7 +446,6 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
     //free(partial);
     
 #else
-    RBOUT("HERE_1A");
     BeagleOperation b_operation =
         { .destinationPartials    = (int) root_idx
         , .destinationScaleWrite  = BEAGLE_OP_NONE
@@ -450,7 +457,6 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
         , .child2TransitionMatrix = (int) right_partials
         //, .child2TransitionMatrix = (int) right_idx
         };
-    RBOUT("HERE_2A");
     
     std::vector<std::vector<double>> model_pi_vectors;
     this->getRootFrequencies(model_pi_vectors);
@@ -467,10 +473,9 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
                                                  , 1
                                                  , BEAGLE_OP_NONE
                                                  );
-    RBOUT("HERE_3A");
 #endif //-- RB_BEAGLE_EIGEN
 
-	if ( b_code_update_partials != 0 )
+    if ( b_code_update_partials != 0 )
 	{
         throw RbException( "Could not update partials for models '"
 	  		             + this->parseBeagleReturnCode(b_code_update_partials));
@@ -508,7 +513,6 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
     this->b_branch_lengths.clear();
     this->b_node_indices.clear();
 
-    RBOUT("HERE_1B");
     //-- Calclulate the lnLikelihood of the model
     b_code_calc_edges =
         beagleCalculateEdgeLogLikelihoods( this->beagle_instance
@@ -518,7 +522,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
                                          , b_firstDerivativeIndices
                                          , b_secondDerivativeIndices
 
-                                         , &b_categoryWeightsIndices
+                                         , 0//&b_categoryWeightsIndices
                                          , &b_stateFrequenciesIndices
 
 				                         , &b_cumulativeScaleIndices
