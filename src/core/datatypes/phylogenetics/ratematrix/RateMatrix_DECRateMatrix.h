@@ -46,10 +46,6 @@ namespace RevBayesCore {
     private:
         std::string                         getRangeStr(const std::vector<unsigned>& v);
         void                                calculateCijk(void);                                                                //!< Do precalculations on eigenvectors and their inverse
-//<<<<<<< HEAD
-//        void                                exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const;
-//        inline void                         multiplyMatrices(TransitionProbabilityMatrix& p,  TransitionProbabilityMatrix& q,  TransitionProbabilityMatrix& r) const;
-//=======
         void                                computeConditionSurvival(MatrixReal& r);
         void                                computeConditionSurvival(TransitionProbabilityMatrix& r);
         void                                tiProbsEigens(double t, TransitionProbabilityMatrix& P) const;                      //!< Calculate transition probabilities for real case
