@@ -11,7 +11,7 @@ project(RevBayes)
 # https://gitlab.kitware.com/cmake/community/-/wikis/CMake-Versions-on-Linux-Distros
 #
 # So, we add the flag directly instead.
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
