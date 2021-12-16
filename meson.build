@@ -58,7 +58,7 @@ boost_modules = [ 'regex',
 want_static = get_option('static')
 
 # This doesn't build an internal boost from the internal copy, yet.
-boost = dependency('boost', modules : boost_modules, static: want_static)
+boost = dependency('boost', modules : boost_modules, version: '>=1.74', static: want_static)
 
 openlibm = dependency('openlibm', static: want_static)
 
