@@ -28,8 +28,8 @@ BeagleInstance::getInstance ( int  b_resource
                             , int  b_scaleBufferCount
                             )
 {
-    if ( !beagle_singleton )
-    {
+//    if ( !beagle_singleton )
+//    {
         beagle_singleton = new BeagleInstance( b_resource
                                              , b_use_cpu_threading
                                              , b_use_scaling
@@ -43,7 +43,7 @@ BeagleInstance::getInstance ( int  b_resource
                                              , b_categoryCount
                                              , b_scaleBufferCount
                                              );
-    }
+//    }
     return beagle_singleton;
 }
 
@@ -200,5 +200,4 @@ BeagleInstance::~BeagleInstance ( )
     RBOUT ( "Finalizing BEAGLE" );
     beagleFinalizeInstance(beagle_singleton->getResourceID());
     BeagleInstance::beagle_singleton = NULL;
-    //this->resourceID = -1;
 }

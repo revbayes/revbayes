@@ -170,6 +170,8 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         if ( RbSettings::userSettings().getUseBeagle() == true )
         {
             dist = new RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<RevBayesCore::DnaState>( tau, 4, true, n, ambig, internal, gapmatch);
+            //dist->initializeBeagleInstance();
+            //RBOUT("Dist Using Beagle Instance '" + std::to_string(dist->beagle_instance) + "'");
         }
         else
         {
