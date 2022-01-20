@@ -3,7 +3,7 @@
 #include "Real.h"
 #include "RealPos.h"
 #include "RlDeterministicNode.h"
-#include "SqrtFunction.h"
+#include "GenericFunction.h"
 #include "TypedDagNode.h"
 #include "Argument.h"
 #include "ArgumentRule.h"
@@ -35,11 +35,10 @@ Func_sqrt* Func_sqrt::clone( void ) const {
 
 RevBayesCore::TypedFunction<double>* Func_sqrt::createFunction( void ) const
 {
-    
     RevBayesCore::TypedDagNode<double>* arg = static_cast<const Real &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::SqrtFunction* f = new RevBayesCore::SqrtFunction( arg );
-    
-    return f;
+
+    // Select the version of sqrt that takes a double.
+    return RevBayesCore::generic_function_ptr( static_cast<double(*)(double)>(sqrt), arg );
 }
 
 
