@@ -580,9 +580,9 @@ void StringUtilities::stringSplit(std::string str, std::string delim, std::vecto
     if ( delim.empty() )
     {
         // erase trailing whitespace
-        str.erase(std::find_if (str.rbegin(), str.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), str.end());
+        str.erase(std::find_if (str.rbegin(), str.rend(), [](char c) {return not isspace(c);} ).base(), str.end());
         // erase leading whitespace
-        str.erase(str.begin(), std::find_if (str.begin(), str.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+        str.erase(str.begin(), std::find_if (str.begin(), str.end(), [](char c) {return not isspace(c);} ));
     }
 
     while ( true )
@@ -603,9 +603,9 @@ void StringUtilities::stringSplit(std::string str, std::string delim, std::vecto
         if ( trim )
         {
             // erase trailing whitespace
-            substr.erase(std::find_if (substr.rbegin(), substr.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), substr.end());
+            substr.erase(std::find_if (substr.rbegin(), substr.rend(), [](char c) {return not isspace(c);}).base(), substr.end());
             // erase leading whitespace
-            substr.erase(substr.begin(), std::find_if (substr.begin(), substr.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+            substr.erase(substr.begin(), std::find_if (substr.begin(), substr.end(), [](char c) {return not isspace(c);}));
         }
 
         results.push_back(substr);
@@ -620,7 +620,7 @@ void StringUtilities::stringSplit(std::string str, std::string delim, std::vecto
         if ( delim.empty() )
         {
             // erase leading whitespace in remaining string
-            str.erase(str.begin(), std::find_if (str.begin(), str.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+            str.erase(str.begin(), std::find_if (str.begin(), str.end(), [](char c) {return not isspace(c);}));
         }
     }
 }
