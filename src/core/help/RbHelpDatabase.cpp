@@ -1099,10 +1099,18 @@ Unlike the Muse-Gaut (1994) model, the Goldman-Yang (1994) model can allow all t
 frequencies to vary independently.)");
 	help_strings[string("fnCodonGY94")][string("example")] = string(R"(kappa ~ dnLognormal(0,1)
 omega ~ dnUniform(0,1)
-pi ~ dnDirichlet( rep(2.0,61) )
-Q := fnCodonGY94(kappa, omega, pi))");
+pi61 ~ dnDirichlet( rep(2.0, 61) )
+Q1 := fnCodonGY94( kappa, omega, pi61 )
+
+pi1 ~ dnDirichlet( rep(2.0, 4) )
+Q2 := fnCodonGY94( kappa, omega, fnF1x4(pi1) )
+
+pi2 ~ dnDirichlet( rep(2.0, 4) )
+pi3 ~ dnDirichlet( rep(2.0, 4) )
+Q3 := fnCodonGY94( kappa, omega, fnF3x4(pi1, pi2, pi3) ))");
 	help_strings[string("fnCodonGY94")][string("name")] = string(R"(fnCodonGY94)");
 	help_references[string("fnCodonGY94")].push_back(RbHelpReference(R"(Goldman, N. and Z. Yang (1994). A codon-based model of nucleotide substitution for protein-coding DNA sequences. Mol. Biol. Evol. (1994) 11 (5):725-736)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040153 )",R"()"));
+	help_arrays[string("fnCodonGY94")][string("see_also")].push_back(string(R"(fnF1x4, fnF3x4)"));
 	help_strings[string("fnCodonGY94")][string("title")] = string(R"(The Goldman-Yang (1994) codon rate matrix)");
 	help_strings[string("fnCodonHKY")][string("name")] = string(R"(fnCodonHKY)");
 	help_strings[string("fnCovarion")][string("name")] = string(R"(fnCovarion)");
@@ -1128,6 +1136,30 @@ Q := fnCodonGY94(kappa, omega, pi))");
 	help_strings[string("fnEpoch")][string("name")] = string(R"(fnEpoch)");
 	help_strings[string("fnEpochCladoProbs")][string("name")] = string(R"(fnEpochCladoProbs)");
 	help_strings[string("fnExtantTree")][string("name")] = string(R"(fnExtantTree)");
+	help_strings[string("fnF1x4")][string("description")] = string(R"(This treats codon frequencies as a product of independent nucleotide frequencies.
+
+Since stop codons are removed from the codon alphabet, frequencies are renormalized
+so that the frequencies of non-stop codons sum to 1.0.)");
+	help_strings[string("fnF1x4")][string("example")] = string(R"(kappa ~ dnLognormal(0,1)
+omega ~ dnUniform(0,1)
+pi ~ dnDirichlet( v(2.0, 2.0, 2.0, 2.0) )
+Q := fnCodonGY94( kappa, omega, fnF1x4(pi) ))");
+	help_strings[string("fnF1x4")][string("name")] = string(R"(fnF1x4)");
+	help_arrays[string("fnF1x4")][string("see_also")].push_back(string(R"(fnGY94, fnF3x4)"));
+	help_strings[string("fnF1x4")][string("title")] = string(R"(The F1x4 codon frequency model)");
+	help_strings[string("fnF3x4")][string("description")] = string(R"(This treats codon frequencies as a product of independent nucleotide frequencies.
+
+Since stop codons are removed from the codon alphabet, frequencies are renormalized
+so that the frequencies of non-stop codons sum to 1.0.)");
+	help_strings[string("fnF3x4")][string("example")] = string(R"(kappa ~ dnLognormal(0,1)
+omega ~ dnUniform(0,1)
+pi1 ~ dnDirichlet( v(2.0, 2.0, 2.0, 2.0) )
+pi2 ~ dnDirichlet( v(2.0, 2.0, 2.0, 2.0) )
+pi3 ~ dnDirichlet( v(2.0, 2.0, 2.0, 2.0) )
+Q := fnCodonGY94( kappa, omega, fnF3x4(pi1, pi2, pi3) ))");
+	help_strings[string("fnF3x4")][string("name")] = string(R"(fnF3x4)");
+	help_arrays[string("fnF3x4")][string("see_also")].push_back(string(R"(fnGY94, fnF1x4)"));
+	help_strings[string("fnF3x4")][string("title")] = string(R"(The F3x4 codon frequency model)");
 	help_strings[string("fnF81")][string("name")] = string(R"(fnF81)");
 	help_strings[string("fnFreeBinary")][string("name")] = string(R"(fnFreeBinary)");
 	help_strings[string("fnFreeK")][string("name")] = string(R"(fnFreeK)");
