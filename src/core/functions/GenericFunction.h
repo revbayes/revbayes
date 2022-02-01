@@ -22,7 +22,7 @@
  * Solution #3: We use lambda functions with an argument of type "auto".
  *              This makes the argument type into a template parameter.
  *
- * Problem #4: We don't want to specify that the function take each parameter by value or by reference.
+ * Problem #4: We don't want to specify whether the function takes each parameter by value or by reference.
  *             We just want to call f(arg1->getValue(), arg2->getValue() ...) to be well-formed.
  * Solution #4: Take the function object as a template parameter.
  *
@@ -59,12 +59,60 @@
  *
  */
 
-/*
- * TODO:
- *
- * 1. Temporarily require only Boost 1.71, which is in Ubuntu LTS.
- *
- */
+
+// TODO: Remove this ugly block after we can require boost version 1.74
+// Define tuple_transform( ) if we have BOOOST version < 1.74
+#if BOOST_VERSION < 107400
+#include <boost/mp11/integer_sequence.hpp>
+
+namespace boost
+{
+
+    namespace mp11
+    {
+
+        namespace detail
+        {
+            template<class... T>
+            constexpr auto tp_forward_r( T&&... t )
+            {
+                return std::tuple<T&&...>( std::forward<T>( t )... );
+            }
+
+            template<class... T>
+            constexpr auto tp_forward_v( T&&... t )
+            {
+                return std::tuple<T...>( std::forward<T>( t )... );
+            }
+
+            template<std::size_t J, class... Tp>
+            constexpr auto tp_extract( Tp&&... tp )
+            {
+                return tp_forward_r( std::get<J>( std::forward<Tp>( tp ) )... );
+            }
+
+            template<class F, class... Tp, std::size_t... J>
+            constexpr auto tuple_transform_impl( integer_sequence<std::size_t, J...>, F const& f, Tp&&... tp )
+            {
+                return tp_forward_v( tuple_apply( f, tp_extract<J>( std::forward<Tp>(tp)... ) )... );
+            }
+
+        } // detail
+
+        template<class F, class... Tp,
+                 class Z = mp_list<mp_size_t<std::tuple_size<typename std::remove_reference<Tp>::type>::value>...>,
+                 class E = mp_if<mp_apply<mp_same, Z>, mp_front<Z>>,
+                 class Seq = make_index_sequence<E::value>>
+        constexpr auto tuple_transform( F const& f, Tp&&... tp )
+        {
+            return detail::tuple_transform_impl( Seq(), f, std::forward<Tp>(tp)... );
+        }
+
+    } // mp11
+
+} // boost
+
+#endif // BOOST_VERSION < 107400
 
 namespace RevBayesCore
 {
