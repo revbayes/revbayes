@@ -35,7 +35,6 @@ jobs:
             os: ubuntu-latest
             compiler: gcc
             version: "7"
-            install_boost: 1.74
             mpi: false
 
           - name: ubuntu-gcc-8
@@ -49,14 +48,12 @@ jobs:
             os: ubuntu-latest
             compiler: gcc
             version: "9"
-            install_boost: 1.74
             mpi: false
 
           - name: ubuntu-gcc-9-mpi
             os: ubuntu-latest
             compiler: gcc
             version: "9"
-            install_boost: 1.74
             mpi: true
 
           - name: ubuntu-gcc-10
@@ -70,7 +67,6 @@ jobs:
             os: ubuntu-latest
             compiler: clang
             version: "8"
-            install_boost: 1.74
             mpi: false
 
           - name: macos-xcode-11.7
