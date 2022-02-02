@@ -341,7 +341,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
         if ( e.getExceptionType() != RbException::MATH_ERROR )
         {
-            throw RbException(e);
+            throw e;
         }
     }
     
@@ -390,7 +390,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
                     if ( e.getExceptionType() != RbException::MATH_ERROR )
                     {
-                        throw RbException(e);
+                        throw e;
                     }
                 }
             }
@@ -406,7 +406,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
                     if ( e.getExceptionType() != RbException::MATH_ERROR )
                     {
-                        throw RbException(e);
+                        throw e;
                     }
                 }
             }
@@ -434,7 +434,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
                     if ( e.getExceptionType() != RbException::MATH_ERROR )
                     {
-                        throw RbException(e);
+                        throw e;
                     }
                 }
             }
@@ -449,7 +449,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
                     if ( e.getExceptionType() != RbException::MATH_ERROR )
                     {
-                        throw RbException(e);
+                        throw e;
                     }
                 }
             }
