@@ -2,7 +2,7 @@ project('RevBayes', ['cpp', 'c'],
         version: '1.0.12',
         default_options: [
           'buildtype=release',
-          'cpp_std=c++11',
+          'cpp_std=c++14',
           'b_ndebug=if-release'
         ],
         meson_version: '>= 0.53',
@@ -58,7 +58,7 @@ boost_modules = [ 'regex',
 want_static = get_option('static')
 
 # This doesn't build an internal boost from the internal copy, yet.
-boost = dependency('boost', modules : boost_modules, static: want_static)
+boost = dependency('boost', modules : boost_modules, version: '>=1.74', static: want_static)
 
 openlibm = dependency('openlibm', static: want_static)
 
