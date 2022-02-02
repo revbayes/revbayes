@@ -39,8 +39,6 @@ template <class valueType> class TypedDagNode;
         
         // members
         bool                                                rescale;
-        //        size_t                                              num_observed_states;
-        //        size_t                                              num_hidden_states;
         const TypedDagNode<RbVector<RateGenerator> >*       rate_matrices;
         const TypedDagNode<RbVector<double> >*              rate_scalars;
         const TypedDagNode<RbVector<RbVector<double> > >*   switch_rates;

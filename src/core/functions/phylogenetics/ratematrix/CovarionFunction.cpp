@@ -15,8 +15,6 @@ using namespace RevBayesCore;
 
 CovarionFunction::CovarionFunction(bool r) : TypedFunction<RateGenerator>( NULL ),
     rescale( r ),
-    //num_observed_states( 0 ),
-    //num_hidden_states( 0 ),
     rate_matrices( NULL ),
     rate_scalars( NULL ),
     switch_rates( NULL )
@@ -42,8 +40,6 @@ void CovarionFunction::setRateMatrices(const TypedDagNode< RbVector<RateGenerato
     rate_matrices = rm;
     addParameter( rate_matrices );
     
-    //    num_observed_states = ceil( sqrt( tr->getValue().size() ) );
-    
     if ( rate_scalars != NULL && switch_rates != NULL && rate_matrices != NULL )
     {
         size_t num_states = rate_scalars->getValue().size() * rate_matrices->getValue()[0].getNumberOfStates();
@@ -56,7 +52,7 @@ void CovarionFunction::setRateMatrices(const TypedDagNode< RbVector<RateGenerato
 void CovarionFunction::setRateScalars(const TypedDagNode< RbVector<double> > *rs)
 {
     rate_scalars = rs;
-    //    num_observed_states = tr->getValue().size();
+    
     addParameter( rate_scalars );
     
     if ( rate_scalars != NULL && switch_rates != NULL && rate_matrices != NULL )
@@ -72,7 +68,7 @@ void CovarionFunction::setRateScalars(const TypedDagNode< RbVector<double> > *rs
 void CovarionFunction::setSwitchRates(const TypedDagNode< RbVector<RbVector<double> > > *sr)
 {
     switch_rates = sr;
-    //    num_observed_states = tr->getValue().size();
+    
     addParameter( switch_rates );
     
     if ( rate_scalars != NULL && switch_rates != NULL && rate_matrices != NULL )
@@ -140,8 +136,10 @@ void CovarionFunction::update( void )
 
     // set the emitted letters for each covartion state in the actual matrix
     std::vector<int> emit(num_states);
-    for(int i=0; i<num_states; i++)
+    for (int i=0; i<num_states; ++i)
+    {
         emit[i] = i % num_org_states;
+    }
     static_cast< RateMatrix_FreeK* >(value)->set_emitted_letters( emit);
 
     value->update();
