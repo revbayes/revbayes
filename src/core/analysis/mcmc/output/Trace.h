@@ -5,6 +5,7 @@
 #include <vector>
 #include <ostream>
 
+#include "AbstractTrace.h"
 #include "RbVector.h"
 #include "Simplex.h"
 #include "Cloneable.h"
@@ -13,18 +14,8 @@
 #include "Serializer.h"
 
 namespace RevBayesCore {
-class Serializable;
 
-    class AbstractTrace : public Cloneable {
-
-    public:
-
-        virtual                         ~AbstractTrace(void) {}
-
-        virtual void                    addValueFromString(const std::string &s) = 0;
-        virtual int                     isCoveredInInterval(const std::string &v, double i, bool verbose) = 0;
-
-    };
+    class Serializable;
     
     template <class valueType>
     class Trace : public AbstractTrace {
@@ -107,6 +98,9 @@ class Serializable;
      */
     template <>
     int Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool verbose);
+
+    template <>
+    int Trace<long>::isCoveredInInterval(const std::string &v, double alpha, bool verbose);
 
     template <>
     int Trace<RbVector<double > >::isCoveredInInterval(const std::string &v, double i, bool verbose);
