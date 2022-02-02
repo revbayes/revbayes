@@ -62,7 +62,6 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractDiscreteTaxonData >* Dist
     // get the parameters
     size_t this_num_sites = size_t( static_cast<const Natural &>( nSites->getRevObject() ).getValue() );
     const std::string& dt = static_cast<const RlString &>( type->getRevObject() ).getValue();
-//    const std::string& code = static_cast<const RlString &>( coding->getRevObject() ).getValue();
 
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* site_rates_node = NULL;
     if ( site_rates != NULL && site_rates->getRevObject() != RevNullObject::getInstance() )
@@ -554,7 +553,6 @@ const MemberRules& Dist_CTMC::getParameterRules(void) const
         dist_member_rules.push_back( new ArgumentRule( "rootFrequencies", Simplex::getClassTypeSpec(), "The root specific frequencies of the characters, if applicable.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         ModelVector<RealPos> *defaultSiteRates = new ModelVector<RealPos>();
-        //dist_member_rules.push_back( new ArgumentRule( "siteMatrices", RlBoolean::getClassTypeSpec(), "Treat Q as vector of site mixture categories instead of branch-specific matrices?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
         std::vector<TypeSpec> matrix_probs_types;
         matrix_probs_types.push_back(Simplex::getClassTypeSpec());
         matrix_probs_types.push_back(RlBoolean::getClassTypeSpec());
@@ -577,8 +575,6 @@ const MemberRules& Dist_CTMC::getParameterRules(void) const
         options.push_back( "Binary" );
         options.push_back( "Restriction" );
         dist_member_rules.push_back( new OptionRule( "type", new RlString("DNA"), options, "The data type, used for simulation and initialization." ) );
-
-//        dist_member_rules.push_back( new ArgumentRule("coding", RlString::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("all") ) );
 
         rules_set = true;
     }
@@ -682,10 +678,6 @@ void Dist_CTMC::setConstParameter(const std::string& name, const RevPtr<const Re
     {
         type = var;
     }
-//    else if ( name == "coding" )
-//    {
-//        coding = var;
-//    }
     else
     {
         Distribution::setConstParameter(name, var);
