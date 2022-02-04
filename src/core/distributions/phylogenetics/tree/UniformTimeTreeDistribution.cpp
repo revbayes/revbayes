@@ -273,7 +273,7 @@ void UniformTimeTreeDistribution::simulateTree( void )
     
 }
 
-void UniformTimeTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, RevBayesCore::DagNode *affecter)
+void UniformTimeTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
 {
     
     if ( affecter == root_age)
@@ -286,7 +286,7 @@ void UniformTimeTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected,
 /**
  * Keep the current value and reset some internal flags. Nothing to do here.
  */
-void UniformTimeTreeDistribution::keepSpecialization(DagNode *affecter)
+void UniformTimeTreeDistribution::keepSpecialization(const DagNode *affecter)
 {
     
     if ( affecter == root_age )
@@ -300,7 +300,7 @@ void UniformTimeTreeDistribution::keepSpecialization(DagNode *affecter)
  * Restore the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void UniformTimeTreeDistribution::restoreSpecialization(DagNode *affecter)
+void UniformTimeTreeDistribution::restoreSpecialization(const DagNode *affecter)
 {
     
     if ( affecter == root_age )
@@ -325,7 +325,7 @@ void UniformTimeTreeDistribution::swapParameterInternal( const DagNode *oldP, co
  * Touch the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void UniformTimeTreeDistribution::touchSpecialization(DagNode *affecter, bool touchAll)
+void UniformTimeTreeDistribution::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     if ( affecter == root_age )

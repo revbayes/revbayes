@@ -1,9 +1,3 @@
-//
-//  Func_cladogeneticSpeciationRateMatrix.cpp
-//
-//  Created by Will Freyman on 8/1/17.
-//
-
 #include <iosfwd>
 #include <string>
 #include <vector>

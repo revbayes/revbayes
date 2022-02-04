@@ -38,10 +38,10 @@ namespace RevBayesCore {
         //        void                                                    setValue(RbAnalytical<mixtureType> *v, bool f=false);
         
         // special handling of state changes
-        void                                                    getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter);                          //!< get affected nodes
-        void                                                    keepSpecialization(DagNode* affecter);
-        void                                                    restoreSpecialization(DagNode *restorer);
-        void                                                    touchSpecialization(DagNode *toucher, bool touchAll);
+        void                                                    getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                          //!< get affected nodes
+        void                                                    keepSpecialization(const DagNode* affecter);
+        void                                                    restoreSpecialization(const DagNode *restorer);
+        void                                                    touchSpecialization(const DagNode *toucher, bool touchAll);
         
     protected:
         // Parameter management functions
@@ -219,7 +219,7 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::executeMethod(con
 
 
 template <class mixtureType>
-void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::getAffected(RbOrderedSet<DagNode *> &affected, DagNode* affecter)
+void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
 {
     
     
@@ -227,7 +227,7 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::getAffected(RbOrd
 
 
 template <class mixtureType>
-void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::keepSpecialization( DagNode* affecter )
+void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::keepSpecialization( const DagNode* affecter )
 {
     // only do this when the toucher was our parameters
     //    if ( affecter == parameterValues && this->dag_node != NULL )
@@ -301,7 +301,7 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::swapParameterInte
 
 
 template <class mixtureType>
-void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::restoreSpecialization( DagNode *restorer )
+void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::restoreSpecialization( const DagNode *restorer )
 {
     
     // only do this when the toucher was our parameters
@@ -312,7 +312,7 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::restoreSpecializa
 
 
 template <class mixtureType>
-void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::touchSpecialization( DagNode *toucher, bool touchAll )
+void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::touchSpecialization( const DagNode *toucher, bool touchAll )
 {
     // only do this when the toucher was our parameters
     dirty = true;

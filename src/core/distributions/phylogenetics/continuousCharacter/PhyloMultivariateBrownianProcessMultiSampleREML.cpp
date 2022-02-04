@@ -142,9 +142,14 @@ double PhyloMultivariateBrownianProcessMultiSampleREML::computeMeanForSpecies(co
         if ( name == t.getSpeciesName() )
         {
             ContinuousTaxonData& taxon = this->value->getTaxonData( t.getName() );
-            mean += taxon.getCharacter(index);
             
-            ++num_samples;
+            if ( taxon.isCharacterResolved( index ) == true )
+            {
+                mean += taxon.getCharacter(index);
+            
+                ++num_samples;
+            }
+            
         }
         
     }
@@ -205,7 +210,7 @@ double PhyloMultivariateBrownianProcessMultiSampleREML::getWithinSpeciesVariance
 
 
 
-void PhyloMultivariateBrownianProcessMultiSampleREML::keepSpecialization( DagNode* affecter )
+void PhyloMultivariateBrownianProcessMultiSampleREML::keepSpecialization( const DagNode* affecter )
 {
     
     // reset all flags
@@ -250,19 +255,24 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::recursiveComputeLnProbabil
                     double stdev = sqrt( var );
 
                     ContinuousTaxonData& taxon = this->value->getTaxonData( t.getName() );
-                    double x = taxon.getCharacter( site_indices[i] );
                     
-                    // get the site specific rate of evolution
-                    double standDev = stdev;
+                    if ( taxon.isCharacterResolved( site_indices[i] ) == true )
+                    {
+                        double x = taxon.getCharacter( site_indices[i] );
                     
-                    // compute the contrasts for this site and node
-                    double contrast = mu_node[i] - x;
+                        // get the site specific rate of evolution
+                        double standDev = stdev;
                     
-                    // compute the probability for the contrasts at this node
-                    double lnl_node = RbStatistics::Normal::lnPdf(0, standDev, contrast);
+                        // compute the contrasts for this site and node
+                        double contrast = mu_node[i] - x;
                     
-                    // sum up the probabilities of the contrasts
-                    p_node += lnl_node;
+                        // compute the probability for the contrasts at this node
+                        double lnl_node = RbStatistics::Normal::lnPdf(0, standDev, contrast);
+                    
+                        // sum up the probabilities of the contrasts
+                        p_node += lnl_node;
+                    
+                    } // if is resolved
                     
                 } // end for-loop over all sites
                 
@@ -527,7 +537,7 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::resetValue( void )
 }
 
 
-void PhyloMultivariateBrownianProcessMultiSampleREML::restoreSpecialization( DagNode* affecter )
+void PhyloMultivariateBrownianProcessMultiSampleREML::restoreSpecialization( const DagNode* affecter )
 {
     
     // reset the precision matrix if necessary
@@ -622,7 +632,7 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::simulateRecursively( const
 }
 
 
-void PhyloMultivariateBrownianProcessMultiSampleREML::touchSpecialization( DagNode* affecter, bool touchAll )
+void PhyloMultivariateBrownianProcessMultiSampleREML::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
     
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty

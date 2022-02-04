@@ -5,13 +5,15 @@
 #include <vector>
 
 namespace RevBayesCore {
-class Tree;
-    
+
+    class Tree;
+    class TopologyNode;
+
     /**
-     * This class represents the writer object of character data objects into files in Fasta format.
+     * General case birth-death forward simulator.
      *
-     * This class currently has only one functionality,
-     * to write character data objects into a file in Fasta format.
+     * All parameters are vectors of vectors. The outer vector is for the epochs. The inner vector is for the state specific rates.
+     * For example, lambda[2][1] is the speciation rate in the 3rd epoch for a lineage in state 2.
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
@@ -27,7 +29,9 @@ class Tree;
         
         // setters
         void                                    setBurstProbability( const std::vector<std::vector< double > > &l );
+        void                                    setCompleteTree( bool c );
         void                                    setExtinctionRate( const std::vector<std::vector< double > > &m );
+        void                                    setMaxNumLineages( size_t m );
         void                                    setMassExtinctionProbability( const std::vector<std::vector< double > > &m );
         void                                    setRootCategoryProbabilities( const std::vector<double> &p );
         void                                    setSamplingProbability( const std::vector<std::vector< double > > &p );
@@ -53,6 +57,7 @@ class Tree;
         double                                  getRProbability( size_t i, size_t n ) const;
         std::vector<double>                     getRRate( size_t i, size_t n ) const;
         std::vector<double>                     getRootCategoryProbabilities( size_t n ) const;
+        bool                                    hasExtantSurvivor(const TopologyNode &n) const;
 
         std::vector<std::vector< double > >     lambda;
         std::vector<std::vector< double > >     Lambda;
@@ -64,7 +69,8 @@ class Tree;
         std::vector<std::vector< double > >     R;
         std::vector<double>                     root_cat_probability;
         std::vector<double>                     timeline;
-        
+        size_t                                  MAX_NUM_LINEAGES;
+        bool                                    complete_tree;        
     };
     
 }

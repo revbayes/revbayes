@@ -2,7 +2,7 @@
 #define Dist_FBDRangeMatrix_H
 
 #include "ModelVector.h"
-#include "PiecewiseConstantFossilizedBirthDeathRangeProcess.h"
+#include "PiecewiseConstantFossilizedBirthDeathRangeMatrixProcess.h"
 #include "RlMatrixReal.h"
 #include "RlTypedDistribution.h"
 
@@ -37,7 +37,7 @@ namespace RevLanguage {
         
         
         // Distribution functions you have to override
-        RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess*                createDistribution(void) const;
+        RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeMatrixProcess*                createDistribution(void) const;
         
     protected:
         

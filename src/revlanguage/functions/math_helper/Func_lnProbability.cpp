@@ -1,11 +1,3 @@
-//
-//  Func_lnProbability.cpp
-//  revbayes-proj
-//
-//  Created by Michael Landis on 3/12/15.
-//  Copyright (c) 2015 Michael Landis. All rights reserved.
-//
-
 #include "Func_lnProbability.h"
 
 #include "Real.h"

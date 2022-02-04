@@ -1,31 +1,34 @@
 ################################################################################
 #
 # RevBayes Validation Test: Jukes-Cantor with birth-death process
-# 
+#
 # Model: Sequences evolve under the Jukes-Cantor model and the tree is drawn
 #        from a constant-rate birth-death process with uniform sampling.
-#            
+#
 #
 # authors: Sebastian Hoehna
 #
 ################################################################################
 
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
 #######################
 # Reading in the Data #
 #######################
 
-###### This just defines a single model for all sites #######
-
-### Read in sequence data for both genes
-
 data <- readDiscreteCharacterData("data/primates_cytb_small.nex")
-#data <- readDiscreteCharacterData("data/test_large.nex")
 
 # Get some useful variables from the data. We need these later on.
 taxa <- data.taxa()
-
-# set my move index
-mvi = 0
 
 
 
@@ -34,9 +37,7 @@ mvi = 0
 ######################
 
 #### specify the Jukes-Cantor substitution model applied uniformly to all sites ###
-Q <- fnJC(4) 
-
-
+Q <- fnJC(4)
 
 
 
@@ -59,18 +60,18 @@ sampling_fraction <- 23 / 450 # 23 out of the ~ 450 primate species
 
 # create some moves that change the stochastic variables
 # all moves are sliding proposals but you could use scaling proposals for the rates too
-moves[++mvi] = mvSlide(diversification,delta=1,tune=true,weight=1)
-moves[++mvi] = mvSlide(turnover,delta=1,tune=true,weight=1)
-moves[++mvi] = mvSlide(root,delta=1,tune=true,weight=1)
+moves.append( mvSlide(diversification,delta=1,tune=true,weight=1) )
+moves.append( mvSlide(turnover,delta=1,tune=true,weight=1) )
+moves.append( mvSlide(root,delta=1,tune=true,weight=1) )
 
 # construct a variable for the tree drawn from a birth death process
 psi ~ dnBDP(lambda=abs(speciation), mu=abs(extinction), rootAge=abs(root), rho=sampling_fraction, taxa=taxa, condition="nTaxa" )
 
-moves[++mvi] = mvNarrow(psi, weight=5.0)
-moves[++mvi] = mvNNI(psi, weight=1.0)
-moves[++mvi] = mvFNPR(psi, weight=3.0)
-moves[++mvi] = mvSubtreeScale(psi, weight=3.0)
-moves[++mvi] = mvNodeTimeSlideUniform(psi, weight=15.0)
+moves.append( mvNarrow(psi, weight=5.0) )
+moves.append( mvNNI(psi, weight=1.0) )
+moves.append( mvFNPR(psi, weight=3.0) )
+moves.append( mvSubtreeScale(psi, weight=3.0) )
+moves.append( mvNodeTimeSlideUniform(psi, weight=15.0) )
 
 
 
@@ -102,22 +103,17 @@ seq.clamp(data)
 mymodel = model(Q)
 
 
-
-
-
-
-monitors[1] = mnModel(filename="output/primates_cytb_JC.log",printgen=10, separator = TAB)
-monitors[2] = mnFile(filename="output/primates_cytb_JC.trees",printgen=10, separator = TAB, psi)
+# We do not need any monitors, so we create only the empty vector.
+monitors = VectorMonitors()
 
 mymcmc = mcmc(mymodel, monitors, moves)
 
-
-validation = validationAnalysis( mymcmc, 1000 )
-validation.burnin(generations=5000,tuningInterval=250)
-validation.run(generations=10000)
-validation.summarize()
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_JC_BD" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
 
 
 # you may want to quit RevBayes now
 q()
-

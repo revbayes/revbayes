@@ -50,7 +50,8 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                       rho;                                                                                    //!< The taxon sampling fraction
         RevPtr<const RevVariable>                       mu_rates;                                                                               //!< The extinction rates
         RevPtr<const RevVariable>                       mu_times;                                                                               //!< The extinction rate change times
-        
+        RevPtr<const RevVariable>                       initial_tree;
+
     };
     
 }

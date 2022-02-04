@@ -5,6 +5,7 @@
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
+#include "ModelVector.h"
 #include "Move_TreeScale.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -19,10 +20,6 @@
 #include "RevVariable.h"
 #include "RlMove.h"
 #include "StochasticNode.h"
-
-namespace RevBayesCore { class Proposal; }
-namespace RevBayesCore { class Tree; }
-namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 
 using namespace RevLanguage;
@@ -52,8 +49,27 @@ void Move_TreeScale::constructInternalObject( void )
     delete value;
     
     // now allocate a new tree scale move
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    
+    // get the tree(s) variable
+    // we either expect to receive a stochastic variable on a single tree (e.g., the species tree), or on a vector of trees (e.g., gene trees)
+    // to avoid re-implementing the move for a single scalar and vector, we allow for both single values and vectors
+    // however, we need to check to make sure that our type conversions stay proper
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = NULL;
+    RevBayesCore::StochasticNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *vec_t = NULL;
+    if ( tree->getRevObject().isType( TimeTree::getClassTypeSpec() ) )
+    {
+        RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+        t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    }
+    else if ( tree->getRevObject().isType( ModelVector<TimeTree>::getClassTypeSpec() ) )
+    {
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *tmp = static_cast<const ModelVector<TimeTree> &>( tree->getRevObject() ).getDagNode();
+        vec_t = static_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *>( tmp );
+    }
+    else
+    {
+        throw RbException("Wrong tree type '" + tree->getRevObject().getType() + "'.");
+    }
     
     RevBayesCore::StochasticNode<double> *ra = NULL;
     if ( rootAge != NULL && rootAge->getRevObject() != RevNullObject::getInstance() )
@@ -65,7 +81,7 @@ void Move_TreeScale::constructInternalObject( void )
     double l = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     bool tune = static_cast<const RlBoolean &>( tuning->getRevObject() ).getValue();
     
-    RevBayesCore::Proposal *p = new RevBayesCore::TreeScaleProposal(t, ra, l);
+    RevBayesCore::Proposal *p = new RevBayesCore::TreeScaleProposal(t, vec_t, ra, l);
     value = new RevBayesCore::MetropolisHastingsMove(p, w, tune);
 }
 

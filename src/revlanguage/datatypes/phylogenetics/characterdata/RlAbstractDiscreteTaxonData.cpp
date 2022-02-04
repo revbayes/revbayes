@@ -46,6 +46,36 @@ AbstractDiscreteTaxonData::AbstractDiscreteTaxonData( RevBayesCore::AbstractDisc
 }
 
 
+AbstractDiscreteTaxonData::AbstractDiscreteTaxonData( const RevBayesCore::AbstractDiscreteTaxonData &d) : ModelObject<RevBayesCore::AbstractDiscreteTaxonData >( d.clone() )
+{
+
+    // Add method for call "x[]" as a function
+    ArgumentRules* squareBracketArgRules = new ArgumentRules();
+    squareBracketArgRules->push_back( new ArgumentRule( "index" , Natural::getClassTypeSpec(), "The index of the value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    this->methods.addFunction( new MemberProcedure( "[]", DiscreteCharacterState::getClassTypeSpec(), squareBracketArgRules) );
+
+    // Add method for call "nchar" as a function
+    ArgumentRules* nchar_arg_rules = new ArgumentRules();
+    this->methods.addFunction( new MemberProcedure( "nchar", Natural::getClassTypeSpec(), nchar_arg_rules) );
+    
+}
+
+
+AbstractDiscreteTaxonData::AbstractDiscreteTaxonData( RevBayesCore::TypedDagNode<RevBayesCore::AbstractDiscreteTaxonData> *d) : ModelObject<RevBayesCore::AbstractDiscreteTaxonData >( d )
+{
+
+    // Add method for call "x[]" as a function
+    ArgumentRules* squareBracketArgRules = new ArgumentRules();
+    squareBracketArgRules->push_back( new ArgumentRule( "index" , Natural::getClassTypeSpec(), "The index of the value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    this->methods.addFunction( new MemberProcedure( "[]", DiscreteCharacterState::getClassTypeSpec(), squareBracketArgRules) );
+
+    // Add method for call "nchar" as a function
+    ArgumentRules* nchar_arg_rules = new ArgumentRules();
+    this->methods.addFunction( new MemberProcedure( "nchar", Natural::getClassTypeSpec(), nchar_arg_rules) );
+    
+}
+
+
 
 AbstractDiscreteTaxonData* AbstractDiscreteTaxonData::clone() const
 {
@@ -91,7 +121,7 @@ RevPtr<RevVariable> AbstractDiscreteTaxonData::executeMethod(std::string const &
 const std::string& AbstractDiscreteTaxonData::getClassType(void)
 {
     
-    static std::string rev_type = "AbstractAbstractDiscreteTaxonData";
+    static std::string rev_type = "AbstractDiscreteTaxonData";
     
     return rev_type;
 }

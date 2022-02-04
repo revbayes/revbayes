@@ -12,6 +12,17 @@
 #
 ################################################################################
 
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
 #######################
 # Reading in the Data #
 #######################
@@ -39,13 +50,8 @@ n_species <- ADM.distanceMatrix().size()
 # tips to the tree
 
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName=species_names[i])
+    species[i] <- taxon(taxonName=species_names[i])
 }
-
-# Set my move and monitor indices
-
-mvi = 0
-mni = 0
 
 ##############
 # Tree Model #
@@ -65,12 +71,12 @@ tree ~ dnBDP(lambda=speciation, mu=extinction, rootAge=tree_height, condition="n
 
 # Create some moves that operate on the stochastic variables
 
-moves[++mvi] = mvScale(tree_height, weight=2.0)
-moves[++mvi] = mvNarrow(tree, weight=10.0)
-moves[++mvi] = mvNNI(tree, weight=10.0)
-moves[++mvi] = mvFNPR(tree, weight=10.0)
-moves[++mvi] = mvSubtreeScale(tree, weight=10.0)
-moves[++mvi] = mvNodeTimeSlideUniform(tree, weight=15.0)
+moves.append( mvScale(tree_height, weight=2.0) )
+moves.append( mvNarrow(tree, weight=10.0) )
+moves.append( mvNNI(tree, weight=10.0) )
+moves.append( mvFNPR(tree, weight=10.0) )
+moves.append( mvSubtreeScale(tree, weight=10.0) )
+moves.append( mvNodeTimeSlideUniform(tree, weight=15.0) )
 
 ###########################
 # Exponential Error Model #
@@ -97,10 +103,7 @@ exp_error_dist.clamp(ADM)
 
 mymodel = model(tree)
 
-# Set up the monitors that will output parameter values to file
 
-monitors[++mni] = mnModel(filename="output/avg_dist_mat_exp_error.log", printgen=50, separator = TAB)
-monitors[++mni] = mnFile(filename="output/avg_dist_mat_exp_error.trees", printgen=50, separator = TAB, tree)
 
 ################
 # The Analysis #
@@ -109,10 +112,11 @@ monitors[++mni] = mnFile(filename="output/avg_dist_mat_exp_error.trees", printge
 mymcmc = mcmc(mymodel, monitors, moves)
 
 
-validation = validationAnalysis( mymcmc, 1000 )
-validation.burnin(generations=5000,tuningInterval=250)
-validation.run(generations=20000)
-validation.summarize()
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_AvgDistMat_ExpErr" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
 
 
 # you may want to quit RevBayes now

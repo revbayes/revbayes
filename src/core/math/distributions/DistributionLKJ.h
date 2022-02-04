@@ -1,11 +1,3 @@
-//
-//  DistributionLKJ.h
-//  revbayes
-//
-//  Created by Michael R. May on 2017-08-04.
-//  Copyright (c) 2014 revbayes team. All rights reserved.
-//
-
 #ifndef DistributionLKJ_H
 #define DistributionLKJ_H
 
@@ -33,4 +25,4 @@ namespace RevBayesCore {
     }
 }
 
-#endif /* defined(__revbayes__DistributionLKJ__) */
+#endif /* defined(DistributionLKJ_H) */

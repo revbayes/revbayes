@@ -355,7 +355,7 @@ void UniformSerialSampledTimeTreeDistribution::simulateTree( void )
 
 }
 
-void UniformSerialSampledTimeTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, RevBayesCore::DagNode *affecter)
+void UniformSerialSampledTimeTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
 {
     
     if ( affecter == start_age)
@@ -368,7 +368,7 @@ void UniformSerialSampledTimeTreeDistribution::getAffected(RbOrderedSet<DagNode 
 /**
  * Keep the current value and reset some internal flags. Nothing to do here.
  */
-void UniformSerialSampledTimeTreeDistribution::keepSpecialization(DagNode *affecter)
+void UniformSerialSampledTimeTreeDistribution::keepSpecialization(const DagNode *affecter)
 {
     
     if ( affecter == start_age )
@@ -382,7 +382,7 @@ void UniformSerialSampledTimeTreeDistribution::keepSpecialization(DagNode *affec
  * Restore the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void UniformSerialSampledTimeTreeDistribution::restoreSpecialization(DagNode *affecter)
+void UniformSerialSampledTimeTreeDistribution::restoreSpecialization(const DagNode *affecter)
 {
     
     if ( affecter == start_age )
@@ -410,7 +410,7 @@ void UniformSerialSampledTimeTreeDistribution::swapParameterInternal( const DagN
  * Touch the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void UniformSerialSampledTimeTreeDistribution::touchSpecialization(DagNode *affecter, bool touchAll)
+void UniformSerialSampledTimeTreeDistribution::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     if ( affecter == start_age )

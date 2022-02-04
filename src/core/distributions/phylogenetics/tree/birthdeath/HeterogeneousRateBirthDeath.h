@@ -39,10 +39,10 @@ namespace RevBayesCore {
         
     protected:
         // Parameter management functions
-        virtual void                                        getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter);                                      //!< get affected nodes
-        virtual void                                        keepSpecialization(DagNode* affecter);
-        virtual void                                        restoreSpecialization(DagNode *restorer);
-        virtual void                                        touchSpecialization(DagNode *toucher, bool touchAll);
+        virtual void                                        getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                                      //!< get affected nodes
+        virtual void                                        keepSpecialization(const DagNode* affecter);
+        virtual void                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
         
         void                                                computeNodeProbability(const TopologyNode &n, size_t nIdx);
         double                                              computeRootLikelihood(void);

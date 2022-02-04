@@ -896,7 +896,7 @@ void ConditionedBirthDeathShiftProcessContinuous::simulateTree( void )
 
 }
 
-void ConditionedBirthDeathShiftProcessContinuous::getAffected(RbOrderedSet<DagNode *> &affected, RevBayesCore::DagNode *affecter)
+void ConditionedBirthDeathShiftProcessContinuous::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
 {
     
     if ( affecter == root_age && this->dag_node != NULL )
@@ -909,7 +909,7 @@ void ConditionedBirthDeathShiftProcessContinuous::getAffected(RbOrderedSet<DagNo
 /**
  * Keep the current value and reset some internal flags. Nothing to do here.
  */
-void ConditionedBirthDeathShiftProcessContinuous::keepSpecialization(DagNode *affecter)
+void ConditionedBirthDeathShiftProcessContinuous::keepSpecialization(const DagNode *affecter)
 {
     
     if ( affecter == root_age && this->dag_node != NULL )
@@ -923,7 +923,7 @@ void ConditionedBirthDeathShiftProcessContinuous::keepSpecialization(DagNode *af
  * Restore the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void ConditionedBirthDeathShiftProcessContinuous::restoreSpecialization(DagNode *affecter)
+void ConditionedBirthDeathShiftProcessContinuous::restoreSpecialization(const DagNode *affecter)
 {
     
     if ( affecter == root_age && this->dag_node != NULL )
@@ -1049,7 +1049,7 @@ void ConditionedBirthDeathShiftProcessContinuous::swapParameterInternal( const D
  * Touch the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void ConditionedBirthDeathShiftProcessContinuous::touchSpecialization(DagNode *affecter, bool touchAll)
+void ConditionedBirthDeathShiftProcessContinuous::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     if ( affecter == root_age )

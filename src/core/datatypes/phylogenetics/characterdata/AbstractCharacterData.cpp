@@ -288,7 +288,8 @@ void AbstractCharacterData::deleteTaxon(const std::string& s) {
  *
  * \return    The original file name.
  */
-const std::string& AbstractCharacterData::getFileName(void) const {
+const std::string& AbstractCharacterData::getFileName(void) const
+{
     
     return fileName;
 }
@@ -302,6 +303,29 @@ const std::string& AbstractCharacterData::getFilePath(void) const
 {
     
     return filePath;
+}
+
+
+/**
+ * Get the included taxa currently stored in this object.
+ *
+ * \return       The included taxa.
+ */
+std::vector<Taxon> AbstractCharacterData::getIncludedTaxa(void) const
+{
+    std::vector<Taxon> included_taxa;
+    size_t n_taxa_total = getNumberOfTaxa();
+    
+    for (size_t i=0; i<n_taxa_total; ++i)
+    {
+        std::set<size_t>::const_iterator pos = deletedTaxa.find( i );
+        if ( pos == deletedTaxa.end() )
+        {
+            included_taxa.push_back( taxa[i] );
+        }
+    }
+    
+    return included_taxa;
 }
 
 

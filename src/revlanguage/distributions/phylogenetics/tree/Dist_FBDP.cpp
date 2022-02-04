@@ -97,7 +97,7 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_FBDP::createDistribution( void ) c
     // death rate
     RevBayesCore::DagNode* d_s = mu->getRevObject().getDagNode();
     // serial sampling rate
-    RevBayesCore::DagNode* s_s = psi->getRevObject().getDagNode();
+    RevBayesCore::DagNode* s_s = phi->getRevObject().getDagNode();
     // treatment probability (there is no treatment in the FBDP)
     RevBayesCore::DagNode* t_s = new ConstantNode<double>("r", new double(0.0) );
 
@@ -143,9 +143,9 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_FBDP::createDistribution( void ) c
     }
 
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* pt = NULL;
-    if ( psi_timeline->getRevObject() != RevNullObject::getInstance() )
+    if ( phi_timeline->getRevObject() != RevNullObject::getInstance() )
     {
-        pt = static_cast<const ModelVector<RealPos> &>( psi_timeline->getRevObject() ).getDagNode();
+        pt = static_cast<const ModelVector<RealPos> &>( phi_timeline->getRevObject() ).getDagNode();
     }
 
     // There is no treatment in the FBDP
@@ -168,6 +168,13 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_FBDP::createDistribution( void ) c
     {
         Pt = static_cast<const ModelVector<RealPos> &>( rho_timeline->getRevObject() ).getDagNode();
     }
+    
+    // tree for initialization
+    RevBayesCore::Tree* init = NULL;
+    if ( initial_tree->getRevObject() != RevNullObject::getInstance() )
+    {
+        init = static_cast<const TimeTree &>( initial_tree->getRevObject() ).getDagNode()->getValue().clone();
+    }
 
     d = new RevBayesCore::EpisodicBirthDeathSamplingTreatmentProcess(sa,
                                                                      b_s,
@@ -188,7 +195,8 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_FBDP::createDistribution( void ) c
                                                                      Pt,
                                                                      cond,
                                                                      tn,
-                                                                     uo);
+                                                                     uo,
+                                                                     init);
 
     return d;
 }
@@ -283,7 +291,11 @@ const MemberRules& Dist_FBDP::getParameterRules(void) const
         paramTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
         dist_member_rules.push_back( new ArgumentRule( "lambda",  paramTypes, "The birth rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "mu",      paramTypes, "The death rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        dist_member_rules.push_back( new ArgumentRule( "psi",     paramTypes, "The serial sampling rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        
+        std::vector<std::string> aliases_serial_sampling;
+        aliases_serial_sampling.push_back("phi");
+        aliases_serial_sampling.push_back("psi");
+        dist_member_rules.push_back( new ArgumentRule( aliases_serial_sampling,     paramTypes, "The serial sampling rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         std::vector<TypeSpec> other_event_paramTypes;
         other_event_paramTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
@@ -292,16 +304,28 @@ const MemberRules& Dist_FBDP::getParameterRules(void) const
 
         std::vector<TypeSpec> event_sampling_paramTypes;
         event_sampling_paramTypes.push_back( Probability::getClassTypeSpec() );
-        event_sampling_paramTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
-        dist_member_rules.push_back( new ArgumentRule( "rho",     event_sampling_paramTypes, "The probability of sampling taxa at sampling events (at present only if input is scalar).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(1.0) ) );
+        event_sampling_paramTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );        
+        
+        std::vector<std::string> aliases_event_sampling;
+        aliases_event_sampling.push_back("Phi");
+        aliases_event_sampling.push_back("rho");
+        dist_member_rules.push_back( new ArgumentRule( aliases_event_sampling,     event_sampling_paramTypes, "The probability of sampling taxa at sampling events (at present only if input is scalar).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(1.0) ) );
 
         dist_member_rules.push_back( new ArgumentRule( "timeline",    ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         dist_member_rules.push_back( new ArgumentRule( "lambdaTimeline",    ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the speciation rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         dist_member_rules.push_back( new ArgumentRule( "muTimeline",        ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the extinction rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        dist_member_rules.push_back( new ArgumentRule( "psiTimeline",       ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the fossil sampling rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        dist_member_rules.push_back( new ArgumentRule( "LambdaTimeline",    ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the birth burst probabilities.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        dist_member_rules.push_back( new ArgumentRule( "MuTimeline",        ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the mass extinction survival probabilities.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        dist_member_rules.push_back( new ArgumentRule( "rhoTimeline",       ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the taxon sampling rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        
+        std::vector<std::string> aliases_serial_sampling_timeline;
+        aliases_serial_sampling_timeline.push_back("phiTimeline");
+        aliases_serial_sampling_timeline.push_back("psiTimeline");
+        dist_member_rules.push_back( new ArgumentRule( aliases_serial_sampling_timeline,       ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the fossil sampling rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "LambdaTimeline",    ModelVector<RealPos>::getClassTypeSpec(), "Times at which all taxa give birth with some probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "MuTimeline",        ModelVector<RealPos>::getClassTypeSpec(), "Times at which all taxa go extinct with some probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        
+        std::vector<std::string> aliases_event_sampling_timeline;
+        aliases_event_sampling_timeline.push_back("PhiTimeline");
+        aliases_event_sampling_timeline.push_back("rhoTimeline");
+        dist_member_rules.push_back( new ArgumentRule( aliases_event_sampling_timeline,       ModelVector<RealPos>::getClassTypeSpec(), "Times at which all taxa are sampled with some probability. There is always additionally a sampling event at the present.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         std::vector<std::string> optionsCondition;
         optionsCondition.push_back( "time" );
@@ -309,6 +333,7 @@ const MemberRules& Dist_FBDP::getParameterRules(void) const
         optionsCondition.push_back( "sampling" );
         dist_member_rules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
         dist_member_rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "initialTree" , TimeTree::getClassTypeSpec() , "Instead of drawing a tree from the distribution, initialize distribution with this tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
 
         rules_set = true;
     }
@@ -351,9 +376,9 @@ void Dist_FBDP::setConstParameter(const std::string& name, const RevPtr<const Re
     {
         mu = var;
     }
-    else if ( name == "psi" )
+    else if ( name == "phi" || name == "psi" || name == "phi/psi" )
     {
-        psi = var;
+        phi = var;
     }
     else if ( name == "Lambda" )
     {
@@ -363,7 +388,7 @@ void Dist_FBDP::setConstParameter(const std::string& name, const RevPtr<const Re
     {
         Mu = var;
     }
-    else if ( name == "rho" )
+    else if ( name == "Phi" || name == "rho" || name == "Phi/rho" )
     {
         rho = var;
     }
@@ -384,9 +409,9 @@ void Dist_FBDP::setConstParameter(const std::string& name, const RevPtr<const Re
     {
         mu_timeline = var;
     }
-    else if ( name == "psiTimeline" )
+    else if ( name == "phiTimeline" || name == "psiTimeline" || name == "phiTimeline/psiTimeline" )
     {
-        psi_timeline = var;
+        phi_timeline = var;
     }
     else if ( name == "LambdaTimeline" )
     {
@@ -396,9 +421,13 @@ void Dist_FBDP::setConstParameter(const std::string& name, const RevPtr<const Re
     {
         Mu_timeline = var;
     }
-    else if ( name == "rhoTimeline" )
+    else if ( name == "PhiTimeline" || name == "rhoTimeline"  || name == "PhiTimeline/rhoTimeline")
     {
         rho_timeline = var;
+    }
+    else if ( name == "initialTree" )
+    {
+        initial_tree = var;
     }
     else
     {

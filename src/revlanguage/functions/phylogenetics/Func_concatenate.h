@@ -24,14 +24,14 @@ namespace RevLanguage {
         
         // Basic utility functions
         Func_concatenate*                               clone(void) const;                                          //!< Clone object
-        static const std::string&                       getClassType(void);                                         //!< Get Rev concatenate
-        static const TypeSpec&                          getClassTypeSpec(void);                                     //!< Get class concatenate spec
+        static const std::string&                       getClassType(void);                                         //!< Get Rev type
+        static const TypeSpec&                          getClassTypeSpec(void);                                     //!< Get class type spec
         std::string                                     getFunctionName(void) const;                                //!< Get the primary name of the function in Rev
-        const TypeSpec&                                 getTypeSpec(void) const;                                    //!< Get language concatenate of the object
+        const TypeSpec&                                 getTypeSpec(void) const;                                    //!< Get language type of the object
         
         // Func_source functions
         const ArgumentRules&                            getArgumentRules(void) const;                               //!< Get argument rules
-        const TypeSpec&                                 getReturnType(void) const;                                  //!< Get concatenate of return val
+        const TypeSpec&                                 getReturnType(void) const;                                  //!< Get type of return val
         
         RevPtr<RevVariable>                             execute(void);                                              //!< Execute function
 

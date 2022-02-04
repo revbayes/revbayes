@@ -372,11 +372,11 @@ void RateMatrix_PoMo4::calculateTransitionProbabilities(double startAge, double 
 
 void RateMatrix_PoMo4::computeExponentialMatrixByRepeatedSquaring(double t,  TransitionProbabilityMatrix& P ) const
 {
-    //We use repeated squaring to quickly obtain exponentials, as in Poujol and Lartillot, Bioinformatics 2014.
-    //Ideally one should dynamically decide how many squarings are necessary.
-    //For the moment, we arbitrarily do 10 such squarings, as it seems to perform well in practice (N. Lartillot, personal communication).
-    //first, multiply the matrix by the right scalar
-    //2^10 = 1024
+    // We use repeated squaring to quickly obtain exponentials, as in Poujol and Lartillot, Bioinformatics 2014.
+    // Ideally one should dynamically decide how many squarings are necessary.
+    // For the moment, we arbitrarily do 10 such squarings, as it seems to perform well in practice (N. Lartillot, personal communication).
+    // first, multiply the matrix by the right scalar
+    // 2^10 = 1024
     double tOver2s = t/(1024);
     for ( size_t i = 0; i < matrixSize; i++ )
     {
@@ -409,7 +409,7 @@ void RateMatrix_PoMo4::computeExponentialMatrixByRepeatedSquaring(double t,  Tra
 
 inline void RateMatrix_PoMo4::squareMatrix( TransitionProbabilityMatrix& P,  TransitionProbabilityMatrix& P2) const
 {
-    //Could probably use boost::ublas here, for the moment we do it ourselves.
+    // Could probably use boost::ublas here, for the moment we do it ourselves.
     for ( size_t i = 0; i < matrixSize; i++ )
     {
         for ( size_t j = 0; j < matrixSize; j++ )

@@ -198,8 +198,19 @@ const std::string& Taxon::getSpeciesName( void ) const
  */
 void Taxon::setAge(double a)
 {
-    age_range.setMin(a);
-    age_range.setMax(a);
+    
+    if ( age_range.getMax() < a )
+    {
+        age_range.setMax(a);
+        age_range.setMin(a);
+    }
+    else
+    {
+        age_range.setMin(a);
+        // Sebastian (20210519): We should not automatically set the max age
+        // because otherwise we always get a range of size 0.
+//        age_range.setMax(a);
+    }
 }
 
 

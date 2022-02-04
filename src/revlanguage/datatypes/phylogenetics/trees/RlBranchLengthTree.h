@@ -46,6 +46,11 @@ namespace RevLanguage {
         virtual std::string                 getGuiName(void) { return "Weighted Tree"; }
         virtual std::string                 getGuiUnicodeSymbol(void) { return "\\psi"; }
         std::string                         getGuiInfo(void) { return ""; }
+        
+    protected:
+        
+        void                                initMethods(void);
+        
     };
 }
 

@@ -1,7 +1,5 @@
-
-
-#ifndef INVERSEWISHARTDISTRIBUTION_H
-#define	INVERSEWISHARTDISTRIBUTION_H
+#ifndef InverseWishartDistribution_H
+#define	InverseWishartDistribution_H
 
 
 #include "TypedDistribution.h"

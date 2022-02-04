@@ -17,7 +17,7 @@ namespace RevLanguage {
      * @copybrief RevBayesCore::MaxFunction
      * @see RevBayesCore::MaxFunction for the internal object
      */
-    class Func_max :  public TypedFunction<Real> {
+    class Func_max : public TypedFunction<Real> {
         
     public:
         Func_max( void );

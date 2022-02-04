@@ -79,11 +79,11 @@ std::string DoubletState::getStringValue(void) const
     RbBitSet letters1(4);
     RbBitSet letters2(4);
 
-    for(int i=0;i<state.size();i++)
+    for (int i=0;i<state.size();i++)
     {
         if (state[i])
         {
-            auto& doublet = DOUBLETS[i];
+            const std::string& doublet = DOUBLETS[i];
 
             DnaState dna_pos1 = DnaState( std::string(1, doublet[0]) );
             DnaState dna_pos2 = DnaState( std::string(1, doublet[1]) );

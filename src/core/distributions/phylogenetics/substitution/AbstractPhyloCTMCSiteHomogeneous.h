@@ -132,9 +132,9 @@ namespace RevBayesCore {
 
 
         // virtual methods that may be overwritten, but then the derived class should call this methods
-        virtual void                                                        keepSpecialization(DagNode* affecter);
-        virtual void                                                        restoreSpecialization(DagNode *restorer);
-        virtual void                                                        touchSpecialization(DagNode *toucher, bool touchAll);
+        virtual void                                                        keepSpecialization(const DagNode* affecter);
+        virtual void                                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
 
         // pure virtual methods
         virtual void                                                        computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r) = 0;
@@ -617,11 +617,15 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     std::vector<TopologyNode*> nodes = tau->getValue().getNodes();
 
     if (treatAmbiguousAsGaps)
+    {
         mark_ambiguous_and_missing_as_gap(*value, site_indices, nodes);
-
+    }
+    
     if (treatUnknownAsGap)
+    {
         mark_unknown_as_gap(*value, site_indices, nodes);
-
+    }
+    
     // set the global variable if we use ambiguous characters (besides gaps)
     using_ambiguous_characters = has_ambiguous_nongap_characters(*value, site_indices, nodes);
 
@@ -743,7 +747,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
                     // we use the index of the state
                     char_matrix[node_index][patternIndex] = c.getStateIndex();
                     if ( c.getStateIndex() >= this->num_chars )
+                    {
                         throw RbException("Problem with state index in PhyloCTMC!");
+                    }
+                    
                 }
                 else
                 {
@@ -767,6 +774,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     invariant_site_index.clear();
     invariant_site_index.resize( pattern_block_size );
     size_t length = char_matrix.size();
+        
     for (size_t i=0; i<pattern_block_size; ++i)
     {
         bool inv = true;
@@ -821,8 +829,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
         }
 
         site_invariant[i] = inv;
+        
     }
-
+    
     // finally we resize the partial likelihood vectors to the new pattern counts
     resizeLikelihoodVectors();
 
@@ -2114,8 +2123,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
 
 }
 
-
-
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fireTreeChangeEvent( const RevBayesCore::TopologyNode &n, const unsigned& m )
 {
@@ -2250,7 +2257,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getPInv( void )
 
 
 template<class charType>
-void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::keepSpecialization( DagNode* affecter )
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::keepSpecialization( const DagNode* affecter )
 {
 
     // reset flags for likelihood computation
@@ -2339,29 +2346,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::redrawValue( void
     // therefore we create our own mask
     if ( do_mask == true )
     {
-        std::vector<size_t> site_indices = getIncludedSiteIndices();
-
-        // set the gap states as in the clamped data
-        for (size_t i = 0; i < tau->getValue().getNumberOfTips(); ++i)
-        {
-            // create a temporary variable for the taxon
-            std::vector<bool> taxon_mask_gap        = std::vector<bool>(num_sites,false);
-            std::vector<bool> taxon_mask_missing    = std::vector<bool>(num_sites,false);
-
-            const std::string &taxon_name = tau->getValue().getNode( i ).getName();
-            AbstractDiscreteTaxonData& taxon = value->getTaxonData( taxon_name );
-
-            for ( size_t site=0; site<site_indices.size(); ++site)
-            {
-                taxon_mask_gap[site]        = taxon.getCharacter( site_indices[site] ).isGapState();
-                taxon_mask_missing[site]    = taxon.getCharacter( site_indices[site] ).isMissingState();
-            }
-
-            mask_gap[i]         = taxon_mask_gap;
-            mask_missing[i]     = taxon_mask_missing;
-
-        }
-
+        this->value->fillMissingSitesMask(mask_gap, mask_missing);
     }
 
     // delete the old value first
@@ -2485,27 +2470,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::redrawValue( void
 
     if ( do_mask == true )
     {
-        // set the gap states as in the clamped data
-        for (size_t i = 0; i < tau->getValue().getNumberOfTips(); ++i)
-        {
-            const std::string &taxon_name = tau->getValue().getNode( i ).getName();
-            AbstractDiscreteTaxonData& taxon = value->getTaxonData( taxon_name );
-
-            for ( size_t site=0; site<num_sites; ++site)
-            {
-                DiscreteCharacterState &c = taxon.getCharacter(site);
-                if ( mask_gap[i][site] == true )
-                {
-                    c.setGapState( true );
-                }
-                if ( mask_missing[i][site] == true )
-                {
-                    c.setMissingState( true );
-                }
-            }
-
-        }
-
+        this->value->applyMissingSitesMask(mask_gap, mask_missing);
     }
 
     // compress the data and initialize internal variables
@@ -2596,7 +2561,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
 
 
 template<class charType>
-void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::restoreSpecialization( DagNode* affecter )
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::restoreSpecialization( const DagNode* affecter )
 {
 
     // reset flags for likelihood computation
@@ -3449,6 +3414,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
         for (size_t site = 0; site < pattern_block_size; ++site, ++patterns)
         {
 
+           
             if ( RbSettings::userSettings().getUseScaling() == true )
             {
                 if ( this->site_invariant[site] == true )
@@ -3489,7 +3455,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
             }
 
         }
-
+        
     }
     else
     {
@@ -3932,7 +3898,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::swapParameterInte
 }
 
 template<class charType>
-void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecialization( DagNode* affecter, bool touch_all )
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecialization( const DagNode* affecter, bool touch_all )
 {
 
     if ( touched == false )
@@ -3948,7 +3914,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
         const std::set<size_t> &indices = heterogeneous_clock_rates->getTouchedElementIndices();
 
         // maybe all of them have been touched or the flags haven't been set properly
-        if ( indices.size() == 0 )
+        if ( indices.size() == 0 || indices.size() == this->tau->getValue().getNodes().size() )
         {
             // just flag everyting for recomputation
             touch_all = true;
@@ -4044,8 +4010,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
 {
     const TopologyNode* node = tau->getValue().getNodes()[node_idx];
 
-    if (node->isRoot()) throw RbException("dnPhyloCTMC called updateTransitionProbabilities for the root node\n");
-
+    if ( node->isRoot() == true )
+    {
+        throw RbException("dnPhyloCTMC called updateTransitionProbabilities for the root node\n");
+    }
     // second, get the clock rate for the branch
     double rate = 1.0;
     if ( this->branch_heterogeneous_clock_rates == true )
@@ -4076,8 +4044,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
 
     if (this->branch_heterogeneous_substitution_matrices == false )
     {
+        // loop now over all per-site rate matrices (could also be only a single one, as by default)
         for (size_t matrix = 0; matrix < this->num_matrices; ++matrix)
         {
+            // get the i-th rate matrix
             if ( this->heterogeneous_rate_matrices != NULL )
             {
                 rm = &this->heterogeneous_rate_matrices->getValue()[matrix];
@@ -4087,6 +4057,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
                 rm = &this->homogeneous_rate_matrix->getValue();
             }
 
+            // now also get the site specific rates
             for (size_t j = 0; j < this->num_site_rates; ++j)
             {
                 double r = 1.0;

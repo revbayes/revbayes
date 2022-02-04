@@ -296,7 +296,7 @@ void StartingTreeSimulator::simulateClade( std::set<TopologyNode*> &nodes) const
             min_age = a;
         }
     }
-    
+
     std::set<TopologyNode*> current_nodes;
     std::multimap<double,TopologyNode*> serial_nodes;
     for (std::set<TopologyNode*>::const_iterator it=nodes.begin(); it!=nodes.end(); ++it)

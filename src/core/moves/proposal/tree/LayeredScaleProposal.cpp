@@ -90,11 +90,10 @@ double LayeredScaleProposal::doProposal( void )
 
     // now we store all necessary values
     storedAges = std::vector<double>(tau.getNumberOfNodes(), 0.0);
-    TreeUtilities::getAges(&tau, root, storedAges);
+    TreeUtilities::getAges(*root, storedAges);
 
     // lower bound
-    double min_age = 0.0;
-    TreeUtilities::getOldestTip(&tau, root, min_age);
+    double min_age = TreeUtilities::getOldestTipAge(*root);
 
     // upper bound
     double max_age = root->getAge();
@@ -119,7 +118,7 @@ double LayeredScaleProposal::doProposal( void )
     //Now we do the actual rescaling:
     for (size_t i = 0; i < subtrees.size(); ++i) {
       // rescale the subtrees
-      TreeUtilities::rescaleSubtree(&tau, subtrees[i], scaling_factor );
+      TreeUtilities::rescaleSubtree(*subtrees[i], scaling_factor );
       //rescale the branch leading to the subtree
       double parentAge = subtrees[i]->getParent().getAge();
       double currentAge = subtrees[i]->getAge();
@@ -175,7 +174,7 @@ void LayeredScaleProposal::undoProposal( void )
 {
 
     // undo the proposal
-    TreeUtilities::setAges(&variable->getValue(), &(variable->getValue().getRoot()), storedAges);
+    TreeUtilities::setAges(variable->getValue().getRoot(), storedAges);
 
 }
 

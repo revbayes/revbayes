@@ -193,6 +193,9 @@ AbstractMove& AbstractMove::operator=(const RevBayesCore::AbstractMove &move)
  */
 void AbstractMove::addNode( DagNode *n )
 {
+    // safety checking that the node is not NULL
+    if ( n == NULL ) return;
+    
     bool exists = false;
     
     for (std::vector<DagNode*>::iterator it=nodes.begin(); it!=nodes.end(); ++it)

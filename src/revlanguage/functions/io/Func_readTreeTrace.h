@@ -1,19 +1,3 @@
-/**
- * @file
- * This file contains the declaration of Func_readTreeTrace, which uses the NCL to read in trees in any of the supported formats:
- * nexus
- *
- * @brief Declaration of Func_readTrees
- *
- * (c) Copyright 2009- under GPL version 3
- * @date Last modified: $Date: 2012-05-27 16:10:36 +0200 (Sun, 27 May 2012) $
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- * @version 1.0
- *
- * $Id: Func_readDiscreteCharacterData.h 1587 2012-05-27 14:10:36Z hoehna $
- */
-
 #ifndef Func_readTreeTrace_H
 #define Func_readTreeTrace_H
 
@@ -49,8 +33,8 @@ namespace RevLanguage {
         
     private:
         
-        WorkspaceVector<TraceTree>*         readTrees(const std::vector<std::string> &fns, const std::string &d, bool clock, long thin);
-        WorkspaceVector<TraceTree>*         readTreesNexus(const std::vector<std::string> &fns, bool clock, long thin);  //!< Read tree trace from Nexus file(s)
+        WorkspaceVector<TraceTree>*         readTrees(const std::vector<std::string> &fns, const std::string &d, bool clock, long thin, long offset);
+        WorkspaceVector<TraceTree>*         readTreesNexus(const std::vector<std::string> &fns, bool clock, long thin, long offset);  //!< Read tree trace from Nexus file(s)
     };
     
 }

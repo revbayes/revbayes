@@ -73,7 +73,6 @@ double MPEST::computeLnProbability( void )
     // using the branch length bl from the species tree.
     
     const RootedTripletDistribution &sp = speciesTree->getValue();
-    //    std::cerr << sp << std::endl;
     
     if (useSpecies) {
         std::map < std::pair < std::string, std::pair < std::string, std::string > >, std::vector<double> > spTriplets = sp.getSpeciesTripletsWithBranchLengths();

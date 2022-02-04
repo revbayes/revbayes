@@ -17,6 +17,7 @@
 #include "RevObject.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
+#include "RlString.h"
 #include "RlUtils.h"
 #include "WorkspaceToCoreWrapperObject.h"
 
@@ -52,8 +53,9 @@ void ValidationAnalysis::constructInternalObject( void )
     // now allocate a new validation analysis
     const RevBayesCore::MonteCarloAnalysis&         s   = static_cast<const MonteCarloAnalysis &>( sampler->getRevObject() ).getValue();
     int                                             n   = (int)static_cast<const Natural &>( simulations->getRevObject() ).getValue();
-    
-    value = new RevBayesCore::ValidationAnalysis( s, size_t(n) );
+    const std::string&                              d   = static_cast<const RlString &>( output_directory->getRevObject() ).getValue();
+
+    value = new RevBayesCore::ValidationAnalysis( s, size_t(n), d );
     
 }
 
@@ -148,7 +150,8 @@ const MemberRules& ValidationAnalysis::getParameterRules(void) const
         
         memberRules.push_back( new ArgumentRule("sampler"       , MonteCarloAnalysis::getClassTypeSpec(), "The template Monte Carlo sampler instance.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         memberRules.push_back( new ArgumentRule("simulations"   , Natural::getClassTypeSpec()           , "How many replicate simulations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        
+        memberRules.push_back( new ArgumentRule("directory"     , RlString::getClassTypeSpec()          , "The directory for the output of the simulations.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "output" ) ) );
+
         rules_set = true;
     }
     
@@ -204,6 +207,10 @@ void ValidationAnalysis::setConstParameter(const std::string& name, const RevPtr
     else if ( name == "simulations")
     {
         simulations = var;
+    }
+    else if ( name == "directory")
+    {
+        output_directory = var;
     }
     else
     {

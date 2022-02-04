@@ -98,7 +98,54 @@ Tree* Tree::clone(void) const
 RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
 {
     
-    if ( name == "calculateEDR" )
+    
+    if ( name == "addFossil" )
+    {
+        found = true;
+        
+        const RevBayesCore::Taxon& taxon = static_cast<const Taxon&>(args[0].getVariable()->getRevObject()).getValue();
+        RevBayesCore::Clade tmp;
+        if ( args[1].getVariable()->getRevObject().isType( ModelVector<Taxon>::getClassTypeSpec() ) )
+        {
+            const std::vector<RevBayesCore::Taxon> &taxa = static_cast<const ModelVector<Taxon>&>( args[1].getVariable()->getRevObject() ).getValue();
+            tmp = RevBayesCore::Clade( taxa );
+        }
+        else if ( args[1].getVariable()->getRevObject().isType( Clade::getClassTypeSpec() ) )
+        {
+            tmp = static_cast<const Clade&>( args[1].getVariable()->getRevObject() ).getValue();
+        }
+        tmp.resetTaxonBitset( this->dag_node->getValue().getTaxonBitSetMap() );
+        RevBayesCore::TopologyNode& n = this->dag_node->getValue().getMrca( tmp );
+        
+        RevBayesCore::TopologyNode& p = n.getParent();
+        
+        RevBayesCore::TopologyNode* new_p = new RevBayesCore::TopologyNode();
+        RevBayesCore::TopologyNode* new_f = new RevBayesCore::TopologyNode(taxon, this->dag_node->getValue().getNumberOfTips()+1);
+
+        new_f->setAge(taxon.getAge());
+        double max_child_age = (taxon.getAge() > n.getAge() ? taxon.getAge() : n.getAge());
+        if ( p.getAge() < max_child_age )
+        {
+            RevBayesCore::TreeUtilities::rescaleTree(this->dag_node->getValue().getRoot(), max_child_age / p.getAge() + 0.5);
+            max_child_age = (taxon.getAge() > n.getAge() ? taxon.getAge() : n.getAge());
+        }
+        
+        new_p->setAge( (p.getAge() - max_child_age) / 2.0 + max_child_age);
+        
+        new_p->addChild( new_f );
+        new_p->addChild( &n );
+        p.removeChild( &n );
+        p.addChild( new_p );
+        new_p->setParent( &p );
+        new_f->setParent( new_p );
+        n.setParent( new_p );
+        
+        this->dag_node->getValue().setRoot( &this->dag_node->getValue().getRoot(), true);
+        this->dag_node->getValue().resetTaxonBitSetMap();
+        
+        return NULL;
+    }
+    else if ( name == "calculateEDR" )
     {
         found = true;
         std::vector<double> edr = RevBayesCore::TreeUtilities::calculateEDR( dag_node->getValue() );
@@ -127,9 +174,19 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     else if (name == "getClade")
     {
         found = true;
-
-        const std::vector<RevBayesCore::Taxon> &taxa = static_cast<const ModelVector<Taxon>&>( args[0].getVariable()->getRevObject() ).getValue();
-        RevBayesCore::Clade tmp = RevBayesCore::Clade( taxa );
+        
+        RevBayesCore::Clade tmp;
+        
+        if ( args[0].getVariable()->getRevObject().isType( ModelVector<Taxon>::getClassTypeSpec() ) )
+        {
+            const std::vector<RevBayesCore::Taxon> &taxa = static_cast<const ModelVector<Taxon>&>( args[0].getVariable()->getRevObject() ).getValue();
+            tmp = RevBayesCore::Clade( taxa );
+        }
+        else if ( args[0].getVariable()->getRevObject().isType( Clade::getClassTypeSpec() ) )
+        {
+            tmp = static_cast<const Clade&>( args[0].getVariable()->getRevObject() ).getValue();
+        }
+        
         tmp.resetTaxonBitset( this->dag_node->getValue().getTaxonBitSetMap() );
         RevBayesCore::Clade c = this->dag_node->getValue().getMrca( tmp ).getClade();
         return new RevVariable( new Clade( c ) );
@@ -196,24 +253,20 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         bool fossils_only = static_cast<RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
         
         RevBayesCore::Tree &tree = dag_node->getValue();
-        tree.makeInternalNodesBifurcating( true, fossils_only );
+        bool reindex = true;
+        tree.makeInternalNodesBifurcating( reindex, fossils_only );
 
         if ( args[1].getVariable()->getRevObject() != RevNullObject::getInstance() )
         {
             const RevBayesCore::Clade& outgroup = static_cast<Clade &>( args[1].getVariable()->getRevObject() ).getValue();
             tree.makeRootBifurcating( outgroup, true );
         }
+        else
+        {
+            RevBayesCore::Clade outgroup = tree.getRoot().getChild(0).getClade();
+            tree.makeRootBifurcating( outgroup, true );
+        }
         
-        return NULL;
-    }
-    else if (name == "makeUltrametric")
-    {
-
-        found = true;
-
-        RevBayesCore::Tree &tree = dag_node->getValue();
-        RevBayesCore::TreeUtilities::makeUltrametric(&tree);
-
         return NULL;
     }
     else if (name == "names" || name == "taxa")
@@ -237,7 +290,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
 
         double f = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
         RevBayesCore::Tree &tree = dag_node->getValue();
-        RevBayesCore::TreeUtilities::offsetTree(&tree, &tree.getRoot(), f);
+        RevBayesCore::TreeUtilities::offsetTree(tree.getRoot(), f);
 
         return NULL;
     }
@@ -248,14 +301,14 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         const RevObject& current = args[0].getVariable()->getRevObject();
         if ( current.isType( Natural::getClassTypeSpec() ) )
         {
-          size_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
-          const RevObject& new_value = args[1].getVariable()->getRevObject();
-          if ( new_value.isType( RealPos::getClassTypeSpec() ) )
-          {
-            double value = static_cast<const RealPos&>( new_value ).getValue();
-            RevBayesCore::Tree &tree = dag_node->getValue();
-            RevBayesCore::TreeUtilities::setBranchLength( &tree, index ,value );
-          }
+            size_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+            const RevObject& new_value = args[1].getVariable()->getRevObject();
+            if ( new_value.isType( RealPos::getClassTypeSpec() ) )
+            {
+                double value = static_cast<const RealPos&>( new_value ).getValue();
+                RevBayesCore::Tree &tree = dag_node->getValue();
+                tree.getNode(index).setBranchLength(value);
+            }
         }
         return NULL;
     }
@@ -310,7 +363,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
 
         double f = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
         RevBayesCore::Tree &tree = dag_node->getValue();
-        RevBayesCore::TreeUtilities::rescaleTree(&tree, &tree.getRoot(), f);
+        RevBayesCore::TreeUtilities::rescaleTree(tree.getRoot(), f);
 
         return NULL;
     }
@@ -382,6 +435,14 @@ const TypeSpec& Tree::getTypeSpec( void ) const
  */
 void Tree::initMethods( void )
 {
+    ArgumentRules* add_fossil_arg_rules = new ArgumentRules();
+    add_fossil_arg_rules->push_back( new ArgumentRule( "fossil", Taxon::getClassTypeSpec(), "The fossil taxon.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    std::vector<TypeSpec> add_fossil_clade_types;
+    add_fossil_clade_types.push_back( ModelVector<Taxon>::getClassTypeSpec() );
+    add_fossil_clade_types.push_back( Clade::getClassTypeSpec() );
+    add_fossil_arg_rules->push_back( new ArgumentRule( "clade", add_fossil_clade_types, "Vector of some/all of the taxa included in the clade.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure( "addFossil", RlUtils::Void, add_fossil_arg_rules ) );
+    
     ArgumentRules* isBinaryArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "isBinary", RlBoolean::getClassTypeSpec(), isBinaryArgRules ) );
 
@@ -489,11 +550,11 @@ void Tree::initMethods( void )
     setNegativeConstraint->push_back( new ArgumentRule( "flag", RlBoolean::getClassTypeSpec(), "Is the tree a negative constraint?.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "setNegativeConstraint", RlUtils::Void, setNegativeConstraint ) );
 
-    ArgumentRules* makeUltraArgRules = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "makeUltrametric", RlUtils::Void, makeUltraArgRules ) );
-
     ArgumentRules* get_clade_arg_rules = new ArgumentRules();
-    get_clade_arg_rules->push_back( new ArgumentRule( "clade", ModelVector<Taxon>::getClassTypeSpec(), "Vector of some of the taxa included in the clade.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    std::vector<TypeSpec> clade_types;
+    clade_types.push_back( ModelVector<Taxon>::getClassTypeSpec() );
+    clade_types.push_back( Clade::getClassTypeSpec() );
+    get_clade_arg_rules->push_back( new ArgumentRule( "clade", clade_types, "Vector of some of the taxa included in the clade.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "getClade", Clade::getClassTypeSpec(), get_clade_arg_rules ) );
 
     ArgumentRules* renumberNodesArgRules = new ArgumentRules();
@@ -505,7 +566,7 @@ void Tree::initMethods( void )
 
     ArgumentRules* rerootArgRules = new ArgumentRules();
     rerootArgRules->push_back( new ArgumentRule( "clade", Clade::getClassTypeSpec(), "The clade to use as outgroup.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    rerootArgRules->push_back( new ArgumentRule( "make_bifurcating", RlBoolean::getClassTypeSpec(), "Do we want a bifurcation at the root?", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    rerootArgRules->push_back( new ArgumentRule( "makeBifurcating", RlBoolean::getClassTypeSpec(), "Do we want a bifurcation at the root?", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "reroot", RlUtils::Void, rerootArgRules ) );
 
     ArgumentRules* getDescendantTaxaArgRules = new ArgumentRules();
@@ -513,8 +574,8 @@ void Tree::initMethods( void )
     methods.addFunction( new MemberProcedure( "getDescendantTaxa", ModelVector<Taxon>::getClassTypeSpec(), getDescendantTaxaArgRules ) );
 
     ArgumentRules* makeBifurcatingArgRules = new ArgumentRules();
-    makeBifurcatingArgRules->push_back( new ArgumentRule( "fossils_only", RlBoolean::getClassTypeSpec(), "Do we want to bifurcate only nodes with degree 1, or all nodes with degree different from 2?", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    makeBifurcatingArgRules->push_back( new ArgumentRule( "clade", Clade::getClassTypeSpec(), "The clade to use as outgroup.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    makeBifurcatingArgRules->push_back( new ArgumentRule( "fossils_only", RlBoolean::getClassTypeSpec(), "Do we want to bifurcate only nodes with degree 1, or all nodes with degree different from 2?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+    makeBifurcatingArgRules->push_back( new ArgumentRule( "clade", Clade::getClassTypeSpec(), "The clade to use as outgroup.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
     methods.addFunction( new MemberProcedure( "makeBifurcating", RlUtils::Void, makeBifurcatingArgRules   ) );
 
     // member functions

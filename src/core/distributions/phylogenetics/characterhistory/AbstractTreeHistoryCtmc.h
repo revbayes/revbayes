@@ -69,9 +69,9 @@ namespace RevBayesCore {
         double                                                              computeBranchRate(size_t index);
 
         // virtual methods that may be overwritten, but then the derived class should call this methods
-        virtual void                                                        keepSpecialization(DagNode* affecter);
-        virtual void                                                        restoreSpecialization(DagNode *restorer);
-        virtual void                                                        touchSpecialization(DagNode *toucher, bool touchAll);
+        virtual void                                                        keepSpecialization(const DagNode* affecter);
+        virtual void                                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
 
         // pure virtual methods
         virtual double                                                      computeRootLikelihood(const TopologyNode &nd) = 0;
@@ -364,7 +364,7 @@ void RevBayesCore::AbstractTreeHistoryCtmc<charType>::initializeHistoriesVector(
 
 
 template<class charType>
-void RevBayesCore::AbstractTreeHistoryCtmc<charType>::keepSpecialization( DagNode* affecter ) {
+void RevBayesCore::AbstractTreeHistoryCtmc<charType>::keepSpecialization( const DagNode* affecter ) {
 
     // reset all flags
     for (std::vector<bool>::iterator it = this->dirty_nodes.begin(); it != this->dirty_nodes.end(); ++it)
@@ -406,7 +406,7 @@ void RevBayesCore::AbstractTreeHistoryCtmc<charType>::flagNodeDirty( const RevBa
 }
 
 template<class charType>
-void RevBayesCore::AbstractTreeHistoryCtmc<charType>::restoreSpecialization( DagNode* affecter ) {
+void RevBayesCore::AbstractTreeHistoryCtmc<charType>::restoreSpecialization( const DagNode* affecter ) {
 
     // reset the flags
     for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
@@ -522,7 +522,7 @@ void RevBayesCore::AbstractTreeHistoryCtmc<charType>::swapParameterInternal(cons
 
 
 template<class charType>
-void RevBayesCore::AbstractTreeHistoryCtmc<charType>::touchSpecialization( DagNode* affecter, bool touchAll )
+void RevBayesCore::AbstractTreeHistoryCtmc<charType>::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
 
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty

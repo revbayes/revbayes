@@ -42,6 +42,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                           gs;
         RevPtr<const RevVariable>                           normals;
         RevPtr<const RevVariable>                           zeta;
+        RevPtr<const RevVariable>                           prop_global;
         RevPtr<const RevVariable>                           order;
     };
 
