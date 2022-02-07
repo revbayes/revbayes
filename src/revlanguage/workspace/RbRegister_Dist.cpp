@@ -290,6 +290,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         ///////////////////////////////////////////////////
         /* Add distributions (in folder "distributions") */
         ///////////////////////////////////////////////////
+        addType( new WorkspaceVector<Distribution>( ) );
 
 
         /* Evolutionary processes (in folder "distributions/phylogenetics") */
