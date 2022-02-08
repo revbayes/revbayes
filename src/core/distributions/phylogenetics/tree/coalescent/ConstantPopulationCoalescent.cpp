@@ -85,11 +85,6 @@ double ConstantPopulationCoalescent::computeLnProbabilityTimes( void ) const
     
     for (size_t i = 0; i < ages.size(); ++i) 
     {
-//        size_t j = num_taxa - i;
-//        double theta = 1.0 / (2.0*Ne->getValue());
-//        double nPairs = j * (j-1) / 2.0;
-//        lnProbTimes += log( nPairs * 2.0 / theta ) - nPairs * 2.0 / theta * ages[i] ;
-        
         
         size_t j = num_taxa - i;
         double theta = Ne->getValue();
@@ -102,14 +97,6 @@ double ConstantPopulationCoalescent::computeLnProbabilityTimes( void ) const
         }
         
         double deltaAge = ages[i] - prevCoalescentTime;
-
-        // CoalescentMCMC
-//        lnProbTimes += log( nPairs / theta ) - 2 * nPairs * deltaAge / theta;
-        // BEAST:
-//        lnProbTimes += log( 1.0 / theta ) - nPairs * deltaAge / theta ;
-        // RevBayes"
-//        lnProbTimes += log( nPairs / theta ) - nPairs * deltaAge / theta;
-        
         
         ln_prob_times += log( 1.0 / theta ) - nPairs * deltaAge / theta;
     }
@@ -133,7 +120,6 @@ std::vector<double> ConstantPopulationCoalescent::simulateCoalescentAges( size_t
     // allocate the vector for the times
     std::vector<double> coalescent_times = std::vector<double>(n,0.0);
     
-//    double theta = 1.0 / (2.0*Ne->getValue());
     double theta = 1.0 / (Ne->getValue());
     // draw a time for each speciation event condition on the time of the process
 	for (size_t i = 0; i < n; ++i)
