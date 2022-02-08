@@ -44,14 +44,14 @@ using namespace RevBayesCore;
 PiecewiseConstantCoalescent::PiecewiseConstantCoalescent(const TypedDagNode<RbVector<double> > *N, const TypedDagNode<RbVector<double> > *i, METHOD_TYPES meth, const std::vector<Taxon> &tn, const std::vector<Clade> &c) :
     AbstractCoalescent( tn, c ),
     Nes( N ),
-    interval_starts_var( i ),
+    interval_change_points_var( i ),
     interval_method( meth )
 {
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
     // this will also ensure that the parameters are not getting deleted before we do
     addParameter( Nes );
-    addParameter( interval_starts_var );
+    addParameter( interval_change_points_var );
     
     simulateTree();
     
@@ -88,63 +88,68 @@ double PiecewiseConstantCoalescent::computeLnProbabilityTimes( void ) const
 {
     
     // variable declarations and initialization
-    double lnProbTimes = 0;
+    double ln_prob = 0;
     
-    const_cast< PiecewiseConstantCoalescent* >( this )->updateIntervals();
+    // update the interval change points and coalescent sizes
+    updateIntervals();
     
-    // retrieved the speciation times
-    std::vector<double> ages;
+    // retrieved the coalescent ages
+    std::vector<double> coalescent_ages;
     for (size_t i = 0; i < value->getNumberOfInteriorNodes()+1; ++i)
     {
         const TopologyNode& n = value->getInteriorNode( i );
         double a = n.getAge();
-        ages.push_back(a);
+        coalescent_ages.push_back(a);
     }
-    // sort the vector of times in ascending order
-    std::sort(ages.begin(), ages.end());
+    // sort the vector of ages in ascending order
+    std::sort(coalescent_ages.begin(), coalescent_ages.end());
     
-    size_t currentInterval = 0;
+    // initialize the current interval index at 0
+    size_t current_interval = 0;
     
-    for (size_t i = 0; i < ages.size(); ++i)
+    size_t current_num_lineages = num_taxa;
+    double last_event_age = 0.0;
+    for (size_t i = 0; i < coalescent_ages.size(); ++i)
     {
-        size_t j = num_taxa - i;
+        double n_pairs = current_num_lineages * (current_num_lineages-1) / 2.0;
+
+        // initialize theta
         double theta = 0.0;
-        double nPairs = j * (j-1) / 2.0;
         
-        double prevCoalescentTime = 0.0;
-        if ( i > 0 )
-        {
-            prevCoalescentTime = ages[i-1];
-        }
-        
-        double deltaAge = ages[i];
-        bool valid = false;
+        // initialize the waiting time variable
+        double delta_age = coalescent_ages[i];
+        bool was_coalescent_event = false;
         do
         {
-            theta = pop_sizes[currentInterval];
-            double age = ages[i];
-            double max = age;
-            if ( currentInterval < interval_starts.size() )
+            theta = pop_sizes[current_interval];
+            double next_coal_age = coalescent_ages[i];
+            double next_event_age = next_coal_age;
+            if ( current_interval < interval_change_points.size() )
             {
-                max = (age > interval_starts[currentInterval]) ? interval_starts[currentInterval] : age;
+                next_event_age = (next_coal_age > interval_change_points[current_interval]) ? interval_change_points[current_interval] : next_coal_age;
             }
             
-            deltaAge = max - prevCoalescentTime;
-            valid = currentInterval >= interval_starts.size() || age <= interval_starts[currentInterval];
-            if ( !valid )
+            delta_age = next_event_age - last_event_age;
+            was_coalescent_event = current_interval >= interval_change_points.size() || next_coal_age <= interval_change_points[current_interval];
+            if ( was_coalescent_event == false )
             {
-                ++currentInterval;
-                prevCoalescentTime = max;
+                ++current_interval;
+                last_event_age = next_event_age;
                 
-                lnProbTimes -= nPairs * deltaAge / theta ;
+                // we multiply with the waiting time that no coalescent event happened until the next interval change point
+                ln_prob -= n_pairs * delta_age / theta ;
             }
             
-        } while ( !valid );
+        } while ( was_coalescent_event == false );
         
-        lnProbTimes += log( 1.0 / theta ) - nPairs * deltaAge / theta;
+        // we multiply with the probability of a coalescent event
+        ln_prob += log( 1.0 / theta ) - n_pairs * delta_age / theta;
+        
+        // decrement the current number of lineage counter
+        --current_num_lineages;
     }
     
-    return lnProbTimes;
+    return ln_prob;
 }
 
 
@@ -154,14 +159,9 @@ void PiecewiseConstantCoalescent::executeMethod(const std::string &n, const std:
     if ( n == "getIntervalAges" )
     {
         
-        rv = interval_starts;
+        rv = interval_change_points;
         
     }
-//    else if ( n == "averageExtinctionRate" )
-//    {
-//
-//
-//    }
     else
     {
         throw RbException("The piecewise-constant coalescent process does not have a member method called '" + n + "'.");
@@ -186,9 +186,10 @@ void PiecewiseConstantCoalescent::keepSpecialization(const DagNode *affecter)
  */
 void PiecewiseConstantCoalescent::restoreSpecialization(const DagNode *affecter)
 {
-    
+
+    // Sebastian: This is currently redudant because we update the intervals each time when we compute the probability
     // just re-update the start times of the intervals
-    updateIntervals();
+//    updateIntervals();
     
 }
 
@@ -206,21 +207,13 @@ std::vector<double> PiecewiseConstantCoalescent::simulateCoalescentAges( size_t 
     // first check if we want to set the interval ages here!
     if ( interval_method == SPECIFIED )
     {
-        if ( interval_starts_var != NULL )
-        {
-            interval_starts = interval_starts_var->getValue();
-        }
-        else
-        {
-            throw RbException("You have to provide the start times of the coalescent skyline intervals if you chose 'SPECIFIED' as the method of choece.");
-        }
-        const_cast< PiecewiseConstantCoalescent* >( this )->updateIntervals();
+        updateIntervals();
     }
     else
     {
-        interval_starts = RbVector<double>(Nes->getValue().size()-1, RbConstants::Double::inf);
+        interval_change_points = RbVector<double>(Nes->getValue().size()-1, RbConstants::Double::inf);
     }
-    size_t num_events_per_interval = size_t( ceil( double(n)/Nes->getValue().size()) );
+    size_t num_events_per_interval = size_t( floor( double(n)/Nes->getValue().size()) );
     size_t current_num_events_in_interval = 0;
     
     // Get the rng
@@ -229,54 +222,52 @@ std::vector<double> PiecewiseConstantCoalescent::simulateCoalescentAges( size_t 
     // now simulate the ages
     
     // allocate the vector for the times
-    std::vector<double> coalescent_times = std::vector<double>(n,0.0);
-    
+    std::vector<double> coalescent_ages = std::vector<double>(n,0.0);
     
     const RbVector<double> &pop_sizes  = Nes->getValue();
     size_t current_interval = 0;
+    size_t current_num_lineages = num_taxa;
     // draw a time for each speciation event condition on the time of the process
     for (size_t i = 0; i < n; ++i)
     {
-        double prevCoalescentTime = 0.0;
+        double prev_coalescent_age = 0.0;
         if ( i > 0 )
         {
-            prevCoalescentTime = coalescent_times[i-1];
+            prev_coalescent_age = coalescent_ages[i-1];
         }
         
-        size_t j = num_taxa - i;
-        double nPairs = j * (j-1) / 2.0;
+        double n_pairs = current_num_lineages * (current_num_lineages-1) / 2.0;
         
         double sim_age = 0.0;
-        bool valid = false;
+        bool was_coalescent_event = false;
         do
         {
-//            double theta = 1.0 / (2.0*popSizes[current_interval]);
-//            double lambda = nPairs * theta / 2.0;
             double theta = 1.0 / (pop_sizes[current_interval]);
-            double lambda = nPairs * theta;
+            double lambda = n_pairs * theta;
             double u = RbStatistics::Exponential::rv( lambda, *rng);
-            sim_age = prevCoalescentTime + u;
-            valid = current_interval >= interval_starts.size() || sim_age < interval_starts[current_interval];
-            if ( valid == false )
+            sim_age = prev_coalescent_age + u;
+            was_coalescent_event = current_interval >= interval_change_points.size() || sim_age < interval_change_points[current_interval];
+            if ( was_coalescent_event == false )
             {
-                prevCoalescentTime = interval_starts[current_interval];
+                prev_coalescent_age = interval_change_points[current_interval];
                 ++current_interval;
             }
             
-        } while ( valid == false );
+        } while ( was_coalescent_event == false );
         
-        coalescent_times[i] = sim_age;
+        coalescent_ages[i] = sim_age;
         
         ++current_num_events_in_interval;
-        if ( interval_method == EVENTS && current_num_events_in_interval == num_events_per_interval && current_interval < interval_starts.size() )
+        if ( interval_method == EVENTS && current_num_events_in_interval == num_events_per_interval && current_interval < interval_change_points.size() )
         {
-            interval_starts[current_interval] = sim_age;
+            interval_change_points[current_interval] = sim_age;
             current_num_events_in_interval = 0;
         }
         
+        --current_num_lineages;
     }
     
-    return coalescent_times;
+    return coalescent_ages;
 }
 
 
@@ -284,18 +275,18 @@ std::vector<double> PiecewiseConstantCoalescent::simulateCoalescentAges( size_t 
  * Swap the parameters held by this distribution.
  *
  *
- * \param[in]    oldP      Pointer to the old parameter.
- * \param[in]    newP      Pointer to the new parameter.
+ * \param[in]    old_p      Pointer to the old parameter.
+ * \param[in]    new_p      Pointer to the new parameter.
  */
-void PiecewiseConstantCoalescent::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void PiecewiseConstantCoalescent::swapParameterInternal(const DagNode *old_p, const DagNode *new_p)
 {
-    if (oldP == Nes)
+    if (old_p == Nes)
     {
-        Nes = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        Nes = static_cast<const TypedDagNode<RbVector<double> >* >( new_p );
     }
-    else if (oldP == interval_starts_var)
+    else if (old_p == interval_change_points_var)
     {
-        interval_starts_var = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        interval_change_points_var = static_cast<const TypedDagNode<RbVector<double> >* >( new_p );
     }
 }
 
@@ -307,75 +298,72 @@ void PiecewiseConstantCoalescent::swapParameterInternal(const DagNode *oldP, con
  */
 void PiecewiseConstantCoalescent::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
-    
+    // Sebastian: This is currently redudant because we update the intervals each time when we compute the probability
     // just update the start times of the intervals
-    updateIntervals();
+//    updateIntervals();
     
 }
 
 
 
 /**
- * Touch the current value and reset some internal flags.
- * If the root age variable has been restored, then we need to change the root age of the tree too.
+ * Recompute the current interval change point vector and corresponding population size vector.
+ *
  *
  * @throw RbExpection when no interval start times are specified when the 'SPECIFIED' interval_method is used
  *
  */
-void PiecewiseConstantCoalescent::updateIntervals( void )
+void PiecewiseConstantCoalescent::updateIntervals( void ) const
 {
     
     // first check if we want to set the interval ages here!
     if ( interval_method == SPECIFIED )
     {
-        if ( interval_starts_var != NULL )
-        {
-            interval_starts = interval_starts_var->getValue();
-        }
-        else
+        // we obtained the interval ages, so we just need to make sure that they are sorted.
+        if ( interval_change_points_var == NULL )
         {
             throw RbException("You have to provide the start times of the coalescent skyline intervals if you chose 'SPECIFIED' as the method of choice.");
         }
         
         // clean all the sets
-        interval_starts.clear();
+        interval_change_points.clear();
         pop_sizes.clear();
+                
+        // important, we use this set of ages to automatically sort the ages.
+        std::set<double> event_ages;
         
-//        double present_time = process_age->getValue();
-        
-        std::set<double> event_times;
-        
-        const std::vector<double>& times = interval_starts_var->getValue();
-        for (std::vector<double>::const_iterator it = times.begin(); it != times.end(); ++it)
+        const std::vector<double>& change_point_ages = interval_change_points_var->getValue();
+        for (std::vector<double>::const_iterator it = change_point_ages.begin(); it != change_point_ages.end(); ++it)
         {
-            event_times.insert( *it );
+            event_ages.insert( *it );
         }
         
+        // get our current population sizes
         const std::vector<double> &p = Nes->getValue();
+                
+        // we assume that the first population size corresponds to the interval starting at time 0
+        pop_sizes.push_back( p[0] );
         
-        size_t index = p.size()-1;
-        
-        // we assume that the last population size corresponds to the interval starting at time 0
-        pop_sizes.push_back( p[index] );
-        
+        size_t index = 0;
         size_t pos = 0;
-        for (std::set<double>::iterator it = event_times.begin(); it != event_times.end(); ++it)
+        for (std::set<double>::iterator it = event_ages.begin(); it != event_ages.end(); ++it)
         {
-            double t = *it;
+            // get the age for the event
+            double a = *it;
             
             // add the time to our vector
-            interval_starts.push_back( t );
+            interval_change_points.push_back( a );
             
-            // add the population size at the event t
-            pos = size_t( find(times.begin(), times.end(), t) - times.begin() );
-            if ( pos != times.size() )
+            // add the population size at the event a
+            pos = size_t( find(change_point_ages.begin(), change_point_ages.end(), a) - change_point_ages.begin() );
+            if ( pos != change_point_ages.size() )
             {
                 index = pos;
-                pop_sizes.push_back( p[index] );
+                pop_sizes.push_back( p[index+1] );
             }
             else
             {
-                pop_sizes.push_back( p[index] );
+                throw RbException("Couldn't sort vector of interval change points.");
             }
             
         }
@@ -388,22 +376,22 @@ void PiecewiseConstantCoalescent::updateIntervals( void )
         pop_sizes = Nes->getValue();
         
         // next, we recompute the starting times of new intervals
-        interval_starts = RbVector<double>(Nes->getValue().size()-1, RbConstants::Double::inf);
+        interval_change_points = RbVector<double>(Nes->getValue().size()-1, RbConstants::Double::inf);
         
         if ( this->value != NULL )
         {            
-            // retrieved the speciation times
-            std::vector<double> ages;
+            // retrieve the coalescent ages
+            std::vector<double> coalescent_ages;
             for (size_t i = 0; i < value->getNumberOfInteriorNodes()+1; ++i)
             {
                 const TopologyNode& n = value->getInteriorNode( i );
                 double a = n.getAge();
-                ages.push_back(a);
+                coalescent_ages.push_back(a);
             }
             // sort the vector of times in ascending order
-            std::sort(ages.begin(), ages.end());
+            std::sort(coalescent_ages.begin(), coalescent_ages.end());
             
-            size_t num_events_per_interval = size_t( ceil( double(num_taxa-1.0)/Nes->getValue().size()) );
+            size_t num_events_per_interval = size_t( floor( double(num_taxa-1.0)/Nes->getValue().size()) );
             size_t current_interval = 0;
             size_t current_num_events_in_interval = 0;
             for (size_t i = 0; i < num_taxa-2; ++i)
@@ -411,7 +399,7 @@ void PiecewiseConstantCoalescent::updateIntervals( void )
                 ++current_num_events_in_interval;
                 if ( current_num_events_in_interval == num_events_per_interval )
                 {
-                    interval_starts[current_interval] = ages[i];
+                    interval_change_points[current_interval] = coalescent_ages[i];
                     current_num_events_in_interval = 0;
                     ++current_interval;
                 }

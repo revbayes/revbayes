@@ -204,14 +204,9 @@ std::vector<double> ConstantPopulationHeterochronousCoalescent::simulateCoalesce
     }
     
     size_t at_serial_age = 0;
-    if (num_taxa_at_present == num_taxa)
-    {
-        serial_ages.push_back(RbConstants::Double::inf);
-    }
-    else
+    if (num_taxa_at_present < num_taxa)
     {
         std::sort(serial_ages.begin(), serial_ages.end());
-        serial_ages.push_back(RbConstants::Double::inf);
     }
     
     // now simulate the ages
@@ -263,13 +258,13 @@ std::vector<double> ConstantPopulationHeterochronousCoalescent::simulateCoalesce
  * Swap the parameters held by this distribution.
  *
  *
- * \param[in]    oldP      Pointer to the old parameter.
- * \param[in]    newP      Pointer to the new parameter.
+ * \param[in]    old_p      Pointer to the old parameter.
+ * \param[in]    new_p      Pointer to the new parameter.
  */
-void ConstantPopulationHeterochronousCoalescent::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void ConstantPopulationHeterochronousCoalescent::swapParameterInternal(const DagNode *old_p, const DagNode *new_p)
 {
-    if (oldP == Ne)
+    if (old_p == Ne)
     {
-        Ne = static_cast<const TypedDagNode<double>* >( newP );
+        Ne = static_cast<const TypedDagNode<double>* >( new_p );
     }
 }

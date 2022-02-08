@@ -43,7 +43,7 @@ namespace RevBayesCore {
         // Parameter management functions
         virtual void                                        keepSpecialization(const DagNode* affecter);
         virtual void                                        restoreSpecialization(const DagNode *restorer);
-        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Swap a parameter
+        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                //!< Swap a parameter
         virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
 
         // derived helper functions
@@ -53,12 +53,12 @@ namespace RevBayesCore {
         
     private:
         
-        void                                                updateIntervals(void);
+        void                                                updateIntervals(void) const;
         
         // members
         const TypedDagNode<RbVector<double> >*              Nes;                                    //!< A pointer for the population sizes for each interval
-        const TypedDagNode<RbVector<double> >*              interval_starts_var;                    //!< A pointer for the start time of each interval
-        mutable RbVector<double>                            interval_starts;                        //!< The start time of each interval
+        const TypedDagNode<RbVector<double> >*              interval_change_points_var;
+        mutable RbVector<double>                            interval_change_points;
         mutable RbVector<double>                            pop_sizes;                              //!< The population sizes for each interval
         METHOD_TYPES                                        interval_method;                        //!< The method of specifying coalescent intervals
 
