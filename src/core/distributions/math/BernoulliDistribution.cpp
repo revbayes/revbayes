@@ -61,7 +61,8 @@ double BernoulliDistribution::computeLnProbability( void )
 }
 
 
-void BernoulliDistribution::redrawValue( void ) {
+void BernoulliDistribution::redrawValue( void )
+{
     
     double u = GLOBAL_RNG->uniform01();
     *value = u > p->getValue() ? 0 : 1;

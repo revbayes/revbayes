@@ -29,14 +29,14 @@ namespace RevBayesCore {
         
     public:
         ConstantPopulationHeterochronousCoalescent(const TypedDagNode<double> *N, const std::vector<Taxon> &tn, const std::vector<Clade> &c);
-        virtual                                            ~ConstantPopulationHeterochronousCoalescent(void);                                                                    //!< Virtual destructor
+        virtual                                            ~ConstantPopulationHeterochronousCoalescent(void);                                               //!< Virtual destructor
         
         // public member functions
-        ConstantPopulationHeterochronousCoalescent*                       clone(void) const;                                                                                  //!< Create an independent clone
+        ConstantPopulationHeterochronousCoalescent*         clone(void) const;                                                                              //!< Create an independent clone
 
     protected:
         // Parameter management functions
-        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Swap a parameter
+        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                //!< Swap a parameter
         
         // derived helper functions
         double                                              computeLnProbabilityTimes(void) const;                                                          //!< Compute the log-transformed probability of the current value.

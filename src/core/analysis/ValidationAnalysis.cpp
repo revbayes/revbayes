@@ -81,7 +81,7 @@ ValidationAnalysis::ValidationAnalysis( const MonteCarloAnalysis &m, size_t n, c
             for (size_t j = 0; j < current_ordered_nodes.size(); ++j)
             {
                 DagNode *the_node = current_ordered_nodes[j];
-            
+                            
                 if ( the_node->isStochastic() == true )
                 {
                     the_node->redraw( SimulationCondition::VALIDATION );
