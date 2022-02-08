@@ -144,7 +144,7 @@ double HeterochronousCoalescent::computeLnProbabilityTimes( void ) const
         if ( heterochronous == true && next_serial_time <= next_age && next_serial_time <= next_df_change_time )
         {
             // serial sample
-            combined_event_times.push_back(next_serial_time);
+            combined_event_times.push_back( next_serial_time );
             combined_event_types.push_back( SERIAL_SAMPLE );
             ++index_serial_time;
             if (index_serial_time < serial_times.size())
