@@ -111,19 +111,17 @@ RevBayesCore::PiecewiseConstantCoalescent* Dist_CoalescentSkyline::createDistrib
         if ( ti != NULL )
         {
             // throw exception
-            throw RbException("Some useful exception.");
+            throw RbException("You can only provide the 'times' when you use 'method=specified'.");
         }
-    } else if ( m == "uniform" )
-    {
-        meth = RevBayesCore::PiecewiseConstantCoalescent::UNIFORM;
-    } else if ( m == "specified" )
+    }
+    else if ( m == "specified" )
     {
         meth = RevBayesCore::PiecewiseConstantCoalescent::SPECIFIED;
         // we need to check that we indeed got interval times
         if ( ti == NULL )
         {
             // throw exception
-            throw RbException("Some useful exception.");
+            throw RbException("You must provide the 'times' when you use 'method=specified'.");
         }
     }
     
@@ -215,7 +213,6 @@ const MemberRules& Dist_CoalescentSkyline::getParameterRules(void) const
         dist_member_rules.push_back( new ArgumentRule( "times"      , ModelVector<RealPos>::getClassTypeSpec(), "A vector of times for the intervals, if applicable.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         std::vector<std::string> optionsCondition;
         optionsCondition.push_back( "events" );
-        optionsCondition.push_back( "uniform" );
         optionsCondition.push_back( "specified" );
         dist_member_rules.push_back( new OptionRule( "method", new RlString("events"), optionsCondition, "The method how intervals are defined." ) );
         dist_member_rules.push_back( new ArgumentRule( "taxa"       , ModelVector<Taxon>::getClassTypeSpec(), "The taxa used when drawing a random tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
