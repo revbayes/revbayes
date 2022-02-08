@@ -389,6 +389,10 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
     {
         once = true;
     }
+    if ( nodeType == STOCHASTIC )
+    {
+        once = false;
+    }
     
     if ( nodeType == STOCHASTIC && the_var->getRevObject().getDagNode()->getDagNodeType() != RevBayesCore::DagNode::STOCHASTIC )
     {
@@ -413,7 +417,7 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
             penalty = the_var->getRevObject().isConvertibleTo( *it, once );
         }
         
-        if ( penalty != -1 && (*it).isDerivedOf( the_var->getRequiredTypeSpec() ) )
+        if ( (*it).isDerivedOf( the_var->getRequiredTypeSpec() ) )
         {
             return penalty;
         }
@@ -421,15 +425,6 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
         {
             return penalty;
         }
-
-//        else if ( once == true &&
-////                 !var->isAssignable() &&
-//                  the_var->getRevObject().isConvertibleTo( *it, true ) != -1 &&
-//                  (*it).isDerivedOf( the_var->getRequiredTypeSpec() )
-//                )
-//        {
-//            return the_var->getRevObject().isConvertibleTo( *it, true );
-//        }
         else if ( nodeType != STOCHASTIC )
         {
             
