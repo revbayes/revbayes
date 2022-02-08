@@ -104,51 +104,114 @@ double PiecewiseConstantCoalescent::computeLnProbabilityTimes( void ) const
     // sort the vector of ages in ascending order
     std::sort(coalescent_ages.begin(), coalescent_ages.end());
     
-    // initialize the current interval index at 0
-    size_t current_interval = 0;
-    
-    size_t current_num_lineages = num_taxa;
-    double last_event_age = 0.0;
-    for (size_t i = 0; i < coalescent_ages.size(); ++i)
+    // retrieve the ages of any serially sampled tips
+    std::vector<double> serial_tip_ages;
+    size_t num_taxa_at_present = value->getNumberOfTips();
+    for (size_t i = 0; i < value->getNumberOfTips(); ++i)
     {
-        double n_pairs = current_num_lineages * (current_num_lineages-1) / 2.0;
-
-        // initialize theta
-        double theta = 0.0;
-        
-        // initialize the waiting time variable
-        double delta_age = coalescent_ages[i];
-        bool was_coalescent_event = false;
-        do
-        {
-            theta = pop_sizes[current_interval];
-            double next_coal_age = coalescent_ages[i];
-            double next_event_age = next_coal_age;
-            if ( current_interval < interval_change_points.size() )
-            {
-                next_event_age = (next_coal_age > interval_change_points[current_interval]) ? interval_change_points[current_interval] : next_coal_age;
-            }
-            
-            delta_age = next_event_age - last_event_age;
-            was_coalescent_event = current_interval >= interval_change_points.size() || next_coal_age <= interval_change_points[current_interval];
-            if ( was_coalescent_event == false )
-            {
-                ++current_interval;
-                last_event_age = next_event_age;
-                
-                // we multiply with the waiting time that no coalescent event happened until the next interval change point
-                ln_prob -= n_pairs * delta_age / theta ;
-            }
-            
-        } while ( was_coalescent_event == false );
-        
-        // we multiply with the probability of a coalescent event
-        ln_prob += log( 1.0 / theta ) - n_pairs * delta_age / theta;
-        
-        // decrement the current number of lineage counter
-        --current_num_lineages;
+        const TopologyNode& n = value->getTipNode( i );
+        double a = n.getAge();
+        if ( a > 0.0 ) {
+            serial_tip_ages.push_back(a);
+            --num_taxa_at_present;
+        }
     }
     
+    std::vector<double> combined_event_ages;
+    std::vector<EVENT_TYPE> combined_event_types;
+
+    // sort the vector of serial sampling times in ascending order
+    std::sort(serial_tip_ages.begin(), serial_tip_ages.end());
+
+    // initialize variables
+    size_t at_coal_age                  = 0;
+    size_t at_serial_age                = 0;
+    size_t at_interval_change_point     = 0;
+    double next_coal_age                = coalescent_ages[at_coal_age];
+    double next_interval_change_point   = interval_change_points[at_interval_change_point];
+    // set the next serially sampled tip age if present, otherwise Inf
+    double next_serial_age              = (at_serial_age < serial_tip_ages.size() ? serial_tip_ages[at_serial_age] : RbConstants::Double::inf);
+
+    // create master list of event times and types
+    // events are either a sample (lineage size up), coalescence (lineage size down), or theta changepoint (lineage size constant)
+    do
+    {
+        next_coal_age = coalescent_ages[at_coal_age];
+        if (next_coal_age <= next_serial_age && next_coal_age <= next_interval_change_point)
+        {
+            // coalescence
+            combined_event_ages.push_back( next_coal_age );
+            combined_event_types.push_back( COALESCENT );
+            ++at_coal_age;
+        }
+        else if ( next_serial_age <= next_coal_age && next_serial_age <= next_interval_change_point )
+        {
+            // serial sample
+            combined_event_ages.push_back( next_serial_age );
+            combined_event_types.push_back( SERIAL_SAMPLE );
+            ++at_serial_age;
+            // set the next serial age
+            if (at_serial_age < serial_tip_ages.size())
+            {
+                next_serial_age = serial_tip_ages[at_serial_age];
+            }
+            else
+            {
+                next_serial_age = RbConstants::Double::inf;
+            }
+        }
+        else
+        {
+            // theta change
+            combined_event_ages.push_back( next_interval_change_point );
+            combined_event_types.push_back( DEMOGRAPHIC_MODEL_CHANGE );
+            ++at_interval_change_point;
+            if ( at_interval_change_point < interval_change_points.size() )
+            {
+                next_interval_change_point = interval_change_points[at_interval_change_point];
+            }
+            else
+            {
+                next_interval_change_point = RbConstants::Double::inf;
+            }
+        }
+    } while (at_coal_age < coalescent_ages.size());
+
+
+    size_t current_interval = 0;
+    size_t current_num_lineages = num_taxa_at_present;
+    double last_event_age = 0.0;
+
+    for (size_t i = 0; i < combined_event_ages.size(); ++i)
+    {
+        
+        double theta = pop_sizes[current_interval];
+        double n_pairs = current_num_lineages * (current_num_lineages-1) / 2.0;
+        
+        double delta_age = combined_event_ages[i] - last_event_age;
+
+        if (combined_event_types[i] == COALESCENT)
+        {
+            // coalescence
+            ln_prob += log( 1.0 / theta ) - n_pairs * delta_age / theta;
+            --current_num_lineages;
+        }
+        else if (combined_event_types[i] == SERIAL_SAMPLE)
+        {
+            // sampled ancestor
+            ln_prob -= n_pairs * delta_age / theta ;
+            ++current_num_lineages;
+        }
+        else
+        {
+            // theta change
+            ln_prob -= n_pairs * delta_age / theta ;
+            ++current_interval;
+        }
+
+        last_event_age = combined_event_ages[i];
+    }
+
     return ln_prob;
 }
 
@@ -193,6 +256,82 @@ void PiecewiseConstantCoalescent::restoreSpecialization(const DagNode *affecter)
     
 }
 
+//
+///**
+// * Simulate new coalescent times.
+// *
+// * \param[in]    n      The number of coalescent events to simulate.
+// *
+// * \return    A vector of the simulated coalescent times.
+// */
+//std::vector<double> PiecewiseConstantCoalescent::simulateCoalescentAges( size_t n ) const
+//{
+//    
+//    // first check if we want to set the interval ages here!
+//    if ( interval_method == SPECIFIED )
+//    {
+//        updateIntervals();
+//    }
+//    else
+//    {
+//        interval_change_points = RbVector<double>(Nes->getValue().size()-1, RbConstants::Double::inf);
+//    }
+//    size_t num_events_per_interval = size_t( floor( double(n)/Nes->getValue().size()) );
+//    size_t current_num_events_in_interval = 0;
+//    
+//    // Get the rng
+//    RandomNumberGenerator* rng = GLOBAL_RNG;
+//    
+//    // allocate the vector for the times
+//    std::vector<double> coalescent_ages = std::vector<double>(n,0.0);
+//    
+//    const RbVector<double> &pop_sizes  = Nes->getValue();
+//    size_t current_interval = 0;
+//    size_t current_num_lineages = num_taxa;
+//    // draw a time for each speciation event condition on the time of the process
+//    for (size_t i = 0; i < n; ++i)
+//    {
+//        double prev_coalescent_age = 0.0;
+//        if ( i > 0 )
+//        {
+//            prev_coalescent_age = coalescent_ages[i-1];
+//        }
+//        
+//        double n_pairs = current_num_lineages * (current_num_lineages-1) / 2.0;
+//        
+//        double sim_age = 0.0;
+//        bool was_coalescent_event = false;
+//        do
+//        {
+//            double theta = 1.0 / (pop_sizes[current_interval]);
+//            double lambda = n_pairs * theta;
+//            double u = RbStatistics::Exponential::rv( lambda, *rng);
+//            sim_age = prev_coalescent_age + u;
+//            was_coalescent_event = current_interval >= interval_change_points.size() || sim_age < interval_change_points[current_interval];
+//            if ( was_coalescent_event == false )
+//            {
+//                prev_coalescent_age = interval_change_points[current_interval];
+//                ++current_interval;
+//            }
+//            
+//        } while ( was_coalescent_event == false );
+//        
+//        coalescent_ages[i] = sim_age;
+//        
+//        ++current_num_events_in_interval;
+//        if ( interval_method == EVENTS && current_num_events_in_interval == num_events_per_interval && current_interval < interval_change_points.size() )
+//        {
+//            interval_change_points[current_interval] = sim_age;
+//            current_num_events_in_interval = 0;
+//        }
+//        
+//        --current_num_lineages;
+//    }
+//    
+//    return coalescent_ages;
+//}
+
+
 
 /**
  * Simulate new coalescent times.
@@ -213,55 +352,158 @@ std::vector<double> PiecewiseConstantCoalescent::simulateCoalescentAges( size_t 
     {
         interval_change_points = RbVector<double>(Nes->getValue().size()-1, RbConstants::Double::inf);
     }
-    size_t num_events_per_interval = size_t( floor( double(n)/Nes->getValue().size()) );
-    size_t current_num_events_in_interval = 0;
-    
+
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
-    // now simulate the ages
+    // retrieve the times of any serially sampled tips
+    std::vector<double> serial_tip_ages;
+    size_t num_taxa_at_present = 0;
+    for (size_t i = 0; i < num_taxa; ++i)
+    {
+        double a = taxa[i].getAge();
+        if ( a > 0.0 )
+        {
+            serial_tip_ages.push_back(a);
+        }
+        else
+        {
+            ++num_taxa_at_present;
+        }
+    }
+
     
+    // Put sampling times and pop-size changes into a single vector of event times
+    std::vector<double> combined_event_ages;
+    std::vector<EVENT_TYPE> combined_event_types;
+    
+    // sort the vector of serial sampling times in ascending order
+    std::sort(serial_tip_ages.begin(), serial_tip_ages.end());
+    
+    // initialize variables
+    size_t at_coal_age                  = 0;
+    size_t at_serial_age                = 0;
+    size_t at_interval_change_point     = 0;
+    double next_interval_change_point   = interval_change_points[at_interval_change_point];
+    // set the next serially sampled tip age if present, otherwise Inf
+    double next_serial_age              = (at_serial_age < serial_tip_ages.size() ? serial_tip_ages[at_serial_age] : RbConstants::Double::inf);
+
+    
+    // create master list of event times and types
+    // pre-defined events are either a sample (lineage size up) or theta changepoint (lineage size constant)
+    size_t num_total_events = ( interval_method == SPECIFIED ? interval_change_points.size() + serial_tip_ages.size() : serial_tip_ages.size() );
+    for (size_t num_events = 0; num_events < num_total_events; ++num_events)
+    {
+        if (next_interval_change_point <= next_serial_age)
+        {
+            // theta change
+            combined_event_ages.push_back(next_interval_change_point);
+            combined_event_types.push_back( DEMOGRAPHIC_MODEL_CHANGE);
+            ++at_interval_change_point;
+            if (at_interval_change_point < interval_change_points.size())
+            {
+                next_interval_change_point = interval_change_points[at_interval_change_point];
+            }
+            else
+            {
+                next_interval_change_point = RbConstants::Double::inf;
+            }
+        }
+        else
+        {
+            // serial sample
+            combined_event_ages.push_back(next_serial_age);
+            combined_event_types.push_back( SERIAL_SAMPLE );
+            ++at_serial_age;
+            if (at_serial_age < serial_tip_ages.size())
+            {
+                next_serial_age = serial_tip_ages[at_serial_age];
+            }
+            else
+            {
+                next_serial_age = RbConstants::Double::inf;
+            }
+        }
+    }
+//    } else {
+//        combinedEventTimes = intervals;
+//        combinedEventTypes = std::vector<double>(intervals.size(),0.0);
+//    }
+ 
+//    // cap vector with an event at t-infinity
+//    combinedEventTimes.push_back(RbConstants::Double::inf);
+//    combinedEventTypes.push_back(RbConstants::Double::inf);
+    
+    if ( interval_method == EVENTS )
+    {
+        size_t num_serial_times = combined_event_ages.size();
+        
+        // add dummies for the change point times
+        for ( size_t i=0; i<interval_change_points.size(); ++i)
+        {
+            combined_event_ages[num_serial_times+i]  = RbConstants::Double::inf;
+            combined_event_types[num_serial_times+i] = DEMOGRAPHIC_MODEL_CHANGE;
+        }
+    }
+
     // allocate the vector for the times
     std::vector<double> coalescent_ages = std::vector<double>(n,0.0);
     
-    const RbVector<double> &pop_sizes  = Nes->getValue();
     size_t current_interval = 0;
-    size_t current_num_lineages = num_taxa;
-    // draw a time for each speciation event condition on the time of the process
+    size_t theta_interval = 0;
+    size_t current_num_lineages = num_taxa_at_present;
+    
+    size_t num_events_per_interval = size_t( floor( double(n)/Nes->getValue().size()) );
+    size_t current_num_events_in_interval = 0;
+    
+    // the current age of the process
+    double sim_age = 0.0;
+
+    // now simulate the ages
     for (size_t i = 0; i < n; ++i)
     {
-        double prev_coalescent_age = 0.0;
-        if ( i > 0 )
-        {
-            prev_coalescent_age = coalescent_ages[i-1];
-        }
         
-        double n_pairs = current_num_lineages * (current_num_lineages-1) / 2.0;
-        
-        double sim_age = 0.0;
         bool was_coalescent_event = false;
         do
         {
-            double theta = 1.0 / (pop_sizes[current_interval]);
-            double lambda = n_pairs * theta;
-            double u = RbStatistics::Exponential::rv( lambda, *rng);
-            sim_age = prev_coalescent_age + u;
-            was_coalescent_event = current_interval >= interval_change_points.size() || sim_age < interval_change_points[current_interval];
+            double n_pairs = current_num_lineages * (current_num_lineages-1) / 2.0;
+            double theta = pop_sizes[theta_interval];
+            double lambda = n_pairs / theta;
+            double u = RbStatistics::Exponential::rv( lambda, *rng );
+            sim_age += u;
+            was_coalescent_event = sim_age < combined_event_ages[current_interval] && current_num_lineages > 1;
             if ( was_coalescent_event == false )
             {
-                prev_coalescent_age = interval_change_points[current_interval];
+                // If j is 1 and we are still simulating coalescent events, we have >= 1 serial sample left to coalesce.
+                // There are no samples to coalesce now, but we cannot exit, thus, we advance to the next serial sample
+                // Alternately, when we cross a serial sampling time or theta window, the number of active lineages changes
+                // or the pop size changes, and it is necessary to discard any "excess" time,
+                // which is drawn from an incorrect distribution,then we can draw a new time according to
+                // the correct number of active lineages.
+                // Either we advance or go back, but in both situations we set the time to the current event in combinedEvents.
+                sim_age = combined_event_ages[current_interval];
+                if (combined_event_types[current_interval] == DEMOGRAPHIC_MODEL_CHANGE)
+                {
+                    // theta change
+                    ++theta_interval;
+                }
+                else
+                {
+                    // serial sample
+                    ++current_num_lineages;
+                }
                 ++current_interval;
             }
-            
         } while ( was_coalescent_event == false );
-        
+
         coalescent_ages[i] = sim_age;
         
         ++current_num_events_in_interval;
-        if ( interval_method == EVENTS && current_num_events_in_interval == num_events_per_interval && current_interval < interval_change_points.size() )
+        if ( interval_method == EVENTS && current_num_events_in_interval == num_events_per_interval && theta_interval < interval_change_points.size() )
         {
-            interval_change_points[current_interval] = sim_age;
+            interval_change_points[theta_interval] = sim_age;
             current_num_events_in_interval = 0;
+            ++theta_interval;
         }
         
         --current_num_lineages;
