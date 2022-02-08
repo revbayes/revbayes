@@ -82,7 +82,7 @@ double HeterochronousCoalescent::computeLnProbabilityTimes( void ) const
 {
     
     // variable declarations and initialization
-    double ln_prob_times = 0;
+    double ln_prob = 0;
     
     // retrieve the coalescence times
     std::vector<double> ages;
@@ -96,22 +96,22 @@ double HeterochronousCoalescent::computeLnProbabilityTimes( void ) const
     std::sort(ages.begin(), ages.end());
     
     // retrieve the times of any serially sampled tips
-    std::vector<double> serial_times;
+    std::vector<double> serial_ages;
     size_t num_taxa_at_present = value->getNumberOfTips();
     for (size_t i = 0; i < value->getNumberOfTips(); ++i)
     {
         double a = value->getTipNode(i).getAge();
         if ( a > 0.0 )
         {
-            serial_times.push_back(a);
+            serial_ages.push_back(a);
             --num_taxa_at_present;
         }
     }
     
     // retrieve change times
-    const RbVector<double> &change_times = intervals->getValue();
+    const RbVector<double> &change_ages = intervals->getValue();
     
-    std::vector<double> combined_event_times;
+    std::vector<double> combined_event_ages;
     std::vector<EVENT_TYPE> combined_event_types;
     
     bool heterochronous = num_taxa_at_present < num_taxa;
@@ -119,62 +119,62 @@ double HeterochronousCoalescent::computeLnProbabilityTimes( void ) const
     if ( heterochronous == true )
     {
         // sort the vector of serial sampling times in ascending order
-        std::sort(serial_times.begin(), serial_times.end());
+        std::sort(serial_ages.begin(), serial_ages.end());
     }
 
     size_t index_age = 0;
-    size_t index_serial_time = 0;
+    size_t index_serial_age = 0;
     size_t index_demographic_function_change_point = 0;
     double next_age = ages[index_age];
-    double next_serial_time = RbConstants::Double::nan;
+    double next_serial_age = RbConstants::Double::nan;
     if ( heterochronous == true )
     {
-        next_serial_time = serial_times[index_serial_time];
+        next_serial_age = serial_ages[index_serial_age];
     }
-    double next_df_change_time = RbConstants::Double::inf;
-    if ( index_demographic_function_change_point < change_times.size() )
+    double next_df_change_age = RbConstants::Double::inf;
+    if ( index_demographic_function_change_point < change_ages.size() )
     {
-        next_df_change_time = change_times[index_demographic_function_change_point];
+        next_df_change_age = change_ages[index_demographic_function_change_point];
     }
     // create master list of event times and types
     // events are either a sample (lineage size up), coalescence (lineage size down), or theta changepoint (lineage size constant)
     do
     {
         next_age = ages[index_age];
-        if ( heterochronous == true && next_serial_time <= next_age && next_serial_time <= next_df_change_time )
+        if ( heterochronous == true && next_serial_age <= next_age && next_serial_age <= next_df_change_age )
         {
             // serial sample
-            combined_event_times.push_back( next_serial_time );
+            combined_event_ages.push_back( next_serial_age );
             combined_event_types.push_back( SERIAL_SAMPLE );
-            ++index_serial_time;
-            if (index_serial_time < serial_times.size())
+            ++index_serial_age;
+            if (index_serial_age < serial_ages.size())
             {
-                next_serial_time = serial_times[index_serial_time];
+                next_serial_age = serial_ages[index_serial_age];
             }
             else
             {
-                next_serial_time = RbConstants::Double::inf;
+                next_serial_age = RbConstants::Double::inf;
             }
         }
-        else if ( next_df_change_time <= next_age )
+        else if ( next_df_change_age <= next_age )
         {
             // change of demographic function
-            combined_event_times.push_back(next_df_change_time);
+            combined_event_ages.push_back(next_df_change_age);
             combined_event_types.push_back( DEMOGRAPHIC_MODEL_CHANGE );
             ++index_demographic_function_change_point;
-            if ( index_demographic_function_change_point < change_times.size() )
+            if ( index_demographic_function_change_point < change_ages.size() )
             {
-                next_df_change_time = change_times[index_demographic_function_change_point];
+                next_df_change_age = change_ages[index_demographic_function_change_point];
             }
             else
             {
-                next_df_change_time = RbConstants::Double::inf;
+                next_df_change_age = RbConstants::Double::inf;
             }
         }
         else
         {
             // coalescence
-            combined_event_times.push_back(next_age);
+            combined_event_ages.push_back(next_age);
             combined_event_types.push_back(COALESCENT);
             ++index_age;
         }
@@ -182,25 +182,25 @@ double HeterochronousCoalescent::computeLnProbabilityTimes( void ) const
         
     
     
-    size_t j = num_taxa_at_present;
-    double window_start = 0.0;
+    size_t current_num_lineages = num_taxa_at_present;
+    double last_event_age = 0.0;
     size_t index_demographic_function = 0;
     const DemographicFunction *current_demographic_function = &demographies[index_demographic_function];
     
     
-    for (size_t i = 0; i < combined_event_times.size(); ++i)
+    for (size_t i = 0; i < combined_event_ages.size(); ++i)
     {
-        double n_pairs = j * (j-1) / 2.0;
-        double interval_area = current_demographic_function->getIntegral(window_start, combined_event_times[i]);
+        double n_pairs = current_num_lineages * (current_num_lineages-1) / 2.0;
+        double interval_area = current_demographic_function->getIntegral(last_event_age, combined_event_ages[i]);
         
         // add log probability that nothing happens until the next event
-        ln_prob_times -= n_pairs * interval_area;
+        ln_prob -= n_pairs * interval_area;
         
         // handle events accordingly
         if (combined_event_types[i] == SERIAL_SAMPLE )
         {
             // sampled ancestor
-            ++j;
+            ++current_num_lineages;
         }
         else if ( combined_event_types[i] == DEMOGRAPHIC_MODEL_CHANGE )
         {
@@ -215,15 +215,15 @@ double HeterochronousCoalescent::computeLnProbabilityTimes( void ) const
         else
         {
             // coalescence
-            double theta_at_coal_time = current_demographic_function->getDemographic(combined_event_times[i]);
-            ln_prob_times -= log( theta_at_coal_time );
-            --j;
+            double theta_at_coal_age = current_demographic_function->getDemographic(combined_event_ages[i]);
+            ln_prob -= log( theta_at_coal_age );
+            --current_num_lineages;
         }
         
-        window_start = combined_event_times[i];
+        last_event_age = combined_event_ages[i];
     }
     
-    return ln_prob_times;
+    return ln_prob;
     
 }
 
@@ -236,20 +236,20 @@ double HeterochronousCoalescent::computeLnProbabilityTimes( void ) const
  */
 std::vector<double> HeterochronousCoalescent::simulateCoalescentAges( size_t n ) const
 {
-    const RbVector<double> &change_times = intervals->getValue();
+    const RbVector<double> &change_ages = intervals->getValue();
 
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
     // retrieve the times of any serially sampled tips
-    std::vector<double> serial_times;
+    std::vector<double> serial_ages;
     size_t num_taxa_at_present = 0;
     for (size_t i = 0; i < num_taxa; ++i)
     {
         double a = taxa[i].getAge();
         if ( a > 0.0 )
         {
-            serial_times.push_back(a);
+            serial_ages.push_back(a);
         }
         else
         {
@@ -262,15 +262,15 @@ std::vector<double> HeterochronousCoalescent::simulateCoalescentAges( size_t n )
     std::vector<double> combinedEventTypes;
     if (num_taxa_at_present < num_taxa) {
         // sort the vector of serial sampling times in ascending order
-        std::sort(serial_times.begin(), serial_times.end());
+        std::sort(serial_ages.begin(), serial_ages.end());
         size_t atSerialTime = 0;
         size_t atIntervalStart = 0;
-        double nextSerialTime = serial_times[atSerialTime];
-        double nextIntervalStart = change_times[atIntervalStart];
+        double nextSerialTime = serial_ages[atSerialTime];
+        double nextIntervalStart = change_ages[atIntervalStart];
         
         // create master list of event times and types
         // pre-defined events are either a sample (lineage size up) or demographic function changepoint (lineage size constant)
-        size_t nTotalEvents = change_times.size() + serial_times.size();
+        size_t nTotalEvents = change_ages.size() + serial_ages.size();
         for (size_t nEvents = 0; nEvents < nTotalEvents; ++nEvents)
         {
             if (nextIntervalStart <= nextSerialTime) {
@@ -278,8 +278,8 @@ std::vector<double> HeterochronousCoalescent::simulateCoalescentAges( size_t n )
                 combinedEventTimes.push_back(nextIntervalStart);
                 combinedEventTypes.push_back(0.0);
                 ++atIntervalStart;
-                if (atIntervalStart < change_times.size()) {
-                    nextIntervalStart = change_times[atIntervalStart];
+                if (atIntervalStart < change_ages.size()) {
+                    nextIntervalStart = change_ages[atIntervalStart];
                 } else {
                     nextIntervalStart = RbConstants::Double::inf;
                 }
@@ -288,16 +288,16 @@ std::vector<double> HeterochronousCoalescent::simulateCoalescentAges( size_t n )
                 combinedEventTimes.push_back(nextSerialTime);
                 combinedEventTypes.push_back(1.0);
                 ++atSerialTime;
-                if (atSerialTime < serial_times.size()) {
-                    nextSerialTime = serial_times[atSerialTime];
+                if (atSerialTime < serial_ages.size()) {
+                    nextSerialTime = serial_ages[atSerialTime];
                 } else {
                     nextSerialTime = RbConstants::Double::inf;
                 }
             }
         }
     } else {
-        combinedEventTimes = change_times;
-        combinedEventTypes = std::vector<double>(change_times.size(),0.0);
+        combinedEventTimes = change_ages;
+        combinedEventTypes = std::vector<double>(change_ages.size(),0.0);
     }
  
     // cap vector with an event at t=infinity
@@ -308,12 +308,12 @@ std::vector<double> HeterochronousCoalescent::simulateCoalescentAges( size_t n )
     // now simulate the ages
     
     // allocate the vector for the times
-    std::vector<double> coalescent_times = std::vector<double>(n,0.0);
+    std::vector<double> coalescent_ages = std::vector<double>(n,0.0);
     
     // j is the number of active lineages at the current time
     size_t j = num_taxa_at_present;
     size_t currentInterval = 0;
-    // size_t index_serial_time = 0;
+    // size_t index_serial_age = 0;
     size_t index_demographic_function = 0;
 
     const DemographicFunction *current_demographic_function = &demographies[index_demographic_function];
@@ -355,12 +355,12 @@ std::vector<double> HeterochronousCoalescent::simulateCoalescentAges( size_t n )
             
         } while ( valid == false );
         
-        coalescent_times[i] = sim_age;
+        coalescent_ages[i] = sim_age;
         --j;
         
     }
     
-    return coalescent_times;
+    return coalescent_ages;
 }
 
 /**

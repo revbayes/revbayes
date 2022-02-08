@@ -25,6 +25,9 @@ namespace RevBayesCore {
     class PiecewiseConstantHeterochronousCoalescent : public AbstractCoalescent {
         
     public:
+        
+        enum METHOD_TYPES { EVENTS, SPECIFIED, UNIFORM };
+        
         PiecewiseConstantHeterochronousCoalescent(const TypedDagNode<RbVector<double> > *N, const TypedDagNode<RbVector<double> > *i, const std::vector<Taxon> &tn, const std::vector<Clade> &c);
         virtual                                            ~PiecewiseConstantHeterochronousCoalescent(void);                                                                    //!< Virtual destructor
         
