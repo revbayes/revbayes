@@ -355,6 +355,7 @@ void PiecewiseConstantCoalescent::updateIntervals( void )
         
         size_t index = p.size()-1;
         
+        // we assume that the last population size corresponds to the interval starting at time 0
         pop_sizes.push_back( p[index] );
         
         size_t pos = 0;

@@ -137,7 +137,8 @@ RevLanguage::ParserInfo RevLanguage::Parser::breakIntoLines(const std::string& c
  * As long as we return to the bison code, bison takes care of deleting the syntax tree. However,
  * if we encounter a quit() call, we delete the syntax tree ourselves and exit immediately.
  */
-int RevLanguage::Parser::execute(SyntaxElement* root, Environment &env) const {
+int RevLanguage::Parser::execute(SyntaxElement* root, Environment &env) const
+{
 
     // don't execute command if we are in checking mode
     if (RevLanguage::Parser::getParser().isChecking())
