@@ -90,7 +90,7 @@ RevBayesCore::PiecewiseConstantCoalescent* Dist_CoalescentSkyline::createDistrib
     
     // theta
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* th       = static_cast<const ModelVector<RealPos> &>( theta->getRevObject() ).getDagNode();
-    // theta
+    // times
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* ti       = NULL;
     if ( times != NULL && times->getRevObject() != RevNullObject::getInstance() )
     {
@@ -107,12 +107,24 @@ RevBayesCore::PiecewiseConstantCoalescent* Dist_CoalescentSkyline::createDistrib
     if ( m == "events" )
     {
         meth = RevBayesCore::PiecewiseConstantCoalescent::EVENTS;
+        // we need to check that we did not get interval times
+        if ( ti != NULL )
+        {
+            // throw exception
+            throw RbException("Some useful exception.");
+        }
     } else if ( m == "uniform" )
     {
         meth = RevBayesCore::PiecewiseConstantCoalescent::UNIFORM;
     } else if ( m == "specified" )
     {
         meth = RevBayesCore::PiecewiseConstantCoalescent::SPECIFIED;
+        // we need to check that we indeed got interval times
+        if ( ti == NULL )
+        {
+            // throw exception
+            throw RbException("Some useful exception.");
+        }
     }
     
     // create the internal distribution object
