@@ -37,6 +37,7 @@ namespace RevBayesCore {
         RbVectorImpl(size_t n, const valueType &v) { for (size_t i = 0; i < n; ++i) this->push_back( v ); }
         RbVectorImpl(const vectorType &v) { size_t n=v.size(); for (size_t i = 0; i < n; ++i) this->push_back( v[i] ); }
         RbVectorImpl(const RbVectorImpl<valueType,indicator> &v):std::vector<valueType>() { size_t n=v.size(); for (size_t i = 0; i < n; ++i) this->push_back( v[i] ); }
+        RbVectorImpl(RbVectorImpl<valueType,indicator> &&v) = default;
         virtual                                            ~RbVectorImpl<valueType,indicator>(void) { }
         
         
@@ -60,6 +61,9 @@ namespace RevBayesCore {
         }
         
         // public (stl-like) vector functions
+        RbVectorImpl<valueType,indicator>&                  operator=(const RbVectorImpl<valueType,indicator> &v) = default;
+        RbVectorImpl<valueType,indicator>&                  operator=(RbVectorImpl<valueType,indicator> &&v) = default;
+
         RbIterator<valueType>                               begin(void) { return RbIterator<valueType>( this->std::vector<valueType>::begin() ); }
         RbConstIterator<valueType>                          begin(void) const { return RbConstIterator<valueType>( this->std::vector<valueType>::begin() ); }
         RbIterator<valueType>                               end(void) { return RbIterator<valueType>( this->std::vector<valueType>::end() ); }
@@ -178,6 +182,7 @@ namespace RevBayesCore {
         RbVectorImpl(size_t n, const valueType &v) { for (size_t i = 0; i < n; ++i) values.push_back( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( v ) ); }
         RbVectorImpl(const vectorType &v) { size_t n=v.size(); for (size_t i = 0; i < n; ++i) values.push_back( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( v[i] ) ); }
         RbVectorImpl(const RbVectorImpl<valueType,1> &v) : values() { size_t n=v.size(); for (size_t i = 0; i < n; ++i) values.push_back( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( v[i] ) ); }
+        RbVectorImpl(RbVectorImpl<valueType,1> &&v) = default;
         virtual                                            ~RbVectorImpl(void) { clear(); }
         
 
@@ -196,6 +201,8 @@ namespace RevBayesCore {
             }
             return *this;
         }
+        RbVectorImpl<valueType, 1>&                         operator=(RbVectorImpl<valueType, 1> &&v) = default;
+
         valueType&                                          operator[](size_t i)
         {
             if ( i >= values.size() )
