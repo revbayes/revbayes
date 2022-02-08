@@ -351,6 +351,7 @@ std::vector<double> PiecewiseConstantCoalescent::simulateCoalescentAges( size_t 
     else
     {
         interval_change_points = RbVector<double>(Nes->getValue().size()-1, RbConstants::Double::inf);
+        pop_sizes = Nes->getValue();
     }
 
     // Get the rng
@@ -374,7 +375,7 @@ std::vector<double> PiecewiseConstantCoalescent::simulateCoalescentAges( size_t 
 
     
     // Put sampling times and pop-size changes into a single vector of event times
-    std::vector<double> combined_event_ages;
+    std::vector<double>     combined_event_ages;
     std::vector<EVENT_TYPE> combined_event_types;
     
     // sort the vector of serial sampling times in ascending order
@@ -397,7 +398,7 @@ std::vector<double> PiecewiseConstantCoalescent::simulateCoalescentAges( size_t 
         if (next_interval_change_point <= next_serial_age)
         {
             // theta change
-            combined_event_ages.push_back(next_interval_change_point);
+            combined_event_ages.push_back( next_interval_change_point );
             combined_event_types.push_back( DEMOGRAPHIC_MODEL_CHANGE);
             ++at_interval_change_point;
             if (at_interval_change_point < interval_change_points.size())
@@ -436,13 +437,11 @@ std::vector<double> PiecewiseConstantCoalescent::simulateCoalescentAges( size_t 
     
     if ( interval_method == EVENTS )
     {
-        size_t num_serial_times = combined_event_ages.size();
-        
         // add dummies for the change point times
         for ( size_t i=0; i<interval_change_points.size(); ++i)
         {
-            combined_event_ages[num_serial_times+i]  = RbConstants::Double::inf;
-            combined_event_types[num_serial_times+i] = DEMOGRAPHIC_MODEL_CHANGE;
+            combined_event_ages.push_back( RbConstants::Double::inf );
+            combined_event_types.push_back( DEMOGRAPHIC_MODEL_CHANGE );
         }
     }
 
