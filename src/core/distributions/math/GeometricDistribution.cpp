@@ -45,10 +45,10 @@ GeometricDistribution* GeometricDistribution::clone( void ) const
 double GeometricDistribution::computeLnProbability( void ) 
 {
     
-    double v = *value;
+    long v = *value;
     
     // check that the value is inside the boundaries
-    if ( v < 0.0 )
+    if ( v < 1 )
     {
         return RbConstants::Double::neginf;
     }
