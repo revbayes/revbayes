@@ -258,9 +258,10 @@ std::vector<double> HeterochronousCoalescent::simulateCoalescentAges( size_t n )
     }
 
     // Put sampling times and demographic function changes into a single vector of event times
-    std::vector<double> combinedEventTimes;
-    std::vector<double> combinedEventTypes;
-    if (num_taxa_at_present < num_taxa) {
+    std::vector<double> combined_event_ages;
+    std::vector<double> combined_event_types;
+    if (num_taxa_at_present < num_taxa)
+    {
         // sort the vector of serial sampling times in ascending order
         std::sort(serial_ages.begin(), serial_ages.end());
         size_t atSerialTime = 0;
@@ -273,20 +274,26 @@ std::vector<double> HeterochronousCoalescent::simulateCoalescentAges( size_t n )
         size_t nTotalEvents = change_ages.size() + serial_ages.size();
         for (size_t nEvents = 0; nEvents < nTotalEvents; ++nEvents)
         {
-            if (nextIntervalStart <= nextSerialTime) {
+            if (nextIntervalStart <= nextSerialTime)
+            {
                 // demographic function change
-                combinedEventTimes.push_back(nextIntervalStart);
-                combinedEventTypes.push_back(0.0);
+                combined_event_ages.push_back(nextIntervalStart);
+                combined_event_types.push_back(0.0);
                 ++atIntervalStart;
-                if (atIntervalStart < change_ages.size()) {
+                if (atIntervalStart < change_ages.size())
+                {
                     nextIntervalStart = change_ages[atIntervalStart];
-                } else {
+                }
+                else
+                {
                     nextIntervalStart = RbConstants::Double::inf;
                 }
-            } else {
+            }
+            else
+            {
                 // serial sample
-                combinedEventTimes.push_back(nextSerialTime);
-                combinedEventTypes.push_back(1.0);
+                combined_event_ages.push_back(nextSerialTime);
+                combined_event_types.push_back(1.0);
                 ++atSerialTime;
                 if (atSerialTime < serial_ages.size()) {
                     nextSerialTime = serial_ages[atSerialTime];
@@ -296,13 +303,13 @@ std::vector<double> HeterochronousCoalescent::simulateCoalescentAges( size_t n )
             }
         }
     } else {
-        combinedEventTimes = change_ages;
-        combinedEventTypes = std::vector<double>(change_ages.size(),0.0);
+        combined_event_ages = change_ages;
+        combined_event_types = std::vector<double>(change_ages.size(),0.0);
     }
  
     // cap vector with an event at t=infinity
-    combinedEventTimes.push_back(RbConstants::Double::inf);
-    combinedEventTypes.push_back(RbConstants::Double::inf);
+    combined_event_ages.push_back(RbConstants::Double::inf);
+    combined_event_types.push_back(RbConstants::Double::inf);
 
     
     // now simulate the ages
@@ -332,8 +339,9 @@ std::vector<double> HeterochronousCoalescent::simulateCoalescentAges( size_t n )
             double waitingTime = current_demographic_function->getWaitingTime(sim_age, lambda);
             sim_age += waitingTime;
 
-            valid = (sim_age < combinedEventTimes[currentInterval] && j > 1) && waitingTime > 0;
-            if ( valid == false ) {
+            valid = (sim_age < combined_event_ages[currentInterval] && j > 1) && waitingTime > 0;
+            if ( valid == false )
+            {
                 // If j is 1 and we are still simulating coalescent events, we have >= 1 serial sample left to coalesce.
                 // There are no samples to coalesce now, but we cannot exit, thus, we advance to the next serial sample
                 // Alternately, when we cross a serial sampling time or theta window, the number of active lineages changes
@@ -341,12 +349,15 @@ std::vector<double> HeterochronousCoalescent::simulateCoalescentAges( size_t n )
                 // which is drawn from an incorrect distribution,then we can draw a new time according to
                 // the correct number of active lineages.
                 // Either we advance or go back, but in both situations we set the time to the current event in combinedEvents.
-                sim_age = combinedEventTimes[currentInterval];
-                if (combinedEventTypes[currentInterval] == 0.0) {
+                sim_age = combined_event_ages[currentInterval];
+                if (combined_event_types[currentInterval] == DEMOGRAPHIC_MODEL_CHANGE)
+                {
                     // demographic function change
                     ++index_demographic_function;
                     current_demographic_function = &demographies[index_demographic_function];
-                } else {
+                }
+                else
+                {
                     // serial sample
                     ++j;
                 }
