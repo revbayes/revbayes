@@ -224,7 +224,8 @@ void RbSettings::initializeUserSettings(void)
     beagleResource = 0;                   // the default BEAGLE resource
     beagleUseDoublePrecision = true;      // BEAGLE will use double precision by default
     beagleMaxCPUThreads = 0;              // no max set, auto threading up to number of cores
-    beagleScalingMode = "dynamic";        // dynamic rescale as needed plus fixed frequency
+    //beagleScalingMode = "dynamic";        // dynamic rescale as needed plus fixed frequency
+    beagleScalingMode = "none";        // dynamic rescale as needed plus fixed frequency
     beagleDynamicScalingFrequency = 100;  // rescale every 100 evaluations by default
 #endif /* RB_BEAGLE */
     

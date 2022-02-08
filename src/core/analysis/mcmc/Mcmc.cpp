@@ -32,6 +32,9 @@
 #include "RbVectorImpl.h"
 #include "StringUtilities.h"
 
+// added here...
+#include "StochasticNode.h"
+
 #ifdef RB_MPI
 #include <mpi.h>
 #endif
@@ -557,15 +560,39 @@ void Mcmc::initializeSampler( bool prior_only )
         delete schedule;
     }
     schedule = NULL;
+
+
+    // CHANGED HERE
+    DagNode *ctmc_node; 
+    DagNode *tree_node; 
+
     
     // Get initial ln_probability of model
-    
+
     // first we touch all nodes so that the likelihood is dirty
     for (std::vector<DagNode *>::iterator i=dag_nodes.begin(); i!=dag_nodes.end(); ++i)
     {
-        
         DagNode *the_node = *i;
-        the_node->setMcmcMode( true );
+
+        //changed
+        RBOUT("\nDAG name: " + the_node->getName());
+        
+        the_node->setMcmcMode( true ); 
+
+        //changed
+        if ( dynamic_cast<StochasticNode<AbstractHomologousDiscreteCharacterData>*>(the_node) != NULL )
+        {
+            RBOUT("PhyloCTMC distribution found!");
+            ctmc_node = the_node;
+        }
+        //changed
+        if ( dynamic_cast<StochasticNode<Tree>*>(the_node) != NULL )
+        {
+            RBOUT("Tree distribution found!");
+            tree_node = the_node;
+            tree_node->keep();
+        }
+            
         the_node->setPriorOnly( prior_only );
         the_node->touch();
         
@@ -614,11 +641,29 @@ void Mcmc::initializeSampler( bool prior_only )
             
             if ( RbMath::isAComputableNumber(ln_prob) == false )
             {
+
+                //changed 
+                //tree_node->keep();
+                //ctmc_node->touch();
+                //RBOUT("Shakey-inner =" + std::to_string(ctmc_node->getLnProbability()) + "\n");
+
                 std::stringstream ss;
                 ss << "Could not compute lnProb for node " << the_node->getName() << "." << std::endl;
+                ss << "\trecieved: " << ln_prob << std::endl; // Killian added....
                 std::ostringstream o1;
                 the_node->printValue( o1, "," );
                 ss << StringUtilities::oneLiner( o1.str(), 54 ) << std::endl;
+
+                //// rattle tree here
+                //tree_node->touch();
+                //RBOUT("Tree rattle - new lnProb =" + std::to_string(ctmc_node->getLnProbability()) + "\n");
+                //tree_node->redraw();
+                //tree_node->reInitialized();
+                //RBOUT("Tree rerattle - new lnProb =" + std::to_string(ctmc_node->getLnProbability()) + "\n");
+                //ctmc_node->reInitialized();
+                //ctmc_node->touch();
+                //RBOUT("Tree rererattle - new lnProb =" + std::to_string(ctmc_node->getLnProbability()) + "\n");
+                //ctmc_node->reInitialized();
 
                 ss << std::endl;
                 RBOUT( ss.str() );
@@ -631,12 +676,22 @@ void Mcmc::initializeSampler( bool prior_only )
             ln_probability += ln_prob;
             
         }
+
+        //-- This works
+        //tree_node->keep();
+        //ctmc_node->touch();
+        //RBOUT("Shakey =" + std::to_string(ctmc_node->getLnProbability()) + "\n");
         
         // now we keep all nodes so that the likelihood is stored
         for (std::vector<DagNode *>::iterator i=dag_nodes.begin(); i!=dag_nodes.end(); ++i)
         {
             (*i)->keep();
         }
+
+        //RBOUT("New lnProb before shake =" + std::to_string(ctmc_node->getLnProbability()) + "\n");
+        //tree_node->redraw();
+        //tree_node->reInitialized();
+        //RBOUT("New lnProb after shake =" + std::to_string(ctmc_node->getLnProbability()) + "\n");
         
         if ( failed == true )
         {
@@ -644,11 +699,18 @@ void Mcmc::initializeSampler( bool prior_only )
             for (std::vector<DagNode *>::iterator i=ordered_stoch_nodes.begin(); i!=ordered_stoch_nodes.end(); ++i)
             {
                 DagNode *the_node = *i;
+
+                //changed here
+                RBOUT("1-Redrawing " + the_node->getName() + " new lnProb =" + std::to_string(ctmc_node->getLnProbability()));
+
                 if ( the_node->isClamped() == false && (*i)->isStochastic() == true )
                 {
                     
                     the_node->redraw();
                     the_node->reInitialized();
+
+                    // changed here
+                    RBOUT("2-Redrawing " + the_node->getName() + " new lnProb =" + std::to_string(ctmc_node->getLnProbability()));
                     
                 }
                 else if ( the_node->isClamped() == true )
@@ -656,6 +718,9 @@ void Mcmc::initializeSampler( bool prior_only )
                     // make sure that the clamped node also recompute their probabilities
                     the_node->reInitialized();
                     the_node->touch();
+
+                    // changed here
+                    RBOUT("Reinitializing " + the_node->getName() + " new lnProb =" + std::to_string(ctmc_node->getLnProbability()));
                 }
                 
             }

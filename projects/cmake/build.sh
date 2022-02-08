@@ -60,6 +60,8 @@ done
 
 if [ "$mpi" = "true" ] ; then
     BUILD_DIR="build-mpi"
+elif [ "$beagle" = "true" ] ; then
+    BUILD_DIR="build-beagle"
 else
     BUILD_DIR="build"
 fi
