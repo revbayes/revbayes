@@ -22,8 +22,8 @@
  * Solution #3: We use lambda functions with an argument of type "auto".
  *              This makes the argument type into a template parameter.
  *
- * Problem #4: We don't want to specify that the function take each parameter by value or by reference.
- *             We just want to call f(arg1->getValue(), arg2->getValue() ...) to be well-formed.
+ * Problem #4: We don't want to specify that the function takes each parameter by value or by reference.
+ *             We just want the call f(arg1->getValue(), arg2->getValue() ...) to be well-formed.
  * Solution #4: Take the function object as a template parameter.
  *
  *
@@ -36,6 +36,15 @@
  *               callable OBJECTS (like lambda functions).
  *             In practice, we only want to handle functions pointers right now.
  * Solution #6: Provide two different overloaded defs for InvokeFunction.
+ *
+ * Problem #7: Sometimes we want a TypedFunction<T1>, even though the callable
+ *             produces a T2 that is a derived class of T1.
+ * Questions: Is seems like we need 3 versions:
+ *            - one does *this->value = compute_value();
+ *            - one does delete this->value ; this->value = compute_value();
+ *            - one does delete this->value ; this->value = compute_value().clone();
+ *            - can we complain if, for example, the return type is not a pointer?
+ * Solution #7: 
  */
 
 /*
@@ -201,6 +210,82 @@ namespace RevBayesCore
 
     };
 
+    template <class ValueType, class F, class ...Args>
+    class GenericFunction2 : public TypedFunction< ValueType >
+    {
+        // The arguments
+        std::tuple<const TypedDagNode<Args>*...>  arguments;
+
+        // The function pointer that we are wrapping.
+        F func;
+
+        typedef boost::callable_traits::return_type_t<F> ReturnType;
+
+    public:
+
+        static_assert( std::is_pointer<ReturnType>::value , "Function must return a pointer");
+
+        GenericFunction2(F f, const TypedDagNode<Args>*... args):
+            TypedFunction<ValueType>(nullptr),
+            arguments({args...}),
+            func(f)
+        {
+            // for each i: addParameter(get<i>(arguments))
+            boost::mp11::tuple_for_each(arguments, [this](const auto& arg) {
+                this->addParameter(arg);
+            });
+        }
+
+        GenericFunction2<ValueType, F, Args...>*  clone(void) const
+        {
+            return new GenericFunction2<ValueType, F, Args...>(*this);
+        }
+
+        ValueType* compute_value()
+        {
+            return InvokeFunction(func, arguments);
+        }
+
+/*
+        void update1(void)
+        {
+            delete this->value;
+            this->value = new ReturnType(compute_value());
+        }
+
+        void update2(void)
+        {
+            delete this->value;
+            this->value = compute_value().clone();
+        }
+
+        void update3(void)
+        {
+            delete this->value;
+            this->value = compute_value();
+        }
+*/
+
+        void update(void)
+        {
+            delete this->value;
+            this->value = compute_value();
+        }
+
+    protected:
+        void swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+        {
+            auto F2 = [=](auto& arg) {
+                using TDN = typename std::remove_reference<decltype(arg)>::type;
+                if (arg == oldP)
+                    // We have to cast from `const DagNode*` to `const TypedDagNode<T>*`
+                    arg = static_cast<TDN>(newP);
+            };
+            boost::mp11::tuple_for_each(arguments, F2);
+        }
+
+    };
+
     // Passing overloaded functions like sqrt means that the compiler needs to know
     // whether to pass
     //    double sqrt(double)
@@ -219,6 +304,18 @@ namespace RevBayesCore
     GenericFunction<F,Args...>* generic_function_ptr(F&& f, const TypedDagNode<Args>*... args)
     {
         return new GenericFunction<F,Args...>(f, args...);
+    }
+
+    template <typename ValueType, class F, class ...Args>
+    GenericFunction2<ValueType, F, Args...> generic_function2(F&& f, const TypedDagNode<Args>*... args)
+    {
+        return GenericFunction2<ValueType, F, Args...>(f, args...);
+    }
+
+    template <typename ValueType, class F, class ...Args>
+    GenericFunction2<ValueType, F, Args...>* generic_function_ptr2(F&& f, const TypedDagNode<Args>*... args)
+    {
+        return new GenericFunction2<ValueType, F,Args...>(f, args...);
     }
 }
 
