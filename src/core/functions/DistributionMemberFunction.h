@@ -84,7 +84,8 @@ RevBayesCore::DistributionMemberFunction<distributionType,valueType>* RevBayesCo
 
 
 template <class distributionType, class valueType>
-void RevBayesCore::DistributionMemberFunction<distributionType,valueType>::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
+void RevBayesCore::DistributionMemberFunction<distributionType,valueType>::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+{
     
     if ( the_member_variable == oldP )
     {

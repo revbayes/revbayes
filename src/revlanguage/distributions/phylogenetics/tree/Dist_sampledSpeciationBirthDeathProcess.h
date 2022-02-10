@@ -1,11 +1,3 @@
-//
-//  Dist_sampledSpeciationBirthDeathProcess.h
-//  revbayes-proj
-//
-//  Created by Michael Landis on 2/10/16.
-//  Copyright © 2016 Michael Landis. All rights reserved.
-//
-
 #ifndef Dist_sampledSpeciationBirthDeathProcess_h
 #define Dist_sampledSpeciationBirthDeathProcess_h
 

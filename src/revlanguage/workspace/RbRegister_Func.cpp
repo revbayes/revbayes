@@ -114,7 +114,9 @@
 #include "Func_treePairwiseDistances.h"
 #include "Func_treePairwiseNodalDistances.h"
 #include "Func_treeScale.h"
+#include "Func_UPGMA.h"
 
+#include "Func_FlowT2Populations.h"
 
 /* Rate matrix functions (in folder "functions/phylogenetics/ratematrix") */
 #include "Func_BinaryMutationCoalescentRateMatrix.h"
@@ -283,6 +285,9 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         /* Add functions (in "functions" folder) */
         ///////////////////////////////////////////
 
+        addFunction( new Func_FlowT2Populations()      );
+
+        
         /* Rate matrix generator functions (in folder "functions/evolution/ratematrix") */
         addFunction( new Func_BinaryMutationCoalescentRateMatrix()          );
         addFunction( new Func_blosum62()                                    );
@@ -394,6 +399,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_treePairwiseNodalDistances()                      );
         addFunction( new Func_treeAssembly()                                    );
         addFunction( new Func_treeScale()                                       );
+        addFunction( new Func_UPGMA()                                           );
 
         /* Population genetics functions (in folder "functions/popgen") */
         addFunction( new Func_PattersonsD()      );

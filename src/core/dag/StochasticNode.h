@@ -10,7 +10,7 @@ namespace RevBayesCore {
     class TypedDistribution;
     
     template <class valueType>
-    class StochasticNode : public DynamicNode<valueType> {
+    class StochasticNode : public DynamicNode<valueType>, public MemberObject< RbVector<double> > {
         
     public:
         
@@ -28,19 +28,27 @@ namespace RevBayesCore {
         // methods
         void                                                bootstrap(void);                                                            //!< Bootstrap the current value of the node (applies only to stochastic nodes)
         void                                                clamp(valueType *val);                                                      //!< Clamp an observation to this random variable
+        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const; //!< Map the member methods to internal function calls
         virtual TypedDistribution<valueType>&               getDistribution(void);
         virtual const TypedDistribution<valueType>&         getDistribution(void) const;
+        void                                                getIntegratedParents(RbOrderedSet<DagNode *>& ip) const;
         virtual double                                      getLnProbability(void);
         virtual double                                      getLnProbabilityRatio(void);
+        virtual std::vector<double>                         getMixtureLikelihoods(bool log=true) const;
+        virtual std::vector<double>                         getMixtureProbabilities(void) const;
+        virtual size_t                                      getNumberOfMixtureElements(void) const;                                                        //!< Get the number of elements for this value
         valueType&                                          getValue(void);
         const valueType&                                    getValue(void) const;
         bool                                                isClamped(void) const;                                                      //!< Is this DAG node clamped?
+        bool                                                isIntegratedOut(void) const;
         bool                                                isStochastic(void) const;                                                   //!< Is this DAG node stochastic?
         virtual void                                        printStructureInfo(std::ostream &o, bool verbose=false) const;              //!< Print the structural information (e.g. name, value-type, distribution/function, children, parents, etc.)
-        void                                                redraw(void);                                                               //!< Redraw the current value of the node (applies only to stochastic nodes)
+        void                                                redraw(SimulationCondition c = SimulationCondition::MCMC);                  //!< Redraw the current value of the node (applies only to stochastic nodes)
         virtual void                                        reInitializeMe(void);                                                       //!< The DAG was re-initialized so maybe you want to reset some stuff (delegate to distribution)
         virtual void                                        setClamped(bool tf);                                                        //!< Set directly the flag whether this node is clamped.
         void                                                setIgnoreRedraw(bool tf=true);
+        void                                                setIntegratedOut(bool tf=true);
+        virtual void                                        setIntegrationIndex( size_t i );
         void                                                setMcmcMode(bool tf);                                                       //!< Set the modus of the DAG node to MCMC mode.
         virtual void                                        setValue(valueType *val, bool touch=true);                                  //!< Set the value of this node
         void                                                setValueFromFile(const std::string &dir);                                   //!< Set value from string.
@@ -53,17 +61,19 @@ namespace RevBayesCore {
         
     protected:
         
-        virtual void                                        getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter);          //!< Mark and get affected nodes
-        virtual void                                        keepMe(DagNode* affecter);                                                  //!< Keep value of this and affected nodes
-        virtual void                                        restoreMe(DagNode *restorer);                                               //!< Restore value of this nodes
-        virtual void                                        setActivePIDSpecialized(size_t i, size_t n);                                          //!< Set the number of processes for this class.
-        virtual void                                        touchMe(DagNode *toucher, bool touchAll);                                   //!< Tell affected nodes value is reset
+        virtual double                                      computeRecursiveIntegratedLnProbability(RbOrderedSet<DagNode *>& ig, size_t idx);
+        virtual void                                        getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);    //!< Mark and get affected nodes
+        virtual void                                        keepMe(const DagNode* affecter);                                            //!< Keep value of this and affected nodes
+        virtual void                                        restoreMe(const DagNode *restorer);                                         //!< Restore value of this nodes
+        virtual void                                        setActivePIDSpecialized(size_t i, size_t n);                                //!< Set the number of processes for this class.
+        virtual void                                        touchMe(const DagNode *toucher, bool touchAll);                             //!< Tell affected nodes value is reset
         
         // protected members
         bool                                                clamped;
         bool                                                ignore_redraw;
+        mutable bool                                        integrated_out;
         double                                              lnProb;                                                                     //!< Current log probability
-        bool                                                needs_probability_recalculation;                                              //!< Do we need recalculation of the ln prob?
+        bool                                                needs_probability_recalculation;                                            //!< Do we need recalculation of the ln prob?
         double                                              stored_ln_prob;
         TypedDistribution<valueType>*                       distribution;
         
@@ -77,10 +87,14 @@ namespace RevBayesCore {
 #include "TypedDistribution.h"
 
 
+#include <cmath>
+
+
 template<class valueType>
 RevBayesCore::StochasticNode<valueType>::StochasticNode( const std::string &n, TypedDistribution<valueType> *d ) : DynamicNode<valueType>( n ),
     clamped( false ),
-    ignore_redraw(false),
+    ignore_redraw( false ),
+    integrated_out( false ),
     lnProb( RbConstants::Double::neginf ),
     needs_probability_recalculation( true ),
     distribution( d )
@@ -108,6 +122,7 @@ template<class valueType>
 RevBayesCore::StochasticNode<valueType>::StochasticNode( const StochasticNode<valueType> &n ) : DynamicNode<valueType>( n ),
     clamped( n.clamped ),
     ignore_redraw( n.ignore_redraw ),
+    integrated_out( n.integrated_out ),
     needs_probability_recalculation( true ),
     distribution( n.distribution->clone() )
 {
@@ -200,6 +215,7 @@ RevBayesCore::StochasticNode<valueType>& RevBayesCore::StochasticNode<valueType>
         
         clamped                             = n.clamped;
         ignore_redraw                       = n.ignore_redraw;
+        integrated_out                      = n.integrated_out;
         needs_probability_recalculation     = true;
     }
     
@@ -240,6 +256,63 @@ RevBayesCore::StochasticNode<valueType>* RevBayesCore::StochasticNode<valueType>
 }
 
 
+template<class valueType>
+double RevBayesCore::StochasticNode<valueType>::computeRecursiveIntegratedLnProbability(RbOrderedSet<DagNode *>& integrated_parents, size_t index)
+{
+
+    double ln_prob = 0;
+    
+    if ( integrated_parents.size() <= index )
+    {
+        ln_prob = distribution->computeLnProbability();
+    }
+    else
+    {
+        DagNode* this_parent = integrated_parents[index];
+        size_t num_mixture_elements = this_parent->getNumberOfMixtureElements();
+        std::vector<double> ln_probs = std::vector<double>(num_mixture_elements, 0.0);
+        double max_ln_probs = RbConstants::Double::neginf;
+        for (size_t i=0; i<num_mixture_elements; ++i)
+        {
+            this_parent->setIntegrationIndex( i );
+            ln_probs[i] = computeRecursiveIntegratedLnProbability( integrated_parents, index+1 );
+            if ( ln_probs[i] > max_ln_probs )
+            {
+                max_ln_probs = ln_probs[i];
+            }
+        }
+        std::vector<double> mixture_probs = this_parent->getMixtureProbabilities();
+        double prob = 0.0;
+        for (size_t i=0; i<num_mixture_elements; ++i)
+        {
+            prob += exp(ln_probs[i] - max_ln_probs) * mixture_probs[i];
+        }
+        ln_prob = log( prob ) + max_ln_probs;
+    }
+    
+    return ln_prob;
+}
+
+
+template<class valueType>
+void RevBayesCore::StochasticNode<valueType>::executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const
+{
+
+    if ( n == "lnMixtureLikelihoods" )
+    {
+        rv = this->getMixtureLikelihoods( true );
+    }
+    else if ( n == "MixtureLikelihoods" )
+    {
+        rv = this->getMixtureLikelihoods( false );
+    }
+    else
+    {
+        throw RbException("A DAG node does not have a member method called '" + n + "'.");
+    }
+
+}
+
 
 /**
  * Get the affected stochastic nodes. We keep track of who issued the call (affecter). The
@@ -251,20 +324,28 @@ RevBayesCore::StochasticNode<valueType>* RevBayesCore::StochasticNode<valueType>
  * the implementation of getAffectedNodes(...).
  */
 template<class valueType>
-void RevBayesCore::StochasticNode<valueType>::getAffected( RbOrderedSet<DagNode*>& affected, DagNode* affecter )
+void RevBayesCore::StochasticNode<valueType>::getAffected( RbOrderedSet<DagNode*>& affected, const DagNode* affecter )
 {
     
-    // Insert this node as one of the affected
-    affected.insert( this );
+    if ( isIntegratedOut() == false )
+    {
+        // Insert this node as one of the affected
+        affected.insert( this );
     
-    // Call the distribution for potential specialized handling (e.g. internal flags)
-    distribution->getAffected( affected, affecter );
-    
+        // Call the distribution for potential specialized handling (e.g. internal flags)
+        distribution->getAffected( affected, affecter );
+    }
+    else
+    {
+        // Dispatch the touch message to downstream nodes
+        this->getAffectedNodes( affected );
+    }
 }
 
 
 template<class valueType>
-RevBayesCore::TypedDistribution<valueType>& RevBayesCore::StochasticNode<valueType>::getDistribution( void ) {
+RevBayesCore::TypedDistribution<valueType>& RevBayesCore::StochasticNode<valueType>::getDistribution( void )
+{
     
     return *distribution;
 }
@@ -279,15 +360,104 @@ const RevBayesCore::TypedDistribution<valueType>& RevBayesCore::StochasticNode<v
 
 
 template<class valueType>
+void RevBayesCore::StochasticNode<valueType>::getIntegratedParents(RbOrderedSet<DagNode *>& integrated_parents) const
+{
+    
+    std::vector<const DagNode*> parents = this->getParents();
+
+    // delegate up the DAG
+    for (size_t i=0; i<parents.size(); ++i)
+    {
+        const DagNode *the_parent = parents[i];
+        if ( the_parent->isIntegratedOut() == true )
+        {
+            the_parent->getIntegratedParents( integrated_parents );
+            integrated_parents.insert( const_cast< DagNode* >(the_parent) );
+        }
+        
+    }
+    
+}
+
+
+template<class valueType>
+std::vector<double> RevBayesCore::StochasticNode<valueType>::getMixtureLikelihoods( bool use_log ) const
+{
+      
+    std::vector<double> ln_probs;
+    
+    if ( isIntegratedOut() == false )
+    {
+        // TODO: This is only for safety. We should actually never get in here!
+        ln_probs.push_back( distribution->computeLnProbability() );
+    }
+    else
+    {
+        // temporarily disable integration
+        integrated_out = false;
+        
+        size_t num_mixture_elements = this->getNumberOfMixtureElements();
+        ln_probs = std::vector<double>(num_mixture_elements, 0.0);
+        std::vector<double> probs = std::vector<double>(num_mixture_elements, 0.0);
+        double max_ln_probs = RbConstants::Double::neginf;
+        RbOrderedSet<DagNode *> affected;
+        this->getAffectedNodes( affected );
+        for (size_t i=0; i<num_mixture_elements; ++i)
+        {
+            const_cast< StochasticNode<valueType>* >(this)->setIntegrationIndex( i );
+            for ( size_t j=0; j<affected.size(); ++j )
+            {
+                ln_probs[i] += affected[j]->getLnProbability();
+            }
+            if ( RbMath::isNan(ln_probs[i]) == true )
+            {
+                ln_probs[i] = RbConstants::Double::neginf;
+            }
+            if ( ln_probs[i] > max_ln_probs )
+            {
+                max_ln_probs = ln_probs[i];
+            }
+        }
+        std::vector<double> mixture_probs = this->getMixtureProbabilities();
+        double prob = 0.0;
+        for (size_t i=0; i<num_mixture_elements; ++i)
+        {
+            prob += exp(ln_probs[i] - max_ln_probs) * mixture_probs[i];
+        }
+        
+        double ln_prob = log( prob ) + max_ln_probs;
+        for (size_t i=0; i<num_mixture_elements; ++i)
+        {
+            probs[i] = exp(ln_probs[i] - max_ln_probs) * mixture_probs[i] / prob;
+            ln_probs[i] += log(mixture_probs[i]) - ln_prob;
+        }
+        
+        if ( use_log == false )
+        {
+            ln_probs = probs;
+        }
+        
+        // switch back integration flag
+        integrated_out = true;
+    }
+    
+    return ln_probs;
+}
+
+
+
+template<class valueType>
 double RevBayesCore::StochasticNode<valueType>::getLnProbability( void )
 {
     
-    if ( needs_probability_recalculation )
+    if ( needs_probability_recalculation == true )
     {
         // compute and store log-probability
-        if ( this->prior_only == false || this->clamped == false )
+        if ( (this->prior_only == false || this->clamped == false) && integrated_out == false )
         {
-            lnProb = distribution->computeLnProbability();
+            RbOrderedSet<DagNode *> integrated_parents;
+            getIntegratedParents(integrated_parents);
+            lnProb = computeRecursiveIntegratedLnProbability(integrated_parents,0);
         }
         else
         {
@@ -307,6 +477,20 @@ double RevBayesCore::StochasticNode<valueType>::getLnProbabilityRatio( void )
 {
     
     return getLnProbability() - stored_ln_prob;
+}
+
+
+template<class valueType>
+std::vector<double> RevBayesCore::StochasticNode<valueType>::getMixtureProbabilities(void) const
+{
+    return distribution->getMixtureProbabilities();
+}
+
+
+template<class valueType>
+size_t RevBayesCore::StochasticNode<valueType>::getNumberOfMixtureElements(void) const
+{
+    return distribution->getNumberOfMixtureElements();
 }
 
 
@@ -346,6 +530,14 @@ bool RevBayesCore::StochasticNode<valueType>::isClamped( void ) const
 
 
 template<class valueType>
+bool RevBayesCore::StochasticNode<valueType>::isIntegratedOut(void) const
+{
+    
+    return integrated_out;
+}
+
+
+template<class valueType>
 bool RevBayesCore::StochasticNode<valueType>::isStochastic( void ) const
 {
     
@@ -358,7 +550,7 @@ bool RevBayesCore::StochasticNode<valueType>::isStochastic( void ) const
  * At this point, we also need to make sure we update the stored ln probability.
  */
 template<class valueType>
-void RevBayesCore::StochasticNode<valueType>::keepMe( DagNode* affecter )
+void RevBayesCore::StochasticNode<valueType>::keepMe( const DagNode* affecter )
 {
     
     if ( this->touched == true )
@@ -367,9 +559,11 @@ void RevBayesCore::StochasticNode<valueType>::keepMe( DagNode* affecter )
         stored_ln_prob = 1.0E6;       // An almost impossible value for the density
         if ( needs_probability_recalculation )
         {
-            if ( this->prior_only == false || this->clamped == false )
+            if ( (this->prior_only == false || this->clamped == false) && integrated_out == false )
             {
-                lnProb = distribution->computeLnProbability();
+                RbOrderedSet<DagNode *> integrated_parents;
+                getIntegratedParents(integrated_parents);
+                lnProb = computeRecursiveIntegratedLnProbability(integrated_parents,0);
             }
             else
             {
@@ -381,6 +575,12 @@ void RevBayesCore::StochasticNode<valueType>::keepMe( DagNode* affecter )
         
         // clear the list of touched element indices
         this->touched_elements.clear();
+        
+        if ( isIntegratedOut() == true )
+        {
+            // Dispatch the touch message to downstream nodes
+            this->keepAffected();
+        }
         
     }
     
@@ -424,13 +624,13 @@ void RevBayesCore::StochasticNode<valueType>::printStructureInfo( std::ostream &
 
 
 template<class valueType>
-void RevBayesCore::StochasticNode<valueType>::redraw( void )
+void RevBayesCore::StochasticNode<valueType>::redraw( SimulationCondition c )
 {
     
     // draw the value
     if ( ignore_redraw == false )
     {
-        distribution->redrawValue();
+        distribution->redrawValue( c );
     }
     
     // touch this node for probability recalculation
@@ -450,7 +650,7 @@ void RevBayesCore::StochasticNode<valueType>::reInitializeMe( void )
 
 /** Restore the old value of the node and tell affected */
 template<class valueType>
-void RevBayesCore::StochasticNode<valueType>::restoreMe(DagNode *restorer)
+void RevBayesCore::StochasticNode<valueType>::restoreMe( const DagNode *restorer )
 {
     
     if ( this->touched == true )
@@ -466,6 +666,12 @@ void RevBayesCore::StochasticNode<valueType>::restoreMe(DagNode *restorer)
         
         // clear the list of touched element indices
         this->touched_elements.clear();
+
+        if ( isIntegratedOut() == true )
+        {
+            // Dispatch the touch message to downstream nodes
+            this->restoreAffected();
+        }
         
     }
     
@@ -502,6 +708,33 @@ void RevBayesCore::StochasticNode<valueType>::setClamped(bool tf)
     
     clamped = tf;
     
+}
+
+
+template <class valueType>
+void RevBayesCore::StochasticNode<valueType>::setIgnoreRedraw( bool tf )
+{
+    
+    ignore_redraw = tf;
+
+}
+
+
+template <class valueType>
+void RevBayesCore::StochasticNode<valueType>::setIntegratedOut( bool tf )
+{
+    
+    integrated_out = tf;
+
+}
+
+
+template <class valueType>
+void RevBayesCore::StochasticNode<valueType>::setIntegrationIndex( size_t i )
+{
+    valueType *new_val = Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( distribution->getParameterValues()[i] );
+    this->setValue( new_val );
+
 }
 
 
@@ -558,14 +791,6 @@ void RevBayesCore::StochasticNode<valueType>::setValueFromString(const std::stri
 }
 
 
-template <class valueType>
-void RevBayesCore::StochasticNode<valueType>::setIgnoreRedraw( bool tf )
-{
-    ignore_redraw = tf;
-
-}
-
-
 /**
  * This function replaces the earlier swapParameter function. If we rely on the
  * internal RevBayesCore::Distribution to manage our parents, we simply need to ask
@@ -599,7 +824,7 @@ void RevBayesCore::StochasticNode<valueType>::swapParent( const RevBayesCore::Da
 
 /** touch this node for recalculation */
 template<class valueType>
-void RevBayesCore::StochasticNode<valueType>::touchMe( DagNode *toucher, bool touchAll )
+void RevBayesCore::StochasticNode<valueType>::touchMe( const DagNode *toucher, bool touchAll )
 {
     
     if ( this->touched == false )
@@ -614,6 +839,13 @@ void RevBayesCore::StochasticNode<valueType>::touchMe( DagNode *toucher, bool to
     
     // delegate call
     DynamicNode<valueType>::touchMe( toucher, touchAll );
+    
+    if ( isIntegratedOut() == true )
+    {
+        // Dispatch the touch message to downstream nodes
+        this->touchAffected( touchAll );
+    }
+    
 }
 
 

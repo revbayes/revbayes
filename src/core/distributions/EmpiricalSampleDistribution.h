@@ -27,7 +27,7 @@ namespace RevBayesCore {
         
     public:
         // constructor(s)
-        EmpiricalSampleDistribution(TypedDistribution<valueType> *g);
+        EmpiricalSampleDistribution(TypedDistribution<valueType> *g, Trace<double>* d = NULL);
         EmpiricalSampleDistribution(const EmpiricalSampleDistribution &d);
         virtual                                            ~EmpiricalSampleDistribution(void);
 
@@ -49,10 +49,14 @@ namespace RevBayesCore {
     private:
         // helper methods
         RbVector<valueType>*                                simulate();
+        virtual void                                        keepSpecialization(const DagNode* affecter);
+        virtual void                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
         
         // private members
         TypedDistribution<valueType>*                       base_distribution;
         std::vector< TypedDistribution<valueType>* >        base_distribution_instances;
+        Trace<double>*                                      sample_prior_density;
 
         size_t                                              num_samples;
         size_t                                              sample_block_start;
@@ -81,9 +85,10 @@ namespace RevBayesCore {
 #endif
 
 template <class valueType>
-RevBayesCore::EmpiricalSampleDistribution<valueType>::EmpiricalSampleDistribution(TypedDistribution<valueType> *g) : TypedDistribution< RbVector<valueType> >( new RbVector<valueType>() ),
+RevBayesCore::EmpiricalSampleDistribution<valueType>::EmpiricalSampleDistribution(TypedDistribution<valueType> *g, Trace<double>* d) : TypedDistribution< RbVector<valueType> >( new RbVector<valueType>() ),
     base_distribution( g ),
     base_distribution_instances(),
+    sample_prior_density( d ),
     num_samples( 0 ),
     sample_block_start( 0 ),
     sample_block_end( num_samples ),
@@ -99,8 +104,6 @@ RevBayesCore::EmpiricalSampleDistribution<valueType>::EmpiricalSampleDistributio
         this->addParameter( the_node );
     }
     
-    delete this->value;
-    
     RbVector<valueType>* new_value = simulate();
     this->setValue( new_value );
 
@@ -110,6 +113,7 @@ template <class valueType>
 RevBayesCore::EmpiricalSampleDistribution<valueType>::EmpiricalSampleDistribution( const EmpiricalSampleDistribution &d ) : TypedDistribution< RbVector<valueType> >( new RbVector<valueType>( d.getValue() ) ),
     base_distribution( d.base_distribution->clone() ),
     base_distribution_instances(),
+    sample_prior_density( d.sample_prior_density ),
     num_samples( d.num_samples ),
     sample_block_start( d.sample_block_start ),
     sample_block_end( d.sample_block_end ),
@@ -178,14 +182,15 @@ RevBayesCore::EmpiricalSampleDistribution<valueType>& RevBayesCore::EmpiricalSam
 
         
 #ifdef RB_MPI
-        pid_per_sample = d.pid_per_sample;
+        pid_per_sample      = d.pid_per_sample;
 #endif
         
         // add the parameters of the distribution
         const std::vector<const DagNode*>& pars = base_distribution->getParameters();
         for (std::vector<const DagNode*>::const_iterator it = pars.begin(); it != pars.end(); ++it)
         {
-            this->addParameter( *it );
+            const DagNode* the_node = *it;
+            this->addParameter( the_node );
         }
         
         base_distribution_instances = std::vector< TypedDistribution<valueType>* >( num_samples, NULL );
@@ -216,7 +221,7 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
     double ln_prob = 0;
     double prob    = 0;
     
-    std::vector<double> probs    = std::vector<double>(num_samples, 0.0);
+    std::vector<double> probs = std::vector<double>(num_samples, 0.0);
     
     // add the ln-probs for each sample
     for (size_t i = 0; i < num_samples; ++i)
@@ -232,13 +237,14 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
 #ifdef RB_MPI
     for (size_t i = 0; i < num_samples; ++i)
     {
-
+        
         if ( this->pid == pid_per_sample[i] )
         {
             
             // send the likelihood from the helpers to the master
             if ( this->process_active == false )
             {
+
                 // send from the workers the log-likelihood to the master
                 MPI_Send(&ln_probs[i], 1, MPI_DOUBLE, this->active_PID, 0, MPI_COMM_WORLD);
             }
@@ -249,6 +255,7 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
         {
             MPI_Status status;
             MPI_Recv(&ln_probs[i], 1, MPI_DOUBLE, pid_per_sample[i], 0, MPI_COMM_WORLD, &status);
+
         }
         
     }
@@ -275,7 +282,6 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
         
     }
 
-    
 #ifdef RB_MPI
     if ( this->process_active == true )
     {
@@ -306,7 +312,7 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
         
     }
 #endif
-    
+
     return ln_prob;
 }
 
@@ -317,16 +323,35 @@ void RevBayesCore::EmpiricalSampleDistribution<mixtureType>::executeMethod(const
     
     if ( n == "getSampleProbabilities" )
     {
-        
         bool log_transorm = static_cast<const TypedDagNode<Boolean>* >( args[0] )->getValue();
+        bool normalize    = static_cast<const TypedDagNode<Boolean>* >( args[1] )->getValue();
 
         rv.clear();
         rv.resize(num_samples);
         
         // Sebastian: Remember that ln_probs is not normalized and would need to be divided by num_samples!
+        double ln_sum = 0.0;
+        if ( normalize == true )
+        {
+            double max = RbConstants::Double::neginf;
+            for (size_t i = 0; i < num_samples; ++i)
+            {
+                if ( max < ln_probs[i] )
+                {
+                    max = ln_probs[i];
+                }
+            }
+            double sum = 0.0;
+            for (size_t i = 0; i < num_samples; ++i)
+            {
+                sum += exp(ln_probs[i]-max);
+            }
+            ln_sum = log(sum) + max;
+            
+        }
         for (size_t i = 0; i < num_samples; ++i)
         {
-            rv[i] = (log_transorm ? ln_probs[i] : exp(ln_probs[i]));
+            rv[i] = (log_transorm ? (ln_probs[i]-ln_sum) : exp(ln_probs[i]-ln_sum));
         }
     }
     else
@@ -352,6 +377,23 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevBayesCore::EmpiricalSampleDistr
         found |= f;
     }
     return NULL;
+    
+}
+
+
+template <class valueType>
+void RevBayesCore::EmpiricalSampleDistribution<valueType>::keepSpecialization(const DagNode *affecter )
+{
+        
+    // call keep for each sample
+    for (size_t i = 0; i < num_samples; ++i)
+    {
+        if ( i >= sample_block_start && i < sample_block_end )
+        {
+            base_distribution_instances[i]->keep( affecter );
+        }
+        
+    }
     
 }
 
@@ -415,8 +457,8 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::setValue(RbVector<val
     sample_block_start = 0;
     sample_block_end   = num_samples;
 #ifdef RB_MPI
-    sample_block_start = size_t(floor( (double(this->pid-this->active_PID)   / this->num_processes ) * num_samples) );
-    sample_block_end   = size_t(floor( (double(this->pid+1-this->active_PID) / this->num_processes ) * num_samples) );
+    sample_block_start = size_t(ceil( (double(this->pid   - this->active_PID)   / this->num_processes ) * num_samples) );
+    sample_block_end   = size_t(ceil( (double(this->pid+1 - this->active_PID)   / this->num_processes ) * num_samples) );
 #endif
     sample_block_size  = sample_block_end - sample_block_start;
     
@@ -429,11 +471,16 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::setValue(RbVector<val
     }
     
 #ifdef RB_MPI
-    // now we need to populate how is
+    // now we need to populate which process is responsible for the given sample
     pid_per_sample = std::vector<size_t>( num_samples, 0 );
-    for (size_t i = 0; i < num_samples; ++i)
+    for (size_t i = 0; i < (this->num_processes-this->active_PID); ++i)
     {
-        pid_per_sample[i] = size_t(floor( double(i) / num_samples * this->num_processes ) ) + this->active_PID;
+        size_t this_pid_sample_block_start = size_t(ceil( (double(i   - this->active_PID)   / this->num_processes ) * num_samples) );
+        size_t this_pid_sample_block_end   = size_t(ceil( (double(i+1 - this->active_PID)   / this->num_processes ) * num_samples) );
+        for (size_t j = this_pid_sample_block_start; j < this_pid_sample_block_end; ++j)
+        {
+            pid_per_sample[j] = i;
+        }
     }
 #endif
     
@@ -442,6 +489,40 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::setValue(RbVector<val
     
     // delegate class
     TypedDistribution< RbVector<valueType> >::setValue( v, force );
+    
+}
+
+
+template <class valueType>
+void RevBayesCore::EmpiricalSampleDistribution<valueType>::touchSpecialization(const DagNode *toucher, bool touchAll )
+{
+        
+    // call keep for each sample
+    for (size_t i = 0; i < num_samples; ++i)
+    {
+        if ( i >= sample_block_start && i < sample_block_end )
+        {
+            base_distribution_instances[i]->touch( toucher, touchAll );
+        }
+        
+    }
+    
+}
+
+
+template <class valueType>
+void RevBayesCore::EmpiricalSampleDistribution<valueType>::restoreSpecialization(const DagNode *restorer )
+{
+        
+    // call keep for each sample
+    for (size_t i = 0; i < num_samples; ++i)
+    {
+        if ( i >= sample_block_start && i < sample_block_end )
+        {
+            base_distribution_instances[i]->restore( restorer );
+        }
+        
+    }
     
 }
 

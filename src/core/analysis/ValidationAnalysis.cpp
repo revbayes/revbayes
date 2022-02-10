@@ -30,20 +30,20 @@
 
 using namespace RevBayesCore;
 
-ValidationAnalysis::ValidationAnalysis( const MonteCarloAnalysis &m, size_t n ) : Cloneable( ), Parallelizable( ),
-    num_runs( n )
+ValidationAnalysis::ValidationAnalysis( const MonteCarloAnalysis &m, size_t n, const std::string& d ) : Cloneable( ), Parallelizable( ),
+    num_runs( n ),
+    output_directory(d)
 {
     
-    std::string directory = "output";
     // some general constant variables
-    RbFileManager fm = RbFileManager( directory );
+    RbFileManager fm = RbFileManager( output_directory );
     const std::string path_separator = fm.getPathSeparator();
     
     // remove all monitors if there are any
     MonteCarloAnalysis *sampler = m.clone();
     sampler->removeMonitors();
     
-    StochasticVariableMonitor mntr = StochasticVariableMonitor(10, "output/posterior_samples.var", "\t");
+    StochasticVariableMonitor mntr = StochasticVariableMonitor(10, output_directory + "/posterior_samples.var", "\t");
     sampler->addMonitor( mntr );
     
     size_t run_block_start = size_t(floor( (double(pid)   / num_processes ) * num_runs) );
@@ -73,7 +73,7 @@ ValidationAnalysis::ValidationAnalysis( const MonteCarloAnalysis &m, size_t n ) 
             
             // create a new directory name for this simulation
             std::stringstream s;
-            s << directory << path_separator << "Validation_Sim_" << i;
+            s << output_directory << path_separator << "Validation_Sim_" << i;
             std::string sim_directory_name = s.str();
             
             // create an independent copy of the analysis
@@ -91,7 +91,7 @@ ValidationAnalysis::ValidationAnalysis( const MonteCarloAnalysis &m, size_t n ) 
             
                 if ( the_node->isStochastic() == true )
                 {
-                    the_node->redraw();
+                    the_node->redraw( SimulationCondition::VALIDATION );
                     
                     // we need to store the new simulated data
                     the_node->writeToFile(sim_directory_name);
@@ -130,7 +130,8 @@ ValidationAnalysis::ValidationAnalysis( const MonteCarloAnalysis &m, size_t n ) 
 
 
 ValidationAnalysis::ValidationAnalysis(const ValidationAnalysis &a) : Cloneable( a ), Parallelizable( a ),
-    num_runs( a.num_runs )
+    num_runs( a.num_runs ),
+    output_directory( a.output_directory )
 {
     
     runs = std::vector<MonteCarloAnalysis*>(num_runs,NULL);
@@ -189,6 +190,7 @@ ValidationAnalysis& ValidationAnalysis::operator=(const ValidationAnalysis &a)
         simulation_values.clear();
         
         num_runs                    = a.num_runs;
+        output_directory            = a.output_directory;
 //        credible_interval_size      = a.credible_interval_size;
         
         
@@ -221,8 +223,12 @@ ValidationAnalysis& ValidationAnalysis::operator=(const ValidationAnalysis &a)
 void ValidationAnalysis::burnin(size_t generations, size_t tuningInterval)
 {
     
+    // compute which block of the data this process needs to compute
+    size_t run_block_start = size_t(floor( (double(pid)  / num_processes ) * num_runs) );
+    size_t run_block_end   = std::max( int(run_block_start), int(floor( (double(pid+1) / num_processes ) * num_runs) ) - 1);
+    
     // start the progress bar
-    ProgressBar progress = ProgressBar(generations, 0);
+    ProgressBar progress = ProgressBar(run_block_end-run_block_start, 0);
     
     if ( process_active == true )
     {
@@ -235,10 +241,6 @@ void ValidationAnalysis::burnin(size_t generations, size_t tuningInterval)
         // Print progress bar (68 characters wide)
         progress.start();
     }
-    
-    // compute which block of the data this process needs to compute
-    size_t run_block_start = size_t(floor( (double(pid)   / num_processes ) * num_runs) );
-    size_t run_block_end   = std::max( int(run_block_start), int(floor( (double(pid+1) / num_processes ) * num_runs) ) - 1);
     
     // Run the chain
     for (size_t i = run_block_start; i <= run_block_end; ++i)
@@ -367,7 +369,17 @@ void ValidationAnalysis::summarizeAll( double credible_interval_size )
     size_t run_block_end   = std::max( int(run_block_start), int(floor( (double(pid+1) / num_processes ) * num_runs) ) - 1);
     //    size_t stone_block_size  = stone_block_end - stone_block_start;
     
-    // Summarize the chain
+    // delete the old coverage file
+    std::fstream out_stream;
+    
+    RbFileManager fm = RbFileManager(output_directory,"coverage.txt");
+    fm.createDirectoryForFile();
+    
+    // open the stream to the file
+    out_stream.open( fm.getFullFileName().c_str(), std::fstream::out );
+    out_stream.close();
+    
+    // Summarize the specific MCMC run
     for (size_t i = run_block_start; i <= run_block_end; ++i)
     {
         
@@ -434,7 +446,7 @@ void ValidationAnalysis::summarizeSim(double credible_interval_size, size_t idx)
 {
     
     std::stringstream ss;
-    ss << "output/Validation_Sim_" << idx << "/" << "posterior_samples.var";
+    ss << output_directory << "/Validation_Sim_" << idx << "/" << "posterior_samples.var";
     std::string fn = ss.str();
         
     TraceReader reader;
@@ -461,6 +473,9 @@ void ValidationAnalysis::summarizeSim(double credible_interval_size, size_t idx)
                 // create a trace
                 AbstractTrace *t = the_node->createTraceObject();
                 trace_map[parameter_name] = t;
+                
+                // we can stop the loop now
+                break;
             }
             
         }
@@ -498,15 +513,31 @@ void ValidationAnalysis::summarizeSim(double credible_interval_size, size_t idx)
             if ( trace_map.find( parameter_name ) != trace_map.end() )
             {
                 // create a trace
-                bool cov = trace_map[parameter_name]->isCoveredInInterval(the_node->getValueAsString(), credible_interval_size, false);
+                int cov = trace_map[parameter_name]->isCoveredInInterval(the_node->getValueAsString(), credible_interval_size, false);
                 
                 if ( coverage_count.find(parameter_name) == coverage_count.end() )
                 {
                     coverage_count.insert( std::pair<std::string,int>(parameter_name,0) );
                 }
-                if ( cov == true )
+                if ( cov == 0 )
                 {
                     coverage_count[ parameter_name ]++;
+                }
+                else
+                {
+                    // the filestream object
+                    std::fstream out_stream;
+                    
+                    RbFileManager fm = RbFileManager(output_directory,"coverage.txt");
+                    fm.createDirectoryForFile();
+                    
+                    // open the stream to the file
+                    out_stream.open( fm.getFullFileName().c_str(), std::fstream::out | std::fstream::app);
+
+                    out_stream << idx << "\t" << cov << std::endl;
+                    
+                    out_stream.close();
+                    
                 }
                 
             }

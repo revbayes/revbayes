@@ -1,9 +1,3 @@
-//
-//  Func_biogeographyCladoEventsBD.cpp
-//
-//  Created by Michael Landis on 12/16/18.
-//
-
 #include <stddef.h>
 #include <iosfwd>
 #include <string>

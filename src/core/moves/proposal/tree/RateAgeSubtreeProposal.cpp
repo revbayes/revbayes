@@ -123,7 +123,7 @@ double RateAgeSubtreeProposal::doProposal( void )
     // now we store all necessary values
     stored_node = node;
     stored_ages = std::vector<double>(tau.getNumberOfNodes(), 0.0);
-    TreeUtilities::getAges(&tau, node, stored_ages);
+    TreeUtilities::getAges(*node, stored_ages);
     
     // store all the old branch lengths
     std::vector<TopologyNode*> nodes = tau.getNodes();
@@ -136,8 +136,7 @@ double RateAgeSubtreeProposal::doProposal( void )
     }
     
     // lower bound
-    double min_age = 0.0;
-    TreeUtilities::getOldestTip(&tau, node, min_age);
+    double min_age = TreeUtilities::getOldestTipAge(*node);
     
     // draw new ages and compute the hastings ratio at the same time
     double my_new_age = min_age + (parent_age - min_age) * rng->uniform01();
@@ -146,7 +145,7 @@ double RateAgeSubtreeProposal::doProposal( void )
     size_t nNodes = node->getNumberOfNodesInSubtree(false);
     
     // rescale the subtrees
-    TreeUtilities::rescaleSubtree(&tau, node, scaling_factor );
+    TreeUtilities::rescaleSubtree(*node, scaling_factor );
     if (min_age != 0.0)
     {
         for (size_t i = 0; i < tau.getNumberOfNodes(); i++)
@@ -245,7 +244,7 @@ void RateAgeSubtreeProposal::undoProposal( void )
     }
 
     // reset the ages
-    TreeUtilities::setAges(&tree->getValue(), stored_node, stored_ages);
+    TreeUtilities::setAges(*stored_node, stored_ages);
     
 }
 

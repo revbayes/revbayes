@@ -1,33 +1,38 @@
 ################################################################################
 #
-# RevBayes Validation Test: Jukes-Cantor with birth-death process
-# 
+# RevBayes Validation Test: Jukes-Cantor with uniform topology and branch length prior
+#
 # Model: Sequences evolve under the Jukes-Cantor model and the tree is drawn
-#        from a constant-rate birth-death process with uniform sampling.
-#            
+#        from a uniform topology distribution jointly modeled with the
+#        branch length prior.
+#
 #
 # authors: Sebastian Hoehna
 #
 ################################################################################
 
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
 #######################
 # Reading in the Data #
 #######################
 
-###### This just defines a single model for all sites #######
-
-### Read in sequence data for both genes
-
 data <- readDiscreteCharacterData("data/primates_cytb_small.nex")
-#data <- readDiscreteCharacterData("data/test_large.nex")
 
 # Get some useful variables from the data. We need these later on.
 taxa <- data.taxa()
 
 n_branches <- taxa.size() * 2 - 3
 
-# set my move index
-mvi = 1
 
 
 
@@ -36,9 +41,7 @@ mvi = 1
 ######################
 
 #### specify the Jukes-Cantor substitution model applied uniformly to all sites ###
-Q <- fnJC(4) 
-
-
+Q <- fnJC(4)
 
 
 
@@ -48,7 +51,7 @@ Q <- fnJC(4)
 
 # Set up branch length hyperprior with a move
 br_len_lambda ~ dnExp(0.2)
-moves[mvi++] = mvScale(br_len_lambda, weight=2)
+moves.append( mvScale(br_len_lambda, weight=2) )
 
 # Define the tree parameter.
 # First, we generate the topology.
@@ -58,9 +61,9 @@ psi ~ dnUniformTopologyBranchLength(taxa, branchLengthDistribution=dnExponential
 # compute the tree length from the phylogeny
 tree_length := psi.treeLength()
 
-moves[mvi++] = mvNNI(psi, weight=n_branches/2.0)
-moves[mvi++] = mvSPR(psi, weight=n_branches/10.0)
-moves[mvi++] = mvBranchLengthScale(psi, weight=n_branches)
+moves.append( mvNNI(psi, weight=n_branches/2.0) )
+moves.append( mvSPR(psi, weight=n_branches/10.0) )
+moves.append( mvBranchLengthScale(psi, weight=n_branches) )
 
 
 
@@ -94,20 +97,14 @@ mymodel = model(Q)
 
 
 
-
-
-monitors[1] = mnModel(filename="output/primates_JC_bl_tree.log",printgen=10, separator = TAB)
-monitors[2] = mnFile(filename="output/primates_JC_bl_tree.trees",printgen=10, separator = TAB, psi)
-
 mymcmc = mcmc(mymodel, monitors, moves)
 
-
-validation = validationAnalysis( mymcmc, 1000 )
-validation.burnin(generations=2000,tuningInterval=250)
-validation.run(generations=10000)
-validation.summarize()
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_JC_uniform_BL" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
 
 
 # you may want to quit RevBayes now
 q()
-

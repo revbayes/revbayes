@@ -49,7 +49,7 @@ namespace RevBayesCore {
     // createTraceObject //
     ///////////////////////
     template<>
-    inline AbstractTrace*                                TypedDagNode<long>::createTraceObject(void) const { return new TraceNumeric(); }
+    inline AbstractTrace*                                TypedDagNode<long>::createTraceObject(void) const { return new TraceNumericInteger(); }
 
     template<>
     inline AbstractTrace*                                TypedDagNode<double>::createTraceObject(void) const { return new TraceNumeric(); }

@@ -62,7 +62,8 @@ Dist_decomposedInverseWishart* Dist_decomposedInverseWishart::clone(void) const
 }
 
 
-RevBayesCore::DecomposedInverseWishartDistribution* Dist_decomposedInverseWishart::createDistribution(void) const {
+RevBayesCore::DecomposedInverseWishartDistribution* Dist_decomposedInverseWishart::createDistribution(void) const
+{
     
     // get the parameters
     RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* sg = static_cast<const MatrixRealSymmetric &>( sigma->getRevObject() ).getDagNode();
@@ -73,20 +74,20 @@ RevBayesCore::DecomposedInverseWishartDistribution* Dist_decomposedInverseWishar
     
     RevBayesCore::DecomposedInverseWishartDistribution* w =  0;
     if ( sg->getValue().getDim() == 0 )
-        {
+    {
         // parameter is sigma
         w = new RevBayesCore::DecomposedInverseWishartDistribution( sg, deg );
-        }
+    }
     else if (dm->getValue() == 0)
-        {
+    {
         // parameter is Diagonal(kappaVector))
         w = new RevBayesCore::DecomposedInverseWishartDistribution( dv, deg );
-        }
+    }
     else
-        {
+    {
         // parameter is kappa * Id
         w = new RevBayesCore::DecomposedInverseWishartDistribution( dm, ka, deg );
-        }
+    }
     return w;
 }
 
@@ -131,19 +132,20 @@ const MemberRules& Dist_decomposedInverseWishart::getParameterRules(void) const
     static MemberRules dist_member_rules;
     static bool rules_set = false;
     if ( !rules_set )
-        {
+    {
         dist_member_rules.push_back( new ArgumentRule( "sigma"   , MatrixRealSymmetric::getClassTypeSpec() , "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new MatrixRealSymmetric()  ) );
         dist_member_rules.push_back( new ArgumentRule( "diagonal", ModelVector<RealPos>::getClassTypeSpec(), "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new ModelVector<RealPos>()  ) );
         dist_member_rules.push_back( new ArgumentRule( "df"      , Natural::getClassTypeSpec(), "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Natural(0L) ) );
         dist_member_rules.push_back( new ArgumentRule( "kappa"   , RealPos::getClassTypeSpec(), "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Real(0.0) ) );
         dist_member_rules.push_back( new ArgumentRule( "dim"     , Natural::getClassTypeSpec(), "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Natural(0L) ) );
         rules_set = true;
-        }
+    }
     return dist_member_rules;
 }
 
 
-const TypeSpec& Dist_decomposedInverseWishart::getTypeSpec(void) const {
+const TypeSpec& Dist_decomposedInverseWishart::getTypeSpec(void) const
+{
     
     static TypeSpec ts = getClassTypeSpec();
     return ts;

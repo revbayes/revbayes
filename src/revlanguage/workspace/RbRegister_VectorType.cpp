@@ -36,6 +36,7 @@
 /// Miscellaneous types ///
 
 #include "AbstractHomologousDiscreteCharacterData.h"
+#include "AbstractDiscreteTaxonData.h"
 #include "AverageDistanceMatrix.h"
 #include "CharacterHistoryRateModifier.h"
 #include "Clade.h"
@@ -90,6 +91,7 @@
 #include "WorkspaceVector.h"
 
 /* Character data types (in folder "datatypes/phylogenetics/datamatrix") */
+#include "RlAbstractDiscreteTaxonData.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlContinuousCharacterData.h"
 
@@ -131,6 +133,7 @@ void RevLanguage::Workspace::initializeVectorTypeGlobalWorkspace(void)
         AddWorkspaceVectorType<MatrixRealPos,3>::addTypeToWorkspace( *this, new MatrixRealPos() );
         AddWorkspaceVectorType<MatrixRealSymmetric,3>::addTypeToWorkspace( *this, new MatrixRealSymmetric() );
         AddWorkspaceVectorType<StochasticMatrix,3>::addTypeToWorkspace( *this, new StochasticMatrix() );
+        AddWorkspaceVectorType<AbstractDiscreteTaxonData,3>::addTypeToWorkspace( *this, new AbstractDiscreteTaxonData() );
         AddWorkspaceVectorType<AbstractHomologousDiscreteCharacterData,3>::addTypeToWorkspace( *this, new AbstractHomologousDiscreteCharacterData() );
         AddWorkspaceVectorType<ContinuousCharacterData,3>::addTypeToWorkspace( *this, new ContinuousCharacterData() );
         AddWorkspaceVectorType<CharacterHistoryRateModifier,3>::addTypeToWorkspace( *this, new CharacterHistoryRateModifier() );

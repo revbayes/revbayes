@@ -64,21 +64,29 @@ void Move_RateAgeBetaShift::constructInternalObject( void )
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tmpRates = static_cast<const ModelVector<RealPos> &>( rates->getRevObject() ).getDagNode();
     std::vector< RevBayesCore::StochasticNode<double> *> rates;
-    RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> >*dnode = static_cast< RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> > *>( tmpRates );
-
-    RevBayesCore::VectorFunction<double>* funcVec = dynamic_cast<RevBayesCore::VectorFunction<double>*>( &dnode->getFunction() );
-    if ( funcVec == NULL )
+    RevBayesCore::StochasticNode< RevBayesCore::RbVector<double> >* snode_rates = dynamic_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<double> > *>( tmpRates );
+    if ( tmpRates->isStochastic() == false )
     {
-        throw RbException("Problem in RateAgeBetaShift move. Wrong argument type for the rates vector. We expect a vector of iid elements.");
+        RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> >*dnode = static_cast< RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> > *>( tmpRates );
+
+        RevBayesCore::VectorFunction<double>* func_vec = dynamic_cast<RevBayesCore::VectorFunction<double>*>( &dnode->getFunction() );
+        if ( func_vec == NULL )
+        {
+            throw RbException("Problem in RateAgeBetaShift move. Wrong argument type for the rates vector. We expect a vector of iid elements.");
+        }
+        const std::vector<const RevBayesCore::TypedDagNode<double>* >& pars = func_vec->getVectorParameters();
+
+        for (std::vector<const RevBayesCore::TypedDagNode<double>* >::const_iterator it = pars.begin(); it != pars.end(); ++it)
+        {
+            rates.push_back( const_cast<RevBayesCore::StochasticNode<double>* >(static_cast<const RevBayesCore::StochasticNode<double>* >( *it ) ) );
+        }
     }
-    const std::vector<const RevBayesCore::TypedDagNode<double>* >& pars = funcVec->getVectorParameters();
-
-    for (std::vector<const RevBayesCore::TypedDagNode<double>* >::const_iterator it = pars.begin(); it != pars.end(); ++it)
+    else
     {
-        rates.push_back( const_cast<RevBayesCore::StochasticNode<double>* >(static_cast<const RevBayesCore::StochasticNode<double>* >( *it ) ) );
+        
     }
     
-    value = new RevBayesCore::RateAgeBetaShift(t, rates, d, at, w);
+    value = new RevBayesCore::RateAgeBetaShift(t, rates, snode_rates, d, at, w);
 }
 
 
@@ -140,8 +148,8 @@ const MemberRules& Move_RateAgeBetaShift::getParameterRules(void) const
     if ( !rules_set )
     {
         
-        move_member_rules.push_back( new ArgumentRule( "tree" , Tree::getClassTypeSpec()            , "The tree on which this move operates on.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        move_member_rules.push_back( new ArgumentRule( "rates", ModelVector<RealPos>::getClassTypeSpec(), "The vector of per-branch rates (from a relaxed clock).", ArgumentRule::BY_REFERENCE, ArgumentRule::DETERMINISTIC)  );
+        move_member_rules.push_back( new ArgumentRule( "tree" , Tree::getClassTypeSpec()                , "The tree on which this move operates on.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
+        move_member_rules.push_back( new ArgumentRule( "rates", ModelVector<RealPos>::getClassTypeSpec(), "The vector of per-branch rates (from a relaxed clock).", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY)  );
         move_member_rules.push_back( new ArgumentRule( "delta", RealPos::getClassTypeSpec()             , "The concentration of the move on the previous age.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Real(1.0) ) );
         move_member_rules.push_back( new ArgumentRule( "tune" , RlBoolean::getClassTypeSpec()           , "Should we tune this move during burnin?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
         

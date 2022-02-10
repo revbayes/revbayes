@@ -153,8 +153,7 @@ double SpeciesTreeScaleProposal::doProposal( void )
         Tree& gene_tree = geneTrees[i]->getValue();
 
         // rescale the subtree of this gene tree
-//        TreeUtilities::rescaleTree(&gene_tree, &gene_tree.getRoot(), scaling_factor );
-        TreeUtilities::rescaleSubtree(&gene_tree, &gene_tree.getRoot(), scaling_factor );
+        TreeUtilities::rescaleSubtree(gene_tree.getRoot(), scaling_factor );
 
         num_nodes += gene_tree.getNumberOfInteriorNodes();
 
@@ -177,7 +176,7 @@ double SpeciesTreeScaleProposal::doProposal( void )
 
 
     // rescale the subtree of the species tree
-    TreeUtilities::rescaleSubtree(&tau, &root, scaling_factor );
+    TreeUtilities::rescaleSubtree(root, scaling_factor );
 
     // compute the Hastings ratio
     double lnHastingsratio = log( scaling_factor ) * num_nodes;
@@ -253,7 +252,7 @@ void SpeciesTreeScaleProposal::undoProposal( void )
     double sf = storedAge / node.getAge();
 
     // re-scale
-    TreeUtilities::rescaleSubtree(&tau, &node, sf );
+    TreeUtilities::rescaleSubtree(node, sf );
 
     if ( rootAge != NULL )
     {
@@ -267,7 +266,7 @@ void SpeciesTreeScaleProposal::undoProposal( void )
 
         // rescale the subtree of this gene tree
         //TreeUtilities::rescaleTree(&gene_tree, &gene_tree.getRoot(), sf );
-        TreeUtilities::rescaleSubtree(&gene_tree, &gene_tree.getRoot(), sf );
+        TreeUtilities::rescaleSubtree(gene_tree.getRoot(), sf );
 
     }
 

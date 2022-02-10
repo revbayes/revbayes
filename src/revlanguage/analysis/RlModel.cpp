@@ -285,11 +285,13 @@ void Model::printModelDotGraph(const std::string &fn, bool vb, const std::string
                         val = "...";
                     o << "   n_" << stname;
                     o << " [shape=";
-                    if ( (*it)->getName() == "" ){
+                    if ( (*it)->getName() == "" )
+                    {
                         o << "box, style=filled, fillcolor=white, ";
                         o << "label=\"" << val << "\"]\n";
                     }
-                    else {
+                    else
+                    {
                         o << "record, style=filled, fillcolor=white, ";
                         rl << "|" << val;
                         o << "label=\"{" << rl.str() << "}\"]\n";
@@ -301,11 +303,13 @@ void Model::printModelDotGraph(const std::string &fn, bool vb, const std::string
                 o << " [shape=";
                 std::stringstream strss;
                 (*it)->printStructureInfo(strss);
-                if (strss.str().find("function",0) < strss.str().npos){
+                if (strss.str().find("function",0) < strss.str().npos)
+                {
                     std::string w;
                     
                     while(strss >> w){
-                        if (w == "_function"){
+                        if (w == "_function")
+                        {
                             strss >> w;
                             strss >> w;
 //                            std::cout << w << std::endl;
@@ -317,7 +321,8 @@ void Model::printModelDotGraph(const std::string &fn, bool vb, const std::string
                 else{
                     std::string w;
                     while(strss >> w){
-                        if (w == "_dagType"){
+                        if (w == "_dagType")
+                        {
                             strss >> w;
                             strss >> w;
                             rl << "\\n[ " << w;

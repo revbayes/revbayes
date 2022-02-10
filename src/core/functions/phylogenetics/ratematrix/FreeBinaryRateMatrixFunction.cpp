@@ -1,11 +1,3 @@
-//
-//  FreeBinaryRateMatrixFunction.cpp
-//  rb_mlandis
-//
-//  Created by Michael Landis on 4/4/14.
-//  Copyright (c) 2014 Michael Landis. All rights reserved.
-//
-
 #include "FreeBinaryRateMatrixFunction.h"
 
 #include <vector>
@@ -55,8 +47,10 @@ void FreeBinaryRateMatrixFunction::update( void )
 
 
 
-void FreeBinaryRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
-    if (oldP == transition_rates) {
+void FreeBinaryRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+{
+    if (oldP == transition_rates)
+    {
         transition_rates = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
 }

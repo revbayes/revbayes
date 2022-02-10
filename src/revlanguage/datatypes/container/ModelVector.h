@@ -316,6 +316,44 @@ RevPtr<RevVariable> ModelVector<rlType>::executeMethod( std::string const &name,
         // return a new RevVariable with the size of this container
         return RevPtr<RevVariable>( new RevVariable( new RlBoolean( false ), "" ) );
     }
+    else if ( name == "erase" )
+    {
+        found = true;
+        
+        // Check whether the DAG node is actually a constant node
+        if ( this->dag_node->isConstant() == false )
+        {
+            throw RbException( "We can only erase from constant variables." );
+        }
+        
+        RevBayesCore::RbVector<typename rlType::valueType> &v = this->dag_node->getValue();
+        
+        if ( args[0].getVariable()->getRevObject().isType( ModelVector<rlType>::getClassTypeSpec() ) )
+        {
+            const ModelVector<rlType> &v_x = static_cast<const ModelVector<rlType>&>( args[0].getVariable()->getRevObject() );
+            const RevBayesCore::RbVector<typename rlType::valueType> &x = v_x.getValue();
+            for (size_t i = 0; i < x.size(); ++i )
+            {
+                RevBayesCore::RbIterator<typename rlType::valueType> pos = v.find( x[i] );
+                if ( pos != v.end() )
+                {
+                    v.erase( pos );
+                }
+            }
+        }
+        else
+        {
+            const rlType &rl_x = static_cast<const rlType&>( args[0].getVariable()->getRevObject() );
+            const typename rlType::valueType &x = rl_x.getValue();
+            RevBayesCore::RbIterator<typename rlType::valueType> pos = v.find( x );
+            if ( pos != v.end() )
+            {
+                v.erase( pos );
+            }
+        }
+        
+        return NULL;
+    }
     else if ( name == "find" )
     {
         found = true;
@@ -441,6 +479,13 @@ void ModelVector<rlType>::initMethods( void )
     ArgumentRules* contains_arg_rules = new ArgumentRules();
     contains_arg_rules->push_back( new ArgumentRule( "x", rlType::getClassTypeSpec(), "The element.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     this->methods.addFunction( new MemberProcedure( "contains", RlBoolean::getClassTypeSpec(), contains_arg_rules ) );
+
+    ArgumentRules* erase_arg_rules = new ArgumentRules();
+    std::vector<TypeSpec> erase_value_types;
+    erase_value_types.push_back( rlType::getClassTypeSpec() );
+    erase_value_types.push_back( ModelVector<rlType>::getClassTypeSpec() );
+    erase_arg_rules->push_back( new ArgumentRule( "x", erase_value_types, "The element that you want to erase.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    this->methods.addFunction( new MemberProcedure( "erase", RlUtils::Void, erase_arg_rules) );
 
     ArgumentRules* find_arg_rules = new ArgumentRules();
     find_arg_rules->push_back( new ArgumentRule( "x", rlType::getClassTypeSpec(), "The element.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );

@@ -52,7 +52,7 @@ void TajimasDFunction::update( void )
     double a1 = RbMath::harmonicNumber(n-1);
     double a2 = RbMath::squaredHarmonicNumber(n-1);
     
-    double pi  = alignment->getValue().getAveragePaiwiseSequenceDifference(exclude_ambiguous_sites);
+    double pi  = alignment->getValue().getAveragePairwiseSequenceDifference(exclude_ambiguous_sites);
     double theta = S / a1;
     
     double b1 = (n+1.0)/ double(3.0*(n-1.0));

@@ -27,7 +27,7 @@ namespace RevBayesCore {
     class SimpleProposal : public Proposal {
         
     public:
-        virtual                                                ~SimpleProposal(void);                                                                         //!< Destructor
+        virtual                                                ~SimpleProposal(void);                                                                   //!< Destructor
         
         // public methods
         virtual double                                          doProposal(void);                                                                       //!< Actually do the proposal.
@@ -38,7 +38,7 @@ namespace RevBayesCore {
         virtual const std::string&                              getProposalName(void) const = 0;                                                        //!< Get the name of this proposal used for printing out info.
         virtual double                                          getProposalTuningParameter(void) const = 0;
         virtual void                                            prepareProposal(void) = 0;                                                              //!< Propose a new state
-        virtual void                                            printParameterSummary(std::ostream &o, bool name_only) const = 0;                                       //!< Print the parameter summary
+        virtual void                                            printParameterSummary(std::ostream &o, bool name_only) const = 0;                       //!< Print the parameter summary
         virtual void                                            setProposalTuningParameter(double tp) = 0;
         virtual void                                            tune(double r) = 0;                                                                     //!< Tune the parameters of the proposal.
         virtual void                                            undoProposal(void) = 0;                                                                 //!< Undo the proposal.
@@ -48,15 +48,15 @@ namespace RevBayesCore {
         
     protected:
         SimpleProposal(StochasticNode<valueType> *v, double p=0.44);                                                                                                                           //!< Default constructor
-        SimpleProposal(const SimpleProposal<valueType> &p);                                                                                                        //!< Copy constructor
-        SimpleProposal<valueType>&                              operator=(const SimpleProposal<valueType> &p);                                                     //!< Assignment operator
+        SimpleProposal(const SimpleProposal<valueType> &p);                                                                                             //!< Copy constructor
+        SimpleProposal<valueType>&                              operator=(const SimpleProposal<valueType> &p);                                          //!< Assignment operator
         
         
         
         // pure virtual protected method that need to be implemented in derived classes
         virtual void                                            swapNodeInternal(DagNode *oldN, DagNode *newN) = 0;                                     //!< Swap the pointers to the variable on which the move works on.
         
-        StochasticNode<valueType>*                              variable;                                                                           //!< The variable the Proposal is working on
+        StochasticNode<valueType>*                              variable;                                                                               //!< The variable the Proposal is working on
 
     private:
         

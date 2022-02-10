@@ -16,8 +16,7 @@ using namespace RevLanguage;
 
 
 /** Standard constructor */
-SyntaxForLoop::SyntaxForLoop( const std::string& identifier, SyntaxElement* inExpr ) :
-    SyntaxElement(),
+SyntaxForLoop::SyntaxForLoop( const std::string& identifier, SyntaxElement* inExpr ) : SyntaxElement(),
     varName( identifier ),
     inExpression( inExpr ),
     stateSpace( NULL ),
@@ -32,8 +31,7 @@ SyntaxForLoop::SyntaxForLoop( const std::string& identifier, SyntaxElement* inEx
 
 
 /** Deep copy constructor */
-SyntaxForLoop::SyntaxForLoop( const SyntaxForLoop& x ) :
-    SyntaxElement(x)
+SyntaxForLoop::SyntaxForLoop( const SyntaxForLoop& x ) : SyntaxElement(x)
 {
     varName                     = x.varName;
     inExpression                = x.inExpression->clone();

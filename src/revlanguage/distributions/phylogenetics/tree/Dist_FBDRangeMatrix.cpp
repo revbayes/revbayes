@@ -10,7 +10,7 @@
 #include "ModelVector.h"
 #include "Natural.h"
 #include "OptionRule.h"
-#include "PiecewiseConstantFossilizedBirthDeathRangeProcess.h"
+#include "PiecewiseConstantFossilizedBirthDeathRangeMatrixProcess.h"
 #include "Probability.h"
 #include "RealPos.h"
 #include "RlString.h"
@@ -77,7 +77,7 @@ Dist_FBDRangeMatrix* Dist_FBDRangeMatrix::clone( void ) const
  *
  * \return A new internal distribution object.
  */
-RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess* Dist_FBDRangeMatrix::createDistribution( void ) const
+RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeMatrixProcess* Dist_FBDRangeMatrix::createDistribution( void ) const
 {
     
     // get the parameters
@@ -115,7 +115,7 @@ RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess* Dist_FBDRangeMa
     bool bo = static_cast<const RlBoolean &>( bounded->getRevObject() ).getValue();
     bool pa = static_cast<const RlBoolean &>( presence_absence->getRevObject() ).getValue();
 
-    RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess* d = new RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeProcess(l, m, p, c, r, rt, cond, t, bo, pa);
+    RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeMatrixProcess* d = new RevBayesCore::PiecewiseConstantFossilizedBirthDeathRangeMatrixProcess(l, m, p, c, r, rt, cond, t, bo, pa);
 
     return d;
 }
@@ -205,7 +205,11 @@ const MemberRules& Dist_FBDRangeMatrix::getParameterRules(void) const
         paramTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
         dist_member_rules.push_back( new ArgumentRule( "lambda",  paramTypes, "The speciation rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "mu",      paramTypes, "The extinction rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
-        dist_member_rules.push_back( new ArgumentRule( "psi",     paramTypes, "The fossil sampling rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
+        
+        std::vector<std::string> aliases_serial_sampling;
+        aliases_serial_sampling.push_back("phi");
+        aliases_serial_sampling.push_back("psi");
+        dist_member_rules.push_back( new ArgumentRule( aliases_serial_sampling,     paramTypes, "The fossil sampling rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
         dist_member_rules.push_back( new ArgumentRule( "rho",     Probability::getClassTypeSpec(), "The extant sampling fraction.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
 
         dist_member_rules.push_back( new ArgumentRule( "timeline",   ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process (from oldest to youngest).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
@@ -266,7 +270,7 @@ void Dist_FBDRangeMatrix::setConstParameter(const std::string& name, const RevPt
     {
         mu = var;
     }
-    else if ( name == "psi" )
+    else if ( name == "psi" || name == "phi" || name == "psi/phi" )
     {
         psi = var;
     }

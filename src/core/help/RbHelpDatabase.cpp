@@ -396,6 +396,9 @@ a)");
 	help_strings[string("dnConstrainedNodeOrder")][string("name")] = string(R"(dnConstrainedNodeOrder)");
 	help_strings[string("dnConstrainedTopology")][string("name")] = string(R"(dnConstrainedTopology)");
 	help_strings[string("dnCppNormal")][string("name")] = string(R"(dnCppNormal)");
+    help_strings[string("dnCTMC")][string("name")] = string(R"(dnCTMC)");
+    help_arrays[string("dnCTMC")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+    help_strings[string("dnCTMC")][string("description")] = string(R"(A continuous time Markov process along a single branch/population. For this process, there is no branching process involved. We simply let the sequence evolve according to the rate matrix for a given amount of time. This process is used to model single population demographies.)");
 	help_strings[string("dnDPP")][string("name")] = string(R"(dnDPP)");
 	help_strings[string("dnDecomposedInvWishart")][string("name")] = string(R"(dnDecomposedInvWishart)");
 	help_arrays[string("dnDirichlet")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
@@ -789,7 +792,7 @@ for (g in 1:n_genes) {
         taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
     }
   }
-  geneTrees[g] ~ dnMultiSpeciesCoalescentUniformPrior(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+  geneTrees[g] ~ dnMultiSpeciesCoalescentUniformPrior(speciesTree=spTree, max=popSize, taxa=taxons[g])
   print(geneTrees[g])
 }
 # We can save the species tree and the gene trees:
@@ -801,6 +804,7 @@ for (i in 1:(n_genes)) {
 	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("name")] = string(R"(dnMultiSpeciesCoalescentUniformPrior)");
 	help_references[string("dnMultiSpeciesCoalescentUniformPrior")].push_back(RbHelpReference(R"(Bayes Estimation of Species Divergence Times and Ancestral Population Sizes Using DNA Sequences From Multiple Loci. Bruce Rannala and Ziheng Yang. GENETICS August 1, 2003 vol. 164 no. 4 1645-1656.)",R"()",R"(http://www.genetics.org/content/164/4/1645.short )"));
 	help_references[string("dnMultiSpeciesCoalescentUniformPrior")].push_back(RbHelpReference(R"('Bayesian Inference of Species Trees from Multilocus Data. Heled and Drummond Mol. Biol Evol. 27 (3): 570-580, 2010.')",R"('DOI: https://doi.org/10.1093/molbev/msp274')",R"(https://academic.oup.com/mbe/article/27/3/570/999753/Bayesian-Inference-of-Species-Trees-from )"));
+	help_references[string("dnMultiSpeciesCoalescentUniformPrior")].push_back(RbHelpReference(R"(Integration within the Felsenstein equation for improved Markov chain Monte Carlo methods in population genetics. Jody Hey and Rasmus Nielsen. PNAS. 104 (8): 2785-2790, 2007.)",R"('DOI: https://doi.org/10.1073/pnas.0611164104')",R"(https://www.pnas.org/content/104/8/2785 )"));
 	help_arrays[string("dnMultiSpeciesCoalescentUniformPrior")][string("see_also")].push_back(string(R"(dnMultiSpeciesCoalescent)"));
 	help_arrays[string("dnMultiSpeciesCoalescentUniformPrior")][string("see_also")].push_back(string(R"(dnMultiSpeciesCoalescentInverseGamma)"));
 	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("title")] = string(R"(Multispecies coalescent Distribution)");

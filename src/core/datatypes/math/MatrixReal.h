@@ -74,9 +74,13 @@ namespace RevBayesCore {
 //        std::vector<std::vector<double> >::iterator             end(void);
         
         // utility functions
+        void                                    addColumn(void);
+        void                                    addRow(void);
         void                                    clear(void);
         MatrixReal*                             clone(void) const;
         MatrixReal                              computeInverse(void) const;
+        void                                    deleteColumn(size_t index);
+        void                                    deleteRow(size_t index);
         void                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;       //!< Map the member methods to internal function calls
         void                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, MatrixReal &rv) const;       //!< Map the member methods to internal function calls
         RbVector<double>                        getColumn(size_t i) const;                                                                               //!< Get the i-th column
@@ -87,6 +91,7 @@ namespace RevBayesCore {
         CholeskyDecomposition&                  getCholeskyDecomposition(void);
         const CholeskyDecomposition&            getCholeskyDecomposition(void) const ;
         double                                  getDet() const;
+        void                                    getIndexOfMin(size_t& row, size_t& col) const;
         double                                  getLogDet() const;
         size_t                                  getNumberOfColumns(void) const;
         double                                  getMax(void) const;

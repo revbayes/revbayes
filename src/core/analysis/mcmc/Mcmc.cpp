@@ -624,7 +624,7 @@ void Mcmc::initializeSampler( bool prior_only )
                 std::ostringstream o1;
                 the_node->printValue( o1, "," );
                 ss << StringUtilities::oneLiner( o1.str(), 54 ) << std::endl;
-
+                
                 ss << std::endl;
                 RBOUT( ss.str() );
                 

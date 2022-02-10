@@ -15,7 +15,7 @@ dnMultiSpeciesCoalescent
 dnMultiSpeciesCoalescentInverseGamma
 ## example
 	# We are going to save the trees we simulate in the folder simulatedTrees:
-	dataFolder = "simulatedTrees/" 
+	dataFolder = "simulatedTrees/"
 	# Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 	n_species <- 10
 	n_genes <- 2
@@ -37,16 +37,16 @@ dnMultiSpeciesCoalescentInverseGamma
 	        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 	    }
 	  }
-	  geneTrees[g] ~ dnMultiSpeciesCoalescentUniformPrior(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+	  geneTrees[g] ~ dnMultiSpeciesCoalescentUniformPrior(speciesTree=spTree, max=popSize, taxa=taxons[g])
 	  print(geneTrees[g])
 	}
-	# We can save the species tree and the gene trees: 
+	# We can save the species tree and the gene trees:
 	write(spTree, filename=dataFolder+"speciesTree")
 	# Saving the gene trees
 	for (i in 1:(n_genes)) {
 	  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 	}
-	
+
 ## references
 - citation: Bayes Estimation of Species Divergence Times and Ancestral Population
     Sizes Using DNA Sequences From Multiple Loci. Bruce Rannala and Ziheng Yang. GENETICS
@@ -57,3 +57,8 @@ dnMultiSpeciesCoalescentInverseGamma
     Mol. Biol Evol. 27 (3): 570-580, 2010.'
   doi: 'DOI: https://doi.org/10.1093/molbev/msp274'
   url: https://academic.oup.com/mbe/article/27/3/570/999753/Bayesian-Inference-of-Species-Trees-from
+- citation: Integration within the Felsenstein equation for improved Markov chain Monte
+    Carlo methods in population genetics. Jody Hey and Rasmus Nielsen. PNAS.
+	104 (8): 2785-2790, 2007.
+  doi: 'DOI: https://doi.org/10.1073/pnas.0611164104'
+  url: https://www.pnas.org/content/104/8/2785
