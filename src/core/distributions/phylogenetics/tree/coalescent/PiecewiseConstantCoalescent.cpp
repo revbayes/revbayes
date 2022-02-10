@@ -128,7 +128,7 @@ double PiecewiseConstantCoalescent::computeLnProbabilityTimes( void ) const
     size_t at_serial_age                = 0;
     size_t at_interval_change_point     = 0;
     double next_coal_age                = coalescent_ages[at_coal_age];
-    double next_interval_change_point   = interval_change_points[at_interval_change_point];
+    double next_interval_change_point   = ( interval_change_points.size() > 0 ? interval_change_points[at_interval_change_point] : RbConstants::Double::inf );
     // set the next serially sampled tip age if present, otherwise Inf
     double next_serial_age              = (at_serial_age < serial_tip_ages.size() ? serial_tip_ages[at_serial_age] : RbConstants::Double::inf);
 
