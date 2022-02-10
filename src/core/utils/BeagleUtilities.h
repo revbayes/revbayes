@@ -21,7 +21,8 @@ namespace RevBayesCore {
     
     namespace BeagleUtilities {
         
-        std::string printBeagleFlags(long inFlags); //!< Print BEAGLE capability flags
+        std::string     printBeagleFlags(long inFlags);     //!< Print BEAGLE capability flags
+        std::string     printErrorCode(int c);              //!< Print the error code for BEAGLE
 
     }
 }

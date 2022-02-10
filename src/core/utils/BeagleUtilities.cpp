@@ -75,4 +75,24 @@ std::string RevBayesCore::BeagleUtilities::printBeagleFlags( long inFlags )
 }
 
 
+std::string RevBayesCore::BeagleUtilities::printErrorCode(int code )
+{
+    
+    switch( code )
+    {
+        case  0 : return "success";
+        case -1 : return "unspecified error";
+        case -2 : return "not enough memory could be allocated";
+        case -3 : return "unspecified exception";
+        case -4 : return "the instance index is out of range, or the instance has not been created";
+        case -5 : return "one of the indices specified exceeded the range of the array";
+        case -6 : return "no resource matches requirements";
+        case -7 : return "no implementation matches requirements";
+        case -8 : return "floating-point range exceeded";
+    }
+
+    return "Unknown BEAGLE error code";
+}
+
+
 #endif /* RB_BEAGLE */
