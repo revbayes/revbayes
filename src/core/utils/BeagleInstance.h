@@ -11,50 +11,48 @@ namespace RevBayesCore {
 
     class BeagleInstance {
 
-    private:
-
-        int resourceID = -1;
-
-    protected:
-
-        static BeagleInstance *beagle_singleton;
-
-        BeagleInstance ( int  b_resource
-                       , bool b_use_cpu_threading
-                       , bool b_use_scaling
-                       , int  b_tipCount
-                       , int  b_partialsBufferCount
-                       , int  b_compactBufferCount
-                       , int  b_stateCount
-                       , int  b_patternCount
-                       , int  b_eigenBufferCount
-                       , int  b_matrixBufferCount
-                       , int  b_categoryCount
-                       , int  b_scaleBufferCount
-                       );
-
     public:
 
+        BeagleInstance ( void );        
         ~BeagleInstance ( void );
+        
+        // overloaded operators
+        BeagleInstance&     operator=(const BeagleInstance &i);
 
-        static BeagleInstance *getInstance  ( int  b_resource
-                                            , bool b_use_cpu_threading
-                                            , bool b_use_scaling
-                                            , int  b_tipCount
-                                            , int  b_partialsBufferCount
-                                            , int  b_compactBufferCount
-                                            , int  b_stateCount
-                                            , int  b_patternCount
-                                            , int  b_eigenBufferCount
-                                            , int  b_matrixBufferCount
-                                            , int  b_categoryCount
-                                            , int  b_scaleBufferCount
-                                            );
+        
+        
+        void                createBEAGLE( int  b_tipCount
+                                         , int  b_partialsBufferCount
+                                         , int  b_compactBufferCount
+                                         , int  b_stateCount
+                                         , int  b_patternCount
+                                         , int  b_eigenBufferCount
+                                         , int  b_matrixBufferCount
+                                         , int  b_categoryCount
+                                         , int  b_scaleBufferCount
+                                         );
+        void                freeBEAGLE(void);
+        
+        // getters
+        int                 getResourceID( void ) { return handle; };
+        
+        // setters
+        void                setCPUThreadCount(size_t n);
+        
+    private:
 
-        static int            getResourceID ( void ) { return (beagle_singleton ? beagle_singleton->resourceID : -1); };
-
-        //static bool           hasInstance   ( void ) { return (beagle_singleton ? true : false); };
-
+        int                         handle;
+        int                         resourcenumber;
+        std::string                 resourcename;
+        unsigned                    nstates;
+        unsigned                    nratecateg;
+        unsigned                    npatterns;
+        unsigned                    nthreads;
+        unsigned                    partial_offset;
+        unsigned                    tmatrix_offset;
+        
+        // Sebastian: not used (yet)
+//        std::vector<unsigned>       subsets;
     };
 
 }
