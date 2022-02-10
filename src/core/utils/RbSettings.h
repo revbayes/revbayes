@@ -32,8 +32,9 @@ class RbSettings {
     
 #if defined( RB_BEAGLE )
     bool                        getUseBeagle(void) const;                           //!< Retrieve the flag whether we should use the BEAGLE library in CTMC models
+    bool                        getUseBeagleLikelihoodStoring(void) const;
     bool                        getBeagleAuto(void) const;                          //!< Retrieve the flag whether we should automatically select the BEAGLE resource
-    size_t                      getBeagleResource(void) const;                      //!< Retrieve the BEAGLE resource to be used
+//    size_t                      getBeagleResource(void) const;                      //!< Retrieve the BEAGLE resource to be used
     bool                        getBeagleUseDoublePrecision(void) const;            //!< Retrieve the flag whether BEAGLE will use double precision floating point format
     size_t                      getBeagleMaxCPUThreads(void) const;                 //!< Retrieve the maximum number of CPU threads BEAGLE is set to use        
     const std::string&          getBeagleScalingMode(void) const;                   //!< Retrieve the BEAGLE numerical scaling mode

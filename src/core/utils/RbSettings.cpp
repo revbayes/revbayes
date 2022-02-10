@@ -66,17 +66,22 @@ bool RbSettings::getUseBeagle( void ) const
     return useBeagle;
 }
 
+bool RbSettings::getUseBeagleLikelihoodStoring( void ) const
+{
+    return !false;
+}
+
 bool RbSettings::getBeagleAuto( void ) const
 {
     // return the internal value
     return beagleAuto;
 }
 
-size_t RbSettings::getBeagleResource( void ) const
-{
-    // return the internal value
-    return beagleResource;
-}
+//size_t RbSettings::getBeagleResource( void ) const
+//{
+//    // return the internal value
+//    return beagleResource;
+//}
 
 bool RbSettings::getBeagleUseDoublePrecision( void ) const
 {
