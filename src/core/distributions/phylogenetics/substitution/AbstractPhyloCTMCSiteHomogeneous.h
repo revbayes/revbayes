@@ -24,6 +24,7 @@
 
 #if defined( RB_BEAGLE )
 #include "RlUserInterface.h"
+#include "BeagleInstance.h"
 #include "BeagleUtilities.h"
 #include "libhmsbeagle/beagle.h"
 //#include "BeagleInstance.h"
@@ -35,8 +36,8 @@
 //#define RB_BEAGLE_DEBUG
 
 //-- Enable / Disable using eigen3 library by (un)commenting the following:
-// #define RB_USE_EIGEN
-// #define RB_USE_EIGEN3
+#define RB_USE_EIGEN
+#define RB_USE_EIGEN3
 #if defined ( RB_USE_EIGEN3 )
 #include <Eigen/Core>
 #include <Eigen/Dense>
@@ -140,13 +141,6 @@ namespace RevBayesCore {
         bool                                                                hasSiteMatrixMixture();
         void                                                                getSampledMixtureComponents(size_t &site_index, size_t &rate_component, size_t &matrix_component );
 
-#if defined ( RB_BEAGLE)
-        void                                                                reinitializeBeagleInstance       ( void );  //-- Reinitialize a BEAGLE instance.
-//        //void                                                                initializeBeagleTips           ( void );  //-- Set the tree tip states and base frequencies for the BEAGLE instance.
-//        
-        //        int                                                                 beagle_instance;
-#endif /* RB_BEAGLE */
-
     protected:
 
         // helper method for this and derived classes
@@ -227,7 +221,7 @@ namespace RevBayesCore {
 #if defined ( RB_BEAGLE )
         mutable std::vector<int>                                            active_eigen_system;
         mutable std::vector<bool>                                           touched_eigen_system;
-#endif /* RB_BEAGLE_DEBUG */
+#endif /* RB_BEAGLE */
 
         // offsets for nodes
         size_t                                                              activeLikelihoodOffset;
@@ -279,7 +273,7 @@ namespace RevBayesCore {
         size_t                                                              sampled_site_matrix_component;
 
 #if defined( RB_BEAGLE )
-        int                                                                 beagle_instance = -1;
+        BeagleInstance*                                                     beagle_instance;
         bool                                                                b_initialized = false;
 
         std::vector<BeagleOperation>                                        b_ops;
@@ -289,19 +283,16 @@ namespace RevBayesCore {
         std::vector<double>                                                 b_inPatternWeights;
         
         //-- TODO - can probably get rid of these later...
-        std::vector<double>                                                 b_inCategoryRates ;
+        std::vector<double>                                                 b_inCategoryRates;
         std::vector<double>                                                 b_inCategoryWeights;
-        
-        //-- Pretty print BEAGLE error codes.
-        std::string                                                         parseBeagleReturnCode          ( int );
-        
+                
         //-- Initialize a BEAGLE instance.
         void                                                                initializeBeagleInstance       ( void );
         //-- Free a BEAGLE instance.
         void                                                                freeBeagleInstance             ( void );
         //-- Reinitialize a BEAGLE instance.
-        //void                                                                reinitializeBeagleInstance     ( void );
-        
+        void                                                                reinitializeBeagleInstance       ( void );  //-- Reinitialize a BEAGLE instance.
+
         //-- Set the tree tip states and base frequencies for the BEAGLE instance.
         void                                                                initializeBeagleTips           ( void );
         
@@ -381,6 +372,7 @@ dirty_nodes( std::vector<bool>(num_nodes, true) ),
 #if defined( RB_BEAGLE )
 active_eigen_system( std::vector<int>(1, 0) ),
 touched_eigen_system( std::vector<bool>(1, false) ),
+beagle_instance( NULL ),
 #endif /* RB_BEAGLE */
 using_ambiguous_characters( amb ),
 treatUnknownAsGap( true ),
@@ -414,14 +406,6 @@ sampled_site_matrix_component( 0 )
     branch_heterogeneous_clock_rates               = false;
     branch_heterogeneous_substitution_matrices     = true;
     rate_variation_across_sites                    = false;
-
-//#if defined( RB_BEAGLE )
-//    if ( RbSettings::userSettings().getUseBeagle() == true )
-//    {
-//        this->beagle_instance = BeagleInstance::getResourceID();
-//        this->initializeBeagleInstance(); 
-//    }
-//#endif /* RB_BEAGLE */
 
     tau->getValue().getTreeChangeEventHandler().addListener( this );
 
@@ -497,6 +481,7 @@ dirty_nodes( n.dirty_nodes ),
 #if defined( RB_BEAGLE )
 active_eigen_system( n.active_eigen_system ),
 touched_eigen_system( n.touched_eigen_system ),
+beagle_instance( NULL ),
 #endif /* RB_BEAGLE */
 using_ambiguous_characters( n.using_ambiguous_characters ),
 treatUnknownAsGap( n.treatUnknownAsGap ),
@@ -549,7 +534,6 @@ sampled_site_matrix_component( n.sampled_site_matrix_component )
         {
             RBOUT("CTMC COPY");
             this->initializeBeagleInstance();
-            //this->beagle_instance = n.beagle_instance;
         }
 #endif /* RB_BEAGLE */
     }
@@ -585,13 +569,13 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::~AbstractPhyloCTMCSite
 
 
 #ifdef RB_BEAGLE
-    if ( RbSettings::userSettings().getUseBeagle() == true && this->beagle_instance > -1 )
+    if ( RbSettings::userSettings().getUseBeagle() == true && this->beagle_instance != NULL )
     {
 #ifdef RB_BEAGLE_DEBUG
-        RBOUT("Deleting Beagle Instance '" + std::to_string(this->beagle_instance) + "'");
+        RBOUT("Deleting Beagle Instance '" + std::to_string(this->beagle_instance->getResourceID()) + "'");
 #endif
-        beagleFinalizeInstance(this->beagle_instance);
-        this->beagle_instance = -1;
+        delete this->beagle_instance;
+        this->beagle_instance = NULL;
     }
 #endif
 }
@@ -977,7 +961,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
         if ( RbSettings::userSettings().getUseBeagle() == true )
         {
             this->reinitializeBeagleInstance();
-            RBOUT("Using Beagle Instance '" + std::to_string(this->beagle_instance) + "' for lnL.");
+            RBOUT("Using Beagle Instance '" + std::to_string(this->beagle_instance->getResourceID()) + "' for lnL.");
         }
 #endif /* RB_BEAGLE */
     }
@@ -998,7 +982,8 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     size_t root_index = root.getIndex();
 
     // only necessary if the root is actually dirty
-    if ( dirty_nodes[root_index] == true )
+    if ( dirty_nodes[root_index] == true ||
+        RbSettings::userSettings().getUseBeagleLikelihoodStoring() == false )
     {
 
         // start by filling the likelihood vector for the children of the root
@@ -2224,7 +2209,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
 {
 
     // check for recomputation
-    if ( dirty_nodes[node_index] == true )
+    if ( dirty_nodes[node_index] == true ||
+        RbSettings::userSettings().getUseBeagleLikelihoodStoring() == false )
     {
         // mark as computed
         dirty_nodes[node_index] = false;
@@ -3227,16 +3213,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setMcmcMode(bool 
     if ( RbSettings::userSettings().getUseBeagle() == true )
     {
         //this->reinitializeBeagleInstance();
-        this->initializeBeagleInstance();
-
-        // Try and toggle active indices when setting mcmc mode
-//        for ( size_t i = 0; i < this->activeLikelihood.size(); ++i ) {
-//            this->activeLikelihood[i] = (this->activeLikelihood[i] == 0 ? 1 : 0);
-//        }
-
-//        // Try and touch everything after we initialize
-//        const TopologyNode &root = this->tau->getValue().getRoot();
-//        this->recursivelyFlagNodeDirty( root );
+        this->initializeBeagleInstance();        
     }
 #endif
     }
@@ -4128,14 +4105,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
         this->storedLnProb = this->lnProb;
     }
 
-//#if defined( RB_BEAGLE )
-//    // Try to always flag everything as dirty -- this is for debugging and should be removed
-//    const TopologyNode &root = this->tau->getValue().getRoot();
-//    this->recursivelyFlagNodeDirty( root );
-//
-//    touch_all = true;
-//#endif /* RB_BEAGLE */
-
 
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
     if ( affecter == heterogeneous_clock_rates )
@@ -4158,33 +4127,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
             }
         }
     }
-//#if defined( RB_BEAGLE )
-//    //-- TODO - Not sure how this is supposed to work... Uncomment this later
-//    else if ( RbSettings::userSettings().getUseBeagle() == true )
-//    {
-//        touch_all = true; // Just touch everything...
-//    //    for ( size_t i = 0; i < active_eigen_system.size(); ++i )
-//    //    {
-//    //        if ( touched_eigen_system[i] == true )
-//    //        {
-//    //            active_eigen_system[i] = (active_eigen_system[i] == 0 ? 1 : 0);
-//    //        }
-//    //    }
-//    }
-//
-//    //else if ( affecter == homogeneous_rate_matrix && RbSettings::userSettings().getUseBeagle() == true )
-//    //{
-//    //    if ( touched_eigen_system[0] == false )
-//    //    {
-//    //        touched_eigen_system[0] = true;
-//    //        active_eigen_system[0]  = (active_eigen_system[0] == 0 ? 1 : 0);
-//    //    }
-//    //
-//    //    this->updateBeagleEigensystem();
-//    //    this->updateBeagleSiteRates();
-//    //}
-//#endif /* RB_BEAGLE */
-
     else if ( affecter == heterogeneous_rate_matrices && branch_heterogeneous_substitution_matrices == true)
     {
         const std::set<size_t> &indices = heterogeneous_rate_matrices->getTouchedElementIndices();
@@ -4390,34 +4332,36 @@ template<class charType>
 void
 RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleInstance ( void )
 {
-    std::stringstream ss;
 
     if ( RbSettings::userSettings().getUseBeagle() == true )
     {
-#if defined ( RB_BEAGLE_INFO )
-        ss << std::endl;
-        ss << "Using BEAGLE library v" << beagleGetVersion();
-        ss << " for parallel likelihood evaluation (https://beagle-dev.github.io/)";
-        ss << std::endl;
-#if defined ( RB_USE_EIGEN3 )
-        ss << "Using Eigen3 library for eigensystem calculations." << std::endl;
-#else
-        ss << "Using Revbayes internal methods for eigensystem calculations." << std::endl;
-#endif /* RB_USE_EIGEN3 */
-#endif /* RB_BEAGLE_INFO */
 
-        int  b_resource            = RbSettings::userSettings().getBeagleResource();
-        bool b_use_cpu_threading   = RbSettings::userSettings().getBeagleMaxCPUThreads() != 1
-                                   ? true : false;
+//        int  b_resource            = RbSettings::userSettings().getBeagleResource();
+        
         bool b_use_scaling         = RbSettings::userSettings().getBeagleScalingMode()   != "none"
                                    ? true : false;
-
+        b_use_scaling = true;
+        
         int  b_tipCount            = this->tau->getValue().getNumberOfTips();
-        int  b_partialsBufferCount = 2 * this-> num_nodes
+        int  b_partialsBufferCount = 2 * this->num_nodes
                                    + ( this->using_ambiguous_characters
                                      ? this->tau->getValue().getNumberOfTips()
                                      : 0
                                      );
+        
+//        int  b_partialsBufferCount = this->tau->getValue().getNumberOfInteriorNodes()
+//                                   + ( this->using_ambiguous_characters
+//                                     ? this->tau->getValue().getNumberOfTips()
+//                                     : 0
+//                                     );
+        
+//        int  b_partialsBufferCount = this->num_nodes
+//                                   + ( this->using_ambiguous_characters
+//                                     ? this->tau->getValue().getNumberOfTips()
+//                                     : 0
+//                                     );
+        
+        
         int  b_compactBufferCount  = this->tau->getValue().getNumberOfTips()
                                    - ( this->using_ambiguous_characters
                                      ? this->tau->getValue().getNumberOfTips()
@@ -4426,147 +4370,26 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleInstan
 
         int  b_stateCount          = this->num_chars;
         int  b_patternCount        = this->pattern_block_size;
-        int  b_eigenBufferCount    = this->num_nodes * 2; 
+        int  b_eigenBufferCount    = this->num_nodes * 2;
+//        int  b_eigenBufferCount    = 1;
         int  b_matrixBufferCount   = this->num_nodes * 2;
+//        int  b_matrixBufferCount   = this->num_nodes;
         int  b_categoryCount       = this->num_site_rates;
         int  b_scaleBufferCount    = (b_use_scaling ? (this->num_nodes * 2) : 0);
+//        int  b_scaleBufferCount    = 0;
 
 
-        BeagleInstanceDetails b_return_info;
-
-        int* b_resourceList        = &b_resource;
-        int  b_resourceCount       = 1;
-        long b_requirementFlags    = 0;
-        long b_preferenceFlags     = ( RbSettings::userSettings().getBeagleUseDoublePrecision()
-                                     ? BEAGLE_FLAG_PRECISION_DOUBLE
-                                     : BEAGLE_FLAG_PRECISION_SINGLE
-                                     )
-                                   | ( b_use_cpu_threading
-                                     ? BEAGLE_FLAG_THREADING_CPP
-                                     : 0
-                                     )
-                                   | BEAGLE_FLAG_SCALING_MANUAL
-                                   | BEAGLE_FLAG_SCALERS_LOG;
-
-        if ( RbSettings::userSettings().getBeagleAuto() == true )
-        {
-            ss << "Running benchmarks to automatically select fastest BEAGLE resource... ";
-            ss << std::endl;
-
-            // select fastest resource
-            BeagleBenchmarkedResourceList* rBList;
-            rBList = beagleGetBenchmarkedResourceList( b_tipCount
-                                                     , b_compactBufferCount
-                                                     , b_stateCount
-                                                     , b_patternCount
-                                                     , b_categoryCount
-                                                     , NULL  // resourceList
-                                                     , 0     // resourceCount
-                                                     , b_preferenceFlags
-                                                     , b_requirementFlags
-                                                     , b_eigenBufferCount
-                                                     , 1     // partitionCount
-                                                     , 0     // calculateDerivatives
-                                                     , 0     // benchmarkFlags
-                                                     );
-
-            if (rBList != NULL)
-            {
-                b_resource = rBList->list[0].number;
-                ss << "\tUsing resource " << rBList->list[0].number << ": " << rBList->list[0].name;
-                if ( rBList->list[0].number != 0 )
-                {
-                    ss << " (" << rBList->list[0].performanceRatio << "x CPU)";
-                }
-                ss << std::endl;
-            } else {
-                ss << "\tResource benchmarking failed, using resource "
-                   << b_resource << ": " << rBList->list[0].name
-                   << std::endl;
-            }
-        }
-
-        this->beagle_instance = beagleCreateInstance( b_tipCount
-                                                    , b_partialsBufferCount
-                                                    , b_compactBufferCount
-                                                    , b_stateCount
-                                                    , b_patternCount
-                                                    , b_eigenBufferCount
-                                                    , b_matrixBufferCount
-                                                    , b_categoryCount
-                                                    , b_scaleBufferCount
-                                                    , b_resourceList
-                                                    , b_resourceCount
-                                                    , b_preferenceFlags
-                                                    , b_requirementFlags
-                                                    , &b_return_info
-                                                    );
-
-        if ( this->beagle_instance < 0 )
-        {
-            ss << "Failed to start BEAGLE instance. "
-               << "Reverting to RevBayes likelihood calculator." << std::endl;
-            RbSettings::userSettings().setUseBeagle(false);
-        }
-        else
-        {
-#if defined ( RB_BEAGLE_INFO )
-
-            ss << "BEAGLE resource " << b_return_info.resourceNumber << std::endl;
-            ss << "\t" << "Rsrc Name : "   << b_return_info.resourceName   << std::endl;
-            ss << "\t" << "Impl Name : "   << b_return_info.implName       << std::endl;
-            ss << "\t" << "Flags :";
-            ss << BeagleUtilities::printBeagleFlags(b_return_info.flags)   <<std::endl;
-
-            ss << "BEAGLE instance " << this->beagle_instance               << std::endl;
-            ss << "\t" << "tipCount            : " << b_tipCount            << std::endl;
-            ss << "\t" << "partialsBufferCount : " << b_partialsBufferCount << std::endl;
-            ss << "\t" << "compactBufferCount  : " << b_compactBufferCount  << std::endl;
-            ss << "\t" << "stateCount          : " << b_stateCount          << std::endl;
-            ss << "\t" << "patternCount        : " << b_patternCount        << std::endl;
-            ss << "\t" << "eigenBufferCount    : " << b_eigenBufferCount    << std::endl;
-            ss << "\t" << "matrixBufferCount   : " << b_matrixBufferCount   << std::endl;
-            ss << "\t" << "categoryCount       : " << b_categoryCount       << std::endl;
-            ss << "\t" << "scaleBufferCount    : " << b_scaleBufferCount    << std::endl;
-            ss << "\t" << "resource            : " << b_resource            << std::endl;
-            ss << std::endl;
-#endif /* RB_BEAGLE_INFO */
-
-            if ( b_use_cpu_threading )
-            {
-                beagleSetCPUThreadCount( this->beagle_instance
-                                       , RbSettings::userSettings().getBeagleMaxCPUThreads()
-                                       );
-            }
-
-        }
-        ss << std::endl;
-        
-
-        //RBOUT("Beagle instance: " + std::to_string(this->beagle_instance));
-        //RBOUT("ASRV: " + std::to_string(this->num_site_rates));
-        //RBOUT("Pattern block size: " + std::to_string(this->pattern_block_size));
-
-        //BeagleInstance::getInstance( b_resource
-        //                           , b_use_cpu_threading
-        //                           , b_use_scaling
-        //                           , b_tipCount
-        //                           , b_partialsBufferCount
-        //                           , b_compactBufferCount
-        //                           , b_stateCount
-        //                           , b_patternCount
-        //                           , b_eigenBufferCount
-        //                           , b_matrixBufferCount
-        //                           , b_categoryCount
-        //                           , b_scaleBufferCount
-        //                           );
-
-        // TODO - Remove resource and declare directly
-        //this->beagle_instance = BeagleInstance::getResourceID();
-
-        // print string stream before setting the tips
-        RBOUT(ss.str());
-
+        this->beagle_instance = new BeagleInstance();
+        beagle_instance->createBEAGLE( b_tipCount
+                                     , b_partialsBufferCount
+                                     , b_compactBufferCount
+                                     , b_stateCount
+                                     , b_patternCount
+                                     , b_eigenBufferCount
+                                     , b_matrixBufferCount
+                                     , b_categoryCount
+                                     , b_scaleBufferCount);
+    
         this->initializeBeagleTips();
     }
     else if ( RbSettings::userSettings().getUseBeagle() == true && tau->getValue().isRooted() == true )
@@ -4574,17 +4397,7 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleInstan
         RBOUT("Failed to start BEAGLE instance, rooted trees not currently supported. Reverting to RevBayes likelihood calculator.");
         RbSettings::userSettings().setUseBeagle(false);
     }
-    //else if ( RbSettings::userSettings().getUseBeagle() == true && num_site_mixtures > 1 )
-    //{
-    //    ss << "Failed to start BEAGLE instance, multiple site mixtures not currently supported. Reverting to RevBayes likelihood calculator." << std::endl;
-    //    RbSettings::userSettings().setUseBeagle(false);
-    //}
-    //else if ( RbSettings::userSettings().getUseBeagle() == true && num_site_rates > 1 )
-    //{
-    //    ss << "Failed to start BEAGLE instance, site rate variation not currently supported. Reverting to RevBayes likelihood calculator." << std::endl;
-    //    RbSettings::userSettings().setUseBeagle(false);
-    //}
-    //RBOUT(ss.str());
+    
 }
 
 template<class charType>
@@ -4593,12 +4406,13 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::freeBeagleInstance ( v
 {
     if ( RbSettings::userSettings().getUseBeagle() == true )
     {
-        if ( this->beagle_instance > -1 ) {
+        if ( this->beagle_instance != NULL )
+        {
 #ifdef RB_BEAGLE_DEBUG
-            RBOUT("Deleting Beagle Instance '" + std::to_string(this->beagle_instance) + "'");
+            RBOUT("Deleting Beagle Instance '" + std::to_string(this->beagle_instance->getResourceID() ) + "'");
 #endif
-            beagleFinalizeInstance(this->beagle_instance);
-            this->beagle_instance = -1;
+            delete this->beagle_instance;
+            this->beagle_instance = NULL;
         }
     }
 }
@@ -4609,56 +4423,18 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::reinitializeBeagleInst
 {
     if ( RbSettings::userSettings().getUseBeagle() == true )
     {
-        if ( this->beagle_instance > -1 ) {
+        if ( this->beagle_instance != NULL )
+        {
 #ifdef RB_BEAGLE_DEBUG
-            RBOUT("Deleting Beagle Instance '" + std::to_string(this->beagle_instance) + "'");
+            RBOUT("Deleting Beagle Instance '" + std::to_string(this->beagle_instance->getResourceID() ) + "'");
 #endif
-            beagleFinalizeInstance(this->beagle_instance);
-            this->beagle_instance = -1;
+            delete this->beagle_instance;
+            this->beagle_instance = NULL;
         }
         this->initializeBeagleInstance();
     }
 }
 
-template<class charType>
-std::string
-RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::parseBeagleReturnCode ( int code )
-{
-    std::string result;
-    switch (code)
-    {
-        case 0:
-            result = "Success!";
-            break;
-        case -1:
-            result = "Unspecified error!";
-            break;
-        case -2:
-            result = "Not enough memory could be allocated!";
-            break;
-        case -3:
-            result = "Unspecified exception!";
-            break;
-        case -4:
-            result = "The instance index is out of range, or the instance has not been created!";
-            break;
-        case -5:
-            result = "One of the indices specified exceeded the range of the array!";
-            break;
-        case -6:
-            result = "No resource matches requirements!";
-            break;
-        case -7:
-            result = "No implementation matches requirements!";
-            break;
-        case -8:
-            result = "Floating-point range exceeded!";
-            break;
-        default:
-            result = "Error code not found!";
-    }
-    return result;
-}
 
 template<class charType>
 void
@@ -4737,51 +4513,33 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleTips (
 
             if ( this->using_ambiguous_characters == true )
             {
-                //RBOUT("Using ambiguous tips: " + std::to_string(this->beagle_instance) + " " + std::to_string(b_tipIndex));
-	            int b_code_tip_partials =
-                    beagleSetTipPartials( this->beagle_instance
+
+                int b_code_tip_partials =
+                    beagleSetTipPartials( this->beagle_instance->getResourceID()
                                         , b_tipIndex
                                         , b_inPartials
                                         );
                     if ( b_code_tip_partials != 0 )
                     {
                         throw RbException( "Could not set tip partials for model"
-                                         + this->parseBeagleReturnCode(b_code_tip_partials));
+                                         + BeagleUtilities::printErrorCode(b_code_tip_partials));
                     }
-                    //int b_code_tip_partials2 =
-                        //    beagleSetTipPartials( this->beagle_instance
-                        //                        , b_tipIndex + num_nodes
-                    //                        , b_inPartials
-                    //                        );
-                    //    if ( b_code_tip_partials2 != 0 )
-                    //    {
-                    //        throw RbException( "Could not set tip partials for model"
-                    //                         + this->parseBeagleReturnCode(b_code_tip_partials2));
-                    //    }
+                
             }
             else
             {
-                //RBOUT("Using tips: " + std::to_string(this->beagle_instance) + " " + std::to_string(b_tipIndex));
-	            int b_code_tip_states =
-                    beagleSetTipStates( this->beagle_instance
+
+                int b_code_tip_states =
+                    beagleSetTipStates( this->beagle_instance->getResourceID()
                                       , b_tipIndex
                                       , b_inStates
                                       );
                 if ( b_code_tip_states != 0 )
                 {
                     throw RbException( "Could not set tip states for model"
-                                     + this->parseBeagleReturnCode(b_code_tip_states));
+                                     + BeagleUtilities::printErrorCode(b_code_tip_states));
                 }
-	            //int b_code_tip_states2 =
-                //    beagleSetTipStates( this->beagle_instance
-                //                      , b_tipIndex + num_nodes
-                //                      , b_inStates
-                //                      );
-                //if ( b_code_tip_states2 != 0 )
-                //{
-                //    throw RbException( "Could not set tip states for model"
-                //                     + this->parseBeagleReturnCode(b_code_tip_states2));
-                //}
+                
             }
 
 #if defined ( RB_BEAGLE_DEBUG )
@@ -4825,13 +4583,13 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleTips (
 #endif /* RB_BEAGLE_DEBUG */
 
     int b_code_pattern_weight =
-        beagleSetPatternWeights( this->beagle_instance
+        beagleSetPatternWeights( this->beagle_instance->getResourceID()
                                , &this->b_inPatternWeights[0]
                                );
     if ( b_code_pattern_weight != 0 )
     {
         throw RbException("Could not set pattern weights for model"
-                         + this->parseBeagleReturnCode(b_code_pattern_weight));
+                          + BeagleUtilities::printErrorCode(b_code_pattern_weight));
     }
 
     delete[] b_inStates;
@@ -4941,7 +4699,7 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigensyste
         ss << std::endl;
 #endif /* RB_BEAGLE_DEBUG */
 
-        beagleSetStateFrequencies( this->beagle_instance
+        beagleSetStateFrequencies( this->beagle_instance->getResourceID()
                                  , b_stateFrequenciesIndex
                                  , &b_inStateFrequencies[0]
                                  );
@@ -5009,7 +4767,7 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigensyste
 #endif /* RB_BEAGLE_DEBUG */
         
         b_code_eigen_decomp =
-            beagleSetEigenDecomposition( this->beagle_instance
+            beagleSetEigenDecomposition( this->beagle_instance->getResourceID()
                                        , b_model_idx
                                        , &b_flat_eigenvectors[0]
                                        , &b_flat_inv_eigenvectors[0]
@@ -5019,7 +4777,7 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigensyste
         {
             throw RbException( "Could not set eigen decomposition for model '"
                                + std::to_string(i) + "'. "
-                               + this->parseBeagleReturnCode(b_code_eigen_decomp));
+                               + BeagleUtilities::printErrorCode(b_code_eigen_decomp));
         }
     }
     
@@ -5044,7 +4802,8 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleSiteRates 
 
     //-- Set the site rate probabilities (corresponds with beagle 'category weights').
     std::vector<double> rates_probs(this->num_site_rates, 1.0 / this->num_site_rates);
-    if ( this->site_rates_probs != NULL ) {
+    if ( this->site_rates_probs != NULL )
+    {
         rates_probs = this->site_rates_probs->getValue();
     }
 
@@ -5052,10 +4811,13 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleSiteRates 
     int b_return_code = 0;
     
     //-- Set the category weights and rates.
-    if ( this->num_site_rates > 1 ) {
+    if ( this->num_site_rates > 1 )
+    {
         this->b_inCategoryWeights = rates_probs; 
         this->b_inCategoryRates   = dynamic_cast<const RbVector<double>&>(this->site_rates->getValue());
-    } else {
+    }
+    else
+    {
         this->b_inCategoryWeights = { 1.0 };
         this->b_inCategoryRates   = { 1.0 };
     }
@@ -5076,31 +4838,33 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleSiteRates 
     }
 #endif /* RB_BEAGLE_DEBUG */
 
-    //-- Set BEAGLE category weights.
-    b_return_code =
-        beagleSetCategoryWeights( this->beagle_instance
-                                , b_categoryWeightsIndex
-                                , &this->b_inCategoryWeights[0]
-                                );
-    if ( b_return_code != 0 ) {
-	    throw RbException( "Could not set category weights for ASRV model "
-                         + std::to_string(b_categoryWeightsIndex)
-                         + " : "
-	  		             + this->parseBeagleReturnCode(b_return_code));
-    }
-
     
     //-- Set BEAGLE category rates.
 	b_return_code =
-        beagleSetCategoryRatesWithIndex( this->beagle_instance
+        beagleSetCategoryRatesWithIndex( this->beagle_instance->getResourceID()
                                        , b_categoryWeightsIndex
                                        , &this->b_inCategoryRates[0]
                                        );
-    if ( b_return_code != 0 ) {
+    if ( b_return_code != 0 )
+    {
 	    throw RbException( "Could not set category rates for ASRV model "
                          + std::to_string(b_categoryWeightsIndex)
                          + " : "
-	  		             + this->parseBeagleReturnCode(b_return_code));
+	  		             + BeagleUtilities::printErrorCode(b_return_code));
+    }
+    
+    //-- Set BEAGLE category weights.
+    b_return_code =
+        beagleSetCategoryWeights( this->beagle_instance->getResourceID()
+                                , b_categoryWeightsIndex
+                                , &this->b_inCategoryWeights[0]
+                                );
+    if ( b_return_code != 0 )
+    {
+        throw RbException( "Could not set category weights for ASRV model "
+                         + std::to_string(b_categoryWeightsIndex)
+                         + " : "
+                           + BeagleUtilities::printErrorCode(b_return_code));
     }
 
     //-- Print the debugging stream.
