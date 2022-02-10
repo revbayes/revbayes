@@ -9,11 +9,7 @@ all_args="$@"
 debug="false"
 travis="false"
 mpi="false"
-<<<<<<< HEAD
 beagle="false"
-gentoo="false"
-=======
->>>>>>> ed686307a2c79e388decb25969f0e1f6da80cc44
 help="false"
 jupyter="false"
 boost_root=""
