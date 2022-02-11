@@ -236,7 +236,7 @@ const size_t FastaFileToNaturalNumbersConverter::getState(std::vector<int>& coun
           //std::cout << "  " << state << "\n";
 
         // if the count is monoallelic & likely "sampled" from a polymoprhic state
-        } else if (n_counts==1 & weight<n_individuals ) {
+        } else if (n_counts==1 && weight<n_individuals ) {
         
           edge = sample_edge(int_index, matrix_edges);
           state = n_alleles+edge*n_individuals-edge+weight-1;
