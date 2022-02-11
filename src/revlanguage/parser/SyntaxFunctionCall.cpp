@@ -152,7 +152,8 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( Environment& env, bool 
             if ( the_object.isType( Function::getClassTypeSpec() ) )
             {
                 func = static_cast<Function*>( the_object.clone() );
-                found = func->checkArguments(args, NULL, !dynamic);
+                std::vector<bool> arg_mapped(args.size(), false);
+                found = func->checkArguments(args, NULL, arg_mapped, !dynamic);
             }
         }
         
