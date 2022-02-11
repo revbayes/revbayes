@@ -36,7 +36,7 @@
  * fixed a bug allowing NodeTimeSlideUniform to move sampled ancestor nodes
 
 
-### Version 1.2.0
+### Version 1.2.0 Lagerstätte
 
 #### New models/analyses
 
