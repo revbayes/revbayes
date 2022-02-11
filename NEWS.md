@@ -34,3 +34,10 @@
  * fixed a crash when using DEC models
  * fixed an issue with using simplex indexes in deterministic nodes
  * fixed a bug allowing NodeTimeSlideUniform to move sampled ancestor nodes
+
+
+### Version 1.2.0
+
+#### New models/analyses
+
+#### Bug fixes
