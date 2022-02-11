@@ -314,7 +314,8 @@ const Function* FunctionTable::findFunction(const std::string& name, const std::
     ret_val = equal_range(name);
     if (hits == 1)
     {
-        if (ret_val.first->second->checkArguments(args,NULL,once) == false)
+        std::vector<bool> arg_mapped(args.size(), false);
+        if (ret_val.first->second->checkArguments(args,NULL,arg_mapped,once) == false)
         {
             std::ostringstream msg;
 
@@ -322,6 +323,15 @@ const Function* FunctionTable::findFunction(const std::string& name, const std::
             std::string whitespace(name.size() + 2, ' ');
             
             msg << "Argument or label mismatch for function call.\n";
+            msg << "Arguments which could not be matched (we stopped after the first mismatch):\n";
+            for (size_t i=0; i<arg_mapped.size(); ++i)
+            {
+                if ( arg_mapped[i] == false )
+                {
+                    msg << "\t" << args[i].getLabel() << "\n";
+                    break;
+                }
+            }
             msg << "Provided call:\n";
             msg << name << " (";
 
@@ -391,7 +401,8 @@ const Function* FunctionTable::findFunction(const std::string& name, const std::
         for (it=ret_val.first; it!=ret_val.second; it++)
         {
             match_score->clear();
-            if ( (*it).second->checkArguments(args, match_score, once) == true )
+            std::vector<bool> arg_mapped(args.size(), false);
+            if ( (*it).second->checkArguments(args, match_score, arg_mapped, once) == true )
             {
                 std::sort(match_score->begin(), match_score->end(), std::greater<double>());
                 if ( best_match == NULL )

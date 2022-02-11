@@ -403,9 +403,12 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
         return -1;
     }
 
+    // we need to store and check all arg types
+    std::vector<double> penalties;
     for ( std::vector<TypeSpec>::const_iterator it = argTypeSpecs.begin(); it != argTypeSpecs.end(); ++it )
     {
-        if ( the_var->getRevObject().isType( *it ) )
+        const TypeSpec& req_arg_type_spec = *it;
+        if ( the_var->getRevObject().isType( req_arg_type_spec ) )
         {
             return 0.0;
         }
@@ -414,22 +417,22 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
         // make sure that we only perform type casting when the variable will not be part of a model graph
         if ( once == true || the_var->getRevObject().isConstant() == true )
         {
-            penalty = the_var->getRevObject().isConvertibleTo( *it, once );
+            penalty = the_var->getRevObject().isConvertibleTo( req_arg_type_spec, once );
         }
         
-        if ( (*it).isDerivedOf( the_var->getRequiredTypeSpec() ) )
+        if ( penalty != -1 && req_arg_type_spec.isDerivedOf( the_var->getRequiredTypeSpec() ) )
         {
-            return penalty;
+            penalties.push_back( penalty );
         }
         else if ( penalty != -1 && evalType == BY_VALUE )
         {
-            return penalty;
+            penalties.push_back( penalty );
         }
         else if ( nodeType != STOCHASTIC )
         {
             
             const TypeSpec& typeFrom = the_var->getRevObject().getTypeSpec();
-            const TypeSpec& typeTo   = *it;
+            const TypeSpec& typeTo   = req_arg_type_spec;
             
             // create the function name
             std::string function_name = "_" + typeFrom.getType() + "2" + typeTo.getType();
@@ -455,7 +458,20 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
         
     }
     
-    return -1;
+    // check which one was the best penalty
+    double best_penalty = -1;
+    for (size_t i=0; i<penalties.size(); ++i)
+    {
+        if ( penalties[i] != -1 )
+        {
+            if (best_penalty == -1 || best_penalty > penalties[i])
+            {
+                best_penalty = penalties[i];
+            }
+        }
+    }
+    
+    return best_penalty;
 }
 
 
