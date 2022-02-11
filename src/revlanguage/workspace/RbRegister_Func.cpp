@@ -118,6 +118,10 @@
 
 #include "Func_FlowT2Populations.h"
 
+/* Frequency functions (in folder "functions/phylogenetics/frequencies") */
+#include "Func_F1x4.h"
+#include "Func_F3x4.h"
+
 /* Rate matrix functions (in folder "functions/phylogenetics/ratematrix") */
 #include "Func_BinaryMutationCoalescentRateMatrix.h"
 #include "Func_blosum62.h"
@@ -125,6 +129,7 @@
 #include "Func_chromosomesPloidy.h"
 #include "Func_codonSynonymousNonsynonymousRateMatrix.h"
 #include "Func_codonSynonymousNonsynonymousHKYRateMatrix.h"
+#include "Func_GoldmanYang94RateMatrix.h"
 #include "Func_covarionRateMatrix.h"
 #include "Func_covarion.h"
 #include "Func_cpRev.h"
@@ -295,6 +300,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_chromosomesPloidy()                           );
         addFunction( new Func_codonSynonymousNonsynonymousRateMatrix()      );
         addFunction( new Func_codonSynonymousNonsynonymousHKYRateMatrix()   );
+        addFunction( new Func_GoldmanYang94RateMatrix()                     );
         addFunction( new Func_covarionRateMatrix()                          );
         addFunction( new Func_covarion()                                    );
         addFunction( new Func_cpRev()                                       );
@@ -336,6 +342,10 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_TVM()                                         );
         addFunction( new Func_vt()                                          );
         addFunction( new Func_wag()                                         );
+
+        /* frequency functions (in folder "function/phylogenetics/frequencies" */
+        addFunction( new Func_F1x4()                                        );
+        addFunction( new Func_F3x4()                                        );
 
         /* rate maps used for data augmentation (in folder "functions/evolution/ratemap") */
         addFunction( new Func_adjacentRateModifier() );
