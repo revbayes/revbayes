@@ -23,7 +23,7 @@ frequencies to vary independently.
 ## details
 ## authors
 ## see_also
-fnF1x4, fnF3x4
+fnF1x4, fnF3x4, fnCodonMG94
 
 ## example
         kappa ~ dnLognormal(0,1)

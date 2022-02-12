@@ -396,9 +396,6 @@ a)");
 	help_strings[string("dnConstrainedNodeOrder")][string("name")] = string(R"(dnConstrainedNodeOrder)");
 	help_strings[string("dnConstrainedTopology")][string("name")] = string(R"(dnConstrainedTopology)");
 	help_strings[string("dnCppNormal")][string("name")] = string(R"(dnCppNormal)");
-    help_strings[string("dnCTMC")][string("name")] = string(R"(dnCTMC)");
-    help_arrays[string("dnCTMC")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-    help_strings[string("dnCTMC")][string("description")] = string(R"(A continuous time Markov process along a single branch/population. For this process, there is no branching process involved. We simply let the sequence evolve according to the rate matrix for a given amount of time. This process is used to model single population demographies.)");
 	help_strings[string("dnDPP")][string("name")] = string(R"(dnDPP)");
 	help_strings[string("dnDecomposedInvWishart")][string("name")] = string(R"(dnDecomposedInvWishart)");
 	help_arrays[string("dnDirichlet")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
@@ -1110,9 +1107,28 @@ pi3 ~ dnDirichlet( rep(2.0, 4) )
 Q3 := fnCodonGY94( kappa, omega, fnF3x4(pi1, pi2, pi3) ))");
 	help_strings[string("fnCodonGY94")][string("name")] = string(R"(fnCodonGY94)");
 	help_references[string("fnCodonGY94")].push_back(RbHelpReference(R"(Goldman, N. and Z. Yang (1994). A codon-based model of nucleotide substitution for protein-coding DNA sequences. Mol. Biol. Evol. (1994) 11 (5):725-736)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040153 )",R"()"));
-	help_arrays[string("fnCodonGY94")][string("see_also")].push_back(string(R"(fnF1x4, fnF3x4)"));
+	help_arrays[string("fnCodonGY94")][string("see_also")].push_back(string(R"(fnF1x4, fnF3x4, fnCodonMG94)"));
 	help_strings[string("fnCodonGY94")][string("title")] = string(R"(The Goldman-Yang (1994) codon rate matrix)");
 	help_strings[string("fnCodonHKY")][string("name")] = string(R"(fnCodonHKY)");
+	help_strings[string("fnCodonMG94")][string("description")] = string(R"(The Muse-Gaut (1994) codon model.
+
+A rate matrix on the 61 non-stop codons (in the standard genetic code).
+
+Rates between codons with more than one nucleotide change are equal to 0.
+
+In this model the rate Q(i,j) from i -> j is proportional to the frequency of
+nucleotide in codon j that changed.  This differs from the Goldman-Yang (1994) model,
+where Q(i,j) is proportional to the frequency of the entire codon j.
+
+Unlike the Goldman-Yang (1994) model, the Muse-Gaut (1994) model does not allow all the codon
+frequencies to vary independently.)");
+	help_strings[string("fnCodonMG94")][string("example")] = string(R"(omega ~ dnUniform(0,1)
+pi ~ dnDirichlet( rep(2.0, 4) )
+Q := fnCodonMG94( omega, pi ))");
+	help_strings[string("fnCodonMG94")][string("name")] = string(R"(fnCodonMG94)");
+	help_references[string("fnCodonMG94")].push_back(RbHelpReference(R"(Muse, S. and B. Gaut (1994) A likelihood approach for comparing synonymous and nonsynonymous nucleotide substitution rates, with application to the chloroplast genome. Mol. Biol. Evol. (1994) 11 (5):715-724)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040152 )",R"()"));
+	help_arrays[string("fnCodonMG94")][string("see_also")].push_back(string(R"(fnCodonGY94)"));
+	help_strings[string("fnCodonMG94")][string("title")] = string(R"(The Muse-Gaut (1994) codon rate matrix)");
 	help_strings[string("fnCovarion")][string("name")] = string(R"(fnCovarion)");
 	help_strings[string("fnCovarionRateMatrix")][string("name")] = string(R"(fnCovarionRateMatrix)");
 	help_strings[string("fnCpRev")][string("name")] = string(R"(fnCpRev)");

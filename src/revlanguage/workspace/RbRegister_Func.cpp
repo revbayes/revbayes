@@ -130,6 +130,7 @@
 #include "Func_codonSynonymousNonsynonymousRateMatrix.h"
 #include "Func_codonSynonymousNonsynonymousHKYRateMatrix.h"
 #include "Func_GoldmanYang94RateMatrix.h"
+#include "Func_MuseGaut94RateMatrix.h"
 #include "Func_covarionRateMatrix.h"
 #include "Func_covarion.h"
 #include "Func_cpRev.h"
@@ -301,6 +302,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_codonSynonymousNonsynonymousRateMatrix()      );
         addFunction( new Func_codonSynonymousNonsynonymousHKYRateMatrix()   );
         addFunction( new Func_GoldmanYang94RateMatrix()                     );
+        addFunction( new Func_MuseGaut94RateMatrix()                        );
         addFunction( new Func_covarionRateMatrix()                          );
         addFunction( new Func_covarion()                                    );
         addFunction( new Func_cpRev()                                       );
