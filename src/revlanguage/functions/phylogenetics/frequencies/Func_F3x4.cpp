@@ -1,4 +1,5 @@
 #include "Func_F3x4.h"
+#include "CppCodonFuncs.h"
 
 #include "RealPos.h"
 #include "RlDeterministicNode.h"
@@ -19,37 +20,6 @@
 
 using namespace RevLanguage;
 
-// We need to distinguish RevBayesCore::Simplex from RevLanguage::Simplex
-typedef RevBayesCore::Simplex CSimplex;
-
-CSimplex F3x4(const CSimplex& nuc_pi1,
-              const CSimplex& nuc_pi2,
-              const CSimplex& nuc_pi3)
-{
-    using RevBayesCore::CodonState;
-
-    assert(nuc_pi1.size() == 4);
-    assert(nuc_pi2.size() == 4);
-    assert(nuc_pi3.size() == 4);
-
-    std::vector<double> codon_pi(61);
-
-    for(int i=0;i<codon_pi.size();i++)
-    {
-        CodonState c = CodonState( CodonState::CODONS[i] );
-        std::vector<unsigned int> codon = c.getTripletStates();
-        int n1 = codon[0];
-        int n2 = codon[1];
-        int n3 = codon[2];
-
-        codon_pi[i] = nuc_pi1[n1] * nuc_pi2[n2] * nuc_pi3[n3];
-    }
-
-    // This line renormalizes the frequencies to sum to 1.0.
-    return CSimplex(codon_pi);
-}
-
-
 /**
  * The clone function is a convenience function to create proper copies of inherited objected.
  * E.g. a.clone() will create a clone of the correct type even if 'a' is of derived type 'b'.
@@ -61,6 +31,7 @@ Func_F3x4* Func_F3x4::clone( void ) const
     return new Func_F3x4( *this );
 }
 
+typedef RevBayesCore::Simplex CSimplex;
 
 RevBayesCore::TypedFunction< CSimplex >* Func_F3x4::createFunction( void ) const
 {
@@ -83,7 +54,7 @@ RevBayesCore::TypedFunction< CSimplex >* Func_F3x4::createFunction( void ) const
         throw RbException("The fnF3x4:baseFrequencies3: must have exactly 4 base frequencies!.");
     }
 
-    return RevBayesCore::generic_function_ptr( F3x4, bf1, bf2, bf3 );
+    return RevBayesCore::generic_function_ptr( RevBayesCore::F3x4, bf1, bf2, bf3 );
 }
 
 
