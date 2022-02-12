@@ -22,6 +22,8 @@ namespace RevBayesCore {
 
     public:
         ConcreteTimeReversibleRateMatrix(const std::vector<double>& er, const std::vector<double>& pi);
+        ConcreteTimeReversibleRateMatrix(const MatrixReal& ER, const std::vector<double>& pi);
+
         ConcreteTimeReversibleRateMatrix(const ConcreteTimeReversibleRateMatrix& m) = default;
 
         // RateMatrix functions
@@ -32,6 +34,9 @@ namespace RevBayesCore {
 
         void                                                    update(void);
     };
+
+    std::vector<double> compute_flattened_exchange_rates( const MatrixReal& Q, const std::vector<double>& pi);
+    std::vector<double> flatten_exchange_rates( const MatrixReal& ER );
 }
 
 #endif
