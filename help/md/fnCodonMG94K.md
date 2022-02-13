@@ -30,7 +30,9 @@ fnCodonGY94, fnCodonMG94K
         kappa ~ dnLognormal(0,1)
         omega ~ dnUniform(0,1)
         pi ~ dnDirichlet( rep(2.0, 4) )
-        Q := fnCodonMG94K( kappa, omega, pi )
+        Q1 := fnCodonMG94K( kappa, omega, pi )
+
+        Q2 := fndNdS( omega, fnX3( fnHKY( kappa, pi) ) ) # MG94K = HKY + X3 + dNdS
 
 ## references
 - citation: Muse, S. and B. Gaut (1994) A likelihood approach for comparing synonymous and nonsynonymous

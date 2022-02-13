@@ -1124,10 +1124,12 @@ Unlike the Goldman-Yang (1994) model, the Muse-Gaut (1994) model does not allow 
 frequencies to vary independently.)");
 	help_strings[string("fnCodonMG94")][string("example")] = string(R"(omega ~ dnUniform(0,1)
 pi ~ dnDirichlet( rep(2.0, 4) )
-Q := fnCodonMG94( omega, pi ))");
+Q1 := fnCodonMG94( omega, pi )
+
+Q2 := fndNdS( omega, fnX3( fnF81(pi) ) ) # MG94 = F81 + X3 + dNdS)");
 	help_strings[string("fnCodonMG94")][string("name")] = string(R"(fnCodonMG94)");
 	help_references[string("fnCodonMG94")].push_back(RbHelpReference(R"(Muse, S. and B. Gaut (1994) A likelihood approach for comparing synonymous and nonsynonymous nucleotide substitution rates, with application to the chloroplast genome. Mol. Biol. Evol. (1994) 11 (5):715-724)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040152 )",R"()"));
-	help_arrays[string("fnCodonMG94")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K)"));
+	help_arrays[string("fnCodonMG94")][string("see_also")].push_back(string(R"(fnCodonMG94, fnCodonMG94K)"));
 	help_strings[string("fnCodonMG94")][string("title")] = string(R"(The Muse-Gaut (1994) codon rate matrix)");
 	help_strings[string("fnCodonMG94K")][string("description")] = string(R"(The Muse-Gaut (1994) codon model, extended with a transition/transversion rate ratio.
 
@@ -1147,7 +1149,9 @@ frequencies to vary independently.)");
 	help_strings[string("fnCodonMG94K")][string("example")] = string(R"(kappa ~ dnLognormal(0,1)
 omega ~ dnUniform(0,1)
 pi ~ dnDirichlet( rep(2.0, 4) )
-Q := fnCodonMG94K( kappa, omega, pi ))");
+Q1 := fnCodonMG94K( kappa, omega, pi )
+
+Q2 := fndNdS( omega, fnX3( fnHKY( kappa, pi) ) ) # MG94K = HKY + X3 + dNdS)");
 	help_strings[string("fnCodonMG94K")][string("name")] = string(R"(fnCodonMG94K)");
 	help_references[string("fnCodonMG94K")].push_back(RbHelpReference(R"(Muse, S. and B. Gaut (1994) A likelihood approach for comparing synonymous and nonsynonymous nucleotide substitution rates, with application to the chloroplast genome. Mol. Biol. Evol. (1994) 11 (5):715-724)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040152 )",R"()"));
 	help_arrays[string("fnCodonMG94K")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K)"));
@@ -1280,21 +1284,53 @@ Q := fnTrN(kappaAT, kappaCT, ,pi))");
 	help_strings[string("fnX3")][string("description")] = string(R"(Constructs a rate matrix on the 61 non-stop codons (in the standard genetic code).
 
 Rates of change from nucleotide i -> j at each codon position are given by the
-nucleotide rate matrix.  The rate of 2 or 3 simultaneous changes is 0.)");
+nucleotide rate matrix.  The rate of 2 or 3 simultaneous changes is 0.
+
+The X3 function can be used to constructor other rate matrices in a modular fashion.
+For example:
+  (i)  MG94  = F81 + X3 + dNdS
+  (ii) MG94K = HKY85 + X3 + dNdS)");
 	help_strings[string("fnX3")][string("example")] = string(R"(
 kappa ~ dnLognormal(0,1)
+omega ~ dnUniform(0,1)
 nuc_pi ~ dnDirichlet( rep(2.0, 4) )
-Q1 := fnCodonMG94K( kappa, 1.0, nuc_pi )
+Q1 := fnCodonMG94K( kappa, omega, nuc_pi )
 # This is the same.
-Q2 := fnX3(fnHKY(k,nuc_pi))   # HKY + X3, or HKY*3
+Q2 := fndNdS(omega,fnX3(fnHKY(kappa,nuc_pi)))   # HKY + X3 + dNdS, or HKY*3 + dNdS
 
 er ~ dnDirichlet( v(1,1,1,1,1,1) )
-Q3 := fnX3(fnGTR(er,pi))      # GTR + X3, or GTR*3)");
+Q3 := fnX3(fnGTR(er,nuc_pi))      # GTR + X3, or GTR*3)");
 	help_strings[string("fnX3")][string("name")] = string(R"(fnX3)");
-	help_references[string("fnX3")].push_back(RbHelpReference(R"()",R"()",R"()"));
-	help_arrays[string("fnX3")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K)"));
+	help_references[string("fnX3")].push_back(RbHelpReference(R"(Redelings, BD (2021). RedelingsBAli-Phy version 3: Model-based co-estimation of Alignment and Phylogeny.  Bioinformatics (2021) 37(10):3032–3034.)",R"(https://doi.org/10.1093/bioinformatics/btab129 )",R"()"));
+	help_arrays[string("fnX3")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K, fndNdS)"));
 	help_strings[string("fnX3")][string("title")] = string(R"(Construct a codon rate matrix from a nucleotide rate matrix.)");
 	help_strings[string("fnassembleContinuousMRF")][string("name")] = string(R"(fnassembleContinuousMRF)");
+	help_strings[string("fndNdS")][string("description")] = string(R"(Constructs a rate matrix on the 61 non-stop codons (in the standard genetic code).
+
+   Q(i,j) = Q'(i,j) * omega if aa(i) != aa(j)
+                    * 1     if aa(i) == aa(j)
+
+where aa(i) gives the amino acid for codon i in the standard genetic code, and
+Q'(i,j) is the input rate matrix on codons.
+
+The dNdS function can be used to construct other rate matrices in a modular fashion.
+For example:
+  (i)  MG94  = F81 + X3 + dNdS
+  (ii) MG94K = HKY85 + X3 + dNdS)");
+	help_strings[string("fndNdS")][string("example")] = string(R"(
+kappa ~ dnLognormal(0,1)
+omega ~ dnUniform(0,1)
+nuc_pi ~ dnDirichlet( rep(2.0, 4) )
+Q1 := fnCodonMG94K( kappa, omega, nuc_pi )
+# This is the same.
+Q2 := fndNdS(omega,fnX3(fnHKY(kappa,nuc_pi)))   # HKY + X3 + dNdS, or HKY*3 + dNdS
+
+er ~ dnDirichlet( v(1,1,1,1,1,1) )
+Q3 := fnX3(fnGTR(er,nuc_pi))      # GTR + X3, or GTR*3)");
+	help_strings[string("fndNdS")][string("name")] = string(R"(fndNdS)");
+	help_references[string("fndNdS")].push_back(RbHelpReference(R"(Redelings, BD (2021). RedelingsBAli-Phy version 3: Model-based co-estimation of Alignment and Phylogeny.  Bioinformatics (2021) 37(10):3032–3034.)",R"(https://doi.org/10.1093/bioinformatics/btab129)",R"()"));
+	help_arrays[string("fndNdS")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K, fnX3)"));
+	help_strings[string("fndNdS")][string("title")] = string(R"(Add a dN/dS factor to a codon rate matrix.)");
 	help_strings[string("formatDiscreteCharacterData")][string("name")] = string(R"(formatDiscreteCharacterData)");
 	help_strings[string("gamma")][string("name")] = string(R"(gamma)");
 	help_arrays[string("getOption")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));

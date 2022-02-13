@@ -1,16 +1,19 @@
 ## name
-fnX3
+fndNdS
 
 ## title
-Construct a codon rate matrix from a nucleotide rate matrix.
+Add a dN/dS factor to a codon rate matrix.
 
 ## description
 Constructs a rate matrix on the 61 non-stop codons (in the standard genetic code).
 
-Rates of change from nucleotide i -> j at each codon position are given by the
-nucleotide rate matrix.  The rate of 2 or 3 simultaneous changes is 0.
+   Q(i,j) = Q'(i,j) * omega if aa(i) != aa(j)
+                    * 1     if aa(i) == aa(j)
 
-The X3 function can be used to constructor other rate matrices in a modular fashion.
+where aa(i) gives the amino acid for codon i in the standard genetic code, and
+Q'(i,j) is the input rate matrix on codons.
+
+The dNdS function can be used to construct other rate matrices in a modular fashion.
 For example:
   (i)  MG94  = F81 + X3 + dNdS
   (ii) MG94K = HKY85 + X3 + dNdS
@@ -18,7 +21,7 @@ For example:
 ## details
 ## authors
 ## see_also
-fnCodonGY94, fnCodonMG94K, fndNdS
+fnCodonGY94, fnCodonMG94K, fnX3
 
 ## example
 

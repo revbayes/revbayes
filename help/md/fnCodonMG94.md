@@ -21,12 +21,14 @@ frequencies to vary independently.
 ## details
 ## authors
 ## see_also
-fnCodonGY94, fnCodonMG94K
+fnCodonMG94, fnCodonMG94K
 
 ## example
         omega ~ dnUniform(0,1)
         pi ~ dnDirichlet( rep(2.0, 4) )
-        Q := fnCodonMG94( omega, pi )
+        Q1 := fnCodonMG94( omega, pi )
+
+        Q2 := fndNdS( omega, fnX3( fnF81(pi) ) ) # MG94 = F81 + X3 + dNdS
 
 ## references
 - citation: Muse, S. and B. Gaut (1994) A likelihood approach for comparing synonymous and nonsynonymous
