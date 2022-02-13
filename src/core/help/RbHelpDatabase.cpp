@@ -1080,29 +1080,6 @@ exists(x))");
 	help_strings[string("fnCoala")][string("name")] = string(R"(fnCoala)");
 	help_references[string("fnCoala")].push_back(RbHelpReference(R"(A branch-heterogeneous model of protein evolution for efficient inference of ancestral sequences. Groussin M, Boussau B, Gouy M. Syst Biol. 2013 Jul;62(4):523-38.)",R"(10.1093/sysbio/syt016)",R"(https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3676677/ )"));
 	help_strings[string("fnCodon")][string("name")] = string(R"(fnCodon)");
-	help_strings[string("fnCodon94K")][string("description")] = string(R"(The Muse-Gaut (1994) codon model, extended with a transition/transversion rate ratio.
-
-A rate matrix on the 61 non-stop codons (in the standard genetic code).
-
-Rates between codons with more than one nucleotide change are equal to 0.
-
-In this model the rate Q(i,j) from i -> j is proportional to the frequency of
-nucleotide in codon j that changed.  This differs from the Goldman-Yang (1994) model,
-where Q(i,j) is proportional to the frequency of the entire codon j.
-
-This version is an extension of the fnCodonMG94 model to add a transition/transversion
-rate ratio.  This makes it more comparable to the Goldman-Yang (1994) model.
-
-Unlike the Goldman-Yang (1994) model, the Muse-Gaut (1994) model does not allow all the codon
-frequencies to vary independently.)");
-	help_strings[string("fnCodon94K")][string("example")] = string(R"(kappa ~ dnLognormal(0,1)
-omega ~ dnUniform(0,1)
-pi ~ dnDirichlet( rep(2.0, 4) )
-Q := fnCodonMG94K( kappa, omega, pi ))");
-	help_strings[string("fnCodon94K")][string("name")] = string(R"(fnCodonMG94K)");
-	help_references[string("fnCodon94K")].push_back(RbHelpReference(R"(Muse, S. and B. Gaut (1994) A likelihood approach for comparing synonymous and nonsynonymous nucleotide substitution rates, with application to the chloroplast genome. Mol. Biol. Evol. (1994) 11 (5):715-724)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040152 )",R"()"));
-	help_arrays[string("fnCodon94K")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K)"));
-	help_strings[string("fnCodon94K")][string("title")] = string(R"(The Muse-Gaut (1994) codon rate matrix + K.)");
 	help_strings[string("fnCodonGY94")][string("description")] = string(R"(The Goldman-Yang (1994) codon model.
 
 A rate matrix on the 61 non-stop codons (in the standard genetic code).
@@ -1152,6 +1129,29 @@ Q := fnCodonMG94( omega, pi ))");
 	help_references[string("fnCodonMG94")].push_back(RbHelpReference(R"(Muse, S. and B. Gaut (1994) A likelihood approach for comparing synonymous and nonsynonymous nucleotide substitution rates, with application to the chloroplast genome. Mol. Biol. Evol. (1994) 11 (5):715-724)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040152 )",R"()"));
 	help_arrays[string("fnCodonMG94")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K)"));
 	help_strings[string("fnCodonMG94")][string("title")] = string(R"(The Muse-Gaut (1994) codon rate matrix)");
+	help_strings[string("fnCodonMG94K")][string("description")] = string(R"(The Muse-Gaut (1994) codon model, extended with a transition/transversion rate ratio.
+
+A rate matrix on the 61 non-stop codons (in the standard genetic code).
+
+Rates between codons with more than one nucleotide change are equal to 0.
+
+In this model the rate Q(i,j) from i -> j is proportional to the frequency of
+nucleotide in codon j that changed.  This differs from the Goldman-Yang (1994) model,
+where Q(i,j) is proportional to the frequency of the entire codon j.
+
+This version is an extension of the fnCodonMG94 model to add a transition/transversion
+rate ratio.  This makes it more comparable to the Goldman-Yang (1994) model.
+
+Unlike the Goldman-Yang (1994) model, the Muse-Gaut (1994) model does not allow all the codon
+frequencies to vary independently.)");
+	help_strings[string("fnCodonMG94K")][string("example")] = string(R"(kappa ~ dnLognormal(0,1)
+omega ~ dnUniform(0,1)
+pi ~ dnDirichlet( rep(2.0, 4) )
+Q := fnCodonMG94K( kappa, omega, pi ))");
+	help_strings[string("fnCodonMG94K")][string("name")] = string(R"(fnCodonMG94K)");
+	help_references[string("fnCodonMG94K")].push_back(RbHelpReference(R"(Muse, S. and B. Gaut (1994) A likelihood approach for comparing synonymous and nonsynonymous nucleotide substitution rates, with application to the chloroplast genome. Mol. Biol. Evol. (1994) 11 (5):715-724)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040152 )",R"()"));
+	help_arrays[string("fnCodonMG94K")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K)"));
+	help_strings[string("fnCodonMG94K")][string("title")] = string(R"(The Muse-Gaut (1994) codon rate matrix + K.)");
 	help_strings[string("fnCovarion")][string("name")] = string(R"(fnCovarion)");
 	help_strings[string("fnCovarionRateMatrix")][string("name")] = string(R"(fnCovarionRateMatrix)");
 	help_strings[string("fnCpRev")][string("name")] = string(R"(fnCpRev)");
@@ -1277,6 +1277,23 @@ Q := fnTrN(kappaAT, kappaCT, ,pi))");
 	help_strings[string("fnVarCovar")][string("name")] = string(R"(fnVarCovar)");
 	help_strings[string("fnWAG")][string("name")] = string(R"(fnWAG)");
 	help_strings[string("fnWattersonsTheta")][string("name")] = string(R"(fnWattersonsTheta)");
+	help_strings[string("fnX3")][string("description")] = string(R"(Constructs a rate matrix on the 61 non-stop codons (in the standard genetic code).
+
+Rates of change from nucleotide i -> j at each codon position are given by the
+nucleotide rate matrix.  The rate of 2 or 3 simultaneous changes is 0.)");
+	help_strings[string("fnX3")][string("example")] = string(R"(
+kappa ~ dnLognormal(0,1)
+nuc_pi ~ dnDirichlet( rep(2.0, 4) )
+Q1 := fnCodonMG94K( kappa, 1.0, nuc_pi )
+# This is the same.
+Q2 := fnX3(fnHKY(k,nuc_pi))   # HKY + X3, or HKY*3
+
+er ~ dnDirichlet( v(1,1,1,1,1,1) )
+Q3 := fnX3(fnGTR(er,pi))      # GTR + X3, or GTR*3)");
+	help_strings[string("fnX3")][string("name")] = string(R"(fnX3)");
+	help_references[string("fnX3")].push_back(RbHelpReference(R"()",R"()",R"()"));
+	help_arrays[string("fnX3")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K)"));
+	help_strings[string("fnX3")][string("title")] = string(R"(Construct a codon rate matrix from a nucleotide rate matrix.)");
 	help_strings[string("fnassembleContinuousMRF")][string("name")] = string(R"(fnassembleContinuousMRF)");
 	help_strings[string("formatDiscreteCharacterData")][string("name")] = string(R"(formatDiscreteCharacterData)");
 	help_strings[string("gamma")][string("name")] = string(R"(gamma)");
