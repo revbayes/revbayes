@@ -1237,6 +1237,28 @@ Q := fnHKY(kappa,pi))");
 	help_strings[string("fnMixtureCladoProbs")][string("name")] = string(R"(fnMixtureCladoProbs)");
 	help_strings[string("fnMtMam")][string("name")] = string(R"(fnMtMam)");
 	help_strings[string("fnMtRev")][string("name")] = string(R"(fnMtRev)");
+	help_strings[string("fnMutSel")][string("description")] = string(R"(Constructs a rate matrix from scaled selection coefficients w[i] and
+mutation rate matrix mu(i,j).
+
+A substitution from allele i -> j can be decomposed into
+ (1) all individuals initially have state i
+ (2) a single individual mutates from i -> j, at rate mu(i,j)
+ (3) the allele j goes to fixation
+
+Then the substitution rate Q is then given by
+  Q(i,j) = mu(i,j) * Pr(j goes to fixation | i was fixed previously).
+
+The probability of fixation is determined by scaled selection coefficients:
+  w[i] = 2*N*s[i]
+and the initial frequency 1/N of allele j.)");
+	help_strings[string("fnMutSel")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
+nuc_pi ~ dnDirichlet( rep(2.0, 4) )
+w ~ dnIID(61, dnNormal(0,1))
+Q := fnMutSel(w, fnX3( fnGTR(er,nuc_pi) ) )   # GTR + X3 + MutSel)");
+	help_strings[string("fnMutSel")][string("name")] = string(R"(fnMutSel)");
+	help_references[string("fnMutSel")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
+	help_arrays[string("fnMutSel")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnX3, fndNdS)"));
+	help_strings[string("fnMutSel")][string("title")] = string(R"(Add mutation-selection balance to a rate matrix.)");
 	help_strings[string("fnNormalizedQuantile")][string("name")] = string(R"(fnNormalizedQuantile)");
 	help_strings[string("fnNumUniqueInVector")][string("name")] = string(R"(fnNumUniqueInVector)");
 	help_strings[string("fnOrderedRateMatrix")][string("name")] = string(R"(fnOrderedRateMatrix)");
@@ -1329,7 +1351,7 @@ er ~ dnDirichlet( v(1,1,1,1,1,1) )
 Q3 := fnX3(fnGTR(er,nuc_pi))      # GTR + X3, or GTR*3)");
 	help_strings[string("fndNdS")][string("name")] = string(R"(fndNdS)");
 	help_references[string("fndNdS")].push_back(RbHelpReference(R"(Redelings, BD (2021). RedelingsBAli-Phy version 3: Model-based co-estimation of Alignment and Phylogeny.  Bioinformatics (2021) 37(10):3032–3034.)",R"(https://doi.org/10.1093/bioinformatics/btab129)",R"()"));
-	help_arrays[string("fndNdS")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K, fnX3)"));
+	help_arrays[string("fndNdS")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K, fnX3, fnMutSel)"));
 	help_strings[string("fndNdS")][string("title")] = string(R"(Add a dN/dS factor to a codon rate matrix.)");
 	help_strings[string("formatDiscreteCharacterData")][string("name")] = string(R"(formatDiscreteCharacterData)");
 	help_strings[string("gamma")][string("name")] = string(R"(gamma)");

@@ -21,7 +21,7 @@ For example:
 ## details
 ## authors
 ## see_also
-fnCodonGY94, fnCodonMG94K, fnX3
+fnCodonGY94, fnCodonMG94K, fnX3, fnMutSel
 
 ## example
 
