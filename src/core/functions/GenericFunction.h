@@ -133,9 +133,9 @@ namespace RevBayesCore
     template <class F, class ArgTuple>
     auto InvokeFunction(F* func, const ArgTuple& args_tuple)
     {
-        // 1. Get the argument values
+        // 1. Get the argument values -- BY REFERENCE.
         // for each i: get<i>(values) = get<i>(arguments)->getValue()
-        auto values = boost::mp11::tuple_transform([](auto& node) {return node->getValue();}, args_tuple);
+        auto values = boost::mp11::tuple_transform([](auto& node) ->decltype(auto) {return node->getValue();}, args_tuple);
 
         // 2. Then call the function and store the result.
         // *value = func( get<0>(values), get<1>(values), get<2>(values), ...)
@@ -146,9 +146,9 @@ namespace RevBayesCore
     template <class F, class ArgTuple>
     auto InvokeFunction(const F& func, const ArgTuple& args_tuple)
     {
-        // 1. Get the argument values
+        // 1. Get the argument values -- BY REFERENCE.
         // for each i: get<i>(values) = get<i>(arguments)->getValue()
-        auto values = boost::mp11::tuple_transform([](auto& node) {return node->getValue();}, args_tuple);
+        auto values = boost::mp11::tuple_transform([](auto& node) -> decltype(auto) {return node->getValue();}, args_tuple);
 
         // 2. Then call the function and store the result.
         // *value = func( get<0>(values), get<1>(values), get<2>(values), ...)
