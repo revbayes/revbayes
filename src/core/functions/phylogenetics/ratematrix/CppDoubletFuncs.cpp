@@ -17,8 +17,11 @@ Simplex F2x4(const Simplex& nuc_pi1,
 {
     using RevBayesCore::DoubletState;
 
-    assert(nuc_pi1.size() == 4);
-    assert(nuc_pi2.size() == 4);
+    if (nuc_pi1.size() != 4)
+        throw RbException()<<"F2x4: nuc_pi1 must have exactly 4 base frequencies, but got "<<nuc_pi1.size()<<".";
+
+    if (nuc_pi2.size() != 4)
+        throw RbException()<<"F2x4: nuc_pi2 must have exactly 4 base frequencies, but got "<<nuc_pi2.size()<<".";
 
     std::vector<double> doublet_pi(16);
 

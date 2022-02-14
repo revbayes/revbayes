@@ -35,18 +35,8 @@ typedef RevBayesCore::Simplex CSimplex;
 
 RevBayesCore::TypedFunction< CSimplex >* Func_F2x4::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< CSimplex >* bf1 = static_cast<const Simplex &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< CSimplex >* bf2 = static_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-
-    if ( bf1->getValue().size() != 4 )
-    {
-        throw RbException("The fnF2x4:baseFrequencies1: must have exactly 4 base frequencies!.");
-    }
-
-    if ( bf2->getValue().size() != 4 )
-    {
-        throw RbException("The fnF2x4:baseFrequencies2: must have exactly 4 base frequencies!.");
-    }
+    RevBayesCore::TypedDagNode< CSimplex >* bf1 = dynamic_cast<const Simplex &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< CSimplex >* bf2 = dynamic_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
 
     return RevBayesCore::generic_function_ptr( RevBayesCore::F2x4, bf1, bf2 );
 }
