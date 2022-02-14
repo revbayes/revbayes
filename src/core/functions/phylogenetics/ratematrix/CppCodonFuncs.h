@@ -42,9 +42,9 @@ namespace RevBayesCore
 
     CGTR GY94(double kappa, double omega, const std::vector<double>& pi);
 
-    CGTR MutSel(const TimeReversibleRateMatrix& Q, const std::vector<double>& F);
+    CGTR MutSel(const std::vector<double>& F, const TimeReversibleRateMatrix& Q);
 
-    CGTR MutSelAA(const TimeReversibleRateMatrix& Q, const std::vector<double>& F);
+    CGTR MutSelAA(const std::vector<double>& F, const TimeReversibleRateMatrix& Q);
 }
 
 

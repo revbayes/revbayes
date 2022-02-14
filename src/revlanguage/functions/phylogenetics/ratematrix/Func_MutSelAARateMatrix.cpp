@@ -1,4 +1,4 @@
-#include "Func_MutSelRateMatrix.h"
+#include "Func_MutSelAARateMatrix.h"
 #include "CppCodonFuncs.h"
 
 #include "Real.h"
@@ -21,17 +21,17 @@
 
 using namespace RevLanguage;
 
-RevBayesCore::ConcreteTimeReversibleRateMatrix* MutSelFunc(const RevBayesCore::RbVector<double> codon_fitnesses, const RevBayesCore::RateGenerator& q_)
+RevBayesCore::ConcreteTimeReversibleRateMatrix* MutSelAAFunc(const RevBayesCore::RbVector<double> codon_fitnesses, const RevBayesCore::RateGenerator& q_)
 {
     auto q = dynamic_cast<const RevBayesCore::TimeReversibleRateMatrix*>(&q_);
 
     if (not q)
-        throw RbException("fnMutSel: the argument must be a time-reversible rate matrix.");
+        throw RbException("fnMutSelAA: the argument must be a time-reversible rate matrix.");
 
     if (q->getRateMatrix().getNumberOfColumns() != 61)
         throw RbException("The dN/dS rate matrix should be 61x61.");
     
-    return RevBayesCore::MutSel(codon_fitnesses, *q).clone();
+    return RevBayesCore::MutSelAA(codon_fitnesses, *q).clone();
 }
 
 
@@ -41,23 +41,23 @@ RevBayesCore::ConcreteTimeReversibleRateMatrix* MutSelFunc(const RevBayesCore::R
  *
  * \return A new copy of the process.
  */
-Func_MutSelRateMatrix* Func_MutSelRateMatrix::clone( void ) const
+Func_MutSelAARateMatrix* Func_MutSelAARateMatrix::clone( void ) const
 {
-    return new Func_MutSelRateMatrix( *this );
+    return new Func_MutSelAARateMatrix( *this );
 }
 
 
-RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_MutSelRateMatrix::createFunction( void ) const
+RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_MutSelAARateMatrix::createFunction( void ) const
 {
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* f = static_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* q = static_cast<const RateGenerator &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
 
-    return RevBayesCore::generic_function_ptr2< RevBayesCore::RateGenerator >( MutSelFunc, f, q );
+    return RevBayesCore::generic_function_ptr2< RevBayesCore::RateGenerator >( MutSelAAFunc, f, q );
 }
 
 
 /* Get argument rules */
-const ArgumentRules& Func_MutSelRateMatrix::getArgumentRules( void ) const
+const ArgumentRules& Func_MutSelAARateMatrix::getArgumentRules( void ) const
 {
 
     static ArgumentRules argumentRules = ArgumentRules();
@@ -65,7 +65,7 @@ const ArgumentRules& Func_MutSelRateMatrix::getArgumentRules( void ) const
 
     if ( !rules_set )
     {
-        argumentRules.push_back( new ArgumentRule( "fitnesses", ModelVector<Real>::getClassTypeSpec(), "Codon fitnesses.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "fitnesses", ModelVector<Real>::getClassTypeSpec(), "Amino acid fitnesses.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "submodel", RateMatrix::getClassTypeSpec(), "Codon rate matrix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         rules_set = true;
@@ -75,17 +75,17 @@ const ArgumentRules& Func_MutSelRateMatrix::getArgumentRules( void ) const
 }
 
 
-const std::string& Func_MutSelRateMatrix::getClassType(void)
+const std::string& Func_MutSelAARateMatrix::getClassType(void)
 {
 
-    static std::string rev_type = "Func_MutSelRateMatrix";
+    static std::string rev_type = "Func_MutSelAARateMatrix";
 
     return rev_type;
 }
 
 
 /* Get class type spec describing type of object */
-const TypeSpec& Func_MutSelRateMatrix::getClassTypeSpec(void)
+const TypeSpec& Func_MutSelAARateMatrix::getClassTypeSpec(void)
 {
 
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
@@ -97,16 +97,16 @@ const TypeSpec& Func_MutSelRateMatrix::getClassTypeSpec(void)
 /**
  * Get the primary Rev name for this function.
  */
-std::string Func_MutSelRateMatrix::getFunctionName( void ) const
+std::string Func_MutSelAARateMatrix::getFunctionName( void ) const
 {
     // create a name variable that is the same for all instance of this class
-    std::string f_name = "fnMutSel";
+    std::string f_name = "fnMutSelAA";
 
     return f_name;
 }
 
 
-const TypeSpec& Func_MutSelRateMatrix::getTypeSpec( void ) const
+const TypeSpec& Func_MutSelAARateMatrix::getTypeSpec( void ) const
 {
 
     static TypeSpec type_spec = getClassTypeSpec();

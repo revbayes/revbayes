@@ -356,7 +356,7 @@ vector<double> aa_to_codon(const vector<double>& x_aa)
     return x_codon;
 }
 
-CGTR MutSel(const TimeReversibleRateMatrix& Q1, const vector<double>& F)
+CGTR MutSel(const vector<double>& F, const TimeReversibleRateMatrix& Q1)
 {
     auto Q2 = MutSelQ( Q1.getRateMatrix(), F);
 
@@ -369,9 +369,10 @@ CGTR MutSel(const TimeReversibleRateMatrix& Q1, const vector<double>& F)
     return Q_out;
 }
 
-CGTR MutSelAA(const TimeReversibleRateMatrix& Q1, const vector<double>& FAA)
+CGTR MutSelAA(const vector<double>& FAA, const TimeReversibleRateMatrix& Q)
 {
-    return MutSel(Q1, aa_to_codon(FAA) );
+    return MutSel(aa_to_codon(FAA), Q);
+}
 }
 
 
