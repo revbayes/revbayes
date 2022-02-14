@@ -21,8 +21,11 @@
 
 using namespace RevLanguage;
 
-RevBayesCore::ConcreteTimeReversibleRateMatrix* MutSelAAFunc(const RevBayesCore::RbVector<double> codon_fitnesses, const RevBayesCore::RateGenerator& q_)
+RevBayesCore::ConcreteTimeReversibleRateMatrix* MutSelAAFunc(const RevBayesCore::RbVector<double> aa_fitnesses, const RevBayesCore::RateGenerator& q_)
 {
+    if (aa_fitnesses.size() != 20)
+        throw RbException("fnFMutSel0: there should be 20 fitnesses for the 20 amino acids");
+
     auto q = dynamic_cast<const RevBayesCore::TimeReversibleRateMatrix*>(&q_);
 
     if (not q)
@@ -31,7 +34,7 @@ RevBayesCore::ConcreteTimeReversibleRateMatrix* MutSelAAFunc(const RevBayesCore:
     if (q->getRateMatrix().getNumberOfColumns() != 61)
         throw RbException("The dN/dS rate matrix should be 61x61.");
     
-    return RevBayesCore::MutSelAA(codon_fitnesses, *q).clone();
+    return RevBayesCore::MutSelAA(aa_fitnesses, *q).clone();
 }
 
 
