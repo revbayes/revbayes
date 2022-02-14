@@ -26,31 +26,30 @@ bool is_transversion_mut(int i, int j)
     return not is_transition_mut(i,j);
 }
 
-int n_different_nucs(const vector<unsigned int>& codon_from, const vector<unsigned int>& codon_to)
+int n_different_nucs(const vector<unsigned int>& states_from, const vector<unsigned int>& states_to)
 {
-    assert(codon_from.size() == 3);
-    assert(codon_to.size() == 3);
+    assert(states_from.size() == states_to.size());
 
     int count = 0;
-    for(int i=0;i<3;i++)
-        if (codon_from[i] != codon_to[i])
+    for(int i=0;i<states_from.size();i++)
+        if (states_from[i] != states_to[i])
             count++;
 
     return count;
 }
 
-std::tuple<int,int,int> triplet_single_nuc_mut(const vector<unsigned int>& codon_from, const vector<unsigned int>& codon_to)
+std::tuple<int,int,int> single_nuc_mut(const vector<unsigned int>& states_from, const vector<unsigned int>& states_to)
 {
-    assert(n_different_nucs(codon_from, codon_to) == 1);
+    assert(n_different_nucs(states_from, states_to) == 1);
 
-    for(int i=0; i<3; i++)
+    for(int i=0; i<states_from.size(); i++)
     {
-        if (codon_from[i] != codon_to[i])
-            return std::tuple<int,int,int>(codon_from[i], codon_to[i], i);
+        if (states_from[i] != states_to[i])
+            return std::tuple<int,int,int>(states_from[i], states_to[i], i);
     }
 
     // This should never happen!
-    throw RbException("triplet_single_nuc_mut: codons are the same!  This should never happen.");
+    throw RbException("single_nuc_mut: codon/doublet/etc states are the same!  This should never happen.");
 }
 
 Simplex F3x4(const Simplex& nuc_pi1,
@@ -109,7 +108,7 @@ MatrixReal singlet_to_triplet_rates(const MatrixReal& q1, const MatrixReal& q2, 
 
             if (n_diff_nucs == 1)
             {
-                auto changed_nucs = triplet_single_nuc_mut(codon_from, codon_to);
+                auto changed_nucs = single_nuc_mut(codon_from, codon_to);
                 int from_nuc = std::get<0>(changed_nucs);
                 int to_nuc = std::get<1>(changed_nucs);
                 int pos = std::get<2>(changed_nucs);

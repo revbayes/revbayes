@@ -1190,6 +1190,16 @@ Q := fnCodonGY94( kappa, omega, fnF1x4(pi) ))");
 	help_strings[string("fnF1x4")][string("name")] = string(R"(fnF1x4)");
 	help_arrays[string("fnF1x4")][string("see_also")].push_back(string(R"(fnGY94, fnF3x4)"));
 	help_strings[string("fnF1x4")][string("title")] = string(R"(The F1x4 codon frequency model)");
+	help_strings[string("fnF2x4")][string("description")] = string(R"(This treats doublet frequencies as a product of independent nucleotide frequencies.)");
+	help_strings[string("fnF2x4")][string("example")] = string(R"(# An RNA stem model with independent base frequencies (from fnF2x4),
+# and simultaneous 2-nucleotide changes allows.
+nuc_pi ~ dnDirichlet( v(2.0, 2.0, 2.0, 2.0) )
+rna_stem_er ~ dnDirichlet( rep(1.0, 16*15/2) )
+rna_stem_pi := fnF2x4(nuc_pi, nuc_pi)
+Q := fnGTR(rna_stem_er, rna_stem_pi))");
+	help_strings[string("fnF2x4")][string("name")] = string(R"(fnF2x4)");
+	help_arrays[string("fnF2x4")][string("see_also")].push_back(string(R"(fnX2)"));
+	help_strings[string("fnF2x4")][string("title")] = string(R"(The F2x4 doublet frequency model)");
 	help_strings[string("fnF3x4")][string("description")] = string(R"(This treats codon frequencies as a product of independent nucleotide frequencies.
 
 Since stop codons are removed from the codon alphabet, frequencies are renormalized
@@ -1327,10 +1337,14 @@ and the initial frequency 1/N of allele j.)");
 	help_strings[string("fnMutSel")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
 nuc_pi ~ dnDirichlet( rep(2.0, 4) )
 F ~ dnIID(61, dnNormal(0,1))
-Q := fnMutSel(F, fnX3( fnGTR(er,nuc_pi) ) )   # GTR + X3 + MutSel)");
+Q := fnMutSel(F, fnX3( fnGTR(er,nuc_pi) ) )   # GTR + X3 + MutSel
+
+# A mutation-selection balance model on RNA, with GTR mutation.
+F2 ~ dnIID(16, dnNormal(0,1))
+Q2 := fnMutSel(F2, fnX2( fnGTR(er,nuc_pi) ) ) # GTR + X2 + MutSel)");
 	help_strings[string("fnMutSel")][string("name")] = string(R"(fnMutSel)");
 	help_references[string("fnMutSel")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
-	help_arrays[string("fnMutSel")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnX3, fndNdS, fnMutSelAA)"));
+	help_arrays[string("fnMutSel")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnMutSelAA, fnFMutSel, fndNdS)"));
 	help_strings[string("fnMutSel")][string("title")] = string(R"(Add mutation-selection balance to a rate matrix.)");
 	help_strings[string("fnMutSelAA")][string("description")] = string(R"(Constructs a rate matrix from scaled selection coefficients w[i] and
 mutation rate matrix mu(i,j).
@@ -1403,12 +1417,30 @@ Q := fnTrN(kappaAT, kappaCT, ,pi))");
 	help_strings[string("fnVarCovar")][string("name")] = string(R"(fnVarCovar)");
 	help_strings[string("fnWAG")][string("name")] = string(R"(fnWAG)");
 	help_strings[string("fnWattersonsTheta")][string("name")] = string(R"(fnWattersonsTheta)");
+	help_strings[string("fnX2")][string("description")] = string(R"(Constructs a double rate matrix on the 16 nucleotide pairs.
+
+Rates of change from nucleotide i -> j at each doublet position are given by the
+nucleotide rate matrix.  The rate of 2 simultaneous changes is 0.
+
+The X3 function can be used to constructor rate matrices on doublets in a
+modular fashion.)");
+	help_strings[string("fnX2")][string("example")] = string(R"(
+kappa ~ dnLognormal(0,1)
+nuc_pi ~ dnDirichlet( rep(2.0, 4) )
+# Mutation rate matrix on RNA stems
+Q1 := fnX2( fnHKY(kappa, nuc_pi) )
+F ~ dnIID(16, dnNormal(0,1))
+# Add selection to the rate matrix
+Q2 := fnMutSel(F, Q1))");
+	help_strings[string("fnX2")][string("name")] = string(R"(fnX2)");
+	help_arrays[string("fnX2")][string("see_also")].push_back(string(R"(fnX3)"));
+	help_strings[string("fnX2")][string("title")] = string(R"(Construct a doublet (16x16) rate matrix from a nucleotide rate matrix.)");
 	help_strings[string("fnX3")][string("description")] = string(R"(Constructs a rate matrix on the 61 non-stop codons (in the standard genetic code).
 
 Rates of change from nucleotide i -> j at each codon position are given by the
 nucleotide rate matrix.  The rate of 2 or 3 simultaneous changes is 0.
 
-The X3 function can be used to constructor other rate matrices in a modular fashion.
+The X3 function can be used to construct other rate matrices in a modular fashion.
 For example:
   (i)  MG94  = F81 + X3 + dNdS
   (ii) MG94K = HKY85 + X3 + dNdS)");
@@ -1423,7 +1455,7 @@ Q2 := fndNdS(omega,fnX3(fnHKY(kappa,nuc_pi)))   # HKY + X3 + dNdS, or HKY*3 + dN
 er ~ dnDirichlet( v(1,1,1,1,1,1) )
 Q3 := fnX3(fnGTR(er,nuc_pi))      # GTR + X3, or GTR*3)");
 	help_strings[string("fnX3")][string("name")] = string(R"(fnX3)");
-	help_references[string("fnX3")].push_back(RbHelpReference(R"(Redelings, BD (2021). RedelingsBAli-Phy version 3: Model-based co-estimation of Alignment and Phylogeny.  Bioinformatics (2021) 37(10):3032–3034.)",R"(https://doi.org/10.1093/bioinformatics/btab129 )",R"()"));
+	help_references[string("fnX3")].push_back(RbHelpReference(R"(Redelings, BD (2021). BAli-Phy version 3: Model-based co-estimation of Alignment and Phylogeny.  Bioinformatics (2021) 37(10):3032–3034.)",R"(https://doi.org/10.1093/bioinformatics/btab129 )",R"()"));
 	help_arrays[string("fnX3")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K, fndNdS)"));
 	help_strings[string("fnX3")][string("title")] = string(R"(Construct a codon rate matrix from a nucleotide rate matrix.)");
 	help_strings[string("fnassembleContinuousMRF")][string("name")] = string(R"(fnassembleContinuousMRF)");

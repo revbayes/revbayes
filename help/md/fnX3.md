@@ -10,7 +10,7 @@ Constructs a rate matrix on the 61 non-stop codons (in the standard genetic code
 Rates of change from nucleotide i -> j at each codon position are given by the
 nucleotide rate matrix.  The rate of 2 or 3 simultaneous changes is 0.
 
-The X3 function can be used to constructor other rate matrices in a modular fashion.
+The X3 function can be used to construct other rate matrices in a modular fashion.
 For example:
   (i)  MG94  = F81 + X3 + dNdS
   (ii) MG94K = HKY85 + X3 + dNdS
@@ -33,6 +33,6 @@ fnCodonGY94, fnCodonMG94K, fndNdS
         Q3 := fnX3(fnGTR(er,nuc_pi))      # GTR + X3, or GTR*3
 
 ## references
-- citation: Redelings, BD (2021). RedelingsBAli-Phy version 3: Model-based co-estimation of Alignment
+- citation: Redelings, BD (2021). BAli-Phy version 3: Model-based co-estimation of Alignment
        and Phylogeny.  Bioinformatics (2021) 37(10):3032–3034.
   doi: https://doi.org/10.1093/bioinformatics/btab129
