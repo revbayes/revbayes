@@ -21,8 +21,13 @@
 
 using namespace RevLanguage;
 
-RevBayesCore::ConcreteTimeReversibleRateMatrix* MutSelFunc(const RevBayesCore::RbVector<double> codon_fitnesses, const RevBayesCore::RateGenerator& q_)
+RevBayesCore::ConcreteTimeReversibleRateMatrix* MutSelFunc(const RevBayesCore::RbVector<double> fitnesses, const RevBayesCore::RateGenerator& q_)
 {
+    const int n = q_.getNumberOfStates();
+
+    if (fitnesses.size() != n)
+        throw RbException("fnMutSel: there should be " + std::to_string(n) + " fitnesses.");
+
     auto q = dynamic_cast<const RevBayesCore::TimeReversibleRateMatrix*>(&q_);
 
     if (not q)
@@ -31,7 +36,7 @@ RevBayesCore::ConcreteTimeReversibleRateMatrix* MutSelFunc(const RevBayesCore::R
     if (q->getRateMatrix().getNumberOfColumns() != 61)
         throw RbException("The dN/dS rate matrix should be 61x61.");
     
-    return RevBayesCore::MutSel(codon_fitnesses, *q).clone();
+    return RevBayesCore::MutSel(fitnesses, *q).clone();
 }
 
 
@@ -65,8 +70,8 @@ const ArgumentRules& Func_MutSelRateMatrix::getArgumentRules( void ) const
 
     if ( !rules_set )
     {
-        argumentRules.push_back( new ArgumentRule( "fitnesses", ModelVector<Real>::getClassTypeSpec(), "Codon fitnesses.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "submodel", RateMatrix::getClassTypeSpec(), "Codon rate matrix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "fitnesses", ModelVector<Real>::getClassTypeSpec(), "Fitnesses.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "submodel", RateMatrix::getClassTypeSpec(), "Mutation rate matrix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         rules_set = true;
     }
