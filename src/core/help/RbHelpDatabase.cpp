@@ -1240,6 +1240,10 @@ Q := fnHKY(kappa,pi))");
 	help_strings[string("fnMutSel")][string("description")] = string(R"(Constructs a rate matrix from scaled selection coefficients w[i] and
 mutation rate matrix mu(i,j).
 
+fnMutSel takes 61 scaled selection coefficients, one for each codon.
+This differs from fnMutSelAA, which takes 20 scaled selection coefficients,
+one for each amino acid.
+
 A substitution from allele i -> j can be decomposed into
  (1) all individuals initially have state i
  (2) a single individual mutates from i -> j, at rate mu(i,j)
@@ -1257,8 +1261,35 @@ w ~ dnIID(61, dnNormal(0,1))
 Q := fnMutSel(w, fnX3( fnGTR(er,nuc_pi) ) )   # GTR + X3 + MutSel)");
 	help_strings[string("fnMutSel")][string("name")] = string(R"(fnMutSel)");
 	help_references[string("fnMutSel")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
-	help_arrays[string("fnMutSel")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnX3, fndNdS)"));
+	help_arrays[string("fnMutSel")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnX3, fndNdS, fnMutSelAA)"));
 	help_strings[string("fnMutSel")][string("title")] = string(R"(Add mutation-selection balance to a rate matrix.)");
+	help_strings[string("fnMutSelAA")][string("description")] = string(R"(Constructs a rate matrix from scaled selection coefficients w[i] and
+mutation rate matrix mu(i,j).
+
+fnMutSelAA takes 20 scaled selection coefficients, one for each amino acid.
+This differs from fnMutSel, which takes 61 scaled selection coefficients,
+one for each codon.  fnMutSelAA assumes that codons for the same amino acid
+have the same fitness.
+
+A substitution from allele i -> j can be decomposed into
+ (1) all individuals initially have state i
+ (2) a single individual mutates from i -> j, at rate mu(i,j)
+ (3) the allele j goes to fixation
+
+Then the substitution rate Q is then given by
+  Q(i,j) = mu(i,j) * Pr(j goes to fixation | i was fixed previously).
+
+The probability of fixation is determined by scaled selection coefficients:
+  w[i] = 2*N*s[i]
+and the initial frequency 1/N of allele j.)");
+	help_strings[string("fnMutSelAA")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
+nuc_pi ~ dnDirichlet( rep(2.0, 4) )
+w ~ dnIID(61, dnNormal(0,1))
+Q := fnMutSel(w, fnX3( fnGTR(er,nuc_pi) ) )   # GTR + X3 + MutSel)");
+	help_strings[string("fnMutSelAA")][string("name")] = string(R"(fnMutSelAA)");
+	help_references[string("fnMutSelAA")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
+	help_arrays[string("fnMutSelAA")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnX3, fndNdS, fnMutSel)"));
+	help_strings[string("fnMutSelAA")][string("title")] = string(R"(Add mutation-selection balance to a rate matrix -- fitnesses on amino acids)");
 	help_strings[string("fnNormalizedQuantile")][string("name")] = string(R"(fnNormalizedQuantile)");
 	help_strings[string("fnNumUniqueInVector")][string("name")] = string(R"(fnNumUniqueInVector)");
 	help_strings[string("fnOrderedRateMatrix")][string("name")] = string(R"(fnOrderedRateMatrix)");

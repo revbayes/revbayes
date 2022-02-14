@@ -339,17 +339,39 @@ Simplex MutSelPi(const vector<double>& pi0, const vector<double>& F0)
     return Simplex(pi);
 }
 
+vector<double> aa_to_codon(const vector<double>& x_aa)
+{
+    assert(x_aa.size() == 20);
+
+    vector<double> x_codon(61);
+
+    for(int i=0;i<x_codon.size();i++)
+    {
+        CodonState c = CodonState( CodonState::CODONS[i] );
+        AminoAcidState aa = c.getAminoAcidState();
+        int j = aa.getStateIndex();
+        x_codon[i] = x_aa[j];
+    }
+
+    return x_codon;
+}
+
 CGTR MutSel(const TimeReversibleRateMatrix& Q1, const vector<double>& F)
 {
     auto Q2 = MutSelQ( Q1.getRateMatrix(), F);
 
     auto pi2 = MutSelPi( Q1.getStationaryFrequencies(), F );
 
-    auto Q_out =CGTR( compute_flattened_exchange_rates(Q2,pi2), pi2);
+    auto Q_out = CGTR( compute_flattened_exchange_rates(Q2,pi2), pi2);
 
     Q_out.rescaleToAverageRate(3.0);
 
     return Q_out;
+}
+
+CGTR MutSelAA(const TimeReversibleRateMatrix& Q1, const vector<double>& FAA)
+{
+    return MutSel(Q1, aa_to_codon(FAA) );
 }
 
 
