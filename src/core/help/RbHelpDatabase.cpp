@@ -1204,6 +1204,75 @@ Q := fnCodonGY94( kappa, omega, fnF3x4(pi1, pi2, pi3) ))");
 	help_arrays[string("fnF3x4")][string("see_also")].push_back(string(R"(fnGY94, fnF1x4)"));
 	help_strings[string("fnF3x4")][string("title")] = string(R"(The F3x4 codon frequency model)");
 	help_strings[string("fnF81")][string("name")] = string(R"(fnF81)");
+	help_strings[string("fnFMutSel")][string("description")] = string(R"(Constructs a rate matrix from 61 scaled selection coefficients w[i] and
+a 4x4 nucleotide mutation rate matrix mu(i,j).  In the original paper
+the nucleotide mutation rate matrix is a GTR rate matrix.
+
+The FMutSel0 model differs from FMutSel by constraining all codons for
+the same amino acid to have the same scaled selection coefficient.
+
+The function fnMutSel differs from fnFMutSel by taking a codon mutation
+rate matrix.
+
+A substitution from allele i -> j can be decomposed into
+ (1) all individuals initially have state i
+ (2) a single individual mutates from i -> j, at rate mu(i,j)
+ (3) the allele j goes to fixation
+
+Then the substitution rate Q is then given by
+  Q(i,j) = mu(i,j) * Pr(j goes to fixation | i was fixed previously).
+
+The probability of fixation is determined by scaled selection coefficients:
+  F[i] = 2*N*s[i]
+and the initial frequency 1/N of allele j.)");
+	help_strings[string("fnFMutSel")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
+nuc_pi ~ dnDirichlet( rep(2.0, 4) )
+F ~ dnIID(61, dnNormal(0,1))
+omega ~ dnUniform(0,1)
+# The FMutSel model from Yang and Nielsen (2008)
+Q1 := fnFMutSel(F, omega, fnGTR(er, nuc_pi))
+
+# The same -- fMutSel = GTR(er,nuc_pi) + X3 + MutSel(F) + dNdS(omega)
+Q2 := fndNdS(omega, fnMutSel(F, fnX3( fnGTR(er, nuc_pi)))))");
+	help_strings[string("fnFMutSel")][string("name")] = string(R"(fnFMutSel)");
+	help_references[string("fnFMutSel")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
+	help_arrays[string("fnFMutSel")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnFMutSel0, fnMutSel)"));
+	help_strings[string("fnFMutSel")][string("title")] = string(R"(The FMutSel model)");
+	help_strings[string("fnFMutSel0")][string("description")] = string(R"(Constructs a rate matrix from 61 scaled selection coefficients w[i] and
+a 4x4 nucleotide mutation rate matrix mu(i,j).  In the original paper
+the nucleotide mutation rate matrix is a GTR rate matrix.
+
+The FMutSel0 model is a restriction of the FMutSel model that constrains
+all codons for the same amino acid to have the same scaled selection
+coefficient.
+
+The function fnMutSelAA differs from fnFMutSel0 by taking a codon mutation
+rate matrix.
+
+A substitution from allele i -> j can be decomposed into
+ (1) all individuals initially have state i
+ (2) a single individual mutates from i -> j, at rate mu(i,j)
+ (3) the allele j goes to fixation
+
+Then the substitution rate Q is then given by
+  Q(i,j) = mu(i,j) * Pr(j goes to fixation | i was fixed previously).
+
+The probability of fixation is determined by scaled selection coefficients:
+  F[i] = 2*N*s[i]
+and the initial frequency 1/N of allele j.)");
+	help_strings[string("fnFMutSel0")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
+nuc_pi ~ dnDirichlet( rep(2.0, 4) )
+F ~ dnIID(20, dnNormal(0,1))
+omega ~ dnUniform(0,1)
+# The FMutSel0 model from Yang and Nielsen (2008)
+Q1 := fnFMutSel0(F, omega, fnGTR(er, nuc_pi))
+
+# The same -- fMutSel0 = GTR(er,nuc_pi) + X3 + MutSel(F) + dNdS(omega)
+Q2 := fndNdS(omega, fnMutSelAA(F, fnX3( fnGTR(er, nuc_pi)))))");
+	help_strings[string("fnFMutSel0")][string("name")] = string(R"(fnFMutSel0)");
+	help_references[string("fnFMutSel0")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
+	help_arrays[string("fnFMutSel0")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnFMutSel0, fnMutSel)"));
+	help_strings[string("fnFMutSel0")][string("title")] = string(R"(The FMutSel0 model)");
 	help_strings[string("fnFreeBinary")][string("name")] = string(R"(fnFreeBinary)");
 	help_strings[string("fnFreeK")][string("name")] = string(R"(fnFreeK)");
 	help_strings[string("fnFreeSymmetricRateMatrix")][string("name")] = string(R"(fnFreeSymmetricRateMatrix)");
@@ -1253,12 +1322,12 @@ Then the substitution rate Q is then given by
   Q(i,j) = mu(i,j) * Pr(j goes to fixation | i was fixed previously).
 
 The probability of fixation is determined by scaled selection coefficients:
-  w[i] = 2*N*s[i]
+  F[i] = 2*N*s[i]
 and the initial frequency 1/N of allele j.)");
 	help_strings[string("fnMutSel")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
 nuc_pi ~ dnDirichlet( rep(2.0, 4) )
-w ~ dnIID(61, dnNormal(0,1))
-Q := fnMutSel(w, fnX3( fnGTR(er,nuc_pi) ) )   # GTR + X3 + MutSel)");
+F ~ dnIID(61, dnNormal(0,1))
+Q := fnMutSel(F, fnX3( fnGTR(er,nuc_pi) ) )   # GTR + X3 + MutSel)");
 	help_strings[string("fnMutSel")][string("name")] = string(R"(fnMutSel)");
 	help_references[string("fnMutSel")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
 	help_arrays[string("fnMutSel")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnX3, fndNdS, fnMutSelAA)"));
@@ -1280,12 +1349,12 @@ Then the substitution rate Q is then given by
   Q(i,j) = mu(i,j) * Pr(j goes to fixation | i was fixed previously).
 
 The probability of fixation is determined by scaled selection coefficients:
-  w[i] = 2*N*s[i]
+  F[i] = 2*N*s[i]
 and the initial frequency 1/N of allele j.)");
 	help_strings[string("fnMutSelAA")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
 nuc_pi ~ dnDirichlet( rep(2.0, 4) )
-w ~ dnIID(61, dnNormal(0,1))
-Q := fnMutSel(w, fnX3( fnGTR(er,nuc_pi) ) )   # GTR + X3 + MutSel)");
+F ~ dnIID(61, dnNormal(0,1))
+Q := fnMutSel(F, fnX3( fnGTR(er,nuc_pi) ) )   # GTR + X3 + MutSel)");
 	help_strings[string("fnMutSelAA")][string("name")] = string(R"(fnMutSelAA)");
 	help_references[string("fnMutSelAA")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
 	help_arrays[string("fnMutSelAA")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnX3, fndNdS, fnMutSel)"));

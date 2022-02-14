@@ -1,16 +1,19 @@
 ## name
-fnMutSel
+fnFMutSel
 
 ## title
-Add mutation-selection balance to a rate matrix.
+The FMutSel model
 
 ## description
-Constructs a rate matrix from scaled selection coefficients w[i] and
-mutation rate matrix mu(i,j).
+Constructs a rate matrix from 61 scaled selection coefficients w[i] and
+a 4x4 nucleotide mutation rate matrix mu(i,j).  In the original paper
+the nucleotide mutation rate matrix is a GTR rate matrix.
 
-fnMutSel takes 61 scaled selection coefficients, one for each codon.
-This differs from fnMutSelAA, which takes 20 scaled selection coefficients,
-one for each amino acid.
+The FMutSel0 model differs from FMutSel by constraining all codons for
+the same amino acid to have the same scaled selection coefficient.
+
+The function fnMutSel differs from fnFMutSel by taking a codon mutation
+rate matrix.
 
 A substitution from allele i -> j can be decomposed into
  (1) all individuals initially have state i
@@ -27,13 +30,18 @@ and the initial frequency 1/N of allele j.
 ## details
 ## authors
 ## see_also
-fnCodonGY94, fnCodonMG94, fnX3, fndNdS, fnMutSelAA
+fnCodonGY94, fnCodonMG94, fnFMutSel0, fnMutSel
 
 ## example
         er ~ dnDirichlet( v(1,1,1,1,1,1) )
         nuc_pi ~ dnDirichlet( rep(2.0, 4) )
         F ~ dnIID(61, dnNormal(0,1))
-        Q := fnMutSel(F, fnX3( fnGTR(er,nuc_pi) ) )   # GTR + X3 + MutSel
+        omega ~ dnUniform(0,1)
+        # The FMutSel model from Yang and Nielsen (2008)        
+        Q1 := fnFMutSel(F, omega, fnGTR(er, nuc_pi))
+
+        # The same -- fMutSel = GTR(er,nuc_pi) + X3 + MutSel(F) + dNdS(omega)
+        Q2 := fndNdS(omega, fnMutSel(F, fnX3( fnGTR(er, nuc_pi))))
 
 ## references
 - citation: Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate

@@ -135,6 +135,8 @@
 #include "Func_MuseGaut94KRateMatrix.h"
 #include "Func_X3RateMatrix.h"
 #include "Func_dNdSRateMatrix.h"
+#include "Func_FMutSelRateMatrix.h"
+#include "Func_FMutSel0RateMatrix.h"
 #include "Func_MutSelRateMatrix.h"
 #include "Func_MutSelAARateMatrix.h"
 
@@ -314,6 +316,8 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_MuseGaut94KRateMatrix()                       );
         addFunction( new Func_X3RateMatrix()                                );
         addFunction( new Func_dNdSRateMatrix()                              );
+        addFunction( new Func_FMutSelRateMatrix()                           );
+        addFunction( new Func_FMutSel0RateMatrix()                          );
         addFunction( new Func_MutSelRateMatrix()                            );
         addFunction( new Func_MutSelAARateMatrix()                          );
 

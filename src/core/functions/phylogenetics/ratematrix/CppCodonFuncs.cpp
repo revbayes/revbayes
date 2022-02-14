@@ -373,6 +373,15 @@ CGTR MutSelAA(const vector<double>& FAA, const TimeReversibleRateMatrix& Q)
 {
     return MutSel(aa_to_codon(FAA), Q);
 }
+
+CGTR FMutSel(const std::vector<double>& F, double omega, const TimeReversibleRateMatrix& Q)
+{
+    return dNdS(omega, MutSel(F, X3( Q ))); // Q + MutSel(F) + dNdS(omega)
+}
+
+CGTR FMutSel0(const std::vector<double>& F, double omega, const TimeReversibleRateMatrix& Q)
+{
+    return dNdS(omega, MutSelAA(F, X3( Q ))); // Q + MutSelAA(F) + dNdS(omega)
 }
 
 
