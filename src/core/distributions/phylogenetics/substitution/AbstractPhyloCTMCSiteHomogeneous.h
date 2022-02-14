@@ -30,14 +30,14 @@
 //#include "BeagleInstance.h"
 
 //-- Enable / Disable extra BEAGLE info by (un)commenting the following:
-#define RB_BEAGLE_INFO
+//#define RB_BEAGLE_DEBUG
 
 //-- Enable / Disable debugging by (un)commenting the following:
 //#define RB_BEAGLE_DEBUG
 
 //-- Enable / Disable using eigen3 library by (un)commenting the following:
-#define RB_USE_EIGEN
-#define RB_USE_EIGEN3
+//#define RB_USE_EIGEN
+//#define RB_USE_EIGEN3
 #if defined ( RB_USE_EIGEN3 )
 #include <Eigen/Core>
 #include <Eigen/Dense>
@@ -290,8 +290,6 @@ namespace RevBayesCore {
         void                                                                initializeBeagleInstance       ( void );
         //-- Free a BEAGLE instance.
         void                                                                freeBeagleInstance             ( void );
-        //-- Reinitialize a BEAGLE instance.
-        void                                                                reinitializeBeagleInstance       ( void );  //-- Reinitialize a BEAGLE instance.
 
         //-- Set the tree tip states and base frequencies for the BEAGLE instance.
         void                                                                initializeBeagleTips           ( void );
@@ -431,18 +429,6 @@ sampled_site_matrix_component( 0 )
 
     // initially we use only a single processor until someone else tells us otherwise
     this->setActivePID( this->pid, 1 );
-
-//#if defined( RB_BEAGLE )
-//    if ( in_mcmc_mode == true )
-//    {
-//        if ( RbSettings::userSettings().getUseBeagle() == true )
-//        {
-//            RBOUT("CTMC NEW");
-//            this->initializeBeagleInstance();
-//        }
-//    }
-//#endif /* RB_BEAGLE */
-
 }
 
 
@@ -530,11 +516,19 @@ sampled_site_matrix_component( n.sampled_site_matrix_component )
         memcpy(partialLikelihoods, n.partialLikelihoods, 2*activeLikelihoodOffset*sizeof(double));
 
 #if defined( RB_BEAGLE )
+        //-- If we are in MCMC mode, we need to make a new BEAGLE instance for our clone.
         if ( RbSettings::userSettings().getUseBeagle() == true )
         {
-            RBOUT("CTMC COPY");
             this->initializeBeagleInstance();
         }
+//        else
+//        {
+//            partialLikelihoods = new double[2*activeLikelihoodOffset];
+//            memcpy(partialLikelihoods, n.partialLikelihoods, 2*activeLikelihoodOffset*sizeof(double));
+//        }
+//#else
+//        partialLikelihoods = new double[2*activeLikelihoodOffset];
+//        memcpy(partialLikelihoods, n.partialLikelihoods, 2*activeLikelihoodOffset*sizeof(double));
 #endif /* RB_BEAGLE */
     }
 
@@ -562,12 +556,7 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::~AbstractPhyloCTMCSite
     {
         tau->getValue().getTreeChangeEventHandler().removeListener( this );
     }
-
-    // free the partial likelihoods
-    delete [] partialLikelihoods;
-    delete [] marginalLikelihoods;
-
-
+    
 #ifdef RB_BEAGLE
     if ( RbSettings::userSettings().getUseBeagle() == true && this->beagle_instance != NULL )
     {
@@ -577,6 +566,14 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::~AbstractPhyloCTMCSite
         delete this->beagle_instance;
         this->beagle_instance = NULL;
     }
+    else {
+        delete [] partialLikelihoods;
+        delete [] marginalLikelihoods;
+    }
+#else
+    // free the partial likelihoods
+    delete [] partialLikelihoods;
+    delete [] marginalLikelihoods;
 #endif
 }
 
@@ -936,7 +933,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
         site_invariant[i] = inv;
         
     }
-    
+
     // finally we resize the partial likelihood vectors to the new pattern counts
     resizeLikelihoodVectors();
 }
@@ -962,27 +959,26 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     // if we are not in MCMC mode, then we need to (temporarily) allocate memory
     if ( in_mcmc_mode == false )
     {
-        // @TODO: We don't need this memory if we use BEAGLE!
         partialLikelihoods = new double[2*activeLikelihoodOffset];
 
-        // we need to set up BEAGLE here if we are not in mcmc mode...
 #if defined( RB_BEAGLE )
+        // We need to set up BEAGLE here if we are not in mcmc mode...
         if ( RbSettings::userSettings().getUseBeagle() == true )
         {
-            this->reinitializeBeagleInstance();
-            RBOUT("Using Beagle Instance '" + std::to_string(this->beagle_instance->getResourceID()) + "' for lnL.");
+            //-- If there is already a BEAGLE instance, delete it.
+            this->freeBeagleInstance();
+
+            //-- Initialize a new BEAGLE instance.
+            this->initializeBeagleInstance();
         }
+//        else
+//        {
+//            partialLikelihoods = new double[2*activeLikelihoodOffset];
+//        }
+//#else
+//        //partialLikelihoods = new double[2*activeLikelihoodOffset];
 #endif /* RB_BEAGLE */
     }
-//#if defined( RB_BEAGLE )
-//    else {
-//        if ( RbSettings::userSettings().getUseBeagle() == true )
-//        {
-//            this->reinitializeBeagleInstance();
-//            //this->initializeBeagleTips();
-//        }
-//    }
-//#endif /* RB_BEAGLE */
 
     // compute the ln probability by recursively calling the probability calculation for each node
     const TopologyNode &root = tau->getValue().getRoot();
@@ -991,8 +987,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     size_t root_index = root.getIndex();
 
     // only necessary if the root is actually dirty
-    if ( dirty_nodes[root_index] == true ||
-        RbSettings::userSettings().getUseBeagleLikelihoodStoring() == false )
+    if ( dirty_nodes[root_index] == true )
     {
 
         // start by filling the likelihood vector for the children of the root
@@ -1000,29 +995,45 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
         {
             const TopologyNode &left = root.getChild(0);
             size_t left_index = left.getIndex();
-            fillLikelihoodVector( left, left_index );
             const TopologyNode &right = root.getChild(1);
             size_t right_index = right.getIndex();
+
+//#if !defined( RB_BEAGLE )
+            //-- We need to fill the likelihood vectors if we are not in BEAGLE
+            fillLikelihoodVector( left, left_index );
             fillLikelihoodVector( right, right_index );
+//#endif
 
             computeRootLikelihood( root_index, left_index, right_index );
+
+//#if !defined( RB_BEAGLE )
+            //-- We only need to scale if we are not using BEAGLE
             scale(root_index, left_index, right_index);
+//#endif
 
         }
         else if ( root.getNumberOfChildren() == 3 ) // unrooted trees have three children for the root
         {
             const TopologyNode &left = root.getChild(0);
             size_t left_index = left.getIndex();
-            fillLikelihoodVector( left, left_index );
             const TopologyNode &right = root.getChild(1);
             size_t right_index = right.getIndex();
-            fillLikelihoodVector( right, right_index );
             const TopologyNode &middle = root.getChild(2);
             size_t middleIndex = middle.getIndex();
+
+//#if !defined( RB_BEAGLE )
+            //-- We need to fill the likelihood vectors if we are not in BEAGLE
+            fillLikelihoodVector( left, left_index );
+            fillLikelihoodVector( right, right_index );
             fillLikelihoodVector( middle, middleIndex );
+//#endif
 
             computeRootLikelihood( root_index, left_index, right_index, middleIndex );
+
+//#if !defined( RB_BEAGLE )
+            //-- We only need to scale if we are not using BEAGLE
             scale(root_index, left_index, right_index, middleIndex);
+//#endif
 
         }
         else
@@ -1038,16 +1049,22 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     // if we are not in MCMC mode, then we need to (temporarily) free memory
     if ( in_mcmc_mode == false )
     {
-        // TODO: We cannot free the memory when we use BEAGLE because we didn't allocate it!
-        // free the partial likelihoods
         delete [] partialLikelihoods;
         partialLikelihoods = NULL;
 
 #if defined( RB_BEAGLE )
-    if ( RbSettings::userSettings().getUseBeagle() == true )
-    {
-        this->freeBeagleInstance();
-    }
+        //-- Clean up after ourselves when not in MCMC mode.
+        if ( RbSettings::userSettings().getUseBeagle() == true )
+        {
+            this->freeBeagleInstance();
+        }
+//        else {
+//            delete [] partialLikelihoods;
+//            partialLikelihoods = NULL;
+//        }
+//#else
+//        delete [] partialLikelihoods;
+//        partialLikelihoods = NULL;
 #endif
     }
 
@@ -2409,7 +2426,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::keepSpecializatio
     }
 
 #if defined( RB_BEAGLE )
-    // reset eigensystems for BEAGLE
+    // Reset eigensystems for BEAGLE
     for (std::vector<bool>::iterator it = this->touched_eigen_system.begin(); it != this->touched_eigen_system.end(); ++it)
     {
         (*it) = false;
@@ -2661,7 +2678,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
     // only do this if we are in MCMC mode. This will safe memory
     if ( in_mcmc_mode == true )
     {
-
         // we resize the partial likelihood vectors to the new dimensions
         delete [] partialLikelihoods;
 
@@ -2672,10 +2688,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
         {
             partialLikelihoods[i] = 0.0;
         }
-
-//#if defined( RB_BEAGLE )
-//        this->reinitializeBeagleInstance();
-//#endif
     }
 
     if ( useMarginalLikelihoods == true )
@@ -2729,6 +2741,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::restoreSpecializa
         changed_nodes[index] = false;
     }
 
+    // TODO - ask about this...
 //#if defined( RB_BEAGLE )
 //    // flip back the active eigen system indices for BEAGLE
 //    for ( size_t i=0; i<active_eigen_system.size(); ++i)
@@ -2754,7 +2767,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
 
     double* p_node = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
 
-    if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 )
+    if ( RbSettings::userSettings().getUseScaling() == true &&
+         node_index % RbSettings::userSettings().getScalingDensity() == 0 )
     {
         // iterate over all mixture categories
         for (size_t site = 0; site < this->pattern_block_size ; ++site)
@@ -3145,10 +3159,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setClockRate(cons
 
 }
 
-// Check in Mcmc class to see where called
-/**
- * Change the likelihood computation to or from MCMC mode.
- */
+
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setMcmcMode(bool tf)
 {
@@ -3159,10 +3170,19 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setMcmcMode(bool 
         partialLikelihoods = NULL;
 
 #if defined( RB_BEAGLE )
+        //-- If there is already a BEAGLE instance, delete it.
         if ( RbSettings::userSettings().getUseBeagle() == true )
         {
             this->freeBeagleInstance();
         }
+//        else
+//        {
+//            delete [] partialLikelihoods;
+//            partialLikelihoods = NULL;
+//        }
+//#else
+//        delete [] partialLikelihoods;
+//        partialLikelihoods = NULL;
 #endif
     }
 
@@ -3175,11 +3195,17 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setMcmcMode(bool 
         resizeLikelihoodVectors();
 
 #if defined( RB_BEAGLE )
-    if ( RbSettings::userSettings().getUseBeagle() == true )
-    {
-        //this->reinitializeBeagleInstance();
-        this->initializeBeagleInstance();        
-    }
+        // Initialize a new BEAGLE instance for MCMC
+        if ( RbSettings::userSettings().getUseBeagle() == true )
+        {
+            this->initializeBeagleInstance();        
+        }
+//        else
+//        {
+//            resizeLikelihoodVectors();
+//        }
+//#else
+//        //resizeLikelihoodVectors();
 #endif
     }
 }
@@ -4281,8 +4307,8 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::calculateBranchLength
         rate = 1.0;
     }
 
-    //-- TODO: check if this should be invariable site...
-    //rate /= this->homogeneous_clock_rate->getValue();
+    //rate /= ( 1.0 - getPInv() );
+    //rate *= ( 1.0 - getPInv() );
 
     branch_len = rate * node.getBranchLength();
     if ( branch_len < 0 )
@@ -4387,25 +4413,6 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::freeBeagleInstance ( v
         }
     }
 }
-
-template<class charType>
-void
-RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::reinitializeBeagleInstance ( void )
-{
-    if ( RbSettings::userSettings().getUseBeagle() == true )
-    {
-        if ( this->beagle_instance != NULL )
-        {
-#ifdef RB_BEAGLE_DEBUG
-            RBOUT("Deleting Beagle Instance '" + std::to_string(this->beagle_instance->getResourceID() ) + "'");
-#endif
-            delete this->beagle_instance;
-            this->beagle_instance = NULL;
-        }
-        this->initializeBeagleInstance();
-    }
-}
-
 
 template<class charType>
 void
@@ -4612,9 +4619,9 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigensyste
     Eigen::VectorXd                      eigenvalues;
     Eigen::MatrixXd                      eigenvectors;
     Eigen::MatrixXd                      inv_eigenvectors;
-#else
-    //-- Old internal eigen system way... but may have bad eigenvectors...
-    EigenSystem*                         eigen_system;
+//#else
+//    //-- Old internal eigen system way... but may have bad eigenvectors...
+//    EigenSystem*                         eigen_system;
 #endif /* RB_BEAGLE_DEBUG */
 
 
@@ -4702,12 +4709,12 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigensyste
         b_flat_eigenvectors     = flat_eigenvectors;
         b_flat_inv_eigenvectors = flat_inv_eigenvectors;
 #else
-#if defined ( RB_USE_EIGEN )
-        eigen_system            = &rate_matrices[i].getEigenSystem();
-        b_flat_eigenvalues      = eigen_system->getRealEigenvalues();
-        b_flat_eigenvectors     = eigen_system->getEigenvectors().flattenMatrix();
-        b_flat_inv_eigenvectors = eigen_system->getInverseEigenvectors().flattenMatrix();
-#endif /* RB_USE_EIGEN */
+//#if defined ( RB_USE_EIGEN )
+//        eigen_system            = &rate_matrices[i].getEigenSystem();
+//        b_flat_eigenvalues      = eigen_system->getRealEigenvalues();
+//        b_flat_eigenvectors     = eigen_system->getEigenvectors().flattenMatrix();
+//        b_flat_inv_eigenvectors = eigen_system->getInverseEigenvectors().flattenMatrix();
+//#endif /* RB_USE_EIGEN */
 #endif /* RB_USE_EIGEN3 */
         
         
@@ -4793,6 +4800,22 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleSiteRates 
         this->b_inCategoryRates   = { 1.0 };
     }
 
+    //double pInv = this->getPInv();
+    //if ( pInv > 0.0 )
+    //{
+    //    //for ( size_t i = 0; i < this->b_inCategoryRates.size(); ++i )
+    //    //{
+    //    //    //this->b_inCategoryRates[i] /= (1 - pInv);
+    //    //    this->b_inCategoryRates[i] *= (1 - pInv);
+    //    //}
+    //    //for ( size_t i = 0; i < this->b_inCategoryWeights.size(); ++i )
+    //    //{
+    //    //    //this->b_inCategoryWeights[i] /= (1 - pInv);
+    //    //    this->b_inCategoryWeights[i] *= (1 - pInv);
+    //    //}
+    //    
+        //}
+
     //-- Debugging output for ASRV
 #if defined ( RB_BEAGLE_DEBUG )
     debug_ss << "Setting Site Rates...\n";
@@ -4833,9 +4856,8 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleSiteRates 
     if ( b_return_code != 0 )
     {
         throw RbException( "Could not set category weights for ASRV model "
-                         + std::to_string(b_categoryWeightsIndex)
-                         + " : "
-                           + BeagleUtilities::printErrorCode(b_return_code));
+                         + std::to_string(b_categoryWeightsIndex) + " : "
+                         + BeagleUtilities::printErrorCode(b_return_code));
     }
 
     //-- Print the debugging stream.

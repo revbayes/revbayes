@@ -10,6 +10,7 @@ debug="false"
 travis="false"
 mpi="false"
 beagle="false"
+eigen="false"
 help="false"
 jupyter="false"
 boost_root=""
@@ -27,6 +28,7 @@ while echo $1 | grep ^- > /dev/null; do
 -debug          <true|false>    : set to true to build in debug mode. Defaults to false.
 -mpi            <true|false>    : set to true if you want to build the MPI version. Defaults to false.
 -beagle         <true|false>    : set to true if you want to build the BEAGLE version. Defaults to false.
+-eigen          <true|false>    : set to true if you want to build with Eigen3 support. Defaults to false.
 -cmd            <true|false>    : set to true if you want to build RevStudio with GTK2+. Defaults to false.
 -jupyter        <true|false>    : set to true if you want to build the jupyter version. Defaults to false.
 -help           <true|false>    : update the help database and build the YAML help generator. Defaults to false.
@@ -60,7 +62,11 @@ done
 if [ "$mpi" = "true" ] ; then
     BUILD_DIR="build-mpi"
 elif [ "$beagle" = "true" ] ; then
-    BUILD_DIR="build-beagle"
+    if [ "$eigen" = "true" ] ; then
+        BUILD_DIR="build-beagle-eigen"
+    else
+        BUILD_DIR="build-beagle-transition"
+    fi
 else
     BUILD_DIR="build"
 fi
@@ -94,6 +100,10 @@ fi
 
 if [ "$beagle" = "true" ] ; then
     cmake_args="-DRB_BEAGLE=ON $cmake_args"
+fi
+
+if [ "$eigen" = "true" ] ; then
+    cmake_args="-DRB_USE_EIGEN3=ON $cmake_args"
 fi
 
 if [ "$jupyter" = "true" ] ; then

@@ -620,7 +620,6 @@ void Mcmc::initializeSampler( bool prior_only )
 
                 std::stringstream ss;
                 ss << "Could not compute lnProb for node " << the_node->getName() << "." << std::endl;
-                ss << "\trecieved: " << ln_prob << std::endl; // Killian added....
                 std::ostringstream o1;
                 the_node->printValue( o1, "," );
                 ss << StringUtilities::oneLiner( o1.str(), 54 ) << std::endl;
