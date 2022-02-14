@@ -33,9 +33,6 @@ RevBayesCore::ConcreteTimeReversibleRateMatrix* MutSelFunc(const RevBayesCore::R
     if (not q)
         throw RbException("fnMutSel: the argument must be a time-reversible rate matrix.");
 
-    if (q->getRateMatrix().getNumberOfColumns() != 61)
-        throw RbException("The dN/dS rate matrix should be 61x61.");
-    
     return RevBayesCore::MutSel(fitnesses, *q).clone();
 }
 
