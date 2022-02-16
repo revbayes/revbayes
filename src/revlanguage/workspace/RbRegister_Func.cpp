@@ -57,6 +57,7 @@
 
 /* Primitive types (in folder "datatypes/basic") */
 #include "Integer.h"
+#include "IntegerPos.h"
 #include "Natural.h"
 #include "Probability.h"
 #include "Real.h"
@@ -147,6 +148,15 @@
 #include "Func_orderedRateMatrix.h"
 #include "Func_pomo.h"
 #include "Func_reversiblePoMo.h"
+#include "Func_PoMoKN.h"
+#include "Func_PoMo4N.h"
+#include "Func_PoMo2N.h"
+#include "Func_revPoMoKN.h"
+#include "Func_revPoMo4N.h"
+#include "Func_revPoMo2N.h"
+#include "Func_revPoMoBalance4N.h"
+#include "Func_revPoMoTwo4N.h"
+#include "Func_revPoMoThree4N.h"
 #include "Func_rtRev.h"
 #include "Func_vt.h"
 #include "Func_t92.h"
@@ -229,9 +239,7 @@
 #include "Func_sumPositive.h"
 #include "Func_sumInteger.h"
 #include "Func_sumNatural.h"
-#include "Func_sumSimplex.h"
 #include "Func_standardDeviation.h"
-#include "Func_stochasticMatrix.h"
 #include "Func_sqrt.h"
 #include "Func_trunc.h"
 #include "Func_upperTriangle.h"
@@ -305,6 +313,15 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_orderedRateMatrix()                           );
         addFunction( new Func_pomo()                                        );
         addFunction( new Func_reversiblePoMo()                              );
+        addFunction( new Func_PoMoKN()                                      );
+        addFunction( new Func_PoMo4N()                                      );
+        addFunction( new Func_PoMo2N()                                      );
+        addFunction( new Func_revPoMoKN()                                   );
+        addFunction( new Func_revPoMo4N()                                   );
+        addFunction( new Func_revPoMo2N()                                   );
+        addFunction( new Func_revPoMoBalance4N()                            );
+        addFunction( new Func_revPoMoTwo4N()                                );
+        addFunction( new Func_revPoMoThree4N()                              );
         addFunction( new Func_rtRev()                                       );
         addFunction( new Func_t92()                                         );
         addFunction( new Func_TamuraNei()                                   );
@@ -427,9 +444,6 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         // matrix function (converts into MatrixReal)
         addFunction( new Func_matrix() );
 
-        // stochastic matrix (converts into row-stochastic matrix)
-        addFunction( new Func_stochasticMatrix() );
-
         // max function
         addFunction( new Func_max()  );
 
@@ -462,7 +476,6 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_sumPositive()  );
         addFunction( new Func_sumInteger()  );
         addFunction( new Func_sumNatural()  );
-        addFunction( new Func_sumSimplex()  );
 
         // standard deviation function
         addFunction( new Func_standardDeviation()  );

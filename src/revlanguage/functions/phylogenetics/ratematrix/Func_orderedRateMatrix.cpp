@@ -15,11 +15,13 @@
 #include "ArgumentRules.h"
 #include "DeterministicNode.h"
 #include "DynamicNode.h"
+#include "OptionRule.h"
 #include "RateGenerator.h"
 #include "RbBoolean.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "RlFunction.h"
+#include "RlString.h"
 #include "RlTypedFunction.h"
 #include "StringUtilities.h"
 #include "TypeSpec.h"
@@ -56,7 +58,10 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_orderedRateMatr
     RevBayesCore::TypedDagNode< double >* mu                            = static_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< RevBayesCore::Boolean >* zero_state     = static_cast<const RlBoolean &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
 
-    RevBayesCore::OrderedRateMatrixFunction* f = new RevBayesCore::OrderedRateMatrixFunction( n, lambda, mu, zero_state->getValue() );
+    bool rescale                                                        = static_cast<const RlBoolean &>( this->args[4].getVariable()->getRevObject() ).getDagNode()->getValue();
+    const std::string method                                            = static_cast<const RlString &>( this->args[5].getVariable()->getRevObject() ).getDagNode()->getValue();
+
+    RevBayesCore::OrderedRateMatrixFunction* f = new RevBayesCore::OrderedRateMatrixFunction( n, lambda, mu, zero_state->getValue(), rescale, method );
     
     return f;
 }
@@ -76,6 +81,16 @@ const ArgumentRules& Func_orderedRateMatrix::getArgumentRules( void ) const
         argumentRules.push_back( new ArgumentRule( "lambda"         , RealPos::getClassTypeSpec(), "The rate of gain.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
         argumentRules.push_back( new ArgumentRule( "mu"             , RealPos::getClassTypeSpec(), "The rate of loss.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
         argumentRules.push_back( new ArgumentRule( "allowZeroState" , RlBoolean::getClassTypeSpec(), "Can the character go into state 0.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+
+        argumentRules.push_back( new ArgumentRule( "rescaled",         RlBoolean::getClassTypeSpec(), "Should the matrix be normalized?", ArgumentRule::BY_VALUE,              ArgumentRule::ANY, new RlBoolean(true) ) );
+
+        std::vector<std::string> optionsMethod;
+        optionsMethod.push_back( "scalingAndSquaring" );
+        optionsMethod.push_back( "scalingAndSquaringPade" );
+        optionsMethod.push_back( "scalingAndSquaringTaylor" );
+        optionsMethod.push_back( "uniformization" );
+        optionsMethod.push_back( "eigen" );
+        argumentRules.push_back( new OptionRule( "matrixExponentialMethod", new RlString("eigen"), optionsMethod, "The method used to compute the matrix exponential." ) );
 
         rules_set = true;
     }
