@@ -145,7 +145,7 @@ std::vector<Event> RevBayesCore::PoolEvents(             const TypedDagNode<doub
  * \param[in]    rho                    Sampling probability at present time.
  * \param[in]    removalPr              Removal probability after sampling.
  * \param[in]    maxHiddenLin           Algorithm accuracy (maximal number of hidden lineages).
- * \param[in]    cond                   Condition of the process (none/survival/#Taxa).
+ * \param[in]    cond                   Condition of the process (none/survival/survival2).
  * \param[in]    time_points            Times for which we want to compute the density.
  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
  * \param[in]    useMt                  If true computes densities with the forwards traversal algorithm (Mt) otherwise uses backward one (Lt).
@@ -199,7 +199,7 @@ MatrixReal RevBayesCore::ComputeLnProbabilityDensitiesOBDP(  const TypedDagNode<
  * \param[in]    rho                    Sampling probability at present time.
  * \param[in]    removalPr              Removal probability after sampling.
  * \param[in]    maxHiddenLin           Algorithm accuracy (maximal number of hidden lineages).
- * \param[in]    cond                   Condition of the process (none/survival/#Taxa).
+ * \param[in]    cond                   Condition of the process (none/survival/survival2).
  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
  * \param[in]    useMt                  If true computes densities with the forwards traversal algorithm (Mt) otherwise uses backward one (Lt).
  * \param[in]    verbose                If true displays warnings and information messages.
@@ -283,7 +283,7 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *sta
 //  * \param[in]    rho                    Sampling probability at present time.
 //  * \param[in]    removalPr              Removal probability after sampling.
 //  * \param[in]    maxHiddenLin           Algorithm accuracy (maximal number of hidden lineages).
-//  * \param[in]    cond                   Condition of the process (none/survival/#Taxa).
+//  * \param[in]    cond                   Condition of the process (none/survival/survival2).
 //  * \param[in]    time_points            Times for which we want to compute the density.
 //  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
 //  * \param[in]    timeTree               Tree for ancestral populations size inference.
@@ -539,7 +539,7 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
 //  * \param[in]    rho                    Sampling probability at present time.
 //  * \param[in]    removalPr              Removal probability after sampling.
 //  * \param[in]    maxHiddenLin           Algorithm accuracy (maximal number of hidden lineages).
-//  * \param[in]    cond                   Condition of the process (none/survival/#Taxa).
+//  * \param[in]    cond                   Condition of the process (none/survival/survival2).
 //  * \param[in]    time_points            Times for which we want to compute the density.
 //  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
 //  * \param[in]    timeTree               Tree for ancestral populations size inference.
@@ -778,7 +778,7 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
  * \param[in]    rho                    Sampling probability at present time.
  * \param[in]    removalPr              Removal probability after sampling.
  * \param[in]    maxHiddenLin           Algorithm accuracy (maximal number of hidden lineages).
- * \param[in]    cond                   Condition of the process (none/survival/#Taxa).
+ * \param[in]    cond                   Condition of the process (none/survival/survival2).
  * \param[in]    time_points            Times for which we want to compute the density.
  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
  * \param[in]    timeTree               Tree for ancestral populations size inference.
@@ -1068,13 +1068,13 @@ MatrixReal RevBayesCore::IncompleteBellPolynomial(unsigned N, unsigned K, const 
 }
 
 std::vector<double> RevBayesCore::GetFunctionUandP(  const TypedDagNode<double> *start_age,
-                                                                  const std::vector<double> &timeline,
-                                                                  const std::vector<double> &lambda,
-                                                                  const std::vector<double> &mu,
-                                                                  const std::vector<double> &psi,
-                                                                  const std::vector<double> &omega,
-                                                                  const TypedDagNode<double> *rho,
-                                                                  const std::vector<double> &removalPr)
+                                                     const std::vector<double>  &timeline,
+                                                     const std::vector<double>  &lambda,
+                                                     const std::vector<double>  &mu,
+                                                     const std::vector<double>  &psi,
+                                                     const std::vector<double>  &omega,
+                                                     const TypedDagNode<double> *rho,
+                                                     const std::vector<double>  &removalPr)
 {
     //get rate vectors
     const std::vector<double> birth = lambda;
