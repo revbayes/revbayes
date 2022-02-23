@@ -46,6 +46,7 @@ namespace RevBayesCore {
         bool                                                matchesConstraints(void);
         void                                                simulateTree(void);
         void                                                simulateHeterochronousTree(void);                                                                   //!< Simulates a heterochronus coalescent tree.
+        void                                                simulateHomochronousTree(void);
         
         // members
         std::vector<Clade>                                  constraints;                                                                                        //!< Topological constrains.

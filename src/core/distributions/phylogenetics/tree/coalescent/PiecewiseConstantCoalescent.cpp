@@ -452,7 +452,7 @@ std::vector<double> PiecewiseConstantCoalescent::simulateCoalescentAges( size_t 
     size_t theta_interval = 0;
     size_t current_num_lineages = num_taxa_at_present;
     
-    size_t num_events_per_interval = size_t( floor( double(n)/Nes->getValue().size()) );
+    size_t num_events_per_interval = size_t( ceil( double(n)/Nes->getValue().size()) );
     size_t current_num_events_in_interval = 0;
     
     // the current age of the process
@@ -632,7 +632,7 @@ void PiecewiseConstantCoalescent::updateIntervals( void ) const
             // sort the vector of times in ascending order
             std::sort(coalescent_ages.begin(), coalescent_ages.end());
             
-            size_t num_events_per_interval = size_t( floor( double(num_taxa-1.0)/Nes->getValue().size()) );
+            size_t num_events_per_interval = size_t( ceil( double(num_taxa-1.0)/Nes->getValue().size()) );
             size_t current_interval = 0;
             size_t current_num_events_in_interval = 0;
             for (size_t i = 0; i < num_taxa-2; ++i)
