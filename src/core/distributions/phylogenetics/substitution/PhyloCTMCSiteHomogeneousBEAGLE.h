@@ -20,6 +20,8 @@
  *
  *     - Configure for usage with mixture models.
  *
+ *     - Invariable sites does not return correct likelihood values.
+ *
  */
 
 #ifndef PhyloCTMCSiteHomogeneousBEAGLE_H
