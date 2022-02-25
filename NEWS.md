@@ -41,3 +41,5 @@
 #### New models/analyses
 
 #### Bug fixes
+
+  * fixed occasional crashes when using recovering a tree from a checkpoint file due to rounding. Checkpointing now records doubles without rounding
