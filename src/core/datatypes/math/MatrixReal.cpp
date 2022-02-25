@@ -17,54 +17,27 @@
 using namespace RevBayesCore;
 
 
-MatrixReal::MatrixReal( void ) : elements( RbVector<RbVector<double> >() ),
-    n_rows( 0 ),
-    n_cols( 0 ),
-    eigensystem( NULL ),
-    eigen_needs_update( true ),
-    cholesky_decomp( NULL ),
-    cholesky_needs_update( true ),
-    use_cholesky_decomp( false )
+MatrixReal::MatrixReal( void )
 {
-
 }
 
 
-MatrixReal::MatrixReal( size_t n ) : elements( RbVector<RbVector<double> >(n, RbVector<double>(n,0.0) ) ),
-    n_rows( n ),
-    n_cols( n ),
-    eigensystem( NULL ),
-    eigen_needs_update( true ),
-    cholesky_decomp( NULL ),
-    cholesky_needs_update( true ),
-    use_cholesky_decomp( false )
+MatrixReal::MatrixReal( size_t n )
+    : MatrixReal( n, n, 0.0 )
 {
-    
 }
 
 
-MatrixReal::MatrixReal( size_t n, size_t k) : elements( RbVector<RbVector<double> >(n, RbVector<double>(k,0.0) ) ),
-    n_rows( n ),
-    n_cols( k ),
-    eigensystem( NULL ),
-    eigen_needs_update( true ),
-    cholesky_decomp( NULL ),
-    cholesky_needs_update( true ),
-    use_cholesky_decomp( false )
+MatrixReal::MatrixReal( size_t n, size_t k)
+    : MatrixReal( n, k, 0.0 )
 {
-    
 }
 
 
 MatrixReal::MatrixReal( size_t n, size_t k, double v) :
     elements( RbVector<RbVector<double> >(n, RbVector<double>(k,v) ) ),
     n_rows( n ),
-    n_cols( k ),
-    eigensystem( NULL ),
-    eigen_needs_update( true ),
-    cholesky_decomp( NULL ),
-    cholesky_needs_update( true ),
-    use_cholesky_decomp( false )
+    n_cols( k )
 {
 
 }
@@ -72,16 +45,18 @@ MatrixReal::MatrixReal( size_t n, size_t k, double v) :
 MatrixReal::MatrixReal( const MatrixReal &m ) :
     elements( m.elements ),
     n_rows( m.n_rows ),
-    n_cols( m.n_cols ),
-    eigensystem( NULL ),
-    eigen_needs_update( true ),
-    cholesky_decomp( NULL ),
-    cholesky_needs_update( true ),
-    use_cholesky_decomp( m.use_cholesky_decomp )
+    n_cols( m.n_cols )
+    // The cached eigensystem and cholesky decomposition are NOT copied.
 {
     
 }
 
+MatrixReal::MatrixReal( MatrixReal &&m )
+{
+    // By swapping the initial entry matrix into m, we ensure that it has a valid state
+    //   after we steal its resources.
+    operator=( std::move(m) );
+}
 
 MatrixReal::~MatrixReal( void )
 {
@@ -103,6 +78,20 @@ MatrixReal& MatrixReal::operator=(const MatrixReal &m)
         cholesky_needs_update = true;
     }
     
+    return *this;
+}
+
+MatrixReal& MatrixReal::operator=(MatrixReal &&m)
+{
+    std::swap( elements, m.elements );
+    std::swap( n_rows  , m.n_rows   );
+    std::swap( n_cols  , m.n_cols );
+    std::swap( eigensystem, m.eigensystem );
+    std::swap( eigen_needs_update, m.eigen_needs_update );
+    std::swap( cholesky_decomp, m.cholesky_decomp );
+    std::swap( cholesky_needs_update, m.cholesky_needs_update );
+    std::swap( use_cholesky_decomp, m.use_cholesky_decomp );
+
     return *this;
 }
 
