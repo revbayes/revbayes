@@ -1,10 +1,21 @@
-### Current changes (development branch)
-
-#### New models/analyses
+### Version 1.2.0 Lagerstätte (unreleased)
 
 #### New MCMC moves
 
-* slice sampling (mvSlice) can now do geometric scaling.
+ * slice sampling (mvSlice) can now do geometric scaling.
+
+#### New models/analyses
+
+ * New codon models:
+   * Goldman-Yang (1994), Muse-Gaut (1994), FMutSel (Yang 2008)
+   * Create of Codon models using stackable blocks fndNdS, fnX3, fnMutSel, fnMutSelAA
+   * i.e. fnMutSel(F, fndNdS(omega, fnX3( fnGTR(er, pi) ) ) # GTR + X3 + dNdS + MutSel
+ * New dinucleotide models: fnX2, fnMutSel
+   * i.e. fnMutSel(F, fnX2( fnHKY(kappa, nuc_pi) ) )    # HKY + X2 + MutSel
+  
+#### Bug fixes
+
+  * fixed occasional crashes when using recovering a tree from a checkpoint file due to rounding. Checkpointing now records doubles without rounding
 
 #### New features
 
@@ -36,10 +47,3 @@
  * fixed a bug allowing NodeTimeSlideUniform to move sampled ancestor nodes
 
 
-### Version 1.2.0 Lagerstätte
-
-#### New models/analyses
-
-#### Bug fixes
-
-  * fixed occasional crashes when using recovering a tree from a checkpoint file due to rounding. Checkpointing now records doubles without rounding
