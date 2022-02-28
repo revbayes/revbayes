@@ -51,7 +51,7 @@ DispersalExtinctionRootStructureFunction* DispersalExtinctionRootStructureFuncti
 }
 
 
-void DispersalExtinctionRootStructureFunction::keep(DagNode *affecter)
+void DispersalExtinctionRootStructureFunction::keep(const DagNode *affecter)
 {
     //delegate to base class
     TypedFunction< Simplex >::keep( affecter );
@@ -96,14 +96,14 @@ void DispersalExtinctionRootStructureFunction::reInitialized( void )
 }
 
 
-void DispersalExtinctionRootStructureFunction::restore(DagNode *restorer)
+void DispersalExtinctionRootStructureFunction::restore( const DagNode *restorer )
 {
     //delegate to base class
     TypedFunction< Simplex >::restore( restorer );
 }
 
 
-void DispersalExtinctionRootStructureFunction::touch(DagNode *toucher)
+void DispersalExtinctionRootStructureFunction::touch( const DagNode *toucher )
 {
     
     //delegate to base class

@@ -32,18 +32,19 @@ namespace RevLanguage {
         UserFunctionNode&                       operator=(const UserFunctionNode& x);                               //!< Assignment operator
         
         // Public methods
-        void                                    bootstrap(void) {}                                                     //!< Bootstrap (or not)
+        void                                    bootstrap(void) {}                                                  //!< Bootstrap (or not)
         UserFunctionNode<rlType>*               clone(void) const;                                                  //!< Type-safe clone
         RevBayesCore::DagNode*                  cloneDAG(RevBayesCore::DagNodeMap &nodesMap, std::map<std::string, const RevBayesCore::DagNode* > &names) const;   //!< Clone the entire DAG connected to this node
+        void                                    getIntegratedParents(RevBayesCore::RbOrderedSet<RevBayesCore::DagNode *>& ip) const;
         double                                  getLnProbability(void) { return 0.0; }                              //!< Get ln prob
         double                                  getLnProbabilityRatio(void) { return 0.0; }                         //!< Get ln prob ratio
         typename rlType::valueType&             getValue(void);                                                     //!< Get the value
         const typename rlType::valueType&       getValue(void) const;                                               //!< Get the value (const)
         bool                                    isConstant(void) const;                                             //!< Is this DAG node constant?
         virtual void                            printStructureInfo(std::ostream& o, bool verbose=false) const;      //!< Print structure info
-        void                                    redraw(void) {}                                                     //!< Redraw (or not)
+        void                                    redraw(RevBayesCore::SimulationCondition c) {}                      //!< Redraw (or not)
         void                                    setMcmcMode(bool tf);                                               //!< Set the modus of the DAG node to MCMC mode.
-        void                                    setValueFromFile(const std::string &fn);                           //!< Set value from string.
+        void                                    setValueFromFile(const std::string &fn);                            //!< Set value from string.
         void                                    setValueFromString(const std::string &v);                           //!< Set value from string.
         void                                    update(void);                                                       //!< Update current value
         
@@ -52,10 +53,10 @@ namespace RevLanguage {
         void                                    swapParent(const RevBayesCore::DagNode *oldParent, const RevBayesCore::DagNode *newParent); //!< Exchange the parent (element variable)
         
     protected:
-        void                                    getAffected(RevBayesCore::RbOrderedSet<RevBayesCore::DagNode *>& affected, RevBayesCore::DagNode* affecter);  //!< Mark and get affected nodes
-        void                                    keepMe(RevBayesCore::DagNode* affecter);                                                    //!< Keep value of this and affected nodes
-        void                                    restoreMe(RevBayesCore::DagNode *restorer);                                                 //!< Restore value of this nodes
-        void                                    touchMe(RevBayesCore::DagNode *toucher, bool touchAll);                                                    //!< Touch myself and tell affected nodes value is reset
+        void                                    getAffected(RevBayesCore::RbOrderedSet<RevBayesCore::DagNode *>& affected, const RevBayesCore::DagNode* affecter);  //!< Mark and get affected nodes
+        void                                    keepMe(const RevBayesCore::DagNode* affecter);                                                    //!< Keep value of this and affected nodes
+        void                                    restoreMe(const RevBayesCore::DagNode *restorer);                                                 //!< Restore value of this nodes
+        void                                    touchMe(const RevBayesCore::DagNode *toucher, bool touchAll);                                                    //!< Touch myself and tell affected nodes value is reset
         
     private:
         UserFunction*                           userFunction;                                                       //!< The user function used to compute the value
@@ -271,10 +272,17 @@ RevBayesCore::DagNode* UserFunctionNode<rlType>::cloneDAG( RevBayesCore::DagNode
  * Get the affected nodes. This call is started by a parent. We need to delegate this call to all our children.
  */
 template<typename rlType>
-void UserFunctionNode<rlType>::getAffected( RevBayesCore::RbOrderedSet<RevBayesCore::DagNode *>& affected, RevBayesCore::DagNode* affecter )
+void UserFunctionNode<rlType>::getAffected( RevBayesCore::RbOrderedSet<RevBayesCore::DagNode *>& affected, const RevBayesCore::DagNode* affecter )
 {
     this->getAffectedNodes( affected );
 }
+
+template<typename rlType>
+void UserFunctionNode<rlType>::getIntegratedParents(RevBayesCore::RbOrderedSet<RevBayesCore::DagNode *>& ip) const
+{
+    // not applicable
+}
+
 
 
 /**
@@ -344,7 +352,7 @@ bool UserFunctionNode<rlType>::isConstant( void ) const
  * if the DAG is in an inconsistent state.
  */
 template<typename rlType>
-void UserFunctionNode<rlType>::keepMe( RevBayesCore::DagNode* affecter )
+void UserFunctionNode<rlType>::keepMe( const RevBayesCore::DagNode* affecter )
 {
     
     // Pass the call to downstream nodes
@@ -406,7 +414,7 @@ void UserFunctionNode<rlType>::printStructureInfo( std::ostream& o, bool verbose
  * DAG states.
  */
 template<typename rlType>
-void UserFunctionNode<rlType>::restoreMe( RevBayesCore::DagNode* restorer )
+void UserFunctionNode<rlType>::restoreMe( const RevBayesCore::DagNode* restorer )
 {
     
     // We can no longer trust our value, so mark us as touched
@@ -498,7 +506,7 @@ void UserFunctionNode<rlType>::swapParent(const RevBayesCore::DagNode* oldParent
  * so that the touch propagates correctly regardless of the starting DAG state.
  */
 template<typename rlType>
-void UserFunctionNode<rlType>::touchMe( RevBayesCore::DagNode* toucher, bool touchAll )
+void UserFunctionNode<rlType>::touchMe( const RevBayesCore::DagNode* toucher, bool touchAll )
 {
     
     // Touch myself

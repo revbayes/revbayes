@@ -23,7 +23,6 @@
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "RlBoolean.h"
-#include "RlMonitor.h"
 #include "StochasticNode.h"
 #include "StandardState.h" // IWYU pragma: keep
 #include "GeographicArea.h" // IWYU pragma: keep
@@ -36,7 +35,7 @@ namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 
-Mntr_CharacterHistoryNhxFile::Mntr_CharacterHistoryNhxFile(void) : Monitor() {
+Mntr_CharacterHistoryNhxFile::Mntr_CharacterHistoryNhxFile(void) : FileMonitor() {
     
 }
 
@@ -60,7 +59,7 @@ void Mntr_CharacterHistoryNhxFile::constructInternalObject( void ) {
     // now allocate a new sliding move
     const std::string& fn = static_cast<const RlString &>( filename->getRevObject() ).getValue();
     const std::string& sep = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    unsigned int g = (int)static_cast<const IntegerPos &>( samplegen->getRevObject() ).getValue();
+    unsigned int g = (int)static_cast<const IntegerPos &>( printgen->getRevObject() ).getValue();
     unsigned int mg = (int)static_cast<const IntegerPos &>( maxgen->getRevObject() ).getValue();
     
     int burn = 0;
@@ -136,36 +135,36 @@ std::string Mntr_CharacterHistoryNhxFile::getMonitorName( void ) const
 const MemberRules& Mntr_CharacterHistoryNhxFile::getParameterRules(void) const
 {
     
-    static MemberRules Mntr_CharacterHistoryNhxFileMemberRules;
+    static MemberRules memberRules;
     static bool rules_set = false;
     
     if ( !rules_set )
     {
         
-        Mntr_CharacterHistoryNhxFileMemberRules.push_back( new ArgumentRule("filename"  , RlString::getClassTypeSpec()             , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        Mntr_CharacterHistoryNhxFileMemberRules.push_back( new ArgumentRule("ctmc"      , AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        Mntr_CharacterHistoryNhxFileMemberRules.push_back( new ArgumentRule("tree"      , TimeTree::getClassTypeSpec()             , "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        Mntr_CharacterHistoryNhxFileMemberRules.push_back( new ArgumentRule("atlas"     , RlAtlas::getClassTypeSpec()              , "", ArgumentRule::BY_CONSTANT_REFERENCE , ArgumentRule::ANY) );
-        Mntr_CharacterHistoryNhxFileMemberRules.push_back( new ArgumentRule("samplegen" , IntegerPos::getClassTypeSpec()              , "", ArgumentRule::BY_VALUE             , ArgumentRule::ANY, new IntegerPos(1) ) );
-        Mntr_CharacterHistoryNhxFileMemberRules.push_back( new ArgumentRule("maxgen"    , IntegerPos::getClassTypeSpec()              , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+        memberRules.push_back( new ArgumentRule("ctmc"      , AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        memberRules.push_back( new ArgumentRule("tree"      , TimeTree::getClassTypeSpec()             , "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        memberRules.push_back( new ArgumentRule("atlas"     , RlAtlas::getClassTypeSpec()              , "", ArgumentRule::BY_CONSTANT_REFERENCE , ArgumentRule::ANY) );
+        memberRules.push_back( new ArgumentRule("maxgen"    , IntegerPos::getClassTypeSpec()              , "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
         std::vector<TypeSpec> burninTypes;
         burninTypes.push_back( Probability::getClassTypeSpec() );
         burninTypes.push_back( Integer::getClassTypeSpec() );
-        Mntr_CharacterHistoryNhxFileMemberRules.push_back( new ArgumentRule("burnin"    , burninTypes                              , "", ArgumentRule::BY_VALUE             , ArgumentRule::ANY, new Probability(0.25) ) );
-        Mntr_CharacterHistoryNhxFileMemberRules.push_back( new ArgumentRule("separator" , RlString::getClassTypeSpec()             , "", ArgumentRule::BY_VALUE             , ArgumentRule::ANY, new RlString(" ") ) );
-        Mntr_CharacterHistoryNhxFileMemberRules.push_back( new ArgumentRule("posterior" , RlBoolean::getClassTypeSpec()            , "", ArgumentRule::BY_VALUE             , ArgumentRule::ANY, new RlBoolean(true) ) );
-        Mntr_CharacterHistoryNhxFileMemberRules.push_back( new ArgumentRule("likelihood", RlBoolean::getClassTypeSpec()            , "", ArgumentRule::BY_VALUE             , ArgumentRule::ANY, new RlBoolean(true) ) );
-        Mntr_CharacterHistoryNhxFileMemberRules.push_back( new ArgumentRule("prior"     , RlBoolean::getClassTypeSpec()            , "", ArgumentRule::BY_VALUE             , ArgumentRule::ANY, new RlBoolean(true) ) );
+        memberRules.push_back( new ArgumentRule("burnin"    , burninTypes                              , "", ArgumentRule::BY_VALUE             , ArgumentRule::ANY, new Probability(0.25) ) );
+        memberRules.push_back( new ArgumentRule("posterior" , RlBoolean::getClassTypeSpec()            , "", ArgumentRule::BY_VALUE             , ArgumentRule::ANY, new RlBoolean(true) ) );
+        memberRules.push_back( new ArgumentRule("likelihood", RlBoolean::getClassTypeSpec()            , "", ArgumentRule::BY_VALUE             , ArgumentRule::ANY, new RlBoolean(true) ) );
+        memberRules.push_back( new ArgumentRule("prior"     , RlBoolean::getClassTypeSpec()            , "", ArgumentRule::BY_VALUE             , ArgumentRule::ANY, new RlBoolean(true) ) );
         
         std::vector<std::string> options;
-//        options.push_back( "std" );
         options.push_back( "biogeo" );
-        Mntr_CharacterHistoryNhxFileMemberRules.push_back( new OptionRule( "type", new RlString("biogeo"), options, "" ) );
+        memberRules.push_back( new OptionRule( "type", new RlString("biogeo"), options, "" ) );
+
+        // add the rules from the base class
+        const MemberRules &parentRules = FileMonitor::getParameterRules();
+        memberRules.insert(memberRules.end(), parentRules.begin(), parentRules.end());
         
         rules_set = true;
     }
     
-    return Mntr_CharacterHistoryNhxFileMemberRules;
+    return memberRules;
 }
 
 /** Get type spec */
@@ -187,46 +186,44 @@ void Mntr_CharacterHistoryNhxFile::printValue(std::ostream &o) const {
 /** Set a member variable */
 void Mntr_CharacterHistoryNhxFile::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) {
     
-    if ( name == "" ) {
-        vars.insert( var );
-    }
-    else if ( name == "filename" ) {
-        filename = var;
-    }
-    else if ( name == "ctmc" ) {
+    if ( name == "ctmc" )
+    {
         ctmc = var;
     }
-    else if ( name == "tree" ) {
+    else if ( name == "tree" )
+    {
         tree = var;
     }
-    else if ( name == "atlas" ) {
+    else if ( name == "atlas" )
+    {
         atlas = var;
     }
-    else if ( name == "separator" ) {
-        separator = var;
-    }
-    else if ( name == "samplegen" ) {
-        samplegen = var;
-    }
-    else if ( name == "maxgen" ) {
+    else if ( name == "maxgen" )
+    {
         maxgen = var;
     }
-    else if ( name == "burnin" ) {
+    else if ( name == "burnin" )
+    {
         burnin = var;
     }
-    else if ( name == "prior" ) {
+    else if ( name == "prior" )
+    {
         prior = var;
     }
-    else if ( name == "posterior" ) {
+    else if ( name == "posterior" )
+    {
         posterior = var;
     }
-    else if ( name == "likelihood" ) {
+    else if ( name == "likelihood" )
+    {
         likelihood = var;
     }
-    else if ( name == "type" ) {
+    else if ( name == "type" )
+    {
         type = var;
     }
-    else {
-        RevObject::setConstParameter(name, var);
+    else
+    {
+        FileMonitor::setConstParameter(name, var);
     }
 }

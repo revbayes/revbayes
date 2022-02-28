@@ -86,6 +86,9 @@ namespace RevBayesCore {
     template<>
     inline void Serializer<int,0>::ressurectFromString( int *obj, const std::string &s ) { *obj = atoi( s.c_str()); }
 
+    template<>
+    inline void Serializer<long,0>::ressurectFromString( long *obj, const std::string &s ) { *obj = atoi( s.c_str()); }
+
     
     template <typename objType>
     // T is derived from Cloneable

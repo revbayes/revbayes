@@ -1,30 +1,11 @@
-/**
- * @file
- * This file contains the implementation of RbException, which
- * is used to handle eceptions in RevBayes.
- *
- * @brief Implementation of RbException
- *
- * (c) Copyright 2009- under GPL version 3
- * @date Last modified: $Date$
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- *
- * $Id$
- */
-
 #include "RbException.h"
 
 #include <iostream>
 
 
-/** Static string with names of exception types for printing */
-std::string RbException::exceptionName[] = { "Default", "Quit", "Missing Variable" };
-
-
 /** Default constructor */
 RbException::RbException(void) :
-    exceptionType(DEFAULT),
+    exception_type(DEFAULT),
     message()
 {
 }
@@ -32,17 +13,24 @@ RbException::RbException(void) :
 
 /** Message constructor */
 RbException::RbException(const std::string& msg) :
-    exceptionType(DEFAULT),
+    exception_type(DEFAULT),
     message(msg)
 {
 }
 
 
 /** General constructor */
-RbException::RbException(exceptionT type, const std::string& msg) :
-    exceptionType(type),
+RbException::RbException(ExceptionType type, const std::string& msg) :
+    exception_type(type),
     message(msg)
 {
+}
+
+
+RbException::ExceptionType RbException::getExceptionType(void) const
+{
+
+    return exception_type;
 }
 
 
@@ -56,24 +44,30 @@ std::string RbException::getMessage(void) const
 void RbException::print(std::ostream &o) const
 {
     
-    std::string errorType;
-    switch (exceptionType)
+    std::string error_type;
+    switch (exception_type)
     {
         case DEFAULT:
-            errorType = "Error";
+            error_type = "Error";
             break;
-        case QUIT:
-            errorType = "Quit";
+        case BUG:
+            error_type = "Bug";
+            break;
+        case MATH_ERROR:
+            error_type = "Mathematical Error";
             break;
         case MISSING_VARIABLE:
-            errorType = "Missing Variable";
+            error_type = "Missing Variable";
+            break;
+        case QUIT:
+            error_type = "Quit";
             break;
             
         default:
-            errorType = "Error";
+            error_type = "Error";
     }
     
-    o << errorType << ":\t" << message;
+    o << error_type << ":\t" << message;
 }
 
 void RbException::setMessage(std::string msg)

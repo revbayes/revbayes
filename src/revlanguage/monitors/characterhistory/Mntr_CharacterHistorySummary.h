@@ -10,7 +10,7 @@
 #define Mntr_CharacterHistorySummary_h
 
 #include "CharacterHistorySummaryMonitor.h"
-#include "RlMonitor.h"
+#include "RlFileMonitor.h"
 #include "TypedDagNode.h"
 
 #include <ostream>
@@ -18,14 +18,14 @@
 
 namespace RevLanguage {
     
-    class Mntr_CharacterHistorySummary : public Monitor {
+    class Mntr_CharacterHistorySummary : public FileMonitor {
         
     public:
         
         Mntr_CharacterHistorySummary(void);                                                                                              //!< Default constructor (0.0)
         
         // Basic utility functions
-        virtual Mntr_CharacterHistorySummary*    clone(void) const;                                                                      //!< Clone object
+        virtual Mntr_CharacterHistorySummary*       clone(void) const;                                                                      //!< Clone object
         void                                        constructInternalObject(void);                                                          //!< We construct the a new internal Mntr_CharacterHistorySummary.
         static const std::string&                   getClassType(void);                                                                     //!< Get class name
         static const TypeSpec&                      getClassTypeSpec(void);                                                                 //!< Get class type spec
@@ -38,20 +38,13 @@ namespace RevLanguage {
         
         void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
         
-        std::set<RevPtr<const RevVariable> >        vars;
-        RevPtr<const RevVariable>                   filename;
         RevPtr<const RevVariable>                   tree;
         RevPtr<const RevVariable>                   ctmc;
-        RevPtr<const RevVariable>                   printgen;
-        RevPtr<const RevVariable>                   separator;
         RevPtr<const RevVariable>                   prior;
         RevPtr<const RevVariable>                   posterior;
         RevPtr<const RevVariable>                   likelihood;
         RevPtr<const RevVariable>                   type;
-        //        RevPtr<const RevVariable>                      counts;
-        //        RevPtr<const RevVariable>                      events;
-        RevPtr<const RevVariable>                      style;
-        RevPtr<const RevVariable>                      append;
+        RevPtr<const RevVariable>                   style;
         
     };
     

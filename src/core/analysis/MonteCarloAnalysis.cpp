@@ -793,7 +793,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         converged &= numConvergenceRules > 0;
         
     } while ( finished == false && converged == false);
-    
+
     
 #ifdef RB_MPI
     // wait until all replicates complete

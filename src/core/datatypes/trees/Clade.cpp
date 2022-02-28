@@ -8,9 +8,6 @@
 #include "RbVectorUtilities.h"
 #include "RbException.h"
 
-using std::vector;
-using std::set;
-
 using namespace RevBayesCore;
 
 
@@ -21,6 +18,7 @@ using namespace RevBayesCore;
  */
 Clade::Clade( void ) :
     age( 0.0 ),
+    clade_name(""),
     num_missing( 0 ),
     taxa(),
     is_negative_constraint(false),
@@ -36,6 +34,7 @@ Clade::Clade( void ) :
 Clade::Clade( const Taxon &t, const RbBitSet &b ) :
     age( 0.0 ),
     bitset( b ),
+    clade_name( "" ),
     num_missing( b.size() > 1 ? b.size() - 1 : 0 ),
     taxa(),
     is_negative_constraint(false),
@@ -55,6 +54,7 @@ Clade::Clade( const Taxon &t, const RbBitSet &b ) :
 Clade::Clade(const std::vector<Taxon> &n, const RbBitSet &b) :
     age( 0.0 ),
     bitset( b ),
+    clade_name( "" ),
     num_missing( b.size() > n.size() ? int(b.size()) - int(n.size()) : 0 ),
     taxa( n ),
     is_negative_constraint(false),
@@ -74,6 +74,7 @@ Clade::Clade(const std::vector<Taxon> &n, const RbBitSet &b) :
 Clade::Clade(const std::set<Taxon> &n, const RbBitSet &b) :
     age( 0.0 ),
     bitset( b ),
+    clade_name( "" ),
     num_missing( b.size() > n.size() ? int(b.size()) - int(n.size()) : 0 ),
     taxa(),
     is_negative_constraint(false),
@@ -98,6 +99,7 @@ Clade::Clade(const std::set<Taxon> &n, const RbBitSet &b) :
 Clade::Clade(const RbBitSet &b, const std::vector<Taxon> &n) :
     age( 0.0 ),
     bitset( b ),
+    clade_name( "" ),
     num_missing( b.size() - b.getNumberSetBits() ),
     is_negative_constraint(false),
     is_optional_match(false)
@@ -124,6 +126,12 @@ bool Clade::operator==(const Clade &c) const
     {
         return false;
     }
+    
+    // Sebastian (20210519): We currently do not compare the clade names anymore.
+//    if ( c.clade_name != clade_name )
+//    {
+//        return false;
+//    }
     
     // Sebastian (10/19/2015): We cannot use the clade age for comparison because
     //                         otherwise we cannot find the same clade in different trees.
@@ -167,6 +175,12 @@ bool Clade::operator<(const Clade &c) const
     {
         return false;
     }
+    
+    // Sebastian (20210519): We don't compare the clade name anymore but only it's other members
+//    if ( c.clade_name != clade_name )
+//    {
+//        return c.clade_name < clade_name;
+//    }
     
     for (size_t i = 0; i < taxa.size(); ++i)
     {
@@ -262,6 +276,20 @@ Clade* Clade::clone(void) const
 }
 
 
+
+/**
+ * Does the provided clade conflicts with this clade? A conflict is if the clades overlap but are non-nested.
+ *
+ * \param[in]    c    The clade.
+ *
+ * \return True/False whether the clades are nested.
+ */
+bool Clade::conflicts(const Clade& c) const
+{
+    return overlaps(c) && ( isNestedWithin(c) == false ) && ( c.isNestedWithin(*this) == false );
+}
+
+
 /**
  * Add a taxon to the list.
  *
@@ -293,6 +321,18 @@ double Clade::getAge( void ) const
 const RbBitSet& Clade::getBitRepresentation( void ) const
 {
     return bitset;
+}
+
+
+/**
+ * Get the clade name.
+ *
+ * \return       The name of the clade
+ *
+ */
+const std::string& Clade::getCladeName(void) const
+{
+    return clade_name;
 }
 
 
@@ -388,6 +428,7 @@ const std::string& Clade::getTaxonName(size_t i) const
     return taxa[i].getName();
 }
 
+
 /**
  * Is this clade a negative clade constraint (used with e.g. dnConstrainedTopology).
  *
@@ -400,6 +441,49 @@ bool Clade::isNegativeConstraint(void) const
 
 
 /**
+ * Is the provided clade nested within me? It is only nested if all it's taxa are nested within me.
+ *
+ * \param[in]    c    Theclade.
+ *
+ * \return       True/False, if there is an overlap.
+ */
+bool Clade::isNestedWithin(const Clade& c) const
+{
+    size_t N = taxa.size();
+
+    // do a quick test if the other clade has more taxa
+    // in that case it could never be nested.
+    if ( N < c.size() )
+    {
+        return false;
+    }
+
+    bool nested = true;
+    for ( size_t i=0; i<c.size(); ++i)
+    {
+        const Taxon& t = c.getTaxon(i);
+        bool found = false;
+        for ( size_t j=0; j<N; ++j)
+        {
+            if ( taxa[j] == t )
+            {
+                found = true;
+                break;
+            }
+        }
+        
+        if ( found == false )
+        {
+            nested = false;
+            break;
+        }
+    }
+
+    return nested;
+}
+
+
+/**
  * Is this clade a negative clade constraint (used with e.g. dnConstrainedTopology).
  *
  * \return       The true/false value of whether the clade is a negative constraint.
@@ -407,6 +491,32 @@ bool Clade::isNegativeConstraint(void) const
 bool Clade::isOptionalMatch(void) const
 {
     return is_optional_match;
+}
+
+
+/**
+ * Does the provided clade overlaps with myself? An overlap is if we share at least one taxon.
+ *
+ * \param[in]    c    Theclade.
+ *
+ * \return       True/False, if there is an overlap.
+ */
+bool Clade::overlaps(const Clade& c) const
+{
+    size_t N = taxa.size();
+    for ( size_t i=0; i<c.size(); ++i)
+    {
+        const Taxon& t = c.getTaxon(i);
+        for ( size_t j=0; j<N; ++j)
+        {
+            if ( taxa[j] == t )
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 
@@ -459,6 +569,18 @@ void Clade::setAge(double a)
 void Clade::setBitRepresentation( const RbBitSet &b )
 {
     bitset = b;
+}
+
+
+/**
+ * Set the clade name.
+ *
+ * \param[in]    n      The new name
+ *
+ */
+void Clade::setCladeName(const std::string& n)
+{
+    clade_name = n;
 }
 
 
@@ -581,81 +703,28 @@ std::ostream& operator<<(std::ostream& o, const Clade& x) {
     return o;
 }
 
-void set_ages_for_constraint_top(Clade& clade, const vector<Taxon>& taxa)
+}
+
+void Clade::setAges(const std::vector<Taxon>& taxa)
 {
+    size_t N = size();
     // set the ages of each of the taxa in the constraint
-    for (size_t j = 0; j < clade.size(); ++j)
+    for (size_t j = 0; j < N; ++j)
     {
         bool found = false;
-        for (auto& taxon: taxa)
+        for (size_t i=0; i<taxa.size(); ++i)
         {
-            if ( taxon.getName() == clade.getTaxonName(j) )
+            const Taxon& t = taxa[i];
+            if ( t.getName() == getTaxonName(j) )
             {
-                clade.setTaxonAge(j, taxon.getAge());
+                setTaxonAge(j, t.getAge());
                 found = true;
                 break;
             }
         }
-        if (not found)
-            throw RbException("set_ages_for_constraint: can't find taxon " + clade.getTaxonName(j) + " in full taxon set!");
+        if ( found == false )
+        {
+            throw RbException("set_ages_for_constraint: can't find taxon " + getTaxonName(j) + " in full taxon set!");
+        }
     }
-}
-
-void set_ages_for_constraint(Clade& clade, const vector<Taxon>& taxa)
-{
-    // set the ages of each of the taxa in the constraint
-    set_ages_for_constraint_top( clade, taxa );
-
-    // set ages for optional constraints
-    std::vector<Clade> optional_constraints = clade.getOptionalConstraints();
-    for (auto& optional_constraint: optional_constraints)
-        set_ages_for_constraint_top( optional_constraint, taxa );
-
-    clade.setOptionalConstraints( optional_constraints );
-}
-
-bool clade_nested_within(const Clade& clade1, const Clade& clade2)
-{
-    set<Taxon> taxa1;
-    for(auto& taxon: clade1.getTaxa())
-        taxa1.insert(taxon);
-
-    set<Taxon> taxa2;
-    for(auto& taxon: clade2.getTaxa())
-        taxa2.insert(taxon);
-
-    return std::includes(clade2.begin(), clade2.end(), clade1.begin(), clade1.end());
-}
-
-bool clades_overlap(const Clade& clade1, const Clade& clade2)
-{
-    set<Taxon> taxa1;
-    for(auto& taxon: clade1.getTaxa())
-        taxa1.insert(taxon);
-
-    set<Taxon> taxa2;
-    for(auto& taxon: clade2.getTaxa())
-        taxa2.insert(taxon);
-
-    auto i = taxa1.begin();
-    auto j = taxa2.begin();
-    while (i != taxa1.end() && j != taxa2.end())
-    {
-      if (*i == *j)
-        return true;
-      else if (*i < *j)
-        ++i;
-      else
-        ++j;
-    }
-    return false;
-}
-
-bool clades_conflict(const Clade& clade1, const Clade& clade2)
-{
-    return clades_overlap(clade1, clade2) and
-        (not clade_nested_within(clade1, clade2)) and
-        (not clade_nested_within(clade2, clade2));
-}
-
 }

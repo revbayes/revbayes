@@ -82,7 +82,8 @@ void NclReader::checkTreeTaxonIndices( std::vector<Tree* >* trees )
 
 
 /** Constructs a tree from NCL */
-void NclReader::constructBranchLengthTreefromNclRecursively(TopologyNode* tn, std::vector<TopologyNode*> &nodes, std::vector<double> &brlens, const NxsSimpleNode* tnNcl, const NxsTaxaBlock *tb) {
+void NclReader::constructBranchLengthTreefromNclRecursively(TopologyNode* tn, std::vector<TopologyNode*> &nodes, std::vector<double> &brlens, bool& reindex, const NxsSimpleNode* tnNcl, const NxsTaxaBlock *tb)
+{
     
     // add the current node to the vector of nodes
     nodes.push_back( tn );
@@ -90,6 +91,28 @@ void NclReader::constructBranchLengthTreefromNclRecursively(TopologyNode* tn, st
     // add the branch length for the node
     double edgeLength = tnNcl->GetEdgeToParent().GetDblEdgeLen();
     edgeLength = (edgeLength < 0 ? 0.0 : edgeLength);
+    
+    const std::vector<NxsComment>& br_comms = tnNcl->GetEdgeToParent().GetUnprocessedComments();
+    int node_idx = -1;
+    for (size_t i=0; i<br_comms.size(); ++i)
+    {
+        const NxsComment& curr_comm = br_comms[i];
+        const std::string& comm_text = curr_comm.GetText();
+        std::vector<std::string> tokens;
+        StringUtilities::stringSplit(comm_text, "=", tokens);
+        if ( tokens[0] == "&index" )
+        {
+            node_idx = StringUtilities::asIntegerNumber( tokens[1] ) - 1;
+            tn->setIndex( node_idx );
+            break;
+        }
+        
+        
+    }
+        
+    // add the current node to the vector of nodes
+    reindex = (reindex || node_idx == -1);
+    
     
     //    tn->setBranchLength( edgeLength );
     // We only store the branch length because we can only set it later once the entire tree is build
@@ -116,7 +139,7 @@ void NclReader::constructBranchLengthTreefromNclRecursively(TopologyNode* tn, st
         child->setParent(tn);
         
         // recursive call for the child to parse the tree
-        constructBranchLengthTreefromNclRecursively(child, nodes, brlens, *it, tb);
+        constructBranchLengthTreefromNclRecursively(child, nodes, brlens, reindex, *it, tb);
     }
 }
 
@@ -285,11 +308,10 @@ std::vector<Tree*>* NclReader::convertTreesFromNcl(void)
             {
                 const NxsFullTreeDescription & ftd = trb->GetFullTreeDescription(j);
                 NxsSimpleTree tree(ftd, -1, -1.0);
-                //                tree.WriteAsNewick(std::cout, true, true, true, tb);
+
                 Tree* rbTree = translateNclSimpleTreeToBranchLengthTree(tree,tb,ftd.IsRooted());
-                //                rbTree->fillNodeTimes();
-                //                rbTree->equalizeBranchLengths();
-                
+
+
                 rbTreesFromFile->push_back( rbTree );
             }
         }
@@ -458,20 +480,18 @@ ContinuousCharacterData* NclReader::createContinuousMatrix(NxsCharactersBlock* c
         // add the real-valued observation
         for (NxsUnsignedSet::const_iterator cit = charset.begin(); cit != charset.end();cit++)
         {
-            double contObs ;
-            bool isResolved = true;
-            const std::vector<double>& x = charblock->GetContinuousValues( origTaxIndex, *cit, std::string("AVERAGE") );
-            if ( x.size() > 0 )
-            {
-                contObs = x[0];
-                isResolved = true;
-            }
-            else
-            {
-                contObs = RbConstants::Double::nan;
-                isResolved = false;
-            }
-            dataVec.addCharacter( contObs, isResolved );
+            double contObs = RbConstants::Double::nan;
+            bool is_resolved = false;
+//            if ( charblock->IsMissingState(origTaxIndex, *cit) == false )
+//            {
+                const std::vector<double>& x = charblock->GetContinuousValues( origTaxIndex, *cit, "AVERAGE" );
+                if ( x.size() > 0 )
+                {
+                    contObs = x[0];
+                    is_resolved = true;
+                }
+//            }
+            dataVec.addCharacter( contObs, is_resolved );
         }
         
         // add sequence to character matrix
@@ -1225,7 +1245,7 @@ bool NclReader::isPhylipFile(std::string& fn, std::string& dType, bool& is_inter
         }
         else if (lineNum == 0 && wordNum == 1 && StringUtilities::isNumber(word) == true)
             foundNumChar = true;
-        else if (lineNum > 0 && wordNum == 0 && word != "" && word.size() < 25)
+        else if (lineNum > 0 && wordNum == 0 && word != "")
             taxonNames.push_back( word );
         else if (lineNum > 0 && wordNum > 0)
             seqStr += word;
@@ -1286,7 +1306,7 @@ std::vector<AbstractCharacterData*> NclReader::readMatrices(const std::string &f
         myFileManager.setStringWithNamesOfFilesInDirectory(vectorOffile_names);
     else
     {
-#       if defined (RB_WIN)
+#       if defined (_WIN32)
         vectorOffile_names.push_back( myFileManager.getFilePath() + "\\" + myFileManager.getFileName() );
 #       else
         vectorOffile_names.push_back( myFileManager.getFilePath() + "/" + myFileManager.getFileName() );
@@ -1686,7 +1706,7 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const std::string &fn)
         std::string filepath = myFileManager.getFilePath();
         if ( filepath != "" )
         {
-#           if defined RB_WIN
+#           if defined _WIN32
             filepath += "\\";
 #           else
             filepath += "/";
@@ -1880,9 +1900,9 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const std::string &file_nam
         return NULL;
     }
         
-    std::vector<std::string> file_nameVector;
+    std::vector<std::string> file_name_vector;
     std::string str = file_name;
-    file_nameVector.push_back( str );
+    file_name_vector.push_back( str );
         
     std::vector<Tree*>* cvm = convertTreesFromNcl();
     
@@ -1890,11 +1910,11 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const std::string &file_nam
 }
 
 
-std::vector<Tree*> NclReader::readTimeTrees( const std::string &treefile_name )
+std::vector<Tree*>* NclReader::readTimeTrees( const std::string &treefile_name )
 {
     
-    std::vector<Tree*> trees;
-    std::vector<Tree*> *m = readBranchLengthTrees( treefile_name );
+    std::vector<Tree*>* trees = new std::vector<Tree*>();
+    std::vector<Tree*>* m = readBranchLengthTrees( treefile_name );
     
     if (m != NULL)
     {
@@ -1902,7 +1922,7 @@ std::vector<Tree*> NclReader::readTimeTrees( const std::string &treefile_name )
         {
             Tree* convertedTree = TreeUtilities::convertTree( *(*it) );
             delete (*it);
-            trees.push_back( convertedTree );
+            trees->push_back( convertedTree );
         }
     }
     
@@ -1954,14 +1974,18 @@ Tree* NclReader::translateNclSimpleTreeToBranchLengthTree(NxsSimpleTree& nTree, 
     // the vector of branch lengths that we use later to set the branch length in the tree object
     std::vector<double> brlens;
     
+    
+    // the vector of node indices that we use later to set the indices in the tree object
+    bool reindex = false;
+    
     // construct tree recursively
-    constructBranchLengthTreefromNclRecursively(root, nodes, brlens, rn, tb);
+    constructBranchLengthTreefromNclRecursively(root, nodes, brlens, reindex, rn, tb);
 
     // create a new simple tree
     Tree* tau = new Tree();
     
     // initialize the topology by setting the root
-    tau->setRoot(root, true);
+    tau->setRoot(root, reindex);
 
     // finally set the branch lengths
     for ( size_t i = 0; i < nodes.size(); ++i )
@@ -1970,11 +1994,10 @@ Tree* NclReader::translateNclSimpleTreeToBranchLengthTree(NxsSimpleTree& nTree, 
     }
     
     bool fossils_only = true;
-    tau->makeInternalNodesBifurcating(true, fossils_only);
+    tau->makeInternalNodesBifurcating(false, fossils_only);
 
     // only trees with 2-degree root nodes are rooted trees.
     tau->setRooted( root->getNumberOfChildren() == 2 );
 
-    return tau;
-    
+    return tau;    
 }

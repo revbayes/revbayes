@@ -133,11 +133,10 @@ double SpeciesSubtreeScaleBetaProposal::doProposal( void )
     // now we store all necessary values
     storedNode = node;
     storedSpeciesTreeAges = std::vector<double>(tau.getNumberOfNodes(), 0.0);
-    TreeUtilities::getAges(&tau, node, storedSpeciesTreeAges);
+    TreeUtilities::getAges(*node, storedSpeciesTreeAges);
 
     // lower bound
-    double min_age = 0.0;
-    TreeUtilities::getOldestTip(&tau, node, min_age);
+    double min_age = TreeUtilities::getOldestTipAge(*node);
 
     // draw new ages
     double current_value = my_age / (parent_age - min_age);
@@ -164,7 +163,7 @@ double SpeciesSubtreeScaleBetaProposal::doProposal( void )
         std::vector<TopologyNode*> nodes = getOldestNodesInPopulation(gene_tree, *node );
 
         storedGeneTreeAges[i] = std::vector<double>(gene_tree.getNumberOfNodes(), 0.0);
-        TreeUtilities::getAges(&gene_tree, &gene_tree.getRoot(), storedGeneTreeAges[i]);
+        TreeUtilities::getAges(gene_tree.getRoot(), storedGeneTreeAges[i]);
 
         for (size_t j=0; j<nodes.size(); ++j)
         {
@@ -172,7 +171,7 @@ double SpeciesSubtreeScaleBetaProposal::doProposal( void )
             num_nodes += nodes[j]->getNumberOfNodesInSubtree( false );
 
             // rescale the subtree of this gene tree
-            TreeUtilities::rescaleSubtree(&gene_tree, nodes[j], scaling_factor );
+            TreeUtilities::rescaleSubtree(*nodes[j], scaling_factor );
 
         }
 
@@ -191,7 +190,7 @@ double SpeciesSubtreeScaleBetaProposal::doProposal( void )
     //    }
 
     // rescale the subtree of the species tree
-    TreeUtilities::rescaleSubtree(&tau, node, scaling_factor );
+    TreeUtilities::rescaleSubtree(*node, scaling_factor );
 
     // compute the Hastings ratio
     double forward = RbStatistics::Beta::lnPdf(a, b, new_value);
@@ -220,7 +219,7 @@ std::vector<TopologyNode*> SpeciesSubtreeScaleBetaProposal::getOldestNodesInPopu
 
     // get all the taxa from the species tree that are descendants of node i
     std::vector<TopologyNode*> speciesTaxa;
-    TreeUtilities::getTaxaInSubtree( &n, speciesTaxa );
+    TreeUtilities::getTaxaInSubtree( n, speciesTaxa );
 
     // get all the individuals
     std::set<TopologyNode*> individualTaxa;
@@ -339,10 +338,10 @@ void SpeciesSubtreeScaleBetaProposal::undoProposal( void )
         // get the i-th gene tree
         Tree& geneTree = geneTrees[i]->getValue();
 
-        TreeUtilities::setAges(&geneTree, &geneTree.getRoot(), storedGeneTreeAges[i]);
+        TreeUtilities::setAges(geneTree.getRoot(), storedGeneTreeAges[i]);
 
     }
-    TreeUtilities::setAges(&speciesTree->getValue(), storedNode, storedSpeciesTreeAges);
+    TreeUtilities::setAges(*storedNode, storedSpeciesTreeAges);
 
 }
 

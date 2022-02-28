@@ -132,6 +132,7 @@
 #include "Dist_WeightedSample.h"
 
 /* Character evolution models (in folder "distributions/phylogenetics/character") */
+#include "Dist_CTMC.h"
 #include "Dist_phyloCTMC.h"
 #include "Dist_phyloCTMCDASequence.h"
 #include "Dist_phyloCTMCDASiteIID.h"
@@ -162,11 +163,13 @@
 #include "Dist_bdp_complete.h"
 #include "Dist_BDSTP.h"
 #include "Dist_BirthDeathBurstProcess.h"
+#include "Dist_BranchRateTree.h"
 #include "Dist_CharacterDependentBirthDeathProcess.h"
 #include "Dist_Coalescent.h"
 #include "Dist_CoalescentSkyline.h"
 #include "Dist_conditionedBirthDeathShiftProcessContinuous.h"
 #include "Dist_ConstrainedTopology.h"
+#include "Dist_ConstrainedUnrootedTopology.h"
 #include "Dist_ConstrainedNodeAge.h"
 #include "Dist_ConstrainedNodeOrder.h"
 #include "Dist_WeightedConstrainedNodeOrder.h"
@@ -184,6 +187,7 @@
 #include "Dist_heterogeneousRateBirthDeath.h"
 #include "Dist_multispeciesCoalescentInverseGammaPrior.h"
 #include "Dist_multispeciesCoalescentUniformPrior.h"
+#include "Dist_MultispeciesCoalescentMigration.h"
 #include "Dist_outgroupBirthDeath.h"
 #include "Dist_PhylodynamicBDP.h"
 #include "Dist_phyloDistanceGamma.h"
@@ -317,6 +321,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 //        AddDistribution< AbstractHomologousDiscreteCharacterData >( new Dist_phyloCTMC() );
 //        AddDistribution< AbstractHomologousDiscreteCharacterData >( new Dist_phyloDACTMC() );
 //        AddDistribution< AbstractHomologousDiscreteCharacterData >( new Dist_phyloCTMCClado() );
+        addDistribution( new Dist_CTMC() );
         addDistribution( new Dist_phyloCTMC() );
         addDistribution( new Dist_phyloCTMCDASequence() );
         addDistribution( new Dist_phyloCTMCDASiteIID() );
@@ -376,6 +381,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< TimeTree                   >( new Dist_constPopMultispCoal() );
         AddDistribution< TimeTree                   >( new Dist_multispeciesCoalescentInverseGammaPrior() );
         AddDistribution< TimeTree                   >( new Dist_multispeciesCoalescentUniformPrior() );
+        AddDistribution< TimeTree                   >( new Dist_MultispeciesCoalescentMigration() );
 
         // constrained node age distribution
         AddDistribution< TimeTree                   >( new Dist_ConstrainedNodeAge() );
@@ -388,6 +394,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // constrained topology distribution
         AddDistribution< TimeTree                   >( new Dist_ConstrainedTopology() );
+
+        // constrained topology distribution
+        AddDistribution< BranchLengthTree           >( new Dist_ConstrainedUnrootedTopology() );
 
         // uniform time tree distribution
         AddDistribution< TimeTree                   >( new Dist_uniformTimeTree() );
@@ -409,6 +418,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // ultrametric tree distributions
         AddDistribution< TimeTree                   >( new Dist_UltrametricTree() );
+
+        // branch rate tree distributions
+        AddDistribution< BranchLengthTree           >( new Dist_BranchRateTree() );
 
 		// Distance Matrix Gamma distribution
 		AddDistribution< DistanceMatrix             >( new Dist_phyloDistanceGamma() );
@@ -552,6 +564,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ModelVector<Real>          >( new Dist_EmpiricalSample<Real>());
         AddDistribution< ModelVector<RealPos>       >( new Dist_EmpiricalSample<RealPos>());
         AddDistribution< ModelVector<TimeTree>      >( new Dist_EmpiricalSample<TimeTree>());
+        AddDistribution< ModelVector<BranchLengthTree>      >( new Dist_EmpiricalSample<BranchLengthTree>());
         AddDistribution< ModelVector<TimeTree>      >( new Dist_WeightedSample<TimeTree>());
         AddDistribution< ModelVector<AbstractHomologousDiscreteCharacterData>      >( new Dist_WeightedSample<AbstractHomologousDiscreteCharacterData>());
 

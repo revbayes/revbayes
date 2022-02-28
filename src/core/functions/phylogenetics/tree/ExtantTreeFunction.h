@@ -25,10 +25,10 @@ template <class valueType> class TypedDagNode;
         
         // public member functions
         ExtantTreeFunction*                                 clone(void) const;                                                                  //!< Create an independent clone
-        void                                                keep(DagNode* affecter);
-        void                                                restore(DagNode *restorer);
+        void                                                keep(const DagNode* affecter);
+        void                                                restore(const DagNode *restorer);
         void                                                reInitialized(void);                                                                //!< The arguments have been re-initialized
-        void                                                touch(DagNode *toucher );
+        void                                                touch(const DagNode *toucher );
         void                                                update(void);
         
     protected:

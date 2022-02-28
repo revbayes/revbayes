@@ -67,7 +67,7 @@ void ModelMonitor::resetDagNodes( void )
             DagNode *the_node = *it;
             
             // only simple numeric variables can be monitored (i.e. only integer and real numbers)
-            if ( the_node->isSimpleNumeric() && !the_node->isClamped())
+            if ( the_node->isSimpleNumeric() && the_node->isClamped() == false )
             {
                 if ( (!stochastic_nodes_only && !the_node->isConstant() && the_node->getName() != "" && !the_node->isHidden() && !the_node->isElementVariable() ) ||
                      ( the_node->isStochastic() && !the_node->isClamped() && the_node->isHidden() == false  && the_node->isElementVariable() == false ) )

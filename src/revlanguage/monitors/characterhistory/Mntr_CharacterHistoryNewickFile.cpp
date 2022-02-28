@@ -22,7 +22,6 @@
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "RlBoolean.h"
-#include "RlMonitor.h"
 #include "StochasticNode.h"
 #include "Real.h" // IWYU pragma: keep
 #include "StandardState.h" // IWYU pragma: keep
@@ -34,7 +33,7 @@ namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 
-Mntr_CharacterHistoryNewickFile::Mntr_CharacterHistoryNewickFile(void) : Monitor() {
+Mntr_CharacterHistoryNewickFile::Mntr_CharacterHistoryNewickFile(void) : FileMonitor() {
     
 }
 
@@ -61,12 +60,7 @@ void Mntr_CharacterHistoryNewickFile::constructInternalObject( void ) {
     unsigned int g = (int)static_cast<const Natural &>( printgen->getRevObject() ).getValue();
    
     RevBayesCore::TypedDagNode<RevBayesCore::Tree> *t = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
-    std::set<RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> > *> n;
-    for (std::set<RevPtr<const RevVariable> >::iterator i = vars.begin(); i != vars.end(); ++i) {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* node = static_cast< const ModelVector<Real> & >((*i)->getRevObject()).getDagNode();
-        n.insert( node );
-    }
-    
+
     RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn   = static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
     
@@ -129,42 +123,36 @@ std::string Mntr_CharacterHistoryNewickFile::getMonitorName( void ) const
 const MemberRules& Mntr_CharacterHistoryNewickFile::getParameterRules(void) const
 {
     
-    static MemberRules Mntr_CharacterHistoryNewickFileMemberRules;
+    static MemberRules memberRules;
     static bool rules_set = false;
     
     if ( !rules_set )
     {
     
-        Mntr_CharacterHistoryNewickFileMemberRules.push_back( new ArgumentRule("filename"  , RlString::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        Mntr_CharacterHistoryNewickFileMemberRules.push_back( new ArgumentRule("ctmc"      , AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        Mntr_CharacterHistoryNewickFileMemberRules.push_back( new ArgumentRule("tree"      , TimeTree::getClassTypeSpec(), "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        Mntr_CharacterHistoryNewickFileMemberRules.push_back( new ArgumentRule("printgen"  , IntegerPos::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new IntegerPos(1) ) );
-        Mntr_CharacterHistoryNewickFileMemberRules.push_back( new ArgumentRule("separator" , RlString::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
-        Mntr_CharacterHistoryNewickFileMemberRules.push_back( new ArgumentRule("posterior" , RlBoolean::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-        Mntr_CharacterHistoryNewickFileMemberRules.push_back( new ArgumentRule("likelihood", RlBoolean::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-        Mntr_CharacterHistoryNewickFileMemberRules.push_back( new ArgumentRule("prior"     , RlBoolean::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-//        Mntr_CharacterHistoryNewickFileMemberRules.push_back( new ArgumentRule("counts", true, RlBoolean::getClassTypeSpec(), new RlBoolean(false) ) );
-//        Mntr_CharacterHistoryNewickFileMemberRules.push_back( new ArgumentRule("events", true, RlBoolean::getClassTypeSpec(), new RlBoolean(true) ) );
-        Mntr_CharacterHistoryNewickFileMemberRules.push_back( new ArgumentRule("append"    , RlBoolean::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-        
+        memberRules.push_back( new ArgumentRule("ctmc"      , AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        memberRules.push_back( new ArgumentRule("tree"      , TimeTree::getClassTypeSpec(), "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        memberRules.push_back( new ArgumentRule("posterior" , RlBoolean::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+        memberRules.push_back( new ArgumentRule("likelihood", RlBoolean::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+        memberRules.push_back( new ArgumentRule("prior"     , RlBoolean::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+
         std::vector<std::string> options_style;
-        //        options.push_back( RlString("std") );
         options_style.push_back( "events" );
         options_style.push_back( "counts" );
-        Mntr_CharacterHistoryNewickFileMemberRules.push_back( new OptionRule( "style", new RlString("events"), options_style, "" ) );
+        memberRules.push_back( new OptionRule( "style", new RlString("events"), options_style, "" ) );
 
         
         std::vector<std::string> options;
-//        options.push_back( RlString("std") );
         options.push_back( "biogeo" );
-        Mntr_CharacterHistoryNewickFileMemberRules.push_back( new OptionRule( "type", new RlString("biogeo"), options, "" ) );
+        memberRules.push_back( new OptionRule( "type", new RlString("biogeo"), options, "" ) );
 
-        
+        // add the rules from the base class
+        const MemberRules &parentRules = FileMonitor::getParameterRules();
+        memberRules.insert(memberRules.end(), parentRules.begin(), parentRules.end());
         
         rules_set = true;
     }
     
-    return Mntr_CharacterHistoryNewickFileMemberRules;
+    return memberRules;
 }
 
 /** Get type spec */
@@ -186,43 +174,36 @@ void Mntr_CharacterHistoryNewickFile::printValue(std::ostream &o) const {
 /** Set a member variable */
 void Mntr_CharacterHistoryNewickFile::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) {
     
-    if ( name == "" ) {
-        vars.insert( var );
-    }
-    else if ( name == "filename" ) {
-        filename = var;
-    }
-    else if ( name == "tree" ) {
+    if ( name == "tree" )
+    {
         tree = var;
     }
-    else if ( name == "ctmc" ) {
+    else if ( name == "ctmc" )
+    {
         ctmc = var;
     }
-    else if ( name == "separator" ) {
-        separator = var;
-    }
-    else if ( name == "printgen" ) {
-        printgen = var;
-    }
-    else if ( name == "prior" ) {
+    else if ( name == "prior" )
+    {
         prior = var;
     }
-    else if ( name == "posterior" ) {
+    else if ( name == "posterior" )
+    {
         posterior = var;
     }
-    else if ( name == "likelihood" ) {
+    else if ( name == "likelihood" )
+    {
         likelihood = var;
     }
-    else if ( name == "type" ) {
+    else if ( name == "type" )
+    {
         type = var;
     }
-    else if ( name == "style" ) {
+    else if ( name == "style" )
+    {
         style = var;
     }
-    else if ( name == "append" ) {
-        append = var;
-    }
-    else {
-        RevObject::setConstParameter(name, var);
+    else
+    {
+        FileMonitor::setConstParameter(name, var);
     }
 }

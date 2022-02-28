@@ -28,7 +28,8 @@ using namespace RevBayesCore;
  * \return Returns the probability density.
  * \throws Throws an RbException::ERROR.
  */
-double RbStatistics::DecomposedInverseWishart::pdf(double nu, const MatrixReal &r) {
+double RbStatistics::DecomposedInverseWishart::pdf(double nu, const MatrixReal &r)
+{
 	
     return exp(lnPdf(nu, r));
 }
@@ -50,42 +51,43 @@ double RbStatistics::DecomposedInverseWishart::pdf(double nu, const MatrixReal &
 // this log density is only up to a normalization factor that *does* depend on df
 // df is therefore assumed to be constant throughout
 
-double RbStatistics::DecomposedInverseWishart::lnPdf(double nu, const MatrixReal &r) {
+double RbStatistics::DecomposedInverseWishart::lnPdf(double nu, const MatrixReal &r)
+{
 
     size_t k = r.getDim();
     
     if ( r.isPositiveDefinite() == false )
-        {
+    {
         return RbConstants::Double::neginf;
-        }
+    }
     
     double lnP = (0.5 * (k - 1.0) * (nu - 1.0) - 1.0);
     lnP += r.getLogDet();
     
     MatrixReal submatrix(k-1);
     for (size_t i=0; i<k; i++)
-        {
+    {
         size_t ai = 0;
         for (size_t a=0; a<k; a++)
-            {
+        {
             if (a != i)
-                {
+            {
                 size_t bi = 0;
                 for (size_t b=0; b<k; b++)
-                    {
+                {
                     if ( b != i )
-                        {
+                    {
                         submatrix[ai][bi] = r[a][b];
                         bi++;
-                        }
                     }
-                ai++;
                 }
+                ai++;
             }
+        }
 
         lnP += submatrix.getLogDet();
 //        std::cout << "logdet=" << submatrix.getLogDet() << std::endl;
-        }
+    }
 
     return lnP;
 }
@@ -100,20 +102,25 @@ double RbStatistics::DecomposedInverseWishart::lnPdf(double nu, const MatrixReal
  * \return Returns a vector containing the InverseWishart random variable.
  * \throws Does not throw an error.
  */
-MatrixReal RbStatistics::DecomposedInverseWishart::rv(size_t k, double nu, RandomNumberGenerator& rng) {
+MatrixReal RbStatistics::DecomposedInverseWishart::rv(size_t k, double nu, RandomNumberGenerator& rng)
+{
         
     MatrixReal z(k);
     
     for (int i=0; i<k; i++)
-        {
+    {
         for (int j=0; j<k; j++)
-            {
+        {
             if (i == j)
+            {
                 z[i][j] = 1.0;
+            }
             else
+            {
                 z[i][j] = 0.0;
             }
         }
+    }
     
     /*for (int i=0; i<k; i++)
         {

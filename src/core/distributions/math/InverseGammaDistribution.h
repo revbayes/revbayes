@@ -1,5 +1,5 @@
-#ifndef __rb_mlandis__InverseGammaDistribution__
-#define __rb_mlandis__InverseGammaDistribution__
+#ifndef InverseGammaDistribution_H
+#define InverseGammaDistribution_H
 
 #include "ContinuousDistribution.h"
 
@@ -50,4 +50,4 @@ template <class valueType> class TypedDagNode;
 }
 
 
-#endif /* defined(__rb_mlandis__InverseGammaDistribution__) */
+#endif /* defined(InverseGammaDistribution_H) */

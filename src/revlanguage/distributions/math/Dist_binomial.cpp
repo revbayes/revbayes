@@ -121,7 +121,7 @@ const MemberRules& Dist_binomial::getParameterRules(void) const
     if ( !rules_set ) 
     {
         dist_member_rules.push_back( new ArgumentRule( "p", Probability::getClassTypeSpec(), "Probability of success.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        dist_member_rules.push_back( new ArgumentRule( "n", Natural::getClassTypeSpec()    , "Number of trials.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "size", Natural::getClassTypeSpec()    , "Number of trials.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         rules_set = true;
     }
     
@@ -150,7 +150,7 @@ void Dist_binomial::printValue(std::ostream& o) const
     {
         o << "?";
     }
-    o << ", n=";
+    o << ", size=";
     if ( n != NULL )
         o << n->getName();
     else
@@ -167,7 +167,7 @@ void Dist_binomial::setConstParameter(const std::string& name, const RevPtr<cons
     {
         p = var;
     }
-    else if ( name == "n" )
+    else if ( name == "size" )
     {
         n = var;
     }

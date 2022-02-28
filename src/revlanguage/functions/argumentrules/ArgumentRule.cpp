@@ -100,18 +100,11 @@ ArgumentRule::ArgumentRule(const std::vector<std::string>& argNames, const TypeS
     evalType( et ),
     nodeType( dt ),
     aliases( argNames ),
+    label( argNames.front() ),
     description( argDesc ),
     hasDefaultVal( false )
 {
-    label = "";
-    for (size_t i = 0; i < argNames.size(); i++)
-    {
-        if (i > 0)
-        {
-            label += "/";
-        }
-        label += argNames[i];
-    }
+
 }
 
 
@@ -125,18 +118,11 @@ ArgumentRule::ArgumentRule(const std::vector<std::string>& argNames, const std::
     evalType( et ),
     nodeType( dt ),
     aliases( argNames ),
+    label( argNames.front() ),
     description( argDesc ),
     hasDefaultVal( false )
 {
-    label = "";
-    for (size_t i = 0; i < argNames.size(); i++)
-    {
-        if (i > 0)
-        {
-            label += "/";
-        }
-        label += argNames[i];
-    }
+
 }
 
 
@@ -150,18 +136,11 @@ ArgumentRule::ArgumentRule(const std::vector<std::string>& argNames, const TypeS
     evalType( et ),
     nodeType( dt ),
     aliases( argNames ),
+    label( argNames.front() ),
     description( argDesc ),
     hasDefaultVal( true )
 {
-    label = "";
-    for (size_t i = 0; i < argNames.size(); i++)
-    {
-        if (i > 0)
-        {
-            label += "/";
-        }
-        label += argNames[i];
-    }
+
 }
 
 
@@ -175,18 +154,11 @@ ArgumentRule::ArgumentRule(const std::vector<std::string>& argNames, const std::
     evalType( et ),
     nodeType( dt ),
     aliases( argNames ),
+    label( argNames.front() ),
     description( argDesc ),
     hasDefaultVal( true )
 {
-    label = "";
-    for (size_t i = 0; i < argNames.size(); i++)
-    {
-        if (i > 0)
-        {
-            label += "/";
-        }
-        label += argNames[i];
-    }
+
 }
 
 
@@ -226,15 +198,15 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
         {
             if ( the_var->getRevObject().isType( *it ) )
             {
-                RevPtr<RevVariable> valueVar = RevPtr<RevVariable>( new RevVariable(the_var->getRevObject().clone(),arg.getLabel()) );
+                RevPtr<RevVariable> valueVar = RevPtr<RevVariable>( new RevVariable(the_var->getRevObject().clone(),the_var->getName() ) );
                 return Argument( valueVar, arg.getLabel(), false );
             }
-            else if ( the_var->getRevObject().isConvertibleTo( *it, once ) != -1)
+            else if ( the_var->getRevObject().isConvertibleTo( *it, once ) != -1 )
             {
                 // Fit by type conversion. For now, we also modify the type of the incoming variable wrapper.
                 RevObject* convertedObject = the_var->getRevObject().convertTo( *it );
 
-                RevPtr<RevVariable> valueVar = RevPtr<RevVariable>( new RevVariable(convertedObject,arg.getLabel()) );
+                RevPtr<RevVariable> valueVar = RevPtr<RevVariable>( new RevVariable(convertedObject,the_var->getName() ) );
                 return Argument( valueVar, arg.getLabel(), false );
                 
             }
@@ -259,16 +231,27 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
             else if ( the_var->getRevObject().isConvertibleTo( *it, once ) != -1  && (*it).isDerivedOf( the_var->getRequiredTypeSpec() ) )
             {
                 // Fit by type conversion. For now, we also modify the type of the incoming variable wrapper.
-                RevObject* convertedObject = the_var->getRevObject().convertTo( *it );
-                the_var->replaceRevObject( convertedObject );
-                the_var->setRequiredTypeSpec( *it );
-                if ( !isEllipsis() )
+                RevObject* converted_object = the_var->getRevObject().convertTo( *it );
+                
+                RevPtr<RevVariable> the_new_var = NULL;
+                if ( the_var->getRevObject().isConstant() == true )
                 {
-                    return Argument( the_var, arg.getLabel(), false );
+                    the_new_var = the_var;
+                    the_new_var->replaceRevObject( converted_object );
+                    the_new_var->setRequiredTypeSpec( *it );
                 }
                 else
                 {
-                    return Argument( the_var, arg.getLabel(), false );
+                    the_new_var = RevPtr<RevVariable>( new RevVariable(converted_object, the_var->getName() ) );
+                }
+                
+                if ( !isEllipsis() )
+                {
+                    return Argument( the_new_var, arg.getLabel(), false );
+                }
+                else
+                {
+                    return Argument( the_new_var, arg.getLabel(), false );
                 }
             }
             else
@@ -423,7 +406,13 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
             return 0.0;
         }
         
-        double penalty = the_var->getRevObject().isConvertibleTo( *it, once );
+        double penalty = -1;
+        // make sure that we only perform type casting when the variable will not be part of a model graph
+        if ( once == true || the_var->getRevObject().isConstant() == true )
+        {
+            penalty = the_var->getRevObject().isConvertibleTo( *it, once );
+        }
+        
         if ( penalty != -1 && (*it).isDerivedOf( the_var->getRequiredTypeSpec() ) )
         {
             return penalty;

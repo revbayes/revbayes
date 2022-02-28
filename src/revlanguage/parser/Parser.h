@@ -5,6 +5,7 @@
 #include <list>
 #include <string>
 #include <sstream>
+#include <vector>
 
 #include "RevPtr.h"
 #include "RevVariable.h"
@@ -16,7 +17,7 @@ namespace RevLanguage {
     public:
         bool inQuote;
         bool inComment;
-        std::list<std::string> lines; 
+        std::vector<std::string> lines;
         int result;
         std::string message;
         std::string function_name;
@@ -122,8 +123,8 @@ namespace RevLanguage {
         Parser&                 operator=(const Parser& w) { return (*this); }                          //! Prevent assignment
 
         // Help functions
-        ParserInfo              breakIntoLines(const std::string& cmd, std::list<std::string>& lines, bool validate) const;    //!< Break a command string buffer into Rev lines
-        ParserInfo              breakIntoLines(const std::string& cmd, std::list<std::string>& lines) const;    //!< Break a command string buffer into Rev lines
+        ParserInfo              breakIntoLines(const std::string& cmd, std::vector<std::string>& lines, bool validate) const;    //!< Break a command string buffer into Rev lines
+        ParserInfo              breakIntoLines(const std::string& cmd, std::vector<std::string>& lines) const;    //!< Break a command string buffer into Rev lines
         void                    setParserMode(ParserMode mode);                                         //!< Set the parser mode
         
         // Member variables

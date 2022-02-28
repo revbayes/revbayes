@@ -18,13 +18,10 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-SlideProposal::SlideProposal( StochasticNode<double> *n, double l, double p) : Proposal(p),
-    variable( n ),
+SlideProposal::SlideProposal( StochasticNode<double> *n, double l, double p) : SimpleProposal<double>( n, p ),
     storedValue( 0.0 ),
     lambda( l )
 {
-    // tell the base class to add the node
-    addNode( variable );
     
 }
 
@@ -81,13 +78,11 @@ double SlideProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double SlideProposal::doProposal( void )
+double SlideProposal::propose( double &val )
 {
     
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
-    
-    double &val = variable->getValue();
     
     // copy value
     storedValue = val;

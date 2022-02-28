@@ -137,7 +137,7 @@ void StitchTreeFunction::initTaxonGroups(void)
     return;
 }
 
-void StitchTreeFunction::keep(DagNode *affecter)
+void StitchTreeFunction::keep( const DagNode *affecter )
 {
     //delegate to base class
     TypedFunction< Tree >::keep( affecter );
@@ -272,14 +272,14 @@ void StitchTreeFunction::reInitialized( void )
 }
 
 
-void StitchTreeFunction::restore(DagNode *restorer)
+void StitchTreeFunction::restore( const DagNode *restorer )
 {
     //delegate to base class
     TypedFunction< Tree >::restore( restorer );
 }
 
 
-void StitchTreeFunction::touch(DagNode *toucher)
+void StitchTreeFunction::touch(const DagNode *toucher)
 {
     
     //delegate to base class

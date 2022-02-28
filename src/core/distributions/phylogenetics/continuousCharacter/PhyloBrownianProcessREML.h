@@ -33,14 +33,14 @@ namespace RevBayesCore {
     protected:
         
         // virtual methods that may be overwritten, but then the derived class should call this methods
-        virtual void                                                        keepSpecialization(DagNode* affecter);
+        virtual void                                                        keepSpecialization(const DagNode* affecter);
         void                                                                recursiveComputeLnProbability( const TopologyNode &node, size_t node_index );
         void                                                                recursivelyFlagNodeDirty(const TopologyNode& n);
         void                                                                resetValue( void );
-        virtual void                                                        restoreSpecialization(DagNode *restorer);
+        virtual void                                                        restoreSpecialization(const DagNode *restorer);
         std::vector<double>                                                 simulateRootCharacters(size_t n);
         double                                                              sumRootLikelihood(void);
-        virtual void                                                        touchSpecialization(DagNode *toucher, bool touchAll);
+        virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
 
         // Parameter management functions.
         virtual void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                         //!< Swap a parameter
@@ -49,12 +49,16 @@ namespace RevBayesCore {
         std::vector<std::vector<std::vector<double> > >                     partial_likelihoods;
         std::vector<std::vector<std::vector<double> > >                     contrasts;
         std::vector<std::vector<double> >                                   contrast_uncertainty;
+        std::vector<std::vector<std::vector<double> > >                     contrast_uncertainty_per_site;
         std::vector<size_t>                                                 active_likelihood;
         
         // convenience variables available for derived classes too
         std::vector<bool>                                                   changed_nodes;
         std::vector<bool>                                                   dirty_nodes;
 
+        bool                                                                use_missing_data;
+        
+        
     private:
                 
     };

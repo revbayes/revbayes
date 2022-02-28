@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "RbVector.h"
 #include "Proposal.h"
 #include "StochasticNode.h"
 #include "Tree.h"
@@ -25,31 +26,33 @@ namespace RevBayesCore {
     class NodeTimeSlideUniformProposal : public Proposal {
         
     public:
-        NodeTimeSlideUniformProposal( StochasticNode<Tree> *n);                                               //!<  constructor
+        NodeTimeSlideUniformProposal( StochasticNode<Tree> *n, StochasticNode< RbVector<Tree> > *vec_n );       //!<  constructor
         
         // Basic utility functions
-        void                                    cleanProposal(void);                                        //!< Clean up proposal
-        NodeTimeSlideUniformProposal*           clone(void) const;                                          //!< Clone object
-        double                                  doProposal(void);                                           //!< Perform proposal
-        const std::string&                      getProposalName(void) const;                                //!< Get the name of the proposal for summary printing
+        void                                    cleanProposal(void);                                            //!< Clean up proposal
+        NodeTimeSlideUniformProposal*           clone(void) const;                                              //!< Clone object
+        double                                  doProposal(void);                                               //!< Perform proposal
+        const std::string&                      getProposalName(void) const;                                    //!< Get the name of the proposal for summary printing
         double                                  getProposalTuningParameter(void) const;
-        void                                    prepareProposal(void);                                      //!< Prepare the proposal
-        void                                    printParameterSummary(std::ostream &o, bool name_only) const;               //!< Print the parameter summary
+        void                                    prepareProposal(void);                                          //!< Prepare the proposal
+        void                                    printParameterSummary(std::ostream &o, bool name_only) const;   //!< Print the parameter summary
         void                                    setProposalTuningParameter(double tp);
-        void                                    tune(double r);                                             //!< Tune the proposal to achieve a better acceptance/rejection ratio
-        void                                    undoProposal(void);                                         //!< Reject the proposal
+        void                                    tune(double r);                                                 //!< Tune the proposal to achieve a better acceptance/rejection ratio
+        void                                    undoProposal(void);                                             //!< Reject the proposal
         
     protected:
         
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);             //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes on which the Proposal is working on
         
         
     private:
         
         // parameters
-        StochasticNode<Tree>*                   variable;                                                   //!< The variable the Proposal is working on
-        
+        StochasticNode<Tree>*                   variable;                                                       //!< The variable the proposal is working on
+        StochasticNode< RbVector<Tree> >*       vector_variable;                                                //!< The laternative variable the proposal is working on
+
         // stored objects to undo proposal
+        size_t                                  tree_index;
         TopologyNode*                           storedNode;
         double                                  storedAge;
         

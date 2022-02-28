@@ -396,6 +396,9 @@ a)");
 	help_strings[string("dnConstrainedNodeOrder")][string("name")] = string(R"(dnConstrainedNodeOrder)");
 	help_strings[string("dnConstrainedTopology")][string("name")] = string(R"(dnConstrainedTopology)");
 	help_strings[string("dnCppNormal")][string("name")] = string(R"(dnCppNormal)");
+    help_strings[string("dnCTMC")][string("name")] = string(R"(dnCTMC)");
+    help_arrays[string("dnCTMC")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+    help_strings[string("dnCTMC")][string("description")] = string(R"(A continuous time Markov process along a single branch/population. For this process, there is no branching process involved. We simply let the sequence evolve according to the rate matrix for a given amount of time. This process is used to model single population demographies.)");
 	help_strings[string("dnDPP")][string("name")] = string(R"(dnDPP)");
 	help_strings[string("dnDecomposedInvWishart")][string("name")] = string(R"(dnDecomposedInvWishart)");
 	help_arrays[string("dnDirichlet")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
@@ -789,7 +792,7 @@ for (g in 1:n_genes) {
         taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
     }
   }
-  geneTrees[g] ~ dnMultiSpeciesCoalescentUniformPrior(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+  geneTrees[g] ~ dnMultiSpeciesCoalescentUniformPrior(speciesTree=spTree, max=popSize, taxa=taxons[g])
   print(geneTrees[g])
 }
 # We can save the species tree and the gene trees:
@@ -801,6 +804,7 @@ for (i in 1:(n_genes)) {
 	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("name")] = string(R"(dnMultiSpeciesCoalescentUniformPrior)");
 	help_references[string("dnMultiSpeciesCoalescentUniformPrior")].push_back(RbHelpReference(R"(Bayes Estimation of Species Divergence Times and Ancestral Population Sizes Using DNA Sequences From Multiple Loci. Bruce Rannala and Ziheng Yang. GENETICS August 1, 2003 vol. 164 no. 4 1645-1656.)",R"()",R"(http://www.genetics.org/content/164/4/1645.short )"));
 	help_references[string("dnMultiSpeciesCoalescentUniformPrior")].push_back(RbHelpReference(R"('Bayesian Inference of Species Trees from Multilocus Data. Heled and Drummond Mol. Biol Evol. 27 (3): 570-580, 2010.')",R"('DOI: https://doi.org/10.1093/molbev/msp274')",R"(https://academic.oup.com/mbe/article/27/3/570/999753/Bayesian-Inference-of-Species-Trees-from )"));
+	help_references[string("dnMultiSpeciesCoalescentUniformPrior")].push_back(RbHelpReference(R"(Integration within the Felsenstein equation for improved Markov chain Monte Carlo methods in population genetics. Jody Hey and Rasmus Nielsen. PNAS. 104 (8): 2785-2790, 2007.)",R"('DOI: https://doi.org/10.1073/pnas.0611164104')",R"(https://www.pnas.org/content/104/8/2785 )"));
 	help_arrays[string("dnMultiSpeciesCoalescentUniformPrior")][string("see_also")].push_back(string(R"(dnMultiSpeciesCoalescent)"));
 	help_arrays[string("dnMultiSpeciesCoalescentUniformPrior")][string("see_also")].push_back(string(R"(dnMultiSpeciesCoalescentInverseGamma)"));
 	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("title")] = string(R"(Multispecies coalescent Distribution)");
@@ -1079,6 +1083,35 @@ exists(x))");
 	help_strings[string("fnCoala")][string("name")] = string(R"(fnCoala)");
 	help_references[string("fnCoala")].push_back(RbHelpReference(R"(A branch-heterogeneous model of protein evolution for efficient inference of ancestral sequences. Groussin M, Boussau B, Gouy M. Syst Biol. 2013 Jul;62(4):523-38.)",R"(10.1093/sysbio/syt016)",R"(https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3676677/ )"));
 	help_strings[string("fnCodon")][string("name")] = string(R"(fnCodon)");
+	help_strings[string("fnCodonGY94")][string("description")] = string(R"(The Goldman-Yang (1994) codon model.
+
+A rate matrix on the 61 non-stop codons (in the standard genetic code).
+
+Rates between codons with more than one nucleotide change are equal to 0.
+
+In this model the rate Q(i,j) from i -> j is proportional to the frequency of codon j.
+This means that the rate of change between low-frequency codons is lower than the rate
+between high-frequency codons, even when the nucleotide change involved is the same.
+In other words, the rate of change from nucleotide n1 -> n2 depends on its neighboring
+nucleotides.  This differs from the Muse-Gaut (1994) model, and is perhaps less realistic.
+
+Unlike the Muse-Gaut (1994) model, the Goldman-Yang (1994) model can allow all the codon
+frequencies to vary independently.)");
+	help_strings[string("fnCodonGY94")][string("example")] = string(R"(kappa ~ dnLognormal(0,1)
+omega ~ dnUniform(0,1)
+pi61 ~ dnDirichlet( rep(2.0, 61) )
+Q1 := fnCodonGY94( kappa, omega, pi61 )
+
+pi1 ~ dnDirichlet( rep(2.0, 4) )
+Q2 := fnCodonGY94( kappa, omega, fnF1x4(pi1) )
+
+pi2 ~ dnDirichlet( rep(2.0, 4) )
+pi3 ~ dnDirichlet( rep(2.0, 4) )
+Q3 := fnCodonGY94( kappa, omega, fnF3x4(pi1, pi2, pi3) ))");
+	help_strings[string("fnCodonGY94")][string("name")] = string(R"(fnCodonGY94)");
+	help_references[string("fnCodonGY94")].push_back(RbHelpReference(R"(Goldman, N. and Z. Yang (1994). A codon-based model of nucleotide substitution for protein-coding DNA sequences. Mol. Biol. Evol. (1994) 11 (5):725-736)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040153 )",R"()"));
+	help_arrays[string("fnCodonGY94")][string("see_also")].push_back(string(R"(fnF1x4, fnF3x4)"));
+	help_strings[string("fnCodonGY94")][string("title")] = string(R"(The Goldman-Yang (1994) codon rate matrix)");
 	help_strings[string("fnCodonHKY")][string("name")] = string(R"(fnCodonHKY)");
 	help_strings[string("fnCovarion")][string("name")] = string(R"(fnCovarion)");
 	help_strings[string("fnCovarionRateMatrix")][string("name")] = string(R"(fnCovarionRateMatrix)");
@@ -1103,6 +1136,30 @@ exists(x))");
 	help_strings[string("fnEpoch")][string("name")] = string(R"(fnEpoch)");
 	help_strings[string("fnEpochCladoProbs")][string("name")] = string(R"(fnEpochCladoProbs)");
 	help_strings[string("fnExtantTree")][string("name")] = string(R"(fnExtantTree)");
+	help_strings[string("fnF1x4")][string("description")] = string(R"(This treats codon frequencies as a product of independent nucleotide frequencies.
+
+Since stop codons are removed from the codon alphabet, frequencies are renormalized
+so that the frequencies of non-stop codons sum to 1.0.)");
+	help_strings[string("fnF1x4")][string("example")] = string(R"(kappa ~ dnLognormal(0,1)
+omega ~ dnUniform(0,1)
+pi ~ dnDirichlet( v(2.0, 2.0, 2.0, 2.0) )
+Q := fnCodonGY94( kappa, omega, fnF1x4(pi) ))");
+	help_strings[string("fnF1x4")][string("name")] = string(R"(fnF1x4)");
+	help_arrays[string("fnF1x4")][string("see_also")].push_back(string(R"(fnGY94, fnF3x4)"));
+	help_strings[string("fnF1x4")][string("title")] = string(R"(The F1x4 codon frequency model)");
+	help_strings[string("fnF3x4")][string("description")] = string(R"(This treats codon frequencies as a product of independent nucleotide frequencies.
+
+Since stop codons are removed from the codon alphabet, frequencies are renormalized
+so that the frequencies of non-stop codons sum to 1.0.)");
+	help_strings[string("fnF3x4")][string("example")] = string(R"(kappa ~ dnLognormal(0,1)
+omega ~ dnUniform(0,1)
+pi1 ~ dnDirichlet( v(2.0, 2.0, 2.0, 2.0) )
+pi2 ~ dnDirichlet( v(2.0, 2.0, 2.0, 2.0) )
+pi3 ~ dnDirichlet( v(2.0, 2.0, 2.0, 2.0) )
+Q := fnCodonGY94( kappa, omega, fnF3x4(pi1, pi2, pi3) ))");
+	help_strings[string("fnF3x4")][string("name")] = string(R"(fnF3x4)");
+	help_arrays[string("fnF3x4")][string("see_also")].push_back(string(R"(fnGY94, fnF1x4)"));
+	help_strings[string("fnF3x4")][string("title")] = string(R"(The F3x4 codon frequency model)");
 	help_strings[string("fnF81")][string("name")] = string(R"(fnF81)");
 	help_strings[string("fnFreeBinary")][string("name")] = string(R"(fnFreeBinary)");
 	help_strings[string("fnFreeK")][string("name")] = string(R"(fnFreeK)");

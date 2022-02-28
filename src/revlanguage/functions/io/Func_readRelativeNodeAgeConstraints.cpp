@@ -1,10 +1,12 @@
+#include "Func_readRelativeNodeAgeConstraints.h"
+
 #include <sstream>
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "Delimiter.h"
 #include "RelativeNodeAgeConstraints.h"
 #include "RelativeNodeAgeConstraintsReader.h"
-#include "Func_readRelativeNodeAgeConstraints.h"
 #include "RlRelativeNodeAgeConstraints.h"
 #include "RlString.h"
 #include "Argument.h"
@@ -31,8 +33,9 @@ RevPtr<RevVariable> Func_readRelativeNodeAgeConstraints::execute( void )
     
     // get the information from the arguments for reading the file
     const RlString& fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() );
+    const std::string& del = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
     
-    RevBayesCore::RelativeNodeAgeConstraintsReader* dmr = new RevBayesCore::RelativeNodeAgeConstraintsReader( fn.getValue(), '\t' );
+    RevBayesCore::RelativeNodeAgeConstraintsReader* dmr = new RevBayesCore::RelativeNodeAgeConstraintsReader( fn.getValue(), del );
     RevBayesCore::RelativeNodeAgeConstraints* dm = new RevBayesCore::RelativeNodeAgeConstraints(dmr);
     
     return new RevVariable( new RlRelativeNodeAgeConstraints(dm) );
@@ -50,6 +53,7 @@ const ArgumentRules& Func_readRelativeNodeAgeConstraints::getArgumentRules( void
     {
         
         argumentRules.push_back( new ArgumentRule( "file", RlString::getClassTypeSpec(), "Relative or absolute name of the file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new Delimiter() );
         rules_set = true;
         
     }

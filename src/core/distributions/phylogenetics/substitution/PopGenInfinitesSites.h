@@ -29,8 +29,6 @@ namespace RevBayesCore {
         
         // non-virtual
         double                                                              computeLnProbability(void);
-//        void                                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;     //!< Map the member methods to internal function calls
-//        void                                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, MatrixReal &rv) const;     //!< Map the member methods to internal function calls
         
         void                                                                redrawValue(void);
 
@@ -41,26 +39,15 @@ namespace RevBayesCore {
         void                                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                             //!< Swap a parameter
         
         
-        // virtual methods that may be overwritten, but then the derived class should call this methods
-//        void                                                                keepSpecialization(DagNode* affecter);
-//        void                                                                restoreSpecialization(DagNode *restorer);
-//        void                                                                touchSpecialization(DagNode *toucher, bool touchAll);
-        
         // virtual methods that you may want to overwrite
         void                                                                compress(void);
         
         
         // members
-//        double                                                              ln_prob;
-//        double                                                              stored_ln_prob;
-//        size_t                                                              num_nodes;
         size_t                                                              num_sites;
-        
-        // the likelihoods
-        
+                
         
         // the data
-//        std::vector<size_t>                                                 pattern_counts;
         std::vector<bool>                                                   site_invariant;
         bool                                                                compressed;
         std::vector<size_t>                                                 site_pattern;    // an array that keeps track of which pattern is used for each site

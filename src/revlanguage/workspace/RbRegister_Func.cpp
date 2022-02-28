@@ -115,7 +115,13 @@
 #include "Func_treePairwiseDistances.h"
 #include "Func_treePairwiseNodalDistances.h"
 #include "Func_treeScale.h"
+#include "Func_UPGMA.h"
 
+#include "Func_FlowT2Populations.h"
+
+/* Frequency functions (in folder "functions/phylogenetics/frequencies") */
+#include "Func_F1x4.h"
+#include "Func_F3x4.h"
 
 /* Rate matrix functions (in folder "functions/phylogenetics/ratematrix") */
 #include "Func_BinaryMutationCoalescentRateMatrix.h"
@@ -124,6 +130,7 @@
 #include "Func_chromosomesPloidy.h"
 #include "Func_codonSynonymousNonsynonymousRateMatrix.h"
 #include "Func_codonSynonymousNonsynonymousHKYRateMatrix.h"
+#include "Func_GoldmanYang94RateMatrix.h"
 #include "Func_covarionRateMatrix.h"
 #include "Func_covarion.h"
 #include "Func_cpRev.h"
@@ -157,6 +164,7 @@
 #include "Func_revPoMoBalance4N.h"
 #include "Func_revPoMoTwo4N.h"
 #include "Func_revPoMoThree4N.h"
+#include "Func_revPoMoThree4.h"
 #include "Func_rtRev.h"
 #include "Func_vt.h"
 #include "Func_t92.h"
@@ -201,7 +209,8 @@
 
 /* Input/output functions (in folder "functions/io") */
 #include "Func_readPoMoCountFile.h"
-
+#include "Func_convertCountFileToNaturalNumbers.h"
+#include "Func_convertFastaFileToNaturalNumbers.h"
 
 /* Math functions (in folder "functions/math") */
 #include "Func_abs.h"
@@ -282,6 +291,9 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         /* Add functions (in "functions" folder) */
         ///////////////////////////////////////////
 
+        addFunction( new Func_FlowT2Populations()      );
+
+        
         /* Rate matrix generator functions (in folder "functions/evolution/ratematrix") */
         addFunction( new Func_BinaryMutationCoalescentRateMatrix()          );
         addFunction( new Func_blosum62()                                    );
@@ -289,6 +301,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_chromosomesPloidy()                           );
         addFunction( new Func_codonSynonymousNonsynonymousRateMatrix()      );
         addFunction( new Func_codonSynonymousNonsynonymousHKYRateMatrix()   );
+        addFunction( new Func_GoldmanYang94RateMatrix()                     );
         addFunction( new Func_covarionRateMatrix()                          );
         addFunction( new Func_covarion()                                    );
         addFunction( new Func_cpRev()                                       );
@@ -322,6 +335,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_revPoMoBalance4N()                            );
         addFunction( new Func_revPoMoTwo4N()                                );
         addFunction( new Func_revPoMoThree4N()                              );
+        addFunction( new Func_revPoMoThree4()                               );
         addFunction( new Func_rtRev()                                       );
         addFunction( new Func_t92()                                         );
         addFunction( new Func_TamuraNei()                                   );
@@ -329,6 +343,10 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_TVM()                                         );
         addFunction( new Func_vt()                                          );
         addFunction( new Func_wag()                                         );
+
+        /* frequency functions (in folder "function/phylogenetics/frequencies" */
+        addFunction( new Func_F1x4()                                        );
+        addFunction( new Func_F3x4()                                        );
 
         /* rate maps used for data augmentation (in folder "functions/evolution/ratemap") */
         addFunction( new Func_adjacentRateModifier() );
@@ -381,6 +399,8 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_pomoRootFrequencies()                             );
         addFunction( new Func_pruneTree()                                       );
         addFunction( new Func_readPoMoCountFile()                               );
+        addFunction( new Func_convertCountFileToNaturalNumbers()                );
+        addFunction( new Func_convertFastaFileToNaturalNumbers()                );
         addFunction( new Func_simStartingTree()                                 );
         addFunction( new Func_simTree()                                         );
         addFunction( new Func_simCompleteTree()                                 );
@@ -391,6 +411,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_treePairwiseNodalDistances()                      );
         addFunction( new Func_treeAssembly()                                    );
         addFunction( new Func_treeScale()                                       );
+        addFunction( new Func_UPGMA()                                           );
 
         /* Population genetics functions (in folder "functions/popgen") */
         addFunction( new Func_PattersonsD()      );

@@ -25,11 +25,11 @@ template <class valueType> class TypedDagNode;
     class AssembleOrder1ContinuousMRFFunction : public TypedFunction<RbVector<double> > {
 
     public:
-        AssembleOrder1ContinuousMRFFunction(const TypedDagNode< double > *theta1, const TypedDagNode< RbVector<double> > *increments, bool log_theta1);
+        AssembleOrder1ContinuousMRFFunction(const TypedDagNode< double > *theta1, const TypedDagNode< RbVector<double> > *increments, const TypedDagNode< RbVector<double> > *pred, const TypedDagNode< double > *b, bool log_theta1);
         virtual                                            ~AssembleOrder1ContinuousMRFFunction(void);                                                    //!< Virtual destructor
 
         // public member functions
-        AssembleOrder1ContinuousMRFFunction*                              clone(void) const;                                                              //!< Create an independent clone
+        AssembleOrder1ContinuousMRFFunction*                clone(void) const;                                                              //!< Create an independent clone
         void                                                update(void);
 
     protected:
@@ -39,7 +39,9 @@ template <class valueType> class TypedDagNode;
 
         // members
         const TypedDagNode< RbVector<double> >*             increments;
+        const TypedDagNode< RbVector<double> >*             predictors;
         const TypedDagNode< double >*                       theta1;
+        const TypedDagNode< double >*                       beta;
 
         size_t                                              field_size;
         bool                                                theta_1_is_log;

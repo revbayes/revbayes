@@ -21,13 +21,15 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-TreeScaleProposal::TreeScaleProposal( StochasticNode<Tree> *t, StochasticNode<double> *r, double d ) : Proposal(),
+TreeScaleProposal::TreeScaleProposal( StochasticNode<Tree> *t, StochasticNode< RbVector<Tree> > *vec_n, StochasticNode<double> *r, double d ) : Proposal(),
     tree( t ),
+    vector_variable( vec_n),
     rootAge( r ),
     delta( d )
 {
     // tell the base class to add the node
     addNode( tree );
+    addNode( vector_variable );
     addNode( rootAge );
     
 }
@@ -88,8 +90,19 @@ double TreeScaleProposal::doProposal( void )
     
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
-    
-    Tree& tau = tree->getValue();
+        
+    // get the current tree either from the single variable or the vector of trees
+    Tree *tmp = NULL;
+    if ( tree != NULL )
+    {
+        tmp = &tree->getValue();
+    }
+    else
+    {
+        tree_index = floor(rng->uniform01() * vector_variable->getValue().size());
+        tmp = &(vector_variable->getValue()[tree_index]);
+    }
+    Tree& tau = *tmp;
     
     TopologyNode& node = tau.getRoot();
     
@@ -98,14 +111,14 @@ double TreeScaleProposal::doProposal( void )
     
     // now we store all necessary values
     storedAges = std::vector<double>(tau.getNumberOfNodes(), 0.0);
-    TreeUtilities::getAges(&tau, &node, storedAges);
+    TreeUtilities::getAges(node, storedAges);
     
     // draw new ages 
     double u = rng->uniform01();
     double scaling_factor = std::exp( delta * ( u - 0.5 ) );
     
     // rescale the subtrees
-    TreeUtilities::rescaleSubtree(&tau, &node, scaling_factor );
+    TreeUtilities::rescaleSubtree(node, scaling_factor );
     
     if ( rootAge != NULL )
     {
@@ -157,13 +170,23 @@ void TreeScaleProposal::printParameterSummary(std::ostream &o, bool name_only) c
  */
 void TreeScaleProposal::undoProposal( void )
 {
-    
-    Tree& tau = tree->getValue();
+        
+    // get the current tree either from the single variable or the vector of trees
+    Tree *tmp = NULL;
+    if ( tree != NULL )
+    {
+        tmp = &tree->getValue();
+    }
+    else
+    {
+        tmp = &(vector_variable->getValue()[tree_index]);
+    }
+    Tree& tau = *tmp;
     
     TopologyNode& node = tau.getRoot();
     
     // undo the proposal
-    TreeUtilities::setAges(&tau, &node, storedAges );
+    TreeUtilities::setAges(node, storedAges );
     
     if ( rootAge != NULL )
     {
@@ -185,6 +208,10 @@ void TreeScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     if ( oldN == tree )
     {
         tree = static_cast<StochasticNode<Tree>* >(newN);
+    }
+    else if ( oldN == rootAge )
+    {
+        vector_variable = static_cast<StochasticNode< RbVector<Tree> >* >(newN);
     }
     else if ( oldN == rootAge )
     {

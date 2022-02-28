@@ -26,7 +26,7 @@ namespace RevBayesCore {
         
     public:
         
-        RelativeNodeAgeConstraintsReader(const std::string &fn, char d='\t', size_t ns=0);
+        RelativeNodeAgeConstraintsReader(const std::string &fn, std::string d="", size_t ns=0);
         
         const std::vector< std::pair < std::pair<std::string, std::string >, std::pair<std::string, std::string > > >& getConstraints(void);
         const size_t                                                                                     getNumberOfConstraints(void);

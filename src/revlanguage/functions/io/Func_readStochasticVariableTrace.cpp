@@ -1,14 +1,17 @@
+#include "Func_readStochasticVariableTrace.h"
+
 #include <sstream>
 #include <vector>
 
 #include "ArgumentRule.h"
-#include "Func_readStochasticVariableTrace.h"
+#include "Delimiter.h"
 #include "RlString.h"
 #include "RlModelTrace.h"
 #include "TraceReader.h"
 #include "WorkspaceVector.h"
 #include "Argument.h"
 #include "ArgumentRules.h"
+#include "Probability.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "RevPtr.h"
@@ -43,6 +46,8 @@ RevPtr<RevVariable> Func_readStochasticVariableTrace::execute( void )
     // get the column delimiter
     const std::string& delimiter    = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
     
+    RevObject& b = args[2].getVariable()->getRevObject();
+    
     
     RevBayesCore::TraceReader reader;
     std::vector<RevBayesCore::ModelTrace> data = reader.readStochasticVariableTrace(fn, delimiter);
@@ -50,6 +55,20 @@ RevPtr<RevVariable> Func_readStochasticVariableTrace::execute( void )
     WorkspaceVector<ModelTrace> *rv = new WorkspaceVector<ModelTrace>();
     for (std::vector<RevBayesCore::ModelTrace>::iterator it = data.begin(); it != data.end(); ++it)
     {
+        int burnin = 0;
+
+        if ( b.isType( Integer::getClassTypeSpec() ) )
+        {
+            burnin = (int)static_cast<const Integer &>(b).getValue();
+        }
+        else
+        {
+            double burninFrac = static_cast<const Probability &>(b).getValue();
+            burnin = int( floor( it->size()*burninFrac ) );
+        }
+        
+        it->setBurnin(burnin);
+
         rv->push_back( ModelTrace( *it ) );
     }
     
@@ -69,7 +88,14 @@ const ArgumentRules& Func_readStochasticVariableTrace::getArgumentRules( void ) 
     {
         
         argumentRules.push_back( new ArgumentRule( "file"     , RlString::getClassTypeSpec(), "The name of the file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "delimiter", RlString::getClassTypeSpec(), "The delimiter used between the output of variables.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
+        argumentRules.push_back( new Delimiter() );
+        std::vector<TypeSpec> burninTypes;
+        burninTypes.push_back( Probability::getClassTypeSpec() );
+        burninTypes.push_back( Integer::getClassTypeSpec() );
+        argumentRules.push_back( new ArgumentRule( "burnin"   , burninTypes     , "The fraction/number of samples to discard as burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.25) ) );
+        // Sebastian: currently thinning is not supported but maybe should be later
+//        argumentRules.push_back( new ArgumentRule( "thinning", Natural::getClassTypeSpec(), "The frequency of samples to read, i.e., we will only used every n-th sample where n is defined by this argument.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( 1l ) ) );
+
         rules_set = true;
     }
     
