@@ -136,8 +136,8 @@ ninja -C build-gtk install
 3. Copy DLLs that the binary needs to the same directory
 
    ```
-   cp /usr/lib/gcc/x86_64-w64-mingw32/*-posix/libgcc_s_seh-1.dll ~/winrb/bin
-   cp /usr/lib/gcc/x86_64-w64-mingw32/*-posix/libstdc++-6.dll    ~/winrb/bin
+   cp /usr/lib/gcc/x86_64-w64-mingw32/*-win32/libgcc_s_seh-1.dll ~/winrb/bin
+   cp /usr/lib/gcc/x86_64-w64-mingw32/*-win32/libstdc++-6.dll    ~/winrb/bin
    cp ~/win_root/mingw64/bin/libboost*.dll                       ~/winrb/bin
    cp ~/win_root/mingw64/bin/libwinpthread-1.dll                 ~/winrb/bin
    cp ~/win_root/mingw64/bin/libopenlibm.dll                     ~/winrb/bin
