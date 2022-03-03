@@ -89,11 +89,18 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
     std::vector<RevBayesCore::Taxon> tree = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
 
     // tree for initialization
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* init = NULL;
+    // RevBayesCore::TypedDagNode<RevBayesCore::Tree>* init = NULL;
+    // if ( initial_tree->getRevObject() != RevNullObject::getInstance() )
+    // {
+    //     init = static_cast<const TimeTree &>( initial_tree->getRevObject() ).getDagNode();
+    // }
+
+    RevBayesCore::Tree* init = NULL;
     if ( initial_tree->getRevObject() != RevNullObject::getInstance() )
     {
-        init = static_cast<const TimeTree &>( initial_tree->getRevObject() ).getDagNode();
+        init = static_cast<const TimeTree &>( initial_tree->getRevObject() ).getDagNode()->getValue().clone();
     }
+
 
     // maximum number of hidden lineages
     RevBayesCore::TypedDagNode< long >* n       = static_cast<const Natural &>( maxHiddenLin->getRevObject() ).getDagNode();

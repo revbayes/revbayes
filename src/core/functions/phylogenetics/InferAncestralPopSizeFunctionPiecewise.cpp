@@ -46,19 +46,19 @@ using namespace RevBayesCore;
  * \param[in]    tr             Tree for ancestral populations size inference.
  */
 InferAncestralPopSizeFunctionPiecewise::InferAncestralPopSizeFunctionPiecewise( 	const TypedDagNode<double> *sa,
-                                                  						const DagNode *inspeciation,
-	                                                          	const DagNode *inextinction,
-	                                                          	const DagNode *inserialsampling,
-	                                                          	const DagNode *inoccurrence,
-	                                                          	const DagNode *ineventsampling,
-	                                                          	const DagNode *intreatment,
-	                                                          	const TypedDagNode<long> *n,
-	                                                          	const std::string& cdt,
-                                                              const TypedDagNode< RevBayesCore::RbVector<double> > *O,
-	                                                          	const std::vector<double> &tau,
-	                                                          	bool uo,
-	                                                          	TypedDagNode<Tree> *tr,
-																															const TypedDagNode< RbVector<double> > *ht) : TypedFunction<MatrixReal>( new MatrixReal(tau.size(), (n->getValue() + 1), 0.0) ),
+                                                  																const DagNode *inspeciation,
+	                                                          											const DagNode *inextinction,
+	                                                          											const DagNode *inserialsampling,
+	                                                          											const DagNode *inoccurrence,
+	                                                          											const DagNode *ineventsampling,
+	                                                          											const DagNode *intreatment,
+	                                                          											const TypedDagNode<long> *n,
+	                                                          											const std::string& cdt,
+                                                              										const TypedDagNode< RevBayesCore::RbVector<double> > *O,
+	                                                          											const std::vector<double> &tau,
+	                                                          											bool uo,
+	                                                          											TypedDagNode<Tree> *tr,
+																																									const TypedDagNode< RbVector<double> > *ht) : TypedFunction<MatrixReal>( new MatrixReal(tau.size(), (n->getValue() + 1), 0.0) ),
     start_age( sa ),
     maxHiddenLin( n ),
     cond (cdt),
@@ -202,9 +202,9 @@ void InferAncestralPopSizeFunctionPiecewise::update( void )
 
 		bool useMt;
 		bool verbose;
-	MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age, timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, time_points, useOrigin, useMt = false, verbose = true, occurrence_ages, tree);
-	std::cout << "LT is ok, go to Mt" << std::endl;
-	MatrixReal B_Mt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age, timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, time_points, useOrigin, useMt = true, verbose = true, occurrence_ages, tree);
+		MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age->getValue(), timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, time_points, useOrigin, useMt = false, verbose = true, occurrence_ages, tree);
+		std::cout << "LT is ok, go to Mt" << std::endl;
+		MatrixReal B_Mt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age->getValue(), timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, time_points, useOrigin, useMt = true, verbose = true, occurrence_ages, tree);
 	// Realize the normalized Hadamar Product of B_Lt and B_Mt
 		MatrixReal D_Kt(S, (N + 1), 0.0);
     for (size_t j = 0; j < S; j++){

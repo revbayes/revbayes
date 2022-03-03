@@ -39,7 +39,7 @@ struct Event {
 namespace RevBayesCore {
 
 
-    std::vector<Event>  PoolEvents                        (   const TypedDagNode<double> *start_age,
+    std::vector<Event>  PoolEvents                        (   const double &start_age,
                                                               const std::vector<double> &time_points,
                                                               const std::vector<double> &occurrence_ages,
                                                               bool verbose,
@@ -47,7 +47,7 @@ namespace RevBayesCore {
                                                               const std::vector<double> &timeline);           //!< Construct the vector containig all branching and sampling times + time points for which we want
 
 
-    MatrixReal          ComputeLnProbabilityDensitiesOBDP (   const TypedDagNode<double> *start_age,
+    MatrixReal          ComputeLnProbabilityDensitiesOBDP (   const double &start_age,
                                                               const std::vector<double> &timeline,
                                                               const std::vector<double> &lambda,
                                                               const std::vector<double> &mu,
@@ -65,7 +65,7 @@ namespace RevBayesCore {
                                                               const Tree &timeTree);                          //!< Compute the joint log-probability density of the observations made up to any time t (direction depending on the algorithm).
 
 
-    double              ComputeLnLikelihoodOBDP           (   const TypedDagNode<double> *start_age,
+    double              ComputeLnLikelihoodOBDP           (   const double &start_age,
                                                               const std::vector<double> &timeline,
                                                               const std::vector<double> &lambda,
                                                               const std::vector<double> &mu,
@@ -82,7 +82,7 @@ namespace RevBayesCore {
                                                               const Tree &timeTree);                          //!< Compute the joint log-probability density of the tree and occurrences.
 
 
-    MatrixReal          ForwardsTraversalMt               (   const TypedDagNode<double> *start_age,
+    MatrixReal          ForwardsTraversalMt               (   const double &start_age,
                                                               const std::vector<double> &timeline,
                                                               const std::vector<double> &lambda,
                                                               const std::vector<double> &mu,
@@ -100,7 +100,7 @@ namespace RevBayesCore {
                                                               const Tree &timeTree);                          //!< Compute the joint probability density of the observations made up to any time t and the population size at that time, as time decreases towards present, with piecewise constant rates : breadth-first forward traversal algorithm.
 
 
-    MatrixReal          BackwardsTraversalLt              (   const TypedDagNode<double> *start_age,
+    MatrixReal          BackwardsTraversalLt              (   const double &start_age,
                                                               const std::vector<double> &timeline,
                                                               const std::vector<double> &lambda,
                                                               const std::vector<double> &mu,
@@ -117,7 +117,7 @@ namespace RevBayesCore {
                                                               const Tree &timeTree);                          //!< Compute the joint log probability density of observations made down any time t, conditioned on the population size at that time, as time increases towards the past, with piecewise constant rates : breadth-first backward traversal algorithm.
 
 
-    double              likelihoodWithAllSamplesRemoved   (   const TypedDagNode<double> *start_age,
+    double              likelihoodWithAllSamplesRemoved   (   const double &start_age,
                                                               const std::vector<double> &timeline,
                                                               const std::vector<double> &lambda,
                                                               const std::vector<double> &mu,
@@ -150,7 +150,7 @@ namespace RevBayesCore {
 
     MatrixReal IncompleteBellPolynomial(unsigned N, unsigned K, const std::vector<double> Vector);
 
-    std::vector<double> GetFunctionUandP( const TypedDagNode<double> *start_age,            //!< The start age of the process
+    std::vector<double> GetFunctionUandP( const double &start_age,            //!< The start age of the process
                                           const std::vector<double> &timeline,              //!< The times of rate shifts.
                                           const std::vector<double> &lambda,                //!< The speciation rates.
                                           const std::vector<double> &mu,                    //!< The extinction rates.
@@ -159,6 +159,6 @@ namespace RevBayesCore {
                                           const TypedDagNode<double> *rho,                  //!< The sampling probability at present.
                                           const std::vector<double> &removalPr);            //!< The removal probabilities after sampling.
 
- 
+
     };
 #endif

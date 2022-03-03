@@ -30,7 +30,7 @@ using namespace RevBayesCore;
  *
  * \return    The matrix of log-Mt values through time.
 */
-std::vector<Event> RevBayesCore::PoolEvents(             const TypedDagNode<double> *start_age,
+std::vector<Event> RevBayesCore::PoolEvents(             const double &start_age,
                                                          const std::vector<double> &time_points,
                                                          const std::vector<double> &occurrence_ages,
                                                          bool verbose,
@@ -48,7 +48,7 @@ std::vector<Event> RevBayesCore::PoolEvents(             const TypedDagNode<doub
 
     // classify nodes
     events.clear();
-    events.push_back(Event(start_age->getValue(), "origin"));
+    events.push_back(Event(start_age, "origin"));
 
     for (size_t i = 0; i < num_nodes; i++)
     {
@@ -155,7 +155,7 @@ std::vector<Event> RevBayesCore::PoolEvents(             const TypedDagNode<doub
  *
  * \return    The matrix of log-Mt values through time.
 */
-MatrixReal RevBayesCore::ComputeLnProbabilityDensitiesOBDP(  const TypedDagNode<double> *start_age,
+MatrixReal RevBayesCore::ComputeLnProbabilityDensitiesOBDP(  const double &start_age,
                                                                       const std::vector<double> &timeline,
                                                                       const std::vector<double> &lambda,
                                                                       const std::vector<double> &mu,
@@ -208,7 +208,7 @@ MatrixReal RevBayesCore::ComputeLnProbabilityDensitiesOBDP(  const TypedDagNode<
  *
  * \return    The joint log-likelihood.
 */
-double RevBayesCore::ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *start_age,
+double RevBayesCore::ComputeLnLikelihoodOBDP(    const double &start_age,
                                                           const std::vector<double> &timeline,
                                                           const std::vector<double> &lambda,
                                                           const std::vector<double> &mu,
@@ -226,14 +226,22 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *sta
 {
     double logLikelihood = 0.0;
 
-    // Use the forwards traversal algorithm (Mt)
-    if(removalPr[0] == 1.0){
+    if((removalPr[0] == 1.0) & (occurrence_ages.size() < 100)){
     const std::vector<double> time_points_Mt( 1, 0.0 );      // Record the probability density at present to compute the likelihood
+
+    if (verbose){std::cout << "\nThere are " << occurrence_ages.size() << " occurrences in this dataset. For optimal performance, we use A.Gupta's solution for the likelihood calculation" << "\n" << std::endl;}
+
     double logLikelihood = RevBayesCore::likelihoodWithAllSamplesRemoved(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, cond, time_points_Mt, useOrigin, verbose, occurrence_ages, timeTree);
     if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood (Ankit) " << logLikelihood << "\n" << std::endl;}
     }
     else {
+
+      // Use the forwards traversal algorithm (Mt)
+
       if (useMt){
+
+          if (verbose){std::cout << "\nThere are " << occurrence_ages.size() << " occurrences in this dataset. For optimal performance, we use the forwards traversal algorithm (Mt)" << "\n" << std::endl;}
+
           const std::vector<double> time_points_Mt( 1, 0.0 );      // Record the probability density at present to compute the likelihood
           bool returnLogLikelihood = true;                         // Input flag
 
@@ -244,7 +252,10 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *sta
       }
     // Use the backwards traversal algorithm (Lt)
       else{
-          const std::vector<double> time_points_Lt(1, start_age->getValue());      // Record the probability density at the start age to compute the likelihood
+
+          if (verbose){std::cout << "\nThere are " << occurrence_ages.size() << " occurrences in this dataset. For optimal performance, we use the forwards traversal algorithm (Lt)" << "\n" << std::endl;}
+
+          const std::vector<double> time_points_Lt(1, start_age);      // Record the probability density at the start age to compute the likelihood
 
           MatrixReal B_Lt_log = RevBayesCore::BackwardsTraversalLt(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, verbose, occurrence_ages, timeTree);
 
@@ -290,7 +301,7 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const TypedDagNode<double> *sta
 //  *
 //  * \return    The matrix of Mt values through time.
 // */
-MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *start_age,
+MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
                                                                   const std::vector<double> &timeline,
                                                                   const std::vector<double> &lambda,
                                                                   const std::vector<double> &mu,
@@ -364,8 +375,8 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
     double thPlusOne = events[0].time;
     // if (verbose){std::cout << k << std::endl;}
 
-    if(thPlusOne != start_age->getValue()) {
-        if (verbose){std::cout << "WARNING : thPlusOne != start_age : " << thPlusOne << " != " << start_age->getValue() << " - type : " << events[0].type << std::endl;}
+    if(thPlusOne != start_age) {
+        if (verbose){std::cout << "WARNING : thPlusOne != start_age : " << thPlusOne << " != " << start_age << " - type : " << events[0].type << std::endl;}
     };
 
 
@@ -377,8 +388,8 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
       std::string type = events[h].type;
 
       // Events older than the start age : accepted
-      if(th > start_age->getValue()) {
-          if (verbose){std::cout << "WARNING : th > start_age : " << th << " > " << start_age->getValue() << " -> type : " << type << std::endl;}
+      if(th > start_age) {
+          if (verbose){std::cout << "WARNING : th > start_age : " << th << " > " << start_age << " -> type : " << type << std::endl;}
 
           // Time points before the start age
           if(type == "time point"){
@@ -546,7 +557,7 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const TypedDagNode<double> *star
 //  *
 //  * \return    The matrix of Lt values through time.
 //  */
-MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *start_age,
+MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
                                                                   const std::vector<double> &timeline,
                                                                   const std::vector<double> &lambda,
                                                                   const std::vector<double> &mu,
@@ -632,8 +643,8 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
       std::string type = events[h].type;
 
       // Events older than the start age
-      if(th > start_age->getValue()) {
-          if (verbose){std::cout << "WARNING : th > start_age : " << th << " > " << start_age->getValue() << " -> type : " << type << std::endl;}
+      if(th > start_age) {
+          if (verbose){std::cout << "WARNING : th > start_age : " << th << " > " << start_age << " -> type : " << type << std::endl;}
 
           // Time points older than the start age : accepted
           if(type == "time point"){
@@ -785,7 +796,7 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const TypedDagNode<double> *star
  *
  * \return    The matrix of Lt values through time.
  */
-double RevBayesCore::likelihoodWithAllSamplesRemoved(  const TypedDagNode<double> *start_age,
+double RevBayesCore::likelihoodWithAllSamplesRemoved(  const double &start_age,
                                                                   const std::vector<double> &timeline,
                                                                   const std::vector<double> &lambda,
                                                                   const std::vector<double> &mu,
@@ -853,8 +864,8 @@ double RevBayesCore::likelihoodWithAllSamplesRemoved(  const TypedDagNode<double
         std::string type = events[h].type;
 
         // Events older than the start age
-        if(th > start_age->getValue()) {
-            if (verbose){std::cout << "WARNING : th > start_age : " << th << " > " << start_age->getValue() << " -> type : " << type << std::endl;}
+        if(th > start_age) {
+            if (verbose){std::cout << "WARNING : th > start_age : " << th << " > " << start_age << " -> type : " << type << std::endl;}
             continue;
         };
 
@@ -1067,7 +1078,7 @@ MatrixReal RevBayesCore::IncompleteBellPolynomial(unsigned N, unsigned K, const 
     return OutputMatrix;
 }
 
-std::vector<double> RevBayesCore::GetFunctionUandP(  const TypedDagNode<double> *start_age,
+std::vector<double> RevBayesCore::GetFunctionUandP(  const double &start_age,
                                                      const std::vector<double>  &timeline,
                                                      const std::vector<double>  &lambda,
                                                      const std::vector<double>  &mu,
@@ -1083,7 +1094,7 @@ std::vector<double> RevBayesCore::GetFunctionUandP(  const TypedDagNode<double> 
     const std::vector<double> om = omega;
     const std::vector<double> rp = removalPr;
     const double rh = rho->getValue();
-    const double time = start_age->getValue();
+    const double time = start_age;
     const std::vector<double> d = timeline;
 
     // quantities that help us compute u

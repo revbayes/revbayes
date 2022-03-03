@@ -45,7 +45,7 @@ namespace RevBayesCore {
                                       const std::string &cdt,
                                       const std::vector<Taxon> &tn,
                                       bool uo,
-                                      TypedDagNode<Tree> *t,
+                                      Tree *t,
                                       const TypedDagNode<long> *n,
                                       const TypedDagNode< RevBayesCore::RbVector<double> > *O,
                                       bool mt,
@@ -60,22 +60,22 @@ namespace RevBayesCore {
 
         // helper functions
         double                                          computeLnProbabilityDivergenceTimes(void) ;                            //!< Compute the log-transformed probability of the current value.
-        double                                          computeLnProbabilityTimes(void);                                       //!< Compute the log-transformed probability of the current value.
-        void                                            countAllNodes(void) const;                                             //!< Count bifurcating nodes, count all heterochronous nodes as either psi- or rho-sampled and as either sampled ancestors or sampled extinct tips
+        double                                          computeLnProbabilityTimes(void) const;                                       //!< Compute the log-transformed probability of the current value.
+        //void                                            countAllNodes(void) const;                                             //!< Count bifurcating nodes, count all heterochronous nodes as either psi- or rho-sampled and as either sampled ancestors or sampled extinct tips
         // double                                          D(size_t i, double t) const;
-        double                                          lnD(size_t i, double t) const;                                         //!< Branch-segment probability at time t with index i, using pre-computed vectors
-        double                                          E(size_t i, double t) const;                                           //!< Extinction probability at time t with index i, using pre-computed vectors
-        double                                          modifiedE(int i, double t, size_t condition_type) const;               //!< Extinction and extinction-like probabilities, recursively computed
+        //double                                          lnD(size_t i, double t) const;                                         //!< Branch-segment probability at time t with index i, using pre-computed vectors
+        //double                                          E(size_t i, double t) const;                                           //!< Extinction probability at time t with index i, using pre-computed vectors
+        //double                                          modifiedE(int i, double t, size_t condition_type) const;               //!< Extinction and extinction-like probabilities, recursively computed
         size_t                                          findIndex(double t) const;                                             //!< Find the index so that times[index-1] < t < times[index]
         void                                            getOffset(void) const;
         double                                          lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const { throw RbException("Cannot compute P(nTaxa)."); }
-        double                                          lnProbTreeShape(void) const;
+        //double                                          lnProbTreeShape(void) const;
         void                                            updateVectorParameters(void) const;
-        void                                            prepareProbComputation(void) const;
+        //void                                            prepareProbComputation(void) const;
         double                                          pSurvival(double start, double end) const;
         double                                          simulateDivergenceTime(double origin, double present) const;           //!< Simulate a speciation event.
-        int                                             survivors(double t) const;                                             //!< Number of species alive at time t.
-        int                                             whichIntervalTime(double t) const;                                     //!< If a time corresponds to an interval/event time, returns that interval, otherwise returns -1
+        //int                                             survivors(double t) const;                                             //!< Number of species alive at time t.
+        //int                                             whichIntervalTime(double t) const;                                     //!< If a time corresponds to an interval/event time, returns that interval, otherwise returns -1
 
         // members
         const TypedDagNode<double >*                    homogeneous_lambda;                       //!< The homogeneous birth rates.
@@ -106,12 +106,12 @@ namespace RevBayesCore {
 
         mutable std::vector<double>                     timeline;                                 //!< The times of the instantaneous events and rate shifts.
 
-        mutable std::vector<double>                     serial_tip_ages;                          //!< The ages of all sampled dead lineages sampled by rate-sampling
-        mutable std::vector<double>                     serial_sampled_ancestor_ages;             //!< The ages of all sampled ancestors sampled by rate-sampling
-        mutable std::vector<std::vector<double> >       event_tip_ages;                           //!< The ages of all sampled dead lineages sampled at sampling events
-        mutable std::vector<std::vector<double> >       event_sampled_ancestor_ages;              //!< The ages of all sampled ancestors sampled at sampling events
-        mutable std::vector<double>                     serial_bifurcation_times;                 //!< The ages of all bifurcation events in the tree NOT at a burst event
-        mutable std::vector<std::vector<double> >       event_bifurcation_times;                  //!< The ages of all bifurcation events in the tree at burst events
+        // mutable std::vector<double>                     serial_tip_ages;                          //!< The ages of all sampled dead lineages sampled by rate-sampling
+        // mutable std::vector<double>                     serial_sampled_ancestor_ages;             //!< The ages of all sampled ancestors sampled by rate-sampling
+        // mutable std::vector<std::vector<double> >       event_tip_ages;                           //!< The ages of all sampled dead lineages sampled at sampling events
+        // mutable std::vector<std::vector<double> >       event_sampled_ancestor_ages;              //!< The ages of all sampled ancestors sampled at sampling events
+        // mutable std::vector<double>                     serial_bifurcation_times;                 //!< The ages of all bifurcation events in the tree NOT at a burst event
+        // mutable std::vector<std::vector<double> >       event_bifurcation_times;                  //!< The ages of all bifurcation events in the tree at burst events
 
         mutable double                                  offset;                                   //!< In the case there the most recent tip is at time y, we internally adjust by this time and treat y as the present; this does not affect the boundary times of the rate shifts
         int                                             num_extant_taxa;
@@ -125,11 +125,11 @@ namespace RevBayesCore {
         mutable std::vector<double>                     mu_event;                                 //!< The times of extinction rate burst events.
         mutable std::vector<double>                     psi_event;                                //!< The times of fossil sampling rate burst events.
 
-        mutable std::vector<double>                     A_i;                                      //!< Helper values
-        mutable std::vector<double>                     B_i;                                      //!< Helper values
-        mutable std::vector<double>                     C_i;                                      //!< Helper values
-        mutable std::vector<double>                     E_previous;                               //!< The probability that a lineage at time t has no sampled descendants.
-        mutable std::vector<double>                     lnD_previous;                             //!< The probability of an observed lineage
+        //mutable std::vector<double>                     A_i;                                      //!< Helper values
+        //mutable std::vector<double>                     B_i;                                      //!< Helper values
+        //mutable std::vector<double>                     C_i;                                      //!< Helper values
+        //mutable std::vector<double>                     E_previous;                               //!< The probability that a lineage at time t has no sampled descendants.
+        //mutable std::vector<double>                     lnD_previous;                             //!< The probability of an observed lineage
     };
 }
 

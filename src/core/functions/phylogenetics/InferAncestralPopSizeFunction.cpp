@@ -47,17 +47,17 @@ using namespace RevBayesCore;
  * \param[in]    tr             Tree for ancestral populations size inference.
  */
 InferAncestralPopSizeFunction::InferAncestralPopSizeFunction( 	const TypedDagNode<double> *sa,
-                                                  				const TypedDagNode<double> *l,
-	                                                          	const TypedDagNode<double> *m,
-	                                                          	const TypedDagNode<double> *p,
-	                                                          	const TypedDagNode<double> *o,
-	                                                          	const TypedDagNode<double> *rho,
-	                                                          	const TypedDagNode<double> *r,
-	                                                          	const TypedDagNode<long> *n,
+                                                  							const TypedDagNode<double> *l,
+	                                                          		const TypedDagNode<double> *m,
+	                                                          		const TypedDagNode<double> *p,
+	                                                          		const TypedDagNode<double> *o,
+	                                                          		const TypedDagNode<double> *rho,
+	                                                          		const TypedDagNode<double> *r,
+		                                                          	const TypedDagNode<long> *n,
 
-	                                                          	const std::string& cdt,
+	                                                          		const std::string& cdt,
                                                                 const TypedDagNode< RevBayesCore::RbVector<double> > *O,
-	                                                          	const std::vector<double> &tau,
+	                                                          		const std::vector<double> &tau,
                                                                 bool uo,
                                                                 bool vb,
 
@@ -132,8 +132,8 @@ void InferAncestralPopSizeFunction::update( void )
 
 
 
-	MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age, timeline, lambd, m, ps, omeg, rho, removalP, maxHiddenLin, cond, time_points, useOrigin, useMt = false, verbose, occurrence_ages, tree);
-	MatrixReal B_Mt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age, timeline, lambd, m, ps, omeg, rho, removalP, maxHiddenLin, cond, time_points, useOrigin, useMt = true, verbose, occurrence_ages, tree);
+	MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age->getValue(), timeline, lambd, m, ps, omeg, rho, removalP, maxHiddenLin, cond, time_points, useOrigin, useMt = false, verbose, occurrence_ages, tree);
+	MatrixReal B_Mt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age->getValue(), timeline, lambd, m, ps, omeg, rho, removalP, maxHiddenLin, cond, time_points, useOrigin, useMt = true, verbose, occurrence_ages, tree);
 
 	// Realize the normalized Hadamar Product of B_Lt and B_Mt
 	MatrixReal D_Kt(S, (N + 1), 0.0);
