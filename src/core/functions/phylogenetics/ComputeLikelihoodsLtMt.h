@@ -150,7 +150,7 @@ namespace RevBayesCore {
 
     MatrixReal IncompleteBellPolynomial(unsigned N, unsigned K, const std::vector<double> Vector);
 
-    std::vector<double> GetFunctionUandP( const double &start_age,            //!< The start age of the process
+    std::vector<double> GetFunctionUandP( const double &start_age,                          //!< The start age of the process
                                           const std::vector<double> &timeline,              //!< The times of rate shifts.
                                           const std::vector<double> &lambda,                //!< The speciation rates.
                                           const std::vector<double> &mu,                    //!< The extinction rates.

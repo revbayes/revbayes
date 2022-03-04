@@ -32,15 +32,20 @@ using namespace RevBayesCore;
 /**
  * Constructor.
  * We delegate most parameters to the base class and initialize the members.
- *
- * \param[in]    s              Speciation rates.
- * \param[in]    e              Extinction rates.
- * \param[in]    p              Serial sampling rates.
- * \param[in]    r              Instantaneous sampling probabilities.
- * \param[in]    t              Rate change times.
- * \param[in]    cdt            Condition of the process (none/survival/#Taxa).
- * \param[in]    tn             Taxa.
- * \param[in]    c              Clades conditioned to be present.
+ * \param[in]    ra                        Age of the root (=time of the process).
+ * \param[in]    inspeciation              Speciation rate(s).
+ * \param[in]    inextinction              Extinction rate(s).
+ * \param[in]    inserialsampling          Serial sampling rate(s).
+ * \param[in]    intreatment               Probabilit(y|ies) of death upon sampling (treatment).
+ * \param[in]    inoccurrence              Occurrence sampling rate(s)
+ * \param[in]    ht                        Rate change times.
+ * \param[in]    cdt                       Condition of the process (none/survival/survival2).
+ * \param[in]    tn                        Taxa.
+ * \param[in]    uo                        Start condition ("rootAge"/"originAge").
+ * \param[in]    t                         Starting tree if we want to avoid simulating trees.
+ * \param[in]    n                         Number of hidden lineages (algorithm accuracy).
+ * \param[in]    O                         The vector of fixed occurrence ages.
+
  */
 OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                                  const TypedDagNode<double> *ra,
                                                                                            const DagNode *inspeciation,

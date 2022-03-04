@@ -244,9 +244,7 @@ const MemberRules& Dist_occurrenceBirthDeathProcess::getParameterRules(void) con
         dist_member_rules.push_back( new ArgumentRule( "timeline",    ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new ModelVector<RealPos>() ) );
 
         std::vector<std::string> optionsCondition;
-        optionsCondition.push_back( "time" );
         optionsCondition.push_back( "survival" );
-        optionsCondition.push_back( "sampleAtLeastOneLineage" );
         optionsCondition.push_back( "survival2" );
         dist_member_rules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
         dist_member_rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );

@@ -85,7 +85,7 @@ namespace RevBayesCore {
 
         const bool                                              useMt;                                    //!< Forward traversal Mt algorithm (otherwise backward Lt)
         const bool                                              useOrigin;                                //!< If true the start age is the origin time otherwise the root age of the process.
-        const std::string &                                     cond;                                     //!< Condition of the process (none/survival/#Taxa).
+        const std::string &                                     cond;                                     //!< Condition of the process (none/survival/survival2).
         const bool                                              verbose;                                  //!< Display warnings and information messages
 
         mutable std::vector<double>                             timeline;                                 //!< The times of the instantaneous events and rate shifts.
