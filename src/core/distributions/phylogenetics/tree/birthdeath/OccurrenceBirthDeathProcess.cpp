@@ -56,7 +56,6 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                       
                                                                                            const std::vector<Taxon> &tn,
                                                                                            bool uo,
                                                                                            Tree *t,
-                                                                                           //TypedDagNode<Tree> *t,
                                                                                            const TypedDagNode<long> *n,
                                                                                            const TypedDagNode< RevBayesCore::RbVector<double> > *O,
                                                                                            bool mt,
@@ -75,21 +74,22 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                       
 {
     // initialize all the pointers to NULL
     homogeneous_lambda   = NULL;
-    homogeneous_mu       = NULL;
-    homogeneous_psi      = NULL;
-    homogeneous_r        = NULL;
-    homogeneous_o        = NULL;
-    // homogeneous_Lambda   = NULL;
-    // homogeneous_Mu       = NULL;
-    homogeneous_rho      = NULL;
     heterogeneous_lambda = NULL;
+
+    homogeneous_mu       = NULL;
     heterogeneous_mu     = NULL;
+
+    homogeneous_psi      = NULL;
     heterogeneous_psi    = NULL;
+
+    homogeneous_r        = NULL;
     heterogeneous_r      = NULL;
+
+    homogeneous_o        = NULL;
     heterogeneous_o      = NULL;
-    heterogeneous_Lambda = NULL;
-    heterogeneous_Mu     = NULL;
-    heterogeneous_rho    = NULL;
+
+    homogeneous_rho      = NULL;
+
 
     std::vector<double> times = timeline;
     std::vector<double> times_sorted_ascending = times;
@@ -133,23 +133,8 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                       
     addParameter( homogeneous_o );
     addParameter( heterogeneous_o );
 
-    heterogeneous_Lambda = dynamic_cast<const TypedDagNode<RbVector<double> >*>(ineventspeciation);
-    // homogeneous_Lambda = dynamic_cast<const TypedDagNode<double >*>(ineventspeciation);
-
-    // addParameter( homogeneous_Lambda );
-    addParameter( heterogeneous_Lambda );
-
-    heterogeneous_Mu = dynamic_cast<const TypedDagNode<RbVector<double> >*>(ineventextinction);
-    // homogeneous_Mu = dynamic_cast<const TypedDagNode<double >*>(ineventextinction);
-
-    // addParameter( homogeneous_Mu );
-    addParameter( heterogeneous_Mu );
-
-    heterogeneous_rho = dynamic_cast<const TypedDagNode<RbVector<double> >*>(ineventsampling);
     homogeneous_rho = dynamic_cast<const TypedDagNode<double >*>(ineventsampling);
-
     addParameter( homogeneous_rho );
-    addParameter( heterogeneous_rho );
 
     //TODO: make sure the offset is added properly into the computation, need to offset *all* times, including interval times
     //          thie means we also need to check that the first interval time is not less than the first tip (which we should probably to anyways)
@@ -180,21 +165,6 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                       
     if ( heterogeneous_o != NULL && !(interval_times->getValue().size() == heterogeneous_o->getValue().size() - 1) )
     {
       throw(RbException("If provided as a vector, argument o must have one more element than timeline."));
-    }
-
-    if ( heterogeneous_Lambda != NULL && !(interval_times->getValue().size() == heterogeneous_Lambda->getValue().size()) )
-    {
-      throw(RbException("If provided, argument Lambda must be of same length as timeline."));
-    }
-
-    if ( heterogeneous_Mu != NULL && !(interval_times->getValue().size() == heterogeneous_Mu->getValue().size()) )
-    {
-      throw(RbException("If provided, argument Mu must be of same length as timeline."));
-    }
-
-    if ( heterogeneous_rho != NULL && !(interval_times->getValue().size() == heterogeneous_rho->getValue().size() - 1) )
-    {
-      throw(RbException("If provided as a vector, argument rho must have one more element than timeline."));
     }
 
     updateVectorParameters();
@@ -335,8 +305,6 @@ void OccurrenceBirthDeathProcess::updateVectorParameters( void ) const
     psi.clear();
     r.clear();
     omega.clear();
-    lambda_event.clear();
-    mu_event.clear();
     psi_event.clear();
 
     // Get vector of birth rates
@@ -389,55 +357,19 @@ void OccurrenceBirthDeathProcess::updateVectorParameters( void ) const
       omega = std::vector<double>(timeline.size(),homogeneous_o->getValue());
     }
 
-    // Get vector of burst birth probabilities
-    if ( heterogeneous_Lambda != NULL )
+    psi_event = std::vector<double>(timeline.size(),0.0);
+    if ( homogeneous_rho != NULL )
     {
-      // User has specified lambda_event_1,...,lambda_event_{l-1}
-      lambda_event = heterogeneous_Lambda->getValue();
-      // lambda_event_0 must be 0 (there can be no burst at the present)
-      lambda_event.insert(lambda_event.begin(),0.0);
+        // User specified the sampling fraction at the present
+        psi_event[0] = homogeneous_rho->getValue();
     }
     else
     {
-      // User specified nothing, there are no birth bursts
-      lambda_event = std::vector<double>(timeline.size(),0.0);
+        // set the final sampling to one (for sampling at the present)
+        psi_event[0] = 1.0;
     }
 
-    // Get vector of burst death (mass extinction) probabilities
-    if ( heterogeneous_Mu != NULL )
-    {
-      // User has specified mu_event_1,...,mu_event_{l-1}
-      mu_event = heterogeneous_Mu->getValue();
-      // mu_event_0 must be 0 (there can be no burst at the present)
-      mu_event.insert(mu_event.begin(),0.0);
-    }
-    else
-    {
-      // User specified nothing, there are no birth bursts
-      mu_event = std::vector<double>(timeline.size(),0.0);
-    }
 
-    // Get vector of event sampling probabilities
-    if ( heterogeneous_rho != NULL )
-    {
-      // User has specified psi_event_0,...,psi_event_{l-1}
-      psi_event = heterogeneous_rho->getValue();
-    }
-    else
-    {
-        psi_event = std::vector<double>(timeline.size(),0.0);
-        if ( homogeneous_rho != NULL )
-        {
-            // User specified the sampling fraction at the present
-            psi_event[0] = homogeneous_rho->getValue();
-        }
-        else
-        {
-            // set the final sampling to one (for sampling at the present)
-            psi_event[0] = 1.0;
-      }
-
-    }
 
 }
 
@@ -446,31 +378,34 @@ void OccurrenceBirthDeathProcess::updateVectorParameters( void ) const
 double OccurrenceBirthDeathProcess::pSurvival(double start, double end) const
 {
 
-  if(end > 0.0) {
+  if(end != 0.0) {
     //To do: this only makes sense if the rate vectors match the timeline.
     //the vector parameters and timeline have to be adjusted.
     double time = start - end;
-     std::vector<double> birth;
-     std::vector<double> death;
-     std::vector<double> ps;
-     std::vector<double> om;
-     std::vector<double> rp;
-     std::vector<double> d;
+    std::vector<double> birth;
+    std::vector<double> death;
+    std::vector<double> ps;
+    std::vector<double> om;
+    std::vector<double> rp;
+    std::vector<double> d;
 
     for(int i = 0; i < d.size(); i++) {
-    if ((timeline[i] - end) > 0)  {
-      d.push_back(timeline[i]);
-      birth.push_back(lambda[i]);
-      death.push_back(mu[i]);
-      ps.push_back(psi[i]);
-      om.push_back(omega[i]);
-      rp.push_back(r[i]);
-
-    }
+      if ((timeline[i] - end) > 0)  {
+        d.push_back(timeline[i]);
+        birth.push_back(lambda[i]);
+        death.push_back(mu[i]);
+        ps.push_back(psi[i]);
+        om.push_back(omega[i]);
+        rp.push_back(r[i]);
+      }
   }
-  std::vector<double> res = RevBayesCore::GetFunctionUandP(time, d, birth, death, ps, om, homogeneous_rho, rp);
-  return 1 - res[0] ;
-}
+    std::vector<double> res = RevBayesCore::GetFunctionUandP(time, d, birth, death, ps, om, homogeneous_rho, rp);
+    return 1 - res[0] ;
+  }
+  else {
+    std::vector<double> res = RevBayesCore::GetFunctionUandP(start, timeline, lambda, mu, psi, omega, homogeneous_rho, r);
+    return 1 - res[0] ;
+  }
 }
 
 /**
@@ -579,26 +514,6 @@ void OccurrenceBirthDeathProcess::swapParameterInternal(const DagNode *oldP, con
         homogeneous_o = static_cast<const TypedDagNode<double>* >( newP );
     }
     // Event probability parameters
-    if (oldP == heterogeneous_Lambda)
-    {
-        heterogeneous_Lambda = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
-    }
-    else if (oldP == heterogeneous_Mu)
-    {
-        heterogeneous_Mu = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
-    }
-    else if (oldP == heterogeneous_rho)
-    {
-        heterogeneous_rho = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
-    }
-    // else if (oldP == homogeneous_Lambda)
-    // {
-    //     homogeneous_Lambda = static_cast<const TypedDagNode<double>* >( newP );
-    // }
-    // else if (oldP == homogeneous_Mu)
-    // {
-    //     homogeneous_Mu = static_cast<const TypedDagNode<double>* >( newP );
-    // }
     else if (oldP == homogeneous_rho)
     {
         homogeneous_rho = static_cast<const TypedDagNode<double>* >( newP );
