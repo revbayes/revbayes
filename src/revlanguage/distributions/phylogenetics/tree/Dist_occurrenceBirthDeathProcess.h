@@ -6,15 +6,15 @@
 namespace RevLanguage {
 
     /**
-     * The RevLanguage wrapper of the constant-rate Fossilized-Birth-Death Process
+     * The RevLanguage wrapper of the piecewise constant Occurrence Birth Death Process
      *
-     * The RevLanguage wrapper of the episodic or constant-rate birth-death-sampling-treatment process connects
-     * the variables/parameters of the process and creates the internal EpisodicBirthDeathSamplingTreatmentProcess object.
-     * Please read the EpisodicBirthDeathSamplingTreatmentProcess.h for more info.
+     * The RevLanguage wrapper of the piecewise constant occurrence-birth-death process connects
+     * the variables/parameters of the process and creates the internal OccurrenceBirthDeathProcess object.
+     * Please read the OccurrenceBirthDeathProcess.h for more info.
      *
      *
      * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
+     * @author The RevBayes Development Core Team
      * @since 2014-01-26, version 1.0
      *c
      */
@@ -46,11 +46,9 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                               lambda;                                                                                 //!< The speciation rate(s)
         RevPtr<const RevVariable>                               mu;                                                                                     //!< The extinction rate(s)
         RevPtr<const RevVariable>                               psi;                                                                                    //!< The serial sampling rate(s)
-        RevPtr<const RevVariable>                               r;
-        RevPtr<const RevVariable>                               omega;                                                                                  //!< The occurrence sampling rate                                                                                 //!< The taxon sampling fraction(s)
-        // RevPtr<const RevVariable>                               Lambda;                                                                                 //!< The speciation rate(s)
-        // RevPtr<const RevVariable>                               Mu;                                                                                     //!< The extinction rate(s)
-        RevPtr<const RevVariable>                               rho;                                                                                    //!< The serial sampling rate(s)
+        RevPtr<const RevVariable>                               r;                                                                                      //!< The probabilit(y|ies) of death upon sampling (treatment)
+        RevPtr<const RevVariable>                               omega;                                                                                  //!< The occurrence sampling rate(s)                                                                               
+        RevPtr<const RevVariable>                               rho;                                                                                    //!< The present sampling rate
         RevPtr<const RevVariable>                               timeline;                                                                               //!< The interval change times
         std::string                                             start_condition;                                                                        //!< The start condition of the process (rootAge/originAge)
         RevPtr<const RevVariable>                               initial_tree;                                                                           //!< Optional initial tree

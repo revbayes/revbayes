@@ -42,14 +42,12 @@ using namespace RevBayesCore;
  * \param[in]    tn             Taxa.
  * \param[in]    c              Clades conditioned to be present.
  */
-OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                                                                              const TypedDagNode<double> *ra,
+OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                                  const TypedDagNode<double> *ra,
                                                                                            const DagNode *inspeciation,
                                                                                            const DagNode *inextinction,
                                                                                            const DagNode *inserialsampling,
                                                                                            const DagNode *intreatment,
                                                                                            const DagNode *inoccurrence,
-                                                                                           const DagNode *ineventspeciation,
-                                                                                           const DagNode *ineventextinction,
                                                                                            const DagNode *ineventsampling,
                                                                                            const TypedDagNode< RbVector<double> > *ht,
                                                                                            const std::string &cdt,

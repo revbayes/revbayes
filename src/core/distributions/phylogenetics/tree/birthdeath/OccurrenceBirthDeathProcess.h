@@ -38,8 +38,6 @@ namespace RevBayesCore {
                                                                 const DagNode *inserialsampling,
                                                                 const DagNode *intreatment,
                                                                 const DagNode *inoccurrence,
-                                                                const DagNode *ineventspeciation,
-                                                                const DagNode *ineventextinction,
                                                                 const DagNode *ineventsampling,
                                                                 const TypedDagNode< RbVector<double> > *ht,
                                                                 const std::string &cdt,

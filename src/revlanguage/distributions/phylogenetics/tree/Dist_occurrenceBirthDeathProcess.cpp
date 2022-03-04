@@ -89,19 +89,11 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
     std::vector<RevBayesCore::Taxon> tree = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
 
     // tree for initialization
-    // RevBayesCore::TypedDagNode<RevBayesCore::Tree>* init = NULL;
-    // if ( initial_tree->getRevObject() != RevNullObject::getInstance() )
-    // {
-    //     init = static_cast<const TimeTree &>( initial_tree->getRevObject() ).getDagNode();
-    // }
-
     RevBayesCore::Tree* init = NULL;
     if ( initial_tree->getRevObject() != RevNullObject::getInstance() )
     {
         init = static_cast<const TimeTree &>( initial_tree->getRevObject() ).getDagNode()->getValue().clone();
     }
-
-
     // maximum number of hidden lineages
     RevBayesCore::TypedDagNode< long >* n       = static_cast<const Natural &>( maxHiddenLin->getRevObject() ).getDagNode();
 
@@ -115,18 +107,6 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
     RevBayesCore::DagNode* t   = r->getRevObject().getDagNode();
     // occurrence rate
     RevBayesCore::DagNode* o_s  = omega->getRevObject().getDagNode();
-    // birth burst
-    RevBayesCore::DagNode* b_e = NULL;
-    // if (Lambda->getRevObject().isType( ModelVector<Probability>::getClassTypeSpec() ))
-    // {
-    //   b_e = Lambda->getRevObject().getDagNode();
-    // }
-    // death burst (mass extinction)
-    RevBayesCore::DagNode* d_e = NULL;
-    //if (Mu->getRevObject().isType( ModelVector<Probability>::getClassTypeSpec() ))
-    // {
-    //   d_e = Mu->getRevObject().getDagNode();
-    // }
     // event sampling
     RevBayesCore::DagNode* s_e = NULL;
     if ( rho->getRevObject() != RevNullObject::getInstance() )
@@ -153,7 +133,7 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
 
     RevBayesCore::AbstractBirthDeathProcess* d;
 
-        d = new RevBayesCore::OccurrenceBirthDeathProcess(sa, b_s, d_s, s_s, t, o_s, b_e, d_e, s_e, ht, cond, tree, uo, init, n, occAges, Mt, vb);
+        d = new RevBayesCore::OccurrenceBirthDeathProcess(sa, b_s, d_s, s_s, t, o_s, s_e, ht, cond, tree, uo, init, n, occAges, Mt, vb);
 
 
     return d;
@@ -254,8 +234,6 @@ const MemberRules& Dist_occurrenceBirthDeathProcess::getParameterRules(void) con
 
         std::vector<TypeSpec> other_event_paramTypes;
         other_event_paramTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
-      //  dist_member_rules.push_back( new ArgumentRule( "Lambda",  other_event_paramTypes, "The episodic birth burst probabilities.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-      //  dist_member_rules.push_back( new ArgumentRule( "Mu",      other_event_paramTypes, "The episodic death burst (mass extinction) survival probabilities.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         std::vector<TypeSpec> event_sampling_paramTypes;
         event_sampling_paramTypes.push_back( Probability::getClassTypeSpec() );
@@ -332,14 +310,6 @@ void Dist_occurrenceBirthDeathProcess::setConstParameter(const std::string& name
     {
         omega = var;
     }
-    // else if ( name == "Lambda" )
-    // {
-    //     Lambda = var;
-    // }
-    // else if ( name == "Mu" )
-    // {
-    //     Mu = var;
-    // }
     else if ( name == "rho" )
     {
         rho = var;
