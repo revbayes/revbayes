@@ -1,3 +1,5 @@
+#if defined (RB_BEAGLE)
+
 #include <iostream>
 
 #include "RbException.h"
@@ -236,3 +238,6 @@ void BeagleInstance::setCPUThreadCount(size_t n)
     nthreads = n;
     beagleSetCPUThreadCount( handle, n);
 }
+
+#endif
+

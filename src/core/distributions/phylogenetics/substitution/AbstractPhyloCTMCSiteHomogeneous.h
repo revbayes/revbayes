@@ -2230,8 +2230,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
 {
 
     // check for recomputation
-    if ( dirty_nodes[node_index] == true ||
-        RbSettings::userSettings().getUseBeagleLikelihoodStoring() == false )
+    if ( dirty_nodes[node_index] == true
+#if defined ( RB_BEAGLE )
+         || RbSettings::userSettings().getUseBeagleLikelihoodStoring() == false
+#endif
+        )
     {
         // mark as computed
         dirty_nodes[node_index] = false;
