@@ -108,6 +108,16 @@ if (BOOST_ROOT)
   MESSAGE("  BOOST_ROOT: ${BOOST_ROOT}")
 else()
   MESSAGE("  BOOST_ROOT not set")
+  MESSAGE("Searching for BOOST:")
+  find_package(Boost
+    1.74.0
+    COMPONENTS regex
+    program_options
+    thread
+    system
+    filesystem
+    date_time
+    serialization REQUIRED)
 endif()
 if (BOOST_INCLUDEDIR)
   MESSAGE("  BOOST_INCLUDEDIR: ${BOOST_INCLUDEDIR}")
@@ -122,16 +132,6 @@ if ("${STATIC_BOOST}" STREQUAL "ON")
 	set(Boost_USE_STATIC_LIBS ON)
 endif()
 
-MESSAGE("Searching for BOOST:")
-find_package(Boost
-1.74.0
-COMPONENTS regex
-program_options
-thread
-system
-filesystem
-date_time
-serialization REQUIRED)
 MESSAGE("Boost configuration results:")
 MESSAGE("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIR}")
 MESSAGE("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
