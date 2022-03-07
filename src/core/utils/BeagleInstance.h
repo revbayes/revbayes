@@ -1,6 +1,8 @@
 #ifndef BEAGLE_INSTANCE_H
 #define BEAGLE_INSTANCE_H
 
+#if defined (RB_BEAGLE)
+
 #include "RbSettings.h"
 #include "RlUserInterface.h"
 #include "BeagleUtilities.h"
@@ -56,5 +58,7 @@ namespace RevBayesCore {
     };
 
 }
+
+#endif
 
 #endif //-- end BEAGLE_INSTANCE_H
