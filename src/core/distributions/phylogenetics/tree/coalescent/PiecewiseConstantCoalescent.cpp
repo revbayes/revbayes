@@ -342,7 +342,6 @@ void PiecewiseConstantCoalescent::restoreSpecialization(const DagNode *affecter)
  */
 std::vector<double> PiecewiseConstantCoalescent::simulateCoalescentAges( size_t n ) const
 {
-    
     // first check if we want to set the interval ages here!
     if ( interval_method == SPECIFIED )
     {
@@ -408,6 +407,13 @@ std::vector<double> PiecewiseConstantCoalescent::simulateCoalescentAges( size_t 
             else
             {
                 next_interval_change_point = RbConstants::Double::inf;
+                // if both the next serial age and the next interval change point are set to ínf
+                // we add inf as last interval time
+                if (std::isinf(next_serial_age))
+                {
+                    combined_event_ages.push_back( next_interval_change_point );
+                    combined_event_types.push_back( DEMOGRAPHIC_MODEL_CHANGE);                    
+                }
             }
         }
         else
@@ -423,6 +429,13 @@ std::vector<double> PiecewiseConstantCoalescent::simulateCoalescentAges( size_t 
             else
             {
                 next_serial_age = RbConstants::Double::inf;
+                // if both the next serial age and the next interval change point are set to ínf
+                // we add inf as last interval time
+                if (std::isinf(next_interval_change_point))
+                {
+                    combined_event_ages.push_back( next_interval_change_point );
+                    combined_event_types.push_back( DEMOGRAPHIC_MODEL_CHANGE);                    
+                }                
             }
         }
     }
