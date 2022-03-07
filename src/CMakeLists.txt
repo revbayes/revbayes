@@ -106,24 +106,17 @@ endif()
 MESSAGE("Boost location hints:")
 if (BOOST_ROOT)
   MESSAGE("  BOOST_ROOT: ${BOOST_ROOT}")
+  set(Boost_INCLUDE_DIR ${BOOST_ROOT})
 else()
   MESSAGE("  BOOST_ROOT not set")
-  MESSAGE("Searching for BOOST:")
-  find_package(Boost
-    1.74.0
-    COMPONENTS regex
-    program_options
-    thread
-    system
-    filesystem
-    date_time
-    serialization REQUIRED)
 endif()
-if (BOOST_INCLUDEDIR)
-  MESSAGE("  BOOST_INCLUDEDIR: ${BOOST_INCLUDEDIR}")
-endif()
+#if (BOOST_INCLUDEDIR)
+#  MESSAGE("  BOOST_INCLUDEDIR: ${BOOST_INCLUDEDIR}")
+#  set(Boost_INCLUDE_DIR ${BOOST_ROOT})
+#endif()
 if (BOOST_LIBRARYDIR)
   MESSAGE("  BOOST_LIBRARYDIR: ${BOOST_LIBRARYDIR}")
+  set(Boost_LIBRARY_DIR ${BOOST_LIBRARYDIR})
 endif()
 
 set(Boost_USE_MULTITHREADED ON)
@@ -131,6 +124,17 @@ if ("${STATIC_BOOST}" STREQUAL "ON")
 	MESSAGE("Static linking Boost")
 	set(Boost_USE_STATIC_LIBS ON)
 endif()
+
+MESSAGE("Searching for BOOST packages:")
+find_package(Boost
+  1.74.0
+  COMPONENTS regex
+  program_options
+  thread
+  system
+  filesystem
+  date_time
+  serialization REQUIRED)
 
 MESSAGE("Boost configuration results:")
 MESSAGE("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIR}")
