@@ -119,11 +119,11 @@ if [ "$travis" = "true" ] ; then
 fi
 
 if [ -n "$boost_root" ] ; then
-    cmake_args="-DBOOST_ROOT=\"${boost_root}\" $cmake_args"
+    cmake_args="-DBOOST_ROOT=${boost_root} $cmake_args"
 fi
 
 if [ -n "$boost_lib" ] ; then
-    cmake_args="-DBOOST_LIBRARYDIR=\"${boost_lib}\" $cmake_args"
+    cmake_args="-DBOOST_LIBRARYDIR=${boost_lib} $cmake_args"
 fi
 
 if [ "$help" = "true" ] ; then
