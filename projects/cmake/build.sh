@@ -15,6 +15,7 @@ help="false"
 jupyter="false"
 boost_root=""
 boost_lib=""
+boost_include=""
 j=4
 
 cmake_args=""
@@ -34,6 +35,7 @@ while echo $1 | grep ^- > /dev/null; do
 -help           <true|false>    : update the help database and build the YAML help generator. Defaults to false.
 -boost_root     string          : specify directory containing Boost headers (e.g. `/usr/include`). Defaults to unset.
 -boost_lib      string          : specify directory containing Boost libraries. (e.g. `/usr/lib`). Defaults to unset.
+-boost_include  string          : specify directory containing Boost includes. (e.g. `/usr/include`). Defaults to unset.
 -j              integer         : the number of threads to use when compiling RevBayes. Defaults to 4.
 
 You can also specify cmake variables as -DCMAKE_VAR1=value1 -DCMAKE_VAR2=value2
@@ -124,6 +126,10 @@ fi
 
 if [ -n "$boost_lib" ] ; then
     cmake_args="-DBOOST_LIBRARYDIR=${boost_lib} $cmake_args"
+fi
+
+if [ -n "$boost_include" ] ; then
+    cmake_args="-DBOOST_INCLUDEDIR=${boost_include} $cmake_args"
 fi
 
 if [ "$help" = "true" ] ; then
