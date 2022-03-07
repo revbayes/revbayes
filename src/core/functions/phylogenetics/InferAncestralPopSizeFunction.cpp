@@ -1,9 +1,3 @@
-//
-//  InferAncestralPopSizeFunction.cpp
-//
-//  Initiated by Rachel Warnock, Marc Manceau 30.01.2020.
-//  Completed by Jérémy Andréoletti, Antoine Zwaans 03.2020.
-//
 #include "InferAncestralPopSizeFunction.h"
 #include "ComputeLikelihoodsLtMt.h"
 
@@ -25,27 +19,27 @@ namespace RevBayesCore {
 
 using namespace RevBayesCore;
 
-/** InferAncestralPopSizeFunction
+/** InferAncestralPopSizeFunctionPiecewise
  * Constructor.
  *
  * The constructor connects the parameters of the birth-death process (DAG structure)
-
  * We delegate most parameters to the base class and initialize the members.
- *
- * \param[in]    sa             Time of the origin/present/length of the process.
- * \param[in]    l              Speciation rate.
- * \param[in]    m              Extinction rate.
- * \param[in]    p              Fossil sampling rate.
- * \param[in]    o              Occurrence sampling rate.
- * \param[in]    rho            Sampling probability at present time.
- * \param[in]    r              Removal probability after sampling.
- * \param[in]    n              Algorithm accuracy (maximal number of hidden lineages).
- * \param[in]    cdt            Condition of the process (none/survival/#Taxa).
- * \param[in]    tau            Times for which we want to compute the density.
- * \param[in]    uo             If true t is the origin time otherwise the root age of the process.
- * \param[in]    vb             If true displays warnings and information messages.
- * \param[in]    tr             Tree for ancestral populations size inference.
+ * \param[in]    sa                        Start age of the process.
+ * \param[in]    l              					 Speciation/birth rate(s).
+ * \param[in]    m              					 Extinction/death rate(s).
+ * \param[in]    p          							 Serial sampling rate(s).
+ * \param[in]    o	              				 Occurrence sampling rate(s).
+ * \param[in]    rho						           Sampling probability at present time.
+ * \param[in]    r               					 Probabilit(y|ies) of death upon sampling (treatment).
+ * \param[in]    n                         Maximum number of hidden lineages (algorithm accuracy).
+ * \param[in]    cdt                       Condition of the process (survival/survival2).
+ * \param[in]    O                       	 Vector of occurrence ages.
+ * \param[in]    tau            					 Time points at which we compute the density.
+ * \param[in]    uo                        If true the start age is the origin time otherwise the root age of the process.
+ * \param[in]    t                         Tree for which ancestral pop. size has to be computed.
+ * \param[in]    ht                        Rate interval change times of the piecewise constant process.
  */
+
 InferAncestralPopSizeFunction::InferAncestralPopSizeFunction( 	const TypedDagNode<double> *sa,
                                                   							const TypedDagNode<double> *l,
 	                                                          		const TypedDagNode<double> *m,

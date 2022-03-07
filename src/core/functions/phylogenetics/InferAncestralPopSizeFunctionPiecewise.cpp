@@ -1,9 +1,3 @@
-//
-//  InferAncestralPopSizeFunctionPiecewise.cpp
-//
-//  Initiated by Rachel Warnock, Marc Manceau 30.01.2020.
-//  Completed by Jérémy Andréoletti, Antoine Zwaans 03.2020.
-//
 #include "InferAncestralPopSizeFunctionPiecewise.h"
 #include "ComputeLikelihoodsLtMt.h"
 
@@ -17,11 +11,10 @@
 #include "TypedDagNode.h"
 #include "Tree.h"
 #include "TopologyNode.h"
-// other includes
 
 namespace RevBayesCore {
 	class DagNode;
-	class MatrixReal; } //tt
+	class MatrixReal; }
 
 using namespace RevBayesCore;
 
@@ -29,22 +22,25 @@ using namespace RevBayesCore;
  * Constructor.
  *
  * The constructor connects the parameters of the birth-death process (DAG structure)
-
  * We delegate most parameters to the base class and initialize the members.
- *
- * \param[in]    sa             Time of the origin/present/length of the process.
- * \param[in]    l              Speciation rate.
- * \param[in]    m              Extinction rate.
- * \param[in]    p              Fossil sampling rate.
- * \param[in]    o              Occurrence sampling rate.
- * \param[in]    rho            Sampling probability at present time.
- * \param[in]    r              Removal probability after sampling.
- * \param[in]    n              Algorithm accuracy (maximal number of hidden lineages).
- * \param[in]    cdt            Condition of the process (none/survival/#Taxa).
- * \param[in]    tau            Times for which we want to compute the density.
- * \param[in]    uo             If true t is the origin time otherwise the root age of the process.
- * \param[in]    tr             Tree for ancestral populations size inference.
+ * \param[in]    sa                        Start age of the process.
+ * \param[in]    inspeciation              Speciation/birth rate(s).
+ * \param[in]    inextinction              Extinction/death rate(s).
+ * \param[in]    inserialsampling          Serial sampling rate(s).
+ * \param[in]    inoccurrence              Occurrence sampling rate(s).
+ * \param[in]    ineventsampling           Sampling probability at present time.
+ * \param[in]    intreatment               Probabilit(y|ies) of death upon sampling (treatment).
+ * \param[in]    n                         Maximum number of hidden lineages (algorithm accuracy).
+ * \param[in]    cdt                       Condition of the process (survival/survival2).
+ * \param[in]    O                       	 Vector of occurrence ages.
+ * \param[in]    tau            					 Time points at which we compute the density.
+ * \param[in]    uo                        If true the start age is the origin time otherwise the root age of the process.
+ * \param[in]    t                         Tree for which ancestral pop. size has to be computed.
+ * \param[in]    ht                        Rate interval change times of the piecewise constant process.
  */
+
+
+
 InferAncestralPopSizeFunctionPiecewise::InferAncestralPopSizeFunctionPiecewise( 	const TypedDagNode<double> *sa,
                                                   																const DagNode *inspeciation,
 	                                                          											const DagNode *inextinction,
@@ -82,7 +78,6 @@ InferAncestralPopSizeFunctionPiecewise::InferAncestralPopSizeFunctionPiecewise( 
 	heterogeneous_o      = NULL;
 
 	homogeneous_rho      = NULL;
-	heterogeneous_rho    = NULL;
 
 	homogeneous_r        = NULL;
 	heterogeneous_r      = NULL;
@@ -130,11 +125,9 @@ InferAncestralPopSizeFunctionPiecewise::InferAncestralPopSizeFunctionPiecewise( 
 	addParameter( homogeneous_o );
 	addParameter( heterogeneous_o );
 
-	heterogeneous_rho = dynamic_cast<const TypedDagNode<RbVector<double> >*>(ineventsampling);
 	homogeneous_rho = dynamic_cast<const TypedDagNode<double >*>(ineventsampling);
 
 	addParameter( homogeneous_rho );
-	addParameter( heterogeneous_rho );
 
 
 	//check that lengths of vector arguments are sane
@@ -163,10 +156,6 @@ InferAncestralPopSizeFunctionPiecewise::InferAncestralPopSizeFunctionPiecewise( 
 		throw(RbException("If provided as a vector, argument o must have one more element than timeline."));
 	}
 
-	if ( heterogeneous_rho != NULL && !(interval_times->getValue().size() == heterogeneous_rho->getValue().size() - 1) )
-	{
-		throw(RbException("If provided as a vector, argument rho must have one more element than timeline."));
-	}
 
 	update();
 }
@@ -189,7 +178,7 @@ InferAncestralPopSizeFunctionPiecewise* InferAncestralPopSizeFunctionPiecewise::
 /**
  * Compute Kt, where you do the work, required
  *
- * \return A density matrix of the number of hidden lineages through time
+ * \return A density matrix of the Maximal number of hidden lineages through time
  */
 void InferAncestralPopSizeFunctionPiecewise::update( void )
 {
@@ -301,27 +290,19 @@ void InferAncestralPopSizeFunctionPiecewise::updateVectorParameters( void ) cons
       omega = std::vector<double>(timeline.size(),homogeneous_o->getValue());
     }
 
-    // Get vector of event sampling probabilities
-    if ( heterogeneous_rho != NULL )
+		psi_event = std::vector<double>(timeline.size(),0.0);
+    if ( homogeneous_rho != NULL )
     {
-      // User has specified psi_event_0,...,psi_event_{l-1}
-      psi_event = heterogeneous_rho->getValue();
+        // User specified the sampling fraction at the present
+        psi_event[0] = homogeneous_rho->getValue();
     }
     else
     {
-        psi_event = std::vector<double>(timeline.size(),0.0);
-        if ( homogeneous_rho != NULL )
-        {
-            // User specified the sampling fraction at the present
-            psi_event[0] = homogeneous_rho->getValue();
-        }
-        else
-        {
-            // set the final sampling to one (for sampling at the present)
-            psi_event[0] = 1.0;
-      }
+        // set the final sampling to one (for sampling at the present)
+        psi_event[0] = 1.0;
+  	}
 
-    }
+
 
 }
 
@@ -370,10 +351,6 @@ void InferAncestralPopSizeFunctionPiecewise::swapParameterInternal( const DagNod
     else if (oldP == homogeneous_o)
     {
         homogeneous_o = static_cast<const TypedDagNode<double>* >( newP );
-    }
-		else if (oldP == heterogeneous_rho)
-    {
-        heterogeneous_rho = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
     else if (oldP == homogeneous_rho)
     {

@@ -33,18 +33,19 @@ using namespace RevBayesCore;
  * Constructor.
  * We delegate most parameters to the base class and initialize the members.
  * \param[in]    ra                        Age of the root (=time of the process).
- * \param[in]    inspeciation              Speciation rate(s).
- * \param[in]    inextinction              Extinction rate(s).
+ * \param[in]    inspeciation              Speciation/birth rate(s).
+ * \param[in]    inextinction              Extinction/death rate(s).
  * \param[in]    inserialsampling          Serial sampling rate(s).
  * \param[in]    intreatment               Probabilit(y|ies) of death upon sampling (treatment).
- * \param[in]    inoccurrence              Occurrence sampling rate(s)
- * \param[in]    ht                        Rate change times.
- * \param[in]    cdt                       Condition of the process (none/survival/survival2).
+ * \param[in]    inoccurrence              Occurrence sampling rate(s).
+ * \param[in]    ineventsampling           Sampling probability at present time.
+ * \param[in]    ht                        Rate interval change times of the piecewise constant process.
+ * \param[in]    cdt                       Condition of the process (survival/survival2).
  * \param[in]    tn                        Taxa.
- * \param[in]    uo                        Start condition ("rootAge"/"originAge").
+ * \param[in]    uo                        If true the start age is the origin time otherwise the root age of the process.
  * \param[in]    t                         Starting tree if we want to avoid simulating trees.
- * \param[in]    n                         Number of hidden lineages (algorithm accuracy).
- * \param[in]    O                         The vector of fixed occurrence ages.
+ * \param[in]    n                         Maximum number of hidden lineages (algorithm accuracy).
+ * \param[in]    O                         Vector of occurrence ages.
 
  */
 OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                                  const TypedDagNode<double> *ra,
@@ -139,10 +140,6 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                       
     homogeneous_rho = dynamic_cast<const TypedDagNode<double >*>(ineventsampling);
     addParameter( homogeneous_rho );
 
-    //TODO: make sure the offset is added properly into the computation, need to offset *all* times, including interval times
-    //          thie means we also need to check that the first interval time is not less than the first tip (which we should probably to anyways)
-
-    //TODO: returning neginf and nan are not currently coherent
 
     //check that lengths of vector arguments are sane
     if ( heterogeneous_lambda != NULL && !(interval_times->getValue().size() == heterogeneous_lambda->getValue().size() - 1) )

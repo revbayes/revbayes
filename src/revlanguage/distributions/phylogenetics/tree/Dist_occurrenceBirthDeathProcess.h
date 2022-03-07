@@ -14,8 +14,8 @@ namespace RevLanguage {
      *
      *
      * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team
-     * @since 2014-01-26, version 1.0
+     * @author The RevBayes Development Core Team (Antoine Zwaans & Jérémy Andréoletti)
+     * @since 2020-03, version 1.0
      *c
      */
     class Dist_occurrenceBirthDeathProcess : public BirthDeathProcess {
@@ -47,7 +47,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                               mu;                                                                                     //!< The extinction rate(s)
         RevPtr<const RevVariable>                               psi;                                                                                    //!< The serial sampling rate(s)
         RevPtr<const RevVariable>                               r;                                                                                      //!< The probabilit(y|ies) of death upon sampling (treatment)
-        RevPtr<const RevVariable>                               omega;                                                                                  //!< The occurrence sampling rate(s)                                                                               
+        RevPtr<const RevVariable>                               omega;                                                                                  //!< The occurrence sampling rate(s)
         RevPtr<const RevVariable>                               rho;                                                                                    //!< The present sampling rate
         RevPtr<const RevVariable>                               timeline;                                                                               //!< The interval change times
         std::string                                             start_condition;                                                                        //!< The start condition of the process (rootAge/originAge)

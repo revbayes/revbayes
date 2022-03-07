@@ -3,8 +3,7 @@
 
 #include "RlTypedFunction.h"
 #include "MatrixReal.h"
-// #include "TypedFunction.h"
-// anything other includes?
+
 
 #include <string>
 #include <vector>
@@ -19,10 +18,24 @@ class Taxon;
 template <class valueType> class RbVector;
 template <class valueType> class TypedDagNode;
 
-  /**
-     * @brief Declaration of the deterministic variable for ancestral population size estimation.
-     * @return The probability density of the number of hidden lineages through time, computed according to Manceau & al. 2020 algorithm (http://dx.doi.org/10.1101/755561)
-     */
+/**
+* @file
+* This file contains a function to estimate ancestral population size
+* given a tree, occurrences, and constant phylodynamic parameters under the Occurrence Birth-Death Process, as a
+* density matrix of the number of hidden lineages through time.
+*
+* @brief Computes the probability density of the number of hidden lineages through time, under the Occurrence Birth-Death Process, using the algorithm introduced in Manceau & al. 2020 (http://dx.doi.org/10.1101/755561))
+*
+* @return A density matrix of the number of hidden lineages through time.
+*
+* (c) Copyright 2009- under GPL version 3
+* @date Last modified: $Date$
+* @author The RevBayes Development Core Team (Antoine Zwaans, Jérémy Andréoletti, Rachel Warnock & Marc Manceau)
+* @license GPL version 3
+* @version 1.0
+* @since 2020-03, version 1.0
+*
+*/
 
   class InferAncestralPopSizeFunction : public TypedFunction<MatrixReal> {
 

@@ -86,17 +86,12 @@ std::vector<Event> RevBayesCore::PoolEvents(             const double &start_age
         else if ( n.isFossil() && !n.isSampledAncestor() )
         {
             // node is fossil leaf
-            // For now, we assume there is no information/labels on removal
-            // @todo add fossil-removed/non-removed
+            // @todo add fossil-removed/non-removed (we assume there is no information/labels on removal)
             events.push_back(Event(n.getAge(),"fossil leaf")) ;
-            // events.push_back(Event(n.getAge(),"terminal non-removed")) ;
         }
         else if ( !n.isFossil() && n.isTip() )
         {
             // node is extant leaf : only their number is necessary to compute Lt and Mt
-            // events.push_back(Event(n.getAge(),"extant leaf") ;
-            // events.push_back(Event(n.getAge(), "terminal non-removed")) ;
-            // if (verbose){std::cout << n.getSpeciesName() << std::endl;}
             nb_extant++;
         }
         else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
@@ -138,39 +133,39 @@ std::vector<Event> RevBayesCore::PoolEvents(             const double &start_age
  * Compute the joint log-probability density of the observations made up to any time t (direction depending on the algorithm).
  *
  * \param[in]    start_age              Start age of the process.
- * \param[in]    lambda                 Speciation rate.
- * \param[in]    mu                     Extinction rate.
- * \param[in]    psi                    Tree sampling rate.
- * \param[in]    omega                  Occurrence sampling rate.
+ * \param[in]    lambda                 Speciation/birth rate(s).
+ * \param[in]    mu                     Extinction/death rate(s).
+ * \param[in]    psi                    Serial sampling rate(s).
+ * \param[in]    omega                  Occurrence sampling rate(s).
  * \param[in]    rho                    Sampling probability at present time.
- * \param[in]    removalPr              Removal probability after sampling.
- * \param[in]    maxHiddenLin           Algorithm accuracy (maximal number of hidden lineages).
- * \param[in]    cond                   Condition of the process (none/survival/survival2).
- * \param[in]    time_points            Times for which we want to compute the density.
+ * \param[in]    removalPr              Probabilit(y|ies) of death upon sampling (treatment).
+ * \param[in]    maxHiddenLin           Maximum number of hidden lineages (algorithm accuracy).
+ * \param[in]    cond                   Condition of the process (survival/survival2).
+ * \param[in]    time_points            Time points at which we compute the density.
  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
  * \param[in]    useMt                  If true computes densities with the forwards traversal algorithm (Mt) otherwise uses backward one (Lt).
  * \param[in]    verbose                If true displays warnings and information messages.
  * \param[in]    occurrence_ages        Vector of occurrence ages.
- * \param[in]    timeTree               Tree for ancestral populations size inference.
+ * \param[in]    timeTree               Tree.
  *
  * \return    The matrix of log-Mt values through time.
 */
 MatrixReal RevBayesCore::ComputeLnProbabilityDensitiesOBDP(  const double &start_age,
-                                                                      const std::vector<double> &timeline,
-                                                                      const std::vector<double> &lambda,
-                                                                      const std::vector<double> &mu,
-                                                                      const std::vector<double> &psi,
-                                                                      const std::vector<double> &omega,
-                                                                      const TypedDagNode<double> *rho,
-                                                                      const std::vector<double> &removalPr,
-                                                                      const TypedDagNode<long> *maxHiddenLin,
-                                                                      const std::string &cond,
-                                                                      const std::vector<double> &time_points,
-                                                                      bool useOrigin,
-                                                                      bool useMt,
-                                                                      bool verbose,
-                                                                      const std::vector<double> &occurrence_ages,
-                                                                      const Tree &timeTree)
+                                                             const std::vector<double> &timeline,
+                                                             const std::vector<double> &lambda,
+                                                             const std::vector<double> &mu,
+                                                             const std::vector<double> &psi,
+                                                             const std::vector<double> &omega,
+                                                             const TypedDagNode<double> *rho,
+                                                             const std::vector<double> &removalPr,
+                                                             const TypedDagNode<long> *maxHiddenLin,
+                                                             const std::string &cond,
+                                                             const std::vector<double> &time_points,
+                                                             bool useOrigin,
+                                                             bool useMt,
+                                                             bool verbose,
+                                                             const std::vector<double> &occurrence_ages,
+                                                             const Tree &timeTree)
 {
     // Use the forwards traversal algorithm (Mt)
     if (useMt){
@@ -192,37 +187,38 @@ MatrixReal RevBayesCore::ComputeLnProbabilityDensitiesOBDP(  const double &start
  * Compute the joint log-probability density of the tree and occurrences.
  *
  * \param[in]    start_age              Start age of the process.
- * \param[in]    lambda                 Speciation rate.
- * \param[in]    mu                     Extinction rate.
- * \param[in]    psi                    Tree sampling rate.
- * \param[in]    omega                  Occurrence sampling rate.
+ * \param[in]    timeline               Rate interval change times of the piecewise constant process.
+ * \param[in]    lambda                 Speciation/birth rate(s).
+ * \param[in]    mu                     Extinction/death rate(s).
+ * \param[in]    psi                    Serial sampling rate(s).
+ * \param[in]    omega                  Occurrence sampling rate(s).
  * \param[in]    rho                    Sampling probability at present time.
- * \param[in]    removalPr              Removal probability after sampling.
- * \param[in]    maxHiddenLin           Algorithm accuracy (maximal number of hidden lineages).
- * \param[in]    cond                   Condition of the process (none/survival/survival2).
+ * \param[in]    removalPr              Probabilit(y|ies) of death upon sampling (treatment).
+ * \param[in]    maxHiddenLin           Maximum number of hidden lineages (algorithm accuracy).
+ * \param[in]    cond                   Condition of the process (survival/survival2).
  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
  * \param[in]    useMt                  If true computes densities with the forwards traversal algorithm (Mt) otherwise uses backward one (Lt).
  * \param[in]    verbose                If true displays warnings and information messages.
  * \param[in]    occurrence_ages        Vector of occurrence ages.
- * \param[in]    timeTree               Tree for ancestral populations size inference.
+ * \param[in]    timeTree               Tree.
  *
  * \return    The joint log-likelihood.
 */
 double RevBayesCore::ComputeLnLikelihoodOBDP(    const double &start_age,
-                                                          const std::vector<double> &timeline,
-                                                          const std::vector<double> &lambda,
-                                                          const std::vector<double> &mu,
-                                                          const std::vector<double> &psi,
-                                                          const std::vector<double> &omega,
-                                                          const TypedDagNode<double> *rho,
-                                                          const std::vector<double> &removalPr,
-                                                          const TypedDagNode<long> *maxHiddenLin,
-                                                          const std::string &cond,
-                                                          bool useOrigin,
-                                                          bool useMt,
-                                                          bool verbose,
-                                                          const std::vector<double> &occurrence_ages,
-                                                          const Tree &timeTree)
+                                                 const std::vector<double> &timeline,
+                                                 const std::vector<double> &lambda,
+                                                 const std::vector<double> &mu,
+                                                 const std::vector<double> &psi,
+                                                 const std::vector<double> &omega,
+                                                 const TypedDagNode<double> *rho,
+                                                 const std::vector<double> &removalPr,
+                                                 const TypedDagNode<long> *maxHiddenLin,
+                                                 const std::string &cond,
+                                                 bool useOrigin,
+                                                 bool useMt,
+                                                 bool verbose,
+                                                 const std::vector<double> &occurrence_ages,
+                                                 const Tree &timeTree   )
 {
     double logLikelihood = 0.0;
 
@@ -286,18 +282,18 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const double &start_age,
 //  * size at that time, as time decreases towards present, with piecewise constant rates : breadth-first forward traversal algorithm.
 //  *
 //  * \param[in]    start_age              Start age of the process.
-//  * \param[in]    timeline               Rate shifts times.
-//  * \param[in]    lambda                 Speciation rate.
-//  * \param[in]    mu                     Extinction rate.
-//  * \param[in]    psi                    Extinction sampling rate.
-//  * \param[in]    omega                  Occurrence sampling rate.
+//  * \param[in]    timeline               Rate interval change times of the piecewise constant process.
+//  * \param[in]    lambda                 Speciation/birth rate(s).
+//  * \param[in]    mu                     Extinction/death rate(s).
+//  * \param[in]    psi                    Serial sampling rate(s).
+//  * \param[in]    omega                  Occurrence sampling rate(s).
 //  * \param[in]    rho                    Sampling probability at present time.
-//  * \param[in]    removalPr              Removal probability after sampling.
-//  * \param[in]    maxHiddenLin           Algorithm accuracy (maximal number of hidden lineages).
-//  * \param[in]    cond                   Condition of the process (none/survival/survival2).
-//  * \param[in]    time_points            Times for which we want to compute the density.
+//  * \param[in]    removalPr              Probabilit(y|ies) of death upon sampling (treatment).
+//  * \param[in]    maxHiddenLin           Maximum number of hidden lineages (algorithm accuracy).
+//  * \param[in]    cond                   Condition of the process (survival/survival2).
+//  * \param[in]    time_points            Time points at which we compute the density.
 //  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
-//  * \param[in]    timeTree               Tree for ancestral populations size inference.
+//  * \param[in]    timeTree               Tree.
 //  *
 //  * \return    The matrix of Mt values through time.
 // */
@@ -433,7 +429,6 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
         if(type == "rate shift"){
         indx_rate--;
         //change rates appropriately, rate changes provided in timeline are in an ascending order
-        //size_t where = LocateTimeSliceIndex(th,timeline) - 1;
         birth_current = birth[indx_rate];
         death_current = death[indx_rate];
         ps_current = ps[indx_rate];
@@ -542,18 +537,18 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
 //  * size at that time, as time increases towards the past, with piecewise constant rates : breadth-first backward traversal algorithm.
 //  *
 //  * \param[in]    start_age              Start age of the process.
-//  * \param[in]    timeline               Rate shifts times.
-//  * \param[in]    lambda                 Speciation rate.
-//  * \param[in]    mu                     Extinction rate.
-//  * \param[in]    psi                    Extinction sampling rate.
-//  * \param[in]    omega                  Occurrence sampling rate.
+//  * \param[in]    timeline               Rate interval change times of the piecewise constant process.
+//  * \param[in]    lambda                 Speciation/birth rate(s).
+//  * \param[in]    mu                     Extinction/death rate(s).
+//  * \param[in]    psi                    Serial sampling rate(s).
+//  * \param[in]    omega                  Occurrence sampling rate(s).
 //  * \param[in]    rho                    Sampling probability at present time.
-//  * \param[in]    removalPr              Removal probability after sampling.
-//  * \param[in]    maxHiddenLin           Algorithm accuracy (maximal number of hidden lineages).
-//  * \param[in]    cond                   Condition of the process (none/survival/survival2).
-//  * \param[in]    time_points            Times for which we want to compute the density.
+//  * \param[in]    removalPr              Probabilit(y|ies) of death upon sampling (treatment).
+//  * \param[in]    maxHiddenLin           Maximum number of hidden lineages (algorithm accuracy).
+//  * \param[in]    cond                   Condition of the process (survival/survival2).
+//  * \param[in]    time_points            Time points at which we compute the density.
 //  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
-//  * \param[in]    timeTree               Tree for ancestral populations size inference.
+//  * \param[in]    timeTree               Tree.
 //  *
 //  * \return    The matrix of Lt values through time.
 //  */
@@ -631,7 +626,6 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
     for ( int i = 0; i < (N + 1); i++){
         Lt[i] *= pow( 1.0-rh, i );
     }
-    // std::cout << "Event time : " << events[0].time << " - Event type : " << events[0].type << std::endl;
 
     // Recording the log terms introduced by events
     double events_factor_log = 0;
@@ -781,18 +775,18 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
  * This function is borrowed from Ankit Gupta,
  * see his paper: "The probability distribution of the reconstructed phylogenetic tree with occurrence data".
  * \param[in]    start_age              Start age of the process.
- * \param[in]    timeline               Rate shifts times.
- * \param[in]    lambda                 Speciation rate.
- * \param[in]    mu                     Extinction rate.
- * \param[in]    psi                    Extinction sampling rate.
- * \param[in]    omega                  Occurrence sampling rate.
+ * \param[in]    timeline               Rate interval change times of the piecewise constant process.
+ * \param[in]    lambda                 Speciation/birth rate(s).
+ * \param[in]    mu                     Extinction/death rate(s).
+ * \param[in]    psi                    Serial sampling rate(s).
+ * \param[in]    omega                  Occurrence sampling rate(s).
  * \param[in]    rho                    Sampling probability at present time.
- * \param[in]    removalPr              Removal probability after sampling.
- * \param[in]    maxHiddenLin           Algorithm accuracy (maximal number of hidden lineages).
- * \param[in]    cond                   Condition of the process (none/survival/survival2).
- * \param[in]    time_points            Times for which we want to compute the density.
+ * \param[in]    removalPr              Probabilit(y|ies) of death upon sampling (treatment).
+ * \param[in]    maxHiddenLin           Maximum number of hidden lineages (algorithm accuracy).
+ * \param[in]    cond                   Condition of the process (survival/survival2).
+ * \param[in]    time_points            Time points at which we compute the density.
  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
- * \param[in]    timeTree               Tree for ancestral populations size inference.
+ * \param[in]    timeTree               Tree.
  *
  * \return    The matrix of Lt values through time.
  */
