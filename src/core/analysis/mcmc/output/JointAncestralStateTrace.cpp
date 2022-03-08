@@ -85,7 +85,7 @@ void JointAncestralStateTrace::collectJointAncestralStateSamples(int site, Tree 
  * Helper function for ancestralStateTree() and cladoAncestralStateTree() that traverses the tree from root to tips collecting ancestral state samples.
  *
  */
-void JointAncestralStateTrace::recursivelyCollectAncestralStateSamples(size_t node_index, std::string map_parent_state, bool root, bool conditional, int site, Tree &final_summary_tree, const std::vector<TopologyNode*> &summary_nodes, std::vector<std::vector<double> > &pp_end, std::vector<std::vector<double> > &pp_start, std::vector<double> &pp_clade, std::vector<std::vector<std::string> > &end_states, std::vector<std::vector<std::string> > &start_states, bool clado, ProgressBar &progress, size_t &num_finished_nodes, bool verbose)
+void JointAncestralStateTrace::recursivelyCollectAncestralStateSamples(size_t node_index, std::string map_parent_state, bool root, bool conditional, int site, Tree &final_summary_tree, const std::vector<TopologyNode*> &summary_nodes, const std::vector< std::vector<size_t> >& sampled_tree_clade_indices, std::vector<std::vector<double> > &pp_end, std::vector<std::vector<double> > &pp_start, std::vector<double> &pp_clade, std::vector<std::vector<std::string> > &end_states, std::vector<std::vector<std::string> > &start_states, bool clado, ProgressBar &progress, size_t &num_finished_nodes, bool verbose)
 {
     
     size_t parent_node_index = 0;
@@ -131,7 +131,7 @@ void JointAncestralStateTrace::recursivelyCollectAncestralStateSamples(size_t no
         const Tree &sample_tree = usingTreeTrace() ? tree_trace.objectAt( j ) : final_summary_tree;
         const TopologyNode& sample_root = sample_tree.getRoot();
         
-         bool parent_sample_clade_found = true;
+        bool parent_sample_clade_found = true;
         
         if ( usingTreeTrace() == true )
         {
@@ -140,17 +140,17 @@ void JointAncestralStateTrace::recursivelyCollectAncestralStateSamples(size_t no
             //            parent_sample_clade_index = sample_root.getCladeIndex( summary_nodes[parent_node_index] );
             try
             {
-                sample_clade_index = sample_root.getCladeIndex( summary_nodes[node_index] );
+                sample_clade_index = sampled_tree_clade_indices[j-burnin][node_index];
             }
-            catch(RbException&)
+            catch (RbException&)
             {
                 continue;
             }
             try
             {
-                parent_sample_clade_index = sample_root.getCladeIndex( summary_nodes[parent_node_index] );
+                parent_sample_clade_index = sampled_tree_clade_indices[j-burnin][parent_node_index];
             }
-            catch(RbException&)
+            catch (RbException&)
             {
                 parent_sample_clade_found = false;
             }
@@ -179,10 +179,9 @@ void JointAncestralStateTrace::recursivelyCollectAncestralStateSamples(size_t no
         
         if ( !summary_nodes[node_index]->isTip() && clado == true )
         {
-            const TopologyNode& sample_node = sample_tree.getNode( sample_clade_index );
             try
             {
-                sample_clade_index_child_1 = sample_node.getCladeIndex( &summary_nodes[node_index]->getChild(0) );
+                sample_clade_index_child_1 = sampled_tree_clade_indices[j-burnin][ summary_nodes[node_index]->getChild(0).getIndex() ];
             }
             catch(RbException&)
             {
@@ -190,7 +189,7 @@ void JointAncestralStateTrace::recursivelyCollectAncestralStateSamples(size_t no
             }
             try
             {
-                sample_clade_index_child_2 = sample_node.getCladeIndex( &summary_nodes[node_index]->getChild(1) );
+                sample_clade_index_child_2 = sampled_tree_clade_indices[j-burnin][ summary_nodes[node_index]->getChild(1).getIndex() ];
             }
             catch(RbException&)
             {
@@ -451,7 +450,7 @@ void JointAncestralStateTrace::recursivelyCollectAncestralStateSamples(size_t no
     std::vector<int> children_indices = summary_nodes[node_index]->getChildrenIndices();
     for (size_t i = 0; i < children_indices.size(); i++)
     {
-        recursivelyCollectAncestralStateSamples(children_indices[i], map_state, false, conditional, site, final_summary_tree, summary_nodes, pp_end, pp_start, pp_clade, end_states, start_states, clado, progress, num_finished_nodes, verbose);
+        recursivelyCollectAncestralStateSamples(children_indices[i], map_state, false, conditional, site, final_summary_tree, summary_nodes, sampled_tree_clade_indices, pp_end, pp_start, pp_clade, end_states, start_states, clado, progress, num_finished_nodes, verbose);
     }
     
 }
@@ -502,6 +501,38 @@ Tree* JointAncestralStateTrace::ancestralStateTree(const Tree &input_summary_tre
         progress.start();
     }
     
+    /*************************************************/
+    /*  prepare the trees for fast access of clades  */
+    /*************************************************/
+    std::vector<RbBitSet> reference_taxa_bitset = std::vector<RbBitSet>(summary_nodes.size(), RbBitSet(1));
+    std::map<RbBitSet, TopologyNode*> reference_taxa_bitset_map = final_summary_tree->getBitsetToNodeMap();
+    for (std::map<RbBitSet, TopologyNode*>::const_iterator it=reference_taxa_bitset_map.begin(); it != reference_taxa_bitset_map.end(); ++it )
+    {
+        const RbBitSet& this_bitset = it->first;
+        TopologyNode* this_node = it->second;
+        reference_taxa_bitset[ this_node->getIndex() ] = this_bitset;
+    }
+    std::vector< std::vector<size_t> > sampled_tree_clade_indices = std::vector< std::vector<size_t> >( num_sampled_states-burnin, std::vector<size_t>( summary_nodes.size(), -1 ) );
+    for (size_t j = burnin; j < num_sampled_states; ++j)
+    {
+        // if necessary, get the sampled tree from the tree trace
+        const Tree &sample_tree = usingTreeTrace() ? tree_trace.objectAt( j ) : *final_summary_tree;
+        std::map<RbBitSet, TopologyNode*> this_taxa_bitset_map = sample_tree.getBitsetToNodeMap();
+        
+        std::vector<size_t>& this_sampled_tree_clade_indices = sampled_tree_clade_indices[j-burnin];
+        for (size_t i=0; i<summary_nodes.size(); ++i)
+        {
+            const RbBitSet& this_bitset = reference_taxa_bitset[i];
+            TopologyNode* this_sampled_node = this_taxa_bitset_map[ this_bitset  ];
+            this_sampled_tree_clade_indices[i] = this_sampled_node->getIndex();
+        }
+
+    }
+    /*********************************************/
+    /* Prepared all tree sampled for easy lookup */
+    /*********************************************/
+
+    
     if ( joint == true )
     {
         // collect and sort the joint samples
@@ -511,7 +542,7 @@ Tree* JointAncestralStateTrace::ancestralStateTree(const Tree &input_summary_tre
     {
         // recurse through summary tree and collect ancestral state samples
         size_t node_index = final_summary_tree->getRoot().getIndex();
-        recursivelyCollectAncestralStateSamples(node_index, "", true, conditional, site, *final_summary_tree, summary_nodes, pp_end, pp_start, pp_clade, states, states, false, progress, num_finished_nodes, verbose);
+        recursivelyCollectAncestralStateSamples(node_index, "", true, conditional, site, *final_summary_tree, summary_nodes, sampled_tree_clade_indices, pp_end, pp_start, pp_clade, states, states, false, progress, num_finished_nodes, verbose);
     }
     
     if ( verbose == true )
@@ -683,6 +714,37 @@ Tree* JointAncestralStateTrace::cladoAncestralStateTree(const Tree &input_summar
         progress.start();
     }
     
+    /*************************************************/
+    /*  prepare the trees for fast access of clades  */
+    /*************************************************/
+    std::vector<RbBitSet> reference_taxa_bitset = std::vector<RbBitSet>(summary_nodes.size(), RbBitSet(1));
+    std::map<RbBitSet, TopologyNode*> reference_taxa_bitset_map = final_summary_tree->getBitsetToNodeMap();
+    for (std::map<RbBitSet, TopologyNode*>::const_iterator it=reference_taxa_bitset_map.begin(); it != reference_taxa_bitset_map.end(); ++it )
+    {
+        const RbBitSet& this_bitset = it->first;
+        TopologyNode* this_node = it->second;
+        reference_taxa_bitset[ this_node->getIndex() ] = this_bitset;
+    }
+    std::vector< std::vector<size_t> > sampled_tree_clade_indices = std::vector< std::vector<size_t> >( num_sampled_states-burnin, std::vector<size_t>( summary_nodes.size(), -1 ) );
+    for (size_t j = burnin; j < num_sampled_states; ++j)
+    {
+        // if necessary, get the sampled tree from the tree trace
+        const Tree &sample_tree = usingTreeTrace() ? tree_trace.objectAt( j ) : *final_summary_tree;
+        std::map<RbBitSet, TopologyNode*> this_taxa_bitset_map = sample_tree.getBitsetToNodeMap();
+        
+        std::vector<size_t>& this_sampled_tree_clade_indices = sampled_tree_clade_indices[j-burnin];
+        for (size_t i=0; i<summary_nodes.size(); ++i)
+        {
+            const RbBitSet& this_bitset = reference_taxa_bitset[i];
+            TopologyNode* this_sampled_node = this_taxa_bitset_map[ this_bitset  ];
+            this_sampled_tree_clade_indices[i] = this_sampled_node->getIndex();
+        }
+
+    }
+    /*********************************************/
+    /* Prepared all tree sampled for easy lookup */
+    /*********************************************/
+
     if ( joint == true )
     {
         // collect and sort the joint samples
@@ -692,7 +754,7 @@ Tree* JointAncestralStateTrace::cladoAncestralStateTree(const Tree &input_summar
     {
         // recurse through summary tree and collect ancestral state samples
         size_t node_index = final_summary_tree->getRoot().getIndex();
-        recursivelyCollectAncestralStateSamples(node_index, "", true, conditional, site, *final_summary_tree, summary_nodes, pp_end, pp_start, pp_clade, end_states, start_states, true, progress, num_finished_nodes, verbose);
+        recursivelyCollectAncestralStateSamples(node_index, "", true, conditional, site, *final_summary_tree, summary_nodes, sampled_tree_clade_indices, pp_end, pp_start, pp_clade, end_states, start_states, true, progress, num_finished_nodes, verbose);
     }
     
     if ( verbose == true )
