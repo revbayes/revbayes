@@ -41,12 +41,12 @@ template <class valueType> class TypedDagNode;
 
   public:
       InferAncestralPopSizeFunction(                        const TypedDagNode<double> *sa,
-                                                            const TypedDagNode<double> *l,
-                                                            const TypedDagNode<double> *m,
-                                                            const TypedDagNode<double> *p,
-                                                            const TypedDagNode<double> *o,
-                                                            const TypedDagNode<double> *rho,
-                                                            const TypedDagNode<double> *r,
+                                                            const TypedDagNode<double> *inspeciation,
+                                                            const TypedDagNode<double> *inextinction,
+                                                            const TypedDagNode<double> *inserialsampling,
+                                                            const TypedDagNode<double> *inoccurrence,
+                                                            const TypedDagNode<double> *ineventsampling,
+                                                            const TypedDagNode<double> *intreatment,
                                                             const TypedDagNode<long> *n,
 
                                                             const std::string& cdt,

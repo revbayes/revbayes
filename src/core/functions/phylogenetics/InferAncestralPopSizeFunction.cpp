@@ -25,12 +25,12 @@ using namespace RevBayesCore;
  * The constructor connects the parameters of the birth-death process (DAG structure)
  * We delegate most parameters to the base class and initialize the members.
  * \param[in]    sa                        Start age of the process.
- * \param[in]    l              					 Speciation/birth rate(s).
- * \param[in]    m              					 Extinction/death rate(s).
- * \param[in]    p          							 Serial sampling rate(s).
- * \param[in]    o	              				 Occurrence sampling rate(s).
- * \param[in]    rho						           Sampling probability at present time.
- * \param[in]    r               					 Probabilit(y|ies) of death upon sampling (treatment).
+ * \param[in]    inspeciation              Speciation/birth rate(s).
+ * \param[in]    inextinction              Extinction/death rate(s).
+ * \param[in]    inserialsampling          Serial sampling rate(s).
+ * \param[in]    inoccurrence              Occurrence sampling rate(s).
+ * \param[in]    ineventsampling           Sampling probability at present time.
+ * \param[in]    intreatment               Probabilit(y|ies) of death upon sampling (treatment).
  * \param[in]    n                         Maximum number of hidden lineages (algorithm accuracy).
  * \param[in]    cdt                       Condition of the process (survival/survival2).
  * \param[in]    O                       	 Vector of occurrence ages.
@@ -41,12 +41,12 @@ using namespace RevBayesCore;
  */
 
 InferAncestralPopSizeFunction::InferAncestralPopSizeFunction( 	const TypedDagNode<double> *sa,
-                                                  							const TypedDagNode<double> *l,
-	                                                          		const TypedDagNode<double> *m,
-	                                                          		const TypedDagNode<double> *p,
-	                                                          		const TypedDagNode<double> *o,
-	                                                          		const TypedDagNode<double> *rho,
-	                                                          		const TypedDagNode<double> *r,
+                                                  							const TypedDagNode<double> *inspeciation,
+	                                                          		const TypedDagNode<double> *inextinction,
+	                                                          		const TypedDagNode<double> *inserialsampling,
+	                                                          		const TypedDagNode<double> *inoccurrence,
+	                                                          		const TypedDagNode<double> *ineventsampling,
+	                                                          		const TypedDagNode<double> *intreatment,
 		                                                          	const TypedDagNode<long> *n,
 
 	                                                          		const std::string& cdt,
@@ -57,12 +57,12 @@ InferAncestralPopSizeFunction::InferAncestralPopSizeFunction( 	const TypedDagNod
 
 	                                                          	TypedDagNode<Tree> *tr) : TypedFunction<MatrixReal>( new MatrixReal(tau.size(), (n->getValue() + 1), 0.0) ),
     start_age( sa ),
-    lambda( l ),
-    mu( m ),
-    psi( p ),
-    omega( o ),
-    rho( rho ),
-    removalPr( r ),
+    lambda( inspeciation ),
+    mu( inextinction ),
+    psi( inserialsampling ),
+    omega( inoccurrence ),
+    rho( ineventsampling ),
+    removalPr( intreatment ),
     maxHiddenLin( n ),
     cond (cdt),
     occurrences( O ),

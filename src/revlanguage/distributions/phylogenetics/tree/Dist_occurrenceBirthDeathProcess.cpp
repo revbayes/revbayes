@@ -98,20 +98,20 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
     RevBayesCore::TypedDagNode< long >* n       = static_cast<const Natural &>( maxHiddenLin->getRevObject() ).getDagNode();
 
     // birth rate
-    RevBayesCore::DagNode* b_s = lambda->getRevObject().getDagNode();
+    RevBayesCore::DagNode* l = lambda->getRevObject().getDagNode();
     // death rate
-    RevBayesCore::DagNode* d_s = mu->getRevObject().getDagNode();
+    RevBayesCore::DagNode* m = mu->getRevObject().getDagNode();
     // serial sampling rate
-    RevBayesCore::DagNode* s_s = psi->getRevObject().getDagNode();
+    RevBayesCore::DagNode* p = psi->getRevObject().getDagNode();
     // treatment probability
-    RevBayesCore::DagNode* t   = r->getRevObject().getDagNode();
+    RevBayesCore::DagNode* rm   = r->getRevObject().getDagNode();
     // occurrence rate
-    RevBayesCore::DagNode* o_s  = omega->getRevObject().getDagNode();
+    RevBayesCore::DagNode* o  = omega->getRevObject().getDagNode();
     // event sampling
-    RevBayesCore::DagNode* s_e = NULL;
+    RevBayesCore::DagNode* rh = NULL;
     if ( rho->getRevObject() != RevNullObject::getInstance() )
     {
-        s_e = rho->getRevObject().getDagNode();
+        rh = rho->getRevObject().getDagNode();
     }
     // rate change times
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ht = NULL;
@@ -133,7 +133,7 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
 
     RevBayesCore::AbstractBirthDeathProcess* d;
 
-        d = new RevBayesCore::OccurrenceBirthDeathProcess(sa, b_s, d_s, s_s, t, o_s, s_e, ht, cond, tree, uo, init, n, occAges, Mt, vb);
+    d = new RevBayesCore::OccurrenceBirthDeathProcess(sa, l, m, p, rm, o, rh, ht, cond, tree, uo, init, n, occAges, Mt, vb);
 
 
     return d;
