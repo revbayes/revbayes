@@ -111,6 +111,52 @@ meson build-gtk -Dstudio=true -Dprefix=$HOME/Applications/revbayes-gui
 ninja -C build-gtk install
 ```
 
+## Cross-compiling (Linux -> Windows)
+
+1. Create a fake windows root directory and download windows libraries from MINGW64.
+
+   ```
+   cd projects/meson/
+   ./make_winroot.sh -ccache true
+   ```
+
+   This command should also generate a "cross-file" that contains info for cross-compiling to windows.
+
+   If you want to compile the GUI version for windows, add `-gtk true` to the command to `make_winroot.sh`.
+
+2. Compile Revbayes
+
+   ```
+   cd projects/meson
+   ./generate.sh
+   meson build ../../ --prefix=${HOME}/winrb  --cross-file=win64-cross.txt
+   ninja -C build install
+   ```
+
+   The binary will end up in `~/winrb/bin`.
+
+   If you want to compile the GUI version for windows, add `-Dstudio=true` to the meson command line.
+
+3. Copy DLLs that the binary needs to the same directory
+
+   ```
+   cp /usr/lib/gcc/x86_64-w64-mingw32/*-posix/libgcc_s_seh-1.dll ~/winrb/bin
+   cp /usr/lib/gcc/x86_64-w64-mingw32/*-posix/libstdc++-6.dll    ~/winrb/bin
+   cp /usr/lib/gcc/x86_64-w64-mingw32/*-posix/libssp-0.dll       ~/winrb/bin
+   cp ~/win_root/mingw64/bin/*.dll                               ~/winrb/bin
+   ```
+
+   This may be a bit fragile.  The paths for the first two DLLs are for Debian/Ubuntu, but could
+   be somewhere else on other systems.
+
+   Note that we need the `*-win32/` versions of `libgcc_s_seh-1.dll` and `libstdc++-6.dll` and not the
+   `*-posix/` versions because we are using the mingw `libwinpthread-1.dll`.
+
+   If you run `rb.exe` and it cannot find a DLL, it will tell you the first one that it cannot find.
+
+Note that this same procedure is shown in the `release.yml` workflow.
+
+
 ## Troubleshooting:
 
 * `rb: command not found`
