@@ -32,7 +32,7 @@ using namespace RevBayesCore;
 /**
  * Constructor.
  * We delegate most parameters to the base class and initialize the members.
- * \param[in]    ra                        Age of the root (=time of the process).
+ * \param[in]    sa                        Start age of the process.
  * \param[in]    inspeciation              Speciation/birth rate(s).
  * \param[in]    inextinction              Extinction/death rate(s).
  * \param[in]    inserialsampling          Serial sampling rate(s).
@@ -48,7 +48,7 @@ using namespace RevBayesCore;
  * \param[in]    O                         Vector of occurrence ages.
 
  */
-OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                                  const TypedDagNode<double> *ra,
+OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                                  const TypedDagNode<double> *sa,
                                                                                            const DagNode *inspeciation,
                                                                                            const DagNode *inextinction,
                                                                                            const DagNode *inserialsampling,
@@ -63,10 +63,10 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                       
                                                                                            const TypedDagNode<long> *n,
                                                                                            const TypedDagNode< RevBayesCore::RbVector<double> > *O,
                                                                                            bool mt,
-                                                                                           bool vb) : AbstractBirthDeathProcess( ra, cdt, tn, uo, t ),
+                                                                                           bool vb) : AbstractBirthDeathProcess( sa, cdt, tn, uo, t ),
     interval_times(ht),
     offset( 0.0 ),
-    start_age(ra),
+    start_age(sa),
     maxHiddenLin(n),
     occurrence_ages(O),
     useMt ( mt ),

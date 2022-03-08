@@ -23,7 +23,7 @@ namespace RevBayesCore {
      * We assume that the rate vectors have one more element than the rate-change vectors.
      * Thus, one rate-change means always two interval, two rate-changes three interval, and so on.
      * This implementation does not deal with rates that change at different times. If provided as vectors,
-     * all vectors must be of equal length, to match the provided timeline.  
+     * all vectors must be of equal length, to match the provided timeline.
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Antoine Zwaans & Jérémy Andréoletti)
@@ -33,7 +33,7 @@ namespace RevBayesCore {
     class OccurrenceBirthDeathProcess : public AbstractBirthDeathProcess {
 
     public:
-        OccurrenceBirthDeathProcess (                           const TypedDagNode<double> *ra,
+        OccurrenceBirthDeathProcess (                           const TypedDagNode<double> *sa,
                                                                 const DagNode *inspeciation,
                                                                 const DagNode *inextinction,
                                                                 const DagNode *inserialsampling,
