@@ -66,13 +66,14 @@ RevPtr<RevVariable> Func_characterMapTree::execute( void )
         ancestralstate_traces.push_back( ast_vector[i].getValue() );
     }
     
-    // get the ancestral state tree trace
-    const TraceTree& tt = static_cast<const TraceTree&>( args[arg_index++].getVariable()->getRevObject() );
-    
     // make a new tree summary object
     RevBayesCore::TraceTree tree_trace;
-    if (args[2].getVariable()->getRevObject() != RevNullObject::getInstance())
+    const Argument& tt_arg = args[arg_index++];
+    if (tt_arg.getVariable()->getRevObject() != RevNullObject::getInstance())
     {
+        
+        // get the ancestral state tree trace
+        const TraceTree& tt = static_cast<const TraceTree&>( tt_arg.getVariable()->getRevObject() );
         tree_trace = tt.getValue();
     }
     
