@@ -23,7 +23,8 @@ namespace RevBayesCore {
      * We assume that the rate vectors have one more element than the rate-change vectors.
      * Thus, one rate-change means always two interval, two rate-changes three interval, and so on.
      * This implementation does not deal with rates that change at different times. If provided as vectors,
-     * all vectors must be of equal length, to match the provided timeline.
+     * all vectors must be of equal length, to match the provided timeline. The handling of heterogeneous/homogeneous rates
+     * is adapted from the episodic birth-death-sampling-treatment process. 
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Antoine Zwaans & Jérémy Andréoletti)
