@@ -1,8 +1,10 @@
 #!/bin/sh
 
-SRC=../../src
+PROJDIR=$(dirname $0)
 
-cd $SRC
+SRC="$PROJDIR"/../../src
+
+cd "$SRC"
 
 echo "Defining variable 'src_inc' in 'src/meson.build'"
 
