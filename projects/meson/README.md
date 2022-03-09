@@ -48,7 +48,6 @@ pip3 install meson ninja
 2. Configure and compile Revbayes:
    
     ``` sh
-    cd revbayes
     projects/meson/generate.sh
     meson build --prefix=$HOME/Applications/revbayes
     ninja -C build install
