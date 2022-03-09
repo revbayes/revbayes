@@ -45,7 +45,7 @@ pip3 install meson ninja
     git submodule update               # Download tests required for the build
     ```
 
-1. Configure and compile Revbayes:
+2. Configure and compile Revbayes:
    
     ``` sh
     cd revbayes
@@ -56,7 +56,7 @@ pip3 install meson ninja
 
     This creates a `build` directory where the build will take place, and says that the executables will eventually be installed in `$HOME/Applications/revbayes`.
 
-1. For the MPI version, add `-Dmpi=true` to the `meson` command.
+3. For the MPI version, add `-Dmpi=true` to the `meson` command.
 
     ``` sh
     meson build -Dmpi=true --prefix=$HOME/Applications/revbayes
