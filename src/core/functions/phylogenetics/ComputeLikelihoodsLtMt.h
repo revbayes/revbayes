@@ -16,7 +16,7 @@
  * $Id$
  */
 
- #ifndef ComputeLikelihoodsLtMt_H
+#ifndef ComputeLikelihoodsLtMt_H
 #define ComputeLikelihoodsLtMt_H
 
 #include "TypedDagNode.h"
@@ -44,7 +44,7 @@ namespace RevBayesCore {
                                                               const std::vector<double> &occurrence_ages,
                                                               bool verbose,
                                                               const Tree &timeTree,
-                                                              const std::vector<double> &timeline);           //!< Construct the vector containig all branching and sampling times + time points for which we want
+                                                              const std::vector<double> &timeline);           //!< Construct the vector containig all branching and sampling times + time points at which we want to compute the density.
 
 
     MatrixReal          ComputeLnProbabilityDensitiesOBDP (   const double &start_age,
@@ -97,7 +97,7 @@ namespace RevBayesCore {
                                                               bool returnLogLikelihood,
                                                               bool verbose,
                                                               const std::vector<double> &occurrence_ages,
-                                                              const Tree &timeTree);                          //!< Compute the joint probability density of the observations made up to any time t and the population size at that time, as time decreases towards present, with piecewise constant rates : breadth-first forward traversal algorithm.
+                                                              const Tree &timeTree);                          //!< Compute the joint probability density of the observations made up to any time t and the population size at that time, as time decreases towards present (breadth-first forward traversal algorithm), with piecewise constant rates.
 
 
     MatrixReal          BackwardsTraversalLt              (   const double &start_age,
@@ -114,7 +114,7 @@ namespace RevBayesCore {
                                                               bool useOrigin,
                                                               bool verbose,
                                                               const std::vector<double> &occurrence_ages,
-                                                              const Tree &timeTree);                          //!< Compute the joint log probability density of observations made down any time t, conditioned on the population size at that time, as time increases towards the past, with piecewise constant rates : breadth-first backward traversal algorithm.
+                                                              const Tree &timeTree);                          //!< Compute the joint log probability density of observations made down any time t, conditioned on the population size at that time, as time increases towards the past (breadth-first backward traversal algorithm), with piecewise constant rates.
 
 
     double              likelihoodWithAllSamplesRemoved   (   const double &start_age,
@@ -130,34 +130,28 @@ namespace RevBayesCore {
                                                               bool useOrigin,
                                                               bool verbose,
                                                               const std::vector<double> &occurrence_ages,
-                                                              const Tree &timeTree);                          //!< Compute the joint log probability density of observations made down any time t, conditioned on the population size at that time, as time increases towards the past, with piecewise constant rates : breadth-first backwards traversal algorithm. This function is borrowed from Ankit Gupta, see his paper: "The probability distribution of the reconstructed phylogenetic tree with occurrence data".
+                                                              const Tree &timeTree);                          //!< Compute the joint log probability density of observations made down any time t, conditioned on the population size at that time, as time increases towards the past (breadth-first backward traversal algorithm), with piecewise constant rates. This function is borrowed from Ankit Gupta, see his paper: "The probability distribution of the reconstructed phylogenetic tree with occurrence data".
 
-    double GetQ(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega );
+    double     GetQ( const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega );
 
-    double GetDerivativeQ(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned n );
+    double     GetDerivativeQ( const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned n );
 
-    unsigned nChoosek( unsigned n, unsigned k );
+    unsigned   nChoosek( unsigned n, unsigned k );
 
-    unsigned factorial( unsigned n );
+    unsigned   factorial( unsigned n );
 
-    double GetMultiDerivativeRecQ(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned n, const unsigned NumObservedLineages );
+    double     GetMultiDerivativeRecQ( const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned n, const unsigned NumObservedLineages );
 
-    double GetP0(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega);
+    double     GetP0( const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega );
 
-    double GetDerP0(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned n);
+    double     GetDerP0( const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned n );
 
-    void TransformDerivativeContrVec( const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned NumObservedLineages, std::vector<double>& v );
+    void       TransformDerivativeContrVec( const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned NumObservedLineages, std::vector<double>& v );
 
-    MatrixReal IncompleteBellPolynomial(unsigned N, unsigned K, const std::vector<double> Vector);
+    MatrixReal IncompleteBellPolynomial( unsigned N, unsigned K, const std::vector<double> Vector );
 
-    std::vector<double> GetFunctionUandP( const double &start_age,                          //!< The start age of the process
-                                          const std::vector<double> &timeline,              //!< The times of rate shifts.
-                                          const std::vector<double> &lambda,                //!< The speciation rates.
-                                          const std::vector<double> &mu,                    //!< The extinction rates.
-                                          const std::vector<double> &psi,                   //!< The fossil sampling rates.
-                                          const std::vector<double> &omega,                 //!< The occurrence sampling rates.
-                                          const TypedDagNode<double> *rho,                  //!< The sampling probability at present.
-                                          const std::vector<double> &removalPr);            //!< The removal probabilities after sampling.
+    std::vector<double> GetFunctionUandP( const double &start_age, const std::vector<double> &timeline, const std::vector<double> &lambda, const std::vector<double> &mu,
+                                          const std::vector<double> &psi, const std::vector<double> &omega, const TypedDagNode<double> *rho, const std::vector<double> &removalPr );
 
 
     };

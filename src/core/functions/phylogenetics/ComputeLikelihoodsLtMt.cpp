@@ -19,11 +19,10 @@ namespace RevBayesCore {
 using namespace RevBayesCore;
 
 /**
- * Construct the vector containig all branching and sampling times + time points for which we want
- * to compute the density.
+ * Construct the vector containig all branching and sampling times + time points at which we want to compute the density.
  *
  * \param[in]    start_age              Start age of the process.
- * \param[in]    time_points            Times for which we want to compute the density.
+ * \param[in]    time_points            Times at which we want to compute the density.
  * \param[in]    verbose                If true displays warnings and information messages.
  * \param[in]    occurrence_ages        Vector of occurrence ages.
  * \param[in]    timeTree               Tree for ancestral populations size inference.
@@ -128,7 +127,6 @@ std::vector<Event> RevBayesCore::PoolEvents(             const double &start_age
 
 
 
-
 /**
  * Compute the joint log-probability density of the observations made up to any time t (direction depending on the algorithm).
  *
@@ -143,7 +141,7 @@ std::vector<Event> RevBayesCore::PoolEvents(             const double &start_age
  * \param[in]    cond                   Condition of the process (survival/survival2).
  * \param[in]    time_points            Time points at which we compute the density.
  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
- * \param[in]    useMt                  If true computes densities with the forwards traversal algorithm (Mt) otherwise uses backward one (Lt).
+ * \param[in]    useMt                  If true computes densities with the forward traversal algorithm (Mt) otherwise uses backward one (Lt).
  * \param[in]    verbose                If true displays warnings and information messages.
  * \param[in]    occurrence_ages        Vector of occurrence ages.
  * \param[in]    timeTree               Tree.
@@ -167,19 +165,25 @@ MatrixReal RevBayesCore::ComputeLnProbabilityDensitiesOBDP(  const double &start
                                                              const std::vector<double> &occurrence_ages,
                                                              const Tree &timeTree)
 {
-    // Use the forwards traversal algorithm (Mt)
+    // Use the forward traversal algorithm (Mt)
     if (useMt){
         bool returnLogLikelihood = false;    // Input flag
 
-        MatrixReal B_Mt_log = RevBayesCore::ForwardsTraversalMt(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, returnLogLikelihood, verbose, occurrence_ages, timeTree);
+        MatrixReal B_Mt_log = RevBayesCore::ForwardsTraversalMt(start_age, timeline, lambda, mu, psi, omega, rho, 
+                                                                removalPr, maxHiddenLin, cond, time_points, useOrigin, 
+                                                                returnLogLikelihood, verbose, occurrence_ages, timeTree);
 
         return (B_Mt_log);
     }
-    // Use the backwards traversal algorithm (Lt)
-    MatrixReal B_Lt_log = RevBayesCore::BackwardsTraversalLt(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points, useOrigin, verbose, occurrence_ages, timeTree);
+    // Use the backward traversal algorithm (Lt)
+    MatrixReal B_Lt_log = RevBayesCore::BackwardsTraversalLt(start_age, timeline, lambda, mu, psi, omega, rho, 
+                                                             removalPr, maxHiddenLin, cond, time_points, useOrigin, 
+                                                             verbose, occurrence_ages, timeTree);
     return (B_Lt_log);
 
 };
+
+
 
 
 
@@ -197,7 +201,7 @@ MatrixReal RevBayesCore::ComputeLnProbabilityDensitiesOBDP(  const double &start
  * \param[in]    maxHiddenLin           Maximum number of hidden lineages (algorithm accuracy).
  * \param[in]    cond                   Condition of the process (survival/survival2).
  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
- * \param[in]    useMt                  If true computes densities with the forwards traversal algorithm (Mt) otherwise uses backward one (Lt).
+ * \param[in]    useMt                  If true computes densities with the forward traversal algorithm (Mt) otherwise uses backward one (Lt).
  * \param[in]    verbose                If true displays warnings and information messages.
  * \param[in]    occurrence_ages        Vector of occurrence ages.
  * \param[in]    timeTree               Tree.
@@ -222,54 +226,58 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const double &start_age,
 {
     double logLikelihood = 0.0;
 
+    // For optimal performance, with less than 100 occurrences, we use A. Gupta's solution for the likelihood calculation
     if((removalPr[0] == 1.0) & (occurrence_ages.size() < 100)){
-    const std::vector<double> time_points_Mt( 1, 0.0 );      // Record the probability density at present to compute the likelihood
+        const std::vector<double> time_points_Mt( 1, 0.0 );      // Record the probability density at present to compute the likelihood
 
-    if (verbose){std::cout << "\nThere are " << occurrence_ages.size() << " occurrences in this dataset. For optimal performance, we use A.Gupta's solution for the likelihood calculation" << "\n" << std::endl;}
+        if (verbose){
+            std::cout << "\nThere are " << occurrence_ages.size() << " occurrences in this dataset." << 
+                " For optimal performance, we use A.Gupta's solution for the likelihood calculation" << "\n" << std::endl;
+        }
 
-    double logLikelihood = RevBayesCore::likelihoodWithAllSamplesRemoved(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, cond, time_points_Mt, useOrigin, verbose, occurrence_ages, timeTree);
-    if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood (Ankit) " << logLikelihood << "\n" << std::endl;}
-    }
+        double logLikelihood = RevBayesCore::likelihoodWithAllSamplesRemoved(start_age, timeline, lambda, mu, psi, omega, 
+                                                                           rho, removalPr, cond, time_points_Mt, useOrigin, 
+                                                                           verbose, occurrence_ages, timeTree);
+
+        if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood (A. Gupta) " << logLikelihood << "\n" << std::endl;}}
     else {
+        // Use the forward traversal algorithm (Mt)
+        if (useMt){
 
-      // Use the forwards traversal algorithm (Mt)
+            if (verbose){std::cout << "\nThere are " << occurrence_ages.size() << " occurrences in this dataset." << 
+                " For optimal performance, we use the forward traversal algorithm (Mt)" << "\n" << std::endl;}
 
-      if (useMt){
+            const std::vector<double> time_points_Mt( 1, 0.0 );      // Record the probability density at present to compute the likelihood
+            bool returnLogLikelihood = true;                         // Input flag
 
-          if (verbose){std::cout << "\nThere are " << occurrence_ages.size() << " occurrences in this dataset. For optimal performance, we use the forwards traversal algorithm (Mt)" << "\n" << std::endl;}
+            MatrixReal LogLikelihood = RevBayesCore::ForwardsTraversalMt(start_age, timeline, lambda, mu, psi, omega, rho, 
+                                                                       removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, 
+                                                                       returnLogLikelihood, verbose, occurrence_ages, timeTree);
 
-          const std::vector<double> time_points_Mt( 1, 0.0 );      // Record the probability density at present to compute the likelihood
-          bool returnLogLikelihood = true;                         // Input flag
+            logLikelihood = LogLikelihood[0][0];
+            if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;}
+        }
+        // Use the backward traversal algorithm (Lt)
+        else{
 
-          MatrixReal LogLikelihood = RevBayesCore::ForwardsTraversalMt(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, returnLogLikelihood, verbose, occurrence_ages, timeTree);
+            if (verbose){std::cout << "\nThere are " << occurrence_ages.size() << " occurrences in this dataset." << 
+                " For optimal performance, we use the forward traversal algorithm (Lt)" << "\n" << std::endl;}
 
-          logLikelihood = LogLikelihood[0][0];
-          if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;}
-      }
-    // Use the backwards traversal algorithm (Lt)
-      else{
+            const std::vector<double> time_points_Lt(1, start_age);      // Record the probability density at the start age to compute the likelihood
 
-          if (verbose){std::cout << "\nThere are " << occurrence_ages.size() << " occurrences in this dataset. For optimal performance, we use the forwards traversal algorithm (Lt)" << "\n" << std::endl;}
+            MatrixReal B_Lt_log = RevBayesCore::BackwardsTraversalLt(start_age, timeline, lambda, mu, psi, omega, rho, 
+                                                                   removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, 
+                                                                   verbose, occurrence_ages, timeTree);
 
-          const std::vector<double> time_points_Lt(1, start_age);      // Record the probability density at the start age to compute the likelihood
-
-          MatrixReal B_Lt_log = RevBayesCore::BackwardsTraversalLt(start_age, timeline, lambda, mu, psi, omega, rho, removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, verbose, occurrence_ages, timeTree);
-
-          // The likelihood corresponds to the first element of the B_Lt matrix
-          logLikelihood = B_Lt_log[0][0];
-          if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood Lt : " << logLikelihood << "\n" << std::endl;}
-      }
-  }
+            // The likelihood corresponds to the first element of the B_Lt matrix
+            logLikelihood = B_Lt_log[0][0];
+            if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood Lt : " << logLikelihood << "\n" << std::endl;}
+        }
+    }
     // We then deal with the conditioning
-    if(cond == "survival"){
-        std::vector<double> res = RevBayesCore::GetFunctionUandP(start_age, timeline, lambda, mu, psi, omega, rho, removalPr);
-        logLikelihood -= log( 1 - res[0] );
-    }
-    else if(cond == "survival2"){
-        std::vector<double> res = RevBayesCore::GetFunctionUandP(start_age, timeline, lambda, mu, psi, omega, rho, removalPr);
-        logLikelihood -= log( 1 - res[0] - res[1] );
-        // if (verbose){std::cout << " at the time of origin, we have u = " << res[0] << " and p = " << res[1] << std::endl;}
-    }
+    std::vector<double> res = RevBayesCore::GetFunctionUandP(start_age, timeline, lambda, mu, psi, omega, rho, removalPr);
+    if(     cond == "survival" ){logLikelihood -= log( 1 - res[0] );}
+    else if(cond == "survival2"){logLikelihood -= log( 1 - res[0] - res[1] );}
 
     return (logLikelihood);
 };
@@ -277,26 +285,27 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const double &start_age,
 
 
 
-// /**
-//  * Compute the joint probability density of the observations made up to any time t and the population
-//  * size at that time, as time decreases towards present, with piecewise constant rates : breadth-first forward traversal algorithm.
-//  *
-//  * \param[in]    start_age              Start age of the process.
-//  * \param[in]    timeline               Rate interval change times of the piecewise constant process.
-//  * \param[in]    lambda                 Speciation/birth rate(s).
-//  * \param[in]    mu                     Extinction/death rate(s).
-//  * \param[in]    psi                    Serial sampling rate(s).
-//  * \param[in]    omega                  Occurrence sampling rate(s).
-//  * \param[in]    rho                    Sampling probability at present time.
-//  * \param[in]    removalPr              Probabilit(y|ies) of death upon sampling (treatment).
-//  * \param[in]    maxHiddenLin           Maximum number of hidden lineages (algorithm accuracy).
-//  * \param[in]    cond                   Condition of the process (survival/survival2).
-//  * \param[in]    time_points            Time points at which we compute the density.
-//  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
-//  * \param[in]    timeTree               Tree.
-//  *
-//  * \return    The matrix of Mt values through time.
-// */
+
+/**
+ * Compute the joint probability density of the observations made up to any time t and the population size at that time, 
+ * as time decreases towards present (breadth-first forward traversal algorithm), with piecewise constant rates.
+ *
+ * \param[in]    start_age              Start age of the process.
+ * \param[in]    timeline               Rate interval change times of the piecewise constant process.
+ * \param[in]    lambda                 Speciation/birth rate(s).
+ * \param[in]    mu                     Extinction/death rate(s).
+ * \param[in]    psi                    Serial sampling rate(s).
+ * \param[in]    omega                  Occurrence sampling rate(s).
+ * \param[in]    rho                    Sampling probability at present time.
+ * \param[in]    removalPr              Probabilit(y|ies) of death upon sampling (treatment).
+ * \param[in]    maxHiddenLin           Maximum number of hidden lineages (algorithm accuracy).
+ * \param[in]    cond                   Condition of the process (survival/survival2).
+ * \param[in]    time_points            Time points at which we compute the density.
+ * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
+ * \param[in]    timeTree               Tree.
+ *
+ * \return    The matrix of Mt values through time.
+*/
 MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
                                                                   const std::vector<double> &timeline,
                                                                   const std::vector<double> &lambda,
@@ -315,7 +324,7 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
                                                                   const Tree &timeTree  )
 {
 
-    // Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
+    // Construct the vector containig all branching and sampling times + time points at which we want to compute the density.
     std::vector<Event> events = RevBayesCore::PoolEvents(start_age, time_points, occurrence_ages, verbose, timeTree, timeline);
 
     // Order times oldest to youngest
@@ -330,14 +339,13 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
     //get rate vectors
     const std::vector<double> birth = lambda;
     const std::vector<double> death = mu;
-    const std::vector<double> ps = psi;
-    const std::vector<double> om = omega;
-    const std::vector<double> rp = removalPr;
-    const double rh = rho->getValue();
-    const long N = maxHiddenLin->getValue();
-
-    const RbVector<double> tau = time_points;
-    const size_t S = tau.size();
+    const std::vector<double> ps    = psi;
+    const std::vector<double> om    = omega;
+    const std::vector<double> rp    = removalPr;
+    const double rh                 = rho->getValue();
+    const long N                    = maxHiddenLin->getValue();
+    const RbVector<double> tau      = time_points;
+    const size_t S                  = tau.size();
     const std::vector<double> gamma = birth + death + ps + om;
 
     // Initialize an empty matrix and a cursor to write lines in this matrix
@@ -350,17 +358,17 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
     //Initialize rates to their root value and a cursor to update rates
     double birth_current = birth.back();
     double death_current = death.back();
-    double ps_current = ps.back();
-    double om_current = om.back();
-    double rp_current = rp.back();
+    double ps_current    = ps.back();
+    double om_current    = om.back();
+    double rp_current    = rp.back();
     double gamma_current = gamma.back();
-    size_t indx_rate = timeline.size()-1;
+    size_t indx_rate     = timeline.size()-1;
 
     // Recording the correction terms c to avoid divergence towards extreme values (outside of double precision)
     double log_correction = 0;
     double c;
-
     double events_factor_log = 0;
+
     // Estimating the smallest sufficient N value for getting most of the probability density
     size_t N_limit = 0;
     size_t N_limit_tmp;
@@ -369,17 +377,17 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
     RbVector<double> Mt(N+1, 0.0);
     Mt[0] = 1;
     double thPlusOne = events[0].time;
-    // if (verbose){std::cout << k << std::endl;}
 
     if(thPlusOne != start_age) {
-        if (verbose){std::cout << "WARNING : thPlusOne != start_age : " << thPlusOne << " != " << start_age << " - type : " << events[0].type << std::endl;}
+        if (verbose){std::cout << "WARNING : thPlusOne != start_age : " << thPlusOne << " != " << start_age << " - type : " 
+            << events[0].type << std::endl;}
     };
 
 
     // Then we iterate over the next events
     for(int h = 0; h < events.size(); h++){
 
-      // First, deal with the update on time period (th, thPlusOne)
+      // First, deal with the update on time period [th, thPlusOne]
       double th = events[h].time;
       std::string type = events[h].type;
 
@@ -420,9 +428,6 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
             }
 
             RbMath::expMatrixPade(A, A, 4);
-            // if (verbose){std::cout << "\nA : " << A << std::endl;}
-            // if (verbose){std::cout << "\nMt : " << Mt << std::endl;}
-            // if (verbose){std::cout << "\nlog(Mt[0]) : " << log(Mt[0]) << " - log(Mt[1]) : " << log(Mt[1]) << " - log(Mt[2]) : " << log(Mt[2]) << " - log(Mt[3]) : " << log(Mt[3]) << std::endl;}
             Mt = A * Mt;
         }
 
@@ -431,9 +436,9 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
         //change rates appropriately, rate changes provided in timeline are in an ascending order
         birth_current = birth[indx_rate];
         death_current = death[indx_rate];
-        ps_current = ps[indx_rate];
-        om_current = om[indx_rate];
-        rp_current = rp[indx_rate];
+        ps_current    = ps[indx_rate];
+        om_current    = om[indx_rate];
+        rp_current    = rp[indx_rate];
         gamma_current = gamma[indx_rate];
 
         }
@@ -442,7 +447,6 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
             for(int i = 0; i < N+1; i++){
                 B[indxJ][i] = log(Mt[i]) + events_factor_log + log_correction;
             }
-            // if (verbose){std::cout << "Time point scaled log : log(Mt[0]) + events_factor_log : " << log(Mt[0]) + events_factor_log << " / log(Mt[N]) + events_factor_log : " << log(Mt[N]) + events_factor_log << std::endl;}
             indxJ--;
         }
 
@@ -483,7 +487,6 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
         }
         log_correction -= log(c);
 
-        // if (verbose){std::cout << "Event time : " << th << " - Event type : " << type << " -> log(c) : " << log(c) << " -> Mt[0] : " << Mt[0] << " / Mt[1] : " << Mt[1] << " / Mt[N] : " << Mt[N] << std::endl;}
 
         // Check that N is big enough
         if (Mt[N]>0.01){
@@ -496,7 +499,6 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
                 N_limit_tmp--;
             }
             N_limit = std::max(N_limit, N_limit_tmp);
-             // if (verbose){std::cout << "\nThe smallest sufficient N value ( such as Mt[N_limit] < max(Mt)/100 for all t ) is " << N_limit << "\n" << std::endl;}
         }
 
         thPlusOne = th;
@@ -505,16 +507,21 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
     // Give the estimated optimal N value
     size_t margin = 5;                        // Safety margin to avoid edge effects on the computation
     if ((N > N_limit + margin) & verbose){
-      std::cout << "\nTo improve performance, set N (" << N << ") to a lower value -> optimal value : N_limit ( such as Mt[N_limit] < max(Mt)/100 for all t ) + safety_margin = " << N_limit + margin << "\n" << std::endl;
+        std::cout << "\nTo improve performance, set N (" << N << ") to a lower value -> optimal value : N_limit ( such as " << 
+            "Mt[N_limit] < max(Mt)/100 for all t ) + safety_margin = " << N_limit + margin << "\n" << std::endl;
     }
     else if ((N == N_limit + margin) & verbose){
-      std::cout << "\nThe selected N value is at a safe margin from the limit of the high-probabilities area ( such as Mt[N_limit] < max(Mt)/100 for all t ) : N = N_limit + safety_margin = " << N_limit + margin << std::endl;
+        std::cout << "\nThe selected N value is at a safe margin from the limit of the high-probabilities area ( such as " << 
+            "Mt[N_limit] < max(Mt)/100 for all t ) : N = N_limit + safety_margin = " << N_limit + margin << std::endl;
     }
     else if ((N >= N_limit) & (N < N_limit + margin)){
-      std::cout << "\nWARNING : You should increase N -> The N value limiting the high-probabilities area ( such as Mt[N_limit] < max(Mt)/100 for all t ) is coming closer to your N value (" << N << ") -> N_limit + safety_margin = " << N_limit + margin << std::endl;
+        std::cout << "\nWARNING : You should increase N -> The N value limiting the high-probabilities area ( such as " << 
+            "Mt[N_limit] < max(Mt)/100 for all t ) is coming closer to your N value (" << N << ") -> N_limit + safety_margin = " << 
+            N_limit + margin << std::endl;
     }
     else if (N_limit == N+1){
-      std::cout << "\nWARNING : You should increase N -> There is a time t at which Mt[N] contains a non-negligeable probability ( Mt[N] > max(Mt)/100 )\n" << std::endl;
+        std::cout << "\nWARNING : You should increase N -> There is a time t at which Mt[N] contains a non-negligeable " << 
+            "probability ( Mt[N] > max(Mt)/100 )\n" << std::endl;
     }
     if(returnLogLikelihood){
 
@@ -531,27 +538,30 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
     return B;
 }
 
-//
-// /**
-//  * Compute the probability density of observations made down any time t, conditioned on the population
-//  * size at that time, as time increases towards the past, with piecewise constant rates : breadth-first backward traversal algorithm.
-//  *
-//  * \param[in]    start_age              Start age of the process.
-//  * \param[in]    timeline               Rate interval change times of the piecewise constant process.
-//  * \param[in]    lambda                 Speciation/birth rate(s).
-//  * \param[in]    mu                     Extinction/death rate(s).
-//  * \param[in]    psi                    Serial sampling rate(s).
-//  * \param[in]    omega                  Occurrence sampling rate(s).
-//  * \param[in]    rho                    Sampling probability at present time.
-//  * \param[in]    removalPr              Probabilit(y|ies) of death upon sampling (treatment).
-//  * \param[in]    maxHiddenLin           Maximum number of hidden lineages (algorithm accuracy).
-//  * \param[in]    cond                   Condition of the process (survival/survival2).
-//  * \param[in]    time_points            Time points at which we compute the density.
-//  * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
-//  * \param[in]    timeTree               Tree.
-//  *
-//  * \return    The matrix of Lt values through time.
-//  */
+
+
+
+
+/**
+ * Compute the probability density of observations made down any time t, conditioned on the population size at that time, 
+ * as time increases towards the past (breadth-first backward traversal algorithm), with piecewise constant rates.
+ *
+ * \param[in]    start_age              Start age of the process.
+ * \param[in]    timeline               Rate interval change times of the piecewise constant process.
+ * \param[in]    lambda                 Speciation/birth rate(s).
+ * \param[in]    mu                     Extinction/death rate(s).
+ * \param[in]    psi                    Serial sampling rate(s).
+ * \param[in]    omega                  Occurrence sampling rate(s).
+ * \param[in]    rho                    Sampling probability at present time.
+ * \param[in]    removalPr              Probabilit(y|ies) of death upon sampling (treatment).
+ * \param[in]    maxHiddenLin           Maximum number of hidden lineages (algorithm accuracy).
+ * \param[in]    cond                   Condition of the process (survival/survival2).
+ * \param[in]    time_points            Time points at which we compute the density.
+ * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
+ * \param[in]    timeTree               Tree.
+ *
+ * \return    The matrix of Lt values through time.
+ */
 MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
                                                                   const std::vector<double> &timeline,
                                                                   const std::vector<double> &lambda,
@@ -569,7 +579,7 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
                                                                   const Tree &timeTree  )
 {
 
-    // Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
+    // Construct the vector containig all branching and sampling times + time points at which we want to compute the density.
     std::vector<Event> events = RevBayesCore::PoolEvents(start_age, time_points, occurrence_ages, verbose, timeTree, timeline);
 
     // Order times youngest to oldest
@@ -583,14 +593,13 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
     //get rate vectors
     const std::vector<double> birth = lambda;
     const std::vector<double> death = mu;
-    const std::vector<double> ps = psi;
-    const std::vector<double> om = omega;
-    const std::vector<double> rp = removalPr;
-    const double rh = rho->getValue();
-
-    const RbVector<double> tau = time_points;
-    const long N = maxHiddenLin->getValue();
-    const size_t S = tau.size();
+    const std::vector<double> ps    = psi;
+    const std::vector<double> om    = omega;
+    const std::vector<double> rp    = removalPr;
+    const double rh                 = rho->getValue();
+    const RbVector<double> tau      = time_points;
+    const long N                    = maxHiddenLin->getValue();
+    const size_t S                  = tau.size();
 
     const std::vector<double> gamma = birth + death + ps + om;
 
@@ -601,16 +610,14 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
     MatrixReal B(S, (N + 1), RbConstants::Double::neginf);
     size_t indxJ = 0;
 
-
     // Initialize rates to their present value and a cursor for rate updates
     double birth_current = birth[0];
     double death_current = death[0];
-    double ps_current = ps[0];
-    double om_current = om[0];
-    double rp_current = rp[0];
+    double ps_current    = ps[0];
+    double om_current    = om[0];
+    double rp_current    = rp[0];
     double gamma_current = gamma[0];
-    size_t indx_rate=0;
-
+    size_t indx_rate     = 0;
 
     // Recording the correction terms c to avoid divergence towards extreme values (outside of double precision)
     double log_correction = 0;
@@ -633,31 +640,31 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
     // We then iterate over the following events until finding the time of origin
     for(int h = 0; h < events.size(); h++){
 
-      double th = events[h].time;
-      std::string type = events[h].type;
+        double th = events[h].time;
+        std::string type = events[h].type;
 
-      // Events older than the start age
-      if(th > start_age) {
-          if (verbose){std::cout << "WARNING : th > start_age : " << th << " > " << start_age << " -> type : " << type << std::endl;}
+        // Events older than the start age
+        if(th > start_age) {
+            if (verbose){std::cout << "WARNING : th > start_age : " << th << " > " << start_age << " -> type : " << type << std::endl;}
 
-          // Time points older than the start age : accepted
-          if(type == "time point"){
+            // Time points older than the start age : accepted
+            if(type == "time point"){
 
               for(int i = 0; i < N+1; i++){
                   B[indxJ][i] = log(Lt[i]) + events_factor_log + log_correction;
               }
               indxJ++;
-          }
-          // Other events older than the start age : rejected
-          else{
+            }
+            // Other events older than the start age : rejected
+            else{
               MatrixReal B_reject(S, (N + 1), RbConstants::Double::neginf);
               return B_reject;
-          }
+            }
 
-          continue;
-      };
+            continue;
+        };
 
-        // First deal with the update along (thMinusOne, th)
+        // First deal with the update along [thMinusOne, th]
         if( th != thMinusOne ){
 
             MatrixReal A( (N+1), (N+1), 0.0 );
@@ -674,11 +681,9 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
 
         // Second, deal with the update at time th
         if(type == "time point"){
-            // if (verbose){std::cout << "events_factor_log : " << events_factor_log  << " / Lt : " << Lt << std::endl;}
             for(int i = 0; i < N+1; i++){
                 B[indxJ][i] = log(Lt[i]) + events_factor_log + log_correction;
             }
-            // if (verbose){std::cout << "Time point scaled log : log(Lt[0]) + events_factor_log : " << log(Lt[0]) + events_factor_log << " / log(Lt[N]) + events_factor_log : " << log(Lt[N]) + events_factor_log << std::endl;}
             indxJ++;
         }
 
@@ -687,40 +692,40 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
         //change rates appropriately
         birth_current = birth[indx_rate];
         death_current = death[indx_rate];
-        ps_current = ps[indx_rate];
-        om_current = om[indx_rate];
-        rp_current = rp[indx_rate];
+        ps_current    = ps[indx_rate];
+        om_current    = om[indx_rate];
+        rp_current    = rp[indx_rate];
         gamma_current = gamma[indx_rate];
 
         }
 
-       if(type == "fossil leaf"){
-           for(int i = 0; i < N; i++){
-               Lt[i] = Lt[i] * rp_current + Lt[i+1] * (1.0-rp_current) ;
-           }
-           Lt[N] = Lt[N] * rp_current;
-           k++;
-           events_factor_log += log(ps_current);
-       }
+        if(type == "fossil leaf"){
+            for(int i = 0; i < N; i++){
+                Lt[i] = Lt[i] * rp_current + Lt[i+1] * (1.0-rp_current) ;
+            }
+            Lt[N] = Lt[N] * rp_current;
+            k++;
+            events_factor_log += log(ps_current);
+        }
 
-       if(type == "sampled ancestor"){
-           for(int i = 0; i < N+1; i++){
-               Lt[i] = Lt[i] * (1.0-rp_current);
-           }
-          events_factor_log += log(ps_current);
-       }
+        if(type == "sampled ancestor"){
+            for(int i = 0; i < N+1; i++){
+                Lt[i] = Lt[i] * (1.0-rp_current);
+            }
+            events_factor_log += log(ps_current);
+        }
 
-       if(type == "occurrence"){
-           for(int i = N; i > 0; i--){
-               Lt[i] = Lt[i-1] * i * rp_current + Lt[i] * (k+i) * (1-rp_current);
-           }
-           Lt[0] = Lt[0] * k * (1-rp_current);
-           events_factor_log += log(om_current);
+        if(type == "occurrence"){
+            for(int i = N; i > 0; i--){
+                Lt[i] = Lt[i-1] * i * rp_current + Lt[i] * (k+i) * (1-rp_current);
+            }
+            Lt[0] = Lt[0] * k * (1-rp_current);
+            events_factor_log += log(om_current);
         }
 
         if(type == "branching time"){
             k--;
-        events_factor_log += log(birth_current);
+            events_factor_log += log(birth_current);
         }
 
         // Correct probability vector to avoid divergence towards extreme values (outside of double precision) by scaling to a unit maximum value
@@ -731,7 +736,6 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
         }
         log_correction -= log(c);
 
-        // if (verbose){std::cout << "Event time : " << th << " - Event type : " << type << " -> log(c) : " << log(c) << " -> Lt[0] : " << Lt[0] << " / Lt[1] : " << Lt[1] << " / Lt[N-1] : " << Lt[N-1] << " / Lt[N] : " << Lt[N] << std::endl;}
 
         // Check that N is big enough
         if (Lt[N]>0.01){
@@ -744,7 +748,6 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
                 N_limit_tmp--;
             }
             N_limit = std::max(N_limit, N_limit_tmp);
-            // if (verbose){std::cout << "\nThe smallest sufficient N value ( such as Lt[N_limit] < max(Lt)/100 for all t ) is " << N_limit << "\n" << std::endl;}
         }
 
         thMinusOne = th;
@@ -753,27 +756,35 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
     // Give the estimated optimal N value
     size_t margin = 5;                        // Safety margin to avoid edge effects on the computation
     if ((N > N_limit + margin) & verbose){
-      std::cout << "\nTo improve performance, set N (" << N << ") to a lower value -> optimal value : N_limit ( such as Lt[N_limit] < max(Lt)/100 for all t ) + safety_margin = " << N_limit + margin << "\n" << std::endl;
+        std::cout << "\nTo improve performance, set N (" << N << ") to a lower value -> optimal value : N_limit ( such as " << 
+            "Lt[N_limit] < max(Lt)/100 for all t ) + safety_margin = " << N_limit + margin << "\n" << std::endl;
     }
     else if ((N == N_limit + margin) & verbose){
-      std::cout << "\nThe selected N value is at a safe margin from the limit of the high-probabilities area ( such as Lt[N_limit] < max(Lt)/100 for all t ) : N = N_limit + safety_margin = " << N_limit + margin << std::endl;
+        std::cout << "\nThe selected N value is at a safe margin from the limit of the high-probabilities area ( such as " << 
+            "Lt[N_limit] < max(Lt)/100 for all t ) : N = N_limit + safety_margin = " << N_limit + margin << std::endl;
     }
     else if ((N >= N_limit) & (N < N_limit + margin)){
-      std::cout << "\nWARNING : You should increase N -> The N value limiting the high-probabilities area ( such as Lt[N_limit] < max(Lt)/100 for all t ) is coming closer to your N value (" << N << ") : N_limit + safety_margin = " << N_limit + margin << std::endl;
+        std::cout << "\nWARNING : You should increase N -> The N value limiting the high-probabilities area ( such as " << 
+            "Lt[N_limit] < max(Lt)/100 for all t ) is coming closer to your N value (" << N << ") : N_limit + safety_margin = " << 
+            N_limit + margin << std::endl;
     }
     else if (N_limit == N+1){
-      std::cout << "\nWARNING : You should increase N -> There is a time t at which Lt[N] contains a non-negligeable probability ( Lt[N] > max(Lt)/100 )\n" << std::endl;
+        std::cout << "\nWARNING : You should increase N -> There is a time t at which Lt[N] contains a non-negligeable " << 
+            "probability ( Lt[N] > max(Lt)/100 )\n" << std::endl;
     }
 
     return B;
 }
 
 
+
+
+
 /**
  * Compute the joint log probability density of observations made down any time t, conditioned on the population
- * size at that time, as time increases towards the past : breadth-first backwards traversal algorithm.
- * This function is borrowed from Ankit Gupta,
- * see his paper: "The probability distribution of the reconstructed phylogenetic tree with occurrence data".
+ * size at that time, as time increases towards the past (breadth-first backward traversal algorithm), with piecewise 
+ * constant rates. This function is borrowed from Ankit Gupta, see his paper: "The probability distribution of the
+ * reconstructed phylogenetic tree with occurrence data".
  * \param[in]    start_age              Start age of the process.
  * \param[in]    timeline               Rate interval change times of the piecewise constant process.
  * \param[in]    lambda                 Speciation/birth rate(s).
@@ -791,21 +802,21 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
  * \return    The matrix of Lt values through time.
  */
 double RevBayesCore::likelihoodWithAllSamplesRemoved(  const double &start_age,
-                                                                  const std::vector<double> &timeline,
-                                                                  const std::vector<double> &lambda,
-                                                                  const std::vector<double> &mu,
-                                                                  const std::vector<double> &psi,
-                                                                  const std::vector<double> &omega,
-                                                                  const TypedDagNode<double> *rho,
-                                                                  const std::vector<double> &removalPr,
-                                                                  const std::string& cond,
-                                                                  const std::vector<double> &time_points,
-                                                                  bool useOrigin,
-                                                                  bool verbose,
-                                                                  const std::vector<double> &occurrence_ages,
-                                                                  const Tree &timeTree  )
+                                                       const std::vector<double> &timeline,
+                                                       const std::vector<double> &lambda,
+                                                       const std::vector<double> &mu,
+                                                       const std::vector<double> &psi,
+                                                       const std::vector<double> &omega,
+                                                       const TypedDagNode<double> *rho,
+                                                       const std::vector<double> &removalPr,
+                                                       const std::string& cond,
+                                                       const std::vector<double> &time_points,
+                                                       bool useOrigin,
+                                                       bool verbose,
+                                                       const std::vector<double> &occurrence_ages,
+                                                       const Tree &timeTree  )
 {
-    // Construct the vector containig all branching and sampling times + time points for which we want to compute the density.
+    // Construct the vector containig branching and sampling times + time points at which we want to compute the density.
     std::vector<Event> events = RevBayesCore::PoolEvents(start_age, time_points, occurrence_ages, verbose, timeTree, timeline);
 
     // Order times youngest to oldest
@@ -819,16 +830,17 @@ double RevBayesCore::likelihoodWithAllSamplesRemoved(  const double &start_age,
     //get rate vectors
     const std::vector<double> birth = lambda;
     const std::vector<double> death = mu;
-    const std::vector<double> ps = psi;
-    const std::vector<double> om = omega;
-    const std::vector<double> rp = removalPr;
-    const double rh = rho->getValue();
+    const std::vector<double> ps    = psi;
+    const std::vector<double> om    = omega;
+    const std::vector<double> rp    = removalPr;
+    const double rh                 = rho->getValue();
+    
     // Initialize rates to their present value
     double birth_current = birth[0];
     double death_current = death[0];
-    double ps_current = ps[0];
-    double om_current = om[0];
-    double rp_current = rp[0];
+    double ps_current    = ps[0];
+    double om_current    = om[0];
+    double rp_current    = rp[0];
 
     if(rp_current != 1.0){
         std::cout << "Warning ! This function should be used only when r=1. Here, r = " << rp_current << std::endl;
@@ -874,15 +886,15 @@ double RevBayesCore::likelihoodWithAllSamplesRemoved(  const double &start_age,
             indx_rate++;
             birth_current = birth[indx_rate];
             death_current = death[indx_rate];
-            ps_current = ps[indx_rate];
-            om_current = om[indx_rate];
-            rp_current = rp[indx_rate];
+            ps_current    = ps[indx_rate];
+            om_current    = om[indx_rate];
+            rp_current    = rp[indx_rate];
+            
             if(rp_current != 1.0){
                 std::cout << "Warning ! This function should be used only when r=1. Here, r = " << rp_current << std::endl;
                 return RbConstants::Double::neginf;
             }
         }
-
 
         if(type == "fossil leaf"){
            k++;
@@ -914,8 +926,17 @@ double RevBayesCore::likelihoodWithAllSamplesRemoved(  const double &start_age,
 }
 
 
+
+
+
 // Below are the helper functions we need for analytical computation
-double RevBayesCore::GetQ(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega )
+
+double RevBayesCore::GetQ(  const double t, 
+                            const double beta, 
+                            const double rhoc, 
+                            const double mu, 
+                            const double psi, 
+                            const double omega )
 {
     double c1 = std::sqrt( (beta - mu - omega - psi)*(beta - mu - omega - psi)+4*beta*psi);
     double c2 = (beta + mu + omega + psi - 2*beta*rhoc)/c1;
@@ -923,7 +944,17 @@ double RevBayesCore::GetQ(  const double t, const double beta, const double rhoc
     return q;
 }
 
-double RevBayesCore::GetDerivativeQ(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned n )
+
+
+
+
+double RevBayesCore::GetDerivativeQ(  const double t, 
+                                      const double beta, 
+                                      const double rhoc, 
+                                      const double mu, 
+                                      const double psi, 
+                                      const double omega, 
+                                      const unsigned n )
 {
     double c1 = std::sqrt( (beta - mu - omega - psi)*(beta - mu - omega - psi)+4*beta*psi);
     double c2 = (beta + mu + omega + psi - 2*beta*rhoc)/c1;
@@ -935,6 +966,10 @@ double RevBayesCore::GetDerivativeQ(  const double t, const double beta, const d
     }
     return q;
 }
+
+
+
+
 
 unsigned RevBayesCore::nChoosek( unsigned n, unsigned k )
 {
@@ -949,6 +984,10 @@ unsigned RevBayesCore::nChoosek( unsigned n, unsigned k )
     return result;
 }
 
+
+
+
+
 unsigned RevBayesCore::factorial( unsigned n )
 {
     unsigned long long res = 1;
@@ -958,7 +997,18 @@ unsigned RevBayesCore::factorial( unsigned n )
     return res;
 }
 
-double RevBayesCore::GetMultiDerivativeRecQ(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned n, const unsigned NumObservedLineages )
+
+
+
+
+double RevBayesCore::GetMultiDerivativeRecQ(  const double t, 
+                                              const double beta, 
+                                              const double rhoc, 
+                                              const double mu, 
+                                              const double psi, 
+                                              const double omega, 
+                                              const unsigned n, 
+                                              const unsigned NumObservedLineages )
 {
     double q0 = 1. / GetQ(t,beta,rhoc,mu,psi,omega);
     double q = 0.0;
@@ -974,7 +1024,8 @@ double RevBayesCore::GetMultiDerivativeRecQ(  const double t, const double beta,
         for( unsigned m1 =0; m1 <= n; m1++){
             if( (n-m1) % 2 == 0){
                 unsigned m2 = (n-m1)/2;
-                q += std::pow(-1, m1+m2) / std::pow(2,m2) * std::pow(q0, m1 + m2 + NumObservedLineages) * nChoosek(m1+m2+NumObservedLineages-1,m1+m2)*nChoosek(m1+m2,m1) *  std::pow(Qder1, m1) * std::pow(Qder2, m2);
+                q += std::pow(-1, m1+m2) / std::pow(2,m2) * std::pow(q0, m1 + m2 + NumObservedLineages) * nChoosek(m1+
+                      m2+NumObservedLineages-1,m1+m2)*nChoosek(m1+m2,m1) *  std::pow(Qder1, m1) * std::pow(Qder2, m2);
             }
         }
     }
@@ -983,7 +1034,15 @@ double RevBayesCore::GetMultiDerivativeRecQ(  const double t, const double beta,
 }
 
 
-double RevBayesCore::GetP0(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega)
+
+
+
+double RevBayesCore::GetP0(  const double t, 
+                             const double beta, 
+                             const double rhoc, 
+                             const double mu, 
+                             const double psi, 
+                             const double omega)
 {
     double c1 = std::sqrt( (beta - mu - omega - psi)*(beta - mu - omega - psi)+4*beta*psi);
     double c2 = (beta + mu + omega + psi - 2*beta*rhoc)/c1;
@@ -993,7 +1052,16 @@ double RevBayesCore::GetP0(  const double t, const double beta, const double rho
 }
 
 
-double RevBayesCore::GetDerP0(  const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned n)
+
+
+
+double RevBayesCore::GetDerP0(  const double t, 
+                                const double beta, 
+                                const double rhoc, 
+                                const double mu, 
+                                const double psi, 
+                                const double omega, 
+                                const unsigned n)
 {
     double c1 = std::sqrt( (beta - mu - omega - psi)*(beta - mu - omega - psi)+4*beta*psi);
     double c2 = (beta + mu + omega + psi - 2*beta*rhoc)/c1;
@@ -1012,7 +1080,17 @@ double RevBayesCore::GetDerP0(  const double t, const double beta, const double 
 }
 
 
-void RevBayesCore::TransformDerivativeContrVec( const double t, const double beta, const double rhoc, const double mu, const double psi, const double omega, const unsigned NumObservedLineages, std::vector<double>& v )
+
+
+
+void RevBayesCore::TransformDerivativeContrVec( const double t, 
+                                                const double beta, 
+                                                const double rhoc, 
+                                                const double mu, 
+                                                const double psi, 
+                                                const double omega, 
+                                                const unsigned NumObservedLineages, 
+                                                std::vector<double>& v )
 {
     unsigned n = v.size();
     std::vector<double> transformedV(n, 0.0);
@@ -1046,6 +1124,10 @@ void RevBayesCore::TransformDerivativeContrVec( const double t, const double bet
     v = transformedV;
 }
 
+
+
+
+
 MatrixReal RevBayesCore::IncompleteBellPolynomial(unsigned N, unsigned K, const std::vector<double> Vector)
 {
     MatrixReal A(N, K, 0.0);
@@ -1072,6 +1154,10 @@ MatrixReal RevBayesCore::IncompleteBellPolynomial(unsigned N, unsigned K, const 
     return OutputMatrix;
 }
 
+
+
+
+
 std::vector<double> RevBayesCore::GetFunctionUandP(  const double &start_age,
                                                      const std::vector<double>  &timeline,
                                                      const std::vector<double>  &lambda,
@@ -1084,40 +1170,40 @@ std::vector<double> RevBayesCore::GetFunctionUandP(  const double &start_age,
     //get rate vectors
     const std::vector<double> birth = lambda;
     const std::vector<double> death = mu;
-    const std::vector<double> ps = psi;
-    const std::vector<double> om = omega;
-    const std::vector<double> rp = removalPr;
-    const double rh = rho->getValue();
-    const double time = start_age;
-    const std::vector<double> d = timeline;
+    const std::vector<double> ps    = psi;
+    const std::vector<double> om    = omega;
+    const std::vector<double> rp    = removalPr;
+    const double rh                 = rho->getValue();
+    const double time               = start_age;
+    const std::vector<double> d     = timeline;
 
     // quantities that help us compute u
-    double new_u = 1 - rh;
-    double old_u = 0.;
-    double new_p = rh;
-    double old_p = 0.;
-    double deltat = 0.;
-    double gamma = 0.;
-    double sqrtDelta = 0.;
-    double x1 = 0.;
-    double x2 = 0.;
-    double numerator = 0.;
+    double new_u       = 1 - rh;
+    double old_u       = 0.;
+    double new_p       = rh;
+    double old_p       = 0.;
+    double deltat      = 0.;
+    double gamma       = 0.;
+    double sqrtDelta   = 0.;
+    double x1          = 0.;
+    double x2          = 0.;
+    double numerator   = 0.;
     double denominator = 0.;
 
     // parameters
     double birth_current = birth[0];
     double death_current = death[0];
-    double ps_current = ps[0];
-    double om_current = om[0];
-    double rp_current = rp[0];
+    double ps_current    = ps[0];
+    double om_current    = om[0];
+    double rp_current    = rp[0];
 
     for (int i = 0; i < d.size(); i++){
         // we take the parameters for this time period
         birth_current = birth[i];
         death_current = death[i];
-        ps_current = ps[i];
-        om_current = om[i];
-        rp_current = rp[i];
+        ps_current    = ps[i];
+        om_current    = om[i];
+        rp_current    = rp[i];
         // we store the old_u that we need to compute new_u a bit further
         old_u = new_u;
         old_p = new_p;
