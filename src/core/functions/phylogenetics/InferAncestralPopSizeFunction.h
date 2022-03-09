@@ -19,11 +19,11 @@ namespace RevBayesCore {
 
     /**
     * @file
-    * This file contains a function to estimate ancestral population size
-    * given a tree, occurrences, and constant phylodynamic parameters under the Occurrence Birth-Death Process, as a
-    * density matrix of the number of hidden lineages through time.
+    * This file contains a function to estimate ancestral population size given a tree, occurrences, and constant phylodynamic 
+    * parameters under the Occurrence Birth-Death Process, as a density matrix of the number of hidden lineages through time, 
+    * using the algorithm introduced in Manceau & al. 2020 (http://dx.doi.org/10.1101/755561).
     *
-    * @brief Computes the probability density of the number of hidden lineages through time, under the Occurrence Birth-Death Process, using the algorithm introduced in Manceau & al. 2020 (http://dx.doi.org/10.1101/755561))
+    * @brief Computes the probability density of the number of hidden lineages through time, under the Occurrence Birth-Death Process)
     *
     * @return A density matrix of the number of hidden lineages through time.
     *
@@ -53,7 +53,7 @@ namespace RevBayesCore {
                                                             const std::vector<double> &tau,
                                                             bool uo,
                                                             bool vb,
-                                                            TypedDagNode<Tree> *tr);
+                                                            TypedDagNode<Tree> *tr);               //!< Compute the density matrix of the number of hidden lineages through time
 
     virtual                                                 ~InferAncestralPopSizeFunction(void);
 

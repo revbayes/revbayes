@@ -133,14 +133,14 @@ const ArgumentRules& Func_inferAncestralPopSize::getArgumentRules( void ) const
         argumentRules.push_back( new ArgumentRule( "maxHiddenLin",      Natural::getClassTypeSpec(), "Maximum number of hidden lineages (algorithm accuracy).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Natural(30) ) );
 
         std::vector<std::string> optionsCondition;
-        optionsCondition.push_back( "survival2" );
         optionsCondition.push_back( "survival" );
+        optionsCondition.push_back( "survival2" );
         argumentRules.push_back( new OptionRule( "condition",           new RlString("none"), optionsCondition, "Condition of the process (survival/survival2)." ) );
 
         argumentRules.push_back( new ArgumentRule( "occurrence_ages",   ModelVector<Real>::getClassTypeSpec(), "Vector of occurrence ages.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "time_points",       ModelVector<Real>::getClassTypeSpec(), "Time points at which we compute the density.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "timeTree" ,         TimeTree::getClassTypeSpec(), "Tree for which ancestral pop. size has to be computed.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
-        argumentRules.push_back( new ArgumentRule( "timeline",    ModelVector<RealPos>::getClassTypeSpec(), "Rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        argumentRules.push_back( new ArgumentRule( "timeline",          ModelVector<RealPos>::getClassTypeSpec(), "Rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         argumentRules.push_back( new ArgumentRule( "verbose",           RlBoolean::getClassTypeSpec(), "If true displays warnings and information messages.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( false ) ) );
 
@@ -152,7 +152,6 @@ const ArgumentRules& Func_inferAncestralPopSize::getArgumentRules( void ) const
 
 const std::string& Func_inferAncestralPopSize::getClassType(void)
 {
-
     static std::string rev_type = "Func_inferAncestralPopSize";
 
     return rev_type;
@@ -161,7 +160,6 @@ const std::string& Func_inferAncestralPopSize::getClassType(void)
 /* Get class type spec describing type of object */
 const TypeSpec& Func_inferAncestralPopSize::getClassTypeSpec(void)
 {
-
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
 
     return rev_type_spec;
@@ -181,7 +179,6 @@ std::string Func_inferAncestralPopSize::getFunctionName( void ) const
 
 const TypeSpec& Func_inferAncestralPopSize::getTypeSpec( void ) const
 {
-
     static TypeSpec type_spec = getClassTypeSpec();
 
     return type_spec;

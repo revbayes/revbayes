@@ -114,7 +114,7 @@ InferAncestralPopSizeFunction* InferAncestralPopSizeFunction::clone( void ) cons
 
 
 /**
- * Compute Kt, where you do the work
+ * Compute the density matrix of the number of hidden lineages through time
  *
  * \return A density matrix of the number of hidden lineages through time
  */

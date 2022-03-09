@@ -186,7 +186,7 @@ InferAncestralPopSizeFunctionPiecewise* InferAncestralPopSizeFunctionPiecewise::
 
 
 /**
- * Compute Kt, where you do the work, required
+ * Compute the density matrix of the number of hidden lineages through time.
  *
  * \return A density matrix of the Maximal number of hidden lineages through time
  */
