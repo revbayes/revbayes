@@ -211,8 +211,6 @@ OccurrenceBirthDeathProcess* OccurrenceBirthDeathProcess::clone( void ) const
  */
 double OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void ) const
 {
-  std::cout << "computeLnProbabilityTimes" << std::endl;
-
   updateVectorParameters();
 
   // compute the log-likelihood : use ComputeLikelihoodsBackwardsLt (backward traversal of the tree) or ComputeLikelihoodsForwardsMt (forward traversal of the tree)
@@ -229,7 +227,6 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void ) const
   }
 
   double logLikelihood = RevBayesCore::ComputeLnLikelihoodOBDP(start_age->getValue(), timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, useOrigin, useMt, verbose, occAges, tree);
-  // if (verbose){std::cout << "\ncomputeLnProbabilityTimes : " << computeLnProbabilityTimes() << "\n\n" << std::endl;}
 
   return logLikelihood;
 }
