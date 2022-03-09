@@ -32,8 +32,8 @@ using namespace RevBayesCore;
  * \param[in]    intreatment               Probabilit(y|ies) of death upon sampling (treatment).
  * \param[in]    n                         Maximum number of hidden lineages (algorithm accuracy).
  * \param[in]    cdt                       Condition of the process (survival/survival2).
- * \param[in]    O                       	 Vector of occurrence ages.
- * \param[in]    tau            					 Time points at which we compute the density.
+ * \param[in]    O                         Vector of occurrence ages.
+ * \param[in]    tau            	       Time points at which we compute the density.
  * \param[in]    uo                        If true the start age is the origin time otherwise the root age of the process.
  * \param[in]    t                         Tree for which ancestral pop. size has to be computed.
  * \param[in]    ht                        Rate interval change times of the piecewise constant process.
@@ -42,19 +42,22 @@ using namespace RevBayesCore;
 
 
 InferAncestralPopSizeFunctionPiecewise::InferAncestralPopSizeFunctionPiecewise( 	const TypedDagNode<double> *sa,
-                                                  																const DagNode *inspeciation,
-	                                                          											const DagNode *inextinction,
-	                                                          											const DagNode *inserialsampling,
-	                                                          											const DagNode *inoccurrence,
-	                                                          											const DagNode *ineventsampling,
-	                                                          											const DagNode *intreatment,
-	                                                          											const TypedDagNode<long> *n,
-	                                                          											const std::string& cdt,
-                                                              										const TypedDagNode< RevBayesCore::RbVector<double> > *O,
-	                                                          											const std::vector<double> &tau,
-	                                                          											bool uo,
-	                                                          											TypedDagNode<Tree> *tr,
-																																									const TypedDagNode< RbVector<double> > *ht) : TypedFunction<MatrixReal>( new MatrixReal(tau.size(), (n->getValue() + 1), 0.0) ),
+                      																const DagNode *inspeciation,
+                                          											const DagNode *inextinction,
+                                          											const DagNode *inserialsampling,
+                                          											const DagNode *inoccurrence,
+                                          											const DagNode *ineventsampling,
+                                          											const DagNode *intreatment,
+                                          											const TypedDagNode<long> *n,
+                                          											const std::string& cdt,
+                                          										    const TypedDagNode< RevBayesCore::RbVector<double> > *O,
+                                          											const std::vector<double> &tau,
+                                          											bool uo,
+                                          											TypedDagNode<Tree> *tr,
+																					const TypedDagNode< RbVector<double> > *ht) : 
+    
+    TypedFunction<MatrixReal>( new MatrixReal(tau.size(), (n->getValue() + 1), 0.0) ),
+    
     start_age( sa ),
     maxHiddenLin( n ),
     cond (cdt),
@@ -62,7 +65,7 @@ InferAncestralPopSizeFunctionPiecewise::InferAncestralPopSizeFunctionPiecewise( 
     time_points ( tau ),
     useOrigin (uo),
     timeTree (tr),
-		interval_times(ht)
+	interval_times(ht)
 
 {
 	homogeneous_lambda   = NULL;
@@ -96,31 +99,31 @@ InferAncestralPopSizeFunctionPiecewise::InferAncestralPopSizeFunctionPiecewise( 
 	addParameter( interval_times );
 
 	heterogeneous_lambda = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inspeciation);
-	homogeneous_lambda = dynamic_cast<const TypedDagNode<double >*>(inspeciation);
+	homogeneous_lambda   = dynamic_cast<const TypedDagNode<double >*>(inspeciation);
 
 	addParameter( homogeneous_lambda );
 	addParameter( heterogeneous_lambda );
 
 	heterogeneous_mu = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inextinction);
-	homogeneous_mu = dynamic_cast<const TypedDagNode<double >*>(inextinction);
+	homogeneous_mu   = dynamic_cast<const TypedDagNode<double >*>(inextinction);
 
 	addParameter( homogeneous_mu );
 	addParameter( heterogeneous_mu );
 
 	heterogeneous_psi = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inserialsampling);
-	homogeneous_psi = dynamic_cast<const TypedDagNode<double >*>(inserialsampling);
+	homogeneous_psi   = dynamic_cast<const TypedDagNode<double >*>(inserialsampling);
 
 	addParameter( homogeneous_psi );
 	addParameter( heterogeneous_psi );
 
 	heterogeneous_r = dynamic_cast<const TypedDagNode<RbVector<double> >*>(intreatment);
-	homogeneous_r = dynamic_cast<const TypedDagNode<double >*>(intreatment);
+	homogeneous_r   = dynamic_cast<const TypedDagNode<double >*>(intreatment);
 
 	addParameter( homogeneous_r );
 	addParameter( heterogeneous_r );
 
 	heterogeneous_o = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inoccurrence);
-	homogeneous_o = dynamic_cast<const TypedDagNode<double >*>(inoccurrence);
+	homogeneous_o   = dynamic_cast<const TypedDagNode<double >*>(inoccurrence);
 
 	addParameter( homogeneous_o );
 	addParameter( heterogeneous_o );
@@ -160,9 +163,12 @@ InferAncestralPopSizeFunctionPiecewise::InferAncestralPopSizeFunctionPiecewise( 
 	update();
 }
 
-InferAncestralPopSizeFunctionPiecewise::~InferAncestralPopSizeFunctionPiecewise( void ){
-    // We don't delete the parameters, because they might be used somewhere else too. The model needs to do that!
-}
+
+
+
+
+InferAncestralPopSizeFunctionPiecewise::~InferAncestralPopSizeFunctionPiecewise( void )
+{}
 
 /**
  * The clone function is a convenience function to create proper copies of inherited objected.
@@ -174,6 +180,10 @@ InferAncestralPopSizeFunctionPiecewise* InferAncestralPopSizeFunctionPiecewise::
 {
     return new InferAncestralPopSizeFunctionPiecewise( *this );
 }
+
+
+
+
 
 /**
  * Compute Kt, where you do the work, required
@@ -221,6 +231,9 @@ void InferAncestralPopSizeFunctionPiecewise::update( void )
 	*this->value = D_Kt;
 
 }
+
+
+
 
 
 void InferAncestralPopSizeFunctionPiecewise::updateVectorParameters( void ) const
@@ -301,10 +314,10 @@ void InferAncestralPopSizeFunctionPiecewise::updateVectorParameters( void ) cons
         // set the final sampling to one (for sampling at the present)
         psi_event[0] = 1.0;
   	}
-
-
-
 }
+
+
+
 
 
 /**
@@ -318,58 +331,58 @@ void InferAncestralPopSizeFunctionPiecewise::swapParameterInternal( const DagNod
 {
     if (oldP == start_age)
     {
-        start_age = static_cast<const TypedDagNode< double >* >( newP );
+        start_age            = static_cast<const TypedDagNode< double >* >( newP );
     }
-		if (oldP == heterogeneous_lambda)
+	else if (oldP == heterogeneous_lambda)
     {
         heterogeneous_lambda = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
-		else if (oldP == homogeneous_lambda)
+	else if (oldP == homogeneous_lambda)
     {
-        homogeneous_lambda = static_cast<const TypedDagNode<double>* >( newP );
+        homogeneous_lambda   = static_cast<const TypedDagNode<double>* >( newP );
     }
-		else if (oldP == heterogeneous_mu)
+	else if (oldP == heterogeneous_mu)
     {
-        heterogeneous_mu = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        heterogeneous_mu     = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
-		else if (oldP == homogeneous_mu)
+	else if (oldP == homogeneous_mu)
     {
-        homogeneous_mu = static_cast<const TypedDagNode<double>* >( newP );
+        homogeneous_mu       = static_cast<const TypedDagNode<double>* >( newP );
     }
-		else if (oldP == heterogeneous_psi)
+	else if (oldP == heterogeneous_psi)
     {
-        heterogeneous_psi = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        heterogeneous_psi    = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
-		else if (oldP == homogeneous_psi)
+	else if (oldP == homogeneous_psi)
     {
-        homogeneous_psi = static_cast<const TypedDagNode<double>* >( newP );
+        homogeneous_psi      = static_cast<const TypedDagNode<double>* >( newP );
     }
-		else if (oldP == heterogeneous_o)
+	else if (oldP == heterogeneous_o)
     {
-        heterogeneous_o = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        heterogeneous_o      = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
     else if (oldP == homogeneous_o)
     {
-        homogeneous_o = static_cast<const TypedDagNode<double>* >( newP );
+        homogeneous_o        = static_cast<const TypedDagNode<double>* >( newP );
     }
     else if (oldP == homogeneous_rho)
     {
-        homogeneous_rho = static_cast<const TypedDagNode<double>* >( newP );
+        homogeneous_rho      = static_cast<const TypedDagNode<double>* >( newP );
     }
-		else if (oldP == heterogeneous_r)
+	else if (oldP == heterogeneous_r)
     {
-        heterogeneous_r = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        heterogeneous_r      = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
     else if (oldP == homogeneous_r)
     {
-        homogeneous_r = static_cast<const TypedDagNode<double>* >( newP );
+        homogeneous_r        = static_cast<const TypedDagNode<double>* >( newP );
     }
     else if (oldP == maxHiddenLin)
     {
-        maxHiddenLin = static_cast<const TypedDagNode< long >* >( newP );
+        maxHiddenLin         = static_cast<const TypedDagNode< long >* >( newP );
     }
     else if (oldP == timeTree)
     {
-        timeTree = static_cast<const TypedDagNode< Tree >* >( newP );
+        timeTree             = static_cast<const TypedDagNode< Tree >* >( newP );
     }
 }

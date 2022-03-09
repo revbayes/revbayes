@@ -29,12 +29,12 @@ using namespace RevBayesCore;
  *
  * \return    The matrix of log-Mt values through time.
 */
-std::vector<Event> RevBayesCore::PoolEvents(             const double &start_age,
-                                                         const std::vector<double> &time_points,
-                                                         const std::vector<double> &occurrence_ages,
-                                                         bool verbose,
-                                                         const Tree &timeTree,
-                                                         const std::vector<double> &timeline)
+std::vector<Event> RevBayesCore::PoolEvents(    const double &start_age,
+                                                const std::vector<double> &time_points,
+                                                const std::vector<double> &occurrence_ages,
+                                                bool verbose,
+                                                const Tree &timeTree,
+                                                const std::vector<double> &timeline)
 {
     // get node/time variables
     const size_t num_nodes = timeTree.getNumberOfNodes();
@@ -307,21 +307,21 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const double &start_age,
  * \return    The matrix of Mt values through time.
 */
 MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
-                                                                  const std::vector<double> &timeline,
-                                                                  const std::vector<double> &lambda,
-                                                                  const std::vector<double> &mu,
-                                                                  const std::vector<double> &psi,
-                                                                  const std::vector<double> &omega,
-                                                                  const TypedDagNode<double> *rho,
-                                                                  const std::vector<double> &removalPr,
-                                                                  const TypedDagNode<long> *maxHiddenLin,
-                                                                  const std::string& cond,
-                                                                  const std::vector<double> &time_points,
-                                                                  bool useOrigin,
-                                                                  bool returnLogLikelihood,
-                                                                  bool verbose,
-                                                                  const std::vector<double> &occurrence_ages,
-                                                                  const Tree &timeTree  )
+                                                const std::vector<double> &timeline,
+                                                const std::vector<double> &lambda,
+                                                const std::vector<double> &mu,
+                                                const std::vector<double> &psi,
+                                                const std::vector<double> &omega,
+                                                const TypedDagNode<double> *rho,
+                                                const std::vector<double> &removalPr,
+                                                const TypedDagNode<long> *maxHiddenLin,
+                                                const std::string& cond,
+                                                const std::vector<double> &time_points,
+                                                bool useOrigin,
+                                                bool returnLogLikelihood,
+                                                bool verbose,
+                                                const std::vector<double> &occurrence_ages,
+                                                const Tree &timeTree  )
 {
 
     // Construct the vector containig all branching and sampling times + time points at which we want to compute the density.
@@ -563,20 +563,20 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
  * \return    The matrix of Lt values through time.
  */
 MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
-                                                                  const std::vector<double> &timeline,
-                                                                  const std::vector<double> &lambda,
-                                                                  const std::vector<double> &mu,
-                                                                  const std::vector<double> &psi,
-                                                                  const std::vector<double> &omega,
-                                                                  const TypedDagNode<double> *rho,
-                                                                  const std::vector<double> &removalPr,
-                                                                  const TypedDagNode<long> *maxHiddenLin,
-                                                                  const std::string& cond,
-                                                                  const std::vector<double> &time_points,
-                                                                  bool useOrigin,
-                                                                  bool verbose,
-                                                                  const std::vector<double> &occurrence_ages,
-                                                                  const Tree &timeTree  )
+                                                const std::vector<double> &timeline,
+                                                const std::vector<double> &lambda,
+                                                const std::vector<double> &mu,
+                                                const std::vector<double> &psi,
+                                                const std::vector<double> &omega,
+                                                const TypedDagNode<double> *rho,
+                                                const std::vector<double> &removalPr,
+                                                const TypedDagNode<long> *maxHiddenLin,
+                                                const std::string& cond,
+                                                const std::vector<double> &time_points,
+                                                bool useOrigin,
+                                                bool verbose,
+                                                const std::vector<double> &occurrence_ages,
+                                                const Tree &timeTree  )
 {
 
     // Construct the vector containig all branching and sampling times + time points at which we want to compute the density.
@@ -801,20 +801,20 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
  *
  * \return    The matrix of Lt values through time.
  */
-double RevBayesCore::likelihoodWithAllSamplesRemoved(  const double &start_age,
-                                                       const std::vector<double> &timeline,
-                                                       const std::vector<double> &lambda,
-                                                       const std::vector<double> &mu,
-                                                       const std::vector<double> &psi,
-                                                       const std::vector<double> &omega,
-                                                       const TypedDagNode<double> *rho,
-                                                       const std::vector<double> &removalPr,
-                                                       const std::string& cond,
-                                                       const std::vector<double> &time_points,
-                                                       bool useOrigin,
-                                                       bool verbose,
-                                                       const std::vector<double> &occurrence_ages,
-                                                       const Tree &timeTree  )
+double RevBayesCore::likelihoodWithAllSamplesRemoved(   const double &start_age,
+                                                        const std::vector<double> &timeline,
+                                                        const std::vector<double> &lambda,
+                                                        const std::vector<double> &mu,
+                                                        const std::vector<double> &psi,
+                                                        const std::vector<double> &omega,
+                                                        const TypedDagNode<double> *rho,
+                                                        const std::vector<double> &removalPr,
+                                                        const std::string& cond,
+                                                        const std::vector<double> &time_points,
+                                                        bool useOrigin,
+                                                        bool verbose,
+                                                        const std::vector<double> &occurrence_ages,
+                                                        const Tree &timeTree  )
 {
     // Construct the vector containig branching and sampling times + time points at which we want to compute the density.
     std::vector<Event> events = RevBayesCore::PoolEvents(start_age, time_points, occurrence_ages, verbose, timeTree, timeline);

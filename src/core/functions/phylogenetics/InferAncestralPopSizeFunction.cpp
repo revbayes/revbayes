@@ -15,7 +15,7 @@
 
 namespace RevBayesCore {
 	class DagNode;
-	class MatrixReal; } //tt
+	class MatrixReal; }
 
 using namespace RevBayesCore;
 
@@ -33,29 +33,30 @@ using namespace RevBayesCore;
  * \param[in]    intreatment               Probabilit(y|ies) of death upon sampling (treatment).
  * \param[in]    n                         Maximum number of hidden lineages (algorithm accuracy).
  * \param[in]    cdt                       Condition of the process (survival/survival2).
- * \param[in]    O                       	 Vector of occurrence ages.
- * \param[in]    tau            					 Time points at which we compute the density.
+ * \param[in]    O                         Vector of occurrence ages.
+ * \param[in]    tau            		   Time points at which we compute the density.
  * \param[in]    uo                        If true the start age is the origin time otherwise the root age of the process.
- * \param[in]    t                         Tree for which ancestral pop. size has to be computed.
- * \param[in]    ht                        Rate interval change times of the piecewise constant process.
+ * \param[in]    vb                        Verbose
+ * \param[in]    tr                        Tree for which ancestral pop. size has to be computed.
  */
 
 InferAncestralPopSizeFunction::InferAncestralPopSizeFunction( 	const TypedDagNode<double> *sa,
-                                                  							const TypedDagNode<double> *inspeciation,
-	                                                          		const TypedDagNode<double> *inextinction,
-	                                                          		const TypedDagNode<double> *inserialsampling,
-	                                                          		const TypedDagNode<double> *inoccurrence,
-	                                                          		const TypedDagNode<double> *ineventsampling,
-	                                                          		const TypedDagNode<double> *intreatment,
-		                                                          	const TypedDagNode<long> *n,
-
-	                                                          		const std::string& cdt,
+                                      							const TypedDagNode<double> *inspeciation,
+	                                                          	const TypedDagNode<double> *inextinction,
+	                                                          	const TypedDagNode<double> *inserialsampling,
+	                                                          	const TypedDagNode<double> *inoccurrence,
+	                                                          	const TypedDagNode<double> *ineventsampling,
+	                                                          	const TypedDagNode<double> *intreatment,
+		                                                        const TypedDagNode<long> *n,
+	                                                          	const std::string& cdt,
                                                                 const TypedDagNode< RevBayesCore::RbVector<double> > *O,
-	                                                          		const std::vector<double> &tau,
+	                                                          	const std::vector<double> &tau,
                                                                 bool uo,
                                                                 bool vb,
-
-	                                                          	TypedDagNode<Tree> *tr) : TypedFunction<MatrixReal>( new MatrixReal(tau.size(), (n->getValue() + 1), 0.0) ),
+	                                                          	TypedDagNode<Tree> *tr) : 
+    
+    TypedFunction<MatrixReal>( new MatrixReal(tau.size(), (n->getValue() + 1), 0.0) ),
+    
     start_age( sa ),
     lambda( inspeciation ),
     mu( inextinction ),
@@ -86,9 +87,16 @@ InferAncestralPopSizeFunction::InferAncestralPopSizeFunction( 	const TypedDagNod
 	update();
 }
 
-InferAncestralPopSizeFunction::~InferAncestralPopSizeFunction( void ){
-    // We don't delete the parameters, because they might be used somewhere else too. The model needs to do that!
-}
+
+
+
+
+InferAncestralPopSizeFunction::~InferAncestralPopSizeFunction( void )
+{}
+
+
+
+
 
 /**
  * The clone function is a convenience function to create proper copies of inherited objected.
@@ -101,8 +109,12 @@ InferAncestralPopSizeFunction* InferAncestralPopSizeFunction::clone( void ) cons
     return new InferAncestralPopSizeFunction( *this );
 }
 
+
+
+
+
 /**
- * Compute Kt, where you do the work, required
+ * Compute Kt, where you do the work
  *
  * \return A density matrix of the number of hidden lineages through time
  */
@@ -111,23 +123,22 @@ void InferAncestralPopSizeFunction::update( void )
     size_t S = time_points.size();
     long N = maxHiddenLin->getValue();
 
-
     const Tree tree = timeTree->getValue();
+    const double sa = start_age->getValue();
     const std::vector<double> occurrence_ages = occurrences->getValue();
 
     bool useMt;
-		std::vector<double> timeline{0.0};
-		std::vector<double> lambd{lambda->getValue()};
-		std::vector<double> m{mu->getValue()};
-		std::vector<double> ps{psi->getValue()};
-		std::vector<double> omeg{omega->getValue()};
-		std::vector<double> removalP{removalPr->getValue()};
+	std::vector<double> timeline{0.0};
+	std::vector<double> lambd{lambda->getValue()};
+	std::vector<double> m{mu->getValue()};
+	std::vector<double> ps{psi->getValue()};
+	std::vector<double> omeg{omega->getValue()};
+	std::vector<double> removalP{removalPr->getValue()};
 
-
-
-
-	MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age->getValue(), timeline, lambd, m, ps, omeg, rho, removalP, maxHiddenLin, cond, time_points, useOrigin, useMt = false, verbose, occurrence_ages, tree);
-	MatrixReal B_Mt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age->getValue(), timeline, lambd, m, ps, omeg, rho, removalP, maxHiddenLin, cond, time_points, useOrigin, useMt = true, verbose, occurrence_ages, tree);
+	MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(sa, timeline, lambd, m, ps, omeg, rho, removalP, maxHiddenLin, cond, 
+                                                                          time_points, useOrigin, useMt = false, verbose, occurrence_ages, tree);
+    MatrixReal B_Mt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(sa, timeline, lambd, m, ps, omeg, rho, removalP, maxHiddenLin, cond, 
+                                                                          time_points, useOrigin, useMt = true, verbose, occurrence_ages, tree);
 
 	// Realize the normalized Hadamar Product of B_Lt and B_Mt
 	MatrixReal D_Kt(S, (N + 1), 0.0);
@@ -154,13 +165,14 @@ void InferAncestralPopSizeFunction::update( void )
     }
 
 	*this->value = D_Kt;
-
 }
+
+
+
 
 
 /**
  * Swap the parameters held by this distribution.
- *
  *
  * \param[in]    oldP      Pointer to the old parameter.
  * \param[in]    newP      Pointer to the new parameter.
@@ -169,31 +181,31 @@ void InferAncestralPopSizeFunction::swapParameterInternal( const DagNode *oldP, 
 {
     if (oldP == start_age)
     {
-        start_age = static_cast<const TypedDagNode< double >* >( newP );
+        start_age    = static_cast<const TypedDagNode< double >* >( newP );
     }
     else if (oldP == lambda)
     {
-        lambda = static_cast<const TypedDagNode< double >* >( newP );
+        lambda       = static_cast<const TypedDagNode< double >* >( newP );
     }
     else if (oldP == mu)
     {
-        mu = static_cast<const TypedDagNode< double >* >( newP );
+        mu           = static_cast<const TypedDagNode< double >* >( newP );
     }
     else if (oldP == psi)
     {
-        psi = static_cast<const TypedDagNode< double >* >( newP );
+        psi          = static_cast<const TypedDagNode< double >* >( newP );
     }
     else if (oldP == omega)
     {
-        omega = static_cast<const TypedDagNode< double >* >( newP );
+        omega        = static_cast<const TypedDagNode< double >* >( newP );
     }
     else if (oldP == rho)
     {
-        rho = static_cast<const TypedDagNode< double >* >( newP );
+        rho          = static_cast<const TypedDagNode< double >* >( newP );
     }
     else if (oldP == removalPr)
     {
-        removalPr = static_cast<const TypedDagNode< double >* >( newP );
+        removalPr    = static_cast<const TypedDagNode< double >* >( newP );
     }
     else if (oldP == maxHiddenLin)
     {
@@ -201,6 +213,6 @@ void InferAncestralPopSizeFunction::swapParameterInternal( const DagNode *oldP, 
     }
     else if (oldP == timeTree)
     {
-        timeTree = static_cast<const TypedDagNode< Tree >* >( newP );
+        timeTree     = static_cast<const TypedDagNode< Tree >* >( newP );
     }
 }
