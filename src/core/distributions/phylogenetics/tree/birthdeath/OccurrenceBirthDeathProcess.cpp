@@ -74,7 +74,6 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                       
     cond (cdt),
     verbose ( vb )
 
-
 {
     // initialize all the pointers to NULL
     homogeneous_lambda   = NULL;
@@ -176,9 +175,10 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                       
     // store the new value
     delete value;
     value = my_tree;
-
-
 }
+
+
+
 
 
 /**
@@ -192,6 +192,10 @@ OccurrenceBirthDeathProcess* OccurrenceBirthDeathProcess::clone( void ) const
     return new OccurrenceBirthDeathProcess( *this );
 }
 
+
+
+
+
 /**
  * Compute the log-transformed probability of the current value under the current parameter values.
  */
@@ -204,6 +208,9 @@ OccurrenceBirthDeathProcess* OccurrenceBirthDeathProcess::clone( void ) const
 
      return lnProbTimes;
  }
+
+
+
 
 
 /**
@@ -233,6 +240,8 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void ) const
 
 
 
+
+
 /**
  * return the index i so that t_{i-1} <= t < t_i
  * where t_i is the instantaneous sampling time (i = 0,...,l)
@@ -258,9 +267,11 @@ size_t OccurrenceBirthDeathProcess::findIndex(double t) const
 
       return(timeline.size() - 1);
     }
-
-
 }
+
+
+
+
 
 // calculate offset so we can set t_0 to time of most recent tip
 void OccurrenceBirthDeathProcess::getOffset(void) const
@@ -275,8 +286,9 @@ void OccurrenceBirthDeathProcess::getOffset(void) const
             offset = n.getAge();
         }
     }
-
 }
+
+
 
 
 
@@ -365,16 +377,14 @@ void OccurrenceBirthDeathProcess::updateVectorParameters( void ) const
         // set the final sampling to one (for sampling at the present)
         psi_event[0] = 1.0;
     }
-
-
-
 }
+
+
 
 
 
 double OccurrenceBirthDeathProcess::pSurvival(double start, double end) const
 {
-
   if(end != 0.0) {
     //To do: this only makes sense if the rate vectors match the timeline.
     //the vector parameters and timeline have to be adjusted.
@@ -404,6 +414,10 @@ double OccurrenceBirthDeathProcess::pSurvival(double start, double end) const
     return 1 - res[0] ;
   }
 }
+
+
+
+
 
 /**
  * Simulate new speciation times.
@@ -459,6 +473,8 @@ double OccurrenceBirthDeathProcess::simulateDivergenceTime(double origin, double
 
 
 
+
+
 /**
  * Swap the parameters held by this distribution.
  *
@@ -474,46 +490,46 @@ void OccurrenceBirthDeathProcess::swapParameterInternal(const DagNode *oldP, con
     }
     else if (oldP == heterogeneous_mu)
     {
-        heterogeneous_mu = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        heterogeneous_mu     = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
     else if (oldP == heterogeneous_psi)
     {
-        heterogeneous_psi = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        heterogeneous_psi    = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
     else if (oldP == homogeneous_lambda)
     {
-        homogeneous_lambda = static_cast<const TypedDagNode<double>* >( newP );
+        homogeneous_lambda   = static_cast<const TypedDagNode<double>* >( newP );
     }
     else if (oldP == homogeneous_mu)
     {
-        homogeneous_mu = static_cast<const TypedDagNode<double>* >( newP );
+        homogeneous_mu       = static_cast<const TypedDagNode<double>* >( newP );
     }
     else if (oldP == homogeneous_psi)
     {
-        homogeneous_psi = static_cast<const TypedDagNode<double>* >( newP );
+        homogeneous_psi      = static_cast<const TypedDagNode<double>* >( newP );
     }
     // Treatment
     else if (oldP == heterogeneous_r)
     {
-        heterogeneous_r = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        heterogeneous_r      = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
     else if (oldP == homogeneous_r)
     {
-        homogeneous_r = static_cast<const TypedDagNode<double>* >( newP );
+        homogeneous_r        = static_cast<const TypedDagNode<double>* >( newP );
     }
     //occurrence
     else if (oldP == heterogeneous_o)
     {
-        heterogeneous_o = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        heterogeneous_o      = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
     else if (oldP == homogeneous_o)
     {
-        homogeneous_o = static_cast<const TypedDagNode<double>* >( newP );
+        homogeneous_o        = static_cast<const TypedDagNode<double>* >( newP );
     }
     // Event probability parameters
     else if (oldP == homogeneous_rho)
     {
-        homogeneous_rho = static_cast<const TypedDagNode<double>* >( newP );
+        homogeneous_rho      = static_cast<const TypedDagNode<double>* >( newP );
     }
     else
     {
