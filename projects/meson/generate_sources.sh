@@ -1,12 +1,14 @@
 #!/bin/sh
 
-DIR=$1 
+PROJDIR=$(dirname $0)
+
+DIR="$1"
 
 echo "Defining variable '${DIR}_sources' in src/${DIR}/meson.build"
 
-SRC=../../src
+SRC="$PROJDIR"/../../src
 
-cd $SRC/$DIR
+cd "$SRC/$DIR"
 
 echo "${DIR}_sources = files([" > meson.build
 find . -name '*.cpp' |
