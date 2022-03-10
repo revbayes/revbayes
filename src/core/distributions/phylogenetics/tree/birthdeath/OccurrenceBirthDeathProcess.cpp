@@ -167,6 +167,7 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                       
 
     updateVectorParameters();
 
+    if(timeline.size() > 1) {
     RbVector<Clade> constr;
     StartingTreeSimulator simulator;
     RevBayesCore::Tree *my_tree = simulator.simulateTree( taxa, constr );
@@ -174,6 +175,10 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                       
     // store the new value
     delete value;
     value = my_tree;
+    }
+    else {
+      redrawValue();
+    }
 }
 
 
