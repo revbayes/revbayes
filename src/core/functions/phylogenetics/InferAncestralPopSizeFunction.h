@@ -51,7 +51,6 @@ namespace RevBayesCore {
                                                             const std::string& cdt,
                                                             const TypedDagNode< RevBayesCore::RbVector<double> > *O,
                                                             const std::vector<double> &tau,
-                                                            bool uo,
                                                             bool vb,
                                                             TypedDagNode<Tree> *tr);               //!< Compute the density matrix of the number of hidden lineages through time
 
@@ -79,7 +78,6 @@ namespace RevBayesCore {
         const std::string&                                  cond;                                  //!< Condition of the process ("survival" or "survival2")
         const std::vector<double>                           time_points;                           //!< Times at which density is computed
         const TypedDagNode< RbVector<double> > *            occurrences;                           //!< Occurrence ages of fossils not included in the tree
-        const bool                                          useOrigin;                             //!< Start the process at the origin (otherwise root node)
         const bool                                          verbose;                               //!< Display warnings and information messages.
         const TypedDagNode< Tree > *                        timeTree;                              //!< Facultative initial tree
 

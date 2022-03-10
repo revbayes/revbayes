@@ -140,7 +140,6 @@ std::vector<Event> RevBayesCore::PoolEvents(    const double &start_age,
  * \param[in]    maxHiddenLin           Maximum number of hidden lineages (algorithm accuracy).
  * \param[in]    cond                   Condition of the process (survival/survival2).
  * \param[in]    time_points            Time points at which we compute the density.
- * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
  * \param[in]    useMt                  If true computes densities with the forward traversal algorithm (Mt) otherwise uses backward one (Lt).
  * \param[in]    verbose                If true displays warnings and information messages.
  * \param[in]    occurrence_ages        Vector of occurrence ages.
@@ -159,7 +158,6 @@ MatrixReal RevBayesCore::ComputeLnProbabilityDensitiesOBDP(  const double &start
                                                              const TypedDagNode<long> *maxHiddenLin,
                                                              const std::string &cond,
                                                              const std::vector<double> &time_points,
-                                                             bool useOrigin,
                                                              bool useMt,
                                                              bool verbose,
                                                              const std::vector<double> &occurrence_ages,
@@ -170,14 +168,14 @@ MatrixReal RevBayesCore::ComputeLnProbabilityDensitiesOBDP(  const double &start
         bool returnLogLikelihood = false;    // Input flag
 
         MatrixReal B_Mt_log = RevBayesCore::ForwardsTraversalMt(start_age, timeline, lambda, mu, psi, omega, rho, 
-                                                                removalPr, maxHiddenLin, cond, time_points, useOrigin, 
+                                                                removalPr, maxHiddenLin, cond, time_points, 
                                                                 returnLogLikelihood, verbose, occurrence_ages, timeTree);
 
         return (B_Mt_log);
     }
     // Use the backward traversal algorithm (Lt)
     MatrixReal B_Lt_log = RevBayesCore::BackwardsTraversalLt(start_age, timeline, lambda, mu, psi, omega, rho, 
-                                                             removalPr, maxHiddenLin, cond, time_points, useOrigin, 
+                                                             removalPr, maxHiddenLin, cond, time_points, 
                                                              verbose, occurrence_ages, timeTree);
     return (B_Lt_log);
 
@@ -200,7 +198,6 @@ MatrixReal RevBayesCore::ComputeLnProbabilityDensitiesOBDP(  const double &start
  * \param[in]    removalPr              Probabilit(y|ies) of death upon sampling (treatment).
  * \param[in]    maxHiddenLin           Maximum number of hidden lineages (algorithm accuracy).
  * \param[in]    cond                   Condition of the process (survival/survival2).
- * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
  * \param[in]    useMt                  If true computes densities with the forward traversal algorithm (Mt) otherwise uses backward one (Lt).
  * \param[in]    verbose                If true displays warnings and information messages.
  * \param[in]    occurrence_ages        Vector of occurrence ages.
@@ -218,7 +215,6 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const double &start_age,
                                                  const std::vector<double> &removalPr,
                                                  const TypedDagNode<long> *maxHiddenLin,
                                                  const std::string &cond,
-                                                 bool useOrigin,
                                                  bool useMt,
                                                  bool verbose,
                                                  const std::vector<double> &occurrence_ages,
@@ -236,8 +232,8 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const double &start_age,
         }
 
         double logLikelihood = RevBayesCore::likelihoodWithAllSamplesRemoved(start_age, timeline, lambda, mu, psi, omega, 
-                                                                           rho, removalPr, cond, time_points_Mt, useOrigin, 
-                                                                           verbose, occurrence_ages, timeTree);
+                                                                             rho, removalPr, cond, time_points_Mt, 
+                                                                             verbose, occurrence_ages, timeTree);
 
         if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood (A. Gupta) " << logLikelihood << "\n" << std::endl;}}
     else {
@@ -251,8 +247,8 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const double &start_age,
             bool returnLogLikelihood = true;                         // Input flag
 
             MatrixReal LogLikelihood = RevBayesCore::ForwardsTraversalMt(start_age, timeline, lambda, mu, psi, omega, rho, 
-                                                                       removalPr, maxHiddenLin, cond, time_points_Mt, useOrigin, 
-                                                                       returnLogLikelihood, verbose, occurrence_ages, timeTree);
+                                                                         removalPr, maxHiddenLin, cond, time_points_Mt, 
+                                                                         returnLogLikelihood, verbose, occurrence_ages, timeTree);
 
             logLikelihood = LogLikelihood[0][0];
             if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood Mt : " << logLikelihood << "\n" << std::endl;}
@@ -266,8 +262,8 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const double &start_age,
             const std::vector<double> time_points_Lt(1, start_age);      // Record the probability density at the start age to compute the likelihood
 
             MatrixReal B_Lt_log = RevBayesCore::BackwardsTraversalLt(start_age, timeline, lambda, mu, psi, omega, rho, 
-                                                                   removalPr, maxHiddenLin, cond, time_points_Lt, useOrigin, 
-                                                                   verbose, occurrence_ages, timeTree);
+                                                                     removalPr, maxHiddenLin, cond, time_points_Lt, 
+                                                                     verbose, occurrence_ages, timeTree);
 
             // The likelihood corresponds to the first element of the B_Lt matrix
             logLikelihood = B_Lt_log[0][0];
@@ -301,7 +297,6 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const double &start_age,
  * \param[in]    maxHiddenLin           Maximum number of hidden lineages (algorithm accuracy).
  * \param[in]    cond                   Condition of the process (survival/survival2).
  * \param[in]    time_points            Time points at which we compute the density.
- * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
  * \param[in]    timeTree               Tree.
  *
  * \return    The matrix of Mt values through time.
@@ -317,7 +312,6 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
                                                 const TypedDagNode<long> *maxHiddenLin,
                                                 const std::string& cond,
                                                 const std::vector<double> &time_points,
-                                                bool useOrigin,
                                                 bool returnLogLikelihood,
                                                 bool verbose,
                                                 const std::vector<double> &occurrence_ages,
@@ -557,7 +551,6 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
  * \param[in]    maxHiddenLin           Maximum number of hidden lineages (algorithm accuracy).
  * \param[in]    cond                   Condition of the process (survival/survival2).
  * \param[in]    time_points            Time points at which we compute the density.
- * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
  * \param[in]    timeTree               Tree.
  *
  * \return    The matrix of Lt values through time.
@@ -573,7 +566,6 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
                                                 const TypedDagNode<long> *maxHiddenLin,
                                                 const std::string& cond,
                                                 const std::vector<double> &time_points,
-                                                bool useOrigin,
                                                 bool verbose,
                                                 const std::vector<double> &occurrence_ages,
                                                 const Tree &timeTree  )
@@ -796,7 +788,6 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
  * \param[in]    maxHiddenLin           Maximum number of hidden lineages (algorithm accuracy).
  * \param[in]    cond                   Condition of the process (survival/survival2).
  * \param[in]    time_points            Time points at which we compute the density.
- * \param[in]    useOrigin              If true the start age is the origin time otherwise the root age of the process.
  * \param[in]    timeTree               Tree.
  *
  * \return    The matrix of Lt values through time.
@@ -811,7 +802,6 @@ double RevBayesCore::likelihoodWithAllSamplesRemoved(   const double &start_age,
                                                         const std::vector<double> &removalPr,
                                                         const std::string& cond,
                                                         const std::vector<double> &time_points,
-                                                        bool useOrigin,
                                                         bool verbose,
                                                         const std::vector<double> &occurrence_ages,
                                                         const Tree &timeTree  )

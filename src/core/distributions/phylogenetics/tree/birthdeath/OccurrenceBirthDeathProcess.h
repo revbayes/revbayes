@@ -86,7 +86,6 @@ namespace RevBayesCore {
         const TypedDagNode< RevBayesCore::RbVector<double> >    *occurrence_ages;                         //!< Vector of occurrence times
 
         const bool                                              useMt;                                    //!< Forward traversal Mt algorithm (otherwise backward Lt)
-        const bool                                              useOrigin;                                //!< If true the start age is the origin time otherwise the root age of the process.
         const std::string &                                     cond;                                     //!< Condition of the process (none/survival/survival2).
         const bool                                              verbose;                                  //!< Display warnings and information messages
 

@@ -70,7 +70,6 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                       
     maxHiddenLin(n),
     occurrence_ages(O),
     useMt ( mt ),
-    useOrigin (uo),
     cond (cdt),
     verbose ( vb )
 
@@ -233,7 +232,7 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void ) const
       occAges = std::vector<double>();
   }
 
-  double logLikelihood = RevBayesCore::ComputeLnLikelihoodOBDP(start_age->getValue(), timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, useOrigin, useMt, verbose, occAges, tree);
+  double logLikelihood = RevBayesCore::ComputeLnLikelihoodOBDP(start_age->getValue(), timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, useMt, verbose, occAges, tree);
 
   return logLikelihood;
 }

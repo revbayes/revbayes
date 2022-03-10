@@ -34,7 +34,6 @@ using namespace RevBayesCore;
  * \param[in]    cdt                       Condition of the process (survival/survival2).
  * \param[in]    O                         Vector of occurrence ages.
  * \param[in]    tau            	       Time points at which we compute the density.
- * \param[in]    uo                        If true the start age is the origin time otherwise the root age of the process.
  * \param[in]    t                         Tree for which ancestral pop. size has to be computed.
  * \param[in]    ht                        Rate interval change times of the piecewise constant process.
  */
@@ -52,7 +51,6 @@ InferAncestralPopSizeFunctionPiecewise::InferAncestralPopSizeFunctionPiecewise( 
                                           											const std::string& cdt,
                                           										    const TypedDagNode< RevBayesCore::RbVector<double> > *O,
                                           											const std::vector<double> &tau,
-                                          											bool uo,
                                           											TypedDagNode<Tree> *tr,
 																					const TypedDagNode< RbVector<double> > *ht) : 
     
@@ -63,7 +61,6 @@ InferAncestralPopSizeFunctionPiecewise::InferAncestralPopSizeFunctionPiecewise( 
     cond (cdt),
     occurrences( O ),
     time_points ( tau ),
-    useOrigin (uo),
     timeTree (tr),
 	interval_times(ht)
 
@@ -201,9 +198,9 @@ void InferAncestralPopSizeFunctionPiecewise::update( void )
 
 		bool useMt;
 		bool verbose;
-		MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age->getValue(), timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, time_points, useOrigin, useMt = false, verbose = true, occurrence_ages, tree);
+		MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age->getValue(), timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, time_points, useMt = false, verbose = true, occurrence_ages, tree);
 		std::cout << "LT is ok, go to Mt" << std::endl;
-		MatrixReal B_Mt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age->getValue(), timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, time_points, useOrigin, useMt = true, verbose = true, occurrence_ages, tree);
+		MatrixReal B_Mt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age->getValue(), timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, time_points, useMt = true, verbose = true, occurrence_ages, tree);
 	// Realize the normalized Hadamar Product of B_Lt and B_Mt
 		MatrixReal D_Kt(S, (N + 1), 0.0);
     for (size_t j = 0; j < S; j++){

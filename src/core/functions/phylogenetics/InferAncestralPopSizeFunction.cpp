@@ -35,7 +35,6 @@ using namespace RevBayesCore;
  * \param[in]    cdt                       Condition of the process (survival/survival2).
  * \param[in]    O                         Vector of occurrence ages.
  * \param[in]    tau            		   Time points at which we compute the density.
- * \param[in]    uo                        If true the start age is the origin time otherwise the root age of the process.
  * \param[in]    vb                        Verbose
  * \param[in]    tr                        Tree for which ancestral pop. size has to be computed.
  */
@@ -51,7 +50,6 @@ InferAncestralPopSizeFunction::InferAncestralPopSizeFunction( 	const TypedDagNod
 	                                                          	const std::string& cdt,
                                                                 const TypedDagNode< RevBayesCore::RbVector<double> > *O,
 	                                                          	const std::vector<double> &tau,
-                                                                bool uo,
                                                                 bool vb,
 	                                                          	TypedDagNode<Tree> *tr) : 
     
@@ -68,7 +66,6 @@ InferAncestralPopSizeFunction::InferAncestralPopSizeFunction( 	const TypedDagNod
     cond (cdt),
     occurrences( O ),
     time_points ( tau ),
-    useOrigin (uo),
     verbose (vb),
     timeTree (tr)
 
@@ -136,9 +133,9 @@ void InferAncestralPopSizeFunction::update( void )
 	std::vector<double> removalP{removalPr->getValue()};
 
 	MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(sa, timeline, lambd, m, ps, omeg, rho, removalP, maxHiddenLin, cond, 
-                                                                          time_points, useOrigin, useMt = false, verbose, occurrence_ages, tree);
+                                                                          time_points, useMt = false, verbose, occurrence_ages, tree);
     MatrixReal B_Mt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(sa, timeline, lambd, m, ps, omeg, rho, removalP, maxHiddenLin, cond, 
-                                                                          time_points, useOrigin, useMt = true, verbose, occurrence_ages, tree);
+                                                                          time_points, useMt = true, verbose, occurrence_ages, tree);
 
 	// Realize the normalized Hadamar Product of B_Lt and B_Mt
 	MatrixReal D_Kt(S, (N + 1), 0.0);

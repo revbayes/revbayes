@@ -52,8 +52,6 @@ RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_inferAncestralPopS
 
     std::vector<double>                                             tau             = static_cast<const ModelVector<Real> &>( time_points->getRevObject() ).getValue();
 
-    bool                                                            uo              = ( start_condition == "originAge" ? true : false );
-
     // verbose
     bool                                                            vb              = static_cast<const RlBoolean &>( verbose->getRevObject() ).getValue();
 
@@ -79,7 +77,7 @@ RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_inferAncestralPopS
 
         RevBayesCore::DagNode*                                      r               = ( removalPr->getRevObject() ).getDagNode();
 
-        RevBayesCore::InferAncestralPopSizeFunctionPiecewise* fxn = new RevBayesCore::InferAncestralPopSizeFunctionPiecewise( sa, l, m, p, o, rh, r, n, cdt, occAges, tau, uo, tr, time );
+        RevBayesCore::InferAncestralPopSizeFunctionPiecewise* fxn = new RevBayesCore::InferAncestralPopSizeFunctionPiecewise( sa, l, m, p, o, rh, r, n, cdt, occAges, tau, tr, time );
 
         return fxn;
     }
@@ -94,7 +92,7 @@ RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_inferAncestralPopS
 
     RevBayesCore::TypedDagNode< double >*                           r               = static_cast<const RealPos &>( removalPr->getRevObject() ).getDagNode();
 
-    RevBayesCore::InferAncestralPopSizeFunction* fxn = new RevBayesCore::InferAncestralPopSizeFunction( sa, l, m, p, o, rh, r, n, cdt, occAges, tau, uo, vb, tr );
+    RevBayesCore::InferAncestralPopSizeFunction* fxn = new RevBayesCore::InferAncestralPopSizeFunction( sa, l, m, p, o, rh, r, n, cdt, occAges, tau, vb, tr );
 
     return fxn;
 }
