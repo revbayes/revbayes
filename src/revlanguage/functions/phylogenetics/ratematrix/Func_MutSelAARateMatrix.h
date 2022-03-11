@@ -20,7 +20,7 @@ class ArgumentRules;
 class TypeSpec;
 
     /**
-     * The RevLanguage wrapper of the Goldman-Yang (1994) rate matrix function.
+     * The RevLanguage wrapper of the MutSelAA rate matrix function.
      *
      *
      * @copyright Copyright 2021-
