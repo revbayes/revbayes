@@ -14,11 +14,11 @@ echo "${DIR}_sources = files([" > meson.build
 find . -name '*.cpp' |
     sed "s|^|'|" |
     sed "s|$|',|" |
-    grep -v '^\.' |
+    grep -v '/\.' |
     grep -v 'main.cpp' >> meson.build
 find . -name '*.c' |
     sed "s|^|'|" |
     sed "s|$|',|" |
-    grep -v '^\.' >> meson.build
+    grep -v '/\.' >> meson.build
 echo "])" >> meson.build
 echo >> meson.build
