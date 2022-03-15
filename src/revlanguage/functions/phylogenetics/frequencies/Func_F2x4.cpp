@@ -1,5 +1,5 @@
-#include "Func_F3x4.h"
-#include "CppCodonFuncs.h"
+#include "Func_F2x4.h"
+#include "CppDoubletFuncs.h"
 
 #include "RealPos.h"
 #include "RlDeterministicNode.h"
@@ -26,40 +26,24 @@ using namespace RevLanguage;
  *
  * \return A new copy of the process.
  */
-Func_F3x4* Func_F3x4::clone( void ) const
+Func_F2x4* Func_F2x4::clone( void ) const
 {
-    return new Func_F3x4( *this );
+    return new Func_F2x4( *this );
 }
 
 typedef RevBayesCore::Simplex CSimplex;
 
-RevBayesCore::TypedFunction< CSimplex >* Func_F3x4::createFunction( void ) const
+RevBayesCore::TypedFunction< CSimplex >* Func_F2x4::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< CSimplex >* bf1 = static_cast<const Simplex &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< CSimplex >* bf2 = static_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< CSimplex >* bf3 = static_cast<const Simplex &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< CSimplex >* bf1 = dynamic_cast<const Simplex &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< CSimplex >* bf2 = dynamic_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
 
-    if ( bf1->getValue().size() != 4 )
-    {
-        throw RbException("The fnF3x4:baseFrequencies1: must have exactly 4 base frequencies!.");
-    }
-
-    if ( bf2->getValue().size() != 4 )
-    {
-        throw RbException("The fnF3x4:baseFrequencies2: must have exactly 4 base frequencies!.");
-    }
-
-    if ( bf3->getValue().size() != 4 )
-    {
-        throw RbException("The fnF3x4:baseFrequencies3: must have exactly 4 base frequencies!.");
-    }
-
-    return RevBayesCore::generic_function_ptr( RevBayesCore::F3x4, bf1, bf2, bf3 );
+    return RevBayesCore::generic_function_ptr( RevBayesCore::F2x4, bf1, bf2 );
 }
 
 
 /* Get argument rules */
-const ArgumentRules& Func_F3x4::getArgumentRules( void ) const
+const ArgumentRules& Func_F2x4::getArgumentRules( void ) const
 {
 
     static ArgumentRules argumentRules = ArgumentRules();
@@ -69,7 +53,6 @@ const ArgumentRules& Func_F3x4::getArgumentRules( void ) const
     {
         argumentRules.push_back( new ArgumentRule( "baseFrequencies1", Simplex::getClassTypeSpec(), "The stationary frequencies of the 1st nucleotide.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "baseFrequencies2", Simplex::getClassTypeSpec(), "The stationary frequencies of the 2nd nucleotide.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "baseFrequencies3", Simplex::getClassTypeSpec(), "The stationary frequencies of the 3rd nucleotide.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         rules_set = true;
     }
@@ -78,7 +61,7 @@ const ArgumentRules& Func_F3x4::getArgumentRules( void ) const
 }
 
 
-const std::string& Func_F3x4::getClassType(void)
+const std::string& Func_F2x4::getClassType(void)
 {
 
     static std::string rev_type = "Simplex";
@@ -88,7 +71,7 @@ const std::string& Func_F3x4::getClassType(void)
 
 
 /* Get class type spec describing type of object */
-const TypeSpec& Func_F3x4::getClassTypeSpec(void)
+const TypeSpec& Func_F2x4::getClassTypeSpec(void)
 {
 
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
@@ -100,16 +83,16 @@ const TypeSpec& Func_F3x4::getClassTypeSpec(void)
 /**
  * Get the primary Rev name for this function.
  */
-std::string Func_F3x4::getFunctionName( void ) const
+std::string Func_F2x4::getFunctionName( void ) const
 {
     // create a name variable that is the same for all instance of this class
-    std::string f_name = "fnF3x4";
+    std::string f_name = "fnF2x4";
 
     return f_name;
 }
 
 
-const TypeSpec& Func_F3x4::getTypeSpec( void ) const
+const TypeSpec& Func_F2x4::getTypeSpec( void ) const
 {
 
     static TypeSpec type_spec = getClassTypeSpec();

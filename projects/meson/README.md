@@ -35,28 +35,30 @@ pip3 install meson ninja
 
 ## Build RevBayes
 
-1. Download RevBayes from our github repository. Clone the repository using git by running the following command in the terminal:
+1. Download RevBayes from our github repository. Clone the repository using git by running the following commands in the terminal:
 
     ``` sh
     git clone https://github.com/revbayes/revbayes.git revbayes
+    cd revbayes
+    git checkout development           # Probably you want the development branch
+    git submodule init
+    git submodule update               # Download tests required for the build
     ```
 
-1. Configure and compile Revbayes:
+2. Configure and compile Revbayes:
    
     ``` sh
-    ( cd revbayes/ ; git checkout development )  # Probably you want the development branch
-    ( cd revbayes/ ; git submodule init ; git submodule update ) # Download tests required for the build
-    ( cd revbayes/projects/meson/ ; ./generate.sh )
-    meson build revbayes --prefix=$HOME/Applications/revbayes
+    projects/meson/generate.sh
+    meson build --prefix=$HOME/Applications/revbayes
     ninja -C build install
     ```
 
     This creates a `build` directory where the build will take place, and says that the executables will eventually be installed in `$HOME/Applications/revbayes`.
 
-1. For the MPI version, add `-Dmpi=true` to the `meson` command.
+3. For the MPI version, add `-Dmpi=true` to the `meson` command.
 
     ``` sh
-    meson build revbayes -Dmpi=true --prefix=$HOME/Applications/revbayes
+    meson build -Dmpi=true --prefix=$HOME/Applications/revbayes
     ```
 
 ## Configuration
