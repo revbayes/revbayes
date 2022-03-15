@@ -98,6 +98,8 @@ RevBayesCore::PiecewiseConstantCoalescent* Dist_CoalescentSkyline::createDistrib
     }
     // method
     const std::string &m                        = static_cast<const RlString &>( method->getRevObject() ).getValue();
+    // demographic model
+    const std::string &dem                        = static_cast<const RlString &>( model->getRevObject() ).getValue();
     // taxon names
     const std::vector<RevBayesCore::Taxon> & ta = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
     // clade constraints
@@ -124,9 +126,19 @@ RevBayesCore::PiecewiseConstantCoalescent* Dist_CoalescentSkyline::createDistrib
             throw RbException("You must provide the 'times' when you use 'method=specified'.");
         }
     }
+
+    RevBayesCore::PiecewiseConstantCoalescent::DEMOGRAPHY_TYPES demfun;// = RevBayesCore::PiecewiseConstantCoalescent::CONSTANT;
+    if ( dem == "constant" )
+    {
+        demfun = RevBayesCore::PiecewiseConstantCoalescent::CONSTANT;
+    }
+    else if ( dem == "linear" )
+    {
+        demfun = RevBayesCore::PiecewiseConstantCoalescent::LINEAR;
+    }
     
     // create the internal distribution object
-    RevBayesCore::PiecewiseConstantCoalescent*   d = new RevBayesCore::PiecewiseConstantCoalescent(th, ti, meth, ta, c);
+    RevBayesCore::PiecewiseConstantCoalescent*   d = new RevBayesCore::PiecewiseConstantCoalescent(th, ti, meth, demfun, ta, c);
     
     return d;
 }
@@ -215,6 +227,10 @@ const MemberRules& Dist_CoalescentSkyline::getParameterRules(void) const
         optionsCondition.push_back( "events" );
         optionsCondition.push_back( "specified" );
         dist_member_rules.push_back( new OptionRule( "method", new RlString("events"), optionsCondition, "The method how intervals are defined." ) );
+        std::vector<std::string> optionsModel;
+        optionsModel.push_back( "constant" );
+        optionsModel.push_back( "linear" );
+        dist_member_rules.push_back( new OptionRule( "model", new RlString("constant"), optionsModel, "The demographic model for the intervals." ) );
         dist_member_rules.push_back( new ArgumentRule( "taxa"       , ModelVector<Taxon>::getClassTypeSpec(), "The taxa used when drawing a random tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "constraints", ModelVector<Clade>::getClassTypeSpec(), "The strictly enforced topology constraints.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new ModelVector<Clade>() ) );
         
@@ -275,6 +291,10 @@ void Dist_CoalescentSkyline::setConstParameter(const std::string& name, const Re
     else if ( name == "method" )
     {
         method = var;
+    }
+    else if ( name == "model" )
+    {
+        model = var;
     }
     else
     {
