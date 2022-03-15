@@ -30,7 +30,7 @@ namespace RevLanguage {
         static const std::string&                           getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                              getClassTypeSpec(void);                                                                 //!< Get class type spec
         std::string                                         getDistributionFunctionName(void) const;                                                //!< Get the Rev-name for this distribution.
-        virtual MethodTable                                 getDistributionMethods( void ) const;                                                                       //!< Get the member methods
+        virtual MethodTable                                 getDistributionMethods( void ) const;                                                   //!< Get the member methods
         const TypeSpec&                                     getTypeSpec(void) const;                                                                //!< Get the type spec of the instance
         const MemberRules&                                  getParameterRules(void) const;                                                          //!< Get member rules (const)
         
@@ -51,6 +51,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                           theta;
         RevPtr<const RevVariable>                           times;
         RevPtr<const RevVariable>                           method;
+        RevPtr<const RevVariable>                           model;
         
     };
     
