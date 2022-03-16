@@ -34,10 +34,10 @@ namespace RevBayesCore {
         
         // enum METHOD_TYPES { EVENTS, SPECIFIED, UNIFORM };
         enum METHOD_TYPES { EVENTS, SPECIFIED };
-        enum DEMOGRAPHY_TYPES { CONSTANT, LINEAR };
+        enum DEMOGRAPHY_FUNCTION_TYPES { CONSTANT, LINEAR };
 
         
-        PiecewiseConstantCoalescent(const TypedDagNode<RbVector<double> > *N, const TypedDagNode<RbVector<double> > *i, METHOD_TYPES meth, DEMOGRAPHY_TYPES dem, const std::vector<Taxon> &tn, const std::vector<Clade> &c);
+        PiecewiseConstantCoalescent(const TypedDagNode<RbVector<double> > *N, const TypedDagNode<RbVector<double> > *i, METHOD_TYPES meth, DEMOGRAPHY_FUNCTION_TYPES dem, const std::vector<Taxon> &tn, const std::vector<Clade> &c);
         virtual                                            ~PiecewiseConstantCoalescent(void);                                                                    //!< Virtual destructor
         
         // public member functions
@@ -58,8 +58,11 @@ namespace RevBayesCore {
         
     private:
         
-        void                                                updateDemographies( void ) const;
+//        void                                                updateDemographies( void ) const;
         void                                                updateIntervals(void) const;
+        double                                              getDemographic(double event_age, double index) const;
+        double                                              getIntegral(double last_age, double event_age, double index) const;
+        double                                              getWaitingTime(double age, double rv, size_t index) const;
 
         // members
         const TypedDagNode<RbVector<double> >*              Nes;                                    //!< A pointer for the population sizes for each interval
@@ -67,8 +70,8 @@ namespace RevBayesCore {
         mutable RbVector<double>                            interval_change_points;
         mutable RbVector<double>                            pop_sizes;                              //!< The population sizes for each interval
         METHOD_TYPES                                        interval_method;                        //!< The method of specifying coalescent intervals
-        DEMOGRAPHY_TYPES                                    demographic_function_var;
-        RbVector< DemographicFunction >                     demographies;
+        DEMOGRAPHY_FUNCTION_TYPES                           demographic_function_var;
+//        RbVector< DemographicFunction >                     demographies;
 
     };
     

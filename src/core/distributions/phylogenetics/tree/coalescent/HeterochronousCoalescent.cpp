@@ -278,7 +278,7 @@ std::vector<double> HeterochronousCoalescent::simulateCoalescentAges( size_t n )
             {
                 // demographic function change
                 combined_event_ages.push_back(nextIntervalStart);
-                combined_event_types.push_back(0.0);
+                combined_event_types.push_back( DEMOGRAPHIC_MODEL_CHANGE );
                 ++atIntervalStart;
                 if (atIntervalStart < change_ages.size())
                 {
@@ -293,18 +293,23 @@ std::vector<double> HeterochronousCoalescent::simulateCoalescentAges( size_t n )
             {
                 // serial sample
                 combined_event_ages.push_back(nextSerialTime);
-                combined_event_types.push_back(1.0);
+                combined_event_types.push_back( SERIAL_SAMPLE );
                 ++atSerialTime;
-                if (atSerialTime < serial_ages.size()) {
+                if (atSerialTime < serial_ages.size())
+                {
                     nextSerialTime = serial_ages[atSerialTime];
-                } else {
+                }
+                else
+                {
                     nextSerialTime = RbConstants::Double::inf;
                 }
             }
         }
-    } else {
+    }
+    else
+    {
         combined_event_ages = change_ages;
-        combined_event_types = std::vector<double>(change_ages.size(),0.0);
+        combined_event_types = std::vector<double>(change_ages.size(),DEMOGRAPHIC_MODEL_CHANGE);
     }
  
     // cap vector with an event at t=infinity

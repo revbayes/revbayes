@@ -127,14 +127,14 @@ RevBayesCore::PiecewiseConstantCoalescent* Dist_CoalescentSkyline::createDistrib
         }
     }
 
-    RevBayesCore::PiecewiseConstantCoalescent::DEMOGRAPHY_TYPES demfun;// = RevBayesCore::PiecewiseConstantCoalescent::CONSTANT;
+    RevBayesCore::PiecewiseConstantCoalescent::DEMOGRAPHY_FUNCTION_TYPES demfun;// = RevBayesCore::PiecewiseConstantCoalescent::CONSTANT;
     if ( dem == "constant" )
     {
-        demfun = RevBayesCore::PiecewiseConstantCoalescent::CONSTANT;
+        demfun = RevBayesCore::PiecewiseConstantCoalescent::DEMOGRAPHY_FUNCTION_TYPES::CONSTANT;
     }
     else if ( dem == "linear" )
     {
-        demfun = RevBayesCore::PiecewiseConstantCoalescent::LINEAR;
+        demfun = RevBayesCore::PiecewiseConstantCoalescent::DEMOGRAPHY_FUNCTION_TYPES::LINEAR;
     }
     
     // create the internal distribution object
