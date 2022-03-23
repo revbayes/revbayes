@@ -1,4 +1,5 @@
 #include "Func_GoldmanYang94RateMatrix.h"
+#include "CppCodonFuncs.h"
 
 #include "RealPos.h"
 #include "RlDeterministicNode.h"
@@ -20,113 +21,18 @@
 #include "ConcreteTimeReversibleRateMatrix.h"
 
 using namespace RevLanguage;
-using RevBayesCore::ConcreteTimeReversibleRateMatrix;
-using RevBayesCore::AminoAcidState;
-using RevBayesCore::CodonState;
-using std::vector;
 
-bool is_transition_mut(int i, int j)
+RevBayesCore::ConcreteTimeReversibleRateMatrix* CodonGY94(double kappa, double omega, const RevBayesCore::Simplex& codon_freqs)
 {
-    assert(i != j);
-
-    if (i > j) std::swap(i,j);
-
-    if (i == 0 and j == 2) return true; // A <-> G
-
-    if (i == 1 and j == 3) return true; // C <-> T
-
-    return false;
-}
-
-bool is_transversion_mut(int i, int j)
-{
-    return not is_transition_mut(i,j);
-}
-
-int n_different_nucs(const vector<unsigned int>& codon_from, const vector<unsigned int>& codon_to)
-{
-    assert(codon_from.size() == 3);
-    assert(codon_to.size() == 3);
-
-    int count = 0;
-    for(int i=0;i<3;i++)
-        if (codon_from[i] != codon_to[i])
-            count++;
-
-    return count;
-}
-
-std::pair<int,int> single_nuc_mut(const vector<unsigned int>& codon_from, const vector<unsigned int>& codon_to)
-{
-    assert(n_different_nucs(codon_from, codon_to) == 1);
-
-    for(int i=0; i<3; i++)
-    {
-        if (codon_from[i] != codon_to[i])
-            return std::pair<int,int>(codon_from[i], codon_to[i]);
-    }
-
-    // This should never happen!
-    throw RbException("single_nuc_mut: codons are the same!  This should never happen.");
-}
-
-ConcreteTimeReversibleRateMatrix* CodonGY94(double omega, double kappa, const RevBayesCore::Simplex& codon_freqs)
-{
-    assert(omega >= 0.0);
     assert(kappa >= 0.0);
+    assert(omega >= 0.0);
 
     constexpr int num_states = 61;
     if (codon_freqs.size() != num_states)
         throw RbException("The fnCodonGY94 dN/dS rate matrix requires exactly 61 codon frequencies.");
 
-    vector<double> exchange_rates(num_states*(num_states-1)/2);
-
-    // set the off-diagonal portions of the rate matrix
-    int k = 0;
-    for (size_t i=0; i<num_states; ++i)
-    {
-        CodonState c1 = CodonState( CodonState::CODONS[i] );
-        vector<unsigned int> codon_from = c1.getTripletStates();
-        AminoAcidState aa_from = c1.getAminoAcidState();
-
-        for (size_t j=i+1; j<num_states; ++j)
-        {
-            CodonState c2 = CodonState( CodonState::CODONS[j] );
-            vector<unsigned int> codon_to = c2.getTripletStates();
-            AminoAcidState aa_to = c2.getAminoAcidState();
-
-            int n_diff_nucs = n_different_nucs(codon_from, codon_to);
-
-            assert(n_diff_nucs > 0);
-
-            // The rate is zero for more than one nucleotide change.
-            double exchange_rate = 1.0;
-
-            if (n_diff_nucs != 1)
-            {
-                exchange_rate = 1.0;
-
-                std::pair<int,int> changed_nucs = single_nuc_mut(codon_from, codon_to);
-
-                // A factor of `kappa` for a transition.
-                if (is_transition_mut(changed_nucs.first, changed_nucs.second))
-                    exchange_rate *= kappa;
-
-                // A factor of `omega` for an amino-acid difference.
-                if (aa_from != aa_to)
-                    exchange_rate *= omega;
-            }
-
-            exchange_rates[k++] = exchange_rate;
-        }
-    }
-
-    // Check that we filled in the entire exchange_rates vector
-    assert( k == num_states*(num_states-1)/2 );
-
-    return new ConcreteTimeReversibleRateMatrix( exchange_rates, codon_freqs );
+    return GY94(kappa, omega, codon_freqs).clone();
 }
-
 
 
 /** default constructor */
@@ -149,13 +55,11 @@ Func_GoldmanYang94RateMatrix* Func_GoldmanYang94RateMatrix::clone( void ) const
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_GoldmanYang94RateMatrix::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< double >* om = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< double >* ka = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* bf = static_cast<const Simplex &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* om = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* cf = static_cast<const Simplex &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
 
-    RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* ptr = RevBayesCore::generic_function_ptr2< RevBayesCore::RateGenerator >( CodonGY94, om, ka, bf );
-
-    return ptr;
+    return RevBayesCore::generic_function_ptr2< RevBayesCore::RateGenerator >( CodonGY94, ka, om, cf );
 }
 
 

@@ -78,7 +78,14 @@ sub parse_entry {
                             my @lines = split(/\n/,$ret);
                             foreach my $line (@lines)
                             {
-                                $line = substr($line,$indent);
+                                if ($indent < length($line))
+                                {
+                                    $line = substr($line,$indent)
+                                }
+                                else
+                                {
+                                    $line = "";
+                                }
                                 $line =~ s/\s*$//s;
                             }
                             $ret = join("\n",@lines);
