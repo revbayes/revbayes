@@ -13,10 +13,9 @@ namespace RevLanguage {
      * Please read the OccurrenceBirthDeathProcess.h for more info.
      *
      *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Antoine Zwaans & Jérémy Andréoletti)
+     * @author Antoine Zwaans & Jérémy Andréoletti
      * @since 2020-03, version 1.0
-     *c
+     *
      */
     class Dist_occurrenceBirthDeathProcess : public BirthDeathProcess {
 

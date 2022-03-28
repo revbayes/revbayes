@@ -6,14 +6,10 @@
  *
  * @brief Compute joint log-probability density of the tree and occurrences under the Occurrence Birth-Death Process.
  *
- * (c) Copyright 2009- under GPL version 3
- * @date Last modified: $Date$
- * @author The RevBayes Development Core Team (Antoine Zwaans & Jérémy Andréoletti)
- * @license GPL version 3
+ * @author Antoine Zwaans & Jérémy Andréoletti
  * @version 1.0
  * @since 2020-03, version 1.0
  *
- * $Id$
  */
 
 #ifndef ComputeLikelihoodsLtMt_H
