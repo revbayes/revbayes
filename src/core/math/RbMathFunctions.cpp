@@ -586,7 +586,6 @@ double RbMath::incompleteBeta(double a, double b, double x) {
 		it++;
 		if ( it_max < it )
         {
-			//std::cerr << "Error in incompleteBeta: Maximum number of iterations exceeded!" << std::endl;
 			return RbConstants::Double::inf;
         }
 		term = term * temp * rx / ( pp + ( double ) ( i ) );
@@ -839,7 +838,7 @@ double RbMath::lnGamma_sign(double x, int *sgn)
     if (x <= 0 && x == RbMath::trunc(x)) { /* Negative integer argument */
         std::ostringstream s;
         s << "Cannot compute log-gamma function for x = " << x;
-        throw RbException(s.str());
+        throw RbException(RbException::MATH_ERROR,s.str());
     }
     
     y = fabs(x);
@@ -852,7 +851,7 @@ double RbMath::lnGamma_sign(double x, int *sgn)
     if (y > xmax) {
         std::ostringstream s;
         s << "Cannot compute log-gamma function for x = " << x;
-        throw RbException(s.str());
+        throw RbException(RbException::MATH_ERROR,s.str());
     }
     
     if (x > 0) { /* i.e. y = x > 10 */
@@ -877,7 +876,7 @@ double RbMath::lnGamma_sign(double x, int *sgn)
         
         std::ostringstream s;
         s << "Cannot compute log-gamma function for x = " << x;
-        throw RbException(s.str());
+        throw RbException(RbException::MATH_ERROR,s.str());
     }
     
     return ans;
@@ -959,15 +958,17 @@ double RbMath::lnGammacor(double x)
     {
         std::ostringstream s;
         s << "Cannot compute log-gammacor function for x = " << x;
-        throw RbException(s.str());
+        throw RbException(RbException::MATH_ERROR,s.str());
     }
-    else if (x >= xmax) {
+    else if (x >= xmax)
+    {
         std::ostringstream s;
         s << "Cannot compute log-gammacor function for x = " << x;
-        throw RbException(s.str());
+        throw RbException(RbException::MATH_ERROR,s.str());
         /* allow to underflow below */
     }
-    else if (x < xbig) {
+    else if (x < xbig)
+    {
         tmp = 10 / x;
         return chebyshev_eval(tmp * tmp * 2 - 1, algmcs, nalgm) / x;
     }

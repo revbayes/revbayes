@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iterator>
 #include <map>
+#include <math.h>
 #include <set>
 #include <string>
 #include <sstream>
@@ -26,6 +27,7 @@
 
 using namespace RevBayesCore;
 
+
 /** Default constructor (interior node, no name). Give the node an optional index ID */
 TopologyNode::TopologyNode(size_t indx) :
     use_ages( true ),
@@ -39,7 +41,12 @@ TopologyNode::TopologyNode(size_t indx) :
     interior_node( false ),
     root_node( true ),
     tip_node( true ),
-    sampled_ancestor( false )
+    sampled_ancestor( false ),
+    num_shift_events( 0 ),
+    burst_speciation( false ),
+    sampling_event( false ),
+    serial_sampling( false ),
+    serial_speciation( false )
 {
 
 }
@@ -58,7 +65,12 @@ TopologyNode::TopologyNode(const Taxon& t, size_t indx) :
     interior_node( false ),
     root_node( true ),
     tip_node( true ),
-    sampled_ancestor( false )
+    sampled_ancestor( false ),
+    num_shift_events( 0 ),
+    burst_speciation( false ),
+    sampling_event( false ),
+    serial_sampling( false ),
+    serial_speciation( false )
 {
 
 }
@@ -77,7 +89,12 @@ TopologyNode::TopologyNode(const std::string& n, size_t indx) :
     interior_node( false ),
     root_node( true ),
     tip_node( true ),
-    sampled_ancestor( false )
+    sampled_ancestor( false ),
+    num_shift_events( 0 ),
+    burst_speciation( false ),
+    sampling_event( false ),
+    serial_sampling( false ),
+    serial_speciation( false )
 {
 
 }
@@ -97,7 +114,12 @@ TopologyNode::TopologyNode(const TopologyNode &n) :
     sampled_ancestor( n.sampled_ancestor ),
     node_comments( n.node_comments ),
     branch_comments( n.branch_comments ),
-    time_in_states( n.time_in_states )
+    time_in_states( n.time_in_states ),
+    num_shift_events( n.num_shift_events ),
+    burst_speciation( n.burst_speciation ),
+    sampling_event( n.sampling_event ),
+    serial_sampling( n.serial_sampling ),
+    serial_speciation( n.serial_speciation )
 {
 
     // copy the children
@@ -126,7 +148,7 @@ TopologyNode::~TopologyNode(void)
     {
         parent->removeChild(this);
     }
-
+    
 }
 
 
@@ -139,21 +161,24 @@ TopologyNode& TopologyNode::operator=(const TopologyNode &n)
         removeAllChildren();
 
         // copy the members
-        use_ages                = n.use_ages;
         age                     = n.age;
+        branch_comments         = n.branch_comments;
         branch_length           = n.branch_length;
-        taxon                   = n.taxon;
+        burst_speciation        = n.burst_speciation;
         index                   = n.index;
         interior_node           = n.interior_node;
-        tip_node                = n.tip_node;
-        sampled_ancestor        = n.sampled_ancestor;
-        root_node               = n.root_node;
         node_comments           = n.node_comments;
-        branch_comments         = n.branch_comments;
-        time_in_states          = n.time_in_states;
-
-        // copy the members
         parent                  = n.parent;
+        root_node               = n.root_node;
+        sampled_ancestor        = n.sampled_ancestor;
+        sampling_event          = n.sampling_event;
+        serial_sampling         = n.serial_sampling;
+        serial_speciation       = n.serial_speciation;
+        taxon                   = n.taxon;
+        time_in_states          = n.time_in_states;
+        num_shift_events        = n.num_shift_events;
+        tip_node                = n.tip_node;
+        use_ages                = n.use_ages;
 
         // copy the children
         for (std::vector<TopologyNode*>::const_iterator it = n.children.begin(); it != n.children.end(); it++)
@@ -244,7 +269,7 @@ void TopologyNode::addChild(TopologyNode* c, size_t pos )
     // add child to beginning if pos is out of bounds
     if( pos > children.size() )
     {
-        throw(RbException("Child position index out of bounds"));
+        throw RbException("Child position index out of bounds");
     }
 
     // add the child at pos offset from the end
@@ -696,6 +721,13 @@ bool TopologyNode::containsClade(const RbBitSet &your_taxa, bool strict) const
 
 
 
+bool TopologyNode::doesUseAges( void ) const
+{
+    return use_ages;
+}
+
+
+
 bool TopologyNode::equals(const TopologyNode& node) const
 {
 
@@ -815,6 +847,40 @@ double TopologyNode::getAge( void ) const
 {
 
     return age;
+}
+
+
+RbBitSet TopologyNode::getAllClades(std::vector<RbBitSet> &all_clades, size_t num_tips, bool internal_only) const
+{
+
+    RbBitSet this_bs = RbBitSet(num_tips);
+    if ( isTip() == true )
+    {
+//        taxa.set( index );
+        // We can't use indices for tree comparison because different trees may
+        // have different indices for the same taxon.
+        // Instead make the BitSet ordered by taxon names.
+        // Eventually this should be refactored with the TaxonMap class.
+        std::map<std::string, size_t> taxon_bitset_map = tree->getTaxonBitSetMap();
+        this_bs.set( taxon_bitset_map[taxon.getName()] );
+        
+        if ( internal_only == false )
+        {
+            all_clades.push_back( this_bs );
+        }
+    }
+    else
+    {
+        for ( std::vector<TopologyNode* >::const_iterator i=children.begin(); i!=children.end(); i++ )
+        {
+            RbBitSet child_bs = (*i)->getAllClades(all_clades, num_tips, internal_only);
+            this_bs |= child_bs;
+        }
+        all_clades.push_back( this_bs );
+
+    }
+
+    return this_bs;
 }
 
 
@@ -1353,6 +1419,12 @@ std::string TopologyNode::getIndividualName() const
 }
 
 
+size_t TopologyNode::getNumberOfShiftEvents( void ) const
+{
+    return num_shift_events;
+}
+
+
 std::string TopologyNode::getSpeciesName() const
 {
     std::string name = taxon.getSpeciesName();
@@ -1555,6 +1627,33 @@ bool TopologyNode::isTip( void ) const
 }
 
 
+bool TopologyNode::isUltrametric(double &depth) const
+{
+    // if we are simply a tip node, then this subtree must be ultrametric
+    if ( isTip() == true )
+    {
+        depth = 0;
+        return true;
+    }
+    
+    double my_depth = 0.0;
+    bool am_ultrametric = children[0]->isUltrametric(my_depth);
+    my_depth += children[0]->getBranchLength();
+    
+    for ( size_t i=1; i<children.size(); ++i )
+    {
+        double child_depth = 0.0;
+        bool child_is_ultrametric = children[i]->isUltrametric(child_depth);
+        child_depth += children[i]->getBranchLength();
+        
+        am_ultrametric = (am_ultrametric && child_is_ultrametric);
+        am_ultrametric = (am_ultrametric && fabs(child_depth - my_depth) < 1E-4);
+    }
+    
+    return am_ultrametric;
+}
+
+
 /**
  * Make this node an all its children bifurcating.
  * The root will not be changed. We throw an error if this node
@@ -1633,6 +1732,28 @@ void TopologyNode::makeBifurcating( bool as_fossils )
 }
 
 
+void TopologyNode::recomputeAge( bool recursive )
+{
+
+    if ( children.size() == 0 )
+    {
+        age = 0.0;
+    }
+    else 
+    {
+        if ( recursive == true )
+        {
+            for (size_t i=0; i<children.size(); ++i)
+            {
+                children[i]->recomputeAge(recursive);
+            }
+        }
+        age = children[0]->getBranchLength() + children[0]->getAge();
+    }
+
+}
+
+
 void TopologyNode::recomputeBranchLength( void )
 {
 
@@ -1683,7 +1804,7 @@ size_t TopologyNode::removeChild(TopologyNode* c)
     }
     else
     {
-        throw(RbException("Cannot find node in list of children nodes"));
+        throw RbException("Cannot find node in list of children nodes");
     }
 
     // update the flags
@@ -1740,13 +1861,19 @@ void TopologyNode::renameNodeParameter(const std::string &old_name, const std::s
 
 void TopologyNode::setAge(double a, bool propagate)
 {
-    if ( sampled_ancestor && propagate )
+    if ( sampled_ancestor == true && propagate == true )
     {
         parent->setAge(a);
         return;
     }
 
     age = a;
+    
+//    // we should also update the taxon age if this is a tip node
+//    if ( isTip() == true )
+//    {
+//        getTaxon().setAge( a );
+//    }
 
     // we need to recompute my branch-length
     recomputeBranchLength();
@@ -1778,8 +1905,15 @@ void TopologyNode::setBranchLength(double b, bool flag_dirty)
 {
 
     branch_length = b;
-
-
+    
+    // we need to mark that we are not using ages but branch lengths
+    // otherwise, this code would need to reformat the branch length into ages!!!
+    // Sebastian (20200819): For some forgotten reason this has been commented out.
+    // I think there are issues if not all ages or branch lengths are set yet.
+    // So the caller needs to make sure of what type of trees are used (unfortunately).
+//    setUseAges( false, false);
+    
+    
     // fire tree change event
     if ( flag_dirty == true && tree != NULL )
     {
@@ -1803,6 +1937,12 @@ void TopologyNode::setName(std::string const &n)
     taxon.setName( n );
     taxon.setSpeciesName( n );
 
+}
+
+
+void TopologyNode::setNumberOfShiftEvents(size_t n)
+{
+    num_shift_events = n;
 }
 
 //SK

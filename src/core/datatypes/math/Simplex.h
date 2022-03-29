@@ -36,7 +36,11 @@ class DagNode;
         Simplex(size_t n, double v);
         Simplex(const std::vector<double> &v);
         Simplex(const Simplex& m);
+        Simplex(Simplex&& m) = default;
         virtual                                ~Simplex(void);
+
+        Simplex& operator=(const Simplex&) = default;
+        Simplex& operator=(Simplex&&) = default;
         
         // global operators
         RbVector<double>                        operator+(double b) const;                                          //!< operator + for matrix + scalar

@@ -5,23 +5,48 @@
 # Model: 20 random variables from a Poisson distribution.
 #
 #
-# authors: Michael R. May
+# authors: Sebastian Hoehna
 #
 ################################################################################
 
+## Global settings
 
-# set my move index
-mi = 0
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
 
-n_samples = 20
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
+####################
+# Set up the model #
+####################
+
+
+NUM_VARS = 3
+NUM_OBS = 10
+
 
 lambda ~ dnExponential(1.0)
-moves[++mi] = mvScale(lambda, weight=2)
+p ~ dnBeta(1,1)
+moves.append( mvScale(lambda, weight=2) )
+moves.append( mvBetaProbability(p, weight=2) )
 
-for (i in 1:n_samples) {
-    x[i] ~ dnPoisson(lambda)
-    x[i].clamp(1)
+for ( j in 1:NUM_VARS ) {
+
+  tries[j] ~ dnPoisson(lambda)
+  moves.append( mvRandomNaturalWalk(tries[j],weight=2) )
+  moves.append( mvRandomGeometricWalk(tries[j],weight=2) )
+
+  for ( i in 1:NUM_OBS){
+    index = (j-1)*NUM_OBS + i
+	x[index] ~ dnBinomial(size=tries[j],p)
+	x[index].clamp( x[index] )
+  }
 }
+
 
 
 #############
@@ -34,17 +59,13 @@ mymodel = model(lambda)
 
 
 
-
-
-
-monitors[1] = mnModel(filename="output/poisson.log",printgen=10, separator = TAB)
-
 mymcmc = mcmc(mymodel, monitors, moves)
 
-validation = validationAnalysis( mymcmc, 1000 )
-validation.burnin(generations=10000,tuningInterval=250)
-validation.run(generations=30000)
-validation.summarize()
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Poisson" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
 
 
 # you may want to quit RevBayes now

@@ -2,7 +2,6 @@
 #define JointConditionalSiteMixtureAllocationMonitor_H
 
 #include "AbstractHomologousDiscreteCharacterData.h"
-#include "StateDependentSpeciationExtinctionProcess.h"
 #include "VariableMonitor.h"
 #include "Tree.h"
 #include "TypedDagNode.h"

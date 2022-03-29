@@ -85,36 +85,128 @@ double NearestNeighborInterchange_nonClockProposal::doProposal( void )
     
     Tree& tau = tree->getValue();
     
-    // pick a random node which is not the root and neithor the direct descendant of the root
+    // pick a random internal branch on which we are going to perform the NNI
+    // the branch is represented by it's tipward node, so we can pick any internal node
+    // which is not the root node
     TopologyNode* node;
     do {
         double u = rng->uniform01();
-        size_t index = size_t( std::floor(tau.getNumberOfNodes() * u) );
+        size_t index = size_t( std::floor((tau.getNumberOfNodes()-tau.getNumberOfTips()) * u) ) + tau.getNumberOfTips();
         node = &tau.getNode(index);
-    } while ( node->isRoot() || node->getParent().isRoot() );
+    } while ( node->isRoot() || node->isTip() );
     
+    // some important nodes that we need several times
     TopologyNode& parent = node->getParent();
-    TopologyNode& grandparent = parent.getParent();
-    TopologyNode* uncle = &grandparent.getChild( 0 );
-    // check if we got the correct child
-    if ( uncle == &parent ) {
-        uncle = &grandparent.getChild( 1 );
+    
+    // some flags to tell us how to perform the tree modifications
+    picked_uncle = true;
+    picked_root_branch = parent.isRoot();
+    
+    // we first need to decide if we use the left or right child of this node
+    TopologyNode* node_A = NULL;
+    if ( rng->uniform01() < 0.5 )
+    {
+        node_A = &node->getChild(0);
+    }
+    else
+    {
+        node_A = &node->getChild(1);
     }
     
+    // now we randomly pick the second node for the swap
+    // here we need to check if this branch "begins" at the root
+    TopologyNode* node_B = NULL;
+    if ( picked_root_branch == false )
+    {
+        // it does not start at the root
+        // so we can either pick the sibling, or the grand parent
+        if ( rng->uniform01() < 0.5 )
+        {
+            // we picked the sibling of the chose node
+            node_B = &parent.getChild(0);
+            if ( node_B == node )
+            {
+                node_B = &parent.getChild(1);
+            }
+            
+            picked_uncle = true;
+        }
+        else
+        {
+            // we picked the grant parent
+            node_B = &parent.getParent();
+            
+            picked_uncle = false;
+        }
+    }
+    else
+    {
+        // the branch begins at the root
+        
+        // first start by checking if the chosen node is child 0
+        size_t child_offset = (node == &parent.getChild(0) ? 1 : 0);
+        
+        // now we can pick the second node, which can be either of the two remaining children
+        if ( rng->uniform01() < 0.5 )
+        {
+            // we picked the first remaining child
+            node_B = &parent.getChild(child_offset);
+        }
+        else
+        {
+            // we picked the second remaining child
+            node_B = &parent.getChild(child_offset+1);
+            if ( node_B == node )
+            {
+                node_B = &parent.getChild(child_offset+2);
+            }
+        }
+        
+        picked_uncle = true;
+        
+    }
+
     // now we store all necessary values
-    storedChoosenNode   = node;
-    storedUncle         = uncle;
-    
-    // now exchange the two nodes
-    grandparent.removeChild( uncle );
-    parent.removeChild( node );
-    grandparent.addChild( node );
-    parent.addChild( uncle );
-    node->setParent( &grandparent );
-    uncle->setParent( &parent );
+    stored_node_A = node_A;
+    stored_node_B = node_B;
+
+    if ( picked_root_branch == false && picked_uncle == true )
+    {
+        
+        // now exchange the two nodes
+        parent.removeChild( node_B );
+        node->removeChild( node_A );
+        parent.addChild( node_A );
+        node->addChild( node_B );
+        node_A->setParent( &parent );
+        node_B->setParent( node );
+    }
+    else if ( picked_root_branch == false && picked_uncle == false )
+    {
+        node_B->removeChild( &parent );
+        parent.removeChild( node );
+        node->removeChild( node_A );
+        node_B->addChild( node );
+        node->addChild( &parent );
+        parent.addChild( node_A );
+        node->setParent( node_B );
+        parent.setParent( node );
+        node_A->setParent( &parent );
+        
+    }
+    else if ( picked_root_branch == true  )
+    {
+        
+        // now exchange the two nodes
+        parent.removeChild( node_B );
+        node->removeChild( node_A );
+        parent.addChild( node_A );
+        node->addChild( node_B );
+        node_A->setParent( &parent );
+        node_B->setParent( node );
+    }
     
     return 0.0;
-    
 }
 
 
@@ -153,16 +245,50 @@ void NearestNeighborInterchange_nonClockProposal::printParameterSummary(std::ost
 void NearestNeighborInterchange_nonClockProposal::undoProposal( void )
 {
     // undo the proposal
-    TopologyNode& parent = storedUncle->getParent();
-    TopologyNode& grandparent = storedChoosenNode->getParent();
+    TopologyNode* parent = &stored_node_A->getParent();
+    TopologyNode* node   = ( (picked_root_branch == false && picked_uncle == false) ? &parent->getParent() : &stored_node_B->getParent());
+    
+    TopologyNode* node_A = stored_node_A;
+    TopologyNode* node_B = stored_node_B;
     
     // now exchange the two nodes
-    grandparent.removeChild( storedChoosenNode );
-    parent.removeChild( storedUncle );
-    grandparent.addChild( storedUncle );
-    parent.addChild( storedChoosenNode );
-    storedUncle->setParent( &grandparent );
-    storedChoosenNode->setParent( &parent );
+    if ( picked_root_branch == false && picked_uncle == true )
+    {
+        
+        // now exchange the two nodes
+        parent->removeChild( node_A );
+        node->removeChild( node_B );
+        parent->addChild( node_B );
+        node->addChild( node_A );
+        node_A->setParent( node );
+        node_B->setParent( parent );
+    }
+    else if ( picked_root_branch == false && picked_uncle == false )
+    {
+        node = &parent->getParent();
+            
+        node_B->removeChild( node );
+        parent->removeChild( node_A );
+        node->removeChild( parent );
+        node_B->addChild( parent );
+        node->addChild( node_A );
+        parent->addChild( node );
+        node->setParent( parent );
+        parent->setParent( node_B );
+        node_A->setParent( node );
+        
+    }
+    else if ( picked_root_branch == true  )
+    {
+        
+        // now exchange the two nodes
+        parent->removeChild( node_A );
+        node->removeChild( node_B );
+        parent->addChild( node_B );
+        node->addChild( node_A );
+        node_A->setParent( node );
+        node_B->setParent( parent );
+    }
     
 }
 

@@ -13,7 +13,7 @@ namespace RevBayesCore {
     class HSRFHyperpriorsGibbsMove : public AbstractGibbsMove {
 
     public:
-        HSRFHyperpriorsGibbsMove( StochasticNode<double> *g, std::vector< StochasticNode<double> *> l, std::vector< StochasticNode<double> *> n, double z, double w);                                                         //!<  constructor
+        HSRFHyperpriorsGibbsMove( StochasticNode<double> *g, std::vector< StochasticNode<double> *> l, std::vector< StochasticNode<double> *> n, double p, double z, double w);                                                         //!<  constructor
         virtual                                ~HSRFHyperpriorsGibbsMove(void);                                                             //!< Destructor
 
         // Basic utility functions
@@ -31,6 +31,7 @@ namespace RevBayesCore {
         StochasticNode<double>*                 global_scale;                                          //!< The half-Cauchy variable the Proposal is working on
         std::vector< StochasticNode<double> *>  local_scales;                                          //!< The half-Cauchy variables the Proposal is working on
         std::vector< StochasticNode<double> *>  normals;                                               //!< The normal random variables on which this is a hyperprior
+        double                                  prop_global_only;                                      //!< The proportion of moves only on the global scale rather than the global and local scales
         double                                  zeta;                                                  //!< Controls total scale of field, x is halfCauchy(0,zeta)
 
     };

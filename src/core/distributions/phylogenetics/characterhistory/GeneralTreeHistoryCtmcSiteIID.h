@@ -54,9 +54,7 @@ namespace RevBayesCore {
         virtual double                                      computeRootLikelihood(const TopologyNode &n);
         virtual double                                      computeInternalNodeLikelihood(const TopologyNode &n);
         virtual double                                      computeTipLikelihood(const TopologyNode &node);
-        // (not needed)        void                         keepSpecialization(DagNode* affecter);
-        // (not needed)        void                         restoreSpecialization(DagNode *restorer);
-        virtual void                                        touchSpecialization(DagNode *toucher, bool touchAll);
+        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
 
     private:
 
@@ -196,7 +194,6 @@ double RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::computeInternalNod
     // check that node ages are consistent with character event ages
     if ( bh->areEventTimesValid(node) == false )
     {
-//        std::cerr << "Rejecting (invalid times)." << std::endl;
         return RbConstants::Double::neginf;
     }
 //    bh->print();
@@ -851,7 +848,7 @@ void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::swapParameterInterna
 }
 
 template<class charType>
-void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::touchSpecialization( DagNode* affecter, bool touchAll )
+void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
 
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty

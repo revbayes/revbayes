@@ -1,4 +1,3 @@
-#include "ModelVector.h"
 #include <ostream>
 #include <string>
 
@@ -6,6 +5,8 @@
 #include "ArgumentRules.h"
 #include "Mntr_Model.h"
 #include "ModelMonitor.h"
+#include "ModelVector.h"
+#include "Natural.h"
 #include "IntegerPos.h"
 #include "RevObject.h"
 #include "RlString.h"

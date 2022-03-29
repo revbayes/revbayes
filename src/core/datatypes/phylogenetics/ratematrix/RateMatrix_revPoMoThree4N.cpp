@@ -213,7 +213,7 @@ void RateMatrix_revPoMoThree4N::computeOffDiagonal( void )
   //scaling the mutation rates (or better, the exchangeabilities)
   std::vector<double> srho(6,0.0);
   
-  double sAC, sAG, sAT, sCG, sCT, sGT = 0.0;
+  double sAC = 0.0, sAG = 0.0, sAT = 0.0, sCG = 0.0, sCT = 0.0, sGT = 0.0;
   double dc; 
   
   for (int n = 1; n<N; n++){
@@ -352,7 +352,7 @@ std::vector<double> RateMatrix_revPoMoThree4N::getStationaryFrequencies( void ) 
   //scaling the mutation rates (or better, the exchangeabilities)
   std::vector<double> srho(6,0.0);
   
-  double sAC, sAG, sAT, sCG, sCT, sGT = 0.0;
+  double sAC = 0.0, sAG = 0.0, sAT = 0.0, sCG = 0.0, sCT = 0.0, sGT = 0.0;
   double dc; 
 
   for (int n = 1; n<N; n++){

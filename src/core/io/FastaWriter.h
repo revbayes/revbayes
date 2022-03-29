@@ -27,8 +27,8 @@ namespace RevBayesCore {
     public:
         FastaWriter();
         
-        void                    writeData(const std::string& fn, const AbstractHomologousDiscreteCharacterData &d);
-        void                    writeData(const std::string& fn, const AbstractNonHomologousDiscreteCharacterData &d);
+        void                    writeData(const std::string& fn, const AbstractHomologousDiscreteCharacterData& d);
+        void                    writeData(const std::string& fn, const AbstractNonHomologousDiscreteCharacterData& d);
         
         
     };

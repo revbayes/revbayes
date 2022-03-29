@@ -23,9 +23,9 @@ namespace RevBayesCore {
         // constructor(s)
         RbIteratorImpl(void) {  }
         RbIteratorImpl(const iteratorType &i) { it = i; }
-        //        RbConstIteratorImpl(const RbConstIteratorImpl<valueType,indicator> &v);
         
         // public (stl-like) vector functions
+        RbIteratorImpl<valueType,indicator>                 operator+(size_t i) const { return RbIteratorImpl<valueType,indicator>(it+i); }                                                                        //!< Increment index (prefix)
         RbIteratorImpl<valueType,indicator>&                operator++(void) { ++it; return *this; }                                                                        //!< Increment index (prefix)
         const RbIteratorImpl<valueType,indicator>&          operator++(void) const { ++it; return *this; }                                                                  //!< Increment index (prefix)
         RbIteratorImpl<valueType,indicator>&                operator--(void) { --it; return *this; }                                                                        //!< Decrement index (prefix)
@@ -38,7 +38,7 @@ namespace RevBayesCore {
         const valueType*                                    operator->(void) const { return &(*it); }
         valueType*                                          operator->(void) { return &(*it); }
             
-    private:
+    protected:
         
         // private members
         iteratorType                                        it;
@@ -55,9 +55,9 @@ namespace RevBayesCore {
         // constructor(s)
         RbIteratorImpl(void) {  }
         RbIteratorImpl(const iteratorType &i) { it = i; }
-        //        RbConstIteratorImpl(const RbConstIteratorImpl<valueType,1> &v);
         
         // public (stl-like) vector functions
+        RbIteratorImpl<valueType,1>                         operator+(size_t i) const { return RbIteratorImpl<valueType,1>(it+i); }                                                                        //!< Increment index (prefix)
         RbIteratorImpl<valueType,1>&                        operator++(void) { ++it; return *this; }                                                                        //!< Increment index (prefix)
         const RbIteratorImpl<valueType,1>&                  operator++(void) const { ++it; return *this; }                                                                  //!< Increment index (prefix)
         RbIteratorImpl<valueType,1>&                        operator--(void) { --it; return *this; }                                                                        //!< Decrement index (prefix)
@@ -70,7 +70,8 @@ namespace RevBayesCore {
         const valueType*                                    operator->(void) const { return (*it); }
         valueType*                                          operator->(void) { return (*it); }
         
-    private:
+
+    protected:
         
         // private members
         iteratorType                                        it;

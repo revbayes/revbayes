@@ -79,6 +79,7 @@
 #include "UserFunctionNode.h"                             // for UserFunctio...
 #include "VectorAppendElement.h"                          // for VectorAppen...
 #include "VectorAppendVector.h"                           // for VectorAppen...
+#include "VectorReverse.h"                                // for VectorRever...
 #include "VectorScalarDivision.h"                         // for VectorScala...
 #include "VectorScalarSubtraction.h"                      // for VectorScala...
 
@@ -142,6 +143,7 @@
 #include "Func_quit.h"
 #include "Func_range.h"
 #include "Func_replicate.h"
+#include "Func_reverse.h"
 #include "Func_seed.h"
 #include "Func_seq.h"
 #include "Func_setOption.h"
@@ -198,6 +200,7 @@
 #include "Func_characterMapTree.h"
 #include "Func_consensusTree.h"
 #include "Func_convertToPhylowood.h"
+#include "Func_fileExists.h"
 #include "Func_listFiles.h"
 #include "Func_maxdiff.h"
 #include "Func_mapTree.h"
@@ -301,6 +304,12 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_appendVector<RealPos>()       );
         addFunction( new Func_appendVector<RlString>()      );
         addFunction( new Func_appendVector<RlBoolean>()     );
+        addFunction( new Func_reverse<Integer>()            );
+        addFunction( new Func_reverse<Real>()               );
+        addFunction( new Func_reverse<Natural>()            );
+        addFunction( new Func_reverse<RealPos>()            );
+        addFunction( new Func_reverse<RlString>()           );
+        addFunction( new Func_reverse<RlBoolean>()          );
         addFunction( new Func_clear()                       );
         addFunction( new Func_exists()                      );
         addFunction( new Func_getwd()                       );
@@ -513,6 +522,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
 		addFunction( new Func_characterMapTree()                        );
         addFunction( new Func_consensusTree()                           );
         addFunction( new Func_convertToPhylowood()                      );
+        addFunction( new Func_fileExists()                              );
         addFunction( new Func_listFiles()                               );
         addFunction( new Func_maxdiff()                                 );
         addFunction( new Func_mapTree()                                 );

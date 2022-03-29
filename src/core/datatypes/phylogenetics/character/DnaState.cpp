@@ -408,6 +408,10 @@ RbBitSet DnaState::getState(void) const
     switch ( state )
     {
         case '-':
+            bs.set(0);
+            bs.set(1);
+            bs.set(2);
+            bs.set(3);
             break;
         case 'A':
             bs.set(0);

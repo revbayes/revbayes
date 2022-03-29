@@ -71,7 +71,6 @@ namespace RevLanguage {
         
         std::string                                         guiDistributionName;
         std::string                                         guiDistributionToolTip;
-//        MethodTable                                         distribution_methods;
 
     };
     

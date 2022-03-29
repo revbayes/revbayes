@@ -25,7 +25,8 @@ Dist_pointMass::Dist_pointMass() : ContinuousDistribution()
 }
 
 
-Dist_pointMass::~Dist_pointMass() {
+Dist_pointMass::~Dist_pointMass()
+{
     
 }
 

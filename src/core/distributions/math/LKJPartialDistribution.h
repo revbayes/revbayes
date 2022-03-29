@@ -1,13 +1,5 @@
-//
-//  LKJPartialDistribution.h
-//  revbayes
-//
-//  Created by Michael R. May on 2017-08-29.
-//  Copyright (c) 2014 revbayes team. All rights reserved.
-//
-
-#ifndef __revbayes__LKJPartialDistribution__
-#define __revbayes__LKJPartialDistribution__
+#ifndef LKJPartialDistribution_H
+#define LKJPartialDistribution_H
 
 #include <stddef.h>
 
@@ -29,7 +21,7 @@ template <class valueType> class TypedDagNode;
         
         // public member functions
 
-        LKJPartialDistribution*                                    clone(void) const;                                                          //!< Create an independent clone
+        LKJPartialDistribution*                             clone(void) const;                                                          //!< Create an independent clone
         double                                              computeLnProbability(void);
         void                                                redrawValue(void);
         
@@ -50,4 +42,4 @@ template <class valueType> class TypedDagNode;
 }
 
 
-#endif /* defined(__revbayes__LKJPartialDistribution__) */
+#endif /* defined(LKJPartialDistribution_H) */

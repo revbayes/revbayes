@@ -17,54 +17,27 @@
 using namespace RevBayesCore;
 
 
-MatrixReal::MatrixReal( void ) : elements( RbVector<RbVector<double> >() ),
-    n_rows( 0 ),
-    n_cols( 0 ),
-    eigensystem( NULL ),
-    eigen_needs_update( true ),
-    cholesky_decomp( NULL ),
-    cholesky_needs_update( true ),
-    use_cholesky_decomp( false )
+MatrixReal::MatrixReal( void )
 {
-
 }
 
 
-MatrixReal::MatrixReal( size_t n ) : elements( RbVector<RbVector<double> >(n, RbVector<double>(n,0.0) ) ),
-    n_rows( n ),
-    n_cols( n ),
-    eigensystem( NULL ),
-    eigen_needs_update( true ),
-    cholesky_decomp( NULL ),
-    cholesky_needs_update( true ),
-    use_cholesky_decomp( false )
+MatrixReal::MatrixReal( size_t n )
+    : MatrixReal( n, n, 0.0 )
 {
-    
 }
 
 
-MatrixReal::MatrixReal( size_t n, size_t k) : elements( RbVector<RbVector<double> >(n, RbVector<double>(k,0.0) ) ),
-    n_rows( n ),
-    n_cols( k ),
-    eigensystem( NULL ),
-    eigen_needs_update( true ),
-    cholesky_decomp( NULL ),
-    cholesky_needs_update( true ),
-    use_cholesky_decomp( false )
+MatrixReal::MatrixReal( size_t n, size_t k)
+    : MatrixReal( n, k, 0.0 )
 {
-    
 }
 
 
 MatrixReal::MatrixReal( size_t n, size_t k, double v) :
     elements( RbVector<RbVector<double> >(n, RbVector<double>(k,v) ) ),
     n_rows( n ),
-    n_cols( k ),
-    eigensystem( NULL ),
-    eigen_needs_update( true ),
-    cholesky_decomp( NULL ),
-    cholesky_needs_update( true ),
-    use_cholesky_decomp( false )
+    n_cols( k )
 {
 
 }
@@ -72,16 +45,18 @@ MatrixReal::MatrixReal( size_t n, size_t k, double v) :
 MatrixReal::MatrixReal( const MatrixReal &m ) :
     elements( m.elements ),
     n_rows( m.n_rows ),
-    n_cols( m.n_cols ),
-    eigensystem( NULL ),
-    eigen_needs_update( true ),
-    cholesky_decomp( NULL ),
-    cholesky_needs_update( true ),
-    use_cholesky_decomp( m.use_cholesky_decomp )
+    n_cols( m.n_cols )
+    // The cached eigensystem and cholesky decomposition are NOT copied.
 {
     
 }
 
+MatrixReal::MatrixReal( MatrixReal &&m )
+{
+    // By swapping the initial entry matrix into m, we ensure that it has a valid state
+    //   after we steal its resources.
+    operator=( std::move(m) );
+}
 
 MatrixReal::~MatrixReal( void )
 {
@@ -106,6 +81,20 @@ MatrixReal& MatrixReal::operator=(const MatrixReal &m)
     return *this;
 }
 
+MatrixReal& MatrixReal::operator=(MatrixReal &&m)
+{
+    std::swap( elements, m.elements );
+    std::swap( n_rows  , m.n_rows   );
+    std::swap( n_cols  , m.n_cols );
+    std::swap( eigensystem, m.eigensystem );
+    std::swap( eigen_needs_update, m.eigen_needs_update );
+    std::swap( cholesky_decomp, m.cholesky_decomp );
+    std::swap( cholesky_needs_update, m.cholesky_needs_update );
+    std::swap( use_cholesky_decomp, m.use_cholesky_decomp );
+
+    return *this;
+}
+
 
 RbVector<double>& MatrixReal::operator[]( size_t index )
 {
@@ -121,6 +110,24 @@ RbVector<double>& MatrixReal::operator[]( size_t index )
 const RbVector<double>& MatrixReal::operator[]( size_t index ) const
 {
     return elements[index];
+}
+
+
+void MatrixReal::addColumn( void )
+{
+
+    for (size_t i=0; i<n_rows; ++i)
+    {
+        elements[i].push_back( 0.0 );
+    }
+    ++n_cols;
+}
+
+
+void MatrixReal::addRow( void )
+{
+    elements.push_back( RbVector<double>(n_cols, 0.0) );
+    ++n_rows;
 }
 
 
@@ -167,6 +174,24 @@ MatrixReal MatrixReal::computeInverse( void ) const
 MatrixReal* MatrixReal::clone(void) const
 {
      return new MatrixReal( *this );
+}
+
+
+void MatrixReal::deleteColumn(size_t index)
+{
+
+    for (size_t i=0; i<n_rows; ++i)
+    {
+        elements[i].erase( elements[i].begin()+index );
+    }
+    --n_cols;
+}
+
+
+void MatrixReal::deleteRow(size_t index)
+{
+    elements.erase( elements.begin()+index );
+    --n_rows;
 }
 
 
@@ -329,6 +354,25 @@ double MatrixReal::getDet() const
 }
 
 
+void MatrixReal::getIndexOfMin(size_t& row, size_t& col) const
+{
+    double min = RbConstants::Double::inf;
+    for (size_t i = 0; i < n_rows; ++i)
+    {
+        for (size_t j = 0; j < n_cols; ++j)
+        {
+            if ( min > elements[i][j] )
+            {
+                min = elements[i][j];
+                row = i;
+                col = j;
+            }
+        }
+    }
+    
+}
+
+
 double MatrixReal::getLogDet() const
 {
     
@@ -362,16 +406,6 @@ double MatrixReal::getLogDet() const
             }
         }
         
-//        if (std::isnan(tot))
-//        {
-//            std::cerr << "in MatrixReal::getLogDet(): nan\n";
-//            std::cerr << "eigen values:\n";
-//            for (size_t i=0; i<nRows; i++)
-//            {
-//                std::cerr << eigenval[i] << '\n';
-//            }
-//            RbException("Problem when computing log-determinant.");
-//        }
         return tot;
     }
     
@@ -397,7 +431,6 @@ double MatrixReal::getMax( void ) const
     return max;
     
 }
-
 
 
 double MatrixReal::getMin( void ) const

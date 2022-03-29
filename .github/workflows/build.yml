@@ -28,6 +28,7 @@ jobs:
             os: ubuntu-18.04
             compiler: gcc
             version: "6"
+            install_boost: 1.74
             mpi: false
 
           - name: ubuntu-gcc-7
@@ -40,6 +41,7 @@ jobs:
             os: ubuntu-latest
             compiler: gcc
             version: "8"
+            install_boost: 1.74
             mpi: false
 
           - name: ubuntu-gcc-9
@@ -58,6 +60,7 @@ jobs:
             os: ubuntu-latest
             compiler: gcc
             version: "10"
+            install_boost: 1.74
             mpi: false
 
           - name: ubuntu-clang-8
@@ -152,7 +155,16 @@ jobs:
       run: |
         # Don't use weird boost version installed by github actions.
         sudo rm -rf /usr/local/share/boost
-        sudo apt-get install -y libboost-dev libboost-program-options-dev libboost-date-time-dev libboost-filesystem-dev libboost-regex-dev libboost-serialization-dev libboost-system-dev libboost-thread-dev
+
+        # Maybe install a particular boost version.
+        if [ -n "${{ matrix.install_boost }}" ] ; then
+          sudo apt-get remove libboost-all-dev
+          sudo add-apt-repository ppa:mhier/libboost-latest
+          sudo apt-get update
+          sudo apt-get install -y libboost${{ matrix.install_boost }}-dev
+        else
+          sudo apt-get install -y libboost-all-dev
+        fi
 
     - name: Install BOOST and set up build (Windows meson cross compile)
       if: matrix.name == 'windows'
@@ -182,8 +194,9 @@ jobs:
       run: |
         /usr/local/bin/meson build ${GITHUB_WORKSPACE} --prefix=${GITHUB_WORKSPACE}/wincrossbuild --cross-file=win64-cross.txt
         /usr/local/bin/ninja -C build install
-        cp /usr/lib/gcc/x86_64-w64-mingw32/*-win32/libgcc_s_seh-1.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
-        cp /usr/lib/gcc/x86_64-w64-mingw32/*-win32/libstdc++-6.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
+        cp /usr/lib/gcc/x86_64-w64-mingw32/*-posix/libgcc_s_seh-1.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
+        cp /usr/lib/gcc/x86_64-w64-mingw32/*-posix/libstdc++-6.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
+        cp /usr/lib/gcc/x86_64-w64-mingw32/*-posix/libssp-0.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
         cp /home/runner/win_root/mingw64/bin/libboost_*.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
         cp /home/runner/win_root/mingw64/bin/libwinpthread-1.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
         cp /home/runner/win_root/mingw64/bin/libopenlibm.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin

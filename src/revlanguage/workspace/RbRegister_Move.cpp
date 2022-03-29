@@ -167,6 +167,7 @@
 
 // moves for the DPP table values
 #include "ScaleProposal.h"
+#include "SlideProposal.h"
 #include "BetaSimplexProposal.h"
 
 
@@ -223,6 +224,7 @@
 #include "Move_SpeciesSubtreeScaleBeta.h"
 #include "Move_SpeciesTreeScale.h"
 #include "Move_SubtreeScale.h"
+#include "Move_SubtreeSwap.h"
 #include "Move_SPRNonclock.h"
 #include "Move_TreeScale.h"
 //#include "Move_WeightedNodeTimeSlide.h"
@@ -334,6 +336,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_HomeologPhase() );
 
         /* Moves on mixtures (in folder "datatypes/inference/moves/mixture") */
+        addType( new Move_DPPTableValueUpdate<Real>(    new RevBayesCore::SlideProposal( NULL, 1.0 ) ) );
         addType( new Move_DPPTableValueUpdate<RealPos>( new RevBayesCore::ScaleProposal( NULL, 1.0 ) ) );
         addType( new Move_DPPTableValueUpdate<Simplex>( new RevBayesCore::BetaSimplexProposal( NULL, 10.0 ) ) );
 
@@ -414,6 +417,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_RootTimeScaleBactrian()            );
         addType( new Move_RootTimeSlideUniform()             );
         addType( new Move_SubtreeScale()                     );
+        addType( new Move_SubtreeSwap()                      );
         addType( new Move_SPRNonclock()                      );
         addType( new Move_SpeciesNarrowExchange()            );
         addType( new Move_SpeciesNodeTimeSlideUniform()      );

@@ -1,0 +1,55 @@
+################################################################################
+#
+# RevBayes Validation Test: Categorical Distribution
+#
+# Model: Several draws from a categorical distribution with Dirichlet prior.
+#
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
+prior <- 1:6
+pi ~ dnDirichlet(prior)
+moves.append( mvBetaSimplex(pi,weight=2) )
+moves.append( mvDirichletSimplex(pi,weight=2,numCats=4) )
+
+n_samples = 25
+
+for (i in 1:n_samples) {
+    x[i] ~ dnCategorical(pi)
+    x[i].clamp( x[i] )
+}
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(pi)
+
+
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Cat" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
+
+
+# you may want to quit RevBayes now
+q()

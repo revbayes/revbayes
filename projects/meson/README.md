@@ -35,28 +35,30 @@ pip3 install meson ninja
 
 ## Build RevBayes
 
-1. Download RevBayes from our github repository. Clone the repository using git by running the following command in the terminal:
+1. Download RevBayes from our github repository. Clone the repository using git by running the following commands in the terminal:
 
     ``` sh
     git clone https://github.com/revbayes/revbayes.git revbayes
+    cd revbayes
+    git checkout development           # Probably you want the development branch
+    git submodule init
+    git submodule update               # Download tests required for the build
     ```
 
-1. Configure and compile Revbayes:
+2. Configure and compile Revbayes:
    
     ``` sh
-    ( cd revbayes/ ; git checkout development )  # Probably you want the development branch
-    ( cd revbayes/ ; git submodule init ; git submodule update ) # Download tests required for the build
-    ( cd revbayes/projects/meson/ ; ./generate.sh )
-    meson build revbayes --prefix=$HOME/Applications/revbayes
+    projects/meson/generate.sh
+    meson build --prefix=$HOME/Applications/revbayes
     ninja -C build install
     ```
 
     This creates a `build` directory where the build will take place, and says that the executables will eventually be installed in `$HOME/Applications/revbayes`.
 
-1. For the MPI version, add `-Dmpi=true` to the `meson` command.
+3. For the MPI version, add `-Dmpi=true` to the `meson` command.
 
     ``` sh
-    meson build revbayes -Dmpi=true --prefix=$HOME/Applications/revbayes
+    meson build -Dmpi=true --prefix=$HOME/Applications/revbayes
     ```
 
 ## Configuration
@@ -110,6 +112,52 @@ After GTK2 is installed, you can then configure and build RevStudio as follows:
 meson build-gtk -Dstudio=true -Dprefix=$HOME/Applications/revbayes-gui
 ninja -C build-gtk install
 ```
+
+## Cross-compiling (Linux -> Windows)
+
+1. Create a fake windows root directory and download windows libraries from MINGW64.
+
+   ```
+   cd projects/meson/
+   ./make_winroot.sh -ccache true
+   ```
+
+   This command should also generate a "cross-file" that contains info for cross-compiling to windows.
+
+   If you want to compile the GUI version for windows, add `-gtk true` to the command to `make_winroot.sh`.
+
+2. Compile Revbayes
+
+   ```
+   cd projects/meson
+   ./generate.sh
+   meson build ../../ --prefix=${HOME}/winrb  --cross-file=win64-cross.txt
+   ninja -C build install
+   ```
+
+   The binary will end up in `~/winrb/bin`.
+
+   If you want to compile the GUI version for windows, add `-Dstudio=true` to the meson command line.
+
+3. Copy DLLs that the binary needs to the same directory
+
+   ```
+   cp /usr/lib/gcc/x86_64-w64-mingw32/*-posix/libgcc_s_seh-1.dll ~/winrb/bin
+   cp /usr/lib/gcc/x86_64-w64-mingw32/*-posix/libstdc++-6.dll    ~/winrb/bin
+   cp /usr/lib/gcc/x86_64-w64-mingw32/*-posix/libssp-0.dll       ~/winrb/bin
+   cp ~/win_root/mingw64/bin/*.dll                               ~/winrb/bin
+   ```
+
+   This may be a bit fragile.  The paths for the first two DLLs are for Debian/Ubuntu, but could
+   be somewhere else on other systems.
+
+   Note that we need the `*-win32/` versions of `libgcc_s_seh-1.dll` and `libstdc++-6.dll` and not the
+   `*-posix/` versions because we are using the mingw `libwinpthread-1.dll`.
+
+   If you run `rb.exe` and it cannot find a DLL, it will tell you the first one that it cannot find.
+
+Note that this same procedure is shown in the `release.yml` workflow.
+
 
 ## Troubleshooting:
 

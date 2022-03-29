@@ -147,7 +147,7 @@ double RevBayesCore::MixtureAllocationProposal<mixtureType>::doProposal( void )
     MixtureDistribution<mixtureType>& dist = static_cast<MixtureDistribution<mixtureType> &>( variable->getDistribution() );
     
     // get the number of categories
-    size_t n = dist.getNumberOfCategories();
+    size_t n = dist.getNumberOfMixtureElements();
     
     // get the current index
     oldCategory = dist.getCurrentIndex();

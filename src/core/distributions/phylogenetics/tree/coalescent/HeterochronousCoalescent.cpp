@@ -47,60 +47,11 @@ HeterochronousCoalescent::HeterochronousCoalescent(const TypedDagNode< RbVector<
 }
 
 
-//HeterochronousCoalescent::HeterochronousCoalescent(const HeterochronousCoalescent &c) : AbstractCoalescent( c ),
-//    intervals( c.intervals ),
-//    demographies( c.demographies )
-//{
-//    
-//    // add the parameters to our set (in the base class)
-//    // in that way other class can easily access the set of our parameters
-//    // this will also ensure that the parameters are not getting deleted before we do
-//    addParameter( intervals );
-//    
-//    for (size_t i=0; i<demographies.size(); ++i)
-//    {
-//        const std::vector<const DagNode*> &pars = demographies[i].getDagNodes();
-//        for (size_t j=0; j<pars.size(); ++j)
-//        {
-//            addParameter( pars[j] );
-//        }
-//    }
-//    
-//}
-
 
 HeterochronousCoalescent::~HeterochronousCoalescent()
 {
     
 }
-
-
-//HeterochronousCoalescent& HeterochronousCoalescent::operator=(const HeterochronousCoalescent &c)
-//{
-//    AbstractCoalescent::operator=(c);
-//
-//    if ( &c != this )
-//    {
-//        intervals       = c.intervals;
-//        demographies    = c.demographies;
-//
-////        // add the parameters to our set (in the base class)
-////        // in that way other class can easily access the set of our parameters
-////        // this will also ensure that the parameters are not getting deleted before we do
-////        addParameter( intervals );
-////
-////        for (size_t i=0; i<demographies.size(); ++i)
-////        {
-////            const std::vector<const DagNode*> &pars = demographies[i].getDagNodes();
-////            for (size_t j=0; j<pars.size(); ++j)
-////            {
-////                addParameter( pars[j] );
-////            }
-////        }
-//    }
-//
-//    return *this;
-//}
 
 /**
  * The clone function is a convenience function to create proper copies of inherited objected.
@@ -142,7 +93,7 @@ double HeterochronousCoalescent::computeLnProbabilityTimes( void ) const
     size_t num_taxa_at_present = value->getNumberOfTips();
     for (size_t i = 0; i < value->getNumberOfTips(); ++i)
     {
-        double a = value->getNode(i).getAge();
+        double a = value->getTipNode(i).getAge();
         if ( a > 0.0 )
         {
             serial_times.push_back(a);
@@ -171,7 +122,7 @@ double HeterochronousCoalescent::computeLnProbabilityTimes( void ) const
     double next_serial_time = RbConstants::Double::nan;
     if ( heterochronous == true )
     {
-        serial_times[index_serial_time];
+        next_serial_time = serial_times[index_serial_time];
     }
     double next_df_change_time = RbConstants::Double::inf;
     if ( index_demographic_function_change_point < change_times.size() )
@@ -278,6 +229,8 @@ double HeterochronousCoalescent::computeLnProbabilityTimes( void ) const
  */
 std::vector<double> HeterochronousCoalescent::simulateCoalescentAges( size_t n ) const
 {
+    const RbVector<double> &change_times = intervals->getValue();
+
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
@@ -296,17 +249,54 @@ std::vector<double> HeterochronousCoalescent::simulateCoalescentAges( size_t n )
             ++num_taxa_at_present;
         }
     }
-    
-    size_t index_serial_time = 0;
-    if (num_taxa_at_present == num_taxa)
-    {
-        serial_times.push_back(RbConstants::Double::inf);
-    }
-    else
-    {
+
+    // Put sampling times and demographic function changes into a single vector of event times
+    std::vector<double> combinedEventTimes;
+    std::vector<double> combinedEventTypes;
+    if (num_taxa_at_present < num_taxa) {
+        // sort the vector of serial sampling times in ascending order
         std::sort(serial_times.begin(), serial_times.end());
-        serial_times.push_back(RbConstants::Double::inf);
+        size_t atSerialTime = 0;
+        size_t atIntervalStart = 0;
+        double nextSerialTime = serial_times[atSerialTime];
+        double nextIntervalStart = change_times[atIntervalStart];
+        
+        // create master list of event times and types
+        // pre-defined events are either a sample (lineage size up) or demographic function changepoint (lineage size constant)
+        size_t nTotalEvents = change_times.size() + serial_times.size();
+        for (size_t nEvents = 0; nEvents < nTotalEvents; ++nEvents)
+        {
+            if (nextIntervalStart <= nextSerialTime) {
+                // demographic function change
+                combinedEventTimes.push_back(nextIntervalStart);
+                combinedEventTypes.push_back(0.0);
+                ++atIntervalStart;
+                if (atIntervalStart < change_times.size()) {
+                    nextIntervalStart = change_times[atIntervalStart];
+                } else {
+                    nextIntervalStart = RbConstants::Double::inf;
+                }
+            } else {
+                // serial sample
+                combinedEventTimes.push_back(nextSerialTime);
+                combinedEventTypes.push_back(1.0);
+                ++atSerialTime;
+                if (atSerialTime < serial_times.size()) {
+                    nextSerialTime = serial_times[atSerialTime];
+                } else {
+                    nextSerialTime = RbConstants::Double::inf;
+                }
+            }
+        }
+    } else {
+        combinedEventTimes = change_times;
+        combinedEventTypes = std::vector<double>(change_times.size(),0.0);
     }
+ 
+    // cap vector with an event at t=infinity
+    combinedEventTimes.push_back(RbConstants::Double::inf);
+    combinedEventTypes.push_back(RbConstants::Double::inf);
+
     
     // now simulate the ages
     
@@ -315,9 +305,12 @@ std::vector<double> HeterochronousCoalescent::simulateCoalescentAges( size_t n )
     
     // j is the number of active lineages at the current time
     size_t j = num_taxa_at_present;
-//    double theta = Ne->getValue();
-    double theta = 1.0;
-    
+    size_t currentInterval = 0;
+    // size_t index_serial_time = 0;
+    size_t index_demographic_function = 0;
+
+    const DemographicFunction *current_demographic_function = &demographies[index_demographic_function];
+
     // the current age of the process
     double sim_age = 0.0;
     
@@ -328,22 +321,31 @@ std::vector<double> HeterochronousCoalescent::simulateCoalescentAges( size_t n )
         do
         {
             double nPairs = j * (j-1) / 2.0;
-            double lambda = nPairs / theta;
-            double u = RbStatistics::Exponential::rv( lambda, *rng);
-            sim_age += u;
-            valid = sim_age < serial_times[index_serial_time] && j > 1;
-            if ( valid == false )
-            {
+            double lambda = RbStatistics::Exponential::rv( nPairs, *rng);
+            double waitingTime = current_demographic_function->getWaitingTime(sim_age, lambda);
+            sim_age += waitingTime;
+
+            valid = (sim_age < combinedEventTimes[currentInterval] && j > 1) && waitingTime > 0;
+            if ( valid == false ) {
                 // If j is 1 and we are still simulating coalescent events, we have >= 1 serial sample left to coalesce.
                 // There are no samples to coalesce now, but we cannot exit, thus, we advance to the next serial sample
-                // Alternately, when we cross a serial sampling time, the number of active lineages changes
-                // it is necessary to discard any "excess" time, which is drawn from an incorrect distribution
-                // then we can draw a new time according to the correct number of active lineages.
-                // Either we advance or go back, but in both situations we set the time to the current serial sample.
-                sim_age = serial_times[index_serial_time];
-                ++index_serial_time;
-                ++j;
+                // Alternately, when we cross a serial sampling time or theta window, the number of active lineages changes
+                // or the pop size changes, and it is necessary to discard any "excess" time,
+                // which is drawn from an incorrect distribution,then we can draw a new time according to
+                // the correct number of active lineages.
+                // Either we advance or go back, but in both situations we set the time to the current event in combinedEvents.
+                sim_age = combinedEventTimes[currentInterval];
+                if (combinedEventTypes[currentInterval] == 0.0) {
+                    // demographic function change
+                    ++index_demographic_function;
+                    current_demographic_function = &demographies[index_demographic_function];
+                } else {
+                    // serial sample
+                    ++j;
+                }
+                ++currentInterval;
             }
+            
         } while ( valid == false );
         
         coalescent_times[i] = sim_age;

@@ -11,6 +11,7 @@ projects/cmake/*
 # ----------------------------------------------
 src/revlanguage/constants.h
 src/ui/constants.h
+src/revlanguage/utils/GitVersion.h
 src/revlanguage/utils/GitVersion.cpp
 projects/xcode/revbayes.xcodeproj
 .DS_Store
@@ -22,7 +23,7 @@ history.txt
 /GRTAGS
 /GTAGS
 # generated files
-validation/output/*
+validation/output*
 src/meson.build
 src/core/meson.build
 src/libs/meson.build

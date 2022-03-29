@@ -11,7 +11,7 @@ using namespace RevBayesCore;
 
 
 template <>
-bool Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool verbose)
+int Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool verbose)
 {
 
     double sample = atof( v.c_str() );
@@ -31,18 +31,55 @@ bool Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool
         }
 
     }
+    
+    RandomNumberGenerator *rng = GLOBAL_RNG;
 
-    double quantile = (smaller_values_count + 0.5*equal_values_count) / double(values.size());
+    double u = rng->uniform01();
+    double quantile = (smaller_values_count + u*equal_values_count) / double(values.size());
     double lower = (1.0 - alpha) / 2.0;
     double upper = 1.0 - lower;
     bool covered = ( quantile >= lower && quantile <= upper );
 
-    return covered;
+    return (covered ? 0 : (quantile < lower ? -1 : 1) );
 }
 
 
 template <>
-bool Trace<RbVector<double > >::isCoveredInInterval(const std::string &v, double i, bool verbose)
+int Trace<long>::isCoveredInInterval(const std::string &v, double alpha, bool verbose)
+{
+
+    long sample = atof( v.c_str() );
+
+    double smaller_values_count = 0;
+    double equal_values_count   = 0;
+    for (size_t j=0; j<values.size(); ++j)
+    {
+
+        if ( values[j] < sample )
+        {
+            ++smaller_values_count;
+        }
+        else if ( values[j] == sample )
+        {
+            ++equal_values_count;
+        }
+
+    }
+    
+    RandomNumberGenerator *rng = GLOBAL_RNG;
+
+    double u = rng->uniform01();
+    double quantile = (smaller_values_count + u*equal_values_count) / double(values.size());
+    double lower = (1.0 - alpha) / 2.0;
+    double upper = 1.0 - lower;
+    bool covered = ( quantile >= lower && quantile <= upper );
+
+    return (covered ? 0 : (quantile < lower ? -1 : 1) );
+}
+
+
+template <>
+int Trace<RbVector<double > >::isCoveredInInterval(const std::string &v, double i, bool verbose)
 {
 
     RbVector<double> sample = RbVector<double>();
@@ -91,12 +128,12 @@ bool Trace<RbVector<double > >::isCoveredInInterval(const std::string &v, double
     double include_prob = num_covered / sample.size();
     covered = ( include_prob > rng->uniform01() );
 
-    return covered;
+    return (covered ? 0 : -1);
 }
 
 
 template <>
-bool Trace<Simplex>::isCoveredInInterval(const std::string &v, double i, bool verbose)
+int Trace<Simplex>::isCoveredInInterval(const std::string &v, double i, bool verbose)
 {
 
     Simplex sample = Simplex();
@@ -140,5 +177,5 @@ bool Trace<Simplex>::isCoveredInInterval(const std::string &v, double i, bool ve
     double include_prob = num_covered / sample.size();
     covered = ( include_prob > rng->uniform01() );
 
-    return covered;
+    return (covered ? 0 : -1);
 }

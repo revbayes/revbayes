@@ -236,8 +236,15 @@ void UniformTopologyBranchLengthDistribution::fireTreeChangeEvent(const Topology
         dirty_topology = true;
     }
     
-    
 }
+
+
+const std::vector<Taxon>& UniformTopologyBranchLengthDistribution::getTaxa( void ) const
+{
+    
+    return taxa;
+}
+
 
 void UniformTopologyBranchLengthDistribution::redrawValue( void )
 {

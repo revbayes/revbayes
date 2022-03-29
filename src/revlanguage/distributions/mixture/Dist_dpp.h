@@ -27,7 +27,7 @@
 namespace RevLanguage {
     
     template <typename valType>
-    class Dist_dpp :  public TypedDistribution< ModelVector<valType> >{
+    class Dist_dpp : public TypedDistribution< ModelVector<valType> >{
         
     public:
         Dist_dpp( void );

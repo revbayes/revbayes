@@ -59,7 +59,7 @@ FossilizedBirthDeathProcess::FossilizedBirthDeathProcess(const TypedDagNode<doub
                                                            const std::vector<Taxon> &intaxa,
                                                            bool c,
                                                            bool re) :
-    AbstractBirthDeathProcess(ra, incondition, intaxa, true),
+    AbstractBirthDeathProcess(ra, incondition, intaxa, true, NULL),
     AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, c, re)
 {
     for(std::vector<const DagNode*>::iterator it = range_parameters.begin(); it != range_parameters.end(); it++)
@@ -128,7 +128,9 @@ FossilizedBirthDeathProcess* FossilizedBirthDeathProcess::clone( void ) const
  */
 double FossilizedBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
 {
-    double lnProb = computeLnProbabilityTimes();
+    double lnProb = computeLnProbabilityRanges();
+
+    lnProb += computeLnProbabilityTimes();
 
     return lnProb;
 }
@@ -138,9 +140,9 @@ double FossilizedBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
+double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void ) const
 {
-    double lnProb = computeLnProbabilityRanges();
+    double lnProb = 0.0;
 
     for(size_t i = 0; i < taxa.size(); i++)
     {

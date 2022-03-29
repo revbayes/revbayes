@@ -1,13 +1,5 @@
-//
-//  FreeBinaryRateMatrixFunction.h
-//  rb_mlandis
-//
-//  Created by Michael Landis on 4/4/14.
-//  Copyright (c) 2014 Michael Landis. All rights reserved.
-//
-
-#ifndef __rb_mlandis__FreeBinaryRateMatrixFunction__
-#define __rb_mlandis__FreeBinaryRateMatrixFunction__
+#ifndef FreeBinaryRateMatrixFunction_h
+#define FreeBinaryRateMatrixFunction_h
 
 #include "TypedFunction.h"
 #include "RateGenerator.h"
@@ -39,4 +31,4 @@ template <class valueType> class TypedDagNode;
     
 }
 
-#endif /* defined(__rb_mlandis__FreeBinaryRateMatrixFunction__) */
+#endif /* defined(FreeBinaryRateMatrixFunction_h) */

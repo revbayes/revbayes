@@ -254,6 +254,7 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         }
         std::cout << (idx+1) << " / " << powers.size();
         std::cout << "\t\t";
+        std::cout.flush();
     }
     
     // set the power of this sampler

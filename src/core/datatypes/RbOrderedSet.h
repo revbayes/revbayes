@@ -21,6 +21,10 @@ namespace RevBayesCore {
         RbOrderedSet();
         virtual                                            ~RbOrderedSet(void);
         
+        // operators
+        const valueType&                                    operator[](size_t i) const;
+        valueType&                                          operator[](size_t i);
+
         // public member functions
         iterator                                            begin(void);
         const_iterator                                      begin(void) const;
@@ -64,6 +68,19 @@ RevBayesCore::RbOrderedSet<valueType>::~RbOrderedSet( void )
     
 }
 
+
+template <class valueType>
+const valueType& RevBayesCore::RbOrderedSet<valueType>::operator[](size_t i) const
+{
+    return values[i];
+}
+
+
+template <class valueType>
+valueType& RevBayesCore::RbOrderedSet<valueType>::operator[](size_t i)
+{
+    return values[i];
+}
 
 //template <class valueType>
 //RevBayesCore::RbOrderedSet<valueType>* RevBayesCore::RbOrderedSet<valueType>::clone(void) const {

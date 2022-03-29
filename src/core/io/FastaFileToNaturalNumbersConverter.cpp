@@ -12,6 +12,8 @@
 #include "StringUtilities.h"
 #include "FastaFileToNaturalNumbersConverter.h"
 
+// FIXME: This file shares a lot of code with CountFileToNaturalNumbersConverter.cpp
+
 using namespace RevBayesCore;
 
 
@@ -192,18 +194,18 @@ const size_t FastaFileToNaturalNumbersConverter::getState(std::vector<int>& coun
         
         // some variables
         std::string str_index;
-        size_t value,state,int_index,M,m,weight,n_counts,edge;
+        size_t state=-1, int_index=-1, m=-1;
 
 
         // setting total counts, the last postive count (why last? important for state indexing), and number of non-null counts to 0
-        M        = 0;
-        n_counts = 0;
+        size_t M        = 0;
+        size_t n_counts = 0;
       
         // goes through the number of alleles
         // counts are comma separated
         for (size_t k=0; k<n_alleles; k++){
         
-          value = counts[k];
+          size_t value = counts[k];
         
           // getting info from the count pattenr
           if (value > 0) {
@@ -225,7 +227,7 @@ const size_t FastaFileToNaturalNumbersConverter::getState(std::vector<int>& coun
         }
       
         // sampling a 0:n_individuals frequency from the weight vector 
-        weight = sample_weight(M, m, n_individuals);
+        size_t weight = sample_weight(M, m, n_individuals);
       
         // determining the pomo state
         // three possible situations
@@ -236,16 +238,16 @@ const size_t FastaFileToNaturalNumbersConverter::getState(std::vector<int>& coun
           //std::cout << "  " << state << "\n";
 
         // if the count is monoallelic & likely "sampled" from a polymoprhic state
-        } else if (n_counts==1 & weight<n_individuals ) {
+        } else if (n_counts==1 && weight<n_individuals ) {
         
-          edge = sample_edge(int_index, matrix_edges);
+          size_t edge = sample_edge(int_index, matrix_edges);
           state = n_alleles+edge*n_individuals-edge+weight-1;
           //std::cout << "  " << state << "\n";
       
         // if the count is biallelic, thus necessarily sampled from a polymoprhic state
         } else if (n_counts>1) {
         
-          edge = get_index(vector_edges,str_index);
+          size_t edge = get_index(vector_edges,str_index);
           state = n_alleles+edge*n_individuals-edge+weight-1;
           //std::cout << "  " << state << "\n";
         

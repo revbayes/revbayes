@@ -85,7 +85,8 @@ RevBayesCore::DagMemberFunction<valueType>* RevBayesCore::DagMemberFunction<valu
 
 
 template <class valueType>
-void RevBayesCore::DagMemberFunction<valueType>::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
+void RevBayesCore::DagMemberFunction<valueType>::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+{
     
     if ( the_member_variable == oldP )
     {
@@ -113,6 +114,11 @@ void RevBayesCore::DagMemberFunction<valueType>::update( void )
 {
     
     const MemberObject<valueType> *member_object = dynamic_cast<const MemberObject<valueType>* >( the_member_variable );
+    
+    if ( member_object == NULL )
+    {
+        throw RbException("Problem in casting DAG member function. This is a bug. Please notify the developers!");
+    }
     member_object->executeMethod(method_name,args,*this->value);
     
 }

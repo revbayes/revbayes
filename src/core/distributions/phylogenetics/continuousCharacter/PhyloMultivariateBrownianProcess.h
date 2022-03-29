@@ -34,9 +34,9 @@ class Tree;
         void                                                    swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Swap a parameter
 
         // special handling of state changes
-        void                                                    keepSpecialization(DagNode* affecter);
-        void                                                    restoreSpecialization(DagNode *restorer);
-        void                                                    touchSpecialization(DagNode *toucher, bool touchAll);
+        void                                                    keepSpecialization(const DagNode* affecter);
+        void                                                    restoreSpecialization(const DagNode *restorer);
+        void                                                    touchSpecialization(const DagNode *toucher, bool touchAll);
         
     private:
         // helper methods

@@ -161,7 +161,7 @@ double PhyloBrownianProcessMVN::computeRootState(size_t siteIdx)
 
 
 
-void PhyloBrownianProcessMVN::keepSpecialization( DagNode* affecter )
+void PhyloBrownianProcessMVN::keepSpecialization( const DagNode* affecter )
 {
     
     // reset the flags
@@ -275,7 +275,7 @@ std::set<size_t> PhyloBrownianProcessMVN::recursiveComputeCovarianceMatrix(Matri
 
 
 
-void PhyloBrownianProcessMVN::restoreSpecialization( DagNode* affecter )
+void PhyloBrownianProcessMVN::restoreSpecialization( const DagNode* affecter )
 {
     
     // reset the flags
@@ -373,7 +373,7 @@ double PhyloBrownianProcessMVN::sumRootLikelihood( void )
 }
 
 
-void PhyloBrownianProcessMVN::touchSpecialization( DagNode* affecter, bool touchAll )
+void PhyloBrownianProcessMVN::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
     
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
