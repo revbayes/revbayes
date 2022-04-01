@@ -25,6 +25,7 @@ while echo $1 | grep ^- > /dev/null; do
         echo 'Command line options are:
 -h                              : print this help and exit.
 -debug          <true|false>    : set to true to build in debug mode. Defaults to false.
+-ninja          <true|false>    : set to true to build with ninja instead of make
 -mpi            <true|false>    : set to true if you want to build the MPI version. Defaults to false.
 -cmd            <true|false>    : set to true if you want to build RevStudio with GTK2+. Defaults to false.
 -jupyter        <true|false>    : set to true if you want to build the jupyter version. Defaults to false.
@@ -84,6 +85,10 @@ if [ "$debug" = "true" ] ; then
     cmake_args="-DCMAKE_BUILD_TYPE=DEBUG $cmake_args"
 fi
 
+if [ "$ninja" = "true" ] ; then
+    cmake_args="$cmake_args -G Ninja"
+fi
+
 if [ "$mpi" = "true" ] ; then
     cmake_args="-DMPI=ON $cmake_args"
 fi
@@ -129,9 +134,9 @@ if [ "$1" = "clean" ]
 then
 	rm -rf ${BUILD_DIR}
 else
-if [ ! -d ${BUILD_DIR} ]; then
+    if [ ! -d ${BUILD_DIR} ]; then
 	mkdir ${BUILD_DIR}
-fi
+    fi
 
     #################
     # generate git version number
@@ -159,8 +164,13 @@ fi
     echo "Running 'cmake ../../../src $cmake_args' in $(pwd)"
     cmake ../../../src $cmake_args
     echo
-    echo "Running 'make -j $j' in $(pwd)"
-    make -j $j
+    if [ "$ninja" = "true" ] ; then
+        echo "Running 'ninja -j $j' in $(pwd)"
+        ninja -j $j
+    else
+        echo "Running 'make -j $j' in $(pwd)"
+        make -j $j
+    fi
     cd ..
 
     if [ -e  GitVersion_backup.cpp ] ; then
