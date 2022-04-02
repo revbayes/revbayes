@@ -207,18 +207,38 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
 
         for(size_t i = 0; i < rv->getValue().size(); i++)
         {
-            (*rv)[i].getValue().setBurnin(burnin);
+            if (burnin >= long( (*rv)[i].getValue().size() ) )
+            {
+                throw RbException("Burnin is greater than or equal to the number of trees in the trace. Please specify a smaller burnin instead.");
+            }
+            else
+            {
+                (*rv)[i].getValue().setBurnin(burnin);
+            }
         }
     }
     else
     {
         double burninFrac = static_cast<const Probability &>(b).getValue();
-
-        for(size_t i = 0; i < rv->getValue().size(); i++)
+            
+        // A probability of 1 will be re-interpreted as an integer to avoid creating a trace of length 0
+        if (burninFrac == 1.0)
         {
-            burnin = long( floor( rv->getValue()[i].getValue().size()*burninFrac ) );
+            burnin = 1;
 
-            (*rv)[i].getValue().setBurnin(burnin);
+            for(size_t i = 0; i < rv->getValue().size(); i++)
+            {
+                (*rv)[i].getValue().setBurnin(burnin);
+            }
+        }
+        else
+        {
+            for(size_t i = 0; i < rv->getValue().size(); i++)
+            {
+                burnin = long( floor( rv->getValue()[i].getValue().size()*burninFrac ) );
+
+                (*rv)[i].getValue().setBurnin(burnin);
+            }
         }
     }
 
