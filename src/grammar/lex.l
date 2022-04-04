@@ -240,6 +240,9 @@ protected                               {
 "!="                                    {
                                             return NE;
                                         }
+"|>"                                    {
+                                            return PIPE;
+                                        }
 [ \t]+                                  {
                                             /* Ignore white space */
                                         }

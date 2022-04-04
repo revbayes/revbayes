@@ -130,6 +130,7 @@ Parser& parser = Parser::getParser();
 %token DECREMENT INCREMENT
 %token EQUAL 
 %token AND OR AND2 OR2 GT GE LT LE EQ NE
+%token PIPE
 %token END_OF_INPUT
 
 /* Destructors */
