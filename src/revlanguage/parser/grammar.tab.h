@@ -101,11 +101,12 @@ extern int yydebug;
     LE = 302,                      /* LE  */
     EQ = 303,                      /* EQ  */
     NE = 304,                      /* NE  */
-    END_OF_INPUT = 305,            /* END_OF_INPUT  */
-    UNOT = 306,                    /* UNOT  */
-    UMINUS = 307,                  /* UMINUS  */
-    UPLUS = 308,                   /* UPLUS  */
-    UAND = 309                     /* UAND  */
+    PIPE = 305,                    /* PIPE  */
+    END_OF_INPUT = 306,            /* END_OF_INPUT  */
+    UNOT = 307,                    /* UNOT  */
+    UMINUS = 308,                  /* UMINUS  */
+    UPLUS = 309,                   /* UPLUS  */
+    UAND = 310                     /* UAND  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -161,11 +162,12 @@ extern int yydebug;
 #define LE 302
 #define EQ 303
 #define NE 304
-#define END_OF_INPUT 305
-#define UNOT 306
-#define UMINUS 307
-#define UPLUS 308
-#define UAND 309
+#define PIPE 305
+#define END_OF_INPUT 306
+#define UNOT 307
+#define UMINUS 308
+#define UPLUS 309
+#define UAND 310
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -187,7 +189,7 @@ union YYSTYPE
     std::list<RevLanguage::SyntaxLabeledExpr*>*     argumentList;
     std::list<RevLanguage::SyntaxFormal*>*          formalList;
 
-#line 191 "./grammar.tab.h"
+#line 193 "./grammar.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
