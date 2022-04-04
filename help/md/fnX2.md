@@ -26,6 +26,7 @@ fnX3
         Q1 := fnX2( fnHKY(kappa, nuc_pi) )
         F ~ dnIID(16, dnNormal(0,1))
         # Add selection to the rate matrix
-        Q2 := fnMutSel(F, Q1)
+        Q2 := fnMutSel(Q1, F)
+        Q2 := Q1 |> fnMutSel(F)   # using pipes
 
 ## references

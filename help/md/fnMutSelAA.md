@@ -33,8 +33,9 @@ fnCodonGY94, fnCodonMG94, fnX3, fndNdS, fnMutSel
 ## example
         er ~ dnDirichlet( v(1,1,1,1,1,1) )
         nuc_pi ~ dnDirichlet( rep(2.0, 4) )
-        F ~ dnIID(61, dnNormal(0,1))
-        Q := fnMutSel(F, fnX3( fnGTR(er,nuc_pi) ) )   # GTR + X3 + MutSel
+        F ~ dnIID(20, dnNormal(0,1))
+        Q := fnMutSelAA(fnX3( fnGTR(er,nuc_pi) ), F)       # GTR + X3 + MutSel
+        Q := fnGTR(er, nuc_pi) |> fnX3() |> fnMutSelAA(F)  # the same, but with pipes
 
 ## references
 - citation: Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon

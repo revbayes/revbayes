@@ -38,10 +38,11 @@ fnCodonGY94, fnCodonMG94, fnFMutSel0, fnMutSel
         F ~ dnIID(61, dnNormal(0,1))
         omega ~ dnUniform(0,1)
         # The FMutSel model from Yang and Nielsen (2008)        
-        Q1 := fnFMutSel(F, omega, fnGTR(er, nuc_pi))
+        Q1 := fnFMutSel(fnGTR(er, nuc_pi), F, omega)
 
         # The same -- fMutSel = GTR(er,nuc_pi) + X3 + MutSel(F) + dNdS(omega)
-        Q2 := fndNdS(omega, fnMutSel(F, fnX3( fnGTR(er, nuc_pi))))
+        Q2 := fndNdS(omega, fnMutSel(F, fnX3( fnGTR(er, nuc_pi))))        # function application
+        Q2 := fnGTR(er, nuc_pi) |> fnX3() |> fnMutSel(F) |> fndNdS(omega) # with pipes
 
 ## references
 - citation: Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate

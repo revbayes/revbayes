@@ -27,10 +27,12 @@ fnCodonGY94, fnCodonMG94K, fndNdS
         nuc_pi ~ dnDirichlet( rep(2.0, 4) )
         Q1 := fnCodonMG94K( kappa, omega, nuc_pi )
         # This is the same.
-        Q2 := fndNdS(omega,fnX3(fnHKY(kappa,nuc_pi)))   # HKY + X3 + dNdS, or HKY*3 + dNdS
+        Q2 := fndNdS(fnX3(fnHKY(kappa,nuc_pi)),omega)          # HKY + X3 + dNdS, or HKY*3 + dNdS
+        Q2 := fnHKY(kappa, nuc_pi) |> fnX3() |> fndNdS(omega)  # the same, but using pipes
 
         er ~ dnDirichlet( v(1,1,1,1,1,1) )
         Q3 := fnX3(fnGTR(er,nuc_pi))      # GTR + X3, or GTR*3
+        Q3 := fnGTR(er, nuc_pi) |> fnX3() # the same, but using pipes
 
 ## references
 - citation: Redelings, BD (2021). BAli-Phy version 3: Model-based co-estimation of Alignment

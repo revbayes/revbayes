@@ -33,11 +33,13 @@ fnCodonGY94, fnCodonMG94, fnMutSelAA, fnFMutSel, fndNdS
         er ~ dnDirichlet( v(1,1,1,1,1,1) )
         nuc_pi ~ dnDirichlet( rep(2.0, 4) )
         F ~ dnIID(61, dnNormal(0,1))
-        Q := fnMutSel(F, fnX3( fnGTR(er,nuc_pi) ) )   # GTR + X3 + MutSel
+        Q := fnMutSel(fnX3( fnGTR(er, nuc_pi) ), F)       # GTR + X3 + MutSel
+        Q := fnGTR(er, nuc_pi) |> fnX3() |> fnMutSel(F)   # the same, but with pipes
 
         # A mutation-selection balance model on RNA, with GTR mutation.
         F2 ~ dnIID(16, dnNormal(0,1))
-        Q2 := fnMutSel(F2, fnX2( fnGTR(er,nuc_pi) ) ) # GTR + X2 + MutSel
+        Q2 := fnMutSel(fnX2( fnGTR(er,nuc_pi) ), F2)      # GTR + X2 + MutSel
+        Q2 := fnGTR(er, nuc_pi) |> fnX2() |> fnMutSel(F2) # the same, but with pipes
 
 ## references
 - citation: Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate
