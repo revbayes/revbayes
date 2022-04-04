@@ -28,8 +28,8 @@ dnf install gcc-c++ meson boost-devel
 
 You can install meson using python:
 ``` sh
-python3 -m venv meson
-source meson/bin/activate
+python3 -m venv meson_env
+source meson_env/bin/activate
 pip3 install meson ninja
 ```
 
