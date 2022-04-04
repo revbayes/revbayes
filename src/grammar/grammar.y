@@ -557,7 +557,6 @@ fxnCall     :   identifier '(' optArguments ')'
                 }
             ;
 
-
 functionCall    :   fxnCall
                     {
 #ifdef DEBUG_BISON_FLEX
@@ -580,6 +579,11 @@ functionCall    :   fxnCall
 #endif
                         $3->setBaseVariable($1);
                         $$ = $3;
+                    }
+                |   expression PIPE fxnCall
+                    {
+                        $$ = $3;
+                        $$->pipeAddArg(new SyntaxLabeledExpr ("" , $1));
                     }
                 ;
 
