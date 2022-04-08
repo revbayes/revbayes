@@ -206,6 +206,8 @@ void UniformTopologyDistribution::simulateClade(std::vector<TopologyNode *> &n )
         left_child->setParent( parent );
         right_right->setParent( parent );
                 
+        parent->setBranchLength( 1.0 );
+        
         // insert the parent to our list
         n.push_back( parent );
         
@@ -234,6 +236,8 @@ void UniformTopologyDistribution::simulateTree( void )
         
         // create the i-th taxon
         TopologyNode* node = new TopologyNode( taxa[i], i );
+        
+        node->setBranchLength( 1.0 );
         
         bool is_outgroup = false;
         for (size_t j = 0; j < outgroup.size(); ++j)
@@ -449,6 +453,8 @@ void UniformTopologyDistribution::simulateTree( void )
 			root = ingroup_nodes[0];
 		}
     }
+    
+    root->setBranchLength(0.0);
     
     // initialize the topology by setting the root
     psi->setRoot(root, true);
