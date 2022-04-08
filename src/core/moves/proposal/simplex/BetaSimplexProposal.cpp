@@ -150,7 +150,7 @@ double BetaSimplexProposal::propose( Simplex &value )
         ln_Hastings_ratio = backward - forward;
         
         // include the Jacobian for the scaling of the other values
-        ln_Hastings_ratio += (cats - 2) * log(scaling_factor_other_values) - (cats - 1) * log(sum);
+        ln_Hastings_ratio += (cats - 2) * log(scaling_factor_other_values) - cats * log(sum);
     }
 	catch (RbException &e)
     {
@@ -247,6 +247,6 @@ void BetaSimplexProposal::tune( double rate )
     }
     
     // set a hard maximum of 100
-    alpha = fmin(100, alpha);
+    // alpha = fmin(100, alpha);
 }
 
