@@ -60,7 +60,8 @@ EpisodicBirthDeathSamplingTreatmentProcess::EpisodicBirthDeathSamplingTreatmentP
                                                                                        const std::string &cdt,
                                                                                        const std::vector<Taxon> &tn,
                                                                                        bool uo,
-                                                                                       Tree *t) : AbstractBirthDeathProcess( ra, cdt, tn, uo, t ),
+                                                                                       Tree *t,
+                                                                                       bool mrtp) : AbstractBirthDeathProcess( ra, cdt, tn, uo, t ),
     interval_times_global(timeline),
     interval_times_speciation(speciation_timeline),
     interval_times_extinction(extinction_timeline),
@@ -69,6 +70,7 @@ EpisodicBirthDeathSamplingTreatmentProcess::EpisodicBirthDeathSamplingTreatmentP
     interval_times_event_speciation(event_sampling_timeline),
     interval_times_event_extinction(event_extinction_timeline),
     interval_times_event_sampling(event_sampling_timeline),
+    mostrecent_tip_present(mrtp),
     offset( 0.0 )
 {
     // initialize all the pointers to NULL
@@ -733,36 +735,37 @@ size_t EpisodicBirthDeathSamplingTreatmentProcess::findIndex(double t, const std
 // calculate offset so we can set t_0 to time of most recent tip
 void EpisodicBirthDeathSamplingTreatmentProcess::getOffset(void) const
 {
-    // On first pass, there is no tree, so we can't loop over nodes
-    // Get taxon ages directly from taxa instead
-    if ( value->getNumberOfNodes() == 0 )
-    {
-        offset = RbConstants::Double::max;
-        for (size_t i = 0; i < taxa.size(); i++)
+    if (mostrecent_tip_present == true) {
+        // On first pass, there is no tree, so we can't loop over nodes
+        // Get taxon ages directly from taxa instead
+        if ( value->getNumberOfNodes() == 0 )
         {
-            const Taxon& n = taxa[i];
-
-            if ( n.getAge() < offset )
+            offset = RbConstants::Double::max;
+            for (size_t i = 0; i < taxa.size(); i++)
             {
-                offset = n.getAge();
+                const Taxon& n = taxa[i];
+
+                if ( n.getAge() < offset )
+                {
+                    offset = n.getAge();
+                }
+            }
+        }
+        // On later passes we have the tree, to avoid any issues with tree and taxon age mismatch, get ages from tree
+        else
+        {
+            offset = RbConstants::Double::max;
+            for (size_t i = 0; i < value->getNumberOfNodes(); i++)
+            {
+                const TopologyNode& n = value->getNode( i );
+
+                if ( n.getAge() < offset )
+                {
+                    offset = n.getAge();
+                }
             }
         }
     }
-    // On later passes we have the tree, to avoid any issues with tree and taxon age mismatch, get ages from tree
-    else
-    {
-        offset = RbConstants::Double::max;
-        for (size_t i = 0; i < value->getNumberOfNodes(); i++)
-        {
-            const TopologyNode& n = value->getNode( i );
-
-            if ( n.getAge() < offset )
-            {
-                offset = n.getAge();
-            }
-        }
-    }
-
 }
 
 bool EpisodicBirthDeathSamplingTreatmentProcess::isConstantRate(void) const

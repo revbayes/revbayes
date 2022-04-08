@@ -83,6 +83,9 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_BDSTP::createDistribution( void ) 
 
     // sampling condition
     const std::string& cond                     = static_cast<const RlString &>( condition->getRevObject() ).getValue();
+    
+    // last time interval ending age
+    bool mrtp = static_cast<const RlBoolean &>( mostrecent_tip_present->getRevObject() ).getValue(); 
 
     // get the taxa to simulate either from a vector of rev taxon objects or a vector of names
     std::vector<RevBayesCore::Taxon> tn = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
@@ -202,7 +205,8 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_BDSTP::createDistribution( void ) 
                                                                      cond,
                                                                      tn,
                                                                      uo,
-                                                                     init);
+                                                                     init,
+                                                                     mrtp);
 
     return d;
 }
@@ -343,6 +347,8 @@ const MemberRules& Dist_BDSTP::getParameterRules(void) const
         dist_member_rules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
         dist_member_rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "initialTree" , TimeTree::getClassTypeSpec() , "Instead of drawing a tree from the distribution, initialize distribution with this tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+        
+        dist_member_rules.push_back( new ArgumentRule( "mostRecentTipPresent" , RlBoolean::getClassTypeSpec() , "Treating the time that the most recent tip is sampled as the present (default, true; otherwise the present has an age of zero while the most recent tip may have an positive age)?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
 
         rules_set = true;
     }
@@ -449,6 +455,10 @@ void Dist_BDSTP::setConstParameter(const std::string& name, const RevPtr<const R
     else if ( name == "initialTree" )
     {
         initial_tree = var;
+    }
+    else if ( name == "mostRecentTipPresent" )
+    {
+        mostrecent_tip_present = var;
     }
     else
     {

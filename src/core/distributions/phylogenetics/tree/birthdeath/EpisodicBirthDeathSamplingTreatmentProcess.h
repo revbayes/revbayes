@@ -53,7 +53,8 @@ namespace RevBayesCore {
                                                     const std::string &cdt,
                                                     const std::vector<Taxon> &tn,
                                                     bool uo,
-                                                    Tree *t);  //!< Constructor
+                                                    Tree *t,
+                                                    bool mrtp = true);  //!< Constructor
 
         // public member functions
         EpisodicBirthDeathSamplingTreatmentProcess*     clone(void) const;                                                      //!< Create an independent clone
@@ -133,6 +134,7 @@ namespace RevBayesCore {
         mutable std::vector<std::vector<double> >       event_bifurcation_times;                               //!< The ages of all bifurcation events in the tree at burst events
 
         mutable double                                  offset;                                                //!< In the case there the most recent tip is at time y, we internally adjust by this time and treat y as the present; this does not affect the boundary times of the rate shifts
+        bool                                            mostrecent_tip_present;                                //!< In the case there the most recent tip is at time y, we internally adjust by this time and treat y as the present or not (i.e., the present remains with age zero while y is positive)
         int                                             num_extant_taxa;
 
         mutable std::vector<double>                     lambda;
