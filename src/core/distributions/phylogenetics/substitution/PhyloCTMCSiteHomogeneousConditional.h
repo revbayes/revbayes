@@ -1137,6 +1137,20 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::redrawValue( v
             this->changed_nodes[index] = true;
         }
     }
+    
+    for (std::vector<bool>::iterator it = this->pmat_dirty_nodes.begin(); it != this->pmat_dirty_nodes.end(); ++it)
+    {
+        (*it) = true;
+    }
+    
+    for (size_t index = 0; index < this->pmat_changed_nodes.size(); ++index)
+    {
+        if ( this->pmat_changed_nodes[index] == false )
+        {
+            this->active_pmatrices[index] = (this->active_pmatrices[index] == 0 ? 1 : 0);
+            this->pmat_changed_nodes[index] = true;
+        }
+    }
 
 }
 
