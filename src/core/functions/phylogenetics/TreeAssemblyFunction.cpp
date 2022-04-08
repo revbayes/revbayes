@@ -89,6 +89,8 @@ void TreeAssemblyFunction::restore( const DagNode *restorer )
     //delegate to base class
     TypedFunction< Tree >::restore( restorer );
     
+    update();
+    
 //    touchedNodeIndices.clear();
 }
 
