@@ -230,6 +230,11 @@
 #include "Move_SpeciesTreeScale.h"
 #include "Move_SubtreeScale.h"
 #include "Move_SubtreeSwap.h"
+#include "Move_SubtreeDirichletRelativeBranchLengthSimplex.h"
+#include "Move_SubtreeScaleBetaRelativeBranchLengthSimplexSingleTreeLength.h"
+#include "Move_SubtreeScaleBetaRelativeBranchLengthSimplexAllTreeLengthVector.h"
+#include "Move_SubtreeScaleRelativeBranchLengthSimplexSingleTreeLength.h"
+#include "Move_SubtreeScaleRelativeBranchLengthSimplexAllTreeLengthVector.h"
 #include "Move_SubtreeSwapExtendingNonclock.h"
 #include "Move_SPRExtendingNonclock.h"
 #include "Move_SPRNonclock.h"
@@ -431,6 +436,11 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_RootTimeSlideUniform()             );
         addType( new Move_SubtreeScale()                     );
         addType( new Move_SubtreeSwap()                      );
+        addType( new Move_SubtreeDirichletRelativeBranchLengthSimplex()              );
+        addType( new Move_SubtreeScaleRelativeBranchLengthSimplexSingleTreeLength()              );
+        addType( new Move_SubtreeScaleRelativeBranchLengthSimplexAllTreeLengthVector()              );
+        addType( new Move_SubtreeScaleBetaRelativeBranchLengthSimplexSingleTreeLength()              );
+        addType( new Move_SubtreeScaleBetaRelativeBranchLengthSimplexAllTreeLengthVector()              );
         addType( new Move_SubtreeSwapExtendingNonclock()     );
         addType( new Move_SPRNonclock()                      );
         addType( new Move_SPRExtendingNonclock()             );
