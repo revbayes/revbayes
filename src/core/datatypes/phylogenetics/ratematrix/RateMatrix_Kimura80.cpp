@@ -72,28 +72,32 @@ void RateMatrix_Kimura80::calculateTransitionProbabilities(double startAge, doub
     
     double xx = - beta * t;
     double aa = exp(xx);
-    double bb = exp( (1.0+0.5*(kappa-1.0))* xx);
+    double bb = exp((0.5 + kappa * 0.5) * xx);
     double oneminusa = 1 - aa;
     
-    P[0][0] = ( ( 0.5+0.5*aa ) + bb) / 2.0;
-    P[0][1] = oneminusa / 4.0;
-    P[0][2] = ( ( 0.5+0.5*aa ) - bb) / 2.0;
-    P[0][3] = oneminusa / 4.0;
+    double p0 = (( 0.5 + 0.5 * aa ) + bb) / 2.0;
+    double p1 = (( 0.5 + 0.5 * aa ) - bb) / 2.0;
+    double p2 = oneminusa / 4.0;
     
-    P[1][0] = oneminusa / 4.0;
-    P[1][1] = ( ( 0.5+0.5*aa ) + bb) / 2.0;
-    P[1][2] =  oneminusa / 4.0;
-    P[1][3] = ( ( 0.5+0.5*aa ) - bb) / 2.0;
+    P[0][0] = p0;
+    P[0][1] = p2;
+    P[0][2] = p1;
+    P[0][3] = p2;
     
-    P[2][0] = ( ( 0.5+0.5*aa ) - bb) / 2.0;
-    P[2][1] = P[0][1];
-    P[2][2] = ( ( 0.5+0.5*aa ) + bb) / 2.0;
-    P[2][3] = P[0][3];
+    P[1][0] = p2;
+    P[1][1] = p0;
+    P[1][2] = p2;
+    P[1][3] = p1;
     
-    P[3][0] = P[1][0];
-    P[3][1] = ( ( 0.5+0.5*aa ) - bb) / 2.0;
-    P[3][2] = P[1][2];
-    P[3][3] = ( ( 0.5+0.5*aa ) + bb) / 2.0;
+    P[2][0] = p1;
+    P[2][1] = p2;
+    P[2][2] = p0;
+    P[2][3] = p2;
+    
+    P[3][0] = p2;
+    P[3][1] = p1;
+    P[3][2] = p2;
+    P[3][3] = p0;
     
 }
 
