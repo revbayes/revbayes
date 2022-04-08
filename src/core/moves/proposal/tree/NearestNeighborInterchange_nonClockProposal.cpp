@@ -206,6 +206,14 @@ double NearestNeighborInterchange_nonClockProposal::doProposal( void )
         parent.setParent( node );
         node_A->setParent( &parent );
         
+        size_t index = node->getIndex();
+        double bl = node->getBranchLength();
+        node->setIndex(parent.getIndex());
+        node->setBranchLength(parent.getBranchLength());
+        parent.setIndex(index);
+        parent.setBranchLength(bl);
+        
+        tau.orderNodesByIndex();
     }
     else if ( picked_root_branch == true  )
     {
@@ -296,6 +304,14 @@ void NearestNeighborInterchange_nonClockProposal::undoProposal( void )
         parent->setParent( node_B );
         node_A->setParent( node );
         
+        size_t index = parent->getIndex();
+        double bl = parent->getBranchLength();
+        parent->setIndex(node->getIndex());
+        parent->setBranchLength(node->getBranchLength());
+        node->setIndex(index);
+        node->setBranchLength(bl);
+        
+        tau.orderNodesByIndex();
     }
     else if ( picked_root_branch == true  )
     {
