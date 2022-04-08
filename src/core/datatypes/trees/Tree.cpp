@@ -431,6 +431,10 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
     if ( n == "parent" )
     {
         long index = static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
+        if (getNode( index ).isRoot() == true)
+        {
+            throw RbException("Root has no parent.");
+        }
         rv = long( getNode( index ).getParent().getIndex() )+1;
     }
     else if ( n == "child" )
