@@ -105,6 +105,11 @@
 #include "Move_DirichletSimplex.h"
 #include "Move_BetaSimplex.h"
 #include "Move_ElementSwapSimplex.h"
+#include "Move_SingleElementBetaSimplexSingleScalar.h"
+#include "Move_SingleElementBetaSimplexAllScalarVector.h"
+#include "Move_SingleElementScaleSimplexSingleScalar.h"
+#include "Move_SingleElementScaleSimplexAllScalarVector.h"
+#include "Move_ElementsSwapSimplex.h"
 
 /* Moves on vectors */
 #include "Move_ElementScale.h"
@@ -281,6 +286,11 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_DirichletSimplex() );
         addType( new Move_BetaSimplex() );
         addType( new Move_ElementSwapSimplex() );
+        addType( new Move_SingleElementBetaSimplexSingleScalar() );
+        addType( new Move_SingleElementBetaSimplexAllScalarVector() );
+        addType( new Move_SingleElementScaleSimplexSingleScalar() );
+        addType( new Move_SingleElementScaleSimplexAllScalarVector() );
+        addType( new Move_ElementsSwapSimplex() );
 
         /* Moves on vectors */
         addType( new Move_MultipleElementScale() );
