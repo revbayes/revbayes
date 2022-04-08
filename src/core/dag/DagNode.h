@@ -90,6 +90,7 @@ template <class valueType> class RbOrderedSet;
         void                                                        incrementReferenceCount(void) const;                                                        //!< Increment the reference count for reference counting in smart pointers
         void                                                        initiateGetAffectedNodes(RbOrderedSet<DagNode *>& affected);                                        //!< get affected nodes
         void                                                        initiateGetAffectedNodesVector(RbOrderedSet<DagNode *>& affected, std::vector<DagNode *>& nodes);
+        void                                                        initiatefindUniqueDescendants(RbOrderedSet<DagNode *>& descendants);
         bool                                                        isAssignable(void) const;                                                                   //!< Is this DAG node modifiable by user?
         virtual bool                                                isClamped(void) const;                                                                      //!< Is this node clamped? Only stochastic nodes might be clamped.
         virtual bool                                                isConstant(void) const;                                                                     //!< Is this DAG node constant?

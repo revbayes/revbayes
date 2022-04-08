@@ -186,7 +186,7 @@ void DagNode::clearVisitFlag( const size_t& flagType )
     findUniqueDescendantsWithFlag(descendants, flagType);
 
     // Clear the designated flagType from all descedants (including node calling this)
-    // Also clear the flags we just flagged to keep descedant searching fast
+    // Also clear the flags we just flagged to keep descendant searching fast
     for (RbOrderedSet<DagNode*>::const_iterator it=descendants.begin(); it!=descendants.end(); ++it)
     {
         DagNode *the_descendant = *it;
@@ -302,7 +302,7 @@ void DagNode::findUniqueDescendantsWithFlag(RbOrderedSet<DagNode *>& descendants
         DagNode *child = *it;
         // if child is not in descedant list, recurse from child's position
         // if ( descendants.find( *it ) == descendants.end() )
-        if ( child->visit_flags[FIND_FLAG] == false && child->visit_flags[flagType] == true )
+        if ( flagType == FIND_FLAG || (child->visit_flags[FIND_FLAG] == false && child->visit_flags[flagType] == true ) )
         {
             child->findUniqueDescendantsWithFlag( descendants, flagType );
         }
@@ -554,6 +554,21 @@ void DagNode::initiateGetAffectedNodes(RbOrderedSet<DagNode *> &affected)
 
     // clear visit flags
     const size_t& flag_type = AFFECTED_FLAG;
+    clearVisitFlag(flag_type);
+}
+
+
+/**
+ * Begins a getAffectedNodes() recursion then clears visited flags
+ */
+void DagNode::initiatefindUniqueDescendants(RbOrderedSet<DagNode *> &descendants)
+{
+    
+    // begin recursion
+    findUniqueDescendants( descendants );
+    
+    // clear visit flags
+    const size_t& flag_type = FIND_FLAG;
     clearVisitFlag(flag_type);
 }
 
