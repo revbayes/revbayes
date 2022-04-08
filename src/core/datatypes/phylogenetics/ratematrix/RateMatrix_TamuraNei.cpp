@@ -3,9 +3,6 @@
 #include <complex>
 #include <vector>
 
-#include "EigenSystem.h"
-#include "MatrixComplex.h"
-#include "MatrixReal.h"
 #include "RateMatrix_TamuraNei.h"
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
@@ -20,23 +17,10 @@ using namespace RevBayesCore;
 RateMatrix_TamuraNei::RateMatrix_TamuraNei(void) : TimeReversibleRateMatrix( 4 )
 {
     
-    theEigenSystem       = new EigenSystem(the_rate_matrix);
-    c_ijk.resize(num_states * num_states * num_states);
-    cc_ijk.resize(num_states * num_states * num_states);
+    kappa_1 = 1.0;
+    kappa_2 = 1.0;
     
     update();
-}
-
-
-/** Copy constructor */
-RateMatrix_TamuraNei::RateMatrix_TamuraNei(const RateMatrix_TamuraNei& m) : TimeReversibleRateMatrix( m )
-{
-    
-    theEigenSystem       = new EigenSystem( *m.theEigenSystem );
-    c_ijk                = m.c_ijk;
-    cc_ijk               = m.cc_ijk;
-    
-    theEigenSystem->setRateMatrixPtr(the_rate_matrix);
 }
 
 
@@ -44,27 +28,6 @@ RateMatrix_TamuraNei::RateMatrix_TamuraNei(const RateMatrix_TamuraNei& m) : Time
 RateMatrix_TamuraNei::~RateMatrix_TamuraNei(void)
 {
     
-    delete theEigenSystem;
-}
-
-
-RateMatrix_TamuraNei& RateMatrix_TamuraNei::operator=(const RateMatrix_TamuraNei &r)
-{
-    
-    if (this != &r)
-    {
-        TimeReversibleRateMatrix::operator=( r );
-        
-        delete theEigenSystem;
-        
-        theEigenSystem       = new EigenSystem( *r.theEigenSystem );
-        c_ijk                = r.c_ijk;
-        cc_ijk               = r.cc_ijk;
-        
-        theEigenSystem->setRateMatrixPtr(the_rate_matrix);
-    }
-    
-    return *this;
 }
 
 
@@ -84,149 +47,57 @@ RateMatrix_TamuraNei& RateMatrix_TamuraNei::assign(const Assignable &m)
 }
 
 
-
-/** Do precalculations on eigenvectors */
-void RateMatrix_TamuraNei::calculateCijk(void)
-{
-    
-    if ( theEigenSystem->isComplex() == false )
-    {
-        // real case
-        const MatrixReal& ev  = theEigenSystem->getEigenvectors();
-        const MatrixReal& iev = theEigenSystem->getInverseEigenvectors();
-        double* pc = &c_ijk[0];
-        for (size_t i=0; i<num_states; i++)
-        {
-            for (size_t j=0; j<num_states; j++)
-            {
-                for (size_t k=0; k<num_states; k++)
-                {
-                    *(pc++) = ev[i][k] * iev[k][j];
-                }
-            }
-        }
-    }
-    else
-    {
-        // complex case
-        const MatrixComplex& cev  = theEigenSystem->getComplexEigenvectors();
-        const MatrixComplex& ciev = theEigenSystem->getComplexInverseEigenvectors();
-        std::complex<double>* pc = &cc_ijk[0];
-        for (size_t i=0; i<num_states; i++)
-        {
-            for (size_t j=0; j<num_states; j++)
-            {
-                for (size_t k=0; k<num_states; k++)
-                {
-                    *(pc++) = cev[i][k] * ciev[k][j];
-                }
-            }
-            
-        }
-        
-    }
-    
-}
-
-
 /** Calculate the transition probabilities */
 void RateMatrix_TamuraNei::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
 {
     double t = rate * (startAge - endAge);
-    if ( theEigenSystem->isComplex() == false )
-    {
-        tiProbsEigens(t, P);
-    }
-    else
-    {
-        tiProbsComplexEigens(t, P);
-    }
+    
+    // notation:
+    double pi_A = stationary_freqs[0];
+    double pi_C = stationary_freqs[1];
+    double pi_G = stationary_freqs[2];
+    double pi_T = stationary_freqs[3];
+    
+    // compute auxilliary variables
+    double pi_AG = pi_A + pi_G;
+    double pi_CT = pi_C + pi_T;
+    
+    // compute beta
+    double beta = 0.5 / (pi_AG * pi_CT + kappa_1 * pi_A * pi_G + kappa_2 * pi_C * pi_T);
+    
+    // calculate the transition probabilities
+    
+    double xx = - beta * t;
+    double aa = exp(xx);
+    double bbR = exp((pi_AG * kappa_1 + pi_CT) * xx);
+    double bbY = exp((pi_CT * kappa_2 + pi_AG) * xx);
+    double oneminusa = 1 - aa;
+    
+    P[0][0] = (pi_A * ( pi_AG+pi_CT*aa ) + pi_G*bbR) / pi_AG;
+    P[0][1] = pi_C * oneminusa;
+    P[0][2] = (pi_G * ( pi_AG+pi_CT*aa ) - pi_G*bbR) / pi_AG;
+    P[0][3] = pi_T * oneminusa;
+    
+    P[1][0] = pi_A * oneminusa;
+    P[1][1] = (pi_C * ( pi_CT+pi_AG*aa ) + pi_T*bbY) / pi_CT;
+    P[1][2] = pi_G * oneminusa;
+    P[1][3] = (pi_T * ( pi_CT+pi_AG*aa ) - pi_T*bbY) / pi_CT;
+    
+    P[2][0] = (pi_A * ( pi_AG+pi_CT*aa ) - pi_A*bbR) / pi_AG;
+    P[2][1] = P[0][1];
+    P[2][2] = (pi_G * ( pi_AG+pi_CT*aa ) + pi_A*bbR) / pi_AG;
+    P[2][3] = P[0][3];
+    
+    P[3][0] = P[1][0];
+    P[3][1] = (pi_C * ( pi_CT+pi_AG*aa ) - pi_C*bbY) / pi_CT;
+    P[3][2] = P[1][2];
+    P[3][3] = (pi_T * ( pi_CT+pi_AG*aa ) + pi_C*bbY) / pi_CT;
 }
 
 
 RateMatrix_TamuraNei* RateMatrix_TamuraNei::clone( void ) const
 {
     return new RateMatrix_TamuraNei( *this );
-}
-
-
-
-/** Calculate the transition probabilities for the real case */
-void RateMatrix_TamuraNei::tiProbsEigens(double t, TransitionProbabilityMatrix& P) const
-{
-    
-    // get a reference to the eigenvalues
-    const std::vector<double>& eigenValue = theEigenSystem->getRealEigenvalues();
-    
-    // precalculate the product of the eigenvalue and the branch length
-    std::vector<double> eigValExp(num_states);
-    for (size_t s=0; s<num_states; s++)
-    {
-        eigValExp[s] = exp(eigenValue[s] * t);
-    }
-    
-    // calculate the transition probabilities
-    const double* ptr = &c_ijk[0];
-    double*         p = P.theMatrix;
-    for (size_t i=0; i<num_states; i++)
-    {
-        for (size_t j=0; j<num_states; j++, ++p)
-        {
-            double sum = 0.0;
-            for (size_t s=0; s<num_states; s++)
-            {
-                sum += (*ptr++) * eigValExp[s];
-            }
-            
-            //			P[i][j] = (sum < 0.0) ? 0.0 : sum;
-            (*p) = (sum < 0.0) ? 0.0 : sum;
-        }
-        
-    }
-    
-}
-
-
-/** Calculate the transition probabilities for the complex case */
-void RateMatrix_TamuraNei::tiProbsComplexEigens(double t, TransitionProbabilityMatrix& P) const
-{
-    
-    // get a reference to the eigenvalues
-    const std::vector<double>& eigenValueReal = theEigenSystem->getRealEigenvalues();
-    const std::vector<double>& eigenValueComp = theEigenSystem->getImagEigenvalues();
-    
-    // precalculate the product of the eigenvalue and the branch length
-    std::vector<std::complex<double> > ceigValExp(num_states);
-    for (size_t s=0; s<num_states; s++)
-    {
-        std::complex<double> ev = std::complex<double>(eigenValueReal[s], eigenValueComp[s]);
-        ceigValExp[s] = exp(ev * t);
-    }
-    
-    // calculate the transition probabilities
-    const std::complex<double>* ptr = &cc_ijk[0];
-    for (size_t i=0; i<num_states; i++)
-    {
-        for (size_t j=0; j<num_states; j++)
-        {
-            std::complex<double> sum = std::complex<double>(0.0, 0.0);
-            for (size_t s=0; s<num_states; s++)
-                sum += (*ptr++) * ceigValExp[s];
-            P[i][j] = (sum.real() < 0.0) ? 0.0 : sum.real();
-        }
-        
-    }
-    
-}
-
-
-/** Update the eigen system */
-void RateMatrix_TamuraNei::updateEigenSystem(void)
-{
-    
-    theEigenSystem->update();
-    calculateCijk();
-    
 }
 
 
@@ -251,9 +122,6 @@ void RateMatrix_TamuraNei::update( void )
         
         // rescale
         rescaleToAverageRate( 1.0 );
-        
-        // now update the eigensystem
-        updateEigenSystem();
         
         // clean flags
         needs_update = false;

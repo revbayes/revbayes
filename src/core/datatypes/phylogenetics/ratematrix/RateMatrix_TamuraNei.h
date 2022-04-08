@@ -34,32 +34,18 @@ namespace RevBayesCore {
         
     public:
         RateMatrix_TamuraNei(void);                                                                                             //!< Construct rate matrix with n states
-        RateMatrix_TamuraNei(const RateMatrix_TamuraNei& m);                                                                    //!< Copy constructor
         virtual                             ~RateMatrix_TamuraNei(void);                                                        //!< Destructor
         
-        // overloaded operators
-        RateMatrix_TamuraNei&                operator=(const RateMatrix_TamuraNei& r);
-        
         // RateMatrix functions
-        virtual RateMatrix_TamuraNei&        assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
+        virtual RateMatrix_TamuraNei&       assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
         void                                calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;    //!< Calculate the transition matrix
-        RateMatrix_TamuraNei*                clone(void) const;
+        RateMatrix_TamuraNei*               clone(void) const;
         void                                setKappa(double k1, double k2);
         void                                update(void);
         
-    private:
-        void                                calculateCijk(void);                                                                //!< Do precalculations on eigenvectors and their inverse
-        void                                tiProbsEigens(double t, TransitionProbabilityMatrix& P) const;                      //!< Calculate transition probabilities for real case
-        void                                tiProbsComplexEigens(double t, TransitionProbabilityMatrix& P) const;               //!< Calculate transition probabilities for complex case
-        void                                updateEigenSystem(void);                                                            //!< Update the system of eigenvalues and eigenvectors
-        
-        EigenSystem*                        theEigenSystem;                                                                     //!< Holds the eigen system
-        std::vector<double>                 c_ijk;                                                                              //!< Vector of precalculated product of eigenvectors and their inverse
-        std::vector<std::complex<double> >  cc_ijk;                                                                             //!< Vector of precalculated product of eigenvectors and thier inverse for complex case
-        
+    private:        
         double                              kappa_1;
         double                              kappa_2;
-        
         
     };
     
