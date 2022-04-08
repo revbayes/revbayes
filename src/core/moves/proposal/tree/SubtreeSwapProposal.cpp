@@ -51,6 +51,29 @@ SubtreeSwapProposal* SubtreeSwapProposal::clone( void ) const
 }
 
 
+// assuming that the given node won't propose a swap with 1) any of its ancestors and 2) its brother(s)
+void SubtreeSwapProposal::findSwappableNodes(std::vector<TopologyNode *> &b, TopologyNode &p, TopologyNode *n)
+{
+    // security check that I'm not a tip
+    if ( (n->isTip() == false) && (&p != n) )
+    {
+        // check the first child
+        std::vector<TopologyNode*> children = n->getChildren();
+        for (size_t i = 0; i < children.size(); i++)
+        {
+            if ( (&(p.getParent()) != n) && (isDescendant(p, *children[i]) == false) )
+            {
+                b.push_back( children[i] );
+            }
+            else if (children[i] != &p)
+            {
+                findSwappableNodes(b, p, children[i]);
+            }
+        }
+    }
+}
+
+
 /**
  * Get Proposals' name of object
  *
@@ -71,6 +94,7 @@ double SubtreeSwapProposal::getProposalTuningParameter( void ) const
 }
 
 
+// if n (the first argument) is a descendant of p (the second argument)
 bool SubtreeSwapProposal::isDescendant(const TopologyNode &n, const TopologyNode &p)
 {
 
@@ -118,16 +142,26 @@ double SubtreeSwapProposal::doProposal( void )
     // 2. do not descent from another
     // 3. are not siblings
     TopologyNode* first_node;
-    TopologyNode* second_node;
+    TopologyNode* root = &tau.getRoot();
+    
+    // collect the swappable nodes
+    // we need to do this collection while randomly picking the first node
+    // as whether the first node is a valid pick or not (i.e., whether there is any second node to swap with)
+    // will depend on the topology of the rest of the tree
+    std::vector<TopologyNode*> swappable_nodes_withfirst;
+    
     do {
         double u = rng->uniform01();
         size_t index = size_t( std::floor(tau.getNumberOfNodes() * u) );
         first_node = &tau.getNode(index);
         
-        u = rng->uniform01();
-        index = size_t( std::floor(tau.getNumberOfNodes() * u) );
-        second_node = &tau.getNode(index);
-    } while ( first_node == second_node || first_node->isRoot() == true || second_node->isRoot() == true || isDescendant(*first_node, *second_node) == true || isDescendant(*second_node, *first_node) == true || &first_node->getParent() == &second_node->getParent() );
+        if (first_node->isRoot()) continue;
+        
+        findSwappableNodes(swappable_nodes_withfirst, *first_node, root);
+    } while (swappable_nodes_withfirst.empty());
+    
+    size_t index = size_t( std::floor(rng->uniform01() * swappable_nodes_withfirst.size()) );
+    TopologyNode* second_node = swappable_nodes_withfirst[index];
     
     // now we store all necessary values
     stored_first_node           = first_node;

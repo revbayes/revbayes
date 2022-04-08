@@ -48,6 +48,7 @@ template <class variableType> class StochasticNode;
         
     private:
         // private methods
+        void                                    findSwappableNodes(std::vector<TopologyNode*> &b, TopologyNode &p, TopologyNode *n);
         bool                                    isDescendant(const TopologyNode &n, const TopologyNode &p);
 
         // parameters
