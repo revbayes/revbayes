@@ -130,6 +130,7 @@
 #include "Move_VectorScale.h"
 #include "Move_VectorSlide.h"
 #include "Move_VectorSlideRecenter.h"
+#include "Move_VectorElementsSwap.h"
 
 /* Moves on real valued matrices */
 #include "Move_MatrixSingleElementScale.h"
@@ -305,6 +306,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_VectorScale() );
         addType( new Move_VectorSlide() );
         addType( new Move_VectorSlideRecenter() );
+        addType( new Move_VectorElementsSwap() );
         addType( new Move_ElementScale() );
         addType( new Move_ElementSlide() );
         addType( new Move_VectorSingleElementScale() );
