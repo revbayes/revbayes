@@ -39,6 +39,7 @@ template <class valueType> class TypedDagNode;
         const TypedDagNode<Tree>*                           tau;
         const TypedDagNode< RbVector<double> >*             brlen;
         std::set<size_t>                                    touchedNodeIndices;
+        bool                                                touchedTopology;
     };
     
 }
