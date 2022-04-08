@@ -93,6 +93,7 @@ EpisodicBirthDeathSamplingTreatmentProcess::EpisodicBirthDeathSamplingTreatmentP
     // We use a global timeline if
     //    1) the user provides one
     //    2) the user provides NO timeline arguments, meaning this is a constant-rate model
+    using_global_timeline = false;
     if ( interval_times_global != NULL )
     {
       using_global_timeline = true;
@@ -477,25 +478,24 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
         }
 
     }
-    lnProbTimes += lnD(findIndex(value->getRoot().getAge()),value->getRoot().getAge());
+    double process_time = (use_origin == true) ? getOriginAge() : value->getRoot().getAge();
+    lnProbTimes += lnD(findIndex(process_time), process_time);
 
     // condition on survival
     if ( condition == "survival" )
     {
-        double root_age = value->getRoot().getAge();
         // conditioning on survival depends on if we are using the origin or root age
         // origin: we condition on a single lineage surviving to the present and being sampled
         // root: we condition on the above plus the other root child leaving a sampled descendant
         
-        lnProbTimes -= num_initial_lineages * log( pSurvival(root_age,0.0) );
+        lnProbTimes -= num_initial_lineages * log( pSurvival(process_time, 0.0) );
     }
     else if ( condition == "sampling" )
     {
         // conditioning on sampling depends on if we are using the origin or root age
         // origin: the conditioning suggested by Stadler 2011 and used by Gavryuskina (2014), sampling at least one lineage
         // root age: sampling at least one descendent from each child of the root
-        double root_age = value->getRoot().getAge();
-        lnProbTimes -= num_initial_lineages * log( pSampling(root_age) );
+        lnProbTimes -= num_initial_lineages * log( pSampling(process_time) );
     }
 
     if ( RbMath::isFinite(lnProbTimes) == false )
