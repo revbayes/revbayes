@@ -148,14 +148,14 @@ double SubtreePruneRegraftProposal::doProposal( void )
         grandparent.removeChild( &parent );
         parent.removeChild( storedBrother );
         grandparent.addChild( storedBrother );
-        storedBrother->setParent( &grandparent );
+        storedBrother->setParent( &grandparent, false );
 
         // re-attach
         newGrandparent.removeChild( newBrother );
         parent.addChild( newBrother );
         newGrandparent.addChild( &parent );
-        parent.setParent( &newGrandparent );
-        newBrother->setParent( &parent );
+        parent.setParent( &newGrandparent, false );
+        newBrother->setParent( &parent, false );
     }
     // if the pruned subtree contains the root
     else
@@ -170,7 +170,7 @@ double SubtreePruneRegraftProposal::doProposal( void )
             storedindices.push_back(storedchildren[i]->getIndex());
             storedbrlens.push_back(storedchildren[i]->getBranchLength());
             storedChoosenNode->removeChild(storedchildren[i]);
-            storedchildren[i]->setParent(NULL);
+            storedchildren[i]->setParent(NULL, false);
             storedchildren[i]->setBranchLength(storedbrlens.back());
         }
         TopologyNode* newParent = &(newBrother->getParent());
@@ -181,7 +181,7 @@ double SubtreePruneRegraftProposal::doProposal( void )
             if (&regraft != storedchildren[i])
             {
                 regraft.addChild(storedchildren[i]);
-                storedchildren[i]->setParent(&regraft);
+                storedchildren[i]->setParent(&regraft, false);
 
                 storedBrother = storedchildren[i];
             }
@@ -196,9 +196,9 @@ double SubtreePruneRegraftProposal::doProposal( void )
 
         // re-attach
         storedChoosenNode->addChild(newBrother);
-        newBrother->setParent(storedChoosenNode);
+        newBrother->setParent(storedChoosenNode, false);
         storedChoosenNode->addChild(newParent);
-        newParent->setParent(storedChoosenNode);
+        newParent->setParent(storedChoosenNode, false);
 
         tau.orderNodesByIndex();
     }
@@ -266,14 +266,14 @@ void SubtreePruneRegraftProposal::undoProposal( void )
         grandparent.removeChild( &parent );
         parent.removeChild( oldBrother );
         grandparent.addChild( oldBrother );
-        oldBrother->setParent( &grandparent );
+        oldBrother->setParent( &grandparent, false );
 
         // re-attach
         newGrandparent.removeChild( storedBrother );
         parent.addChild( storedBrother );
         newGrandparent.addChild( &parent );
-        parent.setParent( &newGrandparent );
-        storedBrother->setParent( &parent );
+        parent.setParent( &newGrandparent, false );
+        storedBrother->setParent( &parent, false );
     }
     else
     {
@@ -288,7 +288,7 @@ void SubtreePruneRegraftProposal::undoProposal( void )
             storedindices.push_back(storedchildren[i]->getIndex());
             storedbrlens.push_back(storedchildren[i]->getBranchLength());
             storedChoosenNode->removeChild(storedchildren[i]);
-            storedchildren[i]->setParent(NULL);
+            storedchildren[i]->setParent(NULL, false);
             storedchildren[i]->setBranchLength(storedbrlens.back());
         }
 
@@ -300,7 +300,7 @@ void SubtreePruneRegraftProposal::undoProposal( void )
             if (&oldBrother != storedchildren[i])
             {
                 oldBrother.addChild(storedchildren[i]);
-                storedchildren[i]->setParent(&oldBrother);
+                storedchildren[i]->setParent(&oldBrother, false);
             }
             else
             {
@@ -313,9 +313,9 @@ void SubtreePruneRegraftProposal::undoProposal( void )
 
         // re-attach
         storedChoosenNode->addChild(storedBrother);
-        storedBrother->setParent(storedChoosenNode);
+        storedBrother->setParent(storedChoosenNode, false);
         storedChoosenNode->addChild(newParent);
-        newParent->setParent(storedChoosenNode);
+        newParent->setParent(storedChoosenNode, false);
 
         tau.orderNodesByIndex();
     }

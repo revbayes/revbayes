@@ -176,8 +176,8 @@ double SubtreeSwapProposal::doProposal( void )
     first_parent.addChild( second_node );
     second_parent.addChild( first_node );
     
-    first_node->setParent( &second_parent );
-    second_node->setParent( &first_parent );
+    first_node->setParent( &second_parent, false );
+    second_node->setParent( &first_parent, false );
     
     return 0.0;
     
@@ -235,8 +235,8 @@ void SubtreeSwapProposal::undoProposal( void )
     first_parent.addChild( stored_second_node );
     second_parent.addChild( stored_first_node );
     
-    stored_first_node->setParent( &second_parent );
-    stored_second_node->setParent( &first_parent );
+    stored_first_node->setParent( &second_parent, false );
+    stored_second_node->setParent( &first_parent, false );
     
 }
 
