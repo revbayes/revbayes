@@ -90,6 +90,7 @@ UniformTopologyBranchLengthDistribution::UniformTopologyBranchLengthDistribution
     
     simulateTree();
     
+    value->getTreeChangeEventHandler().addListener( this );
 }
 
 
@@ -111,7 +112,7 @@ UniformTopologyBranchLengthDistribution::UniformTopologyBranchLengthDistribution
         this->addParameter( *it );
     }
     
-    
+    value->getTreeChangeEventHandler().addListener( this );
 }
 
 
@@ -122,6 +123,7 @@ UniformTopologyBranchLengthDistribution::~UniformTopologyBranchLengthDistributio
     delete branch_length_prior;
     // the tree will be deleted automatically by the base class
     
+    value->getTreeChangeEventHandler().removeListener( this );
 }
 
 
@@ -248,15 +250,23 @@ const std::vector<Taxon>& UniformTopologyBranchLengthDistribution::getTaxa( void
 
 void UniformTopologyBranchLengthDistribution::redrawValue( void )
 {
+    value->getTreeChangeEventHandler().removeListener( this );
     simulateTree();
+    value->getTreeChangeEventHandler().addListener( this );
+    
+    dirty_topology = true;
 }
 
 
 void UniformTopologyBranchLengthDistribution::setValue(RevBayesCore::Tree *v, bool force)
 {
+
+    value->getTreeChangeEventHandler().removeListener( this );
     
     // delegate to super class
     TypedDistribution<Tree>::setValue( v, force );
+    
+    value->getTreeChangeEventHandler().addListener( this );
     
     // Check that this isn't an artifact of arbitrary outgroup choice + clamping
     if ( rooted == false && outgroup_provided == false )
