@@ -1842,6 +1842,15 @@ void TopologyNode::setAge(double a, bool propagate)
 
     // we need to recompute my branch-length
     recomputeBranchLength();
+    
+    // fire tree change event
+    // we need to also flag this node as dirty (instead of only its children) as
+    // 1) this node can be a tip, and
+    // 2) not necessarily every flagging mechanism works recursively (e.g., flagging nodes for P matrices recomputation)
+    if ( tree != NULL )
+    {
+        tree->getTreeChangeEventHandler().fire( *this, RevBayesCore::TreeChangeEventMessage::BRANCH_LENGTH );
+    }
 
     // we also need to recompute the branch lengths of my children
     for (std::vector<TopologyNode *>::iterator it = children.begin(); it != children.end(); ++it)
