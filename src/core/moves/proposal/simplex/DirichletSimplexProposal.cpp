@@ -27,10 +27,11 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-DirichletSimplexProposal::DirichletSimplexProposal( StochasticNode<Simplex> *n, double a, size_t nc, double o, double k /*=0.0*/, double p) : Proposal(p),
+DirichletSimplexProposal::DirichletSimplexProposal( StochasticNode<Simplex> *n, double a, double au, size_t nc, double o, double k /*=0.0*/, double p) : Proposal(p),
     variable( n ),
     storedValue( 0.0 ),
     alpha( a ),
+    alphaUpper( au ),
     nCategories( nc ),
     offset( o ),
     kappa( k )
@@ -355,6 +356,6 @@ void DirichletSimplexProposal::tune( double rate )
     }
     
     // set a hard maximum of 100
-    alpha = fmin(100, alpha);
+    alpha = fmin(alphaUpper, alpha);
 }
 

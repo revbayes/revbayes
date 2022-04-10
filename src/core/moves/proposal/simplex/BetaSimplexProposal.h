@@ -27,7 +27,7 @@ template <class variableType> class StochasticNode;
     class BetaSimplexProposal : public SimpleProposal<Simplex> {
         
     public:
-        BetaSimplexProposal( StochasticNode<Simplex> *n, double a, double p=0.44);                                                                    //!<  constructor
+        BetaSimplexProposal( StochasticNode<Simplex> *n, double a, double au=100, double p=0.44);                                                                    //!<  constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                                                //!< Clean up proposal
@@ -51,6 +51,7 @@ template <class variableType> class StochasticNode;
         
         Simplex                                 storedValue;                                                                        //!< The stored value of the Proposal used for rejections.
         double                                  alpha;                                                                             //!< The scaling parameter of the Proposal
+        double                                  alphaUpper;
 //        double                              proposedValue;                                                                      //!< The value we propose.
         
     };

@@ -60,8 +60,9 @@ void Move_BetaSimplex::constructInternalObject( void )
     RevBayesCore::TypedDagNode< RevBayesCore::Simplex>* tmp = static_cast<const Simplex &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode< RevBayesCore::Simplex> *n = static_cast<RevBayesCore::StochasticNode< RevBayesCore::Simplex > *>( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double au = static_cast<const RealPos &>( alphaUpper->getRevObject() ).getValue();
     
-    RevBayesCore::Proposal *prop = new RevBayesCore::BetaSimplexProposal(n,a,r);
+    RevBayesCore::Proposal *prop = new RevBayesCore::BetaSimplexProposal(n,a,au,r);
     value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);
 
 }
@@ -128,6 +129,7 @@ const MemberRules& Move_BetaSimplex::getParameterRules(void) const
         move_member_rules.push_back( new ArgumentRule( "x"    , Simplex::getClassTypeSpec()  , "The variable this move operates on.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
         move_member_rules.push_back( new ArgumentRule( "alpha", RealPos::getClassTypeSpec()  , "The concentration parameter on the current value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Real(1.0) ) );
         move_member_rules.push_back( new ArgumentRule( "tune" , RlBoolean::getClassTypeSpec(), "Should we tune the concentration parameter during burnin?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
+        move_member_rules.push_back( new ArgumentRule( "alphaUpper", RealPos::getClassTypeSpec() , "The upper limit of the concentration parameter.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Real(100.0) ) );
         
         /* Inherit weight from Move, put it after variable */
         const MemberRules& inheritedRules = Move::getParameterRules();
@@ -181,6 +183,10 @@ void Move_BetaSimplex::setConstParameter(const std::string& name, const RevPtr<c
     else if ( name == "tune" )
     {
         tune = var;
+    }
+    else if ( name == "alphaUpper" )
+    {
+        alphaUpper = var;
     }
     else
     {

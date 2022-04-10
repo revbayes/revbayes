@@ -29,7 +29,7 @@ template <class variableType> class StochasticNode;
     class DirichletSimplexProposal : public Proposal {
         
     public:
-        DirichletSimplexProposal( StochasticNode<Simplex> *n, double a, size_t nc, double o, double k=0.0, double p=0.234);                                                                    //!<  constructor
+        DirichletSimplexProposal( StochasticNode<Simplex> *n, double a, double au, size_t nc, double o, double k=0.0, double p=0.234);                                                                    //!<  constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                                                //!< Clean up proposal
@@ -54,6 +54,7 @@ template <class variableType> class StochasticNode;
         StochasticNode<Simplex>*                variable;                                                                           //!< The variable the Proposal is working on
         Simplex                                 storedValue;                                                                        //!< The stored value of the Proposal used for rejections.
         double                                  alpha;                                                                             //!< The scaling parameter of the Proposal
+        double                                  alphaUpper;
         size_t                                  nCategories;
         double                                  offset;
         double									kappa;

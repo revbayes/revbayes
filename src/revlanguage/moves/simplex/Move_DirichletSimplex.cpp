@@ -63,8 +63,9 @@ void Move_DirichletSimplex::constructInternalObject( void )
     RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* tmp = static_cast<const Simplex &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode< RevBayesCore::Simplex > *n = static_cast<RevBayesCore::StochasticNode< RevBayesCore::Simplex > *>( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double au = static_cast<const RealPos &>( alphaUpper->getRevObject() ).getValue();
 
-    RevBayesCore::Proposal *prop = new RevBayesCore::DirichletSimplexProposal(n,a,nc,o,k,r);
+    RevBayesCore::Proposal *prop = new RevBayesCore::DirichletSimplexProposal(n,a,au,nc,o,k,r);
     value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);
 
 }
@@ -133,6 +134,7 @@ const MemberRules& Move_DirichletSimplex::getParameterRules(void) const
         move_member_rules.push_back( new ArgumentRule( "offset" , RealPos::getClassTypeSpec()  , "The offset of the current value to center new proposals (x+offset).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(0.0) ) );
         move_member_rules.push_back( new ArgumentRule( "kappa"  , RealPos::getClassTypeSpec()  , "The offset of tuning parameter (x * alpha + kappa).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(0.0) ) );
         move_member_rules.push_back( new ArgumentRule( "tune"   , RlBoolean::getClassTypeSpec(), "Should we tune this move during burnin?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
+        move_member_rules.push_back( new ArgumentRule( "alphaUpper", RealPos::getClassTypeSpec() , "The upper limit of the concentration parameter.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Real(100.0) ) );
         
         /* Inherit weight from Move, put it after variable */
         const MemberRules& inheritedRules = Move::getParameterRules();
@@ -197,6 +199,10 @@ void Move_DirichletSimplex::setConstParameter(const std::string& name, const Rev
     else if ( name == "tune" )
     {
         tune = var;
+    }
+    else if ( name == "alphaUpper" )
+    {
+        alphaUpper = var;
     }
     else {
         Move::setConstParameter(name, var);

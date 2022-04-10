@@ -23,9 +23,10 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-BetaSimplexProposal::BetaSimplexProposal( StochasticNode<Simplex> *n, double a, double p ) : SimpleProposal<Simplex>( n, p ),
+BetaSimplexProposal::BetaSimplexProposal( StochasticNode<Simplex> *n, double a, double au, double p ) : SimpleProposal<Simplex>( n, p ),
     storedValue( Simplex() ),
-    alpha( a )
+    alpha( a ),
+    alphaUpper (au)
 {
     // tell the base class to add the node
     
@@ -247,6 +248,6 @@ void BetaSimplexProposal::tune( double rate )
     }
     
     // set a hard maximum of 100
-    // alpha = fmin(100, alpha);
+    alpha = fmin(alphaUpper, alpha);
 }
 
