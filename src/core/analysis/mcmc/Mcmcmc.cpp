@@ -60,8 +60,10 @@ Mcmcmc::Mcmcmc(const Model& m, const RbVector<Move> &mv, const RbVector<Monitor>
     heat_ranks.resize(num_chains, 0);
     heat_temps.resize(num_chains, 0.0);
     
-    num_attempted_swaps = std::vector< std::vector<unsigned long> > (num_chains, std::vector<unsigned long> (num_chains, 0));
-    num_accepted_swaps = std::vector< std::vector<unsigned long> > (num_chains, std::vector<unsigned long> (num_chains, 0));
+    num_attempted_swaps_current_period = std::vector< std::vector<unsigned long> > (num_chains, std::vector<unsigned long> (num_chains, 0));
+    num_attempted_swaps_total = std::vector< std::vector<unsigned long> > (num_chains, std::vector<unsigned long> (num_chains, 0));
+    num_accepted_swaps_current_period = std::vector< std::vector<unsigned long> > (num_chains, std::vector<unsigned long> (num_chains, 0));
+    num_accepted_swaps_total = std::vector< std::vector<unsigned long> > (num_chains, std::vector<unsigned long> (num_chains, 0));
     
     chain_moves_tuningInfo = std::vector< std::vector<Mcmc::tuningInfo> > (num_chains);
     
@@ -110,8 +112,10 @@ Mcmcmc::Mcmcmc(const Mcmcmc &m) : MonteCarloSampler(m)
     schedule_type       = m.schedule_type;
     pid_per_chain       = m.pid_per_chain;
     
-    num_attempted_swaps = m.num_attempted_swaps;
-    num_accepted_swaps  = m.num_accepted_swaps;
+    num_attempted_swaps_current_period = m.num_attempted_swaps_current_period;
+    num_attempted_swaps_total = m.num_attempted_swaps_total;
+    num_accepted_swaps_current_period  = m.num_accepted_swaps_current_period;
+    num_accepted_swaps_total  = m.num_accepted_swaps_total;
     generation          = m.generation;
     
     
@@ -541,7 +545,7 @@ void Mcmcmc::nextCycle(bool advanceCycle)
  *
  * \param[in]     o     The stream to which we print the summary.
  */
-void Mcmcmc::printMoveSummary(std::ostream &o, size_t chainId, size_t moveId, Move &mv) const
+void Mcmcmc::printMoveSummary(std::ostream &o, size_t chainId, size_t moveId, Move &mv, bool current_period) const
 {
     
     std::streamsize previousPrecision = o.precision();
@@ -581,32 +585,38 @@ void Mcmcmc::printMoveSummary(std::ostream &o, size_t chainId, size_t moveId, Mo
     o << weight;
     o << " ";
     
+    size_t num_tried = chain_moves_tuningInfo[chainId][moveId].num_tried_total;
+    size_t num_accepted = chain_moves_tuningInfo[chainId][moveId].num_accepted_total;
+    if (current_period == true)
+    {
+        num_tried = chain_moves_tuningInfo[chainId][moveId].num_tried_current_period;
+        num_accepted = chain_moves_tuningInfo[chainId][moveId].num_accepted_current_period;
+    }
+    
     // print the number of tries
     int t_length = 9;
-    const size_t num_tried_current_period       = chain_moves_tuningInfo[chainId][moveId].num_tried_current_period;
-    if (num_tried_current_period > 0) t_length -= (int)log10(num_tried_current_period);
+    if (num_tried > 0) t_length -= (int)log10(num_tried);
     for (int i = 0; i < t_length; ++i)
     {
         o << " ";
     }
-    o << num_tried_current_period;
+    o << num_tried;
     o << " ";
     
     // print the number of accepted
     int a_length = 9;
-    const size_t num_accepted_current_period        = chain_moves_tuningInfo[chainId][moveId].num_accepted_current_period;
-    if (num_accepted_current_period > 0) a_length -= (int)log10(num_accepted_current_period);
+    if (num_accepted > 0) a_length -= (int)log10(num_accepted);
     
     for (int i = 0; i < a_length; ++i)
     {
         o << " ";
     }
-    o << num_accepted_current_period;
+    o << num_accepted;
     o << " ";
     
     // print the acceptance ratio
-    double ratio = num_accepted_current_period / (double)num_tried_current_period;
-    if (num_tried_current_period == 0) ratio = 0;
+    double ratio = num_accepted / (double)num_tried;
+    if (num_tried == 0) ratio = 0;
     int r_length = 5;
     
     for (int i = 0; i < r_length; ++i)
@@ -675,7 +685,7 @@ void Mcmcmc::printOperatorSummary(bool current_period)
             
             for (size_t j = 0; j < chain_moves_tuningInfo[0].size(); ++j)
             {
-                printMoveSummary(std::cout, chainIdx, j, base_moves[j]);
+                printMoveSummary(std::cout, chainIdx, j, base_moves[j], current_period);
             }
             
             std::cout << std::endl;
@@ -684,7 +694,7 @@ void Mcmcmc::printOperatorSummary(bool current_period)
         
         if (num_chains > 1)
         {
-            printSwapSummary(std::cout);
+            printSwapSummary(std::cout, current_period);
             std::cout << std::endl;
             std::cout.flush();
         }
@@ -701,7 +711,7 @@ void Mcmcmc::printOperatorSummary(bool current_period)
  *
  * \param[in]     o     The stream to which we print the summary.
  */
-void Mcmcmc::printSwapSummary(std::ostream &o) const
+void Mcmcmc::printSwapSummary(std::ostream &o, bool current_period) const
 {
     
     std::streamsize previousPrecision = o.precision();
@@ -721,8 +731,8 @@ void Mcmcmc::printSwapSummary(std::ostream &o) const
         {
             for (size_t j = i + 1; j < num_chains; ++j)
             {
-                printSwapSummaryPair(o, i, j);
-                printSwapSummaryPair(o, j, i);
+                printSwapSummaryPair(o, i, j, current_period);
+                printSwapSummaryPair(o, j, i, current_period);
             }
         }
 
@@ -738,8 +748,8 @@ void Mcmcmc::printSwapSummary(std::ostream &o) const
             {
                 for (size_t j = i + 1; j < num_chains; ++j)
                 {
-                    printSwapSummaryPair(o, i, j);
-                    printSwapSummaryPair(o, j, i);
+                    printSwapSummaryPair(o, i, j, current_period);
+                    printSwapSummaryPair(o, j, i, current_period);
                 }
             }
         }
@@ -747,12 +757,12 @@ void Mcmcmc::printSwapSummary(std::ostream &o) const
         {
             for (size_t i = 0; i < num_chains - 1; ++i)
             {
-                printSwapSummaryPair(o, i, i + 1);
+                printSwapSummaryPair(o, i, i + 1, current_period);
             }
             
             for (size_t i = 1; i < num_chains; ++i)
             {
-                printSwapSummaryPair(o, i, i - 1);
+                printSwapSummaryPair(o, i, i - 1, current_period);
             }
         }
 
@@ -764,7 +774,7 @@ void Mcmcmc::printSwapSummary(std::ostream &o) const
 }
 
 
-void Mcmcmc::printSwapSummaryPair(std::ostream &o, const size_t &row, const size_t &col) const
+void Mcmcmc::printSwapSummaryPair(std::ostream &o, const size_t &row, const size_t &col, bool current_period) const
 {
     // print the name
     o << row + 1;
@@ -812,29 +822,37 @@ void Mcmcmc::printSwapSummaryPair(std::ostream &o, const size_t &row, const size
         o << " ";
     }
     
+    size_t num_attempted = num_attempted_swaps_total[row][col];
+    size_t num_accepted = num_accepted_swaps_total[row][col];
+    if (current_period == true)
+    {
+        num_attempted = num_attempted_swaps_current_period[row][col];
+        num_accepted = num_accepted_swaps_current_period[row][col];
+    }
+    
     // print the number of tries
     int t_length = 6;
-    if (num_attempted_swaps[row][col] > 0) t_length -= (int)log10(num_attempted_swaps[row][col]);
+    if (num_attempted > 0) t_length -= (int)log10(num_attempted);
     for (int i = 0; i < t_length; ++i)
     {
         o << " ";
     }
-    o << num_attempted_swaps[row][col];
+    o << num_attempted;
     o << " ";
     
     // print the number of accepted
     int a_length = 9;
-    if (num_accepted_swaps[row][col] > 0) a_length -= (int)log10(num_accepted_swaps[row][col]);
+    if (num_accepted > 0) a_length -= (int)log10(num_accepted);
     for (int i = 0; i < a_length; ++i)
     {
         o << " ";
     }
-    o << num_accepted_swaps[row][col];
+    o << num_accepted;
     o << " ";
     
     // print the acceptance ratio
-    double ratio = num_accepted_swaps[row][col] / (double)num_attempted_swaps[row][col];
-    if (num_attempted_swaps[row][col] == 0) ratio = 0;
+    double ratio = num_accepted / (double)num_attempted;
+    if (num_attempted == 0) ratio = 0;
     
     int r_length = 6;
     for (int i = 0; i < r_length; ++i)
@@ -940,12 +958,10 @@ void Mcmcmc::resetCounters( void )
     {
         for (size_t j = 0; j < num_chains; ++j)
         {
-            num_attempted_swaps[i][j] = 0;
-            num_accepted_swaps[i][j] = 0;
-//            std::cout << "num_attempted_swaps[" << i << "][" << j << "]=" << num_attempted_swaps[i][j] << ", num_accepted_swaps[" << i << "][" << j << "]=" << num_accepted_swaps[i][j] << "; ";
+            num_attempted_swaps_current_period[i][j] = 0;
+            num_accepted_swaps_current_period[i][j] = 0;
         }
     }
-//    std::cout << std::endl;
 }
 
 
@@ -1095,11 +1111,9 @@ void Mcmcmc::synchronizeValues( bool likelihood_only )
         if ( chains[j] != NULL )
         {
             results[j] = chains[j]->getModelLnProbability(likelihood_only);
-//            std::cout << "results[" << j << "]=" << results[j] << ", ";
         }
         
     }
-//    std::cout << std::endl;
     
 #ifdef RB_MPI
     if ( active_PID != pid )
@@ -1464,7 +1478,8 @@ void Mcmcmc::swapNeighborChains(void)
         heat_rankk = heat_ranktmp;
     }
     
-    ++num_attempted_swaps[heat_rankj][heat_rankk];
+    ++num_attempted_swaps_current_period[heat_rankj][heat_rankk];
+    ++num_attempted_swaps_total[heat_rankj][heat_rankk];
     
     j = int(std::find(chain_heats.begin(), chain_heats.end(), tmp_chain_heats[heat_rankj]) - chain_heats.begin());
     k = int(std::find(chain_heats.begin(), chain_heats.end(), tmp_chain_heats[heat_rankk]) - chain_heats.begin());
@@ -1475,7 +1490,6 @@ void Mcmcmc::swapNeighborChains(void)
     double lnPj = chain_values[j];
     double lnPk = chain_values[k];
     double lnR = bj * (lnPk - lnPj) + bk * (lnPj - lnPk) + lnProposalRatio;
-//    std::cout << "bj=" << bj << ", bk=" << bk << ", lnPj=" << lnPj << ", lnPk=" << lnPk << ", lnR=" << lnR << std::endl;
     
     // determine whether we accept or reject the chain swap
     double u = GLOBAL_RNG->uniform01();
@@ -1519,7 +1533,8 @@ void Mcmcmc::swapNeighborChains(void)
     // on accept, swap beta values and active chains
     if (accept == true )
     {
-        ++num_accepted_swaps[heat_rankj][heat_rankk];
+        ++num_accepted_swaps_current_period[heat_rankj][heat_rankk];
+        ++num_accepted_swaps_total[heat_rankj][heat_rankk];
         
         // swap active chain
         if (active_chain_index == j)
@@ -1602,7 +1617,8 @@ void Mcmcmc::swapRandomChains(void)
     size_t heat_rankj = std::find(tmp_chain_heats.begin(), tmp_chain_heats.end(), chain_heats[j]) - tmp_chain_heats.begin();
     size_t heat_rankk = std::find(tmp_chain_heats.begin(), tmp_chain_heats.end(), chain_heats[k]) - tmp_chain_heats.begin();
     
-    ++num_attempted_swaps[heat_rankj][heat_rankk];
+    ++num_attempted_swaps_current_period[heat_rankj][heat_rankk];
+    ++num_attempted_swaps_total[heat_rankj][heat_rankk];
     
     // compute exchange ratio
     double bj = chain_heats[j];
@@ -1610,7 +1626,6 @@ void Mcmcmc::swapRandomChains(void)
     double lnPj = chain_values[j];
     double lnPk = chain_values[k];
     double lnR = bj * (lnPk - lnPj) + bk * (lnPj - lnPk) + lnProposalRatio;
-    //        std::cout << "bj=" << bj << ", bk=" << bk << ", lnPj=" << lnPj << ", lnPk=" << lnPk << ", lnR=" << lnR << std::endl;
     
     // determine whether we accept or reject the chain swap
     double u = GLOBAL_RNG->uniform01();
@@ -1655,7 +1670,8 @@ void Mcmcmc::swapRandomChains(void)
     // on accept, swap beta values and active chains
     if (accept == true )
     {
-        ++num_accepted_swaps[heat_rankj][heat_rankk];
+        ++num_accepted_swaps_current_period[heat_rankj][heat_rankk];
+        ++num_accepted_swaps_total[heat_rankj][heat_rankk];
         
         // swap active chain
         if (active_chain_index == j)
@@ -1732,13 +1748,11 @@ void Mcmcmc::tune( void )
         
         for (size_t i = 1; i < num_chains; ++i)
         {
-//            std::cout << ", num_accepted_swaps[" << i - 1 << "][" << i << "]=" << num_accepted_swaps[i - 1][i] << ", num_accepted_swaps[" << i << "][" << i - 1 << "]=" << num_accepted_swaps[i][i - 1] << std::endl;
-//            std::cout << ", num_attempted_swaps[" << i - 1 << "][" << i << "]=" << num_attempted_swaps[i - 1][i] << ", num_attempted_swaps[" << i << "][" << i - 1 << "]=" << num_attempted_swaps[i][i - 1] << std::endl;
             
-            size_t num_attempted_swaps_neighbor = num_attempted_swaps[i - 1][i] + num_attempted_swaps[i][i - 1];
+            size_t num_attempted_swaps_neighbor = num_attempted_swaps_current_period[i - 1][i] + num_attempted_swaps_current_period[i][i - 1];
             if ( num_attempted_swaps_neighbor > 2 ) {
                 
-                size_t num_accepted_swaps_neighbor = num_accepted_swaps[i - 1][i] + num_accepted_swaps[i][i - 1];
+                size_t num_accepted_swaps_neighbor = num_accepted_swaps_current_period[i - 1][i] + num_accepted_swaps_current_period[i][i - 1];
                 double rate = num_accepted_swaps_neighbor / (double)num_attempted_swaps_neighbor;
                 
                 if ( rate > tune_heat_target )
@@ -1750,7 +1764,6 @@ void Mcmcmc::tune( void )
                     heats_diff[i - 1] /= (2.0 - rate / tune_heat_target);
                 }
                 
-//                std::cout << "rate=" << rate << ", heats_diff[" << i - 1 << "]=" << heats_diff[i - 1] << std::endl;
             }
         }
         
@@ -1772,7 +1785,6 @@ void Mcmcmc::tune( void )
             {
                 colderChainIdx = hotterChainIdx;
             }
-//            std::cout << "chain_heats[" << hotterChainIdx << "]=" << chain_heats[hotterChainIdx] << std::endl;
         }
         
         // if the heat of a given hot chain is smaller than the minimum bound
@@ -1786,7 +1798,6 @@ void Mcmcmc::tune( void )
             for (; k < num_chains; ++k)
             {
                 chain_heats[hotterChainIdx] = chain_heats[colderChainIdx] / pow(rho, k + 1 - j);
-//                std::cout << "chain_heats[k" << hotterChainIdx << "]=" << chain_heats[hotterChainIdx] << std::endl;
             }
         }
         

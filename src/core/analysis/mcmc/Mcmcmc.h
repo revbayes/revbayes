@@ -46,10 +46,10 @@ namespace RevBayesCore {
         void                                    initializeSamplerFromCheckpoint( void );                                        //!< Initialize the MCMCMC sampler form the checkpoint file.
         void                                    monitor(unsigned long g);
         void                                    nextCycle(bool advanceCycle);
-        void                                    printMoveSummary(std::ostream &o, size_t chainId, size_t moveId, Move &mv) const;
+        void                                    printMoveSummary(std::ostream &o, size_t chainId, size_t moveId, Move &mv, bool current_period) const;
         void                                    printOperatorSummary(bool current_period);
-        void                                    printSwapSummary(std::ostream &o) const;
-        void                                    printSwapSummaryPair(std::ostream &o, const size_t &row, const size_t &col) const;
+        void                                    printSwapSummary(std::ostream &o, bool current_period) const;
+        void                                    printSwapSummaryPair(std::ostream &o, const size_t &row, const size_t &col, bool current_period) const;
         void                                    redrawStartingValues(void);                                                     //!< Redraw the starting values.
         void                                    removeMonitors(void);
         void                                    reset(void);                                                                    //!< Reset the sampler for a new run.
@@ -105,8 +105,10 @@ namespace RevBayesCore {
         Mcmc*                                   base_chain;
         
         unsigned long                           generation;
-        std::vector< std::vector<unsigned long> > num_attempted_swaps;
-        std::vector< std::vector<unsigned long> > num_accepted_swaps;
+        std::vector< std::vector<unsigned long> > num_attempted_swaps_current_period;
+        std::vector< std::vector<unsigned long> > num_attempted_swaps_total;
+        std::vector< std::vector<unsigned long> > num_accepted_swaps_current_period;
+        std::vector< std::vector<unsigned long> > num_accepted_swaps_total;
         
         std::vector< std::vector<Mcmc::tuningInfo> >  chain_moves_tuningInfo;
     };
