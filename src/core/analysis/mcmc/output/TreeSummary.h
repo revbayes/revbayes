@@ -2,6 +2,7 @@
 #define TreeSummary_H
 
 #include "Clade.h"
+#include "Parallelizable.h"
 #include "Trace.h"
 #include "Tree.h"
 
@@ -10,7 +11,7 @@ namespace RevBayesCore {
     class MatrixReal;
     class TraceTree;
 
-    class TreeSummary {
+    class TreeSummary : public Parallelizable {
 
         /*
          * This struct represents a value/count pair that is sorted by count

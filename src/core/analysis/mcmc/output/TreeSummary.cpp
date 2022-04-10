@@ -1742,6 +1742,11 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
 
 void TreeSummary::printCladeSummary(std::ostream &o, double minCladeProbability, bool verbose)
 {
+    if ( process_active == false )
+    {
+        return;
+    }
+    
     summarize( verbose );
 
     std::stringstream ss;
@@ -1831,6 +1836,12 @@ void TreeSummary::printCladeSummary(std::ostream &o, double minCladeProbability,
 
 void TreeSummary::printTreeSummary(std::ostream &o, double credibleIntervalSize, bool verbose)
 {
+
+    if ( process_active == false )
+    {
+        return;
+    }
+    
     summarize( verbose );
 
     std::stringstream ss;
