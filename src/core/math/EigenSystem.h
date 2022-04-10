@@ -44,6 +44,9 @@ namespace RevBayesCore {
         void                                    setRateMatrixPtr(const MatrixReal* qp) { qPtr = qp; }
         void                                    update(void);                                                                                                       //!< Update the eigen system for the matrix q;
         void                                    updatePositiveEigenvalues(void);
+        #ifdef RB_EIGEN
+        void                                    updateUsingEigen(void);
+        #endif
         
     private:
         // functions used to calculate eigenvalues and eigenvectors 

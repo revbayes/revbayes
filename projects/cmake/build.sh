@@ -15,6 +15,7 @@ boost_root=""
 boost_lib=""
 static_boost="false"
 j=4
+eigen="false"
 
 cmake_args=""
 # parse command line arguments
@@ -34,6 +35,7 @@ while echo $1 | grep ^- > /dev/null; do
 -boost_lib      string          : specify directory containing Boost libraries. (e.g. `/usr/lib`). Defaults to unset.
 -static_boost	<true|false>    : link using static Boost libraries. Defaults to false.
 -j              integer         : the number of threads to use when compiling RevBayes. Defaults to 4.
+-eigen          <true|false>    : set to true if you want to use the external library eigen. Defaults to false.
 
 You can also specify cmake variables as -DCMAKE_VAR1=value1 -DCMAKE_VAR2=value2
 
@@ -119,6 +121,10 @@ fi
 
 if [ "$help" = "true" ] ; then
     cmake_args="-DHELP=ON $cmake_args"
+fi
+
+if [ "$eigen" = "true" ] ; then
+    cmake_args="-DEIGEN=ON $cmake_args"
 fi
 
 echo "Building ${exec_name}"

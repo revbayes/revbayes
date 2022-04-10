@@ -104,6 +104,14 @@ MESSAGE("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
 MESSAGE("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
+if ("${EIGEN}" STREQUAL "ON")
+   add_definitions(-DRB_EIGEN)   
+   find_package (Eigen3 REQUIRED)
+   MESSAGE("Eigen3 information:")
+   MESSAGE("  EIGEN3_INCLUDE_DIR: ${EIGEN3_INCLUDE_DIR}")
+   include_directories(${EIGEN3_INCLUDE_DIR})
+endif()
+
 # This will look for "generated_include_dirs.cmake" in the module path.
 include("generated_include_dirs")
 

@@ -32,6 +32,11 @@
 #include <math.h>
 #include <vector>
 
+#ifdef RB_EIGEN
+#include <Eigen/Dense>
+#include <Eigen/LU>
+#endif
+
 #include "MatrixReal.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
@@ -1318,6 +1323,56 @@ void EigenSystem::update(void)
     
     
 }
+
+
+#ifdef RB_EIGEN
+void EigenSystem::updateUsingEigen(void)
+{
+    
+    // copy the rate matrix into A because we don't want to destroy
+    // the rate matrix
+    MatrixReal A(*qPtr);
+
+    // check that the dimension of A is right
+    assert(A.getNumberOfRows() == n && A.getNumberOfColumns() == n);
+
+    // compute eigenvalues and eigenvectors
+    Eigen::MatrixXd A_Eigen(n, n);
+    for (size_t i = 0; i < n; i++)
+    {
+        A_Eigen.row(i) = Eigen::VectorXd::Map(&A[i][0], n);
+    }
+    
+    Eigen::EigenSolver<Eigen::MatrixXd> es(A_Eigen);
+    Eigen::VectorXcd eigenvalues_Eigen = es.eigenvalues();
+    for (size_t i = 0; i < n; i++)
+    {
+        std::complex<double> eval = eigenvalues_Eigen(i);
+        realEigenvalues[i] = eval.real();
+        imaginaryEigenvalues[i] = eval.imag();
+    }
+    
+    Eigen::MatrixXcd eigenvectors_Eigen = es.eigenvectors();
+    Eigen::MatrixXcd inverseEigenvectors_Eigen = eigenvectors_Eigen.inverse();
+    
+    // checks whether there are complex eigenvalues
+    complex = checkForComplexEigenvalues();
+    
+    for (size_t i = 0; i < n; i++)
+    {
+        Eigen::VectorXcd::Map(&complexEigenvectors[i][0], n) = eigenvectors_Eigen.row(i);
+        Eigen::VectorXcd::Map(&complexInverseEigenvectors[i][0], n) = inverseEigenvectors_Eigen.row(i);
+        
+        for (size_t j = 0; j < n; j++)
+        {
+            eigenvectors[i][j] = complexEigenvectors[i][j].real();
+            inverseEigenvectors[i][j] = complexInverseEigenvectors[i][j].real();
+        }
+    }
+    
+}
+#endif
+
 
 /*!
  * This function first checks that the input matrix has the same
