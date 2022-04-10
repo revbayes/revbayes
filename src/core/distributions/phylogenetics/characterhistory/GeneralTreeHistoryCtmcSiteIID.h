@@ -790,7 +790,7 @@ void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::simulate(const Topol
     for ( size_t i = 0; i < this->num_sites; ++i )
     {
         // create the character
-        charType c = charType( this->template_state );
+        charType c = charType( this->num_states );
         c.setStateByIndex( static_cast<CharacterEventDiscrete*>(childState[i])->getState() );
         taxa[nodeIndex].addCharacter( c );
     }
