@@ -51,10 +51,10 @@ InferAncestralPopSizeFunction::InferAncestralPopSizeFunction( 	const TypedDagNod
                                                                 const TypedDagNode< RevBayesCore::RbVector<double> > *O,
 	                                                          	const std::vector<double> &tau,
                                                                 bool vb,
-	                                                          	TypedDagNode<Tree> *tr) : 
-    
+	                                                          	TypedDagNode<Tree> *tr) :
+
     TypedFunction<MatrixReal>( new MatrixReal(tau.size(), (n->getValue() + 1), 0.0) ),
-    
+
     start_age( sa ),
     lambda( inspeciation ),
     mu( inextinction ),
@@ -120,9 +120,9 @@ void InferAncestralPopSizeFunction::update( void )
     size_t S = time_points.size();
     long N = maxHiddenLin->getValue();
 
-    const Tree tree = timeTree->getValue();
+    const Tree& tree = timeTree->getValue();
     const double sa = start_age->getValue();
-    const std::vector<double> occurrence_ages = occurrences->getValue();
+    const std::vector<double>& occurrence_ages = occurrences->getValue();
 
     bool useMt;
 	std::vector<double> timeline{0.0};
@@ -132,9 +132,9 @@ void InferAncestralPopSizeFunction::update( void )
 	std::vector<double> omeg{omega->getValue()};
 	std::vector<double> removalP{removalPr->getValue()};
 
-	MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(sa, timeline, lambd, m, ps, omeg, rho, removalP, maxHiddenLin, cond, 
+	MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(sa, timeline, lambd, m, ps, omeg, rho, removalP, maxHiddenLin, cond,
                                                                           time_points, useMt = false, verbose, occurrence_ages, tree);
-    MatrixReal B_Mt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(sa, timeline, lambd, m, ps, omeg, rho, removalP, maxHiddenLin, cond, 
+    MatrixReal B_Mt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(sa, timeline, lambd, m, ps, omeg, rho, removalP, maxHiddenLin, cond,
                                                                           time_points, useMt = true, verbose, occurrence_ages, tree);
 
 	// Realize the normalized Hadamar Product of B_Lt and B_Mt

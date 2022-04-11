@@ -61,7 +61,7 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                       
                                                                                            bool uo,
                                                                                            Tree *t,
                                                                                            const TypedDagNode<long> *n,
-                                                                                           const TypedDagNode< RevBayesCore::RbVector<double> > *O,
+                                                                                           const TypedDagNode<RbVector<double> > *O,
                                                                                            bool mt,
                                                                                            bool vb) : AbstractBirthDeathProcess( sa, cdt, tn, uo, t ),
     interval_times(ht),
@@ -170,7 +170,7 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                       
     if(timeline.size() > 1) {
     RbVector<Clade> constr;
     StartingTreeSimulator simulator;
-    RevBayesCore::Tree *my_tree = simulator.simulateTree( taxa, constr );
+    Tree *my_tree = simulator.simulateTree( taxa, constr );
 
     // store the new value
     delete value;
@@ -224,7 +224,7 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void ) const
     updateVectorParameters();
 
     // compute the log-likelihood : use ComputeLikelihoodsBackwardsLt (backward traversal of the tree) or ComputeLikelihoodsForwardsMt (forward traversal of the tree)
-    const RevBayesCore::Tree tree(*value);
+    const Tree& tree = *value;
 
     std::vector<double> occAges;
     if (occurrence_ages != NULL)
@@ -236,7 +236,7 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void ) const
         occAges = std::vector<double>();
     }
 
-    double logLikelihood = RevBayesCore::ComputeLnLikelihoodOBDP(start_age->getValue(), timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, useMt, verbose, occAges, tree);
+    double logLikelihood = ComputeLnLikelihoodOBDP(start_age->getValue(), timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, useMt, verbose, occAges, tree);
 
     return logLikelihood;
 }
@@ -410,11 +410,11 @@ double OccurrenceBirthDeathProcess::pSurvival(double start, double end) const
             rp.push_back(r[i]);
         }
     }
-        std::vector<double> res = RevBayesCore::GetFunctionUandP(time, d, birth, death, ps, om, homogeneous_rho, rp);
+        std::vector<double> res = GetFunctionUandP(time, d, birth, death, ps, om, homogeneous_rho, rp);
         return 1 - res[0] ;
   }
     else {
-        std::vector<double> res = RevBayesCore::GetFunctionUandP(start, timeline, lambda, mu, psi, omega, homogeneous_rho, r);
+        std::vector<double> res = GetFunctionUandP(start, timeline, lambda, mu, psi, omega, homogeneous_rho, r);
         return 1 - res[0] ;
     }
 }

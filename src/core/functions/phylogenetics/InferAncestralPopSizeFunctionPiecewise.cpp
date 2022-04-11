@@ -193,8 +193,8 @@ void InferAncestralPopSizeFunctionPiecewise::update( void )
     size_t S = time_points.size();
     long N = maxHiddenLin->getValue();
 
-    const Tree tree = timeTree->getValue();
-    const std::vector<double> occurrence_ages = occurrences->getValue();
+    const Tree& tree = timeTree->getValue();
+    const std::vector<double>& occurrence_ages = occurrences->getValue(); 
 
 		bool useMt;
 		bool verbose;
