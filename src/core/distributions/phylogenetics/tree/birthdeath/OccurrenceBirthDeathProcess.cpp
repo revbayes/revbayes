@@ -205,12 +205,11 @@ OccurrenceBirthDeathProcess* OccurrenceBirthDeathProcess::clone( void ) const
  */
  double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
  {
-   std::cout << "computeLnProbabilityDivergenceTimes" << std::endl;
 
      // variable declarations and initialization
-     double lnProbTimes = computeLnProbabilityTimes();
+    double lnProbTimes = computeLnProbabilityTimes();
 
-     return lnProbTimes;
+    return lnProbTimes;
  }
 
 
@@ -222,24 +221,24 @@ OccurrenceBirthDeathProcess* OccurrenceBirthDeathProcess::clone( void ) const
  */
 double OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void ) const
 {
-  updateVectorParameters();
+    updateVectorParameters();
 
-  // compute the log-likelihood : use ComputeLikelihoodsBackwardsLt (backward traversal of the tree) or ComputeLikelihoodsForwardsMt (forward traversal of the tree)
-  const RevBayesCore::Tree tree(*value);
+    // compute the log-likelihood : use ComputeLikelihoodsBackwardsLt (backward traversal of the tree) or ComputeLikelihoodsForwardsMt (forward traversal of the tree)
+    const RevBayesCore::Tree tree(*value);
 
-  std::vector<double> occAges;
-  if (occurrence_ages != NULL)
-  {
-      occAges = occurrence_ages->getValue();
-  }
-  else
-  {
-      occAges = std::vector<double>();
-  }
+    std::vector<double> occAges;
+    if (occurrence_ages != NULL)
+    {
+        occAges = occurrence_ages->getValue();
+    }
+    else
+    {
+        occAges = std::vector<double>();
+    }
 
-  double logLikelihood = RevBayesCore::ComputeLnLikelihoodOBDP(start_age->getValue(), timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, useMt, verbose, occAges, tree);
+    double logLikelihood = RevBayesCore::ComputeLnLikelihoodOBDP(start_age->getValue(), timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, useMt, verbose, occAges, tree);
 
-  return logLikelihood;
+    return logLikelihood;
 }
 
 
@@ -389,34 +388,35 @@ void OccurrenceBirthDeathProcess::updateVectorParameters( void ) const
 
 double OccurrenceBirthDeathProcess::pSurvival(double start, double end) const
 {
-  if(end != 0.0) {
-    //To do: this only makes sense if the rate vectors match the timeline.
-    //the vector parameters and timeline have to be adjusted.
-    double time = start - end;
-    std::vector<double> birth;
-    std::vector<double> death;
-    std::vector<double> ps;
-    std::vector<double> om;
-    std::vector<double> rp;
-    std::vector<double> d;
+    if(end != 0.0) {
+        //To do: this only makes sense if the rate vectors match the timeline.
+        //the vector parameters and timeline have to be adjusted.
+        double time = start - end;
+        std::vector<double> birth;
+        std::vector<double> death;
+        std::vector<double> ps;
+        std::vector<double> om;
+        std::vector<double> rp;
+        std::vector<double> d;
 
     for(int i = 0; i < d.size(); i++) {
-      if ((timeline[i] - end) > 0)  {
-        d.push_back(timeline[i]);
-        birth.push_back(lambda[i]);
-        death.push_back(mu[i]);
-        ps.push_back(psi[i]);
-        om.push_back(omega[i]);
-        rp.push_back(r[i]);
-      }
+
+        if ((timeline[i] - end) > 0)  {
+            d.push_back(timeline[i]);
+            birth.push_back(lambda[i]);
+            death.push_back(mu[i]);
+            ps.push_back(psi[i]);
+            om.push_back(omega[i]);
+            rp.push_back(r[i]);
+        }
+    }
+        std::vector<double> res = RevBayesCore::GetFunctionUandP(time, d, birth, death, ps, om, homogeneous_rho, rp);
+        return 1 - res[0] ;
   }
-    std::vector<double> res = RevBayesCore::GetFunctionUandP(time, d, birth, death, ps, om, homogeneous_rho, rp);
-    return 1 - res[0] ;
-  }
-  else {
-    std::vector<double> res = RevBayesCore::GetFunctionUandP(start, timeline, lambda, mu, psi, omega, homogeneous_rho, r);
-    return 1 - res[0] ;
-  }
+    else {
+        std::vector<double> res = RevBayesCore::GetFunctionUandP(start, timeline, lambda, mu, psi, omega, homogeneous_rho, r);
+        return 1 - res[0] ;
+    }
 }
 
 

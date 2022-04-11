@@ -54,7 +54,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                                       removalPr;                              //!< The removal probability after sampling
         RevPtr<const RevVariable>                                       maxHiddenLin;                           //!< The number of hidden lineages (algorithm accuracy)
         std::string                                                     start_condition;                        //!< The start condition of the process (rootAge/originAge)
-        RevPtr<const RevVariable>                                       condition;                              //!< The conditioning of the process ("time" or "survaval")
+        RevPtr<const RevVariable>                                       condition;                              //!< The conditioning of the process ("survival" or "survival2")
         RevPtr<const RevVariable>                                       occurrence_ages;                        //!< The occurrence ages of incomplete fossils
         RevPtr<const RevVariable>                                       extant;                                 //!< The number of extant taxa
         RevPtr<const RevVariable>                                       time_points;                            //!< The times at which density is computed

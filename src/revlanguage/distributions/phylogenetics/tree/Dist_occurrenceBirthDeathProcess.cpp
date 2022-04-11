@@ -111,7 +111,7 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
     RevBayesCore::DagNode*              o           = omega->getRevObject().getDagNode();
     // event sampling
     RevBayesCore::DagNode*              rh          = NULL;
-    
+
     if ( rho->getRevObject() != RevNullObject::getInstance() )
     {
                                         rh          = rho->getRevObject().getDagNode();
@@ -257,7 +257,7 @@ const MemberRules& Dist_occurrenceBirthDeathProcess::getParameterRules(void) con
         std::vector<std::string> optionsCondition;
         optionsCondition.push_back( "survival" );
         optionsCondition.push_back( "survival2" );
-        dist_member_rules.push_back( new OptionRule( "condition",           new RlString("none"), optionsCondition, "Condition of the process." ) );
+        dist_member_rules.push_back( new OptionRule( "condition",           new RlString("none"), optionsCondition, "Condition of the process on the survival of either 1 (survival) or 2 lineages (survival2) to the present" ) );
         dist_member_rules.push_back( new ArgumentRule( "taxa"  ,            ModelVector<Taxon>::getClassTypeSpec(), "Taxa used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "initialTree" ,      TimeTree::getClassTypeSpec() , "Instead of drawing a tree from the distribution, initialize distribution with this tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
         dist_member_rules.push_back( new ArgumentRule( "maxHiddenLin",      Natural::getClassTypeSpec(), "Maximum number of hidden lineages.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Natural(30) ) );

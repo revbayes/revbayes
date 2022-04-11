@@ -41,28 +41,28 @@ using namespace RevBayesCore;
 
 
 InferAncestralPopSizeFunctionPiecewise::InferAncestralPopSizeFunctionPiecewise( 	const TypedDagNode<double> *sa,
-                      																const DagNode *inspeciation,
-                                          											const DagNode *inextinction,
-                                          											const DagNode *inserialsampling,
-                                          											const DagNode *inoccurrence,
-                                          											const DagNode *ineventsampling,
-                                          											const DagNode *intreatment,
-                                          											const TypedDagNode<long> *n,
-                                          											const std::string& cdt,
-                                          										    const TypedDagNode< RevBayesCore::RbVector<double> > *O,
-                                          											const std::vector<double> &tau,
-                                          											TypedDagNode<Tree> *tr,
-																					const TypedDagNode< RbVector<double> > *ht) : 
-    
+                      																														const DagNode *inspeciation,
+                                          																				const DagNode *inextinction,
+                                          																				const DagNode *inserialsampling,
+                                          																				const DagNode *inoccurrence,
+                                          																				const DagNode *ineventsampling,
+                                          																				const DagNode *intreatment,
+                                          																				const TypedDagNode<long> *n,
+                                          																				const std::string& cdt,
+								                                          										    const TypedDagNode< RevBayesCore::RbVector<double> > *O,
+                                          																				const std::vector<double> &tau,
+                                          																				TypedDagNode<Tree> *tr,
+																																									const TypedDagNode< RbVector<double> > *ht) :
+
     TypedFunction<MatrixReal>( new MatrixReal(tau.size(), (n->getValue() + 1), 0.0) ),
-    
+
     start_age( sa ),
     maxHiddenLin( n ),
     cond (cdt),
     occurrences( O ),
     time_points ( tau ),
     timeTree (tr),
-	interval_times(ht)
+		interval_times(ht)
 
 {
 	homogeneous_lambda   = NULL;
@@ -199,7 +199,6 @@ void InferAncestralPopSizeFunctionPiecewise::update( void )
 		bool useMt;
 		bool verbose;
 		MatrixReal B_Lt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age->getValue(), timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, time_points, useMt = false, verbose = true, occurrence_ages, tree);
-		std::cout << "LT is ok, go to Mt" << std::endl;
 		MatrixReal B_Mt_log = RevBayesCore::ComputeLnProbabilityDensitiesOBDP(start_age->getValue(), timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, time_points, useMt = true, verbose = true, occurrence_ages, tree);
 	// Realize the normalized Hadamar Product of B_Lt and B_Mt
 		MatrixReal D_Kt(S, (N + 1), 0.0);

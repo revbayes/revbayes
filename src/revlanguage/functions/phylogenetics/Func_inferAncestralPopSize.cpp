@@ -125,7 +125,7 @@ const ArgumentRules& Func_inferAncestralPopSize::getArgumentRules( void ) const
         std::vector<std::string> optionsCondition;
         optionsCondition.push_back( "survival" );
         optionsCondition.push_back( "survival2" );
-        argumentRules.push_back( new OptionRule( "condition",           new RlString("none"), optionsCondition, "Condition of the process (survival/survival2)." ) );
+        argumentRules.push_back( new OptionRule( "condition",           new RlString("none"), optionsCondition, "Condition of the process on the survival of either 1 (survival) or 2 lineages (survival2) to the present." ) );
 
         argumentRules.push_back( new ArgumentRule( "occurrence_ages",   ModelVector<Real>::getClassTypeSpec(), "Vector of occurrence ages.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "time_points",       ModelVector<Real>::getClassTypeSpec(), "Time points at which we compute the density.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
