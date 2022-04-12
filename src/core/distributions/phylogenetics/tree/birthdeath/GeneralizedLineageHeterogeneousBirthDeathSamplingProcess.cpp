@@ -102,7 +102,6 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	// turn on/off debug
 //	tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_FILE, "debug.txt");
 	tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_PRINT);
-
 	tp_ptr->setConditionalProbCompatibilityMode(false); // FIXME Here you go Mike!
 	tp_ptr->setNumberOfThreads(n_proc);
 
@@ -327,6 +326,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::redrawValue(void)
 {
 	// just simulate with a uniform tree and all missing data
     simulateTree();
+    
+    // simulate tree under SSE model (implementation in progress)
+    // simulateSSETree();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setLambda(const TypedDagNode< RbVector<double> >* param)
@@ -1015,12 +1017,19 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
 
 }
 
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::simulateSSETree(void) {
+    RBOUT("Warning: simulating tree under SSE model (not yet implemented).");
+    
+    // simulating a tree
+    std::string sim_newick_string = tp_ptr->simulateTree();
+    // this->setValue( static_cast<Tree*>( tp_ptr->getTreeValue() ) );
+    // this->setValue( static_cast<DiscreteCharacterData*>( tp_ptr->getDataValue() ) );
+}
+
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::simulateTree(void)
 {
 	// Warning: simulating tree under uniform model.
 	RBOUT("Warning: simulating tree under uniform model.");
-
-	// simulating a tree
 
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
