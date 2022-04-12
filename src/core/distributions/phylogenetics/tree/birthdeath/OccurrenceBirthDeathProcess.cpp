@@ -167,18 +167,27 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                       
 
     updateVectorParameters();
 
-    if(timeline.size() > 1) {
-    RbVector<Clade> constr;
-    StartingTreeSimulator simulator;
-    Tree *my_tree = simulator.simulateTree( taxa, constr );
 
-    // store the new value
-    delete value;
-    value = my_tree;
-    }
-    else {
-      redrawValue();
-    }
+
+    if (t == NULL) {
+
+        // with piecewise constant parameters, redrawValue() sometimes fails to initialise, we use instead the following:
+        if(timeline.size() > 1) {
+
+            RbVector<Clade> constr;
+            StartingTreeSimulator simulator;
+            Tree *my_tree = simulator.simulateTree( taxa, constr );
+
+            // store the new value
+            delete value;
+            value = my_tree;
+        }
+
+        else {
+            redrawValue();
+        }
+        
+      }
 }
 
 
