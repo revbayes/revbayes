@@ -92,6 +92,7 @@ namespace RevBayesCore {
 
         // simulation functions
         void                                                              simulateTree(void);
+        void                                                              simulateSSETree(void);
         void                                                              buildSerialSampledRandomBinaryTree(Tree *psi, std::vector<TopologyNode*> &nodes, const std::vector<double> &ages);
         std::vector<double>                                               simulateCoalescentAges() const;
         void                                                              initializeEmptyCharData();
