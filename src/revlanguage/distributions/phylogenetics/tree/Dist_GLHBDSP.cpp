@@ -301,6 +301,9 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
         d->setZeta(z_mats);
     }
 
+    // refresh SSE process outcome given assigned parameter values
+    d->redrawValue();
+    
     // return the distribution
     return d;
 
