@@ -12,18 +12,19 @@
 #include <string>
 #include <vector>
 
-#include "ArgumentRule.h"
-#include "Natural.h"
-#include "RevNullObject.h"
-#include "RlAbstractHomologousDiscreteCharacterData.h"
-#include "RlString.h"
-#include "HomologousDiscreteCharacterData.h"
-#include "BitsetCharacterDataConverter.h"
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "Argument.h"
+#include "ArgumentRule.h"
 #include "ArgumentRules.h"
+#include "BitsetCharacterDataConverter.h"
+#include "HomologousDiscreteCharacterData.h"
+#include "OptionRule.h"
+#include "Natural.h"
+#include "RevNullObject.h"
 #include "RevVariable.h"
+#include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlFunction.h"
+#include "RlString.h"
 #include "TypeSpec.h"
 
 namespace RevBayesCore { class NaturalNumbersState; }
@@ -62,7 +63,7 @@ RevPtr<RevVariable> Func_formatDiscreteCharacterData::execute( void )
     std::string format = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
     size_t num_states = static_cast<const Natural&>( args[2].getVariable()->getRevObject() ).getValue();
     
-    if (format == "DEC") {
+    if (format == "DEC" || format == "GeoSSE") {
         
         // cast off constness
         RevBayesCore::AbstractHomologousDiscreteCharacterData* dataPtr = NULL;
@@ -112,8 +113,14 @@ const ArgumentRules& Func_formatDiscreteCharacterData::getArgumentRules( void ) 
     if (!rulesSet)
     {
         argumentRules.push_back( new ArgumentRule( "data"  , AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The character data object.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "format", RlString::getClassTypeSpec(), "The data format.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("DEC")) );
-        argumentRules.push_back( new ArgumentRule( "numStates", Natural::getClassTypeSpec(), "The number of states (format==\"DEC\" only).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L)) );
+        
+        std::vector<std::string> optionsStrategy;
+        optionsStrategy.push_back( "DEC" );
+        optionsStrategy.push_back( "GeoSSE" );
+        argumentRules.push_back( new OptionRule( "format", new RlString("DEC"), optionsStrategy, "The data format." ) );
+
+        
+        argumentRules.push_back( new ArgumentRule( "numStates", Natural::getClassTypeSpec(), "The number of states (format==\"DEC\" or \"GeoSSE\" only).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L)) );
         rulesSet = true;
     }
     
