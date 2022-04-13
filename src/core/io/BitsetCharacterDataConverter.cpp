@@ -33,10 +33,15 @@ BitsetCharacterDataConverter::BitsetCharacterDataConverter(const HomologousDiscr
     num_taxa = data.getNumberOfTaxa();
     numChars = data.getNumberOfCharacters();
     numAllStates = (size_t)(std::pow(double(2),int(numChars)));
+    if (format == "DEC") {
+        // do nothing
+    }
+    else if (format == "GeoSSE") {
+        numAllStates -= 1; // eliminate null range, 0
+    }
     if (numStates == 0) {
         numStates = numAllStates;
     }
-    
     
     // create bit containers
     initializeBits((size_t)numChars);
@@ -99,16 +104,31 @@ HomologousDiscreteCharacterData<NaturalNumbersState>* BitsetCharacterDataConvert
 
 void BitsetCharacterDataConverter::initializeBits(size_t n)
 {
+    size_t offset = 1;
+    if (format == "DEC") {
+        offset = 0;
+    }
+    
     std::vector<size_t> v(numChars, 0);
-    bitsByNumOn.resize(numChars+1);
+    /// if (format == "GeoSSE") {
+    //    bitsByNumOn.resize(numChars);
+    //} else if (format == "DEC") {
+        bitsByNumOn.resize(numChars+1); // +1 for null range
+    //}
     statesToBitsByNumOn.resize(numAllStates);
     
     // fill out bitsByNumOn
     statesToBits = std::vector<std::vector<size_t> >(numAllStates, std::vector<size_t>(numChars, 0));
-    bitsByNumOn[0].push_back(statesToBits[0]);
-    for (size_t i = 1; i < numAllStates; i++)
+    
+    // enter 0-bit null range
+    if (format == "DEC") {
+        bitsByNumOn[0].push_back(statesToBits[0]);
+    }
+    
+    for (size_t i = 1-offset; i < numAllStates; i++)
     {
-        size_t m = i;
+        // get bit vector-representation for each integer-coded range
+        size_t m = i+offset;
         for (size_t j = 0; j < numChars; j++)
         {
             statesToBits[i][j] = m % 2;
@@ -116,14 +136,19 @@ void BitsetCharacterDataConverter::initializeBits(size_t n)
             if (m == 0)
                 break;
         }
+        
+        // determine how many bits are "on" (regions present)
         size_t j = numBitsOn(statesToBits[i]);
         
+        // store bit vector-ranges with equal numbers of regions into
+        // the same index of bitsByNumOn
         bitsByNumOn[j].push_back(statesToBits[i]);
 
     }
 
-    
-    // assign state to each bit vector, sorted by numOn
+    // assign bit vector-ranges to integer-ranges sorted by range
+    // sizes. for example, all ranges of size-1 have smaller integer-ranges
+    // than any range of size-2.
     size_t k = 0;
     for (size_t i = 0; i < bitsByNumOn.size(); i++)
     {
@@ -133,13 +158,12 @@ void BitsetCharacterDataConverter::initializeBits(size_t n)
         }
     }
     
+    // construct a reverse-map, where the bit vector-range is the key
+    // and the integer-range is the value; also, assign descriptions
+    // to characters
     for (size_t i = 0; i < statesToBitsByNumOn.size(); i++)
     {
         bitsToStatesByNumOn[ statesToBitsByNumOn[i] ] = (size_t)i;
-//        std::cout << i << " : ";
-//        for (size_t j = 0; j < statesToBitsByNumOn[i].size(); j++)
-//            std::cout << statesToBitsByNumOn[i][j];
-//        std::cout << "\n";
 
         std::stringstream ss;
         for (size_t j = 0; j < statesToBitsByNumOn[i].size(); j++)
