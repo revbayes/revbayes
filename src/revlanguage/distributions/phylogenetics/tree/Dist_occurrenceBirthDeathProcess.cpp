@@ -116,12 +116,45 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
     {
                                         rh          = rho->getRevObject().getDagNode();
     }
-    // rate change times
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ht = NULL;
+    // global rate change timeline
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* gt = NULL;
     if ( timeline->getRevObject() != RevNullObject::getInstance() )
     {
-                                        ht          = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
+                                        gt          = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
+
+    // parameter-specific timelines
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* lt = NULL;
+    if ( lambda_timeline->getRevObject() != RevNullObject::getInstance() )
+    {
+        lt = static_cast<const ModelVector<RealPos> &>( lambda_timeline->getRevObject() ).getDagNode();
+    }
+
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* mt = NULL;
+    if ( mu_timeline->getRevObject() != RevNullObject::getInstance() )
+    {
+        mt = static_cast<const ModelVector<RealPos> &>( mu_timeline->getRevObject() ).getDagNode();
+    }
+
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* pt = NULL;
+    if ( psi_timeline->getRevObject() != RevNullObject::getInstance() )
+    {
+        pt = static_cast<const ModelVector<RealPos> &>( psi_timeline->getRevObject() ).getDagNode();
+    }
+
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* rt = NULL;
+    if ( r_timeline->getRevObject() != RevNullObject::getInstance() )
+    {
+        rt = static_cast<const ModelVector<RealPos> &>( r_timeline->getRevObject() ).getDagNode();
+    }
+
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ot = NULL;
+    if ( omega_timeline->getRevObject() != RevNullObject::getInstance() )
+    {
+        ot = static_cast<const ModelVector<RealPos> &>( omega_timeline->getRevObject() ).getDagNode();
+    }
+
+
     // occurrence ages
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*  occAges = NULL;
     if ( occurrence_ages->getRevObject() != RevNullObject::getInstance() )
@@ -135,7 +168,7 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
 
     RevBayesCore::AbstractBirthDeathProcess* d;
 
-    d = new RevBayesCore::OccurrenceBirthDeathProcess(sa, l, m, p, rm, o, rh, ht, cond, tree, uo, init, n, occAges, Mt, vb);
+    d = new RevBayesCore::OccurrenceBirthDeathProcess(sa, l, m, p, rm, o, rh, gt, lt, mt, pt, rt, ot, cond, tree, uo, init, n, occAges, Mt, vb);
 
     return d;
 }
@@ -253,6 +286,11 @@ const MemberRules& Dist_occurrenceBirthDeathProcess::getParameterRules(void) con
         dist_member_rules.push_back( new ArgumentRule( "rho",               event_sampling_paramTypes, "Sampling fraction at present.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         dist_member_rules.push_back( new ArgumentRule( "timeline",          ModelVector<RealPos>::getClassTypeSpec(), "Rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new ModelVector<RealPos>() ) );
+        dist_member_rules.push_back( new ArgumentRule( "lambdaTimeline",    ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the speciation/birth rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "muTimeline",        ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the extinction/death rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "psiTimeline",       ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the serial sampling rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "omegaTimeline",     ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the occurrence sampling rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "rTimeline",         ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the (serial) treatment probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         std::vector<std::string> optionsCondition;
         optionsCondition.push_back( "survival" );
@@ -335,6 +373,26 @@ void Dist_occurrenceBirthDeathProcess::setConstParameter(const std::string& name
     else if ( name == "timeline" )
     {
         timeline = var;
+    }
+    else if ( name == "lambdaTimeline" )
+    {
+        lambda_timeline = var;
+    }
+    else if ( name == "muTimeline" )
+    {
+        mu_timeline = var;
+    }
+    else if ( name == "psiTimeline" )
+    {
+        psi_timeline = var;
+    }
+    else if ( name == "rTimeline" )
+    {
+        r_timeline = var;
+    }
+    else if ( name == "omegaTimeline" )
+    {
+        omega_timeline = var;
     }
     else if ( name == "initialTree" )
     {

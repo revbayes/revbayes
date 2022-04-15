@@ -56,6 +56,11 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                       
                                                                                            const DagNode *inoccurrence,
                                                                                            const DagNode *ineventsampling,
                                                                                            const TypedDagNode< RbVector<double> > *ht,
+                                                                                           const TypedDagNode< RbVector<double> > *speciation_timeline,
+                                                                                           const TypedDagNode< RbVector<double> > *extinction_timeline,
+                                                                                           const TypedDagNode< RbVector<double> > *sampling_timeline,
+                                                                                           const TypedDagNode< RbVector<double> > *treatment_timeline,
+                                                                                           const TypedDagNode< RbVector<double> > *occurrence_timeline,
                                                                                            const std::string &cdt,
                                                                                            const std::vector<Taxon> &tn,
                                                                                            bool uo,
@@ -64,14 +69,19 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                       
                                                                                            const TypedDagNode<RbVector<double> > *O,
                                                                                            bool mt,
                                                                                            bool vb) : AbstractBirthDeathProcess( sa, cdt, tn, uo, t ),
-    interval_times(ht),
+    interval_times_global(ht),
     offset( 0.0 ),
     start_age(sa),
     maxHiddenLin(n),
     occurrence_ages(O),
     useMt ( mt ),
     cond (cdt),
-    verbose ( vb )
+    verbose ( vb ),
+    interval_times_speciation(speciation_timeline),
+    interval_times_extinction(extinction_timeline),
+    interval_times_sampling(sampling_timeline),
+    interval_times_treatment(treatment_timeline),
+    interval_times_occurrence(occurrence_timeline)
 
 {
     // initialize all the pointers to NULL
@@ -87,23 +97,32 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                       
     homogeneous_r        = NULL;
     heterogeneous_r      = NULL;
 
-    homogeneous_o        = NULL;
-    heterogeneous_o      = NULL;
+    homogeneous_omega    = NULL;
+    heterogeneous_omega  = NULL;
 
     homogeneous_rho      = NULL;
 
 
-    std::vector<double> times = timeline;
-    std::vector<double> times_sorted_ascending = times;
-
-    sort(times_sorted_ascending.begin(), times_sorted_ascending.end() );
-
-    if ( times != times_sorted_ascending )
+    // We use a global timeline if
+    //    1) the user provides one
+    //    2) the user provides NO timeline arguments, meaning this is a constant-rate model
+    if ( interval_times_global != NULL )
     {
-        throw(RbException("Rate change times must be provided in ascending order."));
+      using_global_timeline = true;
+
+      std::vector<double> times = interval_times_global->getValue();
+      std::vector<double> times_sorted_ascending = times;
+
+      sort(times_sorted_ascending.begin(), times_sorted_ascending.end() );
+
+      if ( times != times_sorted_ascending )
+      {
+          throw RbException("Rate change times must be provided in ascending order.");
+      }
+
     }
 
-    addParameter( interval_times );
+    addParameter( interval_times_global );
 
     heterogeneous_lambda = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inspeciation);
     homogeneous_lambda = dynamic_cast<const TypedDagNode<double >*>(inspeciation);
@@ -129,69 +148,21 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                       
     addParameter( homogeneous_r );
     addParameter( heterogeneous_r );
 
-    heterogeneous_o = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inoccurrence);
-    homogeneous_o = dynamic_cast<const TypedDagNode<double >*>(inoccurrence);
+    heterogeneous_omega = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inoccurrence);
+    homogeneous_omega = dynamic_cast<const TypedDagNode<double >*>(inoccurrence);
 
-    addParameter( homogeneous_o );
-    addParameter( heterogeneous_o );
+    addParameter( homogeneous_omega );
+    addParameter( heterogeneous_omega );
 
     homogeneous_rho = dynamic_cast<const TypedDagNode<double >*>(ineventsampling);
     addParameter( homogeneous_rho );
 
-
-    //check that lengths of vector arguments are sane
-    if ( heterogeneous_lambda != NULL && !(interval_times->getValue().size() == heterogeneous_lambda->getValue().size() - 1) )
-    {
-      throw(RbException("If provided as a vector, argument lambda must have one more element than timeline."));
-    }
-
-    if ( heterogeneous_mu != NULL && !(interval_times->getValue().size() == heterogeneous_mu->getValue().size() - 1) )
-    {
-      throw(RbException("If provided as a vector, argument mu must have one more element than timeline."));
-    }
-
-    if ( heterogeneous_psi != NULL && !(interval_times->getValue().size() == heterogeneous_psi->getValue().size() - 1) )
-    {
-      throw(RbException("If provided as a vector, argument psi must have one more element than timeline."));
-    }
-
-    if ( heterogeneous_r != NULL && !(interval_times->getValue().size() == heterogeneous_r->getValue().size() - 1) )
-    {
-      throw(RbException("If provided as a vector, argument r must have one more element than timeline."));
-    }
-
-    if ( heterogeneous_o != NULL && !(interval_times->getValue().size() == heterogeneous_o->getValue().size() - 1) )
-    {
-      throw(RbException("If provided as a vector, argument o must have one more element than timeline."));
-    }
-
-    updateVectorParameters();
-
-
+    prepareTimeline();
 
     if (t == NULL) {
-
-        // with piecewise constant parameters, redrawValue() sometimes fails to initialise, we use instead the following:
-        if(timeline.size() > 1) {
-
-            RbVector<Clade> constr;
-            StartingTreeSimulator simulator;
-            Tree *my_tree = simulator.simulateTree( taxa, constr );
-
-            // store the new value
-            delete value;
-            value = my_tree;
-        }
-
-        else {
-            redrawValue();
-        }
-        
-      }
+          redrawValue();
+    }
 }
-
-
-
 
 
 /**
@@ -208,21 +179,15 @@ OccurrenceBirthDeathProcess* OccurrenceBirthDeathProcess::clone( void ) const
 
 
 
-
 /**
  * Compute the log-transformed probability of the current value under the current parameter values.
  */
  double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
  {
 
-     // variable declarations and initialization
     double lnProbTimes = computeLnProbabilityTimes();
-
     return lnProbTimes;
  }
-
-
-
 
 
 /**
@@ -230,7 +195,7 @@ OccurrenceBirthDeathProcess* OccurrenceBirthDeathProcess::clone( void ) const
  */
 double OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void ) const
 {
-    updateVectorParameters();
+    prepareTimeline();
 
     // compute the log-likelihood : use ComputeLikelihoodsBackwardsLt (backward traversal of the tree) or ComputeLikelihoodsForwardsMt (forward traversal of the tree)
     const Tree& tree = *value;
@@ -245,13 +210,10 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void ) const
         occAges = std::vector<double>();
     }
 
-    double logLikelihood = ComputeLnLikelihoodOBDP(start_age->getValue(), timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, useMt, verbose, occAges, tree);
+    double logLikelihood = ComputeLnLikelihoodOBDP(start_age->getValue(), global_timeline, lambda, mu, psi, omega, homogeneous_rho, r, maxHiddenLin, cond, useMt, verbose, occAges, tree);
 
     return logLikelihood;
 }
-
-
-
 
 
 /**
@@ -263,26 +225,30 @@ double OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void ) const
 size_t OccurrenceBirthDeathProcess::findIndex(double t) const
 {
     // Linear search for interval because std::lower_bound is not cooperating
-    if (timeline.size() == 2) // If timeline.size() were 1, we would have 0 break points and would be in constant-rate version
+    // @TODO @efficiency: this would be much faster if we can get std::lower_bound to work consistently
+    // Linear search for interval because std::lower_bound is not cooperating
+    if (global_timeline.size() == 1)
     {
-      return(t < timeline[1] ? 0 : 1);
+        // If global_timeline.size() is 1, we have 0 break points and are in constant-rate version
+        return 0;
+    }
+    else if (global_timeline.size() == 2)
+    {
+        return (t < (global_timeline[1]-1E-5) ? 0 : 1);
     }
     else
     {
-      for (size_t i=0; i < timeline.size()-1; ++i)
-      {
-          if (t >= timeline[i] && t < timeline[i+1])
-          {
-              return(i);
-          }
-      }
+        for (size_t i=0; i < global_timeline.size()-1; ++i)
+        {
+            if (t >= (global_timeline[i]-1E-5) && t < (global_timeline[i+1]-1E-5))
+            {
+                return i;
+            }
+        }
 
-      return(timeline.size() - 1);
+        return global_timeline.size() - 1;
     }
 }
-
-
-
 
 
 // calculate offset so we can set t_0 to time of most recent tip
@@ -301,25 +267,16 @@ void OccurrenceBirthDeathProcess::getOffset(void) const
 }
 
 
-
-
-
-/**
- * Here we ensure that we have a length-l vector of rates and events for all parameters and the timeline.
- * In the case of homogeneous/constant-rate parameters, we fill the vector with this rate.
- * In the case of homogenous/single events, we make all but the first event rates 0.
- *
+/*
+ * Here wepopulate all parameter vectors with their final values.
+ * This requires that we:
+ *    1) Clear out old values of all parameter vectors
+ *    2) Refill and sort vector-valued parameters (leaving scalar parameters alone) to go from present to past
+ *    3) Sort (assemble first if needed) the global timeline, attach the first time (the offset)
+ * Then we can fill in our final vector for each parameter, which will be a vector of the same size as the global timeline
  */
-void OccurrenceBirthDeathProcess::updateVectorParameters( void ) const
+void OccurrenceBirthDeathProcess::prepareTimeline( void ) const
 {
-    // clean and get timeline
-    timeline.clear();
-    timeline = interval_times->getValue();
-
-    // Add t_0
-    getOffset();
-    timeline.insert(timeline.begin(),offset);
-
     // clean all the sets
     lambda.clear();
     mu.clear();
@@ -328,71 +285,557 @@ void OccurrenceBirthDeathProcess::updateVectorParameters( void ) const
     omega.clear();
     psi_event.clear();
 
+    lambda_times.clear();
+    mu_times.clear();
+    psi_times.clear();
+    r_times.clear();
+    omega_times.clear();
+    global_timeline.clear();
+
+    // put in current values for vector parameters so we can re-order them as needed
+    if (heterogeneous_lambda != NULL)
+    {
+        lambda = heterogeneous_lambda->getValue();
+    }
+    if (heterogeneous_mu != NULL)
+    {
+        mu = heterogeneous_mu->getValue();
+    }
+    if (heterogeneous_psi != NULL)
+    {
+        psi = heterogeneous_psi->getValue();
+    }
+    if (heterogeneous_r != NULL)
+    {
+        r = heterogeneous_r->getValue();
+    }
+    if (heterogeneous_omega != NULL)
+    {
+        omega = heterogeneous_omega->getValue();
+    }
+
+    //@TODO we need to check that we have either a scalar or a vector for ALL of lambda/mu/phi/r/Phi (Lambda and Mu are allowed to be NULL), this should probably be done here
+    // put in current values for vector parameters so we can re-order them as needed
+    if (interval_times_global != NULL)
+    {
+        global_timeline = interval_times_global->getValue();
+    }
+    if (interval_times_speciation != NULL)
+    {
+        lambda_times = interval_times_speciation->getValue();
+    }
+    if (interval_times_extinction != NULL)
+    {
+        mu_times = interval_times_extinction->getValue();
+    }
+    if (interval_times_sampling != NULL)
+    {
+        psi_times = interval_times_sampling->getValue();
+    }
+    if (interval_times_treatment != NULL)
+    {
+        r_times = interval_times_treatment->getValue();
+    }
+    if (interval_times_occurrence != NULL)
+    {
+        omega_times = interval_times_occurrence->getValue();
+    }
+
+
+    // If it's a constant-rate process, make sure we only have scalars
+    bool using_constant_rate_process = isConstantRate();
+    if ( using_constant_rate_process )
+    {
+        global_timeline = std::vector<double>(0,0.0);
+    }
+    // If we have a real
+    else if ( using_global_timeline )
+    {
+        // std::cout << "using global timeline" << std::endl;
+        if ( interval_times_speciation != NULL ||
+             interval_times_extinction != NULL ||
+             interval_times_sampling != NULL ||
+             interval_times_treatment != NULL ||
+             interval_times_occurrence != NULL)
+        {
+            throw RbException("Both heterogeneous and homogeneous rate change times provided");
+        }
+
+        // check that the number of provided parameters matches the global timeline
+        // Right now, the global timeline is only the interval times, i.e. breaks between pieces/episodes/windows
+        checkVectorSizes(heterogeneous_lambda,interval_times_global,1,spn,true);
+        checkVectorSizes(heterogeneous_mu,interval_times_global,1,exn,true);
+        checkVectorSizes(heterogeneous_psi,interval_times_global,1,smp,true);
+        checkVectorSizes(heterogeneous_r,interval_times_global,1,trt,false);
+        checkVectorSizes(heterogeneous_omega,interval_times_global,1,occ,false);
+
+        sortGlobalTimesAndVectorParameter();
+
+        // we are done with setting up the timeline (i.e., using the provided global timeline) and checking all dimension of parameters
+    }
+    // We only need to assemble a global timeline if
+    else if ( interval_times_speciation != NULL ||
+              interval_times_extinction != NULL ||
+              interval_times_sampling != NULL ||
+              interval_times_treatment != NULL ||
+              interval_times_occurrence != NULL  )
+    {
+        // check if correct number of speciation rates were provided
+        // if provided as a vector, sort to the correct timescale
+        if ( heterogeneous_lambda == NULL && homogeneous_lambda == NULL)
+        {
+            throw RbException("Speciation rate must be of type RealPos or RealPos[]");
+        }
+        else if ( heterogeneous_lambda != NULL )
+        {
+            if ( interval_times_speciation == NULL ) throw RbException("No time intervals provided for piecewise constant speciation rates");
+            checkVectorSizes(heterogeneous_lambda,interval_times_speciation,1,spn,true);
+            sortNonGlobalTimesAndVectorParameter(lambda_times,lambda);
+        }
+
+        // check if correct number of extinction rates were provided
+        // if provided as a vector, sort to the correct timescale
+        if ( heterogeneous_mu == NULL && homogeneous_mu == NULL)
+        {
+            throw RbException("Extinction rate must be of type RealPos or RealPos[]");
+        }
+        else if ( heterogeneous_mu != NULL )
+        {
+            if ( interval_times_extinction == NULL ) throw RbException("No time intervals provided for piecewise constant extinction rates");
+            checkVectorSizes(heterogeneous_mu,interval_times_extinction,1,exn,true);
+            sortNonGlobalTimesAndVectorParameter(mu_times,mu);
+        }
+
+        // check if correct number of sampling rates were provided
+        // if provided as a vector, sort to the correct timescale
+        if ( heterogeneous_psi == NULL && homogeneous_psi == NULL)
+        {
+            throw RbException("Sampling rate must be of type RealPos or RealPos[]");
+        }
+        else if ( heterogeneous_psi != NULL )
+        {
+            if ( interval_times_sampling == NULL ) throw RbException("No time intervals provided for piecewise constant sampling rates");
+            checkVectorSizes(heterogeneous_psi,interval_times_sampling,1,smp,true);
+            sortNonGlobalTimesAndVectorParameter(psi_times,psi);
+        }
+
+        // check if correct number of serial treatment probabilities were provided
+        // if provided as a vector, sort to the correct timescale
+        if ( heterogeneous_r == NULL && homogeneous_r == NULL)
+        {
+            throw RbException("Treatment probability for serial sampling rate must be of type Probability or Probability[]");
+        }
+        else if ( heterogeneous_r != NULL )
+        {
+            if ( interval_times_treatment == NULL ) throw RbException("No time intervals provided for piecewise constant sampling rates");
+            checkVectorSizes(heterogeneous_r,interval_times_treatment,1,trt,false);
+            sortNonGlobalTimesAndVectorParameter(r_times,r);
+        }
+
+        // check if correct number of occurrence sampling rates were provided
+        // if provided as a vector, sort to the correct timescale
+        if ( heterogeneous_omega == NULL && homogeneous_omega == NULL)
+        {
+            throw RbException("Occurrence sampling rate must be of type Probability or Probability[]");
+        }
+        else if ( heterogeneous_omega != NULL )
+        {
+            if ( interval_times_occurrence == NULL ) throw RbException("No time intervals provided for piecewise constant occurrence sampling rates");
+            checkVectorSizes(heterogeneous_omega,interval_times_occurrence,1,occ,false);
+            sortNonGlobalTimesAndVectorParameter(omega_times,omega);
+        }
+
+        // check that extant sampling probability is provided
+        if ( homogeneous_rho == NULL)
+        {
+          throw RbException("Event-sampling probabilities must be of type Probability");
+        }
+
+
+        // now we start assembling the global timeline by finding the union of unique intervals for all parameters
+        std::set<double> event_times;
+        addTimesToGlobalTimeline(event_times,interval_times_speciation);
+        addTimesToGlobalTimeline(event_times,interval_times_extinction);
+        addTimesToGlobalTimeline(event_times,interval_times_sampling);
+        addTimesToGlobalTimeline(event_times,interval_times_treatment);
+        addTimesToGlobalTimeline(event_times,interval_times_occurrence);
+
+        // we are done with setting up the timeline (i.e., using the all the provided timeline) and checking all dimension of parameters
+
+    }
+
+    // @TODO: @ANDY: Double check the offset works
+    // Add s_0
+    getOffset();
+    global_timeline.insert(global_timeline.begin(),offset);
+
+    // For each parameter vector, we now make sure that its size matches the size of the global vector
+    // For a RATE parameter, there are three cases
+    //     1) It is a vector and it matches the size of the global timeline, in which case it is already sorted and we can use it
+    //     2) It is a vector and it DOES NOT match the size of the global timeline, in which case we must expand it to match
+    //     3) It is a scalar, in which case we simply populate a vector of the correct size with the value
+
     // Get vector of birth rates
+    // @TODO: @SEBASTIAN: would it be better here to check if interval_times_parameter == NULL instead of checking the size? They should be equivalent
     if ( heterogeneous_lambda != NULL )
     {
-      lambda = heterogeneous_lambda->getValue();
+        if ( lambda.size() != global_timeline.size() )
+        {
+            expandNonGlobalRateParameterVector(lambda,lambda_times);
+        } // else it matches in size and is already sorted and is thus ready to be used
     }
     else
     {
-      lambda = std::vector<double>(timeline.size(),homogeneous_lambda->getValue());
+        lambda = std::vector<double>(global_timeline.size(),homogeneous_lambda->getValue());
     }
 
     // Get vector of death rates
     if ( heterogeneous_mu != NULL )
     {
-      mu = heterogeneous_mu->getValue();
+        if ( mu.size() != global_timeline.size() )
+        {
+            expandNonGlobalRateParameterVector(mu,mu_times);
+        } // else it matches in size and is already sorted and is thus ready to be used
     }
     else
     {
-      mu = std::vector<double>(timeline.size(),homogeneous_mu->getValue());
+        mu = std::vector<double>(global_timeline.size(),homogeneous_mu->getValue());
     }
 
-    // Get vector of serial sampling rates
+    // Get vector of sampling rates
     if ( heterogeneous_psi != NULL )
     {
-      psi = heterogeneous_psi->getValue();
+        if ( psi.size() != global_timeline.size() )
+        {
+            expandNonGlobalRateParameterVector(psi,psi_times);
+        } // else it matches in size and is already sorted and is thus ready to be used
     }
     else
     {
-      psi = std::vector<double>(timeline.size(),homogeneous_psi->getValue());
+        psi = std::vector<double>(global_timeline.size(),homogeneous_psi->getValue());
     }
 
-    // Get vector of conditional death upon sampling probabilities
+    // Get vector of treatment probabilities
     if ( heterogeneous_r != NULL )
     {
-      r = heterogeneous_r->getValue();
+        if ( r.size() != global_timeline.size() )
+        {
+            // r is not a rate parameter, but it behaves like them for this function, as it is defined in intervals
+            expandNonGlobalRateParameterVector(r,r_times);
+        } // else it matches in size and is already sorted and is thus ready to be used
     }
     else
     {
-      r = std::vector<double>(timeline.size(),homogeneous_r->getValue());
+        r = std::vector<double>(global_timeline.size(),homogeneous_r->getValue());
     }
 
-    // Get vector of occcurrence rates.
-    if ( heterogeneous_o != NULL )
+    // Get vector of treatment probabilities
+    if ( heterogeneous_omega != NULL )
     {
-      omega = heterogeneous_o->getValue();
+        if ( omega.size() != global_timeline.size() )
+        {
+            // r is not a rate parameter, but it behaves like them for this function, as it is defined in intervals
+            expandNonGlobalRateParameterVector(omega,omega_times);
+        } // else it matches in size and is already sorted and is thus ready to be used
     }
     else
     {
-      omega = std::vector<double>(timeline.size(),homogeneous_o->getValue());
+        omega = std::vector<double>(global_timeline.size(),homogeneous_omega->getValue());
     }
-
-    psi_event = std::vector<double>(timeline.size(),0.0);
+    psi_event = std::vector<double>(global_timeline.size(),0.0);
     if ( homogeneous_rho != NULL )
     {
         // User specified the sampling fraction at the present
         psi_event[0] = homogeneous_rho->getValue();
     }
+
+
+
+
+}
+
+/**
+ * Adds parameter-specific timeline to the set
+ */
+void OccurrenceBirthDeathProcess::addTimesToGlobalTimeline(std::set<double> &event_times, const TypedDagNode<RbVector<double> > *par_times) const
+{
+  if ( par_times != NULL )
+  {
+      const std::vector<double>& times = par_times->getValue();
+      for (std::vector<double>::const_iterator it = times.begin(); it != times.end(); ++it)
+      {
+          event_times.insert( *it );
+      }
+  }
+
+}
+
+bool OccurrenceBirthDeathProcess::isConstantRate(void) const
+{
+  bool has_no_interval_times = false;
+  // For there to be no intervals, every timeline must either be NULL or have size 0
+  if ( (interval_times_global == NULL           || interval_times_global->getValue().size() == 0 ) &&
+       (interval_times_speciation == NULL       || interval_times_speciation->getValue().size() == 0 ) &&
+       (interval_times_extinction == NULL       || interval_times_extinction->getValue().size() == 0 ) &&
+       (interval_times_sampling == NULL         || interval_times_sampling->getValue().size() == 0 ) &&
+       (interval_times_treatment == NULL        || interval_times_treatment->getValue().size() == 0 ) &&
+       (interval_times_occurrence == NULL       || interval_times_occurrence->getValue().size() == 0 ))
+  {
+    has_no_interval_times = true;
+  }
+
+  bool all_parameters_are_scalars = false;
+  // For all parameters to be scalars,
+  // 1) rate parameters must either be homogenous or they must have size <= 1 (1 for scalar, 0 if it's null)
+  if ( (heterogeneous_lambda == NULL || lambda.size() <= 1) &&
+       (heterogeneous_mu == NULL     || mu.size() <= 1) &&
+       (heterogeneous_psi == NULL    || psi.size() <= 1) &&
+       (heterogeneous_r == NULL      || r.size() <= 1) &&
+       (heterogeneous_omega == NULL  || omega.size() <= 1))
+       {
+         all_parameters_are_scalars = true;
+       }
+
+  // std::cout << "has_no_interval_times == " << has_no_interval_times << "; all_parameters_are_scalars == " << all_parameters_are_scalars << std::endl;
+
+  if (has_no_interval_times && !all_parameters_are_scalars)
+  {
+    throw RbException("No timeline(s) was (were) provided but there are non-scalar parameters.");
+  }
+
+  return has_no_interval_times && all_parameters_are_scalars;
+}
+
+
+/**
+ * return the index i so that x_{i-1} <= t < x_i
+ * where x is one of the input vector timelines
+ */
+size_t OccurrenceBirthDeathProcess::findIndex(double t, const std::vector<double>& timeline) const
+{
+
+    // Linear search for interval because std::lower_bound is not cooperating
+    if (timeline.size() == 1)
+    {
+        return 0;
+    }
+    else if (timeline.size() == 2)
+    {
+        return(t < timeline[1] ? 0 : 1);
+    }
     else
     {
-        // set the final sampling to one (for sampling at the present)
-        psi_event[0] = 1.0;
+        for (size_t i=0; i < timeline.size()-1; ++i)
+        {
+            if (t >= timeline[i] && t < timeline[i+1])
+            {
+                return i;
+            }
+        }
+
+        return timeline.size() - 1;
     }
+}
+
+/**
+ * Checks that v1 is the correct size compared to reference vector ref, given the expected size difference.
+ * If the first vector parameter is not a vector (is null), does nothing.
+ * If the sizes are wrong, throws an exception.
+ * Uses param_name and is_rate to make a sensible error message
+ */
+void OccurrenceBirthDeathProcess::checkVectorSizes(const TypedDagNode<RbVector<double> >* v, const TypedDagNode<RbVector<double> >* ref, int v1_minus_ref, const std::string& param_name, bool is_rate) const
+{
+  if ( v != NULL )
+  {
+    if ( v->getValue().size() - ref->getValue().size() != v1_minus_ref )
+    {
+      std::string vec_type = is_rate ? "rates" : "probabilities";
+      std::stringstream ss;
+      ss << "Number of " << param_name << " " << vec_type << " (" << v->getValue().size() << ") does not match number of time intervals (" << ref->getValue().size() << ")";
+      throw RbException(ss.str());
+    }
+  }
+}
+
+/**
+ * Sorts times to run from present to past (0->inf) and orders par to match this.
+ */
+void OccurrenceBirthDeathProcess::sortNonGlobalTimesAndVectorParameter(std::vector<double> &times, std::vector<double>& par) const
+{
+  std::vector<double> times_sorted_ascending = times;
+  std::vector<double> times_sorted_descending = times;
+
+  sort(times_sorted_ascending.begin(), times_sorted_ascending.end() );
+  sort(times_sorted_descending.rbegin(), times_sorted_descending.rend() );
+
+  // We want times in ascending order, so if they already are we're done here
+  if ( times != times_sorted_ascending )
+  {
+      // If times are sorted in descending order, we just flip the parameter and time vectors
+      if ( times == times_sorted_ascending )
+      {
+        std::reverse(times.begin(),times.end());
+        std::reverse(par.begin(),par.end());
+      }
+      else
+      {
+        // Pair up the times and the parameter values so we can sort them together
+        std::vector<std::pair<double,double> > times_par;
+        for (size_t i=0; i<times.size(); ++i)
+        {
+          times_par.push_back(std::make_pair(times[i],par[i]));
+        }
+
+        std::sort(times_par.begin(),times_par.end());
+
+        // Replace times with sorted times
+        for (size_t i=0; i<times.size(); ++i)
+        {
+          times[i] = times_par[i].first;
+          par[i] = times_par[i].second;
+        }
+      }
+  }
+
+  if ( times[0] < DBL_EPSILON )
+  {
+    throw RbException("User-specified interval times cannot include time = 0");
+  }
+
 }
 
 
 
+/**
+ * Takes a par.size() < global_timeline.size() vector and makes it the correct size to work with our global timeline.
+ * The parameter has its own reference timeline, which we use to find the rate in the global intervals.
+ * This works only for parameters (lambda,mu,phi,r), where the global timeline is simply a finer grid than the variable-specific timelines.
+ */
+void OccurrenceBirthDeathProcess::expandNonGlobalRateParameterVector(std::vector<double> &par, const std::vector<double> &par_times) const
+{
+    // Store the original values so we can overwrite the vector
+    std::vector<double> old_par = par;
+
+    // For each time in the global timeline, find the rate according to this variable's own timeline
+    for (size_t i=0; i<global_timeline.size(); ++i)
+    {
+      // Where is this global time interval in the variable's timeline?
+      size_t idx = findIndex(global_timeline[i],par_times);
+      par[i] = old_par[idx];
+    }
+
+}
+
+/**
+ * Sorts global times to run from present to past (0->inf) and orders ALL vector parameters to match this.
+ * These can only be sorted after the local copies have values in them.
+ */
+void OccurrenceBirthDeathProcess::sortGlobalTimesAndVectorParameter( void ) const
+{
+    std::vector<double> times_sorted_ascending  = global_timeline;
+    std::vector<double> times_sorted_descending = global_timeline;
+
+    sort(times_sorted_ascending.begin(), times_sorted_ascending.end() );
+    sort(times_sorted_descending.rbegin(), times_sorted_descending.rend() );
+
+    // We want times in ascending order, so if they already are we're done here
+    if ( global_timeline != times_sorted_ascending )
+    {
+        // If times are sorted in descending order, we just flip the parameter and time vectors
+        if ( global_timeline == times_sorted_descending )
+        {
+            // Reverse timeline
+            std::reverse(global_timeline.begin(),global_timeline.end());
+
+            // @TODO: @ANDY: These checks for NULL might be superfluous because the std vectors are initialized to empty vectors by default in c++
+            // Reverse all vector parameters
+            if (heterogeneous_lambda != NULL)
+            {
+                sort(lambda.rbegin(),lambda.rend());
+            }
+            if (heterogeneous_mu != NULL)
+            {
+                sort(mu.rbegin(),mu.rend());
+            }
+            if (heterogeneous_psi != NULL)
+            {
+                sort(psi.rbegin(),psi.rend());
+            }
+            if (heterogeneous_r != NULL)
+            {
+                sort(r.rbegin(),r.rend());
+            }
+            if (heterogeneous_omega != NULL)
+            {
+                sort(omega.rbegin(),omega.rend());
+            }
+
+        }
+        else
+        {
+            // Find ordering of times vector
+            std::vector<size_t> ordering;
+            for (size_t i=0; i<global_timeline.size(); ++i)
+            {
+                for (size_t j=0; j<global_timeline.size(); ++j)
+                {
+                    if ( times_sorted_ascending[i] == global_timeline[j] )
+                    {
+                        ordering.push_back(j);
+                        break;
+                    }
+                }
+            }
+
+            // Replace times with sorted times
+            global_timeline = times_sorted_ascending;
+
+            // Sort all vector parameters
+            if (heterogeneous_lambda != NULL)
+            {
+                std::vector<double> old_lambda = lambda;
+                for (size_t i=0; i<global_timeline.size(); ++i)
+                {
+                    lambda[i] = old_lambda[ordering[i]];
+                }
+            }
+            if (heterogeneous_mu != NULL)
+            {
+                std::vector<double> old_mu = mu;
+                for (size_t i=0; i<global_timeline.size(); ++i)
+                {
+                    mu[i] = old_mu[ordering[i]];
+                }
+            }
+            if (heterogeneous_psi != NULL)
+            {
+                std::vector<double> old_psi = psi;
+                for (size_t i=0; i<global_timeline.size(); ++i)
+                {
+                    psi[i] = old_psi[ordering[i]];
+                }
+            }
+            if (heterogeneous_r != NULL)
+            {
+                std::vector<double> old_r = r;
+                for (size_t i=0; i<global_timeline.size(); ++i)
+                {
+                    r[i] = old_r[ordering[i]];
+                }
+            }
+            if (heterogeneous_omega != NULL)
+            {
+                std::vector<double> old_omega = omega;
+                for (size_t i=0; i<global_timeline.size(); ++i)
+                {
+                    omega[i] = old_omega[ordering[i]];
+                }
+            }
+
+        }
+    }
+
+}
 
 
 double OccurrenceBirthDeathProcess::pSurvival(double start, double end) const
@@ -437,8 +880,7 @@ double OccurrenceBirthDeathProcess::pSurvival(double start, double end) const
  */
 double OccurrenceBirthDeathProcess::simulateDivergenceTime(double origin, double present) const
 {
-    // incorrect placeholder for constant SSBDP
-
+    //We use a coalescent simulator
 
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -450,7 +892,6 @@ double OccurrenceBirthDeathProcess::simulateDivergenceTime(double origin, double
     double b = lambda[i];
     double d = mu[i];
     double p_e = psi_event[i];
-
 
     // get a random draw
     double u = rng->uniform01();
@@ -531,13 +972,13 @@ void OccurrenceBirthDeathProcess::swapParameterInternal(const DagNode *oldP, con
         homogeneous_r        = static_cast<const TypedDagNode<double>* >( newP );
     }
     //occurrence
-    else if (oldP == heterogeneous_o)
+    else if (oldP == heterogeneous_omega)
     {
-        heterogeneous_o      = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        heterogeneous_omega      = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
-    else if (oldP == homogeneous_o)
+    else if (oldP == homogeneous_omega)
     {
-        homogeneous_o        = static_cast<const TypedDagNode<double>* >( newP );
+        homogeneous_omega        = static_cast<const TypedDagNode<double>* >( newP );
     }
     // Event probability parameters
     else if (oldP == homogeneous_rho)

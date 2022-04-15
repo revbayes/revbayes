@@ -49,6 +49,11 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                               omega;                                          //!< The occurrence sampling rate(s)
         RevPtr<const RevVariable>                               rho;                                            //!< The present sampling rate
         RevPtr<const RevVariable>                               timeline;                                       //!< The interval change times
+        RevPtr<const RevVariable>                               lambda_timeline;                                //!< The speciation/birth rate change times
+        RevPtr<const RevVariable>                               mu_timeline;                                    //!< The extinction/death rate change times
+        RevPtr<const RevVariable>                               psi_timeline;                                   //!< The serial sampling rate change times
+        RevPtr<const RevVariable>                               r_timeline;                                     //!< The change times for the death upon sampling probabilities
+        RevPtr<const RevVariable>                               omega_timeline;                                 //!< The occurrence sampling rate change times
         std::string                                             start_condition;                                //!< The start condition of the process (rootAge/originAge)
         RevPtr<const RevVariable>                               initial_tree;                                   //!< Optional initial tree
         RevPtr<const RevVariable>                               maxHiddenLin;                                   //!< The number of hidden lineages (algorithm accuracy)
