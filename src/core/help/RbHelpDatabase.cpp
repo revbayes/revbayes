@@ -1240,10 +1240,10 @@ nuc_pi ~ dnDirichlet( rep(2.0, 4) )
 F ~ dnIID(61, dnNormal(0,1))
 omega ~ dnUniform(0,1)
 # The FMutSel model from Yang and Nielsen (2008)
-Q1 := fnFMutSel(F, omega, fnGTR(er, nuc_pi))
+Q1 := fnFMutSel(fnGTR(er, nuc_pi), F, omega)
 
 # The same -- fMutSel = GTR(er,nuc_pi) + X3 + MutSel(F) + dNdS(omega)
-Q2 := fndNdS(omega, fnMutSel(F, fnX3( fnGTR(er, nuc_pi)))))");
+Q2 := fndNdS(fnMutSel(F, fnX3(fnGTR(er, nuc_pi))), omega))");
 	help_strings[string("fnFMutSel")][string("name")] = string(R"(fnFMutSel)");
 	help_references[string("fnFMutSel")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
 	help_arrays[string("fnFMutSel")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnFMutSel0, fnMutSel)"));
@@ -1275,10 +1275,10 @@ nuc_pi ~ dnDirichlet( rep(2.0, 4) )
 F ~ dnIID(20, dnNormal(0,1))
 omega ~ dnUniform(0,1)
 # The FMutSel0 model from Yang and Nielsen (2008)
-Q1 := fnFMutSel0(F, omega, fnGTR(er, nuc_pi))
+Q1 := fnFMutSel0(fnGTR(er, nuc_pi), F, omega)
 
 # The same -- fMutSel0 = GTR(er,nuc_pi) + X3 + MutSel(F) + dNdS(omega)
-Q2 := fndNdS(omega, fnMutSelAA(F, fnX3( fnGTR(er, nuc_pi)))))");
+Q2 := fndNdS( fnMutSelAA( fnX3( fnGTR(er, nuc_pi)), F), omega))");
 	help_strings[string("fnFMutSel0")][string("name")] = string(R"(fnFMutSel0)");
 	help_references[string("fnFMutSel0")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
 	help_arrays[string("fnFMutSel0")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnFMutSel0, fnMutSel)"));
@@ -1337,11 +1337,11 @@ and the initial frequency 1/N of allele j.)");
 	help_strings[string("fnMutSel")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
 nuc_pi ~ dnDirichlet( rep(2.0, 4) )
 F ~ dnIID(61, dnNormal(0,1))
-Q := fnMutSel(F, fnX3( fnGTR(er,nuc_pi) ) )   # GTR + X3 + MutSel
+Q := fnMutSel(fnX3(fnGTR(er, nuc_pi) ), F)       # GTR + X3 + MutSel
 
 # A mutation-selection balance model on RNA, with GTR mutation.
 F2 ~ dnIID(16, dnNormal(0,1))
-Q2 := fnMutSel(F2, fnX2( fnGTR(er,nuc_pi) ) ) # GTR + X2 + MutSel)");
+Q2 := fnMutSel(fnX2(fnGTR(er,nuc_pi) ), F2)      # GTR + X2 + MutSel)");
 	help_strings[string("fnMutSel")][string("name")] = string(R"(fnMutSel)");
 	help_references[string("fnMutSel")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
 	help_arrays[string("fnMutSel")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnMutSelAA, fnFMutSel, fndNdS)"));
@@ -1367,8 +1367,8 @@ The probability of fixation is determined by scaled selection coefficients:
 and the initial frequency 1/N of allele j.)");
 	help_strings[string("fnMutSelAA")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
 nuc_pi ~ dnDirichlet( rep(2.0, 4) )
-F ~ dnIID(61, dnNormal(0,1))
-Q := fnMutSel(F, fnX3( fnGTR(er,nuc_pi) ) )   # GTR + X3 + MutSel)");
+F ~ dnIID(20, dnNormal(0,1))
+Q := fnMutSelAA(fnX3(fnGTR(er, nuc_pi)), F))");
 	help_strings[string("fnMutSelAA")][string("name")] = string(R"(fnMutSelAA)");
 	help_references[string("fnMutSelAA")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
 	help_arrays[string("fnMutSelAA")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnX3, fndNdS, fnMutSel)"));
@@ -1431,7 +1431,7 @@ nuc_pi ~ dnDirichlet( rep(2.0, 4) )
 Q1 := fnX2( fnHKY(kappa, nuc_pi) )
 F ~ dnIID(16, dnNormal(0,1))
 # Add selection to the rate matrix
-Q2 := fnMutSel(F, Q1))");
+Q2 := fnMutSel(Q1, F))");
 	help_strings[string("fnX2")][string("name")] = string(R"(fnX2)");
 	help_arrays[string("fnX2")][string("see_also")].push_back(string(R"(fnX3)"));
 	help_strings[string("fnX2")][string("title")] = string(R"(Construct a doublet (16x16) rate matrix from a nucleotide rate matrix.)");
@@ -1450,10 +1450,10 @@ omega ~ dnUniform(0,1)
 nuc_pi ~ dnDirichlet( rep(2.0, 4) )
 Q1 := fnCodonMG94K( kappa, omega, nuc_pi )
 # This is the same.
-Q2 := fndNdS(omega,fnX3(fnHKY(kappa,nuc_pi)))   # HKY + X3 + dNdS, or HKY*3 + dNdS
+Q2 := fndNdS(fnX3(fnHKY(kappa, nuc_pi)), omega)          # HKY + X3 + dNdS, or HKY*3 + dNdS
 
 er ~ dnDirichlet( v(1,1,1,1,1,1) )
-Q3 := fnX3(fnGTR(er,nuc_pi))      # GTR + X3, or GTR*3)");
+Q3 := fnX3(fnGTR(er, nuc_pi))      # GTR + X3, or GTR*3)");
 	help_strings[string("fnX3")][string("name")] = string(R"(fnX3)");
 	help_references[string("fnX3")].push_back(RbHelpReference(R"(Redelings, BD (2021). BAli-Phy version 3: Model-based co-estimation of Alignment and Phylogeny.  Bioinformatics (2021) 37(10):3032–3034.)",R"(https://doi.org/10.1093/bioinformatics/btab129 )",R"()"));
 	help_arrays[string("fnX3")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K, fndNdS)"));
@@ -1477,12 +1477,13 @@ omega ~ dnUniform(0,1)
 nuc_pi ~ dnDirichlet( rep(2.0, 4) )
 Q1 := fnCodonMG94K( kappa, omega, nuc_pi )
 # This is the same.
-Q2 := fndNdS(omega,fnX3(fnHKY(kappa,nuc_pi)))   # HKY + X3 + dNdS, or HKY*3 + dNdS
+Q2 := fndNdS(fnX3(fnHKY(kappa, nuc_pi)), omega)        # HKY + X3 + dNdS,
+                                                       #   or HKY*3 + dNdS
 
 er ~ dnDirichlet( v(1,1,1,1,1,1) )
-Q3 := fnX3(fnGTR(er,nuc_pi))      # GTR + X3, or GTR*3)");
+Q3 := fndNdS(fnX3(fnGTR(er, nuc_pi)), omega)         # GTR + X3 + dNdS)");
 	help_strings[string("fndNdS")][string("name")] = string(R"(fndNdS)");
-	help_references[string("fndNdS")].push_back(RbHelpReference(R"(Redelings, BD (2021). RedelingsBAli-Phy version 3: Model-based co-estimation of Alignment and Phylogeny.  Bioinformatics (2021) 37(10):3032–3034.)",R"(https://doi.org/10.1093/bioinformatics/btab129)",R"()"));
+	help_references[string("fndNdS")].push_back(RbHelpReference(R"(Redelings, BD (2021). BAli-Phy version 3: Model-based co-estimation of Alignment and Phylogeny.  Bioinformatics (2021) 37(10):3032–3034.)",R"(https://doi.org/10.1093/bioinformatics/btab129)",R"()"));
 	help_arrays[string("fndNdS")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K, fnX3, fnMutSel)"));
 	help_strings[string("fndNdS")][string("title")] = string(R"(Add a dN/dS factor to a codon rate matrix.)");
 	help_strings[string("formatDiscreteCharacterData")][string("name")] = string(R"(formatDiscreteCharacterData)");
