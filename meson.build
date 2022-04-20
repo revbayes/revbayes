@@ -75,6 +75,10 @@ if get_option('jupyter')
   add_project_arguments(['-DRB_XCODE'], language : 'cpp')
 endif
 
+if get_option('rb-exe-name') != 'default'
+  rb_name = get_option('rb-exe-name')
+endif
+
 ####
 subdir('src')
 
