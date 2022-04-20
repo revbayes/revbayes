@@ -60,7 +60,7 @@ want_static = get_option('static')
 # This doesn't build an internal boost from the internal copy, yet.
 boost = dependency('boost', modules : boost_modules, version: '>=1.71', static: want_static)
 
-openlibm = dependency('openlibm', static: want_static)
+openlibm = dependency('openlibm', static: want_static, required: get_option('openlibm'))
 
 rb_name = 'rb'
 if get_option('mpi')
