@@ -15,6 +15,7 @@ subdir('core')
 subdir('revlanguage')
 subdir('libs')
 subdir('cmd')
+subdir('help2yml')
 " >> "$SRC"/meson.build
 
 "$PROJDIR"/generate_version_number.sh
@@ -32,3 +33,5 @@ mv GitVersion.cpp "$SRC"/revlanguage/utils/
 "$PROJDIR"/generate_sources.sh libs
 
 "$PROJDIR"/generate_sources.sh cmd
+
+"$PROJDIR"/generate_sources.sh help2yml

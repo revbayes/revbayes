@@ -78,7 +78,7 @@ endif
 ####
 subdir('src')
 
-############# executables #################
+############# libraries #################
 core = static_library('rb-core',
                       core_sources,
                       include_directories: [src_inc],
@@ -93,6 +93,11 @@ libs = static_library('rb-lib',
                       libs_sources,
                       include_directories: [src_inc],
                       dependencies: [boost])
+
+help2yml = static_library('rb-help2yml',
+                          help2yml_sources,
+                          include_directories: [src_inc],
+                          dependencies: [boost])
 
 ############# executables #################
 
@@ -128,6 +133,16 @@ if get_option('studio')
 endif
 
 subdir('tests')
+
+if get_option('help2yml')
+
+  executable(rb_name+'help2yml',
+             ['src/help2yml/main.cpp'],
+             link_with: [core, revlanguage, libs, help2yml],
+             include_directories: [src_inc],
+             dependencies: [boost, mpi],
+             install: true)
+endif
 
 ####
 

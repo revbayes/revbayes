@@ -3,3 +3,4 @@ option('jupyter', type: 'boolean', value: false, description: 'Build rb-jupyter 
 option('studio', type: 'boolean', value: false, description: 'Build gtk shell')
 option('openlibm', type: 'boolean', value: false, description: 'Require openlibm')
 option('static', type: 'boolean', value: false, description: 'Build a statically-linked executable')
+option('help2yml', type : 'boolean', value : false, description: 'Build help2yml')
