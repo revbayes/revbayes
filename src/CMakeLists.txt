@@ -69,46 +69,53 @@ if ("${JUPYTER}" STREQUAL "ON")
    add_definitions(-DRB_XCODE)
 endif()
 
-#MESSAGE("Boost location hints:")
-#if (BOOST_ROOT)
-#  MESSAGE("  BOOST_ROOT: ${BOOST_ROOT}")
-#else()
-#  MESSAGE("  BOOST_ROOT not set")
-#endif()
-#if (BOOST_INCLUDEDIR)
-#  MESSAGE("  BOOST_INCLUDEDIR: ${BOOST_INCLUDEDIR}")
-#endif()
-#if (BOOST_LIBRARYDIR)
-#  MESSAGE("  BOOST_LIBRARYDIR: ${BOOST_LIBRARYDIR}")
-#endif()
-MESSAGE("Boost location hints:")
+# When user specifies boost paths to use, we need to disable searching from the
+# environment and from using cmake's internal boost variables.
 if (BOOST_ROOT OR BOOST_INCLUDEDIR OR BOOST_LIBRARYDIR) 
+  # Ignore environment boost variables
   set(Boost_NO_SYSTEM_PATHS ON)
+  # Ignore cmake boost variables
   set(Boost_NO_BOOST_CMAKE ON)
+  # Disable excessive warning messages when using multiple boost versions
   set(Boost_NO_WARN_NEW_VERSION ON)
 endif()
+
+# For standard installations, only `BOOST_ROOT` needs to be set by the user.
 if (BOOST_ROOT)
   MESSAGE("  BOOST_ROOT: ${BOOST_ROOT}")
+  # We still set the internal boost variables for nicer messages
   set(Boost_INCLUDE_DIR ${BOOST_ROOT}/include)
   set(Boost_LIBRARY_DIR ${BOOST_ROOT}/lib)
-  INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
 endif()
-if (BOOST_INCLUDEDIR)
+
+# For non-standard installations where boost's `include` and `lib` directories
+# are not located in the same directory, we can specify `BOOST_INCLUDEDIR`
+# and # `BOOST_LIBRARYDIR`.
+if (BOOST_INCLUDEDIR AND BOOST_LIBRARYDIR)
+  # Set `include` directory
   MESSAGE("  BOOST_INCLUDEDIR: ${BOOST_INCLUDEDIR}")
   set(Boost_INCLUDE_DIR ${BOOST_ROOT})
-  INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
-endif()
-if (BOOST_LIBRARYDIR)
+  # Set `lib` directory
   MESSAGE("  BOOST_LIBRARYDIR: ${BOOST_LIBRARYDIR}")
   set(Boost_LIBRARY_DIR ${BOOST_LIBRARYDIR})
+# We need both `BOOST_INCLUDEDIR` and `BOOST_LIBRARYDIR` to be specified. 
+# These variables should never occur on their own. 
+elseif  (BOOST_INCLUDEDIR AND NOT BOOST_LIBRARYDIR)
+  MESSAGE("Error: BOOST_LIBRARYDIR needs to be set!")
+elseif  (NOT BOOST_INCLUDEDIR AND BOOST_LIBRARYDIR)
+  MESSAGE("Error: BOOST_INCLUDEDIR needs to be set!")
 endif()
 
+# Enable boost multithreading
 set(Boost_USE_MULTITHREADED ON)
+
+# Use static linking if user has asked for it.
 if ("${STATIC_BOOST}" STREQUAL "ON")
-	MESSAGE("Static linking Boost")
-	set(Boost_USE_STATIC_LIBS ON)
+  MESSAGE("Static linking Boost")
+  set(Boost_USE_STATIC_LIBS ON)
 endif()
 
+# Find required boost packages
 MESSAGE("Searching for BOOST:")
 find_package(Boost
 1.71.0
@@ -119,11 +126,17 @@ system
 filesystem
 date_time
 serialization REQUIRED)
+
+# Add boost to the directories to include and link.
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
+LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
+
+# Print results of the boost configuration
 MESSAGE("Boost configuration results:")
 MESSAGE("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIR}")
 MESSAGE("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
 MESSAGE("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
-LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
+
 
 # This will look for "generated_include_dirs.cmake" in the module path.
 include("generated_include_dirs")

@@ -14,6 +14,7 @@ jupyter="false"
 boost_root=""
 boost_lib=""
 boost_include=""
+boost_debug="false"
 static_boost="false"
 j=4
 
@@ -33,6 +34,7 @@ while echo $1 | grep ^- > /dev/null; do
 -boost_root     string          : specify directory containing Boost headers (e.g. `/usr/include`). Defaults to unset.
 -boost_lib      string          : specify directory containing Boost libraries. (e.g. `/usr/lib`). Defaults to unset.
 -boost_include  string          : specify directory containing Boost includes. (e.g. `/usr/include`). Defaults to unset.
+-boost_debug    <true|false>    : enable Boost debugging information. Defaults to false. 
 -static_boost	<true|false>    : link using static Boost libraries. Defaults to false.
 -j              integer         : the number of threads to use when compiling RevBayes. Defaults to 4.
 
@@ -112,6 +114,10 @@ fi
 
 if [ -n "$boost_include" ] ; then
     cmake_args="-DBOOST_INCLUDEDIR=${boost_include} $cmake_args"
+fi
+
+if [ "$boost_debug" = "true" ] ; then
+    cmake_args="-DBoost_DEBUG=ON -DBoost_VERBOSE=ON $cmake_args"
 fi
 
 if [ "$static_boost" = "true" ] ; then
