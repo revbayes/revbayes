@@ -84,7 +84,12 @@ RevPtr<RevVariable> Func_characterMapTree::execute( void )
     RevBayesCore::path map_pp_filename = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
     
     // get the filename for the tree with shift probability for character history
-    RevBayesCore::path map_shift_pp_filename = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path map_shift_pp_filename = "";
+    const Argument& map_shift_pp_filename_arg = args[arg_index++];
+    if ( map_shift_pp_filename_arg.getVariable()->getRevObject() != RevNullObject::getInstance() )
+    {
+        map_shift_pp_filename = static_cast<const RlString&>( map_shift_pp_filename_arg.getVariable()->getRevObject() ).getValue();
+    }
     
     int burnin;
     RevObject& b = args[arg_index++].getVariable()->getRevObject();
