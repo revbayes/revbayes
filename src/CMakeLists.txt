@@ -101,9 +101,9 @@ if (BOOST_INCLUDEDIR AND BOOST_LIBRARYDIR)
 # We need both `BOOST_INCLUDEDIR` and `BOOST_LIBRARYDIR` to be specified. 
 # These variables should never occur on their own. 
 elseif  (BOOST_INCLUDEDIR AND NOT BOOST_LIBRARYDIR)
-  MESSAGE("Error: BOOST_LIBRARYDIR needs to be set!")
+  MESSAGE("Warning: BOOST_LIBRARYDIR should probably be set.")
 elseif  (NOT BOOST_INCLUDEDIR AND BOOST_LIBRARYDIR)
-  MESSAGE("Error: BOOST_INCLUDEDIR needs to be set!")
+  MESSAGE("Warning: BOOST_INCLUDEDIR should probably be set.")
 endif()
 
 # Enable boost multithreading
