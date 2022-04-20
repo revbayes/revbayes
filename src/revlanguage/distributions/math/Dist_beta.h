@@ -23,7 +23,7 @@ namespace RevLanguage {
      * @since 2012-08-08, version 1.0
      *
      */
-    class Dist_beta :  public TypedDistribution<Probability> {
+    class Dist_beta : public TypedDistribution<Probability> {
         
     public:
         Dist_beta( void );
