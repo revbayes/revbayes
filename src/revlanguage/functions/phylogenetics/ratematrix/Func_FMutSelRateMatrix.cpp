@@ -54,9 +54,9 @@ Func_FMutSelRateMatrix* Func_FMutSelRateMatrix::clone( void ) const
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_FMutSelRateMatrix::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* fitnesses = static_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* omega = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* mu_nuc = static_cast<const RateGenerator &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* mu_nuc = static_cast<const RateGenerator &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* fitnesses = static_cast<const ModelVector<Real> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* omega = static_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
 
     return RevBayesCore::generic_function_ptr2< RevBayesCore::RateGenerator >( FMutSelFunc, fitnesses, omega, mu_nuc );
 }
@@ -70,9 +70,9 @@ const ArgumentRules& Func_FMutSelRateMatrix::getArgumentRules( void ) const
 
     if ( !rules_set )
     {
+        argumentRules.push_back( new ArgumentRule( "submodel" , RateMatrix::getClassTypeSpec(), "Nucleotide mutation rate matrix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "fitnesses", ModelVector<Real>::getClassTypeSpec(), "Scaled selection coefficients 2Ns for 61 codons.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "omega"    , RealPos::getClassTypeSpec(), "The dN / dS rate ratio.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "submodel" , RateMatrix::getClassTypeSpec(), "Nucleotide mutation rate matrix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         rules_set = true;
     }

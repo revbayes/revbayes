@@ -10,8 +10,6 @@ namespace RevBayesCore
 
 bool is_transition_mut(int i, int j)
 {
-    assert(i != j);
-
     if (i > j) std::swap(i,j);
 
     if (i == 0 and j == 2) return true; // A <-> G
@@ -23,7 +21,7 @@ bool is_transition_mut(int i, int j)
 
 bool is_transversion_mut(int i, int j)
 {
-    return not is_transition_mut(i,j);
+    return (i != j) and not is_transition_mut(i,j);
 }
 
 int n_different_nucs(const vector<unsigned int>& states_from, const vector<unsigned int>& states_to)
