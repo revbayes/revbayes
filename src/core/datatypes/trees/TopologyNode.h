@@ -88,6 +88,8 @@ namespace RevBayesCore {
         bool                                        containsClade(const Clade &c, bool strict) const;
         bool                                        containsClade(const RbBitSet &c, bool strict) const;
         bool                                        doesUseAges(void) const;                                                            //!< Does this node use ages or branch lengths?
+        RbBitSet                                    fillCladeBitset(std::map<RbBitSet, TopologyNode*> &clade_index_map, size_t num_tips, bool include_tips);          //!< Fill this map recursively with all clade indices.
+        RbBitSet                                    fillCladeBitset(std::map<RbBitSet, const TopologyNode*> &clade_index_map, size_t num_tips, bool include_tips) const;          //!< Fill this map recursively with all clade indices.
         std::string                                 fillCladeIndices(std::map<std::string,size_t> &clade_index_map) const;              //!< Fill this map recursively with all clade indices.
         void                                        fireTreeChangeEvent(const unsigned& m = RevBayesCore::TreeChangeEventMessage::DEFAULT);
         double                                      getAge(void) const;                                                                 //!< Get the age (time ago from present) for this node

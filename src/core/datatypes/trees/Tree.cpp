@@ -748,21 +748,21 @@ std::vector<RbBitSet>* Tree::getNodesAsBitset(void) const
 }
 
 
-std::map<RbBitSet, TopologyNode*> Tree::getBitsetToNodeMap(void) const
+std::map<RbBitSet, const TopologyNode*> Tree::getBitsetToNodeMap( bool include_tips ) const
+{
+
+    std::map<RbBitSet, const TopologyNode*> bstn;
+    root->fillCladeBitset(bstn, num_tips, include_tips);
+
+    return bstn;
+}
+
+
+std::map<RbBitSet, TopologyNode*> Tree::getBitsetToNodeMap( bool include_tips )
 {
 
     std::map<RbBitSet, TopologyNode*> bstn;
-
-    for ( size_t i=0; i<nodes.size(); ++i )
-    {
-        TopologyNode *n = nodes[i];
-        if ( n->isTip() == false )
-        {
-            RbBitSet taxa_this_node = RbBitSet(num_tips);
-            n->getTaxa(taxa_this_node);
-            bstn[taxa_this_node] = n;
-        }
-    }
+    root->fillCladeBitset(bstn, num_tips, include_tips);
 
     return bstn;
 }
@@ -1693,16 +1693,17 @@ void Tree::renameNodeParameter(const std::string &old_name, const std::string &n
 void Tree::renumberNodes(const Tree &reference)
 {
     // First, internal nodes
-    std::map<RbBitSet, TopologyNode*> ref = reference.getBitsetToNodeMap();
-    std::map<RbBitSet, TopologyNode*> toret = getBitsetToNodeMap();
-    for (std::map<RbBitSet,TopologyNode*>::iterator it=ref.begin(); it!=ref.end(); ++it) {
-      toret[it->first]->setIndex( it->second->getIndex());
+    std::map<RbBitSet, const TopologyNode*> ref = reference.getBitsetToNodeMap( false );
+    std::map<RbBitSet, TopologyNode*> toret = getBitsetToNodeMap( false );
+    for (std::map<RbBitSet,const TopologyNode*>::iterator it=ref.begin(); it!=ref.end(); ++it)
+    {
+        toret[it->first]->setIndex( it->second->getIndex() );
     }
     // Second, the tip nodes
     std::vector<std::string> tipNames = getTipNames();
     for (size_t i = 0; i<tipNames.size(); ++i)
     {
-      getTipNodeWithName(tipNames[i]).setIndex(reference.getTipNodeWithName(tipNames[i]).getIndex());
+        getTipNodeWithName(tipNames[i]).setIndex(reference.getTipNodeWithName(tipNames[i]).getIndex());
     }
     
 }

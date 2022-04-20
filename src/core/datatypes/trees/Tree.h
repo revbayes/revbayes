@@ -76,7 +76,8 @@ namespace RevBayesCore {
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, double &rv) const;     //!< Map the member methods to internal function calls
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, long &rv) const;       //!< Map the member methods to internal function calls
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, Boolean &rv) const;    //!< Map the member methods to internal function calls
-        std::map<RbBitSet, TopologyNode*>                   getBitsetToNodeMap(void) const;                                                                     //!< Get a map between node bitsets and nodes in the Tree
+        std::map<RbBitSet, TopologyNode*>                   getBitsetToNodeMap(bool include_tips);                                                              //!< Get a map between node bitsets and nodes in the Tree
+        std::map<RbBitSet, const TopologyNode*>             getBitsetToNodeMap(bool include_tips) const;                                                        //!< Get a map between node bitsets and nodes in the Tree
         std::vector<Taxon>                                  getFossilTaxa() const;                                                                              //!< Get all the taxa in the tree
         const TopologyNode&                                 getMrca(const TopologyNode &n) const;
         TopologyNode&                                       getMrca(const Clade &c);

@@ -505,7 +505,7 @@ Tree* JointAncestralStateTrace::ancestralStateTree(const Tree &input_summary_tre
     /*  prepare the trees for fast access of clades  */
     /*************************************************/
     std::vector<RbBitSet> reference_taxa_bitset = std::vector<RbBitSet>(summary_nodes.size(), RbBitSet(1));
-    std::map<RbBitSet, TopologyNode*> reference_taxa_bitset_map = final_summary_tree->getBitsetToNodeMap();
+    std::map<RbBitSet, TopologyNode*> reference_taxa_bitset_map = final_summary_tree->getBitsetToNodeMap( true );
     for (std::map<RbBitSet, TopologyNode*>::const_iterator it=reference_taxa_bitset_map.begin(); it != reference_taxa_bitset_map.end(); ++it )
     {
         const RbBitSet& this_bitset = it->first;
@@ -517,13 +517,13 @@ Tree* JointAncestralStateTrace::ancestralStateTree(const Tree &input_summary_tre
     {
         // if necessary, get the sampled tree from the tree trace
         const Tree &sample_tree = usingTreeTrace() ? tree_trace.objectAt( j ) : *final_summary_tree;
-        std::map<RbBitSet, TopologyNode*> this_taxa_bitset_map = sample_tree.getBitsetToNodeMap();
+        std::map<RbBitSet, const TopologyNode*> this_taxa_bitset_map = sample_tree.getBitsetToNodeMap( true );
         
         std::vector<size_t>& this_sampled_tree_clade_indices = sampled_tree_clade_indices[j-burnin];
         for (size_t i=0; i<summary_nodes.size(); ++i)
         {
             const RbBitSet& this_bitset = reference_taxa_bitset[i];
-            TopologyNode* this_sampled_node = this_taxa_bitset_map[ this_bitset  ];
+            const TopologyNode* this_sampled_node = this_taxa_bitset_map[ this_bitset  ];
             this_sampled_tree_clade_indices[i] = this_sampled_node->getIndex();
         }
 
@@ -718,7 +718,7 @@ Tree* JointAncestralStateTrace::cladoAncestralStateTree(const Tree &input_summar
     /*  prepare the trees for fast access of clades  */
     /*************************************************/
     std::vector<RbBitSet> reference_taxa_bitset = std::vector<RbBitSet>(summary_nodes.size(), RbBitSet(1));
-    std::map<RbBitSet, TopologyNode*> reference_taxa_bitset_map = final_summary_tree->getBitsetToNodeMap();
+    std::map<RbBitSet, TopologyNode*> reference_taxa_bitset_map = final_summary_tree->getBitsetToNodeMap( true );
     for (std::map<RbBitSet, TopologyNode*>::const_iterator it=reference_taxa_bitset_map.begin(); it != reference_taxa_bitset_map.end(); ++it )
     {
         const RbBitSet& this_bitset = it->first;
@@ -730,13 +730,17 @@ Tree* JointAncestralStateTrace::cladoAncestralStateTree(const Tree &input_summar
     {
         // if necessary, get the sampled tree from the tree trace
         const Tree &sample_tree = usingTreeTrace() ? tree_trace.objectAt( j ) : *final_summary_tree;
-        std::map<RbBitSet, TopologyNode*> this_taxa_bitset_map = sample_tree.getBitsetToNodeMap();
+        std::map<RbBitSet, const TopologyNode*> this_taxa_bitset_map = sample_tree.getBitsetToNodeMap( true );
         
         std::vector<size_t>& this_sampled_tree_clade_indices = sampled_tree_clade_indices[j-burnin];
         for (size_t i=0; i<summary_nodes.size(); ++i)
         {
             const RbBitSet& this_bitset = reference_taxa_bitset[i];
-            TopologyNode* this_sampled_node = this_taxa_bitset_map[ this_bitset  ];
+            const TopologyNode* this_sampled_node = this_taxa_bitset_map[ this_bitset  ];
+            if ( this_sampled_node == NULL )
+            {
+                size_t index = sample_tree.getRoot().getCladeIndex( summary_nodes[i] );
+            }
             this_sampled_tree_clade_indices[i] = this_sampled_node->getIndex();
         }
 

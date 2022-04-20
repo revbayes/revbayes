@@ -721,6 +721,73 @@ bool TopologyNode::equals(const TopologyNode& node) const
     return true;
 }
 
+RbBitSet TopologyNode::fillCladeBitset(std::map<RbBitSet, TopologyNode*> &clade_index_map, size_t num_tips, bool include_tips)
+{
+    RbBitSet this_bs = RbBitSet(num_tips);
+    if ( isTip() == true )
+    {
+        // We can't use indices for tree comparison because different trees may
+        // have different indices for the same taxon.
+        // Instead make the BitSet ordered by taxon names.
+        // Eventually this should be refactored with the TaxonMap class.
+        std::map<std::string, size_t> taxon_bitset_map = tree->getTaxonBitSetMap();
+        const std::string& this_name = taxon.getName();
+        size_t this_node_index = taxon_bitset_map[ this_name ];
+        this_bs.set( this_node_index );
+        
+        if ( include_tips == true )
+        {
+            clade_index_map[ this_bs ] = this;
+        }
+    }
+    else
+    {
+        for ( std::vector<TopologyNode* >::const_iterator i=children.begin(); i!=children.end(); i++ )
+        {
+            RbBitSet child_bs = (*i)->fillCladeBitset(clade_index_map, num_tips, include_tips);
+            this_bs |= child_bs;
+        }
+        clade_index_map[ this_bs ] = this;
+
+    }
+
+    return this_bs;
+}
+
+RbBitSet TopologyNode::fillCladeBitset(std::map<RbBitSet, const TopologyNode*> &clade_index_map, size_t num_tips, bool include_tips) const
+{
+    RbBitSet this_bs = RbBitSet(num_tips);
+    if ( isTip() == true )
+    {
+        // We can't use indices for tree comparison because different trees may
+        // have different indices for the same taxon.
+        // Instead make the BitSet ordered by taxon names.
+        // Eventually this should be refactored with the TaxonMap class.
+        std::map<std::string, size_t> taxon_bitset_map = tree->getTaxonBitSetMap();
+        const std::string& this_name = taxon.getName();
+        size_t this_node_index = taxon_bitset_map[ this_name ];
+        this_bs.set( this_node_index );
+        
+        if ( include_tips == true )
+        {
+            clade_index_map[ this_bs ] = this;
+        }
+    }
+    else
+    {
+        for ( std::vector<TopologyNode* >::const_iterator i=children.begin(); i!=children.end(); i++ )
+        {
+            RbBitSet child_bs = (*i)->fillCladeBitset(clade_index_map, num_tips, include_tips);
+            this_bs |= child_bs;
+        }
+        clade_index_map[ this_bs ] = this;
+
+    }
+
+    return this_bs;
+}
+
+
 
 /*
  * Fill this map recursively with all clade indices.
