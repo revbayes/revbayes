@@ -33,7 +33,7 @@ namespace RevBayesCore { class ContinuousDistribution; }
 
 using namespace RevLanguage;
 
-Dist_beta::Dist_beta() : TypedDistribution<Probability>()
+Dist_beta::Dist_beta() : ProbabilityContinuousDistribution()
 {
     
     setGuiDistributionName("Beta");
@@ -92,7 +92,7 @@ const std::string& Dist_beta::getClassType(void)
 const TypeSpec& Dist_beta::getClassTypeSpec(void)
 {
     
-    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution<Probability>::getClassTypeSpec() ) );
+    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( ProbabilityContinuousDistribution::getClassTypeSpec() ) );
     
 	return rev_type_spec; 
 }
@@ -181,6 +181,6 @@ void Dist_beta::setConstParameter(const std::string& name, const RevPtr<const Re
     }
     else
     {
-        TypedDistribution<Probability>::setConstParameter(name, var);
+        ProbabilityContinuousDistribution::setConstParameter(name, var);
     }
 }

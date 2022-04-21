@@ -1,5 +1,5 @@
-#ifndef RlPositiveContinuousDistribution_H
-#define RlPositiveContinuousDistribution_H
+#ifndef RlProbabilityContinuousDistribution_H
+#define RlProbabilityContinuousDistribution_H
 
 #include <math.h>
 #include <iosfwd>
@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "ContinuousDistribution.h"
-#include "RealPos.h"
+#include "Probability.h"
 #include "RlTypedDistribution.h"
 #include "DagMemberFunction.h"
 #include "DeterministicNode.h"
@@ -25,16 +25,16 @@
 namespace RevLanguage {
 class TypeSpec;
     
-    class PositiveContinuousDistribution : public TypedDistribution<RealPos> {
+    class ProbabilityContinuousDistribution : public TypedDistribution<Probability> {
         
     public:
-        virtual                                         ~PositiveContinuousDistribution(void);                                                                  //!< Destructor
-        PositiveContinuousDistribution(const PositiveContinuousDistribution &x);                                                                //!< Copy constuctor
+        virtual                                         ~ProbabilityContinuousDistribution(void);                                                                  //!< Destructor
+        ProbabilityContinuousDistribution(const ProbabilityContinuousDistribution &x);                                                                //!< Copy constuctor
         
-        virtual RealPos*                                createRandomVariable(void) const;                                                   //!< Create a random variable from this distribution        
+        virtual Probability*                            createRandomVariable(void) const;                                                   //!< Create a random variable from this distribution
         
         // Basic utility functions you have to override
-        virtual PositiveContinuousDistribution*         clone(void) const = 0;                                                              //!< Clone object
+        virtual ProbabilityContinuousDistribution*      clone(void) const = 0;                                                              //!< Clone object
         static const std::string&                       getClassType(void);                                                                 //!< Get Rev type
         static const TypeSpec&                          getClassTypeSpec(void);                                                             //!< Get class type spec
         
@@ -44,7 +44,7 @@ class TypeSpec;
         
         
     protected:
-        PositiveContinuousDistribution(void);                                                                                                 //!< Basic constructor
+        ProbabilityContinuousDistribution(void);                                                                                                 //!< Basic constructor
         
     };
     
