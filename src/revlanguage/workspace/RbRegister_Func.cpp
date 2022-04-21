@@ -287,6 +287,7 @@
 #include "Func_discretizeLognormalQuadrature.h"
 #include "Func_discretizeDistribution.h"
 #include "Func_discretizePositiveDistribution.h"
+#include "Func_discretizeProbabilityDistribution.h"
 #include "Func_dppConcFromMean.h"
 #include "Func_dppMeanFromConc.h"
 #include "Func_fnNormalizedQuantile.h"
@@ -600,8 +601,9 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_fnNormalizedQuantile<Real>()    );
         addFunction( new Func_fnNormalizedQuantile<RealPos>()    );
 
-        addFunction( new Func_discretizeDistribution( )         );
-        addFunction( new Func_discretizePositiveDistribution( ) );
+        addFunction( new Func_discretizeDistribution( )            );
+        addFunction( new Func_discretizePositiveDistribution( )    );
+        addFunction( new Func_discretizeProbabilityDistribution( ) );
 
         // return a discretized gamma distribution (for gamma-dist rates)
         addFunction( new Func_discretizeBeta( )    );
