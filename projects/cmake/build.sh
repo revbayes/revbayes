@@ -157,13 +157,13 @@ if [ ! -d ${BUILD_DIR} ]; then
     mkdir ${BUILD_DIR}
 fi
 
-#################
-# generate git version number
+######## generate git version number
 ./generate_version_number.sh
 if [ -e ../../src/revlanguage/utils/GitVersion.cpp ] ; then
     cp ../../src/revlanguage/utils/GitVersion.cpp GitVersion_backup.cpp
 fi
 mv GitVersion.cpp ../../src/revlanguage/utils/
+
 
 ######### Generate help database
 if [ "$help" = "true" ]
@@ -175,13 +175,13 @@ then
     )
 fi
 
-
 ######## Generate some files for cmake
 echo "Running './regenerate.sh $(pwd)/$BUILD_DIR"
 ./regenerate.sh $(pwd)/$BUILD_DIR
 cd ${BUILD_DIR}
 echo
 echo
+
 
 ######### Print some environment variables
 # * This can alert the user if some weird values have been set.
@@ -192,10 +192,14 @@ for var in CC CXX CPPFLAGS CXXFLAGS LDFLAGS BOOST_ROOT BOOST_INCLUDEDIR BOOST_LI
     eval $cmd
 done
 
+
 ######### Actually run cmake
 echo "Running 'cmake ../../../src $cmake_args' in $(pwd)"
 cmake ../../../src $cmake_args
 echo
+
+
+######### Do the build
 if [ "$ninja" = "true" ] ; then
     echo "Running 'ninja -j $j' in $(pwd)"
     ninja -j $j
@@ -205,6 +209,8 @@ else
 fi
 cd ..
 
+
+####### Restore GitVersion.cpp from backup
 if [ -e  GitVersion_backup.cpp ] ; then
     cp GitVersion_backup.cpp ../../src/revlanguage/utils/GitVersion.cpp
     rm GitVersion_backup.cpp
