@@ -155,50 +155,51 @@ echo "CC=${CC}  CXX=${CXX}"
 
 if [ "$1" = "clean" ]
 then
-	rm -rf ${BUILD_DIR}
+    rm -rf ${BUILD_DIR}
+    exit 1
+fi
+
+if [ ! -d ${BUILD_DIR} ]; then
+    mkdir ${BUILD_DIR}
+fi
+
+#################
+# generate git version number
+./generate_version_number.sh
+if [ -e ../../src/revlanguage/utils/GitVersion.cpp ] ; then
+    cp ../../src/revlanguage/utils/GitVersion.cpp GitVersion_backup.cpp
+fi
+mv GitVersion.cpp ../../src/revlanguage/utils/
+
+######### Generate help database
+if [ "$help" = "true" ]
+then
+    (
+        cd ../../src
+        echo "Generating help database"
+        perl ../help/md2help.pl ../help/md/*.md > core/help/RbHelpDatabase.cpp
+    )
+fi
+
+echo "Running './regenerate.sh $(pwd)/$BUILD_DIR"
+./regenerate.sh $(pwd)/$BUILD_DIR
+cd ${BUILD_DIR}
+echo
+echo
+echo "Running 'cmake ../../../src $cmake_args' in $(pwd)"
+cmake ../../../src $cmake_args
+echo
+if [ "$ninja" = "true" ] ; then
+    echo "Running 'ninja -j $j' in $(pwd)"
+    ninja -j $j
 else
-    if [ ! -d ${BUILD_DIR} ]; then
-	mkdir ${BUILD_DIR}
-    fi
+    echo "Running 'make -j $j' in $(pwd)"
+    make -j $j
+fi
+cd ..
 
-    #################
-    # generate git version number
-    ./generate_version_number.sh
-    if [ -e ../../src/revlanguage/utils/GitVersion.cpp ] ; then
-        cp ../../src/revlanguage/utils/GitVersion.cpp GitVersion_backup.cpp
-    fi
-    mv GitVersion.cpp ../../src/revlanguage/utils/
-
-    ######### Generate help database
-    if [ "$help" = "true" ]
-    then
-        (
-            cd ../../src
-            echo "Generating help database"
-            perl ../help/md2help.pl ../help/md/*.md > core/help/RbHelpDatabase.cpp
-        )
-    fi
-
-    echo "Running './regenerate.sh $(pwd)/$BUILD_DIR"
-    ./regenerate.sh $(pwd)/$BUILD_DIR
-    cd ${BUILD_DIR}
-    echo
-    echo
-    echo "Running 'cmake ../../../src $cmake_args' in $(pwd)"
-    cmake ../../../src $cmake_args
-    echo
-    if [ "$ninja" = "true" ] ; then
-        echo "Running 'ninja -j $j' in $(pwd)"
-        ninja -j $j
-    else
-        echo "Running 'make -j $j' in $(pwd)"
-        make -j $j
-    fi
-    cd ..
-
-    if [ -e  GitVersion_backup.cpp ] ; then
-        cp GitVersion_backup.cpp ../../src/revlanguage/utils/GitVersion.cpp
-        rm GitVersion_backup.cpp
-    fi
+if [ -e  GitVersion_backup.cpp ] ; then
+    cp GitVersion_backup.cpp ../../src/revlanguage/utils/GitVersion.cpp
+    rm GitVersion_backup.cpp
 fi
 
