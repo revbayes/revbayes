@@ -2,7 +2,7 @@
 
 [Meson](https://mesonbuild.com/) ([git](https://github.com/mesonbuild/meson)) is a new build system that aims to replace autotools and fills the same role as CMake.
 
-Meson makes it easy to cross-compile to Windows, Macintosh, and ARM systems from Linux (see [Cross-Compile.md](Cross-Compile.md)).
+Meson makes it easy to cross-compile to Windows, Macintosh, and ARM systems from Linux (see [Cross-Compiling](#Cross-compiling))
 
 ## Install tools
 
@@ -165,7 +165,7 @@ meson build-gtk -Dstudio=true -Dprefix=$HOME/Applications/revbayes-gui
 ninja -C build-gtk install
 ```
 
-## Cross-compiling (Linux -> Windows)
+## Cross-compiling
 
 1. Create a fake windows root directory and download windows libraries from MINGW64.
 
