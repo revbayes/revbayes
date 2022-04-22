@@ -80,8 +80,8 @@ fi
 
 if [ "$travis" = "true" ]; then
     BUILD_DIR="build"
-    CC=${C_COMPILER}
-    CXX=${CXX_COMPILER}
+    export CC=${C_COMPILER}
+    export CXX=${CXX_COMPILER}
     all_args="-travis true -mpi ${USE_MPI} -help true -exec_name rb"
     exec_name=rb
     help=true
@@ -147,12 +147,6 @@ fi
 echo "Building ${exec_name}"
 cmake_args="-DRB_EXEC_NAME=${exec_name} $cmake_args"
 
-# Just print the values of CC and CXX in case the user has some weird
-# values set.
-export CC
-export CXX
-echo "CC=${CC}  CXX=${CXX}"
-
 if [ "$1" = "clean" ]
 then
     rm -rf ${BUILD_DIR}
@@ -181,11 +175,24 @@ then
     )
 fi
 
+
+######## Generate some files for cmake
 echo "Running './regenerate.sh $(pwd)/$BUILD_DIR"
 ./regenerate.sh $(pwd)/$BUILD_DIR
 cd ${BUILD_DIR}
 echo
 echo
+
+######### Print some environment variables
+# * This can alert the user if some weird values have been set.
+# * This also helps us replicate the call to cmake.
+echo "Note these environment variables:"
+for var in CC CXX CPPFLAGS CXXFLAGS LDFLAGS BOOST_ROOT BOOST_INCLUDEDIR BOOST_LIBRARYDIR ; do
+    cmd="if [ -n \"\${$var}\" ] ; then echo \"  ${var}=\${$var}\"; fi"
+    eval $cmd
+done
+
+######### Actually run cmake
 echo "Running 'cmake ../../../src $cmake_args' in $(pwd)"
 cmake ../../../src $cmake_args
 echo
