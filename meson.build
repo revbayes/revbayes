@@ -55,17 +55,19 @@ boost_modules = [ 'regex',
                   'date_time',
                   'serialization']
 
-want_static = get_option('static')
-
 # This doesn't build an internal boost from the internal copy, yet.
-boost = dependency('boost', modules : boost_modules, version: '>=1.71', static: want_static)
+if get_option('static_boost')
+  boost = dependency('boost', modules : boost_modules, version: '>=1.71', static: true)
+else
+  boost = dependency('boost', modules : boost_modules, version: '>=1.71')
+endif
 
-openlibm = dependency('openlibm', static: want_static, required: get_option('openlibm'))
+openlibm = dependency('openlibm', required: get_option('openlibm'))
 
 rb_name = 'rb'
 if get_option('mpi')
   add_project_arguments(['-DRB_MPI'], language: 'cpp')
-  mpi = dependency('mpi', language: 'cpp', static: want_static)
+  mpi = dependency('mpi', language: 'cpp')
 else
   mpi = dependency('', required: false)
 endif
@@ -105,21 +107,15 @@ help2yml = static_library('rb-help2yml',
 
 ############# executables #################
 
-maybe_link_static = []
-if want_static
-  maybe_link_static = ['-static']
-endif
-
 rb = executable(rb_name,
                 ['src/revlanguage/main.cpp'],
                 link_with: [core, revlanguage, libs],
                 include_directories: [src_inc],
                 dependencies: [boost, mpi, openlibm],
-                link_args: maybe_link_static,
                 install: true)
 
 if get_option('studio')
-  gtk2 = dependency('gtk+-2.0', static: want_static)
+  gtk2 = dependency('gtk+-2.0')
   cmd = static_library('rb-cmd',
                        cmd_sources,
                        include_directories: [src_inc],
