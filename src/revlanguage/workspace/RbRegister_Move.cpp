@@ -191,6 +191,8 @@
 #include "Move_MultiValueEventSlide.h"
 
 /* Moves on continuous phyloprocesses (Brownian, multivariate Brownian, etc) */
+#include "Move_BranchRateNodeValueScale.h"
+#include "Move_BranchRateNodeValueSlide.h"
 
 /* Tree proposals (in folder "datatypes/inference/moves/tree") */
 #include "Move_AddRemoveTip.h"
@@ -435,6 +437,9 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         // addType( new Move_NodeCharacterHistoryRejectionSample() );
         // addType( new Move_PathCharacterHistoryRejectionSample() );
         
+        addType( new Move_BranchRateNodeValueScale( ) );
+        addType( new Move_BranchRateNodeValueSlide( ) );
+
         
         addType( new Move_IndependentPriorSampler<Real>( ) );
         addType( new Move_IndependentPriorSampler<RealPos>( ) );
