@@ -113,10 +113,31 @@ size_t RateAgeBetaShift::getNumberAcceptedTotal( void ) const
  */
 void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHeat )
 {
+
     // These are the nodes we are (directly) modifying.
     const std::vector<DagNode*> nodes = getDagNodes();
     // These are the nodes that are (indirectly) affected.
     const RbOrderedSet<DagNode*> &affected_nodes = getAffectedNodes();
+    
+    Tree& tau = tree->getValue();
+    size_t num_nodes = tau.getNumberOfNodes();
+    
+    // for safety, remove the rates from the affected nodes
+    // for example, if we assume a BM or OU model of autocorrelated rates
+    // then the rates depend on the tree
+    if ( rates == NULL )
+    {
+        size_t num_rates = rates_vec.size();
+        for ( size_t i=0; i<num_rates; ++i )
+        {
+            DagNode* the_rates_node = rates_vec[i];
+            affected.erase( the_rates_node );
+        }
+    }
+    else
+    {
+        affected.erase( rates );
+    }
 
     // 0. Initial checks and debug logging.
     int logMCMC = RbSettings::userSettings().getLogMCMC();
