@@ -45,6 +45,7 @@ PhyloBranchRatesBM* PhyloBranchRatesBM::clone(void) const
 double PhyloBranchRatesBM::computeLnProbability(void)
 {
     size_t n_nodes = tau->getValue().getNumberOfNodes();
+
     std::vector<double> node_values = std::vector<double>(n_nodes, 0.0);
     if ( this->value->size() != (n_nodes-1) )
     {
@@ -52,6 +53,8 @@ double PhyloBranchRatesBM::computeLnProbability(void)
     }
     node_values[n_nodes-1] = log(root_state->getValue());
     double ln_prob = recursiveLnProb(tau->getValue().getRoot(), node_values);
+    
+    ln_prob += (n_nodes-1) * RbConstants::LN2;
     
     return ln_prob;
 }
