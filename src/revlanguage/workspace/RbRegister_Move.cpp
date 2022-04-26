@@ -25,7 +25,7 @@
 
 #include <sstream>
 #include <vector>
-#include <cstdio>
+#include <stdio.h>
 #include <cstdlib>
 
 /* Files including helper classes */
@@ -46,6 +46,7 @@
 #include "Real.h"
 #include "RealPos.h"
 #include "RevPtr.h"
+#include "ReversibleJumpMixtureProposal.h"
 #include "RlTree.h"
 #include "SimpleProposal.h"
 #include "Simplex.h"
@@ -97,7 +98,6 @@
 /* Moves on integer values */
 #include "Move_RandomGeometricWalk.h"
 #include "Move_RandomIntegerWalk.h"
-#include "Move_RandomNaturalWalk.h"
 #include "Move_BinarySwitch.h"
 
 
@@ -117,12 +117,10 @@
 #include "Move_SingleElementScale.h"
 #include "Move_SingleElementSlide.h"
 #include "Move_EllipticalSliceSamplingSimple.h"
-#include "Move_RandomCategoryWalk.h"
 #include "Move_SynchronizedVectorFixedSingleElementSlide.h"
 #include "Move_VectorBinarySwitch.h"
 #include "Move_VectorSingleElementScale.h"
 #include "Move_VectorSingleElementSlide.h"
-#include "Move_VectorElementSwap.h"
 #include "Move_VectorFixedSingleElementSlide.h"
 #include "Move_VectorScale.h"
 #include "Move_VectorSlide.h"
@@ -159,7 +157,6 @@
 
 
 /* Moves on mixtures (in folder "datatypes/inference/moves/mixture") */
-#include "Move_AdaptiveReversibleJumpSwitch.h"
 #include "Move_DPPAllocateAuxGibbsMove.h"
 #include "Move_DPPGibbsConcentration.h"
 #include "Move_DPPTableValueUpdate.h"
@@ -179,7 +176,6 @@
 // #include "Move_PathCharacterHistoryRejectionSample.h"
 #include "Move_CharacterHistory.h"
 
-#include "Move_ResampleFBD.h"
 
 #include "Move_BirthDeathEventContinuous.h"
 #include "Move_BirthDeathEventDiscrete.h"
@@ -194,25 +190,19 @@
 #include "Move_MultiValueEventScale.h"
 #include "Move_MultiValueEventSlide.h"
 
-#include "Move_OrderedEventTimeSlide.h"
-#include "Move_OrderedEventBirthDeath.h"
-#include "Move_OrderedEventSlide.h"
-#include "Move_OrderedEventScale.h"
-#include "Move_OrderedEventVectorSlide.h"
-#include "Move_OrderedEventVectorScale.h"
-
-
 /* Moves on continuous phyloprocesses (Brownian, multivariate Brownian, etc) */
+#include "Move_BranchRateNodeValueScale.h"
+#include "Move_BranchRateNodeValueSlide.h"
 
 /* Tree proposals (in folder "datatypes/inference/moves/tree") */
+#include "Move_AddRemoveTip.h"
 #include "Move_BurstEvent.h"
 #include "Move_BranchLengthScale.h"
 #include "Move_CollapseExpandFossilBranch.h"
 #include "Move_IndependentTopology.h"
 #include "Move_EmpiricalTree.h"
 #include "Move_FNPR.h"
-#include "Move_FossilTipTimeUniform.h"
-#include "Move_FossilTipTimeSlideUniform.h"
+#include "Move_TipTimeSlideUniform.h"
 #include "Move_GibbsPruneAndRegraft.h"
 #include "Move_LayeredScaleProposal.h"
 #include "Move_NarrowExchange.h"
@@ -228,7 +218,6 @@
 #include "Move_RateAgeProposal.h"
 #include "Move_RateAgeSubtreeProposal.h"
 #include "Move_RootTimeScaleBactrian.h"
-#include "Move_RootTimeSlide.h"
 #include "Move_RootTimeSlideUniform.h"
 #include "Move_SpeciesNarrowExchange.h"
 #include "Move_SpeciesNodeTimeSlideUniform.h"
@@ -243,6 +232,7 @@
 
 
 #include "Move_NarrowExchangeRateMatrix.h"
+
 
 #include "Move_IndependentPriorSampler.h"
 
@@ -281,13 +271,12 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_UpDownSlide() );
         addType( new Move_UpDownSlideBactrian() );
 
-        // compound moves on real values
+		// compound moves on real values
         addType( new Move_LevyJumpSum() );
         addType( new Move_LevyJump() );
 
         /* Moves on integer values */
         addType( new Move_RandomIntegerWalk() );
-        addType( new Move_RandomNaturalWalk() );
         addType( new Move_RandomGeometricWalk() );
         addType( new Move_BinarySwitch() );
 
@@ -301,7 +290,6 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_HSRFHyperpriorsGibbs() );
         addType( new Move_HSRFIntervalSwap() );
         addType( new Move_HSRFUnevenGridHyperpriorsGibbs() );
-        addType( new Move_RandomCategoryWalk() );
         addType( new Move_SingleElementSlide() );
         addType( new Move_SingleElementScale() );
         addType( new Move_ShrinkExpand() );
@@ -314,16 +302,6 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_ElementSlide() );
         addType( new Move_VectorSingleElementScale() );
         addType( new Move_VectorSingleElementSlide() );
-        addType( new Move_VectorElementSwap<Real>( ) );
-        addType( new Move_VectorElementSwap<RealPos>( ) );
-        addType( new Move_VectorElementSwap<Natural>( ) );
-        addType( new Move_VectorElementSwap<Integer>( ) );
-        addType( new Move_VectorElementSwap<Probability>( ) );
-        addType( new Move_VectorElementSwap<Simplex>( ) );
-        addType( new Move_VectorElementSwap<ModelVector<RealPos> >( ) );
-        addType( new Move_VectorElementSwap<ModelVector<Real> >( ) );
-        addType( new Move_VectorElementSwap<RateGenerator>( ) );
-        addType( new Move_VectorElementSwap<Tree>( ) );
         addType( new Move_VectorFixedSingleElementSlide() );
         addType( new Move_EllipticalSliceSamplingSimple() );
 
@@ -362,9 +340,9 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_HomeologPhase() );
 
         /* Moves on mixtures (in folder "datatypes/inference/moves/mixture") */
-        addType( new Move_DPPTableValueUpdate<Real>(    new RevBayesCore::SlideProposal( NULL, 1.0 ) ) );        // mvDPPValueSliding
-        addType( new Move_DPPTableValueUpdate<RealPos>( new RevBayesCore::ScaleProposal( NULL, 1.0 ) ) );        // mvDPPValueScaling
-        addType( new Move_DPPTableValueUpdate<Simplex>( new RevBayesCore::BetaSimplexProposal( NULL, 10.0 ) ) ); // mvDPPValueBetaSimplex
+        addType( new Move_DPPTableValueUpdate<Real>(    new RevBayesCore::SlideProposal( NULL, 1.0 ) ) );
+        addType( new Move_DPPTableValueUpdate<RealPos>( new RevBayesCore::ScaleProposal( NULL, 1.0 ) ) );
+        addType( new Move_DPPTableValueUpdate<Simplex>( new RevBayesCore::BetaSimplexProposal( NULL, 10.0 ) ) );
 
 //        addType("mvDPPScaleCatVals",                new Move_DPPScaleCatValsMove() );
 //        addType("mvDPPScaleCatAllocateAux",         new Move_DPPScaleCatAllocateAux() );
@@ -394,8 +372,6 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_GibbsMixtureAllocation<RateGenerator>( ) );
         addType( new Move_UPPAllocation<RealPos>() );
 
-        addType( new Move_AdaptiveReversibleJumpSwitch( )                );
-        
         addType( new Move_ReversibleJumpSwitch<Real>( )                  );
         addType( new Move_ReversibleJumpSwitch<RealPos>( )               );
         addType( new Move_ReversibleJumpSwitch<Natural>( )               );
@@ -410,17 +386,6 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_MultiValueEventSlide()                         );
 
 
-        addType( new Move_OrderedEventTimeSlide()                        );
-        addType( new Move_OrderedEventBirthDeath()                       );
-        addType( new Move_OrderedEventSlide<Real>()                      );
-        addType( new Move_OrderedEventSlide<RealPos>()                   );
-        addType( new Move_OrderedEventSlide<Probability>()               );
-        addType( new Move_OrderedEventScale<RealPos>()                   );
-        addType( new Move_OrderedEventVectorSlide<ModelVector<Real>>()        );
-        addType( new Move_OrderedEventVectorSlide<ModelVector<RealPos>>()     );
-        addType( new Move_OrderedEventVectorSlide<ModelVector<Probability>>() );
-        addType( new Move_OrderedEventVectorScale<ModelVector<RealPos>>()     );
-
 
         addType( new Move_BirthDeathEventContinuous()                    );
         addType( new Move_BirthDeathEventDiscrete()                      );
@@ -432,14 +397,13 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_GibbsDrawCharacterHistory()                    );
 
         /* Tree proposals (in folder "datatypes/inference/moves/tree") */
+        addType( new Move_AddRemoveTip()                     );
         addType( new Move_BurstEvent()                       );
         addType( new Move_BranchLengthScale()                );
         addType( new Move_CollapseExpandFossilBranch()       );
         addType( new Move_IndependentTopology()              );
-        addType( new Move_EmpiricalTree()                    );
+		addType( new Move_EmpiricalTree()                    );
         addType( new Move_FNPR()                             );
-        addType( new Move_FossilTipTimeUniform()             );
-        addType( new Move_FossilTipTimeSlideUniform()        );
         addType( new Move_GibbsPruneAndRegraft()             );
         addType( new Move_LayeredScaleProposal()             );
         addType( new Move_NarrowExchange()                   );
@@ -454,7 +418,6 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_RateAgeBetaShift()                 );
         addType( new Move_RateAgeProposal()                  );
         addType( new Move_RateAgeSubtreeProposal()           );
-        addType( new Move_RootTimeSlide()                    );
         addType( new Move_RootTimeScaleBactrian()            );
         addType( new Move_RootTimeSlideUniform()             );
         addType( new Move_SubtreeScale()                     );
@@ -464,6 +427,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_SpeciesNodeTimeSlideUniform()      );
         addType( new Move_SpeciesSubtreeScale()              );
         addType( new Move_SpeciesSubtreeScaleBeta()          );
+        addType( new Move_TipTimeSlideUniform()              );
         addType( new Move_SpeciesTreeScale()                 );
         addType( new Move_TreeScale()                        );
         addType( new Move_NarrowExchangeRateMatrix()         );
@@ -472,6 +436,9 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_CharacterHistory() );
         // addType( new Move_NodeCharacterHistoryRejectionSample() );
         // addType( new Move_PathCharacterHistoryRejectionSample() );
+        
+        addType( new Move_BranchRateNodeValueScale( ) );
+        addType( new Move_BranchRateNodeValueSlide( ) );
 
         
         addType( new Move_IndependentPriorSampler<Real>( ) );
@@ -482,11 +449,9 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_IndependentPriorSampler<Simplex>( ) );
         addType( new Move_IndependentPriorSampler<ModelVector<RealPos> >( ) );
         addType( new Move_IndependentPriorSampler<ModelVector<Real> >( ) );
-        addType( new Move_IndependentPriorSampler<ModelVector<Natural> >( ) );
 //        addType( new Move_IndependentPriorSampler<RateGenerator>( ) );
         addType( new Move_IndependentPriorSampler<Tree>( ) );
 
-        addType( new Move_ResampleFBD()                      );
     }
     catch(RbException& rbException)
     {
