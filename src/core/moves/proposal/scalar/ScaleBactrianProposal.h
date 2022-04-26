@@ -29,7 +29,7 @@ namespace RevBayesCore {
         
         // Basic utility functions
         void                                cleanProposal(void);                                                                //!< Clean up proposal
-        ScaleBactrianProposal*                      clone(void) const;                                                                  //!< Clone object
+        ScaleBactrianProposal*              clone(void) const;                                                                  //!< Clone object
         const std::string&                  getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                              getProposalTuningParameter(void) const;
         void                                prepareProposal(void);                                                              //!< Prepare the proposal
