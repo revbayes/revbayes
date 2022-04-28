@@ -51,7 +51,7 @@ double PhyloBranchRatesBM::computeLnProbability(void)
     {
         throw RbException("The dimension of the rates vector and the tree don't match.");
     }
-    node_values[n_nodes-1] = log(root_state->getValue());
+    node_values[n_nodes-1] = root_state->getValue();
     double ln_prob = recursiveLnProb(tau->getValue().getRoot(), node_values);
     
     ln_prob += (n_nodes-1) * RbConstants::LN2;
@@ -72,16 +72,18 @@ double PhyloBranchRatesBM::recursiveLnProb( const TopologyNode& node, std::vecto
         // x ~ normal(x_up, sigma^2 * branchLength)
         size_t parent_index = node.getParent().getIndex();
         double parent_value = parent_values[parent_index];
+        double ln_parent_value = log( parent_value );
         double branch_rate = (*this->value)[ index ];
-        double ln_node_value = 2*branch_rate - exp(parent_value);
-        if ( ln_node_value < 0.0 )
+        // rate = (x+x_parent) / 2
+        double node_value = 2*branch_rate - parent_value;
+        if ( node_value < 0.0 )
         {
             return RbConstants::Double::neginf;
         }
-        double node_value = log(ln_node_value);
+        double ln_node_value = log(node_value);
         double stand_dev = sigma->getValue() * sqrt(node.getBranchLength());
-        double mean = parent_value + drift->getValue() * node.getBranchLength();
-        ln_prob += RbStatistics::Normal::lnPdf(node_value, stand_dev, mean) - std::log(ln_node_value);
+        double ln_mean = ln_parent_value; // + drift->getValue() * node.getBranchLength();
+        ln_prob += RbStatistics::Normal::lnPdf(ln_node_value, stand_dev, ln_mean) - ln_node_value;
         
         parent_values[index] = node_value;
     }
@@ -125,12 +127,13 @@ void PhyloBranchRatesBM::recursiveSimulate(const TopologyNode& node, std::vector
         // x ~ normal(x_up, sigma^2 * branchLength)
         
         size_t parent_index = node.getParent().getIndex();
+        double ln_parent_value = log( parent_values[parent_index] );
         double stand_dev = sigma->getValue() * sqrt(node.getBranchLength());
-        double mean = log(parent_values[parent_index]) + drift->getValue() * node.getBranchLength();
+        double ln_mean = ln_parent_value; // + drift->getValue() * node.getBranchLength();
         
         // simulate the new Val
         RandomNumberGenerator* rng = GLOBAL_RNG;
-        parent_values[index] = exp(RbStatistics::Normal::rv( mean, stand_dev, *rng));
+        parent_values[index] = exp(RbStatistics::Normal::rv( ln_mean, stand_dev, *rng));
         (*this->value)[index] = (parent_values[parent_index] + parent_values[index]) / 2.0;
         
     }
