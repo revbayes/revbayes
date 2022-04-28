@@ -52,7 +52,7 @@ double PhyloBranchRatesOU::computeLnProbability(void)
     {
         throw RbException("The dimension of the rates vector and the tree don't match.");
     }
-    node_values[n_nodes-1] = log(root_state->getValue());
+    node_values[n_nodes-1] = root_state->getValue();
     double ln_prob = recursiveLnProb(tau->getValue().getRoot(), node_values);
     
     ln_prob += (n_nodes-1) * RbConstants::LN2;
@@ -71,22 +71,23 @@ double PhyloBranchRatesOU::recursiveLnProb( const TopologyNode& node, std::vecto
     {
         
         // x ~ normal(x_up, sigma^2 * branchLength)
-        size_t parent_index = node.getParent().getIndex();
-        double parent_value = parent_values[parent_index];
+        size_t parent_index    = node.getParent().getIndex();
+        double parent_value    = parent_values[parent_index];
+        double ln_parent_value = log( parent_value );
         double branch_rate = (*this->value)[ index ];
-        double ln_node_value = 2*branch_rate - exp(parent_value);
-        if ( ln_node_value < 0.0 )
+        double node_value = 2*branch_rate - parent_value;
+        if ( node_value < 0.0 )
         {
             return RbConstants::Double::neginf;
         }
-        double node_value = log(ln_node_value);        
+        double ln_node_value = log(node_value);
         double t = node.getBranchLength();
         double e = exp(-alpha->getValue() * t);
         double e2 = exp(-2 * alpha->getValue() * t);
-        double mean = e * parent_value + (1 - e) * theta->getValue();
+        double ln_mean = e * ln_parent_value + (1 - e) * theta->getValue();
         double stand_dev = sigma->getValue() * sqrt((1 - e2) / 2 / alpha->getValue());
         
-        ln_prob += RbStatistics::Normal::lnPdf(node_value, stand_dev, mean) - std::log(ln_node_value);
+        ln_prob += RbStatistics::Normal::lnPdf(ln_node_value, stand_dev, ln_mean) - ln_node_value;
         
         parent_values[index] = node_value;
     }
@@ -131,16 +132,16 @@ void PhyloBranchRatesOU::recursiveSimulate(const TopologyNode& node, std::vector
         
         size_t parent_index = node.getParent().getIndex();
 
-        double upval = parent_values[parent_index];
+        double ln_parent_value = log(parent_values[parent_index]);
         double t = node.getBranchLength();
         double e  = exp(-alpha->getValue() * t);
         double e2 = exp(-2 * alpha->getValue() * t);
-        double mean = e * upval + (1 - e) * theta->getValue();
+        double ln_mean = e * ln_parent_value + (1 - e) * theta->getValue();
         double stand_dev = sigma->getValue() * sqrt((1 - e2) / 2 / alpha->getValue());
 
         // simulate the new Val
         RandomNumberGenerator* rng = GLOBAL_RNG;
-        parent_values[index] = exp(RbStatistics::Normal::rv( mean, stand_dev, *rng));
+        parent_values[index] = exp(RbStatistics::Normal::rv( ln_mean, stand_dev, *rng));
         (*this->value)[index] = (parent_values[parent_index] + parent_values[index]) / 2.0;
                 
     }
