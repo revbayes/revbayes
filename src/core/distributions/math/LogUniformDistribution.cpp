@@ -96,8 +96,9 @@ void LogUniformDistribution::redrawValue( void )
 {
 
     double u = GLOBAL_RNG->uniform01();
-    double ln_a = log( min->getValue() );
-    *value = exp( u*(log( max->getValue() ) - ln_a) + ln_a);
+    double ln_min = log( min->getValue() );
+    double ln_max = log( max->getValue() );
+    *value = exp( u*(ln_max - ln_min) + ln_min);
 
 }
 
