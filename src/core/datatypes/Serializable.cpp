@@ -8,7 +8,7 @@ using namespace RevBayesCore;
 // Serialize (resurrect) the object from a file
 void Serializable::initFromFile( const path &dir, const std::string &fn )
 {
-    path filename = dir / (fn + ".out");
+    path filename = dir / (fn + ".txt");
     
     // open the stream to the file
     std::ifstream inStream( filename.string() );
@@ -32,7 +32,7 @@ void Serializable::initFromFile( const path &dir, const std::string &fn )
 // Write this object into a file in its default format.
 void Serializable::writeToFile( const path &dir, const std::string &fn ) const
 {
-    path filename = dir / (fn + ".out");
+    path filename = dir / (fn + ".txt");
     create_directories( dir );
     
     // open the stream to the file
