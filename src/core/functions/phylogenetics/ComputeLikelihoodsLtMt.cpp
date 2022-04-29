@@ -270,8 +270,12 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const double &start_age,
             if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood Lt : " << logLikelihood << "\n" << std::endl;}
         }
     }
-    // We then deal with the conditioning
-    std::vector<double> res = RevBayesCore::GetFunctionUandP(start_age, timeline, lambda, mu, psi, omega, rho, removalPr);
+    // We then deal with the conditioning, in order to match the conditioning presented in Stadler & al. 2010, we ensure that psi = 0.
+    std::vector<double> psi_cond(psi.size());
+    double value = 0.0;
+    std::fill(psi_cond.begin(), psi_cond.end(), value);
+
+    std::vector<double> res = RevBayesCore::GetFunctionUandP(start_age, timeline, lambda, mu, psi_cond, omega, rho, removalPr);
     if(     cond == "survival" ){logLikelihood -= log( 1 - res[0] );}
     else if(cond == "survival2"){logLikelihood -= log( 1 - res[0] - res[1] );}
 
