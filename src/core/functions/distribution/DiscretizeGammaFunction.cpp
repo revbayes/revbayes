@@ -63,6 +63,12 @@ void RevBayesCore::DiscretizeGammaFunction::update( void )
     double a = shape->getValue();
     double b = rate->getValue();
     int nCats = (int)numCats->getValue();
+    if (a == b && a > 1e8)
+    {
+        for (int i=0; i<nCats; i++)
+            (*value)[i] = 1.0;
+        return;
+    }
     
     double factor = a / b * nCats;
 
