@@ -1,4 +1,4 @@
-#include "FossilizedBirthDeathRangeProcess.h"
+#include "FossilizedBirthDeathRangeMatrixProcess.h"
 
 #include <algorithm>
 #include <cmath>
@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "AbstractFossilizedBirthDeathProcess.h"
+#include "AbstractFossilizedBirthDeathRangeProcess.h"
 #include "DistributionExponential.h"
 #include "MatrixReal.h"
 #include "RandomNumberFactory.h"
@@ -40,7 +40,7 @@ using namespace RevBayesCore;
  * \param[in]    c              Complete sampling?
  * \param[in]    re             Augmented age resampling weight.
  */
-FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode *inspeciation,
+FossilizedBirthDeathRangeMatrixProcess::FossilizedBirthDeathRangeMatrixProcess(const DagNode *inspeciation,
                                                                      const DagNode *inextinction,
                                                                      const DagNode *inpsi,
                                                                      const TypedDagNode<double> *inrho,
@@ -50,7 +50,7 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
                                                                      bool complete,
                                                                      bool resample) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
-    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete, resample)
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete, resample)
 {
     dirty_gamma = std::vector<bool>(taxa.size(), true);
     gamma_i     = std::vector<size_t>(taxa.size(), 0);
@@ -72,9 +72,9 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
  *
  * \return A new copy of myself 
  */
-FossilizedBirthDeathRangeProcess* FossilizedBirthDeathRangeProcess::clone( void ) const
+FossilizedBirthDeathRangeMatrixProcess* FossilizedBirthDeathRangeMatrixProcess::clone( void ) const
 {
-    return new FossilizedBirthDeathRangeProcess( *this );
+    return new FossilizedBirthDeathRangeMatrixProcess( *this );
 }
 
 
@@ -82,7 +82,7 @@ FossilizedBirthDeathRangeProcess* FossilizedBirthDeathRangeProcess::clone( void 
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double FossilizedBirthDeathRangeProcess::computeLnProbability( void )
+double FossilizedBirthDeathRangeMatrixProcess::computeLnProbability( void )
 {
     // prepare the probability computation
     updateGamma();
@@ -106,7 +106,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbability( void )
  *
  * \return Small gamma
  */
-void FossilizedBirthDeathRangeProcess::updateGamma(bool force)
+void FossilizedBirthDeathRangeMatrixProcess::updateGamma(bool force)
 {
     for (size_t i = 0; i < taxa.size(); i++)
     {
@@ -150,7 +150,7 @@ void FossilizedBirthDeathRangeProcess::updateGamma(bool force)
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-void FossilizedBirthDeathRangeProcess::updateStartEndTimes( void )
+void FossilizedBirthDeathRangeMatrixProcess::updateStartEndTimes( void )
 {
     origin = 0;
 
@@ -167,7 +167,7 @@ void FossilizedBirthDeathRangeProcess::updateStartEndTimes( void )
 /**
  * Simulate new speciation times.
  */
-void FossilizedBirthDeathRangeProcess::redrawValue(void)
+void FossilizedBirthDeathRangeMatrixProcess::redrawValue(void)
 {
     // incorrect placeholder
     
@@ -205,20 +205,20 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
 }
 
 
-void FossilizedBirthDeathRangeProcess::keepSpecialization(DagNode *toucher)
+void FossilizedBirthDeathRangeMatrixProcess::keepSpecialization(DagNode *toucher)
 {
     dirty_gamma = std::vector<bool>(taxa.size(), false);
 
-    AbstractFossilizedBirthDeathProcess::keepSpecialization(toucher);
+    AbstractFossilizedBirthDeathRangeProcess::keepSpecialization(toucher);
 }
 
-void FossilizedBirthDeathRangeProcess::restoreSpecialization(DagNode *toucher)
+void FossilizedBirthDeathRangeMatrixProcess::restoreSpecialization(DagNode *toucher)
 {
-    AbstractFossilizedBirthDeathProcess::restoreSpecialization(toucher);
+    AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(toucher);
 }
 
 
-void FossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, bool touchAll)
+void FossilizedBirthDeathRangeMatrixProcess::touchSpecialization(DagNode *toucher, bool touchAll)
 {
     if ( toucher == dag_node )
     {
@@ -249,7 +249,7 @@ void FossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, boo
     }
     else
     {
-        AbstractFossilizedBirthDeathProcess::touchSpecialization(toucher, touchAll);
+        AbstractFossilizedBirthDeathRangeProcess::touchSpecialization(toucher, touchAll);
     }
 }
 
@@ -260,7 +260,7 @@ void FossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, boo
  * \param[in]    oldP      Pointer to the old parameter.
  * \param[in]    newP      Pointer to the new parameter.
  */
-void FossilizedBirthDeathRangeProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void FossilizedBirthDeathRangeMatrixProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
-    AbstractFossilizedBirthDeathProcess::swapParameterInternal(oldP, newP);
+    AbstractFossilizedBirthDeathRangeProcess::swapParameterInternal(oldP, newP);
 }

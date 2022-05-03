@@ -333,7 +333,7 @@ const MemberRules& Dist_BDSTP::getParameterRules(void) const
         dist_member_rules.push_back( new ArgumentRule( "MuTimeline",        ModelVector<RealPos>::getClassTypeSpec(), "Times at which all taxa die with some probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         std::vector<std::string> aliases_event_sampling_timeline;
         aliases_event_sampling_timeline.push_back("PhiTimeline");
-        aliases_event_sampling_timeline.push_back("PsiTimeline");
+        aliases_event_sampling_timeline.push_back("rhoTimeline");
         dist_member_rules.push_back( new ArgumentRule( aliases_event_sampling_timeline,       ModelVector<RealPos>::getClassTypeSpec(), "Times at which all taxa are sampled with some probability. There is always additionally a sampling event at the present.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         std::vector<std::string> optionsCondition;
@@ -426,7 +426,7 @@ void Dist_BDSTP::setConstParameter(const std::string& name, const RevPtr<const R
     {
         mu_timeline = var;
     }
-    else if ( name == "phiTimeline" || name == "psiTimeline" || name == "phiTimeline/psiTimeline" )
+    else if ( name == "phiTimeline" || name == "psiTimeline" )
     {
         phi_timeline = var;
     }
@@ -442,7 +442,7 @@ void Dist_BDSTP::setConstParameter(const std::string& name, const RevPtr<const R
     {
         Mu_timeline = var;
     }
-    else if ( name == "PhiTimeline" || name == "PsiTimeline" || name == "PhiTimeline/PsiTimeline" )
+    else if ( name == "PhiTimeline" || name == "rhoTimeline" )
     {
         Phi_timeline = var;
     }

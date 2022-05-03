@@ -1,5 +1,5 @@
-#ifndef AbstractFossilizedBirthDeathProcess_H
-#define AbstractFossilizedBirthDeathProcess_H
+#ifndef AbstractFossilizedBirthDeathRangeProcess_H
+#define AbstractFossilizedBirthDeathRangeProcess_H
 
 #include "RbVector.h"
 #include "TypedDagNode.h"
@@ -24,10 +24,10 @@ namespace RevBayesCore {
      * @since 2014-03-18, version 1.0
      *
      */
-    class AbstractFossilizedBirthDeathProcess {
+    class AbstractFossilizedBirthDeathRangeProcess {
         
     public:
-        AbstractFossilizedBirthDeathProcess(const DagNode *speciation,
+        AbstractFossilizedBirthDeathRangeProcess(const DagNode *speciation,
                                             const DagNode *extinction,
                                             const DagNode *psi,
                                             const TypedDagNode<double>* rho,
@@ -37,7 +37,7 @@ namespace RevBayesCore {
                                             bool complete,
                                             bool resampling);  //!< Constructor
 
-        virtual ~AbstractFossilizedBirthDeathProcess(){};
+        virtual ~AbstractFossilizedBirthDeathRangeProcess(){};
 
         std::vector<double>&                            getAges();
         void                                            resampleAge(size_t i);

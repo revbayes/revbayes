@@ -1,4 +1,4 @@
-#include "AbstractFossilizedBirthDeathProcess.h"
+#include "AbstractFossilizedBirthDeathRangeProcess.h"
 
 #include <algorithm>
 #include <cmath>
@@ -36,7 +36,7 @@ using namespace RevBayesCore;
  * \param[in]    c              Complete sampling?
  * \param[in]    re             Augmented age resampling weight.
  */
-AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const DagNode *inspeciation,
+AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProcess(const DagNode *inspeciation,
                                                                          const DagNode *inextinction,
                                                                          const DagNode *inpsi,
                                                                          const TypedDagNode<double> *inrho,
@@ -193,7 +193,7 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool force )
+double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( bool force )
 {
     // prepare the probability computation
     prepareProbComputation();
@@ -420,7 +420,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
  * t_0 is origin
  * t_l = 0.0
  */
-size_t AbstractFossilizedBirthDeathProcess::findIndex(double t) const
+size_t AbstractFossilizedBirthDeathRangeProcess::findIndex(double t) const
 {
     return std::prev(std::upper_bound( times.begin(), times.end(), t)) - times.begin();
 }
@@ -429,7 +429,7 @@ size_t AbstractFossilizedBirthDeathProcess::findIndex(double t) const
 /**
  * p_i(t)
  */
-double AbstractFossilizedBirthDeathProcess::p( size_t i, double t, bool survival ) const
+double AbstractFossilizedBirthDeathRangeProcess::p( size_t i, double t, bool survival ) const
 {
     // get the parameters
     double b = birth[i];
@@ -456,7 +456,7 @@ double AbstractFossilizedBirthDeathProcess::p( size_t i, double t, bool survival
 /**
  * q_i(t)
  */
-double AbstractFossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) const
+double AbstractFossilizedBirthDeathRangeProcess::q( size_t i, double t, bool tilde ) const
 {
     if ( t == times[i] ) return 0.0;
     
@@ -489,7 +489,7 @@ double AbstractFossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) 
  *
  *
  */
-std::vector<double>& AbstractFossilizedBirthDeathProcess::getAges(void)
+std::vector<double>& AbstractFossilizedBirthDeathRangeProcess::getAges(void)
 {
     return age;
 }
@@ -499,7 +499,7 @@ std::vector<double>& AbstractFossilizedBirthDeathProcess::getAges(void)
  *
  *
  */
-void AbstractFossilizedBirthDeathProcess::resampleAge(size_t i)
+void AbstractFossilizedBirthDeathRangeProcess::resampleAge(size_t i)
 {
     stored_age = age;
     resampled = true;
@@ -508,7 +508,7 @@ void AbstractFossilizedBirthDeathProcess::resampleAge(size_t i)
 }
 
 
-void AbstractFossilizedBirthDeathProcess::keepSpecialization(DagNode *toucher)
+void AbstractFossilizedBirthDeathRangeProcess::keepSpecialization(DagNode *toucher)
 {
     dirty_psi  = std::vector<bool>(taxa.size(), false);
     dirty_taxa = std::vector<bool>(taxa.size(), false);
@@ -518,7 +518,7 @@ void AbstractFossilizedBirthDeathProcess::keepSpecialization(DagNode *toucher)
 }
 
 
-void AbstractFossilizedBirthDeathProcess::restoreSpecialization(DagNode *toucher)
+void AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(DagNode *toucher)
 {
     partial_likelihood = stored_likelihood;
     Psi = stored_Psi;
@@ -536,7 +536,7 @@ void AbstractFossilizedBirthDeathProcess::restoreSpecialization(DagNode *toucher
 }
 
 
-void AbstractFossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, bool touchAll)
+void AbstractFossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, bool touchAll)
 {
     if ( touched == false )
     {
@@ -559,7 +559,7 @@ void AbstractFossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, 
  *
  *
  */
-void AbstractFossilizedBirthDeathProcess::prepareProbComputation()
+void AbstractFossilizedBirthDeathRangeProcess::prepareProbComputation()
 {
     if ( homogeneous_lambda != NULL )
     {
@@ -650,7 +650,7 @@ void AbstractFossilizedBirthDeathProcess::prepareProbComputation()
  * \param[in]    oldP      Pointer to the old parameter.
  * \param[in]    newP      Pointer to the new parameter.
  */
-void AbstractFossilizedBirthDeathProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void AbstractFossilizedBirthDeathRangeProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     if (oldP == heterogeneous_lambda)
     {

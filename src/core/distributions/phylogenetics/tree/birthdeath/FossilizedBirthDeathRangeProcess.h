@@ -1,7 +1,7 @@
-#ifndef FossilizedBirthDeathProcess_H
-#define FossilizedBirthDeathProcess_H
+#ifndef FossilizedBirthDeathRangeProcess_H
+#define FossilizedBirthDeathRangeProcess_H
 
-#include "AbstractFossilizedBirthDeathProcess.h"
+#include "AbstractFossilizedBirthDeathRangeProcess.h"
 #include "AbstractBirthDeathProcess.h"
 
 namespace RevBayesCore {
@@ -24,12 +24,12 @@ namespace RevBayesCore {
      * @since 2014-03-18, version 1.0
      *
      */
-    class FossilizedBirthDeathProcess : public AbstractBirthDeathProcess, public AbstractFossilizedBirthDeathProcess {
+    class FossilizedBirthDeathRangeProcess : public AbstractBirthDeathProcess, public AbstractFossilizedBirthDeathRangeProcess {
         
-        using AbstractFossilizedBirthDeathProcess::taxa;
+        using AbstractFossilizedBirthDeathRangeProcess::taxa;
 
     public:
-        FossilizedBirthDeathProcess (const TypedDagNode<double>* ra,
+        FossilizedBirthDeathRangeProcess (const TypedDagNode<double>* ra,
                                       const DagNode *speciation,
                                       const DagNode *extinction,
                                       const DagNode *psi,
@@ -43,7 +43,7 @@ namespace RevBayesCore {
                                       bool resampling);  //!< Constructor
         
         // public member functions
-        FossilizedBirthDeathProcess*                    clone(void) const;                                         //!< Create an independent clone
+        FossilizedBirthDeathRangeProcess*               clone(void) const;                                         //!< Create an independent clone
 
         void                                            redrawValue(void);
         void                                            simulateClade(std::vector<TopologyNode *> &n, double age, double present);
