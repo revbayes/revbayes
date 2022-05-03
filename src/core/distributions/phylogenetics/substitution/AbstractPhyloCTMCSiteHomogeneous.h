@@ -965,7 +965,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalNo
             for (size_t j=0; j<num_chars; ++j)
             {
                 const double*   p_parent_site_marginal_k    = p_parent_site_mixture_marginal;
-                *p_site_marginal_j = 0.0;
+                double sum = 0;
 
                 // iterator over all start states
                 for (size_t k=0; k<num_chars; ++k)
@@ -974,11 +974,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalNo
                     const double tp_kj = *p_parent_site_marginal_k * tp_begin[ k * num_chars + j ];
 
                     // add the probability of starting from this state
-                    *p_site_marginal_j += *p_site_j * tp_kj;
+                    sum += *p_site_j * tp_kj;
 
                     // next parent state
                     ++p_parent_site_marginal_k;
                 }
+                *p_site_marginal_j = sum;
 
                 // increment pointers
                 ++p_site_j; ++p_site_marginal_j;
@@ -4014,6 +4015,18 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     {
         throw RbException("dnPhyloCTMC called updateTransitionProbabilities for the root node\n");
     }
+
+    double end_age = node->getAge();
+
+    // if the tree is not a time tree, then the age will be not a number
+    if ( RbMath::isFinite(end_age) == false )
+    {
+        // we assume by default that the end is at time 0
+        end_age = 0.0;
+    }
+    double start_age = end_age + node->getBranchLength();
+
+
     // second, get the clock rate for the branch
     double rate = 1.0;
     if ( this->branch_heterogeneous_clock_rates == true )
@@ -4028,25 +4041,16 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     // we rescale the rate by the inverse of the proportion of invariant sites
     rate /= ( 1.0 - getPInv() );
 
-    double end_age = node->getAge();
-
-    // if the tree is not a time tree, then the age will be not a number
-    if ( RbMath::isFinite(end_age) == false )
-    {
-        // we assume by default that the end is at time 0
-        end_age = 0.0;
-    }
-    double start_age = end_age + node->getBranchLength();
-
     // first, get the rate matrix for this branch
     RateMatrix_JC jc(this->num_chars);
-    const RateGenerator *rm = &jc;
 
     if (this->branch_heterogeneous_substitution_matrices == false )
     {
         // loop now over all per-site rate matrices (could also be only a single one, as by default)
         for (size_t matrix = 0; matrix < this->num_matrices; ++matrix)
         {
+            const RateGenerator *rm = nullptr;
+
             // get the i-th rate matrix
             if ( this->heterogeneous_rate_matrices != NULL )
             {
@@ -4055,6 +4059,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
             else if ( this->homogeneous_rate_matrix != NULL )
             {
                 rm = &this->homogeneous_rate_matrix->getValue();
+            }
+            else
+            {
+                rm = &jc;
             }
 
             // now also get the site specific rates
@@ -4072,6 +4080,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     }
     else
     {
+        const RateGenerator *rm = nullptr;
+
         if ( this->heterogeneous_rate_matrices != NULL )
         {
             rm = &this->heterogeneous_rate_matrices->getValue()[node_idx];
@@ -4079,6 +4089,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
         else if ( this->homogeneous_rate_matrix != NULL )
         {
             rm = &this->homogeneous_rate_matrix->getValue();
+        }
+        else
+        {
+            rm = &jc;
         }
 
         for (size_t j = 0; j < this->num_site_rates; ++j)

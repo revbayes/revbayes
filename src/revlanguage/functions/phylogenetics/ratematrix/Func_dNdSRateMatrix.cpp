@@ -48,8 +48,8 @@ Func_dNdSRateMatrix* Func_dNdSRateMatrix::clone( void ) const
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_dNdSRateMatrix::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< double >* omega = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* nuc_q = static_cast<const RateGenerator &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* nuc_q = static_cast<const RateGenerator &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* omega = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
 
     return RevBayesCore::generic_function_ptr2< RevBayesCore::RateGenerator >( dNdSFunc, omega, nuc_q );
 }
@@ -64,8 +64,8 @@ const ArgumentRules& Func_dNdSRateMatrix::getArgumentRules( void ) const
 
     if ( !rules_set )
     {
-        argumentRules.push_back( new ArgumentRule( "omega"          , RealPos::getClassTypeSpec(), "The dN / dS rate ratio.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "submodel", RateMatrix::getClassTypeSpec(), "Singlet (i.e. nucleotide) rate matrix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "omega"          , RealPos::getClassTypeSpec(), "The dN / dS rate ratio.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         rules_set = true;
     }
