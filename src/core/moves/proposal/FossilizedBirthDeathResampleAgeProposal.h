@@ -10,11 +10,10 @@
 namespace RevBayesCore {
     
     /**
-     * The node-age slide proposal operator using a Uniform distribution.
+     * The fossilized birth death resample age proposal.
      *
-     * This node-age proposal is a Uniform-sliding proposal on rooted subtrees without changing the topology.
-     * That is, we pick a random node which is not the root.
-     * Then, we pick an age between the parent and the oldest sampled descendant drawn from a Uniform distribution centered around the current age.
+     * This proposal resamples the oldest occurrence age for a single taxon in a fossilized birth death range process.
+     * The age is resampled uniformly between the minimum and maximum age.
      *
      *
      * @copyright Copyright 2009-

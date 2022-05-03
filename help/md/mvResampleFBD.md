@@ -2,14 +2,14 @@
 mvResampleFBD
 ## title
 ## description
-This move resamples an oldest occurrence age for a random species in a fossilized birth death process described by `dnFBDP` or `dnFBDRP`
+This move resamples an oldest occurrence age for a random species in a fossilized birth death process described by `dnFBDRP` or `dnFBDRMatrix`
 ## details
 Under the hood, FBD fossil data is augmented with oldest occurrence ages for each species, which are automatically marginalized during when the model is sampled using MCMC. These ages can also be resampled manually using this move.
 ## authors
 Walker Pett
 ## see_also
-dnFossilizedBirthDeath
-dnBirthDeathBirthDeathRange
+dnFossilizedBirthDeathRange
+dnFossilizedBirthDeathRangeMatrix
 ## example
 bd ~ dnFBDRP(lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa, resample=FALSE)
 

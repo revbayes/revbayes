@@ -1,21 +1,21 @@
 ## name
-dnFossilizedBirthDeathRange
+dnFossilizedBirthDeathRangeMatrix
 ## title
 ## description
-The fossilized birth death range process (FBDRP) describes the distribution of a matrix of species origination and extinction times under a model of asymmetric speciation and sampling of extinct species.
+The fossilized birth death range matrix process (FBDRMatrix) describes the distribution of a matrix of species origination and extinction times under a model of asymmetric speciation and sampling of extinct species.
 ## details
 Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. If only a subset of fossil occurrences is provided for each species (e.g. only first and last occurrencces), then the remaining number of fossil samples may be marginalized by specifying `complete=FALSE`. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which are automatically marginalized during when the model is sampled using MCMC. To disable this behavior, use `resample=FALSE`.
 ## authors
 Walker Pett
 ## see_also
-dnFossilizedBirthDeath
+dnFossilizedBirthDeathRange
 dnBirthDeathSamplingTreatment
 ## example
 lambda ~ dnExp(10)
 mu ~ dnExp(10)
 psi ~ dnExp(10)
 
-bd ~ dnFBDRP(lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa, complete=FALSE)
+bd ~ dnFBDRMatrix(lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa, complete=FALSE)
 
 moves.append( mvMatrixElementScale(bd, weight=taxa.size()) )
 moves.append( mvMatrixElementSlide(bd, weight=taxa.size()) )

@@ -130,9 +130,9 @@ bool Taxon::operator>=(const RevBayesCore::Taxon &t) const
  *
  * \param[in]    d     The age range.
  */
-void Taxon::addAge( const TimeInterval &d )
+void Taxon::addOccurrence( const TimeInterval &d )
 {
-    ages[d]++;
+    occurrences[d]++;
 
     if ( d.getMax() > age_range.getMax() )
     {
@@ -168,29 +168,29 @@ double Taxon::getAge( void ) const
 
 
 /**
- * Get the ages for this taxon.
+ * Get the occurrences for this taxon.
  *
- * \return    The ages.
+ * \return    A map of occurrence age ranges to counts.
  */
-std::map<TimeInterval, size_t> Taxon::getAges( void ) const
+const std::map<TimeInterval, size_t>& Taxon::getOccurrences( void ) const
 {
-    return ages;
+    return occurrences;
 }
 
 
 /**
- * Get the age range for this taxon.
+ * Get the age range for this taxon across all occurrences.
  *
  * \return    The age range.
  */
-TimeInterval Taxon::getAgeRange( void ) const
+const TimeInterval& Taxon::getAgeRange( void ) const
 {
     return age_range;
 }
 
 
 /**
- * Get the max age for this taxon.
+ * Get the max age for this taxon across all occurrences.
  *
  * \return    The age.
  */
@@ -201,7 +201,7 @@ double Taxon::getMaxAge( void ) const
 
 
 /**
- * Get the min age for this taxon.
+ * Get the min age for this taxon across all occurrences.
  *
  * \return    The age.
  */

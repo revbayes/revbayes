@@ -158,7 +158,7 @@ BirthDeathRateShiftsProcess::BirthDeathRateShiftsProcess(const DagNode *inspecia
 
     for ( size_t i = 0; i < taxa.size(); i++ )
     {
-        std::map<TimeInterval, size_t> ages = taxa[i].getAges();
+        std::map<TimeInterval, size_t> ages = taxa[i].getOccurrences();
         for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
         {
             // find the oldest minimum age
@@ -203,7 +203,7 @@ double BirthDeathRateShiftsProcess::computeLnProbability()
     prepareProbComputation();
 
     // variable declarations and initialization
-    double lnProbTimes = 0.0;
+    double lnProb = 0.0;
 
     size_t num_rho_sampled = 0;
     size_t num_rho_unsampled = 0;
@@ -269,7 +269,7 @@ double BirthDeathRateShiftsProcess::computeLnProbability()
             // include sampling density
             if ( dirty_psi[i] )
             {
-                std::map<TimeInterval, size_t> ages = taxa[i].getAges();
+                std::map<TimeInterval, size_t> ages = taxa[i].getOccurrences();
 
                 // if there is a range of fossil ages
                 if ( min_age != max_age )
@@ -359,26 +359,26 @@ double BirthDeathRateShiftsProcess::computeLnProbability()
             partial_likelihood[i] += Psi[i];
         }
 
-        lnProbTimes += partial_likelihood[i];
+        lnProb += partial_likelihood[i];
     }
 
     // add the sampled extant tip age term
     if ( homogeneous_rho->getValue() > 0.0)
     {
-        lnProbTimes += num_rho_sampled * log( homogeneous_rho->getValue() );
+        lnProb += num_rho_sampled * log( homogeneous_rho->getValue() );
     }
     // add the unsampled extant tip age term
     if ( homogeneous_rho->getValue() < 1.0)
     {
-        lnProbTimes += num_rho_unsampled * log( 1.0 - homogeneous_rho->getValue() );
+        lnProb += num_rho_unsampled * log( 1.0 - homogeneous_rho->getValue() );
     }
 
-    if ( RbMath::isFinite(lnProbTimes) == false )
+    if ( RbMath::isFinite(lnProb) == false )
     {
         return RbConstants::Double::neginf;
     }
 
-    return lnProbTimes;
+    return lnProb;
 }
 
 
@@ -400,6 +400,8 @@ size_t BirthDeathRateShiftsProcess::findIndex(double t) const
 void BirthDeathRateShiftsProcess::redrawValue(void)
 {
     // incorrect placeholder
+    // simulation conditioned on the oldest occurrence
+    // would require a monte carlo method
 
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;

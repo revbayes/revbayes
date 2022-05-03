@@ -169,7 +169,7 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
 
     for ( size_t i = 0; i < taxa.size(); i++ )
     {
-        std::map<TimeInterval, size_t> ages = taxa[i].getAges();
+        std::map<TimeInterval, size_t> ages = taxa[i].getOccurrences();
         for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
         {
             // find the oldest minimum age
@@ -201,7 +201,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
     updateStartEndTimes();
 
     // variable declarations and initialization
-    double lnProbTimes = 0.0;
+    double lnProb = 0.0;
 
     size_t num_rho_sampled = 0;
     size_t num_rho_unsampled = 0;
@@ -257,7 +257,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
             // skip the rest for extant taxa with no fossil samples
             if ( max_age == present )
             {
-                lnProbTimes += partial_likelihood[i];
+                lnProb += partial_likelihood[i];
 
                 continue;
             }
@@ -279,7 +279,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
 
             if ( dirty_psi[i] || force )
             {
-                std::map<TimeInterval, size_t> ages = taxa[i].getAges();
+                std::map<TimeInterval, size_t> ages = taxa[i].getOccurrences();
 
                 // if there is a range of fossil ages
                 if ( min_age != max_age )
@@ -375,42 +375,42 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
             partial_likelihood[i] += Psi[i];
         }
 
-        lnProbTimes += partial_likelihood[i];
+        lnProb += partial_likelihood[i];
     }
 
     size_t ori = findIndex(origin);
 
     // the origin is not a speciation event
-    lnProbTimes -= log( birth[ori] );
+    lnProb -= log( birth[ori] );
 
     // add the sampled extant tip age term
     if ( homogeneous_rho->getValue() > 0.0)
     {
-        lnProbTimes += num_rho_sampled * log( homogeneous_rho->getValue() );
+        lnProb += num_rho_sampled * log( homogeneous_rho->getValue() );
     }
     // add the unsampled extant tip age term
     if ( homogeneous_rho->getValue() < 1.0)
     {
-        lnProbTimes += num_rho_unsampled * log( 1.0 - homogeneous_rho->getValue() );
+        lnProb += num_rho_unsampled * log( 1.0 - homogeneous_rho->getValue() );
     }
 
     // condition on sampling
     if ( condition == "sampling" )
     {
-        lnProbTimes -= log( 1.0 - p(ori, origin, false) );
+        lnProb -= log( 1.0 - p(ori, origin, false) );
     }
     // condition on survival
     else if ( condition == "survival" )
     {
-        lnProbTimes -= log( 1.0 - p(ori, origin, true) );
+        lnProb -= log( 1.0 - p(ori, origin, true) );
     }
 
-    if ( RbMath::isFinite(lnProbTimes) == false )
+    if ( RbMath::isFinite(lnProb) == false )
     {
         return RbConstants::Double::neginf;
     }
 
-    return lnProbTimes;
+    return lnProb;
 }
 
 

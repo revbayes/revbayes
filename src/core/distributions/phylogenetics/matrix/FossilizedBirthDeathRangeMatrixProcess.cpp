@@ -170,6 +170,8 @@ void FossilizedBirthDeathRangeMatrixProcess::updateStartEndTimes( void )
 void FossilizedBirthDeathRangeMatrixProcess::redrawValue(void)
 {
     // incorrect placeholder
+    // simulation conditioned on the oldest occurrence
+    // would require a monte carlo method
     
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;

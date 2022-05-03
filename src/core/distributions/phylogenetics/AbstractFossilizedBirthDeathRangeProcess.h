@@ -17,7 +17,12 @@ namespace RevBayesCore {
      *
      * We assume that the rate vectors have one more element than the rate-change vectors.
      * Thus, one rate-change means always two interval, two rate-changes three interval, and so on.
-     *
+     * 
+     * This is the base class for the fossilized birth-death range process, as well as
+     * the fossilized birth-death range matrix process. Each process provides a different implementation
+     * of updateStartEndTimes(), which recomputes the origination and extinction times of each taxon
+     * based on either a matrix or tree data structure.
+     * Likelihood computations are otherwise the same for all range-based fossilized birth-death processes.
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
