@@ -513,8 +513,7 @@ std::vector<double> FossilizedBirthDeathRangeProcess::simulateDivergenceTimes(si
 double FossilizedBirthDeathRangeProcess::simulateDivergenceTime(double origin, double present) const
 {
     // incorrect placeholder for constant SSBDP
-
-
+    
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
 
