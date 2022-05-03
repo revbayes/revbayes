@@ -10,7 +10,7 @@
 #include "AbstractBirthDeathProcess.h"
 #include "AbstractFossilizedBirthDeathRangeProcess.h"
 #include "DistributionExponential.h"
-#include "FossilizedBirthDeathRangeProcess.h"
+#include "FossilizedBirthDeathSpeciationProcess.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
@@ -47,7 +47,7 @@ using namespace RevBayesCore;
  * \param[in]    c              Complete sampling?
  * \param[in]    re             Augmented age resampling weight.
  */
-FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const TypedDagNode<double> *ra,
+FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(const TypedDagNode<double> *ra,
                                                            const DagNode *inspeciation,
                                                            const DagNode *inextinction,
                                                            const DagNode *inpsi,
@@ -116,9 +116,9 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const TypedDa
  *
  * \return A new copy of myself 
  */
-FossilizedBirthDeathRangeProcess* FossilizedBirthDeathRangeProcess::clone( void ) const
+FossilizedBirthDeathSpeciationProcess* FossilizedBirthDeathSpeciationProcess::clone( void ) const
 {
-    return new FossilizedBirthDeathRangeProcess( *this );
+    return new FossilizedBirthDeathSpeciationProcess( *this );
 }
 
 
@@ -126,7 +126,7 @@ FossilizedBirthDeathRangeProcess* FossilizedBirthDeathRangeProcess::clone( void 
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double FossilizedBirthDeathRangeProcess::computeLnProbabilityDivergenceTimes( void )
+double FossilizedBirthDeathSpeciationProcess::computeLnProbabilityDivergenceTimes( void )
 {
     double lnProb = computeLnProbabilityRanges();
 
@@ -140,7 +140,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbabilityDivergenceTimes( vo
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double FossilizedBirthDeathRangeProcess::computeLnProbabilityTimes( void ) const
+double FossilizedBirthDeathSpeciationProcess::computeLnProbabilityTimes( void ) const
 {
     double lnProb = 0.0;
 
@@ -168,7 +168,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbabilityTimes( void ) const
 }
 
 
-double FossilizedBirthDeathRangeProcess::getMaxTaxonAge( const TopologyNode& node ) const
+double FossilizedBirthDeathSpeciationProcess::getMaxTaxonAge( const TopologyNode& node ) const
 {
     if( node.isTip() )
     {
@@ -188,7 +188,7 @@ double FossilizedBirthDeathRangeProcess::getMaxTaxonAge( const TopologyNode& nod
 }
 
 
-double FossilizedBirthDeathRangeProcess::lnProbTreeShape(void) const
+double FossilizedBirthDeathSpeciationProcess::lnProbTreeShape(void) const
 {
     // the fossilized birth death range divergence times density is derived for an unlabeled oriented tree
     // so we convert to a labeled oriented tree probability by multiplying by 1 / n!
@@ -206,7 +206,7 @@ double FossilizedBirthDeathRangeProcess::lnProbTreeShape(void) const
  *
  * \return Probability of survival.
  */
-double FossilizedBirthDeathRangeProcess::pSurvival(double start, double end) const
+double FossilizedBirthDeathSpeciationProcess::pSurvival(double start, double end) const
 {
     return AbstractFossilizedBirthDeathRangeProcess::p(findIndex(start), start, true);
 }
@@ -215,7 +215,7 @@ double FossilizedBirthDeathRangeProcess::pSurvival(double start, double end) con
 /**
  * q_i(t)
  */
-double FossilizedBirthDeathRangeProcess::q( size_t i, double t, bool tilde ) const
+double FossilizedBirthDeathSpeciationProcess::q( size_t i, double t, bool tilde ) const
 {
 
     if ( t == times[i] ) return 0.0;
@@ -256,7 +256,7 @@ double FossilizedBirthDeathRangeProcess::q( size_t i, double t, bool tilde ) con
 /**
  *
  */
-void FossilizedBirthDeathRangeProcess::redrawValue(void)
+void FossilizedBirthDeathSpeciationProcess::redrawValue(void)
 {
     AbstractBirthDeathProcess::redrawValue();
 
@@ -276,7 +276,7 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
 /**
  *
  */
-void FossilizedBirthDeathRangeProcess::simulateClade(std::vector<TopologyNode *> &n, double age, double present)
+void FossilizedBirthDeathSpeciationProcess::simulateClade(std::vector<TopologyNode *> &n, double age, double present)
 {
 
     // Get the rng
@@ -491,7 +491,7 @@ void FossilizedBirthDeathRangeProcess::simulateClade(std::vector<TopologyNode *>
 
 }
 
-std::vector<double> FossilizedBirthDeathRangeProcess::simulateDivergenceTimes(size_t n, double origin, double present, double min) const
+std::vector<double> FossilizedBirthDeathSpeciationProcess::simulateDivergenceTimes(size_t n, double origin, double present, double min) const
 {
 
     std::vector<double> t(n, 0.0);
@@ -510,7 +510,7 @@ std::vector<double> FossilizedBirthDeathRangeProcess::simulateDivergenceTimes(si
 /**
  * Simulate new speciation times.
  */
-double FossilizedBirthDeathRangeProcess::simulateDivergenceTime(double origin, double present) const
+double FossilizedBirthDeathSpeciationProcess::simulateDivergenceTime(double origin, double present) const
 {
     // incorrect placeholder for constant SSBDP
     // direct forward simulation under FBDRP is not feasible
@@ -560,7 +560,7 @@ double FossilizedBirthDeathRangeProcess::simulateDivergenceTime(double origin, d
 }
 
 
-int FossilizedBirthDeathRangeProcess::updateStartEndTimes( const TopologyNode& node )
+int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNode& node )
 {
     if( node.isTip() )
     {
@@ -652,7 +652,7 @@ int FossilizedBirthDeathRangeProcess::updateStartEndTimes( const TopologyNode& n
  *
  *
  */
-void FossilizedBirthDeathRangeProcess::prepareProbComputation()
+void FossilizedBirthDeathSpeciationProcess::prepareProbComputation()
 {
     AbstractFossilizedBirthDeathRangeProcess::prepareProbComputation();
 
@@ -689,25 +689,25 @@ void FossilizedBirthDeathRangeProcess::prepareProbComputation()
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-void FossilizedBirthDeathRangeProcess::updateStartEndTimes( void )
+void FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( void )
 {
     updateStartEndTimes(getValue().getRoot());
 }
 
 
-void FossilizedBirthDeathRangeProcess::keepSpecialization(DagNode *toucher)
+void FossilizedBirthDeathSpeciationProcess::keepSpecialization(DagNode *toucher)
 {
     AbstractFossilizedBirthDeathRangeProcess::keepSpecialization(toucher);
 }
 
 
-void FossilizedBirthDeathRangeProcess::restoreSpecialization(DagNode *toucher)
+void FossilizedBirthDeathSpeciationProcess::restoreSpecialization(DagNode *toucher)
 {
     AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(toucher);
 }
 
 
-void FossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, bool touchAll)
+void FossilizedBirthDeathSpeciationProcess::touchSpecialization(DagNode *toucher, bool touchAll)
 {
     if ( toucher == dag_node )
     {
@@ -743,7 +743,7 @@ void FossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, boo
  * \param[in]    oldP      Pointer to the old parameter.
  * \param[in]    newP      Pointer to the new parameter.
  */
-void FossilizedBirthDeathRangeProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void FossilizedBirthDeathSpeciationProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     if (oldP == heterogeneous_lambda_a)
     {

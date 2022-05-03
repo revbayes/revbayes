@@ -1,4 +1,4 @@
-#include "FossilizedBirthDeathRangeMatrixProcess.h"
+#include "FossilizedBirthDeathRangeProcess.h"
 
 #include <algorithm>
 #include <cmath>
@@ -40,7 +40,7 @@ using namespace RevBayesCore;
  * \param[in]    c              Complete sampling?
  * \param[in]    re             Augmented age resampling weight.
  */
-FossilizedBirthDeathRangeMatrixProcess::FossilizedBirthDeathRangeMatrixProcess(const DagNode *inspeciation,
+FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode *inspeciation,
                                                                      const DagNode *inextinction,
                                                                      const DagNode *inpsi,
                                                                      const TypedDagNode<double> *inrho,
@@ -72,9 +72,9 @@ FossilizedBirthDeathRangeMatrixProcess::FossilizedBirthDeathRangeMatrixProcess(c
  *
  * \return A new copy of myself 
  */
-FossilizedBirthDeathRangeMatrixProcess* FossilizedBirthDeathRangeMatrixProcess::clone( void ) const
+FossilizedBirthDeathRangeProcess* FossilizedBirthDeathRangeProcess::clone( void ) const
 {
-    return new FossilizedBirthDeathRangeMatrixProcess( *this );
+    return new FossilizedBirthDeathRangeProcess( *this );
 }
 
 
@@ -82,7 +82,7 @@ FossilizedBirthDeathRangeMatrixProcess* FossilizedBirthDeathRangeMatrixProcess::
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double FossilizedBirthDeathRangeMatrixProcess::computeLnProbability( void )
+double FossilizedBirthDeathRangeProcess::computeLnProbability( void )
 {
     // prepare the probability computation
     updateGamma();
@@ -106,7 +106,7 @@ double FossilizedBirthDeathRangeMatrixProcess::computeLnProbability( void )
  *
  * \return Small gamma
  */
-void FossilizedBirthDeathRangeMatrixProcess::updateGamma(bool force)
+void FossilizedBirthDeathRangeProcess::updateGamma(bool force)
 {
     for (size_t i = 0; i < taxa.size(); i++)
     {
@@ -150,7 +150,7 @@ void FossilizedBirthDeathRangeMatrixProcess::updateGamma(bool force)
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-void FossilizedBirthDeathRangeMatrixProcess::updateStartEndTimes( void )
+void FossilizedBirthDeathRangeProcess::updateStartEndTimes( void )
 {
     origin = 0;
 
@@ -167,7 +167,7 @@ void FossilizedBirthDeathRangeMatrixProcess::updateStartEndTimes( void )
 /**
  * Simulate new speciation times.
  */
-void FossilizedBirthDeathRangeMatrixProcess::redrawValue(void)
+void FossilizedBirthDeathRangeProcess::redrawValue(void)
 {
     // incorrect placeholder
     // simulation conditioned on the oldest occurrence
@@ -207,20 +207,20 @@ void FossilizedBirthDeathRangeMatrixProcess::redrawValue(void)
 }
 
 
-void FossilizedBirthDeathRangeMatrixProcess::keepSpecialization(DagNode *toucher)
+void FossilizedBirthDeathRangeProcess::keepSpecialization(DagNode *toucher)
 {
     dirty_gamma = std::vector<bool>(taxa.size(), false);
 
     AbstractFossilizedBirthDeathRangeProcess::keepSpecialization(toucher);
 }
 
-void FossilizedBirthDeathRangeMatrixProcess::restoreSpecialization(DagNode *toucher)
+void FossilizedBirthDeathRangeProcess::restoreSpecialization(DagNode *toucher)
 {
     AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(toucher);
 }
 
 
-void FossilizedBirthDeathRangeMatrixProcess::touchSpecialization(DagNode *toucher, bool touchAll)
+void FossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, bool touchAll)
 {
     if ( toucher == dag_node )
     {
@@ -262,7 +262,7 @@ void FossilizedBirthDeathRangeMatrixProcess::touchSpecialization(DagNode *touche
  * \param[in]    oldP      Pointer to the old parameter.
  * \param[in]    newP      Pointer to the new parameter.
  */
-void FossilizedBirthDeathRangeMatrixProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void FossilizedBirthDeathRangeProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     AbstractFossilizedBirthDeathRangeProcess::swapParameterInternal(oldP, newP);
 }

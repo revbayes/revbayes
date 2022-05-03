@@ -1,4 +1,4 @@
-#include "Dist_FBDRMatrix.h"
+#include "Dist_FBDRP.h"
 
 #include <math.h>
 #include <stddef.h>
@@ -51,7 +51,7 @@ using namespace RevLanguage;
  *
  * The default constructor does nothing except allocating the object.
  */
-Dist_FBDRMatrix::Dist_FBDRMatrix() : FossilizedBirthDeathRangeProcess<MatrixReal>()
+Dist_FBDRP::Dist_FBDRP() : FossilizedBirthDeathRangeProcess<MatrixReal>()
 {
     
 }
@@ -63,9 +63,9 @@ Dist_FBDRMatrix::Dist_FBDRMatrix() : FossilizedBirthDeathRangeProcess<MatrixReal
  *
  * \return A new copy of the process.
  */
-Dist_FBDRMatrix* Dist_FBDRMatrix::clone( void ) const
+Dist_FBDRP* Dist_FBDRP::clone( void ) const
 {
-    return new Dist_FBDRMatrix(*this);
+    return new Dist_FBDRP(*this);
 }
 
 
@@ -79,7 +79,7 @@ Dist_FBDRMatrix* Dist_FBDRMatrix::clone( void ) const
  *
  * \return A new internal distribution object.
  */
-RevBayesCore::FossilizedBirthDeathRangeMatrixProcess* Dist_FBDRMatrix::createDistribution( void ) const
+RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( void ) const
 {
     
     // get the parameters
@@ -110,7 +110,7 @@ RevBayesCore::FossilizedBirthDeathRangeMatrixProcess* Dist_FBDRMatrix::createDis
     bool c  = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
     bool re = false; //static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathRangeMatrixProcess* d = new RevBayesCore::FossilizedBirthDeathRangeMatrixProcess(l, m, p, r, rt, cond, t, c, re);
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, re);
 
     return d;
 }
@@ -121,10 +121,10 @@ RevBayesCore::FossilizedBirthDeathRangeMatrixProcess* Dist_FBDRMatrix::createDis
  *
  * \return The class' name.
  */
-const std::string& Dist_FBDRMatrix::getClassType( void )
+const std::string& Dist_FBDRP::getClassType( void )
 {
     
-    static std::string rev_type = "Dist_FBDRMatrix";
+    static std::string rev_type = "Dist_FBDRP";
     
     return rev_type;
 }
@@ -135,7 +135,7 @@ const std::string& Dist_FBDRMatrix::getClassType( void )
  *
  * \return TypeSpec of this class.
  */
-const TypeSpec& Dist_FBDRMatrix::getClassTypeSpec( void )
+const TypeSpec& Dist_FBDRP::getClassTypeSpec( void )
 {
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution<ModelVector<ModelVector<RealPos> > >::getClassTypeSpec() ) );
@@ -149,11 +149,11 @@ const TypeSpec& Dist_FBDRMatrix::getClassTypeSpec( void )
  *
  * \return Rev aliases of constructor function.
  */
-std::vector<std::string> Dist_FBDRMatrix::getDistributionFunctionAliases( void ) const
+std::vector<std::string> Dist_FBDRP::getDistributionFunctionAliases( void ) const
 {
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
-    a_names.push_back( "FBDRMatrix" );
+    a_names.push_back( "FBDRP" );
     
     return a_names;
 }
@@ -166,10 +166,10 @@ std::vector<std::string> Dist_FBDRMatrix::getDistributionFunctionAliases( void )
  *
  * \return Rev name of constructor function.
  */
-std::string Dist_FBDRMatrix::getDistributionFunctionName( void ) const
+std::string Dist_FBDRP::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
-    std::string d_name = "FossilizedBirthDeathRangeMatrix";
+    std::string d_name = "FossilizedBirthDeathRange";
     
     return d_name;
 }
@@ -186,7 +186,7 @@ std::string Dist_FBDRMatrix::getDistributionFunctionName( void ) const
  *
  * \return The member rules.
  */
-const MemberRules& Dist_FBDRMatrix::getParameterRules(void) const
+const MemberRules& Dist_FBDRP::getParameterRules(void) const
 {
     
     static MemberRules dist_member_rules;
@@ -211,7 +211,7 @@ const MemberRules& Dist_FBDRMatrix::getParameterRules(void) const
  *
  * \return The type spec of this object.
  */
-const TypeSpec& Dist_FBDRMatrix::getTypeSpec( void ) const
+const TypeSpec& Dist_FBDRP::getTypeSpec( void ) const
 {
     
     static TypeSpec ts = getClassTypeSpec();

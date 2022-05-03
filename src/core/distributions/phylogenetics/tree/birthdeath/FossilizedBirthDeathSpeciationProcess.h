@@ -1,5 +1,5 @@
-#ifndef FossilizedBirthDeathRangeProcess_H
-#define FossilizedBirthDeathRangeProcess_H
+#ifndef FossilizedBirthDeathSpeciationProcess_H
+#define FossilizedBirthDeathSpeciationProcess_H
 
 #include "AbstractFossilizedBirthDeathRangeProcess.h"
 #include "AbstractBirthDeathProcess.h"
@@ -7,9 +7,9 @@
 namespace RevBayesCore {
     
     /**
-     * @brief Piecewise-constant fossilized birth-death range distribution of extended trees.
+     * @brief Piecewise-constant fossilized birth-death species distribution of extended trees.
      *
-     * The piecewise-constant fossilized birth-death range process has constant rates for each time interval.
+     * The piecewise-constant fossilized birth-death species process has constant rates for each time interval.
      * At the end of each time interval there may be an abrupt rate-shift (jump) for each
      * of the rates. Additionally, there may be sampling at the end of each interval.
      * Finally, fossils are sampled with rate psi, the others (fossils and extant taxa) are
@@ -24,12 +24,12 @@ namespace RevBayesCore {
      * @since 2014-03-18, version 1.0
      *
      */
-    class FossilizedBirthDeathRangeProcess : public AbstractBirthDeathProcess, public AbstractFossilizedBirthDeathRangeProcess {
+    class FossilizedBirthDeathSpeciationProcess : public AbstractBirthDeathProcess, public AbstractFossilizedBirthDeathRangeProcess {
         
         using AbstractFossilizedBirthDeathRangeProcess::taxa;
 
     public:
-        FossilizedBirthDeathRangeProcess (const TypedDagNode<double>* ra,
+        FossilizedBirthDeathSpeciationProcess (const TypedDagNode<double>* ra,
                                       const DagNode *speciation,
                                       const DagNode *extinction,
                                       const DagNode *psi,
@@ -43,7 +43,7 @@ namespace RevBayesCore {
                                       bool resampling);  //!< Constructor
         
         // public member functions
-        FossilizedBirthDeathRangeProcess*               clone(void) const;                                         //!< Create an independent clone
+        FossilizedBirthDeathSpeciationProcess*          clone(void) const;                                         //!< Create an independent clone
 
         void                                            redrawValue(void);
         void                                            simulateClade(std::vector<TopologyNode *> &n, double age, double present);

@@ -1,24 +1,25 @@
 #ifndef Dist_FBDRP_H
 #define Dist_FBDRP_H
 
-#include "RlFossilizedBirthDeathRangeProcess.h"
 #include "FossilizedBirthDeathRangeProcess.h"
-#include "RlTimeTree.h"
+#include "RlFossilizedBirthDeathRangeProcess.h"
+#include "ModelVector.h"
+#include "RlMatrixReal.h"
 
 namespace RevLanguage {
     
     /**
-     * The RevLanguage wrapper of the Fossilized-Birth-Death Range Process
+     * The RevLanguage wrapper of the Fossilized-Birth-Death Range Matrix Process
      *
-     * The RevLanguage wrapper of the fossilzed-birth-death process connects
-     * the variables/parameters of the process and creates the internal FossilizedBirthDeathRangeProcess object.
+     * The RevLanguage wrapper of the fossilized-birth-death range matrix process connects
+     * the variables/parameters of the process and creates the internal FossilizedBirthDeathRangeMatrixProcess object.
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
      * @since 2014-01-26, version 1.0
      *c
      */
-    class Dist_FBDRP : public FossilizedBirthDeathRangeProcess<TimeTree> {
+    class Dist_FBDRP : public FossilizedBirthDeathRangeProcess<MatrixReal> {
         
     public:
         Dist_FBDRP( void );
@@ -35,17 +36,6 @@ namespace RevLanguage {
         
         // Distribution functions you have to override
         RevBayesCore::FossilizedBirthDeathRangeProcess*         createDistribution(void) const;
-        
-    protected:
-        
-        void                                                    setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
-        
-        
-    private:
-
-        RevPtr<const RevVariable>                               lambda_a;                                                                               //!< The anagenetic speciation rate(s)
-        RevPtr<const RevVariable>                               beta;                                                                                   //!< The symmetric speciation probability
-        RevPtr<const RevVariable>                               start_age;                                                                              //!< The start time of the process since the origin
 
     };
     
