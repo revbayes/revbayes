@@ -14,7 +14,7 @@
 
 ## Global settings
 
-NUM_VALIDATION_REPLICATES = 1000
+NUM_VALIDATION_REPLICATES = 200
 NUM_MCMC_ITERATIONS       = 10000
 
 
@@ -88,7 +88,7 @@ mat := fnTreePairwiseDistances(tree)
 
 # Have it follow the exponential error distribution with a rate of 0.005
 
-exp_error_dist ~ dnExponentialError(distMat=mat, lambda=0.005)
+exp_error_dist ~ dnExponentialError(distMat=mat, lambda=1.0)
 
 # Attach the data
 
