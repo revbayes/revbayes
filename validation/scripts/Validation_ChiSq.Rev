@@ -12,7 +12,7 @@
 
 ## Global settings
 
-NUM_VALIDATION_REPLICATES = 1000
+NUM_VALIDATION_REPLICATES = 100
 NUM_MCMC_ITERATIONS       = 10000
 
 
@@ -30,6 +30,7 @@ NUM_OBS = 10
 for ( j in 1:NUM_VARS ) {
 
   mean[j] ~ dnChisq(df)
+#  mean[j] ~ dnExp(1.0/df)
   moves.append( mvScale(mean[j],weight=2) )
 
   for ( i in 1:NUM_OBS){

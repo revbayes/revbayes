@@ -1,8 +1,8 @@
 ################################################################################
 #
-# RevBayes Validation Test: Binomial Distribution
+# RevBayes Validation Test: Uniform Distribution
 #
-# Model: Several random variables from a binomial distribution.
+# Model: Several random variable from a uniform distribution.
 #
 #
 # authors: Sebastian Hoehna
@@ -12,7 +12,7 @@
 
 ## Global settings
 
-NUM_VALIDATION_REPLICATES = 10000
+NUM_VALIDATION_REPLICATES = 1000
 NUM_MCMC_ITERATIONS       = 10000
 
 
@@ -20,19 +20,16 @@ NUM_MCMC_ITERATIONS       = 10000
 moves     = VectorMoves()
 monitors  = VectorMonitors()
 
-n ~ dnUniformNatural(10,20)
-p ~ dnBeta(4,2)
-moves.append( mvRandomNaturalWalk(n,weight=5) )
-moves.append( mvRandomGeometricWalk(n,weight=5) )
-moves.append( mvBetaProbability(p, weight=5) )
+max ~ dnExp(2.0)
+moves.append( mvScale(max,weight=2) )
 
 NUM_VARS = 3
 NUM_OBS = 10
 
 for ( j in 1:NUM_VARS ) {
 
-  mean[j] ~ dnBinomial(n,p)
-  moves.append( mvRandomNaturalWalk(mean[j],weight=20) )
+  mean[j] ~ dnUniform(lower=-2,upper=max)
+  moves.append( mvSlide(mean[j],weight=2) )
 
   for ( i in 1:NUM_OBS){
     index = (j-1)*NUM_OBS + i
@@ -42,21 +39,20 @@ for ( j in 1:NUM_VARS ) {
 }
 
 
+
 #############
 # THE Model #
 #############
 
 # We define our model.
 # We can use any node of our model as a handle, here we chose to use the rate matrix.
-mymodel = model(n)
-
-
+mymodel = model(max)
 
 
 
 mymcmc = mcmc(mymodel, monitors, moves)
 
-validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Binomial" )
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_uniform" )
 validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
 validation.run(generations=NUM_MCMC_ITERATIONS)
 validation.summarize(coverageProbability=0.9)
