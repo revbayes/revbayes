@@ -44,7 +44,7 @@ namespace RevBayesCore {
         RateMatrix_PoMo2N(long num_states, long in_n )  ;
         RateMatrix_PoMo2N(const RateMatrix_PoMo2N& m) ;
 
-        RateMatrix_PoMo2N&                         operator=(const RateMatrix_PoMo2N &r) ;
+        RateMatrix_PoMo2N&                          operator=(const RateMatrix_PoMo2N &r) ;
         virtual                                    ~RateMatrix_PoMo2N(void);                     //!< Destructor
 
         // RateMatrix functions
@@ -69,6 +69,17 @@ namespace RevBayesCore {
         std::vector<double>                         phi;    
         std::vector<double>                         stationaryVector;                    //!< Holds the stationary frequencies
 
+        
+        void                                calculateCijk(void);                                                                //!< Do precalculations on eigenvectors and their inverse
+        void                                tiProbsEigens(double t, TransitionProbabilityMatrix& P) const;                      //!< Calculate transition probabilities for real case
+        void                                tiProbsComplexEigens(double t, TransitionProbabilityMatrix& P) const;               //!< Calculate transition probabilities for complex case
+        void                                updateEigenSystem(void);                                                            //!< Update the system of eigenvalues and eigenvectors
+        
+        EigenSystem*                        theEigenSystem;                                                                     //!< Holds the eigen system
+        std::vector<double>                 c_ijk;                                                                              //!< Vector of precalculated product of eigenvectors and their inverse
+        std::vector<std::complex<double> >  cc_ijk;                                                                             //!< Vector of precalculated product of eigenvectors and thier inverse for complex case
+        
+        
     };
 
 }
