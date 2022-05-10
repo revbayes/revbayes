@@ -588,11 +588,12 @@ void AbstractRateMatrix::exponentiateMatrixByScalingAndSquaring(double t,  Trans
     {
         multiplyMatrices(p, p, r);
         p = r;
-
     }
+    
 }
 
-void AbstractRateMatrix::multiplyMatrices(TransitionProbabilityMatrix& p,  TransitionProbabilityMatrix& q,  TransitionProbabilityMatrix& r) const {
+void AbstractRateMatrix::multiplyMatrices(TransitionProbabilityMatrix& p,  TransitionProbabilityMatrix& q,  TransitionProbabilityMatrix& r) const
+{
 
     // could probably use boost::ublas here, for the moment we do it ourselves.
     for ( size_t i = 0; i < num_states; i++ )
