@@ -2815,6 +2815,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
                 }
 
             }
+            
+            // safety check that we won't divide by zero
+            if ( max == 0 )
+            {
+                max = 1.0;
+            }
 
             // Don't divide by zero or NaN.
             if (not (max > 0)) continue;
@@ -4253,6 +4259,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
             }
 
             rm->calculateTransitionProbabilities( start_age, end_age,  rate * r, this->transition_prob_matrices[j] );
+            
         }
     }
 }
