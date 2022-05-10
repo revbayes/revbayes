@@ -51,10 +51,10 @@ RevPtr<RevVariable> Func_TaxonReader::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    const RlString& fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() );
-    std::string del = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+    const std::string& fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+    const std::string& del = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
     
-    RevBayesCore::TaxonReader tr = RevBayesCore::TaxonReader(fn.getValue(), del);
+    RevBayesCore::TaxonReader tr = RevBayesCore::TaxonReader(fn, del);
     const std::vector<RevBayesCore::Taxon>& taxa = tr.getTaxa();
     
     return new RevVariable( new ModelVector<Taxon>( taxa ) );
@@ -65,17 +65,17 @@ RevPtr<RevVariable> Func_TaxonReader::execute( void )
 const ArgumentRules& Func_TaxonReader::getArgumentRules( void ) const
 {
     
-    static ArgumentRules argumentRules = ArgumentRules();
+    static ArgumentRules argument_rules = ArgumentRules();
     static bool rules_set = false;
     
-    if (!rules_set)
+    if ( rules_set == false )
     {
-        argumentRules.push_back( new ArgumentRule( "filename", RlString::getClassTypeSpec(), "Relative or absolute file name.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new Delimiter() );
+        argument_rules.push_back( new ArgumentRule( "filename", RlString::getClassTypeSpec(), "Relative or absolute file name.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argument_rules.push_back( new Delimiter() );
         rules_set = true;
     }
     
-    return argumentRules;
+    return argument_rules;
 }
 
 
