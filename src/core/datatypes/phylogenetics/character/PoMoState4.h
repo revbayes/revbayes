@@ -39,7 +39,7 @@ namespace RevBayesCore {
                   const size_t position, const size_t virtualPopulationSize);
         PoMoState4(const PoMoState4& t);                                                //!< Copy constructor
 
-        PoMoState4*                       clone(void) const;                                 //!< Get a copy of this object
+        PoMoState4*                     clone(void) const;                                 //!< Get a copy of this object
 
         // Discrete character observation functions
         void                            addState(const std::string &symbol);                //!< Add a character state to the set of character states
