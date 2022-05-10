@@ -24,7 +24,7 @@ namespace RevBayesCore {
         
     public:
         
-        TaxonReader(const std::string &fn, std::string d="");                        //!< Constructor
+        TaxonReader(const std::string &fn, const std::string& d="");                        //!< Constructor
         
         const std::vector<Taxon>&   getTaxa(void) const;                        //!< Get the taxa.
 

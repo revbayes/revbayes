@@ -23,7 +23,7 @@ using namespace RevBayesCore;
  * \param[in]     fn       The name of the file where the data is stored.
  * \param[in]     delim    The delimiter between the columns.
  */
-TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDataReader( fn, delim )
+TaxonReader::TaxonReader(const std::string &fn, const std::string& delim) : DelimitedDataReader( fn, delim )
 {
     
     //Reading the header
