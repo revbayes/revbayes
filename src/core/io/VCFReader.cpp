@@ -1,7 +1,5 @@
 #include "DiscreteTaxonData.h"
 #include "VCFReader.h"
-#include "PoMoState4.h"
-#include "PoMoState.h"
 #include "RbFileManager.h"
 
 #include "RbConstants.h"
