@@ -11,7 +11,7 @@
 
 using namespace RevBayesCore;
 
-DelimitedDataReader::DelimitedDataReader(const std::string &fn, std::string d, size_t lines_skipped) :
+DelimitedDataReader::DelimitedDataReader(const std::string &fn, const std::string& d, size_t lines_skipped) :
     filename(fn), 
     delimiter(d),
     chars()
