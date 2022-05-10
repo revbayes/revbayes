@@ -8,7 +8,7 @@
 #include "Natural.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlTaxon.h"
-#include "PoMoState4Converter.h"
+#include "PoMoStateConverter.h"
 #include "TypedDagNode.h"
 #include "Argument.h"
 #include "ArgumentRule.h"
@@ -40,20 +40,22 @@ Func_pomoState4Converter::Func_pomoState4Converter( void ) : Procedure( )
  *
  * \return A new copy of the process.
  */
-Func_pomoState4Converter* Func_pomoState4Converter::clone( void ) const {
+Func_pomoState4Converter* Func_pomoState4Converter::clone( void ) const
+{
     
     return new Func_pomoState4Converter( *this );
 }
 
 
-RevPtr<RevVariable> Func_pomoState4Converter::execute() {
+RevPtr<RevVariable> Func_pomoState4Converter::execute()
+{
     
     const RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* aln = static_cast<const AbstractHomologousDiscreteCharacterData&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     
     RevBayesCore::TypedDagNode< long >* n = static_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
 
 
-    RevBayesCore::PoMoState4Converter* c = new RevBayesCore::PoMoState4Converter(  );
+    RevBayesCore::PoMoStateConverter* c = new RevBayesCore::PoMoStateConverter(  );
     
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::Taxon> >* taxa  = static_cast< const ModelVector<Taxon> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     
@@ -64,7 +66,7 @@ RevPtr<RevVariable> Func_pomoState4Converter::execute() {
         gene2species[it->getName()] = it->getSpeciesName();
     }
     
-    AbstractHomologousDiscreteCharacterData PoMoAln = c->convertData( aln->getValue(), (int)n->getValue(), gene2species ) ;
+    AbstractHomologousDiscreteCharacterData PoMoAln = c->convertData4( aln->getValue(), (int)n->getValue(), gene2species ) ;
         
     return new RevVariable( new AbstractHomologousDiscreteCharacterData( PoMoAln ) );
 }

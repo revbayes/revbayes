@@ -1,20 +1,3 @@
-/**
- * @file
- * This file contains the declaration of the RevLanguage pomoState4Converter, which
- * is used to convert a DNA alignment into a POMO alignment.
- *
- * @brief Declaration and implementation of pomoState4Converter
- *
- * (c) Copyright 2009- under GPL version 3
- * @date Last modified: $Date: 2012-04-20 04:06:14 +0200 (Fri, 20 Apr 2012) $
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- * @version 1.0
- *
- * $Id: Func_pomoState4Converter.h 1406 2012-04-20 02:06:14Z Boussau $
- */
-
-
 #ifndef Func_pomoState4Converter_H
 #define Func_pomoState4Converter_H
 
@@ -24,6 +7,7 @@
 #include "RevPtr.h"
 
 namespace RevLanguage {
+
 class ArgumentRules;
 class RevVariable;
 class TypeSpec;
@@ -34,7 +18,7 @@ class TypeSpec;
         Func_pomoState4Converter( void );
         
         // Basic utility functions
-        Func_pomoState4Converter*                        clone(void) const;                                          //!< Clone the object
+        Func_pomoState4Converter*                       clone(void) const;                                          //!< Clone the object
         static const std::string&                       getClassType(void);                                         //!< Get Rev type
         static const TypeSpec&                          getClassTypeSpec(void);                                     //!< Get class type spec
         std::string                                     getFunctionName(void) const;                                //!< Get the primary name of the function in Rev
