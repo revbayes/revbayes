@@ -44,11 +44,11 @@ template <class valueType> class TypedDagNode;
 
         protected:
 
-            void                                                computeRootLikelihood(size_t root, size_t l, size_t r);
-            void                                                computeRootLikelihood(size_t root, size_t l, size_t r, size_t m);
-            void                                                computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r);
-            void                                                computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m);
-            void                                                computeTipLikelihood(const TopologyNode &node, size_t nIdx);
+            void                                                computeRootLikelihood( size_t root, size_t left, size_t right, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset);
+            void                                                computeRootLikelihood( size_t root, size_t left, size_t right, size_t middle, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset);
+            void                                                computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset);
+            void                                                computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset);
+            void                                                computeTipLikelihood(const TopologyNode &node, size_t node_index, double* likelihoods, size_t likelihood_offset,  size_t node_offset, size_t pattern_block_size, size_t mixture_offset, const std::vector<std::vector<RbBitSet> >& ambiguous_char_matrix, const std::vector<std::vector<unsigned long> >& char_matrix, const std::vector<std::vector<bool> >& gap_matrix);
 
             void                                                computeRootCorrection(size_t root, size_t l, size_t r);
             void                                                computeRootCorrection(size_t root, size_t l, size_t r, size_t m);
