@@ -63,6 +63,7 @@ namespace RevBayesCore {
         void                            setWeighted( bool tf );
         bool                            isGapState(void) const;                             //!< Get whether this is a gapped character state
         bool                            isMissingState(void) const;                         //!< Get whether this is a missing character state
+        bool                            isStateIncludedInAscertainmentBiasCorrection(void) const;  //!< Is the currently set state included in ascertainment bias correction
         void                            setGapState(bool tf);                               //!< set whether this is a gapped character
         void                            setMissingState(bool tf);                           //!< set whether this is a missing character
         
@@ -74,7 +75,7 @@ namespace RevBayesCore {
         size_t                          index_single_state;
         size_t                          virtual_population_size;                            //!< The virtual population size of the PoMo model (by default, 10)
         size_t                          num_raw_states;                                     //!< The number of raw states (4 for A,C,G and T)
-        size_t                          num_pomo_states;                                     //!< The number of raw states (4 for A,C,G and T)
+        size_t                          num_pomo_states;                                    //!< The number of PoMo states
         size_t                          num_observed_states;
         RbBitSet                        state;
         

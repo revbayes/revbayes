@@ -145,6 +145,14 @@ bool PoMoState::isMissingState( void ) const
 }
 
 
+bool PoMoState::isStateIncludedInAscertainmentBiasCorrection( void ) const
+{
+    
+    size_t index = getStateIndex();
+    return index < num_raw_states;
+}
+
+
 const std::string& PoMoState::nexusSeparator(void) const
 {
     static std::string sep = " ";
