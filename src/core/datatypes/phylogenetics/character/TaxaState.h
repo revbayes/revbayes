@@ -33,7 +33,7 @@ namespace RevBayesCore {
         TaxaState(const std::string &s, int m);                                   //!< Constructor with an observation
         TaxaState(int s, int m);                                                  //!< Constructor with an observation
 
-        TaxaState*            clone(void) const;                                  //!< Get a copy of this object
+        TaxaState*                      clone(void) const;                                  //!< Get a copy of this object
 
         // Discrete character observation functions
         void                            addState(const std::string &symbol);                //!< Add a character state to the set of character states

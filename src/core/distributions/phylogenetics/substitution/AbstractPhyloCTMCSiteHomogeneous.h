@@ -73,7 +73,7 @@ namespace RevBayesCore {
         enum AbstractAscertainmentBias { NONE, VARIABLE };
         
         // Note, we need the size of the alignment in the constructor to correctly simulate an initial state
-        AbstractPhyloCTMCSiteHomogeneous(const TypedDagNode<Tree> *t, size_t nChars, size_t nMix, bool c, size_t nSites, bool amb, bool wd = false, bool internal = false, bool gapmatch = true );
+        AbstractPhyloCTMCSiteHomogeneous(const TypedDagNode<Tree> *t, size_t nChars, size_t nMix, bool c, size_t nSites, bool amb, bool wd = false, bool internal = false, bool gapmatch = true, AbstractAscertainmentBias abc = AbstractAscertainmentBias::NONE );
         AbstractPhyloCTMCSiteHomogeneous(const AbstractPhyloCTMCSiteHomogeneous &n);                                                                                    //!< Copy constructor
         virtual                                                            ~AbstractPhyloCTMCSiteHomogeneous(void);                                                     //!< Virtual destructor
 
@@ -211,12 +211,11 @@ namespace RevBayesCore {
         size_t                                                              site_offset;
 
         // flags
+        AbstractAscertainmentBias                                           ascertainment_bias_correction;
         bool                                                                using_ambiguous_characters;
         bool                                                                treat_unknown_as_gap;
         bool                                                                treat_ambiguous_as_gaps;
-
         bool                                                                using_weighted_characters;
-
         bool                                                                use_marginal_likelihoods;
         mutable bool                                                        in_mcmc_mode;
 
@@ -290,7 +289,7 @@ namespace RevBayesCore {
 
 
 template<class charType>
-RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::AbstractPhyloCTMCSiteHomogeneous(const TypedDagNode<Tree> *t, size_t nChars, size_t nMix, bool c, size_t nSites, bool amb, bool internal, bool gapmatch, bool wd) :
+RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::AbstractPhyloCTMCSiteHomogeneous(const TypedDagNode<Tree> *t, size_t nChars, size_t nMix, bool c, size_t nSites, bool amb, bool internal, bool gapmatch, bool wd, AbstractAscertainmentBias abc) :
 TypedDistribution< AbstractHomologousDiscreteCharacterData >(  NULL ),
 ln_prob( 0.0 ),
 stored_ln_prob( 0.0 ),
@@ -303,11 +302,9 @@ num_site_mixtures( nMix ),
 num_matrices( 1 ),
 tau( t ),
 transition_prob_matrices( std::vector<TransitionProbabilityMatrix>(num_site_mixtures, TransitionProbabilityMatrix(num_chars) ) ),
-//    partialLikelihoods( new double[2*num_nodes*num_site_mixtures*num_sites*num_chars] ),
 data_partial_likelihoods( NULL ),
 bias_partial_likelihoods( NULL ),
 active_likelihood( std::vector<size_t>(num_nodes, 0) ),
-//    marginal_likelihoods( new double[num_nodes*num_site_mixtures*num_sites*num_chars] ),
 marginal_likelihoods( NULL ),
 data_per_node_site_log_scaling_factors( std::vector<std::vector< std::vector<double> > >(2, std::vector<std::vector<double> >(num_nodes, std::vector<double>(data_num_sites, 0.0) ) ) ),
 bias_per_node_site_log_scaling_factors(),
@@ -329,6 +326,7 @@ taxon_name_2_tip_index_map(),
 touched( false ),
 changed_nodes( std::vector<bool>(num_nodes, false) ),
 dirty_nodes( std::vector<bool>(num_nodes, true) ),
+ascertainment_bias_correction( abc ),
 using_ambiguous_characters( amb ),
 treat_unknown_as_gap( true ),
 treat_ambiguous_as_gaps( false ),
@@ -374,13 +372,49 @@ sampled_site_matrix_component( 0 )
     
     // now fudge a dataset for the ascertainment bias correction
     bias_num_sites = 0;
+    if ( ascertainment_bias_correction == AbstractAscertainmentBias::VARIABLE )
+    {
+        // our idea here is to build a character matrix with all possible invariant states
+        // therefore, we need to get all possible states and add one column per state to our data matrix
+        size_t num_tips = tau->getValue().getNumberOfTips();
+        bias_ambiguous_char_matrix.resize(num_tips);
+        bias_char_matrix.resize(num_tips);
+        bias_gap_matrix.resize(num_tips);
+        
+        // get a dummy character for the ascertainment bias correction
+        charType abc_state = template_state;
+        
+        // set state to the first state
+        abc_state.setToFirstState();
+        size_t num_states_total = abc_state.getNumberOfStates();
+        for ( size_t i=0; i<num_states_total; ++i )
+        {
+            // check if the current set state is included in as a ascertainment bias correction state
+            if ( abc_state.isStateIncludedInAscertainmentBiasCorrection() == true )
+            {
+                // now add this state for all tips to our data matrix
+                for (size_t j=0; j<num_tips; ++j)
+                {
+                    bias_ambiguous_char_matrix[j].push_back( abc_state.getState() );
+                    bias_char_matrix[j].push_back( abc_state.getStateIndex() );
+                    bias_gap_matrix[j].push_back( false );
+                } // end-for over all tips
+                
+                ++bias_num_sites;
+            } // end-if this state was included
+            
+            // move to the next state
+            ++abc_state;
+        }
+
+    }
     bias_per_node_site_log_scaling_factors = std::vector<std::vector< std::vector<double> > >(2, std::vector<std::vector<double> >(num_nodes, std::vector<double>(bias_num_sites, 0.0) ) );
     bias_num_patterns = bias_num_sites;
     bias_site_pattern = std::vector<size_t>(bias_num_sites, 0);
     
-    bias_active_likelihood_offset   =  num_nodes*num_site_mixtures*bias_num_sites*num_chars;
-    bias_node_offset                =  num_site_mixtures*bias_num_sites*num_chars;
-    bias_mixture_offset             =  bias_num_sites*num_chars;
+    bias_active_likelihood_offset   =  num_nodes * num_site_mixtures * bias_num_sites * num_chars;
+    bias_node_offset                =              num_site_mixtures * bias_num_sites * num_chars;
+    bias_mixture_offset             =                                  bias_num_sites * num_chars;
 //    bias_site_offset                =  num_chars;
 
     // add the parameters to our set (in the base class)

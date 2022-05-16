@@ -28,10 +28,10 @@ namespace RevBayesCore {
     class DoubletState : public DiscreteCharacterState {
 
     public:
-        DoubletState(size_t n=0);                                                             //!< Default constructor
-        DoubletState(const std::string &symbol);                                              //!< Constructor with codon observation
+                                        DoubletState(size_t n=0);                           //!< Default constructor
+                                        DoubletState(const std::string &symbol);            //!< Constructor with codon observation
 
-        DoubletState*                     clone(void) const;                                  //!< Get a copy of this object
+        DoubletState*                   clone(void) const;                                  //!< Get a copy of this object
 
         // Discrete character observation functions
         void                            addState(const std::string &symbol);                //!< Add a character state to the set of character states

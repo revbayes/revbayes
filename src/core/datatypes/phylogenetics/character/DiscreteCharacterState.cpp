@@ -277,6 +277,19 @@ bool DiscreteCharacterState::isAmbiguous( void ) const
     return isMissingState() || isGapState() || ( getNumberObservedStates() > 1 );
 }
 
+/**
+ * Is the currently set state included in ascertainment bias correction
+ * If so, then this state will be used for to condition on not observing all
+ * taxa in this state. Some data types have intermediate states,
+ * so these may be excluded from the ascertainment bias correction.
+ *
+ * @return always true for the standard case
+ */
+bool DiscreteCharacterState::isStateIncludedInAscertainmentBiasCorrection(void) const
+{
+    return true;
+}
+
 
 /** Is this state part of the current set of states?
  * @param index index of a possible state
