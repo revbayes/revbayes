@@ -260,7 +260,7 @@ namespace RevBayesCore {
     private:
 
         // private methods
-        void                                                                fillLikelihoodVector(const TopologyNode &node, size_t node_index, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t num_patterns, size_t mixture_offset, const std::vector<std::vector<RbBitSet> >& ambiguous_char_matrix, const std::vector<std::vector<unsigned long> >& char_matrix, const std::vector<std::vector<bool> >& gap_matrix, std::vector< std::vector< std::vector<double> > >& scaling_factors);
+        void                                                                fillLikelihoodVector(const TopologyNode &node, size_t node_index);
         void                                                                recursiveMarginalLikelihoodComputation(size_t nIdx);
         
         virtual void                                                        scale(size_t i, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset, std::vector< std::vector< std::vector<double> > >& scaling_factors);
@@ -291,7 +291,7 @@ namespace RevBayesCore {
 
 
 template<class charType>
-RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::AbstractPhyloCTMCSiteHomogeneous(const TypedDagNode<Tree> *t, size_t nChars, size_t nMix, bool c, size_t nSites, bool amb, bool internal, bool gapmatch, bool wd, AbstractAscertainmentBias abc) :
+RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::AbstractPhyloCTMCSiteHomogeneous(const TypedDagNode<Tree> *t, size_t nChars, size_t nMix, bool c, size_t nSites, bool amb, bool wd, bool internal, bool gapmatch, AbstractAscertainmentBias abc) :
 TypedDistribution< AbstractHomologousDiscreteCharacterData >(  NULL ),
 ln_prob( 0.0 ),
 stored_ln_prob( 0.0 ),
@@ -385,7 +385,8 @@ sampled_site_matrix_component( 0 )
         bias_gap_matrix.resize(num_tips);
         
         // get a dummy character for the ascertainment bias correction
-        charType abc_state = template_state;
+        charType abc_state = charType( num_chars );
+//        charType abc_state = template_state;
         
         // set state to the first state
         abc_state.setToFirstState();
@@ -406,8 +407,11 @@ sampled_site_matrix_component( 0 )
                 ++bias_num_sites;
             } // end-if this state was included
             
-            // move to the next state
-            ++abc_state;
+            // move to the next state (only if there is another one)
+            if ( i < (num_states_total-1) )
+            {
+                ++abc_state;
+            }
         }
 
     }
@@ -978,31 +982,47 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
         {
             const TopologyNode &left = root.getChild(0);
             size_t left_index = left.getIndex();
-            fillLikelihoodVector( left, left_index, data_partial_likelihoods, data_active_likelihood_offset, data_node_offset, data_num_patterns, data_mixture_offset, data_ambiguous_char_matrix, data_char_matrix, data_gap_matrix, data_per_node_site_log_scaling_factors );
+            fillLikelihoodVector( left, left_index );
 
             const TopologyNode &right = root.getChild(1);
             size_t right_index = right.getIndex();
-            fillLikelihoodVector( right, right_index, data_partial_likelihoods, data_active_likelihood_offset, data_node_offset, data_num_patterns, data_mixture_offset, data_ambiguous_char_matrix, data_char_matrix, data_gap_matrix, data_per_node_site_log_scaling_factors );
+            fillLikelihoodVector( right, right_index );
 
             computeRootLikelihood( root_index, left_index, right_index, data_partial_likelihoods, data_active_likelihood_offset, data_node_offset, data_num_patterns, data_mixture_offset );
             scale(root_index, left_index, right_index, data_partial_likelihoods, data_active_likelihood_offset, data_node_offset, data_num_patterns, data_mixture_offset, data_per_node_site_log_scaling_factors);
-
+            
+            // compute the likelihood for the ascertainment bias correction if necessary
+            if ( ascertainment_bias_correction != AbstractAscertainmentBias::NONE )
+            {
+                computeRootLikelihood( root_index, left_index, right_index, bias_partial_likelihoods, bias_active_likelihood_offset, bias_node_offset, bias_num_patterns, bias_mixture_offset );
+                scale(root_index, left_index, right_index, bias_partial_likelihoods, bias_active_likelihood_offset, bias_node_offset, bias_num_patterns, bias_mixture_offset, bias_per_node_site_log_scaling_factors);
+            }
+            
         }
         else if ( root.getNumberOfChildren() == 3 ) // unrooted trees have three children for the root
         {
             const TopologyNode &left = root.getChild(0);
             size_t left_index = left.getIndex();
-            fillLikelihoodVector( left, left_index, data_partial_likelihoods, data_active_likelihood_offset, data_node_offset, data_num_patterns, data_mixture_offset, data_ambiguous_char_matrix, data_char_matrix, data_gap_matrix, data_per_node_site_log_scaling_factors );
+            fillLikelihoodVector( left, left_index );
             const TopologyNode &right = root.getChild(1);
             size_t right_index = right.getIndex();
-            fillLikelihoodVector( right, right_index, data_partial_likelihoods, data_active_likelihood_offset, data_node_offset, data_num_patterns, data_mixture_offset, data_ambiguous_char_matrix, data_char_matrix, data_gap_matrix, data_per_node_site_log_scaling_factors );
+            fillLikelihoodVector( right, right_index );
             const TopologyNode &middle = root.getChild(2);
             size_t middle_index = middle.getIndex();
-            fillLikelihoodVector( middle, middle_index, data_partial_likelihoods, data_active_likelihood_offset, data_node_offset, data_num_patterns, data_mixture_offset, data_ambiguous_char_matrix, data_char_matrix, data_gap_matrix, data_per_node_site_log_scaling_factors );
+            fillLikelihoodVector( middle, middle_index );
 
             computeRootLikelihood( root_index, left_index, right_index, middle_index, data_partial_likelihoods, data_active_likelihood_offset, data_node_offset, data_num_patterns, data_mixture_offset );
             scale(root_index, left_index, right_index, middle_index, data_partial_likelihoods, data_active_likelihood_offset, data_node_offset, data_num_patterns, data_mixture_offset, data_per_node_site_log_scaling_factors);
-
+            
+            // compute the likelihood for the ascertainment bias correction if necessary
+            if ( ascertainment_bias_correction != AbstractAscertainmentBias::NONE )
+            {
+//                fillLikelihoodVector( left, left_index, bias_partial_likelihoods, bias_active_likelihood_offset, bias_node_offset, bias_num_patterns, bias_mixture_offset, bias_ambiguous_char_matrix, bias_char_matrix, bias_gap_matrix, bias_per_node_site_log_scaling_factors );
+//                fillLikelihoodVector( right, right_index, bias_partial_likelihoods, bias_active_likelihood_offset, bias_node_offset, bias_num_patterns, bias_mixture_offset, bias_ambiguous_char_matrix, bias_char_matrix, bias_gap_matrix, bias_per_node_site_log_scaling_factors );
+//                fillLikelihoodVector( middle, middle_index, bias_partial_likelihoods, bias_active_likelihood_offset, bias_node_offset, bias_num_patterns, bias_mixture_offset, bias_ambiguous_char_matrix, bias_char_matrix, bias_gap_matrix, bias_per_node_site_log_scaling_factors );
+                computeRootLikelihood( root_index, left_index, right_index, middle_index, bias_partial_likelihoods, bias_active_likelihood_offset, bias_node_offset, bias_num_patterns, bias_mixture_offset );
+                scale(root_index, left_index, right_index, middle_index, bias_partial_likelihoods, bias_active_likelihood_offset, bias_node_offset, bias_num_patterns, bias_mixture_offset, bias_per_node_site_log_scaling_factors);
+            }
         }
         else
         {
@@ -2652,7 +2672,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::tipDrawJointCondi
 }
 
 template<class charType>
-void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVector(const TopologyNode &node, size_t node_index, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t num_patterns, size_t mixture_offset, const std::vector<std::vector<RbBitSet> >& ambiguous_char_matrix, const std::vector<std::vector<unsigned long> >& char_matrix, const std::vector<std::vector<bool> >& gap_matrix, std::vector< std::vector< std::vector<double> > >& scaling_factors)
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVector(const TopologyNode &node, size_t node_index)
 {
 
     // check for recomputation
@@ -2665,29 +2685,43 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
         {
             // this is a tip node
             // compute the likelihood for the tip and we are done
-            computeTipLikelihood(node, node_index, likelihoods, likelihood_offset, node_offset, num_patterns, mixture_offset, ambiguous_char_matrix, char_matrix, gap_matrix);
+            computeTipLikelihood(node, node_index, data_partial_likelihoods, data_active_likelihood_offset, data_node_offset, data_num_patterns, data_mixture_offset, data_ambiguous_char_matrix, data_char_matrix, data_gap_matrix);
 
             // rescale likelihood vector
-            scale(node_index, likelihoods, likelihood_offset, node_offset, num_patterns, mixture_offset, scaling_factors);
+            scale(node_index, data_partial_likelihoods, data_active_likelihood_offset, data_node_offset, data_num_patterns, data_mixture_offset, data_per_node_site_log_scaling_factors );
 
+            if ( ascertainment_bias_correction != AbstractAscertainmentBias::NONE )
+            {
+                computeTipLikelihood(node, node_index, bias_partial_likelihoods, bias_active_likelihood_offset, bias_node_offset, bias_num_patterns, bias_mixture_offset, bias_ambiguous_char_matrix, bias_char_matrix, bias_gap_matrix);
+
+                // rescale likelihood vector
+                scale(node_index, bias_partial_likelihoods, bias_active_likelihood_offset, bias_node_offset, bias_num_patterns, bias_mixture_offset, bias_per_node_site_log_scaling_factors );
+            }
         }
         else
         {
             // this is an internal node
             const TopologyNode     &left        = node.getChild(0);
             size_t                  left_index  = left.getIndex();
-            fillLikelihoodVector( left, left_index, likelihoods, likelihood_offset, node_offset, num_patterns, mixture_offset, ambiguous_char_matrix, char_matrix, gap_matrix, scaling_factors );
+            fillLikelihoodVector( left, left_index );
             const TopologyNode     &right       = node.getChild(1);
             size_t                  right_index = right.getIndex();
-            fillLikelihoodVector( right, right_index, likelihoods, likelihood_offset, node_offset, num_patterns, mixture_offset, ambiguous_char_matrix, char_matrix, gap_matrix, scaling_factors );
+            fillLikelihoodVector( right, right_index );
 
             
             // now compute the likelihoods of this internal node
-            computeInternalNodeLikelihood(node, node_index, left_index, right_index, likelihoods, likelihood_offset, node_offset, num_patterns, mixture_offset);
+            computeInternalNodeLikelihood(node, node_index, left_index, right_index, data_partial_likelihoods, data_active_likelihood_offset, data_node_offset, data_num_patterns, data_mixture_offset);
 
             // rescale likelihood vector
-            scale(node_index,left_index,right_index, likelihoods, likelihood_offset, node_offset, num_patterns, mixture_offset, scaling_factors);
+            scale(node_index, left_index, right_index, data_partial_likelihoods, data_active_likelihood_offset, data_node_offset, data_num_patterns, data_mixture_offset, data_per_node_site_log_scaling_factors );
 
+            if ( ascertainment_bias_correction != AbstractAscertainmentBias::NONE )
+            {
+                computeInternalNodeLikelihood(node, node_index, left_index, right_index, bias_partial_likelihoods, bias_active_likelihood_offset, bias_node_offset, bias_num_patterns, bias_mixture_offset);
+
+                // rescale likelihood vector
+                scale(node_index, left_index, right_index, bias_partial_likelihoods, bias_active_likelihood_offset, bias_node_offset, bias_num_patterns, bias_mixture_offset, bias_per_node_site_log_scaling_factors );
+            }
         }
 
     }
@@ -3098,13 +3132,19 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
 
         // we resize the partial likelihood vectors to the new dimensions
         delete [] data_partial_likelihoods;
+        delete [] bias_partial_likelihoods;
 
         data_partial_likelihoods = new double[2*data_active_likelihood_offset];
+        bias_partial_likelihoods = new double[2*bias_active_likelihood_offset];
 
         // reinitialize likelihood vectors
         for (size_t i = 0; i < 2*data_active_likelihood_offset; i++)
         {
             data_partial_likelihoods[i] = 0.0;
+        }
+        for (size_t i = 0; i < 2*bias_active_likelihood_offset; i++)
+        {
+            bias_partial_likelihoods[i] = 0.0;
         }
 
     }
@@ -3125,6 +3165,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
     }
 
     data_per_node_site_log_scaling_factors = std::vector<std::vector< std::vector<double> > >(2, std::vector<std::vector<double> >(num_nodes, std::vector<double>(data_pattern_block_size, 0.0) ) );
+    bias_per_node_site_log_scaling_factors = std::vector<std::vector< std::vector<double> > >(2, std::vector<std::vector<double> >(num_nodes, std::vector<double>(bias_num_sites, 0.0) ) );
 
     transition_prob_matrices = std::vector<TransitionProbabilityMatrix>(num_site_mixtures, TransitionProbabilityMatrix(num_chars) );
 
@@ -3924,7 +3965,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::sumRootLikeliho
             bias_sum_partial_probs += exp(bias_site_likelihoods[site]);
         }
         
-        sum_partial_probs -= log( bias_sum_partial_probs ) * data_num_sites;
+        sum_partial_probs -= log( 1.0 - bias_sum_partial_probs ) * data_num_sites;
     }
 
 #ifdef RB_MPI
