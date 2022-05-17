@@ -80,6 +80,7 @@
 
 
 /* Functions related to evolution (in folder "functions/phylogenetics") */
+#include "Func_AlleleFrequencySimulator.h"
 #include "Func_avgDistanceMatrix.h"
 #include "Func_BirthDeathSimulator.h"
 #include "Func_branchScoreDistance.h"
@@ -412,6 +413,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_SampledCladogenesisRootFrequencies() );
 
 		/* Functions related to phylogenetic trees (in folder "functions/phylogenetics/tree") */
+        addFunction( new Func_AlleleFrequencySimulator()                        );
         addFunction( new Func_BirthDeathSimulator()                             );
         addFunction( new Func_branchScoreDistance()                             );
         addFunction( new Func_checkNodeOrderConstraints()                       );
