@@ -41,8 +41,6 @@ RevPtr<RevVariable> Func_readVCF::execute( void )
     
     // get the information from the arguments for reading the file
     const RlString& fn = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() );
-//    RevBayesCore::TypedDagNode<long>* virtualPopulationSize = static_cast<const Integer &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-//    RevBayesCore::TypedDagNode<long>* n_states = static_cast<const Integer &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     
     
     const std::string type = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
