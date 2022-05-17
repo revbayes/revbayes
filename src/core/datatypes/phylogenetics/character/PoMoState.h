@@ -29,7 +29,7 @@ namespace RevBayesCore {
     class PoMoState : public DiscreteCharacterState {
         
     public:
-        //        PoMoState(size_t n);                                                                    //!< Default constructor
+        //        PoMoState(size_t n);                                                                          //!< Default constructor
         //        PoMoState(size_t n, size_t vps);                                                              //!< Constructor with virtual population size
         //        PoMoState(size_t n, const std::string &s);                                                    //!< Constructor with an observation
         PoMoState(size_t n=4, size_t vps = 10, const std::string &s = "", const std::string &chromosome = "",
