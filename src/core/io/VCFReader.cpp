@@ -1,6 +1,8 @@
 #include "DiscreteTaxonData.h"
 #include "VCFReader.h"
 #include "RbFileManager.h"
+#include "RandomNumberGenerator.h"
+#include "RandomNumberFactory.h"
 
 #include "RbConstants.h"
 
@@ -13,7 +15,8 @@ using namespace RevBayesCore;
 VCFReader::VCFReader(const std::string &fn) : DelimitedDataReader(fn)
 {
     filename = fn;
-    ploidy = DIPLOID;
+//    ploidy = DIPLOID;
+    ploidy = HAPLOID;
 }
 
 
@@ -117,6 +120,36 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( void 
                 else if ( allele_tokens[1] == "." )
                 {
                     taxa[j+NUM_SAMPLES].addCharacter( missing_state );
+                }
+                else
+                {
+                    throw RbException("Unknown scored character!");
+                }
+            }
+            else
+            {
+                // first allele
+                std::string this_allele = allele_tokens[0];
+                if ( allele_tokens.size() > 1 )
+                {
+                    bool use_second_allele = GLOBAL_RNG->uniform01() > 0.5;
+                    if ( use_second_allele )
+                    {
+                        this_allele = allele_tokens[1];
+                    }
+                }
+                
+                if ( this_allele == "0")
+                {
+                    taxa[j].addCharacter( BinaryState("0") );
+                }
+                else if ( this_allele == "1" )
+                {
+                    taxa[j].addCharacter( BinaryState("1") );
+                }
+                else if ( this_allele == "." )
+                {
+                    taxa[j].addCharacter( missing_state );
                 }
                 else
                 {
