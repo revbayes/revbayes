@@ -1,13 +1,5 @@
-//
-//  PhylowoodConverter.h
-//  revbayes-proj
-//
-//  Created by Michael Landis on 3/2/15.
-//  Copyright (c) 2015 Michael Landis. All rights reserved.
-//
-
-#ifndef __revbayes_proj__PhylowoodConverter__
-#define __revbayes_proj__PhylowoodConverter__
+#ifndef PhylowoodConverter_H
+#define PhylowoodConverter_H
 
 #include <string>
 #include "TopologyNode.h"
@@ -57,4 +49,4 @@ namespace RevBayesCore {
 
 
 
-#endif /* defined(__revbayes_proj__PhylowoodConverter__) */
+#endif 

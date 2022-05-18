@@ -1,11 +1,3 @@
-//
-//  Func_TreeTrace.h
-//  RevBayes_development_branch
-//
-//  Created by will freyman on 12/15/15.
-//  Copyright (c) 2015 will freyman. All rights reserved.
-//
-
 #ifndef Func_treeTrace_H
 #define Func_treeTrace_H
 
