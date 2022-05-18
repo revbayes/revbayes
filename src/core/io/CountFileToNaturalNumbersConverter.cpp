@@ -100,15 +100,15 @@ void CountFileToNaturalNumbersConverter::cfconverter( const std::string &fi, con
     size_t edge = 0;
     for (size_t i=0; i<n_alleles; ++i )
     {
-      for (size_t j=(i+1); j<n_alleles; ++j)
-      {
+        for (size_t j=(i+1); j<n_alleles; ++j)
+        {
       
-        vector_edges[edge] = std::to_string(i)+std::to_string(j);
-        matrix_edges[i*n_edges+edge] = 1;
-        matrix_edges[j*n_edges+edge] = 1;
-        edge += 1;
+            vector_edges[edge] = std::to_string(i)+std::to_string(j);
+            matrix_edges[i*n_edges+edge] = 1;
+            matrix_edges[j*n_edges+edge] = 1;
+            edge += 1;
       
-      }
+        }
     }
 
     // we are now in conditions for sampling the state for the first count 
@@ -120,11 +120,10 @@ void CountFileToNaturalNumbersConverter::cfconverter( const std::string &fi, con
     size_t index = 1;
     while ( std::getline(ss1,cell,' ') )
     {
-      state = getState(cell,n_alleles,n_individuals,vector_edges,matrix_edges);
-      taxa[index] += " " + std::to_string(state);
-      index += 1;
+        state = getState(cell,n_alleles,n_individuals,vector_edges,matrix_edges);
+        taxa[index] += " " + std::to_string(state);
+        index += 1;
     }
-    //for (size_t i=0; i<n_taxa; ++i){ std::cout << taxa[i] << "\n"; }
        
     // and now the lines
     size_t n_sites = 1; 
@@ -142,15 +141,14 @@ void CountFileToNaturalNumbersConverter::cfconverter( const std::string &fi, con
         index = 0;
         while ( std::getline(ss2,cell,' ') )
         {
-          state = getState(cell,n_alleles,n_individuals,vector_edges,matrix_edges);
-          taxa[index] += " " + std::to_string(state);
-          index += 1;
+            state = getState(cell,n_alleles,n_individuals,vector_edges,matrix_edges);
+            taxa[index] += " " + std::to_string(state);
+            index += 1;
         }
         
         n_sites += 1;
 
     }
-    //for (size_t i=0; i<n_taxa; ++i){ std::cout << taxa[i] << "\n"; }
     
     // close the input file connection
     fii.closeFile( readStream );
