@@ -1,13 +1,3 @@
-//
-//  Func_TreeTrace.cpp
-//  RevBayes_development_branch
-//
-//  Created by will freyman on 12/15/15.
-//  Copyright (c) 2015 will freyman. All rights reserved.
-//
-
-
-
 #include "Func_treeTrace.h"
 
 #include <math.h>
@@ -100,7 +90,7 @@ const ArgumentRules& Func_treeTrace::getArgumentRules( void ) const
         std::vector<TypeSpec> burninTypes;
         burninTypes.push_back( Probability::getClassTypeSpec() );
         burninTypes.push_back( Integer::getClassTypeSpec() );
-        argumentRules.push_back( new ArgumentRule( "burnin"   , burninTypes     , "The fraction/number of samples to discard as burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.25) ) );
+        argumentRules.push_back( new ArgumentRule( "burnin"   , burninTypes , "The fraction/number of samples to discard as burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.25) ) );
         
         rules_set = true;
     }
