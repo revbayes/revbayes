@@ -79,7 +79,7 @@ const ArgumentRules& Func_AlleleFrequencySimulator::getArgumentRules( void ) con
     {
         
         argument_rules.push_back( new ArgumentRule( "tree"              , TimeTree::getClassTypeSpec(), "The tree along which we want to simulate.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argument_rules.push_back( new ArgumentRule( "populationSites"   , ModelVector<Natural>::getClassTypeSpec(), "The population sizes for all branches, including the root branch.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argument_rules.push_back( new ArgumentRule( "populationSizes"   , ModelVector<Natural>::getClassTypeSpec(), "The population sizes for all branches, including the root branch.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "generationTime"    , RealPos::getClassTypeSpec(), "The generation time for the simulations.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "numSites"          , Natural::getClassTypeSpec(), "The number of sites to simulate.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "mutationRates"     , ModelVector<RealPos>::getClassTypeSpec(), "The mutation rates from 0 to 1 and 1 to 0.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
