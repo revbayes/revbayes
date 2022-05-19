@@ -24,12 +24,13 @@ namespace RevBayesCore {
      *
      */
     class VCFReader : public DelimitedDataReader {
-        
-        enum PLOIDY { HAPLOID, DIPLOID, POLYPLOID };
 
     public:
         
-        VCFReader(const std::string &fn);
+        enum PLOIDY { HAPLOID, DIPLOID, POLYPLOID };
+        enum UNKOWN_TREATMENT { MISSING, REFERENCE, ALTERNATIVE };
+        
+        VCFReader(const std::string &fn, PLOIDY p, UNKOWN_TREATMENT u);
         
         HomologousDiscreteCharacterData<DnaState>*              readDNAMatrix( void );
         HomologousDiscreteCharacterData<BinaryState>*           readBinaryMatrix( void );
@@ -38,7 +39,8 @@ namespace RevBayesCore {
         
         std::string                                             filename;
         PLOIDY                                                  ploidy;
-        
+        UNKOWN_TREATMENT                                        unkown_treatment;
+
     };
     
 }
