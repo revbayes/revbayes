@@ -12,11 +12,12 @@
 using namespace RevBayesCore;
 
 
-VCFReader::VCFReader(const std::string &fn) : DelimitedDataReader(fn)
+VCFReader::VCFReader(const std::string &fn, PLOIDY p, UNKOWN_TREATMENT u) : DelimitedDataReader(fn)
 {
-    filename = fn;
-//    ploidy = DIPLOID;
-    ploidy = HAPLOID;
+    filename            = fn;
+    ploidy              = p;
+    unkown_treatment    = u;
+    
 }
 
 
@@ -101,7 +102,18 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( void 
                 }
                 else if ( allele_tokens[0] == "." )
                 {
-                    taxa[j].addCharacter( missing_state );
+                    if ( unkown_treatment == UNKOWN_TREATMENT::MISSING )
+                    {
+                        taxa[j].addCharacter( missing_state );
+                    }
+                    else if ( unkown_treatment == UNKOWN_TREATMENT::REFERENCE )
+                    {
+                        taxa[j].addCharacter( BinaryState("0") );
+                    }
+                    else if ( unkown_treatment == UNKOWN_TREATMENT::ALTERNATIVE )
+                    {
+                        taxa[j].addCharacter( BinaryState("1") );
+                    }
                 }
                 else
                 {
@@ -119,7 +131,18 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( void 
                 }
                 else if ( allele_tokens[1] == "." )
                 {
-                    taxa[j+NUM_SAMPLES].addCharacter( missing_state );
+                    if ( unkown_treatment == UNKOWN_TREATMENT::MISSING )
+                    {
+                        taxa[j+NUM_SAMPLES].addCharacter( missing_state );
+                    }
+                    else if ( unkown_treatment == UNKOWN_TREATMENT::REFERENCE )
+                    {
+                        taxa[j+NUM_SAMPLES].addCharacter( BinaryState("0") );
+                    }
+                    else if ( unkown_treatment == UNKOWN_TREATMENT::ALTERNATIVE )
+                    {
+                        taxa[j+NUM_SAMPLES].addCharacter( BinaryState("1") );
+                    }
                 }
                 else
                 {
@@ -149,7 +172,18 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( void 
                 }
                 else if ( this_allele == "." )
                 {
-                    taxa[j].addCharacter( missing_state );
+                    if ( unkown_treatment == UNKOWN_TREATMENT::MISSING )
+                    {
+                        taxa[j+NUM_SAMPLES].addCharacter( missing_state );
+                    }
+                    else if ( unkown_treatment == UNKOWN_TREATMENT::REFERENCE )
+                    {
+                        taxa[j+NUM_SAMPLES].addCharacter( BinaryState("0") );
+                    }
+                    else if ( unkown_treatment == UNKOWN_TREATMENT::ALTERNATIVE )
+                    {
+                        taxa[j+NUM_SAMPLES].addCharacter( BinaryState("1") );
+                    }
                 }
                 else
                 {
@@ -252,11 +286,24 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( void )
                 }
                 else if ( allele_tokens[0] == "1" )
                 {
-                    taxa[j].addCharacter( reference_character );
+                    taxa[j].addCharacter( alternative_character );
                 }
                 else if ( allele_tokens[0] == "." )
                 {
-                    taxa[j].addCharacter( DnaState("?") );
+                    
+                    if ( unkown_treatment == UNKOWN_TREATMENT::MISSING )
+                    {
+                        taxa[j].addCharacter( DnaState("?") );
+                    }
+                    else if ( unkown_treatment == UNKOWN_TREATMENT::REFERENCE )
+                    {
+                        taxa[j].addCharacter( reference_character );
+                    }
+                    else if ( unkown_treatment == UNKOWN_TREATMENT::ALTERNATIVE )
+                    {
+                        taxa[j].addCharacter( alternative_character );
+                    }
+                    
                 }
                 else
                 {
@@ -270,11 +317,24 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( void )
                 }
                 else if ( allele_tokens[1] == "1" )
                 {
-                    taxa[j+NUM_SAMPLES].addCharacter( reference_character );
+                    taxa[j+NUM_SAMPLES].addCharacter( alternative_character );
                 }
                 else if ( allele_tokens[1] == "." )
                 {
-                    taxa[j+NUM_SAMPLES].addCharacter( DnaState("?") );
+                    
+                    if ( unkown_treatment == UNKOWN_TREATMENT::MISSING )
+                    {
+                        taxa[j+NUM_SAMPLES].addCharacter( DnaState("?") );
+                    }
+                    else if ( unkown_treatment == UNKOWN_TREATMENT::REFERENCE )
+                    {
+                        taxa[j+NUM_SAMPLES].addCharacter( reference_character );
+                    }
+                    else if ( unkown_treatment == UNKOWN_TREATMENT::ALTERNATIVE )
+                    {
+                        taxa[j+NUM_SAMPLES].addCharacter( alternative_character );
+                    }
+                        
                 }
                 else
                 {

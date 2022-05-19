@@ -41,11 +41,28 @@ RevPtr<RevVariable> Func_readVCF::execute( void )
     
     // get the information from the arguments for reading the file
     const RlString& fn = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() );
-    
-    
+     
     const std::string type = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
 
-    RevBayesCore::VCFReader vcf_reader = RevBayesCore::VCFReader( fn.getValue() );
+    const std::string& ploidy_str       = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::VCFReader::PLOIDY ploidy = RevBayesCore::VCFReader::DIPLOID;
+    if ( ploidy_str == "haploid" )
+    {
+        ploidy = RevBayesCore::VCFReader::HAPLOID;
+    }
+    
+    const std::string& unkown_str       = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::VCFReader::UNKOWN_TREATMENT unkown = RevBayesCore::VCFReader::MISSING;
+    if ( unkown_str == "alternative" )
+    {
+        unkown = RevBayesCore::VCFReader::ALTERNATIVE;
+    }
+    else if ( unkown_str == "reference" )
+    {
+        unkown = RevBayesCore::VCFReader::REFERENCE;
+    }
+    
+    RevBayesCore::VCFReader vcf_reader = RevBayesCore::VCFReader( fn.getValue(), ploidy, unkown );
     
     AbstractHomologousDiscreteCharacterData *rl_aln = NULL;
     
@@ -79,8 +96,16 @@ const ArgumentRules& Func_readVCF::getArgumentRules( void ) const
         character_options.push_back( "binary" );
         argument_rules.push_back( new OptionRule( "type", new RlString("binary"), character_options, "The type of data to be constructed." ) );
         
-//        argument_rules.push_back( new ArgumentRule( "virtualPopulationSize", Natural::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-//        argument_rules.push_back( new ArgumentRule( "numStates", Natural::getClassTypeSpec(), "The number of states (e.g. 4 for A,C,G and T).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(4) ) );
+        std::vector<std::string> ploidy_options;
+        ploidy_options.push_back( "diploid" );
+        ploidy_options.push_back( "haploid" );
+        argument_rules.push_back( new OptionRule( "ploidy", new RlString("diploid"), ploidy_options, "The ploidy type." ) );
+        
+        std::vector<std::string> unknown_options;
+        unknown_options.push_back( "missing" );
+        unknown_options.push_back( "reference" );
+        unknown_options.push_back( "alternative" );
+        argument_rules.push_back( new OptionRule( "unkownTreatment", new RlString("missing"), unknown_options, "How to treat the '.' character, i.e., if the state was unkown." ) );
         
         rules_set = true;
         
