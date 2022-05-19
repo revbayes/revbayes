@@ -213,7 +213,7 @@ void RateMatrix_revPoMoTwo2N::computeOffDiagonal( void )
 
   // receiprocal of the rate
   double rRate = nc/value;
-  std::cout << "rRate" << rRate << "\n\n";
+  //std::cout << "rRate" << rRate << "\n\n";
 
   
   // Mutations
@@ -225,8 +225,6 @@ void RateMatrix_revPoMoTwo2N::computeOffDiagonal( void )
   // selection is not indentifiable with two virtual individuals
   m[1][0]   = 0.5*rRate;             //0 fixed
   m[1][2]   = 0.5*rRate;             //1 fixed
-
-
 
   // set flags
   needs_update = true;
@@ -247,12 +245,11 @@ std::vector<double> RateMatrix_revPoMoTwo2N::getStationaryFrequencies( void ) co
 
 
   // calculating the stationary vector
-
   std::vector<double> stationary_freqs(3,0.0);
 
-  stationary_freqs[0]  = mu[0]*rnc;
-  stationary_freqs[2]  = mu[1]*rnc;
-  stationary_freqs[1]  = mu[0]*mu[1]*N*2.0/rnc;
+  stationary_freqs[0]  = mu[1]*rnc;
+  stationary_freqs[2]  = mu[0]*rnc;
+  stationary_freqs[1]  = mu[0]*mu[1]*N*2.0*harmonic_number*rnc;
 
   return stationary_freqs;
 
