@@ -160,180 +160,189 @@ RateMatrix_revPoMoThree4N* RateMatrix_revPoMoThree4N::clone( void ) const
 void RateMatrix_revPoMoThree4N::computeOffDiagonal( void )
 {
     
-  MatrixReal& m = *the_rate_matrix;
 
-  /*  
-  INFORMATION ABOUT PoMoTwo AND PoMoThree
+    MatrixReal& m = *the_rate_matrix;
 
-  The idea of the virtual PoMos (Two and Three) resumes to mimicking a population dynamic that unfolds 
-  on the effective population N, using a virtual population of smaller size M.
-  M is equal to 2 in PoMoTwo and 3 in PoMoThree. PoMo thee additionally includes selection.
+    /*
+     INFORMATION ABOUT PoMoTwo AND PoMoThree
 
-  M defines a lighter and more efficient state-space. 
-  By matching the expected diversity (i.e., the proportion of fixed and polymorphic sites) in both 
-  the effective and the virtual populations, one can obtain scaling laws for the mutation rates and 
-  selection coefficients (see Borges et al. 2019 Genetics). 
+     The idea of the virtual PoMos (Two and Three) resumes to mimicking a population dynamic that unfolds
+     on the effective population N, using a virtual population of smaller size M.
+     M is equal to 2 in PoMoTwo and 3 in PoMoThree. PoMo three additionally includes selection.
 
-  These are intuitive for the M=2 case, in which the mutation rates are scaled by the 
-  harmonic number of N-1:
-  mu'_ij = mu_ij*H_{N-1}  or equivalently rho'_ij = rho_ij*H_{N-1}  for the reverisible PoMo 
-  mu' and rho' correspond to the mutation rate and exchageability in a virtual population of 2 individuals
+     M defines a lighter and more efficient state-space.
+     By matching the expected diversity (i.e., the proportion of fixed and polymorphic sites) in both
+     the effective and the virtual populations, one can obtain scaling laws for the mutation rates and
+     selection coefficients (see Borges et al. 2019 Genetics).
 
-  Like the standard PoMos the virtual PoMos include both fixed and polymorphic sites: 
+     These are intuitive for the M=2 case, in which the mutation rates are scaled by the
+     harmonic number of N-1:
+     mu'_ij = mu_ij*H_{N-1}  or equivalently rho'_ij = rho_ij*H_{N-1}  for the reverisible PoMo
+     mu' and rho' correspond to the mutation rate and exchageability in a virtual population of 2 individuals
+
+     Like the standard PoMos the virtual PoMos include both fixed and polymorphic sites:
             virtual_individuals_M   n_states   fixed_states   polymorphic_states
-  PoMoTwo   2                       10         {2ai}          {1ai,1aj}
-  PoMoThree 3                       16         {3ai}          {1ai,2aj} and {2ai,1aj}
+     PoMoTwo   2                       10         {2ai}          {1ai,1aj}
+     PoMoThree 3                       16         {3ai}          {1ai,2aj} and {2ai,1aj}
 
-  The pomo rate matrices defined here first list the fixed states {Na0}, {Na1} ...,
-  these occupying positions 0:(K-1), and then polymorphic states, where K is the number of alleles
+     The pomo rate matrices defined here first list the fixed states {Na0}, {Na1} ...,
+     these occupying positions 0:(K-1), and then polymorphic states, where K is the number of alleles
 
-  K alleles comprise (K*K-K)/2 pairwise combinations of alleles.
-  This is the number of edges in the pomo state-space. Each edge comprises M-1 polymorphic states.
-  The polymorphic edges are listed in the following order a0a1, a0a2, a0a3, ..., a(K-2)aK-1
-  */
+     K alleles comprise (K*K-K)/2 pairwise combinations of alleles.
+     This is the number of edges in the pomo state-space. Each edge comprises M-1 polymorphic states.
+     The polymorphic edges are listed in the following order a0a1, a0a2, a0a3, ..., a(K-2)aK-1
+     */
 
     
     
-  // populating the rate matrix with 0.0
-  // **total waste of time with sparse matrices like pomos**
-  for (int i=0; i<16 ; i++){
-    for (int j=0; j<16; j++ ){
-        m[i][j] = 0.0;
+    // populating the rate matrix with 0.0
+    // **total waste of time with sparse matrices like pomos**
+    for (int i=0; i<16 ; i++)
+    {
+        for (int j=0; j<16; j++ )
+        {
+            m[i][j] = 0.0;
+        }
     }
-  }
 
-  //scaling the fitness coefficients
-  std::vector<double> sphi(4,0.0);
+    //scaling the fitness coefficients
+    std::vector<double> sphi(4,0.0);
 
-  sphi[0] = pow( phi[0], 0.5*N-0.5 );
-  sphi[1] = pow( phi[1], 0.5*N-0.5 );
-  sphi[2] = pow( phi[2], 0.5*N-0.5 );
-  sphi[3] = pow( phi[3], 0.5*N-0.5 );
+    sphi[0] = pow( phi[0], 0.5*N-0.5 );
+    sphi[1] = pow( phi[1], 0.5*N-0.5 );
+    sphi[2] = pow( phi[2], 0.5*N-0.5 );
+    sphi[3] = pow( phi[3], 0.5*N-0.5 );
 
-  //scaling the mutation rates (or better, the exchangeabilities)
-  std::vector<double> srho(6,0.0);
+    // scaling the mutation rates (or better, the exchangeabilities)
+    std::vector<double> srho(6,0.0);
   
-  double sAC = 0.0, sAG = 0.0, sAT = 0.0, sCG = 0.0, sCT = 0.0, sGT = 0.0;
-  double dc; 
+    double sAC = 0.0, sAG = 0.0, sAT = 0.0, sCG = 0.0, sCT = 0.0, sGT = 0.0;
+    double dc;
   
-  for (int n = 1; n<N; n++){
+    for (int n = 1; n<N; n++)
+    {
 
-    // drift coefficient
-    dc = 1.0*N/(n*(N-n));
+        // drift coefficient
+        dc = 1.0*N/(n*(N-n));
 
-    sAC += pow(phi[1], n-1)*pow(phi[0], N-n-1)*(n*phi[1] + (N-n)*phi[0])*dc;
-    sAG += pow(phi[2], n-1)*pow(phi[0], N-n-1)*(n*phi[2] + (N-n)*phi[0])*dc;
-    sAT += pow(phi[3], n-1)*pow(phi[0], N-n-1)*(n*phi[3] + (N-n)*phi[0])*dc;
-    sCG += pow(phi[2], n-1)*pow(phi[1], N-n-1)*(n*phi[2] + (N-n)*phi[1])*dc;
-    sCT += pow(phi[3], n-1)*pow(phi[1], N-n-1)*(n*phi[3] + (N-n)*phi[1])*dc;
-    sGT += pow(phi[3], n-1)*pow(phi[2], N-n-1)*(n*phi[3] + (N-n)*phi[2])*dc;
+        sAC += pow(phi[1], n-1)*pow(phi[0], N-n-1)*(n*phi[1] + (N-n)*phi[0])*dc;
+        sAG += pow(phi[2], n-1)*pow(phi[0], N-n-1)*(n*phi[2] + (N-n)*phi[0])*dc;
+        sAT += pow(phi[3], n-1)*pow(phi[0], N-n-1)*(n*phi[3] + (N-n)*phi[0])*dc;
+        sCG += pow(phi[2], n-1)*pow(phi[1], N-n-1)*(n*phi[2] + (N-n)*phi[1])*dc;
+        sCT += pow(phi[3], n-1)*pow(phi[1], N-n-1)*(n*phi[3] + (N-n)*phi[1])*dc;
+        sGT += pow(phi[3], n-1)*pow(phi[2], N-n-1)*(n*phi[3] + (N-n)*phi[2])*dc;
 
-  }
+    }
 
-  double nm = 1/3.0;
+    double nm = 1/3.0;
 
-  srho[0] = rho[0]*nm*sAC/( sphi[0]*sphi[0] + sphi[0]*sphi[1] + sphi[1]*sphi[1] );
-  srho[1] = rho[1]*nm*sAG/( sphi[0]*sphi[0] + sphi[0]*sphi[2] + sphi[2]*sphi[2] );
-  srho[2] = rho[2]*nm*sAT/( sphi[0]*sphi[0] + sphi[0]*sphi[3] + sphi[3]*sphi[3] );
-  srho[3] = rho[3]*nm*sCG/( sphi[1]*sphi[1] + sphi[1]*sphi[2] + sphi[2]*sphi[2] );
-  srho[4] = rho[4]*nm*sCT/( sphi[1]*sphi[1] + sphi[1]*sphi[3] + sphi[3]*sphi[3] );
-  srho[5] = rho[5]*nm*sGT/( sphi[2]*sphi[2] + sphi[2]*sphi[3] + sphi[3]*sphi[3] );
+    srho[0] = rho[0]*nm*sAC/( sphi[0]*sphi[0] + sphi[0]*sphi[1] + sphi[1]*sphi[1] );
+    srho[1] = rho[1]*nm*sAG/( sphi[0]*sphi[0] + sphi[0]*sphi[2] + sphi[2]*sphi[2] );
+    srho[2] = rho[2]*nm*sAT/( sphi[0]*sphi[0] + sphi[0]*sphi[3] + sphi[3]*sphi[3] );
+    srho[3] = rho[3]*nm*sCG/( sphi[1]*sphi[1] + sphi[1]*sphi[2] + sphi[2]*sphi[2] );
+    srho[4] = rho[4]*nm*sCT/( sphi[1]*sphi[1] + sphi[1]*sphi[3] + sphi[3]*sphi[3] );
+    srho[5] = rho[5]*nm*sGT/( sphi[2]*sphi[2] + sphi[2]*sphi[3] + sphi[3]*sphi[3] );
   
 
 
-  // get the expected divergence (or number of evens) per unit of time
-  // normalize rate matrix such that one event happens per unit time.
-  double value = pi[0]*pi[1]*srho[0]*( sphi[0]*sphi[0] + sphi[0]*sphi[1] + sphi[1]*sphi[1] ) +
-                 pi[0]*pi[2]*srho[1]*( sphi[0]*sphi[0] + sphi[0]*sphi[2] + sphi[2]*sphi[2] ) +
-                 pi[0]*pi[3]*srho[2]*( sphi[0]*sphi[0] + sphi[0]*sphi[3] + sphi[3]*sphi[3] ) +
-                 pi[1]*pi[2]*srho[3]*( sphi[1]*sphi[1] + sphi[1]*sphi[2] + sphi[2]*sphi[2] ) +
-                 pi[1]*pi[3]*srho[4]*( sphi[1]*sphi[1] + sphi[1]*sphi[3] + sphi[3]*sphi[3] ) +
-                 pi[2]*pi[3]*srho[5]*( sphi[2]*sphi[2] + sphi[2]*sphi[3] + sphi[3]*sphi[3] ) ;
+    // get the expected divergence (or number of evens) per unit of time
+    // normalize rate matrix such that one event happens per unit time.
+    double value = pi[0]*pi[1]*srho[0]*( sphi[0]*sphi[0] + sphi[0]*sphi[1] + sphi[1]*sphi[1] ) +
+                   pi[0]*pi[2]*srho[1]*( sphi[0]*sphi[0] + sphi[0]*sphi[2] + sphi[2]*sphi[2] ) +
+                   pi[0]*pi[3]*srho[2]*( sphi[0]*sphi[0] + sphi[0]*sphi[3] + sphi[3]*sphi[3] ) +
+                   pi[1]*pi[2]*srho[3]*( sphi[1]*sphi[1] + sphi[1]*sphi[2] + sphi[2]*sphi[2] ) +
+                   pi[1]*pi[3]*srho[4]*( sphi[1]*sphi[1] + sphi[1]*sphi[3] + sphi[3]*sphi[3] ) +
+                   pi[2]*pi[3]*srho[5]*( sphi[2]*sphi[2] + sphi[2]*sphi[3] + sphi[3]*sphi[3] ) ;
 
-  double rRate = ( pi[0]*sphi[0]*sphi[0] +
-                   pi[1]*sphi[1]*sphi[1] +
-                   pi[2]*sphi[2]*sphi[2] +
-                   pi[3]*sphi[3]*sphi[3] + 3.0*value ) / ( 6.0*value );
-
-
-  //mutations
-  //AC
-  m[0][4]   = 3.0*srho[0]*pi[1]*rRate;    //{3A} -> {2A,1C}
-  m[1][5]   = 3.0*srho[0]*pi[0]*rRate;    //{3C} -> {1A,2C}
-
-  //AG
-  m[0][6]   = 3.0*srho[1]*pi[2]*rRate;    //{3A} -> {2A,1G}
-  m[2][7]   = 3.0*srho[1]*pi[0]*rRate;    //{3G} -> {1A,2G}
-
-  //AT
-  m[0][8]   = 3.0*srho[2]*pi[3]*rRate;    //{3A} -> {2A,1T}
-  m[3][9]   = 3.0*srho[2]*pi[0]*rRate;    //{3T} -> {1A,2T}
-
-  //CG
-  m[1][10]  = 3.0*srho[3]*pi[2]*rRate;    //{3C} -> {2C,1G}
-  m[2][11]  = 3.0*srho[3]*pi[1]*rRate;    //{3G} -> {1C,2G}
-
-  //CT
-  m[1][12]  = 3.0*srho[4]*pi[3]*rRate;    //{3C} -> {2C,1T}
-  m[3][13]  = 3.0*srho[4]*pi[1]*rRate;    //{3T} -> {1C,2T}
-
-  //GT
-  m[2][14]  = 3.0*srho[5]*pi[3]*rRate;    //{3G} -> {2G,1T}
-  m[3][15]  = 3.0*srho[5]*pi[2]*rRate;    //{3T} -> {1G,2T}
+    double rRate = ( pi[0]*sphi[0]*sphi[0] +
+                     pi[1]*sphi[1]*sphi[1] +
+                     pi[2]*sphi[2]*sphi[2] +
+                     pi[3]*sphi[3]*sphi[3] + 3.0*value ) / ( 6.0*value );
 
 
-  //fixations
-  //AC
+    // mutations
+    // AC
+    m[0][4]   = 3.0*srho[0]*pi[1]*rRate;    //{3A} -> {2A,1C}
+    m[1][5]   = 3.0*srho[0]*pi[0]*rRate;    //{3C} -> {1A,2C}
 
-  m[4][0]   = 2.0*sphi[0]*rRate/(2.0*sphi[0]+sphi[1]);  //{2A,1C} -> {3A} 
-  m[5][1]   = 2.0*sphi[1]*rRate/(2.0*sphi[1]+sphi[0]);  //{1A,2C} -> {3C} 
+    // AG
+    m[0][6]   = 3.0*srho[1]*pi[2]*rRate;    //{3A} -> {2A,1G}
+    m[2][7]   = 3.0*srho[1]*pi[0]*rRate;    //{3G} -> {1A,2G}
 
-  //AG
-  m[6][0]   = 2.0*sphi[0]*rRate/(2.0*sphi[0]+sphi[2]);  //{2A,1G} -> {3A} 
-  m[7][2]   = 2.0*sphi[2]*rRate/(2.0*sphi[2]+sphi[0]);  //{1A,2G} -> {3G} 
+    // AT
+    m[0][8]   = 3.0*srho[2]*pi[3]*rRate;    //{3A} -> {2A,1T}
+    m[3][9]   = 3.0*srho[2]*pi[0]*rRate;    //{3T} -> {1A,2T}
 
-  //AT
-  m[8][0]   = 2.0*sphi[0]*rRate/(2.0*sphi[0]+sphi[3]);  //{2A,1T} -> {3A} 
-  m[9][3]   = 2.0*sphi[3]*rRate/(2.0*sphi[3]+sphi[0]);  //{1A,2T} -> {3T} 
+    // CG
+    m[1][10]  = 3.0*srho[3]*pi[2]*rRate;    //{3C} -> {2C,1G}
+    m[2][11]  = 3.0*srho[3]*pi[1]*rRate;    //{3G} -> {1C,2G}
 
-  //CG
-  m[10][1]  = 2.0*sphi[1]*rRate/(2.0*sphi[1]+sphi[2]);  //{2C,1G} -> {3C} 
-  m[11][2]  = 2.0*sphi[2]*rRate/(2.0*sphi[2]+sphi[0]);  //{1C,2G} -> {3G}
+    // CT
+    m[1][12]  = 3.0*srho[4]*pi[3]*rRate;    //{3C} -> {2C,1T}
+    m[3][13]  = 3.0*srho[4]*pi[1]*rRate;    //{3T} -> {1C,2T}
 
-  //CT
-  m[12][1]  = 2.0*sphi[1]*rRate/(2.0*sphi[1]+sphi[3]);  //{2C,1T} -> {3C} 
-  m[13][3]  = 2.0*sphi[3]*rRate/(2.0*sphi[3]+sphi[1]);  //{1C,2T} -> {3T} 
+    // GT
+    m[2][14]  = 3.0*srho[5]*pi[3]*rRate;    //{3G} -> {2G,1T}
+    m[3][15]  = 3.0*srho[5]*pi[2]*rRate;    //{3T} -> {1G,2T}
 
-  //GT
-  m[14][2]  = 2.0*sphi[2]*rRate/(2.0*sphi[2]+sphi[3]);  //{2G,1T} -> {3G} 
-  m[15][3]  = 2.0*sphi[3]*rRate/(2.0*sphi[3]+sphi[2]);  //{1G,2T} -> {3T} 
 
-  // frequency shifts
-  m[4][5]    = 2.0*sphi[1]*rRate/(2.0*sphi[0]+sphi[1]);  //{2A,1C} -> {1A,2C}
-  m[5][4]    = 2.0*sphi[0]*rRate/(2.0*sphi[1]+sphi[0]);  //{1A,2C} -> {2A,1C}
+    // fixations
 
-  //AG
-  m[6][7]    = 2.0*sphi[2]*rRate/(2.0*sphi[0]+sphi[2]);  //{2A,1G} -> {1A,2G}
-  m[7][6]    = 2.0*sphi[0]*rRate/(2.0*sphi[2]+sphi[0]);  //{1A,2G} -> {2A,1G}
+    // AC
+    m[4][0]   = 2.0*sphi[0]*rRate/(2.0*sphi[0]+sphi[1]);  //{2A,1C} -> {3A}
+    m[5][1]   = 2.0*sphi[1]*rRate/(2.0*sphi[1]+sphi[0]);  //{1A,2C} -> {3C}
 
-  //AT
-  m[8][9]    = 2.0*sphi[3]*rRate/(2.0*sphi[0]+sphi[3]);  //{2A,1T} -> {1A,2T}
-  m[9][8]    = 2.0*sphi[0]*rRate/(2.0*sphi[3]+sphi[0]);  //{1A,2T} -> {2A,1T}
+    // AG
+    m[6][0]   = 2.0*sphi[0]*rRate/(2.0*sphi[0]+sphi[2]);  //{2A,1G} -> {3A}
+    m[7][2]   = 2.0*sphi[2]*rRate/(2.0*sphi[2]+sphi[0]);  //{1A,2G} -> {3G}
 
-  //CG
-  m[10][11]  = 2.0*sphi[2]*rRate/(2.0*sphi[1]+sphi[2]);  //{2C,1G} -> {1C,2G}
-  m[11][10]  = 2.0*sphi[1]*rRate/(2.0*sphi[2]+sphi[1]);  //{1C,2G} -> {2C,1G}
+    // AT
+    m[8][0]   = 2.0*sphi[0]*rRate/(2.0*sphi[0]+sphi[3]);  //{2A,1T} -> {3A}
+    m[9][3]   = 2.0*sphi[3]*rRate/(2.0*sphi[3]+sphi[0]);  //{1A,2T} -> {3T}
 
-  //CT
-  m[12][13]  = 2.0*sphi[3]*rRate/(2.0*sphi[1]+sphi[3]);  //{2C,1T} -> {1C,2T}
-  m[13][12]  = 2.0*sphi[1]*rRate/(2.0*sphi[3]+sphi[1]);  //{1C,2T} -> {2C,1T}
+    // CG
+    m[10][1]  = 2.0*sphi[1]*rRate/(2.0*sphi[1]+sphi[2]);  //{2C,1G} -> {3C}
+    m[11][2]  = 2.0*sphi[2]*rRate/(2.0*sphi[2]+sphi[0]);  //{1C,2G} -> {3G}
 
-  //GT
-  m[14][15]  = 2.0*sphi[3]*rRate/(2.0*sphi[2]+sphi[3]);  //{2G,1T} -> {1G,2T}
-  m[15] [14] = 2.0*sphi[2]*rRate/(2.0*sphi[3]+sphi[2]);  //{1G,2T} -> {2G,1T}
+    // CT
+    m[12][1]  = 2.0*sphi[1]*rRate/(2.0*sphi[1]+sphi[3]);  //{2C,1T} -> {3C}
+    m[13][3]  = 2.0*sphi[3]*rRate/(2.0*sphi[3]+sphi[1]);  //{1C,2T} -> {3T}
 
-  // set flags
-  needs_update = true;
+    // GT
+    m[14][2]  = 2.0*sphi[2]*rRate/(2.0*sphi[2]+sphi[3]);  //{2G,1T} -> {3G}
+    m[15][3]  = 2.0*sphi[3]*rRate/(2.0*sphi[3]+sphi[2]);  //{1G,2T} -> {3T}
+
+    
+    
+    // frequency shifts
+
+    // AC
+    m[4][5]    = 2.0*sphi[1]*rRate/(2.0*sphi[0]+sphi[1]);  //{2A,1C} -> {1A,2C}
+    m[5][4]    = 2.0*sphi[0]*rRate/(2.0*sphi[1]+sphi[0]);  //{1A,2C} -> {2A,1C}
+
+    // AG
+    m[6][7]    = 2.0*sphi[2]*rRate/(2.0*sphi[0]+sphi[2]);  //{2A,1G} -> {1A,2G}
+    m[7][6]    = 2.0*sphi[0]*rRate/(2.0*sphi[2]+sphi[0]);  //{1A,2G} -> {2A,1G}
+
+    //AT
+    m[8][9]    = 2.0*sphi[3]*rRate/(2.0*sphi[0]+sphi[3]);  //{2A,1T} -> {1A,2T}
+    m[9][8]    = 2.0*sphi[0]*rRate/(2.0*sphi[3]+sphi[0]);  //{1A,2T} -> {2A,1T}
+
+    // CG
+    m[10][11]  = 2.0*sphi[2]*rRate/(2.0*sphi[1]+sphi[2]);  //{2C,1G} -> {1C,2G}
+    m[11][10]  = 2.0*sphi[1]*rRate/(2.0*sphi[2]+sphi[1]);  //{1C,2G} -> {2C,1G}
+
+    // CT
+    m[12][13]  = 2.0*sphi[3]*rRate/(2.0*sphi[1]+sphi[3]);  //{2C,1T} -> {1C,2T}
+    m[13][12]  = 2.0*sphi[1]*rRate/(2.0*sphi[3]+sphi[1]);  //{1C,2T} -> {2C,1T}
+
+    // GT
+    m[14][15]  = 2.0*sphi[3]*rRate/(2.0*sphi[2]+sphi[3]);  //{2G,1T} -> {1G,2T}
+    m[15][14]  = 2.0*sphi[2]*rRate/(2.0*sphi[3]+sphi[2]);  //{1G,2T} -> {2G,1T}
+
+
+    // set flags
+    needs_update = true;
 
 }
 
