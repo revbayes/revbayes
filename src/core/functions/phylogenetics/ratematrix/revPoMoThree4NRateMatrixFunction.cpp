@@ -25,7 +25,8 @@ phi( fc )
 }
 
 
-revPoMoThree4NRateMatrixFunction::~revPoMoThree4NRateMatrixFunction( void ) {
+revPoMoThree4NRateMatrixFunction::~revPoMoThree4NRateMatrixFunction( void )
+{
     // We don't delete the parameters, because they might be used somewhere else too. The model needs to do that!
 }
 
