@@ -14,7 +14,8 @@
 using namespace RevLanguage;
 
 /** default constructor */
-Func_revPoMoTwo2N::Func_revPoMoTwo2N( void ) : TypedFunction<RateMatrix>( ) {
+Func_revPoMoTwo2N::Func_revPoMoTwo2N( void ) : TypedFunction<RateMatrix>( )
+{
 
 }
 
@@ -25,7 +26,8 @@ Func_revPoMoTwo2N::Func_revPoMoTwo2N( void ) : TypedFunction<RateMatrix>( ) {
  *
  * \return A new copy of the process.
  */
-Func_revPoMoTwo2N* Func_revPoMoTwo2N::clone( void ) const {
+Func_revPoMoTwo2N* Func_revPoMoTwo2N::clone( void ) const
+{
 
     return new Func_revPoMoTwo2N( *this );
 }

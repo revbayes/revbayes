@@ -192,10 +192,12 @@ void RateMatrix_revPoMoTwo2N::computeOffDiagonal( void )
     
   // populating the rate matrix with 0.0
   // **total waste of time with sparse matrices like pomos**
-  for (int i=0; i<3 ; i++){
-    for (int j=0; j<3; j++ ){
-        m[i][j] = 0.0;
-    }
+  for (int i=0; i<3 ; i++)
+  {
+      for (int j=0; j<3; j++ )
+      {
+          m[i][j] = 0.0;
+      }
   }
 
 
@@ -217,14 +219,14 @@ void RateMatrix_revPoMoTwo2N::computeOffDiagonal( void )
 
   
   // Mutations
-  m[0][1] = 2*mu[0]*r*rRate;    //mutation 01
-  m[2][1] = 2*mu[1]*r*rRate;    //mutation 10
+  m[0][2] = 2*mu[0]*r*rRate;    // mutation 01
+  m[1][2] = 2*mu[1]*r*rRate;    // mutation 10
 
   // Fixations
   // PoMoTwo only accouts for genetic drift
   // selection is not indentifiable with two virtual individuals
-  m[1][0]   = 0.5*rRate;             //0 fixed
-  m[1][2]   = 0.5*rRate;             //1 fixed
+  m[2][0]   = 0.5*rRate;             // 0 fixed
+  m[2][1]   = 0.5*rRate;             // 1 fixed
 
   // set flags
   needs_update = true;
