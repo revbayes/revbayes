@@ -80,7 +80,7 @@ AbstractDiscreteTaxonData* CharacterTranslator::translateCharacters(const Abstra
     {
         trans_taxon_data = translateToRna( d );
     }
-    else if ( type == "AA" || "Protein" )
+    else if ( type == "AA" || type == "Protein" )
     {
         if ( d.getCharacter(0).getDataType() == "DNA" )
         {
