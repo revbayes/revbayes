@@ -181,6 +181,7 @@
 #include "Dist_FBDSP.h"
 #include "Dist_GLHBDSP.h"
 #include "Dist_constPopMultispCoal.h"
+#include "Dist_DirichletTimeTree.h"
 #include "Dist_divDepYuleProcess.h"
 #include "Dist_empiricalTree.h"
 #include "Dist_episodicBirthDeath.h"
@@ -381,6 +382,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // duplication loss process
         AddDistribution< TimeTree                   >( new Dist_DuplicationLoss() );
+        
+        // Dirichlet time tree distribution
+        AddDistribution< TimeTree                   >( new Dist_DirichletTimeTree() );
 
         // multispecies coalescent (per branch constant population sizes)
         AddDistribution< TimeTree                   >( new Dist_constPopMultispCoal() );
