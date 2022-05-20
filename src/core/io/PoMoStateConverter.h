@@ -6,7 +6,6 @@
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "HomologousDiscreteCharacterData.h"
 #include "PoMoState.h"
-#include "PoMoState4.h"
 
 
 namespace RevBayesCore {
@@ -24,11 +23,11 @@ namespace RevBayesCore {
     public:
         PoMoStateConverter();
         
-        HomologousDiscreteCharacterData<PoMoState>*   convertData2(const AbstractHomologousDiscreteCharacterData &d, size_t virtual_ps, const RbVector<Taxon>& taxa);
-        HomologousDiscreteCharacterData<PoMoState4>*  convertData4(const AbstractHomologousDiscreteCharacterData &d, size_t virtual_ps, const std::map<std::string, std::string> sequenceNameToSpeciesName);
+        HomologousDiscreteCharacterData<PoMoState>*     convertData2(const AbstractHomologousDiscreteCharacterData &d, size_t virtual_ps, const RbVector<Taxon>& taxa);
+        HomologousDiscreteCharacterData<PoMoState>*     convertData4(const AbstractHomologousDiscreteCharacterData &d, size_t virtual_ps, const RbVector<Taxon>& taxa);
         
     private:
-        PoMoState4*                                   convertCounts4(std::vector<double> &counts, size_t virtualPopulationSize, std::vector< std::vector<double> > &frequencies);
+        void                                            createSpeciesToSampleNamesMap( std::map<std::string, std::vector<std::string> >& s, const RbVector<Taxon>& taxa );
 
     };
     

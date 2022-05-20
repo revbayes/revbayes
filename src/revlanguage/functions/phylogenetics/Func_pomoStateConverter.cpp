@@ -52,17 +52,25 @@ RevPtr<RevVariable> Func_pomoStateConverter::execute()
     
     const RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* aln = static_cast<const AbstractHomologousDiscreteCharacterData&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     
-    RevBayesCore::TypedDagNode< long >* k = static_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< long >* n = static_cast<const Natural &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    long num_states     = static_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getValue();
+    long virt_pop_size  = static_cast<const Natural &>( this->args[2].getVariable()->getRevObject() ).getValue();
 
 
     RevBayesCore::PoMoStateConverter* c = new RevBayesCore::PoMoStateConverter(  );
     
     const RevBayesCore::RbVector<RevBayesCore::Taxon>& taxa  = static_cast< const ModelVector<Taxon> &>( this->args[3].getVariable()->getRevObject() ).getValue();
     
-    AbstractHomologousDiscreteCharacterData PoMoAln = c->convertData2( aln->getValue(), (int)n->getValue(), taxa ) ;
-        
-    return new RevVariable( new AbstractHomologousDiscreteCharacterData( PoMoAln ) );
+    AbstractHomologousDiscreteCharacterData* PoMoAln = NULL;
+    
+    if ( num_states == 2 )
+    {
+        PoMoAln = new AbstractHomologousDiscreteCharacterData( c->convertData2( aln->getValue(), virt_pop_size, taxa ) );
+    }
+    else if ( num_states == 4 )
+    {
+//        c->convertData4(aln->getValue(), virt_pop_size, taxa);
+    }
+    return new RevVariable( PoMoAln );
 }
 
 
@@ -70,21 +78,21 @@ RevPtr<RevVariable> Func_pomoStateConverter::execute()
 const ArgumentRules& Func_pomoStateConverter::getArgumentRules( void ) const
 {
     
-    static ArgumentRules argumentRules = ArgumentRules();
+    static ArgumentRules argument_rules = ArgumentRules();
     static bool          rules_set = false;
     
     if ( !rules_set )
     {
         
-        argumentRules.push_back( new ArgumentRule( "aln"      , AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The traditional multiple sequence alignment of all sequences.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "k"        , Natural::getClassTypeSpec()                                , "The number of states.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "virtualNe", Natural::getClassTypeSpec()                                , "The virtual population size.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "taxa"     , ModelVector<Taxon>::getClassTypeSpec()                     , "The taxa to match the individuals to species/populations.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argument_rules.push_back( new ArgumentRule( "aln"      , AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The traditional multiple sequence alignment of all sequences.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argument_rules.push_back( new ArgumentRule( "k"        , Natural::getClassTypeSpec()                                , "The number of states.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argument_rules.push_back( new ArgumentRule( "virtualNe", Natural::getClassTypeSpec()                                , "The virtual population size.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argument_rules.push_back( new ArgumentRule( "taxa"     , ModelVector<Taxon>::getClassTypeSpec()                     , "The taxa to match the individuals to species/populations.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
 
         rules_set = true;
     }
     
-    return argumentRules;
+    return argument_rules;
 }
 
 
