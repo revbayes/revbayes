@@ -250,8 +250,8 @@ std::vector<double> RateMatrix_revPoMoTwo2N::getStationaryFrequencies( void ) co
   std::vector<double> stationary_freqs(3,0.0);
 
   stationary_freqs[0]  = mu[1]*rnc;
-  stationary_freqs[2]  = mu[0]*rnc;
-  stationary_freqs[1]  = mu[0]*mu[1]*N*2.0*harmonic_number*rnc;
+  stationary_freqs[1]  = mu[0]*rnc;
+  stationary_freqs[2]  = mu[0]*mu[1]*N*2.0*harmonic_number*rnc;
 
   return stationary_freqs;
 
