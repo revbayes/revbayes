@@ -93,8 +93,10 @@ cd ${SYSROOT}
 # *-posix/libgcc_s_seh-1.dll and *-posix2/libstdc++-6.dll instead
 # of the *-win32/ versions.
 
+# libwinpthread-git-9.0.0.6090.ad98746a-1
+# We can use the libwinpthread-1 from the cross-compiler instead of download it.
+
 PKGS="boost-1.75.0-2
-libwinpthread-git-9.0.0.6090.ad98746a-1
 openlibm-0.7.5-1
 "
 

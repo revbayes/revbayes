@@ -167,7 +167,23 @@ ninja -C build-gtk install
 
 ## Cross-compiling
 
-1. Create a fake windows root directory and download windows libraries from MINGW64.
+1. Install the cross-compiler MINGW, if you don't have it already:
+
+    For Debian/Ubuntu Linux:
+
+        apt-get install g++-mingw-w64 wine64-development
+
+    The name of the compiler that we want to use is `x86_64-w64-mingw32-g++-posix`.
+    * The prefix `x86_64-w64-` indicates that we want to compile for 64-bit windows, not 32-bit windows.
+    * The ending `-posix` indicates that we want to use UNIX (POSIX) threads, not Windows threads.
+
+    There is also a homebrew package `mingw-w64` on Mac, but these instructions have not been tested on Mac.
+
+        brew install mingw-w64 wine-stable
+
+    You might need to update the paths in the cross-file below.
+
+2. Create a fake windows root directory and download windows libraries from MINGW64.
 
    ```
    cd projects/meson/
@@ -178,10 +194,12 @@ ninja -C build-gtk install
 
    If you want to compile the GUI version for windows, add `-gtk true` to the command to `make_winroot.sh`.
 
-2. Compile Revbayes
 
-   ```
-   cd projects/meson
+3. Compile Revbayes
+
+   In the `projects/meson` directory, run:
+
+   ``` sh
    ./generate.sh
    meson build ../../ --prefix=${HOME}/winrb  --cross-file=win64-cross.txt
    ninja -C build install
@@ -191,22 +209,18 @@ ninja -C build-gtk install
 
    If you want to compile the GUI version for windows, add `-Dstudio=true` to the meson command line.
 
-3. Copy DLLs that the binary needs to the same directory
+4. Copy needed DLLs to the same directory as `rb.exe`:
 
    ```
-   cp /usr/lib/gcc/x86_64-w64-mingw32/*-posix/libgcc_s_seh-1.dll ~/winrb/bin
-   cp /usr/lib/gcc/x86_64-w64-mingw32/*-posix/libstdc++-6.dll    ~/winrb/bin
-   cp /usr/lib/gcc/x86_64-w64-mingw32/*-posix/libssp-0.dll       ~/winrb/bin
-   cp ~/win_root/mingw64/bin/*.dll                               ~/winrb/bin
+   CXX=x86_64-w64-mingw32-g++-posix
+   cp -n ~/win_root/mingw64/bin/*.dll                  ~/winrb/bin
+   cp -n $($CXX --print-file-name libgcc_s_seh-1.dll)  ~/winrb/bin
+   cp -n $($CXX --print-file-name libstdc++-6.dll)     ~/winrb/bin
+   cp -n $($CXX --print-file-name libssp-0.dll)        ~/winrb/bin
+   cp -n $($CXX --print-file-name libwinpthread-1.dll) ~/winrb/bin
    ```
 
-   Note that this same procedure is shown in the `release.yml` workflow.
-
-   This may be a bit fragile.  The paths for the first two DLLs are for Debian/Ubuntu, but could
-   be somewhere else on other systems.
-
-   Note that we need the `*-win32/` versions of `libgcc_s_seh-1.dll` and `libstdc++-6.dll` and not the
-   `*-posix/` versions because we are using the mingw `libwinpthread-1.dll`.
+   Note that this same procedure is shown in the `build.yml` workflow.
 
    If you run `rb.exe` and it cannot find a DLL, it will tell you the first one that it cannot find.
 
