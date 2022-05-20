@@ -103,7 +103,6 @@
 #include "Func_phyloDiversity.h"
 #include "Func_PhylogeneticIndependentContrasts.h"
 #include "Func_PhylogeneticIndependentContrastsMultiSample.h"
-#include "Func_pomoState4Converter.h"
 #include "Func_pomoStateConverter.h"
 #include "Func_pomoRootFrequencies.h"
 #include "Func_pruneTree.h"
@@ -438,8 +437,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_phyloDiversity()                                  );
         addFunction( new Func_PhylogeneticIndependentContrasts()                );
         addFunction( new Func_PhylogeneticIndependentContrastsMultiSample()     );
-        addFunction( new Func_pomoState4Converter()                             );
-        addFunction( new Func_pomoStateConverter()                             );
+        addFunction( new Func_pomoStateConverter()                              );
         addFunction( new Func_pomoRootFrequencies()                             );
         addFunction( new Func_pruneTree()                                       );
         addFunction( new Func_featureInformedRates()                            );
