@@ -14,7 +14,8 @@
 using namespace RevLanguage;
 
 /** default constructor */
-Func_revPoMoTwo4N::Func_revPoMoTwo4N( void ) : TypedFunction<RateMatrix>( ) {
+Func_revPoMoTwo4N::Func_revPoMoTwo4N( void ) : TypedFunction<RateMatrix>( )
+{
 
 }
 
