@@ -31,7 +31,7 @@ namespace RevLanguage {
         Func_revPoMoTwo4N( void );
 
         // Basic utility functions
-        Func_revPoMoTwo4N*                                                   clone(void) const;                                          //!< Clone the object
+        Func_revPoMoTwo4N*                                              clone(void) const;                                          //!< Clone the object
         static const std::string&                                       getClassType(void);                                         //!< Get Rev type
         static const TypeSpec&                                          getClassTypeSpec(void);                                     //!< Get class type spec
         std::string                                                     getFunctionName(void) const;                                //!< Get the primary name of the function in Rev
