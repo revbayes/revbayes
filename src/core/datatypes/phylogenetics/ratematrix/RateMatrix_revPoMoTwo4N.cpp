@@ -195,10 +195,12 @@ void RateMatrix_revPoMoTwo4N::computeOffDiagonal( void )
     
   // populating the rate matrix with 0.0
   // **total waste of time with sparse matrices like pomos**
-  for (int i=0; i<10 ; i++){
-    for (int j=0; j<10; j++ ){
-        m[i][j] = 0.0;
-    }
+  for (int i=0; i<10 ; i++)
+  {
+      for (int j=0; j<10; j++ )
+      {
+          m[i][j] = 0.0;
+      }
   }
 
 

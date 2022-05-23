@@ -2041,22 +2041,20 @@ void RevBayesCore::HomologousDiscreteCharacterData<charType>::restoreCharacter(s
 
 
 /**
- * Compute the state frequencies per site.
+ * Translate, i.e., convert this character data object into a new type.
  *
  * \return       A matrix of character frequencies where each column is a character and each row a taxon.
  */
 template<class charType>
 RevBayesCore::AbstractHomologousDiscreteCharacterData* RevBayesCore::HomologousDiscreteCharacterData<charType>::translateCharacters( const std::string &type ) const
-{
+{    
     
     size_t num_sequences = this->taxa.size();
-    HomologousDiscreteCharacterData<DnaState> *trans_char_data = new HomologousDiscreteCharacterData<DnaState>();
+    AbstractHomologousDiscreteCharacterData* trans_char_data = CharacterTranslator::constructDataMatrix( type );
     
     for (size_t i = 0; i < num_sequences; ++i)
     {
         const DiscreteTaxonData<charType>& seq = this->getTaxonData(i);
-        //        DiscreteTaxonData<DnaState>& trans_seq = seq.convertToDnaCharacters();
-        //
         AbstractDiscreteTaxonData *trans_seq = CharacterTranslator::translateCharacters( seq, type );
         trans_char_data->addTaxonData( *trans_seq );
         

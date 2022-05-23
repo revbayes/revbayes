@@ -268,7 +268,7 @@ size_t CountFileToNaturalNumbersConverter::sampleWeight(size_t M, size_t m, size
     for (size_t i=0; i < N+1; ++i)
     {
         prob = 1.0*i/N;
-      weights[i] = pow(prob,m)*pow(1-prob,M-m);
+        weights[i] = pow(prob,m)*pow(1-prob,M-m);
     }
   
     // sampling a pomo state from the weight vector

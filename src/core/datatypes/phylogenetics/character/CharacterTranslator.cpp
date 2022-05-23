@@ -3,22 +3,63 @@
 #include <stddef.h>
 #include <string>
 
-#include "RbException.h"
-#include "StringUtilities.h"
 #include "AminoAcidState.h"
+#include "AbstractDiscreteTaxonData.h"
+#include "AbstractHomologousDiscreteCharacterData.h"
 #include "Cloneable.h"
 #include "CodonState.h"
 #include "DoubletState.h"
 #include "DiscreteCharacterState.h"
 #include "DnaState.h"
+#include "HomologousDiscreteCharacterData.h"
 #include "NaturalNumbersState.h"
+#include "RbException.h"
+#include "StringUtilities.h"
 #include "RnaState.h"
 
 
 
 using namespace RevBayesCore;
 
-RevBayesCore::AbstractDiscreteTaxonData* CharacterTranslator::translateCharacters(const RevBayesCore::AbstractDiscreteTaxonData &d, const std::string &type)
+
+AbstractHomologousDiscreteCharacterData* CharacterTranslator::constructDataMatrix( const std::string& type )
+{
+    
+    AbstractHomologousDiscreteCharacterData* data = NULL;
+    if ( type == "DNA" )
+    {
+        data = new HomologousDiscreteCharacterData<DnaState>();
+    }
+    else if ( type == "RNA" )
+    {
+        data = new HomologousDiscreteCharacterData<RnaState>();
+    }
+    else if ( type == "AA" || "Protein" )
+    {
+        data = new HomologousDiscreteCharacterData<AminoAcidState>();
+    }
+    else if ( type == "Codon" )
+    {
+        data = new HomologousDiscreteCharacterData<CodonState>();
+    }
+    else if ( type == "Doublet")
+    {
+        data = new HomologousDiscreteCharacterData<DoubletState>();
+    }
+    else if ( type == "NaturalNumbers" )
+    {
+        data = new HomologousDiscreteCharacterData<NaturalNumbersState>();
+    }
+    else
+    {
+        throw RbException("Cannot translate character data object into type \"" + type + "\"" );
+    }
+    
+    return data;
+}
+
+
+AbstractDiscreteTaxonData* CharacterTranslator::translateCharacters(const AbstractDiscreteTaxonData &d, const std::string &type)
 {
     AbstractDiscreteTaxonData *trans_taxon_data = NULL;
 
@@ -39,18 +80,7 @@ RevBayesCore::AbstractDiscreteTaxonData* CharacterTranslator::translateCharacter
     {
         trans_taxon_data = translateToRna( d );
     }
-    else if ( type == "AA" )
-    {
-        if ( d.getCharacter(0).getDataType() == "DNA" )
-        {
-            trans_taxon_data = translateToAaFromDna( dynamic_cast< const DiscreteTaxonData<DnaState>& >(d) );
-        }
-        else
-        {
-            trans_taxon_data = translateToAa( d );
-        }
-    }
-    else if ( type == "Protein" )
+    else if ( type == "AA" || type == "Protein" )
     {
         if ( d.getCharacter(0).getDataType() == "DNA" )
         {
@@ -90,6 +120,10 @@ RevBayesCore::AbstractDiscreteTaxonData* CharacterTranslator::translateCharacter
         {
             trans_taxon_data = translateToDoublet( d );
         }
+    }
+    else if ( type == "NaturalNumbers" )
+    {
+        trans_taxon_data = translateToNaturalNumbers( d );
     }
     else
     {
@@ -234,6 +268,23 @@ DiscreteTaxonData<AminoAcidState>* CharacterTranslator::translateToAaFromDna(con
         CodonState cs = CodonState( codon_string );
         
         trans_taxon_data->addCharacter( cs.getAminoAcidState() );
+    }
+    
+    return trans_taxon_data;
+}
+
+
+DiscreteTaxonData<NaturalNumbersState>* CharacterTranslator::translateToNaturalNumbers(const AbstractDiscreteTaxonData &d)
+{
+    size_t length = d.getNumberOfCharacters();
+    
+    DiscreteTaxonData<NaturalNumbersState> *trans_taxon_data = new DiscreteTaxonData<NaturalNumbersState>( d.getTaxon() );
+    size_t num_states = d.getCharacter(0).getNumberOfStates();
+    
+    for (size_t i=0; i<length; ++i)
+    {
+        size_t state_index = d.getCharacter(i).getStateIndex();
+        trans_taxon_data->addCharacter( NaturalNumbersState( int(state_index), int(num_states) ) );
     }
     
     return trans_taxon_data;
