@@ -81,7 +81,7 @@ PoMoCountFileReader::PoMoCountFileReader(const std::string &fn, const size_t vps
     std::vector<std::string> tmp_res;
     StringUtilities::stringSplit(chars[2][2], ",", tmp_res);
     size_t num_states = tmp_res.size();
-    
+
 	for (size_t i = 2; i < chars.size(); ++i)
 	{
 		if (chars[i].size() != numberOfFields)
@@ -95,7 +95,17 @@ PoMoCountFileReader::PoMoCountFileReader(const std::string &fn, const size_t vps
 		for (size_t j = 2; j < 2 + number_of_populations; ++j)
 		{
 
-            if ( num_states == 4 )
+            if ( num_states == 100 )
+            /* got an error here when num_sates=4
+            stringvalue: 6,0,0,0
+1 1e-08 1e-08 1e-08 0.015625 0.015625 0.015625 1e-08 1e-08 1e-08 
+
+ 
+terminate called after throwing an instance of 'std::bad_alloc'
+  what():  std::bad_alloc
+Aborted (core dumped)
+
+            */
             {
                 PoMoState4 pState (chars[i][j], chromosome, position, virtual_population_size );
                 name_to_taxon_data.at(names[j-2]).addCharacter( pState);
