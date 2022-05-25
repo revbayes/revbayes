@@ -10,7 +10,7 @@ namespace RevLanguage {
     class DistributionMemberFunction : public TypedFunction<retType>, public MemberMethod {
         
     public:
-        DistributionMemberFunction(const std::string &n, const typename distributionType::rlValueType* o, ArgumentRules* argRules, bool f=false);                                 //!< Constructor
+        DistributionMemberFunction(const std::string &n, const typename distributionType::rlValueType* o, ArgumentRules* argRules, bool f=false, bool i=false);                                 //!< Constructor
         virtual ~DistributionMemberFunction(){};
         
         // Basic utility functions
@@ -34,7 +34,8 @@ namespace RevLanguage {
         RevPtr<RevVariable>                                             object;
         const typename distributionType::rlValueType*                   the_member_object;
         bool                                                            force_updates;
-        
+        bool                                                            include_member_arguments;
+
     };
     
     
@@ -47,12 +48,13 @@ namespace RevLanguage {
 
 /** default constructor */
 template <typename distributionType, typename retType>
-RevLanguage::DistributionMemberFunction<distributionType, retType>::DistributionMemberFunction( const std::string &n, const typename distributionType::rlValueType *o, ArgumentRules* ar, bool f ) : TypedFunction<retType>(  ),
+RevLanguage::DistributionMemberFunction<distributionType, retType>::DistributionMemberFunction( const std::string &n, const typename distributionType::rlValueType *o, ArgumentRules* ar, bool f, bool i ) : TypedFunction<retType>(  ),
     argument_rules( ar ),
     funcName( n ),
     object( NULL ),
     the_member_object( o ),
-    force_updates( f )
+    force_updates( f ),
+    include_member_arguments( i )
 {
     
 }
@@ -87,6 +89,15 @@ RevBayesCore::TypedFunction< typename retType::valueType >* RevLanguage::Distrib
     if ( o == NULL )
     {
         throw RbException("Could not cast the member object.");
+    }
+    
+    if ( include_member_arguments == true )
+    {
+        const std::vector<const RevBayesCore::DagNode*>& parent_args = o->getParents();
+        for ( size_t i=0; i<parent_args.size(); ++i)
+        {
+            argNodes.push_back( parent_args[i] );
+        }
     }
     
     RevBayesCore::DistributionMemberFunction<typename distributionType::rbValueType, typename retType::valueType> *func = new RevBayesCore::DistributionMemberFunction<typename distributionType::rbValueType, typename retType::valueType>(this->funcName, o, argNodes);
