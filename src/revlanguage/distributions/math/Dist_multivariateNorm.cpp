@@ -62,7 +62,6 @@ Dist_multivariateNorm::Dist_multivariateNorm(void) : TypedDistribution<ModelVect
     ArgumentRules* clampAtArgRules = new ArgumentRules();
     clampAtArgRules->push_back( new ArgumentRule( "index", Natural::getClassTypeSpec(), "The index of the value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     clampAtArgRules->push_back( new ArgumentRule( "value", Real::getClassTypeSpec(), "The observed value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-//    methods.addFunction("clampAt", new DistributionMemberFunction<TimeTree,RealPos>(this, clampAtArgRules   ) );
     methods.addFunction( new MemberProcedure( "clampAt", RlUtils::Void, clampAtArgRules ) );
 
 }
