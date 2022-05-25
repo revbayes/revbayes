@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "FossilizedBirthDeathRangeProcess.h"
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "ModelVector.h"
@@ -108,10 +109,10 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
     }
 
     bool c  = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
-    bool re = false; //static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
+    bool use_bds = static_cast<const RlBoolean &>( bds->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, re);
-
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, false, use_bds);
+    
     return d;
 }
 
@@ -194,6 +195,7 @@ const MemberRules& Dist_FBDRP::getParameterRules(void) const
     
     if ( !rules_set )
     {
+        dist_member_rules.push_back( new ArgumentRule( "BDS", RlBoolean::getClassTypeSpec(), "Assume complete lineage sampling? (BDS model of Silvestro et al. 2019)", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
 
         // add the rules from the base class
         const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<MatrixReal>::getParameterRules();
@@ -217,4 +219,29 @@ const TypeSpec& Dist_FBDRP::getTypeSpec( void ) const
     static TypeSpec ts = getClassTypeSpec();
     
     return ts;
+}
+
+
+/**
+ * Set a member variable.
+ *
+ * Sets a member variable with the given name and store the pointer to the variable.
+ * The value of the variable might still change but this function needs to be called again if the pointer to
+ * the variable changes. The current values will be used to create the distribution object.
+ *
+ * \param[in]    name     Name of the member variable.
+ * \param[in]    var      Pointer to the variable.
+ */
+void Dist_FBDRP::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+{
+
+    if ( name == "BDS" )
+    {
+        bds = var;
+    }
+    else
+    {
+       FossilizedBirthDeathRangeProcess<MatrixReal>::setConstParameter(name,var);
+    }
+
 }

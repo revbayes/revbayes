@@ -11,6 +11,8 @@
 #include "AbstractFossilizedBirthDeathRangeProcess.h"
 #include "DistributionExponential.h"
 #include "MatrixReal.h"
+#include "RbMathCombinatorialFunctions.h"
+#include "RbMathFunctions.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "StochasticNode.h"
@@ -48,9 +50,11 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
                                                                      const std::string &incondition,
                                                                      const std::vector<Taxon> &intaxa,
                                                                      bool complete,
-                                                                     bool resample) :
+                                                                     bool resample,
+                                                                     bool use_bds) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
-    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete, resample)
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete, resample),
+    bds(use_bds)
 {
     dirty_gamma = std::vector<bool>(taxa.size(), true);
     gamma_i     = std::vector<size_t>(taxa.size(), 0);
@@ -84,15 +88,213 @@ FossilizedBirthDeathRangeProcess* FossilizedBirthDeathRangeProcess::clone( void 
  */
 double FossilizedBirthDeathRangeProcess::computeLnProbability( void )
 {
-    // prepare the probability computation
-    updateGamma();
+    double lnProb = 0.0;
 
-    double lnProb = computeLnProbabilityRanges();
+    // prepare the probability computation
+    if ( bds == true )
+    {
+        lnProb = computeLnProbabilityBDS();
+    }
+    else
+    {
+        updateGamma();
+
+        lnProb = computeLnProbabilityRanges();
+    }
 
     for( size_t i = 0; i < taxa.size(); i++ )
     {
         // multiply by the number of possible birth locations
         lnProb += log( gamma_i[i] == 0 ? 1 : gamma_i[i] );
+    }
+
+    return lnProb;
+}
+
+
+/**
+ * Compute the log-transformed probability of the current value under the current parameter values.
+ *
+ */
+double FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
+{
+    // prepare the probability computation
+    prepareProbComputation();
+
+    // variable declarations and initialization
+    double lnProb = 0.0;
+
+    size_t num_rho_sampled = 0;
+    size_t num_rho_unsampled = 0;
+
+    // add the fossil tip age terms
+    for (size_t i = 0; i < taxa.size(); ++i)
+    {
+        double b = this->getValue()[i][0];
+        double d = this->getValue()[i][1];
+
+        double max_age = taxa[i].getMaxAge();
+        double min_age = taxa[i].getMinAge();
+
+        double present = times.front();
+
+        // check model constraints
+        if ( !( b > o_i[i] && b > d && y_i[i] >= d && d >= present ) )
+        {
+            return RbConstants::Double::neginf;
+        }
+        if ( (d > present) != taxa[i].isExtinct() )
+        {
+            return RbConstants::Double::neginf;
+        }
+
+        // count the number of rho-sampled tips
+        num_rho_sampled   += (d == present && min_age == present);
+        num_rho_unsampled += (d == present && min_age > present);
+
+        if ( dirty_taxa[i] == true )
+        {
+            size_t bi = findIndex(b);
+            size_t di = findIndex(d);
+
+            partial_likelihood[i] = 0.0;
+
+            // include speciation density
+            partial_likelihood[i] += log( birth[bi] );
+
+            // skip the rest for extant taxa with no fossil samples
+            if ( max_age == present )
+            {
+                continue;
+            }
+
+            // include extinction density
+            if (d > present) partial_likelihood[i] += log( death[di] );
+
+            double psi_b_d = 0.0;
+
+            // include poisson density
+            for ( size_t j = di; j <= bi; j++ )
+            {
+                double t_0 = ( j < num_intervals-1 ? times[j+1] : RbConstants::Double::inf );
+
+                double dt = std::min(b, t_0) - std::max(d, times[j]);
+
+                partial_likelihood[i] -= (birth[j] + death[j])*dt;
+
+                psi_b_d += fossil[j]*dt;
+            }
+
+            // include sampling density
+            if ( dirty_psi[i] )
+            {
+                std::map<TimeInterval, size_t> ages = taxa[i].getOccurrences();
+
+                // if there is a range of fossil ages
+                if ( min_age != max_age )
+                {
+                    double psi_y_o = 0.0;
+
+                    std::vector<double> psi(ages.size(), 0.0);
+
+                    for (size_t j = 0; j < num_intervals; j++)
+                    {
+                        double t_0 = ( j < num_intervals-1 ? times[j+1] : RbConstants::Double::inf );
+
+                        if ( t_0 <= std::max(d,min_age) )
+                        {
+                            continue;
+                        }
+                        if ( times[j] >= std::min(b,max_age) )
+                        {
+                            break;
+                        }
+
+                        // increase incomplete sampling psi
+                        double dt = std::min(std::min(b,max_age), t_0) - std::max(std::max(d,min_age), times[j]);
+
+                        psi_y_o += fossil[j]*dt;
+
+                        size_t k = 0;
+                        // increase running psi total for each observation
+                        for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
+                        {
+                            if ( Fi->first.getMin() < t_0 && Fi->first.getMax() > times[j] )
+                            {
+                                double dt = 1.0;
+
+                                // only compute dt if this is a non-singleton
+                                if ( Fi->first.getMin() != Fi->first.getMax() )
+                                {
+                                    dt = std::min(std::min(Fi->first.getMax(), b), t_0) - std::max(std::max(Fi->first.getMin(), d), times[j]);
+                                }
+
+                                psi[k] += fossil[j] * dt;
+                            }
+                        }
+                    }
+
+                    // recompute Psi product
+                    Psi[i] = 0.0;
+
+                    double count = 0;
+
+                    size_t k = 0;
+                    // compute product of psi totals
+                    for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
+                    {
+                        count += Fi->second;
+
+                        Psi[i] += log(psi[k]) * Fi->second;
+                    }
+
+                    if ( complete == true )
+                    {
+                        // compute poisson density for count
+                        Psi[i] -= RbMath::lnFactorial(count);
+                        Psi[i] -= psi_b_d;
+                    }
+                    else
+                    {
+                        // compute poisson density for count + kappa, kappa >= 0
+                        Psi[i] += psi_y_o - psi_b_d;
+                        Psi[i] -= count*log(psi_y_o);
+                        Psi[i] += log(RbMath::incompleteGamma(psi_y_o, count, true, true));
+                    }
+                }
+                // only one fossil age
+                else
+                {
+                    // include instantaneous sampling density
+                    Psi[i] = ages.begin()->second * log(fossil[findIndex(min_age)]);
+                }
+            }
+
+            if ( condition == "sampling" )
+            {
+                partial_likelihood[i] -= log(-expm1(-psi_b_d));
+            }
+
+            partial_likelihood[i] += Psi[i];
+        }
+
+        lnProb += partial_likelihood[i];
+    }
+
+    // add the sampled extant tip age term
+    if ( homogeneous_rho->getValue() > 0.0)
+    {
+        lnProb += num_rho_sampled * log( homogeneous_rho->getValue() );
+    }
+    // add the unsampled extant tip age term
+    if ( homogeneous_rho->getValue() < 1.0)
+    {
+        lnProb += num_rho_unsampled * log( 1.0 - homogeneous_rho->getValue() );
+    }
+
+    if ( RbMath::isFinite(lnProb) == false )
+    {
+        return RbConstants::Double::neginf;
     }
 
     return lnProb;

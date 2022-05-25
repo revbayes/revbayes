@@ -176,7 +176,6 @@
 #include "Dist_DuplicationLoss.h"
 #include "Dist_FBDRP.h"
 #include "Dist_FBDSP.h"
-#include "Dist_BDS.h"
 #include "Dist_constPopMultispCoal.h"
 #include "Dist_divDepYuleProcess.h"
 #include "Dist_empiricalTree.h"
@@ -346,9 +345,6 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         // fossilized-birth-death range processes
         AddDistribution< MatrixReal                 >( new Dist_FBDRP());
         AddDistribution< TimeTree                   >( new Dist_FBDSP());
-
-        // birth-death with rate shifts model (Silvestro et al.)
-        AddDistribution< MatrixReal                 >( new Dist_BDS());
 
         // birth-death-sampling-treatment processes and submodels
         AddDistribution< TimeTree                   >( new Dist_BDSTP());
