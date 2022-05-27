@@ -260,7 +260,6 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
     
     // variable declarations and initialization
     double lnProbTimes = 0.0;
-    //    double process_time = getOriginAge(); // Sebastian: currently unused.
     size_t num_initial_lineages = 0;
     TopologyNode* root = &value->getRoot();
 
@@ -283,6 +282,14 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
         // then we must divide by 2 the log survival probability computed by AbstractBirthDeathProcess
         // TODO: Generalize AbstractBirthDeathProcess to allow conditioning on the origin
         num_initial_lineages = 1;
+
+        double t = getOriginAge();
+        size_t index = findIndex(t);
+        lnProbTimes += lnD(index,t);
+
+        t = value->getRoot().getAge();
+        index = findIndex(t);
+        lnProbTimes -= lnD(index,t);
     }
     // if conditioning on root, root node must be a "true" bifurcation event
     else
@@ -482,20 +489,20 @@ double EpisodicBirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( vo
     // condition on survival
     if ( condition == "survival" )
     {
-        double root_age = value->getRoot().getAge();
+        double age = use_origin ? getOriginAge() : value->getRoot().getAge();
         // conditioning on survival depends on if we are using the origin or root age
         // origin: we condition on a single lineage surviving to the present and being sampled
         // root: we condition on the above plus the other root child leaving a sampled descendant
         
-        lnProbTimes -= num_initial_lineages * log( pSurvival(root_age,0.0) );
+        lnProbTimes -= num_initial_lineages * log( pSurvival(age,0.0) );
     }
     else if ( condition == "sampling" )
     {
         // conditioning on sampling depends on if we are using the origin or root age
         // origin: the conditioning suggested by Stadler 2011 and used by Gavryuskina (2014), sampling at least one lineage
         // root age: sampling at least one descendent from each child of the root
-        double root_age = value->getRoot().getAge();
-        lnProbTimes -= num_initial_lineages * log( pSampling(root_age) );
+        double age = use_origin ? getOriginAge() : value->getRoot().getAge();
+        lnProbTimes -= num_initial_lineages * log( pSampling(age) );
     }
 
     if ( RbMath::isFinite(lnProbTimes) == false )
