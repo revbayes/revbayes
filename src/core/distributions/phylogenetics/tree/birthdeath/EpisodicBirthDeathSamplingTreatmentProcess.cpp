@@ -637,10 +637,6 @@ double EpisodicBirthDeathSamplingTreatmentProcess::lnD(size_t i, double t) const
         {
             this_lnD_i = lnD_previous[i];
         }
-        else
-        {
-            this_lnD_i = phi_event[0] <= DBL_EPSILON ? 0.0 : log(phi_event[0]);
-        }
         this_lnD_i += 2*RbConstants::LN2 + (-A_i[i] * (t - s));
         this_lnD_i -= 2 * log(1 + B_i[i] + exp(-A_i[i] * (t - s)) * (1 - B_i[i]));
 
