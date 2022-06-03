@@ -10,6 +10,7 @@ debug="false"
 travis="false"
 mpi="false"
 beagle="false"
+beagle_root=""
 eigen="false"
 help="false"
 jupyter="false"
@@ -29,6 +30,7 @@ while echo $1 | grep ^- > /dev/null; do
 -debug          <true|false>    : set to true to build in debug mode. Defaults to false.
 -mpi            <true|false>    : set to true if you want to build the MPI version. Defaults to false.
 -beagle         <true|false>    : set to true if you want to build the BEAGLE version. Defaults to false.
+-beagle_root    string          : specify directory where BEAGLE-lib is located. Defaults to unset.
 -eigen          <true|false>    : set to true if you want to build with Eigen3 support. Defaults to false.
 -cmd            <true|false>    : set to true if you want to build RevStudio with GTK2+. Defaults to false.
 -jupyter        <true|false>    : set to true if you want to build the jupyter version. Defaults to false.
@@ -102,6 +104,10 @@ fi
 
 if [ "$beagle" = "true" ] ; then
     cmake_args="-DRB_BEAGLE=ON $cmake_args"
+fi
+
+if [ -n "$beagle_root" ] ; then
+    cmake_args="-DRB_BEAGLE_ROOT=${beagle_root} $cmake_args"
 fi
 
 if [ "$eigen" = "true" ] ; then
