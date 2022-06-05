@@ -52,7 +52,7 @@ const std::string& ProbabilityContinuousDistribution::getClassType(void)
 const TypeSpec& ProbabilityContinuousDistribution::getClassTypeSpec(void)
 {
     
-    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution<RealPos>::getClassTypeSpec() ) );
+    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution<Probability>::getClassTypeSpec() ) );
     
     return rev_type_spec;
 }
