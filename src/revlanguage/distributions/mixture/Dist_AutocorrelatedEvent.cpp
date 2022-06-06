@@ -6,9 +6,9 @@
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "Dist_MultiValueEvent.h"
+#include "Dist_AutocorrelatedEvent.h"
 #include "ModelVector.h"
-#include "MultiValueEventDistribution.h"
+#include "AutocorrelatedEventDistribution.h"
 #include "Natural.h"
 #include "RlDistributionMemberFunction.h"
 #include "RlString.h"
@@ -54,7 +54,7 @@ using namespace RevLanguage;
  *
  * The default constructor does nothing except allocating the object.
  */
-Dist_MultiValueEvent::Dist_MultiValueEvent() : TypedDistribution<MultiValueEvent>()
+Dist_AutocorrelatedEvent::Dist_AutocorrelatedEvent() : TypedDistribution<MultiValueEvent>()
 {
     
 }
@@ -66,10 +66,10 @@ Dist_MultiValueEvent::Dist_MultiValueEvent() : TypedDistribution<MultiValueEvent
  *
  * \return A new copy of myself
  */
-Dist_MultiValueEvent* Dist_MultiValueEvent::clone( void ) const
+Dist_AutocorrelatedEvent* Dist_AutocorrelatedEvent::clone( void ) const
 {
     
-    return new Dist_MultiValueEvent(*this);
+    return new Dist_AutocorrelatedEvent(*this);
 }
 
 
@@ -83,7 +83,7 @@ Dist_MultiValueEvent* Dist_MultiValueEvent::clone( void ) const
  *
  * \return A new internal distribution object.
  */
-RevBayesCore::MultiValueEventDistribution* Dist_MultiValueEvent::createDistribution( void ) const
+RevBayesCore::AutocorrelatedEventDistribution* Dist_AutocorrelatedEvent::createDistribution( void ) const
 {
     // get the parameters
 //    const WorkspaceVector<TypedDistribution<Real> >& rl_vp                   = static_cast<const WorkspaceVector<TypedDistribution<Real> > &>( value_priors->getRevObject() );
@@ -103,7 +103,32 @@ RevBayesCore::MultiValueEventDistribution* Dist_MultiValueEvent::createDistribut
     const std::vector<long> & m = static_cast<const ModelVector<Natural> &>( min_elements->getRevObject() ).getValue();
 
     
-    RevBayesCore::MultiValueEventDistribution* d    = new RevBayesCore::MultiValueEventDistribution(ep, vp, n, m);
+    const std::vector<std::string>& ac_type_names = static_cast<const ModelVector<RlString> &>( autocorrelation_types->getRevObject() ).getValue();
+    std::vector< RevBayesCore::AutocorrelatedEventDistribution::Autocorrelation > ac_types = std::vector< RevBayesCore::AutocorrelatedEventDistribution::Autocorrelation >( ac_type_names.size(), RevBayesCore::AutocorrelatedEventDistribution::NONE );
+    for ( size_t i=0; i<ac_type_names.size(); ++i )
+    {
+        if ( ac_type_names[i] == "NONE" )
+        {
+            ac_types[i] = RevBayesCore::AutocorrelatedEventDistribution::NONE;
+        }
+        else if ( ac_type_names[i] == "ACN" )
+        {
+            ac_types[i] = RevBayesCore::AutocorrelatedEventDistribution::ACN;
+        }
+        else if ( ac_type_names[i] == "ACLN" )
+        {
+            ac_types[i] = RevBayesCore::AutocorrelatedEventDistribution::ACLN;
+        }
+    }
+    
+    const std::vector<std::string>& ac_dep_var = static_cast<const ModelVector<RlString> &>( autocorrelation_dep_var->getRevObject() ).getValue();
+    
+    
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ac_sd = static_cast<const ModelVector<RealPos> &>( autocorrelation_sigmas->getRevObject() ).getDagNode();
+    
+    const std::string& sort_by = static_cast<const RlString &>( name_of_var_to_sort_by->getRevObject() ).getValue();
+
+    RevBayesCore::AutocorrelatedEventDistribution* d    = new RevBayesCore::AutocorrelatedEventDistribution(ep, vp, ac_types, ac_dep_var, ac_sd, n, m, sort_by);
     
     return d;
 }
@@ -115,10 +140,10 @@ RevBayesCore::MultiValueEventDistribution* Dist_MultiValueEvent::createDistribut
  *
  * \return The class' name.
  */
-const std::string& Dist_MultiValueEvent::getClassType(void)
+const std::string& Dist_AutocorrelatedEvent::getClassType(void)
 {
     
-    static std::string rev_type = "Dist_MultiValueEvent";
+    static std::string rev_type = "Dist_AutocorrelatedEvent";
     
     return rev_type;
 }
@@ -129,7 +154,7 @@ const std::string& Dist_MultiValueEvent::getClassType(void)
  *
  * \return TypeSpec of this class.
  */
-const TypeSpec& Dist_MultiValueEvent::getClassTypeSpec(void)
+const TypeSpec& Dist_AutocorrelatedEvent::getClassTypeSpec(void)
 {
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution<MultiValueEvent>::getClassTypeSpec() ) );
@@ -143,7 +168,7 @@ const TypeSpec& Dist_MultiValueEvent::getClassTypeSpec(void)
  *
  * \return Rev aliases of constructor function.
  */
-std::vector<std::string> Dist_MultiValueEvent::getDistributionFunctionAliases( void ) const
+std::vector<std::string> Dist_AutocorrelatedEvent::getDistributionFunctionAliases( void ) const
 {
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
@@ -159,17 +184,17 @@ std::vector<std::string> Dist_MultiValueEvent::getDistributionFunctionAliases( v
  *
  * \return Rev name of constructor function.
  */
-std::string Dist_MultiValueEvent::getDistributionFunctionName( void ) const
+std::string Dist_AutocorrelatedEvent::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
-    std::string d_name = "MultiValueEvent";
+    std::string d_name = "AutocorrelatedEvent";
     
     return d_name;
 }
 
 
 
-MethodTable Dist_MultiValueEvent::getDistributionMethods( void ) const
+MethodTable Dist_AutocorrelatedEvent::getDistributionMethods( void ) const
 {
     
     MethodTable methods = TypedDistribution<MultiValueEvent>::getDistributionMethods();
@@ -177,14 +202,14 @@ MethodTable Dist_MultiValueEvent::getDistributionMethods( void ) const
     // member functions
     ArgumentRules* get_real_values_arg_rules = new ArgumentRules();
     get_real_values_arg_rules->push_back( new ArgumentRule( "name", RlString::getClassTypeSpec(), "The name of the value.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-    methods.addFunction( new DistributionMemberFunction<Dist_MultiValueEvent, ModelVector<Real> >( "getRealValues", this->variable, get_real_values_arg_rules, true ) );
+    methods.addFunction( new DistributionMemberFunction<Dist_AutocorrelatedEvent, ModelVector<Real> >( "getRealValues", this->variable, get_real_values_arg_rules, true ) );
 
     ArgumentRules* get_real_pos_values_arg_rules = new ArgumentRules();
     get_real_pos_values_arg_rules->push_back( new ArgumentRule( "name", RlString::getClassTypeSpec(), "The name of the value.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-    methods.addFunction( new DistributionMemberFunction<Dist_MultiValueEvent, ModelVector<RealPos> >( "getRealPosValues", this->variable, get_real_pos_values_arg_rules, true ) );
+    methods.addFunction( new DistributionMemberFunction<Dist_AutocorrelatedEvent, ModelVector<RealPos> >( "getRealPosValues", this->variable, get_real_pos_values_arg_rules, true ) );
 
     ArgumentRules* get_num_events_arg_rules = new ArgumentRules();
-    methods.addFunction( new DistributionMemberFunction<Dist_MultiValueEvent, Natural >( "getNumberOfEvents", this->variable, get_num_events_arg_rules, true ) );
+    methods.addFunction( new DistributionMemberFunction<Dist_AutocorrelatedEvent, Natural >( "getNumberOfEvents", this->variable, get_num_events_arg_rules, true ) );
     
     
     return methods;
@@ -194,12 +219,12 @@ MethodTable Dist_MultiValueEvent::getDistributionMethods( void ) const
 /**
  * Get the member rules used to create the constructor of this object.
  *
- * The member rules of the MultiValueEvent distribution are:
+ * The member rules of the AutocorrelatedEvent distribution are:
  * (1) the rate lambda which must be a positive real between 0 and 1 (= a probability).
  *
  * \return The member rules.
  */
-const MemberRules& Dist_MultiValueEvent::getParameterRules(void) const
+const MemberRules& Dist_AutocorrelatedEvent::getParameterRules(void) const
 {
     
     static MemberRules dist_member_rules;
@@ -209,10 +234,13 @@ const MemberRules& Dist_MultiValueEvent::getParameterRules(void) const
     {
         
         dist_member_rules.push_back( new ArgumentRule( "eventDistribution", TypedDistribution<Natural>::getClassTypeSpec(), "The prior on the number of events.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-//        dist_member_rules.push_back( new ArgumentRule( "valueDistribution", WorkspaceVector< TypedDistribution<Real> >::getClassTypeSpec(), "The base distribution for the per category values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "valueDistribution", WorkspaceVector< Distribution >::getClassTypeSpec(), "The base distribution for the per category values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "names", ModelVector<RlString>::getClassTypeSpec(), "The names of the values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "minNumberEvents", ModelVector<Natural>::getClassTypeSpec(), "The minum number of values per value category.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "autocorrelationTypes", ModelVector<RlString>::getClassTypeSpec(), "The autocorrelation types per variables. Allowed values are NONE|ACN|ACLN.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "autocorrelationDependencies", ModelVector<RlString>::getClassTypeSpec(), "The autocorrelation dependencies per variables. This is important if you want autocorrelation to be time-dependent. Allowed values are NONE or the name of another variable.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "autocorrelationSigmas", ModelVector<RealPos>::getClassTypeSpec(), "The standard deviation parameters of the autocorrelated variables.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "sort", RlString::getClassTypeSpec(), "The name of the variable to sort by. For example, if you want to enforce sorting by time the you need to specify the name of your time variable.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlString("none") ) );
 
         rules_set = true;
     }
@@ -226,7 +254,7 @@ const MemberRules& Dist_MultiValueEvent::getParameterRules(void) const
  *
  * \return The type spec of this object.
  */
-const TypeSpec& Dist_MultiValueEvent::getTypeSpec( void ) const
+const TypeSpec& Dist_AutocorrelatedEvent::getTypeSpec( void ) const
 {
     
     static TypeSpec ts = getClassTypeSpec();
@@ -246,7 +274,7 @@ const TypeSpec& Dist_MultiValueEvent::getTypeSpec( void ) const
  * \param[in]    name     Name of the member variable.
  * \param[in]    var      Pointer to the variable.
  */
-void Dist_MultiValueEvent::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+void Dist_AutocorrelatedEvent::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
      
     if ( name == "eventDistribution" )
@@ -264,6 +292,22 @@ void Dist_MultiValueEvent::setConstParameter(const std::string& name, const RevP
     else if ( name == "minNumberEvents" )
     {
         min_elements = var;
+    }
+    else if ( name == "autocorrelationTypes" )
+    {
+        autocorrelation_types = var;
+    }
+    else if ( name == "autocorrelationDependencies" )
+    {
+        autocorrelation_dep_var = var;
+    }
+    else if ( name == "autocorrelationSigmas" )
+    {
+        autocorrelation_sigmas = var;
+    }
+    else if ( name == "sort" )
+    {
+        name_of_var_to_sort_by = var;
     }
     else
     {
