@@ -71,7 +71,8 @@ void BernoulliDistribution::redrawValue( void )
 
 
 /** Swap a parameter of the distribution */
-void BernoulliDistribution::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
+void BernoulliDistribution::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+{
     
     if (oldP == p) 
     {
