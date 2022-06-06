@@ -59,7 +59,7 @@ AutocorrelatedEventDistribution::AutocorrelatedEventDistribution(TypedDistributi
             break;
         }
     }
-    std::vector< int > autocorrelation_time_indeces = std::vector< int >(value_priors.size(), -1);
+    autocorrelation_time_indeces = std::vector< int >(value_priors.size(), -1);
     for ( int i=0; i<value_priors.size(); ++i )
     {
         if ( autocorrelation_types[i] != NONE )
@@ -237,8 +237,8 @@ double AutocorrelatedEventDistribution::computeLnProbability( void )
             // if this variable is correlate via a normal distribution
             else if ( autocorrelation_types[j] == ACN )
             {
-                long time_index = i - min_events[autocorrelation_time_indeces[j]];
-                
+                long time_index = i - min_events[j] + min_events[autocorrelation_time_indeces[j]];
+
                 double mean = these_values[i-1];
                 double val  = these_values[i];
                 double dt   = time_values[time_index] - (time_index > 0 ? time_values[time_index-1] : 0.0);
@@ -249,7 +249,7 @@ double AutocorrelatedEventDistribution::computeLnProbability( void )
             // if this variable is correlated via a lognormal distribution
             else if ( autocorrelation_types[j] == ACLN )
             {
-                long time_index = i - min_events[autocorrelation_time_indeces[j]];
+                long time_index = i - min_events[j] + min_events[autocorrelation_time_indeces[j]];
                 
                 double mean = log( these_values[i-1] );
                 double val  = log( these_values[i] );
@@ -386,7 +386,8 @@ void AutocorrelatedEventDistribution::simulate()
             // if this variable is correlate via a normal distribution
             else if ( autocorrelation_types[j] == ACN )
             {
-                long time_index = i - min_events[autocorrelation_time_indeces[j]];
+                long time_index = i - min_events[j] + min_events[autocorrelation_time_indeces[j]];
+
                 
                 double mean     = these_values[i-1];
                 double dt       = time_values[time_index] - (time_index > 0 ? time_values[time_index-1] : 0.0);
@@ -397,7 +398,7 @@ void AutocorrelatedEventDistribution::simulate()
             // if this variable is correlated via a lognormal distribution
             else if ( autocorrelation_types[j] == ACLN )
             {
-                long time_index = i - min_events[autocorrelation_time_indeces[j]];
+                long time_index = i - min_events[j] + min_events[autocorrelation_time_indeces[j]];
                 
                 double mean     = log( these_values[i-1] );
                 double dt       = time_values[time_index] - (time_index > 0 ? time_values[time_index-1] : 0.0);
@@ -406,6 +407,11 @@ void AutocorrelatedEventDistribution::simulate()
                 
             }
             
+        }
+        
+        if ( name_of_var_to_sort_by == this_name )
+        {
+            std::sort(these_values.begin(), these_values.end());
         }
         
         this->value->addValues(these_values, this_name);

@@ -8,8 +8,10 @@
 #include "Proposal.h"
 
 namespace RevBayesCore {
+class AutocorrelatedEventDistribution;
 class DagNode;
 class MultiValueEvent;
+class MultiValueEventDistribution;
 template <class variableType> class StochasticNode;
     
     /**
@@ -48,12 +50,13 @@ template <class variableType> class StochasticNode;
         
     private:
         
+        double                                  doUncorrelatedProposal(const MultiValueEventDistribution* d);   //!< Perform proposal
+        double                                  doAutocorrelatedProposal(const AutocorrelatedEventDistribution* d);
+        
         // parameters
         StochasticNode<MultiValueEvent>*        event_var;                                                   //!< The variable the Proposal is working on
         
         // stored objects to undo proposal
-//        TopologyNode*                           stored_node;
-//        double                                  stored_age;
 //        bool                                    failed;
         bool                                    was_birth;
         std::vector<double>                     stored_values;
