@@ -20,6 +20,7 @@
 #include "RbVectorImpl.h"
 #include "Tree.h"
 #include "TypedDagNode.h"
+#include "RbMathLogic.h"
 
 namespace RevBayesCore { class Clade; }
 namespace RevBayesCore { class DagNode; }
@@ -531,7 +532,11 @@ std::vector<double> PiecewiseConstantCoalescent::simulateCoalescentAges( size_t 
     size_t at_coal_age                  = 0;
     size_t at_serial_age                = 0;
     size_t at_interval_change_point     = 0;
-    double next_interval_change_point   = interval_change_points[at_interval_change_point];
+    double next_interval_change_point   = RbConstants::Double::inf;
+    if ( interval_change_points.size() > 0 )
+    {
+        next_interval_change_point = interval_change_points[at_interval_change_point];
+    }
     // set the next serially sampled tip age if present, otherwise Inf
     double next_serial_age              = (at_serial_age < serial_tip_ages.size() ? serial_tip_ages[at_serial_age] : RbConstants::Double::inf);
 
@@ -615,6 +620,12 @@ std::vector<double> PiecewiseConstantCoalescent::simulateCoalescentAges( size_t 
             double n_pairs = current_num_lineages * (current_num_lineages-1) / 2.0;            
             double lambda = RbStatistics::Exponential::rv( n_pairs, *rng);
             double waitingTime = getWaitingTime(sim_age, lambda, theta_interval);
+            
+            if ( RbMath::isFinite(waitingTime) == false )
+            {
+                std::cerr << "Problem when computing waiting time." << std::endl;
+            }
+            
             sim_age += waitingTime;
 
             was_coalescent_event = (sim_age < combined_event_ages[current_interval] && current_num_lineages > 1) && waitingTime > 0;
