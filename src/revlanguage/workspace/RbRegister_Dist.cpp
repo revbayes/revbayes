@@ -260,6 +260,7 @@
 #include "Process_OrnsteinUhlenbeck.h"
 
 /* Mixture distributions (in folder "distributions/mixture") */
+#include "Dist_AutocorrelatedEvent.h"
 #include "Dist_dpp.h"
 #include "Dist_event.h"
 #include "Dist_IID.h"
@@ -585,6 +586,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ModelVector<Simplex>       >( new Dist_dpp<Simplex>()      );
 
         // event distribution
+        AddDistribution< MultiValueEvent            >( new Dist_AutocorrelatedEvent() );
         AddDistribution< ModelVector<Real>          >( new Dist_event<Real>()         );
         AddDistribution< ModelVector<RealPos>       >( new Dist_event<RealPos>()      );
         AddDistribution< ModelVector<Natural>       >( new Dist_event<Natural>()      );
