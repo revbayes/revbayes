@@ -37,7 +37,7 @@ namespace RevBayesCore {
         enum DEMOGRAPHY_FUNCTION_TYPES { CONSTANT, LINEAR };
 
         
-        PiecewiseConstantCoalescent(const TypedDagNode<RbVector<double> > *N, const TypedDagNode<RbVector<double> > *i, METHOD_TYPES meth, DEMOGRAPHY_FUNCTION_TYPES dem, const std::vector<Taxon> &tn, const std::vector<Clade> &c);
+        PiecewiseConstantCoalescent(const TypedDagNode<RbVector<double> > *N, const TypedDagNode<RbVector<double> > *i, const TypedDagNode<RbVector<double> > *n_events_pi, METHOD_TYPES meth, DEMOGRAPHY_FUNCTION_TYPES dem, const std::vector<Taxon> &tn, const std::vector<Clade> &c);
         virtual                                            ~PiecewiseConstantCoalescent(void);                                                                    //!< Virtual destructor
         
         // public member functions
@@ -67,6 +67,7 @@ namespace RevBayesCore {
         // members
         const TypedDagNode<RbVector<double> >*              Nes;                                    //!< A pointer for the population sizes for each interval
         const TypedDagNode<RbVector<double> >*              interval_change_points_var;
+        mutable RbVector<double>                            number_events_per_interval;
         mutable RbVector<double>                            interval_change_points;
         mutable RbVector<double>                            pop_sizes;                              //!< The population sizes for each interval
         METHOD_TYPES                                        interval_method;                        //!< The method of specifying coalescent intervals

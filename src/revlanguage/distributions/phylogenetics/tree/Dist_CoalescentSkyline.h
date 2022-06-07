@@ -52,6 +52,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                           times;
         RevPtr<const RevVariable>                           method;
         RevPtr<const RevVariable>                           model;
+        RevPtr<const RevVariable>                           events_per_interval;
         
     };
     

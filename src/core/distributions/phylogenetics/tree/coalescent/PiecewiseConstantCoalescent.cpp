@@ -44,10 +44,11 @@ using namespace RevBayesCore;
  *@note If the interval method is 'EVENTS' then we assume that the time between each coalescent event is an interval.
  *
  */
-PiecewiseConstantCoalescent::PiecewiseConstantCoalescent(const TypedDagNode<RbVector<double> > *N, const TypedDagNode<RbVector<double> > *i, METHOD_TYPES meth, DEMOGRAPHY_FUNCTION_TYPES dem, const std::vector<Taxon> &tn, const std::vector<Clade> &c) :
+PiecewiseConstantCoalescent::PiecewiseConstantCoalescent(const TypedDagNode<RbVector<double> > *N, const TypedDagNode<RbVector<double> > *i, const TypedDagNode<RbVector<double> > *n_events_pi, METHOD_TYPES meth, DEMOGRAPHY_FUNCTION_TYPES dem, const std::vector<Taxon> &tn, const std::vector<Clade> &c) :
     AbstractCoalescent( tn, c ),
     Nes( N ),
     interval_change_points_var( i ),
+    number_events_per_interval( n_events_pi ),
     interval_method( meth ),
     demographic_function_var ( dem )
 {
@@ -855,13 +856,15 @@ void PiecewiseConstantCoalescent::updateIntervals( void ) const
             // sort the vector of times in ascending order
             std::sort(coalescent_ages.begin(), coalescent_ages.end());
             
-            size_t num_events_per_interval = size_t( ceil( double(num_taxa-1.0)/Nes->getValue().size()) );
+            // size_t num_events_per_interval = size_t( ceil( double(num_taxa-1.0)/Nes->getValue().size()) );
             size_t current_interval = 0;
             size_t current_num_events_in_interval = 0;
+                        
             for (size_t i = 0; i < num_taxa-2; ++i)
             {
                 ++current_num_events_in_interval;
-                if ( current_num_events_in_interval == num_events_per_interval )
+//                if ( current_num_events_in_interval == num_events_per_interval )
+                if ( current_num_events_in_interval == number_events_per_interval[current_interval] )
                 {
                     interval_change_points[current_interval] = coalescent_ages[i];
                     current_num_events_in_interval = 0;
