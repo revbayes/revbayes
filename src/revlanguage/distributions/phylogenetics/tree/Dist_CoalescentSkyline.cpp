@@ -96,10 +96,16 @@ RevBayesCore::PiecewiseConstantCoalescent* Dist_CoalescentSkyline::createDistrib
     {
         ti = static_cast<const ModelVector<RealPos> &>( times->getRevObject() ).getDagNode();
     }
+    // number of events per interval
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* enpi       = NULL;
+    if ( events_per_interval != NULL && events_per_interval->getRevObject() != RevNullObject::getInstance() )
+    {
+        enpi = static_cast<const ModelVector<RealPos> &>( events_per_interval->getRevObject() ).getDagNode();
+    }
     // method
     const std::string &m                        = static_cast<const RlString &>( method->getRevObject() ).getValue();
     // demographic model
-    const std::string &dem                        = static_cast<const RlString &>( model->getRevObject() ).getValue();
+    const std::string &dem                      = static_cast<const RlString &>( model->getRevObject() ).getValue();
     // taxon names
     const std::vector<RevBayesCore::Taxon> & ta = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
     // clade constraints
@@ -115,6 +121,11 @@ RevBayesCore::PiecewiseConstantCoalescent* Dist_CoalescentSkyline::createDistrib
             // throw exception
             throw RbException("You can only provide the 'times' when you use 'method=specified'.");
         }
+        if ( enpi == NULL )
+        {
+            // throw exception
+            throw RbException("You must provide the 'events_per_interval' when you use 'method=events'.");
+        }
     }
     else if ( m == "specified" )
     {
@@ -124,6 +135,11 @@ RevBayesCore::PiecewiseConstantCoalescent* Dist_CoalescentSkyline::createDistrib
         {
             // throw exception
             throw RbException("You must provide the 'times' when you use 'method=specified'.");
+        }
+        if ( enpi != NULL )
+        {
+            // throw exception
+            throw RbException("You can only provide the 'events_per_interval' when you use 'method=events'.");
         }
     }
 
@@ -138,7 +154,7 @@ RevBayesCore::PiecewiseConstantCoalescent* Dist_CoalescentSkyline::createDistrib
     }
     
     // create the internal distribution object
-    RevBayesCore::PiecewiseConstantCoalescent*   d = new RevBayesCore::PiecewiseConstantCoalescent(th, ti, meth, demfun, ta, c);
+    RevBayesCore::PiecewiseConstantCoalescent*   d = new RevBayesCore::PiecewiseConstantCoalescent(th, ti, enpi, meth, demfun, ta, c);
     
     return d;
 }
@@ -223,6 +239,7 @@ const MemberRules& Dist_CoalescentSkyline::getParameterRules(void) const
     {
         dist_member_rules.push_back( new ArgumentRule( "theta"      , ModelVector<RealPos>::getClassTypeSpec(), "A vector of per interval population sizes.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "times"      , ModelVector<RealPos>::getClassTypeSpec(), "A vector of times for the intervals, if applicable.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "events_per_interval"      , ModelVector<RealPos>::getClassTypeSpec(), "A vector of number of coalescent events for the intervals, if applicable.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         std::vector<std::string> optionsCondition;
         optionsCondition.push_back( "events" );
         optionsCondition.push_back( "specified" );
@@ -295,6 +312,10 @@ void Dist_CoalescentSkyline::setConstParameter(const std::string& name, const Re
     else if ( name == "model" )
     {
         model = var;
+    }
+    else if ( name == "events_per_interval" )
+    {
+        events_per_interval = var;
     }
     else
     {
