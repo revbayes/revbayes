@@ -51,8 +51,8 @@ Func_MutSelRateMatrix* Func_MutSelRateMatrix::clone( void ) const
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_MutSelRateMatrix::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* f = static_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* q = static_cast<const RateGenerator &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* q = static_cast<const RateGenerator &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* f = static_cast<const ModelVector<Real> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
 
     return RevBayesCore::generic_function_ptr2< RevBayesCore::RateGenerator >( MutSelFunc, f, q );
 }
@@ -67,8 +67,8 @@ const ArgumentRules& Func_MutSelRateMatrix::getArgumentRules( void ) const
 
     if ( !rules_set )
     {
-        argumentRules.push_back( new ArgumentRule( "fitnesses", ModelVector<Real>::getClassTypeSpec(), "Fitnesses.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "submodel", RateMatrix::getClassTypeSpec(), "Mutation rate matrix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "fitnesses", ModelVector<Real>::getClassTypeSpec(), "Fitnesses.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         rules_set = true;
     }
