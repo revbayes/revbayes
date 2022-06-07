@@ -97,10 +97,10 @@ RevBayesCore::PiecewiseConstantCoalescent* Dist_CoalescentSkyline::createDistrib
         ti = static_cast<const ModelVector<RealPos> &>( times->getRevObject() ).getDagNode();
     }
     // number of events per interval
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* enpi       = NULL;
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<long> >* enpi       = NULL;
     if ( events_per_interval != NULL && events_per_interval->getRevObject() != RevNullObject::getInstance() )
     {
-        enpi = static_cast<const ModelVector<RealPos> &>( events_per_interval->getRevObject() ).getDagNode();
+        enpi = static_cast<const ModelVector<Natural> &>( events_per_interval->getRevObject() ).getDagNode();
     }
     // method
     const std::string &m                        = static_cast<const RlString &>( method->getRevObject() ).getValue();
@@ -239,7 +239,7 @@ const MemberRules& Dist_CoalescentSkyline::getParameterRules(void) const
     {
         dist_member_rules.push_back( new ArgumentRule( "theta"      , ModelVector<RealPos>::getClassTypeSpec(), "A vector of per interval population sizes.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "times"      , ModelVector<RealPos>::getClassTypeSpec(), "A vector of times for the intervals, if applicable.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        dist_member_rules.push_back( new ArgumentRule( "events_per_interval"      , ModelVector<RealPos>::getClassTypeSpec(), "A vector of number of coalescent events for the intervals, if applicable.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "events_per_interval"      , ModelVector<Natural>::getClassTypeSpec(), "A vector of number of coalescent events for the intervals, if applicable.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         std::vector<std::string> optionsCondition;
         optionsCondition.push_back( "events" );
         optionsCondition.push_back( "specified" );
