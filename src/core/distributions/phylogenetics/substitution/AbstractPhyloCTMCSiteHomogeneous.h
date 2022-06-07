@@ -134,6 +134,7 @@ namespace RevBayesCore {
         virtual void                                                        resizeLikelihoodVectors(void);
         virtual void                                                        setActivePIDSpecialized(size_t i, size_t n);                                                          //!< Set the number of processes for this distribution.
         virtual void                                                        updateTransitionProbabilities(size_t node_idx);
+        virtual void                                                        updateTransitionProbabilityMatrices(void);
         virtual std::vector<double>                                         getRootFrequencies( size_t mixture = 0 ) const;
         virtual void                                                        getRootFrequencies( std::vector<std::vector<double> >& ) const;
         virtual std::vector<double>                                         getMixtureProbs( void ) const;
@@ -271,7 +272,6 @@ namespace RevBayesCore {
         virtual void                                                        scale(size_t i, size_t l, size_t r, size_t m);
         virtual void                                                        simulate(const TopologyNode& node, std::vector< DiscreteTaxonData< charType > > &t, const std::vector<bool> &inv, const std::vector<size_t> &perSiteRates);
         virtual void                                                        updateTransitionProbabilityMatrix(size_t node_idx);
-        virtual void                                                        updateTransitionProbabilityMatrices(void);
         
         
         
