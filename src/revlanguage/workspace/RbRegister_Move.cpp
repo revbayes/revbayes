@@ -465,6 +465,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_IndependentPriorSampler<Simplex>( ) );
         addType( new Move_IndependentPriorSampler<ModelVector<RealPos> >( ) );
         addType( new Move_IndependentPriorSampler<ModelVector<Real> >( ) );
+        addType( new Move_IndependentPriorSampler<ModelVector<Natural> >( ) );
 //        addType( new Move_IndependentPriorSampler<RateGenerator>( ) );
         addType( new Move_IndependentPriorSampler<Tree>( ) );
 
