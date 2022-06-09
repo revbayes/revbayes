@@ -4,10 +4,13 @@
 using namespace RevBayesCore;
 
 
-PoMo2NRateMatrixFunction::PoMo2NRateMatrixFunction(   const TypedDagNode< long > *ni, 
+PoMo2NRateMatrixFunction::PoMo2NRateMatrixFunction(   long virtual_N,
+                                                      const TypedDagNode< double > *ni,
                                                       const TypedDagNode< RbVector<double> > *m, 
-                                                      const TypedDagNode< RbVector<double> > *f ) : 
-TypedFunction<RateGenerator>( new RateMatrix_PoMo2N( computeNumStates( ni->getValue() ), ni->getValue() ) ),
+                                                      const TypedDagNode< RbVector<double> > *f,
+                                                      bool use_mutation_correction,
+                                                      bool use_drift_correction) :
+TypedFunction<RateGenerator>( new RateMatrix_PoMo2N( computeNumStates( virtual_N ), virtual_N, use_mutation_correction, use_drift_correction ) ),
 N( ni ),
 mu( m ),
 phi( f )
@@ -49,12 +52,12 @@ PoMo2NRateMatrixFunction* PoMo2NRateMatrixFunction::clone( void ) const
 void PoMo2NRateMatrixFunction::update( void )
 {
     // get the information from the arguments for reading the file
-    long ni = N->getValue();
+    double ni = N->getValue();
     const std::vector<double>& m = mu->getValue();
     const std::vector<double>& f = phi->getValue();
 
     // set the base frequencies
-    static_cast< RateMatrix_PoMo2N* >(value)->setN( ni );
+    static_cast< RateMatrix_PoMo2N* >(value)->setNeff( ni );
     static_cast< RateMatrix_PoMo2N* >(value)->setMu( m );
     static_cast< RateMatrix_PoMo2N* >(value)->setPhi( f );
 
@@ -68,7 +71,7 @@ void PoMo2NRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const 
     
     if (oldP == N)
     {
-        N =  static_cast<const TypedDagNode< long >* >( newP );
+        N =  static_cast<const TypedDagNode< double >* >( newP );
     }
 
     if (oldP == mu)

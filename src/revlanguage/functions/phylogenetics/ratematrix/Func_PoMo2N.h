@@ -10,11 +10,11 @@
 namespace RevLanguage {
     
     /**
-     * The RevLanguage wrapper of the HKY rate matrix function.
+     * The RevLanguage wrapper of the PoMo2N rate matrix function.
      *
-     * The RevLanguage wrapper of the HKY rate matrix connects
+     * The RevLanguage wrapper of the PoMo2N rate matrix connects
      * the variables/parameters of the function and creates the internal HkyRateMatrixFunction object.
-     * Please read the HkyRateMatrixFunction.h for more info.
+     * Please read the PoMo2NRateMatrixFunction.h for more info.
      *
      *
      * @copyright Copyright 2009-

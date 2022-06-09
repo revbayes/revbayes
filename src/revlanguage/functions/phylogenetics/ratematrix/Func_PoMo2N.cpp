@@ -34,9 +34,13 @@ Func_PoMo2N* Func_PoMo2N::clone( void ) const
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_PoMo2N::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< long                          >* ni = static_cast<const Natural              &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* m  = static_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* fc = static_cast<const ModelVector<RealPos> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    long virtual_N                                                  = static_cast<const Natural              &>( this->args[0].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode< double                        >* N  = static_cast<const RealPos              &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* m  = static_cast<const ModelVector<RealPos> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* fc = static_cast<const ModelVector<RealPos> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+
+    bool mutation_correction    = static_cast<const RlBoolean &>( this->args[4].getVariable()->getRevObject() ).getValue();
+    bool drift_correction       = static_cast<const RlBoolean &>( this->args[5].getVariable()->getRevObject() ).getValue();
 
     if ( m->getValue().size() != 2 )
     {
@@ -47,7 +51,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_PoMo2N::createF
         throw RbException("The number of fitness coefficients given should match the number of alleles: 2.");
     }
 
-    RevBayesCore::PoMo2NRateMatrixFunction* f = new RevBayesCore::PoMo2NRateMatrixFunction( ni, m, fc );
+    RevBayesCore::PoMo2NRateMatrixFunction* f = new RevBayesCore::PoMo2NRateMatrixFunction( virtual_N, N, m, fc, mutation_correction, drift_correction );
     
     return f;
 }
@@ -62,9 +66,12 @@ const ArgumentRules& Func_PoMo2N::getArgumentRules( void ) const
     
     if ( !rules_set )
     {
-        argumentRules.push_back( new ArgumentRule( "N"       , Natural::getClassTypeSpec(), "Number of individuals", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "mu"      , ModelVector<RealPos>::getClassTypeSpec(), "Vector of mutation rates: mu=(mu_a0a1,mu_a1a0)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "phi"     , ModelVector<RealPos>::getClassTypeSpec(), "Vector of fitness coefficients: phi=(phi_0,phi_1)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );  
+        argumentRules.push_back( new ArgumentRule( "virtualN" , Natural::getClassTypeSpec(), "Number of individuals in virtual population", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "Neff"     , RealPos::getClassTypeSpec(), "Effective population size", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "mu"       , ModelVector<RealPos>::getClassTypeSpec(), "Vector of mutation rates: mu=(mu_a0a1,mu_a1a0)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "phi"      , ModelVector<RealPos>::getClassTypeSpec(), "Vector of fitness coefficients: phi=(phi_0,phi_1)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "muCorr"   , RlBoolean::getClassTypeSpec(), "Should we use a correction for the mutation rate", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+        argumentRules.push_back( new ArgumentRule( "driftCorr", RlBoolean::getClassTypeSpec(), "Should we use a correction for the drift rate", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
 
         rules_set = true;
     }

@@ -156,104 +156,104 @@ RateMatrix_revPoMoTwo2N* RateMatrix_revPoMoTwo2N::clone( void ) const
 void RateMatrix_revPoMoTwo2N::computeOffDiagonal( void )
 {
     
-  MatrixReal& m = *the_rate_matrix;
+    MatrixReal& m = *the_rate_matrix;
 
-  /*  
-  INFORMATION ABOUT PoMoTwo AND PoMoThree
+    /*
+     INFORMATION ABOUT PoMoTwo AND PoMoThree
 
-  The idea of the virtual PoMos (Two and Three) resumes to mimicking a population dynamic that unfolds 
-  on the effective population N, using a virtual population of smaller size M.
-  M is equal to 2 in PoMoTwo and 3 in PoMoThree. PoMo thee additionally includes selection.
+     The idea of the virtual PoMos (Two and Three) resumes to mimicking a population dynamic that unfolds
+     on the effective population N, using a virtual population of smaller size M.
+     M is equal to 2 in PoMoTwo and 3 in PoMoThree. PoMo thee additionally includes selection.
 
-  M defines a lighter and more efficient state-space. 
-  By matching the expected diversity (i.e., the proportion of fixed and polymorphic sites) in both 
-  the effective and the virtual populations, one can obtain scaling laws for the mutation rates and 
-  selection coefficients (see Borges et al. 2019 Genetics). 
+     M defines a lighter and more efficient state-space.
+     By matching the expected diversity (i.e., the proportion of fixed and polymorphic sites) in both
+     the effective and the virtual populations, one can obtain scaling laws for the mutation rates and
+     selection coefficients (see Borges et al. 2019 Genetics).
 
-  These are intuitive for the M=2 case, in which the mutation rates are scaled by the 
-  harmonic number of N-1:
-  mu'_ij = mu_ij*H_{N-1}  or equivalently rho'_ij = rho_ij*H_{N-1}  for the reverisible PoMo 
-  mu' and rho' correspond to the mutation rate and exchageability in a virtual population of 2 individuals
+     These are intuitive for the M=2 case, in which the mutation rates are scaled by the
+     harmonic number of N-1:
+     mu'_ij = mu_ij*H_{N-1}  or equivalently rho'_ij = rho_ij*H_{N-1}  for the reverisible PoMo
+     mu' and rho' correspond to the mutation rate and exchageability in a virtual population of 2 individuals
 
-  Like the standard PoMos the virtual PoMos include both fixed and polymorphic sites: 
-            virtual_individuals_M   n_states   fixed_states   polymorphic_states
-  PoMoTwo   2                       10         {2ai}          {1ai,1aj}
-  PoMoThree 3                       16         {3ai}          {1ai,2aj} and {2ai,1aj}
+     Like the standard PoMos the virtual PoMos include both fixed and polymorphic sites:
+               virtual_individuals_M   n_states   fixed_states   polymorphic_states
+     PoMoTwo   2                       10         {2ai}          {1ai,1aj}
+     PoMoThree 3                       16         {3ai}          {1ai,2aj} and {2ai,1aj}
 
-  The pomo rate matrices defined here first list the fixed states {Na0}, {Na1} ...,
-  these occupying positions 0:(K-1), and then polymorphic states, where K is the number of alleles
+     The pomo rate matrices defined here first list the fixed states {Na0}, {Na1} ...,
+     these occupying positions 0:(K-1), and then polymorphic states, where K is the number of alleles
 
-  K alleles comprise (K*K-K)/2 pairwise combinations of alleles.
-  This is the number of edges in the pomo state-space. Each edge comprises M-1 polymorphic states.
-  The polymorphic edges are listed in the following order a0a1, a0a2, a0a3, ..., a(K-2)aK-1
-  */
+     K alleles comprise (K*K-K)/2 pairwise combinations of alleles.
+     This is the number of edges in the pomo state-space. Each edge comprises M-1 polymorphic states.
+     The polymorphic edges are listed in the following order a0a1, a0a2, a0a3, ..., a(K-2)aK-1
+     */
 
     
     
-  // populating the rate matrix with 0.0
-  // **total waste of time with sparse matrices like pomos**
-  for (int i=0; i<3 ; i++)
-  {
-      for (int j=0; j<3; j++ )
-      {
-          m[i][j] = 0.0;
-      }
-  }
+    // populating the rate matrix with 0.0
+    // **total waste of time with sparse matrices like pomos**
+    for (int i=0; i<3 ; i++)
+    {
+        for (int j=0; j<3; j++ )
+        {
+            m[i][j] = 0.0;
+        }
+    }
 
 
-  // calculating the harmonic number of N-1
-  // used to scale the mutation rates
-  double harmonic_number = boost::math::digamma(N) - boost::math::digamma(1.0);
-  double r = N*harmonic_number/2.0;	
+    // calculating the harmonic number of N-1
+    // used to scale the mutation rates
+    double harmonic_number = boost::math::digamma(N) - boost::math::digamma(1.0);
+    double r = N*harmonic_number/2.0;
 
 
-  // get the expected divergence (or number of evens) per unit of time
-  // normalize rate matrix such that one event happens per unit time.
-  // a common quantity to the numerator and denominator
-  double value = 4.0*mu[0]*mu[1]*N*harmonic_number;
-  double nc    = mu[0]+mu[1]+2.0*mu[0]*mu[1]*N*harmonic_number;
+    // get the expected divergence (or number of evens) per unit of time
+    // normalize rate matrix such that one event happens per unit time.
+    // a common quantity to the numerator and denominator
+    double value = 4.0*mu[0]*mu[1]*N*harmonic_number;
+    double nc    = mu[0]+mu[1]+2.0*mu[0]*mu[1]*N*harmonic_number;
 
-  // receiprocal of the rate
-  double rRate = nc/value;
-  //std::cout << "rRate" << rRate << "\n\n";
+    // receiprocal of the rate
+    double rRate = nc/value;
+    //std::cout << "rRate" << rRate << "\n\n";
 
   
-  // Mutations
-  m[0][2] = 2*mu[0]*r*rRate;    // mutation 01
-  m[1][2] = 2*mu[1]*r*rRate;    // mutation 10
+    // Mutations
+    m[0][2] = 2*mu[0]*r*rRate;    // mutation 01
+    m[1][2] = 2*mu[1]*r*rRate;    // mutation 10
 
-  // Fixations
-  // PoMoTwo only accouts for genetic drift
-  // selection is not indentifiable with two virtual individuals
-  m[2][0]   = 0.5*rRate;             // 0 fixed
-  m[2][1]   = 0.5*rRate;             // 1 fixed
+    // Fixations
+    // PoMoTwo only accouts for genetic drift
+    // selection is not indentifiable with two virtual individuals
+    m[2][0]   = 0.5*rRate;             // 0 fixed
+    m[2][1]   = 0.5*rRate;             // 1 fixed
 
-  // set flags
-  needs_update = true;
+    // set flags
+    needs_update = true;
 
 }
 
 std::vector<double> RateMatrix_revPoMoTwo2N::getStationaryFrequencies( void ) const
 {
 
-  // calculating the harmonic number of N-1
-  // used to scale the mutation rates (or exchangeabilities)
-  double harmonic_number = boost::math::digamma(N) - boost::math::digamma(1.0);
+    // calculating the harmonic number of N-1
+    // used to scale the mutation rates (or exchangeabilities)
+    double harmonic_number = boost::math::digamma(N) - boost::math::digamma(1.0);
 
-  // calculating the normalization constant
+    // calculating the normalization constant
 
-  double nc  = mu[0] + mu[1] + 2.0*mu[0]*mu[1]*N*harmonic_number;
-  double rnc = 1.0/nc;
+    double nc  = mu[0] + mu[1] + 2.0*mu[0]*mu[1]*N*harmonic_number;
+    double rnc = 1.0/nc;
 
 
-  // calculating the stationary vector
-  std::vector<double> stationary_freqs(3,0.0);
+    // calculating the stationary vector
+    std::vector<double> stationary_freqs(3,0.0);
 
-  stationary_freqs[0]  = mu[1]*rnc;
-  stationary_freqs[1]  = mu[0]*rnc;
-  stationary_freqs[2]  = mu[0]*mu[1]*N*2.0*harmonic_number*rnc;
+    stationary_freqs[0]  = mu[1]*rnc;
+    stationary_freqs[1]  = mu[0]*rnc;
+    stationary_freqs[2]  = mu[0]*mu[1]*N*2.0*harmonic_number*rnc;
 
-  return stationary_freqs;
+    return stationary_freqs;
 
 }
 

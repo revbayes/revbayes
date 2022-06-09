@@ -41,7 +41,7 @@ namespace RevBayesCore {
         using RateMatrix::getRate;
 
         //RateMatrix_PoMo2N(size_t num_states) ;
-        RateMatrix_PoMo2N(long num_states, long in_n )  ;
+        RateMatrix_PoMo2N(long num_states, long in_n, bool mu_corr, bool d_corr )  ;
         RateMatrix_PoMo2N(const RateMatrix_PoMo2N& m) ;
 
         RateMatrix_PoMo2N&                          operator=(const RateMatrix_PoMo2N &r) ;
@@ -55,7 +55,7 @@ namespace RevBayesCore {
         std::vector<double>                         getStationaryFrequencies(void) const ;  //!< Return the stationary frequencies, which are the stationary frequencies of the Q_mut matrix
 
         void                                        update(void);
-        void                                        setN( long &ni );
+        void                                        setNeff( long ni );
         void                                        setMu(  const std::vector<double> &m );
         void                                        setPhi( const std::vector<double> &f );
 
@@ -64,22 +64,26 @@ namespace RevBayesCore {
         void                                        buildRateMatrix(void) ;
         void                                        computeExponentialMatrixByRepeatedSquaring(double t, TransitionProbabilityMatrix& P ) const ;
         
+        void                                        calculateCijk(void);                                                                //!< Do precalculations on eigenvectors and their inverse
+        void                                        tiProbsEigens(double t, TransitionProbabilityMatrix& P) const;                      //!< Calculate transition probabilities for real case
+        void                                        tiProbsComplexEigens(double t, TransitionProbabilityMatrix& P) const;               //!< Calculate transition probabilities for complex case
+        void                                        updateEigenSystem(void);                                                            //!< Update the system of eigenvalues and eigenvectors
+        
+        EigenSystem*                                theEigenSystem;                                                                     //!< Holds the eigen system
+        std::vector<double>                         c_ijk;                                                                              //!< Vector of precalculated product of eigenvectors and their inverse
+        std::vector<std::complex<double> >          cc_ijk;                                                                             //!< Vector of precalculated product of eigenvectors and thier inverse for complex case
+        
         long                                        N;
-        std::vector<double>                         mu;   
-        std::vector<double>                         phi;    
-        std::vector<double>                         stationaryVector;                    //!< Holds the stationary frequencies
+        std::vector<double>                         mu;
+        std::vector<double>                         phi;
+//        std::vector<double>                         stationaryVector;                    //!< Holds the stationary frequencies
 
-        
-        void                                calculateCijk(void);                                                                //!< Do precalculations on eigenvectors and their inverse
-        void                                tiProbsEigens(double t, TransitionProbabilityMatrix& P) const;                      //!< Calculate transition probabilities for real case
-        void                                tiProbsComplexEigens(double t, TransitionProbabilityMatrix& P) const;               //!< Calculate transition probabilities for complex case
-        void                                updateEigenSystem(void);                                                            //!< Update the system of eigenvalues and eigenvectors
-        
-        EigenSystem*                        theEigenSystem;                                                                     //!< Holds the eigen system
-        std::vector<double>                 c_ijk;                                                                              //!< Vector of precalculated product of eigenvectors and their inverse
-        std::vector<std::complex<double> >  cc_ijk;                                                                             //!< Vector of precalculated product of eigenvectors and thier inverse for complex case
-        
-        
+        bool                                        use_mutation_correction;
+        bool                                        use_drift_correction;
+        double                                      harmonic_number_M;
+        double                                      harmonic_number_N;
+        double                                      N_eff;
+
     };
 
 }

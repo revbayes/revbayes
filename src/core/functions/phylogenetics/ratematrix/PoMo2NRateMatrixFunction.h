@@ -27,12 +27,12 @@ namespace RevBayesCore {
         
     public:
 
-        PoMo2NRateMatrixFunction( const TypedDagNode< long > *ni, const TypedDagNode< RbVector<double> > *m, const TypedDagNode< RbVector<double> > *f ) ;
+        PoMo2NRateMatrixFunction( long virtual_N, const TypedDagNode< double > *ni, const TypedDagNode< RbVector<double> > *m, const TypedDagNode< RbVector<double> > *f, bool mu_corr, bool d_corr ) ;
 
-        virtual                                            ~PoMo2NRateMatrixFunction(void);                                                    //!< Virtual destructor
+        virtual                                                ~PoMo2NRateMatrixFunction(void);                                                    //!< Virtual destructor
         
         // public member functions
-        PoMo2NRateMatrixFunction*      clone(void) const;                                                              //!< Create an independent clone
+        PoMo2NRateMatrixFunction*                               clone(void) const;                                                              //!< Create an independent clone
 
         void                                                    update(void);
         
@@ -44,7 +44,7 @@ namespace RevBayesCore {
         long                                                    computeNumStates( long ni );
 
         // members
-        const TypedDagNode< long >*                             N;
+        const TypedDagNode< double >*                           N;
         const TypedDagNode< RbVector<double> >*                 mu;
         const TypedDagNode< RbVector<double> >*                 phi;
         
