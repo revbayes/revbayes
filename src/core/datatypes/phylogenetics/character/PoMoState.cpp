@@ -146,10 +146,10 @@ bool PoMoState::isMissingState( void ) const
 
 
 bool PoMoState::isStateIncludedInAscertainmentBiasCorrection( void ) const
-{
-    
+{    
     size_t index = getStateIndex();
-    return index < num_raw_states;
+//    return index < num_raw_states;
+    return index < 2;
 }
 
 
