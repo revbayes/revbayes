@@ -1,6 +1,7 @@
 #include "AlleleFrequencySimulator.h"
 #include "DiscreteTaxonData.h"
 #include "DistributionBinomial.h"
+#include "ProgressBar.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "Tree.h"
@@ -19,8 +20,24 @@ root_branch( r )
     
 }
 
+bool AlleleFrequencySimulator::isVariable(std::vector<int>& site_pattern) const
+{
+    
+    int ref = site_pattern[0];
+    for (size_t i=1; i<site_pattern.size(); ++i)
+    {
+        if ( ref != site_pattern[i] )
+        {
+            return true;
+        }
+    }
+    
+    return false;    
+}
 
-void AlleleFrequencySimulator::simulateAlleleFrequencies( const std::string& fn ) const
+
+
+void AlleleFrequencySimulator::simulateAlleleFrequencies( const std::string& fn, bool only_variable ) const
 {
     // first, get some variables/settings for the simulation
     size_t num_tips     = tree->getNumberOfTips();
@@ -29,35 +46,79 @@ void AlleleFrequencySimulator::simulateAlleleFrequencies( const std::string& fn 
     RandomNumberGenerator* rng = GLOBAL_RNG;
 
     // create a vector of taxon data
-    std::vector<std::vector<int> > taxa = std::vector<std::vector<int> >( num_tips, std::vector<int>() );
+    std::vector<std::vector<int> > taxa = std::vector<std::vector<int> >( num_sites, std::vector<int>() );
+    std::vector<bool> monomorphic =  std::vector<bool>( num_sites, true);
+    
+    // start the progress bar
+    ProgressBar progress = ProgressBar(num_sites, 0);
+    
+    // Print progress bar (68 characters wide)
+    progress.start();
+    
+    size_t num_attempts = 0;
+    
     std::vector<long> root_start_states =  std::vector<long>( num_sites, 0);
     for ( size_t i = 0; i < num_sites; ++i )
     {
+        std::vector<int> site_pattern = std::vector<int>( num_tips, 0);
+        bool mono = true;
 
-        // draw the state
-        double u = rng->uniform01();
-        if ( u < mutation_rates[0] / ( mutation_rates[0] + mutation_rates[1] ) )
-        {
-            root_start_states[i] = 0;
-        }
-        else
-        {
-            root_start_states[i] = population_sizes[root_index];
-        }
+        bool success = false;
+        do {
+            ++num_attempts;
+            long root_start_state = 0;
+            
+            // draw the state
+            double u = rng->uniform01();
+            if ( u < mutation_rates[0] / ( mutation_rates[0] + mutation_rates[1] ) )
+            {
+                root_start_state = 0;
+            }
+            else
+            {
+                root_start_state = population_sizes[root_index];
+            }
+            
+            // simulate the root sequence
+            long root_state = simulateAlongBranch( root_index, root_start_state, root_branch );
+
+            // recursively simulate the sequences
+            mono = true;
+            success = simulate( tree->getRoot(), root_state, site_pattern, mono );
+            success = only_variable == false || isVariable( site_pattern );
+            
+            
+        } while ( success == false );
+        
+        taxa[i] = site_pattern;
+        monomorphic[i] = mono;
+        
+        progress.update(i);
         
     }
-    // simulate the root sequence
-    std::vector<long> root_states = simulateAlongBranch( root_index, root_start_states, root_branch );
+    
+    progress.finish();
 
-    // recursively simulate the sequences
-    simulate( tree->getRoot(), root_states, taxa );
+    
+    size_t num_monomorphic = 0;
+    for ( size_t i = 0; i < num_sites; ++i )
+    {
+        if ( monomorphic[i] == false )
+        {
+            ++num_monomorphic;
+        }
+    }
+    std::cerr << "#Monomorphic sites:\t\t" << (num_sites-num_monomorphic) << std::endl;
+    std::cerr << "#Biallelic sites:\t\t" << num_monomorphic << std::endl;
+    std::cerr << "#Invariant sites:\t\t" << (num_attempts-num_sites) << std::endl;
+    
     
     writeCountsFile( fn, taxa );
     
 }
 
 
-void AlleleFrequencySimulator::simulate( const TopologyNode& n, const std::vector<long>& states, std::vector<std::vector<int> >& taxa ) const
+bool AlleleFrequencySimulator::simulate( const TopologyNode& n, long state, std::vector<int>& taxa, bool& monomorphic ) const
 {
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
@@ -68,12 +129,12 @@ void AlleleFrequencySimulator::simulate( const TopologyNode& n, const std::vecto
         double this_populuation_size = population_sizes[node_index];
         double samples = samples_per_species[node_index];
         
-        std::vector<int> &taxon = taxa[node_index];
-        
-        for ( size_t i = 0; i < num_sites; ++i )
+        int tip_sample = RbStatistics::Binomial::rv(samples, state/this_populuation_size, *rng);
+        taxa[node_index] = tip_sample;
+            
+        if ( tip_sample > 0 & tip_sample < samples )
         {
-            int tip_sample = RbStatistics::Binomial::rv(samples, states[i]/this_populuation_size, *rng);
-            taxon.push_back( tip_sample );
+            monomorphic = false;
         }
     }
     else
@@ -81,21 +142,23 @@ void AlleleFrequencySimulator::simulate( const TopologyNode& n, const std::vecto
         const TopologyNode& left = n.getChild(0);
         size_t left_index  = left.getIndex();
         double left_branch = left.getBranchLength();
-        std::vector<long> left_states = simulateAlongBranch( left_index, states, left_branch );
-        simulate( left, left_states, taxa );
+        long left_state = simulateAlongBranch( left_index, state, left_branch );
+        simulate( left, left_state, taxa, monomorphic );
         
         // the right child
         const TopologyNode& right = n.getChild(1);
         size_t right_index  = right.getIndex();
         double right_branch = right.getBranchLength();
-        std::vector<long> right_states = simulateAlongBranch( right_index, states, right_branch );
-        simulate( right, right_states, taxa );
+        long right_state = simulateAlongBranch( right_index, state, right_branch );
+        simulate( right, right_state, taxa, monomorphic );
     }
+    
+    return true;
 }
 
 
 
-std::vector<long> AlleleFrequencySimulator::simulateAlongBranch( size_t node_index, const std::vector<long>& root_start_states, double branch_length ) const
+long AlleleFrequencySimulator::simulateAlongBranch( size_t node_index, long root_start_state, double branch_length ) const
 {
     
     RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -105,35 +168,61 @@ std::vector<long> AlleleFrequencySimulator::simulateAlongBranch( size_t node_ind
     double per_generation_mutation_rate_0 = mutation_rates[0] * this_populuation_size / generation_time;
     double per_generation_mutation_rate_1 = mutation_rates[1] * this_populuation_size / generation_time;
     
-    std::vector<long> current_states = root_start_states;
+    long current_state = root_start_state;
     
     while ( current_time < branch_length )
     {
         current_time += generation_time;
         
-        for ( size_t i = 0; i < num_sites; ++i )
+        // only perform drift if we are in a polymorphic state
+        if ( current_state > 0 && current_state < this_populuation_size )
         {
-            // only perform drift if we are in a polymorphic state
-            if ( current_states[i] > 0 && current_states[i] < this_populuation_size )
+//            current_states = RbStatistics::Binomial::rv(this_populuation_size, current_states/this_populuation_size, *rng);
+                
+            double u = rng->uniform01();
+            if ( current_state/this_populuation_size > u )
             {
-                current_states[i] = RbStatistics::Binomial::rv(this_populuation_size, current_states[i]/this_populuation_size, *rng);
+                double v = rng->uniform01();
+                if ( current_state/this_populuation_size < v )
+                {
+                        ++current_state;
+                }
             }
-            
-            // check for the boundary states at which mutation happen
-            if ( current_states[i] == 0 )
+            else
             {
-                int num_mutants = RbStatistics::Binomial::rv(this_populuation_size, per_generation_mutation_rate_0, *rng);
-                current_states[i] += num_mutants;
+                double v = rng->uniform01();
+                if ( current_state/this_populuation_size > v )
+                {
+                    --current_state;
+                }
             }
-            else if ( current_states[i] == this_populuation_size )
+        }
+        // check for the boundary states at which mutation happen
+        else if ( current_state == 0 )
+        {
+//            int num_mutants = RbStatistics::Binomial::rv(this_populuation_size, per_generation_mutation_rate_0, *rng);
+//            current_state += num_mutants;
+                
+            double u = rng->uniform01();
+            if ( per_generation_mutation_rate_0 > u )
             {
-                int num_mutants = RbStatistics::Binomial::rv(this_populuation_size, per_generation_mutation_rate_1, *rng);
-                current_states[i] -= num_mutants;
+                current_state = 1;
+            }
+        }
+        else if ( current_state == this_populuation_size )
+        {
+//            int num_mutants = RbStatistics::Binomial::rv(this_populuation_size, per_generation_mutation_rate_1, *rng);
+//            current_state -= num_mutants;
+                
+            double u = rng->uniform01();
+            if ( per_generation_mutation_rate_1 > u )
+            {
+                    current_state = this_populuation_size-1;
             }
         }
     }
     
-    return current_states;
+    return current_state;
 }
 
 
@@ -166,11 +255,12 @@ void AlleleFrequencySimulator::writeCountsFile(const std::string& fn, const std:
     out_stream << std::endl;
     for (size_t site=0; site<num_sites; ++site)
     {
+        
         out_stream << "? ?";
         for (size_t i=0; i<num_tips; ++i)
         {
             size_t tip_index = tree->getTipNode(i).getIndex();
-            int sampled_ones = taxa[tip_index][site];
+            int sampled_ones = taxa[site][tip_index];
             int samples = int(samples_per_species[tip_index]);
             out_stream << " " << (samples-sampled_ones) << "," << sampled_ones;
             

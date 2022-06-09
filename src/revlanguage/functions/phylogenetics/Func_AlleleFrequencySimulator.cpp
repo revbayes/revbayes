@@ -58,11 +58,12 @@ RevPtr<RevVariable> Func_AlleleFrequencySimulator::execute()
     std::vector<double> mutation_rates      = static_cast<const ModelVector<RealPos> &>( this->args[4].getVariable()->getRevObject() ).getValue();
     std::vector<long> samples_per_specues   = static_cast<const ModelVector<Natural> &>( this->args[5].getVariable()->getRevObject() ).getValue();
     double root_branch                      = static_cast<const RealPos &>( this->args[6].getVariable()->getRevObject() ).getValue();
-    const std::string& fn                   = static_cast<const RlString &>( this->args[7].getVariable()->getRevObject() ).getValue();
+    bool variable                           = static_cast<const RlBoolean &>( this->args[7].getVariable()->getRevObject() ).getValue();
+    const std::string& fn                   = static_cast<const RlString &>( this->args[8].getVariable()->getRevObject() ).getValue();
 
 
     RevBayesCore::AlleleFrequencySimulator sim = RevBayesCore::AlleleFrequencySimulator(tree, population_sizes, generation_time, num_sites, mutation_rates, samples_per_specues, root_branch );
-    sim.simulateAlleleFrequencies( fn );
+    sim.simulateAlleleFrequencies( fn, variable );
     
     return NULL;
 }
@@ -85,6 +86,7 @@ const ArgumentRules& Func_AlleleFrequencySimulator::getArgumentRules( void ) con
         argument_rules.push_back( new ArgumentRule( "mutationRates"     , ModelVector<RealPos>::getClassTypeSpec(), "The mutation rates from 0 to 1 and 1 to 0.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "samplesPerSpecies" , ModelVector<Natural>::getClassTypeSpec(), "The observed number of samples per species.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "rootBranch"        , RealPos::getClassTypeSpec(), "The length of the root branch for simulating polymorphisms at the root.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argument_rules.push_back( new ArgumentRule( "variable"          , RlBoolean::getClassTypeSpec(), "Do we condition on only observing variable sites?", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "filename"          , RlString::getClassTypeSpec(), "The filename for the counts file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
 
         rules_set = true;
