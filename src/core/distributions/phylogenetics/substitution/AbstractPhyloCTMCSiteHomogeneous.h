@@ -260,13 +260,14 @@ namespace RevBayesCore {
     private:
 
         // private methods
+        bool                                                                isSitePatternValid(const std::vector<charType>& sp) const;
         void                                                                fillLikelihoodVector(const TopologyNode &node, size_t node_index);
         void                                                                recursiveMarginalLikelihoodComputation(size_t nIdx);
         
         virtual void                                                        scale(size_t i, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset, std::vector< std::vector< std::vector<double> > >& scaling_factors);
         virtual void                                                        scale(size_t i, size_t l, size_t r, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset, std::vector< std::vector< std::vector<double> > >& scaling_factors);
         virtual void                                                        scale(size_t i, size_t l, size_t r, size_t m, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset, std::vector< std::vector< std::vector<double> > >& scaling_factors);
-        virtual void                                                        simulate(const TopologyNode& node, std::vector< DiscreteTaxonData< charType > > &t, const std::vector<bool> &inv, const std::vector<size_t> &perSiteRates);
+        virtual void                                                        simulate(const TopologyNode& node, std::vector< charType > &t, bool inv, size_t site_rate_index);
         
         
         
@@ -278,6 +279,7 @@ namespace RevBayesCore {
 #include "DiscreteCharacterState.h"
 #include "DistributionExponential.h"
 #include "HomologousDiscreteCharacterData.h"
+#include "ProgressBar.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RateMatrix_JC.h"
@@ -937,6 +939,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     
     // finally we resize the partial likelihood vectors to the new pattern counts
     resizeLikelihoodVectors();
+    
+    std::cerr << "#Sites(data):\t\t\t" << data_num_sites << std::endl;
+    std::cerr << "#Patterns(data):\t\t" << data_num_patterns << std::endl;
+    std::cerr << "#Sites(bias):\t\t\t" << bias_num_sites << std::endl;
+    std::cerr << "#Patterns(bias):\t\t" << bias_num_patterns << std::endl;
+    
 
 }
 
@@ -2039,6 +2047,31 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getSampledMixture
 }
 
 
+
+template<class charType>
+bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::isSitePatternValid(const std::vector<charType> &site_pattern) const
+{
+    
+    if ( ascertainment_bias_correction == AbstractAscertainmentBias::VARIABLE )
+    {
+        
+        size_t ref = site_pattern[0].getStateIndex();
+        for (size_t i=1; i<site_pattern.size(); ++i)
+        {
+            if ( ref != site_pattern[i].getStateIndex() )
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    return true;
+}
+
+
+
 template<class charType>
 bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyDrawStochasticCharacterMap(const TopologyNode &node, std::vector<std::string>& character_histories, std::vector<std::vector<charType> >& start_states, std::vector<std::vector<charType> >& end_states, size_t site, bool use_simmap_default)
 {
@@ -2965,106 +2998,147 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::redrawValue( void
 
     // first, simulate the per site rates
     RandomNumberGenerator* rng = GLOBAL_RNG;
-    std::vector<size_t> perSiteMixtures = std::vector<size_t>(data_num_sites,0);
-    std::vector<bool> inv = std::vector<bool>(data_num_sites,false);
+//    std::vector<size_t> perSiteMixtures = std::vector<size_t>(data_num_sites,0);
+//    std::vector<bool> inv = std::vector<bool>(data_num_sites,false);
     double prob_invariant = getPInv();
+    
+    size_t root_index = tau->getValue().getRoot().getIndex();
+    
+    std::vector<std::vector<double> > freqs;
+    getRootFrequencies(freqs);
+    
+//    // start the progress bar
+//    ProgressBar progress = ProgressBar(data_num_sites, 0);
+//    
+//    // Print progress bar (68 characters wide)
+//    progress.start();
+    
     for ( size_t i = 0; i < data_num_sites; ++i )
     {
-        // draw if this site is invariant
-        double u = rng->uniform01();
-        if ( u < prob_invariant )
-        {
-            // this site is invariant
-            inv[i] = true;
+        
+        bool success = false;
+        std::vector< charType > site_pattern = std::vector< charType >( num_nodes, charType() );
+        
+        do {
+            
+            bool inv = false;
+            size_t site_mixture_index = 0;
+            
+            // draw if this site is invariant
+            double u = rng->uniform01();
+            if ( u < prob_invariant )
+            {
+                // this site is invariant
+                inv = true;
 
-        }
-        else if ( num_site_mixtures  > 1 )
-        {
-            // draw the rate for this site
+            }
+            else if ( num_site_mixtures  > 1 )
+            {
+                // draw the rate for this site
+                u = rng->uniform01();
+                size_t mixtureIndex = 0;
+
+                std::vector<double> mixtureProbs = getMixtureProbs();
+
+                std::vector< double >::const_iterator freq = mixtureProbs.begin();
+                while ( true )
+                {
+                    u -= *freq;
+
+                    if ( u > 0.0 )
+                    {
+                        ++mixtureIndex;
+                        ++freq;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                site_mixture_index = mixtureIndex;
+            }
+            else
+            {
+                // there is only a single site rate so this is 1.0
+                site_mixture_index = 0;
+
+            }
+
+            const std::vector< double > &stationary_freqs = freqs[site_mixture_index % freqs.size()];
+
+            // create the character
+            charType c = charType( num_chars );
+            c.setToFirstState();
+
+            // draw the state
             u = rng->uniform01();
-            size_t mixtureIndex = 0;
-
-            std::vector<double> mixtureProbs = getMixtureProbs();
-
-            std::vector< double >::const_iterator freq = mixtureProbs.begin();
+            std::vector< double >::const_iterator freq = stationary_freqs.begin();
             while ( true )
             {
                 u -= *freq;
-
                 if ( u > 0.0 )
                 {
-                    ++mixtureIndex;
+                    ++c;
                     ++freq;
                 }
                 else
                 {
                     break;
                 }
+
             }
 
-            perSiteMixtures[i] = mixtureIndex;
-        }
-        else
+            // add the character to the sequence
+//            root.addCharacter( c );
+            site_pattern[ root_index ] = c;
+        
+            // recursively simulate the sequences
+            simulate( tau->getValue().getRoot(), site_pattern, inv, site_mixture_index );
+            
+            success = isSitePatternValid( site_pattern );
+
+        } while( success == false );
+        
+        // add the taxon data to the character data
+        for (size_t i = 0; i < this->tau->getValue().getNumberOfNodes(); ++i)
         {
-            // there is only a single site rate so this is 1.0
-            perSiteMixtures[i] = 0;
-
-        }
-
-    }
-
-    std::vector<std::vector<double> > freqs;
-    getRootFrequencies(freqs);
-    // simulate the root sequence
-    DiscreteTaxonData< charType > &root = taxa[ tau->getValue().getRoot().getIndex() ];
-    for ( size_t i = 0; i < data_num_sites; ++i )
-    {
-        const std::vector< double > &stationary_freqs = freqs[perSiteMixtures[i] % freqs.size()];
-
-        // create the character
-        charType c = charType( num_chars );
-        c.setToFirstState();
-
-        // draw the state
-        double u = rng->uniform01();
-        std::vector< double >::const_iterator freq = stationary_freqs.begin();
-        while ( true )
-        {
-            u -= *freq;
-            if ( u > 0.0 )
+            const TopologyNode& node = this->tau->getValue().getNode(i);
+            size_t node_index = node.getIndex();
+            
+            if (node.isTip() == true)
             {
-                ++c;
-                ++freq;
+                taxa[node_index].addCharacter( site_pattern[node_index] );
             }
-            else
+            else if (store_internal_nodes == true)
             {
-                break;
+                taxa[node_index].addCharacter( site_pattern[node_index] );
             }
 
         }
-
-        // add the character to the sequence
-        root.addCharacter( c );
+        
+//        progress.update(i);
+        
     }
-    // recursively simulate the sequences
-    root.setTaxon( Taxon("Root") );
-
-    // recursively simulate the sequences
-    simulate( tau->getValue().getRoot(), taxa, inv, perSiteMixtures );
-
+    
+//    progress.finish();
+    
     // add the taxon data to the character data
     for (size_t i = 0; i < this->tau->getValue().getNumberOfNodes(); ++i)
     {
-
         const TopologyNode& node = this->tau->getValue().getNode(i);
         size_t node_index = node.getIndex();
-
+        
         if (node.isTip() == true)
         {
+            taxa[node_index].setTaxon( node.getTaxon() );
             this->value->addTaxonData( taxa[node_index] );
         }
         else if (store_internal_nodes == true)
         {
+            //            std::stringstream ss;
+            //            ss << "Node" << child.getIndex();
+            //            taxon.setTaxon( Taxon(ss.str()) );
             std::stringstream ss;
             ss << "Index_" << node_index + 1;
             taxa[node_index].setTaxon( Taxon(ss.str()) );
@@ -3072,6 +3146,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::redrawValue( void
         }
 
     }
+    
 
     if ( do_mask == true )
     {
@@ -3456,7 +3531,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setValue(Abstract
 
 
 template<class charType>
-void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::simulate( const TopologyNode &node, std::vector< DiscreteTaxonData< charType > > &taxa, const std::vector<bool> &invariant, const std::vector<size_t> &perSiteMixtures)
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::simulate( const TopologyNode &node, std::vector< charType > &site_pattern, bool invariant, size_t site_mixture_index)
 {
 
     // get the children of the node
@@ -3464,7 +3539,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::simulate( const T
 
     // get the sequence of this node
     size_t node_index = node.getIndex();
-    const DiscreteTaxonData< charType > &parent = taxa[ node_index ];
+    const charType& parent = site_pattern[ node_index ];
 
     // simulate the sequence for each child
     RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -3475,63 +3550,60 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::simulate( const T
         // update the transition probability matrix
         updateTransitionProbabilities( child.getIndex() );
 
-        DiscreteTaxonData< charType > &taxon = taxa[ child.getIndex() ];
-        for ( size_t i = 0; i < data_num_sites; ++i )
+        charType& taxon = site_pattern[ child.getIndex() ];
+        
+        if ( invariant == true )
         {
 
-            if ( invariant[i] == true )
+            // add the character to the sequence
+            taxon = parent;
+        }
+        else
+        {
+            // get the ancestral character for this site
+            unsigned long parentState = parent.getStateIndex();
+
+            double *freqs = transition_prob_matrices[ site_mixture_index][ parentState ];
+
+            // create the character
+            charType c = charType( num_chars );
+            c.setToFirstState();
+            // draw the state
+            double u = rng->uniform01();
+            size_t stateIndex = 0;
+            while ( true )
             {
-
-                // add the character to the sequence
-                taxon.addCharacter( parent.getCharacter( i ) );
-            }
-            else
-            {
-                // get the ancestral character for this site
-                unsigned long parentState = parent.getCharacter( i ).getStateIndex();
-
-                double *freqs = transition_prob_matrices[ perSiteMixtures[i] ][ parentState ];
-
-                // create the character
-                charType c = charType( num_chars );
-                c.setToFirstState();
-                // draw the state
-                double u = rng->uniform01();
-                size_t stateIndex = 0;
-                while ( true )
+                u -= *freqs;
+                ++stateIndex;
+                
+                if ( u > 0.0 && stateIndex < this->num_chars)
                 {
-                    u -= *freqs;
-                    ++stateIndex;
-
-                    if ( u > 0.0 && stateIndex < this->num_chars)
-                    {
-                        ++c;
-                        ++freqs;
-                    }
-                    else
-                    {
-                        break;
-                    }
-
+                    ++c;
+                    ++freqs;
+                }
+                else
+                {
+                    break;
                 }
 
-                // add the character to the sequence
-                taxon.addCharacter( c );
             }
+
+            // add the character to the sequence
+            taxon = c;
 
         }
 
         if ( child.isTip() )
         {
-            taxon.setTaxon( child.getTaxon() );
+//            taxon.setTaxon( child.getTaxon() );
         }
         else
         {
             // recursively simulate the sequences
-            std::stringstream ss;
-            ss << "Node" << child.getIndex();
-            taxon.setTaxon( Taxon(ss.str()) );
-            simulate( child, taxa, invariant, perSiteMixtures );
+//            std::stringstream ss;
+//            ss << "Node" << child.getIndex();
+//            taxon.setTaxon( Taxon(ss.str()) );
+            simulate( child, site_pattern, invariant, site_mixture_index );
         }
 
     }

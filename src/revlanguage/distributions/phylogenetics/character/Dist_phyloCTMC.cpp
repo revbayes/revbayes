@@ -153,7 +153,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         use_site_matrices = static_cast<const RlBoolean &>( site_matrices->getRevObject() ).getDagNode()->getValue();
     }
 
-    if ( !(dt == "Binary" || dt == "Restriction" || dt == "Standard") && code != "all")
+    if ( !(dt == "Binary" || dt == "Restriction" || dt == "Standard" || dt == "PoMo" ) && code != "all")
     {
         throw RbException( "Ascertainment bias correction only supported with Standard and Binary/Restriction datatypes" );
     }
@@ -525,8 +525,16 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
             RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
             nChars = rm->getValue().getNumberOfStates();
         }
+        
+        RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState>::AbstractAscertainmentBias cd = RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState>::AbstractAscertainmentBias::NONE;
+        // split the coding option on "|"
+        if (code == "variable")
+        {
+            cd = RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState>::AbstractAscertainmentBias::VARIABLE;
+        }
 
-        RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState>(tau, nChars, !true, n, ambig, internal, gapmatch, RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState>::AbstractAscertainmentBias::VARIABLE);
+//        RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState>(tau, nChars, !true, n, ambig, internal, gapmatch, RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState>::AbstractAscertainmentBias::VARIABLE);
+        RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState>(tau, nChars, true, n, ambig, internal, gapmatch, cd);
 
         // set the root frequencies (by default these are NULL so this is OK)
         dist->setRootFrequencies( rf );
@@ -629,6 +637,12 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
             ss << "\tDefault: all.\n";
             throw RbException(ss.str());
         }
+//        RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState>::AbstractAscertainmentBias cd = RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState>::AbstractAscertainmentBias::NONE;
+//        // split the coding option on "|"
+//        if (code == "variable")
+//        {
+//            cd = RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState>::AbstractAscertainmentBias::VARIABLE;
+//        }
 
         RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::StandardState> *dist;
         if (cd == RevBayesCore::AscertainmentBias::ALL)
