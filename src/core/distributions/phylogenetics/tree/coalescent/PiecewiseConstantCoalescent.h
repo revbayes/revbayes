@@ -67,7 +67,7 @@ namespace RevBayesCore {
         // members
         const TypedDagNode<RbVector<double> >*              Nes;                                    //!< A pointer for the population sizes for each interval
         const TypedDagNode<RbVector<double> >*              interval_change_points_var;
-        const TypedDagNode<RbVector<long> >*                  number_events_per_interval;
+        const TypedDagNode<RbVector<long> >*                number_events_per_interval;
         mutable RbVector<double>                            interval_change_points;
         mutable RbVector<double>                            pop_sizes;                              //!< The population sizes for each interval
         METHOD_TYPES                                        interval_method;                        //!< The method of specifying coalescent intervals

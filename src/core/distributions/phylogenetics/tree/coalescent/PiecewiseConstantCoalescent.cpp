@@ -57,6 +57,7 @@ PiecewiseConstantCoalescent::PiecewiseConstantCoalescent(const TypedDagNode<RbVe
     // this will also ensure that the parameters are not getting deleted before we do
     addParameter( Nes );
     addParameter( interval_change_points_var );
+    addParameter( number_events_per_interval );
     
     simulateTree();
     
