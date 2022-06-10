@@ -192,11 +192,12 @@ jobs:
         BOOST_INCLUDEDIR: /home/runner/win_root/mingw64/include/boost
         BOOST_LIBRARYDIR: /home/runner/win_root/mingw64/lib
       run: |
+        CXX=x86_64-w64-mingw32-g++-posix
         /usr/local/bin/meson build ${GITHUB_WORKSPACE} --prefix=${GITHUB_WORKSPACE}/wincrossbuild --cross-file=win64-cross.txt -Dopenlibm=true
         /usr/local/bin/ninja -C build install
-        cp /usr/lib/gcc/x86_64-w64-mingw32/*-posix/libgcc_s_seh-1.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
-        cp /usr/lib/gcc/x86_64-w64-mingw32/*-posix/libstdc++-6.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
-        cp /usr/lib/gcc/x86_64-w64-mingw32/*-posix/libssp-0.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
+        cp $($CXX --print-file-name libgcc_s_seh-1.dll) ${GITHUB_WORKSPACE}/wincrossbuild/bin
+        cp $($CXX --print-file-name libstdc++-6.dll)    ${GITHUB_WORKSPACE}/wincrossbuild/bin
+        cp $($CXX --print-file-name libssp-0.dll)       ${GITHUB_WORKSPACE}/wincrossbuild/bin
         cp /home/runner/win_root/mingw64/bin/libboost_*.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
         cp /home/runner/win_root/mingw64/bin/libwinpthread-1.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
         cp /home/runner/win_root/mingw64/bin/libopenlibm.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
