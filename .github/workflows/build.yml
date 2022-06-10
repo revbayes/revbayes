@@ -203,15 +203,15 @@ jobs:
         cp $WINROOT/mingw64/bin/libboost_*.dll          $PREFIX/bin
         cp $WINROOT/mingw64/bin/libwinpthread-1.dll     $PREFIX/bin
         cp $WINROOT/mingw64/bin/libopenlibm.dll         $PREFIX/bin
-        echo '#!/bin/bash' > $PREFIX/bin/rb
-        echo 'cp $PREFIX/bin/* .' >> $PREFIX/bin/rb
-        echo 'if [ "$#" -gt "1" ]; then' >> $PREFIX/bin/rb
-        echo 'wine64 rb.exe ${@:1:$#-1} $(winepath -w ${@: -1} | sed "s,\\\\,\\\\\\\\,g")' >> $PREFIX/bin/rb
-        echo 'else' >> $PREFIX/bin/rb
-        echo 'wine64 rb.exe $(winepath -w ${1} | sed "s,\\\\,\\\\\\\\,g")' >> $PREFIX/bin/rb
-        echo 'fi' >> $PREFIX/bin/rb
-        echo 'rm -f *.exe' >> $PREFIX/bin/rb
-        echo 'rm -f *.dll' >> $PREFIX/bin/rb
+        ( echo '#!/bin/bash'
+          echo "cp $PREFIX/bin/* ."
+          echo 'if [ "$#" -gt "1" ]; then'
+          echo '  wine64 rb.exe ${@:1:$#-1} $(winepath -w ${@: -1} | sed "s,\\\\,\\\\\\\\,g")'
+          echo 'else'
+          echo '  wine64 rb.exe $(winepath -w ${1} | sed "s,\\\\,\\\\\\\\,g")'
+          echo 'fi'
+          echo 'rm -f *.exe'
+          echo 'rm -f *.dll' ) > $PREFIX/bin/rb
         chmod +x $PREFIX/bin/rb
     - name: Test
       env:
