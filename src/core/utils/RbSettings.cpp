@@ -122,7 +122,7 @@ double RbSettings::getTolerance( void ) const
 }
 
 
-const std::string& RbSettings::getWorkingDirectory( void ) const
+std::string RbSettings::getWorkingDirectory( void ) const
 {
     
     return workingDirectory;

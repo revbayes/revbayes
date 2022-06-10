@@ -253,7 +253,7 @@ void RbFileManager::formatError(std::string& errorStr)
 }
 
 
-const std::string& RbFileManager::getCurrentDirectory( void ) const
+std::string RbFileManager::getCurrentDirectory( void ) const
 {
     return RbSettings::userSettings().getWorkingDirectory();
 }
