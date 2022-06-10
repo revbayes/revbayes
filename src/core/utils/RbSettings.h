@@ -60,8 +60,6 @@ class RbSettings {
         size_t                      scalingDensity;
         double                      tolerance;                                          //!< Tolerance for comparison of doubles
         bool                        useScaling;
-        std::string                 workingDirectory;
-    
 };
 
 #endif
