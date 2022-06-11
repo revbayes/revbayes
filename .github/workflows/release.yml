@@ -2,84 +2,58 @@ name: Build and test
 
 on:
   push:
-    branches:
+    tags:
       - "*"
-  pull_request:
-    branches:
-    - "*"
 
 jobs:
-  build:
+  create_release:
+    name: Create release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: true
+        prerelease: false
+
+
+  build_and_upload:
+    needs: create_release
     strategy:
       matrix:
-        name: [ubuntu-gcc-6,
-               ubuntu-gcc-7,
-               ubuntu-gcc-8,
-               ubuntu-gcc-9,
-               ubuntu-gcc-9-mpi,
-               ubuntu-gcc-10,
-               ubuntu-clang-8,
-               macos-xcode-11.7,
+        name: [ubuntu-gcc-9,
+               macos-xcode-12.5,
                windows
                ]
 
         include:
-          - name: ubuntu-gcc-6
-            os: ubuntu-18.04
-            compiler: gcc
-            version: "6"
-            install_boost: 1.74
-            mpi: false
-
-          - name: ubuntu-gcc-7
-            os: ubuntu-latest
-            compiler: gcc
-            version: "7"
-            mpi: false
-
-          - name: ubuntu-gcc-8
-            os: ubuntu-latest
-            compiler: gcc
-            version: "8"
-            install_boost: 1.74
-            mpi: false
-
           - name: ubuntu-gcc-9
             os: ubuntu-latest
             compiler: gcc
             version: "9"
             mpi: false
+            arch: "linux64"
 
-          - name: ubuntu-gcc-9-mpi
-            os: ubuntu-latest
-            compiler: gcc
-            version: "9"
-            mpi: true
-
-          - name: ubuntu-gcc-10
-            os: ubuntu-latest
-            compiler: gcc
-            version: "10"
-            install_boost: 1.74
-            mpi: false
-
-          - name: ubuntu-clang-8
-            os: ubuntu-latest
-            compiler: clang
-            version: "8"
-            mpi: false
-
-          - name: macos-xcode-11.7
+          - name: macos-xcode-12.5
             os: macos-latest
             compiler: xcode
-            version: "11.7"
+            version: "12.5"
             mpi: false
+            arch: "mac64"
   
           - name: windows
             os: ubuntu-latest
             compiler: idk
             version: "9000"
             mpi: false
+            arch: "win64"
 
 
     runs-on: ${{ matrix.os }}
@@ -200,8 +174,8 @@ jobs:
       env:
         BOOST_ROOT: /home/runner/win_root/mingw64/
       run: |
-        CXX=x86_64-w64-mingw32-g++-posix
         PREFIX=${HOME}/local
+        CXX=x86_64-w64-mingw32-g++-posix
         WINROOT=/home/runner/win_root
         /usr/local/bin/meson build ${GITHUB_WORKSPACE} --prefix=$PREFIX --cross-file=win64-cross.txt -Dopenlibm=true
         /usr/local/bin/ninja -C build install
@@ -255,9 +229,34 @@ jobs:
         name: testiphy-results-${{ matrix.name }}
         path: '~/testiphy'
 
+    - name: Get version
+      id: get_version
+      run: |
+        echo ::set-output name=version::$(echo $GITHUB_REF | cut -d / -f 3)
+
+    - name: Create tarball
+      id: create_tarball
+      run: |
+        PREFIX=${HOME}/local
+        PACKAGE=revbayes-${{ steps.get_version.outputs.version }}
+        TAR=${PACKAGE}-${{ matrix.arch }}.tar.gz
+        cp -a $PREFIX $PACKAGE
+        tar -zcf $TAR ${PACKAGE}
+        echo ::set-output name=archive::${TAR}
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create_release.outputs.upload_url }}
+        asset_path: ./${{ steps.create_tarball.outputs.archive }}
+        asset_name: ${{ steps.create_tarball.outputs.archive }}
+        asset_content_type: application/zip
+
   notify:
     name: Notify Slack
-    needs: build
+    needs: build_and_upload
     runs-on: ubuntu-latest
     if: always()
     steps:
