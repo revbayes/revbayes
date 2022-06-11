@@ -185,7 +185,7 @@ jobs:
       run: |
         cd projects/cmake
         ./build.sh -travis true -DCMAKE_INSTALL_PREFIX=$HOME/local
-        (cd build ; make -j4 install)
+        cmake --install build
 
     - name: Configure and build (Windows meson cross compile)
       if: matrix.name == 'windows'
