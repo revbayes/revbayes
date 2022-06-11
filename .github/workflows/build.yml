@@ -197,12 +197,12 @@ jobs:
         WINROOT=/home/runner/win_root
         /usr/local/bin/meson build ${GITHUB_WORKSPACE} --prefix=$PREFIX --cross-file=win64-cross.txt -Dopenlibm=true
         /usr/local/bin/ninja -C build install
-        cp $($CXX --print-file-name libgcc_s_seh-1.dll) $PREFIX/bin
-        cp $($CXX --print-file-name libstdc++-6.dll)    $PREFIX/bin
-        cp $($CXX --print-file-name libssp-0.dll)       $PREFIX/bin
-        cp $WINROOT/mingw64/bin/libboost_*.dll          $PREFIX/bin
-        cp $WINROOT/mingw64/bin/libwinpthread-1.dll     $PREFIX/bin
-        cp $WINROOT/mingw64/bin/libopenlibm.dll         $PREFIX/bin
+        cp $($CXX --print-file-name libgcc_s_seh-1.dll)   $PREFIX/bin
+        cp $($CXX --print-file-name libstdc++-6.dll)      $PREFIX/bin
+        cp $($CXX --print-file-name libssp-0.dll)         $PREFIX/bin
+        cp $($CXX --print-file-name libwinpthread-1.dll)  $PREFIX/bin
+        cp $WINROOT/mingw64/bin/libboost_*.dll            $PREFIX/bin
+        cp $WINROOT/mingw64/bin/libopenlibm.dll           $PREFIX/bin
         ( echo '#!/bin/bash'
           echo "cp $PREFIX/bin/* ."
           echo 'if [ "$#" -gt "1" ]; then'
