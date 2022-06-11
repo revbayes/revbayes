@@ -184,7 +184,8 @@ jobs:
         USE_MPI: ${{ matrix.mpi }}
       run: |
         cd projects/cmake
-        ./build.sh -travis true
+        ./build.sh -travis true -DCMAKE_INSTALL_PREFIX=$HOME/local
+        cmake --install build
 
     - name: Configure and build (Windows meson cross compile)
       if: matrix.name == 'windows'
@@ -192,7 +193,7 @@ jobs:
         BOOST_ROOT: /home/runner/win_root/mingw64/
       run: |
         CXX=x86_64-w64-mingw32-g++-posix
-        PREFIX=${GITHUB_WORKSPACE}/wincrossbuild/
+        PREFIX=${HOME}/local
         WINROOT=/home/runner/win_root
         /usr/local/bin/meson build ${GITHUB_WORKSPACE} --prefix=$PREFIX --cross-file=win64-cross.txt -Dopenlibm=true
         /usr/local/bin/ninja -C build install
@@ -218,11 +219,8 @@ jobs:
         USE_MPI: ${{ matrix.mpi }}
         IS_WINDOWS: ${{ matrix.name == 'windows' }}
       run: |
-        if [ "${{ matrix.name }}" = "windows" ] ; then
-          export PATH=${GITHUB_WORKSPACE}/wincrossbuild/bin:$PATH
-        else
-          export PATH=${GITHUB_WORKSPACE}/projects/cmake:$PATH
-        fi
+        export PATH=${HOME}/local/bin:$PATH
+
         echo "\"Hello World\"" | rb
         echo ::group::Test suite
         cd tests
