@@ -105,7 +105,7 @@ if [ "${gtk}" = "true" ] ; then
     atk-2.36.0-2
     brotli-1.0.9-4
     bzip2-1.0.8-2
-    cairo-1.16.0-3
+    cairo-1.17.6-2
     expat-2.4.6-1
     fontconfig-2.13.96-1
     freetype-2.11.1-2
@@ -125,6 +125,7 @@ if [ "${gtk}" = "true" ] ; then
     libpng-1.6.37-6
     libthai-0.1.29-1
     libtiff-4.3.0-7
+    lzo2-2.10-2
     pango-1.50.4-1
     pcre-8.45-1
     pixman-0.40.0-2
