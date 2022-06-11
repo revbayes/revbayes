@@ -156,7 +156,15 @@ jobs:
       if: matrix.name != 'windows'
       env:
         USE_MPI: ${{ matrix.mpi }}
+        OSX_VERSION_MIN: "10.14"
       run: |
+        if [ ${{ matrix.arch }} = "mac64" ] && [ -n "${OSX_VERSION_MIN}" ]; then
+          MIN="-mmacosx-version-min=${OSX_VERSION_MIN}"
+          export CFLAGS="$CFLAGS $MIN"
+          export CXXFLAGS="$CXXFLAGS $MIN"
+          export LDFLAGS="$LDFLAGS $MIN"
+        fi
+
         cd projects/cmake
         ./build.sh -travis true -DCMAKE_INSTALL_PREFIX=$HOME/local
         cmake --install build
