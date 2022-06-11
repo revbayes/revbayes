@@ -6,26 +6,7 @@ on:
       - "*"
 
 jobs:
-  create_release:
-    name: Create release
-    runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
-    steps:
-    - name: Create release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: true
-        prerelease: false
-
-
   build_and_upload:
-    needs: create_release
     strategy:
       matrix:
         name: [ubuntu-gcc-9,
@@ -233,15 +214,13 @@ jobs:
         tar -zcf $TAR ${PACKAGE}
         echo ::set-output name=archive::${TAR}
 
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@v2
       with:
-        upload_url: ${{ needs.create_release.outputs.upload_url }}
-        asset_path: ./${{ steps.create_tarball.outputs.archive }}
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: ./${{ steps.create_tarball.outputs.archive }}
         asset_name: ${{ steps.create_tarball.outputs.archive }}
-        asset_content_type: application/zip
+        tag: ${{ github.ref }}
 
   notify:
     name: Notify Slack
