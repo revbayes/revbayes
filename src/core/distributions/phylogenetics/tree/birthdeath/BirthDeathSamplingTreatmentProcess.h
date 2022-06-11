@@ -1,5 +1,5 @@
-#ifndef EpisodicBirthDeathSamplingTreatmentProcess_H
-#define EpisodicBirthDeathSamplingTreatmentProcess_H
+#ifndef BirthDeathSamplingTreatmentProcess_H
+#define BirthDeathSamplingTreatmentProcess_H
 
 #include "AbstractBirthDeathProcess.h"
 #include "RbVector.h"
@@ -30,19 +30,19 @@ namespace RevBayesCore {
      * @since 2014-03-18, version 1.0
      *
      */
-    class EpisodicBirthDeathSamplingTreatmentProcess : public AbstractBirthDeathProcess {
+    class BirthDeathSamplingTreatmentProcess : public AbstractBirthDeathProcess {
 
     public:
-        EpisodicBirthDeathSamplingTreatmentProcess (const TypedDagNode<double> *ra,
-                                                    const DagNode *inspeciation,
-                                                    const DagNode *inextinction,
-                                                    const DagNode *inserialsampling,
-                                                    const DagNode *intreatment,
-                                                    const DagNode *ineventspeciation,
-                                                    const DagNode *ineventextinction,
-                                                    const DagNode *ineventsampling,
-                                                    const DagNode *ineventtreatment,
-                                                    const TypedDagNode< RbVector<double> > *ht,
+        BirthDeathSamplingTreatmentProcess (const TypedDagNode<double> *ra,
+                                                    const DagNode *speciation,
+                                                    const DagNode *extinction,
+                                                    const DagNode *sampling,
+                                                    const DagNode *treatment,
+                                                    const DagNode *event_speciation,
+                                                    const DagNode *event_extinction,
+                                                    const DagNode *event_sampling,
+                                                    const DagNode *event_treatment,
+                                                    const TypedDagNode< RbVector<double> > *timeline,
                                                     const TypedDagNode< RbVector<double> > *speciation_timeline,
                                                     const TypedDagNode< RbVector<double> > *extinction_timeline,
                                                     const TypedDagNode< RbVector<double> > *sampling_timeline,
@@ -56,7 +56,7 @@ namespace RevBayesCore {
                                                     Tree *t);  //!< Constructor
 
         // public member functions
-        EpisodicBirthDeathSamplingTreatmentProcess*     clone(void) const;                                                      //!< Create an independent clone
+        BirthDeathSamplingTreatmentProcess*             clone(void) const;                                                    //!< Create an independent clone
         void                                            redrawValue(SimulationCondition c = SimulationCondition::MCMC);         //!< Draw a new random value from the distribution
 
     protected:
@@ -69,7 +69,7 @@ namespace RevBayesCore {
         void                                            addTimesToGlobalTimeline(std::set<double> &event_times, const TypedDagNode<RbVector<double> > *par_times) const;        //!< Adds timeline for parameter to set that we will use for global timeline
         void                                            checkVectorSizes(const TypedDagNode<RbVector<double> >* v1, const TypedDagNode<RbVector<double> >* v2, int v1_minus_v2, const std::string& param_name, bool is_rate) const;
         double                                          computeLnProbabilityTimes(void) const;                                  //!< Compute the log-transformed probability of the current value.
-        void                                            countAllNodes(void) const;                                              //!< Count bifurcating nodes, count all heterochronous nodes as either phi- or Phi-sampled and as either sampled ancestors or sampled extinct tips
+        bool                                            countAllNodes(void) const;                                              //!< Count bifurcating nodes, count all heterochronous nodes as either phi- or Phi-sampled and as either sampled ancestors or sampled extinct tips
         double                                          lnD(size_t i, double t) const;                                          //!< Branch-segment probability at time t with index i, using pre-computed vectors
         double                                          E(size_t i, double t, bool computeSurvival = false) const;                                       //!< Extinction probability at time t with index i, using pre-computed vectors
         void                                            expandNonGlobalProbabilityParameterVector(std::vector<double> &par, const std::vector<double> &par_times) const; //!< Updates vector par such that it matches the global timeline
