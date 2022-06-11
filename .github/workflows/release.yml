@@ -157,6 +157,12 @@ jobs:
       env:
         USE_MPI: ${{ matrix.mpi }}
       run: |
+        if [ ${{ matrix.arch }} = "mac64" ]; then
+          export CFLAGS="-mmacosx-version-min=10.14"
+          export CXXFLAGS="-mmacosx-version-min=10.14"
+          export LDFLAGS="-mmacosx-version-min=10.14"
+        fi
+
         cd projects/cmake
         ./build.sh -travis true -DCMAKE_INSTALL_PREFIX=$HOME/local
         cmake --install build
