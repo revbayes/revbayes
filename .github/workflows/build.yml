@@ -189,8 +189,7 @@ jobs:
     - name: Configure and build (Windows meson cross compile)
       if: matrix.name == 'windows'
       env:
-        BOOST_INCLUDEDIR: /home/runner/win_root/mingw64/include/boost
-        BOOST_LIBRARYDIR: /home/runner/win_root/mingw64/lib
+        BOOST_ROOT: /home/runner/win_root/mingw64/
       run: |
         CXX=x86_64-w64-mingw32-g++-posix
         PREFIX=${GITHUB_WORKSPACE}/wincrossbuild/
@@ -213,6 +212,7 @@ jobs:
           echo 'rm -f *.exe'
           echo 'rm -f *.dll' ) > $PREFIX/bin/rb
         chmod +x $PREFIX/bin/rb
+
     - name: Test
       env:
         USE_MPI: ${{ matrix.mpi }}
