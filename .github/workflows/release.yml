@@ -145,7 +145,7 @@ jobs:
       env:
         USE_MPI: ${{ matrix.mpi }}
       run: |
-        ${GITHUB_WORKSPACE}/projects/meson/make_winroot.sh -ccache true
+        ${GITHUB_WORKSPACE}/projects/meson/make_winroot.sh -ccache true -gtk true
         ( cd ${GITHUB_WORKSPACE}/projects/meson/ ; ./generate.sh )
         
     - name: Update submodules
@@ -177,7 +177,7 @@ jobs:
         PREFIX=${HOME}/local
         CXX=x86_64-w64-mingw32-g++-posix
         WINROOT=/home/runner/win_root
-        /usr/local/bin/meson build ${GITHUB_WORKSPACE} --prefix=$PREFIX --cross-file=win64-cross.txt -Dopenlibm=true
+        /usr/local/bin/meson build ${GITHUB_WORKSPACE} --prefix=$PREFIX --cross-file=win64-cross.txt -Dopenlibm=true -Dstudio=true
         /usr/local/bin/ninja -C build install
         cp $($CXX --print-file-name libgcc_s_seh-1.dll)   $PREFIX/bin
         cp $($CXX --print-file-name libstdc++-6.dll)      $PREFIX/bin
