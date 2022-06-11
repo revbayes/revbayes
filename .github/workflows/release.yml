@@ -28,7 +28,7 @@ jobs:
     needs: create_release
     strategy:
       matrix:
-        name: [ubuntu-clang-9,
+        name: [ubuntu-gcc-9,
                macos-xcode-12.5,
                windows
                ]
