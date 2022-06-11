@@ -245,7 +245,7 @@ jobs:
 
   notify:
     name: Notify Slack
-    needs: build
+    needs: build_and_upload
     runs-on: ubuntu-latest
     if: always()
     steps:
