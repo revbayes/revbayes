@@ -39,18 +39,21 @@ jobs:
             compiler: gcc
             version: "9"
             mpi: false
+            arch: "linux64"
 
           - name: macos-xcode-12.5
             os: macos-latest
             compiler: xcode
             version: "12.5"
             mpi: false
+            arch: "mac64"
   
           - name: windows
             os: ubuntu-latest
             compiler: idk
             version: "9000"
             mpi: false
+            arch: "win64"
 
 
     runs-on: ${{ matrix.os }}
