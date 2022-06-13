@@ -43,6 +43,7 @@ template <class valueType> class RbVector;
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, long &rv) const;     //!< Map the member methods to internal function calls
         const std::vector< long >&                          getMinimumNumberOfEvents(void) const;
         const std::vector< TypedDistribution<double>* >&    getValuePriors(void) const;
+        bool                                                isSorted(size_t i) const;
         void                                                redrawValue(void);
 //        void                                                setNumberOfEvents(long n);
 

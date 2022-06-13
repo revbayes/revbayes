@@ -257,6 +257,8 @@ double AutocorrelatedEventDistribution::computeLnProbability( void )
                 double sd   = autocorrelation_sigmas->getValue()[j] * dt ;
                 ln_prob += RbStatistics::Normal::lnPdf(mean, sd, val);
                 
+                ln_prob -= these_values[i];
+                
             }
             
         }
@@ -330,6 +332,13 @@ const std::vector< TypedDistribution<double>* >& AutocorrelatedEventDistribution
 
 
 
+bool AutocorrelatedEventDistribution::isSorted(size_t i) const
+{
+    return i == index_of_var_to_sort_by;
+}
+ 
+
+
 void AutocorrelatedEventDistribution::simulate()
 {
     // clear the current value
@@ -338,6 +347,7 @@ void AutocorrelatedEventDistribution::simulate()
     // draw a number of events
     event_prior->redrawValue();
     value->setNumberOfEvents( event_prior->getValue() );
+    value->setNumberOfEvents( 2 );
     
     // we need to specify an ordering for the simulation
     // it is important that we simulate the times first if there are autocorrelated variables

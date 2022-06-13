@@ -122,6 +122,8 @@ double MultiValueEventBirthDeathProposal::doAutocorrelatedProposal(const Autocor
     // Otherwise we might give birth and die every time
     double u = rng->uniform01();
     
+    stored_sorting_index = -1;
+    
     if ( u > 0.5 || n_events == 0 )
     {
         // we pick a birth move
@@ -130,14 +132,62 @@ double MultiValueEventBirthDeathProposal::doAutocorrelatedProposal(const Autocor
         // increment the number of events
         mve.setNumberOfEvents( n_events + 1 );
         
+        // get the offsets
+        const std::vector<long> &offset = dist_mve.getMinimumNumberOfEvents();
+        
         std::vector< TypedDistribution<double> * > priors = dist_mve.getValuePriors();
+        
         for (size_t i=0; i<priors.size(); ++i)
         {
-            priors[i]->redrawValue();
-            double new_val = priors[i]->getValue();
-            mve.getValues(i).push_back( new_val );
+            std::vector<double>& vals = mve.getValues(i);
             
-            hr -= priors[i]->computeLnProbability();
+            if ( dist_mve.isSorted( i ) == true )
+            {
+                size_t num_vals = vals.size();
+                int left  = -1;
+                int right = int(num_vals);
+                                
+                bool success = false;
+                double new_val = 0.0;
+                while ( success == false )
+                {
+                    if ( num_vals > 0 )
+                    {
+                        left = int( (num_vals+1) * rng->uniform01()) - 1;
+                        right = left + 1;
+                    }
+                    
+                    success = true;
+                    priors[i]->redrawValue();
+                    new_val = priors[i]->getValue();
+                    if ( left > -1 )
+                    {
+                        success &= ( new_val > vals[left] );
+                    }
+                    if ( right < num_vals )
+                    {
+                        success &= ( new_val < vals[right] );
+                    }
+                }
+                
+                stored_sorting_index = left+1;
+                vals.insert(vals.begin()+stored_sorting_index, new_val);
+                
+                hr -= priors[i]->computeLnProbability();
+                
+//                hr += log(n_events+1);
+                
+            }
+            else
+            {
+            
+                priors[i]->redrawValue();
+                double new_val = priors[i]->getValue();                
+                vals.insert(vals.begin()+stored_sorting_index+offset[i], new_val);
+            
+                hr += priors[i]->computeLnProbability();
+            }
+            
         }
         
         if ( n_events == 0 )
@@ -183,6 +233,9 @@ double MultiValueEventBirthDeathProposal::doAutocorrelatedProposal(const Autocor
         {
             hr -= log(0.5);
         }
+        
+//        hr -= log(n_events);
+        
     }
     
     return hr;
@@ -324,7 +377,14 @@ void MultiValueEventBirthDeathProposal::undoProposal( void )
         {
             size_t this_index = n_events+offset[i]-1;
             std::vector<double> &this_values = mve.getValues(i);
-            this_values.erase( this_values.begin()+this_index );
+            if ( stored_sorting_index != -1 )
+            {
+                this_values.erase( this_values.begin()+stored_sorting_index+offset[i] );
+            }
+            else
+            {
+                this_values.erase( this_values.begin()+this_index );
+            }
         }
         
     }
