@@ -13,30 +13,30 @@ namespace RevBayesCore {
     
     
     
-    class RateMatrix_revPoMoM2N : public TimeReversibleRateMatrix {
+    class RateMatrix_revPoMoM2N : public AbstractRateMatrix {
         
     public:
-        RateMatrix_revPoMoM2N(size_t ss );                                                                                                       //!< Construct rate matrix with n states
+        RateMatrix_revPoMoM2N(long m);                                                                                                       //!< Construct rate matrix with n states
         RateMatrix_revPoMoM2N(const RateMatrix_revPoMoM2N& m);                                                                                //!< Copy constructor
         virtual                             ~RateMatrix_revPoMoM2N(void);                                                                  //!< Destructor
         
         // overloaded operators
-        RateMatrix_revPoMoM2N&                            operator=(const RateMatrix_revPoMoM2N& r);
+        RateMatrix_revPoMoM2N&                          operator=(const RateMatrix_revPoMoM2N& r);
         
         // RateMatrix functions
-        virtual RateMatrix_revPoMoM2N&               assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
-        void                                           calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;    //!< Calculate the transition matrix
-        RateMatrix_revPoMoM2N*                       clone(void) const;
+        virtual RateMatrix_revPoMoM2N&                  assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
+        double                                          averageRate(void) const;
+        void                                            calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;    //!< Calculate the transition matrix
+        RateMatrix_revPoMoM2N*                          clone(void) const;
 
 		
-		void 										   setN(long ps);
-		void 										   setMu( const std::vector<double> &r );
-        void                                           setM(long vps);
-        void                                           setGen(double g);
+		void 										    setNEffective(double ps);
+		void 										    setMu( const std::vector<double> &r );
+        void                                            setGen(double g);
 
-        std::vector<double>                            getStationaryFrequencies( void ) const;
+        std::vector<double>                             getStationaryFrequencies( void ) const;
 
-        void                                           update(void);
+        void                                            update(void);
         
     private:
         void                                            calculateCijk(void);                                                                //!< Do precalculations on eigenvectors and their inverse
@@ -50,9 +50,9 @@ namespace RevBayesCore {
         std::vector<double>                             c_ijk;                                                                              //!< Vector of precalculated product of eigenvectors and their inverse
         std::vector<std::complex<double> >              cc_ijk;                                                                             //!< Vector of precalculated product of eigenvectors and thier inverse for complex case
         
-        long                                            N;
+        double                                          N_eff;
         std::vector<double>                             mu;                                                                                //!< Vector of precalculated product of eigenvectors and their inverse
-        long                                            M;
+        long                                            N_virt;
         double                                          gen;
 
     };
