@@ -329,7 +329,7 @@ std::vector<double> RateMatrix_PoMo2N::getStationaryFrequencies( void ) const
 }
 
 
-void RateMatrix_PoMo2N::setNeff( long ni )
+void RateMatrix_PoMo2N::setNeff( double ni )
 {
     N_eff = ni;
     

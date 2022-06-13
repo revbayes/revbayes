@@ -31,7 +31,7 @@ namespace RevBayesCore {
     class revPoMoM2NRateMatrixFunction : public TypedFunction<RateGenerator> {
 
     public:
-        revPoMoM2NRateMatrixFunction( const TypedDagNode< long > *n, const TypedDagNode< RbVector<double> > *m ,  const TypedDagNode< long > *v, const TypedDagNode<double> *g );
+        revPoMoM2NRateMatrixFunction( long m, const TypedDagNode< double > *n, const TypedDagNode< RbVector<double> > *mut, const TypedDagNode<double> *g );
 
         virtual                                             ~revPoMoM2NRateMatrixFunction(void);                                                    //!< Virtual destructor
 
@@ -45,10 +45,10 @@ namespace RevBayesCore {
     private:
 
         // members
-        const TypedDagNode< long >*                          N;
-        const TypedDagNode< RbVector<double> >*              mu;
-        const TypedDagNode< long >*                          M;
-        const TypedDagNode< double >*                        gen;
+        const TypedDagNode< double >*                       N_eff;
+        const TypedDagNode< RbVector<double> >*             mu;
+        long                                                N_virt;
+        const TypedDagNode< double >*                       gen;
 
     };
 

@@ -55,7 +55,7 @@ namespace RevBayesCore {
         std::vector<double>                         getStationaryFrequencies(void) const ;  //!< Return the stationary frequencies, which are the stationary frequencies of the Q_mut matrix
 
         void                                        update(void);
-        void                                        setNeff( long ni );
+        void                                        setNeff( double ni );
         void                                        setMu(  const std::vector<double> &m );
         void                                        setPhi( const std::vector<double> &f );
 
