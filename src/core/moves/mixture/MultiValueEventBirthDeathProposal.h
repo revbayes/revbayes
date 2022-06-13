@@ -61,6 +61,7 @@ template <class variableType> class StochasticNode;
         bool                                    was_birth;
         std::vector<double>                     stored_values;
         size_t                                  stored_index;
+        int                                     stored_sorting_index;
 
     };
     
