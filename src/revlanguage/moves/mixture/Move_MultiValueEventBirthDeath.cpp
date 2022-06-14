@@ -9,6 +9,7 @@
 #include "MultiValueEventBirthDeathProposal.h"
 #include "RealPos.h"
 #include "RevObject.h"
+#include "RlBoolean.h"
 #include "TypeSpec.h"
 #include "Move.h"
 #include "RevPtr.h"
@@ -66,10 +67,12 @@ void Move_MultiValueEventBirthDeath::constructInternalObject( void )
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::MultiValueEvent>* tmp = static_cast<const MultiValueEvent &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::MultiValueEvent> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MultiValueEvent> *>( tmp );
-    
+//    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool t = false;
+
     // finally create the internal move object
     RevBayesCore::Proposal *prop = new RevBayesCore::MultiValueEventBirthDeathProposal(n);
-    value = new RevBayesCore::MetropolisHastingsMove(prop,w,false);
+    value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);
     
 }
 
@@ -130,14 +133,15 @@ const MemberRules& Move_MultiValueEventBirthDeath::getParameterRules(void) const
     static MemberRules move_member_rules;
     static bool rules_set = false;
     
-    if ( !rules_set )
+    if ( rules_set == false )
     {
         
         move_member_rules.push_back( new ArgumentRule( "x"   , MultiValueEvent::getClassTypeSpec(),  "The variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        
+//        move_member_rules.push_back( new ArgumentRule( "tune", RlBoolean::getClassTypeSpec(), "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
+
         /* Inherit weight from Move, put it after variable */
-        const MemberRules& inheritedRules = Move::getParameterRules();
-        move_member_rules.insert( move_member_rules.end(), inheritedRules.begin(), inheritedRules.end() );
+        const MemberRules& inherited_rules = Move::getParameterRules();
+        move_member_rules.insert( move_member_rules.end(), inherited_rules.begin(), inherited_rules.end() );
         
         rules_set = true;
     }
@@ -195,6 +199,10 @@ void Move_MultiValueEventBirthDeath::setConstParameter(const std::string& name, 
     {
         x = var;
     }
+//    else if ( name == "tune" )
+//    {
+//        tune = var;
+//    }
     else
     {
         Move::setConstParameter(name, var);
