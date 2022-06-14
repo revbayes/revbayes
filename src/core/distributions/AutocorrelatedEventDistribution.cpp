@@ -5,6 +5,7 @@
 
 #include "DagNode.h"
 #include "DistributionNormal.h"
+#include "DistributionLognormal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
@@ -252,12 +253,11 @@ double AutocorrelatedEventDistribution::computeLnProbability( void )
                 long time_index = i - min_events[j] + min_events[autocorrelation_time_indeces[j]];
                 
                 double mean = log( these_values[i-1] );
-                double val  = log( these_values[i] );
+                double val  = these_values[i];
                 double dt   = time_values[time_index] - (time_index > 0 ? time_values[time_index-1] : 0.0);
                 double sd   = autocorrelation_sigmas->getValue()[j] * dt ;
-                ln_prob += RbStatistics::Normal::lnPdf(mean, sd, val);
                 
-                ln_prob -= these_values[i];
+                ln_prob += RbStatistics::Lognormal::lnPdf(mean, sd, val);
                 
             }
             
@@ -306,11 +306,6 @@ void AutocorrelatedEventDistribution::executeMethod(const std::string &n, const 
         rv = value->getNumberOfEvents();
         
     }
-    //    else if ( n == "getNumberOfEvents" )
-    //    {
-    //
-    //
-    //    }
     else
     {
         throw RbException("The multi-value event does not have a member method called '" + n + "'.");
@@ -347,7 +342,6 @@ void AutocorrelatedEventDistribution::simulate()
     // draw a number of events
     event_prior->redrawValue();
     value->setNumberOfEvents( event_prior->getValue() );
-    value->setNumberOfEvents( 2 );
     
     // we need to specify an ordering for the simulation
     // it is important that we simulate the times first if there are autocorrelated variables
