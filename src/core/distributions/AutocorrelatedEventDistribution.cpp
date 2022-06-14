@@ -327,6 +327,13 @@ const std::vector< TypedDistribution<double>* >& AutocorrelatedEventDistribution
 
 
 
+bool AutocorrelatedEventDistribution::isAutocorrelated(size_t i) const
+{
+    return autocorrelation_types[i] != NONE;
+}
+
+
+
 bool AutocorrelatedEventDistribution::isSorted(size_t i) const
 {
     return i == index_of_var_to_sort_by;

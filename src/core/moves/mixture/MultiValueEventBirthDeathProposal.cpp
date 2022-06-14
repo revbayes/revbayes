@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "AutocorrelatedEventDistribution.h"
+#include "DistributionNormal.h"
 #include "MultiValueEventDistribution.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
@@ -26,6 +27,9 @@ MultiValueEventBirthDeathProposal::MultiValueEventBirthDeathProposal( Stochastic
     
     // tell the base class to add the node
     addNode( event_var );
+    
+    size_t num_vals = n->getValue().getNumberOfValues();
+    ac_proposal_sd = std::vector<double>(num_vals, 0.1);
     
 }
 
@@ -175,17 +179,39 @@ double MultiValueEventBirthDeathProposal::doAutocorrelatedProposal(const Autocor
                 
                 hr -= priors[i]->computeLnProbability();
                 
-//                hr += log(n_events+1);
-                
             }
             else
             {
-            
+                
                 priors[i]->redrawValue();
-                double new_val = priors[i]->getValue();                
+                double new_val = priors[i]->getValue();
                 vals.insert(vals.begin()+stored_sorting_index+offset[i], new_val);
             
-                hr += priors[i]->computeLnProbability();
+                hr -= priors[i]->computeLnProbability();
+
+                
+//                size_t insert_index = offset[i];
+//                if ( stored_sorting_index != -1 )
+//                {
+//                    insert_index += stored_sorting_index;
+//                }
+//
+//                double new_val = -1.0;
+//                if ( dist_mve.isAutocorrelated( i ) == false || true )
+//                {
+//                    priors[i]->redrawValue();
+//                    new_val = priors[i]->getValue();
+//                    hr -= priors[i]->computeLnProbability();
+//                }
+//                else
+//                {
+//                    double predecessor_value = vals[insert_index];
+//                    predecessor_value = 1.5;
+//                    new_val = RbStatistics::Normal::rv(predecessor_value, ac_proposal_sd[i], *GLOBAL_RNG);
+//                    hr -= RbStatistics::Normal::lnPdf(predecessor_value, ac_proposal_sd[i], new_val);
+//                }
+//
+//                vals.insert(vals.begin()+insert_index, new_val);
             }
             
         }
@@ -224,6 +250,18 @@ double MultiValueEventBirthDeathProposal::doAutocorrelatedProposal(const Autocor
             
             priors[i]->setValue( new double(old_val) );
             hr += priors[i]->computeLnProbability();
+
+//            if ( dist_mve.isAutocorrelated( i ) == false || true )
+//            {
+//                priors[i]->setValue( new double(old_val) );
+//                hr += priors[i]->computeLnProbability();
+//            }
+//            else
+//            {
+//                double predecessor_value = this_values[this_index-1];
+//                predecessor_value = 1.5;
+//                hr += RbStatistics::Normal::lnPdf(predecessor_value, ac_proposal_sd[i], old_val);
+//            }
             
             this_values.erase( this_values.begin()+this_index );
         }
@@ -233,8 +271,6 @@ double MultiValueEventBirthDeathProposal::doAutocorrelatedProposal(const Autocor
         {
             hr -= log(0.5);
         }
-        
-//        hr -= log(n_events);
         
     }
     
