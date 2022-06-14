@@ -58,6 +58,7 @@ template <class variableType> class StochasticNode;
         
         // stored objects to undo proposal
 //        bool                                    failed;
+        std::vector<double>                     ac_proposal_sd;
         bool                                    was_birth;
         std::vector<double>                     stored_values;
         size_t                                  stored_index;
