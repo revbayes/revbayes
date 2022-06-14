@@ -30,7 +30,7 @@ template <class variableType> class StochasticNode;
     class MultiValueEventBirthDeathProposal : public Proposal {
         
     public:
-        MultiValueEventBirthDeathProposal( StochasticNode<MultiValueEvent> *n);                                                       //!<  constructor
+        MultiValueEventBirthDeathProposal( StochasticNode<MultiValueEvent> *n, bool use_ac);                                                       //!<  constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                        //!< Clean up proposal
@@ -58,6 +58,7 @@ template <class variableType> class StochasticNode;
         
         // stored objects to undo proposal
 //        bool                                    failed;
+        bool                                    use_autocorrelated_proposal;
         std::vector<double>                     ac_proposal_sd;
         bool                                    was_birth;
         std::vector<double>                     stored_values;
