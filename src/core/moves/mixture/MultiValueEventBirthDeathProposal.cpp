@@ -182,36 +182,29 @@ double MultiValueEventBirthDeathProposal::doAutocorrelatedProposal(const Autocor
             }
             else
             {
-                
-                priors[i]->redrawValue();
-                double new_val = priors[i]->getValue();
-                vals.insert(vals.begin()+stored_sorting_index+offset[i], new_val);
-            
-                hr -= priors[i]->computeLnProbability();
 
                 
-//                size_t insert_index = offset[i];
-//                if ( stored_sorting_index != -1 )
-//                {
-//                    insert_index += stored_sorting_index;
-//                }
-//
-//                double new_val = -1.0;
-//                if ( dist_mve.isAutocorrelated( i ) == false || true )
-//                {
-//                    priors[i]->redrawValue();
-//                    new_val = priors[i]->getValue();
-//                    hr -= priors[i]->computeLnProbability();
-//                }
-//                else
-//                {
-//                    double predecessor_value = vals[insert_index];
-//                    predecessor_value = 1.5;
-//                    new_val = RbStatistics::Normal::rv(predecessor_value, ac_proposal_sd[i], *GLOBAL_RNG);
-//                    hr -= RbStatistics::Normal::lnPdf(predecessor_value, ac_proposal_sd[i], new_val);
-//                }
-//
-//                vals.insert(vals.begin()+insert_index, new_val);
+                size_t insert_index = offset[i];
+                if ( stored_sorting_index != -1 )
+                {
+                    insert_index += stored_sorting_index;
+                }
+
+                double new_val = -1.0;
+                if ( dist_mve.isAutocorrelated( i ) == false )
+                {
+                    priors[i]->redrawValue();
+                    new_val = priors[i]->getValue();
+                    hr -= priors[i]->computeLnProbability();
+                }
+                else
+                {
+                    double predecessor_value = vals[insert_index-1];
+                    new_val = RbStatistics::Normal::rv(predecessor_value, ac_proposal_sd[i], *GLOBAL_RNG);
+                    hr -= RbStatistics::Normal::lnPdf(predecessor_value, ac_proposal_sd[i], new_val);
+                }
+
+                vals.insert(vals.begin()+insert_index, new_val);
             }
             
         }
@@ -247,21 +240,17 @@ double MultiValueEventBirthDeathProposal::doAutocorrelatedProposal(const Autocor
             std::vector<double> &this_values = mve.getValues(i);
             double old_val = this_values[this_index];
             stored_values.push_back( old_val );
-            
-            priors[i]->setValue( new double(old_val) );
-            hr += priors[i]->computeLnProbability();
 
-//            if ( dist_mve.isAutocorrelated( i ) == false || true )
-//            {
-//                priors[i]->setValue( new double(old_val) );
-//                hr += priors[i]->computeLnProbability();
-//            }
-//            else
-//            {
-//                double predecessor_value = this_values[this_index-1];
-//                predecessor_value = 1.5;
-//                hr += RbStatistics::Normal::lnPdf(predecessor_value, ac_proposal_sd[i], old_val);
-//            }
+            if ( dist_mve.isAutocorrelated( i ) == false )
+            {
+                priors[i]->setValue( new double(old_val) );
+                hr += priors[i]->computeLnProbability();
+            }
+            else
+            {
+                double predecessor_value = this_values[this_index-1];
+                hr += RbStatistics::Normal::lnPdf(predecessor_value, ac_proposal_sd[i], old_val);
+            }
             
             this_values.erase( this_values.begin()+this_index );
         }
@@ -381,6 +370,11 @@ void MultiValueEventBirthDeathProposal::prepareProposal( void )
 void MultiValueEventBirthDeathProposal::printParameterSummary(std::ostream &o, bool name_only) const
 {
     
+    o << "sd = ";
+    if (name_only == false)
+    {
+        o << ac_proposal_sd[0];
+    }
 }
 
 
@@ -478,5 +472,23 @@ void MultiValueEventBirthDeathProposal::setProposalTuningParameter(double tp)
 void MultiValueEventBirthDeathProposal::tune( double rate )
 {
     
+    // Sebastian: auto-tuning doesn't seem to work for this move.
+//    double p = this->targetAcceptanceRate;
+//    if ( rate > p )
+//    {
+//        for ( size_t i=0; i<ac_proposal_sd.size(); ++i )
+//        {
+//            ac_proposal_sd[i] *= (1.0 + ((rate-p)/(1.0 - p)) );
+//            ac_proposal_sd[i] = ( ac_proposal_sd[i] > 100.0 ? 100.0 : ac_proposal_sd[i] );
+//        }
+//
+//    }
+//    else
+//    {
+//        for ( size_t i=0; i<ac_proposal_sd.size(); ++i )
+//        {
+//            ac_proposal_sd[i] /= (2.0 - rate/p);
+//            ac_proposal_sd[i] = ( ac_proposal_sd[i] < 0.001 ? 0.001 : ac_proposal_sd[i] );
+//        }
+//    }
 }
-
