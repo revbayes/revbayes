@@ -21,8 +21,9 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-MultiValueEventBirthDeathProposal::MultiValueEventBirthDeathProposal( StochasticNode<MultiValueEvent> *n ) : Proposal(),
-    event_var( n )
+MultiValueEventBirthDeathProposal::MultiValueEventBirthDeathProposal( StochasticNode<MultiValueEvent> *n, bool use_ac ) : Proposal(),
+    event_var( n ),
+    use_autocorrelated_proposal( use_ac )
 {
     
     // tell the base class to add the node
@@ -191,7 +192,7 @@ double MultiValueEventBirthDeathProposal::doAutocorrelatedProposal(const Autocor
                 }
 
                 double new_val = -1.0;
-                if ( dist_mve.isAutocorrelated( i ) == false )
+                if ( dist_mve.isAutocorrelated( i ) == false || use_autocorrelated_proposal == false )
                 {
                     priors[i]->redrawValue();
                     new_val = priors[i]->getValue();
@@ -241,7 +242,7 @@ double MultiValueEventBirthDeathProposal::doAutocorrelatedProposal(const Autocor
             double old_val = this_values[this_index];
             stored_values.push_back( old_val );
 
-            if ( dist_mve.isAutocorrelated( i ) == false )
+            if ( dist_mve.isAutocorrelated( i ) == false || use_autocorrelated_proposal == false )
             {
                 priors[i]->setValue( new double(old_val) );
                 hr += priors[i]->computeLnProbability();

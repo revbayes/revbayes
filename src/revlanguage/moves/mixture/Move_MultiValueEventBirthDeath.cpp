@@ -67,11 +67,12 @@ void Move_MultiValueEventBirthDeath::constructInternalObject( void )
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::MultiValueEvent>* tmp = static_cast<const MultiValueEvent &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::MultiValueEvent> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MultiValueEvent> *>( tmp );
+    bool use_ac = static_cast<const RlBoolean &>( ac->getRevObject() ).getValue();
 //    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     bool t = false;
 
     // finally create the internal move object
-    RevBayesCore::Proposal *prop = new RevBayesCore::MultiValueEventBirthDeathProposal(n);
+    RevBayesCore::Proposal *prop = new RevBayesCore::MultiValueEventBirthDeathProposal(n,use_ac);
     value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);
     
 }
@@ -137,6 +138,7 @@ const MemberRules& Move_MultiValueEventBirthDeath::getParameterRules(void) const
     {
         
         move_member_rules.push_back( new ArgumentRule( "x"   , MultiValueEvent::getClassTypeSpec(),  "The variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
+        move_member_rules.push_back( new ArgumentRule( "ac", RlBoolean::getClassTypeSpec(), "Should we use the autocorrelated proposal?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
 //        move_member_rules.push_back( new ArgumentRule( "tune", RlBoolean::getClassTypeSpec(), "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
 
         /* Inherit weight from Move, put it after variable */
@@ -198,6 +200,10 @@ void Move_MultiValueEventBirthDeath::setConstParameter(const std::string& name, 
     if ( name == "x" )
     {
         x = var;
+    }
+    else if ( name == "ac" )
+    {
+        ac = var;
     }
 //    else if ( name == "tune" )
 //    {
