@@ -20,12 +20,14 @@ namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 
-Dist_lnorm::Dist_lnorm() : PositiveContinuousDistribution() {
+Dist_lnorm::Dist_lnorm() : PositiveContinuousDistribution()
+{
     
 }
 
 
-Dist_lnorm* Dist_lnorm::clone( void ) const {
+Dist_lnorm* Dist_lnorm::clone( void ) const
+{
     return new Dist_lnorm(*this);
 }
 
@@ -44,7 +46,8 @@ RevBayesCore::LognormalDistribution* Dist_lnorm::createDistribution( void ) cons
 
 
 /* Get Rev type of object */
-const std::string& Dist_lnorm::getClassType(void) { 
+const std::string& Dist_lnorm::getClassType(void)
+{
     
     static std::string rev_type = "Dist_lnorm";
     
@@ -95,19 +98,19 @@ std::string Dist_lnorm::getDistributionFunctionName( void ) const
 const MemberRules& Dist_lnorm::getParameterRules(void) const
 {
     
-    static MemberRules memberRules;
+    static MemberRules member_rules;
     static bool rules_set = false;
     
-    if ( !rules_set ) 
+    if ( rules_set == false )
     {
         
-        memberRules.push_back( new ArgumentRule( "mean",   Real::getClassTypeSpec()   , "The mean in log-space (observed mean is exp(m))." , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        memberRules.push_back( new ArgumentRule( "sd"  ,   RealPos::getClassTypeSpec(), "The standard deviation in log-space."             , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        member_rules.push_back( new ArgumentRule( "mean",   Real::getClassTypeSpec()   , "The mean in log-space (observed mean is exp(m))." , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        member_rules.push_back( new ArgumentRule( "sd"  ,   RealPos::getClassTypeSpec(), "The standard deviation in log-space."             , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         rules_set = true;
     }
     
-    return memberRules;
+    return member_rules;
 }
 
 
