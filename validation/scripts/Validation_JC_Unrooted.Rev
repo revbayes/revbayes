@@ -1,33 +1,35 @@
 ################################################################################
 #
-# RevBayes Validation Test: Jukes-Cantor with birth-death process
+# RevBayes Validation Test: Jukes-Cantor with unrooted tree
 #
 # Model: Sequences evolve under the Jukes-Cantor model and the tree is drawn
-#        from a constant-rate birth-death process with uniform sampling.
+#        from a uniform topology distribution.
 #
 #
 # authors: Sebastian Hoehna
 #
 ################################################################################
 
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
 #######################
 # Reading in the Data #
 #######################
 
-###### This just defines a single model for all sites #######
-
-### Read in sequence data for both genes
-
 data <- readDiscreteCharacterData("data/primates_cytb_small.nex")
-#data <- readDiscreteCharacterData("data/test_large.nex")
 
 # Get some useful variables from the data. We need these later on.
 taxa <- data.taxa()
 
 n_branches <- taxa.size() * 2 - 3
-
-# set my move index
-mvi = 1
 
 
 
@@ -40,31 +42,27 @@ Q <- fnJC(4)
 
 
 
-
-
 ##############
 # Tree model #
 ##############
 
 # Set up branch length hyperprior with a move
 br_len_lambda ~ dnExp(0.2)
-moves[mvi++] = mvScale(br_len_lambda, weight=2)
+moves.append( mvScale(br_len_lambda, weight=2) )
 
 topology ~ dnUniformTopology(taxa)
-moves[mvi++] = mvNNI(topology, weight=5.0)
-moves[mvi++] = mvSPR(topology, weight=1.0)
+moves.append( mvNNI(topology, weight=5.0) )
+moves.append( mvSPR(topology, weight=1.0) )
 
 # Branch length prior
 for (i in 1:n_branches) {
     bl[i] ~ dnExponential(br_len_lambda)
-    moves[mvi++] = mvScale(bl[i])
+    moves.append( mvScale(bl[i]) )
 }
 
 TL := sum(bl)
 
 psi := treeAssembly(topology, bl)
-
-
 
 
 
@@ -95,19 +93,13 @@ mymodel = model(Q)
 
 
 
-
-
-
-monitors[1] = mnModel(filename="output/primates_JC_bl_tree.log",printgen=10, separator = TAB)
-monitors[2] = mnFile(filename="output/primates_JC_bl_tree.trees",printgen=10, separator = TAB, psi)
-
 mymcmc = mcmc(mymodel, monitors, moves)
 
-
-validation = validationAnalysis( mymcmc, 100 )
-validation.burnin(generations=2000,tuningInterval=250)
-validation.run(generations=5000)
-validation.summarize()
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_JC_unrooted" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
 
 
 # you may want to quit RevBayes now

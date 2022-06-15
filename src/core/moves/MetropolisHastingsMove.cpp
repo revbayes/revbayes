@@ -337,12 +337,12 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     try {
         ln_hastings_ratio = proposal->doProposal();
     }
-    catch (RbException e)
+    catch (const RbException &e)
     {
 
         if ( e.getExceptionType() != RbException::MATH_ERROR )
         {
-            throw RbException(e);
+            throw e;
         }
     }
 
@@ -385,13 +385,13 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
                 try {
                     ln_likelihood_ratio += the_node->getLnProbabilityRatio();
                 }
-                catch (RbException e)
+                catch (const RbException &e)
                 {
                     ln_likelihood_ratio = RbConstants::Double::neginf;
 
                     if ( e.getExceptionType() != RbException::MATH_ERROR )
                     {
-                        throw RbException(e);
+                        throw e;
                     }
                 }
             }
@@ -401,13 +401,13 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
                 {
                     ln_prior_ratio += the_node->getLnProbabilityRatio();
                 }
-                catch (RbException e)
+                catch (const RbException &e)
                 {
                     ln_prior_ratio = RbConstants::Double::neginf;
 
                     if ( e.getExceptionType() != RbException::MATH_ERROR )
                     {
-                        throw RbException(e);
+                        throw e;
                     }
                 }
             }
@@ -429,13 +429,13 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
                 {
                     ln_likelihood_ratio += the_node->getLnProbabilityRatio();
                 }
-                catch (RbException e)
+                catch (const RbException &e)
                 {
                     ln_likelihood_ratio = RbConstants::Double::neginf;
 
                     if ( e.getExceptionType() != RbException::MATH_ERROR )
                     {
-                        throw RbException(e);
+                        throw e;
                     }
                 }
             }
@@ -444,13 +444,13 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
                 try {
                     ln_prior_ratio += the_node->getLnProbabilityRatio();
                 }
-                catch (RbException e)
+                catch (const RbException &e)
                 {
                     ln_prior_ratio = RbConstants::Double::neginf;
 
                     if ( e.getExceptionType() != RbException::MATH_ERROR )
                     {
-                        throw RbException(e);
+                        throw e;
                     }
                 }
             }

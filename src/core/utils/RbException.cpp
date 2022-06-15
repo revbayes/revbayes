@@ -3,10 +3,6 @@
 #include <iostream>
 
 
-/** Static string with names of exception types for printing */
-std::string RbException::ExceptionName[] = { "Default", "Mathematical Error", "Missing Variable", "Quit" };
-
-
 /** Default constructor */
 RbException::RbException(void) :
     exception_type(DEFAULT),
@@ -54,6 +50,9 @@ void RbException::print(std::ostream &o) const
         case DEFAULT:
             error_type = "Error";
             break;
+        case BUG:
+            error_type = "Bug";
+            break;
         case MATH_ERROR:
             error_type = "Mathematical Error";
             break;
@@ -71,10 +70,13 @@ void RbException::print(std::ostream &o) const
     o << error_type << ":\t" << message;
 }
 
-void RbException::setMessage(std::string msg)
+void RbException::setMessage(const std::string& msg)
 {
-
     message = msg;
 }
 
 
+void RbException::prepend(const std::string& prefix)
+{
+    message = prefix + message;
+}

@@ -34,53 +34,39 @@ bool BirthDeathForwardSimulator::checkParameters( void ) const
         throw RbException("You need to provide the same number of time intervals as speciation rates.");
     }
 
-   if ( !(mu.size() == NUM_TIME_INTERVALS || mu.size() == 1) )
-   {
-       throw RbException("You need to provide the same number of time intervals as extinction rates.");
-   }
-
-   if ( !(phi.size() == NUM_TIME_INTERVALS || phi.size() == 1) )
-   {
-       throw RbException("You need to provide the same number of time intervals as fossilization rates.");
-   }
-
-   if ( !(r.size() == NUM_TIME_INTERVALS || r.size() == 1) )
-   {
-       throw RbException("You need to provide the same number of time intervals as treatment probabilities.");
-   }
-
-   if ( !(Lambda.size() == NUM_TIME_INTERVALS || Lambda.size() == 1) )
-   {
-       throw RbException("You need to provide the same number of time intervals as speciation probabilities.");
-   }
-
-   if ( !(Mu.size() == NUM_TIME_INTERVALS || Mu.size() == 1) )
-   {
-       throw RbException("You need to provide the same number of time intervals as extinction probabilities.");
-   }
-
-   if ( !(Phi.size() == NUM_TIME_INTERVALS || Phi.size() == 1) )
-   {
-       throw RbException("You need to provide the same number of time intervals as fossilization probabilities.");
-   }
-
-   if ( !(R.size() == NUM_TIME_INTERVALS || R.size() == 1) )
-   {
-       std::cout << "R.size() == " << R.size() << std::endl;
-       std::cout << "r.size() == " << r.size() << std::endl;
-       throw RbException("You need to provide the same number of time intervals as event-treatment probabilities.");
-   }
-
-    size_t NUM_CATEGORIES = getNumberOfCategories();
-
-//    if ( root_cat_probability.size() != NUM_CATEGORIES )
-//    {
-//        throw RbException("You need to provide the same number of categories for the root state probability as all other categories.");
-//    }
-
-    for ( size_t i=0; i<NUM_TIME_INTERVALS; ++i )
+    if ( !(mu.size() == NUM_TIME_INTERVALS || mu.size() == 1) )
     {
+        throw RbException("You need to provide the same number of time intervals as extinction rates.");
+    }
 
+    if ( !(phi.size() == NUM_TIME_INTERVALS || phi.size() == 1) )
+    {
+        throw RbException("You need to provide the same number of time intervals as fossilization rates.");
+    }
+
+    if ( !(r.size() == NUM_TIME_INTERVALS || r.size() == 1) )
+    {
+        throw RbException("You need to provide the same number of time intervals as treatment probabilities.");
+    }
+
+    if ( !(Lambda.size() == NUM_TIME_INTERVALS || Lambda.size() == 1) )
+    {
+        throw RbException("You need to provide the same number of time intervals as speciation probabilities.");
+    }
+
+    if ( !(Mu.size() == NUM_TIME_INTERVALS || Mu.size() == 1) )
+    {
+        throw RbException("You need to provide the same number of time intervals as extinction probabilities.");
+    }
+
+    if ( !(Phi.size() == NUM_TIME_INTERVALS || Phi.size() == 1) )
+    {
+        throw RbException("You need to provide the same number of time intervals as fossilization probabilities.");
+    }
+
+    if ( !(R.size() == NUM_TIME_INTERVALS || R.size() == 1) )
+    {
+        throw RbException("You need to provide the same number of time intervals as event-treatment probabilities.");
     }
 
     return true;

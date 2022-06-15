@@ -162,6 +162,61 @@ RateMatrix_revPoMoKN* RateMatrix_revPoMoKN::clone( void ) const
     return new RateMatrix_revPoMoKN( *this );
 }
 
+double RateMatrix_revPoMoKN::calculateReciprocalExpectedDivergence( void )
+{
+
+  // calculating the denominator of the expected rate
+  double sum_d = 0.0;
+
+  // summing the stationary weights for the fixed states 
+  for (int i=0; i<K; i++) {
+    sum_d += pi[i]*pow(phi[i],N-1);
+  }
+
+  // now for the polymorphic states 
+  //first edge
+  int E = 0;
+
+  double drift_coefficient;
+
+  for (int i=0; i<K; i++){
+    for (int j=i+1; j<K; j++){
+      for (int n=1; n<N; n++) {
+
+        // sum weight
+        drift_coefficient = 1.0*N/(n*(N-n));
+        sum_d += pi[i]*pi[j]*rho[E]*pow(phi[j],n-1)*pow(phi[i],N-n-1)*(n*phi[j]+(N-n)*phi[i])*drift_coefficient;
+
+      }
+      E += 1;
+    }
+  }
+
+
+
+  // now the numerator of the expected rate
+  double sum_n = 0.0;
+  E = 0;
+
+  for (int i=0; i<K; i++){
+    for (int j=i+1; j<K; j++){
+      for (int n=1; n<(N+1); n++) {
+
+        sum_n += pi[i]*pi[j]*rho[E]*pow(phi[j],n-1)*pow(phi[i],N-n);
+
+      }
+      E += 1;
+
+    }
+  }
+
+  // finaly the rate (the reciprocal)
+  double rRate;
+  rRate = sum_d / ( 2.0*N*sum_n ) ;
+  return rRate;
+
+}
+
 
 /*populating the rate matrix*/
 void RateMatrix_revPoMoKN::computeOffDiagonal( void )
@@ -199,11 +254,13 @@ void RateMatrix_revPoMoKN::computeOffDiagonal( void )
     }
   }
 
+  double rRate;
+  rRate = calculateReciprocalExpectedDivergence();
+  //std::cout << "rate:" << rRate << "\n";
+
   //first edge
   int E = 0;
 
-  //reciprocal of the population size
-  double rN = 1.0/N;
 
   //these for loops go through the (K*K-K) edges of the pomo state-space
   //their represent all the possible pairwise combinations of alleles: a0a1, a1a2, ..., aK-2aK-1
@@ -211,36 +268,32 @@ void RateMatrix_revPoMoKN::computeOffDiagonal( void )
     for (int j=i+1; j<K; j++){
 
       //mutations
-      m[i][K+E*N-E]          = pi[j]*rho[E];    //{Nai} -> {(N-1)ai,1aj}
-      m[j][K+(E+1)*(N-1)-1]  = pi[i]*rho[E];    //{Naj} -> {1ai,(N-1)aj}
+      m[i][K+E*N-E]          = N*pi[j]*rho[E]*rRate;    //{Nai} -> {(N-1)ai,1aj}
+      m[j][K+(E+1)*(N-1)-1]  = N*pi[i]*rho[E]*rRate;    //{Naj} -> {1ai,(N-1)aj}
 
       //fixations
-      m[K+E*N-E]        [i]  = (N-1.0)*phi[i]*rN;  //{(N-1)ai,1aj} -> {Nai} 
-      m[K+(E+1)*(N-1)-1][j]  = (N-1.0)*phi[j]*rN;  //{1ai,(N-1)aj} -> {Naj} 
+      m[K+E*N-E]        [i]  = (N-1.0)*phi[i]*rRate/(phi[j] + (N-1.0)*phi[i]);  //{(N-1)ai,1aj} -> {Nai} 
+      m[K+(E+1)*(N-1)-1][j]  = (N-1.0)*phi[j]*rRate/(phi[i] + (N-1.0)*phi[j]);  //{1ai,(N-1)aj} -> {Naj} 
 
 
       //the pomo rate matrix is entirely defined by fixations and mutations if N=2
       if (N>2) {
 
         //frequency shifts from singletons
-        m[K+E*N-E]        [K+E*N-E+1]       = (N-1.0)*phi[j]*rN;  //{(N-1)ai,1aj} -> {(N-2)ai,2aj}
-        m[K+(E+1)*(N-1)-1][K+(E+1)*(N-1)-2] = (N-1.0)*phi[i]*rN;  //{1ai,(N-1)aj} -> {2ai,(N-2)aj}
+        m[K+E*N-E]        [K+E*N-E+1]       = (N-1.0)*phi[j]*rRate/(phi[j] + (N-1.0)*phi[i]);  //{(N-1)ai,1aj} -> {(N-2)ai,2aj}
+        m[K+(E+1)*(N-1)-1][K+(E+1)*(N-1)-2] = (N-1.0)*phi[i]*rRate/(phi[i] + (N-1.0)*phi[j]);  //{1ai,(N-1)aj} -> {2ai,(N-2)aj}
 
         //frequency shifts for all the other polymorphic states
         if (N>3) {
 
-          //polymorphic states are populated in two fronts, thus the need for the middle frequency
-          int S = N/2+1; 
-
-          for (int n=2; n<S; n++){
+          //polymorphic states are populated
+          for (int n=2; n<(N-1); n++){
 
             //populates the first half of the polymorphic edge aiaj
-            m[K+E*N-E+n-1]    [K+E*N-E+n]         = n*(N-n)*phi[j]*rN; //{nai,(N-n)aj} -> {(n-1)ai,(N-n+1)aj}
-            m[K+E*N-E+n-1]    [K+E*N-E+n-2]       = n*(N-n)*phi[i]*rN; //{nai,(N-n)aj} -> {(n+1)ai,(N-n-1)aj}
+            m[K+E*N-E+n-1]    [K+E*N-E+n]         = n*(N-n)*phi[j]*rRate/(n*phi[j] + (N-n)*phi[i]); //{(N-n)ai,naj} -> {(N-n-1)ai,(n+1)aj}
+            m[K+E*N-E+n-1]    [K+E*N-E+n-2]       = n*(N-n)*phi[i]*rRate/(n*phi[j] + (N-n)*phi[i]); //{(N-n)ai,naj} -> {(N-n+1)ai,(n-1)aj}
 
-            //populates the second half of the polymorphic edge aiaj
-            m[K+(E+1)*(N-1)-n][K+(E+1)*(N-1)-n-1] = (N-n)*n*phi[i]*rN; //{(N-n)ai,naj} -> {(N-n+1)ai,(n-1)aj}
-            m[K+(E+1)*(N-1)-n][K+(E+1)*(N-1)-n+1] = (N-n)*n*phi[j]*rN; //{(N-n)ai,naj} -> {(N-n-1)ai,(n+1)aj}
+
 
           }
 
@@ -254,11 +307,75 @@ void RateMatrix_revPoMoKN::computeOffDiagonal( void )
     }
   }
 
+
+  //int n_states = K+(K*K-K)*(N-1)/2;
+  //std::vector<double> stationary_freqs; 
+  //stationary_freqs = getStationaryFrequencies();
+
+  //for (int i=0; i<n_states; i++) {
+  //  std::cout << "sf" << i << ":" << stationary_freqs[i] << "\n";
+  //}
+
+
+
   // set flags
   needs_update = true;
 
 }
 
+
+
+std::vector<double> RateMatrix_revPoMoKN::getStationaryFrequencies( void ) const
+{
+
+  // calculating the normalization constant and stationary weights
+  int n_states = K+(K*K-K)*(N-1)/2;
+  std::vector<double> stationary_freqs(n_states,0.0);
+
+  // normalization constant
+  double nc = 0.0;
+
+  // the fixed states first
+  for (int i=0; i<K; i++) {
+    stationary_freqs[i] = pi[i]*pow(phi[i],N-1);
+    nc += stationary_freqs[i];
+  }
+
+  // now for the polymorphic states 
+  //first edge
+  int index = K;
+  int E = 0;
+  double drift_coefficient;
+
+  for (int i=0; i<K; i++){
+    for (int j=i+1; j<K; j++){
+      for (int n=1; n<N; n++) {
+
+        // sum weight
+        drift_coefficient = 1.0*N/(n*(N-n));
+        stationary_freqs[index] = pi[i]*pi[j]*rho[E]*pow(phi[j],n-1)*pow(phi[i],N-n-1)*(n*phi[j]+(N-n)*phi[i])*drift_coefficient;
+        nc += stationary_freqs[index];
+        index += 1;
+
+      }
+
+      //update edge
+      E += 1; 
+
+    }
+  }
+
+
+  // normalizing the stationary vector
+  double rnc = 1.0/nc;
+
+  for (int i=0; i<n_states; i++) {
+    stationary_freqs[i] = stationary_freqs[i]*rnc;
+  }
+
+  return stationary_freqs;
+
+}
 
 
 /** Calculate the transition probabilities for the real case */

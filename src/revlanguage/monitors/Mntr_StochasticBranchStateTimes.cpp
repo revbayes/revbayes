@@ -13,7 +13,6 @@
 
 #include "ArgumentRule.h"
 #include "IntegerPos.h"
-#include "RlMonitor.h"
 #include "RevObject.h"
 #include "RlTimeTree.h"
 #include "RlString.h"
@@ -35,7 +34,7 @@ namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 using namespace RevLanguage;
 
 
-Mntr_StochasticBranchStateTimes::Mntr_StochasticBranchStateTimes(void) : Monitor()
+Mntr_StochasticBranchStateTimes::Mntr_StochasticBranchStateTimes(void) : FileMonitor()
 {
     
 }
@@ -59,7 +58,7 @@ void Mntr_StochasticBranchStateTimes::constructInternalObject( void )
     
     const std::string& file_name      = static_cast<const RlString  &>( filename->getRevObject()           ).getValue();
     const std::string& sep            = static_cast<const RlString  &>( separator->getRevObject()          ).getValue();
-    unsigned int                print_gen      = (int)static_cast<const IntegerPos   &>( printgen->getRevObject()      ).getValue();
+    unsigned int       print_gen      = (int)static_cast<const IntegerPos   &>( printgen->getRevObject()      ).getValue();
     bool               app            = static_cast<const RlBoolean &>( append->getRevObject()             ).getValue();
     bool               wv             = static_cast<const RlBoolean &>( version->getRevObject()            ).getValue();
     
@@ -128,11 +127,10 @@ const MemberRules& Mntr_StochasticBranchStateTimes::getParameterRules(void) cons
     if ( !rules_set )
     {
         monitor_rules.push_back( new ArgumentRule("cdbdp"          , TimeTree::getClassTypeSpec(),  "The character dependent birth-death process to monitor.",                      ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
-        monitor_rules.push_back( new ArgumentRule("filename"       , RlString::getClassTypeSpec() , "The file to save sampled character histories.",                                ArgumentRule::BY_VALUE,     ArgumentRule::ANY ) );
-        monitor_rules.push_back( new ArgumentRule("printgen"       , Natural::getClassTypeSpec()  , "How frequently (in number of iterations) should we save sampled character histories? 1 by default.",                              ArgumentRule::BY_VALUE,     ArgumentRule::ANY, new Natural(1) ) );
-        monitor_rules.push_back( new ArgumentRule("separator"      , RlString::getClassTypeSpec() , "The delimiter between variables. \t by default.",                              ArgumentRule::BY_VALUE,     ArgumentRule::ANY, new RlString("\t") ) );
-        monitor_rules.push_back( new ArgumentRule("append"         , RlBoolean::getClassTypeSpec(), "Should we append to an existing file? False by default.",                  ArgumentRule::BY_VALUE,     ArgumentRule::ANY, new RlBoolean(false) ) );
-        monitor_rules.push_back( new ArgumentRule("version"        , RlBoolean::getClassTypeSpec(), "Should we record the software version?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+
+        // add the rules from the base class
+        const MemberRules &parentRules = FileMonitor::getParameterRules();
+        monitor_rules.insert(monitor_rules.end(), parentRules.begin(), parentRules.end());
 
         rules_set = true;
     }
@@ -166,36 +164,13 @@ void Mntr_StochasticBranchStateTimes::printValue(std::ostream &o) const
 void Mntr_StochasticBranchStateTimes::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     
-    if ( name == "" ) {
-        vars.push_back( var );
-    }
-    else if ( name == "filename" )
-    {
-        filename = var;
-    }
-    else if ( name == "separator" )
-    {
-        separator = var;
-    }
-    else if ( name == "cdbdp" )
+    if ( name == "cdbdp" )
     {
         cdbdp = var;
     }
-    else if ( name == "printgen" )
-    {
-        printgen = var;
-    }
-    else if ( name == "append" )
-    {
-        append = var;
-    }
-    else if ( name == "version" )
-    {
-        version = var;
-    }
     else
     {
-        Monitor::setConstParameter(name, var);
+        FileMonitor::setConstParameter(name, var);
     }
     
 }

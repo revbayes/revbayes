@@ -2,9 +2,18 @@
 
 #### New models/analyses
 
+#### New MCMC moves
+
+* slice sampling (mvSlice) can now do geometric scaling.
+
 #### New features
 
+* optional weighting in fnAverageDistanceMatrix
+
 #### Bug fixes
+
+* fixed a bug when printing individual elements of average distance matrices and calculating their completeness
+
 
 
 ### Version 1.1.1

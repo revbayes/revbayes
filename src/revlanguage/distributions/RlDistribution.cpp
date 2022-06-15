@@ -180,7 +180,17 @@ void Distribution::addSpecificHelpFields(RevBayesCore::RbHelpEntry *e) const
         
         RevBayesCore::RbHelpArgument argument = RevBayesCore::RbHelpArgument();
         
-        argument.setLabel( the_rule.getArgumentLabel() );
+        std::string label;
+        const std::vector<std::string> aliases = the_rule.getArgumentAliases();
+        for ( std::vector<std::string>::const_iterator it = aliases.begin(); it != aliases.end(); it++ )
+        {
+            if ( it != aliases.begin() )
+            {
+                label += "/";
+            }
+            label += *it;
+        }
+        argument.setLabel( label );
         argument.setDescription( the_rule.getArgumentDescription() );
         
         std::string type = "<any>";

@@ -141,6 +141,35 @@ double LinearDemographicFunction::getIntegral(double start, double finish) const
 }
 
 /**
+ * @param[in]   time    Current time in coalescent simulation process
+ * @param[in]   lambda  
+ *
+ * @return Waiting Time until next coalescent event
+ */
+double LinearDemographicFunction::getWaitingTime(double time, double lambda) const
+{
+    double N0 = theta_recent->getValue();
+    double N1 = theta_ancient->getValue();
+    double t0 = time_recent->getValue();
+    double t1 = time_ancient->getValue();
+    
+    if ( t1 < t0 || t0 < 0 || N1 < 0 || time < t0 || time > t1)
+    {
+        throw RbException("Impossible parameter values in Linear growth/decline demographic functions.");
+    }
+    
+    if ( N0 == N1 )
+    {
+        return N0 * lambda;
+    }
+    else
+    {
+        double alpha = ( N1-N0 ) / (t1 - t0);
+        return (N0 + (time-t0) * alpha) * lambda;
+    }
+}
+
+/**
  * @param[in]   old_node    Pointer to the DAG node to be replaced
  * @param[in]   new_node    Pointer to the DAG node replacing the other
  */

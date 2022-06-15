@@ -2,8 +2,11 @@
 #include <ostream>
 #include <string>
 
+#include <boost/optional.hpp>
+
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
+#include "OptionRule.h"
 #include "RlBoolean.h"
 #include "ContinuousStochasticNode.h"
 #include "Move_SliceSampling.h"
@@ -17,6 +20,9 @@
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "RlMove.h"
+#include "RlString.h"
+
+using boost::optional;
 
 namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
@@ -65,13 +71,35 @@ void Move_SliceSampling::constructInternalObject( void )
     // now allocate a new sliding move
     double window_ = static_cast<const RealPos &>( window->getRevObject() ).getValue();
     double weight_ = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+
+    optional<double> lower_bound_;
+    optional<double> upper_bound_;
+    // If the x variable is a RealPos, the lower bound needs to be at least zero.
+    if (dynamic_cast<const RealPos *>( & x->getRevObject() ))
+    {
+        if (lower_bound_)
+            lower_bound_ = std::max(0.0, *lower_bound_);
+        else
+            lower_bound_ = 0.0;
+    }
+
     RevBayesCore::TypedDagNode<double>* tmp = static_cast<const Real &>( x->getRevObject() ).getDagNode();
     RevBayesCore::ContinuousStochasticNode *node_ = static_cast<RevBayesCore::ContinuousStochasticNode *>( tmp );
     bool tune_ = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
 
+    auto search_method_ = dynamic_cast<const RlString&>( search_method->getRevObject() ).getValue();
+    typedef RevBayesCore::SliceSamplingMove::BoundarySearchMethod search_method_t;
+    search_method_t search_method__;
+    if (search_method_ == "doubling")
+        search_method__ = RevBayesCore::SliceSamplingMove::BoundarySearchMethod::search_doubling;
+    else if (search_method_ == "stepping_out")
+        search_method__ = RevBayesCore::SliceSamplingMove::BoundarySearchMethod::search_stepping_out;
+    else
+        throw RbException("mvSlice: search_method should be \"doubling\" or \"stepping out\"");
+
     // finally create the internal move object
 
-    value = new RevBayesCore::SliceSamplingMove(node_ , window_, weight_ ,tune_);
+    value = new RevBayesCore::SliceSamplingMove(node_ , lower_bound_, upper_bound_, window_, weight_ , search_method__, tune_);
 }
 
 
@@ -143,6 +171,11 @@ const MemberRules& Move_SliceSampling::getParameterRules(void) const
         const MemberRules& inheritedRules = Move::getParameterRules();
         move_member_rules.insert( move_member_rules.end(), inheritedRules.begin(), inheritedRules.end() );
 
+        std::vector<std::string> optionsMethod;
+        optionsMethod.push_back( "stepping_out" );
+        optionsMethod.push_back( "doubling" );
+        move_member_rules.push_back( new OptionRule( "search_method", new RlString("doubling"), optionsMethod, "The method used to find the slice boundaries." ) );
+
         rules_set = true;
     }
 
@@ -205,6 +238,10 @@ void Move_SliceSampling::setConstParameter(const std::string& name, const RevPtr
     else if ( name == "tune" )
     {
         tune = var;
+    }
+    else if ( name == "search_method" )
+    {
+        search_method = var;
     }
     else
     {

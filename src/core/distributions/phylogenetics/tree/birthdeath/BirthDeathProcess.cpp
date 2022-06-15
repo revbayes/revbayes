@@ -107,65 +107,49 @@ double BirthDeathProcess::computeLnProbabilityTimes( void ) const
         double p_0_t = 1.0 - pSurvival(last_event,present_time,1.0) * exp( rateIntegral(last_event,present_time) );
         double F_t = p_0_t / p_0_T;
         
-//        if ( F_t > 1.0 || F_t < 0.0 )
-//        {
-//            throw RbException("Problem in computing the probability of missing species in BDP.");
-//        }
+        if ( F_t > 1.0 || F_t < 0.0 )
+        {
+            throw RbException("Problem in computing the probability of missing species in BDP.");
+        }
         
         // get an estimate of the actual number of taxa
         double m = round(num_taxa / rho->getValue());
-        ln_prob_times += (m-num_taxa) * log(F_t); // + log(RbMath::choose(m-initial_taxa,num_taxa-initial_taxa));
-//        ln_prob_times += (m-num_taxa) * log(F_t) + RbMath::lnChoose(m-initial_taxa,num_taxa-initial_taxa);
+        ln_prob_times += (m-num_taxa) * log(F_t);
     }
     
     int total_species = int(num_taxa);
-    
-//    double ln_fact_n_taxa = RbMath::lnFactorial( int(num_taxa-2) );
-    
+        
     // now iterate over the vector of missing species per interval
     for (size_t i=0; i<incomplete_clades.size(); ++i)
     {
         // We use equation (5) of Hoehna et al.
         // "Inferring Speciation and Extinction Rates under Different Sampling Schemes"
         double last_event_time = root_age - incomplete_clade_ages[i];
-//        double last_event = incomplete_clade_ages[i];
         
         double p_0_T = 1.0 - pSurvival(0,present_time,1.0)               * exp( rateIntegral(0,present_time) );
         double p_0_t = 1.0 - pSurvival(last_event_time,present_time,1.0) * exp( rateIntegral(last_event_time,present_time) );
         double log_F_t = log(p_0_t) - log(p_0_T);
 
-//        if ( log_F_t > 0.0 )
-//        {
-//            throw RbException("Problem in computing the probability of missing species in BDP.");
-//        }
+        if ( log_F_t > 0.0 )
+        {
+            throw RbException("Problem in computing the probability of missing species in BDP.");
+        }
 
         // get an estimate of the actual number of taxa
         int m = incomplete_clades[i].getNumberMissingTaxa();
         
         // multiply the probability for the missing species
         ln_prob_times += m * log_F_t;
-//        ln_prob_times -= RbMath::lnFactorial(m);
 
         total_species += m;
     }
     
     if ( incomplete_clades.size() > 0 )
     {
-//        int initial_taxa = 2;
-//        ln_prob_times += RbMath::lnFactorial(total_species-initial_taxa) - RbMath::lnFactorial( int(num_taxa-initial_taxa) );
         
         double p_0_T = 1.0 - pSurvival(0,present_time,1.0) * exp( rateIntegral(0,present_time) );
         ln_prob_times += log( p_0_T )*total_species;
         ln_prob_times -= log( p_0_T )*num_taxa;
-
-        
-//        double p_s = pSurvival(start, end, r);
-//        double rate = rateIntegral(start, end) - log(r);
-//        double e = p_s * exp(rate);
-        // log(n-1) + 4*log(p_s) + 2*rate + log( 1 - e) * (n-2);
-//        ln_prob_times += lnProbNumTaxa( total_species, 0, present_time, true );
-//        ln_prob_times -= lnProbNumTaxa( num_taxa, 0, present_time, true );
-
 
     }
     

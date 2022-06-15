@@ -19,6 +19,8 @@
 
 #include <stdio.h>
 #include <iomanip>
+
+#include <algorithm>
 #include <string>
 #include <cstdlib>
 
@@ -563,32 +565,64 @@ void StringUtilities::replaceAllOccurrences(std::string& str, char old_ch, char 
 }
 
 
-/** Utility function for dividing string into pieces */
-void StringUtilities::stringSplit(const std::string &s, const std::string &delim, std::vector<std::string>& results)
+/**
+ * Utility function for dividing string into pieces
+ * If no delimiter is specified, then the string is split on whitespace.
+ */
+void StringUtilities::stringSplit(std::string str, std::string delim, std::vector<std::string>& results, bool trim)
 {
-    
-    // create our own copy of the string
-    std::string str = s;
 
-    size_t cutAt;
-    while ( (cutAt = StringUtilities::findFirstOf(str, delim)) != str.npos )
+    std::string::iterator cut;
+
+    // if we are delimiting on whitespace*,
+    // then assume the first and last fields are non-empty
+    // i.e. remove leading and trailing whitespace
+    if ( delim.empty() )
     {
-        if (cutAt > 0)
+        // erase trailing whitespace
+        str.erase(std::find_if (str.rbegin(), str.rend(), [](char c) {return not isspace(c);} ).base(), str.end());
+        // erase leading whitespace
+        str.erase(str.begin(), std::find_if (str.begin(), str.end(), [](char c) {return not isspace(c);} ));
+    }
+
+    while ( true )
+    {
+        if ( delim.empty() )
         {
-            results.push_back(str.substr(0, cutAt));
+            // find first whitespace character
+            cut = std::find_if(str.begin(), str.end(), ::isspace);
         }
         else
         {
-            results.push_back( "" );
+            // find the first occurrence of the full delimiter string
+            cut = std::search(str.begin(), str.end(), delim.begin(), delim.end());
         }
-        str = str.substr(cutAt+delim.size());
+
+        std::string substr(str.begin(), cut);
+
+        if ( trim )
+        {
+            // erase trailing whitespace
+            substr.erase(std::find_if (substr.rbegin(), substr.rend(), [](char c) {return not isspace(c);}).base(), substr.end());
+            // erase leading whitespace
+            substr.erase(substr.begin(), std::find_if (substr.begin(), substr.end(), [](char c) {return not isspace(c);}));
+        }
+
+        results.push_back(substr);
+
+        if ( cut == str.end() )
+        {
+            break;
+        }
+
+        str = std::string(cut + delim.size(), str.end());
+
+        if ( delim.empty() )
+        {
+            // erase leading whitespace in remaining string
+            str.erase(str.begin(), std::find_if (str.begin(), str.end(), [](char c) {return not isspace(c);}));
+        }
     }
-    
-    if (str.length() > 0)
-    {
-        results.push_back(str);
-    }
-    
 }
 
 

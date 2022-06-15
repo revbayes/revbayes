@@ -1,12 +1,3 @@
-//
-//  StochasticBranchStateTimesMonitor.h
-//  RevBayes_development_branch
-//
-//  Created by will freyman on 4/25/18.
-//  Copyright (c) 2018 will freyman. All rights reserved.
-//
-
-
 #include "StochasticBranchStateTimesMonitor.h"
 
 #include <stddef.h>

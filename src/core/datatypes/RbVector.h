@@ -26,9 +26,12 @@ namespace RevBayesCore {
         RbVector(size_t n, const valueType &v);
         RbVector(const typename RbVectorImpl<valueType, IsAbstract<valueType>::Is >::vectorType &v);
         RbVector(const RbVector<valueType> &v);
+        RbVector(RbVector<valueType> &&v) = default;
         virtual                                            ~RbVector(void);
         
         // public member functions
+        RbVector<valueType>&                                operator=(const RbVector<valueType>& ) = default;
+        RbVector<valueType>&                                operator=(      RbVector<valueType>&&) = default;
         RbVector<valueType>*                                clone(void) const;                                                                      //!< Create an independent clone
         void                                                printElement(std::ostream &o, size_t i, std::string sep="\t", int l=-1, bool left=true) const;                                          //!< Print the i-th element
         
@@ -55,9 +58,12 @@ namespace RevBayesCore {
         RbVector(size_t n, const long &v) : RbVectorImpl<long, IsAbstract<long>::Is  >( n, v ) {}
         RbVector(const std::vector<long> &v) : RbVectorImpl<long, IsAbstract<long>::Is  >( v ) {}
         RbVector(const RbVector<long> &v) : RbVectorImpl<long, IsAbstract<long>::Is  >( v ) {}
+        RbVector(RbVector<long> &&v) = default;
         virtual                                            ~RbVector(void) {}
         
         // public member functions
+        RbVector<long>&                                     operator=(const RbVector<long>& ) = default;
+        RbVector<long>&                                     operator=(      RbVector<long>&&) = default;
         RbVector<long>*                                     clone(void) const { return new RbVector<long>( *this ); }                                                                            //!< Create an independent clone
         void                                                printElement(std::ostream &o, size_t i, std::string /*sep="\t"*/, int l=-1, bool left=true) const { std::stringstream ss; ss << this->operator[](i); std::string s = ss.str(); StringUtilities::fillWithSpaces( s, l, left ); o << s; } //!< Print the i-th element
         
@@ -87,9 +93,12 @@ namespace RevBayesCore {
         RbVector(const std::vector<double> &v) : RbVectorImpl<double, IsAbstract<double>::Is  >( v ) {}
         RbVector(const RbVector<long> &v) : RbVectorImpl<double, IsAbstract<double>::Is  >( ) {  for (size_t i=0; i<v.size(); ++i) push_back( double(v[i]) ); }
         RbVector(const RbVector<double> &v) : RbVectorImpl<double, IsAbstract<double>::Is  >( v ) {}
+        RbVector(RbVector<double> &&v) = default;
         virtual                                            ~RbVector(void) {}
         
         // public member functions
+        RbVector<double>&                                   operator=(const RbVector<double>& ) = default;
+        RbVector<double>&                                   operator=(      RbVector<double>&&) = default;
         RbVector<double>*                                   clone(void) const { return new RbVector<double>( *this ); }                                                                            //!< Create an independent clone
         void                                                printElement(std::ostream &o, size_t i, std::string /*sep="\t"*/, int l=-1, bool left=true) const {
                                                                 std::stringstream ss;

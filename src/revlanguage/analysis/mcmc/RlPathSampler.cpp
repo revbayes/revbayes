@@ -1,9 +1,12 @@
+#include "PathSampler.h"
+
 #include <ostream>
 #include <string>
 #include <vector>
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
+#include "Delimiter.h"
 #include "RevObject.h"
 #include "Real.h"
 #include "RlPathSampler.h"
@@ -11,7 +14,6 @@
 #include "TypeSpec.h"
 #include "MemberProcedure.h"
 #include "MethodTable.h"
-#include "PathSampler.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "WorkspaceToCoreWrapperObject.h"
@@ -52,7 +54,7 @@ void PathSampler::constructInternalObject( void )
     const std::string&   fn      = static_cast<const RlString &>( filename->getRevObject() ).getValue();
     const std::string&   pn      = static_cast<const RlString &>( powerColumnName->getRevObject() ).getValue();
     const std::string&   ln      = static_cast<const RlString &>( likelihoodColumnName->getRevObject() ).getValue();
-    const std::string&   del     = static_cast<const RlString &>( delimmiter->getRevObject() ).getValue();
+    const std::string&   del     = static_cast<const RlString &>( delimiter->getRevObject() ).getValue();
     
     value = new RevBayesCore::PathSampler(fn, pn, ln, del);
     
@@ -122,7 +124,7 @@ const MemberRules& PathSampler::getParameterRules(void) const
         samplerMemberRules.push_back( new ArgumentRule("filename"            , RlString::getClassTypeSpec(), "The filename where the likelihood samples are stored in.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         samplerMemberRules.push_back( new ArgumentRule("powerColumnName"     , RlString::getClassTypeSpec(), "The name of the column that holds the values of the powers.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         samplerMemberRules.push_back( new ArgumentRule("likelihoodColumnName", RlString::getClassTypeSpec(), "The name of the column that holds the likelihood values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        samplerMemberRules.push_back( new ArgumentRule("delimiter"           , RlString::getClassTypeSpec(), "The delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "\t" ) ) );
+        samplerMemberRules.push_back( new Delimiter() );
         
         rules_set = true;
     }
@@ -162,9 +164,9 @@ void PathSampler::setConstParameter(const std::string& name, const RevPtr<const 
     {
         filename = var;
     }
-    else if ( name == "delimiter")
+    else if ( name == "delimiter" || name == "separator" )
     {
-        delimmiter = var;
+        delimiter = var;
     }
     else
     {

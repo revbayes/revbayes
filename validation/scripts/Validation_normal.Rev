@@ -14,12 +14,22 @@
 #
 ################################################################################
 
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
 n_samples = 10
 
 mu ~ dnUniform( -10, 10 )
 sigma ~ dnExponential( 1.0 )
 
-moves = VectorMoves()
 moves.append( mvSlide(mu) )
 moves.append( mvScale(sigma) )
 
@@ -31,15 +41,13 @@ for (i in 1:n_samples ) {
 mymodel = model(mu)
 
 
-# We do not need any monitors, so we create only the empty vector.
-monitors = VectorMonitors()
-
 mymcmc = mcmc(mymodel, monitors, moves)
 
-validation = validationAnalysis(mymcmc, 2000)
-validation.burnin(generations=1000,tuningInterval=100)
-validation.run(generations=3000)
-validation.summarize( coverageProbability=0.9 )
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_normal" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
 
 
 # you may want to quit RevBayes now

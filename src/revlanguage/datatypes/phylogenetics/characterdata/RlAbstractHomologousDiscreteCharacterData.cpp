@@ -158,6 +158,22 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
 
         return new RevVariable( new AbstractDiscreteTaxonData( element.clone() ) );
     }
+    else if (name == "applyMissingSitesMask")
+    {
+        found = true;
+        
+        size_t                          num_taxa        = this->dag_node->getValue().getNumberOfTaxa();
+        std::vector<std::vector<bool> > mask_gap        = std::vector<std::vector<bool> >(num_taxa, std::vector<bool>());
+        std::vector<std::vector<bool> > mask_missing    = std::vector<std::vector<bool> >(num_taxa, std::vector<bool>());
+        
+        const RevBayesCore::AbstractHomologousDiscreteCharacterData& ref = static_cast<const AbstractHomologousDiscreteCharacterData&>( args[0].getVariable()->getRevObject() ).getValue();
+
+        ref.fillMissingSitesMask(mask_gap, mask_missing);
+        this->dag_node->getValue().applyMissingSitesMask(mask_gap, mask_missing);
+
+        
+        return NULL;
+    }
     else if (name == "computeMultinomialProfileLikelihood")
     {
         found = true;
@@ -408,6 +424,17 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         size_t num_taxa = this->dag_node->getValue().numberTaxaMissingSequence( percentage );
 
         return new RevVariable( new Natural(num_taxa) );
+    }
+    else if (name == "removeRandomSites")
+    {
+        found = true;
+        
+        double missing = static_cast<const Probability&>( args[0].getVariable()->getRevObject() ).getValue();
+
+        this->dag_node->getValue().removeRandomSites(missing);
+
+        
+        return NULL;
     }
     else if (name == "setCodonPartition")
     {
@@ -729,39 +756,42 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     MethodTable charDataMethods = getCharacterDataMethods();
     methods.insertInheritedMethods( charDataMethods );
 
-    ArgumentRules* chartypeArgRules                 = new ArgumentRules();
-    ArgumentRules* comp_site_freq_spec_arg_rules    = new ArgumentRules();
-    ArgumentRules* compStateFreqArgRules            = new ArgumentRules();
-    ArgumentRules* compMultiLikeArgRules            = new ArgumentRules();
-    ArgumentRules* empiricalBaseArgRules            = new ArgumentRules();
-    ArgumentRules* ishomologousArgRules             = new ArgumentRules();
-    ArgumentRules* invSitesArgRules                 = new ArgumentRules();
-    ArgumentRules* setCodonPartitionArgRules        = new ArgumentRules();
-    ArgumentRules* setCodonPartitionArgRules2       = new ArgumentRules();
-    ArgumentRules* setNumStatesPartitionArgRules    = new ArgumentRules();
-    ArgumentRules* getNumStatesVectorArgRules       = new ArgumentRules();
-    ArgumentRules* squareBracketArgRules            = new ArgumentRules();
+    ArgumentRules* chartypeArgRules                         = new ArgumentRules();
+    ArgumentRules* comp_site_freq_spec_arg_rules            = new ArgumentRules();
+    ArgumentRules* compStateFreqArgRules                    = new ArgumentRules();
+    ArgumentRules* compMultiLikeArgRules                    = new ArgumentRules();
+    ArgumentRules* empiricalBaseArgRules                    = new ArgumentRules();
+    ArgumentRules* expandCharactersArgRules                 = new ArgumentRules();
+    ArgumentRules* getNumStatesVectorArgRules               = new ArgumentRules();
+    ArgumentRules* getPairwiseDifferenceArgRules            = new ArgumentRules();
+    ArgumentRules* getStateDescriptionsArgRules             = new ArgumentRules();
+    ArgumentRules* ishomologousArgRules                     = new ArgumentRules();
+    ArgumentRules* invSitesArgRules                         = new ArgumentRules();
+    ArgumentRules* mask_missing_arg_rules                   = new ArgumentRules();
+    ArgumentRules* maxGcContentArgRules                     = new ArgumentRules();
+    ArgumentRules* maxInvariableBlockLengthArgRules         = new ArgumentRules();
+    ArgumentRules* max_states_arg_rules                     = new ArgumentRules();
+    ArgumentRules* maxPairwiseDifferenceArgRules            = new ArgumentRules();
+    ArgumentRules* maxVariableBlockLengthArgRules           = new ArgumentRules();
+    ArgumentRules* meanGcContentArgRules                    = new ArgumentRules();
+    ArgumentRules* meanGcContentByCodonPositionArgRules     = new ArgumentRules();
+    ArgumentRules* minGcContentArgRules                     = new ArgumentRules();
+    ArgumentRules* minPairwiseDifferenceArgRules            = new ArgumentRules();
+    ArgumentRules* numInvariableBlocksArgRules              = new ArgumentRules();
+    ArgumentRules* num_taxaMissingSequenceArgRules          = new ArgumentRules();
+    ArgumentRules* remove_random_sites_arg_rules            = new ArgumentRules();
+    ArgumentRules* setCodonPartitionArgRules                = new ArgumentRules();
+    ArgumentRules* setCodonPartitionArgRules2               = new ArgumentRules();
+    ArgumentRules* setNumStatesPartitionArgRules            = new ArgumentRules();
+    ArgumentRules* squareBracketArgRules                    = new ArgumentRules();
+    ArgumentRules* translateCharactersArgRules              = new ArgumentRules();
+    ArgumentRules* varGcContentArgRules                     = new ArgumentRules();
+    ArgumentRules* varGcContentByCodonPositionArgRules      = new ArgumentRules();
 
-    ArgumentRules* maxGcContentArgRules                 = new ArgumentRules();
-    ArgumentRules* maxInvariableBlockLengthArgRules     = new ArgumentRules();
-    ArgumentRules* max_states_arg_rules                 = new ArgumentRules();
-    ArgumentRules* maxVariableBlockLengthArgRules       = new ArgumentRules();
-    ArgumentRules* minGcContentArgRules                 = new ArgumentRules();
-    ArgumentRules* maxPairwiseDifferenceArgRules        = new ArgumentRules();
-    ArgumentRules* minPairwiseDifferenceArgRules        = new ArgumentRules();
-    ArgumentRules* getPairwiseDifferenceArgRules        = new ArgumentRules();
-    ArgumentRules* meanGcContentArgRules                = new ArgumentRules();
-    ArgumentRules* meanGcContentByCodonPositionArgRules = new ArgumentRules();
-    ArgumentRules* numInvariableBlocksArgRules          = new ArgumentRules();
-    ArgumentRules* num_taxaMissingSequenceArgRules       = new ArgumentRules();
-    ArgumentRules* varGcContentArgRules                 = new ArgumentRules();
-    ArgumentRules* varGcContentByCodonPositionArgRules  = new ArgumentRules();
-
-    ArgumentRules* translateCharactersArgRules          = new ArgumentRules();
-    ArgumentRules* expandCharactersArgRules             = new ArgumentRules();
-    ArgumentRules* getStateDescriptionsArgRules         = new ArgumentRules();
 
 
+
+    
     setCodonPartitionArgRules->push_back(       new ArgumentRule("",        Natural::getClassTypeSpec()              , "The index of the codon position.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     setCodonPartitionArgRules2->push_back(      new ArgumentRule("",        ModelVector<Natural>::getClassTypeSpec() , "The indicies of the codon positions.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     setNumStatesPartitionArgRules->push_back(   new ArgumentRule("",        Natural::getClassTypeSpec()              , "The number of states in this partition.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
@@ -778,49 +808,53 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
 //    comp_site_freq_spec_arg_rules->push_back(           new ArgumentRule( "ambigAreDerived"  , RlBoolean::getClassTypeSpec()          , "Should we treat ambiguous characters as derived?",    ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     expandCharactersArgRules->push_back(                new ArgumentRule( "factor"           , Natural::getClassTypeSpec()            , "The factor by which the state space is expanded.",    ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
     invSitesArgRules->push_back(                        new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
+    mask_missing_arg_rules->push_back(       new ArgumentRule("ref",        AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The reference dataset/alignment which we use for applying the mask of missing sites.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     maxGcContentArgRules->push_back(                    new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     maxInvariableBlockLengthArgRules->push_back(        new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     maxVariableBlockLengthArgRules->push_back(          new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
-    minGcContentArgRules->push_back(                    new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     maxPairwiseDifferenceArgRules->push_back(           new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
+    minGcContentArgRules->push_back(                    new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     minPairwiseDifferenceArgRules->push_back(           new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     getPairwiseDifferenceArgRules->push_back(           new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     meanGcContentArgRules->push_back(                   new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     meanGcContentByCodonPositionArgRules->push_back(    new ArgumentRule( "index" , Natural::getClassTypeSpec()          , "The index of the codon position.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
     meanGcContentByCodonPositionArgRules->push_back(    new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     numInvariableBlocksArgRules->push_back(             new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
-    num_taxaMissingSequenceArgRules->push_back(          new ArgumentRule( "x" ,     Probability::getClassTypeSpec()          , "The percentage/threshold for the missing sequence.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
+    num_taxaMissingSequenceArgRules->push_back(         new ArgumentRule( "x" ,     Probability::getClassTypeSpec()          , "The percentage/threshold for the missing sequence.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
+    remove_random_sites_arg_rules->push_back(       new ArgumentRule("fraction",        Probability::getClassTypeSpec(), "The fraction of sites to remove.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     translateCharactersArgRules->push_back(             new ArgumentRule( "type" ,     RlString::getClassTypeSpec()          , "The character type into which we want to translate.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
     varGcContentArgRules->push_back(                    new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     varGcContentByCodonPositionArgRules->push_back(     new ArgumentRule( "index" , Natural::getClassTypeSpec()          , "The index of the codon position.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
     varGcContentByCodonPositionArgRules->push_back(     new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
 
 
+    methods.addFunction( new MemberProcedure( "applyMissingSitesMask",                  RlUtils::Void,                      mask_missing_arg_rules              ) );
     methods.addFunction( new MemberProcedure( "chartype",                               RlString::getClassTypeSpec(),       chartypeArgRules                ) );
     methods.addFunction( new MemberProcedure( "computeSiteFrequencySpectrum",           ModelVector<Natural>::getClassTypeSpec(), comp_site_freq_spec_arg_rules     ) );
     methods.addFunction( new MemberProcedure( "computeStateFrequencies",                MatrixReal::getClassTypeSpec(),     compStateFreqArgRules           ) );
     methods.addFunction( new MemberProcedure( "computeMultinomialProfileLikelihood",    Real::getClassTypeSpec(),           compMultiLikeArgRules           ) );
-    methods.addFunction( new MemberProcedure( "setCodonPartition",                      RlUtils::Void,                      setCodonPartitionArgRules       ) );
-    methods.addFunction( new MemberProcedure( "setCodonPartition",                      RlUtils::Void,                      setCodonPartitionArgRules2      ) );
-    methods.addFunction( new MemberProcedure( "setNumStatesPartition",                  RlUtils::Void,                      setNumStatesPartitionArgRules   ) );
-    methods.addFunction( new MemberProcedure( "getNumStatesVector"  ,                   ModelVector<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec(), getNumStatesVectorArgRules      ) );
-    methods.addFunction( new MemberProcedure( "isHomologous",                           RlBoolean::getClassTypeSpec(),      ishomologousArgRules            ) );
     methods.addFunction( new MemberProcedure( "expandCharacters",                       AbstractHomologousDiscreteCharacterData::getClassTypeSpec(),        expandCharactersArgRules         ) );
+    methods.addFunction( new MemberProcedure( "getNumStatesVector"  ,                   ModelVector<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec(), getNumStatesVectorArgRules      ) );
     methods.addFunction( new MemberProcedure( "getEmpiricalBaseFrequencies",            Simplex::getClassTypeSpec(),        empiricalBaseArgRules           ) );
     methods.addFunction( new MemberProcedure( "getNumInvariantSites",                   Natural::getClassTypeSpec(),        invSitesArgRules                ) );
+    methods.addFunction( new MemberProcedure( "getPairwiseDifference",                  DistanceMatrix::getClassTypeSpec(), getPairwiseDifferenceArgRules       ) );
+    methods.addFunction( new MemberProcedure( "getStateDescriptions",                   ModelVector<RlString>::getClassTypeSpec(), getStateDescriptionsArgRules ) );
+    methods.addFunction( new MemberProcedure( "isHomologous",                           RlBoolean::getClassTypeSpec(),      ishomologousArgRules            ) );
     methods.addFunction( new MemberProcedure( "maxGcContent",                           Probability::getClassTypeSpec(),    maxGcContentArgRules                ) );
     methods.addFunction( new MemberProcedure( "maxInvariableBlockLength",               Natural::getClassTypeSpec(),        maxInvariableBlockLengthArgRules    ) );
+    methods.addFunction( new MemberProcedure( "maxPairwiseDifference",                  Natural::getClassTypeSpec(),        maxPairwiseDifferenceArgRules       ) );
     methods.addFunction( new MemberProcedure( "maxStates",                              Natural::getClassTypeSpec(),        max_states_arg_rules                ) );
     methods.addFunction( new MemberProcedure( "maxVariableBlockLength",                 Natural::getClassTypeSpec(),        maxVariableBlockLengthArgRules      ) );
     methods.addFunction( new MemberProcedure( "minGcContent",                           Probability::getClassTypeSpec(),    minGcContentArgRules                ) );
-    methods.addFunction( new MemberProcedure( "maxPairwiseDifference",                  Natural::getClassTypeSpec(),        maxPairwiseDifferenceArgRules       ) );
     methods.addFunction( new MemberProcedure( "minPairwiseDifference",                  Natural::getClassTypeSpec(),        minPairwiseDifferenceArgRules       ) );
-    methods.addFunction( new MemberProcedure( "getPairwiseDifference",                  DistanceMatrix::getClassTypeSpec(), getPairwiseDifferenceArgRules       ) );
     methods.addFunction( new MemberProcedure( "meanGcContent",                          Probability::getClassTypeSpec(),    meanGcContentArgRules                ) );
     methods.addFunction( new MemberProcedure( "meanGcContentByCodonPosition",           Probability::getClassTypeSpec(),    meanGcContentByCodonPositionArgRules                ) );
     methods.addFunction( new MemberProcedure( "numInvariableBlocks",                    Natural::getClassTypeSpec(),        numInvariableBlocksArgRules         ) );
     methods.addFunction( new MemberProcedure( "numTaxaMissingSequence",                 Natural::getClassTypeSpec(),        num_taxaMissingSequenceArgRules         ) );
-    methods.addFunction( new MemberProcedure( "getStateDescriptions",                   ModelVector<RlString>::getClassTypeSpec(), getStateDescriptionsArgRules ) );
+    methods.addFunction( new MemberProcedure( "removeRandomSites",                      RlUtils::Void,                      remove_random_sites_arg_rules   ) );
+    methods.addFunction( new MemberProcedure( "setCodonPartition",                      RlUtils::Void,                      setCodonPartitionArgRules       ) );
+    methods.addFunction( new MemberProcedure( "setCodonPartition",                      RlUtils::Void,                      setCodonPartitionArgRules2      ) );
+    methods.addFunction( new MemberProcedure( "setNumStatesPartition",                  RlUtils::Void,                      setNumStatesPartitionArgRules   ) );
     methods.addFunction( new MemberProcedure( "translateCharacters",                    AbstractHomologousDiscreteCharacterData::getClassTypeSpec(),        translateCharactersArgRules         ) );
     methods.addFunction( new MemberProcedure( "varGcContent",                           Probability::getClassTypeSpec(),    varGcContentArgRules                ) );
     methods.addFunction( new MemberProcedure( "varGcContentByCodonPosition",            Probability::getClassTypeSpec(),    varGcContentByCodonPositionArgRules                ) );

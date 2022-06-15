@@ -1,7 +1,6 @@
 #ifndef CTMCProcess_H
 #define CTMCProcess_H
 
-#include "AbstractHomologousDiscreteCharacterData.h"
 #include "Simplex.h"
 #include "RateGenerator.h"
 #include "TransitionProbabilityMatrix.h"
@@ -15,7 +14,7 @@ namespace RevBayesCore {
      *
      */
     template<class charType>
-    class CTMCProcess : public TypedDistribution< AbstractHomologousDiscreteCharacterData > {
+    class CTMCProcess : public TypedDistribution< AbstractDiscreteTaxonData > {
 
     public:
         // Note, we need the size of the alignment in the constructor to correctly simulate an initial state
@@ -32,8 +31,6 @@ namespace RevBayesCore {
         void                                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, MatrixReal &rv) const;     //!< Map the member methods to internal function calls
         virtual void                                                        redrawValue(void);
         void                                                                reInitialized(void);
-//        void                                                                setValue(AbstractHomologousDiscreteCharacterData *v, bool f=false);                         //!< Set the current value, e.g. attach an observation (clamp)
-//        virtual void                                                        tipDrawJointConditionalAncestralStates(const TopologyNode &node, std::vector<std::vector<charType> >& startStates, std::vector<std::vector<charType> >& endStates, const std::vector<size_t>& sampledSiteRates);
 
         void                                                                setProcessTime(const TypedDagNode< double > *t);
         void                                                                setRateMatrix(const TypedDagNode< RateGenerator > *rm);
@@ -42,7 +39,7 @@ namespace RevBayesCore {
         void                                                                setSiteMatricesProbs(const TypedDagNode< Simplex > *rp);
         void                                                                setSiteRates(const TypedDagNode< RbVector< double > > *r);
         void                                                                setSiteRatesProbs(const TypedDagNode< Simplex > *rp);
-        void                                                                setValue(AbstractHomologousDiscreteCharacterData *v, bool f=false);                         //!< Set the current value, e.g. attach an observation (clamp)
+        void                                                                setValue(charType *v, bool f=false);                         //!< Set the current value, e.g. attach an observation (clamp)
 
 
     protected:
@@ -141,7 +138,7 @@ namespace RevBayesCore {
 
 template<class charType>
 RevBayesCore::CTMCProcess<charType>::CTMCProcess(size_t nc, size_t ns) :
-    TypedDistribution< AbstractHomologousDiscreteCharacterData >(  NULL ),
+    TypedDistribution< AbstractDiscreteTaxonData >(  NULL ),
 //    lnProb( 0.0 ),
 //    storedLnProb( 0.0 ),
     num_sites( ns ),
@@ -489,12 +486,12 @@ void RevBayesCore::CTMCProcess<charType>::compress( void )
     // check whether there are ambiguous characters (besides gaps)
     bool ambiguous_characters = false;
 
+    AbstractDiscreteTaxonData& seq = *(this->value);
     // find the unique site patterns and compute their respective frequencies
     for (size_t site = 0; site < num_sites; ++site)
     {
 
-        AbstractDiscreteTaxonData& taxon = value->getTaxonData( 0 );
-        DiscreteCharacterState &c = taxon.getCharacter(site_indices[site]);
+        DiscreteCharacterState &c = seq.getCharacter(site_indices[site]);
 
         // if we treat unknown characters as gaps and this is an unknown character then we change it
         // because we might then have a pattern more
@@ -514,8 +511,7 @@ void RevBayesCore::CTMCProcess<charType>::compress( void )
     for (size_t site = 0; site < num_sites; ++site)
     {
         
-        AbstractDiscreteTaxonData& taxon = value->getTaxonData( 0 );
-        DiscreteCharacterState &c = taxon.getCharacter(site_indices[site]);
+        DiscreteCharacterState &c = seq.getCharacter(site_indices[site]);
 
         if ( c.isWeighted() )
         {
@@ -540,8 +536,7 @@ void RevBayesCore::CTMCProcess<charType>::compress( void )
             // create the site pattern
             std::string pattern = "";
             
-            AbstractDiscreteTaxonData& taxon = value->getTaxonData( 0 );
-            CharacterState &c = taxon.getCharacter(site_indices[site]);
+            DiscreteCharacterState &c = seq.getCharacter(site_indices[site]);
             pattern += c.getStringValue();
             
             // check if we have already seen this site pattern
@@ -594,16 +589,13 @@ void RevBayesCore::CTMCProcess<charType>::compress( void )
 
 
     // compute which block of the data this process needs to compute
-    pattern_block_start = size_t(floor( (double(pid-active_PID)   / num_processes ) * num_patterns) );
-    pattern_block_end   = size_t(floor( (double(pid+1-active_PID) / num_processes ) * num_patterns) );
+    pattern_block_start = size_t(floor( (double(this->pid   - this->active_PID) / this->num_processes ) * num_patterns) );
+    pattern_block_end   = size_t(floor( (double(this->pid+1 - this->active_PID) / this->num_processes ) * num_patterns) );
     pattern_block_size  = pattern_block_end - pattern_block_start;
 
 
     std::vector<size_t> process_pattern_counts = std::vector<size_t>(pattern_block_size,0);
     // allocate and fill the cells of the vectors
-    size_t taxon_index = 0;
-    AbstractDiscreteTaxonData& taxon = value->getTaxonData( taxon_index );
-
     // resize the vectors
     ambiguous_char_vector.resize(pattern_block_size);
     char_vector.resize(pattern_block_size);
@@ -613,7 +605,7 @@ void RevBayesCore::CTMCProcess<charType>::compress( void )
         // set the counts for this patter
         process_pattern_counts[pattern_index] = pattern_counts[pattern_index+pattern_block_start];
 
-        charType &c = static_cast<charType &>( taxon.getCharacter(site_indices[index_of_site_pattern[pattern_index+pattern_block_start]]) );
+        charType &c = static_cast<charType &>( seq.getCharacter(site_indices[index_of_site_pattern[pattern_index+pattern_block_start]]) );
         gap_vector[pattern_index] = c.isGapState();
 
         if ( using_ambiguous_characters == true )
@@ -828,7 +820,8 @@ void RevBayesCore::CTMCProcess<charType>::executeMethod(const std::string &n, co
 template<class charType>
 std::vector<size_t> RevBayesCore::CTMCProcess<charType>::getIncludedSiteIndices( void )
 {
-    return this->value->getIncludedSiteIndices();
+//    return this->value->getIncludedSiteIndices();
+    return std::vector<size_t>(true,this->value->getNumberOfCharacters());
 }
 
 
@@ -932,8 +925,136 @@ void RevBayesCore::CTMCProcess<charType>::keepSpecialization( const DagNode* aff
 template<class charType>
 void RevBayesCore::CTMCProcess<charType>::redrawValue( void )
 {
+    
+    // delete the old value first
+    delete this->value;
 
+    // create a new character data object
+    this->value = new DiscreteTaxonData<charType>( Taxon("") );
+    
+    // prepare the rate matrices
+    updateTransitionProbabilities();
+    
+    // get the global random number generator
+    RandomNumberGenerator* rng = GLOBAL_RNG;
 
+    std::vector<std::vector<double> > freqs;
+    getRootFrequencies(freqs);
+    // simulate the root sequence
+    DiscreteTaxonData< charType > root = DiscreteTaxonData<charType>( Taxon("") );
+    for ( size_t i = 0; i < num_sites; ++i )
+    {
+        size_t matrix_index = 0;
+        size_t rate_index   = 0;
+        
+        // draw the matrix index
+        double u = 0.0;
+        if ( num_site_matrices > 1 )
+        {
+            // draw the rate for this site
+            u = rng->uniform01();
+
+            std::vector<double> matrix_probs = getMixtureProbs();
+
+            std::vector< double >::const_iterator freq = matrix_probs.begin();
+            while ( true )
+            {
+                u -= *freq;
+
+                if ( u > 0.0 )
+                {
+                    ++matrix_index;
+                    ++freq;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+        
+        // draw the rate index
+        if ( num_site_rates > 1 )
+        {
+            // draw the rate for this site
+            u = rng->uniform01();
+
+            const std::vector<double>& rates_probs = site_rates_probs->getValue();
+
+            std::vector< double >::const_iterator freq = rates_probs.begin();
+            while ( true )
+            {
+                u -= *freq;
+
+                if ( u > 0.0 )
+                {
+                    ++rate_index;
+                    ++freq;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+        }
+        
+        
+        const std::vector< double > &stationary_freqs = freqs[matrix_index % freqs.size()];
+
+        // create the character
+        size_t root_state = 0;
+
+        // draw the state
+        u = rng->uniform01();
+        std::vector< double >::const_iterator freq = stationary_freqs.begin();
+        while ( true )
+        {
+            u -= *freq;
+            if ( u > 0.0 )
+            {
+                ++root_state;
+                ++freq;
+            }
+            else
+            {
+                break;
+            }
+
+        }
+        
+        TransitionProbabilityMatrix& p = transition_prob_matrices[matrix_index][rate_index];
+        double *freqs = p[ root_state ];
+
+        // create the character
+        charType sim_c = charType( num_chars );
+        sim_c.setToFirstState();
+        size_t state_index = 0;
+        
+        // draw the state
+        u = rng->uniform01();
+        size_t stateIndex = 0;
+        while ( true )
+        {
+            u -= *freqs;
+            ++state_index;
+
+            if ( u > 0.0 && state_index < this->num_chars)
+            {
+                ++sim_c;
+                ++freqs;
+            }
+            else
+            {
+                break;
+            }
+
+        }
+
+        // add the character to the sequence
+        this->value->addCharacter( sim_c );
+        
+    }
 }
 
 
@@ -965,7 +1086,7 @@ void RevBayesCore::CTMCProcess<charType>::setActivePIDSpecialized(size_t a, size
 
 
 template<class charType>
-void RevBayesCore::CTMCProcess<charType>::setValue(AbstractHomologousDiscreteCharacterData *v, bool force)
+void RevBayesCore::CTMCProcess<charType>::setValue(charType *v, bool force)
 {
 
     if ( v->getMaxObservedStateIndex() > this->num_chars - 1)
@@ -985,7 +1106,7 @@ void RevBayesCore::CTMCProcess<charType>::setValue(AbstractHomologousDiscreteCha
     }
 
     // delegate to the parent class
-    TypedDistribution< AbstractHomologousDiscreteCharacterData >::setValue(v, force);
+    TypedDistribution< AbstractDiscreteTaxonData >::setValue(v, force);
 
     // reset the number of sites
     this->num_sites = v->getNumberOfIncludedCharacters();
@@ -997,7 +1118,7 @@ void RevBayesCore::CTMCProcess<charType>::setValue(AbstractHomologousDiscreteCha
     this->compress();
 
     // now we also set the template state
-    template_state = charType( static_cast<const charType&>( this->value->getTaxonData(0).getCharacter(0) ) );
+    template_state = charType( static_cast<const charType&>( this->value->getCharacter(0) ) );
     template_state.setToFirstState();
     template_state.setGapState( false );
     template_state.setMissingState( false );
@@ -1252,14 +1373,19 @@ template<class charType>
 void RevBayesCore::CTMCProcess<charType>::updateTransitionProbabilities( void ) const
 {
 
-    double time = process_time->getValue();
+    double time = 1.0;
+    
+    if ( process_time != NULL )
+    {
+        time = process_time->getValue();
+    }
     
     // first, get the rate matrix for this branch
-    RateMatrix_JC jc(this->num_chars);
-    const RateGenerator *rm = &jc;
+    const RateGenerator *rm = NULL;
 
     for (size_t matrix_index = 0; matrix_index < this->num_site_matrices; ++matrix_index)
     {
+        bool free_mem = false;
         if ( this->site_rate_matrices != NULL )
         {
             rm = &this->site_rate_matrices->getValue()[matrix_index];
@@ -1267,6 +1393,13 @@ void RevBayesCore::CTMCProcess<charType>::updateTransitionProbabilities( void ) 
         else if ( this->rate_matrix != NULL )
         {
             rm = &this->rate_matrix->getValue();
+        }
+        else
+        {
+            RateMatrix_JC jc(this->num_chars);
+            rm = new RateMatrix_JC(this->num_chars);
+            
+            free_mem = true;
         }
 
         for (size_t rate_index = 0; rate_index < this->num_site_rates; ++rate_index)
@@ -1277,6 +1410,11 @@ void RevBayesCore::CTMCProcess<charType>::updateTransitionProbabilities( void ) 
                 r = this->site_rates->getValue()[rate_index];
             }
             rm->calculateTransitionProbabilities( time, 0.0,  r, this->transition_prob_matrices[matrix_index][rate_index] );
+        }
+        
+        if (free_mem == true)
+        {
+            delete rm;
         }
     }
     

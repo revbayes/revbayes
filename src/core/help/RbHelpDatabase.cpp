@@ -1080,7 +1080,82 @@ exists(x))");
 	help_strings[string("fnCoala")][string("name")] = string(R"(fnCoala)");
 	help_references[string("fnCoala")].push_back(RbHelpReference(R"(A branch-heterogeneous model of protein evolution for efficient inference of ancestral sequences. Groussin M, Boussau B, Gouy M. Syst Biol. 2013 Jul;62(4):523-38.)",R"(10.1093/sysbio/syt016)",R"(https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3676677/ )"));
 	help_strings[string("fnCodon")][string("name")] = string(R"(fnCodon)");
+	help_strings[string("fnCodonGY94")][string("description")] = string(R"(The Goldman-Yang (1994) codon model.
+
+A rate matrix on the 61 non-stop codons (in the standard genetic code).
+
+Rates between codons with more than one nucleotide change are equal to 0.
+
+In this model the rate Q(i,j) from i -> j is proportional to the frequency of codon j.
+This means that the rate of change between low-frequency codons is lower than the rate
+between high-frequency codons, even when the nucleotide change involved is the same.
+In other words, the rate of change from nucleotide n1 -> n2 depends on its neighboring
+nucleotides.  This differs from the Muse-Gaut (1994) model, and is perhaps less realistic.
+
+Unlike the Muse-Gaut (1994) model, the Goldman-Yang (1994) model can allow all the codon
+frequencies to vary independently.)");
+	help_strings[string("fnCodonGY94")][string("example")] = string(R"(kappa ~ dnLognormal(0,1)
+omega ~ dnUniform(0,1)
+pi61 ~ dnDirichlet( rep(2.0, 61) )
+Q1 := fnCodonGY94( kappa, omega, pi61 )
+
+pi1 ~ dnDirichlet( rep(2.0, 4) )
+Q2 := fnCodonGY94( kappa, omega, fnF1x4(pi1) )
+
+pi2 ~ dnDirichlet( rep(2.0, 4) )
+pi3 ~ dnDirichlet( rep(2.0, 4) )
+Q3 := fnCodonGY94( kappa, omega, fnF3x4(pi1, pi2, pi3) ))");
+	help_strings[string("fnCodonGY94")][string("name")] = string(R"(fnCodonGY94)");
+	help_references[string("fnCodonGY94")].push_back(RbHelpReference(R"(Goldman, N. and Z. Yang (1994). A codon-based model of nucleotide substitution for protein-coding DNA sequences. Mol. Biol. Evol. (1994) 11 (5):725-736)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040153 )",R"()"));
+	help_arrays[string("fnCodonGY94")][string("see_also")].push_back(string(R"(fnF1x4, fnF3x4, fnCodonMG94, fnCodonMG94K)"));
+	help_strings[string("fnCodonGY94")][string("title")] = string(R"(The Goldman-Yang (1994) codon rate matrix)");
 	help_strings[string("fnCodonHKY")][string("name")] = string(R"(fnCodonHKY)");
+	help_strings[string("fnCodonMG94")][string("description")] = string(R"(The Muse-Gaut (1994) codon model.
+
+A rate matrix on the 61 non-stop codons (in the standard genetic code).
+
+Rates between codons with more than one nucleotide change are equal to 0.
+
+In this model the rate Q(i,j) from i -> j is proportional to the frequency of
+nucleotide in codon j that changed.  This differs from the Goldman-Yang (1994) model,
+where Q(i,j) is proportional to the frequency of the entire codon j.
+
+Unlike the Goldman-Yang (1994) model, the Muse-Gaut (1994) model does not allow all the codon
+frequencies to vary independently.)");
+	help_strings[string("fnCodonMG94")][string("example")] = string(R"(omega ~ dnUniform(0,1)
+pi ~ dnDirichlet( rep(2.0, 4) )
+Q1 := fnCodonMG94( omega, pi )
+
+Q2 := fndNdS( omega, fnX3( fnF81(pi) ) ) # MG94 = F81 + X3 + dNdS)");
+	help_strings[string("fnCodonMG94")][string("name")] = string(R"(fnCodonMG94)");
+	help_references[string("fnCodonMG94")].push_back(RbHelpReference(R"(Muse, S. and B. Gaut (1994) A likelihood approach for comparing synonymous and nonsynonymous nucleotide substitution rates, with application to the chloroplast genome. Mol. Biol. Evol. (1994) 11 (5):715-724)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040152 )",R"()"));
+	help_arrays[string("fnCodonMG94")][string("see_also")].push_back(string(R"(fnCodonMG94, fnCodonMG94K)"));
+	help_strings[string("fnCodonMG94")][string("title")] = string(R"(The Muse-Gaut (1994) codon rate matrix)");
+	help_strings[string("fnCodonMG94K")][string("description")] = string(R"(The Muse-Gaut (1994) codon model, extended with a transition/transversion rate ratio.
+
+A rate matrix on the 61 non-stop codons (in the standard genetic code).
+
+Rates between codons with more than one nucleotide change are equal to 0.
+
+In this model the rate Q(i,j) from i -> j is proportional to the frequency of
+nucleotide in codon j that changed.  This differs from the Goldman-Yang (1994) model,
+where Q(i,j) is proportional to the frequency of the entire codon j.
+
+This version is an extension of the fnCodonMG94 model to add a transition/transversion
+rate ratio.  This makes it more comparable to the Goldman-Yang (1994) model.
+
+Unlike the Goldman-Yang (1994) model, the Muse-Gaut (1994) model does not allow all the codon
+frequencies to vary independently.)");
+	help_strings[string("fnCodonMG94K")][string("example")] = string(R"(kappa ~ dnLognormal(0,1)
+omega ~ dnUniform(0,1)
+pi ~ dnDirichlet( rep(2.0, 4) )
+Q1 := fnCodonMG94K( kappa, omega, pi )
+
+Q2 := fndNdS( omega, fnX3( fnHKY( kappa, pi) ) ) # MG94K = HKY + X3 + dNdS)");
+	help_strings[string("fnCodonMG94K")][string("name")] = string(R"(fnCodonMG94K)");
+	help_references[string("fnCodonMG94K")].push_back(RbHelpReference(R"(Muse, S. and B. Gaut (1994) A likelihood approach for comparing synonymous and nonsynonymous nucleotide substitution rates, with application to the chloroplast genome. Mol. Biol. Evol. (1994) 11 (5):715-724)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040152 )",R"()"));
+	help_arrays[string("fnCodonMG94K")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K)"));
+	help_strings[string("fnCodonMG94K")][string("title")] = string(R"(The Muse-Gaut (1994) codon rate matrix + K.)");
 	help_strings[string("fnCovarion")][string("name")] = string(R"(fnCovarion)");
 	help_strings[string("fnCovarionRateMatrix")][string("name")] = string(R"(fnCovarionRateMatrix)");
 	help_strings[string("fnCpRev")][string("name")] = string(R"(fnCpRev)");
@@ -1104,7 +1179,110 @@ exists(x))");
 	help_strings[string("fnEpoch")][string("name")] = string(R"(fnEpoch)");
 	help_strings[string("fnEpochCladoProbs")][string("name")] = string(R"(fnEpochCladoProbs)");
 	help_strings[string("fnExtantTree")][string("name")] = string(R"(fnExtantTree)");
+	help_strings[string("fnF1x4")][string("description")] = string(R"(This treats codon frequencies as a product of independent nucleotide frequencies.
+
+Since stop codons are removed from the codon alphabet, frequencies are renormalized
+so that the frequencies of non-stop codons sum to 1.0.)");
+	help_strings[string("fnF1x4")][string("example")] = string(R"(kappa ~ dnLognormal(0,1)
+omega ~ dnUniform(0,1)
+pi ~ dnDirichlet( v(2.0, 2.0, 2.0, 2.0) )
+Q := fnCodonGY94( kappa, omega, fnF1x4(pi) ))");
+	help_strings[string("fnF1x4")][string("name")] = string(R"(fnF1x4)");
+	help_arrays[string("fnF1x4")][string("see_also")].push_back(string(R"(fnGY94, fnF3x4)"));
+	help_strings[string("fnF1x4")][string("title")] = string(R"(The F1x4 codon frequency model)");
+	help_strings[string("fnF2x4")][string("description")] = string(R"(This treats doublet frequencies as a product of independent nucleotide frequencies.)");
+	help_strings[string("fnF2x4")][string("example")] = string(R"(# An RNA stem model with independent base frequencies (from fnF2x4),
+# and simultaneous 2-nucleotide changes allows.
+nuc_pi ~ dnDirichlet( v(2.0, 2.0, 2.0, 2.0) )
+rna_stem_er ~ dnDirichlet( rep(1.0, 16*15/2) )
+rna_stem_pi := fnF2x4(nuc_pi, nuc_pi)
+Q := fnGTR(rna_stem_er, rna_stem_pi))");
+	help_strings[string("fnF2x4")][string("name")] = string(R"(fnF2x4)");
+	help_arrays[string("fnF2x4")][string("see_also")].push_back(string(R"(fnX2)"));
+	help_strings[string("fnF2x4")][string("title")] = string(R"(The F2x4 doublet frequency model)");
+	help_strings[string("fnF3x4")][string("description")] = string(R"(This treats codon frequencies as a product of independent nucleotide frequencies.
+
+Since stop codons are removed from the codon alphabet, frequencies are renormalized
+so that the frequencies of non-stop codons sum to 1.0.)");
+	help_strings[string("fnF3x4")][string("example")] = string(R"(kappa ~ dnLognormal(0,1)
+omega ~ dnUniform(0,1)
+pi1 ~ dnDirichlet( v(2.0, 2.0, 2.0, 2.0) )
+pi2 ~ dnDirichlet( v(2.0, 2.0, 2.0, 2.0) )
+pi3 ~ dnDirichlet( v(2.0, 2.0, 2.0, 2.0) )
+Q := fnCodonGY94( kappa, omega, fnF3x4(pi1, pi2, pi3) ))");
+	help_strings[string("fnF3x4")][string("name")] = string(R"(fnF3x4)");
+	help_arrays[string("fnF3x4")][string("see_also")].push_back(string(R"(fnGY94, fnF1x4)"));
+	help_strings[string("fnF3x4")][string("title")] = string(R"(The F3x4 codon frequency model)");
 	help_strings[string("fnF81")][string("name")] = string(R"(fnF81)");
+	help_strings[string("fnFMutSel")][string("description")] = string(R"(Constructs a rate matrix from 61 scaled selection coefficients w[i] and
+a 4x4 nucleotide mutation rate matrix mu(i,j).  In the original paper
+the nucleotide mutation rate matrix is a GTR rate matrix.
+
+The FMutSel0 model differs from FMutSel by constraining all codons for
+the same amino acid to have the same scaled selection coefficient.
+
+The function fnMutSel differs from fnFMutSel by taking a codon mutation
+rate matrix.
+
+A substitution from allele i -> j can be decomposed into
+ (1) all individuals initially have state i
+ (2) a single individual mutates from i -> j, at rate mu(i,j)
+ (3) the allele j goes to fixation
+
+Then the substitution rate Q is then given by
+  Q(i,j) = mu(i,j) * Pr(j goes to fixation | i was fixed previously).
+
+The probability of fixation is determined by scaled selection coefficients:
+  F[i] = 2*N*s[i]
+and the initial frequency 1/N of allele j.)");
+	help_strings[string("fnFMutSel")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
+nuc_pi ~ dnDirichlet( rep(2.0, 4) )
+F ~ dnIID(61, dnNormal(0,1))
+omega ~ dnUniform(0,1)
+# The FMutSel model from Yang and Nielsen (2008)
+Q1 := fnFMutSel(fnGTR(er, nuc_pi), F, omega)
+
+# The same -- fMutSel = GTR(er,nuc_pi) + X3 + MutSel(F) + dNdS(omega)
+Q2 := fndNdS(fnMutSel(F, fnX3(fnGTR(er, nuc_pi))), omega))");
+	help_strings[string("fnFMutSel")][string("name")] = string(R"(fnFMutSel)");
+	help_references[string("fnFMutSel")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
+	help_arrays[string("fnFMutSel")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnFMutSel0, fnMutSel)"));
+	help_strings[string("fnFMutSel")][string("title")] = string(R"(The FMutSel model)");
+	help_strings[string("fnFMutSel0")][string("description")] = string(R"(Constructs a rate matrix from 61 scaled selection coefficients w[i] and
+a 4x4 nucleotide mutation rate matrix mu(i,j).  In the original paper
+the nucleotide mutation rate matrix is a GTR rate matrix.
+
+The FMutSel0 model is a restriction of the FMutSel model that constrains
+all codons for the same amino acid to have the same scaled selection
+coefficient.
+
+The function fnMutSelAA differs from fnFMutSel0 by taking a codon mutation
+rate matrix.
+
+A substitution from allele i -> j can be decomposed into
+ (1) all individuals initially have state i
+ (2) a single individual mutates from i -> j, at rate mu(i,j)
+ (3) the allele j goes to fixation
+
+Then the substitution rate Q is then given by
+  Q(i,j) = mu(i,j) * Pr(j goes to fixation | i was fixed previously).
+
+The probability of fixation is determined by scaled selection coefficients:
+  F[i] = 2*N*s[i]
+and the initial frequency 1/N of allele j.)");
+	help_strings[string("fnFMutSel0")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
+nuc_pi ~ dnDirichlet( rep(2.0, 4) )
+F ~ dnIID(20, dnNormal(0,1))
+omega ~ dnUniform(0,1)
+# The FMutSel0 model from Yang and Nielsen (2008)
+Q1 := fnFMutSel0(fnGTR(er, nuc_pi), F, omega)
+
+# The same -- fMutSel0 = GTR(er,nuc_pi) + X3 + MutSel(F) + dNdS(omega)
+Q2 := fndNdS( fnMutSelAA( fnX3( fnGTR(er, nuc_pi)), F), omega))");
+	help_strings[string("fnFMutSel0")][string("name")] = string(R"(fnFMutSel0)");
+	help_references[string("fnFMutSel0")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
+	help_arrays[string("fnFMutSel0")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnFMutSel0, fnMutSel)"));
+	help_strings[string("fnFMutSel0")][string("title")] = string(R"(The FMutSel0 model)");
 	help_strings[string("fnFreeBinary")][string("name")] = string(R"(fnFreeBinary)");
 	help_strings[string("fnFreeK")][string("name")] = string(R"(fnFreeK)");
 	help_strings[string("fnFreeSymmetricRateMatrix")][string("name")] = string(R"(fnFreeSymmetricRateMatrix)");
@@ -1138,6 +1316,63 @@ Q := fnHKY(kappa,pi))");
 	help_strings[string("fnMixtureCladoProbs")][string("name")] = string(R"(fnMixtureCladoProbs)");
 	help_strings[string("fnMtMam")][string("name")] = string(R"(fnMtMam)");
 	help_strings[string("fnMtRev")][string("name")] = string(R"(fnMtRev)");
+	help_strings[string("fnMutSel")][string("description")] = string(R"(Constructs a rate matrix from scaled selection coefficients w[i] and
+mutation rate matrix mu(i,j).
+
+fnMutSel takes 61 scaled selection coefficients, one for each codon.
+This differs from fnMutSelAA, which takes 20 scaled selection coefficients,
+one for each amino acid.
+
+A substitution from allele i -> j can be decomposed into
+ (1) all individuals initially have state i
+ (2) a single individual mutates from i -> j, at rate mu(i,j)
+ (3) the allele j goes to fixation
+
+Then the substitution rate Q is then given by
+  Q(i,j) = mu(i,j) * Pr(j goes to fixation | i was fixed previously).
+
+The probability of fixation is determined by scaled selection coefficients:
+  F[i] = 2*N*s[i]
+and the initial frequency 1/N of allele j.)");
+	help_strings[string("fnMutSel")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
+nuc_pi ~ dnDirichlet( rep(2.0, 4) )
+F ~ dnIID(61, dnNormal(0,1))
+Q := fnMutSel(fnX3(fnGTR(er, nuc_pi) ), F)       # GTR + X3 + MutSel
+
+# A mutation-selection balance model on RNA, with GTR mutation.
+F2 ~ dnIID(16, dnNormal(0,1))
+Q2 := fnMutSel(fnX2(fnGTR(er,nuc_pi) ), F2)      # GTR + X2 + MutSel)");
+	help_strings[string("fnMutSel")][string("name")] = string(R"(fnMutSel)");
+	help_references[string("fnMutSel")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
+	help_arrays[string("fnMutSel")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnMutSelAA, fnFMutSel, fndNdS)"));
+	help_strings[string("fnMutSel")][string("title")] = string(R"(Add mutation-selection balance to a rate matrix.)");
+	help_strings[string("fnMutSelAA")][string("description")] = string(R"(Constructs a rate matrix from scaled selection coefficients w[i] and
+mutation rate matrix mu(i,j).
+
+fnMutSelAA takes 20 scaled selection coefficients, one for each amino acid.
+This differs from fnMutSel, which takes 61 scaled selection coefficients,
+one for each codon.  fnMutSelAA assumes that codons for the same amino acid
+have the same fitness.
+
+A substitution from allele i -> j can be decomposed into
+ (1) all individuals initially have state i
+ (2) a single individual mutates from i -> j, at rate mu(i,j)
+ (3) the allele j goes to fixation
+
+Then the substitution rate Q is then given by
+  Q(i,j) = mu(i,j) * Pr(j goes to fixation | i was fixed previously).
+
+The probability of fixation is determined by scaled selection coefficients:
+  F[i] = 2*N*s[i]
+and the initial frequency 1/N of allele j.)");
+	help_strings[string("fnMutSelAA")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
+nuc_pi ~ dnDirichlet( rep(2.0, 4) )
+F ~ dnIID(20, dnNormal(0,1))
+Q := fnMutSelAA(fnX3(fnGTR(er, nuc_pi)), F))");
+	help_strings[string("fnMutSelAA")][string("name")] = string(R"(fnMutSelAA)");
+	help_references[string("fnMutSelAA")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
+	help_arrays[string("fnMutSelAA")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnX3, fndNdS, fnMutSel)"));
+	help_strings[string("fnMutSelAA")][string("title")] = string(R"(Add mutation-selection balance to a rate matrix -- fitnesses on amino acids)");
 	help_strings[string("fnNormalizedQuantile")][string("name")] = string(R"(fnNormalizedQuantile)");
 	help_strings[string("fnNumUniqueInVector")][string("name")] = string(R"(fnNumUniqueInVector)");
 	help_strings[string("fnOrderedRateMatrix")][string("name")] = string(R"(fnOrderedRateMatrix)");
@@ -1182,7 +1417,75 @@ Q := fnTrN(kappaAT, kappaCT, ,pi))");
 	help_strings[string("fnVarCovar")][string("name")] = string(R"(fnVarCovar)");
 	help_strings[string("fnWAG")][string("name")] = string(R"(fnWAG)");
 	help_strings[string("fnWattersonsTheta")][string("name")] = string(R"(fnWattersonsTheta)");
+	help_strings[string("fnX2")][string("description")] = string(R"(Constructs a double rate matrix on the 16 nucleotide pairs.
+
+Rates of change from nucleotide i -> j at each doublet position are given by the
+nucleotide rate matrix.  The rate of 2 simultaneous changes is 0.
+
+The X3 function can be used to constructor rate matrices on doublets in a
+modular fashion.)");
+	help_strings[string("fnX2")][string("example")] = string(R"(
+kappa ~ dnLognormal(0,1)
+nuc_pi ~ dnDirichlet( rep(2.0, 4) )
+# Mutation rate matrix on RNA stems
+Q1 := fnX2( fnHKY(kappa, nuc_pi) )
+F ~ dnIID(16, dnNormal(0,1))
+# Add selection to the rate matrix
+Q2 := fnMutSel(Q1, F))");
+	help_strings[string("fnX2")][string("name")] = string(R"(fnX2)");
+	help_arrays[string("fnX2")][string("see_also")].push_back(string(R"(fnX3)"));
+	help_strings[string("fnX2")][string("title")] = string(R"(Construct a doublet (16x16) rate matrix from a nucleotide rate matrix.)");
+	help_strings[string("fnX3")][string("description")] = string(R"(Constructs a rate matrix on the 61 non-stop codons (in the standard genetic code).
+
+Rates of change from nucleotide i -> j at each codon position are given by the
+nucleotide rate matrix.  The rate of 2 or 3 simultaneous changes is 0.
+
+The X3 function can be used to construct other rate matrices in a modular fashion.
+For example:
+  (i)  MG94  = F81 + X3 + dNdS
+  (ii) MG94K = HKY85 + X3 + dNdS)");
+	help_strings[string("fnX3")][string("example")] = string(R"(
+kappa ~ dnLognormal(0,1)
+omega ~ dnUniform(0,1)
+nuc_pi ~ dnDirichlet( rep(2.0, 4) )
+Q1 := fnCodonMG94K( kappa, omega, nuc_pi )
+# This is the same.
+Q2 := fndNdS(fnX3(fnHKY(kappa, nuc_pi)), omega)          # HKY + X3 + dNdS, or HKY*3 + dNdS
+
+er ~ dnDirichlet( v(1,1,1,1,1,1) )
+Q3 := fnX3(fnGTR(er, nuc_pi))      # GTR + X3, or GTR*3)");
+	help_strings[string("fnX3")][string("name")] = string(R"(fnX3)");
+	help_references[string("fnX3")].push_back(RbHelpReference(R"(Redelings, BD (2021). BAli-Phy version 3: Model-based co-estimation of Alignment and Phylogeny.  Bioinformatics (2021) 37(10):3032–3034.)",R"(https://doi.org/10.1093/bioinformatics/btab129 )",R"()"));
+	help_arrays[string("fnX3")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K, fndNdS)"));
+	help_strings[string("fnX3")][string("title")] = string(R"(Construct a codon rate matrix from a nucleotide rate matrix.)");
 	help_strings[string("fnassembleContinuousMRF")][string("name")] = string(R"(fnassembleContinuousMRF)");
+	help_strings[string("fndNdS")][string("description")] = string(R"(Constructs a rate matrix on the 61 non-stop codons (in the standard genetic code).
+
+   Q(i,j) = Q'(i,j) * omega if aa(i) != aa(j)
+                    * 1     if aa(i) == aa(j)
+
+where aa(i) gives the amino acid for codon i in the standard genetic code, and
+Q'(i,j) is the input rate matrix on codons.
+
+The dNdS function can be used to construct other rate matrices in a modular fashion.
+For example:
+  (i)  MG94  = F81 + X3 + dNdS
+  (ii) MG94K = HKY85 + X3 + dNdS)");
+	help_strings[string("fndNdS")][string("example")] = string(R"(
+kappa ~ dnLognormal(0,1)
+omega ~ dnUniform(0,1)
+nuc_pi ~ dnDirichlet( rep(2.0, 4) )
+Q1 := fnCodonMG94K( kappa, omega, nuc_pi )
+# This is the same.
+Q2 := fndNdS(fnX3(fnHKY(kappa, nuc_pi)), omega)        # HKY + X3 + dNdS,
+                                                       #   or HKY*3 + dNdS
+
+er ~ dnDirichlet( v(1,1,1,1,1,1) )
+Q3 := fndNdS(fnX3(fnGTR(er, nuc_pi)), omega)         # GTR + X3 + dNdS)");
+	help_strings[string("fndNdS")][string("name")] = string(R"(fndNdS)");
+	help_references[string("fndNdS")].push_back(RbHelpReference(R"(Redelings, BD (2021). BAli-Phy version 3: Model-based co-estimation of Alignment and Phylogeny.  Bioinformatics (2021) 37(10):3032–3034.)",R"(https://doi.org/10.1093/bioinformatics/btab129)",R"()"));
+	help_arrays[string("fndNdS")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K, fnX3, fnMutSel)"));
+	help_strings[string("fndNdS")][string("title")] = string(R"(Add a dN/dS factor to a codon rate matrix.)");
 	help_strings[string("formatDiscreteCharacterData")][string("name")] = string(R"(formatDiscreteCharacterData)");
 	help_strings[string("gamma")][string("name")] = string(R"(gamma)");
 	help_arrays[string("getOption")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));

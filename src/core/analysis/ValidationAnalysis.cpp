@@ -223,8 +223,12 @@ ValidationAnalysis& ValidationAnalysis::operator=(const ValidationAnalysis &a)
 void ValidationAnalysis::burnin(size_t generations, size_t tuningInterval)
 {
     
+    // compute which block of the data this process needs to compute
+    size_t run_block_start = size_t(floor( (double(pid)  / num_processes ) * num_runs) );
+    size_t run_block_end   = std::max( int(run_block_start), int(floor( (double(pid+1) / num_processes ) * num_runs) ) - 1);
+    
     // start the progress bar
-    ProgressBar progress = ProgressBar(num_runs, 0);
+    ProgressBar progress = ProgressBar(run_block_end-run_block_start, 0);
     
     if ( process_active == true )
     {
@@ -237,10 +241,6 @@ void ValidationAnalysis::burnin(size_t generations, size_t tuningInterval)
         // Print progress bar (68 characters wide)
         progress.start();
     }
-    
-    // compute which block of the data this process needs to compute
-    size_t run_block_start = size_t(floor( (double(pid)   / num_processes ) * num_runs) );
-    size_t run_block_end   = std::max( int(run_block_start), int(floor( (double(pid+1) / num_processes ) * num_runs) ) - 1);
     
     // Run the chain
     for (size_t i = run_block_start; i <= run_block_end; ++i)

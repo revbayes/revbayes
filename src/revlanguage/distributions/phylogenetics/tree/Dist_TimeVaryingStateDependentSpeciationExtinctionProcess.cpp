@@ -94,8 +94,8 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_TimeVaryingStateDepend
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* ex  = static_cast<const ModelVector< ModelVector<RealPos> > &>( extinction_rates->getRevObject() ).getDagNode();
     
     // get speciation rates or cladogenetic speciation rate event map
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* sp;
-    RevBayesCore::TypedDagNode<RevBayesCore::CladogeneticSpeciationRateMatrix>* cp;
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* sp = nullptr;
+    RevBayesCore::TypedDagNode<RevBayesCore::CladogeneticSpeciationRateMatrix>* cp = nullptr;
     if ( speciation_rates->getRevObject().isType( ModelVector< ModelVector<RealPos> >::getClassTypeSpec() ) )
     {
         sp  = static_cast<const ModelVector< ModelVector<RealPos> > &>( speciation_rates->getRevObject() ).getDagNode();

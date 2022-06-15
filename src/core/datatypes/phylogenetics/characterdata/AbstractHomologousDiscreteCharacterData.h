@@ -48,6 +48,7 @@ class DiscreteCharacterState;
         virtual void                                            writeToFile(const std::string &dir, const std::string &fn) const;
         
         // CharacterData functions
+        void                                                    applyMissingSitesMask( const std::vector<std::vector<bool> >& mask_gap, const std::vector<std::vector<bool> >& mask_missing );
         virtual void                                            concatenate(const AbstractCharacterData &d, std::string type = "") = 0;                     //!< Concatenate data matrices
         virtual void                                            concatenate(const HomologousCharacterData &d, std::string type = "") = 0;                   //!< Concatenate two sequences
         virtual void                                            concatenate(const AbstractHomologousDiscreteCharacterData &d, std::string type = "") = 0;   //!< Concatenate data matrices
@@ -56,6 +57,7 @@ class DiscreteCharacterState;
         virtual std::vector<long>                               computeSiteFrequencySpectrum(bool folded, SFS_AMBIGUITY_TREATMENT ambig_treat) const = 0;
         virtual MatrixReal                                      computeStateFrequencies(void) const = 0;                                                    //!< Compute the state frequencies for this character data object
         virtual void                                            excludeCharacter(size_t i) = 0;                                                             //!< Exclude character
+        void                                                    fillMissingSitesMask( std::vector<std::vector<bool> >& mask_gap, std::vector<std::vector<bool> >& mask_missing ) const;
         virtual const DiscreteCharacterState&                   getCharacter(size_t tn, size_t cn) const = 0;                                               //!< Return a reference to a character element in the character matrix
         virtual std::string                                     getDataType(void) const = 0;                                                                //!< Return the data type of this character data matrix
         virtual std::vector<double>                             getEmpiricalBaseFrequencies(void) const = 0;                                                //!< Compute the empirical base frequencies
@@ -88,6 +90,7 @@ class DiscreteCharacterState;
         virtual double                                          varGcContent(bool excl) const = 0;                                                          //!< Mean GC-content of all sequence
         virtual double                                          varGcContentByCodon(size_t n, bool excl) const = 0;                                         //!< Mean GC-content of all sequences by codon position
         
+        void                                                    removeRandomSites( double p );
         virtual void                                            removeExcludedCharacters(void) = 0;                                                         //!< Remove all the excluded characters
         virtual void                                            restoreCharacter(size_t i) = 0;                                                             //!< Restore character
         

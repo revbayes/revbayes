@@ -57,7 +57,6 @@ Move_RandomIntegerWalk* Move_RandomIntegerWalk::clone(void) const
  * constructor and passing the move-parameters (the variable and other parameters) as arguments of the 
  * constructor. The move constructor takes care of the proper hook-ups.
  *
- * \return A new internal distribution object.
  */
 void Move_RandomIntegerWalk::constructInternalObject( void ) 
 {
@@ -66,7 +65,7 @@ void Move_RandomIntegerWalk::constructInternalObject( void )
     
     // now allocate a new random-integer-walk move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<long>* tmp = static_cast<const Integer &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<long>* tmp = static_cast<const Natural &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<long> *n = static_cast<RevBayesCore::StochasticNode<long> *>( tmp );
     
     // finally create the internal move object
@@ -178,7 +177,8 @@ const TypeSpec& Move_RandomIntegerWalk::getTypeSpec( void ) const
 
 
 
-void Move_RandomIntegerWalk::printValue(std::ostream &o) const {
+void Move_RandomIntegerWalk::printValue(std::ostream &o) const
+{
     
     o << "Move_RandomIntegerWalk(";
     if (x != NULL) 

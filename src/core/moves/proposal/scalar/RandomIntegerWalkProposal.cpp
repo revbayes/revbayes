@@ -78,7 +78,6 @@ double RandomIntegerWalkProposal::getProposalTuningParameter( void ) const
 double RandomIntegerWalkProposal::doProposal( void )
 {
     
-    
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
@@ -137,7 +136,7 @@ void RandomIntegerWalkProposal::printParameterSummary(std::ostream &o, bool name
 void RandomIntegerWalkProposal::undoProposal( void )
 {
     // swap current value and stored value
-    variable->setValue( new long(stored_value) );
+    variable->getValue() = stored_value;
     
 }
 

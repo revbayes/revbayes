@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
-#include "AbstractHomologousDiscreteCharacterData.h"
-#include "RlAbstractHomologousDiscreteCharacterData.h"
+#include "AbstractDiscreteTaxonData.h"
+#include "RlAbstractDiscreteTaxonData.h"
 #include "RlTypedDistribution.h"
 #include "DagMemberFunction.h"
 #include "DeterministicNode.h"
@@ -28,7 +28,7 @@
 namespace RevLanguage {
 class TypeSpec;
 
-    class Dist_CTMC : public TypedDistribution< AbstractHomologousDiscreteCharacterData > {
+    class Dist_CTMC : public TypedDistribution< AbstractDiscreteTaxonData > {
 
     public:
         Dist_CTMC( void );
@@ -46,7 +46,7 @@ class TypeSpec;
 
 
         // Distribution functions you have to override
-        RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharacterData >*      createDistribution(void) const;
+        RevBayesCore::TypedDistribution< RevBayesCore::AbstractDiscreteTaxonData >*      createDistribution(void) const;
 
     protected:
 

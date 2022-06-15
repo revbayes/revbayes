@@ -103,7 +103,7 @@ namespace RevBayesCore {
         void                                                    setExcluded(const NxsCharactersBlock* charblock, HomologousCharacterData* cMat ) const;                         //!< Set excluded taxa and excluded characters
         
         // methods for reading trees
-        void                                                    constructBranchLengthTreefromNclRecursively(TopologyNode* tn, std::vector<TopologyNode*> &nodes, std::vector<double> &brlens, const NxsSimpleNode* tnNcl, const NxsTaxaBlock *tb);  //!< Constructs a tree from NCL
+        void                                                    constructBranchLengthTreefromNclRecursively(TopologyNode* tn, std::vector<TopologyNode*> &nodes, std::vector<double> &brlens, bool& reindex, const NxsSimpleNode* tnNcl, const NxsTaxaBlock *tb);  //!< Constructs a tree from NCL
      // void                                                    constructTreefromNclRecursively(TopologyNode* tn, const NxsSimpleNode* tnNcl, const NxsTaxaBlock *tb);  //!< Constructs a tree from NCL
         std::vector<Tree* >*                                    readBranchLengthTrees(const std::string &fn, const std::string &fileFormat);     //!< Read trees
         std::vector<Tree* >*                                    convertTreesFromNcl(void);                                                       //!< Converts trees stored by NCL into RevBayes formatted trees

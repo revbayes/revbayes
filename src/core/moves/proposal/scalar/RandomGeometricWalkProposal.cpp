@@ -142,7 +142,7 @@ void RandomGeometricWalkProposal::printParameterSummary(std::ostream &o, bool na
 void RandomGeometricWalkProposal::undoProposal( void )
 {
     // swap current value and stored value
-    variable->setValue( new long(stored_value) );
+    variable->getValue() = stored_value;
     
 }
 

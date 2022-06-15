@@ -10,10 +10,8 @@
 using namespace RevBayesCore;
 
 
-DistanceMatrixReader::DistanceMatrixReader(const std::string &fn, char d, size_t numSkipped) : DelimitedDataReader(fn, d, numSkipped)
+DistanceMatrixReader::DistanceMatrixReader(const std::string &fn, std::string d, size_t numSkipped) : DelimitedDataReader(fn, d, numSkipped)
 {
-	
-	filename = fn;
 	
 	//First, get the size of the matrix
 	int siz = int(chars.size()) -1;//atoi( chars[0][0].c_str() );

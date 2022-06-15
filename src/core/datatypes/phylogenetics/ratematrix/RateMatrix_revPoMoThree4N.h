@@ -33,6 +33,7 @@ namespace RevBayesCore {
 		void 										   setPi( const std::vector<double> &f );
 		void 										   setRho( const std::vector<double> &r );
         void                                           setPhi( const std::vector<double> &fc );
+        std::vector<double>                            getStationaryFrequencies( void ) const;
 
         void                                           update(void);
         
