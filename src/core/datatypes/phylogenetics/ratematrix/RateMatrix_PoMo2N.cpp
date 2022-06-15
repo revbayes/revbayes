@@ -201,8 +201,10 @@ void RateMatrix_PoMo2N::buildRateMatrix(void)
     // fixations
 //    m[2][0]  = (N-1.0)*phi[0]/((N-1)*phi[0]+phi[1]);  //{(N-1)a0,1a1} -> {Na0}
 //    m[N][1]  = (N-1.0)*phi[1]/((N-1)*phi[1]+phi[0]);  //{1a0,(N-1)a1} -> {Na1}
-    m[2][0]  = ((N-1.0)*phi[0]/((N-1)*phi[0]+phi[1])) * rescaling_factor_to_effective_population;  //{(N-1)a0,1a1} -> {Na0}
-    m[N][1]  = ((N-1.0)*phi[1]/((N-1)*phi[1]+phi[0])) * rescaling_factor_to_effective_population;  //{1a0,(N-1)a1} -> {Na1}
+//    m[2][0]  = ((N-1.0)*phi[0]/((N-1)*phi[0]+phi[1])) * rescaling_factor_to_effective_population;  //{(N-1)a0,1a1} -> {Na0}
+//    m[N][1]  = ((N-1.0)*phi[1]/((N-1)*phi[1]+phi[0])) * rescaling_factor_to_effective_population;  //{1a0,(N-1)a1} -> {Na1}
+    m[2][0]  = ((N-1.0)*phi[0]/((N-1)*phi[0]+phi[1])) / N;  //{(N-1)a0,1a1} -> {Na0}
+    m[N][1]  = ((N-1.0)*phi[1]/((N-1)*phi[1]+phi[0])) / N;  //{1a0,(N-1)a1} -> {Na1}
     diagonal[2] += m[2][0];
     diagonal[N] += m[N][1];
     
@@ -214,8 +216,10 @@ void RateMatrix_PoMo2N::buildRateMatrix(void)
         //frequency shifts from singletons
 //        m[2][3]   = (N-1.0)*phi[1]/((N-1)*phi[0]+phi[1]);  //{(N-1)a0,1a1} -> {(N-2)a0,2a1}
 //        m[N][N-1] = (N-1.0)*phi[0]/((N-1)*phi[1]+phi[0]);  //{1a0,(N-1)a1} -> {2a0,(N-2)a1}
-        m[2][3]   = ((N-1.0)*phi[1]/((N-1)*phi[0]+phi[1])) * rescaling_factor_to_effective_population;  //{(N-1)a0,1a1} -> {(N-2)a0,2a1}
-        m[N][N-1] = ((N-1.0)*phi[0]/((N-1)*phi[1]+phi[0])) * rescaling_factor_to_effective_population;  //{1a0,(N-1)a1} -> {2a0,(N-2)a1}
+        m[2][3]   = (N-1.0)*phi[1]/((N-1)*phi[0]+phi[1]) / N;  //{(N-1)a0,1a1} -> {(N-2)a0,2a1}
+        m[N][N-1] = (N-1.0)*phi[0]/((N-1)*phi[1]+phi[0]) / N;  //{1a0,(N-1)a1} -> {2a0,(N-2)a1}
+//        m[2][3]   = ((N-1.0)*phi[1]/((N-1)*phi[0]+phi[1]));  //{(N-1)a0,1a1} -> {(N-2)a0,2a1}
+//        m[N][N-1] = ((N-1.0)*phi[0]/((N-1)*phi[1]+phi[0]));  //{1a0,(N-1)a1} -> {2a0,(N-2)a1}
         diagonal[2] += m[2][3] ;
         diagonal[N] += m[N][N-1];
 
@@ -230,8 +234,10 @@ void RateMatrix_PoMo2N::buildRateMatrix(void)
                 //ai aj
 //                m[n+1][2+n]  = n*(N-n)*phi[1]/(n*phi[1]+(N-n)*phi[0]); //{naj,(N-n)ai} -> {(n+1)aj,(N-n-1)ai}
 //                m[n+1][n]    = n*(N-n)*phi[0]/(n*phi[1]+(N-n)*phi[0]); //{naj,(N-n)ai} -> {(n-1)aj,(N-n+1)ai}
-                m[n+1][2+n]  = (n*(N-n)*phi[1]/(n*phi[1]+(N-n)*phi[0])) * rescaling_factor_to_effective_population; //{naj,(N-n)ai} -> {(n+1)aj,(N-n-1)ai}
-                m[n+1][n]    = (n*(N-n)*phi[0]/(n*phi[1]+(N-n)*phi[0])) * rescaling_factor_to_effective_population; //{naj,(N-n)ai} -> {(n-1)aj,(N-n+1)ai}
+//                m[n+1][2+n]  = (n*(N-n)*phi[1]/(n*phi[1]+(N-n)*phi[0])) * rescaling_factor_to_effective_population; //{naj,(N-n)ai} -> {(n+1)aj,(N-n-1)ai}
+//                m[n+1][n]    = (n*(N-n)*phi[0]/(n*phi[1]+(N-n)*phi[0])) * rescaling_factor_to_effective_population; //{naj,(N-n)ai} -> {(n-1)aj,(N-n+1)ai}
+                m[n+1][2+n]  = (n*(N-n)*phi[1]/(n*phi[1]+(N-n)*phi[0])) / N; //{naj,(N-n)ai} -> {(n+1)aj,(N-n-1)ai}
+                m[n+1][n]    = (n*(N-n)*phi[0]/(n*phi[1]+(N-n)*phi[0])) / N; //{naj,(N-n)ai} -> {(n-1)aj,(N-n+1)ai}
                 diagonal[n+1] += m[n+1][2+n] + m[n+1][n];
 
             }
