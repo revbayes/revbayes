@@ -2,6 +2,7 @@
 #define GenericFunction_H
 
 #include "TypedDagNode.h"
+#include "TypedFunction.h"
 #include <boost/mp11.hpp>
 #include <boost/callable_traits/return_type.hpp>
 
