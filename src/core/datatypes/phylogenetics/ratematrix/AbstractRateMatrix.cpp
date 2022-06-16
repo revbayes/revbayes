@@ -582,13 +582,29 @@ void AbstractRateMatrix::exponentiateMatrixByScalingAndSquaring(double t,  Trans
         }
     }
 
+    // sanitization part 1 -- ensure all positive entries
+    for(int i=0;i<num_states;i++)
+        for(int j=0;j<num_states;j++)
+            p[i][j] = std::max(p[i][j], 0.0);
+
+
     // now perform the repeated squaring
     TransitionProbabilityMatrix r(num_states);
     for (size_t i = 0; i < s; i++)
     {
         multiplyMatrices(p, p, r);
         p = r;
+    }
 
+    // sanitization part 2 -- ensure rows sum to 1
+    for(int i=0;i<num_states;i++)
+    {
+        double sum = 0;
+        for(int j=0;j<num_states;j++)
+            sum += p[i][j];
+
+        for(int j=0;j<num_states;j++)
+            p[i][j] /= sum;
     }
 }
 
