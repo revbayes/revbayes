@@ -561,7 +561,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
                 warn = true;
             }
 
-            if ( max + 1 == n)
+            if ( !v.isCharacterExcluded(i) && max + 1 == n)
             {
                 v.includeCharacter(i);
             }
