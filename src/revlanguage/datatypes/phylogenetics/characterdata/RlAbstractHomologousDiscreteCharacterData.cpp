@@ -561,7 +561,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
                 warn = true;
             }
 
-            if ( !v.isCharacterExcluded(i) && max + 1 == n)
+            if ( !v.isCharacterExcluded(i) && max + 1 == n) // only set partition for previously included characters
             {
                 v.includeCharacter(i);
             }
@@ -644,7 +644,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
 
             for (size_t x = 0; x < v.getNumberOfStates(); x++)
             {
-                if ( max == x)
+                if ( !v.isCharacterExcluded(i) && max == x ) // only consider previously included characters
                 {
                     matVec[x]->includeCharacter(i);
                 }
