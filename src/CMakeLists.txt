@@ -69,28 +69,42 @@ endif()
 if ("${RB_BEAGLE}" STREQUAL "ON")
     if (RB_BEAGLE_ROOT)
         set(BEAGLE_ROOT ${RB_BEAGLE_ROOT})
+	set(BEAGLE_INCLUDE_DIR, "${BEAGLE_ROOT}/include/libhmsbeagle-1")	
+	set(BEAGLE_LIBRARY_DIRS, "${BEAGLE_ROOT}/lib ${BEAGLE_ROOT}/lib/libhmsbeagle-1")	
+
+	set(BEAGLE_COMPILE_FLAGS    "-I${BEAGLE_INCLUDE_DIR}")
+	set(BEAGLE_LINK_FLAGS       "-L${BEAGLE_ROOT}/lib/libhmsbeagle-1 -L${BEAGLE_ROOT}/lib -lhmsbeagle")
+	set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${BEAGLE_COMPILE_FLAGS}")
+	set(CMAKE_CXX_LINK_FLAGS    "${CMAKE_CXX_LINK_FLAGS} ${BEAGLE_LINK_FLAGS}")
+
+	#set(BEAGLE_INCLUDE_PATH  "${BEAGLE_ROOT}/include/libhmsbeagle-1")
+	#include_directories(${BEAGLE_INCLUDE_PATH})
+	#set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${BEAGLE_COMPILE_FLAGS}")
+	#set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} ${BEAGLE_LINK_FLAGS}")
+
+	#MESSAGE("My BEAGLE information:")
+        #MESSAGE("  BEAGLE_INCLUDE : ${BEAGLE_INCLUDE_PATH}")
+        #MESSAGE("  BEAGLE_LIBS    : ${BEAGLE_LINK_FLAGS}")
     else()
-        set(BEAGLE_ROOT "")
+	#-- TODO - Check this on other computers...
+	MESSAGE("Searching for BEAGLE packages using `pkg-config`:")
+        find_package(PkgConfig REQUIRED)
+	pkg_check_modules(BEAGLE REQUIRED hmsbeagle-1 hmsbeagle)
     endif()
 
-    set(BEAGLE_INCLUDE_PATH  "${BEAGLE_ROOT}")
-    set(BEAGLE_COMPILE_FLAGS "-I${BEAGLE_INCLUDE_PATH}")
-    set(BEAGLE_LINK_FLAGS    "-L${BEAGLE_ROOT} -L${BEAGLE_ROOT}/CPU -L${BEAGLE_ROOT}/GPU -lhmsbeagle")
-
     add_definitions(-DRB_BEAGLE)
-
-    include_directories(${BEAGLE_INCLUDE_PATH})
-    set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${BEAGLE_COMPILE_FLAGS}")
-    set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} ${BEAGLE_LINK_FLAGS}")
-
-    MESSAGE("My BEAGLE information:")
-    MESSAGE("  BEAGLE_ROOT : ${BEAGLE_ROOT}")
-    MESSAGE("  BEAGLE_LIBS : ${BEAGLE_ROOT}/CPU ${BEAGLE_ROOT}/GPU")
+    
+    INCLUDE_DIRECTORIES(${BEAGLE_INCLUDE_DIR})
+    LINK_DIRECTORIES(${BEAGLE_LIBRARY_DIRS})
+	
+    MESSAGE("BEAGLE configuration results:")
+    MESSAGE("  BEAGLE_INCLUDE_DIR: ${BEAGLE_INCLUDE_DIR}")
+    MESSAGE("  BEAGLE_LIBRARY_DIR: ${BEAGLE_LIBRARY_DIRS}")
 endif()
 
 
 if ("${RB_USE_EIGEN3}" STREQUAL "ON")
-   find_package(Eigen3 REQUIRED)
+   find_package(Eigen3 NAMES Eigen3 Eigen eigen3 eigen REQUIRED)
    include_directories(${EIGEN3_INCLUDE_DIR})
 
    add_definitions(-DRB_USE_EIGEN3)
@@ -98,6 +112,7 @@ if ("${RB_USE_EIGEN3}" STREQUAL "ON")
    set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${EIGEN_COMPILE_FLAGS}")
    MESSAGE("My EIGEN3 information:")
    MESSAGE("  EIGEN3_INCLUDE_DIR : ${EIGEN3_INCLUDE_DIR}")
+   MESSAGE("  EIGEN3_DIR         : ${EIGEN3}")
 endif()
 
 
