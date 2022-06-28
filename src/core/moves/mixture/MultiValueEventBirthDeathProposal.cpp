@@ -284,6 +284,8 @@ double MultiValueEventBirthDeathProposal::doUncorrelatedProposal(const MultiValu
     // Otherwise we might give birth and die every time
     double u = rng->uniform01();
     
+    stored_sorting_index = -1;
+    
     if ( u > 0.5 || n_events == 0 )
     {
         // we pick a birth move
