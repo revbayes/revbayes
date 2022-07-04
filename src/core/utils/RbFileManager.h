@@ -31,7 +31,7 @@ namespace RevBayesCore {
         void                    closeFile(std::ofstream& strm);  //!< Close output file
         void                    createDirectoryForFile(void);  //!< Create the directories in the path of full_file_name
         void                    formatError(std::string& errorStr);  //!< Format the error string when (mis)reading files
-        const std::string&      getCurrentDirectory(void) const;  //!< Returns the current directory for the process
+        std::string             getCurrentDirectory(void) const;  //!< Returns the current directory for the process
         std::string             getFileExtension(void) const;  //!< Returns the file extension from file_name
         const std::string&      getFileName(void) const;
         std::string             getFileNameWithoutExtension(void) const;  //!< Returns file_name without extension
