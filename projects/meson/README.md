@@ -181,8 +181,6 @@ ninja -C build-gtk install
 
         brew install mingw-w64 wine-stable
 
-    You might need to update the paths in the cross-file below.
-
 2. Create a fake windows root directory and download windows libraries from MINGW64.
 
    ```
@@ -193,7 +191,6 @@ ninja -C build-gtk install
    This command should also generate a "cross-file" that contains info for cross-compiling to windows.
 
    If you want to compile the GUI version for windows, add `-gtk true` to the command to `make_winroot.sh`.
-
 
 3. Compile Revbayes
 

@@ -37,14 +37,14 @@ echo "2. Writing cross file to '${CROSSNAME}'"
 
 if [ "$ccache" != "false" ]; then
     COMPILER_LINES=$(cat <<EOF
-c = ['ccache', '/usr/bin/x86_64-w64-mingw32-gcc-posix']
-cpp = ['ccache', '/usr/bin/x86_64-w64-mingw32-g++-posix']
+c = ['ccache', 'x86_64-w64-mingw32-gcc-posix']
+cpp = ['ccache', 'x86_64-w64-mingw32-g++-posix']
 EOF
 )
 else
     COMPILER_LINES=$(cat <<EOF
-c = '/usr/bin/x86_64-w64-mingw32-gcc-posix'
-cpp = '/usr/bin/x86_64-w64-mingw32-g++-posix'
+c = 'x86_64-w64-mingw32-gcc-posix'
+cpp = 'x86_64-w64-mingw32-g++-posix'
 EOF
 )
 fi
@@ -52,9 +52,9 @@ fi
 cat > "${CROSSNAME}" <<EOF
 [binaries]
 ${COMPILER_LINES}
-ar = '/usr/bin/x86_64-w64-mingw32-ar'
-strip = '/usr/bin/x86_64-w64-mingw32-strip'
-pkgconfig = '/usr/bin/pkg-config'
+ar = 'x86_64-w64-mingw32-ar'
+strip = 'x86_64-w64-mingw32-strip'
+pkgconfig = 'pkg-config'
 exe_wrapper = 'wine64' # A command used to run generated executables.
 
 # why do we still need these? shouldn't they get added automatically if we find boost?
