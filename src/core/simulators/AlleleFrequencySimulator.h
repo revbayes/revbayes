@@ -22,7 +22,7 @@ class Tree;
         
     public:
         
-        AlleleFrequencySimulator(Tree* t, const std::vector<long>& ps, double gt, size_t ns, const std::vector<double>& mr, const std::vector<long>& s, double r);
+        AlleleFrequencySimulator(Tree* t, const std::vector<long>& ps, double gt, size_t ns, const std::vector<double>& mr, const std::vector<long>& s, double r, bool mg);
         
         void                                            simulateAlleleFrequencies( const std::string& fn, bool only_Variable ) const;
         
@@ -42,6 +42,7 @@ class Tree;
         std::vector<double>                             mutation_rates;
         std::vector<long>                               samples_per_species;
         double                                          root_branch;
+        bool                                            moran_generations;
         
         
     };
