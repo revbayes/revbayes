@@ -32,6 +32,7 @@
 
 //#define RB_BEAGLE_DEBUG
 //#define RB_BEAGLE_DEBUG_TIP
+#undef RB_BEAGLE_DEBUG
 
 
 namespace RevBayesCore

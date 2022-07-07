@@ -67,52 +67,63 @@ endif()
 
 
 if ("${RB_BEAGLE}" STREQUAL "ON")
-    if (RB_BEAGLE_ROOT)
-        set(BEAGLE_ROOT ${RB_BEAGLE_ROOT})
-	set(BEAGLE_INCLUDE_DIR, "${BEAGLE_ROOT}/include/libhmsbeagle-1")	
-	set(BEAGLE_LIBRARY_DIRS, "${BEAGLE_ROOT}/lib ${BEAGLE_ROOT}/lib/libhmsbeagle-1")	
+    #-- Try to set BEAGLE root path from the environment variable fist
+    set(BEAGLE_ROOT "$ENV{BEAGLE_ROOT}" )
+    if( NOT BEAGLE_ROOT )
+	#-- If there is no environment variable, try to set from command line 
+        if ( NOT "${RB_BEAGLE_ROOT}" STREQUAL "")
+	    set(BEAGLE_ROOT "${RB_BEAGLE_ROOT}")
+        else()
+            # Not sure which of the following is a better way to default to search for beagle...
 
-	set(BEAGLE_COMPILE_FLAGS    "-I${BEAGLE_INCLUDE_DIR}")
-	set(BEAGLE_LINK_FLAGS       "-L${BEAGLE_ROOT}/lib/libhmsbeagle-1 -L${BEAGLE_ROOT}/lib -lhmsbeagle")
-	set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${BEAGLE_COMPILE_FLAGS}")
-	set(CMAKE_CXX_LINK_FLAGS    "${CMAKE_CXX_LINK_FLAGS} ${BEAGLE_LINK_FLAGS}")
-
-	#set(BEAGLE_INCLUDE_PATH  "${BEAGLE_ROOT}/include/libhmsbeagle-1")
-	#include_directories(${BEAGLE_INCLUDE_PATH})
-	#set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${BEAGLE_COMPILE_FLAGS}")
-	#set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} ${BEAGLE_LINK_FLAGS}")
-
-	#MESSAGE("My BEAGLE information:")
-        #MESSAGE("  BEAGLE_INCLUDE : ${BEAGLE_INCLUDE_PATH}")
-        #MESSAGE("  BEAGLE_LIBS    : ${BEAGLE_LINK_FLAGS}")
-    else()
-	#-- TODO - Check this on other computers...
-	MESSAGE("Searching for BEAGLE packages using `pkg-config`:")
-        find_package(PkgConfig REQUIRED)
-	pkg_check_modules(BEAGLE REQUIRED hmsbeagle-1 hmsbeagle)
+            #-- If we could not set it, then we try to search for it on CMAKE path
+            find_package(BEAGLE NAMES hmsbeagle hmsbeagle-1 REQUIRED)
+            
+            #-- Alternatively try pkg-config   
+	    #find_package(PkgConfig REQUIRED)
+            #PKG_CHECK_MODULES(BEAGLE REQUIRED hmsbeagle-1 hmsbeagle)
+        endif()
     endif()
+	
+    set(BEAGLE_INCLUDE_DIR      ${BEAGLE_ROOT}/include/libhmsbeagle-1)	
+    set(BEAGLE_LIBRARY_DIRS     ${BEAGLE_ROOT}/lib)	
 
-    add_definitions(-DRB_BEAGLE)
+    set(BEAGLE_COMPILE_FLAGS    "-I${BEAGLE_INCLUDE_DIR} -I${BEAGLE_ROOT}/libhmsbeagle")
+    set(BEAGLE_LINK_FLAGS       "-L${BEAGLE_ROOT}/lib/libhmsbeagle-1 -L${BEAGLE_ROOT}/lib -lhmsbeagle")
+
+    set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${BEAGLE_COMPILE_FLAGS}")
+    set(CMAKE_CXX_LINK_FLAGS    "${CMAKE_CXX_LINK_FLAGS} ${BEAGLE_LINK_FLAGS}")
+
+    ADD_DEFINITIONS(-DRB_BEAGLE)
     
     INCLUDE_DIRECTORIES(${BEAGLE_INCLUDE_DIR})
     LINK_DIRECTORIES(${BEAGLE_LIBRARY_DIRS})
-	
+        
     MESSAGE("BEAGLE configuration results:")
+    MESSAGE("  BEAGLE_ROOT:        ${BEAGLE_ROOT}")
     MESSAGE("  BEAGLE_INCLUDE_DIR: ${BEAGLE_INCLUDE_DIR}")
     MESSAGE("  BEAGLE_LIBRARY_DIR: ${BEAGLE_LIBRARY_DIRS}")
+
 endif()
 
 
 if ("${RB_USE_EIGEN3}" STREQUAL "ON")
-   find_package(Eigen3 NAMES Eigen3 Eigen eigen3 eigen REQUIRED)
-   include_directories(${EIGEN3_INCLUDE_DIR})
+  #-- Try to set the Eigen3 path from the environment variable fist
+  set(EIGEN_INCLUDE_DIR "$ENV{EIGEN_INCLUDE_DIR}" )
+  if( NOT EIGEN_INCLUDE_DIR )
+     #-- If we could not set it, then we try to search for it on CMAKE path
+     find_package(EIGEN NAMES Eigen3 Eigen eigen3 eigen REQUIRED)
+  endif()
+
+   include_directories(${EIGEN_INCLUDE_DIR})
 
    add_definitions(-DRB_USE_EIGEN3)
 
+   set(EIGEN_COMPILE_FLAGS "-I${EIGEN_INCLUDE_DIR}")
    set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${EIGEN_COMPILE_FLAGS}")
-   MESSAGE("My EIGEN3 information:")
-   MESSAGE("  EIGEN3_INCLUDE_DIR : ${EIGEN3_INCLUDE_DIR}")
-   MESSAGE("  EIGEN3_DIR         : ${EIGEN3}")
+
+   MESSAGE("EIGEN3 information:")
+   MESSAGE("  EIGEN_INCLUDE_DIR : ${EIGEN_INCLUDE_DIR}")
 endif()
 
 
@@ -236,6 +247,10 @@ else()
 
   if ("${MPI}" STREQUAL "ON")
     target_link_libraries(${RB_EXEC_NAME} ${MPI_LIBRARIES})
+  endif()
+  
+  if ("${RB_BEAGLE}" STREQUAL "ON")
+    target_link_libraries(${RB_EXEC_NAME} ${BEAGLE_LIBRARIES})
   endif()
 
 endif()

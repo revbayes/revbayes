@@ -28,7 +28,8 @@
 #include "BeagleUtilities.h"
 #include "libhmsbeagle/beagle.h"
 
-#define RB_BEAGLE_DEBUG
+// #define RB_BEAGLE_DEBUG
+#undef RB_BEAGLE_DEBUG
 
 #if defined ( RB_USE_EIGEN3 )
 #include <Eigen/Core>
@@ -4698,7 +4699,7 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigensyste
         b_flat_eigenvalues      = flat_eigenvalues;
         b_flat_eigenvectors     = flat_eigenvectors;
         b_flat_inv_eigenvectors = flat_inv_eigenvectors;
-#else
+//#else
 //#if defined ( RB_USE_EIGEN )
 //        eigen_system            = &rate_matrices[i].getEigenSystem();
 //        b_flat_eigenvalues      = eigen_system->getRealEigenvalues();
