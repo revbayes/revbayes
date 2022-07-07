@@ -212,7 +212,7 @@ MethodTable Dist_CoalescentSkyline::getDistributionMethods( void ) const
     
     // member functions
     ArgumentRules* get_interval_ages_arg_rules = new ArgumentRules();
-    methods.addFunction( new DistributionMemberFunction<Dist_CoalescentSkyline, ModelVector<RealPos> >( "getIntervalAges", variable, get_interval_ages_arg_rules   ) );
+    methods.addFunction( new DistributionMemberFunction<Dist_CoalescentSkyline, ModelVector<RealPos> >( "getIntervalAges", variable, get_interval_ages_arg_rules, true   ) );
     
     
     return methods;
