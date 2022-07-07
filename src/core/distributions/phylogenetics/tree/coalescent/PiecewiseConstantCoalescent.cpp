@@ -236,6 +236,7 @@ void PiecewiseConstantCoalescent::executeMethod(const std::string &n, const std:
     if ( n == "getIntervalAges" )
     {
         
+        updateIntervals();
         rv = interval_change_points;
         
     }
@@ -402,7 +403,7 @@ void PiecewiseConstantCoalescent::restoreSpecialization(const DagNode *affecter)
 
     // Sebastian: This is currently redudant because we update the intervals each time when we compute the probability
     // just re-update the start times of the intervals
-//    updateIntervals();
+    updateIntervals();
     
 }
 

@@ -263,7 +263,7 @@ double MultiValueEventBirthDeathProposal::doAutocorrelatedProposal(const Autocor
         }
         
     }
-    
+
     return hr;
 }
 
