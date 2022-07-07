@@ -33,24 +33,13 @@ namespace fs = boost::filesystem;
 RbFileManager::RbFileManager( void ) :
     file_name( "" ),
     file_path( "" ),
-    full_file_name( "" ),
-    path_separator( "" ),
-    new_line( "" )
+    full_file_name( "" )
 {
-    
-#	ifdef _WIN32
-    path_separator = "\\";
-    new_line = "\r\n";
-#   else
-    path_separator = "/";
-    new_line = "\n";
-#   endif
-    
     file_path = RbSettings::userSettings().getWorkingDirectory();
     full_file_name = file_path;
     if ( full_file_name != "")
     {
-        full_file_name += path_separator;
+        full_file_name += getPathSeparator();
     }
     
     full_file_name += file_name;
@@ -67,16 +56,8 @@ RbFileManager::RbFileManager( void ) :
 RbFileManager::RbFileManager(const std::string &fn) :
     file_name( fn ),
     file_path( "" ),
-    full_file_name( "" ),
-    path_separator( "" )
+    full_file_name( "" )
 {
-    
-#	ifdef _WIN32
-    path_separator = "\\";
-#	else
-    path_separator = "/";
-#   endif
-    
     parsePathFileNames( fn );
     
 #   ifdef _WIN32
@@ -86,7 +67,7 @@ RbFileManager::RbFileManager(const std::string &fn) :
     full_file_name = file_path;
     if ( full_file_name != "")
     {
-        full_file_name += path_separator;
+        full_file_name += getPathSeparator();
     }
     
     full_file_name += file_name;
@@ -102,38 +83,28 @@ RbFileManager::RbFileManager(const std::string &fn) :
 RbFileManager::RbFileManager(const std::string &pn, const std::string &fn) :
     file_name( fn ),
     file_path( pn ),
-    full_file_name( "" ),
-    path_separator( "" )
+    full_file_name( "" )
 {
-    
-#	ifdef _WIN32
-    path_separator = "\\";
-    new_line = "\r\n";
-#	else
-    path_separator = "/";
-    new_line = "\n";
-#   endif
-    
     // set the path and file for the string
-    std::string tmp = pn + path_separator + fn;
+    std::string tmp = pn + getPathSeparator() + fn;
     parsePathFileNames( tmp );
 
 #   ifdef _WIN32
     StringUtilities::replaceSubstring(file_path,"/","\\");
 #   endif
-    
+
     full_file_name = file_path;
     if ( full_file_name != "")
     {
-        full_file_name += path_separator;
+        full_file_name += getPathSeparator();
     }
-    
+
     full_file_name += file_name;
-    
+
 #   ifdef _WIN32
     StringUtilities::replaceSubstring(full_file_name,"/","\\");
 #   endif
-    
+
 }
 
 
@@ -164,7 +135,7 @@ void RbFileManager::createDirectoryForFile( void )
     std::string dir_path = getStringByDeletingLastPathComponent( full_file_name );
     
     std::vector<std::string> pathComponents;
-    StringUtilities::stringSplit(dir_path, path_separator, pathComponents);
+    StringUtilities::stringSplit(dir_path, getPathSeparator(), pathComponents);
     
     std::string directoryName = "";
     for ( std::vector<std::string>::const_iterator it=pathComponents.begin(); it != pathComponents.end(); ++it)
@@ -180,7 +151,7 @@ void RbFileManager::createDirectoryForFile( void )
             }
         }
         
-        directoryName += path_separator;
+        directoryName += getPathSeparator();
     }
     
 }
@@ -314,13 +285,13 @@ std::string RbFileManager::getFullFilePath( void ) const
     // check if file_path is relative or absolute
     // add current working path only if relative
 #   ifdef RB_XCODE
-    if ( file_path.size() > 0 && path_separator[0] != file_path[0] )
+    if ( file_path.size() > 0 && getPathSeparator()[0] != file_path[0] )
 #    else
     boost::filesystem::path tmp_file = boost::filesystem::path(file_path);
     if ( tmp_file.is_absolute() == false )
 #    endif
     {        
-        fullfile_path = RbSettings::userSettings().getWorkingDirectory() + path_separator + file_path;        
+        fullfile_path = RbSettings::userSettings().getWorkingDirectory() + getPathSeparator() + file_path;
     }
     
     return fullfile_path;
@@ -336,7 +307,7 @@ std::string RbFileManager::getLastPathComponent( void )
 {
     
     std::string tmp = full_file_name;
-    if ( tmp[tmp.size()-1] == path_separator[0] )
+    if ( tmp[tmp.size()-1] == getPathSeparator()[0] )
     {
         tmp = tmp.substr(0,tmp.size()-1);
     }
@@ -353,7 +324,7 @@ std::string RbFileManager::getLastPathComponent(const std::string& s)
 {
     
     std::string tempS = s;
-    size_t location = tempS.find_last_of( path_separator );
+    size_t location = tempS.find_last_of( getPathSeparator() );
     if ( location == std::string::npos )
     {
         // There is no path in this string. We
@@ -377,15 +348,23 @@ std::string RbFileManager::getLastPathComponent(const std::string& s)
 }
 
 
-const std::string& RbFileManager::getNewLine(void) const
+std::string RbFileManager::getNewLine(void) const
 {
-    return new_line;
+#   ifdef _WIN32
+    return "\r\n";
+#   else
+    return "\n";
+#   endif
 }
 
 
-const std::string& RbFileManager::getPathSeparator( void ) const
+std::string RbFileManager::getPathSeparator( void ) const
 {
-    return path_separator;
+#   ifdef _WIN32
+    return "\\";
+#   else
+    return "/";
+#   endif
 }
 
 
@@ -397,7 +376,7 @@ std::string RbFileManager::getStringByDeletingLastPathComponent(const std::strin
 {
     
     std::string tempS = s;
-    size_t location = tempS.find_last_of( path_separator );
+    size_t location = tempS.find_last_of( getPathSeparator() );
     
     if ( location == std::string::npos )
     {
@@ -526,7 +505,7 @@ bool RbFileManager::isFilePresent(const std::string &mp, const std::string &mf) 
         f = RbSettings::userSettings().getWorkingDirectory();
     }
     
-    f += path_separator + mf;
+    f += getPathSeparator() + mf;
     
     return isFilePresent(f);
     
@@ -582,7 +561,7 @@ bool RbFileManager::listDirectoryContents(const std::string& dirpath)
         {
             struct stat entryinfo;
             std::string entryname = entry->d_name;
-            std::string entrypath = dirpath + path_separator + entryname;
+            std::string entrypath = dirpath + getPathSeparator() + entryname;
             if (!stat( entrypath.c_str(), &entryinfo ))
             {
                 if (S_ISDIR( entryinfo.st_mode ))
@@ -639,7 +618,7 @@ bool RbFileManager::openFile(std::ifstream& strm)
 {
     
     // concatenate path and file name
-    std::string file_pathName = file_path + path_separator + file_name;
+    std::string file_pathName = file_path + getPathSeparator() + file_name;
         
     // here we assume that the presence of the path/file has
     // been checked elsewhere
@@ -661,7 +640,7 @@ bool RbFileManager::openFile(std::ofstream& strm)
 {
     
     // concatenate path and file name
-    std::string file_pathName = file_path + path_separator + file_name;
+    std::string file_pathName = file_path + getPathSeparator() + file_name;
     
     // here we assume that the presence of the path/file has
     // been checked elsewhere
@@ -693,14 +672,14 @@ bool RbFileManager::parsePathFileNames(const std::string &input_string)
     //    std::filesystem::path path(winPathString); // Construct the path from a string.
     if ( name.size() > 0 && name[0] != '/' )
     {
-        name = getCurrentDirectory() + path_separator + input_string;
+        name = getCurrentDirectory() + getPathSeparator() + input_string;
     }
 #    else
     boost::filesystem::path tmp_file = boost::filesystem::path(name);
     //    std::filesystem::path path(winPathString); // Construct the path from a string.
     if ( tmp_file.is_absolute() == false )
     {
-        name = getCurrentDirectory() + path_separator + input_string;
+        name = getCurrentDirectory() + getPathSeparator() + input_string;
     }
 #    endif
 
@@ -712,7 +691,7 @@ bool RbFileManager::parsePathFileNames(const std::string &input_string)
     if ( name.length() > 0 && isDPresent == true && isFPresent == false)
     {
         file_name = "";
-        size_t location = name.find_last_of( path_separator );
+        size_t location = name.find_last_of( getPathSeparator() );
         if ( location == name.length() - 1 )
         {
             name.erase( location );
@@ -730,7 +709,7 @@ bool RbFileManager::parsePathFileNames(const std::string &input_string)
     
     // Find the location of the last "/".
     //This is where we will divide the path/file string into two.
-    size_t location = StringUtilities::findLastOf( name, path_separator[0] );
+    size_t location = StringUtilities::findLastOf( name, getPathSeparator()[0] );
     
     if ( location == std::string::npos )
     {
@@ -854,7 +833,7 @@ bool RbFileManager::setStringWithNamesOfFilesInDirectory(const std::string& dirp
         {
             struct stat entryinfo;
             std::string entryname = entry->d_name;
-            std::string entrypath = dirpath + path_separator + entryname;
+            std::string entrypath = dirpath + getPathSeparator() + entryname;
             
             bool skip_me = false;
 
