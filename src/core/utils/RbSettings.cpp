@@ -126,12 +126,6 @@ double RbSettings::getTolerance( void ) const
 }
 
 
-std::string RbSettings::getWorkingDirectory( void ) const
-{
-    return fs::current_path().make_preferred().string();
-}
-
-
 /** Initialize the user settings */
 #define	MAX_DIR_PATH	2048
 void RbSettings::initializeUserSettings(void)
@@ -342,22 +336,6 @@ void RbSettings::setTolerance(double t)
 {
     // replace the internal value with this new value
     tolerance = t;
-    
-    // save the current settings for the future.
-    writeUserSettings();
-}
-
-
-void RbSettings::setWorkingDirectory(const std::string &wd)
-{
-    try
-    {
-        fs::current_path( expandUserDir(wd) );
-    }
-    catch (...)
-    {
-        throw RbException()<<"Cannot set the current directory to \""<<wd<<"\"";
-    }
     
     // save the current settings for the future.
     writeUserSettings();
