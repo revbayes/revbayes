@@ -125,7 +125,7 @@ void RbFileManager::createDirectoryForFile( void )
  * @param path relative path
  * @return full path including user home directory
  */
-std::string RbFileManager::expandUserDir(std::string path)
+std::string expandUserDir(std::string path)
 {
     if ( !path.empty() && path[0] == '~')
     {

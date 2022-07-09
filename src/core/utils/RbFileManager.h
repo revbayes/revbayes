@@ -9,6 +9,7 @@
 namespace RevBayesCore {
     
     std::istream&           safeGetline(std::istream& is, std::string& t); //!< Gets one line from a stream
+    std::string             expandUserDir(std::string path); //!< Get full path to user directory
 
 /** @brief Contains functions for files and directories management
  *
