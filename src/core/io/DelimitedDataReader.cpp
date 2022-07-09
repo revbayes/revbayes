@@ -27,9 +27,8 @@ void DelimitedDataReader::readData( size_t lines_to_skip )
     std::vector<std::string> tmpChars;
     
     // open file
-    std::ifstream readStream;
-    RbFileManager f = RbFileManager(filename);
-    if ( f.openFile(readStream) == false )
+    std::ifstream readStream( filename );
+    if ( not readStream )
     {
         throw RbException( "Could not open file " + filename );
     }

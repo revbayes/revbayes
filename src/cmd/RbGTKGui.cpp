@@ -435,15 +435,11 @@ static void menuitem_load_response( gchar *string )
     
     if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT)
     {
-        char *filename;
-        
-        filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
-        
+        char *filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
         
         // open file
-        std::ifstream read_stream;
-        RevBayesCore::RbFileManager f = RevBayesCore::RbFileManager( std::string(filename) );
-        if ( f.openFile(read_stream) == false )
+        std::ifstream read_stream( std::string(filename) );
+        if ( not read_stream )
         {
 //            throw RbException( "Could not open file " + filename );
             std::cerr << "Could not open file with name '" << std::string(filename) << "'." << std::endl;

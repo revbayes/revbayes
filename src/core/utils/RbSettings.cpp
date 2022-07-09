@@ -155,8 +155,7 @@ void RbSettings::initializeUserSettings(void)
     //    bool failed = false; //unused
     if ( fm.isFile() )
     {
-        std::ifstream readStream;
-        fm.openFile( readStream );
+        std::ifstream readStream( fm.getFullFileName() );
         std::string readLine = "";
         while ( safeGetline(readStream,readLine) )
         {
@@ -373,8 +372,7 @@ void RbSettings::writeUserSettings( void )
     std::string settings_file_name = ".RevBayes.ini";
     RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(user_dir, settings_file_name);
 
-    std::ofstream writeStream;
-    fm.openFile( writeStream );
+    std::ofstream writeStream( fm.getFullFileName() );
     writeStream << "moduledir=" << moduleDir << std::endl;
     writeStream << "outputPrecision=" << outputPrecision << std::endl;
     writeStream << "printNodeIndex=" << (printNodeIndex ? "true" : "false") << std::endl;

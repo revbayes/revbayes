@@ -34,9 +34,8 @@ void CountFileToNaturalNumbersConverter::cfconverter( const std::string &fi, con
 {
   
     // open file
-    std::ifstream readStream;
-    RbFileManager fii = RbFileManager( fi );
-    if ( fii.openFile(readStream) == false )
+    std::ifstream readStream( fi );
+    if ( not readStream )
     {
         throw RbException( "Could not open file \"" + fi + "\".");
     }

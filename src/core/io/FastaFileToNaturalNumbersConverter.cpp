@@ -38,11 +38,9 @@ void FastaFileToNaturalNumbersConverter::faconverter( const std::string &fi, con
   size_t n_taxa    = taxa.size();
 
   // open file
-  std::ifstream readStream;
-  RbFileManager fii = RbFileManager( fi );
-  if ( fii.openFile(readStream) == false ) {
-    throw RbException( "Could not open file \"" + fi + "\".");
-  }
+  std::ifstream readStream( fi );
+  if ( not readStream )
+      throw RbException( "Could not open file \"" + fi + "\".");
 
   // some important quantities to parse the fasta file    
   std::vector<std::string> alignment;

@@ -603,50 +603,6 @@ bool RbFileManager::makeDirectory(const std::string &dn)
 }
 
 
-/** Opens a file for input
- * @param strm stream to associate with the file
- * @return whether the operation was successful
-*/
-bool RbFileManager::openFile(std::ifstream& strm)
-{
-    
-    // concatenate path and file name
-    fs::path file_pathName = fs::path(file_path) / file_name;
-        
-    // here we assume that the presence of the path/file has
-    // been checked elsewhere
-    strm.open( file_pathName.make_preferred().string(), std::ios::in );
-    if ( !strm )
-    {
-        return false;
-    }
-    
-    return true;
-}
-
-
-/** Opens a file for output
- * @param strm stream to associate with the file
- * @return whether the operation was successful
-*/
-bool RbFileManager::openFile(std::ofstream& strm)
-{
-    
-    // concatenate path and file name
-    fs::path file_pathName = fs::path(file_path) / file_name;
-    
-    // here we assume that the presence of the path/file has
-    // been checked elsewhere
-    strm.open( file_pathName.make_preferred().string(), std::ios::out );
-    if ( !strm )
-    {
-        return false;
-    }
-    
-    return true;
-}
-
-
 /** Divides a string into the path and file name components
  * and sets member variables to those values
  *
