@@ -108,24 +108,6 @@ RbFileManager::RbFileManager(const std::string &pn, const std::string &fn) :
 }
 
 
-/** Closes input file
- * @param strm stream to close
- * */
-void RbFileManager::closeFile(std::ifstream& strm)
-{   
-    strm.close();
-}
-
-
-/** Closes output file
- * @param strm stream to close
- * */
-void RbFileManager::closeFile(std::ofstream& strm)
-{    
-    strm.close();
-}
-
-
 /**
  * Recursively create the directories which are present in the full file name.
  */

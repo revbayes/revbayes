@@ -147,7 +147,7 @@ void FastaFileToNaturalNumbersConverter::faconverter( const std::string &fi, con
   }
 
   // close the input file connection
-  fii.closeFile( readStream );
+  readStream.close();
   //for (size_t i =0; i<n_taxa; ++i){ std::cout << ctaxa[i] << "\n"; }
 
   // summarizing the 
