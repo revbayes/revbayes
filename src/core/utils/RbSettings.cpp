@@ -145,7 +145,7 @@ void RbSettings::initializeUserSettings(void)
     printNodeIndex = true;      // print node indices of tree nodes as comments
     collapseSampledAncestors = true;
     
-    std::string user_dir = RevBayesCore::RbFileManager::expandUserDir("~");
+    std::string user_dir = RevBayesCore::expandUserDir("~");
     
     // read the ini file, override defaults if applicable
     std::string settings_file_name = ".RevBayes.ini";
@@ -353,9 +353,7 @@ void RbSettings::setWorkingDirectory(const std::string &wd)
 {
     try
     {
-        RevBayesCore::RbFileManager fm;
-        std::string wd2 = fm.expandUserDir(wd);
-        fs::current_path( wd2 );
+        fs::current_path( expandUserDir(wd) );
     }
     catch (...)
     {
@@ -369,7 +367,7 @@ void RbSettings::setWorkingDirectory(const std::string &wd)
 
 void RbSettings::writeUserSettings( void )
 {
-    std::string user_dir = RevBayesCore::RbFileManager::expandUserDir("~");
+    std::string user_dir = expandUserDir("~");
     
     // open the ini file
     std::string settings_file_name = ".RevBayes.ini";
