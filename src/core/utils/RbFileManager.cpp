@@ -131,29 +131,9 @@ void RbFileManager::closeFile(std::ofstream& strm)
  */
 void RbFileManager::createDirectoryForFile( void )
 {
-    
-    std::string dir_path = getStringByDeletingLastPathComponent( full_file_name );
-    
-    std::vector<std::string> pathComponents;
-    StringUtilities::stringSplit(dir_path, getPathSeparator(), pathComponents);
-    
-    std::string directoryName = "";
-    for ( std::vector<std::string>::const_iterator it=pathComponents.begin(); it != pathComponents.end(); ++it)
-    {
-        directoryName += *it;
-        
-        if ( isDirectoryPresent( directoryName ) == false )
-        {
-            bool success = makeDirectory( directoryName );
-            if ( success == false )
-            {
-                std::cerr << "Failed to build directory with name \"" << directoryName << "\"." << std::endl;
-            }
-        }
-        
-        directoryName += getPathSeparator();
-    }
-    
+    auto dir_path = fs::path( full_file_name ).parent_path();
+
+    fs::create_directories(dir_path);
 }
 
 
@@ -593,20 +573,7 @@ bool RbFileManager::listDirectoryContents(const std::string& dirpath)
  */
 bool RbFileManager::makeDirectory(const std::string &dn)
 {
-    
-#	ifdef _WIN32
-    
-    CreateDirectory(dn.c_str(), NULL);
-    
-    return true;
-    
-#   else
-    
-    std::string cmd = "mkdir -p \"" + dn + "\"";
-    
-    return ( system( cmd.c_str() ) == 0 );
-    
-#   endif
+    return fs::create_directories(dn);
 }
 
 
@@ -618,11 +585,11 @@ bool RbFileManager::openFile(std::ifstream& strm)
 {
     
     // concatenate path and file name
-    std::string file_pathName = file_path + getPathSeparator() + file_name;
+    fs::path file_pathName = fs::path(file_path) / file_name;
         
     // here we assume that the presence of the path/file has
     // been checked elsewhere
-    strm.open( file_pathName.c_str(), std::ios::in );
+    strm.open( file_pathName.make_preferred().string(), std::ios::in );
     if ( !strm )
     {
         return false;
@@ -640,11 +607,11 @@ bool RbFileManager::openFile(std::ofstream& strm)
 {
     
     // concatenate path and file name
-    std::string file_pathName = file_path + getPathSeparator() + file_name;
+    fs::path file_pathName = fs::path(file_path) / file_name;
     
     // here we assume that the presence of the path/file has
     // been checked elsewhere
-    strm.open( file_pathName.c_str(), std::ios::out );
+    strm.open( file_pathName.make_preferred().string(), std::ios::out );
     if ( !strm )
     {
         return false;
