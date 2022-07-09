@@ -739,7 +739,7 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
     {
         
         // Read a line
-        fm.safeGetline( inFile, line );
+        safeGetline( inFile, line );
         
         // skip empty lines
         //line = stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
@@ -763,7 +763,7 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
     StringUtilities::stringSplit(line, delimiter, parameter_names);
     
     // Read a line
-    fm.safeGetline( inFile, line );
+    safeGetline( inFile, line );
     
     // we assume the parameter values at the second line of the file
     StringUtilities::stringSplit(line, delimiter, parameter_values);
@@ -809,7 +809,7 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
     {
         
         // Read a line
-        fm_mcmc.safeGetline( in_file_mcmc, line_mcmc );
+        safeGetline( in_file_mcmc, line_mcmc );
         
         if ( line_mcmc != "" )
         {
@@ -860,7 +860,7 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
     {
         
         // Read a line
-        fm_moves.safeGetline( in_file_moves, line_moves );
+        safeGetline( in_file_moves, line_moves );
         
         if ( line_moves != "" )
         {

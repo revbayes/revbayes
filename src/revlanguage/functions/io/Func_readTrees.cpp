@@ -100,12 +100,10 @@ RevPtr<RevVariable> Func_readTrees::execute( void )
         std::istringstream iss(text);
         RevBayesCore::NewickConverter c;
         
-        
-        RevBayesCore::RbFileManager file_reader = RevBayesCore::RbFileManager();
         if ( treetype == "clock" )
         {
             ModelVector<TimeTree> *trees = new ModelVector<TimeTree>();
-            while (file_reader.safeGetline(iss, aux))
+            while (RevBayesCore::safeGetline(iss, aux))
             {
                 RevBayesCore::Tree *blTree = c.convertFromNewick( aux );
                 trees->push_back( TimeTree(*blTree) );
@@ -118,7 +116,7 @@ RevPtr<RevVariable> Func_readTrees::execute( void )
         else if ( treetype == "non-clock" )
         {
             ModelVector<BranchLengthTree> *trees = new ModelVector<BranchLengthTree>();
-            while (file_reader.safeGetline(iss, aux))
+            while (RevBayesCore::safeGetline(iss, aux))
             {
                 RevBayesCore::Tree *blTree = c.convertFromNewick( aux );
                 trees->push_back( BranchLengthTree(*blTree) );

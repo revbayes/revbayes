@@ -58,7 +58,7 @@ void FastaFileToNaturalNumbersConverter::faconverter( const std::string &fi, con
   //for (size_t i =0; i<n_taxa; ++i){ std::cout << "lt: " <<length_taxa[i] << "\n"; }
 
   // going through the alingment lines
-  while (fii.safeGetline(readStream,line)) {
+  while (safeGetline(readStream,line)) {
 
     if (line.length() == 0) { break; }
 
@@ -70,7 +70,7 @@ void FastaFileToNaturalNumbersConverter::faconverter( const std::string &fi, con
 
       // if the element is found keep the sequence (sitting in the next line) and save the taxa index
       if ( index < n_taxa )  {
-        fii.safeGetline(readStream,line);
+        safeGetline(readStream,line);
         alignment.push_back(line);
         aligment_index.push_back(index);
         ns_taxa[index] += 1;

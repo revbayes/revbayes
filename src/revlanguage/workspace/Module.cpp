@@ -14,15 +14,12 @@ Module::Module(const std::string &fn)
     /* File-processing loop */
     while ( readStream.good() )
     {
-        
         // Read a line
         std::string line;
-        fm.safeGetline(readStream, line);
+        RevBayesCore::safeGetline(readStream, line);
         
         commandLines.push_back( line );
-        
     }
-
 }
 
 

@@ -45,7 +45,7 @@ void CountFileToNaturalNumbersConverter::cfconverter( const std::string &fi, con
     // reading the count file 
     // first ignoring all the commented lines
     std::string line = "";
-    while (fii.safeGetline(readStream,line))
+    while (safeGetline(readStream,line))
     {
         if ( line.at(0) == '#' ) { continue; } 
         else { break; }
@@ -73,7 +73,7 @@ void CountFileToNaturalNumbersConverter::cfconverter( const std::string &fi, con
 
  
     // getting the first count patter to determine the number of alleles
-    fii.safeGetline(readStream,line);
+    safeGetline(readStream,line);
     std::stringstream ss1(line);
 
     // again ignoring the first two elements
@@ -126,7 +126,7 @@ void CountFileToNaturalNumbersConverter::cfconverter( const std::string &fi, con
     // and now the lines
     size_t n_sites = 1; 
 
-    while (fii.safeGetline(readStream,line)){
+    while (safeGetline(readStream,line)){
 
         std::stringstream ss2(line);
 

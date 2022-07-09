@@ -1140,7 +1140,7 @@ void Tree::initFromFile( const std::string &dir, const std::string &fn )
 
         // Read a line
         std::string line;
-        fm.safeGetline( inStream, line );
+        safeGetline( inStream, line );
 
         // append
         s += line;

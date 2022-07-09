@@ -48,7 +48,7 @@ namespace RevBayesCore {
                 
                 // Read a line
                 std::string line;
-                fm.safeGetline( inStream, line );
+                safeGetline( inStream, line );
                 
                 // append
                 s += line;

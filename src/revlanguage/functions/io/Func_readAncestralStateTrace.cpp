@@ -171,68 +171,67 @@ std::vector<RevBayesCore::AncestralStateTrace> Func_readAncestralStateTrace::rea
     
     std::vector<RevBayesCore::AncestralStateTrace> data;
 	
-	bool has_header_been_read = false;
+    bool has_header_been_read = false;
 
 	
-	/* Open file */
-	std::ifstream inFile( fm.getFullFileName().c_str() );
+    /* Open file */
+    std::ifstream inFile( fm.getFullFileName().c_str() );
 	
-	if ( !inFile )
-		throw RbException( "Could not open file \"" + fileName + "\"" );
+    if ( !inFile )
+        throw RbException( "Could not open file \"" + fileName + "\"" );
 	
-	/* Initialize */
-	std::string commandLine;
-	std::cout << "Processing file \"" << fileName << "\"" << std::endl;
+    /* Initialize */
+    std::string commandLine;
+    std::cout << "Processing file \"" << fileName << "\"" << std::endl;
 	
-	/* Command-processing loop */
-	while ( inFile.good() )
-	{
+    /* Command-processing loop */
+    while ( inFile.good() )
+    {
 		
-		// Read a line
-		std::string line;
-        RevBayesCore::RbFileManager reader = RevBayesCore::RbFileManager();
-        reader.safeGetline(inFile, line);
+        // Read a line
+        std::string line;
+        RevBayesCore::safeGetline(inFile, line);
 		
-		// skip empty lines
-		if (line.length() == 0)
-		{
-			continue;
-		}
-		
-		// removing comments
-		if (line[0] == '#') 
+        // skip empty lines
+        if (line.length() == 0)
         {
-			continue;
-		}
+            continue;
+        }
+		
+        // removing comments
+        if (line[0] == '#') 
+        {
+            continue;
+        }
 		
         // split every line into its columns
-		std::vector<std::string> columns;
-		StringUtilities::stringSplit(line, delimiter, columns);
+        std::vector<std::string> columns;
+        StringUtilities::stringSplit(line, delimiter, columns);
 	
-		// we assume a header at the first line of the file
-		if (has_header_been_read == false) 
+        // we assume a header at the first line of the file
+        if (has_header_been_read == false) 
         {
-			for (size_t j = 0; j < columns.size(); j++) 
+            for (size_t j = 0; j < columns.size(); j++) 
             {
-				// set up AncestralStateTrace objects for each node
-				RevBayesCore::AncestralStateTrace t = RevBayesCore::AncestralStateTrace();
-				std::string parmName = columns[j];
-				t.setParameterName(parmName);
-				t.setFileName(fileName);
-				data.push_back( t );
-			}
-			has_header_been_read = true;
-		} 
+                // set up AncestralStateTrace objects for each node
+                RevBayesCore::AncestralStateTrace t = RevBayesCore::AncestralStateTrace();
+                std::string parmName = columns[j];
+                t.setParameterName(parmName);
+                t.setFileName(fileName);
+                data.push_back( t );
+            }
+            has_header_been_read = true;
+        } 
         else 
         {
-			for (size_t j = 0; j < columns.size(); j++) 
+            for (size_t j = 0; j < columns.size(); j++) 
             {
-				// add values to the AncestralStateTrace objects
-				std::string anc_state = columns[j];
-			    data[j].addObject( anc_state );
-			}
-		}
-	}
+                // add values to the AncestralStateTrace objects
+                std::string anc_state = columns[j];
+                data[j].addObject( anc_state );
+            }
+        }
+    }
 
-	return data;
+    return data;
 }

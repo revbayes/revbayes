@@ -48,8 +48,7 @@ std::vector<Tree*>* NewickTreeReader::readBranchLengthTrees(std::string const &f
         
         // Read a line
         std::string line;
-        RbFileManager reader = RbFileManager();
-        reader.safeGetline( inFile, line );
+        safeGetline( inFile, line );
         
         // skip empty lines
         if (line.length() == 0) 

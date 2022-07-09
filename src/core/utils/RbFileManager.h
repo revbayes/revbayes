@@ -8,6 +8,7 @@
 
 namespace RevBayesCore {
     
+    std::istream&           safeGetline(std::istream& is, std::string& t); //!< Gets one line from a stream
 
 /** @brief Contains functions for files and directories management
  *
@@ -41,7 +42,6 @@ namespace RevBayesCore {
         std::string             getLastPathComponent(void);  //!< Get last component of the full_file_name
         std::string             getNewLine(void) const;
         std::string             getPathSeparator(void) const;
-        std::istream&           safeGetline(std::istream& is, std::string& t); //!< Gets one line from a stream
         std::string             getStringByDeletingLastPathComponent(const std::string& s);  //!< Get path by removing last component
         bool                    isDirectory(void) const;  //!< Is full_file_name an existing directory ?
         bool                    isDirectoryPresent(const std::string &mp) const;  //!< Checks for presence of a directory

@@ -109,7 +109,7 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
                 
             // Read a line
             std::string line;
-            myFileManager.safeGetline(inFile, line);
+            RevBayesCore::safeGetline(inFile, line);
                 
             // skip empty lines
             //line = stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
