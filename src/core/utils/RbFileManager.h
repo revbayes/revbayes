@@ -26,10 +26,7 @@ namespace RevBayesCore {
                                 RbFileManager(const std::string &fn);  //!< Constructor with full file/directory name
                                 RbFileManager(const std::string &pn, const std::string &fn);  //!< Constructor with path name and file/directory name
 
-        static std::string      expandUserDir(std::string path); //!< Get full path to user directory
 
-        void                    closeFile(std::ifstream& strm);  //!< Close input file
-        void                    closeFile(std::ofstream& strm);  //!< Close output file
         void                    createDirectoryForFile(void);  //!< Create the directories in the path of full_file_name
         void                    formatError(std::string& errorStr);  //!< Format the error string when (mis)reading files
         std::string             getCurrentDirectory(void) const;  //!< Returns the current directory for the process

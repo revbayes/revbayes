@@ -168,7 +168,7 @@ void RbSettings::initializeUserSettings(void)
             }
         }
         
-        fm.closeFile(readStream);
+        readStream.close();
     }
 
     // initialize the current directory to be the directory the binary is sitting in
@@ -385,6 +385,6 @@ void RbSettings::writeUserSettings( void )
     writeStream << "useScaling=" << (useScaling ? "true" : "false") << std::endl;
     writeStream << "scalingDensity=" << scalingDensity << std::endl;
     writeStream << "collapseSampledAncestors=" << (collapseSampledAncestors ? "true" : "false") << std::endl;
-    fm.closeFile( writeStream );
+    writeStream.close();
 
 }

@@ -341,7 +341,7 @@ void VariableMonitor::combineReplicates( size_t n_reps, MonteCarloAnalysisOption
 
                 }
 
-                fm.closeFile( current_input_stream );
+                current_input_stream.close();
 
             }
 
@@ -454,7 +454,7 @@ void VariableMonitor::combineReplicates( size_t n_reps, MonteCarloAnalysisOption
 
             for (size_t i=0; i<n_reps; ++i)
             {
-                input_fm[i].closeFile( *input_streams[i] );
+                input_streams[i]->close();
                 delete input_streams[i];
             }
 

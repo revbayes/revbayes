@@ -148,7 +148,7 @@ void CountFileToNaturalNumbersConverter::cfconverter( const std::string &fi, con
     //for (size_t i=0; i<n_taxa; ++i){ std::cout << taxa[i] << "\n"; }
     
     // close the input file connection
-    fii.closeFile( readStream );
+    readStream.close();
 
     // summarizing the 
     std::cout <<     "\n  Number of taxa                  " << n_taxa <<

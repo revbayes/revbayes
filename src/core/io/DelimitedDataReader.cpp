@@ -61,7 +61,7 @@ void DelimitedDataReader::readData( size_t lines_to_skip )
         tmpChars.clear();
     };
     
-    f.closeFile( readStream );
+    readStream.close();
 }
 
 const std::vector<std::vector<std::string> >& DelimitedDataReader::getChars(void)
