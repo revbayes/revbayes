@@ -354,8 +354,7 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<std:
         {
             // Read a line
             std::string line;
-            RevBayesCore::RbFileManager reader = RevBayesCore::RbFileManager();
-            reader.safeGetline(tmp_in_file, line);
+            RevBayesCore::safeGetline(tmp_in_file, line);
             if (line.length() == 0 || line[0] == '#')
             {
                 continue;
@@ -393,8 +392,7 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<std:
             
             // Read a line
             std::string line;
-            RevBayesCore::RbFileManager reader = RevBayesCore::RbFileManager();
-            reader.safeGetline(in_file, line);
+            RevBayesCore::safeGetline(in_file, line);
             
             // skip empty lines
             //line = StringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];

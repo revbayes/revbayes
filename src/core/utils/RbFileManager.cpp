@@ -718,7 +718,7 @@ bool RbFileManager::parsePathFileNames(const std::string &input_string)
  *
  * @return the input stream
  * */
-std::istream& RbFileManager::safeGetline(std::istream& is, std::string& t)
+std::istream& safeGetline(std::istream& is, std::string& t)
 {
     t.clear();
     

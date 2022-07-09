@@ -76,7 +76,7 @@ RevPtr<RevVariable> Func_source::execute( void )
         
         // Read a line
         std::string line;
-        reader.safeGetline(inFile, line);
+        RevBayesCore::safeGetline(inFile, line);
         lineNumber++;
         
         if ( echo_on == true )

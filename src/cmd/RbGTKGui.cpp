@@ -452,10 +452,10 @@ static void menuitem_load_response( gchar *string )
         // read file
         std::string read_line = "";
         GtkTextIter end;
-//        while ( f.safeGetline(read_stream,read_line) )
+//        while ( safeGetline(read_stream,read_line) )
         while ( read_stream.good() )
         {
-            f.safeGetline( read_stream, read_line );
+            RevBayesCore::safeGetline( read_stream, read_line );
             
             gtk_text_buffer_get_end_iter(gui_instance.getScriptTextBuffer(), &end);
             gtk_text_buffer_insert(gui_instance.getScriptTextBuffer(), &end, read_line.c_str(), -1);
