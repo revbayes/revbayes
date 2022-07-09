@@ -35,7 +35,7 @@ RbFileManager::RbFileManager( void ) :
     file_path( "" ),
     full_file_name( "" )
 {
-    file_path = RbSettings::userSettings().getWorkingDirectory();
+    file_path = fs::current_path().make_preferred().string();
     full_file_name = file_path;
     if ( full_file_name != "")
     {
@@ -232,12 +232,6 @@ void RbFileManager::formatError(std::string& errorStr)
 }
 
 
-std::string RbFileManager::getCurrentDirectory( void ) const
-{
-    return fs::current_path().make_preferred().string();
-}
-
-
 std::string RbFileManager::getFileExtension( void ) const
 {
     std::vector<std::string> tokens;
@@ -297,7 +291,7 @@ std::string RbFileManager::getFullFilePath( void ) const
     if ( tmp_file.is_absolute() == false )
 #    endif
     {        
-        fullfile_path = RbSettings::userSettings().getWorkingDirectory() + getPathSeparator() + file_path;
+        fullfile_path = (fs::current_path() / file_path ).make_preferred().string();
     }
     
     return fullfile_path;
@@ -508,7 +502,7 @@ bool RbFileManager::isFilePresent(const std::string &mp, const std::string &mf) 
     std::string f = mp;
     if ( mp == "" )
     {
-        f = RbSettings::userSettings().getWorkingDirectory();
+        f = fs::current_path().make_preferred().string();
     }
     
     f += getPathSeparator() + mf;
@@ -621,14 +615,14 @@ bool RbFileManager::parsePathFileNames(const std::string &input_string)
     //    std::filesystem::path path(winPathString); // Construct the path from a string.
     if ( name.size() > 0 && name[0] != '/' )
     {
-        name = getCurrentDirectory() + getPathSeparator() + input_string;
+        name = (fs::current_path() / input_string).make_preferred().string();
     }
 #    else
     boost::filesystem::path tmp_file = boost::filesystem::path(name);
     //    std::filesystem::path path(winPathString); // Construct the path from a string.
     if ( tmp_file.is_absolute() == false )
     {
-        name = getCurrentDirectory() + getPathSeparator() + input_string;
+        name = (fs::current_path() / input_string).make_preferred().string();
     }
 #    endif
 
@@ -652,7 +646,7 @@ bool RbFileManager::parsePathFileNames(const std::string &input_string)
     // the string that is supposed to hold the path/file information is empty.
     if ( name.length() == 0 )
     {
-        file_path = getCurrentDirectory();
+        file_path = fs::current_path().make_preferred().string();
         return false;
     }
     
@@ -666,7 +660,7 @@ bool RbFileManager::parsePathFileNames(const std::string &input_string)
          must have only the file name, and the
          file should be in our current directory. */
         file_name = name;
-        file_path = getCurrentDirectory();
+        file_path = fs::current_path().make_preferred().string();
     }
     else if ( location == name.length() - 1 )
     {
@@ -676,7 +670,7 @@ bool RbFileManager::parsePathFileNames(const std::string &input_string)
         // is not valid, otherwise it would have tested as
         // being present (above).
         file_name = "";
-        file_path = getCurrentDirectory();
+        file_path = fs::current_path().make_preferred().string();
         return false;
     }
     else
