@@ -46,8 +46,6 @@ namespace RevBayesCore {
         bool                    isFile(void) const;  //!< Is file_path + file_name an existing file ?
         bool                    isFileNamePresent(void) const;  //!< Checks whether file_name is non-empty
         bool                    listDirectoryContents(void);  //!< Recursively lists the contents of the directory given by file_path
-        bool                    openFile(std::ifstream& strm);  //!< Open file for input
-        bool                    openFile(std::ofstream& strm);  //!< Open file for output
         void                    setFileName(const std::string &s);
         void                    setFilePath(const std::string &s);
         bool                    setStringWithNamesOfFilesInDirectory(std::vector<std::string>& sv, bool recursive=true);  //!< Recursively fills in a string vector with the contents of the directory given by file_path

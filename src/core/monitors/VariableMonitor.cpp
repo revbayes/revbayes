@@ -260,10 +260,9 @@ void VariableMonitor::combineReplicates( size_t n_reps, MonteCarloAnalysisOption
                 std::string s = ss.str();
                 std::string current_file_name = fm.getFilePath() + fm.getPathSeparator() + fm.getFileNameWithoutExtension() + s + "." + fm.getFileExtension();
 
-                RbFileManager current_fm = RbFileManager(current_file_name);
-                std::ifstream current_input_stream;
+                std::ifstream current_input_stream( current_file_name );
 
-                if ( current_fm.openFile(current_input_stream) == false )
+                if ( not current_input_stream )
                 {
                     throw RbException( "Could not open file '" + current_file_name + "'." );
                 }
@@ -361,9 +360,9 @@ void VariableMonitor::combineReplicates( size_t n_reps, MonteCarloAnalysisOption
                 std::string current_file_name = fm.getFilePath() + fm.getPathSeparator() + fm.getFileNameWithoutExtension() + s + "." + fm.getFileExtension();
 
                 RbFileManager current_fm = RbFileManager(current_file_name);
-                std::ifstream * current_input_stream = new std::ifstream();
+                std::ifstream * current_input_stream = new std::ifstream( current_file_name );
 
-                if ( current_fm.openFile(*current_input_stream) == false )
+                if ( not *current_input_stream )
                 {
                     throw RbException( "Could not open file '" + current_file_name + "'." );
                 }

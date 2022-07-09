@@ -42,9 +42,8 @@ TimeAtlasDataReader::TimeAtlasDataReader(const TimeAtlasDataReader& tadr) : Deli
 void TimeAtlasDataReader::readJson(void)
 {
     
-    std::ifstream readStream;
-    RbFileManager* f = new RbFileManager(this->filename);
-    if ( !f->openFile(readStream) )
+    std::ifstream readStream( filename );
+    if ( not readStream )
     {
         throw RbException( "Could not open file " + this->filename );
     }
