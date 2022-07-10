@@ -1,3 +1,12 @@
+//
+//  RlRegionalFeatureLayer.cpp
+//  revbayes-tensorphylo-proj
+//
+//  Created by Michael Landis on 7/10/22.
+//  Copyright © 2022 Michael Landis. All rights reserved.
+//
+
+#include "RlRegionalFeatureLayer.h"
 #include <stddef.h>
 #include <vector>
 #include <iosfwd>
@@ -11,7 +20,6 @@
 #include "Natural.h"
 #include "OptionRule.h"
 #include "RealPos.h"
-#include "RlRegionalFeatures.h"
 #include "RlRegionalFeatureLayer.h"
 #include "RlString.h"
 #include "RevVariable.h"
@@ -39,7 +47,7 @@
 using namespace RevLanguage;
 
 
-RlRegionalFeatures::RlRegionalFeatures(void) : ModelObject<RevBayesCore::RegionalFeatures>( )
+RlRegionalFeatureLayer::RlRegionalFeatureLayer(void) : ModelObject<RevBayesCore::RegionalFeatureLayer>( )
 {
 
     ArgumentRules* nLayers               = new ArgumentRules();
@@ -51,7 +59,7 @@ RlRegionalFeatures::RlRegionalFeatures(void) : ModelObject<RevBayesCore::Regiona
 }
 
 
-RlRegionalFeatures::RlRegionalFeatures( RevBayesCore::RegionalFeatures *v) : ModelObject<RevBayesCore::RegionalFeatures>( v ) {
+RlRegionalFeatureLayer::RlRegionalFeatureLayer( RevBayesCore::RegionalFeatureLayer *v) : ModelObject<RevBayesCore::RegionalFeatureLayer>( v ) {
    
     ArgumentRules* nLayers               = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "nLayers", ModelVector<RlString>::getClassTypeSpec(), nLayers ) );
@@ -62,7 +70,7 @@ RlRegionalFeatures::RlRegionalFeatures( RevBayesCore::RegionalFeatures *v) : Mod
 }
 
 
-RlRegionalFeatures::RlRegionalFeatures( RevBayesCore::TypedDagNode<RevBayesCore::RegionalFeatures> *m) : ModelObject<RevBayesCore::RegionalFeatures>( m ) {
+RlRegionalFeatureLayer::RlRegionalFeatureLayer( RevBayesCore::TypedDagNode<RevBayesCore::RegionalFeatureLayer> *m) : ModelObject<RevBayesCore::RegionalFeatureLayer>( m ) {
     
     ArgumentRules* nLayers               = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "nLayers", ModelVector<RlString>::getClassTypeSpec(), nLayers ) );
@@ -73,42 +81,35 @@ RlRegionalFeatures::RlRegionalFeatures( RevBayesCore::TypedDagNode<RevBayesCore:
 }
 
 
-RlRegionalFeatures* RlRegionalFeatures::clone() const
+RlRegionalFeatureLayer* RlRegionalFeatureLayer::clone() const
 {
-    return new RlRegionalFeatures( *this );
+    return new RlRegionalFeatureLayer( *this );
 }
 
 
 /* Map calls to member methods */
-RevPtr<RevVariable> RlRegionalFeatures::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
+RevPtr<RevVariable> RlRegionalFeatureLayer::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
 {
     
-    if (name == "nLayers") {
+    if (name == "getFeatures") {
         found = true;
-
-        return new RevVariable(new Natural((int)this->dag_node->getValue().getNumLayers())) ;
-    }
-    if (name == "get") {
-        found = true;
-//        return new RevVariable(new ModelVector<ModelVector<RlRegionalFeatureLayer> >(this->dag_node->getValue().getLayers("within","categorical"))) ;
-//        return new RevVariable(new Natural((int)this->dag_node->getValue().getNumLayers())) ;
+//        return new RevVariable(new ModelVector<ModelVector<Natural> >(this->dag_node->getValue().getLayers("within","categorical"))) ;
     }
     
-    
-    return ModelObject<RevBayesCore::RegionalFeatures>::executeMethod( name, args, found );
+    return ModelObject<RevBayesCore::RegionalFeatureLayer>::executeMethod( name, args, found );
 }
 
 
 /* Get Rev type of object */
-const std::string& RlRegionalFeatures::getClassType(void) {
+const std::string& RlRegionalFeatureLayer::getClassType(void) {
     
-    static std::string rev_type = "RlRegionalFeatures";
+    static std::string rev_type = "RlRegionalFeatureLayer";
     
     return rev_type;
 }
 
 /* Get class type spec describing type of object */
-const TypeSpec& RlRegionalFeatures::getClassTypeSpec(void) {
+const TypeSpec& RlRegionalFeatureLayer::getClassTypeSpec(void) {
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( RevObject::getClassTypeSpec() ) );
     
@@ -117,7 +118,7 @@ const TypeSpec& RlRegionalFeatures::getClassTypeSpec(void) {
 
 
 /** Get the type spec of this class. We return a member variable because instances might have different element types. */
-const TypeSpec& RlRegionalFeatures::getTypeSpec(void) const {
+const TypeSpec& RlRegionalFeatureLayer::getTypeSpec(void) const {
     
     static TypeSpec type_spec = getClassTypeSpec();
     return type_spec;

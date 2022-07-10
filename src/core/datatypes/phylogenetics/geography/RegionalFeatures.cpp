@@ -7,6 +7,7 @@
 //
 
 #include "RegionalFeatures.h"
+#include "RegionalFeatureLayer.h"
 #include "RbConstants.h"
 
 #include <cmath>
@@ -40,7 +41,7 @@ RegionalFeatures::RegionalFeatures(std::map<size_t, std::map<size_t, std::vector
         // loop over time-feature maps
         for (auto jt = withinCategorical[it->first].begin(); jt != withinCategorical[it->first].end(); jt++) {
             RegionalFeatureLayer tmp( it->first, jt->first, "within", "categorical" );
-            tmp.setFeature( withinCategorical[it->first][jt->first] );
+            tmp.setFeatures( withinCategorical[it->first][jt->first] );
             feature_layers["within"]["categorical"][i].push_back(tmp);
         }
     }
@@ -51,12 +52,10 @@ RegionalFeatures::RegionalFeatures(std::map<size_t, std::map<size_t, std::vector
         // loop over time-feature maps
         for (auto jt = withinQuantitative[it->first].begin(); jt != withinQuantitative[it->first].end(); jt++) {
             RegionalFeatureLayer tmp( it->first, jt->first, "within", "quantitative" );
-            tmp.setFeature( withinQuantitative[it->first][jt->first] );
+            tmp.setFeatures( withinQuantitative[it->first][jt->first] );
             feature_layers["within"]["quantitative"][i].push_back(tmp);
         }
     }
-    
-    normalizeWithinQuantitative();
     
     for (auto it = betweenCategorical.begin(); it != betweenCategorical.end(); it++) {
         feature_layers["between"]["categorical"].push_back( std::vector<RegionalFeatureLayer>() );
@@ -64,7 +63,7 @@ RegionalFeatures::RegionalFeatures(std::map<size_t, std::map<size_t, std::vector
         // loop over time-feature maps
         for (auto jt = betweenCategorical[it->first].begin(); jt != betweenCategorical[it->first].end(); jt++) {
             RegionalFeatureLayer tmp( it->first, jt->first, "between", "categorical" );
-            tmp.setFeature( betweenCategorical[it->first][jt->first] );
+            tmp.setFeatures( betweenCategorical[it->first][jt->first] );
             feature_layers["between"]["categorical"][i].push_back(tmp);
         }
     }
@@ -75,10 +74,13 @@ RegionalFeatures::RegionalFeatures(std::map<size_t, std::map<size_t, std::vector
         // loop over time-feature maps
         for (auto jt = betweenQuantitative[it->first].begin(); jt != betweenQuantitative[it->first].end(); jt++) {
             RegionalFeatureLayer tmp( it->first, jt->first, "between", "quantitative" );
-            tmp.setFeature( betweenQuantitative[it->first][jt->first] );
+            tmp.setFeatures( betweenQuantitative[it->first][jt->first] );
             feature_layers["between"]["quantitative"][i].push_back(tmp);
         }
     }
+    
+    normalizeWithinQuantitative();
+    normalizeBetweenQuantitative();
     
     std::cout << "initialized!\n";
 }
@@ -92,7 +94,7 @@ void RegionalFeatures::normalizeWithinQuantitative(void) {
         size_t i = it->first - 1;
         for (auto jt = withinQuantitative[it->first].begin(); jt != withinQuantitative[it->first].end(); jt++) {
             size_t j = jt->first - 1;
-            std::vector<double> v = feature_layers["within"]["quantitative"][i][j].within_quantitative;
+            std::vector<double> v = feature_layers["within"]["quantitative"][i][j].getWithinQuantitativeFeatures();
             for (size_t a = 0; a < v.size(); a++) {
                 if (v[a] > 0) {
                     m += v[a];
@@ -106,11 +108,11 @@ void RegionalFeatures::normalizeWithinQuantitative(void) {
         size_t i = it->first - 1;
         for (auto jt = withinQuantitative[it->first].begin(); jt != withinQuantitative[it->first].end(); jt++) {
             size_t j = jt->first - 1;
-            std::vector<double> v = feature_layers["within"]["quantitative"][i][j].within_quantitative;
+            std::vector<double> v = feature_layers["within"]["quantitative"][i][j].getWithinQuantitativeFeatures();
             for (size_t a = 0; a < v.size(); a++) {
                 v[a] = v[a] / z;;
             }
-            feature_layers["within"]["quantitative"][i][j].within_quantitative = v;
+            feature_layers["within"]["quantitative"][i][j].setFeatures(v);
         }
     }
     return;
@@ -125,7 +127,7 @@ void RegionalFeatures::normalizeBetweenQuantitative(void) {
         size_t i = it->first - 1;
         for (auto jt = betweenQuantitative[it->first].begin(); jt != betweenQuantitative[it->first].end(); jt++) {
             size_t j = jt->first - 1;
-            std::vector<std::vector<double> > v = feature_layers["between"]["quantitative"][i][j].between_quantitative;
+            std::vector<std::vector<double> > v = feature_layers["between"]["quantitative"][i][j].getBetweenQuantitativeFeatures();
             for (size_t a = 0; a < v.size(); a++) {
                 for (size_t b = 0; b < v[a].size(); b++) {
                     if (a != b && v[a][b] > 0) {
@@ -141,7 +143,7 @@ void RegionalFeatures::normalizeBetweenQuantitative(void) {
         size_t i = it->first - 1;
         for (auto jt = betweenQuantitative[it->first].begin(); jt != betweenQuantitative[it->first].end(); jt++) {
             size_t j = jt->first - 1;
-            std::vector<std::vector<double> > v = feature_layers["between"]["quantitative"][i][j].between_quantitative;
+            std::vector<std::vector<double> > v = feature_layers["between"]["quantitative"][i][j].getBetweenQuantitativeFeatures();
             for (size_t a = 0; a < v.size(); a++) {
                 for (size_t b = 0; b < v[a].size(); b++) {
                     if (a != b) {
@@ -149,7 +151,7 @@ void RegionalFeatures::normalizeBetweenQuantitative(void) {
                     }
                 }
             }
-            feature_layers["between"]["quantitative"][i][j].between_quantitative = v;
+            feature_layers["between"]["quantitative"][i][j].setFeatures(v);
         }
     }
     return;
@@ -206,12 +208,7 @@ std::ostream& RevBayesCore::operator<<(std::ostream& o, const RegionalFeatures& 
     for ( size_t i = 0; i < s.str().length() - 1; ++i )
         o << "=";
     o << std::endl;
-
-//    o << "Origination:                   " << x.getFilename() << std::endl;
-//    o << "Number of epochs:              " << x.getEpochs().size() << std::endl;
-//    o << "Number of areas:               " << x.getAreas()[0].size() << std::endl;
-//    o << std::endl;
-
+    
     return o;
 }
 

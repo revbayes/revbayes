@@ -198,6 +198,7 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
     
     // create backend core function object
     RevBayesCore::RegionalFeatures* rf = new RevBayesCore::RegionalFeatures(within_categorical, within_quantitative, between_categorical, between_quantitative);
+    
     return new RevVariable( new RlRegionalFeatures(rf) );
 }
 
