@@ -246,23 +246,14 @@ const std::string& RbFileManager::getFullFileName( void ) const
  */
 std::string RbFileManager::getFullFilePath( void ) const
 {
-    
-    std::string fullfile_path = file_path;
-    
-    // check if file_path is relative or absolute
-    // add current working path only if relative
-#   ifdef RB_XCODE
-    if ( file_path.size() > 0 && getPathSeparator()[0] != file_path[0] )
-#    else
-    boost::filesystem::path tmp_file = boost::filesystem::path(file_path);
-    if ( tmp_file.is_absolute() == false )
-#    endif
-    {        
-        fullfile_path = (fs::current_path() / file_path ).make_preferred().string();
-    }
-    
-    return fullfile_path;
-    
+    path p = file_path;
+
+    if (not p.is_absolute())
+        p = fs::current_path() / p;
+
+    p.make_preferred();
+
+    return p.string();
 }
 
 
@@ -272,13 +263,7 @@ std::string RbFileManager::getFullFilePath( void ) const
  */
 std::string RbFileManager::getLastPathComponent( void )
 {
-    
-    std::string tmp = full_file_name;
-    if ( tmp[tmp.size()-1] == getPathSeparator()[0] )
-    {
-        tmp = tmp.substr(0,tmp.size()-1);
-    }
-    return RevBayesCore::getLastPathComponent( tmp );
+    return fs::path(full_file_name).parent_path().filename().string();
 }
 
 
