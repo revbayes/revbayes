@@ -64,6 +64,9 @@ namespace RevBayesCore {
         
     
     private:
+        void normalizeWithinQuantitative();
+        void normalizeBetweenQuantitative();
+        
         std::map<size_t, std::map<size_t, std::vector<int> > > withinCategorical;
         std::map<size_t, std::map<size_t, std::vector<double> > > withinQuantitative;
         std::map<size_t, std::map<size_t, std::vector<std::vector<int> > > > betweenCategorical;
