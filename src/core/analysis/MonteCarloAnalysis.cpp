@@ -327,7 +327,7 @@ void MonteCarloAnalysis::initializeFromCheckpoint(const std::string &checkpoint_
             
             // assemble the new filename
             RbFileManager fm = RbFileManager(checkpoint_file);
-            std::string run_checkpoint_file = fm.getFilePath() + fm.getPathSeparator() + fm.getFileNameWithoutExtension() + ss.str() + "." + fm.getFileExtension();
+            std::string run_checkpoint_file = fm.getFilePath() + RevBayesCore::getPathSeparator() + fm.getFileNameWithoutExtension() + ss.str() + "." + fm.getFileExtension();
             
             // set the filename for the MCMC object
             runs[i]->setCheckpointFile( run_checkpoint_file );
@@ -628,7 +628,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
                 
                 // assemble the new filename
                 RbFileManager fm = RbFileManager(checkpoint_file);
-                std::string run_checkpoint_file = fm.getFilePath() + fm.getPathSeparator() + fm.getFileNameWithoutExtension() + ss.str() + "." + fm.getFileExtension();
+                std::string run_checkpoint_file = fm.getFilePath() + RevBayesCore::getPathSeparator() + fm.getFileNameWithoutExtension() + ss.str() + "." + fm.getFileExtension();
 
                 // set the filename for the MCMC object
                 runs[i]->setCheckpointFile( run_checkpoint_file );

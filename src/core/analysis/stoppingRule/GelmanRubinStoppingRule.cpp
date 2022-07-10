@@ -81,7 +81,7 @@ bool GelmanRubinStoppingRule::stop( size_t g )
         if ( numReplicates > 1 )
         {
             RbFileManager fm = RbFileManager(filename);
-            fn = fm.getFilePath() + fm.getPathSeparator() + fm.getFileNameWithoutExtension() + "_run_" + StringUtilities::to_string(i) + "." + fm.getFileExtension();
+            fn = fm.getFilePath() + RevBayesCore::getPathSeparator() + fm.getFileNameWithoutExtension() + "_run_" + StringUtilities::to_string(i) + "." + fm.getFileExtension();
         }
         
         TraceContinuousReader reader = TraceContinuousReader( fn );

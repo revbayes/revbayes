@@ -258,7 +258,7 @@ void VariableMonitor::combineReplicates( size_t n_reps, MonteCarloAnalysisOption
                 std::stringstream ss;
                 ss << "_run_" << (i+1);
                 std::string s = ss.str();
-                std::string current_file_name = fm.getFilePath() + fm.getPathSeparator() + fm.getFileNameWithoutExtension() + s + "." + fm.getFileExtension();
+                std::string current_file_name = fm.getFilePath() + RevBayesCore::getPathSeparator() + fm.getFileNameWithoutExtension() + s + "." + fm.getFileExtension();
 
                 std::ifstream current_input_stream( current_file_name );
 
@@ -357,7 +357,7 @@ void VariableMonitor::combineReplicates( size_t n_reps, MonteCarloAnalysisOption
                 ss << "_run_" << (i+1);
                 std::string s = ss.str();
                 RbFileManager fm = RbFileManager(filename);
-                std::string current_file_name = fm.getFilePath() + fm.getPathSeparator() + fm.getFileNameWithoutExtension() + s + "." + fm.getFileExtension();
+                std::string current_file_name = fm.getFilePath() + RevBayesCore::getPathSeparator() + fm.getFileNameWithoutExtension() + s + "." + fm.getFileExtension();
 
                 RbFileManager current_fm = RbFileManager(current_file_name);
                 std::ifstream * current_input_stream = new std::ifstream( current_file_name );

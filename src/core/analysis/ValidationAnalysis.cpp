@@ -37,7 +37,7 @@ ValidationAnalysis::ValidationAnalysis( const MonteCarloAnalysis &m, size_t n, c
     
     // some general constant variables
     RbFileManager fm = RbFileManager( output_directory );
-    const std::string path_separator = fm.getPathSeparator();
+    const std::string path_separator = RevBayesCore::getPathSeparator();
     
     // remove all monitors if there are any
     MonteCarloAnalysis *sampler = m.clone();

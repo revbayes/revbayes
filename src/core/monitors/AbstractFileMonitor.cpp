@@ -63,12 +63,12 @@ void AbstractFileMonitor::addFileExtension(const std::string &s, bool dir)
     if ( dir == false )
     {
         RbFileManager fm = RbFileManager(filename);
-        working_file_name = fm.getFilePath() + fm.getPathSeparator() + fm.getFileNameWithoutExtension() + s + "." + fm.getFileExtension();
+        working_file_name = fm.getFilePath() + RevBayesCore::getPathSeparator() + fm.getFileNameWithoutExtension() + s + "." + fm.getFileExtension();
     }
     else
     {
         RbFileManager fm = RbFileManager(filename);
-        working_file_name = fm.getFilePath() + fm.getPathSeparator() + s + fm.getPathSeparator() + fm.getFileName();
+        working_file_name = fm.getFilePath() + RevBayesCore::getPathSeparator() + s + RevBayesCore::getPathSeparator() + fm.getFileName();
     }
 }
 

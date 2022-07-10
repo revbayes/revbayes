@@ -25,8 +25,10 @@
 #endif
 
 
-using namespace RevBayesCore;
 namespace fs = boost::filesystem;
+
+namespace RevBayesCore
+{
 
 /** Default constructor, creating a file manager object with the file
  path equal to the current (default) directory and an empty file name */
@@ -118,9 +120,6 @@ void RbFileManager::createDirectoryForFile( void )
     fs::create_directories(dir_path);
 }
 
-namespace RevBayesCore
-{
-
 /** Get line while safely handling cross-platform line endings.
  *  Modified from: https://stackoverflow.com/questions/6089231/getting-std-ifstream-to-handle-lf-cr-and-crlf
  *
@@ -197,7 +196,7 @@ std::string expandUserDir(std::string path)
     return path;
 }
 
-}
+
 /** Format an error exception string for problems specifying the file/path name
  * @param[out] errorStr string to store the formatted error
 */
@@ -311,7 +310,7 @@ std::string RbFileManager::getLastPathComponent( void )
     {
         tmp = tmp.substr(0,tmp.size()-1);
     }
-    return getLastPathComponent( tmp );
+    return RevBayesCore::getLastPathComponent( tmp );
 }
 
 
@@ -320,7 +319,7 @@ std::string RbFileManager::getLastPathComponent( void )
  * @param s input path
  * @return last path component
  */
-std::string RbFileManager::getLastPathComponent(const std::string& s)
+std::string getLastPathComponent(const std::string& s)
 {
     
     std::string tempS = s;
@@ -348,17 +347,7 @@ std::string RbFileManager::getLastPathComponent(const std::string& s)
 }
 
 
-std::string RbFileManager::getNewLine(void) const
-{
-#   ifdef _WIN32
-    return "\r\n";
-#   else
-    return "\n";
-#   endif
-}
-
-
-std::string RbFileManager::getPathSeparator( void ) const
+std::string getPathSeparator( void )
 {
 #   ifdef _WIN32
     return "\\";
@@ -372,7 +361,7 @@ std::string RbFileManager::getPathSeparator( void ) const
  * @note any trailing path separator is NOT removed, so x/y/z/ will return x/y/z
  * @return string without the last path component
  */
-std::string RbFileManager::getStringByDeletingLastPathComponent(const std::string& s)
+std::string getStringByDeletingLastPathComponent(const std::string& s)
 {
     
     std::string tempS = s;
@@ -414,7 +403,7 @@ bool RbFileManager::isDirectory( void ) const
  * @param mp path to check
  * @return result of the test
  */
-bool RbFileManager::isDirectoryPresent(const std::string &mp) const
+bool isDirectoryPresent(const std::string &mp)
 {
     
     if ( mp == "" )
@@ -496,7 +485,7 @@ bool RbFileManager::isFileNamePresent(void) const
  * @param mf file name
  * @return whether the file exists
 */
-bool RbFileManager::isFilePresent(const std::string &mp, const std::string &mf) const
+bool isFilePresent(const std::string &mp, const std::string &mf)
 { 
     
     std::string f = mp;
@@ -515,7 +504,7 @@ bool RbFileManager::isFilePresent(const std::string &mp, const std::string &mf) 
  * @param fn full file path
  * @return whether the file exists
 */
-bool RbFileManager::isFilePresent(const std::string &fn) const
+bool isFilePresent(const std::string &fn)
 {
     
     struct stat fInfo;
@@ -535,67 +524,6 @@ bool RbFileManager::isFilePresent(const std::string &fn) const
     return false;
     
 }
-
-
-/** Recursively lists the contents of the directory given by the member variable file_path
- * @return true
- */
-bool RbFileManager::listDirectoryContents(void)
-{    
-    return listDirectoryContents(file_path);
-}
-
-
-/** Recursively lists the contents of a directory
- * @param dirpath path to the directory
- * @return true
- */
-bool RbFileManager::listDirectoryContents(const std::string& dirpath)
-{
-    
-    DIR* dir = opendir( dirpath.c_str() );
-    if (dir)
-    {
-        struct dirent* entry;
-        while ((entry = readdir( dir )))
-        {
-            struct stat entryinfo;
-            std::string entryname = entry->d_name;
-            std::string entrypath = dirpath + getPathSeparator() + entryname;
-            if (!stat( entrypath.c_str(), &entryinfo ))
-            {
-                if (S_ISDIR( entryinfo.st_mode ))
-                {
-                    if (entryname == "..")
-                    {}
-                    else if (entryname == "." )
-                    {}
-                    else
-                    {
-                        listDirectoryContents( entrypath );
-                    }
-                }
-                else
-                {}
-            }
-        }
-        closedir( dir );
-    }
-    
-    return true;
-}
-
-
-/**
- * Make a directory.
- * @param dn path to the new directory
- * @return true on Windows, whether the operation was successful otherwise
- */
-bool RbFileManager::makeDirectory(const std::string &dn)
-{
-    return fs::create_directories(dn);
-}
-
 
 /** Divides a string into the path and file name components
  * and sets member variables to those values
@@ -711,7 +639,7 @@ void RbFileManager::setFilePath(std::string const &s)
 bool RbFileManager::setStringWithNamesOfFilesInDirectory(std::vector<std::string>& sv, bool recursive)
 {
     
-    return setStringWithNamesOfFilesInDirectory(file_path, sv, recursive);
+    return RevBayesCore::setStringWithNamesOfFilesInDirectory(file_path, sv, recursive);
 }
 
 
@@ -723,7 +651,7 @@ bool RbFileManager::setStringWithNamesOfFilesInDirectory(std::vector<std::string
  *
  * @return true
 */
-bool RbFileManager::setStringWithNamesOfFilesInDirectory(const std::string& dirpath, std::vector<std::string>& sv, bool recursive)
+bool setStringWithNamesOfFilesInDirectory(const std::string& dirpath, std::vector<std::string>& sv, bool recursive)
 {
         
     DIR* dir = opendir( dirpath.c_str() );
@@ -823,4 +751,5 @@ bool RbFileManager::testDirectory(void)
 bool RbFileManager::testFile(void)
 {   
     return isFilePresent(file_path, file_name);
+}
 }

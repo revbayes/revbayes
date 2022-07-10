@@ -1257,7 +1257,7 @@ void Mcmcmc::setCheckpointFile(const std::string &f)
         
         if ( chains[j] != NULL )
         {
-            std::string chain_file_name = fm.getFilePath() + fm.getPathSeparator() + fm.getFileNameWithoutExtension() + "_chain_" + j + "." + fm.getFileExtension();
+            std::string chain_file_name = fm.getFilePath() + RevBayesCore::getPathSeparator() + fm.getFileNameWithoutExtension() + "_chain_" + j + "." + fm.getFileExtension();
             chains[j]->setCheckpointFile( chain_file_name );
         }
         
