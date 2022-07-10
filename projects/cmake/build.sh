@@ -187,7 +187,7 @@ echo
 # * This can alert the user if some weird values have been set.
 # * This also helps us replicate the call to cmake.
 echo "Note these environment variables:"
-for var in CC CXX CPPFLAGS CXXFLAGS LDFLAGS BOOST_ROOT BOOST_INCLUDEDIR BOOST_LIBRARYDIR ; do
+for var in CC CXX CFLAGS CPPFLAGS CXXFLAGS LDFLAGS BOOST_ROOT BOOST_INCLUDEDIR BOOST_LIBRARYDIR ; do
     cmd="if [ -n \"\${$var}\" ] ; then echo \"  ${var}=\${$var}\"; fi"
     eval $cmd
 done

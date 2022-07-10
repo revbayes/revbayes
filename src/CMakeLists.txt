@@ -206,3 +206,4 @@ else()
 
 endif()
 
+install(TARGETS ${RB_EXEC_NAME} DESTINATION bin)
