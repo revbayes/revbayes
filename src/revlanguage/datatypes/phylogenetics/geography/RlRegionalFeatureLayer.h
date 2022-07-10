@@ -1,8 +1,16 @@
-#ifndef RlRegionalFeatures_H
-#define RlRegionalFeatures_H
+//
+//  RlRegionalFeatureLayer.hpp
+//  revbayes-tensorphylo-proj
+//
+//  Created by Michael Landis on 7/10/22.
+//  Copyright © 2022 Michael Landis. All rights reserved.
+//
+
+#ifndef RlRegionalFeatureLayer_hpp
+#define RlRegionalFeatureLayer_hpp
 
 #include "ModelObject.h"
-#include "RegionalFeatures.h"
+#include "RegionalFeatureLayer.h"
 #include "TypedDagNode.h"
 
 #include <ostream>
@@ -10,15 +18,15 @@
 
 namespace RevLanguage {
     
-    class RlRegionalFeatures : public ModelObject<RevBayesCore::RegionalFeatures> {
+    class RlRegionalFeatureLayer : public ModelObject<RevBayesCore::RegionalFeatureLayer> {
         
     public:
-        RlRegionalFeatures(void);                                                                          //!< Default constructor
-        RlRegionalFeatures(RevBayesCore::RegionalFeatures *m);                                                    //!< Default constructor
-        RlRegionalFeatures(RevBayesCore::TypedDagNode<RevBayesCore::RegionalFeatures> *d);                        //!< Default constructor
+        RlRegionalFeatureLayer(void);                                                                          //!< Default constructor
+        RlRegionalFeatureLayer(RevBayesCore::RegionalFeatureLayer *m);                                                    //!< Default constructor
+        RlRegionalFeatureLayer(RevBayesCore::TypedDagNode<RevBayesCore::RegionalFeatureLayer> *d);                        //!< Default constructor
         
         // Basic utility functions
-        RlRegionalFeatures*                 clone(void) const;                                                                      //!< Clone object
+        RlRegionalFeatureLayer*             clone(void) const;                                                                      //!< Clone object
         static const std::string&           getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&              getClassTypeSpec(void);                                                                 //!< Get class type spec
         const TypeSpec&                     getTypeSpec(void) const;                                                                //!< Get language type of the object
@@ -31,8 +39,9 @@ namespace RevLanguage {
         std::string                         getGuiInfo(void) { return ""; }
         
     private:
-        RevBayesCore::RegionalFeatures*            rf;
+        RevBayesCore::RegionalFeatureLayer*            layer;
     };
     
 }
-#endif /* defined(RlRegionalFeatures_H) */
+
+#endif /* RlRegionalFeatureLayer_hpp */
