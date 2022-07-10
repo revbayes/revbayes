@@ -1,12 +1,12 @@
 //
-//  Func_makeRegionalFeatures.hpp
+//  Func_readRegionalFeatures.hpp
 //  rb
 //
 //  Created by binho on 5/10/22.
 //
 
-#ifndef Func_makeRegionalFeatures_h
-#define Func_makeRegionalFeatures_h
+#ifndef Func_readRegionalFeatures_h
+#define Func_readRegionalFeatures_h
 
 #include "Procedure.h"
 #include "RbFileManager.h"
@@ -29,11 +29,11 @@ namespace RevLanguage {
      * @since 2015-03-03, version 1.0
      *
      */
-    class Func_makeRegionalFeatures : public Procedure {
+    class Func_readRegionalFeatures : public Procedure {
         
     public:
         // Basic utility functions
-        Func_makeRegionalFeatures*         clone(void) const;                                          //!< Clone the object
+        Func_readRegionalFeatures*         clone(void) const;                                          //!< Clone the object
         static const std::string&           getClassType(void);                                         //!< Get Rev type
         static const TypeSpec&              getClassTypeSpec(void);                                     //!< Get class type spec
         std::string                         getFunctionName(void) const;                                //!< Get the primary name of the function in Rev
@@ -45,11 +45,8 @@ namespace RevLanguage {
         const ArgumentRules&                getArgumentRules(void) const;                               //!< Get argument rules
         const TypeSpec&                     getReturnType(void) const;                                  //!< Get type of return value
         
-    private:
-        std::string                         bitToState(const std::string &s);
-        
     };
     
 }
 
-#endif /* Func_makeRegionalFeatures_hpp */
+#endif /* Func_readRegionalFeatures_hpp */
