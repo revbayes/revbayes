@@ -1,7 +1,6 @@
 #include "RbGTKGui.h"
 
 #include "Parser.h"
-#include "RbFileManager.h"
 #include "RlUserInterface.h"
 #include "StringUtilities.h"
 #include "Workspace.h"
@@ -489,8 +488,6 @@ static void menuitem_set_wd_response( gchar *string )
         
         filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
         
-        RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager( std::string(filename) );
-        
         std::string fn = std::string(filename);
 #       if defined (_WIN32)
         StringUtilities::replaceSubstring(fn, "\\", "\\\\");
@@ -576,7 +573,6 @@ static void menuitem_save_response( gchar *string )
                                                &it_end,
                                                FALSE);
         
-//        RbFileManager fm = RbFileManager(filename);
         std::fstream out_stream;
         out_stream.open( filename, std::fstream::out);
         out_stream << entry_text;
