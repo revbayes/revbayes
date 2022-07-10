@@ -437,7 +437,8 @@ static void menuitem_load_response( gchar *string )
         char *filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
         
         // open file
-        std::ifstream read_stream( std::string(filename) );
+        std::ifstream read_stream(filename);
+
         if ( not read_stream )
         {
 //            throw RbException( "Could not open file " + filename );
