@@ -23,7 +23,7 @@ namespace RevBayesCore {
     class GewekeStoppingRule : public AbstractConvergenceStoppingRule {
         
     public:
-        GewekeStoppingRule(double a, double f1, double f2, const std::string &fn, size_t fq, BurninEstimatorContinuous *be);
+        GewekeStoppingRule(double a, double f1, double f2, const path &fn, size_t fq, BurninEstimatorContinuous *be);
         virtual                                            ~GewekeStoppingRule(void);                                   //!< Virtual destructor
         
         // public methods

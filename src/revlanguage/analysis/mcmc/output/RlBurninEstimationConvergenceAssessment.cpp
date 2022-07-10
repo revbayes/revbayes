@@ -276,7 +276,7 @@ RevPtr<RevVariable> BurninEstimationConvergenceAssessment::executeMethod(std::st
                     
                     if ( index == runs[i].size() )
                     {
-                        throw RbException("Could not find a trace for parameter '" + traceName + "' in file '" + runs[i][0].getFileName() + "'.");
+                        throw RbException()<<"Could not find a trace for parameter '"<<traceName<<"' in file '"<<runs[i][0].getFileName()<<"'.";
                     }
                     RevBayesCore::TraceNumeric& nextTrace = runs[i][index];
                     v.push_back( nextTrace );

@@ -22,7 +22,7 @@ namespace RevBayesCore {
     class MinEssStoppingRule : public AbstractConvergenceStoppingRule {
         
     public:
-        MinEssStoppingRule(double m, const std::string &fn, size_t fq, BurninEstimatorContinuous *be);
+        MinEssStoppingRule(double m, const path &fn, size_t fq, BurninEstimatorContinuous *be);
         virtual                                            ~MinEssStoppingRule(void);                                   //!< Virtual destructor
         
         // public methods
