@@ -30,6 +30,11 @@ namespace fs = boost::filesystem;
 namespace RevBayesCore
 {
 
+path append_to_stem(const path& p, const std::string& s)
+{
+    return p.parent_path() / ( p.stem().string() + s + p.extension().string() );
+}
+
 /** Default constructor, creating a file manager object with the file
  path equal to the current (default) directory and an empty file name */
 RbFileManager::RbFileManager( void )

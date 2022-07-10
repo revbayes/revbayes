@@ -25,6 +25,8 @@ namespace RevBayesCore {
     std::string             getStringByDeletingLastPathComponent(const std::string& s);  //!< Get path by removing last component
     bool                    setStringWithNamesOfFilesInDirectory(const std::string& dirpath, std::vector<std::string>& sv, bool recursive=true);  //!< Recursively fills in a string vector with the contents of the directory passed in argument
 
+    path                    append_to_stem(const path& p, const std::string& s);
+
 /** @brief Contains functions for files and directories management
  *
  * This class takes advantage of the dirent.h and sys/stat.h libraries. Besides doing
