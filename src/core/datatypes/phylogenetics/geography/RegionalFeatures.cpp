@@ -7,15 +7,14 @@
 //
 
 #include "RegionalFeatures.h"
+#include "RbConstants.h"
 
+#include <cmath>
 #include <iostream>
 #include <map>
 #include <vector>
 #include <sstream>
 #include <string>
-
-// #include "RegionalFeaturesDataReader.h"
-#include "GeographicArea.h"
 
 using namespace RevBayesCore;
 
@@ -57,6 +56,8 @@ RegionalFeatures::RegionalFeatures(std::map<size_t, std::map<size_t, std::vector
         }
     }
     
+    normalizeWithinQuantitative();
+    
     for (auto it = betweenCategorical.begin(); it != betweenCategorical.end(); it++) {
         feature_layers["between"]["categorical"].push_back( std::vector<RegionalFeatureLayer>() );
         size_t i = it->first - 1;
@@ -82,6 +83,77 @@ RegionalFeatures::RegionalFeatures(std::map<size_t, std::map<size_t, std::vector
     std::cout << "initialized!\n";
 }
 
+void RegionalFeatures::normalizeWithinQuantitative(void) {
+    double m = 0.0;
+    size_t n_elem = 0;
+    
+    // get product for geometric mean
+    for (auto it = withinQuantitative.begin(); it != withinQuantitative.end(); it++) {
+        size_t i = it->first - 1;
+        for (auto jt = withinQuantitative[it->first].begin(); jt != withinQuantitative[it->first].end(); jt++) {
+            size_t j = jt->first - 1;
+            std::vector<double> v = feature_layers["within"]["quantitative"][i][j].within_quantitative;
+            for (size_t a = 0; a < v.size(); a++) {
+                if (v[a] > 0) {
+                    m += v[a];
+                    n_elem += 1;
+                }
+            }
+        }
+    }
+    double z = m / n_elem;
+    for (auto it = withinQuantitative.begin(); it != withinQuantitative.end(); it++) {
+        size_t i = it->first - 1;
+        for (auto jt = withinQuantitative[it->first].begin(); jt != withinQuantitative[it->first].end(); jt++) {
+            size_t j = jt->first - 1;
+            std::vector<double> v = feature_layers["within"]["quantitative"][i][j].within_quantitative;
+            for (size_t a = 0; a < v.size(); a++) {
+                v[a] = v[a] / z;;
+            }
+            feature_layers["within"]["quantitative"][i][j].within_quantitative = v;
+        }
+    }
+    return;
+}
+
+void RegionalFeatures::normalizeBetweenQuantitative(void) {
+    double m = 0.0;
+    size_t n_elem = 0;
+    
+    // get product for geometric mean
+    for (auto it = betweenQuantitative.begin(); it != betweenQuantitative.end(); it++) {
+        size_t i = it->first - 1;
+        for (auto jt = betweenQuantitative[it->first].begin(); jt != betweenQuantitative[it->first].end(); jt++) {
+            size_t j = jt->first - 1;
+            std::vector<std::vector<double> > v = feature_layers["between"]["quantitative"][i][j].between_quantitative;
+            for (size_t a = 0; a < v.size(); a++) {
+                for (size_t b = 0; b < v[a].size(); b++) {
+                    if (a != b && v[a][b] > 0) {
+                        m += v[a][b];
+                        n_elem += 1;
+                    }
+                }
+            }
+        }
+    }
+    double z = m / n_elem;
+    for (auto it = betweenQuantitative.begin(); it != betweenQuantitative.end(); it++) {
+        size_t i = it->first - 1;
+        for (auto jt = betweenQuantitative[it->first].begin(); jt != betweenQuantitative[it->first].end(); jt++) {
+            size_t j = jt->first - 1;
+            std::vector<std::vector<double> > v = feature_layers["between"]["quantitative"][i][j].between_quantitative;
+            for (size_t a = 0; a < v.size(); a++) {
+                for (size_t b = 0; b < v[a].size(); b++) {
+                    if (a != b) {
+                        v[a][b] = v[a][b] / z;
+                    }
+                }
+            }
+            feature_layers["between"]["quantitative"][i][j].between_quantitative = v;
+        }
+    }
+    return;
+}
 
 RegionalFeatures::RegionalFeatures(const RegionalFeatures& a)
 {
