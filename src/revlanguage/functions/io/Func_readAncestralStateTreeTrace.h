@@ -21,7 +21,6 @@
 
 #include "RlBranchLengthTree.h"
 #include "Procedure.h"
-#include "RbFileManager.h"
 #include "RlTimeTree.h"
 #include "RlTraceTree.h"
 
