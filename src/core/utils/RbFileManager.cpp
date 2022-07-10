@@ -115,9 +115,7 @@ RbFileManager::RbFileManager(const std::string &pn, const std::string &fn) :
  */
 void RbFileManager::createDirectoryForFile( void )
 {
-    auto dir_path = fs::path( full_file_name ).parent_path();
-
-    fs::create_directories(dir_path);
+    fs::create_directories( fs::path( full_file_name ).parent_path() );
 }
 
 /** Get line while safely handling cross-platform line endings.
