@@ -319,29 +319,10 @@ std::string RbFileManager::getLastPathComponent( void )
  */
 std::string getLastPathComponent(const std::string& s)
 {
-    
-    std::string tempS = s;
-    size_t location = tempS.find_last_of( getPathSeparator() );
-    if ( location == std::string::npos )
-    {
-        // There is no path in this string. We
-        // must have only the file name.
-        return tempS;
-    }
-    else if ( location == tempS.length() - 1 )
-    {
-        // It looks like the last character is "/", which
-        // means that no file name has been provided.
-        return "";
-    }
-    else
-    {
-        /* We can divide the path into the path and the file. */
-        std::string lpc = tempS.substr( location+1, tempS.length()-location-1 );
-        return lpc;
-    }
-    
-    return "";
+    auto ss = fs::path(s).filename().string();
+    if (ss == ".")
+        ss == "";
+    return ss;
 }
 
 
