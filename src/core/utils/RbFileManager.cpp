@@ -487,17 +487,9 @@ bool RbFileManager::isFileNamePresent(void) const
 */
 bool isFilePresent(const std::string &mp, const std::string &mf)
 { 
+    auto f = fs::path(mp) / fs::path(mf);
     
-    std::string f = mp;
-    if ( mp == "" )
-    {
-        f = fs::current_path().make_preferred().string();
-    }
-    
-    f += getPathSeparator() + mf;
-    
-    return isFilePresent(f);
-    
+    return fs::is_regular_file(f) and not fs::is_directory(f);
 }
 
 /** Checks whether a file passed in as its full path is present (and is a file)
@@ -506,23 +498,9 @@ bool isFilePresent(const std::string &mp, const std::string &mf)
 */
 bool isFilePresent(const std::string &fn)
 {
-    
-    struct stat fInfo;
-    if ( !stat(fn.c_str(), &fInfo) )
-    {
-        if ( S_ISDIR(fInfo.st_mode) )
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-        
-    }
-    
-    return false;
-    
+    fs::path f = fn;
+
+    return fs::is_regular_file(f) and not fs::is_directory(f);
 }
 
 /** Divides a string into the path and file name components
