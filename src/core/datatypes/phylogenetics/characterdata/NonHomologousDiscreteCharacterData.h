@@ -41,7 +41,7 @@ namespace RevBayesCore {
         // implemented methods of the Serializable interface
         void                                                initFromFile( const std::string &dir, const std::string &fn );              //!< Read and resurrect this object from a file in its default format.
         void                                                initFromString( const std::string &s );                                     //!< Serialize (resurrect) the object from a string value
-        void                                                writeToFile(const std::string &dir, const std::string &fn) const;           //!< Write this object into a file in its default format.
+        void                                                writeToFile(const path &dir, const std::string &fn) const;           //!< Write this object into a file in its default format.
 
         // CharacterData functions
         const charType&                                     getCharacter(size_t tn, size_t cn) const;                                   //!< Return a reference to a character element in the character matrix
@@ -403,14 +403,14 @@ void RevBayesCore::NonHomologousDiscreteCharacterData<charType>::initFromString(
 
 
 template<class charType>
-void RevBayesCore::NonHomologousDiscreteCharacterData<charType>::writeToFile(const std::string &dir, const std::string &fn) const
+void RevBayesCore::NonHomologousDiscreteCharacterData<charType>::writeToFile(const path &dir, const std::string &fn) const
 {
-    RbFileManager fm = RbFileManager(dir, fn + ".fas");
-    fm.createDirectoryForFile();
+    path filename = dir / (fn + ".fas");
+    create_directories(dir);
     
     FastaWriter fw;
     
-    fw.writeData( fm.getFullFileName(), *this );
+    fw.writeData( filename.string(), *this );
     
     
 }

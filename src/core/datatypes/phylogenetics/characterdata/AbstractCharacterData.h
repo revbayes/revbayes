@@ -44,7 +44,7 @@ namespace RevBayesCore {
         
         // methods of the Serializable interface
         virtual void                                initFromString( const std::string &s ) = 0;                                 //!< Serialize (resurrect) the object from a string value
-        virtual void                                writeToFile(const std::string &dir, const std::string &fn) const = 0;
+        virtual void                                writeToFile(const path &dir, const std::string &fn) const = 0;
 
         // public functions
         void                                        addMissingTaxon(const std::string &n);                                      //!< Add taxon data

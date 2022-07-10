@@ -63,7 +63,7 @@ namespace RevBayesCore {
         void                                    removeMonitors(void);
         void                                    reset(void);                                                                    //!< Reset the sampler for a new run.
         void                                    resetCounters(void);                                                            //!< Reset the counters.
-        void                                    setCheckpointFile(const std::string &f);
+        void                                    setCheckpointFile(const path &f);
         void                                    setHeatsInitial(const std::vector<double> &ht);
         void                                    setSwapInterval2(const size_t &si2);
         void                                    setLikelihoodHeat(double h);                                                    //!< Set the heat of the likelihood function.
