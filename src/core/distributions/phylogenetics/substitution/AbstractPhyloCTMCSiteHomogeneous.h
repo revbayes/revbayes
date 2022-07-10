@@ -4288,7 +4288,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
 
 template<class charType>
 void
-RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleInstance ( void )
+RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleInstance
+( void )
 {
 
     if ( RbSettings::userSettings().getUseBeagle() == true )
@@ -4355,7 +4356,8 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleInstan
 
 template<class charType>
 void
-RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::freeBeagleInstance ( void )
+RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::freeBeagleInstance
+( void )
 {
     if ( RbSettings::userSettings().getUseBeagle() == true )
     {
@@ -4372,7 +4374,8 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::freeBeagleInstance ( v
 
 template<class charType>
 void
-RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleTips ( void )
+RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleTips
+( void )
 {
     #if defined ( RB_BEAGLE_DEBUG )
         std::stringstream ss;
@@ -4537,9 +4540,9 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleTips (
 template<class charType>
 double
 RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::calculateBranchLength
-  ( const TopologyNode &node
-  , size_t node_index
-  )
+( const TopologyNode &node
+, size_t node_index
+)
 {
     double branch_len;
     double rate;
@@ -4570,7 +4573,8 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::calculateBranchLength
 
 template<class charType>
 void
-RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigensystem ( void )
+RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigensystem
+( void )
 {
 #if defined ( RB_BEAGLE_DEBUG )
     std::stringstream ss;
@@ -4758,7 +4762,8 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigensyste
 
 template<class charType>
 void
-RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleSiteRates ( void )
+RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleSiteRates
+( void )
 {
     //-- Create debugging string stream
 #if defined ( RB_BEAGLE_DEBUG )
