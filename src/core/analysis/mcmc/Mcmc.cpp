@@ -263,7 +263,7 @@ void Mcmc::checkpoint( void ) const
     /////////
 
     // assemble the new filename
-    std::string mcmc_checkpoint_file_name = fm.getFilePath() + fm.getPathSeparator() + fm.getFileNameWithoutExtension() + "_mcmc." + fm.getFileExtension();
+    std::string mcmc_checkpoint_file_name = fm.getFilePath() + RevBayesCore::getPathSeparator() + fm.getFileNameWithoutExtension() + "_mcmc." + fm.getFileExtension();
     
     RbFileManager fm_mcmc = RbFileManager(mcmc_checkpoint_file_name);
     fm_mcmc.createDirectoryForFile();
@@ -283,7 +283,7 @@ void Mcmc::checkpoint( void ) const
     /////////
     
     // assemble the new filename
-    std::string moves_checkpoint_file_name = fm.getFilePath() + fm.getPathSeparator() + fm.getFileNameWithoutExtension() + "_moves." + fm.getFileExtension();
+    std::string moves_checkpoint_file_name = fm.getFilePath() + RevBayesCore::getPathSeparator() + fm.getFileNameWithoutExtension() + "_moves." + fm.getFileExtension();
     
     RbFileManager fm_moves = RbFileManager(moves_checkpoint_file_name);
     fm_moves.createDirectoryForFile();
@@ -794,7 +794,7 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
     }
     
     // assemble the new filename
-    std::string mcmc_checkpoint_file_name = fm.getFilePath() + fm.getPathSeparator() + fm.getFileNameWithoutExtension() + "_mcmc." + fm.getFileExtension();
+    std::string mcmc_checkpoint_file_name = fm.getFilePath() + RevBayesCore::getPathSeparator() + fm.getFileNameWithoutExtension() + "_mcmc." + fm.getFileExtension();
     
     RbFileManager fm_mcmc = RbFileManager(mcmc_checkpoint_file_name);
     fm_mcmc.createDirectoryForFile();
@@ -845,7 +845,7 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
     /////////
     // Next we also write the moves information into a file
     /////////
-    std::string moves_checkpoint_file_name = fm.getFilePath() + fm.getPathSeparator() + fm.getFileNameWithoutExtension() + "_moves." + fm.getFileExtension();
+    std::string moves_checkpoint_file_name = fm.getFilePath() + RevBayesCore::getPathSeparator() + fm.getFileNameWithoutExtension() + "_moves." + fm.getFileExtension();
     
     RbFileManager fm_moves = RbFileManager(moves_checkpoint_file_name);
     fm_moves.createDirectoryForFile();

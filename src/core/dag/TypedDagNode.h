@@ -3,7 +3,6 @@
 
 #include "DagNode.h"
 #include "NexusWriter.h"
-#include "RbFileManager.h"
 #include "RbSettings.h"
 #include "RbUtil.h"
 #include "Simplex.h"

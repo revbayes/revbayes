@@ -71,7 +71,7 @@ void RevBayesCore::PosteriorPredictiveSimulation::run( int thinning )
     
     // some general constant variables
     RbFileManager fm = RbFileManager( directory );
-    const std::string path_separator = fm.getPathSeparator();
+    const std::string path_separator = RevBayesCore::getPathSeparator();
     
     // this is where we need to implement the posterior predictive simulation
     
