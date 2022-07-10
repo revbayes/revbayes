@@ -11,6 +11,7 @@
 #include "Parallelizable.h"
 #include "RbVector.h"
 #include "SimulationConditions.h"
+#include "RbFileManager.h"
 
 namespace RevBayesCore {
 
@@ -54,7 +55,7 @@ template <class valueType> class RbOrderedSet;
         virtual void                                                setMcmcMode(bool tf) = 0;                                                                   //!< Set the modus of the DAG node to MCMC mode.
         virtual void                                                setValueFromFile(const std::string &dir) = 0;                                               //!< Set value from string.
         virtual void                                                setValueFromString(const std::string &v) = 0;                                               //!< Set value from string.
-        virtual void                                                writeToFile(const std::string &dir) const = 0;                                              //!< Write the value of this node to a file within the given directory.
+        virtual void                                                writeToFile(const path &dir) const = 0;                                                     //!< Write the value of this node to a file within the given directory.
 
         // public member functions
         void                                                        addChild(DagNode *child) const;                                                             //!< Add a new child node

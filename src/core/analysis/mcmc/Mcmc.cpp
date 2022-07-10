@@ -204,13 +204,10 @@ void Mcmc::checkpoint( void ) const
     std::string separator = "\t";
     bool flatten = true;
     
-    RbFileManager fm = RbFileManager(checkpoint_file_name);
-    fm.createDirectoryForFile();
+    create_directories( checkpoint_file_name.parent_path() );
     
     // open the stream to the file
-    std::fstream out_stream;
-    out_stream.open( fm.getFullFileName().c_str(), std::fstream::out);
-    
+    std::fstream out_stream( checkpoint_file_name.string() );
 
     // first, we write the names of the variables
     for (std::vector<DagNode *>::const_iterator it=variable_nodes.begin(); it!=variable_nodes.end(); ++it)
@@ -263,15 +260,10 @@ void Mcmc::checkpoint( void ) const
     /////////
 
     // assemble the new filename
-    std::string mcmc_checkpoint_file_name = fm.getFilePath() + RevBayesCore::getPathSeparator() + fm.getFileNameWithoutExtension() + "_mcmc." + fm.getFileExtension();
-    
-    RbFileManager fm_mcmc = RbFileManager(mcmc_checkpoint_file_name);
-    fm_mcmc.createDirectoryForFile();
+    path mcmc_checkpoint_file_name = append_to_stem(checkpoint_file_name, "_mcmc");
     
     // open the stream to the file
-    std::fstream out_stream_mcmc;
-    out_stream_mcmc.open( fm_mcmc.getFullFileName().c_str(), std::fstream::out);
-    
+    std::fstream out_stream_mcmc( mcmc_checkpoint_file_name.string() );
     out_stream_mcmc << "iter = " << generation << std::endl;
     
     // clean up
@@ -283,14 +275,10 @@ void Mcmc::checkpoint( void ) const
     /////////
     
     // assemble the new filename
-    std::string moves_checkpoint_file_name = fm.getFilePath() + RevBayesCore::getPathSeparator() + fm.getFileNameWithoutExtension() + "_moves." + fm.getFileExtension();
-    
-    RbFileManager fm_moves = RbFileManager(moves_checkpoint_file_name);
-    fm_moves.createDirectoryForFile();
+    path moves_checkpoint_file_name = append_to_stem(checkpoint_file_name, "_moves");
     
     // open the stream to the file
-    std::fstream out_stream_moves;
-    out_stream_moves.open( fm_moves.getFullFileName().c_str(), std::fstream::out);
+    std::fstream out_stream_moves( moves_checkpoint_file_name.string() );
     
     for (size_t i = 0; i < moves.size(); ++i)
     {
@@ -711,7 +699,7 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
     
     
     // check that the file/path name has been correctly specified
-    RevBayesCore::RbFileManager fm( checkpoint_file_name );
+    RevBayesCore::RbFileManager fm( checkpoint_file_name.string() );
     if ( !fm.testFile() || !fm.testDirectory() )
     {
         std::string errorStr = "";
@@ -720,11 +708,11 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
     }
     
     // Open file
-    std::ifstream inFile( fm.getFullFileName().c_str() );
+    std::ifstream inFile( checkpoint_file_name.string() );
     
     if ( !inFile )
     {
-        throw RbException( "Could not open file \"" + checkpoint_file_name + "\"" );
+        throw RbException()<<"Could not open file \""<<checkpoint_file_name<<"\"";
     }
     
     // Initialize
@@ -794,13 +782,10 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
     }
     
     // assemble the new filename
-    std::string mcmc_checkpoint_file_name = fm.getFilePath() + RevBayesCore::getPathSeparator() + fm.getFileNameWithoutExtension() + "_mcmc." + fm.getFileExtension();
-    
-    RbFileManager fm_mcmc = RbFileManager(mcmc_checkpoint_file_name);
-    fm_mcmc.createDirectoryForFile();
-    
+    path mcmc_checkpoint_file_name = append_to_stem( checkpoint_file_name, "_mcmc");
+
     // Open file
-    std::ifstream in_file_mcmc( fm_mcmc.getFullFileName().c_str() );
+    std::ifstream in_file_mcmc( mcmc_checkpoint_file_name.string() );
 
     std::string line_mcmc;
     std::map<std::string, std::string> mcmc_pars;
@@ -841,17 +826,13 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
     }
     
     
-    
     /////////
     // Next we also write the moves information into a file
     /////////
-    std::string moves_checkpoint_file_name = fm.getFilePath() + RevBayesCore::getPathSeparator() + fm.getFileNameWithoutExtension() + "_moves." + fm.getFileExtension();
-    
-    RbFileManager fm_moves = RbFileManager(moves_checkpoint_file_name);
-    fm_moves.createDirectoryForFile();
+    path moves_checkpoint_file_name = append_to_stem( checkpoint_file_name, "_moves" );
     
     // Open file
-    std::ifstream in_file_moves( fm_moves.getFullFileName().c_str() );
+    std::ifstream in_file_moves( moves_checkpoint_file_name.string() );
     
     std::string line_moves;
     std::vector<std::string> stored_move_info;
@@ -1248,7 +1229,7 @@ void Mcmc::setChainLikelihoodHeat(double h)
 }
 
 
-void Mcmc::setCheckpointFile(const std::string &f)
+void Mcmc::setCheckpointFile(const path &f)
 {
     checkpoint_file_name = f;
 }

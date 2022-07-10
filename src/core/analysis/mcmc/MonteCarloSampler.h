@@ -60,7 +60,7 @@ namespace RevBayesCore {
         virtual void                            redrawStartingValues(void) = 0;                             //!< Redraw the starting values.
         virtual void                            removeMonitors(void) = 0;
         virtual void                            reset(void) = 0;                                            //!< Reset the sampler for a new run.
-        virtual void                            setCheckpointFile(const std::string &f) = 0;
+        virtual void                            setCheckpointFile(const path &f) = 0;
         virtual void                            setLikelihoodHeat(double v) = 0;                            //!< Set the heating temparature of the likelihood of the chain
 //        virtual void                            setMasterSampler(bool tf) = 0;                            //!< Set whether this one is the master.
         virtual void                            setModel(Model *m, bool redraw) = 0;

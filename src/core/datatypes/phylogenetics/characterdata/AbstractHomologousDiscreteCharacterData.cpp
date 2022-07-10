@@ -107,22 +107,23 @@ void AbstractHomologousDiscreteCharacterData::removeRandomSites( double p )
 }
 
 
-void AbstractHomologousDiscreteCharacterData::writeToFile(const std::string &dir, const std::string &fn) const
+void AbstractHomologousDiscreteCharacterData::writeToFile(const path &dir, const std::string &fn) const
 {
+    create_directories(dir);
+
     if (this->getDataType() == "NaturalNumbers")
     {
         // NEXUS does not support NaturalNumbers so write tab delimited file
-        RbFileManager fm = RbFileManager(dir, fn + ".tsv");
+        path filename = dir / (fn + ".tsv");
         RevBayesCore::DelimitedCharacterDataWriter writer; 
-        writer.writeData(fm.getFullFileName(), *this);
+        writer.writeData( filename.string(), *this);
     }
     else
     {
         // otherwise write NEXUS file
-        RbFileManager fm = RbFileManager(dir, fn + ".nex");
-        fm.createDirectoryForFile();
+        path filename = dir / (fn + ".nex");
         
-        NexusWriter nw( fm.getFullFileName() );
+        NexusWriter nw( filename.string() );
         nw.openStream(false);
         
         nw.writeNexusBlock( *this );

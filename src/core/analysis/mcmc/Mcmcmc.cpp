@@ -1062,16 +1062,14 @@ void Mcmcmc::startMonitors(size_t num_cycles, bool reopen)
 }
 
 
-void Mcmcmc::setCheckpointFile(const std::string &f)
+void Mcmcmc::setCheckpointFile(const path &f)
 {
-    RbFileManager fm = RbFileManager(f);
-
     for (size_t j = 0; j < num_chains; ++j)
     {
         
         if ( chains[j] != NULL )
         {
-            std::string chain_file_name = fm.getFilePath() + RevBayesCore::getPathSeparator() + fm.getFileNameWithoutExtension() + "_chain_" + j + "." + fm.getFileExtension();
+            path chain_file_name = append_to_stem(f, "_chain_" + std::to_string(j) );
             chains[j]->setCheckpointFile( chain_file_name );
         }
         
