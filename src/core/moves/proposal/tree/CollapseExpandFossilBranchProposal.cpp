@@ -115,8 +115,8 @@ double CollapseExpandFossilBranchProposal::doProposal( void )
 
     if ( fossils.empty() )
     {
+        failed = true;
         return 0;
-        //throw RbException("Cannot perform collapse-expand-branch move on tree without fossils.");
     }
 
     // pick a random fossil node
