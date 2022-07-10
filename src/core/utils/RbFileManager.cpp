@@ -441,8 +441,9 @@ bool isDirectoryPresent(const std::string &mp)
 
 /** Checks whether the path given by file_path + file_name is a path to an existing file */
 bool RbFileManager::isFile( void ) const
-{   
-    return isFilePresent(file_path, file_name);
+{
+    auto f = fs::path(file_path) / fs::path(file_name);
+    return fs::is_regular_file(f) and not fs::is_directory(f);
 }
 
 
