@@ -24,7 +24,7 @@ namespace RevBayesCore {
     class StationarityStoppingRule : public AbstractConvergenceStoppingRule {
         
     public:
-        StationarityStoppingRule(double p, const std::string &fn, size_t fq, BurninEstimatorContinuous *be);
+        StationarityStoppingRule(double p, const path &fn, size_t fq, BurninEstimatorContinuous *be);
         virtual                             ~StationarityStoppingRule(void);                                   //!< Virtual destructor
         
         // public methods

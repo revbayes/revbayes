@@ -11,7 +11,7 @@
 
 using namespace RevBayesCore;
 
-DelimitedDataReader::DelimitedDataReader(const std::string &fn, std::string d, size_t lines_skipped) :
+DelimitedDataReader::DelimitedDataReader(const path &fn, std::string d, size_t lines_skipped) :
     filename(fn), 
     delimiter(d),
     chars()
@@ -27,10 +27,10 @@ void DelimitedDataReader::readData( size_t lines_to_skip )
     std::vector<std::string> tmpChars;
     
     // open file
-    std::ifstream readStream( filename );
+    std::ifstream readStream( filename.string() );
     if ( not readStream )
     {
-        throw RbException( "Could not open file " + filename );
+        throw RbException()<<"Could not open file "<<filename.make_preferred();
     }
     
     chars.clear();
@@ -69,7 +69,7 @@ const std::vector<std::vector<std::string> >& DelimitedDataReader::getChars(void
 }
 
 
-const std::string& DelimitedDataReader::getFilename(void)
+const path& DelimitedDataReader::getFilename(void)
 {
     return filename;
 }
