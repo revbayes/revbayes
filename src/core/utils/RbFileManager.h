@@ -58,8 +58,6 @@ namespace RevBayesCore {
 
     private:
 
-        bool                    parsePathFileNames(const std::string &s);  //!< Divides a string into the file path and file name
-    
         std::string             file_name; //!< file name
         std::string             file_path; //!< file path
         std::string             full_file_name; //!< full file path (i.e file_path + file_name)

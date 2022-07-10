@@ -32,81 +32,46 @@ namespace RevBayesCore
 
 /** Default constructor, creating a file manager object with the file
  path equal to the current (default) directory and an empty file name */
-RbFileManager::RbFileManager( void ) :
-    file_name( "" ),
-    file_path( "" ),
-    full_file_name( "" )
+RbFileManager::RbFileManager( void )
 {
-    file_path = fs::current_path().make_preferred().string();
-    full_file_name = file_path;
-    if ( full_file_name != "")
-    {
-        full_file_name += getPathSeparator();
-    }
-    
-    full_file_name += file_name;
-    
-    
-#    ifdef _WIN32
-    StringUtilities::replaceSubstring(full_file_name,"/","\\");
-#   endif
-    
+    fs::path p = fs::current_path() / "";
+    p.make_preferred();
+
+    file_path = p.parent_path().string();
+    file_name = "";
+    full_file_name = p.string();
 }
 
 
 /** Constructor with full file/directory name */
-RbFileManager::RbFileManager(const std::string &fn) :
-    file_name( fn ),
-    file_path( "" ),
-    full_file_name( "" )
+RbFileManager::RbFileManager(const std::string &fn)
 {
-    parsePathFileNames( fn );
-    
-#   ifdef _WIN32
-    StringUtilities::replaceSubstring(file_path,"/","\\");
-#   endif
-    
-    full_file_name = file_path;
-    if ( full_file_name != "")
-    {
-        full_file_name += getPathSeparator();
-    }
-    
-    full_file_name += file_name;
-    
-#   ifdef _WIN32
-    StringUtilities::replaceSubstring(full_file_name,"/","\\");
-#   endif
-    
+    fs::path p = fn;
+
+    if (not p.is_absolute())
+        p = fs::current_path() / p;
+
+    p.make_preferred();
+
+    file_path = p.parent_path().string();
+    file_name = p.filename().string();
+    full_file_name = p.string();
 }
 
 
 /** Constructor with path name and file/directory name */
-RbFileManager::RbFileManager(const std::string &pn, const std::string &fn) :
-    file_name( fn ),
-    file_path( pn ),
-    full_file_name( "" )
+RbFileManager::RbFileManager(const std::string &pn, const std::string &fn)
 {
-    // set the path and file for the string
-    std::string tmp = pn + getPathSeparator() + fn;
-    parsePathFileNames( tmp );
+    fs::path p = fs::path(pn) / fs::path(fn);
 
-#   ifdef _WIN32
-    StringUtilities::replaceSubstring(file_path,"/","\\");
-#   endif
+    if (not p.is_absolute())
+        p = fs::current_path() / p;
 
-    full_file_name = file_path;
-    if ( full_file_name != "")
-    {
-        full_file_name += getPathSeparator();
-    }
+    p.make_preferred();
 
-    full_file_name += file_name;
-
-#   ifdef _WIN32
-    StringUtilities::replaceSubstring(full_file_name,"/","\\");
-#   endif
-
+    file_path = p.parent_path().string();
+    file_name = p.filename().string();
+    full_file_name = p.string();
 }
 
 
@@ -342,30 +307,7 @@ std::string getPathSeparator( void )
  */
 std::string getStringByDeletingLastPathComponent(const std::string& s)
 {
-    
-    std::string tempS = s;
-    size_t location = tempS.find_last_of( getPathSeparator() );
-    
-    if ( location == std::string::npos )
-    {
-        /* There is no path in this string. We
-         must have only the file name. */
-        return "";
-    }
-    else if ( location == tempS.length() - 1 )
-    {
-        /* It looks like the last character is "/", which
-         means that no file name has been provided. */
-        return tempS;
-    }
-    else
-    {
-        /* We can divide the path into the path and the file. */
-        tempS.erase( location );
-        return tempS;
-    }
-    
-    return "";
+    return fs::path(s).parent_path().make_preferred().string();
 }
 
 
@@ -429,95 +371,6 @@ bool isFilePresent(const std::string &fn)
 
     return fs::is_regular_file(f) and not fs::is_directory(f);
 }
-
-/** Divides a string into the path and file name components
- * and sets member variables to those values
- *
- * @param input_string string to parse
- * @return whether a file name was found
-*/
-bool RbFileManager::parsePathFileNames(const std::string &input_string)
-{
-    std::string name = input_string;
-    
-#	ifdef _WIN32
-    StringUtilities::replaceSubstring(name,"/","\\");
-#   endif
-    
-#    ifdef RB_XCODE
-    //    std::filesystem::path path(winPathString); // Construct the path from a string.
-    if ( name.size() > 0 && name[0] != '/' )
-    {
-        name = (fs::current_path() / input_string).make_preferred().string();
-    }
-#    else
-    boost::filesystem::path tmp_file = boost::filesystem::path(name);
-    //    std::filesystem::path path(winPathString); // Construct the path from a string.
-    if ( tmp_file.is_absolute() == false )
-    {
-        name = (fs::current_path() / input_string).make_preferred().string();
-    }
-#    endif
-
-    
-    // check if the path is a good one
-    bool isDPresent = isDirectoryPresent(name);
-    bool isFPresent = isFilePresent(name);
-    
-    if ( name.length() > 0 && isDPresent == true && isFPresent == false)
-    {
-        file_name = "";
-        size_t location = name.find_last_of( getPathSeparator() );
-        if ( location == name.length() - 1 )
-        {
-            name.erase( location );
-        }
-        file_path = name;
-        return true;
-    }
-    
-    // the string that is supposed to hold the path/file information is empty.
-    if ( name.length() == 0 )
-    {
-        file_path = fs::current_path().make_preferred().string();
-        return false;
-    }
-    
-    // Find the location of the last "/".
-    //This is where we will divide the path/file string into two.
-    size_t location = StringUtilities::findLastOf( name, getPathSeparator()[0] );
-    
-    if ( location == std::string::npos )
-    {
-        /* There is no path in this string. We
-         must have only the file name, and the
-         file should be in our current directory. */
-        file_name = name;
-        file_path = fs::current_path().make_preferred().string();
-    }
-    else if ( location == name.length() - 1 )
-    {
-        // It looks like the last character is "/", which
-        // means that no file name has been provided. However,
-        // it also means that the directory that has been provided
-        // is not valid, otherwise it would have tested as
-        // being present (above).
-        file_name = "";
-        file_path = fs::current_path().make_preferred().string();
-        return false;
-    }
-    else
-    {
-        // We can divide the path into the path and the file.
-        file_name = name.substr( location+1, name.length()-location-1 );
-        name.erase( location );
-        file_path = name;
-        
-    }
-    
-    return true;
-}
-
 
 void RbFileManager::setFileName(std::string const &s)
 {
