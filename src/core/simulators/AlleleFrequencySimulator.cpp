@@ -1,9 +1,11 @@
 #include "AlleleFrequencySimulator.h"
 #include "DiscreteTaxonData.h"
 #include "DistributionBinomial.h"
+#include "MatrixReal.h"
 #include "ProgressBar.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
+#include "TransitionProbabilityMatrix.h"
 #include "Tree.h"
 
 using namespace RevBayesCore;
@@ -80,7 +82,7 @@ void AlleleFrequencySimulator::simulateAlleleFrequencies( const std::string& fn,
             }
             
             // simulate the root sequence
-            long root_state = simulateAlongBranch( root_index, root_start_state, root_branch );
+            long root_state = simulateAlongBranch( population_sizes[root_index], root_start_state, root_branch );
 
             // recursively simulate the sequences
             mono = true;
@@ -118,6 +120,44 @@ void AlleleFrequencySimulator::simulateAlleleFrequencies( const std::string& fn,
 }
 
 
+MatrixReal* AlleleFrequencySimulator::simulateAlleleFrequenciesMatrix( double time, long population_size, long reps ) const
+{
+    
+    MatrixReal* tpm = new MatrixReal(population_size+1);
+    
+    // start the progress bar
+    ProgressBar progress = ProgressBar(population_size, 0);
+    
+    // Print progress bar (68 characters wide)
+    progress.start();
+    
+    for ( long i=0; i<=population_size; ++i )
+    {
+        
+        std::vector<long> counts = std::vector<long>(population_size+1, 0);
+        
+        for (size_t r=0; r<reps; ++r)
+        {
+            long obs_state = simulateAlongBranch(population_size, i, time);
+            ++counts[obs_state];
+        }
+        
+        for ( size_t s=0; s<=population_size; ++s )
+        {
+            (*tpm)[i][s] = double(counts[s])/reps;
+        }
+        
+        progress.update(i);
+        
+    }
+    
+    progress.finish();
+    
+    return tpm;
+}
+
+
+
 bool AlleleFrequencySimulator::simulate( const TopologyNode& n, long state, std::vector<int>& taxa, bool& monomorphic ) const
 {
     RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -132,7 +172,7 @@ bool AlleleFrequencySimulator::simulate( const TopologyNode& n, long state, std:
         int tip_sample = RbStatistics::Binomial::rv(samples, state/this_populuation_size, *rng);
         taxa[node_index] = tip_sample;
             
-        if ( tip_sample > 0 & tip_sample < samples )
+        if ( tip_sample > 0 && tip_sample < samples )
         {
             monomorphic = false;
         }
@@ -142,14 +182,14 @@ bool AlleleFrequencySimulator::simulate( const TopologyNode& n, long state, std:
         const TopologyNode& left = n.getChild(0);
         size_t left_index  = left.getIndex();
         double left_branch = left.getBranchLength();
-        long left_state = simulateAlongBranch( left_index, state, left_branch );
+        long left_state = simulateAlongBranch( population_sizes[left_index], state, left_branch );
         simulate( left, left_state, taxa, monomorphic );
         
         // the right child
         const TopologyNode& right = n.getChild(1);
         size_t right_index  = right.getIndex();
         double right_branch = right.getBranchLength();
-        long right_state = simulateAlongBranch( right_index, state, right_branch );
+        long right_state = simulateAlongBranch( population_sizes[right_index], state, right_branch );
         simulate( right, right_state, taxa, monomorphic );
     }
     
@@ -158,13 +198,12 @@ bool AlleleFrequencySimulator::simulate( const TopologyNode& n, long state, std:
 
 
 
-long AlleleFrequencySimulator::simulateAlongBranch( size_t node_index, long root_start_state, double branch_length ) const
+long AlleleFrequencySimulator::simulateAlongBranch( double this_populuation_size, long root_start_state, double branch_length ) const
 {
     
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
     double current_time = 0.0;
-    double this_populuation_size = population_sizes[node_index];
     double per_generation_mutation_rate_0 = mutation_rates[0] * this_populuation_size / generation_time;
     double per_generation_mutation_rate_1 = mutation_rates[1] * this_populuation_size / generation_time;
     
@@ -180,19 +219,28 @@ long AlleleFrequencySimulator::simulateAlongBranch( size_t node_index, long root
 //            current_states = RbStatistics::Binomial::rv(this_populuation_size, current_states/this_populuation_size, *rng);
                 
             double u = rng->uniform01();
+            // pick a random ancestor individual
             if ( current_state/this_populuation_size > u )
             {
+                // we picked an ancestor with a 1 state
+
+                // pick a random individual to replace
                 double v = rng->uniform01();
                 if ( current_state/this_populuation_size < v )
                 {
-                        ++current_state;
+                    // we picked an individual with a 0 state, so we increase the counter of individuals with a 1
+                    ++current_state;
                 }
             }
             else
             {
+                // we picked an ancestor with 0 state
+                
+                // pick a random individual to replace
                 double v = rng->uniform01();
                 if ( current_state/this_populuation_size > v )
                 {
+                    // we picked an individual with a 1 state, so we decrease the counter of individuals with a 1
                     --current_state;
                 }
             }
