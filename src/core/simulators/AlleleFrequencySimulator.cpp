@@ -272,7 +272,6 @@ long AlleleFrequencySimulator::simulateAlongBranch( double this_populuation_size
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
     double current_time = 0.0;
-    double this_populuation_size = population_sizes[node_index];
     double this_generation_time = moran_generations ? generation_time / this_populuation_size : generation_time;
     double per_generation_mutation_rate_0 = mutation_rates[0] / generation_time;
     double per_generation_mutation_rate_1 = mutation_rates[1] / generation_time;

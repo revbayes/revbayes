@@ -59,12 +59,13 @@ RevPtr<RevVariable> Func_AlleleFrequencyMatrixSimulator::execute()
     
     long population_sizes                   = static_cast<const Natural &>( this->args[0].getVariable()->getRevObject() ).getValue();
     double generation_time                  = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getValue();
-    std::vector<double> mutation_rates      = static_cast<const ModelVector<RealPos> &>( this->args[2].getVariable()->getRevObject() ).getValue();
-    double time                             = static_cast<const RealPos &>( this->args[3].getVariable()->getRevObject() ).getValue();
-    long reps                               = static_cast<const Natural &>( this->args[4].getVariable()->getRevObject() ).getValue();
+    bool moran_generations                  = static_cast<const RlBoolean &>( this->args[2].getVariable()->getRevObject() ).getValue();
+    std::vector<double> mutation_rates      = static_cast<const ModelVector<RealPos> &>( this->args[3].getVariable()->getRevObject() ).getValue();
+    double time                             = static_cast<const RealPos &>( this->args[4].getVariable()->getRevObject() ).getValue();
+    long reps                               = static_cast<const Natural &>( this->args[5].getVariable()->getRevObject() ).getValue();
 
 
-    RevBayesCore::AlleleFrequencySimulator sim = RevBayesCore::AlleleFrequencySimulator(tree, ps, generation_time, num_sites, mutation_rates, samples, root_branch );
+    RevBayesCore::AlleleFrequencySimulator sim = RevBayesCore::AlleleFrequencySimulator(tree, ps, generation_time, num_sites, mutation_rates, samples, root_branch, moran_generations );
     RevBayesCore::MatrixReal* m = sim.simulateAlleleFrequenciesMatrix( time, population_sizes, reps );
     
     return new RevVariable( new MatrixRealPos( m ) );
@@ -83,6 +84,7 @@ const ArgumentRules& Func_AlleleFrequencyMatrixSimulator::getArgumentRules( void
         
         argument_rules.push_back( new ArgumentRule( "populationSize"    , Natural::getClassTypeSpec(), "The population size.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "generationTime"    , RealPos::getClassTypeSpec(), "The generation time for the simulations.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argument_rules.push_back( new ArgumentRule( "moranGenerations"  , RlBoolean::getClassTypeSpec(), "Is the generation time in Moran generation, i.e., scaled by N.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "mutationRates"     , ModelVector<RealPos>::getClassTypeSpec(), "The mutation rates from 0 to 1 and 1 to 0.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "time"              , RealPos::getClassTypeSpec(), "The time for the simulations.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "reps"              , Natural::getClassTypeSpec(), "The number of replicate to simulate the frequencies.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
