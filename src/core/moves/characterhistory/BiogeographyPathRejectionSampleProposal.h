@@ -208,7 +208,6 @@
 ////
 ////    return lnP;
 ////}
-//<<<<<<< HEAD
 ////
 ////
 /////**
@@ -296,7 +295,6 @@
 ////                
 ////                // sample time from next interval (by memorylessness)
 ////                if (currAge - da < epochAge || r == 0.0)
-//=======
 //
 //
 //
@@ -484,7 +482,6 @@
 ////                    
 ////                }
 ////                else
-//<<<<<<< HEAD
 ////                {
 ////                    t += dt;
 ////                    currAge -= da;
@@ -635,8 +632,7 @@
 ////}
 ////
 ////#endif /* defined(__rb_mlandis__BiogeographyPathRejectionSampleProposal__) */
-//=======
-//                
+//
 //                
 //                double dt = 0.0;
 //                if (r > 0.0)
