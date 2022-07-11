@@ -1,4 +1,3 @@
-//<<<<<<< HEAD
 ////#ifndef PathUniformizationSampleProposal_H
 ////#define PathUniformizationSampleProposal_H
 ////
@@ -273,7 +272,6 @@
 ////template<class charType>
 ////double RevBayesCore::PathUniformizationSampleProposal<charType>::doProposal( void )
 ////{
-//=======
 //#ifndef PathUniformizationSampleProposal_H
 //#define PathUniformizationSampleProposal_H
 //
@@ -626,7 +624,6 @@
 ////    
 ////    RateGenerator& rm = const_cast<RateGenerator&>( q_map_site->getValue() );
 ////    rm.update();
-//<<<<<<< HEAD
 ////    
 ////    storedHistory.clear();
 ////    proposedHistory.clear();
@@ -792,7 +789,6 @@
 ////}
 ////
 ////#endif /* defined(__rb_mlandis__PathUniformizationSampleProposal__) */
-//=======
 ////    rm.calculateTransitionProbabilities(branchLength, tpCtmc);
 //
 ////    const RateMap& rm = qmap->getValue();
