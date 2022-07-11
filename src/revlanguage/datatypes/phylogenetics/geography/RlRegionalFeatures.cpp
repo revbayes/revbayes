@@ -10,6 +10,7 @@
 #include "MemberProcedure.h"
 #include "Natural.h"
 #include "OptionRule.h"
+#include "RbVector.h"
 #include "RealPos.h"
 #include "RlRegionalFeatures.h"
 #include "RlRegionalFeatureLayer.h"
@@ -41,37 +42,43 @@ using namespace RevLanguage;
 
 RlRegionalFeatures::RlRegionalFeatures(void) : ModelObject<RevBayesCore::RegionalFeatures>( )
 {
-
-    ArgumentRules* nLayers               = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "nLayers", ModelVector<RlString>::getClassTypeSpec(), nLayers ) );
-    
-    ArgumentRules* get_args = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "get", ModelVector<ModelVector<Natural> >::getClassTypeSpec(), get_args ) );
-
+    initMethods();
 }
 
-
 RlRegionalFeatures::RlRegionalFeatures( RevBayesCore::RegionalFeatures *v) : ModelObject<RevBayesCore::RegionalFeatures>( v ) {
+    initMethods();
+}
+
+/** Construct from core reference */
+RlRegionalFeatures::RlRegionalFeatures(const RevBayesCore::RegionalFeatures &m) : ModelObject<RevBayesCore::RegionalFeatures>( new RevBayesCore::RegionalFeatures( m ) )
+{
+    initMethods();
+}
+
+RlRegionalFeatures::RlRegionalFeatures( RevBayesCore::TypedDagNode<RevBayesCore::RegionalFeatures> *m) : ModelObject<RevBayesCore::RegionalFeatures>( m ) {
+    initMethods();
+}
+
+void RlRegionalFeatures::initMethods(void) {
    
     ArgumentRules* nLayers               = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "nLayers", ModelVector<RlString>::getClassTypeSpec(), nLayers ) );
     
-    ArgumentRules* get_args = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "get", ModelVector<ModelVector<Natural> >::getClassTypeSpec(), get_args ) );
-
-}
-
-
-RlRegionalFeatures::RlRegionalFeatures( RevBayesCore::TypedDagNode<RevBayesCore::RegionalFeatures> *m) : ModelObject<RevBayesCore::RegionalFeatures>( m ) {
+    ArgumentRules* getArgsRules = new ArgumentRules();
+    std::vector<std::string> relationshipOptions;
+    relationshipOptions.push_back( "within" );
+    relationshipOptions.push_back( "between" );
+    getArgsRules->push_back( new OptionRule( "relationship", new RlString("within"), relationshipOptions, "" ) );
+    std::vector<std::string> typeOptions;
+    typeOptions.push_back( "categorical" );
+    typeOptions.push_back( "quantitative" );
+    getArgsRules->push_back( new OptionRule( "type", new RlString("categorical"), typeOptions, "" ) );
+    getArgsRules->push_back( new ArgumentRule( "timeIndex", Natural::getClassTypeSpec(), "Index of time slice.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     
-    ArgumentRules* nLayers               = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "nLayers", ModelVector<RlString>::getClassTypeSpec(), nLayers ) );
-    
-    ArgumentRules* get_args = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "get", ModelVector<ModelVector<Natural> >::getClassTypeSpec(), get_args ) );
+    methods.addFunction( new MemberProcedure( "get", ModelVector<ModelVector<Natural> >::getClassTypeSpec(), getArgsRules ) );
 
+    return;
 }
-
 
 RlRegionalFeatures* RlRegionalFeatures::clone() const
 {
@@ -88,10 +95,17 @@ RevPtr<RevVariable> RlRegionalFeatures::executeMethod(std::string const &name, c
 
         return new RevVariable(new Natural((int)this->dag_node->getValue().getNumLayers())) ;
     }
-    if (name == "get") {
+    if (name == "get")
+    {
         found = true;
-//        return new RevVariable(new ModelVector<ModelVector<RlRegionalFeatureLayer> >(this->dag_node->getValue().getLayers("within","categorical"))) ;
-//        return new RevVariable(new Natural((int)this->dag_node->getValue().getNumLayers())) ;
+        std::string relationship = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+        std::string type = static_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
+        size_t time_index = static_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getValue() - 1;
+
+        // get relevant layer
+        const std::vector<RevBayesCore::RegionalFeatureLayer>& y = this->dag_node->getValue().getLayers(relationship, type, time_index);
+        return new RevVariable( new ModelVector<RlRegionalFeatureLayer>( y ) );
+        
     }
     
     
