@@ -23,7 +23,10 @@ namespace RevLanguage {
     public:
         RlRegionalFeatureLayer(void);                                                                          //!< Default constructor
         RlRegionalFeatureLayer(RevBayesCore::RegionalFeatureLayer *m);                                                    //!< Default constructor
+        RlRegionalFeatureLayer(const RevBayesCore::RegionalFeatureLayer &m);                                       //!< Const ref constructor
         RlRegionalFeatureLayer(RevBayesCore::TypedDagNode<RevBayesCore::RegionalFeatureLayer> *d);                        //!< Default constructor
+        typedef RevBayesCore::RegionalFeatureLayer valueType;
+        
         
         // Basic utility functions
         RlRegionalFeatureLayer*             clone(void) const;                                                                      //!< Clone object
@@ -39,7 +42,8 @@ namespace RevLanguage {
         std::string                         getGuiInfo(void) { return ""; }
         
     private:
-        RevBayesCore::RegionalFeatureLayer*            layer;
+        void initMethods(void);
+//        RevBayesCore::RegionalFeatureLayer*            layer;
     };
     
 }

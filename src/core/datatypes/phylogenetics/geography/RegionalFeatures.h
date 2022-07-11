@@ -24,13 +24,14 @@ namespace RevBayesCore {
     class RegionalFeatures : public Cloneable {
         
     public:
-        RegionalFeatures(std::map<size_t, std::map<size_t, std::vector<int> > > wc,
+        RegionalFeatures(void);
+        RegionalFeatures(std::map<size_t, std::map<size_t, std::vector<long> > > wc,
                          std::map<size_t, std::map<size_t, std::vector<double> > > wq,
-                         std::map<size_t, std::map<size_t, std::vector<std::vector<int> > > > bc,
+                         std::map<size_t, std::map<size_t, std::vector<std::vector<long> > > > bc,
                          std::map<size_t, std::map<size_t, std::vector<std::vector<double> > > > bq);
         RegionalFeatures(const RegionalFeatures& a);
-        RegionalFeatures&                               operator=(const RegionalFeatures& a);
-        virtual RegionalFeatures*                       clone(void) const;
+        RegionalFeatures&                                       operator=(const RegionalFeatures& a);
+        virtual RegionalFeatures*                               clone(void) const;
         
         const std::vector<std::vector<RegionalFeatureLayer> >&  getLayers(std::string feature_relationship, std::string feature_type);
         const std::vector<RegionalFeatureLayer>&                getLayers(std::string feature_relationship, std::string feature_type, size_t time_index);
@@ -40,12 +41,13 @@ namespace RevBayesCore {
         
     
     private:
+        void initializeFeatures();
         void normalizeWithinQuantitative();
         void normalizeBetweenQuantitative();
         
-        std::map<size_t, std::map<size_t, std::vector<int> > > withinCategorical;
+        std::map<size_t, std::map<size_t, std::vector<long> > > withinCategorical;
         std::map<size_t, std::map<size_t, std::vector<double> > > withinQuantitative;
-        std::map<size_t, std::map<size_t, std::vector<std::vector<int> > > > betweenCategorical;
+        std::map<size_t, std::map<size_t, std::vector<std::vector<long> > > > betweenCategorical;
         std::map<size_t, std::map<size_t, std::vector<std::vector<double> > > > betweenQuantitative;
         
         // relationship, type, time_index, feature_index
