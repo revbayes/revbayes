@@ -151,9 +151,9 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
     // populate containers with regional feature data over times/relationships/types
 
     // index by time_index, feature_index, region_index, (region_index)
-    std::map<size_t, std::map<size_t, std::vector<int> > > within_categorical;
+    std::map<size_t, std::map<size_t, std::vector<long> > > within_categorical;
     std::map<size_t, std::map<size_t, std::vector<double> > > within_quantitative;
-    std::map<size_t, std::map<size_t, std::vector<std::vector<int> > > > between_categorical;
+    std::map<size_t, std::map<size_t, std::vector<std::vector<long> > > > between_categorical;
     std::map<size_t, std::map<size_t, std::vector<std::vector<double> > > > between_quantitative;
 
     // populate
@@ -169,7 +169,7 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
         
         if (feature_relationship == "within" && feature_type == "categorical") {
             for (size_t k = 0; k < row_dat[0].size(); k++) {
-                unsigned val = std::stoi( row_dat[0][k] );
+                long val = std::stoi( row_dat[0][k] );
                 within_categorical[time_index][feature_index].push_back(val);
             }
         } else if (feature_relationship == "within" && feature_type == "quantitative") {
@@ -179,9 +179,9 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
             }
         } else if (feature_relationship == "between" && feature_type == "categorical") {
             for (size_t j = 0; j < row_dat.size(); j++) {
-                between_categorical[time_index][feature_index].push_back( std::vector<int>() );
+                between_categorical[time_index][feature_index].push_back( std::vector<long>() );
                 for (size_t k = 0; k < row_dat[0].size(); k++) {
-                    unsigned val = std::stoi( row_dat[j][k] );
+                    long val = std::stoi( row_dat[j][k] );
                     between_categorical[time_index][feature_index][j].push_back(val);
                 }
             }

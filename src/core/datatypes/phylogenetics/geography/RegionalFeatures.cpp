@@ -20,9 +20,14 @@
 using namespace RevBayesCore;
 
 
-RegionalFeatures::RegionalFeatures(std::map<size_t, std::map<size_t, std::vector<int> > > wc,
+RegionalFeatures::RegionalFeatures(void) {
+    ;
+}
+
+
+RegionalFeatures::RegionalFeatures(std::map<size_t, std::map<size_t, std::vector<long> > > wc,
                                    std::map<size_t, std::map<size_t, std::vector<double> > > wq,
-                                   std::map<size_t, std::map<size_t, std::vector<std::vector<int> > > > bc,
+                                   std::map<size_t, std::map<size_t, std::vector<std::vector<long> > > > bc,
                                    std::map<size_t, std::map<size_t, std::vector<std::vector<double> > > > bq) :
     withinCategorical(wc),
     withinQuantitative(wq),
@@ -30,11 +35,42 @@ RegionalFeatures::RegionalFeatures(std::map<size_t, std::map<size_t, std::vector
     betweenQuantitative(bq)
 {
     
+    initializeFeatures();
+}
+
+RegionalFeatures::RegionalFeatures(const RegionalFeatures& a)
+{
+    if (this != &a) {
+        numLayers = a.numLayers;
+        withinCategorical = a.withinCategorical;
+        withinQuantitative = a.withinQuantitative;
+        betweenCategorical = a.betweenCategorical;
+        betweenQuantitative = a.betweenQuantitative;
+        feature_layers = a.feature_layers;
+        *this = a;
+    }
+}
+
+RegionalFeatures& RegionalFeatures::operator=(const RegionalFeatures& a)
+{
+    if (this != &a) {
+        numLayers = a.numLayers;
+        withinCategorical = a.withinCategorical;
+        withinQuantitative = a.withinQuantitative;
+        betweenCategorical = a.betweenCategorical;
+        betweenQuantitative = a.betweenQuantitative;
+        feature_layers = a.feature_layers;
+    }
+    return *this;
+}
+
+RegionalFeatures* RegionalFeatures::clone(void) const
+{
+    return new RegionalFeatures(*this);
+}
+
+void RegionalFeatures::initializeFeatures(void) {
     
-    // relationship, type, time_index, feature_index
-    // feature_layers[ relationship ][ type ][ time_index ][ feature_index ]
-    
-    // loop over time maps
     for (auto it = withinCategorical.begin(); it != withinCategorical.end(); it++) {
         feature_layers["within"]["categorical"].push_back( std::vector<RegionalFeatureLayer>() );
         size_t i = it->first - 1;
@@ -79,10 +115,9 @@ RegionalFeatures::RegionalFeatures(std::map<size_t, std::map<size_t, std::vector
         }
     }
     
+    // normalize all quantitative features across time slices
     normalizeWithinQuantitative();
     normalizeBetweenQuantitative();
-    
-    std::cout << "initialized!\n";
 }
 
 void RegionalFeatures::normalizeWithinQuantitative(void) {
@@ -157,31 +192,13 @@ void RegionalFeatures::normalizeBetweenQuantitative(void) {
     return;
 }
 
-RegionalFeatures::RegionalFeatures(const RegionalFeatures& a)
-{
-    *this = a;
-}
-
-RegionalFeatures& RegionalFeatures::operator=(const RegionalFeatures& a)
-{
-    if (this != &a) {
-        numLayers = a.numLayers;
-    }
-
-    return *this;
-}
-
-RegionalFeatures* RegionalFeatures::clone(void) const
-{
-    return new RegionalFeatures(*this);
-}
-
 const std::vector<std::vector<RegionalFeatureLayer> >& RegionalFeatures::getLayers(std::string feature_relationship, std::string feature_type)
 {
     return feature_layers[feature_relationship][feature_type];
 }
 const std::vector<RegionalFeatureLayer>& RegionalFeatures::getLayers(std::string feature_relationship, std::string feature_type, size_t time_index)
 {
+    
     return feature_layers[feature_relationship][feature_type][time_index];
 }
 const RegionalFeatureLayer& RegionalFeatures::getLayers(std::string feature_relationship, std::string feature_type, size_t time_index, size_t feature_index)
@@ -189,11 +206,9 @@ const RegionalFeatureLayer& RegionalFeatures::getLayers(std::string feature_rela
     return feature_layers[feature_relationship][feature_type][time_index][feature_index];
 }
 
-
 size_t RegionalFeatures::getNumLayers(void) const {
     return numLayers;
 }
-
 
 std::ostream& RevBayesCore::operator<<(std::ostream& o, const RegionalFeatures& x) {
 

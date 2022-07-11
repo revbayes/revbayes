@@ -20,6 +20,7 @@
 #include "Natural.h"
 #include "OptionRule.h"
 #include "RealPos.h"
+#include "RbVector.h"
 #include "RlRegionalFeatureLayer.h"
 #include "RlString.h"
 #include "RevVariable.h"
@@ -33,6 +34,7 @@
 #include "MethodTable.h"
 #include "ModelObject.h"
 #include "RbVectorImpl.h"
+#include "OptionRule.h"
 #include "Real.h"
 #include "RegionalFeatures.h"
 #include "RevObject.h"
@@ -44,40 +46,29 @@
 #include "TypedFunction.h"
 #include "UserFunctionNode.h"
 
-using namespace RevLanguage;
 
+namespace RevLanguage { class Argument; }
+
+using namespace RevLanguage;
 
 RlRegionalFeatureLayer::RlRegionalFeatureLayer(void) : ModelObject<RevBayesCore::RegionalFeatureLayer>( )
 {
-
-    ArgumentRules* nLayers               = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "nLayers", ModelVector<RlString>::getClassTypeSpec(), nLayers ) );
-    
-    ArgumentRules* get_args = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "get", ModelVector<ModelVector<Natural> >::getClassTypeSpec(), get_args ) );
-
+    initMethods();
 }
 
+/** Construct from core reference */
+RlRegionalFeatureLayer::RlRegionalFeatureLayer(const RevBayesCore::RegionalFeatureLayer &m) : ModelObject<RevBayesCore::RegionalFeatureLayer>( new RevBayesCore::RegionalFeatureLayer( m ) )
+{
+    initMethods();
+}
 
 RlRegionalFeatureLayer::RlRegionalFeatureLayer( RevBayesCore::RegionalFeatureLayer *v) : ModelObject<RevBayesCore::RegionalFeatureLayer>( v ) {
-   
-    ArgumentRules* nLayers               = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "nLayers", ModelVector<RlString>::getClassTypeSpec(), nLayers ) );
-    
-    ArgumentRules* get_args = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "get", ModelVector<ModelVector<Natural> >::getClassTypeSpec(), get_args ) );
-
+    initMethods();
 }
 
 
 RlRegionalFeatureLayer::RlRegionalFeatureLayer( RevBayesCore::TypedDagNode<RevBayesCore::RegionalFeatureLayer> *m) : ModelObject<RevBayesCore::RegionalFeatureLayer>( m ) {
-    
-    ArgumentRules* nLayers               = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "nLayers", ModelVector<RlString>::getClassTypeSpec(), nLayers ) );
-    
-    ArgumentRules* get_args = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "get", ModelVector<ModelVector<Natural> >::getClassTypeSpec(), get_args ) );
-
+    initMethods();
 }
 
 
@@ -91,14 +82,53 @@ RlRegionalFeatureLayer* RlRegionalFeatureLayer::clone() const
 RevPtr<RevVariable> RlRegionalFeatureLayer::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
 {
     
-    if (name == "getFeatures") {
+    if (name == "get")
+    {
         found = true;
-//        return new RevVariable(new ModelVector<ModelVector<Natural> >(this->dag_node->getValue().getLayers("within","categorical"))) ;
+        
+        const RevBayesCore::RegionalFeatureLayer& layer = this->getDagNode()->getValue();
+        std::string relationship = layer.getFeatureRelationship();
+        std::string type = layer.getFeatureType();
+        
+        if (relationship == "within" && type == "categorical") {
+            RevBayesCore::RbVector<long> val = layer.getWithinCategoricalFeatures();
+            const ModelVector<Natural>& x = static_cast<const ModelVector<Natural>&>(val);
+            return new RevVariable( new ModelVector<Natural>( x ) );
+        } else if (relationship == "within" && type == "quantitative") {
+            RevBayesCore::RbVector<double> val = layer.getWithinQuantitativeFeatures();
+            const ModelVector<Real>& x = static_cast<const ModelVector<Real>&>(val);
+            return new RevVariable( new ModelVector<Real>( x ) );
+        } else if (relationship == "between" && type == "categorical") {
+            std::vector<std::vector<long> > val = layer.getBetweenCategoricalFeatures();
+            RevBayesCore::RbVector<RevBayesCore::RbVector<long> > z;
+            for (size_t i = 0; i < val.size(); i++) {
+                z.push_back(val[i]);
+            }
+            const ModelVector<ModelVector<Natural> >& x = static_cast<const ModelVector<ModelVector<Natural> >&>(z);
+            return new RevVariable( new ModelVector<ModelVector<Natural> >( x ) );
+        } else if (relationship == "between" && type == "quantitative") {
+            std::vector<std::vector<double> > val = layer.getBetweenQuantitativeFeatures();
+            RevBayesCore::RbVector<RevBayesCore::RbVector<double> > z;
+            for (size_t i = 0; i < val.size(); i++) {
+                z.push_back(val[i]);
+            }
+            const ModelVector<ModelVector<Real> >& x = static_cast<const ModelVector<ModelVector<Real> >&>(z);
+            return new RevVariable( new ModelVector<ModelVector<Real> >( x ) );
+        }
     }
     
     return ModelObject<RevBayesCore::RegionalFeatureLayer>::executeMethod( name, args, found );
 }
 
+void RlRegionalFeatureLayer::initMethods(void) {
+    ArgumentRules* nLayers = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "nLayers", ModelVector<RlString>::getClassTypeSpec(), nLayers ) );
+    
+    ArgumentRules* get_args = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "get", ModelVector<ModelVector<Natural> >::getClassTypeSpec(), get_args ) );
+
+    return;
+}
 
 /* Get Rev type of object */
 const std::string& RlRegionalFeatureLayer::getClassType(void) {
