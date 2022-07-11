@@ -10,6 +10,7 @@
 #include <set>
 #include <string>
 #include <stdlib.h>
+#include <sstream>
 #include <vector>
 
 #include "ArgumentRule.h"
@@ -155,12 +156,11 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
     // error checking
     std::set<unsigned> uniqueTimeIndex;
     std::map<std::string, std::map<std::string, std::map<size_t, std::set<size_t> > > > uniqueFeatureIndex;
-//    uniqueFeatureIndex["within"]["categorical"] = std::map<size_t, std::set<size_t> >();
-//    uniqueFeatureIndex["within"]["quantitative"]  = std::map<size_t, <std::set<size_t> >();
-//    uniqueFeatureIndex["between"]["categorical"]  = std::vector<std::set<unsigned> >();
-//    uniqueFeatureIndex["between"]["quantitative"] = std::vector<std::set<unsigned> >();
+    uniqueFeatureIndex["within"]["categorical"] = std::map<size_t, std::set<size_t> >();
+    uniqueFeatureIndex["within"]["quantitative"]  = std::map<size_t, std::set<size_t> >();
+    uniqueFeatureIndex["between"]["categorical"]  = std::map<size_t, std::set<size_t> >();
+    uniqueFeatureIndex["between"]["quantitative"] = std::map<size_t, std::set<size_t> >();
     
-    // populate
     for (size_t i = 0; i < timeIndex.size(); i++) {
         size_t time_index = timeIndex[i];
         size_t feature_index = featureIndex[i];
@@ -171,10 +171,76 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
         // add unique entries for error checking
         uniqueTimeIndex.insert((unsigned)time_index);
 
-        if (uniqueFeatureIndex[feature_relationship][feature_type].find(time_index) != uniqueFeatureIndex[feature_relationship][feature_type].end()) {
+        if (uniqueFeatureIndex[feature_relationship][feature_type].find(time_index) == uniqueFeatureIndex[feature_relationship][feature_type].end()) {
+            
             uniqueFeatureIndex[feature_relationship][feature_type][time_index] = std::set<size_t>();
         }
+        
         uniqueFeatureIndex[feature_relationship][feature_type][time_index].insert(feature_index);
+    }
+    
+    // check same features are present for each timeslice for each process type
+    std::set<std::string> s_rel;
+    s_rel.insert("within");
+    s_rel.insert("between");
+    std::set<std::string> s_type;
+    s_type.insert("categorical");
+    s_type.insert("quantitative");
+    
+    // within/between
+    for (auto it = s_rel.begin(); it != s_rel.end(); it++) {
+        // categorical/quantitative
+        for (auto jt = s_type.begin(); jt != s_type.end(); jt++) {
+            // time_index
+            auto tmp_unique = uniqueFeatureIndex[*it][*jt];
+            std::set<size_t> s1;
+            std::set<size_t> s2;
+            for (auto kt = uniqueTimeIndex.begin(); kt != uniqueTimeIndex.end(); kt++) {
+                if (tmp_unique.find(*kt) == tmp_unique.end()) {
+                    std::stringstream ss;
+                    ss << "Missing entry in readRegionalFeatures: relationship=" << *it + " type=" << *jt + " time_index=" << *kt << "\n";
+                    throw RbException( ss.str() );
+                }
+            }
+            
+            for (auto kt = tmp_unique.begin(); kt != tmp_unique.end(); kt++) {
+                s2 = s1;
+                s1 = kt->second;
+                
+                if (kt != tmp_unique.begin()) {
+                    /*
+                    std::stringstream ss;
+                    ss << "r=" << *it << " t=" << *jt << " t=" << kt->first << "\n  s1=[";
+                    for (std::set<size_t>::iterator ii = s1.begin(); ii != s1.end(); ii++) {
+                        if (ii != s1.begin()) { ss << ","; }
+                        ss << *ii;
+                    }
+                    ss << "]\n  s2=[";
+                    for (std::set<size_t>::iterator ii = s2.begin(); ii != s2.end(); ii++) {
+                        if (ii != s2.begin()) { ss << ","; }
+                        ss << *ii;
+                    }
+                    ss << "]\n";
+                    std::cout << ss.str() << "\n";
+                    */
+                    
+                    // does set of feature_index match between time slices?
+                    if (s1 != s2) {
+                        std::string s = "Missing entry in readRegionalFeatures: relationship=" + *it + " type=" + *jt + " time_index=" + kt->first + "\n";
+                        throw RbException(s);
+                    }
+                }
+            }
+        }
+    }
+    
+    // populate
+    for (size_t i = 0; i < timeIndex.size(); i++) {
+        size_t time_index = timeIndex[i];
+        size_t feature_index = featureIndex[i];
+        std::string feature_relationship = featureRelationship[i];
+        std::string feature_type = featureType[i];
+        std::string feature_path = featurePath[i];
         
         RevBayesCore::DelimitedDataReader* row_rdr = new RevBayesCore::DelimitedDataReader(feature_path, delimiter[0], header_offset);
         std::vector<std::vector<std::string> > row_dat = row_rdr->getChars();
@@ -207,40 +273,6 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
             }
         }
     }
-    
-    // check same features are present for each timeslice for each process type
-    std::set<std::string> s_rel;
-    s_rel.insert("within");
-    s_rel.insert("between");
-    std::set<std::string> s_type;
-    s_type.insert("categorical");
-    s_type.insert("quantitative");
-    
-    // within/betwen
-    for (auto it = s_rel.begin(); it != s_rel.end(); it++) {
-        // cat/quant
-        for (auto jt = s_type.begin(); jt != s_type.end(); jt++) {
-            auto tmp_unique = uniqueFeatureIndex[*it][*jt];
-            // time_index
-            std::set<size_t> s1;
-            std::set<size_t> s2;
-            for (auto kt = tmp_unique.begin(); kt != tmp_unique.end(); kt++) {
-                if (kt == tmp_unique.begin()) {
-                    s1 = kt->second;
-                    continue;
-                }
-                s2 = s1;
-                s1 = kt->second;
-                // does set of feature_index match between time slices?
-                if (s1 != s2) {
-                    std::string s = "Missing entry: relationship=" + *it + " type=" + *jt + " time_index=" + kt->first + "\n";
-                    throw RbException(s);
-                }
-            }
-        }
-    }
-    
-    
     
     // create backend core function object
     RevBayesCore::RegionalFeatures* rf = new RevBayesCore::RegionalFeatures(within_categorical, within_quantitative, between_categorical, between_quantitative);
