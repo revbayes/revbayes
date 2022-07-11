@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "HomologousDiscreteCharacterData.h"
+#include "Parallelizable.h"
 #include "PoMoState.h"
 
 namespace RevBayesCore {
@@ -18,7 +19,7 @@ class Tree;
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
      * @since 2022-05-17, version 1.1
      */
-    class AlleleFrequencySimulator {
+    class AlleleFrequencySimulator : public Parallelizable {
         
     public:
         
