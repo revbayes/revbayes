@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "HomologousDiscreteCharacterData.h"
+#include "Parallelizable.h"
 #include "PoMoState.h"
 
 namespace RevBayesCore {
@@ -20,11 +21,11 @@ class MatrixReal;
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
      * @since 2022-05-17, version 1.1
      */
-    class AlleleFrequencySimulator {
+    class AlleleFrequencySimulator : public Parallelizable {
         
     public:
         
-        AlleleFrequencySimulator(Tree* t, const std::vector<long>& ps, double gt, size_t ns, const std::vector<double>& mr, const std::vector<long>& s, double r);
+        AlleleFrequencySimulator(Tree* t, const std::vector<long>& ps, double gt, size_t ns, const std::vector<double>& mr, const std::vector<long>& s, double r, bool mg);
         
         void                                            simulateAlleleFrequencies( const std::string& fn, bool only_Variable ) const;
         MatrixReal*                                     simulateAlleleFrequenciesMatrix( double t, long ps, long r ) const;
@@ -45,6 +46,7 @@ class MatrixReal;
         std::vector<double>                             mutation_rates;
         std::vector<long>                               samples_per_species;
         double                                          root_branch;
+        bool                                            moran_generations;
         
         
     };

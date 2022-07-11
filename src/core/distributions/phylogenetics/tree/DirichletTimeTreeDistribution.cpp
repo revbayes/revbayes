@@ -137,7 +137,7 @@ double DirichletTimeTreeDistribution::computeLnProbability( void )
 {
     
     // Variable declarations and initialization
-    double lnProb = 0.0;
+    double ln_prob = 0.0;
     double age = root_age->getValue();
     
     // we need to check that the root age matches
@@ -185,7 +185,7 @@ double DirichletTimeTreeDistribution::computeLnProbability( void )
             
         }
         
-        if ( the_node.isRoot() == false && the_node.isTip() == false )
+        if ( the_node.isTip() == false )
         {
             internal_node_ages.push_back( the_node.getAge() );
         }
@@ -202,13 +202,18 @@ double DirichletTimeTreeDistribution::computeLnProbability( void )
         internal_node_ages[i] /= age;
     }
     
+    if ( alpha->getValue().size() != internal_node_ages.size() )
+    {
+        throw RbException("Missmatching size of alpha parameter (" + StringUtilities::toString(alpha->getValue().size()) + ") with number of between node age intervals (" +  StringUtilities::toString(internal_node_ages.size()) + ") in DirichletTimeTree distribution.");
+    }
+    
     // Take the Dirichlet draw into account
-    lnProb = RbStatistics::Dirichlet::lnPdf(alpha->getValue(), internal_node_ages);
+    ln_prob = RbStatistics::Dirichlet::lnPdf(alpha->getValue(), internal_node_ages);
 
     // Take the ordering effect into account
-    lnProb += RbMath::lnFactorial( int(num_taxa - 2) );
+    ln_prob += RbMath::lnFactorial( int(num_taxa - 2) );
 
-    return lnProb;
+    return ln_prob;
 }
 
 
