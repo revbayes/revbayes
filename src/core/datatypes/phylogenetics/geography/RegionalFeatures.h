@@ -37,13 +37,15 @@ namespace RevBayesCore {
         const std::vector<RegionalFeatureLayer>&                getLayers(std::string feature_relationship, std::string feature_type, size_t time_index);
         const RegionalFeatureLayer&                             getLayers(std::string feature_relationship, std::string feature_type, size_t time_index, size_t feature_index);
         
-        size_t                                          getNumLayers(void) const;
+        
+        void            normalizeWithinQuantitative();
+        void            normalizeBetweenQuantitative();
+        std::map<std::string, std::map<std::string, size_t> >  getNumLayers(void) const;
+        size_t          getNumTimeslices(void) const;
         
     
     private:
         void initializeFeatures();
-        void normalizeWithinQuantitative();
-        void normalizeBetweenQuantitative();
         
         std::map<size_t, std::map<size_t, std::vector<long> > > withinCategorical;
         std::map<size_t, std::map<size_t, std::vector<double> > > withinQuantitative;
@@ -53,7 +55,8 @@ namespace RevBayesCore {
         // relationship, type, time_index, feature_index
         std::map<std::string, std::map<std::string, std::vector< std::vector< RegionalFeatureLayer > > > > feature_layers;
         
-        unsigned                                        numLayers;
+        size_t                                                  numTimeslices;
+        std::map<std::string, std::map<std::string, size_t> >   numLayers;
         
     };
     
