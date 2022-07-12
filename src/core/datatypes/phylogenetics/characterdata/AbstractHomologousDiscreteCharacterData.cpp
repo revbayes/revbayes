@@ -123,7 +123,7 @@ void AbstractHomologousDiscreteCharacterData::writeToFile(const path &dir, const
         // otherwise write NEXUS file
         path filename = dir / (fn + ".nex");
         
-        NexusWriter nw( filename.string() );
+        NexusWriter nw( filename );
         nw.openStream(false);
         
         nw.writeNexusBlock( *this );
