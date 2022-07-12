@@ -42,6 +42,7 @@ RegionalFeatures::RegionalFeatures(const RegionalFeatures& a)
 {
     if (this != &a) {
         numLayers = a.numLayers;
+        numTimeslices = a.numTimeslices;
         withinCategorical = a.withinCategorical;
         withinQuantitative = a.withinQuantitative;
         betweenCategorical = a.betweenCategorical;
@@ -55,6 +56,7 @@ RegionalFeatures& RegionalFeatures::operator=(const RegionalFeatures& a)
 {
     if (this != &a) {
         numLayers = a.numLayers;
+        numTimeslices = a.numTimeslices;
         withinCategorical = a.withinCategorical;
         withinQuantitative = a.withinQuantitative;
         betweenCategorical = a.betweenCategorical;
@@ -70,6 +72,12 @@ RegionalFeatures* RegionalFeatures::clone(void) const
 }
 
 void RegionalFeatures::initializeFeatures(void) {
+    
+    numTimeslices = withinCategorical.size();
+    numLayers["within"]["categorical"]   = withinCategorical[0].size();
+    numLayers["within"]["quantitative"]  = withinQuantitative[0].size();
+    numLayers["between"]["categorical"]  = betweenCategorical[0].size();
+    numLayers["between"]["quantitative"] = betweenQuantitative[0].size();
     
     for (auto it = withinCategorical.begin(); it != withinCategorical.end(); it++) {
         feature_layers["within"]["categorical"].push_back( std::vector<RegionalFeatureLayer>() );
@@ -116,8 +124,9 @@ void RegionalFeatures::initializeFeatures(void) {
     }
     
     // normalize all quantitative features across time slices
-    normalizeWithinQuantitative();
-    normalizeBetweenQuantitative();
+//    normalizeWithinQuantitative();
+//    normalizeBetweenQuantitative();
+    
 }
 
 void RegionalFeatures::normalizeWithinQuantitative(void) {
@@ -206,8 +215,12 @@ const RegionalFeatureLayer& RegionalFeatures::getLayers(std::string feature_rela
     return feature_layers[feature_relationship][feature_type][time_index][feature_index];
 }
 
-size_t RegionalFeatures::getNumLayers(void) const {
+std::map<std::string, std::map<std::string, size_t> > RegionalFeatures::getNumLayers(void) const {
     return numLayers;
+}
+
+size_t RegionalFeatures::getNumTimeslices(void) const {
+    return numTimeslices;
 }
 
 std::ostream& RevBayesCore::operator<<(std::ostream& o, const RegionalFeatures& x) {
