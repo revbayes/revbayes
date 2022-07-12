@@ -116,7 +116,7 @@ void AbstractHomologousDiscreteCharacterData::writeToFile(const path &dir, const
         // NEXUS does not support NaturalNumbers so write tab delimited file
         path filename = dir / (fn + ".tsv");
         RevBayesCore::DelimitedCharacterDataWriter writer; 
-        writer.writeData( filename.string(), *this);
+        writer.writeData( filename, *this);
     }
     else
     {

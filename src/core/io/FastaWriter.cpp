@@ -32,17 +32,12 @@ FastaWriter::FastaWriter( void )
  * \param[in]   fileName    The name of the file into which the objects is to be written.
  * \param[in]   data        The character data object which is written out.
  */
-void FastaWriter::writeData(const std::string& file_name, const AbstractHomologousDiscreteCharacterData& data)
+void FastaWriter::writeData(const path& file_name, const AbstractHomologousDiscreteCharacterData& data)
 {
-    
+    create_directories( file_name.parent_path() );
+
     // the filestream object
-    std::fstream out_stream;
-    
-    RbFileManager f = RbFileManager(file_name);
-    f.createDirectoryForFile();
-    
-    // open the stream to the file
-    out_stream.open( f.getFullFileName().c_str(), std::fstream::out );
+    std::fstream out_stream( file_name.string() );
     
     const std::vector<Taxon> &taxa = data.getTaxa();
     for (std::vector<Taxon>::const_iterator it = taxa.begin();  it != taxa.end(); ++it)
@@ -79,17 +74,12 @@ void FastaWriter::writeData(const std::string& file_name, const AbstractHomologo
  * \param[in]   fileName    The name of the file into which the objects is to be written.
  * \param[in]   data        The character data object which is written out.
  */
-void FastaWriter::writeData(const std::string& fileName, const AbstractNonHomologousDiscreteCharacterData& data)
+void FastaWriter::writeData(const path& fileName, const AbstractNonHomologousDiscreteCharacterData& data)
 {
-    
+    create_directories( fileName.parent_path() );
+
     // the filestream object
-    std::fstream out_stream;
-    
-    RbFileManager fm = RbFileManager(fileName);
-    fm.createDirectoryForFile();
-    
-    // open the stream to the file
-    out_stream.open( fm.getFullFileName().c_str(), std::fstream::out );
+    std::fstream out_stream( fileName.string() );
     
     const std::vector<Taxon> &taxa = data.getTaxa();
     for (std::vector<Taxon>::const_iterator it = taxa.begin();  it != taxa.end(); ++it)

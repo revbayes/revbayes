@@ -410,7 +410,7 @@ void RevBayesCore::NonHomologousDiscreteCharacterData<charType>::writeToFile(con
     
     FastaWriter fw;
     
-    fw.writeData( filename.string(), *this );
+    fw.writeData( filename, *this );
     
     
 }
