@@ -197,9 +197,8 @@ std::vector<AbstractCharacterData* > NclReader::convertFromNcl(const path& file_
             if (m != NULL)
             {
                 
-                
-                
-                m->setFilename( file_name );
+                m->setFileName( file_name.filename().string() );
+                m->setFilePath( file_name.parent_path().string() );
                 
                 unsigned int nAssumptions = nexusReader.GetNumAssumptionsBlocks(charBlock);
                 if ( nAssumptions > 0 )
@@ -272,7 +271,8 @@ std::vector<AbstractCharacterData* > NclReader::convertFromNcl(const path& file_
             
             if (m != NULL)
             {
-                m->setFilename( file_name );
+                m->setFileName( file_name.filename().string() );
+                m->setFilePath( file_name.parent_path().string() );
                 cmv.push_back( m );
             }
         }
@@ -1085,7 +1085,6 @@ std::string NclReader::intuitDataType(std::string& s)
 /** Try to determine if the file is likely to be in Fasta format */
 bool NclReader::isFastaFile(const path& fn, std::string& dType)
 {
-    
     // open file
     std::ifstream fStrm( fn.string() );
     
@@ -1176,9 +1175,9 @@ bool NclReader::isNexusFile(const path& fn)
 /** Try to determine if the file is likely to be in Phylip format */
 bool NclReader::isPhylipFile(const path& fn, std::string& dType, bool& is_interleaved)
 {
+    
     // open file
     std::ifstream fStrm( fn.string() );
-
     std::string seqStr = "";
     
     // read the file token-by-token looking for NEXUS things
@@ -1239,18 +1238,17 @@ bool NclReader::isPhylipFile(const path& fn, std::string& dType, bool& is_interl
 
 std::vector<AbstractCharacterData*> NclReader::readMatrices(const path &fn)
 {
-    
     // check that the file/path name has been correctly specified
     if ( fn.empty() )
     {
         std::string errorStr = "";
         formatError(fn, errorStr);
-        throw RbException()<<"Could not find file or path with name "<<fn;
+        throw RbException()<<"Could not find file or path with name \""<<fn<<"\"";
     }
     
     // are we reading a single file or are we reading the contents of a directory?
     bool readingDirectory = false;
-    if ( fn.filename().empty() or fn.filename_is_dot() or fn.filename_is_dot_dot())
+    if ( fn.filename().string() == "" or fn.filename().string() == "." )
         readingDirectory = true;
     if (readingDirectory == true)
         RBOUT( "Recursively reading the contents of a directory\n" );
@@ -1280,15 +1278,15 @@ std::vector<AbstractCharacterData*> NclReader::readMatrices(const path &fn)
     // read all of the files in the string called "vectorOffile_names" because some of them may not be in a format
     // that can be read.
     std::map<path,std::string> fileMap;
-    for (std::vector<path>::iterator p = vectorOffile_names.begin(); p != vectorOffile_names.end(); p++)
+    for (auto& pp: vectorOffile_names)
     {
         bool is_interleaved = false;
         std::string myFileType = "unknown", dType = "unknown";
-        if (isNexusFile(*p) == true)
+        if (isNexusFile(pp) == true)
             myFileType = "nexus";
-        else if (isPhylipFile(*p, dType, is_interleaved) == true)
+        else if (isPhylipFile(pp, dType, is_interleaved) == true)
             myFileType = "phylip";
-        else if (isFastaFile(*p, dType) == true)
+        else if (isFastaFile(pp, dType) == true)
             myFileType = "fasta";
         
         if (myFileType != "unknown")
@@ -1306,7 +1304,7 @@ std::vector<AbstractCharacterData*> NclReader::readMatrices(const path &fn)
             else
                 suffix += "|unknown";
             myFileType += suffix;
-            fileMap.insert( std::make_pair(*p,myFileType) );
+            fileMap.insert( std::make_pair(pp,myFileType) );
         }
         else
         {
@@ -1382,7 +1380,7 @@ std::vector<AbstractCharacterData *> NclReader::readMatrices(const path &fn, con
     
     // Check that the file exists. It is likely that this has been already checked during the formation of
     // the map that is passed into the function, but it never hurts to be safe...
-    if ( not exists( fn ))
+    if ( not exists(fn) )
     {
         addWarning("Data file not found");
     }
@@ -1420,7 +1418,7 @@ std::vector<AbstractCharacterData *> NclReader::readMatrices(const std::map<path
     // We loop through the map that contains as the key the path and name of the file to be read and as the
     // value the data type. The data types are as follows: Nexus, Phylip+DNA/RNA/AA/Standard+Interleaved/Noninterleaved,
     // Fasta+DNA/RNA/AA.
-    for (auto p = fileMap.begin(); p != fileMap.end(); p++)
+    for (std::map<path,std::string>::const_iterator p = fileMap.begin(); p != fileMap.end(); p++)
     {
         // Check that the file exists. It is likely that this has been already checked during the formation of
         // the map that is passed into the function, but it never hurts to be safe...
@@ -1457,13 +1455,13 @@ std::vector<AbstractCharacterData *> NclReader::readMatrices(const std::map<path
 
 
 /** Read a list of file names contained in a vector of strings */
-std::vector<AbstractCharacterData*> NclReader::readMatrices(const std::vector<path> fn, const std::string file_format, const std::string data_type, const bool is_interleaved) {
+std::vector<AbstractCharacterData*> NclReader::readMatrices(const std::vector<path>& fn, const std::string file_format, const std::string data_type, const bool is_interleaved) {
     
     // instantiate a vector of matrices
     std::vector<AbstractCharacterData*> cmv;
     
     // check that the files exist
-    for (auto f = fn.begin(); f != fn.end(); f++)
+    for (std::vector<path>::const_iterator f = fn.begin(); f != fn.end(); f++)
     {
         if ( not exists(*f) )
         {
@@ -1473,9 +1471,9 @@ std::vector<AbstractCharacterData*> NclReader::readMatrices(const std::vector<pa
     }
     
     // read the data files
-    for (auto f = fn.begin(); f != fn.end(); f++)
+    for (std::vector<path>::const_iterator f = fn.begin(); f != fn.end(); f++)
     {
-        std::vector<AbstractCharacterData*> v = readMatrices( (*f), file_format, data_type, is_interleaved );
+        std::vector<AbstractCharacterData*> v = readMatrices( *f, file_format, data_type, is_interleaved );
         if (v.size() > 0)
         {
             for (std::vector<AbstractCharacterData*>::iterator m = v.begin(); m != v.end(); m++)
@@ -1491,13 +1489,10 @@ std::vector<AbstractCharacterData*> NclReader::readMatrices(const std::vector<pa
 /** Reads a single file using NCL */
 std::vector<AbstractCharacterData*> NclReader::readMatrices(const path &file_name, const std::string &file_format, const std::string &data_type, bool is_interleaved)
 {
-    
-    std::string fns = file_name.string();
-    
-    const char *fn = fns.c_str();
-    
+    const char* fn = file_name.string().c_str();
+
     // check that the file exists
-    if ( not exists(file_name) )
+    if ( not exists( file_name) )
     {
         addWarning("Data file not found");
         std::vector<AbstractCharacterData*> dummy;
@@ -1595,7 +1590,7 @@ std::vector<AbstractCharacterData*> NclReader::readMatrices(const path &file_nam
         std::stringstream errorMessage;
         errorMessage << "The error occurred while reading line ";
         errorMessage << err.line << " column " << err.col;
-        errorMessage << " in file " << file_name.filename();
+        errorMessage << " in file \"" << file_name.filename() << "\"";
         addWarning(errorMessage.str());
         
         // Return empty character matrix vector
@@ -1615,16 +1610,16 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const path &fn)
     nexusReader.ClearContent();
     
     // check that the file/path name has been correctly specified
-    if ( fn.empty() )
+    if ( fn.empty() or not exists(fn))
     {
         std::string errorStr = "";
         formatError(fn, errorStr);
-        throw RbException()<<"Could not find file or path with name "<<fn;
+        throw RbException()<<"Could not find file or path with name \""<<fn<<"\"";
     }
     
     // are we reading a single file or are we reading the contents of a directory?
     bool readingDirectory = false;
-    if ( fn.filename().empty() or fn.filename_is_dot() or fn.filename_is_dot_dot())
+    if ( fn.filename().empty() or fn.filename_is_dot())
     {
         readingDirectory = true;
     }
@@ -1661,7 +1656,7 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const path &fn)
     // read all of the files in the string called "vectorOffile_names" because some of them may not be in a format
     // that can be read.
     std::vector<Tree*> *trees = NULL;
-    for (auto p = vectorOffile_names.begin(); p != vectorOffile_names.end(); p++)
+    for (std::vector<path>::iterator p = vectorOffile_names.begin(); p != vectorOffile_names.end(); p++)
     {
         // we should check here the file type first and make sure it is valid
         
@@ -1784,7 +1779,6 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const path &fn)
 /** Read trees */
 std::vector<Tree*>* NclReader::readBranchLengthTrees(const path &fn, std::vector<std::map<int,std::string> >& translationTables)
 {
-
     std::vector<Tree*>* trees = readBranchLengthTrees(fn);
     getTranslateTables(translationTables);
     return trees;
@@ -1793,8 +1787,7 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const path &fn, std::vector
 /** Read trees */
 std::vector<Tree*>* NclReader::readBranchLengthTrees(const path &file_name, const std::string &file_format)
 {
-    std::string fns = file_name.string();
-
+        
     // check that the file exists
     if ( not exists(file_name) )
     {
@@ -1808,17 +1801,17 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const path &file_name, cons
         if (file_format == "nexus")
         {
             // NEXUS file format
-            nexusReader.ReadFilepath( fns.c_str(), MultiFormatReader::NEXUS_FORMAT);
+            nexusReader.ReadFilepath(file_name.string().c_str(), MultiFormatReader::NEXUS_FORMAT);
         }
         else if (file_format == "phylip")
         {
             // phylip file format with long taxon names
-            nexusReader.ReadFilepath( fns.c_str(), MultiFormatReader::RELAXED_PHYLIP_TREE_FORMAT);
+            nexusReader.ReadFilepath(file_name.string().c_str(), MultiFormatReader::RELAXED_PHYLIP_TREE_FORMAT);
         }
         else if (file_format == "newick")
         {
             NewickTreeReader ntr;
-            std::vector<Tree*>* trees = ntr.readBranchLengthTrees(fns);
+            std::vector<Tree*>* trees = ntr.readBranchLengthTrees(file_name.string());
             return trees;
         }
     }
@@ -1829,6 +1822,9 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const path &file_name, cons
         throw RbException( o.str() );
         return NULL;
     }
+        
+    std::vector<path> file_name_vector;
+    file_name_vector.push_back( file_name );
         
     std::vector<Tree*>* cvm = convertTreesFromNcl();
     
