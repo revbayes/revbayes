@@ -1408,7 +1408,7 @@ void ContinuousCharacterData::initFromFile(const path &dir, const std::string &f
     suffix += "|unknown";
     myFileType += suffix;
         
-    std::vector<AbstractCharacterData*> m_i = reader.readMatrices( filename , myFileType );
+    std::vector<AbstractCharacterData*> m_i = reader.readMatrices( filename, myFileType );
     ContinuousCharacterData *coreM = static_cast<ContinuousCharacterData *>( m_i[0] );
 
     *this = *coreM;

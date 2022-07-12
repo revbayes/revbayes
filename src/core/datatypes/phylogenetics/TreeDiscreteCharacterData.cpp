@@ -83,7 +83,7 @@ void TreeDiscreteCharacterData::initFromFile(const path &dir, const std::string 
     myFileType += suffix;
     
     // read the content of the file now
-    std::vector<AbstractCharacterData*> m_i = reader.readMatrices( filename.string(), myFileType );
+    std::vector<AbstractCharacterData*> m_i = reader.readMatrices( filename, myFileType );
     
     if ( m_i.size() < 1 )
     {
