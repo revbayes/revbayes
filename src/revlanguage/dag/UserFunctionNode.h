@@ -438,7 +438,7 @@ void UserFunctionNode<valueType>::setMcmcMode(bool tf)
 
 
 template<class valueType>
-void UserFunctionNode<valueType>::setValueFromFile(const RevBayesCore::path& fn)
+void UserFunctionNode<valueType>::setValueFromFile(const RevBayesCore::path &fn)
 {
     
     //    *value = v;
