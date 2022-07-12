@@ -92,7 +92,7 @@ void TreeDiscreteCharacterData::initFromFile(const path &dir, const std::string 
         {
             std::cerr << "NCL-Warning:\t\t" << *it << std::endl;
         }
-        throw RbException()<<"Could not read character data matrix from file \""<<filename<<"\".";
+        throw RbException()<<"Could not read character data matrix from file "<<filename<<".";
     }
     
     HomologousDiscreteCharacterData<StandardState> *coreM = static_cast<HomologousDiscreteCharacterData<StandardState> *>( m_i[0] );
