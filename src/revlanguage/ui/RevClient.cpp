@@ -42,14 +42,16 @@ using namespace RevLanguage;
 
 namespace fs = boost::filesystem;
 
-std::vector<std::string> getFileList(const std::string &path)
+std::vector<std::string> getFileList(const RevBayesCore::path& dir)
 {
+    std::vector<RevBayesCore::path> filenames;
+
+    RevBayesCore::setStringWithNamesOfFilesInDirectory( RevBayesCore::current_path() / dir, filenames, false );
+
     std::vector<std::string> v;
-    
-    std::string wd = fs::current_path().make_preferred().string();
-    
-    RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(wd, path);
-    fm.setStringWithNamesOfFilesInDirectory( v, false );
+
+    for(auto& filename: filenames)
+        v.push_back( filename.string() );
     
     return v;
 }
