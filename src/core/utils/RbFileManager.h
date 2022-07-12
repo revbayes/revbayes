@@ -23,9 +23,10 @@ namespace RevBayesCore {
 
     std::string             getLastPathComponent(const std::string& s);  //!< Get last component of given path
     std::string             getStringByDeletingLastPathComponent(const std::string& s);  //!< Get path by removing last component
-    bool                    setStringWithNamesOfFilesInDirectory(const std::string& dirpath, std::vector<std::string>& sv, bool recursive=true);  //!< Recursively fills in a string vector with the contents of the directory passed in argument
+    bool                    setStringWithNamesOfFilesInDirectory(const path& dirpath, std::vector<path>& sv, bool recursive=true);  //!< Recursively fills in a string vector with the contents of the directory passed in argument
 
     path                    append_to_stem(const path& p, const std::string& s);
+    void                    formatError(const path& p, std::string& errorStr);  //!< Format the error string when (mis)reading files
 
 /** @brief Contains functions for files and directories management
  *
