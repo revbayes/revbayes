@@ -49,7 +49,7 @@ void NexusWriter::closeStream( void )
  */
 void NexusWriter::openStream(bool reopen) 
 {
-    createDirectoryForFile( file_name );
+    create_directories( file_name.parent_path() );
     
     // open the stream to the file
     out_stream.open( file_name.string(), std::fstream::out );
