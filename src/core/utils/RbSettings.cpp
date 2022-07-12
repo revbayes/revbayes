@@ -161,26 +161,6 @@ void RbSettings::initializeUserSettings(void)
         readStream.close();
     }
 
-    // initialize the current directory to be the directory the binary is sitting in
-#	ifdef _WIN32
-    
-    char buffer[MAX_DIR_PATH];
-    GetModuleFileName( NULL, buffer, MAX_DIR_PATH );
-    std::string::size_type pos = std::string( buffer ).find_last_of( "\\/" );
-    fs::current_path( std::string( buffer ).substr( 0, pos) );
-
-#	else
-
-    char cwd[MAX_DIR_PATH+1];
-    if ( getcwd(cwd, MAX_DIR_PATH+1) )
-    {
-        fs::current_path( cwd );
-    }
-    
-#   endif
-
-    
-    // save the current settings for the future.
 //    writeUserSettings();
 }
 
