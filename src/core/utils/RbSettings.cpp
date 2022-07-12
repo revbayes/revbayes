@@ -31,9 +31,8 @@ RbSettings::RbSettings(void)
 }
 
 
-const std::string& RbSettings::getModuleDir( void ) const
+const fs::path& RbSettings::getModuleDir( void ) const
 {
-    
     return moduleDir;
 }
 
@@ -66,7 +65,7 @@ std::string RbSettings::getOption(const std::string &key) const
 {
     if ( key == "moduledir" )
     {
-        return moduleDir;
+        return moduleDir.string();
     }
     else if ( key == "outputPrecision" )
     {
@@ -139,17 +138,15 @@ void RbSettings::initializeUserSettings(void)
     printNodeIndex = true;      // print node indices of tree nodes as comments
     collapseSampledAncestors = true;
     
-    std::string user_dir = RevBayesCore::expandUserDir("~");
+    fs::path user_dir = RevBayesCore::expandUserDir("~");
     
     // read the ini file, override defaults if applicable
-    std::string settings_file_name = ".RevBayes.ini";
-    RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(user_dir, settings_file_name);
+    fs::path settings_file_name = user_dir / ".RevBayes.ini";
 
- 	
     //    bool failed = false; //unused
-    if ( fm.isFile() )
+    if ( is_regular_file( settings_file_name) )
     {
-        std::ifstream readStream( fm.getFullFileName() );
+        std::ifstream readStream( settings_file_name.string() );
         std::string readLine = "";
         while ( safeGetline(readStream,readLine) )
         {
@@ -201,17 +198,14 @@ void RbSettings::listOptions() const
 }
 
 
-void RbSettings::setModuleDir(const std::string &md)
+void RbSettings::setModuleDir(const fs::path &md)
 {
-    
-    RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(md);
-    
-    if ( !fm.isDirectory() )
+    if ( not is_directory(md) )
     {
-        throw RbException("Cannot set the help directory to '" + md + "'.");
+        throw RbException()<<"Cannot set the help directory to "<<md<<".";
     }
     
-    moduleDir = fm.getFullFilePath();
+    moduleDir = md;
     
     // save the current settings for the future.
     writeUserSettings();
@@ -344,13 +338,12 @@ void RbSettings::setTolerance(double t)
 
 void RbSettings::writeUserSettings( void )
 {
-    std::string user_dir = expandUserDir("~");
+    fs::path user_dir = expandUserDir("~");
     
     // open the ini file
-    std::string settings_file_name = ".RevBayes.ini";
-    RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(user_dir, settings_file_name);
+    fs::path settings_file_name = user_dir / ".RevBayes.ini";
 
-    std::ofstream writeStream( fm.getFullFileName() );
+    std::ofstream writeStream( settings_file_name.string() );
     writeStream << "moduledir=" << moduleDir << std::endl;
     writeStream << "outputPrecision=" << outputPrecision << std::endl;
     writeStream << "printNodeIndex=" << (printNodeIndex ? "true" : "false") << std::endl;
