@@ -136,32 +136,32 @@ std::istream& safeGetline(std::istream& is, std::string& t)
  * @param path relative path
  * @return full path including user home directory
  */
-std::string expandUserDir(std::string path)
+path expandUserDir(std::string dir)
 {
-    if ( !path.empty() && path[0] == '~')
+    if ( !dir.empty() && dir[0] == '~')
     {
         char const* home = getenv("HOME");
         
         if (home or ((home = getenv("USERPROFILE"))))
         {
-            path.replace(0, 1, home);
+            dir.replace(0, 1, home);
         }
     }
-    else if ( path.empty() == false )
+    else if ( dir.empty() == false )
     {
         char const *hdrive = getenv("HOMEDRIVE"), *hpath = getenv("HOMEPATH");
         if ( hdrive != NULL )
         {
 # ifdef _WIN32
-            path = std::string(hdrive) + hpath + "\\" + path;
+            dir = std::string(hdrive) + hpath + "\\" + dir;
 # else
-            path.replace(0, 1, std::string(hdrive) + hpath);
+            dir.replace(0, 1, std::string(hdrive) + hpath);
 # endif
         }
         
     }
-    
-    return path;
+
+    return dir;
 }
 
 
