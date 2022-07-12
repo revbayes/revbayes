@@ -45,7 +45,7 @@ RevPtr<RevVariable> Func_system::execute( void )
 {
 
     RbSettings& s = RbSettings::userSettings();
-    RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager();
+
     std::string cmd = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue().c_str();
     
     system( cmd.c_str() );
