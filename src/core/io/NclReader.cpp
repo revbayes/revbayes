@@ -199,8 +199,7 @@ std::vector<AbstractCharacterData* > NclReader::convertFromNcl(const std::string
                 
                 
                 
-                m->setFileName( StringUtilities::getLastPathComponent(file_name) );
-                m->setFilePath( StringUtilities::getStringWithDeletedLastPathComponent(file_name) );
+                m->setFilename( file_name );
                 
                 unsigned int nAssumptions = nexusReader.GetNumAssumptionsBlocks(charBlock);
                 if ( nAssumptions > 0 )
@@ -273,8 +272,7 @@ std::vector<AbstractCharacterData* > NclReader::convertFromNcl(const std::string
             
             if (m != NULL)
             {
-                m->setFileName( StringUtilities::getLastPathComponent(file_name) );
-                m->setFilePath( StringUtilities::getStringWithDeletedLastPathComponent(file_name) );
+                m->setFilename( file_name );
                 cmv.push_back( m );
             }
         }

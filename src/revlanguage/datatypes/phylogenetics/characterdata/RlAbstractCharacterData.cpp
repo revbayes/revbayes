@@ -247,7 +247,7 @@ RevPtr<RevVariable> AbstractCharacterData::executeCharacterDataMethod(std::strin
     {
         found = true;
         
-        const std::string &n = charDataObject->getFileName();
+        const std::string n = charDataObject->getFilename().string();
         
         return new RevVariable( new RlString(n) );
     }
