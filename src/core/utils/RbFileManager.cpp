@@ -127,6 +127,38 @@ path expandUserDir(std::string dir)
 */
 void formatError(const path& p, std::string& errorStr)
 {
+    bool file_nameProvided    = p.filename().string() != "." and p.filename().string() != "" and p.filename().string() != "..";
+    bool isfile_nameGood      = exists(p);
+    bool isDirectoryNameGood = is_directory( p.parent_path() );
+
+    if ( file_nameProvided == false && isDirectoryNameGood == false )
+    {
+        errorStr += "Could not read contents of directory \"" + p.string() + "\" because the directory does not exist";
+    }
+    else if (file_nameProvided == true && (isfile_nameGood == false || isDirectoryNameGood == false))
+    {
+        errorStr += "Could not read file named \"" + p.filename().string() + "\" in directory named \"" + p.parent_path().string() + "\" ";
+        if (isfile_nameGood == false && isDirectoryNameGood == true)
+        {
+            errorStr += "because the file does not exist";
+        }
+        else if (isfile_nameGood == true && isDirectoryNameGood == false)
+        {
+            errorStr += "because the directory does not exist";
+        }
+        else
+        {
+            errorStr += "because neither the directory nor the file exist";
+        }
+    }
+}
+
+
+/** Format an error exception string for problems specifying the file/path name
+ * @param[out] errorStr string to store the formatted error
+*/
+void RbFileManager::formatError(std::string& errorStr)
+{
     bool file_nameProvided    = (not p.filename().empty() and not p.filename_is_dot());
     bool isfile_nameGood      = is_regular_file(p);
     bool isDirectoryNameGood = is_directory( p.parent_path() );
@@ -153,6 +185,168 @@ void formatError(const path& p, std::string& errorStr)
     }
 }
 
+
+const std::string& RbFileManager::getFullFileName( void ) const
+{
+    return full_file_name;
+}
+
+
+/** Get absolute file path from file_path
+ * @return absolute path
+ */
+std::string RbFileManager::getFullFilePath( void ) const
+{
+    path p = file_path;
+
+    if (not p.is_absolute())
+        p = fs::current_path() / p;
+
+    p.make_preferred();
+
+    return p.string();
+}
+
+
+/** Get the last path component of full_file_name
+ * @note any trailing path separator is removed, so x/y/z/ will return z
+ * @return last path component
+ */
+std::string RbFileManager::getLastPathComponent( void )
+{
+    return fs::path(full_file_name).parent_path().filename().string();
+}
+
+
+/** Get the last path component of a path
+ * @note any trailing path separator is NOT removed, so x/y/z/ will return an empty string
+ * @param s input path
+ * @return last path component
+ */
+std::string getLastPathComponent(const std::string& s)
+{
+    auto ss = fs::path(s).filename().string();
+    if (ss == ".")
+        ss == "";
+    return ss;
+}
+
+
+std::string getPathSeparator( void )
+{
+#   ifdef _WIN32
+    return "\\";
+#   else
+    return "/";
+#   endif
+}
+
+
+/** Removes the last path component from a path
+ * @note any trailing path separator is NOT removed, so x/y/z/ will return x/y/z
+ * @return string without the last path component
+ */
+std::string getStringByDeletingLastPathComponent(const std::string& s)
+{
+    return fs::path(s).parent_path().make_preferred().string();
+}
+
+
+/** Checks whether full_file_name is a path to an existing directory */
+bool RbFileManager::isDirectory( void ) const
+{
+    return fs::is_directory(full_file_name);
+}
+
+
+/** Tests whether a directory is present (and is a directory)
+ * @param mp path to check
+ * @return result of the test
+ */
+bool isDirectoryPresent(const std::string &mp)
+{
+    return fs::is_directory(mp);
+}
+
+
+/** Checks whether the path given by file_path + file_name is a path to an existing file */
+bool RbFileManager::isFile( void ) const
+{
+    auto f = fs::path(file_path) / fs::path(file_name);
+    return fs::is_regular_file(f) and not fs::is_directory(f);
+}
+
+
+/** Checks whether the file name is non-empty */
+bool RbFileManager::isFileNamePresent(void) const
+{
+    
+    if ( file_name == "" )
+    {
+        return false;
+    }
+    
+    return true;
+}
+
+
+/** Checks whether a file passed in as its path and file name components is present (and a file)
+ * @param mp file path - if empty, set to the working directory
+ * @param mf file name
+ * @return whether the file exists
+*/
+bool isFilePresent(const std::string &mp, const std::string &mf)
+{ 
+    auto f = fs::path(mp) / fs::path(mf);
+    
+    return fs::is_regular_file(f) and not fs::is_directory(f);
+}
+
+/** Checks whether a file passed in as its full path is present (and is a file)
+ * @param fn full file path
+ * @return whether the file exists
+*/
+bool isFilePresent(const std::string &fn)
+{
+    fs::path f = fn;
+
+    return fs::is_regular_file(f) and not fs::is_directory(f);
+}
+
+void RbFileManager::setFileName(std::string const &s)
+{
+    file_name = s;
+}
+
+
+void RbFileManager::setFilePath(std::string const &s)
+{
+    file_path = s;
+#	ifdef _WIN32
+    StringUtilities::replaceSubstring(file_path,"/","\\");
+#   endif
+    
+}
+
+/** Fills in a vector with the names of the files in the directory file_path
+ *
+ * @param[out] sv vector to store the names
+ * @param[in] recursive whether to list recursively, default true
+ *
+ * @return true
+*/
+bool RbFileManager::setStringWithNamesOfFilesInDirectory(std::vector<std::string>& sv, bool recursive)
+{
+    std::vector<path> tmp;
+    bool ok = RevBayesCore::setStringWithNamesOfFilesInDirectory(file_path, tmp, recursive);
+
+    for(auto& f: tmp)
+        sv.push_back( f.string() );
+    
+    return ok;
+}
+
+
 /** Fills in a vector with the names of the files in a directory
  *
  * @param[in] dirpath path to the directory to be listed
@@ -163,84 +357,41 @@ void formatError(const path& p, std::string& errorStr)
 */
 bool setStringWithNamesOfFilesInDirectory(const path& dirpath, std::vector<path>& sv, bool recursive)
 {
-    // FIXME: It should be converted to use boost:filesystem.
-    //        This is a holdover from the days of RbFileManager
-    //        We should try and remove the #ifdef _WIN32, and 
-    std::string dirstring = dirpath.string();
+    auto dir = canonical(dirpath);
 
-    DIR* dir = opendir( dirstring.c_str() );
-    if (dir)
+    for(auto& dir_entry: directory_iterator(dir))
     {
-        struct dirent* entry;
-        while ( (entry = readdir( dir )) )
+        auto entry_path = dir_entry.path();
+            
+        // Is this a symlink that points to something non-existant?
+        if (not exists(entry_path)) continue;
+
+        try
         {
-            struct stat entryinfo;
-            std::string entryname = entry->d_name;
-            std::string entrypath = (dirpath  / entryname).string();
-            
-            bool skip_me = false;
-
-#ifdef _WIN32
-            if (stat( entrypath.c_str(), &entryinfo )) {
-              // if this returned a non-zero value, something is wrong
-              skip_me = true;
-            }
-#else
-            if (!lstat( entrypath.c_str(), &entryinfo ))
-            {
-                
-                // avoid recursing into symlinks that point to a directory above us
-                if ( S_ISLNK( entryinfo.st_mode ) ) {
-                    char *linkname = (char*) malloc(entryinfo.st_size + 1);
-                    ssize_t r = readlink(entrypath.c_str(), linkname, entryinfo.st_size + 1);
-                    if (r < 0 || r > entryinfo.st_size) {
-                        // error
-                        skip_me = true;
-                    } else {
-                        linkname[entryinfo.st_size] = '\0';
-                        if (strspn(linkname, "./") == entryinfo.st_size) {
-                            // this symlink consists entirely of dots and dashes and is likely a reference to a directory above us
-                            skip_me = true;
-                        } else {
-                            // replace entryinfo with info from stat
-                            if ( stat( entrypath.c_str(), &entryinfo ) ) {
-                                // if this returned a non-zero value, something is wrong
-                                skip_me = true;
-                            }
-                        }
-                    }
-                    free(linkname);
-                }
-
-            } else {
-              // if this returned a non-zero value, something is wrong
-              skip_me = true;
-            }
-#endif
-
-            if (!skip_me) {
-
-                if (entryname == "..")
-                {
-                    ;
-                }
-                else if (entryname == "." || entryname[0] == '.')
-                {
-                    ;
-                }
-                else if ( recursive == true && S_ISDIR( entryinfo.st_mode ) )
-                {
-                    setStringWithNamesOfFilesInDirectory( entrypath, sv );
-                }
-                else
-                {
-                    sv.push_back( entrypath );
-                }
-            }
-            
+            entry_path = canonical(entry_path);
         }
-        
-        closedir( dir );
+        catch(...)
+        {
+            continue;
+        }
+
+        auto entry_name = relative( entry_path, dir );
+
+        if (entry_name.empty()) continue;
+
+        // skip symlinks that point outside of the directory
+        if (entry_name.begin()->filename_is_dot_dot()) continue;
+
+        // can this happen?
+        if (entry_name.begin()->filename_is_dot()) continue;
+
+        if (is_directory(entry_path))
+        {
+            if (recursive)
+                setStringWithNamesOfFilesInDirectory( entry_path, sv, recursive );
+        }
+        else
+            sv.push_back( entry_path );
     }
     
     // make sure that the file names are sorted
