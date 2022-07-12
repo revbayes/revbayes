@@ -61,21 +61,29 @@ RlRegionalFeatures::RlRegionalFeatures( RevBayesCore::TypedDagNode<RevBayesCore:
 
 void RlRegionalFeatures::initMethods(void) {
    
-    ArgumentRules* nLayers               = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "nLayers", ModelVector<RlString>::getClassTypeSpec(), nLayers ) );
-    
-    ArgumentRules* getArgsRules = new ArgumentRules();
     std::vector<std::string> relationshipOptions;
     relationshipOptions.push_back( "within" );
     relationshipOptions.push_back( "between" );
-    getArgsRules->push_back( new OptionRule( "relationship", new RlString("within"), relationshipOptions, "" ) );
     std::vector<std::string> typeOptions;
     typeOptions.push_back( "categorical" );
     typeOptions.push_back( "quantitative" );
-    getArgsRules->push_back( new OptionRule( "type", new RlString("categorical"), typeOptions, "" ) );
-    getArgsRules->push_back( new ArgumentRule( "timeIndex", Natural::getClassTypeSpec(), "Index of time slice.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     
-    methods.addFunction( new MemberProcedure( "get", ModelVector<ModelVector<Natural> >::getClassTypeSpec(), getArgsRules ) );
+    ArgumentRules* numTimeArgRules   = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "numTimeslices", Natural::getClassTypeSpec(), numTimeArgRules ) );
+    
+    ArgumentRules* numLayersArgRules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "numLayers", ModelVector<Natural>::getClassTypeSpec(), numLayersArgRules ) );
+    
+    ArgumentRules* normalizeArgRules = new ArgumentRules();
+    normalizeArgRules->push_back( new OptionRule( "relationship", new RlString("within"), relationshipOptions, "" ) );
+    methods.addFunction( new MemberProcedure( "normalize", RlUtils::Void, normalizeArgRules ) );
+    
+    ArgumentRules* getArgRules = new ArgumentRules();
+    getArgRules->push_back( new OptionRule( "relationship", new RlString("within"), relationshipOptions, "" ) );
+    getArgRules->push_back( new OptionRule( "type", new RlString("categorical"), typeOptions, "" ) );
+    getArgRules->push_back( new ArgumentRule( "timeIndex", Natural::getClassTypeSpec(), "Index of time slice.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    
+    methods.addFunction( new MemberProcedure( "get", ModelVector<ModelVector<Natural> >::getClassTypeSpec(), getArgRules ) );
 
     return;
 }
@@ -90,10 +98,33 @@ RlRegionalFeatures* RlRegionalFeatures::clone() const
 RevPtr<RevVariable> RlRegionalFeatures::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
 {
     
-    if (name == "nLayers") {
+    if (name == "numLayers") {
         found = true;
+        std::map<std::string, std::map<std::string, size_t> > val = this->dag_node->getValue().getNumLayers();
+        std::vector<long> x;
+        x.push_back( val["within"]["categorical"] );
+        x.push_back( val["within"]["quantitative"] );
+        x.push_back( val["between"]["categorical"] );
+        x.push_back( val["between"]["quantitative"] );
+        return new RevVariable( new ModelVector<Natural>(x) );
+    }
+    if (name == "numTimeslices") {
+        found = true;
+        int val = (int)this->dag_node->getValue().getNumTimeslices();
+        return new RevVariable( new Natural(val) );
+    }
+    if (name == "normalize") {
+        found = true;
+        
+        std::string relationship = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
 
-        return new RevVariable(new Natural((int)this->dag_node->getValue().getNumLayers())) ;
+        if (relationship == "within") {
+            this->dag_node->getValue().normalizeWithinQuantitative();
+        } else if (relationship == "between") {
+            this->dag_node->getValue().normalizeBetweenQuantitative();
+        }
+
+        return NULL;
     }
     if (name == "get")
     {
