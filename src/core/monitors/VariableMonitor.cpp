@@ -263,7 +263,7 @@ void VariableMonitor::combineReplicates( size_t n_reps, MonteCarloAnalysisOption
 
                 if ( not current_input_stream )
                 {
-                    throw RbException()<<"Could not open file '"<<current_file_name<<"'.";
+                    throw RbException()<<"Could not open file "<<current_file_name<<".";
                 }
 
                 std::string read_line = "";
@@ -360,7 +360,7 @@ void VariableMonitor::combineReplicates( size_t n_reps, MonteCarloAnalysisOption
 
                 if ( not *current_input_stream )
                 {
-                    throw RbException()<<"Could not open file '"<<current_file_name<<"'.";
+                    throw RbException()<<"Could not open file "<<current_file_name<<".";
                 }
 
                 input_streams.push_back( current_input_stream );

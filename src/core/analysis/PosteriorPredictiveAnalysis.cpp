@@ -80,7 +80,7 @@ void PosteriorPredictiveAnalysis::runAll(size_t gen)
     {
         std::string errorStr = "";
         fm.formatError(errorStr);
-        throw RbException()<<"Could not find file or path with name \""<<directory<<"\"";
+        throw RbException()<<"Could not find file or path with name "<<directory<<"";
     }
     
     // set up a vector of strings containing the name or names of the files to be read
@@ -91,7 +91,7 @@ void PosteriorPredictiveAnalysis::runAll(size_t gen)
     }
     else
     {
-        throw RbException()<<"\""<<directory<<"\" is not a directory.";
+        throw RbException()<<directory<<" is not a directory.";
     }
 
     size_t num_runs = dir_names.size();

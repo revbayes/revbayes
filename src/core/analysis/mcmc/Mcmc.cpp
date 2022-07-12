@@ -712,7 +712,7 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
     
     if ( !inFile )
     {
-        throw RbException()<<"Could not open file \""<<checkpoint_file_name<<"\"";
+        throw RbException()<<"Could not open file "<<checkpoint_file_name;
     }
     
     // Initialize
