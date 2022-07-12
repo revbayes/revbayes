@@ -170,18 +170,26 @@ std::string expandUserDir(std::string path)
 */
 void RbFileManager::formatError(std::string& errorStr)
 {
-    
-    bool file_nameProvided    = isFileNamePresent();
-    bool isfile_nameGood      = testFile();
-    bool isDirectoryNameGood = testDirectory();
+    RevBayesCore::formatError( path(getFilePath()) / getFileName(), errorStr );
+}
+
+
+/** Format an error exception string for problems specifying the file/path name
+ * @param[out] errorStr string to store the formatted error
+*/
+void formatError(const path& p, std::string& errorStr)
+{
+    bool file_nameProvided    = (not p.filename().empty() and not p.filename_is_dot());
+    bool isfile_nameGood      = is_regular_file(p);
+    bool isDirectoryNameGood = is_directory( p.parent_path() );
     
     if ( file_nameProvided == false && isDirectoryNameGood == false )
     {
-        errorStr += "Could not read contents of directory \"" + getFilePath() + "\" because the directory does not exist";
+        errorStr += "Could not read contents of directory \"" + p.parent_path().string() + "\" because the directory does not exist";
     }
     else if (file_nameProvided == true && (isfile_nameGood == false || isDirectoryNameGood == false))
     {
-        errorStr += "Could not read file named \"" + getFileName() + "\" in directory named \"" + getFilePath() + "\" ";
+        errorStr += "Could not read file named \"" + p.filename().string() + "\" in directory named \"" + p.parent_path().string() + "\" ";
         if (isfile_nameGood == false && isDirectoryNameGood == true)
         {
             errorStr += "because the file does not exist";
@@ -195,7 +203,6 @@ void RbFileManager::formatError(std::string& errorStr)
             errorStr += "because neither the directory nor the file exist";
         }
     }
-    
 }
 
 
@@ -386,8 +393,12 @@ void RbFileManager::setFilePath(std::string const &s)
 */
 bool RbFileManager::setStringWithNamesOfFilesInDirectory(std::vector<std::string>& sv, bool recursive)
 {
-    
-    return RevBayesCore::setStringWithNamesOfFilesInDirectory(file_path, sv, recursive);
+    std::vector<path> filenames;
+    auto ok = RevBayesCore::setStringWithNamesOfFilesInDirectory(file_path, filenames, recursive);
+    for(auto& filename: filenames)
+        sv.push_back( filename.string() );
+
+    return ok;
 }
 
 
@@ -399,10 +410,11 @@ bool RbFileManager::setStringWithNamesOfFilesInDirectory(std::vector<std::string
  *
  * @return true
 */
-bool setStringWithNamesOfFilesInDirectory(const std::string& dirpath, std::vector<std::string>& sv, bool recursive)
+bool setStringWithNamesOfFilesInDirectory(const path& dirpath, std::vector<path>& sv, bool recursive)
 {
-        
-    DIR* dir = opendir( dirpath.c_str() );
+    std::string dirstring = dirpath.string();
+
+    DIR* dir = opendir( dirstring.c_str() );
     if (dir)
     {
         struct dirent* entry;
@@ -410,7 +422,7 @@ bool setStringWithNamesOfFilesInDirectory(const std::string& dirpath, std::vecto
         {
             struct stat entryinfo;
             std::string entryname = entry->d_name;
-            std::string entrypath = dirpath + getPathSeparator() + entryname;
+            std::string entrypath = (dirpath  / entryname).string();
             
             bool skip_me = false;
 
