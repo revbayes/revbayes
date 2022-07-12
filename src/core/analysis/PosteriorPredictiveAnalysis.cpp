@@ -79,7 +79,7 @@ void PosteriorPredictiveAnalysis::runAll(size_t gen)
     {
         std::string errorStr = "";
         formatError(directory, errorStr);
-        throw RbException()<<"Could not find file or path with name "<<directory<<"";
+        throw RbException()<<"Could not find file or path with name \""<<directory<<"\"";
     }
     
     // set up a vector of strings containing the name or names of the files to be read
@@ -136,7 +136,7 @@ void PosteriorPredictiveAnalysis::runAll(size_t gen)
             DagNode *the_node = current_nodes[j];
             if ( the_node->isClamped() == true )
             {
-                the_node->setValueFromFile( dir_names[i] );
+                the_node->setValueFromFile( dir_names[i].string() );
             }
                 
         }
