@@ -136,7 +136,7 @@ void PosteriorPredictiveAnalysis::runAll(size_t gen)
             DagNode *the_node = current_nodes[j];
             if ( the_node->isClamped() == true )
             {
-                the_node->setValueFromFile( dir_names[i].string() );
+                the_node->setValueFromFile( dir_names[i] );
             }
                 
         }
