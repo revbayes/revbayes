@@ -28,6 +28,8 @@ namespace RevBayesCore {
     path                    append_to_stem(const path& p, const std::string& s);
     void                    formatError(const path& p, std::string& errorStr);  //!< Format the error string when (mis)reading files
 
+    void                    createDirectoryForFile(const path& p);
+
 /** @brief Contains functions for files and directories management
  *
  * This class takes advantage of the dirent.h and sys/stat.h libraries. Besides doing
