@@ -30,7 +30,7 @@ FastaFileToNaturalNumbersConverter::FastaFileToNaturalNumbersConverter( void )
 
 
 /** Read Count File and Write Natural Numbers file */
-void FastaFileToNaturalNumbersConverter::faconverter( const std::string &fi, const std::vector<std::string> &taxa, const std::vector<std::string> &alleles , const size_t& n_individuals, const std::string &fo )
+void FastaFileToNaturalNumbersConverter::faconverter( const path &fi, const std::vector<std::string> &taxa, const std::vector<std::string> &alleles , const size_t& n_individuals, const path &fo )
 {
   
   // getting the number of alleles and taxa
@@ -38,9 +38,9 @@ void FastaFileToNaturalNumbersConverter::faconverter( const std::string &fi, con
   size_t n_taxa    = taxa.size();
 
   // open file
-  std::ifstream readStream( fi );
+  std::ifstream readStream( fi.string() );
   if ( not readStream )
-      throw RbException( "Could not open file \"" + fi + "\".");
+      throw RbException()<<"Could not open file "<<fi<<".";
 
   // some important quantities to parse the fasta file    
   std::vector<std::string> alignment;
@@ -157,13 +157,13 @@ void FastaFileToNaturalNumbersConverter::faconverter( const std::string &fi, con
                    "\n  Number of PoMo states           " << n_alleles*(1.0+(n_alleles-1.0)*(n_individuals-1.0)*0.5) << "\n\n";
 
   // the filestream object
-  std::fstream NaturalNumbers;
-  RbFileManager foo = RbFileManager(fo);
-  foo.createDirectoryForFile();
-    
+  createDirectoryForFile( fo );
+
   // open the stream to the file a write it
-  NaturalNumbers.open( foo.getFullFileName().c_str(), std::fstream::out );
-  for (size_t i=0; i<n_taxa; ++i){
+  std::ofstream NaturalNumbers( fo.string() );
+
+  for (size_t i=0; i<n_taxa; ++i)
+  {
     NaturalNumbers << ctaxa[i] + "\n";
   }
   
