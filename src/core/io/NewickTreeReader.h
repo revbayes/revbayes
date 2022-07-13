@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include "RbFileManager.h"
 
 namespace RevBayesCore {
     
@@ -22,9 +23,9 @@ namespace RevBayesCore {
     class NewickTreeReader {
         
     public:
-        NewickTreeReader();                                                                                     //!< Default constructor.
+        NewickTreeReader();                                                                          //!< Default constructor.
         
-        std::vector<Tree*>*                 readBranchLengthTrees(const std::string &fn);                   //!< Read a set of trees with branch lengths in newick format from a file.
+        std::vector<Tree*>*                 readBranchLengthTrees(const path &fn);                   //!< Read a set of trees with branch lengths in newick format from a file.
                 
     };
     
