@@ -27,16 +27,13 @@ NewickTreeReader::NewickTreeReader()
 /**
  *
  */
-std::vector<Tree*>* NewickTreeReader::readBranchLengthTrees(std::string const &fn)
+std::vector<Tree*>* NewickTreeReader::readBranchLengthTrees(const path& fn)
 {
-    
-    RbFileManager fm = RbFileManager(fn);
-    
     /* Open file */
-    std::ifstream inFile( fm.getFullFileName().c_str() );
+    std::ifstream inFile( fn.string() );
     
     if ( !inFile )
-        throw RbException( "Could not open file \"" + fn + "\"" );
+        throw RbException()<<"Could not open file "<<fn;
     
     /* Initialize */
     std::vector<Tree*>* trees = new std::vector<Tree*>();
