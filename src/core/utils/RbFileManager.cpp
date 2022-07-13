@@ -14,6 +14,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 
+// TODO: remove all these includes
 #ifdef _WIN32
 #	include <dirent.h>
 #   include <unistd.h>
@@ -39,59 +40,6 @@ void createDirectoryForFile(const path& p)
 path append_to_stem(const path& p, const std::string& s)
 {
     return p.parent_path() / ( p.stem().string() + s + p.extension().string() );
-}
-
-/** Default constructor, creating a file manager object with the file
- path equal to the current (default) directory and an empty file name */
-RbFileManager::RbFileManager( void )
-{
-    fs::path p = fs::current_path() / "";
-    p.make_preferred();
-
-    file_path = p.parent_path().string();
-    file_name = "";
-    full_file_name = p.string();
-}
-
-
-/** Constructor with full file/directory name */
-RbFileManager::RbFileManager(const std::string &fn)
-{
-    fs::path p = fn;
-
-    if (not p.is_absolute())
-        p = fs::current_path() / p;
-
-    p.make_preferred();
-
-    file_path = p.parent_path().string();
-    file_name = p.filename().string();
-    full_file_name = p.string();
-}
-
-
-/** Constructor with path name and file/directory name */
-RbFileManager::RbFileManager(const std::string &pn, const std::string &fn)
-{
-    fs::path p = fs::path(pn) / fs::path(fn);
-
-    if (not p.is_absolute())
-        p = fs::current_path() / p;
-
-    p.make_preferred();
-
-    file_path = p.parent_path().string();
-    file_name = p.filename().string();
-    full_file_name = p.string();
-}
-
-
-/**
- * Recursively create the directories which are present in the full file name.
- */
-void RbFileManager::createDirectoryForFile( void )
-{
-    fs::create_directories( fs::path( full_file_name ).parent_path() );
 }
 
 /** Get line while safely handling cross-platform line endings.
@@ -158,9 +106,11 @@ path expandUserDir(std::string dir)
         char const *hdrive = getenv("HOMEDRIVE"), *hpath = getenv("HOMEPATH");
         if ( hdrive != NULL )
         {
+// TODO: remove this ifdef.
 # ifdef _WIN32
             dir = std::string(hdrive) + hpath + "\\" + dir;
 # else
+            // FIXME: there is no leading `~`, so this doesn't make sense.
             dir.replace(0, 1, std::string(hdrive) + hpath);
 # endif
         }
@@ -168,15 +118,6 @@ path expandUserDir(std::string dir)
     }
 
     return dir;
-}
-
-
-/** Format an error exception string for problems specifying the file/path name
- * @param[out] errorStr string to store the formatted error
-*/
-void RbFileManager::formatError(std::string& errorStr)
-{
-    RevBayesCore::formatError( path(getFilePath()) / getFileName(), errorStr );
 }
 
 
@@ -211,203 +152,6 @@ void formatError(const path& p, std::string& errorStr)
     }
 }
 
-
-std::string RbFileManager::getFileExtension( void ) const
-{
-    std::vector<std::string> tokens;
-    StringUtilities::stringSplit(file_name,".",tokens);
-    return tokens[tokens.size()-1];
-}
-
-
-const std::string& RbFileManager::getFileName( void ) const
-{
-    return file_name;
-}
-
-
-std::string RbFileManager::getFileNameWithoutExtension( void ) const
-{
-    std::vector<std::string> tokens;
-    StringUtilities::stringSplit(file_name,".",tokens);
-    std::string name = "";
-    
-    for (size_t i = 0; i < tokens.size()-1; ++i)
-    {
-        if(i > 0) name += ".";
-        name += tokens[i];
-    }
-    
-    return name;
-}
-
-
-const std::string& RbFileManager::getFilePath( void ) const
-{
-    return file_path;
-}
-
-
-const std::string& RbFileManager::getFullFileName( void ) const
-{
-    return full_file_name;
-}
-
-
-/** Get absolute file path from file_path
- * @return absolute path
- */
-std::string RbFileManager::getFullFilePath( void ) const
-{
-    path p = file_path;
-
-    if (not p.is_absolute())
-        p = fs::current_path() / p;
-
-    p.make_preferred();
-
-    return p.string();
-}
-
-
-/** Get the last path component of full_file_name
- * @note any trailing path separator is removed, so x/y/z/ will return z
- * @return last path component
- */
-std::string RbFileManager::getLastPathComponent( void )
-{
-    return fs::path(full_file_name).parent_path().filename().string();
-}
-
-
-/** Get the last path component of a path
- * @note any trailing path separator is NOT removed, so x/y/z/ will return an empty string
- * @param s input path
- * @return last path component
- */
-std::string getLastPathComponent(const std::string& s)
-{
-    auto ss = fs::path(s).filename().string();
-    if (ss == ".")
-        ss == "";
-    return ss;
-}
-
-
-std::string getPathSeparator( void )
-{
-#   ifdef _WIN32
-    return "\\";
-#   else
-    return "/";
-#   endif
-}
-
-
-/** Removes the last path component from a path
- * @note any trailing path separator is NOT removed, so x/y/z/ will return x/y/z
- * @return string without the last path component
- */
-std::string getStringByDeletingLastPathComponent(const std::string& s)
-{
-    return fs::path(s).parent_path().make_preferred().string();
-}
-
-
-/** Checks whether full_file_name is a path to an existing directory */
-bool RbFileManager::isDirectory( void ) const
-{
-    return fs::is_directory(full_file_name);
-}
-
-
-/** Tests whether a directory is present (and is a directory)
- * @param mp path to check
- * @return result of the test
- */
-bool isDirectoryPresent(const std::string &mp)
-{
-    return fs::is_directory(mp);
-}
-
-
-/** Checks whether the path given by file_path + file_name is a path to an existing file */
-bool RbFileManager::isFile( void ) const
-{
-    auto f = fs::path(file_path) / fs::path(file_name);
-    return fs::is_regular_file(f) and not fs::is_directory(f);
-}
-
-
-/** Checks whether the file name is non-empty */
-bool RbFileManager::isFileNamePresent(void) const
-{
-    
-    if ( file_name == "" )
-    {
-        return false;
-    }
-    
-    return true;
-}
-
-
-/** Checks whether a file passed in as its path and file name components is present (and a file)
- * @param mp file path - if empty, set to the working directory
- * @param mf file name
- * @return whether the file exists
-*/
-bool isFilePresent(const std::string &mp, const std::string &mf)
-{ 
-    auto f = fs::path(mp) / fs::path(mf);
-    
-    return fs::is_regular_file(f) and not fs::is_directory(f);
-}
-
-/** Checks whether a file passed in as its full path is present (and is a file)
- * @param fn full file path
- * @return whether the file exists
-*/
-bool isFilePresent(const std::string &fn)
-{
-    fs::path f = fn;
-
-    return fs::is_regular_file(f) and not fs::is_directory(f);
-}
-
-void RbFileManager::setFileName(std::string const &s)
-{
-    file_name = s;
-}
-
-
-void RbFileManager::setFilePath(std::string const &s)
-{
-    file_path = s;
-#	ifdef _WIN32
-    StringUtilities::replaceSubstring(file_path,"/","\\");
-#   endif
-    
-}
-
-/** Fills in a vector with the names of the files in the directory file_path
- *
- * @param[out] sv vector to store the names
- * @param[in] recursive whether to list recursively, default true
- *
- * @return true
-*/
-bool RbFileManager::setStringWithNamesOfFilesInDirectory(std::vector<std::string>& sv, bool recursive)
-{
-    std::vector<path> filenames;
-    auto ok = RevBayesCore::setStringWithNamesOfFilesInDirectory(file_path, filenames, recursive);
-    for(auto& filename: filenames)
-        sv.push_back( filename.string() );
-
-    return ok;
-}
-
-
 /** Fills in a vector with the names of the files in a directory
  *
  * @param[in] dirpath path to the directory to be listed
@@ -418,6 +162,9 @@ bool RbFileManager::setStringWithNamesOfFilesInDirectory(std::vector<std::string
 */
 bool setStringWithNamesOfFilesInDirectory(const path& dirpath, std::vector<path>& sv, bool recursive)
 {
+    // FIXME: It should be converted to use boost:filesystem.
+    //        This is a holdover from the days of RbFileManager
+    //        We should try and remove the #ifdef _WIN32, and 
     std::string dirstring = dirpath.string();
 
     DIR* dir = opendir( dirstring.c_str() );
@@ -499,23 +246,5 @@ bool setStringWithNamesOfFilesInDirectory(const path& dirpath, std::vector<path>
     std::sort(sv.begin(), sv.end());
     
     return true;
-}
-
-
-/** Tests whether the directory specified in the object exists
- * @return true if file_path exists
- */
-bool RbFileManager::testDirectory(void)
-{   
-    return isDirectoryPresent(file_path);
-}
-
-
-/** Tests whether the file specified in the object exists
- * @return true if file_path + file_name exists
- */
-bool RbFileManager::testFile(void)
-{   
-    return isFilePresent(file_path, file_name);
 }
 }
