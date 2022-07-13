@@ -373,7 +373,8 @@ void AlleleFrequencySimulator::writeCountsFile(const std::string& fn, const std:
      */
     
 #ifdef RB_MPI
-    if ( process_active == false )
+    MPI_Barrier( MPI_COMM_WORLD );
+    if ( process_active == true )
     {
 #endif
     out_stream << "COUNTSFILE NPOP " << num_tips << " NSITES " << num_sites << std::endl;
