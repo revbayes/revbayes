@@ -75,19 +75,18 @@ void PosteriorPredictiveAnalysis::runAll(size_t gen)
     }
     
     // create the directory if necessary
-    RbFileManager fm = RbFileManager( directory.string() );
     if ( not is_directory( directory) )
     {
         std::string errorStr = "";
-        fm.formatError(errorStr);
+        formatError(directory, errorStr);
         throw RbException()<<"Could not find file or path with name "<<directory<<"";
     }
     
     // set up a vector of strings containing the name or names of the files to be read
-    std::vector<std::string> dir_names;
+    std::vector<path> dir_names;
     if ( is_directory(directory) )
     {
-        fm.setStringWithNamesOfFilesInDirectory( dir_names, false );
+        setStringWithNamesOfFilesInDirectory( directory, dir_names, false );
     }
     else
     {
@@ -137,13 +136,11 @@ void PosteriorPredictiveAnalysis::runAll(size_t gen)
             DagNode *the_node = current_nodes[j];
             if ( the_node->isClamped() == true )
             {
-                the_node->setValueFromFile( dir_names[i] );
+                the_node->setValueFromFile( dir_names[i].string() );
             }
                 
         }
 
-        RbFileManager tmp = RbFileManager( dir_names[i] );
-        
         // now set the model of the current analysis
 #ifdef RB_MPI
         current_analysis->setModel( current_model, false, analysis_comm );
@@ -155,7 +152,7 @@ void PosteriorPredictiveAnalysis::runAll(size_t gen)
         current_analysis->disableScreenMonitors( true );
 
         // set the monitor index
-        current_analysis->addFileMonitorExtension(tmp.getLastPathComponent(), true);
+        current_analysis->addFileMonitorExtension( dir_names[i].filename().string(), true);
                     
         // print some info
         if ( process_active == true )
