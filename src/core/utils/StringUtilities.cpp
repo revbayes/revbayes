@@ -262,49 +262,12 @@ std::string StringUtilities::formatStringForScreen(const std::string &s, const s
 }
 
 
-std::string StringUtilities::getStringWithDeletedLastPathComponent(const std::string& s)
-{
-    
-#	ifdef _WIN32
-    std::string pathSeparator = "\\";
-#	else
-    std::string pathSeparator = "/";
-#   endif
-    
-    std::string tempS = s;
-	size_t location = StringUtilities::findLastOf(tempS, pathSeparator[0]);
-	if ( location == std::string::npos )
-    {
-		/* There is no path in this string. We
-         must have only the file name. */
-		return "";
-    }
-	else if ( location == tempS.length() - 1 )
-    {
-		/* It looks like the last character is "/", which
-         means that no file name has been provided. */
-		return tempS;
-    }
-	else
-    {
-		/* We can divide the path into the path and the file. */
-		tempS.erase( location );
-		return tempS;
-    }
-    
-    return "";
-}
-
-
 /** Return file contents as string with '\n' line breaks */
-std::string StringUtilities::getFileContentsAsString(const std::string& s)
+std::string StringUtilities::getFileContentsAsString(const RevBayesCore::path& p)
 {
-
-    RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(s);
     
     // open file
-	std::ifstream fStrm;
-    fStrm.open(fm.getFullFileName().c_str(), std::ios::in);
+    std::ifstream fStrm( p.string() );
     if ( !fStrm.is_open() )
         return "";
         
@@ -326,28 +289,6 @@ std::string StringUtilities::getFileContentsAsString(const std::string& s)
 
     return retStr;
 }
-
-
-/** Find the last component of a file path */
-std::string StringUtilities::getLastPathComponent(const std::string& s)
-{
-#	ifdef _WIN32
-    std::string pathSeparator = "\\";
-#	else
-    std::string pathSeparator = "/";
-#   endif
-
-    std::vector<std::string> sVec;
-    stringSplit(s, pathSeparator, sVec);
-    std::string lastComponent = "";
-    if (sVec.size() > 0)
-    {
-        lastComponent = sVec[sVec.size()-1];
-    }
-    
-    return lastComponent;
-}
-
 
 
 /**
