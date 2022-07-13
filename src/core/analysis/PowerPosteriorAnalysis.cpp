@@ -225,10 +225,12 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         throw RbException("Please provide a filename with an extension");
     }
 
-    path stoneFileName = append_to_stem(filename, "_stone_" + std::to_string(idx+1));
+    std::string stone_tag = "_stone_" + std::to_string(idx+1);
+
+    path stoneFileName = append_to_stem(filename, stone_tag);
     createDirectoryForFile( stoneFileName );
     
-    std::fstream outStream( stoneFileName.string() );
+    std::ofstream outStream( stoneFileName.string() );
     outStream << "state\t" << "power\t" << "likelihood" << std::endl;
 
     // reset the sampler
@@ -255,9 +257,7 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     // set the power of this sampler
     sampler->setLikelihoodHeat( powers[idx] );
     
-    std::stringstream ss;
-    ss << "_stone_" << idx;
-    sampler->addFileMonitorExtension( ss.str(), false);
+    sampler->addFileMonitorExtension( stone_tag, false);
     
     // let's do a pre-burnin
     for (size_t k=1; k<=pre_burnin_generations; k++)
@@ -330,7 +330,8 @@ void PowerPosteriorAnalysis::summarizeStones( void )
     // Append each stone
     for (size_t idx = 0; idx < powers.size(); ++idx)
     {
-        path stoneFileName = append_to_stem( filename, "_stone_" + std::to_string(idx+1));
+        std::string stone_tag = "_stone_" + std::to_string(idx+1);
+        path stoneFileName = append_to_stem( filename, stone_tag );
 
         // read the i-th stone
         std::ifstream inStream( stoneFileName.string() );
