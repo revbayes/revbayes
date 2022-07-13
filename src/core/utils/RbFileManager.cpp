@@ -24,6 +24,7 @@
 #   include <unistd.h>
 #endif
 
+// TODO: fix setValueFromFile
 
 namespace fs = boost::filesystem;
 

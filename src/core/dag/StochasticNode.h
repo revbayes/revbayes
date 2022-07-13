@@ -51,7 +51,7 @@ namespace RevBayesCore {
         virtual void                                        setIntegrationIndex( size_t i );
         void                                                setMcmcMode(bool tf);                                                       //!< Set the modus of the DAG node to MCMC mode.
         virtual void                                        setValue(valueType *val, bool touch=true);                                  //!< Set the value of this node
-        void                                                setValueFromFile(const std::string &dir);                                   //!< Set value from string.
+        void                                                setValueFromFile(const path &dir);                                          //!< Set value from string.
         void                                                setValueFromString(const std::string &v);                                   //!< Set value from string.
         void                                                unclamp(void);                                                              //!< Unclamp the variable
         
@@ -768,7 +768,7 @@ void RevBayesCore::StochasticNode<valueType>::setValue(valueType *val, bool forc
 
 
 template<class valueType>
-void RevBayesCore::StochasticNode<valueType>::setValueFromFile(const std::string &dir)
+void RevBayesCore::StochasticNode<valueType>::setValueFromFile(const RevBayesCore::path &dir)
 {
     
     Serializer<valueType, IsDerivedFrom<valueType, RevBayesCore::Serializable>::Is >::ressurectFromFile( &getValue(), dir, this->getName() );
