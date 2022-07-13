@@ -7,6 +7,7 @@
 #include "RlClade.h"
 #include "RlTimeTree.h"
 #include "RlTraceTree.h"
+#include "RbFileManager.h"
 #include "WorkspaceVector.h"
 
 #include <map>
@@ -33,8 +34,8 @@ namespace RevLanguage {
         
     private:
         
-        WorkspaceVector<TraceTree>*         readTrees(const std::vector<std::string> &fns, const std::string &d, bool clock, long thin, long offset);
-        WorkspaceVector<TraceTree>*         readTreesNexus(const std::vector<std::string> &fns, bool clock, long thin, long offset);  //!< Read tree trace from Nexus file(s)
+        WorkspaceVector<TraceTree>*         readTrees(const std::vector<RevBayesCore::path> &fns, const std::string &d, bool clock, long thin, long offset);
+        WorkspaceVector<TraceTree>*         readTreesNexus(const std::vector<RevBayesCore::path> &fns, bool clock, long thin, long offset);  //!< Read tree trace from Nexus file(s)
     };
     
 }
