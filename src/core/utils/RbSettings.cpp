@@ -318,12 +318,14 @@ void RbSettings::setTolerance(double t)
 
 void RbSettings::writeUserSettings( void )
 {
+    // Does this always work on windows?
     fs::path user_dir = expandUserDir("~");
     
     // open the ini file
     fs::path settings_file_name = user_dir / ".RevBayes.ini";
 
     std::ofstream writeStream( settings_file_name.string() );
+    assert( exists(moduleDir) );
     writeStream << "moduledir=" << moduleDir << std::endl;
     writeStream << "outputPrecision=" << outputPrecision << std::endl;
     writeStream << "printNodeIndex=" << (printNodeIndex ? "true" : "false") << std::endl;
