@@ -30,14 +30,14 @@ CountFileToNaturalNumbersConverter::CountFileToNaturalNumbersConverter( void )
 
 
 /** Read Count File and Write Natural Numbers file */
-void CountFileToNaturalNumbersConverter::cfconverter( const std::string &fi, const size_t n_individuals, const std::string &fo )
+void CountFileToNaturalNumbersConverter::cfconverter( const path &fi, const size_t n_individuals, const path &fo )
 {
   
     // open file
-    std::ifstream readStream( fi );
+    std::ifstream readStream( fi.string() );
     if ( not readStream )
     {
-        throw RbException( "Could not open file \"" + fi + "\".");
+        throw RbException()<<"Could not open file "<<fi<<".";
     }
     
 
@@ -164,11 +164,10 @@ void CountFileToNaturalNumbersConverter::cfconverter( const std::string &fi, con
     // the filestream object
     std::fstream NaturalNumbers;
     
-    RbFileManager foo = RbFileManager(fo);
-    foo.createDirectoryForFile();
+    createDirectoryForFile(fo);
     
     // open the stream to the file
-    NaturalNumbers.open( foo.getFullFileName().c_str(), std::fstream::out );
+    NaturalNumbers.open( fo.string(), std::fstream::out );
     
     NaturalNumbers << alignment;
   
