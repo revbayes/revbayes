@@ -30,7 +30,7 @@ namespace RevLanguage {
 class ArgumentRules;
 class TypeSpec;
     
-    class Func_featureInformedRates : public TypedFunction< ModelVector<RealPos> > {
+    class Func_featureInformedRates : public TypedFunction< ModelVector<ModelVector<RealPos> > > {
         
     public:
         Func_featureInformedRates( void );
@@ -43,7 +43,7 @@ class TypeSpec;
         const TypeSpec&                                                 getTypeSpec(void) const;                                //!< Get the type spec of the instance
         
         // Function functions you have to override
-        RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >*         createFunction(void) const;                             //!< Create internal function object
+        RevBayesCore::TypedFunction< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >*         createFunction(void) const;                             //!< Create internal function object
         const ArgumentRules&                                            getArgumentRules(void) const;                           //!< Get argument rules
         
     };

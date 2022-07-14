@@ -20,15 +20,15 @@ namespace RevBayesCore {
     template <class valueType> class RbVector;
     template <class valueType> class TypedDagNode;
     
-    class FeatureInformedRateFunction : public TypedFunction<RbVector<double> > {
+    class FeatureInformedRateFunction : public TypedFunction<RbVector<RbVector<double> > > {
         
     public:
         
         FeatureInformedRateFunction(
-            const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<long> > >* cf,
-            const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* qf,
-            const TypedDagNode< RevBayesCore::RbVector<double> >* cp,
-            const TypedDagNode< RevBayesCore::RbVector<double> >* qp
+            const TypedDagNode< RbVector<RbVector<RbVector<long> > > >* cf,
+            const TypedDagNode< RbVector<RbVector<RbVector<double> > > >* qf,
+            const TypedDagNode< RbVector<double> >* cp,
+            const TypedDagNode< RbVector<double> >* qp
         );
         virtual                                                                         ~FeatureInformedRateFunction(void);
         
@@ -43,11 +43,15 @@ namespace RevBayesCore {
     private:
         
         // members
-        const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<long> > >*    categorical_features;
-        const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >*  quantitative_features;
-        const TypedDagNode< RevBayesCore::RbVector<double> >*  categorical_params;
-        const TypedDagNode< RevBayesCore::RbVector<double> >*  quantitative_params;
-        size_t numStates;
+        const TypedDagNode< RbVector<RbVector<RbVector<long> > > >*    categorical_features;
+        const TypedDagNode< RbVector<RbVector<RbVector<double> > > >*  quantitative_features;
+        const TypedDagNode< RbVector<double> >*  categorical_params;
+        const TypedDagNode< RbVector<double> >*  quantitative_params;
+        
+        size_t numCategoricalFeatures;
+        size_t numQuantitativeFeatures;
+        size_t numDim1;
+        size_t numDim2;
     };
     
 }
