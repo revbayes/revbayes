@@ -37,7 +37,7 @@ void FastaWriter::writeData(const path& file_name, const AbstractHomologousDiscr
     create_directories( file_name.parent_path() );
 
     // the filestream object
-    std::fstream out_stream( file_name.string() );
+    std::ofstream out_stream( file_name.string() );
     
     const std::vector<Taxon> &taxa = data.getTaxa();
     for (std::vector<Taxon>::const_iterator it = taxa.begin();  it != taxa.end(); ++it)

@@ -207,7 +207,7 @@ void Mcmc::checkpoint( void ) const
     create_directories( checkpoint_file_name.parent_path() );
     
     // open the stream to the file
-    std::fstream out_stream( checkpoint_file_name.string() );
+    std::ofstream out_stream( checkpoint_file_name.string() );
 
     // first, we write the names of the variables
     for (std::vector<DagNode *>::const_iterator it=variable_nodes.begin(); it!=variable_nodes.end(); ++it)
@@ -263,7 +263,7 @@ void Mcmc::checkpoint( void ) const
     path mcmc_checkpoint_file_name = append_to_stem(checkpoint_file_name, "_mcmc");
     
     // open the stream to the file
-    std::fstream out_stream_mcmc( mcmc_checkpoint_file_name.string() );
+    std::ofstream out_stream_mcmc( mcmc_checkpoint_file_name.string() );
     out_stream_mcmc << "iter = " << generation << std::endl;
     
     // clean up
@@ -278,7 +278,7 @@ void Mcmc::checkpoint( void ) const
     path moves_checkpoint_file_name = append_to_stem(checkpoint_file_name, "_moves");
     
     // open the stream to the file
-    std::fstream out_stream_moves( moves_checkpoint_file_name.string() );
+    std::ofstream out_stream_moves( moves_checkpoint_file_name.string() );
     
     for (size_t i = 0; i < moves.size(); ++i)
     {
