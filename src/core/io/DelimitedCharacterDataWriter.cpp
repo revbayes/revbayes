@@ -35,7 +35,7 @@ void DelimitedCharacterDataWriter::writeData(path const &fileName, const Homolog
     create_directories( fileName.parent_path() );
     
     // the filestream object
-    std::fstream outStream( fileName.string() );
+    std::ofstream outStream( fileName.string() );
     
     const std::vector<Taxon> &taxa = data.getTaxa();
     for (std::vector<Taxon>::const_iterator it = taxa.begin();  it != taxa.end(); ++it)

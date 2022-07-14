@@ -1129,7 +1129,7 @@ void Tree::initFromFile( const path &dir, const std::string &fn )
     path filename = dir / (fn + ".newick");
 
     // open the stream to the file
-    std::fstream inStream( filename.string() );
+    std::ifstream inStream( filename.string() );
 
     std::string s = "";
     while ( inStream.good() )
@@ -1925,7 +1925,7 @@ void Tree::writeToFile( const path &dir, const std::string &fn ) const
         create_directories(dir);
 
         // open the stream to the file
-        std::fstream outStream( filename.string() );
+        std::ofstream outStream( filename.string() );
 
         // write the value of the node
         outStream << getNewickRepresentation();

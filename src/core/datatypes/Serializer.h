@@ -36,7 +36,7 @@ namespace RevBayesCore {
         {
             auto p = dir / (fn + ".txt");
 
-            std::fstream inStream( p.string() );
+            std::ifstream inStream( p.string() );
             
             std::string s = "";
             while ( inStream.good() )
@@ -62,7 +62,7 @@ namespace RevBayesCore {
             create_directories(p.parent_path());
             
             // open the stream to the file
-            std::fstream outStream( p.string() );
+            std::ofstream outStream( p.string() );
             
             // write the value of the node
 //            Printer<objType, IsDerivedFrom<objType, Printable>::Is >::printForComplexStoring( obj, outStream, "", -1, true );

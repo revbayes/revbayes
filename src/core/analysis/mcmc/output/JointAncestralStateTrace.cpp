@@ -1400,7 +1400,7 @@ void JointAncestralStateTrace::summarizeCharacterMaps(Tree input_tree, const pat
     
     // open stream for file output
     createDirectoryForFile( filename );
-    std::fstream out( filename.string() );
+    std::ofstream out( filename.string() );
     
     // write column headers
     out << "iteration" << separator;

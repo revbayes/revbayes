@@ -134,7 +134,7 @@ void TreeDiscreteCharacterData::writeToFile(const path &dir, const std::string &
         create_directories(dir);
         
         // open the stream to the file
-        std::fstream o( filename.string() );
+        std::ofstream o( filename.string() );
 
         // write the value of the node
         o << getNewickRepresentation();
