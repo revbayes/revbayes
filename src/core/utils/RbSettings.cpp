@@ -325,7 +325,7 @@ void RbSettings::writeUserSettings( void )
     fs::path settings_file_name = user_dir / ".RevBayes.ini";
 
     std::ofstream writeStream( settings_file_name.string() );
-    assert( exists(moduleDir) );
+    assert( moduleDir == "modules" or is_directory(moduleDir) );
     writeStream << "moduledir=" << moduleDir << std::endl;
     writeStream << "outputPrecision=" << outputPrecision << std::endl;
     writeStream << "printNodeIndex=" << (printNodeIndex ? "true" : "false") << std::endl;
