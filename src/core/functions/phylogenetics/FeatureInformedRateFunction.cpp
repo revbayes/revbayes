@@ -23,11 +23,11 @@ using namespace RevBayesCore;
 
 //TypedFunction<MatrixReal>( new MatrixReal( mc + 1, (mc + 1) * (mc + 1), 0.0 ) ),
 FeatureInformedRateFunction::FeatureInformedRateFunction(
-    const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<long> > >* cf,
-    const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* qf,
-    const TypedDagNode< RevBayesCore::RbVector<double> >* cp,
-    const TypedDagNode< RevBayesCore::RbVector<double> >* qp) :
-        TypedFunction<RbVector<double> >( new RbVector<double>() ),
+    const TypedDagNode< RbVector<RbVector<RbVector<long> > > >* cf,
+    const TypedDagNode< RbVector<RbVector<RbVector<double> > > >* qf,
+    const TypedDagNode< RbVector<double> >* cp,
+    const TypedDagNode< RbVector<double> >* qp) :
+        TypedFunction<RbVector<RbVector<double> > >( new RbVector<RbVector<double> >() ),
         categorical_features(cf),
         quantitative_features(qf),
         categorical_params(cp),
@@ -40,7 +40,10 @@ FeatureInformedRateFunction::FeatureInformedRateFunction(
     addParameter( categorical_params );
     addParameter( quantitative_params );
     
-    numStates = categorical_features->getValue()[0].size();
+    numCategoricalFeatures = categorical_features->getValue().size();
+    numQuantitativeFeatures = quantitative_features->getValue().size();
+    numDim1 = categorical_features->getValue()[0].size();
+    numDim2 = categorical_features->getValue()[0][0].size();
     
     // refresh values
     update();
@@ -59,24 +62,27 @@ FeatureInformedRateFunction* FeatureInformedRateFunction::clone( void ) const
 
 void FeatureInformedRateFunction::update( void )
 {
-    RbVector<double> rates(numStates, 1.0);
+    RbVector<RbVector<double> > rates(numDim1, RbVector<double>(numDim2, 1.0));
     
-    const RbVector<RbVector<long> >& cf = categorical_features->getValue();
+    const RbVector<RbVector<RbVector<long> > >& cf = categorical_features->getValue();
     const RbVector<double>& cp = categorical_params->getValue();
-    for (size_t i = 0; i < cf.size(); i++) {
+    for (size_t i = 0; i < numCategoricalFeatures; i++) {
         double cp_i = std::exp(cp[i]);
-        for (size_t j = 0; j < cf[i].size(); j++) {
-            if (cf[i][j] != 0) {
-                rates[j] *= cp_i;
+        for (size_t j = 0; j < numDim1; j++) {
+            for (size_t k = 0; k < numDim2; k++) {
+                if (cf[i][j][k] != 0) {
+                    rates[j][k] *= cp_i;
+                }
             }
         }
     }
-    const RbVector<RbVector<double> >& qf = quantitative_features->getValue();
+    const RbVector<RbVector<RbVector<double> > >& qf = quantitative_features->getValue();
     const RbVector<double>& qp = quantitative_params->getValue();
-    for (size_t i = 0; i < qf.size(); i++) {
-        
-        for (size_t j = 0; j < qf[i].size(); j++) {
-            rates[j] *= std::pow( qf[i][j], qp[i] );
+    for (size_t i = 0; i < numQuantitativeFeatures; i++) {
+        for (size_t j = 0; j < numDim1; j++) {
+            for (size_t k = 0; k < numDim2; k++) {
+                rates[j][k] *= std::pow( qf[i][j][k], qp[i] );
+            }
         }
     }
     
@@ -89,11 +95,11 @@ void FeatureInformedRateFunction::swapParameterInternal(const DagNode *oldP, con
     
     if (oldP == categorical_features)
     {
-        categorical_features = static_cast<const TypedDagNode< RbVector<RbVector<long> > >* >( newP );
+        categorical_features = static_cast<const TypedDagNode< RbVector<RbVector<RbVector<long> > > >* >( newP );
     }
     if (oldP == quantitative_features)
     {
-        quantitative_features = static_cast<const TypedDagNode< RbVector<RbVector<double> > >* >( newP );
+        quantitative_features = static_cast<const TypedDagNode< RbVector<RbVector<RbVector<double> > > >* >( newP );
     }
     if (oldP == categorical_params)
     {

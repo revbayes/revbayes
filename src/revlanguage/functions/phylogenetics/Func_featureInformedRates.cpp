@@ -31,7 +31,7 @@
 using namespace RevLanguage;
 
 /** default constructor */
-Func_featureInformedRates::Func_featureInformedRates( void ) : TypedFunction<ModelVector<RealPos> >( ) {
+Func_featureInformedRates::Func_featureInformedRates( void ) : TypedFunction<ModelVector<ModelVector<RealPos> > >( ) {
     
 }
 
@@ -48,12 +48,12 @@ Func_featureInformedRates* Func_featureInformedRates::clone( void ) const {
 }
 
 
-RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_featureInformedRates::createFunction( void ) const
+RevBayesCore::TypedFunction< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* Func_featureInformedRates::createFunction( void ) const
 {
     
     // supplied arguments
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<long> > >* cf = static_cast<const ModelVector<ModelVector<Natural> > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* qf = static_cast<const ModelVector<ModelVector<Real> > &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::RbVector<long> > > >* cf = static_cast<const ModelVector<ModelVector<ModelVector<Natural> > >&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > >* qf = static_cast<const ModelVector<ModelVector<ModelVector<Real> > >&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sigma = static_cast<const ModelVector<Real> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* phi = static_cast<const ModelVector<Real> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
     
@@ -76,12 +76,12 @@ const ArgumentRules& Func_featureInformedRates::getArgumentRules( void ) const
     {
         
         argumentRules.push_back( new ArgumentRule( "categoricalFeatures",
-                                                  ModelVector<ModelVector<Natural> >::getClassTypeSpec(),
+                                                  ModelVector<ModelVector<ModelVector<Natural> > >::getClassTypeSpec(),
                                                   "Categorical regional features.",
                                                   ArgumentRule::BY_CONSTANT_REFERENCE,
                                                   ArgumentRule::ANY ));
         argumentRules.push_back( new ArgumentRule( "quantitativeFeatures",
-                                                  ModelVector<ModelVector<Real> >::getClassTypeSpec(),
+                                                  ModelVector<ModelVector<ModelVector<Real> > >::getClassTypeSpec(),
                                                   "Quantitative regional features.",
                                                   ArgumentRule::BY_CONSTANT_REFERENCE,
                                                   ArgumentRule::ANY ));
