@@ -32,14 +32,16 @@ namespace RevBayesCore {
         bool                        compDefinitelyGreaterThan(double a, double b, double epsilon);                      //!< Tests whether one number is greater than another
         bool                        compDefinitelyLessThan(double a, double b);                                         //!< Tests whether one number is less than another
         bool                        compDefinitelyLessThan(double a, double b, double epsilon);                         //!< Tests whether one number is less than another
+        double                      fsign(double x, double y);                                                          //!< Transfer of sign
         bool                        isAComputableNumber(double x);
         bool                        isFinite(double x);                                                                 //!< Tests whether a double is finite
         //bool                        isFinite(size_t x); // size_t is always finite (WP)
         bool                        isInt(double x);                                                                    //!< Tests whether a double is actually an interger
         bool                        isNan(double x);                                                                    //!< Tests whether a double is NAN (not a number)
         double                      max(double a, double b);                                                            //!< Returns the max of two real numbers
+        int                         max(int a, int b);                                                                  //!< Returns the max of two real numbers
         double                      min(double a, double b);                                                            //!< Returns the min of two real numbers
-        int                         min(int a, int b);                                                            //!< Returns the min of two real numbers
+        int                         min(int a, int b);                                                                  //!< Returns the min of two real numbers
 
     }
     
