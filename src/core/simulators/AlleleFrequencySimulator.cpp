@@ -1,6 +1,7 @@
 #include "AlleleFrequencySimulator.h"
 #include "DiscreteTaxonData.h"
 #include "DistributionBinomial.h"
+#include "DistributionGeometric.h"
 #include "MatrixReal.h"
 #include "MpiUtilities.h"
 #include "ProgressBar.h"
@@ -429,6 +430,61 @@ long AlleleFrequencySimulator::simulateAlongBranch( double this_populuation_size
     double per_generation_mutation_rate_0 = mutation_rates[0] / generation_time;
     double per_generation_mutation_rate_1 = mutation_rates[1] / generation_time;
     
+    
+//    size_t NUM_TRIES = 100000;
+//    double avg_time_geom = 0;
+//    double avg_time_iid  = 0;
+//    double min_time_geom = RbConstants::Double::inf;
+//    double min_time_iid  = RbConstants::Double::inf;
+//    double max_time_geom = 0;
+//    double max_time_iid  = 0;
+//    double avg_gen_geom  = 0;
+//    double avg_gen_iid   = 0;
+//    
+//    // start the progress bar
+//    ProgressBar progress = ProgressBar(NUM_TRIES, 0);
+//    
+//    // Print progress bar (68 characters wide)
+//    progress.start();
+//    for (size_t i=0; i<NUM_TRIES; ++i)
+//    {
+//        progress.update(i);
+//        
+//        int wait_generations_geom = RbStatistics::Geometric::rv(per_generation_mutation_rate_1, *rng);
+//        double wait_time_geom = this_generation_time * wait_generations_geom;
+//        
+//        double u = rng->uniform01();
+//        double wait_time_iid = 0.0;
+//        int wait_generations_iid = 0;
+//        while ( u >= per_generation_mutation_rate_1 )
+//        {
+//            wait_time_iid += this_generation_time;
+//            u = rng->uniform01();
+//            ++wait_generations_iid;
+//        }
+//        
+//        avg_time_geom += wait_time_geom / NUM_TRIES;
+//        avg_time_iid  += wait_time_iid  / NUM_TRIES;
+//        
+//        avg_gen_geom  += double(wait_generations_geom) / NUM_TRIES;
+//        avg_gen_iid   += double(wait_generations_iid)  / NUM_TRIES;
+//        
+//        if ( wait_time_geom < min_time_geom ) min_time_geom = wait_time_geom;
+//        if ( wait_time_iid  < min_time_iid  ) min_time_iid  = wait_time_iid;
+//        if ( wait_time_geom > max_time_geom ) max_time_geom = wait_time_geom;
+//        if ( wait_time_iid  > max_time_iid  ) max_time_iid  = wait_time_iid;
+//
+//    }
+//    progress.finish();
+//    
+//    std::cerr << "Generation time:\t\t" << this_generation_time << std::endl;
+//    std::cerr << "Avg:\t\t" << avg_time_geom << " -- " << avg_time_iid << std::endl;
+//    std::cerr << "Avg:\t\t" << avg_gen_geom  << " -- " << avg_gen_iid  << std::endl;
+//    std::cerr << "Min:\t\t" << min_time_geom << " -- " << min_time_iid << std::endl;
+//    std::cerr << "Max:\t\t" << max_time_geom << " -- " << max_time_iid << std::endl;
+//    
+//    throw RbException("End test");
+    
     long current_state = root_start_state;
     
     while ( current_time < branch_length )
@@ -472,9 +528,15 @@ long AlleleFrequencySimulator::simulateAlongBranch( double this_populuation_size
         {
 //            int num_mutants = RbStatistics::Binomial::rv(this_populuation_size, per_generation_mutation_rate_0, *rng);
 //            current_state += num_mutants;
-                
-            double u = rng->uniform01();
-            if ( per_generation_mutation_rate_0 > u )
+            
+            // draw the waiting time until the next mutation
+            int mutation_wait_generations = RbStatistics::Geometric::rv(per_generation_mutation_rate_0, *rng);
+            
+            // fast forward the generation time
+            current_time += mutation_wait_generations * this_generation_time;
+            
+            // accept the mutation only if it happened within the time of this branch
+            if ( current_time <= branch_length )
             {
                 current_state = 1;
             }
@@ -483,12 +545,22 @@ long AlleleFrequencySimulator::simulateAlongBranch( double this_populuation_size
         {
 //            int num_mutants = RbStatistics::Binomial::rv(this_populuation_size, per_generation_mutation_rate_1, *rng);
 //            current_state -= num_mutants;
-                
-            double u = rng->uniform01();
-            if ( per_generation_mutation_rate_1 > u )
+            
+            // draw the waiting time until the next mutation
+            int mutation_wait_generations = RbStatistics::Geometric::rv(per_generation_mutation_rate_1, *rng);
+            
+            // fast forward the generation time
+            current_time += mutation_wait_generations * this_generation_time;
+            
+            // accept the mutation only if it happened within the time of this branch
+            if ( current_time <= branch_length )
             {
-                    current_state = this_populuation_size-1;
+                current_state = this_populuation_size-1;
             }
+//            if ( per_generation_mutation_rate_1 > u )
+//            {
+//                current_state = this_populuation_size-1;
+//            }
         }
     }
     

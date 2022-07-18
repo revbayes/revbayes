@@ -245,7 +245,7 @@ int RbStatistics::Helper::poissonLow(double lambda, RandomNumberGenerator& rng) 
 
 /*!
  * This function generates a Poisson-distributed random variable using
- * the ratio-of-uniforms rejectin method. 
+ * the ratio-of-uniforms rejection method.
  *
  * \brief Poisson random variables using the ratio-of-uniforms method.
  * \param lambda is the rate parameter of the Poisson. 
