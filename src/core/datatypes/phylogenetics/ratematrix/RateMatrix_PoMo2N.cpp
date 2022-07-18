@@ -178,10 +178,7 @@ void RateMatrix_PoMo2N::buildRateMatrix(void)
     
     harmonic_number_N = boost::math::digamma(N_eff) - boost::math::digamma(1.0);
     
-//    double rescaling_factor_to_effective_population = (N*N*harmonic_number_M) / (N_eff*N_eff*harmonic_number_N);
-//    double rescaling_factor_to_effective_population = (N*N) / (N_eff*N_eff);
-    double rescaling_factor_to_effective_population = (N) / (N_eff);
-//    double rescaling_factor_to_effective_population = (N*harmonic_number_M) / (N_eff*N_eff*harmonic_number_N);
+    double rescaling_factor_to_effective_population = (N_eff) / (N);
     if ( use_drift_correction == false )
     {
         rescaling_factor_to_effective_population = 1.0;
