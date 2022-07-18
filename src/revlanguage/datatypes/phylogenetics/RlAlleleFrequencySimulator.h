@@ -1,13 +1,57 @@
-//
-//  RlAlleleFrequencySimulator.hpp
-//  RevBayesDev
-//
-//  Created by Sebastian Hoehna on 7/18/22.
-//
+#ifndef RlAlleleFrequencySimulator_H
+#define RlAlleleFrequencySimulator_H
 
-#ifndef RlAlleleFrequencySimulator_hpp
-#define RlAlleleFrequencySimulator_hpp
+#include "AlleleFrequencySimulator.h"
+#include "TypedDagNode.h"
+#include "WorkspaceToCoreWrapperObject.h"
 
-#include <stdio.h>
+#include <ostream>
+#include <string>
 
-#endif /* RlAlleleFrequencySimulator_hpp */
+namespace RevLanguage {
+    
+    
+    /**
+     * @brief Rev wrapper of the Path-Sampler class.
+     *
+     * The path sampler analyzes the output of a power posterior and
+     * computes the marginal likelihood.
+     *
+     *
+     * @copyright Copyright 2009-
+     * @author The RevBayes Development Core Team (Sebastian Hoehna)
+     * @since Version 1.0, 2012-06-17
+     *
+     */
+    class AlleleFrequencySimulator : public WorkspaceToCoreWrapperObject<RevBayesCore::AlleleFrequencySimulator> {
+        
+    public:
+        
+        AlleleFrequencySimulator(void);                                                                                                                  //!< Default constructor
+        
+        // Basic utility functions
+        virtual AlleleFrequencySimulator*           clone(void) const;                                                                      //!< Clone object
+        void                                        constructInternalObject(void);                                                          //!< We construct the a new internal PowerPosterior object.
+        static const std::string&                   getClassType(void);                                                                     //!< Get Rev type
+        static const TypeSpec&                      getClassTypeSpec(void);                                                                 //!< Get class type spec
+        std::string                                 getConstructorFunctionName(void) const;                                                 //!< Get the name used for the constructor function in Rev.
+        const MemberRules&                          getParameterRules(void) const;                                                          //!< Get member rules (const)
+        virtual const TypeSpec&                     getTypeSpec(void) const;                                                                //!< Get language type of the object
+        
+        // Member method inits
+        virtual RevPtr<RevVariable>                 executeMethod(const std::string& name, const std::vector<Argument>& args, bool &f);     //!< Override to map member methods to internal functions
+        
+    protected:
+        
+        virtual void                                printValue(std::ostream& o) const;                                                      //!< Print value (for user)
+        void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
+        
+        RevPtr<const RevVariable>                   generation_time;
+        RevPtr<const RevVariable>                   moran_generations;
+        RevPtr<const RevVariable>                   mutation_rates;
+        
+    };
+    
+}
+
+#endif

@@ -63,8 +63,8 @@ RevPtr<RevVariable> Func_AlleleFrequencySimulator::execute()
     const std::string& fn                   = static_cast<const RlString &>( this->args[9].getVariable()->getRevObject() ).getValue();
 
 
-    RevBayesCore::AlleleFrequencySimulator sim = RevBayesCore::AlleleFrequencySimulator(tree, population_sizes, generation_time, num_sites, mutation_rates, samples_per_species, root_branch, moran_generations );
-    sim.simulateAlleleFrequencies( fn, variable );
+    RevBayesCore::AlleleFrequencySimulator sim = RevBayesCore::AlleleFrequencySimulator( generation_time, mutation_rates, moran_generations );
+    sim.simulateAlleleFrequencies(tree, population_sizes, num_sites, samples_per_species, root_branch, fn, variable);
     
     return NULL;
 }

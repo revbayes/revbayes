@@ -17,18 +17,20 @@
 
 using namespace RevBayesCore;
 
-AlleleFrequencySimulator::AlleleFrequencySimulator(Tree* t, const std::vector<long>& ps, double gt, size_t ns, const std::vector<double>& mr, const std::vector<long>& s, double r, bool mg) :
-tree( t ),
-population_sizes( ps ),
+AlleleFrequencySimulator::AlleleFrequencySimulator(double gt, const std::vector<double>& mr, bool mg) :
 generation_time( gt ),
-num_sites( ns ),
 mutation_rates( mr ),
-samples_per_species( s ),
-root_branch( r ),
 moran_generations( mg )
 {
     
 }
+
+
+AlleleFrequencySimulator* AlleleFrequencySimulator::clone( void ) const
+{
+    return new AlleleFrequencySimulator( *this );
+}
+
 
 bool AlleleFrequencySimulator::isVariable(std::vector<int>& site_pattern) const
 {
@@ -47,7 +49,7 @@ bool AlleleFrequencySimulator::isVariable(std::vector<int>& site_pattern) const
 
 
 
-void AlleleFrequencySimulator::simulateAlleleFrequencies( const std::string& fn, bool only_variable ) const
+void AlleleFrequencySimulator::simulateAlleleFrequencies( const Tree* tree, const std::vector<long>& population_sizes, size_t num_sites, const std::vector<long>& samples_per_species, double root_branch, const std::string& fn, bool only_variable ) const
 {
     // first, get some variables/settings for the simulation
     size_t num_tips     = tree->getNumberOfTips();
@@ -114,7 +116,7 @@ void AlleleFrequencySimulator::simulateAlleleFrequencies( const std::string& fn,
 
             // recursively simulate the sequences
             mono = true;
-            success = simulate( tree->getRoot(), root_state, site_pattern, mono );
+            success = simulateAlignment( tree->getRoot(), root_state, population_sizes, samples_per_species, site_pattern, mono );
             success = only_variable == false || isVariable( site_pattern );
             
             
@@ -178,7 +180,7 @@ void AlleleFrequencySimulator::simulateAlleleFrequencies( const std::string& fn,
     }
 #endif
     
-    writeCountsFile( fn, taxa );
+    writeCountsFile( tree, fn, taxa, samples_per_species );
     
     
 #ifdef RB_MPI
@@ -287,8 +289,97 @@ MatrixReal* AlleleFrequencySimulator::simulateAlleleFrequenciesMatrix( double ti
 }
 
 
+RbVector<double>* AlleleFrequencySimulator::simulateAlleleFrequenciesVector( double time, long population_size, long reps, size_t start_index ) const
+{
+    
+    RbVector<double>* tpv = new RbVector<double>(population_size+1);
+    
+    // forward the rng for different processes
+#ifdef RB_MPI
+    RandomNumberGenerator* rng = GLOBAL_RNG;
 
-bool AlleleFrequencySimulator::simulate( const TopologyNode& n, long state, std::vector<int>& taxa, bool& monomorphic ) const
+    for ( size_t i=active_PID; i<pid; ++i)
+    {
+        // we fast forward 7 times, just to be sure
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+    }
+#endif
+    
+    size_t reps_this_process = reps;
+#ifdef RB_MPI
+    reps_this_process = reps / num_processes;
+#endif
+    
+    // start the progress bar
+    ProgressBar progress = ProgressBar(reps_this_process, 0);
+    
+    // Print progress bar (68 characters wide)
+    progress.start();
+    
+    std::vector<long> counts = std::vector<long>(population_size+1, 0);
+        
+    for (size_t r=0; r<reps_this_process; ++r)
+    {
+        long obs_state = simulateAlongBranch(population_size, start_index, time);
+        ++counts[obs_state];
+        
+        progress.update(r);
+    }
+    progress.finish();
+        
+    for ( size_t s=0; s<=population_size; ++s )
+    {
+        (*tpv)[s] = double(counts[s])/reps;
+    }
+    
+    
+#ifdef RB_MPI
+    MPI_Barrier( MPI_COMM_WORLD );
+    
+    // create a copy of the transition probability matrix
+    RbVector<double> tpv_backup = RbVector<double>( *tpv );
+
+    // we only need to send message if there is more than one process
+    if ( num_processes > 1 )
+    {
+        std::vector< double > this_tpv_row = std::vector<double>(population_size+1,0.0);
+
+        for (size_t i=active_PID; i<active_PID+num_processes; ++i)
+        {
+            
+            if ( pid == i )
+            {
+                this_tpv_row = tpv_backup;
+            }
+                
+            MPI_Bcast(&this_tpv_row[0], population_size+1, MPI_DOUBLE, pid, MPI_COMM_WORLD);
+                
+            if ( pid != i )
+            {
+                for ( size_t k=0; k<=population_size; ++k )
+                {
+                    (*tpv)[k] += this_tpv_row[k];
+                }
+            } // end-if non-sending process to add the transition probabilities
+            
+        } // end-for over all processes
+        
+    } // end-if there are more than one process
+#endif
+
+    
+    return tpv;
+}
+
+
+
+bool AlleleFrequencySimulator::simulateAlignment( const TopologyNode& n, long state, const std::vector<long>& population_sizes, const std::vector<long>& samples_per_species, std::vector<int>& taxa, bool& monomorphic ) const
 {
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
@@ -313,14 +404,14 @@ bool AlleleFrequencySimulator::simulate( const TopologyNode& n, long state, std:
         size_t left_index  = left.getIndex();
         double left_branch = left.getBranchLength();
         long left_state = simulateAlongBranch( population_sizes[left_index], state, left_branch );
-        simulate( left, left_state, taxa, monomorphic );
+        simulateAlignment( left, left_state, population_sizes, samples_per_species, taxa, monomorphic );
         
         // the right child
         const TopologyNode& right = n.getChild(1);
         size_t right_index  = right.getIndex();
         double right_branch = right.getBranchLength();
         long right_state = simulateAlongBranch( population_sizes[right_index], state, right_branch );
-        simulate( right, right_state, taxa, monomorphic );
+        simulateAlignment( right, right_state, population_sizes, samples_per_species, taxa, monomorphic );
     }
     
     return true;
@@ -405,11 +496,18 @@ long AlleleFrequencySimulator::simulateAlongBranch( double this_populuation_size
 }
 
 
-void AlleleFrequencySimulator::writeCountsFile(const std::string& fn, const std::vector<std::vector<int> >& taxa) const
+void AlleleFrequencySimulator::writeCountsFile(const Tree* tree, const std::string& fn, const std::vector<std::vector<int> >& taxa, const std::vector<long>& samples_per_species) const
 {
     
     // first, get some variables/settings for the simulation
     size_t num_tips     = tree->getNumberOfTips();
+    size_t num_sites    = taxa.size();
+#ifdef RB_MPI
+    if ( num_processes > 1 )
+    {
+        num_sites *= num_processes;
+    }
+#endif
     
     // the filestream object
     std::fstream out_stream;

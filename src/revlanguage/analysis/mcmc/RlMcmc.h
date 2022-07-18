@@ -10,7 +10,7 @@ namespace RevLanguage {
     
     
     /**
-     * RevLanguage wrapper class for the power posterior analysis object.
+     * RevLanguage wrapper class for the MCMC analysis object.
      *
      *
      * The wraper class provides the Rev interface to the core class Mcmc.

@@ -50,13 +50,7 @@ Func_AlleleFrequencyMatrixSimulator* Func_AlleleFrequencyMatrixSimulator::clone(
 
 RevPtr<RevVariable> Func_AlleleFrequencyMatrixSimulator::execute()
 {
-    
-    RevBayesCore::Tree* tree = NULL;
-    std::vector<long> ps;
-    long num_sites = 0;
-    std::vector<long> samples;
-    double root_branch = -1;
-    
+        
     long population_sizes                   = static_cast<const Natural &>( this->args[0].getVariable()->getRevObject() ).getValue();
     double generation_time                  = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getValue();
     bool moran_generations                  = static_cast<const RlBoolean &>( this->args[2].getVariable()->getRevObject() ).getValue();
@@ -65,7 +59,7 @@ RevPtr<RevVariable> Func_AlleleFrequencyMatrixSimulator::execute()
     long reps                               = static_cast<const Natural &>( this->args[5].getVariable()->getRevObject() ).getValue();
 
 
-    RevBayesCore::AlleleFrequencySimulator sim = RevBayesCore::AlleleFrequencySimulator(tree, ps, generation_time, num_sites, mutation_rates, samples, root_branch, moran_generations );
+    RevBayesCore::AlleleFrequencySimulator sim = RevBayesCore::AlleleFrequencySimulator( generation_time, mutation_rates, moran_generations );
     RevBayesCore::MatrixReal* m = sim.simulateAlleleFrequenciesMatrix( time, population_sizes, reps );
     
     return new RevVariable( new MatrixRealPos( m ) );
