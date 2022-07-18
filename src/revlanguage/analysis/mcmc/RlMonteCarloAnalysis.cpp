@@ -67,21 +67,6 @@ MonteCarloAnalysis* MonteCarloAnalysis::clone(void) const
 }
 
 
-//void MonteCarloAnalysis::constructInternalObject( void )
-//{
-//    // we free the memory first
-//    delete value;
-//    
-//    // now allocate a new MonteCarloAnalysis object
-//    const RevBayesCore::Model&                              mdl     = static_cast<const Model &>( model->getRevObject() ).getValue();
-//    const RevBayesCore::RbVector<RevBayesCore::Move>&       mvs     = static_cast<const WorkspaceVector<Move> &>( moves->getRevObject() ).getVectorRbPointer();
-//    const RevBayesCore::RbVector<RevBayesCore::Monitor>&    mntr    = static_cast<const WorkspaceVector<Monitor> &>( monitors->getRevObject() ).getVectorRbPointer();
-//    const std::string &                                     sched   = static_cast<const RlString &>( moveSchedule->getRevObject() ).getValue();
-//    value = new RevBayesCore::MonteCarloAnalysis(mdl, mvs, mntr);
-//    value->setScheduleType( sched );
-//}
-
-
 /* Map calls to member methods */
 RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
 {
