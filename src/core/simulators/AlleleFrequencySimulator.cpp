@@ -193,6 +193,28 @@ MatrixReal* AlleleFrequencySimulator::simulateAlleleFrequenciesMatrix( double ti
     
     MatrixReal* tpm = new MatrixReal(population_size+1);
     
+    // forward the rng for different processes
+#ifdef RB_MPI
+    RandomNumberGenerator* rng = GLOBAL_RNG;
+
+    for ( size_t i=active_PID; i<pid; ++i)
+    {
+        // we fast forward 7 times, just to be sure
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+    }
+#endif
+    
+    size_t reps_this_process = reps;
+#ifdef RB_MPI
+    reps_this_process = reps / num_processes;
+#endif
+    
     // start the progress bar
     ProgressBar progress = ProgressBar(population_size, 0);
     
@@ -204,7 +226,7 @@ MatrixReal* AlleleFrequencySimulator::simulateAlleleFrequenciesMatrix( double ti
         
         std::vector<long> counts = std::vector<long>(population_size+1, 0);
         
-        for (size_t r=0; r<reps; ++r)
+        for (size_t r=0; r<reps_this_process; ++r)
         {
             long obs_state = simulateAlongBranch(population_size, i, time);
             ++counts[obs_state];
@@ -220,6 +242,46 @@ MatrixReal* AlleleFrequencySimulator::simulateAlleleFrequenciesMatrix( double ti
     }
     
     progress.finish();
+    
+#ifdef RB_MPI
+    MPI_Barrier( MPI_COMM_WORLD );
+    
+    // create a copy of the transition probability matrix
+    MatrixReal tpm_backup = MatrixReal( *tpm );
+
+    // we only need to send message if there is more than one process
+    if ( num_processes > 1 )
+    {
+
+        std::vector< double > this_tpm_row = std::vector<double>(population_size+1,0.0);
+
+        for (size_t i=active_PID; i<active_PID+num_processes; ++i)
+        {
+            
+            for ( size_t s=0; s<=population_size; ++s )
+            {
+                if ( pid == i )
+                {
+                    this_tpm_row = tpm_backup[s];
+                }
+                
+                MPI_Bcast(&this_tpm_row[0], population_size+1, MPI_DOUBLE, pid, MPI_COMM_WORLD);
+                
+                if ( pid != i )
+                {
+                    for ( size_t k=0; k<=population_size; ++k )
+                    {
+                        (*tpm)[s][k] += this_tpm_row[k];
+                    }
+                } // end-if non-sending process to add the transition probabilities
+                
+            } // end-for over all starting states for the transition probability matrix
+            
+        } // end-for over all processes
+        
+    } // end-if there are more than one process
+#endif
+
     
     return tpm;
 }
