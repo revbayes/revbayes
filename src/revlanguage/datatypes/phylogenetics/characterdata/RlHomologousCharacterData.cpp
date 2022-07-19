@@ -130,7 +130,9 @@ RevPtr<RevVariable> HomologousCharacterData::executeCharacterDataMethod(std::str
             bool excluded = v.isCharacterExcluded(i);
             if ( excluded == false )
             {
-                indices.push_back( int(i) );
+                // remember that we internally store the character indices from 0 to n-1
+                // but externally represent it as 1 to n
+                indices.push_back( int(i+1) );
             }
         }
         
@@ -145,7 +147,7 @@ RevPtr<RevVariable> HomologousCharacterData::executeCharacterDataMethod(std::str
         if ( argument.isType( Natural::getClassTypeSpec() ) )
         {
             size_t n = size_t( static_cast<const Natural&>( argument ).getValue() );
-            // remember that we internally store the character indeces from 0 to n-1
+            // remember that we internally store the character indices from 0 to n-1
             // but externally represent it as 1 to n
             charDataObject->includeCharacter( n-1 );
         }
@@ -155,7 +157,7 @@ RevPtr<RevVariable> HomologousCharacterData::executeCharacterDataMethod(std::str
             RevBayesCore::HomologousCharacterData &v = *charDataObject;
             for ( size_t i=0; i<x.size(); i++ )
             {
-                // remember that we internally store the character indeces from 0 to n-1
+                // remember that we internally store the character indices from 0 to n-1
                 // but externally represent it as 1 to n
                 v.includeCharacter( size_t(x[i])-1 );
             }
@@ -186,7 +188,7 @@ RevPtr<RevVariable> HomologousCharacterData::executeCharacterDataMethod(std::str
         const RevObject& argument2 = args[1].getVariable()->getRevObject();
         size_t tIdx = size_t( static_cast<const Natural&>( argument1 ).getValue() );
         size_t cIdx = size_t( static_cast<const Natural&>( argument2 ).getValue() );
-        // remember that we internally store the character indeces from 0 to n-1
+        // remember that we internally store the character indices from 0 to n-1
         // but externally represent it as 1 to n
         bool tf = charDataObject->isCharacterResolved( tIdx-1, cIdx-1 );
         return new RevVariable( new RlBoolean(tf) );

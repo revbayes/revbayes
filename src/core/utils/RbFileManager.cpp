@@ -11,7 +11,8 @@
 #include "RbFileManager.h"
 #include "RbSettings.h"
 #include "StringUtilities.h"
-#include "boost/filesystem/path.hpp"
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 
 #ifdef _WIN32
 #	include <dirent.h>
@@ -25,6 +26,7 @@
 
 
 using namespace RevBayesCore;
+namespace fs = boost::filesystem;
 
 /** Default constructor, creating a file manager object with the file
  path equal to the current (default) directory and an empty file name */
@@ -253,9 +255,9 @@ void RbFileManager::formatError(std::string& errorStr)
 }
 
 
-const std::string& RbFileManager::getCurrentDirectory( void ) const
+std::string RbFileManager::getCurrentDirectory( void ) const
 {
-    return RbSettings::userSettings().getWorkingDirectory();
+    return fs::current_path().make_preferred().string();
 }
 
 

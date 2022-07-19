@@ -396,9 +396,6 @@ a)");
 	help_strings[string("dnConstrainedNodeOrder")][string("name")] = string(R"(dnConstrainedNodeOrder)");
 	help_strings[string("dnConstrainedTopology")][string("name")] = string(R"(dnConstrainedTopology)");
 	help_strings[string("dnCppNormal")][string("name")] = string(R"(dnCppNormal)");
-    help_strings[string("dnCTMC")][string("name")] = string(R"(dnCTMC)");
-    help_arrays[string("dnCTMC")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-    help_strings[string("dnCTMC")][string("description")] = string(R"(A continuous time Markov process along a single branch/population. For this process, there is no branching process involved. We simply let the sequence evolve according to the rate matrix for a given amount of time. This process is used to model single population demographies.)");
 	help_strings[string("dnDPP")][string("name")] = string(R"(dnDPP)");
 	help_strings[string("dnDecomposedInvWishart")][string("name")] = string(R"(dnDecomposedInvWishart)");
 	help_arrays[string("dnDirichlet")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
@@ -489,19 +486,50 @@ x.probability())");
 	help_strings[string("dnExponential")][string("name")] = string(R"(dnExponential)");
 	help_strings[string("dnExponential")][string("title")] = string(R"(Exponential Distribution)");
 	help_arrays[string("dnFossilizedBirthDeathRange")][string("authors")].push_back(string(R"(Walker Pett)"));
-	help_strings[string("dnFossilizedBirthDeathRange")][string("description")] = string(R"(The fossilized birth death range process describes diversification and sampling of extinct species trees under a mixed model of asymmetric, symmetric and anagenetic speciation.)");
-	help_strings[string("dnFossilizedBirthDeathRange")][string("details")] = string(R"(Fossil species samples are represented by their sampled stratigraphic ranges, consisting of a first and last occurrence, and sample count data. Sampling data may be provided by species, time interval, or both depending on the sampling model assumed. The distribution may describe either sampled trees, in which unsampled tips represent sampling events, or extended trees in which tips represent extinction events.)");
+	help_strings[string("dnFossilizedBirthDeathRange")][string("description")] = string(R"(The fossilized birth death range process (FBDRP) describes the distribution of a matrix of species origination and extinction times under a model of asymmetric speciation and sampling of extinct species.)");
+	help_strings[string("dnFossilizedBirthDeathRange")][string("details")] = string(R"(Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. If only a subset of fossil occurrences is provided for each species (e.g. only first and last occurrencces), then the remaining number of fossil samples may be marginalized by specifying `complete=FALSE`. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which must be sampled during MCMC using `mvResampleFBD`. Setting `BDS` to true causes the model to assume complete lineage sampling i.e. using the Birth-Death with Rateshifts (BDS) model of Silvestro et al. (2019).)");
+	help_strings[string("dnFossilizedBirthDeathRange")][string("example")] = string(R"(lambda ~ dnExp(10)
+mu ~ dnExp(10)
+psi ~ dnExp(10)
+
+bd ~ dnFBDRP(lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa)
+
+moves.append( mvMatrixElementScale(bd, weight=taxa.size()) )
+moves.append( mvMatrixElementSlide(bd, weight=taxa.size()) ))");
 	help_strings[string("dnFossilizedBirthDeathRange")][string("name")] = string(R"(dnFossilizedBirthDeathRange)");
 	help_references[string("dnFossilizedBirthDeathRange")].push_back(RbHelpReference(R"(The fossilized birth-death model for the analysis of stratigraphic range data under different speciation modes. Stadler, Tanja et al. Journal of theoretical biology, 447:41-55.)",R"()",R"(https://www.sciencedirect.com/science/article/pii/S002251931830119X )"));
-	help_arrays[string("dnFossilizedBirthDeathRange")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRangeMatrix)"));
+	help_references[string("dnFossilizedBirthDeathRange")].push_back(RbHelpReference(R"(Improved estimation of macroevolutionary rates from fossil data using a Bayesian framework. Silvestro, Daniele et al. Paleobiology, 45:546-570.)",R"(https://doi.org/10.1017/pab.2019.23)",R"(https://www.cambridge.org/core/journals/paleobiology/article/improved-estimation-of-macroevolutionary-rates-from-fossil-data-using-a-bayesian-framework/334F08A74A6C92F1FEAD91A71FE59A1C )"));
 	help_arrays[string("dnFossilizedBirthDeathRange")][string("see_also")].push_back(string(R"(dnBirthDeathSamplingTreatment)"));
-	help_arrays[string("dnFossilizedBirthDeathRangeMatrix")][string("authors")].push_back(string(R"(Walker Pett)"));
-	help_strings[string("dnFossilizedBirthDeathRangeMatrix")][string("description")] = string(R"(The fossilized birth death range matrix process describes the distribution of a matrix of species origin and extinction times under a model of asymmetric speciation and sampling of extinct species.)");
-	help_strings[string("dnFossilizedBirthDeathRangeMatrix")][string("details")] = string(R"(Fossil species samples are represented by their sampled stratigraphic ranges, consisting of a first and last occurrence, and sample count data. Sampling data may be provided by species, time interval, or both depending on the sampling model assumed.)");
-	help_strings[string("dnFossilizedBirthDeathRangeMatrix")][string("name")] = string(R"(dnFossilizedBirthDeathRangeMatrix)");
-	help_references[string("dnFossilizedBirthDeathRangeMatrix")].push_back(RbHelpReference(R"(The fossilized birth-death model for the analysis of stratigraphic range data under different speciation modes. Stadler, Tanja et al. Journal of theoretical biology, 447:41-55.)",R"()",R"(https://www.sciencedirect.com/science/article/pii/S002251931830119X )"));
-	help_arrays[string("dnFossilizedBirthDeathRangeMatrix")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRange)"));
-	help_arrays[string("dnFossilizedBirthDeathRangeMatrix")][string("see_also")].push_back(string(R"(dnBirthDeathSamplingTreatment)"));
+	help_arrays[string("dnFossilizedBirthDeathRange")][string("see_also")].push_back(string(R"(mvResampleFBD)"));
+	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("authors")].push_back(string(R"(Walker Pett)"));
+	help_strings[string("dnFossilizedBirthDeathSpeciation")][string("description")] = string(R"(The fossilized birth death speciation process (FBDSP) describes the diversification and sampling of extant and extinct species trees under a mixed model of asymmetric, symmetric and anagenetic speciation.)");
+	help_strings[string("dnFossilizedBirthDeathSpeciation")][string("details")] = string(R"(Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. If only a subset of fossil occurrences is provided for each species (e.g. only first and last occurrencces), then the remaining number of fossil samples may be marginalized by specifying `complete=FALSE`. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which must be sampled during MCMC using `mvResampleFBD`. Tips represent extinction events, and therefore should be sampled during MCMC using e.g. `mvTipTimeSlideUniform`.)");
+	help_strings[string("dnFossilizedBirthDeathSpeciation")][string("example")] = string(R"(lambda ~ dnExp(10)
+mu ~ dnExp(10)
+psi ~ dnExp(10)
+
+min_age = 0.0
+for(i in 1:taxa.size())
+{
+        if ( taxa[i].getMinAge() > min_age )
+        {
+                min_age = taxa[i].getMinAge()
+        }
+}
+
+origin ~ dnExp(1/10)
+
+bd ~ dnFBDSP(originAge=min_age+origin, lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa, complete=FALSE)
+
+moves.append( mvFNPR(bd, weight = taxa.size()) )
+moves.append( mvNodeTimeSlideUniform(bd, weight = taxa.size()) )
+moves.append( mvRootTimeSlideUniform(bd, origin=origin, weight = taxa.size()) )
+moves.append( mvTipTimeSlideUniform(bd, weight = taxa.size()) ))");
+	help_strings[string("dnFossilizedBirthDeathSpeciation")][string("name")] = string(R"(dnFossilizedBirthDeathSpeciation)");
+	help_references[string("dnFossilizedBirthDeathSpeciation")].push_back(RbHelpReference(R"(The fossilized birth-death model for the analysis of stratigraphic range data under different speciation modes. Stadler, Tanja et al. Journal of theoretical biology, 447:41-55.)",R"()",R"(https://www.sciencedirect.com/science/article/pii/S002251931830119X )"));
+	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRange)"));
+	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(dnBirthDeathSamplingTreatment)"));
+	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(mvResampleFBD)"));
 	help_arrays[string("dnGamma")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnGamma")][string("description")] = string(R"(Gamma probability distribution for positive real numbers.)");
 	help_strings[string("dnGamma")][string("details")] = string(R"(The gamma distribution is the probability of the sum of exponentially distributed variables. Thus, it provides a natural prior distribution for parameters that could be considered as sums of exponential variables.)");
@@ -1110,9 +1138,55 @@ pi3 ~ dnDirichlet( rep(2.0, 4) )
 Q3 := fnCodonGY94( kappa, omega, fnF3x4(pi1, pi2, pi3) ))");
 	help_strings[string("fnCodonGY94")][string("name")] = string(R"(fnCodonGY94)");
 	help_references[string("fnCodonGY94")].push_back(RbHelpReference(R"(Goldman, N. and Z. Yang (1994). A codon-based model of nucleotide substitution for protein-coding DNA sequences. Mol. Biol. Evol. (1994) 11 (5):725-736)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040153 )",R"()"));
-	help_arrays[string("fnCodonGY94")][string("see_also")].push_back(string(R"(fnF1x4, fnF3x4)"));
+	help_arrays[string("fnCodonGY94")][string("see_also")].push_back(string(R"(fnF1x4, fnF3x4, fnCodonMG94, fnCodonMG94K)"));
 	help_strings[string("fnCodonGY94")][string("title")] = string(R"(The Goldman-Yang (1994) codon rate matrix)");
 	help_strings[string("fnCodonHKY")][string("name")] = string(R"(fnCodonHKY)");
+	help_strings[string("fnCodonMG94")][string("description")] = string(R"(The Muse-Gaut (1994) codon model.
+
+A rate matrix on the 61 non-stop codons (in the standard genetic code).
+
+Rates between codons with more than one nucleotide change are equal to 0.
+
+In this model the rate Q(i,j) from i -> j is proportional to the frequency of
+nucleotide in codon j that changed.  This differs from the Goldman-Yang (1994) model,
+where Q(i,j) is proportional to the frequency of the entire codon j.
+
+Unlike the Goldman-Yang (1994) model, the Muse-Gaut (1994) model does not allow all the codon
+frequencies to vary independently.)");
+	help_strings[string("fnCodonMG94")][string("example")] = string(R"(omega ~ dnUniform(0,1)
+pi ~ dnDirichlet( rep(2.0, 4) )
+Q1 := fnCodonMG94( omega, pi )
+
+Q2 := fndNdS( omega, fnX3( fnF81(pi) ) ) # MG94 = F81 + X3 + dNdS)");
+	help_strings[string("fnCodonMG94")][string("name")] = string(R"(fnCodonMG94)");
+	help_references[string("fnCodonMG94")].push_back(RbHelpReference(R"(Muse, S. and B. Gaut (1994) A likelihood approach for comparing synonymous and nonsynonymous nucleotide substitution rates, with application to the chloroplast genome. Mol. Biol. Evol. (1994) 11 (5):715-724)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040152 )",R"()"));
+	help_arrays[string("fnCodonMG94")][string("see_also")].push_back(string(R"(fnCodonMG94, fnCodonMG94K)"));
+	help_strings[string("fnCodonMG94")][string("title")] = string(R"(The Muse-Gaut (1994) codon rate matrix)");
+	help_strings[string("fnCodonMG94K")][string("description")] = string(R"(The Muse-Gaut (1994) codon model, extended with a transition/transversion rate ratio.
+
+A rate matrix on the 61 non-stop codons (in the standard genetic code).
+
+Rates between codons with more than one nucleotide change are equal to 0.
+
+In this model the rate Q(i,j) from i -> j is proportional to the frequency of
+nucleotide in codon j that changed.  This differs from the Goldman-Yang (1994) model,
+where Q(i,j) is proportional to the frequency of the entire codon j.
+
+This version is an extension of the fnCodonMG94 model to add a transition/transversion
+rate ratio.  This makes it more comparable to the Goldman-Yang (1994) model.
+
+Unlike the Goldman-Yang (1994) model, the Muse-Gaut (1994) model does not allow all the codon
+frequencies to vary independently.)");
+	help_strings[string("fnCodonMG94K")][string("example")] = string(R"(kappa ~ dnLognormal(0,1)
+omega ~ dnUniform(0,1)
+pi ~ dnDirichlet( rep(2.0, 4) )
+Q1 := fnCodonMG94K( kappa, omega, pi )
+
+Q2 := fndNdS( omega, fnX3( fnHKY( kappa, pi) ) ) # MG94K = HKY + X3 + dNdS)");
+	help_strings[string("fnCodonMG94K")][string("name")] = string(R"(fnCodonMG94K)");
+	help_references[string("fnCodonMG94K")].push_back(RbHelpReference(R"(Muse, S. and B. Gaut (1994) A likelihood approach for comparing synonymous and nonsynonymous nucleotide substitution rates, with application to the chloroplast genome. Mol. Biol. Evol. (1994) 11 (5):715-724)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040152 )",R"()"));
+	help_arrays[string("fnCodonMG94K")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K)"));
+	help_strings[string("fnCodonMG94K")][string("title")] = string(R"(The Muse-Gaut (1994) codon rate matrix + K.)");
 	help_strings[string("fnCovarion")][string("name")] = string(R"(fnCovarion)");
 	help_strings[string("fnCovarionRateMatrix")][string("name")] = string(R"(fnCovarionRateMatrix)");
 	help_strings[string("fnCpRev")][string("name")] = string(R"(fnCpRev)");
@@ -1147,6 +1221,16 @@ Q := fnCodonGY94( kappa, omega, fnF1x4(pi) ))");
 	help_strings[string("fnF1x4")][string("name")] = string(R"(fnF1x4)");
 	help_arrays[string("fnF1x4")][string("see_also")].push_back(string(R"(fnGY94, fnF3x4)"));
 	help_strings[string("fnF1x4")][string("title")] = string(R"(The F1x4 codon frequency model)");
+	help_strings[string("fnF2x4")][string("description")] = string(R"(This treats doublet frequencies as a product of independent nucleotide frequencies.)");
+	help_strings[string("fnF2x4")][string("example")] = string(R"(# An RNA stem model with independent base frequencies (from fnF2x4),
+# and simultaneous 2-nucleotide changes allows.
+nuc_pi ~ dnDirichlet( v(2.0, 2.0, 2.0, 2.0) )
+rna_stem_er ~ dnDirichlet( rep(1.0, 16*15/2) )
+rna_stem_pi := fnF2x4(nuc_pi, nuc_pi)
+Q := fnGTR(rna_stem_er, rna_stem_pi))");
+	help_strings[string("fnF2x4")][string("name")] = string(R"(fnF2x4)");
+	help_arrays[string("fnF2x4")][string("see_also")].push_back(string(R"(fnX2)"));
+	help_strings[string("fnF2x4")][string("title")] = string(R"(The F2x4 doublet frequency model)");
 	help_strings[string("fnF3x4")][string("description")] = string(R"(This treats codon frequencies as a product of independent nucleotide frequencies.
 
 Since stop codons are removed from the codon alphabet, frequencies are renormalized
@@ -1161,6 +1245,75 @@ Q := fnCodonGY94( kappa, omega, fnF3x4(pi1, pi2, pi3) ))");
 	help_arrays[string("fnF3x4")][string("see_also")].push_back(string(R"(fnGY94, fnF1x4)"));
 	help_strings[string("fnF3x4")][string("title")] = string(R"(The F3x4 codon frequency model)");
 	help_strings[string("fnF81")][string("name")] = string(R"(fnF81)");
+	help_strings[string("fnFMutSel")][string("description")] = string(R"(Constructs a rate matrix from 61 scaled selection coefficients w[i] and
+a 4x4 nucleotide mutation rate matrix mu(i,j).  In the original paper
+the nucleotide mutation rate matrix is a GTR rate matrix.
+
+The FMutSel0 model differs from FMutSel by constraining all codons for
+the same amino acid to have the same scaled selection coefficient.
+
+The function fnMutSel differs from fnFMutSel by taking a codon mutation
+rate matrix.
+
+A substitution from allele i -> j can be decomposed into
+ (1) all individuals initially have state i
+ (2) a single individual mutates from i -> j, at rate mu(i,j)
+ (3) the allele j goes to fixation
+
+Then the substitution rate Q is then given by
+  Q(i,j) = mu(i,j) * Pr(j goes to fixation | i was fixed previously).
+
+The probability of fixation is determined by scaled selection coefficients:
+  F[i] = 2*N*s[i]
+and the initial frequency 1/N of allele j.)");
+	help_strings[string("fnFMutSel")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
+nuc_pi ~ dnDirichlet( rep(2.0, 4) )
+F ~ dnIID(61, dnNormal(0,1))
+omega ~ dnUniform(0,1)
+# The FMutSel model from Yang and Nielsen (2008)
+Q1 := fnFMutSel(fnGTR(er, nuc_pi), F, omega)
+
+# The same -- fMutSel = GTR(er,nuc_pi) + X3 + MutSel(F) + dNdS(omega)
+Q2 := fndNdS(fnMutSel(F, fnX3(fnGTR(er, nuc_pi))), omega))");
+	help_strings[string("fnFMutSel")][string("name")] = string(R"(fnFMutSel)");
+	help_references[string("fnFMutSel")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
+	help_arrays[string("fnFMutSel")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnFMutSel0, fnMutSel)"));
+	help_strings[string("fnFMutSel")][string("title")] = string(R"(The FMutSel model)");
+	help_strings[string("fnFMutSel0")][string("description")] = string(R"(Constructs a rate matrix from 61 scaled selection coefficients w[i] and
+a 4x4 nucleotide mutation rate matrix mu(i,j).  In the original paper
+the nucleotide mutation rate matrix is a GTR rate matrix.
+
+The FMutSel0 model is a restriction of the FMutSel model that constrains
+all codons for the same amino acid to have the same scaled selection
+coefficient.
+
+The function fnMutSelAA differs from fnFMutSel0 by taking a codon mutation
+rate matrix.
+
+A substitution from allele i -> j can be decomposed into
+ (1) all individuals initially have state i
+ (2) a single individual mutates from i -> j, at rate mu(i,j)
+ (3) the allele j goes to fixation
+
+Then the substitution rate Q is then given by
+  Q(i,j) = mu(i,j) * Pr(j goes to fixation | i was fixed previously).
+
+The probability of fixation is determined by scaled selection coefficients:
+  F[i] = 2*N*s[i]
+and the initial frequency 1/N of allele j.)");
+	help_strings[string("fnFMutSel0")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
+nuc_pi ~ dnDirichlet( rep(2.0, 4) )
+F ~ dnIID(20, dnNormal(0,1))
+omega ~ dnUniform(0,1)
+# The FMutSel0 model from Yang and Nielsen (2008)
+Q1 := fnFMutSel0(fnGTR(er, nuc_pi), F, omega)
+
+# The same -- fMutSel0 = GTR(er,nuc_pi) + X3 + MutSel(F) + dNdS(omega)
+Q2 := fndNdS( fnMutSelAA( fnX3( fnGTR(er, nuc_pi)), F), omega))");
+	help_strings[string("fnFMutSel0")][string("name")] = string(R"(fnFMutSel0)");
+	help_references[string("fnFMutSel0")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
+	help_arrays[string("fnFMutSel0")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnFMutSel0, fnMutSel)"));
+	help_strings[string("fnFMutSel0")][string("title")] = string(R"(The FMutSel0 model)");
 	help_strings[string("fnFreeBinary")][string("name")] = string(R"(fnFreeBinary)");
 	help_strings[string("fnFreeK")][string("name")] = string(R"(fnFreeK)");
 	help_strings[string("fnFreeSymmetricRateMatrix")][string("name")] = string(R"(fnFreeSymmetricRateMatrix)");
@@ -1194,6 +1347,63 @@ Q := fnHKY(kappa,pi))");
 	help_strings[string("fnMixtureCladoProbs")][string("name")] = string(R"(fnMixtureCladoProbs)");
 	help_strings[string("fnMtMam")][string("name")] = string(R"(fnMtMam)");
 	help_strings[string("fnMtRev")][string("name")] = string(R"(fnMtRev)");
+	help_strings[string("fnMutSel")][string("description")] = string(R"(Constructs a rate matrix from scaled selection coefficients w[i] and
+mutation rate matrix mu(i,j).
+
+fnMutSel takes 61 scaled selection coefficients, one for each codon.
+This differs from fnMutSelAA, which takes 20 scaled selection coefficients,
+one for each amino acid.
+
+A substitution from allele i -> j can be decomposed into
+ (1) all individuals initially have state i
+ (2) a single individual mutates from i -> j, at rate mu(i,j)
+ (3) the allele j goes to fixation
+
+Then the substitution rate Q is then given by
+  Q(i,j) = mu(i,j) * Pr(j goes to fixation | i was fixed previously).
+
+The probability of fixation is determined by scaled selection coefficients:
+  F[i] = 2*N*s[i]
+and the initial frequency 1/N of allele j.)");
+	help_strings[string("fnMutSel")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
+nuc_pi ~ dnDirichlet( rep(2.0, 4) )
+F ~ dnIID(61, dnNormal(0,1))
+Q := fnMutSel(fnX3(fnGTR(er, nuc_pi) ), F)       # GTR + X3 + MutSel
+
+# A mutation-selection balance model on RNA, with GTR mutation.
+F2 ~ dnIID(16, dnNormal(0,1))
+Q2 := fnMutSel(fnX2(fnGTR(er,nuc_pi) ), F2)      # GTR + X2 + MutSel)");
+	help_strings[string("fnMutSel")][string("name")] = string(R"(fnMutSel)");
+	help_references[string("fnMutSel")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
+	help_arrays[string("fnMutSel")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnMutSelAA, fnFMutSel, fndNdS)"));
+	help_strings[string("fnMutSel")][string("title")] = string(R"(Add mutation-selection balance to a rate matrix.)");
+	help_strings[string("fnMutSelAA")][string("description")] = string(R"(Constructs a rate matrix from scaled selection coefficients w[i] and
+mutation rate matrix mu(i,j).
+
+fnMutSelAA takes 20 scaled selection coefficients, one for each amino acid.
+This differs from fnMutSel, which takes 61 scaled selection coefficients,
+one for each codon.  fnMutSelAA assumes that codons for the same amino acid
+have the same fitness.
+
+A substitution from allele i -> j can be decomposed into
+ (1) all individuals initially have state i
+ (2) a single individual mutates from i -> j, at rate mu(i,j)
+ (3) the allele j goes to fixation
+
+Then the substitution rate Q is then given by
+  Q(i,j) = mu(i,j) * Pr(j goes to fixation | i was fixed previously).
+
+The probability of fixation is determined by scaled selection coefficients:
+  F[i] = 2*N*s[i]
+and the initial frequency 1/N of allele j.)");
+	help_strings[string("fnMutSelAA")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
+nuc_pi ~ dnDirichlet( rep(2.0, 4) )
+F ~ dnIID(20, dnNormal(0,1))
+Q := fnMutSelAA(fnX3(fnGTR(er, nuc_pi)), F))");
+	help_strings[string("fnMutSelAA")][string("name")] = string(R"(fnMutSelAA)");
+	help_references[string("fnMutSelAA")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
+	help_arrays[string("fnMutSelAA")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnX3, fndNdS, fnMutSel)"));
+	help_strings[string("fnMutSelAA")][string("title")] = string(R"(Add mutation-selection balance to a rate matrix -- fitnesses on amino acids)");
 	help_strings[string("fnNormalizedQuantile")][string("name")] = string(R"(fnNormalizedQuantile)");
 	help_strings[string("fnNumUniqueInVector")][string("name")] = string(R"(fnNumUniqueInVector)");
 	help_strings[string("fnOrderedRateMatrix")][string("name")] = string(R"(fnOrderedRateMatrix)");
@@ -1238,7 +1448,75 @@ Q := fnTrN(kappaAT, kappaCT, ,pi))");
 	help_strings[string("fnVarCovar")][string("name")] = string(R"(fnVarCovar)");
 	help_strings[string("fnWAG")][string("name")] = string(R"(fnWAG)");
 	help_strings[string("fnWattersonsTheta")][string("name")] = string(R"(fnWattersonsTheta)");
+	help_strings[string("fnX2")][string("description")] = string(R"(Constructs a double rate matrix on the 16 nucleotide pairs.
+
+Rates of change from nucleotide i -> j at each doublet position are given by the
+nucleotide rate matrix.  The rate of 2 simultaneous changes is 0.
+
+The X3 function can be used to constructor rate matrices on doublets in a
+modular fashion.)");
+	help_strings[string("fnX2")][string("example")] = string(R"(
+kappa ~ dnLognormal(0,1)
+nuc_pi ~ dnDirichlet( rep(2.0, 4) )
+# Mutation rate matrix on RNA stems
+Q1 := fnX2( fnHKY(kappa, nuc_pi) )
+F ~ dnIID(16, dnNormal(0,1))
+# Add selection to the rate matrix
+Q2 := fnMutSel(Q1, F))");
+	help_strings[string("fnX2")][string("name")] = string(R"(fnX2)");
+	help_arrays[string("fnX2")][string("see_also")].push_back(string(R"(fnX3)"));
+	help_strings[string("fnX2")][string("title")] = string(R"(Construct a doublet (16x16) rate matrix from a nucleotide rate matrix.)");
+	help_strings[string("fnX3")][string("description")] = string(R"(Constructs a rate matrix on the 61 non-stop codons (in the standard genetic code).
+
+Rates of change from nucleotide i -> j at each codon position are given by the
+nucleotide rate matrix.  The rate of 2 or 3 simultaneous changes is 0.
+
+The X3 function can be used to construct other rate matrices in a modular fashion.
+For example:
+  (i)  MG94  = F81 + X3 + dNdS
+  (ii) MG94K = HKY85 + X3 + dNdS)");
+	help_strings[string("fnX3")][string("example")] = string(R"(
+kappa ~ dnLognormal(0,1)
+omega ~ dnUniform(0,1)
+nuc_pi ~ dnDirichlet( rep(2.0, 4) )
+Q1 := fnCodonMG94K( kappa, omega, nuc_pi )
+# This is the same.
+Q2 := fndNdS(fnX3(fnHKY(kappa, nuc_pi)), omega)          # HKY + X3 + dNdS, or HKY*3 + dNdS
+
+er ~ dnDirichlet( v(1,1,1,1,1,1) )
+Q3 := fnX3(fnGTR(er, nuc_pi))      # GTR + X3, or GTR*3)");
+	help_strings[string("fnX3")][string("name")] = string(R"(fnX3)");
+	help_references[string("fnX3")].push_back(RbHelpReference(R"(Redelings, BD (2021). BAli-Phy version 3: Model-based co-estimation of Alignment and Phylogeny.  Bioinformatics (2021) 37(10):3032–3034.)",R"(https://doi.org/10.1093/bioinformatics/btab129 )",R"()"));
+	help_arrays[string("fnX3")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K, fndNdS)"));
+	help_strings[string("fnX3")][string("title")] = string(R"(Construct a codon rate matrix from a nucleotide rate matrix.)");
 	help_strings[string("fnassembleContinuousMRF")][string("name")] = string(R"(fnassembleContinuousMRF)");
+	help_strings[string("fndNdS")][string("description")] = string(R"(Constructs a rate matrix on the 61 non-stop codons (in the standard genetic code).
+
+   Q(i,j) = Q'(i,j) * omega if aa(i) != aa(j)
+                    * 1     if aa(i) == aa(j)
+
+where aa(i) gives the amino acid for codon i in the standard genetic code, and
+Q'(i,j) is the input rate matrix on codons.
+
+The dNdS function can be used to construct other rate matrices in a modular fashion.
+For example:
+  (i)  MG94  = F81 + X3 + dNdS
+  (ii) MG94K = HKY85 + X3 + dNdS)");
+	help_strings[string("fndNdS")][string("example")] = string(R"(
+kappa ~ dnLognormal(0,1)
+omega ~ dnUniform(0,1)
+nuc_pi ~ dnDirichlet( rep(2.0, 4) )
+Q1 := fnCodonMG94K( kappa, omega, nuc_pi )
+# This is the same.
+Q2 := fndNdS(fnX3(fnHKY(kappa, nuc_pi)), omega)        # HKY + X3 + dNdS,
+                                                       #   or HKY*3 + dNdS
+
+er ~ dnDirichlet( v(1,1,1,1,1,1) )
+Q3 := fndNdS(fnX3(fnGTR(er, nuc_pi)), omega)         # GTR + X3 + dNdS)");
+	help_strings[string("fndNdS")][string("name")] = string(R"(fndNdS)");
+	help_references[string("fndNdS")].push_back(RbHelpReference(R"(Redelings, BD (2021). BAli-Phy version 3: Model-based co-estimation of Alignment and Phylogeny.  Bioinformatics (2021) 37(10):3032–3034.)",R"(https://doi.org/10.1093/bioinformatics/btab129)",R"()"));
+	help_arrays[string("fndNdS")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K, fnX3, fnMutSel)"));
+	help_strings[string("fndNdS")][string("title")] = string(R"(Add a dN/dS factor to a codon rate matrix.)");
 	help_strings[string("formatDiscreteCharacterData")][string("name")] = string(R"(formatDiscreteCharacterData)");
 	help_strings[string("gamma")][string("name")] = string(R"(gamma)");
 	help_arrays[string("getOption")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
@@ -1717,6 +1995,16 @@ Variables on [0,infinity) are log-transformed for proposals.)");
 	help_strings[string("mvRandomGeometricWalk")][string("name")] = string(R"(mvRandomGeometricWalk)");
 	help_strings[string("mvRandomIntegerWalk")][string("name")] = string(R"(mvRandomIntegerWalk)");
 	help_strings[string("mvRateAgeBetaShift")][string("name")] = string(R"(mvRateAgeBetaShift)");
+	help_arrays[string("mvResampleFBD")][string("authors")].push_back(string(R"(Walker Pett)"));
+	help_strings[string("mvResampleFBD")][string("description")] = string(R"(This move resamples an oldest occurrence age for a random species in a fossilized birth death process described by `dnFBDRP` or `dnFBDRMatrix`)");
+	help_strings[string("mvResampleFBD")][string("details")] = string(R"(Under the hood, FBD fossil data is augmented with oldest occurrence ages for each species, which are automatically marginalized during when the model is sampled using MCMC. These ages can also be resampled manually using this move.)");
+	help_strings[string("mvResampleFBD")][string("example")] = string(R"(bd ~ dnFBDRP(lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa, resample=FALSE)
+
+moves.append( mvResampleFBD(bd, weight=taxa.size()) ))");
+	help_strings[string("mvResampleFBD")][string("name")] = string(R"(mvResampleFBD)");
+	help_references[string("mvResampleFBD")].push_back(RbHelpReference(R"(The fossilized birth-death model for the analysis of stratigraphic range data under different speciation modes. Stadler, Tanja et al. Journal of theoretical biology, 447:41-55.)",R"()",R"(https://www.sciencedirect.com/science/article/pii/S002251931830119X )"));
+	help_arrays[string("mvResampleFBD")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRange)"));
+	help_arrays[string("mvResampleFBD")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRangeMatrix)"));
 	help_strings[string("mvRootTimeScaleBactrian")][string("name")] = string(R"(mvRootTimeScaleBactrian)");
 	help_strings[string("mvRootTimeSlideUniform")][string("name")] = string(R"(mvRootTimeSlideUniform)");
 	help_strings[string("mvSPR")][string("name")] = string(R"(mvSPR)");

@@ -327,7 +327,7 @@ void Dist_TimeVaryingStateDependentSpeciationExtinctionProcess::setConstParamete
     {
         extinction_rates = var;
     }
-    else if ( name == "psi" || name == "phi" || name == "psi/phi" )
+    else if ( name == "psi" || name == "phi" )
     {
         phi = var;
     }

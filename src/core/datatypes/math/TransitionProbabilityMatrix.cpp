@@ -54,6 +54,11 @@ TransitionProbabilityMatrix::TransitionProbabilityMatrix( const TransitionProbab
     
 }
 
+TransitionProbabilityMatrix::TransitionProbabilityMatrix( TransitionProbabilityMatrix &&tpm )
+{
+    operator=( std::move(tpm) );
+}
+
 
 TransitionProbabilityMatrix::~TransitionProbabilityMatrix()
 {
@@ -79,6 +84,17 @@ TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator=( const Trans
         }
     }
     
+    return *this;
+}
+
+
+/** Construct rate matrix with n states */
+TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator=( TransitionProbabilityMatrix &&tpm )
+{
+    std::swap( nElements , tpm.nElements );
+    std::swap( num_states , tpm.num_states );
+    std::swap( theMatrix, tpm.theMatrix );
+
     return *this;
 }
 

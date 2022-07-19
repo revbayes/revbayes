@@ -70,10 +70,13 @@ void RbException::print(std::ostream &o) const
     o << error_type << ":\t" << message;
 }
 
-void RbException::setMessage(std::string msg)
+void RbException::setMessage(const std::string& msg)
 {
-
     message = msg;
 }
 
 
+void RbException::prepend(const std::string& prefix)
+{
+    message = prefix + message;
+}

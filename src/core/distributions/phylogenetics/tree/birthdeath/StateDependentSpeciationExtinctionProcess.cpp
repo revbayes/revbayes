@@ -353,8 +353,12 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
                 throw RbException("Either a global sampling fraction or state-specific sampling fraction needs to be set.");
             }
 
-            if (phi != NULL && node.isFossil())
+            if ( node.isFossil() )
             {
+                if ( phi == NULL )
+                {
+                    throw(RbException("Tree has serially sampled tips, but no serial sampling rate was provided."));
+                }
                 sampling = phi->getValue();
                 extinction = pExtinction(0.0, node.getAge());
             }
