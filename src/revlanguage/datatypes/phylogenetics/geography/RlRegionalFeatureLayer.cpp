@@ -91,23 +91,33 @@ RevPtr<RevVariable> RlRegionalFeatureLayer::executeMethod(std::string const &nam
         std::string type = layer.getFeatureType();
         
         if (relationship == "within" && type == "categorical") {
-            RevBayesCore::RbVector<long> val = layer.getWithinCategoricalFeatures();
-            const ModelVector<Natural>& x = static_cast<const ModelVector<Natural>&>(val);
-            return new RevVariable( new ModelVector<Natural>( x ) );
+            std::vector<std::vector<double> > val = layer.getFeatureValues();
+            RevBayesCore::RbVector<RevBayesCore::RbVector<long> > z(1);
+            for (size_t i = 0; i < val[0].size(); i++) {
+                z[0].push_back((long)val[0][i]);
+            }
+            return new RevVariable( new ModelVector<ModelVector<Natural> >( z ) );
+            
         } else if (relationship == "within" && type == "quantitative") {
-            RevBayesCore::RbVector<double> val = layer.getWithinQuantitativeFeatures();
-            const ModelVector<Real>& x = static_cast<const ModelVector<Real>&>(val);
-            return new RevVariable( new ModelVector<Real>( x ) );
+            std::vector<std::vector<double> > val = layer.getFeatureValues();
+            RevBayesCore::RbVector<RevBayesCore::RbVector<double> > z(1);
+            for (size_t i = 0; i < val[0].size(); i++) {
+                z[0].push_back((double)val[0][i]);
+            }
+            return new RevVariable( new ModelVector<ModelVector<Real> >( z ) );
         } else if (relationship == "between" && type == "categorical") {
-            std::vector<std::vector<long> > val = layer.getBetweenCategoricalFeatures();
+            std::vector<std::vector<double> > val = layer.getFeatureValues();
             RevBayesCore::RbVector<RevBayesCore::RbVector<long> > z;
             for (size_t i = 0; i < val.size(); i++) {
-                z.push_back(val[i]);
+                z.push_back(RevBayesCore::RbVector<long>());
+                for (size_t j = 0; j < val[i].size(); j++) {
+                    z[i].push_back((long)val[i][j]);
+                }
             }
             const ModelVector<ModelVector<Natural> >& x = static_cast<const ModelVector<ModelVector<Natural> >&>(z);
             return new RevVariable( new ModelVector<ModelVector<Natural> >( x ) );
         } else if (relationship == "between" && type == "quantitative") {
-            std::vector<std::vector<double> > val = layer.getBetweenQuantitativeFeatures();
+            std::vector<std::vector<double> > val = layer.getFeatureValues();
             RevBayesCore::RbVector<RevBayesCore::RbVector<double> > z;
             for (size_t i = 0; i < val.size(); i++) {
                 z.push_back(val[i]);

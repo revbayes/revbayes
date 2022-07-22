@@ -33,28 +33,33 @@ RegionalFeatureLayer::RegionalFeatureLayer(size_t ti, size_t fi, std::string fr,
 RegionalFeatureLayer::RegionalFeatureLayer(const RegionalFeatureLayer& g)
 {
     if (this != &g) {
-        feature_type = g.feature_type;
-        feature_relationship = g.feature_relationship;
-        feature_index = g.feature_index;
         time_index = g.time_index;
-        within_categorical = g.within_categorical;
-        within_quantitative = g.within_quantitative;
-        between_categorical = g.between_categorical;
-        between_quantitative = g.between_quantitative;
+        feature_index = g.feature_index;
+        feature_relationship = g.feature_relationship;
+        feature_type = g.feature_type;
+        feature_values = g.feature_values;
+        
+        // delete...
+//        within_categorical = g.within_categorical;
+//        within_quantitative = g.within_quantitative;
+//        between_categorical = g.between_categorical;
+//        between_quantitative = g.between_quantitative;
+        
     }
 }
 
 RegionalFeatureLayer& RegionalFeatureLayer::operator=(const RegionalFeatureLayer &g)
 {
     if (this != &g) {
-        feature_type = g.feature_type;
-        feature_relationship = g.feature_relationship;
-        feature_index = g.feature_index;
         time_index = g.time_index;
-        within_categorical = g.within_categorical;
-        within_quantitative = g.within_quantitative;
-        between_categorical = g.between_categorical;
-        between_quantitative = g.between_quantitative;
+        feature_index = g.feature_index;
+        feature_relationship = g.feature_relationship;
+        feature_type = g.feature_type;
+        feature_values = g.feature_values;
+//        within_categorical = g.within_categorical;
+//        within_quantitative = g.within_quantitative;
+//        between_categorical = g.between_categorical;
+//        between_quantitative = g.between_quantitative;
     }
     
     return *this;
@@ -158,27 +163,30 @@ bool RegionalFeatureLayer::operator>=(const RevBayesCore::RegionalFeatureLayer &
     return operator>(t) || operator==(t);
 }
 
+//std::vector<long> RegionalFeatureLayer::getWithinCategoricalFeatures(void) const
+//{
+//    return within_categorical;
+//}
+//
+//std::vector<double> RegionalFeatureLayer::getWithinQuantitativeFeatures(void) const
+//{
+//    return within_quantitative;
+//}
+//
+//std::vector<std::vector<long> > RegionalFeatureLayer::getBetweenCategoricalFeatures(void) const
+//{
+//    return between_categorical;
+//}
+//
+//std::vector<std::vector<double> > RegionalFeatureLayer::getBetweenQuantitativeFeatures(void) const
+//{
+//    return between_quantitative;
+//}
 
-std::vector<long> RegionalFeatureLayer::getWithinCategoricalFeatures(void) const
+std::vector<std::vector<double> > RegionalFeatureLayer::getFeatureValues(void) const
 {
-    return within_categorical;
+    return feature_values;
 }
-
-std::vector<double> RegionalFeatureLayer::getWithinQuantitativeFeatures(void) const
-{
-    return within_quantitative;
-}
-
-std::vector<std::vector<long> > RegionalFeatureLayer::getBetweenCategoricalFeatures(void) const
-{
-    return between_categorical;
-}
-
-std::vector<std::vector<double> > RegionalFeatureLayer::getBetweenQuantitativeFeatures(void) const
-{
-    return between_quantitative;
-}
-
 
 size_t RegionalFeatureLayer::getTimeIndex(void) const
 {
@@ -201,24 +209,24 @@ std::string RegionalFeatureLayer::getFeatureRelationship(void) const
 }
 
 
-void RegionalFeatureLayer::setFeatures(std::vector<long> f)
-{
-    within_categorical = f;
-}
-
-void RegionalFeatureLayer::setFeatures(std::vector<double> f)
-{
-    within_quantitative = f;
-}
-
-void RegionalFeatureLayer::setFeatures(std::vector<std::vector<long> > f)
-{
-    between_categorical = f;
-}
+//void RegionalFeatureLayer::setFeatures(std::vector<long> f)
+//{
+//    within_categorical = f;
+//}
+//
+//void RegionalFeatureLayer::setFeatures(std::vector<double> f)
+//{
+//    within_quantitative = f;
+//}
+//
+//void RegionalFeatureLayer::setFeatures(std::vector<std::vector<long> > f)
+//{
+//    between_categorical = f;
+//}
 
 void RegionalFeatureLayer::setFeatures(std::vector<std::vector<double> > f)
 {
-    between_quantitative = f;
+    feature_values = f;
 }
 
 std::ostream& RevBayesCore::operator<<(std::ostream& o, const RegionalFeatureLayer& x) {
