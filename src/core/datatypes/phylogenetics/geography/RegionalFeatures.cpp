@@ -73,53 +73,75 @@ RegionalFeatures* RegionalFeatures::clone(void) const
 
 void RegionalFeatures::initializeFeatures(void) {
     
+    // how many timeslices
     numTimeslices = withinCategorical.size();
-    numLayers["within"]["categorical"]   = withinCategorical[0].size();
-    numLayers["within"]["quantitative"]  = withinQuantitative[0].size();
-    numLayers["between"]["categorical"]  = betweenCategorical[0].size();
-    numLayers["between"]["quantitative"] = betweenQuantitative[0].size();
+    
+    // how many layers for each relationship/type
+    numLayers["within"]["categorical"] = withinCategorical.begin()->second.size();
+    numLayers["within"]["quantitative"] = withinQuantitative.begin()->second.size();
+    numLayers["between"]["categorical"] = betweenCategorical.begin()->second.size();
+    numLayers["between"]["quantitative"] = betweenQuantitative.begin()->second.size();
     
     for (auto it = withinCategorical.begin(); it != withinCategorical.end(); it++) {
         feature_layers["within"]["categorical"].push_back( std::vector<RegionalFeatureLayer>() );
-        size_t i = it->first - 1;
+        size_t time_index = it->first;
         // loop over time-feature maps
-        for (auto jt = withinCategorical[it->first].begin(); jt != withinCategorical[it->first].end(); jt++) {
-            RegionalFeatureLayer tmp( it->first, jt->first, "within", "categorical" );
-            tmp.setFeatures( withinCategorical[it->first][jt->first] );
-            feature_layers["within"]["categorical"][i].push_back(tmp);
+        for (auto jt = withinCategorical[time_index].begin(); jt != withinCategorical[time_index].end(); jt++) {
+            size_t feature_index = jt->first;
+            RegionalFeatureLayer tmp( time_index, feature_index, "within", "categorical" );
+            std::vector<std::vector<double> > tmp_val;
+            tmp_val.push_back(std::vector<double>());
+            for (size_t i = 0; i < withinCategorical[time_index][feature_index].size(); i++) {
+                tmp_val[0].push_back((double)withinCategorical[time_index][feature_index][i]);
+            }
+            tmp.setFeatures(tmp_val);
+            feature_layers["within"]["categorical"][time_index-1].push_back(tmp);
         }
     }
     
     for (auto it = withinQuantitative.begin(); it != withinQuantitative.end(); it++) {
         feature_layers["within"]["quantitative"].push_back( std::vector<RegionalFeatureLayer>() );
-        size_t i = it->first - 1;
+        size_t time_index = it->first;
         // loop over time-feature maps
-        for (auto jt = withinQuantitative[it->first].begin(); jt != withinQuantitative[it->first].end(); jt++) {
+        for (auto jt = withinQuantitative[time_index].begin(); jt != withinQuantitative[time_index].end(); jt++) {
+            size_t feature_index = jt->first;
             RegionalFeatureLayer tmp( it->first, jt->first, "within", "quantitative" );
-            tmp.setFeatures( withinQuantitative[it->first][jt->first] );
-            feature_layers["within"]["quantitative"][i].push_back(tmp);
+            std::vector<std::vector<double> > tmp_val;
+            tmp_val.push_back( withinQuantitative[time_index][feature_index] );
+            tmp.setFeatures(tmp_val);
+            feature_layers["within"]["quantitative"][time_index-1].push_back(tmp);
         }
     }
     
     for (auto it = betweenCategorical.begin(); it != betweenCategorical.end(); it++) {
         feature_layers["between"]["categorical"].push_back( std::vector<RegionalFeatureLayer>() );
-        size_t i = it->first - 1;
+        size_t time_index = it->first;
         // loop over time-feature maps
-        for (auto jt = betweenCategorical[it->first].begin(); jt != betweenCategorical[it->first].end(); jt++) {
-            RegionalFeatureLayer tmp( it->first, jt->first, "between", "categorical" );
-            tmp.setFeatures( betweenCategorical[it->first][jt->first] );
-            feature_layers["between"]["categorical"][i].push_back(tmp);
+        for (auto jt = betweenCategorical[time_index].begin(); jt != betweenCategorical[time_index].end(); jt++) {
+            size_t feature_index = jt->first;
+            RegionalFeatureLayer tmp(time_index, feature_index, "between", "categorical" );
+            std::vector<std::vector<double> > tmp_val;
+            for (size_t i = 0; i < betweenCategorical[time_index][feature_index].size(); i++) {
+                tmp_val.push_back(std::vector<double>());
+                for (size_t j = 0; j < betweenCategorical[time_index][feature_index][i].size(); j++) {
+                    tmp_val[i].push_back((double)betweenCategorical[time_index][feature_index][i][j]);
+                }
+            }
+            tmp.setFeatures(tmp_val);
+            feature_layers["between"]["categorical"][time_index-1].push_back(tmp);
         }
     }
     
     for (auto it = betweenQuantitative.begin(); it != betweenQuantitative.end(); it++) {
         feature_layers["between"]["quantitative"].push_back( std::vector<RegionalFeatureLayer>() );
-        size_t i = it->first - 1;
+        size_t time_index = it->first;
         // loop over time-feature maps
-        for (auto jt = betweenQuantitative[it->first].begin(); jt != betweenQuantitative[it->first].end(); jt++) {
-            RegionalFeatureLayer tmp( it->first, jt->first, "between", "quantitative" );
-            tmp.setFeatures( betweenQuantitative[it->first][jt->first] );
-            feature_layers["between"]["quantitative"][i].push_back(tmp);
+        for (auto jt = betweenQuantitative[time_index].begin(); jt != betweenQuantitative[time_index].end(); jt++) {
+            size_t feature_index = jt->first;
+            RegionalFeatureLayer tmp(time_index, feature_index, "between", "quantitative" );
+            std::vector<std::vector<double> > tmp_val = betweenQuantitative[time_index][feature_index];
+            tmp.setFeatures(tmp_val);
+            feature_layers["between"]["quantitative"][time_index-1].push_back(tmp);
         }
     }
     
@@ -130,31 +152,40 @@ void RegionalFeatures::initializeFeatures(void) {
 }
 
 void RegionalFeatures::normalizeWithinQuantitative(void) {
+    
     double m = 0.0;
     size_t n_elem = 0;
     
-    // get product for geometric mean
+    // collect values to compute mean
     for (auto it = withinQuantitative.begin(); it != withinQuantitative.end(); it++) {
-        size_t i = it->first - 1;
-        for (auto jt = withinQuantitative[it->first].begin(); jt != withinQuantitative[it->first].end(); jt++) {
-            size_t j = jt->first - 1;
-            std::vector<double> v = feature_layers["within"]["quantitative"][i][j].getWithinQuantitativeFeatures();
-            for (size_t a = 0; a < v.size(); a++) {
-                if (v[a] > 0) {
-                    m += v[a];
+        size_t time_index = it->first;
+        size_t i = time_index - 1;
+        for (auto jt = withinQuantitative[time_index].begin(); jt != withinQuantitative[time_index].end(); jt++) {
+            size_t feature_index = jt->first;
+            size_t j = feature_index - 1;
+            std::vector<std::vector<double> > v = feature_layers["within"]["quantitative"][i][j].getFeatureValues();
+            for (size_t a = 0; a < v[0].size(); a++) {
+                if (v[0][a] != 0) {
+                    m += v[0][a];
                     n_elem += 1;
                 }
             }
         }
     }
+    
+    // compute the mean
     double z = m / n_elem;
+    
+    // normalize all values
     for (auto it = withinQuantitative.begin(); it != withinQuantitative.end(); it++) {
-        size_t i = it->first - 1;
-        for (auto jt = withinQuantitative[it->first].begin(); jt != withinQuantitative[it->first].end(); jt++) {
-            size_t j = jt->first - 1;
-            std::vector<double> v = feature_layers["within"]["quantitative"][i][j].getWithinQuantitativeFeatures();
-            for (size_t a = 0; a < v.size(); a++) {
-                v[a] = v[a] / z;;
+        size_t time_index = it->first;
+        size_t i = time_index - 1;
+        for (auto jt = withinQuantitative[time_index].begin(); jt != withinQuantitative[time_index].end(); jt++) {
+            size_t feature_index = jt->first;
+            size_t j = feature_index - 1;
+            std::vector<std::vector<double> > v = feature_layers["within"]["quantitative"][i][j].getFeatureValues();
+            for (size_t a = 0; a < v[0].size(); a++) {
+                v[0][a] = v[0][a] / z;
             }
             feature_layers["within"]["quantitative"][i][j].setFeatures(v);
         }
@@ -166,38 +197,45 @@ void RegionalFeatures::normalizeBetweenQuantitative(void) {
     double m = 0.0;
     size_t n_elem = 0;
     
-    // get product for geometric mean
+    // collect values to compute mean
     for (auto it = betweenQuantitative.begin(); it != betweenQuantitative.end(); it++) {
-        size_t i = it->first - 1;
-        for (auto jt = betweenQuantitative[it->first].begin(); jt != betweenQuantitative[it->first].end(); jt++) {
-            size_t j = jt->first - 1;
-            std::vector<std::vector<double> > v = feature_layers["between"]["quantitative"][i][j].getBetweenQuantitativeFeatures();
+        size_t time_index = it->first;
+        size_t i = time_index - 1;
+        for (auto jt = betweenQuantitative[time_index].begin(); jt != betweenQuantitative[time_index].end(); jt++) {
+            size_t feature_index = jt->first;
+            size_t j = feature_index - 1;
+            std::vector<std::vector<double> > v = feature_layers["between"]["quantitative"][i][j].getFeatureValues();
             for (size_t a = 0; a < v.size(); a++) {
                 for (size_t b = 0; b < v[a].size(); b++) {
-                    if (a != b && v[a][b] > 0) {
-                        m += v[a][b];
+                    if (v[a][b] != 0 && a != b) {
+                        m += v[0][a];
                         n_elem += 1;
                     }
                 }
             }
         }
     }
+    
+    // compute the mean
     double z = m / n_elem;
+    
+    // normalize all values
     for (auto it = betweenQuantitative.begin(); it != betweenQuantitative.end(); it++) {
-        size_t i = it->first - 1;
-        for (auto jt = betweenQuantitative[it->first].begin(); jt != betweenQuantitative[it->first].end(); jt++) {
-            size_t j = jt->first - 1;
-            std::vector<std::vector<double> > v = feature_layers["between"]["quantitative"][i][j].getBetweenQuantitativeFeatures();
+        size_t time_index = it->first;
+        size_t i = time_index - 1;
+        for (auto jt = betweenQuantitative[time_index].begin(); jt != betweenQuantitative[time_index].end(); jt++) {
+            size_t feature_index = jt->first;
+            size_t j = feature_index - 1;
+            std::vector<std::vector<double> > v = feature_layers["between"]["quantitative"][i][j].getFeatureValues();
             for (size_t a = 0; a < v.size(); a++) {
                 for (size_t b = 0; b < v[a].size(); b++) {
-                    if (a != b) {
-                        v[a][b] = v[a][b] / z;
-                    }
+                    v[a][b] = v[a][b] / z;
                 }
             }
             feature_layers["between"]["quantitative"][i][j].setFeatures(v);
         }
     }
+    
     return;
 }
 
