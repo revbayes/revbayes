@@ -57,6 +57,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RbVector<RevBayesCore::RbVector<doubl
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sigma = static_cast<const ModelVector<Real> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* phi = static_cast<const ModelVector<Real> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
     
+    // add error checking
     
     // create P matrix
     RevBayesCore::FeatureInformedRateFunction* f = new RevBayesCore::FeatureInformedRateFunction( cf, qf, sigma, phi );
@@ -77,22 +78,22 @@ const ArgumentRules& Func_featureInformedRates::getArgumentRules( void ) const
         
         argumentRules.push_back( new ArgumentRule( "categoricalFeatures",
                                                   ModelVector<ModelVector<ModelVector<Natural> > >::getClassTypeSpec(),
-                                                  "Categorical regional features.",
+                                                  "Vector of layers for categorical regional features.",
                                                   ArgumentRule::BY_CONSTANT_REFERENCE,
                                                   ArgumentRule::ANY ));
         argumentRules.push_back( new ArgumentRule( "quantitativeFeatures",
                                                   ModelVector<ModelVector<ModelVector<Real> > >::getClassTypeSpec(),
-                                                  "Quantitative regional features.",
+                                                  "Vector of layers for quantitative regional features.",
                                                   ArgumentRule::BY_CONSTANT_REFERENCE,
                                                   ArgumentRule::ANY ));
         argumentRules.push_back( new ArgumentRule( "sigma",
                                                   ModelVector<Real>::getClassTypeSpec(),
-                                                  "Categorical regional features.",
+                                                  "Vector of effect parameters for each categorical feature layer.",
                                                   ArgumentRule::BY_CONSTANT_REFERENCE,
                                                   ArgumentRule::ANY ));
         argumentRules.push_back( new ArgumentRule( "phi",
                                                   ModelVector<Real>::getClassTypeSpec(),
-                                                  "Quantitative regional features.",
+                                                  "Vector of effect parameters for each quantitative feature layer.",
                                                   ArgumentRule::BY_CONSTANT_REFERENCE,
                                                   ArgumentRule::ANY ));
         

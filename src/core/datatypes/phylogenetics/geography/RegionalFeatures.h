@@ -47,10 +47,21 @@ namespace RevBayesCore {
     private:
         void initializeFeatures();
         
+        // [time_index][feature_index][this_region]
         std::map<size_t, std::map<size_t, std::vector<long> > > withinCategorical;
         std::map<size_t, std::map<size_t, std::vector<double> > > withinQuantitative;
+        
+        // example: [cat_or_quant][time_index][feature_index][this_region]
+        // std::vector< std::vector< std::vector< std::vector<double> > > > withinFeatures;
+        
+        // [time_index][feature_index][from_region][to_region]
         std::map<size_t, std::map<size_t, std::vector<std::vector<long> > > > betweenCategorical;
         std::map<size_t, std::map<size_t, std::vector<std::vector<double> > > > betweenQuantitative;
+        
+        // make everything look like this:
+        // std::map<size_t, std::map<size_t, std::vector<std::vector<double> > > >
+        
+        
         
         // relationship, type, time_index, feature_index
         std::map<std::string, std::map<std::string, std::vector< std::vector< RegionalFeatureLayer > > > > feature_layers;
