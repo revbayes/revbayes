@@ -33,6 +33,35 @@
 #include <mpi.h>
 #endif
 
+/*
+ * Round trip statistics are inspired by the paper https://arxiv.org/pdf/cond-mat/0602085.pdf
+ *
+ * 1. The first idea is that simply having good acceptance probabilities for swapping adjacent temperatures is not good enough.
+ *    We need chains to make a round-trip from cold -> hot -> cold.
+ *    But it is possible to have a low rate of making round trips even if we have success swapping between adjacent temperatures.
+ *
+ * 2. The second idea is based on computing the fraction of the time that a chain at temperature j has most recently been at
+         the coldest chain versus the hottest chain.
+ *    The claim is that the fractions should be uniformly spaced.
+ *    For example, if we have 5 chains, then the fraction should be 100% for the cold chain, and then 75%, 50%, 25% and 0%.
+ *    In some cases, geometric heating produces very low round-trip rates, and this is because the fractions are NOT uniformly spaced.
+ *
+ * 3. The third idea is that one scenario where geometric heating works badly is when there is a "phase transition" at temperature T.
+ *    This means that the posterior distribution on one side of T looks very different than the posterior distribution on
+ *        the other side of T.
+ *    This can happen when there are a very large number of low-probability states.
+ *    As the temperature increases, the low-probability states increase in probability, and eventually overwhelm the high-probability
+ *        states because there are so many of the lower-probability states.
+ *    In such a case, we need closely-spaced temperatures near T, because the posterior changes rapidly as T changes.
+ *    However, we can tolerate wider spacing between temperatures further away from T.
+ *
+ * BDR: I worry that diffusion behavior limits the number of round-trips as the number of chains increases.
+ *      By diffusion behavior, I mean that a chain does not always move towards the coldest or hottest chain, but drifts randomly,
+          sometimes stepping away.
+ *      Does a chain take O(N^2) steps to move from cold -> hot, even if the temperatures are well placed?
+ * 
+ */
+
 using namespace RevBayesCore;
 
 Mcmcmc::Mcmcmc(const Model& m, const RbVector<Move> &mv, const RbVector<Monitor> &mn, std::string sT, size_t nc, size_t si, double dt, size_t ntries, bool th, double tht, std::string sm, std::string smo) : MonteCarloSampler( ),
