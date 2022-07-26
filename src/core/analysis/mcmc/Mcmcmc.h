@@ -83,6 +83,7 @@ namespace RevBayesCore {
         void                                    swapNeighborChains(void);
         void                                    swapRandomChains(void);
         void                                    swapGivenChains(int j, int k, double lnProposalRatio = 0.0);
+        void                                    updateTrips(int j);
         void                                    synchronizeValues(bool likelihood_only);
         void                                    synchronizeHeats(void);
         void                                    synchronizeTuningInfo(void);

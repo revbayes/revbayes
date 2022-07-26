@@ -610,6 +610,14 @@ void Mcmcmc::nextCycle(bool advanceCycle)
         }
     }
     
+    for(int i=0;i<num_chains;i++)
+    {
+        int heat_rank = heat_ranks[i];
+        if (chain_prev_boundary[i] == boundary::coldest)
+            heat_visitors[heat_rank].first++;
+        if (chain_prev_boundary[i] == boundary::hottest)
+            heat_visitors[heat_rank].second++;
+    }
 }
 
 
@@ -1576,6 +1584,27 @@ void Mcmcmc::swapRandomChains(void)
     swapGivenChains(j, k);
 }
 
+void Mcmcmc::updateTrips(int j)
+{
+    // The assumption is that we run this right after we have swapped j with another chain.
+    // Therefore heat_ranks[j] is the NEW heat rank for chain j.
+
+    if ( heat_ranks[j] == 0)
+    {
+        if (chain_prev_boundary[j] == boundary::hottest)
+            chain_half_trips[j]++;
+
+        chain_prev_boundary[j] = boundary::coldest;
+    }
+    else if (heat_ranks[j] == int(heat_ranks.size()) - 1)
+    {
+        if (chain_prev_boundary[j] == boundary::coldest)
+            chain_half_trips[j]++;
+
+        chain_prev_boundary[j] = boundary::hottest;
+    }
+}
+
 void Mcmcmc::swapGivenChains(int j, int k, double lnProposalRatio)
 {
     size_t heat_rankj = heat_index_for_chain(j);
@@ -1661,6 +1690,9 @@ void Mcmcmc::swapGivenChains(int j, int k, double lnProposalRatio)
             }
         }
 
+        // Update statistics on round trips (well, half trips) for the swapped chains.
+        updateTrips(j);
+        updateTrips(k);
     }
 
     // update the chains accross processes
