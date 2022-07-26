@@ -56,6 +56,8 @@ namespace RevBayesCore {
         void                                    printMoveSummary(std::ostream &o, size_t chainId, size_t moveId, Move &mv) const;
         void                                    printOperatorSummary(bool current_period);
         void                                    printSwapSummary(std::ostream &o) const;
+        void                                    printTripSummary(std::ostream &o) const;
+        void                                    printHeatSummary(std::ostream &o) const;
         void                                    printSwapSummaryPair(std::ostream &o, const size_t &row, const size_t &col) const;
         void                                    redrawStartingValues(void);                                                     //!< Redraw the starting values.
         void                                    removeMonitors(void);

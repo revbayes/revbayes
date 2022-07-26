@@ -64,6 +64,8 @@
 
 using namespace RevBayesCore;
 
+using std::string;
+
 double Mcmcmc::heat_for_chain(int i) const
 {
     return chain_heats[i];
@@ -772,11 +774,87 @@ void Mcmcmc::printOperatorSummary(bool current_period)
             printSwapSummary(std::cout);
             std::cout << std::endl;
             std::cout.flush();
+
+            printTripSummary(std::cout);
+            std::cout << std::endl;
+            std::cout.flush();
+
+            printHeatSummary(std::cout);
+            std::cout << std::endl;
+            std::cout.flush();
         }
     }
 
 }
 
+
+/**
+ * Print the summary of the move.
+ *
+ * The summary just contains the current value of the tuning parameter.
+ * It is printed to the stream that it passed in.
+ *
+ * \param[in]     o     The stream to which we print the summary.
+ */
+void Mcmcmc::printTripSummary(std::ostream &o) const
+{
+    std::streamsize previousPrecision = o.precision();
+    std::ios_base::fmtflags previousFlags = o.flags();
+
+    o << std::fixed;
+    o << std::setprecision(4);
+
+    o << std::endl;
+    o << "MCMCMC chain round trips |  Number  |  Number/iteration   " << std::endl;
+    o << "=======================================================" << std::endl;
+
+    for (size_t i = 0; i < num_chains; ++i)
+    {
+        // i -> c -> h -> c  -> 2/2 = 1
+        // i -> h -> c -> h  -> 1/2 = 0
+        int round_trips = chain_half_trips[i];
+        if (chain_prev_boundary[i] == boundary::hottest)
+            round_trips--;
+        round_trips /= 2;
+
+        o<<std::setw(25)<<i<<std::setw(11)<<round_trips<<std::setw(19)<<double(round_trips)/(current_generation+burnin_generation)<< std::endl;
+    }
+
+    o.setf(previousFlags);
+    o.precision(previousPrecision);
+}
+
+
+void Mcmcmc::printHeatSummary(std::ostream &o) const
+{
+    std::streamsize previousPrecision = o.precision();
+    std::ios_base::fmtflags previousFlags = o.flags();
+
+    o << std::fixed;
+    o << std::setprecision(4);
+
+    o << std::endl;
+    o << "Heat rank |  Heat  | Temperature | Fraction" << std::endl;
+    o << "===========================================" << std::endl;
+
+    for (size_t i = 0; i < num_chains; ++i)
+    {
+        int c = heat_visitors[i].first;
+        int h = heat_visitors[i].second;
+        double B = heat_for_index(i);
+        double T = 1.0/B;
+        if (c + h > 0)
+        {
+            double fraction = double(c)/(c+h);
+            o<<std::setw(10)<<i<<std::setw(9)<<B<<std::setw(14)<<T<<std::setw(10)<<fraction<<std::endl;
+        }
+        else
+            o<<std::setw(10)<<i<<std::setw(9)<<B<<std::setw(14)<<T<<std::setw(10)<<"NA"<<std::endl;
+    }
+
+    o.setf(previousFlags);
+    o.precision(previousPrecision);
+}
 
 /**
  * Print the summary of the move.
