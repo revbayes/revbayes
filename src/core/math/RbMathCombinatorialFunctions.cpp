@@ -19,6 +19,8 @@
 #include <iostream>
 #include <sstream> // IWYU pragma: keep
 
+#include <boost/math/special_functions/digamma.hpp>
+
 #include "RbConstants.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "RbMathFunctions.h"
@@ -97,28 +99,28 @@ double RbMath::choose(double n, double k)
  * Number of ways to choose 2 elements from k elements
  *
  * \brief Return Kc2 (k choose 2)
- * \param x The x value
+ * \param k The x value
  * \return K choose 2
  */
-int RbMath::kchoose2(int k){
+int RbMath::kchoose2(int k)
+{
 
-//    if (k==0 | k==1 ){
-//        return 0;
-//    }
-//    else if (k==2){
-//        return 1;
-//    }
-//    else{
+    if ( k==0 | k==1 )
+    {
+        return 0;
+    }
+    else
+    {
         return (k*(k-1)/2);
-//    }
+    }
 
 }
 
 /*!
- * This function returns the harmonic number of x=> sum_i=1^x(1/i)
+ * This function returns the harmonic number of x=> sum_i=(1/i)
  *
- * \brief Return sum_i=1^x(1/i)
- * \param x The x value
+ * \brief Return sum_i=(1/i)
+ * \param n The x value
  * \return The harmonic number of x
  */
 double RbMath::harmonicNumber(size_t n)
@@ -156,7 +158,8 @@ double RbMath::factorial(int x)
 /* matching R_D_nonint() in ./dpq.h : */
 #define R_IS_INT(x)	  (fabs((x) - floor((x)+0.5)) <= 1e-7)
 
-double RbMath::lnChoose(double n, double k) {
+double RbMath::lnChoose(double n, double k)
+{
 
     double k0 = k;
     k = floor(k + 0.5);
@@ -189,22 +192,24 @@ double RbMath::lnChoose(double n, double k) {
         }
     /* else non-integer n >= 0 : */
     if (n < k-1)
-        {
+    {
         int s;
         return RbMath::lfastchoose2(n, k, &s);
-        }
+    }
     return RbMath::lfastchoose(n, k);
 }
 
 
-double RbMath::lfastchoose(double n, double k) {
+double RbMath::lfastchoose(double n, double k)
+{
 
     return -log(n + 1.) - RbMath::lnBeta(n - k + 1., k + 1.);
 }
 
 /* mathematically the same:
  less stable typically, but useful if n-k+1 < 0 : */
-double RbMath::lfastchoose2(double n, double k, int *s_choose) {
+double RbMath::lfastchoose2(double n, double k, int *s_choose)
+{
 
     double r = lnGamma_sign(n - k + 1., s_choose);
     return RbMath::lnGamma(n + 1.) - RbMath::lnGamma(k + 1.) - r;
@@ -222,7 +227,8 @@ double RbMath::lfastchoose2(double n, double k, int *s_choose) {
  * \return Returns the natural log of the factorial of n.
  * \throws Does not throw an error.
  */
-double RbMath::lnFactorial(int n) {
+double RbMath::lnFactorial(int n)
+{
 
     if (n == 0)
         return 0;
@@ -235,8 +241,24 @@ double RbMath::lnFactorial(int n) {
     return (n1 + 0.5) * log(n1) - n1 + C0 + r*(C1 + r*r*C3);
 }
 
+/*!
+ * This function returns the harmonic number of x=> sum_i=(1/i)
+ *
+ * \brief Return sum_i=(1/i)
+ * \param n The x value
+ * \return The harmonic number of x
+ */
+double RbMath::fastHarmonicNumber(size_t n)
+{
+    
+    double hm = boost::math::digamma(n+1) - boost::math::digamma(1.0);
+    
+    return (hm);
+}
 
-unsigned long RbMath::stirlingFirst(int n, int k) {
+
+unsigned long RbMath::stirlingFirst(int n, int k)
+{
 	
 	unsigned long r = 0;
 	if (n == k)
@@ -253,7 +275,9 @@ unsigned long RbMath::stirlingFirst(int n, int k) {
 	return r;
 }
 
-int RbMath::stirlingSecond(int n, int k) {
+
+int RbMath::stirlingSecond(int n, int k)
+{
 	
 	int r = 0;
 	if (k > n || k < 0){
@@ -280,7 +304,8 @@ int RbMath::stirlingSecond(int n, int k) {
 	return r;
 }
 
-int RbMath::bell(int n) {
+int RbMath::bell(int n)
+{
 
     int r = 0;
     for (int k = 0; k <= n; k++)
@@ -290,14 +315,16 @@ int RbMath::bell(int n) {
     return r;
 }
 
-double RbMath::lnStirlingFirst(int n, int k) {
+double RbMath::lnStirlingFirst(int n, int k)
+{
 	
 	double r = log(stirlingFirst(n, k));
 	return r;
 }
 
 
-int RbMath::signedStirlingFirst(int n, int k) {
+int RbMath::signedStirlingFirst(int n, int k)
+{
 	int sign = 1;
 	if ((n-k) % 2 == 1)
 		sign = -1;
