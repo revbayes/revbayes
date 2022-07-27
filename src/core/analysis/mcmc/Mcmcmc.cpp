@@ -949,8 +949,28 @@ void Mcmcmc::resetCounters( void )
 }
 
 
-void Mcmcmc::setHeatsInitial(const std::vector<double> &ht)
+void Mcmcmc::setHeatsInitial(const std::vector<double>& ht)
 {
+    // 1. Check that there are num_chains heats.
+    if (ht.size() != num_chains)
+        throw RbException()<<"Heat vector contains "<<ht.size()<<" heats, but there are "<<num_chains<<" chains.";
+
+    // 2. Check that the heats are non-zero
+    for(int i=0; i<int(ht.size()); i++)
+    {
+        if (not (ht[i] > 0.0))
+            throw RbException()<<"Heat "<<i+1<<" is "<<ht[i]<<", but should be > 0";
+    }
+
+    // 3. Check that the heats are sorted with the largest heat first (== smallest temperature first).
+    for(int i=0;i<int(ht.size())-1;i++)
+        if (ht[i] < ht[i+1])
+            throw RbException()<<"Heat "<<i+1<<" ("<<ht[i]<<") should be greater than heat "<<i+2<<" ("<<ht[i+1]<<")";
+
+    // 4. Check that the first heat is 1
+    if (ht[0] != 1.0)
+        throw RbException()<<"Heat 1 should be 1.0 (the cold chain), but is actually "<<ht[0];
+
     heat_temps = ht;
 }
 
