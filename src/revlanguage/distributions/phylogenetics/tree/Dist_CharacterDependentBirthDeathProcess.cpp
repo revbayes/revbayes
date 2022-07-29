@@ -410,7 +410,7 @@ void Dist_CharacterDependentBirthDeathProcess::setConstParameter(const std::stri
     {
         extinction_rates = var;
     }
-    else if ( name == "psi" || name == "phi" || name == "psi/phi" )
+    else if ( name == "psi" || name == "phi" )
     {
         psi = var;
     }

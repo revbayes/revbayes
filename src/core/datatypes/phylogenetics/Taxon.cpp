@@ -9,9 +9,9 @@ using namespace RevBayesCore;
  * Default constructor.
  */
 Taxon::Taxon( void ) :
-    age_range(  ),
     name( "" ),
-    species_name( "" )
+    species_name( "" ),
+    extinct(false)
 {
     
 }
@@ -23,9 +23,9 @@ Taxon::Taxon( void ) :
  * \param[in]    n     The name of the taxon.
  */
 Taxon::Taxon(const std::string &n) :
-    age_range(  ),
     name( n ),
-    species_name( n )
+    species_name( n ),
+    extinct(false)
 {
     
 }
@@ -47,11 +47,6 @@ bool Taxon::operator==(const RevBayesCore::Taxon &t) const
     {
         return false;
     }
-    
-//    if ( age_range != t.age_range)
-//    {
-//        return false;
-//    }
 
     return true;
 }
@@ -131,6 +126,37 @@ bool Taxon::operator>=(const RevBayesCore::Taxon &t) const
 
 
 /**
+ * Add an occurrence age for this taxon, with uncertainty.
+ *
+ * \param[in]    d     The age range.
+ */
+void Taxon::addOccurrence( const TimeInterval &d )
+{
+    occurrences[d]++;
+
+    if ( d.getMax() > age_range.getMax() )
+    {
+        age_range.setMax( d.getMax() );
+    }
+    if ( d.getMin() < age_range.getMin() )
+    {
+        age_range.setMin( d.getMin() );
+    }
+}
+
+
+/**
+ * Get the extinct status flag.
+ *
+ * \return    The flag
+ */
+bool Taxon::isExtinct(void) const
+{
+    return extinct;
+}
+
+
+/**
  * Get the age for this taxon.
  *
  * \return    The age.
@@ -142,13 +168,46 @@ double Taxon::getAge( void ) const
 
 
 /**
- * Get the date info for this taxon.
+ * Get the occurrences for this taxon.
  *
- * \return    The date.
+ * \return    A map of occurrence age ranges to counts.
+ */
+const std::map<TimeInterval, size_t>& Taxon::getOccurrences( void ) const
+{
+    return occurrences;
+}
+
+
+/**
+ * Get the age range for this taxon across all occurrences.
+ *
+ * \return    The age range.
  */
 const TimeInterval& Taxon::getAgeRange( void ) const
 {
     return age_range;
+}
+
+
+/**
+ * Get the max age for this taxon across all occurrences.
+ *
+ * \return    The age.
+ */
+double Taxon::getMaxAge( void ) const
+{
+    return age_range.getMax();
+}
+
+
+/**
+ * Get the min age for this taxon across all occurrences.
+ *
+ * \return    The age.
+ */
+double Taxon::getMinAge( void ) const
+{
+    return age_range.getMin();
 }
 
 
@@ -215,13 +274,24 @@ void Taxon::setAge(double a)
 
 
 /**
- * Set the date info for this taxon.
+ * Set the age range for this taxon.
  *
- * \param[in]    d     The date.
+ * \param[in]    d     The age range.
  */
 void Taxon::setAgeRange( const TimeInterval &d )
 {
     age_range = d;
+}
+
+
+/**
+ * Set the extinct status flag.
+ *
+ * \param[in]    a     The age.
+ */
+void Taxon::setExtinct(bool e)
+{
+    extinct = e;
 }
 
 

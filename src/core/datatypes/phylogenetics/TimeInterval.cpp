@@ -43,6 +43,16 @@ bool TimeInterval::operator!=(const RevBayesCore::TimeInterval &t) const
 
 
 /**
+ * Less than operator. Sort by maximum age.
+ */
+bool TimeInterval::operator<(const RevBayesCore::TimeInterval &t) const
+{
+
+    return max < t.max;
+}
+
+
+/**
  * Get the beginning time of the interval
  */
 double TimeInterval::getMin(void) const

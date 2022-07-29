@@ -10,10 +10,14 @@
 #include "RbException.h"
 #include "RbFileManager.h"
 #include "StringUtilities.h"
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 
 #	ifdef _WIN32
 #include <windows.h>
 #   endif
+
+namespace fs = boost::filesystem;
 
 
 
@@ -122,10 +126,9 @@ double RbSettings::getTolerance( void ) const
 }
 
 
-const std::string& RbSettings::getWorkingDirectory( void ) const
+std::string RbSettings::getWorkingDirectory( void ) const
 {
-    
-    return workingDirectory;
+    return fs::current_path().make_preferred().string();
 }
 
 
@@ -174,27 +177,14 @@ void RbSettings::initializeUserSettings(void)
     char buffer[MAX_DIR_PATH];
     GetModuleFileName( NULL, buffer, MAX_DIR_PATH );
     std::string::size_type pos = std::string( buffer ).find_last_of( "\\/" );
-    workingDirectory = std::string( buffer ).substr( 0, pos);
+    fs::current_path( std::string( buffer ).substr( 0, pos) );
 
 #	else
 
     char cwd[MAX_DIR_PATH+1];
-	if ( getcwd(cwd, MAX_DIR_PATH+1) )
+    if ( getcwd(cwd, MAX_DIR_PATH+1) )
     {
-        std::string pathSeparator = "/";
-        
-        std::string curdir = cwd;
-        
-        if ( curdir.at( curdir.length()-1 ) == pathSeparator[0] )
-        {
-            curdir.erase( curdir.length()-1 );
-        }
-        
-        workingDirectory = curdir;
-	}
-    else
-    {
-        workingDirectory = "";
+        fs::current_path( cwd );
     }
     
 #   endif
@@ -361,15 +351,16 @@ void RbSettings::setTolerance(double t)
 
 void RbSettings::setWorkingDirectory(const std::string &wd)
 {
-    
-    RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager( wd );
-    
-    if ( !fm.isDirectory() )
+    try
     {
-        throw RbException("Cannot set the current directory to '" + wd + "'.");
+        RevBayesCore::RbFileManager fm;
+        std::string wd2 = fm.expandUserDir(wd);
+        fs::current_path( wd2 );
     }
-    
-    workingDirectory = fm.getFullFilePath();
+    catch (...)
+    {
+        throw RbException()<<"Cannot set the current directory to \""<<wd<<"\"";
+    }
     
     // save the current settings for the future.
     writeUserSettings();
