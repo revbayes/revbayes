@@ -41,7 +41,7 @@ template <class valueType> class TypedDagNode;
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;
 
     private:
-        void                                                calculateExpectedSFS(void) const;
+        bool                                                calculateExpectedSFS(void) const;
         RbVector<double>                                    computeTimeBreakpoints(void) const;
         void                                                initialize(void);
         
