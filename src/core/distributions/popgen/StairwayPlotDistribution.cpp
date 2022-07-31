@@ -39,7 +39,7 @@ StairwayPlotDistribution::~StairwayPlotDistribution( void )
 }
 
 
-void StairwayPlotDistribution::calculateExpectedSFS(void) const
+bool StairwayPlotDistribution::calculateExpectedSFS(void) const
 {
     // get the thetas for easier handling
     const RbVector<double>& th = theta->getValue();
@@ -54,6 +54,11 @@ void StairwayPlotDistribution::calculateExpectedSFS(void) const
         {
             double this_theta = th[k-2];
             expected_frequency += this_theta * prob_k[i-1][k-2];
+//            expected_frequency +=  exp( log(this_theta ) +
+//                                        RbMath::lnGamma(num_individuals-i) +
+//                                        RbMath::lnGamma(num_individuals-k+1) -
+//                                        RbMath::lnGamma(num_individuals) -
+//                                        RbMath::lnGamma(num_individuals-i-k+2) );
         }
         
         // add the current expected frequency to our sum
@@ -65,14 +70,23 @@ void StairwayPlotDistribution::calculateExpectedSFS(void) const
         // maybe store the log value too???
     }
     
+    // return false that the likelihood should be -Inf
+    if ( sum_expected_frequency > 1 )
+    {
+        return false;
+    }
+    
     // now normalize
     for (size_t i=1; i<num_individuals; ++i)
     {
         expected_SFS[i] /= sum_expected_frequency;
     }
     
-//    // now also store the probability for the monorphic sites
+    // now also store the probability for the monorphic sites
 //    expected_SFS[0] = 1.0 - sum_expected_frequency;
+    
+    // return that our expected frequencies worked
+    return true;
 }
 
 
@@ -93,7 +107,11 @@ double StairwayPlotDistribution::computeLnProbability( void )
     const RbVector<long>& obs_sfs_counts = *value;
 
     // compute the expected SFS, i.e., the expected frequency of observing a site with frequency i
-    calculateExpectedSFS();
+    bool success = calculateExpectedSFS();
+    if ( success == false )
+    {
+        return RbConstants::Double::neginf;
+    }
     
     size_t max_freq = num_individuals;
     if ( folded == true )
