@@ -57,11 +57,6 @@ bool StairwayPlotDistribution::calculateExpectedSFS(void) const
         {
             double this_theta = th[k-2];
             expected_frequency += this_theta * prob_k[i-1][k-2];
-//            expected_frequency +=  exp( log(this_theta ) +
-//                                        RbMath::lnGamma(num_individuals-i) +
-//                                        RbMath::lnGamma(num_individuals-k+1) -
-//                                        RbMath::lnGamma(num_individuals) -
-//                                        RbMath::lnGamma(num_individuals-i-k+2) );
         }
         
         // add the current expected frequency to our sum
@@ -130,6 +125,7 @@ double StairwayPlotDistribution::computeLnProbability( void )
     // compute the probability of no mutation, i.e., the monorphic frequency
     double p_monomorphic = RbStatistics::Poisson::lnPdf(TL, 0);
     double p_biallelic   = RbStatistics::Poisson::lnPdf(TL, 1);
+    p_biallelic = 0.0;
     
     size_t max_freq = num_individuals;
     if ( folded == true )
@@ -137,8 +133,8 @@ double StairwayPlotDistribution::computeLnProbability( void )
         max_freq = ceil( (num_individuals+1) / 2.0);
     }
     
-    ln_prob -= RbMath::lnGamma((double)obs_sfs_counts[0] + 1.0);
-    ln_prob += (double)obs_sfs_counts[0] * p_monomorphic;
+//    ln_prob -= RbMath::lnGamma((double)obs_sfs_counts[0] + 1.0);
+//    ln_prob += (double)obs_sfs_counts[0] * p_monomorphic;
     
     // Sebastian: Note, we cannot compute the frequency for monomorphic sites.
     for (size_t i=1; i<max_freq; ++i)
