@@ -36,7 +36,7 @@ CoalescentSFSSimulator* CoalescentSFSSimulator::clone( void ) const
 RbVector<long>* CoalescentSFSSimulator::simulateSFS( long sample_size, long reps ) const
 {
     
-    RbVector<long>* tpv = new RbVector<long>(sample_size+1);
+    RbVector<long>* sfs = new RbVector<long>(sample_size+1);
     
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
@@ -66,7 +66,6 @@ RbVector<long>* CoalescentSFSSimulator::simulateSFS( long sample_size, long reps
     // Print progress bar (68 characters wide)
     progress.start();
     
-    std::vector<long>   counts  = std::vector<long>(sample_size+1, 0);
     std::vector<double> ages    = std::vector<double>(2*sample_size-1, 0);
     std::vector<size_t> parents = std::vector<size_t>(2*sample_size-1, -1);
     std::vector<std::vector<size_t> > children = std::vector<std::vector<size_t> >(2*sample_size-1, std::vector<size_t>(2,-1));
@@ -126,6 +125,9 @@ RbVector<long>* CoalescentSFSSimulator::simulateSFS( long sample_size, long reps
             
             // increase the index to the next parent
             next_parent++;
+            
+            // set the current time to the latest event
+            current_time = next_coalescent_time;
         }
         
         // now simulate the mutation
@@ -139,7 +141,7 @@ RbVector<long>* CoalescentSFSSimulator::simulateSFS( long sample_size, long reps
             obs_state += tip_state[tip];
         }
         
-        ++counts[obs_state];
+        ++(*sfs)[obs_state];
         
         progress.update(r);
     }
@@ -150,28 +152,28 @@ RbVector<long>* CoalescentSFSSimulator::simulateSFS( long sample_size, long reps
     MPI_Barrier( MPI_COMM_WORLD );
     
     // create a copy of the transition probability matrix
-    RbVector<long> tpv_backup = RbVector<long>( *tpv );
+    RbVector<long> sfs_backup = RbVector<long>( *sfs );
 
     // we only need to send message if there is more than one process
     if ( num_processes > 1 )
     {
-        std::vector< long > this_tpv_row = std::vector<long>(population_size+1,0.0);
+        std::vector< long > this_sfs = std::vector<long>(population_size+1,0.0);
 
         for (size_t i=active_PID; i<active_PID+num_processes; ++i)
         {
             
             if ( pid == i )
             {
-                this_tpv_row = tpv_backup;
+                this_sfs = tpv_sfs;
             }
                 
-            MPI_Bcast(&this_tpv_row[0], population_size+1, MPI_INT, pid, MPI_COMM_WORLD);
+            MPI_Bcast(&this_sfs[0], population_size+1, MPI_INT, pid, MPI_COMM_WORLD);
                 
             if ( pid != i )
             {
                 for ( size_t k=0; k<=population_size; ++k )
                 {
-                    (*tpv)[k] += this_tpv_row[k];
+                    (*sfs)[k] += this_sfs[k];
                 }
             } // end-if non-sending process to add the transition probabilities
             
@@ -181,7 +183,7 @@ RbVector<long>* CoalescentSFSSimulator::simulateSFS( long sample_size, long reps
 #endif
 
     
-    return tpv;
+    return sfs;
 }
 
 double CoalescentSFSSimulator::simulateCoalescentTime(double current_age, size_t num_active, RandomNumberGenerator *rng) const
