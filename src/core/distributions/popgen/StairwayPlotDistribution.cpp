@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 
+#include "DistributionPoisson.h"
 #include "RandomNumberFactory.h"
 #include "RbMathFunctions.h"
 #include "Cloneable.h"
@@ -18,6 +19,7 @@ using namespace RevBayesCore;
  */
 
 StairwayPlotDistribution::StairwayPlotDistribution(const TypedDagNode< RbVector<double> > *th, long n, long n_ind, bool f) : TypedDistribution< RbVector<long> >( new RbVector<long>() ),
+//    mu( m ),
     theta( th ),
     num_sites( n ),
     folded( f ),
@@ -26,6 +28,7 @@ StairwayPlotDistribution::StairwayPlotDistribution(const TypedDagNode< RbVector<
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
     // this will also ensure that the parameters are not getting deleted before we do
+//    addParameter( mu );
     addParameter( theta );
     
     initialize();
@@ -61,8 +64,6 @@ void StairwayPlotDistribution::calculateExpectedSFS(void) const
         
         // store the value of the expected frequency
         expected_SFS[i] = expected_frequency;
-        
-        // maybe store the log value too???
     }
     
     // now normalize
@@ -91,15 +92,35 @@ double StairwayPlotDistribution::computeLnProbability( void )
     
     // get the data, i.e., the observed counts for the frequencies
     const RbVector<long>& obs_sfs_counts = *value;
+    
+//    // the mutation rate
+//    double mutation_rate = mu->getValue();
+    
+    // get the thetas for easier handling
+    const RbVector<double>& th = theta->getValue();
 
     // compute the expected SFS, i.e., the expected frequency of observing a site with frequency i
     calculateExpectedSFS();
+    
+    // compute the total (expected) tree length
+    double TL = 0.0;
+    for (size_t k=2; k<=num_individuals; ++k)
+    {
+        TL += th[k-2]/(k-1);
+    }
+    
+    // compute the probability of no mutation, i.e., the monorphic frequency
+    double p_monomorphic = RbStatistics::Poisson::lnPdf(TL, 0);
+    double p_biallelic   = RbStatistics::Poisson::lnPdf(TL, 1);
     
     size_t max_freq = num_individuals;
     if ( folded == true )
     {
         max_freq = ceil( (num_individuals+1) / 2.0);
     }
+    
+    ln_prob -= RbMath::lnGamma((double)obs_sfs_counts[0] + 1.0);
+    ln_prob += (double)obs_sfs_counts[0] * p_monomorphic;
     
     // Sebastian: Note, we cannot compute the frequency for monomorphic sites.
     for (size_t i=1; i<max_freq; ++i)
@@ -109,18 +130,18 @@ double StairwayPlotDistribution::computeLnProbability( void )
         if ( folded == false )
         {
             ln_prob -= RbMath::lnGamma((double)obs_sfs_counts[i] + 1.0);
-            ln_prob += (double)obs_sfs_counts[i] * log(expected_SFS[i]);
+            ln_prob += (double)obs_sfs_counts[i] * ( log(expected_SFS[i]) + p_biallelic );
         }
         else
         {
             ln_prob -= RbMath::lnGamma((double)obs_sfs_counts[i] + 1.0);
             if ( i == (num_individuals/2.0) )
             {
-                ln_prob += (double)obs_sfs_counts[i] * log(expected_SFS[i]);
+                ln_prob += (double)obs_sfs_counts[i] * ( log(expected_SFS[i]) + p_biallelic );
             }
             else
             {
-                ln_prob += (double)obs_sfs_counts[i] * log(expected_SFS[i]+expected_SFS[num_individuals-i+1]);
+                ln_prob += (double)obs_sfs_counts[i] * ( log(expected_SFS[i]+expected_SFS[num_individuals-i+1]) + p_biallelic );
             }
         }
     }
@@ -208,5 +229,9 @@ void StairwayPlotDistribution::swapParameterInternal(const DagNode *oldP, const 
     {
         theta = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
+//    if (oldP == mu)
+//    {
+//        mu = static_cast<const TypedDagNode< double >* >( newP );
+//    }
     
 }

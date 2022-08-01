@@ -46,6 +46,7 @@ template <class valueType> class TypedDagNode;
         void                                                initialize(void);
         
         // members
+//        const TypedDagNode< double >*                       mu;
         const TypedDagNode< RbVector<double> >*             theta;
         long                                                num_sites;
         bool                                                folded;
