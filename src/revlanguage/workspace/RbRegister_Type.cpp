@@ -69,6 +69,7 @@
 /* Container types (in folder "distributions/phylogenetics") */
 
 /* Evolution types (in folder "datatypes/phylogenetics") */
+#include "RlCoalescentSFSSimulator.h"
 
 /* Character state types (in folder "datatypes/phylogenetics/character") */
 
@@ -162,6 +163,10 @@ void RevLanguage::Workspace::initializeTypeGlobalWorkspace(void)
         addType( new MaxTimeStoppingRule()                       );
         addType( new MinEssStoppingRule()                        );
         addType( new StationarityStoppingRule()                  );
+        
+        
+        /* Add types (in folder "datatypes/phylogenetics") (alphabetic order) */
+        addType( new CoalescentSFSSimulator()                    );
 
     }
     catch(RbException& rbException)
