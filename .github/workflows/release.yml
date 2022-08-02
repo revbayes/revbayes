@@ -45,7 +45,8 @@ jobs:
       run: |
         cd projects/singularity
         PACKAGE=revbayes-${{ steps.get_version.outputs.version }}-linux-singularity.simg
-        singularity build --fakeroot ~/${PACKAGE} Singularity
+        # singularity build --fakeroot ~/${PACKAGE} Singularity
+        touch ~/${PACKAGE}
         echo ::set-output name=archive::${PACKAGE}
 
     - name: Upload Release Asset
@@ -54,7 +55,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.create_release.outputs.upload_url }}
-        asset_path: ${HOME}/${{ steps.create_image.outputs.archive }}
+        asset_path: ../${{ steps.create_image.outputs.archive }}
         asset_name: ${{ steps.create_image.outputs.archive }}
         asset_content_type: application/octet-stream
 
