@@ -73,13 +73,13 @@ bool StairwayPlotDistribution::calculateExpectedSFS(void) const
     }
     
     // now normalize
-    for (size_t i=1; i<num_individuals; ++i)
-    {
-        expected_SFS[i] /= sum_expected_frequency;
-    }
+//    for (size_t i=1; i<num_individuals; ++i)
+//    {
+//        expected_SFS[i] /= sum_expected_frequency;
+//    }
     
     // now also store the probability for the monorphic sites
-//    expected_SFS[0] = 1.0 - sum_expected_frequency;
+    expected_SFS[0] = 1.0 - sum_expected_frequency;
     
     // return that our expected frequencies worked
     return true;
@@ -134,7 +134,9 @@ double StairwayPlotDistribution::computeLnProbability( void )
     }
     
 //    ln_prob -= RbMath::lnGamma((double)obs_sfs_counts[0] + 1.0);
-//    ln_prob += (double)obs_sfs_counts[0] * p_monomorphic;
+    ln_prob += (double)obs_sfs_counts[0] * p_monomorphic;
+    
+//    ln_prob += (double)obs_sfs_counts[0] * log(expected_SFS[0]);
     
     // Sebastian: Note, we cannot compute the frequency for monomorphic sites.
     for (size_t i=1; i<max_freq; ++i)
@@ -143,12 +145,12 @@ double StairwayPlotDistribution::computeLnProbability( void )
         // compute the multinomial probability for the SFS frequency
         if ( folded == false )
         {
-            ln_prob -= RbMath::lnGamma((double)obs_sfs_counts[i] + 1.0);
+//            ln_prob -= RbMath::lnGamma((double)obs_sfs_counts[i] + 1.0);
             ln_prob += (double)obs_sfs_counts[i] * ( log(expected_SFS[i]) + p_biallelic );
         }
         else
         {
-            ln_prob -= RbMath::lnGamma((double)obs_sfs_counts[i] + 1.0);
+//            ln_prob -= RbMath::lnGamma((double)obs_sfs_counts[i] + 1.0);
             if ( i == (num_individuals/2.0) )
             {
                 ln_prob += (double)obs_sfs_counts[i] * ( log(expected_SFS[i]) + p_biallelic );
@@ -161,8 +163,7 @@ double StairwayPlotDistribution::computeLnProbability( void )
     }
     
     // divide by the factorial of the total number of observation
-//    ln_prob -= RbMath::lnGamma((double)num_sites->getValue() + 1.0);
-    ln_prob -= ln_factorial_num_sites;
+//    ln_prob -= ln_factorial_num_sites;
 
     
     return ln_prob;
