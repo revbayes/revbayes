@@ -16,12 +16,18 @@
 
 using namespace RevBayesCore;
 
-CoalescentSFSSimulator::CoalescentSFSSimulator(const std::vector<double>& p, const std::vector<double>& cp, double gt, double mr) :
+CoalescentSFSSimulator::CoalescentSFSSimulator(const std::vector<double>& p, const std::vector<double>& cp, double gt, double mr, const std::string& ploidy) :
 population_sizes( p ),
 change_points( cp ),
 generation_time( gt ),
-mutation_rate( mr )
+mutation_rate( mr ),
+ploidy_factor( 1.0 )
 {
+    
+    if ( ploidy == "diploid" )
+    {
+        ploidy_factor = 2.0;
+    }
     
 }
 
@@ -157,7 +163,7 @@ RbVector<long>* CoalescentSFSSimulator::simulateSFS( long sample_size, long reps
     // we only need to send message if there is more than one process
     if ( num_processes > 1 )
     {
-        std::vector< long > this_sfs = std::vector<long>(population_size+1,0.0);
+        std::vector< long > this_sfs = std::vector<long>(sample_size+1,0.0);
 
         for (size_t i=active_PID; i<active_PID+num_processes; ++i)
         {
@@ -167,11 +173,11 @@ RbVector<long>* CoalescentSFSSimulator::simulateSFS( long sample_size, long reps
                 this_sfs = tpv_sfs;
             }
                 
-            MPI_Bcast(&this_sfs[0], population_size+1, MPI_INT, pid, MPI_COMM_WORLD);
+            MPI_Bcast(&this_sfs[0], sample_size+1, MPI_INT, pid, MPI_COMM_WORLD);
                 
             if ( pid != i )
             {
-                for ( size_t k=0; k<=population_size; ++k )
+                for ( size_t k=0; k<=sample_size; ++k )
                 {
                     (*sfs)[k] += this_sfs[k];
                 }
@@ -201,7 +207,7 @@ double CoalescentSFSSimulator::simulateCoalescentTime(double current_age, size_t
     do
     {
         double num_pairs = num_active * (num_active-1) / 2.0;
-        double theta = population_sizes[current_interval];
+        double theta = population_sizes[current_interval] * ploidy_factor;
         double lambda = num_pairs / theta;
         double u = RbStatistics::Exponential::rv( lambda, *rng);
         coalescent_time += u;

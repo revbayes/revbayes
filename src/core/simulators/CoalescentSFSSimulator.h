@@ -23,7 +23,7 @@ class RandomNumberGenerator;
         
     public:
         
-        CoalescentSFSSimulator(const std::vector<double>& p, const std::vector<double>& cp, double gt, double mr);
+        CoalescentSFSSimulator(const std::vector<double>& p, const std::vector<double>& cp, double gt, double mr, const std::string& pl);
         
         CoalescentSFSSimulator*                         clone(void) const;
         
@@ -38,6 +38,7 @@ class RandomNumberGenerator;
         double                                          mutation_rate;
         std::vector<double>                             population_sizes;
         std::vector<double>                             change_points;
+        double                                          ploidy_factor;
         
         
     };
