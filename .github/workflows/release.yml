@@ -31,12 +31,9 @@ jobs:
     - uses: actions/setup-python@v1
       with:
         python-version: 3.8
-    - name: Install singularity
-      run: |
-        wget -O- http://neuro.debian.net/lists/focal.us-tn.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
-        sudo apt-key adv --recv-keys --keyserver hkps://keyserver.ubuntu.com 0xA5D32F012649A5A9
-        sudo apt-get update
-        sudo apt-get install -y singularity-container
+    - uses: eWaterCycle/setup-singularity@v7
+      with:
+        singularity-version: 3.8.3
 
     - name: Get version
       id: get_version
