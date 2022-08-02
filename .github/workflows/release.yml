@@ -42,6 +42,7 @@ jobs:
 
     - name: Create singularity image
       run: |
+        echo PATH=$PATH
         cd projects/singularity
         PACKAGE=revbayes-${{ steps.get_version.outputs.version }}-linux-singularity.simg
         sudo singularity build ~/${PACKAGE} Singularity
