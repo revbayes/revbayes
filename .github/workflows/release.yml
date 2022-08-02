@@ -47,7 +47,6 @@ jobs:
         cd projects/singularity
         PACKAGE=revbayes-${{ steps.get_version.outputs.version }}-linux-singularity.simg
         singularity build --fakeroot ~/${PACKAGE} Singularity
-#        sudo singularity build ~/${PACKAGE} Singularity
         echo ::set-output name=archive::${PACKAGE}
 
     - name: Upload Release Asset
