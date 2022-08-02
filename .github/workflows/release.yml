@@ -43,7 +43,7 @@ jobs:
     - name: Create singularity image
       run: |
         echo PATH=$PATH
-        ls /opt/hostedtoolcache/singularity/3.8.3/x64/bin
+        ls -la /opt/hostedtoolcache/singularity/3.8.3/x64/bin
         cd projects/singularity
         PACKAGE=revbayes-${{ steps.get_version.outputs.version }}-linux-singularity.simg
         sudo singularity build ~/${PACKAGE} Singularity
