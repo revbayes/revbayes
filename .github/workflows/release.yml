@@ -47,6 +47,8 @@ jobs:
         PACKAGE=revbayes-${{ steps.get_version.outputs.version }}-linux-singularity.simg
         # singularity build --fakeroot ~/${PACKAGE} Singularity
         touch ~/${PACKAGE}
+        ls ~/${PACKAGE}
+        ls ~
         echo ::set-output name=archive::${PACKAGE}
 
     - name: Upload Release Asset
