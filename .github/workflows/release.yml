@@ -51,6 +51,12 @@ jobs:
         ls ~
         echo ::set-output name=archive::${PACKAGE}
 
+    - name: Find singularity
+      run: |
+        pwd
+        ls
+        ls ..
+
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       env:
