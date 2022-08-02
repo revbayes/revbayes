@@ -29,7 +29,7 @@ namespace RevLanguage {
         CoalescentSFSSimulator(void);                                                                                                                  //!< Default constructor
         
         // Basic utility functions
-        virtual CoalescentSFSSimulator*           clone(void) const;                                                                      //!< Clone object
+        virtual CoalescentSFSSimulator*             clone(void) const;                                                                      //!< Clone object
         void                                        constructInternalObject(void);                                                          //!< We construct the a new internal PowerPosterior object.
         static const std::string&                   getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                      getClassTypeSpec(void);                                                                 //!< Get class type spec
@@ -49,6 +49,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                   generation_time;
         RevPtr<const RevVariable>                   mutation_rate;
         RevPtr<const RevVariable>                   population_sizes;
+        RevPtr<const RevVariable>                   ploidy;
         
     };
     

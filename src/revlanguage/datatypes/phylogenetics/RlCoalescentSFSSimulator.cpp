@@ -7,6 +7,7 @@
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Delimiter.h"
+#include "OptionRule.h"
 #include "RevObject.h"
 #include "Real.h"
 #include "RlCoalescentSFSSimulator.h"
@@ -68,8 +69,9 @@ void CoalescentSFSSimulator::constructInternalObject( void )
     std::vector<double> cp  = static_cast<const ModelVector<RealPos> &>( change_points->getRevObject() ).getValue();
     double gt               = static_cast<const RealPos &>( generation_time->getRevObject() ).getValue();
     double mr               = static_cast<const RealPos &>( mutation_rate->getRevObject() ).getValue();
+    const std::string& p    = static_cast<const RlString &>( ploidy->getRevObject() ).getValue();
     
-    value = new RevBayesCore::CoalescentSFSSimulator(ps, cp, gt, mr);
+    value = new RevBayesCore::CoalescentSFSSimulator(ps, cp, gt, mr, p);
 
     
 }
@@ -143,6 +145,12 @@ const MemberRules& CoalescentSFSSimulator::getParameterRules(void) const
         argument_rules.push_back( new ArgumentRule( "generationTime"    , RealPos::getClassTypeSpec(), "The generation time for the simulations.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "mutationRate"      , RealPos::getClassTypeSpec(), "The mutation rate.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         
+        std::vector<std::string> ploidy_options;
+        ploidy_options.push_back( "haploid" );
+        ploidy_options.push_back( "diploid" );
+        argument_rules.push_back( new OptionRule( "ploidy", new RlString("diploid"), ploidy_options, "The ploidy type of the individuals in the population, to scale N if necessary." ) );
+        
+        
         rules_set = true;
     }
     
@@ -187,6 +195,10 @@ void CoalescentSFSSimulator::setConstParameter(const std::string& name, const Re
     else if ( name == "mutationRate")
     {
         mutation_rate = var;
+    }
+    else if ( name == "ploidy")
+    {
+        ploidy = var;
     }
     else
     {
