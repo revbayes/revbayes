@@ -486,19 +486,50 @@ x.probability())");
 	help_strings[string("dnExponential")][string("name")] = string(R"(dnExponential)");
 	help_strings[string("dnExponential")][string("title")] = string(R"(Exponential Distribution)");
 	help_arrays[string("dnFossilizedBirthDeathRange")][string("authors")].push_back(string(R"(Walker Pett)"));
-	help_strings[string("dnFossilizedBirthDeathRange")][string("description")] = string(R"(The fossilized birth death range process describes diversification and sampling of extinct species trees under a mixed model of asymmetric, symmetric and anagenetic speciation.)");
-	help_strings[string("dnFossilizedBirthDeathRange")][string("details")] = string(R"(Fossil species samples are represented by their sampled stratigraphic ranges, consisting of a first and last occurrence, and sample count data. Sampling data may be provided by species, time interval, or both depending on the sampling model assumed. The distribution may describe either sampled trees, in which unsampled tips represent sampling events, or extended trees in which tips represent extinction events.)");
+	help_strings[string("dnFossilizedBirthDeathRange")][string("description")] = string(R"(The fossilized birth death range process (FBDRP) describes the distribution of a matrix of species origination and extinction times under a model of asymmetric speciation and sampling of extinct species.)");
+	help_strings[string("dnFossilizedBirthDeathRange")][string("details")] = string(R"(Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. If only a subset of fossil occurrences is provided for each species (e.g. only first and last occurrencces), then the remaining number of fossil samples may be marginalized by specifying `complete=FALSE`. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which must be sampled during MCMC using `mvResampleFBD`. Setting `BDS` to true causes the model to assume complete lineage sampling i.e. using the Birth-Death with Rateshifts (BDS) model of Silvestro et al. (2019).)");
+	help_strings[string("dnFossilizedBirthDeathRange")][string("example")] = string(R"(lambda ~ dnExp(10)
+mu ~ dnExp(10)
+psi ~ dnExp(10)
+
+bd ~ dnFBDRP(lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa)
+
+moves.append( mvMatrixElementScale(bd, weight=taxa.size()) )
+moves.append( mvMatrixElementSlide(bd, weight=taxa.size()) ))");
 	help_strings[string("dnFossilizedBirthDeathRange")][string("name")] = string(R"(dnFossilizedBirthDeathRange)");
 	help_references[string("dnFossilizedBirthDeathRange")].push_back(RbHelpReference(R"(The fossilized birth-death model for the analysis of stratigraphic range data under different speciation modes. Stadler, Tanja et al. Journal of theoretical biology, 447:41-55.)",R"()",R"(https://www.sciencedirect.com/science/article/pii/S002251931830119X )"));
-	help_arrays[string("dnFossilizedBirthDeathRange")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRangeMatrix)"));
+	help_references[string("dnFossilizedBirthDeathRange")].push_back(RbHelpReference(R"(Improved estimation of macroevolutionary rates from fossil data using a Bayesian framework. Silvestro, Daniele et al. Paleobiology, 45:546-570.)",R"(https://doi.org/10.1017/pab.2019.23)",R"(https://www.cambridge.org/core/journals/paleobiology/article/improved-estimation-of-macroevolutionary-rates-from-fossil-data-using-a-bayesian-framework/334F08A74A6C92F1FEAD91A71FE59A1C )"));
 	help_arrays[string("dnFossilizedBirthDeathRange")][string("see_also")].push_back(string(R"(dnBirthDeathSamplingTreatment)"));
-	help_arrays[string("dnFossilizedBirthDeathRangeMatrix")][string("authors")].push_back(string(R"(Walker Pett)"));
-	help_strings[string("dnFossilizedBirthDeathRangeMatrix")][string("description")] = string(R"(The fossilized birth death range matrix process describes the distribution of a matrix of species origin and extinction times under a model of asymmetric speciation and sampling of extinct species.)");
-	help_strings[string("dnFossilizedBirthDeathRangeMatrix")][string("details")] = string(R"(Fossil species samples are represented by their sampled stratigraphic ranges, consisting of a first and last occurrence, and sample count data. Sampling data may be provided by species, time interval, or both depending on the sampling model assumed.)");
-	help_strings[string("dnFossilizedBirthDeathRangeMatrix")][string("name")] = string(R"(dnFossilizedBirthDeathRangeMatrix)");
-	help_references[string("dnFossilizedBirthDeathRangeMatrix")].push_back(RbHelpReference(R"(The fossilized birth-death model for the analysis of stratigraphic range data under different speciation modes. Stadler, Tanja et al. Journal of theoretical biology, 447:41-55.)",R"()",R"(https://www.sciencedirect.com/science/article/pii/S002251931830119X )"));
-	help_arrays[string("dnFossilizedBirthDeathRangeMatrix")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRange)"));
-	help_arrays[string("dnFossilizedBirthDeathRangeMatrix")][string("see_also")].push_back(string(R"(dnBirthDeathSamplingTreatment)"));
+	help_arrays[string("dnFossilizedBirthDeathRange")][string("see_also")].push_back(string(R"(mvResampleFBD)"));
+	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("authors")].push_back(string(R"(Walker Pett)"));
+	help_strings[string("dnFossilizedBirthDeathSpeciation")][string("description")] = string(R"(The fossilized birth death speciation process (FBDSP) describes the diversification and sampling of extant and extinct species trees under a mixed model of asymmetric, symmetric and anagenetic speciation.)");
+	help_strings[string("dnFossilizedBirthDeathSpeciation")][string("details")] = string(R"(Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. If only a subset of fossil occurrences is provided for each species (e.g. only first and last occurrencces), then the remaining number of fossil samples may be marginalized by specifying `complete=FALSE`. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which must be sampled during MCMC using `mvResampleFBD`. Tips represent extinction events, and therefore should be sampled during MCMC using e.g. `mvTipTimeSlideUniform`.)");
+	help_strings[string("dnFossilizedBirthDeathSpeciation")][string("example")] = string(R"(lambda ~ dnExp(10)
+mu ~ dnExp(10)
+psi ~ dnExp(10)
+
+min_age = 0.0
+for(i in 1:taxa.size())
+{
+        if ( taxa[i].getMinAge() > min_age )
+        {
+                min_age = taxa[i].getMinAge()
+        }
+}
+
+origin ~ dnExp(1/10)
+
+bd ~ dnFBDSP(originAge=min_age+origin, lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa, complete=FALSE)
+
+moves.append( mvFNPR(bd, weight = taxa.size()) )
+moves.append( mvNodeTimeSlideUniform(bd, weight = taxa.size()) )
+moves.append( mvRootTimeSlideUniform(bd, origin=origin, weight = taxa.size()) )
+moves.append( mvTipTimeSlideUniform(bd, weight = taxa.size()) ))");
+	help_strings[string("dnFossilizedBirthDeathSpeciation")][string("name")] = string(R"(dnFossilizedBirthDeathSpeciation)");
+	help_references[string("dnFossilizedBirthDeathSpeciation")].push_back(RbHelpReference(R"(The fossilized birth-death model for the analysis of stratigraphic range data under different speciation modes. Stadler, Tanja et al. Journal of theoretical biology, 447:41-55.)",R"()",R"(https://www.sciencedirect.com/science/article/pii/S002251931830119X )"));
+	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRange)"));
+	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(dnBirthDeathSamplingTreatment)"));
+	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(mvResampleFBD)"));
 	help_arrays[string("dnGamma")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnGamma")][string("description")] = string(R"(Gamma probability distribution for positive real numbers.)");
 	help_strings[string("dnGamma")][string("details")] = string(R"(The gamma distribution is the probability of the sum of exponentially distributed variables. Thus, it provides a natural prior distribution for parameters that could be considered as sums of exponential variables.)");
@@ -1240,10 +1271,10 @@ nuc_pi ~ dnDirichlet( rep(2.0, 4) )
 F ~ dnIID(61, dnNormal(0,1))
 omega ~ dnUniform(0,1)
 # The FMutSel model from Yang and Nielsen (2008)
-Q1 := fnFMutSel(F, omega, fnGTR(er, nuc_pi))
+Q1 := fnFMutSel(fnGTR(er, nuc_pi), F, omega)
 
 # The same -- fMutSel = GTR(er,nuc_pi) + X3 + MutSel(F) + dNdS(omega)
-Q2 := fndNdS(omega, fnMutSel(F, fnX3( fnGTR(er, nuc_pi)))))");
+Q2 := fndNdS(fnMutSel(F, fnX3(fnGTR(er, nuc_pi))), omega))");
 	help_strings[string("fnFMutSel")][string("name")] = string(R"(fnFMutSel)");
 	help_references[string("fnFMutSel")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
 	help_arrays[string("fnFMutSel")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnFMutSel0, fnMutSel)"));
@@ -1275,10 +1306,10 @@ nuc_pi ~ dnDirichlet( rep(2.0, 4) )
 F ~ dnIID(20, dnNormal(0,1))
 omega ~ dnUniform(0,1)
 # The FMutSel0 model from Yang and Nielsen (2008)
-Q1 := fnFMutSel0(F, omega, fnGTR(er, nuc_pi))
+Q1 := fnFMutSel0(fnGTR(er, nuc_pi), F, omega)
 
 # The same -- fMutSel0 = GTR(er,nuc_pi) + X3 + MutSel(F) + dNdS(omega)
-Q2 := fndNdS(omega, fnMutSelAA(F, fnX3( fnGTR(er, nuc_pi)))))");
+Q2 := fndNdS( fnMutSelAA( fnX3( fnGTR(er, nuc_pi)), F), omega))");
 	help_strings[string("fnFMutSel0")][string("name")] = string(R"(fnFMutSel0)");
 	help_references[string("fnFMutSel0")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
 	help_arrays[string("fnFMutSel0")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnFMutSel0, fnMutSel)"));
@@ -1337,11 +1368,11 @@ and the initial frequency 1/N of allele j.)");
 	help_strings[string("fnMutSel")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
 nuc_pi ~ dnDirichlet( rep(2.0, 4) )
 F ~ dnIID(61, dnNormal(0,1))
-Q := fnMutSel(F, fnX3( fnGTR(er,nuc_pi) ) )   # GTR + X3 + MutSel
+Q := fnMutSel(fnX3(fnGTR(er, nuc_pi) ), F)       # GTR + X3 + MutSel
 
 # A mutation-selection balance model on RNA, with GTR mutation.
 F2 ~ dnIID(16, dnNormal(0,1))
-Q2 := fnMutSel(F2, fnX2( fnGTR(er,nuc_pi) ) ) # GTR + X2 + MutSel)");
+Q2 := fnMutSel(fnX2(fnGTR(er,nuc_pi) ), F2)      # GTR + X2 + MutSel)");
 	help_strings[string("fnMutSel")][string("name")] = string(R"(fnMutSel)");
 	help_references[string("fnMutSel")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
 	help_arrays[string("fnMutSel")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnMutSelAA, fnFMutSel, fndNdS)"));
@@ -1367,8 +1398,8 @@ The probability of fixation is determined by scaled selection coefficients:
 and the initial frequency 1/N of allele j.)");
 	help_strings[string("fnMutSelAA")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
 nuc_pi ~ dnDirichlet( rep(2.0, 4) )
-F ~ dnIID(61, dnNormal(0,1))
-Q := fnMutSel(F, fnX3( fnGTR(er,nuc_pi) ) )   # GTR + X3 + MutSel)");
+F ~ dnIID(20, dnNormal(0,1))
+Q := fnMutSelAA(fnX3(fnGTR(er, nuc_pi)), F))");
 	help_strings[string("fnMutSelAA")][string("name")] = string(R"(fnMutSelAA)");
 	help_references[string("fnMutSelAA")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
 	help_arrays[string("fnMutSelAA")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnX3, fndNdS, fnMutSel)"));
@@ -1431,7 +1462,7 @@ nuc_pi ~ dnDirichlet( rep(2.0, 4) )
 Q1 := fnX2( fnHKY(kappa, nuc_pi) )
 F ~ dnIID(16, dnNormal(0,1))
 # Add selection to the rate matrix
-Q2 := fnMutSel(F, Q1))");
+Q2 := fnMutSel(Q1, F))");
 	help_strings[string("fnX2")][string("name")] = string(R"(fnX2)");
 	help_arrays[string("fnX2")][string("see_also")].push_back(string(R"(fnX3)"));
 	help_strings[string("fnX2")][string("title")] = string(R"(Construct a doublet (16x16) rate matrix from a nucleotide rate matrix.)");
@@ -1450,10 +1481,10 @@ omega ~ dnUniform(0,1)
 nuc_pi ~ dnDirichlet( rep(2.0, 4) )
 Q1 := fnCodonMG94K( kappa, omega, nuc_pi )
 # This is the same.
-Q2 := fndNdS(omega,fnX3(fnHKY(kappa,nuc_pi)))   # HKY + X3 + dNdS, or HKY*3 + dNdS
+Q2 := fndNdS(fnX3(fnHKY(kappa, nuc_pi)), omega)          # HKY + X3 + dNdS, or HKY*3 + dNdS
 
 er ~ dnDirichlet( v(1,1,1,1,1,1) )
-Q3 := fnX3(fnGTR(er,nuc_pi))      # GTR + X3, or GTR*3)");
+Q3 := fnX3(fnGTR(er, nuc_pi))      # GTR + X3, or GTR*3)");
 	help_strings[string("fnX3")][string("name")] = string(R"(fnX3)");
 	help_references[string("fnX3")].push_back(RbHelpReference(R"(Redelings, BD (2021). BAli-Phy version 3: Model-based co-estimation of Alignment and Phylogeny.  Bioinformatics (2021) 37(10):3032–3034.)",R"(https://doi.org/10.1093/bioinformatics/btab129 )",R"()"));
 	help_arrays[string("fnX3")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K, fndNdS)"));
@@ -1477,12 +1508,13 @@ omega ~ dnUniform(0,1)
 nuc_pi ~ dnDirichlet( rep(2.0, 4) )
 Q1 := fnCodonMG94K( kappa, omega, nuc_pi )
 # This is the same.
-Q2 := fndNdS(omega,fnX3(fnHKY(kappa,nuc_pi)))   # HKY + X3 + dNdS, or HKY*3 + dNdS
+Q2 := fndNdS(fnX3(fnHKY(kappa, nuc_pi)), omega)        # HKY + X3 + dNdS,
+                                                       #   or HKY*3 + dNdS
 
 er ~ dnDirichlet( v(1,1,1,1,1,1) )
-Q3 := fnX3(fnGTR(er,nuc_pi))      # GTR + X3, or GTR*3)");
+Q3 := fndNdS(fnX3(fnGTR(er, nuc_pi)), omega)         # GTR + X3 + dNdS)");
 	help_strings[string("fndNdS")][string("name")] = string(R"(fndNdS)");
-	help_references[string("fndNdS")].push_back(RbHelpReference(R"(Redelings, BD (2021). RedelingsBAli-Phy version 3: Model-based co-estimation of Alignment and Phylogeny.  Bioinformatics (2021) 37(10):3032–3034.)",R"(https://doi.org/10.1093/bioinformatics/btab129)",R"()"));
+	help_references[string("fndNdS")].push_back(RbHelpReference(R"(Redelings, BD (2021). BAli-Phy version 3: Model-based co-estimation of Alignment and Phylogeny.  Bioinformatics (2021) 37(10):3032–3034.)",R"(https://doi.org/10.1093/bioinformatics/btab129)",R"()"));
 	help_arrays[string("fndNdS")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K, fnX3, fnMutSel)"));
 	help_strings[string("fndNdS")][string("title")] = string(R"(Add a dN/dS factor to a codon rate matrix.)");
 	help_strings[string("formatDiscreteCharacterData")][string("name")] = string(R"(formatDiscreteCharacterData)");
@@ -1963,6 +1995,16 @@ Variables on [0,infinity) are log-transformed for proposals.)");
 	help_strings[string("mvRandomGeometricWalk")][string("name")] = string(R"(mvRandomGeometricWalk)");
 	help_strings[string("mvRandomIntegerWalk")][string("name")] = string(R"(mvRandomIntegerWalk)");
 	help_strings[string("mvRateAgeBetaShift")][string("name")] = string(R"(mvRateAgeBetaShift)");
+	help_arrays[string("mvResampleFBD")][string("authors")].push_back(string(R"(Walker Pett)"));
+	help_strings[string("mvResampleFBD")][string("description")] = string(R"(This move resamples an oldest occurrence age for a random species in a fossilized birth death process described by `dnFBDRP` or `dnFBDRMatrix`)");
+	help_strings[string("mvResampleFBD")][string("details")] = string(R"(Under the hood, FBD fossil data is augmented with oldest occurrence ages for each species, which are automatically marginalized during when the model is sampled using MCMC. These ages can also be resampled manually using this move.)");
+	help_strings[string("mvResampleFBD")][string("example")] = string(R"(bd ~ dnFBDRP(lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa, resample=FALSE)
+
+moves.append( mvResampleFBD(bd, weight=taxa.size()) ))");
+	help_strings[string("mvResampleFBD")][string("name")] = string(R"(mvResampleFBD)");
+	help_references[string("mvResampleFBD")].push_back(RbHelpReference(R"(The fossilized birth-death model for the analysis of stratigraphic range data under different speciation modes. Stadler, Tanja et al. Journal of theoretical biology, 447:41-55.)",R"()",R"(https://www.sciencedirect.com/science/article/pii/S002251931830119X )"));
+	help_arrays[string("mvResampleFBD")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRange)"));
+	help_arrays[string("mvResampleFBD")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRangeMatrix)"));
 	help_strings[string("mvRootTimeScaleBactrian")][string("name")] = string(R"(mvRootTimeScaleBactrian)");
 	help_strings[string("mvRootTimeSlideUniform")][string("name")] = string(R"(mvRootTimeSlideUniform)");
 	help_strings[string("mvSPR")][string("name")] = string(R"(mvSPR)");

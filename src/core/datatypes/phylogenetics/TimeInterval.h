@@ -21,6 +21,7 @@ namespace RevBayesCore {
         
         bool                                operator==(const TimeInterval &t) const;                //!< Equals operator
         bool                                operator!=(const TimeInterval &t) const;                //!< Not-equals operator
+        bool                                operator<(const TimeInterval &t) const;                 //!< Less than operator
 
         // public functions
         double                              getMin(void) const;                                     //!< Get the number of days since counting.
