@@ -614,7 +614,7 @@ void Mcmcmc::nextCycle(bool advanceCycle)
     
     for(int i=0;i<num_chains;i++)
     {
-        int heat_rank = heat_ranks[i];
+        int heat_rank = heat_index_for_chain(i);
         if (chain_prev_boundary[i] == boundary::coldest)
             heat_visitors[heat_rank].first++;
         if (chain_prev_boundary[i] == boundary::hottest)
@@ -1664,17 +1664,21 @@ void Mcmcmc::swapRandomChains(void)
 
 void Mcmcmc::updateTrips(int j)
 {
-    // The assumption is that we run this right after we have swapped j with another chain.
-    // Therefore heat_ranks[j] is the NEW heat rank for chain j.
+    // I think this code assumes that there is only one coldest chain and one hottest chain.
+    // For example, there are not two chains with heat == 1.0.
+    // This is true, and would probably stay true.
 
-    if ( heat_ranks[j] == 0)
+    // The assumption is that we run this right after we have swapped j with another chain.
+    // Therefore heat_index_for_chain(j) is the NEW heat rank for chain j.
+
+    if ( heat_index_for_chain(j) == 0)
     {
         if (chain_prev_boundary[j] == boundary::hottest)
             chain_half_trips[j]++;
 
         chain_prev_boundary[j] = boundary::coldest;
     }
-    else if (heat_ranks[j] == num_chains - 1)
+    else if (heat_index_for_chain(j) == num_chains - 1)
     {
         if (chain_prev_boundary[j] == boundary::coldest)
             chain_half_trips[j]++;
