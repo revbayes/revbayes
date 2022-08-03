@@ -18,7 +18,7 @@ using namespace RevBayesCore;
  * @param n A long for the number of trials
  */
 
-StairwayPlotDistribution::StairwayPlotDistribution(const TypedDagNode< RbVector<double> > *th, long n, long n_ind, bool f) : TypedDistribution< RbVector<long> >( new RbVector<long>() ),
+StairwayPlotDistribution::StairwayPlotDistribution(const TypedDagNode< RbVector<double> > *th, long n, long n_ind, bool f) : TypedDistribution< RbVector<double> >( new RbVector<double>() ),
 //    mu( m ),
     theta( th ),
     num_sites( n ),
@@ -100,7 +100,7 @@ double StairwayPlotDistribution::computeLnProbability( void )
     double ln_prob = 0;
     
     // get the data, i.e., the observed counts for the frequencies
-    const RbVector<long>& obs_sfs_counts = *value;
+    const RbVector<double>& obs_sfs_counts = *value;
     
 //    // the mutation rate
 //    double mutation_rate = mu->getValue();
@@ -232,7 +232,7 @@ void StairwayPlotDistribution::initialize( void )
 
 void StairwayPlotDistribution::redrawValue( void )
 {
-    *value = RbVector<long>( num_individuals+1, 1 );
+    *value = RbVector<double>( num_individuals+1, 1 );
 }
 
 

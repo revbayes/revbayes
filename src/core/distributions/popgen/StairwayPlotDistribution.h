@@ -24,7 +24,7 @@ template <class valueType> class TypedDagNode;
      * Liu & Fu: Stairway Plot 2: demographic history inference with folded SNP frequency spectra. Genome Biology, 2020, 21, 1-9
      *
      */
-    class StairwayPlotDistribution : public TypedDistribution< RbVector<long> >, public MemberObject< RbVector<double> > {
+    class StairwayPlotDistribution : public TypedDistribution< RbVector<double> >, public MemberObject< RbVector<double> > {
         
     public:
         StairwayPlotDistribution(const TypedDagNode< RbVector<double> > *th, long n, long n_ind, bool f=false);
