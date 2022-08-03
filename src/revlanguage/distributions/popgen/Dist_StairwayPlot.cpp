@@ -42,7 +42,7 @@ namespace RevBayesCore { class Simplex; }
 
 using namespace RevLanguage;
 
-Dist_StairwayPlot::Dist_StairwayPlot(void) : TypedDistribution< ModelVector<Natural> >()
+Dist_StairwayPlot::Dist_StairwayPlot(void) : TypedDistribution< ModelVector<RealPos> >()
 {
     
 }
@@ -71,6 +71,7 @@ RevBayesCore::StairwayPlotDistribution* Dist_StairwayPlot::createDistribution( v
     long                                                            f       = static_cast<const RlBoolean            &>( folded->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*   th      = static_cast<const ModelVector<RealPos> &>( theta->getRevObject() ).getDagNode();
     RevBayesCore::StairwayPlotDistribution*                         d       = new RevBayesCore::StairwayPlotDistribution( th, n_sites, n_ind, f );
+    
     return d;
 }
 
@@ -88,7 +89,7 @@ const std::string& Dist_StairwayPlot::getClassType(void)
 const TypeSpec& Dist_StairwayPlot::getClassTypeSpec(void)
 {
     
-    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution< ModelVector<Natural> >::getClassTypeSpec() ) );
+    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution< ModelVector<RealPos> >::getClassTypeSpec() ) );
     return rev_type_spec;
 }
 
@@ -111,7 +112,7 @@ std::string Dist_StairwayPlot::getDistributionFunctionName( void ) const
 
 MethodTable Dist_StairwayPlot::getDistributionMethods( void ) const
 {
-    MethodTable methods = TypedDistribution< ModelVector<Natural> >::getDistributionMethods();
+    MethodTable methods = TypedDistribution< ModelVector<RealPos> >::getDistributionMethods();
     
     ArgumentRules* times_arg_rules = new ArgumentRules();
     methods.addFunction( new DistributionMemberFunction<Dist_StairwayPlot, ModelVector<RealPos> >( "getTimes", variable, times_arg_rules, true, true ) );
@@ -185,6 +186,6 @@ void Dist_StairwayPlot::setConstParameter(const std::string& name, const RevPtr<
     }
     else
     {
-        TypedDistribution< ModelVector<Natural> >::setConstParameter(name, var);
+        TypedDistribution< ModelVector<RealPos> >::setConstParameter(name, var);
     }
 }

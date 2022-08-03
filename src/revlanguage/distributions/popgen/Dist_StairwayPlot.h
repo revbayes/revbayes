@@ -24,7 +24,7 @@ namespace RevLanguage {
      * @since 2022-05-23, version 1.1
      *
      */
-    class Dist_StairwayPlot : public TypedDistribution< ModelVector<Natural> > {
+    class Dist_StairwayPlot : public TypedDistribution< ModelVector<RealPos> > {
         
     public:
         Dist_StairwayPlot(void);
@@ -42,7 +42,7 @@ namespace RevLanguage {
         
         
         // Distribution functions you have to override
-        RevBayesCore::StairwayPlotDistribution*          createDistribution(void) const;
+        RevBayesCore::StairwayPlotDistribution*         createDistribution(void) const;
         
     protected:
         

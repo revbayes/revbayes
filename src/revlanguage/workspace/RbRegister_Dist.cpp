@@ -428,7 +428,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
                 
         /* Popgen distributions (in folder "distributions/popgen") */
 
-        AddDistribution< ModelVector<Natural>          >( new Dist_StairwayPlot()       );
+        AddDistribution< ModelVector<RealPos>       >( new Dist_StairwayPlot()       );
 
 
 
