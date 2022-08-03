@@ -1674,7 +1674,7 @@ void Mcmcmc::updateTrips(int j)
 
         chain_prev_boundary[j] = boundary::coldest;
     }
-    else if (heat_ranks[j] == int(heat_ranks.size()) - 1)
+    else if (heat_ranks[j] == num_chains - 1)
     {
         if (chain_prev_boundary[j] == boundary::coldest)
             chain_half_trips[j]++;
