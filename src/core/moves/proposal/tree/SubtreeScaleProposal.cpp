@@ -109,11 +109,10 @@ double SubtreeScaleProposal::doProposal( void )
     // now we store all necessary values
     storedNode = node;
     storedAges = std::vector<double>(tau.getNumberOfNodes(), 0.0);
-    TreeUtilities::getAges(&tau, node, storedAges);
+    TreeUtilities::getAges(*node, storedAges);
 
     // lower bound
-    double min_age = 0.0;
-    TreeUtilities::getOldestTip(&tau, node, min_age);
+    double min_age = TreeUtilities::getOldestTipAge(*node);
     
     // draw new ages and compute the hastings ratio at the same time
     double my_new_age = min_age + (parent_age - min_age) * rng->uniform01();
@@ -123,7 +122,7 @@ double SubtreeScaleProposal::doProposal( void )
     size_t nNodes = node->getNumberOfNodesInSubtree(false);
     
     // rescale the subtrees
-    TreeUtilities::rescaleSubtree(&tau, node, scaling_factor );
+    TreeUtilities::rescaleSubtree(*node, scaling_factor );
     
     if (min_age != 0.0)
     {
@@ -179,7 +178,7 @@ void SubtreeScaleProposal::undoProposal( void )
 {
     
     // undo the proposal
-    TreeUtilities::setAges(&variable->getValue(), storedNode, storedAges);
+    TreeUtilities::setAges(*storedNode, storedAges);
 
 }
 

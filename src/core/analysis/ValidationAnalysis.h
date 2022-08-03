@@ -24,7 +24,7 @@ namespace RevBayesCore {
     class ValidationAnalysis : public Cloneable, public Parallelizable {
         
     public:
-        ValidationAnalysis(const MonteCarloAnalysis &m, size_t n);
+        ValidationAnalysis(const MonteCarloAnalysis &m, size_t n, const std::string& ds);
         ValidationAnalysis(const ValidationAnalysis &a);
         virtual                                ~ValidationAnalysis(void);
         
@@ -41,11 +41,11 @@ namespace RevBayesCore {
     private:
                 
         // members
-        size_t                                  num_runs;  //!< number of analyses to run
-        std::vector<MonteCarloAnalysis*>        runs;  //!< vector of analyses
-        std::vector<Model*>                     simulation_values;  //!< vector of initial values of the models
-
-        std::map<std::string, int>              coverage_count; //!< coverage counts, indexed by parameter names
+        size_t                                  num_runs;                       //!< number of analyses to run
+        std::vector<MonteCarloAnalysis*>        runs;                           //!< vector of analyses
+        std::vector<Model*>                     simulation_values;              //!< vector of initial values of the models
+        std::string                             output_directory;               //!< directory to store the simulations
+        std::map<std::string, int>              coverage_count;                 //!< coverage counts, indexed by parameter names
     };
     
 }

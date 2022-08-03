@@ -55,11 +55,29 @@ double RbStatistics::ChiSquare::pdf(double df, double x)
 
 
 /*!
+ * This function calculates the natural log of the probability density
+ * for a chi-square distributed random variable.
+ *
+ * \brief Natural log of chi-square probability density.
+ * \param df is the degrees of freedom parameter of the chi-square.
+ * \param x is the chi-square random variable.
+ * \return Returns the natural log of the probability density.
+ * \throws Does not throw an error.
+ */
+double RbStatistics::ChiSquare::lnPdf(long df, double x)
+{
+    
+    double b = df / 2.0;
+    return ( -(b * log(2.0) + RbMath::lnGamma(b)) - b + (b - 1.0) * std::log(x) );
+}
+
+
+/*!
  * This function calculates the natural log of the probability density 
  * for a chi-square distributed random variable.
  *
  * \brief Natural log of chi-square probability density.
- * \param v is the degrees of freedom parameter of the chi-square. 
+ * \param df is the degrees of freedom parameter of the chi-square. 
  * \param x is the chi-square random variable. 
  * \return Returns the natural log of the probability density.
  * \throws Does not throw an error.
@@ -146,7 +164,7 @@ double RbStatistics::ChiSquare::quantile(double prob, double df)
         double last_improv = q - ch;
 		q = ch; 
 		p1 = 0.5*ch;
-		if ((t = RbMath::incompleteGamma(p1, xx, g)) < 0.0)
+		if ((t = RbMath::incompleteGamma(p1, xx)) < 0.0)
         {
             std::cerr<<"\nerr IncompleteGamma";
 			return (-1.0);
@@ -166,6 +184,34 @@ double RbStatistics::ChiSquare::quantile(double prob, double df)
 			goto l4;
     
 		return (ch);
+}
+
+double RbStatistics::ChiSquare::rv(long df, RandomNumberGenerator& rng)
+{
+        
+    double x2;
+    if ( df <= 100 )
+    {
+        /* If the degrees of freedom is an integer and less than 100, we
+         generate our chi-square random variable by generating v
+         standard normal random variables, squaring each, and taking the
+         sum of the squared random variables. */
+        x2 = 0.0;
+        for (long i=0; i<df; i++)
+        {
+            double x = RbStatistics::Normal::rv(0.0, 1.0, rng);
+            x2 += x * x;
+        }
+    }
+    else
+    {
+        /* Otherwise, we use the relationship of the chi-square to a gamma
+         (it is a special case of the gamma) to generate the chi-square
+         random variable. */
+        x2 = RbStatistics::Gamma::rv(df/2.0, 0.5, rng);
+    }
+    
+    return x2;
 }
 
 double RbStatistics::ChiSquare::rv(double df, RandomNumberGenerator& rng)

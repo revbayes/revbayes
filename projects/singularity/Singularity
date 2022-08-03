@@ -1,0 +1,51 @@
+BootStrap: library
+From: ubuntu:20.04
+
+%post
+
+    export DEBIAN_FRONTEND=noninteractive
+
+    mkdir /revbayes
+    
+    echo "Installing required packages..."
+    
+    # revbayes dependencies
+    apt-get update -y
+    apt-get install -y build-essential bash-completion git cmake
+
+    # install boost
+    apt-get install -y software-properties-common
+    add-apt-repository universe
+    apt-get update -y
+    apt-get install -y libboost-all-dev
+
+    # download revbayes
+    git clone https://github.com/revbayes/revbayes.git /revbayes-build
+    cd /revbayes-build
+    git checkout 1.1.1
+
+%environment
+    export PATH=$PATH:/revbayes
+
+%runscript
+    exec rb $@
+
+%appinstall rb
+    cd /revbayes-build/projects/cmake/
+    rm -rf build
+    ./build.sh
+    mv rb /revbayes/rb
+
+%apprun rb
+    exec rb $@
+
+%appinstall rbmpi
+
+    apt-get install -y libopenmpi-dev
+    cd /revbayes-build/projects/cmake/
+    rm -rf build
+    ./build.sh -mpi true
+    mv rb-mpi /revbayes/rb-mpi
+
+%apprun rbmpi
+    exec rb-mpi $@

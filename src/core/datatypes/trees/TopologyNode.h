@@ -79,16 +79,18 @@ namespace RevBayesCore {
         void                                        clearParameters(void);                                                              //!< Clear the node and branch parameters
         void                                        clearBranchParameters(void);
 		void                                        clearNodeParameters(void);
-        virtual std::string                         computeNewick(void);                                                                //!< Compute the newick string for this clade
+        virtual std::string                         computeNewick(bool round = true);                                                   //!< Compute the newick string for this clade
         std::string                                 computePlainNewick(void) const;                                                     //!< Compute the newick string for this clade as a plain string without branch length
-        std::string                                 computeSimmapNewick(void);                                                          //!< Compute the newick string compatible with SIMMAP and phytools
+        std::string                                 computeSimmapNewick(bool round = true);                                             //!< Compute the newick string compatible with SIMMAP and phytools
         bool                                        containsClade(const TopologyNode* c, bool strict) const;
         bool                                        containsClade(const Clade &c, bool strict) const;
         bool                                        containsClade(const RbBitSet &c, bool strict) const;
+        bool                                        doesUseAges(void) const;                                                            //!< Does this node use ages or branch lengths?
         std::string                                 fillCladeIndices(std::map<std::string,size_t> &clade_index_map) const;              //!< Fill this map recursively with all clade indices.
         void                                        fireTreeChangeEvent(const unsigned& m = RevBayesCore::TreeChangeEventMessage::DEFAULT);
         double                                      getAge(void) const;                                                                 //!< Get the age (time ago from present) for this node
-        const std::vector<std::string>&             getBranchParameters(void) const;                                                        //!< Get the branch length leading towards this node
+        RbBitSet                                    getAllClades(std::vector<RbBitSet> &taxa, size_t n, bool io) const;                 //!< Fill all the taxon bitset
+        const std::vector<std::string>&             getBranchParameters(void) const;                                                    //!< Get the branch length leading towards this node
         double                                      getBranchLength(void) const;                                                        //!< Get the branch length leading towards this node
         size_t                                      getCladeIndex(const TopologyNode* c) const;
         const TopologyNode&                         getChild(size_t i) const;                                                           //!< Returns the i-th child
@@ -114,6 +116,7 @@ namespace RevBayesCore {
         const TopologyNode*                         getNode(const TopologyNode &n, bool strict) const;
         const std::vector<std::string>&             getNodeParameters(void) const;                                                      //!< Get the branch length leading towards this node
         size_t                                      getNumberOfChildren(void) const;                                                    //!< Returns the number of children
+        size_t                                      getNumberOfShiftEvents(void) const;
         size_t                                      getNumberOfNodesInSubtree(bool tips) const;
         TopologyNode&                               getParent(void);                                                                    //!< Returns the node's parent
         const TopologyNode&                         getParent(void) const;                                                              //!< Returns the node's parent
@@ -132,7 +135,10 @@ namespace RevBayesCore {
         bool                                        isRoot(void) const;                                                                 //!< Is node root?
         bool                                        isSampledAncestor(bool propagate=false) const;                                                      //!< Is node (or a child node) a sampled ancestor?
         bool                                        isTip(void) const;                                                                  //!< Is node tip?
+        bool                                        isUltrametric(double& depth) const;                                                 //!< Check if the subtree subtending from this node is ultramtric.
         void                                        makeBifurcating(bool as_fossils);                                                   //!< Make this and all its descendants bifurcating.
+        void                                        recomputeAge(bool recursive);                                                       //!< Recompute the age of this node based on the childs age and the branch length leading to it.
+        void                                        recomputeBranchLength(void);                                                        //!< Recompute the length of this branch based on the ages.
         void                                        renameNodeParameter(const std::string &old_name, const std::string &new_name);
         void                                        removeAllChildren(void);                                                            //!< Removes all of the children of the node
         size_t                                      removeChild(TopologyNode* c);                                                       //!< Removes a specific child
@@ -142,6 +148,7 @@ namespace RevBayesCore {
         void                                        setIndex(size_t idx);                                                               //!< Set the index of the node
 
         void                                        setName(const std::string& n);                                                      //!< Set the name of this node
+        void                                        setNumberOfShiftEvents(size_t n);                                                   //!< Set the number of shift events for stochastic character maps
   		void										setNodeType(bool tip, bool root, bool interior); //SK
         void                                        setParent(TopologyNode* p);                                                         //!< Sets the node's parent
         void                                        setSampledAncestor(bool tf);                                                        //!< Set if the node is a sampled ancestor
@@ -153,12 +160,24 @@ namespace RevBayesCore {
         void                                        setUseAges(bool tf, bool recursive);
         
         // internal helper functions
-        void                                        recomputeBranchLength(void);                                                        //!< Recompute the length of this branch based on the ages.
-        
+        bool getBurstSpeciation(void) const { return burst_speciation; }
+        bool getSamplingEvent(void) const { return sampling_event; }
+        bool getSerialSampling(void) const { return serial_sampling; }
+        bool getSerialSpeciation(void) const { return serial_speciation; }
+        void setBurstSpeciation(bool tf) { burst_speciation = tf; }
+        void setSamplingEvent(bool tf) { sampling_event = tf; }
+        void setSerialSampling(bool tf) { serial_sampling = tf; }
+        void setSerialSpeciation(bool tf) { serial_speciation = tf; }
+                
     protected:
+
+        bool burst_speciation;
+        bool sampling_event;
+        bool serial_sampling;
+        bool serial_speciation;
         
         // helper methods
-        virtual std::string                         buildNewickString(bool simmap);                                                     //!< compute the newick string for a tree rooting at this node
+        virtual std::string                         buildNewickString(bool simmap, bool round);                                                     //!< compute the newick string for a tree rooting at this node
         
         // protected members
         bool                                        use_ages;
@@ -181,6 +200,7 @@ namespace RevBayesCore {
        
         // for stochastic maps
         std::vector<double>                         time_in_states;
+        size_t                                      num_shift_events;
         
 //        RevLanguage::RevPtr<TaxonMap>               taxon_map;
         

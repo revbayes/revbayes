@@ -1,0 +1,84 @@
+################################################################################
+#
+# RevBayes Validation Test: Heterochronous skyline coalescent process
+#
+# Model: The heterochronous skyline coalescent process on a fixed tree.
+#
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+#######################
+# Reading in the Data #
+#######################
+
+# observed_phylogeny <- readTrees( "data/primates.tree" )[1]
+taxa <- readTaxonData("data/bears_taxa.tsv")
+
+# Get the names of the taxa in the tree and the age of the tree. We need these later on.
+# taxa <- observed_phylogeny.taxa()
+n_taxa <- taxa.size()
+
+
+
+##############
+# Tree model #
+##############
+
+NUM_INTERVALS = ceil(n_taxa / 5)
+# NUM_INTERVALS <- 3
+for (i in 1:NUM_INTERVALS) {
+
+    pop_size[i] ~ dnUniform(1E2,1E4)
+    moves.append( mvScale(pop_size[i], lambda=0.1, tune=true, weight=2.0) )
+
+}
+
+for (i in 1:(NUM_INTERVALS-1)) {
+
+    changePoints[i] <- i * 10
+
+}
+
+
+### the time tree is a stochastic node modeled by the heterochronous skyline coalescent process (dnHeterochronousCoalescentSkyline)
+psi ~ dnHeterochronousCoalescentSkyline(theta=pop_size, times=changePoints, taxa=taxa)
+psi.clamp( psi )
+
+
+#############
+# The Model #
+#############
+
+
+### workspace model wrapper ###
+mymodel = model(psi)
+
+
+
+################
+# The Analysis #
+################
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Coal_het_skyline" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
+
+
+# you may want to quit RevBayes now
+q()

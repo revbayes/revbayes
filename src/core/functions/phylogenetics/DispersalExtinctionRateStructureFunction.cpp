@@ -56,7 +56,7 @@ DispersalExtinctionRateStructureFunction* DispersalExtinctionRateStructureFuncti
 }
 
 
-void DispersalExtinctionRateStructureFunction::keep(DagNode *affecter)
+void DispersalExtinctionRateStructureFunction::keep( const DagNode *affecter)
 {
     //delegate to base class
     TypedFunction< RbVector<double> >::keep( affecter );
@@ -138,14 +138,14 @@ void DispersalExtinctionRateStructureFunction::reInitialized( void )
 }
 
 
-void DispersalExtinctionRateStructureFunction::restore(DagNode *restorer)
+void DispersalExtinctionRateStructureFunction::restore( const DagNode *restorer)
 {
     //delegate to base class
     TypedFunction< RbVector<double> >::restore( restorer );
 }
 
 
-void DispersalExtinctionRateStructureFunction::touch(DagNode *toucher)
+void DispersalExtinctionRateStructureFunction::touch(const DagNode *toucher)
 {
     
     //delegate to base class

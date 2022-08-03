@@ -1,4 +1,3 @@
-#include "ModelVector.h"
 #include <ostream>
 #include <string>
 
@@ -6,6 +5,8 @@
 #include "ArgumentRules.h"
 #include "Mntr_Model.h"
 #include "ModelMonitor.h"
+#include "ModelVector.h"
+#include "Natural.h"
 #include "IntegerPos.h"
 #include "RevObject.h"
 #include "RlString.h"
@@ -15,12 +16,11 @@
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "RlBoolean.h"
-#include "RlMonitor.h"
 
 
 using namespace RevLanguage;
 
-Mntr_Model::Mntr_Model(void) : Monitor() 
+Mntr_Model::Mntr_Model(void) : FileMonitor()
 {
     
 }
@@ -119,17 +119,16 @@ const MemberRules& Mntr_Model::getParameterRules(void) const
     if ( !rules_set ) 
     {
         
-        memberRules.push_back( new ArgumentRule("filename"      , RlString::getClassTypeSpec() , "The name of the file where to store the values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        memberRules.push_back( new ArgumentRule("printgen"      , IntegerPos::getClassTypeSpec()  , "The frequency how often to sample values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new IntegerPos(1) ) );
-        memberRules.push_back( new ArgumentRule("separator"     , RlString::getClassTypeSpec() , "The separator between different variables.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
         memberRules.push_back( new ArgumentRule("posterior"     , RlBoolean::getClassTypeSpec(), "Should we print the joint posterior probability?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         memberRules.push_back( new ArgumentRule("likelihood"    , RlBoolean::getClassTypeSpec(), "Should we print the likelihood?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         memberRules.push_back( new ArgumentRule("prior"         , RlBoolean::getClassTypeSpec(), "Should we print the joint prior probability?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-        memberRules.push_back( new ArgumentRule("append"        , RlBoolean::getClassTypeSpec(), "Should we append to an existing file?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
         memberRules.push_back( new ArgumentRule("stochasticOnly", RlBoolean::getClassTypeSpec(), "Should we monitor stochastic variables only?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
-        memberRules.push_back( new ArgumentRule("version", RlBoolean::getClassTypeSpec(), "Should we record the software version?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
         memberRules.push_back( new ArgumentRule{"exclude", ModelVector<RlString>::getClassTypeSpec(), "Variables to exclude from the monitor", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new ModelVector<RlString>()});
         
+        // add the rules from the base class
+        const MemberRules &parentRules = FileMonitor::getParameterRules();
+        memberRules.insert(memberRules.end(), parentRules.begin(), parentRules.end());
+
         rules_set = true;
     }
     
@@ -158,19 +157,7 @@ void Mntr_Model::printValue(std::ostream &o) const
 void Mntr_Model::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) 
 {
     
-    if ( name == "filename" ) 
-    {
-        filename = var;
-    }
-    else if ( name == "separator" ) 
-    {
-        separator = var;
-    }
-    else if ( name == "printgen" ) 
-    {
-        printgen = var;
-    }
-    else if ( name == "prior" ) 
+    if ( name == "prior" )
     {
         prior = var;
     }
@@ -182,17 +169,9 @@ void Mntr_Model::setConstParameter(const std::string& name, const RevPtr<const R
     {
         likelihood = var;
     }
-    else if ( name == "append" ) 
-    {
-        append = var;
-    }
     else if ( name == "stochasticOnly" ) 
     {
         stochOnly = var;
-    }
-    else if ( name == "version" )
-    {
-        version = var;
     }
     else if ( name == "exclude" )
     {
@@ -200,7 +179,7 @@ void Mntr_Model::setConstParameter(const std::string& name, const RevPtr<const R
     }
     else 
     {
-        Monitor::setConstParameter(name, var);
+        FileMonitor::setConstParameter(name, var);
     }
     
 }

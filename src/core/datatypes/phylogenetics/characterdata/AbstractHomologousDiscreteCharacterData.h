@@ -48,6 +48,7 @@ class DiscreteCharacterState;
         virtual void                                            writeToFile(const std::string &dir, const std::string &fn) const;
         
         // CharacterData functions
+        void                                                    applyMissingSitesMask( const std::vector<std::vector<bool> >& mask_gap, const std::vector<std::vector<bool> >& mask_missing );
         virtual void                                            concatenate(const AbstractCharacterData &d, std::string type = "") = 0;                     //!< Concatenate data matrices
         virtual void                                            concatenate(const HomologousCharacterData &d, std::string type = "") = 0;                   //!< Concatenate two sequences
         virtual void                                            concatenate(const AbstractHomologousDiscreteCharacterData &d, std::string type = "") = 0;   //!< Concatenate data matrices
@@ -56,6 +57,7 @@ class DiscreteCharacterState;
         virtual std::vector<long>                               computeSiteFrequencySpectrum(bool folded, SFS_AMBIGUITY_TREATMENT ambig_treat) const = 0;
         virtual MatrixReal                                      computeStateFrequencies(void) const = 0;                                                    //!< Compute the state frequencies for this character data object
         virtual void                                            excludeCharacter(size_t i) = 0;                                                             //!< Exclude character
+        void                                                    fillMissingSitesMask( std::vector<std::vector<bool> >& mask_gap, std::vector<std::vector<bool> >& mask_missing ) const;
         virtual const DiscreteCharacterState&                   getCharacter(size_t tn, size_t cn) const = 0;                                               //!< Return a reference to a character element in the character matrix
         virtual std::string                                     getDataType(void) const = 0;                                                                //!< Return the data type of this character data matrix
         virtual std::vector<double>                             getEmpiricalBaseFrequencies(void) const = 0;                                                //!< Compute the empirical base frequencies
@@ -65,10 +67,10 @@ class DiscreteCharacterState;
         virtual size_t                                          getNumberOfSegregatingSites(bool excl) const = 0;                                           //!< Compute the number of segregating sites
         virtual size_t                                          getNumberOfStates(void) const = 0;                                                          //!< Get the number of states for the characters in this matrix
         virtual size_t                                          getNumberOfInvariantSites(bool excl) const = 0;                                             //!< Number of invariant sites
-        virtual double                                          getAveragePaiwiseSequenceDifference(bool excl) const = 0;                                   //!< Get the average pairwise sequence distance.
-        virtual size_t                                          getMaxPaiwiseSequenceDifference(bool excl) const = 0;                                       //!< Get the average pairwise sequence distance.
-        virtual size_t                                          getMinPaiwiseSequenceDifference(bool excl) const = 0;                                       //!< Get the average pairwise sequence distance.
-        virtual DistanceMatrix                                  getPaiwiseSequenceDifference(bool excl) const = 0;                                       //!< Get the average pairwise sequence distance.
+        virtual double                                          getAveragePairwiseSequenceDifference(bool excl) const = 0;                                   //!< Get the average pairwise sequence distance.
+        virtual size_t                                          getMaxPairwiseSequenceDifference(bool excl) const = 0;                                       //!< Get the average pairwise sequence distance.
+        virtual size_t                                          getMinPairwiseSequenceDifference(bool excl) const = 0;                                       //!< Get the average pairwise sequence distance.
+        virtual DistanceMatrix                                  getPairwiseSequenceDifference(bool excl) const = 0;                                       //!< Get the average pairwise sequence distance.
         virtual AbstractDiscreteTaxonData&                      getTaxonData(size_t tn) = 0;                                                                //!< Return a reference to a sequence in the character matrix
         virtual const AbstractDiscreteTaxonData&                getTaxonData(size_t tn) const = 0;                                                          //!< Return a reference to a sequence in the character matrix
         virtual AbstractDiscreteTaxonData&                      getTaxonData(const std::string &tn) = 0;                                                    //!< Return a reference to a sequence in the character matrix
@@ -88,6 +90,7 @@ class DiscreteCharacterState;
         virtual double                                          varGcContent(bool excl) const = 0;                                                          //!< Mean GC-content of all sequence
         virtual double                                          varGcContentByCodon(size_t n, bool excl) const = 0;                                         //!< Mean GC-content of all sequences by codon position
         
+        void                                                    removeRandomSites( double p );
         virtual void                                            removeExcludedCharacters(void) = 0;                                                         //!< Remove all the excluded characters
         virtual void                                            restoreCharacter(size_t i) = 0;                                                             //!< Restore character
         

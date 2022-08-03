@@ -40,16 +40,16 @@ namespace RevBayesCore {
     protected:
         
         // virtual methods that may be overwritten, but then the derived class should call this methods
-        virtual void                                                        keepSpecialization(DagNode* affecter);
+        virtual void                                                        keepSpecialization(const DagNode* affecter);
         void                                                                recursiveComputeLnProbability( const TopologyNode &node, size_t node_index );
         void                                                                recursivelyFlagNodeDirty(const TopologyNode& n);
         std::set<size_t>                                                    recursiveComputeDistanceMatrix( MatrixReal &m, const TopologyNode &node, size_t node_index );
         void                                                                resetValue( void );
-        virtual void                                                        restoreSpecialization(DagNode *restorer);
+        virtual void                                                        restoreSpecialization(const DagNode *restorer);
         void                                                                simulateRecursively(const TopologyNode& node, std::vector< ContinuousTaxonData > &t);
         std::vector<double>                                                 simulateRootCharacters(size_t n);
         double                                                              sumRootLikelihood(void);
-        virtual void                                                        touchSpecialization(DagNode *toucher, bool touchAll);
+        virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
         std::vector<double>                                                 transformBranchLengths(void) const;
         void                                                                threePoint(std::vector<double> &out, const std::vector<double> &bl, const std::vector<double> &obs, const std::vector<double> &mean);
         

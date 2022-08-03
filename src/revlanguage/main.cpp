@@ -191,10 +191,13 @@ int main(int argc, char* argv[]) {
     {
         source_files = args["file"].as<std::vector<std::string> >();
     }
+//    source_files.push_back("scripts/MCMC_dating_ex4.Rev");
     
-    if ( args.count("args") and args.count("cmd"))
+    if ( args.count("args") && args.count("cmd"))
+    {
         throw RbException("command line: received both --args and --cmd");
-
+    }
+    
     std::vector<std::string> rb_args;
     if ( args.count("args") > 0 )
     {
@@ -207,8 +210,10 @@ int main(int argc, char* argv[]) {
         rb_args.erase(rb_args.begin());
 
         // Let's make batch mode default to true for scripts.
-        if (not args.count("batch"))
+        if ( args.count("batch") == 0 )
+        {
             batch_mode = true;
+        }
     }
 
 

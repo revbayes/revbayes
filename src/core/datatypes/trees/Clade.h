@@ -52,9 +52,10 @@ namespace RevBayesCore {
         
         // public methods
         void                                        addTaxon(const Taxon &t);                                   //!< Add a taxon to our list.
+        bool                                        conflicts(const Clade& c) const;                            //!< Is there a conflict between the clades, i.e. a partial overlap.
         double                                      getAge(void) const;                                         //!< Get the age of this clade.
         const RbBitSet&                             getBitRepresentation(void) const;                           //!< Get the clade as a bit representation.
-        void                                        setBitRepresentation(const RbBitSet &b);
+        const std::string&                          getCladeName(void) const;                                   //!< Get the name of the clade.
         const std::set<Taxon>&                      getMrca(void) const;                                        //!< Get the mrca taxon.
         int                                         getNumberMissingTaxa(void) const;                           //!< Get the number of missing taxa.
         size_t                                      getNumberOfTaxa(void) const;                                //!< Get the number of taxa.
@@ -64,10 +65,14 @@ namespace RevBayesCore {
         const Taxon&                                getTaxon(size_t i) const;                                   //!< Get a single taxon name.
         const std::string&                          getTaxonName(size_t i) const;                               //!< Get a single taxon name.
         bool                                        isNegativeConstraint(void) const;                           //!< Get negative constraint flag.
-        bool                                        isOptionalMatch(void) const;                           //!< Get negative constraint flag.
+        bool                                        isNestedWithin(const Clade& c) const;                       //!< Is the provided clade nested within me?
+        bool                                        isOptionalMatch(void) const;                                //!< Get negative constraint flag.
+        bool                                        overlaps(const Clade& c) const;                              //!< Does the provided clade overlap with me?
         void                                        resetTaxonBitset(const std::map<std::string, size_t> map);
         void                                        setAge(double a);                                           //!< Set the age of the clade.
-
+        void                                        setAges(const std::vector<Taxon>& taxa);                         //!< Set the aged of the taxa based on this set.
+        void                                        setBitRepresentation(const RbBitSet &b);
+        void                                        setCladeName(const std::string& n);                         //!< Set the name of the clade.
         void                                        setOptionalConstraints(std::vector<Clade> c);               //!< Set optional clade constraints.
         void                                        setMrca(const std::set<Taxon>&);                            //!< Set the mrca taxon, if applicable.
         void                                        setNumberMissingTaxa(int n);                                //!< Set the number of missing taxa in this clade.
@@ -84,6 +89,7 @@ namespace RevBayesCore {
         // members
         double                                      age;
         RbBitSet                                    bitset;
+        std::string                                 clade_name;
         int                                         num_missing;
         std::set<Taxon>                             mrca;
         std::vector<Taxon>                          taxa;
@@ -95,11 +101,6 @@ namespace RevBayesCore {
     
     // Global functions using the class
     std::ostream&                       operator<<(std::ostream& o, const Clade& x);                             //!< Overloaded output operator
-
-    void set_ages_for_constraint(Clade& clade, const std::vector<Taxon>& taxa);
-    bool clade_nested_within(const Clade& clade1, const Clade& clade2);
-    bool clades_overlap(const Clade& clade1, const Clade& clade2);
-    bool clades_conflict(const Clade& clade1, const Clade& clade2);
 
 }
 

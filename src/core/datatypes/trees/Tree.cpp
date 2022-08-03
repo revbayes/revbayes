@@ -233,7 +233,7 @@ bool Tree::containsClade(const TopologyNode &n, bool unrooted) const
     if ( contains == false && unrooted == true )
     {
         your_taxa.flip();
-        contains = root->containsClade( your_taxa, true );;
+        contains = root->containsClade( your_taxa, true );
     }
 
     return contains;
@@ -293,6 +293,7 @@ void Tree::dropTipNode( size_t index )
                 sibling_state_times[i] += parent.getTimeInStates()[i];
             }
             sibling->setTimeInStates(sibling_state_times);
+            sibling->setNumberOfShiftEvents( sibling->getNumberOfShiftEvents() + parent.getNumberOfShiftEvents() );
         }
     }
     else
@@ -310,6 +311,7 @@ void Tree::dropTipNode( size_t index )
             if (root->getTimeInStates().size() > 0)
             {
                 root->setTimeInStates(std::vector<double>(root->getTimeInStates().size(), 0.0));
+                root->setNumberOfShiftEvents( 0 );
             }
         }
         else
@@ -335,8 +337,6 @@ void Tree::dropTipNode( size_t index )
     {
         if ( nodes[i] == NULL )
         {
-            std::cerr << "#nodes after filling:\t\t" << nodes.size() << std::endl;
-            std::cerr << i << " - " << nodes[i] << std::endl;
             throw RbException("Problem while reading in tree.");
         }
         num_tips += ( nodes[i]->isTip() ? 1 : 0);
@@ -634,7 +634,7 @@ const TopologyNode& Tree::getInteriorNode( size_t indx ) const
     {
         throw RbException("Cannot acces interior node '" + StringUtilities::to_string(indx) + "' for a tree with " + StringUtilities::to_string(n) + " tips.");
     }
-    return *nodes[ indx + getNumberOfTips() ];
+    return *nodes[ indx + n ];
 }
 
 
@@ -665,10 +665,18 @@ const TopologyNode& Tree::getMrca(const TopologyNode &n) const
 }
 
 
-std::string Tree::getNewickRepresentation() const
+std::string Tree::getNewickRepresentation(bool round ) const
 {
 
-    return root->computeNewick();
+    if ( root == NULL )
+    {
+        return "";
+    }
+    else
+    {
+        return root->computeNewick( round );
+    }
+
 }
 
 
@@ -704,10 +712,10 @@ const std::vector<TopologyNode*>& Tree::getNodes(void) const
 }
 
 
-std::vector<RbBitSet> Tree::getNodesAsBitset(void) const
+std::vector<RbBitSet>* Tree::getNodesAsBitset(void) const
 {
 
-    std::vector<RbBitSet> bs;
+    std::vector<RbBitSet>* bs = new std::vector<RbBitSet>();
 
     for ( size_t i=0; i<nodes.size(); ++i )
     {
@@ -716,7 +724,7 @@ std::vector<RbBitSet> Tree::getNodesAsBitset(void) const
         {
             RbBitSet taxa_this_node = RbBitSet(num_tips);
             n->getTaxa(taxa_this_node);
-            bs.push_back( taxa_this_node );
+            bs->push_back( taxa_this_node );
         }
     }
 
@@ -859,9 +867,9 @@ const TopologyNode& Tree::getRoot(void) const
  * Get the tree and character history in newick format
  * compatible with SIMMAP and phytools
  */
-std::string Tree::getSimmapNewickRepresentation() const
+std::string Tree::getSimmapNewickRepresentation(bool round) const
 {
-    return root->computeSimmapNewick();
+    return root->computeSimmapNewick(round);
 }
 
 
@@ -887,7 +895,10 @@ std::vector<Taxon> Tree::getTaxa() const
     for (size_t i = 0; i < getNumberOfTips(); ++i)
     {
         const TopologyNode& n = getTipNode( i );
-        taxa.push_back( n.getTaxon() );
+        Taxon taxon = n.getTaxon();
+        taxon.setAge(n.getAge());
+        taxa.push_back( taxon );
+
     }
 
     return taxa;
@@ -920,6 +931,7 @@ const std::map<std::string, size_t>& Tree::getTaxonBitSetMap( void ) const
             taxon_bitset_map[ordered_taxa[i]] = i;
         }
     }
+    
     return taxon_bitset_map;
 }
 
@@ -1107,9 +1119,6 @@ bool Tree::hasSameTopology(const Tree &t) const
     std::string a = getPlainNewickRepresentation();
     std::string b = t.getPlainNewickRepresentation();
 
-//    std::cerr << std::endl << a << std::endl;
-//    std::cerr << std::endl << b << std::endl;
-
     return a == b;
 }
 
@@ -1146,11 +1155,21 @@ void Tree::initFromString(const std::string &s)
 {
     NewickConverter converter;
     Tree* bl_tree = converter.convertFromNewick( s );
-    Tree *tree = TreeUtilities::convertTree( *bl_tree );
+    if ( bl_tree->isUltrametric() == true )
+    {
+        Tree *tree = TreeUtilities::convertTree( *bl_tree );
+        
+        *this = *tree;
 
-    *this = *tree;
+        delete bl_tree;
+        delete tree;
+    }
+    else
+    {
+        *this = *bl_tree;
 
-    delete tree;
+        delete bl_tree;
+    }
 }
 
 
@@ -1232,14 +1251,25 @@ bool Tree::isRooted(void) const
 bool Tree::isUltrametric( void ) const
 {
 
-    double tip_age = getTipNode( 0 ).getAge();
-    for (size_t i = 1; i < getNumberOfTips(); ++i)
+    if ( root->doesUseAges() == true )
+    {
+        double tip_age = getTipNode( 0 ).getAge();
+        for (size_t i = 1; i < getNumberOfTips(); ++i)
+        {
+
+            if ( std::fabs(tip_age-getTipNode(i).getAge()) > 1E-4 )
+            {
+                return false;
+            }
+
+        }
+        
+    }
+    else
     {
 
-        if ( std::fabs(tip_age-getTipNode(i).getAge()) > 1E-4 )
-        {
-            return false;
-        }
+        double d = 0;
+        return root->isUltrametric(d);
 
     }
 
@@ -1257,6 +1287,8 @@ void Tree::makeInternalNodesBifurcating(bool reindex, bool as_fossils)
     // we need to reset the root so that the vector of nodes get filled again with the new number of nodes
     setRoot( &getRoot(), reindex );
 
+    // clear the taxon bitset map
+    // the next time someone call getTaxonBitset() it will be rebuilt
     taxon_bitset_map.clear();
 
 }
@@ -1309,6 +1341,16 @@ void Tree::makeRootBifurcating(const Clade& outgroup, bool as_fossils)
     {
         throw RbException("Problem when rerooting with  '" + outgroup.toString() + "'.");
     } // end-if the root node has 3 children
+    
+
+    // we need to reset the root so that the vector of nodes get filled again with the new number of nodes
+    // it only makes sense to reindex the nodes because we have more nodes now!
+    bool reindex = true;
+    setRoot( &getRoot(), reindex );
+
+    // clear the taxon bitset map
+    // the next time someone call getTaxonBitset() it will be rebuilt
+    taxon_bitset_map.clear();
 
 } 
 
@@ -1343,6 +1385,45 @@ void Tree::orderNodesByIndex( void )
 
 }
 
+// Prints tree for user (rounding)
+void Tree::printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const {
+    long previousPrecision = o.precision();
+    std::ios_base::fmtflags previousFlags = o.flags();
+
+    std::fixed( o );
+    o.precision( 3 );
+
+    o << *this;
+    
+    o.setf( previousFlags );
+    o.precision( previousPrecision );
+}
+
+// Prints tree for simple storing (rounding)
+void Tree::printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const {
+    std::stringstream ss;
+    ss << *this;
+    std::string s = ss.str();
+    if ( l > 0 ) 
+    {
+        StringUtilities::fillWithSpaces(s, l, left);
+    }
+    o << s;
+}
+
+// Prints tree for complex storing (no rounding; mostly checkpointing)
+void Tree::printForComplexStoring ( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const {
+    std::stringstream ss;
+
+    // call getNewickRepresentation with round == FALSE
+    ss << this->getNewickRepresentation( false );
+    std::string s = ss.str();
+    if (l > 0) {
+        StringUtilities::fillWithSpaces(s, l, left);
+    }
+    o << s;
+}
+
 void Tree::pruneTaxa(const RbBitSet& prune_map )
 {
     nodes.clear();
@@ -1354,6 +1435,10 @@ void Tree::pruneTaxa(const RbBitSet& prune_map )
     {
         nodes[i]->setIndex(i);
     }
+    
+    // we also need to reset our internal variables
+    num_nodes = nodes.size();
+    num_tips = (num_nodes+1) / 2;
 }
 
 bool Tree::recursivelyPruneTaxa( TopologyNode* n, const RbBitSet& prune_map )
@@ -1523,10 +1608,11 @@ void Tree::renumberNodes(const Tree &reference)
     }
     // Second, the tip nodes
     std::vector<std::string> tipNames = getTipNames();
-    for (auto i = 0; i<tipNames.size(); ++i) {
+    for (size_t i = 0; i<tipNames.size(); ++i)
+    {
       getTipNodeWithName(tipNames[i]).setIndex(reference.getTipNodeWithName(tipNames[i]).getIndex());
     }
-    return;
+    
 }
 
 
@@ -1554,7 +1640,7 @@ void Tree::reroot(const Clade &o, bool make_bifurcating, bool reindex)
     }
 
     // get the node representing the outgroup
-    TopologyNode *outgroup_node = root->getNode( outgroup, strict);
+    TopologyNode *outgroup_node = root->getNode(outgroup, strict);
 
     // check that we properly got a node
     if ( outgroup_node == NULL )
@@ -1617,6 +1703,34 @@ void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
 	// set the new root
 	setRoot( &n.getParent(), reindex );
 
+}
+
+
+/**
+ * Resets a map of the taxa to their BitSet indices.
+ * The taxa are ordered alphabetically in the BitSet.
+ */
+void Tree::resetTaxonBitSetMap( void )
+{
+    taxon_bitset_map.clear();
+    
+    // get all taxon names
+    std::vector<Taxon> unordered_taxa = getTaxa();
+    std::vector<std::string> ordered_taxa;
+    for (size_t i = 0; i < unordered_taxa.size(); ++i)
+    {
+        ordered_taxa.push_back(unordered_taxa[i].getName());
+    }
+
+    // order taxon names
+    std::sort(ordered_taxa.begin(), ordered_taxa.end());
+
+    // add taxa to bitset map
+    for (size_t i = 0; i < ordered_taxa.size(); ++i)
+    {
+        taxon_bitset_map[ordered_taxa[i]] = i;
+    }
+    
 }
 
 
@@ -1691,9 +1805,7 @@ void Tree::setRoot( TopologyNode* r, bool reindex )
     {
         if ( nodes[i] == NULL )
         {
-            std::cerr << "#nodes after filling:\t\t" << nodes.size() << std::endl;
-            std::cerr << i << " - " << nodes[i] << std::endl;
-            throw RbException("Problem while reading in tree.");
+            throw RbException("Problem while setting the root of the tree.");
         }
         if ( nodes[i] == old_root)
         {
@@ -1735,14 +1847,14 @@ void Tree::setTaxonIndices(const TaxonMap &tm)
  * \param[in] current_name    self explanatory.
  * \param[in] newName         self explanatory.
  */
-void Tree::setTaxonName(const std::string& current_name, const std::string& newName)
+void Tree::setTaxonName(const std::string& current_name, const std::string& new_name)
 {
 
     TopologyNode& node = getTipNodeWithName( current_name );
     Taxon& t = node.getTaxon();
-    t.setName( newName );
+    t.setName( new_name );
     taxon_bitset_map.erase( current_name );
-    taxon_bitset_map.insert( std::pair<std::string, size_t>( newName, node.getIndex() ) );
+    taxon_bitset_map.insert( std::pair<std::string, size_t>( new_name, node.getIndex() ) );
 }
 
 
@@ -1809,6 +1921,7 @@ void Tree::unroot( void )
 // Write this object into a file in its default format.
 void Tree::writeToFile( const std::string &dir, const std::string &fn ) const
 {
+    
     // do not write a file if the tree is invalid
     if (this->getNumberOfTips() > 1)
     {

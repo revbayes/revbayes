@@ -1,29 +1,34 @@
 ################################################################################
 #
 # RevBayes Validation Test: Felsenstein (81) with uniform time tree
-# 
+#
 # Model: Sequences evolve under the Felsenstein (81) model and the tree is drawn
-#        from a uniform time tree distribution. 
-#            
+#        from a uniform time tree distribution.
+#
 #
 # authors: Sebastian Hoehna
 #
 ################################################################################
 
-#######################
-# Reading in the Data #
-#######################
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
 
 #######################
 # Reading in the Data #
 #######################
+
 # Import the morphological character matrix #
 # this file contains only the taxa for which morphological characters are available #
 morpho <- readDiscreteCharacterData("data/bears.nex")
 
 ## helpers
-mvi = 1
-mni = 1
 taxa <- morpho.names()
 n_taxa <- taxa.size()
 n_branches <- 2 * n_taxa - 2
@@ -50,8 +55,8 @@ n_cats = 4
 # Specify the two parameters to the Beta distribution, and the moves on these parameters.
 alpha_ofbeta ~ dnExponential( 0.1 )
 beta_ofbeta  ~ dnExponential( 0.1 )
-moves[mvi++] = mvScale(beta_ofbeta, lambda=1, weight=2.0 )
-moves[mvi++] = mvScale(alpha_ofbeta,lambda=1, weight=2.0 )
+moves.append( mvScale(beta_ofbeta, lambda=1, weight=2.0 ) )
+moves.append( mvScale(alpha_ofbeta,lambda=1, weight=2.0 ) )
 
 # Create the Beta distribution, according to the two parameters and the number of categories.
 cat_offset <- 1.0
@@ -66,11 +71,11 @@ for (i in 1:cats.size())
     Q[i] := fnF81(simplex(abs(1-cats[i]), cats[i]))
 }
 
-# Tell the model what the probability of a character going into any particular category. 
+# Tell the model what the probability of a character going into any particular category.
 # This prior says that a character is equally likely to be put into any category.
 
 matrix_probs ~ dnDirichlet( rep(1,n_cats) )
-moves[mvi++] = mvSimplexElementScale(matrix_probs, alpha=10, weight=4.0) 
+moves.append( mvSimplexElementScale(matrix_probs, alpha=10, weight=4.0) )
 
 
 # Set up Gamma-distributed rate variation.
@@ -78,9 +83,9 @@ alpha_morpho ~ dnExponential( 1.0 )
 rates_morpho := fnDiscretizeGamma( alpha_morpho, alpha_morpho, 4 )
 
 # Moves on the parameters to the Gamma distribution.
-moves[mvi++] = mvScale(alpha_morpho,lambda=1, weight=2.0)
+moves.append( mvScale(alpha_morpho,lambda=1, weight=2.0) )
 
-#Combine all of our elements into a CTMC. Because we have not observed any invariant sites, 
+#Combine all of our elements into a CTMC. Because we have not observed any invariant sites,
 # we specify the coding is 'variable'.
 
 #phyMorpho ~ dnPhyloCTMC(tree=phylogeny, siteRates=rates_morpho, Q=Q, type="Standard", coding="variable", siteMatrices=matrix_probs)
@@ -94,16 +99,14 @@ phyMorpho.clamp(morpho)
 mymodel = model(phylogeny)
 
 
-monitors[1] = mnModel(filename="output/bears_mk.log",printgen=10, separator = TAB)
-
 mymcmc = mcmc(mymodel, monitors, moves)
 
-validation = validationAnalysis( mymcmc, 1000 )
-validation.burnin(generations=3000,tuningInterval=250)
-validation.run(generations=10000)
-validation.summarize()
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Mk_discretized_fixed" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
 
 
 # you may want to quit RevBayes now
 q()
-

@@ -367,8 +367,12 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::computeNodeProbabilit
             
             size_t index_epoch = computeEpochIndex( node.getAge() );
             
-            if (phi != NULL && node.isFossil())
+            if ( node.isFossil() )
             {
+                if ( phi == NULL )
+                {
+                    throw(RbException("Tree has serially sampled tips, but no serial sampling rate was provided."));
+                }
                 sampling = phi->getValue()[index_epoch];
                 extinction = pExtinction(0.0, node.getAge());
             }
@@ -1597,7 +1601,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::executeMethod(const s
  * Get the affected nodes by a change of this node.
  * If the root age has changed than we need to call get affected again.
  */
-void TimeVaryingStateDependentSpeciationExtinctionProcess::getAffected(RbOrderedSet<DagNode *> &affected, RevBayesCore::DagNode *affecter)
+void TimeVaryingStateDependentSpeciationExtinctionProcess::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
 {
     
     if ( affecter == process_age)
@@ -1702,7 +1706,7 @@ std::vector<double> TimeVaryingStateDependentSpeciationExtinctionProcess::getRoo
 /**
  * Keep the current value and reset some internal flags. Nothing to do here.
  */
-void TimeVaryingStateDependentSpeciationExtinctionProcess::keepSpecialization(DagNode *affecter)
+void TimeVaryingStateDependentSpeciationExtinctionProcess::keepSpecialization(const DagNode *affecter)
 {
     
     if ( affecter == process_age )
@@ -1798,7 +1802,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::redrawValue( void )
  * Restore the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void TimeVaryingStateDependentSpeciationExtinctionProcess::restoreSpecialization(DagNode *affecter)
+void TimeVaryingStateDependentSpeciationExtinctionProcess::restoreSpecialization(const DagNode *affecter)
 {
     
     if ( affecter == process_age )
@@ -2540,7 +2544,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::swapParameterInternal
  * Touch the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void TimeVaryingStateDependentSpeciationExtinctionProcess::touchSpecialization(DagNode *affecter, bool touchAll)
+void TimeVaryingStateDependentSpeciationExtinctionProcess::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     if ( affecter == process_age )

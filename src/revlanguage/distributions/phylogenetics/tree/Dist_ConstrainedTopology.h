@@ -45,6 +45,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                           constraints;
         RevPtr<const RevVariable>                           backbone;
         RevPtr<const RevVariable>                           invert_constraint;                                                                      //!< Boolean indicating whether topologies are rooted
+        RevPtr<const RevVariable>                           initial_tree;
     };
 }
 

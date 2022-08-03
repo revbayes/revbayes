@@ -76,6 +76,9 @@ RevBayesCore::ConstantRateBirthDeathProcess* Dist_bdp::createDistribution( void 
     // sampling probability
     RevBayesCore::TypedDagNode<double>* r       = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
     
+    // sampling probability
+    RevBayesCore::TypedDagNode<double>* mp      = NULL;
+    
     // sampling strategy
     const std::string &strategy                 = static_cast<const RlString &>( sampling_strategy->getRevObject() ).getValue();
     
@@ -93,7 +96,7 @@ RevBayesCore::ConstantRateBirthDeathProcess* Dist_bdp::createDistribution( void 
     std::vector<RevBayesCore::Taxon> t = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
     
     // create the internal distribution object
-    RevBayesCore::ConstantRateBirthDeathProcess* d = new RevBayesCore::ConstantRateBirthDeathProcess(ra, s, e, r, strategy, inc_clades, cond, t);
+    RevBayesCore::ConstantRateBirthDeathProcess* d = new RevBayesCore::ConstantRateBirthDeathProcess(ra, s, e, r, mp, strategy, inc_clades, cond, t);
     
     return d;
 }

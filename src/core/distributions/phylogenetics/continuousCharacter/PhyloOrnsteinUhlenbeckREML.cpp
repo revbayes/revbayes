@@ -197,7 +197,7 @@ void PhyloOrnsteinUhlenbeckREML::fireTreeChangeEvent( const TopologyNode &n, con
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::keepSpecialization( DagNode* affecter )
+void PhyloOrnsteinUhlenbeckREML::keepSpecialization( const DagNode* affecter )
 {
     
     // reset all flags
@@ -444,7 +444,7 @@ void PhyloOrnsteinUhlenbeckREML::resetValue( void )
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::restoreSpecialization( DagNode* affecter )
+void PhyloOrnsteinUhlenbeckREML::restoreSpecialization( const DagNode* affecter )
 {
     
     // reset the flags
@@ -752,7 +752,7 @@ double PhyloOrnsteinUhlenbeckREML::sumRootLikelihood( void )
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::touchSpecialization( DagNode* affecter, bool touchAll )
+void PhyloOrnsteinUhlenbeckREML::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
     
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty

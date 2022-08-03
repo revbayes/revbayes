@@ -157,7 +157,7 @@ double NodeOrderConstrainedTreeDistribution::computeLnProbability( void )
  * Touch the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void NodeOrderConstrainedTreeDistribution::getAffected(RbOrderedSet<RevBayesCore::DagNode *> &affected, RevBayesCore::DagNode *affecter)
+void NodeOrderConstrainedTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
 {
 
     // delegate to the base distribution
@@ -234,52 +234,7 @@ void NodeOrderConstrainedTreeDistribution::updateMapOfNodeAges()
         node_ages[(*elem)] = TreeUtilities::getAgeOfMRCA(*value, elem->first, elem->second);
     }
 
-
-    //There must be a smart and efficient way of doing that.
-    //For the moment we do it dumb and slow.
-
-    /*Attempt at a smart algorithm
-     std::unordered_set<std::string> tipsToCareAbout;
-     for (const auto& elem: constrainedNodes) {
-     nodeAges[elem] = -1.0;
-     tipsToCareAbout.insert(elem.first);
-     tipsToCareAbout.insert(elem.second);
-     }
-     //First find all tip nodes of interest
-     std::map < TopologyNode*, bool > nodesOfInterest;
-     for (size_t i = 0; i < tree->getValue().getNumberOfTips()-1; ++i)
-     {
-     TopologyNode *node = n[i];
-     if (tipsToCareAbout.contains( node->getName()) ) {
-     nodesOfInterest[node] = true;
-     }
-     }
-     //Now for internal nodes
-     for (size_t i = tree->getValue().getNumberOfTips(); i < n.size(); ++i)
-     {
-     TopologyNode *node = n[i];
-     std::vector< TopologyNode* > kids = node->getChildren();
-     bool doneOne = false;
-     for (size_t j = 0; j< kids.size() ++j) {
-     if ( nodesOfInterest[kids[j]] )
-     {
-     nodesOfInterest[node] = true;
-     if (doneOne)
-     {
-     //Two children of interest, it may be a node whose age we'd like to know
-     //...
-     }
-     else {
-     doneOne = true;
-     }
-     }
-     }
-
-     }
-     */
-
-    return;
-
+    
 }
 
 
@@ -390,21 +345,21 @@ void NodeOrderConstrainedTreeDistribution::swapParameterInternal( const DagNode 
  * Touch the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void NodeOrderConstrainedTreeDistribution::touchSpecialization(DagNode *affecter, bool touchAll)
+void NodeOrderConstrainedTreeDistribution::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
     base_distribution->touch(affecter, touchAll);
     double a = base_distribution->getValue().getRoot().getAge();
     value->getRoot().setAge( a );
 }
 
-void NodeOrderConstrainedTreeDistribution::keepSpecialization(DagNode *affecter)
+void NodeOrderConstrainedTreeDistribution::keepSpecialization(const DagNode *affecter)
 {
     base_distribution->keep(affecter);
     double a = base_distribution->getValue().getRoot().getAge();
     value->getRoot().setAge( a );
 }
 
-void NodeOrderConstrainedTreeDistribution::restoreSpecialization(DagNode *restorer)
+void NodeOrderConstrainedTreeDistribution::restoreSpecialization(const DagNode *restorer)
 {
     base_distribution->restore(restorer);
     double a = base_distribution->getValue().getRoot().getAge();

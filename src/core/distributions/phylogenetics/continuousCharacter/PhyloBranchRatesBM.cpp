@@ -46,6 +46,10 @@ double PhyloBranchRatesBM::computeLnProbability(void)
 {
     size_t n_nodes = tau->getValue().getNumberOfNodes();
     std::vector<double> node_values = std::vector<double>(n_nodes, 0.0);
+    if ( this->value->size() != (n_nodes-1) )
+    {
+        throw RbException("The dimension of the rates vector and the tree don't match.");
+    }
     node_values[n_nodes-1] = log(root_state->getValue());
     double ln_prob = recursiveLnProb(tau->getValue().getRoot(), node_values);
     
@@ -58,8 +62,6 @@ double PhyloBranchRatesBM::recursiveLnProb( const TopologyNode& node, std::vecto
     
     double ln_prob = 0.0;
     size_t index = node.getIndex();
-//    size_t n_tips = tau->getValue().getNumberOfTips();
-//    double val = (*value)[index];
     
     if ( node.isRoot() == false )
     {
@@ -76,7 +78,7 @@ double PhyloBranchRatesBM::recursiveLnProb( const TopologyNode& node, std::vecto
         double node_value = log(ln_node_value);
         double stand_dev = sigma->getValue() * sqrt(node.getBranchLength());
         double mean = parent_value + drift->getValue() * node.getBranchLength();
-        ln_prob += RbStatistics::Normal::lnPdf(node_value, stand_dev, mean);
+        ln_prob += RbStatistics::Normal::lnPdf(node_value, stand_dev, mean) - std::log(ln_node_value);
         
         parent_values[index] = node_value;
     }

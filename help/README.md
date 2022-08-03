@@ -4,7 +4,7 @@ The Markdown files stored in the `md` directory are used to generate the databas
 
 The Perl script `md2help.pl` processes these files to generate the `src/core/help/RbHelpDatabase.cpp` source file that is compiled with the `rb` executable.
 
-Building RevBayes with the `-help true` option automatically runs `md2help.pl` to update the C++ database, and also yields the `rb-help2yml` executable, which is used to generate an exhaustive YAML database of all information contained in the RevBayes help system, including the information contained in the Markdown database, as well as hardcoded elements such as function arguments and return types. A web portal for this databse is presented on the [RevBayes documentation website](https://revbayes.github.io/documentation/).
+Building RevBayes with the `-help true` option automatically runs `md2help.pl` to update the C++ database, and also yields the `rb-help2yml` executable, which is used to generate an exhaustive YAML database of all information contained in the RevBayes help system, including the information contained in the Markdown database, as well as hardcoded elements such as function arguments and return types. A web portal for this database is presented on the [RevBayes documentation website](https://revbayes.github.io/documentation/).
 
 The fields in each Markdown help entry file are:
 
@@ -13,7 +13,7 @@ This field is the name of the RevBayes type to which the entry is mapped.
 ## title
 A brief name or title for the entry.
 ## description
-A longer description of the RevBayes type, what it does or what it is used for. 
+A longer description of the RevBayes type, what it does or what it is used for.
 ## details
 A more detailed theoretical description if applicable.
 ## authors
@@ -35,4 +35,3 @@ Here is an example:
 	    Mol. Biol Evol. 27 (3): 570-580, 2010.'
 	  doi: 'DOI: https://doi.org/10.1093/molbev/msp274'
 	  url: https://academic.oup.com/mbe/article/27/3/570/999753/Bayesian-Inference-of-Species-Trees-from
-

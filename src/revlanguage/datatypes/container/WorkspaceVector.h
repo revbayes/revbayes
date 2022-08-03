@@ -2,6 +2,7 @@
 #define WorkspaceVector_H
 
 #include "RlContainer.h"
+#include "RbConstIterator.h"
 #include "RbVector.h"
 #include "WorkspaceToCoreWrapperObject.h"
 
@@ -36,9 +37,12 @@ namespace RevLanguage {
         // STL-like vector functions provided here
         rlType&                                     operator[](size_t index);                                           //!< Subscript operator
         const rlType&                               operator[](size_t index) const;                                     //!< Subscript operator (const)
+        RevBayesCore::RbConstIterator<rlType>       end(void) const { /* NEEDS IMPLEMENATION!!! */ return RevBayesCore::RbConstIterator<rlType>(); }                                                    //!< Iterator to end
+        void                                        erase(RevBayesCore::RbConstIterator<rlType> p) { /* NEEDS IMPLEMENATION!!! */ }                     //!< Erase an element
+        RevBayesCore::RbConstIterator<rlType>       find(const rlType &x) const { /* NEEDS IMPLEMENATION!!! */ return RevBayesCore::RbConstIterator<rlType>(); }                                        //!< Find an element
         rlType&                                     pop_back(void);                                                     //!< Drop element at back
         rlType&                                     pop_front(void);                                                    //!< Drop element from front
-        void                                        push_back(const RevObject &x);                                      //!< Append element to end
+        void                                        push_back(const RevObject &x);                                      //!< Append element to front
         void                                        push_front(const rlType &x);                                        //!< Append element to end
         size_t                                      size(void) const;                                                   //!< The size of the vector
 
@@ -168,6 +172,35 @@ RevPtr<RevVariable> WorkspaceVector<rlType>::executeMethod( std::string const &n
         
         return NULL;
     }
+    else if ( name == "erase" )
+    {
+        found = true;
+                
+//        if ( args[0].getVariable()->getRevObject().isType( ModelVector<rlType>::getClassTypeSpec() ) )
+//        {
+//            const ModelVector<rlType> &v_x = static_cast<const ModelVector<rlType>&>( args[0].getVariable()->getRevObject() );
+//            const RevBayesCore::RbVector<typename rlType::valueType> &x = v_x.getValue();
+//            for (size_t i = 0; i < x.size(); ++i )
+//            {
+//                RevBayesCore::RbConstIterator<typename rlType::valueType> pos = this->find( x[i] );
+//                if ( pos != this->end() )
+//                {
+//                    this->erase( pos );
+//                }
+//            }
+//        }
+//        else
+//        {
+            const rlType& x = static_cast<const rlType&>( args[0].getVariable()->getRevObject() );
+            RevBayesCore::RbConstIterator<rlType> pos = this->find( x );
+            if ( pos != this->end() )
+            {
+                this->erase( pos );
+            }
+//        }
+        
+        return NULL;
+    }
     
     return WorkspaceToCoreWrapperObject<RevBayesCore::RbVector<rlType> >::executeMethod( name, args, found );
 }
@@ -240,6 +273,10 @@ void WorkspaceVector<rlType>::initMethods( void )
     append_arg_rules->push_back( new ArgumentRule( "x", rlType::getClassTypeSpec(), "The element that you want to add.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     this->methods.addFunction( new MemberProcedure( "append", RlUtils::Void, append_arg_rules) );
 
+    ArgumentRules* erase_arg_rules = new ArgumentRules();
+    erase_arg_rules->push_back( new ArgumentRule( "x", rlType::getClassTypeSpec(), "The element that you want to erase.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    this->methods.addFunction( new MemberProcedure( "erase", RlUtils::Void, erase_arg_rules) );
+
 }
 
 
@@ -275,7 +312,6 @@ rlType&  WorkspaceVector<rlType>::pop_front( void )
 template <typename rlType>
 void WorkspaceVector<rlType>::push_back( const RevObject &x )
 {
-    
     // cast the object
     const rlType *x_converted = dynamic_cast< const rlType* >( &x );
     

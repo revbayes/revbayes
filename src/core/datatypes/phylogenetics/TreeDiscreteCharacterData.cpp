@@ -149,7 +149,7 @@ void TreeDiscreteCharacterData::writeToFile(const std::string &dir, const std::s
         // tab-delimited file
         fm = RbFileManager(dir, fn + ".tsv");
         RevBayesCore::DelimitedCharacterDataWriter writer; 
-        writer.writeData(fm.getFullFileName(), *character_data, "\t"[0]);
+        writer.writeData(fm.getFullFileName(), *character_data);
 
         // write the character history's time spent in each state
         fm = RbFileManager(dir, fn + "_time_in_states.tsv");

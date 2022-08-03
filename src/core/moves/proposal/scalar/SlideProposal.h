@@ -3,7 +3,7 @@
 
 #include <iosfwd>
 
-#include "Proposal.h"
+#include "SimpleProposal.h"
 
 namespace RevBayesCore {
 class DagNode;
@@ -22,7 +22,7 @@ template <class variableType> class StochasticNode;
      * @since 2009-09-08, version 1.0
      *
      */
-    class SlideProposal : public Proposal {
+    class SlideProposal : public SimpleProposal<double> {
         
     public:
         SlideProposal( StochasticNode<double> *n, double l, double p=0.44);                                                                      //!<  constructor
@@ -30,11 +30,11 @@ template <class variableType> class StochasticNode;
         // Basic utility functions
         void                                    cleanProposal(void);                                                                //!< Clean up proposal
         SlideProposal*                          clone(void) const;                                                                  //!< Clone object
-        double                                  doProposal(void);                                                                   //!< Perform proposal
         const std::string&                      getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                                  getProposalTuningParameter(void) const;
         void                                    printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
         void                                    prepareProposal(void);                                                              //!< Prepare the proposal
+        double                                  propose(double &v);                                                                  //!< Perform proposal
         void                                    setProposalTuningParameter(double tp);
         void                                    tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                    undoProposal(void);                                                                 //!< Reject the proposal
@@ -43,9 +43,8 @@ template <class variableType> class StochasticNode;
         void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
         
     private:
-        // parameters
         
-        StochasticNode<double>*                 variable;                                                                           //!< The variable the Proposal is working on
+        // parameters
         double                                  storedValue;                                                                        //!< The stored value of the Proposal used for rejections.
         double                                  lambda;                                                      //!< The value we propose.
     };

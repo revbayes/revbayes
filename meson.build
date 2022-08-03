@@ -2,7 +2,8 @@ project('RevBayes', ['cpp', 'c'],
         version: '1.0.12',
         default_options: [
           'buildtype=release',
-          'cpp_std=c++11'
+          'cpp_std=c++14',
+          'b_ndebug=if-release'
         ],
         meson_version: '>= 0.53',
         license: 'GPLv2')
@@ -22,11 +23,6 @@ elif host_machine.cpu_family().startswith('x86')
 elif host_machine.cpu_family().startswith('arm') or host_machine.cpu_family().startswith('aarch')
   # Only add sse flags for Intel architecture -- not on (say) ARM
   add_project_arguments(['-DRB_ARM'], language: 'cpp')
-endif
-
-if get_option('buildtype') == 'release' or get_option('buildtype') == 'plain'
-  add_project_arguments(['-O3'], language : 'cpp')
-  add_project_arguments(['-O3'], language : 'c')
 endif
 
 if get_option('buildtype') == 'debug' or get_option('buildtype') == 'debugoptimized'
@@ -49,7 +45,6 @@ add_project_arguments([# These just add noise:
 # Handle file too large error when cross-compiling to windows
 if host_machine.system() == 'windows'
   add_project_arguments(['-Wa,-mbig-obj'], language : 'cpp')
-  add_project_arguments(['-DRB_WIN'], language : 'cpp')
 endif
 
 boost_modules = [ 'regex',
@@ -60,15 +55,19 @@ boost_modules = [ 'regex',
                   'date_time',
                   'serialization']
 
-want_static = get_option('static')
-
 # This doesn't build an internal boost from the internal copy, yet.
-boost = dependency('boost', modules : boost_modules, static: want_static)
+if get_option('static_boost')
+  boost = dependency('boost', modules : boost_modules, version: '>=1.71', static: true)
+else
+  boost = dependency('boost', modules : boost_modules, version: '>=1.71')
+endif
+
+openlibm = dependency('openlibm', required: get_option('openlibm'))
 
 rb_name = 'rb'
 if get_option('mpi')
   add_project_arguments(['-DRB_MPI'], language: 'cpp')
-  mpi = dependency('mpi', language: 'cpp', static: want_static)
+  mpi = dependency('mpi', language: 'cpp')
 else
   mpi = dependency('', required: false)
 endif
@@ -78,41 +77,45 @@ if get_option('jupyter')
   add_project_arguments(['-DRB_XCODE'], language : 'cpp')
 endif
 
+if get_option('rb-exe-name') != 'default'
+  rb_name = get_option('rb-exe-name')
+endif
+
 ####
 subdir('src')
 
-############# executables #################
+############# libraries #################
 core = static_library('rb-core',
                       core_sources,
                       include_directories: [src_inc],
-                      dependencies: [mpi])
+                      dependencies: [boost,mpi])
 
 revlanguage = static_library('rb-revlanguage',
                              revlanguage_sources,
                              include_directories: [src_inc],
-                             dependencies: [mpi])
+                             dependencies: [boost,mpi])
 
 libs = static_library('rb-lib',
                       libs_sources,
-                      include_directories: [src_inc])
+                      include_directories: [src_inc],
+                      dependencies: [boost])
+
+help2yml = static_library('rb-help2yml',
+                          help2yml_sources,
+                          include_directories: [src_inc],
+                          dependencies: [boost])
 
 ############# executables #################
-
-maybe_link_static = []
-if want_static
-  maybe_link_static = ['-static']
-endif
 
 rb = executable(rb_name,
                 ['src/revlanguage/main.cpp'],
                 link_with: [core, revlanguage, libs],
                 include_directories: [src_inc],
-                dependencies: [boost, mpi],
-                link_args: maybe_link_static,
+                dependencies: [boost, mpi, openlibm],
                 install: true)
 
 if get_option('studio')
-  gtk2 = dependency('gtk+-2.0', static: want_static)
+  gtk2 = dependency('gtk+-2.0')
   cmd = static_library('rb-cmd',
                        cmd_sources,
                        include_directories: [src_inc],
@@ -124,12 +127,22 @@ if get_option('studio')
                          ['src/cmd/main.cpp'],
                          link_with: [core, revlanguage, libs, cmd],
                          include_directories: [src_inc],
-                         dependencies: [boost, mpi, gtk2],
+                         dependencies: [boost, mpi, gtk2, openlibm],
                          install: true)
 
 endif
 
 subdir('tests')
+
+if get_option('help2yml')
+
+  executable(rb_name+'help2yml',
+             ['src/help2yml/main.cpp'],
+             link_with: [core, revlanguage, libs, help2yml],
+             include_directories: [src_inc],
+             dependencies: [boost, mpi],
+             install: true)
+endif
 
 ####
 
@@ -145,7 +158,17 @@ summary({'exe name': rb_name,
 summary({'prefix': get_option('prefix'),
         },section: 'Directories')
 
+# 3.3 Enable/Disable extra debugging for dynamic programming
+assertions_off = get_option('b_ndebug') == 'true' or (get_option('b_ndebug') == 'if-release' and
+                                                      (get_option('buildtype') == 'release' or
+                                                       get_option('buildtype') == 'plain')
+                                                     )
+assertions_enabled = 'enabled'
+if assertions_off
+  assertions_enabled = 'disabled'
+endif
+
 summary({'optimization': get_option('optimization'),
-         'b_ndebug': get_option('b_ndebug'),
          'debug': get_option('debug'),
+         'assertions': assertions_enabled,
         },section: 'Configuration')

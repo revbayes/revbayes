@@ -79,6 +79,7 @@
 #include "UserFunctionNode.h"                             // for UserFunctio...
 #include "VectorAppendElement.h"                          // for VectorAppen...
 #include "VectorAppendVector.h"                           // for VectorAppen...
+#include "VectorReverse.h"                                // for VectorRever...
 #include "VectorScalarDivision.h"                         // for VectorScala...
 #include "VectorScalarSubtraction.h"                      // for VectorScala...
 
@@ -142,6 +143,7 @@
 #include "Func_quit.h"
 #include "Func_range.h"
 #include "Func_replicate.h"
+#include "Func_reverse.h"
 #include "Func_seed.h"
 #include "Func_seq.h"
 #include "Func_setOption.h"
@@ -198,6 +200,7 @@
 #include "Func_characterMapTree.h"
 #include "Func_consensusTree.h"
 #include "Func_convertToPhylowood.h"
+#include "Func_fileExists.h"
 #include "Func_listFiles.h"
 #include "Func_maxdiff.h"
 #include "Func_mapTree.h"
@@ -207,10 +210,10 @@
 #include "Func_readAncestralStateTrace.h"
 #include "Func_readAtlas.h"
 #include "Func_readBranchLengthTrees.h"
-#include "Func_readCharacterDataDelimited.h"
-#include "Func_readCharacterDataUniversal.h"
+#include "Func_readDelimitedCharacterData.h"
+#include "Func_readCharacterData.h"
 #include "Func_readContinuousCharacterData.h"
-#include "Func_readDataDelimitedFile.h"
+#include "Func_readDelimitedDataFile.h"
 #include "Func_readDiscreteCharacterData.h"
 #include "Func_readDistanceMatrix.h"
 #include "Func_readMatrix.h"
@@ -226,7 +229,7 @@
 #include "Func_TaxonReader.h"
 #include "Func_treeTrace.h"
 #include "Func_write.h"
-#include "Func_writeCharacterDataDelimited.h"
+#include "Func_writeDelimitedCharacterData.h"
 #include "Func_writeFasta.h"
 #include "Func_writeNexus.h"
 
@@ -301,6 +304,12 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_appendVector<RealPos>()       );
         addFunction( new Func_appendVector<RlString>()      );
         addFunction( new Func_appendVector<RlBoolean>()     );
+        addFunction( new Func_reverse<Integer>()            );
+        addFunction( new Func_reverse<Real>()               );
+        addFunction( new Func_reverse<Natural>()            );
+        addFunction( new Func_reverse<RealPos>()            );
+        addFunction( new Func_reverse<RlString>()           );
+        addFunction( new Func_reverse<RlBoolean>()          );
         addFunction( new Func_clear()                       );
         addFunction( new Func_exists()                      );
         addFunction( new Func_getwd()                       );
@@ -513,6 +522,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
 		addFunction( new Func_characterMapTree()                        );
         addFunction( new Func_consensusTree()                           );
         addFunction( new Func_convertToPhylowood()                      );
+        addFunction( new Func_fileExists()                              );
         addFunction( new Func_listFiles()                               );
         addFunction( new Func_maxdiff()                                 );
         addFunction( new Func_mapTree()                                 );
@@ -523,9 +533,11 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_readAtlas()                               );
 		addFunction( new Func_readBranchLengthTrees()                   );
         addFunction( new Func_readContinuousCharacterData()             );
+        addFunction( new Func_readDelimitedCharacterData()              );
+        addFunction( new Func_readDelimitedDataFile()                   );
         addFunction( new Func_readDiscreteCharacterData()               );
 		addFunction( new Func_readDistanceMatrix()                      );
-        addFunction( new Func_readCharacterDataUniversal()              );
+        addFunction( new Func_readCharacterData()              );
         addFunction( new Func_readMatrix()                              );
         addFunction( new Func_readRelativeNodeAgeConstraints()          );
         addFunction( new Func_readRelativeNodeAgeWeightedConstraints()  );
@@ -534,14 +546,12 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_readTrace()                               );
         addFunction( new Func_readTrees()                               );
         addFunction( new Func_readTreeTrace()                           );
-		addFunction( new Func_readCharacterDataDelimited()              );
-        addFunction( new Func_readDataDelimitedFile()                   );
-        addFunction( new Func_readVCF()                                 );
+		addFunction( new Func_readVCF()                                 );
         addFunction( new Func_source()                                  );
         addFunction( new Func_summarizeCharacterMaps()                  );
         addFunction( new Func_treeTrace()                               );
         addFunction( new Func_write()                                   );
-        addFunction( new Func_writeCharacterDataDelimited()             );
+        addFunction( new Func_writeDelimitedCharacterData()             );
         addFunction( new Func_writeFasta()                              );
         addFunction( new Func_writeNexus()                              );
         

@@ -26,7 +26,7 @@ namespace RevBayesCore {
     class DelimitedDataReader {
         
     public:
-        DelimitedDataReader(const std::string &fn, char d='\t', size_t ns=0);
+        DelimitedDataReader(const std::string &fn, std::string d="", size_t ns=0);
         
         void                                                readData( size_t ls);
         const std::vector<std::vector<std::string> >&       getChars(void);
@@ -37,7 +37,7 @@ namespace RevBayesCore {
         
         // protected member only accessible for derived classes
         std::string                                         filename;
-        char                                                delimiter;
+        std::string                                         delimiter;
         std::vector<std::vector<std::string> >              chars;
         
     };

@@ -105,14 +105,16 @@ bool RbMath::isAComputableNumber(double x)
 }
 
 /** Tests whether a double is finite */
-bool RbMath::isFinite(double x) {
+bool RbMath::isFinite(double x)
+{
     
     return x > RbConstants::Double::neginf && x < RbConstants::Double::inf;
 }
 
 
 /** Tests whether a double is actually an integer */
-bool RbMath::isInt(double x){
+bool RbMath::isInt(double x)
+{
 
     double int_part;
     return ( modf ( x, &int_part ) == 0.0 );
@@ -120,7 +122,8 @@ bool RbMath::isInt(double x){
 
 
 /** Tests whether a double is NAN (not a number) */
-bool RbMath::isNan(double x) {
+bool RbMath::isNan(double x)
+{
 
     return x != x;
 }
@@ -146,6 +149,14 @@ int RbMath::min(int x, int y)
 {
     
     return (x < y) ? x : y;
+}
+
+
+/** Returns the sign of a number */
+int RbMath::sgn(double x)
+{
+
+    return (0.0 < x) - (x < 0.0);
 }
 
 

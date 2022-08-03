@@ -46,16 +46,17 @@ namespace RevBayesCore {
         virtual void                                initFromString( const std::string &s ) = 0;                                 //!< Serialize (resurrect) the object from a string value
         virtual void                                writeToFile(const std::string &dir, const std::string &fn) const = 0;
 
-        // Container functions
-        void                                        clear(void);
+        // public functions
         void                                        addMissingTaxon(const std::string &n);                                      //!< Add taxon data
         void                                        addTaxonData(const AbstractTaxonData &obs);                                 //!< Add taxon data
+        void                                        clear(void);
         void                                        excludeTaxon(size_t i);                                                     //!< Exclude taxon
         void                                        excludeTaxon(const std::string& s);                                         //!< Exclude taxon
         void                                        deleteTaxon(size_t i);                                                      //!< Remove taxon
         void                                        deleteTaxon(const std::string& s);                                          //!< Remove taxon
         const std::string&                          getFileName(void) const;                                                    //!< Returns the name of the file the data came from
         const std::string&                          getFilePath(void) const;                                                    //!< Returns the name of the file path
+        std::vector<Taxon>                          getIncludedTaxa(void) const;                                                //!< Get the names of the taxa
         size_t                                      getIndexOfTaxon(const std::string &n) const;                                //!< Get the index of the taxon with name 'n'.
         const std::map<std::string, std::string >   getHomeologMap();
         size_t                                      getNumberOfTaxa(void) const;                                                //!< Number of taxa

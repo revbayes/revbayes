@@ -1,0 +1,63 @@
+################################################################################
+#
+# RevBayes Validation Test: BimodalNormal
+#
+# Model: Several variables drawn from a bimodal normal distribution.
+#
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
+##########################
+## Setting up the model ##
+##########################
+
+NUM_SAMPELS = 20
+
+p ~ dnUniform(0.0,1.0)
+mean1 ~ dnUniform(-10,0)
+mean2 ~ dnUniform(0,10)
+sd1 ~ dnExp(0.1)
+sd2 ~ dnExp(10)
+
+
+moves.append( mvBetaProbability(p,weight=5) )
+moves.append( mvSlide(mean1, delta = 0.1, weight = 3.0))
+moves.append( mvSlide(mean2, delta = 0.1, weight = 3.0))
+moves.append( mvScale(sd1, lambda = 0.1, weight = 3.0))
+moves.append( mvScale(sd2, lambda = 0.1, weight = 3.0))
+
+for ( i in 1:NUM_SAMPELS ) {
+  x[i] ~ dnBimodalNormal(mean1=mean1, mean2 = mean2, sd1= sd1, sd2 = sd2, p = p)
+  x[i].clamp( x[i] )
+}
+
+
+#############
+# The Model #
+#############
+
+mymodel = model(p)
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_BimodalNormal" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
+
+q()

@@ -141,8 +141,9 @@ RevLanguage::MethodTable RevLanguage::Dist_EmpiricalSample<valType>::getDistribu
     
     // member functions
     ArgumentRules* sample_prob_arg_rules = new ArgumentRules();
-    sample_prob_arg_rules->push_back( new ArgumentRule( "log", RlBoolean::getClassTypeSpec(), "If we should return the log-transformed probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( false ) ) );
-    methods.addFunction( new DistributionMemberFunction<Dist_EmpiricalSample<valType>, ModelVector<Real> >( "getSampleProbabilities", this->variable, sample_prob_arg_rules   ) );
+    sample_prob_arg_rules->push_back( new ArgumentRule( "log",       RlBoolean::getClassTypeSpec(), "If we should return the log-transformed probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( false ) ) );
+    sample_prob_arg_rules->push_back( new ArgumentRule( "normalize", RlBoolean::getClassTypeSpec(), "If we should normalize the probabilities.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( false ) ) );
+    methods.addFunction( new DistributionMemberFunction<Dist_EmpiricalSample<valType>, ModelVector<Real> >( "getSampleProbabilities", this->variable, sample_prob_arg_rules, true   ) );
     
     return methods;
 }

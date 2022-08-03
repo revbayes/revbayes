@@ -13,7 +13,7 @@ namespace RevBayesCore {
     class NaturalNumbersState;
     template<typename charType>
     class DiscreteTaxonData;
-class CharacterState;
+    class CharacterState;
     
     /**
      * Abstract class for all taxon objects.

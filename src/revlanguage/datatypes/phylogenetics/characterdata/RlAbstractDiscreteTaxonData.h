@@ -26,13 +26,16 @@ class TypeSpec;
     
     
     class AbstractDiscreteTaxonData : public ModelObject<RevBayesCore::AbstractDiscreteTaxonData> {
-        
+
     public:
         
                                                 AbstractDiscreteTaxonData(void);                                                        //!< Constructor requires character type
-                                                AbstractDiscreteTaxonData(RevBayesCore::AbstractDiscreteTaxonData *v);                  //!< Constructor requires character type
+                                                AbstractDiscreteTaxonData(const RevBayesCore::AbstractDiscreteTaxonData &d);            //!< Constructor requires character type
+                                                AbstractDiscreteTaxonData(RevBayesCore::AbstractDiscreteTaxonData *d);                  //!< Constructor requires character type
+                                                AbstractDiscreteTaxonData(RevBayesCore::TypedDagNode<RevBayesCore::AbstractDiscreteTaxonData>*d);   //!< Constructor requires character type
         
-        typedef RevBayesCore::AbstractDiscreteTaxonData valueType;
+        
+//        typedef RevBayesCore::AbstractDiscreteTaxonData valueType;
         
         // Basic utility functions
         AbstractDiscreteTaxonData*              clone(void) const;                                                                      //!< Clone object

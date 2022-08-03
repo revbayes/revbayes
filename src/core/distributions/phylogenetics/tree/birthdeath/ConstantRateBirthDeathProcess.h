@@ -22,12 +22,13 @@ namespace RevBayesCore {
         
     public:
         ConstantRateBirthDeathProcess(const TypedDagNode<double> *ra, const TypedDagNode<double> *s, const TypedDagNode<double> *e,
-                                      const TypedDagNode<double> *r, const std::string& ss, const std::vector<Clade> &ic, const std::string &cdt,
+                                      const TypedDagNode<double> *r, const TypedDagNode<double> *mp, const std::string& ss, const std::vector<Clade> &ic, const std::string &cdt,
                                       const std::vector<Taxon> &tn);
         
         // public member functions
         ConstantRateBirthDeathProcess*                      clone(void) const;                                                                      //!< Create an independent clone
-        
+        void                                                redrawValue( SimulationCondition condition = SimulationCondition::MCMC );
+
         
     protected:
         // Parameter management functions

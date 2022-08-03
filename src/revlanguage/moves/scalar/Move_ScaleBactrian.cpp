@@ -57,7 +57,6 @@ Move_ScaleBactrian* Move_ScaleBactrian::clone(void) const
  * constructor and passing the move-parameters (the variable and other parameters) as arguments of the 
  * constructor. The move constructor takes care of the proper hook-ups.
  *
- * \return A new internal distribution object.
  */
 void Move_ScaleBactrian::constructInternalObject( void ) 
 {
@@ -68,7 +67,7 @@ void Move_ScaleBactrian::constructInternalObject( void )
     double d = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     double r = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<double>* tmp = static_cast<const RealPos &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* tmp = static_cast<const Real &>( x->getRevObject() ).getDagNode();
     RevBayesCore::ContinuousStochasticNode *n = static_cast<RevBayesCore::ContinuousStochasticNode *>( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
@@ -138,7 +137,7 @@ const MemberRules& Move_ScaleBactrian::getParameterRules(void) const
     
     if ( !rules_set ) 
     {
-        move_member_rules.push_back( new ArgumentRule( "x"     , RealPos::getClassTypeSpec()  , "The variable this move operates on.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
+        move_member_rules.push_back( new ArgumentRule( "x"     , Real::getClassTypeSpec()     , "The variable this move operates on.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
         move_member_rules.push_back( new ArgumentRule( "lambda", RealPos::getClassTypeSpec()  , "The strength of the proposal.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RealPos(1.0) ) );
         move_member_rules.push_back( new ArgumentRule( "tune"  , RlBoolean::getClassTypeSpec(), "Should we tune lambda during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RlBoolean( true ) ) );
         

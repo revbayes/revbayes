@@ -24,7 +24,7 @@ namespace RevBayesCore {
     class TopologyConstrainedTreeDistribution : public TypedDistribution<Tree>, TreeChangeEventListener {
         
     public:
-        TopologyConstrainedTreeDistribution(TypedDistribution<Tree>* base_dist, const std::vector<Clade> &c);
+        TopologyConstrainedTreeDistribution(TypedDistribution<Tree>* base_dist, const std::vector<Clade> &c, Tree *t);
         TopologyConstrainedTreeDistribution(const TopologyConstrainedTreeDistribution &d);
         
         virtual ~TopologyConstrainedTreeDistribution(void);
@@ -48,10 +48,10 @@ namespace RevBayesCore {
     protected:
         
         void                                                initializeBitSets();
-        virtual void                                        getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter);                                  //!< get affected nodes
-        virtual void                                        keepSpecialization(DagNode* affecter);
-        virtual void                                        restoreSpecialization(DagNode *restorer);
-        virtual void                                        touchSpecialization(DagNode *toucher, bool touchAll);
+        virtual void                                        getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                                  //!< get affected nodes
+        virtual void                                        keepSpecialization(const DagNode* affecter);
+        virtual void                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
         
         // Parameter management functions. You need to override both if you have additional parameters
         virtual void                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                    //!< Swap a parameter
@@ -63,8 +63,9 @@ namespace RevBayesCore {
         RbBitSet                                            recursivelyAddBackboneConstraints(const TopologyNode& node, size_t backbone_idx);
         void                                                recursivelyFlagNodesDirty(const TopologyNode& n);
         RbBitSet                                            recursivelyUpdateClades(const TopologyNode& node);
-        Tree*                                               simulateTree(void);
-        
+        Tree*                                               simulateRootedTree(void);
+        Tree*                                               simulateUnrootedTree(void);
+
 
         // members
         std::vector<std::vector<RbBitSet> >                 active_backbone_clades;
@@ -82,6 +83,10 @@ namespace RevBayesCore {
         std::vector<RbBitSet>                               stored_clades;
         size_t                                              num_backbones;
         bool                                                use_multiple_backbones;
+        Tree*                                               starting_tree;
+        
+        bool                                                rooting_known;
+        bool                                                is_rooted;
 
     };
     

@@ -47,7 +47,7 @@ AVMVNProposal::AVMVNProposal( double s, double e, double n0, double c0, double m
 {
     if (waitBeforeUsing < waitBeforeLearning)
     {
-        throw(RbException("Cannot delay learning empirical covariance matrix longer than using empirical covariance matrix"));
+        throw RbException("Cannot delay learning empirical covariance matrix longer than using empirical covariance matrix");
     }
 }
 

@@ -187,7 +187,7 @@ double NarrowExchangeRateMatrixProposal::lnProposalProbabilityRateMatrix(const T
     MixtureDistribution<RateGenerator>& dist = static_cast<MixtureDistribution<RateGenerator> &>( rm->getDistribution() );
     
     // get the number of categories
-    size_t n = dist.getNumberOfCategories();
+    size_t n = dist.getNumberOfMixtureElements();
     
     // create a vector for the weights
     std::vector<double> weights = std::vector<double>(n,0);

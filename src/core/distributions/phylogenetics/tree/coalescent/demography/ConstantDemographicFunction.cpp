@@ -88,6 +88,17 @@ double ConstantDemographicFunction::getIntegral(double start, double finish) con
 }
 
 /**
+ * @param[in]   time    Current time in coalescent simulation process
+ * @param[in]   lambda  
+ *
+ * @return Waiting Time until next coalescent event
+ */
+double ConstantDemographicFunction::getWaitingTime(double time, double lambda) const
+{
+    return theta->getValue() * lambda;
+}
+
+/**
  * @param[in]   old_node    Pointer to the DAG node to be replaced
  * @param[in]   new_node    Pointer to the DAG node replacing the other
  */

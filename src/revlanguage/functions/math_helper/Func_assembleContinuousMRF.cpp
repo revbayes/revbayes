@@ -60,13 +60,21 @@ RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_assembleConti
 {
 
     RevBayesCore::TypedDagNode<double>* theta1                              = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* increments = static_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    bool theta1_is_log_scale                                                = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
-    size_t order                                                            = static_cast<const Natural &>( args[3].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* increments = static_cast<const ModelVector<Real> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    bool theta1_is_log_scale                                                = static_cast<const RlBoolean &>( args[4].getVariable()->getRevObject() ).getValue();
+    size_t order                                                            = static_cast<const Natural &>( args[5].getVariable()->getRevObject() ).getValue();
 
+    
+    RevBayesCore::TypedDagNode<double>* beta                                = static_cast<const Real &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* predictors = NULL;
+    if (this->args[3].getVariable()->getRevObject() != RevNullObject::getInstance())
+    {
+        predictors = static_cast<const ModelVector<Real> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+    }
+    
     if (order == 1)
     {
-      RevBayesCore::AssembleOrder1ContinuousMRFFunction* f = new RevBayesCore::AssembleOrder1ContinuousMRFFunction( theta1, increments, theta1_is_log_scale );
+      RevBayesCore::AssembleOrder1ContinuousMRFFunction* f = new RevBayesCore::AssembleOrder1ContinuousMRFFunction( theta1, increments, predictors, beta, theta1_is_log_scale );
       return f;
 
     }
@@ -90,12 +98,14 @@ const ArgumentRules& Func_assembleContinuousMRF::getArgumentRules( void ) const
     static ArgumentRules argumentRules = ArgumentRules();
     static bool          rules_set = false;
 
-    if ( !rules_set )
+    if ( rules_set == false )
     {
 
 
         argumentRules.push_back( new ArgumentRule( "initialValue"           , Real::getClassTypeSpec()              , "The first value in the MRF.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "increments"             , ModelVector<Real>::getClassTypeSpec() , "The increments of the process, assumed to be on the log-scale.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "beta"                   , Real::getClassTypeSpec()              , "The correlation coefficient for the predictor variables.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Real(0.0) ) );
+        argumentRules.push_back( new ArgumentRule( "predictors"             , ModelVector<Real>::getClassTypeSpec() , "The predictor variables, assumed to be.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         argumentRules.push_back( new ArgumentRule( "initialValueIsLogScale" , RlBoolean::getClassTypeSpec()         , "Is valueInitial on the log-scale, like the increments?", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "order"                  , Natural::getClassTypeSpec()           , "The order of the MRF (1 or 2).", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
 

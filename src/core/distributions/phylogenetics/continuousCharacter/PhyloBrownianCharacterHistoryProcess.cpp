@@ -189,7 +189,7 @@ void PhyloBrownianCharacterHistoryProcess::flagNodeDirty( const TopologyNode &n 
     
 }
 
-void PhyloBrownianCharacterHistoryProcess::keepSpecialization( DagNode* affecter )
+void PhyloBrownianCharacterHistoryProcess::keepSpecialization( const DagNode* affecter )
 {
     
     // reset all flags
@@ -333,7 +333,7 @@ void PhyloBrownianCharacterHistoryProcess::resetValue( void )
 }
 
 
-void PhyloBrownianCharacterHistoryProcess::restoreSpecialization( DagNode* affecter )
+void PhyloBrownianCharacterHistoryProcess::restoreSpecialization( const DagNode* affecter )
 {
     
     // reset the flags
@@ -494,7 +494,7 @@ void PhyloBrownianCharacterHistoryProcess::simulateRecursivelyInternal( const To
     
 }
 
-void PhyloBrownianCharacterHistoryProcess::touchSpecialization( DagNode* affecter, bool touchAll )
+void PhyloBrownianCharacterHistoryProcess::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
     
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty

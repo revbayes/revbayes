@@ -30,7 +30,7 @@ DelimitedCharacterDataWriter::DelimitedCharacterDataWriter( void )
  * \param[in]   data        The character data object which is written out.
  * \param[in]   del         The text character to delimit columns.
  */
-void DelimitedCharacterDataWriter::writeData(std::string const &fileName, const HomologousCharacterData &data, char del)
+void DelimitedCharacterDataWriter::writeData(std::string const &fileName, const HomologousCharacterData &data, std::string del)
 {
     
     // the filestream object
