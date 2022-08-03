@@ -1,10 +1,10 @@
-### Version 1.2.0 Lagerstätte
+# RevBayes 1.2.0 Lagerstätte
 
-#### New MCMC moves
+## New MCMC moves
 
  * slice sampling (mvSlice) can now do geometric scaling.
 
-#### New models/analyses
+## New models/analyses
 
  * New codon models:
    * Goldman-Yang (1994), Muse-Gaut (1994), FMutSel (Yang 2008)
@@ -16,28 +16,30 @@
    * Birth death sampling treatment process (Magee et al. 2020)
    * Time-heterogeneous fossilized birth death range process
   
-#### Bug fixes
-
-  * fixed occasional crashes when using recovering a tree from a checkpoint file due to rounding. Checkpointing now records doubles without rounding
-  * fixed a bug when printing individual elements of average distance matrices and calculating their completeness
-
-#### New features
+## New features
 
   * optional weighting in fnAverageDistanceMatrix
   * FBD range model uses individual fossil occurrence data
   * site mixture allocations work with codon models
   * automatic handling of whitespace delimited files
 
+## Bug fixes
 
-### Version 1.1.1
+  * fixed occasional crashes when using recovering a tree from a checkpoint file due to rounding. Checkpointing now records doubles without rounding
+  * fixed a bug when printing individual elements of average distance matrices and calculating their completeness
 
-**Warning**: this version includes changes to the Random Number Generator, meaning analysis output will be different from v1.1.0, even when run with the same seed.
 
-#### New models/analyses
+# RevBayes 1.1.1
+
+## Changes
+
+ * **Warning**: this version includes changes to the Random Number Generator, meaning analysis output will be different from v1.1.0, even when run with the same seed.
+
+## New models/analyses
 
  * new PoMo rate matrices with selection
 
-#### Bug fixes
+## Bug fixes
 
  * fixed an error in the likelihood calculation for discrete characters when using ambiguous characters and partitioning standard data by state number
  * fixed a bug causing unbounded likelihoods when using PhyloBrownianProcessREML with unrooted trees
