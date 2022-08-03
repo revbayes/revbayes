@@ -9,9 +9,9 @@
  * New codon models:
    * Goldman-Yang (1994), Muse-Gaut (1994), FMutSel (Yang 2008)
    * Create of Codon models using stackable blocks fndNdS, fnX3, fnMutSel, fnMutSelAA
-   * i.e. fnMutSel(F, fndNdS(omega, fnX3( fnGTR(er, pi) ) ) # GTR + X3 + dNdS + MutSel
+   * i.e. fnMutSel( fndNdS( fnX3( fnGTR(er, pi), omega ), F ) # GTR + X3 + dNdS + MutSel
  * New dinucleotide models: fnX2, fnMutSel
-   * i.e. fnMutSel(F, fnX2( fnHKY(kappa, nuc_pi) ) )    # HKY + X2 + MutSel
+   * i.e. fnMutSel( fnX2( fnHKY(kappa, nuc_pi) ), F )    # HKY + X2 + MutSel
  * New birth death models:
    * Birth death sampling treatment process (Magee et al. 2020)
    * Time-heterogeneous fossilized birth death range process
