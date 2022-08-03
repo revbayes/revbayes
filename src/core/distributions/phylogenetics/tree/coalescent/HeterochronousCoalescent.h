@@ -14,17 +14,9 @@ namespace RevBayesCore {
     
     
     /**
-     * @brief Constant population size coalescent process.
+     * @brief Heterochronous Coalescent Process.
      *
-     *
-     * The constant population size coalescent process is the simplest available coalescent process.
-     * It contains only a single parameter NE, the population size.
-     *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2014-01-17, version 1.0
-     *
+     * This process involves coalescence of serially sampled lineages. The process is split into intervals where the demography dynamics can vary between intervals.
      */
     class HeterochronousCoalescent : public AbstractCoalescent {
         
@@ -52,8 +44,8 @@ namespace RevBayesCore {
         enum EVENT_TYPE { COALESCENT, SERIAL_SAMPLE, DEMOGRAPHIC_MODEL_CHANGE };
         
         // members
-        const TypedDagNode< RbVector<double> >*             intervals;
-        RbVector< DemographicFunction >                     demographies;
+        const TypedDagNode< RbVector<double> >*             intervals; //!<The start times for intervals
+        RbVector< DemographicFunction >                     demographies; //!< a vector of functions that model how the demogrpahy changes over the course of that interval
     };
     
 }
