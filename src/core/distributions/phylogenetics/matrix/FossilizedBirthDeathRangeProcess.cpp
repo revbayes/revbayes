@@ -402,12 +402,9 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
         resampleAge(i);
 
         // death time is younger than oldest occurrence and youngest maximum
-        double t = std::min(y_i[i], age[i]);
-        double d = taxa[i].isExtinct() ? rng->uniform01()*(t - present) + present : present;
-
-        // birth time is older than death time and oldest minimum
-        t = std::max(o_i[i], d);
-        double b = t + rng->uniform01()*(max - t) + t;
+        double d = taxa[i].isExtinct() ? rng->uniform01()*(std::min(y_i[i], age[i]) - present) + present : present;
+        // birth time is older than oldest occurrence
+        double b = age[i] + rng->uniform01()*(max - age[i]) + age[i];
 
         // set values
         (*this->value)[i][0] = b;
