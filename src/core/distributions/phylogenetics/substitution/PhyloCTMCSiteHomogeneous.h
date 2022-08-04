@@ -100,6 +100,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
     {
         // get the root frequencies
         const std::vector<double> &f                    = ff[mixture % ff.size()];
+        assert(f.size() == this->num_chars);
         std::vector<double>::const_iterator f_end       = f.end();
         std::vector<double>::const_iterator f_begin     = f.begin();
 
@@ -168,6 +169,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
         
         // get the root frequencies
         const std::vector<double> &f                    = ff[mixture % ff.size()];
+        assert(f.size() == this->num_chars);
         std::vector<double>::const_iterator f_end       = f.end();
         std::vector<double>::const_iterator f_begin     = f.begin();
 
