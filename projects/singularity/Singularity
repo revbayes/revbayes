@@ -3,6 +3,8 @@ From: ubuntu:20.04
 
 %post
 
+    export DEBIAN_FRONTEND=noninteractive
+
     mkdir /revbayes
     
     echo "Installing required packages..."

@@ -16,17 +16,13 @@ namespace RevBayesCore {
      *
      *
      * The piecewise-constant population size coalescent process is an extension to the constant
-     * population size coalescent process. The process can have one or two parameters:
-     * NEs               := the population sizes
-     * internvalStarts   := the start of a new interval (0 is implicitely assumed)
-     * If the second parameter is omitted, then we assume that the interval are
-     * 1) equally distributed over the present time and the time of the root
-     * 2) equally distributed over coalescent events
+     * population size coalescent process. Instead of having a constant population size over the duration of the process, the process is split into intervals where the population size within each interval is constant.
+     *  The process can have one or two parameters:
+     * @param NEs the population sizes
+     * @param internvalStarts the start time of a new interval (0 is implicitely assumed for the first interval)
      *
      *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2015-04-14, version 1.0
+     *
      *
      */
     class PiecewiseConstantCoalescent : public AbstractCoalescent, public MemberObject< RbVector<double> > {
@@ -52,7 +48,7 @@ namespace RevBayesCore {
 
         // derived helper functions
         double                                              computeLnProbabilityTimes(void) const;                                                          //!< Compute the log-transformed probability of the current value.
-        std::vector<double>                                 simulateCoalescentAges(size_t n) const;                                                         //!< Simulate n coalescent events.
+        std::vector<double>                                 simulateCoalescentAges(size_t n) const;
         
         
     private:
@@ -60,11 +56,11 @@ namespace RevBayesCore {
         void                                                updateIntervals(void);
         
         // members
-        const TypedDagNode<RbVector<double> >*              Nes;
-        const TypedDagNode<RbVector<double> >*              interval_starts_var;
-        mutable RbVector<double>                            interval_starts;
-        mutable RbVector<double>                            pop_sizes;
-        METHOD_TYPES                                        interval_method;
+        const TypedDagNode<RbVector<double> >*              Nes;                                    //!< A pointer for the population sizes for each interval
+        const TypedDagNode<RbVector<double> >*              interval_starts_var;                    //!< A pointer for the start time of each interval
+        mutable RbVector<double>                            interval_starts;                        //!< The start time of each interval
+        mutable RbVector<double>                            pop_sizes;                              //!< The population sizes for each interval
+        METHOD_TYPES                                        interval_method;                        //!< The method of specifying coalescent intervals
 
     };
     

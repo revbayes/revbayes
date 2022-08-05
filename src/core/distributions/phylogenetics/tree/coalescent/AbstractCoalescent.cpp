@@ -42,7 +42,7 @@ AbstractCoalescent::AbstractCoalescent(const std::vector<Taxon> &tn, const std::
 
 
 /**
- * Randomly attach the times to a tree topology.
+ * Randomly attach the node times to a tree topology.
  * This function works by randomly picking a node from the set of tips,
  * setting its time to times[index], increment the index,
  * adding the two children (if they are not actual tips) to the set of tips,
@@ -320,8 +320,10 @@ void AbstractCoalescent::redrawValue( void )
 }
 
 
-/**
+/** Simulates a coalescent tree
  *
+ *
+ *@throw RbException if the vector of taxan has nodes with different ages. Taxa cannot be heterochronous.
  */
 void AbstractCoalescent::simulateTree( void )
 {
