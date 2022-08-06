@@ -87,7 +87,14 @@ double RandomCategoryWalkProposal::doProposal( void )
         // return a hastings ratio such that the move will not be accepted
         return RbConstants::Double::neginf;
     }
-    chosen_neighbour = index + int(u-0.5);
+    if ( u < 0.5 )
+    {
+        chosen_neighbour = index - 1;
+    }
+    else
+    {
+        chosen_neighbour = index + 1;
+    }
     
     // now update the elements
     --val[index];
