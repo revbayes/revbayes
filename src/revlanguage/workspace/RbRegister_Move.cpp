@@ -117,6 +117,7 @@
 #include "Move_SingleElementScale.h"
 #include "Move_SingleElementSlide.h"
 #include "Move_EllipticalSliceSamplingSimple.h"
+#include "Move_RandomCategoryWalk.h"
 #include "Move_SynchronizedVectorFixedSingleElementSlide.h"
 #include "Move_VectorBinarySwitch.h"
 #include "Move_VectorSingleElementScale.h"
@@ -285,6 +286,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_HSRFHyperpriorsGibbs() );
         addType( new Move_HSRFIntervalSwap() );
         addType( new Move_HSRFUnevenGridHyperpriorsGibbs() );
+        addType( new Move_RandomCategoryWalk() );
         addType( new Move_SingleElementSlide() );
         addType( new Move_SingleElementScale() );
         addType( new Move_ShrinkExpand() );
