@@ -11,6 +11,7 @@
 #include "RevObject.h"
 #include "Real.h"
 #include "RlCoalescentSFSSimulator.h"
+#include "RlDemographicFunction.h"
 #include "ModelVector.h"
 #include "Natural.h"
 #include "RlBoolean.h"
@@ -65,13 +66,20 @@ void CoalescentSFSSimulator::constructInternalObject( void )
     delete value;
     
     // get the parameter values
-    std::vector<double> ps  = static_cast<const ModelVector<RealPos> &>( population_sizes->getRevObject() ).getValue();
     std::vector<double> cp  = static_cast<const ModelVector<RealPos> &>( change_points->getRevObject() ).getValue();
     double gt               = static_cast<const RealPos &>( generation_time->getRevObject() ).getValue();
     double mr               = static_cast<const RealPos &>( mutation_rate->getRevObject() ).getValue();
     const std::string& p    = static_cast<const RlString &>( ploidy->getRevObject() ).getValue();
     
-    value = new RevBayesCore::CoalescentSFSSimulator(ps, cp, gt, mr, p);
+    // demographic functions
+    const WorkspaceVector<DemographicFunction> &ws_vec_df   = static_cast<const WorkspaceVector<DemographicFunction> &>( demographies->getRevObject() );
+    RevBayesCore::RbVector<RevBayesCore::DemographicFunction> df;
+    for ( size_t i = 0; i < ws_vec_df.size(); ++i )
+    {
+        df.push_back( ws_vec_df[i].getValue() );
+    }
+    
+    value = new RevBayesCore::CoalescentSFSSimulator(df, cp, gt, mr, p);
 
     
 }
@@ -140,7 +148,7 @@ const MemberRules& CoalescentSFSSimulator::getParameterRules(void) const
     if ( rules_set == false )
     {
         
-        argument_rules.push_back( new ArgumentRule( "populationSizes"   , ModelVector<RealPos>::getClassTypeSpec(), "The (constant) population sizes per interval.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argument_rules.push_back( new ArgumentRule( "demographies"      , WorkspaceVector<DemographicFunction>::getClassTypeSpec(), "The vector of demographic functions.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "changePoints"      , ModelVector<RealPos>::getClassTypeSpec(), "The start times of the intervals (the first interval is implicit and starts at 0).", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "generationTime"    , RealPos::getClassTypeSpec(), "The generation time for the simulations.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "mutationRate"      , RealPos::getClassTypeSpec(), "The mutation rate.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
@@ -184,9 +192,9 @@ void CoalescentSFSSimulator::setConstParameter(const std::string& name, const Re
     {
         generation_time = var;
     }
-    else if ( name == "populationSizes")
+    else if ( name == "demographies")
     {
-        population_sizes = var;
+        demographies = var;
     }
     else if ( name == "changePoints")
     {
