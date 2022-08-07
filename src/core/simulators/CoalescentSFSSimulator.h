@@ -3,9 +3,9 @@
 
 #include <vector>
 
-#include "HomologousDiscreteCharacterData.h"
+#include "DemographicFunction.h"
 #include "Parallelizable.h"
-#include "PoMoState.h"
+#include "RbVector.h"
 
 namespace RevBayesCore {
 class RandomNumberGenerator;
@@ -23,7 +23,7 @@ class RandomNumberGenerator;
         
     public:
         
-        CoalescentSFSSimulator(const std::vector<double>& p, const std::vector<double>& cp, double gt, double mr, const std::string& pl);
+        CoalescentSFSSimulator(const RbVector<DemographicFunction>& p, const std::vector<double>& cp, double gt, double mr, const std::string& pl);
         
         CoalescentSFSSimulator*                         clone(void) const;
         
@@ -36,7 +36,7 @@ class RandomNumberGenerator;
 
         double                                          generation_time;
         double                                          mutation_rate;
-        std::vector<double>                             population_sizes;
+        RbVector<DemographicFunction>                   demographies;
         std::vector<double>                             change_points;
         double                                          ploidy_factor;
         

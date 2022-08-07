@@ -16,8 +16,8 @@
 
 using namespace RevBayesCore;
 
-CoalescentSFSSimulator::CoalescentSFSSimulator(const std::vector<double>& p, const std::vector<double>& cp, double gt, double mr, const std::string& ploidy) :
-population_sizes( p ),
+CoalescentSFSSimulator::CoalescentSFSSimulator(const RbVector<DemographicFunction>& d, const std::vector<double>& cp, double gt, double mr, const std::string& ploidy) :
+demographies( d ),
 change_points( cp ),
 generation_time( gt ),
 mutation_rate( mr ),
@@ -207,10 +207,10 @@ double CoalescentSFSSimulator::simulateCoalescentTime(double current_age, size_t
     do
     {
         double num_pairs = num_active * (num_active-1) / 2.0;
-        double theta = population_sizes[current_interval] * ploidy_factor;
-        double lambda = num_pairs / theta;
-        double u = RbStatistics::Exponential::rv( lambda, *rng);
-        coalescent_time += u;
+        double lambda = RbStatistics::Exponential::rv( num_pairs, *rng);
+        double waiting_time = demographies[current_interval].getWaitingTime(coalescent_time, lambda);
+        coalescent_time += waiting_time;
+        
         valid = current_interval == num_intervals || coalescent_time < change_points[current_interval];
         
         if ( valid == false )
