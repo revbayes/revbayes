@@ -134,9 +134,9 @@ double StairwayPlotDistribution::computeLnProbability( void )
     }
     
 //    ln_prob -= RbMath::lnGamma((double)obs_sfs_counts[0] + 1.0);
-    ln_prob += (double)obs_sfs_counts[0] * p_monomorphic;
+//    ln_prob += (double)obs_sfs_counts[0] * p_monomorphic;
     
-//    ln_prob += (double)obs_sfs_counts[0] * log(expected_SFS[0]);
+    ln_prob += (double)obs_sfs_counts[0] * log(expected_SFS[0]);
     
     // Sebastian: Note, we cannot compute the frequency for monomorphic sites.
     for (size_t i=1; i<max_freq; ++i)
@@ -178,7 +178,7 @@ RbVector<double> StairwayPlotDistribution::computeTimeBreakpoints( void ) const
         double this_time = 0.0;
         for (size_t k=i; k<=num_individuals; ++k)
         {
-            this_time += th[k-2]/(i*(i-1));
+            this_time += th[k-2]/(k*(k-1));
         }
         times[i-2] = this_time;
     }
