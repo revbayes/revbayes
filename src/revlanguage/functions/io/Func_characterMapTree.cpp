@@ -121,7 +121,7 @@ RevPtr<RevVariable> Func_characterMapTree::execute( void )
     std::ofstream out_stream;
     if ( not map_filename.empty() )
     {
-        RevBayesCore::create_directories( map_filename.parent_path() );
+        RevBayesCore::createDirectoryForFile( map_filename );
         
         RevBayesCore::Tree t = RevBayesCore::Tree(*tree);
         t.renameNodeParameter("map_character_history", "character_history");
@@ -131,7 +131,7 @@ RevPtr<RevVariable> Func_characterMapTree::execute( void )
     }
     if ( not map_pp_filename.empty() )
     {
-        RevBayesCore::create_directories( map_pp_filename.parent_path() );
+        RevBayesCore::createDirectoryForFile( map_pp_filename );
         
         RevBayesCore::Tree t = RevBayesCore::Tree(*tree);
         t.renameNodeParameter("map_character_history_posteriors", "character_history");
@@ -141,7 +141,7 @@ RevPtr<RevVariable> Func_characterMapTree::execute( void )
     }
     if ( not map_shift_pp_filename.empty() )
     {
-        RevBayesCore::create_directories( map_shift_pp_filename.parent_path() );
+        RevBayesCore::createDirectoryForFile( map_shift_pp_filename );
         
         RevBayesCore::Tree t = RevBayesCore::Tree(*tree);
         t.renameNodeParameter("map_character_history_shift_prob", "character_history");

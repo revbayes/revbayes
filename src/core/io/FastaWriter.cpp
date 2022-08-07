@@ -34,7 +34,7 @@ FastaWriter::FastaWriter( void )
  */
 void FastaWriter::writeData(const path& file_name, const AbstractHomologousDiscreteCharacterData& data)
 {
-    create_directories( file_name.parent_path() );
+    createDirectoryForFile( file_name );
 
     // the filestream object
     std::ofstream out_stream( file_name.string() );
@@ -76,7 +76,7 @@ void FastaWriter::writeData(const path& file_name, const AbstractHomologousDiscr
  */
 void FastaWriter::writeData(const path& fileName, const AbstractNonHomologousDiscreteCharacterData& data)
 {
-    create_directories( fileName.parent_path() );
+    createDirectoryForFile( fileName );
 
     // the filestream object
     std::fstream out_stream( fileName.string() );

@@ -204,7 +204,7 @@ void Mcmc::checkpoint( void ) const
     std::string separator = "\t";
     bool flatten = true;
     
-    create_directories( checkpoint_file_name.parent_path() );
+    createDirectoryForFile( checkpoint_file_name );
     
     // open the stream to the file
     std::ofstream out_stream( checkpoint_file_name.string() );

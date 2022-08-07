@@ -32,9 +32,8 @@ DelimitedCharacterDataWriter::DelimitedCharacterDataWriter( void )
  */
 void DelimitedCharacterDataWriter::writeData(path const &fileName, const HomologousCharacterData &data, std::string del)
 {
-    create_directories( fileName.parent_path() );
+    createDirectoryForFile( fileName );
     
-    // the filestream object
     std::ofstream outStream( fileName.string() );
     
     const std::vector<Taxon> &taxa = data.getTaxa();

@@ -80,7 +80,7 @@ bool AbstractFileMonitor::isFileMonitor( void ) const
 
 void AbstractFileMonitor::openStream( bool reopen )
 {
-    create_directories(working_file_name.parent_path());
+    createDirectoryForFile( working_file_name );
             
     // open the stream to the file
     if ( append == true || reopen == true )

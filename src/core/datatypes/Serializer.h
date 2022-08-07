@@ -59,7 +59,7 @@ namespace RevBayesCore {
         {
             auto p = dir / (fn + ".txt");
 
-            create_directories(p.parent_path());
+            createDirectoryForFile( p );
             
             // open the stream to the file
             std::ofstream outStream( p.string() );

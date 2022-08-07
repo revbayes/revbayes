@@ -238,7 +238,7 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
     const std::vector<RevBayesCore::DagNode*>& theNodes = value->getDagNodes();
     std::vector<RevBayesCore::DagNode*>::const_iterator it;
     
-    create_directories( fn.parent_path() );
+    RevBayesCore::createDirectoryForFile( fn );
     
     std::ofstream o( fn.string() );
 
