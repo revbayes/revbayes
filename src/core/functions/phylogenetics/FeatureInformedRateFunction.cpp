@@ -21,7 +21,6 @@ namespace RevBayesCore { class DagNode; }
 using namespace RevBayesCore;
 
 
-//TypedFunction<MatrixReal>( new MatrixReal( mc + 1, (mc + 1) * (mc + 1), 0.0 ) ),
 FeatureInformedRateFunction::FeatureInformedRateFunction(
     const TypedDagNode< RbVector<RbVector<RbVector<long> > > >* cf,
     const TypedDagNode< RbVector<RbVector<RbVector<double> > > >* qf,
@@ -46,6 +45,7 @@ FeatureInformedRateFunction::FeatureInformedRateFunction(
     numDim2 = categorical_features->getValue()[0][0].size();
     
     // refresh values
+//    this->setForceUpdates(true);
     update();
 }
 
@@ -62,10 +62,17 @@ FeatureInformedRateFunction* FeatureInformedRateFunction::clone( void ) const
 
 void FeatureInformedRateFunction::update( void )
 {
+    
+    // get all parent node values
+    const RbVector<RbVector<RbVector<long> > >& cf = categorical_features->getValue();
+    const RbVector<RbVector<RbVector<double> > >& qf = quantitative_features->getValue();
+    const RbVector<double>& cp = categorical_params->getValue();
+    const RbVector<double>& qp = quantitative_params->getValue();
+
+    // initialize new relative rates (=1)
     RbVector<RbVector<double> > rates(numDim1, RbVector<double>(numDim2, 1.0));
     
-    const RbVector<RbVector<RbVector<long> > >& cf = categorical_features->getValue();
-    const RbVector<double>& cp = categorical_params->getValue();
+    // apply categorical scalers
     for (size_t i = 0; i < numCategoricalFeatures; i++) {
         double cp_i = std::exp(cp[i]);
         for (size_t j = 0; j < numDim1; j++) {
@@ -76,8 +83,7 @@ void FeatureInformedRateFunction::update( void )
             }
         }
     }
-    const RbVector<RbVector<RbVector<double> > >& qf = quantitative_features->getValue();
-    const RbVector<double>& qp = quantitative_params->getValue();
+    // apply quantitative scalers
     for (size_t i = 0; i < numQuantitativeFeatures; i++) {
         for (size_t j = 0; j < numDim1; j++) {
             for (size_t k = 0; k < numDim2; k++) {
@@ -86,6 +92,7 @@ void FeatureInformedRateFunction::update( void )
         }
     }
     
+    // set new values
     (*value) = rates;
 }
 
