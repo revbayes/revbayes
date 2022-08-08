@@ -170,7 +170,7 @@ RbVector<long>* CoalescentSFSSimulator::simulateSFS( long sample_size, long reps
             
             if ( pid == i )
             {
-                this_sfs = tpv_sfs;
+                this_sfs = sfs_backup;
             }
                 
             MPI_Bcast(&this_sfs[0], sample_size+1, MPI_INT, pid, MPI_COMM_WORLD);
@@ -207,7 +207,7 @@ double CoalescentSFSSimulator::simulateCoalescentTime(double current_age, size_t
     do
     {
         double num_pairs = num_active * (num_active-1) / 2.0;
-        double lambda = RbStatistics::Exponential::rv( num_pairs, *rng);
+        double lambda = RbStatistics::Exponential::rv( num_pairs / generation_time, *rng);
         double waiting_time = demographies[current_interval].getWaitingTime(coalescent_time, lambda);
         coalescent_time += waiting_time;
         
