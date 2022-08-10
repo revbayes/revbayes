@@ -13,23 +13,23 @@ namespace RevBayesCore {
     class Taxon;
 
     /**
-     * @brief Piecewise-constant birth-death-sampling process with occurrences.
-     *
-     * The piecewise-constant occurrence birth-death process has constant rates for each time interval.
-     * At the end of each interval there may be a rate-shift (jump for each of the rates).
-     * Fossils with morphological caracters are sampled with rate psi, fossil occurrences
-     * without morphological at rate omega. Present lineages are conserved with probability rho.
-     *
-     * We assume that the rate vectors have one more element than the rate-change vectors.
-     * Thus, one rate-change means always two interval, two rate-changes three interval, and so on.
-     * This implementation does not deal with rates that change at different times. If provided as vectors,
-     * all vectors must be of equal length, to match the provided timeline. The handling of heterogeneous/homogeneous rates
-     * is adapted from the episodic birth-death-sampling-treatment process.
-     *
-     * @author Antoine Zwaans & Jérémy Andréoletti
-     * @since 2020-03, version 1.0
-     *
-     */
+    * @brief Piecewise-constant birth-death-sampling process with occurrences.
+    *
+    * The piecewise-constant occurrence birth-death process has constant rates for each time interval.
+    * At the end of each interval there may be a rate-shift (jump for each of the rates).
+    * Fossils with morphological characters are sampled with rate psi, fossil occurrences
+    * without morphological at rate omega. Present lineages are conserved with probability rho.
+    *
+    * We assume that the rate vectors have one more element than the rate-change vectors.
+    * Thus, one rate-change means always two interval, two rate-changes three interval, and so on.
+    * The handling of heterogeneous/homogeneous rates
+    * is adapted from the episodic birth-death-sampling-treatment process.
+    *
+    * @author Antoine Zwaans & Jérémy Andréoletti
+    * @since 2020-03, version 1.0
+    *
+    */
+
     class OccurrenceBirthDeathProcess : public AbstractBirthDeathProcess {
 
     public:

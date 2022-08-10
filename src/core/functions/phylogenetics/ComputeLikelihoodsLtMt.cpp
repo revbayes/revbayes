@@ -270,10 +270,8 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const double &start_age,
             if (verbose){std::cout << std::setprecision(15) << "\n ==> Log-Likelihood Lt : " << logLikelihood << "\n" << std::endl;}
         }
     }
-    // We then deal with the conditioning, in order to match the conditioning presented in Stadler & al. 2010, we ensure that psi = 0.
-    std::vector<double> psi_cond(psi.size());
-    double value = 0.0;
-    std::fill(psi_cond.begin(), psi_cond.end(), value);
+    // We set psi=0 to condition on the survival AND sampling of either 1 or 2 EXTANT taxa. (matching definitions in Stadler et Al. 2010)
+    std::vector<double> psi_cond(psi.size(),0.0);
 
     std::vector<double> res = RevBayesCore::GetFunctionUandP(start_age, timeline, lambda, mu, psi_cond, omega, rho, removalPr);
     if(     cond == "survival" ){logLikelihood -= log( 1 - res[0] );}
