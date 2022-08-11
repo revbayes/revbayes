@@ -34,7 +34,7 @@
 #include "Trace.h"
 #include "TypeSpec.h"
 #include "WorkspaceToCoreWrapperObject.h"
-
+#include "RlUserInterface.h"  // for RBOUT
 
 using namespace RevLanguage;
 
@@ -174,8 +174,7 @@ std::vector<RevBayesCore::AncestralStateTrace> Func_readAncestralStateTrace::rea
         throw RbException()<<"Could not open file "<<fileName;
 	
     /* Initialize */
-    std::string commandLine;
-    std::cout << "Processing file " << fileName << std::endl;
+    RBOUT("Processing file '" + fileName.string() + "'");
 	
     /* Command-processing loop */
     while ( inFile.good() )
