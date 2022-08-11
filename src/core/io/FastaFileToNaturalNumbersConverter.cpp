@@ -160,15 +160,15 @@ void FastaFileToNaturalNumbersConverter::faconverter( const path &fi, const std:
   createDirectoryForFile( fo );
 
   // open the stream to the file a write it
-  std::ofstream NaturalNumbers( fo.string() );
+  std::ofstream NaturalNumbersStream( fo.string() );
 
   for (size_t i=0; i<n_taxa; ++i)
   {
-    NaturalNumbers << ctaxa[i] + "\n";
+    NaturalNumbersStream << ctaxa[i] + "\n";
   }
   
   // close the stream
-  NaturalNumbers.close();
+  NaturalNumbersStream.close();
 
 }
 
