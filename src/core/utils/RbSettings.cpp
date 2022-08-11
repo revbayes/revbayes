@@ -10,14 +10,10 @@
 #include "RbException.h"
 #include "RbFileManager.h"
 #include "StringUtilities.h"
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
 
 #	ifdef _WIN32
 #include <windows.h>
 #   endif
-
-namespace fs = boost::filesystem;
 
 using namespace RevBayesCore;
 
@@ -31,7 +27,7 @@ RbSettings::RbSettings(void)
 }
 
 
-const fs::path& RbSettings::getModuleDir( void ) const
+const path& RbSettings::getModuleDir( void ) const
 {
     return moduleDir;
 }
@@ -138,10 +134,10 @@ void RbSettings::initializeUserSettings(void)
     printNodeIndex = true;      // print node indices of tree nodes as comments
     collapseSampledAncestors = true;
     
-    fs::path user_dir = RevBayesCore::expandUserDir("~");
+    path user_dir = RevBayesCore::expandUserDir("~");
     
     // read the ini file, override defaults if applicable
-    fs::path settings_file_name = user_dir / ".RevBayes.ini";
+    path settings_file_name = user_dir / ".RevBayes.ini";
 
     //    bool failed = false; //unused
     if ( is_regular_file( settings_file_name) )
@@ -178,7 +174,7 @@ void RbSettings::listOptions() const
 }
 
 
-void RbSettings::setModuleDir(const fs::path &md)
+void RbSettings::setModuleDir(const path &md)
 {
     if ( not is_directory(md) )
     {
@@ -319,10 +315,10 @@ void RbSettings::setTolerance(double t)
 void RbSettings::writeUserSettings( void )
 {
     // Does this always work on windows?
-    fs::path user_dir = expandUserDir("~");
+    path user_dir = expandUserDir("~");
     
     // open the ini file
-    fs::path settings_file_name = user_dir / ".RevBayes.ini";
+    path settings_file_name = user_dir / ".RevBayes.ini";
 
     std::ofstream writeStream( settings_file_name.string() );
     assert( moduleDir == "modules" or is_directory(moduleDir) );
