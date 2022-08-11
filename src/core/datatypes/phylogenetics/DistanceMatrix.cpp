@@ -88,7 +88,7 @@ size_t DistanceMatrix::getSize(void) const
 }
 
 
-path DistanceMatrix::getFilename(void) const
+const path& DistanceMatrix::getFilename(void) const
 {
     return filename;
 }

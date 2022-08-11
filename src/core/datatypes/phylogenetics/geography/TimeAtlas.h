@@ -31,7 +31,7 @@ class TimeAtlasDataReader;
         
         std::vector<double>                             getEpochs(void) const;
         std::vector<std::vector<GeographicArea*> >      getAreas(void) const;
-        path                                            getFilename(void) const;
+        const path&                                     getFilename(void) const;
         std::string                                     getDataType(void) const;  
         size_t                                          getNumEpochs(void) const;
         size_t                                          getNumAreas(void) const;

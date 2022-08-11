@@ -39,7 +39,7 @@ template <class valueType> class RbVector;
         const std::vector<Taxon>&                       getTaxa(void) const;                 //!< Get the taxa whose pairwise distances are stored in the matrix
         const MatrixReal&                               getMatrix(void) const;               //!< Get the matrix of distances (without taxon annotations)
 		size_t                                          getSize(void) const;                 //!< Get the number of tips of the tree associated with the matrix
-        path                                            getFilename(void) const;
+        const path&                                     getFilename(void) const;
         //std::string                                     getDatatype(void) const;
         RbVector<double>&                       		operator[](size_t index);            //!< Overloaded subsetting operator
         const RbVector<double>&                 		operator[](size_t index) const;

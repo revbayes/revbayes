@@ -54,7 +54,7 @@ namespace RevBayesCore {
         
 
         // getters and setters
-        path                            getFileName() const                             { return fileName; }
+        const path&                     getFileName() const                             { return fileName; }
         const std::string&              getParameterName() const                        { return parmName; }
         
         void                            setFileName(path fn)                            { fileName = fn; }
