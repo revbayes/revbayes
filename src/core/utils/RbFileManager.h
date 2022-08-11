@@ -16,7 +16,7 @@ namespace RevBayesCore {
     path                    expandUserDir(std::string path); //!< Get full path to user directory
 
     bool                    setStringWithNamesOfFilesInDirectory(const path& dirpath, std::vector<path>& sv, bool recursive=true);  //!< Recursively fills in a string vector with the contents of the directory passed in argument
-    path                    append_to_stem(const path& p, const std::string& s);
+    path                    appendToStem(const path& p, const std::string& s);
     void                    formatError(const path& p, std::string& errorStr);  //!< Format the error string when (mis)reading files
 
     void                    createDirectoryForFile(const path& p);

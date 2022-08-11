@@ -1255,7 +1255,7 @@ void Mcmcmc::setCheckpointFile(const path &f)
         
         if ( chains[j] != NULL )
         {
-            path chain_file_name = append_to_stem(f, "_chain_" + std::to_string(j) );
+            path chain_file_name = appendToStem(f, "_chain_" + std::to_string(j) );
             chains[j]->setCheckpointFile( chain_file_name );
         }
         

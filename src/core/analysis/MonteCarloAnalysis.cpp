@@ -326,7 +326,7 @@ void MonteCarloAnalysis::initializeFromCheckpoint(const path &checkpoint_file)
             ss << "_run_" << (i+1);
             
             // assemble the new filename
-            path run_checkpoint_file = append_to_stem( checkpoint_file, ss.str() );
+            path run_checkpoint_file = appendToStem( checkpoint_file, ss.str() );
             
             // set the filename for the MCMC object
             runs[i]->setCheckpointFile( run_checkpoint_file );
@@ -625,7 +625,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
                 ss << "_run_" << (i+1);
                 
                 // assemble the new filename
-                auto run_checkpoint_file = append_to_stem(checkpoint_file, ss.str());
+                auto run_checkpoint_file = appendToStem(checkpoint_file, ss.str());
 
                 // set the filename for the MCMC object
                 runs[i]->setCheckpointFile( run_checkpoint_file );

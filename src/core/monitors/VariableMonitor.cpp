@@ -257,7 +257,7 @@ void VariableMonitor::combineReplicates( size_t n_reps, MonteCarloAnalysisOption
                 std::stringstream ss;
                 ss << "_run_" << (i+1);
                 std::string s = ss.str();
-                path current_file_name = append_to_stem(filename, s);
+                path current_file_name = appendToStem(filename, s);
 
                 std::ifstream current_input_stream( current_file_name.string() );
 
@@ -354,7 +354,7 @@ void VariableMonitor::combineReplicates( size_t n_reps, MonteCarloAnalysisOption
                 ss << "_run_" << (i+1);
                 std::string s = ss.str();
 
-                path current_file_name = append_to_stem(filename, s);
+                path current_file_name = appendToStem(filename, s);
 
                 std::ifstream * current_input_stream = new std::ifstream( current_file_name.string() );
 

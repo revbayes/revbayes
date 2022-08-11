@@ -142,7 +142,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
             if ( nruns > 1 )
             {
                 string run_tag = "_run_" + StringUtilities::to_string(i+1);
-                filepath = RevBayesCore::append_to_stem(filepath, run_tag);
+                filepath = RevBayesCore::appendToStem(filepath, run_tag);
             }
 
             if ( not RevBayesCore::exists(filepath))

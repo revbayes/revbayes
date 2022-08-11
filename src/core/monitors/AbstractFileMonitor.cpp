@@ -62,7 +62,7 @@ void AbstractFileMonitor::addFileExtension(const std::string &s, bool dir)
     if (dir)
         working_file_name = filename.parent_path() / s / filename.filename();
     else
-        working_file_name = append_to_stem(filename, s);
+        working_file_name = appendToStem(filename, s);
 }
 
 

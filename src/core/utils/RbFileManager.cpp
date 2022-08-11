@@ -37,7 +37,7 @@ void createDirectoryForFile(const path& p)
     create_directories(p.parent_path());
 }
 
-path append_to_stem(const path& p, const std::string& s)
+path appendToStem(const path& p, const std::string& s)
 {
     return p.parent_path() / ( p.stem().string() + s + p.extension().string() );
 }

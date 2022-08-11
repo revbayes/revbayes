@@ -260,7 +260,7 @@ void Mcmc::checkpoint( void ) const
     /////////
 
     // assemble the new filename
-    path mcmc_checkpoint_file_name = append_to_stem(checkpoint_file_name, "_mcmc");
+    path mcmc_checkpoint_file_name = appendToStem(checkpoint_file_name, "_mcmc");
     
     // open the stream to the file
     std::ofstream out_stream_mcmc( mcmc_checkpoint_file_name.string() );
@@ -275,7 +275,7 @@ void Mcmc::checkpoint( void ) const
     /////////
     
     // assemble the new filename
-    path moves_checkpoint_file_name = append_to_stem(checkpoint_file_name, "_moves");
+    path moves_checkpoint_file_name = appendToStem(checkpoint_file_name, "_moves");
     
     // open the stream to the file
     std::ofstream out_stream_moves( moves_checkpoint_file_name.string() );
@@ -781,7 +781,7 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
     }
     
     // assemble the new filename
-    path mcmc_checkpoint_file_name = append_to_stem( checkpoint_file_name, "_mcmc");
+    path mcmc_checkpoint_file_name = appendToStem( checkpoint_file_name, "_mcmc");
 
     // Open file
     std::ifstream in_file_mcmc( mcmc_checkpoint_file_name.string() );
@@ -828,7 +828,7 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
     /////////
     // Next we also write the moves information into a file
     /////////
-    path moves_checkpoint_file_name = append_to_stem( checkpoint_file_name, "_moves" );
+    path moves_checkpoint_file_name = appendToStem( checkpoint_file_name, "_moves" );
     
     // Open file
     std::ifstream in_file_moves( moves_checkpoint_file_name.string() );

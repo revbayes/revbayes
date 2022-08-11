@@ -227,7 +227,7 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
 
     std::string stone_tag = "_stone_" + std::to_string(idx);
 
-    path stoneFileName = append_to_stem(filename, stone_tag);
+    path stoneFileName = appendToStem(filename, stone_tag);
     createDirectoryForFile( stoneFileName );
     
     std::ofstream outStream( stoneFileName.string() );
@@ -331,7 +331,7 @@ void PowerPosteriorAnalysis::summarizeStones( void )
     for (size_t idx = 0; idx < powers.size(); ++idx)
     {
         std::string stone_tag = "_stone_" + std::to_string(idx);
-        path stoneFileName = append_to_stem( filename, stone_tag );
+        path stoneFileName = appendToStem( filename, stone_tag );
 
         // read the i-th stone
         std::ifstream inStream( stoneFileName.string() );

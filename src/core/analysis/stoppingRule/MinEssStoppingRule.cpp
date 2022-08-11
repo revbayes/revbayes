@@ -57,7 +57,7 @@ bool MinEssStoppingRule::stop( size_t g )
     {
         path fn = filename;
         if ( numReplicates > 1 )
-            fn = append_to_stem(filename, "_run_" + StringUtilities::to_string(i));
+            fn = appendToStem(filename, "_run_" + StringUtilities::to_string(i));
         
         TraceContinuousReader reader = TraceContinuousReader( fn );
     
