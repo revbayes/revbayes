@@ -46,7 +46,7 @@ RevPtr<RevVariable> Func_system::execute( void )
 
     RbSettings& s = RbSettings::userSettings();
 
-    std::string cmd = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue().c_str();
+    const std::string& cmd = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
     
     system( cmd.c_str() );
     
