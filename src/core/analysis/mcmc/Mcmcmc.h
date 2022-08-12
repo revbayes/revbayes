@@ -91,11 +91,11 @@ namespace RevBayesCore {
         void                                    synchronizeTuningInfo(void);
         void                                    updateChainState(size_t j);
         double                                  computeBeta(double d, size_t i);                                                // incremental temperature schedule
-        double                                  heat_for_chain(int i) const;
-        bool                                    is_cold_chain(int i) const;
-        int                                     heat_index_for_chain(int i) const;
-        int                                     chain_for_heat_index(int i) const;
-        double                                  heat_for_index(int i) const;
+        double                                  heatForChain(int i) const;
+        bool                                    isColdChain(int i) const;
+        int                                     heatIndexForChain(int i) const;
+        int                                     chainForHeatIndex(int i) const;
+        double                                  heatForIndex(int i) const;
 
         size_t                                  num_chains;
         std::vector<size_t>                     heat_ranks;
