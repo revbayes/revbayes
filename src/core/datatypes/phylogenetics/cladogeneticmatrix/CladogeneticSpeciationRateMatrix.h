@@ -23,7 +23,7 @@
 
 namespace RevBayesCore {
     
-    class CladogeneticSpeciationRateMatrix : public Cloneable, public Assignable, public Printable, public Serializable, public MemberObject<RbVector<double> >, public MemberObject<CladogeneticProbabilityMatrix> {
+    class CladogeneticSpeciationRateMatrix : public Cloneable, public Assignable, public Printable, public Serializable, public MemberObject<double>, public MemberObject<RbVector<double> >, public MemberObject<RbVector<RbVector<long> > >, public MemberObject<CladogeneticProbabilityMatrix> {
         
     public:
 
@@ -42,7 +42,9 @@ namespace RevBayesCore {
         virtual void                                            initFromString( const std::string &s );
         
         void                                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, CladogeneticProbabilityMatrix &rv) const;     //!< Map the member methods to internal function calls
+        void                                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<RbVector<long> > &rv) const;     //!< Map the member methods to internal function calls
         void                                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;     //!< Map the member methods to internal function calls
+        void                                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, double &rv) const;     //!< Map the member methods to internal function calls
         
         
         // virtual methods that may need to overwritten
