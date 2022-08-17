@@ -98,6 +98,7 @@ cd ${SYSROOT}
 
 PKGS="boost-1.75.0-2
 openlibm-0.7.5-1
+dlfcn-1.3.1-1
 "
 
 if [ "${gtk}" = "true" ] ; then

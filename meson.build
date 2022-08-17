@@ -119,6 +119,8 @@ endif
 
 
 ############# libraries #################
+libdl = cpp.find_library('dl')
+
 core = static_library('rb-core',
                       core_sources,
                       include_directories: [src_inc],
@@ -132,7 +134,7 @@ revlanguage = static_library('rb-revlanguage',
 libs = static_library('rb-lib',
                       libs_sources,
                       include_directories: [src_inc],
-                      dependencies: [boost])
+                      dependencies: [boost, libdl])
 
 help2yml = static_library('rb-help2yml',
                           help2yml_sources,
