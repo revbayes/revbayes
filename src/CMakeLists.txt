@@ -175,7 +175,7 @@ if ("${HELP}" STREQUAL "ON")
   message("Building ${RB_EXEC_NAME}-help2yml")
   add_executable(${RB_EXEC_NAME}-help2yml ${PROJECT_SOURCE_DIR}/help2yml/main.cpp)
 
-  target_link_libraries(${RB_EXEC_NAME}-help2yml rb-help rb-parser rb-core rb-libs rb-parser ${Boost_LIBRARIES})
+  target_link_libraries(${RB_EXEC_NAME}-help2yml rb-help rb-parser rb-core rb-libs rb-parser ${Boost_LIBRARIES} ${CMAKE_DL_LIBS})
   set_target_properties(${RB_EXEC_NAME}-help2yml PROPERTIES PREFIX "../")
   if ("${MPI}" STREQUAL "ON")
     target_link_libraries(${RB_EXEC_NAME}-help2yml ${MPI_LIBRARIES})
@@ -187,7 +187,8 @@ if ("${CMD_GTK}" STREQUAL "ON")
 endif()
 message("Building ${RB_EXEC_NAME}")
 
-if ("${CMD_GTK}" STREQUAL "ON")
+  target_link_libraries(rb-jupyter rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${CMAKE_DL_LIBS})
+
   # Use the package PkgConfig to detect GTK+ headers/library files
   find_package(PkgConfig REQUIRED)
   pkg_check_modules(GTK REQUIRED gtk+-2.0)
@@ -198,6 +199,7 @@ if ("${CMD_GTK}" STREQUAL "ON")
   include_directories(${GTK_INCLUDE_DIRS})
   link_directories(${GTK_LIBRARY_DIRS})
   add_definitions(${GTK_CFLAGS_OTHER})      # Add other flags to the compiler
+  TARGET_LINK_LIBRARIES(RevStudio rb-cmd-lib rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${GTK_LIBRARIES} ${CMAKE_DL_LIBS})
 
   # Look into the cmd directory
   add_subdirectory(cmd)
@@ -210,7 +212,7 @@ else()
   add_executable(${RB_EXEC_NAME}   ${PROJECT_SOURCE_DIR}/revlanguage/main.cpp)
 endif()
 
-# Link the target to RevBayes libraries. RB_CMD_LIB can be empty.
+  target_link_libraries(${RB_EXEC_NAME} rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${OPENLIBM} ${CMAKE_DL_LIBS})
 target_link_libraries(${RB_EXEC_NAME}   ${RB_CMD_LIB} rb-parser rb-core rb-libs)
 # Link the target to other libraries.  Some variables can be empty.
 target_link_libraries(${RB_EXEC_NAME}   ${Boost_LIBRARIES} ${OPENLIBM} ${GTK_LIBRARIES} ${MPI_LIBRARIES})
