@@ -93,7 +93,7 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
     
     std::cout << filename << "\n";
     
-    RevBayesCore::DelimitedDataReader* rdr = new RevBayesCore::DelimitedDataReader(filename, delimiter[0], 0);
+    RevBayesCore::DelimitedDataReader* rdr = new RevBayesCore::DelimitedDataReader(filename, delimiter, 0);
     const std::vector<std::vector<std::string> >&data = rdr->getChars();
 
     std::vector<unsigned> timeIndex;
@@ -242,7 +242,7 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
         std::string feature_type = featureType[i];
         std::string feature_path = featurePath[i];
         
-        RevBayesCore::DelimitedDataReader* row_rdr = new RevBayesCore::DelimitedDataReader(feature_path, delimiter[0], header_offset);
+        RevBayesCore::DelimitedDataReader* row_rdr = new RevBayesCore::DelimitedDataReader(feature_path, delimiter, header_offset);
         std::vector<std::vector<std::string> > row_dat = row_rdr->getChars();
         
         if (feature_relationship == "within" && feature_type == "categorical") {
