@@ -154,7 +154,7 @@ if ("${HELP}" STREQUAL "ON")
   message("Building ${RB_EXEC_NAME}-help2yml")
   add_executable(${RB_EXEC_NAME}-help2yml ${PROJECT_SOURCE_DIR}/help2yml/main.cpp)
 
-  target_link_libraries(${RB_EXEC_NAME}-help2yml rb-help rb-parser rb-core rb-libs rb-parser ${Boost_LIBRARIES})
+  target_link_libraries(${RB_EXEC_NAME}-help2yml rb-help rb-parser rb-core rb-libs rb-parser ${Boost_LIBRARIES} ${CMAKE_DL_LIBS})
   set_target_properties(${RB_EXEC_NAME}-help2yml PROPERTIES PREFIX "../")
   if ("${MPI}" STREQUAL "ON")
     target_link_libraries(${RB_EXEC_NAME}-help2yml ${MPI_LIBRARIES})
@@ -165,7 +165,8 @@ if ("${JUPYTER}" STREQUAL "ON")
   message("Building rb-jupyter")
   add_executable(rb-jupyter ${PROJECT_SOURCE_DIR}/revlanguage/main.cpp)
 
-  target_link_libraries(rb-jupyter rb-parser rb-core rb-libs ${Boost_LIBRARIES})
+  target_link_libraries(rb-jupyter rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${CMAKE_DL_LIBS})
+
   set_target_properties(rb-jupyter PROPERTIES PREFIX "../")
 elseif ("${CMD_GTK}" STREQUAL "ON")
   message("Building RevStudio")
@@ -186,7 +187,7 @@ elseif ("${CMD_GTK}" STREQUAL "ON")
   ADD_EXECUTABLE(RevStudio ${PROJECT_SOURCE_DIR}/cmd/main.cpp)
 
   # Link the target to the GTK+ libraries
-  TARGET_LINK_LIBRARIES(RevStudio rb-cmd-lib rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${GTK_LIBRARIES})
+  TARGET_LINK_LIBRARIES(RevStudio rb-cmd-lib rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${GTK_LIBRARIES} ${CMAKE_DL_LIBS})
 
   SET_TARGET_PROPERTIES(RevStudio PROPERTIES PREFIX "../")
 
@@ -196,7 +197,7 @@ else()
   message("Building ${RB_EXEC_NAME}")
   add_executable(${RB_EXEC_NAME} ${PROJECT_SOURCE_DIR}/revlanguage/main.cpp)
 
-  target_link_libraries(${RB_EXEC_NAME} rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${OPENLIBM})
+  target_link_libraries(${RB_EXEC_NAME} rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${OPENLIBM} ${CMAKE_DL_LIBS})
 
   set_target_properties(${RB_EXEC_NAME} PROPERTIES PREFIX "../")
 
