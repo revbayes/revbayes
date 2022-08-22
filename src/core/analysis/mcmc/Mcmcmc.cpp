@@ -33,7 +33,83 @@
 #include <mpi.h>
 #endif
 
+/*
+ * Round trip statistics are inspired by the paper https://arxiv.org/pdf/cond-mat/0602085.pdf
+ *
+ * 1. The first idea is that simply having good acceptance probabilities for swapping adjacent temperatures is not good enough.
+ *    We need chains to make a round-trip from cold -> hot -> cold.
+ *    But it is possible to have a low rate of making round trips even if we have success swapping between adjacent temperatures.
+ *
+ * 2. The second idea is based on computing the fraction of the time that a chain at temperature j has most recently been at
+         the coldest chain versus the hottest chain.
+ *    The claim is that the fractions should be uniformly spaced.
+ *    For example, if we have 5 chains, then the fraction should be 100% for the cold chain, and then 75%, 50%, 25% and 0%.
+ *    In some cases, geometric heating produces very low round-trip rates, and this is because the fractions are NOT uniformly spaced.
+ *
+ * 3. The third idea is that one scenario where geometric heating works badly is when there is a "phase transition" at temperature T.
+ *    This means that the posterior distribution on one side of T looks very different than the posterior distribution on
+ *        the other side of T.
+ *    This can happen when there are a very large number of low-probability states.
+ *    As the temperature increases, the low-probability states increase in probability, and eventually overwhelm the high-probability
+ *        states because there are so many of the lower-probability states.
+ *    In such a case, we need closely-spaced temperatures near T, because the posterior changes rapidly as T changes.
+ *    However, we can tolerate wider spacing between temperatures further away from T.
+ *
+ * BDR: I worry that diffusion behavior limits the number of round-trips as the number of chains increases.
+ *      By diffusion behavior, I mean that a chain does not always move towards the coldest or hottest chain, but drifts randomly,
+          sometimes stepping away.
+ *      Does a chain take O(N^2) steps to move from cold -> hot, even if the temperatures are well placed?
+ * 
+ */
+
 using namespace RevBayesCore;
+
+using std::string;
+
+double Mcmcmc::heatForChain(int i) const
+{
+    return chain_heats[i];
+}
+
+bool Mcmcmc::isColdChain(int i) const
+{
+    return heatForChain(i) == 1.0;
+}
+
+double Mcmcmc::heatForIndex(int i) const
+{
+    // Can we just maintain a sorted list of chain heats that is always valid?
+    std::vector<double> tmp_chain_heats = chain_heats;
+    sort(tmp_chain_heats.begin(), tmp_chain_heats.end(), std::greater<double>());
+    return tmp_chain_heats[i];
+}
+
+int Mcmcmc::heatIndexForChain(int j) const
+{
+    std::vector<double> tmp_chain_heats = chain_heats;
+    std::sort(tmp_chain_heats.begin(), tmp_chain_heats.end(), std::greater<double>());
+
+    return std::find(tmp_chain_heats.begin(), tmp_chain_heats.end(), chain_heats[j]) - tmp_chain_heats.begin();
+}
+
+int Mcmcmc::chainForHeatIndex(int i) const
+{
+    return std::find(chain_heats.begin(), chain_heats.end(), heatForIndex(i)) - chain_heats.begin();
+/*
+    // 1. Start with [0 .. num_chains-1]
+    std::vector<int> tmp_heat_ranks;
+    for(int i=0;i<num_chains;i++)
+        tmp_heat_ranks.push_back(i);
+
+    // 2. Chains with greater heat come first.
+    sort(tmp_heat_ranks.begin(),
+         tmp_heat_ranks.end(),
+         [&](int j, int k) { return chain_heats[j] > chain_heats[k];} );
+
+    // 3. Get the chain index for heat index i;
+    return tmp_heat_ranks[i];
+*/
+}
 
 Mcmcmc::Mcmcmc(const Model& m, const RbVector<Move> &mv, const RbVector<Monitor> &mn, std::string sT, size_t nc, size_t si, double dt, size_t ntries, bool th, double tht, std::string sm, std::string smo) : MonteCarloSampler( ),
     num_chains(nc),
@@ -56,6 +132,9 @@ Mcmcmc::Mcmcmc(const Model& m, const RbVector<Move> &mv, const RbVector<Monitor>
     chains = std::vector<Mcmc*>(num_chains, NULL);
     chain_values.resize(num_chains, 0.0);
     chain_heats.resize(num_chains, 0.0);
+    chain_prev_boundary.resize(num_chains, boundary::intermediate);
+    chain_half_trips.resize(num_chains, 0);
+    heat_visitors.resize(num_chains, {0,0});
     pid_per_chain.resize(num_chains, 0);
     heat_ranks.resize(num_chains, 0);
     heat_temps.resize(num_chains, 0.0);
@@ -128,6 +207,9 @@ Mcmcmc::Mcmcmc(const Mcmcmc &m) : MonteCarloSampler(m)
     
     chain_values            = m.chain_values;
     chain_heats             = m.chain_heats;
+    chain_prev_boundary     = m.chain_prev_boundary;
+    chain_half_trips        = m.chain_half_trips;
+    heat_visitors           = m.heat_visitors;
     chain_moves_tuningInfo  = m.chain_moves_tuningInfo;
     
     burnin_generation       = m.burnin_generation;
@@ -265,7 +347,7 @@ double Mcmcmc::getModelLnProbability( bool likelihood_only )
     
     for (size_t i=0; i<num_chains; ++i)
     {
-        if ( chain_heats[i] == 1.0 )
+        if ( isColdChain(i) )
         {
             rv = chain_values[i];
             break;
@@ -355,7 +437,7 @@ void Mcmcmc::initializeChains(void)
             Mcmc* oneChain = new Mcmc( *base_chain );
             oneChain->setScheduleType( schedule_type );
             oneChain->setChainActive( i == 0 );
-            oneChain->setChainPosteriorHeat( chain_heats[i] );
+            oneChain->setChainPosteriorHeat( heatForChain(i) );
             oneChain->setChainIndex( i );
             oneChain->setActivePID( active_pid_for_chain, num_processer_for_chain );
             chains[i] = oneChain;
@@ -530,6 +612,14 @@ void Mcmcmc::nextCycle(bool advanceCycle)
         }
     }
     
+    for(int i=0;i<num_chains;i++)
+    {
+        int heat_rank = heatIndexForChain(i);
+        if (chain_prev_boundary[i] == boundary::coldest)
+            heat_visitors[heat_rank].first++;
+        if (chain_prev_boundary[i] == boundary::hottest)
+            heat_visitors[heat_rank].second++;
+    }
 }
 
 
@@ -657,15 +747,12 @@ void Mcmcmc::printOperatorSummary(bool current_period)
             base_moves = chains[active_chainIdx]->getMoves();
         }
         
-        std::vector<double> tmp_chain_heats = chain_heats;
-        sort(tmp_chain_heats.begin(), tmp_chain_heats.end(), std::greater<double>());
-        
         for (size_t i = 0; i < num_chains; ++i)
         {
-            size_t chainIdx = std::find(chain_heats.begin(), chain_heats.end(), tmp_chain_heats[i]) - chain_heats.begin();
+            size_t chainIdx = chainForHeatIndex(i);
             
             std::cout << std::endl;
-            std::cout << "chain_heats[" << i + 1 << "] = " << tmp_chain_heats[i] << std::endl;
+            std::cout << "chain_heats[" << i + 1 << "] = " << heatForIndex(i) << std::endl;
             std::cout.flush();
             
             // printing the moves summary
@@ -687,11 +774,87 @@ void Mcmcmc::printOperatorSummary(bool current_period)
             printSwapSummary(std::cout);
             std::cout << std::endl;
             std::cout.flush();
+
+            printTripSummary(std::cout);
+            std::cout << std::endl;
+            std::cout.flush();
+
+            printHeatSummary(std::cout);
+            std::cout << std::endl;
+            std::cout.flush();
         }
     }
 
 }
 
+
+/**
+ * Print the summary of the move.
+ *
+ * The summary just contains the current value of the tuning parameter.
+ * It is printed to the stream that it passed in.
+ *
+ * \param[in]     o     The stream to which we print the summary.
+ */
+void Mcmcmc::printTripSummary(std::ostream &o) const
+{
+    std::streamsize previousPrecision = o.precision();
+    std::ios_base::fmtflags previousFlags = o.flags();
+
+    o << std::fixed;
+    o << std::setprecision(4);
+
+    o << std::endl;
+    o << "MCMCMC chain round trips |  Number  |  Number/iteration   " << std::endl;
+    o << "=======================================================" << std::endl;
+
+    for (size_t i = 0; i < num_chains; ++i)
+    {
+        // i -> c -> h -> c  -> 2/2 = 1
+        // i -> h -> c -> h  -> 1/2 = 0
+        int round_trips = chain_half_trips[i];
+        if (chain_prev_boundary[i] == boundary::hottest)
+            round_trips--;
+        round_trips /= 2;
+
+        o<<std::setw(25)<<i<<std::setw(11)<<round_trips<<std::setw(19)<<double(round_trips)/(current_generation+burnin_generation)<< std::endl;
+    }
+
+    o.setf(previousFlags);
+    o.precision(previousPrecision);
+}
+
+
+void Mcmcmc::printHeatSummary(std::ostream &o) const
+{
+    std::streamsize previousPrecision = o.precision();
+    std::ios_base::fmtflags previousFlags = o.flags();
+
+    o << std::fixed;
+    o << std::setprecision(4);
+
+    o << std::endl;
+    o << "Heat rank |  Heat  | Temperature | Fraction" << std::endl;
+    o << "===========================================" << std::endl;
+
+    for (size_t i = 0; i < num_chains; ++i)
+    {
+        int c = heat_visitors[i].first;
+        int h = heat_visitors[i].second;
+        double B = heatForIndex(i);
+        double T = 1.0/B;
+        if (c + h > 0)
+        {
+            double fraction = double(c)/(c+h);
+            o<<std::setw(10)<<i<<std::setw(9)<<B<<std::setw(14)<<T<<std::setw(10)<<fraction<<std::endl;
+        }
+        else
+            o<<std::setw(10)<<i<<std::setw(9)<<B<<std::setw(14)<<T<<std::setw(10)<<"NA"<<std::endl;
+    }
+
+    o.setf(previousFlags);
+    o.precision(previousPrecision);
+}
 
 /**
  * Print the summary of the move.
@@ -844,16 +1007,13 @@ void Mcmcmc::printSwapSummaryPair(std::ostream &o, const size_t &row, const size
     o << ratio;
     o << " ";
     
-    std::vector<double> tmp_chain_heats = chain_heats;
-    sort(tmp_chain_heats.begin(), tmp_chain_heats.end(), std::greater<double>());
-    
     // print the heat of the chain that swaps are proposed from
     int h_length = 6;
     for (int i = 0; i < h_length; ++i)
     {
         o << " ";
     }
-    o << tmp_chain_heats[row];
+    o << heatForIndex(row);
     o << " ";
     
     // print the heat of the chain that swaps are proposed to
@@ -862,7 +1022,7 @@ void Mcmcmc::printSwapSummaryPair(std::ostream &o, const size_t &row, const size
     {
         o << " ";
     }
-    o << tmp_chain_heats[col];
+    o << heatForIndex(col);
     o << " ";
     
     o << std::endl;
@@ -949,8 +1109,28 @@ void Mcmcmc::resetCounters( void )
 }
 
 
-void Mcmcmc::setHeatsInitial(const std::vector<double> &ht)
+void Mcmcmc::setHeatsInitial(const std::vector<double>& ht)
 {
+    // 1. Check that there are num_chains heats.
+    if (ht.size() != num_chains)
+        throw RbException()<<"Heat vector contains "<<ht.size()<<" heats, but there are "<<num_chains<<" chains.";
+
+    // 2. Check that the heats are non-zero
+    for(int i=0; i<int(ht.size()); i++)
+    {
+        if (not (ht[i] > 0.0))
+            throw RbException()<<"Heat "<<i+1<<" is "<<ht[i]<<", but should be > 0";
+    }
+
+    // 3. Check that the heats are sorted with the largest heat first (== smallest temperature first).
+    for(int i=0;i<int(ht.size())-1;i++)
+        if (ht[i] < ht[i+1])
+            throw RbException()<<"Heat "<<i+1<<" ("<<ht[i]<<") should be greater than heat "<<i+2<<" ("<<ht[i+1]<<")";
+
+    // 4. Check that the first heat is 1
+    if (ht[0] != 1.0)
+        throw RbException()<<"Heat 1 should be 1.0 (the cold chain), but is actually "<<ht[0];
+
     heat_temps = ht;
 }
 
@@ -1027,12 +1207,18 @@ void Mcmcmc::setActivePIDSpecialized(size_t i, size_t n)
     chains.clear();
     chain_values.clear();
     chain_heats.clear();
+    chain_prev_boundary.clear();
+    chain_half_trips.clear();
+    heat_visitors.clear();
     heat_ranks.clear();
     chain_moves_tuningInfo.clear();
     
     chains.resize(num_chains);
     chain_values.resize(num_chains, 0.0);
     chain_heats.resize(num_chains, 0.0);
+    chain_prev_boundary.resize(num_chains, boundary::intermediate);
+    chain_half_trips.resize(num_chains, 0);
+    heat_visitors.resize(num_chains, {0,0});
     pid_per_chain.resize(num_chains, 0);
     heat_ranks.resize(num_chains, 0);
     
@@ -1435,20 +1621,7 @@ void Mcmcmc::swapMovesTuningInfo(RbVector<Move> &mvsj, RbVector<Move> &mvsk)
 
 void Mcmcmc::swapNeighborChains(void)
 {
-    
-    double lnProposalRatio = 0.0;
-    
     // randomly pick the indices of two chains
-    int j = 0;
-    int k = 0;
-    
-    // swap?
-    bool accept = false;
-    
-    // find the chain index of the neighbor of chain j (no temperature exists between the temperature of chain j and chain k)
-    std::vector<double> tmp_chain_heats = chain_heats;
-    // sort the vector in descending order
-    sort(tmp_chain_heats.begin(), tmp_chain_heats.end(), std::greater<double>());
     
     size_t heat_rankj = size_t(GLOBAL_RNG->uniform01() * (num_chains - 1));
     size_t heat_rankk = heat_rankj;
@@ -1458,128 +1631,18 @@ void Mcmcmc::swapNeighborChains(void)
     }
     
     if ( GLOBAL_RNG->uniform01() >= 0.5)
-    {
-        size_t heat_ranktmp = heat_rankj;
-        heat_rankj = heat_rankk;
-        heat_rankk = heat_ranktmp;
-    }
+        std::swap( heat_rankj, heat_rankk );
     
-    ++num_attempted_swaps[heat_rankj][heat_rankk];
-    
-    j = int(std::find(chain_heats.begin(), chain_heats.end(), tmp_chain_heats[heat_rankj]) - chain_heats.begin());
-    k = int(std::find(chain_heats.begin(), chain_heats.end(), tmp_chain_heats[heat_rankk]) - chain_heats.begin());
+    int j = chainForHeatIndex(heat_rankj);
+    int k = chainForHeatIndex(heat_rankk);
 
-    // compute exchange ratio
-    double bj = chain_heats[j];
-    double bk = chain_heats[k];
-    double lnPj = chain_values[j];
-    double lnPk = chain_values[k];
-    double lnR = bj * (lnPk - lnPj) + bk * (lnPj - lnPk) + lnProposalRatio;
-//    std::cout << "bj=" << bj << ", bk=" << bk << ", lnPj=" << lnPj << ", lnPk=" << lnPk << ", lnR=" << lnR << std::endl;
-    
-    // determine whether we accept or reject the chain swap
-    double u = GLOBAL_RNG->uniform01();
-    if (lnR >= 0)
-    {
-        accept = true;
-    }
-    else if (lnR < -100)
-    {
-        accept = false;
-    }
-    else if (u < exp(lnR))
-    {
-        accept = true;
-    }
-    else
-    {
-        accept = false;
-    }
-    
-    
-#ifdef RB_MPI
-    if ( active_PID == pid )
-    {
-        for (size_t i = 1; i < num_processes; ++i)
-        {
-            MPI_Send(&j, 1, MPI_INT, int(active_PID+i), 0, MPI_COMM_WORLD);
-            MPI_Send(&k, 1, MPI_INT, int(active_PID+i), 0, MPI_COMM_WORLD);
-            MPI_Send(&accept, 1, MPI_C_BOOL, int(active_PID+i), 0, MPI_COMM_WORLD);
-        }
-    }
-    else
-    {
-        MPI_Status status;
-        MPI_Recv(&j, 1, MPI_INT, int(active_PID), 0, MPI_COMM_WORLD, &status);
-        MPI_Recv(&k, 1, MPI_INT, int(active_PID), 0, MPI_COMM_WORLD, &status);
-        MPI_Recv(&accept, 1, MPI_C_BOOL, int(active_PID), 0, MPI_COMM_WORLD, &status);
-    }
-#endif
-    
-    // on accept, swap beta values and active chains
-    if (accept == true )
-    {
-        ++num_accepted_swaps[heat_rankj][heat_rankk];
-        
-        // swap active chain
-        if (active_chain_index == j)
-        {
-            active_chain_index = k;
-        }
-        else if (active_chain_index == k)
-        {
-            active_chain_index = j;
-        }
-        
-        double bj = chain_heats[j];
-        double bk = chain_heats[k];
-        chain_heats[j] = bk;
-        chain_heats[k] = bj;
-        size_t tmp = heat_ranks[j];
-        heat_ranks[j] = heat_ranks[k];
-        heat_ranks[k] = tmp;
-        
-        // also swap the tuning information of each move
-//        RbVector<Move>& tmp_movesj = chains[j]->getMoves();
-//        RbVector<Move>& tmp_movesk = chains[k]->getMoves();
-//        swapMovesTuningInfo(tmp_movesj, tmp_movesk);
-//        chains[j]->setMoves(tmp_movesj);
-//        chains[k]->setMoves(tmp_movesk);
-        
-        std::vector<Mcmc::tuningInfo> tmp_mvs_ti = chain_moves_tuningInfo[j];
-        chain_moves_tuningInfo[j] = chain_moves_tuningInfo[k];
-        chain_moves_tuningInfo[k] = tmp_mvs_ti;
-
-        
-        for (size_t i=0; i<num_chains; ++i)
-        {
-            
-            if ( chains[i] != NULL )
-            {
-                chains[i]->setChainPosteriorHeat( chain_heats[i] );
-                chains[i]->setMovesTuningInfo( chain_moves_tuningInfo[i] );
-                chains[i]->setChainActive( chain_heats[i] == 1.0 );
-            }
-        }
-        
-    }
-    
-    
-    // update the chains accross processes
-    // this is necessary because only process 0 does the swap
-    // all the other processes need to be told that there was a swap
-    //    updateChainState(j);
-    //    updateChainState(k);
-    
+    swapGivenChains(j, k);
 }
 
 
 
 void Mcmcmc::swapRandomChains(void)
 {
-    
-    double lnProposalRatio = 0.0;
-    
     // randomly pick the indices of two chains
     int j = 0;
     int k = 0;
@@ -1596,14 +1659,41 @@ void Mcmcmc::swapRandomChains(void)
         while(j == k);
     }
     
-    std::vector<double> tmp_chain_heats = chain_heats;
-    std::sort(tmp_chain_heats.begin(), tmp_chain_heats.end(), std::greater<double>());
-    
-    size_t heat_rankj = std::find(tmp_chain_heats.begin(), tmp_chain_heats.end(), chain_heats[j]) - tmp_chain_heats.begin();
-    size_t heat_rankk = std::find(tmp_chain_heats.begin(), tmp_chain_heats.end(), chain_heats[k]) - tmp_chain_heats.begin();
-    
+    swapGivenChains(j, k);
+}
+
+void Mcmcmc::updateTrips(int j)
+{
+    // I think this code assumes that there is only one coldest chain and one hottest chain.
+    // For example, there are not two chains with heat == 1.0.
+    // This is true, and would probably stay true.
+
+    // The assumption is that we run this right after we have swapped j with another chain.
+    // Therefore heatIndexForChain(j) is the NEW heat rank for chain j.
+
+    if ( heatIndexForChain(j) == 0)
+    {
+        if (chain_prev_boundary[j] == boundary::hottest)
+            chain_half_trips[j]++;
+
+        chain_prev_boundary[j] = boundary::coldest;
+    }
+    else if (heatIndexForChain(j) == num_chains - 1)
+    {
+        if (chain_prev_boundary[j] == boundary::coldest)
+            chain_half_trips[j]++;
+
+        chain_prev_boundary[j] = boundary::hottest;
+    }
+}
+
+void Mcmcmc::swapGivenChains(int j, int k, double lnProposalRatio)
+{
+    size_t heat_rankj = heatIndexForChain(j);
+    size_t heat_rankk = heatIndexForChain(k);
+
     ++num_attempted_swaps[heat_rankj][heat_rankk];
-    
+
     // compute exchange ratio
     double bj = chain_heats[j];
     double bk = chain_heats[k];
@@ -1611,9 +1701,10 @@ void Mcmcmc::swapRandomChains(void)
     double lnPk = chain_values[k];
     double lnR = bj * (lnPk - lnPj) + bk * (lnPj - lnPk) + lnProposalRatio;
     //        std::cout << "bj=" << bj << ", bk=" << bk << ", lnPj=" << lnPj << ", lnPk=" << lnPk << ", lnR=" << lnR << std::endl;
-    
+
     // determine whether we accept or reject the chain swap
     double u = GLOBAL_RNG->uniform01();
+    bool accept = false;
     if (lnR >= 0)
     {
         accept = true;
@@ -1630,8 +1721,8 @@ void Mcmcmc::swapRandomChains(void)
     {
         accept = false;
     }
-    
-    
+
+
 #ifdef RB_MPI
     if ( active_PID == pid )
     {
@@ -1650,13 +1741,13 @@ void Mcmcmc::swapRandomChains(void)
         MPI_Recv(&accept, 1, MPI_C_BOOL, int(active_PID), 0, MPI_COMM_WORLD, &status);
     }
 #endif
-    
-    
+
+
     // on accept, swap beta values and active chains
     if (accept == true )
     {
         ++num_accepted_swaps[heat_rankj][heat_rankk];
-        
+
         // swap active chain
         if (active_chain_index == j)
         {
@@ -1666,47 +1757,31 @@ void Mcmcmc::swapRandomChains(void)
         {
             active_chain_index = j;
         }
-        
-        double bj = chain_heats[j];
-        double bk = chain_heats[k];
-        chain_heats[j] = bk;
-        chain_heats[k] = bj;
-        size_t tmp = heat_ranks[j];
-        heat_ranks[j] = heat_ranks[k];
-        heat_ranks[k] = tmp;
-        
-        // also swap the tuning information of each move
-        //            RbVector<Move>& tmp_movesj = chains[j]->getMoves();
-        //            RbVector<Move>& tmp_movesk = chains[k]->getMoves();
-        //            swapMovesTuningInfo(tmp_movesj, tmp_movesk);
-        //            chains[j]->setMoves(tmp_movesj);
-        //            chains[k]->setMoves(tmp_movesk);
-        
-        std::vector<Mcmc::tuningInfo> tmp_mvs_ti = chain_moves_tuningInfo[j];
-        chain_moves_tuningInfo[j] = chain_moves_tuningInfo[k];
-        chain_moves_tuningInfo[k] = tmp_mvs_ti;
-        
-        
+
+        std::swap( chain_heats[j], chain_heats[k] );
+        std::swap( heat_ranks[j], heat_ranks[k] );
+        std::swap( chain_moves_tuningInfo[j], chain_moves_tuningInfo[k] );
+
         for (size_t i=0; i<num_chains; ++i)
         {
-            
             if ( chains[i] != NULL )
             {
-                chains[i]->setChainPosteriorHeat( chain_heats[i] );
+                chains[i]->setChainPosteriorHeat( heatForChain(i) );
                 chains[i]->setMovesTuningInfo(chain_moves_tuningInfo[i]);
-                chains[i]->setChainActive( chain_heats[i] == 1.0 );
+                chains[i]->setChainActive( isColdChain(i) );
             }
         }
-        
+
+        // Update statistics on round trips (well, half trips) for the swapped chains.
+        updateTrips(j);
+        updateTrips(k);
     }
-    
-    
+
     // update the chains accross processes
     // this is necessary because only process 0 does the swap
     // all the other processes need to be told that there was a swap
     //    updateChainState(j);
     //    updateChainState(k);
-    
 }
 
 
@@ -1720,14 +1795,11 @@ void Mcmcmc::tune( void )
     
     if (tune_heat == true && num_chains > 1)
     {
-        
-        std::vector<double> tmp_chain_heats = chain_heats;
-        std::sort(tmp_chain_heats.begin(), tmp_chain_heats.end(), std::greater<double>());
         std::vector<double> heats_diff(num_chains - 1, 0.0);
         
         for (size_t i = 1; i < num_chains; ++i)
         {
-            heats_diff[i - 1] = tmp_chain_heats[i - 1] - tmp_chain_heats[i];
+            heats_diff[i - 1] = heatForIndex(i-1) - heatForIndex(i);
         }
         
         for (size_t i = 1; i < num_chains; ++i)
@@ -1756,12 +1828,12 @@ void Mcmcmc::tune( void )
         
         double heatMinBound = 0.01;
         size_t j = 1;
-        size_t colderChainIdx = std::find(chain_heats.begin(), chain_heats.end(), tmp_chain_heats[j - 1]) - chain_heats.begin();
+        size_t colderChainIdx = chainForHeatIndex(j-1);
         size_t hotterChainIdx = colderChainIdx;
         
         for (; j < num_chains; ++j)
         {
-            hotterChainIdx = std::find(chain_heats.begin(), chain_heats.end(), tmp_chain_heats[j]) - chain_heats.begin();
+            hotterChainIdx = chainForHeatIndex(j);
             chain_heats[hotterChainIdx] = chain_heats[colderChainIdx] - heats_diff[j - 1];
             
             if (chain_heats[hotterChainIdx] < heatMinBound)
@@ -1798,8 +1870,8 @@ void Mcmcmc::tune( void )
     {
         if ( chains[i] != NULL )
         {
-            chains[i]->setChainPosteriorHeat( chain_heats[i] );
-            chains[i]->setChainActive( chain_heats[i] == 1.0 );
+            chains[i]->setChainPosteriorHeat( heatForChain(i) );
+            chains[i]->setChainActive( isColdChain( i ) );
             
             chains[i]->tune();
         }
@@ -1836,7 +1908,7 @@ void Mcmcmc::updateChainState(size_t j)
     {
         if ( chains[i] != NULL )
         {
-            chains[i]->setChainActive( chain_heats[i] == 1.0 );
+            chains[i]->setChainActive( isColdChain(i) );
         }
     }
     

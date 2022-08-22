@@ -27,6 +27,13 @@ namespace RevBayesCore {
     class Mcmcmc : public MonteCarloSampler {
         
     public:
+        enum class boundary
+        {
+            hottest,
+            coldest,
+            intermediate
+        };
+
         Mcmcmc(const Model& m, const RbVector<Move> &mv, const RbVector<Monitor> &mn, std::string sT="random", size_t nc=4, size_t si=100, double dt=0.1, size_t ntries=1000, bool th=true, double tht=0.23, std::string sm="neighbor", std::string smo="multiple");
         Mcmcmc(const Mcmcmc &m);
         virtual                                ~Mcmcmc(void);                                                                   //!< Virtual destructor
@@ -49,6 +56,8 @@ namespace RevBayesCore {
         void                                    printMoveSummary(std::ostream &o, size_t chainId, size_t moveId, Move &mv) const;
         void                                    printOperatorSummary(bool current_period);
         void                                    printSwapSummary(std::ostream &o) const;
+        void                                    printTripSummary(std::ostream &o) const;
+        void                                    printHeatSummary(std::ostream &o) const;
         void                                    printSwapSummaryPair(std::ostream &o, const size_t &row, const size_t &col) const;
         void                                    redrawStartingValues(void);                                                     //!< Redraw the starting values.
         void                                    removeMonitors(void);
@@ -75,18 +84,30 @@ namespace RevBayesCore {
         void                                    swapMovesTuningInfo(RbVector<Move> &mvsj, RbVector<Move> &mvsk);
         void                                    swapNeighborChains(void);
         void                                    swapRandomChains(void);
+        void                                    swapGivenChains(int j, int k, double lnProposalRatio = 0.0);
+        void                                    updateTrips(int j);
         void                                    synchronizeValues(bool likelihood_only);
         void                                    synchronizeHeats(void);
         void                                    synchronizeTuningInfo(void);
         void                                    updateChainState(size_t j);
         double                                  computeBeta(double d, size_t i);                                                // incremental temperature schedule
-        
+        double                                  heatForChain(int i) const;
+        bool                                    isColdChain(int i) const;
+        int                                     heatIndexForChain(int i) const;
+        int                                     chainForHeatIndex(int i) const;
+        double                                  heatForIndex(int i) const;
+
         size_t                                  num_chains;
         std::vector<size_t>                     heat_ranks;
         std::vector<size_t>                     pid_per_chain;
         std::vector<Mcmc*>                      chains;
         std::vector<double>                     chain_values;
         std::vector<double>                     chain_heats;
+
+        std::vector<boundary>                   chain_prev_boundary;                                // has the chain most recently visited the hottest or coldest temperature
+        std::vector<int>                        chain_half_trips;                                   // how many trips has the chain made from hottest -> coldest or coldest to hottest
+        std::vector<std::pair<int,int>>         heat_visitors;                                      // how many times is the chain at this temperator most recently hottest (first) or coldest (second)
+
         std::string                             schedule_type;
         size_t                                  current_generation;
         size_t                                  burnin_generation;
