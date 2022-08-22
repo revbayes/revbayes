@@ -18,7 +18,7 @@ using namespace RevBayesCore;
  * @param n A long for the number of trials
  */
 
-StairwayPlotDistribution::StairwayPlotDistribution(const TypedDagNode< RbVector<double> > *th, long n, long n_ind, bool f, MONOMORPHIC_PROBABILITY m, CODING c) : TypedDistribution< RbVector<double> >( new RbVector<double>() ),
+StairwayPlotDistribution::StairwayPlotDistribution(const TypedDagNode< RbVector<double> > *th, long n, long n_ind, bool f, MONOMORPHIC_PROBABILITY m, CODING c) : TypedDistribution< RbVector<double> >( new RbVector<double>( f ? (n_ind/2)+1 : n_ind, 1 ) ),
     theta( th ),
     num_sites( n ),
     folded( f ),
@@ -248,7 +248,7 @@ void StairwayPlotDistribution::initialize( void )
     prob_k.resize( num_individuals-1 );
     
     ln_factorial_num_sites.clear();
-    ln_factorial_num_sites.resize( num_individuals );
+    ln_factorial_num_sites.resize( folded ? num_individuals/2 : num_individuals );
     
     // get the data, i.e., the observed counts for the frequencies
     const RbVector<double>& obs_sfs_counts = *value;
@@ -265,7 +265,10 @@ void StairwayPlotDistribution::initialize( void )
                                          RbMath::lnGamma(num_individuals-i-k+2) );
         }
         
-        ln_factorial_num_sites[i] = RbMath::lnGamma( obs_sfs_counts[i] + 1 );
+        if ( folded == false || i <= (num_individuals/2) )
+        {
+            ln_factorial_num_sites[i] = RbMath::lnGamma( obs_sfs_counts[i] + 1 );
+        }
     }
     ln_factorial_num_sites[0] = RbMath::lnGamma( obs_sfs_counts[0] + 1 );
     
