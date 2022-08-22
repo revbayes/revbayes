@@ -150,7 +150,7 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, 
             {
                 for ( size_t i=1; i<=c->size(); ++i)
                 {
-                    std::string elementIdentifier = theParentVar->getName() + "[" + i + "]";
+                    std::string elementIdentifier = theParentVar->getName() + "[" + std::to_string(i) + "]";
                 
                     RevPtr<RevVariable> theElementVar = NULL;
                     if ( !env.existsVariable( elementIdentifier ) )
@@ -190,7 +190,7 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, 
     
     // compute the index and internal name for this variable
     int idx = (int)static_cast<Integer&>( indexVar->getRevObject() ).getValue();
-    std::string identifier = theParentVar->getName() + "[" + idx + "]";
+    std::string identifier = theParentVar->getName() + "[" + std::to_string(idx) + "]";
     
     // mark the parent variable as a vector variable
     theParentVar->setVectorVariableState( true );
@@ -342,7 +342,7 @@ void SyntaxIndexOperation::updateVariable( Environment& env, const std::string &
             std::vector<Argument> args;
             for (size_t i = 1; i <= max_index; ++i)
             {
-                std::string element_identifier = parentName + "[" + i + "]";
+                std::string element_identifier = parentName + "[" + std::to_string(i) + "]";
                 RevPtr<RevVariable>& elementVar = env.getVariable( element_identifier );
                 // check that the element is not NULL
                 if ( elementVar == NULL || elementVar->getRevObject() == RevNullObject::getInstance() )
