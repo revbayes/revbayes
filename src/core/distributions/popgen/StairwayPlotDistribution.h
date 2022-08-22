@@ -27,7 +27,11 @@ template <class valueType> class TypedDagNode;
     class StairwayPlotDistribution : public TypedDistribution< RbVector<double> >, public MemberObject< RbVector<double> > {
         
     public:
-        StairwayPlotDistribution(const TypedDagNode< RbVector<double> > *th, long n, long n_ind, bool f=false);
+        
+        enum CODING { ALL, NO_MONOMORPHIC, NO_SINGLETONS };
+        enum MONOMORPHIC_PROBABILITY { REST, TREE_LENGTH };
+        
+        StairwayPlotDistribution(const TypedDagNode< RbVector<double> > *th, long n, long n_ind, bool f=false, MONOMORPHIC_PROBABILITY mono=REST, CODING cod=ALL);
         virtual                                            ~StairwayPlotDistribution(void);                                                //!< Virtual destructor
         
         // public member functions
@@ -52,7 +56,10 @@ template <class valueType> class TypedDagNode;
         long                                                num_individuals;
         mutable std::vector<double>                         expected_SFS;
         mutable std::vector< std::vector<double> >          prob_k;
-        double                                              ln_factorial_num_sites;
+        double                                              ln_factorial_num_sites_all;
+        std::vector<double>                                 ln_factorial_num_sites;
+        MONOMORPHIC_PROBABILITY                             monomorphic_probability;
+        CODING                                              coding;
     };
     
 }

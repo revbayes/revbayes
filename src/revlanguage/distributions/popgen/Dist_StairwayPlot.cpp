@@ -20,6 +20,7 @@
 #include "ModelObject.h"
 #include "ModelVector.h"
 #include "Natural.h"
+#include "OptionRule.h"
 #include "RbHelpReference.h"
 #include "RevObject.h"
 #include "RevPtr.h"
@@ -29,6 +30,7 @@
 #include "RlDeterministicNode.h"
 #include "RlDistributionMemberFunction.h"
 #include "RlStochasticNode.h"
+#include "RlString.h"
 #include "RlTypedDistribution.h"
 #include "RlTypedFunction.h"
 #include "StochasticNode.h"
@@ -70,7 +72,26 @@ RevBayesCore::StairwayPlotDistribution* Dist_StairwayPlot::createDistribution( v
     long                                                            n_ind   = static_cast<const Natural              &>( num_individuals->getRevObject() ).getValue();
     long                                                            f       = static_cast<const RlBoolean            &>( folded->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*   th      = static_cast<const ModelVector<RealPos> &>( theta->getRevObject() ).getDagNode();
-    RevBayesCore::StairwayPlotDistribution*                         d       = new RevBayesCore::StairwayPlotDistribution( th, n_sites, n_ind, f );
+
+    const std::string&                                              m       = static_cast<const RlString             &>( monomorphic_probability->getRevObject() ).getValue();
+    RevBayesCore::StairwayPlotDistribution::MONOMORPHIC_PROBABILITY mp = RevBayesCore::StairwayPlotDistribution::REST;
+    if ( m == "treelength" )
+    {
+        mp = RevBayesCore::StairwayPlotDistribution::TREE_LENGTH;
+    }
+
+    const std::string&                                              c       = static_cast<const RlString             &>( coding->getRevObject() ).getValue();
+    RevBayesCore::StairwayPlotDistribution::CODING cd = RevBayesCore::StairwayPlotDistribution::ALL;
+    if ( c == "no-monomorphic" )
+    {
+        cd = RevBayesCore::StairwayPlotDistribution::NO_MONOMORPHIC;
+    }
+    else if ( c == "no-singletons" )
+    {
+        cd = RevBayesCore::StairwayPlotDistribution::NO_SINGLETONS;
+    }
+
+    RevBayesCore::StairwayPlotDistribution*                         d       = new RevBayesCore::StairwayPlotDistribution( th, n_sites, n_ind, f, mp, cd );
     
     return d;
 }
@@ -136,6 +157,18 @@ const MemberRules& Dist_StairwayPlot::getParameterRules(void) const
         dist_member_rules.push_back( new ArgumentRule( "numIndividuals", Natural::getClassTypeSpec(), "The number of individuals in (unfolded) the SFS.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "folded", RlBoolean::getClassTypeSpec(), "Is the site frequency folded.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean(false) ) );
 
+        std::vector<std::string> coding_options;
+        coding_options.push_back( "all" );
+        coding_options.push_back( "no-monomorphic" );
+        coding_options.push_back( "no-singletons" );
+        dist_member_rules.push_back( new OptionRule( "coding", new RlString("all"), coding_options, "The assumption which allele frequencies are included." ) );
+
+        std::vector<std::string> monormorphic_probability_options;
+        monormorphic_probability_options.push_back( "rest" );
+        monormorphic_probability_options.push_back( "treelength" );
+        dist_member_rules.push_back( new OptionRule( "monomorphicProbability", new RlString("rest"), monormorphic_probability_options, "How should we compute the probability of monomorphic sites." ) );
+
+        
         rules_set = true;
     }
     
@@ -183,6 +216,14 @@ void Dist_StairwayPlot::setConstParameter(const std::string& name, const RevPtr<
     else if ( name == "folded" )
     {
         folded = var;
+    }
+    else if ( name == "monomorphicProbability" )
+    {
+        monomorphic_probability = var;
+    }
+    else if ( name == "coding" )
+    {
+        coding = var;
     }
     else
     {

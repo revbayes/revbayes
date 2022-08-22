@@ -55,6 +55,9 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                       num_sites;
         RevPtr<const RevVariable>                       num_individuals;
         RevPtr<const RevVariable>                       folded;
+        RevPtr<const RevVariable>                       coding;
+        RevPtr<const RevVariable>                       monomorphic_probability;
+        
     };
     
 }
