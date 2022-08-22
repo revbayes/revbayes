@@ -18,11 +18,13 @@ using namespace RevBayesCore;
  * @param n A long for the number of trials
  */
 
-StairwayPlotDistribution::StairwayPlotDistribution(const TypedDagNode< RbVector<double> > *th, long n, long n_ind, bool f) : TypedDistribution< RbVector<double> >( new RbVector<double>() ),
+StairwayPlotDistribution::StairwayPlotDistribution(const TypedDagNode< RbVector<double> > *th, long n, long n_ind, bool f, MONOMORPHIC_PROBABILITY m, CODING c) : TypedDistribution< RbVector<double> >( new RbVector<double>() ),
     theta( th ),
     num_sites( n ),
     folded( f ),
-    num_individuals( n_ind )
+    num_individuals( n_ind ),
+    monomorphic_probability( m ),
+    coding( c )
 {
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
@@ -71,7 +73,47 @@ bool StairwayPlotDistribution::calculateExpectedSFS(void) const
     }
     
     // now also store the probability for the monorphic sites
-    expected_SFS[0] = 1.0 - sum_expected_frequency;
+    if ( monomorphic_probability == REST )
+    {
+        expected_SFS[0] = 1.0 - sum_expected_frequency;
+    }
+    else
+    {
+        
+        // compute the expected tree length in units of theta
+        double TL = 0.0;
+        for ( size_t k=2; k<=num_individuals; ++k )
+        {
+            TL += th[k-2]/(k-1.0);
+        }
+        // compute the exponential probability of no event over the tree
+        expected_SFS[0] = 1.0 - exp( -TL );
+    }
+    
+    if ( coding != ALL )
+    {
+        double correction = 1.0;
+        size_t min_allele_count = 1;
+        size_t max_allele_count = num_individuals-1;
+
+        if ( coding == NO_MONOMORPHIC )
+        {
+            correction = 1.0 - expected_SFS[0];
+        }
+        else if ( coding == NO_SINGLETONS )
+        {
+            correction = 1.0 - expected_SFS[0] - expected_SFS[1] - expected_SFS[num_individuals-1];
+            min_allele_count = 2;
+            max_allele_count = num_individuals-2;
+        }
+        
+        // now normalize
+        for (size_t i=min_allele_count; i<max_allele_count; ++i)
+        {
+            // store the corrected frequency
+            expected_SFS[i] = expected_SFS[i] / correction;
+        }
+    }
     
     // return that our expected frequencies worked
     return true;
@@ -106,22 +148,39 @@ double StairwayPlotDistribution::computeLnProbability( void )
     {
         max_freq = ceil( (num_individuals+1) / 2.0);
     }
+
+    // check for the coding
+    // only add the monomorphic probability of we use the coding "all"
+    if ( coding == ALL )
+    {
+        ln_prob += (double)obs_sfs_counts[0] * log(expected_SFS[0]);
+    }
+
+    // shift the smallest allele count depending on coding
+    size_t smallest_allele_count = 1;
+    if ( coding == NO_SINGLETONS )
+    {
+        smallest_allele_count = 2;
+        // also shift the max allele count if we don't allow for singletons
+        if ( folded == false )
+        {
+            max_freq = num_individuals-1;
+        }
+    }
     
-    ln_prob += (double)obs_sfs_counts[0] * log(expected_SFS[0]);
-    
-    // Sebastian: Note, we cannot compute the frequency for monomorphic sites.
-    for (size_t i=1; i<max_freq; ++i)
+    // compute the probability for all allele frequency counts
+    for (size_t i=smallest_allele_count; i<max_freq; ++i)
     {
         
         // compute the multinomial probability for the SFS frequency
         if ( folded == false )
         {
-//            ln_prob -= RbMath::lnGamma((double)obs_sfs_counts[i] + 1.0);
+            ln_prob -= ln_factorial_num_sites[i];
             ln_prob += (double)obs_sfs_counts[i] * log(expected_SFS[i]);
         }
         else
         {
-//            ln_prob -= RbMath::lnGamma((double)obs_sfs_counts[i] + 1.0);
+            ln_prob -= ln_factorial_num_sites[i];
             if ( i == (num_individuals/2.0) )
             {
                 ln_prob += (double)obs_sfs_counts[i] * log(expected_SFS[i]);
@@ -134,7 +193,7 @@ double StairwayPlotDistribution::computeLnProbability( void )
     }
     
     // divide by the factorial of the total number of observation
-//    ln_prob -= ln_factorial_num_sites;
+    ln_prob -= ln_factorial_num_sites_all;
 
     
     return ln_prob;
@@ -166,9 +225,13 @@ void StairwayPlotDistribution::executeMethod(const std::string &name, const std:
     {
         rv = computeTimeBreakpoints();
     }
+    else if ( name == "getExpectedAlleleFrequencies" )
+    {
+        rv = expected_SFS;
+    }
     else
     {
-        throw RbException("The state dependent birth-death process does not have a member method called '" + name + "'.");
+        throw RbException("The StairwayPlot does not have a member method called '" + name + "'.");
     }
 
 }
@@ -179,10 +242,16 @@ void StairwayPlotDistribution::initialize( void )
     
     // allocate/resize the expected SFS frequency vector
     expected_SFS.clear();
-    expected_SFS.resize( num_individuals+1 );
+    expected_SFS.resize( num_individuals );
     
     prob_k.clear();
     prob_k.resize( num_individuals-1 );
+    
+    ln_factorial_num_sites.clear();
+    ln_factorial_num_sites.resize( num_individuals );
+    
+    // get the data, i.e., the observed counts for the frequencies
+    const RbVector<double>& obs_sfs_counts = *value;
     
     for (size_t i=1; i<num_individuals; ++i)
     {
@@ -195,9 +264,12 @@ void StairwayPlotDistribution::initialize( void )
                                          RbMath::lnGamma(num_individuals) -
                                          RbMath::lnGamma(num_individuals-i-k+2) );
         }
+        
+        ln_factorial_num_sites[i] = RbMath::lnGamma( obs_sfs_counts[i] + 1 );
     }
+    ln_factorial_num_sites[0] = RbMath::lnGamma( obs_sfs_counts[0] + 1 );
     
-    ln_factorial_num_sites = RbMath::lnGamma( num_sites );
+    ln_factorial_num_sites_all = RbMath::lnGamma( num_sites + 1 );
 }
 
 
