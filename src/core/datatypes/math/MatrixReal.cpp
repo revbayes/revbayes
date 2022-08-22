@@ -1242,7 +1242,7 @@ std::vector<double> MatrixReal::operator*(const std::vector<double> &V) const
     {
         for (unsigned int j = 0; j < V.size(); j++)
         {
-            E[i] = E[i] + elements[j][i] * V[j];
+            E[i] = E[i] + elements[i][j] * V[j];
         }
     }
     

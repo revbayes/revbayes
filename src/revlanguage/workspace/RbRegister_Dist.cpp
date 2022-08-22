@@ -191,6 +191,7 @@
 #include "Dist_PhylodynamicBDP.h"
 #include "Dist_phyloDistanceGamma.h"
 #include "Dist_sampledSpeciationBirthDeathProcess.h"
+#include "Dist_occurrenceBirthDeathProcess.h"
 #include "Dist_TimeVaryingStateDependentSpeciationExtinctionProcess.h"
 #include "Dist_UltrametricTree.h"
 #include "Dist_uniformTimeTree.h"
@@ -400,6 +401,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // uniform serial-sampled time tree distribution
         AddDistribution< TimeTree                   >( new Dist_uniformSerialSampledTimeTree() );
+
+        // occurrence birth death process tree distribution
+        AddDistribution< TimeTree                   >( new Dist_occurrenceBirthDeathProcess() );
 
         // uniform topology distribution
         AddDistribution< BranchLengthTree           >( new Dist_uniformTopology() );
