@@ -80,15 +80,15 @@ namespace RevBayesCore {
         // helper functions
         double                                          getMaxTaxonAge( const TopologyNode& ) const;
 
-        mutable std::vector<bool>                       I;
+        mutable std::vector<bool>                       I;                                                       //!< Indicates for each taxon whether the parent species was a sampled ancestor.
 
-        mutable std::vector<double>                     anagenetic;
-        mutable std::vector<double>                     symmetric;
+        mutable std::vector<double>                     anagenetic;                                              //!< The sorted anagenetic speciation rates.
+        mutable std::vector<double>                     symmetric;                                               //!< The sorted symmetric speciation probabilities.
 
         const TypedDagNode<double >*                    homogeneous_lambda_a;                                    //!< The homogeneous anagenetic speciation rates.
         const TypedDagNode<RbVector<double> >*          heterogeneous_lambda_a;                                  //!< The heterogeneous anagenetic speciation rates.
-        const TypedDagNode<double >*                    homogeneous_beta;                                        //!< The homogeneous symmetric speciation prob.
-        const TypedDagNode<RbVector<double> >*          heterogeneous_beta;                                      //!< The heterogeneous symmetric speciation probs.
+        const TypedDagNode<double >*                    homogeneous_beta;                                        //!< The homogeneous symmetric speciation probability.
+        const TypedDagNode<RbVector<double> >*          heterogeneous_beta;                                      //!< The heterogeneous symmetric speciation probabilities.
 
     };
 }
