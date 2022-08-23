@@ -120,9 +120,9 @@ public:
 	virtual void setSeed(size_t aSeed) const = 0;
 
 	// MJL: new pure virtual to test interface, to remove
-	virtual int testPass(int x) = 0;
-	virtual std::string testText(std::string s) = 0;
-	virtual std::string simulateTree(void) = 0;
+	// virtual int testPass(int x) = 0;
+	// virtual std::string testText(std::string s) = 0;
+	// virtual std::string simulateTree(void) = 0;
 
 };
 
