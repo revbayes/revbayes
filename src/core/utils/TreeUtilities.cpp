@@ -247,38 +247,38 @@ RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDista
 {
     // gather all taxa across all source matrices into a single vector
     std::vector<RevBayesCore::Taxon> allTaxa;
-    
+
     for(RbConstIterator<DistanceMatrix> it = matvect.begin(); it != matvect.end(); ++it)
     {
         allTaxa.insert(allTaxa.end(), it->getTaxa().begin(), it->getTaxa().end());
     }
-    
+
     // convert the vector of taxa into a vector of strings for easier sorting
     std::vector<std::string> allNames( allTaxa.size() );
-    
+
     for(size_t i = 0; i < allTaxa.size(); i++)
     {
         allNames[i] = allTaxa[i].getName();
     }
-    
+
     // get rid of duplicates by converting from vector to unordered_set
     boost::unordered_set<std::string> uniqueNames;
-    
+
     for(size_t j = 0; j < allNames.size(); j++)
     {
         uniqueNames.insert(allNames[j]);
     }
-    
+
     // repopulate the original vector with unique values only
     allNames.assign( uniqueNames.begin(), uniqueNames.end() );
-    
+
     // initialize the sum and divisor matrices using the size-based constructor:
     RevBayesCore::MatrixReal sumMatrix = MatrixReal( allNames.size() );
     RevBayesCore::MatrixReal divisorMatrix = MatrixReal( allNames.size() );
-    
+
     // initialize the corresponding Boolean matrix of the right dimensions, filled with 'false'
     RevBayesCore::MatrixBoolean mask = MatrixBoolean( allNames.size() );
-    
+
     for(RbConstIterator<DistanceMatrix> mat = matvect.begin(); mat != matvect.end(); ++mat)
     {
         std::vector<Taxon> taxa = mat->getTaxa();
@@ -297,10 +297,10 @@ RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDista
             }
         }
     }
-    
+
     // divide the sum matrix by the divisor matrix
     RevBayesCore::MatrixReal averageMatrix = MatrixReal( allNames.size() );
-    
+
     for(size_t i = 0; i != averageMatrix.getNumberOfRows(); i++)
     {
         for(size_t j = 0; j != averageMatrix.getNumberOfColumns(); j++)
@@ -311,7 +311,7 @@ RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDista
             }
         }
     }
-    
+
     // convert from a vector of strings back to a vector of taxa:
     std::vector<Taxon> uniqueTaxa( allNames.size() );
 
@@ -319,13 +319,13 @@ RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDista
     {
         uniqueTaxa[k] = Taxon( allNames[k] );
     }
-        
+
     // initialize a distance matrix based on the average matrix and taxon vector obtained above:
     DistanceMatrix dm = DistanceMatrix( averageMatrix, uniqueTaxa );
-    
+
     // combine with the Boolean mask into an average distance matrix:
     AverageDistanceMatrix adm = AverageDistanceMatrix( dm, mask );
-    
+
     return adm;
 }
 
@@ -368,7 +368,7 @@ RevBayesCore::DistanceMatrix* RevBayesCore::TreeUtilities::getDistanceMatrix(con
  */
 size_t RevBayesCore::TreeUtilities::getMrcaIndex(const TopologyNode *left, const TopologyNode *right)
 {
-    
+
     if ( left == right )  //same
     {
         return left->getIndex();
@@ -381,7 +381,7 @@ size_t RevBayesCore::TreeUtilities::getMrcaIndex(const TopologyNode *left, const
     {
         return RevBayesCore::TreeUtilities::getMrcaIndex( left, &right->getParent() );
     }
-    
+
 }
 
 /**
@@ -480,7 +480,7 @@ void RevBayesCore::TreeUtilities::makeUltrametric(Tree *t)
         TopologyNode* node = &(t->getTipNode( i ) );
         double age = node->getBranchLength();
         node = &(node->getParent());
-        
+
         while (!node->isRoot() )
         {
             age += node->getBranchLength();
@@ -498,7 +498,7 @@ void RevBayesCore::TreeUtilities::makeUltrametric(Tree *t)
     {
         t->getTipNode( i ).setBranchLength(t->getTipNode( i ).getBranchLength() + max - ages[i]);
     }
-    
+
     setAgesRecursively(t, &(t->getRoot()), max);
 
     // make sure that all the tips have an age of 0
@@ -506,7 +506,7 @@ void RevBayesCore::TreeUtilities::makeUltrametric(Tree *t)
     {
         t->getTipNode( i ).setAge(0.0);
     }
-    
+
 }
 
 /**
@@ -636,7 +636,7 @@ void RevBayesCore::TreeUtilities::setAges(Tree *t, TopologyNode *n, std::vector<
         {
             setAges( t, children[i], ages);
         }
-        
+
     }
 
 }
@@ -651,20 +651,20 @@ void RevBayesCore::TreeUtilities::setAgesRecursively(RevBayesCore::Tree *t, RevB
 {
     // first, we set the age of this node
     n->setAge( age );
-    
+
     // we only rescale internal nodes
     if ( n->isTip() == false )
     {
-        
+
         // rescale both children
         std::vector<TopologyNode*> children = n->getChildren();
         for (size_t i = 0; i < children.size(); ++i)
         {
             setAgesRecursively( t, children[i], age-children[i]->getBranchLength());
         }
-        
+
     }
-    
+
 }
 
 /**
@@ -887,7 +887,7 @@ double RevBayesCore::TreeUtilities::getGammaStatistic(const Tree &t)
             break;
         }
     }
-    
+
     double n = t.getNumberOfTips();
     if (n < 3)
     {
@@ -898,7 +898,7 @@ double RevBayesCore::TreeUtilities::getGammaStatistic(const Tree &t)
     double T = 0;
     for (int j = 2; j <= n; j++)
     {
-        T = T + (j * distances[j - 2]); 
+        T = T + (j * distances[j - 2]);
     }
 
     double a = 1 / ( n - 2 );
@@ -910,10 +910,10 @@ double RevBayesCore::TreeUtilities::getGammaStatistic(const Tree &t)
         {
             temp = temp + (k * distances[k - 2]);
         }
-        b = b + temp; 
+        b = b + temp;
     }
     double num = (a * b) - (T / 2);
-    
+
     double den = T * sqrt( (1 / (12 * (n - 2))) );
 
 
@@ -1099,8 +1099,8 @@ std::vector<double> RevBayesCore::TreeUtilities::getInverseES(const Tree &t)
 
 /**
  * Calculate the Parsimoniously Same State Paths (PSSP). This is the set of branch lengths
- * from clades parsimoniously reconstructed to have the same state. Given (((A,B),C),(D,E)), if A, B, 
- * D, and E are in state 0, then PSSP(0) will contain the four branch lengths in (A,B) and (D,E). Uses 
+ * from clades parsimoniously reconstructed to have the same state. Given (((A,B),C),(D,E)), if A, B,
+ * D, and E are in state 0, then PSSP(0) will contain the four branch lengths in (A,B) and (D,E). Uses
  * Fitch's (1970) algorithm for parsimony ancestral state reconstruction.
  * @param t input tree
  * @param c input character state alignment
@@ -1181,7 +1181,7 @@ std::set<size_t> RevBayesCore::TreeUtilities::recursivelyGetPSSP(const TopologyN
 double RevBayesCore::TreeUtilities::calculateMPD(const Tree &t, const AbstractHomologousDiscreteCharacterData &c, size_t site_index, size_t state_index,
                                                  bool zscore, bool branch_lengths, size_t num_randomizations)
 {
- 
+
     // use either pairwise branch length or nodal distances
     DistanceMatrix* distances;
     if (branch_lengths == true)
@@ -1215,14 +1215,14 @@ double RevBayesCore::TreeUtilities::calculateMPD(const Tree &t, const AbstractHo
                     num_dist += 1.0;
                 }
             }
-        }   
+        }
     }
     double obs_mean_distance = 0.0;
     if (num_dist != 0)
     {
         obs_mean_distance = total_dist/num_dist;
     }
-   
+
     if (zscore == false)
     {
         return obs_mean_distance;
@@ -1245,7 +1245,7 @@ double RevBayesCore::TreeUtilities::calculateMPD(const Tree &t, const AbstractHo
                 new_tip_names.push_back(new_name);
             }
         }
-        
+
         // calculate mean pairwise distances for the random taxa
         double total_dist = 0.0;
         double num_dist = 0.0;
@@ -1263,15 +1263,15 @@ double RevBayesCore::TreeUtilities::calculateMPD(const Tree &t, const AbstractHo
                         num_dist += 1.0;
                     }
                 }
-            }   
+            }
         }
-        
+
         double temp_mean_distance = 0.0;
         if (num_dist != 0)
         {
             temp_mean_distance = total_dist/num_dist;
         }
-        random_mean_distances.push_back(temp_mean_distance); 
+        random_mean_distances.push_back(temp_mean_distance);
     }
 
     // zscore = (mpd_obs - mpd_rand_mean) / mpd_rand_sd
@@ -1317,7 +1317,7 @@ double RevBayesCore::TreeUtilities::calculateMPD(const Tree &t, const AbstractHo
 double RevBayesCore::TreeUtilities::calculateMNTD(const Tree &t, const AbstractHomologousDiscreteCharacterData &c, size_t site_index, size_t state_index,
                                                   bool zscore, bool branch_lengths, size_t num_randomizations)
 {
- 
+
     // use either pairwise branch length or nodal distances
     DistanceMatrix* distances;
     if (branch_lengths == true)
@@ -1360,14 +1360,14 @@ double RevBayesCore::TreeUtilities::calculateMNTD(const Tree &t, const AbstractH
             }
             total_dist += min_dist;
             num_dist += 1.0;
-        }   
+        }
     }
     double obs_mean_distance = 0.0;
     if (num_dist != 0)
     {
         obs_mean_distance = total_dist/num_dist;
     }
-   
+
     if (zscore == false)
     {
         return obs_mean_distance;
@@ -1392,7 +1392,7 @@ double RevBayesCore::TreeUtilities::calculateMNTD(const Tree &t, const AbstractH
                 new_tip_names.push_back(new_name);
             }
         }
-        
+
         // calculate mean nearest taxon distance for the random taxa
         for (size_t i = 0; i < tip_names.size(); ++i)
         {
@@ -1417,15 +1417,15 @@ double RevBayesCore::TreeUtilities::calculateMNTD(const Tree &t, const AbstractH
                 }
                 total_dist += min_dist;
                 num_dist += 1.0;
-            }   
+            }
         }
-        
+
         double temp_mean_distance = 0.0;
         if (num_dist != 0)
         {
             temp_mean_distance = total_dist/num_dist;
         }
-        random_mean_distances.push_back(temp_mean_distance); 
+        random_mean_distances.push_back(temp_mean_distance);
     }
 
     double random_mean = 0.0;
@@ -1482,4 +1482,85 @@ std::vector<double> RevBayesCore::TreeUtilities::calculateEDR(Tree &t)
     }
     return edr;
 }
-      
+
+/**
+ * Set the ages of the provided taxa to the present
+ * @param t tree to be modified
+ * @param amount the width of the uniform interval from which to draw the new age (centered on the current age)
+ * @param fossils whether to also jitter the ages of fossils
+ */
+void RevBayesCore::TreeUtilities::jitter(Tree& tree, double amount, bool fossils)
+{
+    // call recursive function on root
+    TopologyNode& root_node = tree.getRoot();
+    jitterRecursively(root_node, amount, fossils);
+}
+
+void RevBayesCore::TreeUtilities::jitterRecursively(TopologyNode& node, double amount, bool fossils)
+{
+
+  // only rescale nodes (and maybe fossils)
+  if ( node.isInternal() || ( fossils & node.isFossil() ) )
+  {
+
+    // get the children of the node
+    std::vector<TopologyNode*> children = node.getChildren();
+
+    // get the age of this node
+    double age = node.getAge();
+
+    // get the max age
+    double max = age + amount;
+    if ( node.isRoot() == false )
+    {
+      // get the parent age
+      double parent_age = node.getParent().getAge();
+      if (parent_age < max) {
+        max = parent_age;
+      }
+    }
+
+    // get the min age
+    double min = (age - amount) < 0.0 ? 0.0 : age - amount;
+    double child_age;
+    for(size_t i = 0; i < children.size(); ++i)
+    {
+      child_age = children.at(i)->getAge();
+      if (child_age > min)
+      {
+        min = child_age;
+      }
+    }
+
+    // draw the new age
+    RandomNumberGenerator* rng = GLOBAL_RNG;
+    double width = max - min;
+    double new_age = min + rng->uniform01() * width;
+
+    // update the branch length
+    double delta = new_age - age;
+    double old_bl = node.getBranchLength();
+    double new_bl = old_bl - delta;
+    node.setBranchLength(new_bl);
+
+    // update the age
+    node.setAge(new_age);
+
+    // if ( node.isFossil() ) {
+    //   std::cout << "name: " << node.getName() << std::endl;
+    //   std::cout << "    min: " << min << std::endl;
+    //   std::cout << "    max: " << max << std::endl;
+    //   std::cout << "    delta: " << delta << std::endl;
+    //   std::cout << "    old age: " << age << std::endl;
+    //   std::cout << "    new age: " << new_age << std::endl;
+    // }
+
+    // recursively call on children
+    for(size_t i = 0; i < children.size(); ++i)
+    {
+      jitterRecursively(*children.at(i), amount, fossils);
+    }
+
+  }
+
+}
