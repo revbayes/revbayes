@@ -1279,18 +1279,19 @@ bool Tree::isUltrametric( void ) const
 
 void Tree::makeInternalNodesBifurcating(bool reindex, bool as_fossils)
 {
-
     // delegate the call to the nodes which will make the tree bifurcating recursively.
     getRoot().makeBifurcating( as_fossils );
-    
 
+    // reindex here, in case makeBifurcating
+    // * added new fossil tips with no index
+    // * removed out-degree-1 nodes ("knuckles")
+    
     // we need to reset the root so that the vector of nodes get filled again with the new number of nodes
-    setRoot( &getRoot(), reindex );
+    setRoot( &getRoot(), true );
 
     // clear the taxon bitset map
     // the next time someone call getTaxonBitset() it will be rebuilt
     taxon_bitset_map.clear();
-
 }
 
 void Tree::makeRootBifurcating(const Clade& outgroup, bool as_fossils)
