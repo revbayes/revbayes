@@ -891,7 +891,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::initializeEmptyCh
 
 }
 
-void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecialization(DagNode* affecter)
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecialization(const DagNode* affecter)
 {
 
     if ( affecter == age )
@@ -939,7 +939,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::prepareParameters
 
 }
 
-void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecialization(DagNode *restorer)
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecialization(const DagNode *restorer)
 {
 
     if ( restorer == age )
@@ -1021,7 +1021,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::simulateSSETree(v
     RBOUT("Warning: simulating tree under SSE model (not yet implemented).");
     
     // simulating a tree
-    std::string sim_newick_string = tp_ptr->simulateTree();
+    // std::string sim_newick_string = tp_ptr->simulateTree();
     // this->setValue( static_cast<Tree*>( tp_ptr->getTreeValue() ) );
     // this->setValue( static_cast<DiscreteCharacterData*>( tp_ptr->getDataValue() ) );
 }
@@ -1128,7 +1128,7 @@ std::vector<double> GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::si
     return ages;
 }
 
-void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecialization(DagNode *affecter, bool touchAll)
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
 
     if ( affecter == age )
