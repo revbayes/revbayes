@@ -19,9 +19,10 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-BranchLengthScaleProposal::BranchLengthScaleProposal( StochasticNode<Tree> *t,double d ) : Proposal(),
+BranchLengthScaleProposal::BranchLengthScaleProposal( StochasticNode<Tree> *t, double d, bool e ) : Proposal(),
     tree( t ),
-    delta( d )
+    delta( d ),
+    terminal_only( e )
 {
     // tell the base class to add the node
     addNode( tree );
@@ -93,7 +94,7 @@ double BranchLengthScaleProposal::doProposal( void )
         double u = rng->uniform01();
         size_t index = size_t( std::floor(tau.getNumberOfNodes() * u) );
         node = &tau.getNode(index);
-    } while ( node->isRoot() == true );
+    } while ( node->isRoot() == true && ( terminal_only == false || node->isTip() ) );
 
     // we need to work with the times
     double my_branch_length = node->getBranchLength();

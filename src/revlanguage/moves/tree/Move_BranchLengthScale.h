@@ -31,6 +31,7 @@ namespace RevLanguage {
         
         RevPtr<const RevVariable>                   tree;
         RevPtr<const RevVariable>                   delta;
+        RevPtr<const RevVariable>                   external;
         RevPtr<const RevVariable>                   tuning;
         
     };

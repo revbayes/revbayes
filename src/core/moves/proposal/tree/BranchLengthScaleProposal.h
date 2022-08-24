@@ -27,7 +27,7 @@ template <class variableType> class StochasticNode;
     class BranchLengthScaleProposal : public Proposal {
         
     public:
-        BranchLengthScaleProposal( StochasticNode<Tree> *t, double d );                                               //!<  constructor
+        BranchLengthScaleProposal( StochasticNode<Tree> *t, double d, bool e );                                               //!<  constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                        //!< Clean up proposal
@@ -54,6 +54,7 @@ template <class variableType> class StochasticNode;
         
         // parameters
         double                                  delta;
+        bool                                    terminal_only;
         
         // stored objects to undo proposal
         double                                  stored_value;
