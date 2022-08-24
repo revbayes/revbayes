@@ -103,7 +103,7 @@ double WeightedBranchLengthScaleProposal::doProposal( void )
         double u = rng->uniform01();
         size_t index = size_t( std::floor(tau.getNumberOfNodes() * u) );
         node = &tau.getNode(index);
-    } while ( node->isRoot() == true && node->getParent().isRoot() == true );
+    } while ( node->isRoot() == true || node->getParent().isRoot() == true );
 
     // get the parent node
     TopologyNode& parent = node->getParent();
