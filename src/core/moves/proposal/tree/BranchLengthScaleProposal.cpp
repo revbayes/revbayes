@@ -94,7 +94,7 @@ double BranchLengthScaleProposal::doProposal( void )
         double u = rng->uniform01();
         size_t index = size_t( std::floor(tau.getNumberOfNodes() * u) );
         node = &tau.getNode(index);
-    } while ( node->isRoot() == true && ( terminal_only == false || node->isTip() ) );
+    } while ( node->isRoot() == true || ( terminal_only == true && node->isTip() == false ) );
 
     // we need to work with the times
     double my_branch_length = node->getBranchLength();
