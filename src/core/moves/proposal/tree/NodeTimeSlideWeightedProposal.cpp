@@ -127,6 +127,7 @@ double NodeTimeSlideWeightedProposal::doProposal( void )
     
     // approximate the likelihood curve for this node
     std::vector<double> lnl(1,0.0);
+    
     // get the affected dag nodes for the posterior computation
     RbOrderedSet<DagNode*> affected;
     variable->initiateGetAffectedNodes( affected );
@@ -155,7 +156,8 @@ double NodeTimeSlideWeightedProposal::doProposal( void )
     lnl.push_back( 0.0 );
     marginal += pre_lnl/2.0 * (1.0 - prev_x);
     // normalize the likelihoods
-    for (size_t i = 0; i < (blocks+2); ++i) {
+    for (size_t i = 0; i < (blocks+2); ++i)
+    {
         lnl[i] /= marginal;
     }
     

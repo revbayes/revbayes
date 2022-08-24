@@ -34,7 +34,7 @@ template <class valueType> class TypedDagNode;
     private:
         const TypedDagNode<double>*         alpha;
         const TypedDagNode<double>*         beta;
-        const TypedDagNode<long>*            numCats;
+        const TypedDagNode<long>*           numCats;
         bool                                median;
     };
 }

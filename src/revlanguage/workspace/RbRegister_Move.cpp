@@ -240,6 +240,7 @@
 #include "Move_SPRNonclock.h"
 #include "Move_TreeScale.h"
 //#include "Move_WeightedNodeTimeSlide.h"
+#include "Move_WeightedBranchLengthScale.h"
 
 
 #include "Move_NarrowExchangeRateMatrix.h"
@@ -465,6 +466,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_SpeciesTreeScale()                 );
         addType( new Move_TreeScale()                        );
         addType( new Move_NarrowExchangeRateMatrix()         );
+        addType( new Move_WeightedBranchLengthScale()        );
 
         /* Moves on character histories / data augmentation */
         addType( new Move_CharacterHistory() );
