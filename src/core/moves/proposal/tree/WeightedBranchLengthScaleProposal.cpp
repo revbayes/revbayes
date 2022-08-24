@@ -68,7 +68,7 @@ WeightedBranchLengthScaleProposal* WeightedBranchLengthScaleProposal::clone( voi
  */
 const std::string& WeightedBranchLengthScaleProposal::getProposalName( void ) const
 {
-    static std::string name = "TreeScale";
+    static std::string name = "Weighted-BranchLengthScale";
     
     return name;
 }
@@ -141,6 +141,9 @@ double WeightedBranchLengthScaleProposal::doProposal( void )
         double new_sibling_bl = (1.0-interval[i]) * branch_length_total;
         sibling->setBranchLength( new_sibling_bl );
         
+        // flag the tree as dirty
+        tree->touch();
+        
         double ln_likelihood = tree->getLnProbability();
         for (RbOrderedSet<DagNode*>::iterator it = affected.begin(); it != affected.end(); ++it)
         {
@@ -151,24 +154,42 @@ double WeightedBranchLengthScaleProposal::doProposal( void )
     // project the first log likelihood
     lnl[0] = lnl[1] - (lnl[2]-lnl[1])*interval[0]/(interval[1]-interval[0]);
     // project the last log likelihood
-    lnl[num_breaks+1] = lnl[num_breaks] + (lnl[num_breaks]-lnl[num_breaks-1])*interval[num_breaks-1]/(interval[num_breaks-2]-interval[num_breaks-1]);
+    lnl[num_breaks+1] = lnl[num_breaks] + (lnl[num_breaks]-lnl[num_breaks-1])*(1.0-interval[num_breaks-1])/(interval[num_breaks-1]-interval[num_breaks-2]);
+    
+    // find the maximum lnl
+    double max_lnl = lnl[0];
+    for ( size_t i=1; i<(num_breaks+2); ++i )
+    {
+        if ( max_lnl < lnl[i] )
+        {
+            max_lnl = lnl[i];
+        }
+    }
+    
+    // now transform into likelihood
+    std::vector<double> likelihoods = std::vector<double>(num_breaks+2, 1.0);
+    for ( size_t i=0; i<(num_breaks+2); ++i )
+    {
+        likelihoods[i] = exp(lnl[i]-max_lnl);
+    }
+
     
     // compute the integral (marginal likelihood)
     double prev_x = 0.0;
-    double pre_lnl = lnl[0];
+    double pre_like = likelihoods[0];
     double marginal = 0;
     for (size_t i = 0; i < num_breaks; ++i)
     {
-        marginal += (pre_lnl+lnl[i+1])/2.0 * (interval[i] - prev_x);
+        marginal += (pre_like+likelihoods[i+1])/2.0 * (interval[i] - prev_x);
         prev_x = interval[i];
-        pre_lnl = lnl[i+1];
+        pre_like = likelihoods[i+1];
     }
-    marginal += (pre_lnl+lnl[num_breaks+1])/2.0 * (1.0 - prev_x);
+    marginal += (pre_like+likelihoods[num_breaks+1])/2.0 * (1.0 - prev_x);
     
     // normalize the likelihoods
     for (size_t i = 0; i < (num_breaks+2); ++i)
     {
-        lnl[i] /= marginal;
+        likelihoods[i] /= marginal;
     }
     
     // randomly draw a new branch fraction (using the cdf of the weight function)
@@ -177,15 +198,46 @@ double WeightedBranchLengthScaleProposal::doProposal( void )
     size_t index = 1;
     while ( u > 0 )
     {
-        double block = (lnl[index]+lnl[index-1])/2.0 * (interval[index] - interval[index-1]);
+        double x1 = index > 1 ? interval[index-2] : 0.0;
+        double x2 = index < (num_breaks+1) ? interval[index-1] : 1.0;
+        double y1 = likelihoods[index-1];
+        double y2 = likelihoods[index];
+        
+        // compute the total probability for this interval
+        double block = (y1+y2)/2.0 * (x2-x1);
         if ( u < block )
         {
-            double slope = (lnl[index-1]-lnl[index]) / (interval[index] - interval[index-1]);
-            double tmp = sqrt( lnl[index-1]*lnl[index-1] + 2.0*u*slope);
-            proposed_branch_fraction = interval[index-1] + (tmp-lnl[index-1])/slope;
-            if ( proposed_branch_fraction < interval[index-1] || proposed_branch_fraction > interval[index] )
+            // compute the slope
+            double alpha = (y2-y1) / (x2-x1);
+            
+            double sol = 0.0;
+            if ( alpha == 0.0 )
             {
-                proposed_branch_fraction = interval[index-1] + (-tmp-lnl[index-1])/slope;
+                sol = u/y1;
+            }
+            else
+            {
+                // solve the quadratic equation
+                double p = 2.0*y1/alpha;
+                double q = -2.0*u/alpha;
+                double tmp = sqrt( p*p/4.0 - q );
+                double sol1 = -p/2.0 + tmp;
+                double sol2 = -p/2.0 - tmp;
+                if ( sol1 < ( x2-x1 ) && sol1 > 0 )
+                {
+                    sol = sol1;
+                }
+                else
+                {
+                    sol = sol2;
+                }
+            }
+            
+            //
+            proposed_branch_fraction = x1 + sol;
+            if ( proposed_branch_fraction < x1 || proposed_branch_fraction > x2 )
+            {
+                throw RbException("Wrong proposal");
             }
         }
         u -= block;
@@ -200,7 +252,7 @@ double WeightedBranchLengthScaleProposal::doProposal( void )
     // compute Hastings ratio (ratio of the weights)
     double weight_old = 1.0, weight_new = 1.0;
     prev_x = 0.0;
-    pre_lnl = 0.0;
+    pre_like = likelihoods[0];
     bool found_forward = false, found_backward = false;
     double proposed_x = proposed_branch_fraction / branch_length_total;
     double old_x = branch_length_parent / branch_length_total;
@@ -209,19 +261,33 @@ double WeightedBranchLengthScaleProposal::doProposal( void )
         if ( !found_forward && interval[i] > proposed_x)
         {
             found_forward = true;
-            weight_new = pre_lnl + (proposed_x-prev_x)/(interval[i]-prev_x)*(lnl[i+1]-pre_lnl);
+            double alpha = (likelihoods[i+1]-pre_like) / (interval[i]-prev_x);
+            weight_new = pre_like + (proposed_x-prev_x)*alpha;
         }
         if ( !found_backward && interval[i] > old_x)
         {
             found_backward = true;
-            weight_old = pre_lnl + (old_x-prev_x)/(interval[i]-prev_x)*(lnl[i+1]-pre_lnl);
+            double alpha = (likelihoods[i+1]-pre_like) / (interval[i]-prev_x);
+            weight_old = pre_like + (old_x-prev_x)*alpha;
         }
         if ( found_forward && found_backward )
         {
             break;
         }
         prev_x = interval[i];
-        pre_lnl = lnl[i+1];
+        pre_like = likelihoods[i+1];
+    }
+    
+    // if we haven't found it until the last interval
+    if ( !found_forward )
+    {
+        double alpha = (likelihoods[num_breaks+1]-pre_like) / (1.0-prev_x);
+        weight_new = pre_like + (proposed_x-prev_x)*alpha;
+    }
+    if ( !found_backward )
+    {
+        double alpha = (likelihoods[num_breaks+1]-pre_like) / (1.0-prev_x);
+        weight_old = pre_like + (old_x-prev_x)*alpha;
     }
     
     return log( weight_old / weight_new );

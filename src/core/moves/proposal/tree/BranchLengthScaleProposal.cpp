@@ -60,7 +60,7 @@ BranchLengthScaleProposal* BranchLengthScaleProposal::clone( void ) const
  */
 const std::string& BranchLengthScaleProposal::getProposalName( void ) const
 {
-    static std::string name = "TreeScale";
+    static std::string name = "BranchLengthScale";
     
     return name;
 }
