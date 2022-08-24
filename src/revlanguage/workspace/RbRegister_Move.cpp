@@ -214,6 +214,7 @@
 #include "Move_FossilTipTimeUniform.h"
 #include "Move_FossilTipTimeSlideUniform.h"
 #include "Move_GibbsPruneAndRegraft.h"
+#include "Move_GibbsSubtreeSwap.h"
 #include "Move_LayeredScaleProposal.h"
 #include "Move_NarrowExchange.h"
 #include "Move_NNIClock.h"
@@ -440,8 +441,10 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_FossilTipTimeUniform()             );
         addType( new Move_FossilTipTimeSlideUniform()        );
         addType( new Move_GibbsPruneAndRegraft()             );
+        addType( new Move_GibbsSubtreeSwap()                 );
         addType( new Move_LayeredScaleProposal()             );
         addType( new Move_NarrowExchange()                   );
+        addType( new Move_NarrowExchangeRateMatrix()         );
         addType( new Move_NNIClock()                         );
         addType( new Move_NNINonclock()                      );
         addType( new Move_NodeRateTimeSlideUniform()         );
@@ -465,7 +468,6 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_SpeciesSubtreeScaleBeta()          );
         addType( new Move_SpeciesTreeScale()                 );
         addType( new Move_TreeScale()                        );
-        addType( new Move_NarrowExchangeRateMatrix()         );
         addType( new Move_WeightedBranchLengthScale()        );
 
         /* Moves on character histories / data augmentation */

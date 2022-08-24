@@ -138,13 +138,13 @@ double GibbsPruneAndRegraftProposal::doProposal( void )
     RbOrderedSet<DagNode *> affected;
     variable->initiateGetAffectedNodes( affected );
     
-    double backwardLikelihood = variable->getLnProbability();
+    double backward_likelihood = variable->getLnProbability();
     for (RbOrderedSet<DagNode*>::const_iterator it = affected.begin(); it != affected.end(); ++it)
     {
-        backwardLikelihood += (*it)->getLnProbability();
+        backward_likelihood += (*it)->getLnProbability();
     }
-    int offset = (int) -backwardLikelihood;
-    double backward = exp(backwardLikelihood + offset);
+    int offset = (int) -backward_likelihood;
+    double backward = exp(backward_likelihood + offset);
     
     // pick a random node which is not the root and neithor the direct descendant of the root
     TopologyNode* node;
