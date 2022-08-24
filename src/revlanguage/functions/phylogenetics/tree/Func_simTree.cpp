@@ -197,13 +197,13 @@ void Func_simTree::simulateBalancedTree( size_t n, std::vector<RevBayesCore::Top
         RevBayesCore::TopologyNode *parent = nodes[i];
         
         // add a left child
-        RevBayesCore::TopologyNode* leftChild = new RevBayesCore::TopologyNode(0);
+        RevBayesCore::TopologyNode* leftChild = new RevBayesCore::TopologyNode();
         parent->addChild(leftChild);
         leftChild->setParent(parent);
         children.push_back(leftChild);
         
         // add a right child
-        RevBayesCore::TopologyNode* rightChild = new RevBayesCore::TopologyNode(0);
+        RevBayesCore::TopologyNode* rightChild = new RevBayesCore::TopologyNode();
         parent->addChild(rightChild);
         rightChild->setParent(parent);
         children.push_back(rightChild);
@@ -236,12 +236,12 @@ void Func_simTree::simulateCaterpillarTree( size_t n, RevBayesCore::TopologyNode
     
     
     // add a left child
-    RevBayesCore::TopologyNode* leftChild = new RevBayesCore::TopologyNode(0);
+    RevBayesCore::TopologyNode* leftChild = new RevBayesCore::TopologyNode();
     node->addChild(leftChild);
     leftChild->setParent(node);
     
     // add a right child
-    RevBayesCore::TopologyNode* rightChild = new RevBayesCore::TopologyNode(0);
+    RevBayesCore::TopologyNode* rightChild = new RevBayesCore::TopologyNode();
     node->addChild(rightChild);
     rightChild->setParent(node);
     

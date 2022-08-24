@@ -2035,7 +2035,7 @@ bool TimeVaryingStateDependentSpeciationExtinctionProcess::simulateTree( size_t 
     std::vector<TopologyNode*> nodes;
     
     // initialize the root node
-    TopologyNode* root = new TopologyNode(0);
+    TopologyNode* root = new TopologyNode();
     double t = process_age->getValue();
     root->setAge(t);
     root->setNodeType(false, true, true);
