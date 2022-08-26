@@ -1,4 +1,4 @@
-#include "WeightedSubtreePruneAndRegraftProposal.h"
+#include "WeightedSubtreeSwapProposal.h"
 
 #include <cmath>
 #include <cstddef>
@@ -20,13 +20,13 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-WeightedSubtreePruneAndRegraftProposal::WeightedSubtreePruneAndRegraftProposal( StochasticNode<Tree> *n, size_t nb, double a ) : Proposal(),
+WeightedSubtreeSwapProposal::WeightedSubtreeSwapProposal( StochasticNode<Tree> *n, size_t nb, double a ) : Proposal(),
     tree( n ),
     num_breaks( nb ),
     alpha( a ),
     failed( false ),
-    stored_choosen_node( NULL ),
-    stored_sibling( NULL )
+    stored_first_node( NULL ),
+    stored_second_node( NULL )
 {
     // tell the base class to add the node
     addNode( tree );
@@ -53,7 +53,7 @@ WeightedSubtreePruneAndRegraftProposal::WeightedSubtreePruneAndRegraftProposal( 
  * decides whether to accept, reject, etc. the proposed value.
  *
  */
-void WeightedSubtreePruneAndRegraftProposal::cleanProposal( void )
+void WeightedSubtreeSwapProposal::cleanProposal( void )
 {
     ; // do nothing
 }
@@ -64,14 +64,14 @@ void WeightedSubtreePruneAndRegraftProposal::cleanProposal( void )
  *
  * \return A new copy of the proposal.
  */
-WeightedSubtreePruneAndRegraftProposal* WeightedSubtreePruneAndRegraftProposal::clone( void ) const
+WeightedSubtreeSwapProposal* WeightedSubtreeSwapProposal::clone( void ) const
 {
     
-    return new WeightedSubtreePruneAndRegraftProposal( *this );
+    return new WeightedSubtreeSwapProposal( *this );
 }
 
 
-double WeightedSubtreePruneAndRegraftProposal::computeMarginal(TopologyNode& n, size_t index)
+double WeightedSubtreeSwapProposal::computeMarginal(TopologyNode& n, size_t index)
 {
 
     // get the parent node
@@ -175,41 +175,38 @@ double WeightedSubtreePruneAndRegraftProposal::computeMarginal(TopologyNode& n, 
 /**
  * Perform the proposal.
  *
- * A SPR proposal.
+ * A subtree-swap proposal.
  *
  * \return The hastings ratio.
  */
-double WeightedSubtreePruneAndRegraftProposal::doProposal( void )
+double WeightedSubtreeSwapProposal::doProposal( void )
 {
+    // reset failed flag
+    failed = false;
     
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
     Tree& tau = tree->getValue();
     
-    // pick a random node which is not the root and neithor the direct descendant of the root
-    TopologyNode* node;
+    // pick a random node which is not the root
+    TopologyNode* first_node;
     do {
         double u = rng->uniform01();
         size_t index = size_t( std::floor(tau.getNumberOfNodes() * u) );
-        node = &tau.getNode(index);
-    } while ( node->isRoot() || node->getParent().isRoot() );
+        first_node = &tau.getNode(index);
+        
+    } while ( first_node->isRoot() == true );
     
-    // now we store all necessary values
-    stored_choosen_node   = node;
-    TopologyNode &parent = node->getParent();
-    stored_sibling = &parent.getChild( 0 );
+    // get the parent node for easy access
+    TopologyNode& parent = first_node->getParent();
     
-    // check if we got the correct child
-    if ( node == stored_sibling )
-    {
-        stored_sibling = &parent.getChild( 1 );
-    }
-    
-    // get all reattachment points
-    std::vector<TopologyNode*> all_second_nodes = getSecondNodes( *node );
+    // pick a random node which
+    // 1. is not the root
+    // 2. do not descent from another
+    // 3. are not siblings
+    std::vector<TopologyNode*> all_second_nodes = getSecondNodes( *first_node );
     size_t num_second_nodes = all_second_nodes.size();
-    
     
     // sanity check
     if ( num_second_nodes < 1 )
@@ -223,11 +220,12 @@ double WeightedSubtreePruneAndRegraftProposal::doProposal( void )
     /** Compute the backwards topology probability */
     /***********************************************/
     
-    double backward_topology_weight = computeMarginal( parent, stored_sibling->getIndex() );
+    double backward_topology_weight = computeMarginal( parent, first_node->getIndex() );
     int offset = (int) -backward_topology_weight;
     
     // compute the backwards weight
     double backward_weight_topology = exp(backward_topology_weight + offset);
+    
     
     
     
@@ -242,7 +240,7 @@ double WeightedSubtreePruneAndRegraftProposal::doProposal( void )
     for ( size_t i=0; i<num_second_nodes; ++i )
     {
         TopologyNode* second_node = all_second_nodes[i];
-        pruneAndRegraft(node, second_node);
+        swapNodes(first_node, second_node);
         
         // flag the tree as dirty
         tree->touch();
@@ -252,7 +250,7 @@ double WeightedSubtreePruneAndRegraftProposal::doProposal( void )
         sum_of_weights += weights[i];
         
         // undo proposal
-        pruneAndRegraft(node, stored_sibling);
+        swapNodes(first_node, second_node);
 
         // restore the previous likelihoods;
         tree->restore();
@@ -266,20 +264,21 @@ double WeightedSubtreePruneAndRegraftProposal::doProposal( void )
     }
     
     
+    
     /****************************************************/
     /** Compute the backwards branch length probability */
     /****************************************************/
 
     // now we need the branch length of the parent (towards the grant parent) and of the sibling
     double branch_length_parent  = parent.getBranchLength();
-    double branch_length_sibling = stored_sibling->getBranchLength();
+    double branch_length_sibling = stored_second_node->getBranchLength();
     double branch_length_total   = branch_length_parent + branch_length_sibling;
     
     stored_branch_length_parent  = branch_length_parent;
     stored_branch_length_sibling = branch_length_sibling;
     
     // compute backwards proposal probability of the branch length
-    const  std::vector<double>& brackwards_likelihoods = likelihoods[stored_sibling->getIndex()];
+    const  std::vector<double>& brackwards_likelihoods = likelihoods[stored_second_node->getIndex()];
     double backward_prob_branch_length = 1.0;
     double prev_x = 0.0;
     double pre_like = brackwards_likelihoods[0];
@@ -311,9 +310,10 @@ double WeightedSubtreePruneAndRegraftProposal::doProposal( void )
 //    backward_prob_branch_length /= branch_length_total;
     
     
+    
     /*************************************/
     /** Pick a random reattachment point */
-    /*************************************/
+    /*************************************/    
     
     double u = rng->uniform01() * sum_of_weights;
     size_t index = 0;
@@ -326,16 +326,15 @@ double WeightedSubtreePruneAndRegraftProposal::doProposal( void )
     
     TopologyNode* second_node = all_second_nodes[index];
     
-    // store this node for undoing the proposal
-    stored_new_sibling = second_node;
+    // now we store all necessary values
+    stored_first_node           = first_node;
+    stored_second_node          = second_node;
     
-    // perform the topology move
-    pruneAndRegraft(node, second_node);
+    swapNodes(first_node, second_node);
     
     // the forward probability of the topology change
     double forward_weight_topology = weights[index];
 
-    
     
     /**************************************************/
     /** Now also perform the branch length change     */
@@ -452,37 +451,35 @@ double WeightedSubtreePruneAndRegraftProposal::doProposal( void )
  *
  * \return The Proposals' name.
  */
-const std::string& WeightedSubtreePruneAndRegraftProposal::getProposalName( void ) const
+const std::string& WeightedSubtreeSwapProposal::getProposalName( void ) const
 {
-    static std::string name = "WeightedSubtreePruneAndRegraft";
+    static std::string name = "WeightedSubtreeSwap";
     
     return name;
 }
 
 
-double WeightedSubtreePruneAndRegraftProposal::getProposalTuningParameter( void ) const
+double WeightedSubtreeSwapProposal::getProposalTuningParameter( void ) const
 {
     // this proposal has no tuning parameter
     return RbConstants::Double::nan;
 }
 
 
-std::vector<TopologyNode*> WeightedSubtreePruneAndRegraftProposal::getSecondNodes(const TopologyNode& n)
+std::vector<TopologyNode*> WeightedSubtreeSwapProposal::getSecondNodes(const TopologyNode& n)
 {
     
     Tree& tau = tree->getValue();
     size_t num_nodes = tau.getNumberOfNodes();
-    size_t root_index = tau.getRoot().getIndex();
     const std::vector<TopologyNode*> all_nodes = tau.getNodes();
     std::vector<bool> valid = std::vector<bool>( num_nodes, true );
-   
-    // we cannot pick the root
-    valid[root_index] = false;
     
-    // we cannot pick the parent node
-    size_t parent_index = n.getParent().getIndex();
-    valid[parent_index] = false;
-    
+    // mark all nodes toward the root as invalid because I cannot be swapped with a node that sits on my path
+    markAncestralNodes(n, valid);
+
+    // mark all nodes toward the root as invalid because I cannot be swapped with a node that sits on my path
+    markDescendantNodes(n, valid);
+
     // also mark my sibling
     const TopologyNode& p = n.getParent();
     size_t n_children = p.getNumberOfChildren();
@@ -493,8 +490,6 @@ std::vector<TopologyNode*> WeightedSubtreePruneAndRegraftProposal::getSecondNode
         valid[c_index] = false;
     }
     
-    // we cannot pick a node that is within my subtree
-    markDescendantNodes(n, valid);
     
     std::vector<TopologyNode*> second_nodes;
     // now add all the nodes
@@ -510,24 +505,25 @@ std::vector<TopologyNode*> WeightedSubtreePruneAndRegraftProposal::getSecondNode
 }
 
 
-bool WeightedSubtreePruneAndRegraftProposal::isDescendant(const TopologyNode &n, const TopologyNode &p)
+void WeightedSubtreeSwapProposal::markAncestralNodes(const TopologyNode& n, std::vector<bool>& valid)
 {
 
-    if ( n.isRoot() )
+    // mark the current node as invalid;
+    size_t index = n.getIndex();
+    valid[index] = false;
+    
+    // now check if this is the root node
+    if ( n.isRoot() == false )
     {
-        return false;
+        // mark the ancestral nodes via recursive calls
+        const TopologyNode& p = n.getParent();
+        markAncestralNodes(p, valid);
     }
 
-    if ( &n == &p )
-    {
-        return true;
-    }
-
-    return isDescendant(n.getParent(), p);
 }
 
 
-void WeightedSubtreePruneAndRegraftProposal::markDescendantNodes(const TopologyNode& n, std::vector<bool>& valid)
+void WeightedSubtreeSwapProposal::markDescendantNodes(const TopologyNode& n, std::vector<bool>& valid)
 {
 
     // mark the current node as invalid;
@@ -552,7 +548,7 @@ void WeightedSubtreePruneAndRegraftProposal::markDescendantNodes(const TopologyN
 /**
  *
  */
-void WeightedSubtreePruneAndRegraftProposal::prepareProposal( void )
+void WeightedSubtreeSwapProposal::prepareProposal( void )
 {
     
 }
@@ -566,7 +562,7 @@ void WeightedSubtreePruneAndRegraftProposal::prepareProposal( void )
  *
  * \param[in]     o     The stream to which we print the summary.
  */
-void WeightedSubtreePruneAndRegraftProposal::printParameterSummary(std::ostream &o, bool name_only) const
+void WeightedSubtreeSwapProposal::printParameterSummary(std::ostream &o, bool name_only) const
 {
     
     // no parameters
@@ -574,33 +570,20 @@ void WeightedSubtreePruneAndRegraftProposal::printParameterSummary(std::ostream 
 }
 
 
-void WeightedSubtreePruneAndRegraftProposal::pruneAndRegraft(TopologyNode *node, TopologyNode *new_sibling)
+void WeightedSubtreeSwapProposal::swapNodes(TopologyNode *a, TopologyNode *b)
 {
+    TopologyNode& a_parent = a->getParent();
+    TopologyNode& b_parent = b->getParent();
+
+    // swap the two nodes
+    a_parent.removeChild( a );
+    b_parent.removeChild( b );
     
-    // undo the proposal
-    TopologyNode &parent = node->getParent();
-    TopologyNode &grandparent = parent.getParent();
-    TopologyNode* old_sibling = &parent.getChild( 0 );
-    TopologyNode &new_grandparent = new_sibling->getParent();
-
-    // check if we got the correct child
-    if ( node == old_sibling )
-    {
-        old_sibling = &parent.getChild( 1 );
-    }
-
-    // now prune
-    grandparent.removeChild( &parent );
-    parent.removeChild( old_sibling );
-    grandparent.addChild( old_sibling );
-    old_sibling->setParent( &grandparent );
-
-    // re-attach
-    new_grandparent.removeChild( new_sibling );
-    parent.addChild( new_sibling );
-    new_grandparent.addChild( &parent );
-    parent.setParent( &new_grandparent );
-    new_sibling->setParent( &parent );
+    a_parent.addChild( b );
+    b_parent.addChild( a );
+    
+    a->setParent( &b_parent );
+    b->setParent( &a_parent );
 }
 
 
@@ -611,18 +594,34 @@ void WeightedSubtreePruneAndRegraftProposal::pruneAndRegraft(TopologyNode *node,
  * where complex undo operations are known/implement, we need to revert
  * the value of the variable/DAG-node to its original value.
  */
-void WeightedSubtreePruneAndRegraftProposal::undoProposal( void )
+void WeightedSubtreeSwapProposal::undoProposal( void )
 {
     
-    // undo the proposal
-    pruneAndRegraft(stored_choosen_node, stored_sibling);
+    // only if the proposal didn't fail
+    if ( failed == false )
+    {
+
+        // undo the proposal
+        TopologyNode& first_parent  = stored_first_node->getParent();
+        TopologyNode& second_parent = stored_second_node->getParent();
     
-    // undo also the branch length changes
-    TopologyNode& parent = stored_choosen_node->getParent();
-    parent.setBranchLength( stored_branch_length_parent );
-    stored_sibling->setBranchLength( stored_branch_length_sibling );
-    stored_new_sibling->setBranchLength( stored_branch_length_new_sibling );
+        // swap the two nodes
+        first_parent.removeChild( stored_first_node );
+        second_parent.removeChild( stored_second_node );
+    
+        first_parent.addChild( stored_second_node );
+        second_parent.addChild( stored_first_node );
+    
+        stored_first_node->setParent( &second_parent );
+        stored_second_node->setParent( &first_parent );
         
+        // undo also the branch length changes
+        TopologyNode& parent = stored_first_node->getParent();
+        parent.setBranchLength( stored_branch_length_parent );
+        stored_second_node->setBranchLength( stored_branch_length_sibling );
+//        stored_new_sibling->setBranchLength( stored_branch_length_new_sibling );
+    }
+    
 }
 
 
@@ -632,7 +631,7 @@ void WeightedSubtreePruneAndRegraftProposal::undoProposal( void )
  * \param[in]     oldN     The old variable that needs to be replaced.
  * \param[in]     newN     The new RevVariable.
  */
-void WeightedSubtreePruneAndRegraftProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
+void WeightedSubtreeSwapProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
     tree = static_cast<StochasticNode<Tree>* >(newN) ;
@@ -640,7 +639,7 @@ void WeightedSubtreePruneAndRegraftProposal::swapNodeInternal(DagNode *oldN, Dag
 }
 
 
-void WeightedSubtreePruneAndRegraftProposal::setProposalTuningParameter(double tp)
+void WeightedSubtreeSwapProposal::setProposalTuningParameter(double tp)
 {
     // this proposal has no tuning parameter: nothing to do
 }
@@ -653,7 +652,7 @@ void WeightedSubtreePruneAndRegraftProposal::setProposalTuningParameter(double t
  * If it is too large, then we increase the proposal size,
  * and if it is too small, then we decrease the proposal size.
  */
-void WeightedSubtreePruneAndRegraftProposal::tune( double rate )
+void WeightedSubtreeSwapProposal::tune( double rate )
 {
     
     // nothing to tune
