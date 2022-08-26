@@ -177,14 +177,15 @@
 #include "Dist_ConstrainedNodeAge.h"
 #include "Dist_ConstrainedNodeOrder.h"
 #include "Dist_WeightedConstrainedNodeOrder.h"
-#include "Dist_DuplicationLoss.h"
-#include "Dist_FBDRP.h"
-#include "Dist_FBDSP.h"
 #include "Dist_GLHBDSP.h"
 #include "Dist_constPopMultispCoal.h"
 #include "Dist_divDepYuleProcess.h"
+#include "Dist_DuplicationLoss.h"
+#include "Dist_empiricalTopology.h"
 #include "Dist_empiricalTree.h"
 #include "Dist_episodicBirthDeath.h"
+#include "Dist_FBDRP.h"
+#include "Dist_FBDSP.h"
 #include "Dist_heterogeneousRateBirthDeath.h"
 #include "Dist_multispeciesCoalescentInverseGammaPrior.h"
 #include "Dist_multispeciesCoalescentUniformPrior.h"
@@ -411,6 +412,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // constrained topology distribution
         AddDistribution< BranchLengthTree           >( new Dist_ConstrainedUnrootedTopology() );
+        
+        // empirical topology distribution
+        AddDistribution< BranchLengthTree           >( new Dist_empiricalTopology() );
 
         // uniform time tree distribution
         AddDistribution< TimeTree                   >( new Dist_uniformTimeTree() );

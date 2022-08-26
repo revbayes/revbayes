@@ -12,6 +12,8 @@ namespace RevBayesCore {
 
     class TreeSummary {
 
+    public:
+        
         /*
          * This struct represents a value/count pair that is sorted by count
          */
@@ -28,7 +30,7 @@ namespace RevBayesCore {
                     return this->second < rhs.second;
             }
         };
-
+        
         /*
          * This struct represents a tree bipartition (split) that can be rooted or unrooted
          */
@@ -41,8 +43,6 @@ namespace RevBayesCore {
                 return (*this) == s.first;
             }
         };
-
-    public:
 
         /*
          * This struct determines which annotations are reported in the summary tree
@@ -77,6 +77,7 @@ namespace RevBayesCore {
         double                                     computeEntropy( double credible_interval_size, int num_taxa, bool verbose );
         std::vector<double>                        computePairwiseRFDistance( double credible_interval_size, bool verbose );
         std::vector<double>                        computeTreeLengths(void);
+        const std::set<Sample<std::string> >&      getTreeSamples(void) const;
         std::vector<Clade>                         getUniqueClades(double ci=0.95, bool non_trivial_only=true, bool verbose=true);
         std::vector<Tree>                          getUniqueTrees(double ci=0.95, bool verbose=true);
         long                                       getTopologyCount(const Tree &t, bool verbose);
