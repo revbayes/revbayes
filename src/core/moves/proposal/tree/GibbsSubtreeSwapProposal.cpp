@@ -166,6 +166,15 @@ double GibbsSubtreeSwapProposal::doProposal( void )
     }
     
     
+    
+    // sanity check
+    if ( sum_of_weights <= 0.0 )
+    {
+        failed = true;
+        return RbConstants::Double::neginf;
+    }
+    
+    
     double u = rng->uniform01() * sum_of_weights;
     size_t index = 0;
     while (u > 0.0)

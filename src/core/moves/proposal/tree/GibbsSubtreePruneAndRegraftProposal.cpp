@@ -64,6 +64,9 @@ GibbsSubtreePruneAndRegraftProposal* GibbsSubtreePruneAndRegraftProposal::clone(
 double GibbsSubtreePruneAndRegraftProposal::doProposal( void )
 {
     
+    // reset the failed flag
+    failed = false;
+    
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
@@ -80,11 +83,11 @@ double GibbsSubtreePruneAndRegraftProposal::doProposal( void )
     // now we store all necessary values
     stored_choosen_node   = node;
     TopologyNode &parent = node->getParent();
-    TopologyNode &grandparent = parent.getParent();
     stored_sibling = &parent.getChild( 0 );
     
     // check if we got the correct child
-    if ( node == stored_sibling ) {
+    if ( node == stored_sibling )
+    {
         stored_sibling = &parent.getChild( 1 );
     }
     
@@ -92,7 +95,7 @@ double GibbsSubtreePruneAndRegraftProposal::doProposal( void )
     std::vector<TopologyNode*> all_second_nodes = getSecondNodes( *node );
     size_t num_second_nodes = all_second_nodes.size();
     
-    
+    // sanity check
     if ( num_second_nodes < 1 )
     {
         failed = true;
@@ -137,6 +140,12 @@ double GibbsSubtreePruneAndRegraftProposal::doProposal( void )
         tree->restore();
     }
     
+    // sanity check
+    if ( sum_of_weights <= 0.0 )
+    {
+        failed = true;
+        return RbConstants::Double::neginf;
+    }
     
     double u = rng->uniform01() * sum_of_weights;
     size_t index = 0;
@@ -316,6 +325,7 @@ void GibbsSubtreePruneAndRegraftProposal::pruneAndRegraft(TopologyNode *node, To
     new_grandparent.addChild( &parent );
     parent.setParent( &new_grandparent );
     new_sibling->setParent( &parent );
+        
 }
 
 
@@ -330,8 +340,11 @@ void GibbsSubtreePruneAndRegraftProposal::undoProposal( void )
 {
     
     // undo the proposal
-    pruneAndRegraft(stored_choosen_node, stored_sibling);
-        
+    if ( failed == false )
+    {
+        pruneAndRegraft(stored_choosen_node, stored_sibling);
+    }
+    
 }
 
 
