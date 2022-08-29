@@ -217,7 +217,7 @@ void EllipticalSliceSamplingSimpleMove::performMcmcMove( double prHeat, double l
 {
     if ( prHeat != 1 || pHeat != 1)
     {
-        throw(RbException("Elliptical slice sampling moves are invalid with heated priors or posteriors."));
+        throw RbException("Elliptical slice sampling moves are invalid with heated priors or posteriors.");
     }
 
     slice_function lnL(variables, lHeat);
@@ -240,7 +240,10 @@ void EllipticalSliceSamplingSimpleMove::performMcmcMove( double prHeat, double l
     // Log-likelihood threshold (Murray step 2)
     double L_f = lnL();
 
-    assert(L_f == lnL(f));
+    double test = lnL(f);
+    double test2 = lnL(f);
+    double test3 = lnL();
+    assert( fabs(L_f - lnL(f)) < 1E-8 );
 
     double logy = L_f + log(unif());
 
@@ -273,7 +276,8 @@ void EllipticalSliceSamplingSimpleMove::performMcmcMove( double prHeat, double l
         }
 
         // steps 7-9 (10 being loop again)
-        if (theta > 0.0) {
+        if (theta > 0.0)
+        {
             R = theta;
         }
         else {
