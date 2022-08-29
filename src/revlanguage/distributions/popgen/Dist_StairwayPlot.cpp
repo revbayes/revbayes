@@ -138,6 +138,9 @@ MethodTable Dist_StairwayPlot::getDistributionMethods( void ) const
     ArgumentRules* times_arg_rules = new ArgumentRules();
     methods.addFunction( new DistributionMemberFunction<Dist_StairwayPlot, ModelVector<RealPos> >( "getTimes", variable, times_arg_rules, true, true ) );
 
+    ArgumentRules* esfs_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_StairwayPlot, ModelVector<RealPos> >( "getExpectedAlleleFrequencies", variable, esfs_arg_rules, true, true ) );
+
     return methods;
 }
 
