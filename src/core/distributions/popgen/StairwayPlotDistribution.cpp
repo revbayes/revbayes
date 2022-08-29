@@ -44,6 +44,7 @@ StairwayPlotDistribution::~StairwayPlotDistribution( void )
 
 bool StairwayPlotDistribution::calculateExpectedSFS(void) const
 {
+    
     // get the thetas for easier handling
     const RbVector<double>& th = theta->getValue();
 
@@ -146,7 +147,7 @@ double StairwayPlotDistribution::computeLnProbability( void )
     size_t max_freq = num_individuals;
     if ( folded == true )
     {
-        max_freq = ceil( (num_individuals+1) / 2.0);
+        max_freq = floor( num_individuals / 2.0 ) + 1;
     }
 
     // check for the coding
@@ -248,7 +249,8 @@ void StairwayPlotDistribution::initialize( void )
     prob_k.resize( num_individuals-1 );
     
     ln_factorial_num_sites.clear();
-    ln_factorial_num_sites.resize( folded ? ceil(num_individuals/2.0) : num_individuals );
+    ln_factorial_num_sites.resize( folded ? floor( num_individuals / 2.0 ) + 1 : num_individuals );
+
     
     // get the data, i.e., the observed counts for the frequencies
     const RbVector<double>& obs_sfs_counts = *value;
@@ -265,7 +267,7 @@ void StairwayPlotDistribution::initialize( void )
                                          RbMath::lnGamma(num_individuals-i-k+2) );
         }
         
-        if ( folded == false || i <= (num_individuals/2) )
+        if ( folded == false || i <= (num_individuals/2.0) )
         {
             ln_factorial_num_sites[i] = RbMath::lnGamma( obs_sfs_counts[i] + 1 );
         }
