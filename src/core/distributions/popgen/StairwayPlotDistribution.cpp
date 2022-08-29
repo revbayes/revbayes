@@ -248,7 +248,7 @@ void StairwayPlotDistribution::initialize( void )
     prob_k.resize( num_individuals-1 );
     
     ln_factorial_num_sites.clear();
-    ln_factorial_num_sites.resize( folded ? num_individuals/2 : num_individuals );
+    ln_factorial_num_sites.resize( folded ? ceil(num_individuals/2.0) : num_individuals );
     
     // get the data, i.e., the observed counts for the frequencies
     const RbVector<double>& obs_sfs_counts = *value;
