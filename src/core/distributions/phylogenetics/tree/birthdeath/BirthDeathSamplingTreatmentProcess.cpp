@@ -614,7 +614,7 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
               int at_event = whichIntervalTime(t);
 
               // If this bifurcation is not at an event time (and specifically at an event time with Lambda[i] > 0), it's a serial bifurcation
-              if ( at_event == -1 )
+              if ( at_event == -1 || lambda_event[at_event] < DBL_EPSILON)
               {
                   serial_bifurcation_times.push_back(t);
               }
