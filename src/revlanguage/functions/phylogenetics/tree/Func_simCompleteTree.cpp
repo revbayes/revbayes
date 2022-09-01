@@ -154,7 +154,7 @@ void Func_simCompleteTree::buildRandomBinaryTree(std::vector<RevBayesCore::Topol
         nodes.erase(nodes.begin()+long(index));
         
         
-        RevBayesCore::TopologyNode* parent = new RevBayesCore::TopologyNode(0);
+        RevBayesCore::TopologyNode* parent = new RevBayesCore::TopologyNode();
         parent->setAge( ages[0] );
         ages.erase( ages.begin() );
         
