@@ -162,6 +162,7 @@
 #include "Dist_bdp.h"
 #include "Dist_bdp_complete.h"
 #include "Dist_BDSTP.h"
+#include "Dist_FBDP.h"
 #include "Dist_BirthDeathBurstProcess.h"
 #include "Dist_BranchRateTree.h"
 #include "Dist_CharacterDependentBirthDeathProcess.h"
@@ -349,6 +350,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // birth-death-sampling-treatment processes and submodels
         AddDistribution< TimeTree                   >( new Dist_BDSTP());
+        AddDistribution< TimeTree                   >( new Dist_FBDP());
         AddDistribution< TimeTree                   >( new Dist_PhylodynamicBDP());
 
         // diversity-dependent pure-birth process
