@@ -380,9 +380,9 @@ double BirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( void ) con
                 {
                     ln_sampling_event_prob += S_i * log(1 - r_event[i]);
                 }
-                if ( I_i > S_i )
+                if ( T_i > 0 )
                 {
-                    ln_sampling_event_prob += (I_i - S_i) * log(r_event[i] + (1 - r_event[i])*E_previous[i]);
+                    ln_sampling_event_prob += T_i * log(r_event[i] + (1 - r_event[i])*E_previous[i]);
                 }
                 
             }
