@@ -172,13 +172,12 @@ void RateMatrix_PoMo2N::buildRateMatrix(void)
         }
     }
 
-
     // set the diagonal vector
     std::vector< double > diagonal(num_states,0.0);
     
     harmonic_number_N = RbMath::fastHarmonicNumber(N_eff-1);
     
-    double rescaling_factor_to_effective_population = (N_eff) / (N) / (harmonic_number_M/harmonic_number_N);
+    double rescaling_factor_to_effective_population = (N_eff) / (N)   *    (harmonic_number_N/harmonic_number_M);
     if ( use_drift_correction == false )
     {
         rescaling_factor_to_effective_population = 1.0;
