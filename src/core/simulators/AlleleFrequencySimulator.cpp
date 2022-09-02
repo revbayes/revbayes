@@ -380,6 +380,135 @@ RbVector<double>* AlleleFrequencySimulator::simulateAlleleFrequenciesVector( dou
 
 
 
+
+
+RbVector<double>* AlleleFrequencySimulator::simulateAlleleFrequenciesVectorEpoch( const std::vector<double>& time, const std::vector<long>& population_size, long reps, size_t start_index, long final_population_size ) const
+{
+    // get some variables for the process
+    
+    // get the number of epochs
+    size_t num_epochs = time.size();
+    
+    // create the vector with the counts for the final epoch
+    RbVector<double>* tpv = new RbVector<double>(final_population_size+1);
+    
+    // get the gobal random number generator
+    RandomNumberGenerator* rng = GLOBAL_RNG;
+    
+    // forward the rng for different processes
+#ifdef RB_MPI
+    for ( size_t i=active_PID; i<pid; ++i)
+    {
+        // we fast forward 7 times, just to be sure
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+    }
+#endif
+    
+    size_t reps_this_process = reps;
+#ifdef RB_MPI
+    reps_this_process = reps / num_processes;
+#endif
+    
+    // start the progress bar
+    ProgressBar progress = ProgressBar(reps_this_process, 0);
+    
+    // Print progress bar (68 characters wide)
+    progress.start();
+    
+    std::vector<long> counts = std::vector<long>(final_population_size+1, 0);
+    
+    // iterate over the replicates
+    for (size_t r=0; r<reps_this_process; ++r)
+    {
+        
+        // set the current state to the start state
+        long current_state = start_index;
+        
+        // iterate over the epochs
+        for (size_t epoch_index=0; epoch_index<num_epochs; ++epoch_index)
+        {
+            
+            // get the population size for the current epoch
+            long current_epoch_population_size = population_size[epoch_index];
+            
+            // if this is not the first epoch, then we need to rescale the index
+            if ( epoch_index > 0 )
+            {
+                // get the population size for the current epoch
+                long previous_epoch_population_size = population_size[epoch_index-1];
+                double prev_freq = double(current_state)/previous_epoch_population_size;
+                current_state = RbStatistics::Binomial::rv(current_epoch_population_size, prev_freq, *rng);
+            }
+            
+            // get the population size for the current epoch
+            double current_epoch_time = epoch_index > 0 ? time[epoch_index] - time[epoch_index-1] : time[epoch_index];
+            
+            // simulate the Moran process for the current epoch
+            current_state = simulateAlongBranch(current_epoch_population_size, current_state, current_epoch_time);
+        }
+        
+        // get the population size for the current epoch
+        long previous_epoch_population_size = population_size[num_epochs-1];
+        double prev_freq = double(current_state)/previous_epoch_population_size;
+        long obs_state = RbStatistics::Binomial::rv(final_population_size, prev_freq, *rng);
+        ++counts[obs_state];
+        
+        progress.update(r);
+    }
+    progress.finish();
+        
+    for ( size_t s=0; s<=final_population_size; ++s )
+    {
+        (*tpv)[s] = double(counts[s])/reps;
+    }
+    
+    
+#ifdef RB_MPI
+    MPI_Barrier( MPI_COMM_WORLD );
+    
+    // create a copy of the transition probability matrix
+    RbVector<double> tpv_backup = RbVector<double>( *tpv );
+
+    // we only need to send message if there is more than one process
+    if ( num_processes > 1 )
+    {
+        std::vector< double > this_tpv_row = std::vector<double>(final_population_size+1,0.0);
+
+        for (size_t i=active_PID; i<active_PID+num_processes; ++i)
+        {
+            
+            if ( pid == i )
+            {
+                this_tpv_row = tpv_backup;
+            }
+                
+            MPI_Bcast(&this_tpv_row[0], final_population_size+1, MPI_DOUBLE, pid, MPI_COMM_WORLD);
+                
+            if ( pid != i )
+            {
+                for ( size_t k=0; k<=final_population_size; ++k )
+                {
+                    (*tpv)[k] += this_tpv_row[k];
+                }
+            } // end-if non-sending process to add the transition probabilities
+            
+        } // end-for over all processes
+        
+    } // end-if there are more than one process
+#endif
+
+    
+    return tpv;
+}
+
+
+
 bool AlleleFrequencySimulator::simulateAlignment( const TopologyNode& n, long state, const std::vector<long>& population_sizes, const std::vector<long>& samples_per_species, std::vector<int>& taxa, bool& monomorphic ) const
 {
     RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -429,61 +558,6 @@ long AlleleFrequencySimulator::simulateAlongBranch( double this_populuation_size
     double this_generation_time = moran_generations ? generation_time / this_populuation_size : generation_time;
     double per_generation_mutation_rate_0 = mutation_rates[0] / generation_time;
     double per_generation_mutation_rate_1 = mutation_rates[1] / generation_time;
-    
-    
-//    size_t NUM_TRIES = 100000;
-//    double avg_time_geom = 0;
-//    double avg_time_iid  = 0;
-//    double min_time_geom = RbConstants::Double::inf;
-//    double min_time_iid  = RbConstants::Double::inf;
-//    double max_time_geom = 0;
-//    double max_time_iid  = 0;
-//    double avg_gen_geom  = 0;
-//    double avg_gen_iid   = 0;
-//    
-//    // start the progress bar
-//    ProgressBar progress = ProgressBar(NUM_TRIES, 0);
-//    
-//    // Print progress bar (68 characters wide)
-//    progress.start();
-//    for (size_t i=0; i<NUM_TRIES; ++i)
-//    {
-//        progress.update(i);
-//        
-//        int wait_generations_geom = RbStatistics::Geometric::rv(per_generation_mutation_rate_1, *rng);
-//        double wait_time_geom = this_generation_time * wait_generations_geom;
-//        
-//        double u = rng->uniform01();
-//        double wait_time_iid = 0.0;
-//        int wait_generations_iid = 0;
-//        while ( u >= per_generation_mutation_rate_1 )
-//        {
-//            wait_time_iid += this_generation_time;
-//            u = rng->uniform01();
-//            ++wait_generations_iid;
-//        }
-//        
-//        avg_time_geom += wait_time_geom / NUM_TRIES;
-//        avg_time_iid  += wait_time_iid  / NUM_TRIES;
-//        
-//        avg_gen_geom  += double(wait_generations_geom) / NUM_TRIES;
-//        avg_gen_iid   += double(wait_generations_iid)  / NUM_TRIES;
-//        
-//        if ( wait_time_geom < min_time_geom ) min_time_geom = wait_time_geom;
-//        if ( wait_time_iid  < min_time_iid  ) min_time_iid  = wait_time_iid;
-//        if ( wait_time_geom > max_time_geom ) max_time_geom = wait_time_geom;
-//        if ( wait_time_iid  > max_time_iid  ) max_time_iid  = wait_time_iid;
-//
-//    }
-//    progress.finish();
-//    
-//    std::cerr << "Generation time:\t\t" << this_generation_time << std::endl;
-//    std::cerr << "Avg:\t\t" << avg_time_geom << " -- " << avg_time_iid << std::endl;
-//    std::cerr << "Avg:\t\t" << avg_gen_geom  << " -- " << avg_gen_iid  << std::endl;
-//    std::cerr << "Min:\t\t" << min_time_geom << " -- " << min_time_iid << std::endl;
-//    std::cerr << "Max:\t\t" << max_time_geom << " -- " << max_time_iid << std::endl;
-//    
-//    throw RbException("End test");
     
     long current_state = root_start_state;
     

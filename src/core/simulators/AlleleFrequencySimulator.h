@@ -32,6 +32,7 @@ class MatrixReal;
         void                                            simulateAlleleFrequencies(const Tree* t, const std::vector<long>& ps, size_t ns, const std::vector<long>& s, double r, const std::string& fn, bool only_Variable ) const;
         MatrixReal*                                     simulateAlleleFrequenciesMatrix( double t, long ps, long r ) const;
         RbVector<double>*                               simulateAlleleFrequenciesVector( double t, long ps, long r, size_t s ) const;
+        RbVector<double>*                               simulateAlleleFrequenciesVectorEpoch( const std::vector<double>& t, const std::vector<long>& ps, long r, size_t s, long f ) const;
 
     private:
         
