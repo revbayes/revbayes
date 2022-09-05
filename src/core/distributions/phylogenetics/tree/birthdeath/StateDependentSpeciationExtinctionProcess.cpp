@@ -2590,7 +2590,7 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
     std::vector<TopologyNode*> nodes;
 
     // initialize the root node
-    TopologyNode* root = new TopologyNode(0);
+    TopologyNode* root = new TopologyNode();
     double t = process_age->getValue();
     if (condition_on_num_tips == true)
     {

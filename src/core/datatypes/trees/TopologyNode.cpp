@@ -27,74 +27,33 @@
 
 using namespace RevBayesCore;
 
+using boost::optional;
 
 /** Default constructor (interior node, no name). Give the node an optional index ID */
-TopologyNode::TopologyNode(size_t indx) :
-    use_ages( true ),
-    age( RbConstants::Double::nan ),
-    branch_length( RbConstants::Double::nan ),
-    children(),
-    parent( NULL ),
-    tree( NULL ),
-    taxon(""),
-    index(indx),
-    interior_node( false ),
-    root_node( true ),
-    tip_node( true ),
-    sampled_ancestor( false ),
-    num_shift_events( 0 ),
-    burst_speciation( false ),
-    sampling_event( false ),
-    serial_sampling( false ),
-    serial_speciation( false )
+TopologyNode::TopologyNode() {}
+
+
+/** Default constructor (interior node, no name). Give the node an optional index ID */
+TopologyNode::TopologyNode(size_t indx)
+    : index(indx)
 {
 
 }
 
 
 /** Constructor of node with name. Give the node an optional index ID */
-TopologyNode::TopologyNode(const Taxon& t, size_t indx) :
-    use_ages( true ),
-    age( RbConstants::Double::nan ),
-    branch_length( RbConstants::Double::nan ),
-    children(),
-    parent( NULL ),
-    tree( NULL ),
+TopologyNode::TopologyNode(const Taxon& t, const optional<size_t>& indx) :
     taxon(t),
-    index(indx),
-    interior_node( false ),
-    root_node( true ),
-    tip_node( true ),
-    sampled_ancestor( false ),
-    num_shift_events( 0 ),
-    burst_speciation( false ),
-    sampling_event( false ),
-    serial_sampling( false ),
-    serial_speciation( false )
+    index(indx)
 {
 
 }
 
 
 /** Constructor of node with name. Give the node an optional index ID */
-TopologyNode::TopologyNode(const std::string& n, size_t indx) :
-    use_ages( true ),
-    age( RbConstants::Double::nan ),
-    branch_length( RbConstants::Double::nan ),
-    children(),
-    parent( NULL ),
-    tree( NULL ),
+TopologyNode::TopologyNode(const std::string& n, const optional<size_t>& indx) :
     taxon(n),
-    index(indx),
-    interior_node( false ),
-    root_node( true ),
-    tip_node( true ),
-    sampled_ancestor( false ),
-    num_shift_events( 0 ),
-    burst_speciation( false ),
-    sampling_event( false ),
-    serial_sampling( false ),
-    serial_speciation( false )
+    index(indx)
 {
 
 }
@@ -233,7 +192,7 @@ void TopologyNode::addBranchParameters(std::string const &n, const std::vector<d
     if ( !internalOnly || !isTip()  )
     {
         std::stringstream o;
-        o << n << "=" << p[index];
+        o << n << "=" << p[ getIndex() ];
         std::string comment = o.str();
         branch_comments.push_back( comment );
 
@@ -250,7 +209,7 @@ void TopologyNode::addBranchParameters(std::string const &n, const std::vector<s
 
     if ( !internalOnly || !isTip()  )
     {
-        std::string comment = n + "=" + p[index];
+        std::string comment = n + "=" + p[ getIndex() ];
         branch_comments.push_back( comment );
 
         for (std::vector<TopologyNode*>::iterator it = children.begin(); it != children.end(); ++it)
@@ -331,7 +290,7 @@ void TopologyNode::addNodeParameters(std::string const &n, const std::vector<dou
         {
             num_tip_nodes = tree->getNumberOfTips();
         }
-        snprintf(s, sizeof(s), "%f",p[index - num_tip_nodes]);
+        snprintf(s, sizeof(s), "%f",p[ getIndex() - num_tip_nodes]);
         o << n << "=" << s; //SK
         std::string comment = o.str();
         node_comments.push_back( comment );
@@ -351,7 +310,7 @@ void TopologyNode::addNodeParameters(std::string const &n, const std::vector<std
     if ( !internal_only || !isTip()  )
     {
         std::stringstream o;
-        o << n << "=" << p[index];
+        o << n << "=" << p[ getIndex() ];
         std::string comment = o.str();
         node_comments.push_back( comment );
 
@@ -438,7 +397,7 @@ std::string TopologyNode::buildNewickString( bool simmap = false, bool round = t
         // first let us print the node index, we must increment by 1 to match RevLanguage indexing
         if ( RbSettings::userSettings().getPrintNodeIndex() == true )
         {
-            o << "index=" << index+1;
+            o << "index=" << getIndex() + 1;
             needsComma = true;
         }
 
@@ -819,7 +778,7 @@ std::string TopologyNode::fillCladeIndices(std::map<std::string,size_t> &clade_i
     }
 
     // now insert the newick string for this node/clade with the index of this node
-    clade_index_map.insert( std::pair<std::string,size_t>(newick,index) );
+    clade_index_map.insert( std::pair<std::string,size_t>(newick, getIndex()) );
 
 
     // finally return my newick string so that my parents can use it
@@ -970,7 +929,7 @@ size_t TopologyNode::getCladeIndex(const TopologyNode *c) const
     }
 
     // finally return my index
-    return index;
+    return getIndex();
 }
 
 
@@ -1060,11 +1019,17 @@ Clade TopologyNode::getClade( void ) const
     return c;
 }
 
+bool TopologyNode::hasIndex( void) const
+{
+    return (bool)index;
+}
 
 size_t TopologyNode::getIndex( void ) const
 {
+    if (not index)
+        throw RbException()<<"Problem while working with tree: Node index was never set.";
 
-    return index;
+    return *index;
 }
 
 /**
@@ -1082,12 +1047,12 @@ void TopologyNode::getIndicesOfNodesInSubtree( bool countTips, std::vector<size_
     {
         if (countTips)
         {
-            indices->push_back(index);
+            indices->push_back( getIndex() );
         }
     }
     else
     {
-        indices->push_back(index);
+        indices->push_back( getIndex() );
         // now call this function recursively for all your children
         children[0]->getIndicesOfNodesInSubtree(countTips, indices);
         children[1]->getIndicesOfNodesInSubtree(countTips, indices);
@@ -1923,7 +1888,7 @@ void TopologyNode::setBranchLength(double b, bool flag_dirty)
 }
 
 
-void TopologyNode::setIndex( size_t idx)
+void TopologyNode::setIndex( size_t idx )
 {
 
     index = idx;
