@@ -1,7 +1,6 @@
 #ifndef BinaryAddition_H
 #define BinaryAddition_H
 
-#include "StringUtilities.h"    // For string concatenation through addition
 #include "TypedFunction.h"
 #include "TypedDagNode.h"
 
@@ -70,13 +69,26 @@ void RevBayesCore::BinaryAddition<firstValueType, secondValueType, return_type>:
 }
 
 
+template <typename T1, typename T2>
+auto extended_plus(const T1& t1, const T2& t2)
+{
+    return t1 + t2;
+}
+
+template <typename T>
+auto extended_plus(const std::string& t1, const T& t2)
+{
+    std::stringstream o;
+    o << t1 << t2;
+    return o.str();
+}
+
 template<class firstValueType, class secondValueType, class return_type>
 void RevBayesCore::BinaryAddition<firstValueType, secondValueType, return_type>::update( void ) 
 {
 
-    *this->value = a->getValue() + b->getValue();
+    *this->value = extended_plus(a->getValue(), b->getValue());
 
 }
-
 
 #endif

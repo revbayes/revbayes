@@ -30,20 +30,16 @@
 
 using namespace RevBayesCore;
 
-ValidationAnalysis::ValidationAnalysis( const MonteCarloAnalysis &m, size_t n, const std::string& d ) : Cloneable( ), Parallelizable( ),
+ValidationAnalysis::ValidationAnalysis( const MonteCarloAnalysis &m, size_t n, const path& d ) : Cloneable( ), Parallelizable( ),
     num_runs( n ),
     output_directory(d)
 {
-    
-    // some general constant variables
-    RbFileManager fm = RbFileManager( output_directory );
-    const std::string path_separator = fm.getPathSeparator();
     
     // remove all monitors if there are any
     MonteCarloAnalysis *sampler = m.clone();
     sampler->removeMonitors();
     
-    StochasticVariableMonitor mntr = StochasticVariableMonitor(10, output_directory + "/posterior_samples.var", "\t");
+    StochasticVariableMonitor mntr = StochasticVariableMonitor(10, output_directory / "posterior_samples.var", "\t");
     sampler->addMonitor( mntr );
     
     size_t run_block_start = size_t(floor( (double(pid)   / num_processes ) * num_runs) );
@@ -70,11 +66,8 @@ ValidationAnalysis::ValidationAnalysis( const MonteCarloAnalysis &m, size_t n, c
         
         if ( i >= run_block_start && i <= run_block_end)
         {
-            
             // create a new directory name for this simulation
-            std::stringstream s;
-            s << output_directory << path_separator << "Validation_Sim_" << i;
-            std::string sim_directory_name = s.str();
+            path sim_directory_name = output_directory / ("Validation_Sim_" + std::to_string(i));
             
             // create an independent copy of the analysis
             MonteCarloAnalysis *current_analysis = sampler->clone();
@@ -372,11 +365,11 @@ void ValidationAnalysis::summarizeAll( double credible_interval_size )
     // delete the old coverage file
     std::fstream out_stream;
     
-    RbFileManager fm = RbFileManager(output_directory,"coverage.txt");
-    fm.createDirectoryForFile();
+    path coverage = output_directory / "coverage.txt";
+    create_directories( output_directory );
     
     // open the stream to the file
-    out_stream.open( fm.getFullFileName().c_str(), std::fstream::out );
+    out_stream.open( coverage.string(), std::fstream::out );
     out_stream.close();
     
     // Summarize the specific MCMC run
@@ -528,11 +521,11 @@ void ValidationAnalysis::summarizeSim(double credible_interval_size, size_t idx)
                     // the filestream object
                     std::fstream out_stream;
                     
-                    RbFileManager fm = RbFileManager(output_directory,"coverage.txt");
-                    fm.createDirectoryForFile();
+                    path coverage = output_directory / "coverage.txt";
+                    create_directories( output_directory );
                     
                     // open the stream to the file
-                    out_stream.open( fm.getFullFileName().c_str(), std::fstream::out | std::fstream::app);
+                    out_stream.open( coverage.string(), std::fstream::out | std::fstream::app);
 
                     out_stream << idx << "\t" << cov << std::endl;
                     

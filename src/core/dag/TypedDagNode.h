@@ -3,7 +3,6 @@
 
 #include "DagNode.h"
 #include "NexusWriter.h"
-#include "RbFileManager.h"
 #include "RbSettings.h"
 #include "RbUtil.h"
 #include "Simplex.h"
@@ -34,7 +33,7 @@ namespace RevBayesCore {
         virtual bool                                        isSimpleNumeric(void) const;                                                                                //!< Is this variable a simple numeric variable? Currently only integer and real number are.
         virtual void                                        printName(std::ostream &o, const std::string &sep, int l=-1, bool left=true, bool fv=true) const;           //!< Monitor/Print this variable
         virtual void                                        printValue(std::ostream &o, const std::string &sep, int l=-1, bool left=true, bool user=true, bool simple=true, bool flatten=true) const;  //!< Monitor/Print this variable
-        virtual void                                        writeToFile(const std::string &dir) const;                                                                  //!< Write the value of this node to a file within the given directory.
+        virtual void                                        writeToFile(const path &dir) const;                                                                         //!< Write the value of this node to a file within the given directory.
 
         // getters and setters
         virtual valueType&                                  getValue(void) = 0;
@@ -284,7 +283,7 @@ void RevBayesCore::TypedDagNode<valueType>::printValue(std::ostream &o, const st
 
 
 template<class valueType>
-void RevBayesCore::TypedDagNode<valueType>::writeToFile(const std::string &dir) const
+void RevBayesCore::TypedDagNode<valueType>::writeToFile(const path &dir) const
 {
 
     // delegate to the type specific write function

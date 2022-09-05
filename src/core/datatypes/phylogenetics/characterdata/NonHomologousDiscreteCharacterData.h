@@ -39,9 +39,9 @@ namespace RevBayesCore {
         NonHomologousDiscreteCharacterData<charType>*       clone(void) const;
         
         // implemented methods of the Serializable interface
-        void                                                initFromFile( const std::string &dir, const std::string &fn );              //!< Read and resurrect this object from a file in its default format.
+        void                                                initFromFile( const path &dir, const std::string &fn );                     //!< Read and resurrect this object from a file in its default format.
         void                                                initFromString( const std::string &s );                                     //!< Serialize (resurrect) the object from a string value
-        void                                                writeToFile(const std::string &dir, const std::string &fn) const;           //!< Write this object into a file in its default format.
+        void                                                writeToFile(const path &dir, const std::string &fn) const;                  //!< Write this object into a file in its default format.
 
         // CharacterData functions
         const charType&                                     getCharacter(size_t tn, size_t cn) const;                                   //!< Return a reference to a character element in the character matrix
@@ -364,10 +364,9 @@ RevBayesCore::DiscreteTaxonData<charType>& RevBayesCore::NonHomologousDiscreteCh
  * \param[in]   fn    The file name
 */
 template<class charType>
-void RevBayesCore::NonHomologousDiscreteCharacterData<charType>::initFromFile(const std::string &dir, const std::string &fn)
+void RevBayesCore::NonHomologousDiscreteCharacterData<charType>::initFromFile(const RevBayesCore::path &dir, const std::string &fn)
 {
-    RbFileManager fm = RbFileManager(dir, fn + ".fas");
-    fm.createDirectoryForFile();
+    auto filepath = dir / (fn + ".fas");
     
     // get an instance of the NCL reader
     NclReader reader = NclReader();
@@ -380,7 +379,7 @@ void RevBayesCore::NonHomologousDiscreteCharacterData<charType>::initFromFile(co
     myFileType += suffix;
     
     // read the content of the file now
-    std::vector<AbstractCharacterData*> m_i = reader.readMatrices( fm.getFullFileName(), myFileType );
+    std::vector<AbstractCharacterData*> m_i = reader.readMatrices( filepath, myFileType );
     NonHomologousDiscreteCharacterData<charType> *coreM = static_cast<NonHomologousDiscreteCharacterData<charType> *>( m_i[0] );
     
     *this = *coreM;
@@ -403,14 +402,14 @@ void RevBayesCore::NonHomologousDiscreteCharacterData<charType>::initFromString(
 
 
 template<class charType>
-void RevBayesCore::NonHomologousDiscreteCharacterData<charType>::writeToFile(const std::string &dir, const std::string &fn) const
+void RevBayesCore::NonHomologousDiscreteCharacterData<charType>::writeToFile(const path &dir, const std::string &fn) const
 {
-    RbFileManager fm = RbFileManager(dir, fn + ".fas");
-    fm.createDirectoryForFile();
+    path filename = dir / (fn + ".fas");
+    create_directories(dir);
     
     FastaWriter fw;
     
-    fw.writeData( fm.getFullFileName(), *this );
+    fw.writeData( filename, *this );
     
     
 }

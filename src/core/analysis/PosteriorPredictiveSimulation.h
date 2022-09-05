@@ -5,6 +5,7 @@
 #include "Model.h"
 #include "Parallelizable.h"
 #include "RbVector.h"
+#include "RbFileManager.h"
 #include "Trace.h"
 
 namespace RevBayesCore {
@@ -44,7 +45,7 @@ namespace RevBayesCore {
     private:
         
         Model                                               model;
-        std::string                                         directory;
+        path                                                directory;
         RbVector<ModelTrace>                                traces;
         std::vector<RevBayesCore::AncestralStateTrace>      ancestral_state_traces;
         bool                                                condition_on_tips;

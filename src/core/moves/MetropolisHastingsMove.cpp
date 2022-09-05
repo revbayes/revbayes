@@ -316,7 +316,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     }
     if ( fabs(ln_posterior_before_move - ln_posterior_before_move_after_touch) > 1E-6 )
     {
-        throw RbException("Issue in '" + proposal->getProposalName() + "' on '" + nodes[0]->getName() + "' before move because posterior of " + ln_posterior_before_move + " and " + ln_posterior_before_move_after_touch + ".");
+        throw RbException()<<"Issue in '" << proposal->getProposalName() << "' on '" << nodes[0]->getName() << "' before move because posterior of " << ln_posterior_before_move << " and " << ln_posterior_before_move_after_touch << ".";
     }
 #endif
     // --------------------------
@@ -486,7 +486,8 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         if (ln_acceptance_ratio >= 0.0)
         {
 
-            if ( ln_posterior_ratio < -1000 ) throw RbException("Accepted move '" + proposal->getProposalName() + "' with with posterior ratio of " + ln_posterior_ratio + " and Hastings ratio of " + ln_hastings_ratio + ".");
+            if ( ln_posterior_ratio < -1000 )
+                throw RbException() << "Accepted move '" << proposal->getProposalName() << "' with with posterior ratio of " << ln_posterior_ratio << " and Hastings ratio of " << ln_hastings_ratio << ".";
 
             num_accepted_total++;
             num_accepted_current_period++;
@@ -523,7 +524,8 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
             if (u < r)
             {
                 
-                if ( ln_posterior_ratio < -1000 ) throw RbException("Accepted move '" + proposal->getProposalName() + "' with with posterior ratio of " + ln_posterior_ratio + " and Hastings ratio of " + ln_hastings_ratio + ".");
+                if ( ln_posterior_ratio < -1000 )
+                    throw RbException() << "Accepted move '" << proposal->getProposalName() << "' with with posterior ratio of " << ln_posterior_ratio << " and Hastings ratio of " << ln_hastings_ratio << ".";
 
                 num_accepted_total++;
                 num_accepted_current_period++;
@@ -614,7 +616,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     }
     if ( fabs(ln_posterior_after_move - ln_posterior_after_move_after_touch) > 1E-6 )
     {
-        throw RbException("Issue in '" + proposal->getProposalName() + "' on '" + nodes[0]->getName() + "' after move because posterior of " + ln_posterior_after_move + " and " + ln_posterior_after_move_after_touch + ". The move was " + (rejected ? "rejected." : "accepted.") );
+        throw RbException() << "Issue in '" << proposal->getProposalName() << "' on '" << nodes[0]->getName() << "' after move because posterior of " << ln_posterior_after_move << " and " << ln_posterior_after_move_after_touch << ". The move was " << (rejected ? "rejected." : "accepted.");
     }
 #endif
     // --------------------------

@@ -4,6 +4,7 @@
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "ContinuousCharacterData.h"
 #include "Tree.h"
+#include "RbFileManager.h"
 
 #include <fstream>
 #include <string>
@@ -23,7 +24,7 @@ namespace RevBayesCore {
     class NexusWriter {
         
     public:
-        NexusWriter(const std::string& fn);
+        NexusWriter(const path& fn);
         
         // public methods
         void                    closeStream(void);                                                          //!< Close the file stream
@@ -37,7 +38,7 @@ namespace RevBayesCore {
     private:
     
         // members
-        std::string             file_name;                                                                   //!< The file name
+        path                    file_name;                                                                   //!< The file name
         std::fstream            out_stream;                                                                  //!< the filestream object
         
     };

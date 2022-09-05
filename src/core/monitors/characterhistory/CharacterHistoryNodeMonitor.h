@@ -14,6 +14,7 @@
 #include <set>
 
 #include "Monitor.h"
+#include "RbFileManager.h"
 
 namespace RevBayesCore {
 class BranchHistory;
@@ -27,7 +28,7 @@ template <class variableType> class StochasticNode;
         
     public:
         // Constructors and Destructors
-        CharacterHistoryNodeMonitor(TypedDagNode<Tree> *t, std::vector< StochasticNode< BranchHistory >* > bh, unsigned long g, const std::string &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sr=true);
+        CharacterHistoryNodeMonitor(TypedDagNode<Tree> *t, std::vector< StochasticNode< BranchHistory >* > bh, unsigned long g, const path& fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sr=true);
         
         // new CharacterHistoryNodeMonitor( tau, bh_vector_stochastic, 10, filepath + "rb.tree_chars.txt", "\t"));
         
@@ -57,7 +58,7 @@ template <class variableType> class StochasticNode;
         TypedDagNode<Tree>*                 tree;
         std::vector<StochasticNode<BranchHistory>* > branchHistories;
         std::set<DagNode *>                 nodeVariables;
-        std::string                         filename;
+        path                                filename;
         std::string                         separator;
         bool                                posterior;
         bool                                prior;

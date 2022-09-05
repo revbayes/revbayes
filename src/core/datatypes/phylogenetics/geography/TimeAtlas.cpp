@@ -68,7 +68,7 @@ std::vector<std::vector<GeographicArea*> > TimeAtlas::getAreas(void) const
     return areas;
 }
 
-std::string TimeAtlas::getFilename(void) const
+const path& TimeAtlas::getFilename(void) const
 {
     return filename;
 }
