@@ -152,11 +152,6 @@ namespace RevBayesCore {
         StringUtilities::fillWithSpaces( s, l, left );
         o << s;
     }
-    
-    
-    template <class valueType>
-    std::ostream&                                       operator<<(std::ostream& o, const RbVector<valueType>& x);
-    
 }
 
 
@@ -314,26 +309,6 @@ void RevBayesCore::RbVector<valueType>::swap( valueType& a, valueType& b)
     
     delete temp;
 }
-
-
-template <class valueType>
-std::ostream& RevBayesCore::operator<<(std::ostream& o, const RbVector<valueType>& x)
-{
-    
-    o << "[";
-    for ( size_t i = 0; i < x.size(); ++i )
-    {
-        if ( i > 0 )
-        {
-            o << ",";
-        }
-        o << " " << x[i];
-    }
-    o << "]";
-    
-    return o;
-}
-
 
 template <class valueType>
 std::ostream& operator<<(std::ostream& o, const RevBayesCore::RbVector<valueType>& x)

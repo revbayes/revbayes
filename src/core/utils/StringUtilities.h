@@ -59,49 +59,4 @@ namespace StringUtilities {
     
 }
 
-// TODO: Is there a better way for these global operators than duplicating the code for each namespace? (Sebastian)
-namespace RevLanguage {
-
-    std::string                     operator+(const std::string& A, double B);
-    std::string                     operator+(const std::string& A, int B);
-    std::string                     operator+(const std::string& A, long B);
-    std::string                     operator+(const std::string& A, size_t B);
-    std::string                     operator+(double A, const std::string& B);
-    std::string                     operator+(int A, const std::string& B);
-    std::string                     operator+(long A, const std::string& B);
-    std::string                     operator+(size_t A, const std::string& B);
-
-}
-
-namespace RevBayesCore {
-    
-    template <class valueType>
-    class RbVector;
-    
-    std::string                     operator+(const std::string& A, double B);
-    std::string                     operator+(const std::string& A, int B);
-    std::string                     operator+(const std::string& A, long B);
-    std::string                     operator+(const std::string& A, size_t B);
-    std::string                     operator+(const std::string& A, const RbVector<double> &B);
-    std::string                     operator+(const std::string& A, const RbVector<long> &B);
-    std::string                     operator+(double A, const std::string& B);
-    std::string                     operator+(int A, const std::string& B);
-    std::string                     operator+(long A, const std::string& B);
-    std::string                     operator+(size_t A, const std::string& B);
-    
-}
-
-
-std::string                     operator+(const std::string& A, double B);
-std::string                     operator+(const std::string& A, int B);
-std::string                     operator+(const std::string& A, long B);
-std::string                     operator+(const std::string& A, size_t B);
-//std::string                     operator+(const std::string& A, const RevBayesCore::RbVector<double> &B);
-//std::string                     operator+(const std::string& A, const RevBayesCore::RbVector<long> &B);
-std::string                     operator+(double A, const std::string& B);
-std::string                     operator+(int A, const std::string& B);
-std::string                     operator+(long A, const std::string& B);
-std::string                     operator+(size_t A, const std::string& B);
-
-
 #endif
