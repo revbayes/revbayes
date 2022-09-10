@@ -129,6 +129,8 @@ double EpochPoMoDemography::computeLnProbability( void )
         current_rate_matrix.setMu( my_mu );
         current_rate_matrix.setNeff( current_Ne );
         
+        current_rate_matrix.update();
+        
         double rate = 1.0;
         
         current_rate_matrix.calculateTransitionProbabilities( current_epoch_length, 0.0,  rate, tpm );
@@ -141,7 +143,7 @@ double EpochPoMoDemography::computeLnProbability( void )
             for (size_t start=0; start<num_states; ++start)
             {
             
-                for (size_t end=0; end<num_states; ++num_states)
+                for (size_t end=0; end<num_states; ++end)
                 {
                     likelihoods[start] += tpm[start][end] * current_probs[site][end];
                 }
@@ -167,7 +169,18 @@ double EpochPoMoDemography::computeLnProbability( void )
         {
             per_site_sum += current_probs[site][obs_state] * asfs[obs_state];
         }
-        ln_prob += log(per_site_sum) * obs_sfs_counts[site];
+        
+        size_t obs_index = site;
+        if ( site == 1 )
+        {
+            obs_index = num_states-1;
+        }
+        else if ( site > 1 )
+        {
+            obs_index = site-1;
+        }
+        
+        ln_prob += log(per_site_sum) * obs_sfs_counts[obs_index];
     }
     
     return ln_prob;
@@ -180,7 +193,7 @@ void EpochPoMoDemography::executeMethod(const std::string &name, const std::vect
    
     if  ( name == "getExpectedAlleleFrequencies" )
     {
-        rv = expected_SFS;
+//        rv = expected_SFS;
     }
     else
     {
@@ -192,6 +205,12 @@ void EpochPoMoDemography::executeMethod(const std::string &name, const std::vect
 
 void EpochPoMoDemography::initialize( void )
 {
+    
+    
+    // get the number of epochs
+    size_t num_epoch = ne->getValue().size();
+    rate_matrices = std::vector<RateMatrix_PoMo2N>( num_epoch, RateMatrix_PoMo2N(num_states, virtual_pop_size, false, true) );
+    
     
 }
 
@@ -206,9 +225,24 @@ void EpochPoMoDemography::redrawValue( void )
 void EpochPoMoDemography::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     
-    if (oldP == theta)
+    if (oldP == ancestral_SFS)
     {
-        theta = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        ancestral_SFS = static_cast<const TypedDagNode< Simplex >* >( newP );
+    }
+    
+    if (oldP == ne)
+    {
+        ne = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+    }
+    
+    if (oldP == mu)
+    {
+        mu = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+    }
+    
+    if (oldP == epoch_times)
+    {
+        epoch_times = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
     
 }
