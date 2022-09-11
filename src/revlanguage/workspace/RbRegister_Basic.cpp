@@ -229,6 +229,7 @@
 #include "Func_TaxonReader.h"
 #include "Func_treeTrace.h"
 #include "Func_write.h"
+#include "Func_writeCountsFile.h"
 #include "Func_writeDelimitedCharacterData.h"
 #include "Func_writeFasta.h"
 #include "Func_writeNexus.h"
@@ -551,6 +552,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_summarizeCharacterMaps()                  );
         addFunction( new Func_treeTrace()                               );
         addFunction( new Func_write()                                   );
+        addFunction( new Func_writeCountsFile()                         );
         addFunction( new Func_writeDelimitedCharacterData()             );
         addFunction( new Func_writeFasta()                              );
         addFunction( new Func_writeNexus()                              );
