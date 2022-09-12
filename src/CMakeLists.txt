@@ -131,54 +131,70 @@ if ("${JUPYTER}" STREQUAL "ON")
    add_definitions(-DRB_XCODE)
 endif()
 
-MESSAGE("Boost location hints:")
-set(Boost_ROOT "$ENV{Boost_ROOT}" )
-set(Boost_INCLUDE_DIR "$ENV{Boost_INCLUDE_DIR}" )
-set(Boost_LIBRARY_DIR "$ENV{Boost_LIBRARY_DIR}" )
-if (BOOST_ROOT OR BOOST_INCLUDEDIR OR BOOST_LIBRARYDIR OR
-    Boost_ROOT OR Boost_INCLUDE_DIR OR Boost_LIBRARY_DIR) 
+
+# When user specifies boost paths to use, we need to disable searching from the
+# environment and from using cmake's internal boost variables.
+if (BOOST_ROOT OR BOOST_INCLUDEDIR OR BOOST_LIBRARYDIR OR DEFINED ENV{BOOST_ROOT} OR DEFINED ENV{BOOST_INCLUDEDIR} OR DEFINED ENV{BOOST_LIBRARYDIR})
+  # Don't search for system include dirs for boost
   set(Boost_NO_SYSTEM_PATHS ON)
-  set(Boost_NO_BOOST_CMAKE ON)
+  # Disable excessive warning messages when using multiple boost versions
   set(Boost_NO_WARN_NEW_VERSION ON)
 endif()
+
+# Use the OLD way of looking for Boost
+# The NEW way only respects BOOST_ROOT, not these more-specific variables.
+if (BOOST_INCLUDEDIR OR BOOST_LIBRARYDIR OR DEFINED ENV{BOOST_INCLUDEDIR} OR DEFINED ENV{BOOST_LIBRARYDIR})
+  # Ignore cmake boost variables
+  set(Boost_NO_BOOST_CMAKE ON)
+endif()
+
+# Report the options that the control how we are looking for boost
+MESSAGE("Boost location hints:")
 if (BOOST_ROOT)
   MESSAGE("  BOOST_ROOT: ${BOOST_ROOT}")
-  set(Boost_INCLUDE_DIR ${BOOST_ROOT}/include)
-  set(Boost_LIBRARY_DIR ${BOOST_ROOT}/lib)
-  INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
+endif()
+if (DEFINED ENV{BOOST_ROOT})
+  MESSAGE("  ENV{BOOST_ROOT}: $ENV{BOOST_ROOT}")
+endif()
+if (NOT DEFINED BOOST_ROOT AND NOT DEFINED ENV{BOOST_ROOT})
+  MESSAGE("  BOOST_ROOT not set")
 endif()
 if (BOOST_INCLUDEDIR)
   MESSAGE("  BOOST_INCLUDEDIR: ${BOOST_INCLUDEDIR}")
-  set(Boost_INCLUDE_DIR ${BOOST_ROOT})
-  INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
+endif()
+if (DEFINED ENV{BOOST_INCLUDEDIR})
+  MESSAGE("  ENV{BOOST_INCLUDEDIR}: $ENV{BOOST_INCLUDEDIR}")
 endif()
 if (BOOST_LIBRARYDIR)
   MESSAGE("  BOOST_LIBRARYDIR: ${BOOST_LIBRARYDIR}")
-  set(Boost_LIBRARY_DIR ${BOOST_LIBRARYDIR})
+endif()
+if (DEFINED ENV{BOOST_LIBRARYDIR})
+  MESSAGE("  ENV{BOOST_LIBRARYDIR}: $ENV{BOOST_LIBRARYDIR}")
 endif()
 
 set(Boost_USE_MULTITHREADED ON)
 if ("${STATIC_BOOST}" STREQUAL "ON")
-  MESSAGE("Static linking Boost")
-  set(Boost_USE_STATIC_LIBS ON)
+	MESSAGE("Static linking Boost")
+	set(Boost_USE_STATIC_LIBS ON)
 endif()
 
-MESSAGE("Searching for BOOST packages:")
+MESSAGE("Searching for BOOST:")
 find_package(Boost
-  1.74.0
-  COMPONENTS regex
-  program_options
-  thread
-  system
-  filesystem
-  date_time
-  serialization REQUIRED)
-
+1.71.0
+COMPONENTS regex
+program_options
+thread
+system
+filesystem
+date_time
+serialization REQUIRED)
 MESSAGE("Boost configuration results:")
 MESSAGE("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIR}")
 MESSAGE("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
 MESSAGE("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
+
+
 
 # This will look for "generated_include_dirs.cmake" in the module path.
 include("generated_include_dirs")
