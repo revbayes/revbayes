@@ -89,6 +89,14 @@ bool StairwayPlotDistribution::calculateExpectedSFS(void) const
         }
         // compute the exponential probability of no event over the tree
         expected_SFS[0] = 1.0 - exp( -TL );
+
+        // now normalize
+        sum_expected_frequency += expected_SFS[0];
+        for (size_t i=0; i<num_individuals; ++i)
+        {
+            // store the corrected frequency
+            expected_SFS[i] = expected_SFS[i] / sum_expected_frequency;
+        }
     }
     
     if ( coding != ALL )
@@ -109,10 +117,13 @@ bool StairwayPlotDistribution::calculateExpectedSFS(void) const
         }
         
         // now normalize
-        for (size_t i=min_allele_count; i<max_allele_count; ++i)
+        if ( coding == NO_MONOMORPHIC )
         {
-            // store the corrected frequency
-            expected_SFS[i] = expected_SFS[i] / correction;
+            for (size_t i=min_allele_count; i<=max_allele_count; ++i)
+            {
+                // store the corrected frequency
+                expected_SFS[i] = expected_SFS[i] / correction;
+            }
         }
     }
     
@@ -154,18 +165,24 @@ double StairwayPlotDistribution::computeLnProbability( void )
     // only add the monomorphic probability of we use the coding "all"
     if ( coding == ALL )
     {
-        ln_prob += (double)obs_sfs_counts[0] * log(expected_SFS[0]);
+        ln_prob = (double)obs_sfs_counts[0] * log(expected_SFS[0]);
     }
 
     // shift the smallest allele count depending on coding
     size_t smallest_allele_count = 1;
     if ( coding == NO_SINGLETONS )
     {
+        
         smallest_allele_count = 2;
         // also shift the max allele count if we don't allow for singletons
         if ( folded == false )
         {
             max_freq = num_individuals-1;
+            ln_prob = (double)(obs_sfs_counts[0]+obs_sfs_counts[1]) * log(expected_SFS[0]+expected_SFS[1]);
+        }
+        else
+        {
+            ln_prob = (double)(obs_sfs_counts[0]+obs_sfs_counts[1]) * log(expected_SFS[0]+expected_SFS[1]+expected_SFS[num_individuals-1]);
         }
     }
     
@@ -188,7 +205,7 @@ double StairwayPlotDistribution::computeLnProbability( void )
             }
             else
             {
-                ln_prob += (double)obs_sfs_counts[i] * log(expected_SFS[i]+expected_SFS[num_individuals-i+1]);
+                ln_prob += (double)obs_sfs_counts[i] * log(expected_SFS[i]+expected_SFS[num_individuals-i]);
             }
         }
     }
