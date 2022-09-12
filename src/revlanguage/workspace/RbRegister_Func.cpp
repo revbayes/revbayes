@@ -117,8 +117,6 @@
 #include "Func_treeScale.h"
 #include "Func_UPGMA.h"
 
-#include "Func_FlowT2Populations.h"
-
 /* Frequency functions (in folder "functions/phylogenetics/frequencies") */
 #include "Func_F1x4.h"
 #include "Func_F3x4.h"
@@ -144,6 +142,7 @@
 
 #include "Func_X2RateMatrix.h"
 
+#include "Func_BinaryMutationCoalescentRateMatrix.h"
 #include "Func_covarionRateMatrix.h"
 #include "Func_covarion.h"
 #include "Func_cpRev.h"
@@ -151,6 +150,7 @@
 #include "Func_DECRateMatrix.h"
 #include "Func_epoch.h"
 #include "Func_f81.h"
+#include "Func_FlowT2Populations.h"
 #include "Func_FreeBinary.h"
 #include "Func_FreeK.h"
 #include "Func_freeSymmetricRateMatrix.h"
@@ -327,6 +327,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
         addFunction( new Func_X2RateMatrix()                                );
 
+        addFunction( new Func_BinaryMutationCoalescentRateMatrix()          );
         addFunction( new Func_covarionRateMatrix()                          );
         addFunction( new Func_covarion()                                    );
         addFunction( new Func_cpRev()                                       );

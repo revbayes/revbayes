@@ -111,8 +111,8 @@ void RateMatrix_BinaryMutationCoalescent::buildRateMatrix(void)
 void RateMatrix_BinaryMutationCoalescent::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
 {
     
-    //Now the instantaneous rate matrix has been filled up entirely.
-    //We use repeated squaring to quickly obtain exponentials, as in Poujol and Lartillot, Bioinformatics 2014.
+    // Now the instantaneous rate matrix has been filled up entirely.
+    // We use repeated squaring to quickly obtain exponentials, as in Poujol and Lartillot, Bioinformatics 2014.
     double t = rate * (startAge - endAge);
     computeExponentialMatrixByRepeatedSquaring(t, P);
     
