@@ -77,11 +77,11 @@ if ("${RB_BEAGLE}" STREQUAL "ON")
             # Not sure which of the following is a better way to default to search for beagle...
 
             #-- If we could not set it, then we try to search for it on CMAKE path
-            find_package(BEAGLE NAMES hmsbeagle hmsbeagle-1 REQUIRED)
+	    #find_package(BEAGLE NAMES beagle-lib hmsbeagle hmsbeagle-1 REQUIRED)
             
             #-- Alternatively try pkg-config   
-	    #find_package(PkgConfig REQUIRED)
-            #PKG_CHECK_MODULES(BEAGLE REQUIRED hmsbeagle-1 hmsbeagle)
+	    find_package(PkgConfig REQUIRED)
+            PKG_CHECK_MODULES(BEAGLE REQUIRED beagle-lib hmsbeagle-1 hmsbeagle)
         endif()
     endif()
 	
@@ -132,7 +132,11 @@ if ("${JUPYTER}" STREQUAL "ON")
 endif()
 
 MESSAGE("Boost location hints:")
-if (BOOST_ROOT OR BOOST_INCLUDEDIR OR BOOST_LIBRARYDIR) 
+set(Boost_ROOT "$ENV{Boost_ROOT}" )
+set(Boost_INCLUDE_DIR "$ENV{Boost_INCLUDE_DIR}" )
+set(Boost_LIBRARY_DIR "$ENV{Boost_LIBRARY_DIR}" )
+if (BOOST_ROOT OR BOOST_INCLUDEDIR OR BOOST_LIBRARYDIR OR
+    Boost_ROOT OR Boost_INCLUDE_DIR OR Boost_LIBRARY_DIR) 
   set(Boost_NO_SYSTEM_PATHS ON)
   set(Boost_NO_BOOST_CMAKE ON)
   set(Boost_NO_WARN_NEW_VERSION ON)
@@ -155,8 +159,8 @@ endif()
 
 set(Boost_USE_MULTITHREADED ON)
 if ("${STATIC_BOOST}" STREQUAL "ON")
-	MESSAGE("Static linking Boost")
-	set(Boost_USE_STATIC_LIBS ON)
+  MESSAGE("Static linking Boost")
+  set(Boost_USE_STATIC_LIBS ON)
 endif()
 
 MESSAGE("Searching for BOOST packages:")

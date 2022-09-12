@@ -2232,9 +2232,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
 
     // check for recomputation
     if ( dirty_nodes[node_index] == true
-#if defined ( RB_BEAGLE )
-         || RbSettings::userSettings().getUseBeagleLikelihoodStoring() == false
-#endif
+//#if defined ( RB_BEAGLE )
+//         || RbSettings::userSettings().getUseBeagleLikelihoodStoring() == false
+//#endif
         )
     {
         // mark as computed
@@ -4295,46 +4295,31 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleInstan
 
     if ( RbSettings::userSettings().getUseBeagle() == true )
     {
+        bool   b_use_scaling         = RbSettings::userSettings().getBeagleScalingMode() != "manual"
+                                     ? true : false;
 
-//        int  b_resource            = RbSettings::userSettings().getBeagleResource();
-        
-        bool b_use_scaling         = RbSettings::userSettings().getBeagleScalingMode()   != "none"
-                                   ? true : false;
-        
-        int  b_tipCount            = this->tau->getValue().getNumberOfTips();
-        int  b_partialsBufferCount = 2 * this->num_nodes
-                                   + ( this->using_ambiguous_characters
-                                     ? this->tau->getValue().getNumberOfTips()
-                                     : 0
-                                     );
-        
-//        int  b_partialsBufferCount = this->tau->getValue().getNumberOfInteriorNodes()
-//                                   + ( this->using_ambiguous_characters
-//                                     ? this->tau->getValue().getNumberOfTips()
-//                                     : 0
-//                                     );
-        
-//        int  b_partialsBufferCount = this->num_nodes
-//                                   + ( this->using_ambiguous_characters
-//                                     ? this->tau->getValue().getNumberOfTips()
-//                                     : 0
-//                                     );
-        
-        
-        int  b_compactBufferCount  = this->tau->getValue().getNumberOfTips()
-                                   - ( this->using_ambiguous_characters
-                                     ? this->tau->getValue().getNumberOfTips()
-                                     : 0
-                                     );
-
-        int  b_stateCount          = this->num_chars;
-        int  b_patternCount        = this->pattern_block_size;
-        int  b_eigenBufferCount    = this->num_nodes * 2;
-        int  b_matrixBufferCount   = this->num_nodes * 2;
-        int  b_categoryCount       = this->num_site_rates + (this->getPInv() > 0.0 ? 1 : 0);
-        int  b_scaleBufferCount    = (b_use_scaling ? (this->num_nodes * 2) : 0);
+        size_t b_max_cpu_threads     = RbSettings::userSettings().getBeagleMaxCPUThreads();
+        int    b_tipCount            = this->tau->getValue().getNumberOfTips();
+        int    b_partialsBufferCount = 2 * this->num_nodes
+                                     + ( this->using_ambiguous_characters
+                                       ? this->tau->getValue().getNumberOfTips()
+                                       : 0
+                                       );
+        int    b_compactBufferCount  = this->tau->getValue().getNumberOfTips()
+                                     - ( this->using_ambiguous_characters
+                                       ? this->tau->getValue().getNumberOfTips()
+                                       : 0 );
+        int    b_stateCount          = this->num_chars;
+        int    b_patternCount        = this->pattern_block_size;
+        int    b_eigenBufferCount    = this->num_nodes * 2;
+        int    b_matrixBufferCount   = this->num_nodes * 2;
+        int    b_categoryCount       = this->num_site_rates +
+	                               ( this->getPInv() > std::numeric_limits<double>::epsilon()
+	       			     ? 1 : 0 );
+        int    b_scaleBufferCount    = (b_use_scaling ? (this->num_nodes * 2) : 0);
 
         this->beagle_instance = new BeagleInstance();
+
         beagle_instance->createBEAGLE( b_tipCount
                                      , b_partialsBufferCount
                                      , b_compactBufferCount
@@ -4347,6 +4332,7 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleInstan
     
         this->initializeBeagleTips();
     }
+    //-- TODO - remove later
     else if ( RbSettings::userSettings().getUseBeagle() == true && tau->getValue().isRooted() == true )
     {
         RBOUT("Failed to start BEAGLE instance, rooted trees not currently supported. Reverting to RevBayes likelihood calculator.");
@@ -4614,9 +4600,6 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigensyste
     Eigen::VectorXd                      eigenvalues;
     Eigen::MatrixXd                      eigenvectors;
     Eigen::MatrixXd                      inv_eigenvectors;
-//#else
-//    //-- Old internal eigen system way... but may have bad eigenvectors...
-//    EigenSystem*                         eigen_system;
 #endif /* RB_BEAGLE_DEBUG */
 
 
@@ -4626,8 +4609,6 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigensyste
     //-- Get the rate matrices of all models.
     if ( this->homogeneous_rate_matrix )
     {
-        //const AbstractRateMatrix* arm_ptr =
-        //    dynamic_cast<const AbstractRateMatrix*>(&this->homogeneous_rate_matrix->getValue());
         arm_ptr = dynamic_cast<const AbstractRateMatrix*>(&this->homogeneous_rate_matrix->getValue());
         rate_matrices.push_back(arm_ptr->getRateMatrix());
     }
@@ -4635,8 +4616,6 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigensyste
     {
         for ( size_t i = 0; i < this->heterogeneous_rate_matrices->getValue().size(); ++i )
         {
-            //const AbstractRateMatrix* arm_ptr =
-            //    dynamic_cast<const AbstractRateMatrix*>(&this->heterogeneous_rate_matrices->getValue()[i]);
             arm_ptr = dynamic_cast<const AbstractRateMatrix*>(&this->heterogeneous_rate_matrices->getValue()[i]);
             rate_matrices.push_back(arm_ptr->getRateMatrix());
         }
@@ -4645,7 +4624,6 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigensyste
     //-- Get the number of models with unique eigensystems.
     b_num_models = rate_matrices.size();
 
-    //for ( size_t i = 0; i < this->num_site_mixtures; ++i )
     for ( size_t i = 0; i < b_num_models; ++i )
     {
         //-- TODO : Maybe add checks to only update if eigensystem changes (use touched bitmap)
@@ -4703,13 +4681,6 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigensyste
         b_flat_eigenvalues      = flat_eigenvalues;
         b_flat_eigenvectors     = flat_eigenvectors;
         b_flat_inv_eigenvectors = flat_inv_eigenvectors;
-//#else
-//#if defined ( RB_USE_EIGEN )
-//        eigen_system            = &rate_matrices[i].getEigenSystem();
-//        b_flat_eigenvalues      = eigen_system->getRealEigenvalues();
-//        b_flat_eigenvectors     = eigen_system->getEigenvectors().flattenMatrix();
-//        b_flat_inv_eigenvectors = eigen_system->getInverseEigenvectors().flattenMatrix();
-//#endif /* RB_USE_EIGEN */
 #endif /* RB_USE_EIGEN3 */
         
         
@@ -4812,11 +4783,6 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleSiteRates
         {
             this->b_inCategoryWeights[i] -= (pInv / this->b_inCategoryWeights.size());
         }
-        //-- We need the mean of the category rates to be 1.0.
-        //for ( size_t i = 0; i < this->b_inCategoryRates.size(); ++i )
-        //{
-        //    this->b_inCategoryRates[i] += (1.0 / (this->b_inCategoryRates.size()));
-        //}
 
         //-- And push the invariable sites weight and rate, respectively.
         this->b_inCategoryWeights.push_back(pInv);
@@ -4841,22 +4807,17 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleSiteRates
 
     
     //-- Set BEAGLE category rates.
-	b_return_code =
+    b_return_code =
         beagleSetCategoryRatesWithIndex( this->beagle_instance->getResourceID()
-                                       , b_categoryWeightsIndex
-                                       , &this->b_inCategoryRates[0]
-                                       );
-	//b_return_code =
-    //    beagleSetCategoryRatesWithIndex( this->beagle_instance->getResourceID()
-    //                                   , b_categoryWeightsIndex
-    //                                   , &this->b_inCategoryWeights[0]
-    //                                   );
+				       , b_categoryWeightsIndex
+				       , &this->b_inCategoryRates[0]
+	                               );
     if ( b_return_code != 0 )
     {
 	    throw RbException( "Could not set category rates for ASRV model "
-                         + std::to_string(b_categoryWeightsIndex)
-                         + " : "
-	  		             + BeagleUtilities::printErrorCode(b_return_code));
+                             + std::to_string(b_categoryWeightsIndex) + " : "
+	  		     + BeagleUtilities::printErrorCode(b_return_code)
+		             );
     }
     
     //-- Set BEAGLE category weights.
@@ -4865,11 +4826,6 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleSiteRates
                                 , b_categoryWeightsIndex
                                 , &this->b_inCategoryWeights[0]
                                 );
-    //b_return_code =
-    //    beagleSetCategoryWeights( this->beagle_instance->getResourceID()
-    //                            , b_categoryWeightsIndex
-    //                            , &this->b_inCategoryRates[0]
-    //                            );
     if ( b_return_code != 0 )
     {
         throw RbException( "Could not set category weights for ASRV model "

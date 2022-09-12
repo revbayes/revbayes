@@ -24,15 +24,15 @@ namespace RevBayesCore {
         
         
         void                createBEAGLE( int  b_tipCount
-                                         , int  b_partialsBufferCount
-                                         , int  b_compactBufferCount
-                                         , int  b_stateCount
-                                         , int  b_patternCount
-                                         , int  b_eigenBufferCount
-                                         , int  b_matrixBufferCount
-                                         , int  b_categoryCount
-                                         , int  b_scaleBufferCount
-                                         );
+                                        , int  b_partialsBufferCount
+                                        , int  b_compactBufferCount
+                                        , int  b_stateCount
+                                        , int  b_patternCount
+                                        , int  b_eigenBufferCount
+                                        , int  b_matrixBufferCount
+                                        , int  b_categoryCount
+                                        , int  b_scaleBufferCount
+                                        );
         void                freeBEAGLE(void);
         
         // getters
@@ -40,7 +40,10 @@ namespace RevBayesCore {
         
         // setters
         void                setCPUThreadCount(size_t n);
-        
+
+	// functions
+	long                generateSettingsBitmap(void);
+
     private:
 
         int                         handle;

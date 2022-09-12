@@ -194,18 +194,18 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
     size_t num_taxa  = (this->num_nodes + 1) / 2;
     
     size_t root_idx  = root;
-    if ( RbSettings::userSettings().getUseBeagleLikelihoodStoring() == true )
-    {
+    //if ( RbSettings::userSettings().getUseBeagleLikelihoodStoring() == true )
+    //{
         root_idx  = root + this->num_nodes * this->activeLikelihood[root];
-    }
+	//}
     
     size_t left_idx  = left;
     size_t right_idx = right;
-    if ( RbSettings::userSettings().getUseBeagleLikelihoodStoring() == true )
-    {
+    //if ( RbSettings::userSettings().getUseBeagleLikelihoodStoring() == true )
+    //{
         left_idx  = left   + this->num_nodes * this->activeLikelihood[left];
         right_idx = right  + this->num_nodes * this->activeLikelihood[right];
-    }
+	//}
 
     //-- Tips are actually just stored once, so we dont need offests.
     size_t left_partials  = (left  < num_taxa) ? left  : left_idx;
@@ -373,7 +373,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
 #if defined ( RB_USE_EIGEN3 )
     //-- Set the ASRV category for each site. Since we do not allow for partitions, this is always 0.
     std::vector<int> categoryIndicesASRV(this->pattern_block_size, 0);
-    //-- And Update the respective ASRV BEAGLE buffers.
+    //-- And update the respective ASRV BEAGLE buffers.
     this->updateBeagleSiteRates();
 #else
     std::vector<int> categoryIndicesASRV = NULL;
@@ -583,13 +583,13 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikel
     size_t left_idx   = left;
     size_t right_idx  = right;
     size_t middle_idx = middle;
-    if ( RbSettings::userSettings().getUseBeagleLikelihoodStoring() == true )
-    {
+    //if ( RbSettings::userSettings().getUseBeagleLikelihoodStoring() == true )
+    //{
         node_idx   = node_index + this->num_nodes * this->activeLikelihood[node_index];
         left_idx   = left       + this->num_nodes * this->activeLikelihood[left];
         right_idx  = right      + this->num_nodes * this->activeLikelihood[right];
         middle_idx = middle     + this->num_nodes * this->activeLikelihood[middle];
-    }
+	//}
     
     //-- Tips are actually just stored once, so we dont need offests.
     size_t left_partials   = (node.getChild(0).isTip()) ? left   : left_idx;

@@ -32,12 +32,15 @@ class RbSettings {
     
 #if defined( RB_BEAGLE )
     bool                        getUseBeagle(void) const;                           //!< Retrieve the flag whether we should use the BEAGLE library in CTMC models
-    bool                        getUseBeagleLikelihoodStoring(void) const;
-    bool                        getBeagleAuto(void) const;                          //!< Retrieve the flag whether we should automatically select the BEAGLE resource
+    const std::string&          getBeagleDevice(void) const;                        //!< Retrieve the BEAGLE device that is being used
+    //bool                        getUseBeagleLikelihoodStoring(void) const;
+    //bool                        getBeagleAuto(void) const;                          //!< Retrieve the flag whether we should automatically select the BEAGLE resource
     size_t                      getBeagleResource(void) const;                      //!< Retrieve the BEAGLE resource to be used
     bool                        getBeagleUseDoublePrecision(void) const;            //!< Retrieve the flag whether BEAGLE will use double precision floating point format
     size_t                      getBeagleMaxCPUThreads(void) const;                 //!< Retrieve the maximum number of CPU threads BEAGLE is set to use        
-    bool                        getBeaglePreferGPU(void) const;                     //!< Retrieve the flag whether we should prefer to use the available GPU resource
+//const std::string&          getBeagleVectorizationMode(void) const;             //!< Retrieve vectorization flag (SSE, AVX, NONE)
+//const std::string&          getBeagleThreadingMode(void) const;                 //!< Retrieve Threading flag (CPP, OPENMP, NONE)
+//bool                        getBeaglePreferGPU(void) const;                     //!< Retrieve the flag whether we should prefer to use the available GPU resource
     const std::string&          getBeagleScalingMode(void) const;                   //!< Retrieve the BEAGLE numerical scaling mode
     size_t                      getBeagleDynamicScalingFrequency(void) const;       //!< Retrieve the BEAGLE evaluation frequency for calculation of updated numerical scaling factors
 #endif /* RB_BEAGLE */
@@ -57,11 +60,14 @@ class RbSettings {
        
 #if defined( RB_BEAGLE )
     void                        setUseBeagle(bool s);                               //!< Set the flag whether we should use the BEAGLE library in CTMC models
-    void                        setBeagleAuto(bool s);                              //!< Set the flag whether we should automatically select the BEAGLE resource
+    void                        setBeagleDevice(const std::string &bsm);            //!< Set the BEAGLE device to use
+//    void                        setBeagleAuto(bool s);                              //!< Set the flag whether we should automatically select the BEAGLE resource
     void                        setBeagleResource(size_t w);                        //!< Set the BEAGLE resource to be used
     void                        setBeagleUseDoublePrecision(bool s);                //!< Set the flag whether BEAGLE will use double precision floating point format
     void                        setBeagleMaxCPUThreads(size_t w);                   //!< Set the maximum number of CPU threads BEAGLE is set to use        
-    void                        setBeaglePreferGPU(size_t w);                       //!< Set the flag whether we prefer to use available GPU resource
+//    void                        setBeagleVectorizationMode(const std::string &s);   //!< Set the flag if we want to enable vectorization (SSE, AVX, NONE)
+//    void                        setBeagleThreadingMode(const std::string &s);       //!< Set the flag if we want to enable Threading (CPP, OPENMP, NONE)
+//    void                        setBeaglePreferGPU(size_t w);                       //!< Set the flag whether we prefer to use available GPU resource
     void                        setBeagleScalingMode(const std::string &bsm);       //!< Set the BEAGLE numerical scaling mode
     void                        setBeagleDynamicScalingFrequency(size_t w);         //!< Set the BEAGLE evaluation frequency for calculation of updated numerical scaling factors
 #endif /* RB_BEAGLE */
@@ -89,11 +95,14 @@ class RbSettings {
 
 #if defined( RB_BEAGLE )
     bool                        useBeagle;
-    bool                        beagleAuto;
+    std::string                 beagleDevice;
+    //bool                        beagleAuto;
     size_t                      beagleResource;        
     bool                        beagleUseDoublePrecision;
     size_t                      beagleMaxCPUThreads;
-    bool                        beaglePreferGPU;
+    //std::string                 beagleVectorizationMode;
+    //std::string                 beagleThreadingMode;
+    //bool                        beaglePreferGPU;
     std::string                 beagleScalingMode;
     size_t                      beagleDynamicScalingFrequency;
 #endif /* RB_BEAGLE */
