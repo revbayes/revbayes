@@ -5,4 +5,4 @@
 //  Created by Sebastian Hoehna on 12.09.22.
 //
 
-#include "RateMatrix_CoalescentMutation.hpp"
+#include "RateMatrix_CoalescentMutation.h"
