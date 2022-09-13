@@ -128,7 +128,15 @@ void BeagleInstance::createBEAGLE(  int  b_tipCount
     }
     else
     {
-        b_resource = RbSettings::userSettings().getBeagleResource();
+	//-- If the device number has not specifically been set and we are
+	//   using a gpu resource, default to device 1.
+	if (RbSettings::userSettings().getBeagleResource() == 0 &&
+	    (RbSettings::userSettings().getBeagleDevice() == "gpu_cuda" ||
+	     RbSettings::userSettings().getBeagleDevice() == "gpu_opencl")) {
+	    b_resource = 1;
+	} else {
+	    b_resource = RbSettings::userSettings().getBeagleResource();
+        }
     }
 
     handle = beagleCreateInstance( b_tipCount              // tips
@@ -155,9 +163,14 @@ void BeagleInstance::createBEAGLE(  int  b_tipCount
     else {
 	//--- Remaining beagle post-configuration ---
 
-	//-- Set threads count
-    	this->setCPUThreadCount( b_max_cpu_threads );
-	
+	//-- Set threads count if using CPU
+        if (RbSettings::userSettings().getBeagleDevice() != "gpu_cuda" &&
+            RbSettings::userSettings().getBeagleDevice() != "gpu_opencl") {
+	    this->setCPUThreadCount( b_max_cpu_threads );
+        } else {
+	    b_max_cpu_threads = 0;
+	}
+
 #if defined ( RB_BEAGLE_INFO )
 	ss << "\t" << "resource            : " << b_return_info.resourceNumber << std::endl;
 	ss << "\t" << "Rsrc Name           : " << b_return_info.resourceName   << std::endl;

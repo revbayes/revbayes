@@ -223,7 +223,7 @@ void RbSettings::initializeUserSettings(void)
     beagleDevice                  = "auto";     // auto select BEAGLE device by default
     beagleResource                = 0;          // the default BEAGLE resource
     beagleUseDoublePrecision      = true;       // BEAGLE will use double precision by default
-    beagleMaxCPUThreads           = 0;          // no max set, auto threading up to number of cores
+    beagleMaxCPUThreads           = -1;          // no max set, auto threading up to number of cores
     //beagleScalingMode            = "dynamic";   // dynamic rescale as needed plus fixed frequency
     beagleScalingMode             = "manual";   // manually rescale as needed
     beagleDynamicScalingFrequency = 100;        // dynamic rescale every 100 evaluations by default
@@ -383,7 +383,7 @@ void RbSettings::setBeagleDevice(const std::string &d)
 {
     // replace the internal value with this new value
     beagleDevice = d;
-    
+
     // save the current settings for the future.
     //writeUserSettings();
 }
@@ -392,7 +392,7 @@ void RbSettings::setBeagleResource(size_t w)
 {
     // replace the internal value with this new value
     beagleResource = w;
-    
+
     // save the current settings for the future.
     //writeUserSettings();
 }
@@ -613,15 +613,15 @@ void RbSettings::writeUserSettings( void )
     writeStream << "scalingDensity=" << scalingDensity << std::endl;
     writeStream << "collapseSampledAncestors=" << (collapseSampledAncestors ? "true" : "false") << std::endl;
 
-#if defined( RB_BEAGLE )
-    writeStream << "useBeagle=" << (useBeagle ? "true" : "false") << std::endl;
-    writeStream << "beagleDevice=" << beagleDevice << std::endl;
-    writeStream << "beagleResource=" << beagleResource << std::endl;
-    writeStream << "beagleUseDoublePrecision=" << (beagleUseDoublePrecision ? "true" : "false") << std::endl;
-    writeStream << "beagleMaxCPUThreads=" << beagleMaxCPUThreads << std::endl;
-    writeStream << "beagleScalingMode=" << beagleScalingMode << std::endl;
-    writeStream << "beagleDynamicScalingFrequency=" << beagleDynamicScalingFrequency << std::endl;
-#endif /* RB_BEAGLE */
+//#if defined( RB_BEAGLE )
+//    writeStream << "useBeagle=" << (useBeagle ? "true" : "false") << std::endl;
+//    writeStream << "beagleDevice=" << beagleDevice << std::endl;
+//    writeStream << "beagleResource=" << beagleResource << std::endl;
+//    writeStream << "beagleUseDoublePrecision=" << (beagleUseDoublePrecision ? "true" : "false") << std::endl;
+//    writeStream << "beagleMaxCPUThreads=" << beagleMaxCPUThreads << std::endl;
+//    writeStream << "beagleScalingMode=" << beagleScalingMode << std::endl;
+//    writeStream << "beagleDynamicScalingFrequency=" << beagleDynamicScalingFrequency << std::endl;
+//#endif /* RB_BEAGLE */
     
     fm.closeFile( writeStream );
 
