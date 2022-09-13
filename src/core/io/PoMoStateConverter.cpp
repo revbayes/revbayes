@@ -46,6 +46,8 @@ HomologousDiscreteCharacterData<PoMoState>* PoMoStateConverter::convertData2( co
 {
     HomologousDiscreteCharacterData<PoMoState>* data = new HomologousDiscreteCharacterData<PoMoState> ();
     
+    size_t NUM_ORG_STATES = 2;
+    
     // we need to get a map of species names to all samples belonging to that species
     std::map<std::string, std::vector<std::string> > species_names_to_sample_names;
     createSpeciesToSampleNamesMap(species_names_to_sample_names, taxa);
@@ -65,7 +67,7 @@ HomologousDiscreteCharacterData<PoMoState>* PoMoStateConverter::convertData2( co
         {
             
             // allocate the counts vector for the states
-            std::vector<double> counts (2, 0.0); // 0 1
+            std::vector<double> counts (NUM_ORG_STATES+1, 0.0); // 0 1 ?
             
             // iterate over all samples per species
             for (std::vector<std::string>::const_iterator sample_name_it = spample_names.begin(); sample_name_it != spample_names.end(); ++sample_name_it)
@@ -83,21 +85,20 @@ HomologousDiscreteCharacterData<PoMoState>* PoMoStateConverter::convertData2( co
                 {
                     chIndex = 1;
                 }
-                // Sebastian: PoMoState assume no gap in counts
-//                else if (ch.getStringValue() == "-")
-//                {
-//                    chIndex = 2;
-//                }
+                else if (ch.getStringValue() == "-" || ch.getStringValue() == "?")
+                {
+                    chIndex = 2;
+                }
                 counts[chIndex]++;
             }
             // Now we have all the counts for this species,
             // we need to use these counts to build a PoMoState
             
             std::string pomo_string = "";
-            for (size_t i=0; i<counts.size(); ++i)
+            for (size_t i=0; i<NUM_ORG_STATES; ++i)
             {
                 pomo_string += StringUtilities::toString( counts[i] );
-                if ( i < (counts.size()-1) )
+                if ( i < (NUM_ORG_STATES-1) )
                 {
                     pomo_string += ",";
                 }
@@ -107,7 +108,7 @@ HomologousDiscreteCharacterData<PoMoState>* PoMoStateConverter::convertData2( co
             size_t chrom_pos = 0;
             const std::vector<double> weights;
             PoMoState this_state = PoMoState( 2, virtual_population_size, pomo_string, chromosome, chrom_pos, weights );
-            tax.addCharacter( this_state);
+            tax.addCharacter( this_state );
         }
         data->addTaxonData(tax);
     }
@@ -132,6 +133,8 @@ HomologousDiscreteCharacterData<PoMoState>* PoMoStateConverter::convertData4(  c
     std::map<std::string, std::vector<std::string> > species_names_to_sample_names;
     createSpeciesToSampleNamesMap(species_names_to_sample_names, taxa);
     
+    size_t NUM_ORG_STATES = 4;
+    
     
     // iterate over all species
     for (std::map<std::string, std::vector<std::string> >::const_iterator it = species_names_to_sample_names.begin(); it != species_names_to_sample_names.end(); it++)
@@ -147,7 +150,7 @@ HomologousDiscreteCharacterData<PoMoState>* PoMoStateConverter::convertData4(  c
         {
             
             // allocate the counts vector for the states
-            std::vector<double> counts (4, 0.0); // A C G T
+            std::vector<double> counts (NUM_ORG_STATES+1, 0.0); // A C G T
             
             // iterate over all samples per species
             for (std::vector<std::string>::const_iterator sample_name_it = spample_names.begin(); sample_name_it != spample_names.end(); ++sample_name_it)
@@ -174,21 +177,20 @@ HomologousDiscreteCharacterData<PoMoState>* PoMoStateConverter::convertData4(  c
                 {
                     chIndex = 3;
                 }
-                // Sebastian: PoMoState assume no gap in counts
-//                else if (ch.getStringValue() == "-")
-//                {
-//                    chIndex = 4;
-//                }
+                else if (ch.getStringValue() == "-")
+                {
+                    chIndex = 4;
+                }
                 counts[chIndex]++;
             }
             // Now we have all the counts for this species,
             // we need to use these counts to build a PoMoState
             
             std::string pomo_string = "";
-            for (size_t i=0; i<counts.size(); ++i)
+            for (size_t i=0; i<NUM_ORG_STATES; ++i)
             {
                 pomo_string += StringUtilities::toString( counts[i] );
-                if ( i < (counts.size()-1) )
+                if ( i < (NUM_ORG_STATES-1) )
                 {
                     pomo_string += ",";
                 }
