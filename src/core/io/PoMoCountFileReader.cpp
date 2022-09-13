@@ -78,8 +78,26 @@ PoMoCountFileReader::PoMoCountFileReader(const path &fn, const size_t vps, FORMA
 		name_to_taxon_data.insert(std::pair< std::string, DiscreteTaxonData<PoMoState> >(names[i], tax) );
 	}
 
+    // estimate the number of states
+    size_t row=2;
+    size_t col=2;
+    // move ahead until we found a non-missing state
+    while ( chars[row][col] == "?" || chars[row][col] == "-" )
+    {
+        ++col;
+        if ( col == chars[row].size() )
+        {
+            // reset at end of row
+            ++row;
+            col = 2;
+        }
+        if ( row == chars.size() )
+        {
+            throw RbException("Couldn't guess the number of states in PoMo counts file because all states missing.");
+        }
+    }
     std::vector<std::string> tmp_res;
-    StringUtilities::stringSplit(chars[2][2], ",", tmp_res);
+    StringUtilities::stringSplit(chars[row][col], ",", tmp_res);
     size_t num_states = tmp_res.size();
 
 	for (size_t i = 2; i < chars.size(); ++i)
