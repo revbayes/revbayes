@@ -24,7 +24,6 @@ namespace RevBayesCore {
                             const TypedDagNode< RbVector<double> > *et,
                             const TypedDagNode< RbVector<double> > *mu,
                             const TypedDagNode< Simplex >* asfs,
-                            long vps,
                             long n_sites,
                             long n_ind,
                             bool f=false,

@@ -1,4 +1,5 @@
 #include "RateMatrix_BinaryMutationCoalescent.h"
+#include "EigenSystem.h"
 #include "MatrixReal.h"
 #include "RbException.h"
 #include "RbMathCombinatorialFunctions.h"
@@ -11,13 +12,34 @@ using namespace RevBayesCore;
 
 /** Construct rate matrix with n states, virtual population size, mutation rates, selection coefficients */
 RateMatrix_BinaryMutationCoalescent::RateMatrix_BinaryMutationCoalescent(size_t n) : AbstractRateMatrix( n * (n+3) / 2.0 ),
-    N( n ),
+    num_ind( n ),
     matrix_size( (n*(n+3)/2.0) ),
     mu( 1.0 ),
     Ne( 1.0 )
 {
     
+    
+    theEigenSystem       = new EigenSystem(the_rate_matrix);
+    c_ijk.resize(matrix_size * matrix_size * matrix_size);
+    cc_ijk.resize(matrix_size * matrix_size * matrix_size);
+    
     update();
+}
+
+
+/** Copy constructor */
+RateMatrix_BinaryMutationCoalescent::RateMatrix_BinaryMutationCoalescent(const RateMatrix_BinaryMutationCoalescent& m) : AbstractRateMatrix( m ),
+    num_ind( m.num_ind ),
+    matrix_size( m.matrix_size ),
+    mu( m.mu ),
+    Ne( m.Ne )
+{
+    
+    theEigenSystem       = new EigenSystem( *m.theEigenSystem );
+    c_ijk                = m.c_ijk;
+    cc_ijk               = m.cc_ijk;
+    
+    theEigenSystem->setRateMatrixPtr(the_rate_matrix);
 }
 
 
@@ -25,6 +47,32 @@ RateMatrix_BinaryMutationCoalescent::RateMatrix_BinaryMutationCoalescent(size_t 
 RateMatrix_BinaryMutationCoalescent::~RateMatrix_BinaryMutationCoalescent(void)
 {
     
+    delete theEigenSystem;
+}
+
+
+RateMatrix_BinaryMutationCoalescent& RateMatrix_BinaryMutationCoalescent::operator=(const RateMatrix_BinaryMutationCoalescent &r)
+{
+    
+    if (this != &r)
+    {
+        AbstractRateMatrix::operator=( r );
+        
+        num_ind         = r.num_ind;
+        matrix_size     = r.matrix_size;
+        mu              = r.mu;
+        Ne              = r.Ne;
+        
+        delete theEigenSystem;
+        
+        theEigenSystem       = new EigenSystem( *r.theEigenSystem );
+        c_ijk                = r.c_ijk;
+        cc_ijk               = r.cc_ijk;
+        
+        theEigenSystem->setRateMatrixPtr(the_rate_matrix);
+    }
+    
+    return *this;
 }
 
 
@@ -68,27 +116,33 @@ void RateMatrix_BinaryMutationCoalescent::buildRateMatrix(void)
     }
     
     size_t row_index = 0;
-    for ( size_t i=N; i>=1; --i )
+    for ( size_t num_total_ind=num_ind; num_total_ind>=1; --num_total_ind )
     {
-        for (size_t j=0; j<=i; ++j)
+        for (size_t num_derived_ind=0; num_derived_ind<=num_total_ind; ++num_derived_ind)
         {
             
-            if ( i > j )
+            if ( num_total_ind > num_derived_ind )
             {
-                // we can have a mutation
-                (*the_rate_matrix)[row_index][row_index+1] = (i-j)*mu;
+                // we can have a mutation from the 0 to the 1 state
+                (*the_rate_matrix)[row_index][row_index+1] = (num_total_ind-num_derived_ind)*mu;
             }
             
-            if ( (i-j) > 1 )
+            if ( num_derived_ind > 0 )
             {
-                // we can have a coalescent event in the ancestral state
-                (*the_rate_matrix)[row_index][row_index+i+1] = (i-j)*(i-j-1)/(2.0*2.0*Ne);
+                // we can have a mutation from the 1 to the 0 state
+                (*the_rate_matrix)[row_index][row_index-1] = num_derived_ind*mu;
             }
             
-            if ( j > 1 )
+            if ( (num_total_ind-num_derived_ind) > 1 )
             {
                 // we can have a coalescent event in the ancestral state
-                (*the_rate_matrix)[row_index][row_index+i] = j*(j-1)/(2.0*2.0*Ne);
+                (*the_rate_matrix)[row_index][row_index+num_total_ind+1] = (num_total_ind-num_derived_ind)*(num_total_ind-num_derived_ind-1)/(2.0*2.0*Ne);
+            }
+            
+            if ( num_derived_ind > 1 )
+            {
+                // we can have a coalescent event in the ancestral state
+                (*the_rate_matrix)[row_index][row_index+num_total_ind] = num_derived_ind*(num_derived_ind-1)/(2.0*2.0*Ne);
             }
             
             ++row_index;
@@ -107,6 +161,48 @@ void RateMatrix_BinaryMutationCoalescent::buildRateMatrix(void)
 }
 
 
+
+/** Do precalculations on eigenvectors */
+void RateMatrix_BinaryMutationCoalescent::calculateCijk(void)
+{
+    
+    if ( theEigenSystem->isComplex() == false )
+    {
+        // real case
+        const MatrixReal& ev  = theEigenSystem->getEigenvectors();
+        const MatrixReal& iev = theEigenSystem->getInverseEigenvectors();
+        double* pc = &c_ijk[0];
+        for (size_t i=0; i<num_states; i++)
+        {
+            for (size_t j=0; j<num_states; j++)
+            {
+                for (size_t k=0; k<num_states; k++)
+                {
+                    *(pc++) = ev[i][k] * iev[k][j];
+                }
+            }
+        }
+    }
+    else
+    {
+        // complex case
+        const MatrixComplex& cev  = theEigenSystem->getComplexEigenvectors();
+        const MatrixComplex& ciev = theEigenSystem->getComplexInverseEigenvectors();
+        std::complex<double>* pc = &cc_ijk[0];
+        for (size_t i=0; i<num_states; i++)
+        {
+            for (size_t j=0; j<num_states; j++)
+            {
+                for (size_t k=0; k<num_states; k++)
+                {
+                    *(pc++) = cev[i][k] * ciev[k][j];
+                }
+            }
+        }
+    }
+}
+
+
 /** Calculate the transition probabilities */
 void RateMatrix_BinaryMutationCoalescent::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
 {
@@ -114,7 +210,16 @@ void RateMatrix_BinaryMutationCoalescent::calculateTransitionProbabilities(doubl
     // Now the instantaneous rate matrix has been filled up entirely.
     // We use repeated squaring to quickly obtain exponentials, as in Poujol and Lartillot, Bioinformatics 2014.
     double t = rate * (startAge - endAge);
-    computeExponentialMatrixByRepeatedSquaring(t, P);
+//    computeExponentialMatrixByRepeatedSquaring(t, P);
+    
+    if ( theEigenSystem->isComplex() == false )
+    {
+        tiProbsEigens(t, P);
+    }
+    else
+    {
+        tiProbsComplexEigens(t, P);
+    }
     
     return;
 }
@@ -187,12 +292,105 @@ std::vector<double> RateMatrix_BinaryMutationCoalescent::getStationaryFrequencie
 }
 
 
+/** Calculate the transition probabilities for the real case */
+void RateMatrix_BinaryMutationCoalescent::tiProbsEigens(double t, TransitionProbabilityMatrix& P) const
+{
+    
+    // get a reference to the eigenvalues
+    const std::vector<double>& eigenValue = theEigenSystem->getRealEigenvalues();
+    
+    // precalculate the product of the eigenvalue and the branch length
+    std::vector<double> eigValExp(num_states);
+    for (size_t s=0; s<num_states; s++)
+    {
+        eigValExp[s] = exp(eigenValue[s] * t);
+    }
+    
+    // calculate the transition probabilities
+    const double* ptr = &c_ijk[0];
+    double*         p = P.theMatrix;
+    for (size_t i=0; i<num_states; i++)
+    {
+        double rowsum = 0.0;
+        for (size_t j=0; j<num_states; j++, ++p)
+        {
+            double sum = 0.0;
+            for (size_t s=0; s<num_states; s++)
+            {
+                sum += (*ptr++) * eigValExp[s];
+            }
+            
+            sum = (sum < 0.0) ? 0.0 : sum;
+            rowsum += sum;
+            (*p) = sum;
+        }
+
+        // Normalize transition probabilities for row to sum to 1.0
+        double* p2 = p - num_states;
+        for (size_t j=0; j<num_states; j++, ++p2)
+            *p2 /= rowsum;
+    }
+}
+
+
+/** Calculate the transition probabilities for the complex case */
+void RateMatrix_BinaryMutationCoalescent::tiProbsComplexEigens(double t, TransitionProbabilityMatrix& P) const
+{
+    
+    // get a reference to the eigenvalues
+    const std::vector<double>& eigenValueReal = theEigenSystem->getRealEigenvalues();
+    const std::vector<double>& eigenValueComp = theEigenSystem->getImagEigenvalues();
+    
+    // precalculate the product of the eigenvalue and the branch length
+    std::vector<std::complex<double> > ceigValExp(num_states);
+    for (size_t s=0; s<num_states; s++)
+    {
+        std::complex<double> ev = std::complex<double>(eigenValueReal[s], eigenValueComp[s]);
+        ceigValExp[s] = exp(ev * t);
+    }
+    
+    // calculate the transition probabilities
+    const std::complex<double>* ptr = &cc_ijk[0];
+    for (size_t i=0; i<num_states; i++)
+    {
+        double rowsum = 0.0;
+        for (size_t j=0; j<num_states; j++)
+        {
+            std::complex<double> sum = std::complex<double>(0.0, 0.0);
+            for (size_t s=0; s<num_states; s++)
+                sum += (*ptr++) * ceigValExp[s];
+
+            double real_sum = (sum.real() < 0.0) ? 0.0 : sum.real();
+            P[i][j] = real_sum;
+            rowsum += real_sum;
+        }
+        // Normalize transition probabilities for row to sum to 1.0
+        for (size_t j=0; j<num_states; j++)
+            P[i][j] /= rowsum;
+    }
+}
+
+
+/** Update the eigen system */
+void RateMatrix_BinaryMutationCoalescent::updateEigenSystem(void)
+{
+    
+    theEigenSystem->update();
+    calculateCijk();
+    
+}
+
+
 void RateMatrix_BinaryMutationCoalescent::update( void )
 {
     
-    if ( needs_update )
+    if ( needs_update || true )
     {
         buildRateMatrix();
+        
+        // now update the eigensystem
+        updateEigenSystem();
+        
         // clean flags
         needs_update = false;
     }

@@ -23,7 +23,6 @@ EpochCoalRateMatrixDemography::EpochCoalRateMatrixDemography(const TypedDagNode<
                                          const TypedDagNode< RbVector<double> > *et,
                                          const TypedDagNode< RbVector<double> > *m,
                                          const TypedDagNode< Simplex >* asfs,
-                                         long vps,
                                          long n_sites,
                                          long n_ind,
                                          bool f,
@@ -45,7 +44,7 @@ EpochCoalRateMatrixDemography::EpochCoalRateMatrixDemography(const TypedDagNode<
     addParameter( ancestral_SFS );
     addParameter( epoch_times );
     
-//    num_states = virtual_pop_size + 1;
+    num_states = (num_individuals+3.0)*num_individuals/2.0;
 
     initialize();
 }
@@ -98,8 +97,8 @@ double EpochCoalRateMatrixDemography::computeLnProbability( void )
     TransitionProbabilityMatrix tpm = TransitionProbabilityMatrix(num_states);
     
     // create the vector of tip likelihoods (identity matrix)
-    std::vector< std::vector<double> > tip_likelihoods = std::vector< std::vector<double> >( num_states, std::vector<double>(num_states,0.0) );
-    for (size_t obs_state=0; obs_state<num_states; ++obs_state)
+    std::vector< std::vector<double> > tip_likelihoods = std::vector< std::vector<double> >( num_individuals+1, std::vector<double>(num_states,0.0) );
+    for (size_t obs_state=0; obs_state<=num_individuals; ++obs_state)
     {
         tip_likelihoods[obs_state][obs_state] = 1.0;
     }
@@ -125,8 +124,8 @@ double EpochCoalRateMatrixDemography::computeLnProbability( void )
         RateMatrix_BinaryMutationCoalescent& current_rate_matrix = rate_matrices[epoch];
         
         // now set the values for this matrix
-//        current_rate_matrix.setMu( my_mu );
-//        current_rate_matrix.setNeff( current_Ne );
+        current_rate_matrix.setMutationRate( my_mu[0] );
+        current_rate_matrix.setEffectivePopulationSize( current_Ne );
         
         current_rate_matrix.update();
         
@@ -134,7 +133,7 @@ double EpochCoalRateMatrixDemography::computeLnProbability( void )
         
         current_rate_matrix.calculateTransitionProbabilities( current_epoch_length, 0.0,  rate, tpm );
         
-        for ( size_t site=0; site<num_states; ++site )
+        for ( size_t site=0; site<=num_individuals; ++site )
         {
         
             // get the vector of initialized likelihoods
@@ -144,7 +143,7 @@ double EpochCoalRateMatrixDemography::computeLnProbability( void )
             
                 for (size_t end=0; end<num_states; ++end)
                 {
-                    likelihoods[start] += tpm[start][end] * current_probs[site][end];
+                    likelihoods[end] += tpm[start][end] * current_probs[site][start];
                 }
                 
             }
@@ -157,29 +156,21 @@ double EpochCoalRateMatrixDemography::computeLnProbability( void )
     }
     
     // get the ancestral frequencies as a vector
-    const RbVector<double>& asfs = ancestral_SFS->getValue();
+    const Simplex& asfs = ancestral_SFS->getValue();
     
     // multiply the current vector with the ancestral frequency
-    for ( size_t site=0; site<num_states; ++site )
+    for ( size_t site=0; site<=num_individuals; ++site )
     {
     
         double per_site_sum = 0.0;
-        for (size_t obs_state=0; obs_state<num_states; ++obs_state)
-        {
-            per_site_sum += current_probs[site][obs_state] * asfs[obs_state];
-        }
+        per_site_sum += current_probs[site][num_states-2] * asfs[0];
+        per_site_sum += current_probs[site][num_states-1] * asfs[1];
+//        for (size_t obs_state=0; obs_state<num_states; ++obs_state)
+//        {
+//            per_site_sum += current_probs[site][obs_state] * asfs[obs_state];
+//        }
         
-        size_t obs_index = site;
-        if ( site == 1 )
-        {
-            obs_index = num_states-1;
-        }
-        else if ( site > 1 )
-        {
-            obs_index = site-1;
-        }
-        
-        ln_prob += log(per_site_sum) * obs_sfs_counts[obs_index];
+        ln_prob += log(per_site_sum) * obs_sfs_counts[site];
     }
     
     return ln_prob;
@@ -208,7 +199,7 @@ void EpochCoalRateMatrixDemography::initialize( void )
     
     // get the number of epochs
     size_t num_epoch = ne->getValue().size();
-//    rate_matrices = std::vector<RateMatrix_BinaryMutationCoalescent>( num_epoch, RateMatrix_BinaryMutationCoalescent(num_states, virtual_pop_size, false, true) );
+    rate_matrices = std::vector<RateMatrix_BinaryMutationCoalescent>( num_epoch, RateMatrix_BinaryMutationCoalescent(num_individuals) );
     
     
 }
