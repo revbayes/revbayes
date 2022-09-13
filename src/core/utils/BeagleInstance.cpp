@@ -187,6 +187,7 @@ void BeagleInstance::createBEAGLE(  int  b_tipCount
         if ( b_max_cpu_threads > 1 ) {
             ss << "\t" << "max_threads         : " << b_max_cpu_threads << std::endl;
         }
+	ss << "\t" << "flags               :" << BeagleUtilities::printBeagleFlags(b_requirementFlags | b_preferenceFlags) << std::endl;
 #endif /* RB_BEAGLE_INFO */
     }
 
@@ -242,16 +243,17 @@ long BeagleInstance::generateSettingsBitmap(void)
     long b_flag_threading     = 0;
     long b_flag_scaling       = 0;
     long b_flag_gpu_ops       = 0;
+    long b_eigen              = 0;           
 
     //-- Set flags related to each device type
     if (b_device == "cpu") {
-    	b_flag_device = BEAGLE_FLAG_PROCESSOR_CPU | BEAGLE_FLAG_FRAMEWORK_CPU;
+    	b_flag_device = BEAGLE_FLAG_PROCESSOR_CPU | BEAGLE_FLAG_FRAMEWORK_CPU | BEAGLE_FLAG_COMPUTATION_SYNCH;
     	b_flag_vectorization = BEAGLE_FLAG_VECTOR_NONE;
     } else if (b_device == "cpu_sse") {
-    	b_flag_device = BEAGLE_FLAG_PROCESSOR_CPU | BEAGLE_FLAG_FRAMEWORK_CPU;
+    	b_flag_device = BEAGLE_FLAG_PROCESSOR_CPU | BEAGLE_FLAG_FRAMEWORK_CPU | BEAGLE_FLAG_COMPUTATION_SYNCH;
     	b_flag_vectorization = BEAGLE_FLAG_VECTOR_SSE;
     } else if (b_device == "cpu_avx") {
-    	b_flag_device = BEAGLE_FLAG_PROCESSOR_CPU | BEAGLE_FLAG_FRAMEWORK_CPU;
+    	b_flag_device = BEAGLE_FLAG_PROCESSOR_CPU | BEAGLE_FLAG_FRAMEWORK_CPU | BEAGLE_FLAG_COMPUTATION_SYNCH;
     	b_flag_vectorization = BEAGLE_FLAG_VECTOR_AVX;
     } else if (b_device == "gpu_opencl") {
     	b_flag_device = BEAGLE_FLAG_PROCESSOR_GPU | BEAGLE_FLAG_FRAMEWORK_OPENCL;
@@ -277,8 +279,9 @@ long BeagleInstance::generateSettingsBitmap(void)
     } else if (b_scaling_mode == "always") {
 	b_flag_scaling = BEAGLE_FLAG_SCALING_ALWAYS; 
     } else if (b_scaling_mode == "manual") {
-	b_flag_scaling = BEAGLE_FLAG_SCALING_MANUAL;
+	b_flag_scaling = BEAGLE_FLAG_SCALING_MANUAL | BEAGLE_FLAG_SCALERS_RAW;
     }
+    // SCALERS_RAW SCALERS_LOG 
 
     // Configure threading. We error check when the passing the setting from revlang,
     // validity check not needed here.
@@ -290,12 +293,17 @@ long BeagleInstance::generateSettingsBitmap(void)
       }
     }
 
+    // Configure eigensystem flags. This should be the same accross all devices.
+    b_eigen = BEAGLE_FLAG_EIGEN_REAL | BEAGLE_FLAG_INVEVEC_STANDARD;
+    // EIGEN_REAL EIGEN_COMPLEX INVEVEC_STANDARD INVEVEC_TRANSPOSED 
+
     return ( b_flag_device
 	   | b_flag_precision 
 	   | b_flag_vectorization 
 	   | b_flag_threading 
 	   | b_flag_scaling
 	   | b_flag_gpu_ops 
+	   | b_eigen
 	   );
 }
 
