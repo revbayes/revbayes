@@ -263,22 +263,30 @@ void PoMoState::setState(const std::string &symbol)
 {
     // store for internal use
     string_value = symbol;
+    
+    if ( symbol == "-" || symbol == "?" )
+    {
+        setMissingState( true );
+    }
+    else
+    {
         
-    std::vector<std::string> counts_string;
-    StringUtilities::stringSplit(symbol, ",", counts_string);
+        std::vector<std::string> counts_string;
+        StringUtilities::stringSplit(symbol, ",", counts_string);
     
-    if (counts_string.size() != num_raw_states)
-    {
-        throw RbException( "PoMo string state not correctly formatted. We found "+ symbol +", but the preferred format is that of counts, e.g. 0,1,4,0 meaning 0 A, 1 C, 4 G, 0 T were sampled at that position." );
+        if (counts_string.size() != num_raw_states)
+        {
+            throw RbException( "PoMo string state not correctly formatted. We found "+ symbol +", but the preferred format is that of counts, e.g. 0,1,4,0 meaning 0 A, 1 C, 4 G, 0 T were sampled at that position." );
+        }
+    
+        std::vector<size_t> counts = std::vector<size_t>(num_raw_states, 0);
+        for (size_t i = 0; i<num_raw_states; ++i)
+        {
+            counts[i] = StringUtilities::asIntegerNumber( counts_string[i] );
+        }
+    
+        setState( counts );
     }
-    
-    std::vector<size_t> counts = std::vector<size_t>(num_raw_states, 0);
-    for (size_t i = 0; i<num_raw_states; ++i)
-    {
-        counts[i] = StringUtilities::asIntegerNumber( counts_string[i] );
-    }
-    
-    setState( counts );
 }
 
 
