@@ -65,7 +65,7 @@ void CountsFileWriter::writeData(const std::string& file_name, const AbstractHom
     {
         if ( !data.isCharacterExcluded( i ) )
         {
-            
+            out_stream << "? ?";
             for (std::vector<Taxon>::const_iterator it = taxa.begin();  it != taxa.end(); ++it)
             {
 
@@ -73,7 +73,7 @@ void CountsFileWriter::writeData(const std::string& file_name, const AbstractHom
                 {
                     const AbstractDiscreteTaxonData &taxon = data.getTaxonData( it->getName() );
                     const CharacterState &c = taxon.getCharacter( i );
-                    out_stream << c.getStringValue();
+                    out_stream << " " << c.getStringValue();
                 }
             }
             out_stream << std::endl;
