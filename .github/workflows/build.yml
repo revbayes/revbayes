@@ -18,7 +18,7 @@ jobs:
                ubuntu-gcc-9-mpi,
                ubuntu-gcc-10,
                ubuntu-gcc-11,
-               ubuntu-clang-8,
+               ubuntu-clang-11,
                macos-xcode-11.7,
                windows
                ]
@@ -63,10 +63,10 @@ jobs:
             install_boost: 1.74
             mpi: false
 
-          - name: ubuntu-clang-8
+          - name: ubuntu-clang-11
             os: ubuntu-latest
             compiler: clang
-            version: "8"
+            version: "11"
             mpi: false
 
           - name: macos-xcode-11.7
