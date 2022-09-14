@@ -12,8 +12,7 @@ jobs:
   build:
     strategy:
       matrix:
-        name: [ubuntu-gcc-6,
-               ubuntu-gcc-7,
+        name: [ubuntu-gcc-7,
                ubuntu-gcc-8,
                ubuntu-gcc-9,
                ubuntu-gcc-9-mpi,
@@ -24,13 +23,6 @@ jobs:
                ]
 
         include:
-          - name: ubuntu-gcc-6
-            os: ubuntu-18.04
-            compiler: gcc
-            version: "6"
-            install_boost: 1.74
-            mpi: false
-
           - name: ubuntu-gcc-7
             os: ubuntu-latest
             compiler: gcc
