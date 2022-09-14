@@ -192,7 +192,7 @@ jobs:
         fi
 
         cd projects/cmake
-        ./build.sh -travis true -DCMAKE_INSTALL_PREFIX=$HOME/local
+        ./build.sh -travis true -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }}
         cmake --install build
 
     - name: Configure and build (Windows meson cross compile)
