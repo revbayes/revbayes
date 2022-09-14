@@ -17,6 +17,7 @@ jobs:
                ubuntu-gcc-9,
                ubuntu-gcc-9-mpi,
                ubuntu-gcc-10,
+               ubuntu-gcc-11,
                ubuntu-clang-8,
                macos-xcode-11.7,
                windows
@@ -52,6 +53,13 @@ jobs:
             os: ubuntu-latest
             compiler: gcc
             version: "10"
+            install_boost: 1.74
+            mpi: false
+
+          - name: ubuntu-gcc-11
+            os: ubuntu-latest
+            compiler: gcc
+            version: "11"
             install_boost: 1.74
             mpi: false
 
