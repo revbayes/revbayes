@@ -50,7 +50,7 @@ namespace RevLanguage {
         RevVariable&            operator=(const RevVariable &v);                        //!< Assignment operator
 
         // Regular functions
-        void                    addIndex(size_t idx);                                      //!< Resize the vector to include this index.
+        void                    addIndex(size_t idx, const RevPtr<RevVariable>& elem);  //!< Resize the vector to include this index.
         RevVariable*            clone(void) const;                                      //!< Clone variable
         size_t                  getMaxElementIndex(void) const;                        //!< Get the set of element indices for this vector variable.
         const std::string&      getName(void) const;                                    //!< Get the name of the variable
@@ -66,7 +66,7 @@ namespace RevLanguage {
         void                    printValue(std::ostream& o, bool toScreen) const;       //!< Print value of variable
         void                    setElementVariableState(bool flag = true);              //!< Set (or unset) element variable status
         void                    setHiddenVariableState(bool flag = true);               //!< Set (or unset) hidden variable status
-        void                    setVectorVariableState(bool flag = true);               //!< Set (or unset) vector variable status
+        void                    setToVectorVariable();                                  //!< Set (or unset) vector variable status
         void                    setWorkspaceVariableState(bool flag = true);            //!< Set (or unset) control variable status
         void                    setName(const std::string &n);                          //!< Set the name of this variable
         void                    replaceRevObject(RevObject *newObj);                    //!< Replace the Rev object of this variable
@@ -81,9 +81,8 @@ namespace RevLanguage {
         // Member variables
 
         // variables related to building the components of a vector
-        bool                    is_vector_var = false;                                  //!< Is this a vector variable?
-        size_t                  element_index_max = 0;                                  //!< The maximum element index
-        mutable bool            needs_building = false;                                 //!< Do we need to construct the revobject?
+        boost::optional<std::vector<RevPtr<RevVariable>>> vector_var_elements;          //!< Elements if this is a vector variable.
+        bool                    needs_building = false;                                 //!< Do we need to construct the revobject?
 
         bool                    is_element_var = false;                                 //!< Is this variable an element of a vector?
         bool                    is_hidden_var = false;                                  //!< Is this a hidden variable?

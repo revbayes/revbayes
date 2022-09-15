@@ -47,11 +47,10 @@ RevVariable::RevVariable(const RevPtr<RevVariable>& refVar, const std::string &n
 
 /** Copy constructor */
 RevVariable::RevVariable(const RevVariable &v) :
-    is_vector_var( v.is_vector_var ),
-    element_index_max (v.element_index_max ),
     needs_building( v.needs_building ),
     is_element_var( v.is_element_var ),
     is_hidden_var( v.is_hidden_var ),
+    vector_var_elements( v.vector_var_elements ),
     is_workspace_var( v.is_workspace_var ),
     name( v.name ),
     ref_count( 0 ),
@@ -92,9 +91,8 @@ RevVariable& RevVariable::operator=(const RevVariable &v)
         required_type_spec  = v.required_type_spec;
         is_element_var      = v.is_element_var;
         is_hidden_var       = v.is_hidden_var;
-        is_vector_var       = v.is_vector_var;
+        vector_var_elements = v.vector_var_elements;
         is_workspace_var    = v.is_workspace_var;
-        element_index_max   = v.element_index_max;
         needs_building      = v.needs_building;
         referenced_variable = v.referenced_variable;
         
@@ -123,16 +121,17 @@ RevVariable& RevVariable::operator=(const RevVariable &v)
 
 
 /** Resize the vector to include this index. */
-void RevVariable::addIndex(size_t idx)
+void RevVariable::addIndex(size_t idx, const RevPtr<RevVariable>& element)
 {
-    
-    if ( idx > element_index_max )
-    {
-        element_index_max = idx;
-    }
+    assert( isVectorVariable() );
+    assert( idx > 0);
+
+    if (idx > vector_var_elements->size())
+        vector_var_elements->resize(idx);
+
+    (*vector_var_elements)[idx-1] = element;
     
     needs_building = true;
-    
 }
 
 
@@ -156,7 +155,8 @@ size_t RevVariable::decrementReferenceCount( void ) const
 
 size_t RevVariable::getMaxElementIndex( void ) const
 {
-    return element_index_max;
+    assert(isVectorVariable());
+    return vector_var_elements->size();
 }
 
 
@@ -184,36 +184,28 @@ RevObject& RevVariable::getRevObject(void) const
         return referenced_variable->getRevObject();
     }
     
-    if ( is_vector_var == true && needs_building == true )
+    if ( isVectorVariable() && needs_building )
     {
-        needs_building = false;
-        
-        //        const std::set<int>& indices = the_var->getElementIndices();
-        //        if ( indices.empty() )
-        //        {
-        //            throw RbException("Cannot create a vector variable with name '" + identifier + "' because it doesn't have elements.");
-        //        }
-        
-        // @TODO: We actually might need a different workspace here than the user workspace. (Sebastian)
-        Environment &env = Workspace::userWorkspace();
-        
-        size_t max_index = getMaxElementIndex();
         std::vector<Argument> args;
-        for (size_t i = 1; i <= max_index; ++i)
+        int i=1;
+        for (auto& element_var: *vector_var_elements)
         {
-            std::string element_identifier = name + "[" + std::to_string(i) + "]";
-            RevPtr<RevVariable>& element_var = env.getVariable( element_identifier );
             // check that the element is not NULL
             if ( element_var == NULL || element_var->getRevObject() == RevNullObject::getInstance() )
             {
-                throw RbException("Cannot create vector variable with name '" + name + "' because element with name '" + element_identifier + "' is NULL." );
+                std::string element_identifier = name + "[" + std::to_string(i) + "]";
+                throw RbException()<<"Cannot create vector variable with name '"<<name
+                                   <<"' because element with name '"<<element_identifier<<"' is NULL.";
             }
+
             args.push_back( Argument( element_var ) );
+            i++;
         }
+
         // @TODO: We might need a to check if this should be dynamic or not. (Sebastian)
         bool dynamic = true;
-        Function* func = Workspace::userWorkspace().getFunction("v",args,!dynamic).clone();
-        func->processArguments(args,!dynamic);
+        Function* func = Workspace::userWorkspace().getFunction("v", args, not dynamic).clone();
+        func->processArguments(args, not dynamic);
         
         // Evaluate the function (call the static evaluation function)
         RevPtr<RevVariable> func_return_value = func->execute();
@@ -222,7 +214,6 @@ RevObject& RevVariable::getRevObject(void) const
         delete func;
         
         const_cast<RevVariable*>(this)->replaceRevObject( func_return_value->getRevObject().clone() );
-        
     }
     
     if ( rev_object == NULL )
@@ -300,7 +291,7 @@ bool RevVariable::isReferenceVariable( void ) const
 /** Return the internal flag signalling whether the RevVariable is currently a vector RevVariable, that is, should be computed by x := v(x[1],...) */
 bool RevVariable::isVectorVariable( void ) const
 {
-    return is_vector_var;
+    return bool(vector_var_elements);
 }
 
 
@@ -467,16 +458,16 @@ void RevVariable::setHiddenVariableState(bool flag)
  * is a reference RevVariable. If so, you need to set the Rev object first, and then set
  * the vector RevVariable flag.
  */
-void RevVariable::setVectorVariableState(bool flag)
+void RevVariable::setToVectorVariable()
 {
     if ( isReferenceVariable() )
     {
         throw "A reference RevVariable cannot be made a vector RevVariable";
     }
     
-    is_vector_var = flag;
-    if ( is_vector_var == true )
+    if (not vector_var_elements)
     {
+        vector_var_elements = std::vector<RevPtr<RevVariable>>();
         needs_building = true;
     }
 }
