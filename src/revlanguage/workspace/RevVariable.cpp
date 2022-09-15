@@ -20,17 +20,7 @@ using namespace RevLanguage;
 
 /** Constructor of empty RevVariable with specified type. */
 RevVariable::RevVariable( const TypeSpec& ts, const std::string& n ) :
-    element_index_max(0),
-    needs_building(false),
-    is_element_var( false ),
-    is_hidden_var( false ),
-    is_reference_var( false ),
-    is_vector_var( false ),
-    is_workspace_var( false ),
     name( n ),
-    ref_count( 0 ),
-    referenced_variable( NULL ),
-    rev_object( NULL ),
     required_type_spec( ts )
 {
     
@@ -38,17 +28,7 @@ RevVariable::RevVariable( const TypeSpec& ts, const std::string& n ) :
 
 /** Constructor of filled RevVariable (no type restrictions). */
 RevVariable::RevVariable(RevObject *v, const std::string &n) :
-    element_index_max(0),
-    needs_building(false),
-    is_element_var( false ),
-    is_hidden_var( false ),
-    is_reference_var( false ),
-    is_vector_var( false ),
-    is_workspace_var( false ),
     name( n ),
-    ref_count( 0 ),
-    referenced_variable( NULL ),
-    rev_object( NULL ),
     required_type_spec( RevObject::getClassTypeSpec() )
 {
     replaceRevObject( v );
@@ -57,17 +37,9 @@ RevVariable::RevVariable(RevObject *v, const std::string &n) :
 
 /** Constructor of reference RevVariable (no type restrictions). */
 RevVariable::RevVariable(const RevPtr<RevVariable>& refVar, const std::string &n) :
-    element_index_max(0),
-    needs_building(false),
-    is_element_var( false ),
-    is_hidden_var( false ),
     is_reference_var( true ),
-    is_vector_var( false ),
-    is_workspace_var( false ),
     name( n ),
-    ref_count( 0 ),
     referenced_variable( refVar ),
-    rev_object( NULL ),
     required_type_spec( RevObject::getClassTypeSpec() )
 {
     
@@ -77,7 +49,7 @@ RevVariable::RevVariable(const RevPtr<RevVariable>& refVar, const std::string &n
 /** Copy constructor */
 RevVariable::RevVariable(const RevVariable &v) :
     element_index_max( v.element_index_max ),
-    needs_building(v.needs_building),
+    needs_building_env( v.needs_building_env ),
     is_element_var( v.is_element_var ),
     is_hidden_var( v.is_hidden_var ),
     is_reference_var( v.is_hidden_var ),
@@ -86,17 +58,17 @@ RevVariable::RevVariable(const RevVariable &v) :
     name( v.name ),
     ref_count( 0 ),
     referenced_variable( v.referenced_variable ),
-    rev_object( NULL ),
+    rev_object( nullptr ),
     required_type_spec( v.required_type_spec )
 {
     
-    if ( v.rev_object != NULL )
+    if ( v.rev_object )
     {
         replaceRevObject( v.rev_object->clone() );
     }
     else
     {
-        rev_object = NULL;
+        rev_object = nullptr;
     }
     
 }
@@ -126,7 +98,7 @@ RevVariable& RevVariable::operator=(const RevVariable &v)
         is_vector_var       = v.is_vector_var;
         is_workspace_var    = v.is_workspace_var;
         element_index_max   = v.element_index_max;
-        needs_building      = v.needs_building;
+        needs_building_env  = v.needs_building_env;
         referenced_variable = v.referenced_variable;
         
         if ( is_reference_var )
@@ -154,16 +126,20 @@ RevVariable& RevVariable::operator=(const RevVariable &v)
 
 
 /** Resize the vector to include this index. */
-void RevVariable::addIndex(size_t idx)
+void RevVariable::addIndex(size_t idx, Environment* env)
 {
-    
+    assert( env );
+    assert( is_vector_var );
+
     if ( idx > element_index_max )
     {
         element_index_max = idx;
     }
     
-    needs_building = true;
-    
+    if (not needs_building_env)
+        needs_building_env = env;
+    else
+        assert(needs_building_env == env);
 }
 
 
@@ -215,18 +191,16 @@ RevObject& RevVariable::getRevObject(void) const
         return referenced_variable->getRevObject();
     }
     
-    if ( is_vector_var == true && needs_building == true )
+    if ( is_vector_var == true && needs_building_env )
     {
-        needs_building = false;
+        Environment& env = *needs_building_env;
+        needs_building_env = nullptr;
         
         //        const std::set<int>& indices = the_var->getElementIndices();
         //        if ( indices.empty() )
         //        {
         //            throw RbException("Cannot create a vector variable with name '" + identifier + "' because it doesn't have elements.");
         //        }
-        
-        // @TODO: We actually might need a different workspace here than the user workspace. (Sebastian)
-        Environment &env = Workspace::userWorkspace();
         
         size_t max_index = getMaxElementIndex();
         std::vector<Argument> args;
@@ -500,17 +474,24 @@ void RevVariable::setHiddenVariableState(bool flag)
  * is a reference RevVariable. If so, you need to set the Rev object first, and then set
  * the vector RevVariable flag.
  */
-void RevVariable::setVectorVariableState(bool flag)
+void RevVariable::setToVectorVariable(Environment* env)
 {
-    if ( is_reference_var == true )
+    // We need an environment if we are setting this to be a vector variable.
+    assert(env);
+
+    if ( is_reference_var )
     {
         throw "A reference RevVariable cannot be made a vector RevVariable";
     }
     
-    is_vector_var = flag;
-    if ( is_vector_var == true )
+    is_vector_var = true;
+
+    if (not needs_building_env)
+        needs_building_env = env;
+    else
     {
-        needs_building = true;
+        // If needs_building_env is not null, we better not change it.
+        assert(needs_building_env == env);
     }
 }
 

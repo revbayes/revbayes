@@ -167,7 +167,7 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, 
                     // set this variable as a hidden variable so that it doesn't show in ls()
                     theElementVar->setElementVariableState( true );
                     
-                    theParentVar->addIndex( int(i) );
+                    theParentVar->addIndex( int(i) , &env);
                 }
             }
             else
@@ -187,15 +187,14 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, 
             throw RbException("We cannot make a composite container from variable of type '" + theParentObj.getType() + "'.");
         }
     }
-    
+
     // compute the index and internal name for this variable
     int idx = (int)static_cast<Integer&>( indexVar->getRevObject() ).getValue();
     std::string identifier = theParentVar->getName() + "[" + std::to_string(idx) + "]";
-    
-    // mark the parent variable as a vector variable
-    theParentVar->setVectorVariableState( true );
-    theParentVar->addIndex( idx );
 
+    // mark the parent variable as a vector variable
+    theParentVar->setToVectorVariable( &env );
+    theParentVar->addIndex( idx, &env );
 
     if ( env.existsVariable( identifier ) == false )
     {
@@ -207,7 +206,6 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, 
 
     // get the slot and variable
     RevPtr<RevVariable> the_var  = env.getVariable( identifier );
-    
     
     // set this variable as an element variable; which is by default a hidden variable so that it doesn't show in ls()
     the_var->setElementVariableState( true );
