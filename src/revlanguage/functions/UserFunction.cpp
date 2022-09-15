@@ -128,6 +128,14 @@ RevPtr<RevVariable> UserFunction::executeCode( void )
         }
     }
 
+    // Build any vectors that need to be built.
+    // This will clear the needs_building_env pointer, so there are no dangling references after the function frame is destroyed.
+    for(auto& p: function_frame->getVariableTable())
+    {
+        auto& name = p.first;
+        function_frame->getRevObject(name);
+    }
+
     // Return the return value
     return ret_var;
 }
