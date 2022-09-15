@@ -87,7 +87,10 @@ void FeatureInformedRateFunction::update( void )
     for (size_t i = 0; i < numQuantitativeFeatures; i++) {
         for (size_t j = 0; j < numDim1; j++) {
             for (size_t k = 0; k < numDim2; k++) {
-                rates[j][k] *= std::pow( qf[i][j][k], qp[i] );
+//                rates[j][k] *= std::pow( qf[i][j][k], qp[i] );
+                if (std::isnan(qf[i][j][k]) == false) {
+                    rates[j][k] *= std::exp( qf[i][j][k] * qp[i] );
+                }
             }
         }
     }
