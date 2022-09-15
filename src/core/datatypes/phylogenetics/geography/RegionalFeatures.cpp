@@ -153,10 +153,10 @@ void RegionalFeatures::initializeFeatures(void) {
 
 void RegionalFeatures::normalizeWithinQuantitative(void) {
     
-    double m = 0.0;
     size_t n_elem = 0;
     
-    // collect values to compute mean
+    // compute sample mean
+    double m = 0.0;
     for (auto it = withinQuantitative.begin(); it != withinQuantitative.end(); it++) {
         size_t time_index = it->first;
         size_t i = time_index - 1;
@@ -165,18 +165,19 @@ void RegionalFeatures::normalizeWithinQuantitative(void) {
             size_t j = feature_index - 1;
             std::vector<std::vector<double> > v = feature_layers["within"]["quantitative"][i][j].getFeatureValues();
             for (size_t a = 0; a < v[0].size(); a++) {
-                if (v[0][a] != 0) {
+                if (std::isnan( v[0][a] )) {
+                    ; // do nothing
+                } else {
                     m += v[0][a];
                     n_elem += 1;
                 }
             }
         }
     }
+    double mean = m / n_elem;
     
-    // compute the mean
-    double z = m / n_elem;
-    
-    // normalize all values
+    // compute sample standard deviation
+    double stddev = 0;
     for (auto it = withinQuantitative.begin(); it != withinQuantitative.end(); it++) {
         size_t time_index = it->first;
         size_t i = time_index - 1;
@@ -185,7 +186,30 @@ void RegionalFeatures::normalizeWithinQuantitative(void) {
             size_t j = feature_index - 1;
             std::vector<std::vector<double> > v = feature_layers["within"]["quantitative"][i][j].getFeatureValues();
             for (size_t a = 0; a < v[0].size(); a++) {
-                v[0][a] = v[0][a] / z;
+                if (std::isnan( v[0][a] )) {
+                    ; // do nothing
+                } else {
+                    stddev += std::pow(v[0][a] - m, 2);
+                }
+            }
+        }
+    }
+    stddev = std::sqrt( stddev / n_elem );
+    
+    // standardize all values
+    for (auto it = withinQuantitative.begin(); it != withinQuantitative.end(); it++) {
+        size_t time_index = it->first;
+        size_t i = time_index - 1;
+        for (auto jt = withinQuantitative[time_index].begin(); jt != withinQuantitative[time_index].end(); jt++) {
+            size_t feature_index = jt->first;
+            size_t j = feature_index - 1;
+            std::vector<std::vector<double> > v = feature_layers["within"]["quantitative"][i][j].getFeatureValues();
+            for (size_t a = 0; a < v[0].size(); a++) {
+                if (std::isnan( v[0][a] )) {
+                    ; // do nothing
+                } else {
+                    v[0][a] = (v[0][a] - mean) / stddev;
+                }
             }
             feature_layers["within"]["quantitative"][i][j].setFeatures(v);
         }
@@ -194,10 +218,11 @@ void RegionalFeatures::normalizeWithinQuantitative(void) {
 }
 
 void RegionalFeatures::normalizeBetweenQuantitative(void) {
-    double m = 0.0;
+    
     size_t n_elem = 0;
     
-    // collect values to compute mean
+    // compute sample mean
+    double m = 0.0;
     for (auto it = betweenQuantitative.begin(); it != betweenQuantitative.end(); it++) {
         size_t time_index = it->first;
         size_t i = time_index - 1;
@@ -207,19 +232,20 @@ void RegionalFeatures::normalizeBetweenQuantitative(void) {
             std::vector<std::vector<double> > v = feature_layers["between"]["quantitative"][i][j].getFeatureValues();
             for (size_t a = 0; a < v.size(); a++) {
                 for (size_t b = 0; b < v[a].size(); b++) {
-                    if (v[a][b] != 0 && a != b) {
-                        m += v[0][a];
+                    if (std::isnan(v[a][b]) || a == b) {
+                        ; // do nothing
+                    } else {
+                        m += v[a][b];
                         n_elem += 1;
                     }
                 }
             }
         }
     }
+    double mean = m / n_elem;
     
-    // compute the mean
-    double z = m / n_elem;
-    
-    // normalize all values
+    // compute sample standard deviation
+    double stddev = 0;
     for (auto it = betweenQuantitative.begin(); it != betweenQuantitative.end(); it++) {
         size_t time_index = it->first;
         size_t i = time_index - 1;
@@ -229,7 +255,31 @@ void RegionalFeatures::normalizeBetweenQuantitative(void) {
             std::vector<std::vector<double> > v = feature_layers["between"]["quantitative"][i][j].getFeatureValues();
             for (size_t a = 0; a < v.size(); a++) {
                 for (size_t b = 0; b < v[a].size(); b++) {
-                    v[a][b] = v[a][b] / z;
+                    if (std::isnan(v[a][b]) || a == b) {
+                        ; // do nothing
+                    } else {
+                        stddev += std::pow(v[a][b] - mean, 2);
+                    }
+                }
+            }
+        }
+    }
+    stddev = std::sqrt( stddev / n_elem );
+    
+    for (auto it = betweenQuantitative.begin(); it != betweenQuantitative.end(); it++) {
+        size_t time_index = it->first;
+        size_t i = time_index - 1;
+        for (auto jt = betweenQuantitative[time_index].begin(); jt != betweenQuantitative[time_index].end(); jt++) {
+            size_t feature_index = jt->first;
+            size_t j = feature_index - 1;
+            std::vector<std::vector<double> > v = feature_layers["between"]["quantitative"][i][j].getFeatureValues();
+            for (size_t a = 0; a < v.size(); a++) {
+                for (size_t b = 0; b < v[a].size(); b++) {
+                    if (std::isnan( v[a][b] ) || a == b) {
+                        ; // do nothing
+                    } else {
+                        v[a][b] = (v[a][b] - mean) / stddev;
+                    }
                 }
             }
             feature_layers["between"]["quantitative"][i][j].setFeatures(v);
