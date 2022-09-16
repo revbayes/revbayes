@@ -121,10 +121,12 @@ RevVariable& RevVariable::operator=(const RevVariable &v)
 
 
 /** Resize the vector to include this index. */
-void RevVariable::addIndex(size_t idx, const RevPtr<RevVariable>& element)
+void RevVariable::addIndex(int idx, const RevPtr<RevVariable>& element)
 {
     assert( isVectorVariable() );
-    assert( idx > 0);
+
+    if (idx < 1)
+        throw RbException()<<"Index "<<idx<<" not allowed in '"<<name<<"["<<idx<<"]'.  The first element should be '"<<name<<"[1]'";
 
     if (idx > vector_var_elements->size())
         vector_var_elements->resize(idx);

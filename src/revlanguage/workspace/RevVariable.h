@@ -50,9 +50,9 @@ namespace RevLanguage {
         RevVariable&            operator=(const RevVariable &v);                        //!< Assignment operator
 
         // Regular functions
-        void                    addIndex(size_t idx, const RevPtr<RevVariable>& elem);  //!< Resize the vector to include this index.
+        void                    addIndex(int idx, const RevPtr<RevVariable>& elem);     //!< Resize the vector to include this index.
         RevVariable*            clone(void) const;                                      //!< Clone variable
-        size_t                  getMaxElementIndex(void) const;                        //!< Get the set of element indices for this vector variable.
+        size_t                  getMaxElementIndex(void) const;                         //!< Get the set of element indices for this vector variable.
         const std::string&      getName(void) const;                                    //!< Get the name of the variable
         RevObject&              getRevObject(void) const;                               //!< Get the value of the variable (non-const to return non-const value)
         const TypeSpec&         getRequiredTypeSpec(void) const;                        //!< Get the required Rev object type spec
