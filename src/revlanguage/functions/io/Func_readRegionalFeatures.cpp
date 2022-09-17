@@ -196,11 +196,8 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
             std::set<size_t> s1;
             std::set<size_t> s2;
             for (auto kt = uniqueTimeIndex.begin(); kt != uniqueTimeIndex.end(); kt++) {
-                if (tmp_unique.find(*kt) == tmp_unique.end()) {
-                    std::stringstream ss;
-                    ss << "Missing entry in readRegionalFeatures: relationship=" << *it + " type=" << *jt + " time_index=" << *kt << "\n";
-                    throw RbException( ss.str() );
-                }
+                if (tmp_unique.find(*kt) == tmp_unique.end())
+                    throw RbException() << "Missing entry in readRegionalFeatures: relationship=" << *it << " type=" << *jt << " time_index=" << *kt << "\n";
             }
             
             for (auto kt = tmp_unique.begin(); kt != tmp_unique.end(); kt++) {
@@ -225,10 +222,8 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
                     */
                     
                     // does set of feature_index match between time slices?
-                    if (s1 != s2) {
-                        std::string s = "Missing entry in readRegionalFeatures: relationship=" + *it + " type=" + *jt + " time_index=" + kt->first + "\n";
-                        throw RbException(s);
-                    }
+                    if (s1 != s2)
+                        throw RbException() << "Missing entry in readRegionalFeatures: relationship=" << *it << " type=" << *jt << " time_index=" << kt->first << "\n";
                 }
             }
         }
