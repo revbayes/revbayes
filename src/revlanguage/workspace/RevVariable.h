@@ -7,6 +7,7 @@
 
 #include <string>
 #include <set>
+#include <boost/optional.hpp>
 
 namespace RevLanguage {
     
@@ -77,20 +78,20 @@ namespace RevLanguage {
         void                    incrementReferenceCount(void) const;                    //!< Increment the reference count for reference counting in smart pointers
         
     private:
-        
         // Member variables
-        size_t                  element_index_max;                                      //!< The maximum element index
-        mutable bool            needs_building;
-//        std::set<int>           element_indices;                                        //!< The indices of the elements if this is a vector variable.
-        bool                    is_element_var;                                         //!< Is this variable an element of a vector?
-        bool                    is_hidden_var;                                          //!< Is this a hidden variable?
-        bool                    is_reference_var;                                       //!< Is this a reference variable?
-        bool                    is_vector_var;                                          //!< Is this a vector variable?
-        bool                    is_workspace_var;                                       //!< Is this a workspace variable?
+
+        // variables related to building the components of a vector
+        bool                    is_vector_var = false;                                  //!< Is this a vector variable?
+        size_t                  element_index_max = 0;                                  //!< The maximum element index
+        mutable bool            needs_building = false;                                 //!< Do we need to construct the revobject?
+
+        bool                    is_element_var = false;                                 //!< Is this variable an element of a vector?
+        bool                    is_hidden_var = false;                                  //!< Is this a hidden variable?
+        bool                    is_workspace_var = false;                               //!< Is this a workspace variable?
         std::string             name;                                                   //!< Name of variable
-        mutable size_t          ref_count;                                              //!< Reference count used by RevPtr
-        RevPtr<RevVariable>     referenced_variable;                                    //!< Smart pointer to referenced variable
-        RevObject*              rev_object;                                             //!< Pointer to the Rev object inside the variable
+        mutable size_t          ref_count = 0;                                          //!< Reference count used by RevPtr
+        RevPtr<RevVariable>     referenced_variable = nullptr;                          //!< Smart pointer to referenced variable
+        RevObject*              rev_object = nullptr;                                   //!< Pointer to the Rev object inside the variable
         TypeSpec                required_type_spec;                                     //!< Required type of the object
     };
     
