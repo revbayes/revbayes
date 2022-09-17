@@ -1,3 +1,24 @@
+# RevBayes 1.2.1 (unreleased)
+
+## Speed
+  * _UNMERGED_ Cache transition probability matrices.
+
+## Features
+  * Add Occurence Birth-Death Process.
+  * Record better mixing statistics for MC^3.
+
+## Bug Fixes
+
+  * _UNMERGED_ Fix vectors in functions.
+  * _TODO_ Statically link boost into distributed binaries.
+  * _TODO_ Don't link distributed binaries with openlibm.
+  * Fix using file paths and directories on Windows
+  * Restore dnFBDP synonym for dnBDSTP
+  * Fix check for number of rates in FBD-Range process.
+  * Fix crash when reading some trees with sampled ancestors. (#240)
+  * Prevent NumStates methods from overriding character exclusion. (#252)
+
+
 # RevBayes 1.2.0 Lagerstätte
 
 ## New MCMC moves
