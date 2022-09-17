@@ -1,6 +1,7 @@
 #ifndef SigmoidVectorFunction_H
 #define SigmoidVectorFunction_H
 
+#include "RbVector.h"
 #include "ContinuousFunction.h"
 
 namespace RevBayesCore {
