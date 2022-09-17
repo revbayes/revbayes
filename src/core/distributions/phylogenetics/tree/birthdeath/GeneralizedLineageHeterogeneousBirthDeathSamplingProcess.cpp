@@ -127,7 +127,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
     {
         if ( use_origin )
         {
-        	if ( condition_type == "survival" | condition_type == "sampledExtant" )
+        	if ( condition_type == "survival" or condition_type == "sampledExtant" )
         	{
         		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_SURVIVAL);
         	}
@@ -150,7 +150,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
         }
         else
         {
-        	if ( condition_type == "survival" | condition_type == "sampledExtant" )
+        	if ( condition_type == "survival" or condition_type == "sampledExtant" )
         	{
         		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::ROOT_MRCA);
         	}
@@ -1319,7 +1319,7 @@ std::vector< std::map< std::vector<unsigned>, double > > GeneralizedLineageHeter
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool force)
 {
-	if ( force | tree_dirty )
+	if ( force or tree_dirty )
 	{
 		// get the newick string
 		std::string var = this->getValue().getNewickRepresentation();
@@ -1415,7 +1415,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateData(bool f
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateRootFrequency(bool force)
 {
-	if ( force | root_frequency_dirty )
+	if ( force or root_frequency_dirty )
 	{
 		// create empty vector
 		std::vector<double> var;
@@ -1440,7 +1440,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateRootFrequen
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateLambda(bool force)
 {
-	if ( force | lambda_dirty )
+	if ( force or lambda_dirty )
 	{
 		if ( lambda_const != NULL )
 		{
@@ -1475,7 +1475,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateLambda(bool
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateMu(bool force)
 {
-	if ( force | mu_dirty )
+	if ( force or mu_dirty )
 	{
 		if ( mu_const != NULL )
 		{
@@ -1509,7 +1509,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateMu(bool for
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updatePhi(bool force)
 {
-	if ( force | phi_dirty )
+	if ( force or phi_dirty )
 	{
 		if ( phi_const != NULL )
 		{
@@ -1542,7 +1542,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updatePhi(bool fo
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateDelta(bool force)
 {
-	if ( force | delta_dirty )
+	if ( force or delta_dirty )
 	{
 		if ( delta_const != NULL )
 		{
@@ -1575,7 +1575,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateDelta(bool 
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateUpsilon(bool force)
 {
-	if ( force | upsilon_dirty )
+	if ( force or upsilon_dirty )
 	{
 		// create empty vectors
 		std::vector< std::vector<double> > params;
@@ -1600,7 +1600,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateUpsilon(boo
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateGamma(bool force)
 {
-	if ( force | gamma_dirty )
+	if ( force or gamma_dirty )
 	{
 		// create empty vectors
 		std::vector< std::vector<double> > params;
@@ -1625,7 +1625,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateGamma(bool 
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateRho(bool force)
 {
-	if ( force | rho_dirty )
+	if ( force or rho_dirty )
 	{
 		if ( rho_simple != NULL )
 		{
@@ -1665,7 +1665,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateRho(bool fo
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateXi(bool force)
 {
-	if ( force | xi_dirty )
+	if ( force or xi_dirty )
 	{
 		// create empty vectors
 		std::vector< std::vector<double> > params;
@@ -1690,7 +1690,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateXi(bool for
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateEta(bool force)
 {
-	if ( force | eta_dirty )
+	if ( force or eta_dirty )
 	{
 		if ( eta_simple != NULL )
 		{
@@ -1746,7 +1746,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateEta(bool fo
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateOmega(bool force)
 {
-	if ( force | omega_dirty )
+	if ( force or omega_dirty )
 	{
 		if ( omega_const != NULL )
 		{
@@ -1778,7 +1778,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateOmega(bool 
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateZeta(bool force)
 {
-	if ( force | zeta_dirty )
+	if ( force or zeta_dirty )
 	{
 		if ( zeta != NULL )
 		{
