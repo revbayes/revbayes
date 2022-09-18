@@ -52,6 +52,7 @@
 #include "SyntaxUnaryExpr.h"
 #include "SyntaxVariableDecl.h"
 #include "SyntaxVariable.h"
+#include "SyntaxPipePlaceholder.h"
 #include "SyntaxWorkspaceVariableAssignment.h"
 #include "Workspace.h"
 
@@ -131,6 +132,7 @@ Parser& parser = Parser::getParser();
 %token EQUAL 
 %token AND OR AND2 OR2 GT GE LT LE EQ NE
 %token PIPE
+%token PIPE_PLACEHOLDER
 %token END_OF_INPUT
 
 /* Destructors */
@@ -391,6 +393,8 @@ expression  :   constant                    { $$ = $1; }
             |   expression AND2 expression  { $$ = new SyntaxBinaryExpr(SyntaxBinaryExpr::And2, $1, $3); }
             |   expression OR2 expression   { $$ = new SyntaxBinaryExpr(SyntaxBinaryExpr::Or2, $1, $3); }
 
+            |   PIPE_PLACEHOLDER            { $$ = new SyntaxPipePlaceholder(); }
+
             |   arrowAssign                 { $$ = $1; }
             |   equationAssign              { $$ = $1; }
             |   tildeAssign                 { $$ = $1; }
@@ -405,6 +409,7 @@ expression  :   constant                    { $$ = $1; }
             |   functionCall                { $$ = $1; }
 
             |   variable                    { $$ = $1; }
+
             ;
 
 arrowAssign     :   expression ARROW_ASSIGN expression
@@ -583,7 +588,7 @@ functionCall    :   fxnCall
                 |   expression PIPE fxnCall
                     {
                         $$ = $3;
-                        $$->pipeAddArg(new SyntaxLabeledExpr ("" , $1));
+                        $$->pipeAddArg($1);
                     }
                 ;
 

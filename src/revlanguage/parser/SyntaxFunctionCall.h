@@ -82,7 +82,7 @@ namespace RevLanguage {
         const std::string&                  getFunctionName(void) const { return function_name; }                       //!< Get function name
         RevPtr<RevVariable>                 evaluateContent(Environment& env, bool dynamic=false);                      //!< Get semantic value
         void                                setBaseVariable(SyntaxElement* var) { base_variable = var; }                //!< Set base variable
-        void                                pipeAddArg(SyntaxLabeledExpr* arg) { arguments->push_front(arg); }          //!< Add first argument from pipe
+        void                                pipeAddArg(SyntaxElement* piped_arg);                                       //!< Add first argument from pipe
         bool                                isConstExpression(void) const;                                              //!< Is this a constant expression?
         bool                                isFunctionSafe(const Environment&       env,
                                                            std::set<std::string>&   localVars) const;                   //!< Is this element safe in a function?
