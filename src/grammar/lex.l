@@ -243,6 +243,9 @@ protected                               {
 "|>"                                    {
                                             return PIPE;
                                         }
+"_"                                     {
+                                            return PIPE_PLACEHOLDER;
+                                        }
 [ \t]+                                  {
                                             /* Ignore white space */
                                         }

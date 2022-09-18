@@ -352,8 +352,8 @@ static void yynoreturn yy_fatal_error ( const char* msg  );
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-#define YY_NUM_RULES 59
-#define YY_END_OF_BUFFER 60
+#define YY_NUM_RULES 60
+#define YY_END_OF_BUFFER 61
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -363,11 +363,11 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[191] =
     {   0,
-        0,    0,   60,   58,   55,   56,   58,   58,   32,   44,
-       58,   58,   58,   58,   58,   29,   58,   57,   50,   43,
-       48,   30,   30,   30,   30,   30,   58,   30,   30,   30,
+        0,    0,   61,   59,   56,   57,   59,   59,   32,   44,
+       59,   59,   59,   59,   59,   29,   59,   58,   50,   43,
+       48,   30,   30,   30,   30,   30,   55,   30,   30,   30,
        30,   30,   30,   30,   30,   30,   30,   30,   30,   45,
-       35,   55,   53,    0,   31,    0,   32,   46,   39,   41,
+       35,   56,   53,    0,   31,    0,   32,   46,   39,   41,
        37,   42,   38,   27,   40,   26,   29,    0,   34,   33,
        51,   52,   49,   30,   30,   30,   30,   30,   30,   30,
         0,   30,   30,   30,   30,   30,   30,   30,   30,   30,
@@ -1304,22 +1304,22 @@ case 55:
 YY_RULE_SETUP
 #line 246 "./lex.l"
 {
-                                            /* Ignore white space */
+                                            return PIPE_PLACEHOLDER;
                                         }
 	YY_BREAK
 case 56:
-/* rule 56 can match eol */
 YY_RULE_SETUP
 #line 249 "./lex.l"
 {
-                                            foundNewline = true;
-                                            return yytext[0];
+                                            /* Ignore white space */
                                         }
 	YY_BREAK
 case 57:
+/* rule 57 can match eol */
 YY_RULE_SETUP
-#line 253 "./lex.l"
+#line 252 "./lex.l"
 {
+                                            foundNewline = true;
                                             return yytext[0];
                                         }
 	YY_BREAK
@@ -1327,17 +1327,24 @@ case 58:
 YY_RULE_SETUP
 #line 256 "./lex.l"
 {
-                                            /* any character not matching existing rules */
-                                            /* pass it onto the parser and let the parser handle it */
                                             return yytext[0];
                                         }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 261 "./lex.l"
+#line 259 "./lex.l"
+{
+                                            /* any character not matching existing rules */
+                                            /* pass it onto the parser and let the parser handle it */
+                                            return yytext[0];
+                                        }
+	YY_BREAK
+case 60:
+YY_RULE_SETUP
+#line 264 "./lex.l"
 ECHO;
 	YY_BREAK
-#line 1341 "./lex.yy.cpp"
+#line 1348 "./lex.yy.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2342,6 +2349,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 261 "./lex.l"
+#line 264 "./lex.l"
 
 
