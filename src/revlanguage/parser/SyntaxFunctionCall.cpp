@@ -17,6 +17,7 @@
 #include "RevVariable.h"
 #include "RlFunction.h"
 #include "SyntaxElement.h"
+#include "SyntaxPipePlaceholder.h"
 #include "SyntaxLabeledExpr.h"
 #include "SyntaxVariable.h"
 
@@ -220,6 +221,33 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( Environment& env, bool 
 }
 
 
+void SyntaxFunctionCall::pipeAddArg(SyntaxElement* piped_arg)
+{
+    assert(piped_arg);
+
+    // check to see if there is a pipe placeholder anywhere.
+    bool found_placeholder = false;
+    for(auto& argument: *arguments)
+    {
+        // If the argument is of the form `_` or `label = _`, the replace the `_` with piped_arg.
+        if (dynamic_cast<const SyntaxPipePlaceholder*>(&argument->getExpression()))
+        {
+            if (not found_placeholder)
+            {
+                std::string label = argument->getLabel();
+                delete argument;
+                argument = new SyntaxLabeledExpr(label, piped_arg);
+
+                found_placeholder = true;
+            }
+            else
+                throw RbException()<<"pipe placeholder '_' may only appear once";
+        }
+    }
+
+    if (not found_placeholder)
+        arguments->push_front(new SyntaxLabeledExpr ("" , piped_arg));
+} 
 
 /**
  * Is the expression constant?
