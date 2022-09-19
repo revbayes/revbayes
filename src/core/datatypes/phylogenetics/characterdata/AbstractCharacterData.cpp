@@ -182,7 +182,7 @@ void AbstractCharacterData::addTaxonData(const AbstractTaxonData &obs)
 	}
 	else
 	{
-		// remove the taxon data
+		// remove the previously provided taxon data, so we can replace it with new taxon data
 		delete it->second;
 		taxonMap.erase(it);
 	}
