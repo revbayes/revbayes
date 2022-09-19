@@ -82,9 +82,9 @@ namespace RevBayesCore {
     protected:
 
         // likelihoods
-        double current_ln_prob;
-        double old_ln_prob;
-        bool   probability_dirty;
+        double current_ln_prob = 0.0;
+        double old_ln_prob = 0.0;
+        bool   probability_dirty = true;
 
         // tensorphylo interface
         size_t                                    n_proc;
@@ -144,61 +144,61 @@ namespace RevBayesCore {
 		bool                                                             zero_indexed;
 
 		const TypedDagNode< Simplex >*                                   root_frequency;
-		bool                                                             root_frequency_dirty;
+		bool                                                             root_frequency_dirty = true;
 
-		const TypedDagNode< RbVector< double> >*                         lambda_const;
-		const TypedDagNode< RbVector< RbVector<double> > >*              lambda_var;
-		const TypedDagNode< RbVector< double > >*                        lambda_times;
-		bool                                                             lambda_dirty;
+		const TypedDagNode< RbVector< double> >*                         lambda_const = nullptr;
+		const TypedDagNode< RbVector< RbVector<double> > >*              lambda_var = nullptr;
+		const TypedDagNode< RbVector< double > >*                        lambda_times = nullptr;
+		bool                                                             lambda_dirty = true;
 
-		const TypedDagNode< RbVector< double> >*                         mu_const;
-		const TypedDagNode< RbVector< RbVector<double> > >*              mu_var;
-		const TypedDagNode< RbVector< double > >*                        mu_times;
-		bool                                                             mu_dirty;
+		const TypedDagNode< RbVector< double> >*                         mu_const = nullptr;
+		const TypedDagNode< RbVector< RbVector<double> > >*              mu_var = nullptr;
+		const TypedDagNode< RbVector< double > >*                        mu_times = nullptr;
+		bool                                                             mu_dirty = true;
 
-		const TypedDagNode< RbVector< double> >*                         phi_const;
-		const TypedDagNode< RbVector< RbVector<double> > >*              phi_var;
-		const TypedDagNode< RbVector< double > >*                        phi_times;
-		bool                                                             phi_dirty;
+		const TypedDagNode< RbVector< double> >*                         phi_const = nullptr;
+		const TypedDagNode< RbVector< RbVector<double> > >*              phi_var = nullptr;
+		const TypedDagNode< RbVector< double > >*                        phi_times = nullptr;
+		bool                                                             phi_dirty = true;
 
-		const TypedDagNode< RbVector< double> >*                         delta_const;
-		const TypedDagNode< RbVector< RbVector<double> > >*              delta_var;
-		const TypedDagNode< RbVector< double > >*                        delta_times;
-		bool                                                             delta_dirty;
+		const TypedDagNode< RbVector< double> >*                         delta_const = nullptr;
+		const TypedDagNode< RbVector< RbVector<double> > >*              delta_var = nullptr;
+		const TypedDagNode< RbVector< double > >*                        delta_times = nullptr;
+		bool                                                             delta_dirty = true;
 
-		const TypedDagNode< RbVector< RbVector<double> > >*              upsilon;
-		const TypedDagNode< RbVector< double > >*                        upsilon_times;
-		bool                                                             upsilon_dirty;
+		const TypedDagNode< RbVector< RbVector<double> > >*              upsilon = nullptr;
+		const TypedDagNode< RbVector< double > >*                        upsilon_times = nullptr;
+		bool                                                             upsilon_dirty = true;
 
-		const TypedDagNode< RbVector< RbVector<double> > >*              gamma;
-		const TypedDagNode< RbVector< double > >*                        gamma_times;
-		bool                                                             gamma_dirty;
+		const TypedDagNode< RbVector< RbVector<double> > >*              gamma = nullptr;
+		const TypedDagNode< RbVector< double > >*                        gamma_times = nullptr;
+		bool                                                             gamma_dirty = true;
 
-		const TypedDagNode< double >*                                    rho_simple;
-		const TypedDagNode< RbVector< RbVector<double> > >*              rho;
-		const TypedDagNode< RbVector< double > >*                        rho_times;
-		bool                                                             rho_dirty;
+		const TypedDagNode< double >*                                    rho_simple = nullptr;
+		const TypedDagNode< RbVector< RbVector<double> > >*              rho = nullptr;
+		const TypedDagNode< RbVector< double > >*                        rho_times = nullptr;
+		bool                                                             rho_dirty = true;
 
-		const TypedDagNode< RbVector< RbVector<double> > >*              xi;
-		const TypedDagNode< RbVector< double > >*                        xi_times;
-		bool                                                             xi_dirty;
+		const TypedDagNode< RbVector< RbVector<double> > >*              xi = nullptr;
+		const TypedDagNode< RbVector< double > >*                        xi_times = nullptr;
+		bool                                                             xi_dirty = true;
 
-		const TypedDagNode< double >*                                    eta_simple;
-		const TypedDagNode< RateGenerator >*                             eta_const;
-		const TypedDagNode< RbVector< RateGenerator > >*                 eta_var;
-		const TypedDagNode< RbVector< double > >*                        eta_times;
-		bool                                                             eta_dirty;
+		const TypedDagNode< double >*                                    eta_simple = nullptr;
+		const TypedDagNode< RateGenerator >*                             eta_const = nullptr;
+		const TypedDagNode< RbVector< RateGenerator > >*                 eta_var = nullptr;
+		const TypedDagNode< RbVector< double > >*                        eta_times = nullptr;
+		bool                                                             eta_dirty = true;
 
-		const TypedDagNode< CladogeneticProbabilityMatrix >*             omega_const;
-		const TypedDagNode< RbVector< CladogeneticProbabilityMatrix > >* omega_var;
-		const TypedDagNode< RbVector< double > >*                        omega_times;
-		bool                                                             omega_dirty;
+		const TypedDagNode< CladogeneticProbabilityMatrix >*             omega_const = nullptr;
+		const TypedDagNode< RbVector< CladogeneticProbabilityMatrix > >* omega_var = nullptr;
+		const TypedDagNode< RbVector< double > >*                        omega_times = nullptr;
+		bool                                                             omega_dirty = true;
 
-		const TypedDagNode< RbVector< MatrixReal > >*                    zeta;
-		bool                                                             zeta_dirty;
+		const TypedDagNode< RbVector< MatrixReal > >*                    zeta = nullptr;
+		bool                                                             zeta_dirty = true;
 
 		// misc. book-keeping
-		bool tree_dirty;
+		bool tree_dirty = true;
 
     };
     
