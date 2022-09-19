@@ -1,14 +1,14 @@
-/* A Bison parser, made by GNU Bison 2.3.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
-/* Skeleton interface for Bison's Yacc-like parsers in C
+/* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
-   Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
+   Inc.
 
-   This program is free software; you can redistribute it and/or modify
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,9 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301, USA.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -33,67 +31,89 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* Tokens.  */
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
+
+#ifndef YY_YY_GRAMMAR_TAB_H_INCLUDED
+# define YY_YY_GRAMMAR_TAB_H_INCLUDED
+/* Debug traces.  */
+#ifndef YYDEBUG
+# define YYDEBUG 0
+#endif
+#if YYDEBUG
+extern int yydebug;
+#endif
+
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-   /* Put the tokens into the symbol table, so that GDB and other debuggers
-      know about them.  */
-   enum yytokentype {
-     REAL = 258,
-     INT = 259,
-     NAME = 260,
-     STRING = 261,
-     RBNULL = 262,
-     RBTAB = 263,
-     FALSE = 264,
-     TRUE = 265,
-     RBINF = 266,
-     FUNCTION = 267,
-     PROCEDURE = 268,
-     CLASS = 269,
-     FOR = 270,
-     IN = 271,
-     IF = 272,
-     ELSE = 273,
-     WHILE = 274,
-     NEXT = 275,
-     BREAK = 276,
-     RETURN = 277,
-     MOD_CONST = 278,
-     MOD_DYNAMIC = 279,
-     MOD_STOCHASTIC = 280,
-     MOD_DETERMINISTIC = 281,
-     PROTECTED = 282,
-     ARROW_ASSIGN = 283,
-     TILDE_ASSIGN = 284,
-     EQUATION_ASSIGN = 285,
-     WORKSPACE_ASSIGN = 286,
-     REFERENCE_ASSIGN = 287,
-     ADDITION_ASSIGN = 288,
-     SUBTRACTION_ASSIGN = 289,
-     MULTIPLICATION_ASSIGN = 290,
-     DIVISION_ASSIGN = 291,
-     DECREMENT = 292,
-     INCREMENT = 293,
-     EQUAL = 294,
-     AND = 295,
-     OR = 296,
-     AND2 = 297,
-     OR2 = 298,
-     GT = 299,
-     GE = 300,
-     LT = 301,
-     LE = 302,
-     EQ = 303,
-     NE = 304,
-     END_OF_INPUT = 305,
-     UNOT = 306,
-     UPLUS = 307,
-     UMINUS = 308,
-     UAND = 309
-   };
+  enum yytokentype
+  {
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    REAL = 258,                    /* REAL  */
+    INT = 259,                     /* INT  */
+    NAME = 260,                    /* NAME  */
+    STRING = 261,                  /* STRING  */
+    RBNULL = 262,                  /* RBNULL  */
+    RBTAB = 263,                   /* RBTAB  */
+    FALSE = 264,                   /* FALSE  */
+    TRUE = 265,                    /* TRUE  */
+    RBINF = 266,                   /* RBINF  */
+    FUNCTION = 267,                /* FUNCTION  */
+    PROCEDURE = 268,               /* PROCEDURE  */
+    CLASS = 269,                   /* CLASS  */
+    FOR = 270,                     /* FOR  */
+    IN = 271,                      /* IN  */
+    IF = 272,                      /* IF  */
+    ELSE = 273,                    /* ELSE  */
+    WHILE = 274,                   /* WHILE  */
+    NEXT = 275,                    /* NEXT  */
+    BREAK = 276,                   /* BREAK  */
+    RETURN = 277,                  /* RETURN  */
+    MOD_CONST = 278,               /* MOD_CONST  */
+    MOD_DYNAMIC = 279,             /* MOD_DYNAMIC  */
+    MOD_STOCHASTIC = 280,          /* MOD_STOCHASTIC  */
+    MOD_DETERMINISTIC = 281,       /* MOD_DETERMINISTIC  */
+    PROTECTED = 282,               /* PROTECTED  */
+    ARROW_ASSIGN = 283,            /* ARROW_ASSIGN  */
+    TILDE_ASSIGN = 284,            /* TILDE_ASSIGN  */
+    EQUATION_ASSIGN = 285,         /* EQUATION_ASSIGN  */
+    WORKSPACE_ASSIGN = 286,        /* WORKSPACE_ASSIGN  */
+    REFERENCE_ASSIGN = 287,        /* REFERENCE_ASSIGN  */
+    ADDITION_ASSIGN = 288,         /* ADDITION_ASSIGN  */
+    SUBTRACTION_ASSIGN = 289,      /* SUBTRACTION_ASSIGN  */
+    MULTIPLICATION_ASSIGN = 290,   /* MULTIPLICATION_ASSIGN  */
+    DIVISION_ASSIGN = 291,         /* DIVISION_ASSIGN  */
+    DECREMENT = 292,               /* DECREMENT  */
+    INCREMENT = 293,               /* INCREMENT  */
+    EQUAL = 294,                   /* EQUAL  */
+    AND = 295,                     /* AND  */
+    OR = 296,                      /* OR  */
+    AND2 = 297,                    /* AND2  */
+    OR2 = 298,                     /* OR2  */
+    GT = 299,                      /* GT  */
+    GE = 300,                      /* GE  */
+    LT = 301,                      /* LT  */
+    LE = 302,                      /* LE  */
+    EQ = 303,                      /* EQ  */
+    NE = 304,                      /* NE  */
+    END_OF_INPUT = 305,            /* END_OF_INPUT  */
+    UNOT = 306,                    /* UNOT  */
+    UMINUS = 307,                  /* UMINUS  */
+    UPLUS = 308,                   /* UPLUS  */
+    UAND = 309                     /* UAND  */
+  };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
-/* Tokens.  */
+/* Token kinds.  */
+#define YYEMPTY -2
+#define YYEOF 0
+#define YYerror 256
+#define YYUNDEF 257
 #define REAL 258
 #define INT 259
 #define NAME 260
@@ -143,21 +163,20 @@
 #define NE 304
 #define END_OF_INPUT 305
 #define UNOT 306
-#define UPLUS 307
-#define UMINUS 308
+#define UMINUS 307
+#define UPLUS 308
 #define UAND 309
 
-
-
-
+/* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE
-#line 80 "./grammar.y"
+union YYSTYPE
 {
+#line 80 "./grammar.y"
+
     char*                                           c_string;
     std::string*                                    string;
     double                                          realValue;
-    long                                            longIntValue;
+    long                                             longIntValue;
     bool                                            boolValue;
     RevLanguage::SyntaxElement*                     syntaxElement;
     RevLanguage::SyntaxVariable*                    syntaxVariable;
@@ -167,28 +186,34 @@ typedef union YYSTYPE
     std::list<RevLanguage::SyntaxElement*>*         syntaxElementList;
     std::list<RevLanguage::SyntaxLabeledExpr*>*     argumentList;
     std::list<RevLanguage::SyntaxFormal*>*          formalList;
-}
-/* Line 1529 of yacc.c.  */
-#line 173 "./grammar.tab.h"
-	YYSTYPE;
-# define yystype YYSTYPE /* obsolescent; will be withdrawn */
-# define YYSTYPE_IS_DECLARED 1
+
+#line 191 "./grammar.tab.h"
+
+};
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
+# define YYSTYPE_IS_DECLARED 1
 #endif
 
-extern YYSTYPE yylval;
-
+/* Location type.  */
 #if ! defined YYLTYPE && ! defined YYLTYPE_IS_DECLARED
-typedef struct YYLTYPE
+typedef struct YYLTYPE YYLTYPE;
+struct YYLTYPE
 {
   int first_line;
   int first_column;
   int last_line;
   int last_column;
-} YYLTYPE;
-# define yyltype YYLTYPE /* obsolescent; will be withdrawn */
+};
 # define YYLTYPE_IS_DECLARED 1
 # define YYLTYPE_IS_TRIVIAL 1
 #endif
 
+
+extern YYSTYPE yylval;
 extern YYLTYPE yylloc;
+
+int yyparse (void);
+
+
+#endif /* !YY_YY_GRAMMAR_TAB_H_INCLUDED  */

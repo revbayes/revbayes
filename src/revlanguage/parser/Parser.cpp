@@ -678,7 +678,7 @@ ParserInfo Parser::checkCommand(std::string& command, Environment* env)
 }
 
 /** Global call-back function for the flex-generated code in lex.yy.cpp */
-void rrinput(char* buf, size_t& result, size_t maxsize) {
+void rrinput(char* buf, int& result, size_t maxsize) {
 
     buf[0] = '\0';
     RevLanguage::Parser::getParser().getline(buf, maxsize);
