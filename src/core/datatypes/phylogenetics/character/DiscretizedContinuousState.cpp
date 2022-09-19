@@ -10,22 +10,18 @@ using namespace RevBayesCore;
 
 /** Default constructor */
 DiscretizedContinuousState::DiscretizedContinuousState(size_t n, double d) : DiscreteCharacterState( n ),
-    is_gap( false ),
-    is_missing( false ),
-    index_single_state( 0 ),
-    num_observed_states( 0 ),
+    // is_gap( false ),
+    // is_missing( false ),
+    // index_single_state( 0 ),
+    // num_observed_states( 0 ),
     state(n),
 	dx(d),
-	points( std::vector<double>(n, 0.0) )
+	points( n, 0.0 )
 {
     
 }
 
 DiscretizedContinuousState::DiscretizedContinuousState(std::vector<std::string> labels, std::vector<double> pts, double d) : DiscreteCharacterState( labels.size() ),
-	is_gap( false ),
-	is_missing( false ),
-	index_single_state( 0 ),
-	num_observed_states( 0 ),
 	state( labels.size() ),
 	state_descriptions(labels),
 	dx(d),
@@ -37,10 +33,6 @@ DiscretizedContinuousState::DiscretizedContinuousState(std::vector<std::string> 
 
 /** Constructor that sets the observation */
 DiscretizedContinuousState::DiscretizedContinuousState(const std::string &s, std::vector<double> pts, int m, double d) : DiscreteCharacterState( m ),
-    is_gap( false ),
-    is_missing( false ),
-    index_single_state( 0 ),
-    num_observed_states( 0 ),
     state(m),
 	dx(d),
 	points(pts)
@@ -51,10 +43,6 @@ DiscretizedContinuousState::DiscretizedContinuousState(const std::string &s, std
 
 /** Constructor that sets the observation */
 DiscretizedContinuousState::DiscretizedContinuousState(int s, std::vector<double> pts, int m, double d) : DiscreteCharacterState( m ),
-    is_gap( false ),
-    is_missing( false ),
-    index_single_state( 0 ),
-    num_observed_states( 0 ),
     state(m),
 	dx(d),
 	points(pts)
@@ -65,14 +53,12 @@ DiscretizedContinuousState::DiscretizedContinuousState(int s, std::vector<double
 
 DiscretizedContinuousState* DiscretizedContinuousState::clone( void ) const
 {
-    
     return new DiscretizedContinuousState( *this );
 }
 
 
 void DiscretizedContinuousState::addState(int s)
 {
-    
     state.set( s );
     ++num_observed_states;
 }
@@ -86,7 +72,6 @@ void DiscretizedContinuousState::addStateDescriptions(const std::vector<std::str
 
 std::string DiscretizedContinuousState::getDataType( void ) const
 {
-    
     return "DiscretizedContinuousCharacter";
 }
 
