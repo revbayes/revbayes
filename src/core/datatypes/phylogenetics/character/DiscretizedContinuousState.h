@@ -59,10 +59,10 @@ namespace RevBayesCore {
         
     private:
         
-        bool                            is_gap;
-        bool                            is_missing;
-        size_t                          index_single_state;
-        size_t                          num_observed_states;
+        bool                            is_gap = false;
+        bool                            is_missing = false;
+        size_t                          index_single_state = 0;
+        size_t                          num_observed_states = 0;
         RbBitSet                        state;
         std::vector<std::string>        state_descriptions;
         double                          dx;
