@@ -31,9 +31,6 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	bool                                                            zero_indexed_,
 	size_t                                                          n_proc_
 ) : TypedDistribution<Tree>( new TreeDiscreteCharacterData() ),
-	current_ln_prob(0.0),
-	old_ln_prob(0.0),
-	probability_dirty(true),
 	n_proc(n_proc_),
 	taxa(taxa_),
 	age(age_),
@@ -41,52 +38,8 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	num_states(num_states_),
 	use_origin(use_origin_),
 	zero_indexed(zero_indexed_),
-	root_frequency(root_frequency_),
-	root_frequency_dirty(true),
-	lambda_const(NULL),
-	lambda_var(NULL),
-	lambda_times(NULL),
-	lambda_dirty(true),
-	mu_const(NULL),
-	mu_var(NULL),
-	mu_times(NULL),
-	mu_dirty(true),
-	phi_const(NULL),
-	phi_var(NULL),
-	phi_times(NULL),
-	phi_dirty(true),
-	delta_const(NULL),
-	delta_var(NULL),
-	delta_times(NULL),
-	delta_dirty(true),
-	upsilon(NULL),
-	upsilon_times(NULL),
-	upsilon_dirty(true),
-	gamma(NULL),
-	gamma_times(NULL),
-	gamma_dirty(true),
-	rho_simple(NULL),
-	rho(NULL),
-	rho_times(NULL),
-	rho_dirty(true),
-	xi(NULL),
-	xi_times(NULL),
-	xi_dirty(true),
-	eta_simple(NULL),
-	eta_const(NULL),
-	eta_var(NULL),
-	eta_times(NULL),
-	eta_dirty(true),
-	omega_const(NULL),
-	omega_var(NULL),
-	omega_times(NULL),
-	omega_dirty(true),
-	zeta(NULL),
-	zeta_dirty(true),
-	tree_dirty(true)
+	root_frequency(root_frequency_)
 {
-
-	//assert(Plugin::loader().isTensorPhyloLoaded());
 	try {
 		// create the pointer
 		tp_ptr = Plugin::loader().createTensorPhyloLik();
@@ -99,10 +52,9 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	} catch (...) {
 		throw RbException("TensorPhylo is not loaded (use loadPlugin(...)).");
 	}
+	
 	// turn on/off debug
-//	tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_FILE, "debug.txt");
-//	tp_ptr->setDebugMode(TensorPhylo::Interface::DBG_PRINT);
-	tp_ptr->setConditionalProbCompatibilityMode(false); // FIXME Here you go Mike!
+	tp_ptr->setConditionalProbCompatibilityMode(false);
 	tp_ptr->setNumberOfThreads(n_proc);
 
 	// add the parameters
@@ -119,7 +71,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
     updateRootFrequency(true);
 
     // turn on/off debug
-//    tp_ptr->setApplyTreeLikCorrection(false);
+	// tp_ptr->setApplyTreeLikCorrection(false);
 
     // set the condition type
     tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::TIME);
