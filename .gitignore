@@ -7,9 +7,6 @@ projects/cmake/*
 !projects/cmake/README.txt
 !projects/cmake/*.sh
 !projects/cmake/*.cmake
-projects/installer/build
-projects/installer/log.txt
-projects/installer/rb
 
 # ----------------------------------------------
 src/revlanguage/constants.h
