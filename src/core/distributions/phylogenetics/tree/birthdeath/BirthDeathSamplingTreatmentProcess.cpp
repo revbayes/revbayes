@@ -161,15 +161,20 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     prepareTimeline();
     prepareProbComputation();
 
-
-    // We employ a coalescent simulator to guarantee that the starting tree matches all time constraints
-    RbVector<Clade> constr;
-    StartingTreeSimulator simulator;
-    RevBayesCore::Tree *my_tree = simulator.simulateTree( taxa, constr );
-
-    // store the new value
     delete value;
-    value = my_tree;
+    
+    if (t != nullptr) {
+        value = t;
+    }
+    else
+    {
+        RbVector<Clade> constr;
+        // We employ a coalescent simulator to guarantee that the starting tree matches all time constraints
+        StartingTreeSimulator simulator;
+        RevBayesCore::Tree *my_tree = simulator.simulateTree( taxa, constr );
+        // store the new value
+        value = my_tree;
+    }
 
     countAllNodes();
 
