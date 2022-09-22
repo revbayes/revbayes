@@ -506,42 +506,42 @@ variable    :   identifier optElements
                     delete $1;
                     delete $2;
                 }
-            |   fxnCall '[' expression ']' optElements
+            |   fxnCall elementList
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Parser inserting variable (FUNCTION_VAR) in syntax tree\n");
 #endif
-                    $$ = new SyntaxIndexOperation($1,$3);
-                    for (std::list<SyntaxElement*>::iterator it=$5->begin(); it!=$5->end(); ++it)
+                    $$ = $1;
+                    for (auto& element: *$2)
                     {
-                        $$ = new SyntaxIndexOperation($$,*it);
+                        $$ = new SyntaxIndexOperation($$, element);
                     }
-                    delete $5;
+                    delete $2;
                 }
-            |   '(' expression ')' '[' expression ']' optElements
+            |   '(' expression ')' elementList
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Parser inserting variable (EXPRESSION_VAR) in syntax tree\n");
 #endif
-                    $$ = new SyntaxIndexOperation($2,$5);
-                    for (std::list<SyntaxElement*>::iterator it=$7->begin(); it!=$7->end(); ++it)
+                    $$ = $2;
+                    for (auto& element: *$4)
                     {
-                        $$ = new SyntaxIndexOperation($$,*it);
+                        $$ = new SyntaxIndexOperation($$, element);
                     }
-                    delete $7;
+                    delete $4;
                 }
-            |   variable '.' fxnCall '[' expression ']' optElements
+            |   variable '.' fxnCall elementList
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Parser inserting member variable (FUNCTION_VAR) in syntax tree\n");
 #endif
                     $3->setBaseVariable($1);
-                    $$ = new SyntaxIndexOperation($3,$5);
-                    for (std::list<SyntaxElement*>::iterator it=$7->begin(); it!=$7->end(); ++it)
+                    $$ = $3;
+                    for (auto& element: *$4)
                     {
-                        $$ = new SyntaxIndexOperation($$,*it);
+                        $$ = new SyntaxIndexOperation($$, element);
                     }
-                    delete $7;
+                    delete $4;
                 }
             ;
 
