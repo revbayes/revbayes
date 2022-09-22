@@ -543,6 +543,10 @@ variable    :   identifier optElements
                     }
                     delete $4;
                 }
+            |   PIPE_PLACEHOLDER
+                {
+                    $$ = new SyntaxPipePlaceholder;
+                }
             ;
 
 optElements :   /* empty */                     { $$ = new std::list<SyntaxElement*>(); }
@@ -587,7 +591,28 @@ functionCall    :   fxnCall
                     }
                 |   expression PIPE fxnCall
                     {
+#ifdef DEBUG_BISON_FLEX
+                        printf("Parser inserting piped member call in syntax tree\n");
+#endif
                         $$ = $3;
+                        $$->pipeAddArg($1);
+                    }
+                |   expression PIPE variable '.' fxnCall
+                    {
+#ifdef DEBUG_BISON_FLEX
+                        printf("Parser inserting piped member call in syntax tree\n");
+#endif
+                        $5->setBaseVariable($3);
+                        $$ = $5;
+                        $$->pipeAddArg($1);
+                    }
+                |   expression PIPE functionCall '.' fxnCall
+                    {
+#ifdef DEBUG_BISON_FLEX
+                        printf("Parser inserting piped member call in syntax tree\n");
+#endif
+                        $5->setBaseVariable($3);
+                        $$ = $5;
                         $$->pipeAddArg($1);
                     }
                 ;

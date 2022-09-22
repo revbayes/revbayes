@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <list>
+#include <utility>
 
 
 namespace RevLanguage {
@@ -82,6 +83,7 @@ namespace RevLanguage {
         const std::string&                  getFunctionName(void) const { return function_name; }                       //!< Get function name
         RevPtr<RevVariable>                 evaluateContent(Environment& env, bool dynamic=false);                      //!< Get semantic value
         void                                setBaseVariable(SyntaxElement* var) { base_variable = var; }                //!< Set base variable
+        std::pair<int,int>                  pipeAddArgPlaceholder(SyntaxElement* piped_arg);                            //!< Add first argument from pipe
         void                                pipeAddArg(SyntaxElement* piped_arg);                                       //!< Add first argument from pipe
         bool                                isConstExpression(void) const;                                              //!< Is this a constant expression?
         bool                                isFunctionSafe(const Environment&       env,

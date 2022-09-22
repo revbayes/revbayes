@@ -220,34 +220,63 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( Environment& env, bool 
     return func_return_value;
 }
 
-
-void SyntaxFunctionCall::pipeAddArg(SyntaxElement* piped_arg)
+std::pair<int,int> SyntaxFunctionCall::pipeAddArgPlaceholder(SyntaxElement* piped_arg)
 {
     assert(piped_arg);
+    int n_placeholders = 0;
 
-    // check to see if there is a pipe placeholder anywhere.
-    bool found_placeholder = false;
+    // 1. Check arguments of final fxncall for _
     for(auto& argument: *arguments)
     {
         // If the argument is of the form `_` or `label = _`, the replace the `_` with piped_arg.
-        if (dynamic_cast<const SyntaxPipePlaceholder*>(&argument->getExpression()))
+        if (dynamic_cast<SyntaxPipePlaceholder*>(&argument->getExpression()))
         {
-            if (not found_placeholder)
-            {
-                std::string label = argument->getLabel();
-                delete argument;
-                argument = new SyntaxLabeledExpr(label, piped_arg);
-
-                found_placeholder = true;
-            }
-            else
-                throw RbException()<<"pipe placeholder '_' may only appear once";
+            n_placeholders++;
+            std::string label = argument->getLabel();
+            delete argument;
+            argument = new SyntaxLabeledExpr(label, piped_arg);
         }
     }
 
-    if (not found_placeholder)
+    int n_fxncalls = 1;
+    if (base_variable)
+    {
+        // 2. Check if base_variable is _
+        if (dynamic_cast<SyntaxPipePlaceholder*>(base_variable))
+        {
+            n_placeholders++;
+            delete base_variable;
+            base_variable = piped_arg;
+        }
+        // 3. Check if base_variable is another function call
+        else if (auto sub_fxncall = dynamic_cast<SyntaxFunctionCall*>(base_variable))
+        {
+            auto tmp = sub_fxncall->pipeAddArgPlaceholder(piped_arg);
+            n_placeholders += tmp.first;
+            n_fxncalls += tmp.second;
+        }
+    }
+
+    return {n_placeholders, n_fxncalls};
+}
+
+void SyntaxFunctionCall::pipeAddArg(SyntaxElement* piped_arg)
+{
+    auto tmp = pipeAddArgPlaceholder(piped_arg);
+    int n_placeholders   = tmp.first;
+    int n_fxncalls = tmp.second;
+
+    if (n_placeholders > 1)
+        throw RbException()<<"Pipe placeholder may only occur once.";
+
+    if (n_placeholders == 0)
+    {
+        if (n_fxncalls > 1)
+            throw RbException()<<"Piping into expression with multiple function calls requires a pipe placeholder ('_') !";
+
         arguments->push_front(new SyntaxLabeledExpr ("" , piped_arg));
-} 
+    }
+}
 
 /**
  * Is the expression constant?
