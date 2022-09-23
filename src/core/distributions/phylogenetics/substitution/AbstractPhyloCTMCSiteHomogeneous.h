@@ -170,14 +170,14 @@ namespace RevBayesCore {
         virtual std::vector<size_t>                                         getIncludedSiteIndices();
 
         // members
-        double                                                              lnProb;
-        double                                                              storedLnProb;
+        double                                                              lnProb = 0;
+        double                                                              storedLnProb = 0;
         size_t                                                              num_nodes;
         size_t                                                              num_sites;
         const size_t                                                        num_chars;
         size_t                                                              num_site_rates;
         size_t                                                              num_site_mixtures;
-        size_t                                                              num_matrices;
+        size_t                                                              num_matrices = 1;
         const TypedDagNode<Tree>*                                           tau;
         
         std::vector<TransitionProbabilityMatrix>                            transition_prob_matrices;
@@ -191,9 +191,9 @@ namespace RevBayesCore {
         size_t                                                              pmatNodeOffset;
 
         // the likelihoods
-        mutable double*                                                     partialLikelihoods;
+        mutable double*                                                     partialLikelihoods = nullptr;
         std::vector<size_t>                                                 activeLikelihood;
-        double*                                                             marginalLikelihoods;
+        double*                                                             marginalLikelihoods = nullptr;
 
         std::vector< std::vector< std::vector<double> > >                   perNodeSiteLogScalingFactors;
 
@@ -210,7 +210,7 @@ namespace RevBayesCore {
         std::map<std::string,size_t>                                        taxon_name_2_tip_index_map;
 
         // flags for likelihood recomputation
-        bool                                                                touched;
+        bool                                                                touched = false;
         std::vector<bool>                                                   changed_nodes;
         mutable std::vector<bool>                                           dirty_nodes;
 
@@ -222,31 +222,31 @@ namespace RevBayesCore {
 
         // flags
         bool                                                                using_ambiguous_characters;
-        bool                                                                treatUnknownAsGap;
-        bool                                                                treatAmbiguousAsGaps;
+        bool                                                                treatUnknownAsGap = true;
+        bool                                                                treatAmbiguousAsGaps = false;
 
         bool                                                                using_weighted_characters;
 
-        bool                                                                useMarginalLikelihoods;
-        mutable bool                                                        in_mcmc_mode;
+        bool                                                                useMarginalLikelihoods = false;
+        mutable bool                                                        in_mcmc_mode = false;
 
         // members
-        const TypedDagNode< MixtureModel >*                                 mixture_model;
-        const TypedDagNode< double >*                                       homogeneous_clock_rate;
-        const TypedDagNode< RbVector< double > >*                           heterogeneous_clock_rates;
-        const TypedDagNode< RateGenerator >*                                homogeneous_rate_matrix;
-        const TypedDagNode< RbVector< RateGenerator > >*                    heterogeneous_rate_matrices;
-        const TypedDagNode< Simplex >*                                      root_frequencies;
-        const TypedDagNode< RbVector< double > >*                           site_rates;
-        const TypedDagNode< Simplex >*                                      site_matrix_probs;
-        const TypedDagNode< Simplex >*                                      site_rates_probs;
-        const TypedDagNode< double >*                                       p_inv;
+        const TypedDagNode< double >*                                       homogeneous_clock_rate = nullptr;
+        const TypedDagNode< RbVector< double > >*                           heterogeneous_clock_rates = nullptr;
+        const TypedDagNode< MixtureModel >*                                 mixture_model = nullptr;
+        const TypedDagNode< RateGenerator >*                                homogeneous_rate_matrix = nullptr;
+        const TypedDagNode< RbVector< RateGenerator > >*                    heterogeneous_rate_matrices = nullptr;
+        const TypedDagNode< Simplex >*                                      root_frequencies = nullptr;
+        const TypedDagNode< RbVector< double > >*                           site_rates = nullptr;
+        const TypedDagNode< Simplex >*                                      site_matrix_probs = nullptr;
+        const TypedDagNode< Simplex >*                                      site_rates_probs = nullptr;
+        const TypedDagNode< double >*                                       p_inv = nullptr;
 
 
         // flags specifying which model variants we use
-        bool                                                                branch_heterogeneous_clock_rates;
-        bool                                                                branch_heterogeneous_substitution_matrices;
-        bool                                                                rate_variation_across_sites;
+        bool                                                                branch_heterogeneous_clock_rates = false;
+        bool                                                                branch_heterogeneous_substitution_matrices = true;
+        bool                                                                rate_variation_across_sites = false;
 
         // MPI variables
         size_t                                                              pattern_block_start;
@@ -259,10 +259,10 @@ namespace RevBayesCore {
         charType                                                            template_state;                                 //!< Template state used for ancestral state estimation. This makes sure that the state labels are preserved.
 
         // containers for ancestral state/stochastic mapping functions
-        bool                                                                has_ancestral_states;
+        bool                                                                has_ancestral_states = false;
         std::vector<size_t>                                                 sampled_site_mixtures;
-        size_t                                                              sampled_site_rate_component;
-        size_t                                                              sampled_site_matrix_component;
+        size_t                                                              sampled_site_rate_component = 0;
+        size_t                                                              sampled_site_matrix_component = 0;
 
     private:
 
@@ -300,69 +300,33 @@ namespace RevBayesCore {
 template<class charType>
 RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::AbstractPhyloCTMCSiteHomogeneous(const TypedDagNode<Tree> *t, size_t nChars, size_t nMix, bool c, size_t nSites, bool amb, bool internal, bool gapmatch, bool wd) :
 TypedDistribution< AbstractHomologousDiscreteCharacterData >(  NULL ),
-lnProb( 0.0 ),
-storedLnProb( 0.0 ),
 num_nodes( t->getValue().getNumberOfNodes() ),
 num_sites( nSites ),
 num_chars( nChars ),
 num_site_rates( nMix ),
 num_site_mixtures( nMix ),
-num_matrices( 1 ),
 tau( t ),
 transition_prob_matrices( std::vector<TransitionProbabilityMatrix>(num_site_mixtures, TransitionProbabilityMatrix(num_chars) ) ),
 //    partialLikelihoods( new double[2*num_nodes*num_site_mixtures*num_sites*num_chars] ),
-partialLikelihoods( NULL ),
 activeLikelihood( std::vector<size_t>(num_nodes, 0) ),
 //    marginalLikelihoods( new double[num_nodes*num_site_mixtures*num_sites*num_chars] ),
-marginalLikelihoods( NULL ),
 perNodeSiteLogScalingFactors( std::vector<std::vector< std::vector<double> > >(2, std::vector<std::vector<double> >(num_nodes, std::vector<double>(num_sites, 0.0) ) ) ),
-ambiguous_char_matrix(),
-char_matrix(),
-gap_matrix(),
-pattern_counts(),
 site_invariant( num_sites, false ),
 invariant_site_index( num_sites ),
 num_patterns( num_sites ),
 compressed( c ),
 site_pattern( std::vector<size_t>(num_sites, 0) ),
 taxon_name_2_tip_index_map(),
-touched( false ),
 changed_nodes( std::vector<bool>(num_nodes, false) ),
 dirty_nodes( std::vector<bool>(num_nodes, true) ),
 using_ambiguous_characters( amb ),
-treatUnknownAsGap( true ),
-treatAmbiguousAsGaps( false ),
 using_weighted_characters( wd ),
-useMarginalLikelihoods( false ),
-in_mcmc_mode( false ),
 pattern_block_start( 0 ),
 pattern_block_end( num_patterns ),
 pattern_block_size( num_patterns ),
 store_internal_nodes( internal ),
-gap_match_clamped( gapmatch ),
-template_state(),
-has_ancestral_states(false),
-sampled_site_rate_component( 0 ),
-sampled_site_matrix_component( 0 )
-
+gap_match_clamped( gapmatch )
 {
-
-    // initialize with default parameters
-    homogeneous_clock_rate        = NULL;
-    heterogeneous_clock_rates     = NULL;
-    homogeneous_rate_matrix       = NULL;
-    heterogeneous_rate_matrices   = NULL;
-    root_frequencies              = NULL;
-    site_rates                    = NULL;
-    site_matrix_probs             = NULL;
-    site_rates_probs              = NULL;
-    p_inv                         = NULL;
-
-    // flags specifying which model variants we use
-    branch_heterogeneous_clock_rates               = false;
-    branch_heterogeneous_substitution_matrices     = true;
-    rate_variation_across_sites                    = false;
-
 
     tau->getValue().getTreeChangeEventHandler().addListener( this );
 
@@ -385,6 +349,7 @@ sampled_site_matrix_component( 0 )
     this->addParameter( tau );
     this->addParameter( homogeneous_clock_rate );
     this->addParameter( heterogeneous_clock_rates );
+    this->addParameter( mixture_model );
     this->addParameter( homogeneous_rate_matrix );
     this->addParameter( heterogeneous_rate_matrices );
     this->addParameter( root_frequencies );
@@ -451,6 +416,7 @@ sampled_site_matrix_component( n.sampled_site_matrix_component )
     // initialize with default parameters
     homogeneous_clock_rate       = n.homogeneous_clock_rate;
     heterogeneous_clock_rates    = n.heterogeneous_clock_rates;
+    mixture_model                = n.mixture_model;
     homogeneous_rate_matrix      = n.homogeneous_rate_matrix;
     heterogeneous_rate_matrices  = n.heterogeneous_rate_matrices;
     root_frequencies             = n.root_frequencies;
