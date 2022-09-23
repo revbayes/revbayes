@@ -3215,6 +3215,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setMixtureModel(c
 
 }
 
+
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setRateMatrix(const TypedDagNode< RbVector< RateGenerator > > *rm)
 {
@@ -3985,6 +3986,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::swapParameterInte
     else if (oldP == heterogeneous_clock_rates)
     {
         heterogeneous_clock_rates = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+    }
+    else if (oldP == mixture_model)
+    {
+        mixture_model = static_cast<const TypedDagNode< MixtureModel >* >( newP );
     }
     else if (oldP == homogeneous_rate_matrix)
     {
