@@ -132,6 +132,8 @@
 #include "Func_chromosomes.h"
 #include "Func_chromosomesPloidy.h"
 
+#include "Func_GammaRateModel.h"
+
 #include "Func_codonSynonymousNonsynonymousRateMatrix.h"
 #include "Func_codonSynonymousNonsynonymousHKYRateMatrix.h"
 #include "Func_GoldmanYang94RateMatrix.h"
@@ -320,6 +322,8 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_biogeographyRateMatrix()                      );
         addFunction( new Func_chromosomes()                                 );
         addFunction( new Func_chromosomesPloidy()                           );
+
+        addFunction( new Func_GammaRateModel()                              );
 
         addFunction( new Func_codonSynonymousNonsynonymousRateMatrix()      );
         addFunction( new Func_codonSynonymousNonsynonymousHKYRateMatrix()   );
