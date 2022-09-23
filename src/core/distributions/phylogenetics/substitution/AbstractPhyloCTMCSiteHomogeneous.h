@@ -114,6 +114,7 @@ namespace RevBayesCore {
         void                                                                setClockRate(const TypedDagNode< double > *r);
         void                                                                setClockRate(const TypedDagNode< RbVector< double > > *r);
         void                                                                setPInv(const TypedDagNode< double > *);
+        void                                                                setMixtureModel(const TypedDagNode< MixtureModel > *mm);
         void                                                                setRateMatrix(const TypedDagNode< RateGenerator > *rm);
         void                                                                setRateMatrix(const TypedDagNode< RbVector< RateGenerator > > *rm);
         void                                                                setRootFrequencies(const TypedDagNode< Simplex > *f);
@@ -3168,6 +3169,45 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setRateMatrix(con
 
 }
 
+
+template<class charType>
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setMixtureModel(const TypedDagNode< MixtureModel> *mm)
+{
+
+    // remove the old parameter first
+    if ( homogeneous_rate_matrix != NULL)
+    {
+        removeParameter( homogeneous_rate_matrix );
+        homogeneous_rate_matrix = NULL;
+    }
+
+    if ( heterogeneous_rate_matrices != NULL)
+    {
+        removeParameter( heterogeneous_rate_matrices );
+        heterogeneous_rate_matrices = NULL;
+    }
+
+    // set the value
+    mixture_model = mm;
+    num_matrices = 1;
+
+    resizeLikelihoodVectors();
+
+    if (mm && mm->getValue().getNumberOfStates() != this->num_chars)
+    {
+        throw RbException()<<"Mixture model (" << mm->getValue().getNumberOfStates() << " do not match the number of character states (" << num_chars << ")";
+    }
+
+    // add the new parameter
+    addParameter( mixture_model );
+
+    // redraw the current value
+    if ( not dag_node or not dag_node->isClamped())
+    {
+        redrawValue();
+    }
+
+}
 
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setRateMatrix(const TypedDagNode< RbVector< RateGenerator > > *rm)
