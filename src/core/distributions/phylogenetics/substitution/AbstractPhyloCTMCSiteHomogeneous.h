@@ -2177,8 +2177,18 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getRootFrequencie
 {
     if ( root_frequencies != NULL )
     {
+        assert(not mixture_model);
+
         std::vector<double> f = root_frequencies->getValue();
         rf.push_back( f );
+    }
+    else if (mixture_model)
+    {
+        rf.clear();
+
+        auto& mm = mixture_model->getValue();
+        for(int i=0;i < mm.getNumberOfComponents(); i++)
+            rf.push_back( mm.getRootFrequencies(i) );
     }
     else if (heterogeneous_rate_matrices !=  NULL)
     {
