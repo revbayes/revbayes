@@ -2561,7 +2561,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::reInitialized( vo
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodVectors( void )
 {
-    if (this->branch_heterogeneous_substitution_matrices == false)
+    if (mixture_model)
+    {
+        num_site_mixtures = mixture_model->getValue().getNumberOfComponents();
+        // FIXME - not sure if this is right for covarion models.
+        assert(num_chars == mixture_model->getValue().getNumberOfStates());
+    }
+    else if (this->branch_heterogeneous_substitution_matrices == false)
     {
         this->num_site_mixtures = this->num_site_rates * this->num_matrices;
     }
