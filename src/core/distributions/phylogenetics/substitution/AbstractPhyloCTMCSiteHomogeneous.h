@@ -18,6 +18,7 @@
 #include "Tree.h"
 #include "TreeChangeEventListener.h"
 #include "TypedDistribution.h"
+#include "MixtureModel.h"
 
 #include <memory.h>
 
@@ -230,6 +231,7 @@ namespace RevBayesCore {
         mutable bool                                                        in_mcmc_mode;
 
         // members
+        const TypedDagNode< MixtureModel >*                                 mixture_model;
         const TypedDagNode< double >*                                       homogeneous_clock_rate;
         const TypedDagNode< RbVector< double > >*                           heterogeneous_clock_rates;
         const TypedDagNode< RateGenerator >*                                homogeneous_rate_matrix;
@@ -4146,6 +4148,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     if ( node->isRoot() == true )
     {
         throw RbException("dnPhyloCTMC called updateTransitionProbabilities for the root node\n");
+    }
+
+    if (mixture_model)
+    {
+        transition_prob_matrices = mixture_model->getValue().calculateTransitionProbabilities(tau->getValue(), node_idx);
     }
 
     double end_age = node->getAge();
