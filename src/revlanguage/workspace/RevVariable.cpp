@@ -206,14 +206,11 @@ RevObject& RevVariable::getRevObject(void) const
 
         // @TODO: We might need a to check if this should be dynamic or not. (Sebastian)
         bool dynamic = true;
-        Function* func = Workspace::userWorkspace().getFunction("v", args, not dynamic).clone();
+        std::unique_ptr<Function> func( Workspace::userWorkspace().getFunction("v", args, not dynamic).clone() );
         func->processArguments(args, not dynamic);
         
         // Evaluate the function (call the static evaluation function)
         RevPtr<RevVariable> func_return_value = func->execute();
-        
-        // free the memory of our copy
-        delete func;
         
         const_cast<RevVariable*>(this)->replaceRevObject( func_return_value->getRevObject().clone() );
     }
