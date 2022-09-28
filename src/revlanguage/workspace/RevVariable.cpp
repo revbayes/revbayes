@@ -198,6 +198,11 @@ RevObject& RevVariable::getRevObject(void) const
                 std::string element_identifier = name + "[" + std::to_string(i) + "]";
                 throw RbException()<<"Cannot create vector variable with name '"<<name
                                    <<"' because element with name '"<<element_identifier<<"' is NULL.";
+
+                /* NOTE: This scenario can occur if we define x[4] but not x[3] and then try to print x.
+                 *       When x[4] is defined, vector_var_elements is padded with nullptrs to length 4.
+                 *       But only x[4] is then set to a non-NULL value.
+                 */
             }
 
             args.push_back( Argument( element_var ) );
