@@ -145,7 +145,15 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, 
         Container* c = dynamic_cast<Container*>( &theParentObj );
         if ( c != NULL )
         {
-            if ( theParentObj.getDagNode()->isConstant() && c->allowsModificationToCompositeContainer() )
+            if ( theParentObj.getDagNode()->isConstant() == false )
+            {
+                throw RbException("We cannot create a composite container from a non-constant container");
+            }
+            else if ( c->allowsModificationToCompositeContainer() == false )
+            {
+                throw RbException("An object of type '" + theParentObj.getType() + "' does not allow transformation into a composite container.");
+            }
+            else
             {
                 // We need to set this to a vector variable before we call addIndex on it.
                 theParentVar->setToVectorVariable();
@@ -169,17 +177,6 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, 
                     theElementVar->setElementVariableState( true );
                     
                     theParentVar->addIndex( int(i) , theElementVar );
-                }
-            }
-            else
-            {
-                if ( !theParentObj.getDagNode()->isConstant() )
-                {
-                    throw RbException("We cannot create a composite container from a non-constant container");
-                }
-                else if ( !c->allowsModificationToCompositeContainer() )
-                {
-                    throw RbException("An object of type '" + theParentObj.getType() + "' does not allow transformation into a composite container.");
                 }
             }
         }
