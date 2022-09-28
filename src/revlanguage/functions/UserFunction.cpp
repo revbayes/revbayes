@@ -66,7 +66,7 @@ RevPtr<RevVariable> UserFunction::execute( void )
 RevPtr<RevVariable> UserFunction::executeCode( void )
 {
     // Create new evaluation frame with function base class execution environment as parent
-    auto function_frame = std::make_shared<Environment>( getEnvironment(), "UserFunctionEnvironment" );
+    auto function_frame = std::make_unique<Environment>( getEnvironment(), "UserFunctionEnvironment" );
     
     // Add the arguments to our environment
     for ( std::vector<Argument>::iterator it = args.begin(); it != args.end(); ++it )
