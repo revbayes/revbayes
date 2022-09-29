@@ -308,9 +308,9 @@ void RbSettings::listOptions() const
     std::cout << "beagleDevice = " << beagleDevice << std::endl;
     std::cout << "beagleResource = " << beagleResource << std::endl;
     std::cout << "beagleUseDoublePrecision = " << (beagleUseDoublePrecision ? "true" : "false") << std::endl;
-    std::cout << "beagleMaxCPUThreads" << beagleMaxCPUThreads << std::endl;
-    std::cout << "beagleScalingMode" << beagleScalingMode << std::endl;
-    std::cout << "beagleDynamicScalingFrequency" << beagleDynamicScalingFrequency << std::endl;
+    std::cout << "beagleMaxCPUThreads = " << beagleMaxCPUThreads << std::endl;
+    std::cout << "beagleScalingMode = " << beagleScalingMode << std::endl;
+    std::cout << "beagleDynamicScalingFrequency = " << beagleDynamicScalingFrequency << std::endl;
 #endif /* RB_BEAGLE */
 }
 
