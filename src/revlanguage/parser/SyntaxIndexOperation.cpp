@@ -162,18 +162,19 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, 
                 {
                     std::string elementIdentifier = theParentVar->getName() + "[" + std::to_string(i) + "]";
                 
+                    // first ensure that the environment has a slot named `elementIdentifier`
                     if ( !env.existsVariable( elementIdentifier ) )
                     {
-                        // create a new slot
+                        // create a new variable for environment slot `elementIdentifier`
                         RevPtr<RevVariable> theElementVar = RevPtr<RevVariable>( new RevVariable( c->getElement(i-1) ) );
-                        env.addVariable(elementIdentifier,theElementVar);
+                        env.addVariable( elementIdentifier, theElementVar );
                         theElementVar->setName( elementIdentifier );
                     }
-                
-                    // get the slot and variable
+
+                    // then look up the element variable in the environment by its identifier
                     RevPtr<RevVariable> theElementVar  = env.getVariable( elementIdentifier );
                 
-                    // set this variable as a hidden variable so that it doesn't show in ls()
+                    // set the element variable as a hidden variable so that it doesn't show in ls()
                     theElementVar->setElementVariableState( true );
                     
                     theParentVar->addIndex( int(i) , theElementVar );
@@ -190,15 +191,16 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, 
     int idx = (int)static_cast<Integer&>( indexVar->getRevObject() ).getValue();
     std::string identifier = theParentVar->getName() + "[" + std::to_string(idx) + "]";
 
-    if ( env.existsVariable( identifier ) == false )
+    // first ensure that we've got an entry with name `identifier` in the environment
+    if ( not env.existsVariable( identifier ) )
     {
-        // create a new slot
+        // create a new variable called `identifier` if the environment doesn't have one.
         RevPtr<RevVariable> the_var = RevPtr<RevVariable>( new RevVariable( NULL ) );
-        env.addVariable(identifier,the_var);
+        env.addVariable( identifier, the_var );
         the_var->setName( identifier );
     }
 
-    // get the slot and variable
+    // then look up the variable in the environment by its identifier
     RevPtr<RevVariable> the_var  = env.getVariable( identifier );
     
     // set this variable as an element variable; which is by default a hidden variable so that it doesn't show in ls()
