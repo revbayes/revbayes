@@ -204,4 +204,5 @@ endif
 summary({'optimization': get_option('optimization'),
          'debug': get_option('debug'),
          'assertions': assertions_enabled,
+         'openlibm': get_option('openlibm')
         },section: 'Configuration')
