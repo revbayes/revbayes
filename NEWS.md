@@ -9,15 +9,16 @@
 
 ## Bug Fixes
 
-  * _TODO_ Statically link boost into distributed binaries.
-  * _TODO_ Don't link distributed binaries with openlibm.
+  * _UNMERGED_ Statically link boost into distributed binaries.
+  * _UNMERGED_ Don't link distributed binaries with openlibm.
   * Fix vectors in functions.
-  * Fix using file paths and directories on Windows
-  * Restore dnFBDP synonym for dnBDSTP
-  * Restore initialTree argument to dnFBDP
+  * Fix using file paths and directories on Windows.
+  * Restore dnFBDP synonym for dnBDSTP.
+  * Restore initialTree argument to dnFBDP .
   * Fix check for number of rates in FBD-Range process.
   * Fix crash when reading some trees with sampled ancestors. (#240)
   * Prevent NumStates methods from overriding character exclusion. (#252)
+  * Allow compiling in C++17 mode. (#238)
 
 
 # RevBayes 1.2.0 Lagerstätte
