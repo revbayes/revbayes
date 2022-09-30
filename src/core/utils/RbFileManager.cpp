@@ -34,7 +34,8 @@ namespace RevBayesCore
 
 void createDirectoryForFile(const path& p)
 {
-    create_directories(p.parent_path());
+    if (not p.parent_path().empty())
+        create_directories(p.parent_path());
 }
 
 path appendToStem(const path& p, const std::string& s)
