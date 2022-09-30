@@ -84,6 +84,36 @@ endif
 ####
 subdir('src')
 
+##### rpath: where to find shared libraries #####
+extra_rpath = ''
+if target_machine.system() == 'linux'
+  # This allows an installed structure of
+  #
+  # RevBayes/
+  #    bin/
+  #       rb
+  #    lib/
+  #       RevBayes/
+  #          *.so
+  # To find the shared libs from inside bin/ we use $ORIGIN/../lib/RevBayes/
+  #
+  extra_rpath = '$ORIGIN/../lib/RevBayes/'
+elif target_machine.system() == 'darwin'
+  # If ever we make an App bundle, the structure might be
+  #
+  # RevBayes.app/
+  #    Contents/
+  #       MacOS/
+  #          rb
+  #       PlugIns/
+  #          *.dylib
+  #
+  # So, at that point, we might add "@loaderpath/../Plugins/"
+  #
+  extra_rpath = '@loaderpath/../lib/RevBayes/;@loaderpath/../Plugins/'
+endif
+
+
 ############# libraries #################
 core = static_library('rb-core',
                       core_sources,
@@ -112,6 +142,7 @@ rb = executable(rb_name,
                 link_with: [core, revlanguage, libs],
                 include_directories: [src_inc],
                 dependencies: [boost, mpi, openlibm],
+                install_rpath: extra_rpath,
                 install: true)
 
 if get_option('studio')
@@ -128,6 +159,7 @@ if get_option('studio')
                          link_with: [core, revlanguage, libs, cmd],
                          include_directories: [src_inc],
                          dependencies: [boost, mpi, gtk2, openlibm],
+                         install_rpath: extra_rpath,
                          install: true)
 
 endif
@@ -141,6 +173,7 @@ if get_option('help2yml')
              link_with: [core, revlanguage, libs, help2yml],
              include_directories: [src_inc],
              dependencies: [boost, mpi],
+             install_rpath: extra_rpath,
              install: true)
 endif
 
