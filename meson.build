@@ -1,11 +1,11 @@
 project('RevBayes', ['cpp', 'c'],
-        version: '1.0.12',
+        version: '1.2.0',
         default_options: [
           'buildtype=release',
           'cpp_std=c++14',
           'b_ndebug=if-release'
         ],
-        meson_version: '>= 0.53',
+        meson_version: '>= 0.57',
         license: 'GPLv2')
 
 cpp = meson.get_compiler('cpp')
