@@ -159,21 +159,22 @@ jobs:
          restore-keys: |
            ${{ matrix.name }}-ccache-
 
-    - name: Install BOOST (Linux)
-      if: runner.os == 'Linux' && matrix.name != 'windows'
+    - name: Compile static BOOST libs (Linux & Mac)
+      if: matrix.name != 'windows'
       run: |
         # Don't use weird boost version installed by github actions.
         sudo rm -rf /usr/local/share/boost
 
-        # Maybe install a particular boost version.
-        if [ -n "${{ matrix.install_boost }}" ] ; then
-          sudo apt-get remove libboost-all-dev
-          sudo add-apt-repository ppa:mhier/libboost-latest
-          sudo apt-get update
-          sudo apt-get install -y libboost${{ matrix.install_boost }}-dev
-        else
-          sudo apt-get install -y libboost-all-dev
-        fi
+        # This is a hack.
+        ( cd
+          curl -O -L https://boostorg.jfrog.io/artifactory/main/release/1.74.0/source/boost_1_74_0.tar.gz
+          tar -xzvf boost_1_74_0.tar.gz
+          cd boost_1_74_0
+          ./bootstrap.sh --with-libraries=atomic,chrono,filesystem,system,regex,thread,date_time,program_options,math,serialization --prefix=../installed-boost-1.74.0
+          ./b2 link=static install
+          echo -e "\n    BOOST root is at $(cd ../installed-boost-1.74.0; pwd)\n"
+          echo BOOST_ROOT=$(cd ../installed-boost-1.74.0; pwd) >> $GITHUB_ENV
+        )
 
     - name: Install BOOST and set up build (Windows meson cross compile)
       if: matrix.name == 'windows'
