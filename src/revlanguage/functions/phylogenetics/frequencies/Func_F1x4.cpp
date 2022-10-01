@@ -30,17 +30,23 @@ Func_F1x4* Func_F1x4::clone( void ) const
     return new Func_F1x4( *this );
 }
 
+typedef RevBayesCore::Simplex CSimplex;
 
-RevBayesCore::TypedFunction< RevBayesCore::Simplex >* Func_F1x4::createFunction( void ) const
+CSimplex* F1x4(const CSimplex& nuc_pi1)
 {
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* bf = static_cast<const Simplex &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    return RevBayesCore::F1x4(nuc_pi1).clone();
+}
+
+RevBayesCore::TypedFunction< CSimplex >* Func_F1x4::createFunction( void ) const
+{
+    RevBayesCore::TypedDagNode< CSimplex >* bf = static_cast<const Simplex &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
 
     if ( bf->getValue().size() != 4 )
     {
         throw RbException("The fnF1x4 function takes 4 base frequencies.");
     }
 
-    return RevBayesCore::generic_function_ptr( RevBayesCore::F1x4, bf );
+    return RevBayesCore::generic_function_ptr< CSimplex >( F1x4, bf );
 }
 
 

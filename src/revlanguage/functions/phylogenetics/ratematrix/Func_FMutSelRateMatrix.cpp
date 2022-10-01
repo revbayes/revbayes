@@ -58,7 +58,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_FMutSelRateMatr
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* fitnesses = static_cast<const ModelVector<Real> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< double >* omega = static_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
 
-    return RevBayesCore::generic_function_ptr2< RevBayesCore::RateGenerator >( FMutSelFunc, fitnesses, omega, mu_nuc );
+    return RevBayesCore::generic_function_ptr< RevBayesCore::RateGenerator >( FMutSelFunc, fitnesses, omega, mu_nuc );
 }
 
 

@@ -194,7 +194,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_wag::createFunc
         bf = static_cast<const Simplex &>( *obj ).getDagNode();
     }
 
-    return RevBayesCore::generic_function_ptr2< RevBayesCore::RateGenerator >( WAG, bf);
+    return RevBayesCore::generic_function_ptr< RevBayesCore::RateGenerator >( WAG, bf);
 }
 
 
