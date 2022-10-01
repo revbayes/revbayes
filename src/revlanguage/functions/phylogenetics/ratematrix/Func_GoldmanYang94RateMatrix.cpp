@@ -59,7 +59,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_GoldmanYang94Ra
     RevBayesCore::TypedDagNode< double >* om = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* cf = static_cast<const Simplex &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
 
-    return RevBayesCore::generic_function_ptr2< RevBayesCore::RateGenerator >( CodonGY94, ka, om, cf );
+    return RevBayesCore::generic_function_ptr< RevBayesCore::RateGenerator >( CodonGY94, ka, om, cf );
 }
 
 
