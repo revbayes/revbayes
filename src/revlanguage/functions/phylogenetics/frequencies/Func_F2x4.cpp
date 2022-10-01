@@ -33,12 +33,18 @@ Func_F2x4* Func_F2x4::clone( void ) const
 
 typedef RevBayesCore::Simplex CSimplex;
 
+CSimplex* F2x4(const CSimplex& nuc_pi1, const CSimplex& nuc_pi2)
+{
+    return RevBayesCore::F2x4(nuc_pi1, nuc_pi2).clone();
+}
+
+
 RevBayesCore::TypedFunction< CSimplex >* Func_F2x4::createFunction( void ) const
 {
     RevBayesCore::TypedDagNode< CSimplex >* bf1 = dynamic_cast<const Simplex &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< CSimplex >* bf2 = dynamic_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
 
-    return RevBayesCore::generic_function_ptr( RevBayesCore::F2x4, bf1, bf2 );
+    return RevBayesCore::generic_function_ptr< CSimplex >( F2x4, bf1, bf2 );
 }
 
 

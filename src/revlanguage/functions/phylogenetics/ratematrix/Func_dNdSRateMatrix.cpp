@@ -51,7 +51,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_dNdSRateMatrix:
     RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* nuc_q = static_cast<const RateGenerator &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< double >* omega = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
 
-    return RevBayesCore::generic_function_ptr2< RevBayesCore::RateGenerator >( dNdSFunc, omega, nuc_q );
+    return RevBayesCore::generic_function_ptr< RevBayesCore::RateGenerator >( dNdSFunc, omega, nuc_q );
 }
 
 
