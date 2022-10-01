@@ -1,7 +1,7 @@
 # RevBayes 1.2.1 (unreleased)
 
 ## Speed
-  * _UNMERGED_ Cache transition probability matrices.
+  * Cache transition probability matrices.
 
 ## Features
   * Add Occurence Birth-Death Process.
