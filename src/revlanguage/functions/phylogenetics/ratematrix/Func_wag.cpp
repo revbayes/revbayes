@@ -208,7 +208,7 @@ const ArgumentRules& Func_wag::getArgumentRules( void ) const
     if ( !rules_set )
     {
         
-        argumentRules.push_back( new ArgumentRule( "baseFrequencies", Simplex::getClassTypeSpec(), "The stationary frequencies of the states.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, bf_empirical ) );
+        argumentRules.push_back( new ArgumentRule( "aaFrequencies", Simplex::getClassTypeSpec(), "The stationary frequencies of the states.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, bf_empirical ) );
         
         rules_set = true;
     }
