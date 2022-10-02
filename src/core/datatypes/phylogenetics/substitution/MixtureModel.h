@@ -41,6 +41,10 @@ namespace RevBayesCore {
         TransitionProbabilityMatrix      calculateTransitionProbabilities(const Tree& t, int node, int mixture_component) const;
         std::vector<TransitionProbabilityMatrix> calculateTransitionProbabilities(const Tree& t, int node) const;
 
+        virtual double                   rate() const = 0;
+        virtual void                     setRate(double r) = 0;
+        virtual void                     scale(double f) = 0;
+
         virtual std::vector<double>      getRootFrequencies(int mixture_component) const = 0;
         virtual std::vector<double>      componentProbs() const = 0;
 
