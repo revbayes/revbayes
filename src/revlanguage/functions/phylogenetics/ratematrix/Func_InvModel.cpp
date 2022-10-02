@@ -1,4 +1,4 @@
-#include "Func_GammaRateModel.h"
+#include "Func_InvModel.h"
 
 #include "RealPos.h"
 #include "RlDeterministicNode.h"
@@ -20,7 +20,9 @@
 
 #include "DistributionChisq.h"
 #include "RbMathFunctions.h"
+#include "ConcreteTimeReversibleRateMatrix.h"
 #include "ConcreteMixtureModel.h"
+#include "UnitMixtureModel.h"
 
 using std::vector;
 using std::unique_ptr;
@@ -44,7 +46,19 @@ RevBayesCore::ConcreteMixtureModel* InvModelFunc(const RevBayesCore::MixtureMode
     // The non-invariant part.
     sub_models.push_back( unique_ptr<RevBayesCore::MixtureModel>(sub_model.clone()) );
 
-    // sub_models.push_back( invariant );
+    auto f = sub_model.componentProbs();
+    int n = sub_model.getNumberOfStates();
+    vector<double> pi(n,0);
+    for(int m=0; m<f.size(); m++)
+    {
+        auto sub_pi = sub_model.getRootFrequencies(m);
+        for(int l=0;l<pi.size();l++)
+            pi[l] += sub_pi[l] * f[m];
+    }
+    vector<double> er(n*(n-1)/2,0);
+    RevBayesCore::ConcreteTimeReversibleRateMatrix INV(er,pi,{});
+
+    sub_models.push_back( unique_ptr<RevBayesCore::MixtureModel>(new RevBayesCore::UnitMixtureModel(INV)) );
     
     return new RevBayesCore::ConcreteMixtureModel(sub_models, fractions);
 }
@@ -53,7 +67,7 @@ using namespace RevLanguage;
 
 
 /** default constructor */
-Func_GammaRateModel::Func_GammaRateModel( void ) : TypedFunction<MixtureModel>( )
+Func_InvModel::Func_InvModel( void ) : TypedFunction<MixtureModel>( )
 {
 }
 
@@ -64,13 +78,13 @@ Func_GammaRateModel::Func_GammaRateModel( void ) : TypedFunction<MixtureModel>( 
  *
  * \return A new copy of the process.
  */
-Func_GammaRateModel* Func_GammaRateModel::clone( void ) const
+Func_InvModel* Func_InvModel::clone( void ) const
 {
-    return new Func_GammaRateModel( *this );
+    return new Func_InvModel( *this );
 }
 
 
-RevBayesCore::TypedFunction< RevBayesCore::MixtureModel >* Func_GammaRateModel::createFunction( void ) const
+RevBayesCore::TypedFunction< RevBayesCore::MixtureModel >* Func_InvModel::createFunction( void ) const
 {
     RevBayesCore::TypedDagNode< RevBayesCore::MixtureModel >* submodel = static_cast<const MixtureModel &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< double >* pInv = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
@@ -80,7 +94,7 @@ RevBayesCore::TypedFunction< RevBayesCore::MixtureModel >* Func_GammaRateModel::
 
 
 /* Get argument rules */
-const ArgumentRules& Func_GammaRateModel::getArgumentRules( void ) const
+const ArgumentRules& Func_InvModel::getArgumentRules( void ) const
 {
     static ArgumentRules argumentRules = ArgumentRules();
     static bool          rules_set = false;
@@ -97,17 +111,17 @@ const ArgumentRules& Func_GammaRateModel::getArgumentRules( void ) const
 }
 
 
-const std::string& Func_GammaRateModel::getClassType(void)
+const std::string& Func_InvModel::getClassType(void)
 {
 
-    static std::string rev_type = "Func_GammaRateModel";
+    static std::string rev_type = "Func_InvModel";
 
     return rev_type;
 }
 
 
 /* Get class type spec describing type of object */
-const TypeSpec& Func_GammaRateModel::getClassTypeSpec(void)
+const TypeSpec& Func_InvModel::getClassTypeSpec(void)
 {
 
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
@@ -119,16 +133,16 @@ const TypeSpec& Func_GammaRateModel::getClassTypeSpec(void)
 /**
  * Get the primary Rev name for this function.
  */
-std::string Func_GammaRateModel::getFunctionName( void ) const
+std::string Func_InvModel::getFunctionName( void ) const
 {
     // create a name variable that is the same for all instance of this class
-    std::string f_name = "fnGamma";
+    std::string f_name = "fnInv";
 
     return f_name;
 }
 
 
-const TypeSpec& Func_GammaRateModel::getTypeSpec( void ) const
+const TypeSpec& Func_InvModel::getTypeSpec( void ) const
 {
 
     static TypeSpec type_spec = getClassTypeSpec();
