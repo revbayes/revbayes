@@ -4,7 +4,7 @@
 #include "TimeReversibleRateMatrix.h"
 #include <complex>
 #include <vector>
-
+#include <boost/optional.hpp>
 
 namespace RevBayesCore {
 
@@ -19,10 +19,11 @@ namespace RevBayesCore {
      */
     class ConcreteTimeReversibleRateMatrix : public TimeReversibleRateMatrix
     {
+        boost::optional<double> _rate;
 
     public:
-        ConcreteTimeReversibleRateMatrix(const std::vector<double>& er, const std::vector<double>& pi);
-        ConcreteTimeReversibleRateMatrix(const MatrixReal& ER, const std::vector<double>& pi);
+        ConcreteTimeReversibleRateMatrix(const std::vector<double>& er, const std::vector<double>& pi, boost::optional<double> rate = 1.0);
+        ConcreteTimeReversibleRateMatrix(const MatrixReal& ER, const std::vector<double>& pi, boost::optional<double> rate = 1.0);
 
         ConcreteTimeReversibleRateMatrix(const ConcreteTimeReversibleRateMatrix& m) = default;
 

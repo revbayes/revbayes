@@ -80,8 +80,8 @@ vector<double> flatten_exchange_rates( const MatrixReal& ER )
 }
 
 /** Construct rate matrix with n states */
-ConcreteTimeReversibleRateMatrix::ConcreteTimeReversibleRateMatrix( const vector<double>& er, const vector<double>& pi)
-    : TimeReversibleRateMatrix( pi.size() )
+ConcreteTimeReversibleRateMatrix::ConcreteTimeReversibleRateMatrix( const vector<double>& er, const vector<double>& pi, boost::optional<double> r)
+    : TimeReversibleRateMatrix( pi.size() ), _rate(r)
 {
     int n = pi.size();
     assert( er.size() == n*(n-1)/2 );
@@ -91,8 +91,8 @@ ConcreteTimeReversibleRateMatrix::ConcreteTimeReversibleRateMatrix( const vector
     update();
 }
 
-ConcreteTimeReversibleRateMatrix::ConcreteTimeReversibleRateMatrix( const MatrixReal& ER, const vector<double>& pi)
-    : ConcreteTimeReversibleRateMatrix( flatten_exchange_rates(ER), pi)
+ConcreteTimeReversibleRateMatrix::ConcreteTimeReversibleRateMatrix( const MatrixReal& ER, const vector<double>& pi, boost::optional<double> r)
+    : ConcreteTimeReversibleRateMatrix( flatten_exchange_rates(ER), pi, r)
 {
 }
 
@@ -132,8 +132,9 @@ void ConcreteTimeReversibleRateMatrix::update( void )
         // compute the diagonal values
         setDiagonal();
 
-        // rescale
-        rescaleToAverageRate( 1.0 );
+        // rescale - Problem!
+        if (_rate)
+            rescaleToAverageRate( *_rate );
 
         // clean flags
         needs_update = false;
