@@ -244,7 +244,7 @@ else
     rm -rf "${BUILD_DIR}"
     mkdir "${BUILD_DIR}"
     ######### Actually run meson
-    echo "Running 'meson ${BUILDDIR} ../../../src $meson_args' in $(pwd)"
+    echo "Running 'meson ${BUILDDIR} ../.. $meson_args' in $(pwd)"
     meson ${BUILD_DIR} ../.. $meson_args
     echo
     echo "Running 'ninja -C ${BUILD_DIR} ${ninja_args}' in $(pwd)"
