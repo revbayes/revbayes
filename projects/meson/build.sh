@@ -8,6 +8,7 @@ all_args="$@"
 # set default values
 debug="false"
 mpi="false"
+cmd="false"
 jupyter="false"
 help2yml="false"
 boost_root=""
