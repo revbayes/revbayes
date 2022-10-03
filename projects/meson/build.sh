@@ -238,7 +238,7 @@ ninja_args=install
 if [ -n "$j" ] ; then ninja_args="-j $j ${ninja_args}" ; fi
 echo "Trying to run 'ninja -C ${BUILD_DIR} ${ninja_args}' in $(pwd)"
 
-if [ -d "${BUILD_DIR}" ] && ninja -C "${BUILD_DIR}" ${ninja_args} ; then
+if [ -e "${BUILD_DIR}/compile_commands.json" ] && (cd "${BUILD_DIR}" ; meson configure $meson_args) && ninja -C "${BUILD_DIR}" ${ninja_args} ; then
     true
 else
     rm -rf "${BUILD_DIR}"
