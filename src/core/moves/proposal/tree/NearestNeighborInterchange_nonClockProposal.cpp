@@ -142,6 +142,11 @@ double NearestNeighborInterchange_nonClockProposal::doProposal( void )
     else
     {
         // the branch begins at the root
+
+        // If the root only has two children, then the switch we want to perform here isn't an NNI!
+        if (parent.getNumberOfChildren() < 3)
+            throw RbException()<<"NearestNeighborInterchange_nonClockProposal::doProposal( ): root has only "<<parent.getNumberOfChildren()<<" children, but should be at least 3.";
+
         
         // first start by checking if the chosen node is child 0
         size_t child_offset = (node == &parent.getChild(0) ? 1 : 0);
