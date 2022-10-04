@@ -53,6 +53,10 @@ Examples:
                      shift
                      continue
                      ;;
+                 -*=*)
+                     echo "$0: I don't understand '$1' - did you mean '$(echo $1 | sed 's/=/ /')'?"
+                     exit 1
+                     ;;
     esac
 
     # parse pairs
