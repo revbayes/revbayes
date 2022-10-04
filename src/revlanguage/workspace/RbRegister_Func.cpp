@@ -177,6 +177,7 @@
 #include "Func_revPoMoTwo4N.h"
 #include "Func_revPoMoThree4N.h"
 #include "Func_revPoMoThree4.h"
+#include "Func_revPoMoNeutralM4N.h"
 #include "Func_rtRev.h"
 #include "Func_vt.h"
 #include "Func_t92.h"
@@ -360,6 +361,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_revPoMoTwo4N()                                );
         addFunction( new Func_revPoMoThree4N()                              );
         addFunction( new Func_revPoMoThree4()                               );
+        addFunction( new Func_revPoMoNeutralM4N()                           );
         addFunction( new Func_rtRev()                                       );
         addFunction( new Func_t92()                                         );
         addFunction( new Func_TamuraNei()                                   );
