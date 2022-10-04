@@ -62,7 +62,11 @@ else
   boost = dependency('boost', modules : boost_modules, version: '>=1.71')
 endif
 
-openlibm = dependency('openlibm', required: get_option('openlibm'))
+if get_option('openlibm')
+  openlibm = dependency('openlibm')
+else
+  openlibm = dependency('', required: false)
+endif
 
 rb_name = 'rb'
 if get_option('mpi')
