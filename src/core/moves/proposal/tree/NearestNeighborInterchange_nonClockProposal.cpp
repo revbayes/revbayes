@@ -273,8 +273,8 @@ void NearestNeighborInterchange_nonClockProposal::undoProposal( void )
         node_B->addChild( parent );
         node->addChild( node_A );
         parent->addChild( node );
-        node->setParent( parent );
         parent->setParent( node_B );
+        node->setParent( parent );
         node_A->setParent( node );
         
     }
