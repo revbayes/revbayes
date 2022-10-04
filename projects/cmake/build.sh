@@ -9,7 +9,8 @@ all_args="$@"
 debug="false"
 travis="false"
 mpi="false"
-help="false"
+cmd="false"
+help2yml="false"
 jupyter="false"
 boost_root=""
 boost_lib=""
@@ -32,6 +33,7 @@ while echo $1 | grep ^- > /dev/null; do
 -mpi            <true|false>    : set to true if you want to build the MPI version. Defaults to false.
 -cmd            <true|false>    : set to true if you want to build RevStudio with GTK2+. Defaults to false.
 -jupyter        <true|false>    : set to true if you want to build the jupyter version. Defaults to false.
+-help2yml       <true|false>    : update the help database and build the YAML help generator. Defaults to false.
 -boost_root     string          : specify directory containing Boost headers and libraries (e.g. `/usr/`). Defaults to unset.
 -boost_lib      string          : specify directory containing Boost libraries. (e.g. `/usr/lib`). Defaults to unset.
 -boost_include  string          : specify directory containing Boost libraries. (e.g. `/usr/include`). Defaults to unset.
@@ -43,11 +45,11 @@ while echo $1 | grep ^- > /dev/null; do
 You can also specify cmake variables as -DCMAKE_VAR1=value1 -DCMAKE_VAR2=value2
 
 Examples:
-  ./build.sh -mpi true -help true
+  ./build.sh -mpi true -help2yml true
   ./build.sh -boost_root /home/santa/installed-boost-1.72
   ./build.sh -boost_include /home/santa/boost_1_72_0/ -boost_lib /home/santa/boost_1_72_0/stage/lib
-  ./build.sh -DBOOST_ROOT=/home/santa/boost_1.72
-  ./build.sh -mpi true -DHELP=ON -DBOOST_ROOT=/home/santa/boost_1.72'
+  ./build.sh -DBOOST_ROOT=/home/santa/installed-boost_1.72
+  ./build.sh -mpi true -DHELP=ON -DBOOST_ROOT=/home/santa/installed-boost_1.72'
         exit
     fi
 
@@ -55,6 +57,10 @@ Examples:
                      cmake_args="$cmake_args $1"
                      shift
                      continue
+                     ;;
+                 -*=*)
+                     echo "$0: I don't understand '$1' - did you mean '$(echo $1 | sed 's/=/ /')'?"
+                     exit 1
                      ;;
     esac
 
@@ -82,9 +88,8 @@ if [ "$travis" = "true" ]; then
     BUILD_DIR="build"
     export CC=${C_COMPILER}
     export CXX=${CXX_COMPILER}
-    all_args="-travis true -mpi ${USE_MPI} -help true -exec_name rb"
     exec_name=rb
-    help=true
+    help2yml=true
 fi
 
 if [ "$debug" = "true" ] ; then
@@ -140,11 +145,11 @@ if [ "$static_boost" = "true" ] ; then
     cmake_args="-DSTATIC_BOOST=ON $cmake_args"
 fi
 
-if [ "$help" = "true" ] ; then
+if [ "$help2yml" = "true" ] ; then
     cmake_args="-DHELP=ON $cmake_args"
 fi
 
-echo "Building ${exec_name}"
+echo "RevBayes executable is '${exec_name}'"
 cmake_args="-DRB_EXEC_NAME=${exec_name} $cmake_args"
 
 if [ "$1" = "clean" ]
@@ -159,14 +164,16 @@ fi
 
 ######## generate git version number
 ./generate_version_number.sh
+echo " Saving old GitVersion.cpp in projects/cmake/GitVersion_backup.cpp"
 if [ -e ../../src/revlanguage/utils/GitVersion.cpp ] ; then
     cp ../../src/revlanguage/utils/GitVersion.cpp GitVersion_backup.cpp
 fi
+echo " Copying current GitVersion.cpp to src/revlanguage/utils"
 mv GitVersion.cpp ../../src/revlanguage/utils/
 
 
 ######### Generate help database
-if [ "$help" = "true" ]
+if [ "$help2yml" = "true" ]
 then
     (
         cd ../../src
@@ -191,7 +198,7 @@ for var in CC CXX CFLAGS CPPFLAGS CXXFLAGS LDFLAGS BOOST_ROOT BOOST_INCLUDEDIR B
     cmd="if [ -n \"\${$var}\" ] ; then echo \"  ${var}=\${$var}\"; fi"
     eval $cmd
 done
-
+echo
 
 ######### Actually run cmake
 echo "Running 'cmake ../../../src $cmake_args' in $(pwd)"
