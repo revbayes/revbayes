@@ -155,7 +155,7 @@ namespace RevBayesCore {
 
         void                                                fillNodesByPhylogeneticTraversal(TopologyNode* node);               //!< fill the nodes vector by a preorder traversal recursively starting with this node.
         bool                                                recursivelyPruneTaxa(TopologyNode*, const RbBitSet&);
-
+        void                                                reindexNodes();
 
         // private members
         TopologyNode*                                       root;
