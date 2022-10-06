@@ -134,6 +134,9 @@ namespace RevBayesCore {
         void                                                reroot(TopologyNode &n, bool make_bifurcating, bool reindex);
 //        void                                                rerootAndMakeBifurcating(const Clade &o, bool reindex);                                             //!< Re-root the tree with the given outgroup, and make sure we have a bifuration at the root and elsewhere
         void                                                removeDuplicateTaxa(void);
+        void                                                removeDegree2Node(TopologyNode* n);
+        bool                                                removeNodeIfDegree2(TopologyNode& n);
+        bool                                                removeRootIfDegree2();
         void                                                renameNodeParameter(const std::string &old_name, const std::string &new_name);
         void                                                resetTaxonBitSetMap(void);                                                                          //!< Resets the map that holds the BitSet index for each taxon
         TopologyNode&                                       reverseParentChild(TopologyNode &n);                                                                //!< Reverse the parent child relationship.
