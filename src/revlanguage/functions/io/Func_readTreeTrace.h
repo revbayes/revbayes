@@ -34,8 +34,8 @@ namespace RevLanguage {
         
     private:
         
-        WorkspaceVector<TraceTree>*         readTrees(const std::vector<RevBayesCore::path> &fns, const std::string &d, bool clock, long thin, long offset);
-        WorkspaceVector<TraceTree>*         readTreesNexus(const std::vector<RevBayesCore::path> &fns, bool clock, long thin, long offset);  //!< Read tree trace from Nexus file(s)
+        WorkspaceVector<TraceTree>*         readTrees(const std::vector<RevBayesCore::path> &fns, const std::string &d, const std::string& treetype, bool unroot_nonclock, long thin, long offset);
+        WorkspaceVector<TraceTree>*         readTreesNexus(const std::vector<RevBayesCore::path> &fns, const std::string& treetype, bool unroot_nonclock, long thin, long offset);  //!< Read tree trace from Nexus file(s)
     };
     
 }
