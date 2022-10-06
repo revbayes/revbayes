@@ -11,6 +11,8 @@
 
   * _UNMERGED_ Statically link boost into distributed binaries.
   * _UNMERGED_ Don't link distributed binaries with openlibm.
+  * _UNMERGED_ Fix crash in unrooted NNI and SPR.
+  * _UNMERGED_ Don't get stuck on MCMC with amino-acid models.
   * Fix vectors in functions.
   * Fix using file paths and directories on Windows.
   * Restore dnFBDP synonym for dnBDSTP.
