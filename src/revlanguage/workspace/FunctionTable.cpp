@@ -287,7 +287,7 @@ std::vector<Function *> FunctionTable::findFunctions(const std::string& name) co
 
 
 /** Find function (also processes arguments) */
-const Function& FunctionTable::findFunction(const std::string& name, const std::vector<Argument>& args, bool once) const
+const Function* FunctionTable::findFunction(const std::string& name, const std::vector<Argument>& args, bool once) const
 {
     
     std::pair<std::multimap<std::string, Function *>::const_iterator,
@@ -305,7 +305,7 @@ const Function& FunctionTable::findFunction(const std::string& name, const std::
         }
         else
         {
-            throw RbException("No function named '"+ name + "'");
+            return nullptr;
         }
         
     }
@@ -376,7 +376,7 @@ const Function& FunctionTable::findFunction(const std::string& name, const std::
             msg << std::endl;
             throw RbException( msg.str() );
         }
-        return *ret_val.first->second;
+        return ret_val.first->second;
     }
     else 
     {
@@ -474,7 +474,7 @@ const Function& FunctionTable::findFunction(const std::string& name, const std::
         }
         else 
         {
-            return *best_match;
+            return best_match;
         }
         
     }
@@ -547,9 +547,12 @@ const Function& FunctionTable::getFunction(const std::string& name, const std::v
 {
     
     // find the template function
-    const Function& the_function = findFunction(name, args, once);
+    const Function* the_function = findFunction(name, args, once);
 
-    return the_function;
+    if (not the_function)
+        throw RbException("No function named '"+ name + "'");
+
+    return *the_function;
 }
 
 void FunctionTable::getFunctionNames(std::vector<std::string>& names) const
