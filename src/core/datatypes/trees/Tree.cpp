@@ -320,16 +320,7 @@ void Tree::dropTipNode( size_t index )
         }
     }
 
-    nodes.clear();
-
-    // bootstrap all nodes from the root and add the in a pre-order traversal
-    fillNodesByPhylogeneticTraversal(root);
-    for (unsigned int i = 0; i < nodes.size(); ++i)
-    {
-        nodes[i]->setIndex(i);
-    }
-
-    num_nodes = nodes.size();
+    reindexNodes();
 
     // count the number of tips
     num_tips = 0;
@@ -1550,6 +1541,19 @@ bool Tree::recursivelyPruneTaxa( TopologyNode* n, const RbBitSet& prune_map )
 }
 
 
+void Tree::reindexNodes()
+{
+    nodes.clear();
+
+    // bootstrap all nodes from the root and add the in a pre-order traversal
+    fillNodesByPhylogeneticTraversal(root);
+    for (unsigned int i = 0; i < nodes.size(); ++i)
+    {
+        nodes[i]->setIndex(i);
+    }
+
+    num_nodes = nodes.size();
+}
 void Tree::removeDuplicateTaxa( void )
 {
 
