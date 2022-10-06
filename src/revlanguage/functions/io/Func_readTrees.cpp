@@ -58,7 +58,7 @@ RevPtr<RevVariable> Func_readTrees::execute( void )
     const std::string&  fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
     const std::string&  text = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
     const std::string&  treetype = static_cast<const RlString&>( args[2].getVariable()->getRevObject() ).getValue();
-
+    bool unroot_nonclock = static_cast<const RlBoolean&>( args[3].getVariable()->getRevObject() ).getValue();
 
     if (fn != "")
     {
@@ -82,12 +82,22 @@ RevPtr<RevVariable> Func_readTrees::execute( void )
         {
             ModelVector<BranchLengthTree> *trees = new ModelVector<BranchLengthTree>();
             
-            std::vector<RevBayesCore::Tree*>* tmp = reader.readBranchLengthTrees( fn );
-            for (std::vector<RevBayesCore::Tree*>::iterator t = tmp->begin(); t != tmp->end(); ++t)
+            std::vector<RevBayesCore::Tree*>* tmp_trees = reader.readBranchLengthTrees( fn );
+            // FIXME - this can be NULL for branch-length trees, but not for time trees!  Bad.
+            if (tmp_trees)
             {
-                trees->push_back( BranchLengthTree(*t) );
+                for (auto tree: *tmp_trees)
+                {
+                    if (unroot_nonclock)
+                    {
+                        tree->removeRootIfDegree2();
+                        tree->setRooted(false);
+                    }
+
+                    trees->push_back( BranchLengthTree(*tree) );
+                }
+                delete tmp_trees;
             }
-            delete tmp;
             return new RevVariable( trees );
         }
         
@@ -109,7 +119,6 @@ RevPtr<RevVariable> Func_readTrees::execute( void )
                 trees->push_back( TimeTree(*blTree) );
                 
                 delete blTree;
-                
             }
             return new RevVariable( trees );
         }
@@ -119,10 +128,16 @@ RevPtr<RevVariable> Func_readTrees::execute( void )
             while (RevBayesCore::safeGetline(iss, aux))
             {
                 RevBayesCore::Tree *blTree = c.convertFromNewick( aux );
+
+                if (unroot_nonclock)
+                {
+                    blTree->removeRootIfDegree2();
+                    blTree->setRooted(false);
+                }
+
                 trees->push_back( BranchLengthTree(*blTree) );
                 
                 delete blTree;
-                
             }
             return new RevVariable( trees );
             
@@ -156,6 +171,8 @@ const ArgumentRules& Func_readTrees::getArgumentRules( void ) const
         tree_options.push_back( "non-clock" );
         argumentRules.push_back( new OptionRule( "treetype", new RlString("clock"), tree_options, "The type of trees." ) );
         
+        argumentRules.push_back( new ArgumentRule( "unroot_nonclock", RlBoolean::getClassTypeSpec(), "Remove a degree-2 root node and set the tree unrooted, if treetype is non-clock.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+
         rules_set = true;
     }
 
