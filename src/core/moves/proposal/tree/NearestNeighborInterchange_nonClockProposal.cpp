@@ -142,28 +142,23 @@ double NearestNeighborInterchange_nonClockProposal::doProposal( void )
     else
     {
         // the branch begins at the root
+
+        // If the root only has two children, then the switch we want to perform here isn't an NNI!
+        if (parent.getNumberOfChildren() < 3)
+            throw RbException()<<"NearestNeighborInterchange_nonClockProposal::doProposal( ): root has only "<<parent.getNumberOfChildren()<<" children, but should be at least 3.";
+
+        std::vector<TopologyNode*> children;
+        for(auto child:  parent.getChildren())
+            if (child != node)
+                children.push_back(child);
         
-        // first start by checking if the chosen node is child 0
-        size_t child_offset = (node == &parent.getChild(0) ? 1 : 0);
-        
-        // now we can pick the second node, which can be either of the two remaining children
-        if ( rng->uniform01() < 0.5 )
-        {
-            // we picked the first remaining child
-            node_B = &parent.getChild(child_offset);
-        }
-        else
-        {
-            // we picked the second remaining child
-            node_B = &parent.getChild(child_offset+1);
-            if ( node_B == node )
-            {
-                node_B = &parent.getChild(child_offset+2);
-            }
-        }
-        
+        assert(children.size() >= 2);
+
+        int index = int(rng->uniform01() * children.size());
+        node_B = children[ index ];
+        assert(&node_B->getParent() == &parent);
+
         picked_uncle = true;
-        
     }
 
     // now we store all necessary values
@@ -273,8 +268,8 @@ void NearestNeighborInterchange_nonClockProposal::undoProposal( void )
         node_B->addChild( parent );
         node->addChild( node_A );
         parent->addChild( node );
-        node->setParent( parent );
         parent->setParent( node_B );
+        node->setParent( parent );
         node_A->setParent( node );
         
     }

@@ -1733,6 +1733,11 @@ void Tree::resetTaxonBitSetMap( void )
 
 TopologyNode& Tree::reverseParentChild(TopologyNode &n)
 {
+    // This routine makes n the new root by
+    // * first making n.getParent() the new root, and then
+    // * making n.getParent() into a child of n.
+    // It returns the original root.
+
     TopologyNode* ret = &n;
 
     if ( !n.isRoot() )
@@ -1746,6 +1751,7 @@ TopologyNode& Tree::reverseParentChild(TopologyNode &n)
         p.setBranchLength(n.getBranchLength());
 
         p.removeChild( &n );
+        n.setParent( nullptr ); // Avoid loop in parent edges from n -> p -> n
         p.setParent( &n );
         n.addChild( &p );
     }
