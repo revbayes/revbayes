@@ -122,6 +122,7 @@ namespace RevBayesCore {
         size_t                                      getNumberOfChildren(void) const;                                                    //!< Returns the number of children
         size_t                                      getNumberOfShiftEvents(void) const;
         size_t                                      getNumberOfNodesInSubtree(bool tips) const;
+        size_t                                      getDegree() const;                                                                  //!< Returns the degree of the node
         TopologyNode&                               getParent(void);                                                                    //!< Returns the node's parent
         const TopologyNode&                         getParent(void) const;                                                              //!< Returns the node's parent
         std::string                                 getSpeciesName() const;                                                             //!< Get the species name for the node

@@ -1340,6 +1340,14 @@ size_t TopologyNode::getNumberOfChildren( void ) const
     return children.size();
 }
 
+size_t TopologyNode::getDegree( void ) const
+{
+    int degree = children.size();
+    if (not isRoot())
+        degree++;
+    return degree;
+}
+
 
 /**
  * Get the number of nodes contained in the subtree starting with this node as the root.
