@@ -208,6 +208,13 @@ int RevLanguage::Parser::execute(SyntaxElement* root, Environment &env) const {
         // Return signal indicating problem
         return 2;
     }
+    // Don't crash the intepreter for non-Rb exceptions such as file-not-found.
+    catch (std::exception& e)
+    {
+        RBOUT(e.what());
+        // Return signal indicating problem
+        return 2;
+    }
 
     // Print result if the root is not an assign expression
     if ( root->isAssignment() == false  &&  result != NULL  &&  result->getRevObject() != RevNullObject::getInstance() )
