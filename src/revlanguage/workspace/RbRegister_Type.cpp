@@ -84,6 +84,7 @@
 /* Inference types (in folder "analysis") */
 #include "RlBootstrapAnalysis.h"
 #include "RlBurninEstimationConvergenceAssessment.h"
+#include "RlConditionalPosteriorOrdinate.h"
 #include "RlHillClimber.h"
 #include "RlMcmc.h"
 #include "RlMcmcmc.h"
@@ -145,6 +146,7 @@ void RevLanguage::Workspace::initializeTypeGlobalWorkspace(void)
         /* Add inference types (in folder "datatypes/inference") (alphabetic order) */
         addType( new BootstrapAnalysis()                             );
         addType( new BurninEstimationConvergenceAssessment()         );
+        addType( new ConditionalPosteriorOrdinate()                  );
         addType( new HillClimber()                                   );
         addType( new Mcmc()                                          );
         addType( new Mcmcmc()                                        );
