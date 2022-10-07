@@ -88,14 +88,22 @@ bool StairwayPlotDistribution::calculateExpectedSFS(void) const
             TL += th[k-2]/(k-1.0);
         }
         // compute the exponential probability of no event over the tree
-        expected_SFS[0] = 1.0 - exp( -TL );
+        expected_SFS[0] = exp( -TL );
 
+//        // now normalize
+//        sum_expected_frequency += expected_SFS[0];
+//        for (size_t i=0; i<num_individuals; ++i)
+//        {
+//            // store the corrected frequency
+//            expected_SFS[i] = expected_SFS[i] / sum_expected_frequency;
+//        }
+        
         // now normalize
-        sum_expected_frequency += expected_SFS[0];
-        for (size_t i=0; i<num_individuals; ++i)
+        double prob_one_mut = TL * exp( -TL );
+        for (size_t i=1; i<num_individuals; ++i)
         {
             // store the corrected frequency
-            expected_SFS[i] = expected_SFS[i] / sum_expected_frequency;
+            expected_SFS[i] = expected_SFS[i] / sum_expected_frequency * prob_one_mut;
         }
     }
     
