@@ -46,9 +46,8 @@ namespace RevLanguage {
         virtual void                                printValue(std::ostream& o) const;                                                      //!< Print value (for user)
         void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
         
-        RevPtr<const RevVariable>                   likelihoodColumnName;
-        RevPtr<const RevVariable>                   powerColumnName;
         RevPtr<const RevVariable>                   delimiter;
+        RevPtr<const RevVariable>                   col_names_to_skip;
         RevPtr<const RevVariable>                   filename;
         
     };

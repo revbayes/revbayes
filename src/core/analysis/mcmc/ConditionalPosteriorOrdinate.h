@@ -24,12 +24,12 @@ namespace RevBayesCore {
     class ConditionalPosteriorOrdinate : public Cloneable, public Parallelizable {
         
     public:
-        ConditionalPosteriorOrdinate(const std::string &fn, const std::string &pn, const std::string &ln, const std::string &del);      //!< Constructor initializing the object.
+        ConditionalPosteriorOrdinate(const std::string &fn, const std::string &del, const std::vector<std::string>& skip_col_names);      //!< Constructor initializing the object.
         virtual                                            ~ConditionalPosteriorOrdinate(void);                                         //!< Virtual destructor
         
         // public methods
         ConditionalPosteriorOrdinate*                       clone(void) const;                                                          //!< Create a deep copy
-        double                                              marginalLikelihood( void ) const;                                           //!< Compute the marginal likelihood using SteppingStone-Sampler
+        double                                              predictiveProbability( const std::vector<double>& counts, bool site_probs_as_log ) const;                                           //!< Compute the marginal likelihood using SteppingStone-Sampler
         
     private:
         
