@@ -100,11 +100,8 @@ ValidationAnalysis::ValidationAnalysis( const MonteCarloAnalysis &m, size_t n, c
             current_analysis->setModel( current_model, false );
 #endif
             
-            std::stringstream ss;
-            ss << "Validation_Sim_" << i;
-        
             // set the monitor index
-            current_analysis->addFileMonitorExtension(ss.str(), true);
+            current_analysis->addFileMonitorExtension( "Validation_Sim_" + std::to_string(i), true);
         
             // add the current analysis to our vector of analyses
             runs[i] = current_analysis;
@@ -437,10 +434,7 @@ void ValidationAnalysis::summarizeAll( double credible_interval_size )
  **/
 void ValidationAnalysis::summarizeSim(double credible_interval_size, size_t idx)
 {
-    
-    std::stringstream ss;
-    ss << output_directory << "/Validation_Sim_" << idx << "/" << "posterior_samples.var";
-    std::string fn = ss.str();
+    path fn = output_directory / ("Validation_Sim_"+std::to_string(idx)) / "posterior_samples.var";
         
     TraceReader reader;
     std::vector<ModelTrace> traces = reader.readStochasticVariableTrace( fn, "\t");
