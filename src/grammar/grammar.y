@@ -25,6 +25,7 @@
 #include "Probability.h"
 #include "Parser.h"
 #include "RlBoolean.h"
+#include "RbException.h"
 #include "RlString.h"
 #include "Real.h"
 #include "RealPos.h"
@@ -69,6 +70,7 @@ extern Environment *executionEnvironment;
 
 /* The function yyerror handles errors. It is defined below. */
 int yyerror(const char *);
+RevLanguage::SyntaxElement* xxpipe(RevLanguage::SyntaxElement* arg, RevLanguage::SyntaxElement* fxnCallE);
 
 /* We use the global parser to execute the syntax tree */
 Parser& parser = Parser::getParser();
@@ -176,6 +178,7 @@ Parser& parser = Parser::getParser();
 %nonassoc   GT GE LT LE EQ NE
 %left       '+' '-'
 %left       '*' '/'
+%left       PIPE
 %left       ':' '%'
 %right      DECREMENT INCREMENT
 %left       UMINUS UPLUS
@@ -357,6 +360,7 @@ prog    :       END_OF_INPUT
         ;
 
 expression  :   constant                    { $$ = $1; }
+            |   PIPE_PLACEHOLDER            { $$ = new SyntaxPipePlaceholder(); }
 
             |   vector                      { $$ = new SyntaxFunctionCall("v", $1); }
 
@@ -393,7 +397,7 @@ expression  :   constant                    { $$ = $1; }
             |   expression AND2 expression  { $$ = new SyntaxBinaryExpr(SyntaxBinaryExpr::And2, $1, $3); }
             |   expression OR2 expression   { $$ = new SyntaxBinaryExpr(SyntaxBinaryExpr::Or2, $1, $3); }
 
-            |   PIPE_PLACEHOLDER            { $$ = new SyntaxPipePlaceholder(); }
+            |   expression PIPE expression  { $$ = xxpipe($1, $3); }
 
             |   arrowAssign                 { $$ = $1; }
             |   equationAssign              { $$ = $1; }
@@ -588,32 +592,6 @@ functionCall    :   fxnCall
 #endif
                         $3->setBaseVariable($1);
                         $$ = $3;
-                    }
-                |   expression PIPE fxnCall
-                    {
-#ifdef DEBUG_BISON_FLEX
-                        printf("Parser inserting piped member call in syntax tree\n");
-#endif
-                        $$ = $3;
-                        $$->pipeAddArg($1);
-                    }
-                |   expression PIPE variable '.' fxnCall
-                    {
-#ifdef DEBUG_BISON_FLEX
-                        printf("Parser inserting piped member call in syntax tree\n");
-#endif
-                        $5->setBaseVariable($3);
-                        $$ = $5;
-                        $$->pipeAddArg($1);
-                    }
-                |   expression PIPE functionCall '.' fxnCall
-                    {
-#ifdef DEBUG_BISON_FLEX
-                        printf("Parser inserting piped member call in syntax tree\n");
-#endif
-                        $5->setBaseVariable($3);
-                        $$ = $5;
-                        $$->pipeAddArg($1);
                     }
                 ;
 
@@ -967,4 +945,19 @@ int yyerror(const char *msg)
     return 1;
 }
 
+RevLanguage::SyntaxElement* xxpipe(RevLanguage::SyntaxElement* arg,
+                                   RevLanguage::SyntaxElement* fxnCallE)
+{
+    if (auto fxnCall = dynamic_cast<RevLanguage::SyntaxFunctionCall*>(fxnCallE))
+    {
+        fxnCall->pipeAddArg(arg);
+    }
+    else
+    {
+        delete arg;
+        delete fxnCallE;
+        throw RbException("The pipe operator requires a function call as RHS.");
+    }
 
+    return fxnCallE;
+}
