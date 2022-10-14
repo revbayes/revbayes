@@ -188,6 +188,8 @@ RevObject& RevVariable::getRevObject(void) const
     
     if ( isVectorVariable() && needs_building )
     {
+        needs_building = false;
+
         std::vector<Argument> args;
         int i=1;
         for (auto& element_var: *vector_var_elements)
@@ -517,12 +519,10 @@ void RevVariable::setRequiredTypeSpec(const TypeSpec &ts)
     const RevObject& theObject = this->getRevObject();
     if ( theObject != RevNullObject::getInstance() )
     {
-        
         if ( theObject.isType( ts ) == false )
         {
-            throw RbException( "Existing RevVariable object is not of the required type" );
+            throw RbException()<<"setRequiredTypeSpec: failed setting object of type "<<theObject.getType()<<" to "<<ts.getType();
         }
-        
     }
     
     required_type_spec = ts;
