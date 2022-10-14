@@ -936,6 +936,9 @@ size_t TopologyNode::getCladeIndex(const TopologyNode *c) const
 /** Get child at index i */
 const TopologyNode& TopologyNode::getChild(size_t i) const
 {
+    // Maybe this should be an assert, but not sure what the contract is here.
+    if (i >= children.size())
+        throw RbException()<<"Trying to get child "<<i<<", but node only has "<<children.size()<<" children.";
 
     return *children[i];
 }
@@ -944,6 +947,9 @@ const TopologyNode& TopologyNode::getChild(size_t i) const
 /** Get child at index i */
 TopologyNode& TopologyNode::getChild(size_t i)
 {
+    // Maybe this should be an assert, but not sure what the contract is here.
+    if (i >= children.size())
+        throw RbException()<<"Trying to get child "<<i<<", but node only has "<<children.size()<<" children.";
 
     return *children[i];
 }
@@ -1338,6 +1344,14 @@ size_t TopologyNode::getNumberOfChildren( void ) const
 {
 
     return children.size();
+}
+
+size_t TopologyNode::getDegree( void ) const
+{
+    int degree = children.size();
+    if (not isRoot())
+        degree++;
+    return degree;
 }
 
 

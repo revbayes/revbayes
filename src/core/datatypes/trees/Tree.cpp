@@ -320,16 +320,7 @@ void Tree::dropTipNode( size_t index )
         }
     }
 
-    nodes.clear();
-
-    // bootstrap all nodes from the root and add the in a pre-order traversal
-    fillNodesByPhylogeneticTraversal(root);
-    for (unsigned int i = 0; i < nodes.size(); ++i)
-    {
-        nodes[i]->setIndex(i);
-    }
-
-    num_nodes = nodes.size();
+    reindexNodes();
 
     // count the number of tips
     num_tips = 0;
@@ -1549,6 +1540,84 @@ bool Tree::recursivelyPruneTaxa( TopologyNode* n, const RbBitSet& prune_map )
     return false;
 }
 
+
+void Tree::reindexNodes()
+{
+    nodes.clear();
+
+    // bootstrap all nodes from the root and add the in a pre-order traversal
+    fillNodesByPhylogeneticTraversal(root);
+    for (unsigned int i = 0; i < nodes.size(); ++i)
+    {
+        nodes[i]->setIndex(i);
+    }
+
+    num_nodes = nodes.size();
+}
+
+void Tree::removeDegree2Node(TopologyNode* n)
+{
+    // 1. Check that the node is in fact degree 2
+    if (n->getDegree() != 2)
+        throw RbException()<<"removeDegree2Node: node has degree "<<n->getDegree()<<"!";
+
+    // 2. If n is the root, pivot so that it is a child of the root
+    TopologyNode* new_root = nullptr;
+    if (n->isRoot())
+    {
+        // Pick the child with the highest degree for the new root
+        TopologyNode* new_root = &n->getChild(0);
+        for(auto& child: n->getChildren())
+            if (child->getDegree() > new_root->getDegree())
+                new_root = child;
+        reverseParentChild( *new_root );
+
+        root = new_root;
+        root->setTree(this);
+
+        assert(root->isRoot());
+    }
+
+
+    // 3. Save references from n.
+    //    Now we have p -> n -> c
+    assert(not n->isRoot());
+    auto& p = n->getParent();
+    auto& c = n->getChild(0);
+    double combined_branch_length = n->getBranchLength() + c.getBranchLength();
+
+    // 4. Remove references from n
+    n->setParent(nullptr);
+    n->removeChild(&c);
+
+    // 5. Link parent and child and set new branch length
+    p.removeChild(n);
+    p.addChild(&c);
+    c.setParent(&p);
+    c.setBranchLength(combined_branch_length);
+
+    // 6. We need to reindex nodes because we removed an index.
+    reindexNodes();
+
+    // 7. Destroy the removed node.
+    delete n;
+}
+
+bool Tree::removeNodeIfDegree2(TopologyNode& n)
+{
+    if (n.getDegree() == 2)
+    {
+        removeDegree2Node( &n );
+        return true;
+    }
+    else
+        return false;
+}
+
+bool Tree::removeRootIfDegree2()
+{
+    return removeNodeIfDegree2(getRoot());
+}
 
 void Tree::removeDuplicateTaxa( void )
 {
