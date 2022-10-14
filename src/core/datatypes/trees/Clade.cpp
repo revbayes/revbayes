@@ -5,6 +5,7 @@
 #include <string>
 #include <utility>
 
+#include "StringUtilities.h"
 #include "RbVectorUtilities.h"
 #include "RbException.h"
 
@@ -672,22 +673,38 @@ size_t Clade::size(void) const
  */
 std::string Clade::toString( void ) const
 {
-    std::string s = "{";
-    
-    for (size_t i = 0; i < taxa.size(); ++i)
+    std::string s;
+
+    if (isOptionalConstraint())
     {
-        if ( i > 0 )
+        vector<string> cstrings;
+        for(auto& c: getOptionalConstraints())
         {
-            s += ",";
+            cstrings.push_back(c.toString());
         }
-        s += taxa[i].getName();
-        if ( std::find(mrca.begin(), mrca.end(), taxa[i]) != mrca.end() )
-        {
-            s += "*";
-        }
+
+
+        s = "(" + StringUtilities::join(cstrings, " OR ") + ")";
     }
-    s += "}";
-    
+    else
+    {
+        vector<string> tstrings;
+        for (size_t i = 0; i < taxa.size(); ++i)
+        {
+            string t = taxa[i].getName();
+            if ( std::find(mrca.begin(), mrca.end(), taxa[i]) != mrca.end() )
+            {
+                t += "*";
+            }
+            tstrings.push_back(t);
+        }
+
+        s  = "{" + StringUtilities::join(tstrings,", ") + "}";
+    }
+
+    if (isNegativeConstraint())
+        s = "NOT " + s;
+
     return s;
 }
 
