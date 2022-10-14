@@ -648,7 +648,6 @@ void TopologyConstrainedTreeDistribution::setBackbone(const TypedDagNode<Tree> *
     }
 }
 
-
 /**
  *
  */
@@ -721,40 +720,8 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( void )
     all_species.setAge( ra );
     sorted_clades.push_back(all_species);
 
-
-    // try this crummy bubble sort
     size_t num_clades = sorted_clades.size();
-    for (int i = 0; i < num_clades - 1; i++)
-    {
-        for (int j = 0; j < num_clades - i - 1; j++)
-        {
-
-            if ( sorted_clades[j].isNestedWithin(sorted_clades[j+1]) == true )
-            {
-                if ( sorted_clades[j].getAge() < sorted_clades[j+1].getAge() )
-                {
-                    throw RbException("TopologyConstrainedTreeDistribution - cannot simulate tree: nested clade 1 constraint has larger Age");
-                }
-                std::swap(sorted_clades[j], sorted_clades[j+1]);
-            }
-            else if ( sorted_clades[j+1].isNestedWithin(sorted_clades[j]) == true )
-            {
-                if (sorted_clades[j+1].getAge() < sorted_clades[j].getAge())
-                {
-                    throw RbException("TopologyConstrainedTreeDistribution - cannot simulate tree: nested clade 2 constraint has larger Age");
-                }
-            }
-            else if ( sorted_clades[j].overlaps(sorted_clades[j+1]) == true )
-            {
-                throw RbException("Cannot simulate tree: conflicting monophyletic clade constraints. Check that all clade constraints are properly nested.");
-            }
-            else if (sorted_clades[j].getAge() > sorted_clades[j+1].getAge())
-            {
-                std::swap(sorted_clades[j], sorted_clades[j+1]);
-            }
-
-        }
-    }
+    std::sort(sorted_clades.begin(), sorted_clades.end(), clade_within_and_before);
 
     /*
      * Walk clade constraints from tips to root.
