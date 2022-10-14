@@ -10,19 +10,16 @@
 
 using namespace RevBayesCore;
 
+using std::set;
+using std::string;
+using std::vector;
 
 /**
  * Default constructor required by the revlanguage code.
  * We use an empty string and an age of 0.0 for
  * this default object.
  */
-Clade::Clade( void ) :
-    age( 0.0 ),
-    clade_name(""),
-    num_missing( 0 ),
-    taxa(),
-    is_negative_constraint(false),
-    is_optional_match(false)
+Clade::Clade( void )
 {
     
 }
@@ -32,13 +29,8 @@ Clade::Clade( void ) :
  * Constructor with a single taxon.
  */
 Clade::Clade( const Taxon &t, const RbBitSet &b ) :
-    age( 0.0 ),
     bitset( b ),
-    clade_name( "" ),
-    num_missing( b.size() > 1 ? b.size() - 1 : 0 ),
-    taxa(),
-    is_negative_constraint(false),
-    is_optional_match(false)
+    num_missing( b.size() > 1 ? b.size() - 1 : 0 )
 {
     
     taxa.push_back( t );
@@ -52,13 +44,9 @@ Clade::Clade( const Taxon &t, const RbBitSet &b ) :
  * \param[in]   n    The vector containing the taxon names.
  */
 Clade::Clade(const std::vector<Taxon> &n, const RbBitSet &b) :
-    age( 0.0 ),
     bitset( b ),
-    clade_name( "" ),
     num_missing( b.size() > n.size() ? int(b.size()) - int(n.size()) : 0 ),
-    taxa( n ),
-    is_negative_constraint(false),
-    is_optional_match(false)
+    taxa( n )
 {
     
     VectorUtilities::sort( taxa );
@@ -72,13 +60,9 @@ Clade::Clade(const std::vector<Taxon> &n, const RbBitSet &b) :
  * \param[in]   n    The vector containing the taxon names.
  */
 Clade::Clade(const std::set<Taxon> &n, const RbBitSet &b) :
-    age( 0.0 ),
     bitset( b ),
     clade_name( "" ),
-    num_missing( b.size() > n.size() ? int(b.size()) - int(n.size()) : 0 ),
-    taxa(),
-    is_negative_constraint(false),
-    is_optional_match(false)
+    num_missing( b.size() > n.size() ? int(b.size()) - int(n.size()) : 0 )
 {
     
     for (std::set<Taxon>::const_iterator it=n.begin(); it!=n.end(); ++it)
@@ -97,12 +81,8 @@ Clade::Clade(const std::set<Taxon> &n, const RbBitSet &b) :
  * \param[in]   n    The vector containing the taxon names.
  */
 Clade::Clade(const RbBitSet &b, const std::vector<Taxon> &n) :
-    age( 0.0 ),
     bitset( b ),
-    clade_name( "" ),
-    num_missing( b.size() - b.getNumberSetBits() ),
-    is_negative_constraint(false),
-    is_optional_match(false)
+    num_missing( b.size() - b.getNumberSetBits() )
 {
 
     for (size_t i = 0; i < b.size(); i++)
@@ -289,7 +269,6 @@ bool Clade::conflicts(const Clade& c) const
     return overlaps(c) && ( isNestedWithin(c) == false ) && ( c.isNestedWithin(*this) == false );
 }
 
-
 /**
  * Add a taxon to the list.
  *
@@ -377,7 +356,8 @@ size_t Clade::getNumberOfTaxa( void ) const
 
 std::vector<Clade> Clade::getOptionalConstraints(void) const
 {
-    return optional_constraints;
+    assert(optional_constraints.has_value());
+    return *optional_constraints;
 }
 
 
@@ -484,13 +464,14 @@ bool Clade::isNestedWithin(const Clade& c) const
 
 
 /**
- * Is this clade a negative clade constraint (used with e.g. dnConstrainedTopology).
+ * Is this clade an optional constraint (used with e.g. dnConstrainedTopology).
+ * An "optional" constraint means that at least one of the referenced clades must be true.
  *
- * \return       The true/false value of whether the clade is a negative constraint.
+ * \return       The true/false value of whether the clade is an optional constraint.
  */
 bool Clade::isOptionalConstraint(void) const
 {
-    return is_optional_match;
+    return optional_constraints.has_value();
 }
 
 
@@ -632,25 +613,12 @@ void Clade::setNegativeConstraint(bool tf)
 }
 
 /**
- * Set flag for negative clade constraint.
- *
- * \param[in]    tf   Flag indicating if clade is a negative constraint.
- *
- */
-void Clade::setOptionalMatch(bool tf)
-{
-    is_optional_match = tf;
-}
-
-
-
-/**
  * Set optional clade constraints, e.g. dnConstrainedTopology must satisfy one of any clades in the set of clades
  *
  * \param[in]   c   Vector of optional clade constraints
  *
  */
-void Clade::setOptionalConstraints(std::vector<Clade> c)
+void Clade::setOptionalConstraints(const std::vector<Clade>& c)
 {
     optional_constraints = c;
 }
