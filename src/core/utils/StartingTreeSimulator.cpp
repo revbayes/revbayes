@@ -107,7 +107,7 @@ Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const
         if ( my_constraints[i].size() > 1 && my_constraints[i].size() < num_taxa )
         {
             
-            if ( my_constraints[i].isOptionalMatch() == true )
+            if ( my_constraints[i].isOptionalConstraint() == true )
             {
                 std::vector<Clade> optional_constraints = my_constraints[i].getOptionalConstraints();
                 size_t idx = (size_t)( GLOBAL_RNG->uniform01() * optional_constraints.size() );

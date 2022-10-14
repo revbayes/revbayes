@@ -65,8 +65,8 @@ namespace RevBayesCore {
         const Taxon&                                getTaxon(size_t i) const;                                   //!< Get a single taxon name.
         const std::string&                          getTaxonName(size_t i) const;                               //!< Get a single taxon name.
         bool                                        isNegativeConstraint(void) const;                           //!< Get negative constraint flag.
+        bool                                        isOptionalConstraint(void) const;                           //!< Get negative constraint flag.
         bool                                        isNestedWithin(const Clade& c) const;                       //!< Is the provided clade nested within me?
-        bool                                        isOptionalMatch(void) const;                                //!< Get negative constraint flag.
         bool                                        overlaps(const Clade& c) const;                              //!< Does the provided clade overlap with me?
         void                                        resetTaxonBitset(const std::map<std::string, size_t> map);
         void                                        setAge(double a);                                           //!< Set the age of the clade.
