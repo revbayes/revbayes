@@ -357,7 +357,7 @@ size_t Clade::getNumberOfTaxa( void ) const
 
 std::vector<Clade> Clade::getOptionalConstraints(void) const
 {
-    assert(optional_constraints());
+    assert(optional_constraints.has_value());
     return *optional_constraints;
 }
 
