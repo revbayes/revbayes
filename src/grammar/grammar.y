@@ -102,7 +102,6 @@ Parser& parser = Parser::getParser();
 %type <boolValue> FALSE TRUE
 %type <string> RBTAB
 %type <string> identifier typeSpec optDims dimList 
-%type <syntaxElement> variable
 %type <syntaxFunctionCall> functionCall fxnCall
 %type <syntaxLabeledExpr> argument
 %type <syntaxFormal> formal
@@ -141,7 +140,7 @@ Parser& parser = Parser::getParser();
 %destructor { for (std::list<SyntaxLabeledExpr*>::iterator it=$$->begin(); it != $$->end(); it++) { SyntaxLabeledExpr* theElement = *it; delete theElement; }; delete ($$); } argumentList optArguments vectorList vector
 %destructor { for (std::list<SyntaxFormal*>::iterator it=$$->begin(); it != $$->end(); it++) { SyntaxFormal* theElement = *it; delete theElement; }; delete ($$); } formalList optFormals
 %destructor { delete ($$); } identifier typeSpec optDims dimList 
-%destructor { delete ($$); } variable functionCall fxnCall argument formal constant
+%destructor { delete ($$); } functionCall fxnCall argument formal constant
 %destructor { delete ($$); } statement expression stmt_or_expr 
 %destructor { delete ($$); } arrowAssign tildeAssign equationAssign workspaceAssign
 %destructor { delete ($$); } referenceAssign
@@ -411,8 +410,56 @@ expression  :   constant                    { $$ = $1; }
 
             |   functionCall                { $$ = $1; }
 
-            |   variable                    { $$ = $1; }
-
+            |   identifier optElements
+                {
+#ifdef DEBUG_BISON_FLEX
+                    printf("Parser inserting variable (NAMED_VAR) in syntax tree\n");
+#endif
+                    $$ = new SyntaxVariable(*$1);
+                    for (std::list<SyntaxElement*>::iterator it=$2->begin(); it!=$2->end(); ++it)
+                    {
+                        $$ = new SyntaxIndexOperation($$,*it);
+                    }
+                    delete $1;
+                    delete $2;
+                }
+            |   fxnCall elementList
+                {
+#ifdef DEBUG_BISON_FLEX
+                    printf("Parser inserting variable (FUNCTION_VAR) in syntax tree\n");
+#endif
+                    $$ = $1;
+                    for (auto& element: *$2)
+                    {
+                        $$ = new SyntaxIndexOperation($$, element);
+                    }
+                    delete $2;
+                }
+            |   '(' expression ')' elementList
+                {
+#ifdef DEBUG_BISON_FLEX
+                    printf("Parser inserting variable (EXPRESSION_VAR) in syntax tree\n");
+#endif
+                    $$ = $2;
+                    for (auto& element: *$4)
+                    {
+                        $$ = new SyntaxIndexOperation($$, element);
+                    }
+                    delete $4;
+                }
+            |   expression '.' fxnCall elementList
+                {
+#ifdef DEBUG_BISON_FLEX
+                    printf("Parser inserting member variable (FUNCTION_VAR) in syntax tree\n");
+#endif
+                    $3->setBaseVariable($1);
+                    $$ = $3;
+                    for (auto& element: *$4)
+                    {
+                        $$ = new SyntaxIndexOperation($$, element);
+                    }
+                    delete $4;
+                }
             ;
 
 arrowAssign     :   expression ARROW_ASSIGN expression
@@ -495,62 +542,6 @@ divisionAssign  :   expression DIVISION_ASSIGN expression
                         $$ = new SyntaxDivisionAssignment($1, $3); 
                     }
                 ;
-
-variable    :   identifier optElements
-                {
-#ifdef DEBUG_BISON_FLEX
-                    printf("Parser inserting variable (NAMED_VAR) in syntax tree\n");
-#endif
-                    $$ = new SyntaxVariable(*$1);
-                    for (std::list<SyntaxElement*>::iterator it=$2->begin(); it!=$2->end(); ++it)
-                    {
-                        $$ = new SyntaxIndexOperation($$,*it);
-                    }
-                    delete $1;
-                    delete $2;
-                }
-            |   fxnCall elementList
-                {
-#ifdef DEBUG_BISON_FLEX
-                    printf("Parser inserting variable (FUNCTION_VAR) in syntax tree\n");
-#endif
-                    $$ = $1;
-                    for (auto& element: *$2)
-                    {
-                        $$ = new SyntaxIndexOperation($$, element);
-                    }
-                    delete $2;
-                }
-            |   '(' expression ')' elementList
-                {
-#ifdef DEBUG_BISON_FLEX
-                    printf("Parser inserting variable (EXPRESSION_VAR) in syntax tree\n");
-#endif
-                    $$ = $2;
-                    for (auto& element: *$4)
-                    {
-                        $$ = new SyntaxIndexOperation($$, element);
-                    }
-                    delete $4;
-                }
-            |   expression '.' fxnCall elementList
-                {
-#ifdef DEBUG_BISON_FLEX
-                    printf("Parser inserting member variable (FUNCTION_VAR) in syntax tree\n");
-#endif
-                    $3->setBaseVariable($1);
-                    $$ = $3;
-                    for (auto& element: *$4)
-                    {
-                        $$ = new SyntaxIndexOperation($$, element);
-                    }
-                    delete $4;
-                }
-            |   PIPE_PLACEHOLDER
-                {
-                    $$ = new SyntaxPipePlaceholder;
-                }
-            ;
 
 optElements :   /* empty */                     { $$ = new std::list<SyntaxElement*>(); }
             |   elementList                     { $$ = $1; }
