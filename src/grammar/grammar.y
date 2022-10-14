@@ -533,7 +533,7 @@ variable    :   identifier optElements
                     }
                     delete $4;
                 }
-            |   variable '.' fxnCall elementList
+            |   expression '.' fxnCall elementList
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Parser inserting member variable (FUNCTION_VAR) in syntax tree\n");
@@ -576,7 +576,7 @@ functionCall    :   fxnCall
 #endif
                         $$ = $1;
                     }
-                |   variable '.' fxnCall
+                |   expression '.' fxnCall
                     {
 #ifdef DEBUG_BISON_FLEX
                         printf("Parser inserting member call in syntax tree\n");
@@ -584,15 +584,6 @@ functionCall    :   fxnCall
                         $3->setBaseVariable($1);
                         $$ = $3;
                     }
-                |   functionCall '.' fxnCall
-                    {
-#ifdef DEBUG_BISON_FLEX
-                        printf("Parser inserting member call in syntax tree\n");
-#endif
-                        $3->setBaseVariable($1);
-                        $$ = $3;
-                    }
-                ;
 
 
 optArguments    :   /* empty */             { $$ = new std::list<SyntaxLabeledExpr*>(); }
