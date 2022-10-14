@@ -478,7 +478,7 @@ bool Clade::isOptionalConstraint(void) const
 /**
  * Does the provided clade overlaps with myself? An overlap is if we share at least one taxon.
  *
- * \param[in]    c    Theclade.
+ * \param[in]    c    The clade.
  *
  * \return       True/False, if there is an overlap.
  */
@@ -499,6 +499,36 @@ bool Clade::overlaps(const Clade& c) const
 
     return false;
 }
+
+/**
+ * Compute the set of overlapping taxa between clade c and myself.
+ *
+ * \param[in]    c    The clade.
+ *
+ * \return       The set of overlapping taxa.
+ *
+ * We use this method to give a more helpful error message
+ *  when we claim that clades conflict.
+ */
+set<Taxon> Clade::intersection(const Clade& c) const
+{
+    set<Taxon> both;
+    size_t N = taxa.size();
+    for ( size_t i=0; i<c.size(); ++i)
+    {
+        const Taxon& t = c.getTaxon(i);
+        for ( size_t j=0; j<N; ++j)
+        {
+            if ( taxa[j] == t )
+            {
+                both.insert(t);
+            }
+        }
+    }
+
+    return both;
+}
+
 
 
 /**
