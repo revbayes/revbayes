@@ -18,6 +18,7 @@
 #include <sstream> // IWYU pragma: keep
 #include <vector>
 #include "RbFileManager.h"
+#include <boost/optional.hpp>
 
 namespace StringUtilities {
     
@@ -44,6 +45,8 @@ namespace StringUtilities {
     void                        stringSplit(std::string str, std::string delim, std::vector<std::string>& results, bool trim = false); //!< Split a string into pieces
     void                        toLower(std::string& str);                                                          //!< Convert string's characters to lower case
     std::string                 toString(double x, int digits=6);                                                   //!< Convert string's characters to lower case
+    std::string                 join(const std::vector<std::string>& ss, const std::string& sep);
+    void                        join(std::ostream& o, const std::vector<std::string>& ss, const std::string& sep);
     
     /**
      * Generic to_string function
