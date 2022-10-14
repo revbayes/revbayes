@@ -500,6 +500,26 @@ bool Clade::overlaps(const Clade& c) const
     return false;
 }
 
+set<Taxon> Clade::intersection(const Clade& c) const
+{
+    set<Taxon> both;
+    size_t N = taxa.size();
+    for ( size_t i=0; i<c.size(); ++i)
+    {
+        const Taxon& t = c.getTaxon(i);
+        for ( size_t j=0; j<N; ++j)
+        {
+            if ( taxa[j] == t )
+            {
+                both.insert(t);
+            }
+        }
+    }
+
+    return both;
+}
+
+
 
 /**
  * Reset the bitset.
