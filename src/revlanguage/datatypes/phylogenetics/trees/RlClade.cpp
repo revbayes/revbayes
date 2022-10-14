@@ -182,10 +182,6 @@ void Clade::constructInternalObject( void )
         c->setOptionalConstraints( optional_constraints );
     }
 
-
-    // set optional match clade constraint
-    c->setOptionalMatch( match );
-
     // set negative clade constraint
     c->setNegativeConstraint( neg );
 
