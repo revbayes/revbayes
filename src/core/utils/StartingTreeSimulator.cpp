@@ -128,16 +128,7 @@ Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const
     sorted_clades.push_back(all_species);
     
     // DO WE NEED TO SORT THE TAXA?
-    // try this crummy bubble sort
-    size_t num_clades = sorted_clades.size();
-    for (int i = 0; i < num_clades - 1; i++) {
-        for(int j = 0; j < num_clades - i - 1; j++){
-            if (sorted_clades[j].getAge() > sorted_clades[j+1].getAge()) {
-                std::swap(sorted_clades[j], sorted_clades[j+1]);
-            }
-        }
-    }
-    
+    std::sort(sorted_clades.begin(), sorted_clades.end(), clade_before);
     
     std::vector<Clade> virtual_taxa;
     int i = -1;
