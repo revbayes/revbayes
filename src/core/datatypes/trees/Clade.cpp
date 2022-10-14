@@ -5,24 +5,22 @@
 #include <string>
 #include <utility>
 
+#include "StringUtilities.h"
 #include "RbVectorUtilities.h"
 #include "RbException.h"
 
 using namespace RevBayesCore;
 
+using std::set;
+using std::string;
+using std::vector;
 
 /**
  * Default constructor required by the revlanguage code.
  * We use an empty string and an age of 0.0 for
  * this default object.
  */
-Clade::Clade( void ) :
-    age( 0.0 ),
-    clade_name(""),
-    num_missing( 0 ),
-    taxa(),
-    is_negative_constraint(false),
-    is_optional_match(false)
+Clade::Clade( void )
 {
     
 }
@@ -32,13 +30,8 @@ Clade::Clade( void ) :
  * Constructor with a single taxon.
  */
 Clade::Clade( const Taxon &t, const RbBitSet &b ) :
-    age( 0.0 ),
     bitset( b ),
-    clade_name( "" ),
-    num_missing( b.size() > 1 ? b.size() - 1 : 0 ),
-    taxa(),
-    is_negative_constraint(false),
-    is_optional_match(false)
+    num_missing( b.size() > 1 ? b.size() - 1 : 0 )
 {
     
     taxa.push_back( t );
@@ -52,13 +45,9 @@ Clade::Clade( const Taxon &t, const RbBitSet &b ) :
  * \param[in]   n    The vector containing the taxon names.
  */
 Clade::Clade(const std::vector<Taxon> &n, const RbBitSet &b) :
-    age( 0.0 ),
     bitset( b ),
-    clade_name( "" ),
     num_missing( b.size() > n.size() ? int(b.size()) - int(n.size()) : 0 ),
-    taxa( n ),
-    is_negative_constraint(false),
-    is_optional_match(false)
+    taxa( n )
 {
     
     VectorUtilities::sort( taxa );
@@ -72,13 +61,9 @@ Clade::Clade(const std::vector<Taxon> &n, const RbBitSet &b) :
  * \param[in]   n    The vector containing the taxon names.
  */
 Clade::Clade(const std::set<Taxon> &n, const RbBitSet &b) :
-    age( 0.0 ),
     bitset( b ),
     clade_name( "" ),
-    num_missing( b.size() > n.size() ? int(b.size()) - int(n.size()) : 0 ),
-    taxa(),
-    is_negative_constraint(false),
-    is_optional_match(false)
+    num_missing( b.size() > n.size() ? int(b.size()) - int(n.size()) : 0 )
 {
     
     for (std::set<Taxon>::const_iterator it=n.begin(); it!=n.end(); ++it)
@@ -97,12 +82,8 @@ Clade::Clade(const std::set<Taxon> &n, const RbBitSet &b) :
  * \param[in]   n    The vector containing the taxon names.
  */
 Clade::Clade(const RbBitSet &b, const std::vector<Taxon> &n) :
-    age( 0.0 ),
     bitset( b ),
-    clade_name( "" ),
-    num_missing( b.size() - b.getNumberSetBits() ),
-    is_negative_constraint(false),
-    is_optional_match(false)
+    num_missing( b.size() - b.getNumberSetBits() )
 {
 
     for (size_t i = 0; i < b.size(); i++)
@@ -289,7 +270,6 @@ bool Clade::conflicts(const Clade& c) const
     return overlaps(c) && ( isNestedWithin(c) == false ) && ( c.isNestedWithin(*this) == false );
 }
 
-
 /**
  * Add a taxon to the list.
  *
@@ -377,7 +357,8 @@ size_t Clade::getNumberOfTaxa( void ) const
 
 std::vector<Clade> Clade::getOptionalConstraints(void) const
 {
-    return optional_constraints;
+    assert(optional_constraints());
+    return *optional_constraints;
 }
 
 
@@ -484,13 +465,14 @@ bool Clade::isNestedWithin(const Clade& c) const
 
 
 /**
- * Is this clade a negative clade constraint (used with e.g. dnConstrainedTopology).
+ * Is this clade an optional constraint (used with e.g. dnConstrainedTopology).
+ * An "optional" constraint means that at least one of the referenced clades must be true.
  *
- * \return       The true/false value of whether the clade is a negative constraint.
+ * \return       The true/false value of whether the clade is an optional constraint.
  */
-bool Clade::isOptionalMatch(void) const
+bool Clade::isOptionalConstraint(void) const
 {
-    return is_optional_match;
+    return optional_constraints.has_value();
 }
 
 
@@ -518,6 +500,26 @@ bool Clade::overlaps(const Clade& c) const
 
     return false;
 }
+
+set<Taxon> Clade::intersection(const Clade& c) const
+{
+    set<Taxon> both;
+    size_t N = taxa.size();
+    for ( size_t i=0; i<c.size(); ++i)
+    {
+        const Taxon& t = c.getTaxon(i);
+        for ( size_t j=0; j<N; ++j)
+        {
+            if ( taxa[j] == t )
+            {
+                both.insert(t);
+            }
+        }
+    }
+
+    return both;
+}
+
 
 
 /**
@@ -632,25 +634,12 @@ void Clade::setNegativeConstraint(bool tf)
 }
 
 /**
- * Set flag for negative clade constraint.
- *
- * \param[in]    tf   Flag indicating if clade is a negative constraint.
- *
- */
-void Clade::setOptionalMatch(bool tf)
-{
-    is_optional_match = tf;
-}
-
-
-
-/**
  * Set optional clade constraints, e.g. dnConstrainedTopology must satisfy one of any clades in the set of clades
  *
  * \param[in]   c   Vector of optional clade constraints
  *
  */
-void Clade::setOptionalConstraints(std::vector<Clade> c)
+void Clade::setOptionalConstraints(const std::vector<Clade>& c)
 {
     optional_constraints = c;
 }
@@ -674,22 +663,38 @@ size_t Clade::size(void) const
  */
 std::string Clade::toString( void ) const
 {
-    std::string s = "{";
-    
-    for (size_t i = 0; i < taxa.size(); ++i)
+    std::string s;
+
+    if (isOptionalConstraint())
     {
-        if ( i > 0 )
+        vector<string> cstrings;
+        for(auto& c: getOptionalConstraints())
         {
-            s += ",";
+            cstrings.push_back(c.toString());
         }
-        s += taxa[i].getName();
-        if ( std::find(mrca.begin(), mrca.end(), taxa[i]) != mrca.end() )
-        {
-            s += "*";
-        }
+
+
+        s = "(" + StringUtilities::join(cstrings, " OR ") + ")";
     }
-    s += "}";
-    
+    else
+    {
+        vector<string> tstrings;
+        for (size_t i = 0; i < taxa.size(); ++i)
+        {
+            string t = taxa[i].getName();
+            if ( std::find(mrca.begin(), mrca.end(), taxa[i]) != mrca.end() )
+            {
+                t += "*";
+            }
+            tstrings.push_back(t);
+        }
+
+        s  = "{" + StringUtilities::join(tstrings,", ") + "}";
+    }
+
+    if (isNegativeConstraint())
+        s = "NOT " + s;
+
     return s;
 }
 
@@ -701,8 +706,6 @@ std::ostream& operator<<(std::ostream& o, const Clade& x) {
     o << x.toString();
    
     return o;
-}
-
 }
 
 void Clade::setAges(const std::vector<Taxon>& taxa)
@@ -728,3 +731,117 @@ void Clade::setAges(const std::vector<Taxon>& taxa)
         }
     }
 }
+
+// These should provide a "strict weak ordering" that returns
+// true only if c1 is ordered with respect to c2, and c1 < c2.
+// We do not treat conflicting constraints as unordered.
+//
+// Its not really clear how to handle negative constraints or optional constraints.
+// We really should separate the idea of constraints (CladeConstraint,
+// NotCladeConstraint, OptionalCladeConstraint) from the idea of clades.
+
+bool clade_before(const Clade& c1, const Clade& c2)
+{
+    if (&c1 == &c2)
+        return false;
+
+    // Negative constraints and Optional constraints are unordered after all regular constraints.
+    else if (not (c1.isNegativeConstraint() or c1.isOptionalConstraint()) and (c2.isNegativeConstraint() or c2.isOptionalConstraint()))
+        return true;
+    else if (c1.isNegativeConstraint() or c1.isOptionalConstraint() or c2.isNegativeConstraint() or c2.isOptionalConstraint())
+        return false;
+
+    else
+        return c1.getAge() < c2.getAge();
+}
+
+bool clade_within(const Clade& c1, const Clade& c2)
+{
+    if (&c1 == &c2)
+        return false;
+
+    // Negative constraints and Optional constraints are unordered after all regular constraints.
+    else if (not (c1.isNegativeConstraint() or c1.isOptionalConstraint()) and (c2.isNegativeConstraint() or c2.isOptionalConstraint()))
+        return true;
+    else if (c1.isNegativeConstraint() or c1.isOptionalConstraint() or c2.isNegativeConstraint() or c2.isOptionalConstraint())
+        return false;
+
+    // c2 is nested with c1
+    else if (c1.isNestedWithin(c2))
+        return false;
+    // c1 is nested with c2, but not the reverse
+    else if (c2.isNestedWithin(c1))
+        return true;
+    else if (c1.overlaps(c2))
+    {
+        auto both = c1.intersection(c2);
+        RbException e;
+        e<<"Cannot simulate tree: conflicting monophyletic clade constraints:\n"
+         <<"  Clade1 = "<<c1<<"\n"
+         <<"  Clade2 = "<<c2<<"\n"
+         <<"  Overlap = ";
+        for(auto& taxon: both)
+            e<<taxon.getName()<<" ";
+        throw e;
+    }
+    else
+    {
+        // unordered!
+        return false;
+    }
+}
+
+bool clade_within_and_before(const Clade& c1, const Clade& c2)
+{
+    if (&c1 == &c2)
+        return false;
+
+    // Negative constraints and Optional constraints are unordered after all regular constraints.
+    else if (not (c1.isNegativeConstraint() or c1.isOptionalConstraint()) and (c2.isNegativeConstraint() or c2.isOptionalConstraint()))
+        return true;
+    else if (c1.isNegativeConstraint() or c1.isOptionalConstraint() or c2.isNegativeConstraint() or c2.isOptionalConstraint())
+        return false;
+
+    // c2 is nested with c1
+    else if (c1.isNestedWithin(c2))
+    {
+        // .. AND c1 is nested within c2!
+        if (c2.isNestedWithin(c1))
+            return (c1.getAge() < c2.getAge());
+
+        if ( c1.getAge() < c2.getAge() )
+            throw RbException()<<"Conflicting clades: nested Clade1 constraint has larger Age than containing Clade2!\n"
+                               <<"  Clade1 = "<<c2<<"\n"
+                               <<"  Clade2 = "<<c1<<"\n";
+        return false;
+    }
+    // c1 is nested with c2, but not the reverse
+    else if (c2.isNestedWithin(c1))
+    {
+        if ( c2.getAge() < c1.getAge() )
+            throw RbException()<<"Conflicting clades: nested Clade1 constraint has larger Age than containing Clade2!\n"
+                               <<"  Clade1 = "<<c1<<"\n"
+                               <<"  Clade2 = "<<c2<<"\n";
+        return true;
+    }
+    else if (c1.overlaps(c2))
+    {
+        RbException e;
+        e<<"Cannot simulate tree: conflicting monophyletic clade constraints:\n"
+         <<"  Clade1 = "<<c1<<"\n"
+         <<"  Clade2 = "<<c2<<"\n"
+         <<"  Overlap = ";
+        for(auto& taxon: c1.intersection(c2))
+            e<<taxon.getName()<<" ";
+        throw e;
+    }
+    else
+    {
+        // unordered!
+        return false;
+    }
+};
+        
+
+}
+
