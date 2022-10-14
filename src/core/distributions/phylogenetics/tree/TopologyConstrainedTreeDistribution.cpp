@@ -222,7 +222,7 @@ void TopologyConstrainedTreeDistribution::initializeBitSets(void)
     for (size_t i = 0; i < monophyly_constraints.size(); i++)
     {
         // clade constraint has only one match
-        if (monophyly_constraints[i].isOptionalMatch() == false)
+        if (monophyly_constraints[i].isOptionalConstraint() == false)
         {
             RbBitSet b( value->getNumberOfTips() );
             for (size_t j = 0; j < monophyly_constraints[i].size(); j++)
@@ -384,7 +384,7 @@ bool TopologyConstrainedTreeDistribution::matchesConstraints( void )
     {
         
         std::vector<Clade> constraints;
-        if ( monophyly_constraints[i].isOptionalMatch() == true )
+        if ( monophyly_constraints[i].isOptionalConstraint() == true )
         {
             constraints = monophyly_constraints[i].getOptionalConstraints();
         }
@@ -702,7 +702,7 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( void )
         // populate sorted clades vector
         if ( monophyly_constraint.size() > 1 && monophyly_constraint.size() < num_taxa )
         {
-            if ( monophyly_constraint.isOptionalMatch() == true )
+            if ( monophyly_constraint.isOptionalConstraint() == true )
             {
                 std::vector<Clade> optional_constraints = monophyly_constraint.getOptionalConstraints();
                 size_t idx = (size_t)( GLOBAL_RNG->uniform01() * optional_constraints.size() );
@@ -1019,7 +1019,7 @@ Tree* TopologyConstrainedTreeDistribution::simulateUnrootedTree( void )
         if ( monophyly_constraints[i].size() > 1 && monophyly_constraints[i].size() < num_taxa )
         {
         
-            if ( monophyly_constraints[i].isOptionalMatch() == true )
+            if ( monophyly_constraints[i].isOptionalConstraint() == true )
             {
                 std::vector<Clade> optional_constraints = monophyly_constraints[i].getOptionalConstraints();
                 size_t idx = (size_t)( GLOBAL_RNG->uniform01() * optional_constraints.size() );

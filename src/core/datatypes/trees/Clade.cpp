@@ -488,7 +488,7 @@ bool Clade::isNestedWithin(const Clade& c) const
  *
  * \return       The true/false value of whether the clade is a negative constraint.
  */
-bool Clade::isOptionalMatch(void) const
+bool Clade::isOptionalConstraint(void) const
 {
     return is_optional_match;
 }
