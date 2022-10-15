@@ -25,6 +25,7 @@
 #include "Probability.h"
 #include "Parser.h"
 #include "RlBoolean.h"
+#include "RbException.h"
 #include "RlString.h"
 #include "Real.h"
 #include "RealPos.h"
@@ -934,7 +935,11 @@ RevLanguage::SyntaxElement* xxpipe(RevLanguage::SyntaxElement* arg,
         fxnCall->pipeAddArg(arg);
     }
     else
-        yyerror("The pipe operator requires a function call as RHS.");
+    {
+        delete arg;
+        delete fxnCallE;
+        throw RbException("The pipe operator requires a function call as RHS.");
+    }
 
     return fxnCallE;
 }
