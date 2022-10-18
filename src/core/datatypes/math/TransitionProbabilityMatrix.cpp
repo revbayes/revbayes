@@ -99,19 +99,6 @@ TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator=( TransitionP
 }
 
 
-/** Index operator (const) */
-const double* TransitionProbabilityMatrix::operator[]( const size_t i ) const {
-
-    return theMatrix + i*num_states;
-}
-
-
-/** Index operator */
-double* TransitionProbabilityMatrix::operator[]( const size_t i ) {
-    
-    return theMatrix + i*num_states;
-}
-
 TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator*=(const TransitionProbabilityMatrix& B) {
     
     TransitionProbabilityMatrix C(num_states);
@@ -131,43 +118,6 @@ TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator*=(const Trans
     
     return *this;
 }
-
-double TransitionProbabilityMatrix::getElement(size_t i, size_t j) const {
-    
-    return *(theMatrix + num_states*i + j);
-}
-
-
-double& TransitionProbabilityMatrix::getElement(size_t i, size_t j) {
-    
-    return *(theMatrix + num_states*i + j);
-}
-
-
-const double* TransitionProbabilityMatrix::getElements( void ) const {
-    
-    return theMatrix;
-}
-
-
-double* TransitionProbabilityMatrix::getElements( void ) {
-    
-    return theMatrix;
-}
-
-
-size_t TransitionProbabilityMatrix::getNumberOfStates( void ) const {
-    
-    return num_states;
-}
-
-
-size_t TransitionProbabilityMatrix::size(void) const {
-    
-    return nElements;
-}
-
-
 std::ostream& RevBayesCore::operator<<(std::ostream& o, const TransitionProbabilityMatrix& x) {
     
     std::streamsize previousPrecision = o.precision();
