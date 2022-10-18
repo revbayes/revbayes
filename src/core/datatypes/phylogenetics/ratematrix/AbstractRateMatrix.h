@@ -73,7 +73,6 @@ namespace RevBayesCore {
         virtual void                        computeStochasticMatrix(size_t n);
         virtual void                        computeDominatingRate(void);
         virtual void                        exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const;
-        virtual void                        multiplyMatrices(TransitionProbabilityMatrix& p,  TransitionProbabilityMatrix& q,  TransitionProbabilityMatrix& r) const;
         
         // protected members available for derived classes
         MatrixReal*                         the_rate_matrix;                                                                            //!< Holds the rate matrix

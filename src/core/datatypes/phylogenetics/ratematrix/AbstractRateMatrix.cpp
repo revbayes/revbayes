@@ -603,23 +603,6 @@ void AbstractRateMatrix::exponentiateMatrixByScalingAndSquaring(double t,  Trans
     }
 }
 
-void AbstractRateMatrix::multiplyMatrices(TransitionProbabilityMatrix& p,  TransitionProbabilityMatrix& q,  TransitionProbabilityMatrix& r) const {
-
-    // could probably use boost::ublas here, for the moment we do it ourselves.
-    for ( size_t i = 0; i < num_states; i++ )
-    {
-        for ( size_t j = 0; j < num_states; j++ )
-        {
-            r[i][j] = 0;
-            for ( size_t k = 0; k < num_states; k++ )
-            {
-                r[i][j] += p[i][k] * q[k][j];
-            }
-        }
-    }
-}
-
-
 /** Set the diagonal of the rate matrix such that each row sums to zero */
 void AbstractRateMatrix::setDiagonal(void)
 {
