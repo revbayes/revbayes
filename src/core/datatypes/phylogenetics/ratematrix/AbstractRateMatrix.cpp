@@ -16,6 +16,7 @@
 #include "Cloneable.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
+#include "RlUserInterface.h"
 
 using namespace RevBayesCore;
 
@@ -530,9 +531,43 @@ bool AbstractRateMatrix::simulateStochasticMapping(double startAge, double endAg
     return true;
 }
 
+double L1norm(const MatrixReal& M)
+{
+    // ||A||_1 = sup x ||A x||_1 / ||x||_1
+    //         = max 1 <= j<= n \sum_i |A_{i,j}|
+    //         = max over columns of (the sum of the absolute values in each column).
+    double norm = 0;
+    for(int j=0; j < M.getNumberOfColumns(); j++)
+    {
+        double sum = 0;
+        for(int i=0; i < M.getNumberOfRows(); i++)
+            sum += std::abs(M[i][j]);
+        norm = std::max(norm, sum);
+    }
+    assert(norm >= 0);
+    return norm;
+}
 
+double L1norm(const TransitionProbabilityMatrix& M)
+{
+    // ||A||_1 = sup x ||A x||_1 / ||x||_1
+    //         = max 1 <= j<= n \sum_i |A_{i,j}|
+    //         = max over columns of (the sum of the absolute values in each column).
+    double norm = 0;
+    for(int j=0; j < M.getNumberOfStates(); j++)
+    {
+        double sum = 0;
+        for(int i=0; i < M.getNumberOfStates(); i++)
+            sum += std::abs(M[i][j]);
+        norm = std::max(norm, sum);
+    }
+    assert(norm >= 0);
+    return norm;
+}
 
-void AbstractRateMatrix::exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const {
+void AbstractRateMatrix::exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const
+{
+    assert(t >= 0);
     assert(p.num_states == p.getNumberOfStates());
 
     // Here we use the scaling and squaring method with a 4th order Taylor approximant as described in:
@@ -544,7 +579,12 @@ void AbstractRateMatrix::exponentiateMatrixByScalingAndSquaring(double t,  Trans
     // efficiency and returned the same results with about 10^-9 accuracy. The scaling parameter could be
     // increased for better accuracy.
     // -- Will Freyman 11/27/16
-    size_t s = 8;
+    double norm = L1norm(*the_rate_matrix) * std::abs(t);
+
+    int s = 0;
+    std::frexp(norm/0.005, &s);
+    int s1 = s;
+    s = std::max(s, 8);
 
     // first scale the matrix
     double scale = t / pow(2, s);
