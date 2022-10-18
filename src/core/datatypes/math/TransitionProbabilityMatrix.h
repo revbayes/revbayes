@@ -64,6 +64,53 @@ namespace RevBayesCore {
     std::ostream&                       operator<<(std::ostream& o, const TransitionProbabilityMatrix& x);                                           //!< Overloaded output operator
 
     
+    /** Index operator (const) */
+    inline const double* TransitionProbabilityMatrix::operator[]( const size_t i ) const {
+
+        return theMatrix + i*num_states;
+    }
+
+
+    /** Index operator */
+    inline double* TransitionProbabilityMatrix::operator[]( const size_t i ) {
+
+        return theMatrix + i*num_states;
+    }
+
+    inline double TransitionProbabilityMatrix::getElement(size_t i, size_t j) const {
+
+        return *(theMatrix + num_states*i + j);
+    }
+
+
+    inline double& TransitionProbabilityMatrix::getElement(size_t i, size_t j) {
+
+        return *(theMatrix + num_states*i + j);
+    }
+    inline const double* TransitionProbabilityMatrix::getElements( void ) const {
+
+        return theMatrix;
+    }
+
+
+    inline double* TransitionProbabilityMatrix::getElements( void ) {
+
+        return theMatrix;
+    }
+
+
+    inline size_t TransitionProbabilityMatrix::getNumberOfStates( void ) const {
+
+        return num_states;
+    }
+
+
+    inline size_t TransitionProbabilityMatrix::size(void) const {
+
+        return nElements;
+    }
+
+
 }
 
 #endif
