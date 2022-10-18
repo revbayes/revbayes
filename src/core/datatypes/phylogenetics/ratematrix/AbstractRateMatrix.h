@@ -72,7 +72,7 @@ namespace RevBayesCore {
         bool                                checkTimeReversibity(double tolerance);
         virtual void                        computeStochasticMatrix(size_t n);
         virtual void                        computeDominatingRate(void);
-        virtual void                        exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const;
+        void                                exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const;
         
         // protected members available for derived classes
         MatrixReal*                         the_rate_matrix;                                                                            //!< Holds the rate matrix
