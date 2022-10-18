@@ -59,6 +59,8 @@ namespace RevBayesCore {
     };
     
     // Global functions using the class
+    void ensure_nonnegative(TransitionProbabilityMatrix& M);
+    void normalize_rows(TransitionProbabilityMatrix& M);
     std::ostream&                       operator<<(std::ostream& o, const TransitionProbabilityMatrix& x);                                           //!< Overloaded output operator
 
     
