@@ -39,8 +39,11 @@ namespace RevBayesCore {
         double                              operator()(size_t i, size_t j) const;                               //!< Subscript operator
         double&                             operator()(size_t i, size_t j);                                     //!< Subscript operator
 
+        TransitionProbabilityMatrix         operator*(const TransitionProbabilityMatrix& B) const;              //!< Matrix-matrix multiply
         TransitionProbabilityMatrix&        operator*=(const TransitionProbabilityMatrix& B);                   //!< Matrix-matrix multiply
         
+        void                                multiplyTo(const TransitionProbabilityMatrix& B, TransitionProbabilityMatrix&) const;              //!< Matrix-matrix multiply
+
 //        std::vector<std::vector<double> >::const_iterator       begin(void) const;
 //        std::vector<std::vector<double> >::iterator             begin(void);
 //        std::vector<std::vector<double> >::const_iterator       end(void) const;

@@ -99,9 +99,11 @@ TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator=( TransitionP
 }
 
 
-TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator*=(const TransitionProbabilityMatrix& B) {
-    
-    TransitionProbabilityMatrix C(num_states);
+void TransitionProbabilityMatrix::multiplyTo(const TransitionProbabilityMatrix& B, TransitionProbabilityMatrix& C) const
+{
+    assert(B.size() == num_states);
+    assert(C.size() == num_states);
+
     for (size_t i=0; i<num_states; i++)
     {
         for (size_t j=0; j<num_states; j++)
@@ -112,12 +114,26 @@ TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator*=(const Trans
             C[i][j] = sum;
         }
     }
+}
+
+TransitionProbabilityMatrix TransitionProbabilityMatrix::operator*(const TransitionProbabilityMatrix& B) const
+{
+    TransitionProbabilityMatrix C(num_states);
+
+    multiplyTo(B, C);
     
-    for (size_t i=0; i<num_states*num_states; i++)
-        theMatrix[i] = C.theMatrix[i];
-    
+    return C;
+}
+
+TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator*=(const TransitionProbabilityMatrix& B)
+{
+    TransitionProbabilityMatrix C = (*this) * B;
+
+    operator=( std::move(C) );
+
     return *this;
 }
+
 std::ostream& RevBayesCore::operator<<(std::ostream& o, const TransitionProbabilityMatrix& x) {
     
     std::streamsize previousPrecision = o.precision();
