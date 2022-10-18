@@ -533,6 +533,7 @@ bool AbstractRateMatrix::simulateStochasticMapping(double startAge, double endAg
 
 
 void AbstractRateMatrix::exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const {
+    assert(p.num_states == p.getNumberOfStates());
 
     // Here we use the scaling and squaring method with a 4th order Taylor approximant as described in:
     //
@@ -557,15 +558,17 @@ void AbstractRateMatrix::exponentiateMatrixByScalingAndSquaring(double t,  Trans
 
     // compute the 4th order Taylor approximant
 
+    // BDR: Note more recent work uses Pade approximants, which I think are better.
+    // Eigen implements that approach, which goes up to a (13,13) Pade approximant, depending
+    //   on whether the extra work is needed.
+    // Its kind of complicated, so we should probably use Eigen if we switch to that.
+
     // calculate the scaled matrix raised to powers 2, 3 and 4
-    TransitionProbabilityMatrix p_2(num_states);
-    multiplyMatrices(p, p, p_2);
+    TransitionProbabilityMatrix p_2 = p * p;
 
-    TransitionProbabilityMatrix p_3(num_states);
-    multiplyMatrices(p, p_2, p_3);
+    TransitionProbabilityMatrix p_3 = p * p_2;
 
-    TransitionProbabilityMatrix p_4(num_states);
-    multiplyMatrices(p, p_3, p_4);
+    TransitionProbabilityMatrix p_4 = p_2 * p_2;
 
     // add k=0 (the identity matrix) and k=1 terms
     for ( size_t i = 0; i < num_states; i++ )
@@ -582,29 +585,21 @@ void AbstractRateMatrix::exponentiateMatrixByScalingAndSquaring(double t,  Trans
         }
     }
 
-    // sanitization part 1 -- ensure all positive entries
-    for(int i=0;i<num_states;i++)
-        for(int j=0;j<num_states;j++)
-            p[i][j] = std::max(p[i][j], 0.0);
-
+    // Make sure that our Taylor approximation is now a stochastic matrix
+    // BEFORE we start squaring it.
+    ensure_nonnegative(p);
+    normalize_rows(p);
 
     // now perform the repeated squaring
     TransitionProbabilityMatrix r(num_states);
     for (size_t i = 0; i < s; i++)
     {
-        multiplyMatrices(p, p, r);
-        p = r;
-    }
+        // We could do p = p * p, but that allocates memory.
+        p.multiplyTo(p, r);
+        p = std::move(r);
 
-    // sanitization part 2 -- ensure rows sum to 1
-    for(int i=0;i<num_states;i++)
-    {
-        double sum = 0;
-        for(int j=0;j<num_states;j++)
-            sum += p[i][j];
-
-        for(int j=0;j<num_states;j++)
-            p[i][j] /= sum;
+        // Handle roundoff-error.
+        normalize_rows(p);
     }
 }
 
