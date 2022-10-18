@@ -28,7 +28,7 @@ namespace RevBayesCore {
         TransitionProbabilityMatrix(size_t n);                              //!< Constructor
         TransitionProbabilityMatrix(const TransitionProbabilityMatrix &tpm);
         TransitionProbabilityMatrix(TransitionProbabilityMatrix &&tpm);
-        virtual                            ~TransitionProbabilityMatrix();
+        ~TransitionProbabilityMatrix();
         
         
         // overloaded operators
