@@ -37,18 +37,17 @@ namespace RevBayesCore {
         RbBitSet&                       operator|=(const RbBitSet &bs);
 
 
-        void                            clear(void);
+        void                            reset(void);
         bool                            empty(void) const;
         void                            flip();
         void                            flip(size_t i);
-        size_t                          getNumberSetBits(void) const;                                           //!< Get the number of bits set.
-        size_t                          getFirstSetBit(void) const;                                             //!< Get the number of bits set.
-        bool                            isSet(size_t i) const;
+        size_t                          count(void) const;                                                      //!< Get the number of bits set.
+        size_t                          find_first(void) const;                                                 //!< Get the number of bits set.
+        bool                            test(size_t i) const;
         void                            resize(size_t size);
         void                            set(size_t i);
         size_t                          size(void) const;
         void                            unset(size_t i);
-        std::string print();
 
         
     private:
@@ -63,5 +62,7 @@ namespace RevBayesCore {
     std::ostream&                               operator<<(std::ostream& o, const RbBitSet& x);                    //!< Overloaded output operator
     
 }
+
+std::string to_string(const RevBayesCore::RbBitSet& bits);
 
 #endif

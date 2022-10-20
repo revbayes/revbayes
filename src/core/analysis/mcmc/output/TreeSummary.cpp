@@ -1646,7 +1646,7 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
         Split clade = it->first;
 
         //make sure we have an internal node
-        size_t clade_size = clade.first.getNumberSetBits();
+        size_t clade_size = clade.first.count();
         if (clade_size == 1 || clade_size == tipNames.size())  continue;
 
         //find parent node
@@ -1998,8 +1998,8 @@ void TreeSummary::summarize( bool verbose )
     // sort the clade samples in ascending frequency
     for (std::map<Split, long>::iterator it = clade_counts.begin(); it != clade_counts.end(); ++it)
     {
-//        if ( it->first.first.getNumberSetBits() > 0 )
-//        if ( it->first.first.getNumberSetBits() > 0 && it->first.first.getNumberSetBits() < (num_taxa-1) )
+//        if ( it->first.first.count() > 0 )
+//        if ( it->first.first.count() > 0 && it->first.first.count() < (num_taxa-1) )
         {
             clade_samples.insert( Sample<Split>(it->first, it->second) );
         }

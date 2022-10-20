@@ -631,7 +631,7 @@ bool TopologyNode::containsClade(const RbBitSet &your_taxa, bool strict) const
     }
 
     // this node needs to have at least as many taxa to contain the other clade
-    if ( your_taxa.getNumberSetBits() > my_taxa.getNumberSetBits() )
+    if ( your_taxa.count() > my_taxa.count() )
     {
         // quick negative abort to safe computational time
         return false;
@@ -642,7 +642,7 @@ bool TopologyNode::containsClade(const RbBitSet &your_taxa, bool strict) const
     {
 
         // if I don't have any of your taxa then I cannot contain you.
-        if ( your_taxa.isSet(i) == true && my_taxa.isSet(i) == false )
+        if ( your_taxa.test(i) == true && my_taxa.test(i) == false )
         {
             return false;
         }
@@ -655,7 +655,7 @@ bool TopologyNode::containsClade(const RbBitSet &your_taxa, bool strict) const
         // we already know from our check above that all taxa from the contained clade are present in this clade.
         // so we just need to check if there are additional taxa in this clade
         // and if so, then we need to check that the contained clade is contained in one of my children.
-        if ( your_taxa.getNumberSetBits() < my_taxa.getNumberSetBits() )
+        if ( your_taxa.count() < my_taxa.count() )
         {
 
             // loop over all children
@@ -883,7 +883,7 @@ size_t TopologyNode::getCladeIndex(const TopologyNode *c) const
     }
 
     // this node needs to have at least as many taxa to contain the other clade
-    if ( your_taxa.getNumberSetBits() > my_taxa.getNumberSetBits() )
+    if ( your_taxa.count() > my_taxa.count() )
     {
         // quick negative abort to safe computational time
         throw RbException("Node does not have at least as many taxa as input clade.");
@@ -894,7 +894,7 @@ size_t TopologyNode::getCladeIndex(const TopologyNode *c) const
     {
 
         // if I don't have any of your taxa then I cannot contain you.
-        if ( your_taxa.isSet(i) == true && my_taxa.isSet(i) == false )
+        if ( your_taxa.test(i) == true && my_taxa.test(i) == false )
         {
             throw RbException("Node does not contain any taxa in clade.");
         }
@@ -904,7 +904,7 @@ size_t TopologyNode::getCladeIndex(const TopologyNode *c) const
     // we already know from our check above that all taxa from the contained clade are present in this clade.
     // so we just need to check if there are additional taxa in this clade
     // and if so, then we need to check that the contained clade is contained in one of my children.
-    if ( your_taxa.getNumberSetBits() < my_taxa.getNumberSetBits() )
+    if ( your_taxa.count() < my_taxa.count() )
     {
 
         // loop over all children
@@ -1201,7 +1201,7 @@ TopologyNode* TopologyNode::getNode(const RbBitSet &your_taxa, bool strict)
     }
 
     // this node needs to have at least as many taxa to contain the other clade
-    if ( your_taxa.getNumberSetBits() > my_taxa.getNumberSetBits() )
+    if ( your_taxa.count() > my_taxa.count() )
     {
         // quick negative abort to safe computational time
         return NULL;
@@ -1212,7 +1212,7 @@ TopologyNode* TopologyNode::getNode(const RbBitSet &your_taxa, bool strict)
     {
 
         // if I don't have any of your taxa then I cannot contain you.
-        if ( your_taxa.isSet(i) == true && my_taxa.isSet(i) == false )
+        if ( your_taxa.test(i) == true && my_taxa.test(i) == false )
         {
             return NULL;
         }
@@ -1223,7 +1223,7 @@ TopologyNode* TopologyNode::getNode(const RbBitSet &your_taxa, bool strict)
     // we already know from our check above that all taxa from the contained clade are present in this clade.
     // so we just need to check if there are additional taxa in this clade
     // and if so, then we need to check that the contained clade is contained in one of my children.
-    if ( your_taxa.getNumberSetBits() < my_taxa.getNumberSetBits() )
+    if ( your_taxa.count() < my_taxa.count() )
     {
 
         // loop over all children
@@ -1280,7 +1280,7 @@ const TopologyNode* TopologyNode::getNode(const RbBitSet &your_taxa, bool strict
     }
 
     // this node needs to have at least as many taxa to contain the other clade
-    if ( your_taxa.getNumberSetBits() > my_taxa.getNumberSetBits() )
+    if ( your_taxa.count() > my_taxa.count() )
     {
         // quick negative abort to safe computational time
         return NULL;
@@ -1291,7 +1291,7 @@ const TopologyNode* TopologyNode::getNode(const RbBitSet &your_taxa, bool strict
     {
 
         // if I don't have any of your taxa then I cannot contain you.
-        if ( your_taxa.isSet(i) == true && my_taxa.isSet(i) == false )
+        if ( your_taxa.test(i) == true && my_taxa.test(i) == false )
         {
             return NULL;
         }
@@ -1301,7 +1301,7 @@ const TopologyNode* TopologyNode::getNode(const RbBitSet &your_taxa, bool strict
     // we already know from our check above that all taxa from the contained clade are present in this clade.
     // so we just need to check if there are additional taxa in this clade
     // and if so, then we need to check that the contained clade is contained in one of my children.
-    if ( your_taxa.getNumberSetBits() < my_taxa.getNumberSetBits() )
+    if ( your_taxa.count() < my_taxa.count() )
     {
 
         // loop over all children

@@ -606,7 +606,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
                     double p2 = 0.0;
                     double p3 = 0.0;
                     
-                    if ( org_val.isSet(0) == true )
+                    if ( org_val.test(0) == true )
                     {
                         p0 = tp_begin[0];
                         p1 = tp_begin[4];
@@ -614,7 +614,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
                         p3 = tp_begin[12];
                     }
                     
-                    if ( org_val.isSet(1) == true )
+                    if ( org_val.test(1) == true )
                     {
                         p0 += tp_begin[1];
                         p1 += tp_begin[5];
@@ -622,7 +622,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
                         p3 += tp_begin[13];
                     }
                     
-                    if ( org_val.isSet(2) == true )
+                    if ( org_val.test(2) == true )
                     {
                         p0 += tp_begin[2];
                         p1 += tp_begin[6];
@@ -630,7 +630,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
                         p3 += tp_begin[14];
                     }
                     
-                    if ( org_val.isSet(3) == true )
+                    if ( org_val.test(3) == true )
                     {
                         p0 += tp_begin[3];
                         p1 += tp_begin[7];

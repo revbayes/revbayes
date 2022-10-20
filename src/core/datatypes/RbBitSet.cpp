@@ -147,7 +147,7 @@ RbBitSet& RbBitSet::operator|=(const RbBitSet& x)
 }
 
 
-void RbBitSet::clear(void)
+void RbBitSet::reset(void)
 {
     // reset the bitset
     value = std::vector<bool>(value.size(),false);
@@ -174,7 +174,7 @@ void RbBitSet::flip()
     }
 }
 
-size_t RbBitSet::getFirstSetBit( void ) const
+size_t RbBitSet::find_first( void ) const
 {
     size_t index = 0;
     while ( index < value.size() && value[index] == false )
@@ -185,14 +185,14 @@ size_t RbBitSet::getFirstSetBit( void ) const
     return index;
 }
 
-size_t RbBitSet::getNumberSetBits( void ) const
+size_t RbBitSet::count( void ) const
 {
     // get the internal value
     return num_set_bits;
 }
 
 
-bool RbBitSet::isSet(size_t i) const
+bool RbBitSet::test(size_t i) const
 {
     // get the internal value
     return value[i];
@@ -230,26 +230,10 @@ size_t RbBitSet::size(void) const
 }
 
 
-void RbBitSet::unset(size_t i)
-{
-    if (value[i] == true)
-    {
-        --num_set_bits;
-    }
-
-    // set the internal value
-    value[i] = false;
-}
-
-std::string RbBitSet::print()
+std::string to_string(const RevBayesCore::RbBitSet& bits)
 {
     std::stringstream o;
-    o << "[";
-    for (size_t i=0; i<size(); ++i)
-    {
-        o << ( isSet(i) ? "1" : "0");
-    }
-    o << "]";
+    o << bits;
     return o.str();
 }
 
@@ -260,7 +244,7 @@ std::ostream& RevBayesCore::operator<<(std::ostream& o, const RevBayesCore::RbBi
     o << "[";
     for (size_t i=0; i<x.size(); ++i)
     {
-        o << ( x.isSet(i) ? "1" : "0");
+        o << ( x.test(i) ? "1" : "0");
     }
     o << "]";
 

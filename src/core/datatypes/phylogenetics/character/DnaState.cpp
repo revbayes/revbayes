@@ -49,7 +49,7 @@ void DnaState::setState(const std::string &symbol)
     state = s;
     
 //    // we need to clear the bits first
-//    state.clear();
+//    state.reset();
 //    
 //    char s = char( toupper( symbol[0] ) );
 //    
@@ -182,7 +182,7 @@ std::string DnaState::getStringValue(void) const
 //    for ( int i=int(state.size())-1; i>=0; --i )
 //    {
 //        val <<= 1;
-//        if ( state.isSet(i) == true )
+//        if ( state.test(i) == true )
 //        {
 //            val |= 1;
 //        }
