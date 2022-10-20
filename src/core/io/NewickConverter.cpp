@@ -302,7 +302,7 @@ TopologyNode* NewickConverter::createNode(const std::string &n, std::vector<Topo
         if ( char( ss.peek() ) == ';' )
         {
             // Avoid infinite loop.
-            throw RbException()<<"Not enough closing parenthesis!";
+            throw RbException()<<"Not enough closing parentheses!";
         }
     }
 
