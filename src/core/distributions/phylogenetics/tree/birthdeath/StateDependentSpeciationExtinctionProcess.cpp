@@ -378,7 +378,7 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
                 
                 node_likelihood[j] = extinction[j];
                 
-                if ( obs_state.isSet( j ) == true || gap == true )
+                if ( obs_state.test( j ) == true || gap == true )
                 {
                 	if ( node.isFossil() )
                 	{
@@ -2182,7 +2182,6 @@ bool StateDependentSpeciationExtinctionProcess::simulateTreeConditionedOnTips( s
         }
         
         tip_node->setAge(t);
-        tip_node->setNodeType(true, false, false);
         tip_node->setTimeInStates(std::vector<double>(num_states, 0.0));
         tip_node->setNumberOfShiftEvents( 0 );
         lineages_in_state[state_index].push_back(i);
@@ -2391,7 +2390,6 @@ bool StateDependentSpeciationExtinctionProcess::simulateTreeConditionedOnTips( s
             size_t node_index = nodes.size();
             TopologyNode* e = new TopologyNode(node_index);
             e->setAge(t);
-            e->setNodeType(true, false, false);
             e->setTimeInStates(std::vector<double>(num_states, 0.0));
             std::stringstream ss;
             ss << "ex" << node_index;
@@ -2461,7 +2459,6 @@ bool StateDependentSpeciationExtinctionProcess::simulateTreeConditionedOnTips( s
             size_t parent_index = nodes.size();
             TopologyNode* p = new TopologyNode(parent_index);
             p->setAge(t);
-            p->setNodeType(false, is_root, true);
             p->setTimeInStates(std::vector<double>(num_states, 0.0));
             p->setNumberOfShiftEvents(0);
             p->addChild(nodes[daughter1]);
@@ -2597,7 +2594,6 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
         t = 0.0;
     }
     root->setAge(t);
-    root->setNodeType(false, true, true);
     root->setTimeInStates(std::vector<double>(num_states, 0.0));
     root->setNumberOfShiftEvents(0);
     nodes.push_back(root);
@@ -2678,7 +2674,6 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
     left->setAge(t);
     root->addChild(left);
     left->setParent(root);
-    left->setNodeType(true, false, false);
     left->setTimeInStates(std::vector<double>(num_states, 0.0));
     left->setNumberOfShiftEvents(0);
     lineages_in_state[l].push_back(1);
@@ -2688,7 +2683,6 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
     right->setAge(t);
     root->addChild(right);
     right->setParent(root);
-    right->setNodeType(true, false, false);
     right->setTimeInStates(std::vector<double>(num_states, 0.0));
     right->setNumberOfShiftEvents(0);
     lineages_in_state[r].push_back(2);
@@ -2763,7 +2757,6 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
                     ss << "sp" << i;
                     std::string name = ss.str();
                     nodes[i]->setName(name);
-                    nodes[i]->setNodeType(true, false, false);
                 }
             }
 
@@ -2849,7 +2842,6 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
             ss << "ex" << event_index;
             std::string name = ss.str();
             nodes[event_index]->setName(name);
-            nodes[event_index]->setNodeType(true, false, false);
         }
         
         if (event_type == "anagenetic")
@@ -2894,7 +2886,6 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
                         ss << "sp" << i;
                         std::string name = ss.str();
                         nodes[i]->setName(name);
-                        nodes[i]->setNodeType(true, false, false);
                     }
                 }
                 
@@ -3005,7 +2996,6 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
             left->setAge(t);
             nodes[event_index]->addChild(left);
             left->setParent(nodes[event_index]);
-            left->setNodeType(true, false, false);
             left->setTimeInStates(std::vector<double>(num_states, 0.0));
             left->setNumberOfShiftEvents( 0 );
             lineages_in_state[l].push_back(index);
@@ -3016,14 +3006,12 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
             right->setAge(t);
             nodes[event_index]->addChild(right);
             right->setParent(nodes[event_index]);
-            right->setNodeType(true, false, false);
             right->setTimeInStates(std::vector<double>(num_states, 0.0));
             right->setNumberOfShiftEvents( 0 );
             lineages_in_state[r].push_back(index);
             nodes.push_back(right);
            
             // remove the parent node from our vector of current lineages
-            nodes[event_index]->setNodeType(false, false, true);
             lineages_in_state[event_state].erase(std::remove(lineages_in_state[event_state].begin(), lineages_in_state[event_state].end(), event_index), lineages_in_state[event_state].end());
         }
     }

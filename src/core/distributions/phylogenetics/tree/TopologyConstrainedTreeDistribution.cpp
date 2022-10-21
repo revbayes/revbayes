@@ -634,7 +634,7 @@ void TopologyConstrainedTreeDistribution::setBackbone(const TypedDagNode<Tree> *
             std::vector<RbBitSet>v( base_distribution->getValue().getNumberOfInteriorNodes(), RbBitSet() );
             active_backbone_clades.push_back(v);
         }
-        backbone_mask = std::vector<RbBitSet>( num_backbones, base_distribution->getValue().getNumberOfInteriorNodes() );
+        backbone_mask = std::vector<RbBitSet>( num_backbones, RbBitSet(base_distribution->getValue().getNumberOfInteriorNodes()) );
         
         
         initializeBitSets();

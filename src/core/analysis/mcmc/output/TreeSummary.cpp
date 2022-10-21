@@ -1214,18 +1214,16 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, s
     {
         parent = &n;
 
-        std::vector<TopologyNode*> x = n.getChildren();
-
         std::vector<TopologyNode*> new_children;
 
         // keep track of which taxa we found in the children
         RbBitSet child_mask( num_taxa );
 
-        for (size_t i = 0; i < x.size(); i++)
+        for (auto& old_child: n.getChildren())
         {
             RbBitSet child_bset(clade.size());
 
-            TopologyNode* child = findParentNode(*x[i], c, new_children, child_bset );
+            TopologyNode* child = findParentNode(*old_child, c, new_children, child_bset );
 
             // add this child to the mask
             child_mask = (child_bset | child_mask);
@@ -1238,7 +1236,7 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, s
             }
         }
 
-        children = new_children;
+        children = std::move(new_children);
 
         // check that we found all the children
         if ( parent == &n && child_mask != c.first && !n.isTip())
@@ -1558,18 +1556,12 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
     // find the clade credibility score for each tree
     for (std::set<Sample<std::string> >::reverse_iterator it = tree_samples.rbegin(); it != tree_samples.rend(); ++it)
     {
-        std::string newick = it->first;
-
-        // now we summarize the clades for the best tree
-        std::map<Split, std::vector<double> > cladeAges = tree_clade_ages[newick];
-
-        double cc = 0;
+        const std::string& newick = it->first;
 
         // find the product of the clade frequencies
-        for (std::map<Split, std::vector<double> >::iterator clade = cladeAges.begin(); clade != cladeAges.end(); clade++)
-        {
-            cc += log( splitFrequency(clade->first) );
-        }
+        double cc = 0;
+        for (auto& clade: tree_clade_ages.at(newick))
+            cc += log( splitFrequency(clade.first) );
 
         if (cc > max_cc)
         {
@@ -1618,12 +1610,10 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
 
     //first create a bush
     TopologyNode* root = new TopologyNode(tipNames.size()); //construct root node with index = nb Tips
-    root->setNodeType(false, true, true);
 
     for (size_t i = 0; i < tipNames.size(); i++)
     {
         TopologyNode* tipNode = new TopologyNode(tipNames.at(i), i); //Topology node constructor adding tip name and index=taxon nb
-        tipNode->setNodeType(true, false, false);
 
         // set the parent-child relationship
         root->addChild(tipNode);
@@ -1646,7 +1636,7 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
         Split clade = it->first;
 
         //make sure we have an internal node
-        size_t clade_size = clade.first.getNumberSetBits();
+        size_t clade_size = clade.first.count();
         if (clade_size == 1 || clade_size == tipNames.size())  continue;
 
         //find parent node
@@ -1688,8 +1678,6 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
 
             nIndex++;   //increment node index
             TopologyNode* intNode = new TopologyNode(nIndex); //Topology node constructor, with proper node index
-            intNode->setNodeType(false, false, true);
-
 
             // move the children to a new internal node
             for (size_t i = 0; i < children.size(); i++)
@@ -1709,7 +1697,6 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
 
                 nIndex++;   //increment node index
                 parentNode = new TopologyNode(nIndex); //Topology node constructor, with proper node index
-                parentNode->setNodeType(false, false, true);
 
                 intNode->removeChild(mrca[0]);
                 parentNode->addChild(mrca[0]);
@@ -1998,8 +1985,8 @@ void TreeSummary::summarize( bool verbose )
     // sort the clade samples in ascending frequency
     for (std::map<Split, long>::iterator it = clade_counts.begin(); it != clade_counts.end(); ++it)
     {
-//        if ( it->first.first.getNumberSetBits() > 0 )
-//        if ( it->first.first.getNumberSetBits() > 0 && it->first.first.getNumberSetBits() < (num_taxa-1) )
+//        if ( it->first.first.count() > 0 )
+//        if ( it->first.first.count() > 0 && it->first.first.count() < (num_taxa-1) )
         {
             clade_samples.insert( Sample<Split>(it->first, it->second) );
         }

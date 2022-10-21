@@ -418,7 +418,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                         for ( size_t i=0; i<this->num_chars; ++i )
                         {
                             // check whether we observed this state
-                            if ( val.isSet(i) == true )
+                            if ( val.test(i) == true )
                             {
                                 // add the probability
                                 tmp += *d;
@@ -448,7 +448,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                         for ( size_t i=0; i<this->num_chars; ++i )
                         {
                             // check whether we observed this state
-                            if ( val.isSet(i) == true )
+                            if ( val.test(i) == true )
                             {
                                 // add the probability
                                 tmp += *d * weights[i] ;

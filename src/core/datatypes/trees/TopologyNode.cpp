@@ -67,9 +67,6 @@ TopologyNode::TopologyNode(const TopologyNode &n) :
     tree( NULL ),
     taxon( n.taxon ),
     index( n.index ),
-    interior_node( n.interior_node ),
-    root_node( n.root_node ),
-    tip_node( n.tip_node ),
     sampled_ancestor( n.sampled_ancestor ),
     node_comments( n.node_comments ),
     branch_comments( n.branch_comments ),
@@ -125,10 +122,8 @@ TopologyNode& TopologyNode::operator=(const TopologyNode &n)
         branch_length           = n.branch_length;
         burst_speciation        = n.burst_speciation;
         index                   = n.index;
-        interior_node           = n.interior_node;
         node_comments           = n.node_comments;
         parent                  = n.parent;
-        root_node               = n.root_node;
         sampled_ancestor        = n.sampled_ancestor;
         sampling_event          = n.sampling_event;
         serial_sampling         = n.serial_sampling;
@@ -136,7 +131,6 @@ TopologyNode& TopologyNode::operator=(const TopologyNode &n)
         taxon                   = n.taxon;
         time_in_states          = n.time_in_states;
         num_shift_events        = n.num_shift_events;
-        tip_node                = n.tip_node;
         use_ages                = n.use_ages;
 
         // copy the children
@@ -239,10 +233,6 @@ void TopologyNode::addChild(TopologyNode* c, size_t pos )
     {
         tree->getTreeChangeEventHandler().fire( *c, RevBayesCore::TreeChangeEventMessage::TOPOLOGY );
     }
-
-    tip_node = false;
-    interior_node = true;
-
 }
 
 
@@ -346,13 +336,13 @@ std::string TopologyNode::buildNewickString( bool simmap = false, bool round = t
     std::vector<std::string> fossil_comments;
 
     // ensure we have an updated copy of branch_length variables
-    if ( isRoot() == false )
+    if ( not isRoot() )
     {
         recomputeBranchLength();
     }
 
     // test whether this is a internal or external node
-    if ( tip_node == true )
+    if ( isTip() )
     {
         // this is a tip so we just return the name of the node
         o << taxon.getName();
@@ -475,7 +465,7 @@ std::string TopologyNode::buildNewickString( bool simmap = false, bool round = t
         o << "]";
     }
 
-    if ( root_node == true )
+    if ( isRoot() )
     {
         o << ";";
     }
@@ -543,7 +533,7 @@ std::string TopologyNode::computePlainNewick( void ) const
 {
 
     // test whether this is a internal or external node
-    if ( tip_node == true )
+    if ( isTip() )
     {
         // this is a tip so we just return the name of the node
         return taxon.getName();
@@ -631,7 +621,7 @@ bool TopologyNode::containsClade(const RbBitSet &your_taxa, bool strict) const
     }
 
     // this node needs to have at least as many taxa to contain the other clade
-    if ( your_taxa.getNumberSetBits() > my_taxa.getNumberSetBits() )
+    if ( your_taxa.count() > my_taxa.count() )
     {
         // quick negative abort to safe computational time
         return false;
@@ -642,7 +632,7 @@ bool TopologyNode::containsClade(const RbBitSet &your_taxa, bool strict) const
     {
 
         // if I don't have any of your taxa then I cannot contain you.
-        if ( your_taxa.isSet(i) == true && my_taxa.isSet(i) == false )
+        if ( your_taxa.test(i) == true && my_taxa.test(i) == false )
         {
             return false;
         }
@@ -655,7 +645,7 @@ bool TopologyNode::containsClade(const RbBitSet &your_taxa, bool strict) const
         // we already know from our check above that all taxa from the contained clade are present in this clade.
         // so we just need to check if there are additional taxa in this clade
         // and if so, then we need to check that the contained clade is contained in one of my children.
-        if ( your_taxa.getNumberSetBits() < my_taxa.getNumberSetBits() )
+        if ( your_taxa.count() < my_taxa.count() )
         {
 
             // loop over all children
@@ -820,8 +810,9 @@ RbBitSet TopologyNode::getAllClades(std::vector<RbBitSet> &all_clades, size_t nu
         // have different indices for the same taxon.
         // Instead make the BitSet ordered by taxon names.
         // Eventually this should be refactored with the TaxonMap class.
-        std::map<std::string, size_t> taxon_bitset_map = tree->getTaxonBitSetMap();
-        this_bs.set( taxon_bitset_map[taxon.getName()] );
+        int bit_index = tree->getTaxonBitSetMap().at(taxon.getName());
+
+        this_bs.set( bit_index );
         
         if ( internal_only == false )
         {
@@ -830,13 +821,9 @@ RbBitSet TopologyNode::getAllClades(std::vector<RbBitSet> &all_clades, size_t nu
     }
     else
     {
-        for ( std::vector<TopologyNode* >::const_iterator i=children.begin(); i!=children.end(); i++ )
-        {
-            RbBitSet child_bs = (*i)->getAllClades(all_clades, num_tips, internal_only);
-            this_bs |= child_bs;
-        }
+        for ( auto& child: children )
+            this_bs |= child->getAllClades(all_clades, num_tips, internal_only);
         all_clades.push_back( this_bs );
-
     }
 
     return this_bs;
@@ -883,7 +870,7 @@ size_t TopologyNode::getCladeIndex(const TopologyNode *c) const
     }
 
     // this node needs to have at least as many taxa to contain the other clade
-    if ( your_taxa.getNumberSetBits() > my_taxa.getNumberSetBits() )
+    if ( your_taxa.count() > my_taxa.count() )
     {
         // quick negative abort to safe computational time
         throw RbException("Node does not have at least as many taxa as input clade.");
@@ -894,7 +881,7 @@ size_t TopologyNode::getCladeIndex(const TopologyNode *c) const
     {
 
         // if I don't have any of your taxa then I cannot contain you.
-        if ( your_taxa.isSet(i) == true && my_taxa.isSet(i) == false )
+        if ( your_taxa.test(i) == true && my_taxa.test(i) == false )
         {
             throw RbException("Node does not contain any taxa in clade.");
         }
@@ -904,7 +891,7 @@ size_t TopologyNode::getCladeIndex(const TopologyNode *c) const
     // we already know from our check above that all taxa from the contained clade are present in this clade.
     // so we just need to check if there are additional taxa in this clade
     // and if so, then we need to check that the contained clade is contained in one of my children.
-    if ( your_taxa.getNumberSetBits() < my_taxa.getNumberSetBits() )
+    if ( your_taxa.count() < my_taxa.count() )
     {
 
         // loop over all children
@@ -936,6 +923,9 @@ size_t TopologyNode::getCladeIndex(const TopologyNode *c) const
 /** Get child at index i */
 const TopologyNode& TopologyNode::getChild(size_t i) const
 {
+    // Maybe this should be an assert, but not sure what the contract is here.
+    if (i >= children.size())
+        throw RbException()<<"Trying to get child "<<i<<", but node only has "<<children.size()<<" children.";
 
     return *children[i];
 }
@@ -944,6 +934,9 @@ const TopologyNode& TopologyNode::getChild(size_t i) const
 /** Get child at index i */
 TopologyNode& TopologyNode::getChild(size_t i)
 {
+    // Maybe this should be an assert, but not sure what the contract is here.
+    if (i >= children.size())
+        throw RbException()<<"Trying to get child "<<i<<", but node only has "<<children.size()<<" children.";
 
     return *children[i];
 }
@@ -1043,7 +1036,7 @@ size_t TopologyNode::getIndex( void ) const
 void TopologyNode::getIndicesOfNodesInSubtree( bool countTips, std::vector<size_t>* indices ) const
 {
 
-    if ( tip_node )
+    if ( isTip() )
     {
         if (countTips)
         {
@@ -1195,7 +1188,7 @@ TopologyNode* TopologyNode::getNode(const RbBitSet &your_taxa, bool strict)
     }
 
     // this node needs to have at least as many taxa to contain the other clade
-    if ( your_taxa.getNumberSetBits() > my_taxa.getNumberSetBits() )
+    if ( your_taxa.count() > my_taxa.count() )
     {
         // quick negative abort to safe computational time
         return NULL;
@@ -1206,7 +1199,7 @@ TopologyNode* TopologyNode::getNode(const RbBitSet &your_taxa, bool strict)
     {
 
         // if I don't have any of your taxa then I cannot contain you.
-        if ( your_taxa.isSet(i) == true && my_taxa.isSet(i) == false )
+        if ( your_taxa.test(i) == true && my_taxa.test(i) == false )
         {
             return NULL;
         }
@@ -1217,7 +1210,7 @@ TopologyNode* TopologyNode::getNode(const RbBitSet &your_taxa, bool strict)
     // we already know from our check above that all taxa from the contained clade are present in this clade.
     // so we just need to check if there are additional taxa in this clade
     // and if so, then we need to check that the contained clade is contained in one of my children.
-    if ( your_taxa.getNumberSetBits() < my_taxa.getNumberSetBits() )
+    if ( your_taxa.count() < my_taxa.count() )
     {
 
         // loop over all children
@@ -1274,7 +1267,7 @@ const TopologyNode* TopologyNode::getNode(const RbBitSet &your_taxa, bool strict
     }
 
     // this node needs to have at least as many taxa to contain the other clade
-    if ( your_taxa.getNumberSetBits() > my_taxa.getNumberSetBits() )
+    if ( your_taxa.count() > my_taxa.count() )
     {
         // quick negative abort to safe computational time
         return NULL;
@@ -1285,7 +1278,7 @@ const TopologyNode* TopologyNode::getNode(const RbBitSet &your_taxa, bool strict
     {
 
         // if I don't have any of your taxa then I cannot contain you.
-        if ( your_taxa.isSet(i) == true && my_taxa.isSet(i) == false )
+        if ( your_taxa.test(i) == true && my_taxa.test(i) == false )
         {
             return NULL;
         }
@@ -1295,7 +1288,7 @@ const TopologyNode* TopologyNode::getNode(const RbBitSet &your_taxa, bool strict
     // we already know from our check above that all taxa from the contained clade are present in this clade.
     // so we just need to check if there are additional taxa in this clade
     // and if so, then we need to check that the contained clade is contained in one of my children.
-    if ( your_taxa.getNumberSetBits() < my_taxa.getNumberSetBits() )
+    if ( your_taxa.count() < my_taxa.count() )
     {
 
         // loop over all children
@@ -1340,6 +1333,14 @@ size_t TopologyNode::getNumberOfChildren( void ) const
     return children.size();
 }
 
+size_t TopologyNode::getDegree( void ) const
+{
+    int degree = children.size();
+    if (not isRoot())
+        degree++;
+    return degree;
+}
+
 
 /**
  * Get the number of nodes contained in the subtree starting with this node as the root.
@@ -1352,7 +1353,7 @@ size_t TopologyNode::getNumberOfChildren( void ) const
 size_t TopologyNode::getNumberOfNodesInSubtree( bool countTips ) const
 {
 
-    if ( tip_node )
+    if ( isTip() )
     {
         return (countTips ? 1 : 0);
     }
@@ -1426,14 +1427,15 @@ void TopologyNode::getTaxa(RbBitSet &taxa) const
         // have different indices for the same taxon.
         // Instead make the BitSet ordered by taxon names.
         // Eventually this should be refactored with the TaxonMap class.
-        std::map<std::string, size_t> taxon_bitset_map = tree->getTaxonBitSetMap();
-        taxa.set( taxon_bitset_map[taxon.getName()] );
+        int bit_index = tree->getTaxonBitSetMap().at(taxon.getName());
+
+        taxa.set( bit_index );
     }
     else
     {
-        for ( std::vector<TopologyNode* >::const_iterator i=children.begin(); i!=children.end(); i++ )
+        for ( auto& child: children )
         {
-            (*i)->getTaxa( taxa );
+            child->getTaxa( taxa );
         }
     }
 
@@ -1447,14 +1449,14 @@ void TopologyNode::getTaxa(std::vector<Taxon> &taxa, RbBitSet &bitset) const
     if ( isTip() )
     {
         taxa.push_back( taxon );
-        std::map<std::string, size_t> taxon_bitset_map = tree->getTaxonBitSetMap();
-        bitset.set( taxon_bitset_map[taxon.getName()] );
+        int bit_index = tree->getTaxonBitSetMap().at(taxon.getName());
+        bitset.set( bit_index );
     }
     else
     {
-        for ( std::vector<TopologyNode* >::const_iterator i=children.begin(); i!=children.end(); i++ )
+        for ( auto& child : children)
         {
-            (*i)->getTaxa( taxa, bitset );
+            child->getTaxa( taxa, bitset );
         }
     }
 
@@ -1551,14 +1553,14 @@ double TopologyNode::getTmrca(const std::vector<Taxon> &yourTaxa) const
 bool TopologyNode::isFossil( void ) const
 {
 
-    return age > 0.0 && tip_node;
+    return age > 0.0 && isTip();
 }
 
 
 bool TopologyNode::isInternal( void ) const
 {
 
-    return interior_node;
+    return not isTip();
 }
 
 
@@ -1588,7 +1590,7 @@ bool TopologyNode::isSampledAncestor(  bool propagate ) const
 bool TopologyNode::isTip( void ) const
 {
 
-    return tip_node;
+    return children.empty();
 }
 
 
@@ -1747,9 +1749,6 @@ void TopologyNode::removeAllChildren(void)
     }
 
     taxon = Taxon("");
-
-    tip_node = true;
-    interior_node = false;
 }
 
 
@@ -1771,10 +1770,6 @@ size_t TopologyNode::removeChild(TopologyNode* c)
     {
         throw RbException("Cannot find node in list of children nodes");
     }
-
-    // update the flags
-    tip_node      = (children.size() == 0);
-    interior_node = (children.size()  > 0);
 
     // fire tree change event
     if ( tree != NULL )
@@ -1919,17 +1914,6 @@ void TopologyNode::setNumberOfShiftEvents(size_t n)
     num_shift_events = n;
 }
 
-//SK
-void TopologyNode::setNodeType(bool tip, bool root, bool interior)
-{
-
-	tip_node = tip;
-	root_node = root;
-	interior_node = interior;
-
-}
-
-
 void TopologyNode::setParent(TopologyNode* p)
 {
 
@@ -1949,8 +1933,6 @@ void TopologyNode::setParent(TopologyNode* p)
         }
 
     }
-
-    root_node = (parent == NULL);
 }
 
 void TopologyNode::setUseAges(bool tf, bool recursive)

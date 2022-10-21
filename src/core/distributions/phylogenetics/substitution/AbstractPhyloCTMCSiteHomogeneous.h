@@ -834,8 +834,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
                     val &= ambiguous_char_matrix[taxon_index][i];
                 }
 
-                if (   ( allow_ambiguous_as_invariant == true  &&  val.getNumberSetBits() == 0 && gap_matrix[taxon_index][i] == false)
-                    || ( allow_ambiguous_as_invariant == false && (val.getNumberSetBits() == 0 || gap_matrix[taxon_index][i] == true ) ) )
+                if (   ( allow_ambiguous_as_invariant == true  &&  val.count() == 0 && gap_matrix[taxon_index][i] == false)
+                    || ( allow_ambiguous_as_invariant == false && (val.count() == 0 || gap_matrix[taxon_index][i] == true ) ) )
                 {
                     inv = false;
                     break;
@@ -844,7 +844,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
 
             for ( size_t c = 0; c < this->num_chars; c++ )
             {
-                if ( val.isSet(c) )
+                if ( val.test(c) )
                 {
                     invariant_site_index[i].push_back(c);
                 }

@@ -285,7 +285,7 @@ bool DiscreteCharacterState::isStateSet(size_t index) const
 {
     RbBitSet bs = getState();
 
-    return bs.isSet(index);
+    return bs.test(index);
 }
 
 
@@ -314,7 +314,7 @@ size_t DiscreteCharacterState::getStateIndex(void) const
 
     RbBitSet bs = getState();
 
-    return bs.getFirstSetBit();
+    return bs.find_first();
 }
 
 
@@ -323,7 +323,7 @@ size_t DiscreteCharacterState::getNumberObservedStates(void) const
 {
     RbBitSet bs = getState();
 
-    return bs.getNumberSetBits();
+    return bs.count();
 }
 
 
