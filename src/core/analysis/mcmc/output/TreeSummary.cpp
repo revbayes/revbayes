@@ -1556,18 +1556,12 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
     // find the clade credibility score for each tree
     for (std::set<Sample<std::string> >::reverse_iterator it = tree_samples.rbegin(); it != tree_samples.rend(); ++it)
     {
-        std::string newick = it->first;
-
-        // now we summarize the clades for the best tree
-        std::map<Split, std::vector<double> > cladeAges = tree_clade_ages[newick];
-
-        double cc = 0;
+        const std::string& newick = it->first;
 
         // find the product of the clade frequencies
-        for (std::map<Split, std::vector<double> >::iterator clade = cladeAges.begin(); clade != cladeAges.end(); clade++)
-        {
-            cc += log( splitFrequency(clade->first) );
-        }
+        double cc = 0;
+        for (auto& clade: tree_clade_ages.at(newick))
+            cc += log( splitFrequency(clade.first) );
 
         if (cc > max_cc)
         {
