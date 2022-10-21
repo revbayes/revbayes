@@ -1214,18 +1214,16 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, s
     {
         parent = &n;
 
-        std::vector<TopologyNode*> x = n.getChildren();
-
         std::vector<TopologyNode*> new_children;
 
         // keep track of which taxa we found in the children
         RbBitSet child_mask( num_taxa );
 
-        for (size_t i = 0; i < x.size(); i++)
+        for (auto& old_child: n.getChildren())
         {
             RbBitSet child_bset(clade.size());
 
-            TopologyNode* child = findParentNode(*x[i], c, new_children, child_bset );
+            TopologyNode* child = findParentNode(*old_child, c, new_children, child_bset );
 
             // add this child to the mask
             child_mask = (child_bset | child_mask);
@@ -1238,7 +1236,7 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, s
             }
         }
 
-        children = new_children;
+        children = std::move(new_children);
 
         // check that we found all the children
         if ( parent == &n && child_mask != c.first && !n.isTip())
