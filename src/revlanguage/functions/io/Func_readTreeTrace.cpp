@@ -458,7 +458,10 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<RevB
                 if (unroot_nonclock)
                 {
                     tau->removeRootIfDegree2();
-                    tau->setRooted(false);
+//                  Perhaps we should mark the tree unrooted, since we have removed the old root,
+//                    and chosen a neighbor as the now root.
+//                  However, RevBayes has bugs with unrooted trees and may crash.
+//                    tau->setRooted(false);
                 }
             }
             
