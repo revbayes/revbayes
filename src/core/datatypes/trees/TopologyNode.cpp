@@ -820,8 +820,9 @@ RbBitSet TopologyNode::getAllClades(std::vector<RbBitSet> &all_clades, size_t nu
         // have different indices for the same taxon.
         // Instead make the BitSet ordered by taxon names.
         // Eventually this should be refactored with the TaxonMap class.
-        std::map<std::string, size_t> taxon_bitset_map = tree->getTaxonBitSetMap();
-        this_bs.set( taxon_bitset_map[taxon.getName()] );
+        int bit_index = tree->getTaxonBitSetMap().at(taxon.getName());
+
+        this_bs.set( bit_index );
         
         if ( internal_only == false )
         {
@@ -830,13 +831,9 @@ RbBitSet TopologyNode::getAllClades(std::vector<RbBitSet> &all_clades, size_t nu
     }
     else
     {
-        for ( std::vector<TopologyNode* >::const_iterator i=children.begin(); i!=children.end(); i++ )
-        {
-            RbBitSet child_bs = (*i)->getAllClades(all_clades, num_tips, internal_only);
-            this_bs |= child_bs;
-        }
+        for ( auto& child: children )
+            this_bs |= child->getAllClades(all_clades, num_tips, internal_only);
         all_clades.push_back( this_bs );
-
     }
 
     return this_bs;
@@ -1440,14 +1437,15 @@ void TopologyNode::getTaxa(RbBitSet &taxa) const
         // have different indices for the same taxon.
         // Instead make the BitSet ordered by taxon names.
         // Eventually this should be refactored with the TaxonMap class.
-        std::map<std::string, size_t> taxon_bitset_map = tree->getTaxonBitSetMap();
-        taxa.set( taxon_bitset_map[taxon.getName()] );
+        int bit_index = tree->getTaxonBitSetMap().at(taxon.getName());
+
+        taxa.set( bit_index );
     }
     else
     {
-        for ( std::vector<TopologyNode* >::const_iterator i=children.begin(); i!=children.end(); i++ )
+        for ( auto& child: children )
         {
-            (*i)->getTaxa( taxa );
+            child->getTaxa( taxa );
         }
     }
 
@@ -1461,14 +1459,14 @@ void TopologyNode::getTaxa(std::vector<Taxon> &taxa, RbBitSet &bitset) const
     if ( isTip() )
     {
         taxa.push_back( taxon );
-        std::map<std::string, size_t> taxon_bitset_map = tree->getTaxonBitSetMap();
-        bitset.set( taxon_bitset_map[taxon.getName()] );
+        int bit_index = tree->getTaxonBitSetMap().at(taxon.getName());
+        bitset.set( bit_index );
     }
     else
     {
-        for ( std::vector<TopologyNode* >::const_iterator i=children.begin(); i!=children.end(); i++ )
+        for ( auto& child : children)
         {
-            (*i)->getTaxa( taxa, bitset );
+            child->getTaxa( taxa, bitset );
         }
     }
 
