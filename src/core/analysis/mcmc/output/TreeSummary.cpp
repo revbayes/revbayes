@@ -1610,12 +1610,10 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
 
     //first create a bush
     TopologyNode* root = new TopologyNode(tipNames.size()); //construct root node with index = nb Tips
-    root->setNodeType(false, true, true);
 
     for (size_t i = 0; i < tipNames.size(); i++)
     {
         TopologyNode* tipNode = new TopologyNode(tipNames.at(i), i); //Topology node constructor adding tip name and index=taxon nb
-        tipNode->setNodeType(true, false, false);
 
         // set the parent-child relationship
         root->addChild(tipNode);
@@ -1680,8 +1678,6 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
 
             nIndex++;   //increment node index
             TopologyNode* intNode = new TopologyNode(nIndex); //Topology node constructor, with proper node index
-            intNode->setNodeType(false, false, true);
-
 
             // move the children to a new internal node
             for (size_t i = 0; i < children.size(); i++)
@@ -1701,7 +1697,6 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
 
                 nIndex++;   //increment node index
                 parentNode = new TopologyNode(nIndex); //Topology node constructor, with proper node index
-                parentNode->setNodeType(false, false, true);
 
                 intNode->removeChild(mrca[0]);
                 parentNode->addChild(mrca[0]);

@@ -67,9 +67,6 @@ TopologyNode::TopologyNode(const TopologyNode &n) :
     tree( NULL ),
     taxon( n.taxon ),
     index( n.index ),
-    interior_node( n.interior_node ),
-    root_node( n.root_node ),
-    tip_node( n.tip_node ),
     sampled_ancestor( n.sampled_ancestor ),
     node_comments( n.node_comments ),
     branch_comments( n.branch_comments ),
@@ -125,10 +122,8 @@ TopologyNode& TopologyNode::operator=(const TopologyNode &n)
         branch_length           = n.branch_length;
         burst_speciation        = n.burst_speciation;
         index                   = n.index;
-        interior_node           = n.interior_node;
         node_comments           = n.node_comments;
         parent                  = n.parent;
-        root_node               = n.root_node;
         sampled_ancestor        = n.sampled_ancestor;
         sampling_event          = n.sampling_event;
         serial_sampling         = n.serial_sampling;
@@ -136,7 +131,6 @@ TopologyNode& TopologyNode::operator=(const TopologyNode &n)
         taxon                   = n.taxon;
         time_in_states          = n.time_in_states;
         num_shift_events        = n.num_shift_events;
-        tip_node                = n.tip_node;
         use_ages                = n.use_ages;
 
         // copy the children
@@ -239,10 +233,6 @@ void TopologyNode::addChild(TopologyNode* c, size_t pos )
     {
         tree->getTreeChangeEventHandler().fire( *c, RevBayesCore::TreeChangeEventMessage::TOPOLOGY );
     }
-
-    tip_node = false;
-    interior_node = true;
-
 }
 
 
@@ -346,13 +336,13 @@ std::string TopologyNode::buildNewickString( bool simmap = false, bool round = t
     std::vector<std::string> fossil_comments;
 
     // ensure we have an updated copy of branch_length variables
-    if ( isRoot() == false )
+    if ( not isRoot() )
     {
         recomputeBranchLength();
     }
 
     // test whether this is a internal or external node
-    if ( tip_node == true )
+    if ( isTip() )
     {
         // this is a tip so we just return the name of the node
         o << taxon.getName();
@@ -475,7 +465,7 @@ std::string TopologyNode::buildNewickString( bool simmap = false, bool round = t
         o << "]";
     }
 
-    if ( root_node == true )
+    if ( isRoot() )
     {
         o << ";";
     }
@@ -543,7 +533,7 @@ std::string TopologyNode::computePlainNewick( void ) const
 {
 
     // test whether this is a internal or external node
-    if ( tip_node == true )
+    if ( isTip() )
     {
         // this is a tip so we just return the name of the node
         return taxon.getName();
@@ -1046,7 +1036,7 @@ size_t TopologyNode::getIndex( void ) const
 void TopologyNode::getIndicesOfNodesInSubtree( bool countTips, std::vector<size_t>* indices ) const
 {
 
-    if ( tip_node )
+    if ( isTip() )
     {
         if (countTips)
         {
@@ -1363,7 +1353,7 @@ size_t TopologyNode::getDegree( void ) const
 size_t TopologyNode::getNumberOfNodesInSubtree( bool countTips ) const
 {
 
-    if ( tip_node )
+    if ( isTip() )
     {
         return (countTips ? 1 : 0);
     }
@@ -1563,14 +1553,14 @@ double TopologyNode::getTmrca(const std::vector<Taxon> &yourTaxa) const
 bool TopologyNode::isFossil( void ) const
 {
 
-    return age > 0.0 && tip_node;
+    return age > 0.0 && isTip();
 }
 
 
 bool TopologyNode::isInternal( void ) const
 {
 
-    return interior_node;
+    return not isTip();
 }
 
 
@@ -1600,7 +1590,7 @@ bool TopologyNode::isSampledAncestor(  bool propagate ) const
 bool TopologyNode::isTip( void ) const
 {
 
-    return tip_node;
+    return children.empty();
 }
 
 
@@ -1759,9 +1749,6 @@ void TopologyNode::removeAllChildren(void)
     }
 
     taxon = Taxon("");
-
-    tip_node = true;
-    interior_node = false;
 }
 
 
@@ -1783,10 +1770,6 @@ size_t TopologyNode::removeChild(TopologyNode* c)
     {
         throw RbException("Cannot find node in list of children nodes");
     }
-
-    // update the flags
-    tip_node      = (children.size() == 0);
-    interior_node = (children.size()  > 0);
 
     // fire tree change event
     if ( tree != NULL )
@@ -1931,17 +1914,6 @@ void TopologyNode::setNumberOfShiftEvents(size_t n)
     num_shift_events = n;
 }
 
-//SK
-void TopologyNode::setNodeType(bool tip, bool root, bool interior)
-{
-
-	tip_node = tip;
-	root_node = root;
-	interior_node = interior;
-
-}
-
-
 void TopologyNode::setParent(TopologyNode* p)
 {
 
@@ -1961,8 +1933,6 @@ void TopologyNode::setParent(TopologyNode* p)
         }
 
     }
-
-    root_node = (parent == NULL);
 }
 
 void TopologyNode::setUseAges(bool tf, bool recursive)

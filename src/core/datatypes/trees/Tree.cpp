@@ -267,7 +267,6 @@ void Tree::dropTipNode( size_t index )
     {
         // there is nothing left to prune
         node.setName("");
-        node.setNodeType(false, true, false);
         return;
     }
     TopologyNode &parent        = node.getParent();
