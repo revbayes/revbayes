@@ -908,13 +908,14 @@ std::vector<std::string> Tree::getSpeciesNames() const
 std::vector<Taxon> Tree::getTaxa() const
 {
     std::vector< Taxon > taxa;
-    for (size_t i = 0; i < getNumberOfTips(); ++i)
+    for (auto& node: nodes)
     {
-        const TopologyNode& n = getTipNode( i );
-        Taxon taxon = n.getTaxon();
-        taxon.setAge(n.getAge());
-        taxa.push_back( taxon );
-
+        if (node->isTip() or node->isSampledAncestor())
+        {
+            Taxon taxon = node->getTaxon();
+            taxon.setAge(node->getAge());
+            taxa.push_back( taxon );
+        }
     }
 
     return taxa;
