@@ -29,19 +29,6 @@ namespace RevBayesCore { class TreeChangeEventListener; }
 
 using namespace RevBayesCore;
 
-/* Default constructor */
-Tree::Tree(void) :
-    changeEventHandler(),
-    root( NULL ),
-    rooted( false ),
-    is_negative_constraint( false ),
-    num_tips( 0 ),
-    num_nodes( 0 )
-{
-
-}
-
-
 /* Copy constructor */
 Tree::Tree(const Tree& t) :
     changeEventHandler( ),
@@ -63,6 +50,13 @@ Tree::Tree(const Tree& t) :
         setRoot(newRoot, false);
     }
 
+}
+
+
+/* Copy constructor */
+Tree::Tree(Tree&& t)
+{
+    operator=( std::move(t) );
 }
 
 
@@ -115,6 +109,38 @@ Tree& Tree::operator=(const Tree &t)
     return *this;
 }
 
+Tree& Tree::operator=(Tree&& t)
+{
+    // If there are listeners watching t, then maybe we shouldn't steal its nodes.
+    // (However, since t is a temporary variable, then it probably shouldn't have listeners.)
+    if (not t.changeEventHandler.getListeners().empty())
+    {
+        // Use the copy constructor in this case.
+        return operator=(t);
+    }
+
+    // Otherwise steal nodes from t instead of copying them.
+    // By swapping with t, we let t do the work of destroying our nodes.
+    if (this != &t)
+    {
+        std::swap( rooted                , t.rooted                );
+        std::swap( num_tips              , t.num_tips              );
+        std::swap( num_nodes             , t.num_nodes             );
+        std::swap( is_negative_constraint, t.is_negative_constraint);
+        std::swap( root                  , t.root                  );
+        std::swap( nodes                 , t.nodes                 );
+        std::swap( taxon_bitset_map      , t.taxon_bitset_map      );
+
+        // This loop is maybe a reason to NOT record a tree pointer on the nodes...
+        for(auto& node: nodes)
+            node->setTree(this);
+
+        for(auto& node: t.nodes)
+            node->setTree(&t);
+    }
+
+    return *this;
+}
 
 bool Tree::operator==(const Tree &t) const
 {
