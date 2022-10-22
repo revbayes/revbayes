@@ -37,24 +37,6 @@ using namespace RevBayesCore;
 
 
 /*
- * Default AnnotationReport constructor
- */
-TreeSummary::AnnotationReport::AnnotationReport() :
-    clade_probs                   (true),
-    conditional_clade_ages        (false),
-    conditional_clade_probs       (false),
-    conditional_tree_ages         (false),
-    MAP_parameters                (false),
-    node_ages                     (true),
-    mean_node_ages                (true),
-    node_ages_HPD                 (0.95),
-    sampled_ancestor_probs        (true),
-    force_positive_branch_lengths (false),
-    use_outgroup(false)
-{}
-
-
-/*
  * TreeSummary constructor
  */
 TreeSummary::TreeSummary( TraceTree* t, bool c ) :
