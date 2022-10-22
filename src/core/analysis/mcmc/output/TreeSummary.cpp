@@ -1177,7 +1177,7 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, s
     // check if the flipped unrooted split is compatible
     if ( !rooted && !compatible && !ischild)
     {
-        RbBitSet clade_flip = clade; ~clade_flip;
+        RbBitSet clade_flip = ~clade;
         mask  = node | clade_flip;
 
         compatible = (mask == node);
