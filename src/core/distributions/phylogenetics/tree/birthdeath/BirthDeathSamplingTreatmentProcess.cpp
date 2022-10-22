@@ -6,17 +6,18 @@
 #include <string>
 #include <vector>
 
+#include "AbstractBirthDeathProcess.h"
 #include "BirthDeathForwardSimulator.h"
-#include "DistributionExponential.h"
 #include "BirthDeathSamplingTreatmentProcess.h"
+#include "DagNode.h"
+#include "DistributionExponential.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "RbMathLogic.h"
-#include "AbstractBirthDeathProcess.h"
-#include "DagNode.h"
 #include "RbException.h"
+#include "RbSettings.h"
 #include "RbVector.h"
 #include "StartingTreeSimulator.h"
 #include "TopologyNode.h"

@@ -2,7 +2,9 @@
 #define AbstractFossilizedBirthDeathRangeProcess_H
 
 #include "RbVector.h"
+#include "Taxon.h"
 #include "TypedDagNode.h"
+
 
 namespace RevBayesCore {
 

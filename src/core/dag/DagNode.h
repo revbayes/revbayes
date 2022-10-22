@@ -9,7 +9,7 @@
 
 #include "MemberObject.h"
 #include "Parallelizable.h"
-#include "RbVector.h"
+#include "RbOrderedSet.h"
 #include "SimulationConditions.h"
 #include "RbFileManager.h"
 

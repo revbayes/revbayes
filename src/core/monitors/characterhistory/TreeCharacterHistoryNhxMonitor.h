@@ -9,6 +9,7 @@
 #include "TimeAtlas.h"
 #include "Tree.h"
 #include "GeographicArea.h"
+#include "AbstractHomologousDiscreteCharacterData.h"
 
 #include <fstream>
 #include <iostream>
