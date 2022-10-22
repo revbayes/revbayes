@@ -117,8 +117,7 @@ namespace RevBayesCore {
         std::map<Split, std::map<Split, std::vector<double> > >         conditional_clade_ages;
         std::map<std::string, std::map<Split, std::vector<double> > >   tree_clade_ages;
 
-        bool                                       use_outgroup;
-        Clade                                      outgroup;
+        boost::optional<Clade>                     outgroup;
     };
 
 }

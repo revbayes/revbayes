@@ -41,8 +41,7 @@ using namespace RevBayesCore;
  */
 TreeSummary::TreeSummary( TraceTree* t, bool c ) :
     clock( c ),
-    rooted( c ),
-    use_outgroup(false)
+    rooted( c )
 {
     traces.push_back(t);
 }
@@ -54,8 +53,7 @@ TreeSummary::TreeSummary( TraceTree* t, bool c ) :
 TreeSummary::TreeSummary( std::vector<TraceTree* > t, bool c ) :
     traces(t),
     clock( c ),
-    rooted( c ),
-    use_outgroup(false)
+    rooted( c )
 {
     if( traces.empty() )
     {
@@ -666,9 +664,9 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
 
         if ( tmp_tree->isRooted() == false && rooted == false )
         {
-            if ( use_outgroup == true )
+            if ( outgroup )
             {
-                tmp_tree->reroot( outgroup, false, true );
+                tmp_tree->reroot( *outgroup, false, true );
             }
             else
             {
@@ -1244,9 +1242,9 @@ int TreeSummary::getTopologyFrequency(const RevBayesCore::Tree &tree, bool verbo
 
     if ( t.isRooted() == false && rooted == false )
     {
-        if( use_outgroup )
+        if( outgroup )
         {
-            t.reroot( outgroup, false, true );
+            t.reroot( *outgroup, false, true );
         }
         else
         {
@@ -1350,9 +1348,9 @@ bool TreeSummary::isCoveredInInterval(const std::string &v, double ci_size, bool
 
     if ( tree.isRooted() == false && rooted == false )
     {
-        if ( use_outgroup == true )
+        if ( outgroup )
         {
-            tree.reroot( outgroup, false, true );
+            tree.reroot( *outgroup, false, true );
         }
         else
         {
@@ -1880,7 +1878,6 @@ void TreeSummary::printTreeSummary(std::ostream &o, double credibleIntervalSize,
 
 void TreeSummary::setOutgroup(const RevBayesCore::Clade &c)
 {
-    use_outgroup = true;
     outgroup = c;
 }
 
@@ -1944,9 +1941,9 @@ void TreeSummary::summarize( bool verbose )
 
             if ( rooted == false )
             {
-                if ( use_outgroup == true )
+                if ( outgroup )
                 {
-                    tree.reroot( outgroup, false, true );
+                    tree.reroot( *outgroup, false, true );
                 }
                 else
                 {
