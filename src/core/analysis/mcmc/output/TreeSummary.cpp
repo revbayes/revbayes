@@ -1076,26 +1076,30 @@ std::vector<double> TreeSummary::computePairwiseRFDistance( double credible_inte
     std::vector<double> rf_distances;
     for (size_t i=0; i<unique_trees.size(); ++i)
     {
+        // The unique tree occurs sample_count[i] times.
+        // Here we are treating them as coming in one continuous block, which is annoying.
 
-        // first we need to compare the tree to 'itself'
-        for (size_t k=0; k<(sample_count[i]*(sample_count[i]-1)); ++k )
+        for(int rep = 0;rep<sample_count[i];rep++)
         {
-            rf_distances.push_back( 0.0 );
-        }
-
-        for (size_t j=i+1; j<unique_trees.size(); ++j)
-        {
-            
-            std::vector<RbBitSet>* a = unique_trees_bs[i];
-            std::vector<RbBitSet>* b = unique_trees_bs[j];
-            double rf = TreeUtilities::computeRobinsonFouldDistance(*a, *b, true);
-
-            for (size_t k=0; k<(sample_count[i]*sample_count[j]); ++k )
+            // first we need to compare the tree to subsequent copies of itself
+            for (size_t k=rep+1; k<sample_count[i]; ++k )
             {
-                rf_distances.push_back( rf );
+                rf_distances.push_back( 0.0 );
+            }
+
+            // then we compare it to copies of other trees
+            for (size_t j=i+1; j<unique_trees.size(); ++j)
+            {
+                std::vector<RbBitSet>* a = unique_trees_bs[i];
+                std::vector<RbBitSet>* b = unique_trees_bs[j];
+                double rf = TreeUtilities::computeRobinsonFouldDistance(*a, *b, true);
+
+                for (size_t k=0; k<sample_count[j]; ++k )
+                    rf_distances.push_back( rf );
             }
         }
     }
+
     for (size_t i=0; i<unique_trees.size(); ++i)
     {
         Tree* tmp = unique_trees[i];
