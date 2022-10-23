@@ -1,10 +1,13 @@
 #include "TaxonMap.h"
 
+#include <sstream>
 #include <cstddef>
 #include <utility>
 
+#include "RbException.h"
 #include "Tree.h"
 #include "TimeInterval.h"
+
 
 using namespace RevBayesCore;
 
@@ -41,7 +44,10 @@ TaxonMap::TaxonMap( const Tree &t ) :
  */
 void TaxonMap::addTaxon( const Taxon &t )
 {
-    taxa_map.insert( std::pair<Taxon, size_t>( t, taxa.size() ) );
+    if (taxa_map.count(t))
+        throw RbException()<<"TaxonMap: adding duplicate taxon "<<t;
+
+    taxa_map.insert( { t, taxa.size() } );
     taxa.push_back( t );
 }
 
@@ -57,8 +63,39 @@ const Taxon& TaxonMap::getTaxon(size_t i) const
 }
 
 
+bool TaxonMap::hasTaxon(const Taxon &t) const
+{
+    return (taxa_map.count(t) > 0);
+}
+
 size_t TaxonMap::getTaxonIndex(const Taxon &t) const
 {
-    const std::map< Taxon, size_t >::const_iterator& entry = taxa_map.find(t);
+    auto entry = taxa_map.find(t);
+    if (entry == taxa_map.end())
+        throw RbException()<<"TaxonMap: can't find taxon "<<t;
     return entry->second;
 }
+
+
+int TaxonMap::size() const
+{
+    return taxa.size();
+}
+
+std::string TaxonMap::print() const
+{
+    std::ostringstream ss;
+    ss<<(*this);
+    return ss.str();
+}
+
+// Global functions using the class
+std::ostream& RevBayesCore::operator<<(std::ostream& o, const TaxonMap& tm)
+{
+    for(int i=0; i<tm.size();i++)
+    {
+        o<<i+1<<": "<<tm.getTaxon(i)<<"\n";
+    }
+    return o;
+}
+//!< Overloaded output operator
