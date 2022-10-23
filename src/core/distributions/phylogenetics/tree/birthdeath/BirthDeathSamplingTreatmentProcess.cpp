@@ -9,6 +9,7 @@
 #include "AbstractBirthDeathProcess.h"
 #include "BirthDeathForwardSimulator.h"
 #include "BirthDeathSamplingTreatmentProcess.h"
+#include "Clade.h"
 #include "DagNode.h"
 #include "DistributionExponential.h"
 #include "RandomNumberFactory.h"

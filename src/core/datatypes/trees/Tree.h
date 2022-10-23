@@ -26,7 +26,6 @@
 #include "Cloneable.h"
 #include "MemberObject.h"
 #include "Serializable.h"
-#include "TaxonMap.h"
 #include "TreeChangeEventHandler.h"
 #include "Printable.h"
 
@@ -36,6 +35,7 @@
 namespace RevBayesCore {
 
     class TopologyNode;
+    class TaxonMap;
 
     class Tree : public Cloneable, public MemberObject<double>, public MemberObject<long>, public MemberObject<Boolean>, public Serializable, public Printable {
 

@@ -42,7 +42,6 @@
 
 #include "TreeChangeEventMessage.h"
 #include "Taxon.h"
-#include "TaxonMap.h"
 
 #include <vector>
 #include <map>
@@ -52,6 +51,7 @@
 namespace RevBayesCore {
     
     class Tree;
+    class TaxonMap;
     
     class TopologyNode  {
         

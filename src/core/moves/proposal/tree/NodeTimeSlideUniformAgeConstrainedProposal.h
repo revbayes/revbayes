@@ -6,6 +6,7 @@
 #include "Proposal.h"
 #include "StochasticNode.h"
 #include "Tree.h"
+#include "Clade.h"
 
 namespace RevBayesCore {
     
