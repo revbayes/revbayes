@@ -32,13 +32,18 @@ Func_sqrt* Func_sqrt::clone( void ) const {
     return new Func_sqrt( *this );
 }
 
+double* my_sqrt(double x)
+{
+    return new double(std::sqrt(x));
+}
+
 
 RevBayesCore::TypedFunction<double>* Func_sqrt::createFunction( void ) const
 {
     RevBayesCore::TypedDagNode<double>* arg = static_cast<const Real &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
 
     // Select the version of sqrt that takes a double.
-    return RevBayesCore::generic_function_ptr( static_cast<double(*)(double)>(sqrt), arg );
+    return RevBayesCore::generic_function_ptr< double >( my_sqrt, arg );
 }
 
 
