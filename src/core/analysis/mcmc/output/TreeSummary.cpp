@@ -1880,6 +1880,17 @@ void TreeSummary::printTreeSummary(std::ostream &o, double credibleIntervalSize,
 }
 
 
+bool TreeSummary::hasOutgroup() const
+{
+    return outgroup.has_value();
+}
+
+const Clade& TreeSummary::getOutgroup() const
+{
+    assert(hasOutgroup());
+    return *outgroup;
+}
+
 void TreeSummary::setOutgroup(const RevBayesCore::Clade &c)
 {
     outgroup = c;
@@ -1992,4 +2003,9 @@ void TreeSummary::summarize( bool verbose )
     {
         (*trace)->setDirty(false);
     }
+}
+
+const std::set<TreeSummary::Sample<TreeSummary::Split>>& TreeSummary::getCladeSamples() const
+{
+    return clade_samples;
 }

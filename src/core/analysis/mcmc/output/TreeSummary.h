@@ -91,7 +91,10 @@ namespace RevBayesCore {
         void                                       printTreeSummary(std::ostream& o, double ci=0.95, bool verbose=true);
         void                                       printCladeSummary(std::ostream& o, double minP=0.05, bool verbose=true);
         long                                       sampleSize(bool post = false) const;
+        bool                                       hasOutgroup() const;
+        const Clade&                               getOutgroup() const;
         void                                       setOutgroup(const Clade &c);
+        const std::set<Sample<Split>>&             getCladeSamples() const;
 
     protected:
 
