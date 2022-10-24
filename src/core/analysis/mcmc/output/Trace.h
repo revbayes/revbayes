@@ -20,9 +20,10 @@ namespace RevBayesCore {
     template <class valueType>
     class Trace : public AbstractTrace {
         
+        virtual void                    doAddObject(valueType&& d);
     public:
         
-        Trace(void)                     = default;
+                                        Trace(void) = default;
         
         virtual                         ~Trace(void) {}
 
@@ -37,9 +38,9 @@ namespace RevBayesCore {
         const valueType&                objectAt(size_t index, bool post = false) const { return post ? values.at(index + burnin) : values.at(index); }
         long                            size(bool post = false) const                   { return post ? values.size() - burnin : values.size(); }
 
-        virtual void                    addObject(const valueType& d);
-        virtual void                    addObject(valueType&& d);
-        virtual void                    addObject(valueType* d);
+        void                            addObject(const valueType& d);
+        void                            addObject(valueType&& d);
+        void                            addObject(valueType* d);
         virtual int                     isCoveredInInterval(const std::string &v, double i, bool verbose);
         bool                            isDirty(void) const                             { return dirty; };
         void                            setDirty(bool d)                                { dirty = d; };
@@ -112,26 +113,31 @@ namespace RevBayesCore {
 }
 
 template <class valueType>
+void RevBayesCore::Trace<valueType>::doAddObject(valueType&& t)
+{
+    values.push_back( std::move(t));
+    dirty = true;
+}
+
+
+template <class valueType>
 void RevBayesCore::Trace<valueType>::addObject(const valueType& t)
 {
-    values.push_back(t);
-    dirty = true;
+    doAddObject( valueType(t) );
 }
 
 
 template <class valueType>
 void RevBayesCore::Trace<valueType>::addObject(valueType&& t)
 {
-    values.push_back( std::move(t) );
-    dirty = true;
+    doAddObject( std::move(t) );
 }
 
 
 template <class valueType>
 void RevBayesCore::Trace<valueType>::addObject(valueType* t)
 {
-    addObject(*t);
-    delete t;
+    doAddObject( valueType(*t) );
 }
 
 
@@ -142,7 +148,7 @@ void RevBayesCore::Trace<valueType>::addValueFromString(const std::string &s)
     valueType t;
     Serializer<valueType, IsDerivedFrom<valueType, Serializable>::Is >::ressurectFromString( &t, s );
 
-    addObject( t );
+    addObject( std::move(t) );
 
 }
 
