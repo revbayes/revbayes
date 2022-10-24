@@ -27,6 +27,11 @@ namespace RevBayesCore {
     public:
         
                                         Trace(void) = default;
+                                        Trace(Trace<valueType>&&) = default;
+                                        Trace(const Trace<valueType>&) = default;
+
+        Trace<valueType>&               operator=(const Trace<valueType>&) = default;
+        Trace<valueType>&               operator=(Trace<valueType>&&) = default;
         
         virtual                         ~Trace(void) {}
 
