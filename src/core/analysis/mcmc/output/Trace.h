@@ -18,9 +18,12 @@ namespace RevBayesCore {
     class Serializable;
     
     template <class valueType>
-    class Trace : public AbstractTrace {
-        
+    class Trace : public AbstractTrace
+    {
+
+    protected:
         virtual void                    doAddObject(valueType&& d);
+
     public:
         
                                         Trace(void) = default;

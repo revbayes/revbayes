@@ -10,7 +10,7 @@ void TraceTree::doAddObject(Tree&& t)
     else if (not isRooted() and t.isRooted())
         throw RbException()<<"Adding rooted tree to unrooted trace";
 
-    return Trace<Tree>::addObject( std::move(t) );
+    return Trace<Tree>::doAddObject( std::move(t) );
 }
 
 /*
