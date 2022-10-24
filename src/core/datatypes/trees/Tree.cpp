@@ -973,17 +973,31 @@ size_t Tree::getTipIndex( const std::string &name ) const
 
 std::vector<std::string> Tree::getTipNames() const
 {
-
     std::vector<std::string> names;
-    for (size_t i = 0; i < getNumberOfTips(); ++i)
+    for (auto& node: nodes)
     {
-        const TopologyNode& n = getTipNode( i );
-        names.push_back( n.getName() );
+        if (node->isTip())
+        {
+            names.push_back( node->getName() );
+        }
     }
 
     return names;
 }
 
+std::vector<std::string> Tree::getTaxaNames() const
+{
+    std::vector<std::string> names;
+    for (auto& node: nodes)
+    {
+        if (node->isTip() or node->isSampledAncestor())
+        {
+            names.push_back( node->getName() );
+        }
+    }
+
+    return names;
+}
 
 /**
  * We provide this function to allow a caller to randomly pick one of the tip nodes.

@@ -107,6 +107,7 @@ namespace RevBayesCore {
         const std::map<std::string, size_t>&                getTaxonBitSetMap(void) const;                                                                      //!< Returns a map that holds the BitSet index for each taxon
         size_t                                              getTipIndex(const std::string &name) const;
         std::vector<std::string>                            getTipNames() const;
+        std::vector<std::string>                            getTaxaNames() const;
         TopologyNode&                                       getTipNode(size_t indx);                                                                            //!< Get a pointer to tip node i
         const TopologyNode&                                 getTipNode(size_t indx) const;                                                                      //!< Get a pointer to tip node i
         TopologyNode&                                       getTipNodeWithName(const std::string& n);                                                           //!< Get a pointer to tip node i
