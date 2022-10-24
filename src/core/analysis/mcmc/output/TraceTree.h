@@ -6,6 +6,7 @@
 #include "Clade.h"
 #include "Trace.h"
 #include "Tree.h"
+#include "TaxonMap.h"
 
 namespace RevBayesCore {
 
@@ -16,6 +17,8 @@ namespace RevBayesCore {
         // These properties describe the actual trees in the trace.
         bool                                       clock = true;
         bool                                       rooted = true;
+        // This property is imposed on the trees in the trace.
+        boost::optional<TaxonMap>                  taxon_map;
 
         void                                       doAddObject(Tree&& d) override;
 
@@ -36,6 +39,10 @@ namespace RevBayesCore {
         TreeSummary&                               summary();
 
         TraceTree*                                 clone(void) const;
+
+        bool                                       hasTaxonMap() const;
+        const TaxonMap&                            getTaxonMap() const;
+        void                                       setTaxonMap(const TaxonMap&);
 
         bool                                       isRooted() const;
         bool                                       isClock() const;

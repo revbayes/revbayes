@@ -16,11 +16,21 @@ TreeSummary& TraceTree::summary()
 
 void TraceTree::doAddObject(Tree&& t)
 {
+    // 1. Check that rooting of the trace matches rooting of the trees.
     if (isRooted() and not t.isRooted())
         throw RbException()<<"Adding unrooted tree to rooted trace";
     else if (not isRooted() and t.isRooted())
         throw RbException()<<"Adding rooted tree to unrooted trace";
 
+    // 2. Construct a TaxonMap from the first tree we see, if we don't have one already.
+    if (not hasTaxonMap())
+        taxon_map = TaxonMap(t).sort();
+
+    // 3. Check that the tree we read has the same taxa as the trace, and synchronize its indices.
+    if (hasTaxonMap())
+        t.setTaxonIndices(getTaxonMap());
+
+    // 4. Actually add the tree.
     return Trace<Tree>::doAddObject( std::move(t) );
 }
 
@@ -51,6 +61,7 @@ TraceTree&  TraceTree::operator=(const TraceTree& t)
 
     clock = t.clock;
     rooted = t.rooted;
+    taxon_map = t.taxon_map;
 
     the_summary = std::make_unique<TreeSummary>(this, clock);
 
@@ -68,6 +79,26 @@ bool TraceTree::isRooted() const
 bool TraceTree::isClock() const
 {
     return clock;
+}
+
+bool TraceTree::hasTaxonMap() const
+{
+    return taxon_map.has_value();
+}
+
+const TaxonMap& TraceTree::getTaxonMap() const
+{
+    return *taxon_map;
+}
+
+void TraceTree::setTaxonMap(const TaxonMap& tm)
+{
+    if (taxon_map != tm)
+    {
+        taxon_map = tm;
+        for(auto& tree: values)
+            tree.setTaxonIndices(tm);
+    }
 }
 
 /**
