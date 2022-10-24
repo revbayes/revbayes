@@ -92,12 +92,12 @@ std::string TaxonMap::print() const
 TaxonMap& TaxonMap::sort()
 {
     // 1. Sort the taxa by name
-    std::sort(taxa.begin(), taxa.end(), [](const Taxon& a, const Taxon& b) {a.name < b.name;});
+    std::sort(taxa.begin(), taxa.end(), [](const Taxon& a, const Taxon& b) {return a.getName() < b.getName();});
 
     // 2. Reconstruct the map
-    taxon_map.clear();
+    taxa_map.clear();
     for(int i=0;i<taxa.size();i++)
-        taxon_map.insert({taxa[i],i});
+        taxa_map.insert({taxa[i],i});
 
     return *this;
 }
