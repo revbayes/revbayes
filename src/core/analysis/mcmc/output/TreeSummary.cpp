@@ -11,6 +11,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <boost/optional.hpp>
 
 #include "NewickConverter.h"
 #include "ProgressBar.h"
@@ -35,6 +36,7 @@
 
 using namespace RevBayesCore;
 
+using boost::optional;
 
 /*
  * TreeSummary constructor
@@ -55,22 +57,36 @@ TreeSummary::TreeSummary( std::vector<TraceTree* > t, bool c ) :
     clock( c ),
     rooted( c )
 {
+    // 1. Complain if we weren't given any traces.
     if( traces.empty() )
     {
-        throw(RbException("Tree summary requires at least one tree trace"));
+        throw RbException("Tree summary requires at least one tree trace");
     }
 
-    std::vector<std::string> tip_names = traces.front()->objectAt(0).getTipNames();
-    std::sort(tip_names.begin(),tip_names.end());
-
-    for(std::vector<TraceTree* >::iterator trace = traces.begin(); trace != traces.end(); trace++)
+    // 2. Compute the taxon map from the first tree we find.
+    optional<TaxonMap> taxon_indices;
+    for(auto& trace: traces)
     {
-        std::vector<std::string> t = (*trace)->objectAt(0).getTipNames();
-        std::sort(t.begin(),t.end());
+        if (trace->hasTaxonMap())
+            taxon_indices = trace->getTaxonMap();
+    }
 
-        if( t != tip_names )
+    // 3. Complain if we didn't find any trees.
+    //    (If any of the traces had any trees, then their TaxonMap would be set).
+    if (not taxon_indices)
+        throw RbException()<<"Tree summary: all tree traces empty!";
+
+    // 4. Check that all the trees have the same taxa, and synchronize their indices.
+    for(auto& trace: traces)
+    {
+        try
         {
-            throw(RbException("Cannot summarize tree traces with mismatched tip names"));
+            trace->setTaxonMap(*taxon_indices);
+        }
+        catch (RbException& e)
+        {
+            e.prepend("Cannot summarize tree traces with mismatched tip names:\n");
+            throw;
         }
     }
 }
