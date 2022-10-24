@@ -89,6 +89,19 @@ std::string TaxonMap::print() const
     return ss.str();
 }
 
+TaxonMap& TaxonMap::sort()
+{
+    // 1. Sort the taxa by name
+    std::sort(taxa.begin(), taxa.end(), [](const Taxon& a, const Taxon& b) {a.name < b.name;});
+
+    // 2. Reconstruct the map
+    taxon_map.clear();
+    for(int i=0;i<taxa.size();i++)
+        taxon_map.insert({taxa[i],i});
+
+    return *this;
+}
+
 // Global functions using the class
 std::ostream& RevBayesCore::operator<<(std::ostream& o, const TaxonMap& tm)
 {
