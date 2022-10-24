@@ -182,19 +182,11 @@ Func_lg* Func_lg::clone( void ) const
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_lg::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* bf = NULL;
-    const RevObject* obj = &this->args[0].getVariable()->getRevObject();
-    if (obj == NULL) {
-        std::cout << "base frequencies equal default argument\n";
-        
-        // populate default empirical base frequencies
-        ;
-    }
-    else {
-        bf = static_cast<const Simplex &>( *obj ).getDagNode();
-    }
+    const RevObject& obj = args[0].getVariable()->getRevObject();
 
-    return RevBayesCore::generic_function_ptr< RevBayesCore::RateGenerator >( LG, bf);
+    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* bf = static_cast<const Simplex &>( obj ).getDagNode();
+
+    return RevBayesCore::generic_function_ptr< RevBayesCore::RateGenerator >( LG, bf );
 }
 
 
