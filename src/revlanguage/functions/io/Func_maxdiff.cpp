@@ -8,6 +8,7 @@
 #include "Real.h"
 #include "RlTraceTree.h"
 #include "RlTree.h"
+#include "TreeSummary.h"
 #include "TypeSpec.h"
 #include "WorkspaceVector.h"
 

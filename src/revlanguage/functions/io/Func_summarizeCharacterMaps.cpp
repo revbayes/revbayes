@@ -27,6 +27,7 @@
 #include "Trace.h"
 #include "TraceTree.h"
 #include "Tree.h"
+#include "TreeSummary.h"
 #include "TypeSpec.h"
 #include "TypedDagNode.h"
 #include "WorkspaceToCoreWrapperObject.h"

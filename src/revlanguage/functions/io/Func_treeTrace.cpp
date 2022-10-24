@@ -30,6 +30,7 @@
 #include "RlFunction.h"
 #include "RlTimeTree.h"
 #include "TraceTree.h"
+#include "TreeSummary.h"
 #include "Tree.h"
 #include "TypeSpec.h"
 

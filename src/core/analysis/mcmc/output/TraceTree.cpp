@@ -1,7 +1,18 @@
 #include "TraceTree.h"
+#include "TreeSummary.h"
 
 using namespace RevBayesCore;
 
+
+const TreeSummary& TraceTree::summary() const
+{
+    return *the_summary;
+}
+
+TreeSummary& TraceTree::summary()
+{
+    return *the_summary;
+}
 
 void TraceTree::doAddObject(Tree&& t)
 {
@@ -17,24 +28,37 @@ void TraceTree::doAddObject(Tree&& t)
  * TraceTree constructor
  */
 TraceTree::TraceTree( bool c ) :
-    TreeSummary(this, c),
     clock( c ),
-    rooted( c )
+    rooted( c ),
+    the_summary( std::make_unique<TreeSummary>(this, clock) )
 {
 }
 
 
 /*
- * TraceTree copy constructor
+ * TraceTree copy constructor and operator=.
+ * Hopefully we can eventually delete these.
  */
-TraceTree::TraceTree(const TraceTree& t ) : TreeSummary(this, t.isClock())
-{
-    *this = t;
 
-    traces.clear();
-    traces.push_back(this);
+TraceTree::TraceTree(const TraceTree& t)
+{
+    operator=(t);
 }
 
+TraceTree&  TraceTree::operator=(const TraceTree& t)
+{
+    Trace<Tree>::operator=(t);
+
+    clock = t.clock;
+    rooted = t.rooted;
+
+    the_summary = std::make_unique<TreeSummary>(this, clock);
+
+    if (t.summary().hasOutgroup())
+        summary().setOutgroup(t.summary().getOutgroup());
+
+    return *this;
+}
 
 bool TraceTree::isRooted() const
 {
@@ -61,11 +85,11 @@ TraceTree* TraceTree::clone(void) const
 
 int TraceTree::isCoveredInInterval(const std::string &v, double size, bool verbose)
 {
-    return (TreeSummary::isCoveredInInterval(v,size,verbose) ? 0 : -1);
+    return (summary().isCoveredInInterval(v,size,verbose) ? 0 : -1);
 }
 
 int TraceTree::isCoveredInInterval(const Tree &t, double size, bool verbose)
 {
-    return (TreeSummary::isCoveredInInterval(t,size,verbose) ? 0 : -1);
+    return (summary().isCoveredInInterval(t,size,verbose) ? 0 : -1);
 }
 

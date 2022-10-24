@@ -55,7 +55,7 @@ RevPtr<RevVariable> Func_mapTree::execute( void )
     RevObject& b = args[arg_index++].getVariable()->getRevObject();
     if ( b.isType( TraceTree::getClassTypeSpec() ) )
     {
-        summary = &( static_cast<TraceTree &>(b).getValue() );
+        summary = &( static_cast<TraceTree &>(b).getValue().summary() );
     }
     else
     {

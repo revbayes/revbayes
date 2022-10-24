@@ -2,14 +2,16 @@
 #define TraceTree_H
 
 #include <boost/optional.hpp>
+#include <memory>
 #include "Clade.h"
 #include "Trace.h"
 #include "Tree.h"
-#include "TreeSummary.h"
 
 namespace RevBayesCore {
 
-    class TraceTree : public Trace<Tree>, public TreeSummary
+    class TreeSummary;
+
+    class TraceTree : public Trace<Tree>
     {
         // These properties describe the actual trees in the trace.
         bool                                       clock = true;
@@ -17,14 +19,21 @@ namespace RevBayesCore {
 
         void                                       doAddObject(Tree&& d) override;
 
+        std::unique_ptr<TreeSummary>               the_summary;
+
     public:
 
         /*
          * Declaration of the TreeTrace class
          */
-        explicit TraceTree( bool c = true );
-        TraceTree(const TraceTree& t );
-        virtual ~TraceTree(){}
+        explicit                                   TraceTree( bool c = true );
+                                                   TraceTree(const TraceTree& t );
+        virtual                                    ~TraceTree() = default;
+
+        TraceTree&                                 operator=(const TraceTree&);
+
+        const TreeSummary&                         summary() const;
+        TreeSummary&                               summary();
 
         TraceTree*                                 clone(void) const;
 

@@ -52,6 +52,7 @@
 #include "RlTypedFunction.h"                          // for TypedFunction
 #include "StochasticNode.h"                           // for StochasticNode
 #include "Tree.h"                                     // for Tree, operator<<
+#include "TreeSummary.h"                              // for RlTraceTree
 #include "TypedDagNode.h"                             // for TypedDagNode
 #include "TypedDistribution.h"                        // for TypedDistribution
 #include "TypedFunction.h"                            // for TypedFunction

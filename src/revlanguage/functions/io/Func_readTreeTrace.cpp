@@ -25,6 +25,7 @@
 #include "RlUserInterface.h"
 #include "StringUtilities.h"
 #include "TraceTree.h"
+#include "TreeSummary.h"
 #include "TreeUtilities.h"
 #include "Argument.h"
 #include "ArgumentRules.h"
@@ -185,7 +186,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
 
             for (size_t i = 0; i < rv->getValue().size(); ++i)
             {
-                rv->getValue()[i].getValue().setOutgroup(og);
+                rv->getValue()[i].getValue().summary().setOutgroup(og);
             }
         }
 

@@ -28,6 +28,7 @@
 #include "RlFunction.h"
 #include "Trace.h"
 #include "TraceTree.h"
+#include "TreeSummary.h"
 #include "TypeSpec.h"
 
 namespace RevBayesCore { class Tree; }

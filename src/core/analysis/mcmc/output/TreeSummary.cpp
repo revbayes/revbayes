@@ -1441,11 +1441,12 @@ double TreeSummary::maxdiff( bool verbose )
 
     std::set<Sample<Split> > splits_union;
 
-    for (std::vector<TraceTree* >::const_iterator trace = traces.begin(); trace != traces.end(); trace++)
+    for (auto& trace: traces)
     {
-        (*trace)->summarize(verbose);
+        auto& summary = trace->summary();
+        summary.summarize(verbose);
 
-        splits_union.insert((*trace)->clade_samples.begin(), (*trace)->clade_samples.end());
+        splits_union.insert(summary.getCladeSamples().begin(), summary.getCladeSamples().end());
     }
 
 
@@ -1455,15 +1456,16 @@ double TreeSummary::maxdiff( bool verbose )
     {
         std::vector<double> split_freqs;
 
-        for(std::vector<TraceTree* >::const_iterator trace = traces.begin(); trace != traces.end(); trace++)
+        for(auto& trace: traces)
         {
-            double total_samples = (*trace)->size(true);
+            auto& clade_samples = trace->summary().getCladeSamples();
+            double total_samples = trace->size(true);
 
-            std::set<Sample<Split> >::const_iterator it = find_if((*trace)->clade_samples.begin(), (*trace)->clade_samples.end(), split->first );
+            auto it = find_if(clade_samples.begin(), clade_samples.end(), split->first );
 
             double freq = 0;
 
-            if ( it != (*trace)->clade_samples.end() )
+            if ( it != clade_samples.end() )
             {
                 freq = it->second/total_samples;
             }

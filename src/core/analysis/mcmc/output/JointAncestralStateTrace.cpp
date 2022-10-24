@@ -19,7 +19,8 @@
 #include "StringUtilities.h"
 #include "TopologyNode.h"
 #include "Tree.h"
-#include "boost/algorithm/string/trim.hpp"
+#include "TreeSummary.h"
+#include <boost/algorithm/string/trim.hpp>
 
 using namespace RevBayesCore;
 

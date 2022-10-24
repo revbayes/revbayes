@@ -24,6 +24,7 @@
 #include "TopologyNode.h"
 #include "TraceTree.h"
 #include "Tree.h"
+#include "TreeSummary.h"
 #include "TypeSpec.h"
 #include "WorkspaceVector.h"
 
@@ -54,7 +55,7 @@ RevPtr<RevVariable> Func_mccTree::execute( void )
     RevObject& b = args[arg_index++].getVariable()->getRevObject();
     if ( b.isType( TraceTree::getClassTypeSpec() ) )
     {
-        summary = &( static_cast<TraceTree &>(b).getValue() );
+        summary = &( static_cast<TraceTree &>(b).getValue().summary() );
     }
     else
     {
@@ -72,7 +73,7 @@ RevPtr<RevVariable> Func_mccTree::execute( void )
     const std::string& filename = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
     
     
-    RevBayesCore::TraceTree::AnnotationReport report;
+    RevBayesCore::TreeSummary::AnnotationReport report;
 
     report.conditional_clade_ages        = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
     report.conditional_clade_probs       = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
