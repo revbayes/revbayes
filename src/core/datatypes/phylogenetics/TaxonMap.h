@@ -31,8 +31,8 @@ namespace RevBayesCore {
         TaxonMap(const Tree &t);                                                            //!< Constructor from tree object
         virtual                             ~TaxonMap() {}
         
-//        bool                                operator==(const TaxonMap &t) const;           //!< Equals operators
-//        bool                                operator!=(const TaxonMap &t) const;           //!< Not-quals operators
+        bool                                operator==(const TaxonMap &t) const;           //!< Equals operators
+        bool                                operator!=(const TaxonMap &t) const;           //!< Not-quals operators
 //        bool                                operator<(const TaxonMap &t) const;            //!< Less-than operators
 //        bool                                operator<=(const TaxonMap &t) const;           //!< Less-than operators
 //        bool                                operator>(const TaxonMap &t) const;            //!< Less-than operators

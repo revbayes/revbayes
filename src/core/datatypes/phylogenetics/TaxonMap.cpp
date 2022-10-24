@@ -99,3 +99,18 @@ std::ostream& RevBayesCore::operator<<(std::ostream& o, const TaxonMap& tm)
     return o;
 }
 //!< Overloaded output operator
+
+bool TaxonMap::operator==(const TaxonMap& tm) const
+{
+    if (taxa.size() != tm.taxa.size()) return false;
+
+    for(int i=0;i<taxa.size();i++)
+        if (taxa[i] != tm.taxa[i]) return false;
+
+    return true;
+}
+
+bool TaxonMap::operator!=(const TaxonMap& tm) const
+{
+    return not operator==(tm);
+}
