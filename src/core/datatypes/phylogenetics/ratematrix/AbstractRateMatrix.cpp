@@ -579,12 +579,20 @@ void AbstractRateMatrix::exponentiateMatrixByScalingAndSquaring(double t,  Trans
     // efficiency and returned the same results with about 10^-9 accuracy. The scaling parameter could be
     // increased for better accuracy.
     // -- Will Freyman 11/27/16
-    double norm = L1norm(*the_rate_matrix) * std::abs(t);
 
+    // Note that Will had previously chosen a fixed value of 8 scalings/squarings, but this
+    // didn't work for large branch lengths.
+
+    // We need the norm to be small enough for the 4-th order Taylor series to be a good approximation.
+    // This code gives the number of scalings needed to bring the norm down below 2^-10 = 0.000977
+    // This is a heuristic choice, but note that that ((2^-10)^4)/24 = 3.79e-14
+    // The fifth order term would be ((2^-10)^5)/120 = 7.4e-18
+    // Compare 10 with the number 12 in RateMatrix_FreeK::expMatrixTaylor( ) in RateMatrix_FreeK.cpp
+    // -- Ben Redelings 10/23/22
+    double norm = L1norm(*the_rate_matrix) * std::abs(t);
     int s = 0;
-    std::frexp(norm/0.005, &s);
-    int s1 = s;
-    s = std::max(s, 8);
+    std::frexp(norm, &s);
+    s = std::max(10 + s, 0);
 
     // first scale the matrix
     double scale = t / pow(2, s);
