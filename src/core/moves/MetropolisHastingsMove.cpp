@@ -13,6 +13,7 @@
 #include "RbMathLogic.h"
 #include "AbstractMove.h"
 #include "RbOrderedSet.h"
+#include "RbException.h"
 
 using namespace RevBayesCore;
 

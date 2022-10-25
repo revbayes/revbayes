@@ -13,14 +13,12 @@ using namespace RevBayesCore;
 template <>
 int Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool verbose)
 {
-
     double sample = atof( v.c_str() );
 
     double smaller_values_count = 0;
     double equal_values_count   = 0;
     for (size_t j=0; j<values.size(); ++j)
     {
-
         if ( values[j] < sample )
         {
             ++smaller_values_count;
@@ -29,9 +27,8 @@ int Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool 
         {
             ++equal_values_count;
         }
-
     }
-    
+
     RandomNumberGenerator *rng = GLOBAL_RNG;
 
     double u = rng->uniform01();

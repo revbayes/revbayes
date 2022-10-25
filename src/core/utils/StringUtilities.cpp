@@ -262,35 +262,6 @@ std::string StringUtilities::formatStringForScreen(const std::string &s, const s
 }
 
 
-/** Return file contents as string with '\n' line breaks */
-std::string StringUtilities::getFileContentsAsString(const RevBayesCore::path& p)
-{
-    
-    // open file
-    std::ifstream fStrm( p.string() );
-    if ( !fStrm.is_open() )
-        return "";
-        
-    // read the file
-    int ch;
-    std::string retStr = "";
-    while ( (ch = fStrm.get()) != EOF)
-    {
-        char c = (char)ch;
-        
-        if (ch == '\n' || ch == '\r' || ch == EOF)
-            retStr += '\n';
-        else
-            retStr += c;
-        } 
-
-    // close file
-    fStrm.close();
-
-    return retStr;
-}
-
-
 /**
  * Indicates if a char is affecting text formatting
  * @param c

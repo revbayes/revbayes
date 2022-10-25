@@ -37,30 +37,11 @@ using namespace RevBayesCore;
 
 
 /*
- * Default AnnotationReport constructor
- */
-TreeSummary::AnnotationReport::AnnotationReport() :
-    clade_probs                   (true),
-    conditional_clade_ages        (false),
-    conditional_clade_probs       (false),
-    conditional_tree_ages         (false),
-    MAP_parameters                (false),
-    node_ages                     (true),
-    mean_node_ages                (true),
-    node_ages_HPD                 (0.95),
-    sampled_ancestor_probs        (true),
-    force_positive_branch_lengths (false),
-    use_outgroup(false)
-{}
-
-
-/*
  * TreeSummary constructor
  */
 TreeSummary::TreeSummary( TraceTree* t, bool c ) :
     clock( c ),
-    rooted( c ),
-    use_outgroup(false)
+    rooted( c )
 {
     traces.push_back(t);
 }
@@ -72,8 +53,7 @@ TreeSummary::TreeSummary( TraceTree* t, bool c ) :
 TreeSummary::TreeSummary( std::vector<TraceTree* > t, bool c ) :
     traces(t),
     clock( c ),
-    rooted( c ),
-    use_outgroup(false)
+    rooted( c )
 {
     if( traces.empty() )
     {
@@ -684,9 +664,9 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
 
         if ( tmp_tree->isRooted() == false && rooted == false )
         {
-            if ( use_outgroup == true )
+            if ( outgroup )
             {
-                tmp_tree->reroot( outgroup, false, true );
+                tmp_tree->reroot( *outgroup, false, true );
             }
             else
             {
@@ -1096,26 +1076,30 @@ std::vector<double> TreeSummary::computePairwiseRFDistance( double credible_inte
     std::vector<double> rf_distances;
     for (size_t i=0; i<unique_trees.size(); ++i)
     {
+        // The unique tree occurs sample_count[i] times.
+        // Here we are treating them as coming in one continuous block, which is annoying.
 
-        // first we need to compare the tree to 'itself'
-        for (size_t k=0; k<(sample_count[i]*(sample_count[i]-1)); ++k )
+        for(int rep = 0;rep<sample_count[i];rep++)
         {
-            rf_distances.push_back( 0.0 );
-        }
-
-        for (size_t j=i+1; j<unique_trees.size(); ++j)
-        {
-            
-            std::vector<RbBitSet>* a = unique_trees_bs[i];
-            std::vector<RbBitSet>* b = unique_trees_bs[j];
-            double rf = TreeUtilities::computeRobinsonFouldDistance(*a, *b, true);
-
-            for (size_t k=0; k<(sample_count[i]*sample_count[j]); ++k )
+            // first we need to compare the tree to subsequent copies of itself
+            for (size_t k=rep+1; k<sample_count[i]; ++k )
             {
-                rf_distances.push_back( rf );
+                rf_distances.push_back( 0.0 );
+            }
+
+            // then we compare it to copies of other trees
+            for (size_t j=i+1; j<unique_trees.size(); ++j)
+            {
+                std::vector<RbBitSet>* a = unique_trees_bs[i];
+                std::vector<RbBitSet>* b = unique_trees_bs[j];
+                double rf = TreeUtilities::computeRobinsonFouldDistance(*a, *b, true);
+
+                for (size_t k=0; k<sample_count[j]; ++k )
+                    rf_distances.push_back( rf );
             }
         }
     }
+
     for (size_t i=0; i<unique_trees.size(); ++i)
     {
         Tree* tmp = unique_trees[i];
@@ -1197,7 +1181,7 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, s
     // check if the flipped unrooted split is compatible
     if ( !rooted && !compatible && !ischild)
     {
-        RbBitSet clade_flip = clade; ~clade_flip;
+        RbBitSet clade_flip = ~clade;
         mask  = node | clade_flip;
 
         compatible = (mask == node);
@@ -1262,9 +1246,9 @@ int TreeSummary::getTopologyFrequency(const RevBayesCore::Tree &tree, bool verbo
 
     if ( t.isRooted() == false && rooted == false )
     {
-        if( use_outgroup )
+        if( outgroup )
         {
-            t.reroot( outgroup, false, true );
+            t.reroot( *outgroup, false, true );
         }
         else
         {
@@ -1368,9 +1352,9 @@ bool TreeSummary::isCoveredInInterval(const std::string &v, double ci_size, bool
 
     if ( tree.isRooted() == false && rooted == false )
     {
-        if ( use_outgroup == true )
+        if ( outgroup )
         {
-            tree.reroot( outgroup, false, true );
+            tree.reroot( *outgroup, false, true );
         }
         else
         {
@@ -1898,7 +1882,6 @@ void TreeSummary::printTreeSummary(std::ostream &o, double credibleIntervalSize,
 
 void TreeSummary::setOutgroup(const RevBayesCore::Clade &c)
 {
-    use_outgroup = true;
     outgroup = c;
 }
 
@@ -1962,9 +1945,9 @@ void TreeSummary::summarize( bool verbose )
 
             if ( rooted == false )
             {
-                if ( use_outgroup == true )
+                if ( outgroup )
                 {
-                    tree.reroot( outgroup, false, true );
+                    tree.reroot( *outgroup, false, true );
                 }
                 else
                 {

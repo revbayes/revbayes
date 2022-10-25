@@ -26,7 +26,6 @@
 #include "Cloneable.h"
 #include "MemberObject.h"
 #include "Serializable.h"
-#include "TaxonMap.h"
 #include "TreeChangeEventHandler.h"
 #include "Printable.h"
 
@@ -36,16 +35,19 @@
 namespace RevBayesCore {
 
     class TopologyNode;
+    class TaxonMap;
 
     class Tree : public Cloneable, public MemberObject<double>, public MemberObject<long>, public MemberObject<Boolean>, public Serializable, public Printable {
 
     public:
-        Tree(void);                                                                                                                                             //!< Default constructor
+        Tree(void) = default;                                                                                                                                   //!< Default constructor
         Tree(const Tree& t);                                                                                                                                    //!< Copy constructor
+        Tree(Tree&& t);                                                                                                                                         //!< Move constructor
 
         virtual                                            ~Tree(void);                                                                                         //!< Destructor
 
         Tree&                                               operator=(const Tree& t);
+        Tree&                                               operator=(Tree&& t);
 
         // overloaded operators
         bool                                                operator==(const Tree &t) const;
@@ -161,12 +163,12 @@ namespace RevBayesCore {
         void                                                reindexNodes();
 
         // private members
-        TopologyNode*                                       root;
+        TopologyNode*                                       root = nullptr;
         std::vector<TopologyNode*>                          nodes;                                                                  //!< Vector of pointers to all nodes
-        bool                                                rooted;
-        bool                                                is_negative_constraint;
-        size_t                                              num_tips;
-        size_t                                              num_nodes;
+        bool                                                rooted = false;
+        bool                                                is_negative_constraint = false;
+        size_t                                              num_tips = 0;
+        size_t                                              num_nodes = 0;
         mutable std::map<std::string, size_t>               taxon_bitset_map;
 
     };
