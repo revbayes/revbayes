@@ -55,6 +55,11 @@ TraceTree::TraceTree(const TraceTree& t)
     operator=(t);
 }
 
+TraceTree::TraceTree(TraceTree&& t)
+{
+    operator=( std::move(t) );
+}
+
 TraceTree&  TraceTree::operator=(const TraceTree& t)
 {
     Trace<Tree>::operator=(t);
@@ -62,6 +67,32 @@ TraceTree&  TraceTree::operator=(const TraceTree& t)
     clock = t.clock;
     rooted = t.rooted;
     taxon_map = t.taxon_map;
+
+    // If we could just make the summary point to us, that would be better.
+    // the_summary = t.the_summary;
+    // the_summary->traces.clear();
+    // the summary->traces.push_back(this);
+
+    the_summary = std::make_unique<TreeSummary>(this, clock);
+
+    if (t.summary().hasOutgroup())
+        summary().setOutgroup(t.summary().getOutgroup());
+
+    return *this;
+}
+
+TraceTree&  TraceTree::operator=(TraceTree&& t)
+{
+    Trace<Tree>::operator=( std::move(t) );
+
+    clock = t.clock;
+    rooted = t.rooted;
+    taxon_map = std::move( t.taxon_map );
+
+    // If we could just make the summary point to us, that would be better.
+    // the_summary = std::move( t.the_summary);
+    // the_summary->traces.clear();
+    // the summary->traces.push_back(this);
 
     the_summary = std::make_unique<TreeSummary>(this, clock);
 

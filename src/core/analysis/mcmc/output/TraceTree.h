@@ -31,9 +31,11 @@ namespace RevBayesCore {
          */
         explicit                                   TraceTree( bool c = true );
                                                    TraceTree(const TraceTree& t );
+                                                   TraceTree(TraceTree&& t );
         virtual                                    ~TraceTree() = default;
 
         TraceTree&                                 operator=(const TraceTree&);
+        TraceTree&                                 operator=(TraceTree&&);
 
         const TreeSummary&                         summary() const;
         TreeSummary&                               summary();
