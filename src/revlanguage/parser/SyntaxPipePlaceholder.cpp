@@ -7,6 +7,7 @@
 #include "Environment.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
+#include "RbException.h"
 #include "SyntaxPipePlaceholder.h"
 
 using namespace RevLanguage;
