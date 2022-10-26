@@ -95,6 +95,7 @@
 #include "Probability.h"
 #include "Parser.h"
 #include "RlBoolean.h"
+#include "RbException.h"
 #include "RlString.h"
 #include "Real.h"
 #include "RealPos.h"
@@ -122,6 +123,7 @@
 #include "SyntaxUnaryExpr.h"
 #include "SyntaxVariableDecl.h"
 #include "SyntaxVariable.h"
+#include "SyntaxPipePlaceholder.h"
 #include "SyntaxWorkspaceVariableAssignment.h"
 #include "Workspace.h"
 
@@ -138,6 +140,7 @@ extern Environment *executionEnvironment;
 
 /* The function yyerror handles errors. It is defined below. */
 int yyerror(const char *);
+RevLanguage::SyntaxElement* xxpipe(RevLanguage::SyntaxElement* arg, RevLanguage::SyntaxElement* fxnCallE);
 
 /* We use the global parser to execute the syntax tree */
 Parser& parser = Parser::getParser();
@@ -145,7 +148,7 @@ Parser& parser = Parser::getParser();
 
 #define YY_NEVER_INTERACTIVE
 
-#line 149 "./grammar.tab.c"
+#line 152 "./grammar.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -223,78 +226,79 @@ enum yysymbol_kind_t
   YYSYMBOL_LE = 47,                        /* LE  */
   YYSYMBOL_EQ = 48,                        /* EQ  */
   YYSYMBOL_NE = 49,                        /* NE  */
-  YYSYMBOL_END_OF_INPUT = 50,              /* END_OF_INPUT  */
-  YYSYMBOL_51_ = 51,                       /* '?'  */
-  YYSYMBOL_UNOT = 52,                      /* UNOT  */
-  YYSYMBOL_53_ = 53,                       /* '+'  */
-  YYSYMBOL_54_ = 54,                       /* '-'  */
-  YYSYMBOL_55_ = 55,                       /* '*'  */
-  YYSYMBOL_56_ = 56,                       /* '/'  */
-  YYSYMBOL_57_ = 57,                       /* ':'  */
-  YYSYMBOL_58_ = 58,                       /* '%'  */
-  YYSYMBOL_UMINUS = 59,                    /* UMINUS  */
-  YYSYMBOL_UPLUS = 60,                     /* UPLUS  */
-  YYSYMBOL_61_ = 61,                       /* '^'  */
-  YYSYMBOL_62_ = 62,                       /* '.'  */
-  YYSYMBOL_UAND = 63,                      /* UAND  */
-  YYSYMBOL_64_ = 64,                       /* '('  */
-  YYSYMBOL_65_ = 65,                       /* '['  */
-  YYSYMBOL_66_n_ = 66,                     /* '\n'  */
-  YYSYMBOL_67_ = 67,                       /* ';'  */
-  YYSYMBOL_68_ = 68,                       /* ')'  */
-  YYSYMBOL_69_ = 69,                       /* '!'  */
-  YYSYMBOL_70_ = 70,                       /* ']'  */
-  YYSYMBOL_71_ = 71,                       /* ','  */
-  YYSYMBOL_72_ = 72,                       /* '{'  */
-  YYSYMBOL_73_ = 73,                       /* '}'  */
-  YYSYMBOL_YYACCEPT = 74,                  /* $accept  */
-  YYSYMBOL_prog = 75,                      /* prog  */
-  YYSYMBOL_expression = 76,                /* expression  */
-  YYSYMBOL_arrowAssign = 77,               /* arrowAssign  */
-  YYSYMBOL_tildeAssign = 78,               /* tildeAssign  */
-  YYSYMBOL_equationAssign = 79,            /* equationAssign  */
-  YYSYMBOL_workspaceAssign = 80,           /* workspaceAssign  */
-  YYSYMBOL_referenceAssign = 81,           /* referenceAssign  */
-  YYSYMBOL_additionAssign = 82,            /* additionAssign  */
-  YYSYMBOL_subtractionAssign = 83,         /* subtractionAssign  */
-  YYSYMBOL_multiplicationAssign = 84,      /* multiplicationAssign  */
-  YYSYMBOL_divisionAssign = 85,            /* divisionAssign  */
-  YYSYMBOL_variable = 86,                  /* variable  */
-  YYSYMBOL_optElements = 87,               /* optElements  */
-  YYSYMBOL_elementList = 88,               /* elementList  */
-  YYSYMBOL_fxnCall = 89,                   /* fxnCall  */
-  YYSYMBOL_functionCall = 90,              /* functionCall  */
-  YYSYMBOL_optArguments = 91,              /* optArguments  */
-  YYSYMBOL_argumentList = 92,              /* argumentList  */
-  YYSYMBOL_argument = 93,                  /* argument  */
-  YYSYMBOL_functionDef = 94,               /* functionDef  */
-  YYSYMBOL_procedureDef = 95,              /* procedureDef  */
-  YYSYMBOL_optFormals = 96,                /* optFormals  */
-  YYSYMBOL_formalList = 97,                /* formalList  */
-  YYSYMBOL_formal = 98,                    /* formal  */
-  YYSYMBOL_typeSpec = 99,                  /* typeSpec  */
-  YYSYMBOL_optDims = 100,                  /* optDims  */
-  YYSYMBOL_dimList = 101,                  /* dimList  */
-  YYSYMBOL_stmts = 102,                    /* stmts  */
-  YYSYMBOL_stmtList = 103,                 /* stmtList  */
-  YYSYMBOL_statement = 104,                /* statement  */
-  YYSYMBOL_stmt_or_expr = 105,             /* stmt_or_expr  */
-  YYSYMBOL_declaration = 106,              /* declaration  */
-  YYSYMBOL_memberDefs = 107,               /* memberDefs  */
-  YYSYMBOL_memberDef = 108,                /* memberDef  */
-  YYSYMBOL_classDef = 109,                 /* classDef  */
-  YYSYMBOL_ifStatement = 110,              /* ifStatement  */
-  YYSYMBOL_cond = 111,                     /* cond  */
-  YYSYMBOL_forStatement = 112,             /* forStatement  */
-  YYSYMBOL_forCond = 113,                  /* forCond  */
-  YYSYMBOL_whileStatement = 114,           /* whileStatement  */
-  YYSYMBOL_nextStatement = 115,            /* nextStatement  */
-  YYSYMBOL_breakStatement = 116,           /* breakStatement  */
-  YYSYMBOL_returnStatement = 117,          /* returnStatement  */
-  YYSYMBOL_identifier = 118,               /* identifier  */
-  YYSYMBOL_vector = 119,                   /* vector  */
-  YYSYMBOL_vectorList = 120,               /* vectorList  */
-  YYSYMBOL_constant = 121                  /* constant  */
+  YYSYMBOL_PIPE = 50,                      /* PIPE  */
+  YYSYMBOL_PIPE_PLACEHOLDER = 51,          /* PIPE_PLACEHOLDER  */
+  YYSYMBOL_END_OF_INPUT = 52,              /* END_OF_INPUT  */
+  YYSYMBOL_53_ = 53,                       /* '?'  */
+  YYSYMBOL_UNOT = 54,                      /* UNOT  */
+  YYSYMBOL_55_ = 55,                       /* '+'  */
+  YYSYMBOL_56_ = 56,                       /* '-'  */
+  YYSYMBOL_57_ = 57,                       /* '*'  */
+  YYSYMBOL_58_ = 58,                       /* '/'  */
+  YYSYMBOL_59_ = 59,                       /* ':'  */
+  YYSYMBOL_60_ = 60,                       /* '%'  */
+  YYSYMBOL_UMINUS = 61,                    /* UMINUS  */
+  YYSYMBOL_UPLUS = 62,                     /* UPLUS  */
+  YYSYMBOL_63_ = 63,                       /* '^'  */
+  YYSYMBOL_64_ = 64,                       /* '.'  */
+  YYSYMBOL_UAND = 65,                      /* UAND  */
+  YYSYMBOL_66_ = 66,                       /* '('  */
+  YYSYMBOL_67_ = 67,                       /* '['  */
+  YYSYMBOL_68_n_ = 68,                     /* '\n'  */
+  YYSYMBOL_69_ = 69,                       /* ';'  */
+  YYSYMBOL_70_ = 70,                       /* ')'  */
+  YYSYMBOL_71_ = 71,                       /* '!'  */
+  YYSYMBOL_72_ = 72,                       /* ']'  */
+  YYSYMBOL_73_ = 73,                       /* ','  */
+  YYSYMBOL_74_ = 74,                       /* '{'  */
+  YYSYMBOL_75_ = 75,                       /* '}'  */
+  YYSYMBOL_YYACCEPT = 76,                  /* $accept  */
+  YYSYMBOL_prog = 77,                      /* prog  */
+  YYSYMBOL_expression = 78,                /* expression  */
+  YYSYMBOL_arrowAssign = 79,               /* arrowAssign  */
+  YYSYMBOL_tildeAssign = 80,               /* tildeAssign  */
+  YYSYMBOL_equationAssign = 81,            /* equationAssign  */
+  YYSYMBOL_workspaceAssign = 82,           /* workspaceAssign  */
+  YYSYMBOL_referenceAssign = 83,           /* referenceAssign  */
+  YYSYMBOL_additionAssign = 84,            /* additionAssign  */
+  YYSYMBOL_subtractionAssign = 85,         /* subtractionAssign  */
+  YYSYMBOL_multiplicationAssign = 86,      /* multiplicationAssign  */
+  YYSYMBOL_divisionAssign = 87,            /* divisionAssign  */
+  YYSYMBOL_optElements = 88,               /* optElements  */
+  YYSYMBOL_elementList = 89,               /* elementList  */
+  YYSYMBOL_fxnCall = 90,                   /* fxnCall  */
+  YYSYMBOL_functionCall = 91,              /* functionCall  */
+  YYSYMBOL_optArguments = 92,              /* optArguments  */
+  YYSYMBOL_argumentList = 93,              /* argumentList  */
+  YYSYMBOL_argument = 94,                  /* argument  */
+  YYSYMBOL_functionDef = 95,               /* functionDef  */
+  YYSYMBOL_procedureDef = 96,              /* procedureDef  */
+  YYSYMBOL_optFormals = 97,                /* optFormals  */
+  YYSYMBOL_formalList = 98,                /* formalList  */
+  YYSYMBOL_formal = 99,                    /* formal  */
+  YYSYMBOL_typeSpec = 100,                 /* typeSpec  */
+  YYSYMBOL_optDims = 101,                  /* optDims  */
+  YYSYMBOL_dimList = 102,                  /* dimList  */
+  YYSYMBOL_stmts = 103,                    /* stmts  */
+  YYSYMBOL_stmtList = 104,                 /* stmtList  */
+  YYSYMBOL_statement = 105,                /* statement  */
+  YYSYMBOL_stmt_or_expr = 106,             /* stmt_or_expr  */
+  YYSYMBOL_declaration = 107,              /* declaration  */
+  YYSYMBOL_memberDefs = 108,               /* memberDefs  */
+  YYSYMBOL_memberDef = 109,                /* memberDef  */
+  YYSYMBOL_classDef = 110,                 /* classDef  */
+  YYSYMBOL_ifStatement = 111,              /* ifStatement  */
+  YYSYMBOL_cond = 112,                     /* cond  */
+  YYSYMBOL_forStatement = 113,             /* forStatement  */
+  YYSYMBOL_forCond = 114,                  /* forCond  */
+  YYSYMBOL_whileStatement = 115,           /* whileStatement  */
+  YYSYMBOL_nextStatement = 116,            /* nextStatement  */
+  YYSYMBOL_breakStatement = 117,           /* breakStatement  */
+  YYSYMBOL_returnStatement = 118,          /* returnStatement  */
+  YYSYMBOL_identifier = 119,               /* identifier  */
+  YYSYMBOL_vector = 120,                   /* vector  */
+  YYSYMBOL_vectorList = 121,               /* vectorList  */
+  YYSYMBOL_constant = 122                  /* constant  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -623,21 +627,21 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  86
+#define YYFINAL  84
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   1135
+#define YYLAST   1043
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  74
+#define YYNTOKENS  76
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  48
+#define YYNNTS  47
 /* YYNRULES -- Number of rules.  */
 #define YYNRULES  157
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  285
+#define YYNSTATES  270
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   309
+#define YYMAXUTOK   311
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -652,18 +656,18 @@ union yyalloc
 static const yytype_int8 yytranslate[] =
 {
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-      66,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+      68,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,    69,     2,     2,     2,    58,     2,     2,
-      64,    68,    55,    53,    71,    54,    62,    56,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,    57,    67,
-       2,     2,     2,    51,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,    65,     2,    70,    61,     2,     2,     2,     2,     2,
+       2,     2,     2,    71,     2,     2,     2,    60,     2,     2,
+      66,    70,    57,    55,    73,    56,    64,    58,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,    59,    69,
+       2,     2,     2,    53,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,    72,     2,    73,     2,     2,     2,     2,
+       2,    67,     2,    72,    63,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,    74,     2,    75,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -681,29 +685,30 @@ static const yytype_int8 yytranslate[] =
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
       25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
       35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
-      45,    46,    47,    48,    49,    50,    52,    59,    60,    63
+      45,    46,    47,    48,    49,    50,    51,    52,    54,    61,
+      62,    65
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   234,   234,   241,   248,   257,   266,   275,   284,   293,
-     302,   312,   322,   331,   340,   347,   356,   358,   360,   362,
-     363,   364,   365,   367,   368,   369,   370,   372,   374,   375,
-     376,   377,   378,   379,   381,   382,   383,   384,   385,   386,
-     388,   389,   390,   391,   393,   394,   395,   396,   397,   399,
-     400,   401,   402,   404,   406,   409,   418,   427,   436,   445,
-     454,   463,   472,   481,   490,   503,   515,   527,   542,   543,
-     546,   547,   548,   549,   552,   560,   567,   575,   586,   587,
-     590,   591,   594,   601,   611,   620,   633,   642,   655,   656,
-     659,   660,   663,   671,   679,   688,   699,   700,   701,   702,
-     703,   706,   707,   710,   711,   714,   715,   723,   724,   725,
-     726,   727,   728,   731,   732,   733,   734,   735,   736,   739,
-     740,   743,   744,   745,   746,   757,   758,   759,   760,   761,
-     762,   765,   766,   767,   768,   771,   782,   783,   785,   788,
-     791,   794,   797,   800,   803,   804,   807,   811,   814,   815,
-     821,   825,   829,   833,   837,   841,   850,   854
+       0,   239,   239,   246,   253,   262,   271,   280,   289,   298,
+     307,   317,   327,   336,   345,   352,   361,   362,   364,   366,
+     368,   369,   370,   371,   373,   374,   375,   376,   378,   380,
+     381,   382,   383,   384,   385,   387,   388,   389,   390,   391,
+     392,   394,   395,   396,   397,   399,   401,   402,   403,   404,
+     405,   407,   408,   409,   410,   412,   414,   427,   439,   451,
+     466,   475,   484,   493,   502,   511,   520,   529,   538,   547,
+     548,   551,   552,   553,   554,   557,   564,   571,   581,   582,
+     585,   586,   589,   596,   606,   615,   628,   637,   650,   651,
+     654,   655,   658,   666,   674,   683,   694,   695,   696,   697,
+     698,   701,   702,   705,   706,   709,   710,   718,   719,   720,
+     721,   722,   723,   726,   727,   728,   729,   730,   731,   734,
+     735,   738,   739,   740,   741,   752,   753,   754,   755,   756,
+     757,   760,   761,   762,   763,   766,   777,   778,   780,   783,
+     786,   789,   792,   795,   798,   799,   802,   806,   809,   810,
+     816,   820,   824,   828,   832,   836,   845,   849
 };
 #endif
 
@@ -727,20 +732,20 @@ static const char *const yytname[] =
   "EQUATION_ASSIGN", "WORKSPACE_ASSIGN", "REFERENCE_ASSIGN",
   "ADDITION_ASSIGN", "SUBTRACTION_ASSIGN", "MULTIPLICATION_ASSIGN",
   "DIVISION_ASSIGN", "DECREMENT", "INCREMENT", "EQUAL", "AND", "OR",
-  "AND2", "OR2", "GT", "GE", "LT", "LE", "EQ", "NE", "END_OF_INPUT", "'?'",
-  "UNOT", "'+'", "'-'", "'*'", "'/'", "':'", "'%'", "UMINUS", "UPLUS",
-  "'^'", "'.'", "UAND", "'('", "'['", "'\\n'", "';'", "')'", "'!'", "']'",
-  "','", "'{'", "'}'", "$accept", "prog", "expression", "arrowAssign",
-  "tildeAssign", "equationAssign", "workspaceAssign", "referenceAssign",
-  "additionAssign", "subtractionAssign", "multiplicationAssign",
-  "divisionAssign", "variable", "optElements", "elementList", "fxnCall",
-  "functionCall", "optArguments", "argumentList", "argument",
-  "functionDef", "procedureDef", "optFormals", "formalList", "formal",
-  "typeSpec", "optDims", "dimList", "stmts", "stmtList", "statement",
-  "stmt_or_expr", "declaration", "memberDefs", "memberDef", "classDef",
-  "ifStatement", "cond", "forStatement", "forCond", "whileStatement",
-  "nextStatement", "breakStatement", "returnStatement", "identifier",
-  "vector", "vectorList", "constant", YY_NULLPTR
+  "AND2", "OR2", "GT", "GE", "LT", "LE", "EQ", "NE", "PIPE",
+  "PIPE_PLACEHOLDER", "END_OF_INPUT", "'?'", "UNOT", "'+'", "'-'", "'*'",
+  "'/'", "':'", "'%'", "UMINUS", "UPLUS", "'^'", "'.'", "UAND", "'('",
+  "'['", "'\\n'", "';'", "')'", "'!'", "']'", "','", "'{'", "'}'",
+  "$accept", "prog", "expression", "arrowAssign", "tildeAssign",
+  "equationAssign", "workspaceAssign", "referenceAssign", "additionAssign",
+  "subtractionAssign", "multiplicationAssign", "divisionAssign",
+  "optElements", "elementList", "fxnCall", "functionCall", "optArguments",
+  "argumentList", "argument", "functionDef", "procedureDef", "optFormals",
+  "formalList", "formal", "typeSpec", "optDims", "dimList", "stmts",
+  "stmtList", "statement", "stmt_or_expr", "declaration", "memberDefs",
+  "memberDef", "classDef", "ifStatement", "cond", "forStatement",
+  "forCond", "whileStatement", "nextStatement", "breakStatement",
+  "returnStatement", "identifier", "vector", "vectorList", "constant", YY_NULLPTR
 };
 
 static const char *
@@ -750,7 +755,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-221)
+#define YYPACT_NINF (-215)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -764,35 +769,33 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
-     353,   -24,  -221,  -221,  -221,  -221,  -221,  -221,  -221,  -221,
-    -221,    18,    18,    18,   -47,   -36,   -36,  -221,  -221,   461,
-       2,     2,   461,  -221,     2,   461,   461,   461,   461,  -221,
-     461,    33,   842,  -221,  -221,  -221,  -221,  -221,  -221,  -221,
-    -221,  -221,   -28,   -27,    -3,  -221,  -221,  -221,   -22,     5,
-    -221,  -221,  -221,  -221,  -221,  -221,  -221,    10,  -221,  -221,
-    -221,  -221,    22,    25,   -21,    18,   283,   461,   283,   283,
-     842,    10,   461,    21,   -27,    21,  -221,    37,   -40,    54,
-      19,    19,   694,   842,    35,   166,  -221,   461,   461,   461,
-     461,   461,   461,   461,   461,   461,   461,   461,   461,   461,
-     461,   461,   461,   461,   461,   461,   461,   461,   461,   461,
-     461,   461,   461,  -221,  -221,    18,   461,    18,  -221,  -221,
-    -221,  -221,   461,    44,    18,    30,    53,    -8,    18,    36,
-      53,    18,    18,    87,   441,  -221,  -221,   731,    92,  -221,
-    -221,   768,    18,  -221,  -221,    18,  -221,  -221,    58,  -221,
-     461,   842,   872,   902,   932,   961,   989,  1013,  1036,   285,
-     166,  1056,   166,  1056,  1074,  1074,  1074,  1074,  1074,  1074,
-      12,    12,   -26,   -26,    19,    19,    19,    60,    70,   499,
-    -221,   842,    73,    72,  -221,   -35,  -221,   538,  -221,   373,
-      18,    18,    18,    18,    76,    75,  -221,    18,    -2,  -221,
-      88,   113,   116,   121,   114,   461,   -52,  -221,  -221,   283,
-      58,    60,    45,   461,   842,   461,   122,  -221,   461,   461,
-    -221,  -221,   577,   129,   129,   129,   129,   283,    53,   156,
-     461,  -221,    53,  -221,   283,    53,   124,   805,   441,   441,
-    -221,  -221,  -221,  -221,   616,   655,  -221,  -221,   842,  -221,
-    -221,  -221,  -221,  -221,  -221,  -221,   461,   842,   128,  -221,
-     131,    53,  -221,  -221,  -221,   -48,  -221,  -221,  -221,  -221,
-     122,   122,   842,   283,   283,  -221,   124,   124,  -221,  -221,
-    -221,  -221,  -221,  -221,  -221
+     350,   -45,  -215,  -215,  -215,  -215,  -215,  -215,  -215,  -215,
+    -215,     2,     2,     2,   -56,   -27,   -27,  -215,  -215,   503,
+     503,   503,   503,  -215,  -215,   503,   503,   503,   503,   503,
+    -215,   503,    51,   701,  -215,  -215,  -215,  -215,  -215,  -215,
+    -215,  -215,  -215,   -23,  -215,  -215,  -215,  -215,   -28,    -7,
+    -215,  -215,  -215,  -215,  -215,  -215,  -215,    -3,  -215,  -215,
+    -215,  -215,    33,    39,    -5,     2,   278,   503,   278,   278,
+     701,    -3,     8,     8,  -215,   701,    50,    28,    44,    44,
+     584,   701,    65,   -29,  -215,   503,   503,   503,   503,   503,
+     503,   503,   503,  -215,  -215,   503,   503,   503,   503,   503,
+     503,   503,   503,   503,   503,   503,   503,   503,   503,   503,
+     503,   503,   503,   503,     2,   371,    14,  -215,  -215,  -215,
+    -215,   503,     2,    14,    32,    16,     2,    26,    32,     2,
+       2,    86,   449,  -215,  -215,   623,    93,  -215,  -215,  -215,
+    -215,     2,  -215,  -215,   -23,  -215,   503,   701,   737,   772,
+     805,   837,   868,   898,   927,   955,   -29,   264,   -29,   264,
+     979,   979,   979,   979,   979,   979,    72,    10,    10,    53,
+      53,     8,     8,    44,   -23,    49,  -215,   489,   425,   701,
+      57,    47,  -215,   -34,  -215,     2,     2,     2,     2,    81,
+      69,  -215,     2,    -1,  -215,   106,   110,   113,   118,   116,
+     503,   -16,  -215,  -215,   278,    71,    14,   701,    14,  -215,
+    -215,   543,  -215,   503,   503,    56,    56,    56,    56,   278,
+      32,   152,   503,  -215,    32,  -215,   278,    32,   184,   662,
+     449,   449,  -215,  -215,  -215,  -215,  -215,  -215,   701,  -215,
+    -215,  -215,  -215,  -215,  -215,   503,   701,   124,  -215,   125,
+      32,  -215,  -215,  -215,     7,  -215,  -215,  -215,  -215,   701,
+     278,   278,  -215,   184,   184,  -215,  -215,  -215,  -215,  -215
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -802,53 +805,51 @@ static const yytype_uint8 yydefact[] =
 {
        0,     0,   157,   155,   146,   156,   152,   153,   150,   151,
      154,     0,     0,     0,     0,     0,     0,   142,   143,   144,
-       0,     0,     0,     2,     0,     0,     0,     0,     0,     3,
-       0,     0,   120,    44,    46,    45,    47,    48,    49,    50,
-      51,    52,    54,    75,    53,   122,   123,   119,     0,     0,
-     121,   113,   114,   115,   116,   117,   118,    68,    17,    16,
+       0,     0,     0,    17,     2,     0,     0,     0,     0,     0,
+       3,     0,     0,   120,    46,    48,    47,    49,    50,    51,
+      52,    53,    54,    76,    55,   122,   123,   119,     0,     0,
+     121,   113,   114,   115,   116,   117,   118,    69,    18,    16,
       14,    15,   101,   101,     0,     0,     0,     0,     0,     0,
-     145,    68,     0,    23,     0,    25,    22,     0,     0,     0,
-      20,    19,     0,   149,     0,    21,     1,     0,     0,     0,
+     145,    69,    24,    26,    23,     0,    55,    69,    21,    20,
+       0,   149,     0,    22,     1,     0,     0,     0,     0,     0,
+       0,     0,     0,    25,    27,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,    24,    26,     0,     0,     0,     4,     5,
-       6,     7,    78,     0,    64,    69,    88,     0,     0,   102,
-      88,     0,     0,     0,   107,   139,   106,     0,   136,   141,
-      64,     0,     0,    12,    13,     0,     8,     9,    18,   147,
-       0,    55,    56,    57,    59,    60,    61,    62,    63,    58,
-      40,    41,    42,    43,    39,    38,    34,    35,    36,    37,
-      28,    29,    30,    31,    27,    33,    32,    76,     0,     0,
-      77,    82,     0,    79,    80,    68,    71,     0,   124,     0,
-       0,     0,     0,     0,     0,    89,    90,     0,    92,   103,
-       0,     0,     0,     0,     0,     0,     0,   108,   138,     0,
-       0,     0,     0,     0,   148,     0,    68,    74,     0,     0,
-      70,    73,     0,   101,   101,   101,   101,     0,     0,    94,
-       0,    96,    88,   104,     0,    88,   125,     0,   112,   110,
-     105,   137,    10,    11,     0,     0,    65,    81,    83,    72,
-      97,    98,    99,   100,    84,    91,     0,    93,     0,    86,
-       0,     0,   133,   134,   131,     0,   126,   140,   111,   109,
-      68,    68,    95,     0,     0,   132,   130,   128,   135,    66,
-      67,    85,    87,   129,   127
+       0,     0,     0,     0,     0,     0,    57,     4,     5,     6,
+       7,    78,    56,    70,    88,     0,     0,   102,    88,     0,
+       0,     0,   107,   139,   106,     0,   136,   141,    56,    12,
+      13,     0,     8,     9,    19,   147,     0,    60,    61,    62,
+      64,    65,    66,    67,    68,    63,    41,    42,    43,    44,
+      40,    39,    35,    36,    37,    38,    45,    29,    30,    31,
+      32,    28,    34,    33,    77,     0,    72,     0,     0,    82,
+       0,    79,    80,    69,   124,     0,     0,     0,     0,     0,
+      89,    90,     0,    92,   103,     0,     0,     0,     0,     0,
+       0,     0,   108,   138,     0,     0,    58,   148,    59,    71,
+      74,     0,    75,     0,     0,   101,   101,   101,   101,     0,
+       0,    94,     0,    96,    88,   104,     0,    88,   125,     0,
+     112,   110,   105,   137,    10,    11,    73,    81,    83,    97,
+      98,    99,   100,    84,    91,     0,    93,     0,    86,     0,
+       0,   133,   134,   131,     0,   126,   140,   111,   109,    95,
+       0,     0,   132,   130,   128,   135,    85,    87,   129,   127
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int16 yypgoto[] =
 {
-    -221,  -221,    66,  -221,  -221,  -221,  -221,  -221,  -221,  -221,
-    -221,  -221,    40,   -37,  -221,   -15,   176,  -221,  -221,   -16,
-     201,   203,  -128,  -221,  -220,  -221,   -17,  -221,   -29,  -221,
-    -221,     1,  -221,  -221,  -137,  -221,  -221,   188,  -221,  -221,
-    -221,  -221,  -221,  -221,     0,  -221,  -221,  -221
+    -215,  -215,    58,  -215,  -215,  -215,  -215,  -215,  -215,  -215,
+    -215,  -215,   141,   -40,    85,   176,  -215,  -215,   -11,   203,
+     205,  -126,  -215,  -214,  -215,   -41,  -215,   -26,  -215,  -215,
+       1,  -215,  -215,   -83,  -215,  -215,   190,  -215,  -215,  -215,
+    -215,  -215,  -215,     0,  -215,  -215,  -215
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
-static const yytype_int16 yydefgoto[] =
+static const yytype_uint8 yydefgoto[] =
 {
-       0,    31,    32,    33,    34,    35,    36,    37,    38,    39,
-      40,    41,    42,   140,   125,    43,    44,   182,   183,   184,
-     262,   263,   194,   195,   196,   197,   128,   129,   135,   206,
-      47,   136,    49,   265,   266,    50,    51,    68,    52,    66,
-      53,    54,    55,    56,    71,    58,    84,    59
+       0,    32,    33,    34,    35,    36,    37,    38,    39,    40,
+      41,    42,   138,   123,    43,    44,   180,   181,   182,   251,
+     252,   189,   190,   191,   192,   126,   127,   133,   201,    47,
+     134,    49,   254,   255,    50,    51,    68,    52,    66,    53,
+      54,    55,    56,    71,    58,    82,    59
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -856,238 +857,220 @@ static const yytype_int16 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int16 yytable[] =
 {
-      57,    48,   202,  -101,   219,    74,    74,     4,   255,   113,
-     114,    62,    63,    64,   238,   239,   264,    65,   276,   277,
-     124,   240,   117,     4,    79,   278,   143,   144,    67,   122,
-     123,   110,   111,    86,   115,   112,   132,   230,   116,   138,
-     139,   275,    60,    61,   118,   119,   131,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,   264,   264,     4,   117,
-      73,    75,   199,   127,    77,   133,    72,   108,   109,   110,
-     111,   120,   121,   112,   122,   123,   190,   191,   192,   193,
-     112,    20,    21,   142,    22,    70,   126,   127,    76,   130,
-     127,    80,    81,    82,    83,   189,    85,    25,    26,   115,
-     177,   201,   180,   205,   258,   149,   150,   260,    27,    28,
-     209,   242,   243,    30,   186,   178,   145,   178,   122,   123,
-     146,   147,   185,   213,   188,   215,   198,   211,   200,     4,
-     198,   203,   204,   137,   122,   207,    11,    12,   141,   283,
-     284,   217,   178,   218,   227,   212,   228,   190,   191,   192,
-     193,   261,   232,   151,   152,   153,   154,   155,   156,   157,
-     158,   159,   160,   161,   162,   163,   164,   165,   166,   167,
-     168,   169,   170,   171,   172,   173,   174,   175,   176,   246,
-     241,   231,   179,   233,   234,   235,   236,   123,   181,   187,
-     223,   224,   225,   226,   127,   256,   273,   229,   254,   274,
-      78,    45,   247,    46,    69,   259,   250,   251,   252,   253,
-     100,   101,   102,   103,   104,   105,   214,     0,   185,   106,
-     107,   108,   109,   110,   111,     0,     0,   112,   198,     0,
-       0,     0,   198,   279,   280,   198,   198,     0,     0,   268,
-     269,     0,     0,     0,   281,   282,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,   222,     0,     0,     0,     0,
-       0,   198,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,   237,     0,     0,     0,     0,   198,   198,     0,   244,
-       0,   245,     0,     0,   181,   248,     2,     3,     4,     5,
-       6,     7,     8,     9,    10,     0,   257,     0,    14,     0,
-      15,     0,    16,    17,    18,    19,     0,     0,     0,     0,
+      57,    48,   197,   116,  -101,   214,   244,     4,    93,    94,
+      65,    62,    63,    64,   253,   100,   101,   102,   103,   104,
+     105,   106,   129,    60,    61,    77,   107,   108,   109,   110,
+     111,   112,   121,   115,   113,   114,   262,     4,   222,    67,
+     117,   118,   136,   137,   115,    93,    94,    93,    94,   253,
+     253,    84,   230,   231,   130,   185,   186,   187,   188,   232,
+     106,   119,   120,   121,   115,   131,   125,   109,   110,   111,
+     112,   113,   114,   113,   114,   263,   264,    70,    72,    73,
+      74,   178,   265,    75,    78,    79,    80,    81,   194,    83,
+      93,    94,   141,   196,   121,   115,   142,   143,   247,   124,
+     125,   249,   200,   106,   206,   128,   125,   113,   114,    93,
+      94,   204,   111,   112,   175,   121,   113,   114,   139,   140,
+     213,   183,   184,   125,   193,   135,   195,   212,   193,   198,
+     199,   111,   112,   202,   208,   113,   114,   145,   146,   234,
+     235,   205,   220,   147,   148,   149,   150,   151,   152,   153,
+     154,   219,   223,   155,   156,   157,   158,   159,   160,   161,
+     162,   163,   164,   165,   166,   167,   168,   169,   170,   171,
+     172,   173,   224,   177,   239,   240,   241,   242,   233,   179,
+     268,   269,   225,   226,   227,   215,   216,   217,   218,     4,
+     228,   245,   221,   243,   260,   261,    11,    12,   122,   174,
+     248,    76,   237,    45,   207,    46,    69,   185,   186,   187,
+     188,   250,     0,   183,     0,     0,     0,     0,     0,     0,
+     193,     0,     0,     0,   193,     0,     0,   193,   193,     0,
+       0,   257,   258,     0,   266,   267,   211,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-      20,    21,   272,    22,    95,    96,    97,    98,    99,   100,
-     101,   102,   103,   104,   105,     0,    25,    26,   106,   107,
-     108,   109,   110,   111,     0,     0,   112,    27,    28,     0,
-       0,     0,    30,     0,     1,   134,     2,     3,     4,     5,
-       6,     7,     8,     9,    10,    11,    12,    13,    14,     0,
-      15,     0,    16,    17,    18,    19,     2,     3,     4,     5,
-       6,     7,     8,     9,    10,     0,     0,     0,     0,     0,
-      20,    21,     0,    22,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,    23,    24,     0,    25,    26,     0,     0,
-      20,    21,     0,    22,     0,     0,     0,    27,    28,    29,
-       0,     0,    30,     0,     0,     0,    25,    26,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,    27,    28,     0,
-       0,     0,    30,   221,     2,     3,     4,     5,     6,     7,
-       8,     9,    10,     0,     0,     0,    14,     0,    15,     0,
-      16,    17,    18,    19,     2,     3,     4,     5,     6,     7,
-       8,     9,    10,     0,     0,     0,     0,     0,    20,    21,
-       0,    22,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,    25,    26,     0,     0,    20,    21,
-       0,    22,     0,     0,     0,    27,    28,     0,     0,     0,
-      30,     0,     0,     0,    25,    26,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,    27,    28,    87,    88,    89,
-      30,    90,    91,    92,    93,    94,     0,     0,    95,    96,
-      97,    98,    99,   100,   101,   102,   103,   104,   105,     0,
-       0,     0,   106,   107,   108,   109,   110,   111,     0,     0,
-     112,     0,     0,     0,     0,     0,    87,    88,    89,   216,
-      90,    91,    92,    93,    94,     0,     0,    95,    96,    97,
-      98,    99,   100,   101,   102,   103,   104,   105,     0,     0,
-       0,   106,   107,   108,   109,   110,   111,     0,     0,   112,
-       0,     0,     0,     0,     0,    87,    88,    89,   220,    90,
-      91,    92,    93,    94,     0,     0,    95,    96,    97,    98,
-      99,   100,   101,   102,   103,   104,   105,     0,     0,     0,
-     106,   107,   108,   109,   110,   111,     0,     0,   112,     0,
-       0,     0,     0,     0,    87,    88,    89,   249,    90,    91,
-      92,    93,    94,     0,     0,    95,    96,    97,    98,    99,
-     100,   101,   102,   103,   104,   105,     0,     0,     0,   106,
-     107,   108,   109,   110,   111,     0,     0,   112,     0,     0,
-       0,     0,     0,    87,    88,    89,   270,    90,    91,    92,
-      93,    94,     0,     0,    95,    96,    97,    98,    99,   100,
-     101,   102,   103,   104,   105,     0,     0,     0,   106,   107,
-     108,   109,   110,   111,     0,     0,   112,     0,     0,     0,
-       0,     0,    87,    88,    89,   271,    90,    91,    92,    93,
-      94,     0,     0,    95,    96,    97,    98,    99,   100,   101,
-     102,   103,   104,   105,     0,     0,     0,   106,   107,   108,
-     109,   110,   111,     0,     0,   112,     0,     0,     0,    87,
-      88,    89,   148,    90,    91,    92,    93,    94,     0,     0,
+     193,     0,     0,     0,     0,     0,     0,     0,   229,     0,
+       0,     0,     0,   193,   193,     0,     0,     0,     0,     0,
+       0,   179,   238,     0,     0,     0,     0,     0,     0,     0,
+     246,     2,     3,     4,     5,     6,     7,     8,     9,    10,
+       0,     0,     0,    14,     0,    15,     0,    16,    17,    18,
+      19,    93,    94,   259,    96,     0,    98,     0,   100,   101,
+     102,   103,   104,   105,   106,    20,    21,     0,    22,   107,
+     108,   109,   110,   111,   112,     0,     0,   113,   114,    23,
+       0,     0,     0,    26,    27,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,    28,    29,     0,     0,     0,    31,
+       0,     1,   132,     2,     3,     4,     5,     6,     7,     8,
+       9,    10,    11,    12,    13,    14,     0,    15,     0,    16,
+      17,    18,    19,     0,     2,     3,     4,     5,     6,     7,
+       8,     9,    10,     0,     0,     0,     0,    20,    21,     0,
+      22,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,    23,    24,    25,     0,    26,    27,     0,    20,    21,
+       0,    22,     0,     0,     0,     0,    28,    29,    30,     0,
+       0,    31,    23,     0,     0,     0,    26,    27,     2,     3,
+       4,     5,     6,     7,     8,     9,    10,    28,    29,     0,
+       0,     0,    31,   176,     0,     0,     0,     0,     0,     0,
+       0,     0,     2,     3,     4,     5,     6,     7,     8,     9,
+      10,     0,    20,    21,    14,    22,    15,     0,    16,    17,
+      18,    19,     0,     0,     0,     0,    23,     0,     0,     0,
+      26,    27,     0,     0,     0,     0,    20,    21,     0,    22,
+       0,    28,    29,     0,     0,     0,    31,   210,     0,     0,
+      23,     0,     0,     0,    26,    27,     2,     3,     4,     5,
+       6,     7,     8,     9,    10,    28,    29,    85,    86,    87,
+      31,    88,    89,    90,    91,    92,    93,    94,    95,    96,
+      97,    98,    99,   100,   101,   102,   103,   104,   105,   106,
+      20,    21,     0,    22,   107,   108,   109,   110,   111,   112,
+       0,     0,   113,   114,    23,     0,     0,     0,    26,    27,
+       0,   209,     0,     0,     0,     0,     0,     0,     0,    28,
+      29,    85,    86,    87,    31,    88,    89,    90,    91,    92,
+      93,    94,    95,    96,    97,    98,    99,   100,   101,   102,
+     103,   104,   105,   106,     0,     0,     0,     0,   107,   108,
+     109,   110,   111,   112,     0,     0,   113,   114,     0,     0,
+       0,     0,    85,    86,    87,   236,    88,    89,    90,    91,
+      92,    93,    94,    95,    96,    97,    98,    99,   100,   101,
+     102,   103,   104,   105,   106,     0,     0,     0,     0,   107,
+     108,   109,   110,   111,   112,     0,     0,   113,   114,     0,
+       0,    85,    86,    87,   144,    88,    89,    90,    91,    92,
+      93,    94,    95,    96,    97,    98,    99,   100,   101,   102,
+     103,   104,   105,   106,     0,     0,     0,     0,   107,   108,
+     109,   110,   111,   112,     0,     0,   113,   114,     0,     0,
+      85,    86,    87,   203,    88,    89,    90,    91,    92,    93,
+      94,    95,    96,    97,    98,    99,   100,   101,   102,   103,
+     104,   105,   106,     0,     0,     0,     0,   107,   108,   109,
+     110,   111,   112,     0,     0,   113,   114,     0,     0,    85,
+      86,    87,   256,    88,    89,    90,    91,    92,    93,    94,
       95,    96,    97,    98,    99,   100,   101,   102,   103,   104,
-     105,     0,     0,     0,   106,   107,   108,   109,   110,   111,
-       0,     0,   112,     0,     0,     0,    87,    88,    89,   208,
-      90,    91,    92,    93,    94,     0,     0,    95,    96,    97,
-      98,    99,   100,   101,   102,   103,   104,   105,     0,     0,
-       0,   106,   107,   108,   109,   110,   111,     0,     0,   112,
-       0,     0,     0,    87,    88,    89,   210,    90,    91,    92,
-      93,    94,     0,     0,    95,    96,    97,    98,    99,   100,
-     101,   102,   103,   104,   105,     0,     0,     0,   106,   107,
-     108,   109,   110,   111,     0,     0,   112,     0,     0,     0,
-      87,    88,    89,   267,    90,    91,    92,    93,    94,     0,
-       0,    95,    96,    97,    98,    99,   100,   101,   102,   103,
-     104,   105,     0,     0,     0,   106,   107,   108,   109,   110,
-     111,    88,    89,   112,    90,    91,    92,    93,    94,     0,
-       0,    95,    96,    97,    98,    99,   100,   101,   102,   103,
-     104,   105,     0,     0,     0,   106,   107,   108,   109,   110,
-     111,     0,    89,   112,    90,    91,    92,    93,    94,     0,
-       0,    95,    96,    97,    98,    99,   100,   101,   102,   103,
-     104,   105,     0,     0,     0,   106,   107,   108,   109,   110,
-     111,     0,     0,   112,    90,    91,    92,    93,    94,     0,
-       0,    95,    96,    97,    98,    99,   100,   101,   102,   103,
-     104,   105,     0,     0,     0,   106,   107,   108,   109,   110,
-     111,     0,     0,   112,    91,    92,    93,    94,     0,     0,
-      95,    96,    97,    98,    99,   100,   101,   102,   103,   104,
-     105,     0,     0,     0,   106,   107,   108,   109,   110,   111,
-       0,     0,   112,    92,    93,    94,     0,     0,    95,    96,
-      97,    98,    99,   100,   101,   102,   103,   104,   105,     0,
-       0,     0,   106,   107,   108,   109,   110,   111,    93,    94,
-     112,     0,    95,    96,    97,    98,    99,   100,   101,   102,
-     103,   104,   105,     0,     0,     0,   106,   107,   108,   109,
-     110,   111,    94,     0,   112,    95,    96,    97,    98,    99,
-     100,   101,   102,   103,   104,   105,     0,     0,     0,   106,
-     107,   108,   109,   110,   111,     0,    96,   112,    98,     0,
-     100,   101,   102,   103,   104,   105,     0,     0,     0,   106,
-     107,   108,   109,   110,   111,     0,     0,   112,  -102,  -102,
-    -102,  -102,  -102,  -102,     0,     0,     0,   106,   107,   108,
-     109,   110,   111,     0,     0,   112
+     105,   106,     0,     0,     0,     0,   107,   108,   109,   110,
+     111,   112,     0,     0,   113,   114,    86,    87,     0,    88,
+      89,    90,    91,    92,    93,    94,    95,    96,    97,    98,
+      99,   100,   101,   102,   103,   104,   105,   106,     0,     0,
+       0,     0,   107,   108,   109,   110,   111,   112,     0,     0,
+     113,   114,    87,     0,    88,    89,    90,    91,    92,    93,
+      94,    95,    96,    97,    98,    99,   100,   101,   102,   103,
+     104,   105,   106,     0,     0,     0,     0,   107,   108,   109,
+     110,   111,   112,     0,     0,   113,   114,    88,    89,    90,
+      91,    92,    93,    94,    95,    96,    97,    98,    99,   100,
+     101,   102,   103,   104,   105,   106,     0,     0,     0,     0,
+     107,   108,   109,   110,   111,   112,     0,     0,   113,   114,
+      89,    90,    91,    92,    93,    94,    95,    96,    97,    98,
+      99,   100,   101,   102,   103,   104,   105,   106,     0,     0,
+       0,     0,   107,   108,   109,   110,   111,   112,     0,     0,
+     113,   114,    90,    91,    92,    93,    94,    95,    96,    97,
+      98,    99,   100,   101,   102,   103,   104,   105,   106,     0,
+       0,     0,     0,   107,   108,   109,   110,   111,   112,     0,
+       0,   113,   114,    91,    92,    93,    94,    95,    96,    97,
+      98,    99,   100,   101,   102,   103,   104,   105,   106,     0,
+       0,     0,     0,   107,   108,   109,   110,   111,   112,     0,
+       0,   113,   114,    92,    93,    94,    95,    96,    97,    98,
+      99,   100,   101,   102,   103,   104,   105,   106,     0,     0,
+       0,     0,   107,   108,   109,   110,   111,   112,     0,     0,
+     113,   114,    93,    94,    95,    96,    97,    98,    99,   100,
+     101,   102,   103,   104,   105,   106,     0,     0,     0,     0,
+     107,   108,   109,   110,   111,   112,    93,    94,   113,   114,
+       0,     0,     0,  -102,  -102,  -102,  -102,  -102,  -102,   106,
+       0,     0,     0,     0,   107,   108,   109,   110,   111,   112,
+       0,     0,   113,   114
 };
 
 static const yytype_int16 yycheck[] =
 {
-       0,     0,   130,     5,    39,    20,    21,     5,   228,    37,
-      38,    11,    12,    13,    66,    67,   236,    64,    66,    67,
-      57,    73,    62,     5,    24,    73,    66,    67,    64,    64,
-      65,    57,    58,     0,    62,    61,    57,    39,    65,    68,
-      69,   261,    66,    67,    66,    67,    63,     3,     4,     5,
-       6,     7,     8,     9,    10,    11,   276,   277,     5,    62,
-      20,    21,    70,    65,    24,    65,    64,    55,    56,    57,
-      58,    66,    67,    61,    64,    65,    23,    24,    25,    26,
-      61,    37,    38,    62,    40,    19,    64,    65,    22,    64,
-      65,    25,    26,    27,    28,    65,    30,    53,    54,    62,
-     115,    65,   117,    16,   232,    70,    71,   235,    64,    65,
-      18,    66,    67,    69,    70,   115,    62,   117,    64,    65,
-      66,    67,   122,    65,   124,    65,   126,   142,   128,     5,
-     130,   131,   132,    67,    64,   134,    12,    13,    72,   276,
-     277,    68,   142,    71,    68,   145,    71,    23,    24,    25,
-      26,    27,    64,    87,    88,    89,    90,    91,    92,    93,
-      94,    95,    96,    97,    98,    99,   100,   101,   102,   103,
-     104,   105,   106,   107,   108,   109,   110,   111,   112,   216,
-     209,   198,   116,    70,    68,    64,    72,    65,   122,   123,
-     190,   191,   192,   193,    65,    39,    68,   197,   227,    68,
-      24,     0,   218,     0,    16,   234,   223,   224,   225,   226,
-      44,    45,    46,    47,    48,    49,   150,    -1,   218,    53,
-      54,    55,    56,    57,    58,    -1,    -1,    61,   228,    -1,
-      -1,    -1,   232,   270,   271,   235,   236,    -1,    -1,   238,
-     239,    -1,    -1,    -1,   273,   274,    -1,    -1,    -1,    -1,
-      -1,    -1,    -1,    -1,    -1,   189,    -1,    -1,    -1,    -1,
-      -1,   261,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-      -1,   205,    -1,    -1,    -1,    -1,   276,   277,    -1,   213,
-      -1,   215,    -1,    -1,   218,   219,     3,     4,     5,     6,
-       7,     8,     9,    10,    11,    -1,   230,    -1,    15,    -1,
-      17,    -1,    19,    20,    21,    22,    -1,    -1,    -1,    -1,
+       0,     0,   128,    43,     5,    39,   220,     5,    37,    38,
+      66,    11,    12,    13,   228,    44,    45,    46,    47,    48,
+      49,    50,    63,    68,    69,    25,    55,    56,    57,    58,
+      59,    60,    66,    67,    63,    64,   250,     5,    39,    66,
+      68,    69,    68,    69,    67,    37,    38,    37,    38,   263,
+     264,     0,    68,    69,    59,    23,    24,    25,    26,    75,
+      50,    68,    69,    66,    67,    65,    67,    57,    58,    59,
+      60,    63,    64,    63,    64,    68,    69,    19,    20,    21,
+      22,    67,    75,    25,    26,    27,    28,    29,    72,    31,
+      37,    38,    64,    67,    66,    67,    68,    69,   224,    66,
+      67,   227,    16,    50,   144,    66,    67,    63,    64,    37,
+      38,    18,    59,    60,   114,    66,    63,    64,    68,    69,
+      73,   121,   122,    67,   124,    67,   126,    70,   128,   129,
+     130,    59,    60,   132,   174,    63,    64,    72,    73,    68,
+      69,   141,    73,    85,    86,    87,    88,    89,    90,    91,
+      92,    70,   193,    95,    96,    97,    98,    99,   100,   101,
+     102,   103,   104,   105,   106,   107,   108,   109,   110,   111,
+     112,   113,    66,   115,   215,   216,   217,   218,   204,   121,
+     263,   264,    72,    70,    66,   185,   186,   187,   188,     5,
+      74,    39,   192,   219,    70,    70,    12,    13,    57,   114,
+     226,    25,   213,     0,   146,     0,    16,    23,    24,    25,
+      26,    27,    -1,   213,    -1,    -1,    -1,    -1,    -1,    -1,
+     220,    -1,    -1,    -1,   224,    -1,    -1,   227,   228,    -1,
+      -1,   230,   231,    -1,   260,   261,   178,    -1,    -1,    -1,
       -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-      37,    38,   256,    40,    39,    40,    41,    42,    43,    44,
-      45,    46,    47,    48,    49,    -1,    53,    54,    53,    54,
-      55,    56,    57,    58,    -1,    -1,    61,    64,    65,    -1,
-      -1,    -1,    69,    -1,     1,    72,     3,     4,     5,     6,
-       7,     8,     9,    10,    11,    12,    13,    14,    15,    -1,
-      17,    -1,    19,    20,    21,    22,     3,     4,     5,     6,
-       7,     8,     9,    10,    11,    -1,    -1,    -1,    -1,    -1,
-      37,    38,    -1,    40,    -1,    -1,    -1,    -1,    -1,    -1,
-      -1,    -1,    -1,    50,    51,    -1,    53,    54,    -1,    -1,
-      37,    38,    -1,    40,    -1,    -1,    -1,    64,    65,    66,
-      -1,    -1,    69,    -1,    -1,    -1,    53,    54,    -1,    -1,
-      -1,    -1,    -1,    -1,    -1,    -1,    -1,    64,    65,    -1,
-      -1,    -1,    69,    70,     3,     4,     5,     6,     7,     8,
-       9,    10,    11,    -1,    -1,    -1,    15,    -1,    17,    -1,
-      19,    20,    21,    22,     3,     4,     5,     6,     7,     8,
-       9,    10,    11,    -1,    -1,    -1,    -1,    -1,    37,    38,
-      -1,    40,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-      -1,    -1,    -1,    -1,    53,    54,    -1,    -1,    37,    38,
-      -1,    40,    -1,    -1,    -1,    64,    65,    -1,    -1,    -1,
-      69,    -1,    -1,    -1,    53,    54,    -1,    -1,    -1,    -1,
-      -1,    -1,    -1,    -1,    -1,    64,    65,    28,    29,    30,
-      69,    32,    33,    34,    35,    36,    -1,    -1,    39,    40,
-      41,    42,    43,    44,    45,    46,    47,    48,    49,    -1,
-      -1,    -1,    53,    54,    55,    56,    57,    58,    -1,    -1,
-      61,    -1,    -1,    -1,    -1,    -1,    28,    29,    30,    70,
-      32,    33,    34,    35,    36,    -1,    -1,    39,    40,    41,
-      42,    43,    44,    45,    46,    47,    48,    49,    -1,    -1,
-      -1,    53,    54,    55,    56,    57,    58,    -1,    -1,    61,
-      -1,    -1,    -1,    -1,    -1,    28,    29,    30,    70,    32,
-      33,    34,    35,    36,    -1,    -1,    39,    40,    41,    42,
-      43,    44,    45,    46,    47,    48,    49,    -1,    -1,    -1,
-      53,    54,    55,    56,    57,    58,    -1,    -1,    61,    -1,
-      -1,    -1,    -1,    -1,    28,    29,    30,    70,    32,    33,
-      34,    35,    36,    -1,    -1,    39,    40,    41,    42,    43,
-      44,    45,    46,    47,    48,    49,    -1,    -1,    -1,    53,
-      54,    55,    56,    57,    58,    -1,    -1,    61,    -1,    -1,
-      -1,    -1,    -1,    28,    29,    30,    70,    32,    33,    34,
-      35,    36,    -1,    -1,    39,    40,    41,    42,    43,    44,
-      45,    46,    47,    48,    49,    -1,    -1,    -1,    53,    54,
-      55,    56,    57,    58,    -1,    -1,    61,    -1,    -1,    -1,
-      -1,    -1,    28,    29,    30,    70,    32,    33,    34,    35,
-      36,    -1,    -1,    39,    40,    41,    42,    43,    44,    45,
-      46,    47,    48,    49,    -1,    -1,    -1,    53,    54,    55,
-      56,    57,    58,    -1,    -1,    61,    -1,    -1,    -1,    28,
-      29,    30,    68,    32,    33,    34,    35,    36,    -1,    -1,
+     250,    -1,    -1,    -1,    -1,    -1,    -1,    -1,   200,    -1,
+      -1,    -1,    -1,   263,   264,    -1,    -1,    -1,    -1,    -1,
+      -1,   213,   214,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+     222,     3,     4,     5,     6,     7,     8,     9,    10,    11,
+      -1,    -1,    -1,    15,    -1,    17,    -1,    19,    20,    21,
+      22,    37,    38,   245,    40,    -1,    42,    -1,    44,    45,
+      46,    47,    48,    49,    50,    37,    38,    -1,    40,    55,
+      56,    57,    58,    59,    60,    -1,    -1,    63,    64,    51,
+      -1,    -1,    -1,    55,    56,    -1,    -1,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    66,    67,    -1,    -1,    -1,    71,
+      -1,     1,    74,     3,     4,     5,     6,     7,     8,     9,
+      10,    11,    12,    13,    14,    15,    -1,    17,    -1,    19,
+      20,    21,    22,    -1,     3,     4,     5,     6,     7,     8,
+       9,    10,    11,    -1,    -1,    -1,    -1,    37,    38,    -1,
+      40,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+      -1,    51,    52,    53,    -1,    55,    56,    -1,    37,    38,
+      -1,    40,    -1,    -1,    -1,    -1,    66,    67,    68,    -1,
+      -1,    71,    51,    -1,    -1,    -1,    55,    56,     3,     4,
+       5,     6,     7,     8,     9,    10,    11,    66,    67,    -1,
+      -1,    -1,    71,    72,    -1,    -1,    -1,    -1,    -1,    -1,
+      -1,    -1,     3,     4,     5,     6,     7,     8,     9,    10,
+      11,    -1,    37,    38,    15,    40,    17,    -1,    19,    20,
+      21,    22,    -1,    -1,    -1,    -1,    51,    -1,    -1,    -1,
+      55,    56,    -1,    -1,    -1,    -1,    37,    38,    -1,    40,
+      -1,    66,    67,    -1,    -1,    -1,    71,    72,    -1,    -1,
+      51,    -1,    -1,    -1,    55,    56,     3,     4,     5,     6,
+       7,     8,     9,    10,    11,    66,    67,    28,    29,    30,
+      71,    32,    33,    34,    35,    36,    37,    38,    39,    40,
+      41,    42,    43,    44,    45,    46,    47,    48,    49,    50,
+      37,    38,    -1,    40,    55,    56,    57,    58,    59,    60,
+      -1,    -1,    63,    64,    51,    -1,    -1,    -1,    55,    56,
+      -1,    72,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    66,
+      67,    28,    29,    30,    71,    32,    33,    34,    35,    36,
+      37,    38,    39,    40,    41,    42,    43,    44,    45,    46,
+      47,    48,    49,    50,    -1,    -1,    -1,    -1,    55,    56,
+      57,    58,    59,    60,    -1,    -1,    63,    64,    -1,    -1,
+      -1,    -1,    28,    29,    30,    72,    32,    33,    34,    35,
+      36,    37,    38,    39,    40,    41,    42,    43,    44,    45,
+      46,    47,    48,    49,    50,    -1,    -1,    -1,    -1,    55,
+      56,    57,    58,    59,    60,    -1,    -1,    63,    64,    -1,
+      -1,    28,    29,    30,    70,    32,    33,    34,    35,    36,
+      37,    38,    39,    40,    41,    42,    43,    44,    45,    46,
+      47,    48,    49,    50,    -1,    -1,    -1,    -1,    55,    56,
+      57,    58,    59,    60,    -1,    -1,    63,    64,    -1,    -1,
+      28,    29,    30,    70,    32,    33,    34,    35,    36,    37,
+      38,    39,    40,    41,    42,    43,    44,    45,    46,    47,
+      48,    49,    50,    -1,    -1,    -1,    -1,    55,    56,    57,
+      58,    59,    60,    -1,    -1,    63,    64,    -1,    -1,    28,
+      29,    30,    70,    32,    33,    34,    35,    36,    37,    38,
       39,    40,    41,    42,    43,    44,    45,    46,    47,    48,
-      49,    -1,    -1,    -1,    53,    54,    55,    56,    57,    58,
-      -1,    -1,    61,    -1,    -1,    -1,    28,    29,    30,    68,
-      32,    33,    34,    35,    36,    -1,    -1,    39,    40,    41,
-      42,    43,    44,    45,    46,    47,    48,    49,    -1,    -1,
-      -1,    53,    54,    55,    56,    57,    58,    -1,    -1,    61,
-      -1,    -1,    -1,    28,    29,    30,    68,    32,    33,    34,
-      35,    36,    -1,    -1,    39,    40,    41,    42,    43,    44,
-      45,    46,    47,    48,    49,    -1,    -1,    -1,    53,    54,
-      55,    56,    57,    58,    -1,    -1,    61,    -1,    -1,    -1,
-      28,    29,    30,    68,    32,    33,    34,    35,    36,    -1,
-      -1,    39,    40,    41,    42,    43,    44,    45,    46,    47,
-      48,    49,    -1,    -1,    -1,    53,    54,    55,    56,    57,
-      58,    29,    30,    61,    32,    33,    34,    35,    36,    -1,
-      -1,    39,    40,    41,    42,    43,    44,    45,    46,    47,
-      48,    49,    -1,    -1,    -1,    53,    54,    55,    56,    57,
-      58,    -1,    30,    61,    32,    33,    34,    35,    36,    -1,
-      -1,    39,    40,    41,    42,    43,    44,    45,    46,    47,
-      48,    49,    -1,    -1,    -1,    53,    54,    55,    56,    57,
-      58,    -1,    -1,    61,    32,    33,    34,    35,    36,    -1,
-      -1,    39,    40,    41,    42,    43,    44,    45,    46,    47,
-      48,    49,    -1,    -1,    -1,    53,    54,    55,    56,    57,
-      58,    -1,    -1,    61,    33,    34,    35,    36,    -1,    -1,
-      39,    40,    41,    42,    43,    44,    45,    46,    47,    48,
-      49,    -1,    -1,    -1,    53,    54,    55,    56,    57,    58,
-      -1,    -1,    61,    34,    35,    36,    -1,    -1,    39,    40,
-      41,    42,    43,    44,    45,    46,    47,    48,    49,    -1,
-      -1,    -1,    53,    54,    55,    56,    57,    58,    35,    36,
-      61,    -1,    39,    40,    41,    42,    43,    44,    45,    46,
-      47,    48,    49,    -1,    -1,    -1,    53,    54,    55,    56,
-      57,    58,    36,    -1,    61,    39,    40,    41,    42,    43,
-      44,    45,    46,    47,    48,    49,    -1,    -1,    -1,    53,
-      54,    55,    56,    57,    58,    -1,    40,    61,    42,    -1,
-      44,    45,    46,    47,    48,    49,    -1,    -1,    -1,    53,
-      54,    55,    56,    57,    58,    -1,    -1,    61,    44,    45,
-      46,    47,    48,    49,    -1,    -1,    -1,    53,    54,    55,
-      56,    57,    58,    -1,    -1,    61
+      49,    50,    -1,    -1,    -1,    -1,    55,    56,    57,    58,
+      59,    60,    -1,    -1,    63,    64,    29,    30,    -1,    32,
+      33,    34,    35,    36,    37,    38,    39,    40,    41,    42,
+      43,    44,    45,    46,    47,    48,    49,    50,    -1,    -1,
+      -1,    -1,    55,    56,    57,    58,    59,    60,    -1,    -1,
+      63,    64,    30,    -1,    32,    33,    34,    35,    36,    37,
+      38,    39,    40,    41,    42,    43,    44,    45,    46,    47,
+      48,    49,    50,    -1,    -1,    -1,    -1,    55,    56,    57,
+      58,    59,    60,    -1,    -1,    63,    64,    32,    33,    34,
+      35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
+      45,    46,    47,    48,    49,    50,    -1,    -1,    -1,    -1,
+      55,    56,    57,    58,    59,    60,    -1,    -1,    63,    64,
+      33,    34,    35,    36,    37,    38,    39,    40,    41,    42,
+      43,    44,    45,    46,    47,    48,    49,    50,    -1,    -1,
+      -1,    -1,    55,    56,    57,    58,    59,    60,    -1,    -1,
+      63,    64,    34,    35,    36,    37,    38,    39,    40,    41,
+      42,    43,    44,    45,    46,    47,    48,    49,    50,    -1,
+      -1,    -1,    -1,    55,    56,    57,    58,    59,    60,    -1,
+      -1,    63,    64,    35,    36,    37,    38,    39,    40,    41,
+      42,    43,    44,    45,    46,    47,    48,    49,    50,    -1,
+      -1,    -1,    -1,    55,    56,    57,    58,    59,    60,    -1,
+      -1,    63,    64,    36,    37,    38,    39,    40,    41,    42,
+      43,    44,    45,    46,    47,    48,    49,    50,    -1,    -1,
+      -1,    -1,    55,    56,    57,    58,    59,    60,    -1,    -1,
+      63,    64,    37,    38,    39,    40,    41,    42,    43,    44,
+      45,    46,    47,    48,    49,    50,    -1,    -1,    -1,    -1,
+      55,    56,    57,    58,    59,    60,    37,    38,    63,    64,
+      -1,    -1,    -1,    44,    45,    46,    47,    48,    49,    50,
+      -1,    -1,    -1,    -1,    55,    56,    57,    58,    59,    60,
+      -1,    -1,    63,    64
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
@@ -1096,67 +1079,65 @@ static const yytype_int8 yystos[] =
 {
        0,     1,     3,     4,     5,     6,     7,     8,     9,    10,
       11,    12,    13,    14,    15,    17,    19,    20,    21,    22,
-      37,    38,    40,    50,    51,    53,    54,    64,    65,    66,
-      69,    75,    76,    77,    78,    79,    80,    81,    82,    83,
-      84,    85,    86,    89,    90,    94,    95,   104,   105,   106,
-     109,   110,   112,   114,   115,   116,   117,   118,   119,   121,
-      66,    67,   118,   118,   118,    64,   113,    64,   111,   111,
-      76,   118,    64,    86,    89,    86,    76,    86,    90,   118,
-      76,    76,    76,    76,   120,    76,     0,    28,    29,    30,
-      32,    33,    34,    35,    36,    39,    40,    41,    42,    43,
-      44,    45,    46,    47,    48,    49,    53,    54,    55,    56,
-      57,    58,    61,    37,    38,    62,    65,    62,    66,    67,
-      66,    67,    64,    65,    87,    88,    64,    65,   100,   101,
-      64,   100,    57,   118,    72,   102,   105,    76,   102,   102,
-      87,    76,    62,    66,    67,    62,    66,    67,    68,    70,
-      71,    76,    76,    76,    76,    76,    76,    76,    76,    76,
-      76,    76,    76,    76,    76,    76,    76,    76,    76,    76,
-      76,    76,    76,    76,    76,    76,    76,    89,   118,    76,
-      89,    76,    91,    92,    93,   118,    70,    76,   118,    65,
-      23,    24,    25,    26,    96,    97,    98,    99,   118,    70,
-     118,    65,    96,   118,   118,    16,   103,   105,    68,    18,
-      68,    89,   118,    65,    76,    65,    70,    68,    71,    39,
-      70,    70,    76,   118,   118,   118,   118,    68,    71,   118,
-      39,   100,    64,    70,    68,    64,    72,    76,    66,    67,
-      73,   102,    66,    67,    76,    76,    87,    93,    76,    70,
-     100,   100,   100,   100,   102,    98,    39,    76,    96,   102,
-      96,    27,    94,    95,    98,   107,   108,    68,   105,   105,
-      70,    70,    76,    68,    68,    98,    66,    67,    73,    87,
-      87,   102,   102,   108,   108
+      37,    38,    40,    51,    52,    53,    55,    56,    66,    67,
+      68,    71,    77,    78,    79,    80,    81,    82,    83,    84,
+      85,    86,    87,    90,    91,    95,    96,   105,   106,   107,
+     110,   111,   113,   115,   116,   117,   118,   119,   120,   122,
+      68,    69,   119,   119,   119,    66,   114,    66,   112,   112,
+      78,   119,    78,    78,    78,    78,    91,   119,    78,    78,
+      78,    78,   121,    78,     0,    28,    29,    30,    32,    33,
+      34,    35,    36,    37,    38,    39,    40,    41,    42,    43,
+      44,    45,    46,    47,    48,    49,    50,    55,    56,    57,
+      58,    59,    60,    63,    64,    67,    89,    68,    69,    68,
+      69,    66,    88,    89,    66,    67,   101,   102,    66,   101,
+      59,   119,    74,   103,   106,    78,   103,   103,    88,    68,
+      69,    64,    68,    69,    70,    72,    73,    78,    78,    78,
+      78,    78,    78,    78,    78,    78,    78,    78,    78,    78,
+      78,    78,    78,    78,    78,    78,    78,    78,    78,    78,
+      78,    78,    78,    78,    90,   119,    72,    78,    67,    78,
+      92,    93,    94,   119,   119,    23,    24,    25,    26,    97,
+      98,    99,   100,   119,    72,   119,    67,    97,   119,   119,
+      16,   104,   106,    70,    18,   119,    89,    78,    89,    72,
+      72,    78,    70,    73,    39,   119,   119,   119,   119,    70,
+      73,   119,    39,   101,    66,    72,    70,    66,    74,    78,
+      68,    69,    75,   103,    68,    69,    72,    94,    78,   101,
+     101,   101,   101,   103,    99,    39,    78,    97,   103,    97,
+      27,    95,    96,    99,   108,   109,    70,   106,   106,    78,
+      70,    70,    99,    68,    69,    75,   103,   103,   109,   109
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    74,    75,    75,    75,    75,    75,    75,    75,    75,
-      75,    75,    75,    75,    75,    75,    76,    76,    76,    76,
-      76,    76,    76,    76,    76,    76,    76,    76,    76,    76,
-      76,    76,    76,    76,    76,    76,    76,    76,    76,    76,
-      76,    76,    76,    76,    76,    76,    76,    76,    76,    76,
-      76,    76,    76,    76,    76,    77,    78,    79,    80,    81,
-      82,    83,    84,    85,    86,    86,    86,    86,    87,    87,
-      88,    88,    88,    88,    89,    90,    90,    90,    91,    91,
-      92,    92,    93,    93,    94,    94,    95,    95,    96,    96,
-      97,    97,    98,    98,    98,    98,    99,    99,    99,    99,
-      99,   100,   100,   101,   101,   102,   102,   103,   103,   103,
-     103,   103,   103,   104,   104,   104,   104,   104,   104,   105,
-     105,   106,   106,   106,   106,   107,   107,   107,   107,   107,
-     107,   108,   108,   108,   108,   109,   110,   110,   111,   112,
-     113,   114,   115,   116,   117,   117,   118,   119,   120,   120,
-     121,   121,   121,   121,   121,   121,   121,   121
+       0,    76,    77,    77,    77,    77,    77,    77,    77,    77,
+      77,    77,    77,    77,    77,    77,    78,    78,    78,    78,
+      78,    78,    78,    78,    78,    78,    78,    78,    78,    78,
+      78,    78,    78,    78,    78,    78,    78,    78,    78,    78,
+      78,    78,    78,    78,    78,    78,    78,    78,    78,    78,
+      78,    78,    78,    78,    78,    78,    78,    78,    78,    78,
+      79,    80,    81,    82,    83,    84,    85,    86,    87,    88,
+      88,    89,    89,    89,    89,    90,    91,    91,    92,    92,
+      93,    93,    94,    94,    95,    95,    96,    96,    97,    97,
+      98,    98,    99,    99,    99,    99,   100,   100,   100,   100,
+     100,   101,   101,   102,   102,   103,   103,   104,   104,   104,
+     104,   104,   104,   105,   105,   105,   105,   105,   105,   106,
+     106,   107,   107,   107,   107,   108,   108,   108,   108,   108,
+     108,   109,   109,   109,   109,   110,   111,   111,   112,   113,
+     114,   115,   116,   117,   118,   118,   119,   120,   121,   121,
+     122,   122,   122,   122,   122,   122,   122,   122
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
        0,     2,     1,     1,     2,     2,     2,     2,     3,     3,
-       5,     5,     3,     3,     2,     2,     1,     1,     3,     2,
-       2,     2,     2,     2,     2,     2,     2,     3,     3,     3,
+       5,     5,     3,     3,     2,     2,     1,     1,     1,     3,
+       2,     2,     2,     2,     2,     2,     2,     2,     3,     3,
        3,     3,     3,     3,     3,     3,     3,     3,     3,     3,
-       3,     3,     3,     3,     1,     1,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     3,     3,     3,     3,     3,
-       3,     3,     3,     3,     2,     5,     7,     7,     0,     1,
-       3,     2,     4,     3,     4,     1,     3,     3,     0,     1,
+       3,     3,     3,     3,     3,     3,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     2,     2,     4,     4,
+       3,     3,     3,     3,     3,     3,     3,     3,     3,     0,
+       1,     3,     2,     4,     3,     4,     1,     3,     0,     1,
        1,     3,     1,     3,     6,     8,     6,     8,     0,     1,
        1,     3,     1,     3,     2,     4,     2,     3,     3,     3,
        3,     0,     1,     2,     3,     3,     1,     0,     1,     3,
@@ -1456,279 +1437,273 @@ yydestruct (const char *yymsg,
   switch (yykind)
     {
     case YYSYMBOL_expression: /* expression  */
-#line 141 "./grammar.y"
+#line 145 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1462 "./grammar.tab.c"
+#line 1443 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_arrowAssign: /* arrowAssign  */
-#line 142 "./grammar.y"
+#line 146 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1468 "./grammar.tab.c"
+#line 1449 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_tildeAssign: /* tildeAssign  */
-#line 142 "./grammar.y"
+#line 146 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1474 "./grammar.tab.c"
+#line 1455 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_equationAssign: /* equationAssign  */
-#line 142 "./grammar.y"
+#line 146 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1480 "./grammar.tab.c"
+#line 1461 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_workspaceAssign: /* workspaceAssign  */
-#line 142 "./grammar.y"
+#line 146 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1486 "./grammar.tab.c"
+#line 1467 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_referenceAssign: /* referenceAssign  */
-#line 143 "./grammar.y"
+#line 147 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1492 "./grammar.tab.c"
+#line 1473 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_additionAssign: /* additionAssign  */
-#line 144 "./grammar.y"
+#line 148 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1498 "./grammar.tab.c"
+#line 1479 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_subtractionAssign: /* subtractionAssign  */
-#line 144 "./grammar.y"
+#line 148 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1504 "./grammar.tab.c"
+#line 1485 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_multiplicationAssign: /* multiplicationAssign  */
-#line 144 "./grammar.y"
+#line 148 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1510 "./grammar.tab.c"
+#line 1491 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_divisionAssign: /* divisionAssign  */
-#line 144 "./grammar.y"
+#line 148 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1516 "./grammar.tab.c"
-        break;
-
-    case YYSYMBOL_variable: /* variable  */
-#line 140 "./grammar.y"
-            { delete (((*yyvaluep).syntaxElement)); }
-#line 1522 "./grammar.tab.c"
+#line 1497 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_optElements: /* optElements  */
-#line 136 "./grammar.y"
+#line 140 "./grammar.y"
             { for (std::list<SyntaxElement*>::iterator it=((*yyvaluep).syntaxElementList)->begin(); it != ((*yyvaluep).syntaxElementList)->end(); it++) { SyntaxElement* theElement = *it; delete theElement; }; delete (((*yyvaluep).syntaxElementList)); }
-#line 1528 "./grammar.tab.c"
+#line 1503 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_elementList: /* elementList  */
-#line 136 "./grammar.y"
+#line 140 "./grammar.y"
             { for (std::list<SyntaxElement*>::iterator it=((*yyvaluep).syntaxElementList)->begin(); it != ((*yyvaluep).syntaxElementList)->end(); it++) { SyntaxElement* theElement = *it; delete theElement; }; delete (((*yyvaluep).syntaxElementList)); }
-#line 1534 "./grammar.tab.c"
+#line 1509 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_fxnCall: /* fxnCall  */
-#line 140 "./grammar.y"
+#line 144 "./grammar.y"
             { delete (((*yyvaluep).syntaxFunctionCall)); }
-#line 1540 "./grammar.tab.c"
+#line 1515 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_functionCall: /* functionCall  */
-#line 140 "./grammar.y"
+#line 144 "./grammar.y"
             { delete (((*yyvaluep).syntaxFunctionCall)); }
-#line 1546 "./grammar.tab.c"
+#line 1521 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_optArguments: /* optArguments  */
-#line 137 "./grammar.y"
+#line 141 "./grammar.y"
             { for (std::list<SyntaxLabeledExpr*>::iterator it=((*yyvaluep).argumentList)->begin(); it != ((*yyvaluep).argumentList)->end(); it++) { SyntaxLabeledExpr* theElement = *it; delete theElement; }; delete (((*yyvaluep).argumentList)); }
-#line 1552 "./grammar.tab.c"
+#line 1527 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_argumentList: /* argumentList  */
-#line 137 "./grammar.y"
+#line 141 "./grammar.y"
             { for (std::list<SyntaxLabeledExpr*>::iterator it=((*yyvaluep).argumentList)->begin(); it != ((*yyvaluep).argumentList)->end(); it++) { SyntaxLabeledExpr* theElement = *it; delete theElement; }; delete (((*yyvaluep).argumentList)); }
-#line 1558 "./grammar.tab.c"
+#line 1533 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_argument: /* argument  */
-#line 140 "./grammar.y"
+#line 144 "./grammar.y"
             { delete (((*yyvaluep).syntaxLabeledExpr)); }
-#line 1564 "./grammar.tab.c"
+#line 1539 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_functionDef: /* functionDef  */
-#line 146 "./grammar.y"
+#line 150 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1570 "./grammar.tab.c"
+#line 1545 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_procedureDef: /* procedureDef  */
-#line 146 "./grammar.y"
+#line 150 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1576 "./grammar.tab.c"
+#line 1551 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_optFormals: /* optFormals  */
-#line 138 "./grammar.y"
+#line 142 "./grammar.y"
             { for (std::list<SyntaxFormal*>::iterator it=((*yyvaluep).formalList)->begin(); it != ((*yyvaluep).formalList)->end(); it++) { SyntaxFormal* theElement = *it; delete theElement; }; delete (((*yyvaluep).formalList)); }
-#line 1582 "./grammar.tab.c"
+#line 1557 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_formalList: /* formalList  */
-#line 138 "./grammar.y"
+#line 142 "./grammar.y"
             { for (std::list<SyntaxFormal*>::iterator it=((*yyvaluep).formalList)->begin(); it != ((*yyvaluep).formalList)->end(); it++) { SyntaxFormal* theElement = *it; delete theElement; }; delete (((*yyvaluep).formalList)); }
-#line 1588 "./grammar.tab.c"
+#line 1563 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_formal: /* formal  */
-#line 140 "./grammar.y"
+#line 144 "./grammar.y"
             { delete (((*yyvaluep).syntaxFormal)); }
-#line 1594 "./grammar.tab.c"
+#line 1569 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_typeSpec: /* typeSpec  */
-#line 139 "./grammar.y"
+#line 143 "./grammar.y"
             { delete (((*yyvaluep).string)); }
-#line 1600 "./grammar.tab.c"
+#line 1575 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_optDims: /* optDims  */
-#line 139 "./grammar.y"
+#line 143 "./grammar.y"
             { delete (((*yyvaluep).string)); }
-#line 1606 "./grammar.tab.c"
+#line 1581 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_dimList: /* dimList  */
-#line 139 "./grammar.y"
+#line 143 "./grammar.y"
             { delete (((*yyvaluep).string)); }
-#line 1612 "./grammar.tab.c"
+#line 1587 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_stmts: /* stmts  */
-#line 136 "./grammar.y"
+#line 140 "./grammar.y"
             { for (std::list<SyntaxElement*>::iterator it=((*yyvaluep).syntaxElementList)->begin(); it != ((*yyvaluep).syntaxElementList)->end(); it++) { SyntaxElement* theElement = *it; delete theElement; }; delete (((*yyvaluep).syntaxElementList)); }
-#line 1618 "./grammar.tab.c"
+#line 1593 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_stmtList: /* stmtList  */
-#line 136 "./grammar.y"
+#line 140 "./grammar.y"
             { for (std::list<SyntaxElement*>::iterator it=((*yyvaluep).syntaxElementList)->begin(); it != ((*yyvaluep).syntaxElementList)->end(); it++) { SyntaxElement* theElement = *it; delete theElement; }; delete (((*yyvaluep).syntaxElementList)); }
-#line 1624 "./grammar.tab.c"
+#line 1599 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_statement: /* statement  */
-#line 141 "./grammar.y"
+#line 145 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1630 "./grammar.tab.c"
+#line 1605 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_stmt_or_expr: /* stmt_or_expr  */
-#line 141 "./grammar.y"
+#line 145 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1636 "./grammar.tab.c"
+#line 1611 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_declaration: /* declaration  */
-#line 145 "./grammar.y"
+#line 149 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1642 "./grammar.tab.c"
+#line 1617 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_memberDefs: /* memberDefs  */
-#line 136 "./grammar.y"
+#line 140 "./grammar.y"
             { for (std::list<SyntaxElement*>::iterator it=((*yyvaluep).syntaxElementList)->begin(); it != ((*yyvaluep).syntaxElementList)->end(); it++) { SyntaxElement* theElement = *it; delete theElement; }; delete (((*yyvaluep).syntaxElementList)); }
-#line 1648 "./grammar.tab.c"
+#line 1623 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_memberDef: /* memberDef  */
-#line 145 "./grammar.y"
+#line 149 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1654 "./grammar.tab.c"
+#line 1629 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_classDef: /* classDef  */
-#line 145 "./grammar.y"
+#line 149 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1660 "./grammar.tab.c"
+#line 1635 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_ifStatement: /* ifStatement  */
-#line 147 "./grammar.y"
+#line 151 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1666 "./grammar.tab.c"
+#line 1641 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_cond: /* cond  */
-#line 148 "./grammar.y"
+#line 152 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1672 "./grammar.tab.c"
+#line 1647 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_forStatement: /* forStatement  */
-#line 147 "./grammar.y"
+#line 151 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1678 "./grammar.tab.c"
+#line 1653 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_forCond: /* forCond  */
-#line 148 "./grammar.y"
+#line 152 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1684 "./grammar.tab.c"
+#line 1659 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_whileStatement: /* whileStatement  */
-#line 147 "./grammar.y"
+#line 151 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1690 "./grammar.tab.c"
+#line 1665 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_nextStatement: /* nextStatement  */
-#line 149 "./grammar.y"
+#line 153 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1696 "./grammar.tab.c"
+#line 1671 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_breakStatement: /* breakStatement  */
-#line 149 "./grammar.y"
+#line 153 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1702 "./grammar.tab.c"
+#line 1677 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_returnStatement: /* returnStatement  */
-#line 148 "./grammar.y"
+#line 152 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1708 "./grammar.tab.c"
+#line 1683 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_identifier: /* identifier  */
-#line 139 "./grammar.y"
+#line 143 "./grammar.y"
             { delete (((*yyvaluep).string)); }
-#line 1714 "./grammar.tab.c"
+#line 1689 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_vector: /* vector  */
-#line 137 "./grammar.y"
+#line 141 "./grammar.y"
             { for (std::list<SyntaxLabeledExpr*>::iterator it=((*yyvaluep).argumentList)->begin(); it != ((*yyvaluep).argumentList)->end(); it++) { SyntaxLabeledExpr* theElement = *it; delete theElement; }; delete (((*yyvaluep).argumentList)); }
-#line 1720 "./grammar.tab.c"
+#line 1695 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_vectorList: /* vectorList  */
-#line 137 "./grammar.y"
+#line 141 "./grammar.y"
             { for (std::list<SyntaxLabeledExpr*>::iterator it=((*yyvaluep).argumentList)->begin(); it != ((*yyvaluep).argumentList)->end(); it++) { SyntaxLabeledExpr* theElement = *it; delete theElement; }; delete (((*yyvaluep).argumentList)); }
-#line 1726 "./grammar.tab.c"
+#line 1701 "./grammar.tab.c"
         break;
 
     case YYSYMBOL_constant: /* constant  */
-#line 140 "./grammar.y"
+#line 144 "./grammar.y"
             { delete (((*yyvaluep).syntaxElement)); }
-#line 1732 "./grammar.tab.c"
+#line 1707 "./grammar.tab.c"
         break;
 
       default:
@@ -2021,29 +1996,29 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* prog: END_OF_INPUT  */
-#line 235 "./grammar.y"
+#line 240 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison encountered end_of_input; ignored\n");
 #endif
                     return 0;
                 }
-#line 2032 "./grammar.tab.c"
+#line 2007 "./grammar.tab.c"
     break;
 
   case 3: /* prog: '\n'  */
-#line 242 "./grammar.y"
+#line 247 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison encountered newline; ignored\n");
 #endif
                     return 0;
                 }
-#line 2043 "./grammar.tab.c"
+#line 2018 "./grammar.tab.c"
     break;
 
   case 4: /* prog: stmt_or_expr '\n'  */
-#line 249 "./grammar.y"
+#line 254 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison trying to execute statement or expression\n");
@@ -2052,11 +2027,11 @@ yyreduce:
                     delete (yyvsp[-1].syntaxElement);
                     return rv;
                 }
-#line 2056 "./grammar.tab.c"
+#line 2031 "./grammar.tab.c"
     break;
 
   case 5: /* prog: stmt_or_expr ';'  */
-#line 258 "./grammar.y"
+#line 263 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison trying to execute statement or expression\n");
@@ -2065,11 +2040,11 @@ yyreduce:
                     delete (yyvsp[-1].syntaxElement);
                     return rv;
                 }
-#line 2069 "./grammar.tab.c"
+#line 2044 "./grammar.tab.c"
     break;
 
   case 6: /* prog: declaration '\n'  */
-#line 267 "./grammar.y"
+#line 272 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison trying to execute declaration\n");
@@ -2078,11 +2053,11 @@ yyreduce:
                     delete (yyvsp[-1].syntaxElement);
                     return rv;
                 }
-#line 2082 "./grammar.tab.c"
+#line 2057 "./grammar.tab.c"
     break;
 
   case 7: /* prog: declaration ';'  */
-#line 276 "./grammar.y"
+#line 281 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison trying to execute declaration\n");
@@ -2091,11 +2066,11 @@ yyreduce:
                     delete (yyvsp[-1].syntaxElement);
                     return rv;
                 }
-#line 2095 "./grammar.tab.c"
+#line 2070 "./grammar.tab.c"
     break;
 
   case 8: /* prog: '?' identifier '\n'  */
-#line 285 "./grammar.y"
+#line 290 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison trying to get help for symbol\n");
@@ -2104,11 +2079,11 @@ yyreduce:
                     delete (yyvsp[-1].string);
                     return rv;
                 }
-#line 2108 "./grammar.tab.c"
+#line 2083 "./grammar.tab.c"
     break;
 
   case 9: /* prog: '?' identifier ';'  */
-#line 294 "./grammar.y"
+#line 299 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison trying to get help for symbol\n");
@@ -2117,11 +2092,11 @@ yyreduce:
                     delete (yyvsp[-1].string);
                     return rv;
                 }
-#line 2121 "./grammar.tab.c"
+#line 2096 "./grammar.tab.c"
     break;
 
   case 10: /* prog: '?' identifier '.' identifier '\n'  */
-#line 303 "./grammar.y"
+#line 308 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison trying to get help for symbol\n");
@@ -2131,11 +2106,11 @@ yyreduce:
                     delete (yyvsp[-1].string);
                     return rv;
                 }
-#line 2135 "./grammar.tab.c"
+#line 2110 "./grammar.tab.c"
     break;
 
   case 11: /* prog: '?' identifier '.' identifier ';'  */
-#line 313 "./grammar.y"
+#line 318 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                 printf("Bison trying to get help for symbol\n");
@@ -2145,11 +2120,11 @@ yyreduce:
                 delete (yyvsp[-1].string);
                 return rv;
                 }
-#line 2149 "./grammar.tab.c"
+#line 2124 "./grammar.tab.c"
     break;
 
   case 12: /* prog: '?' functionCall '\n'  */
-#line 323 "./grammar.y"
+#line 328 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison trying to get help for function call\n");
@@ -2158,11 +2133,11 @@ yyreduce:
                     delete (yyvsp[-1].syntaxFunctionCall);
                     return rv;
                 }
-#line 2162 "./grammar.tab.c"
+#line 2137 "./grammar.tab.c"
     break;
 
   case 13: /* prog: '?' functionCall ';'  */
-#line 332 "./grammar.y"
+#line 337 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison trying to get help for function call\n");
@@ -2171,366 +2146,273 @@ yyreduce:
                     delete (yyvsp[-1].syntaxFunctionCall);
                     return rv;
                 }
-#line 2175 "./grammar.tab.c"
+#line 2150 "./grammar.tab.c"
     break;
 
   case 14: /* prog: error '\n'  */
-#line 341 "./grammar.y"
+#line 346 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison error when reading line %d position %d to line %d position %d\n", (yyloc).first_line, (yyloc).first_column, (yyloc).last_line, (yyloc).last_column);
 #endif
                     YYABORT;
                 }
-#line 2186 "./grammar.tab.c"
+#line 2161 "./grammar.tab.c"
     break;
 
   case 15: /* prog: error ';'  */
-#line 348 "./grammar.y"
+#line 353 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison error when reading line %d position %d to line %d position %d\n", (yyloc).first_line, (yyloc).first_column, (yyloc).last_line, (yyloc).last_column);
 #endif
                     YYABORT;
                 }
-#line 2197 "./grammar.tab.c"
+#line 2172 "./grammar.tab.c"
     break;
 
   case 16: /* expression: constant  */
-#line 356 "./grammar.y"
+#line 361 "./grammar.y"
                                             { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 2203 "./grammar.tab.c"
+#line 2178 "./grammar.tab.c"
     break;
 
-  case 17: /* expression: vector  */
-#line 358 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxFunctionCall("v", (yyvsp[0].argumentList)); }
-#line 2209 "./grammar.tab.c"
-    break;
-
-  case 18: /* expression: '(' expression ')'  */
-#line 360 "./grammar.y"
-                                            { (yyval.syntaxElement) = (yyvsp[-1].syntaxElement); }
-#line 2215 "./grammar.tab.c"
-    break;
-
-  case 19: /* expression: '-' expression  */
+  case 17: /* expression: PIPE_PLACEHOLDER  */
 #line 362 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxUnaryExpr(SyntaxUnaryExpr::UMinus, (yyvsp[0].syntaxElement)); }
-#line 2221 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxPipePlaceholder(); }
+#line 2184 "./grammar.tab.c"
     break;
 
-  case 20: /* expression: '+' expression  */
-#line 363 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxUnaryExpr(SyntaxUnaryExpr::UPlus, (yyvsp[0].syntaxElement)); }
-#line 2227 "./grammar.tab.c"
-    break;
-
-  case 21: /* expression: '!' expression  */
+  case 18: /* expression: vector  */
 #line 364 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxUnaryExpr(SyntaxUnaryExpr::UNot, (yyvsp[0].syntaxElement)); }
-#line 2233 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxFunctionCall("v", (yyvsp[0].argumentList)); }
+#line 2190 "./grammar.tab.c"
     break;
 
-  case 22: /* expression: AND expression  */
-#line 365 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxUnaryExpr(SyntaxUnaryExpr::UAnd, (yyvsp[0].syntaxElement)); }
-#line 2239 "./grammar.tab.c"
+  case 19: /* expression: '(' expression ')'  */
+#line 366 "./grammar.y"
+                                            { (yyval.syntaxElement) = (yyvsp[-1].syntaxElement); }
+#line 2196 "./grammar.tab.c"
     break;
 
-  case 23: /* expression: DECREMENT variable  */
-#line 367 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxDecrement( (yyvsp[0].syntaxElement), false ); }
-#line 2245 "./grammar.tab.c"
-    break;
-
-  case 24: /* expression: variable DECREMENT  */
+  case 20: /* expression: '-' expression  */
 #line 368 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxDecrement( (yyvsp[-1].syntaxElement), true ); }
-#line 2251 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxUnaryExpr(SyntaxUnaryExpr::UMinus, (yyvsp[0].syntaxElement)); }
+#line 2202 "./grammar.tab.c"
     break;
 
-  case 25: /* expression: INCREMENT variable  */
+  case 21: /* expression: '+' expression  */
 #line 369 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxIncrement( (yyvsp[0].syntaxElement), false ); }
-#line 2257 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxUnaryExpr(SyntaxUnaryExpr::UPlus, (yyvsp[0].syntaxElement)); }
+#line 2208 "./grammar.tab.c"
     break;
 
-  case 26: /* expression: variable INCREMENT  */
+  case 22: /* expression: '!' expression  */
 #line 370 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxIncrement( (yyvsp[-1].syntaxElement), true ); }
-#line 2263 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxUnaryExpr(SyntaxUnaryExpr::UNot, (yyvsp[0].syntaxElement)); }
+#line 2214 "./grammar.tab.c"
     break;
 
-  case 27: /* expression: expression ':' expression  */
-#line 372 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Range, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
-#line 2269 "./grammar.tab.c"
+  case 23: /* expression: AND expression  */
+#line 371 "./grammar.y"
+                                            { (yyval.syntaxElement) = new SyntaxUnaryExpr(SyntaxUnaryExpr::UAnd, (yyvsp[0].syntaxElement)); }
+#line 2220 "./grammar.tab.c"
     break;
 
-  case 28: /* expression: expression '+' expression  */
+  case 24: /* expression: DECREMENT expression  */
+#line 373 "./grammar.y"
+                                            { (yyval.syntaxElement) = new SyntaxDecrement( (yyvsp[0].syntaxElement), false ); }
+#line 2226 "./grammar.tab.c"
+    break;
+
+  case 25: /* expression: expression DECREMENT  */
 #line 374 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Add, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
-#line 2275 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxDecrement( (yyvsp[-1].syntaxElement), true ); }
+#line 2232 "./grammar.tab.c"
     break;
 
-  case 29: /* expression: expression '-' expression  */
+  case 26: /* expression: INCREMENT expression  */
 #line 375 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Sub, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
-#line 2281 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxIncrement( (yyvsp[0].syntaxElement), false ); }
+#line 2238 "./grammar.tab.c"
     break;
 
-  case 30: /* expression: expression '*' expression  */
+  case 27: /* expression: expression INCREMENT  */
 #line 376 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Mul, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
-#line 2287 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxIncrement( (yyvsp[-1].syntaxElement), true ); }
+#line 2244 "./grammar.tab.c"
     break;
 
-  case 31: /* expression: expression '/' expression  */
-#line 377 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Div, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
-#line 2293 "./grammar.tab.c"
-    break;
-
-  case 32: /* expression: expression '^' expression  */
+  case 28: /* expression: expression ':' expression  */
 #line 378 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Exp, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
-#line 2299 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Range, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
+#line 2250 "./grammar.tab.c"
     break;
 
-  case 33: /* expression: expression '%' expression  */
-#line 379 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Mod, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
-#line 2305 "./grammar.tab.c"
+  case 29: /* expression: expression '+' expression  */
+#line 380 "./grammar.y"
+                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Add, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
+#line 2256 "./grammar.tab.c"
     break;
 
-  case 34: /* expression: expression LT expression  */
+  case 30: /* expression: expression '-' expression  */
 #line 381 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Lt, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
-#line 2311 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Sub, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
+#line 2262 "./grammar.tab.c"
     break;
 
-  case 35: /* expression: expression LE expression  */
+  case 31: /* expression: expression '*' expression  */
 #line 382 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Le, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
-#line 2317 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Mul, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
+#line 2268 "./grammar.tab.c"
     break;
 
-  case 36: /* expression: expression EQ expression  */
+  case 32: /* expression: expression '/' expression  */
 #line 383 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Eq, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
-#line 2323 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Div, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
+#line 2274 "./grammar.tab.c"
     break;
 
-  case 37: /* expression: expression NE expression  */
+  case 33: /* expression: expression '^' expression  */
 #line 384 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Ne, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
-#line 2329 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Exp, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
+#line 2280 "./grammar.tab.c"
     break;
 
-  case 38: /* expression: expression GE expression  */
+  case 34: /* expression: expression '%' expression  */
 #line 385 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Ge, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
-#line 2335 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Mod, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
+#line 2286 "./grammar.tab.c"
     break;
 
-  case 39: /* expression: expression GT expression  */
-#line 386 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Gt, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
-#line 2341 "./grammar.tab.c"
+  case 35: /* expression: expression LT expression  */
+#line 387 "./grammar.y"
+                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Lt, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
+#line 2292 "./grammar.tab.c"
     break;
 
-  case 40: /* expression: expression AND expression  */
+  case 36: /* expression: expression LE expression  */
 #line 388 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::And, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
-#line 2347 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Le, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
+#line 2298 "./grammar.tab.c"
     break;
 
-  case 41: /* expression: expression OR expression  */
+  case 37: /* expression: expression EQ expression  */
 #line 389 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Or, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
-#line 2353 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Eq, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
+#line 2304 "./grammar.tab.c"
     break;
 
-  case 42: /* expression: expression AND2 expression  */
+  case 38: /* expression: expression NE expression  */
 #line 390 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::And2, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
-#line 2359 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Ne, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
+#line 2310 "./grammar.tab.c"
     break;
 
-  case 43: /* expression: expression OR2 expression  */
+  case 39: /* expression: expression GE expression  */
 #line 391 "./grammar.y"
-                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Or2, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
-#line 2365 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Ge, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
+#line 2316 "./grammar.tab.c"
     break;
 
-  case 44: /* expression: arrowAssign  */
-#line 393 "./grammar.y"
-                                            { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 2371 "./grammar.tab.c"
+  case 40: /* expression: expression GT expression  */
+#line 392 "./grammar.y"
+                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Gt, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
+#line 2322 "./grammar.tab.c"
     break;
 
-  case 45: /* expression: equationAssign  */
+  case 41: /* expression: expression AND expression  */
 #line 394 "./grammar.y"
-                                            { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 2377 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::And, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
+#line 2328 "./grammar.tab.c"
     break;
 
-  case 46: /* expression: tildeAssign  */
+  case 42: /* expression: expression OR expression  */
 #line 395 "./grammar.y"
-                                            { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 2383 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Or, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
+#line 2334 "./grammar.tab.c"
     break;
 
-  case 47: /* expression: workspaceAssign  */
+  case 43: /* expression: expression AND2 expression  */
 #line 396 "./grammar.y"
-                                            { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 2389 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::And2, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
+#line 2340 "./grammar.tab.c"
     break;
 
-  case 48: /* expression: referenceAssign  */
+  case 44: /* expression: expression OR2 expression  */
 #line 397 "./grammar.y"
-                                            { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 2395 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = new SyntaxBinaryExpr(SyntaxBinaryExpr::Or2, (yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
+#line 2346 "./grammar.tab.c"
     break;
 
-  case 49: /* expression: additionAssign  */
+  case 45: /* expression: expression PIPE expression  */
 #line 399 "./grammar.y"
-                                            { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 2401 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = xxpipe((yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); }
+#line 2352 "./grammar.tab.c"
     break;
 
-  case 50: /* expression: subtractionAssign  */
-#line 400 "./grammar.y"
-                                            { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 2407 "./grammar.tab.c"
-    break;
-
-  case 51: /* expression: multiplicationAssign  */
+  case 46: /* expression: arrowAssign  */
 #line 401 "./grammar.y"
                                             { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 2413 "./grammar.tab.c"
+#line 2358 "./grammar.tab.c"
     break;
 
-  case 52: /* expression: divisionAssign  */
+  case 47: /* expression: equationAssign  */
 #line 402 "./grammar.y"
                                             { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 2419 "./grammar.tab.c"
+#line 2364 "./grammar.tab.c"
     break;
 
-  case 53: /* expression: functionCall  */
-#line 404 "./grammar.y"
-                                            { (yyval.syntaxElement) = (yyvsp[0].syntaxFunctionCall); }
-#line 2425 "./grammar.tab.c"
-    break;
-
-  case 54: /* expression: variable  */
-#line 406 "./grammar.y"
+  case 48: /* expression: tildeAssign  */
+#line 403 "./grammar.y"
                                             { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 2431 "./grammar.tab.c"
+#line 2370 "./grammar.tab.c"
     break;
 
-  case 55: /* arrowAssign: expression ARROW_ASSIGN expression  */
+  case 49: /* expression: workspaceAssign  */
+#line 404 "./grammar.y"
+                                            { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
+#line 2376 "./grammar.tab.c"
+    break;
+
+  case 50: /* expression: referenceAssign  */
+#line 405 "./grammar.y"
+                                            { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
+#line 2382 "./grammar.tab.c"
+    break;
+
+  case 51: /* expression: additionAssign  */
+#line 407 "./grammar.y"
+                                            { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
+#line 2388 "./grammar.tab.c"
+    break;
+
+  case 52: /* expression: subtractionAssign  */
+#line 408 "./grammar.y"
+                                            { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
+#line 2394 "./grammar.tab.c"
+    break;
+
+  case 53: /* expression: multiplicationAssign  */
+#line 409 "./grammar.y"
+                                            { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
+#line 2400 "./grammar.tab.c"
+    break;
+
+  case 54: /* expression: divisionAssign  */
 #line 410 "./grammar.y"
-                    { 
-#ifdef DEBUG_BISON_FLEX
-                        printf("Parser inserting arrow assignment (ARROW_ASSIGN) in syntax tree\n");
-#endif
-                        (yyval.syntaxElement) = new SyntaxConstantAssignment((yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement));
-                    }
-#line 2442 "./grammar.tab.c"
+                                            { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
+#line 2406 "./grammar.tab.c"
     break;
 
-  case 56: /* tildeAssign: expression TILDE_ASSIGN expression  */
-#line 419 "./grammar.y"
-                    {
-#ifdef DEBUG_BISON_FLEX
-                        printf("Parser inserting tilde assignment (TILDE_ASSIGN) in syntax tree\n");
-#endif
-                        (yyval.syntaxElement) = new SyntaxStochasticAssignment((yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement));
-                    }
-#line 2453 "./grammar.tab.c"
+  case 55: /* expression: functionCall  */
+#line 412 "./grammar.y"
+                                            { (yyval.syntaxElement) = (yyvsp[0].syntaxFunctionCall); }
+#line 2412 "./grammar.tab.c"
     break;
 
-  case 57: /* equationAssign: expression EQUATION_ASSIGN expression  */
-#line 428 "./grammar.y"
-                    {
-#ifdef DEBUG_BISON_FLEX
-                        printf("Parser inserting equation assignment (EQUATION_ASSIGN) in syntax tree\n");
-#endif
-                        (yyval.syntaxElement) = new SyntaxDeterministicAssignment((yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); 
-                    }
-#line 2464 "./grammar.tab.c"
-    break;
-
-  case 58: /* workspaceAssign: expression EQUAL expression  */
-#line 437 "./grammar.y"
-                    {
-#ifdef DEBUG_BISON_FLEX
-                        printf("Parser inserting workspace assignment (WORKSPACE_ASSIGN) in syntax tree\n");
-#endif
-                        (yyval.syntaxElement) = new SyntaxWorkspaceVariableAssignment((yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement));
-                    }
-#line 2475 "./grammar.tab.c"
-    break;
-
-  case 59: /* referenceAssign: expression REFERENCE_ASSIGN expression  */
-#line 446 "./grammar.y"
-                    {
-#ifdef DEBUG_BISON_FLEX
-                        printf("Parser inserting reference assignment (REFERENCE_ASSIGN) in syntax tree\n");
-#endif
-                        (yyval.syntaxElement) = new SyntaxReferenceAssignment((yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement));
-                    }
-#line 2486 "./grammar.tab.c"
-    break;
-
-  case 60: /* additionAssign: expression ADDITION_ASSIGN expression  */
-#line 455 "./grammar.y"
-                    {
-#ifdef DEBUG_BISON_FLEX
-                        printf("Parser inserting addition assignment (ADDITION_ASSIGN) in syntax tree\n");
-#endif
-                        (yyval.syntaxElement) = new SyntaxAdditionAssignment((yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); 
-                    }
-#line 2497 "./grammar.tab.c"
-    break;
-
-  case 61: /* subtractionAssign: expression SUBTRACTION_ASSIGN expression  */
-#line 464 "./grammar.y"
-                        {
-#ifdef DEBUG_BISON_FLEX
-                            printf("Parser inserting subtraction assignment (SUBTRACTION_ASSIGN) in syntax tree\n");
-#endif
-                            (yyval.syntaxElement) = new SyntaxSubtractionAssignment((yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); 
-                        }
-#line 2508 "./grammar.tab.c"
-    break;
-
-  case 62: /* multiplicationAssign: expression MULTIPLICATION_ASSIGN expression  */
-#line 473 "./grammar.y"
-                            {
-#ifdef DEBUG_BISON_FLEX
-                                printf("Parser inserting multiplication assignment (MULTIPLICATION_ASSIGN) in syntax tree\n");
-#endif
-                                (yyval.syntaxElement) = new SyntaxMultiplicationAssignment((yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); 
-                            }
-#line 2519 "./grammar.tab.c"
-    break;
-
-  case 63: /* divisionAssign: expression DIVISION_ASSIGN expression  */
-#line 482 "./grammar.y"
-                    {
-#ifdef DEBUG_BISON_FLEX
-                        printf("Parser inserting division assignment (DIVISION_ASSIGN) in syntax tree\n");
-#endif
-                        (yyval.syntaxElement) = new SyntaxDivisionAssignment((yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); 
-                    }
-#line 2530 "./grammar.tab.c"
-    break;
-
-  case 64: /* variable: identifier optElements  */
-#line 491 "./grammar.y"
+  case 56: /* expression: identifier optElements  */
+#line 415 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Parser inserting variable (NAMED_VAR) in syntax tree\n");
@@ -2543,116 +2425,215 @@ yyreduce:
                     delete (yyvsp[-1].string);
                     delete (yyvsp[0].syntaxElementList);
                 }
-#line 2547 "./grammar.tab.c"
+#line 2429 "./grammar.tab.c"
     break;
 
-  case 65: /* variable: fxnCall '[' expression ']' optElements  */
-#line 504 "./grammar.y"
+  case 57: /* expression: fxnCall elementList  */
+#line 428 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Parser inserting variable (FUNCTION_VAR) in syntax tree\n");
 #endif
-                    (yyval.syntaxElement) = new SyntaxIndexOperation((yyvsp[-4].syntaxFunctionCall),(yyvsp[-2].syntaxElement));
-                    for (std::list<SyntaxElement*>::iterator it=(yyvsp[0].syntaxElementList)->begin(); it!=(yyvsp[0].syntaxElementList)->end(); ++it)
+                    (yyval.syntaxElement) = (yyvsp[-1].syntaxFunctionCall);
+                    for (auto& element: *(yyvsp[0].syntaxElementList))
                     {
-                        (yyval.syntaxElement) = new SyntaxIndexOperation((yyval.syntaxElement),*it);
+                        (yyval.syntaxElement) = new SyntaxIndexOperation((yyval.syntaxElement), element);
                     }
                     delete (yyvsp[0].syntaxElementList);
                 }
-#line 2563 "./grammar.tab.c"
+#line 2445 "./grammar.tab.c"
     break;
 
-  case 66: /* variable: '(' expression ')' '[' expression ']' optElements  */
-#line 516 "./grammar.y"
+  case 58: /* expression: '(' expression ')' elementList  */
+#line 440 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Parser inserting variable (EXPRESSION_VAR) in syntax tree\n");
 #endif
-                    (yyval.syntaxElement) = new SyntaxIndexOperation((yyvsp[-5].syntaxElement),(yyvsp[-2].syntaxElement));
-                    for (std::list<SyntaxElement*>::iterator it=(yyvsp[0].syntaxElementList)->begin(); it!=(yyvsp[0].syntaxElementList)->end(); ++it)
+                    (yyval.syntaxElement) = (yyvsp[-2].syntaxElement);
+                    for (auto& element: *(yyvsp[0].syntaxElementList))
                     {
-                        (yyval.syntaxElement) = new SyntaxIndexOperation((yyval.syntaxElement),*it);
+                        (yyval.syntaxElement) = new SyntaxIndexOperation((yyval.syntaxElement), element);
                     }
                     delete (yyvsp[0].syntaxElementList);
                 }
-#line 2579 "./grammar.tab.c"
+#line 2461 "./grammar.tab.c"
     break;
 
-  case 67: /* variable: variable '.' fxnCall '[' expression ']' optElements  */
-#line 528 "./grammar.y"
+  case 59: /* expression: expression '.' fxnCall elementList  */
+#line 452 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Parser inserting member variable (FUNCTION_VAR) in syntax tree\n");
 #endif
-                    (yyvsp[-4].syntaxFunctionCall)->setBaseVariable((yyvsp[-6].syntaxElement));
-                    (yyval.syntaxElement) = new SyntaxIndexOperation((yyvsp[-4].syntaxFunctionCall),(yyvsp[-2].syntaxElement));
-                    for (std::list<SyntaxElement*>::iterator it=(yyvsp[0].syntaxElementList)->begin(); it!=(yyvsp[0].syntaxElementList)->end(); ++it)
+                    (yyvsp[-1].syntaxFunctionCall)->setBaseVariable((yyvsp[-3].syntaxElement));
+                    (yyval.syntaxElement) = (yyvsp[-1].syntaxFunctionCall);
+                    for (auto& element: *(yyvsp[0].syntaxElementList))
                     {
-                        (yyval.syntaxElement) = new SyntaxIndexOperation((yyval.syntaxElement),*it);
+                        (yyval.syntaxElement) = new SyntaxIndexOperation((yyval.syntaxElement), element);
                     }
                     delete (yyvsp[0].syntaxElementList);
                 }
-#line 2596 "./grammar.tab.c"
+#line 2478 "./grammar.tab.c"
     break;
 
-  case 68: /* optElements: %empty  */
-#line 542 "./grammar.y"
-                                                { (yyval.syntaxElementList) = new std::list<SyntaxElement*>(); }
-#line 2602 "./grammar.tab.c"
+  case 60: /* arrowAssign: expression ARROW_ASSIGN expression  */
+#line 467 "./grammar.y"
+                    { 
+#ifdef DEBUG_BISON_FLEX
+                        printf("Parser inserting arrow assignment (ARROW_ASSIGN) in syntax tree\n");
+#endif
+                        (yyval.syntaxElement) = new SyntaxConstantAssignment((yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement));
+                    }
+#line 2489 "./grammar.tab.c"
     break;
 
-  case 69: /* optElements: elementList  */
-#line 543 "./grammar.y"
-                                                { (yyval.syntaxElementList) = (yyvsp[0].syntaxElementList); }
-#line 2608 "./grammar.tab.c"
+  case 61: /* tildeAssign: expression TILDE_ASSIGN expression  */
+#line 476 "./grammar.y"
+                    {
+#ifdef DEBUG_BISON_FLEX
+                        printf("Parser inserting tilde assignment (TILDE_ASSIGN) in syntax tree\n");
+#endif
+                        (yyval.syntaxElement) = new SyntaxStochasticAssignment((yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement));
+                    }
+#line 2500 "./grammar.tab.c"
     break;
 
-  case 70: /* elementList: '[' expression ']'  */
-#line 546 "./grammar.y"
-                                                { (yyval.syntaxElementList) = new std::list<SyntaxElement*>(1, (yyvsp[-1].syntaxElement)); }
-#line 2614 "./grammar.tab.c"
+  case 62: /* equationAssign: expression EQUATION_ASSIGN expression  */
+#line 485 "./grammar.y"
+                    {
+#ifdef DEBUG_BISON_FLEX
+                        printf("Parser inserting equation assignment (EQUATION_ASSIGN) in syntax tree\n");
+#endif
+                        (yyval.syntaxElement) = new SyntaxDeterministicAssignment((yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); 
+                    }
+#line 2511 "./grammar.tab.c"
     break;
 
-  case 71: /* elementList: '[' ']'  */
+  case 63: /* workspaceAssign: expression EQUAL expression  */
+#line 494 "./grammar.y"
+                    {
+#ifdef DEBUG_BISON_FLEX
+                        printf("Parser inserting workspace assignment (WORKSPACE_ASSIGN) in syntax tree\n");
+#endif
+                        (yyval.syntaxElement) = new SyntaxWorkspaceVariableAssignment((yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement));
+                    }
+#line 2522 "./grammar.tab.c"
+    break;
+
+  case 64: /* referenceAssign: expression REFERENCE_ASSIGN expression  */
+#line 503 "./grammar.y"
+                    {
+#ifdef DEBUG_BISON_FLEX
+                        printf("Parser inserting reference assignment (REFERENCE_ASSIGN) in syntax tree\n");
+#endif
+                        (yyval.syntaxElement) = new SyntaxReferenceAssignment((yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement));
+                    }
+#line 2533 "./grammar.tab.c"
+    break;
+
+  case 65: /* additionAssign: expression ADDITION_ASSIGN expression  */
+#line 512 "./grammar.y"
+                    {
+#ifdef DEBUG_BISON_FLEX
+                        printf("Parser inserting addition assignment (ADDITION_ASSIGN) in syntax tree\n");
+#endif
+                        (yyval.syntaxElement) = new SyntaxAdditionAssignment((yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); 
+                    }
+#line 2544 "./grammar.tab.c"
+    break;
+
+  case 66: /* subtractionAssign: expression SUBTRACTION_ASSIGN expression  */
+#line 521 "./grammar.y"
+                        {
+#ifdef DEBUG_BISON_FLEX
+                            printf("Parser inserting subtraction assignment (SUBTRACTION_ASSIGN) in syntax tree\n");
+#endif
+                            (yyval.syntaxElement) = new SyntaxSubtractionAssignment((yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); 
+                        }
+#line 2555 "./grammar.tab.c"
+    break;
+
+  case 67: /* multiplicationAssign: expression MULTIPLICATION_ASSIGN expression  */
+#line 530 "./grammar.y"
+                            {
+#ifdef DEBUG_BISON_FLEX
+                                printf("Parser inserting multiplication assignment (MULTIPLICATION_ASSIGN) in syntax tree\n");
+#endif
+                                (yyval.syntaxElement) = new SyntaxMultiplicationAssignment((yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); 
+                            }
+#line 2566 "./grammar.tab.c"
+    break;
+
+  case 68: /* divisionAssign: expression DIVISION_ASSIGN expression  */
+#line 539 "./grammar.y"
+                    {
+#ifdef DEBUG_BISON_FLEX
+                        printf("Parser inserting division assignment (DIVISION_ASSIGN) in syntax tree\n");
+#endif
+                        (yyval.syntaxElement) = new SyntaxDivisionAssignment((yyvsp[-2].syntaxElement), (yyvsp[0].syntaxElement)); 
+                    }
+#line 2577 "./grammar.tab.c"
+    break;
+
+  case 69: /* optElements: %empty  */
 #line 547 "./grammar.y"
                                                 { (yyval.syntaxElementList) = new std::list<SyntaxElement*>(); }
-#line 2620 "./grammar.tab.c"
+#line 2583 "./grammar.tab.c"
     break;
 
-  case 72: /* elementList: elementList '[' expression ']'  */
+  case 70: /* optElements: elementList  */
 #line 548 "./grammar.y"
-                                                { (yyvsp[-3].syntaxElementList)->push_back((yyvsp[-1].syntaxElement)); (yyval.syntaxElementList) = (yyvsp[-3].syntaxElementList); }
-#line 2626 "./grammar.tab.c"
+                                                { (yyval.syntaxElementList) = (yyvsp[0].syntaxElementList); }
+#line 2589 "./grammar.tab.c"
     break;
 
-  case 73: /* elementList: elementList '[' ']'  */
-#line 549 "./grammar.y"
-                                                { (yyvsp[-2].syntaxElementList)->push_back( NULL ); (yyval.syntaxElementList) = (yyvsp[-2].syntaxElementList); }
-#line 2632 "./grammar.tab.c"
+  case 71: /* elementList: '[' expression ']'  */
+#line 551 "./grammar.y"
+                                                { (yyval.syntaxElementList) = new std::list<SyntaxElement*>(1, (yyvsp[-1].syntaxElement)); }
+#line 2595 "./grammar.tab.c"
     break;
 
-  case 74: /* fxnCall: identifier '(' optArguments ')'  */
+  case 72: /* elementList: '[' ']'  */
+#line 552 "./grammar.y"
+                                                { (yyval.syntaxElementList) = new std::list<SyntaxElement*>(); }
+#line 2601 "./grammar.tab.c"
+    break;
+
+  case 73: /* elementList: elementList '[' expression ']'  */
 #line 553 "./grammar.y"
+                                                { (yyvsp[-3].syntaxElementList)->push_back((yyvsp[-1].syntaxElement)); (yyval.syntaxElementList) = (yyvsp[-3].syntaxElementList); }
+#line 2607 "./grammar.tab.c"
+    break;
+
+  case 74: /* elementList: elementList '[' ']'  */
+#line 554 "./grammar.y"
+                                                { (yyvsp[-2].syntaxElementList)->push_back( NULL ); (yyval.syntaxElementList) = (yyvsp[-2].syntaxElementList); }
+#line 2613 "./grammar.tab.c"
+    break;
+
+  case 75: /* fxnCall: identifier '(' optArguments ')'  */
+#line 558 "./grammar.y"
                 {
                     (yyval.syntaxFunctionCall) = new SyntaxFunctionCall(*(yyvsp[-3].string), (yyvsp[-1].argumentList));
                     delete (yyvsp[-3].string);
                 }
-#line 2641 "./grammar.tab.c"
+#line 2622 "./grammar.tab.c"
     break;
 
-  case 75: /* functionCall: fxnCall  */
-#line 561 "./grammar.y"
+  case 76: /* functionCall: fxnCall  */
+#line 565 "./grammar.y"
                     {
 #ifdef DEBUG_BISON_FLEX
                         printf("Parser inserting function call in syntax tree\n");
 #endif
                         (yyval.syntaxFunctionCall) = (yyvsp[0].syntaxFunctionCall);
                     }
-#line 2652 "./grammar.tab.c"
+#line 2633 "./grammar.tab.c"
     break;
 
-  case 76: /* functionCall: variable '.' fxnCall  */
-#line 568 "./grammar.y"
+  case 77: /* functionCall: expression '.' fxnCall  */
+#line 572 "./grammar.y"
                     {
 #ifdef DEBUG_BISON_FLEX
                         printf("Parser inserting member call in syntax tree\n");
@@ -2660,58 +2641,46 @@ yyreduce:
                         (yyvsp[0].syntaxFunctionCall)->setBaseVariable((yyvsp[-2].syntaxElement));
                         (yyval.syntaxFunctionCall) = (yyvsp[0].syntaxFunctionCall);
                     }
-#line 2664 "./grammar.tab.c"
-    break;
-
-  case 77: /* functionCall: functionCall '.' fxnCall  */
-#line 576 "./grammar.y"
-                    {
-#ifdef DEBUG_BISON_FLEX
-                        printf("Parser inserting member call in syntax tree\n");
-#endif
-                        (yyvsp[0].syntaxFunctionCall)->setBaseVariable((yyvsp[-2].syntaxFunctionCall));
-                        (yyval.syntaxFunctionCall) = (yyvsp[0].syntaxFunctionCall);
-                    }
-#line 2676 "./grammar.tab.c"
+#line 2645 "./grammar.tab.c"
     break;
 
   case 78: /* optArguments: %empty  */
-#line 586 "./grammar.y"
+#line 581 "./grammar.y"
                                             { (yyval.argumentList) = new std::list<SyntaxLabeledExpr*>(); }
-#line 2682 "./grammar.tab.c"
+#line 2651 "./grammar.tab.c"
     break;
 
   case 79: /* optArguments: argumentList  */
-#line 587 "./grammar.y"
+#line 582 "./grammar.y"
                                             { (yyval.argumentList) = (yyvsp[0].argumentList); }
-#line 2688 "./grammar.tab.c"
+#line 2657 "./grammar.tab.c"
     break;
 
   case 80: /* argumentList: argument  */
-#line 590 "./grammar.y"
+#line 585 "./grammar.y"
                                                 { (yyval.argumentList) = new std::list<SyntaxLabeledExpr*>(1,(yyvsp[0].syntaxLabeledExpr)); }
-#line 2694 "./grammar.tab.c"
+#line 2663 "./grammar.tab.c"
     break;
 
   case 81: /* argumentList: argumentList ',' argument  */
-#line 591 "./grammar.y"
+#line 586 "./grammar.y"
                                                 { (yyvsp[-2].argumentList)->push_back((yyvsp[0].syntaxLabeledExpr)); (yyval.argumentList) = (yyvsp[-2].argumentList); }
-#line 2700 "./grammar.tab.c"
+#line 2669 "./grammar.tab.c"
     break;
 
   case 82: /* argument: expression  */
-#line 595 "./grammar.y"
+#line 590 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Parser inserting unlabeled argument in syntax tree\n");
 #endif
                     (yyval.syntaxLabeledExpr) = new SyntaxLabeledExpr( "", (yyvsp[0].syntaxElement));
                 }
-#line 2711 "./grammar.tab.c"
+#line 2680 "./grammar.tab.c"
     break;
 
   case 83: /* argument: identifier EQUAL expression  */
-#line 602 "./grammar.y"
+#line 597 "./grammar.y"
                 { 
 #ifdef DEBUG_BISON_FLEX
                     printf("Parser inserting labeled argument in syntax tree\n");
@@ -2719,11 +2688,11 @@ yyreduce:
                     (yyval.syntaxLabeledExpr) = new SyntaxLabeledExpr(*(yyvsp[-2].string), (yyvsp[0].syntaxElement));
                     delete (yyvsp[-2].string);
                 }
-#line 2723 "./grammar.tab.c"
+#line 2692 "./grammar.tab.c"
     break;
 
   case 84: /* functionDef: FUNCTION identifier '(' optFormals ')' stmts  */
-#line 612 "./grammar.y"
+#line 607 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Parser inserting function definition in syntax tree\n");
@@ -2731,11 +2700,11 @@ yyreduce:
                     (yyval.syntaxElement) = new SyntaxFunctionDef("", *(yyvsp[-4].string), (yyvsp[-2].formalList), (yyvsp[0].syntaxElementList));
                     delete (yyvsp[-4].string);
                 }
-#line 2735 "./grammar.tab.c"
+#line 2704 "./grammar.tab.c"
     break;
 
   case 85: /* functionDef: FUNCTION identifier optDims identifier '(' optFormals ')' stmts  */
-#line 621 "./grammar.y"
+#line 616 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Parser inserting typed function definition in syntax tree\n");
@@ -2746,11 +2715,11 @@ yyreduce:
                     delete (yyvsp[-5].string);
                     delete (yyvsp[-4].string);
                 }
-#line 2750 "./grammar.tab.c"
+#line 2719 "./grammar.tab.c"
     break;
 
   case 86: /* procedureDef: PROCEDURE identifier '(' optFormals ')' stmts  */
-#line 634 "./grammar.y"
+#line 629 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Parser inserting procedure definition in syntax tree\n");
@@ -2758,11 +2727,11 @@ yyreduce:
                     (yyval.syntaxElement) = new SyntaxFunctionDef("", *(yyvsp[-4].string), (yyvsp[-2].formalList), (yyvsp[0].syntaxElementList), true);
                     delete (yyvsp[-4].string);
                 }
-#line 2762 "./grammar.tab.c"
+#line 2731 "./grammar.tab.c"
     break;
 
   case 87: /* procedureDef: PROCEDURE identifier optDims identifier '(' optFormals ')' stmts  */
-#line 643 "./grammar.y"
+#line 638 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Parser inserting typed procedure definition in syntax tree\n");
@@ -2773,35 +2742,35 @@ yyreduce:
                     delete (yyvsp[-5].string);
                     delete (yyvsp[-4].string);
                 }
-#line 2777 "./grammar.tab.c"
+#line 2746 "./grammar.tab.c"
     break;
 
   case 88: /* optFormals: %empty  */
-#line 655 "./grammar.y"
+#line 650 "./grammar.y"
                                         { (yyval.formalList) = new std::list<SyntaxFormal*>(); }
-#line 2783 "./grammar.tab.c"
+#line 2752 "./grammar.tab.c"
     break;
 
   case 89: /* optFormals: formalList  */
-#line 656 "./grammar.y"
+#line 651 "./grammar.y"
                                         { (yyval.formalList) = (yyvsp[0].formalList); }
-#line 2789 "./grammar.tab.c"
+#line 2758 "./grammar.tab.c"
     break;
 
   case 90: /* formalList: formal  */
-#line 659 "./grammar.y"
+#line 654 "./grammar.y"
                                         { (yyval.formalList) = new std::list<SyntaxFormal*>(1, (yyvsp[0].syntaxFormal)); }
-#line 2795 "./grammar.tab.c"
+#line 2764 "./grammar.tab.c"
     break;
 
   case 91: /* formalList: formalList ',' formal  */
-#line 660 "./grammar.y"
+#line 655 "./grammar.y"
                                         { (yyvsp[-2].formalList)->push_back((yyvsp[0].syntaxFormal)); (yyval.formalList) = (yyvsp[-2].formalList); }
-#line 2801 "./grammar.tab.c"
+#line 2770 "./grammar.tab.c"
     break;
 
   case 92: /* formal: identifier  */
-#line 664 "./grammar.y"
+#line 659 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Inserting labeled formal argument without default in syntax tree\n");
@@ -2809,11 +2778,11 @@ yyreduce:
                     (yyval.syntaxFormal) = new SyntaxFormal(*(yyvsp[0].string), NULL );
                     delete (yyvsp[0].string);
                 }
-#line 2813 "./grammar.tab.c"
+#line 2782 "./grammar.tab.c"
     break;
 
   case 93: /* formal: identifier EQUAL expression  */
-#line 672 "./grammar.y"
+#line 667 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Inserting labeled formal argument with default in syntax tree\n");
@@ -2821,11 +2790,11 @@ yyreduce:
                     (yyval.syntaxFormal) = new SyntaxFormal(*(yyvsp[-2].string), (yyvsp[0].syntaxElement));
                     delete (yyvsp[-2].string);
                 }
-#line 2825 "./grammar.tab.c"
+#line 2794 "./grammar.tab.c"
     break;
 
   case 94: /* formal: typeSpec identifier  */
-#line 680 "./grammar.y"
+#line 675 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Inserting typed labeled formal argument without default in syntax tree\n");
@@ -2834,11 +2803,11 @@ yyreduce:
                     delete (yyvsp[-1].string);
                     delete (yyvsp[0].string);
                 }
-#line 2838 "./grammar.tab.c"
+#line 2807 "./grammar.tab.c"
     break;
 
   case 95: /* formal: typeSpec identifier EQUAL expression  */
-#line 689 "./grammar.y"
+#line 684 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Inserting typed labeled formal argument with default in syntax tree\n");
@@ -2847,183 +2816,183 @@ yyreduce:
                     delete (yyvsp[-3].string);
                     delete (yyvsp[-2].string);
                 }
-#line 2851 "./grammar.tab.c"
+#line 2820 "./grammar.tab.c"
     break;
 
   case 96: /* typeSpec: identifier optDims  */
-#line 699 "./grammar.y"
+#line 694 "./grammar.y"
                                                         { (yyvsp[-1].string)->append(*((yyvsp[0].string))); delete (yyvsp[0].string); (yyval.string) = (yyvsp[-1].string); }
-#line 2857 "./grammar.tab.c"
+#line 2826 "./grammar.tab.c"
     break;
 
   case 97: /* typeSpec: MOD_CONST identifier optDims  */
-#line 700 "./grammar.y"
+#line 695 "./grammar.y"
                                                         { (yyvsp[-1].string)->append(*((yyvsp[0].string))); (yyvsp[-1].string)->insert(0, "const ");           delete (yyvsp[0].string); (yyval.string) = (yyvsp[-1].string); }
-#line 2863 "./grammar.tab.c"
+#line 2832 "./grammar.tab.c"
     break;
 
   case 98: /* typeSpec: MOD_DYNAMIC identifier optDims  */
-#line 701 "./grammar.y"
+#line 696 "./grammar.y"
                                                         { (yyvsp[-1].string)->append(*((yyvsp[0].string))); (yyvsp[-1].string)->insert(0, "dynamic ");         delete (yyvsp[0].string); (yyval.string) = (yyvsp[-1].string); }
-#line 2869 "./grammar.tab.c"
+#line 2838 "./grammar.tab.c"
     break;
 
   case 99: /* typeSpec: MOD_STOCHASTIC identifier optDims  */
-#line 702 "./grammar.y"
+#line 697 "./grammar.y"
                                                         { (yyvsp[-1].string)->append(*((yyvsp[0].string))); (yyvsp[-1].string)->insert(0, "stochastic ");      delete (yyvsp[0].string); (yyval.string) = (yyvsp[-1].string); }
-#line 2875 "./grammar.tab.c"
+#line 2844 "./grammar.tab.c"
     break;
 
   case 100: /* typeSpec: MOD_DETERMINISTIC identifier optDims  */
-#line 703 "./grammar.y"
+#line 698 "./grammar.y"
                                                         { (yyvsp[-1].string)->append(*((yyvsp[0].string))); (yyvsp[-1].string)->insert(0, "deterministic ");   delete (yyvsp[0].string); (yyval.string) = (yyvsp[-1].string); }
-#line 2881 "./grammar.tab.c"
+#line 2850 "./grammar.tab.c"
     break;
 
   case 101: /* optDims: %empty  */
-#line 706 "./grammar.y"
+#line 701 "./grammar.y"
                                             { (yyval.string) = new std::string(""); }
-#line 2887 "./grammar.tab.c"
+#line 2856 "./grammar.tab.c"
     break;
 
   case 102: /* optDims: dimList  */
-#line 707 "./grammar.y"
+#line 702 "./grammar.y"
                                             { (yyval.string) = (yyvsp[0].string); }
-#line 2893 "./grammar.tab.c"
+#line 2862 "./grammar.tab.c"
     break;
 
   case 103: /* dimList: '[' ']'  */
-#line 710 "./grammar.y"
+#line 705 "./grammar.y"
                                             { (yyval.string) = new std::string("[]"); }
-#line 2899 "./grammar.tab.c"
+#line 2868 "./grammar.tab.c"
     break;
 
   case 104: /* dimList: dimList '[' ']'  */
-#line 711 "./grammar.y"
+#line 706 "./grammar.y"
                                             { (yyvsp[-2].string)->append("[]"); (yyval.string) = (yyvsp[-2].string); }
-#line 2905 "./grammar.tab.c"
+#line 2874 "./grammar.tab.c"
     break;
 
   case 105: /* stmts: '{' stmtList '}'  */
-#line 714 "./grammar.y"
+#line 709 "./grammar.y"
                                                 { (yyval.syntaxElementList) = (yyvsp[-1].syntaxElementList); }
-#line 2911 "./grammar.tab.c"
+#line 2880 "./grammar.tab.c"
     break;
 
   case 106: /* stmts: stmt_or_expr  */
-#line 716 "./grammar.y"
+#line 711 "./grammar.y"
                 {
                     std::list<SyntaxElement*>* stmts = new std::list<SyntaxElement*>();
                     stmts->push_back((yyvsp[0].syntaxElement));
                     (yyval.syntaxElementList) = stmts;
                 }
-#line 2921 "./grammar.tab.c"
+#line 2890 "./grammar.tab.c"
     break;
 
   case 107: /* stmtList: %empty  */
-#line 723 "./grammar.y"
+#line 718 "./grammar.y"
                                             { (yyval.syntaxElementList) = new std::list<SyntaxElement*>(); }
-#line 2927 "./grammar.tab.c"
+#line 2896 "./grammar.tab.c"
     break;
 
   case 108: /* stmtList: stmt_or_expr  */
-#line 724 "./grammar.y"
+#line 719 "./grammar.y"
                                             { (yyval.syntaxElementList) = new std::list<SyntaxElement*>(1, (yyvsp[0].syntaxElement)); }
-#line 2933 "./grammar.tab.c"
+#line 2902 "./grammar.tab.c"
     break;
 
   case 109: /* stmtList: stmtList ';' stmt_or_expr  */
-#line 725 "./grammar.y"
+#line 720 "./grammar.y"
                                             { (yyvsp[-2].syntaxElementList)->push_back((yyvsp[0].syntaxElement)); (yyval.syntaxElementList) = (yyvsp[-2].syntaxElementList); }
-#line 2939 "./grammar.tab.c"
+#line 2908 "./grammar.tab.c"
     break;
 
   case 110: /* stmtList: stmtList ';'  */
-#line 726 "./grammar.y"
+#line 721 "./grammar.y"
                                             { (yyval.syntaxElementList) = (yyvsp[-1].syntaxElementList); }
-#line 2945 "./grammar.tab.c"
+#line 2914 "./grammar.tab.c"
     break;
 
   case 111: /* stmtList: stmtList '\n' stmt_or_expr  */
-#line 727 "./grammar.y"
+#line 722 "./grammar.y"
                                             { (yyvsp[-2].syntaxElementList)->push_back((yyvsp[0].syntaxElement)); (yyval.syntaxElementList) = (yyvsp[-2].syntaxElementList); }
-#line 2951 "./grammar.tab.c"
+#line 2920 "./grammar.tab.c"
     break;
 
   case 112: /* stmtList: stmtList '\n'  */
-#line 728 "./grammar.y"
+#line 723 "./grammar.y"
                                             { (yyval.syntaxElementList) = (yyvsp[-1].syntaxElementList); }
-#line 2957 "./grammar.tab.c"
+#line 2926 "./grammar.tab.c"
     break;
 
   case 113: /* statement: ifStatement  */
-#line 731 "./grammar.y"
+#line 726 "./grammar.y"
                                         { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 2963 "./grammar.tab.c"
+#line 2932 "./grammar.tab.c"
     break;
 
   case 114: /* statement: forStatement  */
-#line 732 "./grammar.y"
+#line 727 "./grammar.y"
                                         { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 2969 "./grammar.tab.c"
+#line 2938 "./grammar.tab.c"
     break;
 
   case 115: /* statement: whileStatement  */
-#line 733 "./grammar.y"
+#line 728 "./grammar.y"
                                         { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 2975 "./grammar.tab.c"
+#line 2944 "./grammar.tab.c"
     break;
 
   case 116: /* statement: nextStatement  */
-#line 734 "./grammar.y"
+#line 729 "./grammar.y"
                                         { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 2981 "./grammar.tab.c"
+#line 2950 "./grammar.tab.c"
     break;
 
   case 117: /* statement: breakStatement  */
-#line 735 "./grammar.y"
+#line 730 "./grammar.y"
                                         { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 2987 "./grammar.tab.c"
+#line 2956 "./grammar.tab.c"
     break;
 
   case 118: /* statement: returnStatement  */
-#line 736 "./grammar.y"
+#line 731 "./grammar.y"
                                         { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 2993 "./grammar.tab.c"
+#line 2962 "./grammar.tab.c"
     break;
 
   case 119: /* stmt_or_expr: statement  */
-#line 739 "./grammar.y"
+#line 734 "./grammar.y"
                                         { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 2999 "./grammar.tab.c"
+#line 2968 "./grammar.tab.c"
     break;
 
   case 120: /* stmt_or_expr: expression  */
-#line 740 "./grammar.y"
+#line 735 "./grammar.y"
                                         { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 3005 "./grammar.tab.c"
+#line 2974 "./grammar.tab.c"
     break;
 
   case 121: /* declaration: classDef  */
-#line 743 "./grammar.y"
+#line 738 "./grammar.y"
                                         { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 3011 "./grammar.tab.c"
+#line 2980 "./grammar.tab.c"
     break;
 
   case 122: /* declaration: functionDef  */
-#line 744 "./grammar.y"
+#line 739 "./grammar.y"
                                         { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 3017 "./grammar.tab.c"
+#line 2986 "./grammar.tab.c"
     break;
 
   case 123: /* declaration: procedureDef  */
-#line 745 "./grammar.y"
+#line 740 "./grammar.y"
                                         { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 3023 "./grammar.tab.c"
+#line 2992 "./grammar.tab.c"
     break;
 
   case 124: /* declaration: identifier optElements identifier  */
-#line 747 "./grammar.y"
+#line 742 "./grammar.y"
                     {
 #ifdef DEBUG_BISON_FLEX
                         printf("Parser inserting variable declaration in syntax tree\n");
@@ -3032,71 +3001,71 @@ yyreduce:
                         delete (yyvsp[-2].string);
                         delete (yyvsp[0].string);
                     }
-#line 3036 "./grammar.tab.c"
+#line 3005 "./grammar.tab.c"
     break;
 
   case 125: /* memberDefs: %empty  */
-#line 757 "./grammar.y"
+#line 752 "./grammar.y"
                                                 { (yyval.syntaxElementList) = new std::list<SyntaxElement*>(); }
-#line 3042 "./grammar.tab.c"
+#line 3011 "./grammar.tab.c"
     break;
 
   case 126: /* memberDefs: memberDef  */
-#line 758 "./grammar.y"
+#line 753 "./grammar.y"
                                                 { (yyval.syntaxElementList) = new std::list<SyntaxElement*>(1, (yyvsp[0].syntaxElement)); }
-#line 3048 "./grammar.tab.c"
+#line 3017 "./grammar.tab.c"
     break;
 
   case 127: /* memberDefs: memberDefs ';' memberDef  */
-#line 759 "./grammar.y"
+#line 754 "./grammar.y"
                                                 { (yyvsp[-2].syntaxElementList)->push_back((yyvsp[0].syntaxElement)); (yyval.syntaxElementList) = (yyvsp[-2].syntaxElementList); }
-#line 3054 "./grammar.tab.c"
+#line 3023 "./grammar.tab.c"
     break;
 
   case 128: /* memberDefs: memberDefs ';'  */
-#line 760 "./grammar.y"
+#line 755 "./grammar.y"
                                                 { (yyval.syntaxElementList) = (yyvsp[-1].syntaxElementList); }
-#line 3060 "./grammar.tab.c"
+#line 3029 "./grammar.tab.c"
     break;
 
   case 129: /* memberDefs: memberDefs '\n' memberDef  */
-#line 761 "./grammar.y"
+#line 756 "./grammar.y"
                                                 { (yyvsp[-2].syntaxElementList)->push_back((yyvsp[0].syntaxElement)); (yyval.syntaxElementList) = (yyvsp[-2].syntaxElementList); }
-#line 3066 "./grammar.tab.c"
+#line 3035 "./grammar.tab.c"
     break;
 
   case 130: /* memberDefs: memberDefs '\n'  */
-#line 762 "./grammar.y"
+#line 757 "./grammar.y"
                                                 { (yyval.syntaxElementList) = (yyvsp[-1].syntaxElementList); }
-#line 3072 "./grammar.tab.c"
+#line 3041 "./grammar.tab.c"
     break;
 
   case 131: /* memberDef: formal  */
-#line 765 "./grammar.y"
+#line 760 "./grammar.y"
                                     { (yyval.syntaxElement) = (yyvsp[0].syntaxFormal); }
-#line 3078 "./grammar.tab.c"
+#line 3047 "./grammar.tab.c"
     break;
 
   case 132: /* memberDef: PROTECTED formal  */
-#line 766 "./grammar.y"
+#line 761 "./grammar.y"
                                     { (yyvsp[0].syntaxFormal)->setIsProtected(); (yyval.syntaxElement) = (yyvsp[0].syntaxFormal); }
-#line 3084 "./grammar.tab.c"
+#line 3053 "./grammar.tab.c"
     break;
 
   case 133: /* memberDef: functionDef  */
-#line 767 "./grammar.y"
+#line 762 "./grammar.y"
                                     { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 3090 "./grammar.tab.c"
+#line 3059 "./grammar.tab.c"
     break;
 
   case 134: /* memberDef: procedureDef  */
-#line 768 "./grammar.y"
+#line 763 "./grammar.y"
                                     { (yyval.syntaxElement) = (yyvsp[0].syntaxElement); }
-#line 3096 "./grammar.tab.c"
+#line 3065 "./grammar.tab.c"
     break;
 
   case 135: /* classDef: CLASS identifier ':' identifier '{' memberDefs '}'  */
-#line 772 "./grammar.y"
+#line 767 "./grammar.y"
                 {
 #ifdef DEBUG_BISON_FLEX
                 printf("Parser inserting class definition (CLASS_DEF) in syntax tree\n");
@@ -3105,137 +3074,137 @@ yyreduce:
                     delete (yyvsp[-5].string);
                     delete (yyvsp[-3].string);
                 }
-#line 3109 "./grammar.tab.c"
+#line 3078 "./grammar.tab.c"
     break;
 
   case 136: /* ifStatement: IF cond stmts  */
-#line 782 "./grammar.y"
+#line 777 "./grammar.y"
                                             { (yyval.syntaxElement) = new SyntaxStatement(SyntaxStatement::If, (yyvsp[-1].syntaxElement), (yyvsp[0].syntaxElementList)); }
-#line 3115 "./grammar.tab.c"
+#line 3084 "./grammar.tab.c"
     break;
 
   case 137: /* ifStatement: IF cond stmts ELSE stmts  */
-#line 783 "./grammar.y"
+#line 778 "./grammar.y"
                                             { (yyval.syntaxElement) = new SyntaxStatement(SyntaxStatement::IfElse, (yyvsp[-3].syntaxElement), (yyvsp[-2].syntaxElementList), (yyvsp[0].syntaxElementList)); }
-#line 3121 "./grammar.tab.c"
+#line 3090 "./grammar.tab.c"
     break;
 
   case 138: /* cond: '(' expression ')'  */
-#line 785 "./grammar.y"
+#line 780 "./grammar.y"
                                   { (yyval.syntaxElement) = (yyvsp[-1].syntaxElement); }
-#line 3127 "./grammar.tab.c"
+#line 3096 "./grammar.tab.c"
     break;
 
   case 139: /* forStatement: FOR forCond stmts  */
-#line 788 "./grammar.y"
+#line 783 "./grammar.y"
                                         { (yyval.syntaxElement) = new SyntaxStatement(SyntaxStatement::For, (yyvsp[-1].syntaxElement), (yyvsp[0].syntaxElementList)); }
-#line 3133 "./grammar.tab.c"
+#line 3102 "./grammar.tab.c"
     break;
 
   case 140: /* forCond: '(' identifier IN expression ')'  */
-#line 791 "./grammar.y"
+#line 786 "./grammar.y"
                                                     { (yyval.syntaxElement) = new SyntaxForLoop(*(yyvsp[-3].string), (yyvsp[-1].syntaxElement)); delete (yyvsp[-3].string); }
-#line 3139 "./grammar.tab.c"
+#line 3108 "./grammar.tab.c"
     break;
 
   case 141: /* whileStatement: WHILE cond stmts  */
-#line 794 "./grammar.y"
+#line 789 "./grammar.y"
                                         { (yyval.syntaxElement) = new SyntaxStatement(SyntaxStatement::While, (yyvsp[-1].syntaxElement), (yyvsp[0].syntaxElementList)); }
-#line 3145 "./grammar.tab.c"
+#line 3114 "./grammar.tab.c"
     break;
 
   case 142: /* nextStatement: NEXT  */
-#line 797 "./grammar.y"
+#line 792 "./grammar.y"
                             { (yyval.syntaxElement) = new SyntaxStatement(SyntaxStatement::Next); }
-#line 3151 "./grammar.tab.c"
+#line 3120 "./grammar.tab.c"
     break;
 
   case 143: /* breakStatement: BREAK  */
-#line 800 "./grammar.y"
+#line 795 "./grammar.y"
                             { (yyval.syntaxElement) = new SyntaxStatement(SyntaxStatement::Break); }
-#line 3157 "./grammar.tab.c"
+#line 3126 "./grammar.tab.c"
     break;
 
   case 144: /* returnStatement: RETURN  */
-#line 803 "./grammar.y"
+#line 798 "./grammar.y"
                                         { (yyval.syntaxElement) = new SyntaxStatement(SyntaxStatement::Return); }
-#line 3163 "./grammar.tab.c"
+#line 3132 "./grammar.tab.c"
     break;
 
   case 145: /* returnStatement: RETURN expression  */
-#line 804 "./grammar.y"
+#line 799 "./grammar.y"
                                         { (yyval.syntaxElement) = new SyntaxStatement(SyntaxStatement::Return, (yyvsp[0].syntaxElement)); }
-#line 3169 "./grammar.tab.c"
+#line 3138 "./grammar.tab.c"
     break;
 
   case 146: /* identifier: NAME  */
-#line 807 "./grammar.y"
+#line 802 "./grammar.y"
                         { (yyval.string) = new std::string((yyvsp[0].c_string)); }
-#line 3175 "./grammar.tab.c"
+#line 3144 "./grammar.tab.c"
     break;
 
   case 147: /* vector: '[' vectorList ']'  */
-#line 811 "./grammar.y"
+#line 806 "./grammar.y"
                                         { (yyval.argumentList) = (yyvsp[-1].argumentList); }
-#line 3181 "./grammar.tab.c"
+#line 3150 "./grammar.tab.c"
     break;
 
   case 148: /* vectorList: vectorList ',' expression  */
-#line 814 "./grammar.y"
+#line 809 "./grammar.y"
                                             { (yyvsp[-2].argumentList)->push_back(new SyntaxLabeledExpr( "", (yyvsp[0].syntaxElement)) ); (yyval.argumentList) = (yyvsp[-2].argumentList); }
-#line 3187 "./grammar.tab.c"
+#line 3156 "./grammar.tab.c"
     break;
 
   case 149: /* vectorList: expression  */
-#line 816 "./grammar.y"
+#line 811 "./grammar.y"
                 {
                 (yyval.argumentList) = new std::list<SyntaxLabeledExpr*>(1, new SyntaxLabeledExpr("", (yyvsp[0].syntaxElement)) );
                 }
-#line 3195 "./grammar.tab.c"
+#line 3164 "./grammar.tab.c"
     break;
 
   case 150: /* constant: FALSE  */
-#line 822 "./grammar.y"
+#line 817 "./grammar.y"
                 {
                     (yyval.syntaxElement) = new SyntaxConstant(new RlBoolean(false) );
                 }
-#line 3203 "./grammar.tab.c"
+#line 3172 "./grammar.tab.c"
     break;
 
   case 151: /* constant: TRUE  */
-#line 826 "./grammar.y"
+#line 821 "./grammar.y"
                 {
                     (yyval.syntaxElement) = new SyntaxConstant(new RlBoolean(true) );
                 }
-#line 3211 "./grammar.tab.c"
+#line 3180 "./grammar.tab.c"
     break;
 
   case 152: /* constant: RBNULL  */
-#line 830 "./grammar.y"
+#line 825 "./grammar.y"
                 {
                     (yyval.syntaxElement) = new SyntaxConstant( NULL );
                 }
-#line 3219 "./grammar.tab.c"
+#line 3188 "./grammar.tab.c"
     break;
 
   case 153: /* constant: RBTAB  */
-#line 834 "./grammar.y"
+#line 829 "./grammar.y"
                 {
                     (yyval.syntaxElement) = new SyntaxConstant( new RlString("\t") );
                 }
-#line 3227 "./grammar.tab.c"
+#line 3196 "./grammar.tab.c"
     break;
 
   case 154: /* constant: RBINF  */
-#line 838 "./grammar.y"
+#line 833 "./grammar.y"
                 {
                     (yyval.syntaxElement) = new SyntaxConstant( new RealPos( RbConstants::Double::inf ) );
                 }
-#line 3235 "./grammar.tab.c"
+#line 3204 "./grammar.tab.c"
     break;
 
   case 155: /* constant: INT  */
-#line 842 "./grammar.y"
+#line 837 "./grammar.y"
                 {
                     if ( (yyvsp[0].longIntValue) < 0 ) {
                         (yyval.syntaxElement) = new SyntaxConstant(new Integer((yyvsp[0].longIntValue)) );
@@ -3244,19 +3213,19 @@ yyreduce:
                         (yyval.syntaxElement) = new SyntaxConstant(new Natural((yyvsp[0].longIntValue)) );
                     }
                 }
-#line 3248 "./grammar.tab.c"
+#line 3217 "./grammar.tab.c"
     break;
 
   case 156: /* constant: STRING  */
-#line 851 "./grammar.y"
+#line 846 "./grammar.y"
                 {
                     (yyval.syntaxElement) = new SyntaxConstant(new RlString((yyvsp[0].c_string)) );
                 }
-#line 3256 "./grammar.tab.c"
+#line 3225 "./grammar.tab.c"
     break;
 
   case 157: /* constant: REAL  */
-#line 855 "./grammar.y"
+#line 850 "./grammar.y"
                 {
                     /* This code records and preserves input format of the real */
                     /*
@@ -3315,11 +3284,11 @@ yyreduce:
                         (yyval.syntaxElement) = new SyntaxConstant(new Real((yyvsp[0].realValue)) );
                     }
                 }
-#line 3319 "./grammar.tab.c"
+#line 3288 "./grammar.tab.c"
     break;
 
 
-#line 3323 "./grammar.tab.c"
+#line 3292 "./grammar.tab.c"
 
       default: break;
     }
@@ -3517,7 +3486,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 915 "./grammar.y"
+#line 910 "./grammar.y"
 
 
 
@@ -3538,4 +3507,19 @@ int yyerror(const char *msg)
     return 1;
 }
 
+RevLanguage::SyntaxElement* xxpipe(RevLanguage::SyntaxElement* arg,
+                                   RevLanguage::SyntaxElement* fxnCallE)
+{
+    if (auto fxnCall = dynamic_cast<RevLanguage::SyntaxFunctionCall*>(fxnCallE))
+    {
+        fxnCall->pipeAddArg(arg);
+    }
+    else
+    {
+        delete arg;
+        delete fxnCallE;
+        throw RbException("The pipe operator requires a function call as RHS.");
+    }
 
+    return fxnCallE;
+}
