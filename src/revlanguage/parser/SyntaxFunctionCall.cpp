@@ -182,7 +182,14 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( Environment& env, bool 
         
         const MethodTable& mt = the_member_object.getMethods();
         
-        Function* the_function = mt.getFunction( function_name, args, !dynamic ).clone();
+        const Function* the_const_function = mt.findFunction( function_name, args, !dynamic );
+
+        Function* the_function;
+        if (the_const_function)
+            the_function = the_const_function->clone();
+        else
+            throw RbException()<<"Variable of type '"<<the_member_object.getType()<<"' has no method called '"<<function_name<<"'.  You can use '.methods()' to find available methods.";
+
         the_function->processArguments(args, !dynamic);
         
         MemberMethod* theMemberMethod = dynamic_cast<MemberMethod*>( the_function );
