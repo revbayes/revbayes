@@ -2,16 +2,19 @@
 
 ## Speed
   * Cache transition probability matrices.
+  * Faster tree summaries.
 
 ## Features
   * Add Occurence Birth-Death Process.
   * Record better mixing statistics for MC^3.
+  * Automatically remove degree-2 root nodes when reading non-clock trees.
 
 ## Bug Fixes
 
-  * _UNMERGED_ Statically link boost into distributed binaries.
-  * _UNMERGED_ Don't link distributed binaries with openlibm.
-  * _UNMERGED_ Don't get stuck on MCMC with amino-acid models.
+  * _UNMERGED_ Fix false claim of conflicting constraints. (#288)
+  * Statically link boost into distributed binaries.
+  * Don't link distributed binaries with openlibm.
+  * Don't get stuck on MCMC with amino-acid models.
   * Fix crash in unrooted NNI and SPR.
   * Fix vectors in functions.
   * Fix using file paths and directories on Windows.
@@ -21,7 +24,6 @@
   * Fix crash when reading some trees with sampled ancestors. (#240)
   * Prevent NumStates methods from overriding character exclusion. (#252)
   * Allow compiling in C++17 mode. (#238)
-
 
 # RevBayes 1.2.0 Lagerstätte
 
