@@ -53,46 +53,14 @@ bool DiscreteCharacterState::operator<(const CharacterState &x) const
 /** Prefix increment current state (if non ambiguous) by 1 */
 void DiscreteCharacterState::operator++( void )
 {
-
-    if ( isAmbiguous() == true )
-    {
-        throw RbException("Cannot increment an ambiguous character.");
-    }
-
-    size_t index = getStateIndex();
-    ++index;
-
-    if ( index >= getNumberOfStates() )
-    {
-        throw RbException("Cannot increment character state any further; we are already at the last state.");
-    }
-
-    // unset the current state
-    setStateByIndex( index );
+    operator+=(1);
 }
 
 
 /** Postfix increment current state (if non ambiguous) by 1 */
 void DiscreteCharacterState::operator++( int i )
 {
-
-    if ( isAmbiguous() == true )
-    {
-        throw RbException("Cannot increment an ambiguous character.");
-    }
-
-    size_t index = getStateIndex();
-    ++index;
-
-    if ( index >= getNumberOfStates() )
-    {
-        throw RbException("Cannot increment character state any further; we are already at the last state.");
-    }
-
-
-    // unset the current state
-    setStateByIndex( index );
-
+    operator+=(1);
 }
 
 
@@ -101,7 +69,6 @@ void DiscreteCharacterState::operator++( int i )
  */
 void DiscreteCharacterState::operator+=( int i )
 {
-
     if ( isAmbiguous() == true )
     {
         throw RbException("Cannot increment an ambiguous character.");
@@ -118,57 +85,20 @@ void DiscreteCharacterState::operator+=( int i )
 
     // unset the current state
     setStateByIndex( index );
-
 }
 
 
 /** Prefix decrement current state (if non ambiguous) by 1 */
 void DiscreteCharacterState::operator--( void )
 {
-
-    if ( isAmbiguous() == true )
-    {
-        throw RbException("Cannot decrement an ambiguous character.");
-    }
-
-
-    size_t index = getStateIndex();
-
-    if ( index == 0 )
-    {
-        throw RbException("Cannot decrement character state any further; we are already at the first state.");
-    }
-
-    --index;
-
-    // unset the current state
-    setStateByIndex( index );
-
+    operator-=(1);
 }
 
 
 /** Postfix decrement current state (if non ambiguous) by 1 */
 void DiscreteCharacterState::operator--( int i )
 {
-
-    if ( isAmbiguous() == true )
-    {
-        throw RbException("Cannot decrement an ambiguous character.");
-    }
-
-
-    size_t index = getStateIndex();
-
-    if ( index == 0 )
-    {
-        throw RbException("Cannot decrement character state any further; we are already at the first state.");
-    }
-
-    --index;
-
-    // unset the current state
-    setStateByIndex( index );
-
+    operator-=(1);
 }
 
 
@@ -177,7 +107,6 @@ void DiscreteCharacterState::operator--( int i )
  */
 void DiscreteCharacterState::operator-=( int i )
 {
-
     if ( isAmbiguous() == true )
     {
         throw RbException("Cannot decrement an ambiguous character.");
