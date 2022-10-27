@@ -31,7 +31,7 @@ namespace RevBayesCore {
         void                                    operator--(int i);  //!< Decrement
         virtual void                            operator-=(int i);  //!< Decrement
 
-        bool                                    isAmbiguous(void) const;
+        virtual bool                            isAmbiguous(void) const;
         virtual std::string                     getStringValue(void) const;
         virtual std::string                     getStateDescription(void) const;  //!< Get a description of the current state
         virtual std::vector<std::string>        getStateDescriptions(void) const;  //!< Get all possible state labels as a vector
