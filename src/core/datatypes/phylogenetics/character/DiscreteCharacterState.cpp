@@ -37,7 +37,7 @@ bool DiscreteCharacterState::operator!=(const CharacterState& x) const
 bool DiscreteCharacterState::operator<(const CharacterState &x) const
 {
 
-    const DiscreteCharacterState* derivedX = static_cast<const DiscreteCharacterState*>(&x);
+    const DiscreteCharacterState* derivedX = dynamic_cast<const DiscreteCharacterState*>(&x);
     if ( derivedX != NULL )
     {
         const RbBitSet& myState = getState();
