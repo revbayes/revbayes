@@ -10,9 +10,7 @@ using namespace RevBayesCore;
 
 
 
-DiscreteCharacterState::DiscreteCharacterState(size_t n) : CharacterState(),
-    weighted(false),
-    weights(std::vector<double>(n,1.0/n))
+DiscreteCharacterState::DiscreteCharacterState(size_t n) : CharacterState()
 {}
 
 
@@ -291,13 +289,15 @@ bool DiscreteCharacterState::isStateSet(size_t index) const
 
 bool DiscreteCharacterState::isWeighted( void ) const
 {
-    return weighted;
+    return false;
 }
 
 
 void DiscreteCharacterState::setWeighted( bool tf )
 {
-    weighted = tf;
+    // PoMo has weights.
+    if (tf)
+        throw RbException()<<"This character class does not support weights";
 }
 
 
@@ -336,5 +336,6 @@ size_t DiscreteCharacterState::getNumberOfStates(void) const
 
 const std::vector<double>& DiscreteCharacterState::getWeights() const
 {
-    return weights;
+    // PoMo has weights.
+    throw RbException()<<"This character class does not support weights";
 }

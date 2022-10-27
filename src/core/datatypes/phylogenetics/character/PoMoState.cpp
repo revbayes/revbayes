@@ -421,3 +421,18 @@ void PoMoState::setStateByIndex(size_t index)
     state.reset();
     state.set( index );
 }
+
+const std::vector<double>& PoMoState::getWeights( void ) const
+{
+    return weights;
+}
+
+bool PoMoState::isWeighted( void ) const
+{
+    return weighted;
+}
+
+void PoMoState::setWeighted( bool tf )
+{
+    weighted = tf;
+}

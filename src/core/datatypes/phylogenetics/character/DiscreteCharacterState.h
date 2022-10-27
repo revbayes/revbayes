@@ -58,9 +58,6 @@ namespace RevBayesCore {
 
     protected:
                                                 DiscreteCharacterState(size_t n);   //!< Constructor
-        
-        bool                                    weighted;  //!< whether the current state is weighted
-        std::vector<double>                     weights;  //!< vector of weights for each state
     };
 
 }
