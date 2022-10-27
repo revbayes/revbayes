@@ -305,6 +305,8 @@ const Function* FunctionTable::findFunction(const std::string& name, const std::
         }
         else
         {
+            // Here we just return a nullptr to indicate failure.
+            // The caller can produce better error messages, so it is the caller's job to throw an exception.
             return nullptr;
         }
         
