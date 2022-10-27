@@ -31,12 +31,21 @@ namespace RevBayesCore {
                                         DnaState(const std::string &s);                     //!< Constructor with nucleotide observation
                                         DnaState(const RbBitSet& bs);                       //!< Constructor with which letters are observed.
 
+        bool                            operator==(const CharacterState& x) const override;
+        bool                            operator==(const DnaState& x) const;
+//        bool                            operator<(const DnaState& x) const override;
+        void                            operator+=(int) override;
+        void                            operator-=(int) override;
+
+        bool                            isAmbiguous(void) const override;
+        size_t                          getStateIndex(void) const override;                 //!< Get the index of the current state
+
         DnaState*                       clone(void) const;                                  //!< Get a copy of this object
 
         // Discrete character observation functions
 
         void                            addState(const std::string &symbol);                //!< Add a character state to the set of character states
-//        size_t                          getNumberOfStates(void) const;                      //!< Get the number of discrete states for the character
+        size_t                          getNumberOfStates(void) const;                      //!< Get the number of discrete states for the character
         RbBitSet                        getState(void) const;                               //!< Get the state (as the bitset)
         void                            setToFirstState(void);                              //!< Set this character state to the first (lowest) possible state
         void                            setStateByIndex(size_t index);                      //!< Set the discrete observation
