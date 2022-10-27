@@ -43,6 +43,34 @@ DnaState* DnaState::clone( void ) const
 }
 
 
+bool DnaState::operator==(const CharacterState& x) const
+{
+    if (auto d = dynamic_cast<const DnaState*>(&x))
+        return operator==(*d);
+    else
+        return false;
+}
+
+bool DnaState::operator==(const DnaState& x) const
+{
+    return state == x.state;
+}
+
+void DnaState::operator+=(int i)
+{
+    setStateByIndex(getStateIndex()+i);
+}
+
+void DnaState::operator-=(int i)
+{
+    setStateByIndex(getStateIndex()-i);
+}
+
+bool DnaState::isAmbiguous(void) const
+{
+    return not (state == 'A' or state == 'G' or state == 'C' or state == 'T');
+}
+
 void DnaState::setState(const std::string &symbol)
 {
     char s = char( toupper( symbol[0] ) );
@@ -393,11 +421,23 @@ void DnaState::addState(const std::string &symbol)
 }
 
 
-//size_t DnaState::getNumberOfStates(void) const
-//{
-//    return 4;
-//}
+size_t DnaState::getNumberOfStates(void) const
+{
+    return 4;
+}
 
+size_t DnaState::getStateIndex(void) const
+{
+    switch ( state )
+    {
+    case 'A': return 0;
+    case 'C': return 1;
+    case 'G': return 2;
+    case 'T': return 3;
+    }
+
+    throw RbException("Cannot get the index of an ambiguous state.");
+}
 
 RbBitSet DnaState::getState(void) const
 {
