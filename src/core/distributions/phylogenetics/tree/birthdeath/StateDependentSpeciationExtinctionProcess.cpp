@@ -127,7 +127,7 @@ StateDependentSpeciationExtinctionProcess::StateDependentSpeciationExtinctionPro
     }
     
     // set the length of the time slices used by the ODE for numerical integration
-    dt = process_age->getValue() / NUM_TIME_SLICES * 10.0;
+    dt = process_age->getValue() / NUM_TIME_SLICES * 1.0;
 
     value->getTreeChangeEventHandler().addListener( this );
 
@@ -683,6 +683,315 @@ void StateDependentSpeciationExtinctionProcess::fireTreeChangeEvent( const RevBa
 const RevBayesCore::AbstractHomologousDiscreteCharacterData& StateDependentSpeciationExtinctionProcess::getCharacterData() const
 {
     return static_cast<TreeDiscreteCharacterData*>(this->value)->getCharacterData();
+}
+
+
+void StateDependentSpeciationExtinctionProcess::computeAverageRates(void)
+{
+    // now begin the root-to-tip pass, drawing ancestral states conditional on the start states
+    sample_character_history = true;
+    computeLnProbability();
+    
+    std::vector<double> speciation_rates = lambda->getValue();
+    
+    // get the likelihoods of descendant nodes
+    const TopologyNode          &root               = value->getRoot();
+    const TopologyNode          &left               = root.getChild(0);
+    size_t                       left_index         = left.getIndex();
+    const std::vector< double > &left_likelihoods   = node_partial_likelihoods[left_index][active_likelihood[left_index]];
+    const TopologyNode          &right              = root.getChild(1);
+    size_t                       right_index        = right.getIndex();
+    const std::vector< double > &right_likelihoods  = node_partial_likelihoods[right_index][active_likelihood[right_index]];
+    
+//    // get root frequencies
+//    const RbVector<double> &freqs = getRootFrequencies();
+    
+    // recurse towards tips
+    std::vector<double> left_conditional_probs  = std::vector<double>(num_states, 0);
+    std::vector<double> right_conditional_probs = std::vector<double>(num_states, 0);
+    for (size_t i = 0; i < num_states; i++)
+    {
+        left_conditional_probs[ i ]  = right_likelihoods[num_states + i] * speciation_rates[i];
+        right_conditional_probs[ i ] = left_likelihoods[num_states + i]  * speciation_rates[i];
+    }
+    computeAverageRatesRecursively(left, left_conditional_probs);
+    computeAverageRatesRecursively(right, right_conditional_probs);
+    
+}
+
+
+void StateDependentSpeciationExtinctionProcess::computeAverageRatesRecursively(const TopologyNode &node, const std::vector<double>& conditional_probs)
+{
+    
+    size_t node_index = node.getIndex();
+    std::vector<double> speciation_rates = calculateTotalSpeciationRatePerState();
+    std::vector<double> extinction_rates = mu->getValue();
+        
+    // initialize the conditional likelihoods for this branch
+    std::vector< double > branch_conditional_probs = std::vector<double>(2 * num_states, 0);
+    for (size_t i = 0; i < num_states; i++)
+    {
+        branch_conditional_probs[ num_states + i ] = conditional_probs[i];
+    }
+
+    
+    // first calculate extinction likelihoods via a backward time pass
+    double start_time = node.getParent().getAge();
+    numericallyIntegrateProcess(branch_conditional_probs, 0, start_time, true, true);
+    
+    // now calculate conditional likelihoods along branch in forward time
+    double branch_length = node.getParent().getAge() - node.getAge();
+    size_t current_dt = 0;
+    double current_dt_start = 0;
+    double current_dt_end = 0;
+    
+    int downpass_dt = int( branch_partial_likelihoods[node_index].size() ) - 1;
+   
+    // keep track of rates in each time interval so we can calculate per branch averages of each rate
+//    double num_dts = 0.0;
+    
+     // keep track of rates in each time interval so we can calculate per branch averages of each rate
+    for (size_t i = 0; i < num_states; i++)
+    {
+        time_in_states[i] = 0;
+    }
+
+    // loop over every time slice, stopping before the last time slice
+    while ( downpass_dt >= 0 && ((current_dt + 1) * dt) < branch_length)
+    {
+
+        // draw state for this time slice
+        std::vector<double> sample_probs = std::vector<double>(num_states, 0);
+        double sample_probs_sum = 0.0;
+        
+        for (size_t i = 0; i < num_states; i++)
+        {
+            double prob = branch_conditional_probs[i + num_states] * branch_partial_likelihoods[node_index][downpass_dt][i];
+            sample_probs[ i ] = prob;
+            sample_probs_sum += prob;
+        }
+        
+        // normalize
+        for (size_t i = 0; i < num_states; i++)
+        {
+            sample_probs[ i ] /= sample_probs_sum;
+        }
+        
+        // condition branch_conditional_probs on the sampled state
+        for (size_t i = 0; i < num_states; i++)
+        {
+            time_in_states[i] += sample_probs[ i ] * dt;
+        }
+        
+        
+        current_dt_start = (current_dt * dt);
+        current_dt_end = ((current_dt + 1) * dt);
+        
+        numericallyIntegrateProcess(branch_conditional_probs, current_dt_start, current_dt_end, false, false);
+        
+        current_dt++;
+        downpass_dt--;
+    }
+    
+    // calculate average diversification rates on this branch
+    average_speciation[node_index] = 0.0;
+    average_extinction[node_index] = 0.0;
+    for (size_t i = 0; i < num_states; i++)
+    {
+        average_speciation[node_index] += time_in_states[i] * speciation_rates[i] / branch_length;
+        average_extinction[node_index] += time_in_states[i] * extinction_rates[i] / branch_length;
+    }
+    
+    if ( node.isTip() == true )
+    {
+        
+    }
+    else
+    {
+        
+        
+        // get likelihoods of descendant nodes
+        const TopologyNode &left = node.getChild(0);
+        size_t left_index = left.getIndex();
+        std::vector< double > left_likelihoods = node_partial_likelihoods[left_index][active_likelihood[left_index]];
+        const TopologyNode &right = node.getChild(1);
+        size_t right_index = right.getIndex();
+        std::vector< double > right_likelihoods = node_partial_likelihoods[right_index][active_likelihood[right_index]];
+        
+        std::vector<double> sample_probs = std::vector<double>(num_states, 0);
+        double sample_probs_sum = 0.0;
+        
+        for (size_t i = 0; i < num_states; i++)
+        {
+            double likelihood = left_likelihoods[num_states + i] * right_likelihoods[num_states + i] * speciation_rates[i];
+            sample_probs[ i ] = likelihood * branch_conditional_probs[num_states + i];
+            sample_probs_sum += likelihood * branch_conditional_probs[num_states + i];
+        }
+        
+        // normalize
+        for (size_t i = 0; i < num_states; i++)
+        {
+            sample_probs[ i ] /= sample_probs_sum;
+        }
+        
+        std::cerr << "Node(" << node_index << ") = ";
+        for (size_t i = 0; i < num_states; i++)
+        {
+            std::cerr << sample_probs[ i ] << "   ";
+        }
+        std::cerr << std::endl;
+        
+        
+        
+        // recurse towards tips
+        std::vector<double> left_conditional_probs  = std::vector<double>(num_states, 0);
+        std::vector<double> right_conditional_probs = std::vector<double>(num_states, 0);
+        for (size_t i = 0; i < num_states; i++)
+        {
+            left_conditional_probs[ i ]  = branch_conditional_probs[num_states + i] * right_likelihoods[num_states + i] * speciation_rates[i];
+            right_conditional_probs[ i ] = branch_conditional_probs[num_states + i] * left_likelihoods[num_states + i]  * speciation_rates[i];
+        }
+        computeAverageRatesRecursively(left, left_conditional_probs);
+        computeAverageRatesRecursively(right, right_conditional_probs);
+    }
+        
+}
+
+
+
+void StateDependentSpeciationExtinctionProcess::printAncestralStatesProbabilities(void)
+{
+    // now begin the root-to-tip pass, drawing ancestral states conditional on the start states
+    computeLnProbability();
+    
+    std::vector<double> speciation_rates = lambda->getValue();
+    
+    // get the likelihoods of descendant nodes
+    const TopologyNode          &root               = value->getRoot();
+    size_t                       node_index         = root.getIndex();
+    const TopologyNode          &left               = root.getChild(0);
+    size_t                       left_index         = left.getIndex();
+    const std::vector< double > &left_likelihoods   = node_partial_likelihoods[left_index][active_likelihood[left_index]];
+    const TopologyNode          &right              = root.getChild(1);
+    size_t                       right_index        = right.getIndex();
+    const std::vector< double > &right_likelihoods  = node_partial_likelihoods[right_index][active_likelihood[right_index]];
+    
+    // get root frequencies
+    const RbVector<double> &freqs = getRootFrequencies();
+    
+    std::vector<double> sample_probs = std::vector<double>(num_states, 0);
+    double sample_probs_sum = 0.0;
+    
+    for (size_t i = 0; i < num_states; i++)
+    {
+        double likelihood = left_likelihoods[num_states + i] * right_likelihoods[num_states + i] * speciation_rates[i];
+        sample_probs[ i ] = likelihood * freqs[i];
+        sample_probs_sum += likelihood * freqs[i];
+    }
+    
+    // normalize
+    for (size_t i = 0; i < num_states; i++)
+    {
+        sample_probs[ i ] /= sample_probs_sum;
+    }
+    
+    std::cerr << "Node(" << node_index << ") = ";
+    for (size_t i = 0; i < num_states; i++)
+    {
+        std::cerr << sample_probs[ i ] << "   ";
+    }
+    std::cerr << std::endl;
+    
+    
+    // recurse towards tips
+    std::vector<double> left_conditional_probs  = std::vector<double>(num_states, 0);
+    std::vector<double> right_conditional_probs = std::vector<double>(num_states, 0);
+    for (size_t i = 0; i < num_states; i++)
+    {
+        left_conditional_probs[ i ]  = right_likelihoods[num_states + i] * speciation_rates[i];
+        right_conditional_probs[ i ] = left_likelihoods[num_states + i]  * speciation_rates[i];
+    }
+    recursivelyPrintAncestralStatesProbabilities(left, left_conditional_probs);
+    recursivelyPrintAncestralStatesProbabilities(right, right_conditional_probs);
+    
+}
+
+
+void StateDependentSpeciationExtinctionProcess::recursivelyPrintAncestralStatesProbabilities(const TopologyNode &node, std::vector<double>& conditional_probs)
+{
+    
+    size_t node_index = node.getIndex();
+    
+    if ( node.isTip() == true )
+    {
+        
+    }
+    else
+    {
+        // sample characters by their probability conditioned on the branch's start state going to end states
+        
+        // initialize the conditional likelihoods for this branch
+        std::vector< double > branch_conditional_probs = std::vector<double>(2 * num_states, 0);
+        
+        for (size_t i = 0; i < num_states; i++)
+        {
+            branch_conditional_probs[ num_states + i ] = conditional_probs[i];
+        }
+
+        // first calculate extinction likelihoods via a backward time pass
+        double end_age = node.getParent().getAge();
+        numericallyIntegrateProcess(branch_conditional_probs, 0, end_age, true, true);
+        
+        // now calculate conditional likelihoods along branch in forward time
+        end_age        = node.getParent().getAge() - node.getAge();
+        numericallyIntegrateProcess(branch_conditional_probs, 0, end_age, false, false);
+        
+        std::vector<double> speciation_rates = lambda->getValue();
+        
+        // get likelihoods of descendant nodes
+        const TopologyNode &left = node.getChild(0);
+        size_t left_index = left.getIndex();
+        std::vector< double > left_likelihoods = node_partial_likelihoods[left_index][active_likelihood[left_index]];
+        const TopologyNode &right = node.getChild(1);
+        size_t right_index = right.getIndex();
+        std::vector< double > right_likelihoods = node_partial_likelihoods[right_index][active_likelihood[right_index]];
+        
+        std::vector<double> sample_probs = std::vector<double>(num_states, 0);
+        double sample_probs_sum = 0.0;
+        
+        for (size_t i = 0; i < num_states; i++)
+        {
+            double likelihood = left_likelihoods[num_states + i] * right_likelihoods[num_states + i] * speciation_rates[i];
+            sample_probs[ i ] = likelihood * branch_conditional_probs[num_states + i];
+            sample_probs_sum += likelihood * branch_conditional_probs[num_states + i];
+        }
+        
+        // normalize
+        for (size_t i = 0; i < num_states; i++)
+        {
+            sample_probs[ i ] /= sample_probs_sum;
+        }
+        
+        std::cerr << "Node(" << node_index << ") = ";
+        for (size_t i = 0; i < num_states; i++)
+        {
+            std::cerr << sample_probs[ i ] << "   ";
+        }
+        std::cerr << std::endl;
+        
+        
+        // recurse towards tips
+        std::vector<double> left_conditional_probs  = std::vector<double>(num_states, 0);
+        std::vector<double> right_conditional_probs = std::vector<double>(num_states, 0);
+        for (size_t i = 0; i < num_states; i++)
+        {
+            left_conditional_probs[ i ]  = branch_conditional_probs[num_states + i] * right_likelihoods[num_states + i] * speciation_rates[i];
+            right_conditional_probs[ i ] = branch_conditional_probs[num_states + i] * left_likelihoods[num_states + i]  * speciation_rates[i];
+        }
+        recursivelyPrintAncestralStatesProbabilities(left, left_conditional_probs);
+        recursivelyPrintAncestralStatesProbabilities(right, right_conditional_probs);
+    }
+    
 }
 
 
@@ -1533,6 +1842,20 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> StateDependentSpeciationExtinction
         found = true;
         return new RevLanguage::RevVariable( new RlString( simmap ) );        
     }
+    if ( name == "printASP" )
+    {
+        found = true;
+        
+        printAncestralStatesProbabilities();
+        return NULL;
+    }
+    if ( name == "computeAverageRates" )
+    {
+        found = true;
+        
+        computeAverageRates();
+        return NULL;
+    }
     return TypedDistribution<Tree>::executeProcedure( name, args, found );
 }
 
@@ -1557,10 +1880,12 @@ void StateDependentSpeciationExtinctionProcess::executeMethod(const std::string 
    
     if ( name == "averageSpeciationRate" )
     {
+        const_cast<StateDependentSpeciationExtinctionProcess*>(this)->computeAverageRates();
         rv = average_speciation;        
     }
     else if ( name == "averageExtinctionRate" )
     {
+        const_cast<StateDependentSpeciationExtinctionProcess*>(this)->computeAverageRates();
         rv = average_extinction;        
     }
     else if ( name == "getTimeInStates" )

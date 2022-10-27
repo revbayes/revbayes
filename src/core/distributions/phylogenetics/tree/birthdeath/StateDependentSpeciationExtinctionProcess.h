@@ -74,6 +74,10 @@ namespace RevBayesCore {
         void                                                            setNumberOfTimeSlices(double n);                                                                    //!< Set the number of time slices for the numerical ODE.
         virtual void                                                    setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
         
+        void                                                            computeAverageRates(void);
+        void                                                            computeAverageRatesRecursively(const TopologyNode &node, const std::vector<double>& conditional_probs);
+        void                                                            printAncestralStatesProbabilities(void);
+        void                                                            recursivelyPrintAncestralStatesProbabilities(const TopologyNode &node, std::vector<double>& conditional_probs);
         void                                                            drawJointConditionalAncestralStates(std::vector<size_t>& startStates, std::vector<size_t>& endStates);
         void                                                            recursivelyDrawJointConditionalAncestralStates(const TopologyNode &node, std::vector<size_t>& startStates, std::vector<size_t>& endStates);
         void                                                            drawStochasticCharacterMap(std::vector<std::string>& character_histories, bool set_amb_char_data = false);

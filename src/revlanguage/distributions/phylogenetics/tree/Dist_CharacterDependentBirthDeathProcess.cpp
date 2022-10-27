@@ -312,6 +312,13 @@ MethodTable Dist_CharacterDependentBirthDeathProcess::getDistributionMethods( vo
     ArgumentRules* timeInStateArgRules = new ArgumentRules();
     methods.addFunction( new DistributionMemberFunction<Dist_CharacterDependentBirthDeathProcess, ModelVector<RealPos> >( "getTimeInState", variable, timeInStateArgRules   ) );
     
+    ArgumentRules* print_ASP_arg_rules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "printASP", RlUtils::Void, print_ASP_arg_rules ) );
+    
+    ArgumentRules* compute_avg_rates_arg_rules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "computeAverageRates", RlUtils::Void, compute_avg_rates_arg_rules ) );
+    
+    
     return methods;
 }
 
