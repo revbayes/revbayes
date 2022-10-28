@@ -740,7 +740,7 @@ void Clade::setAges(const std::vector<Taxon>& taxa)
 // We really should separate the idea of constraints (CladeConstraint,
 // NotCladeConstraint, OptionalCladeConstraint) from the idea of clades.
 
-bool clade_before(const Clade& c1, const Clade& c2)
+bool cladeBefore(const Clade& c1, const Clade& c2)
 {
     if (&c1 == &c2)
         return false;
@@ -755,7 +755,7 @@ bool clade_before(const Clade& c1, const Clade& c2)
         return c1.getAge() < c2.getAge();
 }
 
-bool clade_within(const Clade& c1, const Clade& c2)
+bool cladeWithin(const Clade& c1, const Clade& c2)
 {
     if (&c1 == &c2)
         return false;
@@ -791,7 +791,7 @@ bool clade_within(const Clade& c1, const Clade& c2)
     }
 }
 
-bool clade_within_and_before(const Clade& c1, const Clade& c2)
+bool cladeWithinAndBefore(const Clade& c1, const Clade& c2)
 {
     if (&c1 == &c2)
         return false;

@@ -721,7 +721,7 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( void )
     sorted_clades.push_back(all_species);
 
     size_t num_clades = sorted_clades.size();
-    std::sort(sorted_clades.begin(), sorted_clades.end(), clade_within_and_before);
+    std::sort(sorted_clades.begin(), sorted_clades.end(), cladeWithinAndBefore);
 
     /*
      * Walk clade constraints from tips to root.

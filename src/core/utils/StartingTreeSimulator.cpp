@@ -128,7 +128,7 @@ Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const
     sorted_clades.push_back(all_species);
     
     // DO WE NEED TO SORT THE TAXA?
-    std::sort(sorted_clades.begin(), sorted_clades.end(), clade_before);
+    std::sort(sorted_clades.begin(), sorted_clades.end(), cladeBefore);
     
     std::vector<Clade> virtual_taxa;
     int i = -1;
