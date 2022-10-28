@@ -1,8 +1,9 @@
 # RevBayes 1.2.1 (unreleased)
 
-## Speed
+## Speed & memory
   * Cache transition probability matrices.
   * Faster tree summaries.
+  * Discrete character data sets take 5x less RAM, and are 5x faster to load.
 
 ## Features
   * Add Occurence Birth-Death Process.
@@ -10,7 +11,6 @@
   * Automatically remove degree-2 root nodes when reading non-clock trees.
 
 ## Bug Fixes
-
   * _UNMERGED_ Fix false claim of conflicting constraints. (#288)
   * Statically link boost into distributed binaries.
   * Don't link distributed binaries with openlibm.
@@ -23,7 +23,7 @@
   * Fix check for number of rates in FBD-Range process.
   * Fix crash when reading some trees with sampled ancestors. (#240)
   * Prevent NumStates methods from overriding character exclusion. (#252)
-  * Allow compiling in C++17 mode. (#238)
+  * C++ standard switched to C++17 (#238, #278)
 
 # RevBayes 1.2.0 Lagerstätte
 
