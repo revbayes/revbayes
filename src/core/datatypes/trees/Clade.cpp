@@ -501,6 +501,16 @@ bool Clade::overlaps(const Clade& c) const
     return false;
 }
 
+/**
+ * Returns the set of overlapping taxa between clade c and myself.
+ *
+ * \param[in]    c    Theclade.
+ *
+ * \return       True/False, if there is an overlap.
+ *
+ * Note that we use this method to give a more helpful error message
+ *  when we claim that clades conflict.
+ */
 set<Taxon> Clade::intersection(const Clade& c) const
 {
     set<Taxon> both;
