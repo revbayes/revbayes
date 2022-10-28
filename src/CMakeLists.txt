@@ -5,13 +5,7 @@ project(RevBayes)
 # -Wno-sign-compare
 # -D_GLIBCXX_DEBUG
 
-# This is the RIGHT way, but requires cmake version >=3:
-#   set(CMAKE_CXX_STANDARD 11)
-#
-# https://gitlab.kitware.com/cmake/community/-/wikis/CMake-Versions-on-Linux-Distros
-#
-# So, we add the flag directly instead.
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+set(CMAKE_CXX_STANDARD 17)
 
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
