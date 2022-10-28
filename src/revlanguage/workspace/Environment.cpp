@@ -340,7 +340,6 @@ Environment* Environment::getChildEnvironment(const std::string &name)
 /** Get function. This call will throw an error if the name is missing or present multiple times. */
 Function* Environment::getFunction(const std::string& name)
 {
-    
     return function_table.getFunction(name);
 }
 
@@ -350,6 +349,13 @@ const Function& Environment::getFunction(const std::string& name, const std::vec
 {
     
     return function_table.getFunction(name, args, once);
+}
+
+
+/* Get function. This call will throw an error if the function is missing. */
+const Function* Environment::findFunction(const std::string& name, const std::vector<Argument>& args, bool once) const
+{
+    return function_table.findFunction(name, args, once);
 }
 
 
