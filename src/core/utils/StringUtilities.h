@@ -17,7 +17,6 @@
 #include <stddef.h>
 #include <sstream> // IWYU pragma: keep
 #include <vector>
-#include <boost/optional.hpp>
 
 namespace StringUtilities {
     
