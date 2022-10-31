@@ -222,7 +222,7 @@ void TopologyConstrainedTreeDistribution::initializeBitSets(void)
     for (size_t i = 0; i < monophyly_constraints.size(); i++)
     {
         // clade constraint has only one match
-        if (monophyly_constraints[i].isOptionalMatch() == false)
+        if (monophyly_constraints[i].isOptionalConstraint() == false)
         {
             RbBitSet b( value->getNumberOfTips() );
             for (size_t j = 0; j < monophyly_constraints[i].size(); j++)
@@ -384,7 +384,7 @@ bool TopologyConstrainedTreeDistribution::matchesConstraints( void )
     {
         
         std::vector<Clade> constraints;
-        if ( monophyly_constraints[i].isOptionalMatch() == true )
+        if ( monophyly_constraints[i].isOptionalConstraint() == true )
         {
             constraints = monophyly_constraints[i].getOptionalConstraints();
         }
@@ -648,7 +648,6 @@ void TopologyConstrainedTreeDistribution::setBackbone(const TypedDagNode<Tree> *
     }
 }
 
-
 /**
  *
  */
@@ -702,7 +701,7 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( void )
         // populate sorted clades vector
         if ( monophyly_constraint.size() > 1 && monophyly_constraint.size() < num_taxa )
         {
-            if ( monophyly_constraint.isOptionalMatch() == true )
+            if ( monophyly_constraint.isOptionalConstraint() == true )
             {
                 std::vector<Clade> optional_constraints = monophyly_constraint.getOptionalConstraints();
                 size_t idx = (size_t)( GLOBAL_RNG->uniform01() * optional_constraints.size() );
@@ -721,40 +720,8 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( void )
     all_species.setAge( ra );
     sorted_clades.push_back(all_species);
 
-
-    // try this crummy bubble sort
     size_t num_clades = sorted_clades.size();
-    for (int i = 0; i < num_clades - 1; i++)
-    {
-        for (int j = 0; j < num_clades - i - 1; j++)
-        {
-
-            if ( sorted_clades[j].isNestedWithin(sorted_clades[j+1]) == true )
-            {
-                if ( sorted_clades[j].getAge() < sorted_clades[j+1].getAge() )
-                {
-                    throw RbException("TopologyConstrainedTreeDistribution - cannot simulate tree: nested clade 1 constraint has larger Age");
-                }
-                std::swap(sorted_clades[j], sorted_clades[j+1]);
-            }
-            else if ( sorted_clades[j+1].isNestedWithin(sorted_clades[j]) == true )
-            {
-                if (sorted_clades[j+1].getAge() < sorted_clades[j].getAge())
-                {
-                    throw RbException("TopologyConstrainedTreeDistribution - cannot simulate tree: nested clade 2 constraint has larger Age");
-                }
-            }
-            else if ( sorted_clades[j].overlaps(sorted_clades[j+1]) == true )
-            {
-                throw RbException("Cannot simulate tree: conflicting monophyletic clade constraints. Check that all clade constraints are properly nested.");
-            }
-            else if (sorted_clades[j].getAge() > sorted_clades[j+1].getAge())
-            {
-                std::swap(sorted_clades[j], sorted_clades[j+1]);
-            }
-
-        }
-    }
+    std::sort(sorted_clades.begin(), sorted_clades.end(), cladeWithinAndBefore);
 
     /*
      * Walk clade constraints from tips to root.
@@ -1019,7 +986,7 @@ Tree* TopologyConstrainedTreeDistribution::simulateUnrootedTree( void )
         if ( monophyly_constraints[i].size() > 1 && monophyly_constraints[i].size() < num_taxa )
         {
         
-            if ( monophyly_constraints[i].isOptionalMatch() == true )
+            if ( monophyly_constraints[i].isOptionalConstraint() == true )
             {
                 std::vector<Clade> optional_constraints = monophyly_constraints[i].getOptionalConstraints();
                 size_t idx = (size_t)( GLOBAL_RNG->uniform01() * optional_constraints.size() );
