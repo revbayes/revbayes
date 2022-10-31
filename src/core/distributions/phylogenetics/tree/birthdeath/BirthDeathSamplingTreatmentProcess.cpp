@@ -1636,7 +1636,7 @@ int BirthDeathSamplingTreatmentProcess::survivors(double t) const
             break;
         } else if (global_timeline[idx] > t)
         {   
-            // TODO by ignoring time = t we implicitly count all tips at a time as survivors
+            // by ignoring time = t we implicitly count all tips at a time as survivors
             // This is compatible with the logic in computing event-sampling probabilities but could be changed
             survivors += (int)event_bifurcation_times[idx].size();
             survivors -= (int)event_tip_ages[idx].size();
