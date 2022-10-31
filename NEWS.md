@@ -11,7 +11,8 @@
   * Automatically remove degree-2 root nodes when reading non-clock trees.
 
 ## Bug Fixes
-  * _UNMERGED_ Fix false claim of conflicting constraints. (#288)
+  * _UNMERGED_ Fix some problems with the BDSTP.
+  * Fix false claim of conflicting constraints. (#288)
   * Statically link boost into distributed binaries.
   * Don't link distributed binaries with openlibm.
   * Don't get stuck on MCMC with amino-acid models.
