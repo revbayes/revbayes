@@ -358,7 +358,7 @@ void PoMoState::setState(const std::vector<size_t> &counts)
         basic_index *= virt_pop_size_minus_1;
         basic_index += num_raw_states;
         
-        if ( index_second_allele > num_raw_states )
+        if ( index_second_allele >= num_raw_states )
         {
             throw RbException( "PoMo string state not correct. The second allele could not be determined." );
         }
