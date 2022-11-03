@@ -742,11 +742,17 @@ void Clade::setAges(const std::vector<Taxon>& taxa)
     }
 }
 
-// These should provide a "strict weak ordering" that returns
-// true only if c1 is ordered with respect to c2, and c1 < c2.
-// We do not treat conflicting constraints as unordered.
+// std::sort needs a "strict weak ordering" that returns true
+//    only if c1 is ordered with respect to c2, and c1 < c2.
+//
+// cladeWithin only provides a partial ordering, so we can't use std::sort with that.
+// We would need to use a topological sort, which is more complex.
+// Real numbers plus NaNs also provide only a partial ordering, so we can't just pretend that
+//   an NaN is a number.
 //
 // Its not really clear how to handle negative constraints or optional constraints.
+// They must all be equivalent, we decide to put them last.
+
 // We really should separate the idea of constraints (CladeConstraint,
 // NotCladeConstraint, OptionalCladeConstraint) from the idea of clades.
 
@@ -755,22 +761,48 @@ bool cladeBefore(const Clade& c1, const Clade& c2)
     if (&c1 == &c2)
         return false;
 
-    // Negative constraints and Optional constraints are unordered after all regular constraints.
+    // Negative constraints and Optional constraints are ordered after all regular constraints.
     else if (not (c1.isNegativeConstraint() or c1.isOptionalConstraint()) and (c2.isNegativeConstraint() or c2.isOptionalConstraint()))
         return true;
     else if (c1.isNegativeConstraint() or c1.isOptionalConstraint() or c2.isNegativeConstraint() or c2.isOptionalConstraint())
         return false;
 
     else
+    {
+        // Clades without ages are equivalent.
+        // They have to come first or last, we pick first.
+        bool c1_has_age = not std::isnan(c1.getAge());
+        bool c2_has_age = not std::isnan(c2.getAge());
+
+        if (not c1_has_age and     c2_has_age) return true;
+        if (    c1_has_age and not c2_has_age) return false;
+
         return c1.getAge() < c2.getAge();
+    }
 }
+
+bool cladeSmaller(const Clade& c1, const Clade& c2)
+{
+    if (&c1 == &c2)
+        return false;
+
+    // Negative constraints and Optional constraints are ordered after all regular constraints.
+    else if (not (c1.isNegativeConstraint() or c1.isOptionalConstraint()) and (c2.isNegativeConstraint() or c2.isOptionalConstraint()))
+        return true;
+    else if (c1.isNegativeConstraint() or c1.isOptionalConstraint() or c2.isNegativeConstraint() or c2.isOptionalConstraint())
+        return false;
+
+    else
+        return c1.getTaxa().size() < c2.getTaxa().size();
+}
+
 
 bool cladeWithin(const Clade& c1, const Clade& c2)
 {
     if (&c1 == &c2)
         return false;
 
-    // Negative constraints and Optional constraints are unordered after all regular constraints.
+    // Negative constraints and Optional constraints are ordered after all regular constraints.
     else if (not (c1.isNegativeConstraint() or c1.isOptionalConstraint()) and (c2.isNegativeConstraint() or c2.isOptionalConstraint()))
         return true;
     else if (c1.isNegativeConstraint() or c1.isOptionalConstraint() or c2.isNegativeConstraint() or c2.isOptionalConstraint())
@@ -800,58 +832,6 @@ bool cladeWithin(const Clade& c1, const Clade& c2)
         return false;
     }
 }
-
-bool cladeWithinAndBefore(const Clade& c1, const Clade& c2)
-{
-    if (&c1 == &c2)
-        return false;
-
-    // Negative constraints and Optional constraints are unordered after all regular constraints.
-    else if (not (c1.isNegativeConstraint() or c1.isOptionalConstraint()) and (c2.isNegativeConstraint() or c2.isOptionalConstraint()))
-        return true;
-    else if (c1.isNegativeConstraint() or c1.isOptionalConstraint() or c2.isNegativeConstraint() or c2.isOptionalConstraint())
-        return false;
-
-    // c2 is nested with c1
-    else if (c1.isNestedWithin(c2))
-    {
-        // .. AND c1 is nested within c2!
-        if (c2.isNestedWithin(c1))
-            return (c1.getAge() < c2.getAge());
-
-        if ( c1.getAge() < c2.getAge() )
-            throw RbException()<<"Conflicting clades: nested Clade1 constraint has larger Age than containing Clade2!\n"
-                               <<"  Clade1 = "<<c2<<"\n"
-                               <<"  Clade2 = "<<c1<<"\n";
-        return false;
-    }
-    // c1 is nested with c2, but not the reverse
-    else if (c2.isNestedWithin(c1))
-    {
-        if ( c2.getAge() < c1.getAge() )
-            throw RbException()<<"Conflicting clades: nested Clade1 constraint has larger Age than containing Clade2!\n"
-                               <<"  Clade1 = "<<c1<<"\n"
-                               <<"  Clade2 = "<<c2<<"\n";
-        return true;
-    }
-    else if (c1.overlaps(c2))
-    {
-        RbException e;
-        e<<"Cannot simulate tree: conflicting monophyletic clade constraints:\n"
-         <<"  Clade1 = "<<c1<<"\n"
-         <<"  Clade2 = "<<c2<<"\n"
-         <<"  Overlap = ";
-        for(auto& taxon: c1.intersection(c2))
-            e<<taxon.getName()<<" ";
-        throw e;
-    }
-    else
-    {
-        // unordered!
-        return false;
-    }
-};
-        
 
 }
 
