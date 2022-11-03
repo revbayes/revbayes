@@ -7,6 +7,7 @@
 #include "Move.h"
 #include "Proposal.h"
 #include "RbException.h"
+#include "RbConstants.h"
 
 
 using namespace RevBayesCore;
@@ -138,6 +139,20 @@ const std::vector<DagNode*>& Proposal::getNodes( void ) const
     return nodes;
 }
 
+
+double Proposal::getProposalTuningParameter( void ) const
+{
+    // Default to no tuning parameter
+    return RbConstants::Double::nan;
+}
+
+void Proposal::setProposalTuningParameter(double tp)
+{
+}
+
+void Proposal::tune(double r)
+{
+}
 
 std::vector<DagNode*> Proposal::identifyNodesToTouch(void)
 {
