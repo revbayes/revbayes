@@ -451,6 +451,10 @@ RbVector<Move>& Mcmc::getMoves(void)
     return moves;
 }
 
+bool Mcmc::tuningInfo::isTunable() const
+{
+    return not std::isnan(tuning_parameter);
+}
 
 std::vector<Mcmc::tuningInfo> Mcmc::getMovesTuningInfo(void)
 {
@@ -468,13 +472,14 @@ std::vector<Mcmc::tuningInfo> Mcmc::getMovesTuningInfo(void)
         moves_tuningInfo[i].num_accepted_current_period = moves[i].getNumberAcceptedCurrentPeriod();
         moves_tuningInfo[i].num_accepted_total          = moves[i].getNumberAcceptedTotal();
         
-        double tmp_tuningParameter = moves[i].getMoveTuningParameter();
-        
-        if ((std::isnan(moves_tuningInfo[i].tuning_parameter) == true && std::isnan(tmp_tuningParameter) == false) || (std::isnan(moves_tuningInfo[i].tuning_parameter) == false && std::isnan(tmp_tuningParameter) == true))
+        if (moves_tuningInfo[i].isTunable() != moves[i].isTunable())
         {
-            throw RbException( "The tunability of some moves changed." );
+            if (moves[i].isTunable())
+                throw RbException()<<"getMovesTuningInfo: Move "<<moves[i].getMoveName()<<" became tunable!";
+            else
+                throw RbException()<<"getMovesTuningInfo: Move "<<moves[i].getMoveName()<<" became non-tunable!";
         }
-        else if (std::isnan(tmp_tuningParameter) == false)
+        else if (moves[i].isTunable())
         {
             moves_tuningInfo[i].tuning_parameter = moves[i].getMoveTuningParameter();
         }
@@ -1325,13 +1330,14 @@ void Mcmc::setMovesTuningInfo(const std::vector<tuningInfo> &mvs_ti)
         moves[i].setNumberAcceptedCurrentPeriod(moves_tuningInfo[i].num_accepted_current_period);
         moves[i].setNumberAcceptedTotal(moves_tuningInfo[i].num_accepted_total);
         
-        double tmp_tuningParameter = moves[i].getMoveTuningParameter();
-        
-        if ((std::isnan(moves_tuningInfo[i].tuning_parameter) == true && std::isnan(tmp_tuningParameter) == false) || (std::isnan(moves_tuningInfo[i].tuning_parameter) == false && std::isnan(tmp_tuningParameter) == true))
+        if (moves_tuningInfo[i].isTunable() != moves[i].isTunable())
         {
-            throw RbException( "The tunability of some moves changed." );
+            if (moves[i].isTunable())
+                throw RbException()<<"setMovesTuningInfo: Move "<<moves[i].getMoveName()<<" became tunable!";
+            else
+                throw RbException()<<"setMovesTuningInfo: Move "<<moves[i].getMoveName()<<" became non-tunable!";
         }
-        else if (std::isnan(tmp_tuningParameter) == false)
+        else if (moves[i].isTunable())
         {
             moves[i].setMoveTuningParameter(moves_tuningInfo[i].tuning_parameter);
         }

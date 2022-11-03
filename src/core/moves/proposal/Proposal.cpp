@@ -2,6 +2,7 @@
 #include <iosfwd>
 #include <string>
 #include <vector>
+#include <cmath>
 
 #include "DagNode.h"
 #include "Move.h"
@@ -154,6 +155,11 @@ void Proposal::setProposalTuningParameter(double tp)
 void Proposal::tune(double r)
 {
     throw RbException()<<"tune: tuning not implemented for "<<getProposalName();
+}
+
+bool Proposal::isTunable() const
+{
+    return not std::isnan( getProposalTuningParameter() );
 }
 
 std::vector<DagNode*> Proposal::identifyNodesToTouch(void)

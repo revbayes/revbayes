@@ -37,6 +37,7 @@ namespace RevBayesCore {
         virtual double                                          getProposalTuningParameter(void) const;
         virtual void                                            setProposalTuningParameter(double tp);
         virtual void                                            tune(double r);                                                                         //!< Tune the parameters of the proposal.
+        bool                                                    isTunable() const;
 
         // pure virtual methods
         virtual void                                            cleanProposal(void) = 0;                                                                //!< Cleanup proposal

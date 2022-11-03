@@ -56,6 +56,7 @@ template <class valueType> class RbOrderedSet;
         virtual double                                          getMoveTuningParameter(void) const;
         virtual void                                            setMoveTuningParameter(double tp);
         virtual void                                            autoTune(void);                                             //!< Automatic tuning of the move.
+        bool                                                    isTunable() const;
         
     protected:
         Move();                                                                                                             //!< Constructor

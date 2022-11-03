@@ -33,6 +33,11 @@ void Move::autoTune(void)
     throw RbException()<<"autoTune: auto-tuning not implemented for "<<getMoveName();
 }
 
+bool Move::isTunable() const
+{
+    return not std::isnan( getMoveTuningParameter() );
+}
+
 std::ostream& RevBayesCore::operator<<(std::ostream& o, const Move& x)
 {
     o << "Move";

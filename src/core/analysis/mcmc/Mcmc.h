@@ -35,6 +35,7 @@ namespace RevBayesCore {
             size_t                                          num_accepted_current_period;
             size_t                                          num_accepted_total;
             double                                          tuning_parameter;
+            bool                                            isTunable() const;
         };
         
         // public methods
