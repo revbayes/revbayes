@@ -51,15 +51,12 @@ namespace RevBayesCore {
         double                                                      computeNodeStateProbability( TopologyNode* parent);
         double                                                      doProposal(void);                                               //!< Perform proposal
         const std::string&                                          getProposalName(void) const;                                    //!< Get the name of the proposal for summary printing
-        double                                                      getProposalTuningParameter(void) const;
         void                                                        prepareProposal(void);                                          //!< Prepare the proposal
         void                                                        printParameterSummary(std::ostream &o, bool name_only) const;                   //!< Print the parameter summary
         void                                                        sampleNodeCharacters(TopologyNode* node);                       //!< Sample the characters at the node
         void                                                        sampleNodeCharactersJoint(TopologyNode* parent);                                         //!< Sample the characters at the node
         void                                                        setRateGenerator(const TypedDagNode<RateGenerator> *d);
         void                                                        setRateGenerator(const TypedDagNode<RateGeneratorSequence> *d);
-        void                                                        setProposalTuningParameter(double tp);
-        void                                                        tune(double r);                                                 //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                                        undoProposal(void);                                             //!< Reject the proposal
 
     protected:
@@ -413,14 +410,6 @@ const std::string& RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType
     static std::string name = "NarrowExchangeCharacterHistoryProposal";
     
     return name;
-}
-
-
-template<class charType>
-double RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::getProposalTuningParameter( void ) const
-{
-    // this proposal has no tuning parameter
-    return RbConstants::Double::nan;
 }
 
 
@@ -1049,29 +1038,6 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::swapNodeInt
     uncle_proposal->swapNodeInternal(oldN, newN);
     brother_proposal->swapNodeInternal(oldN, newN);
     grandparent_proposal->swapNodeInternal(oldN, newN);
-    
-}
-
-
-template<class charType>
-void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-template<class charType>
-void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::tune( double rate )
-{
-    
-    // nothing to tune
     
 }
 

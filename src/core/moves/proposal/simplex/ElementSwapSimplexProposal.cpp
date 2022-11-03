@@ -62,13 +62,6 @@ const std::string& ElementSwapSimplexProposal::getProposalName( void ) const
 }
 
 
-double ElementSwapSimplexProposal::getProposalTuningParameter( void ) const
-{
-    // this proposal has no tuning parameter
-    return RbConstants::Double::nan;
-}
-
-
 /**
  * Perform the proposal.
  *
@@ -159,20 +152,3 @@ void ElementSwapSimplexProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     variable = static_cast<StochasticNode<Simplex >* >(newN) ;
 }
-
-
-void ElementSwapSimplexProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- */
-void ElementSwapSimplexProposal::tune( double rate )
-{
-    
-}
-

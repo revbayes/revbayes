@@ -89,13 +89,6 @@ const std::string& GraphFlipCliqueProposal::getProposalName( void ) const
 }
 
 
-double GraphFlipCliqueProposal::getProposalTuningParameter( void ) const
-{
-    // this proposal has no tuning parameter
-    return RbConstants::Double::nan;
-}
-
-
 /**
  * Perform the proposal.
  *
@@ -333,42 +326,5 @@ void GraphFlipCliqueProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
         matrix = static_cast< StochasticNode<MatrixReal>* >(newN) ;
     }
     
-}
-
-
-void GraphFlipCliqueProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void GraphFlipCliqueProposal::tune( double rate )
-{
-//    
-//    if ( rate > 0.44 )
-//    {
-//        sampling_probability *= (1.0 + ((rate-0.44)/0.56) );
-//    }
-//    else
-//    {
-//        sampling_probability /= (2.0 - rate/0.44 );
-//    }
-//    
-//    // bound value s.t. 0 < switch_probability <= 1.0
-//    if (sampling_probability > 1.0)
-//    {
-//        sampling_probability = 1.0;
-//    }
-//    else if (sampling_probability < 1.0 / vertex_list_length)
-//    {
-//        sampling_probability = 1.0 / vertex_list_length;
-//    }
 }
 

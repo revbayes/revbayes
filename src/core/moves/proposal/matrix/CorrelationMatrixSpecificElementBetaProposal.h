@@ -36,13 +36,14 @@ template <class variableType> class StochasticNode;
         CorrelationMatrixSpecificElementBetaProposal*    clone(void) const;                                                                  //!< Clone object
         double                                   doProposal(void);                                                                   //!< Perform proposal
         const std::string&                       getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
-        double                                   getProposalTuningParameter(void) const;
         void                                     printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
         void                                     prepareProposal(void);                                                              //!< Prepare the proposal
-        void                                     setProposalTuningParameter(double tp);
-        void                                     tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                     undoProposal(void);                                                                 //!< Reject the proposal
         
+        double                                   getProposalTuningParameter(void) const override;
+        void                                     setProposalTuningParameter(double tp) override;
+        void                                     tune(double r) override;                                                            //!< Tune the parameters of the proposal.
+
     protected:
         void                                     swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
         

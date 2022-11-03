@@ -80,13 +80,6 @@ const std::string& AddRemoveTipProposal::getProposalName( void ) const
 }
 
 
-double AddRemoveTipProposal::getProposalTuningParameter( void ) const
-{
-    // this proposal has no tuning parameter
-    return RbConstants::Double::nan;
-}
-
-
 /**
  * Perform the proposal.
  *
@@ -402,23 +395,3 @@ void AddRemoveTipProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     }
     
 }
-
-
-void AddRemoveTipProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void AddRemoveTipProposal::tune( double rate )
-{
-    
-}
-

@@ -31,11 +31,8 @@ namespace RevBayesCore {
         IndependentPriorProposal*               clone(void) const;                                          //!< Clone object
         double                                  doProposal(void);                                           //!< Perform proposal
         const std::string&                      getProposalName(void) const;                                //!< Get the name of the proposal for summary printing
-        double                                  getProposalTuningParameter(void) const;
         void                                    prepareProposal(void);                                      //!< Prepare the proposal
         void                                    printParameterSummary(std::ostream &o, bool name_only) const;               //!< Print the parameter summary
-        void                                    setProposalTuningParameter(double tp);
-        void                                    tune(double r);                                             //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                    undoProposal(void);                                         //!< Reject the proposal
         
     protected:
@@ -98,14 +95,6 @@ const std::string& RevBayesCore::IndependentPriorProposal<valueType>::getProposa
 }
 
 
-template <class valueType>
-double RevBayesCore::IndependentPriorProposal<valueType>::getProposalTuningParameter( void ) const
-{
-    // this proposal has no tuning parameter
-    return RbConstants::Double::nan;
-}
-
-
 /** Perform the move */
 template <class valueType>
 double RevBayesCore::IndependentPriorProposal<valueType>::doProposal( void )
@@ -153,22 +142,6 @@ void RevBayesCore::IndependentPriorProposal<valueType>::undoProposal( void )
     variable->setValue(new valueType(stored_value));
 
 }
-
-template <class valueType>
-void RevBayesCore::IndependentPriorProposal<valueType>::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/** Tune the proposal */
-template <class valueType>
-void RevBayesCore::IndependentPriorProposal<valueType>::tune(double r)
-{
-
-    // nothing to do
-}
-
 
 template <class valueType>
 void RevBayesCore::IndependentPriorProposal<valueType>::swapNodeInternal(RevBayesCore::DagNode *oldN, RevBayesCore::DagNode *newN)

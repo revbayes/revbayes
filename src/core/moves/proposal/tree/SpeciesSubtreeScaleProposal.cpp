@@ -101,13 +101,6 @@ const std::string& SpeciesSubtreeScaleProposal::getProposalName( void ) const
 }
 
 
-double SpeciesSubtreeScaleProposal::getProposalTuningParameter( void ) const
-{
-    // this proposal has no tuning parameter
-    return RbConstants::Double::nan;
-}
-
-
 /**
  * Perform the proposal.
  *
@@ -369,26 +362,5 @@ void SpeciesSubtreeScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
             std::cerr << "Found " << num_found_trees << " DAG nodes matching to node \"" << oldN->getName() << "\".";
         }
     }
-
-}
-
-
-void SpeciesSubtreeScaleProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void SpeciesSubtreeScaleProposal::tune( double rate )
-{
-
-    // nothing to tune
 
 }

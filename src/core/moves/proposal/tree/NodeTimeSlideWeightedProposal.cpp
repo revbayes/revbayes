@@ -74,13 +74,6 @@ const std::string& NodeTimeSlideWeightedProposal::getProposalName( void ) const
 }
 
 
-double NodeTimeSlideWeightedProposal::getProposalTuningParameter( void ) const
-{
-    // this proposal has no tuning parameter
-    return RbConstants::Double::nan;
-}
-
-
 /**
  * Perform the proposal.
  *
@@ -266,23 +259,3 @@ void NodeTimeSlideWeightedProposal::swapNodeInternal(DagNode *oldN, DagNode *new
     variable = static_cast<StochasticNode<Tree>* >(newN) ;
     
 }
-
-
-void NodeTimeSlideWeightedProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void NodeTimeSlideWeightedProposal::tune( double rate )
-{
-    
-}
-

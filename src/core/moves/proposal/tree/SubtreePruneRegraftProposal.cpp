@@ -64,13 +64,6 @@ const std::string& SubtreePruneRegraftProposal::getProposalName( void ) const
 }
 
 
-double SubtreePruneRegraftProposal::getProposalTuningParameter( void ) const
-{
-    // this proposal has no tuning parameter
-    return RbConstants::Double::nan;
-}
-
-
 bool SubtreePruneRegraftProposal::isDescendant(const TopologyNode &n, const TopologyNode &p) {
 
     if ( n.isRoot() ) {
@@ -318,25 +311,3 @@ void SubtreePruneRegraftProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     tree = static_cast<StochasticNode<Tree>* >(newN) ;
     
 }
-
-
-void SubtreePruneRegraftProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void SubtreePruneRegraftProposal::tune( double rate )
-{
-    
-    // nothing to tune
-    
-}
-

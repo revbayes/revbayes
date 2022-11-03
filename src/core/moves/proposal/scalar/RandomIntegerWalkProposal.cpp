@@ -60,13 +60,6 @@ const std::string& RandomIntegerWalkProposal::getProposalName( void ) const
 }
 
 
-double RandomIntegerWalkProposal::getProposalTuningParameter( void ) const
-{
-    // this proposal has no tuning parameter
-    return RbConstants::Double::nan;
-}
-
-
 /**
  * Perform the proposal.
  *
@@ -153,23 +146,3 @@ void RandomIntegerWalkProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     variable = static_cast<StochasticNode<long>* >(newN) ;
     
 }
-
-
-void RandomIntegerWalkProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * There is no tuning parameter here.
- */
-void RandomIntegerWalkProposal::tune( double rate )
-{
-    
-    // no tuning parameter
-    
-}
-

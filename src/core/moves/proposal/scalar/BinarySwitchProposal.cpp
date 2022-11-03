@@ -58,13 +58,6 @@ const std::string& BinarySwitchProposal::getProposalName( void ) const
 }
 
 
-double BinarySwitchProposal::getProposalTuningParameter( void ) const
-{
-    // this proposal has no tuning parameter
-    return RbConstants::Double::nan;
-}
-
-
 /**
  * Perform the proposal.
  *
@@ -146,23 +139,3 @@ void BinarySwitchProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     variable = static_cast<StochasticNode<long>* >(newN) ;
     
 }
-
-
-void BinarySwitchProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * There is no tuning parameter here.
- */
-void BinarySwitchProposal::tune( double rate )
-{
-    
-    // no tuning parameter
-    
-}
-
