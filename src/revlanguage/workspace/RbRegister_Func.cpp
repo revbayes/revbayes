@@ -230,6 +230,7 @@
 #include "Func_readPoMoCountFile.h"
 #include "Func_convertCountFileToNaturalNumbers.h"
 #include "Func_convertFastaFileToNaturalNumbers.h"
+#include "Func_convertVCFtoCountsFile.h"
 
 /* Math functions (in folder "functions/math") */
 #include "Func_abs.h"
@@ -444,6 +445,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_readPoMoCountFile()                               );
         addFunction( new Func_convertCountFileToNaturalNumbers()                );
         addFunction( new Func_convertFastaFileToNaturalNumbers()                );
+        addFunction( new Func_convertVCFtoCountsFile()                          );
         addFunction( new Func_simStartingTree()                                 );
         addFunction( new Func_simTree()                                         );
         addFunction( new Func_simCompleteTree()                                 );

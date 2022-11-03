@@ -37,7 +37,7 @@ PoMoStateConverter::PoMoStateConverter( void )
 /**
  * Data converter from DNA into PoMoState4.
  *
- * This function concverts a DNA matrix into a PoMoState4 matrix of given virtualPopulationSize,
+ * This function concverts a DNA matrix into a PoMoState2 matrix of given virtualPopulationSize,
  * using the given mapping between sequence name and species name.
  */
 HomologousDiscreteCharacterData<PoMoState>* PoMoStateConverter::convertData2( const AbstractHomologousDiscreteCharacterData &d,

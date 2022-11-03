@@ -30,12 +30,16 @@ namespace RevBayesCore {
         enum PLOIDY { HAPLOID, DIPLOID, POLYPLOID };
         enum UNKOWN_TREATMENT { MISSING, REFERENCE, ALTERNATIVE };
         
-        VCFReader(const std::string &fn, PLOIDY p, UNKOWN_TREATMENT u);
+        VCFReader(const std::string &fn, PLOIDY p, UNKOWN_TREATMENT u, bool read_data=true);
         
         HomologousDiscreteCharacterData<DnaState>*              readDNAMatrix( void );
         HomologousDiscreteCharacterData<BinaryState>*           readBinaryMatrix( void );
+        void                                                    convertToCountsFile( const std::string& fn, const RbVector<Taxon>& taxa_list, const std::string& type );
 
     protected:
+        
+        std::vector<size_t>                                     extractStateIndices(std::string alleles, const std::string& type);
+
         
         std::string                                             filename;
         PLOIDY                                                  ploidy;
