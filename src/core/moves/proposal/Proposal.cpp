@@ -148,10 +148,12 @@ double Proposal::getProposalTuningParameter( void ) const
 
 void Proposal::setProposalTuningParameter(double tp)
 {
+    throw RbException()<<"setProposalTuningParameter: tuning not implemented for "<<getProposalName();
 }
 
 void Proposal::tune(double r)
 {
+    throw RbException()<<"tune: tuning not implemented for "<<getProposalName();
 }
 
 std::vector<DagNode*> Proposal::identifyNodesToTouch(void)
