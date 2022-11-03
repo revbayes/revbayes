@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <ostream>
 #include <vector>
+#include <optional>
 
 #include "Cloneable.h"
 
@@ -53,7 +54,7 @@ template <class valueType> class RbOrderedSet;
         virtual void                                            setNumberTriedTotal(size_t nt) = 0;
         virtual void                                            swapNode(DagNode *oldN, DagNode *newN) = 0;                 //!< Swap the pointers to the variable on which the move works on.
         
-        virtual double                                          getMoveTuningParameter(void) const;
+        virtual std::optional<double>                           getMoveTuningParameter(void) const;
         virtual void                                            setMoveTuningParameter(double tp);
         virtual void                                            autoTune(void);                                             //!< Automatic tuning of the move.
         bool                                                    isTunable() const;

@@ -14,7 +14,6 @@
 using namespace RevBayesCore;
 
 
-
 Proposal::Proposal(double p) :
     nodes(),
     move( NULL ),
@@ -141,10 +140,10 @@ const std::vector<DagNode*>& Proposal::getNodes( void ) const
 }
 
 
-double Proposal::getProposalTuningParameter( void ) const
+std::optional<double> Proposal::getProposalTuningParameter( void ) const
 {
     // Default to no tuning parameter
-    return RbConstants::Double::nan;
+    return {};
 }
 
 void Proposal::setProposalTuningParameter(double tp)
@@ -159,7 +158,7 @@ void Proposal::tune(double r)
 
 bool Proposal::isTunable() const
 {
-    return not std::isnan( getProposalTuningParameter() );
+    return not getProposalTuningParameter().has_value();
 }
 
 std::vector<DagNode*> Proposal::identifyNodesToTouch(void)

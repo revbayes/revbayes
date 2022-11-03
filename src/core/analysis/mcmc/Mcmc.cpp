@@ -453,7 +453,7 @@ RbVector<Move>& Mcmc::getMoves(void)
 
 bool Mcmc::tuningInfo::isTunable() const
 {
-    return not std::isnan(tuning_parameter);
+    return tuning_parameter.has_value();
 }
 
 std::vector<Mcmc::tuningInfo> Mcmc::getMovesTuningInfo(void)

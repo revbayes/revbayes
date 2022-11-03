@@ -1,6 +1,8 @@
 #ifndef Mcmc_H
 #define Mcmc_H
 
+#include <optional>
+
 #include "MonteCarloSampler.h"
 
 namespace RevBayesCore {
@@ -34,7 +36,7 @@ namespace RevBayesCore {
             size_t                                          num_tried_total;
             size_t                                          num_accepted_current_period;
             size_t                                          num_accepted_total;
-            double                                          tuning_parameter;
+            std::optional<double>                           tuning_parameter;
             bool                                            isTunable() const;
         };
         

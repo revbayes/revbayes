@@ -4,6 +4,7 @@
 #include "Cloneable.h"
 
 #include <vector>
+#include <optional>
 
 namespace RevBayesCore {
     
@@ -34,7 +35,7 @@ namespace RevBayesCore {
         const Move*                                             getMove(void) const;                                                                    //!< Get the pointer to move object holding this proposal
 
         // tuning: perhaps these methods should be on an abstract base class TunableProposal?
-        virtual double                                          getProposalTuningParameter(void) const;
+        virtual std::optional<double>                           getProposalTuningParameter(void) const;
         virtual void                                            setProposalTuningParameter(double tp);
         virtual void                                            tune(double r);                                                                         //!< Tune the parameters of the proposal.
         bool                                                    isTunable() const;

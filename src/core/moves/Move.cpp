@@ -18,9 +18,9 @@ Move::~Move()
     
 }
 
-double Move::getMoveTuningParameter(void) const
+std::optional<double> Move::getMoveTuningParameter(void) const
 {
-    return RbConstants::Double::nan;
+    return {};
 }
 
 void Move::setMoveTuningParameter(double tp)
@@ -35,7 +35,7 @@ void Move::autoTune(void)
 
 bool Move::isTunable() const
 {
-    return not std::isnan( getMoveTuningParameter() );
+    return getMoveTuningParameter().has_value();
 }
 
 std::ostream& RevBayesCore::operator<<(std::ostream& o, const Move& x)
