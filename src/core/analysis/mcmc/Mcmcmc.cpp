@@ -707,7 +707,7 @@ void Mcmcmc::printMoveSummary(std::ostream &o, size_t chainId, size_t moveId, Mo
     o << " ";
     
     
-    if (RbMath::isNan(chain_moves_tuningInfo[chainId][moveId].tuning_parameter) == false)
+    if (chain_moves_tuningInfo[chainId][moveId].isTunable())
     {
         MetropolisHastingsMove *move = dynamic_cast<MetropolisHastingsMove*>(&mv);
         
@@ -1572,7 +1572,7 @@ void Mcmcmc::swapMovesTuningInfo(RbVector<Move> &mvsj, RbVector<Move> &mvsk)
     {
         if (itj->getMoveName() != itk->getMoveName())
         {
-            throw RbException( "The two moves whose tuning information is attempted to be swapped are not the same move as their names do not match." );
+            throw RbException()<<"Trying to swap tuning information between different moves '"<<itj->getMoveName()<<"' and '"<<itk->getMoveName()<<"'";
         }
         
         size_t tmp_numTriedCurrentPeriodj = itj->getNumberTriedCurrentPeriod();
@@ -1595,20 +1595,20 @@ void Mcmcmc::swapMovesTuningInfo(RbVector<Move> &mvsj, RbVector<Move> &mvsk)
         itj->setNumberAcceptedTotal(tmp_numAcceptedTotalk);
         itk->setNumberAcceptedTotal(tmp_numAcceptedTotalj);
         
-        double tmp_tuningParameterj = itj->getMoveTuningParameter();
-        double tmp_tuningParameterk = itk->getMoveTuningParameter();
-        
-        if ((std::isnan(tmp_tuningParameterj) == true && std::isnan(tmp_tuningParameterk) == false) || (std::isnan(tmp_tuningParameterj) == false && std::isnan(tmp_tuningParameterk) == true))
+        if (itj->isTunable() != itk->isTunable())
         {
-            throw RbException( "The two moves whose tuning information is attempted to be swapped are not the same move as only one of them has tuning parameter." );
+            throw RbException()<<"The two moves named '"<<itj->getMoveName()<<"' whose tuning information is attempted to be swapped are not the same move as only one of them has tuning parameter.";
         }
-        else if (std::isnan(tmp_tuningParameterj) == false)
+        else if (itj->isTunable())
         {
+            double tmp_tuningParameterj = itj->getMoveTuningParameter();
+            double tmp_tuningParameterk = itk->getMoveTuningParameter();
+        
             itj->setMoveTuningParameter(tmp_tuningParameterk);
             itk->setMoveTuningParameter(tmp_tuningParameterj);
         }
     }
-    
+
     if (itk != mvsk.end())
     {
         throw RbException( "The two moves objetcs whose tuning information is attempted to be swapped have different number of moves." );
