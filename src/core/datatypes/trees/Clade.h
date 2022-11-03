@@ -101,10 +101,11 @@ namespace RevBayesCore {
     // Global functions using the class
     std::ostream&                       operator<<(std::ostream& o, const Clade& x);                             //!< Overloaded output operator
 
-    bool cladeWithinAndBefore(const Clade& c1, const Clade& c2);
-
+    // Partial order
     bool cladeWithin(const Clade& c1, const Clade& c2);
 
+    // Strict weak order
+    bool cladeSmaller(const Clade& c1, const Clade& c2);
     bool cladeBefore(const Clade& c1, const Clade& c2);
 }
 
