@@ -648,6 +648,52 @@ void TopologyConstrainedTreeDistribution::setBackbone(const TypedDagNode<Tree> *
     }
 }
 
+void checkCladesConsistent(const std::vector<Clade>& clades)
+{
+    // complain if we have conflicts
+    for(int i=0;i<clades.size();i++)
+    {
+        auto& c1 = clades[i];
+        if ( c1.isNegativeConstraint() ) continue;
+
+        for(int j=0;j<clades.size();j++)
+        {
+            if (i == j) continue;
+
+            auto& c2 = clades[j];
+            if ( c2.isNegativeConstraint() ) continue;
+
+            // c1 conflicts with c2 then say which clades conflict
+            if (c1.conflicts(c2))
+            {
+                RbException e;
+                e<<"Clades conflict:\n"
+                 <<"  Clade1 = "<<c1<<"\n"
+                 <<"  Clade2 = "<<c2<<"\n";
+
+                // Here we print the intersection.
+                // But we should probably print the smallest of:
+                // (c1 AND c2), (c1 - c2), (c2 - c1).
+                e<<"  Overlap = ";
+                auto both = c1.intersection(c2);
+                for(auto& taxon: both)
+                    e<<taxon.getName()<<" ";
+
+                throw e;
+            }
+
+            // If c2 is within c1 then it shouldn't be older
+            if (c1.isNestedWithin(c2))
+            {
+                if (c2.getAge() > c1.getAge())
+                    throw RbException()<<"Clade ages conflict:\n"
+                                       <<"Clade 1 = "<<c1<<" Age = "<<c1.getAge()<<"\n"
+                                       <<"Clade 2 = "<<c2<<" Age = "<<c2.getAge();
+            }
+        }
+    }
+}
+
 /**
  *
  */
@@ -720,8 +766,11 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( void )
     all_species.setAge( ra );
     sorted_clades.push_back(all_species);
 
+    // complain if we have conflicts
+    checkCladesConsistent(sorted_clades);
+
     size_t num_clades = sorted_clades.size();
-    std::sort(sorted_clades.begin(), sorted_clades.end(), cladeWithinAndBefore);
+    std::sort(sorted_clades.begin(), sorted_clades.end(), cladeSmaller);
 
     /*
      * Walk clade constraints from tips to root.
@@ -731,19 +780,29 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( void )
      *   Remove its tip taxa from the unclaimed_taxa set to avoid adding grandchildren as children.
      */
 
+    /*
+     * An alternative idea would be to make a tree with all leaves as children of the root.
+     * Then for each clade we try find the MRCA, and see if we can create a new child that
+     * contains some of the children of the MCRA.  It should contain all the clade taxa and
+     * no others.  If we cannot do that, then the clade is not consistent with the tree.
+     *
+     * For constraints with rooted splits that separate TAXA1 from TAXA2+root, we can use the
+     * BUILD algorithm to find a consistent tree or report failure.
+     *
+     * However, perhaps a better idea would be to use MCMC to find a solution to the constraints.
+     * There isn't a general algorithm for determining if tree constraints are consistent,
+     * especially when we include NOT constraints and OR constraints.
+     */
+    
     std::vector<Clade> virtual_taxa;
     int i = -1;
     for (std::vector<Clade>::iterator it = sorted_clades.begin(); it != sorted_clades.end(); it++)
     {
-        // ignore negative clade constraints during simulation
-        if ( it->isNegativeConstraint() == true )
-        {
-            continue;
-        }
-
-
         ++i;
         const Clade &c = *it;
+
+        // ignore negative clade constraints during simulation
+        if ( c.isNegativeConstraint() ) continue;
 
         std::vector<Taxon> unclaimed_taxa = c.getTaxa();
         std::vector<Clade> children;
@@ -752,21 +811,18 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( void )
         std::vector<Clade>::reverse_iterator jt(it);
         for (; jt != sorted_clades.rend(); jt++)
         {
-            // ignore negative clade constraints during simulation
-            if ( jt->isNegativeConstraint() == true )
-            {
-                continue;
-            }
-
             j--;
             const Clade &c_nested = *jt;
+
+            // ignore negative clade constraints during simulation
+            if ( c_nested.isNegativeConstraint() ) continue;
+
             const std::vector<Taxon>& taxa_nested = c_nested.getTaxa();
 
             bool found_all = true;
             bool found_some = false;
-            for (size_t k=0; k<taxa_nested.size(); ++k)
+            for (auto& taxon_nested: taxa_nested)
             {
-                const Taxon& taxon_nested = taxa_nested[k];
                 std::vector<Taxon>::iterator kt = std::find(unclaimed_taxa.begin(), unclaimed_taxa.end(), taxon_nested);
                 if ( kt != unclaimed_taxa.end() )
                 {
@@ -786,7 +842,7 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( void )
                 children.push_back( virtual_taxa[j] );
             }
 
-            // We check for conflicts when comparing clades during the sort.
+            // We check for conflicts before we try to construct the tree.
             // So any overlapping clades should be nested.
             assert(found_all == found_some);
         }
