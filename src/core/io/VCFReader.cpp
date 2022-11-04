@@ -188,7 +188,7 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
             size_t num_tips  = taxa.size();
             int    num_sites = -1;
             
-            out_stream << "COUNTSFILE NPOP " << num_tips << " NSITES " << num_sites << std::endl;
+            out_stream << "COUNTSFILE NPOP " << species_names.size() << " NSITES " << num_sites << std::endl;
             out_stream << "CHROM POS";
             for (size_t i = 0; i < species_names.size(); ++i)
             {
