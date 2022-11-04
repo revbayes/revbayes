@@ -130,7 +130,7 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
                 taxa = std::vector< Taxon >( NUM_SAMPLES, Taxon("") );
                 for (size_t i=0; i<NUM_SAMPLES; ++i)
                 {
-                    Taxon this_taxon = Taxon( sample_names[i] + "" );
+                    Taxon this_taxon = Taxon( sample_names[i] );
                     taxa[i] = this_taxon;
                 }
             }
@@ -159,14 +159,14 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
                 size_t taxon_index = 0;
                 for (size_t j=0; j<taxa_list.size(); ++j)
                 {
-                    const std::string& this_sample_name = taxa[j].getName();
+                    const std::string& this_sample_name = taxa_list[j].getName();
                     if ( sample_name == this_sample_name )
                     {
                         taxon_index = j;
                         break;
                     }
                 }
-                const std::string& species_name = taxa[taxon_index].getSpeciesName();
+                const std::string& species_name = taxa_list[taxon_index].getSpeciesName();
                 
                 // now get the index of the species
                 size_t species_index = 0;
@@ -190,9 +190,9 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
             
             out_stream << "COUNTSFILE NPOP " << num_tips << " NSITES " << num_sites << std::endl;
             out_stream << "CHROM POS";
-            for (std::vector<Taxon>::const_iterator it = taxa.begin();  it != taxa.end(); ++it)
+            for (size_t i = 0; i < species_names.size(); ++i)
             {
-                out_stream << " " << it->getName();
+                out_stream << " " << species_names[i];
             }
             out_stream << std::endl;
 
@@ -307,15 +307,7 @@ std::vector<size_t> VCFReader::extractStateIndices(std::string alleles, const st
         }
         
         // second allele
-        if ( allele_tokens[1] == "0")
-        {
-            states.push_back( 0 );
-        }
-        else if ( allele_tokens[1] == "1" )
-        {
-            states.push_back( 1 );
-        }
-        else if ( allele_tokens[1] == "." )
+        if ( allele_tokens.size() < 2 || allele_tokens[1] == "." )
         {
             if ( unkown_treatment == UNKOWN_TREATMENT::MISSING )
             {
@@ -329,6 +321,14 @@ std::vector<size_t> VCFReader::extractStateIndices(std::string alleles, const st
             {
                 states.push_back( 1 );
             }
+        }
+        else if ( allele_tokens[1] == "0")
+        {
+            states.push_back( 0 );
+        }
+        else if ( allele_tokens[1] == "1" )
+        {
+            states.push_back( 1 );
         }
         else
         {
