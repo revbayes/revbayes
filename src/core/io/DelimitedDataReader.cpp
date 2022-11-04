@@ -11,13 +11,18 @@
 
 using namespace RevBayesCore;
 
-DelimitedDataReader::DelimitedDataReader(const std::string &fn, const std::string& d, size_t lines_skipped) :
+DelimitedDataReader::DelimitedDataReader(const std::string &fn, const std::string& d, size_t lines_skipped, bool read_data) :
     filename(fn), 
     delimiter(d),
     chars()
 {
 
-    readData( lines_skipped );
+    // only read the data if we are asked to (the default)
+    if ( read_data == true )
+    {
+        readData( lines_skipped );
+    }
+    
     
 }
 
