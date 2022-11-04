@@ -35,6 +35,7 @@ namespace RevBayesCore {
         HomologousDiscreteCharacterData<DnaState>*              readDNAMatrix( void );
         HomologousDiscreteCharacterData<BinaryState>*           readBinaryMatrix( void );
         void                                                    convertToCountsFile( const std::string& fn, const RbVector<Taxon>& taxa_list, const std::string& type );
+        RbVector<long>                                          convertToSFS( const RbVector<Taxon>& taxa_list );
 
     protected:
         
