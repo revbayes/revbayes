@@ -68,10 +68,10 @@ class DiscreteCharacterState;
         virtual size_t                                          getNumberOfSegregatingSites(bool excl) const = 0;                                           //!< Compute the number of segregating sites
         virtual size_t                                          getNumberOfStates(void) const = 0;                                                          //!< Get the number of states for the characters in this matrix
         virtual size_t                                          getNumberOfInvariantSites(bool excl) const = 0;                                             //!< Number of invariant sites
-        virtual double                                          getAveragePairwiseSequenceDifference(bool excl) const = 0;                                   //!< Get the average pairwise sequence distance.
-        virtual size_t                                          getMaxPairwiseSequenceDifference(bool excl) const = 0;                                       //!< Get the average pairwise sequence distance.
-        virtual size_t                                          getMinPairwiseSequenceDifference(bool excl) const = 0;                                       //!< Get the average pairwise sequence distance.
-        virtual DistanceMatrix                                  getPairwiseSequenceDifference(bool excl) const = 0;                                       //!< Get the average pairwise sequence distance.
+        virtual double                                          getAveragePairwiseSequenceDifference(bool excl) const = 0;                                  //!< Get the average pairwise sequence distance.
+        virtual size_t                                          getMaxPairwiseSequenceDifference(bool excl) const = 0;                                      //!< Get the average pairwise sequence distance.
+        virtual size_t                                          getMinPairwiseSequenceDifference(bool excl) const = 0;                                      //!< Get the average pairwise sequence distance.
+        virtual DistanceMatrix                                  getPairwiseSequenceDifference(bool excl, bool rel=true) const = 0;                          //!< Get the average pairwise sequence distance.
         virtual AbstractDiscreteTaxonData&                      getTaxonData(size_t tn) = 0;                                                                //!< Return a reference to a sequence in the character matrix
         virtual const AbstractDiscreteTaxonData&                getTaxonData(size_t tn) const = 0;                                                          //!< Return a reference to a sequence in the character matrix
         virtual AbstractDiscreteTaxonData&                      getTaxonData(const std::string &tn) = 0;                                                    //!< Return a reference to a sequence in the character matrix

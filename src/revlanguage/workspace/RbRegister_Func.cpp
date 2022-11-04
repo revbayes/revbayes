@@ -98,6 +98,7 @@
 #include "Func_inferAncestralPopSize.h"
 #include "Func_maximumTree.h"
 #include "Func_mrcaIndex.h"
+#include "Func_NeighborJoining.h"
 #include "Func_nodeAgeByID.h"
 #include "Func_phyloDiversity.h"
 #include "Func_PhylogeneticIndependentContrasts.h"
@@ -449,6 +450,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_inferAncestralPopSize()                           );
         addFunction( new Func_maximumTree()                                     );
         addFunction( new Func_mrcaIndex()                                       );
+        addFunction( new Func_NeighborJoining()                                 );
         addFunction( new Func_nodeAgeByID()                                     );
         addFunction( new Func_phyloDiversity()                                  );
         addFunction( new Func_PhylogeneticIndependentContrasts()                );

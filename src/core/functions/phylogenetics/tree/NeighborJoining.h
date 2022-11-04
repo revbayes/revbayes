@@ -1,7 +1,7 @@
-#ifndef UPGMA_hpp
-#define UPGMA_hpp
+#ifndef NeighborJoining_hpp
+#define NeighborJoining_hpp
 
-#include <cstdio>
+#include <stdio.h>
 #include <vector>
 #include <set>
 
@@ -13,18 +13,18 @@ class TopologyNode;
 class Tree;
     
     /**
-     * This class provides the UPGMA algorithm to construct a tree from a distance matrix.
+     * This class provides the NeighborJoining algorithm to construct a tree from a distance matrix.
      *
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
      * @since 2013-04-15, version 1.0
      */
-    class UPGMA {
+    class NeighborJoining {
         
     public:
         
-        UPGMA();
+        NeighborJoining();
         
         Tree*                   constructTree( const DistanceMatrix& d ) const;
         
@@ -38,4 +38,4 @@ class Tree;
 
 
 
-#endif /* UPGMA_hpp */
+#endif /* NeighborJoining_hpp */

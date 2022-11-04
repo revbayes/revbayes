@@ -1,14 +1,14 @@
-#ifndef Func_UPGMA_H
-#define Func_UPGMA_H
+#ifndef Func_NeighborJoining_H
+#define Func_NeighborJoining_H
 
 #include "Procedure.h"
 
 namespace RevLanguage {
     
     /**
-     * @brief Rev function to construct a UPGMA tree.
+     * @brief Rev function to construct a NeighborJoining tree.
      *
-     * This procedure builds a tree using the UPGMA algorithm.
+     * This procedure builds a tree using the NeighborJoining algorithm.
      *
      *
      * @copyright Copyright 2009-
@@ -16,13 +16,13 @@ namespace RevLanguage {
      * @since Version 1.0, 2014-12-09
      *
      */
-    class Func_UPGMA : public Procedure {
+    class Func_NeighborJoining : public Procedure {
         
     public:
-        Func_UPGMA( void );
+        Func_NeighborJoining( void );
         
         // Basic utility functions
-        Func_UPGMA*                                     clone(void) const;                                          //!< Clone object
+        Func_NeighborJoining*                           clone(void) const;                                          //!< Clone object
         static const std::string&                       getClassType(void);                                         //!< Get Rev type
         static const TypeSpec&                          getClassTypeSpec(void);                                     //!< Get class type spec
         std::string                                     getFunctionName(void) const;                                //!< Get the primary name of the function in Rev
