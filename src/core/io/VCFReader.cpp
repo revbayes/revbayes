@@ -266,6 +266,147 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
 }
 
 
+
+RbVector<long> VCFReader::convertToSFS(const RbVector<Taxon>& taxa_list )
+{
+    // create the SFS object
+    size_t NUM_SAMPLES = taxa_list.size();
+    if ( ploidy == DIPLOID )
+    {
+        NUM_SAMPLES = 2*taxa_list.size();
+    }
+    RbVector<long> sfs = RbVector<long>(NUM_SAMPLES+1, 0);
+    
+    // we need to get a map of species names to all samples belonging to that species
+    std::vector<size_t> indices_of_taxa;
+    
+    // open file
+    std::ifstream readStream;
+    RbFileManager f_in = RbFileManager(filename);
+    if ( f_in.openFile(readStream) == false )
+    {
+        throw RbException( "Could not open file " + filename );
+    }
+    
+    // read file
+    // bool firstLine = true;
+    std::string read_line = "";
+    size_t lines_skipped = 0;
+    size_t lines_to_skip = 0;
+    std::vector<std::string> tmpChars;
+    bool has_names_been_read = false;
+    size_t samples_start_column = 0;
+    size_t NUM_SAMPLES_TOTAL = 0;
+    
+    while (f_in.safeGetline(readStream,read_line))
+    {
+        
+        tmpChars.clear();
+        ++lines_skipped;
+        if ( lines_skipped <= lines_to_skip)
+        {
+            continue;
+        }
+        
+        // skip blank lines
+        std::string::iterator first_nonspace = std::find_if(read_line.begin(), read_line.end(), [](int c) {return not isspace(c);});
+        if (first_nonspace == read_line.end())
+        {
+            continue;
+        }
+
+        StringUtilities::stringSplit(read_line, delimiter, tmpChars, true);
+        
+        // Skip comments.
+        if ( tmpChars[0][0] == '#' && tmpChars[0][1] == '#')
+        {
+            continue;
+        }
+        
+        if ( has_names_been_read == false )
+        {
+            std::vector<std::string> sample_names;
+            const std::vector<std::string> &format_line = tmpChars;
+            while ( format_line[samples_start_column] != "FORMAT" )
+            {
+                ++samples_start_column;
+            };
+            ++samples_start_column;
+            for (size_t j = samples_start_column; j < format_line.size(); ++j)
+            {
+                sample_names.push_back( format_line[j] );
+            }
+            
+            NUM_SAMPLES_TOTAL = sample_names.size();
+            
+            // create the lookup vector with the species to taxon columns positions
+            for (size_t i=0; i<NUM_SAMPLES_TOTAL; ++i)
+            {
+                const std::string& sample_name = sample_names[i];
+                
+                // now check if that sample is in the taxon list
+                for (size_t j=0; j<taxa_list.size(); ++j)
+                {
+                    const std::string& this_sample_name = taxa_list[j].getName();
+                    if ( sample_name == this_sample_name )
+                    {
+                        indices_of_taxa.push_back( i + samples_start_column );
+                        break;
+                    }
+                }
+                
+            }
+            
+            has_names_been_read = true;
+            
+            // skip now
+            continue;
+            
+        } // finished reading the header and species information
+        
+        
+        // allocate the counts vector for the states
+        std::vector<size_t> counts (2+1, 0.0); // 0 1 ?
+        for (size_t k = 0; k < indices_of_taxa.size(); ++k)
+        {
+            
+            size_t sample_index = indices_of_taxa[k];
+                
+            const std::string &this_char_read = tmpChars[sample_index];
+            std::vector<std::string> format_tokens;
+            StringUtilities::stringSplit(this_char_read, ":", format_tokens);
+                
+            std::string this_alleles = format_tokens[0];
+            std::vector<size_t> states = extractStateIndices(this_alleles, "binary");
+            
+            // get the current character
+            for ( size_t j=0; j<states.size(); ++j)
+            {
+                size_t chIndex = states[j];
+                counts[chIndex]++;
+            }
+        }
+        
+        // Now we have all the counts for this species
+        // only add this site if it didn't include missing sites
+        if ( counts[2] == 0 )
+        {
+            size_t allele_count = counts[0];
+            ++sfs[allele_count];
+        }
+        
+        
+    
+    };
+    
+    
+    
+    f_in.closeFile( readStream );
+
+    return sfs;
+}
+
+
 std::vector<size_t> VCFReader::extractStateIndices(std::string alleles, const std::string& type)
 {
     
