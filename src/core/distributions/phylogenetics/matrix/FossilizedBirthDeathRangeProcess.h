@@ -65,10 +65,10 @@ namespace RevBayesCore {
         void                                            updateGamma(bool force = false);                                    //!< Number of species alive at time t.
         void                                            redrawValue(void);
 
-        bool                                            bds;
-        std::vector<size_t>                             gamma_i;
-        std::vector<std::vector<bool> >                 gamma_links;
-        std::vector<bool>                               dirty_gamma;
+        bool                                            bds;                //!< Indicates whether to assume complete lineage sampling (BDS model)
+        std::vector<size_t>                             gamma_i;            //!< The number of coexisting lineages at each taxon birth time
+        std::vector<std::vector<bool> >                 gamma_links;        //!< A boolean matrix indicating which taxa are coexiting at each birth time
+        std::vector<bool>                               dirty_gamma;        //!< Indicates whether gamma needs updating
     };
 }
 

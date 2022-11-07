@@ -21,7 +21,7 @@
 using namespace RevBayesCore;
 
 
-PoMoCountFileReader::PoMoCountFileReader(const std::string &fn, const size_t virtualPopulationSize, std::string d, size_t ns) : DelimitedDataReader(fn, d, ns), virtualPopulationSize_ ( virtualPopulationSize )
+PoMoCountFileReader::PoMoCountFileReader(const path &fn, const size_t virtualPopulationSize, std::string d, size_t ns) : DelimitedDataReader(fn, d, ns), virtualPopulationSize_ ( virtualPopulationSize )
 {
 	matrix_ = new HomologousDiscreteCharacterData<PoMoState> ();
 
@@ -37,7 +37,7 @@ PoMoCountFileReader::PoMoCountFileReader(const std::string &fn, const size_t vir
 	while (chars[start][0] == "#");
 
 	if (chars[start][0] != "COUNTSFILE" || chars[0].size() != 5) {
-		throw RbException( "File "+fn+" is not a proper PoMo Counts file: first line is not correct, it should be similar to \nCOUNTSFILE NPOP 5 NSITES N\n.");
+            throw RbException()<<"File "<<fn<<" is not a proper PoMo Counts file: first line is not correct, it should be similar to \nCOUNTSFILE NPOP 5 NSITES N\n.";
 	}
 	else {
         numberOfPopulations_ = StringUtilities::asIntegerNumber( chars[0][2] );
@@ -48,15 +48,15 @@ PoMoCountFileReader::PoMoCountFileReader(const std::string &fn, const size_t vir
 	// The second line should look like this:
 	//CHROM  POS  Sheep    BlackSheep  RedSheep  Wolf     RedWolf
 	if (chars[start+1][0] != "CHROM" || chars[1][1] != "POS" || chars[1].size() != numberOfFields)
-    {
-		throw RbException( "File "+fn+" is not a proper PoMo Counts file: second line is not correct, it should be similar to \nCHROM POS Sheep BlackSheep RedSheep Wolf RedWolf\n.");
+        {
+            throw RbException()<<"File "<<fn<<" is not a proper PoMo Counts file: second line is not correct, it should be similar to \nCHROM POS Sheep BlackSheep RedSheep Wolf RedWolf\n.";
 	}
 	else
-    {
-		for (size_t i = start+2; i < 2 + numberOfPopulations_; ++i )
         {
-			names_.push_back(chars[1][i]);
-		}
+            for (size_t i = start+2; i < 2 + numberOfPopulations_; ++i )
+            {
+                names_.push_back(chars[1][i]);
+            }
 	}
 
 	// Setting the taxon names in the data matrix
@@ -84,10 +84,10 @@ PoMoCountFileReader::PoMoCountFileReader(const std::string &fn, const size_t vir
     
 	for (size_t i = 2; i < chars.size(); ++i)
 	{
-		if (chars[i].size() != numberOfFields)
-        {
-			throw RbException( "File "+fn+" is not a proper PoMo Counts file: line "+ i + " is not correct, it does not have "+ numberOfFields + " space-separated fields.");
-		}
+            if (chars[i].size() != numberOfFields)
+            {
+                throw RbException()<<"File "<<fn<<" is not a proper PoMo Counts file: line "<<i<<" is not correct, it does not have "<<numberOfFields<<" space-separated fields.";
+            }
 
 		//chromosomes.push_back(chars[i][0]);
     //positions.push_back( StringUtilities::asIntegerNumber( chars[i][1] ) );

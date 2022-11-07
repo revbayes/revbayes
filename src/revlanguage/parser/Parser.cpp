@@ -208,6 +208,13 @@ int RevLanguage::Parser::execute(SyntaxElement* root, Environment &env) const {
         // Return signal indicating problem
         return 2;
     }
+    // Don't crash the intepreter for non-Rb exceptions such as file-not-found.
+    catch (std::exception& e)
+    {
+        RBOUT(e.what());
+        // Return signal indicating problem
+        return 2;
+    }
 
     // Print result if the root is not an assign expression
     if ( root->isAssignment() == false  &&  result != NULL  &&  result->getRevObject() != RevNullObject::getInstance() )
@@ -678,7 +685,7 @@ ParserInfo Parser::checkCommand(std::string& command, Environment* env)
 }
 
 /** Global call-back function for the flex-generated code in lex.yy.cpp */
-void rrinput(char* buf, size_t& result, size_t maxsize) {
+void rrinput(char* buf, int& result, size_t maxsize) {
 
     buf[0] = '\0';
     RevLanguage::Parser::getParser().getline(buf, maxsize);

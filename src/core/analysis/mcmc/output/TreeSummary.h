@@ -49,19 +49,17 @@ namespace RevBayesCore {
          */
         struct AnnotationReport
         {
-            bool clade_probs;
-            bool conditional_clade_ages;
-            bool conditional_clade_probs;
-            bool conditional_tree_ages;
-            bool MAP_parameters;
-            bool node_ages;
-            bool mean_node_ages;
-            double node_ages_HPD;
-            bool sampled_ancestor_probs;
-            bool force_positive_branch_lengths;
-            bool use_outgroup;
-            
-            AnnotationReport();
+            bool clade_probs = true;
+            bool conditional_clade_ages = false;
+            bool conditional_clade_probs = false;
+            bool conditional_tree_ages = false;
+            bool MAP_parameters = false;
+            bool node_ages = true;
+            bool mean_node_ages = true;
+            double node_ages_HPD = 0.95;
+            bool sampled_ancestor_probs = true;
+            bool force_positive_branch_lengths = false;
+            bool use_outgroup = false;  // Is this unused?
         };
 
 
@@ -119,8 +117,7 @@ namespace RevBayesCore {
         std::map<Split, std::map<Split, std::vector<double> > >         conditional_clade_ages;
         std::map<std::string, std::map<Split, std::vector<double> > >   tree_clade_ages;
 
-        bool                                       use_outgroup;
-        Clade                                      outgroup;
+        boost::optional<Clade>                     outgroup;
     };
 
 }

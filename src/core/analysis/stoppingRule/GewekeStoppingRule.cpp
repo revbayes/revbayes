@@ -17,7 +17,7 @@
 using namespace RevBayesCore;
 
 
-GewekeStoppingRule::GewekeStoppingRule(double a, double f1, double f2, const std::string &fn, size_t f, BurninEstimatorContinuous *be) : AbstractConvergenceStoppingRule(fn, f, be),
+GewekeStoppingRule::GewekeStoppingRule(double a, double f1, double f2, const path &fn, size_t f, BurninEstimatorContinuous *be) : AbstractConvergenceStoppingRule(fn, f, be),
     alpha( a ),
     frac1( f1 ),
     frac2( f2 )
@@ -57,12 +57,9 @@ bool GewekeStoppingRule::stop( size_t g )
     
     for ( size_t i = 1; i <= numReplicates; ++i)
     {
-        std::string fn = filename;
+        path fn = filename;
         if ( numReplicates > 1 )
-        {
-            RbFileManager fm = RbFileManager(filename);
-            fn = fm.getFilePath() + fm.getPathSeparator() + fm.getFileNameWithoutExtension() + "_run_" + StringUtilities::to_string(i) + "." + fm.getFileExtension();
-        }
+            fn = appendToStem(filename, "_run_" + StringUtilities::to_string(i));
         
         TraceContinuousReader reader = TraceContinuousReader( fn );
         

@@ -162,6 +162,7 @@
 #include "Dist_bdp.h"
 #include "Dist_bdp_complete.h"
 #include "Dist_BDSTP.h"
+#include "Dist_FBDP.h"
 #include "Dist_BirthDeathBurstProcess.h"
 #include "Dist_BranchRateTree.h"
 #include "Dist_CharacterDependentBirthDeathProcess.h"
@@ -191,6 +192,7 @@
 #include "Dist_PhylodynamicBDP.h"
 #include "Dist_phyloDistanceGamma.h"
 #include "Dist_sampledSpeciationBirthDeathProcess.h"
+#include "Dist_occurrenceBirthDeathProcess.h"
 #include "Dist_TimeVaryingStateDependentSpeciationExtinctionProcess.h"
 #include "Dist_UltrametricTree.h"
 #include "Dist_uniformTimeTree.h"
@@ -348,6 +350,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // birth-death-sampling-treatment processes and submodels
         AddDistribution< TimeTree                   >( new Dist_BDSTP());
+        AddDistribution< TimeTree                   >( new Dist_FBDP());
         AddDistribution< TimeTree                   >( new Dist_PhylodynamicBDP());
 
         // diversity-dependent pure-birth process
@@ -400,6 +403,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // uniform serial-sampled time tree distribution
         AddDistribution< TimeTree                   >( new Dist_uniformSerialSampledTimeTree() );
+
+        // occurrence birth death process tree distribution
+        AddDistribution< TimeTree                   >( new Dist_occurrenceBirthDeathProcess() );
 
         // uniform topology distribution
         AddDistribution< BranchLengthTree           >( new Dist_uniformTopology() );

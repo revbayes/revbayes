@@ -15,8 +15,8 @@ class DagNode;
 
     public:
         // Constructors and Destructors
-        VariableMonitor(DagNode *n, unsigned long g, const std::string &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool wv=true);                                                                //!< Constructor with single DAG node
-        VariableMonitor(const std::vector<DagNode *> &n, unsigned long g, const std::string &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool wv=true);                                              //!< Constructor with vector of DAG node
+        VariableMonitor(DagNode *n, unsigned long g, const path &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool wv=true);                                                                //!< Constructor with single DAG node
+        VariableMonitor(const std::vector<DagNode *> &n, unsigned long g, const path &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool wv=true);                                              //!< Constructor with vector of DAG node
 
         // basic methods
         VariableMonitor*                        clone(void) const;                                                  //!< Clone the object

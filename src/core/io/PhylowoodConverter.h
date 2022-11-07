@@ -11,16 +11,16 @@
 
 #include <string>
 #include "TopologyNode.h"
+#include "RbFileManager.h"
 
 namespace RevBayesCore {
     
     class DelimitedDataReader;
-    class RbFileManager;
     class TimeAtlas;
     class PhylowoodConverter {
         
     public:
-        PhylowoodConverter(const std::string &sfn, const std::string &tfn, const std::string &gfn, const std::string &pfn, double b, const std::string& ct, const std::string& bt);
+        PhylowoodConverter(const path &sfn, const path &tfn, const path &gfn, const path &pfn, double b, const std::string& ct, const std::string& bt);
         ~PhylowoodConverter(void);
         void                                        convert(void);
         
@@ -40,10 +40,10 @@ namespace RevBayesCore {
         std::vector<std::vector<double> > marginalStartProbs;
         std::vector<std::vector<double> > marginalEndProbs;
         
-        std::string stateFilename;
-        std::string treeFilename;
-        std::string geoFilename;
-        std::string phwFilename;
+        path stateFilename;
+        path treeFilename;
+        path geoFilename;
+        path phwFilename;
         std::string chartype;
         std::string bgtype;
     

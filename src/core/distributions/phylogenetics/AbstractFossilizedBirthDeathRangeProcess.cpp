@@ -82,7 +82,14 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     range_parameters.push_back( heterogeneous_psi );
 
     // setup the timeline
-    num_intervals = timeline == NULL ? 1 : timeline->getValue().size();
+    if ( timeline == NULL )
+    {
+        num_intervals = 1;
+    }
+    else
+    {
+        num_intervals = timeline->getValue().size() + (timeline->getValue().front() != 0.0);
+    }
 
     if ( num_intervals > 1 )
     {
@@ -103,43 +110,37 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
 
     size_t num_rates = 0;
 
-    if( heterogeneous_lambda != NULL )
+    if( heterogeneous_lambda != NULL || heterogeneous_mu != NULL || heterogeneous_psi != NULL)
     {
         if ( timeline == NULL ) throw(no_timeline_err);
 
-        num_rates = heterogeneous_lambda->getValue().size();
-    }
-    if( heterogeneous_mu != NULL )
-    {
-        if ( timeline == NULL ) throw(no_timeline_err);
-
-        if ( num_rates == 0 ) num_rates = heterogeneous_mu->getValue().size();
-
-        if ( heterogeneous_mu->getValue().size() != num_rates ) throw(inconsistent_rates);
-    }
-    if( heterogeneous_psi != NULL )
-    {
-        if ( timeline == NULL ) throw(no_timeline_err);
-
-        if ( num_rates == 0 ) num_rates = heterogeneous_psi->getValue().size();
-
-        if ( heterogeneous_psi->getValue().size() != num_rates ) throw(inconsistent_rates);
-    }
-
-    if ( num_rates > 0 && num_rates != num_intervals )
-    {
-        // if all the rate vectors are one longer than the timeline
-        // then assume the first time is 0
-        if ( num_rates == num_intervals + 1 )
+        if( heterogeneous_lambda != NULL )
         {
-            num_intervals++;
+            num_rates = heterogeneous_lambda->getValue().size();
         }
-        else
+        if( heterogeneous_mu != NULL )
         {
-            std::stringstream ss;
-            ss << "Number of rates does not match number of time intervals in fossilized birth death process.";
-            throw(RbException(ss.str()));
+            if ( num_rates == 0 ) num_rates = heterogeneous_mu->getValue().size();
+
+            if ( heterogeneous_mu->getValue().size() != num_rates ) throw(inconsistent_rates);
         }
+        if( heterogeneous_psi != NULL )
+        {
+            if ( num_rates == 0 ) num_rates = heterogeneous_psi->getValue().size();
+
+            if ( heterogeneous_psi->getValue().size() != num_rates ) throw(inconsistent_rates);
+        }
+    }
+    else
+    {
+        num_rates = 1;
+    }
+
+    if ( num_rates != num_intervals )
+    {
+        std::stringstream ss;
+        ss << "Number of rates does not match number of time intervals in fossilized birth death process.";
+        throw(RbException(ss.str()));
     }
 
     b_i = std::vector<double>(taxa.size(), 0.0);

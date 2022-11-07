@@ -580,27 +580,27 @@ void CodonState::setState(const std::string &s)
         
         
         num_observed_states = 0;
-        state.clear();
+        state.reset();
         
         for (size_t i=0; i<4; ++i)
         {
             
             // test if the bit is set for the first codon position
-            if ( bs_pos_0.isSet( i ) == true )
+            if ( bs_pos_0.test( i ) == true )
             {
                 
                 for (size_t j=0; j<4; ++j)
                 {
                     
                     // test if the bit is set for the second codon position
-                    if ( bs_pos_1.isSet( j ) == true )
+                    if ( bs_pos_1.test( j ) == true )
                     {
                         
                         for (size_t k=0; k<4; ++k)
                         {
                             
                             // test if the bit is set for the third codon position
-                            if ( bs_pos_2.isSet( k ) == true )
+                            if ( bs_pos_2.test( k ) == true )
                             {
                                 
                                 ++num_observed_states;
@@ -663,7 +663,7 @@ void CodonState::setToFirstState(void)
 {
     num_observed_states = 1;
     index_single_state = 0;
-    state.clear();
+    state.reset();
     state.set( 0 );
 }
 
@@ -673,7 +673,7 @@ void CodonState::setStateByIndex(size_t index)
     
     num_observed_states = 1;
     index_single_state = index;
-    state.clear();
+    state.reset();
     state.set( index );
 }
 

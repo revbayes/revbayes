@@ -50,7 +50,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_X2RateMatrix::c
 {
     RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* nuc_q = static_cast<const RateGenerator &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
 
-    return RevBayesCore::generic_function_ptr2< RevBayesCore::RateGenerator >( X2Func, nuc_q );
+    return RevBayesCore::generic_function_ptr< RevBayesCore::RateGenerator >( X2Func, nuc_q );
 }
 
 

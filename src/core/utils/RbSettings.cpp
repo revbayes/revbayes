@@ -10,16 +10,12 @@
 #include "RbException.h"
 #include "RbFileManager.h"
 #include "StringUtilities.h"
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
 
 #	ifdef _WIN32
 #include <windows.h>
 #   endif
 
-namespace fs = boost::filesystem;
-
-
+using namespace RevBayesCore;
 
 
 /** Default constructor: The default settings are first read, and
@@ -31,9 +27,8 @@ RbSettings::RbSettings(void)
 }
 
 
-const std::string& RbSettings::getModuleDir( void ) const
+const path& RbSettings::getModuleDir( void ) const
 {
-    
     return moduleDir;
 }
 
@@ -66,7 +61,7 @@ std::string RbSettings::getOption(const std::string &key) const
 {
     if ( key == "moduledir" )
     {
-        return moduleDir;
+        return moduleDir.string();
     }
     else if ( key == "outputPrecision" )
     {
@@ -126,12 +121,6 @@ double RbSettings::getTolerance( void ) const
 }
 
 
-std::string RbSettings::getWorkingDirectory( void ) const
-{
-    return fs::current_path().make_preferred().string();
-}
-
-
 /** Initialize the user settings */
 #define	MAX_DIR_PATH	2048
 void RbSettings::initializeUserSettings(void)
@@ -145,20 +134,17 @@ void RbSettings::initializeUserSettings(void)
     printNodeIndex = true;      // print node indices of tree nodes as comments
     collapseSampledAncestors = true;
     
-    std::string user_dir = RevBayesCore::RbFileManager::expandUserDir("~");
+    path user_dir = RevBayesCore::expandUserDir("~");
     
     // read the ini file, override defaults if applicable
-    std::string settings_file_name = ".RevBayes.ini";
-    RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(user_dir, settings_file_name);
+    path settings_file_name = user_dir / ".RevBayes.ini";
 
- 	
     //    bool failed = false; //unused
-    if ( fm.isFile() )
+    if ( is_regular_file( settings_file_name) )
     {
-        std::ifstream readStream;
-        fm.openFile( readStream );
+        std::ifstream readStream( settings_file_name.string() );
         std::string readLine = "";
-        while ( fm.safeGetline(readStream,readLine) )
+        while ( safeGetline(readStream,readLine) )
         {
             std::vector<std::string> tokens = std::vector<std::string>();
             StringUtilities::stringSplit(readLine, "=", tokens);
@@ -168,29 +154,9 @@ void RbSettings::initializeUserSettings(void)
             }
         }
         
-        fm.closeFile(readStream);
+        readStream.close();
     }
 
-    // initialize the current directory to be the directory the binary is sitting in
-#	ifdef _WIN32
-    
-    char buffer[MAX_DIR_PATH];
-    GetModuleFileName( NULL, buffer, MAX_DIR_PATH );
-    std::string::size_type pos = std::string( buffer ).find_last_of( "\\/" );
-    fs::current_path( std::string( buffer ).substr( 0, pos) );
-
-#	else
-
-    char cwd[MAX_DIR_PATH+1];
-    if ( getcwd(cwd, MAX_DIR_PATH+1) )
-    {
-        fs::current_path( cwd );
-    }
-    
-#   endif
-
-    
-    // save the current settings for the future.
 //    writeUserSettings();
 }
 
@@ -208,17 +174,14 @@ void RbSettings::listOptions() const
 }
 
 
-void RbSettings::setModuleDir(const std::string &md)
+void RbSettings::setModuleDir(const path &md)
 {
-    
-    RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(md);
-    
-    if ( !fm.isDirectory() )
+    if ( not is_directory(md) )
     {
-        throw RbException("Cannot set the help directory to '" + md + "'.");
+        throw RbException()<<"Cannot set the help directory to "<<md<<".";
     }
     
-    moduleDir = fm.getFullFilePath();
+    moduleDir = md;
     
     // save the current settings for the future.
     writeUserSettings();
@@ -349,34 +312,16 @@ void RbSettings::setTolerance(double t)
 }
 
 
-void RbSettings::setWorkingDirectory(const std::string &wd)
-{
-    try
-    {
-        RevBayesCore::RbFileManager fm;
-        std::string wd2 = fm.expandUserDir(wd);
-        fs::current_path( wd2 );
-    }
-    catch (...)
-    {
-        throw RbException()<<"Cannot set the current directory to \""<<wd<<"\"";
-    }
-    
-    // save the current settings for the future.
-    writeUserSettings();
-}
-
-
 void RbSettings::writeUserSettings( void )
 {
-    std::string user_dir = RevBayesCore::RbFileManager::expandUserDir("~");
+    // Does this always work on windows?
+    path user_dir = expandUserDir("~");
     
     // open the ini file
-    std::string settings_file_name = ".RevBayes.ini";
-    RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(user_dir, settings_file_name);
+    path settings_file_name = user_dir / ".RevBayes.ini";
 
-    std::ofstream writeStream;
-    fm.openFile( writeStream );
+    std::ofstream writeStream( settings_file_name.string() );
+    assert( moduleDir == "modules" or is_directory(moduleDir) );
     writeStream << "moduledir=" << moduleDir << std::endl;
     writeStream << "outputPrecision=" << outputPrecision << std::endl;
     writeStream << "printNodeIndex=" << (printNodeIndex ? "true" : "false") << std::endl;
@@ -385,6 +330,6 @@ void RbSettings::writeUserSettings( void )
     writeStream << "useScaling=" << (useScaling ? "true" : "false") << std::endl;
     writeStream << "scalingDensity=" << scalingDensity << std::endl;
     writeStream << "collapseSampledAncestors=" << (collapseSampledAncestors ? "true" : "false") << std::endl;
-    fm.closeFile( writeStream );
+    writeStream.close();
 
 }

@@ -34,7 +34,7 @@
 #include "Trace.h"
 #include "TypeSpec.h"
 #include "WorkspaceToCoreWrapperObject.h"
-
+#include "RlUserInterface.h"  // for RBOUT
 
 using namespace RevLanguage;
 
@@ -55,29 +55,26 @@ Func_readAncestralStateTrace* Func_readAncestralStateTrace::clone( void ) const
 RevPtr<RevVariable> Func_readAncestralStateTrace::execute( void ) {
     
     // get the information from the arguments for reading the file
-    const std::string&  fn       = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path fn        = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
     const std::string&  sep      = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
     
     // check that the file/path name has been correctly specified
-    RevBayesCore::RbFileManager myFileManager( fn );
     
-    if ( !myFileManager.testFile() || !myFileManager.testDirectory() )
+    if ( not RevBayesCore::exists( fn ))
     {
         std::string errorStr = "";
-        myFileManager.formatError(errorStr);
+        RevBayesCore::formatError(fn, errorStr);
         throw RbException(errorStr);
     }
     
-    if ( !myFileManager.isFile() ) 
+    if ( not RevBayesCore::is_regular_file(fn) )
     {
         throw RbException("readAncestralStateTrace only takes as input a single ancestral state trace file.");
-    
-	} 
-    else 
+    }
+    else
     {
-		
 		RevBayesCore::RbVector<AncestralStateTrace> traceVector;
-		std::vector<RevBayesCore::AncestralStateTrace> ancestral_states = readAncestralStates(myFileManager.getFullFileName(), sep);
+		std::vector<RevBayesCore::AncestralStateTrace> ancestral_states = readAncestralStates(fn, sep);
 		for ( size_t i = 0; i < ancestral_states.size(); i++ )
 		{						
 			traceVector.push_back( AncestralStateTrace( ancestral_states[i] ) );			
@@ -87,7 +84,6 @@ RevPtr<RevVariable> Func_readAncestralStateTrace::execute( void ) {
 		
 		// return a vector of traces, 1 trace for each node
 		return new RevVariable( theVector );
-		
 	}
 }
 
@@ -164,75 +160,70 @@ const TypeSpec& Func_readAncestralStateTrace::getReturnType( void ) const
 }
 
 
-std::vector<RevBayesCore::AncestralStateTrace> Func_readAncestralStateTrace::readAncestralStates(const std::string &fileName, const std::string &delimiter)
+std::vector<RevBayesCore::AncestralStateTrace> Func_readAncestralStateTrace::readAncestralStates(const RevBayesCore::path &fileName, const std::string &delimiter)
 {
-    
-    RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(fileName);
-    
     std::vector<RevBayesCore::AncestralStateTrace> data;
 	
-	bool has_header_been_read = false;
+    bool has_header_been_read = false;
 
 	
-	/* Open file */
-	std::ifstream inFile( fm.getFullFileName().c_str() );
+    /* Open file */
+    std::ifstream inFile( fileName.string() );
 	
-	if ( !inFile )
-		throw RbException( "Could not open file \"" + fileName + "\"" );
+    if ( !inFile )
+        throw RbException()<<"Could not open file "<<fileName;
 	
-	/* Initialize */
-	std::string commandLine;
-	std::cout << "Processing file \"" << fileName << "\"" << std::endl;
+    /* Initialize */
+    RBOUT("Processing file '" + fileName.string() + "'");
 	
-	/* Command-processing loop */
-	while ( inFile.good() )
-	{
+    /* Command-processing loop */
+    while ( inFile.good() )
+    {
 		
-		// Read a line
-		std::string line;
-        RevBayesCore::RbFileManager reader = RevBayesCore::RbFileManager();
-        reader.safeGetline(inFile, line);
+        // Read a line
+        std::string line;
+        RevBayesCore::safeGetline(inFile, line);
 		
-		// skip empty lines
-		if (line.length() == 0)
-		{
-			continue;
-		}
-		
-		// removing comments
-		if (line[0] == '#') 
+        // skip empty lines
+        if (line.length() == 0)
         {
-			continue;
-		}
+            continue;
+        }
+		
+        // removing comments
+        if (line[0] == '#') 
+        {
+            continue;
+        }
 		
         // split every line into its columns
-		std::vector<std::string> columns;
-		StringUtilities::stringSplit(line, delimiter, columns);
+        std::vector<std::string> columns;
+        StringUtilities::stringSplit(line, delimiter, columns);
 	
-		// we assume a header at the first line of the file
-		if (has_header_been_read == false) 
+        // we assume a header at the first line of the file
+        if (has_header_been_read == false) 
         {
-			for (size_t j = 0; j < columns.size(); j++) 
+            for (size_t j = 0; j < columns.size(); j++) 
             {
-				// set up AncestralStateTrace objects for each node
-				RevBayesCore::AncestralStateTrace t = RevBayesCore::AncestralStateTrace();
-				std::string parmName = columns[j];
-				t.setParameterName(parmName);
-				t.setFileName(fileName);
-				data.push_back( t );
-			}
-			has_header_been_read = true;
-		} 
+                // set up AncestralStateTrace objects for each node
+                RevBayesCore::AncestralStateTrace t = RevBayesCore::AncestralStateTrace();
+                std::string parmName = columns[j];
+                t.setParameterName(parmName);
+                t.setFileName(fileName);
+                data.push_back( t );
+            }
+            has_header_been_read = true;
+        } 
         else 
         {
-			for (size_t j = 0; j < columns.size(); j++) 
+            for (size_t j = 0; j < columns.size(); j++) 
             {
-				// add values to the AncestralStateTrace objects
-				std::string anc_state = columns[j];
-			    data[j].addObject( anc_state );
-			}
-		}
-	}
+                // add values to the AncestralStateTrace objects
+                std::string anc_state = columns[j];
+                data[j].addObject( anc_state );
+            }
+        }
+    }
 
-	return data;
+    return data;
 }

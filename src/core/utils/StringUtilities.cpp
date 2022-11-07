@@ -28,7 +28,8 @@
 #include "RbVector.h"
 
 
-
+using std::string;
+using std::vector;
 
 
 /** Convert the string s to a number */
@@ -262,94 +263,6 @@ std::string StringUtilities::formatStringForScreen(const std::string &s, const s
 }
 
 
-std::string StringUtilities::getStringWithDeletedLastPathComponent(const std::string& s)
-{
-    
-#	ifdef _WIN32
-    std::string pathSeparator = "\\";
-#	else
-    std::string pathSeparator = "/";
-#   endif
-    
-    std::string tempS = s;
-	size_t location = StringUtilities::findLastOf(tempS, pathSeparator[0]);
-	if ( location == std::string::npos )
-    {
-		/* There is no path in this string. We
-         must have only the file name. */
-		return "";
-    }
-	else if ( location == tempS.length() - 1 )
-    {
-		/* It looks like the last character is "/", which
-         means that no file name has been provided. */
-		return tempS;
-    }
-	else
-    {
-		/* We can divide the path into the path and the file. */
-		tempS.erase( location );
-		return tempS;
-    }
-    
-    return "";
-}
-
-
-/** Return file contents as string with '\n' line breaks */
-std::string StringUtilities::getFileContentsAsString(const std::string& s)
-{
-
-    RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(s);
-    
-    // open file
-	std::ifstream fStrm;
-    fStrm.open(fm.getFullFileName().c_str(), std::ios::in);
-    if ( !fStrm.is_open() )
-        return "";
-        
-    // read the file
-    int ch;
-    std::string retStr = "";
-    while ( (ch = fStrm.get()) != EOF)
-    {
-        char c = (char)ch;
-        
-        if (ch == '\n' || ch == '\r' || ch == EOF)
-            retStr += '\n';
-        else
-            retStr += c;
-        } 
-
-    // close file
-    fStrm.close();
-
-    return retStr;
-}
-
-
-/** Find the last component of a file path */
-std::string StringUtilities::getLastPathComponent(const std::string& s)
-{
-#	ifdef _WIN32
-    std::string pathSeparator = "\\";
-#	else
-    std::string pathSeparator = "/";
-#   endif
-
-    std::vector<std::string> sVec;
-    stringSplit(s, pathSeparator, sVec);
-    std::string lastComponent = "";
-    if (sVec.size() > 0)
-    {
-        lastComponent = sVec[sVec.size()-1];
-    }
-    
-    return lastComponent;
-}
-
-
-
 /**
  * Indicates if a char is affecting text formatting
  * @param c
@@ -564,6 +477,22 @@ void StringUtilities::replaceAllOccurrences(std::string& str, char old_ch, char 
     
 }
 
+void StringUtilities::join(std::ostream& o, const vector<string>& ss, const string& sep)
+{
+    for(int i=0;i<ss.size();i++)
+    {
+        o<<ss[i];
+        if (i+1 < ss.size())
+            o<<sep;
+    }
+}
+
+string StringUtilities::join(const vector<string>& ss, const string& sep)
+{
+    std::ostringstream o;
+    join(o, ss, sep);
+    return o.str();
+}
 
 /**
  * Utility function for dividing string into pieces
@@ -660,267 +589,3 @@ std::string& StringUtilities::firstCharToUpper(std::string& str)
     
     return str;
 }
-
-
-/** Global operator for appending double to std::string */
-std::string operator+( const std::string& A, double B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string operator+( const std::string& A, int B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string operator+( const std::string& A, long B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string operator+( const std::string& A, size_t B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string operator+( double A, const std::string& B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string operator+( int A, const std::string& B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string operator+( long A, const std::string& B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string operator+( size_t A, const std::string& B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string RevLanguage::operator+( const std::string& A, double B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string RevLanguage::operator+( const std::string& A, int B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string RevLanguage::operator+( const std::string& A, long B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string RevLanguage::operator+( const std::string& A, size_t B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string RevLanguage::operator+( double A, const std::string& B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string RevLanguage::operator+( int A, const std::string& B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string RevLanguage::operator+( long A, const std::string& B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string RevLanguage::operator+( size_t A, const std::string& B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string RevBayesCore::operator+( const std::string& A, double B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string RevBayesCore::operator+( const std::string& A, int B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string RevBayesCore::operator+( const std::string& A, long B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string RevBayesCore::operator+( const std::string& A, size_t B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string RevBayesCore::operator+( const std::string& A, const RbVector<double> &B )
-{
-    RbVector<double> C = B;
-    std::stringstream o;
-    o << A << C;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string RevBayesCore::operator+( const std::string& A, const RbVector<long> &B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string RevBayesCore::operator+( double A, const std::string& B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string RevBayesCore::operator+( int A, const std::string& B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string RevBayesCore::operator+( long A, const std::string& B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-/** Global operator for appending double to std::string */
-std::string RevBayesCore::operator+( size_t A, const std::string& B )
-{
-    
-    std::stringstream o;
-    o << A << B;
-    return o.str();
-}
-
-
-
-

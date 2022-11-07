@@ -2,6 +2,7 @@
 #include <iosfwd>
 #include <vector>
 
+#include "Clade.h"
 #include "ConstantRateBirthDeathProcess.h"
 #include "BirthDeathForwardSimulator.h"
 #include "BirthDeathProcess.h"

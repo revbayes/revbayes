@@ -99,22 +99,11 @@ TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator=( TransitionP
 }
 
 
-/** Index operator (const) */
-const double* TransitionProbabilityMatrix::operator[]( const size_t i ) const {
+void TransitionProbabilityMatrix::multiplyTo(const TransitionProbabilityMatrix& B, TransitionProbabilityMatrix& C) const
+{
+    assert(B.getNumberOfStates() == num_states);
+    assert(C.getNumberOfStates() == num_states);
 
-    return theMatrix + i*num_states;
-}
-
-
-/** Index operator */
-double* TransitionProbabilityMatrix::operator[]( const size_t i ) {
-    
-    return theMatrix + i*num_states;
-}
-
-TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator*=(const TransitionProbabilityMatrix& B) {
-    
-    TransitionProbabilityMatrix C(num_states);
     for (size_t i=0; i<num_states; i++)
     {
         for (size_t j=0; j<num_states; j++)
@@ -125,48 +114,25 @@ TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator*=(const Trans
             C[i][j] = sum;
         }
     }
+}
+
+TransitionProbabilityMatrix TransitionProbabilityMatrix::operator*(const TransitionProbabilityMatrix& B) const
+{
+    TransitionProbabilityMatrix C(num_states);
+
+    multiplyTo(B, C);
     
-    for (size_t i=0; i<num_states*num_states; i++)
-        theMatrix[i] = C.theMatrix[i];
-    
+    return C;
+}
+
+TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator*=(const TransitionProbabilityMatrix& B)
+{
+    TransitionProbabilityMatrix C = (*this) * B;
+
+    operator=( std::move(C) );
+
     return *this;
 }
-
-double TransitionProbabilityMatrix::getElement(size_t i, size_t j) const {
-    
-    return *(theMatrix + num_states*i + j);
-}
-
-
-double& TransitionProbabilityMatrix::getElement(size_t i, size_t j) {
-    
-    return *(theMatrix + num_states*i + j);
-}
-
-
-const double* TransitionProbabilityMatrix::getElements( void ) const {
-    
-    return theMatrix;
-}
-
-
-double* TransitionProbabilityMatrix::getElements( void ) {
-    
-    return theMatrix;
-}
-
-
-size_t TransitionProbabilityMatrix::getNumberOfStates( void ) const {
-    
-    return num_states;
-}
-
-
-size_t TransitionProbabilityMatrix::size(void) const {
-    
-    return nElements;
-}
-
 
 std::ostream& RevBayesCore::operator<<(std::ostream& o, const TransitionProbabilityMatrix& x) {
     
@@ -206,4 +172,29 @@ std::ostream& RevBayesCore::operator<<(std::ostream& o, const TransitionProbabil
     return o;
 }
 
+void RevBayesCore::ensure_nonnegative(TransitionProbabilityMatrix& M)
+{
+    for (size_t i=0; i<M.getNumberOfStates(); i++)
+    {
+        for (size_t j=0; j<M.getNumberOfStates(); j++)
+            M[i][j] = std::max(0.0, M[i][j]);
+    }
+}
 
+void RevBayesCore::normalize_rows(TransitionProbabilityMatrix& M)
+{
+    for (size_t i=0; i<M.getNumberOfStates(); i++)
+    {
+        // This is going to complain about NaNs.
+        // If we have NaNs, then the rows sum to NaN anyway.
+
+        double row_sum = 0;
+        for (size_t j=0; j<M.getNumberOfStates(); j++)
+        {
+            assert(M[i][j]>=0);
+            row_sum += M[i][j];
+        }
+        for (size_t j=0; j<M.getNumberOfStates(); j++)
+            M[i][j] /= row_sum;
+    }
+}

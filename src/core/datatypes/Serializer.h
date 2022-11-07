@@ -32,15 +32,11 @@ namespace RevBayesCore {
         //!< Create a clone of the given object.
         static void                     ressurectFromString( objType* /*obj*/, const std::string &s ) { throw RbException("Could not resurrect object from string value:\n" + s); }
         
-        static void                     ressurectFromFile( objType* obj, const std::string &dir, const std::string &fn )
+        static void                     ressurectFromFile( objType* obj, const path &dir, const std::string &fn )
         {
-            RbFileManager fm = RbFileManager(dir, fn + ".txt");
-            fm.createDirectoryForFile();
-            
-            // open the stream to the file
-            std::fstream inStream;
-            inStream.open( fm.getFullFileName().c_str(), std::fstream::in);
-            
+            auto p = dir / (fn + ".txt");
+
+            std::ifstream inStream( p.string() );
             
             std::string s = "";
             while ( inStream.good() )
@@ -48,7 +44,7 @@ namespace RevBayesCore {
                 
                 // Read a line
                 std::string line;
-                fm.safeGetline( inStream, line );
+                safeGetline( inStream, line );
                 
                 // append
                 s += line;
@@ -58,16 +54,15 @@ namespace RevBayesCore {
             // simply delegate
             Serializer<objType, type>::ressurectFromString( obj, s );
         }
-        
-        static void                     writeToFile( const objType &obj, const std::string &dir, const std::string &fn )
+
+        static void                     writeToFile( const objType &obj, const path &dir, const std::string &fn )
         {
-            RbFileManager fm = RbFileManager(dir, fn + ".txt");
-            fm.createDirectoryForFile();
+            auto p = dir / (fn + ".txt");
+
+            createDirectoryForFile( p );
             
             // open the stream to the file
-            std::fstream outStream;
-            outStream.open( fm.getFullFileName().c_str(), std::fstream::out);
-            
+            std::ofstream outStream( p.string() );
             
             // write the value of the node
 //            Printer<objType, IsDerivedFrom<objType, Printable>::Is >::printForComplexStoring( obj, outStream, "", -1, true );
@@ -98,8 +93,8 @@ namespace RevBayesCore {
     public:
         //!< Create a clone of the given object.
         static void                     ressurectFromString( objType *obj, const std::string &s ) { obj->initFromString(s); }
-        static void                     ressurectFromFile( objType *obj, const std::string &dir, const std::string &fn ) { obj->initFromFile(dir,fn); }
-        static void                     writeToFile( const objType &obj, const std::string &dir, const std::string &fn ) { obj.writeToFile(dir,fn);  }
+        static void                     ressurectFromFile( objType *obj, const path &dir, const std::string &fn ) { obj->initFromFile(dir,fn); }
+        static void                     writeToFile( const objType &obj, const path &dir, const std::string &fn ) { obj.writeToFile(dir,fn);  }
     };
     
     

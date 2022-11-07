@@ -26,7 +26,7 @@ Probability::Probability( double x ) : RealPos( x )
     
     if ( x < 0.0 || x > 1.0)
     {
-        throw RbException( "Creation of " + getClassType() + " with value x=" + x + " outside standard probabilities (0,1)");
+        throw RbException() << "Creation of " << getClassType() << " with value x=" << x << " outside standard probabilities (0,1)";
     }
     
 }

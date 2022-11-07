@@ -2,7 +2,6 @@
 #define Func_mccTree_H
 
 #include "Procedure.h"
-#include "RbFileManager.h"
 
 #include <string>
 

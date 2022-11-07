@@ -68,9 +68,9 @@ bool TreeDiscreteCharacterData::hasCharacterData( void ) const
  *
  * \param[in]   idx    The site at which we want to know if it is constant?
  */
-void TreeDiscreteCharacterData::initFromFile(const std::string &dir, const std::string &fn)
+void TreeDiscreteCharacterData::initFromFile(const path &dir, const std::string &fn)
 {
-    RbFileManager fm = RbFileManager(dir, fn + ".nex");
+    path filename = dir / (fn + ".nex");
     
     // get an instance of the NCL reader
     NclReader reader = NclReader();
@@ -83,7 +83,7 @@ void TreeDiscreteCharacterData::initFromFile(const std::string &dir, const std::
     myFileType += suffix;
     
     // read the content of the file now
-    std::vector<AbstractCharacterData*> m_i = reader.readMatrices( fm.getFullFileName(), myFileType );
+    std::vector<AbstractCharacterData*> m_i = reader.readMatrices( filename.string(), myFileType );
     
     if ( m_i.size() < 1 )
     {
@@ -92,7 +92,7 @@ void TreeDiscreteCharacterData::initFromFile(const std::string &dir, const std::
         {
             std::cerr << "NCL-Warning:\t\t" << *it << std::endl;
         }
-        throw RbException("Could not read character data matrix from file \"" + fm.getFullFileName() + "\".");
+        throw RbException()<<"Could not read character data matrix from file "<<filename<<".";
     }
     
     HomologousDiscreteCharacterData<StandardState> *coreM = static_cast<HomologousDiscreteCharacterData<StandardState> *>( m_i[0] );
@@ -125,17 +125,16 @@ void TreeDiscreteCharacterData::setTimeInStates( std::vector<double> t )
 }
 
 
-void TreeDiscreteCharacterData::writeToFile(const std::string &dir, const std::string &fn) const
+void TreeDiscreteCharacterData::writeToFile(const path &dir, const std::string &fn) const
 {
     // do not write a file if the tree is invalid
     if (this->getNumberOfTips() > 1)
     {
-        RbFileManager fm = RbFileManager(dir, fn + ".newick");
-        fm.createDirectoryForFile();
+        path filename = dir / (fn + ".newick");
+        create_directories(dir);
         
         // open the stream to the file
-        std::fstream o;
-        o.open( fm.getFullFileName().c_str(), std::fstream::out);
+        std::ofstream o( filename.string() );
 
         // write the value of the node
         o << getNewickRepresentation();
@@ -147,13 +146,13 @@ void TreeDiscreteCharacterData::writeToFile(const std::string &dir, const std::s
         // many SSE models use NaturalNumber states, which are incompatible
         // with the NEXUS format, so write the tips states to a separate
         // tab-delimited file
-        fm = RbFileManager(dir, fn + ".tsv");
+        filename = dir / (fn + ".tsv");
         RevBayesCore::DelimitedCharacterDataWriter writer; 
-        writer.writeData(fm.getFullFileName(), *character_data);
+        writer.writeData( filename, *character_data);
 
         // write the character history's time spent in each state
-        fm = RbFileManager(dir, fn + "_time_in_states.tsv");
-        o.open( fm.getFullFileName().c_str(), std::fstream::out);
+        filename = dir / (fn + "_time_in_states.tsv");
+        o.open( filename.string(), std::fstream::out);
         for (size_t i = 0; i < time_in_states.size(); i++)
         {
             o << time_in_states[i]; 

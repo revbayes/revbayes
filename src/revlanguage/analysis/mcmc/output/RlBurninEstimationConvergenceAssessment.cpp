@@ -126,21 +126,17 @@ RevPtr<RevVariable> BurninEstimationConvergenceAssessment::executeMethod(std::st
         // read the traces
         
         // set up a vector of strings containing the name or names of the files to be read
-        std::vector<std::string> vectorOfFileNames;
+        std::vector<RevBayesCore::path> vectorOfFileNames;
         
-        for (std::set<std::string>::const_iterator it=filenames.begin(); it!=filenames.end(); ++it)
+        for (auto& fn : filenames)
         {
-            const std::string &fn = *it;
-            // check that the file/path name has been correctly specified
-            RevBayesCore::RbFileManager myFileManager( fn );
-        
-            if ( myFileManager.isFile() )
+            if ( is_regular_file( fn ))
             {
-                vectorOfFileNames.push_back( myFileManager.getFullFileName() );
+                vectorOfFileNames.push_back( fn );
             }
-            else
+            else if ( is_directory( fn ) )
             {
-                myFileManager.setStringWithNamesOfFilesInDirectory( vectorOfFileNames );
+                RevBayesCore::setStringWithNamesOfFilesInDirectory( fn, vectorOfFileNames );
             }
         }
         
@@ -161,9 +157,9 @@ RevPtr<RevVariable> BurninEstimationConvergenceAssessment::executeMethod(std::st
         for (size_t p = 0; p < vectorOfFileNames.size(); p++)
         {
             
-            const std::string &fn = vectorOfFileNames[p];
+            auto &fn = vectorOfFileNames[p];
             
-            RBOUT("\tProcessing file '" + fn + "'");
+            RBOUT("\tProcessing file '" + fn.string() + "'");
             
             // read in the traces from this file
             readTrace(fn, runs[p]);
@@ -228,13 +224,13 @@ RevPtr<RevVariable> BurninEstimationConvergenceAssessment::executeMethod(std::st
             if ( failed )
             {
                 std::stringstream ss("");
-                ss << "\tConvergence assessment detected " << numFailedParams << " possible issues in file '" + fn + "'.\n\n";
+                ss << "\tConvergence assessment detected " << numFailedParams << " possible issues in file '" + fn.string() + "'.\n\n";
                 RBOUT( ss.str() );
                 
             }
             else
             {
-                RBOUT("No failure to converge was detected in file '"+ fn +"'.\n\n");
+                RBOUT("No failure to converge was detected in file '"+ fn.string() +"'.\n\n");
             }
             
             passed &= !failed;
@@ -276,7 +272,7 @@ RevPtr<RevVariable> BurninEstimationConvergenceAssessment::executeMethod(std::st
                     
                     if ( index == runs[i].size() )
                     {
-                        throw RbException("Could not find a trace for parameter '" + traceName + "' in file '" + runs[i][0].getFileName() + "'.");
+                        throw RbException()<<"Could not find a trace for parameter '"<<traceName<<"' in file "<<runs[i][0].getFileName()<<".";
                     }
                     RevBayesCore::TraceNumeric& nextTrace = runs[i][index];
                     v.push_back( nextTrace );
@@ -429,18 +425,16 @@ void BurninEstimationConvergenceAssessment::printValue(std::ostream &o, bool use
 
 
 
-void BurninEstimationConvergenceAssessment::readTrace(const std::string &fn, std::vector<RevBayesCore::TraceNumeric> &data)
+void BurninEstimationConvergenceAssessment::readTrace(const RevBayesCore::path &fn, std::vector<RevBayesCore::TraceNumeric> &data)
 {
     
     bool hasHeaderBeenRead = false;
     
-    RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(fn);
-    
     /* Open file */
-    std::ifstream inFile( fm.getFullFileName().c_str() );
+    std::ifstream inFile( fn.string() );
     
     if ( !inFile )
-        throw RbException( "Could not open file \"" + fn + "\"" );
+        throw RbException()<<"Could not open file "<<fn;
     
     /* Initialize */
     std::string commandLine;
@@ -453,8 +447,7 @@ void BurninEstimationConvergenceAssessment::readTrace(const std::string &fn, std
         
         // Read a line
         std::string line;
-        RevBayesCore::RbFileManager reader = RevBayesCore::RbFileManager();
-        reader.safeGetline(inFile, line);
+        RevBayesCore::safeGetline(inFile, line);
         
         // skip empty lines
         //line = stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];

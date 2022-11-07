@@ -5,13 +5,7 @@ project(RevBayes)
 # -Wno-sign-compare
 # -D_GLIBCXX_DEBUG
 
-# This is the RIGHT way, but requires cmake version >=3:
-#   set(CMAKE_CXX_STANDARD 11)
-#
-# https://gitlab.kitware.com/cmake/community/-/wikis/CMake-Versions-on-Linux-Distros
-#
-# So, we add the flag directly instead.
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+set(CMAKE_CXX_STANDARD 17)
 
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
@@ -68,6 +62,37 @@ endif()
 if ("${JUPYTER}" STREQUAL "ON")
    add_definitions(-DRB_XCODE)
 endif()
+
+##### rpath: where to find shared libraries #####
+
+if ("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
+  # This allows an installed structure of
+  #
+  # RevBayes/
+  #    bin/
+  #       rb
+  #    lib/
+  #       RevBayes/
+  #          *.so
+  # To find the shared libs from inside bin/ we use $ORIGIN/../lib/RevBayes/
+  #
+  set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib/RevBayes/")
+
+elseif ("${CMAKE_SYSTEM_NAME}" MATCHES "Darwin")
+  # If ever we make an App bundle, the structure might be
+  #
+  # RevBayes.app/
+  #    Contents/
+  #       MacOS/
+  #          rb
+  #       PlugIns/
+  #          *.dylib
+  #
+  # So, at that point, we might add "@loaderpath/../Plugins/"
+  #
+  set(CMAKE_INSTALL_RPATH "@loaderpath/../lib/RevBayes/;@loaderpath/../PlugIns/")
+
+endif ()
 
 # When user specifies boost paths to use, we need to disable searching from the
 # environment and from using cmake's internal boost variables.

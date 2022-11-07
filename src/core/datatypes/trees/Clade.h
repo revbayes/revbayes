@@ -6,6 +6,7 @@
 #include <set>
 #include <vector>
 #include <iosfwd>
+#include <boost/optional.hpp>
 
 #include "RbBitSet.h"
 #include "Taxon.h"
@@ -65,20 +66,20 @@ namespace RevBayesCore {
         const Taxon&                                getTaxon(size_t i) const;                                   //!< Get a single taxon name.
         const std::string&                          getTaxonName(size_t i) const;                               //!< Get a single taxon name.
         bool                                        isNegativeConstraint(void) const;                           //!< Get negative constraint flag.
+        bool                                        isOptionalConstraint(void) const;                           //!< Get negative constraint flag.
         bool                                        isNestedWithin(const Clade& c) const;                       //!< Is the provided clade nested within me?
-        bool                                        isOptionalMatch(void) const;                                //!< Get negative constraint flag.
-        bool                                        overlaps(const Clade& c) const;                              //!< Does the provided clade overlap with me?
+        bool                                        overlaps(const Clade& c) const;                             //!< Does the provided clade overlap with me?
+        std::set<Taxon>                             intersection(const Clade&) const;                           //!< Get the taxa that both clades have in common.
         void                                        resetTaxonBitset(const std::map<std::string, size_t> map);
         void                                        setAge(double a);                                           //!< Set the age of the clade.
         void                                        setAges(const std::vector<Taxon>& taxa);                         //!< Set the aged of the taxa based on this set.
         void                                        setBitRepresentation(const RbBitSet &b);
         void                                        setCladeName(const std::string& n);                         //!< Set the name of the clade.
-        void                                        setOptionalConstraints(std::vector<Clade> c);               //!< Set optional clade constraints.
+        void                                        setOptionalConstraints(const std::vector<Clade>& c);        //!< Set optional clade constraints.
         void                                        setMrca(const std::set<Taxon>&);                            //!< Set the mrca taxon, if applicable.
         void                                        setNumberMissingTaxa(int n);                                //!< Set the number of missing taxa in this clade.
         void                                        setTaxonAge(size_t i, double age);                          //!< Set a single taxon's age.
         void                                        setNegativeConstraint(bool);                                //!< Set clade to be a negative constraint
-        void                                        setOptionalMatch(bool);                                     //!< Set clade to be an optional-match constraint
         size_t                                      size(void) const;                                           //!< Get the number of taxa.
         std::string                                 toString(void) const;                                       //!< Convert this value into a string.
         
@@ -87,21 +88,25 @@ namespace RevBayesCore {
     private: 
         
         // members
-        double                                      age;
+        double                                      age = 0.0;
         RbBitSet                                    bitset;
         std::string                                 clade_name;
-        int                                         num_missing;
+        int                                         num_missing = 0;
         std::set<Taxon>                             mrca;
         std::vector<Taxon>                          taxa;
-        bool                                        is_negative_constraint;
-        bool                                        is_optional_match;
-        std::vector<Clade>                          optional_constraints;
-        
+        bool                                        is_negative_constraint = false;
+        boost::optional<std::vector<Clade>>         optional_constraints;
     };
     
     // Global functions using the class
     std::ostream&                       operator<<(std::ostream& o, const Clade& x);                             //!< Overloaded output operator
 
+    // Partial order
+    bool cladeWithin(const Clade& c1, const Clade& c2);
+
+    // Strict weak order
+    bool cladeSmaller(const Clade& c1, const Clade& c2);
+    bool cladeBefore(const Clade& c1, const Clade& c2);
 }
 
 #endif

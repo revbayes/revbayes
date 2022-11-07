@@ -7,6 +7,7 @@
 #include <set>
 
 #include "Monitor.h"
+#include "RbFileManager.h"
 
 namespace RevBayesCore {
 class BranchHistory;
@@ -20,7 +21,7 @@ template <class variableType> class StochasticNode;
         
     public:
         // Constructors and Destructors
-        PhylowoodNhxMonitor(TypedDagNode<Tree> *t, std::vector< StochasticNode< BranchHistory >* > bh, std::vector<std::vector<double> > gc, unsigned long g, unsigned long mg, int burn, const std::string &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sr=true);
+        PhylowoodNhxMonitor(TypedDagNode<Tree> *t, std::vector< StochasticNode< BranchHistory >* > bh, std::vector<std::vector<double> > gc, unsigned long g, unsigned long mg, int burn, const path &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sr=true);
         
         // new PhylowoodNhxMonitor( tau, bh_vector_stochastic, 10, filepath + "rb.tree_chars.txt", "\t"));
         
@@ -63,7 +64,7 @@ template <class variableType> class StochasticNode;
         size_t numHistories;
         size_t numCharacters;
         
-        std::string                         filename;
+        path                                filename;
         std::string                         separator;
         bool                                posterior;
         bool                                prior;
