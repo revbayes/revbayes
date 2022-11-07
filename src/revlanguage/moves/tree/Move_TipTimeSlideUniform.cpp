@@ -123,6 +123,8 @@ std::vector<std::string> Move_TipTimeSlideUniform::getMoveAliases(void) const
 {
     std::vector<std::string> aliases;
 
+    aliases.push_back("FossilTimeSlideUniform");
+
     return aliases;
 }
 
