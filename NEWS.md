@@ -2,29 +2,27 @@
 
 ## Speed & memory
   * Cache transition probability matrices.
-  * Faster tree summaries.
+  * 4x faster tree summaries.
   * Discrete character data sets take 5x less RAM, and are 5x faster to load.
 
 ## Features
   * Add Occurence Birth-Death Process.
-  * Record better mixing statistics for MC^3.
+  * Better mixing statistics for MC^3.
+
   * Automatically remove degree-2 root nodes when reading non-clock trees.
 
 ## Bug Fixes
-  * _UNMERGED_ Fix some problems with the BDSTP.
-  * Fix false claim of conflicting constraints. (#288)
-  * Statically link boost into distributed binaries.
-  * Don't link distributed binaries with openlibm.
+  * Fix some problems with the BDSTP.
+  * Fix false claim of conflicting constraints. (#250, #288)
   * Don't get stuck on MCMC with amino-acid models.
   * Fix crash in unrooted NNI and SPR.
-  * Fix vectors in functions.
   * Fix using file paths and directories on Windows.
   * Restore dnFBDP synonym for dnBDSTP.
   * Restore initialTree argument to dnFBDP .
   * Fix check for number of rates in FBD-Range process.
   * Fix crash when reading some trees with sampled ancestors. (#240)
   * Prevent NumStates methods from overriding character exclusion. (#252)
-  * C++ standard switched to C++17 (#238, #278)
+  * C++ standard switched to C++17.
 
 # RevBayes 1.2.0 Lagerstätte
 
