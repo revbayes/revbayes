@@ -138,7 +138,7 @@ jobs:
           stamp=$(gdate '+%s')
         fi
         echo "${stamp}"
-        echo "::set-output name=timestamp::${stamp}"
+        echo "timestamp=${stamp}" >> $GITHUB_OUTPUT
 
     - name: ccache cache files
 #      uses: actions/cache@v2

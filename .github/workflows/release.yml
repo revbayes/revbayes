@@ -38,7 +38,7 @@ jobs:
     - name: Get version
       id: get_version
       run: |
-        echo ::set-output name=version::$(echo $GITHUB_REF | cut -d / -f 3)
+        echo "version=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_OUTPUT
 
     - name: Create singularity image
       id: create_image
@@ -46,8 +46,8 @@ jobs:
         cd projects/singularity
         PACKAGE=revbayes-${{ steps.get_version.outputs.version }}-linux64-singularity.simg
         singularity build --fakeroot ~/${PACKAGE} Singularity
-        echo ::set-output name=archive_name::${PACKAGE}
-        echo ::set-output name=archive_path::${HOME}/${PACKAGE}
+        echo "archive_name=${PACKAGE}" >> $GITHUB_OUTPUT
+        echo "archive_path=${HOME}/${PACKAGE}" >> $GITHUB_OUTPUT
 
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
@@ -147,7 +147,7 @@ jobs:
           stamp=$(gdate '+%s')
         fi
         echo "${stamp}"
-        echo "::set-output name=timestamp::${stamp}"
+        echo "timestamp=${stamp}" >> $GITHUB_OUTPUT
 
     - name: ccache cache files
 #      uses: actions/cache@v2
@@ -274,7 +274,7 @@ jobs:
     - name: Get version
       id: get_version
       run: |
-        echo ::set-output name=version::$(echo $GITHUB_REF | cut -d / -f 3)
+        echo "version=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_OUTPUT
 
     - name: Create tarball
       id: create_tarball
@@ -284,7 +284,7 @@ jobs:
         TAR=${PACKAGE}-${{ matrix.arch }}.tar.gz
         cp -a $PREFIX $PACKAGE
         tar -zcf $TAR ${PACKAGE}
-        echo ::set-output name=archive::${TAR}
+        echo "archive=${TAR}" >> $GITHUB_OUTPUT
 
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
