@@ -210,6 +210,8 @@
 #include "Move_IndependentTopology.h"
 #include "Move_EmpiricalTree.h"
 #include "Move_FNPR.h"
+#include "Move_FossilTipTimeUniform.h"
+#include "Move_FossilTipTimeSlideUniform.h"
 #include "Move_TipTimeSlideUniform.h"
 #include "Move_GibbsPruneAndRegraft.h"
 #include "Move_LayeredScaleProposal.h"
@@ -423,6 +425,8 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_IndependentTopology()              );
 		addType( new Move_EmpiricalTree()                    );
         addType( new Move_FNPR()                             );
+        addType( new Move_FossilTipTimeUniform()             );
+        addType( new Move_FossilTipTimeSlideUniform()        );
         addType( new Move_GibbsPruneAndRegraft()             );
         addType( new Move_LayeredScaleProposal()             );
         addType( new Move_NarrowExchange()                   );
