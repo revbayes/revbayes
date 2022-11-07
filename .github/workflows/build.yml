@@ -12,25 +12,18 @@ jobs:
   build:
     strategy:
       matrix:
-        name: [ubuntu-gcc-6,
-               ubuntu-gcc-7,
+        name: [ubuntu-gcc-7,
                ubuntu-gcc-8,
                ubuntu-gcc-9,
                ubuntu-gcc-9-mpi,
                ubuntu-gcc-10,
-               ubuntu-clang-8,
-               macos-xcode-11.7,
+               ubuntu-gcc-11,
+               ubuntu-clang-11,
+               macos-xcode-12.4,
                windows
                ]
 
         include:
-          - name: ubuntu-gcc-6
-            os: ubuntu-18.04
-            compiler: gcc
-            version: "6"
-            install_boost: 1.74
-            mpi: false
-
           - name: ubuntu-gcc-7
             os: ubuntu-latest
             compiler: gcc
@@ -63,16 +56,23 @@ jobs:
             install_boost: 1.74
             mpi: false
 
-          - name: ubuntu-clang-8
+          - name: ubuntu-gcc-11
             os: ubuntu-latest
-            compiler: clang
-            version: "8"
+            compiler: gcc
+            version: "11"
+            install_boost: 1.74
             mpi: false
 
-          - name: macos-xcode-11.7
+          - name: ubuntu-clang-11
+            os: ubuntu-latest
+            compiler: clang
+            version: "11"
+            mpi: false
+
+          - name: macos-xcode-12.4
             os: macos-latest
             compiler: xcode
-            version: "11.7"
+            version: "12.4"
             mpi: false
   
           - name: windows
@@ -171,7 +171,7 @@ jobs:
       env:
         USE_MPI: ${{ matrix.mpi }}
       run: |
-        ${GITHUB_WORKSPACE}/projects/meson/make_winroot.sh -ccache true
+        ${GITHUB_WORKSPACE}/projects/meson/make_winroot.sh -ccache true -gtk true
         ( cd ${GITHUB_WORKSPACE}/projects/meson/ ; ./generate.sh )
         
     - name: Update submodules
@@ -182,44 +182,53 @@ jobs:
       if: matrix.name != 'windows'
       env:
         USE_MPI: ${{ matrix.mpi }}
+        OSX_VERSION_MIN: "10.14"
       run: |
+        if [ ${{ matrix.arch }} = "mac64" ] && [ -n "${OSX_VERSION_MIN}" ]; then
+          MIN="-mmacosx-version-min=${OSX_VERSION_MIN}"
+          export CFLAGS="$CFLAGS $MIN"
+          export CXXFLAGS="$CXXFLAGS $MIN"
+          export LDFLAGS="$LDFLAGS $MIN"
+        fi
+
         cd projects/cmake
-        ./build.sh -travis true
+        ./build.sh -travis true -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }}
+        cmake --install build
 
     - name: Configure and build (Windows meson cross compile)
       if: matrix.name == 'windows'
       env:
-        BOOST_INCLUDEDIR: /home/runner/win_root/mingw64/include/boost
-        BOOST_LIBRARYDIR: /home/runner/win_root/mingw64/lib
+        BOOST_ROOT: /home/runner/win_root/mingw64/
       run: |
-        /usr/local/bin/meson build ${GITHUB_WORKSPACE} --prefix=${GITHUB_WORKSPACE}/wincrossbuild --cross-file=win64-cross.txt -Dopenlibm=true
+        CXX=x86_64-w64-mingw32-g++-posix
+        PREFIX=${HOME}/local
+        WINROOT=/home/runner/win_root
+        /usr/local/bin/meson build ${GITHUB_WORKSPACE} --prefix=$PREFIX --cross-file=win64-cross.txt -Dopenlibm=true -Dstudio=true
         /usr/local/bin/ninja -C build install
-        cp /usr/lib/gcc/x86_64-w64-mingw32/*-posix/libgcc_s_seh-1.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
-        cp /usr/lib/gcc/x86_64-w64-mingw32/*-posix/libstdc++-6.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
-        cp /usr/lib/gcc/x86_64-w64-mingw32/*-posix/libssp-0.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
-        cp /home/runner/win_root/mingw64/bin/libboost_*.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
-        cp /home/runner/win_root/mingw64/bin/libwinpthread-1.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
-        cp /home/runner/win_root/mingw64/bin/libopenlibm.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
-        echo '#!/bin/bash' > ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
-        echo 'cp ${GITHUB_WORKSPACE}/wincrossbuild/bin/* .' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
-        echo 'if [ "$#" -gt "1" ]; then' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
-        echo 'wine64 rb.exe ${@:1:$#-1} $(winepath -w ${@: -1} | sed "s,\\\\,\\\\\\\\,g")' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
-        echo 'else' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
-        echo 'wine64 rb.exe $(winepath -w ${1} | sed "s,\\\\,\\\\\\\\,g")' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
-        echo 'fi' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
-        echo 'rm -f *.exe' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
-        echo 'rm -f *.dll' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
-        chmod +x ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
+        cp $($CXX --print-file-name libgcc_s_seh-1.dll)   $PREFIX/bin
+        cp $($CXX --print-file-name libstdc++-6.dll)      $PREFIX/bin
+        cp $($CXX --print-file-name libssp-0.dll)         $PREFIX/bin
+        cp $($CXX --print-file-name libwinpthread-1.dll)  $PREFIX/bin
+        cp $WINROOT/mingw64/bin/libboost_*.dll            $PREFIX/bin
+        cp $WINROOT/mingw64/bin/libopenlibm.dll           $PREFIX/bin
+        ( echo '#!/bin/bash'
+          echo "cp $PREFIX/bin/* ."
+          echo 'if [ "$#" -gt "1" ]; then'
+          echo '  wine64 rb.exe ${@:1:$#-1} $(winepath -w ${@: -1} | sed "s,\\\\,\\\\\\\\,g")'
+          echo 'else'
+          echo '  wine64 rb.exe $(winepath -w ${1} | sed "s,\\\\,\\\\\\\\,g")'
+          echo 'fi'
+          echo 'rm -f *.exe'
+          echo 'rm -f *.dll' ) > $PREFIX/bin/rb
+        chmod +x $PREFIX/bin/rb
+
     - name: Test
       env:
         USE_MPI: ${{ matrix.mpi }}
         IS_WINDOWS: ${{ matrix.name == 'windows' }}
       run: |
-        if [ "${{ matrix.name }}" = "windows" ] ; then
-          export PATH=${GITHUB_WORKSPACE}/wincrossbuild/bin:$PATH
-        else
-          export PATH=${GITHUB_WORKSPACE}/projects/cmake:$PATH
-        fi
+        export PATH=${HOME}/local/bin:$PATH
+
         echo "\"Hello World\"" | rb
         echo ::group::Test suite
         cd tests

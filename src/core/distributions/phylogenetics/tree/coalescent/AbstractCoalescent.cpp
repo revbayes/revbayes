@@ -42,7 +42,7 @@ AbstractCoalescent::AbstractCoalescent(const std::vector<Taxon> &tn, const std::
 
 
 /**
- * Randomly attach the times to a tree topology.
+ * Randomly attach the node times to a tree topology.
  * This function works by randomly picking a node from the set of tips,
  * setting its time to times[index], increment the index,
  * adding the two children (if they are not actual tips) to the set of tips,
@@ -116,13 +116,13 @@ void AbstractCoalescent::buildRandomBinaryTree(std::vector<TopologyNode*> &tips)
         tips.erase(tips.begin()+long(index));
         
         // add a left child
-        TopologyNode* leftChild = new TopologyNode(0);
+        TopologyNode* leftChild = new TopologyNode();
         parent->addChild(leftChild);
         leftChild->setParent(parent);
         tips.push_back(leftChild);
         
         // add a right child
-        TopologyNode* rightChild = new TopologyNode(0);
+        TopologyNode* rightChild = new TopologyNode();
         parent->addChild(rightChild);
         rightChild->setParent(parent);
         tips.push_back(rightChild);
@@ -180,7 +180,6 @@ void AbstractCoalescent::buildHeterochronousRandomBinaryTree(Tree *psi, std::vec
                 leftChild->setParent(parent);
                 rightChild->setParent(parent);
                 parent->setAge( ages[i] );
-                parent->setNodeType( false, false, true );
                 active.push_back(parent);
                 
                 // we coalesced, we can move on now
@@ -320,8 +319,10 @@ void AbstractCoalescent::redrawValue( void )
 }
 
 
-/**
+/** Simulates a coalescent tree
  *
+ *
+ *@throw RbException if the vector of taxan has nodes with different ages. Taxa cannot be heterochronous.
  */
 void AbstractCoalescent::simulateTree( void )
 {
@@ -432,7 +433,6 @@ void AbstractCoalescent::simulateHeterochronousTree( void )
         node->setName(name);
         node->setSpeciesName(taxa[i].getSpeciesName());
         node->setAge(taxa[i].getAge());
-        node->setNodeType( true, false, false );
         // add to tips
         nodes.push_back(node);
     }

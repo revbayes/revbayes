@@ -76,23 +76,26 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     
     size_t arg_index_files     = 0;
     size_t arg_index_tree_type = 1;
-    size_t arg_index_outgroup  = 2;
-    size_t arg_index_separator = 3;
-    size_t arg_index_burnin    = 4;
-    size_t arg_index_thinning  = 5;
-    size_t arg_index_offset    = 6;
-    size_t arg_index_nexus     = 7;
-    size_t arg_index_nruns     = 8;
+    size_t arg_unroot_nonclock = 2;
+    size_t arg_index_outgroup  = 3;
+    size_t arg_index_separator = 4;
+    size_t arg_index_burnin    = 5;
+    size_t arg_index_thinning  = 6;
+    size_t arg_index_offset    = 7;
+    size_t arg_index_nexus     = 8;
+    size_t arg_index_nruns     = 9;
 
     // get the information from the arguments for reading the file
     const std::string&  treetype = static_cast<const RlString&>( args[arg_index_tree_type].getVariable()->getRevObject() ).getValue();
+    bool unroot_nonclock = static_cast<const RlBoolean&>( args[arg_unroot_nonclock].getVariable()->getRevObject() ).getValue();
+
     const std::string&  sep      = static_cast<const RlString&>( args[arg_index_separator].getVariable()->getRevObject() ).getValue();
     long                thin     = static_cast<const Natural&>( args[arg_index_thinning].getVariable()->getRevObject() ).getValue();
     long                offset   = static_cast<const Natural&>( args[arg_index_offset].getVariable()->getRevObject() ).getValue();
     bool nexus = static_cast<RlBoolean&>(args[arg_index_nexus].getVariable()->getRevObject()).getValue();
     long                nruns    = static_cast<const Natural&>( args[arg_index_nruns].getVariable()->getRevObject() ).getValue();
 
-    std::vector<std::string> vectorOfFileNames;
+    std::vector<RevBayesCore::path> vectorOfFileNames;
     
     if ( args[0].getVariable()->getRevObject().isType( ModelVector<RlString>::getClassTypeSpec() ) )
     {
@@ -102,70 +105,64 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
         }
 
         const ModelVector<RlString>& fn = static_cast<const ModelVector<RlString> &>( args[arg_index_files].getVariable()->getRevObject() ).getValue();
-        std::vector<std::string> tmp;
+        std::vector<RevBayesCore::path> tmp;
         for (size_t i = 0; i < fn.size(); i++)
         {
-            RevBayesCore::RbFileManager myFileManager( fn[i] );
+            RevBayesCore::path filepath = fn[i];
             
-            if ( !myFileManager.testFile() && !(myFileManager.testDirectory() && myFileManager.getFileName() == "" ) )
+            if ( not RevBayesCore::exists(filepath) )
             {
-                std::string errorStr = "Could not find filename: " + myFileManager.getFileName() + "\n";
-                myFileManager.formatError(errorStr);
+                std::string errorStr = "Could not find filename: " + filepath.filename().string() + "\n";
+                RevBayesCore::formatError(filepath, errorStr);
                 throw RbException(errorStr);
             }
             
-            if ( myFileManager.isFile() )
+            if ( RevBayesCore::is_directory(filepath))
             {
-                tmp.push_back( myFileManager.getFullFileName() );
+                RevBayesCore::setStringWithNamesOfFilesInDirectory( filepath, tmp );
             }
             else
             {
-                myFileManager.setStringWithNamesOfFilesInDirectory( tmp );
+                tmp.push_back( filepath );
             }
         }
+        // FIXME: doesn't this add tmp to vectorOfFileNames twice?
         for (size_t i = 0; i < tmp.size(); i++)
         {
             vectorOfFileNames.push_back(tmp[i]);
         }
-        std::set<std::string> s( vectorOfFileNames.begin(), vectorOfFileNames.end() );
+        std::set<RevBayesCore::path> s( vectorOfFileNames.begin(), vectorOfFileNames.end() );
         vectorOfFileNames.assign( s.begin(), s.end() );
     }
     else
     {
         // check that the file/path name has been correctly specified
-        std::string  bn = static_cast<const RlString&>( args[arg_index_files].getVariable()->getRevObject() ).getValue();
-        
-        std::string file_extension = bn.substr(StringUtilities::findLastOf(bn, '.'), string::npos);
-
-        StringUtilities::replaceSubstring(bn,file_extension,"");
+        RevBayesCore::path  bn = static_cast<const RlString&>( args[arg_index_files].getVariable()->getRevObject() ).getValue();
         
         for (size_t i = 0; i < nruns; i++)
         {
-            std::string run = "";
+            auto filepath = bn;
             if ( nruns > 1 )
             {
-                run = "_run_" + StringUtilities::to_string(i+1);
+                string run_tag = "_run_" + StringUtilities::to_string(i+1);
+                filepath = RevBayesCore::appendToStem(filepath, run_tag);
             }
 
-            const std::string  fn = bn + run + file_extension;
-
-            RevBayesCore::RbFileManager myFileManager( fn );
-
-            if ( !myFileManager.testFile() && !(myFileManager.testDirectory() && myFileManager.getFileName() == "" ) )
+            if ( not RevBayesCore::exists(filepath))
             {
-                std::string errorStr = "Could not find filename: " + myFileManager.getFileName() + "\n";
-                myFileManager.formatError(errorStr);
+                std::string errorStr = "Could not find filename: " + filepath.string() + "\n";
+                RevBayesCore::formatError(filepath, errorStr);
                 throw RbException(errorStr);
             }
 
             // set up a vector of strings containing the name or names of the files to be read
-            if ( myFileManager.isFile() )
+            if (RevBayesCore::is_directory( filepath ))
             {
-                vectorOfFileNames.push_back( myFileManager.getFullFileName() );
+                RevBayesCore::setStringWithNamesOfFilesInDirectory( filepath, vectorOfFileNames );
             }
             else
             {
-                myFileManager.setStringWithNamesOfFilesInDirectory( vectorOfFileNames );
+                vectorOfFileNames.push_back( filepath );
             }
         }
     }
@@ -173,13 +170,13 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     WorkspaceVector<TraceTree> *rv = NULL;
     if ( treetype == "clock" )
     {
-        if(nexus) rv = readTreesNexus(vectorOfFileNames, true, thin, offset);
-        else rv = readTrees(vectorOfFileNames, sep, true, thin, offset);
+        if(nexus) rv = readTreesNexus(vectorOfFileNames, treetype, unroot_nonclock, thin, offset);
+        else rv = readTrees(vectorOfFileNames, sep, treetype, unroot_nonclock, thin, offset);
     }
     else if ( treetype == "non-clock" )
     {
-        if(nexus) rv = readTreesNexus(vectorOfFileNames, false, thin, offset);
-        else rv = readTrees(vectorOfFileNames, sep, false, thin, offset);
+        if(nexus) rv = readTreesNexus(vectorOfFileNames, treetype, unroot_nonclock, thin, offset);
+        else rv = readTrees(vectorOfFileNames, sep, treetype, unroot_nonclock, thin, offset);
         
         RevBayesCore::Clade og;
         if ( args[arg_index_outgroup].getVariable() != NULL && args[arg_index_outgroup].getVariable()->getRevObject() != RevNullObject::getInstance())
@@ -253,7 +250,9 @@ const ArgumentRules& Func_readTreeTrace::getArgumentRules( void ) const
         tree_options.push_back( "clock" );
         tree_options.push_back( "non-clock" );
         argumentRules.push_back( new OptionRule( "treetype", new RlString("clock"), tree_options, "The type of trees." ) );
+        argumentRules.push_back( new ArgumentRule( "unroot_nonclock", RlBoolean::getClassTypeSpec(), "Remove a degree-2 root node and set the tree unrooted, if treetype is non-clock.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         argumentRules.push_back( new ArgumentRule( "outgroup"   , Clade::getClassTypeSpec(), "The clade (consisting of one or more taxa) used as an outgroup.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+
         argumentRules.push_back( new Delimiter() );
 
         std::vector<TypeSpec> burninTypes;
@@ -326,36 +325,33 @@ const TypeSpec& Func_readTreeTrace::getReturnType( void ) const
 }
 
 
-WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<std::string> &vector_of_file_names, const std::string &delimiter, bool clock, long thinning, long offset)
+WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<RevBayesCore::path> &vector_of_file_names, const std::string &delimiter, const std::string& treetype, bool unroot_nonclock, long thinning, long offset)
 {
-    
+    bool clock = (treetype == "clock");
+
     std::vector<TraceTree> data;
     
     // Set up a map with the file name to be read as the key and the file type as the value. Note that we may not
     // read all of the files in the string called "vectorOfFileNames" because some of them may not be in a format
     // that can be read.
-    std::map<std::string,std::string> file_ap;
-    for (std::vector<std::string>::const_iterator p = vector_of_file_names.begin(); p != vector_of_file_names.end(); ++p)
+    std::map<RevBayesCore::path,std::string> file_ap;
+    for (auto& fn: vector_of_file_names)
     {
         bool has_header_been_read = false;
-        const std::string &fn = *p;
-        
-        RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(fn);
         
         // let us quickly count the number of lines
         size_t lines = 0;
-        std::ifstream tmp_in_file( fm.getFullFileName().c_str() );
+        std::ifstream tmp_in_file( fn.string() );
         
         if ( !tmp_in_file )
         {
-            throw RbException( "Could not open file \"" + fn + "\"" );
+            throw RbException()<<"Could not open file "<<fn;
         }
         while ( tmp_in_file.good() )
         {
             // Read a line
             std::string line;
-            RevBayesCore::RbFileManager reader = RevBayesCore::RbFileManager();
-            reader.safeGetline(tmp_in_file, line);
+            RevBayesCore::safeGetline(tmp_in_file, line);
             if (line.length() == 0 || line[0] == '#')
             {
                 continue;
@@ -369,16 +365,16 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<std:
         // now we actually process the input
         
         /* Open file */
-        std::ifstream in_file( fm.getFullFileName().c_str() );
+        std::ifstream in_file( fn.string() );
         
         if ( !in_file )
         {
-            throw RbException( "Could not open file \"" + fn + "\"" );
+            throw RbException()<<"Could not open file "<<fn;
         }
         
         /* Initialize */
         std::string commandLine;
-        RBOUT( "Processing file \"" + fn + "\"");
+        RBOUT( "Processing file \"" + fn.string() + "\"");
         
         size_t n_samples = 0;
         size_t index = 0;
@@ -393,8 +389,7 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<std:
             
             // Read a line
             std::string line;
-            RevBayesCore::RbFileManager reader = RevBayesCore::RbFileManager();
-            reader.safeGetline(in_file, line);
+            RevBayesCore::safeGetline(in_file, line);
             
             // skip empty lines
             //line = StringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
@@ -460,6 +455,14 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<std:
             {
                 RevBayesCore::NewickConverter c;
                 tau = c.convertFromNewick( columns[index] );
+                if (unroot_nonclock)
+                {
+                    tau->removeRootIfDegree2();
+//                  Perhaps we should mark the tree unrooted, since we have removed the old root,
+//                    and chosen a neighbor as the now root.
+//                  However, RevBayes has bugs with unrooted trees and may crash.
+//                    tau->setRooted(false);
+                }
             }
             
             t.addObject( tau );
@@ -485,17 +488,17 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<std:
  *
  * @note if multiple files are given, the traces will all be appended without regard for burnin
  * */
-WorkspaceVector<TraceTree>* Func_readTreeTrace::readTreesNexus(const std::vector<string> &fns, bool clock, long thin, long offset)
+WorkspaceVector<TraceTree>* Func_readTreeTrace::readTreesNexus(const std::vector<RevBayesCore::path> &fns, const string& treetype, bool unroot_nonclock, long thin, long offset)
 {
-
     std::vector<TraceTree> data;
 
-    for (size_t i=0; i<fns.size(); ++i)
+    bool clock = (treetype == "clock");
+
+    for (auto& fn: fns)
     {
         RevBayesCore::TraceTree tt = RevBayesCore::TraceTree();
         tt.setParameterName("tree");
 
-        const std::string fn = fns[i];
         // get the global instance of the NCL reader and clear warnings from its warnings buffer
         RevBayesCore::NclReader reader = RevBayesCore::NclReader();
 
@@ -509,13 +512,24 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTreesNexus(const std::vector
             tmp = reader.readBranchLengthTrees( fn );
         }
         int nsamples = 0;
-        for (size_t j=0; j<tmp->size(); ++j)
+        if (tmp)
         {
-            RevBayesCore::Tree* t = (*tmp)[j];
-            if ( (nsamples-offset) % thin == 0) tt.addObject(t);
-            nsamples++;
+            for (auto& tree: *tmp)
+            {
+                if ( (nsamples-offset) % thin == 0)
+                {
+                    if (unroot_nonclock)
+                    {
+                        tree->removeRootIfDegree2();
+                        tree->setRooted(false);
+                    }
+
+                    tt.addObject(tree);
+                }
+                nsamples++;
+            }
+            delete tmp;
         }
-        delete tmp;
 
         data.push_back(TraceTree(tt));
     }

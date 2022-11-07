@@ -25,6 +25,15 @@ namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 
+
+/**
+ * Default Constructor for Heterochronus Coalescent
+ *
+ * @param[in] iv The start times of intervals where demographic dynamics can differ
+ * @param[in] df A vector specifying the demographic dynamics for a given interval.
+ * @param[in] tn        A vector of taxon names used during initialization.
+ * @param[in] c         A vector of clade constraints.
+ */
 HeterochronousCoalescent::HeterochronousCoalescent(const TypedDagNode< RbVector<double> > *iv, const RbVector< DemographicFunction > &df, const std::vector<Taxon> &tn, const std::vector<Clade> &c) : AbstractCoalescent( tn, c ),
     intervals( iv ),
     demographies( df )
@@ -45,8 +54,6 @@ HeterochronousCoalescent::HeterochronousCoalescent(const TypedDagNode< RbVector<
     
     simulateHeterochronousTree();
 }
-
-
 
 HeterochronousCoalescent::~HeterochronousCoalescent()
 {

@@ -40,9 +40,9 @@ class DagNode;
         ContinuousCharacterData*                        clone(void) const;
         
         // implemented methods of the Serializable interface
-        void                                            initFromFile( const std::string &dir, const std::string &fn );              //!< Read and resurrect this object from a file in its default format.
+        void                                            initFromFile( const path &dir, const std::string &fn );              //!< Read and resurrect this object from a file in its default format.
         void                                            initFromString( const std::string &s );                                     //!< Serialize (resurrect) the object from a string value
-        void                                            writeToFile(const std::string &dir, const std::string &fn) const;           //!< Write this object into a file in its default format.
+        void                                            writeToFile(const path &dir, const std::string &fn) const;           //!< Write this object into a file in its default format.
         void                                            printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const;                                  //!< print object for user (in user-formatted way)
         void                                            printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const;           //!< print object with standard rounding
         void                                            printForComplexStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const;          //!< print object with maximum precision

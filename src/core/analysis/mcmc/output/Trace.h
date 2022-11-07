@@ -22,7 +22,7 @@ namespace RevBayesCore {
         
     public:
         
-        Trace(void);
+        Trace(void)                     = default;
         
         virtual                         ~Trace(void) {}
 
@@ -37,7 +37,8 @@ namespace RevBayesCore {
         const valueType&                objectAt(size_t index, bool post = false) const { return post ? values.at(index + burnin) : values.at(index); }
         long                            size(bool post = false) const                   { return post ? values.size() - burnin : values.size(); }
 
-        virtual void                    addObject(valueType d);
+        virtual void                    addObject(const valueType& d);
+        virtual void                    addObject(valueType&& d);
         virtual void                    addObject(valueType* d);
         virtual int                     isCoveredInInterval(const std::string &v, double i, bool verbose);
         bool                            isDirty(void) const                             { return dirty; };
@@ -54,20 +55,20 @@ namespace RevBayesCore {
         
 
         // getters and setters
-        std::string                     getFileName() const                             { return fileName; }
+        const path&                     getFileName() const                             { return fileName; }
         const std::string&              getParameterName() const                        { return parmName; }
         
-        void                            setFileName(std::string fn)                     { fileName = fn; }
+        void                            setFileName(path fn)                            { fileName = fn; }
         void                            setParameterName(std::string pm)                { parmName = pm; }
         
     protected:
         
-        size_t                          burnin;
-        std::string                     fileName;
+        size_t                          burnin = 0;
+        path                            fileName;
         std::string                     parmName;
         std::vector<valueType>          values;                                     //!< the values of this trace
 
-        mutable bool                    dirty;
+        mutable bool                    dirty = true;
 
     };
 
@@ -110,23 +111,18 @@ namespace RevBayesCore {
 
 }
 
-/**
- * Default constructor.
- */
 template <class valueType>
-RevBayesCore::Trace<valueType>::Trace() :
-    burnin( 0 ),
-    fileName( "" ),
-    parmName( "" ),
-    dirty( true )
+void RevBayesCore::Trace<valueType>::addObject(const valueType& t)
 {
+    values.push_back(t);
+    dirty = true;
 }
 
 
 template <class valueType>
-void RevBayesCore::Trace<valueType>::addObject(valueType t)
+void RevBayesCore::Trace<valueType>::addObject(valueType&& t)
 {
-    values.push_back(t);
+    values.push_back( std::move(t) );
     dirty = true;
 }
 

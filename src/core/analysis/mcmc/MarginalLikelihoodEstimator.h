@@ -7,6 +7,7 @@
 
 #include "Cloneable.h"
 #include "Parallelizable.h"
+#include "RbFileManager.h"
 
 namespace RevBayesCore {
     
@@ -25,7 +26,7 @@ namespace RevBayesCore {
     class MarginalLikelihoodEstimator : public Cloneable, public Parallelizable {
         
     public:
-        MarginalLikelihoodEstimator(const std::string &fn, const std::string &pn, const std::string &ln, const std::string &del);
+        MarginalLikelihoodEstimator(const path &fn, const std::string &pn, const std::string &ln, const std::string &del);
         virtual                                            ~MarginalLikelihoodEstimator(void);                                                          //!< Virtual destructor
         
         // public methods

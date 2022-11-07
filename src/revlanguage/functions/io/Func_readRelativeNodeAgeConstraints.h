@@ -29,9 +29,6 @@ namespace RevLanguage {
         RevPtr<RevVariable>                 execute(void);                                                          //!< Execute function
         const ArgumentRules&                getArgumentRules(void) const;                                           //!< Get argument rules
         const TypeSpec&                     getReturnType(void) const;                                              //!< Get type of return value
-        
-    private:
-        void                                formatError(RevBayesCore::RbFileManager& fm, std::string& errorStr);    //!< Format the error string when (mis)reading files
     };
 }
 

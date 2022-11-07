@@ -12,7 +12,12 @@
 #include "RevVariable.h"
 #include "RlFunction.h"
 
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
+
 using namespace RevLanguage;
+
+namespace fs = boost::filesystem;
 
 /** Default constructor */
 Func_getwd::Func_getwd( void ) : Procedure()
@@ -39,7 +44,7 @@ RevPtr<RevVariable> Func_getwd::execute( void )
 {
     
     RbSettings& s = RbSettings::userSettings();
-    const std::string& wd = s.getWorkingDirectory();
+    std::string wd = fs::current_path().make_preferred().string();
     
     RlString* type = new RlString( wd, false );
     

@@ -1231,10 +1231,10 @@ void ContinuousCharacterData::includeCharacter(size_t i)
 }
 
 
-void ContinuousCharacterData::initFromFile(const std::string &dir, const std::string &fn)
+void ContinuousCharacterData::initFromFile(const path &dir, const std::string &fn)
 {
-    RbFileManager fm = RbFileManager(dir, fn + ".nex");
-    fm.createDirectoryForFile();
+    path filename = dir / (fn + ".nex");
+    create_directories(dir);
     
     // get the global instance of the NCL reader and clear warnings from its warnings buffer
     NclReader reader = NclReader();
@@ -1246,7 +1246,7 @@ void ContinuousCharacterData::initFromFile(const std::string &dir, const std::st
     suffix += "|unknown";
     myFileType += suffix;
         
-    std::vector<AbstractCharacterData*> m_i = reader.readMatrices( fm.getFullFileName(), myFileType );
+    std::vector<AbstractCharacterData*> m_i = reader.readMatrices( filename , myFileType );
     ContinuousCharacterData *coreM = static_cast<ContinuousCharacterData *>( m_i[0] );
 
     *this = *coreM;
@@ -1352,12 +1352,12 @@ void ContinuousCharacterData::restoreCharacter(size_t i)
 }
 
 
-void ContinuousCharacterData::writeToFile(const std::string &dir, const std::string &fn) const
+void ContinuousCharacterData::writeToFile(const path &dir, const std::string &fn) const
 {
-    RbFileManager fm = RbFileManager(dir, fn + ".nex");
-    fm.createDirectoryForFile();
+    path filename = dir / (fn + ".nex");
+    create_directories(dir);
     
-    NexusWriter nw( fm.getFullFileName() );
+    NexusWriter nw( filename );
     nw.openStream(false);
     
     nw.writeNexusBlock( *this );

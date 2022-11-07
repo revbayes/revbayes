@@ -11,8 +11,10 @@
 
 
 #include "CharacterHistoryRateModifier.h"
+#include "DistanceMatrix.h"
 #include "StochasticNode.h"
 #include "TopologyNode.h"
+#include "Tree.h"
 
 #include <set>
 #include <string>

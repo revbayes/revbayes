@@ -18,7 +18,7 @@
 using namespace RevBayesCore;
 
 
-StationarityStoppingRule::StationarityStoppingRule(double p, const std::string &fn, size_t f, BurninEstimatorContinuous *be) : AbstractConvergenceStoppingRule(fn, f, be),
+StationarityStoppingRule::StationarityStoppingRule(double p, const path &fn, size_t f, BurninEstimatorContinuous *be) : AbstractConvergenceStoppingRule(fn, f, be),
     prob( p )
 {
     
@@ -76,12 +76,9 @@ bool StationarityStoppingRule::stop( size_t g )
     std::vector<std::vector<size_t> > burnins;
     for ( size_t i = 1; i <= numReplicates; ++i)
     {
-        std::string fn = filename;
+        path fn = filename;
         if ( numReplicates > 1 )
-        {
-            RbFileManager fm = RbFileManager(filename);
-            fn = fm.getFilePath() + fm.getPathSeparator() + fm.getFileNameWithoutExtension() + "_run_" + StringUtilities::to_string(i) + "." + fm.getFileExtension();
-        }
+            fn = appendToStem(filename, "_run_" + StringUtilities::to_string(i));
         
         TraceContinuousReader reader = TraceContinuousReader( fn );
         

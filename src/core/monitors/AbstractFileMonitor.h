@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <vector>
+#include "RbFileManager.h"
 
 #include "Monitor.h"
 
@@ -17,8 +18,8 @@ class DagNode;
         
     public:
         // Constructors and Destructors
-        AbstractFileMonitor(DagNode *n, unsigned long g, const std::string &fname, bool ap=false, bool wv=true);  //!< Constructor with single DAG node
-        AbstractFileMonitor(const std::vector<DagNode *> &n, unsigned long g, const std::string &fname, bool ap=false, bool wv=true);  //!< Constructor with vector of DAG node
+        AbstractFileMonitor(DagNode *n, unsigned long g, const path &fname, bool ap=false, bool wv=true);  //!< Constructor with single DAG node
+        AbstractFileMonitor(const std::vector<DagNode *> &n, unsigned long g, const path &fname, bool ap=false, bool wv=true);  //!< Constructor with vector of DAG node
         AbstractFileMonitor(const AbstractFileMonitor& f);
         
         virtual ~AbstractFileMonitor(void);
@@ -44,8 +45,8 @@ class DagNode;
         std::fstream                        out_stream;  //!< output file stream
         
         // parameters
-        std::string                         filename;  //!< input name of the output file
-        std::string                         working_file_name;  //!< actual output file name, including extension if applicable
+        path                                filename;  //!< input name of the output file
+        path                                working_file_name;  //!< actual output file name, including extension if applicable
         bool                                append;  //!< whether to append to an existing file
         bool                                flatten;  //!< whether vectors should be flattened in the output (i.e each element treated as a separate variable)
         bool                                write_version;  //!< whether to write the version

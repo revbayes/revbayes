@@ -367,8 +367,12 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::computeNodeProbabilit
             
             size_t index_epoch = computeEpochIndex( node.getAge() );
             
-            if (phi != NULL && node.isFossil())
+            if ( node.isFossil() )
             {
+                if ( phi == NULL )
+                {
+                    throw(RbException("Tree has serially sampled tips, but no serial sampling rate was provided."));
+                }
                 sampling = phi->getValue()[index_epoch];
                 extinction = pExtinction(0.0, node.getAge());
             }
@@ -388,7 +392,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::computeNodeProbabilit
                 
                 node_likelihood[j] = extinction[j];
                 
-                if ( obs_state.isSet( j ) == true || gap == true )
+                if ( obs_state.test( j ) == true || gap == true )
                 {
                 	if ( node.isFossil() )
                 	{
@@ -2031,10 +2035,9 @@ bool TimeVaryingStateDependentSpeciationExtinctionProcess::simulateTree( size_t 
     std::vector<TopologyNode*> nodes;
     
     // initialize the root node
-    TopologyNode* root = new TopologyNode(0);
+    TopologyNode* root = new TopologyNode();
     double t = process_age->getValue();
     root->setAge(t);
-    root->setNodeType(false, true, true);
     root->setTimeInStates(std::vector<double>(num_states, 0.0));
     nodes.push_back(root);
     
@@ -2114,7 +2117,6 @@ bool TimeVaryingStateDependentSpeciationExtinctionProcess::simulateTree( size_t 
     left->setAge(t);
     root->addChild(left);
     left->setParent(root);
-    left->setNodeType(true, false, false);
     left->setTimeInStates(std::vector<double>(num_states, 0.0));
     lineages_in_state[l].push_back(1);
     nodes.push_back(left);
@@ -2123,7 +2125,6 @@ bool TimeVaryingStateDependentSpeciationExtinctionProcess::simulateTree( size_t 
     right->setAge(t);
     root->addChild(right);
     right->setParent(root);
-    right->setNodeType(true, false, false);
     right->setTimeInStates(std::vector<double>(num_states, 0.0));
     lineages_in_state[r].push_back(2);
     nodes.push_back(right);
@@ -2206,7 +2207,6 @@ bool TimeVaryingStateDependentSpeciationExtinctionProcess::simulateTree( size_t 
                     ss << "sp" << i;
                     std::string name = ss.str();
                     nodes[i]->setName(name);
-                    nodes[i]->setNodeType(true, false, false);
                 }
             }
             
@@ -2292,7 +2292,6 @@ bool TimeVaryingStateDependentSpeciationExtinctionProcess::simulateTree( size_t 
             ss << "ex" << event_index;
             std::string name = ss.str();
             nodes[event_index]->setName(name);
-            nodes[event_index]->setNodeType(true, false, false);
         }
         
         if (event_type == "anagenetic")
@@ -2389,7 +2388,6 @@ bool TimeVaryingStateDependentSpeciationExtinctionProcess::simulateTree( size_t 
             left->setAge(t);
             nodes[event_index]->addChild(left);
             left->setParent(nodes[event_index]);
-            left->setNodeType(true, false, false);
             left->setTimeInStates(std::vector<double>(num_states, 0.0));
             lineages_in_state[l].push_back(index);
             nodes.push_back(left);
@@ -2399,13 +2397,11 @@ bool TimeVaryingStateDependentSpeciationExtinctionProcess::simulateTree( size_t 
             right->setAge(t);
             nodes[event_index]->addChild(right);
             right->setParent(nodes[event_index]);
-            right->setNodeType(true, false, false);
             right->setTimeInStates(std::vector<double>(num_states, 0.0));
             lineages_in_state[r].push_back(index);
             nodes.push_back(right);
             
             // remove the parent node from our vector of current lineages
-            nodes[event_index]->setNodeType(false, false, true);
             lineages_in_state[event_state].erase(std::remove(lineages_in_state[event_state].begin(), lineages_in_state[event_state].end(), event_index), lineages_in_state[event_state].end());
         }
     }

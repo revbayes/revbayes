@@ -20,17 +20,7 @@ using namespace RevLanguage;
 
 /** Constructor of empty RevVariable with specified type. */
 RevVariable::RevVariable( const TypeSpec& ts, const std::string& n ) :
-    element_index_max(0),
-    needs_building(false),
-    is_element_var( false ),
-    is_hidden_var( false ),
-    is_reference_var( false ),
-    is_vector_var( false ),
-    is_workspace_var( false ),
     name( n ),
-    ref_count( 0 ),
-    referenced_variable( NULL ),
-    rev_object( NULL ),
     required_type_spec( ts )
 {
     
@@ -38,17 +28,7 @@ RevVariable::RevVariable( const TypeSpec& ts, const std::string& n ) :
 
 /** Constructor of filled RevVariable (no type restrictions). */
 RevVariable::RevVariable(RevObject *v, const std::string &n) :
-    element_index_max(0),
-    needs_building(false),
-    is_element_var( false ),
-    is_hidden_var( false ),
-    is_reference_var( false ),
-    is_vector_var( false ),
-    is_workspace_var( false ),
     name( n ),
-    ref_count( 0 ),
-    referenced_variable( NULL ),
-    rev_object( NULL ),
     required_type_spec( RevObject::getClassTypeSpec() )
 {
     replaceRevObject( v );
@@ -57,17 +37,8 @@ RevVariable::RevVariable(RevObject *v, const std::string &n) :
 
 /** Constructor of reference RevVariable (no type restrictions). */
 RevVariable::RevVariable(const RevPtr<RevVariable>& refVar, const std::string &n) :
-    element_index_max(0),
-    needs_building(false),
-    is_element_var( false ),
-    is_hidden_var( false ),
-    is_reference_var( true ),
-    is_vector_var( false ),
-    is_workspace_var( false ),
     name( n ),
-    ref_count( 0 ),
     referenced_variable( refVar ),
-    rev_object( NULL ),
     required_type_spec( RevObject::getClassTypeSpec() )
 {
     
@@ -76,27 +47,25 @@ RevVariable::RevVariable(const RevPtr<RevVariable>& refVar, const std::string &n
 
 /** Copy constructor */
 RevVariable::RevVariable(const RevVariable &v) :
-    element_index_max( v.element_index_max ),
-    needs_building(v.needs_building),
+    needs_building( v.needs_building ),
     is_element_var( v.is_element_var ),
     is_hidden_var( v.is_hidden_var ),
-    is_reference_var( v.is_hidden_var ),
-    is_vector_var( v.is_vector_var ),
+    vector_var_elements( v.vector_var_elements ),
     is_workspace_var( v.is_workspace_var ),
     name( v.name ),
     ref_count( 0 ),
     referenced_variable( v.referenced_variable ),
-    rev_object( NULL ),
+    rev_object( nullptr ),
     required_type_spec( v.required_type_spec )
 {
     
-    if ( v.rev_object != NULL )
+    if ( v.rev_object )
     {
         replaceRevObject( v.rev_object->clone() );
     }
     else
     {
-        rev_object = NULL;
+        rev_object = nullptr;
     }
     
 }
@@ -105,7 +74,7 @@ RevVariable::RevVariable(const RevVariable &v) :
 RevVariable::~RevVariable( void )
 {
     
-    if ( is_reference_var == false && rev_object != NULL )
+    if ( not isReferenceVariable() and rev_object != NULL )
     {
         delete rev_object;
     }
@@ -122,14 +91,12 @@ RevVariable& RevVariable::operator=(const RevVariable &v)
         required_type_spec  = v.required_type_spec;
         is_element_var      = v.is_element_var;
         is_hidden_var       = v.is_hidden_var;
-        is_reference_var    = v.is_reference_var;
-        is_vector_var       = v.is_vector_var;
+        vector_var_elements = v.vector_var_elements;
         is_workspace_var    = v.is_workspace_var;
-        element_index_max   = v.element_index_max;
         needs_building      = v.needs_building;
         referenced_variable = v.referenced_variable;
         
-        if ( is_reference_var )
+        if ( isReferenceVariable() )
         {
             rev_object = NULL;
         }
@@ -154,16 +121,19 @@ RevVariable& RevVariable::operator=(const RevVariable &v)
 
 
 /** Resize the vector to include this index. */
-void RevVariable::addIndex(size_t idx)
+void RevVariable::addIndex(int idx, const RevPtr<RevVariable>& element)
 {
-    
-    if ( idx > element_index_max )
-    {
-        element_index_max = idx;
-    }
+    assert( isVectorVariable() );
+
+    if (idx < 1)
+        throw RbException()<<"Index "<<idx<<" not allowed in '"<<name<<"["<<idx<<"]'.  The first element should be '"<<name<<"[1]'";
+
+    if (idx > vector_var_elements->size())
+        vector_var_elements->resize(idx);
+
+    (*vector_var_elements)[idx-1] = element;
     
     needs_building = true;
-    
 }
 
 
@@ -187,7 +157,8 @@ size_t RevVariable::decrementReferenceCount( void ) const
 
 size_t RevVariable::getMaxElementIndex( void ) const
 {
-    return element_index_max;
+    assert(isVectorVariable());
+    return vector_var_elements->size();
 }
 
 
@@ -210,50 +181,45 @@ size_t RevVariable::getReferenceCount(void) const
 RevObject& RevVariable::getRevObject(void) const
 {
     
-    if ( is_reference_var == true )
+    if ( isReferenceVariable() )
     {
         return referenced_variable->getRevObject();
     }
     
-    if ( is_vector_var == true && needs_building == true )
+    if ( isVectorVariable() && needs_building )
     {
         needs_building = false;
-        
-        //        const std::set<int>& indices = the_var->getElementIndices();
-        //        if ( indices.empty() )
-        //        {
-        //            throw RbException("Cannot create a vector variable with name '" + identifier + "' because it doesn't have elements.");
-        //        }
-        
-        // @TODO: We actually might need a different workspace here than the user workspace. (Sebastian)
-        Environment &env = Workspace::userWorkspace();
-        
-        size_t max_index = getMaxElementIndex();
+
         std::vector<Argument> args;
-        for (size_t i = 1; i <= max_index; ++i)
+        int i=1;
+        for (auto& element_var: *vector_var_elements)
         {
-            std::string element_identifier = name + "[" + i + "]";
-            RevPtr<RevVariable>& element_var = env.getVariable( element_identifier );
             // check that the element is not NULL
             if ( element_var == NULL || element_var->getRevObject() == RevNullObject::getInstance() )
             {
-                throw RbException("Cannot create vector variable with name '" + name + "' because element with name '" + element_identifier + "' is NULL." );
+                std::string element_identifier = name + "[" + std::to_string(i) + "]";
+                throw RbException()<<"Cannot create vector variable with name '"<<name
+                                   <<"' because element with name '"<<element_identifier<<"' is NULL.";
+
+                /* NOTE: This scenario can occur if we define x[4] but not x[3] and then try to print x.
+                 *       When x[4] is defined, vector_var_elements is padded with nullptrs to length 4.
+                 *       But only x[4] is then set to a non-NULL value.
+                 */
             }
+
             args.push_back( Argument( element_var ) );
+            i++;
         }
+
         // @TODO: We might need a to check if this should be dynamic or not. (Sebastian)
         bool dynamic = true;
-        Function* func = Workspace::userWorkspace().getFunction("v",args,!dynamic).clone();
-        func->processArguments(args,!dynamic);
+        std::unique_ptr<Function> func( Workspace::userWorkspace().getFunction("v", args, not dynamic).clone() );
+        func->processArguments(args, not dynamic);
         
         // Evaluate the function (call the static evaluation function)
         RevPtr<RevVariable> func_return_value = func->execute();
         
-        // free the memory of our copy
-        delete func;
-        
         const_cast<RevVariable*>(this)->replaceRevObject( func_return_value->getRevObject().clone() );
-        
     }
     
     if ( rev_object == NULL )
@@ -324,21 +290,21 @@ bool RevVariable::isHiddenVariable( void ) const
 /** Return the internal flag signalling whether the RevVariable is currently a reference RevVariable */
 bool RevVariable::isReferenceVariable( void ) const
 {
-    return is_reference_var;
+    return referenced_variable;
 }
 
 
 /** Return the internal flag signalling whether the RevVariable is currently a vector RevVariable, that is, should be computed by x := v(x[1],...) */
 bool RevVariable::isVectorVariable( void ) const
 {
-    return is_vector_var;
+    return bool(vector_var_elements);
 }
 
 
 /** Return the internal flag signalling whether the RevVariable is currently a workspace (control) RevVariable */
 bool RevVariable::isWorkspaceVariable( void ) const
 {
-    if ( is_reference_var == true )
+    if ( isReferenceVariable() )
     {
         return referenced_variable->isWorkspaceVariable();
     }
@@ -352,7 +318,7 @@ bool RevVariable::isWorkspaceVariable( void ) const
 /** Make this RevVariable a reference to another RevVariable. Make sure we delete any object we held before. */
 void RevVariable::makeReference(const RevPtr<RevVariable>& refVar)
 {
-    if ( is_reference_var == false )
+    if ( not isReferenceVariable ())
     {
         if ( rev_object != NULL )
         {
@@ -360,7 +326,6 @@ void RevVariable::makeReference(const RevPtr<RevVariable>& refVar)
         }
         
         rev_object = NULL;
-        is_reference_var = true;
         is_workspace_var = false;
     }
     
@@ -387,9 +352,8 @@ void RevVariable::printValue(std::ostream& o, bool toScreen) const
 /** Replace the RevVariable and update the DAG structure. */
 void RevVariable::replaceRevObject( RevObject *newValue )
 {
-    if ( is_reference_var == true )
+    if ( isReferenceVariable() )
     {
-        is_reference_var = false;
         referenced_variable = NULL;
     }
 //    
@@ -441,7 +405,7 @@ void RevVariable::replaceRevObject( RevObject *newValue )
 void RevVariable::setElementVariableState(bool flag)
 {
     
-    if ( is_reference_var == true )
+    if ( isReferenceVariable() )
     {
         throw "A reference RevVariable cannot be made a hidden RevVariable";
     }
@@ -471,7 +435,7 @@ void RevVariable::setElementVariableState(bool flag)
  */
 void RevVariable::setHiddenVariableState(bool flag)
 {
-    if ( is_reference_var == true )
+    if ( isReferenceVariable() )
     {
         throw "A reference RevVariable cannot be made a hidden RevVariable";
     }
@@ -500,16 +464,16 @@ void RevVariable::setHiddenVariableState(bool flag)
  * is a reference RevVariable. If so, you need to set the Rev object first, and then set
  * the vector RevVariable flag.
  */
-void RevVariable::setVectorVariableState(bool flag)
+void RevVariable::setToVectorVariable()
 {
-    if ( is_reference_var == true )
+    if ( isReferenceVariable() )
     {
         throw "A reference RevVariable cannot be made a vector RevVariable";
     }
     
-    is_vector_var = flag;
-    if ( is_vector_var == true )
+    if (not vector_var_elements)
     {
+        vector_var_elements = std::vector<RevPtr<RevVariable>>();
         needs_building = true;
     }
 }
@@ -522,7 +486,7 @@ void RevVariable::setVectorVariableState(bool flag)
  */
 void RevVariable::setWorkspaceVariableState(bool flag)
 {
-    if ( is_reference_var == true )
+    if ( isReferenceVariable() and flag == true)
     {
         throw "A reference RevVariable cannot be made a workspace (control) RevVariable";
     }
@@ -555,12 +519,10 @@ void RevVariable::setRequiredTypeSpec(const TypeSpec &ts)
     const RevObject& theObject = this->getRevObject();
     if ( theObject != RevNullObject::getInstance() )
     {
-        
         if ( theObject.isType( ts ) == false )
         {
-            throw RbException( "Existing RevVariable object is not of the required type" );
+            throw RbException()<<"setRequiredTypeSpec: failed setting object of type "<<theObject.getType()<<" to "<<ts.getType();
         }
-        
     }
     
     required_type_spec = ts;

@@ -4,6 +4,7 @@
 #include "TypedDagNode.h"
 #include "RevObject.h"
 #include "WorkspaceObject.h"
+#include "TraceNumeric.h"
 
 #include <ostream>
 #include <string>
@@ -43,11 +44,11 @@ namespace RevLanguage {
         
     protected:
         
-        void                                                readTrace(const std::string &fn, std::vector<RevBayesCore::TraceNumeric> &data);
+        void                                                readTrace(const RevBayesCore::path &fn, std::vector<RevBayesCore::TraceNumeric> &data);
         void                                                setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);          //!< Set member variable
         
         std::string                                         delimiter;
-        std::set<std::string>                               filenames;
+        std::set<RevBayesCore::path>                        filenames;
         std::string                                         burninMethod;
         bool                                                verbose;
     };
