@@ -60,20 +60,14 @@ void Move_FossilTipTimeUniform::constructInternalObject( void )
     
     double we = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
-    RevBayesCore::StochasticNode<double> *org = NULL;
+    RevBayesCore::TypedDagNode<double> *org = NULL;
     if ( origin != NULL && origin->getRevObject() != RevNullObject::getInstance() )
     {
-        RevBayesCore::TypedDagNode<double> *tmp = static_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
-        org = static_cast<RevBayesCore::StochasticNode<double> *>( tmp );
+        org = static_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
     }
     
-    RevBayesCore::StochasticNode<double> *ma = NULL;
-    RevBayesCore::TypedDagNode<double> *tmp_ma = static_cast<const RealPos &>( max->getRevObject() ).getDagNode();
-    ma = static_cast<RevBayesCore::StochasticNode<double> *>( tmp_ma );
-    
-    RevBayesCore::StochasticNode<double> *mi = NULL;
-    RevBayesCore::TypedDagNode<double> *tmp_mi = static_cast<const RealPos &>( min->getRevObject() ).getDagNode();
-    mi = static_cast<RevBayesCore::StochasticNode<double> *>( tmp_mi );
+    RevBayesCore::TypedDagNode<double> *ma = static_cast<const RealPos &>( max->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double> *mi = static_cast<const RealPos &>( min->getRevObject() ).getDagNode();
     
     std::string tip_name = "";
     if ( tip->getRevObject().getType() == RlString::getClassType() )
