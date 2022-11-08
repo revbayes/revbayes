@@ -7,7 +7,6 @@
 
 #include "Cloneable.h"
 #include "RbException.h"
-#include "RbFileManager.h"
 #include "RlUserInterface.h"
 #include "StringUtilities.h"
 
@@ -18,37 +17,36 @@
 using namespace RevBayesCore;
 
 
-ConditionalPosteriorOrdinate::ConditionalPosteriorOrdinate(const std::string &fn, const std::string &del, const std::vector<std::string>& skip_col_names)
+ConditionalPosteriorOrdinate::ConditionalPosteriorOrdinate(const path& fn, const std::string& del, const std::vector<std::string>& skip_col_names)
 {
     
     if ( process_active == true )
     {
-        
-        // check that the file/path name has been correctly specified
-        RbFileManager my_file_manager( fn );
-        if ( !my_file_manager.testFile() || !my_file_manager.testDirectory() )
+        /********************/
+        /* read in the file */
+        /********************/
+    
+        if ( not is_regular_file(fn) )
         {
-            std::string error_str = "";
-            my_file_manager.formatError( error_str );
-            throw RbException(error_str);
+            throw RbException()<< "Could not open file " << fn;
         }
             
             
         long thinning = 1;
         
         bool has_header_been_read = false;
-            
-        /* Open file */
-        std::ifstream input_file( my_file_manager.getFullFileName().c_str() );
-            
+        
+        // Open file
+        std::ifstream input_file( fn.string() );
+        
         if ( !input_file )
         {
-            throw RbException( "Could not open file \"" + fn + "\"" );
+            throw RbException()<<"Could not open file "<<fn;
         }
         
         /* Initialize */
         std::string command_line;
-        RBOUT("Processing file \"" + fn + "\"");
+        RBOUT("Processing file \"" + fn.string() + "\"");
         size_t n_samples = 0;
         
         // flags which columns to skip
@@ -61,7 +59,7 @@ ConditionalPosteriorOrdinate::ConditionalPosteriorOrdinate(const std::string &fn
                     
             // Read a line
             std::string line;
-            my_file_manager.safeGetline(input_file, line);
+            safeGetline( input_file, line );
                     
             // skip empty lines
             if (line.length() == 0)
