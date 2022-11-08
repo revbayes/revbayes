@@ -312,7 +312,7 @@ const Model& MonteCarloAnalysis::getModel( void ) const
 }
 
 
-void MonteCarloAnalysis::initializeFromCheckpoint(const std::string &checkpoint_file)
+void MonteCarloAnalysis::initializeFromCheckpoint(const path &checkpoint_file)
 {
     
     for (size_t i = 0; i < replicates; ++i)
@@ -326,17 +326,15 @@ void MonteCarloAnalysis::initializeFromCheckpoint(const std::string &checkpoint_
             ss << "_run_" << (i+1);
             
             // assemble the new filename
-            RbFileManager fm = RbFileManager(checkpoint_file);
-            std::string run_checkpoint_file = fm.getFilePath() + fm.getPathSeparator() + fm.getFileNameWithoutExtension() + ss.str() + "." + fm.getFileExtension();
+            path run_checkpoint_file = appendToStem( checkpoint_file, ss.str() );
             
             // set the filename for the MCMC object
             runs[i]->setCheckpointFile( run_checkpoint_file );
         }
-        else if ( checkpoint_file != "" )
+        else if ( not checkpoint_file.empty() )
         {
             // set the filename for the MCMC object
             runs[i]->setCheckpointFile( checkpoint_file );
-            
         }
         
         // then, initialize the sample for that replicate
@@ -603,9 +601,9 @@ void MonteCarloAnalysis::resetReplicates( void )
 
 
 #ifdef RB_MPI
-void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, const MPI_Comm &analysis_comm, size_t tuning_interval, const std::string &checkpoint_file, size_t checkpoint_interval, bool verbose )
+void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, const MPI_Comm &analysis_comm, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval, bool verbose )
 #else
-void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, size_t tuning_interval, const std::string &checkpoint_file, size_t checkpoint_interval, bool verbose )
+void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval, bool verbose )
 #endif
 {
     
@@ -627,8 +625,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
                 ss << "_run_" << (i+1);
                 
                 // assemble the new filename
-                RbFileManager fm = RbFileManager(checkpoint_file);
-                std::string run_checkpoint_file = fm.getFilePath() + fm.getPathSeparator() + fm.getFileNameWithoutExtension() + ss.str() + "." + fm.getFileExtension();
+                auto run_checkpoint_file = appendToStem(checkpoint_file, ss.str());
 
                 // set the filename for the MCMC object
                 runs[i]->setCheckpointFile( run_checkpoint_file );

@@ -2,6 +2,7 @@
 #define ModuleSystem_H
 
 #include "Module.h"
+#include "RbFileManager.h"
 
 #include <set>
 #include <string>
@@ -29,7 +30,7 @@ namespace RevLanguage {
         
         const Module&                               getModule(const std::string &qs) const;     //!< Format the help information for printing to the terminal
         bool                                        isModuleAvailable(const std::string &q);    //!< Is a module available with the query name
-        void                                        loadModules(const std::string &dir);        //!< Initialize the help from an XML file
+        void                                        loadModules(const RevBayesCore::path &dir);        //!< Initialize the help from an XML file
         
         static ModuleSystem&                        getModuleSystem(void)                       //!< Return a reference to the singleton help
         {

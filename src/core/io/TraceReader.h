@@ -2,6 +2,7 @@
 #define TraceReader_H
 
 #include "Trace.h"
+#include "RbFileManager.h"
 
 #include <vector>
 #include <string>
@@ -25,7 +26,7 @@ namespace RevBayesCore {
     public:
 //        TraceReader();
         
-        std::vector<ModelTrace>             readStochasticVariableTrace( const std::string &fn, const std::string &delimiter );
+        std::vector<ModelTrace>             readStochasticVariableTrace( const path &fn, const std::string &delimiter );
 
         
     protected:

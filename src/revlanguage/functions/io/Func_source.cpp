@@ -51,12 +51,8 @@ RevPtr<RevVariable> Func_source::execute( void )
     /* Open file */
     std::string fname = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
 
-    RevBayesCore::RbFileManager reader = RevBayesCore::RbFileManager(fname);
-    std::ifstream inFile;
+    std::ifstream inFile(fname);
 
-    // now open the stream
-    reader.openFile(inFile);
-    
     bool echo_on = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
     
     if ( !inFile )
@@ -76,7 +72,7 @@ RevPtr<RevVariable> Func_source::execute( void )
         
         // Read a line
         std::string line;
-        reader.safeGetline(inFile, line);
+        RevBayesCore::safeGetline(inFile, line);
         lineNumber++;
         
         if ( echo_on == true )

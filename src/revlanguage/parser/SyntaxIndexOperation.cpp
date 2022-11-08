@@ -145,40 +145,39 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, 
         Container* c = dynamic_cast<Container*>( &theParentObj );
         if ( c != NULL )
         {
-            
-            if ( theParentObj.getDagNode()->isConstant() && c->allowsModificationToCompositeContainer() )
+            if ( theParentObj.getDagNode()->isConstant() == false )
             {
-                for ( size_t i=1; i<=c->size(); ++i)
-                {
-                    std::string elementIdentifier = theParentVar->getName() + "[" + i + "]";
-                
-                    RevPtr<RevVariable> theElementVar = NULL;
-                    if ( !env.existsVariable( elementIdentifier ) )
-                    {
-                        // create a new slot
-                        RevPtr<RevVariable> theElementVar = RevPtr<RevVariable>( new RevVariable( c->getElement(i-1) ) );
-                        env.addVariable(elementIdentifier,theElementVar);
-                        theElementVar->setName( elementIdentifier );
-                    }
-                
-                    // get the slot and variable
-                    theElementVar  = env.getVariable( elementIdentifier );
-                
-                    // set this variable as a hidden variable so that it doesn't show in ls()
-                    theElementVar->setElementVariableState( true );
-                    
-                    theParentVar->addIndex( int(i) );
-                }
+                throw RbException("We cannot create a composite container from a non-constant container");
+            }
+            else if ( c->allowsModificationToCompositeContainer() == false )
+            {
+                throw RbException("An object of type '" + theParentObj.getType() + "' does not allow transformation into a composite container.");
             }
             else
             {
-                if ( !theParentObj.getDagNode()->isConstant() )
+                // We need to set this to a vector variable before we call addIndex on it.
+                theParentVar->setToVectorVariable();
+
+                for ( size_t i=1; i<=c->size(); ++i)
                 {
-                    throw RbException("We cannot create a composite container from a non-constant container");
-                }
-                else if ( !c->allowsModificationToCompositeContainer() )
-                {
-                    throw RbException("An object of type '" + theParentObj.getType() + "' does not allow transformation into a composite container.");
+                    std::string elementIdentifier = theParentVar->getName() + "[" + std::to_string(i) + "]";
+                
+                    // first ensure that the environment has a slot named `elementIdentifier`
+                    if ( !env.existsVariable( elementIdentifier ) )
+                    {
+                        // create a new variable for environment slot `elementIdentifier`
+                        RevPtr<RevVariable> theElementVar = RevPtr<RevVariable>( new RevVariable( c->getElement(i-1) ) );
+                        env.addVariable( elementIdentifier, theElementVar );
+                        theElementVar->setName( elementIdentifier );
+                    }
+
+                    // then look up the element variable in the environment by its identifier
+                    RevPtr<RevVariable> theElementVar  = env.getVariable( elementIdentifier );
+                
+                    // set the element variable as a hidden variable so that it doesn't show in ls()
+                    theElementVar->setElementVariableState( true );
+                    
+                    theParentVar->addIndex( int(i) , theElementVar );
                 }
             }
         }
@@ -187,30 +186,29 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, 
             throw RbException("We cannot make a composite container from variable of type '" + theParentObj.getType() + "'.");
         }
     }
-    
+
     // compute the index and internal name for this variable
     int idx = (int)static_cast<Integer&>( indexVar->getRevObject() ).getValue();
-    std::string identifier = theParentVar->getName() + "[" + idx + "]";
-    
-    // mark the parent variable as a vector variable
-    theParentVar->setVectorVariableState( true );
-    theParentVar->addIndex( idx );
+    std::string identifier = theParentVar->getName() + "[" + std::to_string(idx) + "]";
 
-
-    if ( env.existsVariable( identifier ) == false )
+    // first ensure that we've got an entry with name `identifier` in the environment
+    if ( not env.existsVariable( identifier ) )
     {
-        // create a new slot
+        // create a new variable called `identifier` if the environment doesn't have one.
         RevPtr<RevVariable> the_var = RevPtr<RevVariable>( new RevVariable( NULL ) );
-        env.addVariable(identifier,the_var);
+        env.addVariable( identifier, the_var );
         the_var->setName( identifier );
     }
 
-    // get the slot and variable
+    // then look up the variable in the environment by its identifier
     RevPtr<RevVariable> the_var  = env.getVariable( identifier );
-    
     
     // set this variable as an element variable; which is by default a hidden variable so that it doesn't show in ls()
     the_var->setElementVariableState( true );
+
+    // mark the parent variable as a vector variable
+    theParentVar->setToVectorVariable();
+    theParentVar->addIndex( idx, the_var );
 
     return the_var;
 }
@@ -342,7 +340,7 @@ void SyntaxIndexOperation::updateVariable( Environment& env, const std::string &
             std::vector<Argument> args;
             for (size_t i = 1; i <= max_index; ++i)
             {
-                std::string element_identifier = parentName + "[" + i + "]";
+                std::string element_identifier = parentName + "[" + std::to_string(i) + "]";
                 RevPtr<RevVariable>& elementVar = env.getVariable( element_identifier );
                 // check that the element is not NULL
                 if ( elementVar == NULL || elementVar->getRevObject() == RevNullObject::getInstance() )

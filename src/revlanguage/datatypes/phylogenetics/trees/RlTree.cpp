@@ -228,7 +228,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     {
         found = true;
         RevBayesCore::Tree &tree = dag_node->getValue();
-        long n = tree.getRoot().getIndex();
+        long n = tree.getRoot().getIndex() + 1;
         return new RevVariable( new Natural( n ) );
     }
     else if (name == "isBinary")

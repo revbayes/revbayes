@@ -44,7 +44,7 @@ namespace RevLanguage {
         
     private:
 		
-		std::vector<RevBayesCore::AncestralStateTrace>     readAncestralStates(const std::string &fns, const std::string &d);
+        std::vector<RevBayesCore::AncestralStateTrace>     readAncestralStates(const RevBayesCore::path& fns, const std::string &d);
     };
     
 }

@@ -5,6 +5,8 @@
 #include "BranchHistoryDiscrete.h"
 #include "CharacterEventDiscrete.h"
 #include "ConstantNode.h"
+#include "ContinuousTaxonData.h"
+#include "ContinuousCharacterData.h"
 #include "DiscreteTaxonData.h"
 #include "HomologousDiscreteCharacterData.h"
 #include "DiscreteCharacterState.h"

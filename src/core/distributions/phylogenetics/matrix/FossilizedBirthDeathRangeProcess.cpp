@@ -398,13 +398,17 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
     // get random uniform draws
     for (size_t i = 0; i < taxa.size(); i++)
     {
-        double b = taxa[i].getMaxAge() + rng->uniform01()*(max - taxa[i].getMaxAge()) + taxa[i].getMaxAge();
-        double d = taxa[i].isExtinct() ? rng->uniform01()*(taxa[i].getMinAge() - present) + present : present;
+        // resample oldest occurrence
+        resampleAge(i);
 
+        // death time is younger than oldest occurrence and youngest maximum
+        double d = taxa[i].isExtinct() ? rng->uniform01()*(std::min(y_i[i], age[i]) - present) + present : present;
+        // birth time is older than oldest occurrence
+        double b = age[i] + rng->uniform01()*(max - age[i]) + age[i];
+
+        // set values
         (*this->value)[i][0] = b;
         (*this->value)[i][1] = d;
-
-        resampleAge(i);
     }
 }
 

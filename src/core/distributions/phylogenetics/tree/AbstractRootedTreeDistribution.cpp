@@ -57,11 +57,7 @@ AbstractRootedTreeDistribution::AbstractRootedTreeDistribution(const TypedDagNod
             found.insert(taxa[i].getName());
         }
         else
-        {
-            std::stringstream ss;
-            ss << "Duplicate taxon name '" << taxa[i].getName() << "' encountered when building tree distribution";
-            throw(RbException(ss.str()));
-        }
+            throw RbException() << "Duplicate taxon name '" << taxa[i].getName() << "' encountered when building tree distribution";
     }
     
     // if we got a starting tree, then we should also use it.
@@ -151,13 +147,13 @@ void AbstractRootedTreeDistribution::buildRandomBinaryTree(std::vector<TopologyN
         tips.erase(tips.begin()+long(index));
         
         // add a left child
-        TopologyNode* leftChild = new TopologyNode(0);
+        TopologyNode* leftChild = new TopologyNode();
         parent->addChild(leftChild);
         leftChild->setParent(parent);
         tips.push_back(leftChild);
         
         // add a right child
-        TopologyNode* rightChild = new TopologyNode(0);
+        TopologyNode* rightChild = new TopologyNode();
         parent->addChild(rightChild);
         rightChild->setParent(parent);
         tips.push_back(rightChild);
@@ -612,7 +608,7 @@ void AbstractRootedTreeDistribution::simulateClade(std::vector<TopologyNode *> &
         
         if ( n.size() > 2 && current_age >= age  )
         {
-            throw RbException("Unexpected number of taxa (remaining #taxa was " + StringUtilities::toString(n.size()) + " and age was " + current_age + " with maximum age of " + age + ") in tree simulation");
+            throw RbException() << "Unexpected number of taxa (remaining #taxa was " << n.size() << " and age was " << current_age << " with maximum age of " << age << ") in tree simulation";
         }
         
     }
@@ -641,7 +637,7 @@ void AbstractRootedTreeDistribution::simulateClade(std::vector<TopologyNode *> &
     }
     else
     {
-        throw RbException("Unexpected number of taxa (" + StringUtilities::toString(n.size()) + ") in tree simulation");
+        throw RbException() << "Unexpected number of taxa (" << n.size() << ") in tree simulation";
     }
 
 
@@ -708,7 +704,7 @@ void AbstractRootedTreeDistribution::simulateTree( void )
     {
         if (ra > 0.0)
         {
-            throw(RbException("Root age younger than oldest taxon age"));
+            throw RbException("Root age younger than oldest taxon age");
         }
 
         // Get the rng

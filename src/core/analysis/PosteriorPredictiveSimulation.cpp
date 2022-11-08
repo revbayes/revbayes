@@ -70,9 +70,6 @@ void RevBayesCore::PosteriorPredictiveSimulation::run( int thinning )
 {
     
     // some general constant variables
-    RbFileManager fm = RbFileManager( directory );
-    const std::string path_separator = fm.getPathSeparator();
-    
     // this is where we need to implement the posterior predictive simulation
     
     size_t n_samples = traces[0].size();
@@ -104,9 +101,7 @@ void RevBayesCore::PosteriorPredictiveSimulation::run( int thinning )
         
         
         // create a new directory name for this simulation
-        std::stringstream s;
-        s << directory << path_separator << "posterior_predictive_sim_" << (current_pp_sim + 1);
-        std::string sim_directory_name = s.str();
+        path sim_directory_name = directory / ("posterior_predictive_sim_" + std::to_string(current_pp_sim + 1));
         
         // now for the numerical parameters
         for ( size_t j=0; j<n_traces; ++j )

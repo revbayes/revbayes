@@ -53,30 +53,30 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
 {
 
     // get the information from the arguments for reading the file
-    const RlString&     fn       = static_cast<const RlString&>( args[0].getVariable()->getRevObject() );
+    RevBayesCore::path trace_file_name = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
     // get the column delimiter
     const std::string& delimiter = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
     
     
     // check that the file/path name has been correctly specified
-    RevBayesCore::RbFileManager myFileManager( fn.getValue() );
-    if ( !myFileManager.testFile() || !myFileManager.testDirectory() )
+    if ( not RevBayesCore::exists( trace_file_name ))
     {
         std::string errorStr = "";
-        myFileManager.formatError( errorStr );
-        throw( RbException(errorStr) );
+        RevBayesCore::formatError( trace_file_name, errorStr );
+        throw RbException(errorStr);
     }
         
     // set up a vector of strings containing the name or names of the files to be read
-    std::vector<std::string> vectorOfFileNames;
-    if ( myFileManager.isFile() )
+    std::vector<RevBayesCore::path> vectorOfFileNames;
+    if ( RevBayesCore::is_directory( trace_file_name) )
     {
-        vectorOfFileNames.push_back( myFileManager.getFileName() );
+        RevBayesCore::setStringWithNamesOfFilesInDirectory( trace_file_name, vectorOfFileNames );
     }
-    else 
+    else
     {
-        myFileManager.setStringWithNamesOfFilesInDirectory( vectorOfFileNames );
+        vectorOfFileNames.push_back( trace_file_name );
     }
+
         
     std::vector<RevBayesCore::TraceNumeric> data;
         
@@ -85,22 +85,20 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
     // Set up a map with the file name to be read as the key and the file type as the value. Note that we may not
     // read all of the files in the string called "vectorOfFileNames" because some of them may not be in a format
     // that can be read.
-    std::map<std::string,std::string> fileMap;
-    for (std::vector<std::string>::iterator p = vectorOfFileNames.begin(); p != vectorOfFileNames.end(); p++)
+
+    for (auto& filename: vectorOfFileNames)
     {
         bool hasHeaderBeenRead = false;
         
-        RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager( fn.getValue() );
-        
         /* Open file */
-        std::ifstream inFile( fm.getFullFileName().c_str() );
+        std::ifstream inFile( filename.string() );
         
         if ( !inFile )
-            throw RbException( "Could not open file \"" + fn.getValue() + "\"" );
+            throw RbException()<<"Could not open file "<<filename;
             
         /* Initialize */
         std::string commandLine;
-        RBOUT("Processing file \"" + fn.getValue() + "\"");
+        RBOUT("Processing file \"" + filename.string() + "\"");
         size_t n_samples = 0;
             
         /* Command-processing loop */
@@ -109,7 +107,7 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
                 
             // Read a line
             std::string line;
-            myFileManager.safeGetline(inFile, line);
+            RevBayesCore::safeGetline(inFile, line);
                 
             // skip empty lines
             //line = stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
@@ -139,7 +137,7 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
                         
                     std::string parmName = columns[j];
                     t.setParameterName(parmName);
-                    t.setFileName(fn.getValue());
+                    t.setFileName( filename );
                         
                     data.push_back( t );
                 }

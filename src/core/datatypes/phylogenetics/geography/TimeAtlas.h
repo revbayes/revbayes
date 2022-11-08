@@ -12,6 +12,7 @@
 #include <stddef.h>
 #include <iosfwd>
 #include <vector>
+#include "RbFileManager.h"
 
 #include "Cloneable.h"
 
@@ -30,7 +31,7 @@ class TimeAtlasDataReader;
         
         std::vector<double>                             getEpochs(void) const;
         std::vector<std::vector<GeographicArea*> >      getAreas(void) const;
-        std::string                                     getFilename(void) const;
+        const path&                                     getFilename(void) const;
         std::string                                     getDataType(void) const;  
         size_t                                          getNumEpochs(void) const;
         size_t                                          getNumAreas(void) const;
@@ -42,7 +43,7 @@ class TimeAtlasDataReader;
     private:
         unsigned                                        numAreas;
         unsigned                                        numEpochs;
-        std::string                                     filename;
+        path                                            filename;
         
     };
     

@@ -56,14 +56,13 @@ namespace RevBayesCore {
         const std::string&              getChromosome( void ) const;                              //!< Get the chromosome for the state
         size_t                          getPosition( void ) const;                                //!< Get the position for the state
         
-        const std::vector<double>       getWeights( void ) const;                            //!< Get the weight of the state
-        // bool                            isWeighted( void ) const;
-        // void                            setWeighted( bool tf );
+        const std::vector<double>&      getWeights( void ) const;                            //!< Get the weight of the state
+        bool                            isWeighted( void ) const;
+        void                            setWeighted( bool tf );
         bool                            isGapState(void) const;                             //!< Get whether this is a gapped character state
         bool                            isMissingState(void) const;                         //!< Get whether this is a missing character state
         void                            setGapState(bool tf);                               //!< set whether this is a gapped character
         void                            setMissingState(bool tf);                           //!< set whether this is a missing character
-        
         
     private:
         void                            populateWeightedStatesForMonoallelicState(size_t id1, int sum); //!< Sets the weights of all the states compatible with a monoallelic state
@@ -79,8 +78,8 @@ namespace RevBayesCore {
         
         std::string                     chromosome;                                         //!< The chromosome on which the state lies
         size_t                          position;                                           //!< The position of the state in the chromosome
-        //std::vector<double>             weights_;                                           //!< Weights are used when the "average" option is used
-        //bool                                    weighted_;
+        std::vector<double>             weights;                                            //!< Weights are used when the "average" option is used
+        bool                            weighted;
         std::string                     string_value;                           //!< The string description of the state.
     };
     

@@ -445,7 +445,7 @@ void Dist_FBDP::setConstParameter(const std::string& name, const RevPtr<const Re
     {
         Mu_timeline = var;
     }
-    else if ( name == "PhiTimeline" || name == "PsiTimeline" )
+    else if ( name == "PhiTimeline" || name == "rhoTimeline" )
     {
         Phi_timeline = var;
     }

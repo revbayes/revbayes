@@ -315,7 +315,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
                         const RevBayesCore::RbBitSet& state = td.getCharacter(i).getState();
                         for (size_t k = 0; k < state.size(); k++)
                         {
-                            if (state.isSet(k) && k +1 > max)
+                            if (state.test(k) && k +1 > max)
                             {
                                 max = static_cast<int>(k)+1;
                             }
@@ -534,7 +534,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
                             const RevBayesCore::RbBitSet& state = td.getCharacter(i).getState();
                             for (size_t k = 0; k < state.size(); k++)
                             {
-                                if (state.isSet(k) )
+                                if (state.test(k) )
                                 {
                                     observed.set(k);
 
@@ -559,7 +559,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
                     }
                 }
 
-                if ( observed.getNumberSetBits() != max + 1 )
+                if ( observed.count() != max + 1 )
                 {
                     warn = true;
                 }
@@ -618,7 +618,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
                             const RevBayesCore::RbBitSet& state = td.getCharacter(i).getState();
                             for (size_t k = 0; k < state.size(); k++)
                             {
-                                if (state.isSet(k) )
+                                if (state.test(k) )
                                 {
                                     observed.set(k);
 
@@ -643,7 +643,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
                     }
                 }
 
-                if ( observed.getNumberSetBits() != max + 1 )
+                if ( observed.count() != max + 1 )
                 {
                     warn = true;
                 }

@@ -23,7 +23,7 @@
 
 using namespace RevBayesCore;
 
-PowerPosteriorAnalysis::PowerPosteriorAnalysis(MonteCarloSampler *m, const std::string &fn, size_t k) : Cloneable( ), Parallelizable(),
+PowerPosteriorAnalysis::PowerPosteriorAnalysis(MonteCarloSampler *m, const path &fn, size_t k) : Cloneable( ), Parallelizable(),
     filename( fn ),
     powers(),
     sampler( m ),
@@ -219,26 +219,23 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
 
 void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_fraction, size_t pre_burnin_generations, size_t tuning_interval)
 {
-    
     // create the directory if necessary
-    RbFileManager fm = RbFileManager(filename);
-    if (fm.getFileName() == "")
+    if (filename.filename().empty() or filename.filename_is_dot() or filename.filename_is_dot_dot())
     {
-        throw(RbException("Please provide a filename with an extension"));
+        throw RbException("Please provide a filename with an extension");
     }
-    std::string stoneFileName = fm.getFileNameWithoutExtension() + "_stone_" + idx + "." + fm.getFileExtension();
 
-    RbFileManager f = RbFileManager(fm.getFilePath(), stoneFileName);
-    f.createDirectoryForFile();
+    std::string stone_tag = "_stone_" + std::to_string(idx);
+
+    path stoneFileName = appendToStem(filename, stone_tag);
+    createDirectoryForFile( stoneFileName );
     
-    std::fstream outStream;
-    outStream.open( f.getFullFileName().c_str(), std::fstream::out);
+    std::ofstream outStream( stoneFileName.string() );
     outStream << "state\t" << "power\t" << "likelihood" << std::endl;
-    
+
     // reset the sampler
     sampler->reset();
 
-    
     size_t burnin = size_t( ceil( burnin_fraction*gen ) );
     
     size_t printInterval = size_t( round( fmax(1,gen/40.0) ) );
@@ -260,9 +257,7 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     // set the power of this sampler
     sampler->setLikelihoodHeat( powers[idx] );
     
-    std::stringstream ss;
-    ss << "_stone_" << idx;
-    sampler->addFileMonitorExtension( ss.str(), false);
+    sampler->addFileMonitorExtension( stone_tag, false);
     
     // let's do a pre-burnin
     for (size_t k=1; k<=pre_burnin_generations; k++)
@@ -327,24 +322,19 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
 void PowerPosteriorAnalysis::summarizeStones( void )
 {
     // create the directory if necessary
-    RbFileManager f = RbFileManager(filename);
-    f.createDirectoryForFile();
+    createDirectoryForFile( filename );
     
-    std::ofstream outStream;
-    outStream.open( f.getFullFileName().c_str(), std::fstream::out);
+    std::ofstream outStream( filename.string() );
     outStream << "state\t" << "power\t" << "likelihood" << std::endl;
 
     // Append each stone
     for (size_t idx = 0; idx < powers.size(); ++idx)
     {
-        RbFileManager fm = RbFileManager(filename);
-        std::string stoneFileName = fm.getFileNameWithoutExtension() + "_stone_" + idx + "." + fm.getFileExtension();
-        
-        RbFileManager f = RbFileManager(fm.getFilePath(), stoneFileName);
+        std::string stone_tag = "_stone_" + std::to_string(idx);
+        path stoneFileName = appendToStem( filename, stone_tag );
 
         // read the i-th stone
-        std::ifstream inStream;
-        inStream.open( f.getFullFileName().c_str(), std::fstream::in);
+        std::ifstream inStream( stoneFileName.string() );
         if (inStream.is_open())
         {
             bool header = true;
@@ -360,7 +350,6 @@ void PowerPosteriorAnalysis::summarizeStones( void )
                 {
                     outStream << line << std::endl;
                 }
-                
             }
             inStream.close();
         }

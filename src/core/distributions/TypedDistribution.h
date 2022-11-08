@@ -33,6 +33,7 @@
 
 #include "Distribution.h"
 #include "Function.h"
+#include "RbVector.h"
 
 #include <iostream>
 

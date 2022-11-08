@@ -81,7 +81,7 @@ RevPtr<RevVariable> RlRelativeNodeAgeWeightedConstraints::executeMethod(std::str
     {
         found = true;
         
-        std::string name = this->dag_node->getValue().getFilename();
+        std::string name = this->dag_node->getValue().getFilename().string();
         RlString *n = new RlString(name);
         return new RevVariable( n );
     }    

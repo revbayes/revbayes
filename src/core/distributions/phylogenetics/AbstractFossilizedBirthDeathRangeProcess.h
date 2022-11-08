@@ -2,7 +2,9 @@
 #define AbstractFossilizedBirthDeathRangeProcess_H
 
 #include "RbVector.h"
+#include "Taxon.h"
 #include "TypedDagNode.h"
+
 
 namespace RevBayesCore {
 
@@ -82,39 +84,39 @@ namespace RevBayesCore {
 
         std::vector<const DagNode*>                     range_parameters;
 
-        std::vector<double>                     birth;
-        std::vector<double>                     death;
-        std::vector<double>                     fossil;
-        std::vector<double>                     times;
+        std::vector<double>                     birth;                          //!< The sorted speciation rates     
+        std::vector<double>                     death;                          //!< The sorted extinction rates
+        std::vector<double>                     fossil;                         //!< The sorted fossil sampling rates
+        std::vector<double>                     times;                          //!< The sorted interval times
 
-        std::vector<double>                     b_i;
-        std::vector<double>                     d_i;
-        std::vector<double>                     o_i;
-        std::vector<double>                     y_i;
+        std::vector<double>                     b_i;                            //!< The birth times for each taxon
+        std::vector<double>                     d_i;                            //!< The extinction times for each taxon
+        std::vector<double>                     o_i;                            //!< The oldest minimum fossil age for each taxon
+        std::vector<double>                     y_i;                            //!< The youngest maximum fossil age for each taxon
 
-        double                                  origin;
+        double                                  origin;                         //!< The origin time (oldest birth time)
 
-        std::vector<double>                     q_i;
-        std::vector<double>                     q_tilde_i;
-        std::vector<double>                     p_i;
-        std::vector<double>                     pS_i;
+        std::vector<double>                     q_i;                            //!< Probability of no speciation or extinction event in each time interval
+        std::vector<double>                     q_tilde_i;                      //!< Probability of no change in species identity in each time interval
+        std::vector<double>                     p_i;                            //!< Probability of leaving no sampled descendants from the end of each time interval
+        std::vector<double>                     pS_i;                           //!< Probability of leaving no descendants from the end of each time interval
 
-        std::vector<double>                     Psi;
-        std::vector<double>                     stored_Psi;
+        std::vector<double>                     Psi;                            //!< Fossil sampling terms computed for each taxon
+        std::vector<double>                     stored_Psi;                     //!< Stored fossil sampling terms
 
-        std::vector<double>                     age;
-        std::vector<double>                     stored_age;
+        std::vector<double>                     age;                            //!< Age of the oldest occurence for each taxon
+        std::vector<double>                     stored_age;                     //!< Stored age of the oldest occurence for each taxon
 
-        std::vector<double>                     partial_likelihood;
-        std::vector<double>                     stored_likelihood;
+        std::vector<double>                     partial_likelihood;             //!< Partial likelihood for each taxon
+        std::vector<double>                     stored_likelihood;              //!< Stored partial likelihood for each taxon
 
-        std::vector<bool>                       dirty_psi;
-        std::vector<bool>                       dirty_taxa;
+        std::vector<bool>                       dirty_psi;                      //!< Indicates whether fossil sampling terms need updating
+        std::vector<bool>                       dirty_taxa;                     //!< Indicates whether partial likelihood needs updating
 
-        bool                                    complete;
-        bool                                    touched;
-        bool                                    resampled;
-        bool                                    resampling;
+        bool                                    complete;                       //!< Indicates whether all fossil observations were included
+        bool                                    touched;                        //!< Indicates whether any terms need updating
+        bool                                    resampled;                      //!< Indicates whether any oldest occurrence ages were resampled
+        bool                                    resampling;                     //!< Indicates whether we are resampling oldest occurrence ages
     };
 }
 

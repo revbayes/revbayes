@@ -15,7 +15,7 @@
 using namespace RevBayesCore;
 
 /* Constructor */
-VariableMonitor::VariableMonitor(DagNode *n, unsigned long g, const std::string &fname,
+VariableMonitor::VariableMonitor(DagNode *n, unsigned long g, const path &fname,
                                  const std::string &del, bool pp, bool l, bool pr, bool ap, bool wv) :
     AbstractFileMonitor(n,g,fname,ap,wv),
     posterior( pp ),
@@ -28,7 +28,7 @@ VariableMonitor::VariableMonitor(DagNode *n, unsigned long g, const std::string 
 
 
 /* Constructor */
-VariableMonitor::VariableMonitor(const std::vector<DagNode *> &n, unsigned long g, const std::string &fname, const std::string &del,
+VariableMonitor::VariableMonitor(const std::vector<DagNode *> &n, unsigned long g, const path &fname, const std::string &del,
                                  bool pp, bool l, bool pr, bool ap, bool wv) :
     AbstractFileMonitor(n,g,fname,ap,wv),
     posterior( pp ),
@@ -246,10 +246,9 @@ void VariableMonitor::combineReplicates( size_t n_reps, MonteCarloAnalysisOption
         int sample_number = 0;
 
         // open the stream to the file
-        RbFileManager fm = RbFileManager(filename);
-        combined_output_stream.open( fm.getFullFileName().c_str(), std::fstream::out);
+        combined_output_stream.open( filename.string(), std::fstream::out);
         combined_output_stream.close();
-        combined_output_stream.open( fm.getFullFileName().c_str(), std::fstream::in | std::fstream::out);
+        combined_output_stream.open( filename.string(), std::fstream::in | std::fstream::out);
 
         if ( tc == MonteCarloAnalysisOptions::SEQUENTIAL )
         {
@@ -258,14 +257,13 @@ void VariableMonitor::combineReplicates( size_t n_reps, MonteCarloAnalysisOption
                 std::stringstream ss;
                 ss << "_run_" << (i+1);
                 std::string s = ss.str();
-                std::string current_file_name = fm.getFilePath() + fm.getPathSeparator() + fm.getFileNameWithoutExtension() + s + "." + fm.getFileExtension();
+                path current_file_name = appendToStem(filename, s);
 
-                RbFileManager current_fm = RbFileManager(current_file_name);
-                std::ifstream current_input_stream;
+                std::ifstream current_input_stream( current_file_name.string() );
 
-                if ( current_fm.openFile(current_input_stream) == false )
+                if ( not current_input_stream )
                 {
-                    throw RbException( "Could not open file '" + current_file_name + "'." );
+                    throw RbException()<<"Could not open file "<<current_file_name<<".";
                 }
 
                 std::string read_line = "";
@@ -341,15 +339,13 @@ void VariableMonitor::combineReplicates( size_t n_reps, MonteCarloAnalysisOption
 
                 }
 
-                fm.closeFile( current_input_stream );
+                current_input_stream.close();
 
             }
 
         }
         else if ( tc == MonteCarloAnalysisOptions::MIXED )
         {
-
-            std::vector< RbFileManager > input_fm;
             std::vector< std::ifstream* > input_streams;
 
             for (size_t i=0; i<n_reps; ++i)
@@ -357,18 +353,16 @@ void VariableMonitor::combineReplicates( size_t n_reps, MonteCarloAnalysisOption
                 std::stringstream ss;
                 ss << "_run_" << (i+1);
                 std::string s = ss.str();
-                RbFileManager fm = RbFileManager(filename);
-                std::string current_file_name = fm.getFilePath() + fm.getPathSeparator() + fm.getFileNameWithoutExtension() + s + "." + fm.getFileExtension();
 
-                RbFileManager current_fm = RbFileManager(current_file_name);
-                std::ifstream * current_input_stream = new std::ifstream();
+                path current_file_name = appendToStem(filename, s);
 
-                if ( current_fm.openFile(*current_input_stream) == false )
+                std::ifstream * current_input_stream = new std::ifstream( current_file_name.string() );
+
+                if ( not *current_input_stream )
                 {
-                    throw RbException( "Could not open file '" + current_file_name + "'." );
+                    throw RbException()<<"Could not open file "<<current_file_name<<".";
                 }
 
-                input_fm.push_back( fm );
                 input_streams.push_back( current_input_stream );
             }
 
@@ -454,7 +448,7 @@ void VariableMonitor::combineReplicates( size_t n_reps, MonteCarloAnalysisOption
 
             for (size_t i=0; i<n_reps; ++i)
             {
-                input_fm[i].closeFile( *input_streams[i] );
+                input_streams[i]->close();
                 delete input_streams[i];
             }
 

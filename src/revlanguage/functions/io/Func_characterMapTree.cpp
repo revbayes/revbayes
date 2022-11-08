@@ -77,13 +77,13 @@ RevPtr<RevVariable> Func_characterMapTree::execute( void )
     }
     
     // get the filename for the tree with MAP character history
-    const std::string& map_filename = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path map_filename = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
     
     // get the filename for the tree with posteriors for the MAP character history
-    const std::string& map_pp_filename = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path map_pp_filename = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
     
     // get the filename for the tree with shift probability for character history
-    const std::string& map_shift_pp_filename = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path map_shift_pp_filename = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
     
     int burnin;
     RevObject& b = args[arg_index++].getVariable()->getRevObject();
@@ -119,36 +119,33 @@ RevPtr<RevVariable> Func_characterMapTree::execute( void )
     
     // write the SIMMAP newick strings
     std::ofstream out_stream;
-    if ( map_filename != "" )
+    if ( not map_filename.empty() )
     {
-        RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(map_filename);
-        fm.createDirectoryForFile();
+        RevBayesCore::createDirectoryForFile( map_filename );
         
         RevBayesCore::Tree t = RevBayesCore::Tree(*tree);
         t.renameNodeParameter("map_character_history", "character_history");
-        out_stream.open(fm.getFullFileName().c_str(), std::fstream::out);
+        out_stream.open( map_filename.string(), std::fstream::out);
         out_stream << t.getSimmapNewickRepresentation();
         out_stream.close();
     }
-    if ( map_pp_filename != "" )
+    if ( not map_pp_filename.empty() )
     {
-        RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(map_pp_filename);
-        fm.createDirectoryForFile();
+        RevBayesCore::createDirectoryForFile( map_pp_filename );
         
         RevBayesCore::Tree t = RevBayesCore::Tree(*tree);
         t.renameNodeParameter("map_character_history_posteriors", "character_history");
-        out_stream.open(fm.getFullFileName().c_str(), std::fstream::out);
+        out_stream.open( map_pp_filename.string(), std::fstream::out);
         out_stream << t.getSimmapNewickRepresentation();
         out_stream.close();
     }
-    if ( map_shift_pp_filename != "" )
+    if ( not map_shift_pp_filename.empty() )
     {
-        RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(map_shift_pp_filename);
-        fm.createDirectoryForFile();
+        RevBayesCore::createDirectoryForFile( map_shift_pp_filename );
         
         RevBayesCore::Tree t = RevBayesCore::Tree(*tree);
         t.renameNodeParameter("map_character_history_shift_prob", "character_history");
-        out_stream.open(fm.getFullFileName().c_str(), std::fstream::out);
+        out_stream.open( map_shift_pp_filename.string(), std::fstream::out);
         out_stream << t.getSimmapNewickRepresentation();
         out_stream.close();
     }

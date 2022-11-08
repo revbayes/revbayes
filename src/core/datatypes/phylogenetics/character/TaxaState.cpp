@@ -121,7 +121,7 @@ std::string TaxaState::getStringValue(void) const
         bool is_first = true;
         for (size_t i=0; i<getNumberOfStates(); ++i)
         {
-            if ( state.isSet(i) == true )
+            if ( state.test(i) == true )
             {
                 if ( is_first == false )
                 {
@@ -183,7 +183,7 @@ void TaxaState::setState(const std::string &symbol)
     {
         try
         {
-            state.clear();
+            state.reset();
 
             if (symbol[0] == '(')
             {
@@ -248,7 +248,7 @@ void TaxaState::setToFirstState(void)
 {
     num_observed_states = 1;
     index_single_state = 0;
-    state.clear();
+    state.reset();
     state.set( 0 );
 }
 
@@ -258,7 +258,7 @@ void TaxaState::setStateByIndex(size_t index)
 
     num_observed_states = 1;
     index_single_state = index;
-    state.clear();
+    state.reset();
     state.set( index );
 }
 

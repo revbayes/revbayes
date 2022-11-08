@@ -116,13 +116,13 @@ void AbstractCoalescent::buildRandomBinaryTree(std::vector<TopologyNode*> &tips)
         tips.erase(tips.begin()+long(index));
         
         // add a left child
-        TopologyNode* leftChild = new TopologyNode(0);
+        TopologyNode* leftChild = new TopologyNode();
         parent->addChild(leftChild);
         leftChild->setParent(parent);
         tips.push_back(leftChild);
         
         // add a right child
-        TopologyNode* rightChild = new TopologyNode(0);
+        TopologyNode* rightChild = new TopologyNode();
         parent->addChild(rightChild);
         rightChild->setParent(parent);
         tips.push_back(rightChild);
@@ -180,7 +180,6 @@ void AbstractCoalescent::buildHeterochronousRandomBinaryTree(Tree *psi, std::vec
                 leftChild->setParent(parent);
                 rightChild->setParent(parent);
                 parent->setAge( ages[i] );
-                parent->setNodeType( false, false, true );
                 active.push_back(parent);
                 
                 // we coalesced, we can move on now
@@ -434,7 +433,6 @@ void AbstractCoalescent::simulateHeterochronousTree( void )
         node->setName(name);
         node->setSpeciesName(taxa[i].getSpeciesName());
         node->setAge(taxa[i].getAge());
-        node->setNodeType( true, false, false );
         // add to tips
         nodes.push_back(node);
     }
