@@ -464,7 +464,6 @@ void AbstractCoalescent::simulateHeterochronousTree( void )
     // initialize the topology by setting the root
     // the root is the only node left in nodes 
     TopologyNode* root = nodes[0]; // Only node left after coalescing all is the root
-    root->setNodeType(false, true, true); // to be sure that this node is flagged as the root node
     psi->setRoot(root, true);
 
     // finally store the new value
