@@ -382,9 +382,9 @@ double BirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( void ) con
                 {
                     ln_sampling_event_prob += S_i * log(1 - r_event[i]);
                 }
-                if ( I_i > S_i )
-                {
-                    ln_sampling_event_prob += (I_i - S_i) * log(r_event[i] + (1 - r_event[i])*E_previous[i]);
+                if ( T_i > 0 )
+                { 
+                    ln_sampling_event_prob += T_i * log(r_event[i] + (1 - r_event[i])*E_previous[i]);
                 }
                 
             }
@@ -614,7 +614,7 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
               int at_event = whichIntervalTime(t);
 
               // If this bifurcation is not at an event time (and specifically at an event time with Lambda[i] > 0), it's a serial bifurcation
-              if ( at_event == -1 )
+              if ( at_event == -1 || lambda_event[at_event] < DBL_EPSILON)
               {
                   serial_bifurcation_times.push_back(t);
               }
@@ -1596,36 +1596,52 @@ double BirthDeathSamplingTreatmentProcess::simulateDivergenceTime(double origin,
  * \return The diversity (number of species in the reconstructed tree).
  */
 int BirthDeathSamplingTreatmentProcess::survivors(double t) const
-{
-
-    const std::vector<TopologyNode*>& nodes = value->getNodes();
-
+{  
+    
     int survivors = 0;
-    for (std::vector<TopologyNode*>::const_iterator it = nodes.begin(); it != nodes.end(); ++it)
-    {
-        TopologyNode* n = *it;
-        double my_age = n->getAge();
 
-        // my age needs to be smaller that the requested time
-        if ( (my_age - t) < 1E-4 )
+    if ( use_origin )
+    {
+        if ( t > getOriginAge() )
         {
-            // my parents age needs to be larger/older than the requested time
-            if ( n->isRoot() == false && (n->getParent().getAge() - t) > 1E-4 )
-            {
-                survivors++;
-            }
+            return 0;
         }
-        else if ( (my_age - t) < -1E-4 )
+        survivors = 1;
+    } else {
+        if ( t > value->getRoot().getAge() )
         {
-            // my parents age needs to be larger/older than the requested time
-            if ( n->isRoot() == false && (n->getParent().getAge() - t) > -1E-4 )
-            {
-                survivors++;
-            }
+            return 0;
         }
-        
+        survivors = 2;
     }
 
+    for (size_t i=0; i<serial_bifurcation_times.size(); ++i) {
+        if (t < serial_bifurcation_times[i])
+        {
+            survivors++;
+        }
+    }
+
+    for (size_t i=0; i<serial_tip_ages.size(); ++i) {
+        if (t < serial_tip_ages[i])
+        {
+            survivors--;
+        }
+    }
+
+    for (size_t i=0; i<global_timeline.size(); ++i)
+    {   
+        size_t idx = global_timeline.size() - i - 1;
+        if ( global_timeline[idx] < t ) {
+            break;
+        } else if (global_timeline[idx] > t)
+        {   
+            // by ignoring time = t we implicitly count all tips at a time as survivors
+            // This is compatible with the logic in computing event-sampling probabilities but could be changed
+            survivors += (int)event_bifurcation_times[idx].size();
+            survivors -= (int)event_tip_ages[idx].size();
+        }
+    }
     return survivors;
 }
 
