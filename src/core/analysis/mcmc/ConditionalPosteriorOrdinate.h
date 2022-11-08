@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Cloneable.h"
+#include "RbFileManager.h"
 #include "Parallelizable.h"
 
 
@@ -24,7 +25,7 @@ namespace RevBayesCore {
     class ConditionalPosteriorOrdinate : public Cloneable, public Parallelizable {
         
     public:
-        ConditionalPosteriorOrdinate(const std::string &fn, const std::string &del, const std::vector<std::string>& skip_col_names);      //!< Constructor initializing the object.
+        ConditionalPosteriorOrdinate(const path& fn, const std::string& del, const std::vector<std::string>& skip_col_names);           //!< Constructor initializing the object.
         virtual                                            ~ConditionalPosteriorOrdinate(void);                                         //!< Virtual destructor
         
         // public methods
