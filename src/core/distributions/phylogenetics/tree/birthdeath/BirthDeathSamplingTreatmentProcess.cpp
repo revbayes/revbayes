@@ -163,13 +163,11 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     prepareTimeline();
     prepareProbComputation();
 
-    delete value;
     
-    if (t != nullptr) {
-        value = t;
-    }
-    else
+    if (starting_tree == NULL)
     {
+        delete value;
+        
         RbVector<Clade> constr;
         // We employ a coalescent simulator to guarantee that the starting tree matches all time constraints
         StartingTreeSimulator simulator;
