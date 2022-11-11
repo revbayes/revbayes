@@ -27,8 +27,8 @@ jobs:
     needs: create_release
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v1
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
       with:
         python-version: 3.8
     - uses: eWaterCycle/setup-singularity@v7
