@@ -242,14 +242,14 @@ jobs:
         echo ::endgroup::
 
     - name: Upload test files if they failed
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v3
       if: failure()
       with:
         name: test-results-${{ matrix.name }}
         path: tests
 
     - name: Upload testiphy files if they failed
-      uses: actions/upload-artifact@v2-preview
+      uses: actions/upload-artifact@v3
       if: failure()
       with:
         name: testiphy-results-${{ matrix.name }}
@@ -261,8 +261,8 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     steps:
-    - uses: technote-space/workflow-conclusion-action@v2.0.1
-    - uses: 8398a7/action-slack@v3.8.1
+    - uses: technote-space/workflow-conclusion-action@v3
+    - uses: 8398a7/action-slack@v3
       with:
         status: custom
         fields: workflow,commit,repo,ref,author
