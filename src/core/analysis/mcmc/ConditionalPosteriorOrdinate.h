@@ -30,7 +30,7 @@ namespace RevBayesCore {
         
         // public methods
         ConditionalPosteriorOrdinate*                       clone(void) const;                                                          //!< Create a deep copy
-        double                                              predictiveProbability( const std::vector<double>& counts, bool site_probs_as_log ) const;                                           //!< Compute the marginal likelihood using SteppingStone-Sampler
+        double                                              predictiveProbability( const std::vector<double>& counts, bool site_probs_as_log, bool folded ) const;                                           //!< Compute the marginal likelihood using SteppingStone-Sampler
         
     private:
         

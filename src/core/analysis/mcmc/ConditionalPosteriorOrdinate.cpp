@@ -157,13 +157,15 @@ ConditionalPosteriorOrdinate* ConditionalPosteriorOrdinate::clone( void ) const
 }
 
 
-double ConditionalPosteriorOrdinate::predictiveProbability( const std::vector<double>& counts, bool site_probs_as_log ) const
+double ConditionalPosteriorOrdinate::predictiveProbability( const std::vector<double>& counts, bool site_probs_as_log, bool folded ) const
 {
     
     double pred_prob = 0.0;
     
     if ( process_active == true )
     {
+        
+        std::vector<double> cpo = std::vector<double>( samples.size(), 0.0 );
     
         for (size_t i = 0; i < samples.size(); ++i)
         {
@@ -195,6 +197,22 @@ double ConditionalPosteriorOrdinate::predictiveProbability( const std::vector<do
             {
                 sum_per_site_probs += exp( (min - lnl_per_site[j]) );
             }
+        
+            // add the per site predictive log probability
+            cpo[i] = ( min + log(num_mcmc_samples) - log(sum_per_site_probs) );
+        
+        }
+        
+        size_t max_state = samples.size();
+        if ( folded == true )
+        {
+            max_state = floor( samples.size() + 1);
+        }
+        
+        
+        for (size_t i = 0; i < max_state; ++i)
+        {
+            
             
             // get the number of observations for this site (if there are multiple times we observed this site)
             double count = 1.0;
@@ -202,10 +220,20 @@ double ConditionalPosteriorOrdinate::predictiveProbability( const std::vector<do
             {
                 count = counts[i];
             }
+            
+            double this_prob = cpo[i];
+            
+            if ( folded == true )
+            {
+                if ( (2.0*(i+1)) < samples.size() )
+                {
+                    this_prob = log( 1 + exp(cpo[i] - cpo[samples.size()-i-1]) ) + cpo[samples.size()-i-1];
+                }
+                
+            }
         
             // add the per site predictive log probability
-            pred_prob += ( min + log(num_mcmc_samples) - log(sum_per_site_probs) ) * count;
-        
+            pred_prob += this_prob * count;
         }
 
     }

@@ -31,6 +31,7 @@ ConditionalPosteriorOrdinate::ConditionalPosteriorOrdinate() : WorkspaceToCoreWr
     ArgumentRules* cpo_arg_rules = new ArgumentRules();
     cpo_arg_rules->push_back( new ArgumentRule("counts", ModelVector<RealPos>::getClassTypeSpec(), "The number of observation for each site (if a site pattern was observed multiple times and we compressed the data).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new ModelVector<RealPos>(  ) ) );
     cpo_arg_rules->push_back( new ArgumentRule("log", RlBoolean::getClassTypeSpec(), "Whether the probabilities were stored as log values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
+    cpo_arg_rules->push_back( new ArgumentRule("folded", RlBoolean::getClassTypeSpec(), "Whether the actual observed data are folded.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
     methods.addFunction(new MemberProcedure( "predictiveProbability", Real::getClassTypeSpec(), cpo_arg_rules) );
 
 }
@@ -74,8 +75,9 @@ RevPtr<RevVariable> ConditionalPosteriorOrdinate::executeMethod(std::string cons
         
         const std::vector<double>& counts   = static_cast<const ModelVector<RealPos> &>( args[0].getVariable()->getRevObject() ).getValue();
         bool as_log                         = static_cast<const RlBoolean            &>( args[1].getVariable()->getRevObject() ).getValue();
+        bool use_folded                     = static_cast<const RlBoolean            &>( args[2].getVariable()->getRevObject() ).getValue();
 
-        double p = value->predictiveProbability( counts, as_log );
+        double p = value->predictiveProbability( counts, as_log, use_folded );
         
         return new RevVariable( new Real( p ) );
     }
