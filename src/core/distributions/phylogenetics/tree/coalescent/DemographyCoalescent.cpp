@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "HeterochronousCoalescent.h"
+#include "DemographyCoalescent.h"
 #include "DistributionExponential.h"
 #include "RandomNumberFactory.h"
 #include "RbConstants.h"
@@ -34,7 +34,7 @@ using namespace RevBayesCore;
  * @param[in] tn        A vector of taxon names used during initialization.
  * @param[in] c         A vector of clade constraints.
  */
-HeterochronousCoalescent::HeterochronousCoalescent(const TypedDagNode< RbVector<double> > *iv, const RbVector< DemographicFunction > &df, const std::vector<Taxon> &tn, const std::vector<Clade> &c) : AbstractCoalescent( tn, c ),
+DemographyCoalescent::DemographyCoalescent(const TypedDagNode< RbVector<double> > *iv, const RbVector< DemographicFunction > &df, const std::vector<Taxon> &tn, const std::vector<Clade> &c) : AbstractCoalescent( tn, c ),
     intervals( iv ),
     demographies( df )
 {
@@ -55,7 +55,7 @@ HeterochronousCoalescent::HeterochronousCoalescent(const TypedDagNode< RbVector<
     simulateHeterochronousTree();
 }
 
-HeterochronousCoalescent::~HeterochronousCoalescent()
+DemographyCoalescent::~DemographyCoalescent()
 {
     
 }
@@ -66,10 +66,10 @@ HeterochronousCoalescent::~HeterochronousCoalescent()
  *
  * \return A new copy of myself
  */
-HeterochronousCoalescent* HeterochronousCoalescent::clone( void ) const
+DemographyCoalescent* DemographyCoalescent::clone( void ) const
 {
     
-    return new HeterochronousCoalescent( *this );
+    return new DemographyCoalescent( *this );
 }
 
 
@@ -78,7 +78,7 @@ HeterochronousCoalescent* HeterochronousCoalescent::clone( void ) const
  *
  * \return    The log-probability density.
  */
-double HeterochronousCoalescent::computeLnProbabilityTimes( void ) const
+double DemographyCoalescent::computeLnProbabilityTimes( void ) const
 {
     
     // variable declarations and initialization
@@ -234,7 +234,7 @@ double HeterochronousCoalescent::computeLnProbabilityTimes( void ) const
  *
  * \return    A vector of the simulated coalescent times.
  */
-std::vector<double> HeterochronousCoalescent::simulateCoalescentAges( size_t n ) const
+std::vector<double> DemographyCoalescent::simulateCoalescentAges( size_t n ) const
 {
     const RbVector<double> &change_ages = intervals->getValue();
 
@@ -386,7 +386,7 @@ std::vector<double> HeterochronousCoalescent::simulateCoalescentAges( size_t n )
  * \param[in]    oldP      Pointer to the old parameter.
  * \param[in]    newP      Pointer to the new parameter.
  */
-void HeterochronousCoalescent::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void DemographyCoalescent::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
 
     bool found = false;

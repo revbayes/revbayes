@@ -1,5 +1,5 @@
-#ifndef HeterochronousCoalescent_H
-#define HeterochronousCoalescent_H
+#ifndef DemographyCoalescent_H
+#define DemographyCoalescent_H
 
 #include "AbstractCoalescent.h"
 #include "DemographicFunction.h"
@@ -18,15 +18,15 @@ namespace RevBayesCore {
      *
      * This process involves coalescence of serially sampled lineages. The process is split into intervals where the demography dynamics can vary between intervals.
      */
-    class HeterochronousCoalescent : public AbstractCoalescent {
+    class DemographyCoalescent : public AbstractCoalescent {
         
     public:
-        HeterochronousCoalescent(const TypedDagNode< RbVector<double> > *iv, const RbVector< DemographicFunction > &df, const std::vector<Taxon> &tn, const std::vector<Clade> &c);
-        virtual                                            ~HeterochronousCoalescent(void);                                                                 //!< Virtual destructor
+        DemographyCoalescent(const TypedDagNode< RbVector<double> > *iv, const RbVector< DemographicFunction > &df, const std::vector<Taxon> &tn, const std::vector<Clade> &c);
+        virtual                                            ~DemographyCoalescent(void);                                                                 //!< Virtual destructor
         
 
         // public member functions
-        HeterochronousCoalescent*                           clone(void) const;                                                                              //!< Create an independent clone
+        DemographyCoalescent*                               clone(void) const;                                                                              //!< Create an independent clone
         
     protected:
         // Parameter management functions

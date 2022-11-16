@@ -1,7 +1,7 @@
 #ifndef Dist_CoalescentSkyline_H
 #define Dist_CoalescentSkyline_H
 
-#include "PiecewiseConstantCoalescent.h"
+#include "PiecewiseCoalescent.h"
 #include "RlTypedDistribution.h"
 #include "RlTimeTree.h"
 
@@ -36,7 +36,7 @@ namespace RevLanguage {
         
         
         // Distribution functions you have to override
-        RevBayesCore::PiecewiseConstantCoalescent*          createDistribution(void) const;                                                         //!< Create an internal object of the diveristy-dependent pure-birth process.
+        RevBayesCore::PiecewiseCoalescent*                  createDistribution(void) const;                                                         //!< Create an internal object of the diveristy-dependent pure-birth process.
         
     protected:
         

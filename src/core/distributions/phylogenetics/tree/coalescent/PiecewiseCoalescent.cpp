@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "PiecewiseConstantCoalescent.h"
+#include "PiecewiseCoalescent.h"
 #include "DistributionExponential.h"
 #include "RandomNumberFactory.h"
 #include "RbConstants.h"
@@ -44,7 +44,7 @@ using namespace RevBayesCore;
  *@note If the interval method is 'EVENTS' then we assume that the time between each coalescent event is an interval.
  *
  */
-PiecewiseConstantCoalescent::PiecewiseConstantCoalescent(const TypedDagNode<RbVector<double> > *N, const TypedDagNode<RbVector<double> > *i, const TypedDagNode<RbVector<long> > *n_events_pi, METHOD_TYPES meth, DEMOGRAPHY_FUNCTION_TYPES dem, const std::vector<Taxon> &tn, const std::vector<Clade> &c) :
+PiecewiseCoalescent::PiecewiseCoalescent(const TypedDagNode<RbVector<double> > *N, const TypedDagNode<RbVector<double> > *i, const TypedDagNode<RbVector<long> > *n_events_pi, METHOD_TYPES meth, DEMOGRAPHY_FUNCTION_TYPES dem, const std::vector<Taxon> &tn, const std::vector<Clade> &c) :
     AbstractCoalescent( tn, c ),
     Nes( N ),
     interval_change_points_var( i ),
@@ -66,7 +66,7 @@ PiecewiseConstantCoalescent::PiecewiseConstantCoalescent(const TypedDagNode<RbVe
 
 
 
-PiecewiseConstantCoalescent::~PiecewiseConstantCoalescent()
+PiecewiseCoalescent::~PiecewiseCoalescent()
 {
     
 }
@@ -78,10 +78,10 @@ PiecewiseConstantCoalescent::~PiecewiseConstantCoalescent()
  *
  * \return A new copy of myself
  */
-PiecewiseConstantCoalescent* PiecewiseConstantCoalescent::clone( void ) const
+PiecewiseCoalescent* PiecewiseCoalescent::clone( void ) const
 {
     
-    return new PiecewiseConstantCoalescent( *this );
+    return new PiecewiseCoalescent( *this );
 }
 
 
@@ -90,7 +90,7 @@ PiecewiseConstantCoalescent* PiecewiseConstantCoalescent::clone( void ) const
  *
  * \return    The log-probability density.
  */
-double PiecewiseConstantCoalescent::computeLnProbabilityTimes( void ) const
+double PiecewiseCoalescent::computeLnProbabilityTimes( void ) const
 {
     
     // variable declarations and initialization
@@ -230,7 +230,7 @@ double PiecewiseConstantCoalescent::computeLnProbabilityTimes( void ) const
 }
 
 
-void PiecewiseConstantCoalescent::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<double> &rv) const
+void PiecewiseCoalescent::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<double> &rv) const
 {
     
     if ( n == "getIntervalAges" )
@@ -251,7 +251,7 @@ void PiecewiseConstantCoalescent::executeMethod(const std::string &n, const std:
 /**
  * Compute the population size of the demographic function at time event_age.
  */
-double PiecewiseConstantCoalescent::getDemographic(double event_age, double index) const
+double PiecewiseCoalescent::getDemographic(double event_age, double index) const
 {
     
     // check which type of demographic function we have
@@ -294,7 +294,7 @@ double PiecewiseConstantCoalescent::getDemographic(double event_age, double inde
 /**
  * Compute the integral over the population between the provided times and the given index of the demographic function.
  */
-double PiecewiseConstantCoalescent::getIntegral(double last_age, double event_age, double index) const
+double PiecewiseCoalescent::getIntegral(double last_age, double event_age, double index) const
 {
     
     // check which type of demographic function we have
@@ -341,7 +341,7 @@ double PiecewiseConstantCoalescent::getIntegral(double last_age, double event_ag
  * the random number (scaled by the current number of lineages), and
  * the index of the current interval/demographic function
  */
-double PiecewiseConstantCoalescent::getWaitingTime(double age, double rv, size_t index) const
+double PiecewiseCoalescent::getWaitingTime(double age, double rv, size_t index) const
 {
     
     // check which type of demographic function we have
@@ -387,7 +387,7 @@ double PiecewiseConstantCoalescent::getWaitingTime(double age, double rv, size_t
 /**
  * Keep the current value and reset some internal flags. Nothing to do here.
  */
-void PiecewiseConstantCoalescent::keepSpecialization(const DagNode *affecter)
+void PiecewiseCoalescent::keepSpecialization(const DagNode *affecter)
 {
     
     // nothing to do here
@@ -398,7 +398,7 @@ void PiecewiseConstantCoalescent::keepSpecialization(const DagNode *affecter)
  * Restore the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void PiecewiseConstantCoalescent::restoreSpecialization(const DagNode *affecter)
+void PiecewiseCoalescent::restoreSpecialization(const DagNode *affecter)
 {
 
     // Sebastian: This is currently redudant because we update the intervals each time when we compute the probability
@@ -415,7 +415,7 @@ void PiecewiseConstantCoalescent::restoreSpecialization(const DagNode *affecter)
 // *
 // * \return    A vector of the simulated coalescent times.
 // */
-//std::vector<double> PiecewiseConstantCoalescent::simulateCoalescentAges( size_t n ) const
+//std::vector<double> PiecewiseCoalescent::simulateCoalescentAges( size_t n ) const
 //{
 //    
 //    // first check if we want to set the interval ages here!
@@ -491,7 +491,7 @@ void PiecewiseConstantCoalescent::restoreSpecialization(const DagNode *affecter)
  *
  * \return    A vector of the simulated coalescent times.
  */
-std::vector<double> PiecewiseConstantCoalescent::simulateCoalescentAges( size_t n ) const
+std::vector<double> PiecewiseCoalescent::simulateCoalescentAges( size_t n ) const
 {
     // first check if we want to set the interval ages here!
     if ( interval_method == SPECIFIED )
@@ -580,10 +580,6 @@ std::vector<double> PiecewiseConstantCoalescent::simulateCoalescentAges( size_t 
             }
         }
     }
-//    } else {
-//        combinedEventTimes = intervals;
-//        combinedEventTypes = std::vector<double>(intervals.size(),0.0);
-//    }
  
     // cap vector with an event at t-infinity
     combined_event_ages.push_back( RbConstants::Double::inf );
@@ -680,7 +676,7 @@ std::vector<double> PiecewiseConstantCoalescent::simulateCoalescentAges( size_t 
  * \param[in]    old_p      Pointer to the old parameter.
  * \param[in]    new_p      Pointer to the new parameter.
  */
-void PiecewiseConstantCoalescent::swapParameterInternal(const DagNode *old_p, const DagNode *new_p)
+void PiecewiseCoalescent::swapParameterInternal(const DagNode *old_p, const DagNode *new_p)
 {
     if (old_p == Nes)
     {
@@ -698,7 +694,7 @@ void PiecewiseConstantCoalescent::swapParameterInternal(const DagNode *old_p, co
  * Touch the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void PiecewiseConstantCoalescent::touchSpecialization(const DagNode *affecter, bool touchAll)
+void PiecewiseCoalescent::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
     // Sebastian: This is currently redudant because we update the intervals each time when we compute the probability
     // just update the start times of the intervals
@@ -712,7 +708,7 @@ void PiecewiseConstantCoalescent::touchSpecialization(const DagNode *affecter, b
 // * Recompute the current interval change point vector and corresponding population size vector.
 // *
 // */
-//void PiecewiseConstantCoalescent::updateDemographies( void ) const
+//void PiecewiseCoalescent::updateDemographies( void ) const
 //{
 //    pop_sizes = Nes->getValue();
 //
@@ -780,7 +776,7 @@ void PiecewiseConstantCoalescent::touchSpecialization(const DagNode *affecter, b
  * @throw RbExpection when no interval start times are specified when the 'SPECIFIED' interval_method is used
  *
  */
-void PiecewiseConstantCoalescent::updateIntervals( void ) const
+void PiecewiseCoalescent::updateIntervals( void ) const
 {
     
     // first check if we want to set the interval ages here!
