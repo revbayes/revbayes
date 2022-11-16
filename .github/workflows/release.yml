@@ -152,7 +152,7 @@ jobs:
     - name: ccache cache files
 #      uses: actions/cache@v2
 #     We want to cache the build artifacts whether or not the tests succeed.
-      uses: pat-s/always-upload-cache@v3
+      uses: pat-s/always-upload-cache@v3.0.11
       with:
          path: ~/.ccache
          key: ${{ matrix.name }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
