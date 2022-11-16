@@ -10,7 +10,7 @@
 #include "Dist_CoalescentSkyline.h"
 #include "ModelVector.h"
 #include "OptionRule.h"
-#include "PiecewiseConstantCoalescent.h"
+#include "PiecewiseCoalescent.h"
 #include "RealPos.h"
 #include "RlClade.h"
 #include "RlDistributionMemberFunction.h"
@@ -83,7 +83,7 @@ Dist_CoalescentSkyline* Dist_CoalescentSkyline::clone( void ) const
  *
  * \return A new internal distribution object.
  */
-RevBayesCore::PiecewiseConstantCoalescent* Dist_CoalescentSkyline::createDistribution( void ) const
+RevBayesCore::PiecewiseCoalescent* Dist_CoalescentSkyline::createDistribution( void ) const
 {
     
     // get the parameters
@@ -111,10 +111,10 @@ RevBayesCore::PiecewiseConstantCoalescent* Dist_CoalescentSkyline::createDistrib
     // clade constraints
     const std::vector<RevBayesCore::Clade> &c   = static_cast<const ModelVector<Clade> &>( constraints->getRevObject() ).getValue();
     
-    RevBayesCore::PiecewiseConstantCoalescent::METHOD_TYPES meth = RevBayesCore::PiecewiseConstantCoalescent::SPECIFIED;
+    RevBayesCore::PiecewiseCoalescent::METHOD_TYPES meth = RevBayesCore::PiecewiseCoalescent::SPECIFIED;
     if ( m == "events" )
     {
-        meth = RevBayesCore::PiecewiseConstantCoalescent::EVENTS;
+        meth = RevBayesCore::PiecewiseCoalescent::EVENTS;
         // we need to check that we did not get interval times
         if ( ti != NULL )
         {
@@ -129,7 +129,7 @@ RevBayesCore::PiecewiseConstantCoalescent* Dist_CoalescentSkyline::createDistrib
     }
     else if ( m == "specified" )
     {
-        meth = RevBayesCore::PiecewiseConstantCoalescent::SPECIFIED;
+        meth = RevBayesCore::PiecewiseCoalescent::SPECIFIED;
         // we need to check that we indeed got interval times
         if ( ti == NULL )
         {
@@ -143,18 +143,18 @@ RevBayesCore::PiecewiseConstantCoalescent* Dist_CoalescentSkyline::createDistrib
         }
     }
 
-    RevBayesCore::PiecewiseConstantCoalescent::DEMOGRAPHY_FUNCTION_TYPES demfun;// = RevBayesCore::PiecewiseConstantCoalescent::CONSTANT;
+    RevBayesCore::PiecewiseCoalescent::DEMOGRAPHY_FUNCTION_TYPES demfun;// = RevBayesCore::PiecewiseConstantCoalescent::CONSTANT;
     if ( dem == "constant" )
     {
-        demfun = RevBayesCore::PiecewiseConstantCoalescent::DEMOGRAPHY_FUNCTION_TYPES::CONSTANT;
+        demfun = RevBayesCore::PiecewiseCoalescent::DEMOGRAPHY_FUNCTION_TYPES::CONSTANT;
     }
     else if ( dem == "linear" )
     {
-        demfun = RevBayesCore::PiecewiseConstantCoalescent::DEMOGRAPHY_FUNCTION_TYPES::LINEAR;
+        demfun = RevBayesCore::PiecewiseCoalescent::DEMOGRAPHY_FUNCTION_TYPES::LINEAR;
     }
     
     // create the internal distribution object
-    RevBayesCore::PiecewiseConstantCoalescent*   d = new RevBayesCore::PiecewiseConstantCoalescent(th, ti, enpi, meth, demfun, ta, c);
+    RevBayesCore::PiecewiseCoalescent*   d = new RevBayesCore::PiecewiseCoalescent(th, ti, enpi, meth, demfun, ta, c);
     
     return d;
 }

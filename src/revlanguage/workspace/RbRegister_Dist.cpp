@@ -169,6 +169,7 @@
 #include "Dist_BranchRateTree.h"
 #include "Dist_CharacterDependentBirthDeathProcess.h"
 #include "Dist_Coalescent.h"
+#include "Dist_CoalescentDemography.h"
 #include "Dist_CoalescentSkyline.h"
 #include "Dist_conditionedBirthDeathShiftProcessContinuous.h"
 #include "Dist_ConstrainedTopology.h"
@@ -184,9 +185,6 @@
 #include "Dist_divDepYuleProcess.h"
 #include "Dist_empiricalTree.h"
 #include "Dist_episodicBirthDeath.h"
-#include "Dist_HeterochronousCoalescent.h"
-#include "Dist_HeterochronousConstantCoalescent.h"
-#include "Dist_HeterochronousSkylineCoalescent.h"
 #include "Dist_heterogeneousRateBirthDeath.h"
 #include "Dist_multispeciesCoalescentInverseGammaPrior.h"
 #include "Dist_multispeciesCoalescentUniformPrior.h"
@@ -369,17 +367,11 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         // coalescent (constant population sizes)
         AddDistribution< TimeTree                   >( new Dist_Coalescent() );
 
+        // coalescent (population sizes via demography functions)
+        AddDistribution< TimeTree                   >( new Dist_CoalescentDemography() );
+        
         // coalescent (skyline population sizes)
         AddDistribution< TimeTree                   >( new Dist_CoalescentSkyline() );
-
-        // heterochronously sampled coalescent (constant population sizes)
-        AddDistribution< TimeTree                   >( new Dist_HeterochronousCoalescent() );
-
-        // heterochronously sampled coalescent (constant population sizes)
-        AddDistribution< TimeTree                   >( new Dist_HeterochronousConstantCoalescent() );
-
-        // heterochronously sampled coalescent (skyline population sizes)
-        AddDistribution< TimeTree                   >( new Dist_HeterochronousSkylineCoalescent() );
 
         // duplication loss process
         AddDistribution< TimeTree                   >( new Dist_DuplicationLoss() );
