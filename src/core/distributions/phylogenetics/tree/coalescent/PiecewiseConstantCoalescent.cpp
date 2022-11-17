@@ -157,11 +157,6 @@ void PiecewiseConstantCoalescent::executeMethod(const std::string &n, const std:
         rv = interval_starts;
         
     }
-//    else if ( n == "averageExtinctionRate" )
-//    {
-//
-//
-//    }
     else
     {
         throw RbException("The piecewise-constant coalescent process does not have a member method called '" + n + "'.");

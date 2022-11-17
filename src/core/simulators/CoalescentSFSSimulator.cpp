@@ -210,7 +210,7 @@ double CoalescentSFSSimulator::simulateCoalescentTime(double current_age, size_t
         double lambda = RbStatistics::Exponential::rv( num_pairs / generation_time, *rng);
         double waiting_time = demographies[current_interval].getWaitingTime(coalescent_time, lambda);
         coalescent_time += waiting_time;
-        
+                
         valid = current_interval == num_intervals || coalescent_time < change_points[current_interval];
         
         if ( valid == false )

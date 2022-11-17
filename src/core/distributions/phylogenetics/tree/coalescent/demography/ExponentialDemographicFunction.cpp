@@ -165,9 +165,13 @@ double ExponentialDemographicFunction::getWaitingTime(double time, double lambda
     {
 	    double alpha = log( N1/N0 ) / (t0 - t1);
 	    double inlog = exp(alpha * (time - t0)) + lambda * alpha * theta_recent->getValue();
-	    if (inlog < 0)
+        
+        // we compute the value for which the waiting time is longer than this demographic function (outside its range)
+        double max_lambda = ( exp(alpha*t1) - exp(alpha*time) ) / (N0*alpha);
+        if ( max_lambda < lambda || inlog < 0)
 	    {
-	        return -1;
+            // simply return a waiting time that is just outside this demographic function range
+	        return t1-time+1.0;
 	    }
 	    else 
 	    {
