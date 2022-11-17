@@ -27,8 +27,8 @@ jobs:
     needs: create_release
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v1
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
       with:
         python-version: 3.8
     - uses: eWaterCycle/setup-singularity@v7
@@ -38,7 +38,7 @@ jobs:
     - name: Get version
       id: get_version
       run: |
-        echo ::set-output name=version::$(echo $GITHUB_REF | cut -d / -f 3)
+        echo "version=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_OUTPUT
 
     - name: Create singularity image
       id: create_image
@@ -46,8 +46,8 @@ jobs:
         cd projects/singularity
         PACKAGE=revbayes-${{ steps.get_version.outputs.version }}-linux64-singularity.simg
         singularity build --fakeroot ~/${PACKAGE} Singularity
-        echo ::set-output name=archive_name::${PACKAGE}
-        echo ::set-output name=archive_path::${HOME}/${PACKAGE}
+        echo "archive_name=${PACKAGE}" >> $GITHUB_OUTPUT
+        echo "archive_path=${HOME}/${PACKAGE}" >> $GITHUB_OUTPUT
 
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
@@ -93,8 +93,8 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v1
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
       with:
         python-version: 3.8
 
@@ -147,12 +147,12 @@ jobs:
           stamp=$(gdate '+%s')
         fi
         echo "${stamp}"
-        echo "::set-output name=timestamp::${stamp}"
+        echo "timestamp=${stamp}" >> $GITHUB_OUTPUT
 
     - name: ccache cache files
 #      uses: actions/cache@v2
 #     We want to cache the build artifacts whether or not the tests succeed.
-      uses: pat-s/always-upload-cache@v2
+      uses: pat-s/always-upload-cache@v3.0.11
       with:
          path: ~/.ccache
          key: ${{ matrix.name }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
@@ -258,14 +258,14 @@ jobs:
         echo ::endgroup::
 
     - name: Upload test files if they failed
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v3
       if: failure()
       with:
         name: test-results-${{ matrix.name }}
         path: tests
 
     - name: Upload testiphy files if they failed
-      uses: actions/upload-artifact@v2-preview
+      uses: actions/upload-artifact@v3
       if: failure()
       with:
         name: testiphy-results-${{ matrix.name }}
@@ -274,7 +274,7 @@ jobs:
     - name: Get version
       id: get_version
       run: |
-        echo ::set-output name=version::$(echo $GITHUB_REF | cut -d / -f 3)
+        echo "version=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_OUTPUT
 
     - name: Create tarball
       id: create_tarball
@@ -284,7 +284,7 @@ jobs:
         TAR=${PACKAGE}-${{ matrix.arch }}.tar.gz
         cp -a $PREFIX $PACKAGE
         tar -zcf $TAR ${PACKAGE}
-        echo ::set-output name=archive::${TAR}
+        echo "archive=${TAR}" >> $GITHUB_OUTPUT
 
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
@@ -302,8 +302,8 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     steps:
-    - uses: technote-space/workflow-conclusion-action@v2.0.1
-    - uses: 8398a7/action-slack@v3.8.1
+    - uses: technote-space/workflow-conclusion-action@v3
+    - uses: 8398a7/action-slack@v3
       with:
         status: custom
         fields: workflow,commit,repo,ref,author
