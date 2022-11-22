@@ -165,18 +165,18 @@ double GibbsSubtreeSwapProposal::doProposal( void )
         tree->restore();
     }
     
-    
+    // pick a new random node according to the weights
+    double u = rng->uniform01() * sum_of_weights;
+    size_t index = 0;
     
     // sanity check
-    if ( sum_of_weights <= 0.0 )
+    if ( sum_of_weights <= 0.0 || u <= 0.0 )
     {
         failed = true;
         return RbConstants::Double::neginf;
     }
     
-    
-    double u = rng->uniform01() * sum_of_weights;
-    size_t index = 0;
+    // now do the roullette wheel to pick the node index
     while (u > 0.0)
     {
         u -= weights[index];
