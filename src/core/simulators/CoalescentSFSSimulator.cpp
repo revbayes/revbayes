@@ -39,6 +39,166 @@ CoalescentSFSSimulator* CoalescentSFSSimulator::clone( void ) const
 
 
 
+void CoalescentSFSSimulator::simulateCoalescent( long sample_size, long reps, const path& file_name_stats, const path& file_name_trees ) const
+{
+    
+    bool write_stats = file_name_stats.string() != "";
+    bool write_trees = file_name_trees.string() != "";
+    
+    // open the output stream where to write the summary statistics
+    std::ofstream out_stream_stats;
+    if ( write_stats )
+    {
+        createDirectoryForFile( file_name_stats );
+        out_stream_stats.open( file_name_stats.string(), std::fstream::out );
+        out_stream_stats << "root" << "," << "TL" << std::endl;
+    }
+    
+    // open the output stream where to write the trees
+    std::ofstream out_stream_trees;
+    if ( write_trees )
+    {
+        createDirectoryForFile( file_name_trees );
+        out_stream_trees.open( file_name_trees.string(), std::fstream::out );
+    }
+    
+    RandomNumberGenerator* rng = GLOBAL_RNG;
+    
+#ifdef RB_MPI
+    // forward the rng for different processes
+    for ( size_t i=active_PID; i<pid; ++i)
+    {
+        // we fast forward 7 times, just to be sure
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+    }
+#endif
+    
+    size_t reps_this_process = reps;
+#ifdef RB_MPI
+    reps_this_process = reps / num_processes;
+#endif
+    
+    // start the progress bar
+    ProgressBar progress = ProgressBar(reps_this_process, 0);
+    
+    // Print progress bar (68 characters wide)
+    progress.start();
+    
+    std::vector<double> ages    = std::vector<double>(2*sample_size-1, 0);
+    std::vector<size_t> parents = std::vector<size_t>(2*sample_size-1, -1);
+    std::vector<std::vector<size_t> > children = std::vector<std::vector<size_t> >(2*sample_size-1, std::vector<size_t>(2,-1));
+    
+    std::vector<long> tip_state = std::vector<long>(sample_size, 0);
+        
+    for (size_t r=0; r<reps_this_process; ++r)
+    {
+        
+        // initialize the active lineages, which are all currently available samples
+        std::unordered_set<size_t> active_lineages;
+        for (size_t i=0; i<sample_size; ++i)
+        {
+            active_lineages.insert( i );
+        }
+        
+        // initialize the statistics
+        double TL = 0.0;
+        
+        // initialize the current time
+        double current_time = 0;
+        
+        // now start simulating coalescent events
+        size_t next_parent = sample_size;
+        for ( size_t num_active=sample_size; num_active>1; --num_active )
+        {
+            double next_coalescent_time = simulateCoalescentTime( current_time, num_active, rng );
+            
+            // update the tree length statistic
+            TL += (next_coalescent_time - current_time) * num_active;
+            
+            // randomly pick the two lineages to coalesce
+            size_t left_index = size_t(rng->uniform01() * num_active);
+            std::unordered_set<size_t>::iterator left_it = active_lineages.begin();
+            std::advance(left_it, left_index);
+            size_t left = *left_it;
+            
+            // remove the left individual
+            active_lineages.erase(left_it);
+            
+            // choose the right individual
+            size_t right_index = size_t(rng->uniform01() * (num_active-1));
+            std::unordered_set<size_t>::iterator right_it = active_lineages.begin();
+            std::advance(right_it, right_index);
+            size_t right = *right_it;
+            
+            // remove the right individual
+            active_lineages.erase(right_it);
+            
+            // set the parents
+            parents[left]  = next_parent;
+            parents[right] = next_parent;
+            
+            // set the childred
+            children[next_parent][0] = left;
+            children[next_parent][1] = right;
+            
+            // set the age
+            ages[next_parent] = next_coalescent_time;
+            
+            // add the parent to our set
+            active_lineages.insert( next_parent );
+            
+            // increase the index to the next parent
+            next_parent++;
+            
+            // set the current time to the latest event
+            current_time = next_coalescent_time;
+        }
+        
+        double root_age = current_time;
+        
+        if ( write_stats )
+        {
+            out_stream_stats << root_age << "," << TL << std::endl;
+        }
+        
+        progress.update(r);
+    }
+    progress.finish();
+    
+    
+#ifdef RB_MPI
+    MPI_Barrier( MPI_COMM_WORLD );
+
+    // we only need to send message if there is more than one process
+    if ( num_processes > 1 )
+    {
+
+        for (size_t i=active_PID; i<active_PID+num_processes; ++i)
+        {
+            
+            if ( pid != i )
+            {
+                // write the merged file
+            } // end-if non-sending process to write the file
+            
+            // wait for all processes
+            MPI_Barrier( MPI_COMM_WORLD );
+            
+        } // end-for over all processes
+        
+    } // end-if there are more than one process
+#endif
+
+}
+
+
+
 RbVector<long>* CoalescentSFSSimulator::simulateSFS( long sample_size, long reps ) const
 {
     
@@ -191,6 +351,8 @@ RbVector<long>* CoalescentSFSSimulator::simulateSFS( long sample_size, long reps
     
     return sfs;
 }
+
+
 
 double CoalescentSFSSimulator::simulateCoalescentTime(double current_age, size_t num_active, RandomNumberGenerator *rng) const
 {

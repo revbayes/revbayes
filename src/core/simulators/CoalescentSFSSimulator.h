@@ -27,7 +27,8 @@ class RandomNumberGenerator;
         
         CoalescentSFSSimulator*                         clone(void) const;
         
-        RbVector<long>*                                 simulateSFS(long s, long r ) const;
+        RbVector<long>*                                 simulateSFS(long s, long r) const;
+        void                                            simulateCoalescent(long s, long r, const path& f_stats, const path& f_trees) const;
 
     private:
         

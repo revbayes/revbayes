@@ -36,12 +36,23 @@ CoalescentSFSSimulator::CoalescentSFSSimulator() : WorkspaceToCoreWrapperObject<
     
     // simulating an SFS
     
-    ArgumentRules* tpv_arg_rules = new ArgumentRules();
+    ArgumentRules* sfs_arg_rules = new ArgumentRules();
     
-    tpv_arg_rules->push_back( new ArgumentRule( "sampleSize"    , Natural::getClassTypeSpec(), "The sample size, i.e., number of individuals at present.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    tpv_arg_rules->push_back( new ArgumentRule( "reps"          , Natural::getClassTypeSpec(), "The number of replicate to simulate the frequencies.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    sfs_arg_rules->push_back( new ArgumentRule( "sampleSize"    , Natural::getClassTypeSpec(), "The sample size, i.e., number of individuals at present.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    sfs_arg_rules->push_back( new ArgumentRule( "reps"          , Natural::getClassTypeSpec(), "The number of replicate to simulate the frequencies.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
 
-    methods.addFunction(new MemberProcedure( "simulateSFS", ModelVector< Natural >::getClassTypeSpec(), tpv_arg_rules) );
+    methods.addFunction(new MemberProcedure( "simulateSFS", ModelVector< Natural >::getClassTypeSpec(), sfs_arg_rules) );
+    
+    // simulating coalescent trees and storing statistics in a file
+    
+    ArgumentRules* coal_arg_rules = new ArgumentRules();
+    
+    coal_arg_rules->push_back( new ArgumentRule( "sampleSize"    , Natural::getClassTypeSpec(),  "The sample size, i.e., number of individuals at present.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    coal_arg_rules->push_back( new ArgumentRule( "reps"          , Natural::getClassTypeSpec(),  "The number of replicate to simulate the frequencies.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    coal_arg_rules->push_back( new ArgumentRule( "statsFilename" , RlString::getClassTypeSpec(), "The filename in which to store the coalescent summary statistics (empty if you don't want it).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("") ) );
+    coal_arg_rules->push_back( new ArgumentRule( "treesFilename" , RlString::getClassTypeSpec(), "The filename in which to store the coalescent trees (empty if you don't want it).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("") ) );
+
+    methods.addFunction(new MemberProcedure( "simulateCoalescent", ModelVector< Natural >::getClassTypeSpec(), coal_arg_rules) );
 
     
 }
@@ -99,6 +110,19 @@ RevPtr<RevVariable> CoalescentSFSSimulator::executeMethod(std::string const &nam
         RevBayesCore::RbVector<long>* m = value->simulateSFS(sample_size, reps);
         
         return new RevVariable( new ModelVector<Natural>( *m ) );
+    }
+    else if (name == "simulateSFS")
+    {
+        found = true;
+            
+        long                sample_size     = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
+        long                reps            = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
+        const std::string&  f_name_stats    = static_cast<const RlString &>( args[2].getVariable()->getRevObject() ).getValue();
+        const std::string&  f_name_trees    = static_cast<const RlString &>( args[3].getVariable()->getRevObject() ).getValue();
+
+        value->simulateCoalescent(sample_size, reps, f_name_stats, f_name_trees);
+            
+        return NULL;
     }
     
     return WorkspaceToCoreWrapperObject<RevBayesCore::CoalescentSFSSimulator>::executeMethod( name, args, found );
