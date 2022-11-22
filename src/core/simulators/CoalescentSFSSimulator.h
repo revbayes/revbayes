@@ -23,20 +23,19 @@ class RandomNumberGenerator;
         
     public:
         
-        CoalescentSFSSimulator(const RbVector<DemographicFunction>& p, const std::vector<double>& cp, double gt, double mr, const std::string& pl);
+        CoalescentSFSSimulator(const RbVector<DemographicFunction>& p, const std::vector<double>& cp, double gt, const std::string& pl);
         
         CoalescentSFSSimulator*                         clone(void) const;
         
-        RbVector<long>*                                 simulateSFS(long s, long r) const;
+        RbVector<long>*                                 simulateSFS(double mr, long s, long r) const;
         void                                            simulateCoalescent(long s, long r, const path& f_stats, const path& f_trees) const;
 
     private:
         
         double                                          simulateCoalescentTime(double t, size_t a, RandomNumberGenerator* r) const;
-        size_t                                          simulateMutations(size_t i, long s, const std::vector<std::vector<size_t> >& c, const std::vector<double>& a, std::vector<long>& t, RandomNumberGenerator* r) const;
+        size_t                                          simulateMutations(double mr, size_t i, long s, const std::vector<std::vector<size_t> >& c, const std::vector<double>& a, std::vector<long>& t, RandomNumberGenerator* r) const;
 
         double                                          generation_time;
-        double                                          mutation_rate;
         RbVector<DemographicFunction>                   demographies;
         std::vector<double>                             change_points;
         double                                          ploidy_factor;

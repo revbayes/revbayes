@@ -16,11 +16,10 @@
 
 using namespace RevBayesCore;
 
-CoalescentSFSSimulator::CoalescentSFSSimulator(const RbVector<DemographicFunction>& d, const std::vector<double>& cp, double gt, double mr, const std::string& ploidy) :
+CoalescentSFSSimulator::CoalescentSFSSimulator(const RbVector<DemographicFunction>& d, const std::vector<double>& cp, double gt, const std::string& ploidy) :
 demographies( d ),
 change_points( cp ),
 generation_time( gt ),
-mutation_rate( mr ),
 ploidy_factor( 1.0 )
 {
     
@@ -171,6 +170,16 @@ void CoalescentSFSSimulator::simulateCoalescent( long sample_size, long reps, co
     }
     progress.finish();
     
+    // close the output streams
+    if ( write_stats )
+    {
+        out_stream_stats.close();
+    }
+    if ( write_trees )
+    {
+        out_stream_trees.close();
+    }
+    
     
 #ifdef RB_MPI
     MPI_Barrier( MPI_COMM_WORLD );
@@ -199,7 +208,7 @@ void CoalescentSFSSimulator::simulateCoalescent( long sample_size, long reps, co
 
 
 
-RbVector<long>* CoalescentSFSSimulator::simulateSFS( long sample_size, long reps ) const
+RbVector<long>* CoalescentSFSSimulator::simulateSFS( double mutation_rate, long sample_size, long reps ) const
 {
     
     RbVector<long>* sfs = new RbVector<long>(sample_size+1);
@@ -299,7 +308,7 @@ RbVector<long>* CoalescentSFSSimulator::simulateSFS( long sample_size, long reps
         // now simulate the mutation
         size_t root_index = 2*sample_size-2;
         long root_state = 0;
-        size_t num_mutations = simulateMutations(root_index, root_state, children, ages, tip_state, rng);
+        size_t num_mutations = simulateMutations(mutation_rate, root_index, root_state, children, ages, tip_state, rng);
         
         size_t obs_state = 0;
         for (size_t tip=0; tip<sample_size; ++tip)
@@ -390,7 +399,7 @@ double CoalescentSFSSimulator::simulateCoalescentTime(double current_age, size_t
 
 
 
-size_t CoalescentSFSSimulator::simulateMutations(size_t current_index, long current_state, const std::vector<std::vector<size_t> > &children, const std::vector<double> &ages, std::vector<long> &tip_states, RandomNumberGenerator* rng) const
+size_t CoalescentSFSSimulator::simulateMutations(double mutation_rate, size_t current_index, long current_state, const std::vector<std::vector<size_t> > &children, const std::vector<double> &ages, std::vector<long> &tip_states, RandomNumberGenerator* rng) const
 {
     size_t sample_size = tip_states.size();
     size_t num_mutations = 0;
@@ -414,7 +423,7 @@ size_t CoalescentSFSSimulator::simulateMutations(size_t current_index, long curr
         {
             left_state = ( left_state == 0 ? 1 : 1 );
         }
-        simulateMutations(left, left_state, children, ages, tip_states, rng);
+        simulateMutations(mutation_rate, left, left_state, children, ages, tip_states, rng);
         
         
         // now simulate for the right child branch
@@ -430,7 +439,7 @@ size_t CoalescentSFSSimulator::simulateMutations(size_t current_index, long curr
         {
             right_state = ( right_state == 0 ? 1 : 1 );
         }
-        simulateMutations(right, right_state, children, ages, tip_states, rng);
+        simulateMutations(mutation_rate, right, right_state, children, ages, tip_states, rng);
         
         
         // finally, add the number of mutations together

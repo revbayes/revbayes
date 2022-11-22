@@ -47,7 +47,6 @@ namespace RevLanguage {
         
         RevPtr<const RevVariable>                   change_points;
         RevPtr<const RevVariable>                   generation_time;
-        RevPtr<const RevVariable>                   mutation_rate;
         RevPtr<const RevVariable>                   demographies;
         RevPtr<const RevVariable>                   ploidy;
         
