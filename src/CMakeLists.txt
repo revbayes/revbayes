@@ -192,6 +192,7 @@ if ("${JUPYTER}" STREQUAL "ON")
 
   target_link_libraries(rb-jupyter rb-parser rb-core rb-libs ${Boost_LIBRARIES})
   set_target_properties(rb-jupyter PROPERTIES PREFIX "../")
+  set(RB_EXEC_NAME "rb-jupyter")
 elseif ("${CMD_GTK}" STREQUAL "ON")
   message("Building RevStudio")
   # Use the package PkgConfig to detect GTK+ headers/library files
