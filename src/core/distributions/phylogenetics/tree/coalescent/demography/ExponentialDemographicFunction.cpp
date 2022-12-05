@@ -145,10 +145,10 @@ double ExponentialDemographicFunction::getIntegral(double start, double finish) 
  *
  * @return Waiting Time until next coalescent event
  */
-double ExponentialDemographicFunction::getWaitingTime(double time, double lambda) const
+double ExponentialDemographicFunction::getWaitingTime(double time, double lambda, double ploidy) const
 {
-    double N0 = theta_recent->getValue();
-    double N1 = theta_ancient->getValue();
+    double N0 = theta_recent->getValue() * ploidy;
+    double N1 = theta_ancient->getValue() * ploidy;
     double t0 = time_recent->getValue();
     double t1 = time_ancient->getValue();
     

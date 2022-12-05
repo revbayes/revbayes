@@ -93,9 +93,9 @@ double ConstantDemographicFunction::getIntegral(double start, double finish) con
  *
  * @return Waiting Time until next coalescent event
  */
-double ConstantDemographicFunction::getWaitingTime(double time, double lambda) const
+double ConstantDemographicFunction::getWaitingTime(double time, double lambda, double ploidy_factor) const
 {
-    return theta->getValue() * lambda;
+    return theta->getValue() * lambda * ploidy_factor;
 }
 
 /**
