@@ -191,7 +191,6 @@ int main(int argc, char* argv[]) {
     {
         source_files = args["file"].as<std::vector<std::string> >();
     }
-//    source_files.push_back("sim_two_epoch.Rev");
     
     if ( args.count("args") && args.count("cmd"))
     {
