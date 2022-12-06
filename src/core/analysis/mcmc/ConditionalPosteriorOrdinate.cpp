@@ -9,6 +9,8 @@
 #include "RbException.h"
 #include "RlUserInterface.h"
 #include "StringUtilities.h"
+#include "RbConstants.h"
+#include "RbMathLogic.h"
 
 #ifdef RB_MPI
 #include <mpi.h>
@@ -165,13 +167,27 @@ double ConditionalPosteriorOrdinate::predictiveProbability( const std::vector<do
     if ( process_active == true )
     {
         
-        std::vector<double> cpo = std::vector<double>( samples.size(), 0.0 );
-    
+        std::vector<double> cpo     = std::vector<double>( samples.size(), 0.0 );
+        std::vector<bool>   zero    = std::vector<bool>( samples.size(), true );
+
         for (size_t i = 0; i < samples.size(); ++i)
         {
         
             std::vector<double> lnl_per_site = samples[i];
             size_t num_mcmc_samples = lnl_per_site.size();
+            
+            // check if all probabilities are zero
+            for (size_t j = 0; j < num_mcmc_samples; ++j)
+            {
+                if ( site_probs_as_log )
+                {
+                    zero[i] = zero[i] & RbMath::isFinite( lnl_per_site[j] );
+                }
+                else
+                {
+                    zero[i] = zero[i] & (lnl_per_site[j] == 0);
+                }
+            }
             
             if ( site_probs_as_log == false )
             {
@@ -221,19 +237,61 @@ double ConditionalPosteriorOrdinate::predictiveProbability( const std::vector<do
                 count = counts[i];
             }
             
-            double this_prob = cpo[i];
+            double this_prob = 0.0;
             
             if ( folded == true )
             {
                 if ( (2.0*(i+1)) < samples.size() )
                 {
-                    this_prob = log( 1 + exp(cpo[i] - cpo[samples.size()-i-1]) ) + cpo[samples.size()-i-1];
+                    
+                    if ( zero[i] == true && zero[samples.size()-i-1]  == true )
+                    {
+                        this_prob = RbConstants::Double::neginf;
+                    }
+                    else if ( zero[i] == true  )
+                    {
+                        this_prob =cpo[samples.size()-i-1];
+                    }
+                    else if ( zero[samples.size()-i-1]  == true )
+                    {
+                        this_prob = cpo[i];
+                    }
+                    else
+                    {
+                        this_prob = log( 1 + exp(cpo[i] - cpo[samples.size()-i-1]) ) + cpo[samples.size()-i-1];
+                    }
+                }
+                else
+                {
+                    if ( zero[i] == true )
+                    {
+                        this_prob = 0.0;
+                    }
+                    else
+                    {
+                        this_prob = cpo[i];
+                    }
                 }
                 
             }
+            else
+            {
+                
+                if ( zero[i] == true )
+                {
+                    this_prob = 0.0;
+                }
+                else
+                {
+                    this_prob = cpo[i];
+                }
+            }
         
             // add the per site predictive log probability
-            pred_prob += this_prob * count;
+            if ( count > 0 )
+            {
+                pred_prob += this_prob * count;
+            }
         }
 
     }

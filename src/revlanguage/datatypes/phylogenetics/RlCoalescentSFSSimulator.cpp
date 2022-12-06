@@ -36,12 +36,24 @@ CoalescentSFSSimulator::CoalescentSFSSimulator() : WorkspaceToCoreWrapperObject<
     
     // simulating an SFS
     
-    ArgumentRules* tpv_arg_rules = new ArgumentRules();
+    ArgumentRules* sfs_arg_rules = new ArgumentRules();
     
-    tpv_arg_rules->push_back( new ArgumentRule( "sampleSize"    , Natural::getClassTypeSpec(), "The sample size, i.e., number of individuals at present.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    tpv_arg_rules->push_back( new ArgumentRule( "reps"          , Natural::getClassTypeSpec(), "The number of replicate to simulate the frequencies.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    sfs_arg_rules->push_back( new ArgumentRule( "mutationRate"  , RealPos::getClassTypeSpec(), "The mutation rate.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    sfs_arg_rules->push_back( new ArgumentRule( "sampleSize"    , Natural::getClassTypeSpec(), "The sample size, i.e., number of individuals at present.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    sfs_arg_rules->push_back( new ArgumentRule( "reps"          , Natural::getClassTypeSpec(), "The number of replicate to simulate the frequencies.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
 
-    methods.addFunction(new MemberProcedure( "simulateSFS", ModelVector< Natural >::getClassTypeSpec(), tpv_arg_rules) );
+    methods.addFunction(new MemberProcedure( "simulateSFS", ModelVector< Natural >::getClassTypeSpec(), sfs_arg_rules) );
+    
+    // simulating coalescent trees and storing statistics in a file
+    
+    ArgumentRules* coal_arg_rules = new ArgumentRules();
+    
+    coal_arg_rules->push_back( new ArgumentRule( "sampleSize"    , Natural::getClassTypeSpec(),  "The sample size, i.e., number of individuals at present.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    coal_arg_rules->push_back( new ArgumentRule( "reps"          , Natural::getClassTypeSpec(),  "The number of replicate to simulate the frequencies.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    coal_arg_rules->push_back( new ArgumentRule( "statsFilename" , RlString::getClassTypeSpec(), "The filename in which to store the coalescent summary statistics (empty if you don't want it).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("") ) );
+    coal_arg_rules->push_back( new ArgumentRule( "treesFilename" , RlString::getClassTypeSpec(), "The filename in which to store the coalescent trees (empty if you don't want it).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("") ) );
+
+    methods.addFunction(new MemberProcedure( "simulateCoalescent", ModelVector< Natural >::getClassTypeSpec(), coal_arg_rules) );
 
     
 }
@@ -68,7 +80,6 @@ void CoalescentSFSSimulator::constructInternalObject( void )
     // get the parameter values
     std::vector<double> cp  = static_cast<const ModelVector<RealPos> &>( change_points->getRevObject() ).getValue();
     double gt               = static_cast<const RealPos &>( generation_time->getRevObject() ).getValue();
-    double mr               = static_cast<const RealPos &>( mutation_rate->getRevObject() ).getValue();
     const std::string& p    = static_cast<const RlString &>( ploidy->getRevObject() ).getValue();
     
     // demographic functions
@@ -79,7 +90,7 @@ void CoalescentSFSSimulator::constructInternalObject( void )
         df.push_back( ws_vec_df[i].getValue() );
     }
     
-    value = new RevBayesCore::CoalescentSFSSimulator(df, cp, gt, mr, p);
+    value = new RevBayesCore::CoalescentSFSSimulator(df, cp, gt, p);
 
     
 }
@@ -92,13 +103,31 @@ RevPtr<RevVariable> CoalescentSFSSimulator::executeMethod(std::string const &nam
     if (name == "simulateSFS")
     {
         found = true;
-            
-        long sample_size    = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
-        long reps           = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
+        
+        size_t args_index   = 0;
+        
+        double mu           = static_cast<const RealPos &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        long sample_size    = static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        long reps           = static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
 
-        RevBayesCore::RbVector<long>* m = value->simulateSFS(sample_size, reps);
+        RevBayesCore::RbVector<long>* m = value->simulateSFS(mu, sample_size, reps);
         
         return new RevVariable( new ModelVector<Natural>( *m ) );
+    }
+    else if (name == "simulateCoalescent")
+    {
+        found = true;
+        
+        size_t args_index   = 0;
+            
+        long                sample_size     = static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        long                reps            = static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        const std::string&  f_name_stats    = static_cast<const RlString &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        const std::string&  f_name_trees    = static_cast<const RlString &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+
+        value->simulateCoalescent(sample_size, reps, f_name_stats, f_name_trees);
+            
+        return NULL;
     }
     
     return WorkspaceToCoreWrapperObject<RevBayesCore::CoalescentSFSSimulator>::executeMethod( name, args, found );
@@ -151,7 +180,6 @@ const MemberRules& CoalescentSFSSimulator::getParameterRules(void) const
         argument_rules.push_back( new ArgumentRule( "demographies"      , WorkspaceVector<DemographicFunction>::getClassTypeSpec(), "The vector of demographic functions.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "changePoints"      , ModelVector<RealPos>::getClassTypeSpec(), "The start times of the intervals (the first interval is implicit and starts at 0).", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "generationTime"    , RealPos::getClassTypeSpec(), "The generation time for the simulations.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argument_rules.push_back( new ArgumentRule( "mutationRate"      , RealPos::getClassTypeSpec(), "The mutation rate.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         
         std::vector<std::string> ploidy_options;
         ploidy_options.push_back( "haploid" );
@@ -199,10 +227,6 @@ void CoalescentSFSSimulator::setConstParameter(const std::string& name, const Re
     else if ( name == "changePoints")
     {
         change_points = var;
-    }
-    else if ( name == "mutationRate")
-    {
-        mutation_rate = var;
     }
     else if ( name == "ploidy")
     {
