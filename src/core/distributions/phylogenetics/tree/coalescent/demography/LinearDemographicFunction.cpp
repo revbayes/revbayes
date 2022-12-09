@@ -165,8 +165,20 @@ double LinearDemographicFunction::getWaitingTime(double time, double lambda, dou
     else
     {
         double alpha = ( N1-N0 ) / (t1 - t0);
-        return (N0 + (time-t0) * alpha) * lambda;
+        // we compute the value for which the waiting time is longer than this demographic function (outside its range)
+        return ( exp(alpha*lambda + log(N0 + alpha * t0)) - N0 )  /  alpha;
+//        double max_lambda = t1 / (N0 + (time-t0) * alpha);
+//        if ( max_lambda < lambda )
+//        {
+//            // simply return a waiting time that is just outside this demographic function range
+//            return t1-time+1.0;
+//        }
+//        else
+//        {
+//            return (N0 + (time-t0) * alpha) * lambda;
+//        }
     }
+
 }
 
 /**
