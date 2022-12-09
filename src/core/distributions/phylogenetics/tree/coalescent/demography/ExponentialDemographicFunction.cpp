@@ -140,8 +140,8 @@ double ExponentialDemographicFunction::getIntegral(double start, double finish) 
 }
 
 /**
- * @param[in]   time    Current time in coalescent simulation process
- * @param[in]   lambda  
+ * @param[in]   time         Current time in coalescent simulation process
+ * @param[in]   lambda     Random draw from a standard exponential
  *
  * @return Waiting Time until next coalescent event
  */
@@ -164,7 +164,7 @@ double ExponentialDemographicFunction::getWaitingTime(double time, double lambda
     else
     {
 	    double alpha = log( N1/N0 ) / (t0 - t1);
-	    double inlog = exp(alpha * (time - t0)) + lambda * alpha * theta_recent->getValue();
+	    double inlog = exp(alpha * (time - t0)) + lambda * alpha * N0;
         
         // we compute the value for which the waiting time is longer than this demographic function (outside its range)
         double max_lambda = ( exp(alpha*t1) - exp(alpha*time) ) / (N0*alpha);
