@@ -210,7 +210,8 @@ void CoalescentSFSSimulator::simulateCoalescent( long sample_size, long reps, co
 
 RbVector<long>* CoalescentSFSSimulator::simulateSFS( double mutation_rate, long sample_size, long reps ) const
 {
-    
+//    long sample_size = ploidy_factor * num_ind;
+//    long sample_size = num_ind;
     RbVector<long>* sfs = new RbVector<long>(sample_size+1);
     
     RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -379,7 +380,7 @@ double CoalescentSFSSimulator::simulateCoalescentTime(double current_age, size_t
     {
         double num_pairs = num_active * (num_active-1) / 2.0;
         double lambda = RbStatistics::Exponential::rv( num_pairs / generation_time, *rng);
-        double waiting_time = demographies[current_interval].getWaitingTime(coalescent_time, lambda);
+        double waiting_time = demographies[current_interval].getWaitingTime(coalescent_time, lambda, ploidy_factor);
         coalescent_time += waiting_time;
                 
         valid = current_interval == num_intervals || coalescent_time < change_points[current_interval];
