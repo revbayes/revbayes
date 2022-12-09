@@ -5,4 +5,4 @@
 //  Created by Sebastian Hoehna on 05.12.22.
 //
 
-#include "AdaptiveReversibleJumpProposal.hpp"
+#include "AdaptiveReversibleJumpProposal.h"
