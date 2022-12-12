@@ -214,7 +214,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::buildSerialSample
 		leftChild->setParent(parent);
 		rightChild->setParent(parent);
 		parent->setAge( current_time );
-		parent->setNodeType( false, false, true );
 		active_nodes.push_back(parent);
 		nodes.push_back(parent);
 
@@ -1007,7 +1006,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::simulateTree(void
         node->setName(name);
         node->setSpeciesName(taxa[i].getSpeciesName());
         node->setAge(taxa[i].getAge());
-        node->setNodeType( true, false, false );
         node->setTaxon(taxa[i]);
 
         // add to tips

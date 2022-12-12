@@ -134,7 +134,7 @@ std::string DiscretizedContinuousState::getStringValue(void) const
         bool is_first = true;
         for (size_t i=0; i<getNumberOfStates(); ++i)
         {
-            if ( state.isSet(i) == true )
+            if ( isStateSet(i) == true )
             {
                 if ( is_first == false )
                 {
@@ -303,3 +303,17 @@ void DiscretizedContinuousState::setWeights(std::vector<double> w)
 
 }
 
+const std::vector<double>& DiscretizedContinuousState::getWeights( void ) const
+{
+    return weights;
+}
+
+bool DiscretizedContinuousState::isWeighted( void ) const
+{
+    return weighted;
+}
+
+void DiscretizedContinuousState::setWeighted( bool tf )
+{
+    weighted = tf;
+}
