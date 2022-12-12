@@ -48,6 +48,7 @@ namespace RevBayesCore {
 //        void                                computeConditionSurvival(TransitionProbabilityMatrix& r);
         void                                tiProbsEigens(double t, TransitionProbabilityMatrix& P) const;                      //!< Calculate transition probabilities for real case
         void                                tiProbsComplexEigens(double t, TransitionProbabilityMatrix& P) const;               //!< Calculate transition probabilities for complex case
+        void                                initializeEigenSystem(void);                                                        //!< Create the eigen system, if it hasn't been created yet
         void                                updateEigenSystem(void);                                                            //!< Update the system of eigenvalues and eigenvectors
         
         
@@ -69,6 +70,7 @@ namespace RevBayesCore {
         size_t                                              num_states;
         bool                                                useSquaring;
         
+        bool                                                hasEigenSystem;                 //!< Whether we have initialized the eigen system yet
         EigenSystem*                                        theEigenSystem;                 //!< Holds the eigen system
         std::vector<double>                                 c_ijk;                          //!< Vector of precalculated product of eigenvectors and their inverse
         std::vector<std::complex<double> >                  cc_ijk;                         //!< Vector of precalculated product of eigenvectors and thier inverse for complex case
