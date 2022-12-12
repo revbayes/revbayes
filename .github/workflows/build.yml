@@ -12,30 +12,17 @@ jobs:
   build:
     strategy:
       matrix:
-        name: [ubuntu-gcc-7,
-               ubuntu-gcc-8,
-               ubuntu-gcc-9,
+        name: [ubuntu-gcc-9,
                ubuntu-gcc-9-mpi,
                ubuntu-gcc-10,
                ubuntu-gcc-11,
-               ubuntu-clang-11,
+               ubuntu-gcc-12,
+               ubuntu-clang-13,
                macos-xcode-12.4,
                windows
                ]
 
         include:
-          - name: ubuntu-gcc-7
-            os: ubuntu-latest
-            compiler: gcc
-            version: "7"
-            mpi: false
-
-          - name: ubuntu-gcc-8
-            os: ubuntu-latest
-            compiler: gcc
-            version: "8"
-            install_boost: 1.74
-            mpi: false
 
           - name: ubuntu-gcc-9
             os: ubuntu-latest
@@ -63,10 +50,16 @@ jobs:
             install_boost: 1.74
             mpi: false
 
-          - name: ubuntu-clang-11
+          - name: ubuntu-gcc-12
+            os: ubuntu-22.04
+            compiler: gcc
+            version: "12"
+            mpi: false
+
+          - name: ubuntu-clang-13
             os: ubuntu-latest
             compiler: clang
-            version: "11"
+            version: "13"
             mpi: false
 
           - name: macos-xcode-12.4
