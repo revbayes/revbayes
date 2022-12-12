@@ -40,14 +40,12 @@ jobs:
             os: ubuntu-latest
             compiler: gcc
             version: "10"
-            install_boost: 1.74
             mpi: false
 
           - name: ubuntu-gcc-11
             os: ubuntu-latest
             compiler: gcc
             version: "11"
-            install_boost: 1.74
             mpi: false
 
           - name: ubuntu-gcc-12
