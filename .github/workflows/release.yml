@@ -64,7 +64,7 @@ jobs:
     strategy:
       matrix:
         name: [ubuntu-gcc-9,
-               macos-xcode-12.5,
+               macos-xcode-13,
                windows
                ]
 
@@ -76,10 +76,10 @@ jobs:
             mpi: false
             arch: "linux64"
 
-          - name: macos-xcode-12.5
+          - name: macos-xcode-13
             os: macos-latest
             compiler: xcode
-            version: "12.5"
+            version: "13"
             mpi: false
             arch: "mac64"
   
@@ -116,14 +116,16 @@ jobs:
           sudo apt-get install libopenmpi-dev
         fi
 
+    - name: Select XCode version (macOS)
+      if: runner.os == 'macOS'
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: ${{ matrix.version }}
+
     - name: Install (macOS)
       if: runner.os == 'macOS'
       run: |
-          rm -rf /usr/local/bin/2to3 
-          
-          brew update
           brew install pkg-config pandoc boost ccache coreutils
-          sudo xcode-select -switch /Applications/Xcode_${{ matrix.version }}.app
           ccache --set-config=cache_dir=$HOME/.ccache
 
     - name: Install (Windows meson cross compile)
