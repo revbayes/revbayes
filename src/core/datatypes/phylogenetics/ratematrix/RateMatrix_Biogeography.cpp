@@ -35,6 +35,8 @@ RateMatrix_Biogeography::RateMatrix_Biogeography(size_t ns, size_t nc, size_t mr
     numCharacters(nc),
     num_states(ns),
     useSquaring(ns > 32),
+    hasEigenSystem(false),
+    theEigenSystem(nullptr),
     dispersalRates( RbVector<RbVector<double > >( numCharacters, RbVector<double>(numCharacters, 1.0) ) ),
     extirpationRates( RbVector<double>( numCharacters, 1.0) ),
     scalingFactor(1.0),
@@ -46,10 +48,6 @@ RateMatrix_Biogeography::RateMatrix_Biogeography(size_t ns, size_t nc, size_t mr
     maxSizeStoredTransitionProbabilites(1e3),
     useStoredTransitionProbabilities(true)
 {
-
-    theEigenSystem = new EigenSystem(the_rate_matrix);
-    c_ijk.resize(num_states * num_states * num_states);
-    cc_ijk.resize(num_states * num_states * num_states);
     
     makeBits();
     makeTransitions();
@@ -81,7 +79,8 @@ RateMatrix_Biogeography::RateMatrix_Biogeography(const RateMatrix_Biogeography& 
     numCharacters        = m.numCharacters;
     num_states           = m.num_states;
     useSquaring          = m.useSquaring;
-    theEigenSystem       = new EigenSystem( *(m.theEigenSystem) );
+    hasEigenSystem       = false;
+    theEigenSystem       = nullptr;
     c_ijk                = m.c_ijk;
     cc_ijk               = m.cc_ijk;
     dispersalRates       = m.dispersalRates;
@@ -97,7 +96,6 @@ RateMatrix_Biogeography::RateMatrix_Biogeography(const RateMatrix_Biogeography& 
     changedAreas = m.changedAreas;
     affectingAreas = m.affectingAreas;
     
-    theEigenSystem->setRateMatrixPtr(the_rate_matrix);
     update();
 
 }
@@ -105,7 +103,6 @@ RateMatrix_Biogeography::RateMatrix_Biogeography(const RateMatrix_Biogeography& 
 
 /** Destructor */
 RateMatrix_Biogeography::~RateMatrix_Biogeography(void) {
-    
     delete theEigenSystem;
 }
 
@@ -128,7 +125,8 @@ RateMatrix_Biogeography& RateMatrix_Biogeography::operator=(const RateMatrix_Bio
         numCharacters        = r.numCharacters;
         num_states           = r.num_states;
         useSquaring          = r.useSquaring;
-        theEigenSystem       = new EigenSystem( *(r.theEigenSystem) );
+        hasEigenSystem       = false;
+        theEigenSystem       = nullptr;
         c_ijk                = r.c_ijk;
         cc_ijk               = r.cc_ijk;
         dispersalRates       = r.dispersalRates;
@@ -143,8 +141,6 @@ RateMatrix_Biogeography& RateMatrix_Biogeography::operator=(const RateMatrix_Bio
         useStoredTransitionProbabilities = r.useStoredTransitionProbabilities;
         changedAreas = r.changedAreas;
         affectingAreas = r.affectingAreas;
-
-        theEigenSystem->setRateMatrixPtr(the_rate_matrix);
 
         update();
         
@@ -577,10 +573,31 @@ void RateMatrix_Biogeography::tiProbsComplexEigens(double t, TransitionProbabili
     }
 }
 
+/** Create the eigen system */
+void RateMatrix_Biogeography::initializeEigenSystem(void) {
+    
+    if (!hasEigenSystem) {
+        
+        // make the eigen system
+        theEigenSystem = new EigenSystem(the_rate_matrix);
+        c_ijk.resize(num_states * num_states * num_states);
+        cc_ijk.resize(num_states * num_states * num_states);
+
+        // flag as created
+        hasEigenSystem = true;
+        
+    }
+
+}
+
 
 /** Update the eigen system */
 void RateMatrix_Biogeography::updateEigenSystem(void) {
     
+    // initialize, if hasn't been done already
+    initializeEigenSystem();
+
+    // update the eigen system
     theEigenSystem->update();
     calculateCijk();
     

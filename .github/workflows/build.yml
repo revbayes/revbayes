@@ -84,8 +84,8 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v1
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
       with:
         python-version: 3.8
 
@@ -138,12 +138,12 @@ jobs:
           stamp=$(gdate '+%s')
         fi
         echo "${stamp}"
-        echo "::set-output name=timestamp::${stamp}"
+        echo "timestamp=${stamp}" >> $GITHUB_OUTPUT
 
     - name: ccache cache files
 #      uses: actions/cache@v2
 #     We want to cache the build artifacts whether or not the tests succeed.
-      uses: pat-s/always-upload-cache@v2
+      uses: pat-s/always-upload-cache@v3.0.11
       with:
          path: ~/.ccache
          key: ${{ matrix.name }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
@@ -242,14 +242,14 @@ jobs:
         echo ::endgroup::
 
     - name: Upload test files if they failed
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v3
       if: failure()
       with:
         name: test-results-${{ matrix.name }}
         path: tests
 
     - name: Upload testiphy files if they failed
-      uses: actions/upload-artifact@v2-preview
+      uses: actions/upload-artifact@v3
       if: failure()
       with:
         name: testiphy-results-${{ matrix.name }}
@@ -261,8 +261,8 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     steps:
-    - uses: technote-space/workflow-conclusion-action@v2.0.1
-    - uses: 8398a7/action-slack@v3.8.1
+    - uses: technote-space/workflow-conclusion-action@v3
+    - uses: 8398a7/action-slack@v3
       with:
         status: custom
         fields: workflow,commit,repo,ref,author

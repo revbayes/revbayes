@@ -28,7 +28,8 @@
 #include "RbVector.h"
 
 
-
+using std::string;
+using std::vector;
 
 
 /** Convert the string s to a number */
@@ -476,6 +477,22 @@ void StringUtilities::replaceAllOccurrences(std::string& str, char old_ch, char 
     
 }
 
+void StringUtilities::join(std::ostream& o, const vector<string>& ss, const string& sep)
+{
+    for(int i=0;i<ss.size();i++)
+    {
+        o<<ss[i];
+        if (i+1 < ss.size())
+            o<<sep;
+    }
+}
+
+string StringUtilities::join(const vector<string>& ss, const string& sep)
+{
+    std::ostringstream o;
+    join(o, ss, sep);
+    return o.str();
+}
 
 /**
  * Utility function for dividing string into pieces

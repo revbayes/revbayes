@@ -55,6 +55,10 @@ namespace RevBayesCore {
         bool                            isMissingState(void) const;                         //!< Get whether this is a missing character state
         void                            setGapState(bool tf);                               //!< set whether this is a gapped character
         void                            setMissingState(bool tf);                           //!< set whether this is a missing character
+        
+        const std::vector<double>&      getWeights( void ) const;                            //!< Get the weight of the state
+        bool                            isWeighted( void ) const;
+        void                            setWeighted( bool tf );
         void                            setWeights(std::vector<double> w);                  //!< set the weight for each character
         
     private:
@@ -67,6 +71,9 @@ namespace RevBayesCore {
         std::vector<std::string>        state_descriptions;
         double                          dx;
         std::vector<double>             points;
+        std::vector<double>             weights;                                            //!< Weights are used when the "average" option is used
+        bool                            weighted;
+
 
     };
 
