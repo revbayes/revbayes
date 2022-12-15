@@ -11,7 +11,6 @@ travis="false"
 mpi="false"
 cmd="false"
 help2yml="false"
-jupyter="false"
 boost_root=""
 boost_lib=""
 boost_include=""
@@ -32,7 +31,6 @@ while echo $1 | grep ^- > /dev/null; do
 -ninja          <true|false>    : set to true to build with ninja instead of make
 -mpi            <true|false>    : set to true if you want to build the MPI version. Defaults to false.
 -cmd            <true|false>    : set to true if you want to build RevStudio with GTK2+. Defaults to false.
--jupyter        <true|false>    : set to true if you want to build the jupyter version. Defaults to false.
 -help2yml       <true|false>    : update the help database and build the YAML help generator. Defaults to false.
 -boost_root     string          : specify directory containing Boost headers and libraries (e.g. `/usr/`). Defaults to unset.
 -boost_lib      string          : specify directory containing Boost libraries. (e.g. `/usr/lib`). Defaults to unset.
@@ -102,10 +100,6 @@ fi
 
 if [ "$mpi" = "true" ] ; then
     cmake_args="-DMPI=ON $cmake_args"
-fi
-
-if [ "$jupyter" = "true" ] ; then
-    cmake_args="-DJUPYTER=ON $cmake_args"
 fi
 
 if [ "$cmd" = "true" ] ; then

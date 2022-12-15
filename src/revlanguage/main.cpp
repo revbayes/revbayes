@@ -17,6 +17,7 @@ using po::variables_map;
 #include "RlCommandLineOutputStream.h"
 #include "RlUserInterface.h"
 #include "StringUtilities.h"
+#include "TerminalFormatter.h"
 #include "Workspace.h"
 
 #ifdef RB_MPI
@@ -54,6 +55,7 @@ variables_map parse_cmd_line(int argc, char* argv[])
 //	("verbose,V",value<int>()->implicit_value(1),"Log extra information for debugging.")
 
 	("batch,b","Run in batch mode.")
+        ("jupyter,j","Run in jupyter mode.")
         // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
         ("args",value<std::vector<std::string> >()->multitoken(),"Command line arguments to initialize RevBayes variables.")
         // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
@@ -191,7 +193,6 @@ int main(int argc, char* argv[]) {
     {
         source_files = args["file"].as<std::vector<std::string> >();
     }
-//    source_files.push_back("scripts/MCMC_dating_ex4.Rev");
     
     if ( args.count("args") && args.count("cmd"))
     {
@@ -224,77 +225,76 @@ int main(int argc, char* argv[]) {
     RevLanguage::UserInterface::userInterface().setOutputStream( rev_output );
     rl.startRevLanguageEnvironment(rb_args, source_files);
 
-#   ifdef RB_XCODE
-
-#   ifndef RB_MPI
-    int process_id = 0;
-
-#   endif
-    /* Declare things we need */
-    int result = 0;
-    std::string commandLine = "";
-    std::string line = "";
-
-    for (;;)
+    if (args.count("jupyter"))
     {
-        /* Print prompt based on state after previous iteration */
-        if ( process_id == 0 )
-        {
-            if (result == 0 || result == 2)
-            {
-                std::cout << "> ";
-            }
-            else
-            {
-                std::cout << "+ ";
-            }
-
-            /* Get the line */
-            std::istream& retStream = std::getline(std::cin, line);
-            if (!retStream)
-            {
-#               ifdef RB_MPI
-                MPI::Finalize();
-#               endif
-                exit(0);
-            }
-
-            if (result == 0 || result == 2)
-            {
-                commandLine = line;
-            }
-            else if (result == 1)
-            {
-                commandLine += ";" + line;
-            }
-        }
-
-        size_t bsz = commandLine.size();
-#       ifdef RB_MPI
-        MPI_Bcast(&bsz, 1, MPI_INT, 0, MPI_COMM_WORLD);
+#       ifndef RB_MPI
+        int process_id = 0;
 #       endif
 
-        char * buffer = new char[bsz+1];
-        buffer[bsz] = 0;
-        for (int i = 0; i < bsz; i++)
+        /* Declare things we need */
+        int result = 0;
+        std::string commandLine = "";
+        std::string line = "";
+
+        for (;;)
         {
-            buffer[i] = commandLine[i];
+            /* Print prompt based on state after previous iteration */
+            if ( process_id == 0 )
+            {
+                if (result == 0 || result == 2)
+                {
+                    std::cout << "> ";
+                }
+                else
+                {
+                    std::cout << "+ ";
+                }
+
+                /* Get the line */
+                std::istream& retStream = std::getline(std::cin, line);
+                if (!retStream)
+                {
+#                   ifdef RB_MPI
+                    MPI::Finalize();
+#                   endif
+                    exit(0);
+                }
+
+                if (result == 0 || result == 2)
+                {
+                    commandLine = line;
+                }
+                else if (result == 1)
+                {
+                    commandLine += ";" + line;
+                }
+            }
+
+            size_t bsz = commandLine.size();
+#           ifdef RB_MPI
+            MPI_Bcast(&bsz, 1, MPI_INT, 0, MPI_COMM_WORLD);
+#           endif
+
+            char * buffer = new char[bsz+1];
+            buffer[bsz] = 0;
+            for (int i = 0; i < bsz; i++)
+                buffer[i] = commandLine[i];
+#           ifdef RB_MPI
+            MPI_Bcast(buffer, (int)bsz, MPI_CHAR, 0, MPI_COMM_WORLD);
+#           endif
+
+            std::string tmp = std::string( buffer );
+
+            result = RevLanguage::Parser::getParser().processCommand(tmp, &RevLanguage::Workspace::userWorkspace());
         }
-#       ifdef RB_MPI
-        MPI_Bcast(buffer, (int)bsz, MPI_CHAR, 0, MPI_COMM_WORLD);
-#       endif
 
-        std::string tmp = std::string( buffer );
-
-        result = RevLanguage::Parser::getParser().processCommand(tmp, &RevLanguage::Workspace::userWorkspace());
     }
-
-#   else
-
-    RevClient c;
-    c.startInterpretor();
-
-#   endif
+    else
+    {
+        enableTermAnsi();
+        RevClient c;
+        c.startInterpretor();
+    }
 
 #   ifdef RB_MPI
     MPI_Finalize();
