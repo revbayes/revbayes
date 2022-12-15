@@ -302,11 +302,31 @@ int printFunctionParameters(const char *buf, size_t len, char c)
     return 0;
 }
 
+int RevClient::interpret(const std::string& command)
+{
+    size_t bsz = command.size();
+#ifdef RB_MPI
+    MPI_Bcast(&bsz, 1, MPI_INT, 0, MPI_COMM_WORLD);
+#endif
+
+    char * buffer = new char[bsz+1];
+    buffer[bsz] = 0;
+    for (int i = 0; i < bsz; i++)
+        buffer[i] = command[i];
+#ifdef RB_MPI
+    MPI_Bcast(buffer, (int)bsz, MPI_CHAR, 0, MPI_COMM_WORLD);
+#endif
+
+    std::string tmp = std::string( buffer );
+
+    return RevLanguage::Parser::getParser().processCommand(tmp, &RevLanguage::Workspace::userWorkspace());
+}
+
 /**
  * Main application loop.
  * 
  */
-void RevClient::startInterpretor( void )
+void RevClient::startInterpreter( void )
 {
     
     int pid = 0;
@@ -390,23 +410,7 @@ void RevClient::startInterpretor( void )
             }
         }
         
-        size_t bsz = commandLine.size();
-#ifdef RB_MPI
-        MPI_Bcast(&bsz, 1, MPI_INT, 0, MPI_COMM_WORLD);
-#endif
-            
-        char * buffer = new char[bsz+1];
-        buffer[bsz] = 0;
-        for (int i = 0; i < bsz; i++)
-            buffer[i] = commandLine[i];
-#ifdef RB_MPI
-        MPI_Bcast(buffer, (int)bsz, MPI_CHAR, 0, MPI_COMM_WORLD);
-#endif
-            
-        std::string tmp = std::string( buffer );
-            
-        result = RevLanguage::Parser::getParser().processCommand(tmp, &RevLanguage::Workspace::userWorkspace());
-
+        result = interpret(commandLine);
 
         /* The typed string is returned as a malloc() allocated string by
          * linenoise, so the user needs to free() it. */

@@ -264,30 +264,15 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            size_t bsz = commandLine.size();
-#           ifdef RB_MPI
-            MPI_Bcast(&bsz, 1, MPI_INT, 0, MPI_COMM_WORLD);
-#           endif
-
-            char * buffer = new char[bsz+1];
-            buffer[bsz] = 0;
-            for (int i = 0; i < bsz; i++)
-                buffer[i] = commandLine[i];
-#           ifdef RB_MPI
-            MPI_Bcast(buffer, (int)bsz, MPI_CHAR, 0, MPI_COMM_WORLD);
-#           endif
-
-            std::string tmp = std::string( buffer );
-
-            result = RevLanguage::Parser::getParser().processCommand(tmp, &RevLanguage::Workspace::userWorkspace());
+            result = RevClient::interpret(commandLine);
         }
 
     }
     else
     {
         enableTermAnsi();
-        RevClient c;
-        c.startInterpretor();
+
+        RevClient::startInterpreter();
     }
 
 #   ifdef RB_MPI

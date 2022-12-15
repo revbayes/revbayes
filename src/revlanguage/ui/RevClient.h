@@ -14,23 +14,19 @@
 //        std::string compMatch;
 //    };
 
-class RevClient {
+namespace RevClient
+{
 
-public:
+    void  startInterpreter(void);
+    int   interpret(const std::string& command);
+}
     
-    void                        startInterpretor(void);
-    
-    
-private:
-
 
 //    std::set<std::string>       getDefaultCompletions();
 //    std::vector<std::string>    getFileList(const std::string &path);
 //        tabCompletionInfo           getTabCompleteInfo(const char *buf);
 //        void                        setTabCompletionInfo(const char *buf);
     
-
-};
 
 #endif	/* REVCLIENT_H */
 
