@@ -16,9 +16,10 @@
 
 namespace RevClient
 {
+    int   interpret(const std::string& command);
 
     void  startInterpreter(void);
-    int   interpret(const std::string& command);
+    void  startJupyterInterpreter(void);
 }
     
 

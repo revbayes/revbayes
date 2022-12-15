@@ -130,9 +130,13 @@ variables_map parse_cmd_line(int argc, char* argv[])
 
 int main(int argc, char* argv[]) {
 
-      using namespace po;
-#   ifdef RB_MPI
+    using namespace po;
+
+    // If we aren't using MPI, this will be zero.
+    // If we are using MPI, it will be zero for the first process.
     int process_id = 0;
+
+#   ifdef RB_MPI
     int num_processes = 0;
     try
     {
@@ -217,7 +221,6 @@ int main(int argc, char* argv[]) {
         }
     }
 
-
     /* initialize environment */
     RevLanguageMain rl = RevLanguageMain(batch_mode);
 
@@ -227,46 +230,7 @@ int main(int argc, char* argv[]) {
 
     if (args.count("jupyter"))
     {
-#       ifndef RB_MPI
-        int process_id = 0;
-#       endif
-
-        /* Declare things we need */
-        int result = 0;
-        std::string commandLine = "";
-        std::string line = "";
-
-        for (;;)
-        {
-            /* Print prompt based on state after previous iteration */
-            if ( process_id == 0 )
-            {
-                if (result == 0 || result == 2)
-                {
-                    std::cout << "> ";
-                }
-                else
-                {
-                    std::cout << "+ ";
-                }
-
-                /* Get the line */
-                std::istream& retStream = std::getline(std::cin, line);
-                if (not retStream) break;
-
-                if (result == 0 || result == 2)
-                {
-                    commandLine = line;
-                }
-                else if (result == 1)
-                {
-                    commandLine += ";" + line;
-                }
-            }
-
-            result = RevClient::interpret(commandLine);
-        }
-
+        RevClient::startJupyterInterpreter();
     }
     else
     {

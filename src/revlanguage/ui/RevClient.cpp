@@ -302,7 +302,10 @@ int printFunctionParameters(const char *buf, size_t len, char c)
     return 0;
 }
 
-int RevClient::interpret(const std::string& command)
+namespace RevClient
+{
+
+int interpret(const std::string& command)
 {
     size_t bsz = command.size();
 #ifdef RB_MPI
@@ -326,9 +329,10 @@ int RevClient::interpret(const std::string& command)
  * Main application loop.
  * 
  */
-void RevClient::startInterpreter( void )
+void startInterpreter( void )
 {
-    
+    // If we aren't using MPI, this will be zero.
+    // If we are using MPI, it will be zero for the first process.
     int pid = 0;
 #ifdef RB_MPI
     MPI_Comm_rank(MPI_COMM_WORLD, &pid);
@@ -423,4 +427,51 @@ void RevClient::startInterpreter( void )
     }
     
     
+}
+
+void startJupyterInterpreter( void )
+{
+    // If we aren't using MPI, this will be zero.
+    // If we are using MPI, it will be zero for the first process.
+    int pid = 0;
+#ifdef RB_MPI
+    MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+#endif
+    
+    /* Declare things we need */
+    int result = 0;
+    std::string commandLine = "";
+
+    for (;;)
+    {
+        /* Print prompt based on state after previous iteration */
+        if ( pid == 0 )
+        {
+            if (result == 0 || result == 2)
+            {
+                std::cout << "> ";
+            }
+            else
+            {
+                std::cout << "+ ";
+            }
+
+            /* Get the line */
+            std::string line = "";
+            if (not std::getline(std::cin, line)) return;
+
+            if (result == 0 || result == 2)
+            {
+                commandLine = line;
+            }
+            else if (result == 1)
+            {
+                commandLine += ";" + line;
+            }
+        }
+
+        result = RevClient::interpret(commandLine);
+    }
+}
+
 }
