@@ -252,13 +252,7 @@ int main(int argc, char* argv[]) {
 
                 /* Get the line */
                 std::istream& retStream = std::getline(std::cin, line);
-                if (!retStream)
-                {
-#                   ifdef RB_MPI
-                    MPI::Finalize();
-#                   endif
-                    exit(0);
-                }
+                if (not retStream) break;
 
                 if (result == 0 || result == 2)
                 {
