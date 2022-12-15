@@ -83,7 +83,7 @@ const ArgumentRules& Func_GeoSSECladoEvents::getArgumentRules( void ) const
     { 
         argumentRules.push_back( new ArgumentRule( "sympatryRates",  ModelVector<RealPos>::getClassTypeSpec() , "The vector of sympatric speciation rates (per geographic region).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "allopatryRates", ModelVector<RealPos>::getClassTypeSpec() , "The vector of allopatric speciation rates (per geographic region).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "jumpRates",      ModelVector<ModelVector<RealPos> >::getClassTypeSpec(), "Jump-dispersal rate between pairs of areas.", ArgumentRule::BY_VALUE, ArgumentRule::CONSTANT, NULL ) );
+        argumentRules.push_back( new ArgumentRule( "jumpRates",      ModelVector<ModelVector<RealPos> >::getClassTypeSpec(), "Jump-dispersal rate between pairs of areas.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
         rules_set = true;
     }
     
