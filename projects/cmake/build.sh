@@ -1,4 +1,28 @@
 #!/bin/sh
+
+# NOTE: All configuration is now done via cmake.
+#
+#       * Configuration options to this file are translated into cmake variables and passed to cmake.
+#       * Options like -DKEY=VALUE are passed to cmake.
+#
+#       To debug configuration problems:
+#         * look at src/CMakeLists.txt
+#         * note what options this script passes to cmake (there's a log message)
+
+# NOTE: Overview of what this script does:
+# 1. Read command line flags
+# 2. Generate cmake variables from command-line flags.
+# 3. Create the build/ directory (if missing).
+# 4. Update the version number            --> src/revlanguage/utils/GitVersion.cpp
+# 5. Update the help database (if asked)  --> src/core/help/RbHelpDatabase.cpp
+# 6. Run ./regenerate.sh
+# 7. Run cmake <--- This is where the configuration actually happens
+# 8. Run make or ninja to do the build.
+# 9. Restore GitVersion.cpp from backup.
+
+# If you change this script, please update the list above.
+
+
 set -e
 
 all_args="$@"
