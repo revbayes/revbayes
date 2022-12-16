@@ -110,6 +110,14 @@ if [ "$travis" = "true" ] ; then
     cmake_args="-DCONTINUOUS_INTEGRATION=TRUE $cmake_args"
 fi
 
+if [ -n "$jupyter" ] ; then
+    echo "There is no longer a -jupyter <true|false> option to '$0'."
+    echo "Jupyter functionality is now part of the standard rb application."
+    echo
+    echo "Run '$0 -h' to see available options."
+    exit 1
+fi
+
 if [ -n "$boost_lib" ] && [ -n "$boost_include" ] ; then
     export BOOST_INCLUDEDIR="${boost_include}"
     export BOOST_LIBRARYDIR="${boost_lib}"
