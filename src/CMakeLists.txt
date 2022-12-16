@@ -59,10 +59,6 @@ if ("${MPI}" STREQUAL "ON")
    set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS}")
 endif()
 
-if ("${JUPYTER}" STREQUAL "ON")
-   add_definitions(-DRB_XCODE)
-endif()
-
 ##### rpath: where to find shared libraries #####
 
 if ("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
@@ -188,8 +184,6 @@ endif()
 
 if ("${CMD_GTK}" STREQUAL "ON")
   set(RB_EXEC_NAME "RevStudio")
-elseif ("${JUPYTER}" STREQUAL "ON")
-  set(RB_EXEC_NAME "rb-jupyter")
 endif()
 message("Building ${RB_EXEC_NAME}")
 
