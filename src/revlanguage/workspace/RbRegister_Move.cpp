@@ -122,6 +122,7 @@
 #include "Move_VectorBinarySwitch.h"
 #include "Move_VectorSingleElementScale.h"
 #include "Move_VectorSingleElementSlide.h"
+#include "Move_VectorElementSwap.h"
 #include "Move_VectorFixedSingleElementSlide.h"
 #include "Move_VectorScale.h"
 #include "Move_VectorSlide.h"
@@ -312,6 +313,16 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_ElementSlide() );
         addType( new Move_VectorSingleElementScale() );
         addType( new Move_VectorSingleElementSlide() );
+        addType( new Move_VectorElementSwap<Real>( ) );
+        addType( new Move_VectorElementSwap<RealPos>( ) );
+        addType( new Move_VectorElementSwap<Natural>( ) );
+        addType( new Move_VectorElementSwap<Integer>( ) );
+        addType( new Move_VectorElementSwap<Probability>( ) );
+        addType( new Move_VectorElementSwap<Simplex>( ) );
+        addType( new Move_VectorElementSwap<ModelVector<RealPos> >( ) );
+        addType( new Move_VectorElementSwap<ModelVector<Real> >( ) );
+        addType( new Move_VectorElementSwap<RateGenerator>( ) );
+        addType( new Move_VectorElementSwap<Tree>( ) );
         addType( new Move_VectorFixedSingleElementSlide() );
         addType( new Move_EllipticalSliceSamplingSimple() );
 
