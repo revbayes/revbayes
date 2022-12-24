@@ -10,6 +10,7 @@
 #include "UserFunction.h"
 #include "UserFunctionDef.h"
 #include "Workspace.h"
+#include <memory>
 #include "Argument.h"
 #include "Environment.h"
 #include "RevObject.h"
