@@ -80,13 +80,16 @@ RevBayesCore::VectorElementSwapProposal<valueType>::VectorElementSwapProposal( c
     stored_index_1( 0 ),
     stored_index_2( 0 )
 {
-        
+    
     // tell the base class to add the node
     typename std::vector< StochasticNode<valueType> *>::const_iterator it;
     for ( it = variables.begin(); it != variables.end(); it++)
     {
         addNode( *it );
     }
+    
+    // set the length variables for internal use
+    length = variables.size();
     
 }
 

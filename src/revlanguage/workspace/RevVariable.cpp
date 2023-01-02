@@ -212,10 +212,11 @@ RevObject& RevVariable::getRevObject(void) const
             i++;
         }
 
-        // @TODO: We might need a to check if this should be dynamic or not. (Sebastian)
+        // Sebastian: We absolutely must use dynamic functions because we may want to use this vector in a dynamic, i.e., determistic function
+        // if this is not dynamic, then the vector is always converted into a constant variable and does not allow it's elements to change.
         bool dynamic = true;
-        std::unique_ptr<Function> func( Workspace::userWorkspace().getFunction("v", args, not dynamic).clone() );
-        func->processArguments(args, not dynamic);
+        std::unique_ptr<Function> func( Workspace::userWorkspace().getFunction("v", args, dynamic).clone() );
+        func->processArguments(args, dynamic);
         
         // Evaluate the function (call the static evaluation function)
         RevPtr<RevVariable> func_return_value = func->execute();

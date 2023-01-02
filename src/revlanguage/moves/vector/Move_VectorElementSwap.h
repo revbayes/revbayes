@@ -119,7 +119,6 @@ template <class rlValueType>
 const std::string& RevLanguage::Move_VectorElementSwap<rlValueType>::getClassType(void)
 {
     
-    //    static std::string rev_type = "Move_VectorElementSwap<" + rlValueType::getClassType() + ">";
     static std::string rev_type = "Move_VectorElementSwap__" + rlValueType::getClassType();
     
     return rev_type;
@@ -159,9 +158,9 @@ const RevLanguage::MemberRules& RevLanguage::Move_VectorElementSwap<rlValueType>
     static MemberRules move_member_rules;
     static bool rules_set = false;
     
-    if ( !rules_set )
+    if ( rules_set == false )
     {
-        move_member_rules.push_back( new ArgumentRule( "x", rlValueType::getClassTypeSpec(), "The variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::DETERMINISTIC ) );
+        move_member_rules.push_back( new ArgumentRule( "x", ModelVector<rlValueType>::getClassTypeSpec(), "The variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::DETERMINISTIC ) );
         move_member_rules.push_back( new ArgumentRule( "neighborsOnly", RlBoolean::getClassTypeSpec(), "Should we switch only neighbors or two random elements?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
 
         /* Inherit weight from Move, put it after variable */
