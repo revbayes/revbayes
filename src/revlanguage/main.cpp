@@ -197,8 +197,7 @@ int main(int argc, char* argv[]) {
     {
         source_files = args["file"].as<std::vector<std::string> >();
     }
-//    source_files.push_back("scripts/mcmc_homochronous_skyline.Rev");
-//    source_files.push_back("mcmc_template.Rev");
+//    source_files.push_back("test.Rev");
 
 
     if ( args.count("args") && args.count("cmd"))

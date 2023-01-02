@@ -562,9 +562,11 @@ const Function& FunctionTable::getFunction(const std::string& name, const std::v
     // find the template function
     const Function* the_function = findFunction(name, args, once);
 
-    if (not the_function)
+    if ( the_function == NULL )
+    {
         throw RbException("No function named '"+ name + "'");
-
+    }
+    
     return *the_function;
 }
 

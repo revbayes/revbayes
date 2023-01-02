@@ -199,7 +199,7 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
             if ( the_var->getRevObject().isType( *it ) )
             {
                 RevPtr<RevVariable> valueVar = RevPtr<RevVariable>( new RevVariable(the_var->getRevObject().clone(),the_var->getName() ) );
-                return Argument( valueVar, arg.getLabel(), false );
+                return Argument( valueVar, arg.getLabel(), true );
             }
             else if ( the_var->getRevObject().isConvertibleTo( *it, once ) != -1 )
             {
@@ -207,7 +207,7 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
                 RevObject* convertedObject = the_var->getRevObject().convertTo( *it );
 
                 RevPtr<RevVariable> valueVar = RevPtr<RevVariable>( new RevVariable(convertedObject,the_var->getName() ) );
-                return Argument( valueVar, arg.getLabel(), false );
+                return Argument( valueVar, arg.getLabel(), true );
                 
             }
         } // if (by-value)
@@ -389,7 +389,7 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
     {
         once = true;
     }
-    if ( nodeType == STOCHASTIC )
+    if ( nodeType == STOCHASTIC || nodeType == DETERMINISTIC )
     {
         once = false;
     }
