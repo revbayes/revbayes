@@ -62,18 +62,21 @@ RevPtr<RevVariable> Func_readVCF::execute( void )
         unkown = RevBayesCore::VCFReader::REFERENCE;
     }
     
+    bool skip_missing = static_cast<const RlBoolean&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+
+    
     RevBayesCore::VCFReader vcf_reader = RevBayesCore::VCFReader( fn.getValue(), ploidy, unkown );
     
     AbstractHomologousDiscreteCharacterData *rl_aln = NULL;
     
     if ( type == "DNA" )
     {
-        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::DnaState> *aln = vcf_reader.readDNAMatrix();
+        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::DnaState> *aln = vcf_reader.readDNAMatrix( skip_missing );
         rl_aln = new AbstractHomologousDiscreteCharacterData( aln );
     }
     else if ( type == "binary")
     {
-        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::BinaryState> *aln = vcf_reader.readBinaryMatrix();
+        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::BinaryState> *aln = vcf_reader.readBinaryMatrix( skip_missing );
         rl_aln = new AbstractHomologousDiscreteCharacterData( aln );
     }
     return new RevVariable( rl_aln );
@@ -107,6 +110,8 @@ const ArgumentRules& Func_readVCF::getArgumentRules( void ) const
         unknown_options.push_back( "alternative" );
         argument_rules.push_back( new OptionRule( "unkownTreatment", new RlString("missing"), unknown_options, "How to treat the '.' character, i.e., if the state was unkown." ) );
         
+        argument_rules.push_back( new ArgumentRule( "skipMissing", RlBoolean::getClassTypeSpec(), "Should we skip sites (i.e., for all individuals) if at least one has a missing character at this position.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
+
         rules_set = true;
         
     }

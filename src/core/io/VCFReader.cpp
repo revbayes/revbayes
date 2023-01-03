@@ -576,7 +576,6 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
                 
             }
             
-            size_t num_tips  = taxa.size();
             int    num_sites = -1;
             
             out_stream << "COUNTSFILE NPOP " << species_names.size() << " NSITES " << num_sites << std::endl;
@@ -913,7 +912,7 @@ std::vector<size_t> VCFReader::extractStateIndices(std::string alleles, const st
 }
 
 
-HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( void )
+HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( bool skip_missing )
 {
     HomologousDiscreteCharacterData<BinaryState> *matrix = new HomologousDiscreteCharacterData<BinaryState> ();
     
@@ -966,9 +965,11 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( void 
     BinaryState missing_state = BinaryState("0");
     missing_state.setMissingState( true );
     
+    std::vector<BinaryState> this_site = std::vector<BinaryState>( ploidy == DIPLOID ? 2*NUM_SAMPLES : NUM_SAMPLES, BinaryState() );
     for (size_t i = start; i < chars.size(); ++i)
     {
         
+        bool is_missing = false;
         for (size_t j = 0; j < NUM_SAMPLES; ++j)
         {
             
@@ -981,106 +982,58 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( void 
             std::vector<std::string> allele_tokens;
             StringUtilities::stringSplit(this_alleles, "|", allele_tokens);
             
-            if ( ploidy == DIPLOID )
+            std::vector<size_t> state_indices = extractStateIndices(this_alleles, "binary");
+            
+            // add the first character
+            if ( state_indices[0] == 0 )
             {
-                // first allele
-                if ( allele_tokens[0] == "0")
-                {
-                    taxa[j].addCharacter( BinaryState("0") );
-                }
-                else if ( allele_tokens[0] == "1" )
-                {
-                    taxa[j].addCharacter( BinaryState("1") );
-                }
-                else if ( allele_tokens[0] == "." )
-                {
-                    if ( unkown_treatment == UNKOWN_TREATMENT::MISSING )
-                    {
-                        taxa[j].addCharacter( missing_state );
-                    }
-                    else if ( unkown_treatment == UNKOWN_TREATMENT::REFERENCE )
-                    {
-                        taxa[j].addCharacter( BinaryState("0") );
-                    }
-                    else if ( unkown_treatment == UNKOWN_TREATMENT::ALTERNATIVE )
-                    {
-                        taxa[j].addCharacter( BinaryState("1") );
-                    }
-                }
-                else
-                {
-                    throw RbException("Unknown scored character!");
-                }
-                
-                // second allele
-                if ( allele_tokens[1] == "0")
-                {
-                    taxa[j+NUM_SAMPLES].addCharacter( BinaryState("0") );
-                }
-                else if ( allele_tokens[1] == "1" )
-                {
-                    taxa[j+NUM_SAMPLES].addCharacter( BinaryState("1") );
-                }
-                else if ( allele_tokens[1] == "." )
-                {
-                    if ( unkown_treatment == UNKOWN_TREATMENT::MISSING )
-                    {
-                        taxa[j+NUM_SAMPLES].addCharacter( missing_state );
-                    }
-                    else if ( unkown_treatment == UNKOWN_TREATMENT::REFERENCE )
-                    {
-                        taxa[j+NUM_SAMPLES].addCharacter( BinaryState("0") );
-                    }
-                    else if ( unkown_treatment == UNKOWN_TREATMENT::ALTERNATIVE )
-                    {
-                        taxa[j+NUM_SAMPLES].addCharacter( BinaryState("1") );
-                    }
-                }
-                else
-                {
-                    throw RbException("Unknown scored character!");
-                }
+                this_site[j] = BinaryState("0");
+            }
+            else if ( state_indices[0] == 1 )
+            {
+                this_site[j] = BinaryState("1");
+            }
+            else if ( state_indices[0] == 2 )
+            {
+                this_site[j] = missing_state;
+                is_missing = true;
             }
             else
             {
-                // first allele
-                std::string this_allele = allele_tokens[0];
-                if ( allele_tokens.size() > 1 )
+                throw RbException("Unknown scored binary character!");
+            }
+            
+            if ( ploidy == DIPLOID )
+            {
+                // add the first character
+                if ( state_indices[1] == 0 )
                 {
-                    bool use_second_allele = GLOBAL_RNG->uniform01() > 0.5;
-                    if ( use_second_allele )
-                    {
-                        this_allele = allele_tokens[1];
-                    }
+                    this_site[j+NUM_SAMPLES] = BinaryState("0");
                 }
-                
-                if ( this_allele == "0")
+                else if ( state_indices[1] == 1 )
                 {
-                    taxa[j].addCharacter( BinaryState("0") );
+                    this_site[j+NUM_SAMPLES] = BinaryState("1");
                 }
-                else if ( this_allele == "1" )
+                else if ( state_indices[1] == 2 )
                 {
-                    taxa[j].addCharacter( BinaryState("1") );
-                }
-                else if ( this_allele == "." )
-                {
-                    if ( unkown_treatment == UNKOWN_TREATMENT::MISSING )
-                    {
-                        taxa[j+NUM_SAMPLES].addCharacter( missing_state );
-                    }
-                    else if ( unkown_treatment == UNKOWN_TREATMENT::REFERENCE )
-                    {
-                        taxa[j+NUM_SAMPLES].addCharacter( BinaryState("0") );
-                    }
-                    else if ( unkown_treatment == UNKOWN_TREATMENT::ALTERNATIVE )
-                    {
-                        taxa[j+NUM_SAMPLES].addCharacter( BinaryState("1") );
-                    }
+                    this_site[j+NUM_SAMPLES] = missing_state;
+                    is_missing = true;
                 }
                 else
                 {
-                    throw RbException("Unknown scored character!");
+                    throw RbException("Unknown scored binary character!");
                 }
+            }
+            
+            
+        } // end-for over all samples for this site
+        
+        if ( is_missing == false || skip_missing == false )
+        {
+            size_t actual_num_samples = (ploidy == DIPLOID ? 2*NUM_SAMPLES : NUM_SAMPLES);
+            for (size_t j = 0; j < actual_num_samples; ++j)
+            {
+                taxa[j].addCharacter( this_site[j] );
             }
             
         }
@@ -1100,7 +1053,7 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( void 
 }
 
 
-HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( void )
+HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_missing )
 {
     HomologousDiscreteCharacterData<DnaState> *matrix = new HomologousDiscreteCharacterData<DnaState> ();
     
