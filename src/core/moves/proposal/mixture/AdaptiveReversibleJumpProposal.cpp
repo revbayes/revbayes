@@ -1,4 +1,5 @@
 #include "AdaptiveReversibleJumpProposal.h"
+#include "DistributionNormal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
@@ -18,13 +19,14 @@ using namespace RevBayesCore;
  */
 AdaptiveReversibleJumpProposal::AdaptiveReversibleJumpProposal( StochasticNode<double> *n, size_t n0, size_t c0, size_t m ) : Proposal(),
     variable( n ),
-    stored_value( NULL ),
+    stored_value( 0 ),
     stored_index( 0 ),
     wait_before_learning( n0 ),
     wait_before_using ( c0 ),
     max_updates ( m ),
     num_tried ( 0 ),
-    updates ( 0 )
+    updates ( 0 ),
+    proposal_distribution( NORMAL )
 {
     if (wait_before_using < wait_before_learning)
     {
@@ -151,75 +153,117 @@ double RevBayesCore::AdaptiveReversibleJumpProposal::doProposal( void )
     stored_value = v;
     stored_index = d.getCurrentIndex();
     
+    ++num_tried;
+    
     if ( num_tried == 1 )
     // First time using move, setting up components
     {
-        sampled_values.clear()
+        sampled_values.clear();
+        sampled_mean = 0.0;
+        updates = 0;
     }
     else
     // Update empirical proposal distribution
     // However, we only change the matrix being used when we tune the variance parameter
     {
-        // Store values
-        for ( size_t i=0; i<dim; ++i )
-        {
-            storedValues[i] = x[i];
-            storedValuesUntransformed[i] = x_untransformed[i];
-        }
 
-        if ( num_tried > wait_before_learning && updates <= max_updates)
+        if ( num_tried > wait_before_learning && updates < max_updates)
         {
             ++updates;
+            
+            // Update averages
+//            double u = updates;
+//            sampled_mean = 1.0/u * v + (u - 1.0)/u * sampled_mean;
+            
+            sampled_values.push_back( v );
 
-            double n = double(updates);
-
-            for ( size_t i=0; i<dim; ++i )
+        }
+        else if (updates == max_updates)
+        {
+            
+            // compute the mean
+            double u = sampled_values.size();
+            sampled_mean = 0.0;
+            for (size_t i=0; i<updates; ++i)
             {
-                // Update covariances first (to save us tracking current and previous averages)
-                for (size_t j=i; j < dim; ++j)
-                {
-                    C_emp[i][j] = 1/n * ( C_emp[i][j] * (n - 1.0) + ((n - 1.0)/n) * ((x[i] - x_bar[i]) * (x[j] - x_bar[j])) );
-                    C_emp[j][i] = C_emp[i][j];
-                }
-
-                // Update averages
-                x_bar[i] = 1/n * x[i] + (n - 1)/n * x_bar[i];
+                sampled_mean += sampled_values[i] / u;
             }
-
+            
+            // compute the variance
+            u = u - 1.0;
+            sampled_var = 0.0;
+            for (size_t i=0; i<updates; ++i)
+            {
+                sampled_var += (sampled_values[i]-sampled_mean)*(sampled_values[i]-sampled_mean) / u;
+            }
+            ++updates;
+            
+            std::cerr << "Updating mean = " << sampled_mean << " and var = " << sampled_var << std::endl;
         }
 
     }
-
-    // Move
-    std::vector<double> x_prime = rMVNCholesky(x, AVMVN_cholesky_L, *rng, sigma);
-
-    // This also sets all x to x_prime
-    calculateHastingsRatio(x_prime, x);
-
-    return lnHastingsratio;
+    
     
     double lnHastingsratio = 0.0;
     
     if ( stored_index == 0 )
     {
         // draw the new value
-        d.redrawValueByIndex( 1 );
+        if ( num_tried <= wait_before_using )
+        {
+            d.redrawValueByIndex( 1 );
+            
+            // get the base distribution
+            TypedDistribution<double> &baseDistribution = d.getBaseDistribution();
+            
+            // store the proposal ratio
+            lnHastingsratio = - baseDistribution.computeLnProbability();
+        }
+        else
+        {
+            // set index
+            d.setCurrentIndex( 1 );
+            
+//            sampled_mean = 0.0;
+            double var = sampled_var;
 
-        // get the base distribution
-        TypedDistribution<double> &baseDistribution = d.getBaseDistribution();
-        
-        // store the proposal ratio
-        lnHastingsratio = - baseDistribution.computeLnProbability();
+            // draw value
+            if ( proposal_distribution == NORMAL )
+            {
+                double sd = sqrt(var);
+                double rv = RbStatistics::Normal::rv(sampled_mean, sd, *GLOBAL_RNG);
+                d.setValue( new double(rv) );
+                
+                // store the proposal ratio
+                lnHastingsratio -= RbStatistics::Normal::lnPdf(sampled_mean, sd, rv);
+            }
+        }
     }
     else
     {
         
-        // get the base distribution
-        TypedDistribution<double> &baseDistribution = d.getBaseDistribution();
-    
-        // store the proposal ratio
-        lnHastingsratio = baseDistribution.computeLnProbability();
-        
+        if ( num_tried <= wait_before_using )
+        {
+            // get the base distribution
+            TypedDistribution<double> &baseDistribution = d.getBaseDistribution();
+            
+            // store the proposal ratio
+            lnHastingsratio = baseDistribution.computeLnProbability();
+        }
+        else
+        {
+//            sampled_mean = 0.0;
+            double var = sampled_var;
+
+            // draw value
+            if ( proposal_distribution == NORMAL )
+            {
+                double sd = sqrt(var);
+                
+                // store the proposal ratio
+                lnHastingsratio += RbStatistics::Normal::lnPdf(sampled_mean, sd, v);
+            }
+        }
         // draw the new value
         d.redrawValueByIndex( 0 );
     }
@@ -247,8 +291,17 @@ void RevBayesCore::AdaptiveReversibleJumpProposal::prepareProposal( void )
  */
 void RevBayesCore::AdaptiveReversibleJumpProposal::printParameterSummary(std::ostream &o, bool name_only) const
 {
-    // nothing to print
     
+    o << "mean";
+    if (name_only == false)
+    {
+        o << " = " << sampled_mean;
+    }
+    o << ", var";
+    if (name_only == false)
+    {
+        o << " = " << sampled_var;
+    }
 }
 
 
@@ -263,7 +316,7 @@ void RevBayesCore::AdaptiveReversibleJumpProposal::undoProposal( void )
 {
     
     // swap current value and stored value
-    variable->setValue( stored_value );
+    variable->setValue( new double(stored_value) );
     
     // also reset the index
     ReversibleJumpMixtureConstantDistribution<double> &d = static_cast< ReversibleJumpMixtureConstantDistribution<double>& >( variable->getDistribution() );
@@ -303,4 +356,3 @@ void RevBayesCore::AdaptiveReversibleJumpProposal::tune( double rate )
     // nothing to do here.
     
 }
->>>>>>> 66299a87ff11a48f8682c29e7f5dbef30ff137d0

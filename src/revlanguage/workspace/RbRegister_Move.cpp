@@ -46,7 +46,6 @@
 #include "Real.h"
 #include "RealPos.h"
 #include "RevPtr.h"
-#include "ReversibleJumpMixtureProposal.h"
 #include "RlTree.h"
 #include "SimpleProposal.h"
 #include "Simplex.h"
@@ -158,6 +157,7 @@
 
 
 /* Moves on mixtures (in folder "datatypes/inference/moves/mixture") */
+#include "Move_AdaptiveReversibleJumpSwitch.h"
 #include "Move_DPPAllocateAuxGibbsMove.h"
 #include "Move_DPPGibbsConcentration.h"
 #include "Move_DPPTableValueUpdate.h"
@@ -370,6 +370,8 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_GibbsMixtureAllocation<RateGenerator>( ) );
         addType( new Move_UPPAllocation<RealPos>() );
 
+        addType( new Move_AdaptiveReversibleJumpSwitch( )                );
+        
         addType( new Move_ReversibleJumpSwitch<Real>( )                  );
         addType( new Move_ReversibleJumpSwitch<RealPos>( )               );
         addType( new Move_ReversibleJumpSwitch<Natural>( )               );

@@ -81,7 +81,7 @@ namespace RevLanguage {
         // Member variables
 
         // variables related to building the components of a vector
-        boost::optional<std::vector<RevPtr<RevVariable>>> vector_var_elements;          //!< Elements if this is a vector variable.
+        boost::optional<std::vector<RevPtr<RevVariable> > > vector_var_elements;          //!< Elements if this is a vector variable.
         mutable bool            needs_building = false;                                 //!< Do we need to construct the revobject?
 
         bool                    is_element_var = false;                                 //!< Is this variable an element of a vector?

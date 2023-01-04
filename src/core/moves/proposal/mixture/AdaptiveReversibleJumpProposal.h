@@ -20,6 +20,8 @@ namespace RevBayesCore {
     class AdaptiveReversibleJumpProposal : public Proposal {
         
     public:
+        enum PROPOSAL_DISTRIBUTION { NORMAL, GAMMA, LOGNORMAL };
+
         AdaptiveReversibleJumpProposal( StochasticNode<double> *n, size_t n0, size_t c0, size_t m);                                                             //!<  constructor
         AdaptiveReversibleJumpProposal( const AdaptiveReversibleJumpProposal &p );
         virtual ~AdaptiveReversibleJumpProposal();
@@ -55,7 +57,10 @@ namespace RevBayesCore {
         size_t                              num_tried;                                                                          //!< How many times has this move been used?
         size_t                              updates;                                                                            //!< How many updates have been tried?
         size_t                              max_updates;                                                                        //!< How many updates until we stop monitoring the covariances?
-
+        std::vector<double>                 sampled_values;                                                                     //!< The sampled values used for updating the mean and variance
+        double                              sampled_mean;                                                                       //!< The sampled mean
+        double                              sampled_var;                                                                        //!< The sampled mean
+        PROPOSAL_DISTRIBUTION               proposal_distribution;                                                              //!< The shape of the proposal distribution to use
     };
     
 }
