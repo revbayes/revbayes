@@ -17,15 +17,14 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-AdaptiveReversibleJumpProposal::AdaptiveReversibleJumpProposal( StochasticNode<double> *n, size_t n0, size_t c0, size_t m ) : Proposal(),
+AdaptiveReversibleJumpProposal::AdaptiveReversibleJumpProposal( StochasticNode<double> *n, size_t n0, size_t c0, size_t ue ) : Proposal(),
     variable( n ),
     stored_value( 0 ),
     stored_index( 0 ),
     wait_before_learning( n0 ),
     wait_before_using ( c0 ),
-    max_updates ( m ),
+    updates_every( ue ),
     num_tried ( 0 ),
-    updates ( 0 ),
     proposal_distribution( NORMAL )
 {
     if (wait_before_using < wait_before_learning)
@@ -50,9 +49,8 @@ AdaptiveReversibleJumpProposal::AdaptiveReversibleJumpProposal( const AdaptiveRe
     stored_value( p.stored_value ),
     wait_before_learning( p.wait_before_learning ),
     wait_before_using ( p.wait_before_using ),
-    max_updates ( p.max_updates ),
-    num_tried ( p.num_tried ),
-    updates ( p.updates )
+    updates_every ( p.updates_every ),
+    num_tried ( p.num_tried )
 {
     // tell the base class to add the node
     addNode( variable );
@@ -160,51 +158,43 @@ double RevBayesCore::AdaptiveReversibleJumpProposal::doProposal( void )
     {
         sampled_values.clear();
         sampled_mean = 0.0;
-        updates = 0;
     }
-    else
+    
     // Update empirical proposal distribution
-    // However, we only change the matrix being used when we tune the variance parameter
+    if ( num_tried > wait_before_learning && num_tried < wait_before_using && num_tried % updates_every == 0)
     {
-
-        if ( num_tried > wait_before_learning && updates < max_updates)
-        {
-            ++updates;
             
-            // Update averages
-//            double u = updates;
-//            sampled_mean = 1.0/u * v + (u - 1.0)/u * sampled_mean;
-            
-            sampled_values.push_back( v );
-
-        }
-        else if (updates == max_updates)
-        {
-            
-            // compute the mean
-            double u = sampled_values.size();
-            sampled_mean = 0.0;
-            for (size_t i=0; i<updates; ++i)
-            {
-                sampled_mean += sampled_values[i] / u;
-            }
-            
-            // compute the variance
-            u = u - 1.0;
-            sampled_var = 0.0;
-            for (size_t i=0; i<updates; ++i)
-            {
-                sampled_var += (sampled_values[i]-sampled_mean)*(sampled_values[i]-sampled_mean) / u;
-            }
-            ++updates;
-            
-            std::cerr << "Updating mean = " << sampled_mean << " and var = " << sampled_var << std::endl;
-        }
+        // store values
+        sampled_values.push_back( v );
 
     }
+    else if (num_tried == wait_before_using)
+    {
+            
+        // compute the mean
+        double u = sampled_values.size();
+        sampled_mean = 0.0;
+        size_t updates = sampled_values.size();
+        for (size_t i=0; i<updates; ++i)
+        {
+            // we divide directly to avoid overflow
+            sampled_mean += sampled_values[i] / u;
+        }
+        
+        // compute the variance
+        u = u - 1.0;
+        sampled_var = 0.0;
+        for (size_t i=0; i<updates; ++i)
+        {
+            sampled_var += (sampled_values[i]-sampled_mean)*(sampled_values[i]-sampled_mean) / u;
+        }
+            
+    }
+
     
     
-    double lnHastingsratio = 0.0;
+    
+    double ln_Hastings_ratio = 0.0;
     
     if ( stored_index == 0 )
     {
@@ -217,14 +207,13 @@ double RevBayesCore::AdaptiveReversibleJumpProposal::doProposal( void )
             TypedDistribution<double> &baseDistribution = d.getBaseDistribution();
             
             // store the proposal ratio
-            lnHastingsratio = - baseDistribution.computeLnProbability();
+            ln_Hastings_ratio = - baseDistribution.computeLnProbability();
         }
         else
         {
             // set index
             d.setCurrentIndex( 1 );
             
-//            sampled_mean = 0.0;
             double var = sampled_var;
 
             // draw value
@@ -235,7 +224,11 @@ double RevBayesCore::AdaptiveReversibleJumpProposal::doProposal( void )
                 d.setValue( new double(rv) );
                 
                 // store the proposal ratio
-                lnHastingsratio -= RbStatistics::Normal::lnPdf(sampled_mean, sd, rv);
+                ln_Hastings_ratio -= RbStatistics::Normal::lnPdf(sampled_mean, sd, rv);
+            }
+            else
+            {
+                throw RbException("You have selected a proposal distribution for the adaptive-RJ-shift move that is currently not implemented.");
             }
         }
     }
@@ -248,11 +241,11 @@ double RevBayesCore::AdaptiveReversibleJumpProposal::doProposal( void )
             TypedDistribution<double> &baseDistribution = d.getBaseDistribution();
             
             // store the proposal ratio
-            lnHastingsratio = baseDistribution.computeLnProbability();
+            ln_Hastings_ratio = baseDistribution.computeLnProbability();
         }
         else
         {
-//            sampled_mean = 0.0;
+            
             double var = sampled_var;
 
             // draw value
@@ -261,14 +254,14 @@ double RevBayesCore::AdaptiveReversibleJumpProposal::doProposal( void )
                 double sd = sqrt(var);
                 
                 // store the proposal ratio
-                lnHastingsratio += RbStatistics::Normal::lnPdf(sampled_mean, sd, v);
+                ln_Hastings_ratio += RbStatistics::Normal::lnPdf(sampled_mean, sd, v);
             }
         }
         // draw the new value
         d.redrawValueByIndex( 0 );
     }
     
-    return lnHastingsratio;
+    return ln_Hastings_ratio;
 }
 
 

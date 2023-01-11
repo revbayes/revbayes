@@ -22,7 +22,7 @@ namespace RevBayesCore {
     public:
         enum PROPOSAL_DISTRIBUTION { NORMAL, GAMMA, LOGNORMAL };
 
-        AdaptiveReversibleJumpProposal( StochasticNode<double> *n, size_t n0, size_t c0, size_t m);                                                             //!<  constructor
+        AdaptiveReversibleJumpProposal( StochasticNode<double> *n, size_t n0, size_t c0, size_t ue);                                                             //!<  constructor
         AdaptiveReversibleJumpProposal( const AdaptiveReversibleJumpProposal &p );
         virtual ~AdaptiveReversibleJumpProposal();
         
@@ -55,8 +55,7 @@ namespace RevBayesCore {
         size_t                              wait_before_learning;                                                               //!< How long to wait before tracking empirical covariances
         size_t                              wait_before_using;                                                                  //!< How long to wait before using the empirical covariances
         size_t                              num_tried;                                                                          //!< How many times has this move been used?
-        size_t                              updates;                                                                            //!< How many updates have been tried?
-        size_t                              max_updates;                                                                        //!< How many updates until we stop monitoring the covariances?
+        size_t                              updates_every;                                                                      //!< How frequent should we store the values for updating?
         std::vector<double>                 sampled_values;                                                                     //!< The sampled values used for updating the mean and variance
         double                              sampled_mean;                                                                       //!< The sampled mean
         double                              sampled_var;                                                                        //!< The sampled mean

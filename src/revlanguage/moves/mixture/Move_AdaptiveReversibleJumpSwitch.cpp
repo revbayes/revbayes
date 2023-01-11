@@ -42,8 +42,8 @@ void Move_AdaptiveReversibleJumpSwitch::constructInternalObject( void )
     RevBayesCore::StochasticNode<double> *sn = static_cast<RevBayesCore::StochasticNode<double> *>( tmp );
     long wbl = static_cast<const Natural &>( wait_before_learning->getRevObject() ).getValue();
     long wbu = static_cast<const Natural &>( wait_before_using->getRevObject() ).getValue();
-    long mu  = static_cast<const Natural &>( max_updates->getRevObject() ).getValue();
-    RevBayesCore::AdaptiveReversibleJumpProposal *p = new RevBayesCore::AdaptiveReversibleJumpProposal(sn, wbl, wbu, mu);
+    long ue  = static_cast<const Natural &>( update_every->getRevObject() ).getValue();
+    RevBayesCore::AdaptiveReversibleJumpProposal *p = new RevBayesCore::AdaptiveReversibleJumpProposal(sn, wbl, wbu, ue);
     value = new RevBayesCore::MetropolisHastingsMove(p,w);
 
 }
@@ -94,7 +94,7 @@ const MemberRules& Move_AdaptiveReversibleJumpSwitch::getParameterRules(void) co
         move_member_rules.push_back( new ArgumentRule( "x", Real::getClassTypeSpec(), "The variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
         move_member_rules.push_back( new ArgumentRule( "waitBeforeLearning", Natural::getClassTypeSpec(), "Number of tries before learning.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1000) ) );
         move_member_rules.push_back( new ArgumentRule( "waitBeforeUsing", Natural::getClassTypeSpec(), "Number of tries before using.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(10000) ) );
-        move_member_rules.push_back( new ArgumentRule( "maxUpdates", Natural::getClassTypeSpec(), "Number of updates in to learn.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(10000) ) );
+        move_member_rules.push_back( new ArgumentRule( "updateEvery", Natural::getClassTypeSpec(), "How frequent to update.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
 
         /* Inherit weight from Move, put it after variable */
         const MemberRules& inheritedRules = Move::getParameterRules();
@@ -148,9 +148,9 @@ void Move_AdaptiveReversibleJumpSwitch::setConstParameter(const std::string& nam
     {
         wait_before_using = var;
     }
-    else if ( name == "maxUpdates" )
+    else if ( name == "updateEvery" )
     {
-        max_updates = var;
+        update_every = var;
     }
     else
     {

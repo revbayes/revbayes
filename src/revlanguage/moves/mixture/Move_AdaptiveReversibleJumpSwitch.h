@@ -42,7 +42,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                   x;                                                                                              //!< The variable holding the real valued vector.
         RevPtr<const RevVariable>                   wait_before_learning;                                                                                              //!< The variable holding the real valued vector.
         RevPtr<const RevVariable>                   wait_before_using;                                                                                              //!< The variable holding the real valued vector.
-        RevPtr<const RevVariable>                   max_updates;                                                                                              //!< The variable holding the real valued vector.
+        RevPtr<const RevVariable>                   update_every;                                                                                              //!< The variable holding the real valued vector.
 
     };
     
