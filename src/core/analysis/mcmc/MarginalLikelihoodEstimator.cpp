@@ -11,7 +11,7 @@
 using namespace RevBayesCore;
 
 
-MarginalLikelihoodEstimator::MarginalLikelihoodEstimator(const std::string &fn, const std::string &pn, const std::string &ln, const std::string &del) :
+MarginalLikelihoodEstimator::MarginalLikelihoodEstimator(const path &fn, const std::string &pn, const std::string &ln, const std::string &del) :
     powers(),
     likelihoodSamples()
 {
@@ -25,25 +25,20 @@ MarginalLikelihoodEstimator::MarginalLikelihoodEstimator(const std::string &fn, 
         /* read in the file */
         /********************/
     
-        // check that the file/path name has been correctly specified
-        RbFileManager myFileManager( fn );
-    
-        if ( !myFileManager.isFile() )
+        if ( not is_regular_file(fn) )
         {
-            std::stringstream ss;
-            ss << "Could not not file " << fn << std::endl;
-            throw RbException(ss.str());
+            throw RbException()<< "Could not not file " << fn;
         }
     
     
         bool hasHeaderBeenRead = false;
         
         // Open file
-        std::ifstream inFile( myFileManager.getFullFileName().c_str() );
+        std::ifstream inFile( fn.string() );
         
         if ( !inFile )
         {
-            throw RbException( "Could not open file \"" + fn + "\"" );
+            throw RbException()<<"Could not open file "<<fn;
         }
     
         // Initialize
@@ -59,10 +54,10 @@ MarginalLikelihoodEstimator::MarginalLikelihoodEstimator(const std::string &fn, 
         // loop over file content
         while ( inFile.good() )
         {
-            
+
             // Read a line
             std::string line;
-            myFileManager.safeGetline( inFile, line );
+            safeGetline( inFile, line );
             
             // skip empty lines
             if (line.length() == 0)

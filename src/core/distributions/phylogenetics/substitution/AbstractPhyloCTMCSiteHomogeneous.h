@@ -834,8 +834,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
                     val &= ambiguous_char_matrix[taxon_index][i];
                 }
 
-                if (   ( allow_ambiguous_as_invariant == true  &&  val.getNumberSetBits() == 0 && gap_matrix[taxon_index][i] == false)
-                    || ( allow_ambiguous_as_invariant == false && (val.getNumberSetBits() == 0 || gap_matrix[taxon_index][i] == true ) ) )
+                if (   ( allow_ambiguous_as_invariant == true  &&  val.count() == 0 && gap_matrix[taxon_index][i] == false)
+                    || ( allow_ambiguous_as_invariant == false && (val.count() == 0 || gap_matrix[taxon_index][i] == true ) ) )
                 {
                     inv = false;
                     break;
@@ -844,7 +844,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
 
             for ( size_t c = 0; c < this->num_chars; c++ )
             {
-                if ( val.isSet(c) )
+                if ( val.test(c) )
                 {
                     invariant_site_index[i].push_back(c);
                 }
@@ -1066,6 +1066,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalRo
     {
         // get root frequencies
         const std::vector<double>&          f           = ff[mixture % ff.size()];
+        assert(f.size() == num_chars);
         std::vector<double>::const_iterator f_end       = f.end();
         std::vector<double>::const_iterator f_begin     = f.begin();
 
@@ -2731,6 +2732,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
 
             }
 
+            // Don't divide by zero or NaN.
+            if (not (max > 0)) continue;
+
             this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] = -log(max);
 
             // compute the per site probabilities
@@ -2795,6 +2799,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
                 }
 
             }
+
+            // Don't divide by zero or NaN.
+            if (not (max > 0)) continue;
 
             this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] = this->perNodeSiteLogScalingFactors[this->activeLikelihood[left]][left][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[right]][right][site] - log(max);
 
@@ -2861,6 +2868,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
                 }
 
             }
+
+            // Don't divide by zero or NaN.
+            if (not (max > 0)) continue;
 
             this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] = this->perNodeSiteLogScalingFactors[this->activeLikelihood[left]][left][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[right]][right][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[middle]][middle][site] - log(max);
 

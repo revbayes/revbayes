@@ -175,17 +175,17 @@ void DoubletState::setState(const std::string &s)
     RbBitSet bs_pos_1 = dna_pos_1.getState();
 
     num_observed_states = 0;
-    state.clear();
+    state.reset();
 
     for (size_t i=0; i<4; ++i)
     {
         // test if the bit is set for the first doublet position
-        if ( bs_pos_0.isSet(i) )
+        if ( bs_pos_0.test(i) )
         {
             for (size_t j=0; j<4; ++j)
             {
                 // test if the bit is set for the second doublet position
-                if ( bs_pos_1.isSet(j)  )
+                if ( bs_pos_1.test(j)  )
                 {
                     ++num_observed_states;
                     size_t doublet_index = i*4 + j;
@@ -196,7 +196,7 @@ void DoubletState::setState(const std::string &s)
         }
     } // end for-loop over all possible states for the first doublet position
 
-    assert(state.getNumberSetBits() > 0);
+    assert(state.count() > 0);
 }
 
 
@@ -230,7 +230,7 @@ void DoubletState::setToFirstState(void)
 {
     num_observed_states = 1;
     index_single_state = 0;
-    state.clear();
+    state.reset();
     state.set( 0 );
 }
 
@@ -239,7 +239,7 @@ void DoubletState::setStateByIndex(size_t index)
 {
     num_observed_states = 1;
     index_single_state = index;
-    state.clear();
+    state.reset();
     state.set( index );
 }
 

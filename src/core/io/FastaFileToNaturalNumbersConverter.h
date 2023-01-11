@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include "RbFileManager.h"
 
 namespace RevBayesCore {
     
@@ -22,7 +23,7 @@ namespace RevBayesCore {
     public:
         FastaFileToNaturalNumbersConverter();
 
-        void               faconverter( const std::string &fi, const std::vector<std::string> &taxa, const std::vector<std::string> &alleles , const size_t& n_individuals, const std::string &fo );
+        void               faconverter( const path &fi, const std::vector<std::string> &taxa, const std::vector<std::string> &alleles , const size_t& n_individuals, const path &fo );
 
 
         //const size_t     getNumberOfAlleles( void );

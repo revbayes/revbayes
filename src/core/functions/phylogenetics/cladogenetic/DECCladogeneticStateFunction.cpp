@@ -817,7 +817,7 @@ std::string DECCladogeneticStateFunction::simulateDataAugmentedCladogeneticState
         if (event_type == "s")
         {
             // choose the area inherited by the right node
-            std::random_shuffle( node_child_on.begin(), node_child_on.end() );
+            deprecated::random_shuffle( node_child_on.begin(), node_child_on.end());
             size_t area_idx = node_child_on[0];
             
             if (GLOBAL_RNG->uniform01() < 0.5)
@@ -848,7 +848,7 @@ std::string DECCladogeneticStateFunction::simulateDataAugmentedCladogeneticState
         else if (event_type == "a")
         {
             // choose the area inherited by the right node
-            std::random_shuffle( node_child_on.begin(), node_child_on.end() );
+            deprecated::random_shuffle( node_child_on.begin(), node_child_on.end());
             size_t area_left_idx = node_child_on[0];
             size_t area_right_idx = node_child_on[1];
             
@@ -874,7 +874,7 @@ std::string DECCladogeneticStateFunction::simulateDataAugmentedCladogeneticState
         else if (event_type == "j")
         {
             // choose the area inherited by the right node
-            std::random_shuffle( node_child_off.begin(), node_child_off.end() );
+            deprecated::random_shuffle( node_child_off.begin(), node_child_off.end());
             size_t area_idx = node_child_off[0];
             
             if (GLOBAL_RNG->uniform01() < 0.5)

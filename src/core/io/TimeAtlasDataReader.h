@@ -23,7 +23,7 @@ class GeographicArea;
     {
     public:
         
-        TimeAtlasDataReader(std::string fn, std::string d="");
+        TimeAtlasDataReader(const path& fn, std::string d="");
         TimeAtlasDataReader(const TimeAtlasDataReader& tadr);
         
         std::vector<double> getEpochs(void);

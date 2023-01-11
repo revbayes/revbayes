@@ -182,6 +182,7 @@
 // #include "Move_PathCharacterHistoryRejectionSample.h"
 #include "Move_CharacterHistory.h"
 
+#include "Move_ResampleFBD.h"
 
 #include "Move_BirthDeathEventContinuous.h"
 #include "Move_BirthDeathEventDiscrete.h"
@@ -458,6 +459,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         // addType( new Move_NodeCharacterHistoryRejectionSample() );
         // addType( new Move_PathCharacterHistoryRejectionSample() );
 
+        addType( new Move_ResampleFBD()                      );
     }
     catch(RbException& rbException)
     {

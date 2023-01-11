@@ -57,9 +57,9 @@ namespace RevBayesCore {
         const std::string               getChromosome( void );                              //!< Get the chromosome for the state
         const size_t                    getPosition( void );                                //!< Get the position for the state
 
-        const std::vector<double>       getWeights( void ) const;                            //!< Get the weight of the state
-        // bool                            isWeighted( void ) const;
-        // void                            setWeighted( bool tf );
+        const std::vector<double>&      getWeights( void ) const;                            //!< Get the weight of the state
+        bool                            isWeighted( void ) const;
+        void                            setWeighted( bool tf );
         bool                            isGapState(void) const;                             //!< Get whether this is a gapped character state
         bool                            isMissingState(void) const;                         //!< Get whether this is a missing character state
         void                            setGapState(bool tf);                               //!< set whether this is a gapped character
@@ -78,8 +78,8 @@ namespace RevBayesCore {
         std::string                     chromosome_;                                        //!< The chromosome on which the state lies
         size_t                          position_;                                          //!< The position of the state in the chromosome
         size_t                          virtualPopulationSize_;                             //!< The virtual population size of the PoMo model (by default, 10)
-        //std::vector<double>             weights_;                                           //!< Weights are used when the "average" option is used
-        //bool                                    weighted_;
+        std::vector<double>             weights;                                           //!< Weights are used when the "average" option is used
+        bool                            weighted;
         std::string stringValue_;                           //!< The string description of the state.
     };
 

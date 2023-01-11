@@ -1,7 +1,6 @@
 #include "RbGTKGui.h"
 
 #include "Parser.h"
-#include "RbFileManager.h"
 #include "RlUserInterface.h"
 #include "StringUtilities.h"
 #include "Workspace.h"
@@ -435,15 +434,12 @@ static void menuitem_load_response( gchar *string )
     
     if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT)
     {
-        char *filename;
-        
-        filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
-        
+        char *filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
         
         // open file
-        std::ifstream read_stream;
-        RevBayesCore::RbFileManager f = RevBayesCore::RbFileManager( std::string(filename) );
-        if ( f.openFile(read_stream) == false )
+        std::ifstream read_stream(filename);
+
+        if ( not read_stream )
         {
 //            throw RbException( "Could not open file " + filename );
             std::cerr << "Could not open file with name '" << std::string(filename) << "'." << std::endl;
@@ -452,10 +448,10 @@ static void menuitem_load_response( gchar *string )
         // read file
         std::string read_line = "";
         GtkTextIter end;
-//        while ( f.safeGetline(read_stream,read_line) )
+//        while ( safeGetline(read_stream,read_line) )
         while ( read_stream.good() )
         {
-            f.safeGetline( read_stream, read_line );
+            RevBayesCore::safeGetline( read_stream, read_line );
             
             gtk_text_buffer_get_end_iter(gui_instance.getScriptTextBuffer(), &end);
             gtk_text_buffer_insert(gui_instance.getScriptTextBuffer(), &end, read_line.c_str(), -1);
@@ -464,7 +460,7 @@ static void menuitem_load_response( gchar *string )
             
         };
         
-        f.closeFile( read_stream );
+        read_stream.close();
         
         g_free (filename);
         
@@ -492,8 +488,6 @@ static void menuitem_set_wd_response( gchar *string )
         char *filename;
         
         filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
-        
-        RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager( std::string(filename) );
         
         std::string fn = std::string(filename);
 #       if defined (_WIN32)
@@ -580,7 +574,6 @@ static void menuitem_save_response( gchar *string )
                                                &it_end,
                                                FALSE);
         
-//        RbFileManager fm = RbFileManager(filename);
         std::fstream out_stream;
         out_stream.open( filename, std::fstream::out);
         out_stream << entry_text;

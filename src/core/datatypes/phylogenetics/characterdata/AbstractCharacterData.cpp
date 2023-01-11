@@ -26,8 +26,7 @@ AbstractCharacterData::AbstractCharacterData() {
  */
 AbstractCharacterData::AbstractCharacterData(const AbstractCharacterData &d) :
     deletedTaxa(d.deletedTaxa),
-    fileName(d.fileName),
-    filePath(d.filePath),
+    filename(d.filename),
     taxa(d.taxa),
     taxonMap(),
     homeologMap() {
@@ -84,8 +83,7 @@ AbstractCharacterData& AbstractCharacterData::operator=( const AbstractCharacter
         clear();
         
         deletedTaxa = d.deletedTaxa;
-        fileName    = d.fileName;
-        filePath    = d.filePath;
+        filename    = d.filename;
         taxa        = d.taxa;
                  
         for (std::map<std::string, AbstractTaxonData*>::const_iterator it = d.taxonMap.begin(); it != d.taxonMap.end(); ++it)
@@ -288,23 +286,10 @@ void AbstractCharacterData::deleteTaxon(const std::string& s) {
  *
  * \return    The original file name.
  */
-const std::string& AbstractCharacterData::getFileName(void) const
+const path& AbstractCharacterData::getFilename(void) const
 {
-    
-    return fileName;
+    return filename;
 }
-
-/**
- * Get the file path from whcih the character data object was read in.
- *
- * \return    The original file path.
- */
-const std::string& AbstractCharacterData::getFilePath(void) const
-{
-    
-    return filePath;
-}
-
 
 /**
  * Get the included taxa currently stored in this object.
@@ -367,8 +352,8 @@ const std::string AbstractCharacterData::getJsonRepresentation(void) const {
 
     std::string jsonStr = "{\"CharacterDataMatrix\": {\n";
     
-    jsonStr += std::string("   \"filePath\": \"")    + filePath + std::string("\",") + '\n';
-    jsonStr += std::string("   \"fileName\": \"")    + fileName + std::string("\",") + '\n';
+    jsonStr += std::string("   \"filePath\": \"")    + filename.parent_path().string() + std::string("\",") + '\n';
+    jsonStr += std::string("   \"fileName\": \"")    + filename.parent_path().string()+ std::string("\",") + '\n';
     jsonStr += std::string("   \"dataType\": \"")    + getDataType() + "\",\n";
     jsonStr += std::string("   \"stateLabels\": \"") + getStateLabels() + "\",\n";
     
@@ -743,21 +728,9 @@ void AbstractCharacterData::restoreTaxon(const std::string& s) {
  *
  * \param[in]    fn    The new file name.
  */
-void AbstractCharacterData::setFileName(const std::string& fn) {
-    
-    fileName = fn;
-}
-
-
-/**
- * Set the original file path for this character data object.
- *
- * \param[in]    fn    The new file path.
- */
-void AbstractCharacterData::setFilePath(const std::string& fn)
+void AbstractCharacterData::setFilename(const path& fn)
 {
-    
-    filePath = fn;
+    filename = fn;
 }
 
 
@@ -902,7 +875,7 @@ std::ostream& RevBayesCore::operator<<(std::ostream& o, const AbstractCharacterD
         }
     o << std::endl;
 
-    o << "Origination:                   " << x.getFileName() << std::endl;
+    o << "Origination:                   " << x.getFilename().filename() << std::endl;
     o << "Number of taxa:                " << x.getNumberOfTaxa() << std::endl;
     o << "Number of included taxa:       " << x.getNumberOfIncludedTaxa() << std::endl;
     o << "Datatype:                      " << x.getDataType() << std::endl;
