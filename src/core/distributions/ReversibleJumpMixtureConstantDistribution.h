@@ -165,29 +165,29 @@ template <class mixtureType>
 double RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::computeLnProbability( void )
 {
     
-    double lnProb;
+    double ln_prob;
     if ( index == 0 )
     {
         if ( *this->value != const_value->getValue() )
         {
-            lnProb = RbConstants::Double::neginf;
+            ln_prob = RbConstants::Double::neginf;
         }
         else
         {
-            lnProb = log( probability->getValue() );
+            ln_prob = log( probability->getValue() );
         }
         
     }
     else
     {
         
-        lnProb = log( 1.0 - probability->getValue() );
+        ln_prob = log( 1.0 - probability->getValue() );
         base_distribution->setValue( Cloner<mixtureType, IsDerivedFrom<mixtureType, Cloneable>::Is >::createClone(*this->value) );
-        lnProb += base_distribution->computeLnProbability();
+        ln_prob += base_distribution->computeLnProbability();
         
     }
     
-    return lnProb;
+    return ln_prob;
 }
 
 
@@ -349,9 +349,9 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::setVa
             base_distribution->setValue( Cloner<mixtureType, IsDerivedFrom<mixtureType, Cloneable>::Is >::createClone( *v ) );
             this->value = v;
         }
-    
+        
     }
-    //throw RbException("Cannot set the value of a reversible jump mixture distribution because we don't know which distribution the value should come from.");
+    
 }
 
 #endif

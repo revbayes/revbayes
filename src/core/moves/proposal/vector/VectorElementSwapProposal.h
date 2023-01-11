@@ -170,9 +170,9 @@ double RevBayesCore::VectorElementSwapProposal<valueType>::doProposal( void )
     }
     
     // Swap the values located at the chosen indices
-    const valueType& tmp   = variables[stored_index_1]->getValue();
-    variables[stored_index_1]->setValue( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone(variables[stored_index_2]->getValue()), true );
-    variables[stored_index_2]->setValue( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone(tmp), true );
+    valueType* tmp   = Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( variables[stored_index_1]->getValue() );
+    variables[stored_index_1]->setValue( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone(variables[stored_index_2]->getValue()) );
+    variables[stored_index_2]->setValue( tmp );
     
     // This move is symmetric, so lnHastings = 0
     double ln_Hastings_ratio = 0.0;
@@ -219,9 +219,9 @@ template <class valueType>
 void RevBayesCore::VectorElementSwapProposal<valueType>::undoProposal( void )
 {
     
-    const valueType& tmp   = variables[stored_index_1]->getValue();
-    variables[stored_index_1]->setValue( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( variables[stored_index_2]->getValue() ), true );
-    variables[stored_index_2]->setValue( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( tmp ), true );
+    valueType* tmp   = Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( variables[stored_index_1]->getValue() );
+    variables[stored_index_1]->setValue( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( variables[stored_index_2]->getValue() ) );
+    variables[stored_index_2]->setValue( tmp );
     
 }
 
