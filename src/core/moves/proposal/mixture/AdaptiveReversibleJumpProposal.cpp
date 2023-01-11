@@ -228,7 +228,7 @@ double RevBayesCore::AdaptiveReversibleJumpProposal::doProposal( void )
             }
             else
             {
-                throw RbException("You have selected a proposal distribution for the adaptive-RJ-shift move that is currently not implemented.");
+                throw RbException("You have selected a proposal distribution for the adaptive-RJ-switch move that is currently not implemented.");
             }
         }
     }
