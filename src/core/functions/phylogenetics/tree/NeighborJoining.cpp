@@ -71,14 +71,14 @@ TopologyNode* NeighborJoining::constructTreeRecursively(std::vector<TopologyNode
     
     double min_Q = RbConstants::Double::inf;
     std::set< std::pair<size_t,size_t> > min_pairs;
-//    MatrixReal Q = MatrixReal(n);
+
     for (size_t i=0; i<n; ++i)
     {
         
         for (size_t j=i+1; j<n; ++j)
         {
             double this_Q = (n-2)*distances[i][j] - row_sums[i] - row_sums[j];
-//            Q[i][j] = this_Q;
+
             if ( this_Q < min_Q )
             {
                 // set the new minimum
@@ -151,6 +151,19 @@ TopologyNode* NeighborJoining::constructTreeRecursively(std::vector<TopologyNode
     // set the branch lengths
     double bl_left = distances[index_A][index_B] / 2.0 + 1.0/(2.0*(n-2.0)) * ( row_sums[index_A] - row_sums[index_B] );
     double bl_right = distances[index_A][index_B] - bl_left;
+    
+    // TODO: we should find a better way to handle this
+    if ( bl_left < 0 )
+    {
+        bl_left  = distances[index_A][index_B] * 0.01;
+        bl_right = distances[index_A][index_B] - bl_left;
+    }
+    else if ( bl_right < 0 )
+    {
+        bl_left  = distances[index_A][index_B] * 0.99;
+        bl_right = distances[index_A][index_B] - bl_left;
+    }
+    
     left->setBranchLength( bl_left );
     right->setBranchLength( bl_right );
 
@@ -173,6 +186,11 @@ TopologyNode* NeighborJoining::constructTreeRecursively(std::vector<TopologyNode
         if ( i != index_A && i != index_B )
         {
             double new_dist = (distances[index_A][i] + distances[index_B][i] - distances[index_A][index_B]) / 2.0;
+            // make sure that the distance stays non-negative
+            if ( new_dist < 0 )
+            {
+                new_dist = 0;
+            }
             distances[num_elements][i] = new_dist;
             distances[i][num_elements] = new_dist;
         }

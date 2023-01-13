@@ -37,10 +37,10 @@ RevPtr<RevVariable> Func_NeighborJoining::execute( void )
 {
     const AbstractHomologousDiscreteCharacterData& char_data = static_cast<const AbstractHomologousDiscreteCharacterData &>( args[0].getVariable()->getRevObject() );
     
-    bool exclude_ambiguous = false;
+    bool exclude_ambiguous  = false;
     bool relative           = true; // normalize by number of sites
     RevBayesCore::DistanceMatrix dist_matrix = char_data.getValue().getPairwiseSequenceDifference( exclude_ambiguous, relative );
-    
+        
     RevBayesCore::NeighborJoining nj;
     RevBayesCore::Tree* nj_tree = nj.constructTree( dist_matrix );
     
