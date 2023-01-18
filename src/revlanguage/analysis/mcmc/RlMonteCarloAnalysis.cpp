@@ -110,6 +110,8 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
         
         // the tuning interval (0 by default)
         int tuning_interval = (int)static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        int tuning_delay_gen = (int)static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        int tuning_terminate_gen = (int)static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
 
         // the checkoint file (empty by default) and the checkoint interval (0 by default)
         const std::string checkpoint_file = static_cast<const RlString &>( args[args_index++].getVariable()->getRevObject() ).getValue();
@@ -127,9 +129,9 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
         else
         {
 #ifdef RB_MPI
-            value->run( gen, rules, MPI_COMM_WORLD, tuning_interval, checkpoint_file, checkpoint_interval );
+            value->run( gen, rules, MPI_COMM_WORLD, tuning_interval, checkpoint_file, checkpoint_interval, tuning_delay_gen, tuning_terminate_gen );
 #else
-            value->run( gen, rules, tuning_interval, checkpoint_file, checkpoint_interval );
+            value->run( gen, rules, tuning_interval, checkpoint_file, checkpoint_interval, tuning_delay_gen, tuning_terminate_gen );
 #endif
         }
         
@@ -270,6 +272,8 @@ void MonteCarloAnalysis::initializeMethods()
     run_arg_rules->push_back( new ArgumentRule( "generations", Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     run_arg_rules->push_back( new ArgumentRule( "rules", WorkspaceVector<StoppingRule>::getClassTypeSpec(), "The rules when to automatically stop the run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
     run_arg_rules->push_back( new ArgumentRule( "tuningInterval", Natural::getClassTypeSpec(), "The interval when to update the tuning parameters of the moves.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L)  ) );
+    run_arg_rules->push_back( new ArgumentRule( "tuningDelayGenerations", Natural::getClassTypeSpec(), "The number of generations before which the moves will not be tuned.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L)  ) );
+    run_arg_rules->push_back( new ArgumentRule( "tuningTerminateGenerations", Natural::getClassTypeSpec(), "The number of generations after which the moves will not be tuned any more.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L)  ) );
     run_arg_rules->push_back( new ArgumentRule( "checkpointFile", RlString::getClassTypeSpec(), "The filename for the checkpoint file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("")  ) );
     run_arg_rules->push_back( new ArgumentRule( "checkpointInterval", Natural::getClassTypeSpec(), "The interval when to write parameters values to a files for checkpointing.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L)  ) );
     run_arg_rules->push_back( new ArgumentRule( "underPrior" , RlBoolean::getClassTypeSpec(), "Should we run this analysis under the prior only?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );

@@ -60,9 +60,9 @@ namespace RevBayesCore {
         void                                                printPerformanceSummary(bool current_period = false) const;
         void                                                removeMonitors(void);                                           //!< Remove all monitors
 #ifdef RB_MPI
-        void                                                run(size_t k, RbVector<StoppingRule> r, const MPI_Comm &c, size_t ti, const path &cp_file, size_t ci=0, bool verbose=true);
+        void                                                run(size_t k, RbVector<StoppingRule> r, const MPI_Comm &c, size_t ti, const path &cp_file, size_t ci=0, size_t tdg=0, size_t ttg=0, bool verbose=true);
 #else
-        void                                                run(size_t k, RbVector<StoppingRule> r, size_t ti, const path &cp_file, size_t ci=0, bool verbose=true);
+        void                                                run(size_t k, RbVector<StoppingRule> r, size_t ti, const path &cp_file, size_t ci=0, size_t tdg=0, size_t ttg=0, bool verbose=true);
 #endif
         void                                                runPriorSampler(size_t k, RbVector<StoppingRule> r, size_t ti);
 #ifdef RB_MPI

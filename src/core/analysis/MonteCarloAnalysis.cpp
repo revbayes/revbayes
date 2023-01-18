@@ -604,9 +604,9 @@ void MonteCarloAnalysis::resetReplicates( void )
 
 
 #ifdef RB_MPI
-void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, const MPI_Comm &analysis_comm, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval, bool verbose )
+void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, const MPI_Comm &analysis_comm, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval, size_t tuning_delay_gen, size_t tuning_terminate_gen, bool verbose )
 #else
-void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval, bool verbose )
+void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval, size_t tuning_delay_gen, size_t tuning_terminate_gen, bool verbose )
 #endif
 {
     
@@ -749,7 +749,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
                 runs[i]->monitor(gen);
                 
                 // check for autotuning
-                if ( tuning_interval != 0 && (gen % tuning_interval) == 0 )
+                if ( tuning_interval != 0 && (gen % tuning_interval) == 0 && (gen >= tuning_delay_gen) && (tuning_terminate_gen <= 0 || (tuning_terminate_gen > 0 && gen <= tuning_terminate_gen)) )
                 {
                     
                     runs[i]->tune();
