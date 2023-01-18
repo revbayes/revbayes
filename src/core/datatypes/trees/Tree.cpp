@@ -1171,10 +1171,10 @@ void Tree::initFromFile( const path &dir, const std::string &fn )
 void Tree::initFromString(const std::string &s)
 {
     NewickConverter converter;
-    Tree* bl_tree = converter.convertFromNewick( s );
+    Tree* bl_tree = converter.convertFromNewick( s, false );
     if ( bl_tree->isUltrametric() == true )
     {
-        Tree *tree = TreeUtilities::convertTree( *bl_tree );
+        Tree *tree = TreeUtilities::convertTree( *bl_tree, false );
         
         *this = *tree;
 
@@ -1304,7 +1304,7 @@ void Tree::makeInternalNodesBifurcating(bool reindex, bool as_fossils)
     // * removed out-degree-1 nodes ("knuckles")
     
     // we need to reset the root so that the vector of nodes get filled again with the new number of nodes
-    setRoot( &getRoot(), true );
+    setRoot( &getRoot(), reindex );
 
     // clear the taxon bitset map
     // the next time someone call getTaxonBitset() it will be rebuilt

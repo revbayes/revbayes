@@ -1603,9 +1603,8 @@ bool TopologyNode::isUltrametric(double &depth) const
         return true;
     }
     
-    double my_depth = 0.0;
-    bool am_ultrametric = children[0]->isUltrametric(my_depth);
-    my_depth += children[0]->getBranchLength();
+    bool am_ultrametric = children[0]->isUltrametric(depth);
+    depth += children[0]->getBranchLength();
     
     for ( size_t i=1; i<children.size(); ++i )
     {
@@ -1614,7 +1613,11 @@ bool TopologyNode::isUltrametric(double &depth) const
         child_depth += children[i]->getBranchLength();
         
         am_ultrametric = (am_ultrametric && child_is_ultrametric);
-        am_ultrametric = (am_ultrametric && fabs(child_depth - my_depth) < 1E-4);
+        am_ultrametric = (am_ultrametric && fabs(child_depth - depth) < 1E-4);
+        if ( child_depth > depth )
+        {
+            depth = child_depth;
+        }
     }
     
     return am_ultrametric;
