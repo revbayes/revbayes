@@ -317,28 +317,31 @@ void MonteCarloAnalysis::initializeFromCheckpoint(const path &checkpoint_file)
     
     for (size_t i = 0; i < replicates; ++i)
     {
-        // first, set the checkpoint filename for the run
-        if ( replicates > 1 && checkpoint_file != "" )
+        if ( runs[i] != NULL )
         {
+            // first, set the checkpoint filename for the run
+            if ( replicates > 1 && checkpoint_file != "" )
+            {
+                
+                // create the run specific appendix
+                std::stringstream ss;
+                ss << "_run_" << (i+1);
+                
+                // assemble the new filename
+                path run_checkpoint_file = appendToStem( checkpoint_file, ss.str() );
+                
+                // set the filename for the MCMC object
+                runs[i]->setCheckpointFile( run_checkpoint_file );
+            }
+            else if ( not checkpoint_file.empty() )
+            {
+                // set the filename for the MCMC object
+                runs[i]->setCheckpointFile( checkpoint_file );
+            }
             
-            // create the run specific appendix
-            std::stringstream ss;
-            ss << "_run_" << (i+1);
-            
-            // assemble the new filename
-            path run_checkpoint_file = appendToStem( checkpoint_file, ss.str() );
-            
-            // set the filename for the MCMC object
-            runs[i]->setCheckpointFile( run_checkpoint_file );
+            // then, initialize the sample for that replicate
+            runs[i]->initializeSamplerFromCheckpoint();
         }
-        else if ( not checkpoint_file.empty() )
-        {
-            // set the filename for the MCMC object
-            runs[i]->setCheckpointFile( checkpoint_file );
-        }
-        
-        // then, initialize the sample for that replicate
-        runs[i]->initializeSamplerFromCheckpoint();
     }
 }
 
