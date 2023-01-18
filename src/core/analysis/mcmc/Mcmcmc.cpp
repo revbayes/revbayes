@@ -119,7 +119,6 @@ Mcmcmc::Mcmcmc(const Model& m, const RbVector<Move> &mv, const RbVector<Monitor>
     generation(0),
     swap_interval(si),
     swap_interval2(0),
-    active_chain_index( 0 ),
     delta( dt ),
     tune_heat(th),
     tune_heat_target(tht),
@@ -187,7 +186,6 @@ Mcmcmc::Mcmcmc(const Mcmcmc &m) : MonteCarloSampler(m)
     useNeighborSwapping = m.useNeighborSwapping;
     useRandomSwapping   = m.useRandomSwapping;
     
-    active_chain_index  = m.active_chain_index;
     schedule_type       = m.schedule_type;
     pid_per_chain       = m.pid_per_chain;
     
@@ -1301,7 +1299,7 @@ void Mcmcmc::synchronizeValues( bool likelihood_only )
     }
     
 #ifdef RB_MPI
-    if ( active_PID != pid )
+    if ( process_active == false )
     {
         for (size_t i=0; i<num_chains; ++i)
         {
@@ -1315,7 +1313,7 @@ void Mcmcmc::synchronizeValues( bool likelihood_only )
     }
 #endif
     
-    if ( active_PID == pid )
+    if ( process_active == true )
     {
 #ifdef RB_MPI
         
@@ -1338,7 +1336,7 @@ void Mcmcmc::synchronizeValues( bool likelihood_only )
     }
     
 #ifdef RB_MPI
-    if ( active_PID == pid )
+    if ( process_active == true )
     {
         for (size_t i=1; i<num_processes; ++i)
         {
@@ -1380,7 +1378,7 @@ void Mcmcmc::synchronizeHeats(void)
     
 #ifdef RB_MPI
     // share the heats accross processes
-    if ( active_PID != pid )
+    if ( process_active == false )
     {
         for (size_t i=0; i<num_chains; ++i)
         {
@@ -1394,7 +1392,7 @@ void Mcmcmc::synchronizeHeats(void)
     }
 #endif
     
-    if ( active_PID == pid )
+    if ( process_active == true )
     {
 #ifdef RB_MPI
         for (size_t j = 0; j < num_chains; ++j)
@@ -1416,7 +1414,7 @@ void Mcmcmc::synchronizeHeats(void)
         }
     }
 #ifdef RB_MPI
-    if ( active_PID == pid )
+    if ( process_active == true )
     {
         for (size_t i=1; i<num_processes; ++i)
         {
@@ -1481,7 +1479,7 @@ void Mcmcmc::synchronizeTuningInfo(void)
     MPI_Type_commit(&mvs_ti_types);
     
     // share the heats accross processes
-    if ( active_PID != pid )
+    if ( process_active == false )
     {
         for (size_t i=0; i<num_chains; ++i)
         {
@@ -1495,7 +1493,7 @@ void Mcmcmc::synchronizeTuningInfo(void)
     }
 #endif
     
-    if ( active_PID == pid )
+    if ( process_active == true )
     {
 #ifdef RB_MPI
         for (size_t j = 0; j < num_chains; ++j)
@@ -1518,7 +1516,7 @@ void Mcmcmc::synchronizeTuningInfo(void)
     }
     
 #ifdef RB_MPI
-    if ( active_PID == pid )
+    if ( process_active == true )
     {
         for (size_t i=1; i<num_processes; ++i)
         {
@@ -1737,7 +1735,7 @@ void Mcmcmc::swapGivenChains(int j, int k, double lnProposalRatio)
 
 
 #ifdef RB_MPI
-    if ( active_PID == pid )
+    if ( process_active == true )
     {
         for (size_t i = 1; i < num_processes; ++i)
         {
@@ -1761,16 +1759,6 @@ void Mcmcmc::swapGivenChains(int j, int k, double lnProposalRatio)
     {
         ++num_accepted_swaps_current_period[heat_rankj][heat_rankk];
         ++num_accepted_swaps_total[heat_rankj][heat_rankk];
-        
-        // swap active chain
-        if (active_chain_index == j)
-        {
-            active_chain_index = k;
-        }
-        else if (active_chain_index == k)
-        {
-            active_chain_index = j;
-        }
 
         std::swap( chain_heats[j], chain_heats[k] );
         std::swap( heat_ranks[j], heat_ranks[k] );
@@ -1894,7 +1882,7 @@ void Mcmcmc::updateChainState(size_t j)
     
 #ifdef RB_MPI
     // update heat
-    if ( active_PID == pid )
+    if ( process_active == true )
     {
         for (size_t i = 1; i < num_processes; ++i)
         {

@@ -71,7 +71,7 @@ namespace RevBayesCore {
         void                                    setNumberOfProcesses(size_t i);                                                 //!< Set the number of processes for this replication.
         void                                    startMonitors(size_t numCycles, bool reopen);                                   //!< Start the monitors
         void                                    tune(void);                                                                     //!< Tune the sampler and its moves.
-        void                                    writeMonitorHeaders(bool screen_only);                                                      //!< Write the headers of the monitors.
+        void                                    writeMonitorHeaders(bool screen_only);                                          //!< Write the headers of the monitors.
 
         
     protected:
@@ -114,7 +114,6 @@ namespace RevBayesCore {
         size_t                                  swap_interval;                                      // the interval at which swaps (between neighbor chains if the swap method is neighbor or both, or between chains chosen randomly if the swap method is random) will be attempted.
         size_t                                  swap_interval2;                                     // the interval at which swaps between randomly chosen chains will be attempted (if the swapMethod is specified as both; otherwise it would be the same as swapInterval if not provided).
         
-        size_t                                  active_chain_index;                                 // index of coldest chain, i.e. which one samples the posterior
         double                                  delta;                                              // delta-T, temperature increment for computeBeta
         std::vector<double>                     heat_temps;                                         // chain temperature vector, could be specified directly by user at the beginning, determined by delta, or changed during the burn-in by tuning
         bool                                    tune_heat;                                          // if the temperatures would be tuned
