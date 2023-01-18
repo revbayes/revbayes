@@ -478,7 +478,7 @@ void Mcmcmc::initializeSamplerFromCheckpoint( void )
             
         if ( chains[i] != NULL )
         {
-            chains[i]->checkpoint();
+            chains[i]->initializeSamplerFromCheckpoint();
         }
         
     }
