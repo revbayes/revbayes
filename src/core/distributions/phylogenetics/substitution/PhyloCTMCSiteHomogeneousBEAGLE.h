@@ -13,14 +13,10 @@
  *     - The allocation and deallocation of 'partialLikelihoods' should be removed when using BEAGLE
  *       in 'AbstractPhyloCTMCSiteHomogeneous.h'. However, it appears that something is still required
  *       inside of 'resizeLikelihoodvectors' or 'scale'. Determine what needs to be refactored.
- * 
- *     - BEAGLE instances should be in a vector. Then we can use with MPI and mixture models.
  *
  *     - Configure for usage with MPI.
  *
  *     - Configure for usage with mixture models.
- *
- *     - Invariable sites does not return correct likelihood values.
  *
  */
 
@@ -107,6 +103,9 @@ namespace RevBayesCore
         private:
 
             //----====  Private Variables  ====----
+            std::vector<BeagleOperation>   b_ops;
+            std::vector<int>               b_node_indices;
+            std::vector<double>            b_branch_lengths;
 
             //-- Accumulate BEAGLE lnLikelihood across all models.
             double ln_beagle_probability;
@@ -152,9 +151,6 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::~PhyloCTMCSiteHomogeneou
 {
     // We don't delete the parameters, because they might be used somewhere else too.
     // The model needs to do that!
-
-    // When we are done clean up BEAGLE instance
-    this->freeBeagleInstance();
 }
 
 
@@ -171,6 +167,12 @@ template<class charType>
 double
 RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::sumRootLikelihood (void )
 {
+    this->ln_beagle_probability = 0.0;
+
+    for ( auto b_instance : this->beagle_instances ) {
+        this->ln_beagle_probability += b_instance->getStoredLnLikelihood();
+    }
+
     //-- We have already computed the ln_beagle_probability, so just return it
     return this->ln_beagle_probability;
 }
@@ -190,22 +192,12 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
     RBOUT(ss.str());
 #endif /* RB_BEAGLE_DEBUG */
 
-    size_t b_model_idx;
+    size_t b_model   = 0;
     size_t num_taxa  = (this->num_nodes + 1) / 2;
     
-    size_t root_idx  = root;
-    //if ( RbSettings::userSettings().getUseBeagleLikelihoodStoring() == true )
-    //{
-        root_idx  = root + this->num_nodes * this->activeLikelihood[root];
-	//}
-    
-    size_t left_idx  = left;
-    size_t right_idx = right;
-    //if ( RbSettings::userSettings().getUseBeagleLikelihoodStoring() == true )
-    //{
-        left_idx  = left   + this->num_nodes * this->activeLikelihood[left];
-        right_idx = right  + this->num_nodes * this->activeLikelihood[right];
-	//}
+    size_t root_idx  = root  + this->num_nodes * this->activeLikelihood[root];
+    size_t left_idx  = left  + this->num_nodes * this->activeLikelihood[left];
+    size_t right_idx = right + this->num_nodes * this->activeLikelihood[right];
 
     //-- Tips are actually just stored once, so we dont need offests.
     size_t left_partials  = (left  < num_taxa) ? left  : left_idx;
@@ -238,97 +230,88 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
     double* b_outSumSecondDerivative  = NULL;
 
     //-- Return codes for BEAGLE operations.
-    int b_code_update_transitions;
-    int b_code_update_partials;
-    int b_code_calc_edges;
+    int b_ret_code;
 
     //-- Update rates across sites 
-    this->updateBeagleSiteRates();
+    this->updateBeagleSiteRates(); // TODO should be in abstract class
 
 #if defined ( RB_BEAGLE_DEBUG )
     ss << "updated site rates" << std::endl;
 #endif /* RB_BEAGLE_DEBUG */
 
 #if defined ( RB_BEAGLE_EIGEN )
-    this->updateBeagleEigensystem();
+    this->updateBeagleEigensystems(); // TODO should be in abstract class
 
+    for ( size_t i = 0; i < this->beagle_instances.size(); ++i ) {
+        //b_model = this->active_eigen_system[i];
+        //b_model = i + 0 * this->active_eigen_system[i] * this->num_site_mixtures;
+	b_model = i;
 
-    for ( size_t i = 0; i < this->num_site_mixtures; ++i )
-    {
-        //b_model_idx = this->active_eigen_system[i];
-        b_model_idx = i + 0* this->active_eigen_system[i] * this->num_site_mixtures;
-
-        //-- Update all transition matrices for model i.
-        b_code_update_transitions =
-            beagleUpdateTransitionMatrices( this->beagle_instance->getResourceID()
-                                          , b_model_idx
-                                          , &this->b_node_indices[0]
-                                          , NULL
-                                          , NULL
-                                          , &this->b_branch_lengths[0]
-                                          , this->b_branch_lengths.size()
-                                          );
-        if ( b_code_update_transitions != 0 )
-        {
-            throw RbException( "Could not update transition matrix for model '"
-                             + std::to_string(i) + "'. "
-                             + BeagleUtilities::printErrorCode(b_code_update_transitions));
+        //-- Update transition matrix for model i.
+        b_ret_code = beagleUpdateTransitionMatrices( this->beagle_instances[i]->getResourceID(),
+						     b_model,
+						     &this->b_node_indices[0],
+						     NULL,
+						     NULL,
+						     &this->b_branch_lengths[0],
+						     this->b_branch_lengths.size() );
+        if ( b_ret_code != 0 ) {
+            throw RbException("Could not update transition matrix for model '" +
+                              std::to_string(i) + "'. " +
+                              BeagleUtilities::printErrorCode(b_ret_code));
         }
-    }
 
-    //-- Calculate and update all partial likelihood buffers
-    b_code_update_partials = beagleUpdatePartials( this->beagle_instance->getResourceID()
-                                                 , &this->b_ops[0]
-                                                 , this->b_ops.size()
-                                                 , BEAGLE_OP_NONE
-                                                 );
+        //-- Calculate and update all partial likelihood buffers
+        b_ret_code = beagleUpdatePartials( this->beagle_instances[i]->getResourceID(),
+					   &this->b_ops[0],
+					   this->b_ops.size(),
+					   BEAGLE_OP_NONE );
+    }
 #else
-    b_code_update_partials = beagleUpdatePartials( this->beagle_instance->getResourceID()
-                                                 , &b_operation
-                                                 , 1
-                                                 , BEAGLE_OP_NONE
-                                                 );
+    for ( size_t i = 0; i < this->beagle_instances.size(); ++i ) {
+	b_ret_code = beagleUpdatePartials( this->beagle_instances[i]->getResourceID(),
+					   &b_operation,
+					   1,
+					   BEAGLE_OP_NONE );
+    };
 #endif /* RB_BEAGLE_EIGEN */
 
 #if defined ( RB_BEAGLE_DEBUG )
     ss << "updated partials" << std::endl;
 #endif /* RB_BEAGLE_DEBUG */
     
-	if ( b_code_update_partials != 0 )
-	{
-        throw RbException( "Could not update partials for models '"
-	  		             + BeagleUtilities::printErrorCode(b_code_update_partials));
-	}
+    if ( b_ret_code != 0 ) {
+        throw RbException( "Could not update partials for models '" +
+			   BeagleUtilities::printErrorCode(b_ret_code));
+    }
 
     this->b_ops.clear();
     this->b_branch_lengths.clear();
     this->b_node_indices.clear();
 
-    //-- Calclulate the lnLikelihood of the model
-    b_code_calc_edges =
-        beagleCalculateEdgeLogLikelihoods( this->beagle_instance->getResourceID()
-                                         , &b_parentBufferIndices
-                                         , &b_childBufferIndices
-                                         , &b_probabilityIndices
-                                         , b_firstDerivativeIndices
-                                         , b_secondDerivativeIndices
+    for ( size_t i = 0; i < this->beagle_instances.size(); ++i ) {
+        //-- Calclulate the lnLikelihood of the model
+        b_ret_code = beagleCalculateEdgeLogLikelihoods( this->beagle_instances[i]->getResourceID(),
+							&b_parentBufferIndices,
+							&b_childBufferIndices,
+							&b_probabilityIndices,
+							b_firstDerivativeIndices,
+							b_secondDerivativeIndices,
+							&b_categoryWeightsIndices,
+							&b_stateFrequenciesIndices,
+							&b_cumulativeScaleIndices,
+							b_count,
+							&b_outSumLogLikelihood,
+							b_outSumFirstDerivative,
+							b_outSumSecondDerivative );
+        if (b_ret_code != 0) {
+	    throw RbException("Could not calculate edge log likelihood for models '" +
+			      BeagleUtilities::printErrorCode(b_ret_code));
+        }
 
-                                         , &b_categoryWeightsIndices
-                                         , &b_stateFrequenciesIndices
-
-				                         , &b_cumulativeScaleIndices
-                                         , b_count
-                                         , &b_outSumLogLikelihood
-                                         , b_outSumFirstDerivative
-                                         , b_outSumSecondDerivative
-                                         );
-    if ( b_code_calc_edges != 0 )
-    {
-	    throw RbException("Could not calculate edge log likelihood for models '"
-                          + BeagleUtilities::printErrorCode(b_code_calc_edges));
+        //this->ln_beagle_probability = b_outSumLogLikelihood;
+	this->beagle_instances[i]->setStoredLnLikelihood(b_outSumLogLikelihood);
     }
-
-    this->ln_beagle_probability = b_outSumLogLikelihood;
 
 #if defined ( RB_BEAGLE_DEBUG )
     RBOUT(ss.str());
@@ -351,6 +334,9 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
 #endif /* RB_BEAGLE_DEBUG */
 
     size_t b_model_idx;
+
+    //-- Return codes for BEAGLE operations.
+    size_t b_ret_code;
 
     //-- Get the number of taxa in the tree
     size_t num_taxa = (this->num_nodes + 2) / 2;
@@ -376,7 +362,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
     //-- And update the respective ASRV BEAGLE buffers.
     this->updateBeagleSiteRates();
 #else
-    std::vector<int> categoryIndicesASRV = NULL;
+    std::vector<int> categoryIndicesASRV;
 #endif
     
     //-- Configure BEAGLE model parameters.
@@ -389,7 +375,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
     int      b_stateFrequenciesIndices = 0; //(int) model;  //0;
     int      b_cumulativeScaleIndices  = BEAGLE_OP_NONE;
     int      b_count                   = 1;
-    double   b_outSumLogLikelihood     = -1 * std::numeric_limits<double>::max();
+    double   b_outSumLogLikelihood     = std::numeric_limits<double>::min();
     double * b_outSumFirstDerivative   = NULL;
     double * b_outSumSecondDerivative  = NULL;
 
@@ -408,100 +394,95 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood
     this->b_ops.push_back(b_operation);
     this->b_node_indices.push_back(root_idx);
 
-    //-- Return codes for BEAGLE operations.
-    int b_code_update_transitions;
-    int b_code_update_partials;
-    int b_code_calc_edges;
-
     
 #if defined ( RB_USE_EIGEN3 )
     //-- Update Eigensystem BEAGLE buffers
-    this->updateBeagleEigensystem();
+    this->updateBeagleEigensystems();  // TODO should be in abstract class
 
-    for ( size_t i = 0; i < b_num_models; ++i )
+    for ( size_t i = 0; i < this->beagle_instances.size(); ++i )
     {
-        b_model_idx = i + this->active_eigen_system[i] * this->num_site_mixtures;
+        //b_model_idx = i + this->active_eigen_system[i] * this->num_site_mixtures;
+        b_model_idx = i;
 
         //-- Update all transition matrices for model i.
-        b_code_update_transitions =
-            beagleUpdateTransitionMatrices( this->beagle_instance->getResourceID()
-                                          , b_model_idx
-                                          , &this->b_node_indices[0]
-                                          , NULL
-                                          , NULL
-                                          , &this->b_branch_lengths[0]
-                                          , this->b_branch_lengths.size()
-                                          );
-        if ( b_code_update_transitions != 0 )
+        b_ret_code = beagleUpdateTransitionMatrices( this->beagle_instances[i]->getResourceID(),
+						     b_model_idx,
+						     &this->b_node_indices[0],
+						     NULL,
+						     NULL,
+						     &this->b_branch_lengths[0],
+						     this->b_branch_lengths.size() );
+        if ( b_ret_code != 0 )
         {
             throw RbException( "Could not update transition matrix for model '"
                              + std::to_string(i) + "'. "
-                             + BeagleUtilities::printErrorCode(b_code_update_transitions));
+                             + BeagleUtilities::printErrorCode(b_ret_code));
         }
+
+        //-- Calculate and update all partial likelihood buffers
+        b_ret_code = beagleUpdatePartials( this->beagle_instances[i]->getResourceID(),
+					   &this->b_ops[0],
+					   this->b_ops.size(),
+					   BEAGLE_OP_NONE );
     }
-
-    //-- Calculate and update all partial likelihood buffers
-    b_code_update_partials = beagleUpdatePartials( this->beagle_instance->getResourceID()
-                                                 , &this->b_ops[0]
-                                                 , this->b_ops.size()
-                                                 , BEAGLE_OP_NONE
-                                                 );
-
 #else
-    // TODO - remove this from set eigensystem as only homogeneous models supported
     std::vector<std::vector<double>> model_pi_vectors;
     this->getRootFrequencies(model_pi_vectors);
     int b_stateFrequenciesIndex = 0;
-    std::vector<double> b_inStateFrequencies = model_pi_vectors[0];
-
-    beagleSetStateFrequencies( this->beagle_instance->getResourceID()
-                             , b_stateFrequenciesIndex
-                             , &b_inStateFrequencies[0]
-                             );
-
-    b_code_update_partials = beagleUpdatePartials( this->beagle_instance->getResourceID()
-                                                 , &b_operation
-                                                 , 1
-                                                 , BEAGLE_OP_NONE
-                                                 );
+    
+    for ( size_t i = 0; i < this->beagle_instances.size(); ++i )
+    {
+	b_stateFrequenciesIndex = i;
+        std::vector<double> b_inStateFrequencies = model_pi_vectors[i];
+    
+        beagleSetStateFrequencies( this->beagle_instances[i]->getResourceID()
+                                 , b_stateFrequenciesIndex
+                                 , &b_inStateFrequencies[0]
+                                 );
+    
+        b_ret_code = beagleUpdatePartials( this->beagle_instances[i]->getResourceID(),
+    				       &b_operation,
+    				       1,
+    				       BEAGLE_OP_NONE );
+    }
 #endif //-- RB_BEAGLE_EIGEN
 
-    if ( b_code_update_partials != 0 )
-	{
-        throw RbException( "Could not update partials for models '"
-	  		             + BeagleUtilities::printErrorCode(b_code_update_partials));
-	}
+    if ( b_ret_code != 0 ) {
+        throw RbException("Could not update partials for models '" +
+			  BeagleUtilities::printErrorCode(b_ret_code));
+    }
 
     //-- Reset the beagle operations queues 
     this->b_ops.clear();
     this->b_branch_lengths.clear();
     this->b_node_indices.clear();
 
-    //-- Calclulate the lnLikelihood of the model
-    b_code_calc_edges =
-        beagleCalculateEdgeLogLikelihoods( this->beagle_instance->getResourceID()
-                                         , &b_parentBufferIndices
-                                         , &b_childBufferIndices
-                                         , &b_probabilityIndices
-                                         , b_firstDerivativeIndices
-                                         , b_secondDerivativeIndices
-
-                                         , b_categoryWeightsIndices
-                                         , &b_stateFrequenciesIndices
-
-				                         , &b_cumulativeScaleIndices
-                                         , b_count
-                                         , &b_outSumLogLikelihood
-                                         , b_outSumFirstDerivative
-                                         , b_outSumSecondDerivative
-                                         );
-    if ( b_code_calc_edges != 0 )
+    for ( size_t i = 0; i < this->beagle_instances.size(); ++i )
     {
-	    throw RbException("Could not calculate edge log likelihood for models '"
-                          + BeagleUtilities::printErrorCode(b_code_calc_edges));
+        //-- Calclulate the lnLikelihood of the model
+        b_ret_code =
+            beagleCalculateEdgeLogLikelihoods(
+                this->beagle_instances[i]->getResourceID(),
+                &b_parentBufferIndices,
+                &b_childBufferIndices,
+                &b_probabilityIndices,
+                b_firstDerivativeIndices,
+                b_secondDerivativeIndices,
+                b_categoryWeightsIndices,
+                &b_stateFrequenciesIndices,
+                &b_cumulativeScaleIndices,
+                b_count,
+                &b_outSumLogLikelihood,
+                b_outSumFirstDerivative,
+                b_outSumSecondDerivative );
+        if (b_ret_code != 0) {
+            throw RbException("Could not calculate edge log likelihood for models '" +
+                              BeagleUtilities::printErrorCode(b_ret_code));
+        }
+        
+        this->beagle_instances[i]->setStoredLnLikelihood(b_outSumLogLikelihood);
     }
 
-    this->ln_beagle_probability = b_outSumLogLikelihood;
 }
 
 
@@ -550,20 +531,21 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikel
     // Compute the transition probability matrix in revbayes
     this->updateTransitionProbabilities( node_index );
 
-    // Set the transition probability matrix in BEAGLE
-    const double * b_tp_begin = this->transition_prob_matrices[0].theMatrix;
-    beagleSetTransitionMatrix( this->beagle_instance->getResourceID()
-                             , (int) b_node_idx
-                             , b_tp_begin
-                             , (double) 1.0
-                             );
+    // Set the transition probability matrices for each model in BEAGLE
+    for ( size_t i = 0; i < this->beagle_instances.size(); ++i )
+    {
+      const double *b_tp_begin = this->transition_prob_matrices[i].theMatrix;
+      beagleSetTransitionMatrix( this->beagle_instances[i]->getResourceID(),
+                                (int) b_node_idx,
+				 b_tp_begin,
+				 (double) 1.0 );
 
-    // Update partial buffers for the node
-    beagleUpdatePartials( this->beagle_instance->getResourceID()
-                        , &b_operation
-                        , 1
-                        , BEAGLE_OP_NONE
-                        );
+      // Update partial buffers for the node
+      beagleUpdatePartials( this->beagle_instances[i]->getResourceID(),
+			    &b_operation,
+			    1,
+			    BEAGLE_OP_NONE );
+    }
 #endif //-- !RB_BEAGLE_EIGEN 
 }
 
@@ -579,17 +561,10 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikel
   , size_t middle
   )
 {
-    size_t node_idx   = node_index;
-    size_t left_idx   = left;
-    size_t right_idx  = right;
-    size_t middle_idx = middle;
-    //if ( RbSettings::userSettings().getUseBeagleLikelihoodStoring() == true )
-    //{
-        node_idx   = node_index + this->num_nodes * this->activeLikelihood[node_index];
-        left_idx   = left       + this->num_nodes * this->activeLikelihood[left];
-        right_idx  = right      + this->num_nodes * this->activeLikelihood[right];
-        middle_idx = middle     + this->num_nodes * this->activeLikelihood[middle];
-	//}
+    size_t node_idx   = node_index + this->num_nodes * this->activeLikelihood[node_index];
+    size_t left_idx   = left       + this->num_nodes * this->activeLikelihood[left];
+    size_t right_idx  = right      + this->num_nodes * this->activeLikelihood[right];
+    size_t middle_idx = middle     + this->num_nodes * this->activeLikelihood[middle];
     
     //-- Tips are actually just stored once, so we dont need offests.
     size_t left_partials   = (node.getChild(0).isTip()) ? left   : left_idx;
@@ -618,21 +593,23 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikel
     //-- If we are not using the eigensystem, we will need to update and set the
     //   transition probability matrices.
 
+    // Compute and update the transition probability matrices in revbayes
     this->updateTransitionProbabilities( node_index );
 
-    const double * b_tp_begin = this->transition_prob_matrices[0].theMatrix;
-    beagleSetTransitionMatrix( this->beagle_instance->getResourceID()
-                               //, (int) node_idx
-                             , (int) node_index
-                             , b_tp_begin
-                             , (double) 1.0
-                             );
+    // Update all model transition matrices and partials
+    for ( size_t i = 0; i < this->beagle_instances.size(); ++i ) {
+	const double *b_tp_begin = this->transition_prob_matrices[i].theMatrix;
 
-    beagleUpdatePartials( this->beagle_instance->getResourceID()
-                        , &b_operation
-                        , 1
-                        , BEAGLE_OP_NONE
-                        );
+	beagleSetTransitionMatrix( this->beagle_instances[i]->getResourceID(),
+				   (int) node_index,
+				   b_tp_begin,
+				   (double) 1.0 );
+
+	beagleUpdatePartials( this->beagle_instances[i]->getResourceID(),
+			      &b_operation,
+			      1,
+			      BEAGLE_OP_NONE );
+    }
 #endif //-- RB_BEAGLE_EIGEN 
 
 }
@@ -641,9 +618,9 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikel
 template<class charType>
 void
 RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeTipLikelihood
-  ( const TopologyNode &node
-  , size_t node_index
-  )
+( const TopologyNode &node,
+  size_t node_index
+)
 {
     size_t b_node_idx      = node_index + this->num_nodes * this->activeLikelihood[node_index];
     double b_branch_length = this->calculateBranchLength(node, node_index);
@@ -655,16 +632,20 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeTipLikelihood
     //-- If we are not using the eigensystem, we will need to update and set the
     //   transition probability matrices.
 
-    // Compute the transition probability matrix in revbayes
+    // Compute and update the transition probability matrices in revbayes
     this->updateTransitionProbabilities( node_index );
 
-    // Set the transition probability matrix in BEAGLE
-    const double * b_tp_begin = this->transition_prob_matrices[0].theMatrix;
-    beagleSetTransitionMatrix( this->beagle_instance->getResourceID()
-                             , (int) b_node_idx
-                             , b_tp_begin
-                             , (double) 1.0
-                             );
+    // Update all model transition matrices
+    for ( size_t i = 0; i < this->beagle_instances.size(); ++i )
+    {
+	// Set the transition probability matrix in BEAGLE
+	const double * b_tp_begin = this->transition_prob_matrices[i].theMatrix;
+
+	beagleSetTransitionMatrix( this->beagle_instances[i]->getResourceID(),
+				   (int) b_node_idx,
+				   b_tp_begin,
+				   (double) 1.0 );
+    }
 #endif //-- !RB_BEAGLE_EIGEN 
 }
 
