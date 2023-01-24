@@ -62,6 +62,8 @@ namespace RevBayesCore {
         MatrixReal&                             operator-=(const MatrixReal& B);                                    //!< operator -= 
         MatrixReal&                             operator*=(const MatrixReal& B);                                    //!< operator *= (matrix multiplication)
         MatrixReal                              operator+(double b) const;                                          //!< operator + for matrix + scalar 
+        MatrixReal                              operator+() const;                                                  //!< operator + (unary)
+        MatrixReal                              operator-() const;                                                  //!< operator - (unary)
         MatrixReal                              operator-(double b) const;                                          //!< operator - for scalar 
         MatrixReal                              operator*(double b) const;                                          //!< operator * for scalar 
         MatrixReal                              operator+(const MatrixReal& B) const;                               //!< operator + 
@@ -131,18 +133,6 @@ namespace RevBayesCore {
     
     // Global functions using the class
     std::ostream&                       operator<<(std::ostream& o, const MatrixReal& x);                                           //!< Overloaded output operator
-
-    
-//    MatrixReal                            operator+(const MatrixReal& A);                                             //!< Unary operator + 
-//    MatrixReal                            operator-(const MatrixReal& A);                                             //!< Unary operator - 
-//    MatrixReal                            operator/(const MatrixReal& A, const MatrixReal& B);                        //!< operator / for matrix / matrix 
-//    MatrixReal                            operator+(double a, const MatrixReal& B);                            //!< operator + for scalar + matrix 
-//    MatrixReal                            operator-(double a, const MatrixReal& B);                            //!< operator - for scalar - matrix 
-//    MatrixReal                            operator*(double a, const MatrixReal& B);                            //!< operator * for scalar * matrix 
-//    MatrixReal                            operator/(double a, const MatrixReal& B);                            //!< operator / for scalar / matrix 
-//    MatrixReal                            operator*(const MatrixReal& A, double b);                            //!< operator * for matrix * scalar 
-//    MatrixReal                            operator/(const MatrixReal& A, double b);                            //!< operator / for matrix / scalar 
-//    MatrixReal&                           operator/=(MatrixReal& A, double b);                                 //!< operator /= for scalar 
 
     RbVector<double>                      operator*(const RbVector<double> &a, const MatrixReal& B);                            //!< operator * for scalar * matrix
     
