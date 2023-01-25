@@ -6,9 +6,11 @@
 //  Copyright (c) 2013 Michael Landis. All rights reserved.
 //
 
+
 #include "RegionalFeatures.h"
 #include "RegionalFeatureLayer.h"
 #include "RbConstants.h"
+#include "RbException.h"
 
 #include <cmath>
 #include <iostream>
@@ -194,7 +196,12 @@ void RegionalFeatures::normalizeWithinQuantitative(void) {
             }
         }
     }
+    
+    // do not use stddev if it equals zero
     stddev = std::sqrt( stddev / n_elem );
+    if (stddev == 0.0) {
+        throw RbException("RegionalFeatures::normalizeWithinQuantitative can only standardize data if stddev != 0 (i.e. features must contain variation.)");
+    }
     
     // standardize all values
     for (auto it = withinQuantitative.begin(); it != withinQuantitative.end(); it++) {
@@ -264,7 +271,12 @@ void RegionalFeatures::normalizeBetweenQuantitative(void) {
             }
         }
     }
+    
     stddev = std::sqrt( stddev / n_elem );
+    if (stddev == 0.0) {
+        throw RbException("RegionalFeatures::normalizeBetweenQuantitative can only standardize data if stddev != 0 (i.e. features must contain variation.)");
+    }
+    
     
     for (auto it = betweenQuantitative.begin(); it != betweenQuantitative.end(); it++) {
         size_t time_index = it->first;
