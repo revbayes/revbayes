@@ -125,22 +125,11 @@ double RbStatistics::Geometric::pdf(int n, double p, bool asLog)
         return ((asLog) ? RbConstants::Double::neginf : 0.0);
     }
     
-    /* prob = (1-p)^x, stable for small p */
-    prob = RbStatistics::Binomial::pdf(n, p,1-p, 1.0, asLog);
+    /* prob = (1-p)^n, stable for small p */
+    prob = RbStatistics::Binomial::pdf(n, p, 1-p, 0.0, asLog);
 
-    return prob;
-//    return ((asLog) ? log(p) + prob : p*prob);
-//
-//    if ( asLog == true )
-//    {
-//        prob = (n-1) * log( 1-p ) + log(p);
-//    }
-//    else
-//    {
-//        prob = pow( 1-p, n-1 ) * p;
-//    }
-//
-//    return prob;
+    /* result = p*(1-p)^n */
+    return asLog ? log(p) + prob : p * prob;
 }
 
 /*!
