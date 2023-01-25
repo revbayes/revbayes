@@ -187,6 +187,7 @@ if ("${CMD_GTK}" STREQUAL "ON")
 endif()
 message("Building ${RB_EXEC_NAME}")
 
+if ("${CMD_GTK}" STREQUAL "ON")
   target_link_libraries(rb-jupyter rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${CMAKE_DL_LIBS})
 
   # Use the package PkgConfig to detect GTK+ headers/library files
