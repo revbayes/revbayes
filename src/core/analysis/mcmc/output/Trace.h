@@ -54,16 +54,16 @@ namespace RevBayesCore {
         
 
         // getters and setters
-        std::string                     getFileName() const                             { return fileName; }
+        const path&                     getFileName() const                             { return fileName; }
         const std::string&              getParameterName() const                        { return parmName; }
         
-        void                            setFileName(std::string fn)                     { fileName = fn; }
+        void                            setFileName(path fn)                            { fileName = fn; }
         void                            setParameterName(std::string pm)                { parmName = pm; }
         
     protected:
         
         size_t                          burnin;
-        std::string                     fileName;
+        path                            fileName;
         std::string                     parmName;
         std::vector<valueType>          values;                                     //!< the values of this trace
 
@@ -116,7 +116,6 @@ namespace RevBayesCore {
 template <class valueType>
 RevBayesCore::Trace<valueType>::Trace() :
     burnin( 0 ),
-    fileName( "" ),
     parmName( "" ),
     dirty( true )
 {

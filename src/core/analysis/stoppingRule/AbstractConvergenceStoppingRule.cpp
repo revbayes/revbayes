@@ -9,7 +9,7 @@
 using namespace RevBayesCore;
 
 
-AbstractConvergenceStoppingRule::AbstractConvergenceStoppingRule(const std::string &fn, size_t f, BurninEstimatorContinuous *be) : StoppingRule(),
+AbstractConvergenceStoppingRule::AbstractConvergenceStoppingRule(const path &fn, size_t f, BurninEstimatorContinuous *be) : StoppingRule(),
     burninEst( be ),
     checkFrequency( f ),
     filename( fn ),

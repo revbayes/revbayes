@@ -92,7 +92,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     bool nexus = static_cast<RlBoolean&>(args[arg_index_nexus].getVariable()->getRevObject()).getValue();
     long                nruns    = static_cast<const Natural&>( args[arg_index_nruns].getVariable()->getRevObject() ).getValue();
 
-    std::vector<std::string> vectorOfFileNames;
+    std::vector<RevBayesCore::path> vectorOfFileNames;
     
     if ( args[0].getVariable()->getRevObject().isType( ModelVector<RlString>::getClassTypeSpec() ) )
     {
@@ -102,70 +102,64 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
         }
 
         const ModelVector<RlString>& fn = static_cast<const ModelVector<RlString> &>( args[arg_index_files].getVariable()->getRevObject() ).getValue();
-        std::vector<std::string> tmp;
+        std::vector<RevBayesCore::path> tmp;
         for (size_t i = 0; i < fn.size(); i++)
         {
-            RevBayesCore::RbFileManager myFileManager( fn[i] );
+            RevBayesCore::path filepath = fn[i];
             
-            if ( !myFileManager.testFile() && !(myFileManager.testDirectory() && myFileManager.getFileName() == "" ) )
+            if ( not RevBayesCore::exists(filepath) )
             {
-                std::string errorStr = "Could not find filename: " + myFileManager.getFileName() + "\n";
-                myFileManager.formatError(errorStr);
+                std::string errorStr = "Could not find filename: " + filepath.filename().string() + "\n";
+                RevBayesCore::formatError(filepath, errorStr);
                 throw RbException(errorStr);
             }
             
-            if ( myFileManager.isFile() )
+            if ( RevBayesCore::is_directory(filepath))
             {
-                tmp.push_back( myFileManager.getFullFileName() );
+                RevBayesCore::setStringWithNamesOfFilesInDirectory( filepath, tmp );
             }
             else
             {
-                myFileManager.setStringWithNamesOfFilesInDirectory( tmp );
+                tmp.push_back( filepath );
             }
         }
+        // FIXME: doesn't this add tmp to vectorOfFileNames twice?
         for (size_t i = 0; i < tmp.size(); i++)
         {
             vectorOfFileNames.push_back(tmp[i]);
         }
-        std::set<std::string> s( vectorOfFileNames.begin(), vectorOfFileNames.end() );
+        std::set<RevBayesCore::path> s( vectorOfFileNames.begin(), vectorOfFileNames.end() );
         vectorOfFileNames.assign( s.begin(), s.end() );
     }
     else
     {
         // check that the file/path name has been correctly specified
-        std::string  bn = static_cast<const RlString&>( args[arg_index_files].getVariable()->getRevObject() ).getValue();
-        
-        std::string file_extension = bn.substr(StringUtilities::findLastOf(bn, '.'), string::npos);
-
-        StringUtilities::replaceSubstring(bn,file_extension,"");
+        RevBayesCore::path  bn = static_cast<const RlString&>( args[arg_index_files].getVariable()->getRevObject() ).getValue();
         
         for (size_t i = 0; i < nruns; i++)
         {
-            std::string run = "";
+            auto filepath = bn;
             if ( nruns > 1 )
             {
-                run = "_run_" + StringUtilities::to_string(i+1);
+                string run_tag = "_run_" + StringUtilities::to_string(i+1);
+                filepath = RevBayesCore::appendToStem(filepath, run_tag);
             }
 
-            const std::string  fn = bn + run + file_extension;
-
-            RevBayesCore::RbFileManager myFileManager( fn );
-
-            if ( !myFileManager.testFile() && !(myFileManager.testDirectory() && myFileManager.getFileName() == "" ) )
+            if ( not RevBayesCore::exists(filepath))
             {
-                std::string errorStr = "Could not find filename: " + myFileManager.getFileName() + "\n";
-                myFileManager.formatError(errorStr);
+                std::string errorStr = "Could not find filename: " + filepath.string() + "\n";
+                RevBayesCore::formatError(filepath, errorStr);
                 throw RbException(errorStr);
             }
 
             // set up a vector of strings containing the name or names of the files to be read
-            if ( myFileManager.isFile() )
+            if (RevBayesCore::is_directory( filepath ))
             {
-                vectorOfFileNames.push_back( myFileManager.getFullFileName() );
+                RevBayesCore::setStringWithNamesOfFilesInDirectory( filepath, vectorOfFileNames );
             }
             else
             {
-                myFileManager.setStringWithNamesOfFilesInDirectory( vectorOfFileNames );
+                vectorOfFileNames.push_back( filepath );
             }
         }
     }
@@ -326,7 +320,7 @@ const TypeSpec& Func_readTreeTrace::getReturnType( void ) const
 }
 
 
-WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<std::string> &vector_of_file_names, const std::string &delimiter, bool clock, long thinning, long offset)
+WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<RevBayesCore::path> &vector_of_file_names, const std::string &delimiter, bool clock, long thinning, long offset)
 {
     
     std::vector<TraceTree> data;
@@ -334,28 +328,24 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<std:
     // Set up a map with the file name to be read as the key and the file type as the value. Note that we may not
     // read all of the files in the string called "vectorOfFileNames" because some of them may not be in a format
     // that can be read.
-    std::map<std::string,std::string> file_ap;
-    for (std::vector<std::string>::const_iterator p = vector_of_file_names.begin(); p != vector_of_file_names.end(); ++p)
+    std::map<RevBayesCore::path,std::string> file_ap;
+    for (auto& fn: vector_of_file_names)
     {
         bool has_header_been_read = false;
-        const std::string &fn = *p;
-        
-        RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(fn);
         
         // let us quickly count the number of lines
         size_t lines = 0;
-        std::ifstream tmp_in_file( fm.getFullFileName().c_str() );
+        std::ifstream tmp_in_file( fn.string() );
         
         if ( !tmp_in_file )
         {
-            throw RbException( "Could not open file \"" + fn + "\"" );
+            throw RbException()<<"Could not open file "<<fn;
         }
         while ( tmp_in_file.good() )
         {
             // Read a line
             std::string line;
-            RevBayesCore::RbFileManager reader = RevBayesCore::RbFileManager();
-            reader.safeGetline(tmp_in_file, line);
+            RevBayesCore::safeGetline(tmp_in_file, line);
             if (line.length() == 0 || line[0] == '#')
             {
                 continue;
@@ -369,16 +359,16 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<std:
         // now we actually process the input
         
         /* Open file */
-        std::ifstream in_file( fm.getFullFileName().c_str() );
+        std::ifstream in_file( fn.string() );
         
         if ( !in_file )
         {
-            throw RbException( "Could not open file \"" + fn + "\"" );
+            throw RbException()<<"Could not open file "<<fn;
         }
         
         /* Initialize */
         std::string commandLine;
-        RBOUT( "Processing file \"" + fn + "\"");
+        RBOUT( "Processing file \"" + fn.string() + "\"");
         
         size_t n_samples = 0;
         size_t index = 0;
@@ -393,8 +383,7 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<std:
             
             // Read a line
             std::string line;
-            RevBayesCore::RbFileManager reader = RevBayesCore::RbFileManager();
-            reader.safeGetline(in_file, line);
+            RevBayesCore::safeGetline(in_file, line);
             
             // skip empty lines
             //line = StringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
@@ -485,17 +474,16 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<std:
  *
  * @note if multiple files are given, the traces will all be appended without regard for burnin
  * */
-WorkspaceVector<TraceTree>* Func_readTreeTrace::readTreesNexus(const std::vector<string> &fns, bool clock, long thin, long offset)
+WorkspaceVector<TraceTree>* Func_readTreeTrace::readTreesNexus(const std::vector<RevBayesCore::path> &fns, bool clock, long thin, long offset)
 {
 
     std::vector<TraceTree> data;
 
-    for (size_t i=0; i<fns.size(); ++i)
+    for (auto& fn: fns)
     {
         RevBayesCore::TraceTree tt = RevBayesCore::TraceTree();
         tt.setParameterName("tree");
 
-        const std::string fn = fns[i];
         // get the global instance of the NCL reader and clear warnings from its warnings buffer
         RevBayesCore::NclReader reader = RevBayesCore::NclReader();
 

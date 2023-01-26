@@ -107,22 +107,23 @@ void AbstractHomologousDiscreteCharacterData::removeRandomSites( double p )
 }
 
 
-void AbstractHomologousDiscreteCharacterData::writeToFile(const std::string &dir, const std::string &fn) const
+void AbstractHomologousDiscreteCharacterData::writeToFile(const path &dir, const std::string &fn) const
 {
+    create_directories(dir);
+
     if (this->getDataType() == "NaturalNumbers")
     {
         // NEXUS does not support NaturalNumbers so write tab delimited file
-        RbFileManager fm = RbFileManager(dir, fn + ".tsv");
+        path filename = dir / (fn + ".tsv");
         RevBayesCore::DelimitedCharacterDataWriter writer; 
-        writer.writeData(fm.getFullFileName(), *this);
+        writer.writeData( filename, *this);
     }
     else
     {
         // otherwise write NEXUS file
-        RbFileManager fm = RbFileManager(dir, fn + ".nex");
-        fm.createDirectoryForFile();
+        path filename = dir / (fn + ".nex");
         
-        NexusWriter nw( fm.getFullFileName() );
+        NexusWriter nw( filename );
         nw.openStream(false);
         
         nw.writeNexusBlock( *this );
@@ -144,7 +145,7 @@ std::ostream& RevBayesCore::operator<<(std::ostream& o, const AbstractHomologous
         o << "=";
     o << std::endl;
     
-    o << "Origination:                   " << x.getFileName() << std::endl;
+    o << "Origination:                   " << x.getFilename().filename() << std::endl;
     o << "Number of taxa:                " << x.getNumberOfTaxa() << std::endl;
     o << "Number of included taxa:       " << x.getNumberOfIncludedTaxa() << std::endl;
     o << "Number of characters:          " << x.getNumberOfCharacters() << std::endl;

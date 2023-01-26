@@ -14,10 +14,9 @@ namespace RevBayesCore {
     class TopologyNode;
     
     /**
-     * This file contains the declaration of the random variable class for any coalescent process.
-     *
      * @brief Declaration of the abstract coalescent process class.
      *
+     *This file contains the declaration of the random variable class for any coalescent process.
      */
     class AbstractCoalescent : public TypedDistribution<Tree> {
         
@@ -46,11 +45,11 @@ namespace RevBayesCore {
         void                                                buildHeterochronousRandomBinaryTree(Tree *psi, std::vector<TopologyNode*> &active, const std::vector<double> &ages);
         bool                                                matchesConstraints(void);
         void                                                simulateTree(void);
-        void                                                simulateHeterochronousTree(void);
+        void                                                simulateHeterochronousTree(void);                                                                   //!< Simulates a heterochronus coalescent tree.
         
         // members
         std::vector<Clade>                                  constraints;                                                                                        //!< Topological constrains.
-        size_t                                              num_taxa;                                                                                            //!< Number of taxa (needed for correct initialization).
+        size_t                                              num_taxa;                                                                                           //!< Number of taxa (needed for correct initialization).
         std::vector<Taxon>                                  taxa;                                                                                               //!< Taxon names that will be attached to new simulated trees.
         double                                              logTreeTopologyProb;                                                                                //!< Log-transformed tree topology probability (combinatorial constant).
         

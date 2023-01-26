@@ -131,7 +131,6 @@ if ("${JUPYTER}" STREQUAL "ON")
    add_definitions(-DRB_XCODE)
 endif()
 
-
 # When user specifies boost paths to use, we need to disable searching from the
 # environment and from using cmake's internal boost variables.
 if (BOOST_ROOT OR BOOST_INCLUDEDIR OR BOOST_LIBRARYDIR OR DEFINED ENV{BOOST_ROOT} OR DEFINED ENV{BOOST_INCLUDEDIR} OR DEFINED ENV{BOOST_LIBRARYDIR})
@@ -275,3 +274,4 @@ else()
 
 endif()
 
+install(TARGETS ${RB_EXEC_NAME} DESTINATION bin)

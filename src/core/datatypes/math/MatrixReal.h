@@ -39,11 +39,13 @@ namespace RevBayesCore {
         MatrixReal(size_t n, size_t k);
         MatrixReal(size_t n, size_t k, double v);
         MatrixReal(const MatrixReal& m);
+        MatrixReal(MatrixReal&& m);
         virtual                                ~MatrixReal(void);
         
         
         // overloaded operators
         MatrixReal&                             operator=(const MatrixReal& m);
+        MatrixReal&                             operator=(MatrixReal&& m);
         RbVector<double>&                       operator[](size_t index);
         const RbVector<double>&                 operator[](size_t index) const;
 
@@ -105,25 +107,25 @@ namespace RevBayesCore {
         bool                                    isSymmetric(void) const;
         bool                                    isUsingCholesky(void) const { return use_cholesky_decomp; }
         void                                    setCholesky(bool c) const;
-        
+
         size_t                                  size(void) const;
         void                                    resize(size_t r, size_t c);
-        
+
     protected:
         // helper methods
         void                                    update(void) const;
-        
+
         // members
         RbVector<RbVector<double> >             elements;
 
-        size_t                                  n_rows;
-        size_t                                  n_cols;
-        mutable EigenSystem*                    eigensystem;
-        mutable bool                            eigen_needs_update;
-        
-        mutable CholeskyDecomposition*          cholesky_decomp;
-        mutable bool                            cholesky_needs_update;
-        mutable bool                            use_cholesky_decomp;
+        size_t                                  n_rows = 0;
+        size_t                                  n_cols = 0;
+        mutable EigenSystem*                    eigensystem = nullptr;
+        mutable bool                            eigen_needs_update = true;
+
+        mutable CholeskyDecomposition*          cholesky_decomp = nullptr;
+        mutable bool                            cholesky_needs_update = true;
+        mutable bool                            use_cholesky_decomp = false;
 
     };
     

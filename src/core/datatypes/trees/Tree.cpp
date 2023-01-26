@@ -1124,23 +1124,19 @@ bool Tree::hasSameTopology(const Tree &t) const
 
 
 // Serialize (resurrect) the object from a file
-void Tree::initFromFile( const std::string &dir, const std::string &fn )
+void Tree::initFromFile( const path &dir, const std::string &fn )
 {
-    RbFileManager fm = RbFileManager(dir, fn + ".newick");
-    fm.createDirectoryForFile();
+    path filename = dir / (fn + ".newick");
 
     // open the stream to the file
-    std::fstream inStream;
-    inStream.open( fm.getFullFileName().c_str(), std::fstream::in);
-
+    std::ifstream inStream( filename.string() );
 
     std::string s = "";
     while ( inStream.good() )
     {
-
         // Read a line
         std::string line;
-        fm.safeGetline( inStream, line );
+        safeGetline( inStream, line );
 
         // append
         s += line;
@@ -1279,18 +1275,19 @@ bool Tree::isUltrametric( void ) const
 
 void Tree::makeInternalNodesBifurcating(bool reindex, bool as_fossils)
 {
-
     // delegate the call to the nodes which will make the tree bifurcating recursively.
     getRoot().makeBifurcating( as_fossils );
-    
 
+    // reindex here, in case makeBifurcating
+    // * added new fossil tips with no index
+    // * removed out-degree-1 nodes ("knuckles")
+    
     // we need to reset the root so that the vector of nodes get filled again with the new number of nodes
-    setRoot( &getRoot(), reindex );
+    setRoot( &getRoot(), true );
 
     // clear the taxon bitset map
     // the next time someone call getTaxonBitset() it will be rebuilt
     taxon_bitset_map.clear();
-
 }
 
 void Tree::makeRootBifurcating(const Clade& outgroup, bool as_fossils)
@@ -1919,18 +1916,17 @@ void Tree::unroot( void )
 
 
 // Write this object into a file in its default format.
-void Tree::writeToFile( const std::string &dir, const std::string &fn ) const
+void Tree::writeToFile( const path &dir, const std::string &fn ) const
 {
     
     // do not write a file if the tree is invalid
     if (this->getNumberOfTips() > 1)
     {
-        RbFileManager fm = RbFileManager(dir, fn + ".newick");
-        fm.createDirectoryForFile();
+        path filename = dir / (fn + ".newick");
+        create_directories(dir);
 
         // open the stream to the file
-        std::fstream outStream;
-        outStream.open( fm.getFullFileName().c_str(), std::fstream::out);
+        std::ofstream outStream( filename.string() );
 
         // write the value of the node
         outStream << getNewickRepresentation();

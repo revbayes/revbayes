@@ -95,8 +95,8 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_CharacterDependentBirt
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ex  = static_cast<const ModelVector<RealPos> &>( extinction_rates->getRevObject() ).getDagNode();
     
     // get speciation rates or cladogenetic speciation rate event map
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sp;
-    RevBayesCore::TypedDagNode<RevBayesCore::CladogeneticSpeciationRateMatrix>* cp;
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sp = nullptr;
+    RevBayesCore::TypedDagNode<RevBayesCore::CladogeneticSpeciationRateMatrix>* cp = nullptr;
     if ( speciation_rates->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
         sp  = static_cast<const ModelVector<RealPos> &>( speciation_rates->getRevObject() ).getDagNode();
@@ -410,7 +410,7 @@ void Dist_CharacterDependentBirthDeathProcess::setConstParameter(const std::stri
     {
         extinction_rates = var;
     }
-    else if ( name == "psi" || name == "phi" || name == "psi/phi" )
+    else if ( name == "psi" || name == "phi" )
     {
         psi = var;
     }

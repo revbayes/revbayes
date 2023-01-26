@@ -57,27 +57,26 @@ RevPtr<RevVariable> Func_readContinuousCharacterData::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    const RlString& fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() );
+    RevBayesCore::path fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
     bool return_as_vector = static_cast<const RlBoolean&>( args[1].getVariable()->getRevObject() ).getValue();
     
     // check that the file/path name has been correctly specified
-    RevBayesCore::RbFileManager my_file_manager( fn.getValue() );
-    if ( my_file_manager.testFile() == false && my_file_manager.testDirectory() == false )
+    if ( not RevBayesCore::exists( fn ))
     {
         std::string errorStr = "";
-        my_file_manager.formatError(errorStr);
-        throw RbException("Could not find file or path with name \"" + fn.getValue() + "\"");
+        RevBayesCore::formatError(fn, errorStr);
+        throw RbException()<<"Could not find file or path with name "<<fn;
     }
     
     // set up a vector of strings containing the name or names of the files to be read
-    std::vector<std::string> vector_of_file_names;
-    if ( my_file_manager.isDirectory() )
+    std::vector<RevBayesCore::path> vector_of_file_names;
+    if ( RevBayesCore::is_directory( fn ))
     {
-        my_file_manager.setStringWithNamesOfFilesInDirectory(vector_of_file_names);
+        RevBayesCore::setStringWithNamesOfFilesInDirectory( fn, vector_of_file_names);
     }
     else
     {
-        vector_of_file_names.push_back( my_file_manager.getFullFileName() );
+        vector_of_file_names.push_back( fn );
     }
     
     // get the global instance of the NCL reader and clear warnings from its warnings buffer
@@ -93,7 +92,7 @@ RevPtr<RevVariable> Func_readContinuousCharacterData::execute( void )
     // read all of the files in the string called "vectorOfFileNames" because some of them may not be in a format
     // that can be read.
     size_t num_files_read = 0;
-    for (std::vector<std::string>::iterator p = vector_of_file_names.begin(); p != vector_of_file_names.end(); ++p)
+    for (auto p = vector_of_file_names.begin(); p != vector_of_file_names.end(); ++p)
     {
         bool is_interleaved = false;
         std::string my_file_type = "unknown";
@@ -173,30 +172,30 @@ RevPtr<RevVariable> Func_readContinuousCharacterData::execute( void )
     
     
     // print summary of results of file reading to the user
-    if (my_file_manager.isDirectory() == true)
+    if (RevBayesCore::is_directory( fn ))
     {
         std::stringstream o2;
         if ( num_files_read == 0 )
         {
-            o2 << "Failed to read any files from directory '" << fn.getValue() << "'";
+            o2 << "Failed to read any files from directory " << fn;
         }
         else if ( num_files_read == 1 )
         {
             if ( m->size() == 1 )
             {
-                o2 << "Successfully read one file with one character matrix from directory '" << fn.getValue() << "'";
+                o2 << "Successfully read one file with one character matrix from directory " << fn;
                 ret_val = new ContinuousCharacterData( (*m)[0] );
                 delete m;
             }
             else
             {
-                o2 << "Successfully read one file with " << m->size() << " character matrices from directory '" << fn.getValue() << "'";
+                o2 << "Successfully read one file with " << m->size() << " character matrices from directory " << fn;
                 ret_val = m;
             }
         }
         else
         {
-            o2 << "Successfully read " << num_files_read << " files with " << m->size() << " character matrices from directory '" << fn.getValue() << "'";
+            o2 << "Successfully read " << num_files_read << " files with " << m->size() << " character matrices from directory " << fn;
             ret_val = m;
         }
         RBOUT(o2.str());
@@ -233,7 +232,7 @@ RevPtr<RevVariable> Func_readContinuousCharacterData::execute( void )
     {
         if (m->size() == 1)
         {
-            RBOUT("Successfully read one character matrix from file '" + fn.getValue() + "'");
+            RBOUT("Successfully read one character matrix from file '" + fn.string() + "'");
             
             // set the return value
             if ( return_as_vector == false )
@@ -249,7 +248,7 @@ RevPtr<RevVariable> Func_readContinuousCharacterData::execute( void )
         else if (m->size() > 1)
         {
             std::stringstream o3;
-            o3 << "Successfully read " << m->size() << " character matrices from file '" << fn.getValue() << "'";
+            o3 << "Successfully read " << m->size() << " character matrices from file " << fn;
             RBOUT(o3.str());
             
             // set the return value
@@ -258,7 +257,7 @@ RevPtr<RevVariable> Func_readContinuousCharacterData::execute( void )
         else
         {
             std::stringstream o3;
-            o3 << "Error reading file '" << fn << "'";
+            o3 << "Error reading file " << fn;
             RBOUT(o3.str());
             RBOUT("No data matrix was read.");
             std::set<std::string> my_warnings = reader.getWarnings();

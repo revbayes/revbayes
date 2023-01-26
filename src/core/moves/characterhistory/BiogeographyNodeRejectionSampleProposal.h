@@ -955,7 +955,7 @@ double RevBayesCore::BiogeographicNodeRejectionSampleProposal<charType>::sampleC
     else if (clado_type == "allopatry")
     {
         // sample how left/right characters will be divided
-        std::random_shuffle(idx_on.begin(), idx_on.end());
+        deprecated::random_shuffle(idx_on.begin(), idx_on.end());
         int n_child1_on = (int)(GLOBAL_RNG->uniform01() * (idx_on.size()-1) ) + 1;
         
         // set the left/right child states

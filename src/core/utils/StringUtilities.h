@@ -17,6 +17,7 @@
 #include <stddef.h>
 #include <sstream> // IWYU pragma: keep
 #include <vector>
+#include "RbFileManager.h"
 
 namespace StringUtilities {
     
@@ -33,9 +34,7 @@ namespace StringUtilities {
                                                         const std::string  &hangingPad,
                                                         size_t              screenWidth);                           //!< Format string for output to screen
     std::string                 formatTabWrap(std::string s, size_t tabs, size_t width, bool removeFormat=true);    //!< Wraps texts.
-    std::string                 getFileContentsAsString(const std::string& s);                                      //!< Convert the file contents to a string
-    std::string                 getStringWithDeletedLastPathComponent(const std::string& s);                        //!< Convert the file contents to a string
-    std::string                 getLastPathComponent(const std::string& s);                                         //!< Find the last component of a file path
+    std::string                 getFileContentsAsString(const RevBayesCore::path& p);                                      //!< Convert the file contents to a string
     bool                        isFormattingChar(char c) ;
     bool                        isIntegerNumber(const std::string& s);                                              //!< Checks if a string is an integer number
     bool                        isNumber(const std::string& s);                                                     //!< Checks if a string is a number
@@ -59,50 +58,5 @@ namespace StringUtilities {
     }
     
 }
-
-// TODO: Is there a better way for these global operators than duplicating the code for each namespace? (Sebastian)
-namespace RevLanguage {
-
-    std::string                     operator+(const std::string& A, double B);
-    std::string                     operator+(const std::string& A, int B);
-    std::string                     operator+(const std::string& A, long B);
-    std::string                     operator+(const std::string& A, size_t B);
-    std::string                     operator+(double A, const std::string& B);
-    std::string                     operator+(int A, const std::string& B);
-    std::string                     operator+(long A, const std::string& B);
-    std::string                     operator+(size_t A, const std::string& B);
-
-}
-
-namespace RevBayesCore {
-    
-    template <class valueType>
-    class RbVector;
-    
-    std::string                     operator+(const std::string& A, double B);
-    std::string                     operator+(const std::string& A, int B);
-    std::string                     operator+(const std::string& A, long B);
-    std::string                     operator+(const std::string& A, size_t B);
-    std::string                     operator+(const std::string& A, const RbVector<double> &B);
-    std::string                     operator+(const std::string& A, const RbVector<long> &B);
-    std::string                     operator+(double A, const std::string& B);
-    std::string                     operator+(int A, const std::string& B);
-    std::string                     operator+(long A, const std::string& B);
-    std::string                     operator+(size_t A, const std::string& B);
-    
-}
-
-
-std::string                     operator+(const std::string& A, double B);
-std::string                     operator+(const std::string& A, int B);
-std::string                     operator+(const std::string& A, long B);
-std::string                     operator+(const std::string& A, size_t B);
-//std::string                     operator+(const std::string& A, const RevBayesCore::RbVector<double> &B);
-//std::string                     operator+(const std::string& A, const RevBayesCore::RbVector<long> &B);
-std::string                     operator+(double A, const std::string& B);
-std::string                     operator+(int A, const std::string& B);
-std::string                     operator+(long A, const std::string& B);
-std::string                     operator+(size_t A, const std::string& B);
-
 
 #endif

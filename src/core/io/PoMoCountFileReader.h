@@ -5,6 +5,7 @@
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "HomologousDiscreteCharacterData.h"
 #include "PoMoState.h"
+#include "RbFileManager.h"
 
 #include <string>
 #include <vector>
@@ -31,7 +32,7 @@ namespace RevBayesCore {
 
 	public:
 
-		PoMoCountFileReader(const std::string &fn, const size_t virtualPopulationSize = 9, std::string d="", size_t ns=0);
+                PoMoCountFileReader(const RevBayesCore::path &fn, const size_t virtualPopulationSize = 9, std::string d="", size_t ns=0);
 
 		const size_t 																getNumberOfPopulations( void );
 		const size_t 																getNumberOfSites( void );

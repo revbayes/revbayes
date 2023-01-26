@@ -15,7 +15,7 @@
 #include <windows.h>
 #   endif
 
-
+using namespace RevBayesCore;
 
 
 /** Default constructor: The default settings are first read, and
@@ -27,9 +27,8 @@ RbSettings::RbSettings(void)
 }
 
 
-const std::string& RbSettings::getModuleDir( void ) const
+const path& RbSettings::getModuleDir( void ) const
 {
-    
     return moduleDir;
 }
 
@@ -108,7 +107,7 @@ std::string RbSettings::getOption(const std::string &key) const
 {
     if ( key == "moduledir" )
     {
-        return moduleDir;
+        return moduleDir.string();
     }
     else if ( key == "outputPrecision" )
     {
@@ -198,13 +197,6 @@ double RbSettings::getTolerance( void ) const
 }
 
 
-const std::string& RbSettings::getWorkingDirectory( void ) const
-{
-    
-    return workingDirectory;
-}
-
-
 /** Initialize the user settings */
 #define	MAX_DIR_PATH	2048
 void RbSettings::initializeUserSettings(void)
@@ -229,20 +221,17 @@ void RbSettings::initializeUserSettings(void)
     beagleDynamicScalingFrequency = 100;        // dynamic rescale every 100 evaluations by default
 #endif /* RB_BEAGLE */
     
-    std::string user_dir = RevBayesCore::RbFileManager::expandUserDir("~");
+    path user_dir = RevBayesCore::expandUserDir("~");
     
     // read the ini file, override defaults if applicable
-    std::string settings_file_name = ".RevBayes.ini";
-    RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(user_dir, settings_file_name);
+    path settings_file_name = user_dir / ".RevBayes.ini";
 
- 	
     //    bool failed = false; //unused
-    if ( fm.isFile() )
+    if ( is_regular_file( settings_file_name) )
     {
-        std::ifstream readStream;
-        fm.openFile( readStream );
+        std::ifstream readStream( settings_file_name.string() );
         std::string readLine = "";
-        while ( fm.safeGetline(readStream,readLine) )
+        while ( safeGetline(readStream,readLine) )
         {
             std::vector<std::string> tokens = std::vector<std::string>();
             StringUtilities::stringSplit(readLine, "=", tokens);
@@ -252,42 +241,9 @@ void RbSettings::initializeUserSettings(void)
             }
         }
         
-        fm.closeFile(readStream);
+        readStream.close();
     }
 
-    // initialize the current directory to be the directory the binary is sitting in
-#	ifdef _WIN32
-    
-    char buffer[MAX_DIR_PATH];
-    GetModuleFileName( NULL, buffer, MAX_DIR_PATH );
-    std::string::size_type pos = std::string( buffer ).find_last_of( "\\/" );
-    workingDirectory = std::string( buffer ).substr( 0, pos);
-
-#	else
-
-    char cwd[MAX_DIR_PATH+1];
-	if ( getcwd(cwd, MAX_DIR_PATH+1) )
-    {
-        std::string pathSeparator = "/";
-        
-        std::string curdir = cwd;
-        
-        if ( curdir.at( curdir.length()-1 ) == pathSeparator[0] )
-        {
-            curdir.erase( curdir.length()-1 );
-        }
-        
-        workingDirectory = curdir;
-	}
-    else
-    {
-        workingDirectory = "";
-    }
-    
-#   endif
-
-    
-    // save the current settings for the future.
 //    writeUserSettings();
 }
 
@@ -315,17 +271,14 @@ void RbSettings::listOptions() const
 }
 
 
-void RbSettings::setModuleDir(const std::string &md)
+void RbSettings::setModuleDir(const path &md)
 {
-    
-    RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(md);
-    
-    if ( !fm.isDirectory() )
+    if ( not is_directory(md) )
     {
-        throw RbException("Cannot set the help directory to '" + md + "'.");
+        throw RbException()<<"Cannot set the help directory to "<<md<<".";
     }
     
-    moduleDir = fm.getFullFilePath();
+    moduleDir = md;
     
     // save the current settings for the future.
     writeUserSettings();
@@ -577,33 +530,16 @@ void RbSettings::setTolerance(double t)
 }
 
 
-void RbSettings::setWorkingDirectory(const std::string &wd)
-{
-    
-    RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager( wd );
-    
-    if ( !fm.isDirectory() )
-    {
-        throw RbException("Cannot set the current directory to '" + wd + "'.");
-    }
-    
-    workingDirectory = fm.getFullFilePath();
-    
-    // save the current settings for the future.
-    writeUserSettings();
-}
-
-
 void RbSettings::writeUserSettings( void )
 {
-    std::string user_dir = RevBayesCore::RbFileManager::expandUserDir("~");
+    // Does this always work on windows?
+    path user_dir = expandUserDir("~");
     
     // open the ini file
-    std::string settings_file_name = ".RevBayes.ini";
-    RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(user_dir, settings_file_name);
+    path settings_file_name = user_dir / ".RevBayes.ini";
 
-    std::ofstream writeStream;
-    fm.openFile( writeStream );
+    std::ofstream writeStream( settings_file_name.string() );
+    assert( moduleDir == "modules" or is_directory(moduleDir) );
     writeStream << "moduledir=" << moduleDir << std::endl;
     writeStream << "outputPrecision=" << outputPrecision << std::endl;
     writeStream << "printNodeIndex=" << (printNodeIndex ? "true" : "false") << std::endl;
@@ -612,17 +548,6 @@ void RbSettings::writeUserSettings( void )
     writeStream << "useScaling=" << (useScaling ? "true" : "false") << std::endl;
     writeStream << "scalingDensity=" << scalingDensity << std::endl;
     writeStream << "collapseSampledAncestors=" << (collapseSampledAncestors ? "true" : "false") << std::endl;
-
-//#if defined( RB_BEAGLE )
-//    writeStream << "useBeagle=" << (useBeagle ? "true" : "false") << std::endl;
-//    writeStream << "beagleDevice=" << beagleDevice << std::endl;
-//    writeStream << "beagleResource=" << beagleResource << std::endl;
-//    writeStream << "beagleUseDoublePrecision=" << (beagleUseDoublePrecision ? "true" : "false") << std::endl;
-//    writeStream << "beagleMaxCPUThreads=" << beagleMaxCPUThreads << std::endl;
-//    writeStream << "beagleScalingMode=" << beagleScalingMode << std::endl;
-//    writeStream << "beagleDynamicScalingFrequency=" << beagleDynamicScalingFrequency << std::endl;
-//#endif /* RB_BEAGLE */
-    
-    fm.closeFile( writeStream );
+    writeStream.close();
 
 }

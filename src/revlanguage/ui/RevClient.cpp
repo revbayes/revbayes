@@ -11,7 +11,8 @@
 #include "RevPtr.h"
 #include "TypeSpec.h"
 #include "boost/algorithm/string/trim.hpp"
-
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 
 #ifdef RB_MPI
 #include <mpi.h>
@@ -39,15 +40,18 @@ const char* prompt = default_prompt;
 
 using namespace RevLanguage;
 
-std::vector<std::string> getFileList(const std::string &path)
+namespace fs = boost::filesystem;
+
+std::vector<std::string> getFileList(const RevBayesCore::path& dir)
 {
+    std::vector<RevBayesCore::path> filenames;
+
+    RevBayesCore::setStringWithNamesOfFilesInDirectory( RevBayesCore::current_path() / dir, filenames, false );
+
     std::vector<std::string> v;
-    
-    RbSettings& s = RbSettings::userSettings();
-    const std::string& wd = s.getWorkingDirectory();
-    
-    RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(wd, path);
-    fm.setStringWithNamesOfFilesInDirectory( v, false );
+
+    for(auto& filename: filenames)
+        v.push_back( filename.string() );
     
     return v;
 }

@@ -95,6 +95,7 @@
 #include "Func_earlyBurstRates.h"
 #include "Func_extantTree.h"
 #include "Func_formatDiscreteCharacterData.h"
+#include "Func_inferAncestralPopSize.h"
 #include "Func_maximumTree.h"
 #include "Func_mrcaIndex.h"
 #include "Func_nodeAgeByID.h"
@@ -118,13 +119,31 @@
 
 #include "Func_FlowT2Populations.h"
 
+/* Frequency functions (in folder "functions/phylogenetics/frequencies") */
+#include "Func_F1x4.h"
+#include "Func_F3x4.h"
+#include "Func_F2x4.h"
+
 /* Rate matrix functions (in folder "functions/phylogenetics/ratematrix") */
 #include "Func_BinaryMutationCoalescentRateMatrix.h"
 #include "Func_blosum62.h"
 #include "Func_chromosomes.h"
 #include "Func_chromosomesPloidy.h"
+
 #include "Func_codonSynonymousNonsynonymousRateMatrix.h"
 #include "Func_codonSynonymousNonsynonymousHKYRateMatrix.h"
+#include "Func_GoldmanYang94RateMatrix.h"
+#include "Func_MuseGaut94RateMatrix.h"
+#include "Func_MuseGaut94KRateMatrix.h"
+#include "Func_X3RateMatrix.h"
+#include "Func_dNdSRateMatrix.h"
+#include "Func_FMutSelRateMatrix.h"
+#include "Func_FMutSel0RateMatrix.h"
+#include "Func_MutSelRateMatrix.h"
+#include "Func_MutSelAARateMatrix.h"
+
+#include "Func_X2RateMatrix.h"
+
 #include "Func_covarionRateMatrix.h"
 #include "Func_covarion.h"
 #include "Func_cpRev.h"
@@ -293,8 +312,21 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_blosum62()                                    );
         addFunction( new Func_chromosomes()                                 );
         addFunction( new Func_chromosomesPloidy()                           );
+
         addFunction( new Func_codonSynonymousNonsynonymousRateMatrix()      );
         addFunction( new Func_codonSynonymousNonsynonymousHKYRateMatrix()   );
+        addFunction( new Func_GoldmanYang94RateMatrix()                     );
+        addFunction( new Func_MuseGaut94RateMatrix()                        );
+        addFunction( new Func_MuseGaut94KRateMatrix()                       );
+        addFunction( new Func_X3RateMatrix()                                );
+        addFunction( new Func_dNdSRateMatrix()                              );
+        addFunction( new Func_FMutSelRateMatrix()                           );
+        addFunction( new Func_FMutSel0RateMatrix()                          );
+        addFunction( new Func_MutSelRateMatrix()                            );
+        addFunction( new Func_MutSelAARateMatrix()                          );
+
+        addFunction( new Func_X2RateMatrix()                                );
+
         addFunction( new Func_covarionRateMatrix()                          );
         addFunction( new Func_covarion()                                    );
         addFunction( new Func_cpRev()                                       );
@@ -337,6 +369,11 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_vt()                                          );
         addFunction( new Func_wag()                                         );
 
+        /* frequency functions (in folder "function/phylogenetics/frequencies" */
+        addFunction( new Func_F1x4()                                        );
+        addFunction( new Func_F3x4()                                        );
+        addFunction( new Func_F2x4()                                        );
+
         /* rate maps used for data augmentation (in folder "functions/evolution/ratemap") */
         addFunction( new Func_adjacentRateModifier() );
         addFunction( new Func_biogeo_de() );
@@ -377,6 +414,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_formatDiscreteCharacterData()                     );
         addFunction( new Func_EarlyBurstRates()                                 );
         addFunction( new Func_extantTree()                                      );
+        addFunction( new Func_inferAncestralPopSize()                           );
         addFunction( new Func_maximumTree()                                     );
         addFunction( new Func_mrcaIndex()                                       );
         addFunction( new Func_nodeAgeByID()                                     );
@@ -561,7 +599,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
         // Type conversion
         addFunction( new Proc_StringToInt( )                         );
-        
+
     }
     catch(RbException& rbException)
     {

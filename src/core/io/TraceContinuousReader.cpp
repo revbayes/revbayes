@@ -19,7 +19,7 @@ using namespace RevBayesCore;
  * \param[in]     fn       The name of the file where the data is stored.
  * \param[in]     delim    The delimiter between the columns.
  */
-TraceContinuousReader::TraceContinuousReader(const std::string &fn, std::string delim) : DelimitedDataReader( fn, delim )
+TraceContinuousReader::TraceContinuousReader(const path &fn, std::string delim) : DelimitedDataReader( fn, delim )
 {
     
     const std::vector<std::string>& headers = chars[0];

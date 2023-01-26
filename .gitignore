@@ -22,6 +22,10 @@ history.txt
 /GPATH
 /GRTAGS
 /GTAGS
+src/GPATH
+src/GRTAGS
+src/GTAGS
+.ccls-cache/
 # generated files
 validation/output*
 src/meson.build
@@ -35,3 +39,6 @@ doxygen/DoxygenWarningLog.txt
 .cproject
 .project
 .settings/
+.vscode
+revbayes.code-workspace
+

@@ -24,7 +24,7 @@
 
 using namespace RevBayesCore;
 
-RevBayesCore::PhylowoodConverter::PhylowoodConverter(const std::string &sfn, const std::string &tfn, const std::string &gfn, const std::string &pfn, double b, const std::string& ct, const std::string& bt) :
+RevBayesCore::PhylowoodConverter::PhylowoodConverter(const path &sfn, const path &tfn, const path &gfn, const path &pfn, double b, const std::string& ct, const std::string& bt) :
     stateFilename(sfn),
     treeFilename(tfn),
     geoFilename(gfn),
@@ -78,15 +78,13 @@ void PhylowoodConverter::convert(void) {
     
     std::string s = buildPhylowoodString();
     
-    RbFileManager fm = RbFileManager(phwFilename);
-    fm.createDirectoryForFile();
+    createDirectoryForFile( phwFilename );
 
     // open the stream to the file
     std::fstream outStream;
-    outStream.open( fm.getFullFileName().c_str(), std::fstream::out );
+    outStream.open( phwFilename.string(), std::fstream::out );
     outStream << s;
     outStream.close();
-
 }
 
 

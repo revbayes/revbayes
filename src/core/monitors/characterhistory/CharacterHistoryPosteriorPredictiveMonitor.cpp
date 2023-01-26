@@ -26,7 +26,7 @@
 using namespace RevBayesCore;
 
 /* Constructor */
-CharacterHistoryPosteriorPredictiveMonitor::CharacterHistoryPosteriorPredictiveMonitor(TypedDagNode<Tree>* t,  std::vector<StochasticNode<BranchHistory>* > bh, unsigned long g, const std::string &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sr) : Monitor(g,t),
+CharacterHistoryPosteriorPredictiveMonitor::CharacterHistoryPosteriorPredictiveMonitor(TypedDagNode<Tree>* t,  std::vector<StochasticNode<BranchHistory>* > bh, unsigned long g, const path &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sr) : Monitor(g,t),
     outStream(),
     tree( t ),
     branchHistories(bh),
@@ -223,15 +223,13 @@ void CharacterHistoryPosteriorPredictiveMonitor::monitor(unsigned long gen) {
 /** open the file stream for printing */
 void CharacterHistoryPosteriorPredictiveMonitor::openStream(bool reopen)
 {
-    
-    RbFileManager fm = RbFileManager(filename);
-    fm.createDirectoryForFile();
+    createDirectoryForFile(filename);
     
     // open the stream to the file
     if (append)
-        outStream.open( fm.getFullFileName().c_str(), std::fstream::out | std::fstream::app);
+        outStream.open( filename.string(), std::fstream::out | std::fstream::app);
     else
-        outStream.open( fm.getFullFileName().c_str(), std::fstream::out);
+        outStream.open( filename.string(), std::fstream::out);
 }
 
 /** Print header for monitored values */

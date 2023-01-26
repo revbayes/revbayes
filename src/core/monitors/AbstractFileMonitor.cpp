@@ -10,7 +10,7 @@ namespace RevBayesCore { class DagNode; }
 using namespace RevBayesCore;
 
 
-AbstractFileMonitor::AbstractFileMonitor(DagNode *n, unsigned long g, const std::string &fname, bool ap, bool wv) : Monitor(g,n),
+AbstractFileMonitor::AbstractFileMonitor(DagNode *n, unsigned long g, const path &fname, bool ap, bool wv) : Monitor(g,n),
     out_stream(),
     filename( fname ),
     working_file_name( fname ),
@@ -20,7 +20,7 @@ AbstractFileMonitor::AbstractFileMonitor(DagNode *n, unsigned long g, const std:
 {}
 
 
-AbstractFileMonitor::AbstractFileMonitor(const std::vector<DagNode *> &n, unsigned long g, const std::string &fname, bool ap, bool wv) : Monitor(g,n),
+AbstractFileMonitor::AbstractFileMonitor(const std::vector<DagNode *> &n, unsigned long g, const path &fname, bool ap, bool wv) : Monitor(g,n),
     out_stream(),
     filename( fname ),
     working_file_name( fname ),
@@ -59,17 +59,10 @@ AbstractFileMonitor::~AbstractFileMonitor(void)
 
 void AbstractFileMonitor::addFileExtension(const std::string &s, bool dir)
 {   
-    // compute the working filename
-    if ( dir == false )
-    {
-        RbFileManager fm = RbFileManager(filename);
-        working_file_name = fm.getFilePath() + fm.getPathSeparator() + fm.getFileNameWithoutExtension() + s + "." + fm.getFileExtension();
-    }
+    if (dir)
+        working_file_name = filename.parent_path() / s / filename.filename();
     else
-    {
-        RbFileManager fm = RbFileManager(filename);
-        working_file_name = fm.getFilePath() + fm.getPathSeparator() + s + fm.getPathSeparator() + fm.getFileName();
-    }
+        working_file_name = appendToStem(filename, s);
 }
 
 
@@ -87,20 +80,18 @@ bool AbstractFileMonitor::isFileMonitor( void ) const
 
 void AbstractFileMonitor::openStream( bool reopen )
 {
-    
-    RbFileManager f = RbFileManager(working_file_name);
-    f.createDirectoryForFile();
+    createDirectoryForFile( working_file_name );
             
     // open the stream to the file
     if ( append == true || reopen == true )
     {
-        out_stream.open( f.getFullFileName().c_str(), std::fstream::in | std::fstream::out | std::fstream::app);
+        out_stream.open( working_file_name.string(), std::fstream::in | std::fstream::out | std::fstream::app);
     }
     else
     {
-        out_stream.open( f.getFullFileName().c_str(), std::fstream::out);
+        out_stream.open( working_file_name.string(), std::fstream::out);
         out_stream.close();
-        out_stream.open( f.getFullFileName().c_str(), std::fstream::in | std::fstream::out);
+        out_stream.open( working_file_name.string(), std::fstream::in | std::fstream::out);
     }
         
 }

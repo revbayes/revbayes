@@ -1361,7 +1361,7 @@ std::vector< std::pair<size_t, double> > JointAncestralStateTrace::parseSIMMAPFo
  * Summarizes sampled character histories for a vector of stochastic character map traces for each node of a given summary tree.
  *
  */
-void JointAncestralStateTrace::summarizeCharacterMaps(Tree input_tree, std::string filename, bool verbose, std::string separator)
+void JointAncestralStateTrace::summarizeCharacterMaps(Tree input_tree, const path& filename, bool verbose, std::string separator)
 {
     std::vector<TopologyNode*> summary_nodes;
     bool condition_on_tree = false;
@@ -1399,10 +1399,8 @@ void JointAncestralStateTrace::summarizeCharacterMaps(Tree input_tree, std::stri
     }
     
     // open stream for file output
-    RbFileManager fm = RbFileManager(filename);
-    fm.createDirectoryForFile();
-    std::fstream out;
-    out.open( fm.getFullFileName().c_str(), std::fstream::out);
+    createDirectoryForFile( filename );
+    std::ofstream out( filename.string() );
     
     // write column headers
     out << "iteration" << separator;
@@ -1518,7 +1516,7 @@ void JointAncestralStateTrace::summarizeCharacterMaps(Tree input_tree, std::stri
             }
             else
             {
-                throw RbException("There were no sampled character histories for node " + StringUtilities::toString(sample_clade_index + 1) + " in the summary tree.");
+                throw RbException()<<"There were no sampled character histories for node "<<(sample_clade_index + 1)<<" in the summary tree.";
             }
             
             // write output if there was no change along the branch
@@ -1768,10 +1766,12 @@ std::string JointAncestralStateTrace::getSiteState( const std::string &site_samp
     {
         states.push_back(state);
     }
+
     if ( states.size() == 0 )
     {
-        throw RbException("Problem while getting state for site '" + StringUtilities::toString(site) + "'.");
+        throw RbException()<<"Problem while getting state for site '"<<site<<"'.";
     }
+
     if (site >= states.size())
     {
         site = 0;

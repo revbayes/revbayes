@@ -232,7 +232,7 @@ RevObject& RevVariable::getRevObject(void) const
         std::vector<Argument> args;
         for (size_t i = 1; i <= max_index; ++i)
         {
-            std::string element_identifier = name + "[" + i + "]";
+            std::string element_identifier = name + "[" + std::to_string(i) + "]";
             RevPtr<RevVariable>& element_var = env.getVariable( element_identifier );
             // check that the element is not NULL
             if ( element_var == NULL || element_var->getRevObject() == RevNullObject::getInstance() )

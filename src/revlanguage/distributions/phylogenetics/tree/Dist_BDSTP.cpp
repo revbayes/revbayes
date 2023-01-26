@@ -8,7 +8,7 @@
 #include "Dist_BDSTP.h"
 #include "ModelVector.h"
 #include "OptionRule.h"
-#include "EpisodicBirthDeathSamplingTreatmentProcess.h"
+#include "BirthDeathSamplingTreatmentProcess.h"
 #include "Probability.h"
 #include "RealPos.h"
 #include "RlString.h"
@@ -182,27 +182,27 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_BDSTP::createDistribution( void ) 
         Pt = static_cast<const ModelVector<RealPos> &>( Phi_timeline->getRevObject() ).getDagNode();
     }
 
-    d = new RevBayesCore::EpisodicBirthDeathSamplingTreatmentProcess(sa,
-                                                                     b_s,
-                                                                     d_s,
-                                                                     s_s,
-                                                                     t_s,
-                                                                     b_e,
-                                                                     d_e,
-                                                                     s_e,
-                                                                     t_e,
-                                                                     gt,
-                                                                     lt,
-                                                                     mt,
-                                                                     pt,
-                                                                     rt,
-                                                                     Lt,
-                                                                     Mt,
-                                                                     Pt,
-                                                                     cond,
-                                                                     tn,
-                                                                     uo,
-                                                                     init);
+    d = new RevBayesCore::BirthDeathSamplingTreatmentProcess(sa,
+                                                             b_s,
+                                                             d_s,
+                                                             s_s,
+                                                             t_s,
+                                                             b_e,
+                                                             d_e,
+                                                             s_e,
+                                                             t_e,
+                                                             gt,
+                                                             lt,
+                                                             mt,
+                                                             pt,
+                                                             rt,
+                                                             Lt,
+                                                             Mt,
+                                                             Pt,
+                                                             cond,
+                                                             tn,
+                                                             uo,
+                                                             init);
 
     return d;
 }
@@ -316,7 +316,7 @@ const MemberRules& Dist_BDSTP::getParameterRules(void) const
         event_sampling_paramTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
         std::vector<std::string> aliases_event_sampling;
         aliases_event_sampling.push_back("Phi");
-        aliases_event_sampling.push_back("Psi");
+        aliases_event_sampling.push_back("rho");
         dist_member_rules.push_back( new ArgumentRule( aliases_event_sampling,     event_sampling_paramTypes, "The probability of sampling taxa at sampling events (at present only if input is scalar).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         dist_member_rules.push_back( new ArgumentRule( "R",       other_event_paramTypes, "The treatment probabilities for the sampling events (excluding sampling at present).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
@@ -333,7 +333,7 @@ const MemberRules& Dist_BDSTP::getParameterRules(void) const
         dist_member_rules.push_back( new ArgumentRule( "MuTimeline",        ModelVector<RealPos>::getClassTypeSpec(), "Times at which all taxa die with some probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         std::vector<std::string> aliases_event_sampling_timeline;
         aliases_event_sampling_timeline.push_back("PhiTimeline");
-        aliases_event_sampling_timeline.push_back("PsiTimeline");
+        aliases_event_sampling_timeline.push_back("rhoTimeline");
         dist_member_rules.push_back( new ArgumentRule( aliases_event_sampling_timeline,       ModelVector<RealPos>::getClassTypeSpec(), "Times at which all taxa are sampled with some probability. There is always additionally a sampling event at the present.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         std::vector<std::string> optionsCondition;
@@ -385,7 +385,7 @@ void Dist_BDSTP::setConstParameter(const std::string& name, const RevPtr<const R
     {
         mu = var;
     }
-    else if ( name == "phi" || name == "psi" || name == "phi/psi" )
+    else if ( name == "phi" || name == "psi" )
     {
         phi = var;
     }
@@ -401,7 +401,7 @@ void Dist_BDSTP::setConstParameter(const std::string& name, const RevPtr<const R
     {
         Mu = var;
     }
-    else if ( name == "Phi" || name == "Psi" || name == "Phi/Psi" )
+    else if ( name == "Phi" || name == "rho" )
     {
         Phi = var;
     }
@@ -426,7 +426,7 @@ void Dist_BDSTP::setConstParameter(const std::string& name, const RevPtr<const R
     {
         mu_timeline = var;
     }
-    else if ( name == "phiTimeline" || name == "psiTimeline" || name == "phiTimeline/psiTimeline" )
+    else if ( name == "phiTimeline" || name == "psiTimeline" )
     {
         phi_timeline = var;
     }
@@ -442,7 +442,7 @@ void Dist_BDSTP::setConstParameter(const std::string& name, const RevPtr<const R
     {
         Mu_timeline = var;
     }
-    else if ( name == "PhiTimeline" || name == "PsiTimeline" || name == "PhiTimeline/PsiTimeline" )
+    else if ( name == "PhiTimeline" || name == "rhoTimeline" )
     {
         Phi_timeline = var;
     }

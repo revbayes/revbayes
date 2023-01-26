@@ -1263,7 +1263,7 @@ double RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::
 
         // get random set of characters to contract (remove)
 //        std::vector<size_t> contractCharacters( sampledCharacters.begin(), sampledCharacters.end() );
-        std::random_shuffle( contractCharacters.begin(), contractCharacters.end() );
+        deprecated::random_shuffle( contractCharacters.begin(), contractCharacters.end());
         
         // remove areas in contractCharacters
         for (size_t i = 0; i < contractCharacters.size(); i++) {
@@ -1276,7 +1276,7 @@ double RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::
         // if we are losing the last character
         if ( onCharacters.size() == 2 ) {
             
-//            std::random_shuffle( onCharacters.begin(), onCharacters.end() );
+//            deprecated::random_shuffle( onCharacters.begin(), onCharacters.end());
             
             size_t site_index = contractCharacters[0];
             static_cast<CharacterEventDiscrete*>( nodeChildState[site_index] )->setState( 1 );
@@ -1293,7 +1293,7 @@ double RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::
 //         Sample cladogenetic states for trunk
         // get random set of characters to contract (remove)
 //        std::vector<size_t> expandCharacters( sampledCharacters.begin(), sampledCharacters.end() );
-        std::random_shuffle( expandCharacters.begin(), expandCharacters.end() );
+        deprecated::random_shuffle( expandCharacters.begin(), expandCharacters.end());
         
         std::set<size_t>::iterator it_s;
         for (size_t i = 0; i < expandCharacters.size(); i++)
@@ -1706,7 +1706,7 @@ void RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::se
     else if (onCharacters.size() == 2) {
         swapCharacters.push_back( onCharacters[0] );
         swapCharacters.push_back( onCharacters[1] );
-        std::random_shuffle( swapCharacters.begin(), swapCharacters.end() );
+        deprecated::random_shuffle( swapCharacters.begin(), swapCharacters.end());
         return;
     }
     
@@ -1744,8 +1744,8 @@ void RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::se
     size_t s_left = 0;
     size_t s_right = 0;
     do {
-        std::random_shuffle( leftCharacters.begin(), leftCharacters.end() );
-        std::random_shuffle( rightCharacters.begin(), rightCharacters.end() );
+        deprecated::random_shuffle( leftCharacters.begin(), leftCharacters.end());
+        deprecated::random_shuffle( rightCharacters.begin(), rightCharacters.end());
         
         s_left = leftCharacters[0];
         s_right = rightCharacters[0];
@@ -1754,7 +1754,7 @@ void RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::se
     
     swapCharacters.push_back( s_left );
     swapCharacters.push_back( s_right );
-    std::random_shuffle( swapCharacters.begin(), swapCharacters.end() );
+    deprecated::random_shuffle( swapCharacters.begin(), swapCharacters.end());
     
     return;
 }
