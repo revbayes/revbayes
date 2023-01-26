@@ -64,17 +64,7 @@ class RbSettings {
     void                            setBeagleDynamicScalingFrequency(size_t w);         //!< Set the BEAGLE evaluation frequency for calculation of updated numerical scaling factors
 #endif /* RB_BEAGLE */
 
-        // setters
-        void                        setCollapseSampledAncestors(bool);                  //!< Set whether to should display sampled ancestors as 2-degree nodes when printing
-        void                        setLineWidth(size_t w);                             //!< Set the line width that will be used for the screen width when printing
-        void                        setModuleDir(const RevBayesCore::path &md);         //!< Set the module directory name
-        void                        setOutputPrecision(size_t p);                       //!< Set the default output precision width
-        void                        setOption(const std::string &k, const std::string &v, bool write);  //!< Set the key value pair.
-        void                        setPrintNodeIndex(bool tf);                         //!< Set the flag whether we should print node indices
-        void                        setScalingDensity(size_t w);                        //!< Set the scaling density n, where CTMC likelihoods are scaled every n-th node (min 1)
-        void                        setTolerance(double t);                             //!< Set the tolerance for comparing double
-        void                        setUseScaling(bool s);                              //!< Set the flag whether we should scale the likelihood in CTMC models
-    
+
     private:
                                     RbSettings(void);                                   //!< Default constructor
                                     RbSettings(const RbSettings&) {}                    //!< Prevent copy
