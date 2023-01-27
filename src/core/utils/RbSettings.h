@@ -45,7 +45,7 @@ class RbSettings {
     // setters
     void                            setCollapseSampledAncestors(bool);                  //!< Set whether to should display sampled ancestors as 2-degree nodes when printing
     void                            setLineWidth(size_t w);                             //!< Set the line width that will be used for the screen width when printing
-    void                            setModuleDir(const std::string &md);                //!< Set the module directory name
+    void                            setModuleDir(const RevBayesCore::path &md);         //!< Set the module directory name
     void                            setOutputPrecision(size_t p);                       //!< Set the default output precision width
     void                            setOption(const std::string &k, const std::string &v, bool write);  //!< Set the key value pair.
     void                            setPrintNodeIndex(bool tf);                         //!< Set the flag whether we should print node indices
