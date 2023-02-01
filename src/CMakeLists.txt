@@ -85,9 +85,6 @@ if ("${RB_BEAGLE}" STREQUAL "ON")
       set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${BEAGLE_COMPILE_FLAGS}")
       set(CMAKE_CXX_LINK_FLAGS    "${CMAKE_CXX_LINK_FLAGS}    ${BEAGLE_LINK_FLAGS}")
 
-      INCLUDE_DIRECTORIES(${BEAGLE_INCLUDE_DIRS})
-      LINK_DIRECTORIES(${BEAGLE_LIBRARY_DIRS})
-	
     else()
       #-- Alternatively, we could search for it on CMAKE path
       #find_package(BEAGLE NAMES beagle-lib hmsbeagle hmsbeagle-1 REQUIRED)
@@ -99,6 +96,9 @@ if ("${RB_BEAGLE}" STREQUAL "ON")
       get_cmake_property(_variableNames VARIABLES)
 
     endif()
+
+    include_directories(${BEAGLE_INCLUDE_DIRS})
+    link_directories(${BEAGLE_LIBRARY_DIRS})
 
     message("  BEAGLE_INCLUDE_DIRS: ${BEAGLE_INCLUDE_DIRS}")
     message("  BEAGLE_LIBRARY_DIRS: ${BEAGLE_LIBRARY_DIRS}")
@@ -115,13 +115,15 @@ if ("${RB_USE_EIGEN3}" STREQUAL "ON")
       find_package(PkgConfig REQUIRED)
       pkg_search_module(EIGEN REQUIRED eigen3 eigen Eigen3 Eigen)
 
-      #-- If we could not set it, then we try to search for it on CMAKE path
+      #-- If that doesn't work, then we could to search for it in the CMAKE path
       # find_package(EIGEN NAMES Eigen3 Eigen eigen3 eigen REQUIRED)
-      # include_directories(${EIGEN_INCLUDEDIR})
       # set(EIGEN_COMPILE_FLAGS "-I${EIGEN_INCLUDEDIR}")
       # set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${EIGEN_COMPILE_FLAGS}")
-
+  else()
+      set(EIGEN_INCLUDE_DIRS ${EIGEN_INCLUDEDIR})
   endif()
+
+  include_directories(${EIGEN_INCLUDE_DIRS})
 
   message("EIGEN3 information:")
   message("  EIGEN_INCLUDE_DIRS : ${EIGEN_INCLUDE_DIRS}")
