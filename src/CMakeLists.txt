@@ -61,64 +61,76 @@ endif()
 
 
 if ("${RB_BEAGLE}" STREQUAL "ON")
+    ADD_DEFINITIONS(-DRB_BEAGLE)
+    message("BEAGLE configuration results:")
+
     #-- Try to set BEAGLE root path from the environment variable fist
     set(BEAGLE_ROOT "$ENV{BEAGLE_ROOT}" )
     if( NOT BEAGLE_ROOT )
 	#-- If there is no environment variable, try to set from command line 
         if ( NOT "${RB_BEAGLE_ROOT}" STREQUAL "")
-	    set(BEAGLE_ROOT "${RB_BEAGLE_ROOT}")
-        else()
-            # Not sure which of the following is a better way to default to search for beagle...
-
-            #-- If we could not set it, then we try to search for it on CMAKE path
-	    #find_package(BEAGLE NAMES beagle-lib hmsbeagle hmsbeagle-1 REQUIRED)
-            
-            #-- Alternatively try pkg-config   
-	    find_package(PkgConfig REQUIRED)
-            PKG_CHECK_MODULES(BEAGLE REQUIRED beagle-lib hmsbeagle-1 hmsbeagle)
+	  set(BEAGLE_ROOT "${RB_BEAGLE_ROOT}")
         endif()
     endif()
+
+    if( BEAGLE_ROOT )
+      message("  BEAGLE_ROOT:        ${BEAGLE_ROOT}")
+      set(BEAGLE_INCLUDEDIR       ${BEAGLE_ROOT}/include/libhmsbeagle-1)	
+      set(BEAGLE_INCLUDE_DIRS     ${BEAGLE_INCLUDEDIR})
+      set(BEAGLE_LIBRARY_DIRS     ${BEAGLE_ROOT}/lib)	
+
+      set(BEAGLE_COMPILE_FLAGS    "-I${BEAGLE_INCLUDEDIR} -I${BEAGLE_ROOT}/libhmsbeagle")
+      set(BEAGLE_LINK_FLAGS       "-L${BEAGLE_ROOT}/lib/libhmsbeagle-1 -L${BEAGLE_ROOT}/lib -lhmsbeagle")
+
+      set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${BEAGLE_COMPILE_FLAGS}")
+      set(CMAKE_CXX_LINK_FLAGS    "${CMAKE_CXX_LINK_FLAGS}    ${BEAGLE_LINK_FLAGS}")
+
+      INCLUDE_DIRECTORIES(${BEAGLE_INCLUDE_DIRS})
+      LINK_DIRECTORIES(${BEAGLE_LIBRARY_DIRS})
 	
-    set(BEAGLE_INCLUDE_DIR      ${BEAGLE_ROOT}/include/libhmsbeagle-1)	
-    set(BEAGLE_LIBRARY_DIRS     ${BEAGLE_ROOT}/lib)	
+    else()
+      #-- Alternatively, we could search for it on CMAKE path
+      #find_package(BEAGLE NAMES beagle-lib hmsbeagle hmsbeagle-1 REQUIRED)
+            
+      #-- Find beagle with pkg-config   
+      find_package(PkgConfig REQUIRED)
+      pkg_search_module(BEAGLE REQUIRED hmsbeagle-1 beagle-lib hmsbeagle)
 
-    set(BEAGLE_COMPILE_FLAGS    "-I${BEAGLE_INCLUDE_DIR} -I${BEAGLE_ROOT}/libhmsbeagle")
-    set(BEAGLE_LINK_FLAGS       "-L${BEAGLE_ROOT}/lib/libhmsbeagle-1 -L${BEAGLE_ROOT}/lib -lhmsbeagle")
+      get_cmake_property(_variableNames VARIABLES)
 
-    set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${BEAGLE_COMPILE_FLAGS}")
-    set(CMAKE_CXX_LINK_FLAGS    "${CMAKE_CXX_LINK_FLAGS} ${BEAGLE_LINK_FLAGS}")
+    endif()
 
-    ADD_DEFINITIONS(-DRB_BEAGLE)
-    
-    INCLUDE_DIRECTORIES(${BEAGLE_INCLUDE_DIR})
-    LINK_DIRECTORIES(${BEAGLE_LIBRARY_DIRS})
-        
-    MESSAGE("BEAGLE configuration results:")
-    MESSAGE("  BEAGLE_ROOT:        ${BEAGLE_ROOT}")
-    MESSAGE("  BEAGLE_INCLUDE_DIR: ${BEAGLE_INCLUDE_DIR}")
-    MESSAGE("  BEAGLE_LIBRARY_DIR: ${BEAGLE_LIBRARY_DIRS}")
-
+    message("  BEAGLE_INCLUDE_DIRS: ${BEAGLE_INCLUDE_DIRS}")
+    message("  BEAGLE_LIBRARY_DIRS: ${BEAGLE_LIBRARY_DIRS}")
 endif()
 
 
 if ("${RB_USE_EIGEN3}" STREQUAL "ON")
+
+  add_definitions(-DRB_USE_EIGEN3)
   #-- Try to set the Eigen3 path from the environment variable fist
-  set(EIGEN_INCLUDE_DIR "$ENV{EIGEN_INCLUDE_DIR}" )
-  if( NOT EIGEN_INCLUDE_DIR )
-     #-- If we could not set it, then we try to search for it on CMAKE path
-     find_package(EIGEN NAMES Eigen3 Eigen eigen3 eigen REQUIRED)
+  set(EIGEN_INCLUDEDIR "$ENV{EIGEN_INCLUDE_DIR}" )
+
+  if( NOT EIGEN_INCLUDEDIR )
+      find_package(PkgConfig REQUIRED)
+      pkg_search_module(EIGEN REQUIRED eigen3 eigen Eigen3 Eigen)
+
+      #-- If we could not set it, then we try to search for it on CMAKE path
+      # find_package(EIGEN NAMES Eigen3 Eigen eigen3 eigen REQUIRED)
+      # include_directories(${EIGEN_INCLUDEDIR})
+      # set(EIGEN_COMPILE_FLAGS "-I${EIGEN_INCLUDEDIR}")
+      # set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${EIGEN_COMPILE_FLAGS}")
+
   endif()
 
-   include_directories(${EIGEN_INCLUDE_DIR})
-
-   add_definitions(-DRB_USE_EIGEN3)
-
-   set(EIGEN_COMPILE_FLAGS "-I${EIGEN_INCLUDE_DIR}")
-   set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${EIGEN_COMPILE_FLAGS}")
-
-   MESSAGE("EIGEN3 information:")
-   MESSAGE("  EIGEN_INCLUDE_DIR : ${EIGEN_INCLUDE_DIR}")
+  message("EIGEN3 information:")
+  message("  EIGEN_INCLUDE_DIRS : ${EIGEN_INCLUDE_DIRS}")
 endif()
+
+#      list (SORT _variableNames)
+#      foreach (_variableName ${_variableNames})
+#        message(STATUS "${_variableName}=${${_variableName}}")
+#      endforeach()
 
 
 ##### rpath: where to find shared libraries #####
@@ -169,36 +181,36 @@ if (BOOST_INCLUDEDIR OR BOOST_LIBRARYDIR OR DEFINED ENV{BOOST_INCLUDEDIR} OR DEF
 endif()
 
 # Report the options that the control how we are looking for boost
-MESSAGE("Boost location hints:")
+message("Boost location hints:")
 if (BOOST_ROOT)
-  MESSAGE("  BOOST_ROOT: ${BOOST_ROOT}")
+  message("  BOOST_ROOT: ${BOOST_ROOT}")
 endif()
 if (DEFINED ENV{BOOST_ROOT})
-  MESSAGE("  ENV{BOOST_ROOT}: $ENV{BOOST_ROOT}")
+  message("  ENV{BOOST_ROOT}: $ENV{BOOST_ROOT}")
 endif()
 if (NOT DEFINED BOOST_ROOT AND NOT DEFINED ENV{BOOST_ROOT})
-  MESSAGE("  BOOST_ROOT not set")
+  message("  BOOST_ROOT not set")
 endif()
 if (BOOST_INCLUDEDIR)
-  MESSAGE("  BOOST_INCLUDEDIR: ${BOOST_INCLUDEDIR}")
+  message("  BOOST_INCLUDEDIR: ${BOOST_INCLUDEDIR}")
 endif()
 if (DEFINED ENV{BOOST_INCLUDEDIR})
-  MESSAGE("  ENV{BOOST_INCLUDEDIR}: $ENV{BOOST_INCLUDEDIR}")
+  message("  ENV{BOOST_INCLUDEDIR}: $ENV{BOOST_INCLUDEDIR}")
 endif()
 if (BOOST_LIBRARYDIR)
-  MESSAGE("  BOOST_LIBRARYDIR: ${BOOST_LIBRARYDIR}")
+  message("  BOOST_LIBRARYDIR: ${BOOST_LIBRARYDIR}")
 endif()
 if (DEFINED ENV{BOOST_LIBRARYDIR})
-  MESSAGE("  ENV{BOOST_LIBRARYDIR}: $ENV{BOOST_LIBRARYDIR}")
+  message("  ENV{BOOST_LIBRARYDIR}: $ENV{BOOST_LIBRARYDIR}")
 endif()
 
 set(Boost_USE_MULTITHREADED ON)
 if ("${STATIC_BOOST}" STREQUAL "ON")
-	MESSAGE("Static linking Boost")
+	message("Static linking Boost")
 	set(Boost_USE_STATIC_LIBS ON)
 endif()
 
-MESSAGE("Searching for BOOST:")
+message("Searching for BOOST:")
 find_package(Boost
 1.71.0
 COMPONENTS regex
@@ -208,10 +220,10 @@ system
 filesystem
 date_time
 serialization REQUIRED)
-MESSAGE("Boost configuration results:")
-MESSAGE("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIR}")
-MESSAGE("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
-MESSAGE("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
+message("Boost configuration results:")
+message("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIR}")
+message("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
+message("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
 
