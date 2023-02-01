@@ -30,9 +30,9 @@ class RbSettings {
         double                      getTolerance(void) const;                           //!< Retrieve the tolerance for comparing doubles
         bool                        getUseScaling(void) const;                          //!< Retrieve the flag whether we should scale the likelihood in CTMC models
         void                        listOptions(void) const;                            //!< Retrieve a list of all user options and their current values
-    
-#if defined( RB_BEAGLE )
+
     bool                            getUseBeagle(void) const;                           //!< Retrieve the flag whether we should use the BEAGLE library in CTMC models
+#if defined( RB_BEAGLE )
     const std::string&              getBeagleDevice(void) const;                        //!< Retrieve the BEAGLE device that is being used
     size_t                          getBeagleResource(void) const;                      //!< Retrieve the BEAGLE resource to be used
     bool                            getBeagleUseDoublePrecision(void) const;            //!< Retrieve the flag whether BEAGLE will use double precision floating point format

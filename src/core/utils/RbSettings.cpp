@@ -58,13 +58,17 @@ bool RbSettings::getCollapseSampledAncestors( void ) const
 }
 
 
-#if defined( RB_BEAGLE )
 bool RbSettings::getUseBeagle( void ) const
 {
+#if defined( RB_BEAGLE )
     // return the internal value
     return useBeagle;
+#else
+    return false;
+#endif
 }
 
+#if defined( RB_BEAGLE )
 const std::string& RbSettings::getBeagleDevice( void ) const
 {
     // return the internal value
