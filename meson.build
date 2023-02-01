@@ -84,6 +84,7 @@ if get_option('beagle')
   beagle = [hmsbeagle,eigen]
 else
   beagle = []
+endif
 
 if get_option('rb-exe-name') != 'default'
   rb_name = get_option('rb-exe-name')
@@ -152,7 +153,6 @@ rb = executable(rb_name,
                 link_with: [core, revlanguage, libs],
                 include_directories: [src_inc],
                 dependencies: [boost, mpi, openlibm, beagle],
-                link_args: maybe_link_static,
                 install_rpath: extra_rpath,
                 install: true)
 

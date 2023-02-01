@@ -277,12 +277,8 @@ endif()
 # Link the target to RevBayes libraries. RB_CMD_LIB can be empty.
 target_link_libraries(${RB_EXEC_NAME}   ${RB_CMD_LIB} rb-parser rb-core rb-libs)
 # Link the target to other libraries.  Some variables can be empty.
-target_link_libraries(${RB_EXEC_NAME}   ${Boost_LIBRARIES} ${OPENLIBM} ${CMAKE_DL_LIBS} ${GTK_LIBRARIES} ${MPI_LIBRARIES})
-
-set_target_properties(${RB_EXEC_NAME}   PROPERTIES PREFIX "../")
-  endif()
-  
-  if ("${RB_BEAGLE}" STREQUAL "ON")
-    target_link_libraries(${RB_EXEC_NAME} ${BEAGLE_LIBRARIES})
+target_link_libraries(${RB_EXEC_NAME}   ${Boost_LIBRARIES} ${OPENLIBM} ${CMAKE_DL_LIBS})
+# Link the target to other libraries.  Some variables can be empty.
+target_link_libraries(${RB_EXEC_NAME}   ${GTK_LIBRARIES} ${MPI_LIBRARIES} ${BEAGLE_LIBRARIES})
 
 install(TARGETS ${RB_EXEC_NAME} DESTINATION bin)
