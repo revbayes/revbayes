@@ -5,13 +5,7 @@ project(RevBayes)
 # -Wno-sign-compare
 # -D_GLIBCXX_DEBUG
 
-# This is the RIGHT way, but requires cmake version >=3:
-#   set(CMAKE_CXX_STANDARD 11)
-#
-# https://gitlab.kitware.com/cmake/community/-/wikis/CMake-Versions-on-Linux-Distros
-#
-# So, we add the flag directly instead.
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+set(CMAKE_CXX_STANDARD 17)
 
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
@@ -127,9 +121,36 @@ if ("${RB_USE_EIGEN3}" STREQUAL "ON")
 endif()
 
 
-if ("${JUPYTER}" STREQUAL "ON")
-   add_definitions(-DRB_XCODE)
-endif()
+##### rpath: where to find shared libraries #####
+
+if ("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
+  # This allows an installed structure of
+  #
+  # RevBayes/
+  #    bin/
+  #       rb
+  #    lib/
+  #       RevBayes/
+  #          *.so
+  # To find the shared libs from inside bin/ we use $ORIGIN/../lib/RevBayes/
+  #
+  set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib/RevBayes/")
+
+elseif ("${CMAKE_SYSTEM_NAME}" MATCHES "Darwin")
+  # If ever we make an App bundle, the structure might be
+  #
+  # RevBayes.app/
+  #    Contents/
+  #       MacOS/
+  #          rb
+  #       PlugIns/
+  #          *.dylib
+  #
+  # So, at that point, we might add "@loaderpath/../Plugins/"
+  #
+  set(CMAKE_INSTALL_RPATH "@loaderpath/../lib/RevBayes/;@loaderpath/../PlugIns/")
+
+endif ()
 
 # When user specifies boost paths to use, we need to disable searching from the
 # environment and from using cmake's internal boost variables.
@@ -210,68 +231,61 @@ message("  CMAKE_CXX_FLAGS = ${CMAKE_CXX_FLAGS}")
 message("  CMAKE_C_FLAGS = ${CMAKE_C_FLAGS}")
 
 ############# executables #################
-# basic rev-bayes binary
 
+# Should we build help2yml?
 if ("${HELP}" STREQUAL "ON")
   add_subdirectory(help2yml)
 
   message("Building ${RB_EXEC_NAME}-help2yml")
   add_executable(${RB_EXEC_NAME}-help2yml ${PROJECT_SOURCE_DIR}/help2yml/main.cpp)
 
-  target_link_libraries(${RB_EXEC_NAME}-help2yml rb-help rb-parser rb-core rb-libs rb-parser ${Boost_LIBRARIES})
+  target_link_libraries(${RB_EXEC_NAME}-help2yml rb-help rb-parser rb-core rb-libs rb-parser ${Boost_LIBRARIES} ${CMAKE_DL_LIBS})
   set_target_properties(${RB_EXEC_NAME}-help2yml PROPERTIES PREFIX "../")
   if ("${MPI}" STREQUAL "ON")
     target_link_libraries(${RB_EXEC_NAME}-help2yml ${MPI_LIBRARIES})
   endif()
 endif()
 
-if ("${JUPYTER}" STREQUAL "ON")
-  message("Building rb-jupyter")
-  add_executable(rb-jupyter ${PROJECT_SOURCE_DIR}/revlanguage/main.cpp)
+if ("${CMD_GTK}" STREQUAL "ON")
+  set(RB_EXEC_NAME "RevStudio")
+endif()
+message("Building ${RB_EXEC_NAME}")
 
-  target_link_libraries(rb-jupyter rb-parser rb-core rb-libs ${Boost_LIBRARIES})
-  set_target_properties(rb-jupyter PROPERTIES PREFIX "../")
-elseif ("${CMD_GTK}" STREQUAL "ON")
-  message("Building RevStudio")
+if ("${CMD_GTK}" STREQUAL "ON")
+  target_link_libraries(rb-jupyter rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${CMAKE_DL_LIBS})
+
   # Use the package PkgConfig to detect GTK+ headers/library files
-  FIND_PACKAGE(PkgConfig REQUIRED)
-  PKG_CHECK_MODULES(GTK REQUIRED gtk+-2.0)
-  #PKG_CHECK_MODULES(GTK REQUIRED gtk+-3.0)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(GTK REQUIRED gtk+-2.0)
+  #pkg_check_modules(GTK REQUIRED gtk+-3.0)
 
   # Setup CMake to use GTK+, tell the compiler where to look for headers
   # and to the linker where to look for libraries
-  INCLUDE_DIRECTORIES(${GTK_INCLUDE_DIRS})
-  LINK_DIRECTORIES(${GTK_LIBRARY_DIRS})
+  include_directories(${GTK_INCLUDE_DIRS})
+  link_directories(${GTK_LIBRARY_DIRS})
+  add_definitions(${GTK_CFLAGS_OTHER})      # Add other flags to the compiler
+  TARGET_LINK_LIBRARIES(RevStudio rb-cmd-lib rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${GTK_LIBRARIES} ${CMAKE_DL_LIBS})
 
-  # Add other flags to the compiler
-  ADD_DEFINITIONS(${GTK_CFLAGS_OTHER})
-
-  # Add an executable compiled from hello.c
-  ADD_EXECUTABLE(RevStudio ${PROJECT_SOURCE_DIR}/cmd/main.cpp)
-
-  # Link the target to the GTK+ libraries
-  TARGET_LINK_LIBRARIES(RevStudio rb-cmd-lib rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${GTK_LIBRARIES})
-
-  SET_TARGET_PROPERTIES(RevStudio PROPERTIES PREFIX "../")
-
+  # Look into the cmd directory
   add_subdirectory(cmd)
+  set(RB_CMD_LIB rb-cmd-lib)
+
+  # The GTK version uses a different main.cpp
+  add_executable(${RB_EXEC_NAME}   ${PROJECT_SOURCE_DIR}/cmd/main.cpp)
 
 else()
-  message("Building ${RB_EXEC_NAME}")
-  add_executable(${RB_EXEC_NAME} ${PROJECT_SOURCE_DIR}/revlanguage/main.cpp)
+  add_executable(${RB_EXEC_NAME}   ${PROJECT_SOURCE_DIR}/revlanguage/main.cpp)
+endif()
 
-  target_link_libraries(${RB_EXEC_NAME} rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${OPENLIBM})
+  target_link_libraries(${RB_EXEC_NAME} rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${OPENLIBM} ${CMAKE_DL_LIBS})
+target_link_libraries(${RB_EXEC_NAME}   ${RB_CMD_LIB} rb-parser rb-core rb-libs)
+# Link the target to other libraries.  Some variables can be empty.
+target_link_libraries(${RB_EXEC_NAME}   ${Boost_LIBRARIES} ${OPENLIBM} ${GTK_LIBRARIES} ${MPI_LIBRARIES})
 
-  set_target_properties(${RB_EXEC_NAME} PROPERTIES PREFIX "../")
-
-  if ("${MPI}" STREQUAL "ON")
-    target_link_libraries(${RB_EXEC_NAME} ${MPI_LIBRARIES})
+set_target_properties(${RB_EXEC_NAME}   PROPERTIES PREFIX "../")
   endif()
   
   if ("${RB_BEAGLE}" STREQUAL "ON")
     target_link_libraries(${RB_EXEC_NAME} ${BEAGLE_LIBRARIES})
-  endif()
-
-endif()
 
 install(TARGETS ${RB_EXEC_NAME} DESTINATION bin)

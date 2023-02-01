@@ -180,7 +180,6 @@ void AbstractCoalescent::buildHeterochronousRandomBinaryTree(Tree *psi, std::vec
                 leftChild->setParent(parent);
                 rightChild->setParent(parent);
                 parent->setAge( ages[i] );
-                parent->setNodeType( false, false, true );
                 active.push_back(parent);
                 
                 // we coalesced, we can move on now
@@ -434,7 +433,6 @@ void AbstractCoalescent::simulateHeterochronousTree( void )
         node->setName(name);
         node->setSpeciesName(taxa[i].getSpeciesName());
         node->setAge(taxa[i].getAge());
-        node->setNodeType( true, false, false );
         // add to tips
         nodes.push_back(node);
     }

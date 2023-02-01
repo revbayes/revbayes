@@ -28,7 +28,8 @@
 #include "RbVector.h"
 
 
-
+using std::string;
+using std::vector;
 
 
 /** Convert the string s to a number */
@@ -262,35 +263,6 @@ std::string StringUtilities::formatStringForScreen(const std::string &s, const s
 }
 
 
-/** Return file contents as string with '\n' line breaks */
-std::string StringUtilities::getFileContentsAsString(const RevBayesCore::path& p)
-{
-    
-    // open file
-    std::ifstream fStrm( p.string() );
-    if ( !fStrm.is_open() )
-        return "";
-        
-    // read the file
-    int ch;
-    std::string retStr = "";
-    while ( (ch = fStrm.get()) != EOF)
-    {
-        char c = (char)ch;
-        
-        if (ch == '\n' || ch == '\r' || ch == EOF)
-            retStr += '\n';
-        else
-            retStr += c;
-        } 
-
-    // close file
-    fStrm.close();
-
-    return retStr;
-}
-
-
 /**
  * Indicates if a char is affecting text formatting
  * @param c
@@ -505,6 +477,22 @@ void StringUtilities::replaceAllOccurrences(std::string& str, char old_ch, char 
     
 }
 
+void StringUtilities::join(std::ostream& o, const vector<string>& ss, const string& sep)
+{
+    for(int i=0;i<ss.size();i++)
+    {
+        o<<ss[i];
+        if (i+1 < ss.size())
+            o<<sep;
+    }
+}
+
+string StringUtilities::join(const vector<string>& ss, const string& sep)
+{
+    std::ostringstream o;
+    join(o, ss, sep);
+    return o.str();
+}
 
 /**
  * Utility function for dividing string into pieces

@@ -26,7 +26,6 @@
 #include "Cloneable.h"
 #include "MemberObject.h"
 #include "Serializable.h"
-#include "TaxonMap.h"
 #include "TreeChangeEventHandler.h"
 #include "Printable.h"
 
@@ -36,16 +35,19 @@
 namespace RevBayesCore {
 
     class TopologyNode;
+    class TaxonMap;
 
     class Tree : public Cloneable, public MemberObject<double>, public MemberObject<long>, public MemberObject<Boolean>, public Serializable, public Printable {
 
     public:
-        Tree(void);                                                                                                                                             //!< Default constructor
+        Tree(void) = default;                                                                                                                                   //!< Default constructor
         Tree(const Tree& t);                                                                                                                                    //!< Copy constructor
+        Tree(Tree&& t);                                                                                                                                         //!< Move constructor
 
         virtual                                            ~Tree(void);                                                                                         //!< Destructor
 
         Tree&                                               operator=(const Tree& t);
+        Tree&                                               operator=(Tree&& t);
 
         // overloaded operators
         bool                                                operator==(const Tree &t) const;
@@ -134,6 +136,9 @@ namespace RevBayesCore {
         void                                                reroot(TopologyNode &n, bool make_bifurcating, bool reindex);
 //        void                                                rerootAndMakeBifurcating(const Clade &o, bool reindex);                                             //!< Re-root the tree with the given outgroup, and make sure we have a bifuration at the root and elsewhere
         void                                                removeDuplicateTaxa(void);
+        void                                                removeDegree2Node(TopologyNode* n);
+        bool                                                removeNodeIfDegree2(TopologyNode& n);
+        bool                                                removeRootIfDegree2();
         void                                                renameNodeParameter(const std::string &old_name, const std::string &new_name);
         void                                                resetTaxonBitSetMap(void);                                                                          //!< Resets the map that holds the BitSet index for each taxon
         TopologyNode&                                       reverseParentChild(TopologyNode &n);                                                                //!< Reverse the parent child relationship.
@@ -155,15 +160,15 @@ namespace RevBayesCore {
 
         void                                                fillNodesByPhylogeneticTraversal(TopologyNode* node);               //!< fill the nodes vector by a preorder traversal recursively starting with this node.
         bool                                                recursivelyPruneTaxa(TopologyNode*, const RbBitSet&);
-
+        void                                                reindexNodes();
 
         // private members
-        TopologyNode*                                       root;
+        TopologyNode*                                       root = nullptr;
         std::vector<TopologyNode*>                          nodes;                                                                  //!< Vector of pointers to all nodes
-        bool                                                rooted;
-        bool                                                is_negative_constraint;
-        size_t                                              num_tips;
-        size_t                                              num_nodes;
+        bool                                                rooted = false;
+        bool                                                is_negative_constraint = false;
+        size_t                                              num_tips = 0;
+        size_t                                              num_nodes = 0;
         mutable std::map<std::string, size_t>               taxon_bitset_map;
 
     };

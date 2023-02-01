@@ -66,6 +66,10 @@ void CladogeneticSpeciationRateMatrixFunction::update( void )
     delete value;
     value = new CladogeneticSpeciationRateMatrix( num_states );
    
+    // create temp variables for exiting speciation rates and cladogenetic event probabilities
+    std::vector<double> speciation_rate_sum_per_state( num_states, 0.0 );
+    CladogeneticProbabilityMatrix cladogenetic_probability_matrix( num_states );
+
     // get speciation rates and the clado events
     const std::vector<double>& sr = speciation_rates->getValue();
     const RbVector<RbVector<long> >& events = cladogenetic_events->getValue();
@@ -90,9 +94,22 @@ void CladogeneticSpeciationRateMatrixFunction::update( void )
         idx[1] = (unsigned)events[i][1];
         idx[2] = (unsigned)events[i][2];
         event_map[ idx ] = sr[i];
+        speciation_rate_sum_per_state[ idx[0] ] += sr[i];
     }
     
+    // populate TensorPhylo rate/prob structures
+    std::map<std::vector<unsigned>, double> clado_prob_event_map = cladogenetic_probability_matrix.getEventMap();
+    for (std::map<std::vector<unsigned>, double>::iterator jt = event_map.begin(); jt != event_map.end(); jt++) {
+        const std::vector<unsigned>& idx = jt->first;
+        clado_prob_event_map[ idx ] = event_map[ idx ] / speciation_rate_sum_per_state[ idx[0] ];
+    }
+    cladogenetic_probability_matrix.setEventMap(clado_prob_event_map);
+
+    // done!
     value->setEventMap(event_map);
+    value->setCladogeneticProbabilityMatrix( cladogenetic_probability_matrix );
+    value->setSpeciationRateSumPerState( speciation_rate_sum_per_state );
+
 }
 
 

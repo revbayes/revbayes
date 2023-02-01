@@ -55,7 +55,7 @@ namespace RevBayesCore {
         void                                                computeTipLikelihood(const TopologyNode &node, size_t nIdx);
         void                                                updateTransitionProbabilities(size_t node_idx);
 
-        virtual void                                        computeMarginalNodeLikelihood(size_t nide_idx, size_t parentIdx);
+        virtual void                                        computeMarginalNodeLikelihood(size_t node_idx, size_t parentIdx);
         virtual void                                        computeMarginalRootLikelihood();
         virtual std::vector< std::vector< double > >*       sumMarginalLikelihoods(size_t node_index);
         
@@ -75,6 +75,7 @@ namespace RevBayesCore {
     private:
         virtual void                                            simulate(const TopologyNode& node, std::vector< DiscreteTaxonData< charType > > &t, const std::vector<size_t> &perSiteRates);
         virtual double                                          sumRootLikelihood( void );
+        void                                                    updateTransitionProbabilityMatrices(void);
         
         const TypedDagNode< CladogeneticProbabilityMatrix >*                       homogeneousCladogenesisMatrix;
         const TypedDagNode< RbVector< CladogeneticProbabilityMatrix > >*           heterogeneousCladogenesisMatrices;
@@ -695,7 +696,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeTipLikelihood(const Topology
                         for ( size_t i=0; i<val.size(); ++i )
                         {
                             // check whether we observed this state
-                            if ( val.isSet(i) == true )
+                            if ( val.test(i) == true )
                             {
                                 // add the probability
                                 tmp += *d;
@@ -723,7 +724,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeTipLikelihood(const Topology
                         for ( size_t i=0; i<val.size(); ++i )
                         {
                             // check whether we observed this state
-                            if ( val.isSet(i) == true )
+                            if ( val.test(i) == true )
                             {
                                 // add the probability
                                 tmp += *d * weights[i] ;
@@ -1703,6 +1704,16 @@ void RevBayesCore::PhyloCTMCClado<charType>::updateTransitionProbabilities(size_
     {
         RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionProbabilities(node_idx);
     }
+}
+
+
+template<class charType>
+void RevBayesCore::PhyloCTMCClado<charType>::updateTransitionProbabilityMatrices( void )
+{
+    // doing nothing here as this function has only been implemented for the classes that
+    // do not have its own updateTransitionProbabilities function.
+    // making this an empty function for this class for now so no redundant computation would be incurred when
+    // updateTransitionProbabilityMatrices gets called in computeLnProbability in AbstractPhyloCTMCSiteHomogeneous
 }
 
 

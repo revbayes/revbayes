@@ -76,16 +76,19 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     
     size_t arg_index_files     = 0;
     size_t arg_index_tree_type = 1;
-    size_t arg_index_outgroup  = 2;
-    size_t arg_index_separator = 3;
-    size_t arg_index_burnin    = 4;
-    size_t arg_index_thinning  = 5;
-    size_t arg_index_offset    = 6;
-    size_t arg_index_nexus     = 7;
-    size_t arg_index_nruns     = 8;
+    size_t arg_unroot_nonclock = 2;
+    size_t arg_index_outgroup  = 3;
+    size_t arg_index_separator = 4;
+    size_t arg_index_burnin    = 5;
+    size_t arg_index_thinning  = 6;
+    size_t arg_index_offset    = 7;
+    size_t arg_index_nexus     = 8;
+    size_t arg_index_nruns     = 9;
 
     // get the information from the arguments for reading the file
     const std::string&  treetype = static_cast<const RlString&>( args[arg_index_tree_type].getVariable()->getRevObject() ).getValue();
+    bool unroot_nonclock = static_cast<const RlBoolean&>( args[arg_unroot_nonclock].getVariable()->getRevObject() ).getValue();
+
     const std::string&  sep      = static_cast<const RlString&>( args[arg_index_separator].getVariable()->getRevObject() ).getValue();
     long                thin     = static_cast<const Natural&>( args[arg_index_thinning].getVariable()->getRevObject() ).getValue();
     long                offset   = static_cast<const Natural&>( args[arg_index_offset].getVariable()->getRevObject() ).getValue();
@@ -167,13 +170,13 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     WorkspaceVector<TraceTree> *rv = NULL;
     if ( treetype == "clock" )
     {
-        if(nexus) rv = readTreesNexus(vectorOfFileNames, true, thin, offset);
-        else rv = readTrees(vectorOfFileNames, sep, true, thin, offset);
+        if(nexus) rv = readTreesNexus(vectorOfFileNames, treetype, unroot_nonclock, thin, offset);
+        else rv = readTrees(vectorOfFileNames, sep, treetype, unroot_nonclock, thin, offset);
     }
     else if ( treetype == "non-clock" )
     {
-        if(nexus) rv = readTreesNexus(vectorOfFileNames, false, thin, offset);
-        else rv = readTrees(vectorOfFileNames, sep, false, thin, offset);
+        if(nexus) rv = readTreesNexus(vectorOfFileNames, treetype, unroot_nonclock, thin, offset);
+        else rv = readTrees(vectorOfFileNames, sep, treetype, unroot_nonclock, thin, offset);
         
         RevBayesCore::Clade og;
         if ( args[arg_index_outgroup].getVariable() != NULL && args[arg_index_outgroup].getVariable()->getRevObject() != RevNullObject::getInstance())
@@ -247,7 +250,9 @@ const ArgumentRules& Func_readTreeTrace::getArgumentRules( void ) const
         tree_options.push_back( "clock" );
         tree_options.push_back( "non-clock" );
         argumentRules.push_back( new OptionRule( "treetype", new RlString("clock"), tree_options, "The type of trees." ) );
+        argumentRules.push_back( new ArgumentRule( "unroot_nonclock", RlBoolean::getClassTypeSpec(), "Remove a degree-2 root node and set the tree unrooted, if treetype is non-clock.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         argumentRules.push_back( new ArgumentRule( "outgroup"   , Clade::getClassTypeSpec(), "The clade (consisting of one or more taxa) used as an outgroup.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+
         argumentRules.push_back( new Delimiter() );
 
         std::vector<TypeSpec> burninTypes;
@@ -320,9 +325,10 @@ const TypeSpec& Func_readTreeTrace::getReturnType( void ) const
 }
 
 
-WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<RevBayesCore::path> &vector_of_file_names, const std::string &delimiter, bool clock, long thinning, long offset)
+WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<RevBayesCore::path> &vector_of_file_names, const std::string &delimiter, const std::string& treetype, bool unroot_nonclock, long thinning, long offset)
 {
-    
+    bool clock = (treetype == "clock");
+
     std::vector<TraceTree> data;
     
     // Set up a map with the file name to be read as the key and the file type as the value. Note that we may not
@@ -449,6 +455,14 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<RevB
             {
                 RevBayesCore::NewickConverter c;
                 tau = c.convertFromNewick( columns[index] );
+                if (unroot_nonclock)
+                {
+                    tau->removeRootIfDegree2();
+//                  Perhaps we should mark the tree unrooted, since we have removed the old root,
+//                    and chosen a neighbor as the now root.
+//                  However, RevBayes has bugs with unrooted trees and may crash.
+//                    tau->setRooted(false);
+                }
             }
             
             t.addObject( tau );
@@ -474,10 +488,11 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<RevB
  *
  * @note if multiple files are given, the traces will all be appended without regard for burnin
  * */
-WorkspaceVector<TraceTree>* Func_readTreeTrace::readTreesNexus(const std::vector<RevBayesCore::path> &fns, bool clock, long thin, long offset)
+WorkspaceVector<TraceTree>* Func_readTreeTrace::readTreesNexus(const std::vector<RevBayesCore::path> &fns, const string& treetype, bool unroot_nonclock, long thin, long offset)
 {
-
     std::vector<TraceTree> data;
+
+    bool clock = (treetype == "clock");
 
     for (auto& fn: fns)
     {
@@ -497,13 +512,24 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTreesNexus(const std::vector
             tmp = reader.readBranchLengthTrees( fn );
         }
         int nsamples = 0;
-        for (size_t j=0; j<tmp->size(); ++j)
+        if (tmp)
         {
-            RevBayesCore::Tree* t = (*tmp)[j];
-            if ( (nsamples-offset) % thin == 0) tt.addObject(t);
-            nsamples++;
+            for (auto& tree: *tmp)
+            {
+                if ( (nsamples-offset) % thin == 0)
+                {
+                    if (unroot_nonclock)
+                    {
+                        tree->removeRootIfDegree2();
+                        tree->setRooted(false);
+                    }
+
+                    tt.addObject(tree);
+                }
+                nsamples++;
+            }
+            delete tmp;
         }
-        delete tmp;
 
         data.push_back(TraceTree(tt));
     }

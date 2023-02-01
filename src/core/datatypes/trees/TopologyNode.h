@@ -42,7 +42,6 @@
 
 #include "TreeChangeEventMessage.h"
 #include "Taxon.h"
-#include "TaxonMap.h"
 
 #include <vector>
 #include <map>
@@ -122,6 +121,7 @@ namespace RevBayesCore {
         size_t                                      getNumberOfChildren(void) const;                                                    //!< Returns the number of children
         size_t                                      getNumberOfShiftEvents(void) const;
         size_t                                      getNumberOfNodesInSubtree(bool tips) const;
+        size_t                                      getDegree() const;                                                                  //!< Returns the degree of the node
         TopologyNode&                               getParent(void);                                                                    //!< Returns the node's parent
         const TopologyNode&                         getParent(void) const;                                                              //!< Returns the node's parent
         std::string                                 getSpeciesName() const;                                                             //!< Get the species name for the node
@@ -153,12 +153,10 @@ namespace RevBayesCore {
 
         void                                        setName(const std::string& n);                                                      //!< Set the name of this node
         void                                        setNumberOfShiftEvents(size_t n);                                                   //!< Set the number of shift events for stochastic character maps
-	void					    setNodeType(bool tip, bool root, bool interior); //SK
         void                                        setParent(TopologyNode* p);                                                         //!< Sets the node's parent
         void                                        setSampledAncestor(bool tf);                                                        //!< Set if the node is a sampled ancestor
         void                                        setSpeciesName(std::string const &n);                                               //!< Set the species name of this node
         void                                        setTaxon(Taxon const &t);                                                           //!< Set the taxon of this node
-        void                                        setTaxonIndices(const TaxonMap &tm);                                                //!< Set the indices of the taxa from the taxon map
         void                                        setTimeInStates(std::vector<double> t);
         void                                        setTree(Tree *t);                                                                   //!< Sets the tree pointer
         void                                        setUseAges(bool tf, bool recursive);
@@ -193,9 +191,6 @@ namespace RevBayesCore {
         Taxon                                       taxon;                                                                              //!< Taxon of the node, i.e. identifier/taxon name, plus species it comes from
 
         boost::optional<size_t>                     index;                                                                              //!< Node index
-        bool                                        interior_node = false;
-        bool                                        root_node = true;
-        bool                                        tip_node = true;
         bool                                        sampled_ancestor = false;
 
         // information for newick representation

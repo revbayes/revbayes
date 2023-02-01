@@ -29,19 +29,6 @@ namespace RevBayesCore { class TreeChangeEventListener; }
 
 using namespace RevBayesCore;
 
-/* Default constructor */
-Tree::Tree(void) :
-    changeEventHandler(),
-    root( NULL ),
-    rooted( false ),
-    is_negative_constraint( false ),
-    num_tips( 0 ),
-    num_nodes( 0 )
-{
-
-}
-
-
 /* Copy constructor */
 Tree::Tree(const Tree& t) :
     changeEventHandler( ),
@@ -63,6 +50,13 @@ Tree::Tree(const Tree& t) :
         setRoot(newRoot, false);
     }
 
+}
+
+
+/* Copy constructor */
+Tree::Tree(Tree&& t)
+{
+    operator=( std::move(t) );
 }
 
 
@@ -115,6 +109,38 @@ Tree& Tree::operator=(const Tree &t)
     return *this;
 }
 
+Tree& Tree::operator=(Tree&& t)
+{
+    // If there are listeners watching t, then maybe we shouldn't steal its nodes.
+    // (However, since t is a temporary variable, then it probably shouldn't have listeners.)
+    if (not t.changeEventHandler.getListeners().empty())
+    {
+        // Use the copy constructor in this case.
+        return operator=(t);
+    }
+
+    // Otherwise steal nodes from t instead of copying them.
+    // By swapping with t, we let t do the work of destroying our nodes.
+    if (this != &t)
+    {
+        std::swap( rooted                , t.rooted                );
+        std::swap( num_tips              , t.num_tips              );
+        std::swap( num_nodes             , t.num_nodes             );
+        std::swap( is_negative_constraint, t.is_negative_constraint);
+        std::swap( root                  , t.root                  );
+        std::swap( nodes                 , t.nodes                 );
+        std::swap( taxon_bitset_map      , t.taxon_bitset_map      );
+
+        // This loop is maybe a reason to NOT record a tree pointer on the nodes...
+        for(auto& node: nodes)
+            node->setTree(this);
+
+        for(auto& node: t.nodes)
+            node->setTree(&t);
+    }
+
+    return *this;
+}
 
 bool Tree::operator==(const Tree &t) const
 {
@@ -267,7 +293,6 @@ void Tree::dropTipNode( size_t index )
     {
         // there is nothing left to prune
         node.setName("");
-        node.setNodeType(false, true, false);
         return;
     }
     TopologyNode &parent        = node.getParent();
@@ -320,16 +345,7 @@ void Tree::dropTipNode( size_t index )
         }
     }
 
-    nodes.clear();
-
-    // bootstrap all nodes from the root and add the in a pre-order traversal
-    fillNodesByPhylogeneticTraversal(root);
-    for (unsigned int i = 0; i < nodes.size(); ++i)
-    {
-        nodes[i]->setIndex(i);
-    }
-
-    num_nodes = nodes.size();
+    reindexNodes();
 
     // count the number of tips
     num_tips = 0;
@@ -892,13 +908,14 @@ std::vector<std::string> Tree::getSpeciesNames() const
 std::vector<Taxon> Tree::getTaxa() const
 {
     std::vector< Taxon > taxa;
-    for (size_t i = 0; i < getNumberOfTips(); ++i)
+    for (auto& node: nodes)
     {
-        const TopologyNode& n = getTipNode( i );
-        Taxon taxon = n.getTaxon();
-        taxon.setAge(n.getAge());
-        taxa.push_back( taxon );
-
+        if (node->isTip() or node->isSampledAncestor())
+        {
+            Taxon taxon = node->getTaxon();
+            taxon.setAge(node->getAge());
+            taxa.push_back( taxon );
+        }
     }
 
     return taxa;
@@ -1550,6 +1567,84 @@ bool Tree::recursivelyPruneTaxa( TopologyNode* n, const RbBitSet& prune_map )
 }
 
 
+void Tree::reindexNodes()
+{
+    nodes.clear();
+
+    // bootstrap all nodes from the root and add the in a pre-order traversal
+    fillNodesByPhylogeneticTraversal(root);
+    for (unsigned int i = 0; i < nodes.size(); ++i)
+    {
+        nodes[i]->setIndex(i);
+    }
+
+    num_nodes = nodes.size();
+}
+
+void Tree::removeDegree2Node(TopologyNode* n)
+{
+    // 1. Check that the node is in fact degree 2
+    if (n->getDegree() != 2)
+        throw RbException()<<"removeDegree2Node: node has degree "<<n->getDegree()<<"!";
+
+    // 2. If n is the root, pivot so that it is a child of the root
+    TopologyNode* new_root = nullptr;
+    if (n->isRoot())
+    {
+        // Pick the child with the highest degree for the new root
+        TopologyNode* new_root = &n->getChild(0);
+        for(auto& child: n->getChildren())
+            if (child->getDegree() > new_root->getDegree())
+                new_root = child;
+        reverseParentChild( *new_root );
+
+        root = new_root;
+        root->setTree(this);
+
+        assert(root->isRoot());
+    }
+
+
+    // 3. Save references from n.
+    //    Now we have p -> n -> c
+    assert(not n->isRoot());
+    auto& p = n->getParent();
+    auto& c = n->getChild(0);
+    double combined_branch_length = n->getBranchLength() + c.getBranchLength();
+
+    // 4. Remove references from n
+    n->setParent(nullptr);
+    n->removeChild(&c);
+
+    // 5. Link parent and child and set new branch length
+    p.removeChild(n);
+    p.addChild(&c);
+    c.setParent(&p);
+    c.setBranchLength(combined_branch_length);
+
+    // 6. We need to reindex nodes because we removed an index.
+    reindexNodes();
+
+    // 7. Destroy the removed node.
+    delete n;
+}
+
+bool Tree::removeNodeIfDegree2(TopologyNode& n)
+{
+    if (n.getDegree() == 2)
+    {
+        removeDegree2Node( &n );
+        return true;
+    }
+    else
+        return false;
+}
+
+bool Tree::removeRootIfDegree2()
+{
+    return removeNodeIfDegree2(getRoot());
+}
+
 void Tree::removeDuplicateTaxa( void )
 {
 
@@ -1733,6 +1828,11 @@ void Tree::resetTaxonBitSetMap( void )
 
 TopologyNode& Tree::reverseParentChild(TopologyNode &n)
 {
+    // This routine makes n the new root by
+    // * first making n.getParent() the new root, and then
+    // * making n.getParent() into a child of n.
+    // It returns the original root.
+
     TopologyNode* ret = &n;
 
     if ( !n.isRoot() )
@@ -1746,6 +1846,7 @@ TopologyNode& Tree::reverseParentChild(TopologyNode &n)
         p.setBranchLength(n.getBranchLength());
 
         p.removeChild( &n );
+        n.setParent( nullptr ); // Avoid loop in parent edges from n -> p -> n
         p.setParent( &n );
         n.addChild( &p );
     }
@@ -1826,15 +1927,58 @@ void Tree::setRoot( TopologyNode* r, bool reindex )
 //!< Set the indices of the taxa from the taxon map
 void Tree::setTaxonIndices(const TaxonMap &tm)
 {
+    assert(root);
 
-    // start a recursive call at the root
-    if ( root != NULL )
+    // 1. Initialize the number of times that we have seen each map taxon to 0
+    std::map<Taxon,int> use_count;
+    for(int i=0;i<tm.size();i++)
+        use_count.insert({tm.getTaxon(i), 0});
+
+    // 2. Initialize the nodes to their index.
+    int next_non_taxon_index = use_count.size();
+    for(auto& node: nodes)
     {
-        root->setTaxonIndices(tm);
-        orderNodesByIndex();
+        if (node->isTip() or node->isSampledAncestor())
+        {
+            // 3a. If this is a tip or sampled ancester, check that we have an index for it.
+            auto& taxon = node->getTaxon();
+            if (not tm.hasTaxon(taxon))
+                throw RbException()<<"setTaxonIndices: tree has unexpected "<<taxon<<" with no index";
+
+            // 3b. Record that we used this taxon
+            auto& count = use_count.at(taxon);
+            count++;
+
+            // 3c. Set the index for the node.
+            node->setIndex( tm.getTaxonIndex(taxon) );
+        }
+        else
+        {
+            // 4. Otherwise set an index starting after all the taxon indices.
+            node->setIndex( next_non_taxon_index++ );
+        }
     }
 
+    // 5. Check that all the taxon labels are used exactly once.
+    for(auto& taxon_count: use_count)
+    {
+        auto& taxon = taxon_count.first;
+        auto& count = taxon_count.second;
+        if (count < 1)
+        {
+            for(auto& node: nodes)
+            {
+                if (node->getTaxon() == taxon)
+                    throw RbException()<<"setTaxonIndices: taxon "<<taxon<<" with "<<node->getNumberOfChildren()<<" children is neither a tip nor a sampled ancestor";
+            }
+            throw RbException()<<"setTaxonIndices: tree is missing the taxon \'"<<taxon<<"\'";
+        }
+        if (count > 1)
+            throw RbException()<<"setTaxonIndices: tree has multiple copies of the taxon "<<taxon;
+    }
 
+    // 6. Sort the nodes by their index.
+    orderNodesByIndex();
 }
 
 

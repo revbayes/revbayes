@@ -4,6 +4,7 @@
 #include "TypedDagNode.h"
 #include "RevObject.h"
 #include "WorkspaceObject.h"
+#include "TraceNumeric.h"
 
 #include <ostream>
 #include <string>

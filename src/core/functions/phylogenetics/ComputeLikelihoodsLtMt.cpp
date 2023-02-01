@@ -5,9 +5,11 @@
 #include <iomanip>
 #include <cmath>
 
+#include "MatrixReal.h"
 #include "RbConstants.h"
 #include "RbMathMatrix.h"
-#include "MatrixReal.h"
+#include "RbUtil.h"
+#include "Simplex.h"
 #include "TypedDagNode.h"
 #include "Tree.h"
 #include "TopologyNode.h"
