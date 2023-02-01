@@ -113,8 +113,6 @@ fi
 if [ -z "${exec_name}" ] ; then
     if [ "$mpi" = "true" ] ; then
         exec_name="rb-mpi"
-    elif [ "$beagle" = "true" ] ; then
-        exec_name="rb-beagle"
     else
         exec_name=rb
     fi
