@@ -4623,7 +4623,7 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleTips
                     if ( this->using_ambiguous_characters == true ) {
                         for ( size_t c = 0; c < this->num_chars; ++c ) {
                             b_inPartials[b_pattern * this->num_chars + c] =
-                                (amb_char_node[b_pattern].isSet(c) ? 1.0 : 0.0);
+                                (amb_char_node[b_pattern][c] ? 1.0 : 0.0);
                         }
                     } else {
                         b_inStates[b_pattern] = (int) char_node[b_pattern];
