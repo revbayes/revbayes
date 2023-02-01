@@ -79,7 +79,7 @@ jobs:
             compiler: xcode
             version: "14"
             mpi: false
-            beagle: true
+            beagle: false
   
           - name: windows
             os: ubuntu-latest
