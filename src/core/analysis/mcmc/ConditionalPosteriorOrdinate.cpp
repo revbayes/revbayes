@@ -222,7 +222,7 @@ double ConditionalPosteriorOrdinate::predictiveProbability( const std::vector<do
         size_t max_state = samples.size();
         if ( folded == true )
         {
-            max_state = floor( samples.size() + 1);
+            max_state = floor( samples.size()/2.0 + 1);
         }
         
         
