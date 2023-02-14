@@ -1554,6 +1554,7 @@ double BirthDeathSamplingTreatmentProcess::simulateDivergenceTime(double origin,
     double b = lambda[i];
     double d = mu[i];
     double p_e = phi_event[i];
+    double x = b - d;
 
 
     // get a random draw
@@ -1561,26 +1562,26 @@ double BirthDeathSamplingTreatmentProcess::simulateDivergenceTime(double origin,
 
     // compute the time for this draw
     double t = 0.0;
-    if ( b > d )
+    if ( x > 0 )
     {
         if( p_e > 0.0 )
         {
-            t = ( log( ( (b-d) / (1 - (u)*(1-((b-d)*exp((d-b)*age))/(p_e*b+(b*(1-p_e)-d)*exp((d-b)*age) ) ) ) - (b*(1-p_e)-d) ) / (p_e * b) ) )  /  (b-d);
+            t = ( log( ( x / (1 - (u)*(1-(x*exp((-x)*age))/(p_e*b+(b*(1-p_e)-d)*exp((-x)*age) ) ) ) - (b*(1-p_e)-d) ) / (p_e * b) ) )  /  x;
         }
         else
         {
-            t = log( 1 - u * (exp(age*(d-b)) - 1) / exp(age*(d-b)) ) / (b-d);
+            t = log( (1 - u) * exp(-x * age) + u) / x + age;
         }
     }
     else
     {
         if( p_e > 0.0 )
         {
-            t = ( log( ( (b-d) / (1 - (u)*(1-(b-d)/(p_e*b*exp((b-d)*age)+(b*(1-p_e)-d) ) ) ) - (b*(1-p_e)-d) ) / (p_e * b) ) )  /  (b-d);
+            t = ( log( ( x / (1 - (u)*(1-x/(p_e*b*exp(x*age)+(b*(1-p_e)-d) ) ) ) - (b*(1-p_e)-d) ) / (p_e * b) ) )  /  x;
         }
         else
         {
-            t = log( 1 - u * (1 - exp(age*(b-d)))  ) / (b-d);
+            t = log( 1 - u * (1 - exp(age*x))  ) / x;
         }
     }
 
