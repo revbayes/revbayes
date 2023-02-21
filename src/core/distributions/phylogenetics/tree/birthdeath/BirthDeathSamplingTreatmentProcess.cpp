@@ -1544,9 +1544,6 @@ double BirthDeathSamplingTreatmentProcess::simulateDivergenceTime(double origin,
 {
     // incorrect placeholder, there is no way to simulate an FBD tree consistent with fossil times, we use a coalescent simulator instead
 
-    // make sure age is not negative, otherwise function doesn't work
-    assert(age >= 0);
-
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
 
@@ -1559,6 +1556,8 @@ double BirthDeathSamplingTreatmentProcess::simulateDivergenceTime(double origin,
     double p_e = phi_event[i];
     double x = b - d;
 
+    // make sure age is not negative, otherwise function doesn't work
+    assert(age >= 0);
 
     // get a random draw
     double u = rng->uniform01();
