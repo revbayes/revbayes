@@ -5,6 +5,7 @@
 #include <iosfwd>
 #include <string>
 #include <vector>
+#include <cassert>
 
 #include "AbstractBirthDeathProcess.h"
 #include "BirthDeathForwardSimulator.h"
@@ -1543,6 +1544,8 @@ double BirthDeathSamplingTreatmentProcess::simulateDivergenceTime(double origin,
 {
     // incorrect placeholder, there is no way to simulate an FBD tree consistent with fossil times, we use a coalescent simulator instead
 
+    // make sure age is not negative, otherwise function doesn't work
+    assert(age >= 0);
 
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -1584,6 +1587,9 @@ double BirthDeathSamplingTreatmentProcess::simulateDivergenceTime(double origin,
             t = log( 1 - u * (1 - exp(age*x))  ) / x;
         }
     }
+
+    // make sure the result is in the right range
+    assert(0 <= t and t <= age);
 
     return present + t;
 }
