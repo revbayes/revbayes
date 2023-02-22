@@ -1406,14 +1406,14 @@ bool TreeSummary::isClock(void) const
 
 bool TreeSummary::isDirty(void) const
 {
-    bool dirty = false;
+    if (not computed) return true;
 
     for (auto& trace: traces)
     {
-        dirty = dirty || trace->isDirty();
+        if (trace->isDirty()) return true;
     }
 
-    return dirty;
+    return false;
 }
 
 double TreeSummary::maxdiff( bool verbose )
@@ -1880,7 +1880,7 @@ long TreeSummary::sampleSize(bool post) const
 
 void TreeSummary::summarize( bool verbose )
 {
-    if ( isDirty() == false ) return;
+    if ( not isDirty() ) return;
 
     std::vector<std::string> tip_names = traces.front()->objectAt(0).getTipNames();
     std::sort(tip_names.begin(),tip_names.end());
@@ -1944,6 +1944,16 @@ void TreeSummary::summarize( bool verbose )
         }
     }
 
+    // FIXME: Lots of the loops we do use reverse iterators.
+    //
+    //        so maybe sort in order of descending frequency instead?
+
+    // FIXME: Storing a second copy of everything just to know the order  wastes memory.
+    //
+    //        Possibly store the clades (and trees) in a vector, and then make
+    //        clade_counts/clade_samples (and tree_counts/tree_samples) just refer to the
+    //        index in the vector.
+    
     // sort the clade samples in ascending frequency
     for (auto& [clade, count]: clade_counts)
     {
@@ -1967,8 +1977,16 @@ void TreeSummary::summarize( bool verbose )
         progress.finish();
     }
 
+    // Mark all the traces clean.
     for (auto& trace: traces)
     {
         trace->setDirty(false);
     }
+
+    // And record that the summary statistics are computed.
+    computed = true;
+
+    // FIXME - Why are we marking input traces dirty?
+    //         This isn't really a property of the input trace,
+    //         but a property of the TreeSummary and its summary statistics.
 }
