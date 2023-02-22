@@ -1149,15 +1149,12 @@ void TreeSummary::enforceNonnegativeBranchLengths(TopologyNode& node) const
 
 long TreeSummary::splitFrequency(const Split &n) const
 {
+    auto iter = clade_counts.find(n);
 
-    std::set<Sample<Split> >::const_iterator it = find_if (clade_samples.begin(), clade_samples.end(), n );
-
-    if ( it != clade_samples.end() )
-    {
-        return it->second;
-    }
-
-    throw RbException("Couldn't find split in set of samples");
+    if (iter == clade_counts.end())
+        throw RbException("Couldn't find split in set of samples");
+    else
+        return iter->second;
 }
 
 
@@ -1259,13 +1256,11 @@ int TreeSummary::getTopologyFrequency(const RevBayesCore::Tree &tree, bool verbo
 
     std::string newick = t.getPlainNewickRepresentation();
 
-    for (auto& [newick_sample, count]: tree_samples)
-    {
-        if ( newick == newick_sample )
-            return count;
-    }
-
-    return 0;
+    auto iter = tree_counts.find(newick);
+    if (iter == tree_counts.end())
+        return 0;
+    else
+        return iter->second;
 }
 
 
@@ -1902,9 +1897,8 @@ void TreeSummary::summarize( bool verbose )
     conditional_clade_ages.clear();
     tree_clade_ages.clear();
 
-    std::map<Split, long>       clade_counts;
-    std::map<std::string, long> tree_counts;
-
+    clade_counts.clear();
+    tree_counts.clear();
 
     ProgressBar progress = ProgressBar(sampleSize(true));
 

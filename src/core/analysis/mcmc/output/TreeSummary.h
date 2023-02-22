@@ -109,8 +109,10 @@ namespace RevBayesCore {
         bool                                       clock;
         bool                                       rooted;
 
+        std::map<Split, long>                      clade_counts;
         std::set<Sample<Split> >                   clade_samples;
         std::map<Taxon, long >                     sampled_ancestor_counts;
+        std::map<std::string, long>                tree_counts;
         std::set<Sample<std::string> >             tree_samples;
 
         std::map<Split, std::vector<double> >                           clade_ages;
