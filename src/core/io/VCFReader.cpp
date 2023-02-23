@@ -22,7 +22,7 @@ VCFReader::VCFReader(const std::string &fn, PLOIDY p, UNKOWN_TREATMENT u, bool r
 }
 
 
-void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVector<Taxon>& taxa_list, const std::string& type )
+void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVector<Taxon>& taxa_list, const std::string& type, long thinning, long skip_first )
 {
     
     // PoMo settings
@@ -79,6 +79,8 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
     std::string read_line = "";
     size_t lines_skipped = 0;
     size_t lines_to_skip = 0;
+    long   lines_read    = 0;
+    bool   skipped_first = false;
     std::vector<std::string> tmpChars;
     bool has_names_been_read = false;
     size_t samples_start_column = 0;
@@ -203,59 +205,74 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
             continue;
             
         } // finished reading the header and species information
+//        std::cerr << "Thinning = " << thinning << "\t\tlines_read = " << lines_read << "\t\tskip = " << skip_first << std::endl;
         
-        
-        out_stream << "? ?";
-        for (size_t species_index = 0; species_index < species_names.size(); ++species_index)
+        ++lines_read;
+        if ( skipped_first == false && lines_read > skip_first )
         {
-            
-            // allocate the counts vector for the states
-            std::vector<double> counts (NUM_ORG_STATES+1, 0.0); // 0 1 ?
-            
-            const std::vector<size_t>& this_samples_indices = indices_of_taxa_per_species[species_index];
-            
-            // iterate over all samples per species
-            for (size_t k = 0; k < this_samples_indices.size(); ++k)
-            {
-                size_t sample_index = this_samples_indices[k];
-                
-                const std::string &this_char_read = tmpChars[sample_index];
-                std::vector<std::string> format_tokens;
-                StringUtilities::stringSplit(this_char_read, ":", format_tokens);
-                
-                std::string this_alleles = format_tokens[0];
-                std::vector<size_t> states = extractStateIndices(this_alleles, type);
-                
-                // get the current character
-                for ( size_t j=0; j<states.size(); ++j)
-                {
-                    size_t chIndex = states[j];
-                    counts[chIndex]++;
-                }
-            }
-            // Now we have all the counts for this species,
-            // we need to use these counts to build a PoMoState
-            
-            std::string pomo_string = "";
-            for (size_t i=0; i<NUM_ORG_STATES; ++i)
-            {
-                pomo_string += StringUtilities::toString( counts[i] );
-                if ( i < (NUM_ORG_STATES-1) )
-                {
-                    pomo_string += ",";
-                }
-            }
-            
-            std::string chromosome = "";
-            size_t chrom_pos = 0;
-            const std::vector<double> weights;
-            PoMoState this_state = PoMoState( NUM_ORG_STATES, this_samples_indices.size(), pomo_string, chromosome, chrom_pos, weights );
-            
-            out_stream << " " << this_state.getStringValue();
-            
-        } // wrote all the species
+//            std::cerr << "\tskipping done" << std::endl;
+            skipped_first = true;
+            lines_read = 0;
+        }
         
-        out_stream << std::endl;
+        if ( skipped_first == true && thinning == lines_read )
+        {
+            // reset the lines read so that we can check the thinning again
+            lines_read = 0;
+            
+            out_stream << "? ?";
+            for (size_t species_index = 0; species_index < species_names.size(); ++species_index)
+            {
+                
+                // allocate the counts vector for the states
+                std::vector<double> counts (NUM_ORG_STATES+1, 0.0); // 0 1 ?
+                
+                const std::vector<size_t>& this_samples_indices = indices_of_taxa_per_species[species_index];
+                
+                // iterate over all samples per species
+                for (size_t k = 0; k < this_samples_indices.size(); ++k)
+                {
+                    size_t sample_index = this_samples_indices[k];
+                    
+                    const std::string &this_char_read = tmpChars[sample_index];
+                    std::vector<std::string> format_tokens;
+                    StringUtilities::stringSplit(this_char_read, ":", format_tokens);
+                    
+                    std::string this_alleles = format_tokens[0];
+                    std::vector<size_t> states = extractStateIndices(this_alleles, type);
+                    
+                    // get the current character
+                    for ( size_t j=0; j<states.size(); ++j)
+                    {
+                        size_t chIndex = states[j];
+                        counts[chIndex]++;
+                    }
+                }
+                // Now we have all the counts for this species,
+                // we need to use these counts to build a PoMoState
+                
+                std::string pomo_string = "";
+                for (size_t i=0; i<NUM_ORG_STATES; ++i)
+                {
+                    pomo_string += StringUtilities::toString( counts[i] );
+                    if ( i < (NUM_ORG_STATES-1) )
+                    {
+                        pomo_string += ",";
+                    }
+                }
+                
+                std::string chromosome = "";
+                size_t chrom_pos = 0;
+                const std::vector<double> weights;
+                PoMoState this_state = PoMoState( NUM_ORG_STATES, this_samples_indices.size(), pomo_string, chromosome, chrom_pos, weights );
+                
+                out_stream << " " << this_state.getStringValue();
+                
+            } // wrote all the species
+            
+            out_stream << std::endl;
+        }
+        
     };
     
     
