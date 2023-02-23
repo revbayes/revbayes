@@ -161,6 +161,15 @@ StateDependentSpeciationExtinctionProcess::~StateDependentSpeciationExtinctionPr
     value->getTreeChangeEventHandler().removeListener( this );
 }
 
+// Create a vector of evenly spaced numbers.
+std::vector<double> range(double min, double max, size_t N) {
+    vector<double> range;
+    double delta = (max-min)/double(N-1);
+    for(int i=0; i<N; i++) {
+        range.push_back(min + i*delta);
+    }
+    return range;
+}
 
 std::vector<double> StateDependentSpeciationExtinctionProcess::calculateTotalSpeciationRatePerState( void ) const
 {
@@ -463,6 +472,13 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
         
         double begin_age = node.getAge();
         double end_age = node.getParent().getAge();
+
+        
+        double branch_length = node.getParent().getAge() - node.getAge();
+        double tree_height = process_age->getValue();
+        int ntimes = int(round(NUM_TIME_SLICES * branch_length / tree_height));
+        std::vector<double> times = range(0.0, branch_length, ntimes);
+        double delta_t = times[1] - times[0];
         
         if ( node.isSampledAncestor() == false )
         {
@@ -470,18 +486,42 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
             if ( sample_character_history == false )
             {
                 // numerically integrate over the entire branch length
-                numericallyIntegrateProcess(node_likelihood, begin_age, end_age, true, false);
+                numericallyIntegrateProcess(node_likelihood, begin_age, end_age, delta_t, true, false);
+/*                 std::cout << "node_likelihood[4:7], idx=" << node_index << ": \t"; 
+                for (int j = 0; j < 4; j++){
+                    std::cout << node_likelihood[j+num_states] << "\t";
+                }
+                std::cout << "\n"; */
             }
             else
             {
                 // calculate the conditional likelihoods for each time slice moving
                 // along this branch backwards in time from the tip towards the root
-
                 std::vector<std::vector<double> > branch_likelihoods;
-                size_t current_dt = 0;
+
+                std::vector<double> dt_likelihood;
+                std::vector<double>::const_iterator first = node_likelihood.begin() + num_states;
+                std::vector<double>::const_iterator last = node_likelihood.begin() + (num_states * 2);
+                dt_likelihood = std::vector<double>(first, last);
+                branch_likelihoods.push_back(dt_likelihood);
+
+                for (int i = 0; i < ntimes-1; i++){
+                    std::vector<double> dt_likelihood;
+
+                    double current_dt_start = times[i];
+                    double current_dt_end = times[i+1];
+
+                    numericallyIntegrateProcess(node_likelihood, current_dt_start, current_dt_end, delta_t, true, false);
+                    std::vector<double>::const_iterator first = node_likelihood.begin() + num_states;
+                    std::vector<double>::const_iterator last = node_likelihood.begin() + (num_states * 2);
+                    dt_likelihood = std::vector<double>(first, last);
+                    branch_likelihoods.push_back(dt_likelihood);
+                    //std::cout << "asd12312\n";
+                    //std::cout << dt_likelihood[0] << "\n";
+                } 
                 
                 // calculate partial likelihoods for each time slice and store them in branch_likelihoods
-                while ( (current_dt * dt) + begin_age < end_age )
+/*                 while ( (current_dt * dt) + begin_age < end_age )
                 {
 
                     std::vector<double> dt_likelihood;
@@ -492,7 +532,7 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
                     {
                         current_dt_end = end_age;
                     }
-                    numericallyIntegrateProcess(node_likelihood, current_dt_start, current_dt_end, true, false);
+                    numericallyIntegrateProcess(node_likelihood, current_dt_start, current_dt_end, delta_t, true, false);
 
                     std::vector<double>::const_iterator first = node_likelihood.begin() + num_states;
                     std::vector<double>::const_iterator last = node_likelihood.begin() + (num_states * 2);
@@ -501,7 +541,7 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
                     branch_likelihoods.push_back(dt_likelihood);
                     current_dt++;
 
-                }
+                } */
                 
                 // save the branch conditional likelihoods
                 branch_partial_likelihoods[node_index] = branch_likelihoods;
@@ -560,7 +600,24 @@ double StateDependentSpeciationExtinctionProcess::computeRootLikelihood( void ) 
     const std::vector<double> &left_likelihoods  = node_partial_likelihoods[left_index][active_likelihood[left_index]];
     const std::vector<double> &right_likelihoods = node_partial_likelihoods[right_index][active_likelihood[right_index]];
 
+/*     std::cout << "right_root_l: ";
+    for(int i = 0; i < 4; i++){
+        std::cout << right_likelihoods[num_states+i] << "\t";
+    }
+    std::cout << "\n";
+    std::cout << "left_root_l: ";
+    for(int i = 0; i < 4; i++){
+        std::cout << left_likelihoods[num_states+i] << "\t";
+    }
+    std::cout << "\n"; */
+
     std::vector<double> &node_likelihood  = node_partial_likelihoods[node_index][active_likelihood[node_index]];
+
+/*     std::cout << "node_l: ";
+    for(int i = 0; i < 4; i++){
+        std::cout << node_likelihood[num_states+i] << "\t";
+    }
+    std::cout << "\n"; */
 
     std::map<std::vector<unsigned>, double> eventMap;
     std::vector<double> speciation_rates;
@@ -589,8 +646,8 @@ double StateDependentSpeciationExtinctionProcess::computeRootLikelihood( void ) 
         // cladogenetic events should be included at the root. right now,
         // I am just forcing the cladogenetic events at the root, but there
         // may be a better solution.
-        if ( use_cladogenetic_events == true || speciation_node == true )
-//		if ( use_cladogenetic_events == true && speciation_node == true )
+//        if ( use_cladogenetic_events == true || speciation_node == true )
+		if ( use_cladogenetic_events == true && speciation_node == true )
         {
 
             double like_sum = 0.0;
@@ -606,7 +663,6 @@ double StateDependentSpeciationExtinctionProcess::computeRootLikelihood( void ) 
                 }
             }
             node_likelihood[num_states + i] = like_sum;
-
         }
         else
         {
@@ -614,6 +670,12 @@ double StateDependentSpeciationExtinctionProcess::computeRootLikelihood( void ) 
             node_likelihood[num_states + i] *= (speciation_node ? speciation_rates[i] : 1.0);
         }
     }
+
+    std::cout << "node_l: ";
+    for(int i = 0; i < 4; i++){
+        std::cout << node_likelihood[num_states+i] << "\t";
+    }
+    std::cout << "\n";
     
     // calculate likelihoods for the root branch
     if ( use_origin == true )
@@ -621,10 +683,17 @@ double StateDependentSpeciationExtinctionProcess::computeRootLikelihood( void ) 
         double begin_age = getRootAge();
         double end_age = getOriginAge();
 
+        double branch_length = end_age - begin_age;
+        double tree_height = getOriginAge();
+        int ntimes = int(round(NUM_TIME_SLICES * branch_length / tree_height));
+        std::vector<double> times = range(0.0, branch_length, ntimes);
+        double delta_t = times[1] - times[0];
+        std::cout << "delta_t [root branch]:\t" << delta_t <<"\n"; 
+
         if ( sample_character_history == false )
         {
             // numerically integrate over the entire branch length
-            numericallyIntegrateProcess(node_likelihood, begin_age, end_age, true, false);
+            numericallyIntegrateProcess(node_likelihood, begin_age, end_age, delta_t, true, false);
         }
         else
         {
@@ -646,7 +715,7 @@ double StateDependentSpeciationExtinctionProcess::computeRootLikelihood( void ) 
                 {
                     current_dt_end = end_age;
                 }
-                numericallyIntegrateProcess(node_likelihood, current_dt_start, current_dt_end, true, false);
+                numericallyIntegrateProcess(node_likelihood, current_dt_start, current_dt_end, delta_t, true, false);
 
                 std::vector<double>::const_iterator first = node_likelihood.begin() + num_states;
                 std::vector<double>::const_iterator last = node_likelihood.begin() + (num_states * 2);
@@ -669,10 +738,13 @@ double StateDependentSpeciationExtinctionProcess::computeRootLikelihood( void ) 
     for (size_t i = 0; i < num_states; ++i)
     {
         prob += freqs[i] * node_likelihood[num_states + i];
+        //std::cout << "prob[" << i << "] = " << prob << "\n";
     }
 
     scaling_factors[node_index][active_likelihood[node_index]] = scaling_factors[left_index][active_likelihood[left_index]] + scaling_factors[right_index][active_likelihood[right_index]];
     
+/*     std::cout << "log(prob):\t" << log(prob) << "\n";
+    std::cout << "sf:\t" << scaling_factors[node_index][active_likelihood[node_index]] << "\n"; */
     return log(prob) + scaling_factors[node_index][active_likelihood[node_index]];
 }
 
@@ -811,6 +883,12 @@ void StateDependentSpeciationExtinctionProcess::recursivelyDrawJointConditionalA
 {
     
     size_t node_index = node.getIndex();
+
+    double branch_length = node.getParent().getAge() - node.getAge();
+    double tree_height = process_age->getValue();
+    int ntimes = int(round(NUM_TIME_SLICES * branch_length / tree_height));
+    std::vector<double> times = range(0.0, branch_length, ntimes);
+    double delta_t = times[1] - times[0];
     
     if ( node.isTip() == true )
     {
@@ -833,11 +911,11 @@ void StateDependentSpeciationExtinctionProcess::recursivelyDrawJointConditionalA
             
             // first calculate extinction likelihoods via a backward time pass
             double end_age = node.getParent().getAge();
-            numericallyIntegrateProcess(branch_conditional_probs, 0, end_age, true, true);
+            numericallyIntegrateProcess(branch_conditional_probs, 0, end_age, delta_t, true, true);
             
             // now calculate conditional likelihoods along branch in forward time
             end_age        = node.getParent().getAge() - node.getAge();
-            numericallyIntegrateProcess(branch_conditional_probs, 0, end_age, false, false);
+            numericallyIntegrateProcess(branch_conditional_probs, 0, end_age, delta_t, false, false);
             
             double total_prob = 0.0;
             for (size_t i = 0; i < num_states; ++i)
@@ -880,11 +958,11 @@ void StateDependentSpeciationExtinctionProcess::recursivelyDrawJointConditionalA
 
         // first calculate extinction likelihoods via a backward time pass
         double end_age = node.getParent().getAge();
-        numericallyIntegrateProcess(branch_conditional_probs, 0, end_age, true, true);
+        numericallyIntegrateProcess(branch_conditional_probs, 0, end_age, delta_t, true, true);
         
         // now calculate conditional likelihoods along branch in forward time
         end_age        = node.getParent().getAge() - node.getAge();
-        numericallyIntegrateProcess(branch_conditional_probs, 0, end_age, false, false);
+        numericallyIntegrateProcess(branch_conditional_probs, 0, end_age, delta_t, false, false);
         
         std::map<std::vector<unsigned>, double> event_map;
         std::vector<double> speciation_rates;
@@ -1152,6 +1230,12 @@ bool StateDependentSpeciationExtinctionProcess::recursivelyDrawStochasticCharact
     size_t node_index = node.getIndex();
     std::vector<double> speciation_rates = calculateTotalSpeciationRatePerState();
     std::vector<double> extinction_rates = mu->getValue();
+
+    double branch_length = node.getParent().getAge() - node.getAge();
+    double tree_height = process_age->getValue();
+    int ntimes = int(round(NUM_TIME_SLICES * branch_length / tree_height));
+    std::vector<double> times = range(0.0, branch_length, ntimes);
+    double delta_t = times[1] - times[0];
     
     // reset the number of rate-shift events
     num_shift_events[node_index] = 0;
@@ -1164,10 +1248,10 @@ bool StateDependentSpeciationExtinctionProcess::recursivelyDrawStochasticCharact
     
     // first calculate extinction likelihoods via a backward time pass
     double start_time = node.getParent().getAge();
-    numericallyIntegrateProcess(branch_conditional_probs, 0, start_time, true, true);
+    numericallyIntegrateProcess(branch_conditional_probs, 0, start_time, delta_t, true, true);
     
     // now calculate conditional likelihoods along branch in forward time
-    double branch_length = node.getParent().getAge() - node.getAge();
+    // double branch_length = node.getParent().getAge() - node.getAge();
     size_t current_dt = 0;
     double current_dt_start = 0;
     double current_dt_end = 0;
@@ -1184,15 +1268,94 @@ bool StateDependentSpeciationExtinctionProcess::recursivelyDrawStochasticCharact
     // keep track of rates in each time interval so we can calculate per branch averages of each rate
     double total_speciation_rate = 0.0;
     double total_extinction_rate = 0.0;
-    double num_dts = 0.0;
+    //double num_dts = 0.0;
+
+    // add node likelihood at t=0
+
+    // iterate over the time slices
+    for (int j = 0; j < (ntimes-1); j++)
+    {
+        current_dt_start = times[j];
+        current_dt_end = times[j+1];
+        
+        std::cout << "j " << j << "ntimes-j " << (ntimes-j);
+        numericallyIntegrateProcess(branch_conditional_probs, current_dt_start, current_dt_end, delta_t, false, false);
+
+        // draw state for this time slice
+        size_t new_state = current_state;
+        double probs_sum = 0.0;
+        for (size_t i = 0; i < num_states; i++)
+        {
+            probs_sum += branch_conditional_probs[i + num_states] * branch_partial_likelihoods[node_index][ntimes-j][i];
+        }
+        if ( probs_sum == 0.0 )
+        {
+            return false;
+        }
+        else
+        {
+            RandomNumberGenerator* rng = GLOBAL_RNG;
+            double u = rng->uniform01() * probs_sum;
+
+            for (size_t i = 0; i < num_states; i++)
+            {
+                u -= branch_conditional_probs[i + num_states] * branch_partial_likelihoods[node_index][ntimes-j][i];
+                if (u < 0.0)
+                {
+                    new_state = i;
+                    break;
+                }
+            }
+        }
+        
+        // check if there was a character state transition
+        if (new_state != current_state)
+        {
+            double time_since_last_transition = 0.0;
+            double transition_times_sum = 0.0;
+            for (size_t j = 0; j < transition_times.size(); j++)
+            {
+                transition_times_sum += transition_times[j];
+            }
+            time_since_last_transition = current_dt_end - transition_times_sum;
+
+            transition_times.push_back(time_since_last_transition);
+            transition_states.push_back(new_state);
+            current_state = new_state;
+            
+            ++num_shift_events[node_index];
+        }
+        
+        // condition branch_conditional_probs on the sampled state
+        for (size_t i = 0; i < num_states; i++)
+        {
+            if (i == current_state)
+            {
+                branch_conditional_probs[ num_states + i ] = 1.0;
+            }
+            else
+            {
+                branch_conditional_probs[ num_states + i ] = 0.0;
+            }
+        }
+        
+        //current_dt++;
+        //downpass_dt--;
+        
+        // keep track of rates in this interal so we can calculate per branch averages of each rate
+        total_speciation_rate += speciation_rates[current_state];
+        total_extinction_rate += extinction_rates[current_state];
+        time_in_states[current_state] += delta_t;
+        //num_dts += 1;
+    }
 
     // loop over every time slice, stopping before the last time slice
-    while ( downpass_dt >= 0 && ((current_dt + 1) * dt) < branch_length)
+    /* while ( downpass_dt >= 0 && ((current_dt + 1) * dt) < branch_length)
     {
         current_dt_start = (current_dt * dt);
         current_dt_end = ((current_dt + 1) * dt);
         
-        numericallyIntegrateProcess(branch_conditional_probs, current_dt_start, current_dt_end, false, false);
+        numericallyIntegrateProcess(branch_conditional_probs, current_dt_start, current_dt_end, delta_t, false, false);
 
         // draw state for this time slice
         size_t new_state = current_state;
@@ -1260,7 +1423,7 @@ bool StateDependentSpeciationExtinctionProcess::recursivelyDrawStochasticCharact
         total_extinction_rate += extinction_rates[current_state];
         time_in_states[current_state] += dt;
         num_dts += 1;
-    }
+    } */
     
     if ( node.isTip() == true )
     {
@@ -1290,8 +1453,8 @@ bool StateDependentSpeciationExtinctionProcess::recursivelyDrawStochasticCharact
         // keep track of rates in this interval so we can calculate per branch averages of each rate
         total_speciation_rate += speciation_rates[new_state];
         total_extinction_rate += extinction_rates[new_state];
-        time_in_states[new_state] += dt;
-        num_dts += 1;
+        time_in_states[new_state] += delta_t;
+        //num_dts += 1;
         
         // check if there was a character state transition
         if (new_state != current_state)
@@ -1332,8 +1495,8 @@ bool StateDependentSpeciationExtinctionProcess::recursivelyDrawStochasticCharact
         simmap_string = simmap_string + "}";
         
         // calculate average diversification rates on this branch
-        average_speciation[node_index] = total_speciation_rate / num_dts;
-        average_extinction[node_index] = total_extinction_rate / num_dts;
+        average_speciation[node_index] = total_speciation_rate / ntimes;
+        average_extinction[node_index] = total_extinction_rate / ntimes;
 
         // save the character history for this branch
         character_histories[node_index] = simmap_string;
@@ -1423,8 +1586,8 @@ bool StateDependentSpeciationExtinctionProcess::recursivelyDrawStochasticCharact
         // keep track of rates in this interval so we can calculate per branch averages of each rate
         total_speciation_rate += speciation_rates[a];
         total_extinction_rate += extinction_rates[a];
-        time_in_states[a] += dt;
-        num_dts += 1;
+        time_in_states[a] += delta_t;
+        //num_dts += 1;
         
         // check if there was a character state transition
         if (a != current_state)
@@ -1469,8 +1632,8 @@ bool StateDependentSpeciationExtinctionProcess::recursivelyDrawStochasticCharact
         character_histories[node_index] = simmap_string;
         
         // calculate average diversification rates on this branch
-        average_speciation[node_index] = total_speciation_rate / num_dts;
-        average_extinction[node_index] = total_extinction_rate / num_dts;
+        average_speciation[node_index] = total_speciation_rate / ntimes;
+        average_extinction[node_index] = total_extinction_rate / ntimes;
         
         // recurse towards tips
         bool success_l = recursivelyDrawStochasticCharacterMap(left, l, character_histories, set_amb_char_data);
@@ -1745,6 +1908,11 @@ double StateDependentSpeciationExtinctionProcess::lnProbTreeShape(void) const
 std::vector<double> StateDependentSpeciationExtinctionProcess::pExtinction(double start, double end) const
 {
     
+    //double process_length = end - start;
+    //int ntimes = int(round(NUM_TIME_SLICES * process_length));
+    int ntimes = NUM_TIME_SLICES;
+    std::vector<double> times = range(start, end, ntimes);
+    double delta_t = times[1] - times[0];
     
     std::vector<double> sampling_probability;
     if ( rho != NULL && rho_per_state == NULL )
@@ -1767,7 +1935,7 @@ std::vector<double> StateDependentSpeciationExtinctionProcess::pExtinction(doubl
         initial_state[num_states + i] = sampling_probability[i];
     }
     
-    numericallyIntegrateProcess(initial_state, start, end, true, false);
+    numericallyIntegrateProcess(initial_state, start, end, delta_t, true, false);
     
     return initial_state;
 }
@@ -3199,7 +3367,7 @@ void StateDependentSpeciationExtinctionProcess::touchSpecialization(const DagNod
 /**
  * Wrapper function for the ODE time stepper function.
  */
-void StateDependentSpeciationExtinctionProcess::numericallyIntegrateProcess(std::vector< double > &likelihoods, double begin_age, double end_age, bool backward_time, bool extinction_only) const
+void StateDependentSpeciationExtinctionProcess::numericallyIntegrateProcess(std::vector< double > &likelihoods, double begin_age, double end_age, double delta_t, bool backward_time, bool extinction_only) const
 {
     const std::vector<double> &extinction_rates = mu->getValue();
     SSE_ODE ode = SSE_ODE(extinction_rates, &getEventRateMatrix(), getEventRate(), backward_time, extinction_only, allow_rate_shifts_on_extinct_lineages);
@@ -3228,7 +3396,7 @@ void StateDependentSpeciationExtinctionProcess::numericallyIntegrateProcess(std:
     typedef boost::numeric::odeint::runge_kutta_dopri5< std::vector< double > > stepper_type;
 
 //    boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-7, 1E-7, stepper_type() ) , ode , likelihoods , begin_age , end_age , dt );
-    boost::numeric::odeint::integrate_adaptive( stepper_type(), ode , likelihoods , begin_age , end_age , dt );
+    boost::numeric::odeint::integrate_adaptive( stepper_type(), ode , likelihoods , begin_age , end_age , delta_t );
     
     // catch negative extinction probabilities that can result from
     // rounding errors in the ODE stepper
