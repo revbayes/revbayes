@@ -11,6 +11,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <optional>
 
 #include "NewickConverter.h"
 #include "ProgressBar.h"
@@ -734,7 +735,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
             // annotate CCPs
             if ( !n->isTip() && report.conditional_clade_probs )
             {
-                double parentCladeFreq = splitFrequency( parent_split );
+                double parentCladeFreq = splitCount( parent_split );
                 double ccp = condCladeAges[split].size() / parentCladeFreq;
                 n->addNodeParameter("ccp",ccp);
             }
@@ -866,21 +867,10 @@ double TreeSummary::cladeProbability(const RevBayesCore::Clade &c, bool verbose 
 {
     summarize(verbose);
 
-    double f = 0.0;
     Clade tmp = c;
     tmp.resetTaxonBitset( traces.front()->objectAt(0).getTaxonBitSetMap() );
 
-    try
-    {
-        double freq = splitFrequency( Split( tmp.getBitRepresentation(), tmp.getMrca(), rooted) );
-        f = freq / sampleSize(true);
-    }
-    catch (RbException& e)
-    {
-        // do nothing
-    }
-
-    return f;
+    return splitFrequency( Split( tmp.getBitRepresentation(), tmp.getMrca(), rooted) );
 }
 
 
@@ -1147,14 +1137,19 @@ void TreeSummary::enforceNonnegativeBranchLengths(TopologyNode& node) const
 }
 
 
-long TreeSummary::splitFrequency(const Split &n) const
+long TreeSummary::splitCount(const Split &n) const
 {
     auto iter = clade_counts.find(n);
 
     if (iter == clade_counts.end())
-        throw RbException("Couldn't find split in set of samples");
+        return 0;
     else
         return iter->second;
+}
+
+double TreeSummary::splitFrequency(const Split &n) const
+{
+    return double(splitCount(n))/sampleSize(true);
 }
 
 
@@ -1233,7 +1228,7 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, s
 }
 
 
-int TreeSummary::getTopologyFrequency(const RevBayesCore::Tree &tree, bool verbose)
+long TreeSummary::getTopologyCount(const RevBayesCore::Tree &tree, bool verbose)
 {
     summarize( verbose );
 
@@ -1263,6 +1258,10 @@ int TreeSummary::getTopologyFrequency(const RevBayesCore::Tree &tree, bool verbo
         return iter->second;
 }
 
+double TreeSummary::getTopologyFrequency(const RevBayesCore::Tree &tree, bool verbose)
+{
+    return getTopologyCount(tree,verbose)/sampleSize(true);
+}
 
 std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_prob, bool non_trivial_only, bool verbose )
 {
@@ -1441,16 +1440,7 @@ double TreeSummary::maxdiff( bool verbose )
 
         for(auto& trace: traces)
         {
-            double total_samples = trace->size(true);
-
-            auto it = trace->clade_counts.find(split);
-
-            double freq = 0;
-
-            if ( it != trace->clade_counts.end() )
-            {
-                freq = it->second/total_samples;
-            }
+            double freq = trace->splitFrequency(split);
 
             split_freqs.push_back(freq);
         }
@@ -1519,7 +1509,7 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
     summarize( verbose );
 
     Tree* best_tree = NULL;
-    double max_cc = 0;
+    std::optional<double> max_cc;
 
     // find the clade credibility score for each tree
     for (const auto& [newick, count]: tree_samples)
@@ -1529,7 +1519,7 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
         for (auto& [clade, age]: tree_clade_ages.at(newick))
             cc += log( splitFrequency(clade) );
 
-        if (cc > max_cc)
+        if (not max_cc or cc > *max_cc)
         {
             max_cc = cc;
 
