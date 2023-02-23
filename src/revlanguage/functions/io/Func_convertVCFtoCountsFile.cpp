@@ -69,7 +69,10 @@ RevPtr<RevVariable> Func_convertVCFtoCountsFile::execute( void )
 
     const RevBayesCore::RbVector<RevBayesCore::Taxon>& taxa  = static_cast< const ModelVector<Taxon> &>( args[arg_index++].getVariable()->getRevObject() ).getValue();
 
-    vcf_reader.convertToCountsFile( fn_counts, taxa, type );
+    long thinning    = static_cast< const Natural&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    long skip_first  = static_cast< const Natural&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+
+    vcf_reader.convertToCountsFile( fn_counts, taxa, type, thinning, skip_first );
     
     return NULL;
 }
@@ -104,6 +107,9 @@ const ArgumentRules& Func_convertVCFtoCountsFile::getArgumentRules( void ) const
         argument_rules.push_back( new OptionRule( "unkownTreatment", new RlString("missing"), unknown_options, "How to treat the '.' character, i.e., if the state was unkown." ) );
         
         argument_rules.push_back( new ArgumentRule( "taxa"     , ModelVector<Taxon>::getClassTypeSpec()                     , "The taxa to match the individuals to species/populations.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+
+        argument_rules.push_back( new ArgumentRule( "thinning", Natural::getClassTypeSpec(), "If thinning is larger than 1, then we only take the i-th entry of the VCF.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
+        argument_rules.push_back( new ArgumentRule( "skipFirst", Natural::getClassTypeSpec(), "Skip the first n entries.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
 
         rules_set = true;
         
