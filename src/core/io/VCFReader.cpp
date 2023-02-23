@@ -22,6 +22,396 @@ VCFReader::VCFReader(const std::string &fn, PLOIDY p, UNKOWN_TREATMENT u, bool r
 }
 
 
+VCFReader* VCFReader::clone( void ) const
+{
+    return new VCFReader( *this );
+}
+
+
+void VCFReader::mapSpeciesNames(const RbVector<Taxon> &taxa_list, std::vector<std::string> &species_names, std::map<std::string, size_t> &species_names_to_index, std::vector<std::vector<size_t>> &indices_of_taxa_per_species)
+{
+    size_t species_index = 0;
+    for (size_t i=0; i<taxa_list.size(); ++i)
+    {
+        const std::string& species_name = taxa_list[i].getSpeciesName();
+        
+        // only add if it doen't exist yet
+        std::map<std::string, size_t>::iterator it = species_names_to_index.find( species_name );
+        if ( it == species_names_to_index.end() )
+        {
+            species_names.push_back( species_name );
+            
+            species_names_to_index[ species_name ] = species_index;
+            ++species_index;
+            
+            indices_of_taxa_per_species.push_back( std::vector<size_t>() );
+        }
+    }
+}
+
+
+void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, const RbVector<Taxon>& taxa_list )
+{
+    size_t NUM_ORG_STATES = 2;
+
+    statistics_ready = true;
+   
+    // we need to get a map of species names to all samples belonging to that species
+    std::vector<std::string> species_names;
+    std::map<std::string, size_t> species_names_to_index;
+    std::vector< std::vector<size_t> > indices_of_taxa_per_species;
+    
+    mapSpeciesNames(taxa_list, species_names, species_names_to_index, indices_of_taxa_per_species);
+    
+    // get the number of species
+    size_t NUM_SPECIES = species_names.size();
+    
+    mono_in_A_var_in_B = std::vector< std::vector<size_t> >( NUM_SPECIES, std::vector<size_t>(NUM_SPECIES, 0) );
+    mono_in_both_equal = std::vector< std::vector<size_t> >( NUM_SPECIES, std::vector<size_t>(NUM_SPECIES, 0) );
+    mono_in_both_diff  = std::vector< std::vector<size_t> >( NUM_SPECIES, std::vector<size_t>(NUM_SPECIES, 0) );
+    var_in_both        = std::vector< std::vector<size_t> >( NUM_SPECIES, std::vector<size_t>(NUM_SPECIES, 0) );
+    
+    // open file
+    std::ifstream readStream;
+    RbFileManager f_in = RbFileManager(filename);
+    if ( f_in.openFile(readStream) == false )
+    {
+        throw RbException( "Could not open file " + filename );
+    }
+    
+    
+    // read file
+    // bool firstLine = true;
+    std::string read_line = "";
+    size_t lines_skipped = 0;
+    size_t lines_to_skip = 0;
+    std::vector<std::string> tmp_chars;
+    bool has_names_been_read = false;
+    size_t samples_start_column = 0;
+    size_t NUM_SAMPLES = 0;
+    
+    while (f_in.safeGetline(readStream,read_line))
+    {
+        
+        tmp_chars.clear();
+        ++lines_skipped;
+        if ( lines_skipped <= lines_to_skip)
+        {
+            continue;
+        }
+        
+        // skip blank lines
+        std::string::iterator first_nonspace = std::find_if (read_line.begin(), read_line.end(), [](int c) {return not isspace(c);});
+        if (first_nonspace == read_line.end())
+        {
+            continue;
+        }
+
+        StringUtilities::stringSplit(read_line, delimiter, tmp_chars, true);
+        
+        // Skip comments.
+        if ( tmp_chars[0][0] == '#' && tmp_chars[0][1] == '#')
+        {
+            continue;
+        }
+        
+        if ( has_names_been_read == false )
+        {
+            std::vector<std::string> sample_names;
+            const std::vector<std::string> &format_line = tmp_chars;
+            while ( format_line[samples_start_column] != "FORMAT" )
+            {
+                ++samples_start_column;
+            };
+            ++samples_start_column;
+            for (size_t j = samples_start_column; j < format_line.size(); ++j)
+            {
+                sample_names.push_back( format_line[j] );
+            }
+            
+            NUM_SAMPLES = sample_names.size();
+            std::vector< Taxon > taxa;
+            if ( ploidy == HAPLOID )
+            {
+                taxa = std::vector< Taxon >( NUM_SAMPLES, Taxon("") );
+                for (size_t i=0; i<NUM_SAMPLES; ++i)
+                {
+                    Taxon this_taxon = Taxon( sample_names[i] );
+                    taxa[i] = this_taxon;
+                }
+            }
+            else if ( ploidy == DIPLOID )
+            {
+                taxa = std::vector< Taxon >( 2*NUM_SAMPLES, Taxon("") );
+                for (size_t i=0; i<NUM_SAMPLES; ++i)
+                {
+                    Taxon this_taxon_A = Taxon( sample_names[i] + "_A" );
+                    taxa[i] = this_taxon_A;
+                    Taxon this_taxon_B = Taxon( sample_names[i] + "_B" );
+                    taxa[i+NUM_SAMPLES] = this_taxon_B;
+                }
+            }
+            else
+            {
+                throw RbException("Currently we have only implementations for haploid and diploid organisms.");
+            }
+            
+            // create the lookup vector with the species to taxon columns positions
+            for (size_t i=0; i<NUM_SAMPLES; ++i)
+            {
+                const std::string& sample_name = sample_names[i];
+                
+                // now get the species name from the taxon list
+                size_t taxon_index = 0;
+                for (size_t j=0; j<taxa_list.size(); ++j)
+                {
+                    const std::string& this_sample_name = taxa_list[j].getName();
+                    if ( sample_name == this_sample_name )
+                    {
+                        taxon_index = j;
+                        break;
+                    }
+                }
+                const std::string& species_name = taxa_list[taxon_index].getSpeciesName();
+                
+                // now get the index of the species
+                size_t species_index = 0;
+                std::map<std::string, size_t>::iterator it = species_names_to_index.find( species_name );
+                if ( it != species_names_to_index.end() )
+                {
+                    species_index = it->second;
+                }
+                else
+                {
+                    throw RbException("Could not find species with name '" + species_name + "'.");
+                }
+                
+                std::vector<size_t>& this_species_taxa_indices = indices_of_taxa_per_species[species_index];
+                this_species_taxa_indices.push_back( i + samples_start_column );
+                
+            }
+
+            
+            has_names_been_read = true;
+            
+            // skip now
+            continue;
+            
+        } // finished reading the header and species information
+        
+        
+        // allocate the counts vector for the states
+        std::vector<std::vector<size_t> > counts_per_species (NUM_SPECIES, std::vector<size_t>(NUM_ORG_STATES+1, 0) ) ; // 0 1 ?
+        for (size_t species_index = 0; species_index < NUM_SPECIES; ++species_index)
+        {
+            // get the counts for this species
+            std::vector<size_t>& counts = counts_per_species[species_index];
+            
+            // get the sample indices of the taxa for this species
+            const std::vector<size_t>& this_samples_indices = indices_of_taxa_per_species[species_index];
+            
+            // iterate over all samples per species
+            for (size_t k = 0; k < this_samples_indices.size(); ++k)
+            {
+                // get the index of the taxon
+                size_t sample_index = this_samples_indices[k];
+                
+                const std::string &this_char_read = tmp_chars[sample_index];
+                std::vector<std::string> format_tokens;
+                StringUtilities::stringSplit(this_char_read, ":", format_tokens);
+                
+                std::string this_alleles = format_tokens[0];
+                std::vector<size_t> states = extractStateIndices(this_alleles, "binary");
+                
+                // get the current character
+                for ( size_t j=0; j<states.size(); ++j)
+                {
+                    size_t ch_index = states[j];
+                    counts[ch_index]++;
+                }
+            }
+            
+        } // for all the species collected the counts
+        
+        // Now we have all the counts for all species,
+        // we need to compute the counts based stats
+        for (size_t species_A = 0; species_A < NUM_SPECIES; ++species_A)
+        {
+            // get the counts for species A
+            const std::vector<size_t>& counts_A = counts_per_species[species_A];
+            
+            bool species_A_monomorphic         = counts_A[0] == 0 || counts_A[1] == 0;
+            size_t species_A_monomorphic_state = ( counts_A[0] == 0 ? 1 : 0 );
+            
+            for (size_t species_B = 0; species_B < NUM_SPECIES; ++species_B)
+            {
+                // get the counts for species B
+                const std::vector<size_t>& counts_B = counts_per_species[species_B];
+                
+                bool species_B_monomorphic         = counts_B[0] == 0 || counts_B[1] == 0;
+                size_t species_B_monomorphic_state = ( counts_B[0] == 0 ? 1 : 0 );
+                
+                
+                mono_in_A_var_in_B[species_A][species_B] += (species_A_monomorphic == true && species_B_monomorphic == false ? 1 : 0);
+                mono_in_both_equal[species_A][species_B] += (species_A_monomorphic == true && species_B_monomorphic == true && species_A_monomorphic_state == species_B_monomorphic_state ? 1 : 0);
+                mono_in_both_diff[species_A][species_B]  += (species_A_monomorphic == true && species_B_monomorphic == true && species_A_monomorphic_state != species_B_monomorphic_state ? 1 : 0);
+                var_in_both[species_A][species_B]        += (species_A_monomorphic == false && species_B_monomorphic == false ? 1 : 0);
+                
+            }
+        }
+        
+    };
+    
+    
+    f_in.closeFile( readStream );
+    
+    
+    
+    
+    // write the results of monomorphic in A but variable in B
+    std::ofstream out_stream_mono_in_A_var_in_B;
+    std::string out_filename_mono_in_A_var_in_B = fn + "_mono_in_A_var_in_B.csv";
+    
+    RbFileManager f_out_mono_in_A_var_in_B = RbFileManager(out_filename_mono_in_A_var_in_B);
+    f_out_mono_in_A_var_in_B.createDirectoryForFile();
+    
+    // open the stream to the file
+    out_stream_mono_in_A_var_in_B.open( f_out_mono_in_A_var_in_B.getFullFileName().c_str(), std::fstream::out );
+    
+    // write the file header
+    out_stream_mono_in_A_var_in_B << "";
+    for (size_t species_A = 0; species_A < NUM_SPECIES; ++species_A)
+    {
+        out_stream_mono_in_A_var_in_B << "," << species_names[species_A];
+    }
+    out_stream_mono_in_A_var_in_B << std::endl;
+    for (size_t species_A = 0; species_A < NUM_SPECIES; ++species_A)
+    {
+        out_stream_mono_in_A_var_in_B << species_names[species_A];
+        for (size_t species_B = 0; species_B < NUM_SPECIES; ++species_B)
+        {
+            out_stream_mono_in_A_var_in_B << "," << mono_in_A_var_in_B[species_A][species_B];
+        }
+        out_stream_mono_in_A_var_in_B << std::endl;
+    }
+    out_stream_mono_in_A_var_in_B << std::endl;
+    
+    // close the stream
+    f_in.closeFile( out_stream_mono_in_A_var_in_B );
+    
+    
+    
+    
+    
+    
+    
+    // write the results of monomorphic in both and equal state
+    std::ofstream out_stream_mono_in_both_equal;
+    std::string out_filename_mono_in_both_equal = fn + "_mono_in_both_equal.csv";
+    
+    RbFileManager f_out_mono_in_both_equal = RbFileManager(out_filename_mono_in_both_equal);
+    f_out_mono_in_both_equal.createDirectoryForFile();
+    
+    // open the stream to the file
+    out_stream_mono_in_both_equal.open( f_out_mono_in_both_equal.getFullFileName().c_str(), std::fstream::out );
+    
+    // write the file header
+    out_stream_mono_in_both_equal << "";
+    for (size_t species_A = 0; species_A < NUM_SPECIES; ++species_A)
+    {
+        out_stream_mono_in_both_equal << "," << species_names[species_A];
+    }
+    out_stream_mono_in_both_equal << std::endl;
+    for (size_t species_A = 0; species_A < NUM_SPECIES; ++species_A)
+    {
+        out_stream_mono_in_both_equal << species_names[species_A];
+        for (size_t species_B = 0; species_B < NUM_SPECIES; ++species_B)
+        {
+            out_stream_mono_in_both_equal << "," << mono_in_both_equal[species_A][species_B];
+        }
+        out_stream_mono_in_both_equal << std::endl;
+    }
+    out_stream_mono_in_both_equal << std::endl;
+    
+    // close the stream
+    f_in.closeFile( out_stream_mono_in_both_equal );
+    
+    
+    
+    
+    
+    
+    
+    // write the results of monomorphic in both and different state
+    std::ofstream out_stream_mono_in_both_diff;
+    std::string out_filename_mono_in_both_diff = fn + "_mono_in_both_diff.csv";
+    
+    RbFileManager f_out_mono_in_both_diff = RbFileManager(out_filename_mono_in_both_diff);
+    f_out_mono_in_both_diff.createDirectoryForFile();
+    
+    // open the stream to the file
+    out_stream_mono_in_both_diff.open( f_out_mono_in_both_diff.getFullFileName().c_str(), std::fstream::out );
+    
+    // write the file header
+    out_stream_mono_in_both_diff << "";
+    for (size_t species_A = 0; species_A < NUM_SPECIES; ++species_A)
+    {
+        out_stream_mono_in_both_diff << "," << species_names[species_A];
+    }
+    out_stream_mono_in_both_diff << std::endl;
+    for (size_t species_A = 0; species_A < NUM_SPECIES; ++species_A)
+    {
+        out_stream_mono_in_both_diff << species_names[species_A];
+        for (size_t species_B = 0; species_B < NUM_SPECIES; ++species_B)
+        {
+            out_stream_mono_in_both_diff << "," << mono_in_both_diff[species_A][species_B];
+        }
+        out_stream_mono_in_both_diff << std::endl;
+    }
+    out_stream_mono_in_both_diff << std::endl;
+    
+    // close the stream
+    f_in.closeFile( out_stream_mono_in_both_diff );
+    
+    
+    
+    
+    
+    
+    
+    // write the results of monomorphic in both and different state
+    std::ofstream out_stream_var_in_both;
+    std::string out_filename_var_in_both = fn + "_var_in_both.csv";
+    
+    RbFileManager f_out_var_in_both = RbFileManager(out_filename_var_in_both);
+    f_out_var_in_both.createDirectoryForFile();
+    
+    // open the stream to the file
+    out_stream_var_in_both.open( f_out_var_in_both.getFullFileName().c_str(), std::fstream::out );
+    
+    // write the file header
+    out_stream_var_in_both << "";
+    for (size_t species_A = 0; species_A < NUM_SPECIES; ++species_A)
+    {
+        out_stream_var_in_both << "," << species_names[species_A];
+    }
+    out_stream_var_in_both << std::endl;
+    for (size_t species_A = 0; species_A < NUM_SPECIES; ++species_A)
+    {
+        out_stream_var_in_both << species_names[species_A];
+        for (size_t species_B = 0; species_B < NUM_SPECIES; ++species_B)
+        {
+            out_stream_var_in_both << "," << var_in_both[species_A][species_B];
+        }
+        out_stream_var_in_both << std::endl;
+    }
+    out_stream_var_in_both << std::endl;
+    
+    // close the stream
+    f_in.closeFile( out_stream_var_in_both );
+
+}
+
 void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVector<Taxon>& taxa_list, const std::string& type, long thinning, long skip_first )
 {
     
@@ -187,7 +577,6 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
                 
             }
             
-            size_t num_tips  = taxa.size();
             int    num_sites = -1;
             
             out_stream << "COUNTSFILE NPOP " << species_names.size() << " NSITES " << num_sites << std::endl;
@@ -539,7 +928,7 @@ std::vector<size_t> VCFReader::extractStateIndices(std::string alleles, const st
 }
 
 
-HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( void )
+HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( bool skip_missing )
 {
     HomologousDiscreteCharacterData<BinaryState> *matrix = new HomologousDiscreteCharacterData<BinaryState> ();
     
@@ -592,9 +981,11 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( void 
     BinaryState missing_state = BinaryState("0");
     missing_state.setMissingState( true );
     
+    std::vector<BinaryState> this_site = std::vector<BinaryState>( ploidy == DIPLOID ? 2*NUM_SAMPLES : NUM_SAMPLES, BinaryState() );
     for (size_t i = start; i < chars.size(); ++i)
     {
         
+        bool is_missing = false;
         for (size_t j = 0; j < NUM_SAMPLES; ++j)
         {
             
@@ -607,106 +998,58 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( void 
             std::vector<std::string> allele_tokens;
             StringUtilities::stringSplit(this_alleles, "|", allele_tokens);
             
-            if ( ploidy == DIPLOID )
+            std::vector<size_t> state_indices = extractStateIndices(this_alleles, "binary");
+            
+            // add the first character
+            if ( state_indices[0] == 0 )
             {
-                // first allele
-                if ( allele_tokens[0] == "0")
-                {
-                    taxa[j].addCharacter( BinaryState("0") );
-                }
-                else if ( allele_tokens[0] == "1" )
-                {
-                    taxa[j].addCharacter( BinaryState("1") );
-                }
-                else if ( allele_tokens[0] == "." )
-                {
-                    if ( unkown_treatment == UNKOWN_TREATMENT::MISSING )
-                    {
-                        taxa[j].addCharacter( missing_state );
-                    }
-                    else if ( unkown_treatment == UNKOWN_TREATMENT::REFERENCE )
-                    {
-                        taxa[j].addCharacter( BinaryState("0") );
-                    }
-                    else if ( unkown_treatment == UNKOWN_TREATMENT::ALTERNATIVE )
-                    {
-                        taxa[j].addCharacter( BinaryState("1") );
-                    }
-                }
-                else
-                {
-                    throw RbException("Unknown scored character!");
-                }
-                
-                // second allele
-                if ( allele_tokens[1] == "0")
-                {
-                    taxa[j+NUM_SAMPLES].addCharacter( BinaryState("0") );
-                }
-                else if ( allele_tokens[1] == "1" )
-                {
-                    taxa[j+NUM_SAMPLES].addCharacter( BinaryState("1") );
-                }
-                else if ( allele_tokens[1] == "." )
-                {
-                    if ( unkown_treatment == UNKOWN_TREATMENT::MISSING )
-                    {
-                        taxa[j+NUM_SAMPLES].addCharacter( missing_state );
-                    }
-                    else if ( unkown_treatment == UNKOWN_TREATMENT::REFERENCE )
-                    {
-                        taxa[j+NUM_SAMPLES].addCharacter( BinaryState("0") );
-                    }
-                    else if ( unkown_treatment == UNKOWN_TREATMENT::ALTERNATIVE )
-                    {
-                        taxa[j+NUM_SAMPLES].addCharacter( BinaryState("1") );
-                    }
-                }
-                else
-                {
-                    throw RbException("Unknown scored character!");
-                }
+                this_site[j] = BinaryState("0");
+            }
+            else if ( state_indices[0] == 1 )
+            {
+                this_site[j] = BinaryState("1");
+            }
+            else if ( state_indices[0] == 2 )
+            {
+                this_site[j] = missing_state;
+                is_missing = true;
             }
             else
             {
-                // first allele
-                std::string this_allele = allele_tokens[0];
-                if ( allele_tokens.size() > 1 )
+                throw RbException("Unknown scored binary character!");
+            }
+            
+            if ( ploidy == DIPLOID )
+            {
+                // add the first character
+                if ( state_indices[1] == 0 )
                 {
-                    bool use_second_allele = GLOBAL_RNG->uniform01() > 0.5;
-                    if ( use_second_allele )
-                    {
-                        this_allele = allele_tokens[1];
-                    }
+                    this_site[j+NUM_SAMPLES] = BinaryState("0");
                 }
-                
-                if ( this_allele == "0")
+                else if ( state_indices[1] == 1 )
                 {
-                    taxa[j].addCharacter( BinaryState("0") );
+                    this_site[j+NUM_SAMPLES] = BinaryState("1");
                 }
-                else if ( this_allele == "1" )
+                else if ( state_indices[1] == 2 )
                 {
-                    taxa[j].addCharacter( BinaryState("1") );
-                }
-                else if ( this_allele == "." )
-                {
-                    if ( unkown_treatment == UNKOWN_TREATMENT::MISSING )
-                    {
-                        taxa[j+NUM_SAMPLES].addCharacter( missing_state );
-                    }
-                    else if ( unkown_treatment == UNKOWN_TREATMENT::REFERENCE )
-                    {
-                        taxa[j+NUM_SAMPLES].addCharacter( BinaryState("0") );
-                    }
-                    else if ( unkown_treatment == UNKOWN_TREATMENT::ALTERNATIVE )
-                    {
-                        taxa[j+NUM_SAMPLES].addCharacter( BinaryState("1") );
-                    }
+                    this_site[j+NUM_SAMPLES] = missing_state;
+                    is_missing = true;
                 }
                 else
                 {
-                    throw RbException("Unknown scored character!");
+                    throw RbException("Unknown scored binary character!");
                 }
+            }
+            
+            
+        } // end-for over all samples for this site
+        
+        if ( is_missing == false || skip_missing == false )
+        {
+            size_t actual_num_samples = (ploidy == DIPLOID ? 2*NUM_SAMPLES : NUM_SAMPLES);
+            for (size_t j = 0; j < actual_num_samples; ++j)
+            {
+                taxa[j].addCharacter( this_site[j] );
             }
             
         }
@@ -726,7 +1069,7 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( void 
 }
 
 
-HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( void )
+HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_missing )
 {
     HomologousDiscreteCharacterData<DnaState> *matrix = new HomologousDiscreteCharacterData<DnaState> ();
     
