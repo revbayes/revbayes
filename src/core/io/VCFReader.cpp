@@ -595,12 +595,10 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
             continue;
             
         } // finished reading the header and species information
-//        std::cerr << "Thinning = " << thinning << "\t\tlines_read = " << lines_read << "\t\tskip = " << skip_first << std::endl;
         
         ++lines_read;
         if ( skipped_first == false && lines_read > skip_first )
         {
-//            std::cerr << "\tskipping done" << std::endl;
             skipped_first = true;
             lines_read = 0;
         }
@@ -1198,50 +1196,51 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_m
             std::vector<std::string> allele_tokens;
             StringUtilities::stringSplit(this_alleles, "|", allele_tokens);
             
-            if ( ploidy == DIPLOID )
+            // first allele
+            if ( allele_tokens[0] == "0")
             {
-                // first allele
-                if ( allele_tokens[0] == "0")
+                taxa[j].addCharacter( reference_character );
+            }
+            else if ( allele_tokens[0] == "." )
+            {
+                
+                if ( unkown_treatment == UNKOWN_TREATMENT::MISSING )
+                {
+                    taxa[j].addCharacter( DnaState("?") );
+                }
+                else if ( unkown_treatment == UNKOWN_TREATMENT::REFERENCE )
                 {
                     taxa[j].addCharacter( reference_character );
                 }
-                else if ( allele_tokens[0] == "." )
+                else if ( unkown_treatment == UNKOWN_TREATMENT::ALTERNATIVE )
                 {
-                    
-                    if ( unkown_treatment == UNKOWN_TREATMENT::MISSING )
-                    {
-                        taxa[j].addCharacter( DnaState("?") );
-                    }
-                    else if ( unkown_treatment == UNKOWN_TREATMENT::REFERENCE )
-                    {
-                        taxa[j].addCharacter( reference_character );
-                    }
-                    else if ( unkown_treatment == UNKOWN_TREATMENT::ALTERNATIVE )
-                    {
-                        taxa[j].addCharacter( alternative_characters[0] );
-                    }
-                    
-                }
-                else
-                {
-                    bool found = false;
-                    for (size_t k = 0; k < alternative_characters.size(); ++k )
-                    {
-                        if ( allele_tokens[0] == StringUtilities::toString( k+1 ) )
-                        {
-                            taxa[j].addCharacter( alternative_characters[k] );
-                            found = true;
-                            break;
-                        }
-                    }
-                    
-                    if ( found == false )
-                    {
-                        throw RbException("Unknown scored character '" + allele_tokens[0] + "'!");
-                    }
-                    
+                    taxa[j].addCharacter( alternative_characters[0] );
                 }
                 
+            }
+            else
+            {
+                bool found = false;
+                for (size_t k = 0; k < alternative_characters.size(); ++k )
+                {
+                    if ( allele_tokens[0] == StringUtilities::toString( k+1 ) )
+                    {
+                        taxa[j].addCharacter( alternative_characters[k] );
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if ( found == false )
+                {
+                    throw RbException("Unknown scored character '" + allele_tokens[0] + "'!");
+                }
+                
+            }
+            
+            if ( ploidy == DIPLOID )
+            {
+             
                 // second allele
                 if ( allele_tokens[1] == "0")
                 {
