@@ -1196,25 +1196,28 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_m
             std::vector<std::string> allele_tokens;
             StringUtilities::stringSplit(this_alleles, "|", allele_tokens);
             
+            DnaState first_allele = reference_character;
             // first allele
             if ( allele_tokens[0] == "0")
             {
-                taxa[j].addCharacter( reference_character );
+                // not necessary because already set this way
+//                first_allele = reference_character;
             }
             else if ( allele_tokens[0] == "." )
             {
                 
                 if ( unkown_treatment == UNKOWN_TREATMENT::MISSING )
                 {
-                    taxa[j].addCharacter( DnaState("?") );
+                    first_allele = DnaState("?");
                 }
                 else if ( unkown_treatment == UNKOWN_TREATMENT::REFERENCE )
                 {
-                    taxa[j].addCharacter( reference_character );
+                    // not necessary because already set this way
+//                    first_allele = reference_character;
                 }
                 else if ( unkown_treatment == UNKOWN_TREATMENT::ALTERNATIVE )
                 {
-                    taxa[j].addCharacter( alternative_characters[0] );
+                    first_allele = alternative_characters[0];
                 }
                 
             }
@@ -1225,7 +1228,7 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_m
                 {
                     if ( allele_tokens[0] == StringUtilities::toString( k+1 ) )
                     {
-                        taxa[j].addCharacter( alternative_characters[k] );
+                        first_allele = alternative_characters[k];
                         found = true;
                         break;
                     }
@@ -1237,6 +1240,21 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_m
                 }
                 
             }
+            
+            // check if this haploid state is uncertain
+            if ( ploidy == HAPLOID && allele_tokens[0] != allele_tokens[1] )
+            {
+                
+                for (size_t k = 0; k < alternative_characters.size(); ++k )
+                {
+                    if ( allele_tokens[1] == StringUtilities::toString( k+1 ) )
+                    {
+                        first_allele.addState( alternative_characters[k].getStringValue() );
+                        break;
+                    }
+                }
+            }
+            taxa[j].addCharacter( first_allele );
             
             if ( ploidy == DIPLOID )
             {
