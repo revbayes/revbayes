@@ -1124,9 +1124,24 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_m
     for (size_t i = start; i < chars.size(); ++i)
     {
         
+        // set the reference character
         DnaState reference_character = DnaState(chars[i][ref_index]);
-        DnaState alternative_character = DnaState(chars[i][alt_index]);
-
+        
+        // now get the alternative character
+        // there may actually be more than one for non-biallelic sites
+        const std::string& alt_char = chars[i][alt_index];
+        
+        // we split this string by ','
+        std::vector<std::string> alt_chars;
+        StringUtilities::stringSplit(alt_char, ",", alt_chars);
+        
+        // now create all the alternative characters
+        std::vector<DnaState> alternative_characters;
+        for (size_t j = 0; j < alt_chars.size(); ++j)
+        {
+            alternative_characters.push_back( DnaState( alt_chars[j] ) );
+        }
+        
         for (size_t j = 0; j < NUM_SAMPLES; ++j)
         {
             
@@ -1146,10 +1161,6 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_m
                 {
                     taxa[j].addCharacter( reference_character );
                 }
-                else if ( allele_tokens[0] == "1" )
-                {
-                    taxa[j].addCharacter( alternative_character );
-                }
                 else if ( allele_tokens[0] == "." )
                 {
                     
@@ -1163,23 +1174,34 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_m
                     }
                     else if ( unkown_treatment == UNKOWN_TREATMENT::ALTERNATIVE )
                     {
-                        taxa[j].addCharacter( alternative_character );
+                        taxa[j].addCharacter( alternative_characters[0] );
                     }
                     
                 }
                 else
                 {
-                    throw RbException("Unknown scored character!");
+                    bool found = false;
+                    for (size_t k = 0; k < alternative_characters.size(); ++k )
+                    {
+                        if ( allele_tokens[0] == StringUtilities::toString( k+1 ) )
+                        {
+                            taxa[j].addCharacter( alternative_characters[k] );
+                            found = true;
+                            break;
+                        }
+                    }
+                    
+                    if ( found == false )
+                    {
+                        throw RbException("Unknown scored character '" + allele_tokens[0] + "'!");
+                    }
+                    
                 }
                 
                 // second allele
                 if ( allele_tokens[1] == "0")
                 {
                     taxa[j+NUM_SAMPLES].addCharacter( reference_character );
-                }
-                else if ( allele_tokens[1] == "1" )
-                {
-                    taxa[j+NUM_SAMPLES].addCharacter( alternative_character );
                 }
                 else if ( allele_tokens[1] == "." )
                 {
@@ -1194,13 +1216,29 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_m
                     }
                     else if ( unkown_treatment == UNKOWN_TREATMENT::ALTERNATIVE )
                     {
-                        taxa[j+NUM_SAMPLES].addCharacter( alternative_character );
+                        taxa[j+NUM_SAMPLES].addCharacter( alternative_characters[0] );
                     }
                         
                 }
                 else
                 {
-                    throw RbException("Unknown scored character!");
+                    
+                    bool found = false;
+                    for (size_t k = 0; k < alternative_characters.size(); ++k )
+                    {
+                        if ( allele_tokens[1] == StringUtilities::toString( k+1 ) )
+                        {
+                            taxa[j+NUM_SAMPLES].addCharacter( alternative_characters[k] );
+                            found = true;
+                            break;
+                        }
+                    }
+                        
+                    if ( found == false )
+                    {
+                        throw RbException("Unknown scored character '" + allele_tokens[1] + "'!");
+                    }
+                    
                 }
             }
             
