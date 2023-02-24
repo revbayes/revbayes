@@ -1097,13 +1097,22 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_m
     if ( ploidy == DIPLOID )
     {
         taxa = std::vector< DiscreteTaxonData<DnaState> >( 2*NUM_SAMPLES, DiscreteTaxonData<DnaState>( Taxon("") ) );
+        for (size_t i=0; i<NUM_SAMPLES; ++i)
+        {
+            Taxon this_taxon_A = Taxon( sample_names[i] + "_A" );
+            taxa[i] = DiscreteTaxonData<DnaState>( this_taxon_A );
+            Taxon this_taxon_B = Taxon( sample_names[i] + "_B" );
+            taxa[i+NUM_SAMPLES] = DiscreteTaxonData<DnaState>( this_taxon_B );
+        }
     }
-    for (size_t i=0; i<NUM_SAMPLES; ++i)
+    else
     {
-        Taxon this_taxon_A = Taxon( sample_names[i] + "_A" );
-        taxa[i] = DiscreteTaxonData<DnaState>( this_taxon_A );
-        Taxon this_taxon_B = Taxon( sample_names[i] + "_B" );
-        taxa[i+NUM_SAMPLES] = DiscreteTaxonData<DnaState>( this_taxon_B );
+        taxa = std::vector< DiscreteTaxonData<DnaState> >( NUM_SAMPLES, DiscreteTaxonData<DnaState>( Taxon("") ) );
+        for (size_t i=0; i<NUM_SAMPLES; ++i)
+        {
+            Taxon this_taxon = Taxon( sample_names[i] );
+            taxa[i] = DiscreteTaxonData<DnaState>( this_taxon );
+        }
     }
     
     size_t ref_index = 0;
