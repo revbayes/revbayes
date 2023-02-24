@@ -33,8 +33,8 @@ namespace RevBayesCore {
         VCFReader(const std::string &fn, PLOIDY p, UNKOWN_TREATMENT u, bool read_data=true);
         
         VCFReader*                                              clone(void) const;
-        HomologousDiscreteCharacterData<DnaState>*              readDNAMatrix( bool skip_missing );
-        HomologousDiscreteCharacterData<BinaryState>*           readBinaryMatrix( bool skip_missing );
+        HomologousDiscreteCharacterData<DnaState>*              readDNAMatrix( bool skip_missing, const std::string& chr, AbstractDiscreteTaxonData* ref );
+        HomologousDiscreteCharacterData<BinaryState>*           readBinaryMatrix( bool skip_missing, const std::string& chr, AbstractDiscreteTaxonData* ref );
         void                                                    convertToCountsFile( const std::string& fn, const RbVector<Taxon>& taxa_list, const std::string& type, long thinning, long skip );
         RbVector<long>                                          convertToSFS( const RbVector<Taxon>& taxa_list );
         void                                                    computeMonomorphicVariableStatistics( const std::string& fn, const RbVector<Taxon>& taxa_list);

@@ -928,7 +928,7 @@ std::vector<size_t> VCFReader::extractStateIndices(std::string alleles, const st
 }
 
 
-HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( bool skip_missing )
+HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( bool skip_missing, const std::string& chr, AbstractDiscreteTaxonData* ref_genome )
 {
     HomologousDiscreteCharacterData<BinaryState> *matrix = new HomologousDiscreteCharacterData<BinaryState> ();
     
@@ -1069,7 +1069,7 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( bool 
 }
 
 
-HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_missing )
+HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_missing, const std::string& chr, AbstractDiscreteTaxonData* ref_genome )
 {
     HomologousDiscreteCharacterData<DnaState> *matrix = new HomologousDiscreteCharacterData<DnaState> ();
     
@@ -1108,6 +1108,8 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_m
     
     size_t ref_index = 0;
     size_t alt_index = 0;
+    size_t chr_index = 0;
+    size_t pos_index = 0;
     for (size_t j = 0; j < format_line.size(); ++j)
     {
         if ( format_line[j] == "REF" )
@@ -1118,10 +1120,43 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_m
         {
             alt_index = j;
         }
+        if ( format_line[j] == "CHROM" || format_line[j] == "#CHROM" )
+        {
+            chr_index = j;
+        }
+        if ( format_line[j] == "POS" )
+        {
+            pos_index = j;
+        }
     }
+    
+    size_t genome_index = 1;
     
     for (size_t i = start; i < chars.size(); ++i)
     {
+        const std::string& current_chrom = chars[i][chr_index];
+        if ( chr != "" && chr != current_chrom )
+        {
+            // skip this side
+            continue;
+        }
+        
+        if ( ref_genome != NULL )
+        {
+            size_t current_pos = StringUtilities::asIntegerNumber( chars[i][pos_index] );
+            for ( ; genome_index < current_pos; ++genome_index )
+            {
+                for (size_t j = 0; j < NUM_SAMPLES; ++j)
+                {
+                    taxa[j].addCharacter( ref_genome->getCharacter( genome_index-1 ) );
+                    if ( ploidy == DIPLOID )
+                    {
+                        taxa[j+NUM_SAMPLES].addCharacter( ref_genome->getCharacter( genome_index-1 ) );
+                    }
+                }
+            }
+            ++genome_index;
+        }
         
         // set the reference character
         DnaState reference_character = DnaState(chars[i][ref_index]);
@@ -1242,6 +1277,23 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_m
             }
             
         }
+    }
+    
+    if ( ref_genome != NULL )
+    {
+        size_t final_pos = ref_genome->getNumberOfCharacters();
+        for ( ; genome_index <= final_pos; ++genome_index )
+        {
+            for (size_t j = 0; j < NUM_SAMPLES; ++j)
+            {
+                taxa[j].addCharacter( ref_genome->getCharacter( genome_index-1 ) );
+                if ( ploidy == DIPLOID )
+                {
+                    taxa[j+NUM_SAMPLES].addCharacter( ref_genome->getCharacter( genome_index-1 ) );
+                }
+            }
+        }
+        ++genome_index;
     }
     
     // We have finished all lines, we fill up the data matrix

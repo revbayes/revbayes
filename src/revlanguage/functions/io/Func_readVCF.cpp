@@ -7,6 +7,7 @@
 #include "OptionRule.h"
 #include "RbException.h"
 #include "RevNullObject.h"
+#include "RlAbstractDiscreteTaxonData.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlBoolean.h"
 #include "RlString.h"
@@ -63,7 +64,15 @@ RevPtr<RevVariable> Func_readVCF::execute( void )
     }
     
     bool skip_missing = static_cast<const RlBoolean&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
-
+    
+    const std::string& chrom = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    
+    RevBayesCore::AbstractDiscreteTaxonData* ref_genome = NULL;
+    RevObject& tmp_ref = args[arg_index++].getVariable()->getRevObject();
+    if ( tmp_ref != RevNullObject::getInstance() )
+    {
+        ref_genome = static_cast<const AbstractDiscreteTaxonData&>( tmp_ref ).getValue().clone();
+    }
     
     RevBayesCore::VCFReader vcf_reader = RevBayesCore::VCFReader( fn.getValue(), ploidy, unkown );
     
@@ -71,14 +80,18 @@ RevPtr<RevVariable> Func_readVCF::execute( void )
     
     if ( type == "DNA" )
     {
-        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::DnaState> *aln = vcf_reader.readDNAMatrix( skip_missing );
+        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::DnaState> *aln = vcf_reader.readDNAMatrix( skip_missing, chrom, ref_genome );
         rl_aln = new AbstractHomologousDiscreteCharacterData( aln );
     }
     else if ( type == "binary")
     {
-        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::BinaryState> *aln = vcf_reader.readBinaryMatrix( skip_missing );
+        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::BinaryState> *aln = vcf_reader.readBinaryMatrix( skip_missing, chrom, ref_genome );
         rl_aln = new AbstractHomologousDiscreteCharacterData( aln );
     }
+    
+    // free data
+    delete ref_genome;
+    
     return new RevVariable( rl_aln );
 }
 
@@ -111,6 +124,10 @@ const ArgumentRules& Func_readVCF::getArgumentRules( void ) const
         argument_rules.push_back( new OptionRule( "unkownTreatment", new RlString("missing"), unknown_options, "How to treat the '.' character, i.e., if the state was unkown." ) );
         
         argument_rules.push_back( new ArgumentRule( "skipMissing", RlBoolean::getClassTypeSpec(), "Should we skip sites (i.e., for all individuals) if at least one has a missing character at this position.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
+
+        argument_rules.push_back( new ArgumentRule( "chrom",       RlString::getClassTypeSpec(), "Name of the chromosome we want to extract. If empty, then all chromosomes are used.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "" ) ) );
+
+        argument_rules.push_back( new ArgumentRule( "reference",   AbstractDiscreteTaxonData::getClassTypeSpec(), "The reference genome if we want to fill in the characters that are not coded in the VCF file, i.e., if the VCF file only contains SNPs but we need the full sequences.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
 
         rules_set = true;
         
