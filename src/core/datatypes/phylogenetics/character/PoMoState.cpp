@@ -315,6 +315,7 @@ void PoMoState::setState(const std::vector<size_t> &counts)
     size_t index_first_allele       = -1;
     size_t index_second_allele      = -1;
     size_t count_first_allele       = 0;
+    size_t count_second_allele      = 0;
     // Sum over elements and count non-zero elements.
     for (size_t i = 0; i < num_raw_states; ++i)
     {
@@ -330,10 +331,28 @@ void PoMoState::setState(const std::vector<size_t> &counts)
             else if (index_second_allele == -1)
             {
                 index_second_allele = i;
+                count_second_allele = allele_count;
             }
             else
             {
-                throw RbException("We current only support biallelic states in the PoMo framework.");
+                if ( count_first_allele < count_second_allele )
+                {
+                    if ( allele_count > count_first_allele )
+                    {
+                        index_first_allele = i;
+                        count_first_allele = allele_count;
+                    }
+                }
+                else
+                {
+                    if ( allele_count > count_second_allele )
+                    {
+                        index_second_allele = i;
+                        count_second_allele = allele_count;
+                    }
+                    
+                }
+//                throw RbException("We current only support biallelic states in the PoMo framework.");
             }
             ++count_observed_alleles;
             total_num_samples += allele_count;
