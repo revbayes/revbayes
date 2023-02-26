@@ -262,6 +262,7 @@
 #include "Func_shortestDistance.h"
 #include "Func_sigmoid.h"
 #include "Func_sigmoidVector.h"
+#include "Func_SmoothenTimeline.h"
 #include "Func_sort.h"
 #include "Func_sum.h"
 #include "Func_sumPositive.h"
@@ -583,6 +584,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
     // helpers for Markov Random Field models
         addFunction( new Func_assembleContinuousMRF( )     );
+        addFunction( new Func_SmoothenTimeline( )     );
 
 		// some helper statistics for the DPP distribution
         addFunction( new Func_dppConcFromMean( )     );
