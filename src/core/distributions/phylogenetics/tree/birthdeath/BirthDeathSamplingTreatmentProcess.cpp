@@ -166,7 +166,8 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
 
     delete value;
     
-    if (t != nullptr) {
+    if (t != nullptr)
+    {
         value = t;
     }
     else
@@ -1474,7 +1475,15 @@ void BirthDeathSamplingTreatmentProcess::redrawValue( SimulationCondition condit
     {
         if ( starting_tree == NULL )
         {
-            simulateTree();
+            // SH 20221212: The simulateTree functions hangs in certain situations. It's more robust to use the coalescent simulator.
+//            simulateTree();
+            
+            RbVector<Clade> constr;
+            // We employ a coalescent simulator to guarantee that the starting tree matches all time constraints
+            StartingTreeSimulator simulator;
+            RevBayesCore::Tree *my_tree = simulator.simulateTree( taxa, constr );
+            // store the new value
+            value = my_tree;
         }
     }
     else if ( condition == SimulationCondition::VALIDATION )
