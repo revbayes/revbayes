@@ -106,6 +106,10 @@
 #include "RlCharacterHistoryRateModifier.h"
 #include "RlTaxon.h"
 
+/* Regional feature types (in folder "datatypes/phylogenetics/geography") */
+#include "RlRegionalFeatures.h"
+#include "RlRegionalFeatureLayer.h"
+
 /// Types ///
 
 #include "Probability.h"
@@ -141,6 +145,8 @@ void RevLanguage::Workspace::initializeVectorTypeGlobalWorkspace(void)
         AddWorkspaceVectorType<BranchLengthTree,3>::addTypeToWorkspace( *this, new BranchLengthTree() );
         AddWorkspaceVectorType<Tree,3>::addTypeToWorkspace( *this, new Tree() );
         AddWorkspaceVectorType<Clade,3>::addTypeToWorkspace( *this, new Clade() );
+//        AddWorkspaceVectorType<RlRegionalFeatures,3>::addTypeToWorkspace( *this, new RlRegionalFeatures() );
+        AddWorkspaceVectorType<RlRegionalFeatureLayer,3>::addTypeToWorkspace( *this, new RlRegionalFeatureLayer() );
         //        AddWorkspaceVectorType<Dist_bdp,3>::addTypeToWorkspace( *this, new Dist_bdp() );
 
 //        AddWorkspaceVectorType<Dist_unif,1>::addTypeToWorkspace( *this, new Dist_unif() );

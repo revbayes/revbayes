@@ -58,8 +58,8 @@ RevLanguage::StochasticNode<valueType>::StochasticNode( const std::string& n, Re
     ArgumentRules* redrawArgRules = new ArgumentRules();
     this->methods.addFunction( new MemberProcedure( "redraw", RlUtils::Void, redrawArgRules) );
     
-    ArgumentRules* probArgRules = new ArgumentRules();
-    this->methods.addFunction( new MemberProcedure( "probability", RealPos::getClassTypeSpec(), probArgRules) );
+    ArgumentRules* prob_arg_rules = new ArgumentRules();
+    this->methods.addFunction( new DagMemberFunction<RealPos>( "probability", this, prob_arg_rules) );
     
     ArgumentRules* lnprob_arg_rules = new ArgumentRules();
     this->methods.addFunction( new DagMemberFunction<Real>( "lnProbability", this, lnprob_arg_rules) );
