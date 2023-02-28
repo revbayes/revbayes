@@ -79,7 +79,8 @@ namespace RevBayesCore {
         std::vector<double>                        computeTreeLengths(void);
         std::vector<Clade>                         getUniqueClades(double ci=0.95, bool non_trivial_only=true, bool verbose=true);
         std::vector<Tree>                          getUniqueTrees(double ci=0.95, bool verbose=true);
-        int                                        getTopologyFrequency(const Tree &t, bool verbose);
+        long                                       getTopologyCount(const Tree &t, bool verbose);
+        double                                     getTopologyFrequency(const Tree &t, bool verbose);
         bool                                       isClock(void) const;
         bool                                       isCoveredInInterval(const std::string &v, double size, bool verbose);
         bool                                       isCoveredInInterval(const Tree &t, double size, bool verbose);
@@ -97,7 +98,8 @@ namespace RevBayesCore {
 
         Split                                      collectTreeSample(const TopologyNode&, RbBitSet&, std::string, std::map<Split, long>&);
         void                                       enforceNonnegativeBranchLengths(TopologyNode& tree) const;
-        long                                       splitFrequency(const Split &n) const;
+        long                                       splitCount(const Split &n) const;
+        double                                     splitFrequency(const Split &n) const;
         TopologyNode*                              findParentNode(TopologyNode&, const Split &, std::vector<TopologyNode*>&, RbBitSet& ) const;
         void                                       mapContinuous(Tree &inputTree, const std::string &n, size_t paramIndex, double hpd, bool np, bool verbose ) const;
         void                                       mapDiscrete(Tree &inputTree, const std::string &n, size_t paramIndex, size_t num, bool np, bool verbose ) const;
@@ -109,8 +111,11 @@ namespace RevBayesCore {
         bool                                       clock;
         bool                                       rooted;
 
+        bool                                       computed = false;
+        std::map<Split, long>                      clade_counts;
         std::set<Sample<Split> >                   clade_samples;
         std::map<Taxon, long >                     sampled_ancestor_counts;
+        std::map<std::string, long>                tree_counts;
         std::set<Sample<std::string> >             tree_samples;
 
         std::map<Split, std::vector<double> >                           clade_ages;
