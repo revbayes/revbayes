@@ -61,7 +61,7 @@ namespace RevBayesCore {
         double                                          p(size_t i, double t, bool survival = false) const;
         virtual double                                  q(size_t i, double t, bool tilde = false) const;
 
-        virtual void                                    prepareProbComputation();
+        virtual void                                    prepareProbComputation(void) const;
 
         void                                            keepSpecialization(DagNode *toucher);
         void                                            restoreSpecialization(DagNode *toucher);
@@ -84,22 +84,22 @@ namespace RevBayesCore {
 
         std::vector<const DagNode*>                     range_parameters;
 
-        std::vector<double>                     birth;                          //!< The sorted speciation rates     
-        std::vector<double>                     death;                          //!< The sorted extinction rates
-        std::vector<double>                     fossil;                         //!< The sorted fossil sampling rates
-        std::vector<double>                     times;                          //!< The sorted interval times
+        mutable std::vector<double>                     birth;                          //!< The sorted speciation rates
+        mutable std::vector<double>                     death;                          //!< The sorted extinction rates
+        mutable std::vector<double>                     fossil;                         //!< The sorted fossil sampling rates
+        mutable std::vector<double>                     times;                          //!< The sorted interval times
 
-        std::vector<double>                     b_i;                            //!< The birth times for each taxon
-        std::vector<double>                     d_i;                            //!< The extinction times for each taxon
-        std::vector<double>                     o_i;                            //!< The oldest minimum fossil age for each taxon
-        std::vector<double>                     y_i;                            //!< The youngest maximum fossil age for each taxon
+        mutable std::vector<double>                     b_i;                            //!< The birth times for each taxon
+        mutable std::vector<double>                     d_i;                            //!< The extinction times for each taxon
+        mutable std::vector<double>                     o_i;                            //!< The oldest minimum fossil age for each taxon
+        mutable std::vector<double>                     y_i;                            //!< The youngest maximum fossil age for each taxon
 
         double                                  origin;                         //!< The origin time (oldest birth time)
 
-        std::vector<double>                     q_i;                            //!< Probability of no speciation or extinction event in each time interval
-        std::vector<double>                     q_tilde_i;                      //!< Probability of no change in species identity in each time interval
-        std::vector<double>                     p_i;                            //!< Probability of leaving no sampled descendants from the end of each time interval
-        std::vector<double>                     pS_i;                           //!< Probability of leaving no descendants from the end of each time interval
+        mutable std::vector<double>                     q_i;                            //!< Probability of no speciation or extinction event in each time interval
+        mutable std::vector<double>                     q_tilde_i;                      //!< Probability of no change in species identity in each time interval
+        mutable std::vector<double>                     p_i;                            //!< Probability of leaving no sampled descendants from the end of each time interval
+        mutable std::vector<double>                     pS_i;                           //!< Probability of leaving no descendants from the end of each time interval
 
         std::vector<double>                     Psi;                            //!< Fossil sampling terms computed for each taxon
         std::vector<double>                     stored_Psi;                     //!< Stored fossil sampling terms

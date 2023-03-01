@@ -64,12 +64,12 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     heterogeneous_psi              = NULL;
 
     // cast the pointers from their input parameters
-    heterogeneous_lambda = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inspeciation);
-    homogeneous_lambda = dynamic_cast<const TypedDagNode<double >*>(inspeciation);
-    heterogeneous_mu = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inextinction);
-    homogeneous_mu = dynamic_cast<const TypedDagNode<double >*>(inextinction);
-    heterogeneous_psi = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inpsi);
-    homogeneous_psi = dynamic_cast<const TypedDagNode<double >*>(inpsi);
+    heterogeneous_lambda    = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inspeciation);
+    homogeneous_lambda      = dynamic_cast<const TypedDagNode<double >*>(inspeciation);
+    heterogeneous_mu        = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inextinction);
+    homogeneous_mu          = dynamic_cast<const TypedDagNode<double >*>(inextinction);
+    heterogeneous_psi       = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inpsi);
+    homogeneous_psi         = dynamic_cast<const TypedDagNode<double >*>(inpsi);
 
     // add the parameters to the model
     range_parameters.push_back( timeline );
@@ -560,7 +560,7 @@ void AbstractFossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *touc
  *
  *
  */
-void AbstractFossilizedBirthDeathRangeProcess::prepareProbComputation()
+void AbstractFossilizedBirthDeathRangeProcess::prepareProbComputation( void ) const
 {
     if ( homogeneous_lambda != NULL )
     {
