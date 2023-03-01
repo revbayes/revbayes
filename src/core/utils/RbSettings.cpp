@@ -126,7 +126,7 @@ double RbSettings::getTolerance( void ) const
 void RbSettings::initializeUserSettings(void)
 {
     moduleDir = "modules";      // the default module directory
-    useScaling = true;         // the default useScaling
+    useScaling = true;          // the default useScaling
     scalingDensity = 1;         // the default scaling density
     lineWidth = 160;            // the default line width
     tolerance = 10E-10;         // set default value for tolerance comparing doubles
@@ -163,7 +163,7 @@ void RbSettings::initializeUserSettings(void)
 
 void RbSettings::listOptions() const
 {
-    std::cout << "moduledir = " << moduleDir << std::endl;
+    std::cout << "moduledir = " << moduleDir.string() << std::endl;
     std::cout << "outputPrecision = " << outputPrecision << std::endl;
     std::cout << "printNodeIndex = " << (printNodeIndex ? "true" : "false") << std::endl;
     std::cout << "tolerance = " << tolerance << std::endl;
@@ -321,8 +321,8 @@ void RbSettings::writeUserSettings( void )
     path settings_file_name = user_dir / ".RevBayes.ini";
 
     std::ofstream writeStream( settings_file_name.string() );
-    assert( moduleDir == "modules" or is_directory(moduleDir) );
-    writeStream << "moduledir=" << moduleDir << std::endl;
+    assert( moduleDir.string() == "modules" or is_directory(moduleDir) );
+    writeStream << "moduledir=" << moduleDir.string() << std::endl;
     writeStream << "outputPrecision=" << outputPrecision << std::endl;
     writeStream << "printNodeIndex=" << (printNodeIndex ? "true" : "false") << std::endl;
     writeStream << "tolerance=" << tolerance << std::endl;
