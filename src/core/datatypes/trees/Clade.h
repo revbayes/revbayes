@@ -60,13 +60,13 @@ namespace RevBayesCore {
         const std::set<Taxon>&                      getMrca(void) const;                                        //!< Get the mrca taxon.
         int                                         getNumberMissingTaxa(void) const;                           //!< Get the number of missing taxa.
         size_t                                      getNumberOfTaxa(void) const;                                //!< Get the number of taxa.
-        std::vector<Clade>                          getOptionalConstraints(void) const;                         //!< Get optional clade constraints
+        const std::vector<Clade>&                   getOptionalConstraints(void) const;                         //!< Get optional clade constraints
         std::vector<Taxon>&                         getTaxa(void);                                              //!< Get the taxon names.
         const std::vector<Taxon>&                   getTaxa(void) const;                                        //!< Get the taxon names.
         const Taxon&                                getTaxon(size_t i) const;                                   //!< Get a single taxon name.
         const std::string&                          getTaxonName(size_t i) const;                               //!< Get a single taxon name.
+        bool                                        hasOptionalConstraints(void) const;                         //!< Has optional clade constraints
         bool                                        isNegativeConstraint(void) const;                           //!< Get negative constraint flag.
-        bool                                        isOptionalConstraint(void) const;                           //!< Get negative constraint flag.
         bool                                        isNestedWithin(const Clade& c) const;                       //!< Is the provided clade nested within me?
         bool                                        overlaps(const Clade& c) const;                             //!< Does the provided clade overlap with me?
         std::set<Taxon>                             intersection(const Clade&) const;                           //!< Get the taxa that both clades have in common.

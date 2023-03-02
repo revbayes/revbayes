@@ -355,7 +355,7 @@ size_t Clade::getNumberOfTaxa( void ) const
  * \return       The optional clade constraints
  */
 
-std::vector<Clade> Clade::getOptionalConstraints(void) const
+const std::vector<Clade>& Clade::getOptionalConstraints(void) const
 {
     assert(optional_constraints.has_value());
     return *optional_constraints;
@@ -411,6 +411,18 @@ const std::string& Clade::getTaxonName(size_t i) const
 
 
 /**
+ * Is this clade an optional constraint (used with e.g. dnConstrainedTopology).
+ * An "optional" constraint means that at least one of the referenced clades must be true.
+ *
+ * \return       The true/false value of whether the clade is an optional constraint.
+ */
+bool Clade::hasOptionalConstraints(void) const
+{
+    return optional_constraints.has_value();
+}
+
+
+/**
  * Is this clade a negative clade constraint (used with e.g. dnConstrainedTopology).
  *
  * \return       The true/false value of whether the clade is a negative constraint.
@@ -461,18 +473,6 @@ bool Clade::isNestedWithin(const Clade& c) const
     }
 
     return nested;
-}
-
-
-/**
- * Is this clade an optional constraint (used with e.g. dnConstrainedTopology).
- * An "optional" constraint means that at least one of the referenced clades must be true.
- *
- * \return       The true/false value of whether the clade is an optional constraint.
- */
-bool Clade::isOptionalConstraint(void) const
-{
-    return optional_constraints.has_value();
 }
 
 
@@ -675,7 +675,7 @@ std::string Clade::toString( void ) const
 {
     std::string s;
 
-    if (isOptionalConstraint())
+    if ( hasOptionalConstraints() == true )
     {
         vector<string> cstrings;
         for(auto& c: getOptionalConstraints())
@@ -762,9 +762,9 @@ bool cladeBefore(const Clade& c1, const Clade& c2)
         return false;
 
     // Negative constraints and Optional constraints are ordered after all regular constraints.
-    else if (not (c1.isNegativeConstraint() or c1.isOptionalConstraint()) and (c2.isNegativeConstraint() or c2.isOptionalConstraint()))
+    else if (not (c1.isNegativeConstraint() or c1.hasOptionalConstraints()) and (c2.isNegativeConstraint() or c2.hasOptionalConstraints()))
         return true;
-    else if (c1.isNegativeConstraint() or c1.isOptionalConstraint() or c2.isNegativeConstraint() or c2.isOptionalConstraint())
+    else if (c1.isNegativeConstraint() or c1.hasOptionalConstraints() or c2.isNegativeConstraint() or c2.hasOptionalConstraints())
         return false;
 
     else
@@ -787,9 +787,9 @@ bool cladeSmaller(const Clade& c1, const Clade& c2)
         return false;
 
     // Negative constraints and Optional constraints are ordered after all regular constraints.
-    else if (not (c1.isNegativeConstraint() or c1.isOptionalConstraint()) and (c2.isNegativeConstraint() or c2.isOptionalConstraint()))
+    else if (not (c1.isNegativeConstraint() or c1.hasOptionalConstraints()) and (c2.isNegativeConstraint() or c2.hasOptionalConstraints()))
         return true;
-    else if (c1.isNegativeConstraint() or c1.isOptionalConstraint() or c2.isNegativeConstraint() or c2.isOptionalConstraint())
+    else if (c1.isNegativeConstraint() or c1.hasOptionalConstraints() or c2.hasOptionalConstraints() or c2.hasOptionalConstraints())
         return false;
 
     else
@@ -803,9 +803,9 @@ bool cladeWithin(const Clade& c1, const Clade& c2)
         return false;
 
     // Negative constraints and Optional constraints are ordered after all regular constraints.
-    else if (not (c1.isNegativeConstraint() or c1.isOptionalConstraint()) and (c2.isNegativeConstraint() or c2.isOptionalConstraint()))
+    else if (not (c1.isNegativeConstraint() or c1.hasOptionalConstraints()) and (c2.isNegativeConstraint() or c2.hasOptionalConstraints()))
         return true;
-    else if (c1.isNegativeConstraint() or c1.isOptionalConstraint() or c2.isNegativeConstraint() or c2.isOptionalConstraint())
+    else if (c1.isNegativeConstraint() or c1.hasOptionalConstraints() or c2.isNegativeConstraint() or c2.hasOptionalConstraints())
         return false;
 
     // c2 is nested with c1

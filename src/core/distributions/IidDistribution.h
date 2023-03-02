@@ -114,13 +114,13 @@ double RevBayesCore::IidDistribution<valueType>::computeLnProbability( void )
     
     for (int i = 0; i < n_samples; ++i)
     {
-        
+
         // we also need to multiply with the probability of the value for this table
         value_prior->setValue( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( this->value->operator[](i) ) );
         ln_prob += value_prior->computeLnProbability();
         
     }
-    
+
     return ln_prob;
 }
 
@@ -130,14 +130,14 @@ void RevBayesCore::IidDistribution<valueType>::simulate()
 {
     // clear the current value
     this->value->clear();
-    
+
     for (int i = 0; i < n_samples; ++i)
     {
-        
+
         // we also need to multiply with the probability of the value for this table
         value_prior->redrawValue();
         this->value->push_back( value_prior->getValue() );
-        
+
     }
     
 }
