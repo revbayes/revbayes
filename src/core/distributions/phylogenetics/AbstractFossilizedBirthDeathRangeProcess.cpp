@@ -289,7 +289,6 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
 
                     std::vector<double> psi(ages.size(), 0.0);
                     
-                    bool test = true;
                     for (size_t j = 0; j < num_intervals; j++)
                     {
                         double t_0 = ( j < num_intervals-1 ? times[j+1] : RbConstants::Double::inf );

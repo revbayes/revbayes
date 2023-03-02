@@ -73,7 +73,7 @@ namespace RevBayesCore {
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
 
-        void                                            prepareProbComputation(void) const;
+        void                                            prepareProbComputation(void) const override;
 
     private:
         

@@ -84,39 +84,40 @@ namespace RevBayesCore {
 
         std::vector<const DagNode*>                     range_parameters;
 
-        mutable std::vector<double>                     birth;                          //!< The sorted speciation rates
-        mutable std::vector<double>                     death;                          //!< The sorted extinction rates
-        mutable std::vector<double>                     fossil;                         //!< The sorted fossil sampling rates
-        mutable std::vector<double>                     times;                          //!< The sorted interval times
+        std::vector<double>                             b_i;                                                    //!< The birth times for each taxon
+        std::vector<double>                             d_i;                                                    //!< The extinction times for each taxon
+        std::vector<double>                             o_i;                                                    //!< The oldest minimum fossil age for each taxon
+        std::vector<double>                             y_i;                                                    //!< The youngest maximum fossil age for each taxon
+        
+        double                                          origin;                                                 //!< The origin time (oldest birth time)
 
-        mutable std::vector<double>                     b_i;                            //!< The birth times for each taxon
-        mutable std::vector<double>                     d_i;                            //!< The extinction times for each taxon
-        mutable std::vector<double>                     o_i;                            //!< The oldest minimum fossil age for each taxon
-        mutable std::vector<double>                     y_i;                            //!< The youngest maximum fossil age for each taxon
+        // the following vectors are used internally for more efficient likelihood calculations and are filled by 'prepareProbComputation'
+        mutable std::vector<double>                     birth;                                                  //!< The sorted speciation rates
+        mutable std::vector<double>                     death;                                                  //!< The sorted extinction rates
+        mutable std::vector<double>                     fossil;                                                 //!< The sorted fossil sampling rates
+        mutable std::vector<double>                     times;                                                  //!< The sorted interval times
+                        
+        mutable std::vector<double>                     q_i;                                                    //!< Probability of no speciation or extinction event in each time interval
+        mutable std::vector<double>                     q_tilde_i;                                              //!< Probability of no change in species identity in each time interval
+        mutable std::vector<double>                     p_i;                                                    //!< Probability of leaving no sampled descendants from the end of each time interval
+        mutable std::vector<double>                     pS_i;                                                   //!< Probability of leaving no descendants from the end of each time interval
 
-        double                                  origin;                         //!< The origin time (oldest birth time)
-
-        mutable std::vector<double>                     q_i;                            //!< Probability of no speciation or extinction event in each time interval
-        mutable std::vector<double>                     q_tilde_i;                      //!< Probability of no change in species identity in each time interval
-        mutable std::vector<double>                     p_i;                            //!< Probability of leaving no sampled descendants from the end of each time interval
-        mutable std::vector<double>                     pS_i;                           //!< Probability of leaving no descendants from the end of each time interval
-
-        std::vector<double>                     Psi;                            //!< Fossil sampling terms computed for each taxon
-        std::vector<double>                     stored_Psi;                     //!< Stored fossil sampling terms
-
-        std::vector<double>                     age;                            //!< Age of the oldest occurence for each taxon
-        std::vector<double>                     stored_age;                     //!< Stored age of the oldest occurence for each taxon
-
-        std::vector<double>                     partial_likelihood;             //!< Partial likelihood for each taxon
-        std::vector<double>                     stored_likelihood;              //!< Stored partial likelihood for each taxon
-
-        std::vector<bool>                       dirty_psi;                      //!< Indicates whether fossil sampling terms need updating
-        std::vector<bool>                       dirty_taxa;                     //!< Indicates whether partial likelihood needs updating
-
-        bool                                    complete;                       //!< Indicates whether all fossil observations were included
-        bool                                    touched;                        //!< Indicates whether any terms need updating
-        bool                                    resampled;                      //!< Indicates whether any oldest occurrence ages were resampled
-        bool                                    resampling;                     //!< Indicates whether we are resampling oldest occurrence ages
+        std::vector<double>                             Psi;                                                    //!< Fossil sampling terms computed for each taxon
+        std::vector<double>                             stored_Psi;                                             //!< Stored fossil sampling terms
+                                
+        std::vector<double>                             age;                                                    //!< Age of the oldest occurence for each taxon
+        std::vector<double>                             stored_age;                                             //!< Stored age of the oldest occurence for each taxon
+                                
+        std::vector<double>                             partial_likelihood;                                     //!< Partial likelihood for each taxon
+        std::vector<double>                             stored_likelihood;                                      //!< Stored partial likelihood for each taxon
+                                
+        std::vector<bool>                               dirty_psi;                                              //!< Indicates whether fossil sampling terms need updating
+        std::vector<bool>                               dirty_taxa;                                             //!< Indicates whether partial likelihood needs updating
+        
+        bool                                            complete;                                               //!< Indicates whether all fossil observations were included
+        bool                                            touched;                                                //!< Indicates whether any terms need updating
+        bool                                            resampled;                                              //!< Indicates whether any oldest occurrence ages were resampled
+        bool                                            resampling;                                             //!< Indicates whether we are resampling oldest occurrence ages
     };
 }
 
