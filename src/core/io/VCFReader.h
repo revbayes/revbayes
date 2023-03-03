@@ -27,14 +27,14 @@ namespace RevBayesCore {
         
     public:
         
-        enum PLOIDY { HAPLOID, DIPLOID, POLYPLOID };
+        enum PLOIDY { HAPLOID, DIPLOID, POLYPLOID, MIXED };
         enum UNKOWN_TREATMENT { MISSING, REFERENCE, ALTERNATIVE };
         
         VCFReader(const std::string &fn, PLOIDY p, UNKOWN_TREATMENT u, bool read_data=true);
         
         VCFReader*                                              clone(void) const;
-        HomologousDiscreteCharacterData<DnaState>*              readDNAMatrix( bool skip_missing, const std::string& chr, AbstractDiscreteTaxonData* ref );
-        HomologousDiscreteCharacterData<BinaryState>*           readBinaryMatrix( bool skip_missing, const std::string& chr, AbstractDiscreteTaxonData* ref );
+        HomologousDiscreteCharacterData<DnaState>*              readDNAMatrix( bool skip_missing, const std::string& chr, AbstractDiscreteTaxonData* ref, const RbVector<Taxon>& in_taxa );
+        HomologousDiscreteCharacterData<BinaryState>*           readBinaryMatrix( bool skip_missing, const std::string& chr, AbstractDiscreteTaxonData* ref, const RbVector<Taxon>& in_taxa );
         void                                                    convertToCountsFile( const std::string& fn, const RbVector<Taxon>& taxa_list, const std::string& type, const std::string& chr, AbstractDiscreteTaxonData* ref, long thinning, long skip );
         RbVector<long>                                          convertToSFS( const RbVector<Taxon>& taxa_list );
         void                                                    computeMonomorphicVariableStatistics( const std::string& fn, const RbVector<Taxon>& taxa_list);
