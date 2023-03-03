@@ -2,6 +2,7 @@
 #define Taxon_H
 
 #include <ostream>
+#include <boost/optional.hpp>
 
 #include "TimeInterval.h"
 
@@ -38,10 +39,12 @@ namespace RevBayesCore {
         const TimeInterval&                 getAgeRange(void) const;                    //!< Get the date info for this taxon.
         const std::string                   getJsonRespresentation(void) const;         //!< Get JSON-formatted string
         const std::string&                  getName(void) const;                        //!< Get the name for this taxon.
+        const std::string&                  getPloidy(void) const;                      //!< Get the ploidy level for this taxon.
         const std::string&                  getSpeciesName(void) const;                 //!< Get the name of the species.
         void                                setAge(double a);                           //!< Set the age.
         void                                setAgeRange(const TimeInterval &d);         //!< Set the date info.
         void                                setName(const std::string &n);              //!< Set the name.
+        void                                setPloidy(const std::string &n);            //!< Set the ploidy information.
         void                                setSpeciesName(const std::string &n);       //!< Set the name of the species.
         
     private:
@@ -50,6 +53,7 @@ namespace RevBayesCore {
         TimeInterval                        age_range;
         std::string                         name;
         std::string                         species_name;
+        boost::optional<std::string>        ploidy;
     
     };
 	

@@ -157,7 +157,8 @@ const TimeInterval& Taxon::getAgeRange( void ) const
 *
 * \return    The JSON-formatted string.
 */
-const std::string Taxon::getJsonRespresentation(void) const {
+const std::string Taxon::getJsonRespresentation(void) const
+{
 
     std::string jsonStr = "";
     jsonStr += "{\"Taxon\": {";
@@ -177,6 +178,26 @@ const std::string Taxon::getJsonRespresentation(void) const {
 const std::string& Taxon::getName( void ) const
 {
     return name;
+}
+
+
+/**
+ * Get the ploidy level info for this taxon.
+ *
+ * \return    The ploidy level.
+ */
+const std::string& Taxon::getPloidy( void ) const
+{
+    
+    if ( ploidy.has_value() == true )
+    {
+        return *ploidy;
+    }
+    else
+    {
+        return "";
+    }
+
 }
 
 
@@ -233,6 +254,17 @@ void Taxon::setAgeRange( const TimeInterval &d )
 void Taxon::setName( const std::string &n )
 {
     name = n;
+}
+
+
+/**
+ * Set the ploidy level info for this taxon.
+ *
+ * \param[in]    p     The ploidy level.
+ */
+void Taxon::setPloidy( const std::string &p )
+{
+    ploidy = p;
 }
 
 

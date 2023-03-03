@@ -30,7 +30,7 @@ TaxonReader::TaxonReader(const std::string &fn, const std::string& delim) : Deli
     std::vector<std::string>& line = chars[0];
     std::map<std::string, int> column_map;
 
-    std::string arr[] = {"taxon","age","species","min","max"};
+    std::string arr[] = {"taxon","age","species","min","max","ploidy"};
     std::vector<std::string> fields (arr, arr + sizeof(arr) / sizeof(arr[0]) );
     
     for (size_t i = 0 ; i < line.size() ; ++i)
@@ -118,6 +118,11 @@ TaxonReader::TaxonReader(const std::string &fn, const std::string& delim) : Deli
         if ( column_map.find("species") != column_map.end() )
         {
             t.setSpeciesName( line[ column_map["species"] ] );
+        }
+        
+        if ( column_map.find("ploidy") != column_map.end() )
+        {
+            t.setPloidy( line[ column_map["ploidy"] ] );
         }
         
         taxa.push_back( t );
