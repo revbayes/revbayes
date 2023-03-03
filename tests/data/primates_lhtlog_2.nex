@@ -1,0 +1,33 @@
+#NEXUS
+
+Begin data;
+	Dimensions ntax=23 nchar=2;
+	Format datatype=Continuous missing=?;
+	Matrix
+
+Alouatta_palliata                   3.95	3.87
+Aotus_trivirgatus                   2.87	2.78
+Callicebus_donacophilus             2.89	2.84
+Cebus_albifrons                     4.21	4.15
+Cheirogaleus_major                  1.79	1.73
+Chlorocebus_aethiops                4.26	4.08
+Colobus_guereza                     4.37	4.25
+Daubentonia_madagascariensis        3.78	3.85
+Galago_senegalensis					1.39	1.36
+Hylobates_lar						4.64	4.61
+Lemur_catta							3.20	2.98
+Lepilemur_hubbardorum				1.94	1.92
+Loris_tardigradus					1.77	1.78
+Macaca_mulatta						4.54	4.43
+Microcebus_murinus					0.39	0.50
+Nycticebus_coucang					2.40	2.26
+Otolemur_crassicaudatus				2.51	2.40
+Pan_paniscus						5.88	5.79
+Perodicticus_potto					2.55	2.47
+Propithecus_coquereli				3.25	3.22
+Saimiri_sciureus					3.19	3.18
+Tarsius_syrichta					1.28	1.18
+Varecia_variegata					3.53	3.44
+;
+End;
+

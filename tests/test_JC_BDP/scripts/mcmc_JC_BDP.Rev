@@ -1,0 +1,116 @@
+################################################################################
+#
+# RevBayes Validation Test: Jukes-Cantor with birth-death process
+# 
+# Model: Sequences evolve under the Jukes-Cantor model and the tree is drawn
+#        from a constant-rate birth-death process with uniform sampling.
+#            
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+seed(12345)
+
+#######################
+# Reading in the Data #
+#######################
+
+###### This just defines a single model for all sites #######
+
+### Read in sequence data for both genes
+
+data <- readDiscreteCharacterData("data/primates_cytb_small.nex")
+
+# Get some useful variables from the data. We need these later on.
+taxa <- data.taxa()
+
+# set my move index
+mvi = 0
+
+
+
+######################
+# Substitution Model #
+######################
+
+#### specify the Jukes-Cantor substitution model applied uniformly to all sites ###
+Q <- fnJC(4) 
+
+
+
+
+
+##############
+# Tree model #
+##############
+
+# Specify a prior on the diversification and turnover rate
+diversification ~ dnGamma(2,2)
+turnover ~ dnGamma(2,2)
+
+# now transform the diversification and turnover rates into speciation and extinction rates
+speciation := diversification + turnover
+extinction := turnover
+
+# specify a prior on the root age (our informed guess is about 75-80 mya)
+root ~ dnNormal(75.0,2.0)
+
+sampling_fraction <- 23 / 450 # 23 out of the ~ 450 primate species
+
+# create some moves that change the stochastic variables
+# all moves are sliding proposals but you could use scaling proposals for the rates too
+moves[++mvi] = mvSlide(diversification,delta=1,tune=true,weight=1)
+moves[++mvi] = mvSlide(turnover,delta=1,tune=true,weight=1)
+moves[++mvi] = mvSlide(root,delta=1,tune=true,weight=1)
+
+# construct a variable for the tree drawn from a birth death process
+psi ~ dnBDP(lambda=abs(speciation), mu=abs(extinction), rootAge=abs(root), rho=sampling_fraction, taxa=taxa, condition="nTaxa" )
+
+moves[++mvi] = mvNarrow(psi, weight=5.0)
+moves[++mvi] = mvNNI(psi, weight=1.0)
+moves[++mvi] = mvFNPR(psi, weight=3.0)
+moves[++mvi] = mvSubtreeScale(psi, weight=3.0)
+moves[++mvi] = mvNodeTimeSlideUniform(psi, weight=15.0)
+
+
+
+
+
+
+###################
+# PhyloCTMC Model #
+###################
+
+# We use an empirical estimate of the clock rate which is 0.01 (=1%) per million years per site
+clockRate <- 0.005
+
+# the sequence evolution model
+seq ~ dnPhyloCTMC(tree=psi, Q=Q, branchRates=clockRate, type="DNA")
+
+# attach the data
+seq.clamp(data)
+
+
+
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(Q)
+
+
+monitors[1] = mnStochasticVariable(filename="output/mcmc_JC_BDP.out",printgen=1, separator = TAB)
+
+mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
+
+
+mymcmc.run(generations=1000)
+
+
+# you may want to quit RevBayes now
+q()
+
