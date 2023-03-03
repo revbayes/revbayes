@@ -109,6 +109,7 @@ const ArgumentRules& Func_convertVCFtoCountsFile::getArgumentRules( void ) const
         std::vector<std::string> ploidy_options;
         ploidy_options.push_back( "diploid" );
         ploidy_options.push_back( "haploid" );
+        ploidy_options.push_back( "mixed" );
         argument_rules.push_back( new OptionRule( "ploidy", new RlString("diploid"), ploidy_options, "The ploidy type." ) );
         
         std::vector<std::string> unknown_options;

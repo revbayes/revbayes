@@ -4,6 +4,7 @@
 #include "VCFReader.h"
 #include "Ellipsis.h"
 #include "Func_readVCF.h"
+#include "ModelVector.h"
 #include "OptionRule.h"
 #include "RbException.h"
 #include "RevNullObject.h"
@@ -11,6 +12,7 @@
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlBoolean.h"
 #include "RlString.h"
+#include "RlTaxon.h"
 #include "RlUtils.h"
 #include "StringUtilities.h"
 #include "RlUserInterface.h"
@@ -51,6 +53,10 @@ RevPtr<RevVariable> Func_readVCF::execute( void )
     {
         ploidy = RevBayesCore::VCFReader::HAPLOID;
     }
+    else if ( ploidy_str == "mixed" )
+    {
+        ploidy = RevBayesCore::VCFReader::MIXED;
+    }
     
     const std::string& unkown_str       = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
     RevBayesCore::VCFReader::UNKOWN_TREATMENT unkown = RevBayesCore::VCFReader::MISSING;
@@ -64,6 +70,13 @@ RevPtr<RevVariable> Func_readVCF::execute( void )
     }
     
     bool skip_missing = static_cast<const RlBoolean&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    
+    RevBayesCore::RbVector<RevBayesCore::Taxon> taxa;
+    const RevObject& rl_taxa = args[arg_index++].getVariable()->getRevObject();
+    if ( rl_taxa != RevNullObject::getInstance() )
+    {
+        taxa  = static_cast< const ModelVector<Taxon> &>( rl_taxa ).getValue();
+    }
     
     const std::string& chrom = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
     
@@ -80,12 +93,12 @@ RevPtr<RevVariable> Func_readVCF::execute( void )
     
     if ( type == "DNA" )
     {
-        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::DnaState> *aln = vcf_reader.readDNAMatrix( skip_missing, chrom, ref_genome );
+        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::DnaState> *aln = vcf_reader.readDNAMatrix( skip_missing, chrom, ref_genome, taxa );
         rl_aln = new AbstractHomologousDiscreteCharacterData( aln );
     }
     else if ( type == "binary")
     {
-        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::BinaryState> *aln = vcf_reader.readBinaryMatrix( skip_missing, chrom, ref_genome );
+        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::BinaryState> *aln = vcf_reader.readBinaryMatrix( skip_missing, chrom, ref_genome, taxa );
         rl_aln = new AbstractHomologousDiscreteCharacterData( aln );
     }
     
@@ -115,6 +128,7 @@ const ArgumentRules& Func_readVCF::getArgumentRules( void ) const
         std::vector<std::string> ploidy_options;
         ploidy_options.push_back( "diploid" );
         ploidy_options.push_back( "haploid" );
+        ploidy_options.push_back( "mixed" );
         argument_rules.push_back( new OptionRule( "ploidy", new RlString("diploid"), ploidy_options, "The ploidy type." ) );
         
         std::vector<std::string> unknown_options;
@@ -123,11 +137,13 @@ const ArgumentRules& Func_readVCF::getArgumentRules( void ) const
         unknown_options.push_back( "alternative" );
         argument_rules.push_back( new OptionRule( "unkownTreatment", new RlString("missing"), unknown_options, "How to treat the '.' character, i.e., if the state was unkown." ) );
         
-        argument_rules.push_back( new ArgumentRule( "skipMissing", RlBoolean::getClassTypeSpec(), "Should we skip sites (i.e., for all individuals) if at least one has a missing character at this position.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
+        argument_rules.push_back( new ArgumentRule( "skipMissing"  , RlBoolean::getClassTypeSpec(), "Should we skip sites (i.e., for all individuals) if at least one has a missing character at this position.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
 
-        argument_rules.push_back( new ArgumentRule( "chrom",       RlString::getClassTypeSpec(), "Name of the chromosome we want to extract. If empty, then all chromosomes are used.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "" ) ) );
+        argument_rules.push_back( new ArgumentRule( "taxa"         , ModelVector<Taxon>::getClassTypeSpec(), "The taxa list to extract the ploidy information if given as mixed.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
 
-        argument_rules.push_back( new ArgumentRule( "reference",   AbstractDiscreteTaxonData::getClassTypeSpec(), "The reference genome if we want to fill in the characters that are not coded in the VCF file, i.e., if the VCF file only contains SNPs but we need the full sequences.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+        argument_rules.push_back( new ArgumentRule( "chrom"        , RlString::getClassTypeSpec(), "Name of the chromosome we want to extract. If empty, then all chromosomes are used.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "" ) ) );
+
+        argument_rules.push_back( new ArgumentRule( "reference"    , AbstractDiscreteTaxonData::getClassTypeSpec(), "The reference genome if we want to fill in the characters that are not coded in the VCF file, i.e., if the VCF file only contains SNPs but we need the full sequences.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
 
         rules_set = true;
         

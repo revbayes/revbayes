@@ -1010,7 +1010,7 @@ std::vector<size_t> VCFReader::extractStateIndices(std::string alleles)
 }
 
 
-HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( bool skip_missing, const std::string& chr, AbstractDiscreteTaxonData* ref_genome )
+HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( bool skip_missing, const std::string& chr, AbstractDiscreteTaxonData* ref_genome, const RbVector<Taxon>& input_taxa  )
 {
     HomologousDiscreteCharacterData<BinaryState> *matrix = new HomologousDiscreteCharacterData<BinaryState> ();
     
@@ -1187,7 +1187,7 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( bool 
 }
 
 
-HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_missing, const std::string& chr, AbstractDiscreteTaxonData* ref_genome )
+HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_missing, const std::string& chr, AbstractDiscreteTaxonData* ref_genome, const RbVector<Taxon>& input_taxa )
 {
     HomologousDiscreteCharacterData<DnaState> *matrix = new HomologousDiscreteCharacterData<DnaState> ();
     
@@ -1212,25 +1212,70 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_m
     }
     size_t NUM_SAMPLES = sample_names.size();
     std::vector< DiscreteTaxonData<DnaState> > taxa;
+    std::vector< PLOIDY > ploidy_of_sample;
     if ( ploidy == DIPLOID )
     {
+        ploidy_of_sample = std::vector< PLOIDY >( NUM_SAMPLES, DIPLOID );
+
         taxa = std::vector< DiscreteTaxonData<DnaState> >( 2*NUM_SAMPLES, DiscreteTaxonData<DnaState>( Taxon("") ) );
         for (size_t i=0; i<NUM_SAMPLES; ++i)
         {
             Taxon this_taxon_A = Taxon( sample_names[i] + "_A" );
             taxa[i] = DiscreteTaxonData<DnaState>( this_taxon_A );
+            
             Taxon this_taxon_B = Taxon( sample_names[i] + "_B" );
             taxa[i+NUM_SAMPLES] = DiscreteTaxonData<DnaState>( this_taxon_B );
         }
     }
-    else
+    else if ( ploidy == HAPLOID )
     {
+        ploidy_of_sample = std::vector< PLOIDY >( NUM_SAMPLES, HAPLOID );
+
         taxa = std::vector< DiscreteTaxonData<DnaState> >( NUM_SAMPLES, DiscreteTaxonData<DnaState>( Taxon("") ) );
         for (size_t i=0; i<NUM_SAMPLES; ++i)
         {
             Taxon this_taxon = Taxon( sample_names[i] );
             taxa[i] = DiscreteTaxonData<DnaState>( this_taxon );
         }
+    }
+    else if ( ploidy == MIXED )
+    {
+        ploidy_of_sample = std::vector< PLOIDY >( NUM_SAMPLES, HAPLOID );
+        
+        // for simplicity of the vector
+        taxa = std::vector< DiscreteTaxonData<DnaState> >( 2*NUM_SAMPLES, DiscreteTaxonData<DnaState>( Taxon("") ) );
+        for (size_t i=0; i<NUM_SAMPLES; ++i)
+        {
+            size_t taxon_index = input_taxa.size();
+            for (size_t j=0; j<input_taxa.size(); ++j)
+            {
+                if ( input_taxa[j].getName() == sample_names[i] )
+                {
+                    taxon_index = j;
+                    break;
+                }
+            }
+
+            if ( input_taxa[taxon_index].getPloidy() == "haploid" )
+            {
+                ploidy_of_sample[i] = HAPLOID;
+                
+                Taxon this_taxon = Taxon( sample_names[i] );
+                taxa[i] = DiscreteTaxonData<DnaState>( this_taxon );
+            }
+            else if ( input_taxa[taxon_index].getPloidy() == "diploid" )
+            {
+                ploidy_of_sample[i] = DIPLOID;
+                
+                Taxon this_taxon_A = Taxon( sample_names[i] + "_A" );
+                taxa[i] = DiscreteTaxonData<DnaState>( this_taxon_A );
+                
+                Taxon this_taxon_B = Taxon( sample_names[i] + "_B" );
+                taxa[i+NUM_SAMPLES] = DiscreteTaxonData<DnaState>( this_taxon_B );
+            }
+            
+        }
+        
     }
     
     size_t ref_index = 0;
@@ -1273,12 +1318,12 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_m
             size_t current_pos = StringUtilities::asIntegerNumber( chars[i][pos_index] );
             for ( ; genome_index < current_pos; ++genome_index )
             {
-                for (size_t j = 0; j < NUM_SAMPLES; ++j)
+                for (size_t sample_index = 0; sample_index < NUM_SAMPLES; ++sample_index)
                 {
-                    taxa[j].addCharacter( ref_genome->getCharacter( genome_index-1 ) );
-                    if ( ploidy == DIPLOID )
+                    taxa[sample_index].addCharacter( ref_genome->getCharacter( genome_index-1 ) );
+                    if ( ploidy_of_sample[sample_index] == DIPLOID )
                     {
-                        taxa[j+NUM_SAMPLES].addCharacter( ref_genome->getCharacter( genome_index-1 ) );
+                        taxa[sample_index+NUM_SAMPLES].addCharacter( ref_genome->getCharacter( genome_index-1 ) );
                     }
                 }
             }
@@ -1303,10 +1348,10 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_m
             alternative_characters.push_back( DnaState( alt_chars[j] ) );
         }
         
-        for (size_t j = 0; j < NUM_SAMPLES; ++j)
+        for (size_t sample_index = 0; sample_index < NUM_SAMPLES; ++sample_index)
         {
             
-            const std::string &this_char_read = chars[i][j+samples_start_column];
+            const std::string &this_char_read = chars[i][sample_index+samples_start_column];
             std::vector<std::string> format_tokens;
             StringUtilities::stringSplit(this_char_read, ":", format_tokens);
             
@@ -1361,7 +1406,7 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_m
             }
             
             // check if this haploid state is uncertain
-            if ( ploidy == HAPLOID && allele_tokens[0] != allele_tokens[1] )
+            if ( ploidy_of_sample[sample_index] == HAPLOID && allele_tokens[0] != allele_tokens[1] )
             {
                 
                 for (size_t k = 0; k < alternative_characters.size(); ++k )
@@ -1373,30 +1418,30 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_m
                     }
                 }
             }
-            taxa[j].addCharacter( first_allele );
+            taxa[sample_index].addCharacter( first_allele );
             
-            if ( ploidy == DIPLOID )
+            if ( ploidy_of_sample[sample_index] == DIPLOID )
             {
              
                 // second allele
                 if ( allele_tokens[1] == "0")
                 {
-                    taxa[j+NUM_SAMPLES].addCharacter( reference_character );
+                    taxa[sample_index+NUM_SAMPLES].addCharacter( reference_character );
                 }
                 else if ( allele_tokens[1] == "." )
                 {
                     
                     if ( unkown_treatment == UNKOWN_TREATMENT::MISSING )
                     {
-                        taxa[j+NUM_SAMPLES].addCharacter( DnaState("?") );
+                        taxa[sample_index+NUM_SAMPLES].addCharacter( DnaState("?") );
                     }
                     else if ( unkown_treatment == UNKOWN_TREATMENT::REFERENCE )
                     {
-                        taxa[j+NUM_SAMPLES].addCharacter( reference_character );
+                        taxa[sample_index+NUM_SAMPLES].addCharacter( reference_character );
                     }
                     else if ( unkown_treatment == UNKOWN_TREATMENT::ALTERNATIVE )
                     {
-                        taxa[j+NUM_SAMPLES].addCharacter( alternative_characters[0] );
+                        taxa[sample_index+NUM_SAMPLES].addCharacter( alternative_characters[0] );
                     }
                         
                 }
@@ -1408,7 +1453,7 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_m
                     {
                         if ( allele_tokens[1] == StringUtilities::toString( k+1 ) )
                         {
-                            taxa[j+NUM_SAMPLES].addCharacter( alternative_characters[k] );
+                            taxa[sample_index+NUM_SAMPLES].addCharacter( alternative_characters[k] );
                             found = true;
                             break;
                         }
@@ -1430,12 +1475,12 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_m
         size_t final_pos = ref_genome->getNumberOfCharacters();
         for ( ; genome_index <= final_pos; ++genome_index )
         {
-            for (size_t j = 0; j < NUM_SAMPLES; ++j)
+            for (size_t sample_index = 0; sample_index < NUM_SAMPLES; ++sample_index)
             {
-                taxa[j].addCharacter( ref_genome->getCharacter( genome_index-1 ) );
-                if ( ploidy == DIPLOID )
+                taxa[sample_index].addCharacter( ref_genome->getCharacter( genome_index-1 ) );
+                if ( ploidy_of_sample[sample_index] == DIPLOID )
                 {
-                    taxa[j+NUM_SAMPLES].addCharacter( ref_genome->getCharacter( genome_index-1 ) );
+                    taxa[sample_index+NUM_SAMPLES].addCharacter( ref_genome->getCharacter( genome_index-1 ) );
                 }
             }
         }
@@ -1443,12 +1488,12 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_m
     }
     
     // We have finished all lines, we fill up the data matrix
-    for (size_t i=0; i<NUM_SAMPLES; ++i)
+    for (size_t sample_index=0; sample_index<NUM_SAMPLES; ++sample_index)
     {
-        matrix->addTaxonData(taxa[i]);
-        if ( ploidy == DIPLOID )
+        matrix->addTaxonData(taxa[sample_index]);
+        if ( ploidy_of_sample[sample_index] == DIPLOID )
         {
-            matrix->addTaxonData( taxa[i+NUM_SAMPLES] );
+            matrix->addTaxonData( taxa[sample_index+NUM_SAMPLES] );
         }
     }
     
