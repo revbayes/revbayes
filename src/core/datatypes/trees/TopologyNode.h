@@ -77,10 +77,10 @@ namespace RevBayesCore {
         void                                        addNodeParameter(const std::string &n, double p);
         void                                        addNodeParameter(const std::string &n, const std::string &p);
         void                                        addNodeParameters(const std::string &n, const std::vector<double> &p, bool io);
-	void                                        addNodeParameters(const std::string &n, const std::vector<std::string> &p, bool io);
+        void                                        addNodeParameters(const std::string &n, const std::vector<std::string> &p, bool io);
         void                                        clearParameters(void);                                                              //!< Clear the node and branch parameters
         void                                        clearBranchParameters(void);
-	void                                        clearNodeParameters(void);
+        void                                        clearNodeParameters(void);
         virtual std::string                         computeNewick(bool round = true);                                                   //!< Compute the newick string for this clade
         std::string                                 computePlainNewick(void) const;                                                     //!< Compute the newick string for this clade as a plain string without branch length
         std::string                                 computeSimmapNewick(bool round = true);                                             //!< Compute the newick string compatible with SIMMAP and phytools

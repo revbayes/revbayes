@@ -1,0 +1,137 @@
+################################################################################
+#
+# RevBayes Script: Bayesian inference of diversification rates under a
+#                   conditioned birth-death-shift model
+#
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+seed(12345)
+
+#######################
+# Reading in the Data #
+#######################
+
+dataset = "primates"
+
+# Read in the observed phylogeny
+observed_phylogeny <- readTrees("data/"+dataset+".tree")[1]
+
+# Get the names of the taxa in the tree and the age of the tree. We need these later on.
+taxa <- observed_phylogeny.taxa()
+root <- observed_phylogeny.rootAge()
+tree_length <- observed_phylogeny.treeLength()
+
+# set my move index
+mvi = 0
+mni = 0
+
+# Global parameters for our analysis
+EXPECTED_NUM_EVENTS = 2
+NUM_TOTAL_SPECIES = 367
+H = 0.587405
+
+####################
+# Create the rates #
+####################
+
+### Specify a prior on the speciation and extinction rates
+
+### Create variables for the prior distributions on the speciation and extinction rates
+### Here we are going to use a lognormal prior distribution, but any other distribution
+### on positive real number could be used too (e.g., exponential or gamma distribution).
+### Note that we also fix the parameters of the distribution.
+speciation_prior_mean <- ln( ln(NUM_TOTAL_SPECIES/2.0) / root )
+extinction_prior_mean <- ln( ln(NUM_TOTAL_SPECIES/2.0) / root )
+speciation_sd <- H*2
+extinction_sd <- H*2
+
+speciation_rate_prior = dnLognormal(speciation_prior_mean,speciation_sd)
+extinction_rate_prior = dnLognormal(extinction_prior_mean,extinction_sd)
+
+
+### Now also create a speciation and extinction rate at the root
+### We will use the same prior as for the rate after a shift event,
+### but any other distribution could be used too.
+speciation_root ~ dnLognormal(speciation_prior_mean,speciation_sd)
+extinction_root ~ dnLognormal(extinction_prior_mean,extinction_sd)
+moves[++mvi] = mvScale(speciation_root,lambda=1,tune=true,weight=5)
+moves[++mvi] = mvScale(extinction_root,lambda=1,tune=true,weight=5)
+
+
+### Create a lognormal distributed variable for the rate of rate-shift events
+shift_rate <- EXPECTED_NUM_EVENTS/tree_length
+
+### rho is the probability of sampling species at the present
+rho <- observed_phylogeny.ntips() / NUM_TOTAL_SPECIES
+
+
+#### construct a variable for the tree drawn from a birth death process
+timetree ~ dnCBDSP(rootLambda=speciation_root,
+                   rootMu=extinction_root,
+                   lambda=speciation_rate_prior, 
+                   mu=extinction_rate_prior, 
+                   delta=shift_rate, 
+                   rootAge=root, 
+                   rho=rho, 
+                   condition="time",
+                   taxa=taxa )
+            
+### clamp the model with the "observed" tree
+timetree.clamp(observed_phylogeny)
+
+### Create moves that change the augmented rate-shift events on the tree
+moves[++mvi] = mvBirthDeathEventContinuous(timetree, weight=10)
+moves[++mvi] = mvContinuousEventScale(timetree, lambda=1.0, weight=5)
+moves[++mvi] = mvEventTimeBeta(timetree, delta=0.01, offset=1.0, weight=5,tune=TRUE)
+moves[++mvi] = mvEventTimeSlide(timetree, delta=timetree.treeLength()/10.0, weight=5,tune=false)
+
+### Create some deterministic variable that hold information about the rates per branch
+num_events := timetree.numberEvents()
+avg_lambda := timetree.averageSpeciationRate()
+avg_mu     := timetree.averageExtinctionRate()
+avg_net    := avg_lambda - avg_mu
+avg_rel    := avg_mu / avg_lambda
+
+prob_incr_lambda := timetree.probabilitySpeciationRateIncrease()
+prob_decr_lambda := timetree.probabilitySpeciationRateDecrease()
+prob_incr_mu     := timetree.probabilityExtinctionRateIncrease()
+prob_decr_mu     := timetree.probabilityExtinctionRateDecrease()
+
+total_num_events := sum( num_events )
+
+#############
+# The Model #
+#############
+
+### workspace model wrapper ###
+mymodel = model(timetree)
+
+### set up the monitors that will output parameter values to file and screen
+monitors[++mni] = mnModel(filename="output/"+dataset+"_CBDSP.log",printgen=10, separator = TAB)
+monitors[++mni] = mnExtNewick(filename="output/"+dataset+"_CBDSP.trees", isNodeParameter=FALSE, printgen=10, separator = TAB, tree=timetree, avg_lambda, avg_mu, avg_net, avg_rel, prob_incr_lambda, prob_decr_lambda, prob_incr_mu, prob_decr_mu)
+monitors[++mni] = mnScreen(printgen=1000, shift_rate, speciation_root, extinction_root, total_num_events)
+
+
+################
+# The Analysis #
+################
+
+### workspace mcmc
+mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
+
+### pre-burnin to tune the proposals
+mymcmc.burnin(generations=500,tuningInterval=100)
+
+### run the MCMC
+mymcmc.run(generations=5000)
+
+### read in the output and create a MAP tree with the rates per branch attached to it
+treetrace = readTreeTrace("output/"+dataset+"_CBDSP.trees", treetype="clock")
+map_tree = mapTree(treetrace,"output/"+dataset+"_CBDSP_MAP.tree")
+
+
+## quit ##
+q()

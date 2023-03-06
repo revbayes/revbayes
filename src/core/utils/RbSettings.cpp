@@ -206,7 +206,7 @@ double RbSettings::getTolerance( void ) const
 void RbSettings::initializeUserSettings(void)
 {
     moduleDir = "modules";      // the default module directory
-    useScaling = true;         // the default useScaling
+    useScaling = true;          // the default useScaling
     scalingDensity = 1;         // the default scaling density
     lineWidth = 160;            // the default line width
     tolerance = 10E-10;         // set default value for tolerance comparing doubles
@@ -400,7 +400,9 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
 
     if ( key == "moduledir" )
     {
-        moduleDir = value;
+        // Read from stream to handle quotes.
+        std::istringstream input(value);
+        input >> moduleDir;
     }
     else if ( key == "outputPrecision" )
     {
