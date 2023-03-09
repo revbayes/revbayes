@@ -139,6 +139,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y pandoc libcairo2-dev ccache dos2unix zstd
           sudo apt-get install git python3-setuptools python3-pip g++-mingw-w64 wine64
+          sudo -H pip3 install meson
+          sudo -H pip3 install ninja
 
     # Caches for different branches are isolated, so we don't need to put the branch name into the key.
     # The total size for all caches in a repository is 5Gb.
