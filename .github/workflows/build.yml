@@ -106,10 +106,14 @@ jobs:
           sudo apt-get install -y g++-${{ matrix.version }}
           echo "C_COMPILER=gcc-${{ matrix.version }}" >> $GITHUB_ENV
           echo "CXX_COMPILER=g++-${{ matrix.version }}" >> $GITHUB_ENV
+          echo "CC=gcc-${{ matrix.version }}" >> $GITHUB_ENV
+          echo "CXX=g++-${{ matrix.version }}" >> $GITHUB_ENV
         else
           sudo apt-get install -y clang-${{ matrix.version }}
           echo "C_COMPILER=clang-${{ matrix.version }}" >> $GITHUB_ENV
           echo "CXX_COMPILER=clang++-${{ matrix.version }}" >> $GITHUB_ENV
+          echo "CC=clang-${{ matrix.version }}" >> $GITHUB_ENV
+          echo "CXX=clang++-${{ matrix.version }}" >> $GITHUB_ENV
         fi
         if [ "${{ matrix.mpi }}" = true ] ; then
           sudo apt-get install libopenmpi-dev
