@@ -209,9 +209,15 @@ jobs:
         ccache -p
         ccache -s
 
-        cd projects/cmake
-        ./build.sh -travis true -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }} -beagle ${{ matrix.beagle }} -eigen ${{ matrix.beagle }}
-        cmake --install build
+        if [ "${{ matrix.beagle }}" = true ] ; then
+            ( cd ${GITHUB_WORKSPACE}/projects/meson/ ; ./generate.sh )
+            /usr/local/bin/meson setup build ${GITHUB_WORKSPACE} --prefix=$HOME/local -Dopenlibm=true -Dmpi=${{ matrix.mpi }} -Dbeagle=${{ matrix.beagle }}
+           /usr/local/bin/ninja -C build install
+        else
+           cd projects/cmake
+           ./build.sh -travis true -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }} -beagle ${{ matrix.beagle }} -eigen ${{ matrix.beagle }}
+           cmake --install build
+        fi
 
         ccache -s
 
