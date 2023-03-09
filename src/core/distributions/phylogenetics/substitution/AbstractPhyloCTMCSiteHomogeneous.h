@@ -380,7 +380,6 @@ dirty_nodes( std::vector<bool>(num_nodes, true) ),
 #if defined( RB_BEAGLE )
 active_eigen_system( std::vector<int>(1, 0) ),
 touched_eigen_system( std::vector<bool>(1, false) ),
-beagle_instances( NULL ),
 #endif /* RB_BEAGLE */
 using_ambiguous_characters( amb ),
 treatUnknownAsGap( true ),
@@ -483,7 +482,6 @@ dirty_nodes( n.dirty_nodes ),
 #if defined( RB_BEAGLE )
 active_eigen_system( n.active_eigen_system ),
 touched_eigen_system( n.touched_eigen_system ),
-beagle_instances( NULL ),
 #endif /* RB_BEAGLE */
 using_ambiguous_characters( n.using_ambiguous_characters ),
 treatUnknownAsGap( n.treatUnknownAsGap ),
