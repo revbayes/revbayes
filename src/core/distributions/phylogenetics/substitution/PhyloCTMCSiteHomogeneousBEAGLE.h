@@ -309,8 +309,8 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
 
     //-- BEAGLE model parameters.
     int     b_parentBufferIndices     = (int) root_idx;
-    int     b_childBufferIndices      = right_partials;
-    int     b_probabilityIndices      = right_idx;
+    int     b_childBufferIndices      = left_partials;
+    int     b_probabilityIndices      = left_idx;
     int*    b_firstDerivativeIndices  = NULL;
     int*    b_secondDerivativeIndices = NULL;
     int*    b_categoryWeightsIndices  = &categoryIndicesASRV[0];

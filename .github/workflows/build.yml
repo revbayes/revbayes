@@ -106,14 +106,20 @@ jobs:
           sudo apt-get install -y g++-${{ matrix.version }}
           echo "C_COMPILER=gcc-${{ matrix.version }}" >> $GITHUB_ENV
           echo "CXX_COMPILER=g++-${{ matrix.version }}" >> $GITHUB_ENV
+          echo "CC=gcc-${{ matrix.version }}" >> $GITHUB_ENV
+          echo "CXX=g++-${{ matrix.version }}" >> $GITHUB_ENV
         else
           sudo apt-get install -y clang-${{ matrix.version }}
           echo "C_COMPILER=clang-${{ matrix.version }}" >> $GITHUB_ENV
           echo "CXX_COMPILER=clang++-${{ matrix.version }}" >> $GITHUB_ENV
+          echo "CC=clang-${{ matrix.version }}" >> $GITHUB_ENV
+          echo "CXX=clang++-${{ matrix.version }}" >> $GITHUB_ENV
         fi
         if [ "${{ matrix.mpi }}" = true ] ; then
           sudo apt-get install libopenmpi-dev
         fi
+        sudo -H pip3 install meson
+        sudo -H pip3 install ninja
 
     - name: Select XCode version (macOS)
       if: runner.os == 'macOS'
@@ -209,9 +215,15 @@ jobs:
         ccache -p
         ccache -s
 
-        cd projects/cmake
-        ./build.sh -travis true -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }} -beagle ${{ matrix.beagle }} -eigen ${{ matrix.beagle }}
-        cmake --install build
+        if [ "${{ matrix.beagle }}" = true ] ; then
+            ( cd ${GITHUB_WORKSPACE}/projects/meson/ ; ./generate.sh )
+            /usr/local/bin/meson setup build ${GITHUB_WORKSPACE} --prefix=$HOME/local -Dopenlibm=true -Dmpi=${{ matrix.mpi }} -Dbeagle=${{ matrix.beagle }}
+           /usr/local/bin/ninja -C build install
+        else
+           cd projects/cmake
+           ./build.sh -travis true -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }} -beagle ${{ matrix.beagle }} -eigen ${{ matrix.beagle }}
+           cmake --install build
+        fi
 
         ccache -s
 
@@ -223,7 +235,7 @@ jobs:
         CXX=x86_64-w64-mingw32-g++-posix
         PREFIX=${HOME}/local
         WINROOT=/home/runner/win_root
-        /usr/local/bin/meson build ${GITHUB_WORKSPACE} --prefix=$PREFIX --cross-file=win64-cross.txt -Dopenlibm=true -Dstudio=true
+        /usr/local/bin/meson setup build ${GITHUB_WORKSPACE} --prefix=$PREFIX --cross-file=win64-cross.txt -Dopenlibm=true -Dstudio=true
         ccache -p
         ccache -s
         /usr/local/bin/ninja -C build install
