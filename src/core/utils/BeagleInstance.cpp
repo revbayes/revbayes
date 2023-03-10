@@ -115,7 +115,8 @@ void BeagleInstance::createBEAGLE(  int  b_tipCount
         }
 #endif //-- RB_BEAGLE_INFO
     }
-    else {
+    else
+    {
         //-- If the device number has not specifically been set and we are
         //   using a gpu resource, default to device 1.
         //-- This is pretty naive, and at some point maybe this needs a bit
@@ -124,7 +125,9 @@ void BeagleInstance::createBEAGLE(  int  b_tipCount
              (RbSettings::userSettings().getBeagleDevice() == "gpu_cuda" ||
               RbSettings::userSettings().getBeagleDevice() == "gpu_opencl" )) {
             b_resource = 1;
-        } else {
+        }
+        else
+        {
             b_resource = RbSettings::userSettings().getBeagleResource();
         }
     }
@@ -145,19 +148,24 @@ void BeagleInstance::createBEAGLE(  int  b_tipCount
                                  , &b_return_info          // pointer for details
                                  );
 
-    if ( handle < 0 ) {
+    if ( handle < 0 )
+    {
         RbSettings::userSettings().setUseBeagle(false);
         ss << "Failed to start BEAGLE instance. "
            << "Reverting to RevBayes likelihood calculator." << std::endl;
     }
-    else {
+    else
+    {
         //--- Remaining beagle post-configuration ---
         
         //-- Set threads count if using CPU
         if (RbSettings::userSettings().getBeagleDevice() != "gpu_cuda" &&
-            RbSettings::userSettings().getBeagleDevice() != "gpu_opencl") {
+            RbSettings::userSettings().getBeagleDevice() != "gpu_opencl")
+        {
             this->setCPUThreadCount( b_max_cpu_threads );
-        } else {
+        }
+        else
+        {
             b_max_cpu_threads = 0;
         }
 
@@ -174,14 +182,17 @@ void BeagleInstance::createBEAGLE(  int  b_tipCount
         ss << "\t" << "matrixBufferCount   : " << b_matrixBufferCount          << std::endl;
         ss << "\t" << "categoryCount       : " << b_categoryCount              << std::endl;
         ss << "\t" << "scaleBufferCount    : " << b_scaleBufferCount           << std::endl;
-        if ( b_max_cpu_threads > 1 ) {
+        if ( b_max_cpu_threads > 1 )
+        {
             ss << "\t" << "max_threads         : " << b_max_cpu_threads << std::endl;
         }
         ss << "\t" << "flags               :" << BeagleUtilities::printBeagleFlags(b_requirementFlags | b_preferenceFlags) << std::endl;
 #endif /* RB_BEAGLE_INFO */
     }
 
+#if defined ( RB_BEAGLE_INFO )
     RBOUT(ss.str());
+#endif /* RB_BEAGLE_INFO */
 }
 
 
@@ -192,29 +203,34 @@ void BeagleInstance::freeBEAGLE( void )
     ss << "Finalizing BEAGLE " << std::to_string(handle) << std::endl << std::endl;
 #endif /* RB_BEAGLE_INFO */
 
-    // finalize BEAGLE
-    int code = beagleFinalizeInstance( handle );
-    if (code != 0)
+    if ( handle >= 0 )
     {
-        std::stringstream err_ss;
-        err_ss << "Likelihood failed to finalize BeagleLib instance. BeagleLib error code was ";
-        err_ss << code << " (" << BeagleUtilities::printErrorCode(code) <<  ").";
-        throw RbException( err_ss.str() );
-    }
+        // finalize BEAGLE
+        int code = beagleFinalizeInstance( handle );
+        if (code != 0)
+        {
+            std::stringstream err_ss;
+            err_ss << "Likelihood failed to finalize BeagleLib instance. BeagleLib error code was ";
+            err_ss << code << " (" << BeagleUtilities::printErrorCode(code) <<  ").";
+//        throw RbException( err_ss.str() );
+            std::cerr << err_ss.str() << std::endl;
+        }
     
-    // reset internal flags
-    handle          = -1;
-    resourcenumber  = -1;
-    resourcename    = "";
-    nstates         = 0;
-    nratecateg      = 0;
-    npatterns       = 0;
-    partial_offset  = 0;
-    tmatrix_offset  = 0;
+        // reset internal flags
+        handle          = -1;
+        resourcenumber  = -1;
+        resourcename    = "";
+        nstates         = 0;
+        nratecateg      = 0;
+        npatterns       = 0;
+        partial_offset  = 0;
+        tmatrix_offset  = 0;
 
 #if defined ( RB_BEAGLE_INFO )
-    RBOUT(ss.str());
+        RBOUT(ss.str());
 #endif /* RB_BEAGLE_INFO */
+    }
+    
 }
 
 

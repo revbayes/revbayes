@@ -286,7 +286,7 @@ namespace RevBayesCore {
 
 #if defined( RB_BEAGLE )
         bool                                                                b_initialized = false;
-        std::vector<BeagleInstance*>                                        beagle_instances;
+        BeagleInstance*                                                     beagle_instance;
 
         std::vector<double>                                                 b_inPatternWeights;
         std::vector<double>                                                 b_inCategoryRates;
@@ -380,7 +380,7 @@ dirty_nodes( std::vector<bool>(num_nodes, true) ),
 #if defined( RB_BEAGLE )
 active_eigen_system( std::vector<int>(1, 0) ),
 touched_eigen_system( std::vector<bool>(1, false) ),
-beagle_instances( NULL ),
+beagle_instance( NULL ),
 #endif /* RB_BEAGLE */
 using_ambiguous_characters( amb ),
 treatUnknownAsGap( true ),
@@ -483,7 +483,7 @@ dirty_nodes( n.dirty_nodes ),
 #if defined( RB_BEAGLE )
 active_eigen_system( n.active_eigen_system ),
 touched_eigen_system( n.touched_eigen_system ),
-beagle_instances( NULL ),
+beagle_instance( NULL ),
 #endif /* RB_BEAGLE */
 using_ambiguous_characters( n.using_ambiguous_characters ),
 treatUnknownAsGap( n.treatUnknownAsGap ),
@@ -537,9 +537,13 @@ sampled_site_matrix_component( n.sampled_site_matrix_component )
     {
 #if defined( RB_BEAGLE )
         //-- If we are in MCMC mode, we need to make a new BEAGLE instance for our clone.
-        if ( RbSettings::userSettings().getUseBeagle() == true ) {
+        charType tmp_char;
+        if ( RbSettings::userSettings().getUseBeagle() == true && ( tmp_char.getDataType() == "Protein" || tmp_char.getDataType() == "DNA" ) )
+        {
             this->initializeBeagleInstances();
-        } else {
+        }
+        else
+        {
            partialLikelihoods = new double[2*activeLikelihoodOffset];
            memcpy(partialLikelihoods, n.partialLikelihoods, 2*activeLikelihoodOffset*sizeof(double));
         }
@@ -575,9 +579,13 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::~AbstractPhyloCTMCSite
     }
     
 #ifdef RB_BEAGLE
-    if ( RbSettings::userSettings().getUseBeagle() == true ) {
+    charType tmp_char;
+    if ( RbSettings::userSettings().getUseBeagle() == true && ( tmp_char.getDataType() == "Protein" || tmp_char.getDataType() == "DNA" ) )
+    {
         this->freeBeagleInstances();
-    } else {
+    }
+    else
+    {
         // If BEAGLE is not used, we still need to free the partial likelihoods
         delete[] partialLikelihoods;
         delete[] marginalLikelihoods;
@@ -978,7 +986,9 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
 
 #if defined( RB_BEAGLE )
         // We need to set up BEAGLE here if we are not in mcmc mode...
-        if ( RbSettings::userSettings().getUseBeagle() == true ) {
+        charType tmp_char;
+        if ( RbSettings::userSettings().getUseBeagle() == true && ( tmp_char.getDataType() == "Protein" || tmp_char.getDataType() == "DNA" ) )
+        {
             //-- If there are already BEAGLE instances, delete them.
             this->freeBeagleInstances();
             //-- Initialize fresh BEAGLE instances.
@@ -1052,7 +1062,9 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     {
 #if defined( RB_BEAGLE )
         //-- Clean up after ourselves when not in MCMC mode.
-        if ( RbSettings::userSettings().getUseBeagle() == true ) {
+        charType tmp_char;
+        if ( RbSettings::userSettings().getUseBeagle() == true && ( tmp_char.getDataType() == "Protein" || tmp_char.getDataType() == "DNA" ) )
+        {
             this->freeBeagleInstances();
         }
 #endif
@@ -3242,9 +3254,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setMcmcMode(bool 
     {
 #if defined( RB_BEAGLE )
         //-- If there is already a BEAGLE instance, delete it.
-        if ( RbSettings::userSettings().getUseBeagle() == true ) {
+        charType tmp_char;
+        if ( RbSettings::userSettings().getUseBeagle() == true && ( tmp_char.getDataType() == "Protein" || tmp_char.getDataType() == "DNA" ) )
+        {
             this->freeBeagleInstances();
-        } else {
+        }
+        else
+        {
             delete [] partialLikelihoods;
             partialLikelihoods = NULL;
         }
@@ -3262,9 +3278,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setMcmcMode(bool 
     {
 #if defined( RB_BEAGLE )
         // Initialize a new BEAGLE instance for MCMC
-        if ( RbSettings::userSettings().getUseBeagle() == true ) {
+        charType tmp_char;
+        if ( RbSettings::userSettings().getUseBeagle() == true && ( tmp_char.getDataType() == "Protein" || tmp_char.getDataType() == "DNA" ) )
+        {
             this->initializeBeagleInstances();
-        } else {
+        }
+        else
+        {
             resizeLikelihoodVectors();
         }
 #else
@@ -4500,11 +4520,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
 
 template<class charType>
 void
-RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleInstances
-( void )
+RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleInstances( void )
 {
     // Return and do nothing if we are not in BEAGLE
-    if ( RbSettings::userSettings().getUseBeagle() != true ) {
+    charType tmp_char;
+    if ( RbSettings::userSettings().getUseBeagle() == false || ( tmp_char.getDataType() != "Protein" && tmp_char.getDataType() != "DNA" ) )
+    {
         return;
     }
 
@@ -4554,8 +4575,14 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleInstan
                               b_categoryCount,
                               b_scaleBufferCount );
 
-    // And add it to the vector of all instances
-    this->beagle_instances.push_back(b_instance);
+    // free old beagle instance
+    if ( beagle_instance != NULL )
+    {
+        freeBeagleInstances();
+    }
+    
+    // And set the globa instance
+    beagle_instance = b_instance;
         
 
     // Initialize tips for models
@@ -4565,24 +4592,25 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleInstan
 
 template<class charType>
 void
-RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::freeBeagleInstances
-( void )
+RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::freeBeagleInstances( void )
 {
-    if ( RbSettings::userSettings().getUseBeagle() == true ) {
-        BeagleInstance *b;
-        while ( ! this->beagle_instances.empty() ) {
-            b = this->beagle_instances.back();
-            this->beagle_instances.pop_back();
-            b->freeBEAGLE();
+    charType tmp_char;
+    if ( RbSettings::userSettings().getUseBeagle() == true && ( tmp_char.getDataType() == "Protein" || tmp_char.getDataType() == "DNA" ) )
+    {
+        if ( beagle_instance != NULL )
+        {
+            beagle_instance->freeBEAGLE();
+            delete beagle_instance;
+            beagle_instance = NULL;
         }
+        
     }
 }
 
 
 template<class charType>
 void
-RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleTips
-( void )
+RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleTips( void )
 {
     // TODO - This method does not work with patitioned analyses!!
     
@@ -4632,7 +4660,7 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleTips
             }
 
             if ( this->using_ambiguous_characters == true ) {
-                b_ret_code = beagleSetTipPartials( beagle_instances[0]->getResourceID(),
+                b_ret_code = beagleSetTipPartials( beagle_instance->getResourceID(),
                                                    b_tipIndex,
                                                    b_inPartials );
                 //-- Check to see if we could set the tips
@@ -4641,7 +4669,7 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleTips
                                       BeagleUtilities::printErrorCode(b_ret_code));
                 }
             } else {
-                b_ret_code = beagleSetTipStates( this->beagle_instances[0]->getResourceID(),
+                b_ret_code = beagleSetTipStates( this->beagle_instance->getResourceID(),
                                                  b_tipIndex,
                                                  b_inStates );
                 //-- Check to see if we could set the tips
@@ -4660,7 +4688,7 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleTips
     }
 
     //-- Set pattern weights 
-    b_ret_code = beagleSetPatternWeights( this->beagle_instances[0]->getResourceID(),
+    b_ret_code = beagleSetPatternWeights( this->beagle_instance->getResourceID(),
                                           &this->b_inPatternWeights[0] );
     //-- Check to see if we could set the pattern weights
     if (b_ret_code != 0) {
@@ -4763,7 +4791,7 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigensyste
         b_inStateFrequencies    = model_pi_vectors[i];
 
         b_ret_code =
-            beagleSetStateFrequencies( this->beagle_instances[0]->getResourceID(),
+            beagleSetStateFrequencies( this->beagle_instance->getResourceID(),
                                        b_stateFrequenciesIndex,
                                        &b_inStateFrequencies[0] );
         if ( b_ret_code != 0 ) {
@@ -4798,7 +4826,7 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleEigensyste
 
         // Set eigensystem for model in BEAGLE
         b_ret_code =
-            beagleSetEigenDecomposition( this->beagle_instances[0]->getResourceID()
+            beagleSetEigenDecomposition( this->beagle_instance->getResourceID()
                                        , b_model_idx
                                        , &b_flat_eigenvectors[0]
                                        , &b_flat_inv_eigenvectors[0]
@@ -4864,7 +4892,7 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleSiteRates
 
     //-- Set BEAGLE category rates for rates mixture
     b_ret_code =
-        beagleSetCategoryRatesWithIndex( this->beagle_instances[0]->getResourceID(),
+        beagleSetCategoryRatesWithIndex( this->beagle_instance->getResourceID(),
                                          b_categoryWeightsIndex,
                                          &this->b_inCategoryRates[0] );
     if ( b_ret_code != 0 ) {
@@ -4875,7 +4903,7 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateBeagleSiteRates
     
     //-- Set BEAGLE category weights for mixture
     b_ret_code =
-        beagleSetCategoryWeights( this->beagle_instances[0]->getResourceID(),
+        beagleSetCategoryWeights( this->beagle_instance->getResourceID(),
                                   b_categoryWeightsIndex,
                                   &this->b_inCategoryWeights[0] );
     if (b_ret_code != 0) {
