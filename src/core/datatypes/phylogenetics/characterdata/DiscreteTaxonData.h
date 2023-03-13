@@ -44,6 +44,7 @@ namespace RevBayesCore {
         std::string                                     getStateLabels(void);                                               //!< Get the possible state labels
         bool                                            isCharacterResolved(size_t idx) const;                              //!< Returns whether the character is fully resolved (e.g., "A" or "1.32") or not (e.g., "AC" or "?")
         bool                                            isSequenceMissing(void) const;                                      //!< Returns whether the contains only missing data or has some actual observations
+        void                                            removeAllCharacters(void);                                          //!< Remove all the characters
         void                                            removeCharacters(const std::set<size_t> &i);                        //!< Remove all the characters with a given index
         void                                            setAllCharactersMissing(void);                                      //!< Set all characters as missing
         
@@ -525,6 +526,19 @@ bool RevBayesCore::DiscreteTaxonData<charType>::isSequenceMissing( void ) const
     }
 
     return true;
+}
+
+
+/**
+ * Remove all characters.
+ *
+ */
+template<class charType>
+void RevBayesCore::DiscreteTaxonData<charType>::removeAllCharacters( void )
+{
+
+    sequence.clear();
+
 }
 
 

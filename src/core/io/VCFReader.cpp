@@ -731,6 +731,439 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
 
 
 
+void VCFReader::convertToNexusFile(const std::string &out_filename, const std::string& type, const std::string& chr, AbstractDiscreteTaxonData* ref_genome, const RbVector<Taxon>& input_taxa, long thinning, long skip_first )
+{
+    
+    
+    // open file
+    std::ifstream readStream;
+    RbFileManager f_in = RbFileManager(filename);
+    if ( f_in.openFile(readStream) == false )
+    {
+        throw RbException( "Could not open file " + filename );
+    }
+    
+    // the filestream object
+    std::ofstream out_stream;
+    
+    RbFileManager f_out = RbFileManager(out_filename);
+    f_out.createDirectoryForFile();
+    
+    // open the stream to the file
+    out_stream.open( f_out.getFullFileName().c_str(), std::fstream::out );
+    
+    
+    // read file
+    // bool firstLine = true;
+    std::string read_line = "";
+    size_t lines_skipped = 0;
+    size_t lines_to_skip = 0;
+    long   lines_read    = 0;
+    bool   skipped_first = false;
+    
+    size_t ref_index = 0;
+    size_t alt_index = 0;
+    size_t chr_index = 0;
+    size_t pos_index = 0;
+    
+    size_t genome_index = 1;
+    
+    size_t INTERLAVE_LENGTHS = 100;
+    size_t NUM_CHARS_ADDED   = 0;
+
+    std::vector<std::string> tmpChars;
+    bool has_names_been_read = false;
+    size_t samples_start_column = 0;
+    size_t NUM_SAMPLES = 0;
+    
+    std::vector< DiscreteTaxonData<DnaState> > taxa;
+    std::vector< PLOIDY > ploidy_of_sample;
+
+    
+    while (f_in.safeGetline(readStream,read_line))
+    {
+        
+        tmpChars.clear();
+        ++lines_skipped;
+        if ( lines_skipped <= lines_to_skip)
+        {
+            continue;
+        }
+        
+        // skip blank lines
+        std::string::iterator first_nonspace = std::find_if (read_line.begin(), read_line.end(), [](int c) {return not isspace(c);});
+        if (first_nonspace == read_line.end())
+        {
+            continue;
+        }
+
+        StringUtilities::stringSplit(read_line, delimiter, tmpChars, true);
+        
+        // Skip comments.
+        if ( tmpChars[0][0] == '#' && tmpChars[0][1] == '#')
+        {
+            continue;
+        }
+        
+        if ( has_names_been_read == false )
+        {
+            std::vector<std::string> sample_names;
+            const std::vector<std::string> &format_line = tmpChars;
+            while ( format_line[samples_start_column] != "FORMAT" )
+            {
+                ++samples_start_column;
+            };
+            ++samples_start_column;
+            for (size_t j = samples_start_column; j < format_line.size(); ++j)
+            {
+                sample_names.push_back( format_line[j] );
+            }
+            
+            NUM_SAMPLES = sample_names.size();
+
+            size_t num_actual_taxa = 0;
+            if ( ploidy == HAPLOID )
+            {
+                ploidy_of_sample = std::vector< PLOIDY >( NUM_SAMPLES, HAPLOID );
+
+                taxa = std::vector< DiscreteTaxonData<DnaState> >( NUM_SAMPLES, DiscreteTaxonData<DnaState>( Taxon("") ) );
+                for (size_t i=0; i<NUM_SAMPLES; ++i)
+                {
+                    Taxon this_taxon = Taxon( sample_names[i] );
+                    taxa[i] = this_taxon;
+                    ++num_actual_taxa;
+                }
+            }
+            else if ( ploidy == DIPLOID )
+            {
+                ploidy_of_sample = std::vector< PLOIDY >( NUM_SAMPLES, DIPLOID );
+
+                taxa = std::vector< DiscreteTaxonData<DnaState> >( 2*NUM_SAMPLES, DiscreteTaxonData<DnaState>( Taxon("") ) );
+                for (size_t i=0; i<NUM_SAMPLES; ++i)
+                {
+                    Taxon this_taxon_A = Taxon( sample_names[i] + "_A" );
+                    taxa[i] = this_taxon_A;
+                    ++num_actual_taxa;
+                    Taxon this_taxon_B = Taxon( sample_names[i] + "_B" );
+                    taxa[i+NUM_SAMPLES] = this_taxon_B;
+                    ++num_actual_taxa;
+                }
+            }
+            else if ( ploidy == MIXED )
+            {
+                ploidy_of_sample = std::vector< PLOIDY >( NUM_SAMPLES, HAPLOID );
+                
+                // for simplicity of the vector
+                taxa = std::vector< DiscreteTaxonData<DnaState> >( 2*NUM_SAMPLES, DiscreteTaxonData<DnaState>( Taxon("") ) );
+                for (size_t i=0; i<NUM_SAMPLES; ++i)
+                {
+                    size_t taxon_index = input_taxa.size();
+                    for (size_t j=0; j<input_taxa.size(); ++j)
+                    {
+                        if ( input_taxa[j].getName() == sample_names[i] )
+                        {
+                            taxon_index = j;
+                            break;
+                        }
+                    }
+
+                    if ( input_taxa[taxon_index].getPloidy() == "haploid" )
+                    {
+                        ploidy_of_sample[i] = HAPLOID;
+                        
+                        Taxon this_taxon = Taxon( sample_names[i] );
+                        taxa[i] = this_taxon;
+                        ++num_actual_taxa;
+                    }
+                    else if ( input_taxa[taxon_index].getPloidy() == "diploid" )
+                    {
+                        ploidy_of_sample[i] = DIPLOID;
+                        
+                        Taxon this_taxon_A = Taxon( sample_names[i] + "_A" );
+                        taxa[i] = this_taxon_A;
+                        ++num_actual_taxa;
+                        
+                        Taxon this_taxon_B = Taxon( sample_names[i] + "_B" );
+                        taxa[i+NUM_SAMPLES] = this_taxon_B;
+                        ++num_actual_taxa;
+                    }
+                    
+                }
+                
+            }
+            else
+            {
+                throw RbException("Currently we have only implementations for haploid and diploid organisms.");
+            }
+            
+            
+            for (size_t j = 0; j < format_line.size(); ++j)
+            {
+                if ( format_line[j] == "REF" )
+                {
+                    ref_index = j;
+                }
+                if ( format_line[j] == "ALT" )
+                {
+                    alt_index = j;
+                }
+                if ( format_line[j] == "CHROM" || format_line[j] == "#CHROM" )
+                {
+                    chr_index = j;
+                }
+                if ( format_line[j] == "POS" )
+                {
+                    pos_index = j;
+                }
+            }
+            
+            int    num_sites = -1;
+            if (ref_genome != NULL )
+            {
+                num_sites = ref_genome->getNumberOfCharacters();
+            }
+            
+            out_stream << "#NEXUS" << std::endl;
+            out_stream << "" << std::endl;
+            out_stream << "Begin data;" << std::endl;
+            out_stream << "Dimensions ntax=" << num_actual_taxa << " nchar=" << num_sites << ";" << std::endl;
+            out_stream << "Format datatype=DNA missing=? gap=- interleaved;" << std::endl;
+            out_stream << "Matrix" << std::endl;
+            
+            has_names_been_read = true;
+            
+            // skip now
+            continue;
+            
+        } // finished reading the header and species information
+        
+        ++lines_read;
+        if ( skipped_first == false && lines_read > skip_first )
+        {
+            skipped_first = true;
+            lines_read = 0;
+        }
+        
+        if ( skipped_first == true && thinning == lines_read )
+        {
+            
+            const std::string& current_chrom = tmpChars[chr_index];
+            if ( chr != "" && chr != current_chrom )
+            {
+                // skip this side
+                continue;
+            }
+                
+            if ( ref_genome != NULL )
+            {
+                
+                size_t current_pos = StringUtilities::asIntegerNumber( tmpChars[pos_index] );
+                for ( ; genome_index < current_pos; ++genome_index )
+                {
+                    for (size_t sample_index = 0; sample_index < NUM_SAMPLES; ++sample_index)
+                    {
+                        taxa[sample_index].addCharacter( ref_genome->getCharacter( genome_index-1 ) );
+                        if ( ploidy_of_sample[sample_index] == DIPLOID )
+                        {
+                            taxa[sample_index+NUM_SAMPLES].addCharacter( ref_genome->getCharacter( genome_index-1 ) );
+                        }
+                    }
+                    ++NUM_CHARS_ADDED;
+                    if ( NUM_CHARS_ADDED == INTERLAVE_LENGTHS )
+                    {
+                        printSequencesToNexusFile(out_stream, taxa, ploidy_of_sample);
+                        NUM_CHARS_ADDED = 0;
+                    }
+                }
+                ++genome_index;
+                
+            }
+            
+            // reset the lines read so that we can check the thinning again
+            lines_read = 0;
+                        
+            // set the reference character
+            DnaState reference_character = DnaState(tmpChars[ref_index]);
+            
+            // now get the alternative character
+            // there may actually be more than one for non-biallelic sites
+            const std::string& alt_char = tmpChars[alt_index];
+            
+            // we split this string by ','
+            std::vector<std::string> alt_chars;
+            StringUtilities::stringSplit(alt_char, ",", alt_chars);
+            
+            // now create all the alternative characters
+            std::vector<DnaState> alternative_characters;
+            for (size_t j = 0; j < alt_chars.size(); ++j)
+            {
+                alternative_characters.push_back( DnaState( alt_chars[j] ) );
+            }
+            
+            for (size_t sample_index = 0; sample_index < NUM_SAMPLES; ++sample_index)
+            {
+                
+                const std::string &this_char_read = tmpChars[sample_index+samples_start_column];
+                std::vector<std::string> format_tokens;
+                StringUtilities::stringSplit(this_char_read, ":", format_tokens);
+                
+                std::string this_alleles = format_tokens[0];
+                StringUtilities::replaceAllOccurrences(this_alleles, '/', '|');
+                std::vector<std::string> allele_tokens;
+                StringUtilities::stringSplit(this_alleles, "|", allele_tokens);
+                
+                DnaState first_allele = reference_character;
+                // first allele
+                if ( allele_tokens[0] == "0")
+                {
+                    // not necessary because already set this way
+    //                first_allele = reference_character;
+                }
+                else if ( allele_tokens[0] == "." )
+                {
+                    
+                    if ( unkown_treatment == UNKOWN_TREATMENT::MISSING )
+                    {
+                        first_allele = DnaState("?");
+                    }
+                    else if ( unkown_treatment == UNKOWN_TREATMENT::REFERENCE )
+                    {
+                        // not necessary because already set this way
+    //                    first_allele = reference_character;
+                    }
+                    else if ( unkown_treatment == UNKOWN_TREATMENT::ALTERNATIVE )
+                    {
+                        first_allele = alternative_characters[0];
+                    }
+                    
+                }
+                else
+                {
+                    bool found = false;
+                    for (size_t k = 0; k < alternative_characters.size(); ++k )
+                    {
+                        if ( allele_tokens[0] == StringUtilities::toString( k+1 ) )
+                        {
+                            first_allele = alternative_characters[k];
+                            found = true;
+                            break;
+                        }
+                    }
+                    
+                    if ( found == false )
+                    {
+                        throw RbException("Unknown scored character '" + allele_tokens[0] + "'!");
+                    }
+                    
+                }
+                
+                // check if this haploid state is uncertain
+                if ( ploidy_of_sample[sample_index] == HAPLOID && allele_tokens[0] != allele_tokens[1] )
+                {
+                    
+                    for (size_t k = 0; k < alternative_characters.size(); ++k )
+                    {
+                        if ( allele_tokens[1] == StringUtilities::toString( k+1 ) )
+                        {
+                            first_allele.addState( alternative_characters[k].getStringValue() );
+                            break;
+                        }
+                    }
+                }
+                taxa[sample_index].addCharacter( first_allele );
+                
+                if ( ploidy_of_sample[sample_index] == DIPLOID )
+                {
+                 
+                    // second allele
+                    if ( allele_tokens[1] == "0")
+                    {
+                        taxa[sample_index+NUM_SAMPLES].addCharacter( reference_character );
+                    }
+                    else if ( allele_tokens[1] == "." )
+                    {
+                        
+                        if ( unkown_treatment == UNKOWN_TREATMENT::MISSING )
+                        {
+                            taxa[sample_index+NUM_SAMPLES].addCharacter( DnaState("?") );
+                        }
+                        else if ( unkown_treatment == UNKOWN_TREATMENT::REFERENCE )
+                        {
+                            taxa[sample_index+NUM_SAMPLES].addCharacter( reference_character );
+                        }
+                        else if ( unkown_treatment == UNKOWN_TREATMENT::ALTERNATIVE )
+                        {
+                            taxa[sample_index+NUM_SAMPLES].addCharacter( alternative_characters[0] );
+                        }
+                            
+                    }
+                    else
+                    {
+                        
+                        bool found = false;
+                        for (size_t k = 0; k < alternative_characters.size(); ++k )
+                        {
+                            if ( allele_tokens[1] == StringUtilities::toString( k+1 ) )
+                            {
+                                taxa[sample_index+NUM_SAMPLES].addCharacter( alternative_characters[k] );
+                                found = true;
+                                break;
+                            }
+                        }
+                            
+                        if ( found == false )
+                        {
+                            throw RbException("Unknown scored character '" + allele_tokens[1] + "'!");
+                        }
+                        
+                    }
+                }
+                
+            } // end for loop over all samples
+            ++NUM_CHARS_ADDED;
+            
+            if ( NUM_CHARS_ADDED == INTERLAVE_LENGTHS )
+            {
+                printSequencesToNexusFile(out_stream, taxa, ploidy_of_sample);
+                NUM_CHARS_ADDED = 0;
+            }
+        }
+        
+    };
+    
+    if ( ref_genome != NULL )
+    {
+        size_t final_pos = ref_genome->getNumberOfCharacters();
+        for ( ; genome_index <= final_pos; ++genome_index )
+        {
+            for (size_t sample_index = 0; sample_index < NUM_SAMPLES; ++sample_index)
+            {
+                taxa[sample_index].addCharacter( ref_genome->getCharacter( genome_index-1 ) );
+                if ( ploidy_of_sample[sample_index] == DIPLOID )
+                {
+                    taxa[sample_index+NUM_SAMPLES].addCharacter( ref_genome->getCharacter( genome_index-1 ) );
+                }
+            }
+            ++NUM_CHARS_ADDED;
+            
+            if ( NUM_CHARS_ADDED == INTERLAVE_LENGTHS )
+            {
+                printSequencesToNexusFile(out_stream, taxa, ploidy_of_sample);
+                NUM_CHARS_ADDED = 0;
+            }
+        }
+        ++genome_index;
+    }
+    
+    
+    
+    f_in.closeFile( readStream );
+    f_out.closeFile( out_stream );
+
+}
+
+
+
 RbVector<long> VCFReader::convertToSFS(const RbVector<Taxon>& taxa_list )
 {
     // create the SFS object
@@ -1500,3 +1933,37 @@ HomologousDiscreteCharacterData<DnaState>* VCFReader::readDNAMatrix( bool skip_m
     
     return matrix;
 }
+
+
+void VCFReader::printSequencesToNexusFile(std::ofstream &out_stream, std::vector<DiscreteTaxonData<DnaState>> &taxa, const std::vector<PLOIDY> &ploidy_of_sample)
+{
+    size_t num_samples = ploidy_of_sample.size();
+    for ( size_t i = 0; i < num_samples; ++i )
+    {
+        out_stream << taxa[i].getTaxonName() << "   ";
+        DiscreteTaxonData<DnaState>& this_seq = taxa[i];
+        for ( size_t j=0; j<this_seq.getNumberOfCharacters(); ++j )
+        {
+            out_stream << this_seq[j];
+        }
+        this_seq.removeAllCharacters();
+        out_stream << std::endl;
+        
+        if ( ploidy_of_sample[i] == DIPLOID )
+        {
+            
+            out_stream << taxa[i+num_samples].getTaxonName() << "   ";
+            DiscreteTaxonData<DnaState>& this_seq = taxa[i+num_samples];
+            for ( size_t j=0; j<this_seq.getNumberOfCharacters(); ++j )
+            {
+                out_stream << this_seq[j];
+            }
+            this_seq.removeAllCharacters();
+            out_stream << std::endl;
+        }
+
+    }
+    out_stream << std::endl;
+    
+}
+

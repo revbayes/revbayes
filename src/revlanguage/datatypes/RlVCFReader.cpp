@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "RlAbstractDiscreteTaxonData.h"
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Delimiter.h"
@@ -35,7 +36,7 @@ using namespace RevLanguage;
 VCFReader::VCFReader() : WorkspaceToCoreWrapperObject<RevBayesCore::VCFReader>()
 {
     
-    // simulating an SFS
+    // computing stats
     
     ArgumentRules* stats_arg_rules = new ArgumentRules();
     
@@ -43,6 +44,21 @@ VCFReader::VCFReader() : WorkspaceToCoreWrapperObject<RevBayesCore::VCFReader>()
     stats_arg_rules->push_back( new ArgumentRule( "taxa"     , ModelVector<Taxon>::getClassTypeSpec()                     , "The taxa to match the individuals to species/populations.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
 
     methods.addFunction(new MemberProcedure( "computeStatistics", RevNullObject::getClassTypeSpec(), stats_arg_rules) );
+    
+    
+    
+    
+    ArgumentRules* convert_to_nexus_arg_rules = new ArgumentRules();
+    
+    convert_to_nexus_arg_rules->push_back( new ArgumentRule( "file", RlString::getClassTypeSpec(), "Relative or absolute base for the name of the statistics files.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    convert_to_nexus_arg_rules->push_back( new ArgumentRule( "taxa"     , ModelVector<Taxon>::getClassTypeSpec()                     , "The taxa to match the individuals to species/populations.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    convert_to_nexus_arg_rules->push_back( new ArgumentRule( "chrom",       RlString::getClassTypeSpec(), "Name of the chromosome we want to extract. If empty, then all chromosomes are used.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "" ) ) );
+    convert_to_nexus_arg_rules->push_back( new ArgumentRule( "reference",   AbstractDiscreteTaxonData::getClassTypeSpec(), "The reference genome if we want to fill in the characters that are not coded in the VCF file, i.e., if the VCF file only contains SNPs but we need the full sequences.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+
+    convert_to_nexus_arg_rules->push_back( new ArgumentRule( "thinning", Natural::getClassTypeSpec(), "If thinning is larger than 1, then we only take the i-th entry of the VCF.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
+    convert_to_nexus_arg_rules->push_back( new ArgumentRule( "skipFirst", Natural::getClassTypeSpec(), "Skip the first n entries.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
+
+    methods.addFunction(new MemberProcedure( "convertToNexusFile", RevNullObject::getClassTypeSpec(), convert_to_nexus_arg_rules) );
 
     
 }
@@ -106,6 +122,31 @@ RevPtr<RevVariable> VCFReader::executeMethod(std::string const &name, const std:
         const RevBayesCore::RbVector<RevBayesCore::Taxon>& taxa  = static_cast< const ModelVector<Taxon> &>( args[arg_index++].getVariable()->getRevObject() ).getValue();
 
         value->computeMonomorphicVariableStatistics(fn, taxa);
+        
+        return NULL;
+    }
+    else if (name == "convertToNexusFile")
+    {
+        found = true;
+        size_t arg_index = 0;
+        
+        const std::string& fn    = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector<RevBayesCore::Taxon>& taxa  = static_cast< const ModelVector<Taxon> &>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+
+        const std::string& chrom = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+        
+        RevBayesCore::AbstractDiscreteTaxonData* ref_genome = NULL;
+        RevObject& tmp_ref = args[arg_index++].getVariable()->getRevObject();
+        if ( tmp_ref != RevNullObject::getInstance() )
+        {
+            ref_genome = static_cast<const AbstractDiscreteTaxonData&>( tmp_ref ).getValue().clone();
+        }
+
+        
+        long thinning    = static_cast< const Natural&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+        long skip_first  = static_cast< const Natural&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+
+        value->convertToNexusFile( fn, "DNA", chrom, ref_genome, taxa, thinning, skip_first );
         
         return NULL;
     }
