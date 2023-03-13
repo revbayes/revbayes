@@ -22,9 +22,10 @@
 #include "AbstractPhyloCTMCSiteHomogeneous.h"
 
 
-//#define RB_BEAGLE_DEBUG
-//#define RB_BEAGLE_DEBUG_TIP
-#undef RB_BEAGLE_DEBUG
+#define RB_BEAGLE_DEBUG
+#define RB_BEAGLE_DEBUG_TIP
+#define RB_BEAGLE_INFO
+//#undef RB_BEAGLE_DEBUG
 
 
 namespace RevBayesCore
@@ -174,7 +175,6 @@ template<class charType>
 void
 RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( size_t root, size_t left, size_t right )
 {
-    size_t b_model_idx = 0;
 
     //-- Return codes for BEAGLE operations.
     size_t b_ret_code;
@@ -291,10 +291,6 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
                                        1,
                                        BEAGLE_OP_NONE );
 #endif /* RB_BEAGLE_EIGEN */
-
-#if defined ( RB_BEAGLE_DEBUG )
-    ss << "updated partials" << std::endl;
-#endif /* RB_BEAGLE_DEBUG */
     
     if ( b_ret_code != 0 )
     {
@@ -309,32 +305,22 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
 
     //-- BEAGLE model parameters.
     int     b_parentBufferIndices     = (int) root_idx;
-    int     b_childBufferIndices      = left_partials;
-    int     b_probabilityIndices      = left_idx;
-    int*    b_firstDerivativeIndices  = NULL;
-    int*    b_secondDerivativeIndices = NULL;
     int*    b_categoryWeightsIndices  = &categoryIndicesASRV[0];
     int     b_stateFrequenciesIndices = 0; //(int) model;  //0;
     int     b_cumulativeScaleIndices  = BEAGLE_OP_NONE;
     int     b_count                   = 1;
     double  b_outSumLogLikelihood     = std::numeric_limits<double>::min();
-    double* b_outSumFirstDerivative   = NULL;
-    double* b_outSumSecondDerivative  = NULL;
+    
+    b_ret_code = beagleCalculateRootLogLikelihoods( this->beagle_instance->getResourceID(),
+                                                   &b_parentBufferIndices,
+                                                   b_categoryWeightsIndices,
+                                                   &b_stateFrequenciesIndices,
+                                                   &b_cumulativeScaleIndices,
+                                                   b_count,
+                                                   &b_outSumLogLikelihood );
 
-    //-- Calclulate the lnLikelihood of the model
-    b_ret_code = beagleCalculateEdgeLogLikelihoods( this->beagle_instance->getResourceID(),
-                                                    &b_parentBufferIndices,
-                                                    &b_childBufferIndices,
-                                                    &b_probabilityIndices,
-                                                    b_firstDerivativeIndices,
-                                                    b_secondDerivativeIndices,
-                                                    b_categoryWeightsIndices,
-                                                    &b_stateFrequenciesIndices,
-                                                    &b_cumulativeScaleIndices,
-                                                    b_count,
-                                                    &b_outSumLogLikelihood,
-                                                    b_outSumFirstDerivative,
-                                                    b_outSumSecondDerivative );
+    std::cerr << "Root("<< root_idx << ") = " << b_outSumLogLikelihood << std::endl;
+    
     if (b_ret_code != 0)
     {
         throw RbException("Could not calculate edge log likelihood for models '" +
@@ -344,10 +330,6 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
     //this->ln_beagle_probability = b_outSumLogLikelihood;
     this->beagle_instance->setStoredLnLikelihood(b_outSumLogLikelihood);
     
-
-#if defined ( RB_BEAGLE_DEBUG )
-    RBOUT(ss.str());
-#endif /* RB_BEAGLE_DEBUG */
 }
 
 
@@ -386,20 +368,6 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
 #else
     std::vector<int> categoryIndicesASRV;
 #endif
-    
-    //-- Configure BEAGLE model parameters.
-    int      b_parentBufferIndices     = (int) root_idx;
-    int      b_childBufferIndices      = (int) mid_partials;
-    int      b_probabilityIndices      = (int) mid_idx;
-    int *    b_firstDerivativeIndices  = NULL;
-    int *    b_secondDerivativeIndices = NULL;
-    int *    b_categoryWeightsIndices  = &categoryIndicesASRV[0];
-    int      b_stateFrequenciesIndices = 0; //(int) model;  //0;
-    int      b_cumulativeScaleIndices  = BEAGLE_OP_NONE;
-    int      b_count                   = 1;
-    double   b_outSumLogLikelihood     = std::numeric_limits<double>::min();
-    double * b_outSumFirstDerivative   = NULL;
-    double * b_outSumSecondDerivative  = NULL;
 
     //-- Create BEAGLE operation.
     BeagleOperation b_operation =
@@ -501,6 +469,20 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
     this->b_ops.clear();
     this->b_branch_lengths.clear();
     this->b_node_indices.clear();
+    
+    //-- Configure BEAGLE model parameters.
+    int      b_parentBufferIndices     = (int) root_idx;
+    int      b_childBufferIndices      = (int) mid_partials;
+    int      b_probabilityIndices      = (int) mid_idx;
+    int *    b_firstDerivativeIndices  = NULL;
+    int *    b_secondDerivativeIndices = NULL;
+    int *    b_categoryWeightsIndices  = &categoryIndicesASRV[0];
+    int      b_stateFrequenciesIndices = 0; //(int) model;  //0;
+    int      b_cumulativeScaleIndices  = BEAGLE_OP_NONE;
+    int      b_count                   = 1;
+    double   b_outSumLogLikelihood     = std::numeric_limits<double>::min();
+    double * b_outSumFirstDerivative   = NULL;
+    double * b_outSumSecondDerivative  = NULL;
 
     //-- Calclulate the lnLikelihood of the model
     b_ret_code = beagleCalculateEdgeLogLikelihoods(
