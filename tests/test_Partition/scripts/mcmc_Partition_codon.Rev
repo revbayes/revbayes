@@ -8,7 +8,7 @@
 ################################################################################
 
 
-seed(12345)
+seed(1234)
 
 #######################
 # Reading in the Data #
@@ -51,22 +51,22 @@ mni = 0
 #      Substitution Model        #
 #   Loop over each data subset   #
 ##################################
-  
+
 for (i in 1:n_data_subsets) {
 
     # exchangeability rates for partition i
     er_prior[i] <- v(1,1,1,1,1,1)
     er[i] ~ dnDirichlet(er_prior[i])
-    moves[++mvi] = mvSimplexElementScale(er[i], alpha=10, tune=true, weight=3) 
+    moves[++mvi] = mvSimplexElementScale(er[i], alpha=10, tune=true, weight=3)
 
     # stationary frequencies for partition i
     pi_prior[i] <- v(1,1,1,1)
     pi[i] ~ dnDirichlet(pi_prior[i])
-    moves[++mvi] = mvSimplexElementScale(pi[i], alpha=10, tune=true, weight=2) 
+    moves[++mvi] = mvSimplexElementScale(pi[i], alpha=10, tune=true, weight=2)
 
     # rate matrix for partition i
-    Q[i] := fnGTR(er[i],pi[i]) 
-  
+    Q[i] := fnGTR(er[i],pi[i])
+
     # +Gamma for partition i
     alpha_prior_mean[i] <- 5.0
     alpha_prior_sd[i] <- 0.587405
@@ -114,7 +114,7 @@ part_rate_mult ~ dnDirichlet( rep(1.0, n_data_subsets) )
 moves[++mvi] = mvBetaSimplex(part_rate_mult, alpha=1.0, tune=true, weight=n_data_subsets)
 moves[++mvi] = mvDirichletSimplex(part_rate_mult, alpha=1.0, tune=true, weight=2.0)
 
-# note that we use here a vector multiplication, 
+# note that we use here a vector multiplication,
 # i.e., multiplying each element of part_rate_mult by n_data_subsets
 part_rate := part_rate_mult * n_data_subsets
 
@@ -137,7 +137,7 @@ for (i in 1:n_data_subsets) {
 mymodel = model(psi)
 
 # add monitors
-monitors[++mni] = mnModel(filename="output/PS_codon.log",printgen=10)
+monitors[++mni] = mnModel(filename="output/PS_codon.log",printgen=1)
 monitors[++mni] = mnFile(psi, filename="output/PS_codon.trees", printgen=100)
 monitors[++mni] = mnScreen(TL, printgen=1000)
 
