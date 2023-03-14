@@ -219,7 +219,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
     this->b_ops.push_back(b_operation);
     this->b_node_indices.push_back(root_idx);
 
-#if defined ( RB_BEAGLE_EIGEN )
+#if defined ( RB_USE_EIGEN3 )
     //-- Update Eigensystem BEAGLE buffers
     this->updateBeagleEigensystems();  // TODO should be in abstract class
 
@@ -290,7 +290,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
                                        &b_operation,
                                        1,
                                        BEAGLE_OP_NONE );
-#endif /* RB_BEAGLE_EIGEN */
+#endif /* RB_USE_EIGEN3 */
     
     if ( b_ret_code != 0 )
     {
@@ -318,8 +318,6 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
                                                    &b_cumulativeScaleIndices,
                                                    b_count,
                                                    &b_outSumLogLikelihood );
-
-    std::cerr << "Root("<< root_idx << ") = " << b_outSumLogLikelihood << std::endl;
     
     if (b_ret_code != 0)
     {
@@ -457,7 +455,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
                                        &b_operation,
                                        1,
                                        BEAGLE_OP_NONE );
-#endif //-- RB_BEAGLE_EIGEN
+#endif //-- RB_USE_EIGEN3
 
     if ( b_ret_code != 0 )
     {
@@ -567,7 +565,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikel
                           &b_operation,
                           1,
                           BEAGLE_OP_NONE );
-#endif //-- !RB_BEAGLE_EIGEN
+#endif //-- !RB_USE_EIGEN3
 }
 
 
@@ -610,7 +608,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikel
     this->b_node_indices.push_back(node_idx);
     this->b_branch_lengths.push_back(branch_length);
 
-#if !defined ( RB_BEAGLE_EIGEN )
+#if !defined ( RB_USE_EIGEN3 )
     //-- If we are not using the eigensystem, we will need to update and set the
     //   transition probability matrices.
 
@@ -629,7 +627,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikel
                           &b_operation,
                           1,
                           BEAGLE_OP_NONE );
-#endif //-- RB_BEAGLE_EIGEN 
+#endif //-- RB_USE_EIGEN3
 
 }
 
@@ -662,7 +660,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeTipLikelihood
                                (int) b_node_idx,
                                b_tp_begin,
                                1.0 );
-#endif //-- !RB_BEAGLE_EIGEN 
+#endif //-- !RB_USE_EIGEN3
 }
 
 
