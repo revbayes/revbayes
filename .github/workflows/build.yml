@@ -267,7 +267,10 @@ jobs:
         echo "\"Hello World\"" | rb
         echo ::group::Test suite
         cd tests
-        ./run_integration_tests.sh -mpi ${USE_MPI} -windows ${IS_WINDOWS} rb
+        if [ ${{ matrix.beagle }} = true ] ; then
+           RB_ARGS="--setOption useBeagle=true --setOption beagleDevice=cpu_sse"
+        fi
+        ./run_integration_tests.sh -mpi ${USE_MPI} -windows ${IS_WINDOWS} rb $RB_ARGS
         cd
         echo ::endgroup::
         echo ::group::testiphy
