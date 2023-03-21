@@ -32,6 +32,7 @@
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "RlBoolean.h"
+#include "RlUserInterface.h"
 #include "RlUtils.h"
 #include "Trace.h"
 #include "WorkspaceToCoreWrapperObject.h"
@@ -95,7 +96,15 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
         size_t args_index = 0;
         
         RevBayesCore::RbVector<RevBayesCore::StoppingRule> rules;
-        int gen = (int)static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue() + currentGen;
+        int gen = (int)static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        bool add_gen = static_cast<const RlBoolean &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        if (add_gen == true)
+        {
+            gen +=currentGen;
+        } else if (currentGen >= gen) {
+            RBOUT("The analysis has already reached the specified number of generations so nothing to run.");
+            return NULL;
+        }
         rules.push_back( RevBayesCore::MaxIterationStoppingRule(gen) );
         
         // get the member with given index
@@ -270,6 +279,7 @@ void MonteCarloAnalysis::initializeMethods()
     
     ArgumentRules* run_arg_rules = new ArgumentRules();
     run_arg_rules->push_back( new ArgumentRule( "generations", Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    run_arg_rules->push_back( new ArgumentRule( "addGenerations" , RlBoolean::getClassTypeSpec(), "Should the specified number of generations be added on top of the current generations?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
     run_arg_rules->push_back( new ArgumentRule( "rules", WorkspaceVector<StoppingRule>::getClassTypeSpec(), "The rules when to automatically stop the run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
     run_arg_rules->push_back( new ArgumentRule( "tuningInterval", Natural::getClassTypeSpec(), "The interval when to update the tuning parameters of the moves.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L)  ) );
     run_arg_rules->push_back( new ArgumentRule( "tuningDelayGenerations", Natural::getClassTypeSpec(), "The number of generations before which the moves will not be tuned.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L)  ) );
@@ -280,7 +290,7 @@ void MonteCarloAnalysis::initializeMethods()
     methods.addFunction( new MemberProcedure( "run", RlUtils::Void, run_arg_rules) );
     
     ArgumentRules* burninArgRules = new ArgumentRules();
-    burninArgRules->push_back( new ArgumentRule( "generations"   , Natural::getClassTypeSpec(), "The number of generation to run this burnin simulation.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
+    burninArgRules->push_back( new ArgumentRule( "generations"   , Natural::getClassTypeSpec(), "The number of generations to run this burnin simulation.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
     burninArgRules->push_back( new ArgumentRule( "tuningInterval", Natural::getClassTypeSpec(), "The interval when to update the tuning parameters of the moves.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
     burninArgRules->push_back( new ArgumentRule( "underPrior" , RlBoolean::getClassTypeSpec(), "Should we run this analysis under the prior only?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
     
