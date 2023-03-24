@@ -39,7 +39,7 @@ AbstractMultispeciesCoalescentGenewise::AbstractMultispeciesCoalescentGenewise(c
     addParameter( species_tree );
 
     // Get num_taxa for all gene trees
-    for (size_t i; i<num_gene_trees; ++i)
+    for (size_t i=0; i<num_gene_trees; ++i)
     {
         num_taxa.push_back( taxa[i].size() );
     }
@@ -48,29 +48,22 @@ AbstractMultispeciesCoalescentGenewise::AbstractMultispeciesCoalescentGenewise(c
     std::vector< std::set<std::string> > species_names;
     for (size_t i=0; i<num_gene_trees; ++i)
     {
-        //for (std::set<Taxon>::iterator it=taxa[i].begin(); it!=taxa[i].end(); ++it)
-        //
-        // for (RevBayesCore::RbIterator<RevBayesCore::Taxon> it=taxa[i]->getValue().begin(); it!=taxa[i]->getValue().end(); ++it)
-        // {
-        //     gene2species[it->getName()] = it->getSpeciesName();
-        // }
+        std::set<std::string> sn;
 
-        //for (size_t j=0; j < taxa[i].size(); j++)
         for (RevBayesCore::RbIterator<RevBayesCore::Taxon> it=taxa[i].begin(); it!=taxa[i].end(); ++it)
-
         {
-            //std::set<Taxon>::iterator it;
-
-            species_names[i].insert( it->getSpeciesName() );
+            std::cout << it->getSpeciesName() << std::endl;
+            sn.insert( it->getSpeciesName() );
         }
+
+        species_names.push_back( sn );
     }
 
     // Get combinatorial topology probs
-    std::vector<double> ln_fact;
     for (size_t i=0; i<num_gene_trees; ++i)
     {
-        ln_fact[i] = RbMath::lnFactorial((int)(num_taxa[i]));
-        log_tree_topology_prob[i] = (num_taxa[i] - 1) * RbConstants::LN2 - 2.0 * ln_fact[i] - std::log( num_taxa[i] ) ;
+        double ln_fact = RbMath::lnFactorial((int)(num_taxa[i]));
+        log_tree_topology_prob += (num_taxa[i] - 1) * RbConstants::LN2 - 2.0 * ln_fact - std::log( num_taxa[i] ) ;
     }
 
     redrawValue();

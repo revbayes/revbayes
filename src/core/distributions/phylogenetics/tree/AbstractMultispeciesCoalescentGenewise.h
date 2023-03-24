@@ -44,7 +44,7 @@ namespace RevBayesCore {
         const TypedDagNode<Tree>*                                           species_tree;               //!< The species tree
         size_t                                                              num_species;                //!< The number of tips in the species tree
         std::vector<size_t>                                                 num_taxa;                   //!< A vector holding the number of tips for each gene tree
-        std::vector<double>                                                 log_tree_topology_prob;     //!< Combinatorial topology prob for species tree
+        double                                                              log_tree_topology_prob;     //!< Combinatorial topology prob for species tree
         size_t                                                              num_gene_trees;             //!< Number of genes/gene trees
         std::vector<Tree* >*                                                gene_trees;                 //!< A vector holding all gene trees embedded in the species tree
 
