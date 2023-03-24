@@ -36,7 +36,7 @@ namespace RevBayesCore {
         virtual double                                      drawNe(size_t index);
 
         // helper functions
-        // void                                                attachTimes(Tree *psi, std::vector<TopologyNode *> &tips, size_t index, const std::vector<double> &times);
+        void                                                attachTimes(std::vector<Tree*> psi, std::vector< std::vector<TopologyNode *> > &tips, size_t index, const std::vector< std::vector<double> > &times);
         // void                                                buildRandomBinaryTree(std::vector<TopologyNode *> &tips);
         double                                              recursivelyComputeLnProbability(const TopologyNode &n);
         void                                                resetTipAllocations(void);
