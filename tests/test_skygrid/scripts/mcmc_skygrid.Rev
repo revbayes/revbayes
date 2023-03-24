@@ -1,0 +1,69 @@
+################################################################################
+#
+# RevBayes Script: Bayesian inference of coalescent skygrid model with 100
+#                   changepoints, aka a first-order GMRF model
+#
+#
+# authors: Andrew Magee
+#
+################################################################################
+seed(8472)
+
+mvi = 0
+num_taxa = 100
+
+# Simulate tree
+
+# Some old taxa
+for (i in 1:50) {
+  taxa[i] = taxon("t" + i, age=runif(1,0,10)[1])
+}
+
+# Some current taxa
+for (i in 51:num_taxa) {
+  taxa[i] = taxon("t" + i)
+}
+
+psi <- rHeterochronousCoalescent(theta=100,taxa=taxa)[1]
+
+# Coalescent tree model
+
+# Get some useful variables from the data. We need these later on.
+root_height <- psi.rootAge()
+
+# set my move index
+
+# set number of diversification regimes
+NUM_INTERVALS = 100
+interval_times <- (root_height * seq(1/NUM_INTERVALS,1-(1/NUM_INTERVALS),1/NUM_INTERVALS))
+
+skygrid_zeta <- 0.011
+skygrid_sd ~ dnHalfCauchy(0,1)
+skygrid_sd.setValue(1)
+
+log_Ne_1 ~ dnNormal(0,10)
+log_Ne_1.setValue(0)
+Ne[1] := exp(log_Ne_1)
+for (i in 1:(NUM_INTERVALS-1)) {
+  delta_log_Ne[i] ~ dnNormal(0,skygrid_sd*skygrid_zeta)
+  delta_log_Ne[i].setValue(0.1)
+  Ne[i+1] := Ne[i] * exp(delta_log_Ne[i])
+}
+
+moves[++mvi] = mvGMRFHyperpriorGibbs(skygrid_sd,delta_log_Ne,skygrid_zeta,weight=5)
+moves[++mvi] = mvEllipticalSliceSamplingSimple(delta_log_Ne,weight=5)
+
+timetree ~ dnHeterochronousCoalescentSkyline(theta=Ne,times=interval_times,taxa=taxa)
+timetree.clamp(psi)
+
+mymodel = model(timetree)
+
+monitors[1] = mnScreen(printgen=10)
+monitors[2] = mnModel(printgen=5,file="output/skygrid.log")
+
+mymcmc = mcmc(mymodel,monitors,moves)
+
+mymcmc.burnin(100,10)
+mymcmc.run(100)
+
+q()
