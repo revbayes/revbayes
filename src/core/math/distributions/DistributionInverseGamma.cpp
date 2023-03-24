@@ -31,8 +31,9 @@ using namespace RevBayesCore;
  */
 double RbStatistics::InverseGamma::pdf(double shape, double rate, double x)
 {
-    
-	return (pow(rate, shape) / RbMath::gamma(shape)) * pow(x, -(shape + 1.0)) * exp(-rate / x);
+	double scale = 1.0 / rate;
+	return (pow(scale, shape) / RbMath::gamma(shape)) * pow(x, -(shape + 1.0)) * exp(-scale / x);
+	//return (pow(rate, shape) / RbMath::gamma(shape)) * pow(x, -(shape + 1.0)) * exp(-rate / x);
 }
 
 
@@ -49,7 +50,7 @@ double RbStatistics::InverseGamma::pdf(double shape, double rate, double x)
  */
 double RbStatistics::InverseGamma::pdf(double shape, double rate, double x, bool isLog)
 {
-    
+
     //    double pr;
     //    if (shape < 0 || rate <= 0) {
     //        std::ostringstream s;
@@ -76,7 +77,7 @@ double RbStatistics::InverseGamma::pdf(double shape, double rate, double x, bool
     // /* else  shape >= 1 */
     // pr = RbStatistics::Poisson::pdf(shape-1, x/rate, isLog);
     // return isLog ? pr - log(rate) : pr/rate;
-    
+
     return isLog ? pdf(shape, rate, exp(x)) : pdf(shape, rate, x);
 }
 
@@ -111,6 +112,12 @@ double RbStatistics::InverseGamma::lnPdf(double shape, double rate, double x)
 double RbStatistics::InverseGamma::cdf(double shape, double rate, double x)
 {
     return RbMath::incompleteGamma( rate/x, shape, true, false );
+    
+    // old code from hsiang_dev; not sure which one works better (SH)
+//	double scale = 1.0 / rate;
+//	double lower_incomplete_gamma = RbMath::incompleteGamma( scale/x, shape, RbMath::lnGamma(shape) );
+//
+//    return 1.0 - lower_incomplete_gamma;
 }
 
 /*!
@@ -129,7 +136,7 @@ double RbStatistics::InverseGamma::quantile(double shape, double rate, double p)
     throw RbException("The quantile function of the inverse gamma distribution is not implemented yet!");
     // NOT IMPLEMENTED...
     return 0.0;
-    
+
 	return RbStatistics::ChiSquare::quantile(p, 2.0 * shape) / (2.0 * rate);
     //	return RbStatistics::Helper::pointChi2(p, 2.0 * shape) / (2.0 * rate);
 }
@@ -137,7 +144,5 @@ double RbStatistics::InverseGamma::quantile(double shape, double rate, double p)
 
 double RbStatistics::InverseGamma::rv(double shape, double rate, RandomNumberGenerator& rng)
 {
-    
 	return (1.0 / (RbStatistics::Helper::rndGamma(shape, rng) * rate) );
 }
-

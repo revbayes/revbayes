@@ -45,9 +45,11 @@ double MultispeciesCoalescent::computeLnCoalescentProbability(size_t k, const st
 
     double theta = 2.0 / getNe( index );
 
-    // std::cout << "----------------\nstart age: " << begin_age << std::endl;
-    // std::cout << "end age: " << end_age << std::endl;
-    // std::cout << "N: " << getNe(index) << std::endl;
+    // if (index == 0) {
+    //     std::cout << "----------------\nstart age: " << begin_age << std::endl;
+    //     std::cout << "end age: " << end_age << std::endl;
+    //     std::cout << "N: " << getNe(index) << std::endl;
+    // }
 
     double ln_prob_coal = 0;
     double current_time = begin_age;
