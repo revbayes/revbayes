@@ -86,28 +86,7 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
 
     if ( nc == 2 )
     {
-        double ngc = getNumberOfGeneCopies();
-        double integral_limit = 2 * fn / theta_max;
-
-        // std::cout << "fn total: " << fn << std::endl;
-        // std::cout << "ngc: " << ngc << std::endl;
-        // std::cout << "integral limit: " << integral_limit << std::endl;
-
-        double upper_incomplete_gamma = 0.0;
-        if ( ngc <= 2 )
-        {
-            upper_incomplete_gamma = recursiveIncompleteGamma( ngc-2.0, integral_limit );
-        }
-        else
-        {
-            upper_incomplete_gamma = RbMath::incompleteGamma( integral_limit, ngc-2.0, false, false );
-        }
-
-        ln_prob_coal += RbConstants::LN2 + (( -ngc+2 ) * log( fn )) + log( upper_incomplete_gamma ) - log( theta_max );
-
-        // Remember to reset the total coalescent rate so that we don't just keep adding to it
-        // because we're now done with it for this particular gene tree
-        resetFn();
+        upper_incomplete_gamma = recursiveIncompleteGamma( nc-2.0, integral_limit );
     }
     else
     {
