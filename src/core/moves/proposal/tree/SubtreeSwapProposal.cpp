@@ -97,21 +97,11 @@ bool SubtreeSwapProposal::isDescendant(const TopologyNode &n, const TopologyNode
  */
 double SubtreeSwapProposal::doProposal( void )
 {
-    // reset flag
-    failed = false;
     
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
     Tree& tau = tree->getValue();
-    
-    size_t num_tips = tau.getNumberOfTips();
-    size_t num_root_children = tau.getRoot().getNumberOfChildren();
-    if ( num_tips <= num_root_children)
-    {
-        failed = true;
-        return RbConstants::Double::neginf;
-    }
     
     // pick two random nodes which
     // 1. are not the root
@@ -184,11 +174,6 @@ void SubtreeSwapProposal::printParameterSummary(std::ostream &o, bool name_only)
  */
 void SubtreeSwapProposal::undoProposal( void )
 {
-    // we undo the proposal only if it didn't fail
-    if ( failed == true )
-    {
-        return;
-    }
     
     // undo the proposal
     TopologyNode& first_parent  = stored_first_node->getParent();
