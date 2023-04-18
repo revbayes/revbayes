@@ -1,3 +1,4 @@
+#ifndef RbFileManager_H
 #define RbFileManager_H
 
 #include <fstream>
