@@ -92,13 +92,16 @@ for t in test_*; do
     cd $t
 
     rm -rf output data
+    mkdir output
     ln -s ../data data
 
     res=0
     # run the test scripts
     for f in scripts/*; do
-        ${rb_exec} -b $f # print output so we can see any error messages
-        res="$?"
+        out=output/$(basename $f).out
+        ${rb_exec} < $f 2>&1 | tee $out  # print and save output so we can check error messages
+        res="${PIPESTATUS[0]}"
+        sed -i -n '/^To quit/,$p' $out   # drop lines before "To quit Revbayes ..."
         if [ $res = 1 ]; then
             res="error: $f"
             break
