@@ -53,29 +53,27 @@ RevPtr<RevVariable> Func_readAncestralStateTreeTrace::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    const std::string&  fn       = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path fn        = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
     const std::string&  treetype = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
     const std::string&  sep      = static_cast<const RlString&>( args[2].getVariable()->getRevObject() ).getValue();
     
     // check that the file/path name has been correctly specified
-    RevBayesCore::RbFileManager myFileManager( fn );
-    
-    if ( !myFileManager.testFile() || !myFileManager.testDirectory() )
+    if ( not RevBayesCore::exists( fn ))
     {
         std::string errorStr = "";
-        myFileManager.formatError(errorStr);
+        RevBayesCore::formatError(fn, errorStr);
         throw RbException(errorStr);
     }
     
     // set up a vector of strings containing the name or names of the files to be read
-    std::vector<std::string> vectorOfFileNames;
-    if ( myFileManager.isFile() )
+    std::vector<RevBayesCore::path> vectorOfFileNames;
+    if (RevBayesCore::is_directory(fn))
     {
-        vectorOfFileNames.push_back( myFileManager.getFullFileName() );
+        RevBayesCore::setStringWithNamesOfFilesInDirectory( fn, vectorOfFileNames );
     }
     else
     {
-        myFileManager.setStringWithNamesOfFilesInDirectory( vectorOfFileNames );
+        vectorOfFileNames.push_back( fn );
     }
     
     TraceTree *rv;
@@ -193,33 +191,25 @@ const TypeSpec& Func_readAncestralStateTreeTrace::getReturnType( void ) const
 }
 
 
-TraceTree* Func_readAncestralStateTreeTrace::readBranchLengthTrees(const std::vector<std::string> &vectorOfFileNames, const std::string &delimiter)
+TraceTree* Func_readAncestralStateTreeTrace::readBranchLengthTrees(const std::vector<RevBayesCore::path> &vectorOfFileNames, const std::string &delimiter)
 {
     
     
     std::vector<RevBayesCore::TraceTree> data;
     
-    
-    // Set up a map with the file name to be read as the key and the file type as the value. Note that we may not
-    // read all of the files in the string called "vectorOfFileNames" because some of them may not be in a format
-    // that can be read.
-    std::map<std::string,std::string> fileMap;
-    for (std::vector<std::string>::const_iterator p = vectorOfFileNames.begin(); p != vectorOfFileNames.end(); p++)
+    for (auto& fn : vectorOfFileNames)
     {
         bool hasHeaderBeenRead = false;
-        const std::string &fn = *p;
-        
-        RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(fn);
         
         /* Open file */
-        std::ifstream inFile( fm.getFullFileName().c_str() );
+        std::ifstream inFile( fn.string() );
         
         if ( !inFile )
-            throw RbException( "Could not open file \"" + fn + "\"" );
+            throw RbException()<< "Could not open file "<<fn;
         
         /* Initialize */
         std::string commandLine;
-        std::cout << "Processing file \"" << fn << "\"" << std::endl;
+        std::cout << "Processing file " << fn << std::endl;
         
         size_t index = 0;
         
@@ -231,8 +221,7 @@ TraceTree* Func_readAncestralStateTreeTrace::readBranchLengthTrees(const std::ve
             
             // Read a line
             std::string line;
-            RevBayesCore::RbFileManager reader = RevBayesCore::RbFileManager();
-            reader.safeGetline(inFile, line);
+            RevBayesCore::safeGetline(inFile, line);
             
             // skip empty lines
             //line = StringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
@@ -291,28 +280,20 @@ TraceTree* Func_readAncestralStateTreeTrace::readBranchLengthTrees(const std::ve
 }
 
 
-TraceTree* Func_readAncestralStateTreeTrace::readTimeTrees(const std::vector<std::string> &vectorOfFileNames, const std::string &delimiter) {
+TraceTree* Func_readAncestralStateTreeTrace::readTimeTrees(const std::vector<RevBayesCore::path> &vectorOfFileNames, const std::string &delimiter) {
     
     
     std::vector<RevBayesCore::TraceTree> data;
     
-    
-    // Set up a map with the file name to be read as the key and the file type as the value. Note that we may not
-    // read all of the files in the string called "vectorOfFileNames" because some of them may not be in a format
-    // that can be read.
-    std::map<std::string,std::string> fileMap;
-    for (std::vector<std::string>::const_iterator p = vectorOfFileNames.begin(); p != vectorOfFileNames.end(); p++)
+    for (auto& fn: vectorOfFileNames)
     {
         bool hasHeaderBeenRead = false;
-        const std::string &fn = *p;
-        
-        RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(fn);
         
         /* Open file */
-        std::ifstream inFile( fm.getFullFileName().c_str() );
+        std::ifstream inFile( fn.string() );
         
         if ( !inFile )
-            throw RbException( "Could not open file \"" + fn + "\"" );
+            throw RbException()<<"Could not open file "<<fn;
         
         /* Initialize */
         std::string commandLine;
@@ -326,8 +307,7 @@ TraceTree* Func_readAncestralStateTreeTrace::readTimeTrees(const std::vector<std
             
             // Read a line
             std::string line;
-            RevBayesCore::RbFileManager reader = RevBayesCore::RbFileManager();
-            reader.safeGetline(inFile, line);
+            RevBayesCore::safeGetline(inFile, line);
             
             // skip empty lines
             //line = StringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];

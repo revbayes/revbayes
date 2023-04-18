@@ -7,22 +7,17 @@ using namespace RevLanguage;
 Module::Module(const std::string &fn)
 {
     // first we need to load the file
-    std::ifstream readStream;
-    RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(fn);
-    fm.openFile( readStream );
+    std::ifstream readStream(fn);
     
     /* File-processing loop */
     while ( readStream.good() )
     {
-        
         // Read a line
         std::string line;
-        fm.safeGetline(readStream, line);
+        RevBayesCore::safeGetline(readStream, line);
         
         commandLines.push_back( line );
-        
     }
-
 }
 
 

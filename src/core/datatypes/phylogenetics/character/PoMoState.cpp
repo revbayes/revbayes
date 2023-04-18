@@ -179,7 +179,7 @@ void PoMoState::setState(const std::string &symbol)
     if ( count == 1 ) // monoallelic state
     {
         index = id1 ; //+ 1;
-        state.clear();
+        state.reset();
         state.set(id1);
         populateWeightedStatesForMonoallelicState(id1, sum);
     }
@@ -200,7 +200,7 @@ void PoMoState::setState(const std::string &symbol)
         
         std::cout << "basicIndex: "<<basicIndex <<std::endl;
         
-        state.clear();
+        state.reset();
         // index corresponds to the closest place where the pomo state is.
         // In case the virtual population size is inferior to the counts in the state, or the reverse,
         // we have to do some maths.
@@ -408,7 +408,7 @@ void PoMoState::setToFirstState(void)
 {
     num_observed_states = 1;
     index_single_state = 0;
-    state.clear();
+    state.reset();
     state.set( 0 );
 }
 
@@ -418,6 +418,21 @@ void PoMoState::setStateByIndex(size_t index)
     
     num_observed_states = 1;
     index_single_state = index;
-    state.clear();
+    state.reset();
     state.set( index );
+}
+
+const std::vector<double>& PoMoState::getWeights( void ) const
+{
+    return weights;
+}
+
+bool PoMoState::isWeighted( void ) const
+{
+    return weighted;
+}
+
+void PoMoState::setWeighted( bool tf )
+{
+    weighted = tf;
 }

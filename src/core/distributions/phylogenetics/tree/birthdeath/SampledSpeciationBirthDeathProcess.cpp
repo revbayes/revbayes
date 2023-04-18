@@ -629,7 +629,8 @@ void SampledSpeciationBirthDeathProcess::simulateTree( void )
             std::vector<size_t> taxon_idx;
             for (size_t i = 0; i < taxa.size(); i++)
                 taxon_idx.push_back(i);
-            std::random_shuffle(taxon_idx.begin(), taxon_idx.end());
+
+            deprecated::random_shuffle(taxon_idx.begin(), taxon_idx.end());
             
             // Set names for terminal taxa
             for (size_t i = 0; i < taxa.size(); i++)

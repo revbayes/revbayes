@@ -44,7 +44,7 @@ namespace RevBayesCore {
         
         // methods of the Serializable interface
         virtual void                                initFromString( const std::string &s ) = 0;                                 //!< Serialize (resurrect) the object from a string value
-        virtual void                                writeToFile(const std::string &dir, const std::string &fn) const = 0;
+        virtual void                                writeToFile(const path &dir, const std::string &fn) const = 0;
 
         // public functions
         void                                        addMissingTaxon(const std::string &n);                                      //!< Add taxon data
@@ -54,8 +54,7 @@ namespace RevBayesCore {
         void                                        excludeTaxon(const std::string& s);                                         //!< Exclude taxon
         void                                        deleteTaxon(size_t i);                                                      //!< Remove taxon
         void                                        deleteTaxon(const std::string& s);                                          //!< Remove taxon
-        const std::string&                          getFileName(void) const;                                                    //!< Returns the name of the file the data came from
-        const std::string&                          getFilePath(void) const;                                                    //!< Returns the name of the file path
+        const path&                                 getFilename(void) const;                                                    //!< Returns the name of the file the data came from
         std::vector<Taxon>                          getIncludedTaxa(void) const;                                                //!< Get the names of the taxa
         size_t                                      getIndexOfTaxon(const std::string &n) const;                                //!< Get the index of the taxon with name 'n'.
         const std::map<std::string, std::string >   getHomeologMap();
@@ -80,8 +79,7 @@ namespace RevBayesCore {
         bool                                        isTaxonExcluded(const std::string& s) const;                                //!< Is the taxon excluded
         void                                        restoreTaxon(size_t i);                                                     //!< Restore taxon
         void                                        restoreTaxon(const std::string& s);                                         //!< Restore taxon
-        void                                        setFileName(const std::string &fn);                                         //!< Set the file name
-        void                                        setFilePath(const std::string &fn);                                         //!< Set the file path
+        void                                        setFilename(const path&fn);                                                 //!< Set the file name
         void                                        setHomeologPhase(const std::string& dataName, const std::string& tipName);  //!< Assign homeolog character data to a tip 
         void                                        setTaxonName(const std::string& currentName, const std::string& newName);   //!< Change the name of a taxon
         void                                        setTaxonObject(const std::string& currentName, const Taxon& new_taxon);     //!< Change the name of a taxon
@@ -101,8 +99,7 @@ namespace RevBayesCore {
         
         // Member variables
         std::set<size_t>                            deletedTaxa;                                                                //!< Set of deleted taxa
-        std::string                                 fileName;                                                                   //!< The path/filename from where this matrix originated
-        std::string                                 filePath;                                                                   //!< The path/filename from where this matrix originated
+        path                                        filename;                                                                   //!< The path/filename from where this matrix originated
         std::map<std::string, std::string >         homeologMap;
         std::vector<Taxon>                          taxa;                                                                       //!< names of the sequences
         std::map<std::string, AbstractTaxonData* >  taxonMap;

@@ -349,7 +349,7 @@ bool RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::isSitePatternC
         RbBitSet r = it->first;
         for (size_t i = 0; i < r.size(); i++)
         {
-            stateCounts[i] += r.isSet(i) * it->second;
+            stateCounts[i] += r.test(i) * it->second;
             if (stateCounts[i] > max)
             {
                 max = stateCounts[i];
@@ -375,7 +375,7 @@ bool RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::isSitePatternC
         {
             RbBitSet r = it->first;
 
-            if ( r.isSet(common_states[i]) ) continue;
+            if ( r.test(common_states[i]) ) continue;
 
             if ( it->second > 1 )
             {
@@ -392,7 +392,7 @@ bool RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::isSitePatternC
                 }
                 else
                 {
-                    stateCounts[i] += r.isSet(i);
+                    stateCounts[i] += r.test(i);
                 }
             }
         }

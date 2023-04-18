@@ -11,6 +11,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <optional>
 
 #include "NewickConverter.h"
 #include "ProgressBar.h"
@@ -37,30 +38,11 @@ using namespace RevBayesCore;
 
 
 /*
- * Default AnnotationReport constructor
- */
-TreeSummary::AnnotationReport::AnnotationReport() :
-    clade_probs                   (true),
-    conditional_clade_ages        (false),
-    conditional_clade_probs       (false),
-    conditional_tree_ages         (false),
-    MAP_parameters                (false),
-    node_ages                     (true),
-    mean_node_ages                (true),
-    node_ages_HPD                 (0.95),
-    sampled_ancestor_probs        (true),
-    force_positive_branch_lengths (false),
-    use_outgroup(false)
-{}
-
-
-/*
  * TreeSummary constructor
  */
 TreeSummary::TreeSummary( TraceTree* t, bool c ) :
     clock( c ),
-    rooted( c ),
-    use_outgroup(false)
+    rooted( c )
 {
     traces.push_back(t);
 }
@@ -72,8 +54,7 @@ TreeSummary::TreeSummary( TraceTree* t, bool c ) :
 TreeSummary::TreeSummary( std::vector<TraceTree* > t, bool c ) :
     traces(t),
     clock( c ),
-    rooted( c ),
-    use_outgroup(false)
+    rooted( c )
 {
     if( traces.empty() )
     {
@@ -83,9 +64,9 @@ TreeSummary::TreeSummary( std::vector<TraceTree* > t, bool c ) :
     std::vector<std::string> tip_names = traces.front()->objectAt(0).getTipNames();
     std::sort(tip_names.begin(),tip_names.end());
 
-    for(std::vector<TraceTree* >::iterator trace = traces.begin(); trace != traces.end(); trace++)
+    for(auto& trace: traces)
     {
-        std::vector<std::string> t = (*trace)->objectAt(0).getTipNames();
+        std::vector<std::string> t = trace->objectAt(0).getTipNames();
         std::sort(t.begin(),t.end());
 
         if( t != tip_names )
@@ -208,14 +189,14 @@ void TreeSummary::mapDiscrete(Tree &tree, const std::string &n, size_t paramInde
 
     size_t total_size = 0;
 
-    for(std::vector<TraceTree* >::const_iterator trace = traces.begin(); trace != traces.end(); trace++)
+    for(auto& trace: traces)
     {
-        total_size += (*trace)->size(true);
+        total_size += trace->size(true);
 
         // loop through all trees in tree trace
-        for (size_t iteration = (*trace)->getBurnin(); iteration < (*trace)->size(); ++iteration)
+        for (size_t iteration = trace->getBurnin(); iteration < trace->size(); ++iteration)
         {
-            const Tree &sample_tree = (*trace)->objectAt( iteration );
+            const Tree &sample_tree = trace->objectAt( iteration );
             const TopologyNode& sample_root = sample_tree.getRoot();
 
             // loop through all nodes in inputTree
@@ -227,7 +208,6 @@ void TreeSummary::mapDiscrete(Tree &tree, const std::string &n, size_t paramInde
                 {
                     if ( tipsChecked == false )
                     {
-
                         tipsChecked = true;
                         size_t sample_clade_index = sample_root.getCladeIndex( node );
 
@@ -349,24 +329,24 @@ void TreeSummary::mapDiscrete(Tree &tree, const std::string &n, size_t paramInde
 
             // collect the samples
             std::set<Sample<std::string> > stateSamples;
-            for (std::map<std::string, long>::iterator it = state_counts[i].begin(); it != state_counts[i].end(); ++it)
+            for (auto& [state,count]: state_counts[i])
             {
-                stateSamples.insert( Sample<std::string>(it->first, it->second) );
+                stateSamples.insert( {state, count} );
             }
 
             double total_node_pp = 0.0;
             std::string final_state = "{";
-            for (std::set<Sample<std::string> >::iterator it = stateSamples.begin(); it != stateSamples.end(); ++it)
+            int i=0;
+            for (auto& [state, count]: stateSamples)
             {
                 if ( total_node_pp > 0.9999 ) continue;
 
-                if (it != stateSamples.begin())
-                {
+                if (i > 0)
                     final_state += ",";
-                }
+                i++;
 
-                double pp = it->second / total_size;
-                final_state += it->first + "=" + StringUtilities::toString(pp);
+                double pp = count / total_size;
+                final_state += state + "=" + StringUtilities::toString(pp);
                 total_node_pp += pp;
 
             }
@@ -425,10 +405,10 @@ void TreeSummary::mapContinuous(Tree &tree, const std::string &n, size_t paramIn
 
     size_t count = 0;
 
-    for(std::vector<TraceTree* >::const_iterator trace = traces.begin(); trace != traces.end(); trace++)
+    for(auto& trace: traces)
     {
         // loop through all trees in tree trace
-        for (size_t i = (*trace)->getBurnin(); i < (*trace)->size(); ++i)
+        for (size_t i = trace->getBurnin(); i < trace->size(); ++i)
         {
             if ( verbose == true )
             {
@@ -436,7 +416,7 @@ void TreeSummary::mapContinuous(Tree &tree, const std::string &n, size_t paramIn
                 count++;
             }
 
-            const Tree &sample_tree = (*trace)->objectAt( i );
+            const Tree &sample_tree = trace->objectAt( i );
             const TopologyNode& sample_root = sample_tree.getRoot();
 
             // create a map from newick strings to clade indices
@@ -684,9 +664,9 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
 
         if ( tmp_tree->isRooted() == false && rooted == false )
         {
-            if ( use_outgroup == true )
+            if ( outgroup )
             {
-                tmp_tree->reroot( outgroup, false, true );
+                tmp_tree->reroot( *outgroup, false, true );
             }
             else
             {
@@ -755,7 +735,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
             // annotate CCPs
             if ( !n->isTip() && report.conditional_clade_probs )
             {
-                double parentCladeFreq = splitFrequency( parent_split );
+                double parentCladeFreq = splitCount( parent_split );
                 double ccp = condCladeAges[split].size() / parentCladeFreq;
                 n->addNodeParameter("ccp",ccp);
             }
@@ -883,25 +863,14 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
 
 
 
-double TreeSummary::cladeProbability(const RevBayesCore::Clade &c, bool verbose )
+double TreeSummary::cladeProbability(const Clade &c, bool verbose )
 {
     summarize(verbose);
 
-    double f = 0.0;
     Clade tmp = c;
     tmp.resetTaxonBitset( traces.front()->objectAt(0).getTaxonBitSetMap() );
 
-    try
-    {
-        double freq = splitFrequency( Split( tmp.getBitRepresentation(), tmp.getMrca(), rooted) );
-        f = freq / sampleSize(true);
-    }
-    catch (RbException& e)
-    {
-        // do nothing
-    }
-
-    return f;
+    return splitFrequency( Split( tmp.getBitRepresentation(), tmp.getMrca(), rooted) );
 }
 
 
@@ -953,10 +922,10 @@ TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSe
         cladeCountMap[parent_split]++;
 
         // add conditional clade ages
-        for (std::vector<Split>::iterator child=child_splits.begin(); child !=child_splits.end(); ++child )
+        for (auto& child_split: child_splits)
         {
             // inserts new entries if doesn't already exist
-            conditional_clade_ages[parent_split][*child].push_back( clade_ages[*child].back() );
+            conditional_clade_ages[parent_split][child_split].push_back( clade_ages[child_split].back() );
         }
 
         // store the age for this split, conditional on the tree topology
@@ -1096,26 +1065,30 @@ std::vector<double> TreeSummary::computePairwiseRFDistance( double credible_inte
     std::vector<double> rf_distances;
     for (size_t i=0; i<unique_trees.size(); ++i)
     {
+        // The unique tree occurs sample_count[i] times.
+        // Here we are treating them as coming in one continuous block, which is annoying.
 
-        // first we need to compare the tree to 'itself'
-        for (size_t k=0; k<(sample_count[i]*(sample_count[i]-1)); ++k )
+        for(int rep = 0;rep<sample_count[i];rep++)
         {
-            rf_distances.push_back( 0.0 );
-        }
-
-        for (size_t j=i+1; j<unique_trees.size(); ++j)
-        {
-            
-            std::vector<RbBitSet>* a = unique_trees_bs[i];
-            std::vector<RbBitSet>* b = unique_trees_bs[j];
-            double rf = TreeUtilities::computeRobinsonFouldDistance(*a, *b, true);
-
-            for (size_t k=0; k<(sample_count[i]*sample_count[j]); ++k )
+            // first we need to compare the tree to subsequent copies of itself
+            for (size_t k=rep+1; k<sample_count[i]; ++k )
             {
-                rf_distances.push_back( rf );
+                rf_distances.push_back( 0.0 );
+            }
+
+            // then we compare it to copies of other trees
+            for (size_t j=i+1; j<unique_trees.size(); ++j)
+            {
+                std::vector<RbBitSet>* a = unique_trees_bs[i];
+                std::vector<RbBitSet>* b = unique_trees_bs[j];
+                double rf = TreeUtilities::computeRobinsonFouldDistance(*a, *b, true);
+
+                for (size_t k=0; k<sample_count[j]; ++k )
+                    rf_distances.push_back( rf );
             }
         }
     }
+
     for (size_t i=0; i<unique_trees.size(); ++i)
     {
         Tree* tmp = unique_trees[i];
@@ -1134,12 +1107,11 @@ std::vector<double> TreeSummary::computeTreeLengths( void )
 
     std::vector<double> tree_lengths;
 
-    for(std::vector<TraceTree* >::iterator trace = traces.begin(); trace != traces.end(); trace++)
+    for(auto& trace: traces)
     {
-        for (size_t i = (*trace)->getBurnin(); i < (*trace)->size(); ++i)
+        for (size_t i = trace->getBurnin(); i < trace->size(); ++i)
         {
-
-            const Tree &tree = (*trace)->objectAt(i);
+            const Tree &tree = trace->objectAt(i);
             tree_lengths.push_back( tree.getTreeLength() );
 
         }
@@ -1165,20 +1137,6 @@ void TreeSummary::enforceNonnegativeBranchLengths(TopologyNode& node) const
 }
 
 
-long TreeSummary::splitFrequency(const Split &n) const
-{
-
-    std::set<Sample<Split> >::const_iterator it = find_if (clade_samples.begin(), clade_samples.end(), n );
-
-    if ( it != clade_samples.end() )
-    {
-        return it->second;
-    }
-
-    throw RbException("Couldn't find split in set of samples");
-}
-
-
 TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, std::vector<TopologyNode*>& children, RbBitSet& child_b ) const
 {
     size_t num_taxa = child_b.size();
@@ -1197,7 +1155,7 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, s
     // check if the flipped unrooted split is compatible
     if ( !rooted && !compatible && !ischild)
     {
-        RbBitSet clade_flip = clade; ~clade_flip;
+        RbBitSet clade_flip = ~clade;
         mask  = node | clade_flip;
 
         compatible = (mask == node);
@@ -1214,18 +1172,16 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, s
     {
         parent = &n;
 
-        std::vector<TopologyNode*> x = n.getChildren();
-
         std::vector<TopologyNode*> new_children;
 
         // keep track of which taxa we found in the children
         RbBitSet child_mask( num_taxa );
 
-        for (size_t i = 0; i < x.size(); i++)
+        for (auto& old_child: n.getChildren())
         {
             RbBitSet child_bset(clade.size());
 
-            TopologyNode* child = findParentNode(*x[i], c, new_children, child_bset );
+            TopologyNode* child = findParentNode(*old_child, c, new_children, child_bset );
 
             // add this child to the mask
             child_mask = (child_bset | child_mask);
@@ -1238,7 +1194,7 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, s
             }
         }
 
-        children = new_children;
+        children = std::move(new_children);
 
         // check that we found all the children
         if ( parent == &n && child_mask != c.first && !n.isTip())
@@ -1256,7 +1212,7 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, s
 }
 
 
-int TreeSummary::getTopologyFrequency(const RevBayesCore::Tree &tree, bool verbose)
+long TreeSummary::getTopologyCount(const RevBayesCore::Tree &tree, bool verbose)
 {
     summarize( verbose );
 
@@ -1264,9 +1220,9 @@ int TreeSummary::getTopologyFrequency(const RevBayesCore::Tree &tree, bool verbo
 
     if ( t.isRooted() == false && rooted == false )
     {
-        if( use_outgroup )
+        if( outgroup )
         {
-            t.reroot( outgroup, false, true );
+            t.reroot( *outgroup, false, true );
         }
         else
         {
@@ -1279,24 +1235,17 @@ int TreeSummary::getTopologyFrequency(const RevBayesCore::Tree &tree, bool verbo
 
     std::string newick = t.getPlainNewickRepresentation();
 
-    double freq = 0;
-
-    for (std::set<Sample<std::string> >::const_reverse_iterator it = tree_samples.rbegin(); it != tree_samples.rend(); ++it)
-    {
-
-        if ( newick == it->first )
-        {
-            freq = it->second;
-
-            // now we found it
-            break;
-        }
-
-    }
-
-    return freq;
+    auto iter = tree_counts.find(newick);
+    if (iter == tree_counts.end())
+        return 0;
+    else
+        return iter->second;
 }
 
+double TreeSummary::getTopologyFrequency(const RevBayesCore::Tree &tree, bool verbose)
+{
+    return getTopologyCount(tree,verbose)/sampleSize(true);
+}
 
 std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_prob, bool non_trivial_only, bool verbose )
 {
@@ -1370,9 +1319,9 @@ bool TreeSummary::isCoveredInInterval(const std::string &v, double ci_size, bool
 
     if ( tree.isRooted() == false && rooted == false )
     {
-        if ( use_outgroup == true )
+        if ( outgroup )
         {
-            tree.reroot( outgroup, false, true );
+            tree.reroot( *outgroup, false, true );
         }
         else
         {
@@ -1440,14 +1389,102 @@ bool TreeSummary::isClock(void) const
 
 bool TreeSummary::isDirty(void) const
 {
-    bool dirty = false;
+    if (not computed) return true;
 
-    for (std::vector<TraceTree* >::const_iterator trace = traces.begin(); trace != traces.end(); trace++)
+    for (auto& trace: traces)
     {
-        dirty = dirty || (*trace)->isDirty();
+        if (trace->isDirty()) return true;
     }
 
-    return dirty;
+    return false;
+}
+
+
+
+double TreeSummary::jointCladeProbability(const RbVector<Clade> &c, bool verbose )
+{
+    summarize(verbose);
+    
+    RbVector<Clade> ref_clades = c;
+
+    size_t num_clades = ref_clades.size();
+    for ( size_t i=0; i<num_clades; ++i )
+    {
+        Clade& tmp = ref_clades[i];
+        tmp.resetTaxonBitset( traces.front()->objectAt(0).getTaxonBitSetMap() );
+    }
+    
+    std::vector<std::string> tip_names = traces.front()->objectAt(0).getTipNames();
+    std::sort(tip_names.begin(),tip_names.end());
+    const std::string& this_outgroup = tip_names[0];
+
+    rooted = traces.front()->objectAt(0).isRooted();
+
+    ProgressBar progress = ProgressBar(sampleSize(true));
+
+    if ( verbose )
+    {
+        RBOUT("Summarizing clades ...\n");
+        progress.start();
+    }
+
+    size_t count = 0;
+    double num_matches = 0;
+
+    for (auto& trace: traces)
+    {
+        for (size_t i = trace->getBurnin(); i < trace->size(); ++i)
+        {
+            if ( verbose )
+            {
+                progress.update(count);
+            }
+            count++;
+
+            Tree tree = trace->objectAt(i);
+
+            if ( rooted == false )
+            {
+                if ( outgroup )
+                {
+                    tree.reroot( *outgroup, false, true );
+                }
+                else
+                {
+                    tree.reroot( this_outgroup, false, true );
+                }
+            }
+            
+            bool matches = true;
+            for ( size_t i=0; i<num_clades; ++i )
+            {
+                const Clade& this_clade = ref_clades[i];
+                bool contains = tree.getRoot().containsClade( this_clade.getBitRepresentation(), true);
+                if ( contains == false )
+                {
+                    matches = false;
+                    break;
+                }
+                
+            }
+            
+            if ( matches == true )
+            {
+                ++num_matches;
+            }
+            
+        }
+    }
+
+
+
+    // finish progress bar
+    if ( verbose )
+    {
+        progress.finish();
+    }
+
+    return num_matches / double(count);
 }
 
 double TreeSummary::maxdiff( bool verbose )
@@ -1459,32 +1496,23 @@ double TreeSummary::maxdiff( bool verbose )
 
     std::set<Sample<Split> > splits_union;
 
-    for (std::vector<TraceTree* >::const_iterator trace = traces.begin(); trace != traces.end(); trace++)
+    for (auto& trace: traces)
     {
-        (*trace)->summarize(verbose);
+        trace->summarize(verbose);
 
-        splits_union.insert((*trace)->clade_samples.begin(), (*trace)->clade_samples.end());
+        splits_union.insert(trace->clade_samples.begin(), trace->clade_samples.end());
     }
 
 
     double maxdiff = 0;
 
-    for (std::set<Sample<Split> >::const_iterator split = splits_union.begin(); split != splits_union.end(); ++split)
+    for (auto& [split, count]: splits_union)
     {
         std::vector<double> split_freqs;
 
-        for(std::vector<TraceTree* >::const_iterator trace = traces.begin(); trace != traces.end(); trace++)
+        for(auto& trace: traces)
         {
-            double total_samples = (*trace)->size(true);
-
-            std::set<Sample<Split> >::const_iterator it = find_if((*trace)->clade_samples.begin(), (*trace)->clade_samples.end(), split->first );
-
-            double freq = 0;
-
-            if ( it != (*trace)->clade_samples.end() )
-            {
-                freq = it->second/total_samples;
-            }
+            double freq = trace->splitFrequency(split);
 
             split_freqs.push_back(freq);
         }
@@ -1553,25 +1581,17 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
     summarize( verbose );
 
     Tree* best_tree = NULL;
-    double max_cc = 0;
+    std::optional<double> max_cc;
 
     // find the clade credibility score for each tree
-    for (std::set<Sample<std::string> >::reverse_iterator it = tree_samples.rbegin(); it != tree_samples.rend(); ++it)
+    for (const auto& [newick, count]: tree_samples)
     {
-        std::string newick = it->first;
-
-        // now we summarize the clades for the best tree
-        std::map<Split, std::vector<double> > cladeAges = tree_clade_ages[newick];
-
-        double cc = 0;
-
         // find the product of the clade frequencies
-        for (std::map<Split, std::vector<double> >::iterator clade = cladeAges.begin(); clade != cladeAges.end(); clade++)
-        {
-            cc += log( splitFrequency(clade->first) );
-        }
+        double cc = 0;
+        for (auto& [clade, age]: tree_clade_ages.at(newick))
+            cc += log( splitFrequency(clade) );
 
-        if (cc > max_cc)
+        if (not max_cc or cc > *max_cc)
         {
             max_cc = cc;
 
@@ -1618,12 +1638,10 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
 
     //first create a bush
     TopologyNode* root = new TopologyNode(tipNames.size()); //construct root node with index = nb Tips
-    root->setNodeType(false, true, true);
 
     for (size_t i = 0; i < tipNames.size(); i++)
     {
         TopologyNode* tipNode = new TopologyNode(tipNames.at(i), i); //Topology node constructor adding tip name and index=taxon nb
-        tipNode->setNodeType(true, false, false);
 
         // set the parent-child relationship
         root->addChild(tipNode);
@@ -1638,15 +1656,13 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
 
     double totalSamples = sampleSize(true);
 
-    for (std::set<Sample<Split> >::reverse_iterator it = clade_samples.rbegin(); it != clade_samples.rend(); ++it)
+    for (const auto& [clade, count]: clade_samples)
     {
-        float cladeFreq = it->second / totalSamples;
+        float cladeFreq = count / totalSamples;
         if (cladeFreq < cutoff)  break;
 
-        Split clade = it->first;
-
         //make sure we have an internal node
-        size_t clade_size = clade.first.getNumberSetBits();
+        size_t clade_size = clade.first.count();
         if (clade_size == 1 || clade_size == tipNames.size())  continue;
 
         //find parent node
@@ -1688,8 +1704,6 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
 
             nIndex++;   //increment node index
             TopologyNode* intNode = new TopologyNode(nIndex); //Topology node constructor, with proper node index
-            intNode->setNodeType(false, false, true);
-
 
             // move the children to a new internal node
             for (size_t i = 0; i < children.size(); i++)
@@ -1709,7 +1723,6 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
 
                 nIndex++;   //increment node index
                 parentNode = new TopologyNode(nIndex); //Topology node constructor, with proper node index
-                parentNode->setNodeType(false, false, true);
 
                 intNode->removeChild(mrca[0]);
                 parentNode->addChild(mrca[0]);
@@ -1911,7 +1924,6 @@ void TreeSummary::printTreeSummary(std::ostream &o, double credibleIntervalSize,
 
 void TreeSummary::setOutgroup(const RevBayesCore::Clade &c)
 {
-    use_outgroup = true;
     outgroup = c;
 }
 
@@ -1919,18 +1931,34 @@ long TreeSummary::sampleSize(bool post) const
 {
     long total = 0;
 
-    for(std::vector<TraceTree* >::const_iterator trace = traces.begin(); trace != traces.end(); trace++)
+    for(auto& trace: traces)
     {
-        total += (*trace)->size(post);
+        total += trace->size(post);
     }
 
     return total;
 }
 
 
+long TreeSummary::splitCount(const Split &n) const
+{
+    auto iter = clade_counts.find(n);
+
+    if (iter == clade_counts.end())
+        return 0;
+    else
+        return iter->second;
+}
+
+double TreeSummary::splitFrequency(const Split &n) const
+{
+    return double(splitCount(n))/sampleSize(true);
+}
+
+
 void TreeSummary::summarize( bool verbose )
 {
-    if ( isDirty() == false ) return;
+    if ( not isDirty() ) return;
 
     std::vector<std::string> tip_names = traces.front()->objectAt(0).getTipNames();
     std::sort(tip_names.begin(),tip_names.end());
@@ -1947,9 +1975,8 @@ void TreeSummary::summarize( bool verbose )
     conditional_clade_ages.clear();
     tree_clade_ages.clear();
 
-    std::map<Split, long>       clade_counts;
-    std::map<std::string, long> tree_counts;
-
+    clade_counts.clear();
+    tree_counts.clear();
 
     ProgressBar progress = ProgressBar(sampleSize(true));
 
@@ -1961,9 +1988,9 @@ void TreeSummary::summarize( bool verbose )
 
     size_t count = 0;
 
-    for (std::vector<TraceTree* >::iterator trace = traces.begin(); trace != traces.end(); ++trace)
+    for (auto& trace: traces)
     {
-        for (size_t i = (*trace)->getBurnin(); i < (*trace)->size(); ++i)
+        for (size_t i = trace->getBurnin(); i < trace->size(); ++i)
         {
             if ( verbose )
             {
@@ -1971,13 +1998,13 @@ void TreeSummary::summarize( bool verbose )
                 count++;
             }
 
-            Tree tree = (*trace)->objectAt(i);
+            Tree tree = trace->objectAt(i);
 
             if ( rooted == false )
             {
-                if ( use_outgroup == true )
+                if ( outgroup )
                 {
-                    tree.reroot( outgroup, false, true );
+                    tree.reroot( *outgroup, false, true );
                 }
                 else
                 {
@@ -1995,21 +2022,31 @@ void TreeSummary::summarize( bool verbose )
         }
     }
 
+    // FIXME: Lots of the loops we do use reverse iterators.
+    //
+    //        so maybe sort in order of descending frequency instead?
+
+    // FIXME: Storing a second copy of everything just to know the order  wastes memory.
+    //
+    //        Possibly store the clades (and trees) in a vector, and then make
+    //        clade_counts/clade_samples (and tree_counts/tree_samples) just refer to the
+    //        index in the vector.
+    
     // sort the clade samples in ascending frequency
-    for (std::map<Split, long>::iterator it = clade_counts.begin(); it != clade_counts.end(); ++it)
+    for (auto& [clade, count]: clade_counts)
     {
-//        if ( it->first.first.getNumberSetBits() > 0 )
-//        if ( it->first.first.getNumberSetBits() > 0 && it->first.first.getNumberSetBits() < (num_taxa-1) )
+//        if ( it->first.first.count() > 0 )
+//        if ( it->first.first.count() > 0 && it->first.first.count() < (num_taxa-1) )
         {
-            clade_samples.insert( Sample<Split>(it->first, it->second) );
+            clade_samples.insert( Sample<Split>(clade, count) );
         }
 
     }
 
     // sort the tree samples in ascending frequency
-    for (std::map<std::string, long>::iterator it = tree_counts.begin(); it != tree_counts.end(); ++it)
+    for (auto& [tree, count]: tree_counts)
     {
-        tree_samples.insert( Sample<std::string>(it->first, it->second) );
+        tree_samples.insert( {tree, count} );
     }
 
     // finish progress bar
@@ -2018,8 +2055,16 @@ void TreeSummary::summarize( bool verbose )
         progress.finish();
     }
 
-    for (std::vector<TraceTree* >::iterator trace = traces.begin(); trace != traces.end(); ++trace)
+    // Mark all the traces clean.
+    for (auto& trace: traces)
     {
-        (*trace)->setDirty(false);
+        trace->setDirty(false);
     }
+
+    // And record that the summary statistics are computed.
+    computed = true;
+
+    // FIXME - Why are we marking input traces dirty?
+    //         This isn't really a property of the input trace,
+    //         but a property of the TreeSummary and its summary statistics.
 }

@@ -18,6 +18,7 @@
 #include "Monitor.h"
 #include "BranchHistory.h"
 #include "RbException.h"
+#include "RbFileManager.h"
 #include "StochasticNode.h"
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
@@ -36,7 +37,7 @@ namespace RevBayesCore {
         
     public:
         // Constructors and Destructors
-        CharacterHistorySummaryMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree> *t, unsigned long g, const std::string &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sne=false, bool ste=true);
+        CharacterHistorySummaryMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree> *t, unsigned long g, const path &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sne=false, bool ste=true);
         CharacterHistorySummaryMonitor(const CharacterHistorySummaryMonitor& f);
         
         // basic methods
@@ -64,7 +65,7 @@ namespace RevBayesCore {
         StochasticNode<AbstractHomologousDiscreteCharacterData>* variable;
         TypedDagNode<Tree>*                 tree;
         std::set<DagNode *>                 nodeVariables;
-        std::string                         filename;
+        path                                filename;
         std::string                         separator;
         bool                                posterior;
         bool                                prior;
@@ -81,7 +82,7 @@ namespace RevBayesCore {
 
 /* Constructor */
 template<class charType>
-RevBayesCore::CharacterHistorySummaryMonitor<charType>::CharacterHistorySummaryMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree>* t, unsigned long g, const std::string &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sne, bool ste) :
+RevBayesCore::CharacterHistorySummaryMonitor<charType>::CharacterHistorySummaryMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree>* t, unsigned long g, const RevBayesCore::path &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sne, bool ste) :
 Monitor(g,t),
 outStream(),
 variable(s),
@@ -392,15 +393,13 @@ void RevBayesCore::CharacterHistorySummaryMonitor<charType>::monitor(unsigned lo
 template<class charType>
 void RevBayesCore::CharacterHistorySummaryMonitor<charType>::openStream(bool reopen)
 {
-    
-    RbFileManager fm = RbFileManager(filename);
-    fm.createDirectoryForFile();
+    RevBayesCore::createDirectoryForFile(filename);
     
     // open the stream to the file
     if (append)
-        outStream.open( fm.getFullFileName().c_str(), std::fstream::out | std::fstream::app);
+        outStream.open( filename.string(), std::fstream::out | std::fstream::app);
     else
-        outStream.open( fm.getFullFileName().c_str(), std::fstream::out);
+        outStream.open( filename.string(), std::fstream::out);
 }
 
 /** Print header for monitored values */

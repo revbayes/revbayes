@@ -16,6 +16,7 @@
 #include "Cloneable.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
+#include "RlUserInterface.h"
 
 using namespace RevBayesCore;
 
@@ -530,9 +531,44 @@ bool AbstractRateMatrix::simulateStochasticMapping(double startAge, double endAg
     return true;
 }
 
+double L1norm(const MatrixReal& M)
+{
+    // ||A||_1 = sup x ||A x||_1 / ||x||_1
+    //         = max 1 <= j<= n \sum_i |A_{i,j}|
+    //         = max over columns of (the sum of the absolute values in each column).
+    double norm = 0;
+    for(int j=0; j < M.getNumberOfColumns(); j++)
+    {
+        double sum = 0;
+        for(int i=0; i < M.getNumberOfRows(); i++)
+            sum += std::abs(M[i][j]);
+        norm = std::max(norm, sum);
+    }
+    assert(norm >= 0);
+    return norm;
+}
 
+double L1norm(const TransitionProbabilityMatrix& M)
+{
+    // ||A||_1 = sup x ||A x||_1 / ||x||_1
+    //         = max 1 <= j<= n \sum_i |A_{i,j}|
+    //         = max over columns of (the sum of the absolute values in each column).
+    double norm = 0;
+    for(int j=0; j < M.getNumberOfStates(); j++)
+    {
+        double sum = 0;
+        for(int i=0; i < M.getNumberOfStates(); i++)
+            sum += std::abs(M[i][j]);
+        norm = std::max(norm, sum);
+    }
+    assert(norm >= 0);
+    return norm;
+}
 
-void AbstractRateMatrix::exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const {
+void AbstractRateMatrix::exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const
+{
+    assert(t >= 0);
+    assert(p.num_states == p.getNumberOfStates());
 
     // Here we use the scaling and squaring method with a 4th order Taylor approximant as described in:
     //
@@ -543,7 +579,20 @@ void AbstractRateMatrix::exponentiateMatrixByScalingAndSquaring(double t,  Trans
     // efficiency and returned the same results with about 10^-9 accuracy. The scaling parameter could be
     // increased for better accuracy.
     // -- Will Freyman 11/27/16
-    size_t s = 8;
+
+    // Note that Will had previously chosen a fixed value of 8 scalings/squarings, but this
+    // didn't work for large branch lengths.
+
+    // We need the norm to be small enough for the 4-th order Taylor series to be a good approximation.
+    // This code gives the number of scalings needed to bring the norm down below 2^-10 = 0.000977
+    // This is a heuristic choice, but note that that ((2^-10)^4)/24 = 3.79e-14
+    // The fifth order term would be ((2^-10)^5)/120 = 7.4e-18
+    // Compare 10 with the number 12 in RateMatrix_FreeK::expMatrixTaylor( ) in RateMatrix_FreeK.cpp
+    // -- Ben Redelings 10/23/22
+    double norm = L1norm(*the_rate_matrix) * std::abs(t);
+    int s = 0;
+    std::frexp(norm, &s);
+    s = std::max(10 + s, 0);
 
     // first scale the matrix
     double scale = t / pow(2, s);
@@ -557,15 +606,17 @@ void AbstractRateMatrix::exponentiateMatrixByScalingAndSquaring(double t,  Trans
 
     // compute the 4th order Taylor approximant
 
+    // BDR: Note more recent work uses Pade approximants, which I think are better.
+    // Eigen implements that approach, which goes up to a (13,13) Pade approximant, depending
+    //   on whether the extra work is needed.
+    // Its kind of complicated, so we should probably use Eigen if we switch to that.
+
     // calculate the scaled matrix raised to powers 2, 3 and 4
-    TransitionProbabilityMatrix p_2(num_states);
-    multiplyMatrices(p, p, p_2);
+    TransitionProbabilityMatrix p_2 = p * p;
 
-    TransitionProbabilityMatrix p_3(num_states);
-    multiplyMatrices(p, p_2, p_3);
+    TransitionProbabilityMatrix p_3 = p * p_2;
 
-    TransitionProbabilityMatrix p_4(num_states);
-    multiplyMatrices(p, p_3, p_4);
+    TransitionProbabilityMatrix p_4 = p_2 * p_2;
 
     // add k=0 (the identity matrix) and k=1 terms
     for ( size_t i = 0; i < num_states; i++ )
@@ -582,32 +633,23 @@ void AbstractRateMatrix::exponentiateMatrixByScalingAndSquaring(double t,  Trans
         }
     }
 
+    // Make sure that our Taylor approximation is now a stochastic matrix
+    // BEFORE we start squaring it.
+    ensure_nonnegative(p);
+    normalize_rows(p);
+
     // now perform the repeated squaring
     TransitionProbabilityMatrix r(num_states);
     for (size_t i = 0; i < s; i++)
     {
-        multiplyMatrices(p, p, r);
-        p = r;
+        // We could do p = p * p, but that allocates memory.
+        p.multiplyTo(p, r);
+        p = std::move(r);
 
+        // Handle roundoff-error.
+        normalize_rows(p);
     }
 }
-
-void AbstractRateMatrix::multiplyMatrices(TransitionProbabilityMatrix& p,  TransitionProbabilityMatrix& q,  TransitionProbabilityMatrix& r) const {
-
-    // could probably use boost::ublas here, for the moment we do it ourselves.
-    for ( size_t i = 0; i < num_states; i++ )
-    {
-        for ( size_t j = 0; j < num_states; j++ )
-        {
-            r[i][j] = 0;
-            for ( size_t k = 0; k < num_states; k++ )
-            {
-                r[i][j] += p[i][k] * q[k][j];
-            }
-        }
-    }
-}
-
 
 /** Set the diagonal of the rate matrix such that each row sums to zero */
 void AbstractRateMatrix::setDiagonal(void)

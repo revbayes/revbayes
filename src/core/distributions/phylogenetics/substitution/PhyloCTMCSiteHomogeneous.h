@@ -100,6 +100,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
     {
         // get the root frequencies
         const std::vector<double> &f                    = ff[mixture % ff.size()];
+        assert(f.size() == this->num_chars);
         std::vector<double>::const_iterator f_end       = f.end();
         std::vector<double>::const_iterator f_begin     = f.begin();
 
@@ -168,6 +169,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
         
         // get the root frequencies
         const std::vector<double> &f                    = ff[mixture % ff.size()];
+        assert(f.size() == this->num_chars);
         std::vector<double>::const_iterator f_end       = f.end();
         std::vector<double>::const_iterator f_begin     = f.begin();
 
@@ -416,7 +418,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                         for ( size_t i=0; i<this->num_chars; ++i )
                         {
                             // check whether we observed this state
-                            if ( val.isSet(i) == true )
+                            if ( val.test(i) == true )
                             {
                                 // add the probability
                                 tmp += *d;
@@ -446,7 +448,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                         for ( size_t i=0; i<this->num_chars; ++i )
                         {
                             // check whether we observed this state
-                            if ( val.isSet(i) == true )
+                            if ( val.test(i) == true )
                             {
                                 // add the probability
                                 tmp += *d * weights[i] ;

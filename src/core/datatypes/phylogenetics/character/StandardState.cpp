@@ -121,7 +121,7 @@ void StandardState::setToFirstState(void)
 {
     num_observed_states = 1;
     index_single_state = 0;
-    state.clear();
+    state.reset();
     state.set( 0 );
 }
 
@@ -133,7 +133,7 @@ void StandardState::setState(const std::string &s)
     std::string labels = getStateLabels();
     
     num_observed_states = 0;
-    state.clear();
+    state.reset();
     
     for (size_t i = 0; i < s.size(); i++)
     {
@@ -152,7 +152,7 @@ void StandardState::setStateByIndex(size_t index)
     
     num_observed_states = 1;
     index_single_state = index;
-    state.clear();
+    state.reset();
     state.set( index );
 }
 

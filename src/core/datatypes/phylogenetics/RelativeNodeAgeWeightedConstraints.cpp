@@ -61,7 +61,7 @@ size_t RelativeNodeAgeWeightedConstraints::getNumberOfConstraints(void) const
 }
 
 
-std::string RelativeNodeAgeWeightedConstraints::getFilename(void) const
+const path& RelativeNodeAgeWeightedConstraints::getFilename(void) const
 {
     return filename;
 }

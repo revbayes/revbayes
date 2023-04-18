@@ -652,7 +652,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipLikelihood(const Top
                         for ( size_t i=0; i<val.size(); ++i )
                         {
                             // check whether we observed this state
-                            if ( val.isSet(i) == true )
+                            if ( val.test(i) == true )
                             {
                                 tmp += pij[c][i];
                             }
@@ -666,7 +666,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipLikelihood(const Top
 
                     for ( size_t i=1; i<val.size(); ++i )
                     {
-                        if ( val.isSet(i) == true )
+                        if ( val.test(i) == true )
                         {
                             // check whether we observed this state
                             p_site_mixture[dim + 1] += f[i];

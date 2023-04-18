@@ -18,6 +18,7 @@
 
 #include "AbstractCladogenicStateFunction.h"
 #include "CladogeneticSpeciationRateMatrix.h"
+#include "CladogeneticProbabilityMatrix.h"
 #include "TypedFunction.h"
 
 namespace RevBayesCore {
@@ -30,7 +31,7 @@ template <class valueType> class TypedDagNode;
         
     public:
         
-        BiogeographyCladogeneticBirthDeathFunction( const TypedDagNode< RbVector< double > >* sr, unsigned mrs, TypedDagNode< RbVector< RbVector<double> > >* cm, TypedDagNode< RbVector< double > >* cw, std::string ct="cutset");
+        BiogeographyCladogeneticBirthDeathFunction( const TypedDagNode<RbVector<double> >* sr, TypedDagNode< RbVector<double> >* wf, TypedDagNode< RbVector< RbVector<double> > >* bf, unsigned mrs, unsigned msss, std::string ct="cutset");
         virtual                                                     ~BiogeographyCladogeneticBirthDeathFunction(void);
         
         const static unsigned NUM_CLADO_EVENT_TYPES                 = 3;
@@ -46,10 +47,14 @@ template <class valueType> class TypedDagNode;
                                                                      size_t right_index ) const;
         
         BiogeographyCladogeneticBirthDeathFunction*                 clone(void) const;
+        
         std::map< std::vector<unsigned>, double >                   getEventMap(double t=0.0);
         const std::map< std::vector<unsigned>, double >&            getEventMap(double t=0.0) const;
+       
         void                                                        setRateMultipliers(const TypedDagNode< RbVector< double > >* rm);
         void                                                        update(void);
+        
+       
         
     protected:
         
@@ -72,15 +77,16 @@ template <class valueType> class TypedDagNode;
         size_t                                                      computeNumStates(size_t numAreas, size_t maxRangeSize);
         void                                                        printEventMap(std::map< std::vector< unsigned >, double > x);
         unsigned                                                    sumBits(const std::vector<unsigned>& b);
-        void                                                        updateEventMapWeights(void);
+//        void                                                        updateEventMapWeights(void);
         void                                                        updateEventMapCutsetWeights(void);
-        void                                                        updateEventMapModularityWeights(void);
+//        void                                                        updateEventMapModularityWeights(void);
         
         // parameters
         const TypedDagNode< RbVector<double> >*                     speciationRates;
         const TypedDagNode< RbVector<double> >*                     hiddenRateMultipliers;
-        const TypedDagNode< RbVector<RbVector<double> > >*          connectivityMatrix;
-        const TypedDagNode< RbVector<double> >*                     connectivityWeights;
+        const TypedDagNode< RbVector<double> >*                     withinRegionFeatures;
+        const TypedDagNode< RbVector<RbVector<double> > >*          betweenRegionFeatures;
+//        const TypedDagNode< RbVector<double> >*                     connectivityWeights;
         
         // dimensions
         unsigned                                                    numCharacters;
@@ -88,6 +94,7 @@ template <class valueType> class TypedDagNode;
         unsigned                                                    numIntStates;
         unsigned                                                    numRanges;
         unsigned                                                    maxRangeSize;
+        unsigned                                                    maxSubrangeSplitSize;
         
         // model settings
         bool                                                        use_hidden_rate;
@@ -118,7 +125,7 @@ template <class valueType> class TypedDagNode;
         // manages string-based simplex mapping??
         std::vector<std::string>                                    eventTypes;
         std::map<std::string, unsigned>                             eventStringToStateMap;
-        
+
     };
     
 }
