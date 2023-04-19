@@ -3506,10 +3506,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
 
     } // end-for over all mixtures
 
-    // SH: Here is something going wrong!
     double prob_invariant = getPInv();
     
-//    prob_invariant = 0.0;
     double oneMinusPInv = 1.0 - prob_invariant;
     std::vector< size_t >::const_iterator patterns = this->pattern_counts.begin();
     if ( prob_invariant > 0.0 )
