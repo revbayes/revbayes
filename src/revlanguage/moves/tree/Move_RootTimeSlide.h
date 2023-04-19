@@ -11,13 +11,13 @@ namespace RevLanguage {
     
     
     /**
-     * @brief Rev wrapper class for the NodeTimeSlideUniform move.
+     * @brief Rev wrapper class for the RootTimeSlide move.
      *
-     * This class is the Rev wrapper class for the NodeTimeSlideUniform move,
-     * a move that proposes a node age.
+     * This class is the Rev wrapper class for the RootTimeSlide move,
+     * a move that proposes a root age.
      *
      *
-     * @author Andrew Magee
+     * @author Sebastian Hoehna
      * @copyright GPL version 3
      */
     class Move_RootTimeSlide : public Move {
