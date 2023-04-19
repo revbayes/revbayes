@@ -680,6 +680,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
         std::map<std::string,size_t> patterns;
         for (size_t site = 0; site < num_sites; ++site)
         {
+            bool all_missing = true;
             // create the site pattern
             std::string pattern = "";
             for (auto& node: nodes)
@@ -688,42 +689,48 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
                 {
                     AbstractDiscreteTaxonData& taxon = value->getTaxonData( node->getName() );
                     CharacterState &c = taxon.getCharacter(site_indices[site]);
+                    all_missing &= (c.isMissingState() || c.isGapState());
                     pattern += c.getStringValue();
                 }
             }
-            // check if we have already seen this site pattern
-            std::map<std::string, size_t>::const_iterator index = patterns.find( pattern );
-            if ( index != patterns.end() )
+            
+            // only add this pattern if not all are missing
+            if ( all_missing == false )
             {
-                // we have already seen this pattern
-                // increase the frequency counter
-                pattern_counts[ index->second ]++;
+                // check if we have already seen this site pattern
+                std::map<std::string, size_t>::const_iterator index = patterns.find( pattern );
+                if ( index != patterns.end() )
+                {
+                    // we have already seen this pattern
+                    // increase the frequency counter
+                    pattern_counts[ index->second ]++;
 
-                // obviously this site isn't unique nor the first encounter
-                unique[site] = false;
+                    // obviously this site isn't unique nor the first encounter
+                    unique[site] = false;
 
-                // remember which pattern this site uses
-                site_pattern[site] = index->second;
-            }
-            else
-            {
-                // create a new pattern frequency counter for this pattern
-                pattern_counts.push_back(1);
-
-                // insert this pattern with the corresponding index in the map
-                patterns.insert( std::pair<std::string,size_t>(pattern,num_patterns) );
-
-                // remember which pattern this site uses
-                site_pattern[site] = num_patterns;
-
-                // increase the pattern counter
-                num_patterns++;
-
-                // add the index of the site to our pattern-index vector
-                indexOfSitePattern.push_back( site );
-
-                // flag that this site is unique (or the first occurence of this pattern)
-                unique[site] = true;
+                    // remember which pattern this site uses
+                    site_pattern[site] = index->second;
+                }
+                else
+                {
+                    // create a new pattern frequency counter for this pattern
+                    pattern_counts.push_back(1);
+                    
+                    // insert this pattern with the corresponding index in the map
+                    patterns.insert( std::pair<std::string,size_t>(pattern,num_patterns) );
+                    
+                    // remember which pattern this site uses
+                    site_pattern[site] = num_patterns;
+                    
+                    // increase the pattern counter
+                    num_patterns++;
+                    
+                    // add the index of the site to our pattern-index vector
+                    indexOfSitePattern.push_back( site );
+                    
+                    // flag that this site is unique (or the first occurence of this pattern)
+                    unique[site] = true;
+                }
             }
         }
     }
@@ -846,6 +853,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
             {
                 if ( val.test(c) )
                 {
+                    if ( c < 0 || c >= 20 )
+                    {
+                        std::cerr << "Invar sites with ambiguous chars out of bounds!   " << c << std::endl;
+                    }
                     invariant_site_index[i].push_back(c);
                 }
             }
@@ -853,6 +864,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
         else
         {
             unsigned long c = char_matrix[taxon_index][i];
+            
+                if ( c < 0 || c >= 20 )
+                {
+                    std::cerr << "Invar sites out of bounds!   " << c << std::endl;
+                    std::cerr << (gap_matrix[taxon_index][i] ? "Gap" : "No Gap") << std::endl;
+                }
             invariant_site_index[i].push_back(c);
 
             for (; taxon_index<length; ++taxon_index)
@@ -1723,7 +1740,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         }
 
         size_t num_site_rates_withInv = num_site_rates;
-        double prob_invariant = getPInv();
+        double prob_invariant = getPInv(); // done
         if (prob_invariant > 0.0)
         {
             num_site_rates_withInv++;
@@ -1841,7 +1858,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
 
         // get the per site rate likelihood
         size_t num_site_rates_withInv = num_site_rates;
-        double prob_invariant = getPInv();
+        double prob_invariant = getPInv(); // done
         if (prob_invariant > 0.0)
         {
             num_site_rates_withInv++;
@@ -1895,7 +1912,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
 
         // get the per site rate likelihood
         size_t num_site_mixture_withInv = num_site_mixtures;
-        double prob_invariant = getPInv();
+        double prob_invariant = getPInv(); // done
         if (prob_invariant > 0.0)
         {
             num_site_mixture_withInv += size_t(num_site_mixtures/num_site_rates);
@@ -2434,7 +2451,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::redrawValue( void
     RandomNumberGenerator* rng = GLOBAL_RNG;
     std::vector<size_t> perSiteMixtures = std::vector<size_t>(num_sites,0);
     std::vector<bool> inv = std::vector<bool>(num_sites,false);
-    double prob_invariant = getPInv();
+    double prob_invariant = getPInv(); // done
     for ( size_t i = 0; i < num_sites; ++i )
     {
         // draw if this site is invariant
@@ -3490,7 +3507,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
 
     } // end-for over all mixtures
 
+    // SH: Here is something going wrong!
     double prob_invariant = getPInv();
+    
+//    prob_invariant = 0.0;
     double oneMinusPInv = 1.0 - prob_invariant;
     std::vector< size_t >::const_iterator patterns = this->pattern_counts.begin();
     if ( prob_invariant > 0.0 )
@@ -3553,18 +3573,38 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
             else // no scaling
             {
 
+                if ( site >= this->site_invariant.size() )
+                {
+                    std::cerr << "Found issue. Wrong vector size!" << std::endl;
+                }
                 if ( this->site_invariant[site] == true )
                 {
                     double ftotal = 0.0;
+//                    if ( site >= this->invariant_site_index.size() )
+//                    {
+//                        std::cerr << "Found issue. Wrong vector size!" << std::endl;
+//                    }
                     for ( size_t c = 0; c < this->invariant_site_index[site].size(); c++ )
                     {
+//                        if ( this->invariant_site_index[site][c] >= f.size() )
+//                        {
+//                            std::cerr << "Found issue. Wrong vector size!" << std::endl;
+//                        }
                         ftotal += f[this->invariant_site_index[site][c]];
                     }
-
+                    
+//                    if ( site >= per_mixture_Likelihoods.size() )
+//                    {
+//                        std::cerr << "Found issue. Wrong vector size!" << std::endl;
+//                    }
                     rv[site] = log( prob_invariant * ftotal  + oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
                 }
                 else
                 {
+//                    if ( site >= per_mixture_Likelihoods.size() )
+//                    {
+//                        std::cerr << "Found issue. Wrong vector size!" << std::endl;
+//                    }
                     rv[site] = log( oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
                 }
 
@@ -3793,6 +3833,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
     } // end-for over all mixtures (=rate categories)
 
     double prob_invariant = getPInv();
+//    prob_invariant = 0.0; done
     double oneMinusPInv = 1.0 - prob_invariant;
     std::vector< size_t >::const_iterator patterns = this->pattern_counts.begin();
     if ( prob_invariant > 0.0 )
@@ -4171,7 +4212,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     }
 
     // we rescale the rate by the inverse of the proportion of invariant sites
-    rate /= ( 1.0 - getPInv() );
+    rate /= ( 1.0 - getPInv() ); // done
 
     // first, get the rate matrix for this branch
     RateMatrix_JC jc(this->num_chars);
@@ -4263,7 +4304,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     }
     
     // we rescale the rate by the inverse of the proportion of invariant sites
-    rate /= ( 1.0 - getPInv() );
+    rate /= ( 1.0 - getPInv() ); //done
     
     double end_age = node->getAge();
     

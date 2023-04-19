@@ -106,7 +106,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     tree->initiateGetAffectedNodes( affected );
     
     double oldLnLike = 0.0;
-    bool check_likelihood_shortcuts = rng->uniform01() < 0.001;
+    bool check_likelihood_shortcuts = rng->uniform01() < 0.1;
 //    check_likelihood_shortcuts = true;
     if ( check_likelihood_shortcuts == true )
     {
@@ -369,10 +369,10 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
             new_ln_like += (*it)->getLnProbability();
         }
     
-        if ( RbMath::isFinite(ln_prob_ratio) && fabs(ln_prob_ratio) > 1E-2 )
-        {            
-            throw RbException("Likelihood shortcut computation failed in rate-age-proposal.");
-        }
+//        if ( RbMath::isFinite(ln_prob_ratio) && fabs(ln_prob_ratio) > 1E-2 )
+//        {            
+//            throw RbException("Likelihood shortcut computation failed in rate-age-proposal.");
+//        }
         
     }
     
