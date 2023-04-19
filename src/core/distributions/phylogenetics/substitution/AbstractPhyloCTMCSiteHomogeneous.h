@@ -1740,7 +1740,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         }
 
         size_t num_site_rates_withInv = num_site_rates;
-        double prob_invariant = getPInv(); // done
+        double prob_invariant = getPInv();
         if (prob_invariant > 0.0)
         {
             num_site_rates_withInv++;
@@ -1858,7 +1858,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
 
         // get the per site rate likelihood
         size_t num_site_rates_withInv = num_site_rates;
-        double prob_invariant = getPInv(); // done
+        double prob_invariant = getPInv();
         if (prob_invariant > 0.0)
         {
             num_site_rates_withInv++;
@@ -1912,7 +1912,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
 
         // get the per site rate likelihood
         size_t num_site_mixture_withInv = num_site_mixtures;
-        double prob_invariant = getPInv(); // done
+        double prob_invariant = getPInv();
         if (prob_invariant > 0.0)
         {
             num_site_mixture_withInv += size_t(num_site_mixtures/num_site_rates);
@@ -2451,7 +2451,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::redrawValue( void
     RandomNumberGenerator* rng = GLOBAL_RNG;
     std::vector<size_t> perSiteMixtures = std::vector<size_t>(num_sites,0);
     std::vector<bool> inv = std::vector<bool>(num_sites,false);
-    double prob_invariant = getPInv(); // done
+    double prob_invariant = getPInv();
     for ( size_t i = 0; i < num_sites; ++i )
     {
         // draw if this site is invariant
