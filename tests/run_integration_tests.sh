@@ -101,7 +101,11 @@ for t in test_*; do
         out=output/$(basename $f).out
         ${rb_exec} < $f 2>&1 | tee $out  # print and save output so we can check error messages
         res="${PIPESTATUS[0]}"
-        sed -i -n '/^To quit/,$p' $out   # drop lines before "To quit Revbayes ..."
+        if [[ $OSTYPE == 'darwin'* ]] ; then
+            echo "running on mac"
+        else
+            sed -i -n '/^To quit/,$p' $out   # drop lines before "To quit Revbayes ..."
+        fi
         if [ $res = 1 ]; then
             res="error: $f"
             break
