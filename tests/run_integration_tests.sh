@@ -152,6 +152,9 @@ while [  $i -lt ${#tests[@]} ]; do
                 errs+=("missing:  $f")
             elif ! diff output/$f ${exp_out_dir}/$f > /dev/null; then
                 errs+=("mismatch: $f")
+                echo "!!!diff for $t"
+                diff -u output/$f ${exp_out_dir}/$f
+                echo "!!!end diff"
             fi
         done
 
