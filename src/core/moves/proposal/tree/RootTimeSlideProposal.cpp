@@ -68,8 +68,7 @@ const std::string& RootTimeSlideProposal::getProposalName( void ) const
 
 double RootTimeSlideProposal::getProposalTuningParameter( void ) const
 {
-    // this proposal has no tuning parameter
-    return RbConstants::Double::nan;
+    return delta;
 }
 
 
@@ -184,7 +183,7 @@ void RootTimeSlideProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 
 void RootTimeSlideProposal::setProposalTuningParameter(double tp)
 {
-    // this proposal has no tuning parameter: nothing to do
+    delta = tp;
 }
 
 
