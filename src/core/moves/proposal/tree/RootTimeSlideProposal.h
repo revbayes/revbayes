@@ -10,11 +10,9 @@
 namespace RevBayesCore {
     
     /**
-     * The node-age slide proposal operator using a Uniform distribution.
+     * The root-age slide proposal operato.
      *
-     * This node-age proposal is a Uniform-sliding proposal on rooted subtrees without changing the topology.
-     * That is, we pick a random node which is not the root.
-     * Then, we pick an age between the parent and the oldest sampled descendant drawn from a Uniform distribution centered around the current age.
+     * This root-age proposal is a uniform-sliding proposal on the root age
      *
      *
      * @copyright Copyright 2009-
@@ -25,7 +23,7 @@ namespace RevBayesCore {
     class RootTimeSlideProposal : public Proposal {
         
     public:
-        RootTimeSlideProposal( StochasticNode<Tree> *n, double d);                                                        //!<  constructor
+        RootTimeSlideProposal( StochasticNode<Tree> *n, double d);                                              //!<  constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                            //!< Clean up proposal
