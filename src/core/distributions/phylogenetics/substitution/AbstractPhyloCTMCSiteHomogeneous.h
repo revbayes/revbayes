@@ -853,9 +853,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
             {
                 if ( val.test(c) )
                 {
-                    if ( c < 0 || c >= 20 )
+                    if ( c < 0 || c >= this->num_chars )
                     {
-                        std::cerr << "Invar sites with ambiguous chars out of bounds!   " << c << std::endl;
+                        throw RbException() << "Possible bug: Invar sites with ambiguous chars at index " << c << " out of bounds!";
                     }
                     invariant_site_index[i].push_back(c);
                 }
@@ -865,11 +865,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
         {
             unsigned long c = char_matrix[taxon_index][i];
             
-                if ( c < 0 || c >= 20 )
-                {
-                    std::cerr << "Invar sites out of bounds!   " << c << std::endl;
-                    std::cerr << (gap_matrix[taxon_index][i] ? "Gap" : "No Gap") << std::endl;
-                }
+            if ( c < 0 || c >= this->num_chars )
+            {
+                throw RbException() << "Possible bug: Invar sites with ambiguous chars at index " << c << " out of bounds! Site was " << (gap_matrix[taxon_index][i] ? "Gap" : "No Gap");
+            }
             invariant_site_index[i].push_back(c);
 
             for (; taxon_index<length; ++taxon_index)
@@ -3573,38 +3572,18 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
             else // no scaling
             {
 
-                if ( site >= this->site_invariant.size() )
-                {
-                    std::cerr << "Found issue. Wrong vector size!" << std::endl;
-                }
                 if ( this->site_invariant[site] == true )
                 {
                     double ftotal = 0.0;
-//                    if ( site >= this->invariant_site_index.size() )
-//                    {
-//                        std::cerr << "Found issue. Wrong vector size!" << std::endl;
-//                    }
                     for ( size_t c = 0; c < this->invariant_site_index[site].size(); c++ )
                     {
-//                        if ( this->invariant_site_index[site][c] >= f.size() )
-//                        {
-//                            std::cerr << "Found issue. Wrong vector size!" << std::endl;
-//                        }
                         ftotal += f[this->invariant_site_index[site][c]];
                     }
                     
-//                    if ( site >= per_mixture_Likelihoods.size() )
-//                    {
-//                        std::cerr << "Found issue. Wrong vector size!" << std::endl;
-//                    }
                     rv[site] = log( prob_invariant * ftotal  + oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
                 }
                 else
                 {
-//                    if ( site >= per_mixture_Likelihoods.size() )
-//                    {
-//                        std::cerr << "Found issue. Wrong vector size!" << std::endl;
-//                    }
                     rv[site] = log( oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
                 }
 
@@ -3833,7 +3812,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
     } // end-for over all mixtures (=rate categories)
 
     double prob_invariant = getPInv();
-//    prob_invariant = 0.0; done
     double oneMinusPInv = 1.0 - prob_invariant;
     std::vector< size_t >::const_iterator patterns = this->pattern_counts.begin();
     if ( prob_invariant > 0.0 )
@@ -4212,7 +4190,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     }
 
     // we rescale the rate by the inverse of the proportion of invariant sites
-    rate /= ( 1.0 - getPInv() ); // done
+    rate /= ( 1.0 - getPInv() );
 
     // first, get the rate matrix for this branch
     RateMatrix_JC jc(this->num_chars);
@@ -4304,7 +4282,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     }
     
     // we rescale the rate by the inverse of the proportion of invariant sites
-    rate /= ( 1.0 - getPInv() ); //done
+    rate /= ( 1.0 - getPInv() );
     
     double end_age = node->getAge();
     
