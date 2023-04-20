@@ -48,6 +48,7 @@
 #include "RlDeterministicNode.h"
 #include "RlDistribution.h"
 #include "RlRateGenerator.h"
+#include "RlMixtureModel.h"
 #include "RlStochasticNode.h"
 #include "RlTypedDistribution.h"
 #include "RlTypedFunction.h"
@@ -122,6 +123,11 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     {
         RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
         nChars = rm->getValue()[0].getNumberOfStates();
+    }
+    else if ( q->getRevObject().isType( MixtureModel::getClassTypeSpec() ) )
+    {
+        RevBayesCore::TypedDagNode< RevBayesCore::MixtureModel >* mm = static_cast<const MixtureModel &>( q->getRevObject() ).getDagNode();
+        nChars = mm->getValue().getNumberOfStates();
     }
     else
     {
@@ -199,6 +205,11 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
             }
             
             dist->setRateMatrix( rm );
+        }
+        else if ( q->getRevObject().isType( MixtureModel::getClassTypeSpec() ) )
+        {
+            RevBayesCore::TypedDagNode< RevBayesCore::MixtureModel >* mm = static_cast<const MixtureModel &>( q->getRevObject() ).getDagNode();
+            dist->setMixtureModel( mm );
         }
         else
         {
@@ -293,6 +304,11 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
             }
             dist->setCladogenesisMatrix( cp );
         }
+        else if ( q->getRevObject().isType( MixtureModel::getClassTypeSpec() ) )
+        {
+            RevBayesCore::TypedDagNode< RevBayesCore::MixtureModel >* mm = static_cast<const MixtureModel &>( q->getRevObject() ).getDagNode();
+            dist->setMixtureModel( mm );
+        }
         else
         {
             RevBayesCore::TypedDagNode<RevBayesCore::CladogeneticProbabilityMatrix>* cp = static_cast<const CladogeneticProbabilityMatrix &>( cladoProbs->getRevObject() ).getDagNode();
@@ -348,6 +364,11 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
             }
             
             dist->setRateMatrix( rm );
+        }
+        else if ( q->getRevObject().isType( MixtureModel::getClassTypeSpec() ) )
+        {
+            RevBayesCore::TypedDagNode< RevBayesCore::MixtureModel >* mm = static_cast<const MixtureModel &>( q->getRevObject() ).getDagNode();
+            dist->setMixtureModel( mm );
         }
         else
         {
@@ -439,6 +460,7 @@ const MemberRules& Dist_phyloCTMCClado::getParameterRules(void) const
         std::vector<TypeSpec> rateMatrixTypes;
         rateMatrixTypes.push_back( RateGenerator::getClassTypeSpec() );
         rateMatrixTypes.push_back( ModelVector<RateGenerator>::getClassTypeSpec() );
+        rateMatrixTypes.push_back( MixtureModel::getClassTypeSpec() );
         dist_member_rules.push_back( new ArgumentRule( "Q"              , rateMatrixTypes, "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         
         // clado model accepts a single or vector of cladogenesis probs
