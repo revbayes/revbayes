@@ -78,6 +78,15 @@ PoMoCountFileReader::PoMoCountFileReader(const std::string &fn, const size_t vps
 		name_to_taxon_data.insert(std::pair< std::string, DiscreteTaxonData<PoMoState> >(names[i], tax) );
 	}
 
+    // Setting the taxon names in the data matrix
+    std::map<std::string, DiscreteTaxonData<PoMoState4> > name_to_taxon_data4;
+    for (size_t i = 0; i < names.size(); ++i )
+    {
+        DiscreteTaxonData<PoMoState4> tax (names[i]);
+        name_to_taxon_data4.insert(std::pair< std::string, DiscreteTaxonData<PoMoState4> >(names[i], tax) );
+    }
+
+
     // estimate the number of states
     size_t row=2;
     size_t col=2;
@@ -113,7 +122,7 @@ PoMoCountFileReader::PoMoCountFileReader(const std::string &fn, const size_t vps
 		for (size_t j = 2; j < 2 + number_of_populations; ++j)
 		{
 
-            if ( num_states == 100 )
+            if ( num_states == 4 )
             /* got an error here when num_sates=4
             stringvalue: 6,0,0,0
 1 1e-08 1e-08 1e-08 0.015625 0.015625 0.015625 1e-08 1e-08 1e-08 
@@ -125,8 +134,12 @@ Aborted (core dumped)
 
             */
             {
+                std::cout << "§1: " << chars[i][j] << " - " << chromosome << " - " << position << " - " << virtual_population_size  << "\n\n"; 
                 PoMoState4 pState (chars[i][j], chromosome, position, virtual_population_size );
-                name_to_taxon_data.at(names[j-2]).addCharacter( pState);
+                std::cout << "§2: " << names[j-2] << "\n\n"; 
+                name_to_taxon_data4.at(names[j-2]).addCharacter( pState);
+                std::cout << "Reached here!\n\n";
+
             }
             else
             {
@@ -137,10 +150,21 @@ Aborted (core dumped)
 	}
 
 	// We have finished all lines, we fill up the data matrix
-	for (std::map<std::string, DiscreteTaxonData<PoMoState> >::iterator tax = name_to_taxon_data.begin(); tax != name_to_taxon_data.end(); ++tax )
-    {
-	 	matrix->addTaxonData(tax->second);
-	}
+    if (num_states == 4){
+    for (std::map<std::string, DiscreteTaxonData<PoMoState4> >::iterator tax = name_to_taxon_data4.begin(); tax != name_to_taxon_data4.end(); ++tax )
+        {
+            matrix->addTaxonData(tax->second);
+        }
+    } else {
+            for (std::map<std::string, DiscreteTaxonData<PoMoState> >::iterator tax = name_to_taxon_data.begin(); tax != name_to_taxon_data.end(); ++tax )
+        {
+            matrix->addTaxonData(tax->second);
+        }
+    }
+
+
+
+
 
 }
 
