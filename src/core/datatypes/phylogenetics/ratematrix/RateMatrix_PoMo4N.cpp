@@ -325,7 +325,7 @@ RateMatrix_PoMo4N* RateMatrix_PoMo4N::clone( void ) const
 
 std::vector<double> RateMatrix_PoMo4N::getStationaryFrequencies( void ) const
 {
-  return stationaryVector;
+  return calculateStationaryFrequencies();
 }
 
 
