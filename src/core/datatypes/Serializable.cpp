@@ -3,20 +3,15 @@
 #include <ostream>
 #include <string>
 
-#include "RbFileManager.h"
-
 using namespace RevBayesCore;
 
 // Serialize (resurrect) the object from a file
-void Serializable::initFromFile( const std::string &dir, const std::string &fn )
+void Serializable::initFromFile( const path &dir, const std::string &fn )
 {
-    RbFileManager fm = RbFileManager(dir, fn + ".out");
-    fm.createDirectoryForFile();
+    path filename = dir / (fn + ".out");
     
     // open the stream to the file
-    std::fstream inStream;
-    inStream.open( fm.getFullFileName().c_str(), std::fstream::in);
-    
+    std::ifstream inStream( filename.string() );
     
     std::string s = "";
     while ( inStream.good() )
@@ -24,7 +19,7 @@ void Serializable::initFromFile( const std::string &dir, const std::string &fn )
         
         // Read a line
         std::string line;
-        fm.safeGetline( inStream, line );
+        safeGetline( inStream, line );
         
         // append
         s += line;
@@ -35,15 +30,13 @@ void Serializable::initFromFile( const std::string &dir, const std::string &fn )
 }
 
 // Write this object into a file in its default format.
-void Serializable::writeToFile( const std::string &dir, const std::string &fn ) const
+void Serializable::writeToFile( const path &dir, const std::string &fn ) const
 {
-    
-    RbFileManager fm = RbFileManager(dir, fn + ".out");
-    fm.createDirectoryForFile();
+    path filename = dir / (fn + ".out");
+    create_directories( dir );
     
     // open the stream to the file
-    std::fstream outStream;
-    outStream.open( fm.getFullFileName().c_str(), std::fstream::out);
+    std::ofstream outStream( filename.string() );
     
     // write the value of the node
     outStream << this;

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include "RbFileManager.h"
 
 namespace RevBayesCore {
     
@@ -22,7 +23,7 @@ namespace RevBayesCore {
     public:
         CountFileToNaturalNumbersConverter();
 
-        void               cfconverter( const std::string &fi, const size_t n_individuals, const std::string &fo );
+        void               cfconverter( const path &fi, const size_t n_individuals, const path &fo );
 
         //const size_t     getNumberOfAlleles( void );
         //const size_t     getNumberOfIndividuals( void );

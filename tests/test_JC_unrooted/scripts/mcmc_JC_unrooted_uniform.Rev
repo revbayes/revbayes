@@ -1,0 +1,88 @@
+################################################################################
+#
+# RevBayes Validation Test: Jukes-Cantor with birth-death process
+#
+# Model: Sequences evolve under the Jukes-Cantor model and the tree is drawn
+#        from a constant-rate birth-death process with uniform sampling.
+#
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+seed(12345)
+
+#######################
+# Reading in the Data #
+#######################
+
+###### This just defines a single model for all sites #######
+
+### Read in sequence data for both genes
+
+data <- readDiscreteCharacterData("data/primates_cytb_small.nex")
+
+# Get some useful variables from the data. We need these later on.
+taxa <- data.taxa()
+
+# set my move index
+mvi = 0
+
+
+
+######################
+# Substitution Model #
+######################
+
+#### specify the Jukes-Cantor substitution model applied uniformly to all sites ###
+Q <- fnJC(4)
+
+
+
+
+
+##############
+# Tree model #
+##############
+
+num_branches = 2 * taxa.size() - 3
+for(i in 1:num_branches) {
+    bl[i] ~ dnExponential(1)
+    moves[++mvi] = mvScale(bl[i], weight=0.1)
+}
+
+topology ~ dnUniformTopology(taxa=taxa)
+moves[++mvi] = mvNNI(topology, weight=1.0)
+moves[++mvi] = mvSPR(topology, weight=3.0)
+
+psi := fnTreeAssembly(topology, bl)
+
+###################
+# PhyloCTMC Model #
+###################
+
+# the sequence evolution model
+seq ~ dnPhyloCTMC(tree=psi, Q=Q, type="DNA")
+
+# attach the data
+seq.clamp(data)
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(Q)
+
+
+monitors[1] = mnStochasticVariable(filename="output/mcmc_JC_unrooted_uniform.out",printgen=1, separator = TAB)
+
+mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
+
+
+mymcmc.run(generations=1000)
+
+
+# you may want to quit RevBayes now
+q()

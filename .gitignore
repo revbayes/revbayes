@@ -9,6 +9,10 @@ projects/cmake/*
 !projects/cmake/*.cmake
 
 # ----------------------------------------------
+tests/*/output/
+
+
+# ----------------------------------------------
 src/revlanguage/constants.h
 src/ui/constants.h
 src/revlanguage/utils/GitVersion.h
@@ -35,3 +39,5 @@ doxygen/DoxygenWarningLog.txt
 .cproject
 .project
 .settings/
+.vscode
+revbayes.code-workspace

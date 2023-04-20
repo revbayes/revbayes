@@ -19,7 +19,7 @@ namespace RevBayesCore { class DagNode; }
 using namespace RevBayesCore;
 
 /* Constructor */
-PhylowoodNhxMonitor::PhylowoodNhxMonitor(TypedDagNode<Tree>* t,  std::vector<StochasticNode<BranchHistory>* > bh, std::vector<std::vector<double> > gc, unsigned long g, unsigned long mg, int b, const std::string &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sr) : Monitor(g,t), outStream(), tree( t ), branchHistories(bh),  geographicCoordinates(gc), filename( fname ), separator( del ), posterior( pp ), prior( pr ), likelihood( l ), append(ap), showMetadata(sm), showRates(sr), numSamples(0), maxGen(mg), burn(b) {
+PhylowoodNhxMonitor::PhylowoodNhxMonitor(TypedDagNode<Tree>* t,  std::vector<StochasticNode<BranchHistory>* > bh, std::vector<std::vector<double> > gc, unsigned long g, unsigned long mg, int b, const path &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sr) : Monitor(g,t), outStream(), tree( t ), branchHistories(bh),  geographicCoordinates(gc), filename( fname ), separator( del ), posterior( pp ), prior( pr ), likelihood( l ), append(ap), showMetadata(sm), showRates(sr), numSamples(0), maxGen(mg), burn(b) {
     
     std::cout << g << " " << mg << "\n";
     
@@ -295,15 +295,13 @@ std::string PhylowoodNhxMonitor::buildNhxString(void)
 /** open the file stream for printing */
 void PhylowoodNhxMonitor::openStream(bool reopen)
 {
-    
-    RbFileManager fm = RbFileManager(filename);
-    fm.createDirectoryForFile();
+    createDirectoryForFile( filename );
     
     // open the stream to the file
     if (append)
-        outStream.open( fm.getFullFileName().c_str(), std::fstream::out | std::fstream::app);
+        outStream.open( filename.string(), std::fstream::out | std::fstream::app);
     else
-        outStream.open( fm.getFullFileName().c_str(), std::fstream::out);
+        outStream.open( filename.string(), std::fstream::out);
 }
 
 /** Print header for monitored values */

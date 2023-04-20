@@ -53,6 +53,7 @@ namespace RevLanguage {
         void                                    getFunctionNames(std::vector<std::string>& names) const;
         Function*                               getFirstFunction(const std::string& name) const;                                            //!< Get first function with given name
         Function*                               getFunction(const std::string& name) const;                                                 //!< Get function, throw an error if overloaded
+        const Function*                         findFunction(const std::string& name, const std::vector<Argument>& args, bool once) const;  //!< Get function
         const Function&                         getFunction(const std::string& name, const std::vector<Argument>& args, bool once) const;   //!< Get function
         bool                                    isDistinctFormal(const ArgumentRules& x, const ArgumentRules& y) const;                     //!< Are formals unique?
         bool                                    isProcedure(const std::string& fxnName) const;                                              //!< Is 'fxnName' a procedure?
@@ -61,9 +62,6 @@ namespace RevLanguage {
 
     protected:
         
-        const Function&                         findFunction(const std::string&           name,
-                                                             const std::vector<Argument>& args,
-                                                             bool                         once) const;                                            //!< Find function, process args
         void                                    testFunctionValidity(const std::string& name, Function* func) const;                        //!< Test whether function can be added
         
         // Member variables

@@ -6,7 +6,9 @@
 #include <cstddef>
 #include <iosfwd>
 
+#include "AbstractHomologousDiscreteCharacterData.h"
 #include "ContinuousTaxonData.h"
+#include "DiscretizedContinuousCharacterData.h"
 #include "DistanceMatrix.h"
 #include "HomologousCharacterData.h"
 #include "MemberObject.h"
@@ -40,9 +42,9 @@ class DagNode;
         ContinuousCharacterData*                        clone(void) const;
         
         // implemented methods of the Serializable interface
-        void                                            initFromFile( const std::string &dir, const std::string &fn );              //!< Read and resurrect this object from a file in its default format.
+        void                                            initFromFile( const path &dir, const std::string &fn );              //!< Read and resurrect this object from a file in its default format.
         void                                            initFromString( const std::string &s );                                     //!< Serialize (resurrect) the object from a string value
-        void                                            writeToFile(const std::string &dir, const std::string &fn) const;           //!< Write this object into a file in its default format.
+        void                                            writeToFile(const path &dir, const std::string &fn) const;           //!< Write this object into a file in its default format.
         void                                            printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const;                                  //!< print object for user (in user-formatted way)
         void                                            printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const;           //!< print object with standard rounding
         void                                            printForComplexStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const;          //!< print object with maximum precision
@@ -51,6 +53,7 @@ class DagNode;
         void                                            concatenate(const ContinuousCharacterData &d, std::string type = "");                              //!< Concatenate data matrices
         void                                            concatenate(const HomologousCharacterData &d, std::string type = "");                              //!< Concatenate data matrices
         void                                            concatenate(const AbstractCharacterData &d, std::string type = "");                                //!< Concatenate data matrices
+        DiscretizedContinuousCharacterData*             discretizeCharacter(double error, long num_bins, double cushion_width) const; //!< Discretize the ith character into k bins
         void                                            excludeAllCharacters(void);                                                 //!< Exclude all characters
         void                                            excludeCharacter(size_t i);                                                 //!< Exclude character
         void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, double &rv) const;     //!< Map the member methods to internal function calls

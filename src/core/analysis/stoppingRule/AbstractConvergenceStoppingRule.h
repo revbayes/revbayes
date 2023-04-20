@@ -3,6 +3,7 @@
 
 #include "BurninEstimatorContinuous.h"
 #include "StoppingRule.h"
+#include "RbFileManager.h"
 
 #include <vector>
 
@@ -23,7 +24,7 @@ namespace RevBayesCore {
     class AbstractConvergenceStoppingRule : public StoppingRule {
         
     public:
-        AbstractConvergenceStoppingRule(const std::string &fn, size_t fq, BurninEstimatorContinuous *be);
+        AbstractConvergenceStoppingRule(const path &fn, size_t fq, BurninEstimatorContinuous *be);
         AbstractConvergenceStoppingRule(const AbstractConvergenceStoppingRule &sr);
         virtual                                            ~AbstractConvergenceStoppingRule(void);                                   //!< Virtual destructor
         
@@ -42,7 +43,7 @@ namespace RevBayesCore {
         
         BurninEstimatorContinuous*                          burninEst;                                                  //!< The method for estimating the burnin
         size_t                                              checkFrequency;                                             //!< The frequency for checking for convergence
-        std::string                                         filename;                                                   //!< The filename from which to read in the data
+        path                                                filename;                                                   //!< The filename from which to read in the data
         size_t                                              numReplicates;
         
     };

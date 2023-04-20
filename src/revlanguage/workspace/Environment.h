@@ -69,6 +69,7 @@ class RevObject;
         Environment*                        getChildEnvironment(const std::string &name);                                               //!< Get child environment with the name
         Function*                           getFunction(const std::string& name);                                                       //!< Get function reference
         const Function&                     getFunction(const std::string& name, const std::vector<Argument>& args, bool once) const;   //!< Get function reference
+        const Function*                     findFunction(const std::string& name, const std::vector<Argument>& args, bool once) const;  //!< Get function reference
         const FunctionTable&                getFunctionTable(void) const;                                                               //!< Get function table (const)
         FunctionTable&                      getFunctionTable(void);                                                                     //!< Get function table (non-const)
         const RevObject&                    getRevObject(const std::string& name) const;                                                //!< Convenient alternative for [name]->getValue()

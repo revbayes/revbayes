@@ -13,13 +13,8 @@ namespace RevLanguage {
     /**
      * The RevLanguage wrapper of the WAG rate matrix function.
      *
-     * The RevLanguage wrapper of the WAG rate matrix connects
-     * the variables/parameters of the function and creates the internal WagRateMatrixFunction object.
-     * Please read the WagRateMatrixFunction.h for more info.
-     *
-     *
      * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
+     * @author The RevBayes Development Core Team (Sebastian Hoehna), Ben Redelings
      * @since 2014-08-14, version 1.0
      *
      */
@@ -40,7 +35,6 @@ namespace RevLanguage {
         const ArgumentRules&                                            getArgumentRules(void) const;                               //!< Get argument rules
     private:
         Simplex* bf_empirical;
-        
     };
     
 }

@@ -9,6 +9,7 @@
 #include "TimeAtlas.h"
 #include "Tree.h"
 #include "GeographicArea.h"
+#include "AbstractHomologousDiscreteCharacterData.h"
 
 #include <fstream>
 #include <iostream>
@@ -22,7 +23,7 @@ namespace RevBayesCore {
         
     public:
         // Constructors and Destructors
-        TreeCharacterHistoryNhxMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree> *t, const TimeAtlas* ta, unsigned long g, unsigned long mg, int burn, const std::string &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sr=true);
+        TreeCharacterHistoryNhxMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree> *t, const TimeAtlas* ta, unsigned long g, unsigned long mg, int burn, const path &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sr=true);
         
         TreeCharacterHistoryNhxMonitor(const TreeCharacterHistoryNhxMonitor& f);
         
@@ -65,7 +66,7 @@ namespace RevBayesCore {
         size_t numHistories;
         size_t numCharacters;
         
-        std::string                         filename;
+        path                                filename;
         std::string                         separator;
         bool                                posterior;
         bool                                prior;
@@ -89,7 +90,7 @@ namespace RevBayesCore {
 
 /* Constructor */
 template<class charType>
-RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>::TreeCharacterHistoryNhxMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree>* t, const TimeAtlas* ta, unsigned long g, unsigned long mg, int b, const std::string &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sr) :
+RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>::TreeCharacterHistoryNhxMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree>* t, const TimeAtlas* ta, unsigned long g, unsigned long mg, int b, const RevBayesCore::path &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sr) :
 Monitor(g,t),
 outStream(),
 variable( s ),
@@ -396,15 +397,13 @@ std::string RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>::buildNhxStri
 template<class charType>
 void RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>::openStream(bool reopen)
 {
-    
-    RbFileManager fm = RbFileManager(filename);
-    fm.createDirectoryForFile();
+    createDirectoryForFile( filename );
     
     // open the stream to the file
     if (append)
-        outStream.open( fm.getFullFileName().c_str(), std::fstream::out | std::fstream::app);
+        outStream.open( filename.string(), std::fstream::out | std::fstream::app);
     else
-        outStream.open( fm.getFullFileName().c_str(), std::fstream::out);
+        outStream.open( filename.string(), std::fstream::out);
 }
 
 /** Print header for monitored values */

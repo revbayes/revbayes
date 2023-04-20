@@ -26,7 +26,7 @@
 
 using namespace RevBayesCore;
 
-PosteriorPredictiveAnalysis::PosteriorPredictiveAnalysis( const MonteCarloAnalysis &m, const std::string &fn ) : Cloneable( ), Parallelizable(),
+PosteriorPredictiveAnalysis::PosteriorPredictiveAnalysis( const MonteCarloAnalysis &m, const path &fn ) : Cloneable( ), Parallelizable(),
     directory( fn ),
     processors_per_likelihood( 1 ),
     template_sampler( m )
@@ -75,25 +75,24 @@ void PosteriorPredictiveAnalysis::runAll(size_t gen)
     }
     
     // create the directory if necessary
-    RbFileManager fm = RbFileManager( directory );
-    if ( fm.testFile() == false && fm.testDirectory() == false )
+    if ( not is_directory( directory) )
     {
         std::string errorStr = "";
-        fm.formatError(errorStr);
-        throw RbException("Could not find file or path with name \"" + directory + "\"");
+        formatError(directory, errorStr);
+        throw RbException()<<"Could not find file or path with name "<<directory<<"";
     }
     
     // set up a vector of strings containing the name or names of the files to be read
-    std::vector<std::string> dir_names;
-    if ( fm.isDirectory() == true )
+    std::vector<path> dir_names;
+    if ( is_directory(directory) )
     {
-        fm.setStringWithNamesOfFilesInDirectory( dir_names, false );
+        setStringWithNamesOfFilesInDirectory( directory, dir_names, false );
     }
     else
     {
-        throw RbException( "\"" + directory + "\" is not a directory.");
+        throw RbException()<<directory<<" is not a directory.";
     }
-    
+
     size_t num_runs = dir_names.size();
     processors_per_likelihood = ceil( double(num_processes) / num_runs );
     size_t run_pid_start =  floor(  pid    / double(num_processes) * num_runs );
@@ -142,8 +141,6 @@ void PosteriorPredictiveAnalysis::runAll(size_t gen)
                 
         }
 
-        RbFileManager tmp = RbFileManager( dir_names[i] );
-        
         // now set the model of the current analysis
 #ifdef RB_MPI
         current_analysis->setModel( current_model, false, analysis_comm );
@@ -155,7 +152,7 @@ void PosteriorPredictiveAnalysis::runAll(size_t gen)
         current_analysis->disableScreenMonitors( true );
 
         // set the monitor index
-        current_analysis->addFileMonitorExtension(tmp.getLastPathComponent(), true);
+        current_analysis->addFileMonitorExtension( dir_names[i].filename().string(), true);
                     
         // print some info
         if ( process_active == true )

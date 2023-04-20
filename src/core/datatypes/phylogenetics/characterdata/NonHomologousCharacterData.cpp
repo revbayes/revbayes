@@ -26,7 +26,7 @@ std::ostream& RevBayesCore::operator<<(std::ostream& o, const NonHomologousChara
     }
     o << std::endl;
     
-    o << "Origination:                   " << x.getFileName() << std::endl;
+    o << "Origination:                   " << x.getFilename().filename() << std::endl;
     o << "Number of taxa:                " << x.getNumberOfTaxa() << std::endl;
     o << "Number of included taxa:       " << x.getNumberOfIncludedTaxa() << std::endl;
     o << "Datatype:                      " << x.getDataType() << std::endl;

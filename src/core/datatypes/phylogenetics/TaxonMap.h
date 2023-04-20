@@ -40,9 +40,15 @@ namespace RevBayesCore {
         
         // public methods
         void                                addTaxon(const Taxon &t);                       //!< Get the age for this TaxonMap.
-        const Taxon&                        getTaxon(size_t i) const;                       //!< Get the i-th Taxon
+        bool                                hasTaxon(const Taxon &t) const;                 //!< Get the i-th Taxon
         size_t                              getTaxonIndex(const Taxon &t) const;            //!< Get the i-th Taxon
+
+        const Taxon&                        getTaxon(size_t i) const;                       //!< Get the i-th Taxon
+
+        int                                 size() const;                                   //!< How many taxa in the map?
         
+        std::string                         print() const;
+
     private:
         
         std::vector<Taxon>                  taxa;

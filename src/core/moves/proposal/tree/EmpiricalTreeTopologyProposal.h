@@ -9,6 +9,8 @@
 
 namespace RevBayesCore {
     
+    class TraceTree;
+
     /**
      * The narrow-exchange operator.
      *
@@ -25,6 +27,7 @@ namespace RevBayesCore {
     class EmpiricalTreeTopologyProposal : public Proposal {
         
     public:
+
         EmpiricalTreeTopologyProposal( StochasticNode<Tree> *t, const TraceTree &tt, double a );                                               //!<  constructor
         
         // Basic utility functions

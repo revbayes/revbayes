@@ -10,7 +10,9 @@
 #include <iomanip>
 #include <utility>
 
+#include "DagNode.h"
 #include "RbException.h"
+#include "TypedDagNode.h"
 
 using namespace RevBayesCore;
 
@@ -52,6 +54,67 @@ CladogeneticSpeciationRateMatrix* CladogeneticSpeciationRateMatrix::clone( void 
     return new CladogeneticSpeciationRateMatrix( *this );
 }
 
+void CladogeneticSpeciationRateMatrix::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, CladogeneticProbabilityMatrix &rv) const
+{
+
+    if ( n == "getCladogeneticProbabilityMatrix" )
+    {
+        rv = cladogenetic_probability_matrix;
+    }
+}
+
+void CladogeneticSpeciationRateMatrix::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<double> &rv) const
+{
+
+    if ( n == "getSpeciationRateSumPerState" )
+    {
+        rv = speciation_rate_sum_per_state;
+    }
+}
+
+void CladogeneticSpeciationRateMatrix::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, double &rv) const
+{
+
+    if ( n == "getRate" )
+    {
+
+        // create variable for event states
+        unsigned anc_state = unsigned( static_cast<const TypedDagNode<long> *>( args[0] )->getValue() );
+        unsigned ch1_state = unsigned( static_cast<const TypedDagNode<long> *>( args[1] )->getValue() );
+        unsigned ch2_state = unsigned( static_cast<const TypedDagNode<long> *>( args[2] )->getValue() );
+        std::vector<unsigned> state;
+        state.push_back(anc_state);
+        state.push_back(ch1_state);
+        state.push_back(ch2_state);
+        
+        // get rate from event map
+        auto it = event_map.find(state);
+        if (it != event_map.end()) {
+            rv = it->second;
+        } else {
+            rv = 0.0;
+        }
+    }
+}
+
+void CladogeneticSpeciationRateMatrix::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<RbVector<long> > &rv) const
+{
+
+    if ( n == "getEvents" )
+    {
+        // collect all anc -> ch1, ch2 state-triplets
+        RbVector<RbVector<long> > valid_events;
+        for (auto it = event_map.begin(); it != event_map.end(); it++) {
+            std::vector<unsigned> state_unsigned = it->first;
+            std::vector<long> state_long( state_unsigned.size() );
+            for (size_t i = 0; i < state_unsigned.size(); i++) {
+                state_long[i] = (long)state_unsigned[i];
+            }
+            valid_events.push_back(state_long);
+        }
+        rv = valid_events;
+    }
+}
 
 std::map<std::vector<unsigned>, double> CladogeneticSpeciationRateMatrix::getEventMap(double t)
 {
@@ -61,6 +124,35 @@ std::map<std::vector<unsigned>, double> CladogeneticSpeciationRateMatrix::getEve
 const std::map<std::vector<unsigned>, double>& CladogeneticSpeciationRateMatrix::getEventMap(double t) const
 {
     return event_map;
+}
+
+std::vector<double> CladogeneticSpeciationRateMatrix::getSpeciationRateSumPerState(void)
+{
+    return speciation_rate_sum_per_state;
+}
+
+const std::vector<double>& CladogeneticSpeciationRateMatrix::getSpeciationRateSumPerState(void) const
+{
+    return speciation_rate_sum_per_state;
+}
+
+void CladogeneticSpeciationRateMatrix::setSpeciationRateSumPerState(std::vector<double> r)
+{
+    speciation_rate_sum_per_state = r;
+}
+
+CladogeneticProbabilityMatrix CladogeneticSpeciationRateMatrix::getCladogeneticProbabilityMatrix(void)
+{
+    return cladogenetic_probability_matrix;
+}
+const CladogeneticProbabilityMatrix& CladogeneticSpeciationRateMatrix::getCladogeneticProbabilityMatrix(void) const
+{
+    return cladogenetic_probability_matrix;
+}
+
+void CladogeneticSpeciationRateMatrix::setCladogeneticProbabilityMatrix(CladogeneticProbabilityMatrix p)
+{
+    cladogenetic_probability_matrix = p;
 }
 
 size_t CladogeneticSpeciationRateMatrix::getNumberOfStates( void ) const

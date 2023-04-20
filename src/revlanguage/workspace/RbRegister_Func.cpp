@@ -95,6 +95,7 @@
 #include "Func_earlyBurstRates.h"
 #include "Func_extantTree.h"
 #include "Func_formatDiscreteCharacterData.h"
+#include "Func_inferAncestralPopSize.h"
 #include "Func_maximumTree.h"
 #include "Func_mrcaIndex.h"
 #include "Func_nodeAgeByID.h"
@@ -104,6 +105,7 @@
 #include "Func_pomoState4Converter.h"
 #include "Func_pomoRootFrequencies.h"
 #include "Func_pruneTree.h"
+#include "Func_featureInformedRates.h"
 #include "Func_simStartingTree.h"
 #include "Func_simTree.h"
 #include "Func_simCompleteTree.h"
@@ -126,6 +128,7 @@
 /* Rate matrix functions (in folder "functions/phylogenetics/ratematrix") */
 #include "Func_BinaryMutationCoalescentRateMatrix.h"
 #include "Func_blosum62.h"
+#include "Func_biogeographyRateMatrix.h"
 #include "Func_chromosomes.h"
 #include "Func_chromosomesPloidy.h"
 
@@ -234,10 +237,12 @@
 #include "Func_diagonalMatrix.h"
 #include "Func_empiricalQuantile.h"
 #include "Func_exp.h"
+#include "Func_expVector.h"
 #include "Func_floor.h"
 #include "Func_gamma.h"
 #include "Func_lnProbability.h"
 #include "Func_geographicalDistance.h"
+#include "Func_geometricMean.h"
 #include "Func_hyperbolicTangent.h"
 #include "Func_hyperbolicSine.h"
 #include "Func_ln.h"
@@ -256,6 +261,8 @@
 //#include "Func_powerVector.h"
 #include "Func_round.h"
 #include "Func_shortestDistance.h"
+#include "Func_sigmoid.h"
+#include "Func_sigmoidVector.h"
 #include "Func_sort.h"
 #include "Func_sum.h"
 #include "Func_sumPositive.h"
@@ -285,6 +292,7 @@
 #include "Func_dppMeanFromConc.h"
 #include "Func_fnNormalizedQuantile.h"
 #include "Func_numUniqueInVector.h"
+#include "Func_rateShifts.h"
 #include "Func_stirling.h"
 #include "Func_varianceCovarianceMatrix.h"
 #include "Func_decomposedVarianceCovarianceMatrix.h"
@@ -310,6 +318,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         /* Rate matrix generator functions (in folder "functions/evolution/ratematrix") */
         addFunction( new Func_BinaryMutationCoalescentRateMatrix()          );
         addFunction( new Func_blosum62()                                    );
+        addFunction( new Func_biogeographyRateMatrix()                      );
         addFunction( new Func_chromosomes()                                 );
         addFunction( new Func_chromosomesPloidy()                           );
 
@@ -415,6 +424,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_formatDiscreteCharacterData()                     );
         addFunction( new Func_EarlyBurstRates()                                 );
         addFunction( new Func_extantTree()                                      );
+        addFunction( new Func_inferAncestralPopSize()                           );
         addFunction( new Func_maximumTree()                                     );
         addFunction( new Func_mrcaIndex()                                       );
         addFunction( new Func_nodeAgeByID()                                     );
@@ -424,6 +434,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_pomoState4Converter()                             );
         addFunction( new Func_pomoRootFrequencies()                             );
         addFunction( new Func_pruneTree()                                       );
+        addFunction( new Func_featureInformedRates()                            );
         addFunction( new Func_readPoMoCountFile()                               );
         addFunction( new Func_convertCountFileToNaturalNumbers()                );
         addFunction( new Func_convertFastaFileToNaturalNumbers()                );
@@ -471,6 +482,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
         // exponential function
         addFunction( new Func_exp() );
+        addFunction( new Func_expVector() );
 
 		// floor function
         addFunction( new Func_floor<Real,Integer>()  );
@@ -479,6 +491,9 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         // gamma function
         addFunction( new Func_gamma() );
 
+        // geometric mean function
+        addFunction( new Func_geometricMean() );
+        
         // logistic function
         addFunction( new Func_logistic() );
 
@@ -514,6 +529,14 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
         // sort vector function
         addFunction( new Func_sort() );
+
+        // sigmoid function
+        addFunction( new Func_sigmoid() );
+        addFunction( new Func_sigmoidVector() );
+
+        // rate shift function
+        addFunction( new Func_shiftEvents<RealPos>()              );
+        addFunction( new Func_shiftEvents<ModelVector<RealPos>>() );
 
 		// square root function
         addFunction( new Func_sqrt()  );
@@ -599,7 +622,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
         // Type conversion
         addFunction( new Proc_StringToInt( )                         );
-        
+
     }
     catch(RbException& rbException)
     {

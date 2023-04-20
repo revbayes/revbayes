@@ -4,6 +4,7 @@
 #include "Model.h"
 #include "WorkspaceToCoreWrapperObject.h"
 #include "TypedDagNode.h"
+#include "RbFileManager.h"
 
 #include <ostream>
 #include <string>
@@ -45,7 +46,7 @@ namespace RevLanguage {
         
         virtual void                                printValue(std::ostream& o, bool user) const;                                                      //!< Print value (for user)
         void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);     //!< Set member variable
-        void                                        printModelDotGraph(const std::string &fn, bool vb, const std::string &bgc);
+        void                                        printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std::string &bgc);
         
         std::set<RevPtr<const RevVariable> >        sources;
         

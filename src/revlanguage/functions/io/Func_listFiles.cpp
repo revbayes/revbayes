@@ -52,30 +52,26 @@ RevPtr<RevVariable> Func_listFiles::execute( void )
     
     // get the information from the arguments for reading the file
     size_t arg_index = 0;
-    const std::string& pn   = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path dir    = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
     //bool all_files          = static_cast<const RlBoolean&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
     bool recursive          = static_cast<const RlBoolean&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
     //bool incl_dirs          = static_cast<const RlBoolean&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
     
     // check that the file/path name has been correctly specified
-    RevBayesCore::RbFileManager my_file_manager( pn );
-    if ( my_file_manager.testDirectory() == false )
+    if ( not RevBayesCore::is_directory(dir) )
     {
         std::string errorStr = "";
-        my_file_manager.formatError( errorStr );
-        throw RbException("Could not find path with name \"" + pn + "\"");
+        RevBayesCore::formatError( dir, errorStr );
+        throw RbException()<<"Could not find path with name "<<dir;
     }
     
     // set up a vector of strings containing the name or names of the files to be read
+    std::vector< RevBayesCore::path > ps;
+    RevBayesCore::setStringWithNamesOfFilesInDirectory( dir, ps, recursive );
+
     RevBayesCore::RbVector<std::string> file_names;
-    if ( my_file_manager.isDirectory() )
-    {
-        my_file_manager.setStringWithNamesOfFilesInDirectory( file_names, recursive );
-    }
-    else
-    {
-        file_names.push_back( my_file_manager.getFullFileName() );
-    }
+    for(auto& p : ps)
+        file_names.push_back( p.string() );
     
     return new RevVariable( new ModelVector<RlString>( file_names ) );
 }

@@ -4,6 +4,7 @@
 #include "Cloneable.h"
 #include "Parallelizable.h"
 #include "RbVector.h"
+#include "RbFileManager.h"
 
 namespace RevBayesCore {
     
@@ -25,7 +26,7 @@ namespace RevBayesCore {
     class PowerPosteriorAnalysis : public Cloneable, public Parallelizable {
         
     public:
-        PowerPosteriorAnalysis(MonteCarloSampler *m, const std::string &fn, size_t k);
+        PowerPosteriorAnalysis(MonteCarloSampler *m, const path &fn, size_t k);
         PowerPosteriorAnalysis(const PowerPosteriorAnalysis &a);
         virtual                                ~PowerPosteriorAnalysis(void);                               //!< Virtual destructor
         
@@ -45,7 +46,7 @@ namespace RevBayesCore {
         void                                    initMPI(void);
         
         // members
-        std::string                             filename;
+        path                                    filename;
         std::vector<double>                     powers;
         MonteCarloSampler*                      sampler;
         size_t                                  sampleFreq;                                                                     //!< The rate of the distribution

@@ -2,6 +2,7 @@
 #define GenericFunction_H
 
 #include "TypedDagNode.h"
+#include "TypedFunction.h"
 #include <boost/mp11.hpp>
 #include <boost/callable_traits/return_type.hpp>
 
@@ -155,68 +156,14 @@ namespace RevBayesCore
         return boost::mp11::tuple_apply(func, values);
     }
 
-
-    template <class F, class ...Args>
-    class GenericFunction : public TypedFunction< boost::callable_traits::return_type_t<F> >
-    {
-        // The arguments
-        std::tuple<const TypedDagNode<Args>*...>  arguments;
-
-        // The function pointer that we are wrapping.
-        F func;
-
-        // The return type of the function
-        typedef boost::callable_traits::return_type_t<F> ValueType;
-
-    public:
-
-        GenericFunction(F f, const TypedDagNode<Args>*... args):
-            TypedFunction<ValueType>(new ValueType),
-            arguments({args...}),
-            func(f)
-        {
-            // for each i: addParameter(get<i>(arguments))
-            boost::mp11::tuple_for_each(arguments, [this](const auto& arg) {
-                this->addParameter(arg);
-            });
-        }
-
-        GenericFunction<F, Args...>*  clone(void) const
-        {
-            return new GenericFunction<F, Args...>(*this);
-        }
-
-        ValueType compute_value()
-        {
-            return InvokeFunction(func, arguments);
-        }
-
-        void update(void)
-        {
-            *this->value = compute_value();
-        }
-
-    protected:
-        void swapParameterInternal(const DagNode *oldP, const DagNode *newP)
-        {
-            auto F2 = [=](auto& arg) {
-                using TDN = typename std::remove_reference<decltype(arg)>::type;
-                if (arg == oldP)
-                    // We have to cast from `const DagNode*` to `const TypedDagNode<T>*`
-                    arg = static_cast<TDN>(newP);
-            };
-            boost::mp11::tuple_for_each(arguments, F2);
-        }
-
-    };
-
+    // The callable must return a pointer!
     template <class ValueType, class F, class ...Args>
-    class GenericFunction2 : public TypedFunction< ValueType >
+    class GenericFunction : public TypedFunction< ValueType >
     {
         // The arguments
         std::tuple<const TypedDagNode<Args>*...>  arguments;
 
-        // The function pointer that we are wrapping.
+        // The callable that we are wrapping.
         F func;
 
         typedef boost::callable_traits::return_type_t<F> ReturnType;
@@ -225,7 +172,7 @@ namespace RevBayesCore
 
         static_assert( std::is_pointer<ReturnType>::value , "Function must return a pointer");
 
-        GenericFunction2(F f, const TypedDagNode<Args>*... args):
+        GenericFunction(F f, const TypedDagNode<Args>*... args):
             TypedFunction<ValueType>(nullptr),
             arguments({args...}),
             func(f)
@@ -236,35 +183,15 @@ namespace RevBayesCore
             });
         }
 
-        GenericFunction2<ValueType, F, Args...>*  clone(void) const
+        GenericFunction<ValueType, F, Args...>*  clone(void) const
         {
-            return new GenericFunction2<ValueType, F, Args...>(*this);
+            return new GenericFunction<ValueType, F, Args...>(*this);
         }
 
         ValueType* compute_value()
         {
             return InvokeFunction(func, arguments);
         }
-
-/*
-        void update1(void)
-        {
-            delete this->value;
-            this->value = new ReturnType(compute_value());
-        }
-
-        void update2(void)
-        {
-            delete this->value;
-            this->value = compute_value().clone();
-        }
-
-        void update3(void)
-        {
-            delete this->value;
-            this->value = compute_value();
-        }
-*/
 
         void update(void)
         {
@@ -294,28 +221,16 @@ namespace RevBayesCore
 
     // So, we will need to either make a NON-overloaded function, or add a type-cast.
 
-    template <class F, class ...Args>
-    GenericFunction<F,Args...> generic_function(F&& f, const TypedDagNode<Args>*... args)
+    template <typename ValueType, class F, class ...Args>
+    GenericFunction<ValueType, F, Args...> generic_function(F&& f, const TypedDagNode<Args>*... args)
     {
-        return GenericFunction<F,Args...>(f, args...);
-    }
-
-    template <class F, class ...Args>
-    GenericFunction<F,Args...>* generic_function_ptr(F&& f, const TypedDagNode<Args>*... args)
-    {
-        return new GenericFunction<F,Args...>(f, args...);
+        return GenericFunction<ValueType, F, Args...>(f, args...);
     }
 
     template <typename ValueType, class F, class ...Args>
-    GenericFunction2<ValueType, F, Args...> generic_function2(F&& f, const TypedDagNode<Args>*... args)
+    GenericFunction<ValueType, F, Args...>* generic_function_ptr(F&& f, const TypedDagNode<Args>*... args)
     {
-        return GenericFunction2<ValueType, F, Args...>(f, args...);
-    }
-
-    template <typename ValueType, class F, class ...Args>
-    GenericFunction2<ValueType, F, Args...>* generic_function_ptr2(F&& f, const TypedDagNode<Args>*... args)
-    {
-        return new GenericFunction2<ValueType, F,Args...>(f, args...);
+        return new GenericFunction<ValueType, F,Args...>(f, args...);
     }
 }
 
