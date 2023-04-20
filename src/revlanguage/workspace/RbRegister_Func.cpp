@@ -133,6 +133,7 @@
 #include "Func_chromosomes.h"
 #include "Func_chromosomesPloidy.h"
 
+#include "Func_GammaRateModel.h"
 #include "Func_ConvertRateMatrix.h"
 #include "Func_ConvertVectorRateMatrix.h"
 
@@ -328,6 +329,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_ConvertRateMatrix()                           );
         addFunction( new Func_ConvertVectorRateMatrix()                     );
 
+        addFunction( new Func_GammaRateModel()                              );
         addFunction( new Func_codonSynonymousNonsynonymousRateMatrix()      );
         addFunction( new Func_codonSynonymousNonsynonymousHKYRateMatrix()   );
         addFunction( new Func_GoldmanYang94RateMatrix()                     );
